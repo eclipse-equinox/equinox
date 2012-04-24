@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.framework.BundleException;
@@ -22,87 +23,127 @@ import org.osgi.service.resolver.ResolutionException;
  * module {@link ModuleContainer container}.
  */
 public abstract class Module implements BundleReference {
+	/**
+	 * The possible start options for a module
+	 */
 	public static enum START_OPTIONS {
-		TRANSIENT, ACTIVATION_POLICY, LAZY_TRIGGER
+		/**
+		 * The module start operation is transient and the persistent 
+		 * autostart or activation policy setting of the module is not modified.
+		 */
+		TRANSIENT,
+		/**
+		 * The module start operation must activate the module according to the module's declared
+		 * activation policy.
+		 */
+		ACTIVATION_POLICY,
+		/**
+		 * The module start operation that indicates the module is being started because of a
+		 * lazy start trigger class load.  This option must be used with the 
+		 * {@link START_OPTIONS#TRANSIENT transient} options.
+		 */
+		LAZY_TRIGGER
 	}
 
+	/**
+	 * The possible start options for a module
+	 */
 	public static enum STOP_OPTIONS {
+		/**
+		 * The module stop operation is transient and the persistent 
+		 * autostart setting of the module is not modified.
+		 */
 		TRANSIENT
 	}
 
+	/**
+	 * An enumeration of the possible {@link Module#getState() states} a module may be in.
+	 */
 	public static enum State {
 		/**
-		 * 
+		 * The module is installed but not yet resolved.
 		 */
 		INSTALLED,
 		/**
-		 * 
+		 * The module is resolved and able to be started.
 		 */
 		RESOLVED,
 		/**
-		 * 
+		 * The module is waiting for a {@link START_OPTIONS#LAZY_TRIGGER trigger}
+		 * class load to proceed with starting.
 		 */
 		LAZY_STARTING,
 		/**
-		 * 
+		 * The module is in the process of starting.
 		 */
 		STARTING,
 		/**
-		 * 
+		 * The module is now running.
 		 */
 		ACTIVE,
 		/**
-		 * 
+		 * The module is in the process of stopping
 		 */
 		STOPPING,
 		/**
-		 * 
+		 * The module is uninstalled and may not be used.
 		 */
 		UNINSTALLED
 	}
 
+	/**
+	 * A set of {@link State states} that indicate a module is active.
+	 */
 	public static final EnumSet<State> ACTIVE_SET = EnumSet.of(State.STARTING, State.LAZY_STARTING, State.ACTIVE, State.STOPPING);
+	/**
+	 * A set of {@link State states} that indicate a module is resolved.
+	 */
 	public static final EnumSet<State> RESOLVED_SET = EnumSet.of(State.RESOLVED, State.STARTING, State.LAZY_STARTING, State.ACTIVE, State.STOPPING);
 
+	/**
+	 * Event types that may be {@link Module#fireEvent(Event) fired} for a module
+	 * indicating a {@link Module#getState() state} change has occurred for a module.
+	 */
 	public static enum Event {
 		/**
-		 * 
+		 * The module has been installed
 		 */
 		INSTALLED,
 		/**
-		 * 
+		 * The module has been activated with the lazy activation policy and
+		 * is waiting a {@link START_OPTIONS#LAZY_TRIGGER trigger} class load.
 		 */
 		LAZY_ACTIVATION,
 		/**
-		 * 
+		 * The module has been resolved.
 		 */
 		RESOLVED,
 		/**
-		 * 
+		 * The module has beens started.
 		 */
 		STARTED,
 		/**
-		 * 
+		 * The module is about to be activated.
 		 */
 		STARTING,
 		/**
-		 * 
+		 * The module has been stopped.
 		 */
 		STOPPED,
 		/**
-		 * 
+		 * The module is about to be deactivated.
 		 */
 		STOPPING,
 		/**
-		 * 
+		 * The module has been uninstalled.
 		 */
 		UNINSTALLED,
 		/**
-		 * 
+		 * The module has been unresolved.
 		 */
 		UNRESOLVED,
 		/**
-		 * 
+		 * The module has been updated.
 		 */
 		UPDATED
 	}
@@ -114,6 +155,13 @@ public abstract class Module implements BundleReference {
 	private final EnumSet<Event> stateTransitionEvents = EnumSet.noneOf(Event.class);
 	private volatile State state = State.INSTALLED;
 
+	/**
+	 * Constructs a new module with the specified id, location and
+	 * container.
+	 * @param id the new module id
+	 * @param location the new module location
+	 * @param container the container for the new module
+	 */
 	public Module(Long id, String location, ModuleContainer container) {
 		this.id = id;
 		this.location = location;
@@ -148,10 +196,13 @@ public abstract class Module implements BundleReference {
 	 * @return the current {@link ModuleRevision revision} associated with this module.
 	 */
 	public final ModuleRevision getCurrentRevision() {
-		List<ModuleRevision> revisionList = revisions.getModuleRevisions();
-		return revisionList.isEmpty() || revisions.isUninstalled() ? null : revisionList.get(0);
+		return revisions.getCurrentRevision();
 	}
 
+	/**
+	 * Returns the current {@link State state} of the module.
+	 * @return the current state of the module.
+	 */
 	public State getState() {
 		return state;
 	}
@@ -163,6 +214,15 @@ public abstract class Module implements BundleReference {
 	private static final EnumSet<Event> VALID_RESOLVED_TRANSITION = EnumSet.of(Event.STARTED);
 	private static final EnumSet<Event> VALID_STOPPED_TRANSITION = EnumSet.of(Event.UPDATED, Event.UNRESOLVED, Event.UNINSTALLED);
 
+	/**
+	 * Acquires the module lock for state changes by the current thread for the specified
+	 * transition event.  Certain transition events locks may be nested within other
+	 * transition event locks.  For example, a resolved transition event lock may be
+	 * nested within a started transition event lock.  A stopped transition lock
+	 * may be nested within an updated, unresolved or uninstalled transition lock.
+	 * @param transitionEvent the transition event to acquire the lock for.
+	 * @throws BundleException
+	 */
 	protected void lockStateChange(Event transitionEvent) throws BundleException {
 		try {
 			boolean acquired = stateChangeLock.tryLock(5, TimeUnit.SECONDS);
@@ -200,6 +260,10 @@ public abstract class Module implements BundleReference {
 		}
 	}
 
+	/**
+	 * Releases the lock for state changes for the specified transition event.
+	 * @param transitionEvent
+	 */
 	protected void unlockStateChange(Event transitionEvent) {
 		if (stateChangeLock.getHoldCount() == 0 || !stateTransitionEvents.contains(transitionEvent))
 			throw new IllegalMonitorStateException("Current thread does not hold the state change lock for: " + transitionEvent);
@@ -207,12 +271,22 @@ public abstract class Module implements BundleReference {
 		stateChangeLock.unlock();
 	}
 
+	/**
+	 * Starts this module
+	 * @param options the options for starting
+	 * @throws BundleException if an errors occurs while starting
+	 */
 	public void start(EnumSet<START_OPTIONS> options) throws BundleException {
 		if (options == null)
 			options = EnumSet.noneOf(START_OPTIONS.class);
 		if (options.contains(START_OPTIONS.LAZY_TRIGGER) && !options.contains(START_OPTIONS.TRANSIENT))
 			throw new IllegalArgumentException("Cannot use lazy trigger option without the transient option.");
 		Event event;
+		if (options.contains(START_OPTIONS.LAZY_TRIGGER)) {
+			if (stateChangeLock.getHoldCount() > 0 && stateTransitionEvents.contains(Event.STARTED)) {
+				// nothing to do here; the current thread is activating the bundle.
+			}
+		}
 		lockStateChange(Event.STARTED);
 		try {
 			checkValid();
@@ -244,6 +318,11 @@ public abstract class Module implements BundleReference {
 		}
 	}
 
+	/**
+	 * Stops this module.
+	 * @param options options for stopping
+	 * @throws BundleException if an error occurs while stopping
+	 */
 	public void stop(EnumSet<STOP_OPTIONS> options) throws BundleException {
 		if (options == null)
 			options = EnumSet.noneOf(STOP_OPTIONS.class);
@@ -283,9 +362,33 @@ public abstract class Module implements BundleReference {
 	}
 
 	private Event doStart(EnumSet<START_OPTIONS> options) throws BundleException {
-		if (isLazyActivate(options)) {
-			setState(State.LAZY_STARTING);
-			return Event.LAZY_ACTIVATION;
+		boolean isLazyTrigger = options.contains(START_OPTIONS.LAZY_TRIGGER);
+		if (isLazyTrigger) {
+			if (!State.LAZY_STARTING.equals(getState())) {
+				// need to make sure we transition through the lazy starting state
+				setState(State.LAZY_STARTING);
+				// need to fire the lazy event
+				unlockStateChange(Event.STARTED);
+				try {
+					fireEvent(Event.LAZY_ACTIVATION);
+				} finally {
+					lockStateChange(Event.STARTED);
+				}
+				if (State.ACTIVE.equals(getState())) {
+					// A sync listener must have caused the bundle to activate
+					return null;
+				}
+				// continue on to normal starting
+			}
+		} else {
+			if (isLazyActivate()) {
+				if (State.LAZY_STARTING.equals(getState())) {
+					// a sync listener must have tried to start this module again with the lazy option
+					return null; // no event to fire; nothing to do
+				}
+				setState(State.LAZY_STARTING);
+				return Event.LAZY_ACTIVATION;
+			}
 		}
 		setState(State.STARTING);
 		fireEvent(Event.STARTING);
@@ -300,6 +403,11 @@ public abstract class Module implements BundleReference {
 		}
 	}
 
+	/**
+	 * Performs any work associated with starting a module.  For example,
+	 * loading and calling start on an activator.
+	 * @param options
+	 */
 	protected void startWorker(EnumSet<START_OPTIONS> options) {
 		// do nothing
 	}
@@ -338,6 +446,10 @@ public abstract class Module implements BundleReference {
 		return "[id=" + id + "]";
 	}
 
+	/**
+	 * Publishes the specified event for this module.
+	 * @param event the event type to publish
+	 */
 	abstract protected void fireEvent(Event event);
 
 	abstract protected void persistStartOptions(EnumSet<START_OPTIONS> options);
@@ -346,5 +458,5 @@ public abstract class Module implements BundleReference {
 
 	abstract protected void cleanup(ModuleRevision revision);
 
-	abstract protected boolean isLazyActivate(EnumSet<START_OPTIONS> options);
+	abstract protected boolean isLazyActivate();
 }

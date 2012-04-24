@@ -135,7 +135,7 @@ public class ModuleRevision implements BundleRevision {
 	}
 
 	boolean isCurrent() {
-		return !revisions.isUninstalled() && revisions.getRevisions().indexOf(this) == 0;
+		return this.equals(revisions.getCurrentRevision());
 	}
 
 	public String toString() {

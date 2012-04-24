@@ -63,6 +63,20 @@ public class ModuleRevisions implements BundleRevisions {
 		}
 	}
 
+	/**
+	 * Returns the current {@link ModuleRevision revision} associated with this revisions.
+	 * @return the current {@link ModuleRevision revision} associated with this revisions
+	 *     or {@code null} if the current revision does not exist.
+	 */
+	ModuleRevision getCurrentRevision() {
+		synchronized (monitor) {
+			if (revisions.isEmpty() || uninstalled) {
+				return null;
+			}
+			return revisions.get(0);
+		}
+	}
+
 	ModuleRevision addRevision(ModuleRevision revision) {
 		synchronized (monitor) {
 			revisions.add(0, revision);
