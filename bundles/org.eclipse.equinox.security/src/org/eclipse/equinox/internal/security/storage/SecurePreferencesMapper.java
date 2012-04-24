@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,8 @@ public class SecurePreferencesMapper {
 
 	static private Map preferences = new HashMap(); // URL.toString() -> SecurePreferencesRoot
 
+	final public static String USER_HOME = "user.home"; //$NON-NLS-1$
+
 	static public ISecurePreferences getDefault() {
 		if (defaultPreferences == null) {
 			try {
@@ -72,7 +74,7 @@ public class SecurePreferencesMapper {
 					if (args[i + 1].startsWith(("-"))) //$NON-NLS-1$
 						continue;
 					if (location == null && KEYRING_ARGUMENT.equalsIgnoreCase(args[i])) {
-						location = new File(args[i + 1]).toURL(); // don't use File.toURI().toURL()
+						location = getKeyringFile(args[i + 1]).toURL(); // don't use File.toURI().toURL()
 						continue;
 					}
 					if (PASSWORD_ARGUMENT.equalsIgnoreCase(args[i])) {
@@ -143,6 +145,14 @@ public class SecurePreferencesMapper {
 				break;
 			}
 		}
+	}
+
+	// Replace any @user.home variables found in eclipse.keyring path arg
+	static private File getKeyringFile(String path) {
+		if (path.startsWith('@' + USER_HOME))
+			return new File(System.getProperty(USER_HOME), path.substring(USER_HOME.length() + 1));
+
+		return new File(path);
 	}
 
 	static private Map processPassword(Map options, String arg) {
