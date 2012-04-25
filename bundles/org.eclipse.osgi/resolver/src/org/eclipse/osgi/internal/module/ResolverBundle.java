@@ -448,7 +448,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 		for (int i = 0; i < newImports.length; i++) {
 			ResolverImport hostImport = getImport(newImports[i].getName());
 			ResolverExport resolvedExport = (ResolverExport) (hostImport == null ? null : hostImport.getSelectedSupplier());
-			if ((resolvedExport == null && isResolved()) || (resolvedExport != null && !newImports[i].isSatisfiedBy(resolvedExport.getExportPackageDescription()))) {
+			if (importPackageConflict(resolvedExport, newImports[i])) {
 				result = true;
 				resolver.getState().addResolverError(fragment, ResolverError.FRAGMENT_CONFLICT, newImports[i].toString(), newImports[i]);
 			}
@@ -472,6 +472,12 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 			}
 		}
 		return result;
+	}
+
+	private boolean importPackageConflict(ResolverExport resolvedExport, ImportPackageSpecification newImport) {
+		if (resolvedExport == null)
+			return isResolved();
+		return !((ImportPackageSpecificationImpl) newImport).isSatisfiedBy(resolvedExport.getExportPackageDescription(), false);
 	}
 
 	private void setNewFragmentExports(boolean newFragmentExports) {

@@ -3655,6 +3655,49 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("2.4", 1, wiresE.size());
 	}
 
+	public void testEEBug377510() throws BundleException {
+		State state = buildEmptyState();
+		int bundleID = 0;
+		Hashtable manifest = new Hashtable();
+
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "org.eclipse.osgi"); //$NON-NLS-1$
+		BundleDescription systemBundle = state.getFactory().createBundleDescription(state, manifest, "org.eclipse.osgi", bundleID++); //$NON-NLS-1$
+		state.addBundle(systemBundle);
+
+		List bundles = new ArrayList();
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A"); //$NON-NLS-1$
+		manifest.put(Constants.IMPORT_PACKAGE, "test");
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "JavaSE-1.6"); //$NON-NLS-1$
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, "A", bundleID++); //$NON-NLS-1$
+		bundles.add(a);
+		state.addBundle(a);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A.FRAG"); //$NON-NLS-1$
+		manifest.put(Constants.FRAGMENT_HOST, "A");
+		manifest.put(Constants.IMPORT_PACKAGE, "test");
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.5"); //$NON-NLS-1$
+		BundleDescription aFrag = state.getFactory().createBundleDescription(state, manifest, "A.FRAG", bundleID++); //$NON-NLS-1$
+		bundles.add(aFrag);
+		state.addBundle(aFrag);
+
+		Dictionary[] props = new Dictionary[] {new Hashtable(), new Hashtable(), new Hashtable(), new Hashtable(), new Hashtable(), new Hashtable(), new Hashtable(), new Hashtable()};
+		props[0].put("org.osgi.framework.executionenvironment", "J2SE-1.5");
+		props[0].put(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, "test");
+		props[1].put("org.osgi.framework.executionenvironment", "J2SE-1.5, JavaSE-1.6");
+		props[1].put(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, "test");
+		state.setPlatformProperties(props);
+
+		state.resolve();
+
+		assertTrue("host not resolved", a.isResolved());
+		assertTrue("fragment not resolved", aFrag.isResolved());
+	}
+
 	public void testBug338697() throws BundleException, IOException {
 		State state = buildEmptyState();
 		int bundleID = 0;

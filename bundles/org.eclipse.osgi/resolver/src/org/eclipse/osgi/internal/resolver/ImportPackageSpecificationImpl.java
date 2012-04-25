@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -95,6 +95,10 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	}
 
 	public boolean isSatisfiedBy(BaseDescription supplier) {
+		return isSatisfiedBy(supplier, true);
+	}
+
+	public boolean isSatisfiedBy(BaseDescription supplier, boolean checkEE) {
 		if (!(supplier instanceof ExportPackageDescription))
 			return false;
 		ExportPackageDescriptionImpl pkgDes = (ExportPackageDescriptionImpl) supplier;
@@ -152,6 +156,8 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		if (!hasMandatoryAttributes(mandatory))
 			return false;
 		// finally check the ee index
+		if (!checkEE)
+			return true;
 		if (((BundleDescriptionImpl) getBundle()).getEquinoxEE() < 0)
 			return true;
 		int eeIndex = ((Integer) pkgDes.getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue();
