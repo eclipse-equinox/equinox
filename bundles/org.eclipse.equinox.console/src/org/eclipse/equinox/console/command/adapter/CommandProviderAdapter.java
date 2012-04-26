@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 IBM Corporation, SAP AG.
+ * Copyright (c) 2010, 2012 IBM Corporation, SAP AG.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,7 +53,7 @@ public class CommandProviderAdapter {
 
 	private Method findCommand(Object commandName) {
 		for (Method command : commands) {
-			if (command.getName().equals(commandName))
+			if (command.getName().equalsIgnoreCase(commandName.toString()))
 				return command;
 		}
 		throw new IllegalArgumentException("Cannot find the command method for: " + commandName);
