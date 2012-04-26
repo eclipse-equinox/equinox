@@ -41,6 +41,16 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
 
     private final OSGiWeavingContext weavingContext;
 
+    /**
+     * The OSGi weaving adaptor provides a bridge to the AspectJ weaving adaptor
+     * implementation for general classloaders. This weaving adaptor exists per
+     * bundle that should be woven.
+     * 
+     * @param loader The classloader of the bundle to be woven
+     * @param context The bridge to the weaving context
+     * @param namespace The namespace of this adaptor, some kind of unique ID
+     *            for this weaver
+     */
     public OSGiWeavingAdaptor(final ClassLoader loader,
             final OSGiWeavingContext context, final String namespace) {
         super();
@@ -49,6 +59,19 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
         this.namespace = namespace;
     }
 
+    /**
+     * In some situations the weaving creates new classes on the fly that are
+     * not part of the original bundle. This is the case when the weaver needs
+     * to create closure-like constructs for the woven code.
+     * 
+     * This method returns a map of the generated classes (name -> bytecode) and
+     * flushes the internal cache afterwards to avoid memory damage over time.
+     * 
+     * @param className The name of the class for which additional classes might
+     *            got generated
+     * @return the map of generated class names and bytecodes for those
+     *         generated classes
+     */
     public Map<String, byte[]> getGeneratedClassesFor(final String className) {
         final Map<?, ?> generated = this.generatedClasses;
         final Map<String, byte[]> result = new HashMap<String, byte[]>();
@@ -76,6 +99,9 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
         return namespace;
     }
 
+    /**
+     * initialize the weaving adaptor
+     */
     public void initialize() {
         if (!initializing) {
             if (!initialized) {
@@ -100,7 +126,6 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
         }
     }
 
-    // Bug 215177: Adapt to updated (AJ 1.5.4) super class signature:
     /**
      * @see org.aspectj.weaver.tools.WeavingAdaptor#weaveClass(java.lang.String,
      *      byte[], boolean)
@@ -113,11 +138,10 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
         if (!initializing) {
             if (!initialized) {
                 initializing = true;
-                initialize(classLoader, weavingContext);
+                super.initialize(classLoader, weavingContext);
                 initialized = true;
                 initializing = false;
             }
-            // Bug 215177: Adapt to updated (AJ 1.5.4) super class signature:
             bytes = super.weaveClass(name, bytes, mustWeave);
         }
         return bytes;
