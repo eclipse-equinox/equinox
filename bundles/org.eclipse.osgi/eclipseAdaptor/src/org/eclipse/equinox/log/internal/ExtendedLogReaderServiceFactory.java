@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2012 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -49,10 +49,10 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 
 	private static PrintStream errorStream;
 
+	private final BasicReadWriteLock listenersLock = new BasicReadWriteLock();
 	private ArrayMap<LogListener, Object[]> listeners = new ArrayMap<LogListener, Object[]>(5);
 	private LogFilter[] filters = null;
-
-	private BasicReadWriteLock listenersLock = new BasicReadWriteLock();
+	private final ThreadLocal<int[]> nestedCallCount = new ThreadLocal<int[]>();
 
 	static boolean safeIsLoggable(LogFilter filter, Bundle bundle, String name, int level) {
 		try {
@@ -116,26 +116,54 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	}
 
 	boolean isLoggablePrivileged(Bundle bundle, String name, int level) {
-		int numNested = listenersLock.readLock();
+		LogFilter[] filtersCopy;
+		listenersLock.readLock();
 		try {
-			if (numNested == MAX_RECURSIONS)
+			filtersCopy = filters;
+		} finally {
+			listenersLock.readUnlock();
+		}
+		try {
+			if (incrementNestedCount() == MAX_RECURSIONS)
 				return false;
-			if (filters == null)
+			if (filtersCopy == null)
 				return false;
 
-			if (filters == ALWAYS_LOG)
+			if (filtersCopy == ALWAYS_LOG)
 				return true;
 
-			int filtersLength = filters.length;
+			int filtersLength = filtersCopy.length;
 			for (int i = 0; i < filtersLength; i++) {
-				LogFilter filter = filters[i];
+				LogFilter filter = filtersCopy[i];
 				if (safeIsLoggable(filter, bundle, name, level))
 					return true;
 			}
 		} finally {
-			listenersLock.readUnlock();
+			decrementNestedCount();
 		}
 		return false;
+	}
+
+	private int incrementNestedCount() {
+		int[] count = getCount();
+		count[0] = count[0] + 1;
+		return count[0];
+	}
+
+	private void decrementNestedCount() {
+		int[] count = getCount();
+		if (count[0] == 0)
+			return;
+		count[0] = count[0] - 1;
+	}
+
+	private int[] getCount() {
+		int[] count = nestedCallCount.get();
+		if (count == null) {
+			count = new int[] {0};
+			nestedCallCount.set(count);
+		}
+		return count;
 	}
 
 	void log(final Bundle bundle, final String name, final Object context, final int level, final String message, final Throwable exception) {
@@ -153,16 +181,22 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 
 	void logPrivileged(Bundle bundle, String name, Object context, int level, String message, Throwable exception) {
 		LogEntry logEntry = new ExtendedLogEntryImpl(bundle, name, context, level, message, exception);
-		int numNested = listenersLock.readLock();
+		ArrayMap<LogListener, Object[]> listenersCopy;
+		listenersLock.readLock();
 		try {
-			if (numNested >= MAX_RECURSIONS)
+			listenersCopy = listeners;
+		} finally {
+			listenersLock.readUnlock();
+		}
+		try {
+			if (incrementNestedCount() >= MAX_RECURSIONS)
 				return;
-			int size = listeners.size();
+			int size = listenersCopy.size();
 			for (int i = 0; i < size; i++) {
-				Object[] listenerObjects = listeners.getValue(i);
+				Object[] listenerObjects = listenersCopy.getValue(i);
 				LogFilter filter = (LogFilter) listenerObjects[0];
 				if (safeIsLoggable(filter, bundle, name, level)) {
-					LogListener listener = listeners.getKey(i);
+					LogListener listener = listenersCopy.getKey(i);
 					SerializedTaskQueue taskQueue = (SerializedTaskQueue) listenerObjects[1];
 					if (taskQueue != null) {
 						taskQueue.put(new LogTask(logEntry, listener));
@@ -173,14 +207,15 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 				}
 			}
 		} finally {
-			listenersLock.readUnlock();
+			decrementNestedCount();
 		}
 	}
 
 	void addLogListener(LogListener listener, LogFilter filter) {
 		listenersLock.writeLock();
 		try {
-			Object[] listenerObjects = listeners.get(listener);
+			ArrayMap<LogListener, Object[]> listenersCopy = new ArrayMap<LogListener, Object[]>(listeners.getKeys(), listeners.getValues());
+			Object[] listenerObjects = listenersCopy.get(listener);
 			if (listenerObjects == null) {
 				// Only create a task queue for non-SynchronousLogListeners
 				SerializedTaskQueue taskQueue = (listener instanceof SynchronousLogListener) ? null : new SerializedTaskQueue(listener.toString());
@@ -189,18 +224,19 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 				// update the filter
 				listenerObjects[0] = filter;
 			}
-			listeners.put(listener, listenerObjects);
-			recalculateFilters();
+			listenersCopy.put(listener, listenerObjects);
+			recalculateFilters(listenersCopy);
+			listeners = listenersCopy;
 		} finally {
 			listenersLock.writeUnlock();
 		}
 	}
 
-	private void recalculateFilters() {
+	private void recalculateFilters(ArrayMap<LogListener, Object[]> listenersCopy) {
 		List<LogFilter> filtersList = new ArrayList<LogFilter>();
-		int size = listeners.size();
+		int size = listenersCopy.size();
 		for (int i = 0; i < size; i++) {
-			Object[] listenerObjects = listeners.getValue(i);
+			Object[] listenerObjects = listenersCopy.getValue(i);
 			LogFilter filter = (LogFilter) listenerObjects[0];
 			if (filter == NULL_LOGGER_FILTER) {
 				filters = ALWAYS_LOG;
@@ -218,8 +254,10 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	void removeLogListener(LogListener listener) {
 		listenersLock.writeLock();
 		try {
-			listeners.remove(listener);
-			recalculateFilters();
+			ArrayMap<LogListener, Object[]> listenersCopy = new ArrayMap<LogListener, Object[]>(listeners.getKeys(), listeners.getValues());
+			listenersCopy.remove(listener);
+			recalculateFilters(listenersCopy);
+			listeners = listenersCopy;
 		} finally {
 			listenersLock.writeUnlock();
 		}
