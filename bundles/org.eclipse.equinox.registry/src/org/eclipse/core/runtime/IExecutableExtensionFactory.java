@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,18 +10,16 @@
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
-import org.eclipse.core.runtime.CoreException;
-
 /**
  * This interface allows extension providers to control how the instances provided to extension-points are being created 
  * by referring to the factory instead of referring to a class. For example, the following extension to the preference page 
  * extension-point uses a factory called <code>PreferencePageFactory</code>.   
  * <code><pre>
- *    <extension point="org.eclipse.ui.preferencePages">
- *    <page  name="..."  class="org.eclipse.update.ui.PreferencePageFactory:org.eclipse.update.ui.preferences.MainPreferencePage"> 
- *    </page>
- *  </extension>
- *  </pre>
+ *  &lt;extension point="org.eclipse.ui.preferencePages"&gt;
+ *    &lt;page  name="..."  class="org.eclipse.update.ui.PreferencePageFactory:org.eclipse.update.ui.preferences.MainPreferencePage"&gt; 
+ *    &lt;/page&gt;
+ *  &lt;/extension&gt;
+ * </pre>
  *  </code>
  * 
  * <p>
