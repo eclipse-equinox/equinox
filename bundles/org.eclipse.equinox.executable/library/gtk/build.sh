@@ -58,21 +58,24 @@ case $OS in
 			"x86_64")
 				defaultOSArch="x86_64"
 				defaultJava=DEFAULT_JAVA_EXEC
-				[ -d /usr/java64/1.5 ] && defaultJavaHome="/usr/java64/1.5"
+				[ -d /bluebird/teamswt/swt-builddir/build/JRE/x64/jdk1.6.0_14 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/build/JRE/x64/jdk1.6.0_14"
 				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			i?86)
 				defaultOSArch="x86"
+				[ -d /bluebird/teamswt/swt-builddir/build/JRE/x32/jdk1.6.0_14 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/build/JRE/x32/jdk1.6.0_14"
 				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			"ppc")
 				defaultOSArch="ppc"
 				defaultJava=DEFAULT_JAVA_EXEC
+				[ -d /bluebird/teamswt/swt-builddir/JDKs/PPC/ibm-java2-ppc-50 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/PPC/ibm-java2-ppc-50"
 				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			"ppc64")
 				defaultOSArch="ppc64"
 				defaultJava=DEFAULT_JAVA_EXEC
+				[ -d /bluebird/teamswt/swt-builddir/JDKs/PPC64/ibm-java2-ppc64-50 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/PPC64/ibm-java2-ppc64-50"
 				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			"s390")
@@ -112,7 +115,6 @@ case $OS in
 	"SunOS")
 		makefile="make_solaris.mak"
 		defaultOS="solaris"
-		[ -d /usr/jdk/jdk1.5.0_01 ] && defaultJavaHome="/usr/jdk/jdk1.5.0_01"
 		OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 		#PATH=/usr/ccs/bin:/opt/SUNWspro/bin:$PATH
 		PATH=/usr/ccs/bin:/export/home/SUNWspro/bin:$PATH
@@ -123,10 +125,12 @@ case $OS in
 		case ${PROC} in
 			"i386")
 				defaultOSArch="x86"
+				[ -d /bluebird/teamswt/swt-builddir/build/JRE/Solaris_x86/jdk1.6.0_14 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/build/JRE/Solaris_x86/jdk1.6.0_14"
 				CC=cc
 				;;
 			"sparc")
 				defaultOSArch="sparc"
+				[ -d /bluebird/teamswt/swt-builddir/build/JRE/SPARC/jdk1.6.0_14 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/build/JRE/SPARC/jdk1.6.0_14"
 				CC=cc
 				;;
 			*)
