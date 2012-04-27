@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.core.internal.registry;
 
 import java.lang.ref.SoftReference;
 import java.util.*;
+import org.eclipse.core.runtime.IContributor;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.spi.RegistryContributor;
 
@@ -582,6 +583,11 @@ public class RegistryObjectManager implements IObjectManager {
 				contributors = registry.getTableReader().loadContributors();
 		}
 		return contributors;
+	}
+
+	synchronized IContributor[] getContributorsSync() {
+		Collection contributorValues = getContributors().values();
+		return (IContributor[]) contributorValues.toArray(new IContributor[contributorValues.size()]);
 	}
 
 	synchronized RegistryContributor getContributor(String id) {
