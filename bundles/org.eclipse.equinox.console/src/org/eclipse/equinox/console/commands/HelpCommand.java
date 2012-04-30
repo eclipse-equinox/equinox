@@ -89,6 +89,8 @@ public class HelpCommand {
 	/**
 	 * Provides help for the available commands. Prints the names, descriptions and parameters of all registered commands.
 	 * 
+	 * If -scope <command_scope> is passed to the command, help is printed only for the commands with the specified scope. 
+	 * 
 	 * If a command name is passed as argument to the help command, then the help
 	 * message only for the particular command is displayed (if such is defined).
 	 *  
@@ -98,9 +100,19 @@ public class HelpCommand {
 	 */
 	public void help(final CommandSession session, String... args) throws Exception {
 		String command = null;
+		String scope = null;
 		
 		if (args.length > 0) {
-			command = args[0];
+			if (args[0].equals("-scope")) {
+				if (args.length < 2) {
+					System.out.println("Specify scope");
+					return;
+				} else {
+					scope = args[1];
+				}
+			} else {
+				command = args[0];
+			}
 		}
 		
 		if (command != null) {
@@ -109,8 +121,11 @@ public class HelpCommand {
 			return;
 		}
 
-		printAllLegacyCommandsHelp();
-		printAllGogoCommandsHelp(session);
+		
+		if ((scope == null) || "equinox".equals(scope)) {
+			printAllLegacyCommandsHelp();
+		}
+		printAllGogoCommandsHelp(session, scope);
 	}
 
 	private void printGogoCommandHelp(final CommandSession session, String command) throws Exception {
@@ -127,12 +142,15 @@ public class HelpCommand {
 		}
 	}
 
-	private void printAllGogoCommandsHelp(final CommandSession session) throws Exception {
+	private void printAllGogoCommandsHelp(final CommandSession session, String scope) throws Exception {
 		@SuppressWarnings("unchecked")
 		Set<String> commandNames = (Set<String>) session.get(COMMANDS);
 		
 		try {
 			for (String commandName : commandNames) {
+				if (scope != null && !commandName.startsWith(scope + ":")) {
+					continue;
+				}
 				session.execute("felix:help " + commandName);
 			}
 		} catch (IllegalArgumentException e) {
