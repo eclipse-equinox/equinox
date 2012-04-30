@@ -119,26 +119,14 @@ public class ModuleRevisionBuilder {
 	}
 
 	/**
-	 * Used by the container to build a new module for installation.
-	 * This builder is used to build the {@link Module#getCurrentRevision() current}
-	 * revision for the new module. 
-	 * @param id the module id being installed.
-	 * @param location the location of the module being installed
-	 * @param container the container the module is being installed into
-	 * @return the new module.
+	 * Used by the container to build a new revision for a module.
+	 * This builder is used to build a new {@link Module#getCurrentRevision() current}
+	 * revision for the specified module.
+	 * @param module the module to build a new revision for
+	 * @return the new new {@link Module#getCurrentRevision() current} revision.
 	 */
-	Module buildModule(Long id, String location, ModuleContainer container) {
-		Module module = container.moduleDataBase.createModule(location, id);
-		addRevision(module.getRevisions());
-		return module;
-	}
-
-	/**
-	 * Used by the container to build a new revision to update a module.
-	 * @param revisions the module revisions the update is for
-	 * @return the new revision for update.
-	 */
-	ModuleRevision addRevision(ModuleRevisions revisions) {
+	ModuleRevision addRevision(Module module) {
+		ModuleRevisions revisions = module.getRevisions();
 		ModuleRevision revision = new ModuleRevision(symbolicName, version, types, capabilityInfos, requirementInfos, revisions);
 		revisions.addRevision(revision);
 		return revision;

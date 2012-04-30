@@ -408,8 +408,11 @@ class ModuleResolver {
 			try {
 				filterResolvable();
 				selectSingletons();
-				// remove disabled from unresolved to prevent the resolver from resolving them
-				unresolved.removeAll(disabled);
+				// remove disabled from optional and triggers to prevent the resolver from resolving them
+				optionals.removeAll(disabled);
+				if (triggers.removeAll(disabled) && triggersMandatory) {
+					throw new ResolutionException("Could not resolve mandatory modules because another singleton was selected or the module was disabled: " + disabled);
+				}
 				return resolver.resolve(this);
 			} finally {
 				hook.end();
@@ -500,8 +503,9 @@ class ModuleResolver {
 					Collection<ModuleRevision> sameName = current.get(revision.getSymbolicName());
 					if (sameName == null) {
 						sameName = new ArrayList<ModuleRevision>();
-						sameName.add(revision);
+						current.put(revision.getSymbolicName(), sameName);
 					}
+					sameName.add(revision);
 				}
 				byName = current;
 			}

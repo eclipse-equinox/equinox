@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.util.Arrays;
-import java.util.EnumSet;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleReference;
+import org.osgi.resource.Capability;
 import org.osgi.service.resolver.ResolutionException;
 
 /**
@@ -36,7 +37,12 @@ public abstract class Module implements BundleReference {
 		 * The module start operation must activate the module according to the module's declared
 		 * activation policy.
 		 */
-		ACTIVATION_POLICY,
+		USE_ACTIVATION_POLICY,
+		/**
+		 * The module start operation is transient and the persistent activation policy
+		 * setting should be used.
+		 */
+		TRANSIENT_RESUME,
 		/**
 		 * The module start operation that indicates the module is being started because of a
 		 * lazy start trigger class load.  This option must be used with the 
@@ -92,15 +98,6 @@ public abstract class Module implements BundleReference {
 	}
 
 	/**
-	 * A set of {@link State states} that indicate a module is active.
-	 */
-	public static final EnumSet<State> ACTIVE_SET = EnumSet.of(State.STARTING, State.LAZY_STARTING, State.ACTIVE, State.STOPPING);
-	/**
-	 * A set of {@link State states} that indicate a module is resolved.
-	 */
-	public static final EnumSet<State> RESOLVED_SET = EnumSet.of(State.RESOLVED, State.STARTING, State.LAZY_STARTING, State.ACTIVE, State.STOPPING);
-
-	/**
 	 * Event types that may be {@link Module#fireEvent(Event) fired} for a module
 	 * indicating a {@link Module#getState() state} change has occurred for a module.
 	 */
@@ -148,12 +145,38 @@ public abstract class Module implements BundleReference {
 		UPDATED
 	}
 
+	/**
+	 * An enumeration of persistent settings for a module
+	 */
+	public static enum Settings {
+		/**
+		 * The module has been set to auto start.
+		 */
+		AUTO_START,
+		/**
+		 * The module has been set to use its activation policy
+		 */
+		USE_ACTIVATION_POLICY,
+	}
+
+	/**
+	 * A set of {@link State states} that indicate a module is active.
+	 */
+	public static final EnumSet<State> ACTIVE_SET = EnumSet.of(State.STARTING, State.LAZY_STARTING, State.ACTIVE, State.STOPPING);
+	/**
+	 * A set of {@link State states} that indicate a module is resolved.
+	 */
+	public static final EnumSet<State> RESOLVED_SET = EnumSet.of(State.RESOLVED, State.STARTING, State.LAZY_STARTING, State.ACTIVE, State.STOPPING);
+
 	private final Long id;
 	private final String location;
 	private final ModuleRevisions revisions;
 	private final ReentrantLock stateChangeLock = new ReentrantLock();
 	private final EnumSet<Event> stateTransitionEvents = EnumSet.noneOf(Event.class);
+	private final EnumSet<Settings> settings;
 	private volatile State state = State.INSTALLED;
+	private volatile int startlevel;
+	private volatile long lastModified;
 
 	/**
 	 * Constructs a new module with the specified id, location and
@@ -161,11 +184,15 @@ public abstract class Module implements BundleReference {
 	 * @param id the new module id
 	 * @param location the new module location
 	 * @param container the container for the new module
+	 * @param settings the persisted settings.  May be {@code null} if there are no settings.
+	 * @param startlevel the persisted start level or initial start level.
 	 */
-	public Module(Long id, String location, ModuleContainer container) {
+	public Module(Long id, String location, ModuleContainer container, EnumSet<Settings> settings, int startlevel) {
 		this.id = id;
 		this.location = location;
 		this.revisions = new ModuleRevisions(this, container);
+		this.settings = settings == null ? EnumSet.noneOf(Settings.class) : settings;
+		this.startlevel = startlevel;
 	}
 
 	/**
@@ -200,8 +227,8 @@ public abstract class Module implements BundleReference {
 	}
 
 	/**
-	 * Returns the current {@link State state} of the module.
-	 * @return the current state of the module.
+	 * Returns the current {@link State state} of this module.
+	 * @return the current state of this module.
 	 */
 	public State getState() {
 		return state;
@@ -209,6 +236,33 @@ public abstract class Module implements BundleReference {
 
 	void setState(State state) {
 		this.state = state;
+	}
+
+	/**
+	 * Returns the current start level of this module.
+	 * @return the current start level of this module.
+	 */
+	public int getStartLevel() {
+		return this.startlevel;
+	}
+
+	void setStartLevel(int startlevel) {
+		this.startlevel = startlevel;
+	}
+
+	/**
+	 * Returns the time when this module was last modified.  A module is considered
+	 * to be modified when it is installed, updated or uninstalled.
+	 * <p>
+	 * The time value is a the number of milliseconds since January 1, 1970, 00:00:00 UTC.
+	 * @return the time when this bundle was last modified.
+	 */
+	public long getLastModified() {
+		return this.lastModified;
+	}
+
+	void setlastModified(long lastModified) {
+		this.lastModified = lastModified;
 	}
 
 	private static final EnumSet<Event> VALID_RESOLVED_TRANSITION = EnumSet.of(Event.STARTED);
@@ -277,10 +331,9 @@ public abstract class Module implements BundleReference {
 	 * @throws BundleException if an errors occurs while starting
 	 */
 	public void start(EnumSet<START_OPTIONS> options) throws BundleException {
-		if (options == null)
+		if (options == null) {
 			options = EnumSet.noneOf(START_OPTIONS.class);
-		if (options.contains(START_OPTIONS.LAZY_TRIGGER) && !options.contains(START_OPTIONS.TRANSIENT))
-			throw new IllegalArgumentException("Cannot use lazy trigger option without the transient option.");
+		}
 		Event event;
 		if (options.contains(START_OPTIONS.LAZY_TRIGGER)) {
 			if (stateChangeLock.getHoldCount() > 0 && stateTransitionEvents.contains(Event.STARTED)) {
@@ -290,10 +343,15 @@ public abstract class Module implements BundleReference {
 		lockStateChange(Event.STARTED);
 		try {
 			checkValid();
-			// TODO need a check to see if the current revision is valid for start (e.g. is fragment).
-			if (!options.contains(START_OPTIONS.TRANSIENT)) {
-				persistStartOptions(options);
+			persistStartOptions(options);
+			if (getStartLevel() > getRevisions().getContainer().getStartLevel()) {
+				if (options.contains(START_OPTIONS.TRANSIENT)) {
+					throw new BundleException("Cannot transiently start a module whose start level is not met.", BundleException.START_TRANSIENT_ERROR);
+				}
+				// DO nothing
+				return;
 			}
+			// TODO need a check to see if the current revision is valid for start (e.g. is fragment).
 			if (State.ACTIVE.equals(getState()))
 				return;
 			if (getState().equals(State.INSTALLED)) {
@@ -331,13 +389,11 @@ public abstract class Module implements BundleReference {
 		lockStateChange(Event.STOPPED);
 		try {
 			checkValid();
-			if (!options.contains(STOP_OPTIONS.TRANSIENT)) {
-				persistStopOptions(options);
-			}
+			persistStopOptions(options);
 			if (!Module.ACTIVE_SET.contains(getState()))
 				return;
 			try {
-				event = doStop(options);
+				event = doStop();
 			} catch (BundleException e) {
 				stopError = e;
 				// must always fire the STOPPED event
@@ -381,19 +437,22 @@ public abstract class Module implements BundleReference {
 				// continue on to normal starting
 			}
 		} else {
-			if (isLazyActivate()) {
+			if (settings.contains(Settings.USE_ACTIVATION_POLICY) && isLazyActivate()) {
 				if (State.LAZY_STARTING.equals(getState())) {
 					// a sync listener must have tried to start this module again with the lazy option
 					return null; // no event to fire; nothing to do
 				}
+				// set the lazy starting state and return lazy activation event for firing
 				setState(State.LAZY_STARTING);
 				return Event.LAZY_ACTIVATION;
 			}
 		}
+
+		// time to actual start the module
 		setState(State.STARTING);
 		fireEvent(Event.STARTING);
 		try {
-			startWorker(options);
+			startWorker();
 			setState(State.ACTIVE);
 			return Event.STARTED;
 		} catch (Throwable t) {
@@ -406,17 +465,16 @@ public abstract class Module implements BundleReference {
 	/**
 	 * Performs any work associated with starting a module.  For example,
 	 * loading and calling start on an activator.
-	 * @param options
 	 */
-	protected void startWorker(EnumSet<START_OPTIONS> options) {
+	protected void startWorker() {
 		// do nothing
 	}
 
-	private Event doStop(EnumSet<STOP_OPTIONS> options) throws BundleException {
+	private Event doStop() throws BundleException {
 		setState(State.STOPPING);
 		fireEvent(Event.STOPPING);
 		try {
-			stopWorker(options);
+			stopWorker();
 			return Event.STOPPED;
 		} catch (Throwable t) {
 			if (t instanceof BundleException)
@@ -431,7 +489,7 @@ public abstract class Module implements BundleReference {
 	/**
 	 * @throws BundleException  
 	 */
-	protected void stopWorker(EnumSet<STOP_OPTIONS> options) throws BundleException {
+	protected void stopWorker() throws BundleException {
 		// do nothing
 	}
 
@@ -452,11 +510,42 @@ public abstract class Module implements BundleReference {
 	 */
 	abstract protected void fireEvent(Event event);
 
-	abstract protected void persistStartOptions(EnumSet<START_OPTIONS> options);
+	private void persistStartOptions(EnumSet<START_OPTIONS> options) {
+		if (options.contains(START_OPTIONS.TRANSIENT_RESUME) || options.contains(START_OPTIONS.LAZY_TRIGGER)) {
+			return;
+		}
 
-	abstract protected void persistStopOptions(EnumSet<STOP_OPTIONS> options);
+		// Always set the use acivation policy setting
+		if (options.contains(START_OPTIONS.USE_ACTIVATION_POLICY)) {
+			settings.add(Settings.USE_ACTIVATION_POLICY);
+		} else {
+			settings.remove(Settings.USE_ACTIVATION_POLICY);
+		}
+
+		if (options.contains(START_OPTIONS.TRANSIENT)) {
+			return;
+		}
+		settings.add(Settings.AUTO_START);
+		revisions.getContainer().moduleDataBase.persistSettings(settings, this);
+	}
+
+	private void persistStopOptions(EnumSet<STOP_OPTIONS> options) {
+		if (options.contains(STOP_OPTIONS.TRANSIENT))
+			return;
+		settings.clear();
+		revisions.getContainer().moduleDataBase.persistSettings(settings, this);
+	}
 
 	abstract protected void cleanup(ModuleRevision revision);
 
-	abstract protected boolean isLazyActivate();
+	private boolean isLazyActivate() {
+		ModuleRevision current = getCurrentRevision();
+		if (current == null)
+			return false;
+		List<Capability> capabilities = current.getCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
+		if (capabilities.isEmpty())
+			return false;
+		Capability moduleData = capabilities.get(0);
+		return EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY.equals(moduleData.getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY));
+	}
 }

@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.osgi.framework.Version;
 import org.osgi.resource.*;
@@ -86,6 +87,13 @@ public abstract class ModuleDataBase {
 	final AtomicLong timeStamp;
 
 	/**
+	 * A map of module settings keyed by module id.
+	 */
+	private final Map<Long, EnumSet<Settings>> moduleSettings;
+
+	private int initialModuleStartLevel = 1;
+
+	/**
 	 * Monitors read and write access to this database
 	 */
 	private final ReentrantReadWriteLock monitor = new ReentrantReadWriteLock(true);
@@ -100,6 +108,7 @@ public abstract class ModuleDataBase {
 		this.wirings = new HashMap<ModuleRevision, ModuleWiring>();
 		this.nextId = new AtomicLong(0);
 		this.timeStamp = new AtomicLong(0);
+		this.moduleSettings = new HashMap<Long, EnumSet<Settings>>();
 	}
 
 	/**
@@ -204,7 +213,8 @@ public abstract class ModuleDataBase {
 	final Module install(String location, ModuleRevisionBuilder builder) {
 		lockWrite();
 		try {
-			Module module = load(location, builder, getNextIdAndIncrement());
+			Module module = load(location, builder, getNextIdAndIncrement(), null, getInitialModuleStartLevel());
+			module.setlastModified(System.currentTimeMillis());
 			incrementTimestamp();
 			return module;
 		} finally {
@@ -212,7 +222,7 @@ public abstract class ModuleDataBase {
 		}
 	}
 
-	final Module load(String location, ModuleRevisionBuilder builder, long id) {
+	final Module load(String location, ModuleRevisionBuilder builder, long id, EnumSet<Settings> settings, int startlevel) {
 		// sanity check
 		checkWrite();
 		if (container == null)
@@ -221,9 +231,12 @@ public abstract class ModuleDataBase {
 			throw new IllegalArgumentException("Location is already used: " + location); //$NON-NLS-1$
 		if (modulesById.containsKey(id))
 			throw new IllegalArgumentException("Id is already used: " + id); //$NON-NLS-1$
-		Module module = builder.buildModule(id, location, container);
+		Module module = createModule(location, id, settings, startlevel);
+		builder.addRevision(module);
 		modulesByLocations.put(location, module);
 		modulesById.put(id, module);
+		if (settings != null)
+			moduleSettings.put(id, settings);
 		ModuleRevision newRevision = module.getCurrentRevision();
 		addToRevisionByName(newRevision);
 		addCapabilities(newRevision);
@@ -258,6 +271,7 @@ public abstract class ModuleDataBase {
 			// remove the location
 			modulesByLocations.remove(module.getLocation());
 			modulesById.remove(module.getId());
+			moduleSettings.remove(module.getId());
 			// remove the revisions by name
 			List<ModuleRevision> revisions = uninstalling.getModuleRevisions();
 			for (ModuleRevision revision : revisions) {
@@ -281,6 +295,7 @@ public abstract class ModuleDataBase {
 			// attempt to cleanup any removal pendings
 			cleanupRemovalPending();
 
+			module.setlastModified(System.currentTimeMillis());
 			incrementTimestamp();
 		} finally {
 			unlockWrite();
@@ -298,7 +313,7 @@ public abstract class ModuleDataBase {
 		lockWrite();
 		try {
 			ModuleRevision oldRevision = module.getCurrentRevision();
-			ModuleRevision newRevision = builder.addRevision(module.getRevisions());
+			ModuleRevision newRevision = builder.addRevision(module);
 			String name = newRevision.getSymbolicName();
 			Collection<ModuleRevision> sameName = revisionByName.get(name);
 			if (sameName == null) {
@@ -326,6 +341,7 @@ public abstract class ModuleDataBase {
 			// attempt to clean up removal pendings
 			cleanupRemovalPending();
 
+			module.setlastModified(System.currentTimeMillis());
 			incrementTimestamp();
 		} finally {
 			unlockWrite();
@@ -642,12 +658,16 @@ public abstract class ModuleDataBase {
 	protected abstract List<ModuleCapability> findCapabilities(ModuleRequirement requirement);
 
 	/**
-	 * Creates a new module.  This gets called when a new module is installed.
+	 * Creates a new module.  This gets called when a new module is installed
+	 * or when {@link #load(DataInputStream) loading} persistent data into this
+	 * database.
 	 * @param location the location for the module
 	 * @param id the id for the module
+	 * @param settings the settings for the module.  May be {@code null} if there are no settings.
+	 * @param startlevel the start level for the module
 	 * @return the Module
 	 */
-	protected abstract Module createModule(String location, long id);
+	protected abstract Module createModule(String location, long id, EnumSet<Settings> settings, int startlevel);
 
 	/**
 	 * Writes this database in a format suitable for using the {@link #load(DataInputStream)}
@@ -702,6 +722,42 @@ public abstract class ModuleDataBase {
 		}
 	}
 
+	public void persistSettings(EnumSet<Settings> settings, Module module) {
+		lockWrite();
+		try {
+			moduleSettings.put(module.getId(), EnumSet.copyOf(settings));
+		} finally {
+			unlockWrite();
+		}
+	}
+
+	public void setStartLevel(Module module, int startlevel) {
+		lockWrite();
+		try {
+			module.setStartLevel(startlevel);
+		} finally {
+			unlockWrite();
+		}
+	}
+
+	public int getInitialModuleStartLevel() {
+		lockRead();
+		try {
+			return this.initialModuleStartLevel;
+		} finally {
+			unlockRead();
+		}
+	}
+
+	public void setInitialModuleStartLevel(int initialStartlevel) {
+		lockWrite();
+		try {
+			this.initialModuleStartLevel = initialStartlevel;
+		} finally {
+			unlockWrite();
+		}
+	}
+
 	private static class Persistence {
 		private static final int VERSION = 1;
 		private static final byte NULL = 0;
@@ -738,12 +794,14 @@ public abstract class ModuleDataBase {
 			out.writeInt(VERSION);
 			out.writeLong(moduleDataBase.getTimestamp());
 			out.writeLong(moduleDataBase.getNextId());
+			out.writeInt(moduleDataBase.getInitialModuleStartLevel());
+
 			List<Module> modules = moduleDataBase.getModules();
 			out.writeInt(modules.size());
 
 			Map<Object, Integer> objectTable = new HashMap<Object, Integer>();
 			for (Module module : modules) {
-				writeModule(module, out, objectTable);
+				writeModule(module, moduleDataBase, out, objectTable);
 			}
 
 			Collection<ModuleRevision> removalPendings = moduleDataBase.getRemovalPending();
@@ -777,8 +835,10 @@ public abstract class ModuleDataBase {
 			int version = in.readInt();
 			if (version < VERSION)
 				throw new UnsupportedOperationException("Perstence version is not correct for loading: " + version + " expecting: " + VERSION); //$NON-NLS-1$ //$NON-NLS-2$
-			moduleDataBase.timeStamp.set(in.readLong());
+			long timeStamp = in.readLong();
 			moduleDataBase.nextId.set(in.readLong());
+			moduleDataBase.setInitialModuleStartLevel(in.readInt());
+
 			int numModules = in.readInt();
 
 			Map<Integer, Object> objectTable = new HashMap<Integer, Object>();
@@ -805,9 +865,12 @@ public abstract class ModuleDataBase {
 			}
 			// TODO need to do this without incrementing the timestamp
 			moduleDataBase.setWiring(wirings);
+
+			// Setting the timestamp at the end since some operations increment it
+			moduleDataBase.timeStamp.set(timeStamp);
 		}
 
-		private static void writeModule(Module module, DataOutputStream out, Map<Object, Integer> objectTable) throws IOException {
+		private static void writeModule(Module module, ModuleDataBase moduleDataBase, DataOutputStream out, Map<Object, Integer> objectTable) throws IOException {
 			ModuleRevision current = module.getCurrentRevision();
 			if (current == null)
 				return;
@@ -833,6 +896,21 @@ public abstract class ModuleDataBase {
 				out.writeInt(addToWriteTable(requirement, objectTable));
 				writeGenericInfo(requirement.getNamespace(), requirement.getAttributes(), requirement.getDirectives(), out);
 			}
+
+			// settings
+			EnumSet<Settings> settings = moduleDataBase.moduleSettings.get(module.getId());
+			out.writeInt(settings == null ? 0 : settings.size());
+			if (settings != null) {
+				for (Settings setting : settings) {
+					writeString(setting.name(), out);
+				}
+			}
+
+			// startlevel
+			out.writeInt(module.getStartLevel());
+
+			// last modified
+			out.writeLong(module.getLastModified());
 		}
 
 		private static void readModule(ModuleDataBase moduleDataBase, DataInputStream in, Map<Integer, Object> objectTable) throws IOException {
@@ -857,7 +935,23 @@ public abstract class ModuleDataBase {
 				requirementIndexes[i] = in.readInt();
 				readGenericInfo(false, in, builder);
 			}
-			Module module = moduleDataBase.load(location, builder, id);
+
+			// settings
+			EnumSet<Settings> settings = null;
+			int numSettings = in.readInt();
+			if (numSettings > 0) {
+				settings = EnumSet.noneOf(Settings.class);
+				for (int i = 0; i < numSettings; i++) {
+					settings.add(Settings.valueOf(readString(in)));
+				}
+			}
+
+			// startlevel
+			int startlevel = in.readInt();
+			Module module = moduleDataBase.load(location, builder, id, settings, startlevel);
+
+			// last modified
+			module.setlastModified(in.readLong());
 
 			ModuleRevision current = module.getCurrentRevision();
 			addToReadTable(current, moduleIndex, objectTable);

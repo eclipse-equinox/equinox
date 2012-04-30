@@ -280,7 +280,7 @@ public final class ModuleContainer {
 			}
 			if (Module.ACTIVE_SET.contains(previousState)) {
 				// restart the module if necessary
-				module.start(EnumSet.of(START_OPTIONS.TRANSIENT, START_OPTIONS.ACTIVATION_POLICY));
+				module.start(EnumSet.of(START_OPTIONS.TRANSIENT_RESUME));
 			}
 			if (updateError != null) {
 				// throw cause of update error
@@ -333,7 +333,7 @@ public final class ModuleContainer {
 	 * @param triggers the modules to resolve or {@code null} to resolve all unresolved
 	 *    current revisions.
 	 * @param triggersMandatory true if the triggers must be resolved.  This will result in 
-	 *   a {@link ResolutionException} if set to true and one of the triggers could not be resolved
+	 *   a {@link ResolutionException} if set to true and one of the triggers could not be resolved.
 	 * @throws ResolutionException if a resolution error occurs
 	 * @see FrameworkWiring#resolveBundles(Collection)
 	 */
@@ -571,7 +571,8 @@ public final class ModuleContainer {
 		resolve(refreshTriggers, false);
 		for (Module module : refreshTriggers) {
 			try {
-				module.start(EnumSet.of(START_OPTIONS.TRANSIENT, START_OPTIONS.ACTIVATION_POLICY));
+
+				module.start(EnumSet.of(START_OPTIONS.TRANSIENT_RESUME));
 			} catch (BundleException e) {
 				// TODO fire error event
 				e.printStackTrace();
@@ -601,6 +602,20 @@ public final class ModuleContainer {
 	 */
 	public Collection<ModuleRevision> getRemovalPending() {
 		return moduleDataBase.getRemovalPending();
+	}
+
+	/**
+	 * Return the active start level value of this container.
+	 * 
+	 * If the container is in the process of changing the start level this
+	 * method must return the active start level if this differs from the
+	 * requested start level.
+	 * 
+	 * @return The active start level value of the Framework.
+	 */
+	public int getStartLevel() {
+		// TODO Auto-generated method stub
+		return 1;
 	}
 
 	Collection<Module> getRefreshClosure(Collection<Module> initial, Map<ModuleRevision, ModuleWiring> wiringCopy) {

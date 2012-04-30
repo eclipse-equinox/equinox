@@ -58,7 +58,7 @@ public class ModuleWiring implements BundleWiring {
 		return ((BundleRevision.TYPE_FRAGMENT & revision.getTypes()) != 0) && !getRequiredWires(HostNamespace.HOST_NAMESPACE).isEmpty();
 	}
 
-	List<ModuleCapability> getModuleCapabilities(String namespace) {
+	public List<ModuleCapability> getModuleCapabilities(String namespace) {
 		if (!isValid)
 			return null;
 		if (namespace == null)
@@ -72,7 +72,7 @@ public class ModuleWiring implements BundleWiring {
 		return result;
 	}
 
-	List<ModuleRequirement> getModuleRequirements(String namespace) {
+	public List<ModuleRequirement> getModuleRequirements(String namespace) {
 		if (!isValid)
 			return null;
 		if (namespace == null)
@@ -97,11 +97,11 @@ public class ModuleWiring implements BundleWiring {
 		return Converters.asListBundleRequirement(getModuleRequirements(namespace));
 	}
 
-	List<ModuleWire> getProvidedModuleWires(String namespace) {
+	public List<ModuleWire> getProvidedModuleWires(String namespace) {
 		return getWires(namespace, providedWires);
 	}
 
-	List<ModuleWire> getRequiredModuleWires(String namespace) {
+	public List<ModuleWire> getRequiredModuleWires(String namespace) {
 		return getWires(namespace, requiredWires);
 	}
 
