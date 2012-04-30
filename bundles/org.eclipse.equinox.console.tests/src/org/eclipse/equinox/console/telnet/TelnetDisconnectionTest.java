@@ -52,6 +52,7 @@ public class TelnetDisconnectionTest {
             EasyMock.replay(processor);
             
             connection.start();
+            Thread.sleep(60000);
             
             BundleContext context = EasyMock.createMock(BundleContext.class);
             final DisconnectCommand command = new DisconnectCommand(context);

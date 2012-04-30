@@ -25,7 +25,7 @@ public class DisconnectCommand {
 		this.context = context;
 	}
 	
-	public void start() {
+	public void startService() {
 		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put(CommandProcessor.COMMAND_SCOPE, "equinox");
 		props.put(CommandProcessor.COMMAND_FUNCTION, new String[] {"disconnect"});

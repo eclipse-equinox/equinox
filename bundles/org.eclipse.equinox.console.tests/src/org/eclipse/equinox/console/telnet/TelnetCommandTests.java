@@ -56,7 +56,7 @@ public class TelnetCommandTests {
         EasyMock.replay(context);
         
         TelnetCommand command = new TelnetCommand(processor, context);
-        command.start();
+        command.startService();
         
         Socket socketClient = null;
         try {

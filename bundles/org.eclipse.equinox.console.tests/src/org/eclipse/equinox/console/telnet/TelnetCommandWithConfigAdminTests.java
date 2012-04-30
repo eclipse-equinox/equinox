@@ -85,7 +85,7 @@ public class TelnetCommandWithConfigAdminTests {
         EasyMock.replay(context);
         
         TelnetCommand command = new TelnetCommand(processor, context);
-        command.start();
+        command.startService();
         Dictionary props = new Hashtable();
 		props.put("port", TELNET_PORT);
 		props.put("host", HOST);
@@ -165,7 +165,7 @@ public class TelnetCommandWithConfigAdminTests {
         EasyMock.replay(context);
         
         TelnetCommand command = new TelnetCommand(processor, context);
-        command.start();
+        command.startService();
         Dictionary props = new Hashtable();
 		props.put("port", TELNET_PORT);
 		props.put("host", HOST);

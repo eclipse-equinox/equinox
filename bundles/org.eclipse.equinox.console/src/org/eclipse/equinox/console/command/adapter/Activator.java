@@ -81,7 +81,7 @@ public class Activator implements BundleActivator {
 			if (isFirstProcessor) {
 				isFirstProcessor = false;
 				telnetConnection = new TelnetCommand(processor, context);
-				telnetConnection.start();
+				telnetConnection.startService();
 			} else {
 				telnetConnection.addCommandProcessor(processor);
 			}
@@ -223,16 +223,16 @@ public class Activator implements BundleActivator {
 		platformAdminTracker.open();
 		
 		equinoxCmdProvider = new EquinoxCommandProvider(context, this);
-		equinoxCmdProvider.start();
+		equinoxCmdProvider.startService();
 		
 		HelpCommand helpCommand = new HelpCommand(context); 
-		helpCommand.start();
+		helpCommand.startService();
 		
 		ManCommand manCommand = new ManCommand(context);
-		manCommand.start();
+		manCommand.startService();
 		
 		DisconnectCommand disconnectCommand = new DisconnectCommand(context);
-		disconnectCommand.start();
+		disconnectCommand.startService();
 
 		startBundle("org.apache.felix.gogo.runtime", true);
 		startBundle("org.apache.felix.gogo.shell", true);
@@ -315,7 +315,7 @@ public class Activator implements BundleActivator {
 		commandProviderTracker.close();
 		commandProcessorTracker.close();
 		if (equinoxCmdProvider != null) {
-			equinoxCmdProvider.stop();
+			equinoxCmdProvider.stopService();
 		}
 
 		try {

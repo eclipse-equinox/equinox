@@ -156,7 +156,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 *  Registers this object as a service providing commands
 	 *  Adds this object as a SynchronousBundleListener.
 	 */
-	public void start() {
+	public void startService() {
 		EquinoxCommandsConverter converter = new EquinoxCommandsConverter(context);
 		converterReg = context.registerService(Converter.class.getName(), converter, null);
 		
@@ -168,7 +168,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		context.addBundleListener(this);
 	}
 
-	public void stop() {
+	public void stopService() {
 		if (converterReg != null) {
 			converterReg.unregister();
 		}

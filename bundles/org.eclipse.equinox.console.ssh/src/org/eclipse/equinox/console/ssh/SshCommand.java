@@ -94,7 +94,7 @@ public class SshCommand {
         }
     }
     
-    public synchronized void start() {
+    public synchronized void startService() {
     	Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		properties.put("osgi.command.scope", "equinox");
 		properties.put("osgi.command.function", new String[] {"ssh"});

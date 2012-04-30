@@ -78,7 +78,7 @@ public class HelpCommand {
 		commandProvidersTracker.open();
 	}
 	
-	public void start() {
+	public void startService() {
 		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 		props.put(CommandProcessor.COMMAND_SCOPE, "equinox");

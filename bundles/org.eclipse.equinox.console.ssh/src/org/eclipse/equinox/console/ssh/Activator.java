@@ -31,7 +31,7 @@ public class Activator implements BundleActivator {
 			if (isFirstProcessor) {
 				isFirstProcessor = false;
 				sshConnection = new SshCommand(processor, context);
-				sshConnection.start();
+				sshConnection.startService();
 			} else {
 				sshConnection.addCommandProcessor(processor);
 			}
