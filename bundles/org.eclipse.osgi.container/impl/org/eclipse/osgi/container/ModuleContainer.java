@@ -127,23 +127,27 @@ public final class ModuleContainer {
 		boolean locationLocked = false;
 		boolean nameLocked = false;
 		try {
+			// Attempt to lock the location and name
+			try {
+				locationLocked = locationLocks.tryLock(location, 5, TimeUnit.SECONDS);
+				nameLocked = name != null && nameLocks.tryLock(name, 5, TimeUnit.SECONDS);
+				if (!locationLocked) {
+					throw new BundleException("Failed to obtain location lock for installation: " + location, BundleException.STATECHANGE_ERROR);
+				}
+				if (name != null && !nameLocked) {
+					throw new BundleException("Failed to obtain symbolic name lock for installation: " + name, BundleException.STATECHANGE_ERROR);
+				}
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR, e);
+			}
+
 			Module existingLocation = null;
 			Collection<Module> collisionCandidates = Collections.emptyList();
 			moduleDataBase.lockRead();
 			try {
 				existingLocation = moduleDataBase.getModule(location);
 				if (existingLocation == null) {
-					// Attempt to lock the location and name
-					try {
-						locationLocked = locationLocks.tryLock(location, 5, TimeUnit.SECONDS);
-						nameLocked = name != null && nameLocks.tryLock(name, 5, TimeUnit.SECONDS);
-						if (!locationLocked || !nameLocked) {
-							throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR);
-						}
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-						throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR, e);
-					}
 					// Collect existing current revisions with the same name and version as the revision we want to install
 					// This is to perform the collision check below
 					Collection<ModuleRevision> existingRevisionNames = moduleDataBase.getRevisions(name, builder.getVersion());
@@ -208,19 +212,20 @@ public final class ModuleContainer {
 		String name = builder.getSymbolicName();
 		boolean nameLocked = false;
 		try {
+			// Attempt to lock the name
+			try {
+				nameLocked = name != null && nameLocks.tryLock(name, 5, TimeUnit.SECONDS);
+				if (!nameLocked) {
+					throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR);
+				}
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR, e);
+			}
+
 			Collection<Module> collisionCandidates = Collections.emptyList();
 			moduleDataBase.lockRead();
 			try {
-				// Attempt to lock the name
-				try {
-					nameLocked = name != null && nameLocks.tryLock(name, 5, TimeUnit.SECONDS);
-					if (!nameLocked) {
-						throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR);
-					}
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR, e);
-				}
 				// Collect existing bundles with the same name and version as the bundle we want to install
 				// This is to perform the collision check below
 				Collection<ModuleRevision> existingRevisionNames = moduleDataBase.getRevisions(name, builder.getVersion());
