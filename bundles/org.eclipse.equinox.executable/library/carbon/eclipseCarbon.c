@@ -53,12 +53,16 @@ static char * findLib(char * command);
 
 #ifdef i386
 #define JAVA_ARCH "i386"
+#define JAVA_HOME_ARCH "i386"
 #elif defined(__ppc__) || defined(__powerpc64__)
 #define JAVA_ARCH "ppc"
+#define JAVA_HOME_ARCH "ppc"
 #elif defined(__amd64__) || defined(__x86_64__)
 #define JAVA_ARCH "amd64"
+#define JAVA_HOME_ARCH "x86_64"
 #else
 #define JAVA_ARCH DEFAULT_OS_ARCH
+#define JAVA_HOME_ARCH DEFAULT_OS_ARCH
 #endif
 
 #define LIB_PATH_VAR _T_ECLIPSE("LD_LIBRARY_PATH")
@@ -511,19 +515,21 @@ char * getJavaHome() {
 	FILE *fp;
 	char path[4096];
 	char *result, *start;
-	fp = popen("/usr/libexec/java_home", "r");
+	sprintf(path, "/usr/libexec/java_home -a %s", JAVA_HOME_ARCH);
+	fp = popen(path, "r");
 	if (fp == NULL) {
 		return NULL;
 	}
 	while (fgets(path, sizeof(path)-1, fp) != NULL) {
 	}
-	result = strdup(path);
+	result = path;
 	start = strchr(result, '\n');
 	if (start) {
 		start[0] = 0;
 	}
+	sprintf(path, "%s/bin/java", result);
 	pclose(fp);
-	return result;
+	return strdup(path);
 }
 
 char * findVMLibrary( char* command ) {
@@ -555,21 +561,21 @@ char * findVMLibrary( char* command ) {
 			free(version);
 		} 
 	}
-	version = getJavaVersion(command);
+	char *java_home = NULL, *cmd = command;
+	if (strstr(cmd, "/JavaVM.framework/") != NULL && (strstr(cmd, "/Current/") != NULL || strstr(cmd, "/A/") != NULL)) {
+		java_home = cmd = getJavaHome();
+	}
+	version = getJavaVersion(cmd);
 	isJDK7 = version && versionCmp(version, "1.7.0") >= 0;
 	if (version) free(version);
 	if (isJDK7) {
-		char *java_home = NULL, *cmd = command;
-		if (strstr(cmd, "/JavaVM.framework/") != NULL && (strstr(cmd, "/Current/") != NULL || strstr(cmd, "/A/") != NULL)) {
-			java_home = cmd = getJavaHome();
-		}
 		start = strstr(cmd, "/Contents/");
 		if (start != NULL){
 			start[0] = 0;
 			return cmd;
 		}
-		if (java_home) free(java_home);
 	}
+	if (java_home) free(java_home);
 	if (strstr(command, "/JavaVM.framework/") == NULL) {
 		char * lib = findLib(command);
 		if (lib != NULL) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -171,7 +171,11 @@ public class CompositeImpl extends CompositeBase implements CompositeBundle {
 	protected void stopHook() throws BundleException {
 		// bug 363561; need to make sure the class loader is created
 		// before stopping the composite framework
-		checkClassLoader();
+		try {
+			checkClassLoader();
+		} catch (Throwable t) {
+			framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, t);
+		}
 		trackerManager.stoppedComposite();
 		// do not stop the framework unless we are persistently stopped 
 		if ((bundledata.getStatus() & Constants.BUNDLE_STARTED) == 0)

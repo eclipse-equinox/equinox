@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -224,7 +224,6 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 				synchronized (framework.bundles) {
 					// now collect the descriptions to refresh
 					List<BundleDescription> results = new ArrayList<BundleDescription>(numBundles);
-					BundleDelta[] addDeltas = null;
 					for (int i = 0; i < numBundles; i++) {
 						BundleDescription description = ((AbstractBundle) bundles[i]).getBundleDescription();
 						if (description != null && description.getBundleId() != 0 && !results.contains(description))
@@ -233,13 +232,11 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 							// add in any bundles that have the same symbolic name see bug (169593)
 							AbstractBundle[] sameNames = framework.bundles.getBundles(bundles[i].getSymbolicName());
 							if (sameNames != null && sameNames.length > 1) {
-								if (addDeltas == null)
-									addDeltas = systemState.getChanges().getChanges(BundleDelta.ADDED, false);
 								for (int j = 0; j < sameNames.length; j++)
 									if (sameNames[j] != bundles[i]) {
 										BundleDescription sameName = sameNames[j].getBundleDescription();
 										if (sameName != null && sameName.getBundleId() != 0 && !results.contains(sameName)) {
-											if (checkExtensionBundle(sameName, addDeltas))
+											if (checkExtensionBundle(sameName))
 												results.add(sameName);
 										}
 									}
@@ -289,12 +286,13 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 		}
 	}
 
-	private boolean checkExtensionBundle(BundleDescription sameName, BundleDelta[] addDeltas) {
+	private boolean checkExtensionBundle(BundleDescription sameName) {
 		if (sameName.getHost() == null || !sameName.isResolved())
 			return true; // only do this extra check for resolved fragment bundles
-		// only add fragments of the system bundle when newly added bundles exist.
-		if (((BundleDescription) sameName.getHost().getSupplier()).getBundleId() != 0 || addDeltas.length > 0)
+		// only add fragments if they are not for the system bundle
+		if (((BundleDescription) sameName.getHost().getSupplier()).getBundleId() != 0)
 			return true;
+		// never do this for resolved system bundle fragments
 		return false;
 	}
 

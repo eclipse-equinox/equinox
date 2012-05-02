@@ -91,6 +91,7 @@
 		<resolveProperty name="javaArg" value="j_${os}.${arch}" />
 		<resolveProperty name="userName" value="u_${os}.${arch}" />
 		<property name="userName" value="swtbuild" />
+		<property name="localGit" value="../../.." />
 		
 		<!-- windows is built locally, everything else is remote -->
 		<condition property="local" >
@@ -156,7 +157,12 @@
 			<equals arg1="cocoa" arg2="${ws}" />
 		</condition>
 		<condition property="javaParam" value="" else="-java ${javaArg}" >
-			<equals arg1="macosx" arg2="${os}" />
+			<or>
+				<equals arg1="macosx" arg2="${os}" />
+				<not>
+					<isset property="javaArg"/>
+				</not>
+			</or>
 		</condition>
 		<sshexec host="${machine}" 
 			username="${userName}" 

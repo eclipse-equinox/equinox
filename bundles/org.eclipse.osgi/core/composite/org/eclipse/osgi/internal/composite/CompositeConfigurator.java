@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -171,7 +171,14 @@ public class CompositeConfigurator implements SynchronousBundleListener, HookCon
 		if ((data.getType() & (BundleData.TYPE_COMPOSITEBUNDLE | BundleData.TYPE_SURROGATEBUNDLE)) == 0)
 			return null;
 		// only create composite class loaders for bundles that are of type composite | surrogate
-		ClassLoaderDelegate companionDelegate = ((CompositeModule) ((CompositeBase) data.getBundle()).getCompanionBundle()).getDelegate();
+		CompositeModule compositeModule = (CompositeModule) ((CompositeBase) data.getBundle()).getCompanionBundle();
+		if (compositeModule == null) {
+			throw new IllegalStateException("Could not find companion bundle for " + data.getBundle());
+		}
+		ClassLoaderDelegate companionDelegate = compositeModule.getDelegate();
+		if (companionDelegate == null) {
+			throw new IllegalStateException("Could not find the companion bundle delegate for" + compositeModule);
+		}
 		return new CompositeClassLoader(parent, delegate, companionDelegate, data);
 	}
 

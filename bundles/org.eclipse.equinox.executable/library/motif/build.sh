@@ -68,7 +68,7 @@ case $OS in
 	"SunOS")
 #		PATH=/usr/ccs/bin:/opt/SUNWspro/bin:$PATH
 		PATH=/usr/ccs/bin:/export/home/SUNWspro/bin:$PATH
-		javaHome="/usr/jdk/jdk1.5.0_01"
+		[ -d /bluebird/teamswt/swt-builddir/build/JRE/SPARC/jdk1.6.0_14 ] && javaHome="/bluebird/teamswt/swt-builddir/build/JRE/SPARC/jdk1.6.0_14"
 		outputRoot="../../contributed"
 		export PATH
 		makefile="make_solaris.mak"
