@@ -86,6 +86,12 @@ public class ModuleRevision implements BundleRevision {
 		return Converters.asListBundleRequirement(getModuleRequirements(namespace));
 	}
 
+	/**
+	 * Returns the capabilities declared by this revision
+	 * @param namespace The namespace of the declared capabilities to return or 
+	 * {@code null} to return the declared capabilities from all namespaces. 
+	 * @return An unmodifiable list containing the declared capabilities.
+	 */
 	public List<ModuleCapability> getModuleCapabilities(String namespace) {
 		if (namespace == null)
 			return Collections.unmodifiableList(capabilities);
@@ -98,6 +104,12 @@ public class ModuleRevision implements BundleRevision {
 		return Collections.unmodifiableList(result);
 	}
 
+	/**
+	 * Returns the requirements declared by this revision
+	 * @param namespace The namespace of the declared requirements to return or 
+	 * {@code null} to return the declared requirements from all namespaces. 
+	 * @return An unmodifiable list containing the declared requirements.
+	 */
 	public List<ModuleRequirement> getModuleRequirements(String namespace) {
 		if (namespace == null)
 			return Collections.unmodifiableList(requirements);
@@ -130,6 +142,10 @@ public class ModuleRevision implements BundleRevision {
 		return Converters.asListRequirement(getDeclaredRequirements(namespace));
 	}
 
+	/**
+	 * Returns the {@link ModuleRevisions revisions} for this revision.
+	 * @return the {@link ModuleRevisions revisions} for this revision.
+	 */
 	public ModuleRevisions getRevisions() {
 		return revisions;
 	}
@@ -138,6 +154,7 @@ public class ModuleRevision implements BundleRevision {
 		return this.equals(revisions.getCurrentRevision());
 	}
 
+	@Override
 	public String toString() {
 		List<ModuleCapability> identities = getModuleCapabilities(IdentityNamespace.IDENTITY_NAMESPACE);
 		if (identities.isEmpty())

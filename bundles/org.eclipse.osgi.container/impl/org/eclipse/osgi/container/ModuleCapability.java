@@ -54,6 +54,7 @@ public class ModuleCapability implements BundleCapability {
 		return revision;
 	}
 
+	@Override
 	public String toString() {
 		return namespace + ModuleRevision.toString(attributes, false) + ModuleRevision.toString(directives, true);
 	}

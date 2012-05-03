@@ -4,8 +4,10 @@ Bundle-Name: Framework
 Bundle-SymbolicName: org.eclipse.osgi.container
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.eclipse.osgi.framework.internal.core,
+Import-Package: org.eclipse.osgi.framework.eventmgr;version="1.2.0",
+ org.eclipse.osgi.framework.internal.core,
  org.eclipse.osgi.framework.util,
+ org.eclipse.osgi.internal.resolver,
  org.eclipse.osgi.util;version="1.1.0",
  org.osgi.framework;version="[1.7.0,2.0.0)",
  org.osgi.framework.hooks.resolver;version="[1.0.0,1.1.0)",

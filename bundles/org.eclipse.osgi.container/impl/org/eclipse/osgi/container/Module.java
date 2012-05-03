@@ -13,9 +13,11 @@ package org.eclipse.osgi.container;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import org.eclipse.osgi.container.ModuleContainer.ContainerStartLevel;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleReference;
+import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.resource.Capability;
 import org.osgi.service.resolver.ResolutionException;
 
@@ -23,7 +25,7 @@ import org.osgi.service.resolver.ResolutionException;
  * A module represents a set of revisions installed in a
  * module {@link ModuleContainer container}.
  */
-public abstract class Module implements BundleReference {
+public abstract class Module implements BundleReference, BundleStartLevel, Comparable<Module> {
 	/**
 	 * The possible start options for a module
 	 */
@@ -40,9 +42,14 @@ public abstract class Module implements BundleReference {
 		USE_ACTIVATION_POLICY,
 		/**
 		 * The module start operation is transient and the persistent activation policy
-		 * setting should be used.
+		 * setting will be used.
 		 */
 		TRANSIENT_RESUME,
+		/**
+		 * The module start operation is transient and will only happen if {@link Settings#AUTO_START auto start}
+		 * setting is persistent.
+		 */
+		TRANSIENT_IF_AUTO_START,
 		/**
 		 * The module start operation that indicates the module is being started because of a
 		 * lazy start trigger class load.  This option must be used with the 
@@ -98,7 +105,7 @@ public abstract class Module implements BundleReference {
 	}
 
 	/**
-	 * Event types that may be {@link Module#fireEvent(Event) fired} for a module
+	 * Event types that may be {@link Module#publishEvent(Event) published} for a module
 	 * indicating a {@link Module#getState() state} change has occurred for a module.
 	 */
 	public static enum Event {
@@ -220,6 +227,7 @@ public abstract class Module implements BundleReference {
 
 	/**
 	 * Returns the current {@link ModuleRevision revision} associated with this module.
+	 * If the module is uninstalled then {@code null} is returned.
 	 * @return the current {@link ModuleRevision revision} associated with this module.
 	 */
 	public final ModuleRevision getCurrentRevision() {
@@ -238,16 +246,28 @@ public abstract class Module implements BundleReference {
 		this.state = state;
 	}
 
-	/**
-	 * Returns the current start level of this module.
-	 * @return the current start level of this module.
-	 */
+	@Override
 	public int getStartLevel() {
 		return this.startlevel;
 	}
 
-	void setStartLevel(int startlevel) {
-		this.startlevel = startlevel;
+	@Override
+	public void setStartLevel(int startLevel) {
+		revisions.getContainer().setStartLevel(this, startLevel);
+	}
+
+	@Override
+	public boolean isPersistentlyStarted() {
+		return settings.contains(Settings.AUTO_START);
+	}
+
+	@Override
+	public boolean isActivationPolicyUsed() {
+		return settings.contains(Settings.USE_ACTIVATION_POLICY);
+	}
+
+	void storeStartLevel(int newStartLevel) {
+		this.startlevel = newStartLevel;
 	}
 
 	/**
@@ -343,6 +363,10 @@ public abstract class Module implements BundleReference {
 		lockStateChange(Event.STARTED);
 		try {
 			checkValid();
+			if (options.contains(START_OPTIONS.TRANSIENT_IF_AUTO_START) && !settings.contains(Settings.AUTO_START)) {
+				// Do nothing
+				return;
+			}
 			persistStartOptions(options);
 			if (getStartLevel() > getRevisions().getContainer().getStartLevel()) {
 				if (options.contains(START_OPTIONS.TRANSIENT)) {
@@ -372,7 +396,7 @@ public abstract class Module implements BundleReference {
 		if (event != null) {
 			if (!EnumSet.of(Event.STARTED, Event.LAZY_ACTIVATION, Event.STOPPED).contains(event))
 				throw new IllegalStateException("Wrong event type: " + event);
-			fireEvent(event);
+			publishEvent(event);
 		}
 	}
 
@@ -396,7 +420,7 @@ public abstract class Module implements BundleReference {
 				event = doStop();
 			} catch (BundleException e) {
 				stopError = e;
-				// must always fire the STOPPED event
+				// must always publish the STOPPED event
 				event = Event.STOPPED;
 			}
 		} finally {
@@ -406,10 +430,20 @@ public abstract class Module implements BundleReference {
 		if (event != null) {
 			if (!Event.STOPPED.equals(event))
 				throw new IllegalStateException("Wrong event type: " + event);
-			fireEvent(event);
+			publishEvent(event);
 		}
 		if (stopError != null)
 			throw stopError;
+	}
+
+	@Override
+	public int compareTo(Module o) {
+		int slcomp = getStartLevel() - o.getStartLevel();
+		if (slcomp != 0) {
+			return slcomp;
+		}
+		long idcomp = getId() - o.getId();
+		return (idcomp < 0L) ? -1 : ((idcomp > 0L) ? 1 : 0);
 	}
 
 	private void checkValid() {
@@ -423,10 +457,10 @@ public abstract class Module implements BundleReference {
 			if (!State.LAZY_STARTING.equals(getState())) {
 				// need to make sure we transition through the lazy starting state
 				setState(State.LAZY_STARTING);
-				// need to fire the lazy event
+				// need to publish the lazy event
 				unlockStateChange(Event.STARTED);
 				try {
-					fireEvent(Event.LAZY_ACTIVATION);
+					publishEvent(Event.LAZY_ACTIVATION);
 				} finally {
 					lockStateChange(Event.STARTED);
 				}
@@ -440,7 +474,7 @@ public abstract class Module implements BundleReference {
 			if (settings.contains(Settings.USE_ACTIVATION_POLICY) && isLazyActivate()) {
 				if (State.LAZY_STARTING.equals(getState())) {
 					// a sync listener must have tried to start this module again with the lazy option
-					return null; // no event to fire; nothing to do
+					return null; // no event to publish; nothing to do
 				}
 				// set the lazy starting state and return lazy activation event for firing
 				setState(State.LAZY_STARTING);
@@ -450,7 +484,7 @@ public abstract class Module implements BundleReference {
 
 		// time to actual start the module
 		setState(State.STARTING);
-		fireEvent(Event.STARTING);
+		publishEvent(Event.STARTING);
 		try {
 			startWorker();
 			setState(State.ACTIVE);
@@ -467,12 +501,14 @@ public abstract class Module implements BundleReference {
 	 * loading and calling start on an activator.
 	 */
 	protected void startWorker() {
-		// do nothing
+		if (getId() != 0)
+			return;
+		((ContainerStartLevel) revisions.getContainer().getFrameworkStartLevel()).doContainerStartLevel(this, 1);
 	}
 
 	private Event doStop() throws BundleException {
 		setState(State.STOPPING);
-		fireEvent(Event.STOPPING);
+		publishEvent(Event.STOPPING);
 		try {
 			stopWorker();
 			return Event.STOPPED;
@@ -490,7 +526,9 @@ public abstract class Module implements BundleReference {
 	 * @throws BundleException  
 	 */
 	protected void stopWorker() throws BundleException {
-		// do nothing
+		if (getId() != 0)
+			return;
+		((ContainerStartLevel) revisions.getContainer().getFrameworkStartLevel()).doContainerStartLevel(this, 0);
 	}
 
 	/**
@@ -500,6 +538,7 @@ public abstract class Module implements BundleReference {
 		// do nothing
 	}
 
+	@Override
 	public String toString() {
 		return "[id=" + id + "]";
 	}
@@ -508,7 +547,7 @@ public abstract class Module implements BundleReference {
 	 * Publishes the specified event for this module.
 	 * @param event the event type to publish
 	 */
-	abstract protected void fireEvent(Event event);
+	abstract protected void publishEvent(Event event);
 
 	private void persistStartOptions(EnumSet<START_OPTIONS> options) {
 		if (options.contains(START_OPTIONS.TRANSIENT_RESUME) || options.contains(START_OPTIONS.LAZY_TRIGGER)) {
@@ -536,9 +575,14 @@ public abstract class Module implements BundleReference {
 		revisions.getContainer().moduleDataBase.persistSettings(settings, this);
 	}
 
+	/**
+	 * The container is done with the revision and it has been complete removed.
+	 * This method allows the resources behind the revision to be cleaned up.
+	 * @param revision the revision to clean up
+	 */
 	abstract protected void cleanup(ModuleRevision revision);
 
-	private boolean isLazyActivate() {
+	boolean isLazyActivate() {
 		ModuleRevision current = getCurrentRevision();
 		if (current == null)
 			return false;

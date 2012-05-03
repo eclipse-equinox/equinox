@@ -20,6 +20,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.framework.util.ObjectPool;
+import org.eclipse.osgi.internal.resolver.ComputeNodeOrder;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.osgi.resource.*;
 import org.osgi.service.resolver.Resolver;
@@ -91,12 +93,19 @@ public abstract class ModuleDataBase {
 	 */
 	private final Map<Long, EnumSet<Settings>> moduleSettings;
 
+	/**
+	 * The initial module start level.
+	 */
 	private int initialModuleStartLevel = 1;
 
 	/**
 	 * Monitors read and write access to this database
 	 */
 	private final ReentrantReadWriteLock monitor = new ReentrantReadWriteLock(true);
+
+	protected static enum Sort {
+		BY_DEPENDENCY, BY_START_LEVEL, BY_ID
+	}
 
 	/**
 	 * Constructs a new empty database.
@@ -106,7 +115,8 @@ public abstract class ModuleDataBase {
 		this.modulesById = new HashMap<Long, Module>();
 		this.revisionByName = new HashMap<String, Collection<ModuleRevision>>();
 		this.wirings = new HashMap<ModuleRevision, ModuleWiring>();
-		this.nextId = new AtomicLong(0);
+		// Start at id 1 because 0 is reserved for the system bundle
+		this.nextId = new AtomicLong(1);
 		this.timeStamp = new AtomicLong(0);
 		this.moduleSettings = new HashMap<Long, EnumSet<Settings>>();
 	}
@@ -213,7 +223,9 @@ public abstract class ModuleDataBase {
 	final Module install(String location, ModuleRevisionBuilder builder) {
 		lockWrite();
 		try {
-			Module module = load(location, builder, getNextIdAndIncrement(), null, getInitialModuleStartLevel());
+			int startlevel = Constants.SYSTEM_BUNDLE_LOCATION.equals(location) ? 0 : getInitialModuleStartLevel();
+			long id = Constants.SYSTEM_BUNDLE_LOCATION.equals(location) ? 0 : getNextIdAndIncrement();
+			Module module = load(location, builder, id, null, startlevel);
 			module.setlastModified(System.currentTimeMillis());
 			incrementTimestamp();
 			return module;
@@ -501,26 +513,111 @@ public abstract class ModuleDataBase {
 	}
 
 	/**
-	 * Returns a snapshot of all modules.
+	 * Returns a snapshot of all modules ordered by module ID.
 	 * <p>
 	 * A read operation protected by the {@link #lockRead() read} lock.
 	 * @return a snapshot of all modules.
 	 */
 	protected final List<Module> getModules() {
-		List<Module> modules;
+		return getSortedModules(null);
+	}
+
+	/**
+	 * Returns a snapshot of all modules ordered according to the sort options
+	 * @param sortOptions options for sorting
+	 * @return a snapshot of all modules ordered according to the sort options
+	 */
+	protected final List<Module> getSortedModules(EnumSet<Sort> sortOptions) {
 		lockRead();
 		try {
-			modules = new ArrayList<Module>(modulesByLocations.values());
+			List<Module> modules = new ArrayList<Module>(modulesByLocations.values());
+			sortModules(sortOptions, modules);
+			return modules;
+		} finally {
+			unlockRead();
+		}
+	}
+
+	protected final void sortModules(EnumSet<Sort> sortOptions, List<Module> modules) {
+		if (modules.size() < 2)
+			return;
+		if (sortOptions == null || sortOptions.contains(Sort.BY_ID) || sortOptions.isEmpty()) {
 			Collections.sort(modules, new Comparator<Module>() {
 				@Override
 				public int compare(Module m1, Module m2) {
 					return m1.getId().compareTo(m2.getId());
 				}
 			});
-		} finally {
-			unlockRead();
+			return;
 		}
-		return modules;
+		// first sort by start-level
+		if (sortOptions.contains(Sort.BY_START_LEVEL)) {
+			Collections.sort(modules);
+		}
+		if (sortOptions.contains(Sort.BY_DEPENDENCY)) {
+			if (sortOptions.contains(Sort.BY_START_LEVEL)) {
+				// sort each sublist that has modules of the same start level
+				int currentSL = modules.get(0).getStartLevel();
+				int currentSLindex = 0;
+				boolean lazy = false;
+				for (int i = 0; i < modules.size(); i++) {
+					Module module = modules.get(i);
+					if (currentSL != module.getStartLevel()) {
+						if (lazy)
+							sortByDependencies(modules.subList(currentSLindex, i));
+						currentSL = module.getStartLevel();
+						currentSLindex = i;
+						lazy = false;
+					}
+					lazy |= module.isLazyActivate();
+				}
+				// sort the last set of bundles
+				if (lazy)
+					sortByDependencies(modules.subList(currentSLindex, modules.size()));
+			} else {
+				// sort the whole list by dependency
+				sortByDependencies(modules);
+			}
+		}
+	}
+
+	private Collection<List<Module>> sortByDependencies(List<Module> toSort) {
+		// Build references so we can sort
+		List<Module[]> references = new ArrayList<Module[]>(toSort.size());
+		for (Module module : toSort) {
+			ModuleRevision current = module.getCurrentRevision();
+			if (current == null) {
+				continue;
+			}
+			ModuleWiring wiring = current.getWiring();
+			if (wiring == null) {
+				continue;
+			}
+			for (ModuleWire wire : wiring.getRequiredModuleWires(null)) {
+				references.add(new Module[] {wire.getRequirer().getRevisions().getModule(), wire.getProvider().getRevisions().getModule()});
+			}
+		}
+
+		// Sort an array using the references
+		Module[] sorted = toSort.toArray(new Module[toSort.size()]);
+		Object[][] cycles = ComputeNodeOrder.computeNodeOrder(sorted, references.toArray(new Module[references.size()][]));
+
+		// Apply the sorted array to the list
+		toSort.clear();
+		toSort.addAll(Arrays.asList(sorted));
+
+		if (cycles.length == 0)
+			return Collections.emptyList();
+
+		Collection<List<Module>> moduleCycles = new ArrayList<List<Module>>(cycles.length);
+		for (Object[] cycle : cycles) {
+			List<Module> moduleCycle = new ArrayList<Module>(cycle.length);
+			for (Object module : cycle) {
+				moduleCycle.add((Module) module);
+			}
+			moduleCycles.add(moduleCycle);
+		}
+		return moduleCycles;
 	}
 
 	/**
@@ -731,16 +828,16 @@ public abstract class ModuleDataBase {
 		}
 	}
 
-	public void setStartLevel(Module module, int startlevel) {
+	void setStartLevel(Module module, int startlevel) {
 		lockWrite();
 		try {
-			module.setStartLevel(startlevel);
+			module.storeStartLevel(startlevel);
 		} finally {
 			unlockWrite();
 		}
 	}
 
-	public int getInitialModuleStartLevel() {
+	int getInitialModuleStartLevel() {
 		lockRead();
 		try {
 			return this.initialModuleStartLevel;

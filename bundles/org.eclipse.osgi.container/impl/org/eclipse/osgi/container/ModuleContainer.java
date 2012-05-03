@@ -14,18 +14,21 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.osgi.container.Module.Event;
 import org.eclipse.osgi.container.Module.START_OPTIONS;
 import org.eclipse.osgi.container.Module.STOP_OPTIONS;
 import org.eclipse.osgi.container.Module.State;
+import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
+import org.eclipse.osgi.container.ModuleDataBase.Sort;
+import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.internal.container.LockSet;
 import org.osgi.framework.*;
-import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.resolver.ResolutionException;
-import org.osgi.service.resolver.Resolver;
 
 /**
  * A container for installing, updating, uninstalling and resolve modules.
@@ -46,7 +49,12 @@ public final class ModuleContainer {
 	/**
 	 * An implementation of FrameworkWiring for this container
 	 */
-	private final FrameworkWiring frameworkWiring = new ModuleFrameworkWiring();
+	private final FrameworkWiring frameworkWiring;
+
+	/**
+	 * An implementation of FrameworkStartLevel for this container
+	 */
+	private final ContainerStartLevel frameworkStartLevel;
 
 	/**
 	 * The module database for this container.  All access to this database MUST
@@ -55,10 +63,7 @@ public final class ModuleContainer {
 	/* @GuardedBy("moduleDataBase") */
 	final ModuleDataBase moduleDataBase;
 
-	/**
-	 * Hook used to determine if a module revision being installed or updated will cause a collision
-	 */
-	private final ModuleCollisionHook moduleCollisionHook;
+	private final ModuleContainerAdaptor adaptor;
 
 	/**
 	 * The module resolver which implements the ResolverContext and handles calling the 
@@ -68,15 +73,15 @@ public final class ModuleContainer {
 
 	/**
 	 * Constructs a new container with the specified collision hook, resolver hook, resolver and module database.
-	 * @param moduleCollisionHook the collision hook
-	 * @param resolverHookFactory the resolver hook
-	 * @param resolver the resolver
+	 * @param adaptor the adaptor for the container
 	 * @param moduleDataBase the module database
 	 */
-	public ModuleContainer(ModuleCollisionHook moduleCollisionHook, ResolverHookFactory resolverHookFactory, Resolver resolver, ModuleDataBase moduleDataBase) {
-		this.moduleCollisionHook = moduleCollisionHook;
-		this.moduleResolver = new ModuleResolver(resolverHookFactory, resolver);
+	public ModuleContainer(ModuleContainerAdaptor adaptor, ModuleDataBase moduleDataBase) {
+		this.adaptor = adaptor;
+		this.moduleResolver = new ModuleResolver(adaptor);
 		this.moduleDataBase = moduleDataBase;
+		this.frameworkWiring = new ModuleFrameworkWiring();
+		this.frameworkStartLevel = new ContainerStartLevel();
 	}
 
 	/**
@@ -180,7 +185,7 @@ public final class ModuleContainer {
 			// Check that the bundle does not collide with other bundles with the same name and version
 			// This is from the perspective of the origin bundle
 			if (origin != null && !collisionCandidates.isEmpty()) {
-				moduleCollisionHook.filterCollisions(ModuleCollisionHook.INSTALLING, origin, collisionCandidates);
+				adaptor.getModuleCollisionHook().filterCollisions(ModuleCollisionHook.INSTALLING, origin, collisionCandidates);
 			}
 			if (!collisionCandidates.isEmpty()) {
 				throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
@@ -188,7 +193,7 @@ public final class ModuleContainer {
 
 			Module result = moduleDataBase.install(location, builder);
 
-			result.fireEvent(Event.INSTALLED);
+			result.publishEvent(Event.INSTALLED);
 
 			return result;
 		} finally {
@@ -250,7 +255,7 @@ public final class ModuleContainer {
 			// Check that the module does not collide with other modules with the same name and version
 			// This is from the perspective of the module being updated
 			if (module != null && !collisionCandidates.isEmpty()) {
-				moduleCollisionHook.filterCollisions(ModuleCollisionHook.UPDATING, module, collisionCandidates);
+				adaptor.getModuleCollisionHook().filterCollisions(ModuleCollisionHook.UPDATING, module, collisionCandidates);
 			}
 
 			if (!collisionCandidates.isEmpty()) {
@@ -267,9 +272,9 @@ public final class ModuleContainer {
 					// throwing an exception from updateWorker keeps the previous revision
 					module.updateWorker(builder);
 					if (Module.RESOLVED_SET.contains(previousState)) {
-						// set the state to installed and fire unresolved event
+						// set the state to installed and publish unresolved event
 						module.setState(State.INSTALLED);
-						module.fireEvent(Event.UNRESOLVED);
+						module.publishEvent(Event.UNRESOLVED);
 					}
 					moduleDataBase.update(module, builder);
 				} catch (BundleException e) {
@@ -280,8 +285,8 @@ public final class ModuleContainer {
 				module.unlockStateChange(Event.UPDATED);
 			}
 			if (updateError == null) {
-				// only fire updated event on success
-				module.fireEvent(Event.UPDATED);
+				// only publish updated event on success
+				module.publishEvent(Event.UPDATED);
 			}
 			if (Module.ACTIVE_SET.contains(previousState)) {
 				// restart the module if necessary
@@ -309,8 +314,7 @@ public final class ModuleContainer {
 				try {
 					module.stop(EnumSet.of(STOP_OPTIONS.TRANSIENT));
 				} catch (BundleException e) {
-					// TODO fire error event
-					e.printStackTrace();
+					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
 				}
 			}
 			moduleDataBase.uninstall(module);
@@ -318,7 +322,7 @@ public final class ModuleContainer {
 		} finally {
 			module.unlockStateChange(Event.UNINSTALLED);
 		}
-		module.fireEvent(Event.UNINSTALLED);
+		module.publishEvent(Event.UNINSTALLED);
 	}
 
 	ModuleWiring getWiring(ModuleRevision revision) {
@@ -331,6 +335,14 @@ public final class ModuleContainer {
 	 */
 	public FrameworkWiring getFrameworkWiring() {
 		return frameworkWiring;
+	}
+
+	/**
+	 * Returns the {@link FrameworkStartLevel} for this container
+	 * @return the framework start level for this container
+	 */
+	public FrameworkStartLevel getFrameworkStartLevel() {
+		return frameworkStartLevel;
 	}
 
 	/**
@@ -399,7 +411,7 @@ public final class ModuleContainer {
 			moduleDataBase.lockWrite();
 			try {
 				if (timestamp != moduleDataBase.getTimestamp())
-					return false; // need to try again TODO release state change locks
+					return false; // need to try again
 				Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDataBase.getWiringsCopy();
 				for (Map.Entry<ModuleRevision, ModuleWiring> deltaEntry : deltaWiring.entrySet()) {
 					ModuleWiring current = wiringCopy.get(deltaEntry.getKey());
@@ -427,7 +439,7 @@ public final class ModuleContainer {
 		}
 
 		for (Module module : modulesLocked) {
-			module.fireEvent(Event.RESOLVED);
+			module.publishEvent(Event.RESOLVED);
 		}
 		return true;
 	}
@@ -500,8 +512,7 @@ public final class ModuleContainer {
 					try {
 						refreshModule.stop(EnumSet.of(STOP_OPTIONS.TRANSIENT));
 					} catch (BundleException e) {
-						// TODO log error
-						e.printStackTrace();
+						adaptor.publishContainerEvent(ContainerEvent.ERROR, refreshModule, e);
 					}
 				} else {
 					iTriggers.remove();
@@ -557,9 +568,9 @@ public final class ModuleContainer {
 			}
 		}
 
-		// fire unresolved events after giving up all locks
+		// publish unresolved events after giving up all locks
 		for (Module module : modulesUnresolved) {
-			module.fireEvent(Event.UNRESOLVED);
+			module.publishEvent(Event.UNRESOLVED);
 		}
 		return refreshTriggers;
 	}
@@ -576,11 +587,9 @@ public final class ModuleContainer {
 		resolve(refreshTriggers, false);
 		for (Module module : refreshTriggers) {
 			try {
-
 				module.start(EnumSet.of(START_OPTIONS.TRANSIENT_RESUME));
 			} catch (BundleException e) {
-				// TODO fire error event
-				e.printStackTrace();
+				adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
 			}
 		}
 	}
@@ -619,8 +628,11 @@ public final class ModuleContainer {
 	 * @return The active start level value of the Framework.
 	 */
 	public int getStartLevel() {
-		// TODO Auto-generated method stub
-		return 1;
+		return frameworkStartLevel.getStartLevel();
+	}
+
+	void setStartLevel(Module module, int startlevel) {
+		frameworkStartLevel.setStartLevel(module, startlevel);
 	}
 
 	Collection<Module> getRefreshClosure(Collection<Module> initial, Map<ModuleRevision, ModuleWiring> wiringCopy) {
@@ -688,29 +700,46 @@ public final class ModuleContainer {
 		}
 	}
 
-	class ModuleFrameworkWiring implements FrameworkWiring {
+	Bundle getSystemBundle() {
+		Module systemModule = moduleDataBase.getModule(0);
+		return systemModule == null ? null : systemModule.getBundle();
+	}
+
+	void checkAdminPermission(Bundle bundle, String action) {
+		if (bundle == null)
+			return;
+		SecurityManager sm = System.getSecurityManager();
+		if (sm != null)
+			sm.checkPermission(new AdminPermission(bundle, action));
+	}
+
+	class ModuleFrameworkWiring implements FrameworkWiring, EventDispatcher<ModuleFrameworkWiring, FrameworkListener[], Collection<Module>> {
+		private final EventManager refreshThread = new EventManager("Refresh Bundles: " + adaptor.toString());
 
 		@Override
 		public Bundle getBundle() {
-			Module systemModule = moduleDataBase.getModule(Constants.SYSTEM_BUNDLE_LOCATION);
-			return systemModule == null ? null : systemModule.getBundle();
+			return getSystemBundle();
 		}
 
 		@Override
 		public void refreshBundles(Collection<Bundle> bundles, FrameworkListener... listeners) {
+			checkAdminPermission(getBundle(), AdminPermission.RESOLVE);
 			Collection<Module> modules = getModules(bundles);
-			// TODO must happen in background
-			try {
-				refresh(modules);
-			} catch (ResolutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			// TODO Must fire refresh event to listeners
+
+			// queue to refresh in the background
+			// notice that we only do one refresh operation at a time
+			CopyOnWriteIdentityMap<ModuleFrameworkWiring, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<ModuleContainer.ModuleFrameworkWiring, FrameworkListener[]>();
+			dispatchListeners.put(this, listeners);
+			ListenerQueue<ModuleFrameworkWiring, FrameworkListener[], Collection<Module>> queue = new ListenerQueue<ModuleContainer.ModuleFrameworkWiring, FrameworkListener[], Collection<Module>>(refreshThread);
+			queue.queueListeners(dispatchListeners.entrySet(), this);
+
+			// dispatch the refresh job
+			queue.dispatchEventAsynchronous(0, modules);
 		}
 
 		@Override
 		public boolean resolveBundles(Collection<Bundle> bundles) {
+			checkAdminPermission(getBundle(), AdminPermission.RESOLVE);
 			Collection<Module> modules = getModules(bundles);
 			try {
 				resolve(modules, false);
@@ -771,6 +800,179 @@ public final class ModuleContainer {
 					return result;
 				}
 			});
+		}
+
+		@Override
+		public void dispatchEvent(ModuleFrameworkWiring eventListener, FrameworkListener[] frameworkListeners, int eventAction, Collection<Module> eventObject) {
+			try {
+				refresh(eventObject);
+			} catch (ResolutionException e) {
+				adaptor.publishContainerEvent(ContainerEvent.ERROR, moduleDataBase.getModule(0), e);
+			} finally {
+				adaptor.publishContainerEvent(ContainerEvent.REFRESH, moduleDataBase.getModule(0), null, frameworkListeners);
+			}
+		}
+	}
+
+	class ContainerStartLevel implements FrameworkStartLevel, EventDispatcher<Module, FrameworkListener[], Integer> {
+		private static final int FRAMEWORK_STARTLEVEL = 1;
+		private static final int MODULE_STARTLEVEL = 2;
+		private final EventManager startLevelThread = new EventManager("Start Level: " + adaptor.toString());
+		private final AtomicInteger activeStartLevel = new AtomicInteger(0);
+
+		@Override
+		public Bundle getBundle() {
+			return getSystemBundle();
+		}
+
+		@Override
+		public int getStartLevel() {
+			return activeStartLevel.get();
+		}
+
+		void setStartLevel(Module module, int startlevel) {
+			checkAdminPermission(module.getBundle(), AdminPermission.EXECUTE);
+			if (module.getId() == 0) {
+				throw new IllegalArgumentException("Cannot set the start level of the system bundle.");
+			}
+			if (startlevel < 1) {
+				throw new IllegalArgumentException("Cannot set the start level to less than 1: " + startlevel);
+			}
+			moduleDataBase.setStartLevel(module, startlevel);
+			// queue start level operation in the background
+			// notice that we only do one start level operation at a time
+			CopyOnWriteIdentityMap<Module, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<Module, FrameworkListener[]>();
+			dispatchListeners.put(module, new FrameworkListener[0]);
+			ListenerQueue<Module, FrameworkListener[], Integer> queue = new ListenerQueue<Module, FrameworkListener[], Integer>(startLevelThread);
+			queue.queueListeners(dispatchListeners.entrySet(), this);
+
+			// dispatch the start level job
+			queue.dispatchEventAsynchronous(MODULE_STARTLEVEL, startlevel);
+		}
+
+		@Override
+		public void setStartLevel(int startlevel, FrameworkListener... listeners) {
+			checkAdminPermission(getBundle(), AdminPermission.STARTLEVEL);
+			if (startlevel < 1) {
+				throw new IllegalArgumentException("Cannot set the start level to less than 1: " + startlevel);
+			}
+
+			if (activeStartLevel.get() == 0) {
+				throw new IllegalStateException("The system has not be activated yet.");
+			}
+			// queue start level operation in the background
+			// notice that we only do one start level operation at a time
+			CopyOnWriteIdentityMap<Module, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<Module, FrameworkListener[]>();
+			dispatchListeners.put(moduleDataBase.getModule(0), listeners);
+			ListenerQueue<Module, FrameworkListener[], Integer> queue = new ListenerQueue<Module, FrameworkListener[], Integer>(startLevelThread);
+			queue.queueListeners(dispatchListeners.entrySet(), this);
+
+			// dispatch the start level job
+			queue.dispatchEventAsynchronous(FRAMEWORK_STARTLEVEL, startlevel);
+		}
+
+		@Override
+		public int getInitialBundleStartLevel() {
+			return moduleDataBase.getInitialModuleStartLevel();
+		}
+
+		@Override
+		public void setInitialBundleStartLevel(int startlevel) {
+			checkAdminPermission(getBundle(), AdminPermission.STARTLEVEL);
+			moduleDataBase.setInitialModuleStartLevel(startlevel);
+		}
+
+		@Override
+		public void dispatchEvent(Module module, FrameworkListener[] listeners, int eventAction, Integer startlevel) {
+			switch (eventAction) {
+				case FRAMEWORK_STARTLEVEL :
+					doContainerStartLevel(module, startlevel, listeners);
+					break;
+				case MODULE_STARTLEVEL :
+					try {
+						if (getStartLevel() < startlevel) {
+							module.stop(EnumSet.of(STOP_OPTIONS.TRANSIENT));
+						} else {
+							module.start(EnumSet.of(START_OPTIONS.TRANSIENT_IF_AUTO_START, START_OPTIONS.TRANSIENT_RESUME));
+						}
+					} catch (BundleException e) {
+						adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
+					}
+					break;
+				default :
+					break;
+			}
+		}
+
+		void doContainerStartLevel(Module module, Integer newStartLevel, FrameworkListener... listeners) {
+			try {
+				int currentSL = getStartLevel();
+				// Note that we must get a new list of modules each time;
+				// this is because additional modules could have been installed from the previous start-level
+				if (newStartLevel > currentSL) {
+					for (int i = currentSL; i < newStartLevel; i++) {
+						int toStartLevel = i + 1;
+						activeStartLevel.set(toStartLevel);
+						incStartLevel(toStartLevel, moduleDataBase.getSortedModules(EnumSet.of(Sort.BY_START_LEVEL)));
+					}
+				} else {
+					for (int i = currentSL; i > newStartLevel; i--) {
+						int toStartLevel = i - 1;
+						activeStartLevel.set(toStartLevel);
+						decStartLevel(toStartLevel, moduleDataBase.getSortedModules(EnumSet.of(Sort.BY_START_LEVEL, Sort.BY_DEPENDENCY)));
+					}
+				}
+				adaptor.publishContainerEvent(ContainerEvent.START_LEVEL, module, null, listeners);
+			} catch (Error e) {
+				adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e, listeners);
+				throw e;
+			} catch (RuntimeException e) {
+				adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e, listeners);
+				throw e;
+			}
+		}
+
+		private void incStartLevel(int toStartLevel, List<Module> sortedModules) {
+			incStartLevel(toStartLevel, sortedModules, true);
+			incStartLevel(toStartLevel, sortedModules, false);
+		}
+
+		private void incStartLevel(int toStartLevel, List<Module> sortedModules, boolean lazyOnly) {
+			for (Module module : sortedModules) {
+				if (module.getStartLevel() < toStartLevel) {
+					// skip modules who should have already been started
+					continue;
+				} else if (module.getStartLevel() == toStartLevel) {
+					boolean isLazyStart = module.isLazyActivate();
+					if (lazyOnly ? isLazyStart : !isLazyStart) {
+						try {
+							module.start(EnumSet.of(START_OPTIONS.TRANSIENT_IF_AUTO_START, START_OPTIONS.TRANSIENT_RESUME));
+						} catch (BundleException e) {
+							adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
+						}
+					}
+				}
+			}
+		}
+
+		private void decStartLevel(int toStartLevel, List<Module> sortedModules) {
+			ListIterator<Module> iModules = sortedModules.listIterator(sortedModules.size());
+			while (iModules.hasPrevious()) {
+				Module module = iModules.previous();
+
+				if (module.getStartLevel() > toStartLevel + 1) {
+					// skip modules who should have already been stopped
+					continue;
+				} else if (module.getStartLevel() <= toStartLevel) {
+					// stopped all modules we are going to for this start level
+					break;
+				}
+				try {
+					module.stop(EnumSet.of(STOP_OPTIONS.TRANSIENT));
+				} catch (BundleException e) {
+					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
+				}
+			}
 		}
 	}
 }

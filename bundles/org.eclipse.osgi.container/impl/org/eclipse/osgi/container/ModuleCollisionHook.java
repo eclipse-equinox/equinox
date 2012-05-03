@@ -12,6 +12,10 @@ package org.eclipse.osgi.container;
 
 import java.util.Collection;
 
+/**
+ * Hook used to determine if a module revision being installed or updated will cause a collision
+
+ */
 public interface ModuleCollisionHook {
 
 	/**

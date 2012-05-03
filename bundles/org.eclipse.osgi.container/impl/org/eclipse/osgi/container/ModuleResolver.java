@@ -14,7 +14,6 @@ import java.util.*;
 import org.eclipse.osgi.internal.container.Converters;
 import org.osgi.framework.Version;
 import org.osgi.framework.hooks.resolver.ResolverHook;
-import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.namespace.*;
 import org.osgi.framework.wiring.*;
 import org.osgi.resource.*;
@@ -25,25 +24,15 @@ import org.osgi.service.resolver.*;
  * in a module {@link ModuleContainer container}.
  */
 class ModuleResolver {
-	/**
-	 * Hook used to control the resolution process
-	 */
-	final ResolverHookFactory resolverHookFactory;
-
-	/**
-	 * Resolver used to resolve modules
-	 */
-	final Resolver resolver;
+	final ModuleContainerAdaptor adaptor;
 
 	/**
 	 * Constructs the module resolver with the specified resolver hook factory
 	 * and resolver.
-	 * @param resolverHookFactory the resolver hook factory
-	 * @param resolver the resolver
+	 * @param adaptor the container adaptor
 	 */
-	ModuleResolver(ResolverHookFactory resolverHookFactory, Resolver resolver) {
-		this.resolverHookFactory = resolverHookFactory;
-		this.resolver = resolver;
+	ModuleResolver(ModuleContainerAdaptor adaptor) {
+		this.adaptor = adaptor;
 	}
 
 	/**
@@ -404,7 +393,7 @@ class ModuleResolver {
 		}
 
 		Map<Resource, List<Wire>> resolve() throws ResolutionException {
-			hook = resolverHookFactory.begin(Converters.asListBundleRevision((List<? extends BundleRevision>) triggers));
+			hook = adaptor.getResolverHookFactory().begin(Converters.asListBundleRevision((List<? extends BundleRevision>) triggers));
 			try {
 				filterResolvable();
 				selectSingletons();
@@ -413,7 +402,7 @@ class ModuleResolver {
 				if (triggers.removeAll(disabled) && triggersMandatory) {
 					throw new ResolutionException("Could not resolve mandatory modules because another singleton was selected or the module was disabled: " + disabled);
 				}
-				return resolver.resolve(this);
+				return adaptor.getResolver().resolve(this);
 			} finally {
 				hook.end();
 			}
