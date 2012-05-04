@@ -13,7 +13,6 @@ package org.eclipse.osgi.container;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-import org.eclipse.osgi.container.ModuleContainer.ContainerStartLevel;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleReference;
@@ -346,6 +345,15 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	/**
+	 * Returns true if the current thread holds the state change lock for the specified transition event.
+	 * @param transitionEvent
+	 * @return true if the current thread holds the state change lock for the specified transition event.
+	 */
+	protected boolean holdsTransitionEventLock(Event transitionEvent) {
+		return stateChangeLock.getHoldCount() > 0 && stateTransitionEvents.contains(transitionEvent);
+	}
+
+	/**
 	 * Starts this module
 	 * @param options the options for starting
 	 * @throws BundleException if an errors occurs while starting
@@ -360,6 +368,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				// nothing to do here; the current thread is activating the bundle.
 			}
 		}
+		BundleException startError = null;
 		lockStateChange(Event.STARTED);
 		try {
 			checkValid();
@@ -388,7 +397,15 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			if (getState().equals(State.INSTALLED)) {
 				throw new BundleException("Could not resolve module.", BundleException.RESOLVE_ERROR);
 			}
-			event = doStart(options);
+			try {
+				event = doStart(options);
+			} catch (BundleException e) {
+				// must return state to resolved
+				setState(State.RESOLVED);
+				startError = e;
+				// must always publish the STOPPED event on error
+				event = Event.STOPPED;
+			}
 		} finally {
 			unlockStateChange(Event.STARTED);
 		}
@@ -397,6 +414,10 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			if (!EnumSet.of(Event.STARTED, Event.LAZY_ACTIVATION, Event.STOPPED).contains(event))
 				throw new IllegalStateException("Wrong event type: " + event);
 			publishEvent(event);
+		}
+
+		if (startError != null) {
+			throw startError;
 		}
 	}
 
@@ -446,7 +467,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		return (idcomp < 0L) ? -1 : ((idcomp > 0L) ? 1 : 0);
 	}
 
-	private void checkValid() {
+	void checkValid() {
 		if (getState().equals(State.UNINSTALLED))
 			throw new IllegalStateException("Module has been uninstalled.");
 	}
@@ -483,13 +504,20 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		}
 
 		// time to actual start the module
-		setState(State.STARTING);
-		publishEvent(Event.STARTING);
+		if (!State.STARTING.equals(getState())) {
+			// TODO this starting state check should not be needed
+			// but we do it because of the way the system module init works
+			setState(State.STARTING);
+			publishEvent(Event.STARTING);
+		}
 		try {
 			startWorker();
 			setState(State.ACTIVE);
 			return Event.STARTED;
 		} catch (Throwable t) {
+			// must fire stopping event
+			setState(State.STOPPING);
+			publishEvent(Event.STOPPING);
 			if (t instanceof BundleException)
 				throw (BundleException) t;
 			throw new BundleException("Error starting module.", BundleException.ACTIVATOR_ERROR, t);
@@ -499,11 +527,10 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * Performs any work associated with starting a module.  For example,
 	 * loading and calling start on an activator.
+	 * @throws BundleException 
 	 */
-	protected void startWorker() {
-		if (getId() != 0)
-			return;
-		((ContainerStartLevel) revisions.getContainer().getFrameworkStartLevel()).doContainerStartLevel(this, 1);
+	protected void startWorker() throws BundleException {
+		// Do nothing
 	}
 
 	private Event doStop() throws BundleException {
@@ -526,9 +553,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * @throws BundleException  
 	 */
 	protected void stopWorker() throws BundleException {
-		if (getId() != 0)
-			return;
-		((ContainerStartLevel) revisions.getContainer().getFrameworkStartLevel()).doContainerStartLevel(this, 0);
+		// Do nothing
 	}
 
 	/**

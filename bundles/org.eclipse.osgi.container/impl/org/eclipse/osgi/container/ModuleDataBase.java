@@ -19,6 +19,7 @@ import java.util.concurrent.locks.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import org.eclipse.osgi.container.Module.Settings;
+import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.internal.resolver.ComputeNodeOrder;
 import org.osgi.framework.Constants;
@@ -243,7 +244,12 @@ public abstract class ModuleDataBase {
 			throw new IllegalArgumentException("Location is already used: " + location); //$NON-NLS-1$
 		if (modulesById.containsKey(id))
 			throw new IllegalArgumentException("Id is already used: " + id); //$NON-NLS-1$
-		Module module = createModule(location, id, settings, startlevel);
+		Module module;
+		if (id == 0) {
+			module = createSystemModule();
+		} else {
+			module = createModule(location, id, settings, startlevel);
+		}
 		builder.addRevision(module);
 		modulesByLocations.put(location, module);
 		modulesById.put(id, module);
@@ -767,6 +773,15 @@ public abstract class ModuleDataBase {
 	protected abstract Module createModule(String location, long id, EnumSet<Settings> settings, int startlevel);
 
 	/**
+	 * Creates the system module.  This gets called when the system module is installed
+	 * or when {@link #load(DataInputStream) loading} persistent data into this
+	 * database.
+
+	 * @return the system module
+	 */
+	protected abstract SystemModule createSystemModule();
+
+	/**
 	 * Writes this database in a format suitable for using the {@link #load(DataInputStream)}
 	 * method.  All modules are stored which have a current {@link ModuleRevision revision}.
 	 * Only the current revision of each module is stored (no removal pending revisions
@@ -962,6 +977,11 @@ public abstract class ModuleDataBase {
 			}
 			// TODO need to do this without incrementing the timestamp
 			moduleDataBase.setWiring(wirings);
+
+			// need to set the resolution state of the modules
+			for (ModuleWiring wiring : wirings.values()) {
+				wiring.getRevision().getRevisions().getModule().setState(State.RESOLVED);
+			}
 
 			// Setting the timestamp at the end since some operations increment it
 			moduleDataBase.timeStamp.set(timeStamp);

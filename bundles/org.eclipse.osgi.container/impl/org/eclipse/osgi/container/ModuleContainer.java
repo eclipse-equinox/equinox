@@ -49,7 +49,7 @@ public final class ModuleContainer {
 	/**
 	 * An implementation of FrameworkWiring for this container
 	 */
-	private final FrameworkWiring frameworkWiring;
+	private final ContainerWiring frameworkWiring;
 
 	/**
 	 * An implementation of FrameworkStartLevel for this container
@@ -63,7 +63,7 @@ public final class ModuleContainer {
 	/* @GuardedBy("moduleDataBase") */
 	final ModuleDataBase moduleDataBase;
 
-	private final ModuleContainerAdaptor adaptor;
+	final ModuleContainerAdaptor adaptor;
 
 	/**
 	 * The module resolver which implements the ResolverContext and handles calling the 
@@ -80,7 +80,7 @@ public final class ModuleContainer {
 		this.adaptor = adaptor;
 		this.moduleResolver = new ModuleResolver(adaptor);
 		this.moduleDataBase = moduleDataBase;
-		this.frameworkWiring = new ModuleFrameworkWiring();
+		this.frameworkWiring = new ContainerWiring();
 		this.frameworkStartLevel = new ContainerStartLevel();
 	}
 
@@ -635,6 +635,16 @@ public final class ModuleContainer {
 		frameworkStartLevel.setStartLevel(module, startlevel);
 	}
 
+	void open() {
+		frameworkStartLevel.open();
+		frameworkWiring.open();
+	}
+
+	void close() {
+		frameworkStartLevel.close();
+		frameworkWiring.close();
+	}
+
 	Collection<Module> getRefreshClosure(Collection<Module> initial, Map<ModuleRevision, ModuleWiring> wiringCopy) {
 		Set<Module> refreshClosure = new HashSet<Module>();
 		if (initial == null) {
@@ -713,8 +723,9 @@ public final class ModuleContainer {
 			sm.checkPermission(new AdminPermission(bundle, action));
 	}
 
-	class ModuleFrameworkWiring implements FrameworkWiring, EventDispatcher<ModuleFrameworkWiring, FrameworkListener[], Collection<Module>> {
-		private final EventManager refreshThread = new EventManager("Refresh Bundles: " + adaptor.toString());
+	class ContainerWiring implements FrameworkWiring, EventDispatcher<ContainerWiring, FrameworkListener[], Collection<Module>> {
+		private final Object monitor = new Object();
+		private EventManager refreshThread = null;
 
 		@Override
 		public Bundle getBundle() {
@@ -728,9 +739,9 @@ public final class ModuleContainer {
 
 			// queue to refresh in the background
 			// notice that we only do one refresh operation at a time
-			CopyOnWriteIdentityMap<ModuleFrameworkWiring, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<ModuleContainer.ModuleFrameworkWiring, FrameworkListener[]>();
+			CopyOnWriteIdentityMap<ContainerWiring, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<ModuleContainer.ContainerWiring, FrameworkListener[]>();
 			dispatchListeners.put(this, listeners);
-			ListenerQueue<ModuleFrameworkWiring, FrameworkListener[], Collection<Module>> queue = new ListenerQueue<ModuleContainer.ModuleFrameworkWiring, FrameworkListener[], Collection<Module>>(refreshThread);
+			ListenerQueue<ContainerWiring, FrameworkListener[], Collection<Module>> queue = new ListenerQueue<ModuleContainer.ContainerWiring, FrameworkListener[], Collection<Module>>(refreshThread);
 			queue.queueListeners(dispatchListeners.entrySet(), this);
 
 			// dispatch the refresh job
@@ -803,7 +814,7 @@ public final class ModuleContainer {
 		}
 
 		@Override
-		public void dispatchEvent(ModuleFrameworkWiring eventListener, FrameworkListener[] frameworkListeners, int eventAction, Collection<Module> eventObject) {
+		public void dispatchEvent(ContainerWiring eventListener, FrameworkListener[] frameworkListeners, int eventAction, Collection<Module> eventObject) {
 			try {
 				refresh(eventObject);
 			} catch (ResolutionException e) {
@@ -812,13 +823,46 @@ public final class ModuleContainer {
 				adaptor.publishContainerEvent(ContainerEvent.REFRESH, moduleDataBase.getModule(0), null, frameworkListeners);
 			}
 		}
+
+		private EventManager getManager() {
+			synchronized (monitor) {
+				if (refreshThread == null) {
+					refreshThread = new EventManager("Start Level: " + adaptor.toString());
+				}
+				return refreshThread;
+			}
+		}
+
+		// because of bug 378491 we have to synchronize access to the manager
+		// so we can close and re-open ourselves
+		void close() {
+			synchronized (monitor) {
+				// force a manager to be created if it did not exist
+				EventManager manager = getManager();
+				// this prevents any operations until open is called
+				manager.close();
+			}
+		}
+
+		void open() {
+			synchronized (monitor) {
+				if (refreshThread != null) {
+					// Make sure it is closed just incase
+					refreshThread.close();
+					// a new one will be constructed on demand
+					refreshThread = null;
+				}
+			}
+		}
 	}
 
 	class ContainerStartLevel implements FrameworkStartLevel, EventDispatcher<Module, FrameworkListener[], Integer> {
+		static final int USE_BEGINNING_START_LEVEL = Integer.MIN_VALUE;
 		private static final int FRAMEWORK_STARTLEVEL = 1;
 		private static final int MODULE_STARTLEVEL = 2;
-		private final EventManager startLevelThread = new EventManager("Start Level: " + adaptor.toString());
 		private final AtomicInteger activeStartLevel = new AtomicInteger(0);
+		private final Object monitor = new Object();
+		private EventManager startLevelThread = null;
 
 		@Override
 		public Bundle getBundle() {
@@ -838,12 +882,15 @@ public final class ModuleContainer {
 			if (startlevel < 1) {
 				throw new IllegalArgumentException("Cannot set the start level to less than 1: " + startlevel);
 			}
+			if (module.getStartLevel() == startlevel) {
+				return; // do nothing
+			}
 			moduleDataBase.setStartLevel(module, startlevel);
 			// queue start level operation in the background
 			// notice that we only do one start level operation at a time
 			CopyOnWriteIdentityMap<Module, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<Module, FrameworkListener[]>();
 			dispatchListeners.put(module, new FrameworkListener[0]);
-			ListenerQueue<Module, FrameworkListener[], Integer> queue = new ListenerQueue<Module, FrameworkListener[], Integer>(startLevelThread);
+			ListenerQueue<Module, FrameworkListener[], Integer> queue = new ListenerQueue<Module, FrameworkListener[], Integer>(getManager());
 			queue.queueListeners(dispatchListeners.entrySet(), this);
 
 			// dispatch the start level job
@@ -864,7 +911,7 @@ public final class ModuleContainer {
 			// notice that we only do one start level operation at a time
 			CopyOnWriteIdentityMap<Module, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<Module, FrameworkListener[]>();
 			dispatchListeners.put(moduleDataBase.getModule(0), listeners);
-			ListenerQueue<Module, FrameworkListener[], Integer> queue = new ListenerQueue<Module, FrameworkListener[], Integer>(startLevelThread);
+			ListenerQueue<Module, FrameworkListener[], Integer> queue = new ListenerQueue<Module, FrameworkListener[], Integer>(getManager());
 			queue.queueListeners(dispatchListeners.entrySet(), this);
 
 			// dispatch the start level job
@@ -904,7 +951,11 @@ public final class ModuleContainer {
 			}
 		}
 
-		void doContainerStartLevel(Module module, Integer newStartLevel, FrameworkListener... listeners) {
+		void doContainerStartLevel(Module module, int newStartLevel, FrameworkListener... listeners) {
+			if (newStartLevel == USE_BEGINNING_START_LEVEL) {
+				String beginningSL = (String) adaptor.getConfiguration().get(Constants.FRAMEWORK_BEGINNING_STARTLEVEL);
+				newStartLevel = beginningSL == null ? 1 : Integer.parseInt(beginningSL);
+			}
 			try {
 				int currentSL = getStartLevel();
 				// Note that we must get a new list of modules each time;
@@ -951,6 +1002,9 @@ public final class ModuleContainer {
 							adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
 						}
 					}
+				} else {
+					// can stop resumin since any remaining modules have a greater startlevel than the active startlevel
+					break;
 				}
 			}
 		}
@@ -971,6 +1025,37 @@ public final class ModuleContainer {
 					module.stop(EnumSet.of(STOP_OPTIONS.TRANSIENT));
 				} catch (BundleException e) {
 					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
+				}
+			}
+		}
+
+		private EventManager getManager() {
+			synchronized (monitor) {
+				if (startLevelThread == null) {
+					startLevelThread = new EventManager("Start Level: " + adaptor.toString());
+				}
+				return startLevelThread;
+			}
+		}
+
+		// because of bug 378491 we have to synchronize access to the manager
+		// so we can close and re-open ourselves
+		void close() {
+			synchronized (monitor) {
+				// force a manager to be created if it did not exist
+				EventManager manager = getManager();
+				// this prevents any operations until open is called
+				manager.close();
+			}
+		}
+
+		void open() {
+			synchronized (monitor) {
+				if (startLevelThread != null) {
+					// Make sure it is closed just incase
+					startLevelThread.close();
+					// a new one will be constructed on demand
+					startLevelThread = null;
 				}
 			}
 		}
