@@ -1,0 +1,6 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: sub1
+Bundle-Version: 1.0.1
+Export-Package: 
+ sub1.a; version=1.0.1
+Import-Package: org.osgi.framework, sub1.a; version="[1.0, 2.0)"

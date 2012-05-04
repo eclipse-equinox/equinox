@@ -1,0 +1,6 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: lazy1
+Bundle-Version: 1.0.0
+Export-Package: 
+ lazy1; version=1.0
+Bundle-ActivationPolicy: lazy
