@@ -104,7 +104,7 @@ public abstract class ModuleDataBase {
 	 */
 	private final ReentrantReadWriteLock monitor = new ReentrantReadWriteLock(true);
 
-	protected static enum Sort {
+	static enum Sort {
 		BY_DEPENDENCY, BY_START_LEVEL, BY_ID
 	}
 
@@ -524,7 +524,7 @@ public abstract class ModuleDataBase {
 	 * A read operation protected by the {@link #lockRead() read} lock.
 	 * @return a snapshot of all modules.
 	 */
-	protected final List<Module> getModules() {
+	final List<Module> getModules() {
 		return getSortedModules(null);
 	}
 
@@ -533,7 +533,7 @@ public abstract class ModuleDataBase {
 	 * @param sortOptions options for sorting
 	 * @return a snapshot of all modules ordered according to the sort options
 	 */
-	protected final List<Module> getSortedModules(EnumSet<Sort> sortOptions) {
+	final List<Module> getSortedModules(EnumSet<Sort> sortOptions) {
 		lockRead();
 		try {
 			List<Module> modules = new ArrayList<Module>(modulesByLocations.values());
@@ -544,7 +544,7 @@ public abstract class ModuleDataBase {
 		}
 	}
 
-	protected final void sortModules(EnumSet<Sort> sortOptions, List<Module> modules) {
+	final void sortModules(EnumSet<Sort> sortOptions, List<Module> modules) {
 		if (modules.size() < 2)
 			return;
 		if (sortOptions == null || sortOptions.contains(Sort.BY_ID) || sortOptions.isEmpty()) {
@@ -776,7 +776,9 @@ public abstract class ModuleDataBase {
 	 * Creates the system module.  This gets called when the system module is installed
 	 * or when {@link #load(DataInputStream) loading} persistent data into this
 	 * database.
-
+	 * <p>
+	 * The returned system module must have an {@link Module#getId() id} of zero and a location
+	 * of {@link Constants#SYSTEM_BUNDLE_LOCATION System Bundle}.
 	 * @return the system module
 	 */
 	protected abstract SystemModule createSystemModule();
