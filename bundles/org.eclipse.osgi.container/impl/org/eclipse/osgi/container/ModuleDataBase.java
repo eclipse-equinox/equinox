@@ -834,7 +834,7 @@ public abstract class ModuleDataBase {
 		}
 	}
 
-	public void persistSettings(EnumSet<Settings> settings, Module module) {
+	void persistSettings(EnumSet<Settings> settings, Module module) {
 		lockWrite();
 		try {
 			moduleSettings.put(module.getId(), EnumSet.copyOf(settings));
@@ -861,7 +861,7 @@ public abstract class ModuleDataBase {
 		}
 	}
 
-	public void setInitialModuleStartLevel(int initialStartlevel) {
+	void setInitialModuleStartLevel(int initialStartlevel) {
 		lockWrite();
 		try {
 			this.initialModuleStartLevel = initialStartlevel;
