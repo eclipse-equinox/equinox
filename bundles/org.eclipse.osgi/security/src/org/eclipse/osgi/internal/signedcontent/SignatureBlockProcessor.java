@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2007, 2012 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -143,6 +143,8 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 					manifestDigest = calculateDigest(getMessageDigest(MD5_STR), manifestBytes);
 				else if (digestName.equalsIgnoreCase(SHA1_STR))
 					manifestDigest = calculateDigest(getMessageDigest(SHA1_STR), manifestBytes);
+				else
+					manifestDigest = calculateDigest(getMessageDigest(digestName), manifestBytes);
 				off += digestManifestSearchLen;
 
 				// find out the index of first '\n' after the -Digest-Manifest: 
@@ -270,9 +272,7 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 				// remember the "algorithm type" object
 				return SHA1_STR;
 			} else {
-				// unknown algorithm type, we will stop processing this entry
-				// break;
-				throw new NoSuchAlgorithmException(NLS.bind(SignedContentMessages.Algorithm_Not_Supported, sDigestAlgType));
+				return sDigestAlgType;
 			}
 		}
 		return null;

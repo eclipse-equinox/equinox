@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -848,6 +848,56 @@ public class SignedBundleTest extends BaseSecurityTest {
 			testBundle = installBundle(getTestJarPath("test.bug252098"));
 			assertNotNull("Test bundle not installed!", testBundle);
 			testBundle.start();
+		} catch (Exception e) {
+			fail("Unexpected exception", e);
+		} finally {
+			try {
+				if (testBundle != null)
+					testBundle.uninstall();
+			} catch (BundleException e) {
+				fail("Failed to uninstall bundle", e);
+			}
+		}
+	}
+
+	public void testBug378155() {
+		doTestBug378155("SHA1withRSA");
+		doTestBug378155("SHA256withRSA");
+		doTestBug378155("SHA384withRSA");
+		doTestBug378155("SHA512withRSA");
+	}
+
+	private void doTestBug378155(String bundleName) {
+
+		Bundle testBundle = null;
+		try {
+			testBundle = installBundle(getTestJarPath(bundleName));
+			assertNotNull("Test bundle not installed!", testBundle);
+			// get the signed content for the bundle
+			SignedContent signedContent = getSignedContentFactory().getSignedContent(testBundle);
+			assertNotNull("SignedContent is null", signedContent);
+			// check if it is signed
+			assertTrue("Should be signed", signedContent.isSigned());
+			// get the signer infos
+			SignerInfo[] infos = signedContent.getSignerInfos();
+			assertNotNull("SignerInfo is null", infos);
+			assertEquals("wrong number of signers", 1, infos.length);
+			// check the signer validity
+			signedContent.checkValidity(infos[0]);
+			// check the signer trust (it is NOT trusted)
+			assertFalse("Signer is trusted", infos[0].isTrusted());
+			// check the trust anchor
+			assertNull("Trust anchor is not null", infos[0].getTrustAnchor());
+			// verify and validate the entries
+			SignedContentEntry[] entries = signedContent.getSignedEntries();
+			assertNotNull("Entries is null", entries);
+			for (int i = 0; i < entries.length; i++) {
+				entries[i].verify();
+				SignerInfo[] entryInfos = entries[i].getSignerInfos();
+				assertNotNull("SignerInfo is null", entryInfos);
+				assertEquals("wrong number of entry signers", 1, entryInfos.length);
+				assertEquals("Entry signer does not equal content signer", infos[0], entryInfos[0]);
+			}
 		} catch (Exception e) {
 			fail("Unexpected exception", e);
 		} finally {

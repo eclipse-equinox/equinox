@@ -12,6 +12,12 @@ package org.eclipse.osgi.internal.signedcontent;
 public interface SignedContentConstants {
 
 	public static final String SHA1_STR = "SHA1"; //$NON-NLS-1$
+	public static final String SHA256_STR = "SHA256"; //$NON-NLS-1$
+	public static final String SHA384_STR = "SHA384"; //$NON-NLS-1$
+	public static final String SHA512_STR = "SHA512"; //$NON-NLS-1$
+	public static final String SHA224_STR = "SHA224"; //$NON-NLS-1$
+	public static final String SHA512_224_STR = "SHA512-224"; //$NON-NLS-1$
+	public static final String SHA512_256_STR = "SHA512-256"; //$NON-NLS-1$
 	public static final String MD5_STR = "MD5"; //$NON-NLS-1$
 	public static final String MD2_STR = "MD2"; //$NON-NLS-1$
 
@@ -36,7 +42,16 @@ public interface SignedContentConstants {
 	public static final int SIGNEDDATA_OID[] = {1, 2, 840, 113549, 1, 7, 2};
 	public static final int MD5_OID[] = {1, 2, 840, 113549, 2, 5};
 	public static final int MD2_OID[] = {1, 2, 840, 113549, 2, 2};
+
 	public static final int SHA1_OID[] = {1, 3, 14, 3, 2, 26};
+
+	public static final int SHA256_OID[] = {2, 16, 840, 1, 101, 3, 4, 2, 1};
+	public static final int SHA384_OID[] = {2, 16, 840, 1, 101, 3, 4, 2, 2};
+	public static final int SHA512_OID[] = {2, 16, 840, 1, 101, 3, 4, 2, 3};
+	public static final int SHA224_OID[] = {2, 16, 840, 1, 101, 3, 4, 2, 4};
+	public static final int SHA512_224_OID[] = {2, 16, 840, 1, 101, 3, 4, 2, 5};
+	public static final int SHA512_256_OID[] = {2, 16, 840, 1, 101, 3, 4, 2, 6};
+
 	public static final int DSA_OID[] = {1, 2, 840, 10040, 4, 1};
 	public static final int RSA_OID[] = {1, 2, 840, 113549, 1, 1, 1};
 
