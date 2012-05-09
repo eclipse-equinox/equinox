@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 20011 IBM Corporation and others.
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -96,6 +96,9 @@ public class ConsoleMsg extends NLS {
 	public static String CONSOLE_DISABLED_COUNT_MESSAGE;
 	public static String CONSOLE_DISABLED_BUNDLE_HEADER;
 	public static String CONSOLE_DISABLED_BUNDLE_REASON;
+	public static String CONSOLE_STOP_MESSAGE;
+	public static String CONSOLE_STOP_CONFIRMATION_YES;
+	public static String CONSOLE_STOP_ERROR_READ_CONFIRMATION;
 
 	public static String STARTLEVEL_FRAMEWORK_ACTIVE_STARTLEVEL;
 	public static String STARTLEVEL_BUNDLE_STARTLEVEL;

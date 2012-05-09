@@ -12,7 +12,11 @@
 
 package org.eclipse.equinox.console.commands;
 
+import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -185,8 +189,10 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_EXIT_COMMAND_DESCRIPTION)
 	public void exit() throws Exception {
-		System.out.println();
-		System.exit(0);
+		if (confirmStop()) {
+			System.out.println();
+			System.exit(0);
+		}
 	}
 
 	/**
@@ -1169,8 +1175,10 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_CLOSE_COMMAND_DESCRIPTION)
 	public void close() throws Exception {
-		context.getBundle(0).stop();
-		System.exit(0);
+		if (confirmStop()) {
+			context.getBundle(0).stop();
+			System.exit(0);
+		}
 	}
 
 	/**
@@ -2025,6 +2033,27 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			}
 		}
 
+	}
+	
+	private boolean confirmStop() {
+		System.out.print(ConsoleMsg.CONSOLE_STOP_MESSAGE);
+		System.out.flush();
+		
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+		String reply = null;
+		try {
+			reply = reader.readLine();
+		} catch (IOException e) {
+			System.out.println(ConsoleMsg.CONSOLE_STOP_ERROR_READ_CONFIRMATION);
+		}
+		
+		if (reply != null) {
+			if (reply.toLowerCase().startsWith(ConsoleMsg.CONSOLE_STOP_CONFIRMATION_YES) || reply.length() == 0) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }
 
