@@ -19,6 +19,7 @@ import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.Event;
 import org.eclipse.osgi.container.Module.START_OPTIONS;
 import org.eclipse.osgi.container.Module.State;
+import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.tests.dummys.*;
 import org.eclipse.osgi.container.tests.dummys.DummyModuleDataBase.DummyContainerEvent;
@@ -831,23 +832,76 @@ public class TestModuleContainer {
 		List<DummyModuleEvent> actual = database.getModuleEvents();
 		Assert.assertEquals("Did not expect any events.", 0, actual.size());
 
-		c4.setStartLevel(1);
-		lazy1.setStartLevel(1);
+		database.getContainerEvents();
+		container.getFrameworkStartLevel().setStartLevel(3);
+
+		List<DummyContainerEvent> actualContainerEvents = database.getContainerEvents(1);
+		List<DummyContainerEvent> expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(
+				new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null)));
+		Assert.assertEquals("Wrong container events.", expectedContainerEvents, actualContainerEvents);
 
 		actual = database.getModuleEvents(3);
 		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
+				new DummyModuleEvent(lazy1, Event.LAZY_ACTIVATION, State.LAZY_STARTING),
 				new DummyModuleEvent(c4, Event.STARTING, State.STARTING),
-				new DummyModuleEvent(c4, Event.STARTED, State.ACTIVE),
-				new DummyModuleEvent(lazy1, Event.LAZY_ACTIVATION, State.LAZY_STARTING)));
+				new DummyModuleEvent(c4, Event.STARTED, State.ACTIVE)));
 		assertEvents(expected, actual, true);
+
+		systemBundle.stop(null);
 
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 		DataOutputStream data = new DataOutputStream(bytes);
 		database.store(data, true);
 
-		DummyModuleDataBase database2 = new DummyModuleDataBase();
-		ModuleContainer container2 = createDummyContainer(database2);
-		database2.load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
+		// reload into a new container
+		database = new DummyModuleDataBase();
+		container = createDummyContainer(database);
+		database.load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
+
+		systemBundle = container.getModule(0);
+		Assert.assertNotNull("System bundle is null.", systemBundle);
+		Assert.assertTrue("System bundle should always use activation policy.", systemBundle.isActivationPolicyUsed());
+		Assert.assertTrue("System bundle should always have its auto-start flag set.", systemBundle.isPersistentlyStarted());
+
+		c4 = container.getModule(c4.getId());
+		Assert.assertNotNull("c4 is null", c4);
+		lazy1 = container.getModule(lazy1.getId());
+		Assert.assertNotNull("lazy1 is null", lazy1);
+
+		Assert.assertFalse("c4 has activation policy set.", c4.isActivationPolicyUsed());
+		Assert.assertTrue("c4 is not auto started.", c4.isPersistentlyStarted());
+		Assert.assertEquals("c4 has wrong start-level", 2, c4.getStartLevel());
+		Assert.assertTrue("lazy1 is using activation policy.", lazy1.isActivationPolicyUsed());
+		Assert.assertTrue("lazy1 is not auto started.", lazy1.isPersistentlyStarted());
+		Assert.assertEquals("lazy1 has wrong start-level", 2, lazy1.getStartLevel());
+
+		// relaunch the container
+		systemBundle.start(null);
+
+		actualContainerEvents = database.getContainerEvents();
+		expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(
+				new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null),
+				new DummyContainerEvent(ContainerEvent.STARTED, systemBundle, null)));
+
+		actual = database.getModuleEvents(2);
+		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
+				new DummyModuleEvent(systemBundle, Event.STARTING, State.STARTING),
+				new DummyModuleEvent(systemBundle, Event.STARTED, State.ACTIVE)));
+		assertEvents(expected, actual, true);
+
+		container.getFrameworkStartLevel().setStartLevel(3);
+
+		actualContainerEvents = database.getContainerEvents(1);
+		expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(
+				new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null)));
+		Assert.assertEquals("Wrong container events.", expectedContainerEvents, actualContainerEvents);
+
+		actual = database.getModuleEvents(3);
+		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
+				new DummyModuleEvent(lazy1, Event.LAZY_ACTIVATION, State.LAZY_STARTING),
+				new DummyModuleEvent(c4, Event.STARTING, State.STARTING),
+				new DummyModuleEvent(c4, Event.STARTED, State.ACTIVE)));
+		assertEvents(expected, actual, true);
 	}
 
 	@Test
@@ -913,7 +967,39 @@ public class TestModuleContainer {
 		assertEvents(expectedModuleEvents, actualModuleEvents, false);
 
 		List<DummyContainerEvent> actualContainerEvents = database.getContainerEvents();
-		actualContainerEvents.size();
+		List<DummyContainerEvent> expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(
+				new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null),
+				new DummyContainerEvent(ContainerEvent.STARTED, systemBundle, null)));
+		Assert.assertEquals("Wrong container events.", expectedContainerEvents, actualContainerEvents);
+
+		systemBundle.stop(null);
+
+		actualContainerEvents = database.getContainerEvents();
+		expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(
+				new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null),
+				new DummyContainerEvent(ContainerEvent.STOPPED, systemBundle, null)));
+		Assert.assertEquals("Wrong container events.", expectedContainerEvents, actualContainerEvents);
+
+		actualModuleEvents = database.getModuleEvents(16);
+		expectedModuleEvents = new ArrayList<DummyModuleEvent>(Arrays.asList(
+				new DummyModuleEvent(systemBundle, Event.STOPPING, State.STOPPING),
+				new DummyModuleEvent(c1, Event.STOPPING, State.STOPPING),
+				new DummyModuleEvent(c1, Event.STOPPED, State.RESOLVED),
+				new DummyModuleEvent(c2, Event.STOPPING, State.STOPPING),
+				new DummyModuleEvent(c2, Event.STOPPED, State.RESOLVED),
+				new DummyModuleEvent(c3, Event.STOPPING, State.STOPPING),
+				new DummyModuleEvent(c3, Event.STOPPED, State.RESOLVED),
+				new DummyModuleEvent(c4, Event.STOPPING, State.STOPPING),
+				new DummyModuleEvent(c4, Event.STOPPED, State.RESOLVED),
+				new DummyModuleEvent(c5, Event.STOPPING, State.STOPPING),
+				new DummyModuleEvent(c5, Event.STOPPED, State.RESOLVED),
+				new DummyModuleEvent(c6, Event.STOPPING, State.STOPPING),
+				new DummyModuleEvent(c6, Event.STOPPED, State.RESOLVED),
+				new DummyModuleEvent(c7, Event.STOPPING, State.STOPPING),
+				new DummyModuleEvent(c7, Event.STOPPED, State.RESOLVED),
+				new DummyModuleEvent(systemBundle, Event.STOPPED, State.RESOLVED)));
+		assertEvents(expectedModuleEvents, actualModuleEvents, false);
+
 	}
 
 	private ModuleContainer createDummyContainer(DummyModuleDataBase moduleDatabase) {
