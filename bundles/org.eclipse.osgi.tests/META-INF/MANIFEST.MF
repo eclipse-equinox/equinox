@@ -18,3 +18,4 @@ Export-Package: org.eclipse.osgi.tests.bundles,
  org.eclipse.osgi.tests.appadmin
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
 DynamicImport-Package: ext.framework.b
+Eclipse-BundleShape: dir
