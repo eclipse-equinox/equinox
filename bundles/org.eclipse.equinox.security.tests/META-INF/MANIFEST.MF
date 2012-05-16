@@ -17,3 +17,4 @@ Export-Package: org.eclipse.equinox.internal.security.tests;x-internal:=true,
  org.eclipse.equinox.internal.security.tests.storage;x-internal:=true,
  org.eclipse.equinox.security.tests;version="1.0.0"
 Bundle-ActivationPolicy: lazy
+Eclipse-BundleShape: dir

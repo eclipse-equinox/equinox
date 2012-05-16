@@ -21,3 +21,4 @@ Import-Package: junit.framework;version="4.8.1",
  org.osgi.resource; version="[1.0.0, 1.1.0)"
 Bundle-ClassPath: stubs/org.eclipse.virgo.teststubs.osgi.jar,
  .
+Eclipse-BundleShape: dir

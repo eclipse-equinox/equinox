@@ -17,3 +17,4 @@ Import-Package:
  org.osgi.util.tracker;version="1.4.2"
 Export-Package: org.eclipse.equinox.ds.tests.tbc
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
+Eclipse-BundleShape: dir

@@ -9,3 +9,4 @@ Require-Bundle: org.junit;bundle-version="3.8.2",
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
 Export-Package: org.eclipse.equinox.bidi.internal.tests;x-internal:=true
+Eclipse-BundleShape: dir
