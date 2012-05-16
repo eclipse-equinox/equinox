@@ -14,8 +14,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.BundleReference;
+import org.osgi.framework.*;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.resource.Capability;
 import org.osgi.service.resolver.ResolutionException;
@@ -359,6 +358,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * @throws BundleException if an errors occurs while starting
 	 */
 	public void start(EnumSet<START_OPTIONS> options) throws BundleException {
+		revisions.getContainer().checkAdminPermission(getBundle(), AdminPermission.EXECUTE);
 		if (options == null) {
 			options = EnumSet.noneOf(START_OPTIONS.class);
 		}
@@ -427,6 +427,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * @throws BundleException if an error occurs while stopping
 	 */
 	public void stop(EnumSet<STOP_OPTIONS> options) throws BundleException {
+		revisions.getContainer().checkAdminPermission(getBundle(), AdminPermission.EXECUTE);
 		if (options == null)
 			options = EnumSet.noneOf(STOP_OPTIONS.class);
 		Event event;
