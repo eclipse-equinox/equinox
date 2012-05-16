@@ -58,4 +58,13 @@ public abstract class ModuleContainerAdaptor {
 	public Map<String, Object> getConfiguration() {
 		return Collections.emptyMap();
 	}
+
+	/**
+	 * Creates a new {@link ModuleClassLoader} for the specified wiring.
+	 * @param wiring the module wiring to create a module class loader for
+	 * @return a new {@link ModuleClassLoader} for the specified wiring.
+	 */
+	public ModuleClassLoader createClassLoader(ModuleWiring wiring) {
+		throw new UnsupportedOperationException("Container adaptor does not support module class loaders.");
+	}
 }

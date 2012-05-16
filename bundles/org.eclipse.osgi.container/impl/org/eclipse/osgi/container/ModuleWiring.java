@@ -13,6 +13,7 @@ package org.eclipse.osgi.container;
 import java.net.URL;
 import java.util.*;
 import org.eclipse.osgi.internal.container.Converters;
+import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.wiring.*;
@@ -22,9 +23,12 @@ import org.osgi.resource.*;
  * An implementation of {@link BundleWiring}.
  */
 public class ModuleWiring implements BundleWiring {
+	private static final RuntimePermission GET_CLASSLOADER_PERM = new RuntimePermission("getClassLoader"); //$NON-NLS-1$
 	private final ModuleRevision revision;
 	private final List<ModuleCapability> capabilities;
 	private final List<ModuleRequirement> requirements;
+	private final Object monitor = new Object();
+	private ModuleClassLoader loader = null;
 	private volatile List<ModuleWire> providedWires;
 	private volatile List<ModuleWire> requiredWires;
 	private volatile boolean isValid = true;
@@ -136,26 +140,48 @@ public class ModuleWiring implements BundleWiring {
 
 	@Override
 	public ClassLoader getClassLoader() {
-		if (!isValid)
-			return null;
-		// TODO Auto-generated method stub
-		return null;
+		return (ClassLoader) getModuleClassLoader();
+	}
+
+	public ModuleClassLoader getModuleClassLoader() {
+		SecurityManager sm = System.getSecurityManager();
+		if (sm != null) {
+			sm.checkPermission(GET_CLASSLOADER_PERM);
+		}
+		synchronized (monitor) {
+			if (!isValid) {
+				return null;
+			}
+			if (loader == null) {
+				loader = revision.getRevisions().getContainer().adaptor.createClassLoader(this);
+			}
+			return loader;
+		}
+
 	}
 
 	@Override
 	public List<URL> findEntries(String path, String filePattern, int options) {
-		if (!isValid)
+		if (!hasResourcePermission())
+			return Collections.emptyList();
+		ModuleClassLoader current = getModuleClassLoader();
+		if (current == null) {
+			// must not be valid
 			return null;
-		// TODO Auto-generated method stub
-		return null;
+		}
+		return current.findEntries(path, filePattern, options);
 	}
 
 	@Override
 	public Collection<String> listResources(String path, String filePattern, int options) {
-		if (!isValid)
+		if (!hasResourcePermission())
+			return Collections.emptyList();
+		ModuleClassLoader current = getModuleClassLoader();
+		if (current == null) {
+			// must not be valid
 			return null;
-		// TODO Auto-generated method stub
-		return null;
+		}
+		return current.listResources(path, filePattern, options);
 	}
 
 	@Override
@@ -192,6 +218,24 @@ public class ModuleWiring implements BundleWiring {
 	}
 
 	void invalidate() {
-		this.isValid = false;
+		synchronized (monitor) {
+			this.isValid = false;
+			if (loader != null) {
+				loader.close();
+				loader = null;
+			}
+		}
+	}
+
+	private boolean hasResourcePermission() {
+		SecurityManager sm = System.getSecurityManager();
+		if (sm != null) {
+			try {
+				sm.checkPermission(new AdminPermission(getBundle(), AdminPermission.RESOURCE));
+			} catch (SecurityException e) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
