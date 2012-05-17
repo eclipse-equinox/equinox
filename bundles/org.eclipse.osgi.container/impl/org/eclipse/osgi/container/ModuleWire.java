@@ -60,12 +60,12 @@ public class ModuleWire implements BundleWire {
 
 	@Override
 	public ModuleRevision getProvider() {
-		return capability.getRevision();
+		return hostingProvider;
 	}
 
 	@Override
 	public ModuleRevision getRequirer() {
-		return requirement.getRevision();
+		return hostingRequirer;
 	}
 
 	public String toString() {
