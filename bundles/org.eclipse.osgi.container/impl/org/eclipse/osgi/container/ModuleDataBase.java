@@ -24,6 +24,7 @@ import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.internal.resolver.ComputeNodeOrder;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.*;
 import org.osgi.service.resolver.Resolver;
 
@@ -208,6 +209,27 @@ public abstract class ModuleDataBase {
 				}
 			}
 			return sameVersion;
+		} finally {
+			unlockRead();
+		}
+	}
+
+	/**
+	 * Returns a snapshot collection of current revisions which are fragments
+
+	 * @return a snapshot collection of current revisions which are fragments
+	 */
+	final Collection<ModuleRevision> getFragmentRevisions() {
+		Collection<ModuleRevision> fragments = new ArrayList<ModuleRevision>();
+		lockRead();
+		try {
+			for (Module module : modulesById.values()) {
+				ModuleRevision revision = module.getCurrentRevision();
+				if (revision != null && ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0)) {
+					fragments.add(revision);
+				}
+			}
+			return fragments;
 		} finally {
 			unlockRead();
 		}

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.util.Map;
+import java.util.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 import org.osgi.framework.namespace.*;
@@ -32,8 +32,8 @@ public class ModuleRequirement implements BundleRequirement {
 
 	ModuleRequirement(String namespace, Map<String, String> directives, Map<String, Object> attributes, ModuleRevision revision) {
 		this.namespace = namespace;
-		this.directives = directives;
-		this.attributes = attributes;
+		this.directives = Collections.unmodifiableMap(directives);
+		this.attributes = Collections.unmodifiableMap(attributes);
 		this.revision = revision;
 	}
 
@@ -116,5 +116,60 @@ public class ModuleRequirement implements BundleRequirement {
 
 	public String toString() {
 		return namespace + ModuleRevision.toString(attributes, false) + ModuleRevision.toString(directives, true);
+	}
+
+	private static final String PACKAGENAME_FILTER_COMPONENT = PackageNamespace.PACKAGE_NAMESPACE + "=";
+
+	DynamicModuleRequirement getDynamicPackageRequirement(ModuleRevision host, String dynamicPkgName) {
+		if (!PackageNamespace.PACKAGE_NAMESPACE.equals(namespace)) {
+			return null;
+		}
+		if (!PackageNamespace.RESOLUTION_DYNAMIC.equals(directives.get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
+			// not dynamic
+			return null;
+		}
+		String dynamicFilter = directives.get(PackageNamespace.REQUIREMENT_FILTER_DIRECTIVE);
+		// TODO we make some assumptions here on the format of the filter string
+		int packageNameBegin = dynamicFilter.indexOf(PACKAGENAME_FILTER_COMPONENT);
+		if (packageNameBegin == -1) {
+			// not much we can do
+			return null;
+		}
+		packageNameBegin += PACKAGENAME_FILTER_COMPONENT.length();
+		int packageNameEnd = dynamicFilter.indexOf(')', packageNameBegin);
+		if (packageNameEnd == -1) {
+			// not much we can do
+			return null;
+		}
+		String filterPackageName = dynamicFilter.substring(packageNameBegin, packageNameEnd);
+		String specificPackageFilter = null;
+		if ("*".equals(filterPackageName)) {
+			// matches all
+			specificPackageFilter = dynamicFilter.replace(PACKAGENAME_FILTER_COMPONENT + filterPackageName, PACKAGENAME_FILTER_COMPONENT + dynamicPkgName);
+		} else if (filterPackageName.endsWith(".*")) {
+			if (dynamicPkgName.startsWith(filterPackageName.substring(0, filterPackageName.length() - 1))) {
+				specificPackageFilter = dynamicFilter.replace(PACKAGENAME_FILTER_COMPONENT + filterPackageName, PACKAGENAME_FILTER_COMPONENT + dynamicPkgName);
+			}
+		} else if (dynamicPkgName.equals(filterPackageName)) {
+			specificPackageFilter = dynamicFilter;
+		}
+
+		if (specificPackageFilter != null) {
+			Map<String, String> dynamicDirectives = new HashMap<String, String>(directives);
+			dynamicDirectives.put(PackageNamespace.REQUIREMENT_FILTER_DIRECTIVE, specificPackageFilter);
+			return new DynamicModuleRequirement(host, dynamicDirectives);
+		}
+		return null;
+	}
+
+	class DynamicModuleRequirement extends ModuleRequirement {
+
+		DynamicModuleRequirement(ModuleRevision host, Map<String, String> directives) {
+			super(ModuleRequirement.this.getNamespace(), directives, ModuleRequirement.this.getAttributes(), host);
+		}
+
+		ModuleRequirement getOriginal() {
+			return ModuleRequirement.this;
+		}
 	}
 }

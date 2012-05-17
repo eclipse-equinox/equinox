@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
+import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.internal.container.Converters;
 import org.osgi.framework.Version;
 import org.osgi.framework.hooks.resolver.ResolverHook;
@@ -55,10 +58,16 @@ class ModuleResolver {
 	Map<ModuleRevision, ModuleWiring> resolveDelta(Collection<ModuleRevision> triggers, boolean triggersMandatory, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDataBase moduleDataBase) throws ResolutionException {
 		ResolveProcess resolveProcess = new ResolveProcess(unresolved, triggers, triggersMandatory, wiringCopy, moduleDataBase);
 		Map<Resource, List<Wire>> result = resolveProcess.resolve();
-		return generateDelta(result, wiringCopy, unresolved);
+		return generateDelta(result, wiringCopy);
 	}
 
-	private static Map<ModuleRevision, ModuleWiring> generateDelta(Map<Resource, List<Wire>> result, Map<ModuleRevision, ModuleWiring> wiringCopy, Collection<ModuleRevision> unresolved) {
+	Map<ModuleRevision, ModuleWiring> resolveDynamicDelta(DynamicModuleRequirement dynamicReq, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDataBase moduleDataBase) throws ResolutionException {
+		ResolveProcess resolveProcess = new ResolveProcess(unresolved, dynamicReq, wiringCopy, moduleDataBase);
+		Map<Resource, List<Wire>> result = resolveProcess.resolve();
+		return generateDelta(result, wiringCopy);
+	}
+
+	private static Map<ModuleRevision, ModuleWiring> generateDelta(Map<Resource, List<Wire>> result, Map<ModuleRevision, ModuleWiring> wiringCopy) {
 		Map<ModuleRevision, Map<ModuleCapability, List<ModuleWire>>> provided = new HashMap<ModuleRevision, Map<ModuleCapability, List<ModuleWire>>>();
 		Map<ModuleRevision, List<ModuleWire>> required = new HashMap<ModuleRevision, List<ModuleWire>>();
 		// First populate the list of provided and required wires for revision
@@ -87,16 +96,22 @@ class ModuleResolver {
 		Map<ModuleRevision, ModuleWiring> delta = new HashMap<ModuleRevision, ModuleWiring>();
 		// now create the ModuleWiring for the newly resolved revisions
 		for (ModuleRevision revision : required.keySet()) {
-			delta.put(revision, createNewWiring(revision, provided, required));
+			ModuleWiring existingWiring = wiringCopy.get(revision);
+			if (existingWiring == null) {
+				delta.put(revision, createNewWiring(revision, provided, required));
+			} else {
+				// this is to handle dynamic imports
+				delta.put(revision, createWiringDelta(revision, existingWiring, provided.get(revision), required.get(revision)));
+			}
 		}
 		// Also need to create the wiring deltas for already resolved bundles
 		// This should only include updating provided wires and
 		// for fragments it may include new hosts
-		// TODO also need to handle new dynamic wires
 		for (ModuleRevision revision : provided.keySet()) {
 			ModuleWiring existingWiring = wiringCopy.get(revision);
-			if (existingWiring != null)
-				delta.put(revision, createWiringDelta(revision, existingWiring, provided.get(revision), required.get(revision), unresolved));
+			if (existingWiring != null && !delta.containsKey(revision)) {
+				delta.put(revision, createWiringDelta(revision, existingWiring, provided.get(revision), required.get(revision)));
+			}
 		}
 		return delta;
 	}
@@ -115,7 +130,11 @@ class ModuleResolver {
 		ListIterator<ModuleRequirement> iRequirements = requirements.listIterator(requirements.size());
 
 		// add fragment capabilities and requirements
-		addFragmentContent(providedWireMap.get(HostNamespace.HOST_NAMESPACE), iCapabilities, iRequirements);
+		List<ModuleCapability> hostCapabilities = revision.getModuleCapabilities(HostNamespace.HOST_NAMESPACE);
+		ModuleCapability hostCapability = hostCapabilities.isEmpty() ? null : hostCapabilities.get(0);
+		if (hostCapability != null) {
+			addFragmentContent(providedWireMap.get(hostCapability), iCapabilities, iRequirements);
+		}
 
 		removeNonEffectiveCapabilities(iCapabilities);
 		removeNonEffectiveRequirements(iRequirements, requiredWires);
@@ -216,10 +235,10 @@ class ModuleResolver {
 					continue; // host and osgi.ee is not a payload
 				if (!fragmentRequirement.getNamespace().equals(currentNamespace)) {
 					currentNamespace = fragmentRequirement.getNamespace();
-					fastForward(iCapabilities);
-					while (iCapabilities.hasPrevious()) {
-						if (iCapabilities.previous().getNamespace().equals(currentNamespace)) {
-							iCapabilities.next(); // put position after the last one
+					fastForward(iRequirements);
+					while (iRequirements.hasPrevious()) {
+						if (iRequirements.previous().getNamespace().equals(currentNamespace)) {
+							iRequirements.next(); // put position after the last one
 							break;
 						}
 					}
@@ -268,18 +287,18 @@ class ModuleResolver {
 		}
 	}
 
-	static void fastForward(ListIterator<?> listIterator) {
+	private static void fastForward(ListIterator<?> listIterator) {
 		while (listIterator.hasNext())
 			listIterator.next();
 	}
 
-	static void rewind(ListIterator<?> listIterator) {
+	private static void rewind(ListIterator<?> listIterator) {
 		while (listIterator.hasPrevious())
 			listIterator.previous();
 	}
 
 	@SuppressWarnings("unchecked")
-	private static ModuleWiring createWiringDelta(ModuleRevision revision, ModuleWiring existingWiring, Map<ModuleCapability, List<ModuleWire>> providedWireMap, List<ModuleWire> requiredWires, Collection<ModuleRevision> unresolved) {
+	private static ModuleWiring createWiringDelta(ModuleRevision revision, ModuleWiring existingWiring, Map<ModuleCapability, List<ModuleWire>> providedWireMap, List<ModuleWire> requiredWires) {
 		// Create a ModuleWiring that only contains the new ordered list of provided wires
 		List<ModuleWire> existingProvided = existingWiring.getProvidedModuleWires(null);
 		addProvidedWires(providedWireMap, existingProvided, existingWiring.getModuleCapabilities(null));
@@ -325,6 +344,7 @@ class ModuleResolver {
 		private final boolean triggersMandatory;
 		private final ModuleDataBase moduleDataBase;
 		private final Map<ModuleRevision, ModuleWiring> wirings;
+		private final DynamicModuleRequirement dynamicReq;
 		private volatile ResolverHook hook = null;
 		private volatile Map<String, Collection<ModuleRevision>> byName = null;
 
@@ -339,11 +359,29 @@ class ModuleResolver {
 			}
 			this.wirings = wirings;
 			this.moduleDataBase = moduleDataBase;
+			this.dynamicReq = null;
+		}
+
+		ResolveProcess(Collection<ModuleRevision> unresolved, DynamicModuleRequirement dynamicReq, Map<ModuleRevision, ModuleWiring> wirings, ModuleDataBase moduleDataBase) {
+			this.unresolved = unresolved;
+			this.disabled = new HashSet<ModuleRevision>(unresolved);
+			ModuleRevision revision = dynamicReq.getRevision();
+			this.triggers = new ArrayList<ModuleRevision>(1);
+			this.triggers.add(revision);
+			this.triggersMandatory = false;
+			this.optionals = new ArrayList<ModuleRevision>(unresolved);
+			this.wirings = wirings;
+			this.moduleDataBase = moduleDataBase;
+			this.dynamicReq = dynamicReq;
 		}
 
 		@Override
 		public List<Capability> findProviders(Requirement requirement) {
 			List<ModuleCapability> candidates = moduleDataBase.findCapabilities((ModuleRequirement) requirement);
+			return filterProviders(requirement, candidates);
+		}
+
+		private List<Capability> filterProviders(Requirement requirement, List<ModuleCapability> candidates) {
 			filterDisabled(candidates);
 			hook.filterMatches((BundleRequirement) requirement, Converters.asListBundleCapability(candidates));
 			Collections.sort(candidates, this);
@@ -402,9 +440,33 @@ class ModuleResolver {
 				if (triggers.removeAll(disabled) && triggersMandatory) {
 					throw new ResolutionException("Could not resolve mandatory modules because another singleton was selected or the module was disabled: " + disabled);
 				}
+				if (dynamicReq != null) {
+					return resolveDynamic();
+				}
 				return adaptor.getResolver().resolve(this);
 			} finally {
 				hook.end();
+			}
+		}
+
+		private Map<Resource, List<Wire>> resolveDynamic() throws ResolutionException {
+			Resolver resolver = adaptor.getResolver();
+			List<Capability> dynamicMatches = filterProviders(dynamicReq.getOriginal(), moduleDataBase.findCapabilities(dynamicReq));
+
+			Collection<Resource> onDemandFragments = Converters.asCollectionResource(moduleDataBase.getFragmentRevisions());
+			try {
+				Method resolve = resolver.getClass().getMethod("resolve", ResolveContext.class, Resource.class, Requirement.class, List.class, Collection.class);
+				@SuppressWarnings("unchecked")
+				Map<Resource, List<Wire>> result = (Map<Resource, List<Wire>>) resolve.invoke(resolver, this, triggers.iterator().next(), dynamicReq.getOriginal(), dynamicMatches, onDemandFragments);
+				return result;
+			} catch (InvocationTargetException e) {
+				Throwable t = e.getTargetException();
+				if (t instanceof ResolutionException) {
+					throw (ResolutionException) t;
+				}
+				throw new ResolutionException("Dynamic import resolution not supported.", t, null);
+			} catch (Throwable t) {
+				throw new ResolutionException("Dynamic import resolution not supported.", t, null);
 			}
 		}
 

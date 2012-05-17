@@ -21,10 +21,12 @@ import org.eclipse.osgi.container.Module.STOP_OPTIONS;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleDataBase.Sort;
+import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.internal.container.LockSet;
 import org.osgi.framework.*;
 import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.FrameworkWiring;
@@ -395,6 +397,67 @@ public final class ModuleContainer {
 			if (!wiringClone.containsKey(deltaRevision))
 				modulesResolved.add(deltaRevision.getRevisions().getModule());
 		}
+
+		return applyDelta(deltaWiring, modulesResolved, timestamp);
+	}
+
+	public ModuleWire resolveDynamic(String dynamicPkgName, ModuleRevision revision) throws ResolutionException {
+		ModuleWire result;
+		Map<ModuleRevision, ModuleWiring> deltaWiring;
+		Collection<Module> modulesResolved;
+		long timestamp;
+		do {
+			result = null;
+			Map<ModuleRevision, ModuleWiring> wiringClone = null;
+			DynamicModuleRequirement dynamicReq = null;
+			Collection<ModuleRevision> unresolved = new ArrayList<ModuleRevision>();
+			moduleDataBase.lockRead();
+			try {
+				dynamicReq = getDynamicRequirement(dynamicPkgName, revision);
+				if (dynamicReq == null) {
+					// do nothing
+					return null;
+				}
+				timestamp = moduleDataBase.getTimestamp();
+				wiringClone = moduleDataBase.getWiringsClone();
+				Collection<Module> allModules = moduleDataBase.getModules();
+				for (Module module : allModules) {
+					ModuleRevision current = module.getCurrentRevision();
+					if (current != null && !wiringClone.containsKey(current))
+						unresolved.add(current);
+				}
+			} finally {
+				moduleDataBase.unlockRead();
+			}
+
+			deltaWiring = moduleResolver.resolveDynamicDelta(dynamicReq, unresolved, wiringClone, moduleDataBase);
+			if (deltaWiring.isEmpty())
+				return null; // nothing to do
+
+			modulesResolved = new ArrayList<Module>();
+			for (ModuleRevision deltaRevision : deltaWiring.keySet()) {
+				if (!wiringClone.containsKey(deltaRevision))
+					modulesResolved.add(deltaRevision.getRevisions().getModule());
+			}
+
+			// Save the result
+			ModuleWiring wiring = deltaWiring.get(revision);
+			if (wiring != null) {
+				List<ModuleWire> wires = wiring.getRequiredModuleWires(null);
+				result = wires.isEmpty() ? null : wires.get(wires.size() - 1);
+				// Doing a sanity check, may not be necessary
+				if (result != null) {
+					if (!PackageNamespace.PACKAGE_NAMESPACE.equals(result.getCapability().getNamespace()) || !dynamicPkgName.equals(result.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
+						throw new ResolutionException("Resolver provided an invalid dynamic wire: " + result);
+					}
+				}
+			}
+		} while (!applyDelta(deltaWiring, modulesResolved, timestamp));
+
+		return result;
+	}
+
+	private boolean applyDelta(Map<ModuleRevision, ModuleWiring> deltaWiring, Collection<Module> modulesResolved, long timestamp) {
 		Collection<Module> modulesLocked = new ArrayList<Module>(modulesResolved.size());
 		// now attempt to apply the delta
 		try {
@@ -442,6 +505,29 @@ public final class ModuleContainer {
 			module.publishEvent(Event.RESOLVED);
 		}
 		return true;
+	}
+
+	private DynamicModuleRequirement getDynamicRequirement(String dynamicPkgName, ModuleRevision revision) {
+		// TODO Will likely need to optimize this
+		if ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+			// only do this for hosts
+			return null;
+		}
+		ModuleWiring wiring = revision.getWiring();
+		if (wiring == null) {
+			// not resolved!
+			return null;
+		}
+		// check the dynamic import packages
+		DynamicModuleRequirement dynamicRequirement;
+		for (ModuleRequirement requirement : wiring.getModuleRequirements(PackageNamespace.PACKAGE_NAMESPACE)) {
+			dynamicRequirement = requirement.getDynamicPackageRequirement(revision, dynamicPkgName);
+			if (dynamicRequirement != null) {
+				return dynamicRequirement;
+			}
+		}
+
+		return null;
 	}
 
 	private Collection<Module> unresolve(Collection<Module> initial) {

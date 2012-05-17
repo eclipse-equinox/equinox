@@ -209,6 +209,54 @@ public class TestModuleContainer {
 	}
 
 	@Test
+	public void testFragments01() throws ResolutionException, BundleException, IOException {
+		ModuleContainer container = createDummyContainer(new DummyModuleDataBase());
+		Module systemModule = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+		Module c1 = installDummyModule("c1_v1.MF", "c1_v1", container);
+		Module h2 = installDummyModule("h2_v1.MF", "h2_v1", container);
+		Module f2 = installDummyModule("f2_v1.MF", "f2_v1", container);
+		container.resolve(Arrays.asList(systemModule, c1, h2, f2), true);
+
+		ModuleWiring wiring = h2.getCurrentRevision().getWiring();
+		List<ModuleWire> requiredWires = wiring.getRequiredModuleWires(null);
+		Assert.assertEquals("Wrong number of required wires.", 3, requiredWires.size());
+		for (ModuleWire wire : requiredWires) {
+			ModuleCapability capability = wire.getCapability();
+			Assert.assertEquals("Wrong namespace.", PackageNamespace.PACKAGE_NAMESPACE, capability.getNamespace());
+
+			Assert.assertEquals("Wrong requirer.", h2.getCurrentRevision(), wire.getRequirer());
+
+			String pkgName = (String) capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+			Assert.assertNotNull("No package name.", pkgName);
+			ModuleRevision expectedReqRevision;
+			if (pkgName.equals("org.osgi.framework")) {
+				expectedReqRevision = h2.getCurrentRevision();
+			} else {
+				expectedReqRevision = f2.getCurrentRevision();
+			}
+			Assert.assertEquals("Wrong requirement revision.", expectedReqRevision, wire.getRequirement().getRevision());
+		}
+	}
+
+	@Test
+	public void testFragments02() throws ResolutionException, BundleException, IOException {
+		ModuleContainer container = createDummyContainer(new DummyModuleDataBase());
+		Module systemModule = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+		Module c1 = installDummyModule("c1_v1.MF", "c1_v1", container);
+		Module h2 = installDummyModule("h2_v1.MF", "h2_v1", container);
+
+		container.resolve(Arrays.asList(systemModule, c1, h2), true);
+
+		ModuleWiring h2wiring = h2.getCurrentRevision().getWiring();
+		Assert.assertNotNull("Wiring is null.", h2wiring);
+
+		Module f2 = installDummyModule("f2_v1.MF", "f2_v1", container);
+		Assert.assertEquals("Wrong state.", State.INSTALLED, f2.getState());
+		container.resolve(Arrays.asList(f2), false);
+		Assert.assertNull("Expected to not be able to resolve f2.", f2.getCurrentRevision().getWiring());
+	}
+
+	@Test
 	public void testExecutionEnvironment() throws BundleException, IOException, ResolutionException {
 		ModuleContainer container = createDummyContainer(new DummyModuleDataBase());
 		String extraCapabilities = "osgi.ee; osgi.ee=JavaSE; version:List<Version>=\"1.3, 1.4, 1.5, 1.6, 1.7\"";
@@ -1002,6 +1050,112 @@ public class TestModuleContainer {
 
 	}
 
+	@Test
+	public void testDynamicImport01() throws BundleException, IOException, ResolutionException {
+		DummyModuleDataBase database = new DummyModuleDataBase();
+		ModuleContainer container = createDummyContainer(database);
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+
+		Module c1 = installDummyModule("c1_v1.MF", "c1_v1", container);
+		Module dynamic1 = installDummyModule("dynamic1_v1.MF", "dynamic1_v1", container);
+
+		container.resolve(Arrays.asList(c1, dynamic1), true);
+
+		ModuleWire dynamicWire = container.resolveDynamic("c1.b", dynamic1.getCurrentRevision());
+		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
+		Assert.assertEquals("Wrong package found.", "c1.b", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+	}
+
+	@Test
+	public void testDynamicImport02() throws BundleException, IOException, ResolutionException {
+		DummyModuleDataBase database = new DummyModuleDataBase();
+		ModuleContainer container = createDummyContainer(database);
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+
+		Module c1 = installDummyModule("c1_v1.MF", "c1_v1", container);
+		Module c4 = installDummyModule("c4_v1.MF", "c4_v1", container);
+		Module dynamic1 = installDummyModule("dynamic1_v1.MF", "dynamic1_v1", container);
+		Module dynamic1Frag = installDummyModule("dynamic1.frag_v1.MF", "dynamic1.frag_v1", container);
+
+		container.resolve(Arrays.asList(c1, c4, dynamic1, dynamic1Frag), true);
+
+		ModuleWire dynamicWire = container.resolveDynamic("c1.b", dynamic1.getCurrentRevision());
+		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
+		Assert.assertEquals("Wrong package found.", "c1.b", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+
+		dynamicWire = container.resolveDynamic("c4.a", dynamic1.getCurrentRevision());
+		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
+		Assert.assertEquals("Wrong package found.", "c4.a", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+
+		dynamicWire = container.resolveDynamic("c4.b", dynamic1.getCurrentRevision());
+		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
+		Assert.assertEquals("Wrong package found.", "c4.b", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+	}
+
+	@Test
+	public void testDynamicImport03() throws BundleException, IOException, ResolutionException {
+		DummyModuleDataBase database = new DummyModuleDataBase();
+		ModuleContainer container = createDummyContainer(database);
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+
+		Module dynamic3 = installDummyModule("dynamic2_v1.MF", "dynamic2_v1", container);
+
+		container.resolve(Arrays.asList(systemBundle, dynamic3), true);
+
+		ModuleWire dynamicWire = container.resolveDynamic("c1.a", dynamic3.getCurrentRevision());
+		Assert.assertNull("Dynamic wire found.", dynamicWire);
+
+		Module c1 = installDummyModule("c1_v1.MF", "c1_v1", container);
+		database.getModuleEvents();
+
+		dynamicWire = container.resolveDynamic("c1.a", dynamic3.getCurrentRevision());
+		Assert.assertNotNull("Dynamic wire not found.", dynamicWire);
+		Assert.assertEquals("Wrong package found.", "c1.a", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+
+		ModuleWiring c1Wiring = c1.getCurrentRevision().getWiring();
+		Assert.assertNotNull("c1 wiring is null.", c1Wiring);
+	}
+
+	@Test
+	public void testDynamicImport04() throws BundleException, IOException, ResolutionException {
+		DummyModuleDataBase database = new DummyModuleDataBase();
+		ModuleContainer container = createDummyContainer(database);
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+
+		Module dynamic3 = installDummyModule("dynamic2_v1.MF", "dynamic2_v1", container);
+
+		container.resolve(Arrays.asList(systemBundle, dynamic3), true);
+
+		ModuleWire dynamicWire = container.resolveDynamic("h1.a", dynamic3.getCurrentRevision());
+		Assert.assertNull("Dynamic wire found.", dynamicWire);
+
+		Module h1 = installDummyModule("h1_v1.MF", "h1_v1", container);
+		Module f1 = installDummyModule("f1_v1.MF", "f1_v1", container);
+		database.getModuleEvents();
+
+		dynamicWire = container.resolveDynamic("h1.a", dynamic3.getCurrentRevision());
+		Assert.assertNotNull("Dynamic wire not found.", dynamicWire);
+		Assert.assertEquals("Wrong package found.", "h1.a", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+
+		dynamicWire = container.resolveDynamic("f1.a", dynamic3.getCurrentRevision());
+		Assert.assertNotNull("Dynamic wire not found.", dynamicWire);
+		Assert.assertEquals("Wrong package found.", "f1.a", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+
+		ModuleWiring h1Wiring = h1.getCurrentRevision().getWiring();
+		Assert.assertNotNull("h1 wiring is null.", h1Wiring);
+
+		ModuleWiring f1Wiring = f1.getCurrentRevision().getWiring();
+		Assert.assertNotNull("f1 wiring is null.", f1Wiring);
+	}
+
 	private ModuleContainer createDummyContainer(DummyModuleDataBase moduleDatabase) {
 		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(resolver, new DummyCollisionHook(false), new DummyResolverHookFactory(), moduleDatabase, Collections.<String, Object> emptyMap());
 		return createDummyContainer(moduleDatabase, adaptor);
@@ -1027,6 +1181,7 @@ public class TestModuleContainer {
 
 	private Map<String, String> getManifest(String manifestFile) throws IOException, BundleException {
 		URL manifest = ((BundleReference) getClass().getClassLoader()).getBundle().getEntry("/manifests/" + manifestFile);
+		Assert.assertNotNull("Could not find manifest: " + manifestFile, manifest);
 		return ManifestElement.parseBundleManifest(manifest.openStream(), null);
 	}
 
