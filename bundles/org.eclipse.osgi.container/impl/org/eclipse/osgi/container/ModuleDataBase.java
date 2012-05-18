@@ -106,7 +106,18 @@ public abstract class ModuleDataBase {
 	private final ReentrantReadWriteLock monitor = new ReentrantReadWriteLock(true);
 
 	static enum Sort {
-		BY_DEPENDENCY, BY_START_LEVEL, BY_ID
+		BY_DEPENDENCY, BY_START_LEVEL, BY_ID;
+		/**
+		 * Tests if this option is contained in the specified options
+		 */
+		public boolean isContained(Sort... options) {
+			for (Sort option : options) {
+				if (equals(option)) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 	/**
@@ -547,7 +558,7 @@ public abstract class ModuleDataBase {
 	 * @return a snapshot of all modules.
 	 */
 	final List<Module> getModules() {
-		return getSortedModules(null);
+		return getSortedModules();
 	}
 
 	/**
@@ -555,21 +566,21 @@ public abstract class ModuleDataBase {
 	 * @param sortOptions options for sorting
 	 * @return a snapshot of all modules ordered according to the sort options
 	 */
-	final List<Module> getSortedModules(EnumSet<Sort> sortOptions) {
+	final List<Module> getSortedModules(Sort... sortOptions) {
 		lockRead();
 		try {
 			List<Module> modules = new ArrayList<Module>(modulesByLocations.values());
-			sortModules(sortOptions, modules);
+			sortModules(modules, sortOptions);
 			return modules;
 		} finally {
 			unlockRead();
 		}
 	}
 
-	final void sortModules(EnumSet<Sort> sortOptions, List<Module> modules) {
+	final void sortModules(List<Module> modules, Sort... sortOptions) {
 		if (modules.size() < 2)
 			return;
-		if (sortOptions == null || sortOptions.contains(Sort.BY_ID) || sortOptions.isEmpty()) {
+		if (sortOptions == null || Sort.BY_ID.isContained(sortOptions) || sortOptions.length == 0) {
 			Collections.sort(modules, new Comparator<Module>() {
 				@Override
 				public int compare(Module m1, Module m2) {
@@ -579,11 +590,11 @@ public abstract class ModuleDataBase {
 			return;
 		}
 		// first sort by start-level
-		if (sortOptions.contains(Sort.BY_START_LEVEL)) {
+		if (Sort.BY_START_LEVEL.isContained(sortOptions)) {
 			Collections.sort(modules);
 		}
-		if (sortOptions.contains(Sort.BY_DEPENDENCY)) {
-			if (sortOptions.contains(Sort.BY_START_LEVEL)) {
+		if (Sort.BY_DEPENDENCY.isContained(sortOptions)) {
+			if (Sort.BY_START_LEVEL.isContained(sortOptions)) {
 				// sort each sublist that has modules of the same start level
 				int currentSL = modules.get(0).getStartLevel();
 				int currentSLindex = 0;

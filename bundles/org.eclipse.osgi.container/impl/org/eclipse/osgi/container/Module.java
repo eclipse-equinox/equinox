@@ -53,7 +53,19 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		 * lazy start trigger class load.  This option must be used with the 
 		 * {@link StartOptions#TRANSIENT transient} options.
 		 */
-		LAZY_TRIGGER
+		LAZY_TRIGGER;
+
+		/**
+		 * Tests if this option is contained in the specified options
+		 */
+		public boolean isContained(StartOptions... options) {
+			for (StartOptions option : options) {
+				if (equals(option)) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 	/**
@@ -64,7 +76,19 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		 * The module stop operation is transient and the persistent 
 		 * autostart setting of the module is not modified.
 		 */
-		TRANSIENT
+		TRANSIENT;
+
+		/**
+		 * Tests if this option is contained in the specified options
+		 */
+		public boolean isContained(StopOptions... options) {
+			for (StopOptions option : options) {
+				if (equals(option)) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 	/**
@@ -357,13 +381,13 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * @param options the options for starting
 	 * @throws BundleException if an errors occurs while starting
 	 */
-	public void start(EnumSet<StartOptions> options) throws BundleException {
+	public void start(StartOptions... options) throws BundleException {
 		revisions.getContainer().checkAdminPermission(getBundle(), AdminPermission.EXECUTE);
 		if (options == null) {
-			options = EnumSet.noneOf(StartOptions.class);
+			options = new StartOptions[0];
 		}
 		Event event;
-		if (options.contains(StartOptions.LAZY_TRIGGER)) {
+		if (StartOptions.LAZY_TRIGGER.isContained(options)) {
 			if (stateChangeLock.getHoldCount() > 0 && stateTransitionEvents.contains(Event.STARTED)) {
 				// nothing to do here; the current thread is activating the bundle.
 			}
@@ -372,13 +396,13 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		lockStateChange(Event.STARTED);
 		try {
 			checkValid();
-			if (options.contains(StartOptions.TRANSIENT_IF_AUTO_START) && !settings.contains(Settings.AUTO_START)) {
+			if (StartOptions.TRANSIENT_IF_AUTO_START.isContained(options) && !settings.contains(Settings.AUTO_START)) {
 				// Do nothing
 				return;
 			}
 			persistStartOptions(options);
 			if (getStartLevel() > getRevisions().getContainer().getStartLevel()) {
-				if (options.contains(StartOptions.TRANSIENT)) {
+				if (StartOptions.TRANSIENT.isContained(options)) {
 					throw new BundleException("Cannot transiently start a module whose start level is not met.", BundleException.START_TRANSIENT_ERROR);
 				}
 				// DO nothing
@@ -426,10 +450,10 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * @param options options for stopping
 	 * @throws BundleException if an error occurs while stopping
 	 */
-	public void stop(EnumSet<StopOptions> options) throws BundleException {
+	public void stop(StopOptions... options) throws BundleException {
 		revisions.getContainer().checkAdminPermission(getBundle(), AdminPermission.EXECUTE);
 		if (options == null)
-			options = EnumSet.noneOf(StopOptions.class);
+			options = new StopOptions[0];
 		Event event;
 		BundleException stopError = null;
 		lockStateChange(Event.STOPPED);
@@ -473,8 +497,8 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			throw new IllegalStateException("Module has been uninstalled.");
 	}
 
-	private Event doStart(EnumSet<StartOptions> options) throws BundleException {
-		boolean isLazyTrigger = options.contains(StartOptions.LAZY_TRIGGER);
+	private Event doStart(StartOptions... options) throws BundleException {
+		boolean isLazyTrigger = StartOptions.LAZY_TRIGGER.isContained(options);
 		if (isLazyTrigger) {
 			if (!State.LAZY_STARTING.equals(getState())) {
 				// need to make sure we transition through the lazy starting state
@@ -575,27 +599,27 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 */
 	abstract protected void publishEvent(Event event);
 
-	private void persistStartOptions(EnumSet<StartOptions> options) {
-		if (options.contains(StartOptions.TRANSIENT_RESUME) || options.contains(StartOptions.LAZY_TRIGGER)) {
+	private void persistStartOptions(StartOptions... options) {
+		if (StartOptions.TRANSIENT_RESUME.isContained(options) || StartOptions.LAZY_TRIGGER.isContained(options)) {
 			return;
 		}
 
 		// Always set the use acivation policy setting
-		if (options.contains(StartOptions.USE_ACTIVATION_POLICY)) {
+		if (StartOptions.USE_ACTIVATION_POLICY.isContained(options)) {
 			settings.add(Settings.USE_ACTIVATION_POLICY);
 		} else {
 			settings.remove(Settings.USE_ACTIVATION_POLICY);
 		}
 
-		if (options.contains(StartOptions.TRANSIENT)) {
+		if (StartOptions.TRANSIENT.isContained(options)) {
 			return;
 		}
 		settings.add(Settings.AUTO_START);
 		revisions.getContainer().moduleDataBase.persistSettings(settings, this);
 	}
 
-	private void persistStopOptions(EnumSet<StopOptions> options) {
-		if (options.contains(StopOptions.TRANSIENT))
+	private void persistStopOptions(StopOptions... options) {
+		if (StopOptions.TRANSIENT.isContained(options))
 			return;
 		settings.clear();
 		revisions.getContainer().moduleDataBase.persistSettings(settings, this);

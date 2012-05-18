@@ -614,7 +614,7 @@ public class TestModuleContainer {
 		container.resolve(Arrays.asList(systemBundle), true);
 
 		// actually launch the container
-		systemBundle.start(null);
+		systemBundle.start();
 
 		Module c1 = installDummyModule("c1_v1.MF", "c1_v1", container);
 		Module c2 = installDummyModule("c2_v1.MF", "c2_v1", container);
@@ -626,7 +626,7 @@ public class TestModuleContainer {
 		// throw away installed events
 		database.getModuleEvents();
 
-		c7.start(null);
+		c7.start();
 
 		List<DummyModuleEvent> actual = database.getModuleEvents();
 		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
@@ -650,14 +650,14 @@ public class TestModuleContainer {
 
 		container.resolve(Arrays.asList(systemBundle), true);
 		// actually launch the container
-		systemBundle.start(null);
+		systemBundle.start();
 
 		Module c4 = installDummyModule("c4_v1.MF", "c4_v1", container);
 		Module c5 = installDummyModule("c5_v1.MF", "c5_v1", container);
 		Module c6 = installDummyModule("c6_v1.MF", "c6_v1", container);
 		Module c7 = installDummyModule("c7_v1.MF", "c7_v1", container);
 
-		c7.start(null);
+		c7.start();
 		// discard events
 		database.getModuleEvents();
 		container.refresh(Arrays.asList(c4));
@@ -797,14 +797,14 @@ public class TestModuleContainer {
 		container.resolve(Arrays.asList(systemBundle), true);
 
 		// actually launch the container
-		systemBundle.start(null);
+		systemBundle.start();
 
 		Module lazy1 = installDummyModule("lazy1_v1.MF", "lazy1", container);
 
 		// throw out installed and resolved events
 		database.getModuleEvents();
 
-		lazy1.start(EnumSet.of(StartOptions.USE_ACTIVATION_POLICY));
+		lazy1.start(StartOptions.USE_ACTIVATION_POLICY);
 
 		List<DummyModuleEvent> actual = database.getModuleEvents();
 		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
@@ -812,7 +812,7 @@ public class TestModuleContainer {
 				new DummyModuleEvent(lazy1, Event.LAZY_ACTIVATION, State.LAZY_STARTING)));
 		assertEvents(expected, actual, true);
 
-		lazy1.start(EnumSet.of(StartOptions.LAZY_TRIGGER));
+		lazy1.start(StartOptions.LAZY_TRIGGER);
 
 		actual = database.getModuleEvents();
 		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
@@ -831,7 +831,7 @@ public class TestModuleContainer {
 				new DummyModuleEvent(lazy1, Event.LAZY_ACTIVATION, State.LAZY_STARTING)));
 		assertEvents(expected, actual, true);
 
-		lazy1.start(EnumSet.of(StartOptions.LAZY_TRIGGER));
+		lazy1.start(StartOptions.LAZY_TRIGGER);
 		// flush events
 		database.getModuleEvents();
 
@@ -856,7 +856,7 @@ public class TestModuleContainer {
 		container.resolve(Arrays.asList(systemBundle), true);
 
 		// actually launch the container
-		systemBundle.start(null);
+		systemBundle.start();
 
 		Module c4 = installDummyModule("c4_v1.MF", "c4_v1", container);
 		Module lazy1 = installDummyModule("lazy1_v1.MF", "lazy1", container);
@@ -874,8 +874,8 @@ public class TestModuleContainer {
 
 		database.getModuleEvents();
 
-		c4.start(null);
-		lazy1.start(EnumSet.of(StartOptions.USE_ACTIVATION_POLICY));
+		c4.start();
+		lazy1.start(StartOptions.USE_ACTIVATION_POLICY);
 
 		List<DummyModuleEvent> actual = database.getModuleEvents();
 		Assert.assertEquals("Did not expect any events.", 0, actual.size());
@@ -895,7 +895,7 @@ public class TestModuleContainer {
 				new DummyModuleEvent(c4, Event.STARTED, State.ACTIVE)));
 		assertEvents(expected, actual, true);
 
-		systemBundle.stop(null);
+		systemBundle.stop();
 
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 		DataOutputStream data = new DataOutputStream(bytes);
@@ -924,7 +924,7 @@ public class TestModuleContainer {
 		Assert.assertEquals("lazy1 has wrong start-level", 2, lazy1.getStartLevel());
 
 		// relaunch the container
-		systemBundle.start(null);
+		systemBundle.start();
 
 		actualContainerEvents = database.getContainerEvents();
 		expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(
@@ -981,18 +981,18 @@ public class TestModuleContainer {
 		c6.setStartLevel(20);
 		c7.setStartLevel(10);
 
-		c1.start(null);
-		c2.start(null);
-		c3.start(null);
-		c4.start(null);
-		c5.start(null);
-		c6.start(null);
-		c7.start(null);
+		c1.start();
+		c2.start();
+		c3.start();
+		c4.start();
+		c5.start();
+		c6.start();
+		c7.start();
 
 		List<DummyModuleEvent> actualModuleEvents = database.getModuleEvents();
 		Assert.assertEquals("Expecting no events.", 0, actualModuleEvents.size());
 
-		systemBundle.start(null);
+		systemBundle.start();
 
 		actualModuleEvents = database.getModuleEvents(16);
 		List<DummyModuleEvent> expectedModuleEvents = new ArrayList<DummyModuleEvent>(Arrays.asList(
@@ -1020,7 +1020,7 @@ public class TestModuleContainer {
 				new DummyContainerEvent(ContainerEvent.STARTED, systemBundle, null)));
 		Assert.assertEquals("Wrong container events.", expectedContainerEvents, actualContainerEvents);
 
-		systemBundle.stop(null);
+		systemBundle.stop();
 
 		actualContainerEvents = database.getContainerEvents();
 		expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(

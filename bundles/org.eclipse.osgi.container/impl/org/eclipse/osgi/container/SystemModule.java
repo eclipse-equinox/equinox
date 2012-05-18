@@ -70,18 +70,18 @@ public abstract class SystemModule extends Module {
 	}
 
 	@Override
-	public void start(EnumSet<StartOptions> options) throws BundleException {
+	public void start(StartOptions... options) throws BundleException {
 		// make sure to init if needed
 		init();
 		// Always transient
-		super.start(EnumSet.of(StartOptions.TRANSIENT, StartOptions.USE_ACTIVATION_POLICY));
+		super.start(StartOptions.TRANSIENT, StartOptions.USE_ACTIVATION_POLICY);
 		getRevisions().getContainer().adaptor.publishContainerEvent(ContainerEvent.STARTED, this, null);
 	}
 
 	@Override
-	public void stop(EnumSet<StopOptions> options) throws BundleException {
+	public void stop(StopOptions... options) throws BundleException {
 		// Always transient
-		super.stop(EnumSet.of(StopOptions.TRANSIENT));
+		super.stop(StopOptions.TRANSIENT);
 		ContainerEvent containerEvent;
 		if (holdsTransitionEventLock(Event.UPDATED)) {
 			containerEvent = ContainerEvent.STOPPED_UPDATE;

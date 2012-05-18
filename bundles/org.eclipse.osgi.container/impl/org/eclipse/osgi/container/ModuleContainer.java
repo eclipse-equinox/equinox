@@ -17,8 +17,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.osgi.container.Module.Event;
 import org.eclipse.osgi.container.Module.StartOptions;
-import org.eclipse.osgi.container.Module.StopOptions;
 import org.eclipse.osgi.container.Module.State;
+import org.eclipse.osgi.container.Module.StopOptions;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleDataBase.Sort;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
@@ -269,7 +269,7 @@ public final class ModuleContainer {
 			BundleException updateError = null;
 			try {
 				// throwing an exception from stop terminates update
-				module.stop(EnumSet.of(StopOptions.TRANSIENT));
+				module.stop(StopOptions.TRANSIENT);
 				try {
 					// throwing an exception from updateWorker keeps the previous revision
 					module.updateWorker(builder);
@@ -292,7 +292,7 @@ public final class ModuleContainer {
 			}
 			if (Module.ACTIVE_SET.contains(previousState)) {
 				// restart the module if necessary
-				module.start(EnumSet.of(StartOptions.TRANSIENT_RESUME));
+				module.start(StartOptions.TRANSIENT_RESUME);
 			}
 			if (updateError != null) {
 				// throw cause of update error
@@ -314,7 +314,7 @@ public final class ModuleContainer {
 		try {
 			if (Module.ACTIVE_SET.equals(module.getState())) {
 				try {
-					module.stop(EnumSet.of(StopOptions.TRANSIENT));
+					module.stop(StopOptions.TRANSIENT);
 				} catch (BundleException e) {
 					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
 				}
@@ -603,7 +603,7 @@ public final class ModuleContainer {
 				Module refreshModule = iTriggers.next();
 				if (Module.ACTIVE_SET.contains(refreshModule.getState())) {
 					try {
-						refreshModule.stop(EnumSet.of(StopOptions.TRANSIENT));
+						refreshModule.stop(StopOptions.TRANSIENT);
 					} catch (BundleException e) {
 						adaptor.publishContainerEvent(ContainerEvent.ERROR, refreshModule, e);
 					}
@@ -680,7 +680,7 @@ public final class ModuleContainer {
 		resolve(refreshTriggers, false);
 		for (Module module : refreshTriggers) {
 			try {
-				module.start(EnumSet.of(StartOptions.TRANSIENT_RESUME));
+				module.start(StartOptions.TRANSIENT_RESUME);
 			} catch (BundleException e) {
 				adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
 			}
@@ -1031,9 +1031,9 @@ public final class ModuleContainer {
 				case MODULE_STARTLEVEL :
 					try {
 						if (getStartLevel() < startlevel) {
-							module.stop(EnumSet.of(StopOptions.TRANSIENT));
+							module.stop(StopOptions.TRANSIENT);
 						} else {
-							module.start(EnumSet.of(StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME));
+							module.start(StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
 						}
 					} catch (BundleException e) {
 						adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
@@ -1057,13 +1057,13 @@ public final class ModuleContainer {
 					for (int i = currentSL; i < newStartLevel; i++) {
 						int toStartLevel = i + 1;
 						activeStartLevel.set(toStartLevel);
-						incStartLevel(toStartLevel, moduleDataBase.getSortedModules(EnumSet.of(Sort.BY_START_LEVEL)));
+						incStartLevel(toStartLevel, moduleDataBase.getSortedModules(Sort.BY_START_LEVEL));
 					}
 				} else {
 					for (int i = currentSL; i > newStartLevel; i--) {
 						int toStartLevel = i - 1;
 						activeStartLevel.set(toStartLevel);
-						decStartLevel(toStartLevel, moduleDataBase.getSortedModules(EnumSet.of(Sort.BY_START_LEVEL, Sort.BY_DEPENDENCY)));
+						decStartLevel(toStartLevel, moduleDataBase.getSortedModules(Sort.BY_START_LEVEL, Sort.BY_DEPENDENCY));
 					}
 				}
 				adaptor.publishContainerEvent(ContainerEvent.START_LEVEL, module, null, listeners);
@@ -1090,7 +1090,7 @@ public final class ModuleContainer {
 					boolean isLazyStart = module.isLazyActivate();
 					if (lazyOnly ? isLazyStart : !isLazyStart) {
 						try {
-							module.start(EnumSet.of(StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME));
+							module.start(StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
 						} catch (BundleException e) {
 							adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
 						}
@@ -1115,7 +1115,7 @@ public final class ModuleContainer {
 					break;
 				}
 				try {
-					module.stop(EnumSet.of(StopOptions.TRANSIENT));
+					module.stop(StopOptions.TRANSIENT);
 				} catch (BundleException e) {
 					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
 				}
