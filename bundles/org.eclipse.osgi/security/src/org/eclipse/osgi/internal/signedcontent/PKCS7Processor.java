@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2006, 2012 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -77,6 +77,24 @@ public class PKCS7Processor implements SignedContentConstants {
 	private static String findDigest(int digestOid[]) throws NoSuchAlgorithmException {
 		if (Arrays.equals(SHA1_OID, digestOid)) {
 			return SHA1_STR;
+		}
+		if (Arrays.equals(SHA224_OID, digestOid)) {
+			return SHA224_STR;
+		}
+		if (Arrays.equals(SHA256_OID, digestOid)) {
+			return SHA256_STR;
+		}
+		if (Arrays.equals(SHA384_OID, digestOid)) {
+			return SHA384_STR;
+		}
+		if (Arrays.equals(SHA512_OID, digestOid)) {
+			return SHA512_STR;
+		}
+		if (Arrays.equals(SHA512_224_OID, digestOid)) {
+			return SHA512_224_STR;
+		}
+		if (Arrays.equals(SHA512_256_OID, digestOid)) {
+			return SHA512_256_STR;
 		}
 		if (Arrays.equals(MD5_OID, digestOid)) {
 			return MD5_STR;
