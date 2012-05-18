@@ -27,7 +27,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * The possible start options for a module
 	 */
-	public static enum START_OPTIONS {
+	public static enum StartOptions {
 		/**
 		 * The module start operation is transient and the persistent 
 		 * autostart or activation policy setting of the module is not modified.
@@ -51,7 +51,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		/**
 		 * The module start operation that indicates the module is being started because of a
 		 * lazy start trigger class load.  This option must be used with the 
-		 * {@link START_OPTIONS#TRANSIENT transient} options.
+		 * {@link StartOptions#TRANSIENT transient} options.
 		 */
 		LAZY_TRIGGER
 	}
@@ -59,7 +59,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * The possible start options for a module
 	 */
-	public static enum STOP_OPTIONS {
+	public static enum StopOptions {
 		/**
 		 * The module stop operation is transient and the persistent 
 		 * autostart setting of the module is not modified.
@@ -80,7 +80,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		 */
 		RESOLVED,
 		/**
-		 * The module is waiting for a {@link START_OPTIONS#LAZY_TRIGGER trigger}
+		 * The module is waiting for a {@link StartOptions#LAZY_TRIGGER trigger}
 		 * class load to proceed with starting.
 		 */
 		LAZY_STARTING,
@@ -113,7 +113,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		INSTALLED,
 		/**
 		 * The module has been activated with the lazy activation policy and
-		 * is waiting a {@link START_OPTIONS#LAZY_TRIGGER trigger} class load.
+		 * is waiting a {@link StartOptions#LAZY_TRIGGER trigger} class load.
 		 */
 		LAZY_ACTIVATION,
 		/**
@@ -357,13 +357,13 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * @param options the options for starting
 	 * @throws BundleException if an errors occurs while starting
 	 */
-	public void start(EnumSet<START_OPTIONS> options) throws BundleException {
+	public void start(EnumSet<StartOptions> options) throws BundleException {
 		revisions.getContainer().checkAdminPermission(getBundle(), AdminPermission.EXECUTE);
 		if (options == null) {
-			options = EnumSet.noneOf(START_OPTIONS.class);
+			options = EnumSet.noneOf(StartOptions.class);
 		}
 		Event event;
-		if (options.contains(START_OPTIONS.LAZY_TRIGGER)) {
+		if (options.contains(StartOptions.LAZY_TRIGGER)) {
 			if (stateChangeLock.getHoldCount() > 0 && stateTransitionEvents.contains(Event.STARTED)) {
 				// nothing to do here; the current thread is activating the bundle.
 			}
@@ -372,13 +372,13 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		lockStateChange(Event.STARTED);
 		try {
 			checkValid();
-			if (options.contains(START_OPTIONS.TRANSIENT_IF_AUTO_START) && !settings.contains(Settings.AUTO_START)) {
+			if (options.contains(StartOptions.TRANSIENT_IF_AUTO_START) && !settings.contains(Settings.AUTO_START)) {
 				// Do nothing
 				return;
 			}
 			persistStartOptions(options);
 			if (getStartLevel() > getRevisions().getContainer().getStartLevel()) {
-				if (options.contains(START_OPTIONS.TRANSIENT)) {
+				if (options.contains(StartOptions.TRANSIENT)) {
 					throw new BundleException("Cannot transiently start a module whose start level is not met.", BundleException.START_TRANSIENT_ERROR);
 				}
 				// DO nothing
@@ -426,10 +426,10 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * @param options options for stopping
 	 * @throws BundleException if an error occurs while stopping
 	 */
-	public void stop(EnumSet<STOP_OPTIONS> options) throws BundleException {
+	public void stop(EnumSet<StopOptions> options) throws BundleException {
 		revisions.getContainer().checkAdminPermission(getBundle(), AdminPermission.EXECUTE);
 		if (options == null)
-			options = EnumSet.noneOf(STOP_OPTIONS.class);
+			options = EnumSet.noneOf(StopOptions.class);
 		Event event;
 		BundleException stopError = null;
 		lockStateChange(Event.STOPPED);
@@ -473,8 +473,8 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			throw new IllegalStateException("Module has been uninstalled.");
 	}
 
-	private Event doStart(EnumSet<START_OPTIONS> options) throws BundleException {
-		boolean isLazyTrigger = options.contains(START_OPTIONS.LAZY_TRIGGER);
+	private Event doStart(EnumSet<StartOptions> options) throws BundleException {
+		boolean isLazyTrigger = options.contains(StartOptions.LAZY_TRIGGER);
 		if (isLazyTrigger) {
 			if (!State.LAZY_STARTING.equals(getState())) {
 				// need to make sure we transition through the lazy starting state
@@ -575,27 +575,27 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 */
 	abstract protected void publishEvent(Event event);
 
-	private void persistStartOptions(EnumSet<START_OPTIONS> options) {
-		if (options.contains(START_OPTIONS.TRANSIENT_RESUME) || options.contains(START_OPTIONS.LAZY_TRIGGER)) {
+	private void persistStartOptions(EnumSet<StartOptions> options) {
+		if (options.contains(StartOptions.TRANSIENT_RESUME) || options.contains(StartOptions.LAZY_TRIGGER)) {
 			return;
 		}
 
 		// Always set the use acivation policy setting
-		if (options.contains(START_OPTIONS.USE_ACTIVATION_POLICY)) {
+		if (options.contains(StartOptions.USE_ACTIVATION_POLICY)) {
 			settings.add(Settings.USE_ACTIVATION_POLICY);
 		} else {
 			settings.remove(Settings.USE_ACTIVATION_POLICY);
 		}
 
-		if (options.contains(START_OPTIONS.TRANSIENT)) {
+		if (options.contains(StartOptions.TRANSIENT)) {
 			return;
 		}
 		settings.add(Settings.AUTO_START);
 		revisions.getContainer().moduleDataBase.persistSettings(settings, this);
 	}
 
-	private void persistStopOptions(EnumSet<STOP_OPTIONS> options) {
-		if (options.contains(STOP_OPTIONS.TRANSIENT))
+	private void persistStopOptions(EnumSet<StopOptions> options) {
+		if (options.contains(StopOptions.TRANSIENT))
 			return;
 		settings.clear();
 		revisions.getContainer().moduleDataBase.persistSettings(settings, this);

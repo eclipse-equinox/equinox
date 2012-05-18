@@ -17,7 +17,7 @@ import java.util.concurrent.*;
 import junit.framework.Assert;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.Event;
-import org.eclipse.osgi.container.Module.START_OPTIONS;
+import org.eclipse.osgi.container.Module.StartOptions;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
@@ -804,7 +804,7 @@ public class TestModuleContainer {
 		// throw out installed and resolved events
 		database.getModuleEvents();
 
-		lazy1.start(EnumSet.of(START_OPTIONS.USE_ACTIVATION_POLICY));
+		lazy1.start(EnumSet.of(StartOptions.USE_ACTIVATION_POLICY));
 
 		List<DummyModuleEvent> actual = database.getModuleEvents();
 		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
@@ -812,7 +812,7 @@ public class TestModuleContainer {
 				new DummyModuleEvent(lazy1, Event.LAZY_ACTIVATION, State.LAZY_STARTING)));
 		assertEvents(expected, actual, true);
 
-		lazy1.start(EnumSet.of(START_OPTIONS.LAZY_TRIGGER));
+		lazy1.start(EnumSet.of(StartOptions.LAZY_TRIGGER));
 
 		actual = database.getModuleEvents();
 		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
@@ -831,7 +831,7 @@ public class TestModuleContainer {
 				new DummyModuleEvent(lazy1, Event.LAZY_ACTIVATION, State.LAZY_STARTING)));
 		assertEvents(expected, actual, true);
 
-		lazy1.start(EnumSet.of(START_OPTIONS.LAZY_TRIGGER));
+		lazy1.start(EnumSet.of(StartOptions.LAZY_TRIGGER));
 		// flush events
 		database.getModuleEvents();
 
@@ -875,7 +875,7 @@ public class TestModuleContainer {
 		database.getModuleEvents();
 
 		c4.start(null);
-		lazy1.start(EnumSet.of(START_OPTIONS.USE_ACTIVATION_POLICY));
+		lazy1.start(EnumSet.of(StartOptions.USE_ACTIVATION_POLICY));
 
 		List<DummyModuleEvent> actual = database.getModuleEvents();
 		Assert.assertEquals("Did not expect any events.", 0, actual.size());
