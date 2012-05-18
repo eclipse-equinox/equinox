@@ -409,12 +409,12 @@ public final class ModuleContainer {
 		do {
 			result = null;
 			Map<ModuleRevision, ModuleWiring> wiringClone = null;
-			DynamicModuleRequirement dynamicReq = null;
+			List<DynamicModuleRequirement> dynamicReqs = null;
 			Collection<ModuleRevision> unresolved = new ArrayList<ModuleRevision>();
 			moduleDataBase.lockRead();
 			try {
-				dynamicReq = getDynamicRequirement(dynamicPkgName, revision);
-				if (dynamicReq == null) {
+				dynamicReqs = getDynamicRequirements(dynamicPkgName, revision);
+				if (dynamicReqs.isEmpty()) {
 					// do nothing
 					return null;
 				}
@@ -430,8 +430,14 @@ public final class ModuleContainer {
 				moduleDataBase.unlockRead();
 			}
 
-			deltaWiring = moduleResolver.resolveDynamicDelta(dynamicReq, unresolved, wiringClone, moduleDataBase);
-			if (deltaWiring.isEmpty())
+			deltaWiring = null;
+			for (DynamicModuleRequirement dynamicReq : dynamicReqs) {
+				deltaWiring = moduleResolver.resolveDynamicDelta(dynamicReq, unresolved, wiringClone, moduleDataBase);
+				if (deltaWiring.get(revision) != null) {
+					break;
+				}
+			}
+			if (deltaWiring == null || deltaWiring.get(revision) == null)
 				return null; // nothing to do
 
 			modulesResolved = new ArrayList<Module>();
@@ -507,7 +513,7 @@ public final class ModuleContainer {
 		return true;
 	}
 
-	private DynamicModuleRequirement getDynamicRequirement(String dynamicPkgName, ModuleRevision revision) {
+	private List<DynamicModuleRequirement> getDynamicRequirements(String dynamicPkgName, ModuleRevision revision) {
 		// TODO Will likely need to optimize this
 		if ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 			// only do this for hosts
@@ -518,16 +524,17 @@ public final class ModuleContainer {
 			// not resolved!
 			return null;
 		}
+		List<DynamicModuleRequirement> result = new ArrayList<ModuleRequirement.DynamicModuleRequirement>(1);
 		// check the dynamic import packages
 		DynamicModuleRequirement dynamicRequirement;
 		for (ModuleRequirement requirement : wiring.getModuleRequirements(PackageNamespace.PACKAGE_NAMESPACE)) {
 			dynamicRequirement = requirement.getDynamicPackageRequirement(revision, dynamicPkgName);
 			if (dynamicRequirement != null) {
-				return dynamicRequirement;
+				result.add(dynamicRequirement);
 			}
 		}
 
-		return null;
+		return result;
 	}
 
 	private Collection<Module> unresolve(Collection<Module> initial) {
