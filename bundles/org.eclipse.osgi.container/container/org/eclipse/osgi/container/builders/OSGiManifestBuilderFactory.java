@@ -14,6 +14,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import org.eclipse.osgi.container.ModuleRevisionBuilder;
+import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.eclipse.osgi.framework.internal.core.Tokenizer;
@@ -57,6 +58,8 @@ public class OSGiManifestBuilderFactory {
 			getProvideCapabilities(builder, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, extraCapabilities));
 		}
 		getRequireCapabilities(builder, ManifestElement.parseHeader(Constants.REQUIRE_CAPABILITY, manifest.get(Constants.REQUIRE_CAPABILITY)));
+
+		addRequireEclipsePlatform(builder, manifest);
 
 		getEquinoxDataCapability(builder, manifest);
 
@@ -328,6 +331,17 @@ public class OSGiManifestBuilderFactory {
 				builder.addRequirement(namespace, directives, attributes);
 			}
 		}
+	}
+
+	private static void addRequireEclipsePlatform(ModuleRevisionBuilder builder, Map<String, String> manifest) {
+		String platformFilter = manifest.get(EclipsePlatformNamespace.ECLIPSE_PLATFORM_FILTER_HEADER);
+		if (platformFilter == null) {
+			return;
+		}
+		// only support one
+		HashMap<String, String> directives = new HashMap<String, String>();
+		directives.put(EclipsePlatformNamespace.REQUIREMENT_FILTER_DIRECTIVE, platformFilter);
+		builder.addRequirement(EclipsePlatformNamespace.ECLIPSE_PLATFORM_NAMESPACE, directives, Collections.<String, Object> emptyMap());
 	}
 
 	private static void getEquinoxDataCapability(ModuleRevisionBuilder builder, Map<String, String> manifest) throws BundleException {

@@ -21,6 +21,7 @@ import org.eclipse.osgi.container.Module.StartOptions;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
+import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
 import org.eclipse.osgi.container.tests.dummys.*;
 import org.eclipse.osgi.container.tests.dummys.DummyModuleDataBase.DummyContainerEvent;
 import org.eclipse.osgi.container.tests.dummys.DummyModuleDataBase.DummyModuleEvent;
@@ -46,6 +47,10 @@ public class TestModuleContainer {
 		}
 	}
 
+	private static final String OSGI_OS = "osgi.os";
+	private static final String OSGI_WS = "osgi.ws";
+	private static final String OSGI_ARCH = "osgi.arch";
+
 	private DummyModuleDataBase getDatabase() throws BundleException, ResolutionException {
 		BundleContext context = ((BundleReference) getClass().getClassLoader()).getBundle().getBundleContext();
 
@@ -54,6 +59,14 @@ public class TestModuleContainer {
 
 		Bundle systemBundle = context.getBundle(0);
 		String extraCapabilities = context.getProperty(Constants.FRAMEWORK_SYSTEMCAPABILITIES);
+		extraCapabilities = (extraCapabilities == null ? "" : (extraCapabilities + ", "));
+		String osName = context.getProperty(OSGI_OS);
+		String wsName = context.getProperty(OSGI_WS);
+		String archName = context.getProperty(OSGI_ARCH);
+		extraCapabilities += EclipsePlatformNamespace.ECLIPSE_PLATFORM_NAMESPACE + "; " +
+				OSGI_OS + "=" + osName + "; " +
+				OSGI_WS + "=" + wsName + "; " +
+				OSGI_ARCH + "=" + archName;
 		ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(asMap(systemBundle.getHeaders("")), Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, extraCapabilities);
 		container.install(null, systemBundle.getLocation(), builder);
 
@@ -91,6 +104,12 @@ public class TestModuleContainer {
 			}
 		}
 		container.resolve(new ArrayList<Module>(), false);
+		List<Module> modules = container.getModules();
+		for (Module module : modules) {
+			if (module.getCurrentRevision().getWiring() == null) {
+				System.out.println("Could not resolve module: " + module.getCurrentRevision());
+			}
+		}
 		return moduleDatabase;
 	}
 
@@ -267,6 +286,34 @@ public class TestModuleContainer {
 		Assert.assertEquals("Wrong number of requirements", 1, ee2Requirements.size());
 		List<ModuleWire> ee2Wires = ee2Wiring.getRequiredModuleWires(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE);
 		Assert.assertEquals("Wrong number of wires", 1, ee2Wires.size());
+	}
+
+	@Test
+	public void testPlatformFilter01() throws BundleException, IOException, ResolutionException {
+		ModuleContainer container = createDummyContainer(new DummyModuleDataBase());
+		String extraCapabilities = EclipsePlatformNamespace.ECLIPSE_PLATFORM_NAMESPACE + "; osgi.os=foo; osgi.arch=bar";
+		installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, null, null, extraCapabilities, container);
+		container.resolve(null, false);
+
+		Module platformFilter1 = installDummyModule("platformFilter1_v1.MF", "ee1", container);
+		container.resolve(Arrays.asList(platformFilter1), true);
+
+		ModuleWiring platformFilter1Wiring = platformFilter1.getCurrentRevision().getWiring();
+		Assert.assertNotNull("platformFilter1 is not resolved", platformFilter1Wiring);
+	}
+
+	@Test
+	public void testPlatformFilter02() throws BundleException, IOException, ResolutionException {
+		ModuleContainer container = createDummyContainer(new DummyModuleDataBase());
+		String extraCapabilities = EclipsePlatformNamespace.ECLIPSE_PLATFORM_NAMESPACE + "; osgi.os=baz; osgi.arch=boz";
+		installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, null, null, extraCapabilities, container);
+		container.resolve(null, false);
+
+		Module platformFilter1 = installDummyModule("platformFilter1_v1.MF", "ee1", container);
+		container.resolve(Arrays.asList(platformFilter1), false);
+
+		ModuleWiring platformFilter1Wiring = platformFilter1.getCurrentRevision().getWiring();
+		Assert.assertNull("platformFilter1 is resolved", platformFilter1Wiring);
 	}
 
 	@Test
