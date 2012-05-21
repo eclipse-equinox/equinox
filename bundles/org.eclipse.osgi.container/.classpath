@@ -4,5 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="osgi"/>
 	<classpathentry kind="src" path="container"/>
+	<classpathentry kind="src" path="resolver"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

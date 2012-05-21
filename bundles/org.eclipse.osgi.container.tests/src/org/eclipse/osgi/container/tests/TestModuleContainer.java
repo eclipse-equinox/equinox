@@ -34,28 +34,13 @@ import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.*;
 import org.osgi.service.resolver.ResolutionException;
-import org.osgi.service.resolver.Resolver;
 
 public class TestModuleContainer {
 
 	private static DummyModuleDataBase resolvedModuleDatabase;
-	private ServiceReference<Resolver> resolverRef;
-	private Resolver resolver;
 
 	@Before
 	public void setup() throws BundleException, ResolutionException {
-		BundleContext context = ((BundleReference) getClass().getClassLoader()).getBundle().getBundleContext();
-		for (Bundle bundle : context.getBundles()) {
-			// make sure the resolver impl is started
-			if ("org.apache.felix.resolver".equals(bundle.getSymbolicName()))
-				bundle.start();
-		}
-		resolverRef = context.getServiceReference(Resolver.class);
-		if (resolverRef == null)
-			Assert.fail("Cannot find resolver service");
-		resolver = context.getService(resolverRef);
-		if (resolver == null)
-			Assert.fail("Cannot find resolver service");
 		if (resolvedModuleDatabase == null) {
 			resolvedModuleDatabase = getDatabase();
 		}
@@ -301,7 +286,7 @@ public class TestModuleContainer {
 	@Test
 	public void testInstallCollision02() throws BundleException, IOException {
 		DummyModuleDataBase database = new DummyModuleDataBase();
-		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(resolver, new DummyCollisionHook(true), new DummyResolverHookFactory(), database, Collections.<String, Object> emptyMap());
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(true), new DummyResolverHookFactory(), database, Collections.<String, Object> emptyMap());
 		ModuleContainer container = createDummyContainer(database, adaptor);
 		installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
 		installDummyModule("b1_v1.MF", "b1_a", container);
@@ -336,7 +321,7 @@ public class TestModuleContainer {
 	@Test
 	public void testUpdateCollision03() throws BundleException, IOException {
 		DummyModuleDataBase database = new DummyModuleDataBase();
-		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(resolver, new DummyCollisionHook(true), new DummyResolverHookFactory(), database, Collections.<String, Object> emptyMap());
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(true), new DummyResolverHookFactory(), database, Collections.<String, Object> emptyMap());
 		ModuleContainer container = createDummyContainer(database, adaptor);
 		Module b1_v1 = installDummyModule("b1_v1.MF", "b1_v1", container);
 		installDummyModule("b1_v2.MF", "b1_v2", container);
@@ -395,7 +380,7 @@ public class TestModuleContainer {
 				};
 			}
 		};
-		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(resolver, new DummyCollisionHook(false), resolverHookFactory, database, Collections.<String, Object> emptyMap());
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), resolverHookFactory, database, Collections.<String, Object> emptyMap());
 		ModuleContainer container = createDummyContainer(database, adaptor);
 
 		Module s1 = installDummyModule("singleton1_v1.MF", "s1_v1", container);
@@ -463,7 +448,7 @@ public class TestModuleContainer {
 				};
 			}
 		};
-		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(resolver, new DummyCollisionHook(false), resolverHookFactory, database, Collections.<String, Object> emptyMap());
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), resolverHookFactory, database, Collections.<String, Object> emptyMap());
 		ModuleContainer container = createDummyContainer(database, adaptor);
 
 		Module s1_v1 = installDummyModule("singleton1_v1.MF", "s1_v1", container);
@@ -957,7 +942,7 @@ public class TestModuleContainer {
 		Map<String, Object> configuration = new HashMap<String, Object>();
 		configuration.put(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, "100");
 		DummyModuleDataBase database = new DummyModuleDataBase();
-		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(resolver, new DummyCollisionHook(false), new DummyResolverHookFactory(), database, configuration);
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), new DummyResolverHookFactory(), database, configuration);
 		ModuleContainer container = createDummyContainer(database, adaptor);
 		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
 
@@ -1157,7 +1142,7 @@ public class TestModuleContainer {
 	}
 
 	private ModuleContainer createDummyContainer(DummyModuleDataBase moduleDatabase) {
-		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(resolver, new DummyCollisionHook(false), new DummyResolverHookFactory(), moduleDatabase, Collections.<String, Object> emptyMap());
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), new DummyResolverHookFactory(), moduleDatabase, Collections.<String, Object> emptyMap());
 		return createDummyContainer(moduleDatabase, adaptor);
 
 	}

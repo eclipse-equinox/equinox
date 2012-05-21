@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
+import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.internal.container.Converters;
 import org.osgi.framework.Version;
@@ -451,23 +450,14 @@ class ModuleResolver {
 
 		private Map<Resource, List<Wire>> resolveDynamic() throws ResolutionException {
 			Resolver resolver = adaptor.getResolver();
-			List<Capability> dynamicMatches = filterProviders(dynamicReq.getOriginal(), moduleDataBase.findCapabilities(dynamicReq));
-
-			Collection<Resource> onDemandFragments = Converters.asCollectionResource(moduleDataBase.getFragmentRevisions());
-			try {
-				Method resolve = resolver.getClass().getMethod("resolve", ResolveContext.class, Resource.class, Requirement.class, List.class, Collection.class);
-				@SuppressWarnings("unchecked")
-				Map<Resource, List<Wire>> result = (Map<Resource, List<Wire>>) resolve.invoke(resolver, this, triggers.iterator().next(), dynamicReq.getOriginal(), dynamicMatches, onDemandFragments);
-				return result;
-			} catch (InvocationTargetException e) {
-				Throwable t = e.getTargetException();
-				if (t instanceof ResolutionException) {
-					throw (ResolutionException) t;
-				}
-				throw new ResolutionException("Dynamic import resolution not supported.", t, null);
-			} catch (Throwable t) {
-				throw new ResolutionException("Dynamic import resolution not supported.", t, null);
+			if (!(resolver instanceof ResolverImpl)) {
+				throw new ResolutionException("Dynamic import resolution not supported by the resolver: " + resolver.getClass());
 			}
+			List<Capability> dynamicMatches = filterProviders(dynamicReq.getOriginal(), moduleDataBase.findCapabilities(dynamicReq));
+			Collection<Resource> ondemandFragments = Converters.asCollectionResource(moduleDataBase.getFragmentRevisions());
+
+			return ((ResolverImpl) resolver).resolve(this, dynamicReq.getRevision(), dynamicReq.getOriginal(), dynamicMatches, ondemandFragments);
+
 		}
 
 		private void filterResolvable() {

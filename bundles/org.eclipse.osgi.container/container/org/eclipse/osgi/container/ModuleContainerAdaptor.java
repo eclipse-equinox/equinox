@@ -12,6 +12,8 @@ package org.eclipse.osgi.container;
 
 import java.util.Collections;
 import java.util.Map;
+import org.apache.felix.resolver.Logger;
+import org.apache.felix.resolver.ResolverImpl;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.service.resolver.Resolver;
@@ -25,10 +27,14 @@ public abstract class ModuleContainerAdaptor {
 	}
 
 	/**
-	 * Returns the resolver the container will use.
+	 * Returns the resolver the container will use.  This implementation will
+	 * return the default implementation of the resolver.  Override this method
+	 * to provide an alternative resolver implementation for the container.
 	 * @return the resolver the container will use.
 	 */
-	public abstract Resolver getResolver();
+	public Resolver getResolver() {
+		return new ResolverImpl(new Logger(4));
+	}
 
 	/**
 	 * Returns the collision hook the container will use.
