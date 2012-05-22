@@ -22,7 +22,7 @@
   </parent>
   <groupId>org.eclipse.equinox.bundles</groupId>
   <artifactId>org.eclipse.equinox.security.macosx</artifactId>
-  <version>1.100.100-SNAPSHOT</version>
+  <version>1.100.200-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 
   <build>

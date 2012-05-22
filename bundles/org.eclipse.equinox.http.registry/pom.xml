@@ -21,7 +21,7 @@
   </parent>
   <groupId>org.eclipse.equinox.bundles</groupId>
   <artifactId>org.eclipse.equinox.http.registry</artifactId>
-  <version>1.1.100-SNAPSHOT</version>
+  <version>1.1.200-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 
   <build>

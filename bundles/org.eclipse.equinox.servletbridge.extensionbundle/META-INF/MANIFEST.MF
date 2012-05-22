@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servletbridge Extension bundle
 Bundle-SymbolicName: org.eclipse.equinox.servletbridge.extensionbundle
-Bundle-Version: 1.2.0.qualifier
+Bundle-Version: 1.2.100.qualifier
 Fragment-Host: system.bundle; extension:=framework
 X-Deploy-Export-Package: javax.servlet;version="2.5",
  javax.servlet.http;version ="2.5",
