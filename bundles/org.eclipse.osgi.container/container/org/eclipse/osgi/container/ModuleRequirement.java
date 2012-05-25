@@ -11,8 +11,9 @@
 package org.eclipse.osgi.container;
 
 import java.util.*;
-import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.*;
+import org.eclipse.osgi.framework.internal.core.FilterImpl;
+import org.eclipse.osgi.internal.container.Capabilities;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.namespace.*;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRequirement;
@@ -28,7 +29,6 @@ public class ModuleRequirement implements BundleRequirement {
 	private final Map<String, String> directives;
 	private final Map<String, Object> attributes;
 	private final ModuleRevision revision;
-	private volatile Filter filter;
 
 	ModuleRequirement(String namespace, Map<String, String> directives, Map<String, Object> attributes, ModuleRevision revision) {
 		this.namespace = namespace;
@@ -47,35 +47,16 @@ public class ModuleRequirement implements BundleRequirement {
 		if (!namespace.equals(capability.getNamespace()))
 			return false;
 		String filterSpec = directives.get(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
+		FilterImpl f = null;
 		if (filterSpec != null) {
-			Filter f = getFilter();
-			if (f == null) {
-				try {
-					f = FrameworkUtil.createFilter(filterSpec);
-					setFilter(f);
-				} catch (InvalidSyntaxException e) {
-					return false;
-				}
-			}
-			if (!f.matches(capability.getAttributes()))
+			try {
+				f = FilterImpl.newInstance(filterSpec);
+			} catch (InvalidSyntaxException e) {
 				return false;
-		}
-		if (PackageNamespace.PACKAGE_NAMESPACE.equals(namespace) || BundleNamespace.BUNDLE_NAMESPACE.equals(namespace) || HostNamespace.HOST_NAMESPACE.equals(namespace)) {
-			// check for mandatory directive
-			String mandatory = capability.getDirectives().get(AbstractWiringNamespace.CAPABILITY_MANDATORY_DIRECTIVE);
-			if (mandatory != null) {
-				if (filterSpec == null)
-					return false;
-				String[] mandatoryAttrs = ManifestElement.getArrayFromList(mandatory, ","); //$NON-NLS-1$
-				for (String mandatoryAttr : mandatoryAttrs) {
-					// TODO doing the simple thing here.  there are likely corner cases this does not satisfy
-					if (filterSpec.indexOf("(" + mandatoryAttr + "=") < 0) //$NON-NLS-1$ //$NON-NLS-2$
-						return false;
-				}
 			}
 		}
-
-		return true;
+		boolean matchMandatory = PackageNamespace.PACKAGE_NAMESPACE.equals(namespace) || BundleNamespace.BUNDLE_NAMESPACE.equals(namespace) || HostNamespace.HOST_NAMESPACE.equals(namespace);
+		return Capabilities.matches(f, capability, matchMandatory);
 	}
 
 	@Override
@@ -96,22 +77,6 @@ public class ModuleRequirement implements BundleRequirement {
 	@Override
 	public ModuleRevision getResource() {
 		return revision;
-	}
-
-	/**
-	 * The cached instance of the filter used for matching this requirement
-	 * @return the cached instance of the filter.
-	 */
-	public Filter getFilter() {
-		return filter;
-	}
-
-	/**
-	 * Used to cache an instance of a filter used for matching this requirement
-	 * @param filter
-	 */
-	void setFilter(Filter filter) {
-		this.filter = filter;
 	}
 
 	public String toString() {

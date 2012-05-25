@@ -140,6 +140,19 @@ public class TestModuleContainer {
 	}
 
 	@Test
+	public void testResolveInstallBundles01() throws BundleException, ResolutionException, IOException {
+		DummyModuleDataBase moduleDataBase = new DummyModuleDataBase();
+		ModuleContainer container = createDummyContainer(moduleDataBase);
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		resolvedModuleDatabase.store(new DataOutputStream(bytes), false);
+		bytes.close();
+		moduleDataBase.load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
+		for (int i = 0; i < 50; i++) {
+			container.refresh(container.getModules());
+		}
+	}
+
+	@Test
 	public void testResolveAlreadyResolvedBundles() throws BundleException, ResolutionException, IOException {
 		DummyModuleDataBase moduleDataBase = new DummyModuleDataBase();
 		ModuleContainer container = createDummyContainer(moduleDataBase);

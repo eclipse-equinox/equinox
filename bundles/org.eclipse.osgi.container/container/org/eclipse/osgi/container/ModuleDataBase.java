@@ -21,6 +21,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.framework.util.ObjectPool;
+import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.resolver.ComputeNodeOrder;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
@@ -90,6 +91,8 @@ public abstract class ModuleDataBase {
 	 */
 	final AtomicLong timeStamp;
 
+	private final Capabilities capabilities;
+
 	/**
 	 * A map of module settings keyed by module id.
 	 */
@@ -132,6 +135,7 @@ public abstract class ModuleDataBase {
 		this.nextId = new AtomicLong(1);
 		this.timeStamp = new AtomicLong(0);
 		this.moduleSettings = new HashMap<Long, EnumSet<Settings>>();
+		this.capabilities = new Capabilities();
 	}
 
 	/**
@@ -768,7 +772,10 @@ public abstract class ModuleDataBase {
 	 * This method must be called while holding the {@link #lockWrite() write} lock.
 	 * @param revision the revision which has capabilities to add
 	 */
-	protected abstract void addCapabilities(ModuleRevision revision);
+	protected void addCapabilities(ModuleRevision revision) {
+		checkWrite();
+		capabilities.addCapabilities(revision);
+	}
 
 	/**
 	 * Removes the {@link ModuleRevision#getModuleCapabilities(String) capabilities}
@@ -779,7 +786,10 @@ public abstract class ModuleDataBase {
 	 * This method must be called while holding the {@link #lockWrite() write} lock.
 	 * @param revision
 	 */
-	protected abstract void removeCapabilities(ModuleRevision revision);
+	protected void removeCapabilities(ModuleRevision revision) {
+		checkWrite();
+		capabilities.removeCapabilities(revision);
+	}
 
 	/**
 	 * Returns a mutable snapshot of capabilities that are candidates for 
@@ -791,7 +801,14 @@ public abstract class ModuleDataBase {
 	 * @param requirement the requirement
 	 * @return the candidates for the requirement
 	 */
-	protected abstract List<ModuleCapability> findCapabilities(ModuleRequirement requirement);
+	protected List<ModuleCapability> findCapabilities(ModuleRequirement requirement) {
+		lockRead();
+		try {
+			return capabilities.findCapabilities(requirement);
+		} finally {
+			unlockRead();
+		}
+	}
 
 	/**
 	 * Creates a new module.  This gets called when a new module is installed

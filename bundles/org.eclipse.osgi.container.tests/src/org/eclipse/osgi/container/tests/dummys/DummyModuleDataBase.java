@@ -20,45 +20,8 @@ import org.osgi.framework.FrameworkListener;
 
 public class DummyModuleDataBase extends ModuleDataBase {
 
-	private Map<String, Collection<ModuleCapability>> namespaces = new HashMap<String, Collection<ModuleCapability>>();
 	private List<DummyModuleEvent> moduleEvents = new ArrayList<DummyModuleEvent>();
 	private List<DummyContainerEvent> containerEvents = new ArrayList<DummyContainerEvent>();
-
-	@Override
-	protected void addCapabilities(ModuleRevision revision) {
-		List<ModuleCapability> capabilities = revision.getModuleCapabilities(null);
-		for (ModuleCapability capability : capabilities) {
-			Collection<ModuleCapability> namespace = namespaces.get(capability.getNamespace());
-			if (namespace == null) {
-				namespace = new ArrayList<ModuleCapability>();
-				namespaces.put(capability.getNamespace(), namespace);
-			}
-			namespace.add(capability);
-		}
-	}
-
-	@Override
-	protected void removeCapabilities(ModuleRevision revision) {
-		List<ModuleCapability> capabilities = revision.getModuleCapabilities(null);
-		for (ModuleCapability capability : capabilities) {
-			Collection<ModuleCapability> namespace = namespaces.get(capability.getNamespace());
-			if (namespace != null)
-				namespace.remove(capability);
-		}
-	}
-
-	@Override
-	protected List<ModuleCapability> findCapabilities(ModuleRequirement requirement) {
-		Collection<ModuleCapability> namespace = namespaces.get(requirement.getNamespace());
-		List<ModuleCapability> candidates = new ArrayList<ModuleCapability>();
-		if (namespace == null)
-			return candidates;
-		for (ModuleCapability candidate : namespace) {
-			if (requirement.matches(candidate))
-				candidates.add(candidate);
-		}
-		return candidates;
-	}
 
 	@Override
 	protected Module createModule(String location, long id, EnumSet<Settings> settings, int startlevel) {
