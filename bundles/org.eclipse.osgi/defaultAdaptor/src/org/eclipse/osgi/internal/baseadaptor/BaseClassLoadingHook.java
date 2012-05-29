@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,11 +29,19 @@ public class BaseClassLoadingHook implements ClassLoadingHook {
 	private static final String[] LIB_EXTENSIONS;
 	private static final String[] EMPTY_STRINGS = new String[0];
 	static {
-		String[] libExtensions = ManifestElement.getArrayFromList(FrameworkProperties.getProperty("osgi.framework.library.extensions", FrameworkProperties.getProperty(Constants.FRAMEWORK_LIBRARY_EXTENSIONS)), ","); //$NON-NLS-1$ //$NON-NLS-2$
+		String[] libExtensions = ManifestElement.getArrayFromList(FrameworkProperties.getProperty("osgi.framework.library.extensions", FrameworkProperties.getProperty(Constants.FRAMEWORK_LIBRARY_EXTENSIONS, getOSLibraryExtDefaults())), ","); //$NON-NLS-1$ //$NON-NLS-2$
 		for (int i = 0; i < libExtensions.length; i++)
 			if (libExtensions[i].length() > 0 && libExtensions[i].charAt(0) != '.')
 				libExtensions[i] = '.' + libExtensions[i];
 		LIB_EXTENSIONS = libExtensions;
+	}
+
+	private static String getOSLibraryExtDefaults() {
+		// Some OSes have multiple library extensions
+		// We should provide defaults to the known ones
+		// For example Mac OS X uses dylib and jnilib (bug 380350)
+		String os = FrameworkProperties.getProperty("os.name"); //$NON-NLS-1$
+		return os == null || !os.startsWith("Mac OS") ? null : "dylib,jnilib"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/*
