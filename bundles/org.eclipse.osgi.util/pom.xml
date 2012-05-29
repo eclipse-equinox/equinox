@@ -21,6 +21,6 @@
   </parent>
   <groupId>org.eclipse.equinox.framework</groupId>
   <artifactId>org.eclipse.osgi.util</artifactId>
-  <version>3.2.33300-SNAPSHOT</version>
+  <version>3.2.300-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 </project>
