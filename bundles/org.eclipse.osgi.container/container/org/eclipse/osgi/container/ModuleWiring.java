@@ -16,6 +16,7 @@ import org.eclipse.osgi.internal.container.Converters;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.*;
 import org.osgi.resource.*;
 
@@ -27,19 +28,21 @@ public class ModuleWiring implements BundleWiring {
 	private final ModuleRevision revision;
 	private final List<ModuleCapability> capabilities;
 	private final List<ModuleRequirement> requirements;
+	private final Collection<String> substitutedPkgNames;
 	private final Object monitor = new Object();
 	private ModuleClassLoader loader = null;
 	private volatile List<ModuleWire> providedWires;
 	private volatile List<ModuleWire> requiredWires;
 	private volatile boolean isValid = true;
 
-	ModuleWiring(ModuleRevision revision, List<ModuleCapability> capabilities, List<ModuleRequirement> requirements, List<ModuleWire> providedWires, List<ModuleWire> requiredWires) {
+	ModuleWiring(ModuleRevision revision, List<ModuleCapability> capabilities, List<ModuleRequirement> requirements, List<ModuleWire> providedWires, List<ModuleWire> requiredWires, Collection<String> substitutedPkgNames) {
 		super();
 		this.revision = revision;
 		this.capabilities = capabilities;
 		this.requirements = requirements;
 		this.providedWires = providedWires;
 		this.requiredWires = requiredWires;
+		this.substitutedPkgNames = substitutedPkgNames;
 	}
 
 	@Override
@@ -225,6 +228,17 @@ public class ModuleWiring implements BundleWiring {
 				loader = null;
 			}
 		}
+	}
+
+	boolean isSubtituted(ModuleCapability capability) {
+		if (!PackageNamespace.PACKAGE_NAMESPACE.equals(capability.getNamespace())) {
+			return false;
+		}
+		return substitutedPkgNames.contains(capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+	}
+
+	Collection<String> getSubstitutedNames() {
+		return substitutedPkgNames;
 	}
 
 	private boolean hasResourcePermission() {

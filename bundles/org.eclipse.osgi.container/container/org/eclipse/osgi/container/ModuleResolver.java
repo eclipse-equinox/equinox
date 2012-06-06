@@ -137,15 +137,16 @@ class ModuleResolver {
 
 		removeNonEffectiveCapabilities(iCapabilities);
 		removeNonEffectiveRequirements(iRequirements, requiredWires);
-		removeSubstitutedCapabilities(iCapabilities, requiredWires);
+		Collection<String> substituted = removeSubstitutedCapabilities(iCapabilities, requiredWires);
 
 		List<ModuleWire> providedWires = new ArrayList<ModuleWire>();
 		addProvidedWires(providedWireMap, providedWires, capabilities);
 
-		return new ModuleWiring(revision, capabilities, requirements, providedWires, requiredWires);
+		return new ModuleWiring(revision, capabilities, requirements, providedWires, requiredWires, substituted);
 	}
 
-	private static void removeSubstitutedCapabilities(ListIterator<ModuleCapability> iCapabilities, List<ModuleWire> requiredWires) {
+	private static Collection<String> removeSubstitutedCapabilities(ListIterator<ModuleCapability> iCapabilities, List<ModuleWire> requiredWires) {
+		Collection<String> substituted = null;
 		for (ModuleWire moduleWire : requiredWires) {
 			if (!PackageNamespace.PACKAGE_NAMESPACE.equals(moduleWire.getCapability().getNamespace()))
 				continue;
@@ -154,14 +155,22 @@ class ModuleResolver {
 			while (iCapabilities.hasNext()) {
 				ModuleCapability capability = iCapabilities.next();
 				if (PackageNamespace.PACKAGE_NAMESPACE.equals(capability.getNamespace())) {
-					if (packageName.equals(capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE)))
+					if (packageName.equals(capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
 						// found a package capability with the same name as a package that got imported
 						// this indicates a substitution
 						iCapabilities.remove();
+						if (substituted == null) {
+							substituted = new ArrayList<String>();
+						}
+						substituted.add(packageName);
+						if (!substituted.contains(packageName)) {
+							substituted.add(packageName);
+						}
+					}
 				}
 			}
 		}
-
+		return substituted == null ? Collections.<String> emptyList() : substituted;
 	}
 
 	private static void removeNonEffectiveRequirements(ListIterator<ModuleRequirement> iRequirements, List<ModuleWire> requiredWires) {
@@ -194,7 +203,7 @@ class ModuleResolver {
 		}
 	}
 
-	private static void removeNonEffectiveCapabilities(ListIterator<ModuleCapability> iCapabilities) {
+	static void removeNonEffectiveCapabilities(ListIterator<ModuleCapability> iCapabilities) {
 		rewind(iCapabilities);
 		while (iCapabilities.hasNext()) {
 			Object effective = iCapabilities.next().getAttributes().get(Namespace.CAPABILITY_EFFECTIVE_DIRECTIVE);
@@ -291,7 +300,7 @@ class ModuleResolver {
 			listIterator.next();
 	}
 
-	private static void rewind(ListIterator<?> listIterator) {
+	static void rewind(ListIterator<?> listIterator) {
 		while (listIterator.hasPrevious())
 			listIterator.previous();
 	}
@@ -306,7 +315,7 @@ class ModuleResolver {
 		// Also will be needed for dynamic imports
 		List<ModuleWire> existingRequired = existingWiring.getRequiredModuleWires(null);
 		addRequiredWires(requiredWires, existingRequired, existingWiring.getModuleRequirements(null));
-		return new ModuleWiring(revision, Collections.EMPTY_LIST, Collections.EMPTY_LIST, existingProvided, existingRequired);
+		return new ModuleWiring(revision, Collections.EMPTY_LIST, Collections.EMPTY_LIST, existingProvided, existingRequired, Collections.EMPTY_LIST);
 	}
 
 	static boolean isSingleton(ModuleRevision revision) {
@@ -381,16 +390,31 @@ class ModuleResolver {
 		}
 
 		private List<Capability> filterProviders(Requirement requirement, List<ModuleCapability> candidates) {
-			filterDisabled(candidates);
+			ListIterator<ModuleCapability> iCandidates = candidates.listIterator();
+			filterDisabled(iCandidates);
+			removeNonEffectiveCapabilities(iCandidates);
+			removeSubstituted(iCandidates);
 			hook.filterMatches((BundleRequirement) requirement, Converters.asListBundleCapability(candidates));
 			Collections.sort(candidates, this);
 			return Converters.asListCapability(candidates);
 		}
 
-		private void filterDisabled(List<ModuleCapability> candidates) {
-			for (Iterator<ModuleCapability> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
+		private void filterDisabled(ListIterator<ModuleCapability> iCandidates) {
+			rewind(iCandidates);
+			while (iCandidates.hasNext()) {
 				if (disabled.contains(iCandidates.next().getResource()))
 					iCandidates.remove();
+			}
+		}
+
+		private void removeSubstituted(ListIterator<ModuleCapability> iCapabilities) {
+			rewind(iCapabilities);
+			while (iCapabilities.hasNext()) {
+				ModuleCapability capability = iCapabilities.next();
+				ModuleWiring wiring = wirings.get(capability.getRevision());
+				if (wiring != null && wiring.isSubtituted(capability)) {
+					iCapabilities.remove();
+				}
 			}
 		}
 

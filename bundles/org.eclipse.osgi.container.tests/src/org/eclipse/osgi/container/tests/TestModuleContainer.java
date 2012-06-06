@@ -799,7 +799,7 @@ public class TestModuleContainer {
 	}
 
 	@Test
-	public void testSubstitutableExports() throws ResolutionException, BundleException, IOException {
+	public void testSubstitutableExports01() throws ResolutionException, BundleException, IOException {
 		DummyModuleDataBase database = new DummyModuleDataBase();
 		ModuleContainer container = createDummyContainer(database);
 		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
@@ -830,6 +830,55 @@ public class TestModuleContainer {
 		Assert.assertEquals("Wrong number of exported packages: " + exportedPackages, 1, exportedPackages.size());
 		requiredWires = sub1Wiring.getRequiredWires(PackageNamespace.PACKAGE_NAMESPACE);
 		Assert.assertEquals("Wrong number of imported packages: ", 1, requiredWires.size());
+
+	}
+
+	@Test
+	public void testSubstitutableExports02() throws BundleException, IOException, ResolutionException {
+		DummyModuleDataBase database = new DummyModuleDataBase();
+		ModuleContainer container = createDummyContainer(database);
+		Module a = installDummyModule("sub.a.MF", "a", container);
+		Module b = installDummyModule("sub.b.MF", "b", container);
+		Module c = installDummyModule("sub.c.MF", "c", container);
+
+		container.resolve(Arrays.asList(a, b, c), true);
+
+		ModuleWiring wiringA = a.getCurrentRevision().getWiring();
+		ModuleWiring wiringB = b.getCurrentRevision().getWiring();
+		ModuleWiring wiringC = c.getCurrentRevision().getWiring();
+
+		List<ModuleWire> providedWiresA = wiringA.getProvidedModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+		Assert.assertEquals("Wrong number of provided wires.", 2, providedWiresA.size());
+
+		Collection<ModuleRevision> requirers = new ArrayList<ModuleRevision>();
+		for (ModuleWire wire : providedWiresA) {
+			requirers.add(wire.getRequirer());
+		}
+		Assert.assertTrue("b does not require.", requirers.contains(b.getCurrentRevision()));
+		Assert.assertTrue("c does not require.", requirers.contains(c.getCurrentRevision()));
+
+		List<ModuleWire> requiredWiresB = wiringB.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+		Assert.assertEquals("Wrong number of required wires.", 1, requiredWiresB.size());
+		Assert.assertEquals("Unexpected package name.", "javax.servlet", requiredWiresB.iterator().next().getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong provider.", a.getCurrentRevision(), requiredWiresB.iterator().next().getProvider());
+
+		List<ModuleWire> requiredWiresC = wiringC.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+		Assert.assertEquals("Wrong number of required wires.", 1, requiredWiresC.size());
+		Assert.assertEquals("Wrong number of required wires.", 1, requiredWiresC.size());
+		Assert.assertEquals("Unexpected package name.", "javax.servlet", requiredWiresC.iterator().next().getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong provider.", a.getCurrentRevision(), requiredWiresC.iterator().next().getProvider());
+
+		Module d = installDummyModule("sub.d.MF", "d", container);
+
+		container.resolve(Arrays.asList(d), true);
+
+		ModuleWiring wiringD = d.getCurrentRevision().getWiring();
+		List<ModuleWire> requiredWiresD = wiringD.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+		Assert.assertEquals("Wrong number of required wires.", 2, requiredWiresD.size());
+		Assert.assertEquals("Unexpected package name.", "org.ops4j.pax.web.service", requiredWiresD.get(0).getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong provider.", c.getCurrentRevision(), requiredWiresD.get(0).getProvider());
+		Assert.assertEquals("Unexpected package name.", "javax.servlet", requiredWiresD.get(1).getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong provider.", a.getCurrentRevision(), requiredWiresD.get(1).getProvider());
 
 	}
 
@@ -1156,15 +1205,24 @@ public class TestModuleContainer {
 		ModuleWire dynamicWire = container.resolveDynamic("c1.a", dynamic3.getCurrentRevision());
 		Assert.assertNull("Dynamic wire found.", dynamicWire);
 
-		Module c1 = installDummyModule("c1_v1.MF", "c1_v1", container);
+		Module c1v1 = installDummyModule("c1_v1.MF", "c1_v1", container);
 		database.getModuleEvents();
 
 		dynamicWire = container.resolveDynamic("c1.a", dynamic3.getCurrentRevision());
 		Assert.assertNotNull("Dynamic wire not found.", dynamicWire);
 		Assert.assertEquals("Wrong package found.", "c1.a", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
 
-		ModuleWiring c1Wiring = c1.getCurrentRevision().getWiring();
-		Assert.assertNotNull("c1 wiring is null.", c1Wiring);
+		ModuleWiring c1v1Wiring = c1v1.getCurrentRevision().getWiring();
+		Assert.assertNotNull("c1 wiring is null.", c1v1Wiring);
+
+		Module c1v2 = installDummyModule("c1_v2.MF", "c1_v2", container);
+		container.resolve(Arrays.asList(c1v2), true);
+		database.getModuleEvents();
+
+		dynamicWire = container.resolveDynamic("c1.b", dynamic3.getCurrentRevision());
+		Assert.assertNotNull("Dynamic wire not found.", dynamicWire);
+		Assert.assertEquals("Wrong package found.", "c1.b", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong provider.", c1v1.getCurrentRevision(), dynamicWire.getProvider());
 	}
 
 	@Test

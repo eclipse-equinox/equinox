@@ -510,7 +510,7 @@ public abstract class ModuleDataBase {
 		try {
 			Map<ModuleRevision, ModuleWiring> clonedWirings = new HashMap<ModuleRevision, ModuleWiring>();
 			for (Map.Entry<ModuleRevision, ModuleWiring> entry : wirings.entrySet()) {
-				ModuleWiring wiring = new ModuleWiring(entry.getKey(), entry.getValue().getModuleCapabilities(null), entry.getValue().getModuleRequirements(null), entry.getValue().getProvidedModuleWires(null), entry.getValue().getRequiredModuleWires(null));
+				ModuleWiring wiring = new ModuleWiring(entry.getKey(), entry.getValue().getModuleCapabilities(null), entry.getValue().getModuleRequirements(null), entry.getValue().getProvidedModuleWires(null), entry.getValue().getRequiredModuleWires(null), entry.getValue().getSubstitutedNames());
 				clonedWirings.put(entry.getKey(), wiring);
 			}
 			return clonedWirings;
@@ -1211,6 +1211,12 @@ public abstract class ModuleDataBase {
 					throw new NullPointerException("Could not find required wire for wiring."); //$NON-NLS-1$
 				out.writeInt(wireIndex);
 			}
+
+			Collection<String> substituted = wiring.getSubstitutedNames();
+			out.writeInt(substituted.size());
+			for (String pkgName : substituted) {
+				writeString(pkgName, out);
+			}
 		}
 
 		private static ModuleWiring readWiring(DataInputStream in, Map<Integer, Object> objectTable) throws IOException {
@@ -1242,7 +1248,13 @@ public abstract class ModuleDataBase {
 				requiredWires.add((ModuleWire) objectTable.get(in.readInt()));
 			}
 
-			return new ModuleWiring(revision, capabilities, requirements, providedWires, requiredWires);
+			int numSubstitutedNames = in.readInt();
+			Collection<String> substituted = new ArrayList<String>(numSubstitutedNames);
+			for (int i = 0; i < numSubstitutedNames; i++) {
+				substituted.add(readString(in));
+			}
+
+			return new ModuleWiring(revision, capabilities, requirements, providedWires, requiredWires, substituted);
 		}
 
 		private static void writeGenericInfo(String namespace, Map<String, ?> attributes, Map<String, String> directives, DataOutputStream out) throws IOException {
