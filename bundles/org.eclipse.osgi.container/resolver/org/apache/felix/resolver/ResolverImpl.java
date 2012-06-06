@@ -313,126 +313,123 @@ public class ResolverImpl implements Resolver
         // 4. The package in question is not exported by the resource.
         // 5. The package in question matches a dynamic import of the resource.
         Candidates allCandidates = getDynamicImportCandidates(rc, host, dynamicReq, matching);
-        if (allCandidates == null)
+        if (allCandidates != null)
         {
-            return wireMap;
-        }
-
-        Map<Resource, Packages> resourcePkgMap = new HashMap<Resource, Packages>();
-
-
-        ondemandFragments = new ArrayList<Resource>(ondemandFragments);
-
-        boolean retry;
-        do
-        {
-            retry = false;
-
-            try
+            Map<Resource, Packages> resourcePkgMap = new HashMap<Resource, Packages>();
+    
+    
+            ondemandFragments = new ArrayList<Resource>(ondemandFragments);
+    
+            boolean retry;
+            do
             {
-                // Try to populate optional fragments.
-                for (Resource r : ondemandFragments)
+                retry = false;
+    
+                try
                 {
-                    if (Util.isFragment(r))
+                    // Try to populate optional fragments.
+                    for (Resource r : ondemandFragments)
                     {
-                        allCandidates.populate(rc, r, Candidates.ON_DEMAND);
+                        if (Util.isFragment(r))
+                        {
+                            allCandidates.populate(rc, r, Candidates.ON_DEMAND);
+                        }
                     }
-                }
-
-                // Merge any fragments into hosts.
-                allCandidates.prepare(rc);
-
-                // Record the initial candidate permutation.
-                m_usesPermutations.add(allCandidates);
-
-                ResolutionException rethrow = null;
-
-                do
-                {
-                    rethrow = null;
-
-                    resourcePkgMap.clear();
-                    m_packageSourcesCache.clear();
-
-                    allCandidates = (m_usesPermutations.size() > 0)
-                        ? m_usesPermutations.remove(0)
-                        : m_importPermutations.remove(0);
-//allCandidates.dump();
-
-                    // For a dynamic import, the instigating resource
-                    // will never be a fragment since fragments never
-                    // execute code, so we don't need to check for
-                    // this case like we do for a normal resolve.
-
-                    calculatePackageSpaces(rc,
-                        allCandidates.getWrappedHost(host), allCandidates, resourcePkgMap,
-                        new HashMap(), new HashSet());
-//System.out.println("+++ PACKAGE SPACES START +++");
-//dumpResourcePkgMap(resourcePkgMap);
-//System.out.println("+++ PACKAGE SPACES END +++");
-
-                    try
+    
+                    // Merge any fragments into hosts.
+                    allCandidates.prepare(rc);
+    
+                    // Record the initial candidate permutation.
+                    m_usesPermutations.add(allCandidates);
+    
+                    ResolutionException rethrow = null;
+    
+                    do
                     {
-                        checkPackageSpaceConsistency(rc,
-                            false, allCandidates.getWrappedHost(host),
-                            allCandidates, resourcePkgMap, new HashMap());
+                        rethrow = null;
+    
+                        resourcePkgMap.clear();
+                        m_packageSourcesCache.clear();
+    
+                        allCandidates = (m_usesPermutations.size() > 0)
+                            ? m_usesPermutations.remove(0)
+                            : m_importPermutations.remove(0);
+    //allCandidates.dump();
+    
+                        // For a dynamic import, the instigating resource
+                        // will never be a fragment since fragments never
+                        // execute code, so we don't need to check for
+                        // this case like we do for a normal resolve.
+    
+                        calculatePackageSpaces(rc,
+                            allCandidates.getWrappedHost(host), allCandidates, resourcePkgMap,
+                            new HashMap(), new HashSet());
+    //System.out.println("+++ PACKAGE SPACES START +++");
+    //dumpResourcePkgMap(resourcePkgMap);
+    //System.out.println("+++ PACKAGE SPACES END +++");
+    
+                        try
+                        {
+                            checkPackageSpaceConsistency(rc,
+                                true, allCandidates.getWrappedHost(host),
+                                allCandidates, resourcePkgMap, new HashMap());
+                        }
+                        catch (ResolutionException ex)
+                        {
+                            rethrow = ex;
+                        }
                     }
-                    catch (ResolutionException ex)
+                    while ((rethrow != null)
+                        && ((m_usesPermutations.size() > 0) || (m_importPermutations.size() > 0)));
+    
+                    // If there is a resolve exception, then determine if an
+                    // optionally resolved resource is to blame (typically a fragment).
+                    // If so, then remove the optionally resolved resource and try
+                    // again; otherwise, rethrow the resolve exception.
+                    if (rethrow != null)
                     {
-                        rethrow = ex;
+                        Collection<Requirement> exReqs = rethrow.getUnresolvedRequirements();
+                        Requirement faultyReq = ((exReqs == null) || (exReqs.isEmpty()))
+                            ? null : exReqs.iterator().next();
+                        Resource faultyResource = (faultyReq == null)
+                            ? null : getDeclaredResource(faultyReq.getResource());
+                        // If the faulty requirement is wrapped, then it may
+                        // be from a fragment, so consider the fragment faulty
+                        // instead of the host.
+                        if (faultyReq instanceof WrappedRequirement)
+                        {
+                            faultyResource =
+                                ((WrappedRequirement) faultyReq)
+                                    .getDeclaredRequirement().getResource();
+                        }
+                        // Try to ignore the faulty resource if it is not mandatory.
+                        if (ondemandFragments.remove(faultyResource))
+                        {
+                            retry = true;
+                        }
+                        else
+                        {
+                            throw rethrow;
+                        }
                     }
-                }
-                while ((rethrow != null)
-                    && ((m_usesPermutations.size() > 0) || (m_importPermutations.size() > 0)));
-
-                // If there is a resolve exception, then determine if an
-                // optionally resolved resource is to blame (typically a fragment).
-                // If so, then remove the optionally resolved resource and try
-                // again; otherwise, rethrow the resolve exception.
-                if (rethrow != null)
-                {
-                    Collection<Requirement> exReqs = rethrow.getUnresolvedRequirements();
-                    Requirement faultyReq = ((exReqs == null) || (exReqs.isEmpty()))
-                        ? null : exReqs.iterator().next();
-                    Resource faultyResource = (faultyReq == null)
-                        ? null : getDeclaredResource(faultyReq.getResource());
-                    // If the faulty requirement is wrapped, then it may
-                    // be from a fragment, so consider the fragment faulty
-                    // instead of the host.
-                    if (faultyReq instanceof WrappedRequirement)
-                    {
-                        faultyResource =
-                            ((WrappedRequirement) faultyReq)
-                                .getDeclaredRequirement().getResource();
-                    }
-                    // Try to ignore the faulty resource if it is not mandatory.
-                    if (ondemandFragments.remove(faultyResource))
-                    {
-                        retry = true;
-                    }
+                    // If there is no exception to rethrow, then this was a clean
+                    // resolve, so populate the wire map.
                     else
                     {
-                        throw rethrow;
+                        wireMap = populateDynamicWireMap(rc,
+                            host, dynamicReq, resourcePkgMap, wireMap, allCandidates);
+                        return wireMap;
                     }
                 }
-                // If there is no exception to rethrow, then this was a clean
-                // resolve, so populate the wire map.
-                else
+                finally
                 {
-                    wireMap = populateDynamicWireMap(rc,
-                        host, dynamicReq, resourcePkgMap, wireMap, allCandidates);
-                    return wireMap;
+                    // Always clear the state.
+                    m_usesPermutations.clear();
+                    m_importPermutations.clear();
                 }
             }
-            finally
-            {
-                // Always clear the state.
-                m_usesPermutations.clear();
-                m_importPermutations.clear();
-            }
+            while (retry);
         }
-        while (retry);
-
 
         return wireMap;
     }
@@ -499,9 +496,17 @@ public class ResolverImpl implements Resolver
         cycle.add(resource);
 
         // Make sure package space hasn't already been calculated.
-        if (resourcePkgMap.containsKey(resource))
+        Packages resourcePkgs = resourcePkgMap.get(resource);
+        if (resourcePkgs != null)
         {
-            return;
+            if (resourcePkgs.m_isCalculated)
+            {
+                return;
+            }
+            else
+            {
+                resourcePkgs.m_isCalculated = true;
+            }
         }
 
         // Create parallel arrays for requirement and proposed candidate
@@ -592,7 +597,7 @@ public class ResolverImpl implements Resolver
 
         // First, add all exported packages to the target resource's package space.
         calculateExportedPackages(rc, resource, allCandidates, resourcePkgMap);
-        Packages resourcePkgs = resourcePkgMap.get(resource);
+        resourcePkgs = resourcePkgMap.get(resource);
 
         // Second, add all imported packages to the target resource's package space.
         for (int i = 0; i < reqs.size(); i++)
@@ -1236,7 +1241,7 @@ public class ResolverImpl implements Resolver
         Candidates allCandidates, Requirement req, List<Candidates> permutations)
     {
         List<Capability> candidates = allCandidates.getCandidates(req);
-        if (candidates.size() > 1)
+        if (candidates != null && candidates.size() > 1)
         {
             Candidates perm = allCandidates.copy();
             candidates = perm.getCandidates(req);
@@ -1249,7 +1254,7 @@ public class ResolverImpl implements Resolver
         Candidates allCandidates, Requirement req, List<Candidates> permutations)
     {
         List<Capability> candidates = allCandidates.getCandidates(req);
-        if (candidates.size() > 1)
+        if (candidates != null && candidates.size() > 1)
         {
             // Check existing permutations to make sure we haven't
             // already permutated this requirement. This check for
@@ -1839,6 +1844,7 @@ public class ResolverImpl implements Resolver
         public final Map<String, List<Blame>> m_importedPkgs = new HashMap();
         public final Map<String, List<Blame>> m_requiredPkgs = new HashMap();
         public final Map<String, List<Blame>> m_usedPkgs = new HashMap();
+        public boolean m_isCalculated = false;
 
         public Packages(Resource resource)
         {
