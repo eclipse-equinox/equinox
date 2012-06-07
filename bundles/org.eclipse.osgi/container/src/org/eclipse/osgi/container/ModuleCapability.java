@@ -15,6 +15,7 @@ import org.osgi.framework.wiring.BundleCapability;
 
 /**
  * An implementation of {@link BundleCapability}.
+ * @since 3.10
  */
 public class ModuleCapability implements BundleCapability {
 	private final String namespace;

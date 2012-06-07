@@ -24,6 +24,9 @@ import org.osgi.framework.*;
 import org.osgi.framework.namespace.*;
 import org.osgi.framework.wiring.BundleRevision;
 
+/**
+ * @since 3.10
+ */
 public class OSGiManifestBuilderFactory {
 	private static final String ATTR_TYPE_STRING = "string"; //$NON-NLS-1$
 	private static final String ATTR_TYPE_VERSION = "version"; //$NON-NLS-1$

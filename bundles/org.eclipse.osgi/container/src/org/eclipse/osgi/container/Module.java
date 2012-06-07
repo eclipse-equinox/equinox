@@ -22,6 +22,7 @@ import org.osgi.service.resolver.ResolutionException;
 /**
  * A module represents a set of revisions installed in a
  * module {@link ModuleContainer container}.
+ * @since 3.10
  */
 public abstract class Module implements BundleReference, BundleStartLevel, Comparable<Module> {
 	/**

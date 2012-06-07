@@ -18,6 +18,9 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.service.resolver.ResolutionException;
 
+/**
+ * @since 3.10
+ */
 public abstract class SystemModule extends Module {
 
 	public SystemModule(ModuleContainer container) {

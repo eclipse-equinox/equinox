@@ -14,6 +14,9 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * @since 3.10
+ */
 public interface ModuleClassLoader {
 	/**
 	 * 

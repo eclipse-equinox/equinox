@@ -23,6 +23,7 @@ import org.osgi.resource.Requirement;
 
 /**
  * An implementation of {@link BundleRevision}.
+ * @since 3.10
  */
 public class ModuleRevision implements BundleRevision {
 	private final String symbolicName;

@@ -23,6 +23,7 @@ import org.osgi.resource.Namespace;
  * An implementation of {@link BundleRequirement}.  This requirement implements 
  * the matches method according to the OSGi specification which includes
  * implementing the mandatory directive for the osgi.wiring.* namespaces.
+ * @since 3.10
  */
 public class ModuleRequirement implements BundleRequirement {
 	private final String namespace;

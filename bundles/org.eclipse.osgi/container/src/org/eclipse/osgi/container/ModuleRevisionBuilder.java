@@ -20,6 +20,7 @@ import org.osgi.framework.Version;
  * installing} or {@link ModuleContainer#update(Module, ModuleRevisionBuilder) updating} a module.
  * <p>
  * The builder provides the instructions to the container for creating a {@link ModuleRevision}.
+ * @since 3.10
  */
 public class ModuleRevisionBuilder {
 	/**

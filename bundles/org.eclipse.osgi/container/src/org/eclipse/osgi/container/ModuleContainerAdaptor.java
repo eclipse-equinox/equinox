@@ -20,6 +20,7 @@ import org.osgi.service.resolver.Resolver;
 
 /**
  * Adapts the behavior of a container.
+ * @since 3.10
  */
 public abstract class ModuleContainerAdaptor {
 	public enum ContainerEvent {

@@ -22,6 +22,7 @@ import org.osgi.resource.*;
 
 /**
  * An implementation of {@link BundleWiring}.
+ * @since 3.10
  */
 public class ModuleWiring implements BundleWiring {
 	private static final RuntimePermission GET_CLASSLOADER_PERM = new RuntimePermission("getClassLoader"); //$NON-NLS-1$

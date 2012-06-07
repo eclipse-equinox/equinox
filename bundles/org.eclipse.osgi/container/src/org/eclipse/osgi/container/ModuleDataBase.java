@@ -54,6 +54,7 @@ import org.osgi.service.resolver.Resolver;
  * resolving and unresolving modules.  Except for the {@link #load(DataInputStream)},
  * all other methods that perform write operations are intended to be used by
  * the associated container.
+ * @since 3.10
  */
 public abstract class ModuleDataBase {
 	/**

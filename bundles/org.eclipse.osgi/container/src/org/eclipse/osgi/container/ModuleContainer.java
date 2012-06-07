@@ -34,7 +34,7 @@ import org.osgi.service.resolver.ResolutionException;
 
 /**
  * A container for installing, updating, uninstalling and resolve modules.
- *
+ * @since 3.10
  */
 public final class ModuleContainer {
 
