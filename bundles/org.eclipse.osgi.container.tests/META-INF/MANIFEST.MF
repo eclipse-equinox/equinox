@@ -4,9 +4,11 @@ Bundle-Name: Junit
 Bundle-SymbolicName: org.eclipse.osgi.container.tests
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: org.junit;bundle-version="4.8.2",
- org.eclipse.osgi.container;bundle-version="1.0.0"
-Import-Package: org.eclipse.osgi.util;version="1.1.0",
+Require-Bundle: org.junit;bundle-version="4.8.2"
+Import-Package: org.eclipse.osgi.container;version="1.0.0",
+ org.eclipse.osgi.container.builders;version="1.0.0",
+ org.eclipse.osgi.container.namespaces;version="1.0.0",
+ org.eclipse.osgi.util;version="1.1.0",
  org.osgi.framework;version="1.7.0",
  org.osgi.framework.hooks.bundle;version="1.1.0",
  org.osgi.framework.hooks.resolver;version="1.0.0",
