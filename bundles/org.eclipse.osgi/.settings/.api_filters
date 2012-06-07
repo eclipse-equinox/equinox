@@ -576,6 +576,34 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="osgi/src/org/osgi/service/resolver/HostedCapability.java" type="org.osgi.service.resolver.HostedCapability">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.service.resolver.HostedCapability"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/resolver/ResolutionException.java" type="org.osgi.service.resolver.ResolutionException">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.service.resolver.ResolutionException"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/resolver/ResolveContext.java" type="org.osgi.service.resolver.ResolveContext">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.service.resolver.ResolveContext"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/resolver/Resolver.java" type="org.osgi.service.resolver.Resolver">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.service.resolver.Resolver"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="supplement/src/org/eclipse/core/runtime/internal/adaptor/Locker_JavaNio.java" type="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio">
         <filter comment="Code is protected when running on a limited environment" id="630194212">
             <message_arguments>
