@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import org.eclipse.osgi.container.ModuleContainer.ContainerStartLevel;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
+import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.service.resolver.ResolutionException;
@@ -29,7 +30,7 @@ public abstract class SystemModule extends Module {
 
 	public void init() throws BundleException {
 		getRevisions().getContainer().open();
-		lockStateChange(Event.STARTED);
+		lockStateChange(ModuleEvent.STARTED);
 		try {
 			checkValid();
 			if (ACTIVE_SET.contains(getState()))
@@ -45,14 +46,14 @@ public abstract class SystemModule extends Module {
 				throw new BundleException("Could not resolve module.", BundleException.RESOLVE_ERROR);
 			}
 			setState(State.STARTING);
-			publishEvent(Event.STARTING);
+			publishEvent(ModuleEvent.STARTING);
 			try {
 				initWorker();
 			} catch (Throwable t) {
 				setState(State.STOPPING);
-				publishEvent(Event.STOPPING);
+				publishEvent(ModuleEvent.STOPPING);
 				setState(State.RESOLVED);
-				publishEvent(Event.STOPPED);
+				publishEvent(ModuleEvent.STOPPED);
 				getRevisions().getContainer().close();
 				if (t instanceof BundleException) {
 					throw (BundleException) t;
@@ -60,7 +61,7 @@ public abstract class SystemModule extends Module {
 				throw new BundleException("Error initializing container.", BundleException.ACTIVATOR_ERROR, t);
 			}
 		} finally {
-			unlockStateChange(Event.STARTED);
+			unlockStateChange(ModuleEvent.STARTED);
 		}
 
 	}
@@ -86,9 +87,9 @@ public abstract class SystemModule extends Module {
 		// Always transient
 		super.stop(StopOptions.TRANSIENT);
 		ContainerEvent containerEvent;
-		if (holdsTransitionEventLock(Event.UPDATED)) {
+		if (holdsTransitionEventLock(ModuleEvent.UPDATED)) {
 			containerEvent = ContainerEvent.STOPPED_UPDATE;
-		} else if (holdsTransitionEventLock(Event.UNRESOLVED)) {
+		} else if (holdsTransitionEventLock(ModuleEvent.UNRESOLVED)) {
 			containerEvent = ContainerEvent.STOPPED_REFRESH;
 		} else {
 			containerEvent = ContainerEvent.STOPPED;

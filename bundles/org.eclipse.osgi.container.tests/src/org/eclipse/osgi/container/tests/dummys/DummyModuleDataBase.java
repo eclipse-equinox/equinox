@@ -13,9 +13,9 @@ package org.eclipse.osgi.container.tests.dummys;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.osgi.container.*;
-import org.eclipse.osgi.container.Module.Event;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
+import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.osgi.framework.FrameworkListener;
 
 public class DummyModuleDataBase extends ModuleDataBase {
@@ -85,10 +85,10 @@ public class DummyModuleDataBase extends ModuleDataBase {
 
 	public static class DummyModuleEvent {
 		public final Module module;
-		public final Event event;
+		public final ModuleEvent event;
 		public final State state;
 
-		public DummyModuleEvent(Module module, Event event, State state) {
+		public DummyModuleEvent(Module module, ModuleEvent event, State state) {
 			this.module = module;
 			this.event = event;
 			this.state = state;

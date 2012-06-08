@@ -14,6 +14,7 @@ import java.util.*;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.container.tests.dummys.DummyModuleDataBase.DummyContainerEvent;
+import org.eclipse.osgi.container.tests.dummys.DummyModuleDataBase.DummyModuleEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 
@@ -71,5 +72,10 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 
 	public DummyModuleDataBase getDataBase() {
 		return moduleDataBase;
+	}
+
+	@Override
+	protected void publishEvent(ModuleEvent type, Module module) {
+		moduleDataBase.addEvent(new DummyModuleEvent(module, type, module.getState()));
 	}
 }

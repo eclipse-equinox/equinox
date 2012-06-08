@@ -15,11 +15,11 @@ import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.eclipse.osgi.container.Module.Event;
 import org.eclipse.osgi.container.Module.StartOptions;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.Module.StopOptions;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
+import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.ModuleDataBase.Sort;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.framework.eventmgr.*;
@@ -59,12 +59,13 @@ public final class ModuleContainer {
 	private final ContainerStartLevel frameworkStartLevel;
 
 	/**
-	 * The module database for this container.  All access to this database MUST
-	 * be guarded by the database lock
+	 * The module database for this container.
 	 */
-	/* @GuardedBy("moduleDataBase") */
 	final ModuleDataBase moduleDataBase;
 
+	/**
+	 * The module adaptor for this container.
+	 */
 	final ModuleContainerAdaptor adaptor;
 
 	/**
@@ -84,6 +85,14 @@ public final class ModuleContainer {
 		this.moduleDataBase = moduleDataBase;
 		this.frameworkWiring = new ContainerWiring();
 		this.frameworkStartLevel = new ContainerStartLevel();
+	}
+
+	/**
+	 * Returns the adaptor for this container
+	 * @return the adaptor for this container
+	 */
+	public ModuleContainerAdaptor getAdaptor() {
+		return adaptor;
 	}
 
 	/**
@@ -208,7 +217,7 @@ public final class ModuleContainer {
 
 			Module result = moduleDataBase.install(location, builder);
 
-			result.publishEvent(Event.INSTALLED);
+			adaptor.publishEvent(ModuleEvent.INSTALLED, result);
 
 			return result;
 		} finally {
@@ -277,7 +286,7 @@ public final class ModuleContainer {
 				throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
 			}
 
-			module.lockStateChange(Event.UPDATED);
+			module.lockStateChange(ModuleEvent.UPDATED);
 			State previousState = module.getState();
 			BundleException updateError = null;
 			try {
@@ -289,7 +298,7 @@ public final class ModuleContainer {
 					if (Module.RESOLVED_SET.contains(previousState)) {
 						// set the state to installed and publish unresolved event
 						module.setState(State.INSTALLED);
-						module.publishEvent(Event.UNRESOLVED);
+						adaptor.publishEvent(ModuleEvent.UNRESOLVED, module);
 					}
 					moduleDataBase.update(module, builder);
 				} catch (BundleException e) {
@@ -297,11 +306,11 @@ public final class ModuleContainer {
 				}
 
 			} finally {
-				module.unlockStateChange(Event.UPDATED);
+				module.unlockStateChange(ModuleEvent.UPDATED);
 			}
 			if (updateError == null) {
 				// only publish updated event on success
-				module.publishEvent(Event.UPDATED);
+				adaptor.publishEvent(ModuleEvent.UPDATED, module);
 			}
 			if (Module.ACTIVE_SET.contains(previousState)) {
 				// restart the module if necessary
@@ -323,7 +332,7 @@ public final class ModuleContainer {
 	 * @throws BundleException if some error occurs uninstalling the module
 	 */
 	public void uninstall(Module module) throws BundleException {
-		module.lockStateChange(Event.UNINSTALLED);
+		module.lockStateChange(ModuleEvent.UNINSTALLED);
 		try {
 			if (Module.ACTIVE_SET.equals(module.getState())) {
 				try {
@@ -335,9 +344,9 @@ public final class ModuleContainer {
 			moduleDataBase.uninstall(module);
 			module.setState(State.UNINSTALLED);
 		} finally {
-			module.unlockStateChange(Event.UNINSTALLED);
+			module.unlockStateChange(ModuleEvent.UNINSTALLED);
 		}
-		module.publishEvent(Event.UNINSTALLED);
+		adaptor.publishEvent(ModuleEvent.UNINSTALLED, module);
 	}
 
 	ModuleWiring getWiring(ModuleRevision revision) {
@@ -483,7 +492,7 @@ public final class ModuleContainer {
 			// acquire the necessary RESOLVED state change lock
 			for (Module module : modulesResolved) {
 				try {
-					module.lockStateChange(Event.RESOLVED);
+					module.lockStateChange(ModuleEvent.RESOLVED);
 					modulesLocked.add(module);
 				} catch (BundleException e) {
 					// TODO throw some appropriate exception
@@ -516,12 +525,12 @@ public final class ModuleContainer {
 			}
 		} finally {
 			for (Module module : modulesLocked) {
-				module.unlockStateChange(Event.RESOLVED);
+				module.unlockStateChange(ModuleEvent.RESOLVED);
 			}
 		}
 
 		for (Module module : modulesLocked) {
-			module.publishEvent(Event.RESOLVED);
+			adaptor.publishEvent(ModuleEvent.RESOLVED, module);
 		}
 		return true;
 	}
@@ -604,7 +613,7 @@ public final class ModuleContainer {
 			// acquire module state change locks
 			try {
 				for (Module refreshModule : refreshTriggers) {
-					refreshModule.lockStateChange(Event.UNRESOLVED);
+					refreshModule.lockStateChange(ModuleEvent.UNRESOLVED);
 					modulesLocked.add(refreshModule);
 				}
 			} catch (BundleException e) {
@@ -670,13 +679,13 @@ public final class ModuleContainer {
 			}
 		} finally {
 			for (Module module : modulesLocked) {
-				module.unlockStateChange(Event.UNRESOLVED);
+				module.unlockStateChange(ModuleEvent.UNRESOLVED);
 			}
 		}
 
 		// publish unresolved events after giving up all locks
 		for (Module module : modulesUnresolved) {
-			module.publishEvent(Event.UNRESOLVED);
+			adaptor.publishEvent(ModuleEvent.UNRESOLVED, module);
 		}
 		return refreshTriggers;
 	}

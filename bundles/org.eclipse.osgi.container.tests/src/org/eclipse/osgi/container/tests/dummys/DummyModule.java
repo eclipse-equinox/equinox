@@ -12,7 +12,6 @@ package org.eclipse.osgi.container.tests.dummys;
 
 import java.util.EnumSet;
 import org.eclipse.osgi.container.*;
-import org.eclipse.osgi.container.tests.dummys.DummyModuleDataBase.DummyModuleEvent;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -33,11 +32,6 @@ public class DummyModule extends Module {
 	@Override
 	protected void updateWorker(ModuleRevisionBuilder builder) throws BundleException {
 		// Do nothing
-	}
-
-	@Override
-	protected void publishEvent(Event event) {
-		database.addEvent(new DummyModuleEvent(this, event, getState()));
 	}
 
 	@Override

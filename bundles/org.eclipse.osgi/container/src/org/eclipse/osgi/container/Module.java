@@ -13,6 +13,7 @@ package org.eclipse.osgi.container;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.osgi.framework.*;
 import org.osgi.framework.startlevel.BundleStartLevel;
@@ -128,54 +129,6 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	/**
-	 * Event types that may be {@link Module#publishEvent(Event) published} for a module
-	 * indicating a {@link Module#getState() state} change has occurred for a module.
-	 */
-	public static enum Event {
-		/**
-		 * The module has been installed
-		 */
-		INSTALLED,
-		/**
-		 * The module has been activated with the lazy activation policy and
-		 * is waiting a {@link StartOptions#LAZY_TRIGGER trigger} class load.
-		 */
-		LAZY_ACTIVATION,
-		/**
-		 * The module has been resolved.
-		 */
-		RESOLVED,
-		/**
-		 * The module has beens started.
-		 */
-		STARTED,
-		/**
-		 * The module is about to be activated.
-		 */
-		STARTING,
-		/**
-		 * The module has been stopped.
-		 */
-		STOPPED,
-		/**
-		 * The module is about to be deactivated.
-		 */
-		STOPPING,
-		/**
-		 * The module has been uninstalled.
-		 */
-		UNINSTALLED,
-		/**
-		 * The module has been unresolved.
-		 */
-		UNRESOLVED,
-		/**
-		 * The module has been updated.
-		 */
-		UPDATED
-	}
-
-	/**
 	 * An enumeration of persistent settings for a module
 	 */
 	public static enum Settings {
@@ -202,7 +155,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	private final String location;
 	private final ModuleRevisions revisions;
 	private final ReentrantLock stateChangeLock = new ReentrantLock();
-	private final EnumSet<Event> stateTransitionEvents = EnumSet.noneOf(Event.class);
+	private final EnumSet<ModuleEvent> stateTransitionEvents = EnumSet.noneOf(ModuleEvent.class);
 	private final EnumSet<Settings> settings;
 	private volatile State state = State.INSTALLED;
 	private volatile int startlevel;
@@ -308,8 +261,8 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		this.lastModified = lastModified;
 	}
 
-	private static final EnumSet<Event> VALID_RESOLVED_TRANSITION = EnumSet.of(Event.STARTED);
-	private static final EnumSet<Event> VALID_STOPPED_TRANSITION = EnumSet.of(Event.UPDATED, Event.UNRESOLVED, Event.UNINSTALLED);
+	private static final EnumSet<ModuleEvent> VALID_RESOLVED_TRANSITION = EnumSet.of(ModuleEvent.STARTED);
+	private static final EnumSet<ModuleEvent> VALID_STOPPED_TRANSITION = EnumSet.of(ModuleEvent.UPDATED, ModuleEvent.UNRESOLVED, ModuleEvent.UNINSTALLED);
 
 	/**
 	 * Acquires the module lock for state changes by the current thread for the specified
@@ -320,7 +273,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * @param transitionEvent the transition event to acquire the lock for.
 	 * @throws BundleException
 	 */
-	protected void lockStateChange(Event transitionEvent) throws BundleException {
+	protected void lockStateChange(ModuleEvent transitionEvent) throws BundleException {
 		try {
 			boolean acquired = stateChangeLock.tryLock(5, TimeUnit.SECONDS);
 			if (acquired) {
@@ -361,7 +314,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * Releases the lock for state changes for the specified transition event.
 	 * @param transitionEvent
 	 */
-	protected void unlockStateChange(Event transitionEvent) {
+	protected void unlockStateChange(ModuleEvent transitionEvent) {
 		if (stateChangeLock.getHoldCount() == 0 || !stateTransitionEvents.contains(transitionEvent))
 			throw new IllegalMonitorStateException("Current thread does not hold the state change lock for: " + transitionEvent);
 		stateTransitionEvents.remove(transitionEvent);
@@ -373,7 +326,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * @param transitionEvent
 	 * @return true if the current thread holds the state change lock for the specified transition event.
 	 */
-	protected boolean holdsTransitionEventLock(Event transitionEvent) {
+	protected boolean holdsTransitionEventLock(ModuleEvent transitionEvent) {
 		return stateChangeLock.getHoldCount() > 0 && stateTransitionEvents.contains(transitionEvent);
 	}
 
@@ -387,14 +340,14 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		if (options == null) {
 			options = new StartOptions[0];
 		}
-		Event event;
+		ModuleEvent event;
 		if (StartOptions.LAZY_TRIGGER.isContained(options)) {
-			if (stateChangeLock.getHoldCount() > 0 && stateTransitionEvents.contains(Event.STARTED)) {
+			if (stateChangeLock.getHoldCount() > 0 && stateTransitionEvents.contains(ModuleEvent.STARTED)) {
 				// nothing to do here; the current thread is activating the bundle.
 			}
 		}
 		BundleException startError = null;
-		lockStateChange(Event.STARTED);
+		lockStateChange(ModuleEvent.STARTED);
 		try {
 			checkValid();
 			if (StartOptions.TRANSIENT_IF_AUTO_START.isContained(options) && !settings.contains(Settings.AUTO_START)) {
@@ -429,14 +382,14 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				setState(State.RESOLVED);
 				startError = e;
 				// must always publish the STOPPED event on error
-				event = Event.STOPPED;
+				event = ModuleEvent.STOPPED;
 			}
 		} finally {
-			unlockStateChange(Event.STARTED);
+			unlockStateChange(ModuleEvent.STARTED);
 		}
 
 		if (event != null) {
-			if (!EnumSet.of(Event.STARTED, Event.LAZY_ACTIVATION, Event.STOPPED).contains(event))
+			if (!EnumSet.of(ModuleEvent.STARTED, ModuleEvent.LAZY_ACTIVATION, ModuleEvent.STOPPED).contains(event))
 				throw new IllegalStateException("Wrong event type: " + event);
 			publishEvent(event);
 		}
@@ -444,6 +397,10 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		if (startError != null) {
 			throw startError;
 		}
+	}
+
+	void publishEvent(ModuleEvent type) {
+		revisions.getContainer().getAdaptor().publishEvent(type, this);
 	}
 
 	/**
@@ -455,9 +412,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		revisions.getContainer().checkAdminPermission(getBundle(), AdminPermission.EXECUTE);
 		if (options == null)
 			options = new StopOptions[0];
-		Event event;
+		ModuleEvent event;
 		BundleException stopError = null;
-		lockStateChange(Event.STOPPED);
+		lockStateChange(ModuleEvent.STOPPED);
 		try {
 			checkValid();
 			persistStopOptions(options);
@@ -468,14 +425,14 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			} catch (BundleException e) {
 				stopError = e;
 				// must always publish the STOPPED event
-				event = Event.STOPPED;
+				event = ModuleEvent.STOPPED;
 			}
 		} finally {
-			unlockStateChange(Event.STOPPED);
+			unlockStateChange(ModuleEvent.STOPPED);
 		}
 
 		if (event != null) {
-			if (!Event.STOPPED.equals(event))
+			if (!ModuleEvent.STOPPED.equals(event))
 				throw new IllegalStateException("Wrong event type: " + event);
 			publishEvent(event);
 		}
@@ -498,18 +455,18 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			throw new IllegalStateException("Module has been uninstalled.");
 	}
 
-	private Event doStart(StartOptions... options) throws BundleException {
+	private ModuleEvent doStart(StartOptions... options) throws BundleException {
 		boolean isLazyTrigger = StartOptions.LAZY_TRIGGER.isContained(options);
 		if (isLazyTrigger) {
 			if (!State.LAZY_STARTING.equals(getState())) {
 				// need to make sure we transition through the lazy starting state
 				setState(State.LAZY_STARTING);
 				// need to publish the lazy event
-				unlockStateChange(Event.STARTED);
+				unlockStateChange(ModuleEvent.STARTED);
 				try {
-					publishEvent(Event.LAZY_ACTIVATION);
+					publishEvent(ModuleEvent.LAZY_ACTIVATION);
 				} finally {
-					lockStateChange(Event.STARTED);
+					lockStateChange(ModuleEvent.STARTED);
 				}
 				if (State.ACTIVE.equals(getState())) {
 					// A sync listener must have caused the bundle to activate
@@ -525,7 +482,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				}
 				// set the lazy starting state and return lazy activation event for firing
 				setState(State.LAZY_STARTING);
-				return Event.LAZY_ACTIVATION;
+				return ModuleEvent.LAZY_ACTIVATION;
 			}
 		}
 
@@ -534,16 +491,16 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			// TODO this starting state check should not be needed
 			// but we do it because of the way the system module init works
 			setState(State.STARTING);
-			publishEvent(Event.STARTING);
+			publishEvent(ModuleEvent.STARTING);
 		}
 		try {
 			startWorker();
 			setState(State.ACTIVE);
-			return Event.STARTED;
+			return ModuleEvent.STARTED;
 		} catch (Throwable t) {
 			// must fire stopping event
 			setState(State.STOPPING);
-			publishEvent(Event.STOPPING);
+			publishEvent(ModuleEvent.STOPPING);
 			if (t instanceof BundleException)
 				throw (BundleException) t;
 			throw new BundleException("Error starting module.", BundleException.ACTIVATOR_ERROR, t);
@@ -559,12 +516,12 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		// Do nothing
 	}
 
-	private Event doStop() throws BundleException {
+	private ModuleEvent doStop() throws BundleException {
 		setState(State.STOPPING);
-		publishEvent(Event.STOPPING);
+		publishEvent(ModuleEvent.STOPPING);
 		try {
 			stopWorker();
-			return Event.STOPPED;
+			return ModuleEvent.STOPPED;
 		} catch (Throwable t) {
 			if (t instanceof BundleException)
 				throw (BundleException) t;
@@ -593,12 +550,6 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	public String toString() {
 		return "[id=" + id + "]";
 	}
-
-	/**
-	 * Publishes the specified event for this module.
-	 * @param event the event type to publish
-	 */
-	abstract protected void publishEvent(Event event);
 
 	private void persistStartOptions(StartOptions... options) {
 		if (StartOptions.TRANSIENT_RESUME.isContained(options) || StartOptions.LAZY_TRIGGER.isContained(options)) {

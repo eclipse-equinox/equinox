@@ -30,6 +30,54 @@ public abstract class ModuleContainerAdaptor {
 	}
 
 	/**
+	 * Event types that may be {@link #publishEvent(ModuleEvent, Module) published} for a module
+	 * indicating a {@link Module#getState() state} change has occurred for a module.
+	 */
+	public static enum ModuleEvent {
+		/**
+		 * The module has been installed
+		 */
+		INSTALLED,
+		/**
+		 * The module has been activated with the lazy activation policy and
+		 * is waiting a {@link Module.StartOptions#LAZY_TRIGGER trigger} class load.
+		 */
+		LAZY_ACTIVATION,
+		/**
+		 * The module has been resolved.
+		 */
+		RESOLVED,
+		/**
+		 * The module has beens started.
+		 */
+		STARTED,
+		/**
+		 * The module is about to be activated.
+		 */
+		STARTING,
+		/**
+		 * The module has been stopped.
+		 */
+		STOPPED,
+		/**
+		 * The module is about to be deactivated.
+		 */
+		STOPPING,
+		/**
+		 * The module has been uninstalled.
+		 */
+		UNINSTALLED,
+		/**
+		 * The module has been unresolved.
+		 */
+		UNRESOLVED,
+		/**
+		 * The module has been updated.
+		 */
+		UPDATED
+	}
+
+	/**
 	 * Returns the resolver the container will use.  This implementation will
 	 * return the default implementation of the resolver.  Override this method
 	 * to provide an alternative resolver implementation for the container.
@@ -59,6 +107,13 @@ public abstract class ModuleContainerAdaptor {
 	 * @param listeners additional listeners to publish the event to synchronously
 	 */
 	public abstract void publishContainerEvent(ContainerEvent type, Module module, Throwable error, FrameworkListener... listeners);
+
+	/**
+	 * Publishes the specified module event type for the specified module.
+	 * @param type the event type to publish
+	 * @param module the module the event is associated with
+	 */
+	abstract protected void publishEvent(ModuleEvent type, Module module);
 
 	/**
 	 * Returns an unmodifiable map of the configuration for the container
