@@ -39,6 +39,7 @@ import org.osgi.resource.Namespace;
  * match requirements and should not be considered as effective by a resolver.
  * 
  * @Immutable
+ * @noinstantiate This class is not intended to be instantiated by clients.
  * @since 3.10
  */
 public class EquinoxModuleDataNamespace extends Namespace {

@@ -25,7 +25,7 @@ import org.osgi.framework.wiring.BundleRevisions;
  * a module in a container such as the module id and location.
  * @since 3.10
  */
-public class ModuleRevisions implements BundleRevisions {
+public final class ModuleRevisions implements BundleRevisions {
 	private final Object monitor = new Object();
 	private final Module module;
 	private final ModuleContainer container;

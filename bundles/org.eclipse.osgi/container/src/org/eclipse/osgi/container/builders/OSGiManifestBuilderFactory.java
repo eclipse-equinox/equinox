@@ -26,8 +26,9 @@ import org.osgi.framework.wiring.BundleRevision;
 
 /**
  * @since 3.10
+ * @noinstantiate This class is not intended to be instantiated by clients.
  */
-public class OSGiManifestBuilderFactory {
+public final class OSGiManifestBuilderFactory {
 	private static final String ATTR_TYPE_STRING = "string"; //$NON-NLS-1$
 	private static final String ATTR_TYPE_VERSION = "version"; //$NON-NLS-1$
 	private static final String ATTR_TYPE_URI = "uri"; //$NON-NLS-1$

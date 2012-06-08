@@ -182,14 +182,14 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * Returns the module id.
 	 * @return the module id.
 	 */
-	public Long getId() {
+	public final Long getId() {
 		return id;
 	}
 
 	/** Returns the module location
 	 * @return the module location
 	 */
-	public String getLocation() {
+	public final String getLocation() {
 		return location;
 	}
 
@@ -214,35 +214,35 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * Returns the current {@link State state} of this module.
 	 * @return the current state of this module.
 	 */
-	public State getState() {
+	public final State getState() {
 		return state;
 	}
 
-	void setState(State state) {
+	final void setState(State state) {
 		this.state = state;
 	}
 
 	@Override
-	public int getStartLevel() {
+	public final int getStartLevel() {
 		return this.startlevel;
 	}
 
 	@Override
-	public void setStartLevel(int startLevel) {
+	public final void setStartLevel(int startLevel) {
 		revisions.getContainer().setStartLevel(this, startLevel);
 	}
 
 	@Override
-	public boolean isPersistentlyStarted() {
+	public final boolean isPersistentlyStarted() {
 		return settings.contains(Settings.AUTO_START);
 	}
 
 	@Override
-	public boolean isActivationPolicyUsed() {
+	public final boolean isActivationPolicyUsed() {
 		return settings.contains(Settings.USE_ACTIVATION_POLICY);
 	}
 
-	void storeStartLevel(int newStartLevel) {
+	final void storeStartLevel(int newStartLevel) {
 		this.startlevel = newStartLevel;
 	}
 
@@ -253,11 +253,11 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * The time value is a the number of milliseconds since January 1, 1970, 00:00:00 UTC.
 	 * @return the time when this bundle was last modified.
 	 */
-	public long getLastModified() {
+	public final long getLastModified() {
 		return this.lastModified;
 	}
 
-	void setlastModified(long lastModified) {
+	final void setlastModified(long lastModified) {
 		this.lastModified = lastModified;
 	}
 
@@ -273,7 +273,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * @param transitionEvent the transition event to acquire the lock for.
 	 * @throws BundleException
 	 */
-	protected void lockStateChange(ModuleEvent transitionEvent) throws BundleException {
+	protected final void lockStateChange(ModuleEvent transitionEvent) throws BundleException {
 		try {
 			boolean acquired = stateChangeLock.tryLock(5, TimeUnit.SECONDS);
 			if (acquired) {
@@ -314,7 +314,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * Releases the lock for state changes for the specified transition event.
 	 * @param transitionEvent
 	 */
-	protected void unlockStateChange(ModuleEvent transitionEvent) {
+	protected final void unlockStateChange(ModuleEvent transitionEvent) {
 		if (stateChangeLock.getHoldCount() == 0 || !stateTransitionEvents.contains(transitionEvent))
 			throw new IllegalMonitorStateException("Current thread does not hold the state change lock for: " + transitionEvent);
 		stateTransitionEvents.remove(transitionEvent);
@@ -326,7 +326,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * @param transitionEvent
 	 * @return true if the current thread holds the state change lock for the specified transition event.
 	 */
-	protected boolean holdsTransitionEventLock(ModuleEvent transitionEvent) {
+	protected final boolean holdsTransitionEventLock(ModuleEvent transitionEvent) {
 		return stateChangeLock.getHoldCount() > 0 && stateTransitionEvents.contains(transitionEvent);
 	}
 
@@ -399,7 +399,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		}
 	}
 
-	void publishEvent(ModuleEvent type) {
+	final void publishEvent(ModuleEvent type) {
 		revisions.getContainer().getAdaptor().publishEvent(type, this);
 	}
 
@@ -441,7 +441,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	@Override
-	public int compareTo(Module o) {
+	public final int compareTo(Module o) {
 		int slcomp = getStartLevel() - o.getStartLevel();
 		if (slcomp != 0) {
 			return slcomp;
@@ -450,7 +450,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		return (idcomp < 0L) ? -1 : ((idcomp > 0L) ? 1 : 0);
 	}
 
-	void checkValid() {
+	final void checkValid() {
 		if (getState().equals(State.UNINSTALLED))
 			throw new IllegalStateException("Module has been uninstalled.");
 	}
@@ -584,7 +584,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 */
 	abstract protected void cleanup(ModuleRevision revision);
 
-	boolean isLazyActivate() {
+	final boolean isLazyActivate() {
 		ModuleRevision current = getCurrentRevision();
 		if (current == null)
 			return false;

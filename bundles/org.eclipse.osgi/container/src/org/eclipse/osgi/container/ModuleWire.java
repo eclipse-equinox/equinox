@@ -16,7 +16,7 @@ import org.osgi.framework.wiring.BundleWire;
  * An implementation of {@link BundleWire}.
  * @since 3.10
  */
-public class ModuleWire implements BundleWire {
+public final class ModuleWire implements BundleWire {
 	private final ModuleCapability capability;
 	private final ModuleRevision hostingProvider;
 	private final ModuleRequirement requirement;

@@ -22,7 +22,7 @@ import org.osgi.framework.Version;
  * The builder provides the instructions to the container for creating a {@link ModuleRevision}.
  * @since 3.10
  */
-public class ModuleRevisionBuilder {
+public final class ModuleRevisionBuilder {
 	/**
 	 * Provides information about a capability or requirement
 	 */

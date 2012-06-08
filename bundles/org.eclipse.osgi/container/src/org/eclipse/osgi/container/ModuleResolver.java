@@ -25,7 +25,7 @@ import org.osgi.service.resolver.*;
  * The module resolver handles calls to the {@link Resolver} service for resolving modules
  * in a module {@link ModuleContainer container}.
  */
-class ModuleResolver {
+final class ModuleResolver {
 	final ModuleContainerAdaptor adaptor;
 
 	/**

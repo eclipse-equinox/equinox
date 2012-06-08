@@ -23,6 +23,7 @@ import org.osgi.resource.Namespace;
  * {@code String}, unless otherwise indicated.
  * 
  * @Immutable
+ * @noinstantiate This class is not intended to be instantiated by clients.
  * @since 3.10
  */
 public class EclipsePlatformNamespace extends Namespace {

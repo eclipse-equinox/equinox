@@ -839,7 +839,7 @@ public class ModuleDataBase {
 		}
 	}
 
-	void persistSettings(EnumSet<Settings> settings, Module module) {
+	final void persistSettings(EnumSet<Settings> settings, Module module) {
 		lockWrite();
 		try {
 			moduleSettings.put(module.getId(), EnumSet.copyOf(settings));
@@ -848,7 +848,7 @@ public class ModuleDataBase {
 		}
 	}
 
-	void setStartLevel(Module module, int startlevel) {
+	final void setStartLevel(Module module, int startlevel) {
 		lockWrite();
 		try {
 			module.storeStartLevel(startlevel);
@@ -857,7 +857,7 @@ public class ModuleDataBase {
 		}
 	}
 
-	int getInitialModuleStartLevel() {
+	final int getInitialModuleStartLevel() {
 		lockRead();
 		try {
 			return this.initialModuleStartLevel;
@@ -866,7 +866,7 @@ public class ModuleDataBase {
 		}
 	}
 
-	void setInitialModuleStartLevel(int initialStartlevel) {
+	final void setInitialModuleStartLevel(int initialStartlevel) {
 		lockWrite();
 		try {
 			this.initialModuleStartLevel = initialStartlevel;

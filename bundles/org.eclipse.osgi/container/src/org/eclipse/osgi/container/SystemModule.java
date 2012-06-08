@@ -28,7 +28,7 @@ public abstract class SystemModule extends Module {
 		super(new Long(0), Constants.SYSTEM_BUNDLE_LOCATION, container, EnumSet.of(Settings.AUTO_START, Settings.USE_ACTIVATION_POLICY), new Integer(0));
 	}
 
-	public void init() throws BundleException {
+	public final void init() throws BundleException {
 		getRevisions().getContainer().open();
 		lockStateChange(ModuleEvent.STARTED);
 		try {
@@ -69,7 +69,7 @@ public abstract class SystemModule extends Module {
 	/**
 	 * @throws BundleException  
 	 */
-	public void initWorker() throws BundleException {
+	protected void initWorker() throws BundleException {
 		// Do nothing
 	}
 
