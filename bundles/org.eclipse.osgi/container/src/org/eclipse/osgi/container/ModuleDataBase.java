@@ -56,11 +56,11 @@ import org.osgi.service.resolver.Resolver;
  * the associated container.
  * @since 3.10
  */
-public abstract class ModuleDataBase {
+public class ModuleDataBase {
 	/**
-	 * The container this database is associated with
+	 * The adaptor for this database
 	 */
-	protected ModuleContainer container = null;
+	private final ModuleContainerAdaptor adaptor;
 
 	/**
 	 * A map of modules by location.
@@ -127,7 +127,8 @@ public abstract class ModuleDataBase {
 	/**
 	 * Constructs a new empty database.
 	 */
-	public ModuleDataBase() {
+	public ModuleDataBase(ModuleContainerAdaptor adaptor) {
+		this.adaptor = adaptor;
 		this.modulesByLocations = new HashMap<String, Module>();
 		this.modulesById = new HashMap<Long, Module>();
 		this.revisionByName = new HashMap<String, Collection<ModuleRevision>>();
@@ -137,30 +138,6 @@ public abstract class ModuleDataBase {
 		this.timeStamp = new AtomicLong(0);
 		this.moduleSettings = new HashMap<Long, EnumSet<Settings>>();
 		this.capabilities = new Capabilities();
-	}
-
-	/**
-	 * Sets the container for this database.  A database can only
-	 * be associated with a single container and that container must
-	 * have been constructed with this database.
-	 * <p>
-	 * This method modifies this database and is considered a write operation.
-	 * This method acquires the {@link #lockWrite() write} lock while setting
-	 * the container for this database.
-	 * @param container the container to associate this database with.
-	 */
-	public final void setContainer(ModuleContainer container) {
-		lockWrite();
-		try {
-			if (this.container != null)
-				throw new IllegalStateException("The container is already set."); //$NON-NLS-1$
-			if (container.moduleDataBase != this) {
-				throw new IllegalArgumentException("Container is already using a different database."); //$NON-NLS-1$
-			}
-			this.container = container;
-		} finally {
-			unlockWrite();
-		}
 	}
 
 	/**
@@ -276,17 +253,15 @@ public abstract class ModuleDataBase {
 	final Module load(String location, ModuleRevisionBuilder builder, long id, EnumSet<Settings> settings, int startlevel) {
 		// sanity check
 		checkWrite();
-		if (container == null)
-			throw new IllegalStateException("Container is not set."); //$NON-NLS-1$
 		if (modulesByLocations.containsKey(location))
 			throw new IllegalArgumentException("Location is already used: " + location); //$NON-NLS-1$
 		if (modulesById.containsKey(id))
 			throw new IllegalArgumentException("Id is already used: " + id); //$NON-NLS-1$
 		Module module;
 		if (id == 0) {
-			module = createSystemModule();
+			module = adaptor.createSystemModule();
 		} else {
-			module = createModule(location, id, settings, startlevel);
+			module = adaptor.createModule(location, id, settings, startlevel);
 		}
 		builder.addRevision(module);
 		modulesByLocations.put(location, module);
@@ -810,29 +785,6 @@ public abstract class ModuleDataBase {
 			unlockRead();
 		}
 	}
-
-	/**
-	 * Creates a new module.  This gets called when a new module is installed
-	 * or when {@link #load(DataInputStream) loading} persistent data into this
-	 * database.
-	 * @param location the location for the module
-	 * @param id the id for the module
-	 * @param settings the settings for the module.  May be {@code null} if there are no settings.
-	 * @param startlevel the start level for the module
-	 * @return the Module
-	 */
-	protected abstract Module createModule(String location, long id, EnumSet<Settings> settings, int startlevel);
-
-	/**
-	 * Creates the system module.  This gets called when the system module is installed
-	 * or when {@link #load(DataInputStream) loading} persistent data into this
-	 * database.
-	 * <p>
-	 * The returned system module must have an {@link Module#getId() id} of zero and a location
-	 * of {@link Constants#SYSTEM_BUNDLE_LOCATION System Bundle}.
-	 * @return the system module
-	 */
-	protected abstract SystemModule createSystemModule();
 
 	/**
 	 * Writes this database in a format suitable for using the {@link #load(DataInputStream)}

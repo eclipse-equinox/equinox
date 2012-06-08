@@ -238,6 +238,10 @@ public class ModuleWiring implements BundleWiring {
 		return substitutedPkgNames.contains(capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
 	}
 
+	public boolean isSubstitutedPackage(String packageName) {
+		return substitutedPkgNames.contains(packageName);
+	}
+
 	Collection<String> getSubstitutedNames() {
 		return substitutedPkgNames;
 	}

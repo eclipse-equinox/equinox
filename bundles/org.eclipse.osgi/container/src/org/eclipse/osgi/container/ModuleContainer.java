@@ -115,6 +115,19 @@ public final class ModuleContainer {
 	}
 
 	/**
+	 * Returns a snapshot collection of revisions with the specified name 
+	 * and version.  If version is {@code null} then all revisions with
+	 * the specified name are returned.
+	 * @param name the name of the modules
+	 * @param version the version of the modules or {@code null}
+	 * @return a snapshot collection of revisions with the specified name
+	 * and version.
+	 */
+	public Collection<ModuleRevision> getRevisions(String name, Version version) {
+		return moduleDataBase.getRevisions(name, version);
+	}
+
+	/**
 	 * Installs a new module using the specified location.  The specified
 	 * builder is used to create a new {@link ModuleRevision revision} 
 	 * which will become the {@link Module#getCurrentRevision() current}

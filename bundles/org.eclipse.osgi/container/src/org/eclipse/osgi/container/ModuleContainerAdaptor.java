@@ -10,10 +10,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.util.Collections;
-import java.util.Map;
+import java.io.DataInputStream;
+import java.util.*;
 import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.ResolverImpl;
+import org.eclipse.osgi.container.Module.Settings;
+import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.service.resolver.Resolver;
@@ -74,4 +76,27 @@ public abstract class ModuleContainerAdaptor {
 	public ModuleClassLoader createClassLoader(ModuleWiring wiring) {
 		throw new UnsupportedOperationException("Container adaptor does not support module class loaders.");
 	}
+
+	/**
+	 * Creates a new module.  This gets called when a new module is installed
+	 * or when {@link ModuleDataBase#load(DataInputStream) loading} persistent data into this
+	 * database.
+	 * @param location the location for the module
+	 * @param id the id for the module
+	 * @param settings the settings for the module.  May be {@code null} if there are no settings.
+	 * @param startlevel the start level for the module
+	 * @return the Module
+	 */
+	protected abstract Module createModule(String location, long id, EnumSet<Settings> settings, int startlevel);
+
+	/**
+	 * Creates the system module.  This gets called when the system module is installed
+	 * or when {@link ModuleDataBase#load(DataInputStream) loading} persistent data into this
+	 * database.
+	 * <p>
+	 * The returned system module must have an {@link Module#getId() id} of zero and a location
+	 * of {@link Constants#SYSTEM_BUNDLE_LOCATION System Bundle}.
+	 * @return the system module
+	 */
+	protected abstract SystemModule createSystemModule();
 }

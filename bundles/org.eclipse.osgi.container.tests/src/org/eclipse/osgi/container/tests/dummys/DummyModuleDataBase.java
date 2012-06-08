@@ -10,28 +10,22 @@
  *******************************************************************************/
 package org.eclipse.osgi.container.tests.dummys;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.Event;
-import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.osgi.framework.FrameworkListener;
 
 public class DummyModuleDataBase extends ModuleDataBase {
 
+	public DummyModuleDataBase(ModuleContainerAdaptor adaptor) {
+		super(adaptor);
+	}
+
 	private List<DummyModuleEvent> moduleEvents = new ArrayList<DummyModuleEvent>();
 	private List<DummyContainerEvent> containerEvents = new ArrayList<DummyContainerEvent>();
-
-	@Override
-	protected Module createModule(String location, long id, EnumSet<Settings> settings, int startlevel) {
-		return new DummyModule(id, location, this.container, this, settings, startlevel);
-	}
-
-	@Override
-	protected SystemModule createSystemModule() {
-		return new DummySystemModule(this.container, this);
-	}
 
 	void addEvent(DummyModuleEvent event) {
 		synchronized (moduleEvents) {

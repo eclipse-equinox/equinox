@@ -38,7 +38,7 @@ public class ModuleRevisions implements BundleRevisions {
 		this.container = container;
 	}
 
-	Module getModule() {
+	public Module getModule() {
 		return module;
 	}
 
@@ -58,7 +58,7 @@ public class ModuleRevisions implements BundleRevisions {
 		}
 	}
 
-	List<ModuleRevision> getModuleRevisions() {
+	public List<ModuleRevision> getModuleRevisions() {
 		synchronized (monitor) {
 			return new ArrayList<ModuleRevision>(revisions);
 		}

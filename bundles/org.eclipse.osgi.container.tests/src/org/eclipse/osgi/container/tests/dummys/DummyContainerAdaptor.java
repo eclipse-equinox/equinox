@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.container.tests.dummys;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.container.tests.dummys.DummyModuleDataBase.DummyContainerEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
@@ -21,14 +21,16 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 
 	private final ModuleCollisionHook collisionHook;
 	private final ResolverHookFactory resolverHookFactory;
-	private final DummyModuleDataBase moduleDataBase;
 	private final Map<String, Object> configuration;
+	private final DummyModuleDataBase moduleDataBase;
+	private final ModuleContainer container;
 
-	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, ResolverHookFactory resolverHookFactory, DummyModuleDataBase moduleDataBase, Map<String, Object> configuration) {
+	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, ResolverHookFactory resolverHookFactory, Map<String, Object> configuration) {
 		this.collisionHook = collisionHook;
 		this.resolverHookFactory = resolverHookFactory;
-		this.moduleDataBase = moduleDataBase;
 		this.configuration = Collections.unmodifiableMap(configuration);
+		this.moduleDataBase = new DummyModuleDataBase(this);
+		this.container = new ModuleContainer(this, moduleDataBase);
 	}
 
 	@Override
@@ -51,5 +53,23 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	@Override
 	public Map<String, Object> getConfiguration() {
 		return configuration;
+	}
+
+	@Override
+	protected Module createModule(String location, long id, EnumSet<Settings> settings, int startlevel) {
+		return new DummyModule(id, location, container, moduleDataBase, settings, startlevel);
+	}
+
+	@Override
+	protected SystemModule createSystemModule() {
+		return new DummySystemModule(container, moduleDataBase);
+	}
+
+	public ModuleContainer getContainer() {
+		return container;
+	}
+
+	public DummyModuleDataBase getDataBase() {
+		return moduleDataBase;
 	}
 }
