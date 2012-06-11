@@ -225,6 +225,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	@Override
 	public final int getStartLevel() {
+		checkValid();
 		return this.startlevel;
 	}
 
@@ -235,11 +236,13 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	@Override
 	public final boolean isPersistentlyStarted() {
+		checkValid();
 		return settings.contains(Settings.AUTO_START);
 	}
 
 	@Override
 	public final boolean isActivationPolicyUsed() {
+		checkValid();
 		return settings.contains(Settings.USE_ACTIVATION_POLICY);
 	}
 

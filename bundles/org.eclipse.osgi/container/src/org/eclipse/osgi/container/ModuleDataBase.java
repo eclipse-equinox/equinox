@@ -852,6 +852,7 @@ public class ModuleDataBase {
 	final void setStartLevel(Module module, int startlevel) {
 		lockWrite();
 		try {
+			module.checkValid();
 			module.storeStartLevel(startlevel);
 		} finally {
 			unlockWrite();
