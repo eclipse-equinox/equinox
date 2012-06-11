@@ -333,6 +333,7 @@ public final class ModuleContainer {
 	 */
 	public void uninstall(Module module) throws BundleException {
 		module.lockStateChange(ModuleEvent.UNINSTALLED);
+		State previousState = module.getState();
 		try {
 			if (Module.ACTIVE_SET.equals(module.getState())) {
 				try {
@@ -342,6 +343,11 @@ public final class ModuleContainer {
 				}
 			}
 			moduleDataBase.uninstall(module);
+			if (Module.RESOLVED_SET.contains(previousState)) {
+				// set the state to installed and publish unresolved event
+				module.setState(State.INSTALLED);
+				adaptor.publishEvent(ModuleEvent.UNRESOLVED, module);
+			}
 			module.setState(State.UNINSTALLED);
 		} finally {
 			module.unlockStateChange(ModuleEvent.UNINSTALLED);

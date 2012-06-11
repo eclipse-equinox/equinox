@@ -810,6 +810,23 @@ public class TestModuleContainer {
 				new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED),
 				new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED)));
 		assertEvents(expected, actual, false);
+
+		// uninstall c4
+		c4Revision0 = c4.getCurrentRevision();
+		container.uninstall(c4);
+		removalPending = container.getRemovalPending();
+		Assert.assertEquals("Wrong number of removal pending", 1, removalPending.size());
+		Assert.assertTrue("Wrong module removalPending: " + removalPending, removalPending.containsAll(Arrays.asList(c4Revision0)));
+
+		container.refresh(null);
+		actual = database.getModuleEvents();
+		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
+				new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED),
+				new DummyModuleEvent(c4, ModuleEvent.UNINSTALLED, State.UNINSTALLED),
+
+				new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED),
+				new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED)));
+		assertEvents(expected, actual, false);
 	}
 
 	@Test
