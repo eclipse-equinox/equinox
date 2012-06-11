@@ -152,7 +152,7 @@ public final class ModuleRevision implements BundleRevision {
 	}
 
 	boolean isCurrent() {
-		return this.equals(revisions.getCurrentRevision());
+		return !revisions.isUninstalled() && this.equals(revisions.getCurrentRevision());
 	}
 
 	@Override

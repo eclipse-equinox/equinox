@@ -31,7 +31,10 @@ public final class ModuleRevisions implements BundleRevisions {
 	private final ModuleContainer container;
 	/* @GuardedBy("monitor") */
 	private final List<ModuleRevision> revisions = new ArrayList<ModuleRevision>(1);
-	private volatile boolean uninstalled = false;
+	/* @GuardedBy("monitor") */
+	private boolean uninstalled = false;
+	/* @GuardedBy("monitor") */
+	private ModuleRevision uninstalledCurrent;
 
 	ModuleRevisions(Module module, ModuleContainer container) {
 		this.module = module;
@@ -66,12 +69,16 @@ public final class ModuleRevisions implements BundleRevisions {
 
 	/**
 	 * Returns the current {@link ModuleRevision revision} associated with this revisions.
+	 * 
 	 * @return the current {@link ModuleRevision revision} associated with this revisions
 	 *     or {@code null} if the current revision does not exist.
 	 */
 	ModuleRevision getCurrentRevision() {
 		synchronized (monitor) {
-			if (revisions.isEmpty() || uninstalled) {
+			if (uninstalled) {
+				return uninstalledCurrent;
+			}
+			if (revisions.isEmpty()) {
 				return null;
 			}
 			return revisions.get(0);
@@ -96,11 +103,20 @@ public final class ModuleRevisions implements BundleRevisions {
 	}
 
 	boolean isUninstalled() {
-		return uninstalled;
+		synchronized (monitor) {
+			return uninstalled;
+		}
 	}
 
 	void uninstall() {
-		uninstalled = true;
+		synchronized (monitor) {
+			uninstalled = true;
+			// save off the current revision
+			if (revisions.isEmpty()) {
+				throw new IllegalStateException("Revisions is empty on uninstall!");
+			}
+			uninstalledCurrent = revisions.get(0);
+		}
 	}
 
 	public String toString() {

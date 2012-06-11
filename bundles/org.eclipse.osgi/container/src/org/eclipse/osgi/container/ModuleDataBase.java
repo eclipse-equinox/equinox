@@ -299,6 +299,8 @@ public class ModuleDataBase {
 		lockWrite();
 		try {
 			ModuleRevisions uninstalling = module.getRevisions();
+			// mark the revisions as uninstalled before removing the revisions
+			uninstalling.uninstall();
 			// remove the location
 			modulesByLocations.remove(module.getLocation());
 			modulesById.remove(module.getId());
@@ -321,8 +323,7 @@ public class ModuleDataBase {
 					module.getRevisions().removeRevision(revision);
 				}
 			}
-			// marke the revisions as uninstalled
-			uninstalling.uninstall();
+
 			// attempt to cleanup any removal pendings
 			cleanupRemovalPending();
 
