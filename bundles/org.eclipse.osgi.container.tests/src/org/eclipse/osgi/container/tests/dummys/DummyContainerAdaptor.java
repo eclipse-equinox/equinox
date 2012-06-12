@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.container.tests.dummys;
 
-import java.util.*;
+import java.util.EnumSet;
+import java.util.Map;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.container.tests.dummys.DummyModuleDatabase.DummyContainerEvent;
@@ -22,14 +23,14 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 
 	private final ModuleCollisionHook collisionHook;
 	private final ResolverHookFactory resolverHookFactory;
-	private final Map<String, Object> configuration;
+	private final Map<String, String> configuration;
 	private final DummyModuleDatabase moduleDatabase;
 	private final ModuleContainer container;
 
-	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, ResolverHookFactory resolverHookFactory, Map<String, Object> configuration) {
+	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, ResolverHookFactory resolverHookFactory, Map<String, String> configuration) {
 		this.collisionHook = collisionHook;
 		this.resolverHookFactory = resolverHookFactory;
-		this.configuration = Collections.unmodifiableMap(configuration);
+		this.configuration = configuration;
 		this.moduleDatabase = new DummyModuleDatabase(this);
 		this.container = new ModuleContainer(this, moduleDatabase);
 	}
@@ -52,8 +53,8 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	}
 
 	@Override
-	public Map<String, Object> getConfiguration() {
-		return configuration;
+	public String getProperty(String key) {
+		return configuration.get(key);
 	}
 
 	@Override

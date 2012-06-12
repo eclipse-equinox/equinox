@@ -1074,7 +1074,7 @@ public final class ModuleContainer {
 
 		void doContainerStartLevel(Module module, int newStartLevel, FrameworkListener... listeners) {
 			if (newStartLevel == USE_BEGINNING_START_LEVEL) {
-				String beginningSL = (String) adaptor.getConfiguration().get(Constants.FRAMEWORK_BEGINNING_STARTLEVEL);
+				String beginningSL = adaptor.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL);
 				newStartLevel = beginningSL == null ? 1 : Integer.parseInt(beginningSL);
 			}
 			try {

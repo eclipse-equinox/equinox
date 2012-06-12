@@ -11,7 +11,7 @@
 package org.eclipse.osgi.container;
 
 import java.io.DataInputStream;
-import java.util.*;
+import java.util.EnumSet;
 import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.container.Module.Settings;
@@ -116,11 +116,12 @@ public abstract class ModuleContainerAdaptor {
 	abstract public void publishEvent(ModuleEvent type, Module module);
 
 	/**
-	 * Returns an unmodifiable map of the configuration for the container
-	 * @return an unmodifiable map of the configuration for the container
+	 * Returns the specified configuration property value
+	 * @param key the key of the configuration property
+	 * @return the configuration property value
 	 */
-	public Map<String, Object> getConfiguration() {
-		return Collections.emptyMap();
+	public String getProperty(String key) {
+		return null;
 	}
 
 	/**
