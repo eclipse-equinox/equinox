@@ -57,12 +57,12 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	}
 
 	@Override
-	protected Module createModule(String location, long id, EnumSet<Settings> settings, int startlevel) {
+	public Module createModule(String location, long id, EnumSet<Settings> settings, int startlevel) {
 		return new DummyModule(id, location, container, moduleDatabase, settings, startlevel);
 	}
 
 	@Override
-	protected SystemModule createSystemModule() {
+	public SystemModule createSystemModule() {
 		return new DummySystemModule(container, moduleDatabase);
 	}
 
@@ -75,7 +75,7 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	}
 
 	@Override
-	protected void publishEvent(ModuleEvent type, Module module) {
+	public void publishEvent(ModuleEvent type, Module module) {
 		moduleDatabase.addEvent(new DummyModuleEvent(module, type, module.getState()));
 	}
 }

@@ -113,7 +113,7 @@ public abstract class ModuleContainerAdaptor {
 	 * @param type the event type to publish
 	 * @param module the module the event is associated with
 	 */
-	abstract protected void publishEvent(ModuleEvent type, Module module);
+	abstract public void publishEvent(ModuleEvent type, Module module);
 
 	/**
 	 * Returns an unmodifiable map of the configuration for the container
@@ -142,7 +142,7 @@ public abstract class ModuleContainerAdaptor {
 	 * @param startlevel the start level for the module
 	 * @return the Module
 	 */
-	protected abstract Module createModule(String location, long id, EnumSet<Settings> settings, int startlevel);
+	public abstract Module createModule(String location, long id, EnumSet<Settings> settings, int startlevel);
 
 	/**
 	 * Creates the system module.  This gets called when the system module is installed
@@ -153,5 +153,5 @@ public abstract class ModuleContainerAdaptor {
 	 * of {@link Constants#SYSTEM_BUNDLE_LOCATION System Bundle}.
 	 * @return the system module
 	 */
-	protected abstract SystemModule createSystemModule();
+	public abstract SystemModule createSystemModule();
 }
