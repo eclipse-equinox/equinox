@@ -43,9 +43,6 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 	public static final String EXTERNAL_LIB_PREFIX = "external:"; //$NON-NLS-1$
 	public static final String VARIABLE_DELIM_STRING = "$"; //$NON-NLS-1$
 	public static final char VARIABLE_DELIM_CHAR = '$';
-	public static String COMPOSITE_HEADER = "Equinox-CompositeBundle"; //$NON-NLS-1$
-	public static String COMPOSITE_BUNDLE = "composite"; //$NON-NLS-1$
-	public static String SURROGATE_BUNDLE = "surrogate"; //$NON-NLS-1$
 
 	/** bundle's file name */
 	private String fileName;
@@ -116,14 +113,6 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 					bundleType |= BundleData.TYPE_BOOTCLASSPATH_EXTENSION;
 				else if (extensionType.equals("extclasspath")) //$NON-NLS-1$
 					bundleType |= BundleData.TYPE_EXTCLASSPATH_EXTENSION;
-			}
-		} else {
-			String composite = manifest.get(COMPOSITE_HEADER);
-			if (composite != null) {
-				if (COMPOSITE_BUNDLE.equals(composite))
-					bundleType |= BundleData.TYPE_COMPOSITEBUNDLE;
-				else
-					bundleType |= BundleData.TYPE_SURROGATEBUNDLE;
 			}
 		}
 		target.setType(bundleType);

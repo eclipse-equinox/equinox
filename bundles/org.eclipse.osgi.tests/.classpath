@@ -88,14 +88,6 @@
 	<classpathentry kind="src" output="bundle_tests/test.filter.a" path="bundles_src/test.filter.a"/>
 	<classpathentry kind="src" output="bundle_tests/test.link.a" path="bundles_src/test.link.a"/>
 	<classpathentry kind="src" output="bundle_tests/test.link.a.client" path="bundles_src/test.link.a.client"/>
-	<classpathentry kind="src" output="bundle_tests/test.link.b" path="bundles_src/test.link.b"/>
-	<classpathentry kind="src" output="bundle_tests/test.link.b.client" path="bundles_src/test.link.b.client"/>
-	<classpathentry kind="src" output="bundle_tests/test.link.c" path="bundles_src/test.link.c"/>
-	<classpathentry kind="src" output="bundle_tests/test.link.c.client" path="bundles_src/test.link.c.client"/>
-	<classpathentry kind="src" output="bundle_tests/test.link.d" path="bundles_src/test.link.d"/>
-	<classpathentry kind="src" output="bundle_tests/test.link.e" path="bundles_src/test.link.e"/>
-	<classpathentry kind="src" output="bundle_tests/test.link.e.client" path="bundles_src/test.link.e.client"/>
-	<classpathentry kind="src" output="bundle_tests/test.link.postponed" path="bundles_src/test.link.postponed"/>
 	<classpathentry kind="src" output="bundle_tests/test.bug259903.a" path="bundles_src/test.bug259903.a"/>
 	<classpathentry kind="src" output="bundle_tests/test.bug259903.a.update" path="bundles_src/test.bug259903.a.update"/>
 	<classpathentry kind="src" output="bundle_tests/test.bug259903.b" path="bundles_src/test.bug259903.b"/>
