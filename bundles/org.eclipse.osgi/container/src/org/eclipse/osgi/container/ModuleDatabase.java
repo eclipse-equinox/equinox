@@ -56,7 +56,7 @@ import org.osgi.service.resolver.Resolver;
  * the associated container.
  * @since 3.10
  */
-public class ModuleDataBase {
+public class ModuleDatabase {
 	/**
 	 * The adaptor for this database
 	 */
@@ -127,7 +127,7 @@ public class ModuleDataBase {
 	/**
 	 * Constructs a new empty database.
 	 */
-	public ModuleDataBase(ModuleContainerAdaptor adaptor) {
+	public ModuleDatabase(ModuleContainerAdaptor adaptor) {
 		this.adaptor = adaptor;
 		this.modulesByLocations = new HashMap<String, Module>();
 		this.modulesById = new HashMap<Long, Module>();
@@ -743,7 +743,7 @@ public class ModuleDataBase {
 	/**
 	 * Adds the {@link ModuleRevision#getModuleCapabilities(String) capabilities}
 	 * provided by the specified revision to this database.  These capabilities must 
-	 * become available for lookup with the {@link ModuleDataBase#findCapabilities(ModuleRequirement)}
+	 * become available for lookup with the {@link ModuleDatabase#findCapabilities(ModuleRequirement)}
 	 * method.
 	 * <p>
 	 * This method must be called while holding the {@link #lockWrite() write} lock.
@@ -758,7 +758,7 @@ public class ModuleDataBase {
 	 * Removes the {@link ModuleRevision#getModuleCapabilities(String) capabilities}
 	 * provided by the specified revision from this database.  These capabilities
 	 * must no longer be available for lookup with the 
-	 * {@link ModuleDataBase#findCapabilities(ModuleRequirement)} method.
+	 * {@link ModuleDatabase#findCapabilities(ModuleRequirement)} method.
 	 * <p>
 	 * This method must be called while holding the {@link #lockWrite() write} lock.
 	 * @param revision
@@ -909,21 +909,21 @@ public class ModuleDataBase {
 			objectTable.put(new Integer(index), object);
 		}
 
-		public static void store(ModuleDataBase moduleDataBase, DataOutputStream out, boolean persistWirings) throws IOException {
+		public static void store(ModuleDatabase moduleDatabase, DataOutputStream out, boolean persistWirings) throws IOException {
 			out.writeInt(VERSION);
-			out.writeLong(moduleDataBase.getTimestamp());
-			out.writeLong(moduleDataBase.getNextId());
-			out.writeInt(moduleDataBase.getInitialModuleStartLevel());
+			out.writeLong(moduleDatabase.getTimestamp());
+			out.writeLong(moduleDatabase.getNextId());
+			out.writeInt(moduleDatabase.getInitialModuleStartLevel());
 
-			List<Module> modules = moduleDataBase.getModules();
+			List<Module> modules = moduleDatabase.getModules();
 			out.writeInt(modules.size());
 
 			Map<Object, Integer> objectTable = new HashMap<Object, Integer>();
 			for (Module module : modules) {
-				writeModule(module, moduleDataBase, out, objectTable);
+				writeModule(module, moduleDatabase, out, objectTable);
 			}
 
-			Collection<ModuleRevision> removalPendings = moduleDataBase.getRemovalPending();
+			Collection<ModuleRevision> removalPendings = moduleDatabase.getRemovalPending();
 			// only persist wirings if there are no removals pending
 			persistWirings &= removalPendings.isEmpty();
 			out.writeBoolean(persistWirings);
@@ -931,7 +931,7 @@ public class ModuleDataBase {
 				return;
 			}
 
-			Map<ModuleRevision, ModuleWiring> wirings = moduleDataBase.wirings;
+			Map<ModuleRevision, ModuleWiring> wirings = moduleDatabase.wirings;
 			// prime the object table with all the required wires
 			out.writeInt(wirings.size());
 			for (ModuleWiring wiring : wirings.values()) {
@@ -950,19 +950,19 @@ public class ModuleDataBase {
 			out.flush();
 		}
 
-		public static void load(ModuleDataBase moduleDataBase, DataInputStream in) throws IOException {
+		public static void load(ModuleDatabase moduleDatabase, DataInputStream in) throws IOException {
 			int version = in.readInt();
 			if (version < VERSION)
 				throw new UnsupportedOperationException("Perstence version is not correct for loading: " + version + " expecting: " + VERSION); //$NON-NLS-1$ //$NON-NLS-2$
 			long timeStamp = in.readLong();
-			moduleDataBase.nextId.set(in.readLong());
-			moduleDataBase.setInitialModuleStartLevel(in.readInt());
+			moduleDatabase.nextId.set(in.readLong());
+			moduleDatabase.setInitialModuleStartLevel(in.readInt());
 
 			int numModules = in.readInt();
 
 			Map<Integer, Object> objectTable = new HashMap<Integer, Object>();
 			for (int i = 0; i < numModules; i++) {
-				readModule(moduleDataBase, in, objectTable);
+				readModule(moduleDatabase, in, objectTable);
 			}
 			if (!in.readBoolean())
 				return; // no wires persisted
@@ -983,7 +983,7 @@ public class ModuleDataBase {
 				wirings.put(wiring.getRevision(), wiring);
 			}
 			// TODO need to do this without incrementing the timestamp
-			moduleDataBase.setWiring(wirings);
+			moduleDatabase.setWiring(wirings);
 
 			// need to set the resolution state of the modules
 			for (ModuleWiring wiring : wirings.values()) {
@@ -991,10 +991,10 @@ public class ModuleDataBase {
 			}
 
 			// Setting the timestamp at the end since some operations increment it
-			moduleDataBase.timeStamp.set(timeStamp);
+			moduleDatabase.timeStamp.set(timeStamp);
 		}
 
-		private static void writeModule(Module module, ModuleDataBase moduleDataBase, DataOutputStream out, Map<Object, Integer> objectTable) throws IOException {
+		private static void writeModule(Module module, ModuleDatabase moduleDatabase, DataOutputStream out, Map<Object, Integer> objectTable) throws IOException {
 			ModuleRevision current = module.getCurrentRevision();
 			if (current == null)
 				return;
@@ -1022,7 +1022,7 @@ public class ModuleDataBase {
 			}
 
 			// settings
-			EnumSet<Settings> settings = moduleDataBase.moduleSettings.get(module.getId());
+			EnumSet<Settings> settings = moduleDatabase.moduleSettings.get(module.getId());
 			out.writeInt(settings == null ? 0 : settings.size());
 			if (settings != null) {
 				for (Settings setting : settings) {
@@ -1037,7 +1037,7 @@ public class ModuleDataBase {
 			out.writeLong(module.getLastModified());
 		}
 
-		private static void readModule(ModuleDataBase moduleDataBase, DataInputStream in, Map<Integer, Object> objectTable) throws IOException {
+		private static void readModule(ModuleDatabase moduleDatabase, DataInputStream in, Map<Integer, Object> objectTable) throws IOException {
 			ModuleRevisionBuilder builder = new ModuleRevisionBuilder();
 			int moduleIndex = in.readInt();
 			String location = readString(in);
@@ -1072,7 +1072,7 @@ public class ModuleDataBase {
 
 			// startlevel
 			int startlevel = in.readInt();
-			Module module = moduleDataBase.load(location, builder, id, settings, startlevel);
+			Module module = moduleDatabase.load(location, builder, id, settings, startlevel);
 
 			// last modified
 			module.setlastModified(in.readLong());

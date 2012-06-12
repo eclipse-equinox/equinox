@@ -23,8 +23,8 @@ import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
 import org.eclipse.osgi.container.tests.dummys.*;
-import org.eclipse.osgi.container.tests.dummys.DummyModuleDataBase.DummyContainerEvent;
-import org.eclipse.osgi.container.tests.dummys.DummyModuleDataBase.DummyModuleEvent;
+import org.eclipse.osgi.container.tests.dummys.DummyModuleDatabase.DummyContainerEvent;
+import org.eclipse.osgi.container.tests.dummys.DummyModuleDatabase.DummyModuleEvent;
 import org.eclipse.osgi.util.ManifestElement;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +38,7 @@ import org.osgi.service.resolver.ResolutionException;
 
 public class TestModuleContainer {
 
-	private static DummyModuleDataBase resolvedModuleDatabase;
+	private static DummyModuleDatabase resolvedModuleDatabase;
 
 	@Before
 	public void setup() throws BundleException, ResolutionException {
@@ -51,7 +51,7 @@ public class TestModuleContainer {
 	private static final String OSGI_WS = "osgi.ws";
 	private static final String OSGI_ARCH = "osgi.arch";
 
-	private DummyModuleDataBase getDatabase() throws BundleException, ResolutionException {
+	private DummyModuleDatabase getDatabase() throws BundleException, ResolutionException {
 		BundleContext context = ((BundleReference) getClass().getClassLoader()).getBundle().getBundleContext();
 
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
@@ -110,7 +110,7 @@ public class TestModuleContainer {
 				System.out.println("Could not resolve module: " + module.getCurrentRevision());
 			}
 		}
-		return adaptor.getDataBase();
+		return adaptor.getDatabase();
 	}
 
 	private static <K, V> Map<K, V> asMap(Dictionary<K, V> dictionary) {
@@ -134,7 +134,7 @@ public class TestModuleContainer {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 		resolvedModuleDatabase.store(new DataOutputStream(bytes), false);
 		bytes.close();
-		adaptor.getDataBase().load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
+		adaptor.getDatabase().load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
 		adaptor.getContainer().resolve(new ArrayList<Module>(), false);
 	}
 
@@ -144,7 +144,7 @@ public class TestModuleContainer {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 		resolvedModuleDatabase.store(new DataOutputStream(bytes), false);
 		bytes.close();
-		adaptor.getDataBase().load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
+		adaptor.getDatabase().load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
 		for (int i = 0; i < 50; i++) {
 			adaptor.getContainer().refresh(adaptor.getContainer().getModules());
 		}
@@ -156,7 +156,7 @@ public class TestModuleContainer {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 		resolvedModuleDatabase.store(new DataOutputStream(bytes), true);
 		bytes.close();
-		adaptor.getDataBase().load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
+		adaptor.getDatabase().load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
 		adaptor.getContainer().resolve(new ArrayList<Module>(), false);
 	}
 
@@ -166,7 +166,7 @@ public class TestModuleContainer {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 		resolvedModuleDatabase.store(new DataOutputStream(bytes), true);
 		bytes.close();
-		adaptor.getDataBase().load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
+		adaptor.getDatabase().load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
 		adaptor.getContainer().refresh(Arrays.asList(adaptor.getContainer().getModule(0)));
 	}
 
@@ -569,7 +569,7 @@ public class TestModuleContainer {
 		Module c6 = installDummyModule("c6_v1.MF", "c6_v1", container);
 		Module c7 = installDummyModule("c7_v1.MF", "c7_v1", container);
 
-		List<DummyModuleEvent> actual = adaptor.getDataBase().getModuleEvents();
+		List<DummyModuleEvent> actual = adaptor.getDatabase().getModuleEvents();
 		List<DummyModuleEvent> expected = Arrays.asList(
 				new DummyModuleEvent(c1, ModuleEvent.INSTALLED, State.INSTALLED),
 				new DummyModuleEvent(c2, ModuleEvent.INSTALLED, State.INSTALLED),
@@ -585,7 +585,7 @@ public class TestModuleContainer {
 	public void testEventsResolved() throws BundleException, IOException, ResolutionException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
-		DummyModuleDataBase database = adaptor.getDataBase();
+		DummyModuleDatabase database = adaptor.getDatabase();
 
 		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
 
@@ -618,7 +618,7 @@ public class TestModuleContainer {
 	public void testEventsRefresh() throws BundleException, IOException, ResolutionException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
-		DummyModuleDataBase database = adaptor.getDataBase();
+		DummyModuleDatabase database = adaptor.getDatabase();
 
 		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
 
@@ -662,7 +662,7 @@ public class TestModuleContainer {
 	public void testEventsStart() throws BundleException, IOException, ResolutionException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
-		DummyModuleDataBase database = adaptor.getDataBase();
+		DummyModuleDatabase database = adaptor.getDatabase();
 
 		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
 
@@ -701,7 +701,7 @@ public class TestModuleContainer {
 	public void testEventsStartRefresh() throws BundleException, IOException, ResolutionException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
-		DummyModuleDataBase database = adaptor.getDataBase();
+		DummyModuleDatabase database = adaptor.getDatabase();
 
 		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
 
@@ -739,7 +739,7 @@ public class TestModuleContainer {
 	public void testRemovalPending() throws ResolutionException, BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
-		DummyModuleDataBase database = adaptor.getDataBase();
+		DummyModuleDatabase database = adaptor.getDatabase();
 
 		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
 
@@ -919,7 +919,7 @@ public class TestModuleContainer {
 	public void testLazy01() throws BundleException, IOException, ResolutionException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
-		DummyModuleDataBase database = adaptor.getDataBase();
+		DummyModuleDatabase database = adaptor.getDatabase();
 
 		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
 
@@ -980,7 +980,7 @@ public class TestModuleContainer {
 	public void testSettings01() throws BundleException, IOException, ResolutionException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
-		DummyModuleDataBase database = adaptor.getDataBase();
+		DummyModuleDatabase database = adaptor.getDatabase();
 
 		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
 
@@ -1035,7 +1035,7 @@ public class TestModuleContainer {
 		// reload into a new container
 		adaptor = createDummyAdaptor();
 		container = adaptor.getContainer();
-		database = adaptor.getDataBase();
+		database = adaptor.getDatabase();
 		database.load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
 
 		systemBundle = container.getModule(0);
@@ -1091,7 +1091,7 @@ public class TestModuleContainer {
 
 		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), new DummyResolverHookFactory(), configuration);
 		ModuleContainer container = adaptor.getContainer();
-		DummyModuleDataBase database = adaptor.getDataBase();
+		DummyModuleDatabase database = adaptor.getDatabase();
 
 		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
 
@@ -1236,7 +1236,7 @@ public class TestModuleContainer {
 	public void testDynamicImport03() throws BundleException, IOException, ResolutionException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
-		DummyModuleDataBase database = adaptor.getDataBase();
+		DummyModuleDatabase database = adaptor.getDatabase();
 		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
 
 		container.resolve(Arrays.asList(systemBundle), true);
@@ -1272,7 +1272,7 @@ public class TestModuleContainer {
 	public void testDynamicImport04() throws BundleException, IOException, ResolutionException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
-		DummyModuleDataBase database = adaptor.getDataBase();
+		DummyModuleDatabase database = adaptor.getDatabase();
 		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
 
 		container.resolve(Arrays.asList(systemBundle), true);
@@ -1344,7 +1344,7 @@ public class TestModuleContainer {
 	}
 
 	private List<DummyModuleEvent> removeFirstListOfCommonEvents(List<DummyModuleEvent> events) {
-		List<DummyModuleEvent> result = new ArrayList<DummyModuleDataBase.DummyModuleEvent>();
+		List<DummyModuleEvent> result = new ArrayList<DummyModuleDatabase.DummyModuleEvent>();
 		if (events.isEmpty()) {
 			return result;
 		}

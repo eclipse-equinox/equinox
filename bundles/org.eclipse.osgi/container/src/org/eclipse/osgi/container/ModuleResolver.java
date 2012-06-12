@@ -49,19 +49,19 @@ final class ModuleResolver {
 	 * @param triggersMandatory true if the triggers must be resolved by the resolve process
 	 * @param unresolved a snapshot of unresolved revisions
 	 * @param wiringCopy the wirings snapshot of the currently resolved revisions
-	 * @param moduleDataBase the module database.
+	 * @param moduleDatabase the module database.
 	 * @return a delta container the new wirings or modified wirings that should be
 	 * merged into the moduleDatabase
 	 * @throws ResolutionException
 	 */
-	Map<ModuleRevision, ModuleWiring> resolveDelta(Collection<ModuleRevision> triggers, boolean triggersMandatory, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDataBase moduleDataBase) throws ResolutionException {
-		ResolveProcess resolveProcess = new ResolveProcess(unresolved, triggers, triggersMandatory, wiringCopy, moduleDataBase);
+	Map<ModuleRevision, ModuleWiring> resolveDelta(Collection<ModuleRevision> triggers, boolean triggersMandatory, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDatabase moduleDatabase) throws ResolutionException {
+		ResolveProcess resolveProcess = new ResolveProcess(unresolved, triggers, triggersMandatory, wiringCopy, moduleDatabase);
 		Map<Resource, List<Wire>> result = resolveProcess.resolve();
 		return generateDelta(result, wiringCopy);
 	}
 
-	Map<ModuleRevision, ModuleWiring> resolveDynamicDelta(DynamicModuleRequirement dynamicReq, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDataBase moduleDataBase) throws ResolutionException {
-		ResolveProcess resolveProcess = new ResolveProcess(unresolved, dynamicReq, wiringCopy, moduleDataBase);
+	Map<ModuleRevision, ModuleWiring> resolveDynamicDelta(DynamicModuleRequirement dynamicReq, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDatabase moduleDatabase) throws ResolutionException {
+		ResolveProcess resolveProcess = new ResolveProcess(unresolved, dynamicReq, wiringCopy, moduleDatabase);
 		Map<Resource, List<Wire>> result = resolveProcess.resolve();
 		return generateDelta(result, wiringCopy);
 	}
@@ -350,13 +350,13 @@ final class ModuleResolver {
 		private final Collection<ModuleRevision> triggers;
 		private final Collection<ModuleRevision> optionals;
 		private final boolean triggersMandatory;
-		private final ModuleDataBase moduleDataBase;
+		private final ModuleDatabase moduleDatabase;
 		private final Map<ModuleRevision, ModuleWiring> wirings;
 		private final DynamicModuleRequirement dynamicReq;
 		private volatile ResolverHook hook = null;
 		private volatile Map<String, Collection<ModuleRevision>> byName = null;
 
-		ResolveProcess(Collection<ModuleRevision> unresolved, Collection<ModuleRevision> triggers, boolean triggersMandatory, Map<ModuleRevision, ModuleWiring> wirings, ModuleDataBase moduleDataBase) {
+		ResolveProcess(Collection<ModuleRevision> unresolved, Collection<ModuleRevision> triggers, boolean triggersMandatory, Map<ModuleRevision, ModuleWiring> wirings, ModuleDatabase moduleDatabase) {
 			this.unresolved = unresolved;
 			this.disabled = new HashSet<ModuleRevision>(unresolved);
 			this.triggers = triggers;
@@ -366,11 +366,11 @@ final class ModuleResolver {
 				this.optionals.removeAll(triggers);
 			}
 			this.wirings = wirings;
-			this.moduleDataBase = moduleDataBase;
+			this.moduleDatabase = moduleDatabase;
 			this.dynamicReq = null;
 		}
 
-		ResolveProcess(Collection<ModuleRevision> unresolved, DynamicModuleRequirement dynamicReq, Map<ModuleRevision, ModuleWiring> wirings, ModuleDataBase moduleDataBase) {
+		ResolveProcess(Collection<ModuleRevision> unresolved, DynamicModuleRequirement dynamicReq, Map<ModuleRevision, ModuleWiring> wirings, ModuleDatabase moduleDatabase) {
 			this.unresolved = unresolved;
 			this.disabled = new HashSet<ModuleRevision>(unresolved);
 			ModuleRevision revision = dynamicReq.getRevision();
@@ -379,13 +379,13 @@ final class ModuleResolver {
 			this.triggersMandatory = false;
 			this.optionals = new ArrayList<ModuleRevision>(unresolved);
 			this.wirings = wirings;
-			this.moduleDataBase = moduleDataBase;
+			this.moduleDatabase = moduleDatabase;
 			this.dynamicReq = dynamicReq;
 		}
 
 		@Override
 		public List<Capability> findProviders(Requirement requirement) {
-			List<ModuleCapability> candidates = moduleDataBase.findCapabilities((ModuleRequirement) requirement);
+			List<ModuleCapability> candidates = moduleDatabase.findCapabilities((ModuleRequirement) requirement);
 			return filterProviders(requirement, candidates);
 		}
 
@@ -477,8 +477,8 @@ final class ModuleResolver {
 			if (!(resolver instanceof ResolverImpl)) {
 				throw new ResolutionException("Dynamic import resolution not supported by the resolver: " + resolver.getClass());
 			}
-			List<Capability> dynamicMatches = filterProviders(dynamicReq.getOriginal(), moduleDataBase.findCapabilities(dynamicReq));
-			Collection<Resource> ondemandFragments = Converters.asCollectionResource(moduleDataBase.getFragmentRevisions());
+			List<Capability> dynamicMatches = filterProviders(dynamicReq.getOriginal(), moduleDatabase.findCapabilities(dynamicReq));
+			Collection<Resource> ondemandFragments = Converters.asCollectionResource(moduleDatabase.getFragmentRevisions());
 
 			return ((ResolverImpl) resolver).resolve(this, dynamicReq.getRevision(), dynamicReq.getOriginal(), dynamicMatches, ondemandFragments);
 
@@ -629,9 +629,9 @@ final class ModuleResolver {
 
 		@Override
 		public int compare(Capability c1, Capability c2) {
-			// TODO Ideally this policy should be handled by the ModuleDataBase.
+			// TODO Ideally this policy should be handled by the ModuleDatabase.
 			// To do that the wirings would have to be provided since the wirings may
-			// be a subset of the current wirings provided by the ModuleDataBase
+			// be a subset of the current wirings provided by the ModuleDatabase
 			boolean resolved1 = wirings.get(c1.getResource()) != null;
 			boolean resolved2 = wirings.get(c2.getResource()) != null;
 			if (resolved1 != resolved2)

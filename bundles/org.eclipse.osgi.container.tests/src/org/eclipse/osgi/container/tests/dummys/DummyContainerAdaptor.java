@@ -13,8 +13,8 @@ package org.eclipse.osgi.container.tests.dummys;
 import java.util.*;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.Settings;
-import org.eclipse.osgi.container.tests.dummys.DummyModuleDataBase.DummyContainerEvent;
-import org.eclipse.osgi.container.tests.dummys.DummyModuleDataBase.DummyModuleEvent;
+import org.eclipse.osgi.container.tests.dummys.DummyModuleDatabase.DummyContainerEvent;
+import org.eclipse.osgi.container.tests.dummys.DummyModuleDatabase.DummyModuleEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 
@@ -23,15 +23,15 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	private final ModuleCollisionHook collisionHook;
 	private final ResolverHookFactory resolverHookFactory;
 	private final Map<String, Object> configuration;
-	private final DummyModuleDataBase moduleDataBase;
+	private final DummyModuleDatabase moduleDatabase;
 	private final ModuleContainer container;
 
 	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, ResolverHookFactory resolverHookFactory, Map<String, Object> configuration) {
 		this.collisionHook = collisionHook;
 		this.resolverHookFactory = resolverHookFactory;
 		this.configuration = Collections.unmodifiableMap(configuration);
-		this.moduleDataBase = new DummyModuleDataBase(this);
-		this.container = new ModuleContainer(this, moduleDataBase);
+		this.moduleDatabase = new DummyModuleDatabase(this);
+		this.container = new ModuleContainer(this, moduleDatabase);
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	@Override
 	public void publishContainerEvent(ContainerEvent type, Module module,
 			Throwable error, FrameworkListener... listeners) {
-		moduleDataBase.addEvent(new DummyContainerEvent(type, module, error, listeners));
+		moduleDatabase.addEvent(new DummyContainerEvent(type, module, error, listeners));
 
 	}
 
@@ -58,24 +58,24 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 
 	@Override
 	protected Module createModule(String location, long id, EnumSet<Settings> settings, int startlevel) {
-		return new DummyModule(id, location, container, moduleDataBase, settings, startlevel);
+		return new DummyModule(id, location, container, moduleDatabase, settings, startlevel);
 	}
 
 	@Override
 	protected SystemModule createSystemModule() {
-		return new DummySystemModule(container, moduleDataBase);
+		return new DummySystemModule(container, moduleDatabase);
 	}
 
 	public ModuleContainer getContainer() {
 		return container;
 	}
 
-	public DummyModuleDataBase getDataBase() {
-		return moduleDataBase;
+	public DummyModuleDatabase getDatabase() {
+		return moduleDatabase;
 	}
 
 	@Override
 	protected void publishEvent(ModuleEvent type, Module module) {
-		moduleDataBase.addEvent(new DummyModuleEvent(module, type, module.getState()));
+		moduleDatabase.addEvent(new DummyModuleEvent(module, type, module.getState()));
 	}
 }

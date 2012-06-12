@@ -17,9 +17,9 @@ import org.osgi.framework.BundleException;
 
 public class DummyModule extends Module {
 
-	private final DummyModuleDataBase database;
+	private final DummyModuleDatabase database;
 
-	public DummyModule(Long id, String location, ModuleContainer container, DummyModuleDataBase database, EnumSet<Settings> settings, int startlevel) {
+	public DummyModule(Long id, String location, ModuleContainer container, DummyModuleDatabase database, EnumSet<Settings> settings, int startlevel) {
 		super(id, location, container, settings, startlevel);
 		this.database = database;
 	}

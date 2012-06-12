@@ -571,14 +571,14 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			return;
 		}
 		settings.add(Settings.AUTO_START);
-		revisions.getContainer().moduleDataBase.persistSettings(settings, this);
+		revisions.getContainer().moduleDatabase.persistSettings(settings, this);
 	}
 
 	private void persistStopOptions(StopOptions... options) {
 		if (StopOptions.TRANSIENT.isContained(options))
 			return;
 		settings.clear();
-		revisions.getContainer().moduleDataBase.persistSettings(settings, this);
+		revisions.getContainer().moduleDatabase.persistSettings(settings, this);
 	}
 
 	/**

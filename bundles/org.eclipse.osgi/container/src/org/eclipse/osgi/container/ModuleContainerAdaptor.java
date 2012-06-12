@@ -134,7 +134,7 @@ public abstract class ModuleContainerAdaptor {
 
 	/**
 	 * Creates a new module.  This gets called when a new module is installed
-	 * or when {@link ModuleDataBase#load(DataInputStream) loading} persistent data into this
+	 * or when {@link ModuleDatabase#load(DataInputStream) loading} persistent data into this
 	 * database.
 	 * @param location the location for the module
 	 * @param id the id for the module
@@ -146,7 +146,7 @@ public abstract class ModuleContainerAdaptor {
 
 	/**
 	 * Creates the system module.  This gets called when the system module is installed
-	 * or when {@link ModuleDataBase#load(DataInputStream) loading} persistent data into this
+	 * or when {@link ModuleDatabase#load(DataInputStream) loading} persistent data into this
 	 * database.
 	 * <p>
 	 * The returned system module must have an {@link Module#getId() id} of zero and a location

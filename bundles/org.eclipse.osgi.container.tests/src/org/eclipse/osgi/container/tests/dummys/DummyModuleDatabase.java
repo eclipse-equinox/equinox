@@ -18,9 +18,9 @@ import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.osgi.framework.FrameworkListener;
 
-public class DummyModuleDataBase extends ModuleDataBase {
+public class DummyModuleDatabase extends ModuleDatabase {
 
-	public DummyModuleDataBase(ModuleContainerAdaptor adaptor) {
+	public DummyModuleDatabase(ModuleContainerAdaptor adaptor) {
 		super(adaptor);
 	}
 

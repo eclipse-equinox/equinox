@@ -20,7 +20,7 @@ import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.Module.StopOptions;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
-import org.eclipse.osgi.container.ModuleDataBase.Sort;
+import org.eclipse.osgi.container.ModuleDatabase.Sort;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.internal.container.LockSet;
@@ -61,7 +61,7 @@ public final class ModuleContainer {
 	/**
 	 * The module database for this container.
 	 */
-	final ModuleDataBase moduleDataBase;
+	final ModuleDatabase moduleDatabase;
 
 	/**
 	 * The module adaptor for this container.
@@ -77,12 +77,12 @@ public final class ModuleContainer {
 	/**
 	 * Constructs a new container with the specified collision hook, resolver hook, resolver and module database.
 	 * @param adaptor the adaptor for the container
-	 * @param moduleDataBase the module database
+	 * @param moduledataBase the module database
 	 */
-	public ModuleContainer(ModuleContainerAdaptor adaptor, ModuleDataBase moduleDataBase) {
+	public ModuleContainer(ModuleContainerAdaptor adaptor, ModuleDatabase moduledataBase) {
 		this.adaptor = adaptor;
 		this.moduleResolver = new ModuleResolver(adaptor);
-		this.moduleDataBase = moduleDataBase;
+		this.moduleDatabase = moduledataBase;
 		this.frameworkWiring = new ContainerWiring();
 		this.frameworkStartLevel = new ContainerStartLevel();
 	}
@@ -100,7 +100,7 @@ public final class ModuleContainer {
 	 * @return the list of currently installed modules sorted by module id.
 	 */
 	public List<Module> getModules() {
-		return moduleDataBase.getModules();
+		return moduleDatabase.getModules();
 	}
 
 	/**
@@ -110,7 +110,7 @@ public final class ModuleContainer {
 	 * @return the module with the specified id, or null of no such module is installed.
 	 */
 	public Module getModule(long id) {
-		return moduleDataBase.getModule(id);
+		return moduleDatabase.getModule(id);
 	}
 
 	/**
@@ -120,7 +120,7 @@ public final class ModuleContainer {
 	 * @return the module with the specified location, or null of no such module is installed.
 	 */
 	public Module getModule(String location) {
-		return moduleDataBase.getModule(location);
+		return moduleDatabase.getModule(location);
 	}
 
 	/**
@@ -133,7 +133,7 @@ public final class ModuleContainer {
 	 * and version.
 	 */
 	public Collection<ModuleRevision> getRevisions(String name, Version version) {
-		return moduleDataBase.getRevisions(name, version);
+		return moduleDatabase.getRevisions(name, version);
 	}
 
 	/**
@@ -173,13 +173,13 @@ public final class ModuleContainer {
 
 			Module existingLocation = null;
 			Collection<Module> collisionCandidates = Collections.emptyList();
-			moduleDataBase.lockRead();
+			moduleDatabase.lockRead();
 			try {
-				existingLocation = moduleDataBase.getModule(location);
+				existingLocation = moduleDatabase.getModule(location);
 				if (existingLocation == null) {
 					// Collect existing current revisions with the same name and version as the revision we want to install
 					// This is to perform the collision check below
-					Collection<ModuleRevision> existingRevisionNames = moduleDataBase.getRevisions(name, builder.getVersion());
+					Collection<ModuleRevision> existingRevisionNames = moduleDatabase.getRevisions(name, builder.getVersion());
 					if (!existingRevisionNames.isEmpty()) {
 						collisionCandidates = new ArrayList<Module>(1);
 						for (ModuleRevision equinoxRevision : existingRevisionNames) {
@@ -192,7 +192,7 @@ public final class ModuleContainer {
 					}
 				}
 			} finally {
-				moduleDataBase.unlockRead();
+				moduleDatabase.unlockRead();
 			}
 			// Check that the existing location is visible from the origin module
 			if (existingLocation != null) {
@@ -215,7 +215,7 @@ public final class ModuleContainer {
 				throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
 			}
 
-			Module result = moduleDataBase.install(location, builder);
+			Module result = moduleDatabase.install(location, builder);
 
 			adaptor.publishEvent(ModuleEvent.INSTALLED, result);
 
@@ -253,11 +253,11 @@ public final class ModuleContainer {
 			}
 
 			Collection<Module> collisionCandidates = Collections.emptyList();
-			moduleDataBase.lockRead();
+			moduleDatabase.lockRead();
 			try {
 				// Collect existing bundles with the same name and version as the bundle we want to install
 				// This is to perform the collision check below
-				Collection<ModuleRevision> existingRevisionNames = moduleDataBase.getRevisions(name, builder.getVersion());
+				Collection<ModuleRevision> existingRevisionNames = moduleDatabase.getRevisions(name, builder.getVersion());
 				if (!existingRevisionNames.isEmpty()) {
 					collisionCandidates = new ArrayList<Module>(1);
 					for (ModuleRevision equinoxRevision : existingRevisionNames) {
@@ -273,7 +273,7 @@ public final class ModuleContainer {
 				}
 
 			} finally {
-				moduleDataBase.unlockRead();
+				moduleDatabase.unlockRead();
 			}
 
 			// Check that the module does not collide with other modules with the same name and version
@@ -300,7 +300,7 @@ public final class ModuleContainer {
 						module.setState(State.INSTALLED);
 						adaptor.publishEvent(ModuleEvent.UNRESOLVED, module);
 					}
-					moduleDataBase.update(module, builder);
+					moduleDatabase.update(module, builder);
 				} catch (BundleException e) {
 					updateError = e;
 				}
@@ -342,7 +342,7 @@ public final class ModuleContainer {
 					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
 				}
 			}
-			moduleDataBase.uninstall(module);
+			moduleDatabase.uninstall(module);
 			if (Module.RESOLVED_SET.contains(previousState)) {
 				// set the state to installed and publish unresolved event
 				module.setState(State.INSTALLED);
@@ -356,7 +356,7 @@ public final class ModuleContainer {
 	}
 
 	ModuleWiring getWiring(ModuleRevision revision) {
-		return moduleDataBase.getWiring(revision);
+		return moduleDatabase.getWiring(revision);
 	}
 
 	/**
@@ -397,26 +397,26 @@ public final class ModuleContainer {
 		Collection<ModuleRevision> unresolved = new ArrayList<ModuleRevision>();
 		Map<ModuleRevision, ModuleWiring> wiringClone;
 		long timestamp;
-		moduleDataBase.lockRead();
+		moduleDatabase.lockRead();
 		try {
-			timestamp = moduleDataBase.getTimestamp();
-			wiringClone = moduleDataBase.getWiringsClone();
+			timestamp = moduleDatabase.getTimestamp();
+			wiringClone = moduleDatabase.getWiringsClone();
 			for (Module module : triggers) {
 				ModuleRevision current = module.getCurrentRevision();
 				if (current != null)
 					triggerRevisions.add(current);
 			}
-			Collection<Module> allModules = moduleDataBase.getModules();
+			Collection<Module> allModules = moduleDatabase.getModules();
 			for (Module module : allModules) {
 				ModuleRevision revision = module.getCurrentRevision();
 				if (revision != null && !wiringClone.containsKey(revision))
 					unresolved.add(revision);
 			}
 		} finally {
-			moduleDataBase.unlockRead();
+			moduleDatabase.unlockRead();
 		}
 
-		Map<ModuleRevision, ModuleWiring> deltaWiring = moduleResolver.resolveDelta(triggerRevisions, triggersMandatory, unresolved, wiringClone, moduleDataBase);
+		Map<ModuleRevision, ModuleWiring> deltaWiring = moduleResolver.resolveDelta(triggerRevisions, triggersMandatory, unresolved, wiringClone, moduleDatabase);
 		if (deltaWiring.isEmpty())
 			return true; // nothing to do
 
@@ -439,28 +439,28 @@ public final class ModuleContainer {
 			Map<ModuleRevision, ModuleWiring> wiringClone = null;
 			List<DynamicModuleRequirement> dynamicReqs = null;
 			Collection<ModuleRevision> unresolved = new ArrayList<ModuleRevision>();
-			moduleDataBase.lockRead();
+			moduleDatabase.lockRead();
 			try {
 				dynamicReqs = getDynamicRequirements(dynamicPkgName, revision);
 				if (dynamicReqs.isEmpty()) {
 					// do nothing
 					return null;
 				}
-				timestamp = moduleDataBase.getTimestamp();
-				wiringClone = moduleDataBase.getWiringsClone();
-				Collection<Module> allModules = moduleDataBase.getModules();
+				timestamp = moduleDatabase.getTimestamp();
+				wiringClone = moduleDatabase.getWiringsClone();
+				Collection<Module> allModules = moduleDatabase.getModules();
 				for (Module module : allModules) {
 					ModuleRevision current = module.getCurrentRevision();
 					if (current != null && !wiringClone.containsKey(current))
 						unresolved.add(current);
 				}
 			} finally {
-				moduleDataBase.unlockRead();
+				moduleDatabase.unlockRead();
 			}
 
 			deltaWiring = null;
 			for (DynamicModuleRequirement dynamicReq : dynamicReqs) {
-				deltaWiring = moduleResolver.resolveDynamicDelta(dynamicReq, unresolved, wiringClone, moduleDataBase);
+				deltaWiring = moduleResolver.resolveDynamicDelta(dynamicReq, unresolved, wiringClone, moduleDatabase);
 				if (deltaWiring.get(revision) != null) {
 					break;
 				}
@@ -505,11 +505,11 @@ public final class ModuleContainer {
 					throw new IllegalStateException("Could not acquire state change lock.", e);
 				}
 			}
-			moduleDataBase.lockWrite();
+			moduleDatabase.lockWrite();
 			try {
-				if (timestamp != moduleDataBase.getTimestamp())
+				if (timestamp != moduleDatabase.getTimestamp())
 					return false; // need to try again
-				Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDataBase.getWiringsCopy();
+				Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDatabase.getWiringsCopy();
 				for (Map.Entry<ModuleRevision, ModuleWiring> deltaEntry : deltaWiring.entrySet()) {
 					ModuleWiring current = wiringCopy.get(deltaEntry.getKey());
 					if (current != null) {
@@ -521,9 +521,9 @@ public final class ModuleContainer {
 						modulesResolved.add(deltaEntry.getValue().getRevision().getRevisions().getModule());
 					}
 				}
-				moduleDataBase.mergeWiring(deltaWiring);
+				moduleDatabase.mergeWiring(deltaWiring);
 			} finally {
-				moduleDataBase.unlockWrite();
+				moduleDatabase.unlockWrite();
 			}
 			// set the modules state to resolved
 			for (Module module : modulesLocked) {
@@ -580,10 +580,10 @@ public final class ModuleContainer {
 		Collection<ModuleWiring> toRemoveWirings;
 		Map<ModuleWiring, Collection<ModuleWire>> toRemoveWireLists;
 		long timestamp;
-		moduleDataBase.lockRead();
+		moduleDatabase.lockRead();
 		try {
-			timestamp = moduleDataBase.getTimestamp();
-			wiringCopy = moduleDataBase.getWiringsCopy();
+			timestamp = moduleDatabase.getTimestamp();
+			wiringCopy = moduleDatabase.getWiringsCopy();
 			refreshTriggers = getRefreshClosure(initial, wiringCopy);
 			toRemoveRevisions = new ArrayList<ModuleRevision>();
 			toRemoveWirings = new ArrayList<ModuleWiring>();
@@ -611,7 +611,7 @@ public final class ModuleContainer {
 				}
 			}
 		} finally {
-			moduleDataBase.unlockRead();
+			moduleDatabase.unlockRead();
 		}
 		Collection<Module> modulesLocked = new ArrayList<Module>(refreshTriggers.size());
 		Collection<Module> modulesUnresolved = new ArrayList<Module>();
@@ -648,9 +648,9 @@ public final class ModuleContainer {
 			}
 
 			// finally apply the unresolve to the database
-			moduleDataBase.lockWrite();
+			moduleDatabase.lockWrite();
 			try {
-				if (timestamp != moduleDataBase.getTimestamp())
+				if (timestamp != moduleDatabase.getTimestamp())
 					return null; // need to try again
 				// remove any wires from unresolved wirings that got removed
 				for (Map.Entry<ModuleWiring, Collection<ModuleWire>> entry : toRemoveWireLists.entrySet()) {
@@ -666,15 +666,15 @@ public final class ModuleContainer {
 				// remove any revisions that got removed as part of the refresh
 				for (ModuleRevision removed : toRemoveRevisions) {
 					removed.getRevisions().removeRevision(removed);
-					moduleDataBase.removeCapabilities(removed);
+					moduleDatabase.removeCapabilities(removed);
 				}
 				// invalidate any removed wiring objects
 				for (ModuleWiring moduleWiring : toRemoveWirings) {
 					moduleWiring.invalidate();
 				}
-				moduleDataBase.setWiring(wiringCopy);
+				moduleDatabase.setWiring(wiringCopy);
 			} finally {
-				moduleDataBase.unlockWrite();
+				moduleDatabase.unlockWrite();
 			}
 			// set the state of modules to unresolved
 			for (Module module : modulesLocked) {
@@ -722,11 +722,11 @@ public final class ModuleContainer {
 	 *    modules, or an empty collection if there were no specified modules. 
 	 */
 	public Collection<Module> getDependencyClosure(Collection<Module> initial) {
-		moduleDataBase.lockRead();
+		moduleDatabase.lockRead();
 		try {
-			return getRefreshClosure(initial, moduleDataBase.getWiringsCopy());
+			return getRefreshClosure(initial, moduleDatabase.getWiringsCopy());
 		} finally {
-			moduleDataBase.unlockRead();
+			moduleDatabase.unlockRead();
 		}
 	}
 
@@ -736,7 +736,7 @@ public final class ModuleContainer {
 	 * or an empty collection if there are no such revisions.
 	 */
 	public Collection<ModuleRevision> getRemovalPending() {
-		return moduleDataBase.getRemovalPending();
+		return moduleDatabase.getRemovalPending();
 	}
 
 	/**
@@ -770,7 +770,7 @@ public final class ModuleContainer {
 		Set<Module> refreshClosure = new HashSet<Module>();
 		if (initial == null) {
 			initial = new HashSet<Module>();
-			Collection<ModuleRevision> removalPending = moduleDataBase.getRemovalPending();
+			Collection<ModuleRevision> removalPending = moduleDatabase.getRemovalPending();
 			for (ModuleRevision revision : removalPending) {
 				initial.add(revision.getRevisions().getModule());
 			}
@@ -832,7 +832,7 @@ public final class ModuleContainer {
 	}
 
 	Bundle getSystemBundle() {
-		Module systemModule = moduleDataBase.getModule(0);
+		Module systemModule = moduleDatabase.getModule(0);
 		return systemModule == null ? null : systemModule.getBundle();
 	}
 
@@ -887,32 +887,32 @@ public final class ModuleContainer {
 
 		@Override
 		public Collection<Bundle> getRemovalPendingBundles() {
-			moduleDataBase.lockRead();
+			moduleDatabase.lockRead();
 			try {
 				Collection<Bundle> removalPendingBundles = new HashSet<Bundle>();
-				Collection<ModuleRevision> removalPending = moduleDataBase.getRemovalPending();
+				Collection<ModuleRevision> removalPending = moduleDatabase.getRemovalPending();
 				for (ModuleRevision moduleRevision : removalPending) {
 					removalPendingBundles.add(moduleRevision.getBundle());
 				}
 				return removalPendingBundles;
 			} finally {
-				moduleDataBase.unlockRead();
+				moduleDatabase.unlockRead();
 			}
 		}
 
 		@Override
 		public Collection<Bundle> getDependencyClosure(Collection<Bundle> bundles) {
 			Collection<Module> modules = getModules(bundles);
-			moduleDataBase.lockRead();
+			moduleDatabase.lockRead();
 			try {
-				Collection<Module> closure = getRefreshClosure(modules, moduleDataBase.getWiringsCopy());
+				Collection<Module> closure = getRefreshClosure(modules, moduleDatabase.getWiringsCopy());
 				Collection<Bundle> result = new ArrayList<Bundle>(closure.size());
 				for (Module module : closure) {
 					result.add(module.getBundle());
 				}
 				return result;
 			} finally {
-				moduleDataBase.unlockRead();
+				moduleDatabase.unlockRead();
 			}
 		}
 
@@ -939,9 +939,9 @@ public final class ModuleContainer {
 			try {
 				refresh(eventObject);
 			} catch (ResolutionException e) {
-				adaptor.publishContainerEvent(ContainerEvent.ERROR, moduleDataBase.getModule(0), e);
+				adaptor.publishContainerEvent(ContainerEvent.ERROR, moduleDatabase.getModule(0), e);
 			} finally {
-				adaptor.publishContainerEvent(ContainerEvent.REFRESH, moduleDataBase.getModule(0), null, frameworkListeners);
+				adaptor.publishContainerEvent(ContainerEvent.REFRESH, moduleDatabase.getModule(0), null, frameworkListeners);
 			}
 		}
 
@@ -1006,7 +1006,7 @@ public final class ModuleContainer {
 			if (module.getStartLevel() == startlevel) {
 				return; // do nothing
 			}
-			moduleDataBase.setStartLevel(module, startlevel);
+			moduleDatabase.setStartLevel(module, startlevel);
 			// queue start level operation in the background
 			// notice that we only do one start level operation at a time
 			CopyOnWriteIdentityMap<Module, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<Module, FrameworkListener[]>();
@@ -1031,7 +1031,7 @@ public final class ModuleContainer {
 			// queue start level operation in the background
 			// notice that we only do one start level operation at a time
 			CopyOnWriteIdentityMap<Module, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<Module, FrameworkListener[]>();
-			dispatchListeners.put(moduleDataBase.getModule(0), listeners);
+			dispatchListeners.put(moduleDatabase.getModule(0), listeners);
 			ListenerQueue<Module, FrameworkListener[], Integer> queue = new ListenerQueue<Module, FrameworkListener[], Integer>(getManager());
 			queue.queueListeners(dispatchListeners.entrySet(), this);
 
@@ -1041,13 +1041,13 @@ public final class ModuleContainer {
 
 		@Override
 		public int getInitialBundleStartLevel() {
-			return moduleDataBase.getInitialModuleStartLevel();
+			return moduleDatabase.getInitialModuleStartLevel();
 		}
 
 		@Override
 		public void setInitialBundleStartLevel(int startlevel) {
 			checkAdminPermission(getBundle(), AdminPermission.STARTLEVEL);
-			moduleDataBase.setInitialModuleStartLevel(startlevel);
+			moduleDatabase.setInitialModuleStartLevel(startlevel);
 		}
 
 		@Override
@@ -1085,13 +1085,13 @@ public final class ModuleContainer {
 					for (int i = currentSL; i < newStartLevel; i++) {
 						int toStartLevel = i + 1;
 						activeStartLevel.set(toStartLevel);
-						incStartLevel(toStartLevel, moduleDataBase.getSortedModules(Sort.BY_START_LEVEL));
+						incStartLevel(toStartLevel, moduleDatabase.getSortedModules(Sort.BY_START_LEVEL));
 					}
 				} else {
 					for (int i = currentSL; i > newStartLevel; i--) {
 						int toStartLevel = i - 1;
 						activeStartLevel.set(toStartLevel);
-						decStartLevel(toStartLevel, moduleDataBase.getSortedModules(Sort.BY_START_LEVEL, Sort.BY_DEPENDENCY));
+						decStartLevel(toStartLevel, moduleDatabase.getSortedModules(Sort.BY_START_LEVEL, Sort.BY_DEPENDENCY));
 					}
 				}
 				adaptor.publishContainerEvent(ContainerEvent.START_LEVEL, module, null, listeners);
