@@ -20,10 +20,10 @@ import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
-import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.framework.internal.core.BundleHost;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
@@ -92,10 +92,6 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 		if (converter == null)
 			converter = new PluginConverterImpl(adaptor, context);
 		registrations.add(AdaptorUtil.register(PluginConverter.class.getName(), converter, context));
-		String builtinEnabled = FrameworkProperties.getProperty(ConsoleManager.PROP_CONSOLE_ENABLED, ConsoleManager.CONSOLE_BUNDLE);
-		if ("true".equals(builtinEnabled)) { //$NON-NLS-1$
-			registrations.add(AdaptorUtil.register(CommandProvider.class.getName(), new EclipseCommandProvider(context), context));
-		}
 		registrations.add(AdaptorUtil.register(org.eclipse.osgi.service.localization.BundleLocalization.class.getName(), new BundleLocalizationImpl(), context));
 	}
 
