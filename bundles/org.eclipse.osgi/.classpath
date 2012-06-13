@@ -4,13 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="osgi/src"/>
 	<classpathentry kind="src" path="supplement/src"/>
-	<classpathentry kind="src" path="core/adaptor"/>
 	<classpathentry kind="src" path="container/src"/>
-	<classpathentry kind="src" path="core/framework"/>
 	<classpathentry kind="src" path="resolver/src"/>
-	<classpathentry kind="src" path="defaultAdaptor/src"/>
-	<classpathentry kind="src" path="eclipseAdaptor/src"/>
-	<classpathentry kind="src" path="security/src"/>
-	<classpathentry kind="src" path="console/src"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

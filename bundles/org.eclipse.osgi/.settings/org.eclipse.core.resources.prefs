@@ -1,6 +1,5 @@
-#Thu Aug 06 15:31:01 CDT 2009
 eclipse.preferences.version=1
-encoding//core/framework/org/eclipse/osgi/framework/internal/core/osname.aliases=UTF-8
-encoding//core/framework/org/eclipse/osgi/framework/internal/core/processor.aliases=UTF-8
+encoding//container/src/org/eclipse/osgi/framework/internal/core/osname.aliases=UTF-8
+encoding//container/src/org/eclipse/osgi/framework/internal/core/processor.aliases=UTF-8
 encoding//osgi/src=UTF-8
 encoding/<project>=ISO-8859-1
