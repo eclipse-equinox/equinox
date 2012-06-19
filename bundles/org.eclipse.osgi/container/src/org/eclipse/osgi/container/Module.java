@@ -203,6 +203,14 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	/**
+	 * Returns the module container this module is contained in.
+	 * @return the module container.
+	 */
+	public ModuleContainer getContainer() {
+		return revisions.getContainer();
+	}
+
+	/**
 	 * Returns the current {@link ModuleRevision revision} associated with this module.
 	 * If the module is uninstalled then {@code null} is returned.
 	 * @return the current {@link ModuleRevision revision} associated with this module.
