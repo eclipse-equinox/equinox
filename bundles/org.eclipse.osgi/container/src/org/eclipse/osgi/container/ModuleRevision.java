@@ -32,14 +32,16 @@ public final class ModuleRevision implements BundleRevision {
 	private final List<ModuleCapability> capabilities;
 	private final List<ModuleRequirement> requirements;
 	private final ModuleRevisions revisions;
+	private final Object revisionInfo;
 
-	ModuleRevision(String symbolicName, Version version, int types, List<GenericInfo> capabilityInfos, List<GenericInfo> requirementInfos, ModuleRevisions revisions) {
+	ModuleRevision(String symbolicName, Version version, int types, List<GenericInfo> capabilityInfos, List<GenericInfo> requirementInfos, ModuleRevisions revisions, Object revisionInfo) {
 		this.symbolicName = symbolicName;
 		this.version = version;
 		this.types = types;
 		this.capabilities = createCapabilities(capabilityInfos);
 		this.requirements = createRequirements(requirementInfos);
 		this.revisions = revisions;
+		this.revisionInfo = revisionInfo;
 	}
 
 	private List<ModuleCapability> createCapabilities(List<GenericInfo> capabilityInfos) {
@@ -149,6 +151,15 @@ public final class ModuleRevision implements BundleRevision {
 	 */
 	public ModuleRevisions getRevisions() {
 		return revisions;
+	}
+
+	/**
+	 * Returns the revision info for this revision.  The revision info is
+	 * assigned when a revision is created to install a module or update module
+	 * @return the revision info for this revision, may be {@code null}.
+	 */
+	public Object getRevisionInfo() {
+		return revisionInfo;
 	}
 
 	boolean isCurrent() {

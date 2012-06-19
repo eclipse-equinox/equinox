@@ -68,7 +68,7 @@ public class TestModuleContainer {
 				OSGI_WS + "=" + wsName + "; " +
 				OSGI_ARCH + "=" + archName;
 		ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(asMap(systemBundle.getHeaders("")), Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, extraCapabilities);
-		container.install(null, systemBundle.getLocation(), builder);
+		container.install(null, systemBundle.getLocation(), builder, null);
 
 		final List<Throwable> installErrors = new ArrayList<Throwable>(0);
 		// just trying to pound the container with a bunch of installs
@@ -82,7 +82,7 @@ public class TestModuleContainer {
 				public void run() {
 					try {
 						ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(asMap(bundle.getHeaders("")));
-						container.install(null, bundle.getLocation(), builder);
+						container.install(null, bundle.getLocation(), builder, null);
 					} catch (Throwable t) {
 						t.printStackTrace();
 						synchronized (installErrors) {
@@ -364,7 +364,7 @@ public class TestModuleContainer {
 		Module b1_v1 = installDummyModule("b1_v1.MF", "b1_v1", container);
 		installDummyModule("b1_v2.MF", "b1_v2", container);
 		try {
-			container.update(b1_v1, OSGiManifestBuilderFactory.createBuilder(getManifest("b1_v2.MF")));
+			container.update(b1_v1, OSGiManifestBuilderFactory.createBuilder(getManifest("b1_v2.MF")), null);
 			Assert.fail("Expected to fail update because of a collision.");
 		} catch (BundleException e) {
 			// expected
@@ -378,7 +378,7 @@ public class TestModuleContainer {
 		ModuleContainer container = adaptor.getContainer();
 		Module b1_v1 = installDummyModule("b1_v1.MF", "b1_v1", container);
 		try {
-			container.update(b1_v1, OSGiManifestBuilderFactory.createBuilder(getManifest("b1_v1.MF")));
+			container.update(b1_v1, OSGiManifestBuilderFactory.createBuilder(getManifest("b1_v1.MF")), null);
 		} catch (BundleException e) {
 			Assert.assertNull("Expected to succeed update to same revision.", e);
 		}
@@ -392,7 +392,7 @@ public class TestModuleContainer {
 		Module b1_v1 = installDummyModule("b1_v1.MF", "b1_v1", container);
 		installDummyModule("b1_v2.MF", "b1_v2", container);
 		try {
-			container.update(b1_v1, OSGiManifestBuilderFactory.createBuilder(getManifest("b1_v2.MF")));
+			container.update(b1_v1, OSGiManifestBuilderFactory.createBuilder(getManifest("b1_v2.MF")), null);
 		} catch (BundleException e) {
 			Assert.assertNull("Expected to succeed update to same revision.", e);
 		}
@@ -755,7 +755,7 @@ public class TestModuleContainer {
 
 		ModuleRevision c4Revision0 = c4.getCurrentRevision();
 		// updating to identical content
-		container.update(c4, OSGiManifestBuilderFactory.createBuilder(getManifest("c4_v1.MF")));
+		container.update(c4, OSGiManifestBuilderFactory.createBuilder(getManifest("c4_v1.MF")), null);
 		container.resolve(Arrays.asList(c4), true);
 
 		Collection<ModuleRevision> removalPending = container.getRemovalPending();
@@ -764,7 +764,7 @@ public class TestModuleContainer {
 
 		ModuleRevision c6Revision0 = c6.getCurrentRevision();
 		// updating to identical content
-		container.update(c6, OSGiManifestBuilderFactory.createBuilder(getManifest("c6_v1.MF")));
+		container.update(c6, OSGiManifestBuilderFactory.createBuilder(getManifest("c6_v1.MF")), null);
 		container.resolve(Arrays.asList(c6), true);
 
 		removalPending = container.getRemovalPending();
@@ -772,8 +772,8 @@ public class TestModuleContainer {
 		Assert.assertTrue("Wrong module removalPending: " + removalPending, removalPending.containsAll(Arrays.asList(c4Revision0, c6Revision0)));
 
 		// update again with identical content
-		container.update(c4, OSGiManifestBuilderFactory.createBuilder(getManifest("c4_v1.MF")));
-		container.update(c6, OSGiManifestBuilderFactory.createBuilder(getManifest("c6_v1.MF")));
+		container.update(c4, OSGiManifestBuilderFactory.createBuilder(getManifest("c4_v1.MF")), null);
+		container.update(c6, OSGiManifestBuilderFactory.createBuilder(getManifest("c6_v1.MF")), null);
 		container.resolve(Arrays.asList(c4, c6), true);
 
 		// Again we only have two since the previous current revisions did not have any dependents
@@ -845,7 +845,7 @@ public class TestModuleContainer {
 
 		container.resolve(Arrays.asList(sub2), true);
 
-		container.update(sub1, OSGiManifestBuilderFactory.createBuilder(getManifest("sub1_v2.MF")));
+		container.update(sub1, OSGiManifestBuilderFactory.createBuilder(getManifest("sub1_v2.MF")), null);
 		container.resolve(Arrays.asList(sub1), true);
 
 		ModuleWiring sub1Wiring = sub1.getCurrentRevision().getWiring();
@@ -964,7 +964,7 @@ public class TestModuleContainer {
 		// flush events
 		database.getModuleEvents();
 
-		container.update(lazy1, OSGiManifestBuilderFactory.createBuilder(getManifest("lazy1_v1.MF")));
+		container.update(lazy1, OSGiManifestBuilderFactory.createBuilder(getManifest("lazy1_v1.MF")), null);
 		actual = database.getModuleEvents();
 		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
 				new DummyModuleEvent(lazy1, ModuleEvent.STOPPING, State.STOPPING),
@@ -1315,7 +1315,7 @@ public class TestModuleContainer {
 		Map<String, String> manifest = getManifest(manifestFile);
 		ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(manifest, alias, extraExports, extraCapabilities);
 		Module system = container.getModule(0);
-		return container.install(system, location, builder);
+		return container.install(system, location, builder, null);
 	}
 
 	private Map<String, String> getManifest(String manifestFile) throws IOException, BundleException {

@@ -16,8 +16,8 @@ import org.osgi.framework.Version;
 /**
  * A builder for creating module {@link ModuleRevision} objects.  A builder can only be used by 
  * the module {@link ModuleContainer container} to build revisions when 
- * {@link ModuleContainer#install(Module, String, ModuleRevisionBuilder) 
- * installing} or {@link ModuleContainer#update(Module, ModuleRevisionBuilder) updating} a module.
+ * {@link ModuleContainer#install(Module, String, ModuleRevisionBuilder, Object) 
+ * installing} or {@link ModuleContainer#update(Module, ModuleRevisionBuilder, Object) updating} a module.
  * <p>
  * The builder provides the instructions to the container for creating a {@link ModuleRevision}.
  * @since 3.10
@@ -124,11 +124,12 @@ public final class ModuleRevisionBuilder {
 	 * This builder is used to build a new {@link Module#getCurrentRevision() current}
 	 * revision for the specified module.
 	 * @param module the module to build a new revision for
+	 * @param revisionInfo the revision info for the new revision, may be {@code null}
 	 * @return the new new {@link Module#getCurrentRevision() current} revision.
 	 */
-	ModuleRevision addRevision(Module module) {
+	ModuleRevision addRevision(Module module, Object revisionInfo) {
 		ModuleRevisions revisions = module.getRevisions();
-		ModuleRevision revision = new ModuleRevision(symbolicName, version, types, capabilityInfos, requirementInfos, revisions);
+		ModuleRevision revision = new ModuleRevision(symbolicName, version, types, capabilityInfos, requirementInfos, revisions, revisionInfo);
 		revisions.addRevision(revision);
 		return revision;
 	}

@@ -234,14 +234,15 @@ public class ModuleDatabase {
 	 * A write operation protected by the {@link #lockWrite() write} lock.
 	 * @param location the location to use for the installation
 	 * @param builder the builder to use to create the new revision
+	 * @param revisionInfo the revision info for the new revision, may be {@code null}.
 	 * @return the installed module
 	 */
-	final Module install(String location, ModuleRevisionBuilder builder) {
+	final Module install(String location, ModuleRevisionBuilder builder, Object revisionInfo) {
 		lockWrite();
 		try {
 			int startlevel = Constants.SYSTEM_BUNDLE_LOCATION.equals(location) ? 0 : getInitialModuleStartLevel();
 			long id = Constants.SYSTEM_BUNDLE_LOCATION.equals(location) ? 0 : getNextIdAndIncrement();
-			Module module = load(location, builder, id, null, startlevel);
+			Module module = load(location, builder, revisionInfo, id, null, startlevel);
 			module.setlastModified(System.currentTimeMillis());
 			incrementTimestamp();
 			return module;
@@ -250,7 +251,7 @@ public class ModuleDatabase {
 		}
 	}
 
-	final Module load(String location, ModuleRevisionBuilder builder, long id, EnumSet<Settings> settings, int startlevel) {
+	final Module load(String location, ModuleRevisionBuilder builder, Object revisionInfo, long id, EnumSet<Settings> settings, int startlevel) {
 		// sanity check
 		checkWrite();
 		if (modulesByLocations.containsKey(location))
@@ -263,7 +264,7 @@ public class ModuleDatabase {
 		} else {
 			module = adaptor.createModule(location, id, settings, startlevel);
 		}
-		builder.addRevision(module);
+		builder.addRevision(module, revisionInfo);
 		modulesByLocations.put(location, module);
 		modulesById.put(id, module);
 		if (settings != null)
@@ -340,12 +341,13 @@ public class ModuleDatabase {
 	 * A write operation protected by the {@link #lockWrite() write} lock.
 	 * @param module the module for which the revision provides an update for
 	 * @param builder the builder to use to create the new revision
+	 * @param revisionInfo the revision info for the new revision, may be {@code null}.
 	 */
-	final void update(Module module, ModuleRevisionBuilder builder) {
+	final void update(Module module, ModuleRevisionBuilder builder, Object revisionInfo) {
 		lockWrite();
 		try {
 			ModuleRevision oldRevision = module.getCurrentRevision();
-			ModuleRevision newRevision = builder.addRevision(module);
+			ModuleRevision newRevision = builder.addRevision(module, revisionInfo);
 			String name = newRevision.getSymbolicName();
 			Collection<ModuleRevision> sameName = revisionByName.get(name);
 			if (sameName == null) {
@@ -1072,7 +1074,8 @@ public class ModuleDatabase {
 
 			// startlevel
 			int startlevel = in.readInt();
-			Module module = moduleDatabase.load(location, builder, id, settings, startlevel);
+			Object revisionInfo = moduleDatabase.adaptor.getRevisionInfo(location, id);
+			Module module = moduleDatabase.load(location, builder, revisionInfo, id, settings, startlevel);
 
 			// last modified
 			module.setlastModified(in.readLong());

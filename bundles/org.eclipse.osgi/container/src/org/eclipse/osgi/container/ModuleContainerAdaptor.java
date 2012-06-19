@@ -155,4 +155,14 @@ public abstract class ModuleContainerAdaptor {
 	 * @return the system module
 	 */
 	public abstract SystemModule createSystemModule();
+
+	/**
+	 * Returns the current revision info for a module with the specified location and id
+	 * @param location the location of the module
+	 * @param id the id of the module
+	 * @return the revision info, may be {@code null}
+	 */
+	public Object getRevisionInfo(String location, long id) {
+		return null;
+	}
 }

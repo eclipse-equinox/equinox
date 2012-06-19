@@ -147,11 +147,12 @@ public final class ModuleContainer {
 	 * @param origin the module performing the install, may be {@code null}.
 	 * @param location The location identifier of the module to install. 
 	 * @param builder the builder used to create the revision to install.
+	 * @param revisionInfo the revision info for the new revision, may be {@code null}.
 	 * @return a new module or a existing module if one exists at the 
 	 *     specified location.
 	 * @throws BundleException if some error occurs installing the module
 	 */
-	public Module install(Module origin, String location, ModuleRevisionBuilder builder) throws BundleException {
+	public Module install(Module origin, String location, ModuleRevisionBuilder builder, Object revisionInfo) throws BundleException {
 		String name = builder.getSymbolicName();
 		boolean locationLocked = false;
 		boolean nameLocked = false;
@@ -215,7 +216,7 @@ public final class ModuleContainer {
 				throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
 			}
 
-			Module result = moduleDatabase.install(location, builder);
+			Module result = moduleDatabase.install(location, builder, revisionInfo);
 
 			adaptor.publishEvent(ModuleEvent.INSTALLED, result);
 
@@ -235,9 +236,10 @@ public final class ModuleContainer {
 	 * revision of the new module.
 	 * @param module the module to update
 	 * @param builder the builder used to create the revision for the update.
+	 * @param revisionInfo the revision info for the new revision, may be {@code null}.
 	 * @throws BundleException if some error occurs updating the module
 	 */
-	public void update(Module module, ModuleRevisionBuilder builder) throws BundleException {
+	public void update(Module module, ModuleRevisionBuilder builder, Object revisionInfo) throws BundleException {
 		String name = builder.getSymbolicName();
 		boolean nameLocked = false;
 		try {
@@ -300,7 +302,7 @@ public final class ModuleContainer {
 						module.setState(State.INSTALLED);
 						adaptor.publishEvent(ModuleEvent.UNRESOLVED, module);
 					}
-					moduleDatabase.update(module, builder);
+					moduleDatabase.update(module, builder, revisionInfo);
 				} catch (BundleException e) {
 					updateError = e;
 				}
