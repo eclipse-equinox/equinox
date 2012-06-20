@@ -388,6 +388,30 @@ public final class OSGiManifestBuilderFactory {
 			attributes.put(EquinoxModuleDataNamespace.CAPABILITY_CLASSPATH, classpath);
 		}
 
+		// Get the buddy policy list
+		ManifestElement[] buddyPolicies = ManifestElement.parseHeader(EquinoxModuleDataNamespace.BUDDY_POLICY_HEADER, manifest.get(EquinoxModuleDataNamespace.BUDDY_POLICY_HEADER));
+		if (buddyPolicies != null) {
+			List<String> policies = new ArrayList<String>();
+			for (ManifestElement element : buddyPolicies) {
+				for (String component : element.getValueComponents()) {
+					policies.add(component);
+				}
+			}
+			attributes.put(EquinoxModuleDataNamespace.CAPABILITY_BUDDY_POLICY, policies);
+		}
+
+		// Get the registered buddy list
+		ManifestElement[] registeredBuddies = ManifestElement.parseHeader(EquinoxModuleDataNamespace.REGISTERED_BUDDY_HEADER, manifest.get(EquinoxModuleDataNamespace.REGISTERED_BUDDY_HEADER));
+		if (registeredBuddies != null) {
+			List<String> buddies = new ArrayList<String>();
+			for (ManifestElement element : registeredBuddies) {
+				for (String component : element.getValueComponents()) {
+					buddies.add(component);
+				}
+			}
+			attributes.put(EquinoxModuleDataNamespace.CAPABILITY_BUDDY_REGISTERED, buddies);
+		}
+
 		// only create the capability if the attributes is not empty
 		if (!attributes.isEmpty()) {
 			builder.addCapability(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE, Collections.<String, String> emptyMap(), attributes);
