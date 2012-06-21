@@ -264,7 +264,8 @@ public class ModuleDatabase {
 		} else {
 			module = adaptor.createModule(location, id, settings, startlevel);
 		}
-		builder.addRevision(module, revisionInfo);
+		ModuleRevision revision = builder.addRevision(module, revisionInfo);
+		adaptor.associateRevision(revision, revisionInfo);
 		modulesByLocations.put(location, module);
 		modulesById.put(id, module);
 		if (settings != null)

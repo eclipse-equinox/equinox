@@ -165,4 +165,13 @@ public abstract class ModuleContainerAdaptor {
 	public Object getRevisionInfo(String location, long id) {
 		return null;
 	}
+
+	/**
+	 * After a revision is created this method is called with the specified revision info.
+	 * @param revision the newly created revision
+	 * @param revisionInfo the revision info that got associated with the revision
+	 */
+	public void associateRevision(ModuleRevision revision, Object revisionInfo) {
+		// do nothing by default
+	}
 }
