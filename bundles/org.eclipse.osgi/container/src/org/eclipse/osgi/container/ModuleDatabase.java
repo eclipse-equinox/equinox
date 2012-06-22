@@ -88,9 +88,15 @@ public class ModuleDatabase {
 	final AtomicLong nextId;
 
 	/**
-	 * Holds the current timestamp of this database.
+	 * Holds the current timestamp for revisions of this database.
 	 */
-	final AtomicLong timeStamp;
+	final AtomicLong revisionsTimeStamp;
+
+	/**
+	 * Holds the current timestamp for all changes to this database.
+	 * This includes changes to revisions and changes to module settings.
+	 */
+	final AtomicLong allTimeStamp;
 
 	private final Capabilities capabilities;
 
@@ -135,7 +141,8 @@ public class ModuleDatabase {
 		this.wirings = new HashMap<ModuleRevision, ModuleWiring>();
 		// Start at id 1 because 0 is reserved for the system bundle
 		this.nextId = new AtomicLong(1);
-		this.timeStamp = new AtomicLong(0);
+		this.revisionsTimeStamp = new AtomicLong(0);
+		this.allTimeStamp = new AtomicLong(0);
 		this.moduleSettings = new HashMap<Long, EnumSet<Settings>>();
 		this.capabilities = new Capabilities();
 	}
@@ -244,7 +251,7 @@ public class ModuleDatabase {
 			long id = Constants.SYSTEM_BUNDLE_LOCATION.equals(location) ? 0 : getNextIdAndIncrement();
 			Module module = load(location, builder, revisionInfo, id, null, startlevel);
 			module.setlastModified(System.currentTimeMillis());
-			incrementTimestamp();
+			incrementTimestamps(true);
 			return module;
 		} finally {
 			unlockWrite();
@@ -330,7 +337,7 @@ public class ModuleDatabase {
 			cleanupRemovalPending();
 
 			module.setlastModified(System.currentTimeMillis());
-			incrementTimestamp();
+			incrementTimestamps(true);
 		} finally {
 			unlockWrite();
 		}
@@ -377,7 +384,7 @@ public class ModuleDatabase {
 			cleanupRemovalPending();
 
 			module.setlastModified(System.currentTimeMillis());
-			incrementTimestamp();
+			incrementTimestamps(true);
 		} finally {
 			unlockWrite();
 		}
@@ -511,7 +518,7 @@ public class ModuleDatabase {
 		try {
 			wirings.clear();
 			wirings.putAll(newWiring);
-			incrementTimestamp();
+			incrementTimestamps(true);
 		} finally {
 			unlockWrite();
 		}
@@ -529,7 +536,7 @@ public class ModuleDatabase {
 		lockWrite();
 		try {
 			wirings.putAll(deltaWiring);
-			incrementTimestamp();
+			incrementTimestamps(true);
 		} finally {
 			unlockWrite();
 		}
@@ -674,9 +681,9 @@ public class ModuleDatabase {
 	}
 
 	/**
-	 * Returns the current timestamp of this database.
+	 * Returns the current timestamp for the revisions of this database.
 	 * The timestamp is incremented any time a modification
-	 * is made to this database.  For example:
+	 * is made to the revisions in this database.  For example:
 	 * <ul>
 	 *   <li> installing a module
 	 *   <li> updating a module
@@ -687,22 +694,48 @@ public class ModuleDatabase {
 	 * A read operation protected by the {@link #lockRead() read} lock.
 	 * @return the current timestamp of this database.
 	 */
-	final public long getTimestamp() {
+	final public long getRevisionsTimestamp() {
 		lockRead();
 		try {
-			return timeStamp.get();
+			return revisionsTimeStamp.get();
 		} finally {
 			unlockRead();
 		}
 	}
 
 	/**
-	 * Increments the timestamp of this database.
+	 * Returns the current timestamp for  this database.
+	 * The timestamp is incremented any time a modification
+	 * is made to this database.  This includes the modifications
+	 * described in {@link #getRevisionsTimestamp() revisions timestamp}
+	 * and the following modifications related to modules:
+	 * <ul>
+	 *   <li> modifying the initial module start level
+	 *   <li> modifying a module start level
+	 *   <li> modifying a module settings
+	 * </ul>
+	 * <p>
+	 * A read operation protected by the {@link #lockRead() read} lock.
+	 * @return the current timestamp of this database.
 	 */
-	private void incrementTimestamp() {
+	final public long getTimestamp() {
+		lockRead();
+		try {
+			return allTimeStamp.get();
+		} finally {
+			unlockRead();
+		}
+	}
+
+	/**
+	 * Increments the timestamps of this database.
+	 * @param incrementRevision indicates if the revision timestamp should change
+	 */
+	private void incrementTimestamps(boolean incrementRevision) {
 		// sanity check
 		checkWrite();
-		timeStamp.incrementAndGet();
+		revisionsTimeStamp.incrementAndGet();
+		allTimeStamp.incrementAndGet();
 	}
 
 	/**
@@ -819,7 +852,7 @@ public class ModuleDatabase {
 
 	/**
 	 * Loads information into this database from the input data stream.  This data
-	 * base must be empty and never been modified (the {@link #getTimestamp() timestamp} is zero.
+	 * base must be empty and never been modified (the {@link #getRevisionsTimestamp() timestamp} is zero.
 	 * All stored modules are loaded into this database.  If the input stream contains
 	 * wiring then it will also be loaded into this database.
 	 * <p>
@@ -835,7 +868,7 @@ public class ModuleDatabase {
 	public final void load(DataInputStream in) throws IOException {
 		lockWrite();
 		try {
-			if (timeStamp.get() != 0)
+			if (allTimeStamp.get() != 0)
 				throw new IllegalStateException("Can only load into a empty database."); //$NON-NLS-1$
 			Persistence.load(this, in);
 		} finally {
@@ -847,6 +880,7 @@ public class ModuleDatabase {
 		lockWrite();
 		try {
 			moduleSettings.put(module.getId(), EnumSet.copyOf(settings));
+			incrementTimestamps(false);
 		} finally {
 			unlockWrite();
 		}
@@ -857,6 +891,7 @@ public class ModuleDatabase {
 		try {
 			module.checkValid();
 			module.storeStartLevel(startlevel);
+			incrementTimestamps(false);
 		} finally {
 			unlockWrite();
 		}
@@ -875,6 +910,7 @@ public class ModuleDatabase {
 		lockWrite();
 		try {
 			this.initialModuleStartLevel = initialStartlevel;
+			incrementTimestamps(false);
 		} finally {
 			unlockWrite();
 		}
@@ -914,7 +950,7 @@ public class ModuleDatabase {
 
 		public static void store(ModuleDatabase moduleDatabase, DataOutputStream out, boolean persistWirings) throws IOException {
 			out.writeInt(VERSION);
-			out.writeLong(moduleDatabase.getTimestamp());
+			out.writeLong(moduleDatabase.getRevisionsTimestamp());
 			out.writeLong(moduleDatabase.getNextId());
 			out.writeInt(moduleDatabase.getInitialModuleStartLevel());
 
@@ -994,7 +1030,7 @@ public class ModuleDatabase {
 			}
 
 			// Setting the timestamp at the end since some operations increment it
-			moduleDatabase.timeStamp.set(timeStamp);
+			moduleDatabase.revisionsTimeStamp.set(timeStamp);
 		}
 
 		private static void writeModule(Module module, ModuleDatabase moduleDatabase, DataOutputStream out, Map<Object, Integer> objectTable) throws IOException {

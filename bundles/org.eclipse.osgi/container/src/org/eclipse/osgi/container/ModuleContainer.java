@@ -401,7 +401,7 @@ public final class ModuleContainer {
 		long timestamp;
 		moduleDatabase.lockRead();
 		try {
-			timestamp = moduleDatabase.getTimestamp();
+			timestamp = moduleDatabase.getRevisionsTimestamp();
 			wiringClone = moduleDatabase.getWiringsClone();
 			for (Module module : triggers) {
 				ModuleRevision current = module.getCurrentRevision();
@@ -448,7 +448,7 @@ public final class ModuleContainer {
 					// do nothing
 					return null;
 				}
-				timestamp = moduleDatabase.getTimestamp();
+				timestamp = moduleDatabase.getRevisionsTimestamp();
 				wiringClone = moduleDatabase.getWiringsClone();
 				Collection<Module> allModules = moduleDatabase.getModules();
 				for (Module module : allModules) {
@@ -509,7 +509,7 @@ public final class ModuleContainer {
 			}
 			moduleDatabase.lockWrite();
 			try {
-				if (timestamp != moduleDatabase.getTimestamp())
+				if (timestamp != moduleDatabase.getRevisionsTimestamp())
 					return false; // need to try again
 				Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDatabase.getWiringsCopy();
 				for (Map.Entry<ModuleRevision, ModuleWiring> deltaEntry : deltaWiring.entrySet()) {
@@ -584,7 +584,7 @@ public final class ModuleContainer {
 		long timestamp;
 		moduleDatabase.lockRead();
 		try {
-			timestamp = moduleDatabase.getTimestamp();
+			timestamp = moduleDatabase.getRevisionsTimestamp();
 			wiringCopy = moduleDatabase.getWiringsCopy();
 			refreshTriggers = getRefreshClosure(initial, wiringCopy);
 			toRemoveRevisions = new ArrayList<ModuleRevision>();
@@ -652,7 +652,7 @@ public final class ModuleContainer {
 			// finally apply the unresolve to the database
 			moduleDatabase.lockWrite();
 			try {
-				if (timestamp != moduleDatabase.getTimestamp())
+				if (timestamp != moduleDatabase.getRevisionsTimestamp())
 					return null; // need to try again
 				// remove any wires from unresolved wirings that got removed
 				for (Map.Entry<ModuleWiring, Collection<ModuleWire>> entry : toRemoveWireLists.entrySet()) {
