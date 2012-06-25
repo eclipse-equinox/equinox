@@ -321,6 +321,7 @@ public final class ModuleContainer {
 	 * @throws BundleException if some error occurs uninstalling the module
 	 */
 	public void uninstall(Module module) throws BundleException {
+		checkAdminPermission(module.getBundle(), AdminPermission.LIFECYCLE);
 		module.lockStateChange(ModuleEvent.UNINSTALLED);
 		State previousState = module.getState();
 		try {

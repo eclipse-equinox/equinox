@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
+import java.security.AllPermission;
 import java.util.*;
-import org.osgi.framework.Version;
+import org.eclipse.osgi.framework.internal.core.FilterImpl;
+import org.osgi.framework.*;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.resource.Namespace;
 
 /**
  * A builder for creating module {@link ModuleRevision} objects.  A builder can only be used by 
@@ -128,9 +132,52 @@ public final class ModuleRevisionBuilder {
 	 * @return the new new {@link Module#getCurrentRevision() current} revision.
 	 */
 	ModuleRevision addRevision(Module module, Object revisionInfo) {
+		Collection<?> systemNames = Collections.emptyList();
+		Module systemModule = module.getContainer().getModule(0);
+		if (systemModule != null) {
+			ModuleRevision systemRevision = systemModule.getCurrentRevision();
+			List<ModuleCapability> hostCapabilities = systemRevision.getModuleCapabilities(HostNamespace.HOST_NAMESPACE);
+			for (ModuleCapability hostCapability : hostCapabilities) {
+				Object hostNames = hostCapability.getAttributes().get(HostNamespace.HOST_NAMESPACE);
+				if (hostNames instanceof Collection) {
+					systemNames = (Collection<?>) hostNames;
+				} else if (hostNames instanceof String) {
+					systemNames = Arrays.asList(hostNames);
+				}
+			}
+		}
 		ModuleRevisions revisions = module.getRevisions();
 		ModuleRevision revision = new ModuleRevision(symbolicName, version, types, capabilityInfos, requirementInfos, revisions, revisionInfo);
 		revisions.addRevision(revision);
+
+		try {
+			List<ModuleRequirement> hostRequirements = revision.getModuleRequirements(HostNamespace.HOST_NAMESPACE);
+			for (ModuleRequirement hostRequirement : hostRequirements) {
+				FilterImpl f = null;
+				String filterSpec = hostRequirement.getDirectives().get(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
+				if (filterSpec != null) {
+					try {
+						f = FilterImpl.newInstance(filterSpec);
+						String hostName = f.getPrimaryKeyValue(HostNamespace.HOST_NAMESPACE);
+						if (hostName != null) {
+							if (systemNames.contains(hostName)) {
+								Bundle b = module.getBundle();
+								if (b != null && !b.hasPermission(new AllPermission())) {
+									throw new SecurityException("Must have AllPermission granted to install an extension bundle"); //$NON-NLS-1$
+								}
+								module.getContainer().checkAdminPermission(module.getBundle(), AdminPermission.EXTENSIONLIFECYCLE);
+							}
+						}
+					} catch (InvalidSyntaxException e) {
+						continue;
+					}
+				}
+			}
+			module.getContainer().checkAdminPermission(module.getBundle(), AdminPermission.LIFECYCLE);
+		} catch (SecurityException e) {
+			revisions.removeRevision(revision);
+			throw e;
+		}
 		return revision;
 	}
 
