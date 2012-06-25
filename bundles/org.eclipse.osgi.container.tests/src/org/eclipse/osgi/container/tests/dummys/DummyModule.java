@@ -13,7 +13,6 @@ package org.eclipse.osgi.container.tests.dummys;
 import java.util.EnumSet;
 import org.eclipse.osgi.container.*;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 
 public class DummyModule extends Module {
 
@@ -27,11 +26,6 @@ public class DummyModule extends Module {
 	@Override
 	public Bundle getBundle() {
 		return null;
-	}
-
-	@Override
-	protected void updateWorker(ModuleRevisionBuilder builder) throws BundleException {
-		// Do nothing
 	}
 
 	@Override

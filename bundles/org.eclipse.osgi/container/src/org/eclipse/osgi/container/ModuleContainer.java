@@ -290,37 +290,24 @@ public final class ModuleContainer {
 
 			module.lockStateChange(ModuleEvent.UPDATED);
 			State previousState = module.getState();
-			BundleException updateError = null;
 			try {
 				// throwing an exception from stop terminates update
 				module.stop(StopOptions.TRANSIENT);
-				try {
-					// throwing an exception from updateWorker keeps the previous revision
-					module.updateWorker(builder);
-					if (Module.RESOLVED_SET.contains(previousState)) {
-						// set the state to installed and publish unresolved event
-						module.setState(State.INSTALLED);
-						adaptor.publishEvent(ModuleEvent.UNRESOLVED, module);
-					}
-					moduleDatabase.update(module, builder, revisionInfo);
-				} catch (BundleException e) {
-					updateError = e;
+				if (Module.RESOLVED_SET.contains(previousState)) {
+					// set the state to installed and publish unresolved event
+					module.setState(State.INSTALLED);
+					adaptor.publishEvent(ModuleEvent.UNRESOLVED, module);
 				}
-
+				moduleDatabase.update(module, builder, revisionInfo);
 			} finally {
 				module.unlockStateChange(ModuleEvent.UPDATED);
 			}
-			if (updateError == null) {
-				// only publish updated event on success
-				adaptor.publishEvent(ModuleEvent.UPDATED, module);
-			}
+			// only publish updated event on success
+			adaptor.publishEvent(ModuleEvent.UPDATED, module);
+
 			if (Module.ACTIVE_SET.contains(previousState)) {
 				// restart the module if necessary
 				module.start(StartOptions.TRANSIENT_RESUME);
-			}
-			if (updateError != null) {
-				// throw cause of update error
-				throw updateError;
 			}
 		} finally {
 			if (nameLocked)

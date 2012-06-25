@@ -551,13 +551,6 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		// Do nothing
 	}
 
-	/**
-	 * @throws BundleException  
-	 */
-	protected void updateWorker(ModuleRevisionBuilder builder) throws BundleException {
-		// do nothing
-	}
-
 	@Override
 	public String toString() {
 		return "[id=" + id + "]";

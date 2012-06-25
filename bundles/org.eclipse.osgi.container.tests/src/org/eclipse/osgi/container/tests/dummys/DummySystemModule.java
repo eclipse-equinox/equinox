@@ -12,7 +12,6 @@ package org.eclipse.osgi.container.tests.dummys;
 
 import org.eclipse.osgi.container.*;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 
 public class DummySystemModule extends SystemModule {
 
@@ -26,11 +25,6 @@ public class DummySystemModule extends SystemModule {
 	@Override
 	public Bundle getBundle() {
 		return null;
-	}
-
-	@Override
-	protected void updateWorker(ModuleRevisionBuilder builder) throws BundleException {
-		// Do nothing
 	}
 
 	@Override
