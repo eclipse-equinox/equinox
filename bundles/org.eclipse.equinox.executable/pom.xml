@@ -28,13 +28,69 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>target-platform-configuration</artifactId>
-        <configuration>
-          <allowConflictingDependencies>true</allowConflictingDependencies>
-        </configuration>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version> 1.7 </version>
+        <executions>
+          <execution>
+            <id>copy-executable-natives</id>
+            <phase>generate-resources</phase>
+            <configuration>
+              <target>
+                <!--  We need to get binary bits from binary repo -->
+                <copy todir="bin" overwrite="true">
+                  <fileset dir="../../../rt.equinox.binaries/org.eclipse.equinox.executable/bin/">
+                    <include name="**/*" />
+                  </fileset>
+                </copy>
+                
+                <!--  Things below were copied from custombuildCallbacks.xml, as Tycho does not support that -->
+                <copy includeEmptyDirs="false" todir="tempBin">
+                  <fileset dir="bin" />
+                </copy>
+                <delete dir="bin" />
+                <move todir="bin">
+                  <fileset dir="tempBin" />
+                </move>
+ 
+                <!-- rename eclipse launchers to "launcher" -->
+                <move todir="bin" verbose="true">
+                  <fileset dir="bin" />
+                  <regexpmapper from="^(.*[/\\])eclipse(.exe)?$" to="\1launcher\2" />
+                </move>
+                <move todir="contributed" verbose="true">
+                  <fileset dir="contributed" />
+                  <regexpmapper from="^(.*[/\\])eclipse(.exe)?$" to="\1launcher\2" />
+                </move>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>bsf</groupId>
+            <artifactId>bsf</artifactId>
+            <version>2.4.0</version>
+          </dependency>
+          <dependency>
+            <groupId>rhino</groupId>
+            <artifactId>js</artifactId>
+            <version>1.7R2</version>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant-apache-bsf</artifactId>
+            <version>1.8.3</version>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant-nodeps</artifactId>
+            <version>1.8.1</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
-
 </project>

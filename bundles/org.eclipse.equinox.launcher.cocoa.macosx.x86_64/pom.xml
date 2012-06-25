@@ -26,6 +26,9 @@
 
   <properties>
     <launcher-binary.version>1500</launcher-binary.version>
+    <os>macosx</os>
+    <ws>cocoa</ws>
+    <arch>x86_64</arch>
   </properties>
 
 </project>
