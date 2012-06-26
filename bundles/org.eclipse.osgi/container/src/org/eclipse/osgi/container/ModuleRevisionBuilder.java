@@ -30,16 +30,40 @@ public final class ModuleRevisionBuilder {
 	/**
 	 * Provides information about a capability or requirement
 	 */
-	static class GenericInfo {
+	public static class GenericInfo {
+		final String namespace;
+		final Map<String, String> directives;
+		final Map<String, Object> attributes;
+
 		GenericInfo(String namespace, Map<String, String> directives, Map<String, Object> attributes) {
 			this.namespace = namespace;
 			this.directives = directives;
 			this.attributes = attributes;
 		}
 
-		final String namespace;
-		final Map<String, String> directives;
-		final Map<String, Object> attributes;
+		/**
+		 * Returns the namespace of this generic info
+		 * @return the namespace
+		 */
+		public String getNamespace() {
+			return namespace;
+		}
+
+		/**
+		 * Returns the directives of this generic info
+		 * @return the directives
+		 */
+		public Map<String, String> getDirectives() {
+			return directives;
+		}
+
+		/**
+		 * Returns the attributes of this generic info
+		 * @return the attributes
+		 */
+		public Map<String, Object> getAttributes() {
+			return attributes;
+		}
 	}
 
 	private String symbolicName = null;
@@ -90,6 +114,14 @@ public final class ModuleRevisionBuilder {
 	}
 
 	/**
+	 * Returns a snapshot of the capabilities for this builder
+	 * @return the capabilities
+	 */
+	public List<GenericInfo> getCapabilities() {
+		return new ArrayList<GenericInfo>(capabilityInfos);
+	}
+
+	/**
 	 * Adds a requirement to this builder using the specified namespace, directives and attributes
 	 * @param namespace the namespace of the requirement
 	 * @param directives the directives of the requirement
@@ -97,6 +129,14 @@ public final class ModuleRevisionBuilder {
 	 */
 	public void addRequirement(String namespace, Map<String, String> directives, Map<String, Object> attributes) {
 		requirementInfos = addGenericInfo(requirementInfos, namespace, directives, attributes);
+	}
+
+	/**
+	 * Returns a snapshot of the requirements for this builder
+	 * @return the requirements
+	 */
+	public List<GenericInfo> getRequirements() {
+		return new ArrayList<GenericInfo>(requirementInfos);
 	}
 
 	/**
@@ -185,7 +225,11 @@ public final class ModuleRevisionBuilder {
 		if (infos == null) {
 			infos = new ArrayList<GenericInfo>();
 		}
-		infos.add(new GenericInfo(namespace, directives, attributes));
+		infos.add(new GenericInfo(namespace, copyUnmodifiableMap(directives), copyUnmodifiableMap(attributes)));
 		return infos;
+	}
+
+	private static <K, V> Map<K, V> copyUnmodifiableMap(Map<K, V> map) {
+		return Collections.unmodifiableMap(new HashMap<K, V>(map));
 	}
 }
