@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * @since 3.10
  */
-public interface ModuleClassLoader {
+public interface ModuleLoader {
 	/**
 	 * 
 	 * @param path
@@ -39,7 +39,8 @@ public interface ModuleClassLoader {
 	public Collection<String> listResources(String path, String filePattern, int options);
 
 	/**
-	 * Closes this module class loader and all of its associated resources
+	 * 
+	 * @return TODO
 	 */
-	public void close();
+	public ClassLoader getClassLoader();
 }

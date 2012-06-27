@@ -31,7 +31,7 @@ public final class ModuleWiring implements BundleWiring {
 	private final List<ModuleRequirement> requirements;
 	private final Collection<String> substitutedPkgNames;
 	private final Object monitor = new Object();
-	private ModuleClassLoader loader = null;
+	private ModuleLoader loader = null;
 	private volatile List<ModuleWire> providedWires;
 	private volatile List<ModuleWire> requiredWires;
 	private volatile boolean isValid = true;
@@ -144,20 +144,26 @@ public final class ModuleWiring implements BundleWiring {
 
 	@Override
 	public ClassLoader getClassLoader() {
-		return (ClassLoader) getModuleClassLoader();
-	}
-
-	public ModuleClassLoader getModuleClassLoader() {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null) {
 			sm.checkPermission(GET_CLASSLOADER_PERM);
 		}
+
+		ModuleLoader current = getModuleLoader();
+		if (current == null) {
+			// must not be valid
+			return null;
+		}
+		return current.getClassLoader();
+	}
+
+	private ModuleLoader getModuleLoader() {
 		synchronized (monitor) {
 			if (!isValid) {
 				return null;
 			}
 			if (loader == null) {
-				loader = revision.getRevisions().getContainer().adaptor.createClassLoader(this);
+				loader = revision.getRevisions().getContainer().adaptor.createModuleLoader(this);
 			}
 			return loader;
 		}
@@ -168,7 +174,7 @@ public final class ModuleWiring implements BundleWiring {
 	public List<URL> findEntries(String path, String filePattern, int options) {
 		if (!hasResourcePermission())
 			return Collections.emptyList();
-		ModuleClassLoader current = getModuleClassLoader();
+		ModuleLoader current = getModuleLoader();
 		if (current == null) {
 			// must not be valid
 			return null;
@@ -180,7 +186,7 @@ public final class ModuleWiring implements BundleWiring {
 	public Collection<String> listResources(String path, String filePattern, int options) {
 		if (!hasResourcePermission())
 			return Collections.emptyList();
-		ModuleClassLoader current = getModuleClassLoader();
+		ModuleLoader current = getModuleLoader();
 		if (current == null) {
 			// must not be valid
 			return null;
@@ -222,13 +228,12 @@ public final class ModuleWiring implements BundleWiring {
 	}
 
 	void invalidate() {
+		ModuleLoader current;
 		synchronized (monitor) {
 			this.isValid = false;
-			if (loader != null) {
-				loader.close();
-				loader = null;
-			}
+			current = loader;
 		}
+		revision.getRevisions().getContainer().getAdaptor().invalidateWiring(this, current);
 	}
 
 	boolean isSubtituted(ModuleCapability capability) {

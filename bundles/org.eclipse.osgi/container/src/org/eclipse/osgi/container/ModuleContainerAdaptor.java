@@ -101,6 +101,7 @@ public abstract class ModuleContainerAdaptor {
 
 	/**
 	 * Publishes the specified container event.
+	 * No locks are held by the container when this method is called
 	 * @param type the type of event
 	 * @param module the module associated with the event
 	 * @param error the error associated with the event, may be {@code null}
@@ -110,10 +111,11 @@ public abstract class ModuleContainerAdaptor {
 
 	/**
 	 * Publishes the specified module event type for the specified module.
+	 * No locks are held by the container when this method is called
 	 * @param type the event type to publish
 	 * @param module the module the event is associated with
 	 */
-	abstract public void publishEvent(ModuleEvent type, Module module);
+	public abstract void publishEvent(ModuleEvent type, Module module);
 
 	/**
 	 * Returns the specified configuration property value
@@ -125,11 +127,11 @@ public abstract class ModuleContainerAdaptor {
 	}
 
 	/**
-	 * Creates a new {@link ModuleClassLoader} for the specified wiring.
-	 * @param wiring the module wiring to create a module class loader for
-	 * @return a new {@link ModuleClassLoader} for the specified wiring.
+	 * Creates a new {@link ModuleLoader} for the specified wiring.
+	 * @param wiring the module wiring to create a module loader for
+	 * @return a new {@link ModuleLoader} for the specified wiring.
 	 */
-	public ModuleClassLoader createClassLoader(ModuleWiring wiring) {
+	public ModuleLoader createModuleLoader(ModuleWiring wiring) {
 		throw new UnsupportedOperationException("Container adaptor does not support module class loaders.");
 	}
 
@@ -172,6 +174,18 @@ public abstract class ModuleContainerAdaptor {
 	 * @param revisionInfo the revision info that got associated with the revision
 	 */
 	public void associateRevision(ModuleRevision revision, Object revisionInfo) {
+		// do nothing by default
+	}
+
+	/**
+	 * This is called when a wiring is made invalid and allows the adaptor to react 
+	 * to this.  This method is called while holding state change lock for the
+	 * module as well as for the module database.  Care must be taken not to introduce
+	 * deadlock.
+	 * @param moduleWiring the module wiring being invalidated
+	 * @param current the current module loader associated with the wiring
+	 */
+	public void invalidateWiring(ModuleWiring moduleWiring, ModuleLoader current) {
 		// do nothing by default
 	}
 }
