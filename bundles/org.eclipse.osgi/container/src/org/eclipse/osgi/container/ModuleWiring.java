@@ -66,6 +66,13 @@ public final class ModuleWiring implements BundleWiring {
 		return ((BundleRevision.TYPE_FRAGMENT & revision.getTypes()) != 0) && !getRequiredWires(HostNamespace.HOST_NAMESPACE).isEmpty();
 	}
 
+	/**
+	 * Returns the same result as {@link #getCapabilities(String)} except
+	 * uses type ModuleCapability.
+	 * @param namespace the namespace
+	 * @return the capabilities
+	 * @see #getCapabilities(String)
+	 */
 	public List<ModuleCapability> getModuleCapabilities(String namespace) {
 		if (!isValid)
 			return null;
@@ -80,6 +87,13 @@ public final class ModuleWiring implements BundleWiring {
 		return result;
 	}
 
+	/**
+	 * Returns the same result as {@link #getRequirements(String)} except
+	 * uses type ModuleRequirement.
+	 * @param namespace the namespace
+	 * @return the requirements
+	 * @see #getRequirements(String)
+	 */
 	public List<ModuleRequirement> getModuleRequirements(String namespace) {
 		if (!isValid)
 			return null;
@@ -105,10 +119,24 @@ public final class ModuleWiring implements BundleWiring {
 		return Converters.asListBundleRequirement(getModuleRequirements(namespace));
 	}
 
+	/**
+	 * Returns the same result as {@link #getProvidedWires(String)} except
+	 * uses type ModuleWire.
+	 * @param namespace the namespace
+	 * @return the wires
+	 * @see #getProvidedWires(String)
+	 */
 	public List<ModuleWire> getProvidedModuleWires(String namespace) {
 		return getWires(namespace, providedWires);
 	}
 
+	/**
+	 * Returns the same result as {@link #getRequiredWires(String)} except
+	 * uses type ModuleWire.
+	 * @param namespace the namespace
+	 * @return the wires
+	 * @see #getRequiredWires(String)
+	 */
 	public List<ModuleWire> getRequiredModuleWires(String namespace) {
 		return getWires(namespace, requiredWires);
 	}
@@ -157,7 +185,12 @@ public final class ModuleWiring implements BundleWiring {
 		return current.getClassLoader();
 	}
 
-	private ModuleLoader getModuleLoader() {
+	/**
+	 * Returns the module loader for this wiring.  If the module 
+	 * loader does not exist yet then one will be created
+	 * @return the module loader for this wiring.
+	 */
+	public ModuleLoader getModuleLoader() {
 		synchronized (monitor) {
 			if (!isValid) {
 				return null;
@@ -247,8 +280,13 @@ public final class ModuleWiring implements BundleWiring {
 		return substitutedPkgNames.contains(packageName);
 	}
 
-	Collection<String> getSubstitutedNames() {
-		return substitutedPkgNames;
+	/**
+	 * Returns an unmodifiable collection of package names for 
+	 * package capabilities that have been substituted.
+	 * @return the substituted package names
+	 */
+	public Collection<String> getSubstitutedNames() {
+		return Collections.unmodifiableCollection(substitutedPkgNames);
 	}
 
 	private boolean hasResourcePermission() {
