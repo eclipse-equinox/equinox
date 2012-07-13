@@ -496,6 +496,19 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 		return newFragmentCapabilities;
 	}
 
+	public void detachFromHosts() {
+		if (!isFragment()) {
+			return;
+		}
+		VersionSupplier[] hosts = getHost().getPossibleSuppliers();
+		if (hosts == null) {
+			return;
+		}
+		for (VersionSupplier possibleHost : hosts) {
+			((ResolverBundle) possibleHost).detachFragment(this, null);
+		}
+	}
+
 	void detachFragment(ResolverBundle fragment, ResolverConstraint reason) {
 		if (isFragment())
 			return;

@@ -1681,6 +1681,7 @@ public class ResolverImpl implements Resolver {
 			resolverExports.remove(bundle.getExportPackages());
 			removeGenerics(bundle.getGenericCapabilities());
 			bundle.detachAllFragments();
+			bundle.detachFromHosts();
 			bundle.initialize(false);
 			if (!removed) {
 				// add back the available exports/capabilities
