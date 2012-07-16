@@ -101,16 +101,12 @@ public abstract class SystemModule extends Module {
 	@Override
 	protected void startWorker() throws BundleException {
 		super.startWorker();
-		if (getId() != 0)
-			return;
 		((ContainerStartLevel) getRevisions().getContainer().getFrameworkStartLevel()).doContainerStartLevel(this, ContainerStartLevel.USE_BEGINNING_START_LEVEL);
 	}
 
 	@Override
 	protected void stopWorker() throws BundleException {
 		super.stopWorker();
-		if (getId() != 0)
-			return;
 		((ContainerStartLevel) getRevisions().getContainer().getFrameworkStartLevel()).doContainerStartLevel(this, 0);
 	}
 
