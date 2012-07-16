@@ -300,4 +300,9 @@ public final class ModuleWiring implements BundleWiring {
 		}
 		return true;
 	}
+
+	public void addDynamicImports(ModuleRevisionBuilder builder) {
+		// TODO Need to update the requirements of the wiring and the revision
+		// TODO should make sure to add a directive that indicates the requirement should not be persisted
+	}
 }
