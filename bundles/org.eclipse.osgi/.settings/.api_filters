@@ -1,31 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.osgi" version="2">
-    <resource path="container/src/org/eclipse/osgi/container/builders/OSGiManifestBuilderFactory.java" type="org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory">
-        <filter id="647004193">
-            <message_arguments>
-                <message_argument value="org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory.addPackageImports(ModuleRevisionBuilder, ManifestElement[], Collection&lt;String&gt;, boolean)"/>
-                <message_argument value="StringBuilder"/>
-                <message_argument value="length()"/>
-                <message_argument value="JavaSE-1.6"/>
-            </message_arguments>
-        </filter>
-        <filter id="647004193">
-            <message_arguments>
-                <message_argument value="org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory.getFragmentHost(ModuleRevisionBuilder, ManifestElement[])"/>
-                <message_argument value="StringBuilder"/>
-                <message_argument value="length()"/>
-                <message_argument value="JavaSE-1.6"/>
-            </message_arguments>
-        </filter>
-        <filter id="647004193">
-            <message_arguments>
-                <message_argument value="org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory.getRequireBundle(ModuleRevisionBuilder, ManifestElement[])"/>
-                <message_argument value="StringBuilder"/>
-                <message_argument value="length()"/>
-                <message_argument value="JavaSE-1.6"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="core/framework/org/eclipse/osgi/framework/internal/protocol/URLStreamHandlerFactoryProxyFor15.java" type="org.eclipse.osgi.framework.internal.protocol.URLStreamHandlerFactoryProxyFor15">
         <filter comment="Code is protected when running on a limited environment" id="646971428">
             <message_arguments>
