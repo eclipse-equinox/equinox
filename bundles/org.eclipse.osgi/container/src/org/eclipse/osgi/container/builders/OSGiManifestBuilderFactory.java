@@ -14,13 +14,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import org.eclipse.osgi.container.ModuleRevisionBuilder;
-import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
-import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
-import org.eclipse.osgi.framework.internal.core.FilterImpl;
-import org.eclipse.osgi.framework.internal.core.Tokenizer;
+import org.eclipse.osgi.container.namespaces.*;
+import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.framework.Constants;
 import org.osgi.framework.namespace.*;
 import org.osgi.framework.wiring.BundleRevision;
 
@@ -70,6 +69,8 @@ public final class OSGiManifestBuilderFactory {
 		getFragmentHost(builder, ManifestElement.parseHeader(Constants.FRAGMENT_HOST, manifest.get(Constants.FRAGMENT_HOST)));
 
 		convertBREEs(builder, manifest);
+
+		getNativeCode(builder, manifest);
 		return builder;
 	}
 
@@ -138,7 +139,7 @@ public final class OSGiManifestBuilderFactory {
 		return symbolicName == null ? symbolicNameAlias : symbolicName;
 	}
 
-	private static void getPackageExports(ModuleRevisionBuilder builder, ManifestElement[] exportElements, Object symbolicName, Collection<Map<String, Object>> exportedPackages) throws BundleException {
+	private static void getPackageExports(ModuleRevisionBuilder builder, ManifestElement[] exportElements, Object symbolicName, Collection<Map<String, Object>> exportedPackages) {
 		if (exportElements == null)
 			return;
 		for (ManifestElement exportElement : exportElements) {
@@ -250,7 +251,7 @@ public final class OSGiManifestBuilderFactory {
 		return directives;
 	}
 
-	private static void getRequireBundle(ModuleRevisionBuilder builder, ManifestElement[] requireBundles) throws BundleException {
+	private static void getRequireBundle(ModuleRevisionBuilder builder, ManifestElement[] requireBundles) {
 		if (requireBundles == null)
 			return;
 		for (ManifestElement requireElement : requireBundles) {
@@ -280,7 +281,7 @@ public final class OSGiManifestBuilderFactory {
 		}
 	}
 
-	private static void getFragmentHost(ModuleRevisionBuilder builder, ManifestElement[] fragmentHosts) throws BundleException {
+	private static void getFragmentHost(ModuleRevisionBuilder builder, ManifestElement[] fragmentHosts) {
 		if (fragmentHosts == null || fragmentHosts.length == 0)
 			return;
 
@@ -309,7 +310,7 @@ public final class OSGiManifestBuilderFactory {
 		builder.addRequirement(HostNamespace.HOST_NAMESPACE, directives, new HashMap<String, Object>(0));
 	}
 
-	private static void getProvideCapabilities(ModuleRevisionBuilder builder, ManifestElement[] provideElements) throws BundleException {
+	private static void getProvideCapabilities(ModuleRevisionBuilder builder, ManifestElement[] provideElements) {
 		if (provideElements == null)
 			return;
 		for (ManifestElement provideElement : provideElements) {
@@ -360,11 +361,11 @@ public final class OSGiManifestBuilderFactory {
 				attributes.put(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY, policyName);
 				String includeSpec = policy.getDirective(Constants.INCLUDE_DIRECTIVE);
 				if (includeSpec != null) {
-					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_INCLUDE_ATTRIBUTE, convertValue("List<String>", includeSpec));
+					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_INCLUDE_ATTRIBUTE, convertValue("List<String>", includeSpec)); //$NON-NLS-1$
 				}
 				String excludeSpec = policy.getDirective(Constants.EXCLUDE_DIRECTIVE);
 				if (excludeSpec != null) {
-					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE, convertValue("List<String>", excludeSpec));
+					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE, convertValue("List<String>", excludeSpec)); //$NON-NLS-1$
 				}
 			}
 		}
@@ -581,5 +582,94 @@ public final class OSGiManifestBuilderFactory {
 		String eeName = ee1 + (ee2 == null ? "" : '/' + ee2); //$NON-NLS-1$
 
 		return new String[] {eeName, v1};
+	}
+
+	private static void getNativeCode(ModuleRevisionBuilder builder, Map<String, String> manifest) throws BundleException {
+		ManifestElement[] elements = ManifestElement.parseHeader(Constants.BUNDLE_NATIVECODE, manifest.get(Constants.BUNDLE_NATIVECODE));
+		if (elements == null) {
+			return;
+		}
+
+		boolean optional = elements.length > 0 && elements[elements.length - 1].getValue().equals("*"); //$NON-NLS-1$
+
+		AliasMapper aliasMapper = new AliasMapper();
+		StringBuilder allFilters = new StringBuilder();
+		allFilters.append("(|"); //$NON-NLS-1$
+		for (ManifestElement nativeCode : elements) {
+			List<String> nativePaths = new ArrayList<String>(Arrays.asList(nativeCode.getValueComponents()));
+			StringBuilder filter = new StringBuilder();
+
+			filter.append("(&"); //$NON-NLS-1$
+			addToNativeCodeFilter(filter, nativeCode, Constants.BUNDLE_NATIVECODE_OSNAME, aliasMapper);
+			addToNativeCodeFilter(filter, nativeCode, Constants.BUNDLE_NATIVECODE_PROCESSOR, aliasMapper);
+			addToNativeCodeFilter(filter, nativeCode, Constants.BUNDLE_NATIVECODE_OSVERSION, aliasMapper);
+			addToNativeCodeFilter(filter, nativeCode, Constants.BUNDLE_NATIVECODE_LANGUAGE, aliasMapper);
+			addToNativeCodeFilter(filter, nativeCode, Constants.SELECTION_FILTER_ATTRIBUTE, aliasMapper);
+			filter.append(')');
+
+			allFilters.append(filter.toString());
+			Map<String, String> directives = new HashMap<String, String>(3);
+			directives.put(EquinoxNativeCodeNamespace.REQUIREMENT_FILTER_DIRECTIVE, filter.toString());
+			directives.put(EquinoxNativeCodeNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE, EquinoxNativeCodeNamespace.RESOLUTION_OPTIONAL);
+
+			Map<String, Object> attributes = new HashMap<String, Object>(2);
+			attributes.put(EquinoxNativeCodeNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE, nativePaths);
+			builder.addRequirement(EquinoxNativeCodeNamespace.EQUINOX_NATIVECODE_NAMESPACE, directives, attributes);
+		}
+		allFilters.append(')');
+
+		if (!optional) {
+			Map<String, String> directives = new HashMap<String, String>(2);
+			directives.put(EquinoxNativeCodeNamespace.REQUIREMENT_FILTER_DIRECTIVE, allFilters.toString());
+			builder.addRequirement(EquinoxNativeCodeNamespace.EQUINOX_NATIVECODE_NAMESPACE, directives, Collections.<String, Object> emptyMap());
+		}
+	}
+
+	private static void addToNativeCodeFilter(StringBuilder filter, ManifestElement nativeCode, String attribute, AliasMapper aliasMapper) {
+		String[] attrValues = nativeCode.getAttributes(attribute);
+		Collection<String> attrAliases = new HashSet<String>(1);
+		if (attrValues != null) {
+			for (String attrValue : attrValues) {
+				Object aliasedName = null;
+				if (Constants.BUNDLE_NATIVECODE_OSNAME.equals(attribute)) {
+					aliasedName = aliasMapper.aliasOSName(attrValue);
+				} else if (Constants.BUNDLE_NATIVECODE_PROCESSOR.equals(attribute)) {
+					aliasedName = aliasMapper.aliasProcessor(attrValue);
+				}
+
+				if (aliasedName == null) {
+					attrAliases.add(attrValue);
+				} else if (aliasedName instanceof String) {
+					attrAliases.add(aliasedName.toString().toLowerCase());
+				} else {
+					for (Iterator<?> iAliases = ((Collection<?>) aliasedName).iterator(); iAliases.hasNext();) {
+						attrAliases.add(iAliases.next().toString().toLowerCase());
+					}
+				}
+			}
+		}
+		String filterAttribute = attribute;
+		if (Constants.BUNDLE_NATIVECODE_OSNAME.equals(attribute)) {
+			filterAttribute = EquinoxNativeCodeNamespace.CAPABILITY_OS_NAME_ATTRIBUTE;
+		} else if (Constants.BUNDLE_NATIVECODE_PROCESSOR.equals(attribute)) {
+			filterAttribute = EquinoxNativeCodeNamespace.CAPABILITY_PROCESSOR_ATTRIBUTE;
+		} else if (Constants.BUNDLE_NATIVECODE_LANGUAGE.equals(attribute)) {
+			filterAttribute = EquinoxNativeCodeNamespace.CAPABILITY_LANGUAGE_ATTRIBUTE;
+		} else if (Constants.BUNDLE_NATIVECODE_OSVERSION.equals(attribute)) {
+			filterAttribute = EquinoxNativeCodeNamespace.CAPABILITY_OS_VERSION_ATTRIBUTE;
+		}
+		if (attrAliases.size() > 1) {
+			filter.append("(|"); //$NON-NLS-1$
+		}
+		for (String attrAlias : attrAliases) {
+			if (EquinoxNativeCodeNamespace.CAPABILITY_OS_VERSION_ATTRIBUTE.equals(attribute)) {
+				filter.append(new VersionRange(attrAlias).toFilterString(attribute));
+			} else {
+				filter.append('(').append(filterAttribute).append('=').append(attrAlias).append(')');
+			}
+		}
+		if (attrAliases.size() > 1) {
+			filter.append(')');
+		}
 	}
 }
