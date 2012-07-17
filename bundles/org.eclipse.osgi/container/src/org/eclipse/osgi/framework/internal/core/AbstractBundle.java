@@ -52,7 +52,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		STATE_CHANGE_TIMEOUT = stateChangeWait;
 	}
 	/** The Framework this bundle is part of */
-	protected final Framework framework;
+	public final Framework framework;
 	/** The state of the bundle. */
 	protected volatile int state;
 	/** A flag to denote whether a bundle state change is in progress */
@@ -64,7 +64,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 	/** ProtectionDomain for the bundle */
 	protected BundleProtectionDomain domain;
 
-	volatile protected ManifestLocalization manifestLocalization = null;
+	public volatile ManifestLocalization manifestLocalization = null;
 
 	/**
 	 * Bundle object constructor. This constructor should not perform any real

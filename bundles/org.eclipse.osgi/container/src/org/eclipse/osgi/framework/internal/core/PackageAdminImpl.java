@@ -11,13 +11,12 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
-import org.eclipse.osgi.internal.debug.Debug;
-
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
 import org.eclipse.osgi.internal.profile.Profile;
@@ -647,7 +646,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 		//This is only called when the framework is shutting down
 	}
 
-	protected void setResolvedBundles(InternalSystemBundle systemBundle) {
+	public void setResolvedBundles(InternalSystemBundle systemBundle) {
 		checkSystemBundle(systemBundle);
 		// Now set the actual state of the bundles from the persisted state.
 		State state = framework.adaptor.getState();

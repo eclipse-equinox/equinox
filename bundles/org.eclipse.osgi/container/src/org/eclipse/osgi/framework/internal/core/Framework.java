@@ -10,15 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
-import org.eclipse.osgi.internal.url.ContentHandlerFactory;
-import org.eclipse.osgi.internal.url.StreamHandlerFactory;
-
-import org.eclipse.osgi.internal.loader.sources.PackageSource;
-
-import org.eclipse.osgi.internal.framework.ContextFinder;
-
-import org.eclipse.osgi.internal.debug.Debug;
-
 import java.io.*;
 import java.lang.reflect.*;
 import java.net.*;
@@ -29,11 +20,17 @@ import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
-import org.eclipse.osgi.internal.loader.*;
+import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.framework.ContextFinder;
+import org.eclipse.osgi.internal.loader.BundleLoader;
+import org.eclipse.osgi.internal.loader.SystemBundleLoader;
+import org.eclipse.osgi.internal.loader.sources.PackageSource;
 import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
 import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
 import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.internal.serviceregistry.*;
+import org.eclipse.osgi.internal.url.ContentHandlerFactory;
+import org.eclipse.osgi.internal.url.StreamHandlerFactory;
 import org.eclipse.osgi.signedcontent.SignedContentFactory;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
@@ -61,7 +58,7 @@ public class Framework implements EventPublisher, Runnable {
 	private static String JAVASE = "JavaSE-"; //$NON-NLS-1$
 	private static String PROFILE_EXT = ".profile"; //$NON-NLS-1$
 	/** FrameworkAdaptor specific functions. */
-	protected FrameworkAdaptor adaptor;
+	public FrameworkAdaptor adaptor;
 	/** Framework properties object.  A reference to the 
 	 * System.getProperies() object.  The properties from
 	 * the adaptor will be merged into these properties.
@@ -74,11 +71,11 @@ public class Framework implements EventPublisher, Runnable {
 	/** The bundles installed in the framework */
 	protected BundleRepository bundles;
 	/** Package Admin object. This object manages the exported packages. */
-	protected PackageAdminImpl packageAdmin;
+	public PackageAdminImpl packageAdmin;
 	/** PermissionAdmin and ConditionalPermissionAdmin impl. This object manages the bundle permissions. */
-	protected SecurityAdmin securityAdmin;
+	public SecurityAdmin securityAdmin;
 	/** Startlevel object. This object manages the framework and bundle startlevels */
-	protected StartLevelManager startLevelManager;
+	public StartLevelManager startLevelManager;
 	/** The ServiceRegistry */
 	private ServiceRegistry serviceRegistry;
 	private final int BSN_VERSION;
@@ -113,7 +110,7 @@ public class Framework implements EventPublisher, Runnable {
 	/* Reservation object for install synchronization */
 	private Map<String, Thread> installLock;
 	/** System Bundle object */
-	protected InternalSystemBundle systemBundle;
+	public InternalSystemBundle systemBundle;
 	private String[] bootDelegation;
 	private String[] bootDelegationStems;
 	private boolean bootDelegateAll = false;
@@ -2001,7 +1998,7 @@ public class Framework implements EventPublisher, Runnable {
 		return (currentTracker == null ? null : currentTracker.getService());
 	}
 
-	ContextFinder getContextFinder() {
+	public ContextFinder getContextFinder() {
 		return contextFinder;
 	}
 
