@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.core.runtime.internal.adaptor;
+package org.eclipse.osgi.internal.log;
 
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 
