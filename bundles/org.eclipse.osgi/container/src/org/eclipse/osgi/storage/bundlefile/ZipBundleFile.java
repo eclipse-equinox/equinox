@@ -10,7 +10,7 @@
  *     Rob Harrop - SpringSource Inc. (bug 253942)
  *******************************************************************************/
 
-package org.eclipse.osgi.baseadaptor.bundlefile;
+package org.eclipse.osgi.storage.bundlefile;
 
 import org.eclipse.osgi.internal.debug.Debug;
 

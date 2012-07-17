@@ -12,13 +12,6 @@
 
 package org.eclipse.osgi.internal.baseadaptor;
 
-import org.eclipse.osgi.internal.location.EquinoxLocations;
-
-import org.eclipse.osgi.internal.debug.Debug;
-import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
-
-import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
-
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -27,17 +20,21 @@ import java.util.*;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.baseadaptor.bundlefile.*;
 import org.eclipse.osgi.baseadaptor.hooks.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
+import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
+import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
+import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.storage.bundlefile.*;
 import org.eclipse.osgi.storagemanager.ManagedOutputStream;
 import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.osgi.util.ManifestElement;

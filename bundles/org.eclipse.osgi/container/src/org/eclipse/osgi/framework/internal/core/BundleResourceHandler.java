@@ -11,10 +11,11 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+
 import java.io.IOException;
 import java.net.*;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.protocol.ProtocolActivator;

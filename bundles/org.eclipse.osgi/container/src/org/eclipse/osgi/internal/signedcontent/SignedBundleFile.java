@@ -11,6 +11,9 @@
 
 package org.eclipse.osgi.internal.signedcontent;
 
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
+
 import java.io.*;
 import java.net.URL;
 import java.security.*;
@@ -18,8 +21,6 @@ import java.security.cert.*;
 import java.security.cert.Certificate;
 import java.util.Date;
 import java.util.Enumeration;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.security.TrustEngine;
 import org.eclipse.osgi.signedcontent.*;

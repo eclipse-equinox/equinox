@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.baseadaptor.weaving;
 
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+
 import java.security.*;
 import java.util.*;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.serviceregistry.HookContext;

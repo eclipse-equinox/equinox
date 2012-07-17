@@ -11,6 +11,8 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+
 import org.eclipse.osgi.internal.debug.Debug;
 
 import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
@@ -20,7 +22,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
 import org.eclipse.osgi.baseadaptor.*;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathEntry;

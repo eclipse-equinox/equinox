@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.baseadaptor.weaving;
 
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
 import org.eclipse.osgi.baseadaptor.*;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook;
 import org.eclipse.osgi.baseadaptor.loader.*;

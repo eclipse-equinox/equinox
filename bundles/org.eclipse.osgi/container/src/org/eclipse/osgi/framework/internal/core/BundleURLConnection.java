@@ -11,11 +11,12 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
 import org.eclipse.osgi.util.NLS;
 

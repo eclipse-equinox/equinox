@@ -11,6 +11,9 @@
 
 package org.eclipse.osgi.baseadaptor;
 
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
+
 import org.eclipse.osgi.internal.debug.Debug;
 
 import java.io.File;
@@ -20,8 +23,6 @@ import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;

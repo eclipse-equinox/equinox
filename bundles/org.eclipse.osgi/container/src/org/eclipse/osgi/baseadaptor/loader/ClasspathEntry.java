@@ -11,9 +11,10 @@
 
 package org.eclipse.osgi.baseadaptor.loader;
 
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
+
 import java.security.ProtectionDomain;
 import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
 

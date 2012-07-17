@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Rob Harrop - SpringSource Inc. (bug 253942)
  *******************************************************************************/
-package org.eclipse.osgi.baseadaptor.bundlefile;
+package org.eclipse.osgi.storage.bundlefile;
 
 import java.io.*;
 import java.net.MalformedURLException;

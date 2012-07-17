@@ -23,7 +23,7 @@ package org.eclipse.osgi.baseadaptor.loader;
  * class loaders when {@link ClasspathManager#findLocalClass(String)} is 
  * called a lock will be obtained for the class name being searched while 
  * calling {@link BaseClassLoader#publicFindLoaded(String)} and 
- * {@link BaseClassLoader#defineClass(String, byte[], ClasspathEntry, org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry)}.
+ * {@link BaseClassLoader#defineClass(String, byte[], ClasspathEntry, org.eclipse.osgi.storage.bundlefile.BundleEntry)}.
  * This prevents other threads from trying to searching for the same class at the
  * same time.  For other class loaders the class loader lock is obtained 
  * instead.  This prevents other threads from trying to search for any 

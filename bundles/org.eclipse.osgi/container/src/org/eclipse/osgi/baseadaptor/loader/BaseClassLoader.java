@@ -11,10 +11,11 @@
 
 package org.eclipse.osgi.baseadaptor.loader;
 
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
+
 import java.net.URL;
 import java.security.ProtectionDomain;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
 
 /**

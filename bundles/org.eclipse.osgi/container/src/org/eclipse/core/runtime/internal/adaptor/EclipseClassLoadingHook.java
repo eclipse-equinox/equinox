@@ -11,6 +11,9 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
+
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 
 import java.io.File;
@@ -20,8 +23,6 @@ import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import org.eclipse.osgi.baseadaptor.*;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
 import org.eclipse.osgi.baseadaptor.loader.*;
 import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;

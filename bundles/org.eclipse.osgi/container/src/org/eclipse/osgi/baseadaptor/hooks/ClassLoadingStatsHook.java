@@ -11,9 +11,10 @@
 
 package org.eclipse.osgi.baseadaptor.hooks;
 
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+
 import java.net.URL;
 import org.eclipse.osgi.baseadaptor.HookRegistry;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathEntry;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;
 

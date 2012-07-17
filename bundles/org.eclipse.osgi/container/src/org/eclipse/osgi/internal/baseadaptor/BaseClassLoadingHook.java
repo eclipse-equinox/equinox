@@ -11,13 +11,14 @@
 
 package org.eclipse.osgi.internal.baseadaptor;
 
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+
 import org.eclipse.osgi.internal.debug.Debug;
 
 import java.io.File;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
 import org.eclipse.osgi.baseadaptor.loader.*;
 import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;

@@ -12,6 +12,8 @@
 
 package org.eclipse.osgi.internal.baseadaptor;
 
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 
 import org.eclipse.osgi.internal.debug.Debug;
@@ -23,7 +25,6 @@ import java.net.URLConnection;
 import java.util.*;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.framework.adaptor.*;

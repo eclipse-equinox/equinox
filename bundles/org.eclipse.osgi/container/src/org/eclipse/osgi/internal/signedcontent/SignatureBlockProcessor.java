@@ -8,14 +8,15 @@
  ******************************************************************************/
 package org.eclipse.osgi.internal.signedcontent;
 
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.*;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.signedcontent.SignerInfo;
 import org.eclipse.osgi.util.NLS;

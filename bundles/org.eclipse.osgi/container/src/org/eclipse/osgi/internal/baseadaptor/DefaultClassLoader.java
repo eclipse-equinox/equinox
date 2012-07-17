@@ -11,8 +11,6 @@
 
 package org.eclipse.osgi.internal.baseadaptor;
 
-import org.eclipse.osgi.internal.debug.Debug;
-
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -21,12 +19,13 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.util.*;
 import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.baseadaptor.bundlefile.*;
 import org.eclipse.osgi.baseadaptor.loader.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.signedcontent.SignedContent;
 import org.eclipse.osgi.signedcontent.SignerInfo;
+import org.eclipse.osgi.storage.bundlefile.*;
 import org.osgi.framework.Bundle;
 
 /**

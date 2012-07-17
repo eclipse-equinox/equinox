@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.stats;
 
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 
@@ -18,7 +20,6 @@ import java.net.URL;
 import java.util.*;
 import org.eclipse.osgi.baseadaptor.HookConfigurator;
 import org.eclipse.osgi.baseadaptor.HookRegistry;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathEntry;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;

@@ -11,10 +11,11 @@
 
 package org.eclipse.osgi.baseadaptor.hooks;
 
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
+
 import java.io.IOException;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 
 /**
  * A factory that creates bundle file objects.

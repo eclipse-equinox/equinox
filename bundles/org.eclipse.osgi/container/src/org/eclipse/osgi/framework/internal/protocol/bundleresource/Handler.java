@@ -11,11 +11,12 @@
 
 package org.eclipse.osgi.framework.internal.protocol.bundleresource;
 
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;

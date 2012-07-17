@@ -11,6 +11,9 @@
 
 package org.eclipse.osgi.baseadaptor.loader;
 
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
+
 import org.eclipse.osgi.internal.debug.Debug;
 
 import java.io.File;
@@ -20,8 +23,6 @@ import java.security.ProtectionDomain;
 import java.util.*;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook;
 import org.eclipse.osgi.framework.adaptor.*;
