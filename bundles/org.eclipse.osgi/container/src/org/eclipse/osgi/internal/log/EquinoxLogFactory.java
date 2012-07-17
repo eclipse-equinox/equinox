@@ -19,11 +19,11 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.osgi.framework.*;
 import org.osgi.service.log.LogService;
 
-public class EclipseLogFactory implements ServiceFactory<FrameworkLog> {
-	final EclipseLogWriter defaultWriter;
+public class EquinoxLogFactory implements ServiceFactory<FrameworkLog> {
+	final EquinoxLogWriter defaultWriter;
 	final LogServiceManager logManager;
 
-	public EclipseLogFactory(EclipseLogWriter defaultWriter, LogServiceManager logManager) {
+	public EquinoxLogFactory(EquinoxLogWriter defaultWriter, LogServiceManager logManager) {
 		this.defaultWriter = defaultWriter;
 		this.logManager = logManager;
 	}
@@ -32,8 +32,8 @@ public class EclipseLogFactory implements ServiceFactory<FrameworkLog> {
 		return createFrameworkLog(bundle, defaultWriter);
 	}
 
-	FrameworkLog createFrameworkLog(Bundle bundle, EclipseLogWriter eclipseWriter) {
-		final EclipseLogWriter logWriter = eclipseWriter == null ? defaultWriter : eclipseWriter;
+	FrameworkLog createFrameworkLog(Bundle bundle, EquinoxLogWriter eclipseWriter) {
+		final EquinoxLogWriter logWriter = eclipseWriter == null ? defaultWriter : eclipseWriter;
 		final Logger logger = bundle == null ? logManager.getSystemBundleLog().getLogger(eclipseWriter.getLoggerName()) : logManager.getSystemBundleLog().getLogger(bundle, logWriter.getLoggerName());
 		return new FrameworkLog() {
 

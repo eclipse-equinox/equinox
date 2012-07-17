@@ -27,7 +27,7 @@ import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.osgi.framework.*;
 
-public class EclipseLogHook implements HookConfigurator, AdaptorHook {
+public class EquinoxLogServices implements HookConfigurator, AdaptorHook {
 	static final String EQUINOX_LOGGER_NAME = "org.eclipse.equinox.logger"; //$NON-NLS-1$
 	static final String PERF_LOGGER_NAME = "org.eclipse.performance.logger"; //$NON-NLS-1$
 	private static final String PROP_LOG_ENABLED = "eclipse.log.enabled"; //$NON-NLS-1$
@@ -35,15 +35,15 @@ public class EclipseLogHook implements HookConfigurator, AdaptorHook {
 	// The eclipse log file extension */
 	private static final String LOG_EXT = ".log"; //$NON-NLS-1$
 	private final LogServiceManager logServiceManager;
-	private final EclipseLogFactory eclipseLogFactory;
-	private final EclipseLogWriter logWriter;
-	private final EclipseLogWriter perfWriter;
+	private final EquinoxLogFactory eclipseLogFactory;
+	private final EquinoxLogWriter logWriter;
+	private final EquinoxLogWriter perfWriter;
 
-	public EclipseLogHook() {
+	public EquinoxLogServices() {
 		String logFileProp = FrameworkProperties.getProperty(EclipseStarter.PROP_LOGFILE);
 		boolean enabled = "true".equals(FrameworkProperties.getProperty(PROP_LOG_ENABLED, "true")); //$NON-NLS-1$ //$NON-NLS-2$
 		if (logFileProp != null) {
-			logWriter = new EclipseLogWriter(new File(logFileProp), EQUINOX_LOGGER_NAME, enabled);
+			logWriter = new EquinoxLogWriter(new File(logFileProp), EQUINOX_LOGGER_NAME, enabled);
 		} else {
 			Location location = EquinoxLocations.getConfigurationLocation();
 			File configAreaDirectory = null;
@@ -52,25 +52,25 @@ public class EclipseLogHook implements HookConfigurator, AdaptorHook {
 				configAreaDirectory = new File(location.getURL().getFile());
 
 			if (configAreaDirectory != null) {
-				String logFileName = Long.toString(System.currentTimeMillis()) + EclipseLogHook.LOG_EXT;
+				String logFileName = Long.toString(System.currentTimeMillis()) + EquinoxLogServices.LOG_EXT;
 				File logFile = new File(configAreaDirectory, logFileName);
 				FrameworkProperties.setProperty(EclipseStarter.PROP_LOGFILE, logFile.getAbsolutePath());
-				logWriter = new EclipseLogWriter(logFile, EQUINOX_LOGGER_NAME, enabled);
+				logWriter = new EquinoxLogWriter(logFile, EQUINOX_LOGGER_NAME, enabled);
 			} else
-				logWriter = new EclipseLogWriter((Writer) null, EQUINOX_LOGGER_NAME, enabled);
+				logWriter = new EquinoxLogWriter((Writer) null, EQUINOX_LOGGER_NAME, enabled);
 		}
 
 		File logFile = logWriter.getFile();
 		if (logFile != null) {
 			File perfLogFile = new File(logFile.getParentFile(), "performance.log"); //$NON-NLS-1$
-			perfWriter = new EclipseLogWriter(perfLogFile, PERF_LOGGER_NAME, true);
+			perfWriter = new EquinoxLogWriter(perfLogFile, PERF_LOGGER_NAME, true);
 		} else {
-			perfWriter = new EclipseLogWriter((Writer) null, PERF_LOGGER_NAME, true);
+			perfWriter = new EquinoxLogWriter((Writer) null, PERF_LOGGER_NAME, true);
 		}
 		if ("true".equals(FrameworkProperties.getProperty(EclipseStarter.PROP_CONSOLE_LOG))) //$NON-NLS-1$
 			logWriter.setConsoleLog(true);
 		logServiceManager = new LogServiceManager(logWriter, perfWriter);
-		eclipseLogFactory = new EclipseLogFactory(logWriter, logServiceManager);
+		eclipseLogFactory = new EquinoxLogFactory(logWriter, logServiceManager);
 
 	}
 

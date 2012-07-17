@@ -27,7 +27,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogService;
 
-public class EclipseLogWriter implements SynchronousLogListener, LogFilter {
+public class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	private static final String PASSWORD = "-password"; //$NON-NLS-1$	
 	/** The session tag */
 	private static final String SESSION = "!SESSION"; //$NON-NLS-1$
@@ -97,7 +97,7 @@ public class EclipseLogWriter implements SynchronousLogListener, LogFilter {
 	 * Constructs an EclipseLog which uses the specified File to log messages to
 	 * @param outFile a file to log messages to
 	 */
-	public EclipseLogWriter(File outFile, String loggerName, boolean enabled) {
+	public EquinoxLogWriter(File outFile, String loggerName, boolean enabled) {
 		this.outFile = outFile;
 		this.writer = null;
 		this.loggerName = loggerName;
@@ -109,7 +109,7 @@ public class EclipseLogWriter implements SynchronousLogListener, LogFilter {
 	 * Constructs an EclipseLog which uses the specified Writer to log messages to
 	 * @param writer a writer to log messages to
 	 */
-	public EclipseLogWriter(Writer writer, String loggerName, boolean enabled) {
+	public EquinoxLogWriter(Writer writer, String loggerName, boolean enabled) {
 		if (writer == null)
 			// log to System.err by default
 			this.writer = logForStream(System.err);
@@ -675,11 +675,11 @@ public class EclipseLogWriter implements SynchronousLogListener, LogFilter {
 			return false;
 		if (loggerName.equals(loggableName))
 			return isLoggable(convertSeverity(loggableLevel));
-		if (EclipseLogHook.PERF_LOGGER_NAME.equals(loggableName))
+		if (EquinoxLogServices.PERF_LOGGER_NAME.equals(loggableName))
 			// we don't want to do anything with performance logger unless
 			// this is the performance logger (check done above).
 			return false;
-		if (!EclipseLogHook.EQUINOX_LOGGER_NAME.equals(loggerName))
+		if (!EquinoxLogServices.EQUINOX_LOGGER_NAME.equals(loggerName))
 			// only the equinox log writer should pay attention to other logs
 			return false;
 		// for now only log errors; probably need this to be configurable
