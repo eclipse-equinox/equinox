@@ -21,8 +21,8 @@ import org.eclipse.osgi.util.NLS;
 /**
  * Internal class.
  */
-public class EclipseEnvironmentInfo implements EnvironmentInfo {
-	private static EclipseEnvironmentInfo singleton;
+public class EquinoxConfiguration implements EnvironmentInfo {
+	private static EquinoxConfiguration singleton;
 	private static String nl;
 	private static String os;
 	private static String ws;
@@ -50,14 +50,14 @@ public class EclipseEnvironmentInfo implements EnvironmentInfo {
 	// this internally to be x86_64.
 	private static final String INTERNAL_AMD64 = "amd64"; //$NON-NLS-1$
 
-	private EclipseEnvironmentInfo() {
+	private EquinoxConfiguration() {
 		super();
 		setupSystemContext();
 	}
 
-	public static EclipseEnvironmentInfo getDefault() {
+	public static EquinoxConfiguration getDefault() {
 		if (singleton == null)
-			singleton = new EclipseEnvironmentInfo();
+			singleton = new EquinoxConfiguration();
 		return singleton;
 	}
 
@@ -175,17 +175,17 @@ public class EclipseEnvironmentInfo implements EnvironmentInfo {
 
 	public static void setAllArgs(String[] allArgs) {
 		// do not check if this is set already to allow arguments to change when multiple applications are launched
-		EclipseEnvironmentInfo.allArgs = allArgs;
+		EquinoxConfiguration.allArgs = allArgs;
 	}
 
 	public static void setAppArgs(String[] appArgs) {
 		// do not check if this is set already to allow arguments to change when multiple applications are launched
-		EclipseEnvironmentInfo.appArgs = appArgs;
+		EquinoxConfiguration.appArgs = appArgs;
 	}
 
 	public static void setFrameworkArgs(String[] frameworkArgs) {
 		// do not check if this is set already to allow arguments to change when multiple applications are launched
-		EclipseEnvironmentInfo.frameworkArgs = frameworkArgs;
+		EquinoxConfiguration.frameworkArgs = frameworkArgs;
 	}
 
 	public static String guessWS(String osName) {

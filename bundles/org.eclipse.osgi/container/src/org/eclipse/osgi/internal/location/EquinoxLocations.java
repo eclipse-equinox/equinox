@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.location;
 
-import org.eclipse.osgi.internal.framework.EclipseEnvironmentInfo;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -167,7 +167,7 @@ public class EquinoxLocations {
 		File launcherDir = new File(launcherFile.getParent());
 		// check for mac os; the os check is copied from EclipseEnvironmentInfo.
 		String macosx = org.eclipse.osgi.service.environment.Constants.OS_MACOSX;
-		if (macosx.equals(EclipseEnvironmentInfo.getDefault().getOS()))
+		if (macosx.equals(EquinoxConfiguration.getDefault().getOS()))
 			launcherDir = getMacOSEclipsoeHomeLocation(launcherDir);
 		return (launcherDir.exists() && launcherDir.isDirectory()) ? launcherDir.getAbsolutePath() : null;
 	}

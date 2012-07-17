@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.adaptor;
 
-import org.eclipse.osgi.internal.framework.EclipseEnvironmentInfo;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -209,15 +209,15 @@ public class EclipseLogWriter implements SynchronousLogListener, LogFilter {
 			// then just skip over them.
 		}
 		// The Bootloader has some information that we might be interested in.
-		write("BootLoader constants: OS=" + EclipseEnvironmentInfo.getDefault().getOS()); //$NON-NLS-1$
-		write(", ARCH=" + EclipseEnvironmentInfo.getDefault().getOSArch()); //$NON-NLS-1$
-		write(", WS=" + EclipseEnvironmentInfo.getDefault().getWS()); //$NON-NLS-1$
-		writeln(", NL=" + EclipseEnvironmentInfo.getDefault().getNL()); //$NON-NLS-1$
+		write("BootLoader constants: OS=" + EquinoxConfiguration.getDefault().getOS()); //$NON-NLS-1$
+		write(", ARCH=" + EquinoxConfiguration.getDefault().getOSArch()); //$NON-NLS-1$
+		write(", WS=" + EquinoxConfiguration.getDefault().getWS()); //$NON-NLS-1$
+		writeln(", NL=" + EquinoxConfiguration.getDefault().getNL()); //$NON-NLS-1$
 		// Add the command-line arguments used to invoke the platform 
 		// XXX: this includes runtime-private arguments - should we do that?
 		if (includeCommandLine) {
-			writeArgs("Framework arguments: ", EclipseEnvironmentInfo.getDefault().getNonFrameworkArgs()); //$NON-NLS-1$
-			writeArgs("Command-line arguments: ", EclipseEnvironmentInfo.getDefault().getCommandLineArgs()); //$NON-NLS-1$
+			writeArgs("Framework arguments: ", EquinoxConfiguration.getDefault().getNonFrameworkArgs()); //$NON-NLS-1$
+			writeArgs("Command-line arguments: ", EquinoxConfiguration.getDefault().getCommandLineArgs()); //$NON-NLS-1$
 		}
 	}
 

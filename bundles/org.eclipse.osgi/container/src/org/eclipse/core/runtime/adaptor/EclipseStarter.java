@@ -11,7 +11,7 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
-import org.eclipse.osgi.internal.framework.EclipseEnvironmentInfo;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 
@@ -744,10 +744,10 @@ public class EclipseStarter {
 	}
 
 	private static String[] processCommandLine(String[] args) throws Exception {
-		EclipseEnvironmentInfo.setAllArgs(args);
+		EquinoxConfiguration.setAllArgs(args);
 		if (args.length == 0) {
-			EclipseEnvironmentInfo.setFrameworkArgs(args);
-			EclipseEnvironmentInfo.setAllArgs(args);
+			EquinoxConfiguration.setFrameworkArgs(args);
+			EquinoxConfiguration.setAllArgs(args);
 			return args;
 		}
 		int[] configArgs = new int[args.length];
@@ -897,8 +897,8 @@ public class EclipseStarter {
 
 		// remove all the arguments consumed by this argument parsing
 		if (configArgIndex == 0) {
-			EclipseEnvironmentInfo.setFrameworkArgs(new String[0]);
-			EclipseEnvironmentInfo.setAppArgs(args);
+			EquinoxConfiguration.setFrameworkArgs(new String[0]);
+			EquinoxConfiguration.setAppArgs(args);
 			return args;
 		}
 		String[] appArgs = new String[args.length - configArgIndex];
@@ -913,8 +913,8 @@ public class EclipseStarter {
 			} else
 				appArgs[j++] = args[i];
 		}
-		EclipseEnvironmentInfo.setFrameworkArgs(frameworkArgs);
-		EclipseEnvironmentInfo.setAppArgs(appArgs);
+		EquinoxConfiguration.setFrameworkArgs(frameworkArgs);
+		EquinoxConfiguration.setAppArgs(appArgs);
 		return appArgs;
 	}
 

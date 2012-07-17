@@ -11,7 +11,7 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
-import org.eclipse.osgi.internal.framework.EclipseEnvironmentInfo;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 
@@ -93,7 +93,7 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 		urlProperties.put("protocol", new String[] {"bundleentry", "bundleresource"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		registrations.add(context.registerService(URLConverter.class.getName(), new URLConverterImpl(), urlProperties));
 
-		registrations.add(AdaptorUtil.register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EclipseEnvironmentInfo.getDefault(), context));
+		registrations.add(AdaptorUtil.register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EquinoxConfiguration.getDefault(), context));
 		registrations.add(AdaptorUtil.register(PlatformAdmin.class.getName(), adaptor.getPlatformAdmin(), context));
 		PluginConverter converter = PluginConverterImpl.getDefault();
 		if (converter == null)
@@ -217,7 +217,7 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 	public void initialize(BaseAdaptor initAdaptor) {
 		this.adaptor = initAdaptor;
 		// EnvironmentInfo has to be initialized first to compute defaults for system context (see bug 88925)
-		EclipseEnvironmentInfo.getDefault();
+		EquinoxConfiguration.getDefault();
 		setDebugOptions();
 	}
 

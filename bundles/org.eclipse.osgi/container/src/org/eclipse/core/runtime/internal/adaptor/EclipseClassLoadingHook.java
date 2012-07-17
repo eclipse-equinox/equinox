@@ -11,7 +11,7 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
-import org.eclipse.osgi.internal.framework.EclipseEnvironmentInfo;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 
 import java.io.File;
 import java.security.ProtectionDomain;
@@ -31,7 +31,7 @@ import org.eclipse.osgi.internal.baseadaptor.BaseClassLoadingHook;
 import org.eclipse.osgi.internal.baseadaptor.BaseStorageHook;
 
 public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurator {
-	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(EclipseEnvironmentInfo.getDefault().getNL());
+	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(EquinoxConfiguration.getDefault().getNL());
 	private static boolean DEFINE_PACKAGES;
 	private final static boolean DEFINE_PACKAGE_ATTRIBUTES = !"noattributes".equals(FrameworkProperties.getProperty("osgi.classloader.define.packages")); //$NON-NLS-1$ //$NON-NLS-2$
 	private static String[] LIB_VARIANTS = buildLibraryVariants();
@@ -48,7 +48,7 @@ public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurat
 
 	private static String[] buildLibraryVariants() {
 		List<String> result = new ArrayList<String>();
-		EclipseEnvironmentInfo info = EclipseEnvironmentInfo.getDefault();
+		EquinoxConfiguration info = EquinoxConfiguration.getDefault();
 		result.add("ws/" + info.getWS() + "/"); //$NON-NLS-1$ //$NON-NLS-2$
 		result.add("os/" + info.getOS() + "/" + info.getOSArch() + "/"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		result.add("os/" + info.getOS() + "/"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -149,9 +149,9 @@ public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurat
 
 	private boolean addInternalClassPath(String var, ArrayList<ClasspathEntry> cpEntries, String cp, ClasspathManager hostloader, BaseData sourcedata, ProtectionDomain sourcedomain) {
 		if (var.equals("ws")) //$NON-NLS-1$
-			return ClasspathManager.addClassPathEntry(cpEntries, "ws/" + EclipseEnvironmentInfo.getDefault().getWS() + cp.substring(4), hostloader, sourcedata, sourcedomain); //$NON-NLS-1$
+			return ClasspathManager.addClassPathEntry(cpEntries, "ws/" + EquinoxConfiguration.getDefault().getWS() + cp.substring(4), hostloader, sourcedata, sourcedomain); //$NON-NLS-1$
 		if (var.equals("os")) //$NON-NLS-1$
-			return ClasspathManager.addClassPathEntry(cpEntries, "os/" + EclipseEnvironmentInfo.getDefault().getOS() + cp.substring(4), hostloader, sourcedata, sourcedomain); //$NON-NLS-1$ 
+			return ClasspathManager.addClassPathEntry(cpEntries, "os/" + EquinoxConfiguration.getDefault().getOS() + cp.substring(4), hostloader, sourcedata, sourcedomain); //$NON-NLS-1$ 
 		if (var.equals("nl")) { //$NON-NLS-1$
 			cp = cp.substring(4);
 			for (int i = 0; i < NL_JAR_VARIANTS.length; i++)
@@ -212,7 +212,7 @@ public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurat
 				if (libFile == null)
 					return null;
 				// see bug 88697 - HP requires libraries to have executable permissions
-				if (org.eclipse.osgi.service.environment.Constants.OS_HPUX.equals(EclipseEnvironmentInfo.getDefault().getOS())) {
+				if (org.eclipse.osgi.service.environment.Constants.OS_HPUX.equals(EquinoxConfiguration.getDefault().getOS())) {
 					try {
 						// use the string array method in case there is a space in the path
 						Runtime.getRuntime().exec(new String[] {"chmod", "755", libFile.getAbsolutePath()}).waitFor(); //$NON-NLS-1$ //$NON-NLS-2$
