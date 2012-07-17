@@ -11,8 +11,9 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
+import org.eclipse.osgi.internal.debug.Debug;
+
 import java.util.*;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.osgi.framework.*;
 import org.osgi.framework.Constants;

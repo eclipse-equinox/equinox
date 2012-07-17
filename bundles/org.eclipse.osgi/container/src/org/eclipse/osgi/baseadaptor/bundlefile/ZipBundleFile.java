@@ -12,12 +12,13 @@
 
 package org.eclipse.osgi.baseadaptor.bundlefile;
 
+import org.eclipse.osgi.internal.debug.Debug;
+
 import java.io.*;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.util.NLS;

@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.internal.baseadaptor;
 
+import org.eclipse.osgi.internal.debug.Debug;
+
 import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
 
 import java.io.*;
@@ -21,7 +23,6 @@ import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.framework.util.ObjectPool;

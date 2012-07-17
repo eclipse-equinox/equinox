@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.baseadaptor.loader;
 
+import org.eclipse.osgi.internal.debug.Debug;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -23,7 +25,6 @@ import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook;
 import org.eclipse.osgi.framework.adaptor.*;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
 import org.eclipse.osgi.internal.baseadaptor.ArrayMap;

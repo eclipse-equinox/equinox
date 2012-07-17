@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.internal.baseadaptor;
 
+import org.eclipse.osgi.internal.debug.Debug;
+
 import java.io.File;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
@@ -20,7 +22,6 @@ import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
 import org.eclipse.osgi.baseadaptor.loader.*;
 import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Constants;

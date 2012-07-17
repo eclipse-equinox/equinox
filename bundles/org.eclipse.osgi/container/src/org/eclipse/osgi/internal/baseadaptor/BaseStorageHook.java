@@ -12,6 +12,8 @@
 
 package org.eclipse.osgi.internal.baseadaptor;
 
+import org.eclipse.osgi.internal.debug.Debug;
+
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -24,7 +26,6 @@ import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.framework.adaptor.*;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;

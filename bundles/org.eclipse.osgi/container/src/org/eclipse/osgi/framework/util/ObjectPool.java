@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.util;
 
+import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
+
 import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.WeakHashMap;
-import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 
 public class ObjectPool {
 	private static String OPTION_DEBUG_OBJECTPOOL_ADDS = Debug.ECLIPSE_OSGI + "/debug/objectPool/adds"; //$NON-NLS-1$

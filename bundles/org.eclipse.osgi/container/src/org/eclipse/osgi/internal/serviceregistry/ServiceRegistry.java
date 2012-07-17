@@ -11,9 +11,10 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
+import org.eclipse.osgi.internal.debug.Debug;
+
 import java.security.*;
 import java.util.*;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.util.NLS;

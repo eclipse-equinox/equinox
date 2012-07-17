@@ -11,6 +11,9 @@
 
 package org.eclipse.osgi.tests.debugoptions;
 
+import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
+import org.eclipse.osgi.internal.debug.FrameworkDebugTraceEntry;
+
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -19,8 +22,6 @@ import java.util.Map.Entry;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.tests.harness.CoreTest;
-import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
-import org.eclipse.osgi.framework.debug.FrameworkDebugTraceEntry;
 import org.eclipse.osgi.service.debug.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.ServiceReference;

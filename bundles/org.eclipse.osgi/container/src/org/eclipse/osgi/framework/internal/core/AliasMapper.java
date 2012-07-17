@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.internal.debug.Debug;
+
 import java.io.*;
 import java.util.*;
-import org.eclipse.osgi.framework.debug.Debug;
 
 /**
  * This class maps aliases.

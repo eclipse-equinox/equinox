@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.debug;
+package org.eclipse.osgi.internal.debug;
 
 import java.io.PrintStream;
 import java.lang.reflect.*;

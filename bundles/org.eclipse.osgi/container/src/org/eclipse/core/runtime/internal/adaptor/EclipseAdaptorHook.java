@@ -11,6 +11,9 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
+
 import org.eclipse.osgi.internal.location.BasicLocation;
 import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
 
@@ -23,8 +26,6 @@ import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.framework.internal.core.BundleHost;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLog;

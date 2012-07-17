@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.internal.loader;
 
+import org.eclipse.osgi.internal.debug.Debug;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
@@ -18,7 +20,6 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.KeyedElement;

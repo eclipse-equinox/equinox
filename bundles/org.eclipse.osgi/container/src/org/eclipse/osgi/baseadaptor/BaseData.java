@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.baseadaptor;
 
+import org.eclipse.osgi.internal.debug.Debug;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -25,7 +27,6 @@ import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;
 import org.eclipse.osgi.framework.adaptor.*;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.protocol.bundleentry.Handler;

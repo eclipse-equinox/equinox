@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.internal.debug.Debug;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -18,7 +20,6 @@ import java.security.Permission;
 import java.security.ProtectionDomain;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.*;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.FrameworkWiring;

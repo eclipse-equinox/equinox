@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.framework.debug;
+package org.eclipse.osgi.internal.debug;
 
 import java.io.*;
 import java.security.AccessController;

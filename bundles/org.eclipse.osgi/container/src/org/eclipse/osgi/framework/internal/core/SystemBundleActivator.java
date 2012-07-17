@@ -11,9 +11,10 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.resolver.StateImpl;
 import org.eclipse.osgi.service.resolver.State;
 import org.osgi.framework.*;

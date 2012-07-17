@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.stats;
 
+import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
+
 import java.io.*;
 import java.net.URL;
 import java.util.*;
@@ -21,8 +24,6 @@ import org.eclipse.osgi.baseadaptor.loader.ClasspathEntry;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;
 import org.eclipse.osgi.framework.adaptor.BundleWatcher;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Bundle;
 

@@ -11,9 +11,10 @@
 
 package org.eclipse.osgi.internal.profile;
 
+import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
+
 import java.io.*;
 import java.util.*;
-import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 
 public class DefaultProfileLogger implements ProfileLogger {

@@ -11,12 +11,13 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.internal.debug.Debug;
+
 import java.io.File;
 import java.io.InputStream;
 import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.event.BatchBundleListener;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
 import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.internal.serviceregistry.*;

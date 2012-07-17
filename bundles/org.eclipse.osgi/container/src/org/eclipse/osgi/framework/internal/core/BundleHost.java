@@ -11,11 +11,12 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.internal.debug.Debug;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.*;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.BundleLoaderProxy;

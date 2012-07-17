@@ -11,11 +11,12 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.internal.debug.Debug;
+
 import java.lang.reflect.*;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.internal.serviceregistry.ServiceReferenceImpl;
 import org.eclipse.osgi.util.NLS;

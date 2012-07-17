@@ -11,9 +11,10 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
+import org.eclipse.osgi.internal.debug.Debug;
+
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.BundleContextImpl;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.util.NLS;

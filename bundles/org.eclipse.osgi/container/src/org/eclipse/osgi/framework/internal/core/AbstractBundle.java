@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.internal.debug.Debug;
+
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
@@ -18,7 +20,6 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;

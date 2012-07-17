@@ -12,6 +12,9 @@
 
 package org.eclipse.osgi.internal.baseadaptor;
 
+import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
+
 import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
 
 import java.io.*;
@@ -26,8 +29,6 @@ import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.*;
 import org.eclipse.osgi.baseadaptor.hooks.*;
 import org.eclipse.osgi.framework.adaptor.*;
-import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;

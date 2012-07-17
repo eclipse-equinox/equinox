@@ -11,6 +11,8 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.internal.debug.Debug;
+
 import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
 
 import java.io.IOException;
@@ -25,7 +27,6 @@ import org.eclipse.osgi.baseadaptor.loader.ClasspathEntry;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.adaptor.StatusException;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;
