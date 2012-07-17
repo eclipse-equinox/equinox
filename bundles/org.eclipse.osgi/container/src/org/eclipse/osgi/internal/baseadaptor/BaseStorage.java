@@ -12,7 +12,7 @@
 
 package org.eclipse.osgi.internal.baseadaptor;
 
-import org.eclipse.osgi.internal.location.LocationManager;
+import org.eclipse.osgi.internal.location.EquinoxLocations;
 
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
@@ -147,14 +147,14 @@ public class BaseStorage implements SynchronousBundleListener {
 
 		// we need to set the install path as soon as possible so we can determine
 		// the absolute location of install relative URLs
-		Location installLoc = LocationManager.getInstallLocation();
+		Location installLoc = EquinoxLocations.getInstallLocation();
 		if (installLoc != null) {
 			URL installURL = installLoc.getURL();
 			// assume install URL is file: based
 			installPath = installURL.getPath();
 		}
-		boolean readOnlyConfiguration = LocationManager.getConfigurationLocation().isReadOnly();
-		storageManager = initFileManager(LocationManager.getOSGiConfigurationDir(), readOnlyConfiguration ? "none" : null, readOnlyConfiguration); //$NON-NLS-1$
+		boolean readOnlyConfiguration = EquinoxLocations.getConfigurationLocation().isReadOnly();
+		storageManager = initFileManager(EquinoxLocations.getOSGiConfigurationDir(), readOnlyConfiguration ? "none" : null, readOnlyConfiguration); //$NON-NLS-1$
 		storageManagerClosed = false;
 		// initialize the storageHooks
 		StorageHook[] hooks = initAdaptor.getHookRegistry().getStorageHooks();
@@ -365,7 +365,7 @@ public class BaseStorage implements SynchronousBundleListener {
 	}
 
 	private BaseData[] readBundleDatas() {
-		InputStream bundleDataStream = findStorageStream(LocationManager.BUNDLE_DATA_FILE);
+		InputStream bundleDataStream = findStorageStream(EquinoxLocations.BUNDLE_DATA_FILE);
 		if (bundleDataStream == null)
 			return null;
 		try {
@@ -448,7 +448,7 @@ public class BaseStorage implements SynchronousBundleListener {
 	private StorageManager getStorageManager() {
 		if (storageManagerClosed)
 			try {
-				storageManager.open(!LocationManager.getConfigurationLocation().isReadOnly());
+				storageManager.open(!EquinoxLocations.getConfigurationLocation().isReadOnly());
 				storageManagerClosed = false;
 			} catch (IOException e) {
 				String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FILEMANAGER_OPEN_ERROR, e.getMessage());
@@ -572,7 +572,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		if (Debug.DEBUG_GENERAL)
 			Debug.println("Saving bundle data ..."); //$NON-NLS-1$
 		try {
-			ManagedOutputStream fmos = getStorageManager().getOutputStream(LocationManager.BUNDLE_DATA_FILE);
+			ManagedOutputStream fmos = getStorageManager().getOutputStream(EquinoxLocations.BUNDLE_DATA_FILE);
 			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(fmos));
 			boolean error = true;
 			try {
@@ -659,8 +659,8 @@ public class BaseStorage implements SynchronousBundleListener {
 		File stateTmpFile = null;
 		File lazyTmpFile = null;
 		try {
-			stateTmpFile = File.createTempFile(LocationManager.STATE_FILE, ".new", LocationManager.getOSGiConfigurationDir()); //$NON-NLS-1$
-			lazyTmpFile = File.createTempFile(LocationManager.LAZY_FILE, ".new", LocationManager.getOSGiConfigurationDir()); //$NON-NLS-1$
+			stateTmpFile = File.createTempFile(EquinoxLocations.STATE_FILE, ".new", EquinoxLocations.getOSGiConfigurationDir()); //$NON-NLS-1$
+			lazyTmpFile = File.createTempFile(EquinoxLocations.LAZY_FILE, ".new", EquinoxLocations.getOSGiConfigurationDir()); //$NON-NLS-1$
 			if (shutdown)
 				stateManager.shutdown(stateTmpFile, lazyTmpFile);
 			else
@@ -668,9 +668,9 @@ public class BaseStorage implements SynchronousBundleListener {
 					stateManager.update(stateTmpFile, lazyTmpFile);
 				}
 			StorageManager curStorageManager = getStorageManager();
-			curStorageManager.lookup(LocationManager.STATE_FILE, true);
-			curStorageManager.lookup(LocationManager.LAZY_FILE, true);
-			curStorageManager.update(new String[] {LocationManager.STATE_FILE, LocationManager.LAZY_FILE}, new String[] {stateTmpFile.getName(), lazyTmpFile.getName()});
+			curStorageManager.lookup(EquinoxLocations.STATE_FILE, true);
+			curStorageManager.lookup(EquinoxLocations.LAZY_FILE, true);
+			curStorageManager.update(new String[] {EquinoxLocations.STATE_FILE, EquinoxLocations.LAZY_FILE}, new String[] {stateTmpFile.getName(), lazyTmpFile.getName()});
 		} catch (IOException e) {
 			adaptor.getFrameworkLog().log(new FrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), e));
 		} finally {
@@ -824,7 +824,7 @@ public class BaseStorage implements SynchronousBundleListener {
 	}
 
 	private StateManager readStateData() {
-		File[] stateFiles = findStorageFiles(new String[] {LocationManager.STATE_FILE, LocationManager.LAZY_FILE});
+		File[] stateFiles = findStorageFiles(new String[] {EquinoxLocations.STATE_FILE, EquinoxLocations.LAZY_FILE});
 		File stateFile = stateFiles[0];
 		File lazyFile = stateFiles[1];
 
@@ -880,7 +880,7 @@ public class BaseStorage implements SynchronousBundleListener {
 			return storageFiles;
 		//if it does not exist, try to read it from the parent
 		Location parentConfiguration = null;
-		Location currentConfiguration = LocationManager.getConfigurationLocation();
+		Location currentConfiguration = EquinoxLocations.getConfigurationLocation();
 		if (currentConfiguration != null && (parentConfiguration = currentConfiguration.getParentLocation()) != null) {
 			try {
 				File stateLocationDir = new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME);
@@ -954,7 +954,7 @@ public class BaseStorage implements SynchronousBundleListener {
 			}
 		}
 		if (storageStream == null) {
-			Location currentConfiguration = LocationManager.getConfigurationLocation();
+			Location currentConfiguration = EquinoxLocations.getConfigurationLocation();
 			Location parentConfiguration = null;
 			if (currentConfiguration != null && (parentConfiguration = currentConfiguration.getParentLocation()) != null) {
 				try {
@@ -1008,7 +1008,7 @@ public class BaseStorage implements SynchronousBundleListener {
 	}
 
 	private void cleanOSGiCache() {
-		File osgiConfig = LocationManager.getOSGiConfigurationDir();
+		File osgiConfig = EquinoxLocations.getOSGiConfigurationDir();
 		if (!AdaptorUtil.rm(osgiConfig))
 			adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, "The -clean (osgi.clean) option was not successful. Unable to clean the storage area: " + osgiConfig.getAbsolutePath(), 0, null, null)); //$NON-NLS-1$
 
@@ -1133,12 +1133,12 @@ public class BaseStorage implements SynchronousBundleListener {
 	}
 
 	private void initBundleStoreRoot() {
-		File configurationLocation = LocationManager.getOSGiConfigurationDir();
+		File configurationLocation = EquinoxLocations.getOSGiConfigurationDir();
 		if (configurationLocation != null)
-			bundleStoreRoot = new File(configurationLocation, LocationManager.BUNDLES_DIR);
+			bundleStoreRoot = new File(configurationLocation, EquinoxLocations.BUNDLES_DIR);
 		else
 			// last resort just default to "bundles"
-			bundleStoreRoot = new File(LocationManager.BUNDLES_DIR);
+			bundleStoreRoot = new File(EquinoxLocations.BUNDLES_DIR);
 	}
 
 	public File getBundleStoreRoot() {

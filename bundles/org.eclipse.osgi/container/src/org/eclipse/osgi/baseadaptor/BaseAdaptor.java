@@ -11,7 +11,7 @@
 
 package org.eclipse.osgi.baseadaptor;
 
-import org.eclipse.osgi.internal.location.LocationManager;
+import org.eclipse.osgi.internal.location.EquinoxLocations;
 
 import org.eclipse.osgi.internal.debug.Debug;
 
@@ -94,8 +94,8 @@ public class BaseAdaptor implements FrameworkAdaptor {
 	 * @param args arguments passed to the adaptor by the framework.
 	 */
 	public BaseAdaptor(String[] args) {
-		if (LocationManager.getConfigurationLocation() == null)
-			LocationManager.initializeLocations();
+		if (EquinoxLocations.getConfigurationLocation() == null)
+			EquinoxLocations.initializeLocations();
 		hookRegistry = new HookRegistry(this);
 		FrameworkLogEntry[] errors = hookRegistry.initialize();
 		if (errors.length > 0)

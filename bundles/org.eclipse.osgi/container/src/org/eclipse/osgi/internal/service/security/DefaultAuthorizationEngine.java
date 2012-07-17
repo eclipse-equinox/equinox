@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.service.security;
 
-import org.eclipse.osgi.internal.location.LocationManager;
+import org.eclipse.osgi.internal.location.EquinoxLocations;
 
 import java.io.*;
 import java.security.cert.CertificateException;
@@ -54,7 +54,7 @@ public class DefaultAuthorizationEngine extends AuthorizationEngine {
 
 	private static final File policyFile;
 	static {
-		File osgiFile = LocationManager.getOSGiConfigurationDir();
+		File osgiFile = EquinoxLocations.getOSGiConfigurationDir();
 		policyFile = new File(osgiFile.getPath() + File.separatorChar + FILE_LOAD_POLICY);
 
 		Properties properties = null;

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.adaptor;
 
-import org.eclipse.osgi.internal.location.LocationManager;
+import org.eclipse.osgi.internal.location.EquinoxLocations;
 
 import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
 
@@ -724,7 +724,7 @@ public class PluginConverterImpl implements PluginConverter {
 	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String targetVersion, boolean analyseJars, Dictionary<String, String> devProps) throws PluginConversionException {
 		convertManifest(pluginBaseLocation, compatibilityManifest, targetVersion, analyseJars, devProps);
 		if (bundleManifestLocation == null) {
-			String cacheLocation = FrameworkProperties.getProperty(LocationManager.PROP_MANIFEST_CACHE);
+			String cacheLocation = FrameworkProperties.getProperty(EquinoxLocations.PROP_MANIFEST_CACHE);
 			bundleManifestLocation = new File(cacheLocation, pluginInfo.getUniqueId() + '_' + pluginInfo.getVersion() + ".MF"); //$NON-NLS-1$
 		}
 		if (upToDate(bundleManifestLocation, pluginManifestLocation, manifestType))

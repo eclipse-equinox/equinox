@@ -11,7 +11,7 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
-import org.eclipse.osgi.internal.location.LocationManager;
+import org.eclipse.osgi.internal.location.EquinoxLocations;
 
 import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
 
@@ -353,8 +353,8 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		if (PluginConverterImpl.getTimeStamp(bundledata.getBundleFile().getBaseFile(), getManifestType()) == getManifestTimeStamp()) {
 			if ((getManifestType() & (PluginConverterImpl.MANIFEST_TYPE_JAR | PluginConverterImpl.MANIFEST_TYPE_BUNDLE)) != 0)
 				return true;
-			String cacheLocation = FrameworkProperties.getProperty(LocationManager.PROP_MANIFEST_CACHE);
-			Location parentConfiguration = LocationManager.getConfigurationLocation().getParentLocation();
+			String cacheLocation = FrameworkProperties.getProperty(EquinoxLocations.PROP_MANIFEST_CACHE);
+			Location parentConfiguration = EquinoxLocations.getConfigurationLocation().getParentLocation();
 			if (parentConfiguration != null) {
 				try {
 					return checkManifestAndParent(cacheLocation, bundledata.getSymbolicName(), bundledata.getVersion().toString(), getManifestType()) != null;
@@ -374,8 +374,8 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		if (result != null)
 			return result;
 		Location parentConfiguration = null;
-		if ((parentConfiguration = LocationManager.getConfigurationLocation().getParentLocation()) != null)
-			result = basicCheckManifest(new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + '/' + LocationManager.MANIFESTS_DIR).toString(), symbolicName, version, inputType);
+		if ((parentConfiguration = EquinoxLocations.getConfigurationLocation().getParentLocation()) != null)
+			result = basicCheckManifest(new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + '/' + EquinoxLocations.MANIFESTS_DIR).toString(), symbolicName, version, inputType);
 		return result;
 	}
 
@@ -435,7 +435,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 	}
 
 	private Dictionary<String, String> generateManifest(Dictionary<String, String> builtIn) throws BundleException {
-		String cacheLocation = FrameworkProperties.getProperty(LocationManager.PROP_MANIFEST_CACHE);
+		String cacheLocation = FrameworkProperties.getProperty(EquinoxLocations.PROP_MANIFEST_CACHE);
 		if (bundledata.getSymbolicName() != null) {
 			Headers<String, String> existingHeaders = checkManifestAndParent(cacheLocation, bundledata.getSymbolicName(), bundledata.getVersion().toString(), manifestType);
 			if (existingHeaders != null)

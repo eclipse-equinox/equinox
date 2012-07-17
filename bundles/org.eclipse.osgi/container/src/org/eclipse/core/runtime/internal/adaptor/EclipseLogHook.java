@@ -11,7 +11,7 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
-import org.eclipse.osgi.internal.location.LocationManager;
+import org.eclipse.osgi.internal.location.EquinoxLocations;
 
 import java.io.*;
 import java.net.URLConnection;
@@ -45,7 +45,7 @@ public class EclipseLogHook implements HookConfigurator, AdaptorHook {
 		if (logFileProp != null) {
 			logWriter = new EclipseLogWriter(new File(logFileProp), EQUINOX_LOGGER_NAME, enabled);
 		} else {
-			Location location = LocationManager.getConfigurationLocation();
+			Location location = EquinoxLocations.getConfigurationLocation();
 			File configAreaDirectory = null;
 			if (location != null)
 				// TODO assumes the URL is a file: url

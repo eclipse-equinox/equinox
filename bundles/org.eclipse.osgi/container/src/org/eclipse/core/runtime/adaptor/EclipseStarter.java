@@ -11,7 +11,7 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
-import org.eclipse.osgi.internal.location.LocationManager;
+import org.eclipse.osgi.internal.location.EquinoxLocations;
 
 import org.eclipse.core.runtime.internal.adaptor.*;
 import org.eclipse.osgi.internal.location.*;
@@ -252,7 +252,7 @@ public class EclipseStarter {
 			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ALREADY_RUNNING);
 		FrameworkProperties.initializeProperties();
 		processCommandLine(args);
-		LocationManager.initializeLocations();
+		EquinoxLocations.initializeLocations();
 		loadConfigurationInfo();
 		finalizeProperties();
 		if (Profile.PROFILE)
@@ -680,7 +680,7 @@ public class EclipseStarter {
 					// skip this entry
 					continue;
 				}
-				location = makeRelative(LocationManager.getInstallLocation().getURL(), location);
+				location = makeRelative(EquinoxLocations.getInstallLocation().getURL(), location);
 				String locationString = INITIAL_LOCATION + location.toExternalForm();
 				result.add(new InitialBundle(locationString, location, level, start));
 			} catch (IOException e) {
@@ -822,25 +822,25 @@ public class EclipseStarter {
 
 			// look for the configuration location .  
 			if (args[i - 1].equalsIgnoreCase(CONFIGURATION)) {
-				FrameworkProperties.setProperty(LocationManager.PROP_CONFIG_AREA, arg);
+				FrameworkProperties.setProperty(EquinoxLocations.PROP_CONFIG_AREA, arg);
 				found = true;
 			}
 
 			// look for the data location for this instance.  
 			if (args[i - 1].equalsIgnoreCase(DATA)) {
-				FrameworkProperties.setProperty(LocationManager.PROP_INSTANCE_AREA, arg);
+				FrameworkProperties.setProperty(EquinoxLocations.PROP_INSTANCE_AREA, arg);
 				found = true;
 			}
 
 			// look for the user location for this instance.  
 			if (args[i - 1].equalsIgnoreCase(USER)) {
-				FrameworkProperties.setProperty(LocationManager.PROP_USER_AREA, arg);
+				FrameworkProperties.setProperty(EquinoxLocations.PROP_USER_AREA, arg);
 				found = true;
 			}
 
 			// look for the launcher location
 			if (args[i - 1].equalsIgnoreCase(LAUNCHER)) {
-				FrameworkProperties.setProperty(LocationManager.PROP_LAUNCHER, arg);
+				FrameworkProperties.setProperty(EquinoxLocations.PROP_LAUNCHER, arg);
 				found = true;
 			}
 			// look for the development mode and class path entries.  
@@ -1131,13 +1131,13 @@ public class EclipseStarter {
 	}
 
 	private static void loadConfigurationInfo() {
-		Location configArea = LocationManager.getConfigurationLocation();
+		Location configArea = EquinoxLocations.getConfigurationLocation();
 		if (configArea == null)
 			return;
 
 		URL location = null;
 		try {
-			location = new URL(configArea.getURL().toExternalForm() + LocationManager.CONFIG_FILE);
+			location = new URL(configArea.getURL().toExternalForm() + EquinoxLocations.CONFIG_FILE);
 		} catch (MalformedURLException e) {
 			// its ok.  This should never happen
 		}

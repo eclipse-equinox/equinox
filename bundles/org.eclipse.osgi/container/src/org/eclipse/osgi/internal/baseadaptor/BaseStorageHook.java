@@ -12,7 +12,7 @@
 
 package org.eclipse.osgi.internal.baseadaptor;
 
-import org.eclipse.osgi.internal.location.LocationManager;
+import org.eclipse.osgi.internal.location.EquinoxLocations;
 
 import org.eclipse.osgi.internal.debug.Debug;
 
@@ -284,9 +284,9 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 
 	File getParentGenerationDir() {
 		Location parentConfiguration = null;
-		Location currentConfiguration = LocationManager.getConfigurationLocation();
+		Location currentConfiguration = EquinoxLocations.getConfigurationLocation();
 		if (currentConfiguration != null && (parentConfiguration = currentConfiguration.getParentLocation()) != null)
-			return new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + '/' + LocationManager.BUNDLES_DIR + '/' + bundleData.getBundleID() + '/' + getGeneration());
+			return new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + '/' + EquinoxLocations.BUNDLES_DIR + '/' + bundleData.getBundleID() + '/' + getGeneration());
 		return null;
 	}
 

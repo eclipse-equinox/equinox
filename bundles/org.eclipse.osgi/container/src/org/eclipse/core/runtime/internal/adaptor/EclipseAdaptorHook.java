@@ -11,7 +11,7 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
-import org.eclipse.osgi.internal.location.LocationManager;
+import org.eclipse.osgi.internal.location.EquinoxLocations;
 
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
@@ -60,30 +60,30 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 		registrations.clear();
 		registerEndorsedXMLParser(context);
 		Dictionary<String, Object> locationProperties = new Hashtable<String, Object>(1);
-		Location location = LocationManager.getUserLocation();
+		Location location = EquinoxLocations.getUserLocation();
 		if (location != null) {
-			locationProperties.put("type", LocationManager.PROP_USER_AREA); //$NON-NLS-1$
+			locationProperties.put("type", EquinoxLocations.PROP_USER_AREA); //$NON-NLS-1$
 			registrations.add(context.registerService(Location.class.getName(), location, locationProperties));
 		}
-		location = LocationManager.getInstanceLocation();
+		location = EquinoxLocations.getInstanceLocation();
 		if (location != null) {
-			locationProperties.put("type", LocationManager.PROP_INSTANCE_AREA); //$NON-NLS-1$
+			locationProperties.put("type", EquinoxLocations.PROP_INSTANCE_AREA); //$NON-NLS-1$
 			registrations.add(context.registerService(Location.class.getName(), location, locationProperties));
 		}
-		location = LocationManager.getConfigurationLocation();
+		location = EquinoxLocations.getConfigurationLocation();
 		if (location != null) {
-			locationProperties.put("type", LocationManager.PROP_CONFIG_AREA); //$NON-NLS-1$
+			locationProperties.put("type", EquinoxLocations.PROP_CONFIG_AREA); //$NON-NLS-1$
 			registrations.add(context.registerService(Location.class.getName(), location, locationProperties));
 		}
-		location = LocationManager.getInstallLocation();
+		location = EquinoxLocations.getInstallLocation();
 		if (location != null) {
-			locationProperties.put("type", LocationManager.PROP_INSTALL_AREA); //$NON-NLS-1$
+			locationProperties.put("type", EquinoxLocations.PROP_INSTALL_AREA); //$NON-NLS-1$
 			registrations.add(context.registerService(Location.class.getName(), location, locationProperties));
 		}
 
-		location = LocationManager.getEclipseHomeLocation();
+		location = EquinoxLocations.getEclipseHomeLocation();
 		if (location != null) {
-			locationProperties.put("type", LocationManager.PROP_HOME_LOCATION_AREA); //$NON-NLS-1$
+			locationProperties.put("type", EquinoxLocations.PROP_HOME_LOCATION_AREA); //$NON-NLS-1$
 			registrations.add(context.registerService(Location.class.getName(), location, locationProperties));
 		}
 

@@ -29,7 +29,7 @@ import org.eclipse.osgi.service.datalocation.Location;
  * @since 3.1
  * @noextend This class is not intended to be subclassed by clients.
  */
-public class LocationManager {
+public class EquinoxLocations {
 	private static Location installLocation = null;
 	private static Location configurationLocation = null;
 	private static Location userLocation = null;
