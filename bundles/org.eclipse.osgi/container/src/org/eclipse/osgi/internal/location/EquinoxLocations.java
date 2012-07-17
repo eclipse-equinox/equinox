@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.location;
 
+import org.eclipse.osgi.internal.framework.EclipseEnvironmentInfo;
+
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
-import org.eclipse.core.runtime.internal.adaptor.EclipseEnvironmentInfo;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;

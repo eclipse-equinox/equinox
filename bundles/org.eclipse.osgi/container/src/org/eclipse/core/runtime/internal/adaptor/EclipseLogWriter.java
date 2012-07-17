@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.internal.framework.EclipseEnvironmentInfo;
+
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.security.AccessController;

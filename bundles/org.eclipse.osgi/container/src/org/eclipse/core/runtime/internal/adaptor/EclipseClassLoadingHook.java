@@ -11,6 +11,8 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.internal.framework.EclipseEnvironmentInfo;
+
 import java.io.File;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;

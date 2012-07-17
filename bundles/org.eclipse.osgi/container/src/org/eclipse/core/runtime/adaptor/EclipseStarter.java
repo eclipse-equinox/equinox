@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
+import org.eclipse.osgi.internal.framework.EclipseEnvironmentInfo;
+
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 
 import org.eclipse.core.runtime.internal.adaptor.*;

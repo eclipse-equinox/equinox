@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.eclipseadaptor;
 
+import org.eclipse.osgi.internal.framework.EclipseEnvironmentInfo;
+
 import junit.framework.*;
-import org.eclipse.core.runtime.internal.adaptor.EclipseEnvironmentInfo;
 import org.eclipse.osgi.service.environment.Constants;
 
 public class EnvironmentInfoTest extends TestCase {
