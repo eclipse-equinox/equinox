@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.baseadaptor;
 
+import org.eclipse.osgi.storage.url.BundleResourceHandler;
+
 import org.eclipse.osgi.internal.loader.classpath.BaseClassLoader;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
 

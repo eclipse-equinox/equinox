@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.storage.url.BundleURLConnection;
+
 import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
 
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-import org.eclipse.osgi.framework.internal.core.BundleURLConnection;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.util.NLS;
 

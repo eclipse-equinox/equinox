@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.storage.bundlefile;
 
+import org.eclipse.osgi.storage.url.BundleResourceHandler;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;

@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.framework.internal.protocol.bundleentry;
 
+import org.eclipse.osgi.storage.url.BundleResourceHandler;
+
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 
 import java.io.FileNotFoundException;
@@ -19,7 +21,6 @@ import java.net.URL;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
-import org.eclipse.osgi.framework.internal.core.BundleResourceHandler;
 
 /**
  * URLStreamHandler the bundleentry protocol.

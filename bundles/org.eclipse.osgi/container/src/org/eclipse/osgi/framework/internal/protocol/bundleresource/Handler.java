@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.framework.internal.protocol.bundleresource;
 
+import org.eclipse.osgi.storage.url.BundleResourceHandler;
+
 import org.eclipse.osgi.internal.loader.classpath.BaseClassLoader;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
 
@@ -21,7 +23,6 @@ import java.io.IOException;
 import java.net.URL;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
-import org.eclipse.osgi.framework.internal.core.BundleResourceHandler;
 
 /**
  * URLStreamHandler the bundleresource protocol.

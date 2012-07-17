@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.internal.core;
+package org.eclipse.osgi.storage.url;
 
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 

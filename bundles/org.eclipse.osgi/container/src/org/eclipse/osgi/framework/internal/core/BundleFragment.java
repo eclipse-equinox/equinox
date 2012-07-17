@@ -317,7 +317,7 @@ public class BundleFragment extends AbstractBundle {
 		return true;
 	}
 
-	protected BundleLoader getBundleLoader() {
+	public BundleLoader getBundleLoader() {
 		// Fragments cannot have a BundleLoader.
 		return null;
 	}

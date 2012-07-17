@@ -1270,7 +1270,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		return bundledata.getStartLevel();
 	}
 
-	protected abstract BundleLoader getBundleLoader();
+	public abstract BundleLoader getBundleLoader();
 
 	/**
 	 * Mark this bundle as resolved.

@@ -9,7 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.internal.core;
+package org.eclipse.osgi.storage.url;
+
+import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 
 import org.eclipse.osgi.internal.url.ProtocolActivator;
 
