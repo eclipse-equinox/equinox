@@ -8,12 +8,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.framework.internal.core;
+package org.eclipse.osgi.storage;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
+import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.util.Headers;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -33,7 +34,7 @@ public class ManifestLocalization {
 		this.rawHeaders = rawHeaders;
 	}
 
-	Dictionary<String, String> getHeaders(String localeString) {
+	public Dictionary<String, String> getHeaders(String localeString) {
 		if (localeString.length() == 0)
 			return rawHeaders;
 		boolean isDefaultLocale = localeString.equals(Locale.getDefault().toString());
@@ -87,7 +88,7 @@ public class ManifestLocalization {
 	 * This method find the appropriate Manifest Localization file inside the
 	 * bundle. If not found, return null.
 	 */
-	ResourceBundle getResourceBundle(String localeString, boolean isDefaultLocale) {
+	public ResourceBundle getResourceBundle(String localeString, boolean isDefaultLocale) {
 		BundleResourceBundle resourceBundle = lookupResourceBundle(localeString);
 		if (isDefaultLocale)
 			return (ResourceBundle) resourceBundle;

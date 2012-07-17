@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
-import org.eclipse.osgi.internal.debug.Debug;
-
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
@@ -21,11 +19,13 @@ import java.security.cert.X509Certificate;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.util.KeyedElement;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ResolverError;
 import org.eclipse.osgi.signedcontent.*;
+import org.eclipse.osgi.storage.ManifestLocalization;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.CollisionHook;
@@ -1165,7 +1165,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 	 * @exception java.lang.IllegalStateException
 	 *                If the bundle is uninstalled.
 	 */
-	protected void checkValid() {
+	public void checkValid() {
 		if (state == UNINSTALLED) {
 			throw new IllegalStateException(NLS.bind(Msg.BUNDLE_UNINSTALLED_EXCEPTION, getBundleData().getLocation()));
 		}
@@ -1184,16 +1184,16 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		return new AccessControlContext(new ProtectionDomain[] {domain});
 	}
 
-	protected BundleFragment[] getFragments() {
+	public BundleFragment[] getFragments() {
 		checkValid();
 		return null;
 	}
 
-	protected boolean isFragment() {
+	public boolean isFragment() {
 		return false;
 	}
 
-	BundleHost[] getHosts() {
+	public BundleHost[] getHosts() {
 		checkValid();
 		return null;
 	}
@@ -1241,7 +1241,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		return getEntry0(fileName);
 	}
 
-	URL getEntry0(String fileName) {
+	public URL getEntry0(String fileName) {
 		checkValid();
 		return bundledata.getEntry(fileName);
 	}

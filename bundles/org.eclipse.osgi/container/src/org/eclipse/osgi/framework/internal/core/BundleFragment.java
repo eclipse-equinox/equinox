@@ -11,12 +11,11 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
-import org.eclipse.osgi.internal.debug.Debug;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.BundleData;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -280,11 +279,11 @@ public class BundleFragment extends AbstractBundle {
 		return null;
 	}
 
-	synchronized BundleHost[] getHosts() {
+	public synchronized BundleHost[] getHosts() {
 		return hosts;
 	}
 
-	protected boolean isFragment() {
+	public boolean isFragment() {
 		return true;
 	}
 
