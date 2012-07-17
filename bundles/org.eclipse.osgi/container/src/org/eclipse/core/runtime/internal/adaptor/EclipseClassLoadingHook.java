@@ -11,6 +11,8 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.internal.loader.classpath.*;
+
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 
@@ -24,7 +26,6 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
-import org.eclipse.osgi.baseadaptor.loader.*;
 import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;

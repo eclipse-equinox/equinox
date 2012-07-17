@@ -11,12 +11,13 @@
 
 package org.eclipse.osgi.baseadaptor.hooks;
 
+import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
+import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
+
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 
 import java.net.URL;
 import org.eclipse.osgi.baseadaptor.HookRegistry;
-import org.eclipse.osgi.baseadaptor.loader.ClasspathEntry;
-import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;
 
 /**
  * A ClassLoadingStatsHook hooks into the <code>ClasspathManager</code> class.  This class allows 

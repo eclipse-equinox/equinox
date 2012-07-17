@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.baseadaptor.loader;
+package org.eclipse.osgi.internal.loader.classpath;
 
 /**
  * A parallel class loader.  Parallel class loaders are thread safe class loaders

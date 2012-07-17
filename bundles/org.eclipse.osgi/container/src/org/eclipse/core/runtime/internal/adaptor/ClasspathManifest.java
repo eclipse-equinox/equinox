@@ -11,13 +11,14 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.internal.loader.classpath.*;
+
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.jar.Manifest;
 import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.baseadaptor.loader.*;
 import org.eclipse.osgi.framework.util.KeyedElement;
 
 public class ClasspathManifest implements KeyedElement {

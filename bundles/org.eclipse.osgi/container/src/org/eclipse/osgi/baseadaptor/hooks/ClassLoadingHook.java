@@ -11,13 +11,14 @@
 
 package org.eclipse.osgi.baseadaptor.hooks;
 
+import org.eclipse.osgi.internal.loader.classpath.*;
+
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.HookRegistry;
-import org.eclipse.osgi.baseadaptor.loader.*;
 import org.eclipse.osgi.framework.adaptor.*;
 
 /**
