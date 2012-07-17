@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.internal.url.ProtocolActivator;
+
 import org.eclipse.osgi.internal.loader.classpath.BaseClassLoader;
 
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
@@ -19,7 +21,6 @@ import java.io.IOException;
 import java.net.*;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.internal.protocol.ProtocolActivator;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.util.NLS;

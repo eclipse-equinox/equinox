@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  * 
  *******************************************************************************/
-package org.eclipse.osgi.framework.internal.protocol;
+package org.eclipse.osgi.internal.url;
 
 import java.lang.reflect.Method;
 import java.util.LinkedList;

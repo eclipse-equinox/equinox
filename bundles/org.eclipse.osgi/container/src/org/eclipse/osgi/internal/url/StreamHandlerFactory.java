@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.internal.protocol;
+package org.eclipse.osgi.internal.url;
 
 import java.lang.reflect.Method;
 import java.net.*;

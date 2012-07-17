@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.internal.url.ContentHandlerFactory;
+import org.eclipse.osgi.internal.url.StreamHandlerFactory;
+
 import org.eclipse.osgi.internal.loader.sources.PackageSource;
 
 import org.eclipse.osgi.internal.framework.ContextFinder;
@@ -24,8 +27,6 @@ import java.util.*;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.eventmgr.*;
-import org.eclipse.osgi.framework.internal.protocol.ContentHandlerFactory;
-import org.eclipse.osgi.framework.internal.protocol.StreamHandlerFactory;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.loader.*;
