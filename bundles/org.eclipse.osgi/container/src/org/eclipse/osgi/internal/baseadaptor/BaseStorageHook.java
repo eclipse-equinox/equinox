@@ -12,6 +12,8 @@
 
 package org.eclipse.osgi.internal.baseadaptor;
 
+import org.eclipse.osgi.framework.util.FilePath;
+
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 
 import org.eclipse.osgi.internal.location.EquinoxLocations;

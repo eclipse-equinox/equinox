@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
+import org.eclipse.osgi.framework.util.FilePath;
+
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 
 import org.eclipse.osgi.internal.location.EquinoxLocations;

@@ -11,10 +11,11 @@
 
 package org.eclipse.osgi.framework.internal.protocol.reference;
 
+import org.eclipse.osgi.framework.util.FilePath;
+
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import org.eclipse.osgi.framework.adaptor.FilePath;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.internal.core.ReferenceInputStream;
 

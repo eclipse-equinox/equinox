@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.framework.adaptor;
+package org.eclipse.osgi.framework.util;
 
 import java.io.File;
 
