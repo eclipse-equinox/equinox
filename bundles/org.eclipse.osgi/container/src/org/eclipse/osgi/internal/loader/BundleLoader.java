@@ -11,8 +11,6 @@
 
 package org.eclipse.osgi.internal.loader;
 
-import org.eclipse.osgi.internal.debug.Debug;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
@@ -24,7 +22,9 @@ import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.loader.buddy.PolicyHandler;
+import org.eclipse.osgi.internal.loader.sources.*;
 import org.eclipse.osgi.internal.resolver.StateBuilder;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
@@ -389,7 +389,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @return The loaded Class or null if the class is not found.
 	 * @throws ClassNotFoundException 
 	 */
-	Class<?> findLocalClass(String name) throws ClassNotFoundException {
+	public Class<?> findLocalClass(String name) throws ClassNotFoundException {
 		if (Debug.DEBUG_LOADER)
 			Debug.println("BundleLoader[" + this + "].findLocalClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		try {
@@ -817,7 +817,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @param name The name of the resource to find.
 	 * @return The URL to the resource or null if the resource is not found.
 	 */
-	URL findLocalResource(final String name) {
+	public URL findLocalResource(final String name) {
 		return createClassLoader().findLocalResource(name);
 	}
 
@@ -828,7 +828,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @param  name the resource name
 	 * @return an Enumeration of URLs for the resources
 	 */
-	Enumeration<URL> findLocalResources(String name) {
+	public Enumeration<URL> findLocalResources(String name) {
 		return createClassLoader().findLocalResources(name);
 	}
 

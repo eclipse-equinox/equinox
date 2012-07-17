@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.internal.loader.sources.PackageSource;
+
 import org.eclipse.osgi.internal.framework.ContextFinder;
 
 import org.eclipse.osgi.internal.debug.Debug;

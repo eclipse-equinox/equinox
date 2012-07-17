@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.loader;
 
+import org.eclipse.osgi.internal.loader.sources.*;
+
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;

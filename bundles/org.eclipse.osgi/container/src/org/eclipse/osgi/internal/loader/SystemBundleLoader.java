@@ -112,7 +112,7 @@ public class SystemBundleLoader extends BundleLoader {
 	/**
 	 * The ClassLoader that loads OSGi framework classes is used to find the class. 
 	 */
-	Class<?> findLocalClass(String name) {
+	public Class<?> findLocalClass(String name) {
 		try {
 			return classLoader.loadClass(name);
 		} catch (ClassNotFoundException e) {
@@ -132,7 +132,7 @@ public class SystemBundleLoader extends BundleLoader {
 	/**
 	 * The ClassLoader that loads OSGi framework classes is used to find the resource.
 	 */
-	URL findLocalResource(String name) {
+	public URL findLocalResource(String name) {
 		URL result = classLoader.getResource(name);
 		if (result == null && extClassLoader != null)
 			synchronized (extPackages) {
@@ -145,7 +145,7 @@ public class SystemBundleLoader extends BundleLoader {
 	/**
 	 * The ClassLoader that loads OSGi framework classes is used to find the resource.
 	 */
-	Enumeration<URL> findLocalResources(String name) {
+	public Enumeration<URL> findLocalResources(String name) {
 		Enumeration<URL> result = null;
 		try {
 			result = classLoader.getResources(name);

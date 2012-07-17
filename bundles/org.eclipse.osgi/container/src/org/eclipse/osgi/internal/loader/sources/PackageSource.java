@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.internal.loader;
+package org.eclipse.osgi.internal.loader.sources;
 
 import java.io.IOException;
 import java.net.URL;

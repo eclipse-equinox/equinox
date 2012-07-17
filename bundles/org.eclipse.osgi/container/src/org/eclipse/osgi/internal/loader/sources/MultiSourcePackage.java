@@ -8,15 +8,16 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.internal.loader;
+package org.eclipse.osgi.internal.loader.sources;
 
 import java.net.URL;
 import java.util.*;
+import org.eclipse.osgi.internal.loader.BundleLoader;
 
 public class MultiSourcePackage extends PackageSource {
 	SingleSourcePackage[] suppliers;
 
-	MultiSourcePackage(String id, SingleSourcePackage[] suppliers) {
+	public MultiSourcePackage(String id, SingleSourcePackage[] suppliers) {
 		super(id);
 		this.suppliers = suppliers;
 	}
