@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.internal.framework.ContextFinder;
+
 import org.eclipse.osgi.internal.debug.Debug;
 
 import java.io.*;
@@ -17,7 +19,6 @@ import java.lang.reflect.*;
 import java.net.*;
 import java.security.*;
 import java.util.*;
-import org.eclipse.core.runtime.internal.adaptor.ContextFinder;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.eventmgr.*;
