@@ -17,7 +17,6 @@ import java.util.Map;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.internal.resolver.BaseDescriptionImpl.BaseCapability;
 import org.eclipse.osgi.service.resolver.*;
-import org.eclipse.osgi.service.resolver.extras.SpecificationReference;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -125,7 +124,7 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 		this.userObject = userObject;
 	}
 
-	class BundleRequirementImpl implements BundleRequirement, SpecificationReference {
+	class BundleRequirementImpl implements BundleRequirement {
 		private final String namespace;
 
 		public BundleRequirementImpl(String namespace) {
@@ -192,10 +191,6 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 
 		public BundleRevision getResource() {
 			return getRevision();
-		}
-
-		public VersionConstraint getSpecification() {
-			return VersionConstraintImpl.this;
 		}
 	}
 

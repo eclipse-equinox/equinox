@@ -11,7 +11,6 @@
 package org.eclipse.osgi.internal.baseadaptor;
 
 import java.util.*;
-import org.eclipse.osgi.service.resolver.extras.Sortable;
 
 /**
  * Simple map when dealing with small amounts of entries.
@@ -20,7 +19,7 @@ import org.eclipse.osgi.service.resolver.extras.Sortable;
  * @param <K> The key type
  * @param <V> the value type
  */
-public class ArrayMap<K, V> implements Collection<K>, Sortable<K> {
+public class ArrayMap<K, V> implements Collection<K> {
 	final List<K> keys;
 	final List<V> values;
 
