@@ -11,6 +11,8 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.internal.location.LocationManager;
+
 import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
 
 import java.io.*;
@@ -18,7 +20,6 @@ import java.net.URL;
 import java.security.*;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;

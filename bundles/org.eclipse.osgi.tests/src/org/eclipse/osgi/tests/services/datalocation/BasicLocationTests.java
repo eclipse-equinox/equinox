@@ -16,8 +16,8 @@ import java.net.URL;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.core.tests.harness.CoreTest;
+import org.eclipse.osgi.internal.location.LocationManager;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 

@@ -11,11 +11,12 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.internal.location.LocationManager;
+
 import java.io.*;
 import java.net.URLConnection;
 import java.util.*;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
-import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.equinox.log.internal.LogServiceManager;
 import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;

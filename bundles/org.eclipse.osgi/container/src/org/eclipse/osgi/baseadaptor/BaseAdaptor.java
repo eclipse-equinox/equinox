@@ -11,13 +11,14 @@
 
 package org.eclipse.osgi.baseadaptor;
 
+import org.eclipse.osgi.internal.location.LocationManager;
+
 import org.eclipse.osgi.internal.debug.Debug;
 
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
-import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.*;
 import org.eclipse.osgi.framework.adaptor.*;

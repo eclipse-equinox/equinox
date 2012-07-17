@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
+import org.eclipse.osgi.internal.location.LocationManager;
+
 import org.eclipse.core.runtime.internal.adaptor.*;
 import org.eclipse.osgi.internal.location.*;
 

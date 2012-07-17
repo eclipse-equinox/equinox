@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.service.security;
 
+import org.eclipse.osgi.internal.location.LocationManager;
+
 import java.io.*;
 import java.security.cert.CertificateException;
 import java.util.Properties;
-import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;

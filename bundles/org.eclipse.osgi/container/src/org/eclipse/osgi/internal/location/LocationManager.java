@@ -8,15 +8,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.core.runtime.adaptor;
-
-import org.eclipse.core.runtime.internal.adaptor.EclipseEnvironmentInfo;
-import org.eclipse.osgi.internal.location.*;
+package org.eclipse.osgi.internal.location;
 
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
+import org.eclipse.core.runtime.internal.adaptor.EclipseEnvironmentInfo;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
@@ -51,7 +49,7 @@ public class LocationManager {
 	public static final String PROP_USER_HOME = "user.home"; //$NON-NLS-1$
 	public static final String PROP_USER_DIR = "user.dir"; //$NON-NLS-1$
 	public static final String PROP_HOME_LOCATION_AREA = "eclipse.home.location"; //$NON-NLS-1$
-	static final String PROP_LAUNCHER = "eclipse.launcher"; //$NON-NLS-1$
+	public static final String PROP_LAUNCHER = "eclipse.launcher"; //$NON-NLS-1$
 
 	// configuration area file/dir names
 	public static final String BUNDLES_DIR = "bundles"; //$NON-NLS-1$

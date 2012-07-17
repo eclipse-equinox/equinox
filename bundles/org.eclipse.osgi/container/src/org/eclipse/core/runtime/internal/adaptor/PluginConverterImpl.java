@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.internal.location.LocationManager;
+
 import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
 
 import java.io.*;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
