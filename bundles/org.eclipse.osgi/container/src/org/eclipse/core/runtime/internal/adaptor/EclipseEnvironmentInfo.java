@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
+
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.service.environment.Constants;

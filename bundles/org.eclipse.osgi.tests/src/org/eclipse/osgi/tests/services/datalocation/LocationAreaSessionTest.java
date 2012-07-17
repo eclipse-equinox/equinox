@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.datalocation;
 
+import org.eclipse.osgi.internal.location.BasicLocation;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import junit.framework.*;
-import org.eclipse.core.runtime.internal.adaptor.BasicLocation;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
 import org.eclipse.core.tests.session.SetupManager.SetupException;
 import org.eclipse.osgi.service.datalocation.Location;

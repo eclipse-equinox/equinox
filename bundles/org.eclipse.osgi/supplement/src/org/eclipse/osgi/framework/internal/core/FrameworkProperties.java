@@ -8,13 +8,14 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
+
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.security.CodeSource;
 import java.util.*;
-import org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorMsg;
 import org.eclipse.osgi.util.NLS;
 
 /*

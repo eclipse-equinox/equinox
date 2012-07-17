@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
+
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;

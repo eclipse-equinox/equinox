@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
+
 import java.util.Dictionary;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.BundleData;

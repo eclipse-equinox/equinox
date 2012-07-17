@@ -10,7 +10,7 @@
  *     Danail Nachev (Prosyst) - bug 185654
  *     Andrei Loskutov - bug 44735
  *******************************************************************************/
-package org.eclipse.core.runtime.internal.adaptor;
+package org.eclipse.osgi.internal.location;
 
 import java.io.*;
 import java.nio.channels.FileLock;

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
+
 import java.util.Date;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.NLS;

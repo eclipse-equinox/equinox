@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.storagemanager;
 
+import org.eclipse.osgi.internal.location.*;
+
 import java.io.*;
 import java.security.AccessController;
 import java.util.*;
-import org.eclipse.core.runtime.internal.adaptor.*;
 import org.eclipse.osgi.framework.internal.reliablefile.*;
 import org.eclipse.osgi.framework.util.SecureAction;
 

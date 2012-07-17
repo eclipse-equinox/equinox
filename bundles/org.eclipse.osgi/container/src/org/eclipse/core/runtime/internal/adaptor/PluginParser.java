@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
+
 import java.io.InputStream;
 import java.util.*;
 import javax.xml.parsers.SAXParserFactory;

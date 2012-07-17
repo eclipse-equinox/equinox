@@ -11,6 +11,8 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
+import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
+
 import java.lang.reflect.Method;
 import java.util.Map;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;

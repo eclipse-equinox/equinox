@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
+import org.eclipse.core.runtime.internal.adaptor.*;
+import org.eclipse.osgi.internal.location.*;
+
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -18,7 +21,6 @@ import java.net.*;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.*;
-import org.eclipse.core.runtime.internal.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
