@@ -24,4 +24,21 @@
   <artifactId>org.eclipse.osgi</artifactId>
   <version>3.8.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>jsr14</target>
+              <compilerArguments>
+                <inlineJSR/>
+                <enableJavadoc/>
+                <encoding>ISO-8859-1</encoding>
+              </compilerArguments>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
