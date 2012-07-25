@@ -31,11 +31,9 @@ org.osgi.framework.system.packages = \
  javax.lang.model.type,\
  javax.lang.model.util,\
  javax.management,\
- javax.management.event,\
  javax.management.loading,\
  javax.management.modelmbean,\
  javax.management.monitor,\
- javax.management.namespace,\
  javax.management.openmbean,\
  javax.management.relation,\
  javax.management.remote,\
