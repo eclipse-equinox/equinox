@@ -27,11 +27,11 @@
 
   <profiles>
     <profile>
-      <id>build-native-launchers-linux.gtk.x86_64</id>
+      <id>build-native-launchers-gtk.linux.x86_64</id>
       <activation>
         <property>
           <name>native</name>
-          <value>linux.gtk.x86_64</value>
+          <value>gtk.linux.x86_64</value>
         </property>
       </activation>
       <build>
@@ -80,11 +80,11 @@
       </build>
     </profile>
     <profile>
-      <id>build-native-launchers-linux.gtk.x86</id>
+      <id>build-native-launchers-gtk.linux.x86</id>
       <activation>
         <property>
           <name>native</name>
-          <value>linux.gtk.x86</value>
+          <value>gtk.linux.x86</value>
         </property>
       </activation>
       <build>
