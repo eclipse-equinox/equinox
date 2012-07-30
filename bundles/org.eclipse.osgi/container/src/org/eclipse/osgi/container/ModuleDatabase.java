@@ -356,6 +356,7 @@ public class ModuleDatabase {
 		try {
 			ModuleRevision oldRevision = module.getCurrentRevision();
 			ModuleRevision newRevision = builder.addRevision(module, revisionInfo);
+			adaptor.associateRevision(newRevision, revisionInfo);
 			String name = newRevision.getSymbolicName();
 			Collection<ModuleRevision> sameName = revisionByName.get(name);
 			if (sameName == null) {
@@ -992,7 +993,7 @@ public class ModuleDatabase {
 		public static void load(ModuleDatabase moduleDatabase, DataInputStream in) throws IOException {
 			int version = in.readInt();
 			if (version < VERSION)
-				throw new UnsupportedOperationException("Perstence version is not correct for loading: " + version + " expecting: " + VERSION); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new IOException("Perstence version is not correct for loading: " + version + " expecting: " + VERSION); //$NON-NLS-1$ //$NON-NLS-2$
 			long timeStamp = in.readLong();
 			moduleDatabase.nextId.set(in.readLong());
 			moduleDatabase.setInitialModuleStartLevel(in.readInt());
