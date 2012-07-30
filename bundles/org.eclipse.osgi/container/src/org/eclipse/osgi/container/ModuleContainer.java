@@ -747,6 +747,7 @@ public final class ModuleContainer {
 	}
 
 	void open() {
+		loadModules();
 		frameworkStartLevel.open();
 		frameworkWiring.open();
 	}
@@ -754,6 +755,83 @@ public final class ModuleContainer {
 	void close() {
 		frameworkStartLevel.close();
 		frameworkWiring.close();
+		unloadModules();
+	}
+
+	private void loadModules() {
+		List<Module> modules = null;
+		moduleDatabase.lockRead();
+		try {
+			modules = getModules();
+			for (Module module : modules) {
+				if (module.getId() != 0) {
+					try {
+						module.lockStateChange(ModuleEvent.RESOLVED);
+					} catch (BundleException e) {
+						throw new IllegalStateException("Unable to lock module state.", e); //$NON-NLS-1$
+					}
+
+					ModuleWiring wiring = moduleDatabase.getWiring(module.getCurrentRevision());
+					if (wiring != null) {
+						module.setState(State.RESOLVED);
+					} else {
+						module.setState(State.INSTALLED);
+					}
+				}
+			}
+			Map<ModuleRevision, ModuleWiring> wirings = moduleDatabase.getWiringsCopy();
+			for (ModuleWiring wiring : wirings.values()) {
+				wiring.validate();
+			}
+		} finally {
+			if (modules != null) {
+				for (Module module : modules) {
+					if (module.getId() != 0) {
+						try {
+							module.unlockStateChange(ModuleEvent.RESOLVED);
+						} catch (IllegalMonitorStateException e) {
+							// ignore
+						}
+					}
+				}
+			}
+			moduleDatabase.unlockRead();
+		}
+	}
+
+	private void unloadModules() {
+		List<Module> modules = null;
+		moduleDatabase.lockRead();
+		try {
+			modules = getModules();
+			for (Module module : modules) {
+				if (module.getId() != 0) {
+					try {
+						module.lockStateChange(ModuleEvent.UNINSTALLED);
+					} catch (BundleException e) {
+						throw new IllegalStateException("Unable to lock module state.", e); //$NON-NLS-1$
+					}
+					module.setState(State.UNINSTALLED);
+				}
+			}
+			Map<ModuleRevision, ModuleWiring> wirings = moduleDatabase.getWiringsCopy();
+			for (ModuleWiring wiring : wirings.values()) {
+				wiring.invalidate();
+			}
+		} finally {
+			if (modules != null) {
+				for (Module module : modules) {
+					if (module.getId() != 0) {
+						try {
+							module.unlockStateChange(ModuleEvent.UNINSTALLED);
+						} catch (IllegalMonitorStateException e) {
+							// ignore
+						}
+					}
+				}
+			}
+			moduleDatabase.unlockRead();
+		}
 	}
 
 	Collection<Module> getRefreshClosure(Collection<Module> initial, Map<ModuleRevision, ModuleWiring> wiringCopy) {

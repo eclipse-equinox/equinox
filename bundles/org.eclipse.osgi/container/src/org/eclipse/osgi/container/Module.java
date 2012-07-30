@@ -154,7 +154,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	private final Long id;
 	private final String location;
 	private final ModuleRevisions revisions;
-	private final ReentrantLock stateChangeLock = new ReentrantLock();
+	final ReentrantLock stateChangeLock = new ReentrantLock();
 	private final EnumSet<ModuleEvent> stateTransitionEvents = EnumSet.noneOf(ModuleEvent.class);
 	private final EnumSet<Settings> settings;
 	private volatile State state = State.INSTALLED;
@@ -356,6 +356,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		if (StartOptions.LAZY_TRIGGER.isContained(options)) {
 			if (stateChangeLock.getHoldCount() > 0 && stateTransitionEvents.contains(ModuleEvent.STARTED)) {
 				// nothing to do here; the current thread is activating the bundle.
+				return;
 			}
 		}
 		BundleException startError = null;
@@ -487,7 +488,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				// continue on to normal starting
 			}
 		} else {
-			if (settings.contains(Settings.USE_ACTIVATION_POLICY) && isLazyActivate()) {
+			if (isLazyActivate()) {
 				if (State.LAZY_STARTING.equals(getState())) {
 					// a sync listener must have tried to start this module again with the lazy option
 					return null; // no event to publish; nothing to do
@@ -590,6 +591,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	abstract protected void cleanup(ModuleRevision revision);
 
 	final boolean isLazyActivate() {
+		if (!settings.contains(Settings.USE_ACTIVATION_POLICY)) {
+			return false;
+		}
 		ModuleRevision current = getCurrentRevision();
 		if (current == null)
 			return false;

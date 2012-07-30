@@ -26,7 +26,7 @@ import org.osgi.service.resolver.Resolver;
  */
 public abstract class ModuleContainerAdaptor {
 	public enum ContainerEvent {
-		REFRESH, START_LEVEL, STARTED, STOPPED, STOPPED_UPDATE, STOPPED_REFRESH, ERROR, WARNING, INFO
+		REFRESH, START_LEVEL, STARTED, STOPPED, STOPPED_UPDATE, STOPPED_REFRESH, STOPPED_TIMEOUT, ERROR, WARNING, INFO
 	}
 
 	/**

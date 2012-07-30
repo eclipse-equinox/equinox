@@ -10,31 +10,32 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.util.Arrays;
-import java.util.EnumSet;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.osgi.container.ModuleContainer.ContainerStartLevel;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
+import org.osgi.framework.*;
 import org.osgi.service.resolver.ResolutionException;
 
 /**
  * @since 3.10
  */
 public abstract class SystemModule extends Module {
+	private final Map<Thread, ContainerEvent> forStop = new HashMap<Thread, ContainerEvent>(2);
 
 	public SystemModule(ModuleContainer container) {
 		super(new Long(0), Constants.SYSTEM_BUNDLE_LOCATION, container, EnumSet.of(Settings.AUTO_START, Settings.USE_ACTIVATION_POLICY), new Integer(0));
 	}
 
 	public final void init() throws BundleException {
-		getRevisions().getContainer().open();
+		getRevisions().getContainer().checkAdminPermission(getBundle(), AdminPermission.EXECUTE);
 		lockStateChange(ModuleEvent.STARTED);
 		try {
 			checkValid();
 			if (ACTIVE_SET.contains(getState()))
 				return;
+			getRevisions().getContainer().open();
 			if (getState().equals(State.INSTALLED)) {
 				try {
 					getRevisions().getContainer().resolve(Arrays.asList((Module) this), true);
@@ -63,7 +64,60 @@ public abstract class SystemModule extends Module {
 		} finally {
 			unlockStateChange(ModuleEvent.STARTED);
 		}
+	}
 
+	public ContainerEvent waitForStop(long timeout) throws InterruptedException {
+		final boolean waitForEver = timeout == 0;
+		final long start = System.currentTimeMillis();
+		final Thread current = Thread.currentThread();
+		long timeLeft = timeout;
+		ContainerEvent event = null;
+		boolean stateLocked;
+		if (timeout == 0) {
+			stateChangeLock.lockInterruptibly();
+			stateLocked = true;
+		} else {
+			stateLocked = stateChangeLock.tryLock(timeLeft, TimeUnit.MILLISECONDS);
+		}
+		timeLeft = waitForEver ? 0 : start + timeout - System.currentTimeMillis();
+		if (stateLocked) {
+			synchronized (forStop) {
+				try {
+					if (!Module.ACTIVE_SET.contains(getState())) {
+						return ContainerEvent.STOPPED;
+					}
+					event = forStop.remove(current);
+					if (event == null) {
+						forStop.put(current, null);
+					}
+				} finally {
+					stateChangeLock.unlock();
+				}
+				if (event == null) {
+					do {
+						forStop.wait(timeLeft);
+						event = forStop.remove(current);
+						if (!waitForEver) {
+							timeLeft = start + timeout - System.currentTimeMillis();
+							if (timeLeft == 0) {
+								timeLeft = -1;
+							}
+						}
+					} while (event == null && timeLeft >= 0);
+				}
+			}
+		}
+		return event == null ? ContainerEvent.STOPPED_TIMEOUT : event;
+	}
+
+	private void notifyWaitForStop(ContainerEvent event) {
+		synchronized (forStop) {
+			Collection<Thread> waiting = new ArrayList<Thread>(forStop.keySet());
+			for (Thread t : waiting) {
+				forStop.put(t, event);
+			}
+			forStop.notifyAll();
+		}
 	}
 
 	/**
@@ -82,10 +136,16 @@ public abstract class SystemModule extends Module {
 		getRevisions().getContainer().adaptor.publishContainerEvent(ContainerEvent.STARTED, this, null);
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public void stop(StopOptions... options) throws BundleException {
-		// Always transient
-		super.stop(StopOptions.TRANSIENT);
+		try {
+			// Always transient
+			super.stop(StopOptions.TRANSIENT);
+		} catch (BundleException e) {
+			getRevisions().getContainer().adaptor.publishContainerEvent(ContainerEvent.ERROR, this, e);
+			// must continue on
+		}
 		ContainerEvent containerEvent;
 		if (holdsTransitionEventLock(ModuleEvent.UPDATED)) {
 			containerEvent = ContainerEvent.STOPPED_UPDATE;
@@ -96,6 +156,20 @@ public abstract class SystemModule extends Module {
 		}
 		getRevisions().getContainer().adaptor.publishContainerEvent(containerEvent, this, null);
 		getRevisions().getContainer().close();
+
+		notifyWaitForStop(containerEvent);
+	}
+
+	public void update() throws BundleException {
+		getContainer().checkAdminPermission(getBundle(), AdminPermission.LIFECYCLE);
+		lockStateChange(ModuleEvent.UPDATED);
+		try {
+			stop();
+		} finally {
+			unlockStateChange(ModuleEvent.UPDATED);
+		}
+		// would publish an updated event here but the listener services are down
+		start();
 	}
 
 	@Override
@@ -109,5 +183,4 @@ public abstract class SystemModule extends Module {
 		super.stopWorker();
 		((ContainerStartLevel) getRevisions().getContainer().getFrameworkStartLevel()).doContainerStartLevel(this, 0);
 	}
-
 }

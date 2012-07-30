@@ -265,8 +265,15 @@ public final class ModuleWiring implements BundleWiring {
 		synchronized (monitor) {
 			this.isValid = false;
 			current = loader;
+			loader = null;
 		}
 		revision.getRevisions().getContainer().getAdaptor().invalidateWiring(this, current);
+	}
+
+	void validate() {
+		synchronized (monitor) {
+			this.isValid = true;
+		}
 	}
 
 	boolean isSubtituted(ModuleCapability capability) {
