@@ -65,7 +65,7 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 			// make sure the active framework thread is used
 			setEquinoxProperties(configuration);
 			current = new Framework(new BaseAdaptor(new String[0]));
-			consoleMgr = ConsoleManager.startConsole(current);
+			consoleMgr = ConsoleManager.startConsole(current.getSystemBundleContext());
 			current.launch();
 			framework = current;
 			systemBundle = current.systemBundle;

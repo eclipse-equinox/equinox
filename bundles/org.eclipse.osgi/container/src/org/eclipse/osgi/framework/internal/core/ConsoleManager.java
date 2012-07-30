@@ -10,22 +10,20 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
+import org.osgi.framework.*;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 public class ConsoleManager {
 
 	public static final String PROP_CONSOLE = "osgi.console"; //$NON-NLS-1$
-	private static final String PROP_SYSTEM_IN_OUT = "console.systemInOut"; //$NON-NLS-1$
-	private static final String CONSOLE_NAME = "OSGi Console"; //$NON-NLS-1$
 	public static final String CONSOLE_BUNDLE = "org.eclipse.equinox.console"; //$NON-NLS-1$
 	public static final String PROP_CONSOLE_ENABLED = "osgi.console.enable.builtin"; //$NON-NLS-1$
 
-	private final Framework framework;
+	private final BundleContext context;
 	private final String consoleBundle;
 	private final String consolePort;
 
-	public ConsoleManager(Framework framework, String consolePropValue) {
+	public ConsoleManager(BundleContext context, String consolePropValue) {
 		String port = null;
 		if (consolePropValue != null) {
 			int index = consolePropValue.lastIndexOf(":"); //$NON-NLS-1$
@@ -33,7 +31,7 @@ public class ConsoleManager {
 		}
 		this.consolePort = port != null ? port.trim() : port;
 		String enabled = FrameworkProperties.getProperty(PROP_CONSOLE_ENABLED, CONSOLE_BUNDLE);
-		this.framework = framework;
+		this.context = context;
 		if (!"true".equals(enabled) || "none".equals(consolePort)) { //$NON-NLS-1$ //$NON-NLS-2$
 			this.consoleBundle = "false".equals(enabled) ? CONSOLE_BUNDLE : enabled; //$NON-NLS-1$
 			if (consolePort == null || consolePort.length() > 0) {
@@ -49,16 +47,19 @@ public class ConsoleManager {
 		this.consoleBundle = "unknown"; //$NON-NLS-1$
 	}
 
-	public static ConsoleManager startConsole(Framework framework) {
-		ConsoleManager consoleManager = new ConsoleManager(framework, FrameworkProperties.getProperty(PROP_CONSOLE));
+	public static ConsoleManager startConsole(BundleContext context) {
+		ConsoleManager consoleManager = new ConsoleManager(context, FrameworkProperties.getProperty(PROP_CONSOLE));
 		return consoleManager;
 	}
 
+	@SuppressWarnings("deprecation")
 	public void checkForConsoleBundle() throws BundleException {
 		if ("none".equals(consolePort)) //$NON-NLS-1$
 			return;
 		// otherwise we need to check for the equinox console bundle and start it
-		Bundle[] consoles = framework.getBundleBySymbolicName(consoleBundle);
+		ServiceReference<PackageAdmin> paRef = context.getServiceReference(PackageAdmin.class);
+		PackageAdmin pa = paRef == null ? null : context.getService(paRef);
+		Bundle[] consoles = pa.getBundles(consoleBundle, null);
 		if (consoles == null || consoles.length == 0) {
 			if (consolePort != null)
 				throw new BundleException("Could not find bundle: " + consoleBundle, BundleException.UNSUPPORTED_OPERATION); //$NON-NLS-1$

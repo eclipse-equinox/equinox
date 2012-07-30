@@ -11,15 +11,6 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
-import org.eclipse.osgi.framework.util.FilePath;
-
-import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
-
-import org.eclipse.osgi.internal.location.EquinoxLocations;
-
-import org.eclipse.core.runtime.internal.adaptor.*;
-import org.eclipse.osgi.internal.location.*;
-
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -27,12 +18,17 @@ import java.net.*;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.*;
-import org.eclipse.osgi.framework.adaptor.*;
+import org.eclipse.core.runtime.internal.adaptor.*;
+import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.framework.adaptor.StatusException;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.framework.util.FilePath;
 import org.eclipse.osgi.internal.baseadaptor.BaseStorageHook;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+import org.eclipse.osgi.internal.location.*;
 import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.resolver.*;
@@ -275,7 +271,7 @@ public class EclipseStarter {
 		publishSplashScreen(endSplashHandler);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "osgi launched"); //$NON-NLS-1$ //$NON-NLS-2$
-		consoleMgr = ConsoleManager.startConsole(framework);
+		consoleMgr = ConsoleManager.startConsole(context);
 		if (Profile.PROFILE && Profile.STARTUP) {
 			Profile.logTime("EclipseStarter.startup()", "console started"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
