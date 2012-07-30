@@ -368,6 +368,27 @@ public final class OSGiManifestBuilderFactory {
 					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE, convertValue("List<String>", excludeSpec)); //$NON-NLS-1$
 				}
 			}
+		} else {
+			policyElements = ManifestElement.parseHeader(EquinoxModuleDataNamespace.LAZYSTART_HEADER, manifest.get(EquinoxModuleDataNamespace.LAZYSTART_HEADER));
+			if (policyElements == null) {
+				policyElements = ManifestElement.parseHeader(EquinoxModuleDataNamespace.AUTOSTART_HEADER, manifest.get(EquinoxModuleDataNamespace.AUTOSTART_HEADER));
+			}
+			if (policyElements != null) {
+				ManifestElement policy = policyElements[0];
+				String excludeSpec = policy.getDirective(Constants.EXCLUDE_DIRECTIVE);
+				if ("true".equals(policy.getValue())) { //$NON-NLS-1$
+					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY, EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY);
+					if (excludeSpec != null) {
+						attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE, convertValue("List<String>", excludeSpec)); //$NON-NLS-1$
+					}
+				} else {
+					// NOTICE - the exclude list gets converted to an include list when the header is not true
+					if (excludeSpec != null) {
+						attributes.put(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY, EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY);
+						attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_INCLUDE_ATTRIBUTE, convertValue("List<String>", excludeSpec)); //$NON-NLS-1$
+					}
+				}
+			}
 		}
 
 		// Get the activator

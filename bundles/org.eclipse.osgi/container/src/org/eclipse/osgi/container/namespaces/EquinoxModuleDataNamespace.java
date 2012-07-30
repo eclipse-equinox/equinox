@@ -55,6 +55,17 @@ public class EquinoxModuleDataNamespace extends Namespace {
 	public final static String REGISTERED_BUDDY_HEADER = "Eclipse-RegisterBuddy"; //$NON-NLS-1$
 
 	/**
+	 * The Equinox specific header for specifying the lazy start policy
+	 */
+	public static final String LAZYSTART_HEADER = "Eclipse-LazyStart"; //$NON-NLS-1$
+
+	/** 
+	 * The Equinox specific header for specifying the lazy start policy 
+	 * @deprecated use {@link #LAZYSTART_HEADER}
+	 */
+	public static final String AUTOSTART_HEADER = "Eclipse-AutoStart"; //$NON-NLS-1$
+
+	/**
 	 * Namespace name for equinox module data.  Unlike typical name spaces
 	 * this namespace is not intended to be used as an attribute.
 	 */
