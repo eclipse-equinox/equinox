@@ -317,6 +317,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			}
 			throw new BundleException("Unable to acquire the state change lock for the module: " + transitionEvent, BundleException.STATECHANGE_ERROR);
 		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 			throw new BundleException("Unable to acquire the state change lock for the module.", BundleException.STATECHANGE_ERROR, e);
 		}
 	}
