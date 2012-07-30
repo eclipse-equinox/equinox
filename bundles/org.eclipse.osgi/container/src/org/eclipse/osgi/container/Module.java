@@ -190,7 +190,6 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * @return the module location
 	 */
 	public final String getLocation() {
-		revisions.getContainer().checkAdminPermission(getBundle(), AdminPermission.METADATA);
 		return location;
 	}
 
