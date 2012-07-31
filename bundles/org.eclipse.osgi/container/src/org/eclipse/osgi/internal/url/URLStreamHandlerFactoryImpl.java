@@ -15,11 +15,11 @@ import java.lang.reflect.Method;
 import java.net.*;
 import java.security.AccessController;
 import java.util.*;
-import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.storage.url.BundleResourceHandler;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -31,25 +31,14 @@ import org.osgi.util.tracker.ServiceTracker;
  * This class contains the URL stream handler factory for the OSGi framework.
  */
 public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements URLStreamHandlerFactory {
+	protected static final String URLSTREAMHANDLERCLASS = "org.osgi.service.url.URLStreamHandlerService"; //$NON-NLS-1$
+	protected static final String PROTOCOL_HANDLER_PKGS = "java.protocol.handler.pkgs"; //$NON-NLS-1$
+	private static final String PROTOCOL_REFERENCE = "reference"; //$NON-NLS-1$
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
 	private ServiceTracker<URLStreamHandlerService, URLStreamHandlerService> handlerTracker;
 
-	protected static final String URLSTREAMHANDLERCLASS = "org.osgi.service.url.URLStreamHandlerService"; //$NON-NLS-1$
-	protected static final String PROTOCOL_HANDLER_PKGS = "java.protocol.handler.pkgs"; //$NON-NLS-1$
-	protected static final String INTERNAL_PROTOCOL_HANDLER_PKG = "org.eclipse.osgi.framework.internal.protocol"; //$NON-NLS-1$
-
 	private static final List<Class<?>> ignoredClasses = Arrays.asList(new Class<?>[] {MultiplexingURLStreamHandler.class, URLStreamHandlerFactoryImpl.class, URL.class});
-	private static final boolean useNetProxy;
-	static {
-		Class<?> clazz = null;
-		try {
-			clazz = Class.forName("java.net.Proxy"); //$NON-NLS-1$
-		} catch (ClassNotFoundException e) {
-			// expected on JRE < 1.5
-		}
-		useNetProxy = clazz != null;
-	}
 	private Map<String, URLStreamHandler> proxies;
 	private URLStreamHandlerFactory parentFactory;
 	private ThreadLocal<List<String>> creatingProtocols = new ThreadLocal<List<String>>();
@@ -59,8 +48,8 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 	 *
 	 * @param context BundleContext for the system bundle
 	 */
-	public URLStreamHandlerFactoryImpl(BundleContext context, FrameworkAdaptor adaptor) {
-		super(context, adaptor);
+	public URLStreamHandlerFactoryImpl(BundleContext context, EquinoxContainer container) {
+		super(context, container);
 
 		proxies = new Hashtable<String, URLStreamHandler>(15);
 		handlerTracker = new ServiceTracker<URLStreamHandlerService, URLStreamHandlerService>(context, URLSTREAMHANDLERCLASS, null);
@@ -121,7 +110,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 				result = parentFactory.createURLStreamHandler(protocol);
 			return result; //result may be null; let the VM handle it (consider sun.net.protocol.www.*)
 		} catch (Throwable t) {
-			adaptor.getFrameworkLog().log(new FrameworkLogEntry(URLStreamHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR, 0, "Unexpected error in factory.", 0, t, null)); //$NON-NLS-1$
+			container.getLogServices().log(URLStreamHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR, "Unexpected error in factory.", t); //$NON-NLS-1$
 			return null;
 		} finally {
 			releaseRecursive(protocol);
@@ -145,54 +134,52 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 		protocols.remove(protocol);
 	}
 
+	private URLStreamHandler getFrameworkHandler(String protocol) {
+		if (BundleResourceHandler.OSGI_ENTRY_URL_PROTOCOL.equals(protocol)) {
+			return new org.eclipse.osgi.storage.url.bundleentry.Handler(container.getStorage().getModuleContainer(), null);
+		} else if (BundleResourceHandler.OSGI_RESOURCE_URL_PROTOCOL.equals(protocol)) {
+			return new org.eclipse.osgi.storage.url.bundleresource.Handler(container.getStorage().getModuleContainer(), null);
+		} else if (PROTOCOL_REFERENCE.equals(protocol)) {
+			return new org.eclipse.osgi.storage.url.reference.Handler();
+		}
+		return null;
+	}
+
 	public URLStreamHandler createInternalURLStreamHandler(String protocol) {
 		//internal protocol handlers
-		String internalHandlerPkgs = secureAction.getProperty(Constants.INTERNAL_HANDLER_PKGS);
-		internalHandlerPkgs = internalHandlerPkgs == null ? INTERNAL_PROTOCOL_HANDLER_PKG : internalHandlerPkgs + '|' + INTERNAL_PROTOCOL_HANDLER_PKG;
-		Class<?> clazz = getBuiltIn(protocol, internalHandlerPkgs, true);
+		URLStreamHandler frameworkHandler = getFrameworkHandler(protocol);
+		if (frameworkHandler != null) {
+			return frameworkHandler;
+		}
 
-		if (clazz == null) {
-			//Now we check the service registry
-			//first check to see if the handler is in the cache
-			URLStreamHandlerProxy handler = (URLStreamHandlerProxy) proxies.get(protocol);
-			if (handler != null)
-				return (handler);
-			//look through the service registry for a URLStramHandler registered for this protocol
-			ServiceReference<URLStreamHandlerService>[] serviceReferences = handlerTracker.getServiceReferences();
-			if (serviceReferences == null)
-				return null;
-			for (int i = 0; i < serviceReferences.length; i++) {
-				Object prop = serviceReferences[i].getProperty(URLConstants.URL_HANDLER_PROTOCOL);
-				if (prop instanceof String)
-					prop = new String[] {(String) prop}; // TODO should this be a warning?
-				if (!(prop instanceof String[])) {
-					String message = NLS.bind(Msg.URL_HANDLER_INCORRECT_TYPE, new Object[] {URLConstants.URL_HANDLER_PROTOCOL, URLSTREAMHANDLERCLASS, serviceReferences[i].getBundle()});
-					adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, message, 0, null, null));
-					continue;
+		//Now we check the service registry
+		//first check to see if the handler is in the cache
+		URLStreamHandlerProxy handler = (URLStreamHandlerProxy) proxies.get(protocol);
+		if (handler != null)
+			return (handler);
+		//look through the service registry for a URLStramHandler registered for this protocol
+		ServiceReference<URLStreamHandlerService>[] serviceReferences = handlerTracker.getServiceReferences();
+		if (serviceReferences == null)
+			return null;
+		for (int i = 0; i < serviceReferences.length; i++) {
+			Object prop = serviceReferences[i].getProperty(URLConstants.URL_HANDLER_PROTOCOL);
+			if (prop instanceof String)
+				prop = new String[] {(String) prop}; // TODO should this be a warning?
+			if (!(prop instanceof String[])) {
+				String message = NLS.bind(Msg.URL_HANDLER_INCORRECT_TYPE, new Object[] {URLConstants.URL_HANDLER_PROTOCOL, URLSTREAMHANDLERCLASS, serviceReferences[i].getBundle()});
+				container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, message, null);
+				continue;
+			}
+			String[] protocols = (String[]) prop;
+			for (int j = 0; j < protocols.length; j++) {
+				if (protocols[j].equals(protocol)) {
+					handler = new URLStreamHandlerProxy(protocol, serviceReferences[i], context);
+					proxies.put(protocol, handler);
+					return (handler);
 				}
-				String[] protocols = (String[]) prop;
-				for (int j = 0; j < protocols.length; j++)
-					if (protocols[j].equals(protocol)) {
-						handler = useNetProxy ? new URLStreamHandlerFactoryProxyFor15(protocol, serviceReferences[i], context) : new URLStreamHandlerProxy(protocol, serviceReferences[i], context);
-						proxies.put(protocol, handler);
-						return (handler);
-					}
 			}
-			return null;
 		}
-
-		// must be a built-in handler
-		try {
-			URLStreamHandler handler = (URLStreamHandler) clazz.newInstance();
-
-			if (handler instanceof ProtocolActivator) {
-				((ProtocolActivator) handler).start(context, adaptor);
-			}
-
-			return handler;
-		} catch (Exception e) {
-			return null;
-		}
+		return null;
 	}
 
 	protected URLStreamHandler findAuthorizedURLStreamHandler(String protocol) {
@@ -207,7 +194,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 			Method createInternalURLStreamHandlerMethod = factory.getClass().getMethod("createInternalURLStreamHandler", new Class[] {String.class}); //$NON-NLS-1$
 			return (URLStreamHandler) createInternalURLStreamHandlerMethod.invoke(factory, new Object[] {protocol});
 		} catch (Exception e) {
-			adaptor.getFrameworkLog().log(new FrameworkLogEntry(URLStreamHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR, 0, "findAuthorizedURLStreamHandler-loop", 0, e, null)); //$NON-NLS-1$
+			container.getLogServices().log(URLStreamHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR, "findAuthorizedURLStreamHandler-loop", e); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}

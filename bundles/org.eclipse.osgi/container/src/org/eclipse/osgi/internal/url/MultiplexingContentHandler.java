@@ -15,9 +15,9 @@ import java.net.URLConnection;
 public class MultiplexingContentHandler extends ContentHandler {
 
 	private String contentType;
-	private ContentHandlerFactory factory;
+	private ContentHandlerFactoryImpl factory;
 
-	public MultiplexingContentHandler(String contentType, ContentHandlerFactory factory) {
+	public MultiplexingContentHandler(String contentType, ContentHandlerFactoryImpl factory) {
 		this.contentType = contentType;
 		this.factory = factory;
 	}

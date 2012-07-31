@@ -12,6 +12,8 @@
 package org.eclipse.osgi.internal.url;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.*;
 import org.osgi.framework.*;
 import org.osgi.service.url.URLConstants;
@@ -215,4 +217,17 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 		return (property instanceof Integer) ? ((Integer) property).intValue() : 0;
 	}
 
+	protected URLConnection openConnection(URL u, Proxy p) throws IOException {
+		try {
+			Method openConn = realHandlerService.getClass().getMethod("openConnection", new Class[] {URL.class, Proxy.class}); //$NON-NLS-1$
+			return (URLConnection) openConn.invoke(realHandlerService, new Object[] {u, p});
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException() instanceof IOException)
+				throw (IOException) e.getTargetException();
+			throw (RuntimeException) e.getTargetException();
+		} catch (Exception e) {
+			// expected on JRE < 1.5
+			throw (UnsupportedOperationException) new UnsupportedOperationException().initCause(e);
+		}
+	}
 }

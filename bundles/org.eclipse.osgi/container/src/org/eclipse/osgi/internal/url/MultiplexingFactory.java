@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2006, 2012 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,24 +11,19 @@ package org.eclipse.osgi.internal.url;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
-import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.util.tracker.ServiceTracker;
+import org.eclipse.osgi.internal.framework.EquinoxBundle;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.osgi.framework.*;
 
 /*
  * An abstract class for handler factory impls (Stream and Content) that can 
  * handle environments running multiple osgi frameworks with the same VM.
  */
 public abstract class MultiplexingFactory {
-
-	protected static final String PACKAGEADMINCLASS = "org.osgi.service.packageadmin.PackageAdmin"; //$NON-NLS-1$
+	protected EquinoxContainer container;
 	protected BundleContext context;
-	protected FrameworkAdaptor adaptor;
 	private List<Object> factories; // list of multiplexed factories
-	private ServiceTracker<ServiceReference<?>, PackageAdmin> packageAdminTracker;
 
 	// used to get access to the protected SecurityManager#getClassContext method
 	static class InternalSecurityManager extends SecurityManager {
@@ -39,11 +34,10 @@ public abstract class MultiplexingFactory {
 
 	private static InternalSecurityManager internalSecurityManager = new InternalSecurityManager();
 
-	MultiplexingFactory(BundleContext context, FrameworkAdaptor adaptor) {
+	MultiplexingFactory(BundleContext context, EquinoxContainer container) {
 		this.context = context;
-		this.adaptor = adaptor;
-		packageAdminTracker = new ServiceTracker<ServiceReference<?>, PackageAdmin>(context, PACKAGEADMINCLASS, null);
-		packageAdminTracker.open();
+		this.container = container;
+
 	}
 
 	abstract public void setParentFactory(Object parentFactory);
@@ -61,7 +55,7 @@ public abstract class MultiplexingFactory {
 			Method setParentFactory = clazz.getMethod("setParentFactory", new Class[] {Object.class}); //$NON-NLS-1$
 			setParentFactory.invoke(factory, new Object[] {getParentFactory()});
 		} catch (Exception e) {
-			adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, 0, "register", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
+			container.getLogServices().log(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, "register", e); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage(), e);
 		}
 		addFactory(factory);
@@ -76,7 +70,7 @@ public abstract class MultiplexingFactory {
 			closeTracker.setAccessible(true); // its a private method
 			closeTracker.invoke(factory, (Object[]) null);
 		} catch (Exception e) {
-			adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, 0, "unregister", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
+			container.getLogServices().log(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, "unregister", e); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -101,7 +95,7 @@ public abstract class MultiplexingFactory {
 				register.invoke(successor, new Object[] {r});
 			}
 		} catch (Exception e) {
-			adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, 0, "designateSuccessor", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
+			container.getLogServices().log(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, "designateSuccessor", e); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage(), e);
 		}
 		closePackageAdminTracker(); // close tracker
@@ -109,7 +103,7 @@ public abstract class MultiplexingFactory {
 	}
 
 	private void closePackageAdminTracker() {
-		packageAdminTracker.close();
+		// Do nothing, just here for posterity
 	}
 
 	public Object findAuthorizedFactory(List<Class<?>> ignoredClasses) {
@@ -130,7 +124,7 @@ public abstract class MultiplexingFactory {
 						return factory;
 					}
 				} catch (Exception e) {
-					adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, 0, "findAuthorizedURLStreamHandler-loop", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
+					container.getLogServices().log(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, "findAuthorizedURLStreamHandler-loop", e); //$NON-NLS-1$
 					throw new RuntimeException(e.getMessage(), e);
 				}
 			}
@@ -139,11 +133,11 @@ public abstract class MultiplexingFactory {
 	}
 
 	public boolean hasAuthority(Class<?> clazz) {
-		PackageAdmin packageAdminService = packageAdminTracker.getService();
-		if (packageAdminService != null) {
-			return packageAdminService.getBundle(clazz) != null;
+		Bundle b = FrameworkUtil.getBundle(clazz);
+		if (!(b instanceof EquinoxBundle)) {
+			return false;
 		}
-		return false;
+		return (container.getStorage().getModuleContainer() == ((EquinoxBundle) b).getModule().getContainer());
 	}
 
 	private synchronized List<Object> getFactories() {

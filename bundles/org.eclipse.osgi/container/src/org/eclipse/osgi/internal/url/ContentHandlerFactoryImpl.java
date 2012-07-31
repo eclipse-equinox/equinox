@@ -15,9 +15,9 @@ import java.lang.reflect.Method;
 import java.net.ContentHandler;
 import java.net.URLConnection;
 import java.util.*;
-import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -31,21 +31,20 @@ import org.osgi.util.tracker.ServiceTracker;
  * will search the service registry for a maching Content-Handler and, if found, return a 
  * proxy for that content handler.
  */
-// TODO rename this class!!!  its really confusing to name the impl the same as the interface
-public class ContentHandlerFactory extends MultiplexingFactory implements java.net.ContentHandlerFactory {
+public class ContentHandlerFactoryImpl extends MultiplexingFactory implements java.net.ContentHandlerFactory {
 	private ServiceTracker<ContentHandler, ContentHandler> contentHandlerTracker;
 
 	private static final String contentHandlerClazz = "java.net.ContentHandler"; //$NON-NLS-1$
 	private static final String CONTENT_HANDLER_PKGS = "java.content.handler.pkgs"; //$NON-NLS-1$
 	private static final String DEFAULT_VM_CONTENT_HANDLERS = "sun.net.www.content"; //$NON-NLS-1$
 
-	private static final List<Class<?>> ignoredClasses = Arrays.asList(new Class<?>[] {MultiplexingContentHandler.class, ContentHandlerFactory.class, URLConnection.class});
+	private static final List<Class<?>> ignoredClasses = Arrays.asList(new Class<?>[] {MultiplexingContentHandler.class, ContentHandlerFactoryImpl.class, URLConnection.class});
 
 	private Map<String, ContentHandlerProxy> proxies;
 	private java.net.ContentHandlerFactory parentFactory;
 
-	public ContentHandlerFactory(BundleContext context, FrameworkAdaptor adaptor) {
-		super(context, adaptor);
+	public ContentHandlerFactoryImpl(BundleContext context, EquinoxContainer container) {
+		super(context, container);
 
 		proxies = new Hashtable<String, ContentHandlerProxy>(5);
 
@@ -109,7 +108,7 @@ public class ContentHandlerFactory extends MultiplexingFactory implements java.n
 					prop = new String[] {(String) prop}; // TODO should this be a warning?
 				if (!(prop instanceof String[])) {
 					String message = NLS.bind(Msg.URL_HANDLER_INCORRECT_TYPE, new Object[] {URLConstants.URL_CONTENT_MIMETYPE, contentHandlerClazz, serviceReferences[i].getBundle()});
-					adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, message, 0, null, null));
+					container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, message, null);
 					continue;
 				}
 				String[] contentHandler = (String[]) prop;
@@ -147,7 +146,7 @@ public class ContentHandlerFactory extends MultiplexingFactory implements java.n
 			Method createInternalContentHandlerMethod = factory.getClass().getMethod("createInternalContentHandler", new Class[] {String.class}); //$NON-NLS-1$
 			return (ContentHandler) createInternalContentHandlerMethod.invoke(factory, new Object[] {contentType});
 		} catch (Exception e) {
-			adaptor.getFrameworkLog().log(new FrameworkLogEntry(ContentHandlerFactory.class.getName(), FrameworkLogEntry.ERROR, 0, "findAuthorizedContentHandler-loop", 0, e, null)); //$NON-NLS-1$
+			container.getLogServices().log(ContentHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR, "findAuthorizedContentHandler-loop", e); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
