@@ -11,7 +11,7 @@
 
 package org.eclipse.osgi.internal.baseadaptor;
 
-import org.eclipse.osgi.framework.internal.protocol.reference.ReferenceInputStream;
+import org.eclipse.osgi.storage.url.reference.ReferenceInputStream;
 
 import org.eclipse.osgi.internal.debug.Debug;
 

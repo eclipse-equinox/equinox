@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.internal.protocol.reference;
+package org.eclipse.osgi.storage.url.reference;
 
 import java.io.IOException;
 import java.io.InputStream;
