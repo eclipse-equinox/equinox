@@ -17,7 +17,6 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
-import org.eclipse.osgi.framework.internal.core.ReferenceInputStream;
 
 /**
  * URLConnection for the reference protocol.

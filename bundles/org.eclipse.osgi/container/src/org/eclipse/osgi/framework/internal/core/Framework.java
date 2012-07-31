@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.internal.framework.UniversalUniqueIdentifier;
+
+import org.eclipse.osgi.internal.framework.AliasMapper;
+
 import java.io.*;
 import java.lang.reflect.*;
 import java.net.*;

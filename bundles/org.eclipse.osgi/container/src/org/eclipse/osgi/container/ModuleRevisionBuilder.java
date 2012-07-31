@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
+import org.eclipse.osgi.internal.framework.FilterImpl;
+
 import java.security.AllPermission;
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.osgi.framework.*;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.resource.Namespace;

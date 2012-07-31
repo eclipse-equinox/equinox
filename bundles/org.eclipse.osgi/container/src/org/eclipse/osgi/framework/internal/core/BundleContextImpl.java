@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.internal.framework.FilterImpl;
+
 import org.eclipse.osgi.internal.debug.Debug;
 
 import java.io.File;

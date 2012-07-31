@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.baseadaptor;
 
+import org.eclipse.osgi.internal.framework.FilterImpl;
+
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 
 import org.eclipse.osgi.internal.location.EquinoxLocations;

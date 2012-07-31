@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.signedcontent;
 
+import org.eclipse.osgi.internal.framework.FilterImpl;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.*;

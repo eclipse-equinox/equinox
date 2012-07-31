@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import org.eclipse.osgi.internal.framework.FilterImpl;
+
 import java.lang.reflect.Constructor;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.*;

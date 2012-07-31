@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.container.builders;
 
+import org.eclipse.osgi.internal.framework.FilterImpl;
+
+import org.eclipse.osgi.internal.framework.AliasMapper;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;

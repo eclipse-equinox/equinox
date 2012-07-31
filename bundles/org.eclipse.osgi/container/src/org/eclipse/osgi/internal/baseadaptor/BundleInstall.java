@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.internal.baseadaptor;
 
+import org.eclipse.osgi.framework.internal.protocol.reference.ReferenceInputStream;
+
 import org.eclipse.osgi.internal.debug.Debug;
 
 import java.io.*;
@@ -21,7 +23,6 @@ import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.BundleOperation;
-import org.eclipse.osgi.framework.internal.core.ReferenceInputStream;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 

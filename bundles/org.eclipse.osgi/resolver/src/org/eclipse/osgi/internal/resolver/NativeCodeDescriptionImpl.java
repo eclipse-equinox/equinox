@@ -11,9 +11,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import org.eclipse.osgi.internal.framework.FilterImpl;
+
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.resolver.VersionRange;
 import org.osgi.framework.*;

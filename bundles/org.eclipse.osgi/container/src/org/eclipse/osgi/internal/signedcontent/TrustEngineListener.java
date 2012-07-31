@@ -8,6 +8,8 @@
  ******************************************************************************/
 package org.eclipse.osgi.internal.signedcontent;
 
+import org.eclipse.osgi.internal.framework.FilterImpl;
+
 import java.security.cert.Certificate;
 import java.util.*;
 import org.eclipse.osgi.baseadaptor.BaseData;

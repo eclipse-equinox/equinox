@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
+import org.eclipse.osgi.internal.framework.FilterImpl;
+
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.eclipse.osgi.internal.container.Capabilities;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.namespace.*;

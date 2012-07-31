@@ -8,7 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.framework.internal.core;
+package org.eclipse.osgi.internal.framework;
+
+import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.framework.internal.core.Tokenizer;
 
 import org.eclipse.osgi.internal.debug.Debug;
 

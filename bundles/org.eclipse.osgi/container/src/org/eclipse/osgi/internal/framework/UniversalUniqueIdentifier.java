@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.framework.internal.core;
+package org.eclipse.osgi.internal.framework;
 
 import java.io.*;
 import java.math.BigInteger;
