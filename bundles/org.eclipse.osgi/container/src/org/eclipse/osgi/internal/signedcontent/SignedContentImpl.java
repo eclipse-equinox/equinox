@@ -8,14 +8,14 @@
  ******************************************************************************/
 package org.eclipse.osgi.internal.signedcontent;
 
-import org.eclipse.osgi.storage.bundlefile.BundleEntry;
-import org.eclipse.osgi.storage.bundlefile.BundleFile;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
 import java.util.*;
 import org.eclipse.osgi.signedcontent.*;
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.eclipse.osgi.util.NLS;
 
 public class SignedContentImpl implements SignedContent {
@@ -126,7 +126,11 @@ public class SignedContentImpl implements SignedContent {
 		Object[] mdResult = (Object[]) contentMDResults.get(nestedEntry.getName());
 		if (mdResult == null)
 			return null;
-		return new DigestedInputStream(nestedEntry, content, (SignerInfo[]) mdResult[0], (byte[][]) mdResult[1], nestedEntry.getSize());
+		try {
+			return new DigestedInputStream(nestedEntry, content, (SignerInfo[]) mdResult[0], (byte[][]) mdResult[1], nestedEntry.getSize());
+		} catch (NoSuchAlgorithmException e) {
+			throw new IOException(e);
+		}
 	}
 
 	public class SignedContentEntryImpl implements SignedContentEntry {

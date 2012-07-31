@@ -16,7 +16,6 @@ import java.security.cert.Certificate;
 import java.text.*;
 import java.util.*;
 import javax.security.auth.x500.X500Principal;
-import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -30,7 +29,8 @@ public class PKCS7Processor implements SignedContentConstants {
 		try {
 			certFact = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$
 		} catch (CertificateException e) {
-			SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
+			// TODO this is bad and will lead to NPEs
+			// Should we just throw a runtime exception to fail <clinit>?
 		}
 	}
 

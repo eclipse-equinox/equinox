@@ -59,10 +59,6 @@ public interface SignedContentConstants {
 	public static final String TRUST_ENGINE = "osgi.signedcontent.trust.engine"; //$NON-NLS-1$
 	public static final Object DEFAULT_TRUST_ENGINE = "org.eclipse.osgi"; //$NON-NLS-1$
 
-	// constants for authorization engine service
-	public static final String AUTHORIZATION_ENGINE = "osgi.signedcontent.authorization.engine"; //$NON-NLS-1$
-	public static final Object DEFAULT_AUTHORIZATION_ENGINE = "org.eclipse.osgi"; //$NON-NLS-1$
-
 	// constant for the timestamp related
 	public static final int TIMESTAMP_OID[] = {1, 2, 840, 113549, 1, 9, 16, 2, 14};
 	public static final int TIMESTAMP_TST_OID[] = {1, 2, 840, 113549, 1, 9, 16, 1, 4};

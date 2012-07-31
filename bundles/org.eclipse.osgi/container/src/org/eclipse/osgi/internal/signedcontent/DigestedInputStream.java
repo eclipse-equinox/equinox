@@ -11,14 +11,14 @@
 
 package org.eclipse.osgi.internal.signedcontent;
 
-import org.eclipse.osgi.storage.bundlefile.BundleEntry;
-import org.eclipse.osgi.storage.bundlefile.BundleFile;
-
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import org.eclipse.osgi.signedcontent.InvalidContentException;
 import org.eclipse.osgi.signedcontent.SignerInfo;
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -42,15 +42,16 @@ class DigestedInputStream extends FilterInputStream {
 	 * @param signerInfos the signers.
 	 * @param results the expected digest.
 	 * @throws IOException 
+	 * @throws NoSuchAlgorithmException 
 	 */
-	DigestedInputStream(BundleEntry entry, BundleFile bundleFile, SignerInfo[] signerInfos, byte results[][], long size) throws IOException {
+	DigestedInputStream(BundleEntry entry, BundleFile bundleFile, SignerInfo[] signerInfos, byte results[][], long size) throws IOException, NoSuchAlgorithmException {
 		super(entry.getInputStream());
 		this.entry = entry;
 		this.bundleFile = bundleFile;
 		this.remaining = size;
 		this.digests = new MessageDigest[signerInfos.length];
 		for (int i = 0; i < signerInfos.length; i++)
-			this.digests[i] = SignatureBlockProcessor.getMessageDigest(signerInfos[i].getMessageDigestAlgorithm());
+			this.digests[i] = MessageDigest.getInstance(signerInfos[i].getMessageDigestAlgorithm());
 		this.result = results;
 	}
 

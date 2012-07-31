@@ -8,9 +8,6 @@
  ******************************************************************************/
 package org.eclipse.osgi.internal.signedcontent;
 
-import org.eclipse.osgi.storage.bundlefile.BundleEntry;
-import org.eclipse.osgi.storage.bundlefile.BundleFile;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.*;
@@ -19,6 +16,8 @@ import java.security.cert.CertificateException;
 import java.util.*;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.signedcontent.SignerInfo;
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.eclipse.osgi.util.NLS;
 
 public class SignatureBlockProcessor implements SignedContentConstants {
@@ -28,10 +27,12 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 	// map of tsa singers keyed by SignerInfo -> {tsa_SignerInfo, signingTime}
 	private Map<SignerInfo, Object[]> tsaSignerInfos;
 	private final int supportFlags;
+	private final SignedBundleHook signedBundleHook;
 
-	public SignatureBlockProcessor(SignedBundleFile signedContent, int supportFlags) {
+	public SignatureBlockProcessor(SignedBundleFile signedContent, int supportFlags, SignedBundleHook signedBundleHook) {
 		this.signedBundle = signedContent;
 		this.supportFlags = supportFlags;
+		this.signedBundleHook = signedBundleHook;
 	}
 
 	public SignedContentImpl process() throws IOException, InvalidKeyException, SignatureException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
@@ -155,7 +156,7 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 				// check if the the computed digest value of manifest file equals to the digest value in the .sf file
 				if (!digestValue.equals(manifestDigest)) {
 					SignatureException se = new SignatureException(NLS.bind(SignedContentMessages.Security_File_Is_Tampered, new String[] {signedBundle.getBaseFile().toString()}));
-					SignedBundleHook.log(se.getMessage(), FrameworkLogEntry.ERROR, se);
+					signedBundleHook.log(se.getMessage(), FrameworkLogEntry.ERROR, se);
 					throw se;
 				}
 			}
@@ -309,11 +310,11 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 		return new String(Base64.encode(digest.digest(bytes)));
 	}
 
-	static synchronized MessageDigest getMessageDigest(String algorithm) {
+	synchronized MessageDigest getMessageDigest(String algorithm) {
 		try {
 			return MessageDigest.getInstance(algorithm);
 		} catch (NoSuchAlgorithmException e) {
-			SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
+			signedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
 		}
 		return null;
 	}
