@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,22 +9,26 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.internal.core;
+package org.eclipse.osgi.internal.framework;
 
-import org.eclipse.osgi.internal.framework.FilterImpl;
-
-import org.eclipse.osgi.internal.debug.Debug;
-
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
+import java.net.URLConnection;
 import java.security.*;
 import java.util.*;
-import org.eclipse.osgi.event.BatchBundleListener;
+import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.container.ModuleWiring;
+import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
+import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.internal.serviceregistry.*;
+import org.eclipse.osgi.next.internal.debug.Debug;
+import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.framework.hooks.bundle.FindHook;
+import org.osgi.resource.Capability;
 
 /**
  * Bundle's execution context.
@@ -35,7 +39,7 @@ import org.osgi.framework.*;
  */
 
 public class BundleContextImpl implements BundleContext, EventDispatcher<Object, Object, Object> {
-	private static boolean SET_TCCL = "true".equals(FrameworkProperties.getProperty("eclipse.bundle.setTCCL", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	static final String findHookName = FindHook.class.getName();
 	/** true if the bundle context is still valid */
 	private volatile boolean valid;
 
@@ -43,10 +47,11 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	// This slot is accessed directly by the Framework instead of using
 	// the getBundle() method because the Framework needs access to the bundle
 	// even when the context is invalid while the close method is being called.
-	final BundleHost bundle;
+	final EquinoxBundle bundle;
 
-	/** Internal framework object. */
-	final Framework framework;
+	/** Internal equinox container object. */
+	final EquinoxContainer container;
+	final Debug debug;
 
 	/** Services that bundle is using. Key is ServiceRegistrationImpl,
 	 Value is ServiceUse */
@@ -65,10 +70,11 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 *
 	 * @param bundle The bundle we are wrapping.
 	 */
-	protected BundleContextImpl(BundleHost bundle) {
+	public BundleContextImpl(EquinoxBundle bundle, EquinoxContainer container) {
 		this.bundle = bundle;
+		this.container = container;
+		this.debug = container.getConfiguration().getDebug();
 		valid = true;
-		framework = bundle.framework;
 		synchronized (contextLock) {
 			servicesInUse = null;
 		}
@@ -82,10 +88,10 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	protected void close() {
 		valid = false; /* invalidate context */
 
-		final ServiceRegistry registry = framework.getServiceRegistry();
+		final ServiceRegistry registry = container.getServiceRegistry();
 
 		registry.removeAllServiceListeners(this);
-		framework.removeAllListeners(this);
+		container.getEventPublisher().removeAllListeners(this);
 
 		/* service's registered by the bundle, if any, are unregistered. */
 		registry.unregisterServices(this);
@@ -112,7 +118,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			sm.checkPropertyAccess(key);
 		}
 
-		return (framework.getProperty(key));
+		return (container.getConfiguration().getProperty(key));
 	}
 
 	/**
@@ -126,7 +132,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		return getBundleImpl();
 	}
 
-	public AbstractBundle getBundleImpl() {
+	public EquinoxBundle getBundleImpl() {
 		return bundle;
 	}
 
@@ -136,8 +142,14 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 
 	public Bundle installBundle(String location, InputStream in) throws BundleException {
 		checkValid();
-		//note AdminPermission is checked after bundle is loaded
-		return framework.installBundle(location, in, this);
+		try {
+			URLConnection content = container.getStorage().getContentConnection(null, location, in);
+			Generation generation = container.getStorage().install(bundle.getModule(), location, content);
+			return generation.getRevision().getBundle();
+		} catch (IOException e) {
+			throw new BundleException("Error reading bundle content.", e); //$NON-NLS-1$
+		}
+
 	}
 
 	/**
@@ -148,22 +160,24 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 * if the identifier doesn't match any installed bundle.
 	 */
 	public Bundle getBundle(long id) {
-		return framework.getBundle(this, id);
+		Module m = container.getStorage().getModuleContainer().getModule(id);
+		if (m == null) {
+			return null;
+		}
+		if (getBundle().getBundleId() != 0) {
+			List<Bundle> bundles = new ArrayList<Bundle>(1);
+			bundles.add(m.getBundle());
+			notifyFindHooks(this, bundles);
+			if (bundles.isEmpty()) {
+				return null;
+			}
+		}
+		return m.getBundle();
 	}
 
 	public Bundle getBundle(String location) {
-		return framework.getBundleByLocation(location);
-	}
-
-	/**
-	 * Retrieve the bundle that has the given location.
-	 *
-	 * @param location The location string of the bundle to retrieve.
-	 * @return A Bundle object, or <code>null</code>
-	 * if the location doesn't match any installed bundle.
-	 */
-	public AbstractBundle getBundleByLocation(String location) {
-		return (framework.getBundleByLocation(location));
+		Module m = container.getStorage().getModuleContainer().getModule(location);
+		return m == null ? null : m.getBundle();
 	}
 
 	/**
@@ -172,51 +186,63 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 * of the call to getBundles, but the framework is a very dynamic
 	 * environment and bundles can be installed or uninstalled at anytime.
 	 *
-	 * @return An array of {@link AbstractBundle} objects, one
+	 * @return An array of {@link Bundle} objects, one
 	 * object per installed bundle.
 	 */
 	public Bundle[] getBundles() {
-		return framework.getBundles(this);
+		List<Module> modules = container.getStorage().getModuleContainer().getModules();
+		List<Bundle> bundles = new ArrayList<Bundle>(modules.size());
+		for (Module module : modules) {
+			bundles.add(module.getBundle());
+		}
+		if (getBundle().getBundleId() != 0) {
+			notifyFindHooks(this, bundles);
+		}
+		return bundles.toArray(new Bundle[bundles.size()]);
 	}
 
-	/**
-	 * Add a service listener with a filter.
-	 * {@link ServiceListener}s are notified when a service has a lifecycle
-	 * state change.
-	 * See {@link #getServiceReferences(String, String) getServiceReferences}
-	 * for a description of the filter syntax.
-	 * The listener is added to the context bundle's list of listeners.
-	 * See {@link #getBundle() getBundle()}
-	 * for a definition of context bundle.
-	 *
-	 * <p>The listener is called if the filter criteria is met.
-	 * To filter based upon the class of the service, the filter
-	 * should reference the "objectClass" property.
-	 * If the filter paramater is <code>null</code>, all services
-	 * are considered to match the filter.
-	 * <p>If the Java runtime environment supports permissions, then additional
-	 * filtering is done.
-	 * {@link AbstractBundle#hasPermission(Object) Bundle.hasPermission} is called for the
-	 * bundle which defines the listener to validate that the listener has the
-	 * {@link ServicePermission} permission to <code>"get"</code> the service
-	 * using at least one of the named classes the service was registered under.
-	 *
-	 * @param listener The service listener to add.
-	 * @param filter The filter criteria.
-	 * @exception InvalidSyntaxException If the filter parameter contains
-	 * an invalid filter string which cannot be parsed.
-	 * @see ServiceEvent
-	 * @see ServiceListener
-	 * @exception java.lang.IllegalStateException
-	 * If the bundle context has stopped.
-	 */
+	private void notifyFindHooks(final BundleContextImpl context, List<Bundle> allBundles) {
+		final Collection<Bundle> shrinkable = new ShrinkableCollection<Bundle>(allBundles);
+		if (System.getSecurityManager() == null) {
+			notifyFindHooksPriviledged(context, shrinkable);
+		} else {
+			AccessController.doPrivileged(new PrivilegedAction<Object>() {
+				public Object run() {
+					notifyFindHooksPriviledged(context, shrinkable);
+					return null;
+				}
+			});
+		}
+	}
+
+	void notifyFindHooksPriviledged(final BundleContextImpl context, final Collection<Bundle> allBundles) {
+		if (debug.DEBUG_HOOKS) {
+			Debug.println("notifyBundleFindHooks(" + allBundles + ")"); //$NON-NLS-1$ //$NON-NLS-2$ 
+		}
+		container.getServiceRegistry().notifyHooksPrivileged(new HookContext() {
+			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
+				if (hook instanceof FindHook) {
+					((FindHook) hook).find(context, allBundles);
+				}
+			}
+
+			public String getHookClassName() {
+				return findHookName;
+			}
+
+			public String getHookMethodName() {
+				return "find"; //$NON-NLS-1$ 
+			}
+		});
+	}
+
 	public void addServiceListener(ServiceListener listener, String filter) throws InvalidSyntaxException {
 		checkValid();
 
 		if (listener == null) {
 			throw new IllegalArgumentException();
 		}
-		framework.getServiceRegistry().addServiceListener(this, listener, filter);
+		container.getServiceRegistry().addServiceListener(this, listener, filter);
 	}
 
 	/**
@@ -232,7 +258,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		try {
 			addServiceListener(listener, null);
 		} catch (InvalidSyntaxException e) {
-			if (Debug.DEBUG_GENERAL) {
+			if (debug.DEBUG_GENERAL) {
 				Debug.println("InvalidSyntaxException w/ null filter" + e.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(e);
 			}
@@ -258,7 +284,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		if (listener == null) {
 			throw new IllegalArgumentException();
 		}
-		framework.getServiceRegistry().removeServiceListener(this, listener);
+		container.getServiceRegistry().removeServiceListener(this, listener);
 	}
 
 	/**
@@ -281,12 +307,12 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			throw new IllegalArgumentException();
 		}
 
-		if (Debug.DEBUG_EVENTS) {
+		if (debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("addBundleListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
-		framework.addBundleListener(listener, this);
+		container.getEventPublisher().addBundleListener(listener, this);
 	}
 
 	/**
@@ -308,12 +334,12 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			throw new IllegalArgumentException();
 		}
 
-		if (Debug.DEBUG_EVENTS) {
+		if (debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("removeBundleListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
-		framework.removeBundleListener(listener, this);
+		container.getEventPublisher().removeBundleListener(listener, this);
 	}
 
 	/**
@@ -335,12 +361,12 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			throw new IllegalArgumentException();
 		}
 
-		if (Debug.DEBUG_EVENTS) {
+		if (debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("addFrameworkListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
-		framework.addFrameworkListener(listener, this);
+		container.getEventPublisher().addFrameworkListener(listener, this);
 	}
 
 	/**
@@ -362,12 +388,12 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			throw new IllegalArgumentException();
 		}
 
-		if (Debug.DEBUG_EVENTS) {
+		if (debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("removeFrameworkListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
-		framework.removeFrameworkListener(listener, this);
+		container.getEventPublisher().removeFrameworkListener(listener, this);
 	}
 
 	/**
@@ -433,7 +459,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 */
 	public ServiceRegistration<?> registerService(String[] clazzes, Object service, Dictionary<String, ?> properties) {
 		checkValid();
-		return framework.getServiceRegistry().registerService(this, clazzes, service, properties);
+		return container.getServiceRegistry().registerService(this, clazzes, service, properties);
 	}
 
 	/**
@@ -499,12 +525,12 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 */
 	public ServiceReference<?>[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
 		checkValid();
-		return framework.getServiceRegistry().getServiceReferences(this, clazz, filter, false);
+		return container.getServiceRegistry().getServiceReferences(this, clazz, filter, false);
 	}
 
 	public ServiceReference<?>[] getAllServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
 		checkValid();
-		return framework.getServiceRegistry().getServiceReferences(this, clazz, filter, true);
+		return container.getServiceRegistry().getServiceReferences(this, clazz, filter, true);
 	}
 
 	/**
@@ -530,7 +556,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	public ServiceReference<?> getServiceReference(String clazz) {
 		checkValid();
 
-		return framework.getServiceRegistry().getServiceReference(this, clazz);
+		return container.getServiceRegistry().getServiceReference(this, clazz);
 	}
 
 	/**
@@ -594,7 +620,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		}
 
 		@SuppressWarnings("unchecked")
-		S service = (S) framework.getServiceRegistry().getService(this, (ServiceReferenceImpl<S>) reference);
+		S service = (S) container.getServiceRegistry().getService(this, (ServiceReferenceImpl<S>) reference);
 		return service;
 	}
 
@@ -636,7 +662,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	public boolean ungetService(ServiceReference<?> reference) {
 		checkValid();
 
-		return framework.getServiceRegistry().ungetService(this, (ServiceReferenceImpl<?>) reference);
+		return container.getServiceRegistry().ungetService(this, (ServiceReferenceImpl<?>) reference);
 	}
 
 	/**
@@ -666,7 +692,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	public File getDataFile(String filename) {
 		checkValid();
 
-		return (framework.getDataFile(bundle, filename));
+		Generation generation = (Generation) bundle.getModule().getCurrentRevision().getRevisionInfo();
+		return generation.getBundleInfo().getDataFile(filename);
 	}
 
 	/**
@@ -679,7 +706,14 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 *            method failed
 	 */
 	protected void start() throws BundleException {
-		activator = bundle.loadBundleActivator();
+		try {
+			activator = loadBundleActivator();
+		} catch (Exception e) {
+			if (e instanceof RuntimeException) {
+				throw (RuntimeException) e;
+			}
+			throw new BundleException("Error loading bundle activator.", BundleException.ACTIVATOR_ERROR, e);
+		}
 
 		if (activator != null) {
 			try {
@@ -694,11 +728,31 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		 same activator object when we stop this bundle. */
 	}
 
+	private BundleActivator loadBundleActivator() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+		ModuleWiring wiring = bundle.getModule().getCurrentRevision().getWiring();
+		if (wiring == null) {
+			return null;
+		}
+
+		BundleLoader loader = (BundleLoader) wiring.getModuleLoader();
+		List<Capability> metadata = wiring.getRevision().getCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
+		if (metadata.isEmpty()) {
+			return null;
+		}
+
+		String activatorName = (String) metadata.get(0).getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATOR);
+		if (activatorName == null) {
+			return null;
+		}
+		Class<?> activatorClass = loader.findClass(activatorName);
+		return (BundleActivator) activatorClass.newInstance();
+	}
+
 	/**
 	 * Calls the start method of a BundleActivator.
 	 * @param bundleActivator that activator to start
 	 */
-	protected void startActivator(final BundleActivator bundleActivator) throws BundleException {
+	private void startActivator(final BundleActivator bundleActivator) throws BundleException {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logEnter("BundleContextImpl.startActivator()", null); //$NON-NLS-1$
 		try {
@@ -727,7 +781,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 				t = ((PrivilegedActionException) t).getException();
 			}
 
-			if (Debug.DEBUG_GENERAL) {
+			if (debug.DEBUG_GENERAL) {
 				Debug.printStackTrace(t);
 			}
 
@@ -742,13 +796,13 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	}
 
 	Object setContextFinder() {
-		if (!SET_TCCL)
+		if (container.getConfiguration().BUNDLE_SET_TCCL)
 			return Boolean.FALSE;
 		Thread currentThread = Thread.currentThread();
 		ClassLoader previousTCCL = currentThread.getContextClassLoader();
-		ClassLoader contextFinder = framework.getContextFinder();
+		ClassLoader contextFinder = container.getContextFinder();
 		if (previousTCCL != contextFinder) {
-			currentThread.setContextClassLoader(framework.getContextFinder());
+			currentThread.setContextClassLoader(container.getContextFinder());
 			return previousTCCL;
 		}
 		return Boolean.FALSE;
@@ -785,7 +839,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 				t = ((PrivilegedActionException) t).getException();
 			}
 
-			if (Debug.DEBUG_GENERAL) {
+			if (debug.DEBUG_GENERAL) {
 				Debug.printStackTrace(t);
 			}
 
@@ -820,36 +874,21 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	public void dispatchEvent(Object originalListener, Object l, int action, Object object) {
 		// save the bundle ref to a local variable 
 		// to avoid interference from another thread closing this context
-		AbstractBundle tmpBundle = bundle;
+		EquinoxBundle tmpBundle = bundle;
 		Object previousTCCL = setContextFinder();
 		try {
 			if (isValid()) /* if context still valid */{
 				switch (action) {
-					case Framework.BUNDLEEVENT :
-					case Framework.BUNDLEEVENTSYNC : {
+					case EquinoxEventPublisher.BUNDLEEVENT :
+					case EquinoxEventPublisher.BUNDLEEVENTSYNC : {
 						BundleListener listener = (BundleListener) l;
 
-						if (Debug.DEBUG_EVENTS) {
+						if (debug.DEBUG_EVENTS) {
 							String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 							Debug.println("dispatchBundleEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
 
-						BundleEvent event = (BundleEvent) object;
-						switch (event.getType()) {
-							case Framework.BATCHEVENT_BEGIN : {
-								if (listener instanceof BatchBundleListener)
-									((BatchBundleListener) listener).batchBegin();
-								break;
-							}
-							case Framework.BATCHEVENT_END : {
-								if (listener instanceof BatchBundleListener)
-									((BatchBundleListener) listener).batchEnd();
-								break;
-							}
-							default : {
-								listener.bundleChanged((BundleEvent) object);
-							}
-						}
+						listener.bundleChanged((BundleEvent) object);
 						break;
 					}
 
@@ -857,19 +896,18 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 						ServiceEvent event = (ServiceEvent) object;
 
 						ServiceListener listener = (ServiceListener) l;
-						if (Debug.DEBUG_EVENTS) {
+						if (debug.DEBUG_EVENTS) {
 							String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 							Debug.println("dispatchServiceEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
 						listener.serviceChanged(event);
-
 						break;
 					}
 
-					case Framework.FRAMEWORKEVENT : {
+					case EquinoxEventPublisher.FRAMEWORKEVENT : {
 						FrameworkListener listener = (FrameworkListener) l;
 
-						if (Debug.DEBUG_EVENTS) {
+						if (debug.DEBUG_EVENTS) {
 							String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 							Debug.println("dispatchFrameworkEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
@@ -883,21 +921,21 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 				}
 			}
 		} catch (Throwable t) {
-			if (Debug.DEBUG_GENERAL) {
+			if (debug.DEBUG_GENERAL) {
 				Debug.println("Exception in bottom level event dispatcher: " + t.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(t);
 			}
 			// allow the adaptor to handle this unexpected error
-			framework.adaptor.handleRuntimeError(t);
+			container.handleRuntimeError(t);
 			publisherror: {
-				if (action == Framework.FRAMEWORKEVENT) {
+				if (action == EquinoxEventPublisher.FRAMEWORKEVENT) {
 					FrameworkEvent event = (FrameworkEvent) object;
 					if (event.getType() == FrameworkEvent.ERROR) {
 						break publisherror; // avoid infinite loop
 					}
 				}
 
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR, tmpBundle, t);
+				container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, tmpBundle, t);
 			}
 		} finally {
 			if (previousTCCL != Boolean.FALSE)
@@ -944,10 +982,6 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		return valid;
 	}
 
-	public Framework getFramework() {
-		return framework;
-	}
-
 	public <S> ServiceRegistration<S> registerService(Class<S> clazz, S service, Dictionary<String, ?> properties) {
 		@SuppressWarnings("unchecked")
 		ServiceRegistration<S> registration = (ServiceRegistration<S>) registerService(clazz.getName(), service, properties);
@@ -973,5 +1007,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			result.add(b);
 		}
 		return result;
+	}
+
+	public EquinoxContainer getContainer() {
+		return container;
 	}
 }
