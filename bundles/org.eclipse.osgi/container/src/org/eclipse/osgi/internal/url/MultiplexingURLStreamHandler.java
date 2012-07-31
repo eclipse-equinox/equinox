@@ -29,9 +29,9 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 	private static boolean methodsInitialized = false;
 
 	private String protocol;
-	private StreamHandlerFactory factory;
+	private URLStreamHandlerFactoryImpl factory;
 
-	private static synchronized void initializeMethods(StreamHandlerFactory factory) {
+	private static synchronized void initializeMethods(URLStreamHandlerFactoryImpl factory) {
 		if (methodsInitialized)
 			return;
 		try {
@@ -80,7 +80,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		methodsInitialized = true;
 	}
 
-	public MultiplexingURLStreamHandler(String protocol, StreamHandlerFactory factory) {
+	public MultiplexingURLStreamHandler(String protocol, URLStreamHandlerFactoryImpl factory) {
 		this.protocol = protocol;
 		this.factory = factory;
 		initializeMethods(factory);

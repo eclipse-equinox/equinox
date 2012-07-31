@@ -53,8 +53,8 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 		//set the handler and ranking
 		setNewHandler(reference, getRank(reference));
 
-		urlStreamHandlerServiceTracker = new ServiceTracker<URLStreamHandlerService, ServiceReference<URLStreamHandlerService>>(context, StreamHandlerFactory.URLSTREAMHANDLERCLASS, this);
-		StreamHandlerFactory.secureAction.open(urlStreamHandlerServiceTracker);
+		urlStreamHandlerServiceTracker = new ServiceTracker<URLStreamHandlerService, ServiceReference<URLStreamHandlerService>>(context, URLStreamHandlerFactoryImpl.URLSTREAMHANDLERCLASS, this);
+		URLStreamHandlerFactoryImpl.secureAction.open(urlStreamHandlerServiceTracker);
 	}
 
 	private void setNewHandler(ServiceReference<URLStreamHandlerService> reference, int rank) {
@@ -67,7 +67,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 		if (reference == null)
 			realHandlerService = new NullURLStreamHandlerService();
 		else
-			realHandlerService = StreamHandlerFactory.secureAction.getService(reference, context);
+			realHandlerService = URLStreamHandlerFactoryImpl.secureAction.getService(reference, context);
 	}
 
 	/**

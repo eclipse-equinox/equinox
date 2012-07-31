@@ -61,7 +61,7 @@ public class ContentHandlerFactory extends MultiplexingFactory implements java.n
 	public ContentHandler createContentHandler(String contentType) {
 		//first, we check to see if there exists a built in content handler for
 		//this content type.  we can not overwrite built in ContentHandlers
-		String builtInHandlers = StreamHandlerFactory.secureAction.getProperty(CONTENT_HANDLER_PKGS);
+		String builtInHandlers = URLStreamHandlerFactoryImpl.secureAction.getProperty(CONTENT_HANDLER_PKGS);
 		builtInHandlers = builtInHandlers == null ? DEFAULT_VM_CONTENT_HANDLERS : DEFAULT_VM_CONTENT_HANDLERS + '|' + builtInHandlers;
 		Class<?> clazz = null;
 		if (builtInHandlers != null) {
@@ -79,7 +79,7 @@ public class ContentHandlerFactory extends MultiplexingFactory implements java.n
 				name.append("."); //$NON-NLS-1$
 				name.append(convertedContentType);
 				try {
-					clazz = StreamHandlerFactory.secureAction.loadSystemClass(name.toString());
+					clazz = URLStreamHandlerFactoryImpl.secureAction.loadSystemClass(name.toString());
 					if (clazz != null) {
 						return (null); //this class exists, it is a built in handler, let the JVM handle it	
 					}

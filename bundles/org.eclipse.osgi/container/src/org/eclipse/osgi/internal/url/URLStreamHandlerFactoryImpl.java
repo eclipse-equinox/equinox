@@ -30,7 +30,7 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * This class contains the URL stream handler factory for the OSGi framework.
  */
-public class StreamHandlerFactory extends MultiplexingFactory implements URLStreamHandlerFactory {
+public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements URLStreamHandlerFactory {
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
 	private ServiceTracker<URLStreamHandlerService, URLStreamHandlerService> handlerTracker;
@@ -39,7 +39,7 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 	protected static final String PROTOCOL_HANDLER_PKGS = "java.protocol.handler.pkgs"; //$NON-NLS-1$
 	protected static final String INTERNAL_PROTOCOL_HANDLER_PKG = "org.eclipse.osgi.framework.internal.protocol"; //$NON-NLS-1$
 
-	private static final List<Class<?>> ignoredClasses = Arrays.asList(new Class<?>[] {MultiplexingURLStreamHandler.class, StreamHandlerFactory.class, URL.class});
+	private static final List<Class<?>> ignoredClasses = Arrays.asList(new Class<?>[] {MultiplexingURLStreamHandler.class, URLStreamHandlerFactoryImpl.class, URL.class});
 	private static final boolean useNetProxy;
 	static {
 		Class<?> clazz = null;
@@ -59,7 +59,7 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 	 *
 	 * @param context BundleContext for the system bundle
 	 */
-	public StreamHandlerFactory(BundleContext context, FrameworkAdaptor adaptor) {
+	public URLStreamHandlerFactoryImpl(BundleContext context, FrameworkAdaptor adaptor) {
 		super(context, adaptor);
 
 		proxies = new Hashtable<String, URLStreamHandler>(15);
@@ -121,7 +121,7 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 				result = parentFactory.createURLStreamHandler(protocol);
 			return result; //result may be null; let the VM handle it (consider sun.net.protocol.www.*)
 		} catch (Throwable t) {
-			adaptor.getFrameworkLog().log(new FrameworkLogEntry(StreamHandlerFactory.class.getName(), FrameworkLogEntry.ERROR, 0, "Unexpected error in factory.", 0, t, null)); //$NON-NLS-1$
+			adaptor.getFrameworkLog().log(new FrameworkLogEntry(URLStreamHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR, 0, "Unexpected error in factory.", 0, t, null)); //$NON-NLS-1$
 			return null;
 		} finally {
 			releaseRecursive(protocol);
@@ -207,7 +207,7 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 			Method createInternalURLStreamHandlerMethod = factory.getClass().getMethod("createInternalURLStreamHandler", new Class[] {String.class}); //$NON-NLS-1$
 			return (URLStreamHandler) createInternalURLStreamHandlerMethod.invoke(factory, new Object[] {protocol});
 		} catch (Exception e) {
-			adaptor.getFrameworkLog().log(new FrameworkLogEntry(StreamHandlerFactory.class.getName(), FrameworkLogEntry.ERROR, 0, "findAuthorizedURLStreamHandler-loop", 0, e, null)); //$NON-NLS-1$
+			adaptor.getFrameworkLog().log(new FrameworkLogEntry(URLStreamHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR, 0, "findAuthorizedURLStreamHandler-loop", 0, e, null)); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}

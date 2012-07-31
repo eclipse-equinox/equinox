@@ -49,7 +49,7 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 		setNewHandler(reference, getRank(reference));
 
 		contentHandlerServiceTracker = new ServiceTracker<ContentHandler, ServiceReference<ContentHandler>>(context, ContentHandler.class.getName(), this);
-		StreamHandlerFactory.secureAction.open(contentHandlerServiceTracker);
+		URLStreamHandlerFactoryImpl.secureAction.open(contentHandlerServiceTracker);
 	}
 
 	private void setNewHandler(ServiceReference<ContentHandler> reference, int rank) {
@@ -62,7 +62,7 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 		if (reference == null)
 			realHandler = new DefaultContentHandler();
 		else
-			realHandler = StreamHandlerFactory.secureAction.getService(reference, context);
+			realHandler = URLStreamHandlerFactoryImpl.secureAction.getService(reference, context);
 	}
 
 	/**

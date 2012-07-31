@@ -10,10 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
-import org.eclipse.osgi.internal.framework.UniversalUniqueIdentifier;
-
-import org.eclipse.osgi.internal.framework.AliasMapper;
-
 import java.io.*;
 import java.lang.reflect.*;
 import java.net.*;
@@ -25,7 +21,7 @@ import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.debug.Debug;
-import org.eclipse.osgi.internal.framework.ContextFinder;
+import org.eclipse.osgi.internal.framework.*;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.SystemBundleLoader;
 import org.eclipse.osgi.internal.loader.sources.PackageSource;
@@ -34,7 +30,7 @@ import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
 import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.internal.serviceregistry.*;
 import org.eclipse.osgi.internal.url.ContentHandlerFactory;
-import org.eclipse.osgi.internal.url.StreamHandlerFactory;
+import org.eclipse.osgi.internal.url.URLStreamHandlerFactoryImpl;
 import org.eclipse.osgi.signedcontent.SignedContentFactory;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
@@ -132,7 +128,7 @@ public class Framework implements EventPublisher, Runnable {
 	private final Map<Long, Map<String, AdminPermission>> adminPermissions = new HashMap<Long, Map<String, AdminPermission>>();
 
 	// we need to hold these so that we can unregister them at shutdown
-	private StreamHandlerFactory streamHandlerFactory;
+	private URLStreamHandlerFactoryImpl streamHandlerFactory;
 	private ContentHandlerFactory contentHandlerFactory;
 
 	private volatile ServiceTracker<SignedContentFactory, SignedContentFactory> signedContentFactory;
@@ -1758,7 +1754,7 @@ public class Framework implements EventPublisher, Runnable {
 	}
 
 	private void installURLStreamHandlerFactory(BundleContext context, FrameworkAdaptor frameworkAdaptor) {
-		StreamHandlerFactory shf = new StreamHandlerFactory(context, frameworkAdaptor);
+		URLStreamHandlerFactoryImpl shf = new URLStreamHandlerFactoryImpl(context, frameworkAdaptor);
 		try {
 			// first try the standard way
 			URL.setURLStreamHandlerFactory(shf);
@@ -1774,7 +1770,7 @@ public class Framework implements EventPublisher, Runnable {
 		streamHandlerFactory = shf;
 	}
 
-	private static void forceURLStreamHandlerFactory(StreamHandlerFactory shf) throws Exception {
+	private static void forceURLStreamHandlerFactory(URLStreamHandlerFactoryImpl shf) throws Exception {
 		Field factoryField = getField(URL.class, URLStreamHandlerFactory.class, false);
 		if (factoryField == null)
 			throw new Exception("Could not find URLStreamHandlerFactory field"); //$NON-NLS-1$
