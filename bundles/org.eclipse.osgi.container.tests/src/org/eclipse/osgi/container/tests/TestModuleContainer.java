@@ -1026,11 +1026,11 @@ public class TestModuleContainer {
 				new DummyModuleEvent(c4, ModuleEvent.STARTED, State.ACTIVE)));
 		assertEvents(expected, actual, true);
 
-		systemBundle.stop();
-
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 		DataOutputStream data = new DataOutputStream(bytes);
 		database.store(data, true);
+
+		systemBundle.stop();
 
 		// reload into a new container
 		adaptor = createDummyAdaptor();

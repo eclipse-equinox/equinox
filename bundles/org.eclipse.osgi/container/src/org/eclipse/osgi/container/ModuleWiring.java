@@ -12,6 +12,7 @@ package org.eclipse.osgi.container;
 
 import java.net.URL;
 import java.util.*;
+import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
 import org.eclipse.osgi.internal.container.Converters;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
@@ -26,9 +27,10 @@ import org.osgi.resource.*;
  */
 public final class ModuleWiring implements BundleWiring {
 	private static final RuntimePermission GET_CLASSLOADER_PERM = new RuntimePermission("getClassLoader"); //$NON-NLS-1$
+	private static final String DYNAMICALLY_ADDED_IMPORT_DIRECTIVE = "x.dynamically.added"; //$NON-NLS-1$
 	private final ModuleRevision revision;
 	private final List<ModuleCapability> capabilities;
-	private final List<ModuleRequirement> requirements;
+	private volatile List<ModuleRequirement> requirements;
 	private final Collection<String> substitutedPkgNames;
 	private final Object monitor = new Object();
 	private ModuleLoader loader = null;
@@ -95,12 +97,32 @@ public final class ModuleWiring implements BundleWiring {
 	 * @see #getRequirements(String)
 	 */
 	public List<ModuleRequirement> getModuleRequirements(String namespace) {
+		return getModuleRequirements(namespace, requirements);
+	}
+
+	List<ModuleRequirement> getPersistentRequirements() {
+		List<ModuleRequirement> persistentRequriements = getModuleRequirements(null);
+		if (persistentRequriements == null) {
+			return null;
+		}
+		for (Iterator<ModuleRequirement> iRequirements = persistentRequriements.iterator(); iRequirements.hasNext();) {
+			ModuleRequirement requirement = iRequirements.next();
+			if (PackageNamespace.PACKAGE_NAMESPACE.equals(requirement.getNamespace())) {
+				if ("true".equals(requirement.getAttributes().get(DYNAMICALLY_ADDED_IMPORT_DIRECTIVE))) { //$NON-NLS-1$
+					iRequirements.remove();
+				}
+			}
+		}
+		return persistentRequriements;
+	}
+
+	private List<ModuleRequirement> getModuleRequirements(String namespace, List<ModuleRequirement> allRequirements) {
 		if (!isValid)
 			return null;
 		if (namespace == null)
-			return new ArrayList<ModuleRequirement>(requirements);
+			return new ArrayList<ModuleRequirement>(allRequirements);
 		List<ModuleRequirement> result = new ArrayList<ModuleRequirement>();
-		for (ModuleRequirement requirement : requirements) {
+		for (ModuleRequirement requirement : allRequirements) {
 			if (namespace.equals(requirement.getNamespace())) {
 				result.add(requirement);
 			}
@@ -130,6 +152,10 @@ public final class ModuleWiring implements BundleWiring {
 		return getWires(namespace, providedWires);
 	}
 
+	List<ModuleWire> getPersistentProvidedWires() {
+		return getPersistentWires(providedWires);
+	}
+
 	/**
 	 * Returns the same result as {@link #getRequiredWires(String)} except
 	 * uses type ModuleWire.
@@ -139,6 +165,26 @@ public final class ModuleWiring implements BundleWiring {
 	 */
 	public List<ModuleWire> getRequiredModuleWires(String namespace) {
 		return getWires(namespace, requiredWires);
+	}
+
+	List<ModuleWire> getPersistentRequiredWires() {
+		return getPersistentWires(requiredWires);
+	}
+
+	private List<ModuleWire> getPersistentWires(List<ModuleWire> allWires) {
+		List<ModuleWire> persistentWires = getWires(null, allWires);
+		if (persistentWires == null) {
+			return null;
+		}
+		for (Iterator<ModuleWire> iWires = persistentWires.iterator(); iWires.hasNext();) {
+			ModuleWire wire = iWires.next();
+			if (PackageNamespace.PACKAGE_NAMESPACE.equals(wire.getRequirement().getNamespace())) {
+				if ("true".equals(wire.getRequirement().getDirectives().get(DYNAMICALLY_ADDED_IMPORT_DIRECTIVE))) { //$NON-NLS-1$
+					iWires.remove();
+				}
+			}
+		}
+		return persistentWires;
 	}
 
 	@Override
@@ -309,7 +355,26 @@ public final class ModuleWiring implements BundleWiring {
 	}
 
 	public void addDynamicImports(ModuleRevisionBuilder builder) {
-		// TODO Need to update the requirements of the wiring and the revision
-		// TODO should make sure to add a directive that indicates the requirement should not be persisted
+		List<GenericInfo> newImports = builder.getRequirements();
+		List<ModuleRequirement> newRequirements = new ArrayList<ModuleRequirement>();
+		for (GenericInfo info : newImports) {
+			if (!PackageNamespace.PACKAGE_NAMESPACE.equals(info.getNamespace())) {
+				throw new IllegalArgumentException("Invalid namespace for package imports: " + info.getNamespace()); //$NON-NLS-1$
+			}
+			Map<String, Object> attributes = new HashMap<String, Object>(info.getAttributes());
+			Map<String, String> directives = new HashMap<String, String>(info.getDirectives());
+			directives.put(DYNAMICALLY_ADDED_IMPORT_DIRECTIVE, "true"); //$NON-NLS-1$
+			directives.put(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE, PackageNamespace.RESOLUTION_DYNAMIC);
+			newRequirements.add(new ModuleRequirement(info.getNamespace(), directives, attributes, revision));
+		}
+		ModuleDatabase moduleDatabase = revision.getRevisions().getContainer().moduleDatabase;
+		moduleDatabase.lockWrite();
+		try {
+			List<ModuleRequirement> updatedRequirements = new ArrayList<ModuleRequirement>(requirements);
+			updatedRequirements.addAll(newRequirements);
+			requirements = updatedRequirements;
+		} finally {
+			moduleDatabase.unlockWrite();
+		}
 	}
 }

@@ -1181,7 +1181,7 @@ public class ModuleDatabase {
 				out.writeInt(capabilityIndex);
 			}
 
-			List<ModuleRequirement> requirements = wiring.getModuleRequirements(null);
+			List<ModuleRequirement> requirements = wiring.getPersistentRequirements();
 			out.writeInt(requirements.size());
 			for (ModuleRequirement requirement : requirements) {
 				Integer requirementIndex = objectTable.get(requirement);
@@ -1190,7 +1190,7 @@ public class ModuleDatabase {
 				out.writeInt(requirementIndex);
 			}
 
-			List<ModuleWire> providedWires = wiring.getProvidedModuleWires(null);
+			List<ModuleWire> providedWires = wiring.getPersistentProvidedWires();
 			out.writeInt(providedWires.size());
 			for (ModuleWire wire : providedWires) {
 				Integer wireIndex = objectTable.get(wire);
@@ -1199,7 +1199,7 @@ public class ModuleDatabase {
 				out.writeInt(wireIndex);
 			}
 
-			List<ModuleWire> requiredWires = wiring.getRequiredModuleWires(null);
+			List<ModuleWire> requiredWires = wiring.getPersistentRequiredWires();
 			out.writeInt(requiredWires.size());
 			for (ModuleWire wire : requiredWires) {
 				Integer wireIndex = objectTable.get(wire);
