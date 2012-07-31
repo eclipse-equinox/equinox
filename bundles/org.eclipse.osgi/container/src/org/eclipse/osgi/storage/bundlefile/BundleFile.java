@@ -11,19 +11,16 @@
 
 package org.eclipse.osgi.storage.bundlefile;
 
-import org.eclipse.osgi.storage.url.BundleResourceHandler;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
-import java.util.*;
-import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.framework.internal.core.*;
-import org.eclipse.osgi.framework.internal.protocol.bundleresource.Handler;
+import java.util.Enumeration;
+import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.framework.util.SecureAction;
-import org.eclipse.osgi.util.ManifestElement;
+import org.eclipse.osgi.storage.url.BundleResourceHandler;
+import org.eclipse.osgi.storage.url.bundleresource.Handler;
 
 /**
  * The BundleFile API is used by Adaptors to read resources out of an 
@@ -34,21 +31,12 @@ import org.eclipse.osgi.util.ManifestElement;
  * @since 3.2
  */
 abstract public class BundleFile {
-	protected static final String PROP_SETPERMS_CMD = "osgi.filepermissions.command"; //$NON-NLS-1$
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 	/**
 	 * The File object for this BundleFile.
 	 */
 	protected File basefile;
 	private int mruIndex = -1;
-
-	/**
-	 * Default constructor
-	 *
-	 */
-	public BundleFile() {
-		// do nothing
-	}
 
 	/**
 	 * BundleFile constructor
@@ -117,47 +105,19 @@ abstract public class BundleFile {
 	/**
 	 * Returns a URL to access the contents of the entry specified by the path
 	 * @param path the path to the resource
-	 * @param hostBundleID the host bundle ID
-	 * @return a URL to access the contents of the entry specified by the path
-	 * @deprecated use {@link #getResourceURL(String, BaseData, int)}
-	 */
-	public URL getResourceURL(String path, long hostBundleID) {
-		return getResourceURL(path, hostBundleID, 0);
-	}
-
-	/**
-	 * Returns a URL to access the contents of the entry specified by the path
-	 * @param path the path to the resource
-	 * @param hostBundleID the host bundle ID
-	 * @param index the resource index
-	 * @return a URL to access the contents of the entry specified by the path
-	 * @deprecated use {@link #getResourceURL(String, BaseData, int)}
-	 */
-	public URL getResourceURL(String path, long hostBundleID, int index) {
-		return internalGetResourceURL(path, null, hostBundleID, index);
-	}
-
-	/**
-	 * Returns a URL to access the contents of the entry specified by the path
-	 * @param path the path to the resource
-	 * @param hostData the host BaseData
+	 * @param hostModule the host module
 	 * @param index the resource index
 	 * @return a URL to access the contents of the entry specified by the path
 	 */
-	public URL getResourceURL(String path, BaseData hostData, int index) {
-		return internalGetResourceURL(path, hostData, 0, index);
-	}
-
-	private URL internalGetResourceURL(String path, BaseData hostData, long hostBundleID, int index) {
+	public URL getResourceURL(String path, Module hostModule, int index) {
 		BundleEntry bundleEntry = getEntry(path);
 		if (bundleEntry == null)
 			return null;
-		if (hostData != null)
-			hostBundleID = hostData.getBundleID();
+		long hostBundleID = hostModule.getId();
 		path = fixTrailingSlash(path, bundleEntry);
 		try {
 			//use the constant string for the protocol to prevent duplication
-			return secureAction.getURL(Constants.OSGI_RESOURCE_URL_PROTOCOL, Long.toString(hostBundleID) + BundleResourceHandler.BID_FWKID_SEPARATOR + Integer.toString(hostData.getAdaptor().hashCode()), index, path, new Handler(bundleEntry, hostData == null ? null : hostData.getAdaptor()));
+			return secureAction.getURL(BundleResourceHandler.OSGI_RESOURCE_URL_PROTOCOL, Long.toString(hostBundleID) + BundleResourceHandler.BID_FWKID_SEPARATOR + Integer.toString(hostModule.getContainer().hashCode()), index, path, new Handler(hostModule.getContainer(), bundleEntry));
 		} catch (MalformedURLException e) {
 			return null;
 		}
@@ -177,35 +137,6 @@ abstract public class BundleFile {
 
 	int getMruIndex() {
 		return mruIndex;
-	}
-
-	/**
-	 * Attempts to set the permissions of the file in a system dependent way.
-	 * @param file the file to set the permissions on
-	 */
-	public static void setPermissions(File file) {
-		String commandProp = FrameworkProperties.getProperty(PROP_SETPERMS_CMD);
-		if (commandProp == null)
-			commandProp = FrameworkProperties.getProperty(Constants.FRAMEWORK_EXECPERMISSION);
-		if (commandProp == null)
-			return;
-		String[] temp = ManifestElement.getArrayFromList(commandProp, " "); //$NON-NLS-1$
-		List<String> command = new ArrayList<String>(temp.length + 1);
-		boolean foundFullPath = false;
-		for (int i = 0; i < temp.length; i++) {
-			if ("[fullpath]".equals(temp[i]) || "${abspath}".equals(temp[i])) { //$NON-NLS-1$ //$NON-NLS-2$
-				command.add(file.getAbsolutePath());
-				foundFullPath = true;
-			} else
-				command.add(temp[i]);
-		}
-		if (!foundFullPath)
-			command.add(file.getAbsolutePath());
-		try {
-			Runtime.getRuntime().exec(command.toArray(new String[command.size()])).waitFor();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	public String toString() {

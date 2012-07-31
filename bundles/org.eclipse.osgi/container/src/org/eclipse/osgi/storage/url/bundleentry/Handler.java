@@ -9,18 +9,15 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.internal.protocol.bundleentry;
-
-import org.eclipse.osgi.storage.url.BundleResourceHandler;
-
-import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+package org.eclipse.osgi.storage.url.bundleentry;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import org.eclipse.osgi.baseadaptor.BaseAdaptor;
-import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
+import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.storage.BundleInfo;
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.url.BundleResourceHandler;
 
 /**
  * URLStreamHandler the bundleentry protocol.
@@ -28,24 +25,16 @@ import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 
 public class Handler extends BundleResourceHandler {
 
-	/**
-	 * Constructor for a bundle protocol resource URLStreamHandler.
-	 */
-	public Handler() {
-		super();
+	public Handler(ModuleContainer container, BundleEntry bundleEntry) {
+		super(container, bundleEntry);
 	}
 
-	public Handler(BundleEntry bundleEntry, BaseAdaptor adaptor) {
-		super(bundleEntry, adaptor);
-	}
-
-	protected BundleEntry findBundleEntry(URL url, AbstractBundle bundle) throws IOException {
-		BaseData bundleData = (BaseData) bundle.getBundleData();
-		BundleEntry entry = bundleData.getBundleFile().getEntry(url.getPath());
+	protected BundleEntry findBundleEntry(URL url, Module module) throws IOException {
+		ModuleRevision revision = module.getCurrentRevision();
+		BundleInfo.Generation revisionInfo = (BundleInfo.Generation) revision.getRevisionInfo();
+		BundleEntry entry = revisionInfo == null ? null : revisionInfo.getBundleFile().getEntry(url.getPath());
 		if (entry == null)
 			throw new FileNotFoundException(url.getPath());
 		return entry;
-
 	}
-
 }

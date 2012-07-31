@@ -12,17 +12,16 @@
 
 package org.eclipse.osgi.storage.bundlefile;
 
-import org.eclipse.osgi.internal.debug.Debug;
-
 import java.io.*;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import org.eclipse.osgi.baseadaptor.BaseData;
+import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
+import org.eclipse.osgi.next.internal.debug.Debug;
+import org.eclipse.osgi.storage.BundleInfo;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.FrameworkEvent;
 
 /**
  * A BundleFile that uses a ZipFile as it base file.
@@ -31,10 +30,10 @@ import org.osgi.framework.FrameworkEvent;
 public class ZipBundleFile extends BundleFile {
 
 	private final MRUBundleFileList mruList;
-	/**
-	 * The bundle data
-	 */
-	protected BaseData bundledata;
+
+	private final BundleInfo.Generation generation;
+
+	private final Debug debug;
 	/**
 	 * The zip file
 	 */
@@ -46,21 +45,12 @@ public class ZipBundleFile extends BundleFile {
 
 	private int referenceCount = 0;
 
-	/**
-	 * Constructs a ZipBundle File
-	 * @param basefile the base file
-	 * @param bundledata the bundle data
-	 * @throws IOException
-	 */
-	public ZipBundleFile(File basefile, BaseData bundledata) throws IOException {
-		this(basefile, bundledata, null);
-	}
-
-	public ZipBundleFile(File basefile, BaseData bundledata, MRUBundleFileList mruList) throws IOException {
+	public ZipBundleFile(File basefile, BundleInfo.Generation generation, MRUBundleFileList mruList) throws IOException {
 		super(basefile);
 		if (!BundleFile.secureAction.exists(basefile))
 			throw new IOException(NLS.bind(AdaptorMsg.ADAPTER_FILEEXIST_EXCEPTION, basefile));
-		this.bundledata = bundledata;
+		this.debug = generation.getBundleInfo().getStorage().getConfiguration().getDebug();
+		this.generation = generation;
 		this.closed = true;
 		this.mruList = mruList;
 	}
@@ -73,8 +63,9 @@ public class ZipBundleFile extends BundleFile {
 		try {
 			return getZipFile() != null;
 		} catch (IOException e) {
-			if (bundledata != null)
-				bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
+			if (generation != null) {
+				generation.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, null, e);
+			}
 			return false;
 		}
 	}
@@ -145,7 +136,7 @@ public class ZipBundleFile extends BundleFile {
 	}
 
 	protected File getExtractFile(String entryName) {
-		if (bundledata == null)
+		if (generation == null)
 			return null;
 		String path = ".cp"; /* put all these entries in this subdir *///$NON-NLS-1$
 		String name = entryName.replace('/', File.separatorChar);
@@ -153,7 +144,7 @@ public class ZipBundleFile extends BundleFile {
 			path = path.concat(name);
 		else
 			path = path + File.separator + name;
-		return bundledata.getExtractFile(path);
+		return generation.getExtractFile(path);
 	}
 
 	public synchronized File getFile(String entry, boolean nativeCode) {
@@ -168,7 +159,7 @@ public class ZipBundleFile extends BundleFile {
 			if (nested != null) {
 				if (nested.exists()) {
 					/* the entry is already cached */
-					if (Debug.DEBUG_GENERAL)
+					if (debug.DEBUG_GENERAL)
 						Debug.println("File already present: " + nested.getPath()); //$NON-NLS-1$
 					if (nested.isDirectory())
 						// must ensure the complete directory is extracted (bug 182585)
@@ -176,7 +167,7 @@ public class ZipBundleFile extends BundleFile {
 				} else {
 					if (zipEntry.getName().endsWith("/")) { //$NON-NLS-1$
 						if (!nested.mkdirs()) {
-							if (Debug.DEBUG_GENERAL)
+							if (debug.DEBUG_GENERAL)
 								Debug.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
 							throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
 						}
@@ -186,26 +177,27 @@ public class ZipBundleFile extends BundleFile {
 						if (in == null)
 							return null;
 						/* the entry has not been cached */
-						if (Debug.DEBUG_GENERAL)
+						if (debug.DEBUG_GENERAL)
 							Debug.println("Creating file: " + nested.getPath()); //$NON-NLS-1$
 						/* create the necessary directories */
 						File dir = new File(nested.getParent());
 						if (!dir.exists() && !dir.mkdirs()) {
-							if (Debug.DEBUG_GENERAL)
+							if (debug.DEBUG_GENERAL)
 								Debug.println("Unable to create directory: " + dir.getPath()); //$NON-NLS-1$
 							throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, dir.getAbsolutePath()));
 						}
 						/* copy the entry to the cache */
 						AdaptorUtil.readFile(in, nested);
-						if (nativeCode)
-							setPermissions(nested);
+						if (nativeCode) {
+							generation.getBundleInfo().getStorage().setPermissions(nested);
+						}
 					}
 				}
 
 				return nested;
 			}
 		} catch (IOException e) {
-			if (Debug.DEBUG_GENERAL)
+			if (debug.DEBUG_GENERAL)
 				Debug.printStackTrace(e);
 		}
 		return null;

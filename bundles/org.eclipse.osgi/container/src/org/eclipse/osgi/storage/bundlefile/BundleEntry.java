@@ -11,8 +11,6 @@
 
 package org.eclipse.osgi.storage.bundlefile;
 
-import org.eclipse.osgi.internal.debug.Debug;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -92,8 +90,8 @@ public abstract class BundleEntry {
 	public byte[] getBytes() throws IOException {
 		InputStream in = getInputStream();
 		int length = (int) getSize();
-		if (Debug.DEBUG_LOADER)
-			Debug.println("  about to read " + length + " bytes from " + getName()); //$NON-NLS-1$ //$NON-NLS-2$
+		//		if (Debug.DEBUG_LOADER)
+		//			Debug.println("  about to read " + length + " bytes from " + getName()); //$NON-NLS-1$ //$NON-NLS-2$
 		return AdaptorUtil.getBytes(in, length, BUF_SIZE);
 	}
 }

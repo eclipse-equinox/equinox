@@ -14,7 +14,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.service.debug.*;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
@@ -32,35 +32,33 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	private static final String OSGI_DEBUG = "osgi.debug"; //$NON-NLS-1$
 	private static final String OSGI_DEBUG_VERBOSE = "osgi.debug.verbose"; //$NON-NLS-1$
 	public static final String PROP_TRACEFILE = "osgi.tracefile"; //$NON-NLS-1$
+	/** The default name of the .options file if loading when the -debug command-line argument is used */
+	private static final String OPTIONS = ".options"; //$NON-NLS-1$
+
 	/** monitor used to lock the options maps */
 	private final Object lock = new Object();
 	/** A current map of all the options with values set */
 	private Properties options = null;
 	/** A map of all the disabled options with values set at the time debug was disabled */
 	private Properties disabledOptions = null;
-	/** The singleton object of this class */
-	private static FrameworkDebugOptions singleton = null;
-	/** The default name of the .options file if loading when the -debug command-line argument is used */
-	private static final String OPTIONS = ".options"; //$NON-NLS-1$
 	/** A cache of all of the bundles <code>DebugTrace</code> in the format <key,value> --> <bundle name, DebugTrace> */
-	protected final static Map<String, DebugTrace> debugTraceCache = new HashMap<String, DebugTrace>();
+	protected final Map<String, DebugTrace> debugTraceCache = new HashMap<String, DebugTrace>();
 	/** The File object to store messages.  This value may be null. */
 	protected File outFile = null;
 	/** Is verbose debugging enabled?  Changing this value causes a new tracing session to start. */
 	protected boolean verboseDebug = true;
+	private final EquinoxConfiguration environmentInfo;
 	private volatile BundleContext context;
 	private volatile ServiceTracker<DebugOptionsListener, DebugOptionsListener> listenerTracker;
 
-	/**
-	 * Internal constructor to create a <code>FrameworkDebugOptions</code> singleton object. 
-	 */
-	private FrameworkDebugOptions() {
+	public FrameworkDebugOptions(EquinoxConfiguration environmentInfo) {
+		this.environmentInfo = environmentInfo;
 		// check if verbose debugging was set during initialization.  This needs to be set even if debugging is disabled
-		this.verboseDebug = Boolean.valueOf(FrameworkProperties.getProperty(OSGI_DEBUG_VERBOSE, Boolean.TRUE.toString())).booleanValue();
+		this.verboseDebug = Boolean.valueOf(environmentInfo.getConfiguration(OSGI_DEBUG_VERBOSE, Boolean.TRUE.toString())).booleanValue();
 		// if no debug option was specified, don't even bother to try.
 		// Must ensure that the options slot is null as this is the signal to the
 		// platform that debugging is not enabled.
-		String debugOptionsFilename = FrameworkProperties.getProperty(OSGI_DEBUG);
+		String debugOptionsFilename = environmentInfo.getConfiguration(OSGI_DEBUG);
 		if (debugOptionsFilename == null)
 			return;
 		options = new Properties();
@@ -69,7 +67,7 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 			// default options location is user.dir (install location may be r/o so
 			// is not a good candidate for a trace options that need to be updatable by
 			// by the user)
-			String userDir = FrameworkProperties.getProperty("user.dir").replace(File.separatorChar, '/'); //$NON-NLS-1$
+			String userDir = System.getProperty("user.dir").replace(File.separatorChar, '/'); //$NON-NLS-1$
 			if (!userDir.endsWith("/")) //$NON-NLS-1$
 				userDir += "/"; //$NON-NLS-1$
 			debugOptionsFilename = new File(userDir, OPTIONS).toString();
@@ -110,18 +108,6 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 		listenerTracker.close();
 		listenerTracker = null;
 		this.context = null;
-	}
-
-	/**
-	 * Returns the singleton instance of <code>FrameworkDebugOptions</code>.
-	 * @return the instance of <code>FrameworkDebugOptions</code>
-	 */
-	public static FrameworkDebugOptions getDefault() {
-
-		if (FrameworkDebugOptions.singleton == null) {
-			FrameworkDebugOptions.singleton = new FrameworkDebugOptions();
-		}
-		return FrameworkDebugOptions.singleton;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -363,7 +349,7 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 				EclipseDebugTrace.newSession = true;
 
 				// enable platform debugging - there is no .options file
-				FrameworkProperties.setProperty(OSGI_DEBUG, ""); //$NON-NLS-1$
+				environmentInfo.setConfiguration(OSGI_DEBUG, ""); //$NON-NLS-1$
 				if (disabledOptions != null) {
 					options = disabledOptions;
 					disabledOptions = null;
@@ -376,7 +362,7 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 				if (options == null)
 					return;
 				// disable platform debugging.
-				FrameworkProperties.clearProperty(OSGI_DEBUG);
+				environmentInfo.clearConfiguration(OSGI_DEBUG);
 				if (options.size() > 0) {
 					// Save the current options off in case debug is re-enabled
 					disabledOptions = options;
@@ -408,11 +394,11 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	public final DebugTrace newDebugTrace(String bundleSymbolicName, Class<?> traceEntryClass) {
 
 		DebugTrace debugTrace = null;
-		synchronized (FrameworkDebugOptions.debugTraceCache) {
-			debugTrace = FrameworkDebugOptions.debugTraceCache.get(bundleSymbolicName);
+		synchronized (debugTraceCache) {
+			debugTrace = debugTraceCache.get(bundleSymbolicName);
 			if (debugTrace == null) {
-				debugTrace = new EclipseDebugTrace(bundleSymbolicName, FrameworkDebugOptions.singleton, traceEntryClass);
-				FrameworkDebugOptions.debugTraceCache.put(bundleSymbolicName, debugTrace);
+				debugTrace = new EclipseDebugTrace(bundleSymbolicName, this, traceEntryClass);
+				debugTraceCache.put(bundleSymbolicName, debugTrace);
 			}
 		}
 		return debugTrace;
@@ -434,7 +420,7 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	public synchronized void setFile(final File traceFile) {
 
 		this.outFile = traceFile;
-		FrameworkProperties.setProperty(PROP_TRACEFILE, this.outFile.getAbsolutePath());
+		environmentInfo.setConfiguration(PROP_TRACEFILE, this.outFile.getAbsolutePath());
 		// the file changed so start a new session
 		EclipseDebugTrace.newSession = true;
 	}

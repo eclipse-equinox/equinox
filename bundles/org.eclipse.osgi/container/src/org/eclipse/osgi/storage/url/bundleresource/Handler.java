@@ -9,20 +9,15 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.internal.protocol.bundleresource;
-
-import org.eclipse.osgi.storage.url.BundleResourceHandler;
-
-import org.eclipse.osgi.internal.loader.classpath.BaseClassLoader;
-import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
-
-import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+package org.eclipse.osgi.storage.url.bundleresource;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import org.eclipse.osgi.baseadaptor.BaseAdaptor;
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
+import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.internal.loader.ModuleClassLoader;
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.url.BundleResourceHandler;
 
 /**
  * URLStreamHandler the bundleresource protocol.
@@ -30,28 +25,24 @@ import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 
 public class Handler extends BundleResourceHandler {
 
-	/**
-	 * Constructor for a bundle protocol resource URLStreamHandler.
-	 */
-	public Handler() {
-		super();
+	public Handler(ModuleContainer container, BundleEntry bundleEntry) {
+		super(container, bundleEntry);
 	}
 
-	public Handler(BundleEntry bundleEntry, BaseAdaptor adaptor) {
-		super(bundleEntry, adaptor);
-	}
-
-	protected BundleEntry findBundleEntry(URL url, AbstractBundle bundle) throws IOException {
-		BaseClassLoader classloader = getBundleClassLoader(bundle);
+	protected BundleEntry findBundleEntry(URL url, Module module) throws IOException {
+		ModuleRevision current = module.getCurrentRevision();
+		ModuleWiring wiring = current == null ? null : current.getWiring();
+		ModuleClassLoader classloader = (ModuleClassLoader) (current == null ? null : wiring.getClassLoader());
 		if (classloader == null)
 			throw new FileNotFoundException(url.getPath());
-		ClasspathManager cpManager = classloader.getClasspathManager();
-		BundleEntry entry = cpManager.findLocalEntry(url.getPath(), url.getPort());
-		if (entry == null)
+		BundleEntry entry = classloader.getClasspathManager().findLocalEntry(url.getPath(), url.getPort());
+		if (entry == null) {
 			// this isn't strictly needed but is kept to maintain compatibility
-			entry = cpManager.findLocalEntry(url.getPath());
-		if (entry == null)
+			entry = classloader.getClasspathManager().findLocalEntry(url.getPath());
+		}
+		if (entry == null) {
 			throw new FileNotFoundException(url.getPath());
+		}
 		return entry;
 	}
 

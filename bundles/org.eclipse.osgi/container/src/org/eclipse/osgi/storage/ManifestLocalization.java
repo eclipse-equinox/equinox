@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,27 +14,39 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.framework.util.Headers;
-import org.osgi.framework.Bundle;
+import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.osgi.framework.Constants;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.wiring.BundleRevision;
 
 /**
- * This class is used by the Bundle Class to localize manifest headers.
+ * This class is used to localize manifest headers for a revision.
  */
 public class ManifestLocalization {
-	final static String DEFAULT_ROOT = FrameworkProperties.getProperty("equinox.root.locale", "en"); //$NON-NLS-1$ //$NON-NLS-2$
-	private final AbstractBundle bundle;
+	final String defaultRoot;
+	private final Generation generation;
 	private final Dictionary<String, String> rawHeaders;
-	private Dictionary<String, String> defaultLocaleHeaders = null;
+	private volatile Dictionary<String, String> defaultLocaleHeaders = null;
 	private final Hashtable<String, BundleResourceBundle> cache = new Hashtable<String, BundleResourceBundle>(5);
 
-	public ManifestLocalization(AbstractBundle bundle, Dictionary<String, String> rawHeaders) {
-		this.bundle = bundle;
+	public ManifestLocalization(Generation generation, Dictionary<String, String> rawHeaders, String defaultRoot) {
+		this.generation = generation;
 		this.rawHeaders = rawHeaders;
+		this.defaultRoot = defaultRoot;
 	}
 
-	public Dictionary<String, String> getHeaders(String localeString) {
+	public void clearCache() {
+		synchronized (cache) {
+			cache.clear();
+			defaultLocaleHeaders = null;
+		}
+	}
+
+	Dictionary<String, String> getHeaders(String localeString) {
+		if (localeString == null)
+			localeString = Locale.getDefault().toString();
 		if (localeString.length() == 0)
 			return rawHeaders;
 		boolean isDefaultLocale = localeString.equals(Locale.getDefault().toString());
@@ -42,19 +54,17 @@ public class ManifestLocalization {
 		if (isDefaultLocale && currentDefault != null) {
 			return currentDefault;
 		}
-		try {
-			bundle.checkValid();
-		} catch (IllegalStateException ex) {
+		if (generation.getRevision().getRevisions().getModule().getState().equals(Module.State.UNINSTALLED)) {
 			// defaultLocaleHeaders should have been initialized on uninstall
 			if (currentDefault != null)
 				return currentDefault;
 			return rawHeaders;
 		}
 		ResourceBundle localeProperties = getResourceBundle(localeString, isDefaultLocale);
-		Enumeration<String> e = this.rawHeaders.keys();
+		Enumeration<String> eKeys = this.rawHeaders.keys();
 		Headers<String, String> localeHeaders = new Headers<String, String>(this.rawHeaders.size());
-		while (e.hasMoreElements()) {
-			String key = e.nextElement();
+		while (eKeys.hasMoreElements()) {
+			String key = eKeys.nextElement();
 			String value = this.rawHeaders.get(key);
 			if (value.startsWith("%") && (value.length() > 1)) { //$NON-NLS-1$
 				String propertiesKey = value.substring(1);
@@ -88,7 +98,7 @@ public class ManifestLocalization {
 	 * This method find the appropriate Manifest Localization file inside the
 	 * bundle. If not found, return null.
 	 */
-	public ResourceBundle getResourceBundle(String localeString, boolean isDefaultLocale) {
+	ResourceBundle getResourceBundle(String localeString, boolean isDefaultLocale) {
 		BundleResourceBundle resourceBundle = lookupResourceBundle(localeString);
 		if (isDefaultLocale)
 			return (ResourceBundle) resourceBundle;
@@ -148,34 +158,22 @@ public class ManifestLocalization {
 	}
 
 	private URL findResource(String resource) {
-		AbstractBundle searchBundle = bundle;
-		if (bundle.isResolved()) {
-			if (bundle.isFragment() && bundle.getHosts() != null) {
-				//if the bundle is a fragment, look in the host first
-				searchBundle = bundle.getHosts()[0];
-				if (searchBundle.getState() == Bundle.UNINSTALLED)
-					searchBundle = bundle;
+		ModuleWiring searchWiring = generation.getRevision().getWiring();
+		if (searchWiring != null) {
+			if ((generation.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+				List<ModuleWire> hostWires = searchWiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
+				searchWiring = (hostWires == null || hostWires.isEmpty()) ? null : hostWires.get(0).getProviderWiring();
 			}
-			return findInResolved(resource, searchBundle);
 		}
-		return searchBundle.getEntry0(resource);
-	}
-
-	private static URL findInResolved(String filePath, AbstractBundle bundleHost) {
-		URL result = bundleHost.getEntry0(filePath);
-		if (result != null)
-			return result;
-		return findInFragments(filePath, bundleHost);
-	}
-
-	private static URL findInFragments(String filePath, AbstractBundle searchBundle) {
-		BundleFragment[] fragments = searchBundle.getFragments();
-		URL fileURL = null;
-		for (int i = 0; fragments != null && i < fragments.length && fileURL == null; i++) {
-			if (fragments[i].getState() != Bundle.UNINSTALLED)
-				fileURL = fragments[i].getEntry0(filePath);
+		if (searchWiring != null) {
+			int lastSlash = resource.lastIndexOf('/');
+			String path = lastSlash > 0 ? resource.substring(0, lastSlash) : "/"; //$NON-NLS-1$
+			String fileName = lastSlash != -1 ? resource.substring(lastSlash + 1) : resource;
+			List<URL> result = searchWiring.findEntries(path, fileName, 0);
+			return (result == null || result.isEmpty()) ? null : result.get(0);
 		}
-		return fileURL;
+		// search the raw bundle file for the generation
+		return generation.getEntry(resource);
 	}
 
 	private interface BundleResourceBundle {
@@ -232,7 +230,7 @@ public class ManifestLocalization {
 		}
 
 		public boolean isStemEmpty() {
-			if (DEFAULT_ROOT.equals(localeString))
+			if (defaultRoot.equals(localeString))
 				return false;
 			if (parent == null)
 				return true;

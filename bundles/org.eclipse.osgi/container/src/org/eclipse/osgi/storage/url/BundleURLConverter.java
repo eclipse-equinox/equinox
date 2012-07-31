@@ -8,15 +8,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.core.runtime.internal.adaptor;
-
-import org.eclipse.osgi.storage.url.BundleURLConnection;
-
-import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
+package org.eclipse.osgi.storage.url;
 
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.util.NLS;
 
@@ -26,7 +23,7 @@ import org.eclipse.osgi.util.NLS;
  * 
  * <p>Internal class.</p>
  */
-public class URLConverterImpl implements URLConverter {
+public class BundleURLConverter implements URLConverter {
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.osgi.service.urlconversion.URLConverter#toFileURL(java.net.URL)

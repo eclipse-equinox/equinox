@@ -8,10 +8,14 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.core.runtime.internal.adaptor;
+package org.eclipse.osgi.storage;
 
 import java.util.ResourceBundle;
+import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.container.ModuleRevision;
+import org.eclipse.osgi.internal.framework.EquinoxBundle;
 import org.eclipse.osgi.service.localization.BundleLocalization;
+import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.osgi.framework.Bundle;
 
 /**
@@ -30,6 +34,9 @@ public class BundleLocalizationImpl implements BundleLocalization {
 	 * If null is passed for the locale parameter, the default locale is used.
 	 */
 	public ResourceBundle getLocalization(Bundle bundle, String locale) {
-		return ((org.eclipse.osgi.framework.internal.core.AbstractBundle) (bundle)).getResourceBundle(locale);
+		Module m = ((EquinoxBundle) bundle).getModule();
+		ModuleRevision r = m.getCurrentRevision();
+		Generation g = (Generation) r.getRevisionInfo();
+		return g.getResourceBundle(locale);
 	}
 }

@@ -15,8 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
-import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.baseadaptor.hooks.BundleFileWrapperFactoryHook;
+import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.internal.hookregistry.BundleFileWrapperFactoryHook;
 
 /**
  * Used to chain the BundleFile objects returned from {@link BundleFileWrapperFactoryHook}.  
@@ -27,6 +27,7 @@ public class BundleFileWrapperChain extends BundleFile {
 	private final BundleFileWrapperChain next;
 
 	public BundleFileWrapperChain(BundleFile wrapped, BundleFileWrapperChain next) {
+		super(null);
 		this.wrapped = wrapped;
 		this.next = next;
 	}
@@ -59,8 +60,8 @@ public class BundleFileWrapperChain extends BundleFile {
 		return wrapped.getBaseFile();
 	}
 
-	public URL getResourceURL(String path, BaseData hostData, int index) {
-		return wrapped.getResourceURL(path, hostData, index);
+	public URL getResourceURL(String path, Module hostModule, int index) {
+		return wrapped.getResourceURL(path, hostModule, index);
 	}
 
 	public String toString() {

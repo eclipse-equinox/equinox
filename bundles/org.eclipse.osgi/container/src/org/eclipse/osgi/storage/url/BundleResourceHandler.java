@@ -11,48 +11,35 @@
 
 package org.eclipse.osgi.storage.url;
 
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
-
-import org.eclipse.osgi.internal.url.ProtocolActivator;
-
-import org.eclipse.osgi.internal.loader.classpath.BaseClassLoader;
-
-import org.eclipse.osgi.storage.bundlefile.BundleEntry;
-
 import java.io.IOException;
 import java.net.*;
-import org.eclipse.osgi.baseadaptor.BaseAdaptor;
-import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.container.ModuleContainer;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
-import org.eclipse.osgi.internal.loader.BundleLoader;
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.*;
+import org.osgi.framework.AdminPermission;
+import org.osgi.framework.Bundle;
 
 /**
  * URLStreamHandler the bundleentry and bundleresource protocols.
  */
 
-public abstract class BundleResourceHandler extends URLStreamHandler implements ProtocolActivator {
+public abstract class BundleResourceHandler extends URLStreamHandler {
+	// Bundle resource URL protocol
+	public static final String OSGI_RESOURCE_URL_PROTOCOL = "bundleresource"; //$NON-NLS-1$
+	// Bundle entry URL protocol
+	public static final String OSGI_ENTRY_URL_PROTOCOL = "bundleentry"; //$NON-NLS-1$
+
 	public static final String SECURITY_CHECKED = "SECURITY_CHECKED"; //$NON-NLS-1$
 	public static final String SECURITY_UNCHECKED = "SECURITY_UNCHECKED"; //$NON-NLS-1$
 	public static final String BID_FWKID_SEPARATOR = ".fwk"; //$NON-NLS-1$
-	private BaseAdaptor adaptor;
+	protected final ModuleContainer container;
 	protected BundleEntry bundleEntry;
 
-	/**
-	 * Constructor for a bundle protocol resource URLStreamHandler.
-	 */
-	public BundleResourceHandler() {
-		this(null, null);
-	}
-
-	public BundleResourceHandler(BundleEntry bundleEntry, BaseAdaptor adaptor) {
+	public BundleResourceHandler(ModuleContainer container, BundleEntry bundleEntry) {
+		this.container = container;
 		this.bundleEntry = bundleEntry;
-		this.adaptor = adaptor;
-	}
-
-	public void start(BundleContext context, FrameworkAdaptor baseAdaptor) {
-		this.adaptor = (BaseAdaptor) baseAdaptor;
 	}
 
 	/** 
@@ -129,17 +116,20 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 		// are allowed access to the resource.
 		String authorized = SECURITY_UNCHECKED;
 		long bundleId = getBundleID(host);
-		Bundle bundle = adaptor == null ? null : adaptor.getBundle(bundleId);
-		if (checkAuthorization(bundle))
+		Module module = getModule(bundleId);
+		if (checkAuthorization(module))
 			authorized = SECURITY_CHECKED;
 		// Always force the use of the hash from the adaptor
-		if (adaptor != null)
-			host = Long.toString(bundleId) + BID_FWKID_SEPARATOR + Integer.toString(adaptor.hashCode());
+		host = Long.toString(bundleId) + BID_FWKID_SEPARATOR + Integer.toString(container.hashCode());
 		// Setting the authority portion of the URL to SECURITY_ATHORIZED
 		// ensures that this URL was created by using this parseURL
 		// method.  The openConnection method will only open URLs
 		// that have the authority set to this.
 		setURL(url, url.getProtocol(), host, resIndex, authorized, null, path, null, url.getRef());
+	}
+
+	private Module getModule(long id) {
+		return container.getModule(id);
 	}
 
 	/**
@@ -160,24 +150,23 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 		if (host == null) {
 			throw new IOException(NLS.bind(AdaptorMsg.URL_NO_BUNDLE_ID, url.toExternalForm()));
 		}
-		AbstractBundle bundle = null;
 		long bundleID;
 		try {
 			bundleID = getBundleID(host);
 		} catch (NumberFormatException nfe) {
 			throw (MalformedURLException) new MalformedURLException(NLS.bind(AdaptorMsg.URL_INVALID_BUNDLE_ID, host)).initCause(nfe);
 		}
-		bundle = adaptor == null ? null : (AbstractBundle) adaptor.getBundle(bundleID);
-		if (bundle == null)
+		Module module = getModule(bundleID);
+		if (module == null)
 			throw new IOException(NLS.bind(AdaptorMsg.URL_NO_BUNDLE_FOUND, url.toExternalForm()));
 		// check to make sure that this URL was created using the
 		// parseURL method.  This ensures the security check was done
 		// at URL construction.
 		if (!url.getAuthority().equals(SECURITY_CHECKED)) {
 			// No admin security check was made better check now.
-			checkAuthorization(bundle);
+			checkAuthorization(module);
 		}
-		return (new BundleURLConnection(url, findBundleEntry(url, bundle)));
+		return (new BundleURLConnection(url, findBundleEntry(url, module)));
 	}
 
 	/**
@@ -185,10 +174,11 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 	 * differently for Bundle.gerResource() and Bundle.getEntry()
 	 * because getResource uses the bundle classloader and getEntry
 	 * only used the base bundle file.
-	 * @param url The URL to find the BundleEntry for.
+	 * @param url The URL to find the entry for.
+	 * @param module the module to find the entry for.
 	 * @return the bundle entry
 	 */
-	abstract protected BundleEntry findBundleEntry(URL url, AbstractBundle bundle) throws IOException;
+	abstract protected BundleEntry findBundleEntry(URL url, Module module) throws IOException;
 
 	/**
 	 * Converts a bundle URL to a String.
@@ -239,8 +229,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 		if (path != null)
 			hash += path.hashCode();
 
-		if (adaptor != null)
-			hash += adaptor.hashCode();
+		hash += container.hashCode();
 		return hash;
 	}
 
@@ -285,21 +274,15 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 		// URLs depending on how they were constructed.
 	}
 
-	protected boolean checkAuthorization(Bundle bundle) {
+	protected boolean checkAuthorization(Module module) {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm == null)
 			return true;
+		Bundle bundle = module == null ? null : module.getBundle();
 		if (bundle == null)
 			return false;
 		sm.checkPermission(new AdminPermission(bundle, AdminPermission.RESOURCE));
 		return true;
-	}
-
-	protected static BaseClassLoader getBundleClassLoader(AbstractBundle bundle) {
-		BundleLoader loader = bundle.getBundleLoader();
-		if (loader == null)
-			return null;
-		return (BaseClassLoader) loader.createClassLoader();
 	}
 
 	private long getBundleID(String host) {
