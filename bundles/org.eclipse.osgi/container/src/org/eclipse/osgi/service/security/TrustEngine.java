@@ -48,7 +48,7 @@ public abstract class TrustEngine {
 	 */
 	public String addTrustAnchor(Certificate anchor, String alias) throws IOException, GeneralSecurityException {
 		String storedAlias = doAddTrustAnchor(anchor, alias);
-		TrustEngineListener listener = TrustEngineListener.getInstance();
+		TrustEngineListener listener = trustEngineListener;
 		if (listener != null)
 			listener.addedTrustAnchor(anchor);
 		return storedAlias;
@@ -76,7 +76,7 @@ public abstract class TrustEngine {
 	 */
 	public final void removeTrustAnchor(Certificate anchor) throws IOException, GeneralSecurityException {
 		doRemoveTrustAnchor(anchor);
-		TrustEngineListener listener = TrustEngineListener.getInstance();
+		TrustEngineListener listener = trustEngineListener;
 		if (listener != null)
 			listener.removedTrustAnchor(anchor);
 	}
@@ -99,7 +99,7 @@ public abstract class TrustEngine {
 		Certificate existing = getTrustAnchor(alias);
 		doRemoveTrustAnchor(alias);
 		if (existing != null) {
-			TrustEngineListener listener = TrustEngineListener.getInstance();
+			TrustEngineListener listener = trustEngineListener;
 			if (listener != null)
 				listener.removedTrustAnchor(existing);
 		}
@@ -143,4 +143,6 @@ public abstract class TrustEngine {
 	 * @return	a string
 	 */
 	public abstract String getName();
+
+	private volatile TrustEngineListener trustEngineListener;
 }
