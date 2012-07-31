@@ -16,10 +16,8 @@ import java.net.URL;
 import java.security.*;
 import java.security.cert.*;
 import java.util.*;
-import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
-import org.eclipse.osgi.framework.adaptor.PermissionStorage;
-import org.eclipse.osgi.framework.internal.core.*;
-import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.internal.framework.EquinoxBundle;
+import org.eclipse.osgi.storage.PermissionData;
 import org.osgi.framework.*;
 import org.osgi.service.condpermadmin.*;
 import org.osgi.service.permissionadmin.PermissionAdmin;
@@ -34,6 +32,9 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			DEFAULT_DEFAULT.add(allPerm);
 	}
 
+	// Base implied permissions for all bundles 
+	private static final String OSGI_BASE_IMPLIED_PERMISSIONS = "implied.permissions"; //$NON-NLS-1$
+
 	private static final String ADMIN_IMPLIED_ACTIONS = AdminPermission.RESOURCE + ',' + AdminPermission.METADATA + ',' + AdminPermission.CLASS + ',' + AdminPermission.CONTEXT;
 	private static final PermissionInfo[] EMPTY_PERM_INFO = new PermissionInfo[0];
 	/* @GuardedBy(lock) */
@@ -47,25 +48,23 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/* @GuardedBy(lock) */
 	private long nextID = System.currentTimeMillis();
 	/* @GuardedBy(lock) */
-	private final PermissionStorage permissionStorage;
+	private final PermissionData permissionStorage;
 	private final Object lock = new Object();
-	private final Framework framework;
+	//private final EquinoxContainer container;
 	private final PermissionInfo[] impliedPermissionInfos;
 	private final EquinoxSecurityManager supportedSecurityManager;
 
-	private SecurityAdmin(EquinoxSecurityManager supportedSecurityManager, Framework framework, PermissionInfo[] impliedPermissionInfos, PermissionInfoCollection permAdminDefaults) {
+	private SecurityAdmin(EquinoxSecurityManager supportedSecurityManager, PermissionInfo[] impliedPermissionInfos, PermissionInfoCollection permAdminDefaults) {
 		this.supportedSecurityManager = supportedSecurityManager;
-		this.framework = framework;
 		this.impliedPermissionInfos = impliedPermissionInfos;
 		this.permAdminDefaults = permAdminDefaults;
 		this.permissionStorage = null;
 	}
 
-	public SecurityAdmin(EquinoxSecurityManager supportedSecurityManager, Framework framework, PermissionStorage permissionStorage) throws IOException {
+	public SecurityAdmin(EquinoxSecurityManager supportedSecurityManager, PermissionData permissionStorage) {
 		this.supportedSecurityManager = supportedSecurityManager;
-		this.framework = framework;
-		this.permissionStorage = new SecurePermissionStorage(permissionStorage);
-		this.impliedPermissionInfos = SecurityAdmin.getPermissionInfos(getClass().getResource(Constants.OSGI_BASE_IMPLIED_PERMISSIONS), framework);
+		this.permissionStorage = permissionStorage;
+		this.impliedPermissionInfos = SecurityAdmin.getPermissionInfos(getClass().getResource(OSGI_BASE_IMPLIED_PERMISSIONS));
 		String[] encodedDefaultInfos = permissionStorage.getPermissionData(null);
 		PermissionInfo[] defaultInfos = getPermissionInfos(encodedDefaultInfos);
 		if (defaultInfos != null)
@@ -115,7 +114,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		synchronized (lock) {
 			// get location the hard way to avoid permission check
 			Bundle bundle = bundlePermissions.getBundle();
-			locationCollection = bundle instanceof AbstractBundle ? permAdminTable.getCollection(((AbstractBundle) bundle).getBundleData().getLocation()) : null;
+			locationCollection = bundle instanceof EquinoxBundle ? permAdminTable.getCollection(((EquinoxBundle) bundle).getModule().getLocation()) : null;
 			curCondAdminTable = condAdminTable;
 			curPermAdminDefaults = permAdminDefaults;
 		}
@@ -163,12 +162,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 				permAdminDefaults = null;
 			else
 				permAdminDefaults = new PermissionInfoCollection(permissions);
-			try {
-				permissionStorage.setPermissionData(null, getEncodedPermissionInfos(permissions));
-			} catch (IOException e) {
-				// log
-				e.printStackTrace();
-			}
+			permissionStorage.setPermissionData(null, getEncodedPermissionInfos(permissions));
 		}
 	}
 
@@ -191,18 +185,12 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		checkAllPermission();
 		synchronized (lock) {
 			permAdminTable.setPermissions(location, permissions);
-			try {
-				permissionStorage.setPermissionData(location, getEncodedPermissionInfos(permissions));
-			} catch (IOException e) {
-				// TODO log
-				e.printStackTrace();
-			}
+			permissionStorage.setPermissionData(location, getEncodedPermissionInfos(permissions));
 		}
 	}
 
 	void delete(SecurityRow securityRow, boolean firstTry) {
 		ConditionalPermissionUpdate update = newConditionalPermissionUpdate();
-		@SuppressWarnings("unchecked")
 		List<ConditionalPermissionInfo> rows = update.getConditionalPermissionInfos();
 		for (Iterator<ConditionalPermissionInfo> iRows = rows.iterator(); iRows.hasNext();) {
 			ConditionalPermissionInfo info = iRows.next();
@@ -279,7 +267,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	private SecurityAdmin getSnapShot() {
 		SecurityAdmin sa;
 		synchronized (lock) {
-			sa = new SecurityAdmin(supportedSecurityManager, framework, impliedPermissionInfos, permAdminDefaults);
+			sa = new SecurityAdmin(supportedSecurityManager, impliedPermissionInfos, permAdminDefaults);
 			SecurityRow[] rows = condAdminTable.getRows();
 			SecurityRow[] rowsSnapShot = new SecurityRow[rows.length];
 			for (int i = 0; i < rows.length; i++)
@@ -291,7 +279,6 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 
 	private ConditionalPermissionInfo setConditionalPermissionInfo(String name, ConditionInfo[] conds, PermissionInfo[] perms, boolean firstTry) {
 		ConditionalPermissionUpdate update = newConditionalPermissionUpdate();
-		@SuppressWarnings("unchecked")
 		List<ConditionalPermissionInfo> rows = update.getConditionalPermissionInfos();
 		ConditionalPermissionInfo newInfo = newConditionalPermissionInfo(name, conds, perms, ConditionalPermissionInfo.ALLOW);
 		int index = -1;
@@ -341,12 +328,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 				newRows[i] = new SecurityRow(this, name, infoBaseRow.getConditionInfos(), infoBaseRow.getPermissionInfos(), infoBaseRow.getAccessDecision());
 			}
 			condAdminTable = new SecurityTable(this, newRows);
-			try {
-				permissionStorage.saveConditionalPermissionInfos(condAdminTable.getEncodedRows());
-			} catch (IOException e) {
-				// TODO log
-				e.printStackTrace();
-			}
+			permissionStorage.saveConditionalPermissionInfos(condAdminTable.getEncodedRows());
 			timeStamp += 1;
 			return true;
 		}
@@ -357,16 +339,16 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		return "generated_" + Long.toString(nextID++); //$NON-NLS-1$;
 	}
 
-	public BundleProtectionDomain createProtectionDomain(Bundle bundle) {
+	public ProtectionDomain createProtectionDomain(Bundle bundle) {
 		return createProtectionDomain(bundle, this);
 	}
 
-	private BundleProtectionDomain createProtectionDomain(Bundle bundle, SecurityAdmin sa) {
+	private ProtectionDomain createProtectionDomain(Bundle bundle, SecurityAdmin sa) {
 		PermissionInfoCollection impliedPermissions = getImpliedPermission(bundle);
-		PermissionInfo[] restrictedInfos = getFileRelativeInfos(SecurityAdmin.getPermissionInfos(bundle.getEntry("OSGI-INF/permissions.perm"), framework), bundle); //$NON-NLS-1$
+		PermissionInfo[] restrictedInfos = getFileRelativeInfos(SecurityAdmin.getPermissionInfos(bundle.getEntry("OSGI-INF/permissions.perm")), bundle); //$NON-NLS-1$
 		PermissionInfoCollection restrictedPermissions = restrictedInfos == null ? null : new PermissionInfoCollection(restrictedInfos);
 		BundlePermissions bundlePermissions = new BundlePermissions(bundle, sa, impliedPermissions, restrictedPermissions);
-		return new BundleProtectionDomain(bundlePermissions, null, bundle);
+		return new ProtectionDomain(null, bundlePermissions);
 	}
 
 	private PermissionInfoCollection getImpliedPermission(Bundle bundle) {
@@ -381,7 +363,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	}
 
 	private PermissionInfo[] getFileRelativeInfos(PermissionInfo[] permissionInfos, Bundle bundle) {
-		if (permissionInfos == null || !(bundle instanceof AbstractBundle))
+		if (permissionInfos == null)
 			return permissionInfos;
 		PermissionInfo[] results = new PermissionInfo[permissionInfos.length];
 		for (int i = 0; i < permissionInfos.length; i++) {
@@ -390,7 +372,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 				if (!"<<ALL FILES>>".equals(permissionInfos[i].getName())) { //$NON-NLS-1$
 					File file = new File(permissionInfos[i].getName());
 					if (!file.isAbsolute()) { // relative name
-						File target = ((AbstractBundle) bundle).getBundleData().getDataFile(permissionInfos[i].getName());
+						File target = bundle.getDataFile(permissionInfos[i].getName());
 						if (target != null)
 							results[i] = new PermissionInfo(permissionInfos[i].getType(), target.getPath(), permissionInfos[i].getActions());
 					}
@@ -426,7 +408,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		}
 	}
 
-	private static PermissionInfo[] getPermissionInfos(URL resource, Framework framework) {
+	private static PermissionInfo[] getPermissionInfos(URL resource) {
 		if (resource == null)
 			return null;
 		PermissionInfo[] info = EMPTY_PERM_INFO;
@@ -453,8 +435,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 					permissions.add(new PermissionInfo(line));
 				} catch (IllegalArgumentException iae) {
 					/* incorrectly encoded permission */
-					if (framework != null)
-						framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.getBundle(0), iae);
+					// TODO used to publish an event here
 				}
 			}
 			int size = permissions.size();
