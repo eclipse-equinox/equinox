@@ -11,12 +11,11 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
-import org.eclipse.osgi.internal.debug.Debug;
-
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import org.eclipse.osgi.framework.internal.core.BundleContextImpl;
 import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.osgi.internal.framework.BundleContextImpl;
+import org.eclipse.osgi.next.internal.debug.Debug;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
@@ -36,6 +35,7 @@ public class ServiceUse<S> {
 	final BundleContextImpl context;
 	/** ServiceDescription of the registered service */
 	final ServiceRegistrationImpl<S> registration;
+	final Debug debug;
 
 	/** Service object either registered or that returned by
 	 ServiceFactory.getService() */
@@ -59,6 +59,7 @@ public class ServiceUse<S> {
 	 * @param   registration ServiceRegistration of the service
 	 */
 	ServiceUse(BundleContextImpl context, ServiceRegistrationImpl<S> registration) {
+		this.debug = context.getContainer().getConfiguration().getDebug();
 		this.useCount = 0;
 		this.factoryInUse = false;
 		S service = registration.getServiceObject();
@@ -121,17 +122,17 @@ public class ServiceUse<S> {
 			return cachedService;
 		}
 
-		if (Debug.DEBUG_SERVICES) {
+		if (debug.DEBUG_SERVICES) {
 			Debug.println("getService[factory=" + registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 		// check for recursive call
 		if (factoryInUse == true) {
-			if (Debug.DEBUG_SERVICES) {
+			if (debug.DEBUG_SERVICES) {
 				Debug.println(factory + ".getService() recursively called."); //$NON-NLS-1$
 			}
 
 			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_RECURSION, factory.getClass().getName(), "getService"), ServiceException.FACTORY_RECURSION); //$NON-NLS-1$
-			context.getFramework().publishFrameworkEvent(FrameworkEvent.WARNING, registration.getBundle(), se);
+			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.WARNING, registration.getBundle(), se);
 			return null;
 		}
 		factoryInUse = true;
@@ -143,37 +144,37 @@ public class ServiceUse<S> {
 				}
 			});
 		} catch (Throwable t) {
-			if (Debug.DEBUG_SERVICES) {
+			if (debug.DEBUG_SERVICES) {
 				Debug.println(factory + ".getService() exception: " + t.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(t);
 			}
 			// allow the adaptor to handle this unexpected error
-			context.getFramework().getAdaptor().handleRuntimeError(t);
+			context.getContainer().handleRuntimeError(t);
 			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "getService"), ServiceException.FACTORY_EXCEPTION, t); //$NON-NLS-1$ 
-			context.getFramework().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
+			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
 			return null;
 		} finally {
 			factoryInUse = false;
 		}
 
 		if (service == null) {
-			if (Debug.DEBUG_SERVICES) {
+			if (debug.DEBUG_SERVICES) {
 				Debug.println(factory + ".getService() returned null."); //$NON-NLS-1$
 			}
 
 			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_OBJECT_NULL_EXCEPTION, factory.getClass().getName()), ServiceException.FACTORY_ERROR);
-			context.getFramework().publishFrameworkEvent(FrameworkEvent.WARNING, registration.getBundle(), se);
+			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.WARNING, registration.getBundle(), se);
 			return null;
 		}
 
 		String[] clazzes = registration.getClasses();
 		String invalidService = ServiceRegistry.checkServiceClass(clazzes, service);
 		if (invalidService != null) {
-			if (Debug.DEBUG_SERVICES) {
+			if (debug.DEBUG_SERVICES) {
 				Debug.println("Service object is not an instanceof " + invalidService); //$NON-NLS-1$
 			}
 			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_NOT_INSTANCEOF_CLASS_EXCEPTION, factory.getClass().getName(), invalidService), ServiceException.FACTORY_ERROR);
-			context.getFramework().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
+			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
 			return null;
 		}
 
@@ -230,7 +231,7 @@ public class ServiceUse<S> {
 		final S service = cachedService;
 		cachedService = null;
 
-		if (Debug.DEBUG_SERVICES) {
+		if (debug.DEBUG_SERVICES) {
 			Debug.println("ungetService[factory=" + registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 		try {
@@ -241,13 +242,13 @@ public class ServiceUse<S> {
 				}
 			});
 		} catch (Throwable t) {
-			if (Debug.DEBUG_GENERAL) {
+			if (debug.DEBUG_GENERAL) {
 				Debug.println(factory + ".ungetService() exception"); //$NON-NLS-1$
 				Debug.printStackTrace(t);
 			}
 
 			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "ungetService"), ServiceException.FACTORY_EXCEPTION, t); //$NON-NLS-1$ 
-			context.getFramework().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
+			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
 		}
 
 		return true;
@@ -272,7 +273,7 @@ public class ServiceUse<S> {
 		cachedService = null;
 		useCount = 0;
 
-		if (Debug.DEBUG_SERVICES) {
+		if (debug.DEBUG_SERVICES) {
 			Debug.println("releaseService[factory=" + registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 		try {
@@ -283,13 +284,13 @@ public class ServiceUse<S> {
 				}
 			});
 		} catch (Throwable t) {
-			if (Debug.DEBUG_SERVICES) {
+			if (debug.DEBUG_SERVICES) {
 				Debug.println(factory + ".ungetService() exception"); //$NON-NLS-1$
 				Debug.printStackTrace(t);
 			}
 
 			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "ungetService"), ServiceException.FACTORY_EXCEPTION, t); //$NON-NLS-1$ 
-			context.getFramework().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
+			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
 		}
 	}
 }

@@ -11,11 +11,9 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
+import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.framework.FilterImpl;
-
-import org.eclipse.osgi.internal.debug.Debug;
-
-import org.eclipse.osgi.framework.internal.core.BundleContextImpl;
+import org.eclipse.osgi.next.internal.debug.Debug;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.service.ListenerHook;
 
@@ -37,6 +35,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	private final String objectClass;
 	/** indicates whether the listener has been removed */
 	private volatile boolean removed;
+	private final Debug debug;
 
 	/**
 	 * Constructor.
@@ -47,6 +46,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	 * @exception InvalidSyntaxException if the filter is invalid.
 	 */
 	FilteredServiceListener(final BundleContextImpl context, final ServiceListener listener, final String filterstring) throws InvalidSyntaxException {
+		this.debug = context.getContainer().getConfiguration().getDebug();
 		this.unfiltered = (listener instanceof UnfilteredServiceListener);
 		if (filterstring == null) {
 			this.filter = null;
@@ -91,7 +91,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 		if (!ServiceRegistry.hasListenServicePermission(event, context))
 			return;
 
-		if (Debug.DEBUG_EVENTS) {
+		if (debug.DEBUG_EVENTS) {
 			String listenerName = this.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(this)); //$NON-NLS-1$
 			Debug.println("filterServiceEvent(" + listenerName + ", \"" + getFilter() + "\", " + reference.getRegistration().getProperties() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
@@ -101,7 +101,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 			return;
 		}
 		if (allservices || ServiceRegistry.isAssignableTo(context, reference)) {
-			if (Debug.DEBUG_EVENTS) {
+			if (debug.DEBUG_EVENTS) {
 				String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 				Debug.println("dispatchFilteredServiceEvent(" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			}

@@ -11,12 +11,12 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
-import org.eclipse.osgi.internal.debug.Debug;
-
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.osgi.internal.framework.BundleContextImpl;
+import org.eclipse.osgi.internal.loader.sources.PackageSource;
+import org.eclipse.osgi.next.internal.debug.Debug;
 import org.osgi.framework.*;
-import org.osgi.framework.Constants;
 
 /**
  * A registered service.
@@ -36,9 +36,6 @@ import org.osgi.framework.Constants;
  * @ThreadSafe
  */
 public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Comparable<ServiceRegistrationImpl<?>> {
-	/** Internal framework object. */
-	private final Framework framework;
-
 	private final ServiceRegistry registry;
 
 	/** context which registered this service. */
@@ -93,7 +90,6 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		this.registry = registry;
 		this.context = context;
 		this.bundle = context.getBundleImpl();
-		this.framework = context.getFramework();
 		this.clazzes = clazzes; /* must be set before calling createProperties. */
 		this.service = service;
 		this.serviceid = registry.getNextServiceId(); /* must be set before calling createProperties. */
@@ -121,7 +117,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 				ref = reference; /* used to publish event outside sync */
 				this.properties = createProperties(props); /* must be valid after unregister is called. */
 			}
-			if (Debug.DEBUG_SERVICES) {
+			if (registry.debug.DEBUG_SERVICES) {
 				Debug.println("registerService[" + bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			registry.addServiceRegistration(context, this);
@@ -211,7 +207,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 				}
 
 				/* remove this object from the service registry */
-				if (Debug.DEBUG_SERVICES) {
+				if (registry.debug.DEBUG_SERVICES) {
 					Debug.println("unregisterService[" + bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 
@@ -234,7 +230,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 
 			size = contextsUsing.size();
 			if (size > 0) {
-				if (Debug.DEBUG_SERVICES) {
+				if (registry.debug.DEBUG_SERVICES) {
 					Debug.println("unregisterService: releasing users"); //$NON-NLS-1$
 				}
 				users = contextsUsing.toArray(new BundleContextImpl[size]);
@@ -425,7 +421,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 				return null;
 			}
 		}
-		if (Debug.DEBUG_SERVICES) {
+		if (registry.debug.DEBUG_SERVICES) {
 			Debug.println("getService[" + user.getBundleImpl() + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
@@ -498,7 +494,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 			}
 		}
 
-		if (Debug.DEBUG_SERVICES) {
+		if (registry.debug.DEBUG_SERVICES) {
 			Debug.println("ungetService[" + user.getBundleImpl() + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
@@ -541,7 +537,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 			}
 		}
 
-		if (Debug.DEBUG_SERVICES) {
+		if (registry.debug.DEBUG_SERVICES) {
 			Debug.println("releaseService[" + user.getBundleImpl() + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
@@ -588,7 +584,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	}
 
 	boolean isAssignableTo(Bundle client, String className) {
-		return framework.isServiceAssignableTo(bundle, client, className, service.getClass());
+		return PackageSource.isServiceAssignableTo(bundle, client, className, service.getClass(), context.getContainer());
 	}
 
 	/**

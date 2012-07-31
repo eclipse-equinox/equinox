@@ -11,15 +11,18 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
-import org.eclipse.osgi.internal.debug.Debug;
-
 import java.security.*;
 import java.util.*;
+import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.framework.eventmgr.*;
-import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.osgi.internal.framework.BundleContextImpl;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.next.internal.debug.Debug;
+import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
-import org.osgi.framework.Constants;
 import org.osgi.framework.hooks.service.*;
 import org.osgi.framework.hooks.service.ListenerHook.ListenerInfo;
 
@@ -74,20 +77,25 @@ public class ServiceRegistry {
 	private static final int initialCapacity = 50;
 	/** initial capacity of the nested data structure */
 	private static final int initialSubCapacity = 10;
-	/** framework which created this service registry */
-	private final Framework framework;
+	/** container which created this service registry */
+	private final EquinoxContainer container;
+	private final BundleContextImpl systemBundleContext;
+	final Debug debug;
 
 	/**
 	 * Initializes the internal data structures of this ServiceRegistry.
 	 *
 	 */
-	public ServiceRegistry(Framework framework) {
-		this.framework = framework;
+	public ServiceRegistry(EquinoxContainer container) {
+		this.container = container;
+		this.debug = container.getConfiguration().getDebug();
 		serviceid = 1;
 		publishedServicesByClass = new HashMap<String, List<ServiceRegistrationImpl<?>>>(initialCapacity);
 		publishedServicesByContext = new HashMap<BundleContextImpl, List<ServiceRegistrationImpl<?>>>(initialCapacity);
 		allPublishedServices = new ArrayList<ServiceRegistrationImpl<?>>(initialCapacity);
 		serviceEventListeners = new HashMap<BundleContextImpl, CopyOnWriteIdentityMap<ServiceListener, FilteredServiceListener>>(initialCapacity);
+		Module systemModule = container.getStorage().getModuleContainer().getModule(0);
+		systemBundleContext = (BundleContextImpl) systemModule.getBundle().getBundleContext();
 	}
 
 	/**
@@ -169,7 +177,7 @@ public class ServiceRegistry {
 	 */
 	public ServiceRegistrationImpl<?> registerService(BundleContextImpl context, String[] clazzes, Object service, Dictionary<String, ?> properties) {
 		if (service == null) {
-			if (Debug.DEBUG_SERVICES) {
+			if (debug.DEBUG_SERVICES) {
 				Debug.println("Service object is null"); //$NON-NLS-1$
 			}
 
@@ -179,7 +187,7 @@ public class ServiceRegistry {
 		int size = clazzes.length;
 
 		if (size == 0) {
-			if (Debug.DEBUG_SERVICES) {
+			if (debug.DEBUG_SERVICES) {
 				Debug.println("Classes array is empty"); //$NON-NLS-1$
 			}
 
@@ -204,7 +212,7 @@ public class ServiceRegistry {
 		if (!(service instanceof ServiceFactory<?>)) {
 			String invalidService = checkServiceClass(clazzes, service);
 			if (invalidService != null) {
-				if (Debug.DEBUG_SERVICES) {
+				if (debug.DEBUG_SERVICES) {
 					Debug.println("Service object is not an instanceof " + invalidService); //$NON-NLS-1$
 				}
 				throw new IllegalArgumentException(NLS.bind(Msg.SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION, invalidService));
@@ -293,7 +301,7 @@ public class ServiceRegistry {
 	 *         longer valid.
 	 */
 	public ServiceReferenceImpl<?>[] getServiceReferences(final BundleContextImpl context, final String clazz, final String filterstring, final boolean allservices, boolean callHooks) throws InvalidSyntaxException {
-		if (Debug.DEBUG_SERVICES) {
+		if (debug.DEBUG_SERVICES) {
 			Debug.println((allservices ? "getAllServiceReferences(" : "getServiceReferences(") + clazz + ", \"" + filterstring + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 		Filter filter = (filterstring == null) ? null : context.createFilter(filterstring);
@@ -381,7 +389,7 @@ public class ServiceRegistry {
 	 *         longer valid.
 	 */
 	public ServiceReferenceImpl<?> getServiceReference(BundleContextImpl context, String clazz) {
-		if (Debug.DEBUG_SERVICES) {
+		if (debug.DEBUG_SERVICES) {
 			Debug.println("getServiceReference(" + clazz + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
@@ -394,7 +402,7 @@ public class ServiceRegistry {
 				return references[0];
 			}
 		} catch (InvalidSyntaxException e) {
-			if (Debug.DEBUG_GENERAL) {
+			if (debug.DEBUG_GENERAL) {
 				Debug.println("InvalidSyntaxException w/ null filter" + e.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(e);
 			}
@@ -659,7 +667,7 @@ public class ServiceRegistry {
 			}
 			registrations = new ArrayList<ServiceRegistrationImpl<?>>(servicesInUse.keySet());
 		}
-		if (Debug.DEBUG_SERVICES) {
+		if (debug.DEBUG_SERVICES) {
 			Debug.println("Releasing services"); //$NON-NLS-1$
 		}
 		for (ServiceRegistrationImpl<?> registration : registrations) {
@@ -676,7 +684,7 @@ public class ServiceRegistry {
 	 * @throws InvalidSyntaxException If the filter string is invalid.
 	 */
 	public void addServiceListener(BundleContextImpl context, ServiceListener listener, String filter) throws InvalidSyntaxException {
-		if (Debug.DEBUG_EVENTS) {
+		if (debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("addServiceListener[" + context.getBundleImpl() + "](" + listenerName + ", \"" + filter + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
@@ -709,7 +717,7 @@ public class ServiceRegistry {
 	 * @param listener Service Listener to be removed.
 	 */
 	public void removeServiceListener(BundleContextImpl context, ServiceListener listener) {
-		if (Debug.DEBUG_EVENTS) {
+		if (debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("removeServiceListener[" + context.getBundleImpl() + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
@@ -810,7 +818,7 @@ public class ServiceRegistry {
 		}
 
 		/* deliver the event to the snapshot */
-		ListenerQueue<ServiceListener, FilteredServiceListener, ServiceEvent> queue = framework.newListenerQueue();
+		ListenerQueue<ServiceListener, FilteredServiceListener, ServiceEvent> queue = container.newListenerQueue();
 		for (Map.Entry<BundleContextImpl, Set<Map.Entry<ServiceListener, FilteredServiceListener>>> entry : listenerSnapshot.entrySet()) {
 			@SuppressWarnings({"unchecked", "rawtypes"})
 			EventDispatcher<ServiceListener, FilteredServiceListener, ServiceEvent> dispatcher = (EventDispatcher) entry.getKey();
@@ -1044,7 +1052,11 @@ public class ServiceRegistry {
 	 * Check for permission to listen to a service.
 	 */
 	static boolean hasListenServicePermission(ServiceEvent event, BundleContextImpl context) {
-		ProtectionDomain domain = context.getBundleImpl().getProtectionDomain();
+		ModuleRevision revision = context.getBundleImpl().getModule().getCurrentRevision();
+		if (revision == null) {
+			return false;
+		}
+		ProtectionDomain domain = ((Generation) revision.getRevisionInfo()).getDomain();
 		if (domain == null) {
 			return true;
 		}
@@ -1126,7 +1138,7 @@ public class ServiceRegistry {
 	}
 
 	void notifyFindHooksPrivileged(final BundleContextImpl context, final String clazz, final String filterstring, final boolean allservices, final Collection<ServiceReference<?>> result) {
-		if (Debug.DEBUG_HOOKS) {
+		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyServiceFindHooks(" + context.getBundleImpl() + "," + clazz + "," + filterstring + "," + allservices + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		}
 		notifyHooksPrivileged(new HookContext() {
@@ -1155,7 +1167,7 @@ public class ServiceRegistry {
 	 * @param result The result to return to the caller which may have been shrunk by the EventHooks.
 	 */
 	private void notifyEventHooksPrivileged(final ServiceEvent event, final Collection<BundleContext> result) {
-		if (Debug.DEBUG_HOOKS) {
+		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyServiceEventHooks(" + event.getType() + ":" + event.getServiceReference() + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 		}
 		notifyHooksPrivileged(new HookContext() {
@@ -1184,7 +1196,7 @@ public class ServiceRegistry {
 	 * @param result The result to return to the caller which may have been shrunk by the EventListenerHooks.
 	 */
 	private void notifyEventListenerHooksPrivileged(final ServiceEvent event, final Map<BundleContext, Collection<ListenerInfo>> result) {
-		if (Debug.DEBUG_HOOKS) {
+		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyServiceEventListenerHooks(" + event.getType() + ":" + event.getServiceReference() + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 		}
 		notifyHooksPrivileged(new HookContext() {
@@ -1210,11 +1222,6 @@ public class ServiceRegistry {
 	 * @param hookContext Context to use when calling the hook services.
 	 */
 	public void notifyHooksPrivileged(HookContext hookContext) {
-		BundleContextImpl systemBundleContext = framework.getSystemBundleContext();
-		if (systemBundleContext == null) { // if no system bundle context, we are done!
-			return;
-		}
-
 		List<ServiceRegistrationImpl<?>> hooks = lookupServiceRegistrations(hookContext.getHookClassName(), null);
 		// Since the list is already sorted, we don't need to sort the list to call the hooks
 		// in the proper order.
@@ -1239,14 +1246,14 @@ public class ServiceRegistry {
 		try {
 			hookContext.call(hook, registration);
 		} catch (Throwable t) {
-			if (Debug.DEBUG_HOOKS) {
+			if (debug.DEBUG_HOOKS) {
 				Debug.println(hook.getClass().getName() + "." + hookContext.getHookMethodName() + "() exception: " + t.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 				Debug.printStackTrace(t);
 			}
 			// allow the adaptor to handle this unexpected error
-			framework.getAdaptor().handleRuntimeError(t);
+			container.handleRuntimeError(t);
 			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, hook.getClass().getName(), hookContext.getHookMethodName()), t);
-			framework.publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
+			container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
 		} finally {
 			registration.ungetService(context);
 		}
@@ -1273,12 +1280,7 @@ public class ServiceRegistry {
 	}
 
 	void notifyNewListenerHookPrivileged(ServiceRegistrationImpl<?> registration) {
-		BundleContextImpl systemBundleContext = framework.getSystemBundleContext();
-		if (systemBundleContext == null) { // if no system bundle context, we are done!
-			return;
-		}
-
-		if (Debug.DEBUG_HOOKS) {
+		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyServiceNewListenerHook(" + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		}
 
@@ -1336,7 +1338,7 @@ public class ServiceRegistry {
 
 	void notifyListenerHooksPrivileged(final Collection<ListenerInfo> listeners, final boolean added) {
 		assert !listeners.isEmpty();
-		if (Debug.DEBUG_HOOKS) {
+		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyServiceListenerHooks(" + listeners + "," + (added ? "added" : "removed") + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 
