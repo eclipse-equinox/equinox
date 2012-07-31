@@ -12,33 +12,33 @@
 package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.*;
 import org.eclipse.core.runtime.internal.adaptor.*;
-import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.adaptor.StatusException;
-import org.eclipse.osgi.framework.internal.core.*;
-import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
+import org.eclipse.osgi.framework.internal.core.ConsoleManager;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.FilePath;
-import org.eclipse.osgi.internal.baseadaptor.BaseStorageHook;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.location.*;
 import org.eclipse.osgi.internal.profile.Profile;
+import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.service.datalocation.Location;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.service.runnable.ApplicationLauncher;
 import org.eclipse.osgi.service.runnable.StartupMonitor;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.service.startlevel.StartLevel;
+import org.osgi.framework.launch.Framework;
+import org.osgi.framework.startlevel.BundleStartLevel;
+import org.osgi.framework.startlevel.FrameworkStartLevel;
+import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -58,12 +58,10 @@ import org.osgi.util.tracker.ServiceTracker;
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class EclipseStarter {
-	private static FrameworkAdaptor adaptor;
 	private static BundleContext context;
 	private static boolean initialize = false;
 	public static boolean debug = false;
 	private static boolean running = false;
-	private static Framework framework = null;
 	private static ServiceRegistration<?> defaultMonitorRegistration = null;
 	private static ServiceRegistration<?> appLauncherRegistration = null;
 	private static ServiceRegistration<?> splashStreamRegistration = null;
@@ -126,8 +124,6 @@ public class EclipseStarter {
 	private static final String REFERENCE_SCHEME = "reference:"; //$NON-NLS-1$
 	private static final String REFERENCE_PROTOCOL = "reference"; //$NON-NLS-1$
 	private static final String INITIAL_LOCATION = "initial@"; //$NON-NLS-1$
-	/** string containing the classname of the adaptor to be used in this framework instance */
-	protected static final String DEFAULT_ADAPTOR_CLASS = "org.eclipse.osgi.baseadaptor.BaseAdaptor"; //$NON-NLS-1$
 
 	private static final int DEFAULT_INITIAL_STARTLEVEL = 6; // default value for legacy purposes
 	private static final String DEFAULT_BUNDLES_STARTLEVEL = "4"; //$NON-NLS-1$
@@ -140,20 +136,65 @@ public class EclipseStarter {
 
 	private static ConsoleManager consoleMgr = null;
 
+	private static Map<String, String> configuration = null;
+	private static Framework framework = null;
+	private static EquinoxConfiguration equinoxConfig;
+
+	private synchronized static String getProperty(String key) {
+		if (equinoxConfig != null) {
+			return equinoxConfig.getProperty(key);
+		}
+		return getConfiguration().get(key);
+	}
+
+	private synchronized static String getProperty(String key, String dft) {
+		if (equinoxConfig != null) {
+			return equinoxConfig.getConfiguration(key, dft);
+		}
+		String result = getConfiguration().get(key);
+		return result == null ? dft : result;
+	}
+
+	private synchronized static Object setProperty(String key, String value) {
+		if (equinoxConfig != null) {
+			return equinoxConfig.setProperty(key, value);
+		}
+		return getConfiguration().put(key, value);
+	}
+
+	private synchronized static Object clearProperty(String key) {
+		if (equinoxConfig != null) {
+			return equinoxConfig.clearConfiguration(key);
+		}
+		return getConfiguration().remove(key);
+	}
+
+	private synchronized static Map<String, String> getConfiguration() {
+		if (configuration == null) {
+			configuration = new HashMap<String, String>();
+			// TODO hack
+			String useSystemProperties = System.getProperty(EquinoxConfiguration.PROP_USE_SYSTEM_PROPERTIES, "true"); //$NON-NLS-1$
+			if ("true".equals(useSystemProperties)) { //$NON-NLS-1$
+				configuration.put(EquinoxConfiguration.PROP_USE_SYSTEM_PROPERTIES, "true"); //$NON-NLS-1$
+			}
+		}
+		return configuration;
+	}
+
 	/**
 	 * This is the main to start osgi.
 	 * It only works when the framework is being jared as a single jar
 	 */
 	public static void main(String[] args) throws Exception {
-		if (FrameworkProperties.getProperty("eclipse.startTime") == null) //$NON-NLS-1$
-			FrameworkProperties.setProperty("eclipse.startTime", Long.toString(System.currentTimeMillis())); //$NON-NLS-1$
-		if (FrameworkProperties.getProperty(PROP_NOSHUTDOWN) == null)
-			FrameworkProperties.setProperty(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
+		if (getProperty("eclipse.startTime") == null) //$NON-NLS-1$
+			setProperty("eclipse.startTime", Long.toString(System.currentTimeMillis())); //$NON-NLS-1$
+		if (getProperty(PROP_NOSHUTDOWN) == null)
+			setProperty(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
 		// set the compatibility boot delegation flag to false to get "standard" OSGi behavior WRT boot delegation (bug 178477)
-		if (FrameworkProperties.getProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION) == null)
-			FrameworkProperties.setProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION, "false"); //$NON-NLS-1$
+		if (getProperty(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION) == null)
+			setProperty(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION, "false"); //$NON-NLS-1$
 		Object result = run(args, null);
-		if (result instanceof Integer && !Boolean.valueOf(FrameworkProperties.getProperty(PROP_NOSHUTDOWN)).booleanValue())
+		if (result instanceof Integer && !Boolean.valueOf(getProperty(PROP_NOSHUTDOWN)).booleanValue())
 			System.exit(((Integer) result).intValue());
 	}
 
@@ -179,7 +220,7 @@ public class EclipseStarter {
 		try {
 			startup(args, endSplashHandler);
 			startupFailed = false;
-			if (Boolean.valueOf(FrameworkProperties.getProperty(PROP_IGNOREAPP)).booleanValue() || isForcedRestart())
+			if (Boolean.valueOf(getProperty(PROP_IGNOREAPP)).booleanValue() || isForcedRestart())
 				return null;
 			return run(null);
 		} catch (Throwable e) {
@@ -187,7 +228,7 @@ public class EclipseStarter {
 			if (endSplashHandler != null)
 				endSplashHandler.run();
 			// may use startupFailed to understand where the error happened
-			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, startupFailed ? EclipseAdaptorMsg.ECLIPSE_STARTUP_STARTUP_ERROR : EclipseAdaptorMsg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null);
+			FrameworkLogEntry logEntry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, startupFailed ? EclipseAdaptorMsg.ECLIPSE_STARTUP_STARTUP_ERROR : EclipseAdaptorMsg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null);
 			if (log != null)
 				log.log(logEntry);
 			else
@@ -198,11 +239,11 @@ public class EclipseStarter {
 				// The application typically sets the exit code however the framework can request that
 				// it be re-started. We need to check for this and potentially override the exit code.
 				if (isForcedRestart())
-					FrameworkProperties.setProperty(PROP_EXITCODE, "23"); //$NON-NLS-1$
-				if (!Boolean.valueOf(FrameworkProperties.getProperty(PROP_NOSHUTDOWN)).booleanValue())
+					setProperty(PROP_EXITCODE, "23"); //$NON-NLS-1$
+				if (!Boolean.valueOf(getProperty(PROP_NOSHUTDOWN)).booleanValue())
 					shutdown();
 			} catch (Throwable e) {
-				FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_SHUTDOWN_ERROR, 1, e, null);
+				FrameworkLogEntry logEntry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_SHUTDOWN_ERROR, 1, e, null);
 				if (log != null)
 					log.log(logEntry);
 				else
@@ -219,9 +260,9 @@ public class EclipseStarter {
 			}
 		}
 		// we only get here if an error happened
-		if (FrameworkProperties.getProperty(PROP_EXITCODE) == null) {
-			FrameworkProperties.setProperty(PROP_EXITCODE, "13"); //$NON-NLS-1$
-			FrameworkProperties.setProperty(PROP_EXITDATA, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_CHECK_LOG, log == null ? null : log.getFile().getPath()));
+		if (getProperty(PROP_EXITCODE) == null) {
+			setProperty(PROP_EXITCODE, "13"); //$NON-NLS-1$
+			setProperty(PROP_EXITDATA, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_CHECK_LOG, log == null ? null : log.getFile().getPath()));
 		}
 		return null;
 	}
@@ -250,23 +291,22 @@ public class EclipseStarter {
 			Profile.logEnter("EclipseStarter.startup()", null); //$NON-NLS-1$
 		if (running)
 			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ALREADY_RUNNING);
-		FrameworkProperties.initializeProperties();
 		processCommandLine(args);
-		EquinoxLocations.initializeLocations();
-		loadConfigurationInfo();
 		finalizeProperties();
 		if (Profile.PROFILE)
 			Profile.initProps(); // catch any Profile properties set in eclipse.properties...
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "props inited"); //$NON-NLS-1$ //$NON-NLS-2$
-		adaptor = createAdaptor();
-		log = adaptor.getFrameworkLog();
-		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logTime("EclipseStarter.startup()", "adapter created"); //$NON-NLS-1$ //$NON-NLS-2$
-		framework = new Framework(adaptor);
+		framework = new Equinox(configuration);
+		framework.init();
+		context = framework.getBundleContext();
+		ServiceReference<FrameworkLog> logRef = context.getServiceReference(FrameworkLog.class);
+		log = context.getService(logRef);
+		ServiceReference<EnvironmentInfo> configRef = context.getServiceReference(EnvironmentInfo.class);
+		equinoxConfig = (EquinoxConfiguration) context.getService(configRef);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "OSGi created"); //$NON-NLS-1$ //$NON-NLS-2$
-		context = framework.getBundle(0).getBundleContext();
+
 		registerFrameworkShutdownHandlers();
 		publishSplashScreen(endSplashHandler);
 		if (Profile.PROFILE && Profile.STARTUP)
@@ -275,12 +315,10 @@ public class EclipseStarter {
 		if (Profile.PROFILE && Profile.STARTUP) {
 			Profile.logTime("EclipseStarter.startup()", "console started"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		framework.launch();
-		// save the cached timestamp before loading basic bundles; this is needed so we can do a proper timestamp check when logging resolver errors
-		long stateStamp = adaptor.getState().getTimeStamp();
+
 		Bundle[] startBundles = loadBasicBundles();
 
-		if (startBundles == null || ("true".equals(FrameworkProperties.getProperty(PROP_REFRESH_BUNDLES)) && refreshPackages(getCurrentBundles(false)))) { //$NON-NLS-1$
+		if (startBundles == null || ("true".equals(getProperty(PROP_REFRESH_BUNDLES)) && refreshPackages(getCurrentBundles(false)))) { //$NON-NLS-1$
 			waitForShutdown();
 			return context; // cannot continue; loadBasicBundles caused refreshPackages to shutdown the framework
 		}
@@ -300,13 +338,10 @@ public class EclipseStarter {
 		try {
 			consoleMgr.checkForConsoleBundle();
 		} catch (BundleException e) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, e.getMessage(), 0, e, null);
+			FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, e.getMessage(), 0, e, null);
 			log.log(entry);
 		}
-		if (debug || FrameworkProperties.getProperty(PROP_DEV) != null)
-			// only spend time showing unresolved bundles in dev/debug mode and the state has changed
-			if (stateStamp != adaptor.getState().getTimeStamp())
-				logUnresolvedBundles(context.getBundles());
+		// TODO should log unresolved bundles if in debug or dev mode
 		running = true;
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logExit("EclipseStarter.startup()"); //$NON-NLS-1$
@@ -314,7 +349,7 @@ public class EclipseStarter {
 	}
 
 	private static int getStartLevel() {
-		String level = FrameworkProperties.getProperty(PROP_INITIAL_STARTLEVEL);
+		String level = getProperty(PROP_INITIAL_STARTLEVEL);
 		if (level != null)
 			try {
 				return Integer.parseInt(level);
@@ -347,9 +382,9 @@ public class EclipseStarter {
 			return new Integer(0);
 		try {
 			if (appLauncher == null) {
-				boolean launchDefault = Boolean.valueOf(FrameworkProperties.getProperty(PROP_APPLICATION_LAUNCHDEFAULT, "true")).booleanValue(); //$NON-NLS-1$
+				boolean launchDefault = Boolean.valueOf(getProperty(PROP_APPLICATION_LAUNCHDEFAULT, "true")).booleanValue(); //$NON-NLS-1$
 				// create the ApplicationLauncher and register it as a service
-				appLauncher = new EclipseAppLauncher(context, Boolean.valueOf(FrameworkProperties.getProperty(PROP_ALLOW_APPRELAUNCH)).booleanValue(), launchDefault, log);
+				appLauncher = new EclipseAppLauncher(context, Boolean.valueOf(getProperty(PROP_ALLOW_APPRELAUNCH)).booleanValue(), launchDefault, log);
 				appLauncherRegistration = context.registerService(ApplicationLauncher.class.getName(), appLauncher, null);
 				// must start the launcher AFTER service restration because this method 
 				// blocks and runs the application on the current thread.  This method 
@@ -358,8 +393,9 @@ public class EclipseStarter {
 			}
 			return appLauncher.reStart(argument);
 		} catch (Exception e) {
-			if (log != null && context != null) // context can be null if OSGi failed to launch (bug 151413)
-				logUnresolvedBundles(context.getBundles());
+			if (log != null && context != null) { // context can be null if OSGi failed to launch (bug 151413)
+				// TODO Should log unresolved bundles here
+			}
 			throw e;
 		}
 	}
@@ -400,115 +436,31 @@ public class EclipseStarter {
 			consoleMgr.stopConsole();
 			consoleMgr = null;
 		}
-		framework.close();
+		framework.stop();
+		framework.waitForStop(0);
 		framework = null;
+		configuration = null;
+		equinoxConfig = null;
 		context = null;
 		running = false;
 	}
 
 	private static void ensureBundlesActive(Bundle[] bundles) {
-		ServiceTracker<StartLevel, StartLevel> tracker = null;
-		try {
-			for (int i = 0; i < bundles.length; i++) {
-				if (bundles[i].getState() != Bundle.ACTIVE) {
-					if (bundles[i].getState() == Bundle.INSTALLED) {
-						// Log that the bundle is not resolved
-						log.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED, bundles[i].getLocation()), 0, null, null));
-						continue;
-					}
-					// check that the startlevel allows the bundle to be active (111550)
-					if (tracker == null) {
-						tracker = new ServiceTracker<StartLevel, StartLevel>(context, StartLevel.class.getName(), null);
-						tracker.open();
-					}
-					StartLevel sl = tracker.getService();
-					if (sl != null && (sl.getBundleStartLevel(bundles[i]) <= sl.getStartLevel())) {
-						log.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE, bundles[i]), 0, null, null));
-					}
+		for (int i = 0; i < bundles.length; i++) {
+			if (bundles[i].getState() != Bundle.ACTIVE) {
+				if (bundles[i].getState() == Bundle.INSTALLED) {
+					// Log that the bundle is not resolved
+					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED, bundles[i].getLocation()), 0, null, null));
+					continue;
+				}
+				// check that the startlevel allows the bundle to be active (111550)
+				FrameworkStartLevel fwStartLevel = context.getBundle().adapt(FrameworkStartLevel.class);
+				BundleStartLevel bundleStartLevel = bundles[i].adapt(BundleStartLevel.class);
+				if (fwStartLevel != null && (bundleStartLevel.getStartLevel() <= fwStartLevel.getStartLevel())) {
+					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE, bundles[i]), 0, null, null));
 				}
 			}
-		} finally {
-			if (tracker != null)
-				tracker.close();
 		}
-	}
-
-	private static void logUnresolvedBundles(Bundle[] bundles) {
-		State state = adaptor.getState();
-		FrameworkLog logService = adaptor.getFrameworkLog();
-		StateHelper stateHelper = adaptor.getPlatformAdmin().getStateHelper();
-
-		// first lets look for missing leaf constraints (bug 114120)
-		VersionConstraint[] leafConstraints = stateHelper.getUnsatisfiedLeaves(state.getBundles());
-		// hash the missing leaf constraints by the declaring bundles
-		Map<BundleDescription, List<VersionConstraint>> missing = new HashMap<BundleDescription, List<VersionConstraint>>();
-		for (int i = 0; i < leafConstraints.length; i++) {
-			// only include non-optional and non-dynamic constraint leafs
-			if (leafConstraints[i] instanceof BundleSpecification && ((BundleSpecification) leafConstraints[i]).isOptional())
-				continue;
-			if (leafConstraints[i] instanceof ImportPackageSpecification) {
-				if (ImportPackageSpecification.RESOLUTION_OPTIONAL.equals(((ImportPackageSpecification) leafConstraints[i]).getDirective(Constants.RESOLUTION_DIRECTIVE)))
-					continue;
-				if (ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(((ImportPackageSpecification) leafConstraints[i]).getDirective(Constants.RESOLUTION_DIRECTIVE)))
-					continue;
-			}
-			BundleDescription bundle = leafConstraints[i].getBundle();
-			List<VersionConstraint> constraints = missing.get(bundle);
-			if (constraints == null) {
-				constraints = new ArrayList<VersionConstraint>();
-				missing.put(bundle, constraints);
-			}
-			constraints.add(leafConstraints[i]);
-		}
-
-		// found some bundles with missing leaf constraints; log them first 
-		if (missing.size() > 0) {
-			FrameworkLogEntry[] rootChildren = new FrameworkLogEntry[missing.size()];
-			int rootIndex = 0;
-			for (Iterator<BundleDescription> iter = missing.keySet().iterator(); iter.hasNext(); rootIndex++) {
-				BundleDescription description = iter.next();
-				String symbolicName = description.getSymbolicName() == null ? FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME : description.getSymbolicName();
-				String generalMessage = NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED, description.getLocation());
-				List<VersionConstraint> constraints = missing.get(description);
-				FrameworkLogEntry[] logChildren = new FrameworkLogEntry[constraints.size()];
-				for (int i = 0; i < logChildren.length; i++)
-					logChildren[i] = new FrameworkLogEntry(symbolicName, FrameworkLogEntry.WARNING, 0, MessageHelper.getResolutionFailureMessage(constraints.get(i)), 0, null, null);
-				rootChildren[rootIndex] = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, generalMessage, 0, null, logChildren);
-			}
-			logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_ROOTS_NOT_RESOLVED, 0, null, rootChildren));
-		}
-
-		// There may be some bundles unresolved for other reasons, causing the system to be unresolved
-		// log all unresolved constraints now
-		List<FrameworkLogEntry> allChildren = new ArrayList<FrameworkLogEntry>();
-		for (int i = 0; i < bundles.length; i++)
-			if (bundles[i].getState() == Bundle.INSTALLED) {
-				String symbolicName = bundles[i].getSymbolicName() == null ? FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME : bundles[i].getSymbolicName();
-				String generalMessage = NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED, bundles[i]);
-				BundleDescription description = state.getBundle(bundles[i].getBundleId());
-				// for some reason, the state does not know about that bundle
-				if (description == null)
-					continue;
-				FrameworkLogEntry[] logChildren = null;
-				VersionConstraint[] unsatisfied = stateHelper.getUnsatisfiedConstraints(description);
-				if (unsatisfied.length > 0) {
-					// the bundle wasn't resolved due to some of its constraints were unsatisfiable
-					logChildren = new FrameworkLogEntry[unsatisfied.length];
-					for (int j = 0; j < unsatisfied.length; j++)
-						logChildren[j] = new FrameworkLogEntry(symbolicName, FrameworkLogEntry.WARNING, 0, MessageHelper.getResolutionFailureMessage(unsatisfied[j]), 0, null, null);
-				} else {
-					ResolverError[] resolverErrors = state.getResolverErrors(description);
-					if (resolverErrors.length > 0) {
-						logChildren = new FrameworkLogEntry[resolverErrors.length];
-						for (int j = 0; j < resolverErrors.length; j++)
-							logChildren[j] = new FrameworkLogEntry(symbolicName, FrameworkLogEntry.WARNING, 0, resolverErrors[j].toString(), 0, null, null);
-					}
-				}
-
-				allChildren.add(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, generalMessage, 0, null, logChildren));
-			}
-		if (allChildren.size() > 0)
-			logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_ALL_NOT_RESOLVED, 0, null, allChildren.toArray(new FrameworkLogEntry[allChildren.size()])));
 	}
 
 	private static void publishSplashScreen(final Runnable endSplashHandler) {
@@ -602,11 +554,11 @@ public class EclipseStarter {
 	 */
 	private static Bundle[] loadBasicBundles() {
 		long startTime = System.currentTimeMillis();
-		String osgiBundles = FrameworkProperties.getProperty(PROP_BUNDLES);
-		String osgiExtensions = FrameworkProperties.getProperty(PROP_EXTENSIONS);
+		String osgiBundles = getProperty(PROP_BUNDLES);
+		String osgiExtensions = getProperty(PROP_EXTENSIONS);
 		if (osgiExtensions != null && osgiExtensions.length() > 0) {
 			osgiBundles = osgiExtensions + ',' + osgiBundles;
-			FrameworkProperties.setProperty(PROP_BUNDLES, osgiBundles);
+			setProperty(PROP_BUNDLES, osgiBundles);
 		}
 		String[] installEntries = getArrayFromList(osgiBundles, ","); //$NON-NLS-1$
 		// get the initial bundle list from the installEntries
@@ -642,7 +594,7 @@ public class EclipseStarter {
 	private static InitialBundle[] getInitialBundles(String[] installEntries) {
 		searchCandidates.clear();
 		List<InitialBundle> result = new ArrayList<InitialBundle>(installEntries.length);
-		int defaultStartLevel = Integer.parseInt(FrameworkProperties.getProperty(PROP_BUNDLES_STARTLEVEL, DEFAULT_BUNDLES_STARTLEVEL));
+		int defaultStartLevel = Integer.parseInt(getProperty(PROP_BUNDLES_STARTLEVEL, DEFAULT_BUNDLES_STARTLEVEL));
 		String syspath = getSysPath();
 		// should canonicalize the syspath.
 		try {
@@ -650,6 +602,8 @@ public class EclipseStarter {
 		} catch (IOException ioe) {
 			// do nothing
 		}
+		ServiceReference<Location> installLocRef = context.getServiceReference(Location.class);
+		Location installLocation = context.getService(installLocRef);
 		for (int i = 0; i < installEntries.length; i++) {
 			String name = installEntries[i];
 			int level = defaultStartLevel;
@@ -675,16 +629,16 @@ public class EclipseStarter {
 			try {
 				URL location = searchForBundle(name, syspath);
 				if (location == null) {
-					FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_BUNDLE_NOT_FOUND, installEntries[i]), 0, null, null);
+					FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_BUNDLE_NOT_FOUND, installEntries[i]), 0, null, null);
 					log.log(entry);
 					// skip this entry
 					continue;
 				}
-				location = makeRelative(EquinoxLocations.getInstallLocation().getURL(), location);
+				location = makeRelative(installLocation.getURL(), location);
 				String locationString = INITIAL_LOCATION + location.toExternalForm();
 				result.add(new InitialBundle(locationString, location, level, start));
 			} catch (IOException e) {
-				log.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, e.getMessage(), 0, e, null));
+				log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, e.getMessage(), 0, e, null));
 			}
 		}
 		return result.toArray(new InitialBundle[result.size()]);
@@ -692,20 +646,13 @@ public class EclipseStarter {
 
 	// returns true if the refreshPackages operation caused the framework to shutdown
 	private static boolean refreshPackages(Bundle[] bundles) {
-		ServiceReference<?> packageAdminRef = context.getServiceReference(PackageAdmin.class.getName());
-		PackageAdmin packageAdmin = null;
-		if (packageAdminRef != null)
-			packageAdmin = (PackageAdmin) context.getService(packageAdminRef);
-		if (packageAdmin == null)
+		FrameworkWiring frameworkWiring = context.getBundle().adapt(FrameworkWiring.class);
+		if (frameworkWiring == null)
 			return false;
-		// TODO this is such a hack it is silly.  There are still cases for race conditions etc
-		// but this should allow for some progress...
-		final Semaphore semaphore = new Semaphore(0);
+		Semaphore semaphore = new Semaphore(0);
 		StartupEventListener listener = new StartupEventListener(semaphore, FrameworkEvent.PACKAGES_REFRESHED);
-		context.addFrameworkListener(listener);
 		context.addBundleListener(listener);
-		packageAdmin.refreshPackages(bundles);
-		context.ungetService(packageAdminRef);
+		frameworkWiring.refreshBundles(Arrays.asList(bundles), listener);
 		updateSplash(semaphore, listener);
 		if (isForcedRestart())
 			return true;
@@ -713,39 +660,20 @@ public class EclipseStarter {
 	}
 
 	private static void waitForShutdown() {
-		if (!isForcedRestart())
-			return;
 		// wait for the system bundle to stop
-		Bundle systemBundle = framework.getBundle(0);
-		int i = 0;
-		while (i < 5000 && (systemBundle.getState() & (Bundle.STARTING | Bundle.ACTIVE | Bundle.STOPPING)) != 0) {
-			i += 200;
-			try {
-				Thread.sleep(200);
-			} catch (InterruptedException e) {
-				break;
-			}
+		try {
+			framework.waitForStop(0);
+		} catch (InterruptedException e) {
+			Thread.interrupted();
+			throw new RuntimeException(e);
 		}
 	}
 
-	/**
-	 *  Creates and returns the adaptor
-	 *
-	 *  @return a FrameworkAdaptor object
-	 */
-	private static FrameworkAdaptor createAdaptor() throws Exception {
-		String adaptorClassName = FrameworkProperties.getProperty(PROP_ADAPTOR, DEFAULT_ADAPTOR_CLASS);
-		Class<?> adaptorClass = Class.forName(adaptorClassName);
-		Class<?>[] constructorArgs = new Class[] {String[].class};
-		Constructor<?> constructor = adaptorClass.getConstructor(constructorArgs);
-		return (FrameworkAdaptor) constructor.newInstance(new Object[] {new String[0]});
-	}
-
 	private static String[] processCommandLine(String[] args) throws Exception {
-		EquinoxConfiguration.setAllArgs(args);
+		equinoxConfig.setAllArgs(args);
 		if (args.length == 0) {
-			EquinoxConfiguration.setFrameworkArgs(args);
-			EquinoxConfiguration.setAllArgs(args);
+			equinoxConfig.setFrameworkArgs(args);
+			equinoxConfig.setAllArgs(args);
 			return args;
 		}
 		int[] configArgs = new int[args.length];
@@ -760,7 +688,7 @@ public class EclipseStarter {
 			// simply enable debug.  Otherwise, assume that that the following arg is
 			// actually the filename of an options file.  This will be processed below.
 			if (args[i].equalsIgnoreCase(DEBUG) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
-				FrameworkProperties.setProperty(PROP_DEBUG, ""); //$NON-NLS-1$
+				setProperty(PROP_DEBUG, ""); //$NON-NLS-1$
 				debug = true;
 				found = true;
 			}
@@ -770,7 +698,7 @@ public class EclipseStarter {
 			// simply enable development mode.  Otherwise, assume that that the following arg is
 			// actually some additional development time class path entries.  This will be processed below.
 			if (args[i].equalsIgnoreCase(DEV) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
-				FrameworkProperties.setProperty(PROP_DEV, ""); //$NON-NLS-1$
+				setProperty(PROP_DEV, ""); //$NON-NLS-1$
 				found = true;
 			}
 
@@ -782,24 +710,24 @@ public class EclipseStarter {
 
 			// look for the clean flag.
 			if (args[i].equalsIgnoreCase(CLEAN)) {
-				FrameworkProperties.setProperty(PROP_CLEAN, "true"); //$NON-NLS-1$
+				setProperty(PROP_CLEAN, "true"); //$NON-NLS-1$
 				found = true;
 			}
 
 			// look for the consoleLog flag
 			if (args[i].equalsIgnoreCase(CONSOLE_LOG)) {
-				FrameworkProperties.setProperty(PROP_CONSOLE_LOG, "true"); //$NON-NLS-1$
+				setProperty(PROP_CONSOLE_LOG, "true"); //$NON-NLS-1$
 				found = true;
 			}
 
 			// look for the console with no port.  
 			if (args[i].equalsIgnoreCase(CONSOLE) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
-				FrameworkProperties.setProperty(PROP_CONSOLE, ""); //$NON-NLS-1$
+				setProperty(PROP_CONSOLE, ""); //$NON-NLS-1$
 				found = true;
 			}
 
 			if (args[i].equalsIgnoreCase(NOEXIT)) {
-				FrameworkProperties.setProperty(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
+				setProperty(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
 				found = true;
 			}
 
@@ -816,73 +744,73 @@ public class EclipseStarter {
 
 			// look for the console and port.  
 			if (args[i - 1].equalsIgnoreCase(CONSOLE)) {
-				FrameworkProperties.setProperty(PROP_CONSOLE, arg);
+				setProperty(PROP_CONSOLE, arg);
 				found = true;
 			}
 
 			// look for the configuration location .  
 			if (args[i - 1].equalsIgnoreCase(CONFIGURATION)) {
-				FrameworkProperties.setProperty(EquinoxLocations.PROP_CONFIG_AREA, arg);
+				setProperty(EquinoxLocations.PROP_CONFIG_AREA, arg);
 				found = true;
 			}
 
 			// look for the data location for this instance.  
 			if (args[i - 1].equalsIgnoreCase(DATA)) {
-				FrameworkProperties.setProperty(EquinoxLocations.PROP_INSTANCE_AREA, arg);
+				setProperty(EquinoxLocations.PROP_INSTANCE_AREA, arg);
 				found = true;
 			}
 
 			// look for the user location for this instance.  
 			if (args[i - 1].equalsIgnoreCase(USER)) {
-				FrameworkProperties.setProperty(EquinoxLocations.PROP_USER_AREA, arg);
+				setProperty(EquinoxLocations.PROP_USER_AREA, arg);
 				found = true;
 			}
 
 			// look for the launcher location
 			if (args[i - 1].equalsIgnoreCase(LAUNCHER)) {
-				FrameworkProperties.setProperty(EquinoxLocations.PROP_LAUNCHER, arg);
+				setProperty(EquinoxLocations.PROP_LAUNCHER, arg);
 				found = true;
 			}
 			// look for the development mode and class path entries.  
 			if (args[i - 1].equalsIgnoreCase(DEV)) {
-				FrameworkProperties.setProperty(PROP_DEV, arg);
+				setProperty(PROP_DEV, arg);
 				found = true;
 			}
 
 			// look for the debug mode and option file location.  
 			if (args[i - 1].equalsIgnoreCase(DEBUG)) {
-				FrameworkProperties.setProperty(PROP_DEBUG, arg);
+				setProperty(PROP_DEBUG, arg);
 				debug = true;
 				found = true;
 			}
 
 			// look for the window system.  
 			if (args[i - 1].equalsIgnoreCase(WS)) {
-				FrameworkProperties.setProperty(PROP_WS, arg);
+				setProperty(PROP_WS, arg);
 				found = true;
 			}
 
 			// look for the operating system
 			if (args[i - 1].equalsIgnoreCase(OS)) {
-				FrameworkProperties.setProperty(PROP_OS, arg);
+				setProperty(PROP_OS, arg);
 				found = true;
 			}
 
 			// look for the system architecture
 			if (args[i - 1].equalsIgnoreCase(ARCH)) {
-				FrameworkProperties.setProperty(PROP_ARCH, arg);
+				setProperty(PROP_ARCH, arg);
 				found = true;
 			}
 
 			// look for the nationality/language
 			if (args[i - 1].equalsIgnoreCase(NL)) {
-				FrameworkProperties.setProperty(PROP_NL, arg);
+				setProperty(PROP_NL, arg);
 				found = true;
 			}
 
 			// look for the locale extensions
 			if (args[i - 1].equalsIgnoreCase(NL_EXTENSIONS)) {
-				FrameworkProperties.setProperty(PROP_NL_EXTENSIONS, arg);
+				setProperty(PROP_NL_EXTENSIONS, arg);
 				found = true;
 			}
 
@@ -895,8 +823,8 @@ public class EclipseStarter {
 
 		// remove all the arguments consumed by this argument parsing
 		if (configArgIndex == 0) {
-			EquinoxConfiguration.setFrameworkArgs(new String[0]);
-			EquinoxConfiguration.setAppArgs(args);
+			equinoxConfig.setFrameworkArgs(new String[0]);
+			equinoxConfig.setAppArgs(args);
 			return args;
 		}
 		String[] appArgs = new String[args.length - configArgIndex];
@@ -911,8 +839,8 @@ public class EclipseStarter {
 			} else
 				appArgs[j++] = args[i];
 		}
-		EquinoxConfiguration.setFrameworkArgs(frameworkArgs);
-		EquinoxConfiguration.setAppArgs(appArgs);
+		equinoxConfig.setFrameworkArgs(frameworkArgs);
+		equinoxConfig.setAppArgs(appArgs);
 		return appArgs;
 	}
 
@@ -927,10 +855,10 @@ public class EclipseStarter {
 	}
 
 	protected static String getSysPath() {
-		String result = FrameworkProperties.getProperty(PROP_SYSPATH);
+		String result = getProperty(PROP_SYSPATH);
 		if (result != null)
 			return result;
-		result = getSysPathFromURL(FrameworkProperties.getProperty(PROP_FRAMEWORK));
+		result = getSysPathFromURL(getProperty(PROP_FRAMEWORK));
 		if (result == null)
 			result = getSysPathFromCodeSource();
 		if (result == null)
@@ -940,7 +868,7 @@ public class EclipseStarter {
 			chars[0] = Character.toLowerCase(chars[0]);
 			result = new String(chars);
 		}
-		FrameworkProperties.setProperty(PROP_SYSPATH, result);
+		setProperty(PROP_SYSPATH, result);
 		return result;
 	}
 
@@ -969,7 +897,7 @@ public class EclipseStarter {
 		String result = url.getFile();
 		if (result.endsWith(".jar")) { //$NON-NLS-1$
 			result = result.substring(0, result.lastIndexOf('/'));
-			if ("folder".equals(FrameworkProperties.getProperty(PROP_FRAMEWORK_SHAPE))) //$NON-NLS-1$
+			if ("folder".equals(getProperty(PROP_FRAMEWORK_SHAPE))) //$NON-NLS-1$
 				result = result.substring(0, result.lastIndexOf('/'));
 		} else {
 			if (result.endsWith("/")) //$NON-NLS-1$
@@ -1017,58 +945,50 @@ public class EclipseStarter {
 					curInitBundles[i].uninstall();
 					toRefresh.add(curInitBundles[i]);
 				} catch (BundleException e) {
-					FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_UNINSTALL, curInitBundles[i].getLocation()), 0, e, null);
+					FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_UNINSTALL, curInitBundles[i].getLocation()), 0, e, null);
 					log.log(entry);
 				}
 		}
 	}
 
 	private static void installBundles(InitialBundle[] initialBundles, Bundle[] curInitBundles, List<Bundle> startBundles, List<Bundle> lazyActivationBundles, List<Bundle> toRefresh) {
-		ServiceReference<?> reference = context.getServiceReference(StartLevel.class.getName());
-		StartLevel startService = null;
-		if (reference != null)
-			startService = (StartLevel) context.getService(reference);
-		try {
-			for (int i = 0; i < initialBundles.length; i++) {
-				Bundle osgiBundle = getBundleByLocation(initialBundles[i].locationString, curInitBundles);
-				try {
-					// don't need to install if it is already installed
-					if (osgiBundle == null) {
-						InputStream in = initialBundles[i].location.openStream();
-						try {
-							osgiBundle = context.installBundle(initialBundles[i].locationString, in);
-						} catch (BundleException e) {
-							StatusException status = e instanceof StatusException ? (StatusException) e : null;
-							if (status != null && status.getStatusCode() == StatusException.CODE_OK && status.getStatus() instanceof Bundle) {
-								osgiBundle = (Bundle) status.getStatus();
-							} else
-								throw e;
+		for (int i = 0; i < initialBundles.length; i++) {
+			Bundle osgiBundle = getBundleByLocation(initialBundles[i].locationString, curInitBundles);
+			try {
+				// don't need to install if it is already installed
+				if (osgiBundle == null) {
+					InputStream in = initialBundles[i].location.openStream();
+					try {
+						osgiBundle = context.installBundle(initialBundles[i].locationString, in);
+					} catch (BundleException e) {
+						if (e.getType() == BundleException.DUPLICATE_BUNDLE_ERROR) {
+							continue;
+							// TODO should attempt to lookup the existing bundle
 						}
-						// only check for lazy activation header if this is a newly installed bundle and is not marked for persistent start
-						if (!initialBundles[i].start && hasLazyActivationPolicy(osgiBundle))
-							lazyActivationBundles.add(osgiBundle);
+						throw e;
 					}
-					// always set the startlevel incase it has changed (bug 111549)
-					// this is a no-op if the level is the same as previous launch.
-					if ((osgiBundle.getState() & Bundle.UNINSTALLED) == 0 && initialBundles[i].level >= 0 && startService != null)
-						startService.setBundleStartLevel(osgiBundle, initialBundles[i].level);
-					// if this bundle is supposed to be started then add it to the start list
-					if (initialBundles[i].start)
-						startBundles.add(osgiBundle);
-					// include basic bundles in case they were not resolved before
-					if ((osgiBundle.getState() & Bundle.INSTALLED) != 0)
-						toRefresh.add(osgiBundle);
-				} catch (BundleException e) {
-					FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
-					log.log(entry);
-				} catch (IOException e) {
-					FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
-					log.log(entry);
+					// only check for lazy activation header if this is a newly installed bundle and is not marked for persistent start
+					if (!initialBundles[i].start && hasLazyActivationPolicy(osgiBundle))
+						lazyActivationBundles.add(osgiBundle);
 				}
+				// always set the startlevel incase it has changed (bug 111549)
+				// this is a no-op if the level is the same as previous launch.
+				if ((osgiBundle.getState() & Bundle.UNINSTALLED) == 0 && initialBundles[i].level >= 0) {
+					osgiBundle.adapt(BundleStartLevel.class).setStartLevel(initialBundles[i].level);
+				}
+				// if this bundle is supposed to be started then add it to the start list
+				if (initialBundles[i].start)
+					startBundles.add(osgiBundle);
+				// include basic bundles in case they were not resolved before
+				if ((osgiBundle.getState() & Bundle.INSTALLED) != 0)
+					toRefresh.add(osgiBundle);
+			} catch (BundleException e) {
+				FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
+				log.log(entry);
+			} catch (IOException e) {
+				FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
+				log.log(entry);
 			}
-		} finally {
-			if (reference != null)
-				context.ungetService(reference);
 		}
 	}
 
@@ -1092,10 +1012,10 @@ public class EclipseStarter {
 				}
 			} else {
 				// check for Eclipse specific lazy start headers "Eclipse-LazyStart" and "Eclipse-AutoStart"
-				String eclipseLazyStart = headers.get(Constants.ECLIPSE_LAZYSTART);
+				String eclipseLazyStart = headers.get(EquinoxModuleDataNamespace.LAZYSTART_HEADER);
 				if (eclipseLazyStart == null)
-					eclipseLazyStart = headers.get(Constants.ECLIPSE_AUTOSTART);
-				ManifestElement[] elements = ManifestElement.parseHeader(Constants.ECLIPSE_LAZYSTART, eclipseLazyStart);
+					eclipseLazyStart = headers.get(EquinoxModuleDataNamespace.AUTOSTART_HEADER);
+				ManifestElement[] elements = ManifestElement.parseHeader(EquinoxModuleDataNamespace.AUTOSTART_HEADER, eclipseLazyStart);
 				if (elements != null && elements.length > 0) {
 					// if the value is true then it is lazy activated
 					if ("true".equals(elements[0].getValue())) //$NON-NLS-1$
@@ -1124,58 +1044,10 @@ public class EclipseStarter {
 		} catch (BundleException e) {
 			if ((bundle.getState() & Bundle.RESOLVED) != 0) {
 				// only log errors if the bundle is resolved
-				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_START, bundle.getLocation()), 0, e, null);
+				FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_START, bundle.getLocation()), 0, e, null);
 				log.log(entry);
 			}
 		}
-	}
-
-	private static void loadConfigurationInfo() {
-		Location configArea = EquinoxLocations.getConfigurationLocation();
-		if (configArea == null)
-			return;
-
-		URL location = null;
-		try {
-			location = new URL(configArea.getURL().toExternalForm() + EquinoxLocations.CONFIG_FILE);
-		} catch (MalformedURLException e) {
-			// its ok.  This should never happen
-		}
-		mergeProperties(FrameworkProperties.getProperties(), loadProperties(location));
-	}
-
-	private static Properties loadProperties(URL location) {
-		Properties result = new Properties();
-		if (location == null)
-			return result;
-		try {
-			InputStream in = location.openStream();
-			try {
-				result.load(in);
-			} finally {
-				in.close();
-			}
-		} catch (IOException e) {
-			// its ok if there is no file.  We'll just use the defaults for everything
-			// TODO but it might be nice to log something with gentle wording (i.e., it is not an error)
-		}
-		return substituteVars(result);
-	}
-
-	private static Properties substituteVars(Properties result) {
-		if (result == null) {
-			//nothing todo.
-			return null;
-		}
-		for (Enumeration<Object> eKeys = result.keys(); eKeys.hasMoreElements();) {
-			Object key = eKeys.nextElement();
-			if (key instanceof String) {
-				String value = result.getProperty((String) key);
-				if (value != null)
-					result.put(key, BaseStorageHook.substituteVars(value));
-			}
-		}
-		return result;
 	}
 
 	/**
@@ -1219,26 +1091,12 @@ public class EclipseStarter {
 		return relative;
 	}
 
-	private static void mergeProperties(Properties destination, Properties source) {
-		for (Enumeration<?> e = source.keys(); e.hasMoreElements();) {
-			String key = (String) e.nextElement();
-			String value = source.getProperty(key);
-			if (destination.getProperty(key) == null)
-				destination.setProperty(key, value);
-		}
-	}
-
 	private static void setStartLevel(final int value) {
-		ServiceReference<?> reference = context.getServiceReference(StartLevel.class.getName());
-		final StartLevel startLevel = reference != null ? (StartLevel) context.getService(reference) : null;
-		if (startLevel == null)
-			return;
+		FrameworkStartLevel fwkStartLevel = context.getBundle().adapt(FrameworkStartLevel.class);
 		final Semaphore semaphore = new Semaphore(0);
 		StartupEventListener listener = new StartupEventListener(semaphore, FrameworkEvent.STARTLEVEL_CHANGED);
-		context.addFrameworkListener(listener);
 		context.addBundleListener(listener);
-		startLevel.setStartLevel(value);
-		context.ungetService(reference);
+		fwkStartLevel.setStartLevel(value, listener);
 		updateSplash(semaphore, listener);
 	}
 
@@ -1305,7 +1163,7 @@ public class EclipseStarter {
 			// Pre-check if file exists, if not, and it contains escape characters,
 			// try decoding the path
 			if (!startFile.exists() && start.indexOf('%') >= 0) {
-				String decodePath = FrameworkProperties.decode(start);
+				String decodePath = EquinoxConfiguration.decode(start);
 				File f = new File(decodePath);
 				if (f.exists())
 					startFile = f;
@@ -1412,8 +1270,8 @@ public class EclipseStarter {
 
 	private static void finalizeProperties() {
 		// if check config is unknown and we are in dev mode, 
-		if (FrameworkProperties.getProperty(PROP_DEV) != null && FrameworkProperties.getProperty(PROP_CHECK_CONFIG) == null)
-			FrameworkProperties.setProperty(PROP_CHECK_CONFIG, "true"); //$NON-NLS-1$
+		if (getProperty(PROP_DEV) != null && getProperty(PROP_CHECK_CONFIG) == null)
+			setProperty(PROP_CHECK_CONFIG, "true"); //$NON-NLS-1$
 	}
 
 	private static class InitialBundle {
@@ -1447,9 +1305,9 @@ public class EclipseStarter {
 			return;
 		for (Map.Entry<String, String> entry : initialProperties.entrySet()) {
 			if (entry.getValue() != null)
-				FrameworkProperties.setProperty(entry.getKey(), entry.getValue());
+				setProperty(entry.getKey(), entry.getValue());
 			else
-				FrameworkProperties.clearProperty(entry.getKey());
+				clearProperty(entry.getKey());
 		}
 	}
 
@@ -1468,7 +1326,7 @@ public class EclipseStarter {
 	}
 
 	private static boolean isForcedRestart() {
-		return Boolean.valueOf(FrameworkProperties.getProperty(PROP_FORCED_RESTART)).booleanValue();
+		return Boolean.valueOf(getProperty(PROP_FORCED_RESTART)).booleanValue();
 	}
 
 	/*
