@@ -39,17 +39,20 @@ public class KeyStoreTrustEngine extends TrustEngine {
 	private final char[] password;
 	private final String name;
 
+	private final SignedBundleHook signedBundleHook;
+
 	/**
 	 * Create a new KeyStoreTrustEngine that is backed by a KeyStore 
 	 * @param path - path to the keystore
 	 * @param type - the type of keystore at the path location
 	 * @param password - the password required to unlock the keystore
 	 */
-	public KeyStoreTrustEngine(String path, String type, char[] password, String name) { //TODO: This should be a *CallbackHandler*
+	public KeyStoreTrustEngine(String path, String type, char[] password, String name, SignedBundleHook signedBundleHook) { //TODO: This should be a *CallbackHandler*
 		this.path = path;
 		this.type = type;
 		this.password = password;
 		this.name = name;
+		this.signedBundleHook = signedBundleHook;
 	}
 
 	/**
@@ -147,7 +150,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 		} catch (KeyStoreException e) {
 			throw (IOException) new IOException(e.getMessage()).initCause(e);
 		} catch (GeneralSecurityException e) {
-			SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.WARNING, e);
+			signedBundleHook.log(e.getMessage(), FrameworkLogEntry.WARNING, e);
 			return null;
 		}
 		return null;
