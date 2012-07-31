@@ -13,7 +13,7 @@ import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import org.eclipse.equinox.log.*;
-import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.osgi.framework.*;
 import org.osgi.service.log.*;
 
@@ -265,7 +265,7 @@ public class LogServiceManager implements BundleListener, FrameworkListener, Ser
 		}
 
 		public String getSymbolicName() {
-			return FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME;
+			return EquinoxContainer.NAME;
 		}
 
 		public Class<?> loadClass(String name) throws ClassNotFoundException {
