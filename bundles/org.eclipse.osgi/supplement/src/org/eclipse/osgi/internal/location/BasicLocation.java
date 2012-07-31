@@ -13,7 +13,7 @@ package org.eclipse.osgi.internal.location;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.util.NLS;
 
@@ -21,6 +21,9 @@ import org.eclipse.osgi.util.NLS;
  * Internal class.
  */
 public class BasicLocation implements Location {
+	public static final String PROP_OSGI_LOCKING = "osgi.locking"; //$NON-NLS-1$
+	private static String DEFAULT_LOCK_FILENAME = ".metadata/.lock"; //$NON-NLS-1$
+
 	static class MockLocker implements Locker {
 		/**
 		 * @throws IOException  
@@ -42,32 +45,20 @@ public class BasicLocation implements Location {
 	}
 
 	final private boolean isReadOnly;
-	private URL location = null;
-	private Location parent;
 	final private URL defaultValue;
 	final private String property;
 	final private String dataAreaPrefix;
+	final private EquinoxConfiguration environmentInfo;
+	final private boolean debug;
+
+	private URL location = null;
+	private Location parent;
 
 	// locking related fields
 	private File lockFile;
 	private Locker locker;
-	public static final String PROP_OSGI_LOCKING = "osgi.locking"; //$NON-NLS-1$
-	private static String DEFAULT_LOCK_FILENAME = ".metadata/.lock"; //$NON-NLS-1$
-	public static boolean DEBUG;
 
-	private static boolean isRunningWithNio() {
-		try {
-			Class.forName("java.nio.channels.FileLock"); //$NON-NLS-1$
-		} catch (ClassNotFoundException e) {
-			return false;
-		}
-		return true;
-	}
-
-	public static Locker createLocker(File lock, String lockMode) {
-		if (lockMode == null)
-			lockMode = FrameworkProperties.getProperty(PROP_OSGI_LOCKING);
-
+	public static Locker createLocker(File lock, String lockMode, boolean debug) {
 		if ("none".equals(lockMode)) //$NON-NLS-1$
 			return new MockLocker();
 
@@ -75,25 +66,20 @@ public class BasicLocation implements Location {
 			return new Locker_JavaIo(lock);
 
 		if ("java.nio".equals(lockMode)) { //$NON-NLS-1$
-			if (isRunningWithNio())
-				return new Locker_JavaNio(lock);
-			// TODO should we return null here.  NIO was requested but we could not do it...
-			return new Locker_JavaIo(lock);
+			return new Locker_JavaNio(lock, debug);
 		}
 
 		//	Backup case if an invalid value has been specified
-		if (isRunningWithNio())
-			return new Locker_JavaNio(lock);
-		return new Locker_JavaIo(lock);
-
+		return new Locker_JavaNio(lock, debug);
 	}
 
-	public BasicLocation(String property, URL defaultValue, boolean isReadOnly, String dataAreaPrefix) {
-		super();
+	public BasicLocation(String property, URL defaultValue, boolean isReadOnly, String dataAreaPrefix, EquinoxConfiguration environmentInfo) {
 		this.property = property;
 		this.defaultValue = defaultValue;
 		this.isReadOnly = isReadOnly;
 		this.dataAreaPrefix = dataAreaPrefix == null ? "" : dataAreaPrefix; //$NON-NLS-1$
+		this.environmentInfo = environmentInfo;
+		this.debug = environmentInfo.getDebug().DEBUG_LOCATION;
 	}
 
 	public boolean allowsDefault() {
@@ -167,7 +153,7 @@ public class BasicLocation implements Location {
 		lockFile = file;
 		location = value;
 		if (property != null)
-			FrameworkProperties.setProperty(property, location.toExternalForm());
+			environmentInfo.setConfiguration(property, location.toExternalForm());
 		return lock;
 	}
 
@@ -236,8 +222,8 @@ public class BasicLocation implements Location {
 	private void setLocker(File lock) {
 		if (locker != null)
 			return;
-		String lockMode = FrameworkProperties.getProperty(PROP_OSGI_LOCKING);
-		locker = createLocker(lock, lockMode);
+		String lockMode = environmentInfo.getConfiguration(PROP_OSGI_LOCKING);
+		locker = createLocker(lock, lockMode, debug);
 	}
 
 	public synchronized void release() {
@@ -246,7 +232,7 @@ public class BasicLocation implements Location {
 	}
 
 	public Location createLocation(Location parentLocation, URL defaultLocation, boolean readonly) {
-		BasicLocation result = new BasicLocation(null, defaultLocation, readonly, dataAreaPrefix);
+		BasicLocation result = new BasicLocation(null, defaultLocation, readonly, dataAreaPrefix, environmentInfo);
 		result.setParent(parentLocation);
 		return result;
 	}

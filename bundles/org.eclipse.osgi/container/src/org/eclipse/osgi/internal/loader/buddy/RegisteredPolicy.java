@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,15 +12,11 @@ package org.eclipse.osgi.internal.loader.buddy;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.Iterator;
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
-import org.eclipse.osgi.framework.internal.core.Constants;
+import java.util.*;
+import org.eclipse.osgi.container.ModuleCapability;
+import org.eclipse.osgi.container.ModuleWiring;
+import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.internal.loader.BundleLoader;
-import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.BundleException;
 
 /**
  *Registered policy is an implementation of a buddy policy. 
@@ -36,27 +32,25 @@ public class RegisteredPolicy extends DependentPolicy {
 		if (allDependents == null)
 			return;
 
-		for (Iterator<BundleDescription> iter = allDependents.iterator(); iter.hasNext();) {
-			BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(iter.next());
-			if (proxy == null)
+		String requesterName = requester.getWiring().getRevision().getSymbolicName();
+		for (Iterator<ModuleWiring> iter = allDependents.iterator(); iter.hasNext();) {
+			ModuleWiring wiring = iter.next();
+			List<ModuleCapability> moduleDatas = wiring.getRevision().getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
+			@SuppressWarnings("unchecked")
+			List<String> registeredList = (List<String>) (moduleDatas.isEmpty() ? null : moduleDatas.get(0).getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_BUDDY_REGISTERED));
+			if (registeredList == null || registeredList.isEmpty()) {
 				iter.remove();
-
-			try {
-				String[] allContributions = ManifestElement.getArrayFromList(((AbstractBundle) proxy.getBundle()).getBundleData().getManifest().get(Constants.REGISTERED_POLICY));
-				if (allContributions == null) {
-					iter.remove();
-					continue;
-				}
+			} else {
 				boolean contributes = false;
-				for (int j = 0; j < allContributions.length && contributes == false; j++) {
-					if (allContributions[j].equals(buddyRequester.getBundle().getSymbolicName()))
+				for (String registeredName : registeredList) {
+					if (registeredName.equals(requesterName)) {
 						contributes = true;
+						break;
+					}
 				}
-				if (!contributes)
+				if (!contributes) {
 					iter.remove();
-
-			} catch (BundleException e) {
-				iter.remove();
+				}
 			}
 		}
 
@@ -72,11 +66,10 @@ public class RegisteredPolicy extends DependentPolicy {
 		Class<?> result = null;
 		int size = allDependents.size();
 		for (int i = 0; i < size && result == null; i++) {
+			ModuleWiring searchWiring = allDependents.get(i);
+			BundleLoader searchLoader = (BundleLoader) searchWiring.getModuleLoader();
 			try {
-				BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(allDependents.get(i));
-				if (proxy == null)
-					continue;
-				result = proxy.getBundleLoader().findClass(name);
+				result = searchLoader.findClass(name);
 			} catch (ClassNotFoundException e) {
 				//Nothing to do, just keep looking
 				continue;
@@ -92,10 +85,9 @@ public class RegisteredPolicy extends DependentPolicy {
 		URL result = null;
 		int size = allDependents.size();
 		for (int i = 0; i < size && result == null; i++) {
-			BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(allDependents.get(i));
-			if (proxy == null)
-				continue;
-			result = proxy.getBundleLoader().findResource(name);
+			ModuleWiring searchWiring = allDependents.get(i);
+			BundleLoader searchLoader = (BundleLoader) searchWiring.getModuleLoader();
+			result = searchLoader.findResource(name);
 		}
 		return result;
 	}
@@ -108,10 +100,9 @@ public class RegisteredPolicy extends DependentPolicy {
 		int size = allDependents.size();
 		for (int i = 0; i < size; i++) {
 			try {
-				BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(allDependents.get(i));
-				if (proxy == null)
-					continue;
-				results = BundleLoader.compoundEnumerations(results, proxy.getBundleLoader().findResources(name));
+				ModuleWiring searchWiring = allDependents.get(i);
+				BundleLoader searchLoader = (BundleLoader) searchWiring.getModuleLoader();
+				results = BundleLoader.compoundEnumerations(results, searchLoader.findResources(name));
 			} catch (IOException e) {
 				//Ignore and keep looking
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,17 +10,16 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.loader.sources;
 
-import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
-
 import java.net.URL;
 import java.util.Collection;
 import java.util.Enumeration;
-import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
+import org.eclipse.osgi.internal.loader.BundleLoader;
+import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 
 public class SingleSourcePackage extends PackageSource {
-	BundleLoaderProxy supplier;
+	BundleLoader supplier;
 
-	public SingleSourcePackage(String id, BundleLoaderProxy supplier) {
+	public SingleSourcePackage(String id, BundleLoader supplier) {
 		super(id);
 		this.supplier = supplier;
 	}
@@ -34,15 +33,15 @@ public class SingleSourcePackage extends PackageSource {
 	}
 
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
-		return supplier.getBundleLoader().findLocalClass(name);
+		return supplier.findLocalClass(name);
 	}
 
 	public URL getResource(String name) {
-		return supplier.getBundleLoader().findLocalResource(name);
+		return supplier.findLocalResource(name);
 	}
 
 	public Enumeration<URL> getResources(String name) {
-		return supplier.getBundleLoader().findLocalResources(name);
+		return supplier.findLocalResources(name);
 	}
 
 	public boolean equals(Object source) {
@@ -65,7 +64,7 @@ public class SingleSourcePackage extends PackageSource {
 
 	@Override
 	public Collection<String> listResources(String path, String filePattern) {
-		BundleClassLoader bcl = supplier.getBundleLoader().createClassLoader();
-		return bcl.listLocalResources(path, filePattern, 0);
+		ModuleClassLoader mcl = supplier.getModuleClassLoader();
+		return mcl.listLocalResources(path, filePattern, 0);
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,9 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.internal.baseadaptor;
-
-import org.eclipse.osgi.internal.loader.classpath.*;
+package org.eclipse.osgi.internal.loader;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -20,22 +18,19 @@ import java.net.URL;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.util.*;
-import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
-import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
+import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
+import org.eclipse.osgi.next.internal.debug.Debug;
 import org.eclipse.osgi.signedcontent.SignedContent;
 import org.eclipse.osgi.signedcontent.SignerInfo;
-import org.eclipse.osgi.storage.bundlefile.*;
+import org.eclipse.osgi.storage.BundleInfo.Generation;
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
+import org.eclipse.osgi.storage.bundlefile.BundleFileWrapperChain;
 import org.osgi.framework.Bundle;
 
-/**
- * The default implementation of <code>BaseClassLoader</code>.  This implementation extends
- * <code>ClassLoader</code>.
- * @see BaseClassLoader
- * @see ClasspathManager
- */
-public class DefaultClassLoader extends ClassLoader implements ParallelClassLoader {
+public class ModuleClassLoader extends ClassLoader {
 	/**
 	 * A PermissionCollection for AllPermissions; shared across all ProtectionDomains when security is disabled
 	 */
@@ -45,6 +40,7 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 	private final static String CLASS_LOADER_TYPE_PARALLEL = "parallel"; //$NON-NLS-1$
 	private static final boolean CLASS_CERTIFICATE;
 	private static final boolean PARALLEL_CAPABLE;
+
 	@SuppressWarnings("unchecked")
 	private static final Enumeration<URL> EMPTY_ENUMERATION = Collections.enumeration(Collections.EMPTY_LIST);
 
@@ -69,24 +65,34 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 		PARALLEL_CAPABLE = parallelCapable;
 	}
 
-	protected ClassLoaderDelegate delegate;
-	protected ProtectionDomain domain;
-	// Note that PDE has internal dependency on this field type/name (bug 267238)
-	protected ClasspathManager manager;
+	private final EquinoxConfiguration configuration;
+	private final Debug debug;
+	private final BundleLoader delegate;
+	private final Generation generation;
+	// TODO Note that PDE has internal dependency on this field type/name (bug 267238)
+	private final ClasspathManager manager;
 
 	/**
 	 * Constructs a new DefaultClassLoader.
 	 * @param parent the parent classloader
 	 * @param delegate the delegate for this classloader
-	 * @param domain the domain for this classloader
-	 * @param bundledata the bundledata for this classloader
-	 * @param classpath the classpath for this classloader
+	 * @param generation the generation for this class loader
 	 */
-	public DefaultClassLoader(ClassLoader parent, ClassLoaderDelegate delegate, ProtectionDomain domain, BaseData bundledata, String[] classpath) {
+	public ModuleClassLoader(ClassLoader parent, EquinoxConfiguration configuration, BundleLoader delegate, Generation generation) {
 		super(parent);
+		this.configuration = configuration;
+		this.debug = configuration.getDebug();
 		this.delegate = delegate;
-		this.domain = domain;
-		this.manager = new ClasspathManager(bundledata, classpath, this);
+		this.generation = generation;
+		this.manager = new ClasspathManager(generation, this);
+	}
+
+	/**
+	 * Returns the generation of the host revision associated with this class loader
+	 * @return the generation for this class loader
+	 */
+	Generation getGeneration() {
+		return this.generation;
 	}
 
 	/**
@@ -101,7 +107,7 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 	 * @throws ClassNotFoundException if the class is not found.
 	 */
 	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-		if (Debug.DEBUG_LOADER)
+		if (debug.DEBUG_LOADER)
 			Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		try {
 			// Just ask the delegate.  This could result in findLocalClass(name) being called.
@@ -111,7 +117,7 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 				resolveClass(clazz);
 			return (clazz);
 		} catch (Error e) {
-			if (Debug.DEBUG_LOADER) {
+			if (debug.DEBUG_LOADER) {
 				Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				Debug.printStackTrace(e);
 			}
@@ -119,7 +125,7 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 		} catch (ClassNotFoundException e) {
 			// If the class is not found do not try to look for it locally.
 			// The delegate would have already done that for us.
-			if (Debug.DEBUG_LOADER) {
+			if (debug.DEBUG_LOADER) {
 				Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				Debug.printStackTrace(e);
 			}
@@ -137,7 +143,7 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 	 * @return The URL of the resource or null if it does not exist.
 	 */
 	public URL getResource(String name) {
-		if (Debug.DEBUG_LOADER) {
+		if (debug.DEBUG_LOADER) {
 			Debug.println("BundleClassLoader[" + delegate + "].getResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
@@ -145,7 +151,7 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 		if (url != null)
 			return (url);
 
-		if (Debug.DEBUG_LOADER) {
+		if (debug.DEBUG_LOADER) {
 			Debug.println("BundleClassLoader[" + delegate + "].getResource(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
@@ -177,15 +183,11 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 		return manager.findLibrary(libname);
 	}
 
-	public ProtectionDomain getDomain() {
-		return domain;
+	public ClasspathEntry createClassPathEntry(BundleFile bundlefile, Generation entryGeneration) {
+		return new ClasspathEntry(bundlefile, createProtectionDomain(bundlefile, entryGeneration.getDomain()), entryGeneration);
 	}
 
-	public ClasspathEntry createClassPathEntry(BundleFile bundlefile, ProtectionDomain cpDomain) {
-		return new ClasspathEntry(bundlefile, createProtectionDomain(bundlefile, cpDomain));
-	}
-
-	public Class<?> defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry) {
+	public Class<?> defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry) {
 		return defineClass(name, classbytes, 0, classbytes.length, classpathEntry.getDomain());
 	}
 
@@ -201,10 +203,6 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 		return definePackage(name, specTitle, specVersion, specVendor, implTitle, implVersion, implVendor, sealBase);
 	}
 
-	public void initialize() {
-		manager.initialize();
-	}
-
 	public URL findLocalResource(String resource) {
 		return manager.findLocalResource(resource);
 	}
@@ -215,18 +213,6 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 
 	public Class<?> findLocalClass(String classname) throws ClassNotFoundException {
 		return manager.findLocalClass(classname);
-	}
-
-	public void close() {
-		manager.close();
-	}
-
-	public void attachFragment(BundleData sourcedata, ProtectionDomain sourcedomain, String[] sourceclasspath) {
-		manager.attachFragment(sourcedata, sourcedomain, sourceclasspath);
-	}
-
-	public ClassLoaderDelegate getDelegate() {
-		return delegate;
 	}
 
 	/**
@@ -260,7 +246,7 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 				if (signers.length > 0)
 					certs = signers[0].getCertificateChain();
 			}
-			return new BundleProtectionDomain(permissions, new CodeSource(bundlefile.getBaseFile().toURL(), certs), null);
+			return new ProtectionDomain(new CodeSource(bundlefile.getBaseFile().toURL(), certs), permissions);
 		} catch (MalformedURLException e) {
 			// Failed to create our own domain; just return the baseDomain
 			return baseDomain;
@@ -272,7 +258,7 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 	}
 
 	public Bundle getBundle() {
-		return manager.getBaseData().getBundle();
+		return generation.getRevision().getBundle();
 	}
 
 	public boolean isParallelCapable() {
@@ -289,6 +275,10 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 
 	public Collection<String> listLocalResources(String path, String filePattern, int options) {
 		return manager.listLocalResources(path, filePattern, options);
+	}
+
+	public BundleLoader getBundleLoader() {
+		return delegate;
 	}
 
 	public String toString() {

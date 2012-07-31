@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,35 +10,22 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.loader.sources;
 
-import org.eclipse.osgi.internal.loader.BundleLoader;
-import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
-
 import java.net.URL;
 import java.util.*;
+import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.util.ManifestElement;
 
 public class FilteredSourcePackage extends SingleSourcePackage {
 	private static final char ALL = '*';
 	String[] includes;
 	String[] excludes;
-	String[] friends;
 
-	public FilteredSourcePackage(String name, BundleLoaderProxy supplier, String includes, String excludes, String[] friends) {
-		super(name, supplier);
+	public FilteredSourcePackage(String name, BundleLoader supplier, String includes, String excludes) {
+		super(excludes, supplier);
 		if (includes != null)
 			this.includes = ManifestElement.getArrayFromList(includes);
 		if (excludes != null)
 			this.excludes = ManifestElement.getArrayFromList(excludes);
-		this.friends = friends;
-	}
-
-	public boolean isFriend(String symbolicName) {
-		if (friends == null)
-			return true;
-		for (int i = 0; i < friends.length; i++)
-			if (friends[i].equals(symbolicName))
-				return true;
-		return false;
 	}
 
 	public URL getResource(String name) {

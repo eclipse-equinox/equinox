@@ -9,54 +9,49 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.core.runtime.internal.adaptor;
+package org.eclipse.osgi.internal.hooks;
 
-import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
-import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
-
-import org.eclipse.osgi.storage.bundlefile.BundleEntry;
-
-import org.eclipse.osgi.internal.debug.Debug;
-
-import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
-
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.*;
-import org.eclipse.osgi.baseadaptor.*;
-import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
-import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook;
-import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.container.Module.StartOptions;
+import org.eclipse.osgi.container.Module.State;
+import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.adaptor.StatusException;
-import org.eclipse.osgi.framework.internal.core.*;
-import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.log.FrameworkLog;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.StateHelper;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
+import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
+import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
-public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, HookConfigurator {
+public class EclipseLazyStarter extends ClassLoaderHook {
 	private static final boolean throwErrorOnFailedStart = "true".equals(FrameworkProperties.getProperty("osgi.compatibility.errorOnFailedStart", "true")); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-	private BaseAdaptor adaptor;
+	private static final EnumSet<State> alreadyActive = EnumSet.of(State.ACTIVE, State.STOPPING, State.UNINSTALLED);
 	// holds the current activation trigger class and the ClasspathManagers that need to be activated
-	private ThreadLocal<List<Object>> activationStack = new ThreadLocal<List<Object>>();
+	private final ThreadLocal<List<Object>> activationStack = new ThreadLocal<List<Object>>();
 	// used to store exceptions that occurred while activating a bundle
 	// keyed by ClasspathManager->Exception
 	// WeakHashMap is used to prevent pinning the ClasspathManager objects.
 	private final Map<ClasspathManager, TerminatingClassNotFoundException> errors = Collections.synchronizedMap(new WeakHashMap<ClasspathManager, TerminatingClassNotFoundException>());
 
+	private final EquinoxContainer container;
+
+	public EclipseLazyStarter(EquinoxContainer container) {
+		this.container = container;
+	}
+
+	@Override
 	public void preFindLocalClass(String name, ClasspathManager manager) throws ClassNotFoundException {
-		AbstractBundle bundle = (AbstractBundle) manager.getBaseData().getBundle();
+		ModuleRevision revision = manager.getGeneration().getRevision();
+		Module module = revision.getRevisions().getModule();
 		// If the bundle is active, uninstalled or stopping then the bundle has already
 		// been initialized (though it may have been destroyed) so just return the class.
-		if ((bundle.getState() & (Bundle.ACTIVE | Bundle.UNINSTALLED | Bundle.STOPPING)) != 0)
+		if (alreadyActive.contains(module.getState()))
 			return;
-		EclipseStorageHook storageHook = (EclipseStorageHook) manager.getBaseData().getStorageHook(EclipseStorageHook.KEY);
 		// The bundle is not active and does not require activation, just return the class
-		if (!shouldActivateFor(name, manager.getBaseData(), storageHook, manager))
+		if (!shouldActivateFor(name, module, revision, manager))
 			return;
 		List<Object> stack = activationStack.get();
 		if (stack == null) {
@@ -73,14 +68,12 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 					// the manager is already on the stack in which case we are already in the process of loading the trigger class
 					return;
 		}
-		Thread threadChangingState = bundle.getStateChanging();
-		if (bundle.getState() == Bundle.STARTING && threadChangingState == Thread.currentThread())
-			return; // this thread is starting the bundle already
 		if (size == 0)
 			stack.add(name);
 		stack.add(manager);
 	}
 
+	@Override
 	public void postFindLocalClass(String name, Class<?> clazz, ClasspathManager manager) throws ClassNotFoundException {
 		List<Object> stack = activationStack.get();
 		if (stack == null)
@@ -109,16 +102,16 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 			long startTime = System.currentTimeMillis();
 			try {
 				// do not persist the start of this bundle
-				managers[i].getBaseClassLoader().getDelegate().setLazyTrigger();
+				managers[i].getGeneration().getRevision().getRevisions().getModule().start(StartOptions.LAZY_TRIGGER);
 			} catch (BundleException e) {
-				Bundle bundle = managers[i].getBaseData().getBundle();
+				Bundle bundle = managers[i].getGeneration().getRevision().getBundle();
 				Throwable cause = e.getCause();
 				if (cause != null && cause instanceof StatusException) {
 					StatusException status = (StatusException) cause;
 					if ((status.getStatusCode() & StatusException.CODE_ERROR) == 0) {
 						if (status.getStatus() instanceof Thread) {
 							String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread(), name, status.getStatus(), bundle, new Long(System.currentTimeMillis() - startTime)});
-							adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, message, 0, e, null));
+							container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, message, e);
 						}
 						continue;
 					}
@@ -127,142 +120,55 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 				TerminatingClassNotFoundException error = new TerminatingClassNotFoundException(message, e);
 				errors.put(managers[i], error);
 				if (throwErrorOnFailedStart) {
-					adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, e, null));
+					container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, message, e, null);
 					throw error;
 				}
-				adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(message, e));
+				container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(message, e));
 			}
 		}
 	}
 
-	public void preFindLocalResource(String name, ClasspathManager manager) {
-		// do nothing
-	}
-
-	public void postFindLocalResource(String name, URL resource, ClasspathManager manager) {
-		// do nothing
-	}
-
-	public void recordClassDefine(String name, Class<?> clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
-		// do nothing
-	}
-
-	private boolean shouldActivateFor(String className, BaseData bundledata, EclipseStorageHook storageHook, ClasspathManager manager) throws ClassNotFoundException {
-		if (!isLazyStartable(className, bundledata, storageHook))
+	private boolean shouldActivateFor(String className, Module module, ModuleRevision revision, ClasspathManager manager) throws ClassNotFoundException {
+		if (!module.isActivationPolicyUsed() || !isLazyStartable(className, revision))
 			return false;
-		//if (manager.getBaseClassLoader().getDelegate().isLazyTriggerSet())
-		//	return false;
 		// Don't activate non-starting bundles
-		if (bundledata.getBundle().getState() == Bundle.RESOLVED) {
+		if (State.RESOLVED.equals(module.getState())) {
 			if (throwErrorOnFailedStart) {
 				TerminatingClassNotFoundException error = errors.get(manager);
 				if (error != null)
 					throw error;
 			}
-			return (bundledata.getStatus() & Constants.BUNDLE_STARTED) != 0;
+			return revision.getRevisions().getModule().isPersistentlyStarted();
 		}
 		return true;
 	}
 
-	private boolean isLazyStartable(String className, BaseData bundledata, EclipseStorageHook storageHook) {
-		if (storageHook == null)
+	private boolean isLazyStartable(String className, ModuleRevision revision) {
+		List<ModuleCapability> moduleDatas = revision.getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
+		if (moduleDatas.isEmpty()) {
 			return false;
-		boolean lazyStart = storageHook.isLazyStart();
-		String[] excludes = storageHook.getLazyStartExcludes();
-		String[] includes = storageHook.getLazyStartIncludes();
+		}
+
+		Map<String, Object> moduleDataAttrs = moduleDatas.get(0).getAttributes();
+		String policy = (String) moduleDataAttrs.get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY);
+		if (!EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY.equals(policy)) {
+			return false;
+		}
+
+		@SuppressWarnings("unchecked")
+		List<String> excludes = (List<String>) moduleDataAttrs.get(EquinoxModuleDataNamespace.CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE);
+		@SuppressWarnings("unchecked")
+		List<String> includes = (List<String>) moduleDataAttrs.get(EquinoxModuleDataNamespace.CAPABILITY_LAZY_INCLUDE_ATTRIBUTE);
 		// no exceptions, it is easy to figure it out
 		if (excludes == null && includes == null)
-			return lazyStart;
+			return true;
 		// otherwise, we need to check if the package is in the exceptions list
 		int dotPosition = className.lastIndexOf('.');
 		// the class has no package name... no exceptions apply
 		if (dotPosition == -1)
-			return lazyStart;
+			return true;
 		String packageName = className.substring(0, dotPosition);
-		if (lazyStart)
-			return ((includes == null || contains(includes, packageName)) && (excludes == null || !contains(excludes, packageName)));
-		return (excludes != null && contains(excludes, packageName));
-	}
-
-	private boolean contains(String[] array, String element) {
-		for (int i = 0; i < array.length; i++)
-			if (array[i].equals(element))
-				return true;
-		return false;
-	}
-
-	public void addHooks(HookRegistry hookRegistry) {
-		hookRegistry.addClassLoadingStatsHook(this);
-		hookRegistry.addAdaptorHook(this);
-	}
-
-	public void addProperties(Properties properties) {
-		// do nothing
-	}
-
-	public FrameworkLog createFrameworkLog() {
-		// do nothing
-		return null;
-	}
-
-	/**
-	 * @throws BundleException  
-	 */
-	public void frameworkStart(BundleContext context) throws BundleException {
-		// nothing
-	}
-
-	/**
-	 * @throws BundleException  
-	 */
-	public void frameworkStop(BundleContext context) throws BundleException {
-		// nothing
-	}
-
-	public void frameworkStopping(BundleContext context) {
-		if (!Debug.DEBUG_ENABLED)
-			return;
-
-		BundleDescription[] allBundles = adaptor.getState().getResolvedBundles();
-		StateHelper stateHelper = adaptor.getPlatformAdmin().getStateHelper();
-		Object[][] cycles = stateHelper.sortBundles(allBundles);
-		logCycles(cycles);
-	}
-
-	public void handleRuntimeError(Throwable error) {
-		// do nothing
-
-	}
-
-	public void initialize(BaseAdaptor baseAdaptor) {
-		this.adaptor = baseAdaptor;
-	}
-
-	/**
-	 * @throws IOException  
-	 */
-	public URLConnection mapLocationToURLConnection(String location) throws IOException {
-		// do nothing
-		return null;
-	}
-
-	private void logCycles(Object[][] cycles) {
-		// log cycles
-		if (cycles.length > 0) {
-			StringBuffer cycleText = new StringBuffer("["); //$NON-NLS-1$			
-			for (int i = 0; i < cycles.length; i++) {
-				cycleText.append('[');
-				for (int j = 0; j < cycles[i].length; j++) {
-					cycleText.append(((BundleDescription) cycles[i][j]).getSymbolicName());
-					cycleText.append(',');
-				}
-				cycleText.insert(cycleText.length() - 1, ']');
-			}
-			cycleText.setCharAt(cycleText.length() - 1, ']');
-			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_BUNDLESTOPPER_CYCLES_FOUND, cycleText);
-			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, message, 0, null, null);
-			adaptor.getFrameworkLog().log(entry);
-		}
+		return ((includes == null || includes.contains(packageName)) && (excludes == null || !excludes.contains(packageName)));
 	}
 
 	private static class TerminatingClassNotFoundException extends ClassNotFoundException implements StatusException {

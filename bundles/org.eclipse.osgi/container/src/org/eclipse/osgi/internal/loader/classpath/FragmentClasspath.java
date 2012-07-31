@@ -12,9 +12,8 @@
 package org.eclipse.osgi.internal.loader.classpath;
 
 import java.io.IOException;
-import java.security.ProtectionDomain;
-import org.eclipse.osgi.baseadaptor.BaseData;
-import org.osgi.framework.FrameworkEvent;
+import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
+import org.eclipse.osgi.storage.BundleInfo.Generation;
 
 /**
  * A FragmentClasspath contains all the <code>ClasspathEntry</code> objects for a fragment
@@ -22,31 +21,21 @@ import org.osgi.framework.FrameworkEvent;
  * @since 3.2
  */
 public class FragmentClasspath {
-	private BaseData bundledata;
+	private Generation generation;
 	// Note that PDE has internal dependency on this field type/name (bug 267238)
 	private ClasspathEntry[] entries;
-	private ProtectionDomain domain;
 
-	public FragmentClasspath(BaseData bundledata, ClasspathEntry[] entries, ProtectionDomain domain) {
-		this.bundledata = bundledata;
+	public FragmentClasspath(Generation generation, ClasspathEntry[] entries) {
+		this.generation = generation;
 		this.entries = entries;
-		this.domain = domain;
 	}
 
 	/**
-	 * Returns the fragment BaseData for this FragmentClasspath
-	 * @return the fragment BaseData for this FragmentClasspath
+	 * Returns the fragment Generation for this FragmentClasspath
+	 * @return the fragment Generation for this FragmentClasspath
 	 */
-	public BaseData getBundleData() {
-		return bundledata;
-	}
-
-	/**
-	 * Returns the fragment domain for this FragmentClasspath
-	 * @return the fragment domain for this FragmentClasspath
-	 */
-	public ProtectionDomain getDomain() {
-		return domain;
+	public Generation getGeneration() {
+		return generation;
 	}
 
 	/**
@@ -66,7 +55,7 @@ public class FragmentClasspath {
 			try {
 				entries[i].getBundleFile().close();
 			} catch (IOException e) {
-				bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
+				generation.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, generation.getRevision().getRevisions().getModule(), e);
 			}
 		}
 	}

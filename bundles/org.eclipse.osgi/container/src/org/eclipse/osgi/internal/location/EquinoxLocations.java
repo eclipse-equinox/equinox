@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,33 +10,19 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.location;
 
-import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
-
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
-import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.service.datalocation.Location;
+import org.osgi.framework.Constants;
 
 /**
  * This class is used to manage the various Locations for Eclipse.
- * <p>
- * Clients may not extend this class.
- * </p>
- * @since 3.1
- * @noextend This class is not intended to be subclassed by clients.
  */
 public class EquinoxLocations {
-	private static Location installLocation = null;
-	private static Location configurationLocation = null;
-	private static Location userLocation = null;
-	private static Location instanceLocation = null;
-	private static Location eclipseHomeLocation = null;
-
 	public static final String READ_ONLY_AREA_SUFFIX = ".readOnly"; //$NON-NLS-1$
 	public static final String PROP_INSTALL_AREA = "osgi.install.area"; //$NON-NLS-1$
 	public static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
@@ -46,20 +32,10 @@ public class EquinoxLocations {
 	public static final String PROP_INSTANCE_AREA_DEFAULT = "osgi.instance.area.default"; //$NON-NLS-1$
 	public static final String PROP_USER_AREA = "osgi.user.area"; //$NON-NLS-1$
 	public static final String PROP_USER_AREA_DEFAULT = "osgi.user.area.default"; //$NON-NLS-1$
-	public static final String PROP_MANIFEST_CACHE = "osgi.manifest.cache"; //$NON-NLS-1$
 	public static final String PROP_USER_HOME = "user.home"; //$NON-NLS-1$
 	public static final String PROP_USER_DIR = "user.dir"; //$NON-NLS-1$
 	public static final String PROP_HOME_LOCATION_AREA = "eclipse.home.location"; //$NON-NLS-1$
 	public static final String PROP_LAUNCHER = "eclipse.launcher"; //$NON-NLS-1$
-
-	// configuration area file/dir names
-	public static final String BUNDLES_DIR = "bundles"; //$NON-NLS-1$
-	public static final String STATE_FILE = ".state"; //$NON-NLS-1$
-	public static final String LAZY_FILE = ".lazy"; //$NON-NLS-1$
-	public static final String BUNDLE_DATA_FILE = ".bundledata"; //$NON-NLS-1$
-	public static final String MANIFESTS_DIR = "manifests"; //$NON-NLS-1$
-	public static final String CONFIG_FILE = "config.ini"; //$NON-NLS-1$
-	public static final String ECLIPSE_PROPERTIES = "eclipse.properties"; //$NON-NLS-1$
 
 	// Constants for configuration location discovery
 	private static final String ECLIPSE = "eclipse"; //$NON-NLS-1$
@@ -79,6 +55,68 @@ public class EquinoxLocations {
 
 	private static final String INSTANCE_DATA_AREA_PREFIX = ".metadata/.plugins/"; //$NON-NLS-1$
 
+	private final EquinoxConfiguration equinoxConfig;
+
+	private final Location installLocation;
+	private final Location configurationLocation;
+	private final Location userLocation;
+	private final Location instanceLocation;
+	private final Location eclipseHomeLocation;
+
+	public EquinoxLocations(EquinoxConfiguration equinoxConfig) {
+		this.equinoxConfig = equinoxConfig;
+
+		// Initializes the Location objects for the LocationManager.
+		// set the osgi storage area if it exists
+		String osgiStorage = equinoxConfig.getConfiguration(Constants.FRAMEWORK_STORAGE);
+		if (osgiStorage != null)
+			equinoxConfig.setConfiguration(PROP_CONFIG_AREA, osgiStorage);
+		// do install location initialization first since others may depend on it
+		// assumes that the property is already set
+		installLocation = buildLocation(PROP_INSTALL_AREA, null, "", true, false, null); //$NON-NLS-1$
+
+		// TODO not sure what the data area prefix should be here for the user area
+		Location temp = buildLocation(PROP_USER_AREA_DEFAULT, null, "", false, false, null); //$NON-NLS-1$
+		URL defaultLocation = temp == null ? null : temp.getURL();
+		if (defaultLocation == null)
+			defaultLocation = buildURL(new File(System.getProperty(PROP_USER_HOME), "user").getAbsolutePath(), true); //$NON-NLS-1$
+		userLocation = buildLocation(PROP_USER_AREA, defaultLocation, "", false, false, null); //$NON-NLS-1$
+
+		temp = buildLocation(PROP_INSTANCE_AREA_DEFAULT, null, "", false, false, INSTANCE_DATA_AREA_PREFIX); //$NON-NLS-1$
+		defaultLocation = temp == null ? null : temp.getURL();
+		if (defaultLocation == null)
+			defaultLocation = buildURL(new File(System.getProperty(PROP_USER_DIR), "workspace").getAbsolutePath(), true); //$NON-NLS-1$
+		instanceLocation = buildLocation(PROP_INSTANCE_AREA, defaultLocation, "", false, false, INSTANCE_DATA_AREA_PREFIX); //$NON-NLS-1$
+
+		mungeConfigurationLocation();
+		// compute a default but it is very unlikely to be used since main will have computed everything
+		temp = buildLocation(PROP_CONFIG_AREA_DEFAULT, null, "", false, false, null); //$NON-NLS-1$
+		defaultLocation = temp == null ? null : temp.getURL();
+		if (defaultLocation == null && equinoxConfig.getConfiguration(PROP_CONFIG_AREA) == null)
+			// only compute the default if the configuration area property is not set
+			defaultLocation = buildURL(computeDefaultConfigurationLocation(), true);
+		configurationLocation = buildLocation(PROP_CONFIG_AREA, defaultLocation, "", false, false, null); //$NON-NLS-1$
+		// get the parent location based on the system property. This will have been set on the 
+		// way in either by the caller/user or by main.  There will be no parent location if we are not 
+		// cascaded.
+		URL parentLocation = computeSharedConfigurationLocation();
+		if (parentLocation != null && !parentLocation.equals(configurationLocation.getURL())) {
+			Location parent = new BasicLocation(null, parentLocation, true, null, equinoxConfig);
+			((BasicLocation) configurationLocation).setParent(parent);
+		}
+
+		if (equinoxConfig.getConfiguration(PROP_HOME_LOCATION_AREA) == null) {
+			String eclipseLauncher = equinoxConfig.getConfiguration(PROP_LAUNCHER);
+			String eclipseHomeLocationPath = getEclipseHomeLocation(eclipseLauncher, equinoxConfig);
+			if (eclipseHomeLocationPath != null)
+				equinoxConfig.setConfiguration(PROP_HOME_LOCATION_AREA, eclipseHomeLocationPath);
+		}
+		// if eclipse.home.location is not set then default to osgi.install.area
+		if (equinoxConfig.getConfiguration(PROP_HOME_LOCATION_AREA) == null && equinoxConfig.getConfiguration(PROP_INSTALL_AREA) != null)
+			equinoxConfig.setConfiguration(PROP_HOME_LOCATION_AREA, equinoxConfig.getConfiguration(PROP_INSTALL_AREA));
+		eclipseHomeLocation = buildLocation(PROP_HOME_LOCATION_AREA, null, "", true, true, null); //$NON-NLS-1$
+	}
+
 	/**
 	 * Builds a URL with the given specification
 	 * @param spec the URL specification
@@ -89,76 +127,21 @@ public class EquinoxLocations {
 		return LocationHelper.buildURL(spec, trailingSlash);
 	}
 
-	private static void mungeConfigurationLocation() {
+	private void mungeConfigurationLocation() {
 		// if the config property was set, munge it for backwards compatibility.
-		String location = FrameworkProperties.getProperty(PROP_CONFIG_AREA);
+		String location = equinoxConfig.getConfiguration(PROP_CONFIG_AREA);
 		if (location != null) {
 			if (location.endsWith(".cfg")) { //$NON-NLS-1$
 				int index = location.lastIndexOf('/');
 				if (index < 0)
 					index = location.lastIndexOf('\\');
 				location = location.substring(0, index + 1);
-				FrameworkProperties.setProperty(PROP_CONFIG_AREA, location);
+				equinoxConfig.setConfiguration(PROP_CONFIG_AREA, location);
 			}
 		}
 	}
 
-	/**
-	 * Initializes the Location objects for the LocationManager.
-	 */
-	public static void initializeLocations() {
-		// set the osgi storage area if it exists
-		String osgiStorage = FrameworkProperties.getProperty(Constants.FRAMEWORK_STORAGE);
-		if (osgiStorage != null)
-			FrameworkProperties.setProperty(PROP_CONFIG_AREA, osgiStorage);
-		// do install location initialization first since others may depend on it
-		// assumes that the property is already set
-		installLocation = buildLocation(PROP_INSTALL_AREA, null, "", true, false, null); //$NON-NLS-1$
-
-		// TODO not sure what the data area prefix should be here for the user area
-		Location temp = buildLocation(PROP_USER_AREA_DEFAULT, null, "", false, false, null); //$NON-NLS-1$
-		URL defaultLocation = temp == null ? null : temp.getURL();
-		if (defaultLocation == null)
-			defaultLocation = buildURL(new File(FrameworkProperties.getProperty(PROP_USER_HOME), "user").getAbsolutePath(), true); //$NON-NLS-1$
-		userLocation = buildLocation(PROP_USER_AREA, defaultLocation, "", false, false, null); //$NON-NLS-1$
-
-		temp = buildLocation(PROP_INSTANCE_AREA_DEFAULT, null, "", false, false, INSTANCE_DATA_AREA_PREFIX); //$NON-NLS-1$
-		defaultLocation = temp == null ? null : temp.getURL();
-		if (defaultLocation == null)
-			defaultLocation = buildURL(new File(FrameworkProperties.getProperty(PROP_USER_DIR), "workspace").getAbsolutePath(), true); //$NON-NLS-1$
-		instanceLocation = buildLocation(PROP_INSTANCE_AREA, defaultLocation, "", false, false, INSTANCE_DATA_AREA_PREFIX); //$NON-NLS-1$
-
-		mungeConfigurationLocation();
-		// compute a default but it is very unlikely to be used since main will have computed everything
-		temp = buildLocation(PROP_CONFIG_AREA_DEFAULT, null, "", false, false, null); //$NON-NLS-1$
-		defaultLocation = temp == null ? null : temp.getURL();
-		if (defaultLocation == null && FrameworkProperties.getProperty(PROP_CONFIG_AREA) == null)
-			// only compute the default if the configuration area property is not set
-			defaultLocation = buildURL(computeDefaultConfigurationLocation(), true);
-		configurationLocation = buildLocation(PROP_CONFIG_AREA, defaultLocation, "", false, false, null); //$NON-NLS-1$
-		// get the parent location based on the system property. This will have been set on the 
-		// way in either by the caller/user or by main.  There will be no parent location if we are not 
-		// cascaded.
-		URL parentLocation = computeSharedConfigurationLocation();
-		if (parentLocation != null && !parentLocation.equals(configurationLocation.getURL())) {
-			Location parent = new BasicLocation(null, parentLocation, true, null);
-			((BasicLocation) configurationLocation).setParent(parent);
-		}
-		initializeDerivedConfigurationLocations();
-
-		if (FrameworkProperties.getProperty(PROP_HOME_LOCATION_AREA) == null) {
-			String eclipseLauncher = FrameworkProperties.getProperty(PROP_LAUNCHER);
-			String eclipseHomeLocationPath = getEclipseHomeLocation(eclipseLauncher);
-			if (eclipseHomeLocationPath != null)
-				FrameworkProperties.setProperty(PROP_HOME_LOCATION_AREA, eclipseHomeLocationPath);
-		}
-		// if eclipse.home.location is not set then default to osgi.install.area
-		if (FrameworkProperties.getProperty(PROP_HOME_LOCATION_AREA) == null && FrameworkProperties.getProperty(PROP_INSTALL_AREA) != null)
-			FrameworkProperties.setProperty(PROP_HOME_LOCATION_AREA, FrameworkProperties.getProperty(PROP_INSTALL_AREA));
-		eclipseHomeLocation = buildLocation(PROP_HOME_LOCATION_AREA, null, "", true, true, null); //$NON-NLS-1$
-	}
-
-	private static String getEclipseHomeLocation(String launcher) {
+	private static String getEclipseHomeLocation(String launcher, EquinoxConfiguration equinoxConfig) {
 		if (launcher == null)
 			return null;
 		File launcherFile = new File(launcher);
@@ -167,7 +150,7 @@ public class EquinoxLocations {
 		File launcherDir = new File(launcherFile.getParent());
 		// check for mac os; the os check is copied from EclipseEnvironmentInfo.
 		String macosx = org.eclipse.osgi.service.environment.Constants.OS_MACOSX;
-		if (macosx.equals(EquinoxConfiguration.getDefault().getOS()))
+		if (macosx.equals(equinoxConfig.getOS()))
 			launcherDir = getMacOSEclipsoeHomeLocation(launcherDir);
 		return (launcherDir.exists() && launcherDir.isDirectory()) ? launcherDir.getAbsolutePath() : null;
 	}
@@ -186,20 +169,20 @@ public class EquinoxLocations {
 	}
 
 	@SuppressWarnings("deprecation")
-	private static Location buildLocation(String property, URL defaultLocation, String userDefaultAppendage, boolean readOnlyDefault, boolean computeReadOnly, String dataAreaPrefix) {
-		String location = FrameworkProperties.clearProperty(property);
+	private Location buildLocation(String property, URL defaultLocation, String userDefaultAppendage, boolean readOnlyDefault, boolean computeReadOnly, String dataAreaPrefix) {
+		String location = equinoxConfig.clearConfiguration(property);
 		// the user/product may specify a non-default readOnly setting   
-		String userReadOnlySetting = FrameworkProperties.getProperty(property + READ_ONLY_AREA_SUFFIX);
+		String userReadOnlySetting = equinoxConfig.getConfiguration(property + READ_ONLY_AREA_SUFFIX);
 		boolean readOnly = (userReadOnlySetting == null ? readOnlyDefault : Boolean.valueOf(userReadOnlySetting).booleanValue());
 		// if the instance location is not set, predict where the workspace will be and 
 		// put the instance area inside the workspace meta area.
 		if (location == null)
-			return new BasicLocation(property, defaultLocation, userReadOnlySetting != null || !computeReadOnly ? readOnly : !canWrite(defaultLocation), dataAreaPrefix);
+			return new BasicLocation(property, defaultLocation, userReadOnlySetting != null || !computeReadOnly ? readOnly : !canWrite(defaultLocation), dataAreaPrefix, equinoxConfig);
 		String trimmedLocation = location.trim();
 		if (trimmedLocation.equalsIgnoreCase(NONE))
 			return null;
 		if (trimmedLocation.equalsIgnoreCase(NO_DEFAULT))
-			return new BasicLocation(property, null, readOnly, dataAreaPrefix);
+			return new BasicLocation(property, null, readOnly, dataAreaPrefix, equinoxConfig);
 		if (trimmedLocation.startsWith(USER_HOME)) {
 			String base = substituteVar(location, USER_HOME, PROP_USER_HOME);
 			location = new File(base, userDefaultAppendage).getAbsolutePath();
@@ -216,31 +199,26 @@ public class EquinoxLocations {
 		URL url = buildURL(location, true);
 		BasicLocation result = null;
 		if (url != null) {
-			result = new BasicLocation(property, null, userReadOnlySetting != null || !computeReadOnly ? readOnly : !canWrite(url), dataAreaPrefix);
+			result = new BasicLocation(property, null, userReadOnlySetting != null || !computeReadOnly ? readOnly : !canWrite(url), dataAreaPrefix, equinoxConfig);
 			result.setURL(url, false);
 		}
 		return result;
 	}
 
-	private static String substituteVar(String source, String var, String prop) {
-		String value = FrameworkProperties.getProperty(prop, ""); //$NON-NLS-1$
+	private String substituteVar(String source, String var, String prop) {
+		String value = equinoxConfig.getConfiguration(prop, ""); //$NON-NLS-1$
 		return value + source.substring(var.length());
 	}
 
-	private static void initializeDerivedConfigurationLocations() {
-		if (FrameworkProperties.getProperty(PROP_MANIFEST_CACHE) == null)
-			FrameworkProperties.setProperty(PROP_MANIFEST_CACHE, getConfigurationFile(MANIFESTS_DIR).getAbsolutePath());
-	}
-
-	private static URL computeInstallConfigurationLocation() {
-		String property = FrameworkProperties.getProperty(PROP_INSTALL_AREA);
+	private URL computeInstallConfigurationLocation() {
+		String property = equinoxConfig.getConfiguration(PROP_INSTALL_AREA);
 		if (property != null)
 			return LocationHelper.buildURL(property, true);
 		return null;
 	}
 
-	private static URL computeSharedConfigurationLocation() {
-		String property = FrameworkProperties.getProperty(PROP_SHARED_CONFIG_AREA);
+	private URL computeSharedConfigurationLocation() {
+		String property = equinoxConfig.getConfiguration(PROP_SHARED_CONFIG_AREA);
 		if (property == null)
 			return null;
 		try {
@@ -255,14 +233,14 @@ public class EquinoxLocations {
 				// different protocol
 				return sharedConfigurationURL;
 			sharedConfigurationURL = new URL(installURL, sharedConfigurationURL.getPath());
-			FrameworkProperties.setProperty(PROP_SHARED_CONFIG_AREA, sharedConfigurationURL.toExternalForm());
+			equinoxConfig.setConfiguration(PROP_SHARED_CONFIG_AREA, sharedConfigurationURL.toExternalForm());
 		} catch (MalformedURLException e) {
 			// do nothing here since it is basically impossible to get a bogus url 
 		}
 		return null;
 	}
 
-	private static String computeDefaultConfigurationLocation() {
+	private String computeDefaultConfigurationLocation() {
 		// 1) We store the config state relative to the 'eclipse' directory if possible
 		// 2) If this directory is read-only 
 		//    we store the state in <user.home>/.eclipse/<application-id>_<version> where <user.home> 
@@ -294,12 +272,12 @@ public class EquinoxLocations {
 		return false;
 	}
 
-	private static String computeDefaultUserAreaLocation(String pathAppendage) {
+	private String computeDefaultUserAreaLocation(String pathAppendage) {
 		//    we store the state in <user.home>/.eclipse/<application-id>_<version> where <user.home> 
 		//    is unique for each local user, and <application-id> is the one 
 		//    defined in .eclipseproduct marker file. If .eclipseproduct does not
 		//    exist, use "eclipse" as the application-id.
-		String installProperty = FrameworkProperties.getProperty(PROP_INSTALL_AREA);
+		String installProperty = equinoxConfig.getConfiguration(PROP_INSTALL_AREA);
 		URL installURL = buildURL(installProperty, true);
 		if (installURL == null)
 			return null;
@@ -329,7 +307,7 @@ public class EquinoxLocations {
 			// add the hash to help prevent collisions
 			appName += File.separator + installDirHash;
 		}
-		String userHome = FrameworkProperties.getProperty(PROP_USER_HOME);
+		String userHome = System.getProperty(PROP_USER_HOME);
 		return new File(userHome, appName + "/" + pathAppendage).getAbsolutePath(); //$NON-NLS-1$
 	}
 
@@ -337,9 +315,9 @@ public class EquinoxLocations {
 	 * Return hash code identifying an absolute installation path
 	 * @return hash code as String
 	 */
-	private static String getInstallDirHash() {
+	private String getInstallDirHash() {
 		// compute an install dir hash to prevent configuration area collisions with other eclipse installs
-		String installProperty = FrameworkProperties.getProperty(PROP_INSTALL_AREA);
+		String installProperty = equinoxConfig.getConfiguration(PROP_INSTALL_AREA);
 		URL installURL = buildURL(installProperty, true);
 		if (installURL == null)
 			return ""; //$NON-NLS-1$
@@ -361,7 +339,7 @@ public class EquinoxLocations {
 	 * Returns the user Location object
 	 * @return the user Location object
 	 */
-	public static Location getUserLocation() {
+	public Location getUserLocation() {
 		return userLocation;
 	}
 
@@ -369,7 +347,7 @@ public class EquinoxLocations {
 	 * Returns the configuration Location object
 	 * @return the configuration Location object
 	 */
-	public static Location getConfigurationLocation() {
+	public Location getConfigurationLocation() {
 		return configurationLocation;
 	}
 
@@ -377,7 +355,7 @@ public class EquinoxLocations {
 	 * Returns the install Location object
 	 * @return the install Location object
 	 */
-	public static Location getInstallLocation() {
+	public Location getInstallLocation() {
 		return installLocation;
 	}
 
@@ -385,32 +363,11 @@ public class EquinoxLocations {
 	 * Returns the instance Location object
 	 * @return the instance Location object
 	 */
-	public static Location getInstanceLocation() {
+	public Location getInstanceLocation() {
 		return instanceLocation;
 	}
 
-	public static Location getEclipseHomeLocation() {
+	public Location getEclipseHomeLocation() {
 		return eclipseHomeLocation;
-	}
-
-	/**
-	 * Returns the File object under the configuration location used for the OSGi configuration
-	 * @return the OSGi configuration directory
-	 */
-	public static File getOSGiConfigurationDir() {
-		// TODO assumes the URL is a file: url
-		return new File(configurationLocation.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME);
-	}
-
-	/**
-	 * Returns a file from the configuration area that can be used by the framework
-	 * @param filename the filename
-	 * @return a file from the configuration area
-	 */
-	public static File getConfigurationFile(String filename) {
-		File dir = getOSGiConfigurationDir();
-		if (!dir.exists())
-			dir.mkdirs();
-		return new File(dir, filename);
 	}
 }

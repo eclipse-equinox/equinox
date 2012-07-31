@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@ package org.eclipse.osgi.internal.loader.buddy;
 
 import java.net.URL;
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -29,6 +28,7 @@ public class PolicyHandler implements SynchronousBundleListener {
 
 	//The loader to which this policy is attached.
 	private final BundleLoader policedLoader;
+	private final List<String> originalBuddyList;
 	//List of the policies as well as cache for the one that have been created. The size of this array never changes over time. This is why the synchronization is not done when iterating over it.
 	private volatile Object[] policies = null;
 
@@ -36,9 +36,10 @@ public class PolicyHandler implements SynchronousBundleListener {
 	private final ThreadLocal<Set<String>> beingLoaded;
 	private final PackageAdmin packageAdmin;
 
-	public PolicyHandler(BundleLoader loader, String buddyList, PackageAdmin packageAdmin) {
+	public PolicyHandler(BundleLoader loader, List<String> buddyList, PackageAdmin packageAdmin) {
 		policedLoader = loader;
-		policies = getArrayFromList(buddyList);
+		this.originalBuddyList = buddyList;
+		policies = buddyList.toArray();
 		beingLoaded = new ThreadLocal<Set<String>>();
 		this.packageAdmin = packageAdmin;
 	}
@@ -209,11 +210,6 @@ public class PolicyHandler implements SynchronousBundleListener {
 		if ((event.getType() & (BundleEvent.RESOLVED | BundleEvent.UNRESOLVED)) == 0)
 			return;
 		// reinitialize the policies
-		try {
-			String list = policedLoader.getBundle().getBundleData().getManifest().get(Constants.BUDDY_LOADER);
-			policies = getArrayFromList(list);
-		} catch (BundleException e) {
-			//Ignore
-		}
+		policies = originalBuddyList.toArray();
 	}
 }

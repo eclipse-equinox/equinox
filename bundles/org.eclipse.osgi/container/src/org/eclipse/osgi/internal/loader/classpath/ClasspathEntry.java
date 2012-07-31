@@ -11,12 +11,16 @@
 
 package org.eclipse.osgi.internal.loader.classpath;
 
-import org.eclipse.osgi.storage.bundlefile.BundleFile;
-
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.ProtectionDomain;
-import org.eclipse.osgi.baseadaptor.BaseData;
+import java.util.jar.Manifest;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
+import org.eclipse.osgi.storage.BundleInfo;
+import org.eclipse.osgi.storage.BundleInfo.Generation;
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
 
 /**
  * A ClasspathEntry contains a single <code>BundleFile</code> which is used as 
@@ -27,19 +31,25 @@ import org.eclipse.osgi.framework.util.KeyedHashSet;
  */
 public class ClasspathEntry {
 	private final BundleFile bundlefile;
+	private final Generation generation;
 	private final ProtectionDomain domain;
+	private final Manifest manifest;
 	private KeyedHashSet userObjects = null;
-	// Note that PDE has internal dependency on this field type/name (bug 267238)
-	private volatile BaseData data;
+
+	// TODO Note that PDE has internal dependency on this field type/name (bug 267238)
+	//private volatile BaseData data;
 
 	/**
 	 * Constructs a ClasspathElement with the specified bundlefile and domain
 	 * @param bundlefile A BundleFile object which acts as a source
-	 * @param domain the ProtectDomain for all code loaded from this classpath element
+	 * @param domain the protection domain
+	 * @param generation the generation this class path entry is for
 	 */
-	public ClasspathEntry(BundleFile bundlefile, ProtectionDomain domain) {
+	public ClasspathEntry(BundleFile bundlefile, ProtectionDomain domain, Generation generation) {
 		this.bundlefile = bundlefile;
 		this.domain = domain;
+		this.generation = generation;
+		this.manifest = getManifest(bundlefile, generation);
 	}
 
 	/**
@@ -51,23 +61,11 @@ public class ClasspathEntry {
 	}
 
 	/**
-	 * Returns the base data which this entry is associated with.  This can be
-	 * either a host or fragment base data.
-	 */
-	public BaseData getBaseData() {
-		return data;
-	}
-
-	void setBaseData(BaseData data) {
-		this.data = data;
-	}
-
-	/**
 	 * Returns the ProtectionDomain for this classpath entry
 	 * @return the ProtectionDomain for this classpath entry
 	 */
 	public ProtectionDomain getDomain() {
-		return domain;
+		return generation.getDomain();
 	}
 
 	/**
@@ -94,4 +92,31 @@ public class ClasspathEntry {
 			userObjects.add(userObject);
 		}
 	}
+
+	private static Manifest getManifest(BundleFile cpBundleFile, Generation generation) {
+		if (!generation.hasPackageInfo() && generation.getBundleFile() == cpBundleFile) {
+			return null;
+		}
+		BundleEntry mfEntry = cpBundleFile.getEntry(BundleInfo.OSGI_BUNDLE_MANIFEST);
+		if (mfEntry != null) {
+			InputStream manIn = null;
+			try {
+				try {
+					manIn = mfEntry.getInputStream();
+					return new Manifest(manIn);
+				} finally {
+					if (manIn != null)
+						manIn.close();
+				}
+			} catch (IOException e) {
+				// do nothing
+			}
+		}
+		return null;
+	}
+
+	public Manifest getManifest() {
+		return this.manifest;
+	}
+
 }

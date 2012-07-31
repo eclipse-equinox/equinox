@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.log;
 
-import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
-
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.security.AccessController;
@@ -19,15 +17,15 @@ import java.util.Calendar;
 import java.util.Date;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.equinox.log.*;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogService;
 
-public class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
+class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	private static final String PASSWORD = "-password"; //$NON-NLS-1$	
 	/** The session tag */
 	private static final String SESSION = "!SESSION"; //$NON-NLS-1$
@@ -85,6 +83,7 @@ public class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	private final String loggerName;
 	private final boolean enabled;
+	private final EquinoxConfiguration environmentInfo;
 
 	int maxLogSize = DEFAULT_LOG_SIZE; // The value is in KB.
 	int maxLogFiles = DEFAULT_LOG_FILES;
@@ -97,11 +96,12 @@ public class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	 * Constructs an EclipseLog which uses the specified File to log messages to
 	 * @param outFile a file to log messages to
 	 */
-	public EquinoxLogWriter(File outFile, String loggerName, boolean enabled) {
+	public EquinoxLogWriter(File outFile, String loggerName, boolean enabled, EquinoxConfiguration environmentInfo) {
 		this.outFile = outFile;
 		this.writer = null;
 		this.loggerName = loggerName;
 		this.enabled = enabled;
+		this.environmentInfo = environmentInfo;
 		readLogProperties();
 	}
 
@@ -109,7 +109,7 @@ public class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	 * Constructs an EclipseLog which uses the specified Writer to log messages to
 	 * @param writer a writer to log messages to
 	 */
-	public EquinoxLogWriter(Writer writer, String loggerName, boolean enabled) {
+	public EquinoxLogWriter(Writer writer, String loggerName, boolean enabled, EquinoxConfiguration environmentInfo) {
 		if (writer == null)
 			// log to System.err by default
 			this.writer = logForStream(System.err);
@@ -117,6 +117,7 @@ public class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 			this.writer = writer;
 		this.loggerName = loggerName;
 		this.enabled = enabled;
+		this.environmentInfo = environmentInfo;
 	}
 
 	private Throwable getRoot(Throwable t) {
@@ -161,7 +162,7 @@ public class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	private String getSessionTimestamp() {
 		// Main should have set the session start-up timestamp so return that. 
 		// Return the "now" time if not available.
-		String ts = FrameworkProperties.getProperty("eclipse.startTime"); //$NON-NLS-1$
+		String ts = environmentInfo.getConfiguration("eclipse.startTime"); //$NON-NLS-1$
 		if (ts != null) {
 			try {
 				return getDate(new Date(Long.parseLong(ts)));
@@ -189,7 +190,7 @@ public class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 		// Write out certain values found in System.getProperties()
 		try {
 			String key = "eclipse.buildId"; //$NON-NLS-1$
-			String value = FrameworkProperties.getProperty(key, "unknown"); //$NON-NLS-1$
+			String value = environmentInfo.getConfiguration(key, "unknown"); //$NON-NLS-1$
 			writeln(key + "=" + value); //$NON-NLS-1$
 
 			key = "java.fullversion"; //$NON-NLS-1$
@@ -209,15 +210,15 @@ public class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 			// then just skip over them.
 		}
 		// The Bootloader has some information that we might be interested in.
-		write("BootLoader constants: OS=" + EquinoxConfiguration.getDefault().getOS()); //$NON-NLS-1$
-		write(", ARCH=" + EquinoxConfiguration.getDefault().getOSArch()); //$NON-NLS-1$
-		write(", WS=" + EquinoxConfiguration.getDefault().getWS()); //$NON-NLS-1$
-		writeln(", NL=" + EquinoxConfiguration.getDefault().getNL()); //$NON-NLS-1$
+		write("BootLoader constants: OS=" + environmentInfo.getOS()); //$NON-NLS-1$
+		write(", ARCH=" + environmentInfo.getOSArch()); //$NON-NLS-1$
+		write(", WS=" + environmentInfo.getWS()); //$NON-NLS-1$
+		writeln(", NL=" + environmentInfo.getNL()); //$NON-NLS-1$
 		// Add the command-line arguments used to invoke the platform 
 		// XXX: this includes runtime-private arguments - should we do that?
 		if (includeCommandLine) {
-			writeArgs("Framework arguments: ", EquinoxConfiguration.getDefault().getNonFrameworkArgs()); //$NON-NLS-1$
-			writeArgs("Command-line arguments: ", EquinoxConfiguration.getDefault().getCommandLineArgs()); //$NON-NLS-1$
+			writeArgs("Framework arguments: ", environmentInfo.getNonFrameworkArgs()); //$NON-NLS-1$
+			writeArgs("Command-line arguments: ", environmentInfo.getCommandLineArgs()); //$NON-NLS-1$
 		}
 	}
 
@@ -315,7 +316,7 @@ public class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 			backupIdx = 0;
 		}
 		setOutput(newFile, null, append);
-		FrameworkProperties.setProperty(EclipseStarter.PROP_LOGFILE, newFile == null ? "" : newFile.getAbsolutePath()); //$NON-NLS-1$
+		environmentInfo.setConfiguration(EclipseStarter.PROP_LOGFILE, newFile == null ? "" : newFile.getAbsolutePath()); //$NON-NLS-1$
 	}
 
 	public synchronized File getFile() {

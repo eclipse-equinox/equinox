@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,23 +11,20 @@
 
 package org.eclipse.osgi.internal.log;
 
-import org.eclipse.osgi.internal.location.EquinoxLocations;
-
-import java.io.*;
-import java.net.URLConnection;
-import java.util.*;
+import java.io.File;
+import java.io.Writer;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.equinox.log.internal.LogServiceManager;
-import org.eclipse.osgi.baseadaptor.*;
-import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
-import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLog;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.osgi.framework.*;
 
-public class EquinoxLogServices implements HookConfigurator, AdaptorHook {
+public class EquinoxLogServices {
 	static final String EQUINOX_LOGGER_NAME = "org.eclipse.equinox.logger"; //$NON-NLS-1$
 	static final String PERF_LOGGER_NAME = "org.eclipse.performance.logger"; //$NON-NLS-1$
 	private static final String PROP_LOG_ENABLED = "eclipse.log.enabled"; //$NON-NLS-1$
@@ -38,57 +35,49 @@ public class EquinoxLogServices implements HookConfigurator, AdaptorHook {
 	private final EquinoxLogFactory eclipseLogFactory;
 	private final EquinoxLogWriter logWriter;
 	private final EquinoxLogWriter perfWriter;
+	private final FrameworkLog rootFrameworkLog;
 
-	public EquinoxLogServices() {
-		String logFileProp = FrameworkProperties.getProperty(EclipseStarter.PROP_LOGFILE);
-		boolean enabled = "true".equals(FrameworkProperties.getProperty(PROP_LOG_ENABLED, "true")); //$NON-NLS-1$ //$NON-NLS-2$
+	public EquinoxLogServices(EquinoxConfiguration environmentInfo, Location configuration) {
+		String logFileProp = environmentInfo.getConfiguration(EclipseStarter.PROP_LOGFILE);
+		boolean enabled = "true".equals(environmentInfo.getConfiguration(PROP_LOG_ENABLED, "true")); //$NON-NLS-1$ //$NON-NLS-2$
 		if (logFileProp != null) {
-			logWriter = new EquinoxLogWriter(new File(logFileProp), EQUINOX_LOGGER_NAME, enabled);
+			logWriter = new EquinoxLogWriter(new File(logFileProp), EQUINOX_LOGGER_NAME, enabled, environmentInfo);
 		} else {
-			Location location = EquinoxLocations.getConfigurationLocation();
 			File configAreaDirectory = null;
-			if (location != null)
+			if (configuration != null)
 				// TODO assumes the URL is a file: url
-				configAreaDirectory = new File(location.getURL().getFile());
+				configAreaDirectory = new File(configuration.getURL().getFile());
 
 			if (configAreaDirectory != null) {
 				String logFileName = Long.toString(System.currentTimeMillis()) + EquinoxLogServices.LOG_EXT;
 				File logFile = new File(configAreaDirectory, logFileName);
-				FrameworkProperties.setProperty(EclipseStarter.PROP_LOGFILE, logFile.getAbsolutePath());
-				logWriter = new EquinoxLogWriter(logFile, EQUINOX_LOGGER_NAME, enabled);
+				environmentInfo.setConfiguration(EclipseStarter.PROP_LOGFILE, logFile.getAbsolutePath());
+				logWriter = new EquinoxLogWriter(logFile, EQUINOX_LOGGER_NAME, enabled, environmentInfo);
 			} else
-				logWriter = new EquinoxLogWriter((Writer) null, EQUINOX_LOGGER_NAME, enabled);
+				logWriter = new EquinoxLogWriter((Writer) null, EQUINOX_LOGGER_NAME, enabled, environmentInfo);
 		}
 
 		File logFile = logWriter.getFile();
 		if (logFile != null) {
 			File perfLogFile = new File(logFile.getParentFile(), "performance.log"); //$NON-NLS-1$
-			perfWriter = new EquinoxLogWriter(perfLogFile, PERF_LOGGER_NAME, true);
+			perfWriter = new EquinoxLogWriter(perfLogFile, PERF_LOGGER_NAME, true, environmentInfo);
 		} else {
-			perfWriter = new EquinoxLogWriter((Writer) null, PERF_LOGGER_NAME, true);
+			perfWriter = new EquinoxLogWriter((Writer) null, PERF_LOGGER_NAME, true, environmentInfo);
 		}
-		if ("true".equals(FrameworkProperties.getProperty(EclipseStarter.PROP_CONSOLE_LOG))) //$NON-NLS-1$
+		if ("true".equals(environmentInfo.getConfiguration(EclipseStarter.PROP_CONSOLE_LOG))) //$NON-NLS-1$
 			logWriter.setConsoleLog(true);
 		logServiceManager = new LogServiceManager(logWriter, perfWriter);
 		eclipseLogFactory = new EquinoxLogFactory(logWriter, logServiceManager);
-
+		rootFrameworkLog = eclipseLogFactory.createFrameworkLog(null, logWriter);
 	}
 
 	private ServiceRegistration<?> frameworkLogReg;
 	private ServiceRegistration<?> perfLogReg;
 
-	public void addHooks(HookRegistry hookRegistry) {
-		hookRegistry.addAdaptorHook(this);
-	}
-
-	public void initialize(BaseAdaptor initAdaptor) {
-		// Nothing
-	}
-
 	/**
 	 * @throws BundleException  
 	 */
-	public void frameworkStart(BundleContext context) throws BundleException {
+	public void start(BundleContext context) throws BundleException {
 		logServiceManager.start(context);
 		frameworkLogReg = AdaptorUtil.register(FrameworkLog.class.getName(), eclipseLogFactory, context);
 		perfLogReg = registerPerformanceLog(context);
@@ -97,35 +86,14 @@ public class EquinoxLogServices implements HookConfigurator, AdaptorHook {
 	/**
 	 * @throws BundleException  
 	 */
-	public void frameworkStop(BundleContext context) throws BundleException {
+	public void stop(BundleContext context) throws BundleException {
 		frameworkLogReg.unregister();
 		perfLogReg.unregister();
 		logServiceManager.stop(context);
 	}
 
-	public void frameworkStopping(BundleContext context) {
-		// do nothing
-
-	}
-
-	public void addProperties(Properties properties) {
-		// do nothing
-	}
-
-	/**
-	 * @throws IOException  
-	 */
-	public URLConnection mapLocationToURLConnection(String location) throws IOException {
-		// do nothing
-		return null;
-	}
-
-	public void handleRuntimeError(Throwable error) {
-		// do nothing
-	}
-
-	public FrameworkLog createFrameworkLog() {
-		return eclipseLogFactory.createFrameworkLog(null, logWriter);
+	public FrameworkLog getFrameworkLog() {
+		return rootFrameworkLog;
 	}
 
 	private ServiceRegistration<?> registerPerformanceLog(BundleContext context) {
@@ -144,5 +112,13 @@ public class EquinoxLogServices implements HookConfigurator, AdaptorHook {
 
 	private FrameworkLog createPerformanceLog(Bundle systemBundle) {
 		return eclipseLogFactory.createFrameworkLog(systemBundle, perfWriter);
+	}
+
+	public void log(String entry, int severity, String message, Throwable throwable) {
+		log(entry, severity, message, throwable, null);
+	}
+
+	public void log(String entry, int severity, String message, Throwable throwable, FrameworkLogEntry[] children) {
+		getFrameworkLog().log(new FrameworkLogEntry(entry, severity, 0, message, 0, throwable, children));
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,9 +14,11 @@ package org.eclipse.osgi.internal.loader.buddy;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import org.eclipse.osgi.container.ModuleWire;
+import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.internal.loader.BundleLoader;
-import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
-import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.osgi.framework.namespace.BundleNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
 
 /**
  * DependentPolicy is an implementation of a buddy policy. 
@@ -26,14 +28,14 @@ import org.eclipse.osgi.service.resolver.BundleDescription;
 public class DependentPolicy implements IBuddyPolicy {
 	BundleLoader buddyRequester;
 	int lastDependentOfAdded = -1; //remember the index of the bundle for which we last added the dependent
-	List<BundleDescription> allDependents = null; //the list of all dependents known so far
+	List<ModuleWiring> allDependents = null; //the list of all dependents known so far
 
 	public DependentPolicy(BundleLoader requester) {
 		buddyRequester = requester;
 
 		//Initialize with the first level of dependent the list
-		allDependents = new ArrayList<BundleDescription>();
-		basicAddImmediateDependents(buddyRequester.getBundle().getBundleDescription());
+		allDependents = new ArrayList<ModuleWiring>();
+		basicAddImmediateDependents(requester.getWiring());
 		//If there is no dependent, reset to null
 		if (allDependents.size() == 0)
 			allDependents = null;
@@ -46,24 +48,22 @@ public class DependentPolicy implements IBuddyPolicy {
 		Class<?> result = null;
 		//size may change, so we must check it every time
 		for (int i = 0; i < allDependents.size() && result == null; i++) {
-			BundleDescription searchedBundle = allDependents.get(i);
+			ModuleWiring searchWiring = allDependents.get(i);
+			BundleLoader searchLoader = (BundleLoader) searchWiring.getModuleLoader();
 			try {
-				BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(searchedBundle);
-				if (proxy == null)
-					continue;
-				result = proxy.getBundleLoader().findClass(name);
+				result = searchLoader.findClass(name);
 			} catch (ClassNotFoundException e) {
 				if (result == null)
-					addDependent(i, searchedBundle);
+					addDependent(i, searchWiring);
 			}
 		}
 		return result;
 	}
 
-	private synchronized void addDependent(int i, BundleDescription searchedBundle) {
+	private synchronized void addDependent(int i, ModuleWiring searchedWiring) {
 		if (i > lastDependentOfAdded) {
 			lastDependentOfAdded = i;
-			basicAddImmediateDependents(searchedBundle);
+			basicAddImmediateDependents(searchedWiring);
 		}
 	}
 
@@ -74,13 +74,11 @@ public class DependentPolicy implements IBuddyPolicy {
 		URL result = null;
 		//size may change, so we must check it every time
 		for (int i = 0; i < allDependents.size() && result == null; i++) {
-			BundleDescription searchedBundle = allDependents.get(i);
-			BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(searchedBundle);
-			if (proxy == null)
-				continue;
-			result = proxy.getBundleLoader().findResource(name);
+			ModuleWiring searchWiring = allDependents.get(i);
+			BundleLoader searchLoader = (BundleLoader) searchWiring.getModuleLoader();
+			result = searchLoader.findResource(name);
 			if (result == null) {
-				addDependent(i, searchedBundle);
+				addDependent(i, searchWiring);
 			}
 		}
 		return result;
@@ -93,13 +91,11 @@ public class DependentPolicy implements IBuddyPolicy {
 		Enumeration<URL> results = null;
 		//size may change, so we must check it every time
 		for (int i = 0; i < allDependents.size(); i++) {
-			BundleDescription searchedBundle = allDependents.get(i);
+			ModuleWiring searchWiring = allDependents.get(i);
+			BundleLoader searchLoader = (BundleLoader) searchWiring.getModuleLoader();
 			try {
-				BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(searchedBundle);
-				if (proxy == null)
-					continue;
-				results = BundleLoader.compoundEnumerations(results, proxy.getBundleLoader().findResources(name));
-				addDependent(i, searchedBundle);
+				results = BundleLoader.compoundEnumerations(results, searchLoader.findResources(name));
+				addDependent(i, searchWiring);
 			} catch (IOException e) {
 				//Ignore and keep looking
 			}
@@ -107,12 +103,15 @@ public class DependentPolicy implements IBuddyPolicy {
 		return results;
 	}
 
-	private void basicAddImmediateDependents(BundleDescription root) {
-		BundleDescription[] dependents = root.getDependents();
-		for (int i = 0; i < dependents.length; i++) {
-			BundleDescription toAdd = dependents[i];
-			if (toAdd.getHost() == null && !allDependents.contains(toAdd)) {
-				allDependents.add(toAdd);
+	private void basicAddImmediateDependents(ModuleWiring wiring) {
+		List<ModuleWire> providedWires = wiring.getProvidedModuleWires(null);
+		for (ModuleWire wire : providedWires) {
+			String namespace = wire.getRequirement().getNamespace();
+			if (PackageNamespace.PACKAGE_NAMESPACE.equals(namespace) || BundleNamespace.BUNDLE_NAMESPACE.equals(namespace)) {
+				ModuleWiring dependent = wire.getRequirerWiring();
+				if (!allDependents.contains(dependent)) {
+					allDependents.add(dependent);
+				}
 			}
 		}
 	}

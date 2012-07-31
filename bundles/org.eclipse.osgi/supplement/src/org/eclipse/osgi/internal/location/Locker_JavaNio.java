@@ -22,11 +22,13 @@ import org.eclipse.osgi.util.NLS;
  */
 public class Locker_JavaNio implements Locker {
 	private final File lockFile;
+	private final boolean debug;
 	private FileLock fileLock;
 	private RandomAccessFile raFile;
 
-	public Locker_JavaNio(File lockFile) {
+	public Locker_JavaNio(File lockFile, boolean debug) {
 		this.lockFile = lockFile;
+		this.debug = debug;
 	}
 
 	public synchronized boolean lock() throws IOException {
@@ -39,7 +41,7 @@ public class Locker_JavaNio implements Locker {
 			fileLock = raFile.getChannel().tryLock(0, 1, false);
 		} catch (IOException ioe) {
 			// print exception if debugging
-			if (BasicLocation.DEBUG)
+			if (debug)
 				System.out.println(NLS.bind(EclipseAdaptorMsg.location_cannotLock, lockFile));
 			// produce a more specific message for clients
 			String specificMessage = NLS.bind(EclipseAdaptorMsg.location_cannotLockNIO, new Object[] {lockFile, ioe.getMessage(), "\"-D" + BasicLocation.PROP_OSGI_LOCKING + "=none\""}); //$NON-NLS-1$ //$NON-NLS-2$
@@ -89,7 +91,7 @@ public class Locker_JavaNio implements Locker {
 				try {
 					tempLock = temp.getChannel().tryLock(0, 1, false);
 				} catch (IOException ioe) {
-					if (BasicLocation.DEBUG)
+					if (debug)
 						System.out.println(NLS.bind(EclipseAdaptorMsg.location_cannotLock, lockFile));
 					// produce a more specific message for clients
 					String specificMessage = NLS.bind(EclipseAdaptorMsg.location_cannotLockNIO, new Object[] {lockFile, ioe.getMessage(), "\"-D" + BasicLocation.PROP_OSGI_LOCKING + "=none\""}); //$NON-NLS-1$ //$NON-NLS-2$
