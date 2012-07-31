@@ -10,14 +10,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.baseadaptor.weaving;
 
-import org.eclipse.osgi.storage.bundlefile.BundleEntry;
-
 import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.serviceregistry.HookContext;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.weaving.*;
@@ -80,7 +79,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 	void checkPermission() {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null)
-			sm.checkPermission(new AdminPermission(loader.getBundle(), AdminPermission.WEAVE));
+			sm.checkPermission(new AdminPermission(loader.getWiring().getBundle(), AdminPermission.WEAVE));
 	}
 
 	public List<String> getDynamicImports() {
@@ -121,7 +120,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 	}
 
 	public BundleWiring getBundleWiring() {
-		return loader.getLoaderProxy().getBundleDescription().getWiring();
+		return loader.getWiring();
 	}
 
 	public void call(final Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
