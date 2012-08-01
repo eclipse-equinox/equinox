@@ -930,7 +930,7 @@ public final class ModuleContainer {
 			// notice that we only do one refresh operation at a time
 			CopyOnWriteIdentityMap<ContainerWiring, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<ModuleContainer.ContainerWiring, FrameworkListener[]>();
 			dispatchListeners.put(this, listeners);
-			ListenerQueue<ContainerWiring, FrameworkListener[], Collection<Module>> queue = new ListenerQueue<ModuleContainer.ContainerWiring, FrameworkListener[], Collection<Module>>(refreshThread);
+			ListenerQueue<ContainerWiring, FrameworkListener[], Collection<Module>> queue = new ListenerQueue<ModuleContainer.ContainerWiring, FrameworkListener[], Collection<Module>>(getManager());
 			queue.queueListeners(dispatchListeners.entrySet(), this);
 
 			// dispatch the refresh job
@@ -1016,7 +1016,7 @@ public final class ModuleContainer {
 		private EventManager getManager() {
 			synchronized (monitor) {
 				if (refreshThread == null) {
-					refreshThread = new EventManager("Start Level: " + adaptor.toString());
+					refreshThread = new EventManager("Refresh Thread: " + adaptor.toString()); //$NON-NLS-1$
 				}
 				return refreshThread;
 			}
@@ -1221,7 +1221,7 @@ public final class ModuleContainer {
 		private EventManager getManager() {
 			synchronized (monitor) {
 				if (startLevelThread == null) {
-					startLevelThread = new EventManager("Start Level: " + adaptor.toString());
+					startLevelThread = new EventManager("Start Level: " + adaptor.toString()); //$NON-NLS-1$
 				}
 				return startLevelThread;
 			}
