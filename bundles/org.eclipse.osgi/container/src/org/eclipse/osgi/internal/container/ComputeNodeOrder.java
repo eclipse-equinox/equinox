@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.internal.resolver;
+package org.eclipse.osgi.internal.container;
 
 import java.util.*;
 

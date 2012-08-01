@@ -22,7 +22,7 @@ import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.internal.container.Capabilities;
-import org.eclipse.osgi.internal.resolver.ComputeNodeOrder;
+import org.eclipse.osgi.internal.container.ComputeNodeOrder;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleRevision;
