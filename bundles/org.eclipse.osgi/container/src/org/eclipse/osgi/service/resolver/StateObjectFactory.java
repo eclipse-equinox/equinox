@@ -12,7 +12,6 @@ package org.eclipse.osgi.service.resolver;
 
 import java.io.*;
 import java.util.*;
-import org.eclipse.osgi.internal.resolver.StateObjectFactoryImpl;
 import org.osgi.framework.*;
 
 /**
@@ -30,7 +29,7 @@ public interface StateObjectFactory {
 	 * states.  This is particularly useful when using the resolver outside the context
 	 * of a running Equinox framework.
 	 */
-	public static final StateObjectFactory defaultFactory = new StateObjectFactoryImpl();
+	public static final StateObjectFactory defaultFactory = null; // new StateObjectFactoryImpl();
 
 	/**
 	 * Creates an empty state. The returned state does not have an 
