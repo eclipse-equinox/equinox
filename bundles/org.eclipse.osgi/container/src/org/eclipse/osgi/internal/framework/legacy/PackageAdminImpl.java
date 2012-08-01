@@ -181,6 +181,9 @@ public class PackageAdminImpl implements PackageAdmin {
 
 	public Bundle[] getFragments(Bundle bundle) {
 		ModuleWiring wiring = getWiring(bundle);
+		if (wiring == null) {
+			return null;
+		}
 		List<ModuleWire> hostWires = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
 		Collection<Bundle> fragments = new ArrayList<Bundle>(hostWires.size());
 		for (ModuleWire wire : hostWires) {
@@ -194,6 +197,9 @@ public class PackageAdminImpl implements PackageAdmin {
 
 	public Bundle[] getHosts(Bundle bundle) {
 		ModuleWiring wiring = getWiring(bundle);
+		if (wiring == null) {
+			return null;
+		}
 		List<ModuleWire> hostWires = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
 		Collection<Bundle> hosts = new ArrayList<Bundle>(hostWires.size());
 		for (ModuleWire wire : hostWires) {
