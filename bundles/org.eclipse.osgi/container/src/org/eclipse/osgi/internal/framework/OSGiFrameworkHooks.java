@@ -18,7 +18,6 @@ import org.eclipse.osgi.container.ModuleCollisionHook;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.internal.serviceregistry.*;
 import org.eclipse.osgi.next.internal.debug.Debug;
-import org.eclipse.osgi.service.resolver.ResolverHookException;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.CollisionHook;
@@ -140,7 +139,7 @@ class OSGiFrameworkHooks {
 					Debug.printStackTrace(t);
 			}
 			String message = NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, hook.getClass().getName(), method);
-			throw new ResolverHookException(message, t);
+			throw new RuntimeException(message, t);
 		}
 
 		private ServiceReferenceImpl<ResolverHookFactory>[] getHookReferences(ServiceRegistry registry, BundleContextImpl context) {

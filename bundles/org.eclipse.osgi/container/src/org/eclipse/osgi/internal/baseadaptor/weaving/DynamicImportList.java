@@ -11,8 +11,6 @@
 package org.eclipse.osgi.internal.baseadaptor.weaving;
 
 import java.util.*;
-import org.eclipse.osgi.internal.resolver.StateBuilder;
-import org.eclipse.osgi.service.resolver.ImportPackageSpecification;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Constants;
 
@@ -63,16 +61,8 @@ public class DynamicImportList extends AbstractList<String> implements RandomAcc
 
 	private void validateSyntax(String imported) {
 		// validate the syntax of imports that are added.
-		ManifestElement[] importElements;
 		try {
-			importElements = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, imported);
-
-			// validate the syntax is correct
-			StateBuilder.checkImportExportSyntax(Constants.IMPORT_PACKAGE, importElements, false, false, false);
-			// validate we can create an import spec out of it.
-			List<ImportPackageSpecification> dynamicImportSpecs = new ArrayList<ImportPackageSpecification>(importElements.length);
-			for (ManifestElement dynamicImportElement : importElements)
-				StateBuilder.addImportPackages(dynamicImportElement, dynamicImportSpecs, 2, true);
+			ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, imported);
 		} catch (Throwable t) {
 			IllegalArgumentException exception = new IllegalArgumentException();
 			exception.initCause(t);
