@@ -138,6 +138,9 @@ public class EclipseStarter {
 	private static Map<String, String> configuration = null;
 	private static Framework framework = null;
 	private static EquinoxConfiguration equinoxConfig;
+	private static String[] allArgs = null;
+	private static String[] frameworkArgs = null;
+	private static String[] appArgs = null;
 
 	private synchronized static String getProperty(String key) {
 		if (equinoxConfig != null) {
@@ -288,6 +291,10 @@ public class EclipseStarter {
 		ServiceReference<EnvironmentInfo> configRef = context.getServiceReference(EnvironmentInfo.class);
 		equinoxConfig = (EquinoxConfiguration) context.getService(configRef);
 
+		equinoxConfig.setAllArgs(allArgs);
+		equinoxConfig.setFrameworkArgs(frameworkArgs);
+		equinoxConfig.setAppArgs(appArgs);
+
 		registerFrameworkShutdownHandlers();
 		publishSplashScreen(endSplashHandler);
 		consoleMgr = ConsoleManager.startConsole(context);
@@ -298,6 +305,8 @@ public class EclipseStarter {
 			waitForShutdown();
 			return context; // cannot continue; loadBasicBundles caused refreshPackages to shutdown the framework
 		}
+
+		framework.start();
 
 		// set the framework start level to the ultimate value.  This will actually start things
 		// running if they are persistently active.
@@ -569,8 +578,16 @@ public class EclipseStarter {
 		} catch (IOException ioe) {
 			// do nothing
 		}
-		ServiceReference<Location> installLocRef = context.getServiceReference(Location.class);
-		Location installLocation = context.getService(installLocRef);
+		Collection<ServiceReference<Location>> installLocRef;
+		try {
+			installLocRef = context.getServiceReferences(Location.class, Location.INSTALL_FILTER);
+		} catch (InvalidSyntaxException e) {
+			throw new RuntimeException(e);
+		}
+		Location installLocation = installLocRef == null ? null : context.getService(installLocRef.iterator().next());
+		if (installLocation == null) {
+			throw new IllegalStateException("No install location found.");
+		}
 		for (int i = 0; i < installEntries.length; i++) {
 			String name = installEntries[i];
 			int level = defaultStartLevel;
@@ -636,12 +653,11 @@ public class EclipseStarter {
 		}
 	}
 
-	private static String[] processCommandLine(String[] args) throws Exception {
-		equinoxConfig.setAllArgs(args);
+	private static void processCommandLine(String[] args) throws Exception {
+		allArgs = args;
 		if (args.length == 0) {
-			equinoxConfig.setFrameworkArgs(args);
-			equinoxConfig.setAllArgs(args);
-			return args;
+			frameworkArgs = args;
+			return;
 		}
 		int[] configArgs = new int[args.length];
 		configArgs[0] = -1; // need to initialize the first element to something that could not be an index.
@@ -790,12 +806,13 @@ public class EclipseStarter {
 
 		// remove all the arguments consumed by this argument parsing
 		if (configArgIndex == 0) {
-			equinoxConfig.setFrameworkArgs(new String[0]);
+			frameworkArgs = new String[0];
+			appArgs = args;
 			equinoxConfig.setAppArgs(args);
-			return args;
+			return;
 		}
-		String[] appArgs = new String[args.length - configArgIndex];
-		String[] frameworkArgs = new String[configArgIndex];
+		appArgs = new String[args.length - configArgIndex];
+		frameworkArgs = new String[configArgIndex];
 		configArgIndex = 0;
 		int j = 0;
 		int k = 0;
@@ -806,9 +823,7 @@ public class EclipseStarter {
 			} else
 				appArgs[j++] = args[i];
 		}
-		equinoxConfig.setFrameworkArgs(frameworkArgs);
-		equinoxConfig.setAppArgs(appArgs);
-		return appArgs;
+		return;
 	}
 
 	/**
