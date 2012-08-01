@@ -129,6 +129,10 @@ public abstract class SystemModule extends Module {
 
 	@Override
 	public void start(StartOptions... options) throws BundleException {
+		// TODO this is a hack to work around a bad assumption in simple configurator
+		if (holdsTransitionEventLock(ModuleEvent.STARTED)) {
+			return;
+		}
 		// make sure to init if needed
 		init();
 		// Always transient
