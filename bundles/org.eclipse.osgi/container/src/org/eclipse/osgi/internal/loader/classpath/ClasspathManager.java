@@ -85,7 +85,7 @@ public class ClasspathManager {
 	private static String[] getClassPath(ModuleRevision revision) {
 		List<ModuleCapability> moduleDatas = revision.getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
 		@SuppressWarnings("unchecked")
-		List<String> cp = (List<String>) moduleDatas.get(0).getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_CLASSPATH);
+		List<String> cp = moduleDatas.isEmpty() ? null : (List<String>) moduleDatas.get(0).getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_CLASSPATH);
 		return cp == null ? DEFAULT_CLASSPATH : cp.toArray(new String[cp.size()]);
 	}
 
