@@ -10,20 +10,17 @@
  *******************************************************************************/
 package org.eclipse.osgi.container.builders;
 
-import org.eclipse.osgi.internal.framework.FilterImpl;
-
-import org.eclipse.osgi.internal.framework.AliasMapper;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import org.eclipse.osgi.container.ModuleRevisionBuilder;
 import org.eclipse.osgi.container.namespaces.*;
-import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.framework.internal.core.Tokenizer;
+import org.eclipse.osgi.internal.framework.AliasMapper;
+import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
-import org.osgi.framework.Constants;
 import org.osgi.framework.namespace.*;
 import org.osgi.framework.wiring.BundleRevision;
 
@@ -314,7 +311,7 @@ public final class OSGiManifestBuilderFactory {
 		builder.addRequirement(HostNamespace.HOST_NAMESPACE, directives, new HashMap<String, Object>(0));
 	}
 
-	private static void getProvideCapabilities(ModuleRevisionBuilder builder, ManifestElement[] provideElements) {
+	private static void getProvideCapabilities(ModuleRevisionBuilder builder, ManifestElement[] provideElements) throws BundleException {
 		if (provideElements == null)
 			return;
 		for (ManifestElement provideElement : provideElements) {
@@ -322,12 +319,14 @@ public final class OSGiManifestBuilderFactory {
 			Map<String, Object> attributes = getAttributes(provideElement);
 			Map<String, String> directives = getDirectives(provideElement);
 			for (String namespace : namespaces) {
+				if (IdentityNamespace.IDENTITY_NAMESPACE.equals(namespace))
+					throw new BundleException("A bundle is not allowed to define a capability in the " + IdentityNamespace.IDENTITY_NAMESPACE + " name space."); //$NON-NLS-1$ //$NON-NLS-2$
 				builder.addCapability(namespace, directives, attributes);
 			}
 		}
 	}
 
-	private static void getRequireCapabilities(ModuleRevisionBuilder builder, ManifestElement[] requireElements) throws BundleException {
+	private static void getRequireCapabilities(ModuleRevisionBuilder builder, ManifestElement[] requireElements) {
 		if (requireElements == null)
 			return;
 		for (ManifestElement requireElement : requireElements) {
@@ -335,8 +334,6 @@ public final class OSGiManifestBuilderFactory {
 			Map<String, Object> attributes = getAttributes(requireElement);
 			Map<String, String> directives = getDirectives(requireElement);
 			for (String namespace : namespaces) {
-				if (IdentityNamespace.IDENTITY_NAMESPACE.equals(namespace))
-					throw new BundleException("A bundle is not allowed to define a capability in the " + IdentityNamespace.IDENTITY_NAMESPACE + " name space."); //$NON-NLS-1$ //$NON-NLS-2$
 				builder.addRequirement(namespace, directives, attributes);
 			}
 		}
