@@ -195,13 +195,16 @@ public class ModuleDatabase {
 	final Collection<ModuleRevision> getRevisions(String name, Version version) {
 		lockRead();
 		try {
-			if (version == null)
-				return new ArrayList<ModuleRevision>(revisionByName.get(name));
-
 			Collection<ModuleRevision> existingRevisions = revisionByName.get(name);
+
 			if (existingRevisions == null) {
 				return Collections.emptyList();
 			}
+
+			if (version == null) {
+				return new ArrayList<ModuleRevision>(existingRevisions);
+			}
+
 			Collection<ModuleRevision> sameVersion = new ArrayList<ModuleRevision>(1);
 			for (ModuleRevision revision : existingRevisions) {
 				if (revision.getVersion().equals(version)) {
