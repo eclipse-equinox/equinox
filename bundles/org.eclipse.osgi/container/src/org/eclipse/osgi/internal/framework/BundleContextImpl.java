@@ -21,7 +21,6 @@ import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.internal.loader.BundleLoader;
-import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.internal.serviceregistry.*;
 import org.eclipse.osgi.next.internal.debug.Debug;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
@@ -753,14 +752,10 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 * @param bundleActivator that activator to start
 	 */
 	private void startActivator(final BundleActivator bundleActivator) throws BundleException {
-		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logEnter("BundleContextImpl.startActivator()", null); //$NON-NLS-1$
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 				public Object run() throws Exception {
 					if (bundleActivator != null) {
-						if (Profile.PROFILE && Profile.STARTUP)
-							Profile.logTime("BundleContextImpl.startActivator()", "calling " + bundle.getLocation() + " bundle activator"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 						// make sure the context class loader is set correctly
 						Object previousTCCL = setContextFinder();
 						/* Start the bundle synchronously */
@@ -770,8 +765,6 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 							if (previousTCCL != Boolean.FALSE)
 								Thread.currentThread().setContextClassLoader((ClassLoader) previousTCCL);
 						}
-						if (Profile.PROFILE && Profile.STARTUP)
-							Profile.logTime("BundleContextImpl.startActivator()", "returned from " + bundle.getLocation() + " bundle activator"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 					}
 					return null;
 				}
@@ -789,9 +782,6 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			clazz = bundleActivator.getClass().getName();
 
 			throw new BundleException(NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, new Object[] {clazz, "start", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}), BundleException.ACTIVATOR_ERROR, t); //$NON-NLS-1$ //$NON-NLS-2$ 
-		} finally {
-			if (Profile.PROFILE && Profile.STARTUP)
-				Profile.logExit("BundleContextImpl.startActivator()"); //$NON-NLS-1$
 		}
 	}
 
@@ -957,7 +947,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	public Filter createFilter(String filter) throws InvalidSyntaxException {
 		checkValid();
 
-		return FilterImpl.newInstance(filter);
+		return FilterImpl.newInstance(filter, container.getConfiguration().getDebug().DEBUG_FILTER);
 	}
 
 	/**

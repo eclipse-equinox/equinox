@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.storagemanager;
 
-import org.eclipse.osgi.internal.location.*;
-
 import java.io.*;
 import java.security.AccessController;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.reliablefile.*;
 import org.eclipse.osgi.framework.util.SecureAction;
+import org.eclipse.osgi.internal.location.*;
 
 /**
  * Storage managers provide a facility for tracking the state of a group of files having 
@@ -188,7 +187,7 @@ public final class StorageManager {
 			return;
 		this.instanceFile = File.createTempFile(".tmp", ".instance", managerRoot); //$NON-NLS-1$//$NON-NLS-2$
 		this.instanceFile.deleteOnExit();
-		instanceLocker = BasicLocation.createLocker(instanceFile, lockMode);
+		instanceLocker = BasicLocation.createLocker(instanceFile, lockMode, false);
 		instanceLocker.lock();
 	}
 
@@ -383,7 +382,7 @@ public final class StorageManager {
 		if (readOnly)
 			return false;
 		if (locker == null) {
-			locker = BasicLocation.createLocker(lockFile, lockMode);
+			locker = BasicLocation.createLocker(lockFile, lockMode, false);
 			if (locker == null)
 				throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
 		}
@@ -609,7 +608,7 @@ public final class StorageManager {
 			if (files != null) {
 				for (int i = 0; i < files.length; i++) {
 					if (files[i].endsWith(".instance") && (instanceFile == null || !files[i].equalsIgnoreCase(instanceFile.getName()))) { //$NON-NLS-1$
-						Locker tmpLocker = BasicLocation.createLocker(new File(managerRoot, files[i]), lockMode);
+						Locker tmpLocker = BasicLocation.createLocker(new File(managerRoot, files[i]), lockMode, false);
 						if (tmpLocker.lock()) {
 							//If I can lock it is a file that has been left behind by a crash
 							tmpLocker.release();

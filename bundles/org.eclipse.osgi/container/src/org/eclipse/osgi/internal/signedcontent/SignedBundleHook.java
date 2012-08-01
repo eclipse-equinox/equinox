@@ -20,7 +20,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.*;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.internal.framework.*;
+import org.eclipse.osgi.internal.framework.EquinoxBundle;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.hookregistry.*;
 import org.eclipse.osgi.internal.service.security.KeyStoreTrustEngine;
 import org.eclipse.osgi.internal.signedcontent.SignedStorageHook.StorageHookImpl;
@@ -266,7 +267,7 @@ public class SignedBundleHook implements ActivatorHookFactory, BundleFileWrapper
 			Filter filter = null;
 			if (trustEngineNameProp != null)
 				try {
-					filter = FilterImpl.newInstance("(&(" + Constants.OBJECTCLASS + "=" + TrustEngine.class.getName() + ")(" + SignedContentConstants.TRUST_ENGINE + "=" + trustEngineNameProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$//$NON-NLS-5$
+					filter = context.createFilter("(&(" + Constants.OBJECTCLASS + "=" + TrustEngine.class.getName() + ")(" + SignedContentConstants.TRUST_ENGINE + "=" + trustEngineNameProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$//$NON-NLS-5$
 				} catch (InvalidSyntaxException e) {
 					log("Invalid trust engine filter", FrameworkLogEntry.WARNING, e); //$NON-NLS-1$
 				}

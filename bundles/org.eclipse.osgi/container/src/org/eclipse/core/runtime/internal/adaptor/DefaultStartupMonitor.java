@@ -12,7 +12,6 @@ package org.eclipse.core.runtime.internal.adaptor;
 
 import java.lang.reflect.Method;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
-import org.eclipse.core.runtime.internal.stats.StatsManager;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.service.runnable.StartupMonitor;
 
@@ -62,7 +61,6 @@ public class DefaultStartupMonitor implements StartupMonitor {
 			long time = timeString == null ? 0L : Long.parseLong(timeString);
 			System.out.println("Application Started: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$
 		}
-		StatsManager.doneBooting();
 		splashHandler.run();
 	}
 }

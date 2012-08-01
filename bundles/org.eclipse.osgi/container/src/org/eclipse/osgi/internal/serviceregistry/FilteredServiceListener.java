@@ -52,7 +52,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 			this.filter = null;
 			this.objectClass = null;
 		} else {
-			FilterImpl filterImpl = FilterImpl.newInstance(filterstring);
+			FilterImpl filterImpl = FilterImpl.newInstance(filterstring, context.getContainer().getConfiguration().getDebug().DEBUG_FILTER);
 			String clazz = filterImpl.getRequiredObjectClass();
 			if (unfiltered || (clazz == null)) {
 				this.objectClass = null;

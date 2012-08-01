@@ -26,7 +26,6 @@ import org.eclipse.osgi.framework.util.FilePath;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.location.*;
-import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
@@ -212,8 +211,6 @@ public class EclipseStarter {
 	 * @throws Exception if anything goes wrong
 	 */
 	public static Object run(String[] args, Runnable endSplashHandler) throws Exception {
-		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logEnter("EclipseStarter.run()", null); //$NON-NLS-1$
 		if (running)
 			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ALREADY_RUNNING);
 		boolean startupFailed = true;
@@ -250,14 +247,6 @@ public class EclipseStarter {
 					// TODO desperate measure - ideally, we should write this to disk (a la Main.log)
 					e.printStackTrace();
 			}
-			if (Profile.PROFILE && Profile.STARTUP)
-				Profile.logExit("EclipseStarter.run()"); //$NON-NLS-1$
-			if (Profile.PROFILE) {
-				String report = Profile.getProfileLog();
-				// avoiding writing to the console if there is nothing to print
-				if (report != null && report.length() > 0)
-					System.out.println(report);
-			}
 		}
 		// we only get here if an error happened
 		if (getProperty(PROP_EXITCODE) == null) {
@@ -287,16 +276,10 @@ public class EclipseStarter {
 	 * @throws Exception if anything goes wrong
 	 */
 	public static BundleContext startup(String[] args, Runnable endSplashHandler) throws Exception {
-		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logEnter("EclipseStarter.startup()", null); //$NON-NLS-1$
 		if (running)
 			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ALREADY_RUNNING);
 		processCommandLine(args);
 		finalizeProperties();
-		if (Profile.PROFILE)
-			Profile.initProps(); // catch any Profile properties set in eclipse.properties...
-		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logTime("EclipseStarter.startup()", "props inited"); //$NON-NLS-1$ //$NON-NLS-2$
 		framework = new Equinox(configuration);
 		framework.init();
 		context = framework.getBundleContext();
@@ -304,17 +287,10 @@ public class EclipseStarter {
 		log = context.getService(logRef);
 		ServiceReference<EnvironmentInfo> configRef = context.getServiceReference(EnvironmentInfo.class);
 		equinoxConfig = (EquinoxConfiguration) context.getService(configRef);
-		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logTime("EclipseStarter.startup()", "OSGi created"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		registerFrameworkShutdownHandlers();
 		publishSplashScreen(endSplashHandler);
-		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logTime("EclipseStarter.startup()", "osgi launched"); //$NON-NLS-1$ //$NON-NLS-2$
 		consoleMgr = ConsoleManager.startConsole(context);
-		if (Profile.PROFILE && Profile.STARTUP) {
-			Profile.logTime("EclipseStarter.startup()", "console started"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
 
 		Bundle[] startBundles = loadBasicBundles();
 
@@ -323,14 +299,9 @@ public class EclipseStarter {
 			return context; // cannot continue; loadBasicBundles caused refreshPackages to shutdown the framework
 		}
 
-		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logTime("EclipseStarter.startup()", "loading basic bundles"); //$NON-NLS-1$ //$NON-NLS-2$
-
 		// set the framework start level to the ultimate value.  This will actually start things
 		// running if they are persistently active.
 		setStartLevel(getStartLevel());
-		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logTime("EclipseStarter.startup()", "StartLevel set"); //$NON-NLS-1$ //$NON-NLS-2$
 		// they should all be active by this time
 		ensureBundlesActive(startBundles);
 
@@ -343,8 +314,6 @@ public class EclipseStarter {
 		}
 		// TODO should log unresolved bundles if in debug or dev mode
 		running = true;
-		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logExit("EclipseStarter.startup()"); //$NON-NLS-1$
 		return context;
 	}
 
@@ -373,8 +342,6 @@ public class EclipseStarter {
 	 * @throws Exception if anything goes wrong
 	 */
 	public static Object run(Object argument) throws Exception {
-		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logEnter("EclipseStarter.run(Object)()", null); //$NON-NLS-1$
 		if (!running)
 			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_NOT_RUNNING);
 		// if we are just initializing, do not run the application just return.

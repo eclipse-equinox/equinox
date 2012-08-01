@@ -11,10 +11,6 @@
 
 package org.eclipse.osgi.internal.baseadaptor;
 
-import org.eclipse.osgi.internal.debug.Debug;
-
-import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
-
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -22,11 +18,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.util.Headers;
-import org.eclipse.osgi.framework.util.ObjectPool;
-import org.eclipse.osgi.util.NLS;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.osgi.framework.*;
 
 /**
@@ -159,16 +151,6 @@ public class AdaptorUtil {
 		}
 	}
 
-	public static Version loadVersion(DataInputStream in) throws IOException {
-		String versionString = readString(in, false);
-		try {
-			//return Version.parseVersion(versionString);
-			return (Version) ObjectPool.intern(Version.parseVersion(versionString));
-		} catch (IllegalArgumentException e) {
-			return new InvalidVersion(versionString);
-		}
-	}
-
 	/**
 	 * Register a service object.
 	 * @param name the service class name
@@ -183,17 +165,6 @@ public class AdaptorUtil {
 		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 		properties.put(Constants.SERVICE_PID, context.getBundle().getBundleId() + "." + service.getClass().getName()); //$NON-NLS-1$
 		return context.registerService(name, service, properties);
-	}
-
-	public static Dictionary<String, String> loadManifestFrom(BaseData bundledata) throws BundleException {
-		URL url = bundledata.getEntry(Constants.OSGI_BUNDLE_MANIFEST);
-		if (url == null)
-			return null;
-		try {
-			return Headers.parseManifest(url.openStream());
-		} catch (IOException e) {
-			throw new BundleException(NLS.bind(EclipseAdaptorMsg.ECLIPSE_DATA_ERROR_READING_MANIFEST, bundledata.getLocation()), BundleException.MANIFEST_ERROR, e);
-		}
 	}
 
 	public static boolean canWrite(File installDir) {

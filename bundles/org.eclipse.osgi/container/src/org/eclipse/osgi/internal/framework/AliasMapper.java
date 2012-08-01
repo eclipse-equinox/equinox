@@ -10,13 +10,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.framework;
 
-import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.internal.core.Tokenizer;
-
-import org.eclipse.osgi.internal.debug.Debug;
-
 import java.io.*;
 import java.util.*;
+import org.eclipse.osgi.framework.internal.core.Tokenizer;
+import org.eclipse.osgi.internal.debug.Debug;
 
 /**
  * This class maps aliases.
@@ -28,7 +25,7 @@ public class AliasMapper {
 	// Safe lazy initialization
 	private static synchronized Map<String, Object> getProcessorAliasTable() {
 		if (processorAliasTable == null) {
-			InputStream in = AliasMapper.class.getResourceAsStream(Constants.OSGI_PROCESSOR_ALIASES);
+			InputStream in = AliasMapper.class.getResourceAsStream("processor.aliases"); //$NON-NLS-1$
 			if (in != null) {
 				try {
 					processorAliasTable = initAliases(in);
@@ -47,7 +44,7 @@ public class AliasMapper {
 	// Safe lazy initialization
 	private static synchronized Map<String, Object> getOSNameAliasTable() {
 		if (osnameAliasTable == null) {
-			InputStream in = AliasMapper.class.getResourceAsStream(Constants.OSGI_OSNAME_ALIASES);
+			InputStream in = AliasMapper.class.getResourceAsStream("osname.aliases"); //$NON-NLS-1$
 			if (in != null) {
 				try {
 					osnameAliasTable = initAliases(in);

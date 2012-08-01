@@ -11,17 +11,14 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
-import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
-
 import java.lang.reflect.Method;
 import java.util.Map;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
-import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.internal.profile.Profile;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
 import org.eclipse.osgi.service.runnable.*;
 import org.osgi.framework.*;
 
@@ -83,9 +80,9 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 				if (!relaunch || (context.getBundle().getState() & Bundle.ACTIVE) == 0)
 					throw e;
 				if (log != null)
-					log.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null));
+					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null));
 			}
-			doRelaunch = (relaunch && (context.getBundle().getState() & Bundle.ACTIVE) != 0) || FrameworkProperties.getProperty(Constants.PROP_OSGI_RELAUNCH) != null;
+			doRelaunch = (relaunch && (context.getBundle().getState() & Bundle.ACTIVE) != 0);
 		} while (doRelaunch);
 		return result;
 	}
@@ -105,14 +102,10 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 			long time = timeString == null ? 0L : Long.parseLong(timeString);
 			System.out.println("Starting application: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$ 
 		}
-		if (Profile.PROFILE && (Profile.STARTUP || Profile.BENCHMARK))
-			Profile.logTime("EclipseStarter.run(Object)()", "framework initialized! starting application..."); //$NON-NLS-1$ //$NON-NLS-2$
 		try {
 			// run the actual application on the current thread (main).
 			return runnable.run(appContext != null ? appContext : defaultContext);
 		} finally {
-			if (Profile.PROFILE && Profile.STARTUP)
-				Profile.logExit("EclipseStarter.run(Object)()"); //$NON-NLS-1$
 			// free the runnable application and release the lock to allow another app to be launched.
 			runnable = null;
 			appContext = null;
