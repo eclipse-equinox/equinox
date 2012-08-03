@@ -117,11 +117,11 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	public void refreshPackages(Bundle[] input) {
-		container.getFrameworkWiring().refreshBundles(Arrays.asList(input));
+		container.getFrameworkWiring().refreshBundles(input == null ? null : Arrays.asList(input));
 	}
 
-	public boolean resolveBundles(Bundle[] bundles) {
-		return container.getFrameworkWiring().resolveBundles(Arrays.asList(bundles));
+	public boolean resolveBundles(Bundle[] input) {
+		return container.getFrameworkWiring().resolveBundles(input == null ? null : Arrays.asList(input));
 	}
 
 	public RequiredBundle[] getRequiredBundles(String symbolicName) {
