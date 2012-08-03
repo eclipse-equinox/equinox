@@ -325,7 +325,7 @@ public final class ModuleContainer {
 		module.lockStateChange(ModuleEvent.UNINSTALLED);
 		State previousState = module.getState();
 		try {
-			if (Module.ACTIVE_SET.equals(module.getState())) {
+			if (Module.ACTIVE_SET.contains(module.getState())) {
 				try {
 					module.stop(StopOptions.TRANSIENT);
 				} catch (BundleException e) {
