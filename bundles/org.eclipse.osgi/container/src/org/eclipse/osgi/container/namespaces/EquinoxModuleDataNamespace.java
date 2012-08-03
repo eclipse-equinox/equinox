@@ -110,7 +110,7 @@ public class EquinoxModuleDataNamespace extends Namespace {
 	 * If the attribute is not defined then the default is no package names. 
 	 * The value of this attribute must be of type {@code List<String>}.
 	 */
-	public final static String CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE = "lazy.include"; //$NON-NLS-1$
+	public final static String CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE = "lazy.exclude"; //$NON-NLS-1$
 
 	/**
 	 * The capability attribute contains the {@link Constants#BUNDLE_ACTIVATOR activator}
