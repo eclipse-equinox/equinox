@@ -319,10 +319,6 @@ public class Storage {
 		if (osgiLocation.isReadOnly()) {
 			throw new BundleException("The framework storage area is read only.", BundleException.INVALID_OPERATION); //$NON-NLS-1$
 		}
-		Module existing = moduleContainer.getModule(bundleLocation);
-		if (existing != null) {
-			return (Generation) existing.getCurrentRevision().getRevisionInfo();
-		}
 		URL sourceURL = content.getURL();
 		InputStream in;
 		try {
