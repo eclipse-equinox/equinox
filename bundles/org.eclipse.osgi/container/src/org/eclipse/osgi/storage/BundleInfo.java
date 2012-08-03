@@ -234,6 +234,16 @@ public final class BundleInfo {
 		}
 
 		public void delete() {
+			synchronized (this.genMonitor) {
+				// make sure the bundle file is closed
+				if (bundleFile != null) {
+					try {
+						bundleFile.close();
+					} catch (IOException e) {
+						// ignore
+					}
+				}
+			}
 			getBundleInfo().delete(this);
 		}
 
@@ -318,13 +328,19 @@ public final class BundleInfo {
 		return storage;
 	}
 
+	public void delete() {
+		try {
+			getStorage().delete(getStorage().getFile(Long.toString(getBundleId()), false));
+		} catch (IOException e) {
+			storage.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, "Error deleting bunlde info.", e); //$NON-NLS-1$
+		}
+	}
+
 	void delete(Generation generation) {
-		synchronized (this.infoMonitor) {
-			try {
-				getStorage().delete(getStorage().getFile(getBundleId() + "/" + generation.getGenerationId(), false)); //$NON-NLS-1$
-			} catch (IOException e) {
-				storage.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, "Error deleting generation.", e); //$NON-NLS-1$
-			}
+		try {
+			getStorage().delete(getStorage().getFile(getBundleId() + "/" + generation.getGenerationId(), false)); //$NON-NLS-1$
+		} catch (IOException e) {
+			storage.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, "Error deleting generation.", e); //$NON-NLS-1$
 		}
 	}
 

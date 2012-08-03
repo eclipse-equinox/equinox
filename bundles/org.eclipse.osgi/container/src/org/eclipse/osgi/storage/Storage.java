@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.storage;
 
-import org.eclipse.osgi.storage.url.reference.ReferenceInputStream;
-
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
@@ -38,6 +36,7 @@ import org.eclipse.osgi.next.internal.debug.Debug;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.bundlefile.*;
+import org.eclipse.osgi.storage.url.reference.ReferenceInputStream;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -361,6 +360,7 @@ public class Storage {
 			}
 			if (generation != null) {
 				generation.delete();
+				generation.getBundleInfo().delete();
 			}
 			if (t instanceof BundleException) {
 				throw (BundleException) t;
@@ -471,7 +471,7 @@ public class Storage {
 			if (result.length() > 0) {
 				result.append(", "); //$NON-NLS-1$
 			}
-			result.append(extraSystemPackages).append(", "); //$NON-NLS-1$
+			result.append(extraSystemPackages);
 		}
 
 		return result.toString();
@@ -547,7 +547,9 @@ public class Storage {
 				throw new BundleException("Could not create generation directory: " + generationRoot.getAbsolutePath()); //$NON-NLS-1$
 			}
 			contentFile = new File(generationRoot, BUNDLE_FILE_NAME);
-			staged.renameTo(contentFile);
+			if (!staged.renameTo(contentFile)) {
+				throw new BundleException("Error while renaming bundle file to final location: " + contentFile); //$NON-NLS-1$
+			}
 		} else {
 			contentFile = staged;
 		}
@@ -745,19 +747,21 @@ public class Storage {
 	}
 
 	void delete(final File delete) throws IOException {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			delete0(delete);
-		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-				public Object run() throws IOException {
-					delete0(delete);
-					return null;
-				}
-			});
-		} catch (PrivilegedActionException e) {
-			if (e.getException() instanceof IOException)
-				throw (IOException) e.getException();
-			throw (RuntimeException) e.getException();
+		} else {
+			try {
+				AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+					public Object run() throws IOException {
+						delete0(delete);
+						return null;
+					}
+				});
+			} catch (PrivilegedActionException e) {
+				if (e.getException() instanceof IOException)
+					throw (IOException) e.getException();
+				throw (RuntimeException) e.getException();
+			}
 		}
 	}
 

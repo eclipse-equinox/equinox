@@ -178,6 +178,10 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		protected void cleanup(ModuleRevision revision) {
 			Generation generation = (Generation) revision.getRevisionInfo();
 			generation.delete();
+			if (revision.equals(getCurrentRevision())) {
+				// uninstall case
+				generation.getBundleInfo().delete();
+			}
 		}
 	}
 
