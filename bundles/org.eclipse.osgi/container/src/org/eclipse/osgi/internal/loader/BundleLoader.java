@@ -63,7 +63,7 @@ public class BundleLoader implements ModuleLoader {
 	private static final int PRE_RESOURCES = 5;
 	private static final int POST_RESOURCES = 6;
 
-	private static final Pattern PACKAGENAME_FILTER = Pattern.compile("\\(osgi.wiring.package\\s*=\\s*([^)])\\)"); //$NON-NLS-1$
+	private static final Pattern PACKAGENAME_FILTER = Pattern.compile("\\(osgi.wiring.package\\s*=\\s*([^)]+)\\)"); //$NON-NLS-1$
 
 	private final ModuleWiring wiring;
 	private final EquinoxContainer container;
@@ -815,7 +815,7 @@ public class BundleLoader implements ModuleLoader {
 			if (PackageNamespace.RESOLUTION_DYNAMIC.equals(packageImport.getDirectives().get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
 				Matcher matcher = PACKAGENAME_FILTER.matcher(packageImport.getDirectives().get(PackageNamespace.REQUIREMENT_FILTER_DIRECTIVE));
 				if (matcher.find()) {
-					String dynamicName = matcher.group(0);
+					String dynamicName = matcher.group(1);
 					if (dynamicName != null) {
 						dynamicImports.add(dynamicName);
 					}
@@ -963,7 +963,7 @@ public class BundleLoader implements ModuleLoader {
 	}
 
 	private PackageSource findDynamicSource(String pkgName) {
-		if (isDynamicallyImported(pkgName)) {
+		if (!isExportedPackage(pkgName) && isDynamicallyImported(pkgName)) {
 			ModuleRevision revision = wiring.getRevision();
 			try {
 				ModuleWire dynamicWire = revision.getRevisions().getModule().getContainer().resolveDynamic(pkgName, revision);
