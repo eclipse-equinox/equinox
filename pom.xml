@@ -71,8 +71,12 @@
     <module>bundles/org.eclipse.equinox.ds</module>
     <module>bundles/org.eclipse.equinox.event</module>
     <module>bundles/org.eclipse.equinox.http</module>
+    
+    <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=386040
     <module>bundles/org.eclipse.equinox.http.jetty5</module>
     <module>bundles/org.eclipse.equinox.http.jetty6</module>
+    -->
+
     <module>bundles/org.eclipse.equinox.http.jetty8</module>
     <module>bundles/org.eclipse.equinox.http.registry</module>
     <module>bundles/org.eclipse.equinox.http.servlet</module>
