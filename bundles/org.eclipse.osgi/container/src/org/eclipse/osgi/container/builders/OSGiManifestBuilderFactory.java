@@ -467,11 +467,11 @@ public final class OSGiManifestBuilderFactory {
 				attributes.put(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY, policyName);
 				String includeSpec = policy.getDirective(Constants.INCLUDE_DIRECTIVE);
 				if (includeSpec != null) {
-					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_INCLUDE_ATTRIBUTE, convertValue("List<String>", includeSpec)); //$NON-NLS-1$
+					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_INCLUDE_ATTRIBUTE, convertValueWithNoWhitespace("List<String>", includeSpec)); //$NON-NLS-1$
 				}
 				String excludeSpec = policy.getDirective(Constants.EXCLUDE_DIRECTIVE);
 				if (excludeSpec != null) {
-					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE, convertValue("List<String>", excludeSpec)); //$NON-NLS-1$
+					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE, convertValueWithNoWhitespace("List<String>", excludeSpec)); //$NON-NLS-1$
 				}
 			}
 		} else {
@@ -485,13 +485,13 @@ public final class OSGiManifestBuilderFactory {
 				if ("true".equals(policy.getValue())) { //$NON-NLS-1$
 					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY, EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY);
 					if (excludeSpec != null) {
-						attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE, convertValue("List<String>", excludeSpec)); //$NON-NLS-1$
+						attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE, convertValueWithNoWhitespace("List<String>", excludeSpec)); //$NON-NLS-1$
 					}
 				} else {
 					// NOTICE - the exclude list gets converted to an include list when the header is not true
 					if (excludeSpec != null) {
 						attributes.put(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY, EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY);
-						attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_INCLUDE_ATTRIBUTE, convertValue("List<String>", excludeSpec)); //$NON-NLS-1$
+						attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_INCLUDE_ATTRIBUTE, convertValueWithNoWhitespace("List<String>", excludeSpec)); //$NON-NLS-1$
 					}
 				}
 			}
@@ -563,6 +563,11 @@ public final class OSGiManifestBuilderFactory {
 			attributes.put(key, convertValue(type, value));
 		}
 		return attributes;
+	}
+
+	private static Object convertValueWithNoWhitespace(String type, String value) {
+		value = value.replaceAll("\\s", ""); //$NON-NLS-1$//$NON-NLS-2$
+		return convertValue(type, value);
 	}
 
 	private static Object convertValue(String type, String value) {
