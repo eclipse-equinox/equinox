@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.container;
 
-import org.eclipse.osgi.internal.framework.FilterImpl;
-
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.namespace.*;
@@ -21,6 +22,7 @@ import org.osgi.resource.Capability;
 import org.osgi.resource.Namespace;
 
 public class Capabilities {
+	public static final Pattern MANDATORY_ATTR = Pattern.compile("\\(([^(=<>]+)\\s*[=<>]\\s*[^)]+\\)");
 
 	static class NamespaceSet {
 		private final String name;
@@ -175,10 +177,21 @@ public class Capabilities {
 			if (f == null) {
 				return false;
 			}
+			Matcher matcher = MANDATORY_ATTR.matcher(f.toString());
 			String[] mandatoryAttrs = ManifestElement.getArrayFromList(mandatory, ","); //$NON-NLS-1$
 			boolean allPresent = true;
-			for (String attribute : mandatoryAttrs) {
-				allPresent &= f.getPrimaryKeyValue(attribute) != null;
+			for (String mandatoryAttr : mandatoryAttrs) {
+				matcher.reset();
+				boolean found = false;
+				while (matcher.find()) {
+					int numGroups = matcher.groupCount();
+					for (int i = 1; i <= numGroups; i++) {
+						if (mandatoryAttr.equals(matcher.group(i))) {
+							found = true;
+						}
+					}
+				}
+				allPresent &= found;
 			}
 			return allPresent;
 		}
