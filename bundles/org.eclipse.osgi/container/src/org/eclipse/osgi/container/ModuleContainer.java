@@ -245,8 +245,7 @@ public final class ModuleContainer {
 		try {
 			// Attempt to lock the name
 			try {
-				nameLocked = name != null && nameLocks.tryLock(name, 5, TimeUnit.SECONDS);
-				if (!nameLocked) {
+				if (name != null && !(nameLocked = nameLocks.tryLock(name, 5, TimeUnit.SECONDS))) {
 					throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR);
 				}
 			} catch (InterruptedException e) {
