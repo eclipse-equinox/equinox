@@ -21,7 +21,7 @@ public class FilteredSourcePackage extends SingleSourcePackage {
 	String[] excludes;
 
 	public FilteredSourcePackage(String name, BundleLoader supplier, String includes, String excludes) {
-		super(excludes, supplier);
+		super(name, supplier);
 		if (includes != null)
 			this.includes = ManifestElement.getArrayFromList(includes);
 		if (excludes != null)
