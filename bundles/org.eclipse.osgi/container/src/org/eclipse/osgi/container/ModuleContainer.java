@@ -945,6 +945,9 @@ public final class ModuleContainer {
 			} catch (ResolutionException e) {
 				return false;
 			}
+			if (modules == null) {
+				modules = ModuleContainer.this.getModules();
+			}
 			for (Module module : modules) {
 				if (getWiring(module.getCurrentRevision()) == null)
 					return false;
