@@ -13,7 +13,7 @@ package org.eclipse.osgi.internal.location;
 import org.eclipse.osgi.util.NLS;
 
 public class EclipseAdaptorMsg extends NLS {
-	private static final String BUNDLE_NAME = "org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorMessages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.osgi.internal.location.EclipseAdaptorMessages"; //$NON-NLS-1$
 
 	public static String ECLIPSE_MISSING_IMPORTED_PACKAGE;
 	public static String ECLIPSE_MISSING_OPTIONAL_IMPORTED_PACKAGE;
