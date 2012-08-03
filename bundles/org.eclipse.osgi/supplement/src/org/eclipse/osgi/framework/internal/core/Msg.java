@@ -81,6 +81,15 @@ public class Msg extends NLS {
 
 	public static String URL_HANDLER_INCORRECT_TYPE;
 
+	public static String HEADER_REQUIRED;
+	public static String HEADER_PACKAGE_DUPLICATES;
+	public static String HEADER_PACKAGE_JAVA;
+	public static String HEADER_VERSION_ERROR;
+	public static String HEADER_EXPORT_ATTR_ERROR;
+	public static String HEADER_DIRECTIVE_DUPLICATES;
+	public static String HEADER_ATTRIBUTE_DUPLICATES;
+	public static String HEADER_EXTENSION_ERROR;
+
 	static {
 		// initialize resource bundles
 		NLS.initializeMessages(BUNDLE_NAME, Msg.class);

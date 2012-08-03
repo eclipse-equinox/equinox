@@ -15,9 +15,9 @@ import java.net.URISyntaxException;
 import java.util.*;
 import org.eclipse.osgi.container.ModuleRevisionBuilder;
 import org.eclipse.osgi.container.namespaces.*;
+import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.internal.core.Tokenizer;
-import org.eclipse.osgi.internal.framework.AliasMapper;
-import org.eclipse.osgi.internal.framework.FilterImpl;
+import org.eclipse.osgi.internal.framework.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -36,6 +36,7 @@ public final class OSGiManifestBuilderFactory {
 	private static final String ATTR_TYPE_DOUBLE = "double"; //$NON-NLS-1$
 	private static final String ATTR_TYPE_SET = "set"; //$NON-NLS-1$
 	private static final String ATTR_TYPE_LIST = "List"; //$NON-NLS-1$
+	private static final String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REQUIRE_BUNDLE};
 
 	public static ModuleRevisionBuilder createBuilder(Map<String, String> manifest) throws BundleException {
 		return createBuilder(manifest, null, null, null);
@@ -45,6 +46,9 @@ public final class OSGiManifestBuilderFactory {
 		ModuleRevisionBuilder builder = new ModuleRevisionBuilder();
 
 		int manifestVersion = getManifestVersion(manifest);
+		if (manifestVersion >= 2) {
+			validateHeaders(manifest);
+		}
 
 		Object symbolicName = getSymbolicNameAndVersion(builder, manifest, symbolicNameAlias, manifestVersion);
 
@@ -73,6 +77,107 @@ public final class OSGiManifestBuilderFactory {
 
 		getNativeCode(builder, manifest);
 		return builder;
+	}
+
+	private static void validateHeaders(Map<String, String> manifest) throws BundleException {
+		for (int i = 0; i < DEFINED_OSGI_VALIDATE_HEADERS.length; i++) {
+			String header = manifest.get(DEFINED_OSGI_VALIDATE_HEADERS[i]);
+			if (header != null) {
+				ManifestElement[] elements = ManifestElement.parseHeader(DEFINED_OSGI_VALIDATE_HEADERS[i], header);
+				checkForDuplicateDirectivesAttributes(DEFINED_OSGI_VALIDATE_HEADERS[i], elements);
+				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.IMPORT_PACKAGE)
+					checkImportExportSyntax(DEFINED_OSGI_VALIDATE_HEADERS[i], elements, false, false);
+				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.DYNAMICIMPORT_PACKAGE)
+					checkImportExportSyntax(DEFINED_OSGI_VALIDATE_HEADERS[i], elements, false, true);
+				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.EXPORT_PACKAGE)
+					checkImportExportSyntax(DEFINED_OSGI_VALIDATE_HEADERS[i], elements, true, false);
+				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.FRAGMENT_HOST)
+					checkExtensionBundle(DEFINED_OSGI_VALIDATE_HEADERS[i], elements);
+			} else if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.BUNDLE_SYMBOLICNAME) {
+				throw new BundleException(Constants.BUNDLE_SYMBOLICNAME + " header is required.", BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+			}
+		}
+	}
+
+	public static void checkImportExportSyntax(String headerKey, ManifestElement[] elements, boolean export, boolean dynamic) throws BundleException {
+		if (elements == null)
+			return;
+		int length = elements.length;
+		Set<String> packages = new HashSet<String>(length);
+		for (int i = 0; i < length; i++) {
+			// check for duplicate imports
+			String[] packageNames = elements[i].getValueComponents();
+			for (int j = 0; j < packageNames.length; j++) {
+				if (!export && !dynamic && packages.contains(packageNames[j])) {
+					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
+					throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_PACKAGE_DUPLICATES, packageNames[j]), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+				}
+				// check for java.*
+				if (packageNames[j].startsWith("java.")) { //$NON-NLS-1$
+					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
+					throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_PACKAGE_JAVA, packageNames[j]), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+				}
+				packages.add(packageNames[j]);
+			}
+			// check for version/specification version mismatch
+			String version = elements[i].getAttribute(Constants.VERSION_ATTRIBUTE);
+			if (version != null) {
+				String specVersion = elements[i].getAttribute(Constants.PACKAGE_SPECIFICATION_VERSION);
+				if (specVersion != null && !specVersion.equals(version))
+					throw new BundleException(NLS.bind(Msg.HEADER_VERSION_ERROR, Constants.VERSION_ATTRIBUTE, Constants.PACKAGE_SPECIFICATION_VERSION), BundleException.MANIFEST_ERROR);
+			}
+			// check for bundle-symbolic-name and bundle-verion attibures
+			// (failure)
+			if (export) {
+				if (elements[i].getAttribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE) != null) {
+					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
+					throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_EXPORT_ATTR_ERROR, Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Constants.EXPORT_PACKAGE), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+				}
+				if (elements[i].getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE) != null) {
+					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
+					throw new BundleException(NLS.bind(message + " : " + Msg.HEADER_EXPORT_ATTR_ERROR, Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.EXPORT_PACKAGE), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+				}
+			}
+		}
+	}
+
+	private static void checkForDuplicateDirectivesAttributes(String headerKey, ManifestElement[] elements) throws BundleException {
+		// check for duplicate directives
+		for (int i = 0; i < elements.length; i++) {
+			Enumeration<String> directiveKeys = elements[i].getDirectiveKeys();
+			if (directiveKeys != null) {
+				while (directiveKeys.hasMoreElements()) {
+					String key = directiveKeys.nextElement();
+					String[] directives = elements[i].getDirectives(key);
+					if (directives.length > 1) {
+						String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
+						throw new BundleException(NLS.bind(message + " : " + Msg.HEADER_DIRECTIVE_DUPLICATES, key), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+					}
+				}
+			}
+			Enumeration<String> attrKeys = elements[i].getKeys();
+			if (attrKeys != null) {
+				while (attrKeys.hasMoreElements()) {
+					String key = attrKeys.nextElement();
+					String[] attrs = elements[i].getAttributes(key);
+					if (attrs.length > 1) {
+						String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
+						throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_ATTRIBUTE_DUPLICATES, key), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+					}
+				}
+			}
+		}
+	}
+
+	private static void checkExtensionBundle(String headerKey, ManifestElement[] elements) throws BundleException {
+		if (elements.length == 0 || elements[0].getDirective(Constants.EXTENSION_DIRECTIVE) == null)
+			return;
+		String hostName = elements[0].getValue();
+		// XXX: The extension bundle check is done against system.bundle and org.eclipse.osgi
+		if (!hostName.equals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME) && !hostName.equals(EquinoxContainer.NAME)) {
+			String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[0].toString());
+			throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_EXTENSION_ERROR, hostName), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+		}
 	}
 
 	private static int getManifestVersion(Map<String, String> manifest) {
