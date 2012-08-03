@@ -21,6 +21,7 @@ import org.eclipse.osgi.container.Module.StartOptions;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.Module.StopOptions;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
+import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
@@ -108,6 +109,12 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		@Override
 		public void update() throws BundleException {
 			update(null);
+		}
+
+		@Override
+		public void uninstall() throws BundleException {
+			getEquinoxContainer().checkAdminPermission(this, AdminPermission.LIFECYCLE);
+			throw new BundleException(Msg.BUNDLE_SYSTEMBUNDLE_UNINSTALL_EXCEPTION, BundleException.INVALID_OPERATION);
 		}
 
 	}
