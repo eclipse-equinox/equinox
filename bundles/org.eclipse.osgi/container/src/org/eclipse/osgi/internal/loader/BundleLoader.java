@@ -972,6 +972,7 @@ public class BundleLoader implements ModuleLoader {
 					synchronized (importedSources) {
 						importedSources.add(source);
 					}
+					return source;
 				}
 			} catch (ResolutionException e) {
 				// do nothing;
