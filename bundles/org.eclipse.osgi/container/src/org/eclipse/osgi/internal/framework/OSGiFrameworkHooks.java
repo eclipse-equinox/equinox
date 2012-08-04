@@ -141,7 +141,7 @@ class OSGiFrameworkHooks {
 					Debug.printStackTrace(t);
 			}
 			String message = NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, hook.getClass().getName(), method);
-			throw new RuntimeException(message, t);
+			throw new RuntimeException(message, new BundleException(message, BundleException.REJECTED_BY_HOOK, t));
 		}
 
 		private ServiceReferenceImpl<ResolverHookFactory>[] getHookReferences(ServiceRegistry registry, BundleContextImpl context) {
@@ -159,7 +159,6 @@ class OSGiFrameworkHooks {
 			if (debug.DEBUG_HOOKS) {
 				Debug.println("ResolverHook.begin"); //$NON-NLS-1$
 			}
-
 			ServiceRegistry registry = container.getServiceRegistry();
 			if (registry == null) {
 				return new CoreResolverHook(Collections.<HookReference> emptyList());
@@ -170,7 +169,7 @@ class OSGiFrameworkHooks {
 			ServiceReferenceImpl<ResolverHookFactory>[] refs = getHookReferences(registry, context);
 			@SuppressWarnings("unchecked")
 			List<HookReference> hookRefs = refs == null ? Collections.EMPTY_LIST : new ArrayList<CoreResolverHookFactory.HookReference>(refs.length);
-			if (refs != null)
+			if (refs != null) {
 				for (ServiceReferenceImpl<ResolverHookFactory> hookRef : refs) {
 					ResolverHookFactory factory = context.getService(hookRef);
 					if (factory != null) {
@@ -189,6 +188,7 @@ class OSGiFrameworkHooks {
 						}
 					}
 				}
+			}
 			return new CoreResolverHook(hookRefs);
 		}
 
