@@ -162,7 +162,18 @@ public class ManifestLocalization {
 		if (searchWiring != null) {
 			if ((generation.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 				List<ModuleWire> hostWires = searchWiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
-				searchWiring = (hostWires == null || hostWires.isEmpty()) ? null : hostWires.get(0).getProviderWiring();
+				searchWiring = null;
+				Long lowestHost = Long.MAX_VALUE;
+				if (hostWires != null) {
+					// search for the host with the highest ID
+					for (ModuleWire hostWire : hostWires) {
+						Long hostID = hostWire.getProvider().getRevisions().getModule().getId();
+						if (hostID.compareTo(lowestHost) <= 0) {
+							lowestHost = hostID;
+							searchWiring = hostWire.getProviderWiring();
+						}
+					}
+				}
 			}
 		}
 		if (searchWiring != null) {
