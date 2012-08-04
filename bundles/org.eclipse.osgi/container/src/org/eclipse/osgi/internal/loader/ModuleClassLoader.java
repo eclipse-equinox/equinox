@@ -29,8 +29,9 @@ import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.eclipse.osgi.storage.bundlefile.BundleFileWrapperChain;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleReference;
 
-public class ModuleClassLoader extends ClassLoader {
+public class ModuleClassLoader extends ClassLoader implements BundleReference {
 	/**
 	 * A PermissionCollection for AllPermissions; shared across all ProtectionDomains when security is disabled
 	 */
