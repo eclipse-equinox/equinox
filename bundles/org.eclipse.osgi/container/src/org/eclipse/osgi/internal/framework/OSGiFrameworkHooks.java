@@ -16,6 +16,7 @@ import java.util.*;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleCollisionHook;
 import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.osgi.internal.baseadaptor.ArrayMap;
 import org.eclipse.osgi.internal.serviceregistry.*;
 import org.eclipse.osgi.next.internal.debug.Debug;
 import org.eclipse.osgi.util.NLS;
@@ -55,11 +56,12 @@ class OSGiFrameworkHooks {
 		@Override
 		public void filterCollisions(int operationType, Module target, Collection<Module> collisionCandidates) {
 			Bundle targetBundle = target.getBundle();
-			Collection<Bundle> candidateBundles = new ArrayList<Bundle>();
+			ArrayMap<Bundle, Module> candidateBundles = new ArrayMap<Bundle, Module>(collisionCandidates.size());
 			for (Module module : collisionCandidates) {
-				candidateBundles.add(module.getBundle());
+				candidateBundles.put(module.getBundle(), module);
 			}
 			notifyCollisionHooks(operationType, targetBundle, candidateBundles);
+			collisionCandidates.retainAll(candidateBundles.getValues());
 		}
 
 		private void notifyCollisionHooks(final int operationType, final Bundle target, Collection<Bundle> collisionCandidates) {
