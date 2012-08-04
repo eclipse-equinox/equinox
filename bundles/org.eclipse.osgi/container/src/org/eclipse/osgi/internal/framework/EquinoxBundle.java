@@ -677,8 +677,10 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		ModuleRevision current = getModule().getCurrentRevision();
 		result.add((Generation) current.getRevisionInfo());
 		ModuleWiring wiring = current.getWiring();
-		for (ModuleWire hostWire : wiring.getProvidedModuleWires(HostNamespace.HOST_NAMESPACE)) {
-			result.add((Generation) hostWire.getRequirer().getRevisionInfo());
+		if (wiring != null) {
+			for (ModuleWire hostWire : wiring.getProvidedModuleWires(HostNamespace.HOST_NAMESPACE)) {
+				result.add((Generation) hostWire.getRequirer().getRevisionInfo());
+			}
 		}
 		return result;
 	}
