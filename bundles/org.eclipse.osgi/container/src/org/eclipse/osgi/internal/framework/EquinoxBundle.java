@@ -360,6 +360,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		} catch (SecurityException e) {
 			return null;
 		}
+		checkValid();
 		if (isFragment()) {
 			return null;
 		}
@@ -394,7 +395,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		} catch (SecurityException e) {
 			throw new ClassNotFoundException(name, e);
 		}
-
+		checkValid();
 		try {
 			ModuleClassLoader classLoader = getModuleClassLoader();
 			if (classLoader != null) {
@@ -428,6 +429,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		} catch (SecurityException e) {
 			return null;
 		}
+		checkValid();
 		if (isFragment()) {
 			return null;
 		}
