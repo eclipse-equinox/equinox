@@ -363,6 +363,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		lockStateChange(ModuleEvent.STARTED);
 		try {
 			checkValid();
+			checkFragment();
 			if (StartOptions.TRANSIENT_IF_AUTO_START.isContained(options) && !settings.contains(Settings.AUTO_START)) {
 				// Do nothing
 				return;
@@ -430,6 +431,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		lockStateChange(ModuleEvent.STOPPED);
 		try {
 			checkValid();
+			checkFragment();
 			persistStopOptions(options);
 			if (!Module.ACTIVE_SET.contains(getState()))
 				return;
@@ -451,6 +453,13 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		}
 		if (stopError != null)
 			throw stopError;
+	}
+
+	private void checkFragment() throws BundleException {
+		ModuleRevision current = getCurrentRevision();
+		if ((current.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+			throw new BundleException("Invalid operation on a fragment.", BundleException.INVALID_OPERATION);
+		}
 	}
 
 	@Override
