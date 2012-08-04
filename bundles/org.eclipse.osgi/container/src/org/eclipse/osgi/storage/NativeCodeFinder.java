@@ -170,7 +170,7 @@ public class NativeCodeFinder {
 
 		// TODO just taking the first paths for the revision, need to sort correctly
 		for (ModuleWire moduleWire : nativeCode) {
-			if (moduleWire.getRequirer().equals(revision)) {
+			if (moduleWire.getRequirement().getRevision().equals(revision)) {
 				@SuppressWarnings("unchecked")
 				List<String> result = (List<String>) nativeCode.get(0).getRequirement().getAttributes().get(EquinoxNativeCodeNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE);
 				if (result != null)
