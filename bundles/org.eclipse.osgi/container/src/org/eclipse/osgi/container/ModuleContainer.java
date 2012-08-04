@@ -288,10 +288,14 @@ public final class ModuleContainer {
 			}
 
 			module.lockStateChange(ModuleEvent.UPDATED);
-			State previousState = module.getState();
+			State previousState;
 			try {
-				// throwing an exception from stop terminates update
-				module.stop(StopOptions.TRANSIENT);
+				module.checkValid();
+				previousState = module.getState();
+				if (Module.ACTIVE_SET.contains(previousState)) {
+					// throwing an exception from stop terminates update
+					module.stop(StopOptions.TRANSIENT);
+				}
 				if (Module.RESOLVED_SET.contains(previousState)) {
 					// set the state to installed and publish unresolved event
 					module.setState(State.INSTALLED);
@@ -326,8 +330,10 @@ public final class ModuleContainer {
 	public void uninstall(Module module) throws BundleException {
 		checkAdminPermission(module.getBundle(), AdminPermission.LIFECYCLE);
 		module.lockStateChange(ModuleEvent.UNINSTALLED);
-		State previousState = module.getState();
+		State previousState;
 		try {
+			module.checkValid();
+			previousState = module.getState();
 			if (Module.ACTIVE_SET.contains(module.getState())) {
 				try {
 					module.stop(StopOptions.TRANSIENT);
