@@ -40,6 +40,9 @@ public abstract class SystemModule extends Module {
 				try {
 					getRevisions().getContainer().resolve(Arrays.asList((Module) this), true);
 				} catch (ResolutionException e) {
+					if (e.getCause() instanceof BundleException) {
+						throw (BundleException) e.getCause();
+					}
 					throw new BundleException("Could not resolve module.", BundleException.RESOLVE_ERROR, e);
 				}
 			}

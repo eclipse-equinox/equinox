@@ -14,6 +14,7 @@ import java.util.*;
 import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.internal.container.Converters;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.namespace.*;
@@ -26,6 +27,12 @@ import org.osgi.service.resolver.*;
  * in a module {@link ModuleContainer container}.
  */
 final class ModuleResolver {
+	final ThreadLocal<Boolean> threadResolving = new ThreadLocal<Boolean>() {
+		@Override
+		protected Boolean initialValue() {
+			return Boolean.FALSE;
+		}
+	};
 	final ModuleContainerAdaptor adaptor;
 
 	/**
@@ -454,21 +461,39 @@ final class ModuleResolver {
 		}
 
 		Map<Resource, List<Wire>> resolve() throws ResolutionException {
-			hook = adaptor.getResolverHookFactory().begin(Converters.asListBundleRevision((List<? extends BundleRevision>) triggers));
+			if (threadResolving.get().booleanValue()) {
+				throw new IllegalStateException("Detected a recursive resolve operation.");
+			}
+			threadResolving.set(Boolean.TRUE);
 			try {
-				filterResolvable();
-				selectSingletons();
-				// remove disabled from optional and triggers to prevent the resolver from resolving them
-				optionals.removeAll(disabled);
-				if (triggers.removeAll(disabled) && triggersMandatory) {
-					throw new ResolutionException("Could not resolve mandatory modules because another singleton was selected or the module was disabled: " + disabled);
+				try {
+					hook = adaptor.getResolverHookFactory().begin(Converters.asListBundleRevision((List<? extends BundleRevision>) triggers));
+				} catch (RuntimeException e) {
+					if (e.getCause() instanceof BundleException) {
+						BundleException be = (BundleException) e.getCause();
+						if (be.getType() == BundleException.REJECTED_BY_HOOK) {
+							throw new ResolutionException(be);
+						}
+					}
+					throw e;
 				}
-				if (dynamicReq != null) {
-					return resolveDynamic();
+				try {
+					filterResolvable();
+					selectSingletons();
+					// remove disabled from optional and triggers to prevent the resolver from resolving them
+					optionals.removeAll(disabled);
+					if (triggers.removeAll(disabled) && triggersMandatory) {
+						throw new ResolutionException("Could not resolve mandatory modules because another singleton was selected or the module was disabled: " + disabled);
+					}
+					if (dynamicReq != null) {
+						return resolveDynamic();
+					}
+					return adaptor.getResolver().resolve(this);
+				} finally {
+					hook.end();
 				}
-				return adaptor.getResolver().resolve(this);
 			} finally {
-				hook.end();
+				threadResolving.set(Boolean.FALSE);
 			}
 		}
 

@@ -17,6 +17,7 @@ import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.osgi.framework.*;
 import org.osgi.framework.startlevel.BundleStartLevel;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Capability;
 import org.osgi.service.resolver.ResolutionException;
 
@@ -383,6 +384,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				try {
 					getRevisions().getContainer().resolve(Arrays.asList(this), true);
 				} catch (ResolutionException e) {
+					if (e.getCause() instanceof BundleException) {
+						throw (BundleException) e.getCause();
+					}
 					throw new BundleException("Could not resolve module.", BundleException.RESOLVE_ERROR, e);
 				}
 			}

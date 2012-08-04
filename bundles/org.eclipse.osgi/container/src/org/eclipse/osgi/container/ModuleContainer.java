@@ -378,8 +378,15 @@ public final class ModuleContainer {
 	 * @see FrameworkWiring#resolveBundles(Collection)
 	 */
 	public void resolve(Collection<Module> triggers, boolean triggersMandatory) throws ResolutionException {
-		while (!resolve0(triggers, triggersMandatory)) {
-			// nothing
+		try {
+			while (!resolve0(triggers, triggersMandatory)) {
+				// nothing
+			}
+		} catch (RuntimeException e) {
+			if (e.getCause() instanceof BundleException) {
+				throw new ResolutionException(e.getCause());
+			}
+			throw e;
 		}
 	}
 
