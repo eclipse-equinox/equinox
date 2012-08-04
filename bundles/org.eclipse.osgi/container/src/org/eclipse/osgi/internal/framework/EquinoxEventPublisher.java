@@ -52,16 +52,22 @@ public class EquinoxEventPublisher {
 	}
 
 	/**
-	 * Deliver a BundleEvent to SynchronousBundleListeners (synchronous). and
+	 * Deliver a BundleEvent to SynchronousBundleListeners (synchronous) and
 	 * BundleListeners (asynchronous).
 	 * 
 	 * @param type
 	 *            BundleEvent type.
 	 * @param bundle
 	 *            Affected bundle or null.
+	 * @param origin
+	 *            The origin of the event
 	 */
-	public void publishBundleEvent(int type, Bundle bundle) {
-		publishBundleEvent(new BundleEvent(type, bundle));
+	public void publishBundleEvent(int type, Bundle bundle, Bundle origin) {
+		if (origin != null) {
+			publishBundleEvent(new BundleEvent(type, bundle, origin));
+		} else {
+			publishBundleEvent(new BundleEvent(type, bundle));
+		}
 	}
 
 	private void publishBundleEvent(final BundleEvent event) {

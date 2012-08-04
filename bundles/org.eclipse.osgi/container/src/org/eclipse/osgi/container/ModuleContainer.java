@@ -218,7 +218,7 @@ public final class ModuleContainer {
 
 			Module result = moduleDatabase.install(location, builder, revisionInfo);
 
-			adaptor.publishEvent(ModuleEvent.INSTALLED, result);
+			adaptor.publishModuleEvent(ModuleEvent.INSTALLED, result, origin);
 
 			return result;
 		} finally {
@@ -299,14 +299,14 @@ public final class ModuleContainer {
 				if (Module.RESOLVED_SET.contains(previousState)) {
 					// set the state to installed and publish unresolved event
 					module.setState(State.INSTALLED);
-					adaptor.publishEvent(ModuleEvent.UNRESOLVED, module);
+					adaptor.publishModuleEvent(ModuleEvent.UNRESOLVED, module, module);
 				}
 				moduleDatabase.update(module, builder, revisionInfo);
 			} finally {
 				module.unlockStateChange(ModuleEvent.UPDATED);
 			}
 			// only publish updated event on success
-			adaptor.publishEvent(ModuleEvent.UPDATED, module);
+			adaptor.publishModuleEvent(ModuleEvent.UPDATED, module, module);
 
 			if (Module.ACTIVE_SET.contains(previousState)) {
 				try {
@@ -345,13 +345,13 @@ public final class ModuleContainer {
 			if (Module.RESOLVED_SET.contains(previousState)) {
 				// set the state to installed and publish unresolved event
 				module.setState(State.INSTALLED);
-				adaptor.publishEvent(ModuleEvent.UNRESOLVED, module);
+				adaptor.publishModuleEvent(ModuleEvent.UNRESOLVED, module, module);
 			}
 			module.setState(State.UNINSTALLED);
 		} finally {
 			module.unlockStateChange(ModuleEvent.UNINSTALLED);
 		}
-		adaptor.publishEvent(ModuleEvent.UNINSTALLED, module);
+		adaptor.publishModuleEvent(ModuleEvent.UNINSTALLED, module, module);
 	}
 
 	ModuleWiring getWiring(ModuleRevision revision) {
@@ -542,7 +542,7 @@ public final class ModuleContainer {
 		}
 
 		for (Module module : modulesLocked) {
-			adaptor.publishEvent(ModuleEvent.RESOLVED, module);
+			adaptor.publishModuleEvent(ModuleEvent.RESOLVED, module, module);
 		}
 		return true;
 	}
@@ -697,7 +697,7 @@ public final class ModuleContainer {
 
 		// publish unresolved events after giving up all locks
 		for (Module module : modulesUnresolved) {
-			adaptor.publishEvent(ModuleEvent.UNRESOLVED, module);
+			adaptor.publishModuleEvent(ModuleEvent.UNRESOLVED, module, module);
 		}
 		return refreshTriggers;
 	}

@@ -418,7 +418,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	final void publishEvent(ModuleEvent type) {
-		revisions.getContainer().getAdaptor().publishEvent(type, this);
+		revisions.getContainer().getAdaptor().publishModuleEvent(type, this, this);
 	}
 
 	/**

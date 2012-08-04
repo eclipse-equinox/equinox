@@ -77,10 +77,10 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	}
 
 	@Override
-	public void publishEvent(ModuleEvent type, Module module) {
+	public void publishModuleEvent(ModuleEvent type, Module module, Module origin) {
 		EquinoxEventPublisher publisher = container.getEventPublisher();
 		if (publisher != null) {
-			publisher.publishBundleEvent(getType(type), module.getBundle());
+			publisher.publishBundleEvent(getType(type), module.getBundle(), origin.getBundle());
 		}
 	}
 

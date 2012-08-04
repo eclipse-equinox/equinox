@@ -30,7 +30,7 @@ public abstract class ModuleContainerAdaptor {
 	}
 
 	/**
-	 * Event types that may be {@link #publishEvent(ModuleEvent, Module) published} for a module
+	 * Event types that may be {@link #publishModuleEvent(ModuleEvent, Module, Module) published} for a module
 	 * indicating a {@link Module#getState() state} change has occurred for a module.
 	 */
 	public static enum ModuleEvent {
@@ -114,8 +114,12 @@ public abstract class ModuleContainerAdaptor {
 	 * No locks are held by the container when this method is called
 	 * @param type the event type to publish
 	 * @param module the module the event is associated with
+	 * @param origin the module which is the origin of the event. For the event
+	 *        type {@link ModuleEvent#INSTALLED}, this is the module whose context was used
+	 *        to install the module. Otherwise it is the module itself. May be null only
+	 *        when the event is not of type {@link ModuleEvent#INSTALLED}.
 	 */
-	public abstract void publishEvent(ModuleEvent type, Module module);
+	public abstract void publishModuleEvent(ModuleEvent type, Module module, Module origin);
 
 	/**
 	 * Returns the specified configuration property value
