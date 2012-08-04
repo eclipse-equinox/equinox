@@ -227,10 +227,13 @@ public final class OSGiManifestBuilderFactory {
 					builder.addCapability(BundleNamespace.BUNDLE_NAMESPACE, directives, bundleAttributes);
 
 					// create the host namespace
-					Map<String, Object> hostAttributes = new HashMap<String, Object>(attributes);
-					hostAttributes.put(HostNamespace.HOST_NAMESPACE, symbolicName);
-					hostAttributes.put(HostNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE, builder.getVersion());
-					builder.addCapability(HostNamespace.HOST_NAMESPACE, directives, hostAttributes);
+					// only if the directive is not never
+					if (!HostNamespace.FRAGMENT_ATTACHMENT_NEVER.equals(directives.get(HostNamespace.CAPABILITY_FRAGMENT_ATTACHMENT_DIRECTIVE))) {
+						Map<String, Object> hostAttributes = new HashMap<String, Object>(attributes);
+						hostAttributes.put(HostNamespace.HOST_NAMESPACE, symbolicName);
+						hostAttributes.put(HostNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE, builder.getVersion());
+						builder.addCapability(HostNamespace.HOST_NAMESPACE, directives, hostAttributes);
+					}
 				}
 				// every bundle that has a symbolic name gets an identity;
 				// never use the symbolic name alias for the identity namespace
