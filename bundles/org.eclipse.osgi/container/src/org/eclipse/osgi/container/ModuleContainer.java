@@ -305,8 +305,12 @@ public final class ModuleContainer {
 			adaptor.publishEvent(ModuleEvent.UPDATED, module);
 
 			if (Module.ACTIVE_SET.contains(previousState)) {
-				// restart the module if necessary
-				module.start(StartOptions.TRANSIENT_RESUME);
+				try {
+					// restart the module if necessary
+					module.start(StartOptions.TRANSIENT_RESUME);
+				} catch (BundleException e) {
+					getAdaptor().publishContainerEvent(ContainerEvent.ERROR, module, e);
+				}
 			}
 		} finally {
 			if (nameLocked)
