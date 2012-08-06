@@ -274,8 +274,7 @@ public class ModuleDatabase {
 		} else {
 			module = adaptor.createModule(location, id, settings, startlevel);
 		}
-		ModuleRevision revision = builder.addRevision(module, revisionInfo);
-		adaptor.associateRevision(revision, revisionInfo);
+		builder.addRevision(module, revisionInfo);
 		modulesByLocations.put(location, module);
 		modulesById.put(id, module);
 		if (settings != null)
@@ -359,7 +358,6 @@ public class ModuleDatabase {
 		try {
 			ModuleRevision oldRevision = module.getCurrentRevision();
 			ModuleRevision newRevision = builder.addRevision(module, revisionInfo);
-			adaptor.associateRevision(newRevision, revisionInfo);
 			String name = newRevision.getSymbolicName();
 			Collection<ModuleRevision> sameName = revisionByName.get(name);
 			if (sameName == null) {

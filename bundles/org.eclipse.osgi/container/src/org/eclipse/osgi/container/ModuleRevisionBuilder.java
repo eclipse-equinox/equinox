@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import org.eclipse.osgi.internal.framework.FilterImpl;
-
 import java.security.AllPermission;
 import java.util.*;
+import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.osgi.framework.*;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.resource.Namespace;
@@ -190,6 +189,7 @@ public final class ModuleRevisionBuilder {
 		ModuleRevisions revisions = module.getRevisions();
 		ModuleRevision revision = new ModuleRevision(symbolicName, version, types, capabilityInfos, requirementInfos, revisions, revisionInfo);
 		revisions.addRevision(revision);
+		module.getContainer().getAdaptor().associateRevision(revision, revisionInfo);
 
 		try {
 			List<ModuleRequirement> hostRequirements = revision.getModuleRequirements(HostNamespace.HOST_NAMESPACE);
