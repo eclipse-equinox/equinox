@@ -21,6 +21,7 @@ import org.eclipse.osgi.container.Module.StartOptions;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.Module.StopOptions;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
+import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
@@ -63,18 +64,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		@Override
 		public void stop(final int options) throws BundleException {
 			getEquinoxContainer().checkAdminPermission(this, AdminPermission.EXECUTE);
-			Thread t = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						getModule().stop();
-					} catch (BundleException e) {
-						// TODO not sure we can even log if this fails
-						e.printStackTrace();
-					}
-				}
-			}, "Framework stop"); //$NON-NLS-1$
-			t.start();
+			((EquinoxSystemModule) getModule()).asyncStop();
 		}
 
 		@Override
@@ -91,19 +81,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			} catch (IOException e) {
 				// do nothing
 			}
-			Thread t = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						SystemModule systemModule = (SystemModule) getModule();
-						systemModule.update();
-					} catch (BundleException e) {
-						e.printStackTrace();
-						// TODO not sure we can even log if this fails
-					}
-				}
-			}, "Framework stop"); //$NON-NLS-1$
-			t.start();
+			((EquinoxSystemModule) getModule()).asyncUpdate();
 		}
 
 		@Override
@@ -151,6 +129,52 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			super.stopWorker();
 			stopWorker0();
 			equinoxContainer.close();
+		}
+
+		void asyncStop() throws BundleException {
+			lockStateChange(ModuleEvent.STOPPED);
+			try {
+				if (Module.ACTIVE_SET.contains(getState())) {
+					// TODO this still has a chance of a race condition:
+					// multiple threads could get started if stop is called over and over
+					Thread t = new Thread(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								stop();
+							} catch (BundleException e) {
+								// TODO not sure we can even log if this fails
+								e.printStackTrace();
+							}
+						}
+					}, "Framework stop"); //$NON-NLS-1$
+					t.start();
+				}
+			} finally {
+				unlockStateChange(ModuleEvent.STOPPED);
+			}
+		}
+
+		void asyncUpdate() throws BundleException {
+			lockStateChange(ModuleEvent.UPDATED);
+			try {
+				if (Module.ACTIVE_SET.contains(getState())) {
+					Thread t = new Thread(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								update();
+							} catch (BundleException e) {
+								e.printStackTrace();
+								// TODO not sure we can even log if this fails
+							}
+						}
+					}, "Framework update"); //$NON-NLS-1$
+					t.start();
+				}
+			} finally {
+				unlockStateChange(ModuleEvent.UPDATED);
+			}
 		}
 	}
 
