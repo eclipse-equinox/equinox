@@ -99,7 +99,7 @@ public final class OSGiManifestBuilderFactory {
 		}
 	}
 
-	public static void checkImportExportSyntax(String headerKey, ManifestElement[] elements, boolean export, boolean dynamic) throws BundleException {
+	private static void checkImportExportSyntax(String headerKey, ManifestElement[] elements, boolean export, boolean dynamic) throws BundleException {
 		if (elements == null)
 			return;
 		int length = elements.length;
@@ -545,7 +545,8 @@ public final class OSGiManifestBuilderFactory {
 
 		// only create the capability if the attributes is not empty
 		if (!attributes.isEmpty()) {
-			builder.addCapability(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE, Collections.<String, String> emptyMap(), attributes);
+			Map<String, String> directives = Collections.singletonMap(EquinoxModuleDataNamespace.CAPABILITY_EFFECTIVE_DIRECTIVE, EquinoxModuleDataNamespace.EFFECTIVE_INFORMATION);
+			builder.addCapability(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE, directives, attributes);
 		}
 	}
 
