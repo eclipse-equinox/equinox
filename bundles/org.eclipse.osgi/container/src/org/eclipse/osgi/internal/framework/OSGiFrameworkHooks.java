@@ -55,13 +55,27 @@ class OSGiFrameworkHooks {
 
 		@Override
 		public void filterCollisions(int operationType, Module target, Collection<Module> collisionCandidates) {
-			Bundle targetBundle = target.getBundle();
-			ArrayMap<Bundle, Module> candidateBundles = new ArrayMap<Bundle, Module>(collisionCandidates.size());
-			for (Module module : collisionCandidates) {
-				candidateBundles.put(module.getBundle(), module);
+			switch (container.getConfiguration().BSN_VERSION) {
+				case EquinoxConfiguration.BSN_VERSION_SINGLE : {
+					return;
+				}
+				case EquinoxConfiguration.BSN_VERSION_MULTIPLE : {
+					collisionCandidates.clear();
+					return;
+				}
+				case EquinoxConfiguration.BSN_VERSION_MANAGED : {
+					Bundle targetBundle = target.getBundle();
+					ArrayMap<Bundle, Module> candidateBundles = new ArrayMap<Bundle, Module>(collisionCandidates.size());
+					for (Module module : collisionCandidates) {
+						candidateBundles.put(module.getBundle(), module);
+					}
+					notifyCollisionHooks(operationType, targetBundle, candidateBundles);
+					collisionCandidates.retainAll(candidateBundles.getValues());
+					return;
+				}
+				default :
+					throw new IllegalStateException("Bad configuration: " + container.getConfiguration().BSN_VERSION);
 			}
-			notifyCollisionHooks(operationType, targetBundle, candidateBundles);
-			collisionCandidates.retainAll(candidateBundles.getValues());
 		}
 
 		private void notifyCollisionHooks(final int operationType, final Bundle target, Collection<Bundle> collisionCandidates) {
