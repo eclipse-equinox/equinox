@@ -27,6 +27,9 @@ import org.osgi.service.resolver.*;
  * in a module {@link ModuleContainer container}.
  */
 final class ModuleResolver {
+	private static final Collection<String> NON_PAYLOAD_CAPABILITIES = Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE);
+	private static final Collection<String> NON_PAYLOAD_REQUIREMENTS = Arrays.asList(HostNamespace.HOST_NAMESPACE, ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE);
+
 	final ThreadLocal<Boolean> threadResolving = new ThreadLocal<Boolean>() {
 		@Override
 		protected Boolean initialValue() {
@@ -135,11 +138,16 @@ final class ModuleResolver {
 		List<ModuleRequirement> requirements = new ArrayList<ModuleRequirement>(revision.getModuleRequirements(null));
 		ListIterator<ModuleRequirement> iRequirements = requirements.listIterator(requirements.size());
 
-		// add fragment capabilities and requirements
-		List<ModuleCapability> hostCapabilities = revision.getModuleCapabilities(HostNamespace.HOST_NAMESPACE);
-		ModuleCapability hostCapability = hostCapabilities.isEmpty() ? null : hostCapabilities.get(0);
-		if (hostCapability != null) {
-			addFragmentContent(providedWireMap.get(hostCapability), iCapabilities, iRequirements);
+		// if revision is a fragment remove payload requirements and capabilities
+		if ((BundleRevision.TYPE_FRAGMENT & revision.getTypes()) != 0) {
+			removePayloadContent(iCapabilities, iRequirements);
+		} else {
+			// add fragment capabilities and requirements
+			List<ModuleCapability> hostCapabilities = revision.getModuleCapabilities(HostNamespace.HOST_NAMESPACE);
+			ModuleCapability hostCapability = hostCapabilities.isEmpty() ? null : hostCapabilities.get(0);
+			if (hostCapability != null) {
+				addPayloadContent(providedWireMap.get(hostCapability), iCapabilities, iRequirements);
+			}
 		}
 
 		removeNonEffectiveCapabilities(iCapabilities);
@@ -150,6 +158,22 @@ final class ModuleResolver {
 		addProvidedWires(providedWireMap, providedWires, capabilities);
 
 		return new ModuleWiring(revision, capabilities, requirements, providedWires, requiredWires, substituted);
+	}
+
+	private static void removePayloadContent(ListIterator<ModuleCapability> iCapabilities, ListIterator<ModuleRequirement> iRequirements) {
+		rewind(iCapabilities);
+		while (iCapabilities.hasNext()) {
+			if (!NON_PAYLOAD_CAPABILITIES.contains(iCapabilities.next().getNamespace())) {
+				iCapabilities.remove();
+			}
+		}
+
+		rewind(iRequirements);
+		while (iRequirements.hasNext()) {
+			if (!NON_PAYLOAD_REQUIREMENTS.contains(iRequirements.next().getNamespace())) {
+				iRequirements.remove();
+			}
+		}
 	}
 
 	private static Collection<String> removeSubstitutedCapabilities(ListIterator<ModuleCapability> iCapabilities, List<ModuleWire> requiredWires) {
@@ -182,29 +206,28 @@ final class ModuleResolver {
 
 	private static void removeNonEffectiveRequirements(ListIterator<ModuleRequirement> iRequirements, List<ModuleWire> requiredWires) {
 		rewind(iRequirements);
-		requirements: while (iRequirements.hasNext()) {
+		while (iRequirements.hasNext()) {
 			ModuleRequirement requirement = iRequirements.next();
 			// check the effective directive;
-			Object effective = requirement.getAttributes().get(Namespace.REQUIREMENT_EFFECTIVE_DIRECTIVE);
+			Object effective = requirement.getDirectives().get(Namespace.REQUIREMENT_EFFECTIVE_DIRECTIVE);
 			if (effective != null && !Namespace.EFFECTIVE_RESOLVE.equals(effective)) {
 				iRequirements.remove();
-				break requirements;
-			}
-			// check the resolution directive
-			Object resolution = requirement.getAttributes().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
-			if (resolution != null && !Namespace.RESOLUTION_MANDATORY.equals(resolution)) {
-				boolean found = false;
-				// need to check the wires to see if the optional requirement is resolved
-				wires: for (ModuleWire wire : requiredWires) {
-					if (wire.getRequirement().equals(requirement)) {
-						found = true;
-						break wires;
+			} else {
+				// check the resolution directive
+				Object resolution = requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
+				if (Namespace.RESOLUTION_OPTIONAL.equals(resolution)) {
+					boolean found = false;
+					// need to check the wires to see if the optional requirement is resolved
+					wires: for (ModuleWire wire : requiredWires) {
+						if (wire.getRequirement().equals(requirement)) {
+							found = true;
+							break wires;
+						}
 					}
-				}
-				if (!found) {
-					// optional requirement is not resolved
-					iRequirements.remove();
-					break requirements;
+					if (!found) {
+						// optional requirement is not resolved
+						iRequirements.remove();
+					}
 				}
 			}
 		}
@@ -213,13 +236,13 @@ final class ModuleResolver {
 	static void removeNonEffectiveCapabilities(ListIterator<ModuleCapability> iCapabilities) {
 		rewind(iCapabilities);
 		while (iCapabilities.hasNext()) {
-			Object effective = iCapabilities.next().getAttributes().get(Namespace.CAPABILITY_EFFECTIVE_DIRECTIVE);
+			Object effective = iCapabilities.next().getDirectives().get(Namespace.CAPABILITY_EFFECTIVE_DIRECTIVE);
 			if (effective != null && !Namespace.EFFECTIVE_RESOLVE.equals(effective))
 				iCapabilities.remove();
 		}
 	}
 
-	private static void addFragmentContent(List<ModuleWire> hostWires, ListIterator<ModuleCapability> iCapabilities, ListIterator<ModuleRequirement> iRequirements) {
+	private static void addPayloadContent(List<ModuleWire> hostWires, ListIterator<ModuleCapability> iCapabilities, ListIterator<ModuleRequirement> iRequirements) {
 		if (hostWires == null)
 			return;
 		for (ModuleWire hostWire : hostWires) {
@@ -227,8 +250,9 @@ final class ModuleResolver {
 			String currentNamespace = null;
 			List<ModuleCapability> fragmentCapabilities = hostWire.getRequirer().getModuleCapabilities(null);
 			for (ModuleCapability fragmentCapability : fragmentCapabilities) {
-				if (IdentityNamespace.IDENTITY_NAMESPACE.equals(fragmentCapability.getNamespace()))
-					continue; // identity is not a payload
+				if (NON_PAYLOAD_CAPABILITIES.contains(fragmentCapability.getNamespace())) {
+					continue; // don't include, not a payload capability
+				}
 				if (!fragmentCapability.getNamespace().equals(currentNamespace)) {
 					currentNamespace = fragmentCapability.getNamespace();
 					fastForward(iCapabilities);
@@ -245,9 +269,9 @@ final class ModuleResolver {
 			currentNamespace = null;
 			List<ModuleRequirement> fragmentRequriements = hostWire.getRequirer().getModuleRequirements(null);
 			for (ModuleRequirement fragmentRequirement : fragmentRequriements) {
-				String fragNamespace = fragmentRequirement.getNamespace();
-				if (HostNamespace.HOST_NAMESPACE.equals(fragNamespace) || ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE.equals(fragNamespace))
-					continue; // host and osgi.ee is not a payload
+				if (NON_PAYLOAD_REQUIREMENTS.contains(fragmentRequirement.getNamespace())) {
+					continue; // don't inlcude, not a payload requirement
+				}
 				if (!fragmentRequirement.getNamespace().equals(currentNamespace)) {
 					currentNamespace = fragmentRequirement.getNamespace();
 					fastForward(iRequirements);

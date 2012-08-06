@@ -65,7 +65,12 @@ public final class ModuleWiring implements BundleWiring {
 
 	private boolean isFragmentInUse() {
 		// A fragment is considered in use if it has any required host wires
-		return ((BundleRevision.TYPE_FRAGMENT & revision.getTypes()) != 0) && !getRequiredWires(HostNamespace.HOST_NAMESPACE).isEmpty();
+		if ((BundleRevision.TYPE_FRAGMENT & revision.getTypes()) != 0) {
+			List<ModuleWire> hostWires = getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
+			// hostWires may be null if the fragment wiring is no longer valid
+			return hostWires == null ? false : !hostWires.isEmpty();
+		}
+		return false;
 	}
 
 	/**
@@ -108,7 +113,7 @@ public final class ModuleWiring implements BundleWiring {
 		for (Iterator<ModuleRequirement> iRequirements = persistentRequriements.iterator(); iRequirements.hasNext();) {
 			ModuleRequirement requirement = iRequirements.next();
 			if (PackageNamespace.PACKAGE_NAMESPACE.equals(requirement.getNamespace())) {
-				if ("true".equals(requirement.getAttributes().get(DYNAMICALLY_ADDED_IMPORT_DIRECTIVE))) { //$NON-NLS-1$
+				if ("true".equals(requirement.getDirectives().get(DYNAMICALLY_ADDED_IMPORT_DIRECTIVE))) { //$NON-NLS-1$
 					iRequirements.remove();
 				}
 			}
