@@ -230,7 +230,7 @@ public class EquinoxContainer {
 			serviceRegistry = null;
 			storage.close();
 			initialized = false;
-			notifyAll();
+			this.monitor.notifyAll();
 		}
 	}
 
