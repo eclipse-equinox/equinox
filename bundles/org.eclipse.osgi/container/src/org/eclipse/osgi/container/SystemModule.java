@@ -169,14 +169,24 @@ public abstract class SystemModule extends Module {
 
 	public void update() throws BundleException {
 		getContainer().checkAdminPermission(getBundle(), AdminPermission.LIFECYCLE);
+		State previousState;
 		lockStateChange(ModuleEvent.UPDATED);
 		try {
+			previousState = getState();
 			stop();
 		} finally {
 			unlockStateChange(ModuleEvent.UPDATED);
 		}
 		// would publish an updated event here but the listener services are down
-		start();
+		switch (previousState) {
+			case STARTING :
+				init();
+				break;
+			case ACTIVE :
+				start();
+			default :
+				break;
+		}
 	}
 
 	@Override
