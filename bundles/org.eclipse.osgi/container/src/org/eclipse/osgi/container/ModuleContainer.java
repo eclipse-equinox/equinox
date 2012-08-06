@@ -408,9 +408,11 @@ public final class ModuleContainer {
 			timestamp = moduleDatabase.getRevisionsTimestamp();
 			wiringClone = moduleDatabase.getWiringsClone();
 			for (Module module : triggers) {
-				ModuleRevision current = module.getCurrentRevision();
-				if (current != null)
-					triggerRevisions.add(current);
+				if (!State.UNINSTALLED.equals(module.getState())) {
+					ModuleRevision current = module.getCurrentRevision();
+					if (current != null)
+						triggerRevisions.add(current);
+				}
 			}
 			Collection<Module> allModules = moduleDatabase.getModules();
 			for (Module module : allModules) {

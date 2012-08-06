@@ -212,7 +212,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	/**
 	 * Returns the current {@link ModuleRevision revision} associated with this module.
-	 * If the module is uninstalled then {@code null} is returned.
+	 * If the module is uninstalled then the last current revision is returned.
 	 * @return the current {@link ModuleRevision revision} associated with this module.
 	 */
 	public final ModuleRevision getCurrentRevision() {
