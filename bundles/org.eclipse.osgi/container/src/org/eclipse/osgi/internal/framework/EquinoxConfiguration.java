@@ -666,6 +666,10 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		configuration.put(org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_FRAGMENT, "true"); //$NON-NLS-1$
 		configuration.put(org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_REQUIREBUNDLE, "true"); //$NON-NLS-1$
 		configuration.put(org.osgi.framework.Constants.FRAMEWORK_UUID, new UniversalUniqueIdentifier().toString());
+		configuration.put(org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_EXTENSION, "true"); //$NON-NLS-1$
+		if (org.osgi.framework.Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT.equals(configuration.get(org.osgi.framework.Constants.FRAMEWORK_STORAGE_CLEAN))) {
+			configuration.put(PROP_CLEAN, "true"); //$NON-NLS-1$
+		}
 	}
 
 	private static int parseVersionInt(String value) {
