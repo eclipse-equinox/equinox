@@ -782,19 +782,16 @@ public final class ModuleContainer {
 		try {
 			modules = getModules();
 			for (Module module : modules) {
-				if (module.getId() != 0) {
-					try {
-						module.lockStateChange(ModuleEvent.RESOLVED);
-					} catch (BundleException e) {
-						throw new IllegalStateException("Unable to lock module state.", e); //$NON-NLS-1$
-					}
-
+				try {
+					module.lockStateChange(ModuleEvent.RESOLVED);
 					ModuleWiring wiring = moduleDatabase.getWiring(module.getCurrentRevision());
 					if (wiring != null) {
 						module.setState(State.RESOLVED);
 					} else {
 						module.setState(State.INSTALLED);
 					}
+				} catch (BundleException e) {
+					throw new IllegalStateException("Unable to lock module state.", e); //$NON-NLS-1$
 				}
 			}
 			Map<ModuleRevision, ModuleWiring> wirings = moduleDatabase.getWiringsCopy();
@@ -804,12 +801,10 @@ public final class ModuleContainer {
 		} finally {
 			if (modules != null) {
 				for (Module module : modules) {
-					if (module.getId() != 0) {
-						try {
-							module.unlockStateChange(ModuleEvent.RESOLVED);
-						} catch (IllegalMonitorStateException e) {
-							// ignore
-						}
+					try {
+						module.unlockStateChange(ModuleEvent.RESOLVED);
+					} catch (IllegalMonitorStateException e) {
+						// ignore
 					}
 				}
 			}
@@ -848,6 +843,36 @@ public final class ModuleContainer {
 					}
 				}
 			}
+			moduleDatabase.unlockRead();
+		}
+	}
+
+	public void setInitialModuleStates() throws BundleException {
+		moduleDatabase.lockRead();
+		try {
+			List<Module> modules = getModules();
+			for (Module module : modules) {
+				if (module.getId() == 0) {
+					module.lockStateChange(ModuleEvent.UNINSTALLED);
+					try {
+						module.setState(State.INSTALLED);
+					} finally {
+						module.unlockStateChange(ModuleEvent.UNINSTALLED);
+					}
+				} else {
+					module.lockStateChange(ModuleEvent.UNINSTALLED);
+					try {
+						module.setState(State.UNINSTALLED);
+					} finally {
+						module.unlockStateChange(ModuleEvent.UNINSTALLED);
+					}
+				}
+			}
+			Map<ModuleRevision, ModuleWiring> wirings = moduleDatabase.getWiringsCopy();
+			for (ModuleWiring wiring : wirings.values()) {
+				wiring.invalidate();
+			}
+		} finally {
 			moduleDatabase.unlockRead();
 		}
 	}

@@ -66,6 +66,8 @@ public class EquinoxContainer {
 			this.storage = new Storage(this);
 		} catch (IOException e) {
 			throw new RuntimeException("Error initializing storage.", e); //$NON-NLS-1$
+		} catch (BundleException e) {
+			throw new RuntimeException("Error initializing storage.", e); //$NON-NLS-1$
 		}
 		this.packageAdmin = new PackageAdminImpl(storage.getModuleContainer());
 		this.startLevel = new StartLevelImpl(storage.getModuleContainer());

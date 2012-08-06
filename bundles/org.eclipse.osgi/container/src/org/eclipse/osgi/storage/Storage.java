@@ -71,7 +71,7 @@ public class Storage {
 	private final LockSet<Long> idLocks = new LockSet<Long>(false);
 	private final MRUBundleFileList mruList = new MRUBundleFileList();
 
-	public Storage(EquinoxContainer container) throws IOException {
+	public Storage(EquinoxContainer container) throws IOException, BundleException {
 		equinoxContainer = container;
 
 		// we need to set the install path as soon as possible so we can determine
@@ -128,6 +128,8 @@ public class Storage {
 			}
 		}
 		checkSystemBundle();
+		// TODO hack to make sure all bundles are in UNINSTALLED state before system bundle init is called
+		this.moduleContainer.setInitialModuleStates();
 	}
 
 	private static PermissionData loadPermissionData(DataInputStream in) throws IOException {
