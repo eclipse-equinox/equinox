@@ -141,6 +141,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 		@Override
 		protected void initWorker() throws BundleException {
+			equinoxContainer.getConfiguration().setConfiguration(Constants.FRAMEWORK_UUID, new UniversalUniqueIdentifier().toString());
 			equinoxContainer.init();
 			startWorker0();
 		}
