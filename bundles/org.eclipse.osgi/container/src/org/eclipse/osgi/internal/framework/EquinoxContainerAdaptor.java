@@ -150,6 +150,8 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 			case STOPPED_REFRESH :
 			case STOPPED_UPDATE :
 				return FrameworkEvent.STOPPED_UPDATE;
+			case STOPPED_TIMEOUT :
+				return FrameworkEvent.WAIT_TIMEDOUT;
 			default :
 				// default to error
 				return FrameworkEvent.ERROR;
