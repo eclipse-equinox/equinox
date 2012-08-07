@@ -339,14 +339,26 @@ final class ModuleResolver {
 	@SuppressWarnings("unchecked")
 	private static ModuleWiring createWiringDelta(ModuleRevision revision, ModuleWiring existingWiring, Map<ModuleCapability, List<ModuleWire>> providedWireMap, List<ModuleWire> requiredWires) {
 		// Create a ModuleWiring that only contains the new ordered list of provided wires
-		List<ModuleWire> existingProvided = existingWiring.getProvidedModuleWires(null);
-		addProvidedWires(providedWireMap, existingProvided, existingWiring.getModuleCapabilities(null));
+		List<ModuleWire> existingProvidedWires = existingWiring.getProvidedModuleWires(null);
+		List<ModuleCapability> existingCapabilities = existingWiring.getModuleCapabilities(null);
+		addProvidedWires(providedWireMap, existingProvidedWires, existingCapabilities);
 
 		// Also need to include any new required wires that may have be added for fragment hosts
 		// Also will be needed for dynamic imports
-		List<ModuleWire> existingRequired = existingWiring.getRequiredModuleWires(null);
-		addRequiredWires(requiredWires, existingRequired, existingWiring.getModuleRequirements(null));
-		return new ModuleWiring(revision, Collections.EMPTY_LIST, Collections.EMPTY_LIST, existingProvided, existingRequired, Collections.EMPTY_LIST);
+		List<ModuleWire> existingRequiredWires = existingWiring.getRequiredModuleWires(null);
+		List<ModuleRequirement> existingRequirements = existingWiring.getModuleRequirements(null);
+		addRequiredWires(requiredWires, existingRequiredWires, existingRequirements);
+
+		// add newly resolved fragment capabilities and requirements
+		if (providedWireMap != null) {
+			List<ModuleCapability> hostCapabilities = revision.getModuleCapabilities(HostNamespace.HOST_NAMESPACE);
+			ModuleCapability hostCapability = hostCapabilities.isEmpty() ? null : hostCapabilities.get(0);
+			List<ModuleWire> newHostWires = hostCapability == null ? null : providedWireMap.get(hostCapability);
+			if (newHostWires != null) {
+				addPayloadContent(newHostWires, existingCapabilities.listIterator(), existingRequirements.listIterator());
+			}
+		}
+		return new ModuleWiring(revision, existingCapabilities, existingRequirements, existingProvidedWires, existingRequiredWires, Collections.EMPTY_LIST);
 	}
 
 	static boolean isSingleton(ModuleRevision revision) {
@@ -504,6 +516,11 @@ final class ModuleResolver {
 				try {
 					filterResolvable();
 					selectSingletons();
+					Map<Resource, List<Wire>> extensionWirings = resolveFrameworkExtensions();
+					if (!extensionWirings.isEmpty()) {
+						return extensionWirings;
+					}
+
 					// remove disabled from optional and triggers to prevent the resolver from resolving them
 					optionals.removeAll(disabled);
 					if (triggers.removeAll(disabled) && triggersMandatory) {
@@ -519,6 +536,49 @@ final class ModuleResolver {
 			} finally {
 				threadResolving.set(Boolean.FALSE);
 			}
+		}
+
+		private Map<Resource, List<Wire>> resolveFrameworkExtensions() {
+			// special handling only if explicitly asked to resolve an extension as mandatory.
+			ModuleRevision extension = triggersMandatory && triggers.size() == 1 ? triggers.iterator().next() : null;
+			if (extension == null) {
+				return Collections.emptyMap();
+			}
+
+			// Need the system module wiring to attach to.
+			Module systemModule = moduleDatabase.getModule(0);
+			ModuleRevision systemRevision = systemModule == null ? null : systemModule.getCurrentRevision();
+			ModuleWiring systemWiring = systemRevision == null ? null : wirings.get(systemRevision);
+			if (systemWiring == null) {
+				return Collections.emptyMap();
+			}
+
+			// Check all the non-payload requirements are met and a proper host is found
+			Map<Resource, List<Wire>> result = new HashMap<Resource, List<Wire>>(0);
+			if (!disabled.contains(extension)) {
+				List<Wire> nonPayloadWires = new ArrayList<Wire>(0);
+				boolean foundHost = false;
+				boolean payLoadRequirements = false;
+				for (ModuleRequirement requirement : extension.getModuleRequirements(null)) {
+					if (NON_PAYLOAD_REQUIREMENTS.contains(requirement.getNamespace())) {
+						List<ModuleCapability> matching = moduleDatabase.findCapabilities(requirement);
+						for (ModuleCapability candidate : matching) {
+							if (candidate.getRevision().getRevisions().getModule().getId().longValue() == 0) {
+								foundHost |= HostNamespace.HOST_NAMESPACE.equals(requirement.getNamespace());
+								nonPayloadWires.add(new ModuleWire(candidate, candidate.getRevision(), requirement, extension));
+							}
+						}
+					} else {
+						// oh oh! somehow a payload requirement got into the mix
+						payLoadRequirements |= true;
+					}
+
+				}
+				if (foundHost && !payLoadRequirements) {
+					result.put(extension, nonPayloadWires);
+				}
+			}
+			return result;
 		}
 
 		private Map<Resource, List<Wire>> resolveDynamic() throws ResolutionException {

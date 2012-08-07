@@ -29,7 +29,7 @@ public final class ModuleWiring implements BundleWiring {
 	private static final RuntimePermission GET_CLASSLOADER_PERM = new RuntimePermission("getClassLoader"); //$NON-NLS-1$
 	private static final String DYNAMICALLY_ADDED_IMPORT_DIRECTIVE = "x.dynamically.added"; //$NON-NLS-1$
 	private final ModuleRevision revision;
-	private final List<ModuleCapability> capabilities;
+	private volatile List<ModuleCapability> capabilities;
 	private volatile List<ModuleRequirement> requirements;
 	private final Collection<String> substitutedPkgNames;
 	private final Object monitor = new Object();
@@ -81,12 +81,16 @@ public final class ModuleWiring implements BundleWiring {
 	 * @see #getCapabilities(String)
 	 */
 	public List<ModuleCapability> getModuleCapabilities(String namespace) {
+		return getModuleCapabilities(namespace, capabilities);
+	}
+
+	private List<ModuleCapability> getModuleCapabilities(String namespace, List<ModuleCapability> allCapabilities) {
 		if (!isValid)
 			return null;
 		if (namespace == null)
-			return new ArrayList<ModuleCapability>(capabilities);
+			return new ArrayList<ModuleCapability>(allCapabilities);
 		List<ModuleCapability> result = new ArrayList<ModuleCapability>();
-		for (ModuleCapability capability : capabilities) {
+		for (ModuleCapability capability : allCapabilities) {
 			if (namespace.equals(capability.getNamespace())) {
 				result.add(capability);
 			}
@@ -309,6 +313,10 @@ public final class ModuleWiring implements BundleWiring {
 
 	void setRequiredWires(List<ModuleWire> requiredWires) {
 		this.requiredWires = requiredWires;
+	}
+
+	void setCapabilities(List<ModuleCapability> capabilities) {
+		this.capabilities = capabilities;
 	}
 
 	void invalidate() {

@@ -521,7 +521,8 @@ public final class ModuleContainer {
 				for (Map.Entry<ModuleRevision, ModuleWiring> deltaEntry : deltaWiring.entrySet()) {
 					ModuleWiring current = wiringCopy.get(deltaEntry.getKey());
 					if (current != null) {
-						// only need to update the provided and required wires for currently resolved
+						// need to update the provided capabilities, provided and required wires for currently resolved
+						current.setCapabilities(deltaEntry.getValue().getModuleCapabilities(null));
 						current.setProvidedWires(deltaEntry.getValue().getProvidedModuleWires(null));
 						current.setRequiredWires(deltaEntry.getValue().getRequiredModuleWires(null));
 						deltaEntry.setValue(current); // set the real wiring into the delta
