@@ -439,8 +439,10 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			public ModuleClassLoader run() {
 				ModuleWiring wiring = getModule().getCurrentRevision().getWiring();
 				if (wiring != null) {
-					BundleLoader moduleLoader = (BundleLoader) wiring.getModuleLoader();
-					return moduleLoader.getModuleClassLoader();
+					ModuleLoader moduleLoader = wiring.getModuleLoader();
+					if (moduleLoader instanceof BundleLoader) {
+						return ((BundleLoader) moduleLoader).getModuleClassLoader();
+					}
 				}
 				return null;
 			}
