@@ -146,24 +146,35 @@ public abstract class SystemModule extends Module {
 	@SuppressWarnings("unused")
 	@Override
 	public void stop(StopOptions... options) throws BundleException {
+		ContainerEvent containerEvent = ContainerEvent.STOPPED_TIMEOUT;
+		// Need to lock the state change lock with no state to prevent 
+		// other threads from starting the framework while we are shutting down
 		try {
-			// Always transient
-			super.stop(StopOptions.TRANSIENT);
-		} catch (BundleException e) {
+			if (stateChangeLock.tryLock(5, TimeUnit.SECONDS)) {
+				try {
+					try {
+						// Always transient
+						super.stop(StopOptions.TRANSIENT);
+					} catch (BundleException e) {
+						getRevisions().getContainer().adaptor.publishContainerEvent(ContainerEvent.ERROR, this, e);
+						// must continue on
+					}
+					if (holdsTransitionEventLock(ModuleEvent.UPDATED)) {
+						containerEvent = ContainerEvent.STOPPED_UPDATE;
+					} else if (holdsTransitionEventLock(ModuleEvent.UNRESOLVED)) {
+						containerEvent = ContainerEvent.STOPPED_REFRESH;
+					} else {
+						containerEvent = ContainerEvent.STOPPED;
+					}
+					getRevisions().getContainer().adaptor.publishContainerEvent(containerEvent, this, null);
+					getRevisions().getContainer().close();
+				} finally {
+					stateChangeLock.unlock();
+				}
+			}
+		} catch (InterruptedException e) {
 			getRevisions().getContainer().adaptor.publishContainerEvent(ContainerEvent.ERROR, this, e);
-			// must continue on
 		}
-		ContainerEvent containerEvent;
-		if (holdsTransitionEventLock(ModuleEvent.UPDATED)) {
-			containerEvent = ContainerEvent.STOPPED_UPDATE;
-		} else if (holdsTransitionEventLock(ModuleEvent.UNRESOLVED)) {
-			containerEvent = ContainerEvent.STOPPED_REFRESH;
-		} else {
-			containerEvent = ContainerEvent.STOPPED;
-		}
-		getRevisions().getContainer().adaptor.publishContainerEvent(containerEvent, this, null);
-		getRevisions().getContainer().close();
-
 		notifyWaitForStop(containerEvent);
 	}
 
