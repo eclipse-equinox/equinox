@@ -728,6 +728,7 @@ public final class OSGiManifestBuilderFactory {
 
 		boolean optional = elements.length > 0 && elements[elements.length - 1].getValue().equals("*"); //$NON-NLS-1$
 
+		List<String> allSelectionFilters = new ArrayList<String>(0);
 		AliasMapper aliasMapper = new AliasMapper();
 		StringBuilder allFilters = new StringBuilder();
 		allFilters.append("(|"); //$NON-NLS-1$
@@ -740,13 +741,17 @@ public final class OSGiManifestBuilderFactory {
 			addToNativeCodeFilter(filter, nativeCode, Constants.BUNDLE_NATIVECODE_PROCESSOR, aliasMapper);
 			addToNativeCodeFilter(filter, nativeCode, Constants.BUNDLE_NATIVECODE_OSVERSION, aliasMapper);
 			addToNativeCodeFilter(filter, nativeCode, Constants.BUNDLE_NATIVECODE_LANGUAGE, aliasMapper);
-			addToNativeCodeFilter(filter, nativeCode, Constants.SELECTION_FILTER_ATTRIBUTE, aliasMapper);
 			filter.append(')');
 
 			allFilters.append(filter.toString());
 			Map<String, String> directives = new HashMap<String, String>(3);
 			directives.put(EquinoxNativeCodeNamespace.REQUIREMENT_FILTER_DIRECTIVE, filter.toString());
 			directives.put(EquinoxNativeCodeNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE, EquinoxNativeCodeNamespace.RESOLUTION_OPTIONAL);
+			String selectionFilter = nativeCode.getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE);
+			if (selectionFilter != null) {
+				allSelectionFilters.add(selectionFilter);
+				directives.put(EquinoxNativeCodeNamespace.REQUIREMENT_SELECTION_FILTER_DIRECTIVE, selectionFilter);
+			}
 
 			Map<String, Object> attributes = new HashMap<String, Object>(2);
 			attributes.put(EquinoxNativeCodeNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE, nativePaths);
@@ -757,6 +762,15 @@ public final class OSGiManifestBuilderFactory {
 		if (!optional) {
 			Map<String, String> directives = new HashMap<String, String>(2);
 			directives.put(EquinoxNativeCodeNamespace.REQUIREMENT_FILTER_DIRECTIVE, allFilters.toString());
+			if (!allSelectionFilters.isEmpty()) {
+				StringBuilder selectionFilter = new StringBuilder();
+				selectionFilter.append("(|"); //$NON-NLS-1$
+				for (String filter : allSelectionFilters) {
+					selectionFilter.append(filter);
+				}
+				selectionFilter.append(")"); //$NON-NLS-1$
+				directives.put(EquinoxNativeCodeNamespace.REQUIREMENT_SELECTION_FILTER_DIRECTIVE, selectionFilter.toString());
+			}
 			builder.addRequirement(EquinoxNativeCodeNamespace.EQUINOX_NATIVECODE_NAMESPACE, directives, Collections.<String, Object> emptyMap());
 		}
 	}

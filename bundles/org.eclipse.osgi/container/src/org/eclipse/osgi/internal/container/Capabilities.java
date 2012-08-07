@@ -14,8 +14,10 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.container.namespaces.EquinoxNativeCodeNamespace;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.util.ManifestElement;
+import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.namespace.*;
 import org.osgi.resource.Capability;
@@ -124,33 +126,51 @@ public class Capabilities {
 				}
 			}
 
-			if (filterSpec == null) {
-				return match(null, all);
-			}
-
-			String indexKey = f.getPrimaryKeyValue(name);
-			if (indexKey == null) {
-				return match(f, all);
-			}
-
 			List<ModuleCapability> result;
-			Set<ModuleCapability> indexed = indexes.get(indexKey);
-			if (indexed == null) {
-				result = new ArrayList<ModuleCapability>(0);
+			if (filterSpec == null) {
+				result = match(null, all);
 			} else {
-				result = match(f, indexed);
-			}
-
-			if (!nonStringIndexes.isEmpty()) {
-				List<ModuleCapability> nonStringResult = match(f, nonStringIndexes);
-				for (ModuleCapability capability : nonStringResult) {
-					if (!result.contains(capability)) {
-						result.add(capability);
+				String indexKey = f.getPrimaryKeyValue(name);
+				if (indexKey == null) {
+					result = match(f, all);
+				} else {
+					Set<ModuleCapability> indexed = indexes.get(indexKey);
+					if (indexed == null) {
+						result = new ArrayList<ModuleCapability>(0);
+					} else {
+						result = match(f, indexed);
+					}
+					if (!nonStringIndexes.isEmpty()) {
+						List<ModuleCapability> nonStringResult = match(f, nonStringIndexes);
+						for (ModuleCapability capability : nonStringResult) {
+							if (!result.contains(capability)) {
+								result.add(capability);
+							}
+						}
 					}
 				}
 			}
-
+			// if this is native code need to check selection filter
+			checkNativeSelectionFilter(requirement, result);
 			return result;
+		}
+
+		private void checkNativeSelectionFilter(ModuleRequirement requirement, List<ModuleCapability> result) {
+			if (EquinoxNativeCodeNamespace.EQUINOX_NATIVECODE_NAMESPACE.equals(name)) {
+				String filterSpec = requirement.getDirectives().get(EquinoxNativeCodeNamespace.REQUIREMENT_SELECTION_FILTER_DIRECTIVE);
+				if (filterSpec != null) {
+					try {
+						Filter f = FilterImpl.newInstance(filterSpec);
+						@SuppressWarnings("rawtypes")
+						Dictionary properties = System.getProperties();
+						if (!f.matchCase(properties)) {
+							result.clear();
+						}
+					} catch (InvalidSyntaxException e) {
+						result.clear();
+					}
+				}
+			}
 		}
 
 		private List<ModuleCapability> match(FilterImpl f, Set<ModuleCapability> candidates) {
