@@ -87,22 +87,44 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	}
 
 	private void checkFrameworkExtensions(ModuleEvent type, Module module) {
-		if (ModuleEvent.INSTALLED.equals(type)) {
-			ModuleRevision current = module.getCurrentRevision();
-			if ((BundleRevision.TYPE_FRAGMENT & current.getTypes()) != 0) {
-				Module systemModule = storage.getModuleContainer().getModule(0);
-				List<ModuleCapability> candidates = systemModule == null ? Collections.<ModuleCapability> emptyList() : systemModule.getCurrentRevision().getModuleCapabilities(HostNamespace.HOST_NAMESPACE);
-				List<ModuleRequirement> hostReqs = current.getModuleRequirements(HostNamespace.HOST_NAMESPACE);
-				if (!hostReqs.isEmpty() && !candidates.isEmpty()) {
-					if (hostReqs.get(0).matches(candidates.get(0))) {
-						try {
-							storage.getModuleContainer().resolve(Arrays.asList(module), true);
-						} catch (ResolutionException e) {
-							publishContainerEvent(ContainerEvent.ERROR, module, e);
+		switch (type) {
+			case INSTALLED : {
+				ModuleRevision current = module.getCurrentRevision();
+				if ((BundleRevision.TYPE_FRAGMENT & current.getTypes()) != 0) {
+					Module systemModule = storage.getModuleContainer().getModule(0);
+					List<ModuleCapability> candidates = systemModule == null ? Collections.<ModuleCapability> emptyList() : systemModule.getCurrentRevision().getModuleCapabilities(HostNamespace.HOST_NAMESPACE);
+					List<ModuleRequirement> hostReqs = current.getModuleRequirements(HostNamespace.HOST_NAMESPACE);
+					if (!hostReqs.isEmpty() && !candidates.isEmpty()) {
+						if (hostReqs.get(0).matches(candidates.get(0))) {
+							try {
+								storage.getModuleContainer().resolve(Arrays.asList(module), true);
+							} catch (ResolutionException e) {
+								publishContainerEvent(ContainerEvent.ERROR, module, e);
+							}
 						}
 					}
 				}
+				break;
 			}
+			case RESOLVED : {
+				ModuleRevision current = module.getCurrentRevision();
+				if ((BundleRevision.TYPE_FRAGMENT & current.getTypes()) != 0) {
+					ModuleWiring wiring = current.getWiring();
+					if (wiring != null) {
+						List<ModuleWire> hosts = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
+						if (!hosts.isEmpty() && hosts.get(0).getProvider().getRevisions().getModule().getId().longValue() == 0) {
+							try {
+								storage.getExtensionInstaller().addExtensionContent(current);
+							} catch (BundleException e) {
+								publishContainerEvent(ContainerEvent.ERROR, module, e);
+							}
+						}
+					}
+				}
+				break;
+			}
+			default :
+				break;
 		}
 	}
 

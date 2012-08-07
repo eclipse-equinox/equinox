@@ -40,6 +40,7 @@ import org.eclipse.osgi.storage.url.reference.ReferenceInputStream;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.wiring.BundleWiring;
 
 public class Storage {
@@ -70,9 +71,11 @@ public class Storage {
 	private long lastSavedTimestamp = -1;
 	private final LockSet<Long> idLocks = new LockSet<Long>(false);
 	private final MRUBundleFileList mruList = new MRUBundleFileList();
+	private final FrameworkExtensionInstaller extensionInstaller;
 
 	public Storage(EquinoxContainer container) throws IOException, BundleException {
 		equinoxContainer = container;
+		extensionInstaller = new FrameworkExtensionInstaller(container.getConfiguration());
 
 		// we need to set the install path as soon as possible so we can determine
 		// the absolute location of install relative URLs
@@ -128,8 +131,25 @@ public class Storage {
 			}
 		}
 		checkSystemBundle();
+		installExtensions();
 		// TODO hack to make sure all bundles are in UNINSTALLED state before system bundle init is called
 		this.moduleContainer.setInitialModuleStates();
+	}
+
+	private void installExtensions() {
+		Module systemModule = moduleContainer.getModule(0);
+		ModuleRevision systemRevision = systemModule == null ? null : systemModule.getCurrentRevision();
+		ModuleWiring systemWiring = systemRevision == null ? null : systemRevision.getWiring();
+		if (systemWiring == null) {
+			return;
+		}
+		for (ModuleWire hostWire : systemWiring.getProvidedModuleWires(HostNamespace.HOST_NAMESPACE)) {
+			try {
+				getExtensionInstaller().addExtensionContent(hostWire.getRequirer());
+			} catch (BundleException e) {
+				getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, e.getMessage(), e);
+			}
+		}
 	}
 
 	private static PermissionData loadPermissionData(DataInputStream in) throws IOException {
@@ -263,6 +283,10 @@ public class Storage {
 
 	public EquinoxLogServices getLogServices() {
 		return equinoxContainer.getLogServices();
+	}
+
+	public FrameworkExtensionInstaller getExtensionInstaller() {
+		return extensionInstaller;
 	}
 
 	public boolean isReadOnly() {
