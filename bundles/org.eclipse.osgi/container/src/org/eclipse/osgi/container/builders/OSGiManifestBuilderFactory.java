@@ -92,7 +92,7 @@ public final class OSGiManifestBuilderFactory {
 				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.EXPORT_PACKAGE)
 					checkImportExportSyntax(DEFINED_OSGI_VALIDATE_HEADERS[i], elements, true, false);
 				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.FRAGMENT_HOST)
-					checkExtensionBundle(DEFINED_OSGI_VALIDATE_HEADERS[i], elements);
+					checkExtensionBundle(DEFINED_OSGI_VALIDATE_HEADERS[i], elements, manifest);
 			} else if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.BUNDLE_SYMBOLICNAME) {
 				throw new BundleException(Constants.BUNDLE_SYMBOLICNAME + " header is required.", BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 			}
@@ -169,14 +169,26 @@ public final class OSGiManifestBuilderFactory {
 		}
 	}
 
-	private static void checkExtensionBundle(String headerKey, ManifestElement[] elements) throws BundleException {
-		if (elements.length == 0 || elements[0].getDirective(Constants.EXTENSION_DIRECTIVE) == null)
+	private static void checkExtensionBundle(String headerKey, ManifestElement[] elements, Map<String, String> manifest) throws BundleException {
+		if (elements.length == 0)
 			return;
 		String hostName = elements[0].getValue();
 		// XXX: The extension bundle check is done against system.bundle and org.eclipse.osgi
 		if (!hostName.equals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME) && !hostName.equals(EquinoxContainer.NAME)) {
-			String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[0].toString());
-			throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_EXTENSION_ERROR, hostName), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+			if (elements[0].getDirective(Constants.EXTENSION_DIRECTIVE) != null) {
+				String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[0].toString());
+				throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_EXTENSION_ERROR, hostName), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+			}
+		} else {
+			if (manifest.get(Constants.IMPORT_PACKAGE) != null)
+				throw new BundleException("Extension bundles cannot import packages.", BundleException.MANIFEST_ERROR);
+			if (manifest.get(Constants.REQUIRE_BUNDLE) != null)
+				throw new BundleException("Extension bundles cannot require bundles.", BundleException.MANIFEST_ERROR);
+			if (manifest.get(Constants.REQUIRE_CAPABILITY) != null)
+				throw new BundleException("Extension bundles cannot require bundles.", BundleException.MANIFEST_ERROR);
+			if (manifest.get(Constants.BUNDLE_NATIVECODE) != null)
+				throw new BundleException("Extension bundles cannot have native code.", BundleException.MANIFEST_ERROR);
+
 		}
 	}
 
