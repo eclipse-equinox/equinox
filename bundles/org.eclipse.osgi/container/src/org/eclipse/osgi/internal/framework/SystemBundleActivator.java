@@ -18,8 +18,10 @@ import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.hookregistry.ActivatorHookFactory;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
+import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
 import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
 import org.eclipse.osgi.internal.url.EquinoxFactoryManager;
+import org.eclipse.osgi.next.internal.debug.Debug;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
@@ -43,6 +45,7 @@ public class SystemBundleActivator implements BundleActivator {
 	private EquinoxFactoryManager urlFactoryManager;
 	private List<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>(10);
 	private List<BundleActivator> hookActivators;
+	private SecurityManager setSecurityManagner;
 
 	@SuppressWarnings("deprecation")
 	public void start(BundleContext bc) throws Exception {
@@ -50,12 +53,15 @@ public class SystemBundleActivator implements BundleActivator {
 		EquinoxBundle bundle = (EquinoxBundle) bc.getBundle();
 
 		bundle.getEquinoxContainer().systemStart(bc);
+
+		EquinoxConfiguration configuration = bundle.getEquinoxContainer().getConfiguration();
+		installSecurityManager(configuration);
 		bundle.getEquinoxContainer().getLogServices().start(bc);
 
 		urlFactoryManager = new EquinoxFactoryManager(bundle.getEquinoxContainer());
 		urlFactoryManager.installHandlerFactories(bc);
 
-		FrameworkDebugOptions dbgOptions = (FrameworkDebugOptions) bundle.getEquinoxContainer().getConfiguration().getDebugOptions();
+		FrameworkDebugOptions dbgOptions = (FrameworkDebugOptions) configuration.getDebugOptions();
 		dbgOptions.start(bc);
 
 		SecurityAdmin sa = bundle.getEquinoxContainer().getStorage().getSecurityAdmin();
@@ -89,6 +95,44 @@ public class SystemBundleActivator implements BundleActivator {
 		register(bc, DocumentBuilderFactory.class, new ParsingService(false, setTccl), false, null);
 
 		startHookActivators(bundle.getEquinoxContainer(), bc);
+	}
+
+	private void installSecurityManager(EquinoxConfiguration configuration) {
+		String securityManager = configuration.getConfiguration(Constants.FRAMEWORK_SECURITY, configuration.getConfiguration(EquinoxConfiguration.PROP_EQUINOX_SECURITY));
+		if (securityManager == null) {
+			securityManager = configuration.getProperty("java.security.manager"); //$NON-NLS-1$
+		}
+		if (securityManager != null) {
+			SecurityManager sm = System.getSecurityManager();
+			if (sm == null) {
+				if (securityManager.length() == 0)
+					sm = new SecurityManager(); // use the default one from java
+				else if (securityManager.equals(Constants.FRAMEWORK_SECURITY_OSGI))
+					sm = new EquinoxSecurityManager(); // use an OSGi enabled manager that understands postponed conditions
+				else {
+					// try to use a specific classloader by classname
+					try {
+						Class<?> clazz = Class.forName(securityManager);
+						sm = (SecurityManager) clazz.newInstance();
+					} catch (ClassNotFoundException e) {
+						// do nothing
+					} catch (ClassCastException e) {
+						// do nothing
+					} catch (InstantiationException e) {
+						// do nothing
+					} catch (IllegalAccessException e) {
+						// do nothing
+					}
+				}
+				if (sm == null)
+					throw new NoClassDefFoundError(securityManager);
+				if (configuration.getDebug().DEBUG_SECURITY)
+					Debug.println("Setting SecurityManager to: " + sm); //$NON-NLS-1$
+				System.setSecurityManager(sm);
+				setSecurityManagner = sm;
+				return;
+			}
+		}
 	}
 
 	private void registerLocations(BundleContext bc, EquinoxLocations equinoxLocations) {
@@ -147,7 +191,14 @@ public class SystemBundleActivator implements BundleActivator {
 			registration.unregister();
 		registrations.clear();
 		bundle.getEquinoxContainer().getLogServices().stop(bc);
+		unintallSecurityManager();
 		bundle.getEquinoxContainer().systemStop(bc);
+	}
+
+	private void unintallSecurityManager() {
+		if (System.getSecurityManager() == setSecurityManagner)
+			System.setSecurityManager(null);
+		setSecurityManagner = null;
 	}
 
 	private void stopHookActivators(BundleContext context) throws Exception {

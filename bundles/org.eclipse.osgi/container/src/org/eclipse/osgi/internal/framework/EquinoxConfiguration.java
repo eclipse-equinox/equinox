@@ -154,6 +154,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String PROP_DEFINE_PACKAGES = "osgi.classloader.define.packages"; //$NON-NLS-1$
 	public static final String PROP_BUNDLE_SETTCCL = "eclipse.bundle.setTCCL"; //$NON-NLS-1$
 
+	public static final String PROP_EQUINOX_SECURITY = "eclipse.security"; //$NON-NLS-1$
+
 	EquinoxConfiguration(Map<String, String> initialConfig, HookRegistry hookRegistry) {
 		this.hookRegistry = hookRegistry;
 		String useSystemPropsValue = initialConfig == null ? null : initialConfig.get(PROP_USE_SYSTEM_PROPERTIES);
