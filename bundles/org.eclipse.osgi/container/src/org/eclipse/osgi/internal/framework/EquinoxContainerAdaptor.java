@@ -167,7 +167,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 
 	@Override
 	public void invalidateWiring(ModuleWiring moduleWiring, ModuleLoader current) {
-		if (current != null) {
+		if (current instanceof BundleLoader) {
 			BundleLoader bundleLoader = (BundleLoader) current;
 			bundleLoader.close();
 		}

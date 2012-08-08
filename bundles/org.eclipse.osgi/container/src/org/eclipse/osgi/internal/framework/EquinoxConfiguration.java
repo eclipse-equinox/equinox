@@ -306,6 +306,21 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		BUNDLE_SET_TCCL = "true".equals(getConfiguration("eclipse.bundle.setTCCL", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
+	public Map<String, String> asMap() {
+		Map<String, String> result = new HashMap<String, String>();
+		synchronized (configuration) {
+			for (Object key : configuration.keySet()) {
+				if (key instanceof String) {
+					Object value = configuration.get(key);
+					if (value instanceof String) {
+						result.put((String) key, (String) value);
+					}
+				}
+			}
+		}
+		return result;
+	}
+
 	private static List<String> buildEclipseLibraryVariants(String ws, String os, String arch, String nl) {
 		List<String> result = new ArrayList<String>();
 		result.add("ws/" + ws + "/"); //$NON-NLS-1$ //$NON-NLS-2$
