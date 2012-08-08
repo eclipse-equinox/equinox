@@ -240,6 +240,7 @@ public final class ModuleContainer {
 	 * @throws BundleException if some error occurs updating the module
 	 */
 	public void update(Module module, ModuleRevisionBuilder builder, Object revisionInfo) throws BundleException {
+		checkAdminPermission(module.getBundle(), AdminPermission.LIFECYCLE);
 		String name = builder.getSymbolicName();
 		boolean nameLocked = false;
 		try {
