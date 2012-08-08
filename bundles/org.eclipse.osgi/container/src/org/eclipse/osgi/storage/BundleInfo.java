@@ -157,7 +157,7 @@ public final class BundleInfo {
 		void setContent(File content) {
 			synchronized (this.genMonitor) {
 				this.content = content;
-				this.isDirectory = content == null ? false : content.isDirectory();
+				this.isDirectory = content == null ? false : Storage.secureAction.isDirectory(content);
 			}
 		}
 
@@ -352,7 +352,7 @@ public final class BundleInfo {
 
 	public File getDataFile(String path) {
 		File dataRoot = getStorage().getFile(getBundleId() + "/" + Storage.BUNDLE_DATA_DIR, false); //$NON-NLS-1$
-		if (!dataRoot.exists() && (storage.isReadOnly() || !dataRoot.mkdirs())) {
+		if (!Storage.secureAction.exists(dataRoot) && (storage.isReadOnly() || !Storage.secureAction.mkdirs(dataRoot))) {
 			if (getStorage().getConfiguration().getDebug().DEBUG_GENERAL)
 				Debug.println("Unable to create bundle data directory: " + dataRoot.getAbsolutePath()); //$NON-NLS-1$
 			return null;

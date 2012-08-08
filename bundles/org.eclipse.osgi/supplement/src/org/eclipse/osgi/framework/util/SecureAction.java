@@ -213,6 +213,16 @@ public class SecureAction {
 		}, controlContext).booleanValue();
 	}
 
+	public boolean mkdirs(final File file) {
+		if (System.getSecurityManager() == null)
+			return file.mkdirs();
+		return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+			public Boolean run() {
+				return file.mkdirs() ? Boolean.TRUE : Boolean.FALSE;
+			}
+		}, controlContext).booleanValue();
+	}
+
 	/**
 	 * Returns true if a file is a directory, otherwise false is returned.  Same as calling
 	 * file.isDirectory().
