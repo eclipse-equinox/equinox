@@ -14,11 +14,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.AccessController;
 import java.util.*;
 import org.eclipse.osgi.framework.eventmgr.EventManager;
 import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.framework.legacy.PackageAdminImpl;
 import org.eclipse.osgi.internal.framework.legacy.StartLevelImpl;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
@@ -39,6 +41,7 @@ import org.osgi.util.tracker.ServiceTracker;
 public class EquinoxContainer {
 	public static final String NAME = "org.eclipse.osgi"; //$NON-NLS-1$
 	private static final String CONFIG_FILE = "config.ini"; //$NON-NLS-1$
+	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
 	private final EquinoxConfiguration equinoxConfig;
 	private final EquinoxLocations equinoxLocations;

@@ -179,7 +179,7 @@ class OSGiFrameworkHooks {
 				return new CoreResolverHook(Collections.<HookReference> emptyList());
 			}
 			Module systemModule = container.getStorage().getModuleContainer().getModule(0);
-			BundleContextImpl context = (BundleContextImpl) systemModule.getBundle().getBundleContext();
+			BundleContextImpl context = (BundleContextImpl) EquinoxContainer.secureAction.getContext(systemModule.getBundle());
 
 			ServiceReferenceImpl<ResolverHookFactory>[] refs = getHookReferences(registry, context);
 			@SuppressWarnings("unchecked")

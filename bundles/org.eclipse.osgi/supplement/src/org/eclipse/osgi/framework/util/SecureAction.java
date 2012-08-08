@@ -463,4 +463,15 @@ public class SecureAction {
 	public void start(final Bundle bundle) throws BundleException {
 		start(bundle, 0);
 	}
+
+	public BundleContext getContext(final Bundle bundle) {
+		if (System.getSecurityManager() == null) {
+			return bundle.getBundleContext();
+		}
+		return AccessController.doPrivileged(new PrivilegedAction<BundleContext>() {
+			public BundleContext run() {
+				return bundle.getBundleContext();
+			}
+		}, controlContext);
+	}
 }
