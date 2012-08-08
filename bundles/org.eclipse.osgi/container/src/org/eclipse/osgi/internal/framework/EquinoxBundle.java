@@ -13,6 +13,7 @@ package org.eclipse.osgi.internal.framework;
 import java.io.*;
 import java.net.URL;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import org.eclipse.osgi.container.*;
@@ -26,6 +27,7 @@ import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
+import org.eclipse.osgi.signedcontent.*;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.Storage;
 import org.osgi.framework.*;
@@ -551,8 +553,31 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 	@Override
 	public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType) {
-		// TODO Auto-generated method stub
-		return null;
+		SignedContentFactory factory = equinoxContainer.getSignedContentFactory();
+		if (factory == null) {
+			return Collections.emptyMap();
+		}
+		try {
+			SignedContent signedContent = factory.getSignedContent(this);
+			SignerInfo[] infos = signedContent.getSignerInfos();
+			if (infos.length == 0)
+				return Collections.emptyMap();
+			Map<X509Certificate, List<X509Certificate>> results = new HashMap<X509Certificate, List<X509Certificate>>(infos.length);
+			for (int i = 0; i < infos.length; i++) {
+				if (signersType == SIGNERS_TRUSTED && !infos[i].isTrusted())
+					continue;
+				Certificate[] certs = infos[i].getCertificateChain();
+				if (certs == null || certs.length == 0)
+					continue;
+				List<X509Certificate> certChain = new ArrayList<X509Certificate>();
+				for (int j = 0; j < certs.length; j++)
+					certChain.add((X509Certificate) certs[j]);
+				results.put((X509Certificate) certs[0], certChain);
+			}
+			return results;
+		} catch (Exception e) {
+			return Collections.emptyMap();
+		}
 	}
 
 	@Override

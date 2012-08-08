@@ -49,6 +49,7 @@ public class SystemBundleActivator implements BundleActivator {
 		registrations.clear();
 		EquinoxBundle bundle = (EquinoxBundle) bc.getBundle();
 
+		bundle.getEquinoxContainer().systemStart(bc);
 		bundle.getEquinoxContainer().getLogServices().start(bc);
 
 		urlFactoryManager = new EquinoxFactoryManager(bundle.getEquinoxContainer());
@@ -146,6 +147,7 @@ public class SystemBundleActivator implements BundleActivator {
 			registration.unregister();
 		registrations.clear();
 		bundle.getEquinoxContainer().getLogServices().stop(bc);
+		bundle.getEquinoxContainer().systemStop(bc);
 	}
 
 	private void stopHookActivators(BundleContext context) throws Exception {

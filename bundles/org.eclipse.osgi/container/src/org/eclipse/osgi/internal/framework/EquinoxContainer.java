@@ -26,12 +26,14 @@ import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.internal.log.EquinoxLogServices;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
 import org.eclipse.osgi.service.datalocation.Location;
+import org.eclipse.osgi.signedcontent.SignedContentFactory;
 import org.eclipse.osgi.storage.Storage;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
+import org.osgi.util.tracker.ServiceTracker;
 
 @SuppressWarnings("deprecation")
 public class EquinoxContainer {
@@ -54,6 +56,8 @@ public class EquinoxContainer {
 	private ServiceRegistry serviceRegistry;
 	private ContextFinder contextFinder;
 	private boolean initialized = false;
+
+	private ServiceTracker<SignedContentFactory, SignedContentFactory> signedContentFactory;
 
 	public EquinoxContainer(Map<String, String> configuration) {
 		this.equinoxConfig = new EquinoxConfiguration(configuration, new HookRegistry(this));
@@ -179,6 +183,14 @@ public class EquinoxContainer {
 		return startLevel;
 	}
 
+	public SignedContentFactory getSignedContentFactory() {
+		ServiceTracker<SignedContentFactory, SignedContentFactory> current;
+		synchronized (this.monitor) {
+			current = signedContentFactory;
+		}
+		return current == null ? null : current.getService();
+	}
+
 	public boolean isBootDelegationPackage(String name) {
 		if (bootDelegateAll)
 			return true;
@@ -298,5 +310,22 @@ public class EquinoxContainer {
 
 	public void handleRuntimeError(Throwable t) {
 		// TODO need to call some hook here
+	}
+
+	void systemStart(BundleContext bc) {
+		synchronized (this.monitor) {
+			signedContentFactory = new ServiceTracker<SignedContentFactory, SignedContentFactory>(bc, SignedContentFactory.class, null);
+		}
+		signedContentFactory.open();
+	}
+
+	void systemStop(BundleContext bc) {
+		ServiceTracker<SignedContentFactory, SignedContentFactory> current;
+		synchronized (this.monitor) {
+			current = signedContentFactory;
+		}
+		if (current != null) {
+			current.close();
+		}
 	}
 }
