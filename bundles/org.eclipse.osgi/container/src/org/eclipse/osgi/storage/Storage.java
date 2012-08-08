@@ -398,6 +398,9 @@ public class Storage {
 				generation.delete();
 				generation.getBundleInfo().delete();
 			}
+			if (t instanceof RuntimeException) {
+				throw (RuntimeException) t;
+			}
 			if (t instanceof BundleException) {
 				throw (BundleException) t;
 			}
@@ -549,6 +552,9 @@ public class Storage {
 				}
 			}
 			newGen.delete();
+			if (t instanceof RuntimeException) {
+				throw (RuntimeException) t;
+			}
 			if (t instanceof BundleException) {
 				throw (BundleException) t;
 			}
