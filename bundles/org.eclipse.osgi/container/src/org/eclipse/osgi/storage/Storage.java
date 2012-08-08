@@ -337,8 +337,22 @@ public class Storage {
 		return updateLocation == null ? module.getLocation() : updateLocation;
 	}
 
-	private URLConnection getContentConnection(String spec) throws IOException {
-		return new URL(spec).openConnection();
+	private URLConnection getContentConnection(final String spec) throws IOException {
+		if (System.getSecurityManager() == null) {
+			return new URL(spec).openConnection();
+		}
+		try {
+			return AccessController.doPrivileged(new PrivilegedExceptionAction<URLConnection>() {
+				@Override
+				public URLConnection run() throws IOException {
+					return new URL(spec).openConnection();
+				}
+			});
+		} catch (PrivilegedActionException e) {
+			if (e.getException() instanceof IOException)
+				throw (IOException) e.getException();
+			throw (RuntimeException) e.getException();
+		}
 	}
 
 	public Generation install(Module origin, String bundleLocation, URLConnection content) throws BundleException {
