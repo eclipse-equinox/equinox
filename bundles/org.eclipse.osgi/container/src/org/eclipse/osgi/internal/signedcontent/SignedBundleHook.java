@@ -204,7 +204,7 @@ public class SignedBundleHook implements ActivatorHookFactory, BundleFileWrapper
 		if (content.isDirectory())
 			contentBundleFile = new DirBundleFile(content);
 		else
-			contentBundleFile = new ZipBundleFile(content, null, null);
+			contentBundleFile = new ZipBundleFile(content, null, null, container.getConfiguration().getDebug());
 		SignedBundleFile result = new SignedBundleFile(null, VERIFY_ALL, this);
 		try {
 			result.setBundleFile(contentBundleFile);

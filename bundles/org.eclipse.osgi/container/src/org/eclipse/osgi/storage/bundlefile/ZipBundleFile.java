@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
+import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.next.internal.debug.Debug;
@@ -45,11 +46,11 @@ public class ZipBundleFile extends BundleFile {
 
 	private int referenceCount = 0;
 
-	public ZipBundleFile(File basefile, BundleInfo.Generation generation, MRUBundleFileList mruList) throws IOException {
+	public ZipBundleFile(File basefile, BundleInfo.Generation generation, MRUBundleFileList mruList, Debug debug) throws IOException {
 		super(basefile);
 		if (!BundleFile.secureAction.exists(basefile))
 			throw new IOException(NLS.bind(AdaptorMsg.ADAPTER_FILEEXIST_EXCEPTION, basefile));
-		this.debug = generation.getBundleInfo().getStorage().getConfiguration().getDebug();
+		this.debug = debug;
 		this.generation = generation;
 		this.closed = true;
 		this.mruList = mruList;
@@ -64,9 +65,12 @@ public class ZipBundleFile extends BundleFile {
 			return getZipFile() != null;
 		} catch (IOException e) {
 			if (generation != null) {
-				generation.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, null, e);
+				ModuleRevision r = generation.getRevision();
+				if (r != null) {
+					generation.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, r.getRevisions().getModule(), e);
+				}
 			}
-			return false;
+			throw new RuntimeException("Failed to open bundle file.", e);
 		}
 	}
 

@@ -731,7 +731,7 @@ public class Storage {
 			if (isDirectory) {
 				result = new DirBundleFile(content);
 			} else {
-				result = new ZipBundleFile(content, generation, mruList);
+				result = new ZipBundleFile(content, generation, mruList, getConfiguration().getDebug());
 			}
 		} catch (IOException e) {
 			throw new RuntimeException("Could not create bundle file.", e); //$NON-NLS-1$
