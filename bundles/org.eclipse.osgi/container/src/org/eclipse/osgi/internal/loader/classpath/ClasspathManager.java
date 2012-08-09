@@ -76,7 +76,7 @@ public class ClasspathManager {
 		this.hookRegistry = generation.getBundleInfo().getStorage().getConfiguration().getHookRegistry();
 		this.generation = generation;
 		this.classloader = classloader;
-		this.isParallelClassLoader = classloader.isParallelCapable();
+		this.isParallelClassLoader = classloader != null && classloader.isParallelCapable();
 		String[] cp = getClassPath(generation.getRevision());
 		this.fragments = buildFragmentClasspaths(this.classloader, this);
 		this.entries = buildClasspath(cp, this, this.generation);

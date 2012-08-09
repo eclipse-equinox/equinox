@@ -26,6 +26,7 @@ import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
+import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
 import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
 import org.eclipse.osgi.signedcontent.*;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
@@ -401,8 +402,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			// ignore
 		}
 
-		// TODO need to handle unresolved host case
-		return null;
+		return new ClasspathManager((Generation) module.getCurrentRevision().getRevisionInfo(), null).findLocalResource(name);
 	}
 
 	@Override
@@ -473,8 +473,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			// ignore
 		}
 
-		// TODO need to handle unresolved host case
-		return null;
+		return new ClasspathManager((Generation) module.getCurrentRevision().getRevisionInfo(), null).findLocalResources(name);
 	}
 
 	@Override
