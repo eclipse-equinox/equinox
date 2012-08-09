@@ -97,10 +97,14 @@ public class SystemBundleActivator implements BundleActivator {
 		startHookActivators(bundle.getEquinoxContainer(), bc);
 	}
 
-	private void installSecurityManager(EquinoxConfiguration configuration) {
-		String securityManager = configuration.getConfiguration(Constants.FRAMEWORK_SECURITY, configuration.getConfiguration(EquinoxConfiguration.PROP_EQUINOX_SECURITY));
+	private void installSecurityManager(EquinoxConfiguration configuration) throws BundleException {
+		String securityManager = configuration.getConfiguration(Constants.FRAMEWORK_SECURITY);
+		if (System.getSecurityManager() != null && securityManager != null) {
+			throw new BundleException("Cannot specify the \"" + Constants.FRAMEWORK_SECURITY + "\" configuration property when a security manager is already installed."); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+
 		if (securityManager == null) {
-			securityManager = configuration.getProperty("java.security.manager"); //$NON-NLS-1$
+			securityManager = configuration.getConfiguration(EquinoxConfiguration.PROP_EQUINOX_SECURITY, configuration.getProperty("java.security.manager")); //$NON-NLS-1$
 		}
 		if (securityManager != null) {
 			SecurityManager sm = System.getSecurityManager();
