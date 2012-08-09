@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
+import java.security.Permission;
 import java.util.*;
 import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.internal.container.Converters;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Version;
+import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.namespace.*;
 import org.osgi.framework.wiring.*;
@@ -157,6 +157,7 @@ final class ModuleResolver {
 		List<ModuleWire> providedWires = new ArrayList<ModuleWire>();
 		addProvidedWires(providedWireMap, providedWires, capabilities);
 
+		filterCapabilityPermissions(capabilities);
 		return new ModuleWiring(revision, capabilities, requirements, providedWires, requiredWires, substituted);
 	}
 
@@ -358,7 +359,23 @@ final class ModuleResolver {
 				addPayloadContent(newHostWires, existingCapabilities.listIterator(), existingRequirements.listIterator());
 			}
 		}
+
+		filterCapabilityPermissions(existingCapabilities);
 		return new ModuleWiring(revision, existingCapabilities, existingRequirements, existingProvidedWires, existingRequiredWires, Collections.EMPTY_LIST);
+	}
+
+	private static void filterCapabilityPermissions(List<ModuleCapability> capabilities) {
+		if (System.getSecurityManager() == null) {
+			return;
+		}
+		for (Iterator<ModuleCapability> iCapabilities = capabilities.iterator(); iCapabilities.hasNext();) {
+			ModuleCapability capability = iCapabilities.next();
+			Permission permission = getProvidePermission(capability);
+			Bundle provider = capability.getRevision().getBundle();
+			if (provider != null && !provider.hasPermission(permission)) {
+				iCapabilities.remove();
+			}
+		}
 	}
 
 	static boolean isSingleton(ModuleRevision revision) {
@@ -385,6 +402,46 @@ final class ModuleResolver {
 		}
 		Object version = c.getAttributes().get(versionAttr);
 		return version instanceof Version ? (Version) version : Version.emptyVersion;
+	}
+
+	static Permission getRequirePermission(BundleCapability candidate) {
+		String name = candidate.getNamespace();
+		if (PackageNamespace.PACKAGE_NAMESPACE.equals(name)) {
+			return new PackagePermission(getPermisionName(candidate), candidate.getRevision().getBundle(), PackagePermission.IMPORT);
+		}
+		if (HostNamespace.HOST_NAMESPACE.equals(name)) {
+			return new BundlePermission(getPermisionName(candidate), BundlePermission.FRAGMENT);
+		}
+		if (BundleNamespace.BUNDLE_NAMESPACE.equals(name)) {
+			return new BundlePermission(getPermisionName(candidate), BundlePermission.REQUIRE);
+		}
+		return new CapabilityPermission(name, candidate.getAttributes(), candidate.getRevision().getBundle(), CapabilityPermission.REQUIRE);
+	}
+
+	static Permission getProvidePermission(BundleCapability candidate) {
+		String name = candidate.getNamespace();
+		if (PackageNamespace.PACKAGE_NAMESPACE.equals(name)) {
+			return new PackagePermission(getPermisionName(candidate), PackagePermission.EXPORTONLY);
+		}
+		if (HostNamespace.HOST_NAMESPACE.equals(name)) {
+			return new BundlePermission(getPermisionName(candidate), BundlePermission.HOST);
+		}
+		if (BundleNamespace.BUNDLE_NAMESPACE.equals(name)) {
+			return new BundlePermission(getPermisionName(candidate), BundlePermission.PROVIDE);
+		}
+		return new CapabilityPermission(name, CapabilityPermission.PROVIDE);
+	}
+
+	private static String getPermisionName(BundleCapability candidate) {
+		Object name = candidate.getAttributes().get(candidate.getNamespace());
+		if (name instanceof String) {
+			return (String) name;
+		}
+		if (name instanceof Collection) {
+			Collection<?> names = (Collection<?>) name;
+			return names.isEmpty() ? "unknown" : names.iterator().next().toString(); //$NON-NLS-1$
+		}
+		return "unknown"; //$NON-NLS-1$
 	}
 
 	class ResolveProcess extends ResolveContext implements Comparator<Capability> {
@@ -437,9 +494,32 @@ final class ModuleResolver {
 			filterDisabled(iCandidates);
 			removeNonEffectiveCapabilities(iCandidates);
 			removeSubstituted(iCandidates);
+			filterPermissions((BundleRequirement) requirement, iCandidates);
 			hook.filterMatches((BundleRequirement) requirement, Converters.asListBundleCapability(candidates));
 			Collections.sort(candidates, this);
 			return Converters.asListCapability(candidates);
+		}
+
+		private void filterPermissions(BundleRequirement requirement, ListIterator<ModuleCapability> iCandidates) {
+			rewind(iCandidates);
+			if (System.getSecurityManager() == null || !iCandidates.hasNext()) {
+				return;
+			}
+
+			candidates: while (iCandidates.hasNext()) {
+				ModuleCapability candidate = iCandidates.next();
+				// TODO this is a hack for when a bundle imports and exports the same package
+				if (PackageNamespace.PACKAGE_NAMESPACE.equals(requirement.getNamespace())) {
+					if (requirement.getRevision().equals(candidate.getRevision())) {
+						continue candidates;
+					}
+				}
+				Permission requirePermission = getRequirePermission(candidate);
+				Permission providePermission = getProvidePermission(candidate);
+				if (!requirement.getRevision().getBundle().hasPermission(requirePermission) || !candidate.getRevision().getBundle().hasPermission(providePermission)) {
+					iCandidates.remove();
+				}
+			}
 		}
 
 		private void filterDisabled(ListIterator<ModuleCapability> iCandidates) {
