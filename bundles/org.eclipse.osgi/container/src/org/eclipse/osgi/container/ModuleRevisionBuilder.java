@@ -204,7 +204,11 @@ public final class ModuleRevisionBuilder {
 							if (systemNames.contains(hostName)) {
 								Bundle b = module.getBundle();
 								if (b != null && !b.hasPermission(new AllPermission())) {
-									throw new SecurityException("Must have AllPermission granted to install an extension bundle"); //$NON-NLS-1$
+									SecurityException se = new SecurityException("Must have AllPermission granted to install an extension bundle"); //$NON-NLS-1$
+									// TODO this is such a hack: making the cause a bundle exception so we can throw the right one later
+									BundleException be = new BundleException(se.getMessage(), BundleException.SECURITY_ERROR, se);
+									se.initCause(be);
+									throw se;
 								}
 								module.getContainer().checkAdminPermission(module.getBundle(), AdminPermission.EXTENSIONLIFECYCLE);
 							}

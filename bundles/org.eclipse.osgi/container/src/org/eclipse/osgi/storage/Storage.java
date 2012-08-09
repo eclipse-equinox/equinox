@@ -398,8 +398,13 @@ public class Storage {
 				generation.delete();
 				generation.getBundleInfo().delete();
 			}
-			if (t instanceof RuntimeException) {
-				throw (RuntimeException) t;
+			if (t instanceof SecurityException) {
+				// TODO hack from ModuleContainer
+				// if the cause is a bundle exception then throw that
+				if (t.getCause() instanceof BundleException) {
+					throw (BundleException) t.getCause();
+				}
+				throw (SecurityException) t;
 			}
 			if (t instanceof BundleException) {
 				throw (BundleException) t;
@@ -552,8 +557,13 @@ public class Storage {
 				}
 			}
 			newGen.delete();
-			if (t instanceof RuntimeException) {
-				throw (RuntimeException) t;
+			if (t instanceof SecurityException) {
+				// TODO hack from ModuleContainer
+				// if the cause is a bundle exception then throw that
+				if (t.getCause() instanceof BundleException) {
+					throw (BundleException) t.getCause();
+				}
+				throw (SecurityException) t;
 			}
 			if (t instanceof BundleException) {
 				throw (BundleException) t;
