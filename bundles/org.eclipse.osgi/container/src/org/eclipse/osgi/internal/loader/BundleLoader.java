@@ -203,8 +203,17 @@ public class BundleLoader implements ModuleLoader {
 	public ModuleClassLoader getModuleClassLoader() {
 		synchronized (classLoaderMonitor) {
 			if (classloader == null) {
-				Generation generation = (Generation) wiring.getRevision().getRevisionInfo();
-				classloader = new ModuleClassLoader(parent, generation.getBundleInfo().getStorage().getConfiguration(), this, generation);
+				final Generation generation = (Generation) wiring.getRevision().getRevisionInfo();
+				if (System.getSecurityManager() == null) {
+					classloader = new ModuleClassLoader(parent, generation.getBundleInfo().getStorage().getConfiguration(), this, generation);
+				} else {
+					classloader = AccessController.doPrivileged(new PrivilegedAction<ModuleClassLoader>() {
+						@Override
+						public ModuleClassLoader run() {
+							return new ModuleClassLoader(parent, generation.getBundleInfo().getStorage().getConfiguration(), BundleLoader.this, generation);
+						}
+					});
+				}
 			}
 			return classloader;
 		}
