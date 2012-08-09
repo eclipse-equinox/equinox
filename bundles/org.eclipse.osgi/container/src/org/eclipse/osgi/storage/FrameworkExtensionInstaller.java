@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.osgi.container.ModuleCapability;
@@ -65,7 +66,25 @@ public class FrameworkExtensionInstaller {
 		this.configuration = configuraiton;
 	}
 
-	public void addExtensionContent(ModuleRevision revision) throws BundleException {
+	public void addExtensionContent(final ModuleRevision revision) throws BundleException {
+		if (System.getSecurityManager() == null) {
+			addExtensionContent0(revision);
+		} else {
+			try {
+				AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+					@Override
+					public Object run() throws BundleException {
+						addExtensionContent0(revision);
+						return null;
+					}
+				});
+			} catch (PrivilegedActionException e) {
+				throw (BundleException) e.getCause();
+			}
+		}
+	}
+
+	void addExtensionContent0(ModuleRevision revision) throws BundleException {
 		if (CL == null || ADD_FWK_URL_METHOD == null) {
 			return;
 		}
