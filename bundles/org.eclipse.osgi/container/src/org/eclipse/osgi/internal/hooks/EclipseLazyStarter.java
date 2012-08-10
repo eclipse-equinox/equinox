@@ -129,18 +129,21 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 	}
 
 	private boolean shouldActivateFor(String className, Module module, ModuleRevision revision, ClasspathManager manager) throws ClassNotFoundException {
-		if (!module.isActivationPolicyUsed() || !isLazyStartable(className, revision))
-			return false;
-		// Don't activate non-starting bundles
-		if (State.RESOLVED.equals(module.getState())) {
-			if (throwErrorOnFailedStart) {
-				TerminatingClassNotFoundException error = errors.get(manager);
-				if (error != null)
-					throw error;
+		if (!State.LAZY_STARTING.equals(module.getState())) {
+			// Don't activate non-starting bundles
+			if (State.RESOLVED.equals(module.getState())) {
+				// handle the resolved case where a previous error occurred
+				if (throwErrorOnFailedStart) {
+					TerminatingClassNotFoundException error = errors.get(manager);
+					if (error != null)
+						throw error;
+				}
+				return module.isPersistentlyStarted() && module.isActivationPolicyUsed() && isLazyStartable(className, revision);
 			}
-			return revision.getRevisions().getModule().isPersistentlyStarted();
+			return false;
 		}
-		return true;
+
+		return isLazyStartable(className, revision);
 	}
 
 	private boolean isLazyStartable(String className, ModuleRevision revision) {

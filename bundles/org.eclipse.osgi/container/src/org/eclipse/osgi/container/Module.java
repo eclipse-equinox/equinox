@@ -501,7 +501,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				// continue on to normal starting
 			}
 		} else {
-			if (isLazyActivate()) {
+			if (isLazyActivate(options)) {
 				if (State.LAZY_STARTING.equals(getState())) {
 					// a sync listener must have tried to start this module again with the lazy option
 					return null; // no event to publish; nothing to do
@@ -571,19 +571,14 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	private void persistStartOptions(StartOptions... options) {
-		if (StartOptions.TRANSIENT_RESUME.isContained(options) || StartOptions.LAZY_TRIGGER.isContained(options)) {
+		if (StartOptions.TRANSIENT.isContained(options) || StartOptions.TRANSIENT_RESUME.isContained(options) || StartOptions.LAZY_TRIGGER.isContained(options)) {
 			return;
 		}
 
-		// Always set the use acivation policy setting
 		if (StartOptions.USE_ACTIVATION_POLICY.isContained(options)) {
 			settings.add(Settings.USE_ACTIVATION_POLICY);
 		} else {
 			settings.remove(Settings.USE_ACTIVATION_POLICY);
-		}
-
-		if (StartOptions.TRANSIENT.isContained(options)) {
-			return;
 		}
 		settings.add(Settings.AUTO_START);
 		revisions.getContainer().moduleDatabase.persistSettings(settings, this);
@@ -603,10 +598,18 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 */
 	abstract protected void cleanup(ModuleRevision revision);
 
-	final boolean isLazyActivate() {
-		if (!settings.contains(Settings.USE_ACTIVATION_POLICY)) {
+	final boolean isLazyActivate(StartOptions... options) {
+		if (StartOptions.TRANSIENT.isContained(options)) {
+			if (!StartOptions.USE_ACTIVATION_POLICY.isContained(options)) {
+				return false;
+			}
+		} else if (!settings.contains(Settings.USE_ACTIVATION_POLICY)) {
 			return false;
 		}
+		return hasLazyActivatePolicy();
+	}
+
+	private boolean hasLazyActivatePolicy() {
 		ModuleRevision current = getCurrentRevision();
 		if (current == null)
 			return false;
