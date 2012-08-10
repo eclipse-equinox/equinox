@@ -184,6 +184,8 @@ public class Storage {
 					ModuleRevisionBuilder newBuilder = getBuilder(currentGeneration);
 					if (needUpdate(currentRevision, newBuilder)) {
 						newGeneration = currentGeneration.getBundleInfo().createGeneration();
+						File contentFile = getSystemContent();
+						newGeneration.setContent(contentFile);
 						moduleContainer.update(systemModule, newBuilder, newGeneration);
 						moduleContainer.refresh(Arrays.asList(systemModule));
 					}
