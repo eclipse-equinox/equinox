@@ -210,7 +210,7 @@ public class EquinoxContainer {
 
 	void init() {
 		synchronized (this.monitor) {
-			eventManager = new EventManager("Framework Event Dispatcher"); //$NON-NLS-1$
+			eventManager = new EventManager("Framework Event Dispatcher: " + toString()); //$NON-NLS-1$
 			eventPublisher = new EquinoxEventPublisher(this);
 			serviceRegistry = new ServiceRegistry(this);
 			initializeContextFinder();
@@ -330,5 +330,11 @@ public class EquinoxContainer {
 		if (current != null) {
 			current.close();
 		}
+	}
+
+	@Override
+	public String toString() {
+		String UUID = equinoxConfig == null ? null : equinoxConfig.getConfiguration(Constants.FRAMEWORK_UUID);
+		return "Equinox Container: " + UUID; //$NON-NLS-1$
 	}
 }

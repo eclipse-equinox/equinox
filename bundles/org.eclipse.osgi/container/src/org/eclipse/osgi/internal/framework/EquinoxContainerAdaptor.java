@@ -229,4 +229,9 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 				return 0;
 		}
 	}
+
+	@Override
+	public String toString() {
+		return container.toString();
+	}
 }
