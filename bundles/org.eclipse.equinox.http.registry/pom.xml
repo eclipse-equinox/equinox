@@ -40,8 +40,6 @@
               <removeAll/>
             </filter>
           </filters>
-
-          <executionEnvironment>CDC-1.0/Foundation-1.0</executionEnvironment>
         </configuration>
       </plugin>
     </plugins>

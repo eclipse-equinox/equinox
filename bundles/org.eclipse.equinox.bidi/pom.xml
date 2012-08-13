@@ -36,7 +36,7 @@
              this to the equinox team to reconsile the two, but for now just
              override build profile in pom.xml.
            -->
-          <executionEnvironment>J2SE-1.4</executionEnvironment>
+          <executionEnvironment>OSGi/Minimum-1.2</executionEnvironment>
         </configuration>
       </plugin>
     </plugins>

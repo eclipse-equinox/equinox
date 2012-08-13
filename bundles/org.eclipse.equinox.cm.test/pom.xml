@@ -23,4 +23,24 @@
   <artifactId>org.eclipse.equinox.cm.test</artifactId>
   <version>1.0.0</version>
   <packaging>eclipse-plugin</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <configuration>
+          <!--
+          Default BREE J2SE-1.5+ results in compile errors similar to
+          
+          1. ERROR in /private/var/tmp/lts/R4_platform-aggregator/rt.equinox.bundles/bundles/org.eclipse.equinox.cm.test/src/org/eclipse/equinox/cm/test/ConfigurationPluginTest.java (at line 47)
+        config.update(props);
+               ^^^^^^
+The method update(Dictionary<String,?>) in the type Configuration is not applicable for the arguments (Properties)
+           -->
+          <executionEnvironment>J2SE-1.4</executionEnvironment>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

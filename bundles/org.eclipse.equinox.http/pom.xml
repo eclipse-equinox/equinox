@@ -31,6 +31,8 @@
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>target-platform-configuration</artifactId>
         <configuration>
+          <!-- J2SE-1.4 to satisfy Import-Package javax.net -->
+          <executionEnvironment>J2SE-1.4</executionEnvironment>
           <filters>
             <!--
               Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=348045

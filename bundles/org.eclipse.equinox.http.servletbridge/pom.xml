@@ -31,7 +31,6 @@
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>target-platform-configuration</artifactId>
         <configuration>
-          <executionEnvironment>CDC-1.0/Foundation-1.0</executionEnvironment>
           <filters>
             <!--
               Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=348045
