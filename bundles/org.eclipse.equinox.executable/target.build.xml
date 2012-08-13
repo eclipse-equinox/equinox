@@ -135,7 +135,6 @@
 			<fileset dir="${basedir}/gtk_root" includes="**"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.gtk.x86/${collectingFolder}" includes="launcher" /> 
-		<chmod perm="755" dir="${feature.base}/linux.gtk.x86/${collectingFolder}" includes="libcairo-swt.so" /> 
 	</target>
 	<target name="rootFileslinux_gtk_ppc">
 		<mkdir dir="${feature.base}/linux.gtk.ppc/${collectingFolder}"/>
@@ -144,7 +143,6 @@
 			<fileset dir="${basedir}/gtk_root" includes="**"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.gtk.ppc/${collectingFolder}" includes="launcher" />
-		<chmod perm="755" dir="${feature.base}/linux.gtk.x86/${collectingFolder}" includes="libcairo-swt.so" />
 	</target>
 	<target name="rootFileslinux_gtk_ppc64">
 		<mkdir dir="${feature.base}/linux.gtk.ppc64/${collectingFolder}"/>
@@ -177,7 +175,6 @@
 			<fileset dir="${basedir}/gtk_root" includes="**"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.gtk.x86_64/${collectingFolder}" includes="launcher" /> 
-		<chmod perm="755" dir="${feature.base}/linux.gtk.x86_64/${collectingFolder}" includes="libcairo-swt.so" /> 
 	</target>
 	<target name="rootFileslinux_gtk_ia64">
 		<mkdir dir="${feature.base}/linux.gtk.ia64/${collectingFolder}"/>
@@ -207,7 +204,7 @@
 			<fileset dir="${basedir}/bin/motif/linux/x86" includes="**"			/>
 			<fileset dir="${basedir}/motif_root" includes="**"			/>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/linux.motif.x86/${collectingFolder}" includes="libXm.so.2,libcairo-swt.so" /> 
+		<chmod perm="755" dir="${feature.base}/linux.motif.x86/${collectingFolder}" includes="libXm.so.2" /> 
 		<chmod perm="755" dir="${feature.base}/linux.motif.x86/${collectingFolder}" includes="launcher" /> 
 	</target>
 	<target name="rootFilessolaris_gtk_sparc">
