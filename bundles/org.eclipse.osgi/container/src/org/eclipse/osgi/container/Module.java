@@ -364,11 +364,11 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		lockStateChange(ModuleEvent.STARTED);
 		try {
 			checkValid();
-			checkFragment();
 			if (StartOptions.TRANSIENT_IF_AUTO_START.isContained(options) && !settings.contains(Settings.AUTO_START)) {
 				// Do nothing
 				return;
 			}
+			checkFragment();
 			persistStartOptions(options);
 			if (getStartLevel() > getRevisions().getContainer().getStartLevel()) {
 				if (StartOptions.TRANSIENT.isContained(options)) {
