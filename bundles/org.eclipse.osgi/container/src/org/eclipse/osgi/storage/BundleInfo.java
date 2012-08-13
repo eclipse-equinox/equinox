@@ -201,7 +201,7 @@ public final class BundleInfo {
 				return null;
 			}
 			synchronized (this.genMonitor) {
-				if (domain == null) {
+				if (domain == null && System.getSecurityManager() != null) {
 					if (revision == null) {
 						throw new IllegalStateException("The revision is not yet set for this generation."); //$NON-NLS-1$
 					}

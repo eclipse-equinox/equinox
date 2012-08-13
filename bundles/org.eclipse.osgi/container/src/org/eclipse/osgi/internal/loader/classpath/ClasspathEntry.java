@@ -31,7 +31,6 @@ import org.eclipse.osgi.storage.bundlefile.BundleFile;
  */
 public class ClasspathEntry {
 	private final BundleFile bundlefile;
-	private final Generation generation;
 	private final ProtectionDomain domain;
 	private final Manifest manifest;
 	private KeyedHashSet userObjects = null;
@@ -43,12 +42,10 @@ public class ClasspathEntry {
 	 * Constructs a ClasspathElement with the specified bundlefile and domain
 	 * @param bundlefile A BundleFile object which acts as a source
 	 * @param domain the protection domain
-	 * @param generation the generation this class path entry is for
 	 */
 	public ClasspathEntry(BundleFile bundlefile, ProtectionDomain domain, Generation generation) {
 		this.bundlefile = bundlefile;
 		this.domain = domain;
-		this.generation = generation;
 		this.manifest = getManifest(bundlefile, generation);
 	}
 
@@ -65,7 +62,7 @@ public class ClasspathEntry {
 	 * @return the ProtectionDomain for this classpath entry
 	 */
 	public ProtectionDomain getDomain() {
-		return generation.getDomain();
+		return domain;
 	}
 
 	/**
