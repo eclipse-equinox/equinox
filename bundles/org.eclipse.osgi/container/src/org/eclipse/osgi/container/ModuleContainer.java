@@ -1259,7 +1259,13 @@ public final class ModuleContainer {
 					break;
 				}
 				try {
-					module.stop(StopOptions.TRANSIENT);
+					if (Module.ACTIVE_SET.contains(module.getState())) {
+						// Note that we don't need to hold the state change lock
+						// here when checking the active status because no other
+						// thread will successfully be able to start this bundle
+						// since the start-level is no longer met.
+						module.stop(StopOptions.TRANSIENT);
+					}
 				} catch (BundleException e) {
 					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
 				}
