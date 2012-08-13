@@ -691,8 +691,6 @@ final class ModuleResolver {
 				selected = new ArrayList<ModuleRevision>(1);
 				selectedSingletons.put(bsn, selected);
 
-				// TODO out of band call that obtains the read lock
-				// Should generate our own copy Map<String, Collection<ModuleRevision>> 
 				Collection<ModuleRevision> sameBSN = getRevisions(bsn);
 				if (sameBSN.size() < 2) {
 					selected.add(revision);
@@ -749,6 +747,8 @@ final class ModuleResolver {
 		private Collection<ModuleRevision> getRevisions(String name) {
 			Map<String, Collection<ModuleRevision>> current = byName;
 			if (current == null) {
+				// generate the map using unresolved collection and wiring snap shot
+				// this is to avoid interacting with the module database
 				Set<ModuleRevision> revisions = new HashSet<ModuleRevision>();
 				revisions.addAll(unresolved);
 				revisions.addAll(wirings.keySet());
