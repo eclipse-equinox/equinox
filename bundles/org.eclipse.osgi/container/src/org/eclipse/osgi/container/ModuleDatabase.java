@@ -736,7 +736,9 @@ public class ModuleDatabase {
 	private void incrementTimestamps(boolean incrementRevision) {
 		// sanity check
 		checkWrite();
-		revisionsTimeStamp.incrementAndGet();
+		if (incrementRevision) {
+			revisionsTimeStamp.incrementAndGet();
+		}
 		allTimeStamp.incrementAndGet();
 	}
 
@@ -953,6 +955,7 @@ public class ModuleDatabase {
 		public static void store(ModuleDatabase moduleDatabase, DataOutputStream out, boolean persistWirings) throws IOException {
 			out.writeInt(VERSION);
 			out.writeLong(moduleDatabase.getRevisionsTimestamp());
+			out.writeLong(moduleDatabase.getTimestamp());
 			out.writeLong(moduleDatabase.getNextId());
 			out.writeInt(moduleDatabase.getInitialModuleStartLevel());
 
@@ -995,7 +998,8 @@ public class ModuleDatabase {
 			int version = in.readInt();
 			if (version < VERSION)
 				throw new IOException("Perstence version is not correct for loading: " + version + " expecting: " + VERSION); //$NON-NLS-1$ //$NON-NLS-2$
-			long timeStamp = in.readLong();
+			long revisionsTimeStamp = in.readLong();
+			long allTimeStamp = in.readLong();
 			moduleDatabase.nextId.set(in.readLong());
 			moduleDatabase.setInitialModuleStartLevel(in.readInt());
 
@@ -1032,7 +1036,8 @@ public class ModuleDatabase {
 			}
 
 			// Setting the timestamp at the end since some operations increment it
-			moduleDatabase.revisionsTimeStamp.set(timeStamp);
+			moduleDatabase.revisionsTimeStamp.set(revisionsTimeStamp);
+			moduleDatabase.allTimeStamp.set(allTimeStamp);
 		}
 
 		private static void writeModule(Module module, ModuleDatabase moduleDatabase, DataOutputStream out, Map<Object, Integer> objectTable) throws IOException {

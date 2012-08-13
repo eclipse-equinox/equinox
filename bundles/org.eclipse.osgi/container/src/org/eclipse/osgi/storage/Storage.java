@@ -120,6 +120,7 @@ public class Storage {
 			this.moduleContainer = new ModuleContainer(this.adaptor, this.moduleDatabase);
 			if (in != null) {
 				moduleDatabase.load(in);
+				lastSavedTimestamp = moduleDatabase.getTimestamp();
 			}
 		} finally {
 			if (in != null) {
