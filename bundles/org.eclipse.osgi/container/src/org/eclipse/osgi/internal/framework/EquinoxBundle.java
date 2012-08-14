@@ -523,11 +523,11 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 	@Override
 	public BundleContext getBundleContext() {
+		equinoxContainer.checkAdminPermission(this, AdminPermission.CONTEXT);
 		return createBundleContext(true);
 	}
 
 	BundleContextImpl createBundleContext(boolean checkPermission) {
-		equinoxContainer.checkAdminPermission(this, AdminPermission.CONTEXT);
 		if (isFragment()) {
 			// fragments cannot have contexts
 			return null;
