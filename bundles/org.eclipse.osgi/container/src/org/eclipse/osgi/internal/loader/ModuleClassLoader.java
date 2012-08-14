@@ -18,7 +18,6 @@ import java.net.URL;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
@@ -36,34 +35,26 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 	 * A PermissionCollection for AllPermissions; shared across all ProtectionDomains when security is disabled
 	 */
 	protected static final PermissionCollection ALLPERMISSIONS;
-	private final static String CLASS_CERTIFICATE_SUPPORT = "osgi.support.class.certificate"; //$NON-NLS-1$
-	private final static String CLASS_LOADER_TYPE = "osgi.classloader.type"; //$NON-NLS-1$
-	private final static String CLASS_LOADER_TYPE_PARALLEL = "parallel"; //$NON-NLS-1$
-	private static final boolean CLASS_CERTIFICATE;
-	private static final boolean PARALLEL_CAPABLE;
+	private static final boolean REGISTERED_AS_PARALLEL;
 
 	@SuppressWarnings("unchecked")
 	private static final Enumeration<URL> EMPTY_ENUMERATION = Collections.enumeration(Collections.EMPTY_LIST);
 
 	static {
-		CLASS_CERTIFICATE = Boolean.valueOf(FrameworkProperties.getProperty(CLASS_CERTIFICATE_SUPPORT, "true")).booleanValue(); //$NON-NLS-1$
 		AllPermission allPerm = new AllPermission();
 		ALLPERMISSIONS = allPerm.newPermissionCollection();
 		if (ALLPERMISSIONS != null)
 			ALLPERMISSIONS.add(allPerm);
-		boolean typeParallel = CLASS_LOADER_TYPE_PARALLEL.equals(FrameworkProperties.getProperty(CLASS_LOADER_TYPE, CLASS_LOADER_TYPE_PARALLEL));
-		boolean parallelCapable = false;
+		boolean registeredAsParallel;
 		try {
-			if (typeParallel) {
-				Method parallelCapableMetod = ClassLoader.class.getDeclaredMethod("registerAsParallelCapable", (Class[]) null); //$NON-NLS-1$
-				parallelCapableMetod.setAccessible(true);
-				parallelCapable = ((Boolean) parallelCapableMetod.invoke(null, (Object[]) null)).booleanValue();
-			}
+			Method parallelCapableMetod = ClassLoader.class.getDeclaredMethod("registerAsParallelCapable", (Class[]) null); //$NON-NLS-1$
+			parallelCapableMetod.setAccessible(true);
+			registeredAsParallel = ((Boolean) parallelCapableMetod.invoke(null, (Object[]) null)).booleanValue();
 		} catch (Throwable e) {
 			// must do everything to avoid failing in clinit
-			parallelCapable = false;
+			registeredAsParallel = false;
 		}
-		PARALLEL_CAPABLE = parallelCapable;
+		REGISTERED_AS_PARALLEL = registeredAsParallel;
 	}
 
 	private final EquinoxConfiguration configuration;
@@ -223,7 +214,7 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 	 * @return a ProtectionDomain which uses specified BundleFile and the permissions of the baseDomain 
 	 */
 	@SuppressWarnings("deprecation")
-	public static ProtectionDomain createProtectionDomain(BundleFile bundlefile, ProtectionDomain baseDomain) {
+	public ProtectionDomain createProtectionDomain(BundleFile bundlefile, ProtectionDomain baseDomain) {
 		// create a protection domain which knows about the codesource for this classpath entry (bug 89904)
 		try {
 			// use the permissions supplied by the domain passed in from the framework
@@ -242,7 +233,7 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 					wrapper = wrapper.getNext();
 				signedContent = wrapper == null ? null : (SignedContent) wrapper.getWrapped();
 			}
-			if (CLASS_CERTIFICATE && signedContent != null && signedContent.isSigned()) {
+			if (configuration.CLASS_CERTIFICATE && signedContent != null && signedContent.isSigned()) {
 				SignerInfo[] signers = signedContent.getSignerInfos();
 				if (signers.length > 0)
 					certs = signers[0].getCertificateChain();
@@ -263,7 +254,7 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 	}
 
 	public boolean isParallelCapable() {
-		return PARALLEL_CAPABLE;
+		return REGISTERED_AS_PARALLEL || configuration.PARALLEL_CAPABLE;
 	}
 
 	public List<URL> findEntries(String path, String filePattern, int options) {

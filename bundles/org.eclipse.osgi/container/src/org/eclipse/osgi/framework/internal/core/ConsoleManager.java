@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
 
@@ -20,35 +21,38 @@ public class ConsoleManager {
 	public static final String PROP_CONSOLE_ENABLED = "osgi.console.enable.builtin"; //$NON-NLS-1$
 
 	private final BundleContext context;
+	private final EquinoxConfiguration equinoxConfig;
 	private final String consoleBundle;
 	private final String consolePort;
 
-	public ConsoleManager(BundleContext context, String consolePropValue) {
+	public ConsoleManager(BundleContext context, EquinoxConfiguration equinoxConfig) {
+		this.equinoxConfig = equinoxConfig;
 		String port = null;
+		String consolePropValue = equinoxConfig.getConfiguration(PROP_CONSOLE);
 		if (consolePropValue != null) {
 			int index = consolePropValue.lastIndexOf(":"); //$NON-NLS-1$
 			port = consolePropValue.substring(index + 1);
 		}
 		this.consolePort = port != null ? port.trim() : port;
-		String enabled = FrameworkProperties.getProperty(PROP_CONSOLE_ENABLED, CONSOLE_BUNDLE);
+		String enabled = equinoxConfig.getConfiguration(PROP_CONSOLE_ENABLED, CONSOLE_BUNDLE);
 		this.context = context;
 		if (!"true".equals(enabled) || "none".equals(consolePort)) { //$NON-NLS-1$ //$NON-NLS-2$
 			this.consoleBundle = "false".equals(enabled) ? CONSOLE_BUNDLE : enabled; //$NON-NLS-1$
 			if (consolePort == null || consolePort.length() > 0) {
 				// no -console was specified or it has specified none or a port for telnet;
 				// need to make sure the gogo shell does not create an interactive console on standard in/out
-				FrameworkProperties.setProperty("gosh.args", "--nointeractive"); //$NON-NLS-1$//$NON-NLS-2$
+				equinoxConfig.setProperty("gosh.args", "--nointeractive"); //$NON-NLS-1$//$NON-NLS-2$
 			} else {
 				// Need to make sure we don't shutdown the framework if no console is around (bug 362412)
-				FrameworkProperties.setProperty("gosh.args", "--noshutdown"); //$NON-NLS-1$//$NON-NLS-2$
+				equinoxConfig.setProperty("gosh.args", "--noshutdown"); //$NON-NLS-1$//$NON-NLS-2$
 			}
 			return;
 		}
 		this.consoleBundle = "unknown"; //$NON-NLS-1$
 	}
 
-	public static ConsoleManager startConsole(BundleContext context) {
-		ConsoleManager consoleManager = new ConsoleManager(context, FrameworkProperties.getProperty(PROP_CONSOLE));
+	public static ConsoleManager startConsole(BundleContext context, EquinoxConfiguration equinoxConfig) {
+		ConsoleManager consoleManager = new ConsoleManager(context, equinoxConfig);
 		return consoleManager;
 	}
 

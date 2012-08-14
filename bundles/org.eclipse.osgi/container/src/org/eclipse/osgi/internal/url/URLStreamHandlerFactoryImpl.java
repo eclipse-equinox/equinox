@@ -19,6 +19,7 @@ import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.storage.url.BundleResourceHandler;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
@@ -140,7 +141,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 		} else if (BundleResourceHandler.OSGI_RESOURCE_URL_PROTOCOL.equals(protocol)) {
 			return new org.eclipse.osgi.storage.url.bundleresource.Handler(container.getStorage().getModuleContainer(), null);
 		} else if (PROTOCOL_REFERENCE.equals(protocol)) {
-			return new org.eclipse.osgi.storage.url.reference.Handler();
+			return new org.eclipse.osgi.storage.url.reference.Handler(container.getConfiguration().getConfiguration(EquinoxLocations.PROP_INSTALL_AREA));
 		}
 		return null;
 	}

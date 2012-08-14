@@ -628,7 +628,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	 * Reads the PROP_LOG_SIZE_MAX and PROP_LOG_FILE_MAX properties.
 	 */
 	private void readLogProperties() {
-		String newMaxLogSize = secureAction.getProperty(PROP_LOG_SIZE_MAX);
+		String newMaxLogSize = environmentInfo.getConfiguration(PROP_LOG_SIZE_MAX);
 		if (newMaxLogSize != null) {
 			maxLogSize = Integer.parseInt(newMaxLogSize);
 			if (maxLogSize != 0 && maxLogSize < LOG_SIZE_MIN) {
@@ -638,7 +638,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 			}
 		}
 
-		String newMaxLogFiles = secureAction.getProperty(PROP_LOG_FILE_MAX);
+		String newMaxLogFiles = environmentInfo.getConfiguration(PROP_LOG_FILE_MAX);
 		if (newMaxLogFiles != null) {
 			maxLogFiles = Integer.parseInt(newMaxLogFiles);
 			if (maxLogFiles < 1) {
@@ -647,7 +647,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 			}
 		}
 
-		String newLogLevel = secureAction.getProperty(PROP_LOG_LEVEL);
+		String newLogLevel = environmentInfo.getConfiguration(PROP_LOG_LEVEL);
 		if (newLogLevel != null) {
 			if (newLogLevel.equals("ERROR")) //$NON-NLS-1$
 				logLevel = FrameworkLogEntry.ERROR;
@@ -659,7 +659,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 				logLevel = FrameworkLogEntry.OK; // OK (0) means log everything
 		}
 
-		includeCommandLine = "true".equals(secureAction.getProperty(PROP_LOG_INCLUDE_COMMAND_LINE, "true")); //$NON-NLS-1$//$NON-NLS-2$
+		includeCommandLine = "true".equals(environmentInfo.getConfiguration(PROP_LOG_INCLUDE_COMMAND_LINE, "true")); //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	/**

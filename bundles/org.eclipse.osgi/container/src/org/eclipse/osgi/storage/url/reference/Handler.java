@@ -28,11 +28,23 @@ import java.net.*;
  */
 public class Handler extends URLStreamHandler {
 
+	private final String installPath;
+
+	public Handler(String installURL) {
+		super();
+		if (installURL != null && installURL.startsWith("file:")) { //$NON-NLS-1$
+			// this is the safest way to create a File object off a file: URL
+			this.installPath = installURL.substring(5);
+		} else {
+			this.installPath = null;
+		}
+	}
+
 	/**
 	 * @throws IOException  
 	 */
 	protected URLConnection openConnection(URL url) throws IOException {
-		return new ReferenceURLConnection(url);
+		return new ReferenceURLConnection(url, installPath);
 	}
 
 	protected void parseURL(URL url, String str, int start, int end) {

@@ -23,21 +23,9 @@ import org.eclipse.osgi.framework.eventmgr.*;
  * @since 3.2
  */
 public class MRUBundleFileList implements EventDispatcher<Object, Object, BundleFile> {
-	private static final String PROP_FILE_LIMIT = "osgi.bundlefile.limit"; //$NON-NLS-1$
 	private static final int MIN = 10;
-	private static final int PROP_FILE_LIMIT_VALUE;
 	private static final ThreadLocal<BundleFile> closingBundleFile = new ThreadLocal<BundleFile>();
-	static {
-		int propValue = 100; // enable to 100 open files by default
-		try {
-			String prop = BundleFile.secureAction.getProperty(PROP_FILE_LIMIT);
-			if (prop != null)
-				propValue = Integer.parseInt(prop);
-		} catch (NumberFormatException e) {
-			//MRU will be disabled
-		}
-		PROP_FILE_LIMIT_VALUE = propValue;
-	}
+
 	// list of open bundle files
 	final private BundleFile[] bundleFileList;
 	// list of open bundle files use stamps
@@ -52,10 +40,6 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	private long curUseStamp = 0;
 	// used to work around bug 275166
 	private boolean firstDispatch = true;
-
-	public MRUBundleFileList() {
-		this(PROP_FILE_LIMIT_VALUE);
-	}
 
 	public MRUBundleFileList(int fileLimit) {
 		// only enable the MRU if the initFileLimit is > MIN

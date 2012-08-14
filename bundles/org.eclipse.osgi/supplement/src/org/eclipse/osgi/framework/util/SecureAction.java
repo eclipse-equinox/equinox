@@ -14,10 +14,8 @@ package org.eclipse.osgi.framework.util;
 import java.io.*;
 import java.net.*;
 import java.security.*;
-import java.util.Properties;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -70,43 +68,10 @@ public class SecureAction {
 	 */
 	public String getProperty(final String property) {
 		if (System.getSecurityManager() == null)
-			return FrameworkProperties.getProperty(property);
+			return System.getProperty(property);
 		return AccessController.doPrivileged(new PrivilegedAction<String>() {
 			public String run() {
-				return FrameworkProperties.getProperty(property);
-			}
-		}, controlContext);
-	}
-
-	/**
-	 * Returns a system property.  Same as calling
-	 * System.getProperty(String,String).
-	 * @param property the property key.
-	 * @param def the default value if the property key does not exist.
-	 * @return the value of the property or the def value if the property
-	 * does not exist.
-	 */
-	public String getProperty(final String property, final String def) {
-		if (System.getSecurityManager() == null)
-			return FrameworkProperties.getProperty(property, def);
-		return AccessController.doPrivileged(new PrivilegedAction<String>() {
-			public String run() {
-				return FrameworkProperties.getProperty(property, def);
-			}
-		}, controlContext);
-	}
-
-	/**
-	 * Returns the system properties.  Same as calling
-	 * System.getProperties().
-	 * @return the system properties.
-	 */
-	public Properties getProperties() {
-		if (System.getSecurityManager() == null)
-			return FrameworkProperties.getProperties();
-		return AccessController.doPrivileged(new PrivilegedAction<Properties>() {
-			public Properties run() {
-				return FrameworkProperties.getProperties();
+				return System.getProperty(property);
 			}
 		}, controlContext);
 	}

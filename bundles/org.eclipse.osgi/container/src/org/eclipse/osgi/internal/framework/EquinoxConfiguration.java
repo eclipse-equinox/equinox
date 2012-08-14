@@ -91,6 +91,11 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final int BSN_VERSION_MULTIPLE = 2;
 	public static final int BSN_VERSION_MANAGED = 3;
 
+	public final boolean throwErrorOnFailedStart;
+
+	public final boolean CLASS_CERTIFICATE;
+	public final boolean PARALLEL_CAPABLE;
+
 	// JVM os.arch property name
 	public static final String PROP_JVM_OS_ARCH = "os.arch"; //$NON-NLS-1$
 	// JVM os.name property name
@@ -128,6 +133,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public static final String PROP_CONTEXT_BOOTDELEGATION = "osgi.context.bootdelegation"; //$NON-NLS-1$
 	public static final String PROP_COMPATIBILITY_BOOTDELEGATION = "osgi.compatibility.bootdelegation"; //$NON-NLS-1$
+	public static final String PROP_COMPATIBILITY_ERROR_FAILED_START = "osgi.compatibility.errorOnFailedStart"; //$NON-NLS-1$
 
 	public static final String PROP_OSGI_OS = "osgi.os"; //$NON-NLS-1$
 	public static final String PROP_OSGI_WS = "osgi.ws"; //$NON-NLS-1$
@@ -155,6 +161,11 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String PROP_BUNDLE_SETTCCL = "eclipse.bundle.setTCCL"; //$NON-NLS-1$
 
 	public static final String PROP_EQUINOX_SECURITY = "eclipse.security"; //$NON-NLS-1$
+	public static final String PROP_FILE_LIMIT = "osgi.bundlefile.limit"; //$NON-NLS-1$
+
+	public final static String PROP_CLASS_CERTIFICATE_SUPPORT = "osgi.support.class.certificate"; //$NON-NLS-1$
+	public final static String PROP_CLASS_LOADER_TYPE = "osgi.classloader.type"; //$NON-NLS-1$
+	public final static String CLASS_LOADER_TYPE_PARALLEL = "parallel"; //$NON-NLS-1$
 
 	EquinoxConfiguration(Map<String, String> initialConfig, HookRegistry hookRegistry) {
 		this.hookRegistry = hookRegistry;
@@ -306,6 +317,11 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		}
 
 		BUNDLE_SET_TCCL = "true".equals(getConfiguration("eclipse.bundle.setTCCL", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+		throwErrorOnFailedStart = "true".equals(getConfiguration(PROP_COMPATIBILITY_ERROR_FAILED_START, "true")); //$NON-NLS-1$//$NON-NLS-2$
+
+		CLASS_CERTIFICATE = Boolean.valueOf(getConfiguration(PROP_CLASS_CERTIFICATE_SUPPORT, "true")).booleanValue(); //$NON-NLS-1$
+		PARALLEL_CAPABLE = CLASS_LOADER_TYPE_PARALLEL.equals(getConfiguration(PROP_CLASS_LOADER_TYPE, CLASS_LOADER_TYPE_PARALLEL));
 	}
 
 	public Map<String, String> asMap() {

@@ -14,9 +14,9 @@ package org.eclipse.core.runtime.internal.adaptor;
 import java.lang.reflect.Method;
 import java.util.Map;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
 import org.eclipse.osgi.service.runnable.*;
@@ -31,12 +31,14 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 	private boolean relaunch = false;
 	private boolean failOnNoDefault = false;
 	private FrameworkLog log;
+	private final EquinoxConfiguration equinoxConfig;
 
-	public EclipseAppLauncher(BundleContext context, boolean relaunch, boolean failOnNoDefault, FrameworkLog log) {
+	public EclipseAppLauncher(BundleContext context, boolean relaunch, boolean failOnNoDefault, FrameworkLog log, EquinoxConfiguration equinoxConfig) {
 		this.context = context;
 		this.relaunch = relaunch;
 		this.failOnNoDefault = failOnNoDefault;
 		this.log = log;
+		this.equinoxConfig = equinoxConfig;
 		findRunnableService();
 	}
 
@@ -98,7 +100,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 		// this must happen after we have acquired an application (by acquiring waitForAppLock above).
 		runningLock.acquire();
 		if (EclipseStarter.debug) {
-			String timeString = FrameworkProperties.getProperty("eclipse.startTime"); //$NON-NLS-1$ 
+			String timeString = equinoxConfig.getConfiguration("eclipse.startTime"); //$NON-NLS-1$ 
 			long time = timeString == null ? 0L : Long.parseLong(timeString);
 			System.out.println("Starting application: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$ 
 		}

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.util;
 
-import org.eclipse.osgi.internal.debug.Debug;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -19,9 +17,9 @@ import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.internal.debug.Debug;
 
 /**
  * Common superclass for all message bundle classes.  Provides convenience
@@ -58,7 +56,7 @@ public abstract class NLS {
 	private static String[] nlSuffixes;
 	private static final String PROP_WARNINGS = "osgi.nls.warnings"; //$NON-NLS-1$
 	private static final String IGNORE = "ignore"; //$NON-NLS-1$
-	private static final boolean ignoreWarnings = IGNORE.equals(FrameworkProperties.getProperty(PROP_WARNINGS));
+	private static final boolean ignoreWarnings = IGNORE.equals(System.getProperty(PROP_WARNINGS));
 
 	/*
 	 * NOTE do not change the name of this field; it is set by the Framework using reflection

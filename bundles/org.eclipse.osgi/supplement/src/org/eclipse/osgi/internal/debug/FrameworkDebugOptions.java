@@ -434,6 +434,10 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 		return this.verboseDebug;
 	}
 
+	EquinoxConfiguration getConfiguration() {
+		return this.environmentInfo;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.osgi.service.debug.DebugOptions#setVerbose(boolean)

@@ -369,7 +369,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 */
 	private void readLogProperties() {
 
-		String newMaxTraceFileSize = secureAction.getProperty(PROP_TRACE_SIZE_MAX);
+		String newMaxTraceFileSize = debugOptions.getConfiguration().getConfiguration(PROP_TRACE_SIZE_MAX);
 		if (newMaxTraceFileSize != null) {
 			maxTraceFileSize = Integer.parseInt(newMaxTraceFileSize);
 			if (maxTraceFileSize != 0 && maxTraceFileSize < DEFAULT_TRACE_FILE_MIN_SIZE) {
@@ -379,7 +379,7 @@ class EclipseDebugTrace implements DebugTrace {
 			}
 		}
 
-		String newMaxLogFiles = secureAction.getProperty(PROP_TRACE_FILE_MAX);
+		String newMaxLogFiles = debugOptions.getConfiguration().getConfiguration(PROP_TRACE_FILE_MAX);
 		if (newMaxLogFiles != null) {
 			maxTraceFiles = Integer.parseInt(newMaxLogFiles);
 			if (maxTraceFiles < 1) {

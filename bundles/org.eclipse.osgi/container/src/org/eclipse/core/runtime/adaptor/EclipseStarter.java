@@ -297,7 +297,7 @@ public class EclipseStarter {
 
 		registerFrameworkShutdownHandlers();
 		publishSplashScreen(endSplashHandler);
-		consoleMgr = ConsoleManager.startConsole(context);
+		consoleMgr = ConsoleManager.startConsole(context, equinoxConfig);
 
 		Bundle[] startBundles = loadBasicBundles();
 
@@ -360,7 +360,7 @@ public class EclipseStarter {
 			if (appLauncher == null) {
 				boolean launchDefault = Boolean.valueOf(getProperty(PROP_APPLICATION_LAUNCHDEFAULT, "true")).booleanValue(); //$NON-NLS-1$
 				// create the ApplicationLauncher and register it as a service
-				appLauncher = new EclipseAppLauncher(context, Boolean.valueOf(getProperty(PROP_ALLOW_APPRELAUNCH)).booleanValue(), launchDefault, log);
+				appLauncher = new EclipseAppLauncher(context, Boolean.valueOf(getProperty(PROP_ALLOW_APPRELAUNCH)).booleanValue(), launchDefault, log, equinoxConfig);
 				appLauncherRegistration = context.registerService(ApplicationLauncher.class.getName(), appLauncher, null);
 				// must start the launcher AFTER service restration because this method 
 				// blocks and runs the application on the current thread.  This method 
@@ -458,7 +458,7 @@ public class EclipseStarter {
 		try {
 			Dictionary<String, Object> monitorProps = new Hashtable<String, Object>();
 			monitorProps.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
-			defaultMonitorRegistration = context.registerService(StartupMonitor.class.getName(), new DefaultStartupMonitor(endSplashHandler), monitorProps);
+			defaultMonitorRegistration = context.registerService(StartupMonitor.class.getName(), new DefaultStartupMonitor(endSplashHandler, equinoxConfig), monitorProps);
 		} catch (IllegalStateException e) {
 			//splash handler did not provide the necessary methods, ignore it
 		}

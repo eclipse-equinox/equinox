@@ -17,7 +17,6 @@ import org.eclipse.osgi.container.Module.StartOptions;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.adaptor.StatusException;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
@@ -27,7 +26,6 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 public class EclipseLazyStarter extends ClassLoaderHook {
-	private static final boolean throwErrorOnFailedStart = "true".equals(FrameworkProperties.getProperty("osgi.compatibility.errorOnFailedStart", "true")); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 	private static final EnumSet<State> alreadyActive = EnumSet.of(State.ACTIVE, State.STOPPING, State.UNINSTALLED);
 	// holds the current activation trigger class and the ClasspathManagers that need to be activated
 	private final ThreadLocal<List<Object>> activationStack = new ThreadLocal<List<Object>>();
@@ -91,7 +89,7 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 			return;
 		for (int i = managers.length - 1; i >= 0; i--) {
 			if (errors.get(managers[i]) != null) {
-				if (throwErrorOnFailedStart)
+				if (container.getConfiguration().throwErrorOnFailedStart)
 					throw errors.get(managers[i]);
 				continue;
 			}
@@ -119,7 +117,7 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 				String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_ACTIVATION, bundle.getSymbolicName(), Long.toString(bundle.getBundleId()));
 				TerminatingClassNotFoundException error = new TerminatingClassNotFoundException(message, e);
 				errors.put(managers[i], error);
-				if (throwErrorOnFailedStart) {
+				if (container.getConfiguration().throwErrorOnFailedStart) {
 					container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, message, e, null);
 					throw error;
 				}
@@ -133,7 +131,7 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 			// Don't activate non-starting bundles
 			if (State.RESOLVED.equals(module.getState())) {
 				// handle the resolved case where a previous error occurred
-				if (throwErrorOnFailedStart) {
+				if (container.getConfiguration().throwErrorOnFailedStart) {
 					TerminatingClassNotFoundException error = errors.get(manager);
 					if (error != null)
 						throw error;

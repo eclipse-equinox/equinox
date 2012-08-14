@@ -70,10 +70,11 @@ public class Storage {
 	private final Object saveMonitor = new Object();
 	private long lastSavedTimestamp = -1;
 	private final LockSet<Long> idLocks = new LockSet<Long>(false);
-	private final MRUBundleFileList mruList = new MRUBundleFileList();
+	private final MRUBundleFileList mruList;
 	private final FrameworkExtensionInstaller extensionInstaller;
 
 	public Storage(EquinoxContainer container) throws IOException, BundleException {
+		mruList = new MRUBundleFileList(getBundleFileLimit(container.getConfiguration()));
 		equinoxContainer = container;
 		extensionInstaller = new FrameworkExtensionInstaller(container.getConfiguration());
 
@@ -135,6 +136,18 @@ public class Storage {
 		installExtensions();
 		// TODO hack to make sure all bundles are in UNINSTALLED state before system bundle init is called
 		this.moduleContainer.setInitialModuleStates();
+	}
+
+	private int getBundleFileLimit(EquinoxConfiguration configuration) {
+		int propValue = 100; // enable to 100 open files by default
+		try {
+			String prop = configuration.getConfiguration(EquinoxConfiguration.PROP_FILE_LIMIT);
+			if (prop != null)
+				propValue = Integer.parseInt(prop);
+		} catch (NumberFormatException e) {
+			// use default of 100
+		}
+		return propValue;
 	}
 
 	private void installExtensions() {

@@ -12,13 +12,14 @@ package org.eclipse.core.runtime.internal.adaptor;
 
 import java.lang.reflect.Method;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.service.runnable.StartupMonitor;
 
 public class DefaultStartupMonitor implements StartupMonitor {
 
-	private Method updateMethod = null;
-	private Runnable splashHandler = null;
+	private final Method updateMethod;
+	private final Runnable splashHandler;
+	private final EquinoxConfiguration equinoxConfig;
 
 	/**
 	 * Create a new startup monitor using the given splash handler.  The splash handle must
@@ -27,8 +28,9 @@ public class DefaultStartupMonitor implements StartupMonitor {
 	 * @param splashHandler
 	 * @throws IllegalStateException
 	 */
-	public DefaultStartupMonitor(Runnable splashHandler) throws IllegalStateException {
+	public DefaultStartupMonitor(Runnable splashHandler, EquinoxConfiguration equinoxConfig) throws IllegalStateException {
 		this.splashHandler = splashHandler;
+		this.equinoxConfig = equinoxConfig;
 
 		try {
 			updateMethod = splashHandler.getClass().getMethod("updateSplash", (Class[]) null); //$NON-NLS-1$
@@ -57,7 +59,7 @@ public class DefaultStartupMonitor implements StartupMonitor {
 
 	public void applicationRunning() {
 		if (EclipseStarter.debug) {
-			String timeString = FrameworkProperties.getProperty("eclipse.startTime"); //$NON-NLS-1$ 
+			String timeString = equinoxConfig.getConfiguration("eclipse.startTime"); //$NON-NLS-1$ 
 			long time = timeString == null ? 0L : Long.parseLong(timeString);
 			System.out.println("Application Started: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$
 		}
