@@ -147,9 +147,7 @@ public class AliasMapper {
 				}
 			}
 		} catch (IOException e) {
-			if (Debug.DEBUG_GENERAL) {
-				Debug.printStackTrace(e);
-			}
+			Debug.printStackTrace(e);
 		}
 		return aliases;
 	}

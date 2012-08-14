@@ -11,9 +11,9 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.framework.FilterImpl;
-import org.eclipse.osgi.next.internal.debug.Debug;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.service.ListenerHook;
 

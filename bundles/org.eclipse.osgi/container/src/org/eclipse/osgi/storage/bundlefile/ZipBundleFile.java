@@ -20,7 +20,7 @@ import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
-import org.eclipse.osgi.next.internal.debug.Debug;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.storage.BundleInfo;
 import org.eclipse.osgi.util.NLS;
 

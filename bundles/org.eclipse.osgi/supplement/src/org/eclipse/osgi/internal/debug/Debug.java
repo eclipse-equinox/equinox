@@ -13,6 +13,8 @@ package org.eclipse.osgi.internal.debug;
 
 import java.io.PrintStream;
 import java.lang.reflect.*;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.service.debug.DebugOptions;
 
 /**
  * This class has debug constants which can be used by the Framework implementation 
@@ -21,78 +23,9 @@ import java.lang.reflect.*;
  */
 public class Debug {
 	/**
-	 * Indicates if tracing is enabled
-	 */
-	public static boolean DEBUG_ENABLED = false;
-
-	/**
-	 * General debug flag.
-	 */
-	public static boolean DEBUG_GENERAL = false; // "debug"
-	/**
-	 * Bundle time debug flag.
-	 */
-	public static boolean DEBUG_BUNDLE_TIME = false; //"debug.bundleTime"
-	/**
-	 * Loader debug flag.
-	 */
-	public static boolean DEBUG_LOADER = false; // "debug.loader"
-	/**
-	 * Events debug flag.
-	 */
-	public static boolean DEBUG_EVENTS = false; // "debug.events"
-	/**
-	 * Services debug flag.
-	 */
-	public static boolean DEBUG_SERVICES = false; // "debug.services"
-
-	/**
-	 * Hooks debug flag.
-	 */
-	public static boolean DEBUG_HOOKS = false; // "debug.hooks"
-	/**
-	 * Packages debug flag.
-	 */
-	// TODO remove this or use it somewhere
-	public static boolean DEBUG_PACKAGES = false; // "debug.packages"
-	/**
-	 * Manifest debug flag.
-	 */
-	public static boolean DEBUG_MANIFEST = false; // "debug.manifest"
-	/**
-	 * Filter debug flag.
-	 */
-	public static boolean DEBUG_FILTER = false; // "debug.filter"
-	/**
-	 * Security debug flag.
-	 */
-	public static boolean DEBUG_SECURITY = false; // "debug.security"
-	/**
-	 * Start level debug flag.
-	 */
-	public static boolean DEBUG_STARTLEVEL = false; // "debug.startlevel"
-	/**
-	 * PackageAdmin debug flag.
-	 */
-	public static boolean DEBUG_PACKAGEADMIN = false; // "debug.packageadmin"
-	/**
-	 * PackageAdmin timing debug flag.
-	 */
-	// TODO remove this or use it somewhere
-	public static boolean DEBUG_PACKAGEADMIN_TIMING = false; //"debug.packageadmin/timing"
-	/**
-	 * Message debug flag.
-	 */
-	public static boolean DEBUG_MESSAGE_BUNDLES = false; //"/debug/messageBundles"
-	/**
-	 * Monitor activation debug flag.
-	 */
-	public static boolean MONITOR_ACTIVATION = false; // "monitor/bundles"
-
-	/**
 	 * Base debug option key (org.eclispe.osgi).
 	 */
-	public static final String ECLIPSE_OSGI = "org.eclipse.osgi"; //$NON-NLS-1$
+	public static final String ECLIPSE_OSGI = EquinoxContainer.NAME;
 	/**
 	 * General Debug option key.
 	 */
@@ -155,27 +88,110 @@ public class Debug {
 	 */
 	public static final String OPTION_DEBUG_MESSAGE_BUNDLES = ECLIPSE_OSGI + "/debug/messageBundles"; //$NON-NLS-1$
 
-	//	static {
-	//		FrameworkDebugOptions dbgOptions = FrameworkDebugOptions.getDefault();
-	//		if (dbgOptions != null) {
-	//			DEBUG_ENABLED = dbgOptions.isDebugEnabled();
-	//			DEBUG_GENERAL = dbgOptions.getBooleanOption(OPTION_DEBUG_GENERAL, false);
-	//			DEBUG_BUNDLE_TIME = dbgOptions.getBooleanOption(OPTION_DEBUG_BUNDLE_TIME, false) || dbgOptions.getBooleanOption("org.eclipse.core.runtime/timing/startup", false); //$NON-NLS-1$
-	//			DEBUG_LOADER = dbgOptions.getBooleanOption(OPTION_DEBUG_LOADER, false);
-	//			DEBUG_EVENTS = dbgOptions.getBooleanOption(OPTION_DEBUG_EVENTS, false);
-	//			DEBUG_SERVICES = dbgOptions.getBooleanOption(OPTION_DEBUG_SERVICES, false);
-	//			DEBUG_HOOKS = dbgOptions.getBooleanOption(OPTION_DEBUG_HOOKS, false);
-	//			DEBUG_PACKAGES = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGES, false);
-	//			DEBUG_MANIFEST = dbgOptions.getBooleanOption(OPTION_DEBUG_MANIFEST, false);
-	//			DEBUG_FILTER = dbgOptions.getBooleanOption(OPTION_DEBUG_FILTER, false);
-	//			DEBUG_SECURITY = dbgOptions.getBooleanOption(OPTION_DEBUG_SECURITY, false);
-	//			DEBUG_STARTLEVEL = dbgOptions.getBooleanOption(OPTION_DEBUG_STARTLEVEL, false);
-	//			DEBUG_PACKAGEADMIN = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN, false);
-	//			DEBUG_PACKAGEADMIN_TIMING = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN_TIMING, false) || dbgOptions.getBooleanOption("org.eclipse.core.runtime/debug", false); //$NON-NLS-1$
-	//			DEBUG_MESSAGE_BUNDLES = dbgOptions.getBooleanOption(OPTION_DEBUG_MESSAGE_BUNDLES, false);
-	//			MONITOR_ACTIVATION = dbgOptions.getBooleanOption(OPTION_MONITOR_ACTIVATION, false);
-	//		}
-	//	}
+	public static final String OPTION_DEBUG_LOCATION = ECLIPSE_OSGI + "/debug/location"; //$NON-NLS-1$
+
+	/**
+	 * Indicates if tracing is enabled
+	 */
+	public boolean DEBUG_ENABLED = false;
+
+	// these static debug options are left overs because it would be messy to fix references to them
+	// this means that if multiple frameworks are using this class these debug options may get overwritten
+	public static boolean STATIC_DEBUG_GENERAL = false; // "debug"
+	public static boolean STATIC_DEBUG_MANIFEST = false; // "debug.manifest"
+	public static boolean STATIC_DEBUG_MESSAGE_BUNDLES = false; //"/debug/messageBundles"
+
+	/**
+	 * General debug flag.
+	 */
+	public boolean DEBUG_GENERAL = false; // "debug"
+	/**
+	 * Bundle time debug flag.
+	 */
+	public boolean DEBUG_BUNDLE_TIME = false; //"debug.bundleTime"
+	/**
+	 * Loader debug flag.
+	 */
+	public boolean DEBUG_LOADER = false; // "debug.loader"
+	/**
+	 * Events debug flag.
+	 */
+	public boolean DEBUG_EVENTS = false; // "debug.events"
+	/**
+	 * Services debug flag.
+	 */
+	public boolean DEBUG_SERVICES = false; // "debug.services"
+
+	/**
+	 * Hooks debug flag.
+	 */
+	public boolean DEBUG_HOOKS = false; // "debug.hooks"
+	/**
+	 * Packages debug flag.
+	 */
+	// TODO remove this or use it somewhere
+	public boolean DEBUG_PACKAGES = false; // "debug.packages"
+	/**
+	 * Manifest debug flag.
+	 */
+	public boolean DEBUG_MANIFEST = false; // "debug.manifest"
+	/**
+	 * Filter debug flag.
+	 */
+	public boolean DEBUG_FILTER = false; // "debug.filter"
+	/**
+	 * Security debug flag.
+	 */
+	public boolean DEBUG_SECURITY = false; // "debug.security"
+	/**
+	 * Start level debug flag.
+	 */
+	public boolean DEBUG_STARTLEVEL = false; // "debug.startlevel"
+	/**
+	 * PackageAdmin debug flag.
+	 */
+	public boolean DEBUG_PACKAGEADMIN = false; // "debug.packageadmin"
+	/**
+	 * PackageAdmin timing debug flag.
+	 */
+	// TODO remove this or use it somewhere
+	public boolean DEBUG_PACKAGEADMIN_TIMING = false; //"debug.packageadmin/timing"
+	/**
+	 * Message debug flag.
+	 */
+	public boolean DEBUG_MESSAGE_BUNDLES = false; //"/debug/messageBundles"
+	/**
+	 * Monitor activation debug flag.
+	 */
+	public boolean MONITOR_ACTIVATION = false; // "monitor/bundles"
+
+	public boolean DEBUG_LOCATION = false; // debug/location
+
+	public Debug(DebugOptions dbgOptions) {
+		if (dbgOptions == null) {
+			return;
+		}
+		DEBUG_ENABLED = dbgOptions.isDebugEnabled();
+		DEBUG_GENERAL = dbgOptions.getBooleanOption(OPTION_DEBUG_GENERAL, false);
+		STATIC_DEBUG_GENERAL = DEBUG_GENERAL;
+		DEBUG_BUNDLE_TIME = dbgOptions.getBooleanOption(OPTION_DEBUG_BUNDLE_TIME, false) || dbgOptions.getBooleanOption("org.eclipse.core.runtime/timing/startup", false); //$NON-NLS-1$
+		DEBUG_LOADER = dbgOptions.getBooleanOption(OPTION_DEBUG_LOADER, false);
+		DEBUG_EVENTS = dbgOptions.getBooleanOption(OPTION_DEBUG_EVENTS, false);
+		DEBUG_SERVICES = dbgOptions.getBooleanOption(OPTION_DEBUG_SERVICES, false);
+		DEBUG_HOOKS = dbgOptions.getBooleanOption(OPTION_DEBUG_HOOKS, false);
+		DEBUG_PACKAGES = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGES, false);
+		DEBUG_MANIFEST = dbgOptions.getBooleanOption(OPTION_DEBUG_MANIFEST, false);
+		STATIC_DEBUG_MANIFEST = DEBUG_MANIFEST;
+		DEBUG_FILTER = dbgOptions.getBooleanOption(OPTION_DEBUG_FILTER, false);
+		DEBUG_SECURITY = dbgOptions.getBooleanOption(OPTION_DEBUG_SECURITY, false);
+		DEBUG_STARTLEVEL = dbgOptions.getBooleanOption(OPTION_DEBUG_STARTLEVEL, false);
+		DEBUG_PACKAGEADMIN = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN, false);
+		DEBUG_PACKAGEADMIN_TIMING = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN_TIMING, false) || dbgOptions.getBooleanOption("org.eclipse.core.runtime/debug", false); //$NON-NLS-1$
+		DEBUG_MESSAGE_BUNDLES = dbgOptions.getBooleanOption(OPTION_DEBUG_MESSAGE_BUNDLES, false);
+		STATIC_DEBUG_MESSAGE_BUNDLES = DEBUG_MESSAGE_BUNDLES;
+		MONITOR_ACTIVATION = dbgOptions.getBooleanOption(OPTION_MONITOR_ACTIVATION, false);
+		DEBUG_LOCATION = dbgOptions.getBooleanOption(OPTION_DEBUG_LOCATION, false);
+	}
 
 	/**
 	 * The PrintStream to print debug messages to.
