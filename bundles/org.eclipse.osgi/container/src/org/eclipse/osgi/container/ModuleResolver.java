@@ -37,6 +37,7 @@ final class ModuleResolver {
 		}
 	};
 	final ModuleContainerAdaptor adaptor;
+	final Resolver resolver;
 
 	/**
 	 * Constructs the module resolver with the specified resolver hook factory
@@ -45,6 +46,7 @@ final class ModuleResolver {
 	 */
 	ModuleResolver(ModuleContainerAdaptor adaptor) {
 		this.adaptor = adaptor;
+		this.resolver = adaptor.getResolver();
 	}
 
 	/**
@@ -609,7 +611,7 @@ final class ModuleResolver {
 					if (dynamicReq != null) {
 						return resolveDynamic();
 					}
-					return adaptor.getResolver().resolve(this);
+					return resolver.resolve(this);
 				} finally {
 					hook.end();
 				}
@@ -662,7 +664,6 @@ final class ModuleResolver {
 		}
 
 		private Map<Resource, List<Wire>> resolveDynamic() throws ResolutionException {
-			Resolver resolver = adaptor.getResolver();
 			if (!(resolver instanceof ResolverImpl)) {
 				throw new ResolutionException("Dynamic import resolution not supported by the resolver: " + resolver.getClass());
 			}
