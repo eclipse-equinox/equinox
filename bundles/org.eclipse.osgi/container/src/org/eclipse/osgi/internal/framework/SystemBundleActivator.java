@@ -35,6 +35,7 @@ import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.permissionadmin.PermissionAdmin;
+import org.osgi.service.resolver.Resolver;
 import org.osgi.service.startlevel.StartLevel;
 
 /**
@@ -74,6 +75,8 @@ public class SystemBundleActivator implements BundleActivator {
 
 		register(bc, PermissionAdmin.class, sa, null);
 		register(bc, ConditionalPermissionAdmin.class, sa, null);
+
+		register(bc, Resolver.class, bundle.getEquinoxContainer().getStorage().getAdaptor().getResolver(), null);
 
 		register(bc, DebugOptions.class, dbgOptions, null);
 
