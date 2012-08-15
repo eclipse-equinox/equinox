@@ -69,7 +69,7 @@ public class Storage {
 	private final ModuleContainer moduleContainer;
 	private final Object saveMonitor = new Object();
 	private long lastSavedTimestamp = -1;
-	private final LockSet<Long> idLocks = new LockSet<Long>(false);
+	private final LockSet<Long> idLocks = new LockSet<Long>();
 	private final MRUBundleFileList mruList;
 	private final FrameworkExtensionInstaller extensionInstaller;
 

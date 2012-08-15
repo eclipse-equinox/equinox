@@ -41,12 +41,12 @@ public final class ModuleContainer {
 	/**
 	 * Used by install operations to establish a write lock on an install location
 	 */
-	private final LockSet<String> locationLocks = new LockSet<String>(false);
+	private final LockSet<String> locationLocks = new LockSet<String>();
 
 	/**
 	 * Used by install and update operations to establish a write lock for a name
 	 */
-	private final LockSet<String> nameLocks = new LockSet<String>(false);
+	private final LockSet<String> nameLocks = new LockSet<String>();
 
 	/**
 	 * An implementation of FrameworkWiring for this container

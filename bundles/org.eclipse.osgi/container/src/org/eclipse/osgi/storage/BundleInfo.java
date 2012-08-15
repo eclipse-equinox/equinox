@@ -291,7 +291,7 @@ public final class BundleInfo {
 	Generation createGeneration() throws BundleException {
 		synchronized (this.infoMonitor) {
 			if (generationLocks == null) {
-				generationLocks = new LockSet<Long>(false);
+				generationLocks = new LockSet<Long>();
 			}
 			boolean lockedID;
 			try {
