@@ -1233,21 +1233,30 @@ public final class ModuleContainer {
 
 		private void incStartLevel(int toStartLevel, List<Module> sortedModules, boolean lazyOnly) {
 			for (Module module : sortedModules) {
-				if (module.getStartLevel() < toStartLevel) {
-					// skip modules who should have already been started
-					continue;
-				} else if (module.getStartLevel() == toStartLevel) {
-					boolean isLazyStart = module.isLazyActivate();
-					if (lazyOnly ? isLazyStart : !isLazyStart) {
-						try {
-							module.start(StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
-						} catch (BundleException e) {
-							adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
+				try {
+					int moduleStartLevel = module.getStartLevel();
+					if (moduleStartLevel < toStartLevel) {
+						// skip modules who should have already been started
+						continue;
+					} else if (moduleStartLevel == toStartLevel) {
+						boolean isLazyStart = module.isLazyActivate();
+						if (lazyOnly ? isLazyStart : !isLazyStart) {
+							try {
+								module.start(StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
+							} catch (BundleException e) {
+								adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
+							} catch (IllegalStateException e) {
+								// been uninstalled
+								continue;
+							}
 						}
+					} else {
+						// can stop resuming since any remaining modules have a greater startlevel than the active startlevel
+						break;
 					}
-				} else {
-					// can stop resumin since any remaining modules have a greater startlevel than the active startlevel
-					break;
+				} catch (IllegalStateException e) {
+					// been uninstalled
+					continue;
 				}
 			}
 		}
@@ -1256,24 +1265,29 @@ public final class ModuleContainer {
 			ListIterator<Module> iModules = sortedModules.listIterator(sortedModules.size());
 			while (iModules.hasPrevious()) {
 				Module module = iModules.previous();
-
-				if (module.getStartLevel() > toStartLevel + 1) {
-					// skip modules who should have already been stopped
-					continue;
-				} else if (module.getStartLevel() <= toStartLevel) {
-					// stopped all modules we are going to for this start level
-					break;
-				}
 				try {
-					if (Module.ACTIVE_SET.contains(module.getState())) {
-						// Note that we don't need to hold the state change lock
-						// here when checking the active status because no other
-						// thread will successfully be able to start this bundle
-						// since the start-level is no longer met.
-						module.stop(StopOptions.TRANSIENT);
+					int moduleStartLevel = module.getStartLevel();
+					if (moduleStartLevel > toStartLevel + 1) {
+						// skip modules who should have already been stopped
+						continue;
+					} else if (moduleStartLevel <= toStartLevel) {
+						// stopped all modules we are going to for this start level
+						break;
 					}
-				} catch (BundleException e) {
-					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
+					try {
+						if (Module.ACTIVE_SET.contains(module.getState())) {
+							// Note that we don't need to hold the state change lock
+							// here when checking the active status because no other
+							// thread will successfully be able to start this bundle
+							// since the start-level is no longer met.
+							module.stop(StopOptions.TRANSIENT);
+						}
+					} catch (BundleException e) {
+						adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
+					}
+				} catch (IllegalStateException e) {
+					// been uninstalled
+					continue;
 				}
 			}
 		}
