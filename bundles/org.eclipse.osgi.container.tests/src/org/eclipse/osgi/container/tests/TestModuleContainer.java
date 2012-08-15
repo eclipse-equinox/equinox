@@ -58,6 +58,7 @@ public class TestModuleContainer {
 		final ModuleContainer container = adaptor.getContainer();
 
 		Bundle systemBundle = context.getBundle(0);
+		String extraPackages = context.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
 		String extraCapabilities = context.getProperty(Constants.FRAMEWORK_SYSTEMCAPABILITIES);
 		extraCapabilities = (extraCapabilities == null ? "" : (extraCapabilities + ", "));
 		String osName = context.getProperty(OSGI_OS);
@@ -67,7 +68,7 @@ public class TestModuleContainer {
 				OSGI_OS + "=" + osName + "; " +
 				OSGI_WS + "=" + wsName + "; " +
 				OSGI_ARCH + "=" + archName;
-		ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(asMap(systemBundle.getHeaders("")), Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, extraCapabilities);
+		ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(asMap(systemBundle.getHeaders("")), Constants.SYSTEM_BUNDLE_SYMBOLICNAME, extraPackages, extraCapabilities);
 		container.install(null, systemBundle.getLocation(), builder, null);
 
 		final List<Throwable> installErrors = new ArrayList<Throwable>(0);
