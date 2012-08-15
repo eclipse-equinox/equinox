@@ -1175,7 +1175,13 @@ public final class ModuleContainer {
 				case MODULE_STARTLEVEL :
 					try {
 						if (getStartLevel() < startlevel) {
-							module.stop(StopOptions.TRANSIENT);
+							if (Module.ACTIVE_SET.contains(module.getState())) {
+								// Note that we don't need to hold the state change lock
+								// here when checking the active status because no other
+								// thread will successfully be able to start this bundle
+								// since the start-level is no longer met.
+								module.stop(StopOptions.TRANSIENT);
+							}
 						} else {
 							module.start(StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
 						}
