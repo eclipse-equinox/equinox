@@ -76,7 +76,7 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	}
 
 	@Override
-	public void publishEvent(ModuleEvent type, Module module) {
+	public void publishModuleEvent(ModuleEvent type, Module module, Module origin) {
 		moduleDatabase.addEvent(new DummyModuleEvent(module, type, module.getState()));
 	}
 }
