@@ -175,7 +175,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		this.id = id;
 		this.location = location;
 		this.revisions = new ModuleRevisions(this, container);
-		this.settings = settings == null ? EnumSet.noneOf(Settings.class) : settings;
+		this.settings = settings == null ? EnumSet.noneOf(Settings.class) : EnumSet.copyOf(settings);
 		this.startlevel = startlevel;
 	}
 

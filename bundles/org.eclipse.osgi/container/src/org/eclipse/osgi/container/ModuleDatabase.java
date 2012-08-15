@@ -883,8 +883,11 @@ public class ModuleDatabase {
 	final void persistSettings(EnumSet<Settings> settings, Module module) {
 		lockWrite();
 		try {
-			moduleSettings.put(module.getId(), EnumSet.copyOf(settings));
-			incrementTimestamps(false);
+			EnumSet<Settings> existing = moduleSettings.get(module.getId());
+			if (!settings.equals(existing)) {
+				moduleSettings.put(module.getId(), EnumSet.copyOf(settings));
+				incrementTimestamps(false);
+			}
 		} finally {
 			unlockWrite();
 		}
