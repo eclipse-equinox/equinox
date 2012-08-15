@@ -321,7 +321,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		throwErrorOnFailedStart = "true".equals(getConfiguration(PROP_COMPATIBILITY_ERROR_FAILED_START, "true")); //$NON-NLS-1$//$NON-NLS-2$
 
 		CLASS_CERTIFICATE = Boolean.valueOf(getConfiguration(PROP_CLASS_CERTIFICATE_SUPPORT, "true")).booleanValue(); //$NON-NLS-1$
-		PARALLEL_CAPABLE = CLASS_LOADER_TYPE_PARALLEL.equals(getConfiguration(PROP_CLASS_LOADER_TYPE, CLASS_LOADER_TYPE_PARALLEL));
+		PARALLEL_CAPABLE = CLASS_LOADER_TYPE_PARALLEL.equals(getConfiguration(PROP_CLASS_LOADER_TYPE));
 	}
 
 	public Map<String, String> asMap() {
