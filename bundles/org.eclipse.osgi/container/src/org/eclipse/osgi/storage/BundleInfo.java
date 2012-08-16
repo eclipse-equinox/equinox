@@ -37,11 +37,12 @@ public final class BundleInfo {
 	public final class Generation {
 		private final long generationId;
 		private final Object genMonitor = new Object();
+		private final Dictionary<String, String> cachedHeaders;
 		private File content;
 		private boolean isDirectory;
 		private boolean hasPackageInfo;
 		private BundleFile bundleFile;
-		private Dictionary<String, String> headers;
+		private Dictionary<String, String> rawHeaders;
 		private ModuleRevision revision;
 		private ManifestLocalization headerLocalization;
 		private ProtectionDomain domain;
@@ -50,13 +51,15 @@ public final class BundleInfo {
 
 		Generation(long generationId) {
 			this.generationId = generationId;
+			this.cachedHeaders = new CachedManifest(this, Collections.<String, String> emptyMap());
 		}
 
-		Generation(long generationId, File content, boolean isDirectory, boolean hasPackageInfo) {
+		Generation(long generationId, File content, boolean isDirectory, boolean hasPackageInfo, Map<String, String> cached) {
 			this.generationId = generationId;
 			this.content = content;
 			this.isDirectory = isDirectory;
 			this.hasPackageInfo = hasPackageInfo;
+			this.cachedHeaders = new CachedManifest(this, cached);
 		}
 
 		public BundleFile getBundleFile() {
@@ -85,11 +88,15 @@ public final class BundleInfo {
 		}
 
 		public Dictionary<String, String> getHeaders() {
+			return cachedHeaders;
+		}
+
+		Dictionary<String, String> getRawHeaders() {
 			synchronized (genMonitor) {
-				if (headers == null) {
+				if (rawHeaders == null) {
 					BundleEntry manifest = getBundleFile().getEntry(OSGI_BUNDLE_MANIFEST);
 					try {
-						headers = Headers.parseManifest(manifest.getInputStream());
+						rawHeaders = Headers.parseManifest(manifest.getInputStream());
 					} catch (Exception e) {
 						if (e instanceof RuntimeException) {
 							throw (RuntimeException) e;
@@ -97,7 +104,7 @@ public final class BundleInfo {
 						throw new RuntimeException("Error occurred getting the bundle manifest.", e); //$NON-NLS-1$
 					}
 				}
-				return headers;
+				return rawHeaders;
 			}
 		}
 
@@ -317,9 +324,9 @@ public final class BundleInfo {
 		}
 	}
 
-	Generation restoreGeneration(long generationId, File content, boolean isDirectory, boolean hasPackageInfo) {
+	Generation restoreGeneration(long generationId, File content, boolean isDirectory, boolean hasPackageInfo, Map<String, String> cached) {
 		synchronized (this.infoMonitor) {
-			Generation restoredGeneration = new Generation(generationId, content, isDirectory, hasPackageInfo);
+			Generation restoredGeneration = new Generation(generationId, content, isDirectory, hasPackageInfo, cached);
 			return restoredGeneration;
 		}
 	}
@@ -401,6 +408,54 @@ public final class BundleInfo {
 				}
 		}
 		return false;
+	}
+
+	static class CachedManifest extends Dictionary<String, String> {
+		private final Map<String, String> cached;
+		private final Generation generation;
+
+		CachedManifest(Generation generation, Map<String, String> cached) {
+			this.generation = generation;
+			this.cached = cached;
+		}
+
+		@Override
+		public Enumeration<String> elements() {
+			return generation.getRawHeaders().elements();
+		}
+
+		@Override
+		public String get(Object key) {
+			if (cached.containsKey(key)) {
+				return cached.get(key);
+			}
+			return generation.getRawHeaders().get(key);
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return generation.getRawHeaders().isEmpty();
+		}
+
+		@Override
+		public Enumeration<String> keys() {
+			return generation.getRawHeaders().keys();
+		}
+
+		@Override
+		public String put(String key, String value) {
+			return generation.getRawHeaders().put(key, value);
+		}
+
+		@Override
+		public String remove(Object key) {
+			return generation.getRawHeaders().remove(key);
+		}
+
+		@Override
+		public int size() {
+			return generation.getRawHeaders().size();
+		}
 	}
 
 }

@@ -22,8 +22,7 @@ import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
 import org.eclipse.osgi.container.namespaces.EquinoxNativeCodeNamespace;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.framework.util.FilePath;
-import org.eclipse.osgi.framework.util.SecureAction;
+import org.eclipse.osgi.framework.util.*;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.internal.container.LockSet;
@@ -55,6 +54,8 @@ public class Storage {
 	private static final String J2SE = "J2SE-"; //$NON-NLS-1$
 	private static final String JAVASE = "JavaSE-"; //$NON-NLS-1$
 	private static final String PROFILE_EXT = ".profile"; //$NON-NLS-1$
+	private static final String NUL = new String(new byte[] {0});
+
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
 	private final EquinoxContainer equinoxContainer;
@@ -72,6 +73,7 @@ public class Storage {
 	private final LockSet<Long> idLocks = new LockSet<Long>();
 	private final MRUBundleFileList mruList;
 	private final FrameworkExtensionInstaller extensionInstaller;
+	private final List<String> cachedHeaderKeys = Arrays.asList(Constants.BUNDLE_SYMBOLICNAME, Constants.BUNDLE_ACTIVATIONPOLICY, "Service-Component"); //$NON-NLS-1$
 
 	public Storage(EquinoxContainer container) throws IOException, BundleException {
 		mruList = new MRUBundleFileList(getBundleFileLimit(container.getConfiguration()));
@@ -910,6 +912,12 @@ public class Storage {
 			}
 		}
 		out.writeInt(VERSION);
+
+		out.writeInt(cachedHeaderKeys.size());
+		for (String headerKey : cachedHeaderKeys) {
+			out.writeUTF(headerKey);
+		}
+
 		out.writeInt(generations.size());
 		for (Generation generation : generations) {
 			BundleInfo bundleInfo = generation.getBundleInfo();
@@ -923,6 +931,16 @@ public class Storage {
 				out.writeUTF(""); //$NON-NLS-1$
 			} else {
 				out.writeUTF(new FilePath(installPath).makeRelative(new FilePath(generation.getContent().getAbsolutePath())));
+			}
+
+			Dictionary<String, String> headers = generation.getHeaders();
+			for (String headerKey : cachedHeaderKeys) {
+				String value = headers.get(headerKey);
+				if (value != null) {
+					out.writeUTF(value);
+				} else {
+					out.writeUTF(NUL);
+				}
 			}
 		}
 
@@ -965,6 +983,12 @@ public class Storage {
 		if (version < VERSION)
 			throw new IOException("Perstence version is not correct for loading: " + version + " expecting: " + VERSION); //$NON-NLS-1$ //$NON-NLS-2$
 
+		int numCachedHeaders = in.readInt();
+		List<String> storedCachedHeaderKeys = new ArrayList<String>(numCachedHeaders);
+		for (int i = 0; i < numCachedHeaders; i++) {
+			storedCachedHeaderKeys.add((String) ObjectPool.intern(in.readUTF()));
+		}
+
 		int numInfos = in.readInt();
 		Map<Long, Generation> result = new HashMap<Long, Generation>(numInfos);
 		List<Generation> generations = new ArrayList<BundleInfo.Generation>(numInfos);
@@ -975,6 +999,17 @@ public class Storage {
 			boolean isDirectory = in.readBoolean();
 			boolean hasPackageInfo = in.readBoolean();
 			String contentPath = in.readUTF();
+
+			Map<String, String> cachedHeaders = new HashMap<String, String>(storedCachedHeaderKeys.size());
+			for (String headerKey : storedCachedHeaderKeys) {
+				String value = in.readUTF();
+				if (NUL.equals(value)) {
+					value = null;
+				} else {
+					value = (String) ObjectPool.intern(value);
+				}
+				cachedHeaders.put(headerKey, value);
+			}
 
 			File content;
 			if (infoId == 0) {
@@ -990,7 +1025,7 @@ public class Storage {
 			}
 
 			BundleInfo info = new BundleInfo(this, infoId, nextGenId);
-			Generation generation = info.restoreGeneration(generationId, content, isDirectory, hasPackageInfo);
+			Generation generation = info.restoreGeneration(generationId, content, isDirectory, hasPackageInfo, cachedHeaders);
 			result.put(infoId, generation);
 			generations.add(generation);
 		}
