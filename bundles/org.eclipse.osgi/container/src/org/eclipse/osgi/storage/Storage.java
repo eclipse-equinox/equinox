@@ -107,7 +107,7 @@ public class Storage {
 		DataInputStream in = null;
 		if (frameworkInfo.exists()) {
 			try {
-				in = new DataInputStream(new FileInputStream(frameworkInfo));
+				in = new DataInputStream(new BufferedInputStream(new FileInputStream(frameworkInfo)));
 			} catch (IOException e) {
 				// do nothing
 			}
