@@ -11,12 +11,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import org.eclipse.osgi.internal.framework.EquinoxContainer;
-import org.eclipse.osgi.internal.framework.FilterImpl;
-
 import java.lang.reflect.Constructor;
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.osgi.framework.internal.core.Tokenizer;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.resolver.VersionRange;
 import org.eclipse.osgi.util.ManifestElement;

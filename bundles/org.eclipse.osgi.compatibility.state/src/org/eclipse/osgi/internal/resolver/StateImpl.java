@@ -12,14 +12,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import org.eclipse.osgi.internal.framework.EquinoxContainer;
-import org.eclipse.osgi.internal.framework.FilterImpl;
-
-import org.eclipse.osgi.internal.debug.Debug;
-import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
-
 import java.util.*;
 import org.eclipse.osgi.framework.util.*;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;

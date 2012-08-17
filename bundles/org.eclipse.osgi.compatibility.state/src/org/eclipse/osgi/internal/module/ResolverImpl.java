@@ -11,23 +11,19 @@
  ******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
-import org.eclipse.osgi.internal.framework.EquinoxContainer;
-import org.eclipse.osgi.internal.framework.FilterImpl;
-
-import org.eclipse.osgi.internal.debug.Debug;
-import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
-
 import java.security.AccessController;
 import java.util.*;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.baseadaptor.ArrayMap;
+import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.internal.module.GroupingChecker.PackageRoots;
 import org.eclipse.osgi.internal.resolver.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.wiring.BundleCapability;

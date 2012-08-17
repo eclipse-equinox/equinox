@@ -14,14 +14,12 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.util.Collections;
 import java.util.Map;
-
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.resolver.BaseDescriptionImpl.BaseCapability;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.VersionRange;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.*;
 import org.osgi.framework.namespace.AbstractWiringNamespace;
 import org.osgi.framework.wiring.*;
 import org.osgi.resource.Capability;

@@ -13,7 +13,6 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
-
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Constants;

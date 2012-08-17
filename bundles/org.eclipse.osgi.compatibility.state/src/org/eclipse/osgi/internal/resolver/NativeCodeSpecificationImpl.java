@@ -11,13 +11,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import org.eclipse.osgi.internal.framework.AliasMapper;
-
 import java.util.*;
+import org.eclipse.osgi.internal.framework.AliasMapper;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.Version;
+import org.eclipse.osgi.service.resolver.VersionRange;
+import org.osgi.framework.*;
 
 public class NativeCodeSpecificationImpl extends VersionConstraintImpl implements NativeCodeSpecification {
 	private static final NativeCodeDescription[] EMPTY_NATIVECODEDESCRIPTIONS = new NativeCodeDescription[0];
