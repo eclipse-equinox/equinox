@@ -12,9 +12,10 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.internal.baseadaptor.ArrayMap;
+import org.eclipse.osgi.internal.container.ComputeNodeOrder;
 import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.Constants;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
@@ -493,7 +494,7 @@ public final class StateHelperImpl implements StateHelper {
 	private boolean isFriend(String consumerBSN, ExportPackageDescription export, boolean strict) {
 		if (!strict)
 			return true; // ignore friends rules if not in strict mode
-		String[] friends = (String[]) export.getDirective(Constants.FRIENDS_DIRECTIVE);
+		String[] friends = (String[]) export.getDirective(StateImpl.FRIENDS_DIRECTIVE);
 		if (friends == null)
 			return true; // no x-friends means it is wide open
 		for (int i = 0; i < friends.length; i++)
@@ -503,7 +504,7 @@ public final class StateHelperImpl implements StateHelper {
 	}
 
 	public int getAccessCode(BundleDescription bundle, ExportPackageDescription export) {
-		if (((Boolean) export.getDirective(Constants.INTERNAL_DIRECTIVE)).booleanValue())
+		if (((Boolean) export.getDirective(StateImpl.INTERNAL_DIRECTIVE)).booleanValue())
 			return ACCESS_DISCOURAGED;
 		if (!isFriend(bundle.getSymbolicName(), export, true)) // pass strict here so that x-friends is processed
 			return ACCESS_DISCOURAGED;

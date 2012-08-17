@@ -12,7 +12,6 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.io.*;
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.internal.module.ResolverImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.resolver.VersionRange;
@@ -375,12 +374,6 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return result;
 	}
 
-	public SystemState createSystemState(BundleContext context) {
-		SystemState state = new SystemState(context);
-		state.setFactory(this);
-		return state;
-	}
-
 	/**
 	 * @deprecated
 	 */
@@ -415,16 +408,6 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		StateImpl state = new UserState();
 		state.setFactory(this);
 		return state;
-	}
-
-	public SystemState readSystemState(BundleContext context, File stateFile, File lazyFile, boolean lazyLoad, long expectedTimeStamp) throws IOException {
-		StateReader reader = new StateReader(stateFile, lazyFile, lazyLoad);
-		SystemState restoredState = new SystemState(context);
-		restoredState.setReader(reader);
-		restoredState.setFactory(this);
-		if (!reader.loadState(restoredState, expectedTimeStamp))
-			return null;
-		return restoredState;
 	}
 
 	/**
@@ -505,7 +488,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		writer.saveState((StateImpl) state, stateFile, lazyFile);
 	}
 
-	public void internalWriteStateDeprecated(State state, DataOutputStream stream) throws IOException {
+	private void internalWriteStateDeprecated(State state, DataOutputStream stream) throws IOException {
 		if (state.getFactory() != this)
 			throw new IllegalArgumentException();
 		StateWriter writer = new StateWriter();

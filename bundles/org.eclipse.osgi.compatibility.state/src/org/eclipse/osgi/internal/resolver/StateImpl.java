@@ -12,16 +12,14 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.*;
-import org.eclipse.osgi.internal.baseadaptor.StateManager;
-import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
@@ -31,11 +29,87 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.wiring.BundleRevision;
 
 public abstract class StateImpl implements State {
+
+	public static final String ECLIPSE_PLATFORMFILTER = "Eclipse-PlatformFilter"; //$NON-NLS-1$
+	public static final String Eclipse_JREBUNDLE = "Eclipse-JREBundle"; //$NON-NLS-1$
+	/**
+	 * Manifest Export-Package directive indicating that the exported package should only 
+	 * be made available when the resolver is not in strict mode.
+	 */
+	public static final String INTERNAL_DIRECTIVE = "x-internal"; //$NON-NLS-1$
+
+	/**
+	 * Manifest Export-Package directive indicating that the exported package should only 
+	 * be made available to friends of the exporting bundle.
+	 */
+	public static final String FRIENDS_DIRECTIVE = "x-friends"; //$NON-NLS-1$
+
+	/**
+	 * Manifest header (named &quot;Provide-Package&quot;)
+	 * identifying the packages name
+	 * provided to other bundles which require the bundle.
+	 *
+	 * <p>
+	 * NOTE: this is only used for backwards compatibility, bundles manifest using
+	 * syntax version 2 will not recognize this header.
+	 *
+	 * <p>The attribute value may be retrieved from the
+	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
+	 * @deprecated
+	 */
+	public final static String PROVIDE_PACKAGE = "Provide-Package"; //$NON-NLS-1$
+
+	/**
+	 * Manifest header attribute (named &quot;reprovide&quot;)
+	 * for Require-Bundle
+	 * identifying that any packages that are provided
+	 * by the required bundle must be reprovided by the requiring bundle.
+	 * The default value is <tt>false</tt>.
+	 * <p>
+	 * The attribute value is encoded in the Require-Bundle manifest 
+	 * header like:
+	 * <pre>
+	 * Require-Bundle: com.acme.module.test; reprovide="true"
+	 * </pre>
+	 * <p>
+	 * NOTE: this is only used for backwards compatibility, bundles manifest using
+	 * syntax version 2 will not recognize this attribute.
+	 * @deprecated
+	 */
+	public final static String REPROVIDE_ATTRIBUTE = "reprovide"; //$NON-NLS-1$
+
+	/**
+	 * Manifest header attribute (named &quot;optional&quot;)
+	 * for Require-Bundle
+	 * identifying that a required bundle is optional and that
+	 * the requiring bundle can be resolved if there is no 
+	 * suitable required bundle.
+	 * The default value is <tt>false</tt>.
+	 *
+	 * <p>The attribute value is encoded in the Require-Bundle manifest 
+	 * header like:
+	 * <pre>
+	 * Require-Bundle: com.acme.module.test; optional="true"
+	 * </pre>
+	 * <p>
+	 * NOTE: this is only used for backwards compatibility, bundles manifest using
+	 * syntax version 2 will not recognize this attribute.
+	 * @since 1.3 <b>EXPERIMENTAL</b>
+	 * @deprecated
+	 */
+	public final static String OPTIONAL_ATTRIBUTE = "optional"; //$NON-NLS-1$
+
+	public static final String OSGI_RESOLVER_MODE = "osgi.resolverMode"; //$NON-NLS-1$
+	public static final String STRICT_MODE = "strict"; //$NON-NLS-1$
+	public static final String DEVELOPMENT_MODE = "development"; //$NON-NLS-1$
+
+	public static final String STATE_SYSTEM_BUNDLE = "osgi.system.bundle"; //$NON-NLS-1$
+
 	private static final String OSGI_OS = "osgi.os"; //$NON-NLS-1$
 	private static final String OSGI_WS = "osgi.ws"; //$NON-NLS-1$
 	private static final String OSGI_NL = "osgi.nl"; //$NON-NLS-1$
 	private static final String OSGI_ARCH = "osgi.arch"; //$NON-NLS-1$
-	public static final String[] PROPS = {OSGI_OS, OSGI_WS, OSGI_NL, OSGI_ARCH, Constants.FRAMEWORK_SYSTEMPACKAGES, Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases", Constants.FRAMEWORK_OS_NAME, Constants.FRAMEWORK_OS_VERSION, Constants.FRAMEWORK_PROCESSOR, Constants.FRAMEWORK_LANGUAGE, Constants.STATE_SYSTEM_BUNDLE, Constants.FRAMEWORK_SYSTEMCAPABILITIES, Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA}; //$NON-NLS-1$ //$NON-NLS-2$
+	public static final String[] PROPS = {OSGI_OS, OSGI_WS, OSGI_NL, OSGI_ARCH, Constants.FRAMEWORK_SYSTEMPACKAGES, Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases", Constants.FRAMEWORK_OS_NAME, Constants.FRAMEWORK_OS_VERSION, Constants.FRAMEWORK_PROCESSOR, Constants.FRAMEWORK_LANGUAGE, STATE_SYSTEM_BUNDLE, Constants.FRAMEWORK_SYSTEMCAPABILITIES, Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA}; //$NON-NLS-1$ //$NON-NLS-2$
 	private static final DisabledInfo[] EMPTY_DISABLEDINFOS = new DisabledInfo[0];
 	public static final String OSGI_EE_NAMESPACE = "osgi.ee"; //$NON-NLS-1$
 
@@ -195,9 +269,6 @@ public abstract class StateImpl implements State {
 	}
 
 	private boolean isInUse(BundleDescription bundle) {
-		Object userObject = bundle.getUserObject();
-		if (userObject instanceof BundleLoaderProxy)
-			return ((BundleLoaderProxy) userObject).inUse();
 		return bundle.getDependents().length > 0;
 	}
 
@@ -427,8 +498,6 @@ public abstract class StateImpl implements State {
 			try {
 				resolving = true;
 				long start = 0;
-				if (StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER)
-					start = System.currentTimeMillis();
 				if (!incremental) {
 					resolved = false;
 					reResolve = getBundles();
@@ -491,12 +560,6 @@ public abstract class StateImpl implements State {
 				savedChanges.setResolverHookException(error);
 				changes = new StateDeltaImpl(this);
 
-				if (StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER) {
-					long time = System.currentTimeMillis() - start;
-					Debug.println("Time spent resolving: " + time); //$NON-NLS-1$
-					cumulativeTime = cumulativeTime + time;
-					FrameworkDebugOptions.getDefault().setOption("org.eclipse.core.runtime.adaptor/resolver/timing/value", Long.toString(cumulativeTime)); //$NON-NLS-1$
-				}
 				if (savedChanges.getChanges().length > 0)
 					updateTimeStamp();
 				return savedChanges;
@@ -804,7 +867,7 @@ public abstract class StateImpl implements State {
 			resetSystemExports();
 		if (performResetSystemCapabilities)
 			resetSystemCapabilities();
-		developmentMode = this.platformProperties.length == 0 ? false : org.eclipse.osgi.framework.internal.core.Constants.DEVELOPMENT_MODE.equals(this.platformProperties[0].get(org.eclipse.osgi.framework.internal.core.Constants.OSGI_RESOLVER_MODE));
+		developmentMode = this.platformProperties.length == 0 ? false : DEVELOPMENT_MODE.equals(this.platformProperties[0].get(OSGI_RESOLVER_MODE));
 		return result;
 	}
 
@@ -960,8 +1023,8 @@ public abstract class StateImpl implements State {
 	public String getSystemBundle() {
 		String symbolicName = null;
 		if (platformProperties != null && platformProperties.length > 0)
-			symbolicName = (String) platformProperties[0].get(Constants.STATE_SYSTEM_BUNDLE);
-		return symbolicName != null ? symbolicName : Constants.getInternalSymbolicName();
+			symbolicName = (String) platformProperties[0].get(STATE_SYSTEM_BUNDLE);
+		return symbolicName != null ? symbolicName : EquinoxContainer.NAME;
 	}
 
 	public BundleDescription[] getRemovalPending() {
@@ -1123,7 +1186,7 @@ public abstract class StateImpl implements State {
 
 	boolean inStrictMode() {
 		synchronized (this.monitor) {
-			return Constants.STRICT_MODE.equals(getPlatformProperties()[0].get(Constants.OSGI_RESOLVER_MODE));
+			return STRICT_MODE.equals(getPlatformProperties()[0].get(OSGI_RESOLVER_MODE));
 		}
 	}
 

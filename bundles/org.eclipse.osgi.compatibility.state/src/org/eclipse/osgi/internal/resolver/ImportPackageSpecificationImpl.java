@@ -13,8 +13,10 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.Constants;
+
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleRevision;
 
 public class ImportPackageSpecificationImpl extends VersionConstraintImpl implements ImportPackageSpecification {
@@ -74,7 +76,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		synchronized (this.monitor) {
 			if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(symbolicName)) {
 				StateImpl state = (StateImpl) getBundle().getContainingState();
-				return state == null ? Constants.getInternalSymbolicName() : state.getSystemBundle();
+				return state == null ? EquinoxContainer.NAME : state.getSystemBundle();
 			}
 			return symbolicName;
 		}
@@ -105,8 +107,8 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 
 		// If we are in strict mode, check to see if the export specifies friends.
 		// If it does, are we one of the friends 
-		String[] friends = (String[]) pkgDes.getDirective(Constants.FRIENDS_DIRECTIVE);
-		Boolean internal = (Boolean) pkgDes.getDirective(Constants.INTERNAL_DIRECTIVE);
+		String[] friends = (String[]) pkgDes.getDirective(StateImpl.FRIENDS_DIRECTIVE);
+		Boolean internal = (Boolean) pkgDes.getDirective(StateImpl.INTERNAL_DIRECTIVE);
 		if (internal.booleanValue() || friends != null) {
 			StateImpl state = (StateImpl) getBundle().getContainingState();
 			boolean strict = state == null ? false : state.inStrictMode();

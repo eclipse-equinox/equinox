@@ -13,8 +13,10 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.Constants;
+
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleRevision;
 
@@ -59,8 +61,8 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 			if (mandatory != null)
 				result.put(Constants.MANDATORY_DIRECTIVE, mandatory);
 			if (friends != null)
-				result.put(Constants.FRIENDS_DIRECTIVE, friends);
-			result.put(Constants.INTERNAL_DIRECTIVE, internal);
+				result.put(StateImpl.FRIENDS_DIRECTIVE, friends);
+			result.put(StateImpl.INTERNAL_DIRECTIVE, internal);
 			result.put(EQUINOX_EE, equinox_ee == -1 ? EQUINOX_EE_DEFAULT : new Integer(equinox_ee));
 			return result;
 		}
@@ -81,9 +83,9 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 			if (mandatory != null)
 				result.put(Constants.MANDATORY_DIRECTIVE, toString(mandatory));
 			if (friends != null)
-				result.put(Constants.FRIENDS_DIRECTIVE, toString(friends));
+				result.put(StateImpl.FRIENDS_DIRECTIVE, toString(friends));
 			if (internal != null)
-				result.put(Constants.INTERNAL_DIRECTIVE, internal.toString());
+				result.put(StateImpl.INTERNAL_DIRECTIVE, internal.toString());
 			return Collections.unmodifiableMap(result);
 		}
 	}
@@ -100,7 +102,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 				result.put(Constants.BUNDLE_VERSION_ATTRIBUTE, bundleVersion);
 			String symbolicName = getSupplier().getSymbolicName();
 			if (symbolicName != null) {
-				if (symbolicName.equals(Constants.getInternalSymbolicName()))
+				if (symbolicName.equals(EquinoxContainer.NAME))
 					result.put(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Arrays.asList(Constants.SYSTEM_BUNDLE_SYMBOLICNAME, symbolicName));
 				else
 					result.put(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, symbolicName);
@@ -128,9 +130,9 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 				return include;
 			if (key.equals(Constants.MANDATORY_DIRECTIVE))
 				return mandatory;
-			if (key.equals(Constants.FRIENDS_DIRECTIVE))
+			if (key.equals(StateImpl.FRIENDS_DIRECTIVE))
 				return friends;
-			if (key.equals(Constants.INTERNAL_DIRECTIVE))
+			if (key.equals(StateImpl.INTERNAL_DIRECTIVE))
 				return internal;
 			if (key.equals(EQUINOX_EE))
 				return equinox_ee == -1 ? EQUINOX_EE_DEFAULT : new Integer(equinox_ee);
@@ -148,9 +150,9 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 				return include = (String) value;
 			if (key.equals(Constants.MANDATORY_DIRECTIVE))
 				return mandatory = (String[]) value;
-			if (key.equals(Constants.FRIENDS_DIRECTIVE))
+			if (key.equals(StateImpl.FRIENDS_DIRECTIVE))
 				return friends = (String[]) value;
-			if (key.equals(Constants.INTERNAL_DIRECTIVE))
+			if (key.equals(StateImpl.INTERNAL_DIRECTIVE))
 				return internal = (Boolean) value;
 			if (key.equals(EQUINOX_EE)) {
 				equinox_ee = ((Integer) value).intValue();
@@ -168,8 +170,8 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 			exclude = (String) directives.get(Constants.EXCLUDE_DIRECTIVE);
 			include = (String) directives.get(Constants.INCLUDE_DIRECTIVE);
 			mandatory = (String[]) directives.get(Constants.MANDATORY_DIRECTIVE);
-			friends = (String[]) directives.get(Constants.FRIENDS_DIRECTIVE);
-			internal = (Boolean) directives.get(Constants.INTERNAL_DIRECTIVE);
+			friends = (String[]) directives.get(StateImpl.FRIENDS_DIRECTIVE);
+			internal = (Boolean) directives.get(StateImpl.INTERNAL_DIRECTIVE);
 			equinox_ee = ((Integer) directives.get(EQUINOX_EE)).intValue();
 		}
 	}

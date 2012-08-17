@@ -11,6 +11,7 @@
  ******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 
 import org.eclipse.osgi.internal.debug.Debug;
@@ -18,14 +19,13 @@ import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 
 import java.security.AccessController;
 import java.util.*;
-import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.baseadaptor.ArrayMap;
 import org.eclipse.osgi.internal.module.GroupingChecker.PackageRoots;
 import org.eclipse.osgi.internal.resolver.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.hooks.resolver.ResolverHook;
@@ -35,7 +35,7 @@ import org.osgi.framework.wiring.BundleRevision;
 
 public class ResolverImpl implements Resolver {
 	// Debug fields
-	private static final String RESOLVER = FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + "/resolver"; //$NON-NLS-1$
+	private static final String RESOLVER = EquinoxContainer.NAME + "/resolver"; //$NON-NLS-1$
 	private static final String OPTION_DEBUG = RESOLVER + "/debug";//$NON-NLS-1$
 	private static final String OPTION_WIRING = RESOLVER + "/wiring"; //$NON-NLS-1$
 	private static final String OPTION_IMPORTS = RESOLVER + "/imports"; //$NON-NLS-1$
@@ -424,7 +424,7 @@ public class ResolverImpl implements Resolver {
 		hook = (state instanceof StateImpl) ? ((StateImpl) state).getResolverHook() : null;
 		try {
 			// set developmentMode each resolution
-			developmentMode = platformProperties.length == 0 ? false : org.eclipse.osgi.framework.internal.core.Constants.DEVELOPMENT_MODE.equals(platformProperties[0].get(org.eclipse.osgi.framework.internal.core.Constants.OSGI_RESOLVER_MODE));
+			developmentMode = platformProperties.length == 0 ? false : StateImpl.DEVELOPMENT_MODE.equals(platformProperties[0].get(StateImpl.OSGI_RESOLVER_MODE));
 			// set uses timeout each resolution
 			usesTimeout = getUsesTimeout(platformProperties);
 			// set limit for constraints with multiple suppliers each resolution
@@ -1178,9 +1178,9 @@ public class ResolverImpl implements Resolver {
 
 	String getSystemBundle() {
 		Dictionary<?, ?>[] platformProperties = state.getPlatformProperties();
-		String systemBundle = platformProperties.length == 0 ? null : (String) platformProperties[0].get(Constants.STATE_SYSTEM_BUNDLE);
+		String systemBundle = platformProperties.length == 0 ? null : (String) platformProperties[0].get(StateImpl.STATE_SYSTEM_BUNDLE);
 		if (systemBundle == null)
-			systemBundle = Constants.getInternalSymbolicName();
+			systemBundle = EquinoxContainer.NAME;
 		return systemBundle;
 	}
 
@@ -2125,7 +2125,7 @@ public class ResolverImpl implements Resolver {
 	}
 
 	private void setDebugOptions() {
-		FrameworkDebugOptions options = FrameworkDebugOptions.getDefault();
+		FrameworkDebugOptions options = null; //FrameworkDebugOptions.getDefault();
 		// may be null if debugging is not enabled
 		if (options == null)
 			return;

@@ -15,11 +15,7 @@ package org.eclipse.osgi.internal.resolver;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
-import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
-import org.eclipse.osgi.framework.internal.core.BundleHost;
-import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.KeyedElement;
-import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
 import org.osgi.framework.wiring.*;
@@ -1221,59 +1217,16 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 
 		public ClassLoader getClassLoader() {
-			SecurityManager sm = System.getSecurityManager();
-			if (sm != null)
-				sm.checkPermission(GET_CLASSLOADER_PERM);
-			if (!isInUse())
-				return null;
-			return (ClassLoader) getBundleClassLoader();
+			throw new UnsupportedOperationException();
 		}
 
-		private BundleClassLoader getBundleClassLoader() {
-			Object o = BundleDescriptionImpl.this.getUserObject();
-			if (!(o instanceof BundleLoaderProxy)) {
-				if (o instanceof BundleReference)
-					o = ((BundleReference) o).getBundle();
-				if (o instanceof BundleHost)
-					o = ((BundleHost) o).getLoaderProxy();
-			}
-			if (o instanceof BundleLoaderProxy)
-				return ((BundleLoaderProxy) o).getBundleLoader().createClassLoader();
+
+		public List<URL> findEntries(String path, String filePattern, int options) {
 			return null;
 		}
 
-		private boolean hasResourcePermission() {
-			SecurityManager sm = System.getSecurityManager();
-			if (sm != null) {
-				try {
-					sm.checkPermission(new AdminPermission(getBundle(), AdminPermission.RESOURCE));
-				} catch (SecurityException e) {
-					return false;
-				}
-			}
-			return true;
-		}
-
-		public List<URL> findEntries(String path, String filePattern, int options) {
-			if (!hasResourcePermission() || !isInUse())
-				return null;
-			@SuppressWarnings("unchecked")
-			List<URL> result = Collections.EMPTY_LIST;
-			BundleClassLoader bcl = getBundleClassLoader();
-			if (bcl != null)
-				result = bcl.findEntries(path, filePattern, options);
-			return Collections.unmodifiableList(result);
-		}
-
 		public Collection<String> listResources(String path, String filePattern, int options) {
-			if (!hasResourcePermission() || !isInUse())
-				return null;
-			@SuppressWarnings("unchecked")
-			Collection<String> result = Collections.EMPTY_LIST;
-			BundleClassLoader bcl = getBundleClassLoader();
-			if (bcl != null)
-				result = bcl.listResources(path, filePattern, options);
-			return Collections.unmodifiableCollection(result);
+			return null;
 		}
 
 		public String toString() {

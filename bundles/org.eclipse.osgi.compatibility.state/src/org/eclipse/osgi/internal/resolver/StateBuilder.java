@@ -11,12 +11,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.*;
-import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.resolver.VersionRange;
 import org.eclipse.osgi.util.ManifestElement;
@@ -30,13 +30,13 @@ import org.osgi.resource.Namespace;
  * This class builds bundle description objects from manifests
  */
 public class StateBuilder {
-	private static final String[] DEFINED_EXPORT_PACKAGE_DIRECTIVES = {Constants.USES_DIRECTIVE, Constants.INCLUDE_DIRECTIVE, Constants.EXCLUDE_DIRECTIVE, Constants.FRIENDS_DIRECTIVE, Constants.INTERNAL_DIRECTIVE, Constants.MANDATORY_DIRECTIVE};
+	private static final String[] DEFINED_EXPORT_PACKAGE_DIRECTIVES = {Constants.USES_DIRECTIVE, Constants.INCLUDE_DIRECTIVE, Constants.EXCLUDE_DIRECTIVE, StateImpl.FRIENDS_DIRECTIVE, StateImpl.INTERNAL_DIRECTIVE, Constants.MANDATORY_DIRECTIVE};
 	private static final String[] DEFINED_IMPORT_PACKAGE_DIRECTIVES = {Constants.RESOLUTION_DIRECTIVE};
 	private static final String[] DEFINED_PACKAGE_MATCHING_ATTRS = {Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.PACKAGE_SPECIFICATION_VERSION, Constants.VERSION_ATTRIBUTE};
 	private static final String[] DEFINED_REQUIRE_BUNDLE_DIRECTIVES = {Constants.RESOLUTION_DIRECTIVE, Constants.VISIBILITY_DIRECTIVE};
 	private static final String[] DEFINED_FRAGMENT_HOST_DIRECTIVES = {Constants.EXTENSION_DIRECTIVE};
 	static final String[] DEFINED_BSN_DIRECTIVES = {Constants.SINGLETON_DIRECTIVE, Constants.FRAGMENT_ATTACHMENT_DIRECTIVE, Constants.MANDATORY_DIRECTIVE};
-	static final String[] DEFINED_BSN_MATCHING_ATTRS = {Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.OPTIONAL_ATTRIBUTE, Constants.REPROVIDE_ATTRIBUTE};
+	static final String[] DEFINED_BSN_MATCHING_ATTRS = {Constants.BUNDLE_VERSION_ATTRIBUTE, StateImpl.OPTIONAL_ATTRIBUTE, StateImpl.REPROVIDE_ATTRIBUTE};
 	private static final String[] DEFINED_REQUIRE_CAPABILITY_DIRECTIVES = {Constants.RESOLUTION_DIRECTIVE, Constants.FILTER_DIRECTIVE, Namespace.REQUIREMENT_CARDINALITY_DIRECTIVE};
 	private static final String[] DEFINED_REQUIRE_CAPABILITY_ATTRS = {};
 	private static final String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REQUIRE_BUNDLE};
@@ -57,7 +57,7 @@ public class StateBuilder {
 	static BundleDescription createBundleDescription(StateImpl state, Dictionary<String, String> manifest, String location) throws BundleException {
 		BundleDescriptionImpl result = new BundleDescriptionImpl();
 		String manifestVersionHeader = manifest.get(Constants.BUNDLE_MANIFESTVERSION);
-		boolean jreBundle = "true".equals(manifest.get(Constants.Eclipse_JREBUNDLE)); //$NON-NLS-1$
+		boolean jreBundle = "true".equals(manifest.get(StateImpl.Eclipse_JREBUNDLE)); //$NON-NLS-1$
 		int manifestVersion = 1;
 		if (manifestVersionHeader != null)
 			manifestVersion = Integer.parseInt(manifestVersionHeader);
@@ -103,14 +103,14 @@ public class StateBuilder {
 			// must not fail for old R3 style bundles
 		}
 		result.setLocation(location);
-		result.setPlatformFilter(manifest.get(Constants.ECLIPSE_PLATFORMFILTER));
+		result.setPlatformFilter(manifest.get(StateImpl.ECLIPSE_PLATFORMFILTER));
 		String[] brees = ManifestElement.getArrayFromList(manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT));
 		result.setExecutionEnvironments(brees);
 		ManifestElement[] host = ManifestElement.parseHeader(Constants.FRAGMENT_HOST, manifest.get(Constants.FRAGMENT_HOST));
 		if (host != null)
 			result.setHost(createHostSpecification(host[0], state));
 		ManifestElement[] exports = ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, manifest.get(Constants.EXPORT_PACKAGE));
-		ManifestElement[] provides = ManifestElement.parseHeader(Constants.PROVIDE_PACKAGE, manifest.get(Constants.PROVIDE_PACKAGE));
+		ManifestElement[] provides = ManifestElement.parseHeader(StateImpl.PROVIDE_PACKAGE, manifest.get(StateImpl.PROVIDE_PACKAGE));
 		boolean strict = state != null && state.inStrictMode();
 		List<String> providedExports = new ArrayList<String>(provides == null ? 0 : provides.length);
 		result.setExportPackages(createExportPackages(exports, provides, providedExports, strict));
@@ -237,8 +237,8 @@ public class StateBuilder {
 		BundleSpecificationImpl result = new BundleSpecificationImpl();
 		result.setName(spec.getValue());
 		result.setVersionRange(getVersionRange(spec.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE)));
-		result.setExported(Constants.VISIBILITY_REEXPORT.equals(spec.getDirective(Constants.VISIBILITY_DIRECTIVE)) || "true".equals(spec.getAttribute(Constants.REPROVIDE_ATTRIBUTE))); //$NON-NLS-1$
-		result.setOptional(Constants.RESOLUTION_OPTIONAL.equals(spec.getDirective(Constants.RESOLUTION_DIRECTIVE)) || "true".equals(spec.getAttribute(Constants.OPTIONAL_ATTRIBUTE))); //$NON-NLS-1$
+		result.setExported(Constants.VISIBILITY_REEXPORT.equals(spec.getDirective(Constants.VISIBILITY_DIRECTIVE)) || "true".equals(spec.getAttribute(StateImpl.REPROVIDE_ATTRIBUTE))); //$NON-NLS-1$
+		result.setOptional(Constants.RESOLUTION_OPTIONAL.equals(spec.getDirective(Constants.RESOLUTION_DIRECTIVE)) || "true".equals(spec.getAttribute(StateImpl.OPTIONAL_ATTRIBUTE))); //$NON-NLS-1$
 		result.setAttributes(getAttributes(spec, DEFINED_BSN_MATCHING_ATTRS));
 		result.setArbitraryDirectives(getDirectives(spec, DEFINED_REQUIRE_BUNDLE_DIRECTIVES));
 		return result;
@@ -333,7 +333,7 @@ public class StateBuilder {
 		String[] exportNames = exportPackage.getValueComponents();
 		for (int i = 0; i < exportNames.length; i++) {
 			// if we are in strict mode and the package is marked as internal, skip it.
-			if (strict && "true".equals(exportPackage.getDirective(Constants.INTERNAL_DIRECTIVE))) //$NON-NLS-1$
+			if (strict && "true".equals(exportPackage.getDirective(StateImpl.INTERNAL_DIRECTIVE))) //$NON-NLS-1$
 				continue;
 			ExportPackageDescriptionImpl result = new ExportPackageDescriptionImpl();
 			result.setName(exportNames[i]);
@@ -345,8 +345,8 @@ public class StateBuilder {
 			result.setDirective(Constants.USES_DIRECTIVE, ManifestElement.getArrayFromList(exportPackage.getDirective(Constants.USES_DIRECTIVE)));
 			result.setDirective(Constants.INCLUDE_DIRECTIVE, exportPackage.getDirective(Constants.INCLUDE_DIRECTIVE));
 			result.setDirective(Constants.EXCLUDE_DIRECTIVE, exportPackage.getDirective(Constants.EXCLUDE_DIRECTIVE));
-			result.setDirective(Constants.FRIENDS_DIRECTIVE, ManifestElement.getArrayFromList(exportPackage.getDirective(Constants.FRIENDS_DIRECTIVE)));
-			result.setDirective(Constants.INTERNAL_DIRECTIVE, Boolean.valueOf(exportPackage.getDirective(Constants.INTERNAL_DIRECTIVE)));
+			result.setDirective(StateImpl.FRIENDS_DIRECTIVE, ManifestElement.getArrayFromList(exportPackage.getDirective(StateImpl.FRIENDS_DIRECTIVE)));
+			result.setDirective(StateImpl.INTERNAL_DIRECTIVE, Boolean.valueOf(exportPackage.getDirective(StateImpl.INTERNAL_DIRECTIVE)));
 			result.setDirective(Constants.MANDATORY_DIRECTIVE, ManifestElement.getArrayFromList(exportPackage.getDirective(Constants.MANDATORY_DIRECTIVE)));
 			result.setAttributes(getAttributes(exportPackage, DEFINED_PACKAGE_MATCHING_ATTRS));
 			result.setArbitraryDirectives(getDirectives(exportPackage, DEFINED_EXPORT_PACKAGE_DIRECTIVES));
@@ -882,7 +882,7 @@ public class StateBuilder {
 			return;
 		String hostName = elements[0].getValue();
 		// XXX: The extension bundle check is done against system.bundle and org.eclipse.osgi
-		if (!hostName.equals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME) && !hostName.equals(Constants.getInternalSymbolicName())) {
+		if (!hostName.equals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME) && !hostName.equals(EquinoxContainer.NAME)) {
 			String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[0].toString());
 			throw new BundleException(message + " : " + NLS.bind(StateMsg.HEADER_EXTENSION_ERROR, hostName), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 		}
