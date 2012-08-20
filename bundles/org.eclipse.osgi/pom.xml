@@ -22,7 +22,7 @@
   </parent>
   <groupId>org.eclipse.equinox.framework</groupId>
   <artifactId>org.eclipse.osgi</artifactId>
-  <version>3.8.0-SNAPSHOT</version>
+  <version>3.8.1-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
   <build>
     <plugins>
