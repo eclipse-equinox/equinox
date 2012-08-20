@@ -56,26 +56,26 @@ public class Framework implements EventPublisher, Runnable {
 	private static String JAVASE = "JavaSE-"; //$NON-NLS-1$
 	private static String PROFILE_EXT = ".profile"; //$NON-NLS-1$
 	/** FrameworkAdaptor specific functions. */
-	protected FrameworkAdaptor adaptor;
+	protected volatile FrameworkAdaptor adaptor;
 	/** Framework properties object.  A reference to the 
 	 * System.getProperies() object.  The properties from
 	 * the adaptor will be merged into these properties.
 	 */
 	protected Properties properties;
 	/** Has the framework been started */
-	protected boolean active;
+	protected volatile boolean active;
 	/** Event indicating the reason for shutdown*/
 	private FrameworkEvent[] shutdownEvent;
 	/** The bundles installed in the framework */
 	protected BundleRepository bundles;
 	/** Package Admin object. This object manages the exported packages. */
-	protected PackageAdminImpl packageAdmin;
+	protected volatile PackageAdminImpl packageAdmin;
 	/** PermissionAdmin and ConditionalPermissionAdmin impl. This object manages the bundle permissions. */
 	protected SecurityAdmin securityAdmin;
 	/** Startlevel object. This object manages the framework and bundle startlevels */
 	protected StartLevelManager startLevelManager;
 	/** The ServiceRegistry */
-	private ServiceRegistry serviceRegistry;
+	private volatile ServiceRegistry serviceRegistry;
 	private final int BSN_VERSION;
 	private static final int BSN_VERSION_SINGLE = 1;
 	private static final int BSN_VERSION_MULTIPLE = 2;
@@ -104,7 +104,7 @@ public class Framework implements EventPublisher, Runnable {
 	static final String findHookName = FindHook.class.getName();
 	static final String collisionHookName = CollisionHook.class.getName();
 	/** EventManager for event delivery. */
-	protected EventManager eventManager;
+	protected volatile EventManager eventManager;
 	/* Reservation object for install synchronization */
 	private Map<String, Thread> installLock;
 	/** System Bundle object */
@@ -121,7 +121,7 @@ public class Framework implements EventPublisher, Runnable {
 	 * The AliasMapper used to alias OS Names.
 	 */
 	protected static AliasMapper aliasMapper = new AliasMapper();
-	SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
+	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 	// cache of AdminPermissions keyed by Bundle ID
 	private final Map<Long, Map<String, AdminPermission>> adminPermissions = new HashMap<Long, Map<String, AdminPermission>>();
 
@@ -616,7 +616,6 @@ public class Framework implements EventPublisher, Runnable {
 			eventManager.close();
 			eventManager = null;
 		}
-		secureAction = null;
 		packageAdmin = null;
 		adaptor = null;
 		uninstallURLStreamHandlerFactory();

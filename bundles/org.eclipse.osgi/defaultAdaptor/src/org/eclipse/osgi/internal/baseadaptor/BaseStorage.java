@@ -912,7 +912,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		this.context = fwContext;
 		// System property can be set to enable state saver or not.
 		if (Boolean.valueOf(FrameworkProperties.getProperty(BaseStorage.PROP_ENABLE_STATE_SAVER, "true")).booleanValue()) //$NON-NLS-1$
-			stateSaver = new StateSaver();
+			stateSaver = new StateSaver(adaptor.getState());
 
 	}
 
@@ -1249,7 +1249,13 @@ public class BaseStorage implements SynchronousBundleListener {
 		private Thread runningThread = null;
 		private Thread shutdownHook = null;
 
-		StateSaver() {
+		// Bug 383338. Pass the BaseAdaptor state as a constructor argument and
+		// reuse rather than call adaptor.getState(), and risk an NPE from
+		// Framework due to a null ServiceRegistry, each time a lock is desired.
+		private final State lock;
+
+		StateSaver(State lock) {
+			this.lock = lock;
 			String prop = FrameworkProperties.getProperty("eclipse.stateSaveDelayInterval"); //$NON-NLS-1$
 			long delayValue = 30000; // 30 seconds.
 			long maxDelayValue = 1800000; // 30 minutes.
@@ -1272,8 +1278,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		}
 
 		public void run() {
-			State systemState = adaptor.getState();
-			synchronized (systemState) {
+			synchronized (lock) {
 				long firstSaveTime = lastSaveTime;
 				long curSaveTime = 0;
 				long delayTime;
@@ -1289,7 +1294,7 @@ public class BaseStorage implements SynchronousBundleListener {
 						// wait for other save requests 
 						try {
 							if (!shutdown)
-								systemState.wait(delayTime);
+								lock.wait(delayTime);
 						} catch (InterruptedException ie) {
 							// force break from do/while loops
 							curSaveTime = lastSaveTime;
@@ -1312,12 +1317,13 @@ public class BaseStorage implements SynchronousBundleListener {
 		}
 
 		void shutdown() {
-			State systemState = adaptor.getState();
-			Thread joinWith = null;
-			synchronized (systemState) {
+			Thread joinWith;
+			synchronized (lock) {
+				if (shutdown)
+					return; // Don't shutdown more than once. Bug 383338.
 				shutdown = true;
 				joinWith = runningThread;
-				systemState.notifyAll(); // To wakeup sleeping thread.
+				lock.notifyAll(); // To wakeup sleeping thread.
 			}
 			try {
 				if (joinWith != null) {
@@ -1337,8 +1343,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		}
 
 		void requestSave() {
-			final State systemState = adaptor.getState();
-			synchronized (systemState) {
+			synchronized (lock) {
 				if (shutdown)
 					return; // do not start another thread if we have already shutdown
 				if (delay_interval == 0) {
