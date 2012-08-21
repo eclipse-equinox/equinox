@@ -1012,6 +1012,9 @@ public class ModuleDatabase {
 			for (int i = 0; i < numModules; i++) {
 				readModule(moduleDatabase, in, objectTable);
 			}
+
+			moduleDatabase.revisionsTimeStamp.set(revisionsTimeStamp);
+			moduleDatabase.allTimeStamp.set(allTimeStamp);
 			if (!in.readBoolean())
 				return; // no wires persisted
 
