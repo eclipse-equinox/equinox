@@ -26,5 +26,8 @@
 
   <properties>
     <launcher-binary.version>1500</launcher-binary.version>
+    <os>linux</os>
+    <ws>gtk</ws>
+    <arch>ppc</arch>
   </properties>
 </project>

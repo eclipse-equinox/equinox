@@ -26,6 +26,9 @@
 
   <properties>
     <launcher-binary.version>1500</launcher-binary.version>
+    <os>aix</os>
+    <ws>motif</ws>
+    <arch>ppc</arch>
   </properties>
 
 </project>

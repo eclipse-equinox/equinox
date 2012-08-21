@@ -27,5 +27,8 @@
 
   <properties>
     <launcher-binary.version>1500</launcher-binary.version>
+    <os>aix</os>
+    <ws>gtk</ws>
+    <arch>ppc64</arch>
   </properties>
 </project>

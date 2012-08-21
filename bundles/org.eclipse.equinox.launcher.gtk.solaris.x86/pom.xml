@@ -27,5 +27,8 @@
 
   <properties>
     <launcher-binary.version>1500</launcher-binary.version>
+    <os>solaris</os>
+    <ws>gtk</ws>
+    <arch>x86</arch>
   </properties>
 </project>

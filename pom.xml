@@ -35,15 +35,9 @@
     
     <module>bundles/org.eclipse.equinox.executable</module>
     <module>bundles/org.eclipse.equinox.launcher</module>
-    <module>bundles/org.eclipse.equinox.launcher.gtk.linux.x86</module>
-    <module>bundles/org.eclipse.equinox.launcher.gtk.linux.x86_64</module>
-    <module>bundles/org.eclipse.equinox.launcher.cocoa.macosx.x86_64</module>
-    <module>bundles/org.eclipse.equinox.launcher.win32.win32.x86</module>
-    <module>bundles/org.eclipse.equinox.launcher.win32.win32.x86_64</module>
-
-    <!--
     <module>bundles/org.eclipse.equinox.launcher.carbon.macosx</module>
     <module>bundles/org.eclipse.equinox.launcher.cocoa.macosx</module>
+    <module>bundles/org.eclipse.equinox.launcher.cocoa.macosx.x86_64</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.aix.ppc</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.aix.ppc64</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.hpux.ia64_32</module>
@@ -51,6 +45,8 @@
     <module>bundles/org.eclipse.equinox.launcher.gtk.linux.ppc64</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.linux.s390</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.linux.s390x</module>
+    <module>bundles/org.eclipse.equinox.launcher.gtk.linux.x86</module>
+    <module>bundles/org.eclipse.equinox.launcher.gtk.linux.x86_64</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.solaris.sparc</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.solaris.x86</module>
     <module>bundles/org.eclipse.equinox.launcher.motif.aix.ppc</module>
@@ -58,9 +54,10 @@
     <module>bundles/org.eclipse.equinox.launcher.motif.linux.x86</module>
     <module>bundles/org.eclipse.equinox.launcher.motif.solaris.sparc</module>
     <module>bundles/org.eclipse.equinox.launcher.win32.win32.ia64</module>
+    <module>bundles/org.eclipse.equinox.launcher.win32.win32.x86</module>
+    <module>bundles/org.eclipse.equinox.launcher.win32.win32.x86_64</module>
     <module>bundles/org.eclipse.equinox.launcher.wpf.win32.x86</module>
-    <module>features/rt.equinox.framework.site</module>
-     -->
+
     <module>bundles/org.eclipse.osgi.tests</module>
     <module>features/org.eclipse.equinox.core.sdk</module>
   </modules>

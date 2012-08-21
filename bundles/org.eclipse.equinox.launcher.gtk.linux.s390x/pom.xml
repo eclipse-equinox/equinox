@@ -23,4 +23,10 @@
   <artifactId>org.eclipse.equinox.launcher.gtk.linux.s390x</artifactId>
   <version>1.1.200-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
+
+  <properties>
+    <os>linux</os>
+    <ws>gtk</ws>
+    <arch>s390x</arch>
+  </properties>
 </project>
