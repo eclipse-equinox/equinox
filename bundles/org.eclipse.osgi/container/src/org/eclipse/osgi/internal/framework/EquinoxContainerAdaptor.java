@@ -232,6 +232,11 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	}
 
 	@Override
+	public void refreshedSystemModule() {
+		storage.getConfiguration().setConfiguration(EquinoxConfiguration.PROP_FORCED_RESTART, "true"); //$NON-NLS-1$
+	}
+
+	@Override
 	public String toString() {
 		return container.toString();
 	}

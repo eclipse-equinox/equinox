@@ -192,4 +192,14 @@ public abstract class ModuleContainerAdaptor {
 	public void invalidateWiring(ModuleWiring moduleWiring, ModuleLoader current) {
 		// do nothing by default
 	}
+
+	/**
+	 * This is called if a request to refresh modules causes the system module
+	 * to be refreshed.  This causes the system module to be stopped in a back
+	 * ground thread.  This method is called before the background thread is 
+	 * started to stop the system module.
+	 */
+	public void refreshedSystemModule() {
+		// do nothing by default
+	}
 }

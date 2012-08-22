@@ -167,6 +167,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public final static String PROP_CLASS_LOADER_TYPE = "osgi.classloader.type"; //$NON-NLS-1$
 	public final static String CLASS_LOADER_TYPE_PARALLEL = "parallel"; //$NON-NLS-1$
 
+	public static final String PROP_FORCED_RESTART = "osgi.forcedRestart"; //$NON-NLS-1$
+
 	EquinoxConfiguration(Map<String, String> initialConfig, HookRegistry hookRegistry) {
 		this.hookRegistry = hookRegistry;
 		String useSystemPropsValue = initialConfig == null ? null : initialConfig.get(PROP_USE_SYSTEM_PROPERTIES);

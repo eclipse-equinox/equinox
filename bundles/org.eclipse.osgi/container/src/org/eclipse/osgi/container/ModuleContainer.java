@@ -74,6 +74,8 @@ public final class ModuleContainer {
 	 */
 	private final ModuleResolver moduleResolver;
 
+	private final Collection<SystemModule> refreshingSystemModule = new ArrayList<SystemModule>(1);
+
 	/**
 	 * Constructs a new container with the specified collision hook, resolver hook, resolver and module database.
 	 * @param adaptor the adaptor for the container
@@ -385,6 +387,9 @@ public final class ModuleContainer {
 	 * @see FrameworkWiring#resolveBundles(Collection)
 	 */
 	public void resolve(Collection<Module> triggers, boolean triggersMandatory) throws ResolutionException {
+		if (isRefreshingSystemModule()) {
+			throw new ResolutionException("Unable to resolve while shutting down the framework.");
+		}
 		try {
 			while (!resolve0(triggers, triggersMandatory)) {
 				// nothing
@@ -592,6 +597,7 @@ public final class ModuleContainer {
 		long timestamp;
 		moduleDatabase.lockRead();
 		try {
+			checkSystemExtensionRefresh(initial);
 			timestamp = moduleDatabase.getRevisionsTimestamp();
 			wiringCopy = moduleDatabase.getWiringsCopy();
 			refreshTriggers = getRefreshClosure(initial, wiringCopy);
@@ -622,6 +628,12 @@ public final class ModuleContainer {
 			}
 		} finally {
 			moduleDatabase.unlockRead();
+		}
+
+		Module systemModule = moduleDatabase.getModule(0);
+		if (refreshTriggers.contains(systemModule)) {
+			refreshSystemModule();
+			return Collections.emptyList();
 		}
 		Collection<Module> modulesLocked = new ArrayList<Module>(refreshTriggers.size());
 		Collection<Module> modulesUnresolved = new ArrayList<Module>();
@@ -706,6 +718,35 @@ public final class ModuleContainer {
 		return refreshTriggers;
 	}
 
+	private void checkSystemExtensionRefresh(Collection<Module> initial) {
+		Long zero = new Long(0);
+		for (Iterator<Module> iModules = initial.iterator(); iModules.hasNext();) {
+			Module m = iModules.next();
+			if (m.getId().equals(zero)) {
+				// never allow system bundle to be unresolved directly
+				iModules.remove();
+			} else {
+				if (Module.RESOLVED_SET.contains(m.getState())) {
+					// check if current revision is an extension of the system module
+					ModuleRevision current = m.getCurrentRevision();
+					if ((current.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+						ModuleWiring wiring = current.getWiring();
+						if (wiring != null) {
+							List<ModuleWire> hostWires = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
+							for (ModuleWire hostWire : hostWires) {
+								if (hostWire.getProvider().getRevisions().getModule().getId().equals(zero)) {
+									// The current revision is the extension to allow it to refresh
+									// this would just shutdown the framework for no reason
+									iModules.remove();
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	/**
 	 * Refreshes the specified collection of modules.
 	 * @param initial the modules to refresh or {@code null} to refresh the
@@ -715,12 +756,14 @@ public final class ModuleContainer {
 	 */
 	public void refresh(Collection<Module> initial) throws ResolutionException {
 		Collection<Module> refreshTriggers = unresolve(initial);
-		resolve(refreshTriggers, false);
-		for (Module module : refreshTriggers) {
-			try {
-				module.start(StartOptions.TRANSIENT_RESUME);
-			} catch (BundleException e) {
-				adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
+		if (!isRefreshingSystemModule()) {
+			resolve(refreshTriggers, false);
+			for (Module module : refreshTriggers) {
+				try {
+					module.start(StartOptions.TRANSIENT_RESUME);
+				} catch (BundleException e) {
+					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
+				}
 			}
 		}
 	}
@@ -770,6 +813,9 @@ public final class ModuleContainer {
 		loadModules();
 		frameworkStartLevel.open();
 		frameworkWiring.open();
+		synchronized (refreshingSystemModule) {
+			refreshingSystemModule.clear();
+		}
 	}
 
 	void close() {
@@ -957,6 +1003,39 @@ public final class ModuleContainer {
 			sm.checkPermission(new AdminPermission(bundle, action));
 	}
 
+	void refreshSystemModule() {
+		final SystemModule systemModule = (SystemModule) moduleDatabase.getModule(0);
+		synchronized (refreshingSystemModule) {
+			if (refreshingSystemModule.contains(systemModule)) {
+				return;
+			}
+			refreshingSystemModule.add(systemModule);
+			getAdaptor().refreshedSystemModule();
+		}
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					systemModule.lockStateChange(ModuleEvent.UNRESOLVED);
+					try {
+						systemModule.stop();
+					} finally {
+						systemModule.unlockStateChange(ModuleEvent.UNRESOLVED);
+					}
+				} catch (BundleException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		t.start();
+	}
+
+	boolean isRefreshingSystemModule() {
+		synchronized (refreshingSystemModule) {
+			return !refreshingSystemModule.isEmpty();
+		}
+	}
+
 	class ContainerWiring implements FrameworkWiring, EventDispatcher<ContainerWiring, FrameworkListener[], Collection<Module>> {
 		private final Object monitor = new Object();
 		private EventManager refreshThread = null;
@@ -1098,8 +1177,9 @@ public final class ModuleContainer {
 		private static final int FRAMEWORK_STARTLEVEL = 1;
 		private static final int MODULE_STARTLEVEL = 2;
 		private final AtomicInteger activeStartLevel = new AtomicInteger(0);
-		private final Object monitor = new Object();
+		private final Object eventManagerLock = new Object();
 		private EventManager startLevelThread = null;
+		private final Object frameworkStartLevelLock = new Object();
 
 		@Override
 		public Bundle getBundle() {
@@ -1195,34 +1275,36 @@ public final class ModuleContainer {
 		}
 
 		void doContainerStartLevel(Module module, int newStartLevel, FrameworkListener... listeners) {
-			if (newStartLevel == USE_BEGINNING_START_LEVEL) {
-				String beginningSL = adaptor.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL);
-				newStartLevel = beginningSL == null ? 1 : Integer.parseInt(beginningSL);
-			}
-			try {
-				int currentSL = getStartLevel();
-				// Note that we must get a new list of modules each time;
-				// this is because additional modules could have been installed from the previous start-level
-				if (newStartLevel > currentSL) {
-					for (int i = currentSL; i < newStartLevel; i++) {
-						int toStartLevel = i + 1;
-						activeStartLevel.set(toStartLevel);
-						incStartLevel(toStartLevel, moduleDatabase.getSortedModules(Sort.BY_START_LEVEL));
-					}
-				} else {
-					for (int i = currentSL; i > newStartLevel; i--) {
-						int toStartLevel = i - 1;
-						activeStartLevel.set(toStartLevel);
-						decStartLevel(toStartLevel, moduleDatabase.getSortedModules(Sort.BY_START_LEVEL, Sort.BY_DEPENDENCY));
-					}
+			synchronized (frameworkStartLevelLock) {
+				if (newStartLevel == USE_BEGINNING_START_LEVEL) {
+					String beginningSL = adaptor.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL);
+					newStartLevel = beginningSL == null ? 1 : Integer.parseInt(beginningSL);
 				}
-				adaptor.publishContainerEvent(ContainerEvent.START_LEVEL, module, null, listeners);
-			} catch (Error e) {
-				adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e, listeners);
-				throw e;
-			} catch (RuntimeException e) {
-				adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e, listeners);
-				throw e;
+				try {
+					int currentSL = getStartLevel();
+					// Note that we must get a new list of modules each time;
+					// this is because additional modules could have been installed from the previous start-level
+					if (newStartLevel > currentSL) {
+						for (int i = currentSL; i < newStartLevel; i++) {
+							int toStartLevel = i + 1;
+							activeStartLevel.set(toStartLevel);
+							incStartLevel(toStartLevel, moduleDatabase.getSortedModules(Sort.BY_START_LEVEL));
+						}
+					} else {
+						for (int i = currentSL; i > newStartLevel; i--) {
+							int toStartLevel = i - 1;
+							activeStartLevel.set(toStartLevel);
+							decStartLevel(toStartLevel, moduleDatabase.getSortedModules(Sort.BY_START_LEVEL, Sort.BY_DEPENDENCY));
+						}
+					}
+					adaptor.publishContainerEvent(ContainerEvent.START_LEVEL, module, null, listeners);
+				} catch (Error e) {
+					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e, listeners);
+					throw e;
+				} catch (RuntimeException e) {
+					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e, listeners);
+					throw e;
+				}
 			}
 		}
 
@@ -1233,6 +1315,9 @@ public final class ModuleContainer {
 
 		private void incStartLevel(int toStartLevel, List<Module> sortedModules, boolean lazyOnly) {
 			for (Module module : sortedModules) {
+				if (isRefreshingSystemModule()) {
+					return;
+				}
 				try {
 					int moduleStartLevel = module.getStartLevel();
 					if (moduleStartLevel < toStartLevel) {
@@ -1293,7 +1378,7 @@ public final class ModuleContainer {
 		}
 
 		private EventManager getManager() {
-			synchronized (monitor) {
+			synchronized (eventManagerLock) {
 				if (startLevelThread == null) {
 					startLevelThread = new EventManager("Start Level: " + adaptor.toString()); //$NON-NLS-1$
 				}
@@ -1304,7 +1389,7 @@ public final class ModuleContainer {
 		// because of bug 378491 we have to synchronize access to the manager
 		// so we can close and re-open ourselves
 		void close() {
-			synchronized (monitor) {
+			synchronized (eventManagerLock) {
 				// force a manager to be created if it did not exist
 				EventManager manager = getManager();
 				// this prevents any operations until open is called
@@ -1313,7 +1398,7 @@ public final class ModuleContainer {
 		}
 
 		void open() {
-			synchronized (monitor) {
+			synchronized (eventManagerLock) {
 				if (startLevelThread != null) {
 					// Make sure it is closed just incase
 					startLevelThread.close();

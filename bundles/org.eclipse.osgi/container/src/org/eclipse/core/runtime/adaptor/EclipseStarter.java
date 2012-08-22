@@ -109,7 +109,6 @@ public class EclipseStarter {
 	public static final String PROP_INSTALL_AREA = "osgi.install.area"; //$NON-NLS-1$
 	public static final String PROP_FRAMEWORK_SHAPE = "osgi.framework.shape"; //$NON-NLS-1$ //the shape of the fwk (jar, or folder)
 	public static final String PROP_NOSHUTDOWN = "osgi.noShutdown"; //$NON-NLS-1$
-	private static final String PROP_FORCED_RESTART = "osgi.forcedRestart"; //$NON-NLS-1$
 
 	public static final String PROP_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 	public static final String PROP_EXITDATA = "eclipse.exitdata"; //$NON-NLS-1$
@@ -308,6 +307,9 @@ public class EclipseStarter {
 
 		framework.start();
 
+		if (isForcedRestart()) {
+			return context;
+		}
 		// set the framework start level to the ultimate value.  This will actually start things
 		// running if they are persistently active.
 		setStartLevel(getStartLevel());
@@ -1308,7 +1310,7 @@ public class EclipseStarter {
 	}
 
 	private static boolean isForcedRestart() {
-		return Boolean.valueOf(getProperty(PROP_FORCED_RESTART)).booleanValue();
+		return Boolean.valueOf(getProperty(EquinoxConfiguration.PROP_FORCED_RESTART)).booleanValue();
 	}
 
 	/*
