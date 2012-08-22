@@ -330,14 +330,6 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	protected final void unlockStateChange(ModuleEvent transitionEvent) {
 		if (stateChangeLock.getHoldCount() == 0 || !stateTransitionEvents.contains(transitionEvent))
 			throw new IllegalMonitorStateException("Current thread does not hold the state change lock for: " + transitionEvent);
-		// TODO hack until p2 is fixed
-		if (transitionEvent.equals(ModuleEvent.INSTALLED) || transitionEvent.equals(ModuleEvent.UPDATED)) {
-			if (hasLazyActivatePolicy()) {
-				settings.add(Settings.USE_ACTIVATION_POLICY);
-				settings.add(Settings.AUTO_START);
-				revisions.getContainer().moduleDatabase.persistSettings(settings, this);
-			}
-		}
 		stateTransitionEvents.remove(transitionEvent);
 		stateChangeLock.unlock();
 	}
@@ -385,7 +377,6 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				// DO nothing
 				return;
 			}
-			// TODO need a check to see if the current revision is valid for start (e.g. is fragment).
 			if (State.ACTIVE.equals(getState()))
 				return;
 			if (getState().equals(State.INSTALLED)) {

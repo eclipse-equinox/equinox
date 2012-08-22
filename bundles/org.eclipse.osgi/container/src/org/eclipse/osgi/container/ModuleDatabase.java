@@ -20,6 +20,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.container.Module.State;
+import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
+import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.container.ComputeNodeOrder;
@@ -252,13 +254,30 @@ public class ModuleDatabase {
 		try {
 			int startlevel = Constants.SYSTEM_BUNDLE_LOCATION.equals(location) ? 0 : getInitialModuleStartLevel();
 			long id = Constants.SYSTEM_BUNDLE_LOCATION.equals(location) ? 0 : getNextIdAndIncrement();
-			Module module = load(location, builder, revisionInfo, id, null, startlevel);
+			EnumSet<Settings> settings = getActivationPolicySettings(builder);
+			Module module = load(location, builder, revisionInfo, id, settings, startlevel);
 			module.setlastModified(System.currentTimeMillis());
 			incrementTimestamps(true);
 			return module;
 		} finally {
 			unlockWrite();
 		}
+	}
+
+	private EnumSet<Settings> getActivationPolicySettings(ModuleRevisionBuilder builder) {
+		for (GenericInfo info : builder.getCapabilities()) {
+			if (EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE.equals(info.getNamespace())) {
+				if (EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY.equals(info.getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY))) {
+					// TODO hack until p2 is fixed (bug 177641)
+					EnumSet<Settings> settings = EnumSet.noneOf(Settings.class);
+					settings.add(Settings.USE_ACTIVATION_POLICY);
+					settings.add(Settings.AUTO_START);
+					return settings;
+				}
+				return null;
+			}
+		}
+		return null;
 	}
 
 	final Module load(String location, ModuleRevisionBuilder builder, Object revisionInfo, long id, EnumSet<Settings> settings, int startlevel) {
