@@ -192,6 +192,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 			case STOPPED :
 				return FrameworkEvent.STOPPED;
 			case STOPPED_REFRESH :
+				return FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED;
 			case STOPPED_UPDATE :
 				return FrameworkEvent.STOPPED_UPDATE;
 			case STOPPED_TIMEOUT :
