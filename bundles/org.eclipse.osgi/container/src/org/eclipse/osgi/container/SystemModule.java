@@ -132,10 +132,6 @@ public abstract class SystemModule extends Module {
 
 	@Override
 	public void start(StartOptions... options) throws BundleException {
-		// TODO this is a hack to work around a bad assumption in simple configurator
-		if (holdsTransitionEventLock(ModuleEvent.STARTED)) {
-			return;
-		}
 		// make sure to init if needed
 		init();
 		// Always transient
@@ -150,7 +146,7 @@ public abstract class SystemModule extends Module {
 		// Need to lock the state change lock with no state to prevent 
 		// other threads from starting the framework while we are shutting down
 		try {
-			if (stateChangeLock.tryLock(5, TimeUnit.SECONDS)) {
+			if (stateChangeLock.tryLock(10, TimeUnit.SECONDS)) {
 				try {
 					try {
 						// Always transient
@@ -171,6 +167,8 @@ public abstract class SystemModule extends Module {
 				} finally {
 					stateChangeLock.unlock();
 				}
+			} else {
+				throw new BundleException("Could not lock the system bundle state for shutdown.");
 			}
 		} catch (InterruptedException e) {
 			getRevisions().getContainer().adaptor.publishContainerEvent(ContainerEvent.ERROR, this, e);
