@@ -184,12 +184,12 @@ public class PackageAdminImpl implements PackageAdmin {
 		if (wiring == null) {
 			return null;
 		}
-		List<ModuleWire> hostWires = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
+		List<ModuleWire> hostWires = wiring.getProvidedModuleWires(HostNamespace.HOST_NAMESPACE);
 		Collection<Bundle> fragments = new ArrayList<Bundle>(hostWires.size());
 		for (ModuleWire wire : hostWires) {
-			Bundle host = wire.getRequirer().getBundle();
-			if (host != null) {
-				fragments.add(host);
+			Bundle fragment = wire.getRequirer().getBundle();
+			if (fragment != null) {
+				fragments.add(fragment);
 			}
 		}
 		return fragments.isEmpty() ? null : fragments.toArray(new Bundle[fragments.size()]);
