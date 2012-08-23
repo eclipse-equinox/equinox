@@ -719,6 +719,9 @@ public final class ModuleContainer {
 	}
 
 	private void checkSystemExtensionRefresh(Collection<Module> initial) {
+		if (initial == null) {
+			return;
+		}
 		Long zero = new Long(0);
 		for (Iterator<Module> iModules = initial.iterator(); iModules.hasNext();) {
 			Module m = iModules.next();
