@@ -24,6 +24,7 @@ import org.osgi.resource.Namespace;
  * installing} or {@link ModuleContainer#update(Module, ModuleRevisionBuilder, Object) updating} a module.
  * <p>
  * The builder provides the instructions to the container for creating a {@link ModuleRevision}.
+ * They are not thread-safe; in the absence of external synchronization, they do not support concurrent access by multiple threads.
  * @since 3.10
  */
 public final class ModuleRevisionBuilder {
@@ -69,8 +70,8 @@ public final class ModuleRevisionBuilder {
 	private String symbolicName = null;
 	private Version version = Version.emptyVersion;
 	private int types = 0;
-	private List<GenericInfo> capabilityInfos = null;
-	private List<GenericInfo> requirementInfos = null;
+	private final List<GenericInfo> capabilityInfos = new ArrayList<GenericInfo>();
+	private final List<GenericInfo> requirementInfos = new ArrayList<GenericInfo>();
 
 	/**
 	 * Constructs a new module builder
@@ -110,7 +111,7 @@ public final class ModuleRevisionBuilder {
 	 * @param attributes the attributes of the capability
 	 */
 	public void addCapability(String namespace, Map<String, String> directives, Map<String, Object> attributes) {
-		capabilityInfos = addGenericInfo(capabilityInfos, namespace, directives, attributes);
+		addGenericInfo(capabilityInfos, namespace, directives, attributes);
 	}
 
 	/**
@@ -128,7 +129,7 @@ public final class ModuleRevisionBuilder {
 	 * @param attributes the attributes of the requirement
 	 */
 	public void addRequirement(String namespace, Map<String, String> directives, Map<String, Object> attributes) {
-		requirementInfos = addGenericInfo(requirementInfos, namespace, directives, attributes);
+		addGenericInfo(requirementInfos, namespace, directives, attributes);
 	}
 
 	/**
@@ -226,12 +227,11 @@ public final class ModuleRevisionBuilder {
 		return revision;
 	}
 
-	private static List<GenericInfo> addGenericInfo(List<GenericInfo> infos, String namespace, Map<String, String> directives, Map<String, Object> attributes) {
+	private static void addGenericInfo(List<GenericInfo> infos, String namespace, Map<String, String> directives, Map<String, Object> attributes) {
 		if (infos == null) {
 			infos = new ArrayList<GenericInfo>();
 		}
 		infos.add(new GenericInfo(namespace, copyUnmodifiableMap(directives), copyUnmodifiableMap(attributes)));
-		return infos;
 	}
 
 	private static <K, V> Map<K, V> copyUnmodifiableMap(Map<K, V> map) {
