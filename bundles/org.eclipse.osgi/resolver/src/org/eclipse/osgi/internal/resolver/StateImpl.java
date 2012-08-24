@@ -1053,7 +1053,10 @@ public abstract class StateImpl implements State {
 	}
 
 	public void addDynamicImportPackages(BundleDescription importingBundle, ImportPackageSpecification[] dynamicImports) {
-		((BundleDescriptionImpl) importingBundle).addDynamicImportPackages(dynamicImports);
+		synchronized (this.monitor) {
+			((BundleDescriptionImpl) importingBundle).addDynamicImportPackages(dynamicImports);
+			setDynamicCacheChanged(true);
+		}
 	}
 
 	void setReader(StateReader reader) {

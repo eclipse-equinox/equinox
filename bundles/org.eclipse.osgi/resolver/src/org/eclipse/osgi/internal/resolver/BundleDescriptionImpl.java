@@ -682,7 +682,6 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			newImports[newImports.length - 1] = result;
 			lazyData.resolvedImports = newImports;
 		}
-		setLazyLoaded(false);
 	}
 
 	void addDynamicImportPackages(ImportPackageSpecification[] dynamicImport) {
@@ -703,7 +702,6 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 				currentData.addedDynamicImports.add(addImport);
 			}
 		}
-		setLazyLoaded(false);
 	}
 
 	private boolean equalImports(ImportPackageSpecification addImport, ImportPackageSpecification currentImport) {
