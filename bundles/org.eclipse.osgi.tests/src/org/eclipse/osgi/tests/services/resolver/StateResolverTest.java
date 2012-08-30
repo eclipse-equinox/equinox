@@ -3867,6 +3867,57 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("1.4", testDependent.isResolved()); //$NON-NLS-1$
 	}
 
+	public void testBug388299() throws Exception {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		long bundleID = 0;
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "org.eclipse.osgi; singleton:=true"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.PROVIDE_CAPABILITY, "osgi.ee;osgi.ee=test"); //$NON-NLS-1$
+		BundleDescription systemBundle = state.getFactory().createBundleDescription(state, manifest, "test.host100", bundleID++); //$NON-NLS-1$
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.host; singleton:=true"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.1"); //$NON-NLS-1$
+		BundleDescription testHost = state.getFactory().createBundleDescription(state, manifest, "test.host101", bundleID++); //$NON-NLS-1$
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag; singleton:=true"); //$NON-NLS-1$
+		manifest.put(Constants.FRAGMENT_HOST, "test.host; bundle-version=\"[1.0.0,2.0.0)\""); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.REQUIRE_CAPABILITY, "osgi.ee;filter:=\"(osgi.ee=test)\"");
+		BundleDescription testFrag = state.getFactory().createBundleDescription(state, manifest, "test.frag100", bundleID++); //$NON-NLS-1$
+
+		state.addBundle(systemBundle);
+		state.addBundle(testFrag);
+		state.addBundle(testHost);
+
+		state.resolve();
+
+		assertTrue("1.0", systemBundle.isResolved()); //$NON-NLS-1$
+		assertTrue("1.1", testHost.isResolved()); //$NON-NLS-1$
+		assertTrue("1.2", testFrag.isResolved()); //$NON-NLS-1$
+
+		BundleContext context = OSGiTestsActivator.getContext();
+		File stateCache = context.getDataFile(getName()); //$NON-NLS-1$
+		stateCache.mkdirs();
+		File stateFile = new File(stateCache, ".state");
+		File lazyFile = new File(stateCache, ".lazy");
+		StateObjectFactoryImpl factory = (StateObjectFactoryImpl) StateObjectFactory.defaultFactory;
+		factory.writeState(state, stateFile, lazyFile);
+		state = null;
+
+		StateImpl systemState = factory.readSystemState(null, stateFile, lazyFile, true, -1);
+		try {
+			systemState.getBundle(systemBundle.getBundleId()).getExportPackages();
+		} catch (RuntimeException e) {
+			fail("Load lazy data failed", e);
+		}
+	}
+
 	public void testBug187616() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
