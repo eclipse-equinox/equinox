@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import org.eclipse.osgi.internal.baseadaptor.ArrayMap;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
 
@@ -340,12 +341,18 @@ public final class StateHelperImpl implements StateHelper {
 		HostSpecification host = description.getHost();
 		// it is a fragment
 		if (host != null) {
-			// just create a dependency between fragment and host
+			// just create a dependencies for non-payload requirements (osgi.wiring.host and osgi.ee)
 			if (host.getHosts() != null) {
 				BundleDescription[] hosts = host.getHosts();
 				for (int i = 0; i < hosts.length; i++)
 					if (hosts[i] != description)
 						references.add(new Object[] {description, hosts[i]});
+			}
+			GenericDescription[] genericDependencies = description.getResolvedGenericRequires();
+			for (GenericDescription dependency : genericDependencies) {
+				if (ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE.equals(dependency.getType())) {
+					references.add(new Object[] {description, dependency.getSupplier()});
+				}
 			}
 		} else {
 			// it is a host
