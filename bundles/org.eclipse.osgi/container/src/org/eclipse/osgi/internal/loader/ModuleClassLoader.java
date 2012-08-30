@@ -31,6 +31,19 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleReference;
 
 public class ModuleClassLoader extends ClassLoader implements BundleReference {
+	public static class GenerationProtectionDomain extends ProtectionDomain implements BundleReference {
+		private final Generation generation;
+
+		public GenerationProtectionDomain(CodeSource codesource, PermissionCollection permissions, Generation generation) {
+			super(codesource, permissions);
+			this.generation = generation;
+		}
+
+		public Bundle getBundle() {
+			return generation.getRevision().getBundle();
+		}
+	}
+
 	/**
 	 * A PermissionCollection for AllPermissions; shared across all ProtectionDomains when security is disabled
 	 */
@@ -176,7 +189,7 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 	}
 
 	public ClasspathEntry createClassPathEntry(BundleFile bundlefile, Generation entryGeneration) {
-		return new ClasspathEntry(bundlefile, createProtectionDomain(bundlefile, entryGeneration.getDomain()), entryGeneration);
+		return new ClasspathEntry(bundlefile, createProtectionDomain(bundlefile, entryGeneration), entryGeneration);
 	}
 
 	public Class<?> defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry) {
@@ -214,17 +227,19 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 	 * @return a ProtectionDomain which uses specified BundleFile and the permissions of the baseDomain 
 	 */
 	@SuppressWarnings("deprecation")
-	public ProtectionDomain createProtectionDomain(BundleFile bundlefile, ProtectionDomain baseDomain) {
+	ProtectionDomain createProtectionDomain(BundleFile bundlefile, Generation domainGeneration) {
 		// create a protection domain which knows about the codesource for this classpath entry (bug 89904)
+		ProtectionDomain baseDomain = domainGeneration.getDomain();
 		try {
 			// use the permissions supplied by the domain passed in from the framework
 			PermissionCollection permissions;
-			if (baseDomain != null)
+			if (baseDomain != null) {
 				permissions = baseDomain.getPermissions();
-			else
+			} else {
 				// no domain specified.  Better use a collection that has all permissions
 				// this is done just incase someone sets the security manager later
 				permissions = ALLPERMISSIONS;
+			}
 			Certificate[] certs = null;
 			SignedContent signedContent = null;
 			if (bundlefile instanceof BundleFileWrapperChain) {
@@ -238,7 +253,8 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 				if (signers.length > 0)
 					certs = signers[0].getCertificateChain();
 			}
-			return new ProtectionDomain(new CodeSource(bundlefile.getBaseFile().toURL(), certs), permissions);
+			return new GenerationProtectionDomain(new CodeSource(bundlefile.getBaseFile().toURL(), certs), permissions, generation);
+			//return new ProtectionDomain(new CodeSource(bundlefile.getBaseFile().toURL(), certs), permissions);
 		} catch (MalformedURLException e) {
 			// Failed to create our own domain; just return the baseDomain
 			return baseDomain;
