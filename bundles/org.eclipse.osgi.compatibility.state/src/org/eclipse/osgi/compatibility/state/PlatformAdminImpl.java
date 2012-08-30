@@ -9,27 +9,30 @@
  ******************************************************************************/
 package org.eclipse.osgi.compatibility.state;
 
-import org.eclipse.osgi.container.ModuleContainer;
-import org.eclipse.osgi.container.ModuleDatabase;
+import java.util.*;
+import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.module.ResolverImpl;
 import org.eclipse.osgi.internal.resolver.StateHelperImpl;
 import org.eclipse.osgi.internal.resolver.StateObjectFactoryImpl;
 import org.eclipse.osgi.service.resolver.*;
-import org.eclipse.osgi.storage.Storage;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
 public class PlatformAdminImpl implements PlatformAdmin {
 	private final StateHelper stateHelper = new StateHelperImpl();
 	private final StateObjectFactory factory = new StateObjectFactoryImpl();
-	private volatile ModuleContainer container;
-	private volatile ModuleDatabase database;
+	private final Object monitor = new Object();
+	private EquinoxContainer equinoxContainer;
+	private State systemState;
 
+	@SuppressWarnings("unused")
+	// this is used by DS to activate us
 	private void activate(BundleContext context) {
-		Storage storage = ((BundleContextImpl) context).getContainer().getStorage();
-		this.container = storage.getModuleContainer();
-		this.database = storage.getModuleDatabase();
+		synchronized (this.monitor) {
+			equinoxContainer = ((BundleContextImpl) context).getContainer();
+		}
 		context.registerService(PlatformAdmin.class, this, null);
 	}
 
@@ -41,26 +44,66 @@ public class PlatformAdminImpl implements PlatformAdmin {
 	@Override
 	public State getState(boolean mutable) {
 		if (mutable) {
-			return stateCopy();
+			return factory.createState(getSystemState());
 		}
-		return new ReadOnlySystemState(container, database);
+		return new ReadOnlyState(this);
 	}
 
-	private State stateCopy() {
-		// TODO
-		throw new UnsupportedOperationException();
+	State getSystemState() {
+		synchronized (this.monitor) {
+			if (systemState == null) {
+				systemState = createSystemState();
+			}
+			return systemState;
+		}
+	}
+
+	long getTimeStamp() {
+		synchronized (this.monitor) {
+			return equinoxContainer.getStorage().getModuleDatabase().getTimestamp();
+		}
+	}
+
+	private State createSystemState() {
+		State state = factory.createState(true);
+		StateConverter converter = new StateConverter(state);
+		ModuleDatabase database = equinoxContainer.getStorage().getModuleDatabase();
+		database.lockRead();
+		try {
+			List<Module> modules = equinoxContainer.getStorage().getModuleContainer().getModules();
+			for (Module module : modules) {
+				ModuleRevision current = module.getCurrentRevision();
+				BundleDescription description = converter.createDescription(current);
+				state.addBundle(description);
+				state.setPlatformProperties(asDictionary(equinoxContainer.getConfiguration().asMap()));
+			}
+			state.setTimeStamp(database.getTimestamp());
+			// TODO add hooks to get the resolution correct
+			// TODO add listeners to keep state copy in sync
+		} finally {
+			database.unlockRead();
+		}
+		return state;
+	}
+
+	private Dictionary<String, String> asDictionary(Map<String, String> map) {
+		return new Hashtable<String, String>(map);
 	}
 
 	@Override
 	public StateHelper getStateHelper() {
-		return stateHelper;
+		return StateHelperImpl.getInstance();
 	}
 
+	/**
+	 * @throws BundleException  
+	 */
 	@Override
 	public void commit(State state) throws BundleException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Deprecated
 	@Override
 	public Resolver getResolver() {
 		return createResolver();

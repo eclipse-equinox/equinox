@@ -10,19 +10,20 @@
  *     Danail Nachev -  ProSyst - bug 218625
  *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
-package org.eclipse.osgi.internal.resolver;
+package org.eclipse.osgi.compatibility.state;
 
 import java.util.*;
+import org.eclipse.osgi.internal.resolver.StateHelperImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 
 public final class ReadOnlyState implements State {
-	private final State target;
+	private final PlatformAdminImpl platformAdmin;
 
-	public ReadOnlyState(State target) {
-		this.target = target;
+	public ReadOnlyState(PlatformAdminImpl platformAdmin) {
+		this.platformAdmin = platformAdmin;
 	}
 
 	public boolean addBundle(BundleDescription description) {
@@ -30,55 +31,55 @@ public final class ReadOnlyState implements State {
 	}
 
 	public StateDelta compare(State state) throws BundleException {
-		return target.compare(state);
+		return platformAdmin.getSystemState().compare(state);
 	}
 
 	public BundleDescription getBundle(long id) {
-		return target.getBundle(id);
+		return platformAdmin.getSystemState().getBundle(id);
 	}
 
 	public BundleDescription getBundle(String symbolicName, Version version) {
-		return target.getBundle(symbolicName, version);
+		return platformAdmin.getSystemState().getBundle(symbolicName, version);
 	}
 
 	public BundleDescription getBundleByLocation(String location) {
-		return target.getBundleByLocation(location);
+		return platformAdmin.getSystemState().getBundleByLocation(location);
 	}
 
 	public BundleDescription[] getBundles() {
-		return target.getBundles();
+		return platformAdmin.getSystemState().getBundles();
 	}
 
 	public BundleDescription[] getBundles(String symbolicName) {
-		return target.getBundles(symbolicName);
+		return platformAdmin.getSystemState().getBundles(symbolicName);
 	}
 
 	public StateDelta getChanges() {
-		return target.getChanges();
+		return platformAdmin.getSystemState().getChanges();
 	}
 
 	public ExportPackageDescription[] getExportedPackages() {
-		return target.getExportedPackages();
+		return platformAdmin.getSystemState().getExportedPackages();
 	}
 
 	public StateObjectFactory getFactory() {
-		return target.getFactory();
+		return platformAdmin.getSystemState().getFactory();
 	}
 
 	public BundleDescription[] getResolvedBundles() {
-		return target.getResolvedBundles();
+		return platformAdmin.getSystemState().getResolvedBundles();
 	}
 
 	public long getTimeStamp() {
-		return target.getTimeStamp();
+		return platformAdmin.getTimeStamp();
 	}
 
 	public boolean isEmpty() {
-		return target.isEmpty();
+		return platformAdmin.getSystemState().isEmpty();
 	}
 
 	public boolean isResolved() {
-		return target.isResolved();
+		return platformAdmin.getSystemState().isResolved();
 	}
 
 	public boolean removeBundle(BundleDescription bundle) {
@@ -158,7 +159,7 @@ public final class ReadOnlyState implements State {
 
 	@SuppressWarnings("rawtypes")
 	public Dictionary[] getPlatformProperties() {
-		return target.getPlatformProperties();
+		return platformAdmin.getSystemState().getPlatformProperties();
 	}
 
 	public ExportPackageDescription linkDynamicImport(BundleDescription importingBundle, String requestedPackage) {
@@ -170,7 +171,7 @@ public final class ReadOnlyState implements State {
 	}
 
 	public ExportPackageDescription[] getSystemPackages() {
-		return target.getSystemPackages();
+		return platformAdmin.getSystemState().getSystemPackages();
 	}
 
 	public void addResolverError(BundleDescription bundle, int type, String data, VersionConstraint unsatisfied) {
@@ -178,7 +179,7 @@ public final class ReadOnlyState implements State {
 	}
 
 	public ResolverError[] getResolverErrors(BundleDescription bundle) {
-		return target.getResolverErrors(bundle);
+		return platformAdmin.getSystemState().getResolverErrors(bundle);
 	}
 
 	public void removeResolverErrors(BundleDescription bundle) {
@@ -190,7 +191,7 @@ public final class ReadOnlyState implements State {
 	}
 
 	public long getHighestBundleId() {
-		return target.getHighestBundleId();
+		return platformAdmin.getSystemState().getHighestBundleId();
 	}
 
 	public void setNativePathsInvalid(NativeCodeDescription nativeCodeDescription, boolean hasInvalidPaths) {
@@ -198,7 +199,7 @@ public final class ReadOnlyState implements State {
 	}
 
 	public BundleDescription[] getDisabledBundles() {
-		return target.getDisabledBundles();
+		return platformAdmin.getSystemState().getDisabledBundles();
 	}
 
 	public void addDisabledInfo(DisabledInfo disabledInfo) {
@@ -206,11 +207,11 @@ public final class ReadOnlyState implements State {
 	}
 
 	public DisabledInfo[] getDisabledInfos(BundleDescription bundle) {
-		return target.getDisabledInfos(bundle);
+		return platformAdmin.getSystemState().getDisabledInfos(bundle);
 	}
 
 	public DisabledInfo getDisabledInfo(BundleDescription bundle, String policyName) {
-		return target.getDisabledInfo(bundle, policyName);
+		return platformAdmin.getSystemState().getDisabledInfo(bundle, policyName);
 	}
 
 	public void removeDisabledInfo(DisabledInfo disabledInfo) {
@@ -222,7 +223,7 @@ public final class ReadOnlyState implements State {
 	}
 
 	public Collection<BundleDescription> getDependencyClosure(Collection<BundleDescription> bundles) {
-		return target.getDependencyClosure(bundles);
+		return platformAdmin.getSystemState().getDependencyClosure(bundles);
 	}
 
 	public void addDynamicImportPackages(BundleDescription importingBundle, ImportPackageSpecification[] dynamicImports) {
