@@ -286,6 +286,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * @throws BundleException
 	 */
 	protected final void lockStateChange(ModuleEvent transitionEvent) throws BundleException {
+		boolean previousInterruption = Thread.interrupted();
 		try {
 			boolean acquired = stateChangeLock.tryLock(5, TimeUnit.SECONDS);
 			if (acquired) {
@@ -320,6 +321,10 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new BundleException("Unable to acquire the state change lock for the module.", BundleException.STATECHANGE_ERROR, e);
+		} finally {
+			if (previousInterruption) {
+				Thread.currentThread().interrupt();
+			}
 		}
 	}
 
