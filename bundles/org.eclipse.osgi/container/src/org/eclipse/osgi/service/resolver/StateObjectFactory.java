@@ -29,7 +29,7 @@ public interface StateObjectFactory {
 	 * states.  This is particularly useful when using the resolver outside the context
 	 * of a running Equinox framework.
 	 */
-	public static final StateObjectFactory defaultFactory = null; // new StateObjectFactoryImpl();
+	public static final StateObjectFactory defaultFactory = new StateObjectFactoryProxy();
 
 	/**
 	 * Creates an empty state. The returned state does not have an 
@@ -483,4 +483,220 @@ public interface StateObjectFactory {
 	 */
 	public State readState(File stateDirectory) throws IOException;
 
+	static class StateObjectFactoryProxy implements StateObjectFactory {
+		private static final String IMPL_NAME = "org.eclipse.osgi.internal.resolver.StateObjectFactoryImpl"; //$NON-NLS-1$
+		private Object monitor = new Object();
+		private StateObjectFactory implementation;
+
+		private StateObjectFactory getImplementation() {
+			synchronized (this.monitor) {
+				if (implementation == null) {
+					Exception error = null;
+					try {
+						Class<?> implClass = Class.forName(IMPL_NAME);
+						implementation = (StateObjectFactory) implClass.newInstance();
+					} catch (ClassNotFoundException e) {
+						error = e;
+					} catch (InstantiationException e) {
+						error = e;
+					} catch (IllegalAccessException e) {
+						error = e;
+					}
+					if (error != null) {
+						throw new UnsupportedOperationException("Not able to create StateObjectFactory implementation: " + IMPL_NAME, error);
+					}
+				}
+				return implementation;
+			}
+		}
+
+		@Deprecated
+		@Override
+		public State createState() {
+			return getImplementation().createState();
+		}
+
+		@Override
+		public State createState(boolean resolver) {
+			return getImplementation().createState(resolver);
+		}
+
+		@Override
+		public State createState(State state) {
+			return getImplementation().createState(state);
+		}
+
+		@Deprecated
+		@Override
+		public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton) {
+			return getImplementation().createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, providedPackages, singleton);
+		}
+
+		@Deprecated
+		@Override
+		public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String executionEnvironment, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities) {
+			return getImplementation().createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, providedPackages, singleton, attachFragments, dynamicFragments, platformFilter, executionEnvironment, genericRequires, genericCapabilities);
+		}
+
+		@Override
+		public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities) {
+			return getImplementation().createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, singleton, attachFragments, dynamicFragments, platformFilter, executionEnvironments, genericRequires, genericCapabilities);
+		}
+
+		@Override
+		public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode) {
+			return getImplementation().createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, singleton, attachFragments, dynamicFragments, platformFilter, executionEnvironments, genericRequires, genericCapabilities, nativeCode);
+		}
+
+		@Override
+		public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode) {
+			return getImplementation().createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, platformFilter, executionEnvironments, genericRequires, genericCapabilities, nativeCode);
+		}
+
+		@Override
+		public BundleDescription createBundleDescription(State state, Dictionary<String, String> manifest, String location, long id) throws BundleException {
+			return getImplementation().createBundleDescription(state, manifest, location, id);
+		}
+
+		@Deprecated
+		@Override
+		public BundleDescription createBundleDescription(Dictionary<String, String> manifest, String location, long id) throws BundleException {
+			return getImplementation().createBundleDescription(manifest, location, id);
+		}
+
+		@Override
+		public BundleDescription createBundleDescription(BundleDescription original) {
+			return getImplementation().createBundleDescription(original);
+		}
+
+		@Override
+		public BundleSpecification createBundleSpecification(String requiredSymbolicName, VersionRange requiredVersionRange, boolean export, boolean optional) {
+			return getImplementation().createBundleSpecification(requiredSymbolicName, requiredVersionRange, export, optional);
+		}
+
+		@Override
+		public BundleSpecification createBundleSpecification(BundleSpecification original) {
+			return getImplementation().createBundleSpecification(original);
+		}
+
+		@Override
+		public List<BundleSpecification> createBundleSpecifications(String declaration) {
+			return getImplementation().createBundleSpecifications(declaration);
+		}
+
+		@Override
+		public HostSpecification createHostSpecification(String hostSymbolicName, VersionRange hostVersionRange) {
+			return getImplementation().createHostSpecification(hostSymbolicName, hostVersionRange);
+		}
+
+		@Override
+		public List<HostSpecification> createHostSpecifications(String declaration) {
+			return getImplementation().createHostSpecifications(declaration);
+		}
+
+		@Override
+		public HostSpecification createHostSpecification(HostSpecification original) {
+			return getImplementation().createHostSpecification(original);
+		}
+
+		@Override
+		public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, Map<String, ?> directives, Map<String, ?> attributes, BundleDescription importer) {
+			return getImplementation().createImportPackageSpecification(packageName, versionRange, bundleSymbolicName, bundleVersionRange, directives, attributes, importer);
+		}
+
+		@Override
+		public ImportPackageSpecification createImportPackageSpecification(ImportPackageSpecification original) {
+			return getImplementation().createImportPackageSpecification(original);
+		}
+
+		@Override
+		public List<ImportPackageSpecification> createImportPackageSpecifications(String declaration) {
+			return getImplementation().createImportPackageSpecifications(declaration);
+		}
+
+		@Override
+		public ExportPackageDescription createExportPackageDescription(String packageName, Version version, Map<String, ?> directives, Map<String, ?> attributes, boolean root, BundleDescription exporter) {
+			return getImplementation().createExportPackageDescription(packageName, version, directives, attributes, root, exporter);
+		}
+
+		@Deprecated
+		@Override
+		public GenericDescription createGenericDescription(String name, String type, Version version, Map<String, ?> attributes) {
+			return getImplementation().createGenericDescription(name, type, version, attributes);
+		}
+
+		@Override
+		public GenericDescription createGenericDescription(String type, Map<String, ?> attributes, Map<String, String> directives, BundleDescription supplier) {
+			return getImplementation().createGenericDescription(type, attributes, directives, supplier);
+		}
+
+		@Override
+		public List<GenericDescription> createGenericDescriptions(String declaration) {
+			return getImplementation().createGenericDescriptions(declaration);
+		}
+
+		@Override
+		public GenericSpecification createGenericSpecification(String name, String type, String matchingFilter, boolean optional, boolean multiple) throws InvalidSyntaxException {
+			return getImplementation().createGenericSpecification(name, type, matchingFilter, optional, multiple);
+		}
+
+		@Override
+		public List<GenericSpecification> createGenericSpecifications(String declaration) {
+			return getImplementation().createGenericSpecifications(declaration);
+		}
+
+		@Override
+		public NativeCodeSpecification createNativeCodeSpecification(NativeCodeDescription[] nativeCodeDescriptions, boolean optional) {
+			return getImplementation().createNativeCodeSpecification(nativeCodeDescriptions, optional);
+		}
+
+		@Override
+		public NativeCodeDescription createNativeCodeDescription(String[] nativePaths, String[] processors, String[] osNames, VersionRange[] osVersions, String[] languages, String filter) throws InvalidSyntaxException {
+			return getImplementation().createNativeCodeDescription(nativePaths, processors, osNames, osVersions, languages, filter);
+		}
+
+		@Override
+		public ExportPackageDescription createExportPackageDescription(ExportPackageDescription original) {
+			return getImplementation().createExportPackageDescription(original);
+		}
+
+		@Override
+		public List<ExportPackageDescription> createExportPackageDescriptions(String declaration) {
+			return getImplementation().createExportPackageDescriptions(declaration);
+		}
+
+		@Deprecated
+		@Override
+		public void writeState(State state, OutputStream stream) throws IOException {
+			getImplementation().writeState(state, stream);
+		}
+
+		@Deprecated
+		@Override
+		public void writeState(State state, DataOutputStream stream) throws IOException {
+			getImplementation().writeState(state, stream);
+		}
+
+		@Override
+		public void writeState(State state, File stateDirectory) throws IOException {
+			getImplementation().writeState(state, stateDirectory);
+		}
+
+		@Deprecated
+		@Override
+		public State readState(InputStream stream) throws IOException {
+			return getImplementation().readState(stream);
+		}
+
+		@Deprecated
+		@Override
+		public State readState(DataInputStream stream) throws IOException {
+			return getImplementation().readState(stream);
+		}
+
+		@Override
+		public State readState(File stateDirectory) throws IOException {
+			return getImplementation().readState(stateDirectory);
+		}
+	}
 }
