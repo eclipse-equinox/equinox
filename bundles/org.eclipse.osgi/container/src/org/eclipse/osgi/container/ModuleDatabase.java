@@ -256,7 +256,9 @@ public class ModuleDatabase {
 			long id = Constants.SYSTEM_BUNDLE_LOCATION.equals(location) ? 0 : getNextIdAndIncrement();
 			EnumSet<Settings> settings = getActivationPolicySettings(builder);
 			Module module = load(location, builder, revisionInfo, id, settings, startlevel);
-			module.setlastModified(System.currentTimeMillis());
+			long currentTime = System.currentTimeMillis();
+			module.setlastModified(currentTime);
+			setSystemLastModified(currentTime);
 			incrementTimestamps(true);
 			return module;
 		} finally {
@@ -356,8 +358,9 @@ public class ModuleDatabase {
 
 			// attempt to cleanup any removal pendings
 			cleanupRemovalPending();
-
-			module.setlastModified(System.currentTimeMillis());
+			long currentTime = System.currentTimeMillis();
+			module.setlastModified(currentTime);
+			setSystemLastModified(currentTime);
 			incrementTimestamps(true);
 		} finally {
 			unlockWrite();
@@ -404,7 +407,9 @@ public class ModuleDatabase {
 			// attempt to clean up removal pendings
 			cleanupRemovalPending();
 
-			module.setlastModified(System.currentTimeMillis());
+			long currentTime = System.currentTimeMillis();
+			module.setlastModified(currentTime);
+			setSystemLastModified(currentTime);
 			incrementTimestamps(true);
 		} finally {
 			unlockWrite();
@@ -759,6 +764,15 @@ public class ModuleDatabase {
 			revisionsTimeStamp.incrementAndGet();
 		}
 		allTimeStamp.incrementAndGet();
+	}
+
+	private void setSystemLastModified(long currentTime) {
+		// sanity check
+		checkWrite();
+		Module systemModule = getModule(0);
+		if (systemModule != null) {
+			systemModule.setlastModified(currentTime);
+		}
 	}
 
 	/**
