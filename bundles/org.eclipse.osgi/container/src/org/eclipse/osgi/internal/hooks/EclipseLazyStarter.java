@@ -16,7 +16,6 @@ import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.StartOptions;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
-import org.eclipse.osgi.framework.adaptor.StatusException;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
@@ -32,7 +31,7 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 	// used to store exceptions that occurred while activating a bundle
 	// keyed by ClasspathManager->Exception
 	// WeakHashMap is used to prevent pinning the ClasspathManager objects.
-	private final Map<ClasspathManager, TerminatingClassNotFoundException> errors = Collections.synchronizedMap(new WeakHashMap<ClasspathManager, TerminatingClassNotFoundException>());
+	private final Map<ClasspathManager, ClassNotFoundException> errors = Collections.synchronizedMap(new WeakHashMap<ClasspathManager, ClassNotFoundException>());
 
 	private final EquinoxContainer container;
 
@@ -103,19 +102,13 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 				managers[i].getGeneration().getRevision().getRevisions().getModule().start(StartOptions.LAZY_TRIGGER);
 			} catch (BundleException e) {
 				Bundle bundle = managers[i].getGeneration().getRevision().getBundle();
-				Throwable cause = e.getCause();
-				if (cause != null && cause instanceof StatusException) {
-					StatusException status = (StatusException) cause;
-					if ((status.getStatusCode() & StatusException.CODE_ERROR) == 0) {
-						if (status.getStatus() instanceof Thread) {
-							String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread(), name, status.getStatus(), bundle, new Long(System.currentTimeMillis() - startTime)});
-							container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, message, e);
-						}
-						continue;
-					}
+				if (e.getType() == BundleException.STATECHANGE_ERROR) {
+					String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread(), name, null, bundle, new Long(System.currentTimeMillis() - startTime)});
+					container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, message, e);
+					continue;
 				}
 				String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_ACTIVATION, bundle.getSymbolicName(), Long.toString(bundle.getBundleId()));
-				TerminatingClassNotFoundException error = new TerminatingClassNotFoundException(message, e);
+				ClassNotFoundException error = new ClassNotFoundException(message, e);
 				errors.put(managers[i], error);
 				if (container.getConfiguration().throwErrorOnFailedStart) {
 					container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, message, e, null);
@@ -132,7 +125,7 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 			if (State.RESOLVED.equals(module.getState())) {
 				// handle the resolved case where a previous error occurred
 				if (container.getConfiguration().throwErrorOnFailedStart) {
-					TerminatingClassNotFoundException error = errors.get(manager);
+					ClassNotFoundException error = errors.get(manager);
 					if (error != null)
 						throw error;
 				}
@@ -172,22 +165,4 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 		return ((includes == null || includes.contains(packageName)) && (excludes == null || !excludes.contains(packageName)));
 	}
 
-	private static class TerminatingClassNotFoundException extends ClassNotFoundException implements StatusException {
-		private static final long serialVersionUID = -6730732895632169173L;
-		private Throwable cause;
-
-		public TerminatingClassNotFoundException(String message, Throwable cause) {
-			super(message, cause);
-			this.cause = cause;
-		}
-
-		public Object getStatus() {
-			return cause;
-		}
-
-		public int getStatusCode() {
-			return StatusException.CODE_ERROR;
-		}
-
-	}
 }

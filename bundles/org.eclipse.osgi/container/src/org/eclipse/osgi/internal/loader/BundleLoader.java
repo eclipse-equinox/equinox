@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
-import org.eclipse.osgi.framework.adaptor.StatusException;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
 import org.eclipse.osgi.internal.debug.Debug;
@@ -283,9 +282,9 @@ public class BundleLoader implements ModuleLoader {
 				Debug.println("BundleLoader[" + this + "] found local class " + name); //$NON-NLS-1$ //$NON-NLS-2$
 			return clazz;
 		} catch (ClassNotFoundException e) {
-			if (e instanceof StatusException) {
-				if ((((StatusException) e).getStatusCode() & StatusException.CODE_ERROR) != 0)
-					throw e;
+			if (e.getCause() instanceof BundleException) {
+				// Here we assume this is because of a lazy activation error
+				throw e;
 			}
 			return null;
 		}
