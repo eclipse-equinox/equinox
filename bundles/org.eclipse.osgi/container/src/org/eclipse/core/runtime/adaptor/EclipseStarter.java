@@ -19,7 +19,6 @@ import java.security.ProtectionDomain;
 import java.util.*;
 import org.eclipse.core.runtime.internal.adaptor.*;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
-import org.eclipse.osgi.framework.internal.core.ConsoleManager;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.FilePath;
