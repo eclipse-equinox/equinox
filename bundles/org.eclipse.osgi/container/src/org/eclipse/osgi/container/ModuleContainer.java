@@ -631,7 +631,7 @@ public final class ModuleContainer {
 		}
 
 		Module systemModule = moduleDatabase.getModule(0);
-		if (refreshTriggers.contains(systemModule)) {
+		if (refreshTriggers.contains(systemModule) && Module.ACTIVE_SET.contains(systemModule.getState())) {
 			refreshSystemModule();
 			return Collections.emptyList();
 		}
@@ -726,8 +726,10 @@ public final class ModuleContainer {
 		for (Iterator<Module> iModules = initial.iterator(); iModules.hasNext();) {
 			Module m = iModules.next();
 			if (m.getId().equals(zero)) {
-				// never allow system bundle to be unresolved directly
-				iModules.remove();
+				// never allow system bundle to be unresolved directly if the system module is active
+				if (Module.ACTIVE_SET.contains(m.getState())) {
+					iModules.remove();
+				}
 			} else {
 				if (Module.RESOLVED_SET.contains(m.getState())) {
 					// check if current revision is an extension of the system module
@@ -758,6 +760,7 @@ public final class ModuleContainer {
 	 * @see FrameworkWiring#refreshBundles(Collection, FrameworkListener...)
 	 */
 	public void refresh(Collection<Module> initial) throws ResolutionException {
+		initial = initial == null ? null : new ArrayList<Module>(initial);
 		Collection<Module> refreshTriggers = unresolve(initial);
 		if (!isRefreshingSystemModule()) {
 			resolve(refreshTriggers, false);
