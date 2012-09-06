@@ -30,7 +30,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
-import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.*;
@@ -416,10 +415,10 @@ public class TestModuleContainer {
 
 	@Test
 	public void testSingleton02() throws BundleException, IOException, ResolutionException {
-		ResolverHookFactory resolverHookFactory = new ResolverHookFactory() {
+		ModuleResolverHookFactory resolverHookFactory = new ModuleResolverHookFactory() {
 
 			@Override
-			public ResolverHook begin(Collection<BundleRevision> triggers) {
+			public ResolverHook begin(Collection<BundleRevision> triggers, ResolutionReportBuilder builder) {
 				return new ResolverHook() {
 
 					@Override
@@ -483,10 +482,10 @@ public class TestModuleContainer {
 	@Test
 	public void testSingleton04() throws BundleException, IOException, ResolutionException {
 		final Collection<BundleRevision> disabled = new ArrayList<BundleRevision>();
-		ResolverHookFactory resolverHookFactory = new ResolverHookFactory() {
+		ModuleResolverHookFactory resolverHookFactory = new ModuleResolverHookFactory() {
 
 			@Override
-			public ResolverHook begin(Collection<BundleRevision> triggers) {
+			public ResolverHook begin(Collection<BundleRevision> triggers, ResolutionReportBuilder builder) {
 				return new ResolverHook() {
 
 					@Override

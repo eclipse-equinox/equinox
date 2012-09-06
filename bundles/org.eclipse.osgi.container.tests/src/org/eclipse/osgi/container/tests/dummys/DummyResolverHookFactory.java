@@ -11,36 +11,45 @@
 package org.eclipse.osgi.container.tests.dummys;
 
 import java.util.Collection;
+import org.eclipse.osgi.container.ModuleResolverHookFactory;
+import org.eclipse.osgi.container.ResolutionReportBuilder;
 import org.osgi.framework.hooks.resolver.ResolverHook;
-import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.wiring.*;
 
-public class DummyResolverHookFactory implements ResolverHookFactory {
+public class DummyResolverHookFactory implements ModuleResolverHookFactory {
+	private int writeCount;
 
 	@Override
-	public ResolverHook begin(Collection<BundleRevision> triggers) {
+	public ResolverHook begin(Collection<BundleRevision> triggers, ResolutionReportBuilder builder) {
+		writeCount++;
 		return new ResolverHook() {
-
 			@Override
-			public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
-				// nothing
+			public void filterResolvable(Collection<BundleRevision> candidates) {
+				// TODO Auto-generated method stub
+
 			}
 
 			@Override
-			public void filterResolvable(Collection<BundleRevision> candidates) {
-				// nothing
+			public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
+				// TODO Auto-generated method stub
+
 			}
 
 			@Override
 			public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
-				// nothing
+				// TODO Auto-generated method stub
+
 			}
 
 			@Override
 			public void end() {
-				// nothing
+				// TODO Auto-generated method stub
+
 			}
 		};
 	}
 
+	public int getWriteCount() {
+		return writeCount;
+	}
 }

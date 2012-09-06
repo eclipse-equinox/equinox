@@ -585,7 +585,7 @@ final class ModuleResolver {
 			threadResolving.set(Boolean.TRUE);
 			try {
 				try {
-					hook = adaptor.getResolverHookFactory().begin(Converters.asListBundleRevision((List<? extends BundleRevision>) triggers));
+					hook = adaptor.getResolverHookFactory().begin(Converters.asListBundleRevision((List<? extends BundleRevision>) triggers), null);
 				} catch (RuntimeException e) {
 					if (e.getCause() instanceof BundleException) {
 						BundleException be = (BundleException) e.getCause();

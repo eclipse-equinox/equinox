@@ -17,17 +17,16 @@ import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.container.tests.dummys.DummyModuleDatabase.DummyContainerEvent;
 import org.eclipse.osgi.container.tests.dummys.DummyModuleDatabase.DummyModuleEvent;
 import org.osgi.framework.FrameworkListener;
-import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 
 public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 
 	private final ModuleCollisionHook collisionHook;
-	private final ResolverHookFactory resolverHookFactory;
+	private final ModuleResolverHookFactory resolverHookFactory;
 	private final Map<String, String> configuration;
 	private final DummyModuleDatabase moduleDatabase;
 	private final ModuleContainer container;
 
-	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, ResolverHookFactory resolverHookFactory, Map<String, String> configuration) {
+	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, ModuleResolverHookFactory resolverHookFactory, Map<String, String> configuration) {
 		this.collisionHook = collisionHook;
 		this.resolverHookFactory = resolverHookFactory;
 		this.configuration = configuration;
@@ -41,7 +40,7 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	}
 
 	@Override
-	public ResolverHookFactory getResolverHookFactory() {
+	public ModuleResolverHookFactory getResolverHookFactory() {
 		return resolverHookFactory;
 	}
 

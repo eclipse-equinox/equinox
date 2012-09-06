@@ -17,7 +17,6 @@ import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.container.Module.Settings;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkListener;
-import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.service.resolver.Resolver;
 
 /**
@@ -97,7 +96,7 @@ public abstract class ModuleContainerAdaptor {
 	 * Returns the resolver hook factory the container will use.
 	 * @return the resolver hook factory the container will use.
 	 */
-	public abstract ResolverHookFactory getResolverHookFactory();
+	public abstract ModuleResolverHookFactory getResolverHookFactory();
 
 	/**
 	 * Publishes the specified container event.

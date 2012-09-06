@@ -13,10 +13,11 @@ package org.eclipse.osgi.internal.framework;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import org.eclipse.osgi.container.Module;
-import org.eclipse.osgi.container.ModuleCollisionHook;
+import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.namespaces.EquinoxNativeCodeNamespace;
 import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.osgi.framework.report.ResolutionReport;
+import org.eclipse.osgi.framework.report.ResolutionReportReader;
 import org.eclipse.osgi.internal.baseadaptor.ArrayMap;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.serviceregistry.*;
@@ -29,7 +30,7 @@ import org.osgi.framework.wiring.*;
 
 class OSGiFrameworkHooks {
 	static final String collisionHookName = CollisionHook.class.getName();
-	private final ResolverHookFactory resolverHookFactory;
+	private final ModuleResolverHookFactory resolverHookFactory;
 	private final ModuleCollisionHook collisionHook;
 
 	OSGiFrameworkHooks(EquinoxContainer container) {
@@ -37,7 +38,7 @@ class OSGiFrameworkHooks {
 		collisionHook = new BundleCollisionHook(container);
 	}
 
-	public ResolverHookFactory getResolverHookFactory() {
+	public ModuleResolverHookFactory getResolverHookFactory() {
 		return resolverHookFactory;
 	}
 
@@ -126,7 +127,7 @@ class OSGiFrameworkHooks {
 	 * This class is not thread safe and expects external synchronization.
 	 *
 	 */
-	static class CoreResolverHookFactory implements ResolverHookFactory {
+	static class CoreResolverHookFactory implements ModuleResolverHookFactory {
 		// need a tuple to hold the service reference and hook object
 		// do not use a map for performance reasons; no need to hash based on a key.
 		static class HookReference {
@@ -170,13 +171,13 @@ class OSGiFrameworkHooks {
 			}
 		}
 
-		public ResolverHook begin(Collection<BundleRevision> triggers) {
+		public ResolverHook begin(Collection<BundleRevision> triggers, ResolutionReportBuilder builder) {
 			if (debug.DEBUG_HOOKS) {
 				Debug.println("ResolverHook.begin"); //$NON-NLS-1$
 			}
 			ServiceRegistry registry = container.getServiceRegistry();
 			if (registry == null) {
-				return new CoreResolverHook(Collections.<HookReference> emptyList());
+				return new CoreResolverHook(Collections.<HookReference> emptyList(), builder);
 			}
 			Module systemModule = container.getStorage().getModuleContainer().getModule(0);
 			BundleContextImpl context = (BundleContextImpl) EquinoxContainer.secureAction.getContext(systemModule.getBundle());
@@ -195,7 +196,7 @@ class OSGiFrameworkHooks {
 						} catch (Throwable t) {
 							// need to force an end call on the ResolverHooks we got and release them
 							try {
-								new CoreResolverHook(hookRefs).end();
+								new CoreResolverHook(hookRefs, builder).end();
 							} catch (Throwable endError) {
 								// we are already in failure mode; just continue
 							}
@@ -204,14 +205,16 @@ class OSGiFrameworkHooks {
 					}
 				}
 			}
-			return new CoreResolverHook(hookRefs);
+			return new CoreResolverHook(hookRefs, builder);
 		}
 
 		class CoreResolverHook implements ResolverHook {
+			private final ResolutionReportBuilder builder;
 			private final List<HookReference> hooks;
 
-			CoreResolverHook(List<HookReference> hooks) {
+			CoreResolverHook(List<HookReference> hooks, ResolutionReportBuilder builder) {
 				this.hooks = hooks;
+				this.builder = builder;
 			}
 
 			public void filterResolvable(Collection<BundleRevision> candidates) {
@@ -307,6 +310,7 @@ class OSGiFrameworkHooks {
 					HookReference missingHook = null;
 					Throwable endError = null;
 					HookReference endBadHook = null;
+					ResolutionReport report = null;
 					for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
 						HookReference hookRef = iHooks.next();
 						// We do not remove unregistered services here because we are going to remove all of them at the end
@@ -315,6 +319,8 @@ class OSGiFrameworkHooks {
 								missingHook = hookRef;
 						} else {
 							try {
+								if (hookRef.hook instanceof ResolutionReportReader)
+									((ResolutionReportReader) hookRef.hook).read(report);
 								hookRef.hook.end();
 							} catch (Throwable t) {
 								// Must continue on to the next hook.end method
