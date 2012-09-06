@@ -12,11 +12,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import org.eclipse.osgi.internal.framework.FilterImpl;
+
+import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
+
 import java.util.*;
-import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.eclipse.osgi.framework.util.*;
 import org.eclipse.osgi.internal.baseadaptor.StateManager;
 import org.eclipse.osgi.internal.loader.BundleLoaderProxy;

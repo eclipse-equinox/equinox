@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.misc;
 
+import org.eclipse.osgi.internal.loader.sources.SingleSourcePackage;
+
 import junit.framework.*;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.framework.internal.core.BundleHost;
-import org.eclipse.osgi.internal.loader.SingleSourcePackage;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 
 public class MiscTests extends TestCase {

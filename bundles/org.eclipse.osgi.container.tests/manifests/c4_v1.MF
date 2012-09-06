@@ -1,0 +1,7 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: c4
+Bundle-Version: 1.0.0
+Export-Package: 
+ c4.a; version=1.0,
+ c4.b; version=1.0; uses:="c1.a"
+Import-Package: org.osgi.framework

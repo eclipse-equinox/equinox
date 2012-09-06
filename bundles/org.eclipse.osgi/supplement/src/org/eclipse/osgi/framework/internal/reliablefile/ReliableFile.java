@@ -15,7 +15,6 @@ import java.io.*;
 import java.util.*;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 
 /**
  * ReliableFile class used by ReliableFileInputStream and ReliableOutputStream.
@@ -71,7 +70,7 @@ public class ReliableFile {
 	 */
 	public static final String PROP_MAX_GENERATIONS = "osgi.ReliableFile.maxGenerations"; //$NON-NLS-1$
 	/**
-	 * @see org.eclipse.core.runtime.internal.adaptor.BasicLocation#PROP_OSGI_LOCKING
+	 * @see org.eclipse.osgi.internal.location.BasicLocation#PROP_OSGI_LOCKING
 	 */
 	public static final String PROP_OSGI_LOCKING = "osgi.locking"; //$NON-NLS-1$
 
@@ -92,7 +91,7 @@ public class ReliableFile {
 	private static final Object lastGenerationLock = new Object();
 
 	static {
-		String prop = FrameworkProperties.getProperty(PROP_MAX_BUFFER);
+		String prop = System.getProperty(PROP_MAX_BUFFER);
 		int tmpMaxInput = 128 * 1024; //128k
 		if (prop != null) {
 			try {
@@ -103,7 +102,7 @@ public class ReliableFile {
 		maxInputStreamBuffer = tmpMaxInput;
 
 		int tmpDefaultMax = 2;
-		prop = FrameworkProperties.getProperty(PROP_MAX_GENERATIONS);
+		prop = System.getProperty(PROP_MAX_GENERATIONS);
 		if (prop != null) {
 			try {
 				tmpDefaultMax = Integer.parseInt(prop);
@@ -112,7 +111,7 @@ public class ReliableFile {
 		}
 		defaultMaxGenerations = tmpDefaultMax;
 
-		prop = FrameworkProperties.getProperty(PROP_OSGI_LOCKING);
+		prop = System.getProperty(PROP_OSGI_LOCKING);
 		boolean tmpFileSharing = true;
 		if (prop != null) {
 			if (prop.equals("none")) { //$NON-NLS-1$
