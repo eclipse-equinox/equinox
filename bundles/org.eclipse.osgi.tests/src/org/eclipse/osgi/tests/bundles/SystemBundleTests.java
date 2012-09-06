@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,8 @@
 package org.eclipse.osgi.tests.bundles;
 
 import java.io.*;
-import java.net.URL;
+import java.net.*;
+import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.jar.*;
 import junit.framework.Test;
@@ -28,6 +29,7 @@ import org.osgi.framework.wiring.*;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
+import org.osgi.service.url.*;
 
 public class SystemBundleTests extends AbstractBundleTests {
 	public static Test suite() {
@@ -1140,6 +1142,96 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox2.getState()); //$NON-NLS-1$
+	}
+
+	class TestHandler extends AbstractURLStreamHandlerService {
+
+		public URLConnection openConnection(URL u) throws IOException {
+			throw new IOException();
+		}
+
+	}
+
+	public void testURLMultiplexing01() throws BundleException {
+		// create multiple instances of Equinox to test
+		File config1 = OSGiTestsActivator.getContext().getDataFile(getName() + "_1");
+		Properties configuration1 = new Properties();
+		configuration1.put(Constants.FRAMEWORK_STORAGE, config1.getAbsolutePath());
+		Equinox equinox1 = new Equinox(configuration1);
+		try {
+			equinox1.start();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
+		// should be in the STARTING state
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox1.getState()); //$NON-NLS-1$
+
+		File config2 = OSGiTestsActivator.getContext().getDataFile(getName() + "_2"); //$NON-NLS-1$
+		Properties configuration2 = new Properties();
+		configuration2.put(Constants.FRAMEWORK_STORAGE, config2.getAbsolutePath());
+		Equinox equinox2 = new Equinox(configuration2);
+		try {
+			equinox2.start();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
+		// should be in the STARTING state
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox2.getState()); //$NON-NLS-1$
+
+		BundleContext systemContext1 = equinox1.getBundleContext();
+		assertNotNull("System context is null", systemContext1); //$NON-NLS-1$
+		BundleContext systemContext2 = equinox2.getBundleContext();
+		assertNotNull("System context is null", systemContext2); //$NON-NLS-1$
+
+		assertNotSame(systemContext1, systemContext2);
+
+		// register a protocol hander in the "root" framework
+		Dictionary props = new Hashtable();
+		props.put(URLConstants.URL_HANDLER_PROTOCOL, getName().toLowerCase());
+		ServiceRegistration handlerReg = OSGiTestsActivator.getContext().registerService(URLStreamHandlerService.class, new TestHandler(), props);
+		try {
+			URL baseTestUrl = new URL(getName().toLowerCase(), "", "/test/url");
+			System.getProperties().put("test.url", baseTestUrl);
+			System.setProperty("test.url.spec", baseTestUrl.toExternalForm());
+		} catch (MalformedURLException e) {
+			fail("Unexpected url exception.", e);
+		}
+
+		Bundle geturlBundle = systemContext1.installBundle(installer.getBundleLocation("geturl"));
+		geturlBundle.start();
+		PrivilegedAction geturlAction = (PrivilegedAction) systemContext1.getService(systemContext1.getServiceReference(PrivilegedAction.class));
+		try {
+			geturlAction.run();
+		} catch (Exception e) {
+			fail("Unexpected exception", e);
+		}
+
+		// put the framework 1 back to the RESOLVED state
+		try {
+			equinox1.stop();
+		} catch (BundleException e) {
+			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox1.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox1.getState()); //$NON-NLS-1$
+
+		// put the framework 2 back to the RESOLVED state
+		try {
+			equinox2.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox2.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox2.getState()); //$NON-NLS-1$
+		handlerReg.unregister();
 	}
 
 	public void testUUID() {

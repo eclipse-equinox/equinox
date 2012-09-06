@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2006, 2012 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,8 +28,9 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 	private static Field handlerField;
 	private static boolean methodsInitialized = false;
 
-	private String protocol;
-	private StreamHandlerFactory factory;
+	private final String protocol;
+	private final StreamHandlerFactory factory;
+	private final URLStreamHandler authorized;
 
 	private static synchronized void initializeMethods(StreamHandlerFactory factory) {
 		if (methodsInitialized)
@@ -80,14 +81,15 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		methodsInitialized = true;
 	}
 
-	public MultiplexingURLStreamHandler(String protocol, StreamHandlerFactory factory) {
+	public MultiplexingURLStreamHandler(String protocol, StreamHandlerFactory factory, URLStreamHandler authorized) {
 		this.protocol = protocol;
 		this.factory = factory;
+		this.authorized = authorized;
 		initializeMethods(factory);
 	}
 
 	protected URLConnection openConnection(URL url) throws IOException {
-		URLStreamHandler handler = factory.findAuthorizedURLStreamHandler(protocol);
+		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
 				return (URLConnection) openConnectionMethod.invoke(handler, new Object[] {url});
@@ -104,7 +106,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 	}
 
 	protected boolean equals(URL url1, URL url2) {
-		URLStreamHandler handler = factory.findAuthorizedURLStreamHandler(protocol);
+		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
 				return ((Boolean) equalsMethod.invoke(handler, new Object[] {url1, url2})).booleanValue();
@@ -119,7 +121,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 	}
 
 	protected int getDefaultPort() {
-		URLStreamHandler handler = factory.findAuthorizedURLStreamHandler(protocol);
+		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
 				return ((Integer) getDefaultPortMethod.invoke(handler, (Object[]) null)).intValue();
@@ -134,7 +136,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 	}
 
 	protected InetAddress getHostAddress(URL url) {
-		URLStreamHandler handler = factory.findAuthorizedURLStreamHandler(protocol);
+		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
 				return (InetAddress) getHostAddressMethod.invoke(handler, new Object[] {url});
@@ -149,7 +151,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 	}
 
 	protected int hashCode(URL url) {
-		URLStreamHandler handler = factory.findAuthorizedURLStreamHandler(protocol);
+		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
 				return ((Integer) hashCodeMethod.invoke(handler, new Object[] {url})).intValue();
@@ -164,7 +166,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 	}
 
 	protected boolean hostsEqual(URL url1, URL url2) {
-		URLStreamHandler handler = factory.findAuthorizedURLStreamHandler(protocol);
+		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
 				return ((Boolean) hostsEqualMethod.invoke(handler, new Object[] {url1, url2})).booleanValue();
@@ -197,7 +199,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 	}
 
 	protected boolean sameFile(URL url1, URL url2) {
-		URLStreamHandler handler = factory.findAuthorizedURLStreamHandler(protocol);
+		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
 				return ((Boolean) sameFileMethod.invoke(handler, new Object[] {url1, url2})).booleanValue();
@@ -212,7 +214,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 	}
 
 	protected void setURL(URL arg0, String arg1, String arg2, int arg3, String arg4, String arg5, String arg6, String arg7, String arg8) {
-		URLStreamHandler handler = factory.findAuthorizedURLStreamHandler(protocol);
+		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
 				// set the real handler for the URL
@@ -230,7 +232,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 	}
 
 	protected String toExternalForm(URL url) {
-		URLStreamHandler handler = factory.findAuthorizedURLStreamHandler(protocol);
+		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
 				return (String) toExternalFormMethod.invoke(handler, new Object[] {url});
@@ -244,4 +246,8 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		throw new IllegalStateException();
 	}
 
+	private URLStreamHandler findAuthorizedURLStreamHandler(String requested) {
+		URLStreamHandler handler = factory.findAuthorizedURLStreamHandler(requested);
+		return handler == null ? authorized : handler;
+	}
 }
