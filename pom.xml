@@ -70,7 +70,11 @@
     <module>bundles/org.eclipse.equinox.device</module>
     <module>bundles/org.eclipse.equinox.ds</module>
     <module>bundles/org.eclipse.equinox.event</module>
+
+    <!-- Module is deprecated
+         https://bugs.eclipse.org/bugs/show_bug.cgi?id=389050
     <module>bundles/org.eclipse.equinox.http</module>
+    -->
     
     <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=386040
     <module>bundles/org.eclipse.equinox.http.jetty5</module>
