@@ -51,7 +51,7 @@
         <executions>
           <execution>
             <id>copy-launcher-natives</id>
-            <phase>generate-resources</phase>
+            <phase>process-resources</phase>
             <configuration>
               <property name="feature.base" value="." />
               <target>

@@ -25,72 +25,355 @@
   <version>3.6.0-SNAPSHOT</version>
   <packaging>eclipse-feature</packaging>
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version> 1.7 </version>
-        <executions>
-          <execution>
-            <id>copy-executable-natives</id>
-            <phase>generate-resources</phase>
-            <configuration>
-              <target>
-                <!--  We need to get binary bits from binary repo -->
-                <copy todir="bin" overwrite="true">
-                  <fileset dir="../../../rt.equinox.binaries/org.eclipse.equinox.executable/bin/">
-                    <include name="**/*" />
-                  </fileset>
-                </copy>
-                
-                <!--  Things below were copied from custombuildCallbacks.xml, as Tycho does not support that -->
-                <copy includeEmptyDirs="false" todir="tempBin">
-                  <fileset dir="bin" />
-                </copy>
-                <delete dir="bin" />
-                <move todir="bin">
-                  <fileset dir="tempBin" />
-                </move>
- 
-                <!-- rename eclipse launchers to "launcher" -->
-                <move todir="bin" verbose="true">
-                  <fileset dir="bin" />
-                  <regexpmapper from="^(.*[/\\])eclipse(.exe)?$" to="\1launcher\2" />
-                </move>
-                <move todir="contributed" verbose="true">
-                  <fileset dir="contributed" />
-                  <regexpmapper from="^(.*[/\\])eclipse(.exe)?$" to="\1launcher\2" />
-                </move>
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>bsf</groupId>
-            <artifactId>bsf</artifactId>
-            <version>2.4.0</version>
-          </dependency>
-          <dependency>
-            <groupId>rhino</groupId>
-            <artifactId>js</artifactId>
-            <version>1.7R2</version>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.ant</groupId>
-            <artifactId>ant-apache-bsf</artifactId>
-            <version>1.8.3</version>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.ant</groupId>
-            <artifactId>ant-nodeps</artifactId>
-            <version>1.8.1</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-    </plugins>
-  </build>
+  <profiles>
+    <profile>
+      <id>build-native-launchers-linux.gtk.x86_64</id>
+      <activation>
+        <property>
+          <name>native</name>
+          <value>linux.gtk.x86_64</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version> 1.7 </version>
+            <executions>
+              <execution>
+                <id>compile-executable-natives</id>
+                <phase>generate-resources</phase>
+                <configuration>
+                  <target>
+                    <ant antfile="build.xml" dir="library/gtk/" target="build_eclipse_cbi" />
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+            <dependencies>
+              <dependency>
+                <groupId>bsf</groupId>
+                <artifactId>bsf</artifactId>
+                <version>2.4.0</version>
+              </dependency>
+              <dependency>
+                <groupId>rhino</groupId>
+                <artifactId>js</artifactId>
+                <version>1.7R2</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant-apache-bsf</artifactId>
+                <version>1.8.3</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant-nodeps</artifactId>
+                <version>1.8.1</version>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>build-native-launchers-linux.gtk.x86</id>
+      <activation>
+        <property>
+          <name>native</name>
+          <value>linux.gtk.x86</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version> 1.7 </version>
+            <executions>
+              <execution>
+                <id>compile-executable-natives</id>
+                <phase>generate-resources</phase>
+                <configuration>
+                  <target>
+                    <ant antfile="build.xml" dir="library/gtk/" target="build_eclipse_cbi" />
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+            <dependencies>
+              <dependency>
+                <groupId>bsf</groupId>
+                <artifactId>bsf</artifactId>
+                <version>2.4.0</version>
+              </dependency>
+              <dependency>
+                <groupId>rhino</groupId>
+                <artifactId>js</artifactId>
+                <version>1.7R2</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant-apache-bsf</artifactId>
+                <version>1.8.3</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant-nodeps</artifactId>
+                <version>1.8.1</version>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>build-native-launchers-win32.win32.x86_64</id>
+      <activation>
+        <property>
+          <name>native</name>
+          <value>win32.win32.x86_64</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version> 1.7 </version>
+            <executions>
+              <execution>
+                <id>compile-executable-natives</id>
+                <phase>generate-resources</phase>
+                <configuration>
+                  <target>
+                    <ant antfile="build.xml" dir="library/win32/" target="build_eclipse_cbi" />
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+            <dependencies>
+              <dependency>
+                <groupId>bsf</groupId>
+                <artifactId>bsf</artifactId>
+                <version>2.4.0</version>
+              </dependency>
+              <dependency>
+                <groupId>rhino</groupId>
+                <artifactId>js</artifactId>
+                <version>1.7R2</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant-apache-bsf</artifactId>
+                <version>1.8.3</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant-nodeps</artifactId>
+                <version>1.8.1</version>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>build-native-launchers-win32.win32.x86</id>
+      <activation>
+        <property>
+          <name>native</name>
+          <value>win32.win32.x86</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version> 1.7 </version>
+            <executions>
+              <execution>
+                <id>compile-executable-natives</id>
+                <phase>generate-resources</phase>
+                <configuration>
+                  <target>
+                    <ant antfile="build.xml" dir="library/win32/" target="build_eclipse_cbi" />
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+            <dependencies>
+              <dependency>
+                <groupId>bsf</groupId>
+                <artifactId>bsf</artifactId>
+                <version>2.4.0</version>
+              </dependency>
+              <dependency>
+                <groupId>rhino</groupId>
+                <artifactId>js</artifactId>
+                <version>1.7R2</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant-apache-bsf</artifactId>
+                <version>1.8.3</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant-nodeps</artifactId>
+                <version>1.8.1</version>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>build-native-launchers-cocoa.macosx.x86_64</id>
+      <activation>
+        <property>
+          <name>native</name>
+          <value>cocoa.macosx.x86_64</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version> 1.7 </version>
+            <executions>
+              <execution>
+                <id>compile-executable-natives</id>
+                <phase>generate-resources</phase>
+                <configuration>
+                  <target>
+                    <ant antfile="build.xml" dir="library/carbon/" target="build_eclipse_cbi" />
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+            <dependencies>
+              <dependency>
+                <groupId>bsf</groupId>
+                <artifactId>bsf</artifactId>
+                <version>2.4.0</version>
+              </dependency>
+              <dependency>
+                <groupId>rhino</groupId>
+                <artifactId>js</artifactId>
+                <version>1.7R2</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant-apache-bsf</artifactId>
+                <version>1.8.3</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant-nodeps</artifactId>
+                <version>1.8.1</version>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>assemble-launchers</id>
+      <activation>
+        <property>
+          <!-- workaround. activeByDefault is disabled when another profile is 
+            selected. -->
+          <name>!longnotexistingproperty</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version> 1.7 </version>
+            <executions>
+              <execution>
+                <id>copy-executable-natives</id>
+                <phase>process-resources</phase>
+                <configuration>
+                  <target>
+                    <!-- We need to get binary bits from binary repo -->
+                    <!-- If local binaries had been built, copy will not overwrite 
+                      them -->
+                    <copy todir="bin">
+                      <fileset
+                        dir="../../../rt.equinox.binaries/org.eclipse.equinox.executable/bin/">
+                        <include name="**/*" />
+                      </fileset>
+                    </copy>
+
+                    <!-- Things below were copied from custombuildCallbacks.xml, as 
+                      Tycho does not support that -->
+                    <copy includeEmptyDirs="false" todir="tempBin">
+                      <fileset dir="bin" />
+                    </copy>
+                    <delete dir="bin" />
+                    <move todir="bin">
+                      <fileset dir="tempBin" />
+                    </move>
+
+                    <!-- rename eclipse launchers to "launcher" -->
+                    <move todir="bin" verbose="true">
+                      <fileset dir="bin" />
+                      <regexpmapper from="^(.*[/\\])eclipse(.exe)?$"
+                        to="\1launcher\2" />
+                    </move>
+                    <move todir="contributed" verbose="true">
+                      <fileset dir="contributed" />
+                      <regexpmapper from="^(.*[/\\])eclipse(.exe)?$"
+                        to="\1launcher\2" />
+                    </move>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+            <dependencies>
+              <dependency>
+                <groupId>bsf</groupId>
+                <artifactId>bsf</artifactId>
+                <version>2.4.0</version>
+              </dependency>
+              <dependency>
+                <groupId>rhino</groupId>
+                <artifactId>js</artifactId>
+                <version>1.7R2</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant-apache-bsf</artifactId>
+                <version>1.8.3</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant-nodeps</artifactId>
+                <version>1.8.1</version>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
