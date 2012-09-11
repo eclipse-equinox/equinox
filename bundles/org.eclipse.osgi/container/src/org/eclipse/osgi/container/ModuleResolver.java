@@ -449,6 +449,7 @@ final class ModuleResolver {
 	}
 
 	class ResolveProcess extends ResolveContext implements Comparator<Capability> {
+		private final ResolutionReport.Builder reportBuilder = new ResolutionReport.Builder();
 		private final Collection<ModuleRevision> unresolved;
 		private final Collection<ModuleRevision> disabled;
 		private final Collection<ModuleRevision> triggers;
@@ -490,7 +491,10 @@ final class ModuleResolver {
 		@Override
 		public List<Capability> findProviders(Requirement requirement) {
 			List<ModuleCapability> candidates = moduleDatabase.findCapabilities((ModuleRequirement) requirement);
-			return filterProviders(requirement, candidates);
+			List<Capability> result = filterProviders(requirement, candidates);
+			if (result.isEmpty())
+				reportBuilder.addEntry(requirement.getResource(), Entry.Type.MISSING_CAPABILITY, requirement);
+			return result;
 		}
 
 		private List<Capability> filterProviders(Requirement requirement, List<ModuleCapability> candidates) {
@@ -597,10 +601,9 @@ final class ModuleResolver {
 					}
 					throw e;
 				}
-				ResolutionReport.Builder builder = new ResolutionReport.Builder();
 				try {
-					filterResolvable(builder);
-					selectSingletons(builder);
+					filterResolvable();
+					selectSingletons();
 					Map<Resource, List<Wire>> extensionWirings = resolveFrameworkExtensions();
 					if (!extensionWirings.isEmpty()) {
 						return extensionWirings;
@@ -617,7 +620,7 @@ final class ModuleResolver {
 					return resolver.resolve(this);
 				} finally {
 					if (hook instanceof ResolutionReport.Listener)
-						((ResolutionReport.Listener) hook).handleResolutionReport(builder.build());
+						((ResolutionReport.Listener) hook).handleResolutionReport(reportBuilder.build());
 					hook.end();
 				}
 			} finally {
@@ -679,15 +682,15 @@ final class ModuleResolver {
 
 		}
 
-		private void filterResolvable(ResolutionReport.Builder builder) {
+		private void filterResolvable() {
 			Collection<ModuleRevision> enabledCandidates = new ArrayList<ModuleRevision>(unresolved);
 			hook.filterResolvable(Converters.asListBundleRevision((List<? extends BundleRevision>) enabledCandidates));
 			disabled.removeAll(enabledCandidates);
 			for (ModuleRevision revision : disabled)
-				builder.addEntry(revision, Entry.Type.FILTERED_BY_RESOLVER_HOOK, null);
+				reportBuilder.addEntry(revision, Entry.Type.FILTERED_BY_RESOLVER_HOOK, null);
 		}
 
-		private void selectSingletons(ResolutionReport.Builder builder) {
+		private void selectSingletons() {
 			Map<String, Collection<ModuleRevision>> selectedSingletons = new HashMap<String, Collection<ModuleRevision>>();
 			for (ModuleRevision revision : unresolved) {
 				if (!isSingleton(revision) || disabled.contains(revision))
@@ -723,7 +726,7 @@ final class ModuleResolver {
 						if (selected.contains(collision)) {
 							// Must fail since there is already a selected bundle which is a collision of the singleton bundle
 							disabled.add(singleton);
-							builder.addEntry(singleton, Type.SINGLETON_SELECTION, collision);
+							reportBuilder.addEntry(singleton, Type.SINGLETON_SELECTION, collision);
 							break;
 						}
 						if (!pickOneToResolve.contains(collision))
@@ -736,7 +739,7 @@ final class ModuleResolver {
 								if (selected.contains(collisionEntry.getKey())) {
 									// Must fail since there is already a selected bundle for which the singleton bundle is a collision
 									disabled.add(singleton);
-									builder.addEntry(singleton, Type.SINGLETON_SELECTION, collisionEntry.getKey());
+									reportBuilder.addEntry(singleton, Type.SINGLETON_SELECTION, collisionEntry.getKey());
 									break;
 								}
 								if (!pickOneToResolve.contains(collisionEntry.getKey()))
@@ -746,7 +749,7 @@ final class ModuleResolver {
 					}
 					if (!disabled.contains(singleton)) {
 						pickOneToResolve.add(singleton);
-						selected.add(pickOneToResolve(pickOneToResolve, builder));
+						selected.add(pickOneToResolve(pickOneToResolve));
 					}
 				}
 			}
@@ -778,7 +781,7 @@ final class ModuleResolver {
 			return result;
 		}
 
-		private ModuleRevision pickOneToResolve(Collection<ModuleRevision> pickOneToResolve, ResolutionReport.Builder builder) {
+		private ModuleRevision pickOneToResolve(Collection<ModuleRevision> pickOneToResolve) {
 			ModuleRevision selectedVersion = null;
 			for (ModuleRevision singleton : pickOneToResolve) {
 				if (selectedVersion == null)
@@ -791,7 +794,7 @@ final class ModuleResolver {
 			for (ModuleRevision singleton : pickOneToResolve) {
 				if (singleton != selectedVersion) {
 					disabled.add(singleton);
-					builder.addEntry(singleton, Type.SINGLETON_SELECTION, selectedVersion);
+					reportBuilder.addEntry(singleton, Type.SINGLETON_SELECTION, selectedVersion);
 				}
 			}
 			return selectedVersion;
