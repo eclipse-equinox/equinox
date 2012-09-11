@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.framework.report;
+package org.eclipse.osgi.report.resolution;
 
 import java.util.List;
 import java.util.Map;

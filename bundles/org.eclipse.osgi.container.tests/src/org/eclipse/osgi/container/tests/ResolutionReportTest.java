@@ -19,7 +19,7 @@ import java.util.*;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleContainer;
 import org.eclipse.osgi.container.tests.dummys.*;
-import org.eclipse.osgi.framework.report.ResolutionReport;
+import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.junit.Test;
 import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleRevision;

@@ -1,7 +1,7 @@
 package org.eclipse.osgi.container.tests.dummys;
 
 import java.util.*;
-import org.eclipse.osgi.framework.report.ResolutionReport;
+import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.wiring.*;
 

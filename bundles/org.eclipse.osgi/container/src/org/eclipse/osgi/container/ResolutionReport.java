@@ -6,7 +6,7 @@ import org.osgi.resource.Resource;
 /**
  * @since 3.10
  */
-public class ResolutionReport implements org.eclipse.osgi.framework.report.ResolutionReport {
+public class ResolutionReport implements org.eclipse.osgi.report.resolution.ResolutionReport {
 	public static class Builder {
 		private final Map<Resource, List<Entry>> resourceToEntries = new HashMap<Resource, List<Entry>>();
 
