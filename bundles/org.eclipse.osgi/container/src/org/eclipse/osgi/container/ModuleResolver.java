@@ -725,7 +725,7 @@ final class ModuleResolver {
 							disabled.add(singleton);
 							// TODO add resolver diagnostics here
 							//state.addResolverError(singleton.getBundleDescription(), ResolverError.SINGLETON_SELECTION, collision.getBundleDescription().toString(), null);
-							builder.addEntry(singleton, Type.SINGLETON);
+							builder.addEntry(singleton, Type.SINGLETON_SELECTION);
 							break;
 						}
 						if (!pickOneToResolve.contains(collision))
@@ -740,7 +740,7 @@ final class ModuleResolver {
 									disabled.add(singleton);
 									// TODO add resolver diagnostics here
 									// state.addResolverError(singleton.getBundleDescription(), ResolverError.SINGLETON_SELECTION, collisionEntry.getKey().getBundleDescription().toString(), null);
-									builder.addEntry(singleton, Type.SINGLETON);
+									builder.addEntry(singleton, Type.SINGLETON_SELECTION);
 									break;
 								}
 								if (!pickOneToResolve.contains(collisionEntry.getKey()))
@@ -797,7 +797,7 @@ final class ModuleResolver {
 					disabled.add(singleton);
 					// TODO add resolver diagnostic here.
 					// state.addResolverError(singleton.getBundleDescription(), ResolverError.SINGLETON_SELECTION, selectedVersion.getBundleDescription().toString(), null);
-					builder.addEntry(singleton, Type.SINGLETON);
+					builder.addEntry(singleton, Type.SINGLETON_SELECTION);
 				}
 			}
 			return selectedVersion;

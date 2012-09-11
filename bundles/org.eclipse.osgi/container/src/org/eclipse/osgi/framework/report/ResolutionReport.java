@@ -20,7 +20,7 @@ import org.osgi.resource.Resource;
 public interface ResolutionReport {
 	public interface Entry {
 		enum Type {
-			FILTERED_BY_RESOLVER_HOOK, SINGLETON
+			FILTERED_BY_RESOLVER_HOOK, SINGLETON_SELECTION
 		}
 
 		Type getType();
