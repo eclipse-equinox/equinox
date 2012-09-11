@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
+import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.*;
@@ -350,7 +351,7 @@ public class TestModuleContainer {
 
 	@Test
 	public void testInstallCollision02() throws BundleException, IOException {
-		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(true), new DummyResolverHookFactory(), Collections.<String, String> emptyMap());
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(true), Collections.<String, String> emptyMap());
 		ModuleContainer container = adaptor.getContainer();
 		installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
 		installDummyModule("b1_v1.MF", "b1_a", container);
@@ -387,7 +388,7 @@ public class TestModuleContainer {
 	@Test
 	public void testUpdateCollision03() throws BundleException, IOException {
 
-		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(true), new DummyResolverHookFactory(), Collections.<String, String> emptyMap());
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(true), Collections.<String, String> emptyMap());
 		ModuleContainer container = adaptor.getContainer();
 		Module b1_v1 = installDummyModule("b1_v1.MF", "b1_v1", container);
 		installDummyModule("b1_v2.MF", "b1_v2", container);
@@ -415,10 +416,10 @@ public class TestModuleContainer {
 
 	@Test
 	public void testSingleton02() throws BundleException, IOException, ResolutionException {
-		ModuleResolverHookFactory resolverHookFactory = new ModuleResolverHookFactory() {
+		ResolverHookFactory resolverHookFactory = new ResolverHookFactory() {
 
 			@Override
-			public ResolverHook begin(Collection<BundleRevision> triggers, ResolutionReportBuilder builder) {
+			public ResolverHook begin(Collection<BundleRevision> triggers) {
 				return new ResolverHook() {
 
 					@Override
@@ -445,7 +446,7 @@ public class TestModuleContainer {
 				};
 			}
 		};
-		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), resolverHookFactory, Collections.<String, String> emptyMap());
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.<String, String> emptyMap());
 		ModuleContainer container = adaptor.getContainer();
 
 		Module s1 = installDummyModule("singleton1_v1.MF", "s1_v1", container);
@@ -482,10 +483,10 @@ public class TestModuleContainer {
 	@Test
 	public void testSingleton04() throws BundleException, IOException, ResolutionException {
 		final Collection<BundleRevision> disabled = new ArrayList<BundleRevision>();
-		ModuleResolverHookFactory resolverHookFactory = new ModuleResolverHookFactory() {
+		ResolverHookFactory resolverHookFactory = new ResolverHookFactory() {
 
 			@Override
-			public ResolverHook begin(Collection<BundleRevision> triggers, ResolutionReportBuilder builder) {
+			public ResolverHook begin(Collection<BundleRevision> triggers) {
 				return new ResolverHook() {
 
 					@Override
@@ -512,7 +513,7 @@ public class TestModuleContainer {
 				};
 			}
 		};
-		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), resolverHookFactory, Collections.<String, String> emptyMap());
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.<String, String> emptyMap());
 		ModuleContainer container = adaptor.getContainer();
 
 		Module s1_v1 = installDummyModule("singleton1_v1.MF", "s1_v1", container);
@@ -1089,7 +1090,7 @@ public class TestModuleContainer {
 		Map<String, String> configuration = new HashMap<String, String>();
 		configuration.put(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, "100");
 
-		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), new DummyResolverHookFactory(), configuration);
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), configuration);
 		ModuleContainer container = adaptor.getContainer();
 		DummyModuleDatabase database = adaptor.getDatabase();
 
@@ -1304,7 +1305,7 @@ public class TestModuleContainer {
 	}
 
 	private DummyContainerAdaptor createDummyAdaptor() {
-		return new DummyContainerAdaptor(new DummyCollisionHook(false), new DummyResolverHookFactory(), Collections.<String, String> emptyMap());
+		return new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.<String, String> emptyMap());
 	}
 
 	private Module installDummyModule(String manifestFile, String location, ModuleContainer container) throws BundleException, IOException {

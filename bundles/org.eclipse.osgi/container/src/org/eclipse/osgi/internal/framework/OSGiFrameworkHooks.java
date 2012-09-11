@@ -13,11 +13,11 @@ package org.eclipse.osgi.internal.framework;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.container.ModuleCollisionHook;
 import org.eclipse.osgi.container.namespaces.EquinoxNativeCodeNamespace;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.report.ResolutionReport;
-import org.eclipse.osgi.framework.report.ResolutionReportReader;
 import org.eclipse.osgi.internal.baseadaptor.ArrayMap;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.serviceregistry.*;
@@ -30,7 +30,7 @@ import org.osgi.framework.wiring.*;
 
 class OSGiFrameworkHooks {
 	static final String collisionHookName = CollisionHook.class.getName();
-	private final ModuleResolverHookFactory resolverHookFactory;
+	private final ResolverHookFactory resolverHookFactory;
 	private final ModuleCollisionHook collisionHook;
 
 	OSGiFrameworkHooks(EquinoxContainer container) {
@@ -38,7 +38,7 @@ class OSGiFrameworkHooks {
 		collisionHook = new BundleCollisionHook(container);
 	}
 
-	public ModuleResolverHookFactory getResolverHookFactory() {
+	public ResolverHookFactory getResolverHookFactory() {
 		return resolverHookFactory;
 	}
 
@@ -127,7 +127,7 @@ class OSGiFrameworkHooks {
 	 * This class is not thread safe and expects external synchronization.
 	 *
 	 */
-	static class CoreResolverHookFactory implements ModuleResolverHookFactory {
+	static class CoreResolverHookFactory implements ResolverHookFactory {
 		// need a tuple to hold the service reference and hook object
 		// do not use a map for performance reasons; no need to hash based on a key.
 		static class HookReference {
@@ -171,13 +171,13 @@ class OSGiFrameworkHooks {
 			}
 		}
 
-		public ResolverHook begin(Collection<BundleRevision> triggers, ResolutionReportBuilder builder) {
+		public ResolverHook begin(Collection<BundleRevision> triggers) {
 			if (debug.DEBUG_HOOKS) {
 				Debug.println("ResolverHook.begin"); //$NON-NLS-1$
 			}
 			ServiceRegistry registry = container.getServiceRegistry();
 			if (registry == null) {
-				return new CoreResolverHook(Collections.<HookReference> emptyList(), builder);
+				return new CoreResolverHook(Collections.<HookReference> emptyList());
 			}
 			Module systemModule = container.getStorage().getModuleContainer().getModule(0);
 			BundleContextImpl context = (BundleContextImpl) EquinoxContainer.secureAction.getContext(systemModule.getBundle());
@@ -196,7 +196,7 @@ class OSGiFrameworkHooks {
 						} catch (Throwable t) {
 							// need to force an end call on the ResolverHooks we got and release them
 							try {
-								new CoreResolverHook(hookRefs, builder).end();
+								new CoreResolverHook(hookRefs).end();
 							} catch (Throwable endError) {
 								// we are already in failure mode; just continue
 							}
@@ -205,16 +205,16 @@ class OSGiFrameworkHooks {
 					}
 				}
 			}
-			return new CoreResolverHook(hookRefs, builder);
+			return new CoreResolverHook(hookRefs);
 		}
 
-		class CoreResolverHook implements ResolverHook {
-			private final ResolutionReportBuilder builder;
+		class CoreResolverHook implements ResolutionReport.Listener, ResolverHook {
 			private final List<HookReference> hooks;
 
-			CoreResolverHook(List<HookReference> hooks, ResolutionReportBuilder builder) {
+			private volatile ResolutionReport report;
+
+			CoreResolverHook(List<HookReference> hooks) {
 				this.hooks = hooks;
-				this.builder = builder;
 			}
 
 			public void filterResolvable(Collection<BundleRevision> candidates) {
@@ -310,7 +310,6 @@ class OSGiFrameworkHooks {
 					HookReference missingHook = null;
 					Throwable endError = null;
 					HookReference endBadHook = null;
-					ResolutionReport report = null;
 					for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
 						HookReference hookRef = iHooks.next();
 						// We do not remove unregistered services here because we are going to remove all of them at the end
@@ -319,8 +318,8 @@ class OSGiFrameworkHooks {
 								missingHook = hookRef;
 						} else {
 							try {
-								if (hookRef.hook instanceof ResolutionReportReader)
-									((ResolutionReportReader) hookRef.hook).read(report);
+								if (hookRef.hook instanceof ResolutionReport.Listener)
+									((ResolutionReport.Listener) hookRef.hook).handleResolutionReport(report);
 								hookRef.hook.end();
 							} catch (Throwable t) {
 								// Must continue on to the next hook.end method
@@ -342,6 +341,11 @@ class OSGiFrameworkHooks {
 					}
 					hooks.clear();
 				}
+			}
+
+			@Override
+			public void handleResolutionReport(ResolutionReport report) {
+				this.report = report;
 			}
 		}
 	}

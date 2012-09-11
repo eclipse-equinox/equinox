@@ -14,6 +14,8 @@ import java.security.Permission;
 import java.util.*;
 import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
+import org.eclipse.osgi.framework.report.ResolutionReport.Entry;
+import org.eclipse.osgi.framework.report.ResolutionReport.Entry.Type;
 import org.eclipse.osgi.internal.container.Converters;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
@@ -585,7 +587,7 @@ final class ModuleResolver {
 			threadResolving.set(Boolean.TRUE);
 			try {
 				try {
-					hook = adaptor.getResolverHookFactory().begin(Converters.asListBundleRevision((List<? extends BundleRevision>) triggers), null);
+					hook = adaptor.getResolverHookFactory().begin(Converters.asListBundleRevision((List<? extends BundleRevision>) triggers));
 				} catch (RuntimeException e) {
 					if (e.getCause() instanceof BundleException) {
 						BundleException be = (BundleException) e.getCause();
@@ -595,9 +597,10 @@ final class ModuleResolver {
 					}
 					throw e;
 				}
+				ResolutionReport.Builder builder = new ResolutionReport.Builder();
 				try {
-					filterResolvable();
-					selectSingletons();
+					filterResolvable(builder);
+					selectSingletons(builder);
 					Map<Resource, List<Wire>> extensionWirings = resolveFrameworkExtensions();
 					if (!extensionWirings.isEmpty()) {
 						return extensionWirings;
@@ -613,6 +616,8 @@ final class ModuleResolver {
 					}
 					return resolver.resolve(this);
 				} finally {
+					if (hook instanceof ResolutionReport.Listener)
+						((ResolutionReport.Listener) hook).handleResolutionReport(builder.build());
 					hook.end();
 				}
 			} finally {
@@ -674,13 +679,15 @@ final class ModuleResolver {
 
 		}
 
-		private void filterResolvable() {
+		private void filterResolvable(ResolutionReport.Builder builder) {
 			Collection<ModuleRevision> enabledCandidates = new ArrayList<ModuleRevision>(unresolved);
 			hook.filterResolvable(Converters.asListBundleRevision((List<? extends BundleRevision>) enabledCandidates));
 			disabled.removeAll(enabledCandidates);
+			for (ModuleRevision revision : disabled)
+				builder.addEntry(revision, Entry.Type.FILTERED_BY_HOOK);
 		}
 
-		private void selectSingletons() {
+		private void selectSingletons(ResolutionReport.Builder builder) {
 			Map<String, Collection<ModuleRevision>> selectedSingletons = new HashMap<String, Collection<ModuleRevision>>();
 			for (ModuleRevision revision : unresolved) {
 				if (!isSingleton(revision) || disabled.contains(revision))
@@ -718,28 +725,32 @@ final class ModuleResolver {
 							disabled.add(singleton);
 							// TODO add resolver diagnostics here
 							//state.addResolverError(singleton.getBundleDescription(), ResolverError.SINGLETON_SELECTION, collision.getBundleDescription().toString(), null);
+							builder.addEntry(singleton, Type.SINGLETON);
 							break;
 						}
 						if (!pickOneToResolve.contains(collision))
 							pickOneToResolve.add(collision);
 					}
-					// need to make sure the bundle does not collide from the POV of another entry
-					for (Map.Entry<ModuleRevision, Collection<ModuleRevision>> collisionEntry : collisionMap.entrySet()) {
-						if (collisionEntry.getKey() != singleton && collisionEntry.getValue().contains(singleton)) {
-							if (selected.contains(collisionEntry.getKey())) {
-								// Must fail since there is already a selected bundle for which the singleton bundle is a collision
-								disabled.add(singleton);
-								// TODO add resolver diagnostics here
-								// state.addResolverError(singleton.getBundleDescription(), ResolverError.SINGLETON_SELECTION, collisionEntry.getKey().getBundleDescription().toString(), null);
-								break;
+					if (!disabled.contains(singleton)) {
+						// need to make sure the bundle does not collide from the POV of another entry
+						for (Map.Entry<ModuleRevision, Collection<ModuleRevision>> collisionEntry : collisionMap.entrySet()) {
+							if (collisionEntry.getKey() != singleton && collisionEntry.getValue().contains(singleton)) {
+								if (selected.contains(collisionEntry.getKey())) {
+									// Must fail since there is already a selected bundle for which the singleton bundle is a collision
+									disabled.add(singleton);
+									// TODO add resolver diagnostics here
+									// state.addResolverError(singleton.getBundleDescription(), ResolverError.SINGLETON_SELECTION, collisionEntry.getKey().getBundleDescription().toString(), null);
+									builder.addEntry(singleton, Type.SINGLETON);
+									break;
+								}
+								if (!pickOneToResolve.contains(collisionEntry.getKey()))
+									pickOneToResolve.add(collisionEntry.getKey());
 							}
-							if (!pickOneToResolve.contains(collisionEntry.getKey()))
-								pickOneToResolve.add(collisionEntry.getKey());
 						}
 					}
 					if (!disabled.contains(singleton)) {
 						pickOneToResolve.add(singleton);
-						selected.add(pickOneToResolve(pickOneToResolve));
+						selected.add(pickOneToResolve(pickOneToResolve, builder));
 					}
 				}
 			}
@@ -771,7 +782,7 @@ final class ModuleResolver {
 			return result;
 		}
 
-		private ModuleRevision pickOneToResolve(Collection<ModuleRevision> pickOneToResolve) {
+		private ModuleRevision pickOneToResolve(Collection<ModuleRevision> pickOneToResolve, ResolutionReport.Builder builder) {
 			ModuleRevision selectedVersion = null;
 			for (ModuleRevision singleton : pickOneToResolve) {
 				if (selectedVersion == null)
@@ -786,6 +797,7 @@ final class ModuleResolver {
 					disabled.add(singleton);
 					// TODO add resolver diagnostic here.
 					// state.addResolverError(singleton.getBundleDescription(), ResolverError.SINGLETON_SELECTION, selectedVersion.getBundleDescription().toString(), null);
+					builder.addEntry(singleton, Type.SINGLETON);
 				}
 			}
 			return selectedVersion;

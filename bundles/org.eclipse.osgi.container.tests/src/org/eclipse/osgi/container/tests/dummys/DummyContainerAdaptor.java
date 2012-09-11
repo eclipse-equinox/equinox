@@ -17,19 +17,23 @@ import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.container.tests.dummys.DummyModuleDatabase.DummyContainerEvent;
 import org.eclipse.osgi.container.tests.dummys.DummyModuleDatabase.DummyModuleEvent;
 import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 
 public class DummyContainerAdaptor extends ModuleContainerAdaptor {
-
 	private final ModuleCollisionHook collisionHook;
-	private final ModuleResolverHookFactory resolverHookFactory;
 	private final Map<String, String> configuration;
 	private final DummyModuleDatabase moduleDatabase;
 	private final ModuleContainer container;
+	private final ResolverHookFactory resolverHookFactory;
 
-	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, ModuleResolverHookFactory resolverHookFactory, Map<String, String> configuration) {
+	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, Map<String, String> configuration) {
+		this(collisionHook, configuration, new DummyResolverHookFactory());
+	}
+
+	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, Map<String, String> configuration, ResolverHookFactory resolverHookFactory) {
 		this.collisionHook = collisionHook;
-		this.resolverHookFactory = resolverHookFactory;
 		this.configuration = configuration;
+		this.resolverHookFactory = resolverHookFactory;
 		this.moduleDatabase = new DummyModuleDatabase(this);
 		this.container = new ModuleContainer(this, moduleDatabase);
 	}
@@ -40,7 +44,7 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	}
 
 	@Override
-	public ModuleResolverHookFactory getResolverHookFactory() {
+	public ResolverHookFactory getResolverHookFactory() {
 		return resolverHookFactory;
 	}
 

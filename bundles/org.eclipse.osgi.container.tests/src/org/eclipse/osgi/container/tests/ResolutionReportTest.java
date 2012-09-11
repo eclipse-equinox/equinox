@@ -11,91 +11,150 @@
 package org.eclipse.osgi.container.tests;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleContainer;
-import org.eclipse.osgi.container.tests.dummys.DummyContainerAdaptor;
-import org.eclipse.osgi.container.tests.dummys.DummyResolverHookFactory;
+import org.eclipse.osgi.container.tests.dummys.*;
 import org.eclipse.osgi.framework.report.ResolutionReport;
-import org.eclipse.osgi.framework.report.ResolutionReportReader;
 import org.junit.Test;
 import org.osgi.framework.Constants;
-import org.osgi.framework.wiring.*;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.FrameworkWiring;
+import org.osgi.resource.Resource;
+import org.osgi.service.resolver.ResolutionException;
 
 public class ResolutionReportTest extends AbstractTest {
-	private static class ResolverHookFactory implements org.osgi.framework.hooks.resolver.ResolverHookFactory {
-		private AtomicBoolean receivedCallback;
-
-		public ResolverHookFactory(AtomicBoolean receivedCallback) {
-			this.receivedCallback = receivedCallback;
-		}
-
-		@Override
-		public org.osgi.framework.hooks.resolver.ResolverHook begin(Collection<BundleRevision> triggers) {
-			return new ResolverHook(receivedCallback);
-		}
-	}
-
-	private static class ResolverHook implements org.osgi.framework.hooks.resolver.ResolverHook, ResolutionReportReader {
-		private final AtomicBoolean receivedCallback;
-
-		public ResolverHook(AtomicBoolean receivedCallback) {
-			this.receivedCallback = receivedCallback;
-		}
-
-		@Override
-		public void end() {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void filterResolvable(Collection<BundleRevision> candidates) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void read(ResolutionReport report) {
-			receivedCallback.set(true);
-		}
-	}
-
 	@Test
-	public void testResolutionReportReadCallback() throws Exception {
-		AtomicBoolean receivedCallback = new AtomicBoolean(false);
-		registerService(org.osgi.framework.hooks.resolver.ResolverHookFactory.class, new ResolverHookFactory(receivedCallback));
-
+	public void testResolutionReportListenerService() throws Exception {
+		DummyResolverHook hook = new DummyResolverHook();
+		registerService(org.osgi.framework.hooks.resolver.ResolverHookFactory.class, new DummyResolverHookFactory(hook));
 		getSystemBundle().adapt(FrameworkWiring.class).resolveBundles(Collections.singleton(getSystemBundle()));
-
-		//		DummyContainerAdaptor adaptor = createDummyAdaptor();
-		//		ModuleContainer container = adaptor.getContainer();
-		//		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
-		//		container.resolve(Arrays.asList(systemBundle), true);
-		assertTrue("Did not receive a resolution report callback", receivedCallback.get());
+		assertEquals("No resolution report listener callback", 1, hook.getResolutionReports().size());
+		assertNotNull("Resolution report was null", hook.getResolutionReports().get(0));
 	}
 
 	@Test
-	public void testResolutionReportWriteCallback() throws Exception {
-		DummyContainerAdaptor adaptor = createDummyAdaptor();
+	public void testResolutionReportListenerModule() throws Exception {
+		DummyResolverHook hook = new DummyResolverHook();
+		DummyContainerAdaptor adaptor = createDummyAdaptor(hook);
 		ModuleContainer container = adaptor.getContainer();
 		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
 		container.resolve(Arrays.asList(systemBundle), true);
-		assertEquals("No resolution report write callback", 1, ((DummyResolverHookFactory) adaptor.getResolverHookFactory()).getWriteCount());
+		assertEquals("No resolution report listener callback", 1, hook.getResolutionReports().size());
+		assertNotNull("Resolution report was null", hook.getResolutionReports().get(0));
+	}
+
+	@Test
+	public void testResolutionReportBuilder() {
+		org.eclipse.osgi.container.ResolutionReport.Builder builder = new org.eclipse.osgi.container.ResolutionReport.Builder();
+		ResolutionReport report = builder.build();
+		assertNotNull("Resolution report was null", report);
+	}
+
+	@Test
+	public void testFilteredByResolverHook() throws Exception {
+		DummyResolverHook hook = new DummyResolverHook() {
+			@Override
+			public void filterResolvable(Collection<BundleRevision> candidates) {
+				candidates.clear();
+			}
+		};
+		DummyContainerAdaptor adaptor = createDummyAdaptor(hook);
+		ModuleContainer container = adaptor.getContainer();
+		Module module = installDummyModule("resolution.report.a.MF", "resolution.report.a", container);
+		try {
+			container.resolve(Collections.singleton(module), true);
+			fail("Resolution should not have succeeded");
+		} catch (ResolutionException e) {
+			// Okay.
+		}
+		ResolutionReport report = hook.getResolutionReports().get(0);
+		Map<Resource, List<ResolutionReport.Entry>> resourceToEntries = report.getEntries();
+		assertNotNull("No entries", resourceToEntries);
+		assertEquals("Wrong number of total entries", 1, resourceToEntries.size());
+		List<ResolutionReport.Entry> entries = resourceToEntries.get(module.getCurrentRevision());
+		assertNotNull("No entry for resource", entries);
+		assertEquals("Wrong number of entries", 1, entries.size());
+		ResolutionReport.Entry entry = entries.get(0);
+		assertEquals("Wrong type", ResolutionReport.Entry.Type.FILTERED_BY_HOOK, entry.getType());
+	}
+
+	@Test
+	public void testFilteredBySingletonNoneResolved() throws Exception {
+		DummyResolverHook hook = new DummyResolverHook();
+		DummyContainerAdaptor adaptor = createDummyAdaptor(hook);
+		ModuleContainer container = adaptor.getContainer();
+		Module resolutionReporta = installDummyModule("resolution.report.a.MF", "resolution.report.a", container);
+		Module resolutionReportaV1 = installDummyModule("resolution.report.a.v1.MF", "resolution.report.a.v1", container);
+		try {
+			container.resolve(Arrays.asList(resolutionReporta, resolutionReportaV1), true);
+			fail("Resolution should not have succeeded");
+		} catch (ResolutionException e) {
+			// Okay.
+		}
+		ResolutionReport report = hook.getResolutionReports().get(0);
+		Map<Resource, List<ResolutionReport.Entry>> resourceToEntries = report.getEntries();
+		assertNotNull("No entries", resourceToEntries);
+		assertEquals("Wrong number of total entries", 1, resourceToEntries.size());
+		List<ResolutionReport.Entry> entries = resourceToEntries.get(resolutionReporta.getCurrentRevision());
+		assertNotNull("No entry for resource", entries);
+		assertEquals("Wrong number of entries", 1, entries.size());
+		ResolutionReport.Entry entry = entries.get(0);
+		assertEquals("Wrong type", ResolutionReport.Entry.Type.SINGLETON, entry.getType());
+	}
+
+	@Test
+	public void testFilteredBySingletonHighestVersionResolved() throws Exception {
+		DummyResolverHook hook = new DummyResolverHook();
+		DummyContainerAdaptor adaptor = createDummyAdaptor(hook);
+		ModuleContainer container = adaptor.getContainer();
+		Module resolutionReporta = installDummyModule("resolution.report.a.MF", "resolution.report.a", container);
+		Module resolutionReportaV1 = installDummyModule("resolution.report.a.v1.MF", "resolution.report.a.v1", container);
+		container.resolve(Arrays.asList(resolutionReportaV1), true);
+		hook.getResolutionReports().clear();
+		try {
+			container.resolve(Arrays.asList(resolutionReporta), true);
+			fail("Resolution should not have succeeded");
+		} catch (ResolutionException e) {
+			// Okay.
+		}
+		ResolutionReport report = hook.getResolutionReports().get(0);
+		Map<Resource, List<ResolutionReport.Entry>> resourceToEntries = report.getEntries();
+		assertNotNull("No entries", resourceToEntries);
+		assertEquals("Wrong number of total entries", 1, resourceToEntries.size());
+		List<ResolutionReport.Entry> entries = resourceToEntries.get(resolutionReporta.getCurrentRevision());
+		assertNotNull("No entry for resource", entries);
+		assertEquals("Wrong number of entries", 1, entries.size());
+		ResolutionReport.Entry entry = entries.get(0);
+		assertEquals("Wrong type", ResolutionReport.Entry.Type.SINGLETON, entry.getType());
+	}
+
+	@Test
+	public void testFilteredBySingletonLowestVersionResolved() throws Exception {
+		DummyResolverHook hook = new DummyResolverHook();
+		DummyContainerAdaptor adaptor = createDummyAdaptor(hook);
+		ModuleContainer container = adaptor.getContainer();
+		Module resolutionReporta = installDummyModule("resolution.report.a.MF", "resolution.report.a", container);
+		container.resolve(Arrays.asList(resolutionReporta), true);
+		hook.getResolutionReports().clear();
+		Module resolutionReportaV1 = installDummyModule("resolution.report.a.v1.MF", "resolution.report.a.v1", container);
+		try {
+			container.resolve(Arrays.asList(resolutionReportaV1), true);
+			fail("Resolution should not have succeeded");
+		} catch (ResolutionException e) {
+			// Okay.
+		}
+		ResolutionReport report = hook.getResolutionReports().get(0);
+		Map<Resource, List<ResolutionReport.Entry>> resourceToEntries = report.getEntries();
+		assertNotNull("No entries", resourceToEntries);
+		assertEquals("Wrong number of total entries", 1, resourceToEntries.size());
+		List<ResolutionReport.Entry> entries = resourceToEntries.get(resolutionReportaV1.getCurrentRevision());
+		assertNotNull("No entry for resource", entries);
+		assertEquals("Wrong number of entries", 1, entries.size());
+		ResolutionReport.Entry entry = entries.get(0);
+		assertEquals("Wrong type", ResolutionReport.Entry.Type.SINGLETON, entry.getType());
 	}
 }

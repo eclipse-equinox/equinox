@@ -21,6 +21,7 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.junit.After;
 import org.junit.Before;
 import org.osgi.framework.*;
+import org.osgi.framework.hooks.resolver.ResolverHook;
 
 public abstract class AbstractTest {
 	protected Set<ServiceRegistration<?>> serviceRegistrations;
@@ -42,7 +43,11 @@ public abstract class AbstractTest {
 	}
 
 	protected DummyContainerAdaptor createDummyAdaptor() {
-		return new DummyContainerAdaptor(new DummyCollisionHook(false), new DummyResolverHookFactory(), Collections.<String, String> emptyMap());
+		return new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.<String, String> emptyMap());
+	}
+
+	protected DummyContainerAdaptor createDummyAdaptor(ResolverHook hook) {
+		return new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.<String, String> emptyMap(), new DummyResolverHookFactory(hook));
 	}
 
 	protected Bundle getBundle() {

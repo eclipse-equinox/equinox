@@ -10,12 +10,25 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.report;
 
-import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import org.osgi.resource.Resource;
 
 /**
  * @since 3.10
  */
-public interface ResolutionReport extends Iterator<ResolutionReportEntry> {
-	public ResolutionReportEntry getResolutionReport(Resource resource);
+public interface ResolutionReport {
+	public interface Entry {
+		enum Type {
+			FILTERED_BY_HOOK, SINGLETON
+		}
+
+		Type getType();
+	}
+
+	public interface Listener {
+		void handleResolutionReport(ResolutionReport report);
+	}
+
+	Map<Resource, List<Entry>> getEntries();
 }

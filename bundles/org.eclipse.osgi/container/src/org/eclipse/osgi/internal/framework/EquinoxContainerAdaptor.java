@@ -17,6 +17,7 @@ import org.eclipse.osgi.internal.loader.*;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.Storage;
 import org.osgi.framework.*;
+import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.service.resolver.ResolutionException;
@@ -64,7 +65,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	}
 
 	@Override
-	public ModuleResolverHookFactory getResolverHookFactory() {
+	public ResolverHookFactory getResolverHookFactory() {
 		return hooks.getResolverHookFactory();
 	}
 
