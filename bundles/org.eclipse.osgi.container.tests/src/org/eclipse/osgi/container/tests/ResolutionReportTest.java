@@ -79,7 +79,7 @@ public class ResolutionReportTest extends AbstractTest {
 		assertNotNull("No entry for resource", entries);
 		assertEquals("Wrong number of entries", 1, entries.size());
 		ResolutionReport.Entry entry = entries.get(0);
-		assertEquals("Wrong type", ResolutionReport.Entry.Type.FILTERED_BY_HOOK, entry.getType());
+		assertEquals("Wrong type", ResolutionReport.Entry.Type.FILTERED_BY_RESOLVER_HOOK, entry.getType());
 	}
 
 	@Test

@@ -684,7 +684,7 @@ final class ModuleResolver {
 			hook.filterResolvable(Converters.asListBundleRevision((List<? extends BundleRevision>) enabledCandidates));
 			disabled.removeAll(enabledCandidates);
 			for (ModuleRevision revision : disabled)
-				builder.addEntry(revision, Entry.Type.FILTERED_BY_HOOK);
+				builder.addEntry(revision, Entry.Type.FILTERED_BY_RESOLVER_HOOK);
 		}
 
 		private void selectSingletons(ResolutionReport.Builder builder) {
