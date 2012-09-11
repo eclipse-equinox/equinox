@@ -50,7 +50,7 @@ public class ResolutionReportTest extends AbstractTest {
 
 	@Test
 	public void testResolutionReportBuilder() {
-		org.eclipse.osgi.container.ResolutionReport.Builder builder = new org.eclipse.osgi.container.ResolutionReport.Builder();
+		org.eclipse.osgi.container.ModuleResolutionReport.Builder builder = new org.eclipse.osgi.container.ModuleResolutionReport.Builder();
 		ResolutionReport report = builder.build();
 		assertNotNull("Resolution report was null", report);
 	}

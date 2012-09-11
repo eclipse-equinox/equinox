@@ -446,7 +446,7 @@ public class TestModuleContainer {
 				};
 			}
 		};
-		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.<String, String> emptyMap());
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.<String, String> emptyMap(), resolverHookFactory);
 		ModuleContainer container = adaptor.getContainer();
 
 		Module s1 = installDummyModule("singleton1_v1.MF", "s1_v1", container);
@@ -513,7 +513,7 @@ public class TestModuleContainer {
 				};
 			}
 		};
-		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.<String, String> emptyMap());
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.<String, String> emptyMap(), resolverHookFactory);
 		ModuleContainer container = adaptor.getContainer();
 
 		Module s1_v1 = installDummyModule("singleton1_v1.MF", "s1_v1", container);

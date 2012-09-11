@@ -1,12 +1,13 @@
 package org.eclipse.osgi.container;
 
 import java.util.*;
+import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.osgi.resource.Resource;
 
 /**
  * @since 3.10
  */
-public class ResolutionReport implements org.eclipse.osgi.report.resolution.ResolutionReport {
+public class ModuleResolutionReport implements ResolutionReport {
 	public static class Builder {
 		private final Map<Resource, List<Entry>> resourceToEntries = new HashMap<Resource, List<Entry>>();
 
@@ -19,8 +20,8 @@ public class ResolutionReport implements org.eclipse.osgi.report.resolution.Reso
 			entries.add(new EntryImpl(type, data));
 		}
 
-		public ResolutionReport build() {
-			return new ResolutionReport(resourceToEntries);
+		public ModuleResolutionReport build() {
+			return new ModuleResolutionReport(resourceToEntries);
 		}
 	}
 
@@ -44,9 +45,9 @@ public class ResolutionReport implements org.eclipse.osgi.report.resolution.Reso
 		}
 	}
 
-	private final Map<Resource, List<ResolutionReport.Entry>> entries;
+	private final Map<Resource, List<Entry>> entries;
 
-	ResolutionReport(Map<Resource, List<ResolutionReport.Entry>> entries) {
+	ModuleResolutionReport(Map<Resource, List<Entry>> entries) {
 		this.entries = Collections.unmodifiableMap(new HashMap<Resource, List<ResolutionReport.Entry>>(entries));
 	}
 

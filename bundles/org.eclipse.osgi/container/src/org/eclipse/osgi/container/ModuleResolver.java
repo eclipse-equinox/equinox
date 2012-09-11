@@ -15,6 +15,7 @@ import java.util.*;
 import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.internal.container.Converters;
+import org.eclipse.osgi.report.resolution.*;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry.Type;
 import org.osgi.framework.*;
@@ -449,7 +450,7 @@ final class ModuleResolver {
 	}
 
 	class ResolveProcess extends ResolveContext implements Comparator<Capability> {
-		private final ResolutionReport.Builder reportBuilder = new ResolutionReport.Builder();
+		private final ModuleResolutionReport.Builder reportBuilder = new ModuleResolutionReport.Builder();
 		private final Collection<ModuleRevision> unresolved;
 		private final Collection<ModuleRevision> disabled;
 		private final Collection<ModuleRevision> triggers;
