@@ -684,7 +684,7 @@ final class ModuleResolver {
 			hook.filterResolvable(Converters.asListBundleRevision((List<? extends BundleRevision>) enabledCandidates));
 			disabled.removeAll(enabledCandidates);
 			for (ModuleRevision revision : disabled)
-				builder.addEntry(revision, Entry.Type.FILTERED_BY_RESOLVER_HOOK);
+				builder.addEntry(revision, Entry.Type.FILTERED_BY_RESOLVER_HOOK, null);
 		}
 
 		private void selectSingletons(ResolutionReport.Builder builder) {
@@ -723,9 +723,7 @@ final class ModuleResolver {
 						if (selected.contains(collision)) {
 							// Must fail since there is already a selected bundle which is a collision of the singleton bundle
 							disabled.add(singleton);
-							// TODO add resolver diagnostics here
-							//state.addResolverError(singleton.getBundleDescription(), ResolverError.SINGLETON_SELECTION, collision.getBundleDescription().toString(), null);
-							builder.addEntry(singleton, Type.SINGLETON_SELECTION);
+							builder.addEntry(singleton, Type.SINGLETON_SELECTION, collision);
 							break;
 						}
 						if (!pickOneToResolve.contains(collision))
@@ -738,9 +736,7 @@ final class ModuleResolver {
 								if (selected.contains(collisionEntry.getKey())) {
 									// Must fail since there is already a selected bundle for which the singleton bundle is a collision
 									disabled.add(singleton);
-									// TODO add resolver diagnostics here
-									// state.addResolverError(singleton.getBundleDescription(), ResolverError.SINGLETON_SELECTION, collisionEntry.getKey().getBundleDescription().toString(), null);
-									builder.addEntry(singleton, Type.SINGLETON_SELECTION);
+									builder.addEntry(singleton, Type.SINGLETON_SELECTION, collisionEntry.getKey());
 									break;
 								}
 								if (!pickOneToResolve.contains(collisionEntry.getKey()))
@@ -795,9 +791,7 @@ final class ModuleResolver {
 			for (ModuleRevision singleton : pickOneToResolve) {
 				if (singleton != selectedVersion) {
 					disabled.add(singleton);
-					// TODO add resolver diagnostic here.
-					// state.addResolverError(singleton.getBundleDescription(), ResolverError.SINGLETON_SELECTION, selectedVersion.getBundleDescription().toString(), null);
-					builder.addEntry(singleton, Type.SINGLETON_SELECTION);
+					builder.addEntry(singleton, Type.SINGLETON_SELECTION, selectedVersion);
 				}
 			}
 			return selectedVersion;

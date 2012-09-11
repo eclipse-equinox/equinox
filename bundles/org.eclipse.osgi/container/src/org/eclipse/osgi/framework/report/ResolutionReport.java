@@ -23,6 +23,8 @@ public interface ResolutionReport {
 			FILTERED_BY_RESOLVER_HOOK, SINGLETON_SELECTION
 		}
 
+		Object getData();
+
 		Type getType();
 	}
 
