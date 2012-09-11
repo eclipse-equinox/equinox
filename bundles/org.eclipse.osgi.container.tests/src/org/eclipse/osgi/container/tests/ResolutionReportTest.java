@@ -55,7 +55,7 @@ public class ResolutionReportTest extends AbstractTest {
 	}
 
 	@Test
-	public void testFilteredByResolverHook() throws Exception {
+	public void testResolutionReportEntryFilteredByResolverHook() throws Exception {
 		DummyResolverHook hook = new DummyResolverHook() {
 			@Override
 			public void filterResolvable(Collection<BundleRevision> candidates) {
@@ -77,7 +77,7 @@ public class ResolutionReportTest extends AbstractTest {
 	}
 
 	@Test
-	public void testFilteredBySingletonNoneResolved() throws Exception {
+	public void testResolutionReportEntrySingletonSelectionNoneResolved() throws Exception {
 		DummyResolverHook hook = new DummyResolverHook();
 		DummyContainerAdaptor adaptor = createDummyAdaptor(hook);
 		ModuleContainer container = adaptor.getContainer();
@@ -95,7 +95,7 @@ public class ResolutionReportTest extends AbstractTest {
 	}
 
 	@Test
-	public void testFilteredBySingletonHighestVersionResolved() throws Exception {
+	public void testResolutionReportEntrySingletonSelectionHighestVersionResolved() throws Exception {
 		DummyResolverHook hook = new DummyResolverHook();
 		DummyContainerAdaptor adaptor = createDummyAdaptor(hook);
 		ModuleContainer container = adaptor.getContainer();
@@ -115,7 +115,7 @@ public class ResolutionReportTest extends AbstractTest {
 	}
 
 	@Test
-	public void testFilteredBySingletonLowestVersionResolved() throws Exception {
+	public void testResolutionReportEntrySingletonSelectionLowestVersionResolved() throws Exception {
 		DummyResolverHook hook = new DummyResolverHook();
 		DummyContainerAdaptor adaptor = createDummyAdaptor(hook);
 		ModuleContainer container = adaptor.getContainer();
