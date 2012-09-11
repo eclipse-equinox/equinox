@@ -12,6 +12,7 @@ package org.eclipse.osgi.container.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.*;
@@ -23,7 +24,7 @@ import org.junit.Test;
 import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.FrameworkWiring;
-import org.osgi.resource.Resource;
+import org.osgi.resource.*;
 import org.osgi.service.resolver.ResolutionException;
 
 public class ResolutionReportTest extends AbstractTest {
@@ -134,6 +135,23 @@ public class ResolutionReportTest extends AbstractTest {
 		assertResolutionReportEntryDataNotNull(entry.getData());
 	}
 
+	@Test
+	public void testResolutionReportEntryMissingCapability() throws Exception {
+		DummyResolverHook hook = new DummyResolverHook();
+		DummyContainerAdaptor adaptor = createDummyAdaptor(hook);
+		ModuleContainer container = adaptor.getContainer();
+		Module resolutionReportB = installDummyModule("resolution.report.b.MF", "resolution.report.b", container);
+		assertResolutionDoesNotSucceed(container, Arrays.asList(resolutionReportB));
+		ResolutionReport report = hook.getResolutionReports().get(0);
+		Map<Resource, List<ResolutionReport.Entry>> resourceToEntries = report.getEntries();
+		assertResolutionReportEntriesSize(resourceToEntries, 1);
+		List<ResolutionReport.Entry> entries = resourceToEntries.get(resolutionReportB.getCurrentRevision());
+		assertResolutionReportEntriesSize(entries, 1);
+		ResolutionReport.Entry entry = entries.get(0);
+		assertResolutionReportEntryTypeMissingCapability(entry.getType());
+		assertResolutionReportEntryDataMissingCapability(entry.getData(), "resolution.report.a");
+	}
+
 	private void clearResolutionReports(DummyResolverHook hook) {
 		hook.getResolutionReports().clear();
 	}
@@ -179,6 +197,17 @@ public class ResolutionReportTest extends AbstractTest {
 
 	private void assertResolutionReportEntryTypeSingletonSelection(ResolutionReport.Entry.Type type) {
 		assertResolutionReportEntryType(ResolutionReport.Entry.Type.SINGLETON_SELECTION, type);
+	}
+
+	private void assertResolutionReportEntryDataMissingCapability(Object data, String osgiWiringPackage) {
+		assertResolutionReportEntryDataNotNull(data);
+		assertTrue("Wrong resolution report entry data type", data instanceof Requirement);
+		Requirement requirement = (Requirement) data;
+		assertTrue("Wrong missing capability", requirement.getDirectives().get(Namespace.REQUIREMENT_FILTER_DIRECTIVE).contains("osgi.wiring.package=" + osgiWiringPackage));
+	}
+
+	private void assertResolutionReportEntryTypeMissingCapability(ResolutionReport.Entry.Type type) {
+		assertResolutionReportEntryType(ResolutionReport.Entry.Type.MISSING_CAPABILITY, type);
 	}
 
 	private void assertResolutionReportEntryType(ResolutionReport.Entry.Type expected, ResolutionReport.Entry.Type actual) {
