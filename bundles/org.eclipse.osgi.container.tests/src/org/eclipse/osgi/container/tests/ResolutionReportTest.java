@@ -65,22 +65,15 @@ public class ResolutionReportTest extends AbstractTest {
 		DummyContainerAdaptor adaptor = createDummyAdaptor(hook);
 		ModuleContainer container = adaptor.getContainer();
 		Module module = installDummyModule("resolution.report.a.MF", "resolution.report.a", container);
-		try {
-			container.resolve(Collections.singleton(module), true);
-			fail("Resolution should not have succeeded");
-		} catch (ResolutionException e) {
-			// Okay.
-		}
+		assertResolutionDoesNotSucceed(container, Arrays.asList(module));
 		ResolutionReport report = hook.getResolutionReports().get(0);
 		Map<Resource, List<ResolutionReport.Entry>> resourceToEntries = report.getEntries();
-		assertNotNull("No entries", resourceToEntries);
-		assertEquals("Wrong number of total entries", 1, resourceToEntries.size());
+		assertResolutionReportEntriesSize(resourceToEntries, 1);
 		List<ResolutionReport.Entry> entries = resourceToEntries.get(module.getCurrentRevision());
-		assertNotNull("No entry for resource", entries);
-		assertEquals("Wrong number of entries", 1, entries.size());
+		assertResolutionReportEntriesSize(entries, 1);
 		ResolutionReport.Entry entry = entries.get(0);
-		assertEquals("Wrong type", ResolutionReport.Entry.Type.FILTERED_BY_RESOLVER_HOOK, entry.getType());
-		assertEquals("Unexpected data", null, entry.getData());
+		assertResolutionReportEntryTypeFilteredByResolverHook(entry.getType());
+		assertResolutionReportEntryDataNull(entry.getData());
 	}
 
 	@Test
@@ -90,22 +83,15 @@ public class ResolutionReportTest extends AbstractTest {
 		ModuleContainer container = adaptor.getContainer();
 		Module resolutionReporta = installDummyModule("resolution.report.a.MF", "resolution.report.a", container);
 		Module resolutionReportaV1 = installDummyModule("resolution.report.a.v1.MF", "resolution.report.a.v1", container);
-		try {
-			container.resolve(Arrays.asList(resolutionReporta, resolutionReportaV1), true);
-			fail("Resolution should not have succeeded");
-		} catch (ResolutionException e) {
-			// Okay.
-		}
+		assertResolutionDoesNotSucceed(container, Arrays.asList(resolutionReporta, resolutionReportaV1));
 		ResolutionReport report = hook.getResolutionReports().get(0);
 		Map<Resource, List<ResolutionReport.Entry>> resourceToEntries = report.getEntries();
-		assertNotNull("No entries", resourceToEntries);
-		assertEquals("Wrong number of total entries", 1, resourceToEntries.size());
+		assertResolutionReportEntriesSize(resourceToEntries, 1);
 		List<ResolutionReport.Entry> entries = resourceToEntries.get(resolutionReporta.getCurrentRevision());
-		assertNotNull("No entry for resource", entries);
-		assertEquals("Wrong number of entries", 1, entries.size());
+		assertResolutionReportEntriesSize(entries, 1);
 		ResolutionReport.Entry entry = entries.get(0);
-		assertEquals("Wrong type", ResolutionReport.Entry.Type.SINGLETON_SELECTION, entry.getType());
-		assertNotNull("No data", entry.getData());
+		assertResolutionReportEntryTypeSingletonSelection(entry.getType());
+		assertResolutionReportEntryDataNotNull(entry.getData());
 	}
 
 	@Test
@@ -116,23 +102,16 @@ public class ResolutionReportTest extends AbstractTest {
 		Module resolutionReporta = installDummyModule("resolution.report.a.MF", "resolution.report.a", container);
 		Module resolutionReportaV1 = installDummyModule("resolution.report.a.v1.MF", "resolution.report.a.v1", container);
 		container.resolve(Arrays.asList(resolutionReportaV1), true);
-		hook.getResolutionReports().clear();
-		try {
-			container.resolve(Arrays.asList(resolutionReporta), true);
-			fail("Resolution should not have succeeded");
-		} catch (ResolutionException e) {
-			// Okay.
-		}
+		clearResolutionReports(hook);
+		assertResolutionDoesNotSucceed(container, Arrays.asList(resolutionReporta));
 		ResolutionReport report = hook.getResolutionReports().get(0);
 		Map<Resource, List<ResolutionReport.Entry>> resourceToEntries = report.getEntries();
-		assertNotNull("No entries", resourceToEntries);
-		assertEquals("Wrong number of total entries", 1, resourceToEntries.size());
+		assertResolutionReportEntriesSize(resourceToEntries, 1);
 		List<ResolutionReport.Entry> entries = resourceToEntries.get(resolutionReporta.getCurrentRevision());
-		assertNotNull("No entry for resource", entries);
-		assertEquals("Wrong number of entries", 1, entries.size());
+		assertResolutionReportEntriesSize(entries, 1);
 		ResolutionReport.Entry entry = entries.get(0);
-		assertEquals("Wrong type", ResolutionReport.Entry.Type.SINGLETON_SELECTION, entry.getType());
-		assertNotNull("No data", entry.getData());
+		assertResolutionReportEntryTypeSingletonSelection(entry.getType());
+		assertResolutionReportEntryDataNotNull(entry.getData());
 	}
 
 	@Test
@@ -142,23 +121,67 @@ public class ResolutionReportTest extends AbstractTest {
 		ModuleContainer container = adaptor.getContainer();
 		Module resolutionReporta = installDummyModule("resolution.report.a.MF", "resolution.report.a", container);
 		container.resolve(Arrays.asList(resolutionReporta), true);
-		hook.getResolutionReports().clear();
+		clearResolutionReports(hook);
 		Module resolutionReportaV1 = installDummyModule("resolution.report.a.v1.MF", "resolution.report.a.v1", container);
+		assertResolutionDoesNotSucceed(container, Arrays.asList(resolutionReportaV1));
+		ResolutionReport report = hook.getResolutionReports().get(0);
+		Map<Resource, List<ResolutionReport.Entry>> resourceToEntries = report.getEntries();
+		assertResolutionReportEntriesSize(resourceToEntries, 1);
+		List<ResolutionReport.Entry> entries = resourceToEntries.get(resolutionReportaV1.getCurrentRevision());
+		assertResolutionReportEntriesSize(entries, 1);
+		ResolutionReport.Entry entry = entries.get(0);
+		assertResolutionReportEntryTypeSingletonSelection(entry.getType());
+		assertResolutionReportEntryDataNotNull(entry.getData());
+	}
+
+	private void clearResolutionReports(DummyResolverHook hook) {
+		hook.getResolutionReports().clear();
+	}
+
+	private void assertResolutionDoesNotSucceed(ModuleContainer container, Collection<Module> modules) {
 		try {
-			container.resolve(Arrays.asList(resolutionReportaV1), true);
+			container.resolve(modules, true);
 			fail("Resolution should not have succeeded");
 		} catch (ResolutionException e) {
 			// Okay.
 		}
-		ResolutionReport report = hook.getResolutionReports().get(0);
-		Map<Resource, List<ResolutionReport.Entry>> resourceToEntries = report.getEntries();
-		assertNotNull("No entries", resourceToEntries);
-		assertEquals("Wrong number of total entries", 1, resourceToEntries.size());
-		List<ResolutionReport.Entry> entries = resourceToEntries.get(resolutionReportaV1.getCurrentRevision());
-		assertNotNull("No entry for resource", entries);
-		assertEquals("Wrong number of entries", 1, entries.size());
-		ResolutionReport.Entry entry = entries.get(0);
-		assertEquals("Wrong type", ResolutionReport.Entry.Type.SINGLETON_SELECTION, entry.getType());
-		assertNotNull("No data", entry.getData());
+	}
+
+	private void assertResolutionReportEntriesNotNull(Map<Resource, List<ResolutionReport.Entry>> entries) {
+		assertNotNull("Resolution report entries was null", entries);
+	}
+
+	private void assertResolutionReportEntriesSize(Map<Resource, List<ResolutionReport.Entry>> entries, int expected) {
+		assertResolutionReportEntriesNotNull(entries);
+		assertEquals("Wrong number of total resolution report entries", expected, entries.size());
+	}
+
+	private void assertResolutionReportEntriesNotNull(List<ResolutionReport.Entry> entries) {
+		assertNotNull("Resolution report entries for resource was null", entries);
+	}
+
+	private void assertResolutionReportEntriesSize(List<ResolutionReport.Entry> entries, int expected) {
+		assertResolutionReportEntriesNotNull(entries);
+		assertEquals("Wrong number of resolution report entries", expected, entries.size());
+	}
+
+	private void assertResolutionReportEntryDataNotNull(Object data) {
+		assertNotNull("No resolution report entry data", data);
+	}
+
+	private void assertResolutionReportEntryDataNull(Object data) {
+		assertEquals("Unexpected resolution report entry data", null, data);
+	}
+
+	private void assertResolutionReportEntryTypeFilteredByResolverHook(ResolutionReport.Entry.Type type) {
+		assertResolutionReportEntryType(ResolutionReport.Entry.Type.FILTERED_BY_RESOLVER_HOOK, type);
+	}
+
+	private void assertResolutionReportEntryTypeSingletonSelection(ResolutionReport.Entry.Type type) {
+		assertResolutionReportEntryType(ResolutionReport.Entry.Type.SINGLETON_SELECTION, type);
+	}
+
+	private void assertResolutionReportEntryType(ResolutionReport.Entry.Type expected, ResolutionReport.Entry.Type actual) {
+		assertEquals("Wrong resolution report entry type", expected, actual);
 	}
 }
