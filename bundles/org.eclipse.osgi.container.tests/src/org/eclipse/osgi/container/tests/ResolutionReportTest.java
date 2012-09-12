@@ -22,6 +22,7 @@ import org.eclipse.osgi.container.tests.dummys.*;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.junit.Test;
 import org.osgi.framework.Constants;
+import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.resource.*;
@@ -149,7 +150,32 @@ public class ResolutionReportTest extends AbstractTest {
 		assertResolutionReportEntriesSize(entries, 1);
 		ResolutionReport.Entry entry = entries.get(0);
 		assertResolutionReportEntryTypeMissingCapability(entry.getType());
-		assertResolutionReportEntryDataMissingCapability(entry.getData(), "resolution.report.a");
+		assertResolutionReportEntryDataMissingCapability(entry.getData(), "osgi.wiring.package", "resolution.report.a");
+	}
+
+	@Test
+	public void testResolutionReportEntryUnresolvedProvider() throws Exception {
+		DummyResolverHook hook = new DummyResolverHook();
+		DummyContainerAdaptor adaptor = createDummyAdaptor(hook);
+		ModuleContainer container = adaptor.getContainer();
+		Module resolutionReportC = installDummyModule("resolution.report.c.MF", "resolution.report.c", container);
+		Module resolutionReportD = installDummyModule("resolution.report.d.MF", "resolution.report.d", container);
+		assertResolutionDoesNotSucceed(container, Arrays.asList(resolutionReportC, resolutionReportD));
+		ResolutionReport report = hook.getResolutionReports().get(0);
+		Map<Resource, List<ResolutionReport.Entry>> resourceToEntries = report.getEntries();
+		assertResolutionReportEntriesSize(resourceToEntries, 2);
+
+		List<ResolutionReport.Entry> entries = resourceToEntries.get(resolutionReportC.getCurrentRevision());
+		assertResolutionReportEntriesSize(entries, 1);
+		ResolutionReport.Entry entry = entries.get(0);
+		assertResolutionReportEntryTypeUnresolvedProvider(entry.getType());
+		assertResolutionReportEntryDataUnresolvedProvider(entry.getData(), "resolution.report.d");
+
+		entries = resourceToEntries.get(resolutionReportD.getCurrentRevision());
+		assertResolutionReportEntriesSize(entries, 1);
+		entry = entries.get(0);
+		assertResolutionReportEntryTypeMissingCapability(entry.getType());
+		assertResolutionReportEntryDataMissingCapability(entry.getData(), "does.not.exist", null);
 	}
 
 	private void clearResolutionReports(DummyResolverHook hook) {
@@ -199,11 +225,26 @@ public class ResolutionReportTest extends AbstractTest {
 		assertResolutionReportEntryType(ResolutionReport.Entry.Type.SINGLETON_SELECTION, type);
 	}
 
-	private void assertResolutionReportEntryDataMissingCapability(Object data, String osgiWiringPackage) {
+	private void assertResolutionReportEntryTypeUnresolvedProvider(ResolutionReport.Entry.Type type) {
+		assertResolutionReportEntryType(ResolutionReport.Entry.Type.UNRESOLVED_PROVIDER, type);
+	}
+
+	private void assertResolutionReportEntryDataMissingCapability(Object data, String namespace, String namespaceValue) {
 		assertResolutionReportEntryDataNotNull(data);
 		assertTrue("Wrong resolution report entry data type", data instanceof Requirement);
 		Requirement requirement = (Requirement) data;
-		assertTrue("Wrong missing capability", requirement.getDirectives().get(Namespace.REQUIREMENT_FILTER_DIRECTIVE).contains("osgi.wiring.package=" + osgiWiringPackage));
+		assertEquals("Wrong requirement namespace", namespace, requirement.getNamespace());
+		if (namespaceValue == null)
+			return;
+		assertTrue("Wrong requirement namespace value", requirement.getDirectives().get(Namespace.REQUIREMENT_FILTER_DIRECTIVE).contains(namespace + "=" + namespaceValue));
+	}
+
+	private void assertResolutionReportEntryDataUnresolvedProvider(Object data, String osgiIdentity) {
+		assertResolutionReportEntryDataNotNull(data);
+		assertTrue("Wrong resolution report entry data type", data instanceof Resource);
+		Resource resource = (Resource) data;
+		Capability capability = resource.getCapabilities(IdentityNamespace.IDENTITY_NAMESPACE).get(0);
+		assertEquals("Wrong unresolved provider", osgiIdentity, capability.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE));
 	}
 
 	private void assertResolutionReportEntryTypeMissingCapability(ResolutionReport.Entry.Type type) {
