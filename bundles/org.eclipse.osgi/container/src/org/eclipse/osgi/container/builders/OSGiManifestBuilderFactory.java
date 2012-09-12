@@ -740,14 +740,15 @@ public final class OSGiManifestBuilderFactory {
 
 		boolean optional = elements.length > 0 && elements[elements.length - 1].getValue().equals("*"); //$NON-NLS-1$
 
-		List<String> allSelectionFilters = new ArrayList<String>(0);
 		AliasMapper aliasMapper = new AliasMapper();
-		StringBuilder allFilters = new StringBuilder();
-		allFilters.append("(|"); //$NON-NLS-1$
+		List<List<String>> allNativePaths = new ArrayList<List<String>>();
+		List<String> allSelectionFilters = new ArrayList<String>(0);
+		StringBuilder allNativeFilters = new StringBuilder();
+		allNativeFilters.append("(|"); //$NON-NLS-1$
 		for (ManifestElement nativeCode : elements) {
-			List<String> nativePaths = new ArrayList<String>(Arrays.asList(nativeCode.getValueComponents()));
-			StringBuilder filter = new StringBuilder();
+			allNativePaths.add(new ArrayList<String>(Arrays.asList(nativeCode.getValueComponents())));
 
+			StringBuilder filter = new StringBuilder();
 			filter.append("(&"); //$NON-NLS-1$
 			addToNativeCodeFilter(filter, nativeCode, Constants.BUNDLE_NATIVECODE_OSNAME, aliasMapper);
 			addToNativeCodeFilter(filter, nativeCode, Constants.BUNDLE_NATIVECODE_PROCESSOR, aliasMapper);
@@ -755,36 +756,42 @@ public final class OSGiManifestBuilderFactory {
 			addToNativeCodeFilter(filter, nativeCode, Constants.BUNDLE_NATIVECODE_LANGUAGE, aliasMapper);
 			filter.append(')');
 
-			allFilters.append(filter.toString());
-			Map<String, String> directives = new HashMap<String, String>(3);
-			directives.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_FILTER_DIRECTIVE, filter.toString());
-			directives.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE, EquinoxNativeEnvironmentNamespace.RESOLUTION_OPTIONAL);
+			allNativeFilters.append(filter.toString());
 			String selectionFilter = nativeCode.getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE);
 			if (selectionFilter != null) {
 				allSelectionFilters.add(selectionFilter);
-				directives.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_SELECTION_FILTER_DIRECTIVE, selectionFilter);
 			}
-
-			Map<String, Object> attributes = new HashMap<String, Object>(2);
-			attributes.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE, nativePaths);
-			builder.addRequirement(EquinoxNativeEnvironmentNamespace.NATIVE_ENVIRONMENT_NAMESPACE, directives, attributes);
 		}
-		allFilters.append(')');
+		allNativeFilters.append(')');
 
-		if (!optional) {
-			Map<String, String> directives = new HashMap<String, String>(2);
-			directives.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_FILTER_DIRECTIVE, allFilters.toString());
-			if (!allSelectionFilters.isEmpty()) {
-				StringBuilder selectionFilter = new StringBuilder();
-				selectionFilter.append("(|"); //$NON-NLS-1$
-				for (String filter : allSelectionFilters) {
-					selectionFilter.append(filter);
-				}
-				selectionFilter.append(")"); //$NON-NLS-1$
-				directives.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_SELECTION_FILTER_DIRECTIVE, selectionFilter.toString());
+		Map<String, String> directives = new HashMap<String, String>(2);
+		directives.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_FILTER_DIRECTIVE, allNativeFilters.toString());
+		if (optional) {
+			directives.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE, EquinoxNativeEnvironmentNamespace.RESOLUTION_OPTIONAL);
+		}
+
+		Map<String, Object> attributes = new HashMap<String, Object>(0);
+		int i = 0;
+		int numNativePaths = allNativePaths.size();
+		for (List<String> nativePaths : allNativePaths) {
+			if (numNativePaths == 0) {
+				attributes.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE, nativePaths);
+			} else {
+				attributes.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE + '.' + i, nativePaths);
 			}
-			builder.addRequirement(EquinoxNativeEnvironmentNamespace.NATIVE_ENVIRONMENT_NAMESPACE, directives, Collections.<String, Object> emptyMap());
+			i++;
 		}
+
+		if (!allSelectionFilters.isEmpty()) {
+			StringBuilder selectionFilter = new StringBuilder();
+			selectionFilter.append("(|"); //$NON-NLS-1$
+			for (String filter : allSelectionFilters) {
+				selectionFilter.append(filter);
+			}
+			selectionFilter.append(")"); //$NON-NLS-1$
+			directives.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_SELECTION_FILTER_DIRECTIVE, selectionFilter.toString());
+		}
+		builder.addRequirement(EquinoxNativeEnvironmentNamespace.NATIVE_ENVIRONMENT_NAMESPACE, directives, attributes);
 	}
 
 	private static void addToNativeCodeFilter(StringBuilder filter, ManifestElement nativeCode, String attribute, AliasMapper aliasMapper) {

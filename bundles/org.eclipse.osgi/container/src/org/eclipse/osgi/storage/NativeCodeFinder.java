@@ -16,10 +16,12 @@ import java.util.*;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.namespaces.EquinoxNativeEnvironmentNamespace;
 import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 
@@ -175,6 +177,26 @@ public class NativeCodeFinder {
 				List<String> result = (List<String>) nativeCode.get(0).getRequirement().getAttributes().get(EquinoxNativeEnvironmentNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE);
 				if (result != null)
 					return result;
+				// this must be a multi-clause Bundle-NativeCode header, need to check for the correct one in the index
+				try {
+					FilterImpl filter = FilterImpl.newInstance(moduleWire.getRequirement().getDirectives().get(EquinoxNativeEnvironmentNamespace.REQUIREMENT_FILTER_DIRECTIVE));
+					int index = -1;
+					Map<String, Object> capabilityAttrs = moduleWire.getCapability().getAttributes();
+					for (FilterImpl child : filter.getChildren()) {
+						index++;
+						if (child.matches(capabilityAttrs)) {
+							break;
+						}
+					}
+					if (index != -1) {
+						@SuppressWarnings("unchecked")
+						List<String> indexResult = (List<String>) nativeCode.get(0).getRequirement().getAttributes().get(EquinoxNativeEnvironmentNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE + '.' + index);
+						if (indexResult != null)
+							return indexResult;
+					}
+				} catch (InvalidSyntaxException e) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 		return Collections.emptyList();

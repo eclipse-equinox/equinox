@@ -1357,6 +1357,13 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return null;
 	}
 
+	public List<FilterImpl> getChildren() {
+		if (value instanceof FilterImpl[]) {
+			return new ArrayList<FilterImpl>(Arrays.asList((FilterImpl[]) value));
+		}
+		return Collections.emptyList();
+	}
+
 	/**
 	 * Returns all the attributes contained within this filter
 	 * @return all the attributes contained within this filter
