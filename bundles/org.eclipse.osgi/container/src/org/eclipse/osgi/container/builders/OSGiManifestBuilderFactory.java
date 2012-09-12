@@ -757,23 +757,23 @@ public final class OSGiManifestBuilderFactory {
 
 			allFilters.append(filter.toString());
 			Map<String, String> directives = new HashMap<String, String>(3);
-			directives.put(EquinoxNativeCodeNamespace.REQUIREMENT_FILTER_DIRECTIVE, filter.toString());
-			directives.put(EquinoxNativeCodeNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE, EquinoxNativeCodeNamespace.RESOLUTION_OPTIONAL);
+			directives.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_FILTER_DIRECTIVE, filter.toString());
+			directives.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE, EquinoxNativeEnvironmentNamespace.RESOLUTION_OPTIONAL);
 			String selectionFilter = nativeCode.getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE);
 			if (selectionFilter != null) {
 				allSelectionFilters.add(selectionFilter);
-				directives.put(EquinoxNativeCodeNamespace.REQUIREMENT_SELECTION_FILTER_DIRECTIVE, selectionFilter);
+				directives.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_SELECTION_FILTER_DIRECTIVE, selectionFilter);
 			}
 
 			Map<String, Object> attributes = new HashMap<String, Object>(2);
-			attributes.put(EquinoxNativeCodeNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE, nativePaths);
-			builder.addRequirement(EquinoxNativeCodeNamespace.EQUINOX_NATIVECODE_NAMESPACE, directives, attributes);
+			attributes.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE, nativePaths);
+			builder.addRequirement(EquinoxNativeEnvironmentNamespace.NATIVE_ENVIRONMENT_NAMESPACE, directives, attributes);
 		}
 		allFilters.append(')');
 
 		if (!optional) {
 			Map<String, String> directives = new HashMap<String, String>(2);
-			directives.put(EquinoxNativeCodeNamespace.REQUIREMENT_FILTER_DIRECTIVE, allFilters.toString());
+			directives.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_FILTER_DIRECTIVE, allFilters.toString());
 			if (!allSelectionFilters.isEmpty()) {
 				StringBuilder selectionFilter = new StringBuilder();
 				selectionFilter.append("(|"); //$NON-NLS-1$
@@ -781,9 +781,9 @@ public final class OSGiManifestBuilderFactory {
 					selectionFilter.append(filter);
 				}
 				selectionFilter.append(")"); //$NON-NLS-1$
-				directives.put(EquinoxNativeCodeNamespace.REQUIREMENT_SELECTION_FILTER_DIRECTIVE, selectionFilter.toString());
+				directives.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_SELECTION_FILTER_DIRECTIVE, selectionFilter.toString());
 			}
-			builder.addRequirement(EquinoxNativeCodeNamespace.EQUINOX_NATIVECODE_NAMESPACE, directives, Collections.<String, Object> emptyMap());
+			builder.addRequirement(EquinoxNativeEnvironmentNamespace.NATIVE_ENVIRONMENT_NAMESPACE, directives, Collections.<String, Object> emptyMap());
 		}
 	}
 
@@ -792,40 +792,28 @@ public final class OSGiManifestBuilderFactory {
 		Collection<String> attrAliases = new HashSet<String>(1);
 		if (attrValues != null) {
 			for (String attrValue : attrValues) {
-				Object aliasedName = null;
-				if (Constants.BUNDLE_NATIVECODE_OSNAME.equals(attribute)) {
-					aliasedName = aliasMapper.aliasOSName(attrValue);
-				} else if (Constants.BUNDLE_NATIVECODE_PROCESSOR.equals(attribute)) {
-					aliasedName = aliasMapper.aliasProcessor(attrValue);
+				if (Constants.BUNDLE_NATIVECODE_OSNAME.equals(attribute) || Constants.BUNDLE_NATIVECODE_PROCESSOR.equals(attribute)) {
+					attrValue = attrValue.toLowerCase();
 				}
-
-				if (aliasedName == null) {
-					attrAliases.add(attrValue);
-				} else if (aliasedName instanceof String) {
-					attrAliases.add(aliasedName.toString().toLowerCase());
-				} else {
-					for (Iterator<?> iAliases = ((Collection<?>) aliasedName).iterator(); iAliases.hasNext();) {
-						attrAliases.add(iAliases.next().toString().toLowerCase());
-					}
-				}
+				attrAliases.add(attrValue);
 			}
 		}
 		String filterAttribute = attribute;
 		if (Constants.BUNDLE_NATIVECODE_OSNAME.equals(attribute)) {
-			filterAttribute = EquinoxNativeCodeNamespace.CAPABILITY_OS_NAME_ATTRIBUTE;
+			filterAttribute = EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_NAME_ATTRIBUTE;
 		} else if (Constants.BUNDLE_NATIVECODE_PROCESSOR.equals(attribute)) {
-			filterAttribute = EquinoxNativeCodeNamespace.CAPABILITY_PROCESSOR_ATTRIBUTE;
+			filterAttribute = EquinoxNativeEnvironmentNamespace.CAPABILITY_PROCESSOR_ATTRIBUTE;
 		} else if (Constants.BUNDLE_NATIVECODE_LANGUAGE.equals(attribute)) {
-			filterAttribute = EquinoxNativeCodeNamespace.CAPABILITY_LANGUAGE_ATTRIBUTE;
+			filterAttribute = EquinoxNativeEnvironmentNamespace.CAPABILITY_LANGUAGE_ATTRIBUTE;
 		} else if (Constants.BUNDLE_NATIVECODE_OSVERSION.equals(attribute)) {
-			filterAttribute = EquinoxNativeCodeNamespace.CAPABILITY_OS_VERSION_ATTRIBUTE;
+			filterAttribute = EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_VERSION_ATTRIBUTE;
 		}
 		if (attrAliases.size() > 1) {
 			filter.append("(|"); //$NON-NLS-1$
 		}
 		for (String attrAlias : attrAliases) {
-			if (EquinoxNativeCodeNamespace.CAPABILITY_OS_VERSION_ATTRIBUTE.equals(attribute)) {
-				filter.append(new VersionRange(attrAlias).toFilterString(attribute));
+			if (EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_VERSION_ATTRIBUTE.equals(filterAttribute)) {
+				filter.append(new VersionRange(attrAlias).toFilterString(filterAttribute));
 			} else {
 				filter.append('(').append(filterAttribute).append('=').append(attrAlias).append(')');
 			}

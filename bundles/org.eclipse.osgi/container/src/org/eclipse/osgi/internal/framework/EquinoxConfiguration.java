@@ -631,26 +631,18 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		if (value == null) {
 			value = System.getProperty(PROP_JVM_OS_ARCH);
 			if (value != null) {
-				configuration.put(org.osgi.framework.Constants.FRAMEWORK_PROCESSOR, aliasMapper.aliasProcessor(value));
+				configuration.put(org.osgi.framework.Constants.FRAMEWORK_PROCESSOR, aliasMapper.getCanonicalProcessor(value));
 			}
 		}
+
 		value = configuration.getProperty(org.osgi.framework.Constants.FRAMEWORK_OS_NAME);
 		if (value == null) {
 			value = System.getProperty(PROP_JVM_OS_NAME);
-			try {
-				String canonicalValue = (String) aliasMapper.aliasOSName(value);
-				if (canonicalValue != null) {
-					value = canonicalValue;
-				}
-			} catch (ClassCastException ex) {
-				//A vector was returned from the alias mapper.
-				//The alias mapped to more than one canonical value
-				//such as "win32" for example
-			}
 			if (value != null) {
-				configuration.put(org.osgi.framework.Constants.FRAMEWORK_OS_NAME, value);
+				configuration.put(org.osgi.framework.Constants.FRAMEWORK_OS_NAME, aliasMapper.getCanonicalOSName(value));
 			}
 		}
+
 		value = configuration.getProperty(org.osgi.framework.Constants.FRAMEWORK_OS_VERSION);
 		if (value == null) {
 			value = System.getProperty(PROP_JVM_OS_VERSION);

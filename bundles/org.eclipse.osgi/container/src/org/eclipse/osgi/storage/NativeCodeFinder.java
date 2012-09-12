@@ -14,7 +14,7 @@ package org.eclipse.osgi.storage;
 import java.io.File;
 import java.util.*;
 import org.eclipse.osgi.container.*;
-import org.eclipse.osgi.container.namespaces.EquinoxNativeCodeNamespace;
+import org.eclipse.osgi.container.namespaces.EquinoxNativeEnvironmentNamespace;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
@@ -163,7 +163,7 @@ public class NativeCodeFinder {
 			}
 		}
 
-		List<ModuleWire> nativeCode = wiring.getRequiredModuleWires(EquinoxNativeCodeNamespace.EQUINOX_NATIVECODE_NAMESPACE);
+		List<ModuleWire> nativeCode = wiring.getRequiredModuleWires(EquinoxNativeEnvironmentNamespace.NATIVE_ENVIRONMENT_NAMESPACE);
 		if (nativeCode.isEmpty()) {
 			return Collections.emptyList();
 		}
@@ -172,7 +172,7 @@ public class NativeCodeFinder {
 		for (ModuleWire moduleWire : nativeCode) {
 			if (moduleWire.getRequirement().getRevision().equals(revision)) {
 				@SuppressWarnings("unchecked")
-				List<String> result = (List<String>) nativeCode.get(0).getRequirement().getAttributes().get(EquinoxNativeCodeNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE);
+				List<String> result = (List<String>) nativeCode.get(0).getRequirement().getAttributes().get(EquinoxNativeEnvironmentNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE);
 				if (result != null)
 					return result;
 			}

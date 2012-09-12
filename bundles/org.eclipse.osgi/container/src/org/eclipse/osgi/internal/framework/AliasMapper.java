@@ -19,45 +19,28 @@ import org.eclipse.osgi.internal.debug.Debug;
  * This class maps aliases.
  */
 public class AliasMapper {
-	private static Map<String, Object> processorAliasTable;
-	private static Map<String, Object> osnameAliasTable;
-
-	// Safe lazy initialization
-	private static synchronized Map<String, Object> getProcessorAliasTable() {
-		if (processorAliasTable == null) {
-			InputStream in = AliasMapper.class.getResourceAsStream("processor.aliases"); //$NON-NLS-1$
-			if (in != null) {
-				try {
-					processorAliasTable = initAliases(in);
-				} finally {
-					try {
-						in.close();
-					} catch (IOException ee) {
-						// nothing
-					}
-				}
-			}
-		}
-		return processorAliasTable;
+	private static final Map<String, Collection<String>> processorAliasTable = new HashMap<String, Collection<String>>();
+	private static final Map<String, String> processorCanonicalTable = new HashMap<String, String>();
+	private static final Map<String, Collection<String>> osnameAliasTable = new HashMap<String, Collection<String>>();
+	private static final Map<String, String> osnameCanonicalTable = new HashMap<String, String>();
+	static {
+		getTables("osname.aliases", osnameAliasTable, osnameCanonicalTable); //$NON-NLS-1$
+		getTables("processor.aliases", processorAliasTable, processorCanonicalTable); //$NON-NLS-1$
 	}
 
-	// Safe lazy initialization
-	private static synchronized Map<String, Object> getOSNameAliasTable() {
-		if (osnameAliasTable == null) {
-			InputStream in = AliasMapper.class.getResourceAsStream("osname.aliases"); //$NON-NLS-1$
-			if (in != null) {
+	private static void getTables(String resourceName, Map<String, Collection<String>> aliasTable, Map<String, String> canonicalTable) {
+		InputStream in = AliasMapper.class.getResourceAsStream(resourceName);
+		if (in != null) {
+			try {
+				initAliases(in, aliasTable, canonicalTable);
+			} finally {
 				try {
-					osnameAliasTable = initAliases(in);
-				} finally {
-					try {
-						in.close();
-					} catch (IOException ee) {
-						// nothing
-					}
+					in.close();
+				} catch (IOException ee) {
+					// nothing
 				}
 			}
 		}
-		return osnameAliasTable;
 	}
 
 	/**
@@ -66,16 +49,8 @@ public class AliasMapper {
 	 * @param processor Input name
 	 * @return aliased name (if any)
 	 */
-	public String aliasProcessor(String processor) {
-		processor = processor.toLowerCase();
-		Map<String, Object> aliases = getProcessorAliasTable();
-		if (aliases != null) {
-			String alias = (String) aliases.get(processor);
-			if (alias != null) {
-				processor = alias;
-			}
-		}
-		return processor;
+	public Collection<String> getProcessorAliases(String processor) {
+		return getAlias(processor.toLowerCase(), processorAliasTable);
 	}
 
 	/**
@@ -84,20 +59,29 @@ public class AliasMapper {
 	 * @param osname Input name
 	 * @return aliased name (if any)
 	 */
-	public Object aliasOSName(String osname) {
-		osname = osname.toLowerCase();
-		Map<String, Object> aliases = getOSNameAliasTable();
-		if (aliases != null) {
-			Object aliasObject = aliases.get(osname);
-			//String alias = (String) osnameAliasTable.get(osname);
-			if (aliasObject != null)
-				if (aliasObject instanceof String) {
-					osname = (String) aliasObject;
-				} else {
-					return aliasObject;
-				}
+	public Collection<String> getOSNameAliases(String osname) {
+		return getAlias(osname.toLowerCase(), osnameAliasTable);
+	}
+
+	public String getCanonicalOSName(String osname) {
+		String result = osnameCanonicalTable.get(osname.toLowerCase());
+		return result == null ? osname : result;
+	}
+
+	public String getCanonicalProcessor(String processor) {
+		String result = processorCanonicalTable.get(processor).toLowerCase();
+		return result == null ? processor : result;
+	}
+
+	private Collection<String> getAlias(String name, Map<String, Collection<String>> aliasMap) {
+		if (name == null) {
+			return Collections.emptyList();
 		}
-		return osname;
+		Collection<String> aliases = aliasMap == null ? null : aliasMap.get(name);
+		if (aliases != null) {
+			return Collections.unmodifiableCollection(aliases);
+		}
+		return Collections.singletonList(name.toLowerCase());
 	}
 
 	/**
@@ -106,8 +90,7 @@ public class AliasMapper {
 	 * @param in InputStream from which to read alias data.
 	 * @return Map of aliases.
 	 */
-	protected static Map<String, Object> initAliases(InputStream in) {
-		Map<String, Object> aliases = new HashMap<String, Object>(37);
+	protected static Map<String, Collection<String>> initAliases(InputStream in, Map<String, Collection<String>> aliasTable, Map<String, String> canonicalTable) {
 		try {
 			BufferedReader br;
 			try {
@@ -123,25 +106,35 @@ public class AliasMapper {
 				Tokenizer tokenizer = new Tokenizer(line);
 				String master = tokenizer.getString("# \t"); //$NON-NLS-1$
 				if (master != null) {
-					aliases.put(master.toLowerCase(), master);
+					String masterLower = master.toLowerCase();
+					canonicalTable.put(masterLower, master);
+					Collection<String> aliasLine = new ArrayList<String>(1);
+					aliasLine.add(masterLower);
 					parseloop: while (true) {
 						String alias = tokenizer.getString("# \t"); //$NON-NLS-1$
 						if (alias == null) {
 							break parseloop;
 						}
-						String lowerCaseAlias = alias.toLowerCase();
-						Object storedMaster = aliases.get(lowerCaseAlias);
-						if (storedMaster == null) {
-							aliases.put(lowerCaseAlias, master);
-						} else if (storedMaster instanceof String) {
-							List<String> newMaster = new ArrayList<String>();
-							newMaster.add((String) storedMaster);
-							newMaster.add(master);
-							aliases.put(lowerCaseAlias, newMaster);
+						String aliasLower = alias.toLowerCase();
+						aliasLine.add(aliasLower);
+						if (!canonicalTable.containsKey(aliasLower)) {
+							canonicalTable.put(aliasLower, master);
 						} else {
-							@SuppressWarnings("unchecked")
-							List<String> newMaster = ((List<String>) storedMaster);
-							newMaster.add(master);
+							// the alias has multiple masters just make its canonical name be the alias
+							canonicalTable.put(aliasLower, alias);
+						}
+					}
+					for (String alias : aliasLine) {
+						Collection<String> aliases = aliasTable.get(alias);
+						if (aliases == null) {
+							aliases = new ArrayList<String>(aliasLine);
+							aliasTable.put(alias, aliases);
+						} else {
+							for (String aliasToAdd : aliasLine) {
+								if (!aliases.contains(aliasToAdd)) {
+									aliases.add(aliasToAdd);
+								}
+							}
 						}
 					}
 				}
@@ -149,6 +142,6 @@ public class AliasMapper {
 		} catch (IOException e) {
 			Debug.printStackTrace(e);
 		}
-		return aliases;
+		return aliasTable;
 	}
 }

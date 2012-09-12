@@ -27,39 +27,39 @@ import org.osgi.resource.Namespace;
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @since 3.10
  */
-public class EquinoxNativeCodeNamespace extends Namespace {
+public class EquinoxNativeEnvironmentNamespace extends Namespace {
 
 	/**
-	 * Namespace name for native code.  Unlike typical name spaces
+	 * Namespace name for native environment.  Unlike typical name spaces
 	 * this namespace is not intended to be used as an attribute.
 	 */
-	public static final String EQUINOX_NATIVECODE_NAMESPACE = "equinox.native.code"; //$NON-NLS-1$
+	public static final String NATIVE_ENVIRONMENT_NAMESPACE = "equinox.native.environment"; //$NON-NLS-1$
 
 	/**
-	 * Specifies the supported canonical name for the environment OS.
+	 * Specifies the supported canonical names for the environment OS.
 	 * All names are lower case.
-	 * The value of this attribute must be of type {@code String}.
+	 * The value of this attribute must be of type {@code List<String>}.
 	 */
-	public static final String CAPABILITY_OS_NAME_ATTRIBUTE = "osname"; //$NON-NLS-1$
+	public static final String CAPABILITY_OS_NAME_ATTRIBUTE = NATIVE_ENVIRONMENT_NAMESPACE + ".osname"; //$NON-NLS-1$
 
 	/**
 	 * Specifies the environment OS version.
 	 * The value of this attribute must be of type {@code Version}.
 	 */
-	public static final String CAPABILITY_OS_VERSION_ATTRIBUTE = "osversion"; //$NON-NLS-1$
+	public static final String CAPABILITY_OS_VERSION_ATTRIBUTE = NATIVE_ENVIRONMENT_NAMESPACE + ".osversion"; //$NON-NLS-1$
 
 	/**
-	 * Specifies the canonical name for the environment processor.  The value
+	 * Specifies the canonical names for the environment processor.  The value
 	 * is lower case.
-	 * The value of this attribute must be of type {@code String}.
+	 * The value of this attribute must be of type {@code List<String>}.
 	 */
-	public static final String CAPABILITY_PROCESSOR_ATTRIBUTE = "processor"; //$NON-NLS-1$
+	public static final String CAPABILITY_PROCESSOR_ATTRIBUTE = NATIVE_ENVIRONMENT_NAMESPACE + ".processor"; //$NON-NLS-1$
 
 	/**
 	 * Specifies the language supported by the environment.  The value
 	 * of this attribute must be of type {@code String}.
 	 */
-	public static final String CAPABILITY_LANGUAGE_ATTRIBUTE = "language"; //$NON-NLS-1$
+	public static final String CAPABILITY_LANGUAGE_ATTRIBUTE = NATIVE_ENVIRONMENT_NAMESPACE + ".language"; //$NON-NLS-1$
 
 	/**
 	 * Specifies the paths to the native libraries for the native code requirement.  If this

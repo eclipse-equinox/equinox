@@ -20,7 +20,7 @@ import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
-import org.eclipse.osgi.container.namespaces.EquinoxNativeCodeNamespace;
+import org.eclipse.osgi.container.namespaces.EquinoxNativeEnvironmentNamespace;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.*;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
@@ -509,14 +509,34 @@ public class Storage {
 		language = language == null ? null : language.toLowerCase();
 
 		result.append(", "); //$NON-NLS-1$
-		result.append(EquinoxNativeCodeNamespace.EQUINOX_NATIVECODE_NAMESPACE).append("; "); //$NON-NLS-1$
-		result.append(EquinoxNativeCodeNamespace.CAPABILITY_OS_NAME_ATTRIBUTE).append("=").append(osName).append("; "); //$NON-NLS-1$ //$NON-NLS-2$
-		result.append(EquinoxNativeCodeNamespace.CAPABILITY_PROCESSOR_ATTRIBUTE).append("=").append(processor).append("; "); //$NON-NLS-1$ //$NON-NLS-2$
-		result.append(EquinoxNativeCodeNamespace.CAPABILITY_OS_VERSION_ATTRIBUTE + ":Version").append("=").append(osVersion).append("; "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		result.append(EquinoxNativeCodeNamespace.CAPABILITY_LANGUAGE_ATTRIBUTE).append("=").append(language); //$NON-NLS-1$
+		result.append(EquinoxNativeEnvironmentNamespace.NATIVE_ENVIRONMENT_NAMESPACE).append("; "); //$NON-NLS-1$
+		if (osName != null) {
+			osName = getAliasList(equinoxConfig.getAliasMapper().getOSNameAliases(osName));
+			result.append(EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_NAME_ATTRIBUTE).append(":List<String>=").append(osName).append("; "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+		if (processor != null) {
+			processor = getAliasList(equinoxConfig.getAliasMapper().getProcessorAliases(processor));
+			result.append(EquinoxNativeEnvironmentNamespace.CAPABILITY_PROCESSOR_ATTRIBUTE).append(":List<String>=").append(processor).append("; "); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		result.append(EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_VERSION_ATTRIBUTE).append(":Version").append("=").append(osVersion).append("; "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		result.append(EquinoxNativeEnvironmentNamespace.CAPABILITY_LANGUAGE_ATTRIBUTE).append("=").append(language); //$NON-NLS-1$
 		// TODO need a way to configure in arbitrary native code matching attributes
 
 		return result.toString();
+	}
+
+	String getAliasList(Collection<String> aliases) {
+		if (aliases.isEmpty()) {
+			return null;
+		}
+		StringBuilder builder = new StringBuilder();
+		builder.append('"');
+		for (String alias : aliases) {
+			builder.append(alias).append(',');
+		}
+		builder.setLength(builder.length() - 1);
+		builder.append('"');
+		return builder.toString();
 	}
 
 	private String getSystemExtraPackages() {
