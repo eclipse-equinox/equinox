@@ -452,6 +452,16 @@ final class ModuleResolver {
 	class ResolveProcess extends ResolveContext implements Comparator<Capability> {
 		private final ModuleResolutionReport.Builder reportBuilder = new ModuleResolutionReport.Builder();
 		private final Collection<ModuleRevision> unresolved;
+		/*
+		 * Contains unresolved revisions that should not be resolved as part of
+		 * this process. The reasons they should not be resolved will vary. For 
+		 * example, some might have been filtered out by the resolver hook while
+		 * others represent singleton collisions. It is assumed that all
+		 * unresolved revisions are disabled at the start of the resolve
+		 * process (see initialization in constructors). Any not filtered out
+		 * by ResolverHook.filterResolvable are then removed but may be added 
+		 * back later for other reasons.
+		 */
 		private final Collection<ModuleRevision> disabled;
 		private final Collection<ModuleRevision> triggers;
 		private final Collection<ModuleRevision> optionals;
