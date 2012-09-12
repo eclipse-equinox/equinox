@@ -502,7 +502,10 @@ final class ModuleResolver {
 		@Override
 		public List<Capability> findProviders(Requirement requirement) {
 			List<ModuleCapability> candidates = moduleDatabase.findCapabilities((ModuleRequirement) requirement);
+			// TODO Record missing capability here if empty? Then record other
+			// entry types later if an existing capability was filtered?
 			List<Capability> result = filterProviders(requirement, candidates);
+			// TODO Don't record the entry if the requirement is optional?
 			if (result.isEmpty())
 				reportBuilder.addEntry(requirement.getResource(), Entry.Type.MISSING_CAPABILITY, requirement);
 			return result;
