@@ -451,6 +451,10 @@ final class ModuleResolver {
 
 	class ResolveProcess extends ResolveContext implements Comparator<Capability> {
 		private final ModuleResolutionReport.Builder reportBuilder = new ModuleResolutionReport.Builder();
+		/*
+		 * Contains the revisions that were requested to be resolved and is not
+		 * modified post instantiation.
+		 */
 		private final Collection<ModuleRevision> unresolved;
 		/*
 		 * Contains unresolved revisions that should not be resolved as part of
@@ -471,6 +475,12 @@ final class ModuleResolver {
 		private final DynamicModuleRequirement dynamicReq;
 		private volatile ResolverHook hook = null;
 		private volatile Map<String, Collection<ModuleRevision>> byName = null;
+		/*
+		 * Maps a resource requested to be resolved to all unresolved providers
+		 * having one or more capabilities matching a requirement necessary for
+		 * successful resolution.
+		 */
+		private final Map<Resource, Set<Resource>> unresolvedProviders = new HashMap<Resource, Set<Resource>>();
 
 		ResolveProcess(Collection<ModuleRevision> unresolved, Collection<ModuleRevision> triggers, boolean triggersMandatory, Map<ModuleRevision, ModuleWiring> wirings, ModuleDatabase moduleDatabase) {
 			this.unresolved = unresolved;
@@ -505,6 +515,7 @@ final class ModuleResolver {
 			// TODO Record missing capability here if empty? Then record other
 			// entry types later if an existing capability was filtered?
 			List<Capability> result = filterProviders(requirement, candidates);
+			computeUnresolvedProviders(requirement, result);
 			// TODO Don't record the entry if the requirement is optional?
 			if (result.isEmpty())
 				reportBuilder.addEntry(requirement.getResource(), Entry.Type.MISSING_CAPABILITY, requirement);
@@ -615,6 +626,7 @@ final class ModuleResolver {
 					}
 					throw e;
 				}
+				Map<Resource, List<Wire>> result = null;
 				try {
 					filterResolvable();
 					selectSingletons();
@@ -631,8 +643,11 @@ final class ModuleResolver {
 					if (dynamicReq != null) {
 						return resolveDynamic();
 					}
-					return resolver.resolve(this);
+					result = resolver.resolve(this);
+					return result;
 				} finally {
+					computeUnresolvableProviderResolutionReportEntries(result);
+					// TODO Don't send out a report if the resolution was successful?
 					if (hook instanceof ResolutionReport.Listener)
 						((ResolutionReport.Listener) hook).handleResolutionReport(reportBuilder.build());
 					hook.end();
@@ -640,6 +655,73 @@ final class ModuleResolver {
 			} finally {
 				threadResolving.set(Boolean.FALSE);
 			}
+		}
+
+		/*
+		 * Given the results of a resolution, compute which, if any, of the
+		 * enabled, resolving resources are still unresolved. For those that are
+		 * unresolved, generate resolution report entries for unresolved
+		 * providers, if necessary.
+		 */
+		private void computeUnresolvableProviderResolutionReportEntries(Map<Resource, List<Wire>> resolution) {
+			// Create a collection representing the resources asked to be
+			// resolved.
+			Collection<Resource> shouldHaveResolvedResources = new ArrayList<Resource>(unresolved);
+			// Remove disabled resources.
+			shouldHaveResolvedResources.removeAll(disabled);
+			// Remove resolved resources, if necessary. The resolution will be
+			// null if the resolver threw an exception because the triggers
+			// were mandatory but didn't resolve.
+			if (resolution != null)
+				shouldHaveResolvedResources.removeAll(resolution.keySet());
+			// What remains are resources that should have resolved but didn't.
+			// For each resource, add report entries for any unresolved
+			// providers.
+			for (Resource shouldHaveResolvedResource : shouldHaveResolvedResources) {
+				assert !wirings.containsKey(shouldHaveResolvedResource);
+				if (unresolvedProviders.get(shouldHaveResolvedResource) == null)
+					continue;
+				for (Resource unresolvedProvider : unresolvedProviders.get(shouldHaveResolvedResource))
+					reportBuilder.addEntry(shouldHaveResolvedResource, Entry.Type.UNRESOLVED_PROVIDER, unresolvedProvider);
+			}
+		}
+
+		/*
+		 * Given a requirement and its matching capabilities, map the
+		 * requirement's resource to capability resources that are unresolved.
+		 */
+		private void computeUnresolvedProviders(Requirement requirement, Collection<? extends Capability> capabilities) {
+			if (capabilities.isEmpty())
+				// There were no capabilities matching the requirement.
+				return;
+			Set<Resource> toAdd = new HashSet<Resource>(capabilities.size());
+			for (Capability capability : capabilities) {
+				Resource resource = capability.getResource();
+				if (!isResolved(resource))
+					// Add the capability provider because it is not resolved.
+					toAdd.add(resource);
+			}
+			if (toAdd.isEmpty())
+				// There were no unresolved capability providers.
+				return;
+			Resource requirer = requirement.getResource();
+			Set<Resource> toAddTo = unresolvedProviders.get(requirer);
+			if (toAddTo == null)
+				// The requiring resource was not already mapped to any
+				// unresolved providers.
+				unresolvedProviders.put(requirer, toAdd);
+			else
+				// The requiring resource was already mapped to unresolved
+				// providers. Add the new ones.
+				toAddTo.addAll(toAdd);
+		}
+
+		/*
+		 * Determine if the specified resource is already resolved within the
+		 * context of this resolve process.
+		 */
+		private boolean isResolved(Resource resource) {
+			return wirings.containsKey(resource);
 		}
 
 		private Map<Resource, List<Wire>> resolveFrameworkExtensions() {
