@@ -154,7 +154,7 @@ public class ResolutionReportTest extends AbstractTest {
 	}
 
 	@Test
-	public void testResolutionReportEntryUnresolvedProvider() throws Exception {
+	public void testResolutionReportEntryUnresolvedProvider01() throws Exception {
 		DummyResolverHook hook = new DummyResolverHook();
 		DummyContainerAdaptor adaptor = createDummyAdaptor(hook);
 		ModuleContainer container = adaptor.getContainer();
@@ -178,6 +178,32 @@ public class ResolutionReportTest extends AbstractTest {
 		assertResolutionReportEntryDataMissingCapability(entry.getData(), "does.not.exist", null);
 	}
 
+	@Test
+	public void testResolutionReportEntryUnresolvedProvider02() throws Exception {
+		DummyResolverHook hook = new DummyResolverHook();
+		DummyContainerAdaptor adaptor = createDummyAdaptor(hook);
+		ModuleContainer container = adaptor.getContainer();
+		Module resolutionReportE = installDummyModule("resolution.report.e.MF", "resolution.report.e", container);
+		Module resolutionReportF = installDummyModule("resolution.report.f.MF", "resolution.report.f", container);
+		Module resolutionReportG = installDummyModule("resolution.report.g.MF", "resolution.report.g", container);
+		assertResolutionSucceeds(container, Arrays.asList(resolutionReportG, resolutionReportE, resolutionReportF));
+		ResolutionReport report = hook.getResolutionReports().get(0);
+		Map<Resource, List<ResolutionReport.Entry>> resourceToEntries = report.getEntries();
+		assertResolutionReportEntriesSize(resourceToEntries, 2);
+
+		List<ResolutionReport.Entry> entries = resourceToEntries.get(resolutionReportG.getCurrentRevision());
+		assertResolutionReportEntriesSize(entries, 1);
+		ResolutionReport.Entry entry = entries.get(0);
+		assertResolutionReportEntryTypeUnresolvedProvider(entry.getType());
+		assertResolutionReportEntryDataUnresolvedProvider(entry.getData(), "resolution.report.f");
+
+		entries = resourceToEntries.get(resolutionReportF.getCurrentRevision());
+		assertResolutionReportEntriesSize(entries, 1);
+		entry = entries.get(0);
+		assertResolutionReportEntryTypeMissingCapability(entry.getType());
+		assertResolutionReportEntryDataMissingCapability(entry.getData(), "does.not.exist", null);
+	}
+
 	private void clearResolutionReports(DummyResolverHook hook) {
 		hook.getResolutionReports().clear();
 	}
@@ -188,6 +214,15 @@ public class ResolutionReportTest extends AbstractTest {
 			fail("Resolution should not have succeeded");
 		} catch (ResolutionException e) {
 			// Okay.
+		}
+	}
+
+	private void assertResolutionSucceeds(ModuleContainer container, Collection<Module> modules) {
+		try {
+			container.resolve(modules, false);
+			// Okay
+		} catch (ResolutionException e) {
+			fail("Unexpected resolution exception");
 		}
 	}
 
