@@ -632,18 +632,19 @@ final class ModuleResolver {
 					selectSingletons();
 					Map<Resource, List<Wire>> extensionWirings = resolveFrameworkExtensions();
 					if (!extensionWirings.isEmpty()) {
-						return extensionWirings;
+						result = extensionWirings;
+					} else {
+						// remove disabled from optional and triggers to prevent the resolver from resolving them
+						optionals.removeAll(disabled);
+						if (triggers.removeAll(disabled) && triggersMandatory) {
+							throw new ResolutionException("Could not resolve mandatory modules because another singleton was selected or the module was disabled: " + disabled);
+						}
+						if (dynamicReq != null) {
+							result = resolveDynamic();
+						} else {
+							result = resolver.resolve(this);
+						}
 					}
-
-					// remove disabled from optional and triggers to prevent the resolver from resolving them
-					optionals.removeAll(disabled);
-					if (triggers.removeAll(disabled) && triggersMandatory) {
-						throw new ResolutionException("Could not resolve mandatory modules because another singleton was selected or the module was disabled: " + disabled);
-					}
-					if (dynamicReq != null) {
-						return resolveDynamic();
-					}
-					result = resolver.resolve(this);
 					return result;
 				} finally {
 					computeUnresolvableProviderResolutionReportEntries(result);
