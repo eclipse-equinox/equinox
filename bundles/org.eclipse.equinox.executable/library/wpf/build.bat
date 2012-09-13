@@ -105,7 +105,8 @@ set PROGRAM_LIBRARY=%programLibrary%
 set DEFAULT_OS=%defaultOS%
 set DEFAULT_OS_ARCH=%defaultOSArch%
 set DEFAULT_WS=%defaultWS%
-set OUTPUT_DIR=..\..\bin\%defaultWS%\%defaultOS%\%defaultOSArch%
+set EXEC_DIR=..\..\.\..\..\rt.equinox.binaries\org.eclipse.equinox.executable
+set OUTPUT_DIR=%EXEC_DIR%\bin\%defaultWS%\%defaultOS%\%defaultOSArch%
 set JAVA_HOME=%javaHome%
 
 rem --------------------------

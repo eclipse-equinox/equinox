@@ -60,7 +60,8 @@ PROGRAM_OUTPUT="$programOutput"
 DEFAULT_OS="$defaultOS"
 DEFAULT_OS_ARCH="$defaultOSArch"
 DEFAULT_WS="$defaultWS"
-OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+EXEC_DIR=../../../../../rt.equinox.binaries/org.eclipse.equinox.executable
+OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 
 export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS
 

@@ -35,6 +35,7 @@ programOutput="eclipse"
 defaultOS=""
 defaultOSArch=""
 defaultWS="gtk"
+EXEC_DIR=../../../../../rt.equinox.binaries/org.eclipse.equinox.executable
 defaultJava=DEFAULT_JAVA_JNI
 defaultJavaHome=""
 javaHome=""
@@ -59,39 +60,39 @@ case $OS in
 				defaultOSArch="x86_64"
 				defaultJava=DEFAULT_JAVA_EXEC
 				[ -d /bluebird/teamswt/swt-builddir/build/JRE/x64/jdk1.6.0_14 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/build/JRE/x64/jdk1.6.0_14"
-				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			i?86)
 				defaultOSArch="x86"
 				[ -d /bluebird/teamswt/swt-builddir/build/JRE/x32/jdk1.6.0_14 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/build/JRE/x32/jdk1.6.0_14"
-				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			"ppc")
 				defaultOSArch="ppc"
 				defaultJava=DEFAULT_JAVA_EXEC
 				[ -d /bluebird/teamswt/swt-builddir/JDKs/PPC/ibm-java2-ppc-50 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/PPC/ibm-java2-ppc-50"
-				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			"ppc64")
 				defaultOSArch="ppc64"
 				defaultJava=DEFAULT_JAVA_EXEC
 				[ -d /bluebird/teamswt/swt-builddir/JDKs/PPC64/ibm-java2-ppc64-50 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/PPC64/ibm-java2-ppc64-50"
-				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			"s390")
 				defaultOSArch="s390"
 				defaultJava=DEFAULT_JAVA_EXEC
-				OUTPUT_DIR="../../contributed/$defaultWS/$defaultOS/$defaultOSArch"
+				OUTPUT_DIR="$EXEC_DIR/contributed/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			"s390x")
 				defaultOSArch="s390x"
 				defaultJava=DEFAULT_JAVA_EXEC
-				OUTPUT_DIR="../../contributed/$defaultWS/$defaultOS/$defaultOSArch"
+				OUTPUT_DIR="$EXEC_DIR/contributed/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			"ia64")
 				defaultOSArch="ia64"
 				defaultJava=DEFAULT_JAVA_EXEC
-				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			*)
 				echo "*** Unknown MODEL <${MODEL}>"
@@ -115,7 +116,7 @@ case $OS in
 	"SunOS")
 		makefile="make_solaris.mak"
 		defaultOS="solaris"
-		OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+		OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 		#PATH=/usr/ccs/bin:/opt/SUNWspro/bin:$PATH
 		PATH=/usr/ccs/bin:/export/home/SUNWspro/bin:$PATH
 		export PATH
@@ -195,8 +196,8 @@ elif [ "$defaultOSArch" = "s390" ];  then
 	export M_ARCH
 fi
 
-LIBRARY_DIR="../../../org.eclipse.equinox.launcher/fragments/org.eclipse.equinox.launcher.$defaultWS.$defaultOS.$defaultOSArch"
-OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+LIBRARY_DIR="$EXEC_DIR/../org.eclipse.equinox.launcher.$defaultWS.$defaultOS.$defaultOSArch"
+OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 
 export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS DEFAULT_JAVA LIBRARY_DIR
 
