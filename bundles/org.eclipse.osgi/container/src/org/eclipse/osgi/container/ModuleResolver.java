@@ -679,11 +679,13 @@ final class ModuleResolver {
 			// For each resource, add report entries for any unresolved
 			// providers.
 			for (Resource shouldHaveResolvedResource : shouldHaveResolvedResources) {
-				assert !wirings.containsKey(shouldHaveResolvedResource);
 				if (unresolvedProviders.get(shouldHaveResolvedResource) == null)
 					continue;
-				for (Resource unresolvedProvider : unresolvedProviders.get(shouldHaveResolvedResource))
-					reportBuilder.addEntry(shouldHaveResolvedResource, Entry.Type.UNRESOLVED_PROVIDER, unresolvedProvider);
+				for (Resource unresolvedProvider : unresolvedProviders.get(shouldHaveResolvedResource)) {
+					if (resolution == null || !resolution.containsKey(unresolvedProvider)) {
+						reportBuilder.addEntry(shouldHaveResolvedResource, Entry.Type.UNRESOLVED_PROVIDER, unresolvedProvider);
+					}
+				}
 			}
 		}
 
