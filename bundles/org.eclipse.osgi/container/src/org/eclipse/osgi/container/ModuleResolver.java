@@ -647,7 +647,6 @@ final class ModuleResolver {
 					return result;
 				} finally {
 					computeUnresolvableProviderResolutionReportEntries(result);
-					// TODO Don't send out a report if the resolution was successful?
 					if (hook instanceof ResolutionReport.Listener)
 						((ResolutionReport.Listener) hook).handleResolutionReport(reportBuilder.build());
 					hook.end();
