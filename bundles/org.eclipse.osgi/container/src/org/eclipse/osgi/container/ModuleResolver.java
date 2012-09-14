@@ -646,7 +646,7 @@ final class ModuleResolver {
 					}
 					return result;
 				} finally {
-					computeUnresolvableProviderResolutionReportEntries(result);
+					computeUnresolvedProviderResolutionReportEntries(result);
 					if (hook instanceof ResolutionReport.Listener)
 						((ResolutionReport.Listener) hook).handleResolutionReport(reportBuilder.build());
 					hook.end();
@@ -662,7 +662,7 @@ final class ModuleResolver {
 		 * unresolved, generate resolution report entries for unresolved
 		 * providers, if necessary.
 		 */
-		private void computeUnresolvableProviderResolutionReportEntries(Map<Resource, List<Wire>> resolution) {
+		private void computeUnresolvedProviderResolutionReportEntries(Map<Resource, List<Wire>> resolution) {
 			// Create a collection representing the resources asked to be
 			// resolved.
 			Collection<Resource> shouldHaveResolvedResources = new ArrayList<Resource>(unresolved);
