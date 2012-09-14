@@ -516,7 +516,6 @@ final class ModuleResolver {
 			// entry types later if an existing capability was filtered?
 			List<Capability> result = filterProviders(requirement, candidates);
 			computeUnresolvedProviders(requirement, result);
-			// TODO Don't record the entry if the requirement is optional?
 			if (result.isEmpty())
 				reportBuilder.addEntry(requirement.getResource(), Entry.Type.MISSING_CAPABILITY, requirement);
 			return result;
