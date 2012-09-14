@@ -29,6 +29,8 @@ import org.osgi.resource.*;
 import org.osgi.service.resolver.ResolutionException;
 
 public class ResolutionReportTest extends AbstractTest {
+	// TODO Add test for dynamic resolution in conjunction with UNRESOLVED_PROVIDER entries.
+
 	@Test
 	public void testResolutionReportListenerService() throws Exception {
 		DummyResolverHook hook = new DummyResolverHook();
