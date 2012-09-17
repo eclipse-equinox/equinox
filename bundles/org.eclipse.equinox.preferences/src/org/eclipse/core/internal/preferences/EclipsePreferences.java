@@ -424,17 +424,25 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * @see org.osgi.service.prefs.Preferences#flush()
 	 */
 	public void flush() throws BackingStoreException {
+		IEclipsePreferences toFlush = null;
 		synchronized (childAndPropertyLock) {
-			internalFlush();
+			toFlush = internalFlush();
 		}
+		//if we aren't at the right level, then flush the appropriate node
+		if (toFlush != null)
+			toFlush.flush();
 		PreferencesService.getDefault().shareStrings();
 	}
 
 	/*
 	 * Do the real flushing in a non-synchronized internal method so sub-classes 
 	 * (mainly ProjectPreferences and ProfilePreferences) don't cause deadlocks.
+	 * 
+	 * If this node is not responsible for persistence (a load level), then this method
+	 * returns the node that should be flushed. Returns null if this method performed
+	 * the flush.
 	 */
-	protected void internalFlush() throws BackingStoreException {
+	protected IEclipsePreferences internalFlush() throws BackingStoreException {
 		// illegal state if this node has been removed
 		checkRemoved();
 
@@ -445,19 +453,17 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			String[] childrenNames = childrenNames();
 			for (int i = 0; i < childrenNames.length; i++)
 				node(childrenNames[i]).flush();
-			return;
+			return null;
 		}
 
 		// a parent is the load level for this node
-		if (this != loadLevel) {
-			loadLevel.flush();
-			return;
-		}
+		if (this != loadLevel)
+			return loadLevel;
 
 		// this node is a load level
 		// any work to do?
 		if (!dirty)
-			return;
+			return null;
 		//remove dirty bit before saving, to ensure that concurrent 
 		//changes during save mark the store as dirty
 		dirty = false;
@@ -468,6 +474,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			dirty = true;
 			throw e;
 		}
+		return null;
 	}
 
 	/*
