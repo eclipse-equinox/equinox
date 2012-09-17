@@ -22,7 +22,6 @@ import org.eclipse.osgi.container.tests.dummys.*;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.junit.Test;
 import org.osgi.framework.Constants;
-import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.resource.*;
@@ -171,7 +170,7 @@ public class ResolutionReportTest extends AbstractTest {
 		assertResolutionReportEntriesSize(entries, 1);
 		ResolutionReport.Entry entry = entries.get(0);
 		assertResolutionReportEntryTypeUnresolvedProvider(entry.getType());
-		assertResolutionReportEntryDataUnresolvedProvider(entry.getData(), "resolution.report.d");
+		assertResolutionReportEntryDataUnresolvedProvider(entry.getData(), Arrays.asList("resolution.report.d"));
 
 		entries = resourceToEntries.get(resolutionReportD.getCurrentRevision());
 		assertResolutionReportEntriesSize(entries, 1);
@@ -197,7 +196,7 @@ public class ResolutionReportTest extends AbstractTest {
 		assertResolutionReportEntriesSize(entries, 1);
 		ResolutionReport.Entry entry = entries.get(0);
 		assertResolutionReportEntryTypeUnresolvedProvider(entry.getType());
-		assertResolutionReportEntryDataUnresolvedProvider(entry.getData(), "resolution.report.f");
+		assertResolutionReportEntryDataUnresolvedProvider(entry.getData(), Arrays.asList("osgi.wiring.package"));
 
 		entries = resourceToEntries.get(resolutionReportF.getCurrentRevision());
 		assertResolutionReportEntriesSize(entries, 1);
@@ -209,6 +208,8 @@ public class ResolutionReportTest extends AbstractTest {
 	private void clearResolutionReports(DummyResolverHook hook) {
 		hook.getResolutionReports().clear();
 	}
+
+	// TODO Need to test both mandatory and optional triggers.
 
 	private void assertResolutionDoesNotSucceed(ModuleContainer container, Collection<Module> modules) {
 		try {
@@ -276,12 +277,23 @@ public class ResolutionReportTest extends AbstractTest {
 		assertTrue("Wrong requirement namespace value", requirement.getDirectives().get(Namespace.REQUIREMENT_FILTER_DIRECTIVE).contains(namespace + "=" + namespaceValue));
 	}
 
-	private void assertResolutionReportEntryDataUnresolvedProvider(Object data, String osgiIdentity) {
+	@SuppressWarnings("unchecked")
+	private void assertResolutionReportEntryDataUnresolvedProvider(Object data, Collection<String> namespaces) {
 		assertResolutionReportEntryDataNotNull(data);
-		assertTrue("Wrong resolution report entry data type", data instanceof Resource);
-		Resource resource = (Resource) data;
-		Capability capability = resource.getCapabilities(IdentityNamespace.IDENTITY_NAMESPACE).get(0);
-		assertEquals("Wrong unresolved provider", osgiIdentity, capability.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE));
+		assertTrue("Wrong resolution report entry data type", data instanceof Map);
+		Map<Requirement, Set<Capability>> unresolvedProviders = (Map<Requirement, Set<Capability>>) data;
+		assertEquals("Wrong number of unresolved providers", namespaces.size(), unresolvedProviders.size());
+		for (String namespace : namespaces) {
+			boolean found = false;
+			for (Map.Entry<Requirement, Set<Capability>> entry : unresolvedProviders.entrySet()) {
+				if (entry.getKey().getNamespace().equals(namespace)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+				fail("Unresolved provider not found: " + namespace);
+		}
 	}
 
 	private void assertResolutionReportEntryTypeMissingCapability(ResolutionReport.Entry.Type type) {

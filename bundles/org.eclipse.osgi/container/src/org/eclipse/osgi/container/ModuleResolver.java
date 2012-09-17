@@ -476,11 +476,15 @@ final class ModuleResolver {
 		private volatile ResolverHook hook = null;
 		private volatile Map<String, Collection<ModuleRevision>> byName = null;
 		/*
-		 * Maps a resource requested to be resolved to all unresolved providers
-		 * having one or more capabilities matching a requirement necessary for
-		 * successful resolution.
+		 * Used to generate the UNRESOLVED_PROVIDER resolution report entries.
+		 * 
+		 * The inner map associates a requirement to the set of all matching
+		 * capabilities that were found. The outer map associates the requiring
+		 * resource to the inner map so that its contents may easily be looked
+		 * up from the set of unresolved resources, if any, after the resolution
+		 * has occurred.
 		 */
-		private final Map<Resource, Set<Resource>> unresolvedProviders = new HashMap<Resource, Set<Resource>>();
+		private final Map<Resource, Map<Requirement, Set<Capability>>> unresolvedProviders = new HashMap<Resource, Map<Requirement, Set<Capability>>>();
 
 		ResolveProcess(Collection<ModuleRevision> unresolved, Collection<ModuleRevision> triggers, boolean triggersMandatory, Map<ModuleRevision, ModuleWiring> wirings, ModuleDatabase moduleDatabase) {
 			this.unresolved = unresolved;
@@ -515,9 +519,10 @@ final class ModuleResolver {
 			// TODO Record missing capability here if empty? Then record other
 			// entry types later if an existing capability was filtered?
 			List<Capability> result = filterProviders(requirement, candidates);
-			computeUnresolvedProviders(requirement, result);
 			if (result.isEmpty())
 				reportBuilder.addEntry(requirement.getResource(), Entry.Type.MISSING_CAPABILITY, requirement);
+			else
+				computeUnresolvedProviders(requirement, result);
 			return result;
 		}
 
@@ -677,52 +682,53 @@ final class ModuleResolver {
 			// For each resource, add report entries for any unresolved
 			// providers.
 			for (Resource shouldHaveResolvedResource : shouldHaveResolvedResources) {
-				if (unresolvedProviders.get(shouldHaveResolvedResource) == null)
+				Map<Requirement, Set<Capability>> requirementToCapabilities = unresolvedProviders.get(shouldHaveResolvedResource);
+				if (requirementToCapabilities == null)
 					continue;
-				for (Resource unresolvedProvider : unresolvedProviders.get(shouldHaveResolvedResource)) {
-					if (resolution == null || !resolution.containsKey(unresolvedProvider)) {
-						reportBuilder.addEntry(shouldHaveResolvedResource, Entry.Type.UNRESOLVED_PROVIDER, unresolvedProvider);
+				// If nothing resolved then there are no resolved resources to
+				// filter out.
+				if (resolution != null) {
+					// Filter out capability providers that resolved.
+					for (Iterator<Set<Capability>> values = requirementToCapabilities.values().iterator(); values.hasNext();) {
+						Set<Capability> value = values.next();
+						for (Iterator<Capability> capabilities = value.iterator(); capabilities.hasNext();)
+							if (resolution.containsKey(capabilities.next().getResource()))
+								// Remove the resolved capability provider.
+								capabilities.remove();
+						if (value.isEmpty())
+							// Remove the requirement that has no unresolved
+							// capability providers.
+							values.remove();
 					}
 				}
+				// Add a report entry if there are any remaining requirements
+				// pointing to unresolved capability providers.
+				if (!requirementToCapabilities.isEmpty())
+					reportBuilder.addEntry(shouldHaveResolvedResource, Entry.Type.UNRESOLVED_PROVIDER, requirementToCapabilities);
 			}
 		}
 
 		/*
 		 * Given a requirement and its matching capabilities, map the
-		 * requirement's resource to capability resources that are unresolved.
+		 * requirement's resource to the requirement and matching capabilities.
+		 * This data is used to compute report entries for resources that did
+		 * not resolve because a provider did not resolve.
 		 */
 		private void computeUnresolvedProviders(Requirement requirement, Collection<? extends Capability> capabilities) {
-			if (capabilities.isEmpty())
-				// There were no capabilities matching the requirement.
-				return;
-			Set<Resource> toAdd = new HashSet<Resource>(capabilities.size());
-			for (Capability capability : capabilities) {
-				Resource resource = capability.getResource();
-				if (!isResolved(resource))
-					// Add the capability provider because it is not resolved.
-					toAdd.add(resource);
-			}
-			if (toAdd.isEmpty())
-				// There were no unresolved capability providers.
-				return;
 			Resource requirer = requirement.getResource();
-			Set<Resource> toAddTo = unresolvedProviders.get(requirer);
-			if (toAddTo == null)
-				// The requiring resource was not already mapped to any
-				// unresolved providers.
-				unresolvedProviders.put(requirer, toAdd);
-			else
-				// The requiring resource was already mapped to unresolved
-				// providers. Add the new ones.
-				toAddTo.addAll(toAdd);
-		}
-
-		/*
-		 * Determine if the specified resource is already resolved within the
-		 * context of this resolve process.
-		 */
-		private boolean isResolved(Resource resource) {
-			return wirings.containsKey(resource);
+			Map<Requirement, Set<Capability>> requirementToCapabilities = unresolvedProviders.get(requirer);
+			if (requirementToCapabilities == null) {
+				requirementToCapabilities = new HashMap<Requirement, Set<Capability>>();
+				unresolvedProviders.put(requirer, requirementToCapabilities);
+			}
+			Set<Capability> value = requirementToCapabilities.get(requirement);
+			if (value == null) {
+				value = new HashSet<Capability>(capabilities.size());
+				requirementToCapabilities.put(requirement, value);
+			}
+			for (Capability capability : capabilities)
+				if (!wirings.containsKey(capability.getResource()))
+					value.add(capability);
 		}
 
 		private Map<Resource, List<Wire>> resolveFrameworkExtensions() {
