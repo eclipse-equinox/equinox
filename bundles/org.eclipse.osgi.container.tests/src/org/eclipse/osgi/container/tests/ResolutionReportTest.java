@@ -22,6 +22,7 @@ import org.eclipse.osgi.container.tests.dummys.*;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.junit.Test;
 import org.osgi.framework.Constants;
+import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.resource.*;
@@ -170,7 +171,12 @@ public class ResolutionReportTest extends AbstractTest {
 		assertResolutionReportEntriesSize(entries, 1);
 		ResolutionReport.Entry entry = entries.get(0);
 		assertResolutionReportEntryTypeUnresolvedProvider(entry.getType());
-		assertResolutionReportEntryDataUnresolvedProvider(entry.getData(), Arrays.asList("resolution.report.d"));
+		assertResolutionReportEntryDataUnresolvedProvider(
+				entry.getData(),
+				new UnresolvedProviderEntryBuilder()
+						.requirement(resolutionReportC.getCurrentRevision().getRequirements("resolution.report.d").get(0))
+						.capability(resolutionReportD.getCurrentRevision().getCapabilities("resolution.report.d").get(0))
+						.build());
 
 		entries = resourceToEntries.get(resolutionReportD.getCurrentRevision());
 		assertResolutionReportEntriesSize(entries, 1);
@@ -196,7 +202,12 @@ public class ResolutionReportTest extends AbstractTest {
 		assertResolutionReportEntriesSize(entries, 1);
 		ResolutionReport.Entry entry = entries.get(0);
 		assertResolutionReportEntryTypeUnresolvedProvider(entry.getType());
-		assertResolutionReportEntryDataUnresolvedProvider(entry.getData(), Arrays.asList("osgi.wiring.package"));
+		assertResolutionReportEntryDataUnresolvedProvider(
+				entry.getData(),
+				new UnresolvedProviderEntryBuilder()
+						.requirement(resolutionReportG.getCurrentRevision().getRequirements(PackageNamespace.PACKAGE_NAMESPACE).get(1))
+						.capability(resolutionReportF.getCurrentRevision().getCapabilities(PackageNamespace.PACKAGE_NAMESPACE).get(0))
+						.build());
 
 		entries = resourceToEntries.get(resolutionReportF.getCurrentRevision());
 		assertResolutionReportEntriesSize(entries, 1);
@@ -278,21 +289,17 @@ public class ResolutionReportTest extends AbstractTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void assertResolutionReportEntryDataUnresolvedProvider(Object data, Collection<String> namespaces) {
+	private void assertResolutionReportEntryDataUnresolvedProvider(Object data, Map<Requirement, List<Capability>> expected) {
 		assertResolutionReportEntryDataNotNull(data);
 		assertTrue("Wrong resolution report entry data type", data instanceof Map);
 		Map<Requirement, Set<Capability>> unresolvedProviders = (Map<Requirement, Set<Capability>>) data;
-		assertEquals("Wrong number of unresolved providers", namespaces.size(), unresolvedProviders.size());
-		for (String namespace : namespaces) {
-			boolean found = false;
-			for (Map.Entry<Requirement, Set<Capability>> entry : unresolvedProviders.entrySet()) {
-				if (entry.getKey().getNamespace().equals(namespace)) {
-					found = true;
-					break;
-				}
+		assertEquals("Wrong number of unresolved providers", expected.size(), unresolvedProviders.size());
+		for (Map.Entry<Requirement, List<Capability>> entry : expected.entrySet()) {
+			Set<Capability> actualCapabilities = unresolvedProviders.get(entry.getKey());
+			assertEquals("Wrong number of capabilities", entry.getValue().size(), actualCapabilities.size());
+			for (Capability c : entry.getValue()) {
+				assertTrue("Capability not found", actualCapabilities.contains(c));
 			}
-			if (!found)
-				fail("Unresolved provider not found: " + namespace);
 		}
 	}
 
