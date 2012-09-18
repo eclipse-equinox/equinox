@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -105,19 +106,8 @@ public class DefaultPreferences extends EclipsePreferences {
 	 * as an argument on the command-line.
 	 */
 	private void applyCommandLineDefaults() {
-		// prime the cache the first time
-		if (commandLineCustomization == null) {
-			String filename = pluginCustomizationFile;
-			if (filename == null) {
-				if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
-					PrefsMessages.message("Command-line preferences customization file not specified."); //$NON-NLS-1$
-				return;
-			}
-			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
-				PrefsMessages.message("Using command-line preference customization file: " + filename); //$NON-NLS-1$
-			commandLineCustomization = loadProperties(filename);
-		}
-		applyDefaults(null, commandLineCustomization, null);
+		if (commandLineCustomization != null)
+			applyDefaults(null, commandLineCustomization, null);
 	}
 
 	/*
@@ -153,6 +143,67 @@ public class DefaultPreferences extends EclipsePreferences {
 		return internalNode(childName, true, context);
 	}
 
+	private boolean containsNode(Properties props, IPath path) {
+		if (props == null)
+			return false;
+		for (Enumeration e = props.keys(); e.hasMoreElements();) {
+			String fullKey = (String) e.nextElement();
+			if (props.getProperty(fullKey) == null)
+				continue;
+			// remove last segment which stands for key
+			IPath nodePath = new Path(fullKey).removeLastSegments(1);
+			if (path.isPrefixOf(nodePath))
+				return true;
+		}
+		return false;
+	}
+
+	public boolean nodeExists(String path) throws BackingStoreException {
+		// use super implementation for empty and absolute paths
+		if (path.length() == 0 || path.charAt(0) == IPath.SEPARATOR)
+			return super.nodeExists(path);
+		// if the node already exists, nothing more to do
+		if (super.nodeExists(path))
+			return true;
+		// if the node does not exist, maybe it has not been loaded yet
+		initializeCustomizations();
+		// scope based path is a path relative to the "/default" node; this is the path that appears in customizations
+		IPath scopeBasedPath = new Path(absolutePath() + PATH_SEPARATOR + path).removeFirstSegments(1);
+		return containsNode(productCustomization, scopeBasedPath) || containsNode(commandLineCustomization, scopeBasedPath);
+	}
+
+	private void initializeCustomizations() {
+		// prime the cache the first time
+		if (productCustomization == null) {
+			BundleContext context = Activator.getContext();
+			if (context != null) {
+				ServiceTracker productTracker = new ServiceTracker(context, IProductPreferencesService.class.getName(), null);
+				productTracker.open();
+				IProductPreferencesService productSpecials = (IProductPreferencesService) productTracker.getService();
+				if (productSpecials != null) {
+					productCustomization = productSpecials.getProductCustomization();
+					productTranslation = productSpecials.getProductTranslation();
+				}
+				productTracker.close();
+			} else {
+				PrefsMessages.message("Product-specified preferences called before plugin is started"); //$NON-NLS-1$
+			}
+			if (productCustomization == null)
+				productCustomization = new Properties();
+		}
+		if (commandLineCustomization == null) {
+			String filename = pluginCustomizationFile;
+			if (filename == null) {
+				if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+					PrefsMessages.message("Command-line preferences customization file not specified."); //$NON-NLS-1$
+			} else {
+				if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+					PrefsMessages.message("Using command-line preference customization file: " + filename); //$NON-NLS-1$
+				commandLineCustomization = loadProperties(filename);
+			}
+		}
+	}
+
 	/*
 	 * Runtime defaults are the ones which are specified in code at runtime. 
 	 * 
@@ -176,24 +227,6 @@ public class DefaultPreferences extends EclipsePreferences {
 	 * file in the primary feature's plug-in directory.
 	 */
 	private void applyProductDefaults() {
-		// prime the cache the first time
-		if (productCustomization == null) {
-			BundleContext context = Activator.getContext();
-			if (context != null) {
-				ServiceTracker productTracker = new ServiceTracker(context, IProductPreferencesService.class.getName(), null);
-				productTracker.open();
-				IProductPreferencesService productSpecials = (IProductPreferencesService) productTracker.getService();
-				if (productSpecials != null) {
-					productCustomization = productSpecials.getProductCustomization();
-					productTranslation = productSpecials.getProductTranslation();
-				}
-				productTracker.close();
-			} else {
-				PrefsMessages.message("Product-specified preferences called before plugin is started"); //$NON-NLS-1$
-			}
-			if (productCustomization == null)
-				productCustomization = new Properties();
-		}
 		if (!productCustomization.isEmpty())
 			applyDefaults(null, productCustomization, productTranslation);
 	}
@@ -239,6 +272,7 @@ public class DefaultPreferences extends EclipsePreferences {
 		} finally {
 			clearInitializingBundleDefaults();
 		}
+		initializeCustomizations();
 		applyProductDefaults();
 		applyCommandLineDefaults();
 	}
