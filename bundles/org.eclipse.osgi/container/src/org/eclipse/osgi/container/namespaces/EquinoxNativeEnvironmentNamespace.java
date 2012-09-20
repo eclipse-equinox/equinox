@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.container.namespaces;
 
-import org.osgi.framework.Constants;
 import org.osgi.resource.Namespace;
 
 /**
@@ -69,11 +68,4 @@ public class EquinoxNativeEnvironmentNamespace extends Namespace {
 	 * The value of this attribute must be of type {@code List<String>}.
 	 */
 	public static final String REQUIREMENT_NATIVE_PATHS_ATTRIBUTE = "native.paths"; //$NON-NLS-1$
-
-	/**
-	 * Specifies the arbitrary selection filter for the native code requirement.  This filter 
-	 * is matched against the system properties.
-	 * @see Constants#SELECTION_FILTER_ATTRIBUTE
-	 */
-	public static final String REQUIREMENT_SELECTION_FILTER_DIRECTIVE = "selection.filter"; //$NON-NLS-1$
 }

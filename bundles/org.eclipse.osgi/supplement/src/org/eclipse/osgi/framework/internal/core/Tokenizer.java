@@ -110,7 +110,6 @@ public class Tokenizer {
 				StringBuffer sb = new StringBuffer();
 				cur++; /* skip quote */
 				char c = '\0';
-				int begin = cur;
 				for (; cur < max; cur++) {
 					c = val[cur];
 					// this is an escaped char
@@ -126,19 +125,18 @@ public class Tokenizer {
 					}
 					sb.append(c);
 				}
-				int count = cur - begin;
+
 				if (c == '\"') {
 					cur++;
-				}
+				} // TODO else error; no closing quote?
+
 				cursor = cur;
-				if (count > 0) {
-					skipWhiteSpace();
-					return sb.toString();
-				}
-			} else /* not a quoted string; same as token */
-			{
-				return getToken(terminals);
+				skipWhiteSpace();
+				return sb.toString();
+
 			}
+			/* not a quoted string; same as token */
+			return getToken(terminals);
 		}
 		return (null);
 	}

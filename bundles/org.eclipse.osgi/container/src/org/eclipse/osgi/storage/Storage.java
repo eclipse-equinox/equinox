@@ -209,6 +209,12 @@ public class Storage {
 					throw new IllegalStateException("Could not create a builder for the system bundle.", e); //$NON-NLS-1$
 				}
 			}
+			ModuleRevision currentRevision = systemModule.getCurrentRevision();
+			List<ModuleCapability> nativeEnvironments = currentRevision.getModuleCapabilities(EquinoxNativeEnvironmentNamespace.NATIVE_ENVIRONMENT_NAMESPACE);
+			Map<String, String> configMap = equinoxContainer.getConfiguration().getInitialConfig();
+			for (ModuleCapability nativeEnvironment : nativeEnvironments) {
+				nativeEnvironment.setTransientAttrs(configMap);
+			}
 		} catch (Exception e) {
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
@@ -512,16 +518,14 @@ public class Storage {
 		result.append(EquinoxNativeEnvironmentNamespace.NATIVE_ENVIRONMENT_NAMESPACE).append("; "); //$NON-NLS-1$
 		if (osName != null) {
 			osName = getAliasList(equinoxConfig.getAliasMapper().getOSNameAliases(osName));
-			result.append(EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_NAME_ATTRIBUTE).append(":List<String>=").append(osName).append("; "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			result.append(EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_NAME_ATTRIBUTE).append(":List<String>=").append(osName).append("; "); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (processor != null) {
 			processor = getAliasList(equinoxConfig.getAliasMapper().getProcessorAliases(processor));
 			result.append(EquinoxNativeEnvironmentNamespace.CAPABILITY_PROCESSOR_ATTRIBUTE).append(":List<String>=").append(processor).append("; "); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		result.append(EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_VERSION_ATTRIBUTE).append(":Version").append("=").append(osVersion).append("; "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		result.append(EquinoxNativeEnvironmentNamespace.CAPABILITY_LANGUAGE_ATTRIBUTE).append("=").append(language); //$NON-NLS-1$
-		// TODO need a way to configure in arbitrary native code matching attributes
-
+		result.append(EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_VERSION_ATTRIBUTE).append(":Version").append("=\"").append(osVersion).append("\"; "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		result.append(EquinoxNativeEnvironmentNamespace.CAPABILITY_LANGUAGE_ATTRIBUTE).append("=\"").append(language).append('\"'); //$NON-NLS-1$
 		return result.toString();
 	}
 
@@ -1418,7 +1422,7 @@ public class Storage {
 		return pathList;
 	}
 
-	private static String sanitizeFilterInput(String filePattern) throws InvalidSyntaxException {
+	public static String sanitizeFilterInput(String filePattern) throws InvalidSyntaxException {
 		StringBuffer buffer = null;
 		boolean foundEscape = false;
 		for (int i = 0; i < filePattern.length(); i++) {

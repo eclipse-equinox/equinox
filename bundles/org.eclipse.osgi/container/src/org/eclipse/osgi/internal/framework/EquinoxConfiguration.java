@@ -10,6 +10,17 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.framework;
 
+import static org.osgi.framework.Constants.FRAMEWORK_LANGUAGE;
+import static org.osgi.framework.Constants.FRAMEWORK_OS_NAME;
+import static org.osgi.framework.Constants.FRAMEWORK_OS_VERSION;
+import static org.osgi.framework.Constants.FRAMEWORK_PROCESSOR;
+import static org.osgi.framework.Constants.FRAMEWORK_STORAGE_CLEAN;
+import static org.osgi.framework.Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT;
+import static org.osgi.framework.Constants.FRAMEWORK_VENDOR;
+import static org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_EXTENSION;
+import static org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_FRAGMENT;
+import static org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_REQUIREBUNDLE;
+
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.*;
@@ -52,11 +63,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String VARIABLE_DELIM_STRING = "$"; //$NON-NLS-1$
 	public static final char VARIABLE_DELIM_CHAR = '$';
 
+	private final Map<String, String> initialConfig;
 	private final Properties configuration;
-	private final String nl;
-	private final String os;
-	private final String ws;
-	private final String arch;
 
 	private final Debug debug;
 	private final DebugOptions debugOptions;
@@ -169,9 +177,12 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public static final String PROP_FORCED_RESTART = "osgi.forcedRestart"; //$NON-NLS-1$
 
-	EquinoxConfiguration(Map<String, String> initialConfig, HookRegistry hookRegistry) {
+	private final static Collection<String> populateInitConfig = Arrays.asList(PROP_OSGI_ARCH, PROP_OSGI_OS, PROP_OSGI_WS, PROP_OSGI_NL, FRAMEWORK_OS_NAME, FRAMEWORK_OS_VERSION, FRAMEWORK_PROCESSOR, FRAMEWORK_LANGUAGE);
+
+	EquinoxConfiguration(Map<String, String> initialConfiguration, HookRegistry hookRegistry) {
+		this.initialConfig = initialConfiguration == null ? new HashMap<String, String>(0) : new HashMap<String, String>(initialConfiguration);
 		this.hookRegistry = hookRegistry;
-		String useSystemPropsValue = initialConfig == null ? null : initialConfig.get(PROP_USE_SYSTEM_PROPERTIES);
+		String useSystemPropsValue = initialConfig.get(PROP_USE_SYSTEM_PROPERTIES);
 		boolean useSystemProps = useSystemPropsValue == null ? false : Boolean.parseBoolean(useSystemPropsValue);
 		this.configuration = useSystemProps ? System.getProperties() : new Properties();
 		if (useSystemProps) {
@@ -179,91 +190,25 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			for (Map.Entry<String, String> configEntry : initialConfig.entrySet()) {
 				if (!this.configuration.containsKey(configEntry.getKey())) {
 					this.configuration.put(configEntry.getKey(), configEntry.getValue());
+				} else {
+					// override the initial config value
+					Object systemValue = this.configuration.get(configEntry.getKey());
+					if (systemValue instanceof String) {
+						configEntry.setValue((String) systemValue);
+					}
 				}
 			}
 		} else {
 			this.configuration.putAll(initialConfig);
 		}
-		initializeProperties(this.configuration, aliasMapper);
-		/*
-		 * Initializes the execution context for this run of the platform.  The context
-		 * includes information about the locale, operating system and window system.
-		 * 
-		 * NOTE: The OS, WS, and ARCH values should never be null. The executable should
-		 * be setting these values and therefore this code path is obsolete for Eclipse
-		 * when run from the executable.
-		 */
 
-		// if the user didn't set the locale with a command line argument then use the default.
-		String nlValue = configuration.getProperty(PROP_OSGI_NL);
-		if (nlValue != null) {
-			StringTokenizer tokenizer = new StringTokenizer(nlValue, "_"); //$NON-NLS-1$
-			int segments = tokenizer.countTokens();
-			try {
-				Locale userLocale = null;
-				switch (segments) {
-					case 1 :
-						// use the 2 arg constructor to maintain compatibility with 1.3.1
-						userLocale = new Locale(tokenizer.nextToken(), ""); //$NON-NLS-1$
-						break;
-					case 2 :
-						userLocale = new Locale(tokenizer.nextToken(), tokenizer.nextToken());
-						break;
-					case 3 :
-						userLocale = new Locale(tokenizer.nextToken(), tokenizer.nextToken(), tokenizer.nextToken());
-						break;
-					default :
-						// if the user passed us in a bogus value then log a message and use the default
-						System.err.println(NLS.bind(EclipseAdaptorMsg.error_badNL, nlValue));
-						userLocale = Locale.getDefault();
-						break;
-				}
-				Locale.setDefault(userLocale);
-				// TODO what the heck is this for?? why not just use osgi.nl
-				configuration.put(PROP_OSGI_NL_USER, nlValue);
-			} catch (NoSuchElementException e) {
-				// fall through and use the default
+		initializeProperties(this.configuration, aliasMapper);
+		for (String initialKey : populateInitConfig) {
+			String value = this.configuration.getProperty(initialKey);
+			if (value != null) {
+				this.initialConfig.put(initialKey, value);
 			}
 		}
-		nlValue = Locale.getDefault().toString();
-		configuration.put(PROP_OSGI_NL, nlValue);
-
-		// if the user didn't set the operating system with a command line 
-		// argument then use the default.
-		String osValue = configuration.getProperty(PROP_OSGI_OS);
-		if (osValue == null) {
-			osValue = guessOS(System.getProperty(PROP_JVM_OS_NAME));
-			configuration.put(PROP_OSGI_OS, osValue);
-		}
-
-		// if the user didn't set the window system with a command line 
-		// argument then use the default.
-		String wsValue = configuration.getProperty(PROP_OSGI_WS);
-		if (wsValue == null) {
-			wsValue = guessWS(osValue);
-			configuration.put(PROP_OSGI_WS, wsValue);
-		}
-
-		// if the user didn't set the system architecture with a command line 
-		// argument then use the default.
-		String archValue = configuration.getProperty(PROP_OSGI_ARCH);
-		if (archValue == null) {
-			String name = System.getProperty(PROP_JVM_OS_ARCH);
-			// Map i386 architecture to x86
-			if (name.equalsIgnoreCase(INTERNAL_ARCH_I386))
-				archValue = Constants.ARCH_X86;
-			// Map amd64 architecture to x86_64
-			else if (name.equalsIgnoreCase(INTERNAL_AMD64))
-				archValue = Constants.ARCH_X86_64;
-			else
-				archValue = name;
-			configuration.put(PROP_OSGI_ARCH, archValue);
-		}
-
-		nl = nlValue;
-		os = osValue;
-		ws = wsValue;
-		arch = archValue;
 
 		this.debugOptions = new FrameworkDebugOptions(this);
 		this.debug = new Debug(this.debugOptions);
@@ -305,8 +250,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			if (libExtensions[i].length() > 0 && libExtensions[i].charAt(0) != '.')
 				libExtensions[i] = '.' + libExtensions[i];
 		LIB_EXTENSIONS = Collections.unmodifiableList(Arrays.asList(libExtensions));
-		ECLIPSE_LIB_VARIANTS = buildEclipseLibraryVariants(ws, os, arch, nl);
-		ECLIPSE_NL_JAR_VARIANTS = buildNLJarVariants(nl);
+		ECLIPSE_LIB_VARIANTS = buildEclipseLibraryVariants(getWS(), getOS(), getOSArch(), getNL());
+		ECLIPSE_NL_JAR_VARIANTS = buildNLJarVariants(getNL());
 		DEFINE_PACKAGE_ATTRIBUTES = !"noattributes".equals(configuration.getProperty(PROP_DEFINE_PACKAGES)); //$NON-NLS-1$
 
 		String bsnVersion = configuration.getProperty(org.osgi.framework.Constants.FRAMEWORK_BSNVERSION);
@@ -326,19 +271,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		PARALLEL_CAPABLE = CLASS_LOADER_TYPE_PARALLEL.equals(getConfiguration(PROP_CLASS_LOADER_TYPE));
 	}
 
-	public Map<String, String> asMap() {
-		Map<String, String> result = new HashMap<String, String>();
-		synchronized (configuration) {
-			for (Object key : configuration.keySet()) {
-				if (key instanceof String) {
-					Object value = configuration.get(key);
-					if (value instanceof String) {
-						result.put((String) key, (String) value);
-					}
-				}
-			}
-		}
-		return result;
+	public Map<String, String> getInitialConfig() {
+		return Collections.unmodifiableMap(initialConfig);
 	}
 
 	private static List<String> buildEclipseLibraryVariants(String ws, String os, String arch, String nl) {
@@ -397,19 +331,19 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	}
 
 	public String getOSArch() {
-		return arch;
+		return this.configuration.getProperty(PROP_OSGI_ARCH);
 	}
 
 	public String getNL() {
-		return nl;
+		return this.configuration.getProperty(PROP_OSGI_NL);
 	}
 
 	public String getOS() {
-		return os;
+		return this.configuration.getProperty(PROP_OSGI_OS);
 	}
 
 	public String getWS() {
-		return ws;
+		return this.configuration.getProperty(PROP_OSGI_WS);
 	}
 
 	public void setAllArgs(String[] allArgs) {
@@ -607,6 +541,19 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		}
 	}
 
+	void mergeConfiguration(Properties source) {
+		for (Enumeration<?> e = source.keys(); e.hasMoreElements();) {
+			String key = (String) e.nextElement();
+			String value = source.getProperty(key);
+			if (getConfiguration(key) == null) {
+				setProperty(key, value);
+				initialConfig.put(key, value);
+			} else {
+				initialConfig.put(key, getConfiguration(key));
+			}
+		}
+	}
+
 	private static void initializeProperties(Properties configuration, AliasMapper aliasMapper) {
 		// initialize some framework properties that must always be set
 		if (configuration.get(PROP_FRAMEWORK) == null || configuration.get(EquinoxLocations.PROP_INSTALL_AREA) == null) {
@@ -626,24 +573,24 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		configuration.put(PROP_FRAMEWORK, decode(configuration.getProperty(PROP_FRAMEWORK)));
 		configuration.put(EquinoxLocations.PROP_INSTALL_AREA, decode(configuration.getProperty(EquinoxLocations.PROP_INSTALL_AREA)));
 
-		configuration.put(org.osgi.framework.Constants.FRAMEWORK_VENDOR, ECLIPSE_FRAMEWORK_VENDOR);
-		String value = configuration.getProperty(org.osgi.framework.Constants.FRAMEWORK_PROCESSOR);
+		configuration.put(FRAMEWORK_VENDOR, ECLIPSE_FRAMEWORK_VENDOR);
+		String value = configuration.getProperty(FRAMEWORK_PROCESSOR);
 		if (value == null) {
 			value = System.getProperty(PROP_JVM_OS_ARCH);
 			if (value != null) {
-				configuration.put(org.osgi.framework.Constants.FRAMEWORK_PROCESSOR, aliasMapper.getCanonicalProcessor(value));
+				configuration.put(FRAMEWORK_PROCESSOR, aliasMapper.getCanonicalProcessor(value));
 			}
 		}
 
-		value = configuration.getProperty(org.osgi.framework.Constants.FRAMEWORK_OS_NAME);
+		value = configuration.getProperty(FRAMEWORK_OS_NAME);
 		if (value == null) {
 			value = System.getProperty(PROP_JVM_OS_NAME);
 			if (value != null) {
-				configuration.put(org.osgi.framework.Constants.FRAMEWORK_OS_NAME, aliasMapper.getCanonicalOSName(value));
+				configuration.put(FRAMEWORK_OS_NAME, aliasMapper.getCanonicalOSName(value));
 			}
 		}
 
-		value = configuration.getProperty(org.osgi.framework.Constants.FRAMEWORK_OS_VERSION);
+		value = configuration.getProperty(FRAMEWORK_OS_VERSION);
 		if (value == null) {
 			value = System.getProperty(PROP_JVM_OS_VERSION);
 			if (value != null) {
@@ -682,20 +629,96 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 					// must be an invalid qualifier; just ignore it
 					value = new Version(major, minor, micro).toString();
 				}
-				configuration.put(org.osgi.framework.Constants.FRAMEWORK_OS_VERSION, value);
+				configuration.put(FRAMEWORK_OS_VERSION, value);
 			}
 		}
-		value = configuration.getProperty(org.osgi.framework.Constants.FRAMEWORK_LANGUAGE);
+		value = configuration.getProperty(FRAMEWORK_LANGUAGE);
 		if (value == null)
 			// set the value of the framework language property
-			configuration.put(org.osgi.framework.Constants.FRAMEWORK_LANGUAGE, Locale.getDefault().getLanguage());
+			configuration.put(FRAMEWORK_LANGUAGE, Locale.getDefault().getLanguage());
 		// set the support properties for fragments and require-bundle (bug 173090)
-		configuration.put(org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_FRAGMENT, "true"); //$NON-NLS-1$
-		configuration.put(org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_REQUIREBUNDLE, "true"); //$NON-NLS-1$
-		configuration.put(org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_EXTENSION, "true"); //$NON-NLS-1$
-		if (org.osgi.framework.Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT.equals(configuration.get(org.osgi.framework.Constants.FRAMEWORK_STORAGE_CLEAN))) {
+		configuration.put(SUPPORTS_FRAMEWORK_FRAGMENT, "true"); //$NON-NLS-1$
+		configuration.put(SUPPORTS_FRAMEWORK_REQUIREBUNDLE, "true"); //$NON-NLS-1$
+		configuration.put(SUPPORTS_FRAMEWORK_EXTENSION, "true"); //$NON-NLS-1$
+		if (FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT.equals(configuration.get(FRAMEWORK_STORAGE_CLEAN))) {
 			configuration.put(PROP_CLEAN, "true"); //$NON-NLS-1$
 		}
+
+		/*
+		 * Initializes the execution context for this run of the platform.  The context
+		 * includes information about the locale, operating system and window system.
+		 * 
+		 * NOTE: The OS, WS, and ARCH values should never be null. The executable should
+		 * be setting these values and therefore this code path is obsolete for Eclipse
+		 * when run from the executable.
+		 */
+
+		// if the user didn't set the locale with a command line argument then use the default.
+		String nlValue = configuration.getProperty(PROP_OSGI_NL);
+		if (nlValue != null) {
+			StringTokenizer tokenizer = new StringTokenizer(nlValue, "_"); //$NON-NLS-1$
+			int segments = tokenizer.countTokens();
+			try {
+				Locale userLocale = null;
+				switch (segments) {
+					case 1 :
+						// use the 2 arg constructor to maintain compatibility with 1.3.1
+						userLocale = new Locale(tokenizer.nextToken(), ""); //$NON-NLS-1$
+						break;
+					case 2 :
+						userLocale = new Locale(tokenizer.nextToken(), tokenizer.nextToken());
+						break;
+					case 3 :
+						userLocale = new Locale(tokenizer.nextToken(), tokenizer.nextToken(), tokenizer.nextToken());
+						break;
+					default :
+						// if the user passed us in a bogus value then log a message and use the default
+						System.err.println(NLS.bind(EclipseAdaptorMsg.error_badNL, nlValue));
+						userLocale = Locale.getDefault();
+						break;
+				}
+				Locale.setDefault(userLocale);
+				// TODO what the heck is this for?? why not just use osgi.nl
+				configuration.put(PROP_OSGI_NL_USER, nlValue);
+			} catch (NoSuchElementException e) {
+				// fall through and use the default
+			}
+		}
+		nlValue = Locale.getDefault().toString();
+		configuration.put(PROP_OSGI_NL, nlValue);
+
+		// if the user didn't set the operating system with a command line 
+		// argument then use the default.
+		String osValue = configuration.getProperty(PROP_OSGI_OS);
+		if (osValue == null) {
+			osValue = guessOS(System.getProperty(PROP_JVM_OS_NAME));
+			configuration.put(PROP_OSGI_OS, osValue);
+		}
+
+		// if the user didn't set the window system with a command line 
+		// argument then use the default.
+		String wsValue = configuration.getProperty(PROP_OSGI_WS);
+		if (wsValue == null) {
+			wsValue = guessWS(osValue);
+			configuration.put(PROP_OSGI_WS, wsValue);
+		}
+
+		// if the user didn't set the system architecture with a command line 
+		// argument then use the default.
+		String archValue = configuration.getProperty(PROP_OSGI_ARCH);
+		if (archValue == null) {
+			String name = System.getProperty(PROP_JVM_OS_ARCH);
+			// Map i386 architecture to x86
+			if (name.equalsIgnoreCase(INTERNAL_ARCH_I386))
+				archValue = Constants.ARCH_X86;
+			// Map amd64 architecture to x86_64
+			else if (name.equalsIgnoreCase(INTERNAL_AMD64))
+				archValue = Constants.ARCH_X86_64;
+			else
+				archValue = name;
+			configuration.put(PROP_OSGI_ARCH, archValue);
+		}
+
 	}
 
 	private static int parseVersionInt(String value) {

@@ -116,16 +116,7 @@ public class EquinoxContainer {
 		} catch (MalformedURLException e) {
 			// its ok.  This should never happen
 		}
-		mergeProperties(equinoxConfig, loadProperties(location, equinoxConfig));
-	}
-
-	private static void mergeProperties(EquinoxConfiguration equinoxConfig, Properties source) {
-		for (Enumeration<?> e = source.keys(); e.hasMoreElements();) {
-			String key = (String) e.nextElement();
-			String value = source.getProperty(key);
-			if (equinoxConfig.getConfiguration(key) == null)
-				equinoxConfig.setProperty(key, value);
-		}
+		equinoxConfig.mergeConfiguration(loadProperties(location, equinoxConfig));
 	}
 
 	private static Properties loadProperties(URL location, EquinoxConfiguration equinoxConfig) {

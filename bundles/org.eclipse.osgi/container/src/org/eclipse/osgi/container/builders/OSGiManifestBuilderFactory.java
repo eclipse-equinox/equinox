@@ -17,7 +17,9 @@ import org.eclipse.osgi.container.ModuleRevisionBuilder;
 import org.eclipse.osgi.container.namespaces.*;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.internal.core.Tokenizer;
-import org.eclipse.osgi.internal.framework.*;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.framework.FilterImpl;
+import org.eclipse.osgi.storage.Storage;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -732,35 +734,124 @@ public final class OSGiManifestBuilderFactory {
 		return new String[] {eeName, v1};
 	}
 
+	static class NativeClause implements Comparable<NativeClause> {
+		private final int manifestIndex;
+		final List<String> nativePaths;
+		final String filter;
+		private final Version highestFloor;
+		private final boolean hasLanguage;
+
+		NativeClause(int manifestIndex, ManifestElement clause) throws BundleException {
+			this.manifestIndex = manifestIndex;
+			this.nativePaths = new ArrayList<String>(Arrays.asList(clause.getValueComponents()));
+			StringBuilder sb = new StringBuilder();
+			sb.append("(&"); //$NON-NLS-1$
+			addToNativeCodeFilter(sb, clause, Constants.BUNDLE_NATIVECODE_OSNAME);
+			addToNativeCodeFilter(sb, clause, Constants.BUNDLE_NATIVECODE_PROCESSOR);
+			this.highestFloor = (Version) addToNativeCodeFilter(sb, clause, Constants.BUNDLE_NATIVECODE_OSVERSION);
+			this.hasLanguage = ((Boolean) addToNativeCodeFilter(sb, clause, Constants.BUNDLE_NATIVECODE_LANGUAGE)).booleanValue();
+			String selectionFilter = clause.getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE);
+			if (selectionFilter != null) {
+				sb.append(selectionFilter);
+			}
+			sb.append(')');
+			this.filter = sb.toString();
+		}
+
+		private static Object addToNativeCodeFilter(StringBuilder filter, ManifestElement nativeCode, String attribute) throws BundleException {
+			Boolean hasLanguage = Boolean.FALSE;
+			Version highestFloor = null;
+			String[] attrValues = nativeCode.getAttributes(attribute);
+			if (attrValues != null) {
+
+				String filterAttribute = attribute;
+				if (Constants.BUNDLE_NATIVECODE_OSNAME.equals(attribute)) {
+					filterAttribute = EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_NAME_ATTRIBUTE;
+				} else if (Constants.BUNDLE_NATIVECODE_PROCESSOR.equals(attribute)) {
+					filterAttribute = EquinoxNativeEnvironmentNamespace.CAPABILITY_PROCESSOR_ATTRIBUTE;
+				} else if (Constants.BUNDLE_NATIVECODE_LANGUAGE.equals(attribute)) {
+					filterAttribute = EquinoxNativeEnvironmentNamespace.CAPABILITY_LANGUAGE_ATTRIBUTE;
+					hasLanguage = attrValues.length > 0;
+				} else if (Constants.BUNDLE_NATIVECODE_OSVERSION.equals(attribute)) {
+					filterAttribute = EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_VERSION_ATTRIBUTE;
+				}
+
+				if (attrValues.length > 1) {
+					filter.append("(|"); //$NON-NLS-1$
+				}
+				for (String attrAlias : attrValues) {
+					if (EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_VERSION_ATTRIBUTE.equals(filterAttribute)) {
+						VersionRange range = new VersionRange(attrAlias);
+						if (highestFloor == null || highestFloor.compareTo(range.getLeft()) < 0) {
+							highestFloor = range.getLeft();
+						}
+						filter.append(range.toFilterString(filterAttribute));
+					} else {
+						try {
+							filter.append('(').append(filterAttribute).append("~=").append(Storage.sanitizeFilterInput(attrAlias)).append(')'); //$NON-NLS-1$
+						} catch (InvalidSyntaxException e) {
+							throw new BundleException("Bad native attribute: " + attrAlias, e); //$NON-NLS-1$
+						}
+					}
+				}
+				if (attrValues.length > 1) {
+					filter.append(')');
+				}
+			}
+			return Constants.BUNDLE_NATIVECODE_LANGUAGE.equals(attribute) ? hasLanguage : highestFloor;
+		}
+
+		@Override
+		public int compareTo(NativeClause other) {
+			if (this.highestFloor != null) {
+				if (other == null) {
+					return -1;
+				}
+				int compareVersions = this.highestFloor.compareTo(other.highestFloor);
+				if (compareVersions != 0) {
+					return -(compareVersions);
+				}
+			} else if (other.highestFloor != null) {
+				return 1;
+			}
+			if (this.hasLanguage) {
+				return other.hasLanguage ? other.manifestIndex - this.manifestIndex : 1;
+			}
+			return other.hasLanguage ? -1 : other.manifestIndex - this.manifestIndex;
+		}
+	}
+
 	private static void getNativeCode(ModuleRevisionBuilder builder, Map<String, String> manifest) throws BundleException {
 		ManifestElement[] elements = ManifestElement.parseHeader(Constants.BUNDLE_NATIVECODE, manifest.get(Constants.BUNDLE_NATIVECODE));
 		if (elements == null) {
 			return;
 		}
 
-		boolean optional = elements.length > 0 && elements[elements.length - 1].getValue().equals("*"); //$NON-NLS-1$
+		boolean optional = false;
 
-		AliasMapper aliasMapper = new AliasMapper();
-		List<List<String>> allNativePaths = new ArrayList<List<String>>();
-		List<String> allSelectionFilters = new ArrayList<String>(0);
+		List<NativeClause> nativeClauses = new ArrayList<NativeClause>();
+		for (int i = 0; i < elements.length; i++) {
+			if (i == elements.length - 1) {
+				optional = elements[i].getValue().equals("*"); //$NON-NLS-1$
+			}
+			if (!optional) {
+				nativeClauses.add(new NativeClause(i, elements[i]));
+			}
+		}
+		Collections.sort(nativeClauses);
+
+		Map<String, Object> attributes = new HashMap<String, Object>(2);
+		int numNativePaths = nativeClauses.size();
 		StringBuilder allNativeFilters = new StringBuilder();
 		allNativeFilters.append("(|"); //$NON-NLS-1$
-		for (ManifestElement nativeCode : elements) {
-			allNativePaths.add(new ArrayList<String>(Arrays.asList(nativeCode.getValueComponents())));
-
-			StringBuilder filter = new StringBuilder();
-			filter.append("(&"); //$NON-NLS-1$
-			addToNativeCodeFilter(filter, nativeCode, Constants.BUNDLE_NATIVECODE_OSNAME, aliasMapper);
-			addToNativeCodeFilter(filter, nativeCode, Constants.BUNDLE_NATIVECODE_PROCESSOR, aliasMapper);
-			addToNativeCodeFilter(filter, nativeCode, Constants.BUNDLE_NATIVECODE_OSVERSION, aliasMapper);
-			addToNativeCodeFilter(filter, nativeCode, Constants.BUNDLE_NATIVECODE_LANGUAGE, aliasMapper);
-			filter.append(')');
-
-			allNativeFilters.append(filter.toString());
-			String selectionFilter = nativeCode.getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE);
-			if (selectionFilter != null) {
-				allSelectionFilters.add(selectionFilter);
+		for (int i = 0; i < numNativePaths; i++) {
+			NativeClause nativeClause = nativeClauses.get(i);
+			if (numNativePaths == 1) {
+				attributes.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE, nativeClause.nativePaths);
+			} else {
+				attributes.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE + '.' + i, nativeClause.nativePaths);
 			}
+			allNativeFilters.append(nativeClauses.get(i).filter);
 		}
 		allNativeFilters.append(')');
 
@@ -770,63 +861,6 @@ public final class OSGiManifestBuilderFactory {
 			directives.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE, EquinoxNativeEnvironmentNamespace.RESOLUTION_OPTIONAL);
 		}
 
-		Map<String, Object> attributes = new HashMap<String, Object>(0);
-		int i = 0;
-		int numNativePaths = allNativePaths.size();
-		for (List<String> nativePaths : allNativePaths) {
-			if (numNativePaths == 0) {
-				attributes.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE, nativePaths);
-			} else {
-				attributes.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE + '.' + i, nativePaths);
-			}
-			i++;
-		}
-
-		if (!allSelectionFilters.isEmpty()) {
-			StringBuilder selectionFilter = new StringBuilder();
-			selectionFilter.append("(|"); //$NON-NLS-1$
-			for (String filter : allSelectionFilters) {
-				selectionFilter.append(filter);
-			}
-			selectionFilter.append(")"); //$NON-NLS-1$
-			directives.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_SELECTION_FILTER_DIRECTIVE, selectionFilter.toString());
-		}
 		builder.addRequirement(EquinoxNativeEnvironmentNamespace.NATIVE_ENVIRONMENT_NAMESPACE, directives, attributes);
-	}
-
-	private static void addToNativeCodeFilter(StringBuilder filter, ManifestElement nativeCode, String attribute, AliasMapper aliasMapper) {
-		String[] attrValues = nativeCode.getAttributes(attribute);
-		Collection<String> attrAliases = new HashSet<String>(1);
-		if (attrValues != null) {
-			for (String attrValue : attrValues) {
-				if (Constants.BUNDLE_NATIVECODE_OSNAME.equals(attribute) || Constants.BUNDLE_NATIVECODE_PROCESSOR.equals(attribute)) {
-					attrValue = attrValue.toLowerCase();
-				}
-				attrAliases.add(attrValue);
-			}
-		}
-		String filterAttribute = attribute;
-		if (Constants.BUNDLE_NATIVECODE_OSNAME.equals(attribute)) {
-			filterAttribute = EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_NAME_ATTRIBUTE;
-		} else if (Constants.BUNDLE_NATIVECODE_PROCESSOR.equals(attribute)) {
-			filterAttribute = EquinoxNativeEnvironmentNamespace.CAPABILITY_PROCESSOR_ATTRIBUTE;
-		} else if (Constants.BUNDLE_NATIVECODE_LANGUAGE.equals(attribute)) {
-			filterAttribute = EquinoxNativeEnvironmentNamespace.CAPABILITY_LANGUAGE_ATTRIBUTE;
-		} else if (Constants.BUNDLE_NATIVECODE_OSVERSION.equals(attribute)) {
-			filterAttribute = EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_VERSION_ATTRIBUTE;
-		}
-		if (attrAliases.size() > 1) {
-			filter.append("(|"); //$NON-NLS-1$
-		}
-		for (String attrAlias : attrAliases) {
-			if (EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_VERSION_ATTRIBUTE.equals(filterAttribute)) {
-				filter.append(new VersionRange(attrAlias).toFilterString(filterAttribute));
-			} else {
-				filter.append('(').append(filterAttribute).append('=').append(attrAlias).append(')');
-			}
-		}
-		if (attrAliases.size() > 1) {
-			filter.append(')');
-		}
 	}
 }

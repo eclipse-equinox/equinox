@@ -12,6 +12,7 @@ package org.eclipse.osgi.internal.framework;
 
 import java.io.*;
 import java.util.*;
+import java.util.Map.Entry;
 import org.eclipse.osgi.framework.internal.core.Tokenizer;
 import org.eclipse.osgi.internal.debug.Debug;
 
@@ -90,7 +91,7 @@ public class AliasMapper {
 	 * @param in InputStream from which to read alias data.
 	 * @return Map of aliases.
 	 */
-	protected static Map<String, Collection<String>> initAliases(InputStream in, Map<String, Collection<String>> aliasTable, Map<String, String> canonicalTable) {
+	private static Map<String, Collection<String>> initAliases(InputStream in, Map<String, Collection<String>> aliasTable, Map<String, String> canonicalTable) {
 		try {
 			BufferedReader br;
 			try {
@@ -98,6 +99,7 @@ public class AliasMapper {
 			} catch (UnsupportedEncodingException e) {
 				br = new BufferedReader(new InputStreamReader(in));
 			}
+			Map<String, Set<String>> multiMaster = new HashMap<String, Set<String>>();
 			while (true) {
 				String line = br.readLine();
 				if (line == null) /* EOF */{
@@ -109,36 +111,40 @@ public class AliasMapper {
 					String masterLower = master.toLowerCase();
 					canonicalTable.put(masterLower, master);
 					Collection<String> aliasLine = new ArrayList<String>(1);
-					aliasLine.add(masterLower);
+					aliasLine.add(master);
 					parseloop: while (true) {
 						String alias = tokenizer.getString("# \t"); //$NON-NLS-1$
 						if (alias == null) {
 							break parseloop;
 						}
+						aliasLine.add(alias);
 						String aliasLower = alias.toLowerCase();
-						aliasLine.add(aliasLower);
 						if (!canonicalTable.containsKey(aliasLower)) {
 							canonicalTable.put(aliasLower, master);
 						} else {
 							// the alias has multiple masters just make its canonical name be the alias
-							canonicalTable.put(aliasLower, alias);
-						}
-					}
-					for (String alias : aliasLine) {
-						Collection<String> aliases = aliasTable.get(alias);
-						if (aliases == null) {
-							aliases = new ArrayList<String>(aliasLine);
-							aliasTable.put(alias, aliases);
-						} else {
-							for (String aliasToAdd : aliasLine) {
-								if (!aliases.contains(aliasToAdd)) {
-									aliases.add(aliasToAdd);
-								}
+							String existingMaster = canonicalTable.put(aliasLower, alias);
+							Set<String> masters = multiMaster.get(aliasLower);
+							if (masters == null) {
+								masters = new HashSet<String>();
+								multiMaster.put(aliasLower, masters);
+								masters.add(existingMaster.toLowerCase());
 							}
+							masters.add(masterLower);
 						}
 					}
+					aliasTable.put(masterLower, aliasLine);
 				}
 			}
+			Map<String, Set<String>> multiMasterAliases = new HashMap<String, Set<String>>(multiMaster.size());
+			for (Entry<String, Set<String>> entry : multiMaster.entrySet()) {
+				Set<String> aliases = new HashSet<String>();
+				for (String master : entry.getValue()) {
+					aliases.addAll(aliasTable.get(master));
+				}
+				multiMasterAliases.put(entry.getKey(), aliases);
+			}
+			aliasTable.putAll(multiMasterAliases);
 		} catch (IOException e) {
 			Debug.printStackTrace(e);
 		}

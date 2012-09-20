@@ -28,7 +28,8 @@ import org.eclipse.osgi.internal.container.ComputeNodeOrder;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.resource.*;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Wire;
 import org.osgi.service.resolver.Resolver;
 
 /**
@@ -1092,11 +1093,11 @@ public class ModuleDatabase {
 			writeVersion(current.getVersion(), out);
 			out.writeInt(current.getTypes());
 
-			List<Capability> capabilities = current.getCapabilities(null);
+			List<ModuleCapability> capabilities = current.getModuleCapabilities(null);
 			out.writeInt(capabilities.size());
-			for (Capability capability : capabilities) {
+			for (ModuleCapability capability : capabilities) {
 				out.writeInt(addToWriteTable(capability, objectTable));
-				writeGenericInfo(capability.getNamespace(), capability.getAttributes(), capability.getDirectives(), out);
+				writeGenericInfo(capability.getNamespace(), capability.getPersistentAttributes(), capability.getDirectives(), out);
 			}
 
 			List<Requirement> requirements = current.getRequirements(null);

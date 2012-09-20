@@ -15,7 +15,6 @@ import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleCollisionHook;
-import org.eclipse.osgi.container.namespaces.EquinoxNativeEnvironmentNamespace;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.internal.baseadaptor.ArrayMap;
 import org.eclipse.osgi.internal.debug.Debug;
@@ -263,10 +262,6 @@ class OSGiFrameworkHooks {
 				if (debug.DEBUG_HOOKS) {
 					Debug.println("ResolverHook.filterMatches(" + requirement + ", " + candidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
-
-				// always filter the native code namespace
-				filterNativeSelectionFilter(requirement, candidates);
-
 				if (hooks.isEmpty())
 					return;
 				candidates = new ShrinkableCollection<BundleCapability>(candidates);
@@ -279,22 +274,6 @@ class OSGiFrameworkHooks {
 							hookRef.hook.filterMatches(requirement, candidates);
 						} catch (Throwable t) {
 							handleHookException(t, hookRef.hook, "filterMatches"); //$NON-NLS-1$
-						}
-					}
-				}
-			}
-
-			private void filterNativeSelectionFilter(BundleRequirement requirement, Collection<BundleCapability> candidates) {
-				if (EquinoxNativeEnvironmentNamespace.NATIVE_ENVIRONMENT_NAMESPACE.equals(requirement.getNamespace())) {
-					String filterSpec = requirement.getDirectives().get(EquinoxNativeEnvironmentNamespace.REQUIREMENT_SELECTION_FILTER_DIRECTIVE);
-					if (filterSpec != null) {
-						try {
-							Filter f = FilterImpl.newInstance(filterSpec);
-							if (!f.matches(container.getConfiguration().asMap())) {
-								candidates.clear();
-							}
-						} catch (InvalidSyntaxException e) {
-							candidates.clear();
 						}
 					}
 				}
