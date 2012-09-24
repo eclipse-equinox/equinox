@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2011 by ProSyst Software GmbH
+ * Copyright (c) 1997-2012 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -222,21 +222,19 @@ public class ServiceComponentProp implements Component, PrivilegedExceptionActio
 					}
 					if (ref.reference.bindMethod == null || ccError != null || !ref.isBound()) {
 						//the bind method is not found and called for some reason or it has thrown exception
-						if (ref.reference.cardinality == ComponentReference.CARDINALITY_1_1 || ref.reference.cardinality == ComponentReference.CARDINALITY_1_N) {
-							Activator.log(null, LogService.LOG_WARNING, "Could not bind a reference of component " + name + ". The reference is: " + ref.reference, null); //$NON-NLS-1$ //$NON-NLS-2$
+						Activator.log(null, LogService.LOG_ERROR, "Could not bind a reference of component " + name + ". The reference is: " + ref.reference, null); //$NON-NLS-1$ //$NON-NLS-2$
+						if (ccError != null) {
 							//unbind the already bound references
 							for (int j = i - 1; j >= 0; j--) {
-								ref = (Reference) references.elementAt(i);
+								ref = (Reference) references.elementAt(j);
 								if (ref.reference.unbind != null) {
 									unbindReference(ref, componentInstance);
 								}
 							}
-							if (ccError != null) {
-								//rethrow the error so it is further processed according to the use case
-								throw ccError;
-							}
-							return false;
+							//rethrow the error so it is further processed according to the use case
+							throw ccError;
 						}
+						// continue nevertheless the bind is unsuccessful - see bug 388961
 					}
 				} else {
 					if (Activator.DEBUG) {

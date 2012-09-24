@@ -1991,7 +1991,7 @@ public class DSTest extends TestCase {
     assertEquals("Unbind method of " + CE_NS110 + " should be called", 1 << 3, (1 << 3) & getBaseConfigData(bs));
 
     bs = getBaseService(CE_MAP_NS100);
-    assertNull("Component " + CE_MAP_NS100 + " should not be activated", bs);
+    assertNotNull("Component " + CE_MAP_NS100 + " should be activated", bs);
 
     bs = getBaseService(CE_MAP_NS110);
     assertNotNull("Component " + CE_MAP_NS110 + " should be activated", bs);
