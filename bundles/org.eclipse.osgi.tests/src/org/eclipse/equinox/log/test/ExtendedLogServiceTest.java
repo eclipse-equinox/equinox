@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others All rights reserved. This
+ * Copyright (c) 2007, 2012 IBM Corporation and others All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -49,7 +49,7 @@ public class ExtendedLogServiceTest extends TestCase {
 	public void testLogContext() throws Exception {
 		synchronized (listener) {
 			log.log(this, LogService.LOG_INFO, null);
-			listener.wait();
+			listener.waitForLogEntry();
 		}
 		assertTrue(listener.getEntryX().getContext() == this);
 	}
@@ -57,7 +57,7 @@ public class ExtendedLogServiceTest extends TestCase {
 	public void testNullLogContext() throws Exception {
 		synchronized (listener) {
 			log.log(null, LogService.LOG_INFO, null);
-			listener.wait();
+			listener.waitForLogEntry();
 		}
 		assertTrue(listener.getEntryX().getContext() == null);
 	}
@@ -65,7 +65,7 @@ public class ExtendedLogServiceTest extends TestCase {
 	public void testLogContextWithNullThrowable() throws Exception {
 		synchronized (listener) {
 			log.log(this, LogService.LOG_INFO, null, null);
-			listener.wait();
+			listener.waitForLogEntry();
 		}
 		assertTrue(listener.getEntryX().getContext() == this);
 	}
@@ -95,25 +95,27 @@ public class ExtendedLogServiceTest extends TestCase {
 	public void testNamedLoggerLogNull() throws Exception {
 		synchronized (listener) {
 			log.getLogger("test").log(null, 0, null, null);
-			listener.wait();
+			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntryX().getLoggerName() == "test");
-		assertTrue(listener.getEntry().getLevel() == 0);
-		assertTrue(listener.getEntry().getMessage() == null);
-		assertTrue(listener.getEntry().getException() == null);
-		assertTrue(listener.getEntry().getServiceReference() == null);
+		ExtendedLogEntry entry = listener.getEntryX();
+		assertTrue(entry.getLoggerName() == "test");
+		assertTrue(entry.getLevel() == 0);
+		assertTrue(entry.getMessage() == null);
+		assertTrue(entry.getException() == null);
+		assertTrue(entry.getServiceReference() == null);
 	}
 
 	public void testNullLoggerLogNull() throws Exception {
 		synchronized (listener) {
 			log.getLogger(null).log(null, 0, null, null);
-			listener.wait();
+			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntryX().getLoggerName() == null);
-		assertTrue(listener.getEntry().getLevel() == 0);
-		assertTrue(listener.getEntry().getMessage() == null);
-		assertTrue(listener.getEntry().getException() == null);
-		assertTrue(listener.getEntry().getServiceReference() == null);
+		ExtendedLogEntry entry = listener.getEntryX();
+		assertTrue(entry.getLoggerName() == null);
+		assertTrue(entry.getLevel() == 0);
+		assertTrue(entry.getMessage() == null);
+		assertTrue(entry.getException() == null);
+		assertTrue(entry.getServiceReference() == null);
 	}
 
 	public void testNamedLoggerLogFull() throws Exception {
@@ -121,14 +123,15 @@ public class ExtendedLogServiceTest extends TestCase {
 		Throwable t = new Throwable("test");
 		synchronized (listener) {
 			log.getLogger("test").log(logReference, LogService.LOG_INFO, message, t);
-			listener.wait();
+			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntryX().getLoggerName() == "test");
-		assertTrue(listener.getEntry().getBundle() == bundle);
-		assertTrue(listener.getEntry().getLevel() == LogService.LOG_INFO);
-		assertTrue(listener.getEntry().getMessage().equals(message));
-		assertTrue(listener.getEntry().getException().getMessage().equals(t.getMessage()));
-		assertTrue(listener.getEntry().getServiceReference() == logReference);
+		ExtendedLogEntry entry = listener.getEntryX();
+		assertTrue(entry.getLoggerName() == "test");
+		assertTrue(entry.getBundle() == bundle);
+		assertTrue(entry.getLevel() == LogService.LOG_INFO);
+		assertTrue(entry.getMessage().equals(message));
+		assertTrue(entry.getException().getMessage().equals(t.getMessage()));
+		assertTrue(entry.getServiceReference() == logReference);
 	}
 
 	public void testNamedLoggerLogFullWithNullBundle() throws Exception {
@@ -136,14 +139,15 @@ public class ExtendedLogServiceTest extends TestCase {
 		Throwable t = new Throwable("test");
 		synchronized (listener) {
 			log.getLogger(null, "test").log(logReference, LogService.LOG_INFO, message, t);
-			listener.wait();
+			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntryX().getLoggerName() == "test");
-		assertTrue(listener.getEntry().getBundle() == bundle);
-		assertTrue(listener.getEntry().getLevel() == LogService.LOG_INFO);
-		assertTrue(listener.getEntry().getMessage().equals(message));
-		assertTrue(listener.getEntry().getException().getMessage().equals(t.getMessage()));
-		assertTrue(listener.getEntry().getServiceReference() == logReference);
+		ExtendedLogEntry entry = listener.getEntryX();
+		assertTrue(entry.getLoggerName() == "test");
+		assertTrue(entry.getBundle() == bundle);
+		assertTrue(entry.getLevel() == LogService.LOG_INFO);
+		assertTrue(entry.getMessage().equals(message));
+		assertTrue(entry.getException().getMessage().equals(t.getMessage()));
+		assertTrue(entry.getServiceReference() == logReference);
 	}
 
 	public void testNamedLoggerLogFullWithBundle() throws Exception {
@@ -151,14 +155,15 @@ public class ExtendedLogServiceTest extends TestCase {
 		Throwable t = new Throwable("test");
 		synchronized (listener) {
 			log.getLogger(bundle, "test").log(logReference, LogService.LOG_INFO, message, t);
-			listener.wait();
+			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntryX().getLoggerName() == "test");
-		assertTrue(listener.getEntry().getBundle() == bundle);
-		assertTrue(listener.getEntry().getLevel() == LogService.LOG_INFO);
-		assertTrue(listener.getEntry().getMessage().equals(message));
-		assertTrue(listener.getEntry().getException().getMessage().equals(t.getMessage()));
-		assertTrue(listener.getEntry().getServiceReference() == logReference);
+		ExtendedLogEntry entry = listener.getEntryX();
+		assertTrue(entry.getLoggerName() == "test");
+		assertTrue(entry.getBundle() == bundle);
+		assertTrue(entry.getLevel() == LogService.LOG_INFO);
+		assertTrue(entry.getMessage().equals(message));
+		assertTrue(entry.getException().getMessage().equals(t.getMessage()));
+		assertTrue(entry.getServiceReference() == logReference);
 	}
 
 	public void testLoggerIsLoggableTrue() throws Exception {

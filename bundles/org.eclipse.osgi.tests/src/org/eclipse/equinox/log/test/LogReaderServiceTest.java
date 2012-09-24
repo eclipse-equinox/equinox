@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others All rights reserved. This
+ * Copyright (c) 2007, 2012 IBM Corporation and others All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -45,9 +45,9 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		reader.addLogListener(listener);
 		synchronized (listener) {
 			log.log(LogService.LOG_INFO, "info"); //$NON-NLS-1$
-			listener.wait();
+			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntry().getLevel() == LogService.LOG_INFO);
+		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
 	}
 
 	public void testaddListenerTwice() throws Exception {
@@ -56,9 +56,9 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		reader.addLogListener(listener);
 		synchronized (listener) {
 			log.log(LogService.LOG_INFO, "info"); //$NON-NLS-1$
-			listener.wait();
+			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntry().getLevel() == LogService.LOG_INFO);
+		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
 	}
 
 	public void testaddNullListener() throws Exception {
@@ -91,14 +91,15 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		long timeBeforeLog = System.currentTimeMillis();
 		synchronized (listener) {
 			log.log(logReference, LogService.LOG_INFO, "info", new Throwable("test")); //$NON-NLS-1$ //$NON-NLS-2$
-			listener.wait();
+			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntry().getBundle() == OSGiTestsActivator.getContext().getBundle());
-		assertTrue(listener.getEntry().getMessage().equals("info")); //$NON-NLS-1$
-		assertTrue(listener.getEntry().getException().getMessage().equals("test")); //$NON-NLS-1$
-		assertTrue(listener.getEntry().getServiceReference() == logReference);
-		assertTrue(listener.getEntry().getTime() >= timeBeforeLog);
-		assertTrue(listener.getEntry().getLevel() == LogService.LOG_INFO);
+		LogEntry entry = listener.getEntryX();
+		assertTrue(entry.getBundle() == OSGiTestsActivator.getContext().getBundle());
+		assertTrue(entry.getMessage().equals("info")); //$NON-NLS-1$
+		assertTrue(entry.getException().getMessage().equals("test")); //$NON-NLS-1$
+		assertTrue(entry.getServiceReference() == logReference);
+		assertTrue(entry.getTime() >= timeBeforeLog);
+		assertTrue(entry.getLevel() == LogService.LOG_INFO);
 	}
 
 	public void testLogBundleEventInfo() throws Exception {
@@ -109,9 +110,9 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		reader.addLogListener(listener);
 		synchronized (listener) {
 			testBundle.start();
-			listener.wait();
+			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntry().getLevel() == LogService.LOG_INFO);
+		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
 	}
 
 	public void testLogServiceEventInfo() throws Exception {
@@ -119,9 +120,9 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		reader.addLogListener(listener);
 		synchronized (listener) {
 			OSGiTestsActivator.getContext().registerService(Object.class.getName(), new Object(), null);
-			listener.wait();
+			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntry().getLevel() == LogService.LOG_INFO);
+		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
 	}
 
 	public void testLogServiceEventDebug() throws Exception {
@@ -131,9 +132,9 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		reader.addLogListener(listener);
 		synchronized (listener) {
 			registration.setProperties(new Hashtable());
-			listener.wait();
+			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntry().getLevel() == LogService.LOG_DEBUG);
+		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_DEBUG);
 	}
 
 	public void testLogFrameworkEvent() throws Exception {
@@ -142,8 +143,8 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		reader.addLogListener(listener);
 		synchronized (listener) {
 			installer.refreshPackages(new Bundle[] {testBundle});
-			listener.wait();
+			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntry().getLevel() == LogService.LOG_INFO);
+		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
 	}
 }
