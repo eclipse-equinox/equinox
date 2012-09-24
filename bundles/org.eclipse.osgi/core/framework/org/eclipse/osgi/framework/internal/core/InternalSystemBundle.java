@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -255,7 +255,7 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 		framework.checkAdminPermission(this, AdminPermission.EXECUTE);
 
 		if ((state & (ACTIVE | STARTING)) != 0) {
-			Thread shutdown = framework.secureAction.createThread(new Runnable() {
+			Thread shutdown = Framework.secureAction.createThread(new Runnable() {
 				public void run() {
 					try {
 						framework.close();
@@ -309,7 +309,7 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 		framework.checkAdminPermission(this, AdminPermission.LIFECYCLE);
 
 		if ((state & (ACTIVE | STARTING)) != 0) {
-			Thread restart = framework.secureAction.createThread(new Runnable() {
+			Thread restart = Framework.secureAction.createThread(new Runnable() {
 				public void run() {
 					int sl = framework.startLevelManager.getStartLevel();
 					FrameworkProperties.setProperty(Constants.PROP_OSGI_RELAUNCH, ""); //$NON-NLS-1$

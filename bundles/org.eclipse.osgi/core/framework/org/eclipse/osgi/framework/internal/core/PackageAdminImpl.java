@@ -169,7 +169,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 			if (framework.isForcedRestart())
 				framework.systemBundle.stop();
 		} else {
-			Thread refresh = framework.secureAction.createThread(new Runnable() {
+			Thread refresh = Framework.secureAction.createThread(new Runnable() {
 				public void run() {
 					doResolveBundles(copy, true, listeners);
 					if (framework.isForcedRestart())
