@@ -78,12 +78,11 @@ Bundle-Activator: org.eclipse.osgi.framework.internal.core.SystemBundleActivator
 Bundle-Description: %systemBundle
 Bundle-Copyright: %copyright
 Bundle-Vendor: %eclipse.org
-Bundle-Version: 3.8.100.qualifier
+Bundle-Version: 3.9.0.qualifier
 Bundle-Localization: systembundle
 Bundle-DocUrl: http://www.eclipse.org
 Eclipse-ExtensibleAPI: true
 Eclipse-SystemBundle: true
 Main-Class: org.eclipse.core.runtime.adaptor.EclipseStarter
-Bundle-RequiredExecutionEnvironment: J2SE-1.5,
- OSGi/Minimum-1.2
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Eclipse-BundleShape: jar
