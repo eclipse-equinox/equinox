@@ -752,6 +752,12 @@ public final class OSGiManifestBuilderFactory {
 			this.hasLanguage = ((Boolean) addToNativeCodeFilter(sb, clause, Constants.BUNDLE_NATIVECODE_LANGUAGE)).booleanValue();
 			String selectionFilter = clause.getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE);
 			if (selectionFilter != null) {
+				// do a sanity check to make sure the filter is valid
+				try {
+					FrameworkUtil.createFilter(selectionFilter);
+				} catch (InvalidSyntaxException e) {
+					throw new BundleException("Bad native code selection-filter.", BundleException.MANIFEST_ERROR, e); //$NON-NLS-1$
+				}
 				sb.append(selectionFilter);
 			}
 			sb.append(')');
