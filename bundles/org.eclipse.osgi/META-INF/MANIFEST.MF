@@ -3,7 +3,6 @@ Bundle-ManifestVersion: 2
 Export-Package: org.eclipse.core.runtime.adaptor;x-friends:="org.eclipse.core.runtime",
  org.eclipse.core.runtime.internal.adaptor;x-internal:=true,
  org.eclipse.equinox.log;version="1.0",
- org.eclipse.equinox.log.internal;x-internal:=true,
  org.eclipse.osgi.container;version="1.0",
  org.eclipse.osgi.container.builders;version="1.0",
  org.eclipse.osgi.container.namespaces;version="1.0",

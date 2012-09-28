@@ -5,7 +5,7 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  ******************************************************************************/
-package org.eclipse.equinox.log.internal;
+package org.eclipse.osgi.internal.log;
 
 import java.io.PrintStream;
 import java.security.AccessController;

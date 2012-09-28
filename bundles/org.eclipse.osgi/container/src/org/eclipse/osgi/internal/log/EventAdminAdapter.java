@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.log.internal;
+package org.eclipse.osgi.internal.log;
 
 import java.util.*;
 import org.osgi.framework.*;

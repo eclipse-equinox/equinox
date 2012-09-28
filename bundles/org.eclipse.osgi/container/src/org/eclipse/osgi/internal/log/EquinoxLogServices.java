@@ -16,7 +16,6 @@ import java.io.Writer;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
-import org.eclipse.equinox.log.internal.LogServiceManager;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;

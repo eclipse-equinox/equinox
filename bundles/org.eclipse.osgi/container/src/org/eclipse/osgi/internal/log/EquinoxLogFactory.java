@@ -13,7 +13,6 @@ package org.eclipse.osgi.internal.log;
 
 import java.io.*;
 import org.eclipse.equinox.log.Logger;
-import org.eclipse.equinox.log.internal.LogServiceManager;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.osgi.framework.*;
