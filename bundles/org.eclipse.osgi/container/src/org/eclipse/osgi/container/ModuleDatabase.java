@@ -439,10 +439,36 @@ public class ModuleDatabase {
 				}
 			}
 			if (allPendingRemoval) {
+				Map<ModuleWiring, Collection<ModuleWire>> toRemoveWireLists = new HashMap<ModuleWiring, Collection<ModuleWire>>();
+				for (ModuleRevision pendingRemoval : dependencyClosure) {
+					ModuleWiring removedWiring = wirings.get(pendingRemoval);
+					if (removedWiring == null) {
+						continue;
+					}
+					List<ModuleWire> removedWires = removedWiring.getRequiredModuleWires(null);
+					for (ModuleWire wire : removedWires) {
+						Collection<ModuleWire> providerWires = toRemoveWireLists.get(wire.getProviderWiring());
+						if (providerWires == null) {
+							providerWires = new ArrayList<ModuleWire>();
+							toRemoveWireLists.put(wire.getProviderWiring(), providerWires);
+						}
+						providerWires.add(wire);
+					}
+				}
 				for (ModuleRevision pendingRemoval : dependencyClosure) {
 					pendingRemoval.getRevisions().removeRevision(pendingRemoval);
 					removeCapabilities(pendingRemoval);
 					wirings.remove(pendingRemoval);
+				}
+				// remove any wires from unresolved wirings that got removed
+				for (Map.Entry<ModuleWiring, Collection<ModuleWire>> entry : toRemoveWireLists.entrySet()) {
+					List<ModuleWire> provided = entry.getKey().getProvidedModuleWires(null);
+					provided.removeAll(entry.getValue());
+					entry.getKey().setProvidedWires(provided);
+					for (ModuleWire removedWire : entry.getValue()) {
+						// invalidate the wire
+						removedWire.invalidate();
+					}
 				}
 			}
 		}
