@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
-import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
+import org.eclipse.osgi.storage.StorageMsg;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -32,7 +32,7 @@ public class DirBundleFile extends BundleFile {
 	public DirBundleFile(File basefile) throws IOException {
 		super(basefile);
 		if (!BundleFile.secureAction.exists(basefile) || !BundleFile.secureAction.isDirectory(basefile)) {
-			throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_EXCEPTION, basefile));
+			throw new IOException(NLS.bind(StorageMsg.ADAPTOR_DIRECTORY_EXCEPTION, basefile));
 		}
 	}
 

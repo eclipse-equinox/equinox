@@ -18,10 +18,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleRevision;
-import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
 import org.eclipse.osgi.internal.debug.Debug;
-import org.eclipse.osgi.storage.BundleInfo;
-import org.eclipse.osgi.storage.StorageUtil;
+import org.eclipse.osgi.storage.*;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -49,7 +47,7 @@ public class ZipBundleFile extends BundleFile {
 	public ZipBundleFile(File basefile, BundleInfo.Generation generation, MRUBundleFileList mruList, Debug debug) throws IOException {
 		super(basefile);
 		if (!BundleFile.secureAction.exists(basefile))
-			throw new IOException(NLS.bind(AdaptorMsg.ADAPTER_FILEEXIST_EXCEPTION, basefile));
+			throw new IOException(NLS.bind(StorageMsg.ADAPTER_FILEEXIST_EXCEPTION, basefile));
 		this.debug = debug;
 		this.generation = generation;
 		this.closed = true;
@@ -173,7 +171,7 @@ public class ZipBundleFile extends BundleFile {
 						if (!nested.mkdirs()) {
 							if (debug.DEBUG_GENERAL)
 								Debug.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
-							throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
+							throw new IOException(NLS.bind(StorageMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
 						}
 						extractDirectory(zipEntry.getName());
 					} else {
@@ -188,7 +186,7 @@ public class ZipBundleFile extends BundleFile {
 						if (!dir.exists() && !dir.mkdirs()) {
 							if (debug.DEBUG_GENERAL)
 								Debug.println("Unable to create directory: " + dir.getPath()); //$NON-NLS-1$
-							throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, dir.getAbsolutePath()));
+							throw new IOException(NLS.bind(StorageMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, dir.getAbsolutePath()));
 						}
 						/* copy the entry to the cache */
 						StorageUtil.readFile(in, nested);

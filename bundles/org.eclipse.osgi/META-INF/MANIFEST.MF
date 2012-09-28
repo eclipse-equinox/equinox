@@ -13,7 +13,6 @@ Export-Package: org.eclipse.core.runtime.adaptor;x-friends:="org.eclipse.core.ru
  org.eclipse.osgi.framework.internal.reliablefile;x-internal:=true,
  org.eclipse.osgi.framework.log;version="1.1",
  org.eclipse.osgi.framework.util;x-internal:=true,
- org.eclipse.osgi.internal.baseadaptor;x-internal:=true,
  org.eclipse.osgi.internal.debug;x-internal:=true,
  org.eclipse.osgi.internal.framework;x-internal:=true,
  org.eclipse.osgi.internal.loader;x-internal:=true,

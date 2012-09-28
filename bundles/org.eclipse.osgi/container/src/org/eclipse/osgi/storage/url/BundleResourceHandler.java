@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.net.*;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleContainer;
-import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
+import org.eclipse.osgi.storage.StorageMsg;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.AdminPermission;
@@ -148,17 +148,17 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 
 		String host = url.getHost();
 		if (host == null) {
-			throw new IOException(NLS.bind(AdaptorMsg.URL_NO_BUNDLE_ID, url.toExternalForm()));
+			throw new IOException(NLS.bind(StorageMsg.URL_NO_BUNDLE_ID, url.toExternalForm()));
 		}
 		long bundleID;
 		try {
 			bundleID = getBundleID(host);
 		} catch (NumberFormatException nfe) {
-			throw (MalformedURLException) new MalformedURLException(NLS.bind(AdaptorMsg.URL_INVALID_BUNDLE_ID, host)).initCause(nfe);
+			throw (MalformedURLException) new MalformedURLException(NLS.bind(StorageMsg.URL_INVALID_BUNDLE_ID, host)).initCause(nfe);
 		}
 		Module module = getModule(bundleID);
 		if (module == null)
-			throw new IOException(NLS.bind(AdaptorMsg.URL_NO_BUNDLE_FOUND, url.toExternalForm()));
+			throw new IOException(NLS.bind(StorageMsg.URL_NO_BUNDLE_FOUND, url.toExternalForm()));
 		// check to make sure that this URL was created using the
 		// parseURL method.  This ensures the security check was done
 		// at URL construction.

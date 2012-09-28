@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
+import org.eclipse.osgi.storage.StorageMsg;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.util.NLS;
 
@@ -53,7 +53,7 @@ public class BundleURLConnection extends URLConnection {
 				in = bundleEntry.getInputStream();
 				connected = true;
 			} else {
-				throw new IOException(NLS.bind(AdaptorMsg.RESOURCE_NOT_FOUND_EXCEPTION, url));
+				throw new IOException(NLS.bind(StorageMsg.RESOURCE_NOT_FOUND_EXCEPTION, url));
 			}
 		}
 	}

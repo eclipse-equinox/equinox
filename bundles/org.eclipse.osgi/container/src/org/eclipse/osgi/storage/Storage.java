@@ -23,7 +23,6 @@ import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
 import org.eclipse.osgi.container.namespaces.EquinoxNativeEnvironmentNamespace;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.*;
-import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
 import org.eclipse.osgi.internal.container.LockSet;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.*;
@@ -689,7 +688,7 @@ public class Storage {
 			if (in instanceof ReferenceInputStream) {
 				URL reference = ((ReferenceInputStream) in).getReference();
 				if (!"file".equals(reference.getProtocol())) //$NON-NLS-1$
-					throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_URL_CREATE_EXCEPTION, reference));
+					throw new BundleException(NLS.bind(StorageMsg.ADAPTOR_URL_CREATE_EXCEPTION, reference));
 				return new File(reference.getPath());
 			}
 
@@ -713,7 +712,7 @@ public class Storage {
 			if (outFile != null) {
 				outFile.delete();
 			}
-			throw new BundleException(AdaptorMsg.BUNDLE_READ_EXCEPTION, BundleException.READ_ERROR, e);
+			throw new BundleException(StorageMsg.BUNDLE_READ_EXCEPTION, BundleException.READ_ERROR, e);
 		}
 	}
 

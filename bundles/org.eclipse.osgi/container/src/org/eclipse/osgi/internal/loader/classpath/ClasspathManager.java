@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.internal.loader.classpath;
 
+import org.eclipse.osgi.storage.StorageMsg;
+
 import java.io.*;
 import java.net.URL;
 import java.util.*;
@@ -20,7 +22,6 @@ import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.util.ArrayMap;
-import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
@@ -167,7 +168,7 @@ public class ClasspathManager {
 			hookAdded |= hook.addClassPathEntry(result, cp, hostloader, sourceGeneration);
 		}
 		if (!addClassPathEntry(result, cp, hostloader, sourceGeneration) && !hookAdded) {
-			BundleException be = new BundleException(NLS.bind(AdaptorMsg.BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION, cp, sourceGeneration.getRevision().toString()), BundleException.MANIFEST_ERROR);
+			BundleException be = new BundleException(NLS.bind(StorageMsg.BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION, cp, sourceGeneration.getRevision().toString()), BundleException.MANIFEST_ERROR);
 			sourceGeneration.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(ContainerEvent.INFO, sourceGeneration.getRevision().getRevisions().getModule(), be);
 		}
 	}
