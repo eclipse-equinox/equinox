@@ -24,7 +24,6 @@ import org.eclipse.osgi.container.namespaces.EquinoxNativeEnvironmentNamespace;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.*;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
-import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.internal.container.LockSet;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.*;
@@ -284,7 +283,7 @@ public class Storage {
 	}
 
 	private void cleanOSGiStorage(Location location, File root) {
-		if (location.isReadOnly() || !AdaptorUtil.rm(root)) {
+		if (location.isReadOnly() || !StorageUtil.rm(root)) {
 			equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "The -clean (osgi.clean) option was not successful. Unable to clean the storage area: " + root.getAbsolutePath(), null); //$NON-NLS-1$
 		}
 	}
@@ -702,12 +701,12 @@ public class Storage {
 				if (inFile.isDirectory()) {
 					// need to delete the outFile because it is not a directory
 					outFile.delete();
-					AdaptorUtil.copyDir(inFile, outFile);
+					StorageUtil.copyDir(inFile, outFile);
 				} else {
-					AdaptorUtil.readFile(in, outFile);
+					StorageUtil.readFile(in, outFile);
 				}
 			} else {
-				AdaptorUtil.readFile(in, outFile);
+				StorageUtil.readFile(in, outFile);
 			}
 			return outFile;
 		} catch (IOException e) {
@@ -824,7 +823,7 @@ public class Storage {
 			// and the directory is marked for delete
 			if (delete.exists()) {
 				// if rm fails to delete the directory and .delete was removed
-				if (!AdaptorUtil.rm(target) && !delete.exists()) {
+				if (!StorageUtil.rm(target) && !delete.exists()) {
 					try {
 						// recreate .delete
 						FileOutputStream out = new FileOutputStream(delete);
@@ -860,7 +859,7 @@ public class Storage {
 	}
 
 	void delete0(File delete) throws IOException {
-		if (!AdaptorUtil.rm(delete)) {
+		if (!StorageUtil.rm(delete)) {
 			/* create .delete */
 			FileOutputStream out = new FileOutputStream(new File(delete, DELETE_FLAG));
 			out.close();
@@ -1546,7 +1545,7 @@ public class Storage {
 		// copy the library file
 		try {
 			InputStream in = new FileInputStream(realLib);
-			AdaptorUtil.readFile(in, libTempFile);
+			StorageUtil.readFile(in, libTempFile);
 			// set permissions if needed
 			setPermissions(libTempFile);
 			libTempFile.deleteOnExit(); // this probably will not work because the VM will probably have the lib locked at exit

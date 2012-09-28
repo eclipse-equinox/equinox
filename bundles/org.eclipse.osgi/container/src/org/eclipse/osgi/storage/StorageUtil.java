@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.internal.baseadaptor;
+package org.eclipse.osgi.storage;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -24,7 +24,7 @@ import org.osgi.framework.*;
 /**
  * A utility class with some generally useful static methods for adaptor hook implementations
  */
-public class AdaptorUtil {
+public class StorageUtil {
 	/** The NULL tag used in bundle storage */
 	public static final byte NULL = 0;
 	/** The OBJECT tag used in bundle storage */

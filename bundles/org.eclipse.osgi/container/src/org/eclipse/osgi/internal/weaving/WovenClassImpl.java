@@ -12,10 +12,10 @@ package org.eclipse.osgi.internal.weaving;
 
 import java.security.*;
 import java.util.*;
-import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.serviceregistry.HookContext;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
+import org.eclipse.osgi.storage.StorageUtil;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
@@ -133,7 +133,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 				hookFlags |= FLAG_HOOKCALLED;
 				// only do this check on the first weaving hook call
 				if (!validBytes(validBytes)) {
-					validBytes = AdaptorUtil.getBytes(entry.getInputStream(), (int) entry.getSize(), 8 * 1024);
+					validBytes = StorageUtil.getBytes(entry.getInputStream(), (int) entry.getSize(), 8 * 1024);
 				}
 			}
 			try {

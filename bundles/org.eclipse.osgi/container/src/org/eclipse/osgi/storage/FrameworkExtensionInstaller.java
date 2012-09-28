@@ -21,7 +21,6 @@ import java.util.List;
 import org.eclipse.osgi.container.ModuleCapability;
 import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
-import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.osgi.framework.BundleException;
@@ -97,7 +96,7 @@ public class FrameworkExtensionInstaller {
 			if (files[i] == null)
 				continue;
 			try {
-				callAddURLMethod(AdaptorUtil.encodeFileURL(files[i]));
+				callAddURLMethod(StorageUtil.encodeFileURL(files[i]));
 			} catch (InvocationTargetException e) {
 				throw new BundleException("Error adding extension content.", e);
 			} catch (MalformedURLException e) {

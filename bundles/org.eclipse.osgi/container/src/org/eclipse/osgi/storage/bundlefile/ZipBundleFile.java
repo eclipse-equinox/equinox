@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,9 +19,9 @@ import java.util.zip.ZipFile;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
-import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.storage.BundleInfo;
+import org.eclipse.osgi.storage.StorageUtil;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -191,7 +191,7 @@ public class ZipBundleFile extends BundleFile {
 							throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, dir.getAbsolutePath()));
 						}
 						/* copy the entry to the cache */
-						AdaptorUtil.readFile(in, nested);
+						StorageUtil.readFile(in, nested);
 						if (nativeCode) {
 							generation.getBundleInfo().getStorage().setPermissions(nested);
 						}

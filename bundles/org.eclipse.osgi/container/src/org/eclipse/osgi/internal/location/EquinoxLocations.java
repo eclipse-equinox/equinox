@@ -14,9 +14,9 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
-import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.service.datalocation.Location;
+import org.eclipse.osgi.storage.StorageUtil;
 import org.osgi.framework.Constants;
 
 /**
@@ -254,7 +254,7 @@ public class EquinoxLocations {
 			File defaultConfigDir = new File(installDir, CONFIG_DIR);
 			if (!defaultConfigDir.exists())
 				defaultConfigDir.mkdirs();
-			if (defaultConfigDir.exists() && AdaptorUtil.canWrite(defaultConfigDir))
+			if (defaultConfigDir.exists() && StorageUtil.canWrite(defaultConfigDir))
 				return defaultConfigDir.getAbsolutePath();
 		}
 		// We can't write in the eclipse install dir so try for some place in the user's home dir
@@ -266,7 +266,7 @@ public class EquinoxLocations {
 			File locationDir = new File(location.getFile());
 			if (!locationDir.exists())
 				locationDir.mkdirs();
-			if (locationDir.exists() && AdaptorUtil.canWrite(locationDir))
+			if (locationDir.exists() && StorageUtil.canWrite(locationDir))
 				return true;
 		}
 		return false;

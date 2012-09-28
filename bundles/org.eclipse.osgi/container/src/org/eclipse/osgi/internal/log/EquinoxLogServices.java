@@ -19,9 +19,9 @@ import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.equinox.log.internal.LogServiceManager;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.service.datalocation.Location;
+import org.eclipse.osgi.storage.StorageUtil;
 import org.osgi.framework.*;
 
 public class EquinoxLogServices {
@@ -79,7 +79,7 @@ public class EquinoxLogServices {
 	 */
 	public void start(BundleContext context) throws BundleException {
 		logServiceManager.start(context);
-		frameworkLogReg = AdaptorUtil.register(FrameworkLog.class.getName(), eclipseLogFactory, context);
+		frameworkLogReg = StorageUtil.register(FrameworkLog.class.getName(), eclipseLogFactory, context);
 		perfLogReg = registerPerformanceLog(context);
 	}
 
