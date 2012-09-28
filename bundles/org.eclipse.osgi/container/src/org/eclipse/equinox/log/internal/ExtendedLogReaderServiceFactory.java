@@ -13,7 +13,7 @@ import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.equinox.log.LogFilter;
 import org.eclipse.equinox.log.SynchronousLogListener;
-import org.eclipse.osgi.internal.baseadaptor.ArrayMap;
+import org.eclipse.osgi.framework.util.ArrayMap;
 import org.osgi.framework.*;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogListener;
