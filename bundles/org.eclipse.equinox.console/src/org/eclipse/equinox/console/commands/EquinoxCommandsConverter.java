@@ -57,6 +57,12 @@ public class EquinoxCommandsConverter implements Converter {
 		
 		if(desiredType == Bundle.class) {
 			Bundle bundle = null;
+			if (in instanceof Long) {
+				long id = ((Long) in).longValue();
+				bundle = context.getBundle(id);
+				return bundle;
+			}
+			
 			try {
 				long id = Long.parseLong((String) in);
 				bundle = context.getBundle(id);
