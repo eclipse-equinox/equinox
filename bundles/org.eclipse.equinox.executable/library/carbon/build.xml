@@ -7,7 +7,6 @@
 		<arg line="${basedir}/build.sh"/>
 		<arg line="install"/>
 	</exec>
-	<eclipse.refreshLocal resource="platform-launcher" depth="infinite" />		
 </target>
 
 <target name="clean">

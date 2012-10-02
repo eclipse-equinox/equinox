@@ -60,9 +60,10 @@ PROGRAM_OUTPUT="$programOutput"
 DEFAULT_OS="$defaultOS"
 DEFAULT_OS_ARCH="$defaultOSArch"
 DEFAULT_WS="$defaultWS"
-PPC_OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/ppc/Eclipse.app/Contents/MacOS"
-X86_OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/x86/Eclipse.app/Contents/MacOS"
-X86_64_OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/x86_64/Eclipse.app/Contents/MacOS"
+EXEC_DIR=../../../../../rt.equinox.binaries/org.eclipse.equinox.executable
+PPC_OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/ppc/Eclipse.app/Contents/MacOS"
+X86_OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/x86/Eclipse.app/Contents/MacOS"
+X86_64_OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/x86_64/Eclipse.app/Contents/MacOS"
 
 if [ "$DEFAULT_WS" == "cocoa" ]; then
 	makefile="make_cocoa.mak"

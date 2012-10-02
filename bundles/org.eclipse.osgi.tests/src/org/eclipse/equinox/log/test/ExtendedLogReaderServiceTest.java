@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2012 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -49,9 +49,9 @@ public class ExtendedLogReaderServiceTest extends TestCase {
 		});
 		synchronized (listener) {
 			log.log(LogService.LOG_INFO, "info");
-			listener.wait();
+			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntry().getLevel() == LogService.LOG_INFO);
+		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
 	}
 
 	public void testaddNullFilterr() throws Exception {
@@ -83,9 +83,9 @@ public class ExtendedLogReaderServiceTest extends TestCase {
 		});
 		synchronized (listener) {
 			log.log(LogService.LOG_INFO, "info");
-			listener.wait();
+			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntry().getLevel() == LogService.LOG_INFO);
+		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
 	}
 
 	public void testaddNullListener() throws Exception {
@@ -131,27 +131,29 @@ public class ExtendedLogReaderServiceTest extends TestCase {
 		long threadId = getCurrentThreadId();
 		synchronized (listener) {
 			log.getLogger("test").log(logReference, LogService.LOG_INFO, "info", new Throwable("test"));
-			listener.wait();
+			listener.waitForLogEntry();
 		}
-		long sequenceNumberBefore = listener.getEntryX().getSequenceNumber();
+		ExtendedLogEntry entry = listener.getEntryX();
+		long sequenceNumberBefore = entry.getSequenceNumber();
 
 		synchronized (listener) {
 			log.getLogger("test").log(logReference, LogService.LOG_INFO, "info", new Throwable("test"));
-			listener.wait();
+			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntryX().getBundle() == OSGiTestsActivator.getContext().getBundle());
-		assertTrue(listener.getEntryX().getMessage().equals("info"));
-		assertTrue(listener.getEntryX().getException().getMessage().equals("test"));
-		assertTrue(listener.getEntryX().getServiceReference() == logReference);
-		assertTrue(listener.getEntryX().getTime() >= timeBeforeLog);
-		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
+		entry = listener.getEntryX();
+		assertTrue(entry.getBundle() == OSGiTestsActivator.getContext().getBundle());
+		assertTrue(entry.getMessage().equals("info"));
+		assertTrue(entry.getException().getMessage().equals("test"));
+		assertTrue(entry.getServiceReference() == logReference);
+		assertTrue(entry.getTime() >= timeBeforeLog);
+		assertTrue(entry.getLevel() == LogService.LOG_INFO);
 
-		assertTrue(listener.getEntryX().getLoggerName().equals("test"));
-		assertTrue(listener.getEntryX().getThreadName().equals(threadName));
+		assertTrue(entry.getLoggerName().equals("test"));
+		assertTrue(entry.getThreadName().equals(threadName));
 		if (threadId >= 0)
-			assertTrue(listener.getEntryX().getThreadId() == threadId);
-		assertTrue(listener.getEntryX().getContext() == logReference);
-		assertTrue(listener.getEntryX().getSequenceNumber() > sequenceNumberBefore);
+			assertTrue(entry.getThreadId() == threadId);
+		assertTrue(entry.getContext() == logReference);
+		assertTrue(entry.getSequenceNumber() > sequenceNumberBefore);
 	}
 
 	private long getCurrentThreadId() {

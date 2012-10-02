@@ -37,9 +37,10 @@ defaultOS=""
 defaultOSArch=""
 defaultWS="motif"
 defaultJava=DEFAULT_JAVA_JNI
+EXEC_DIR=../../../../../rt.equinox.binaries/org.eclipse.equinox.executable
 makefile=""
 javaHome=""
-outputRoot="../../bin"
+outputRoot="bin"
 if [ "$OS" = "" ];  then
     OS=`uname -s`
 fi
@@ -54,7 +55,7 @@ case $OS in
 		defaultOSArch="ppc"
 		defaultWS="motif"
 		MOTIF_HOME=/usr
-		OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+		OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 		;;
 	"Linux")
 		makefile="make_linux.mak"
@@ -63,13 +64,13 @@ case $OS in
 		defaultWS="motif"
 		X11_HOME=/usr/X11R6
 		MOTIF_HOME=~/motif21
-		OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+		OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 		;;
 	"SunOS")
 #		PATH=/usr/ccs/bin:/opt/SUNWspro/bin:$PATH
 		PATH=/usr/ccs/bin:/export/home/SUNWspro/bin:$PATH
 		[ -d /bluebird/teamswt/swt-builddir/build/JRE/SPARC/jdk1.6.0_14 ] && javaHome="/bluebird/teamswt/swt-builddir/build/JRE/SPARC/jdk1.6.0_14"
-		outputRoot="../../contributed"
+		outputRoot="contributed"
 		export PATH
 		makefile="make_solaris.mak"
 		defaultOS="solaris"
@@ -78,7 +79,7 @@ case $OS in
 		OS="Solaris"
 		X11_HOME=/usr/openwin
 		MOTIF_HOME=/usr/dt
-		OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+		OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 		;;
 	"HP-UX")
 		X11_HOME=/usr
@@ -89,7 +90,7 @@ case $OS in
 				defaultOS="hpux"
 				defaultOSArch="ia64_32"
 				defaultWS="motif"
-				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				javaHome="/opt/java1.5"
 				defaultJava=DEFAULT_JAVA_EXEC
 				PATH=/opt/hp-gcc/bin:$PATH
@@ -100,7 +101,7 @@ case $OS in
 				defaultOS="hpux"
 				defaultOSArch="PA_RISC"
 				defaultWS="motif"
-				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 		esac
         ;;
@@ -141,8 +142,8 @@ DEFAULT_WS="$defaultWS"
 JAVA_HOME=$javaHome
 DEFAULT_JAVA=$defaultJava
 
-LIBRARY_DIR="../../../org.eclipse.equinox.launcher/fragments/org.eclipse.equinox.launcher.$defaultWS.$defaultOS.$defaultOSArch"
-OUTPUT_DIR="$outputRoot/$defaultWS/$defaultOS/$defaultOSArch"
+LIBRARY_DIR="$EXEC_DIR/../org.eclipse.equinox.launcher.$defaultWS.$defaultOS.$defaultOSArch"
+OUTPUT_DIR="$EXEC_DIR/$outputRoot/$defaultWS/$defaultOS/$defaultOSArch"
 
 export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS X11_HOME MOTIF_HOME JAVA_HOME DEFAULT_JAVA LIBRARY_DIR
 

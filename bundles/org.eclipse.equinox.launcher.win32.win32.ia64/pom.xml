@@ -27,5 +27,8 @@
   <properties>
     <launcher-binary.version>1500</launcher-binary.version>
     <launcher-binary.ext>dll</launcher-binary.ext>
+    <os>win32</os>
+    <ws>win32</ws>
+    <arch>ia64</arch>
   </properties>
 </project>

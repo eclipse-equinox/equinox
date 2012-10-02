@@ -27,6 +27,9 @@
 
   <properties>
     <launcher-binary.version>1500</launcher-binary.version>
+    <os>hpux</os>
+    <ws>motif</ws>
+    <arch>ia64_32</arch>
   </properties>
 
 </project>
