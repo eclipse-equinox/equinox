@@ -68,23 +68,23 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 			if (osNames.length == 0)
 				match = true;
 			else {
+				Collection<String> platformOSAliases;
 				Object platformOS = platformProps[i].get(Constants.FRAMEWORK_OS_NAME);
-				Object aliasedPlatformOS = platformOS == null || !(platformOS instanceof String) ? platformOS : aliasMapper.aliasOSName((String) platformOS);
-				Object[] platformOSes;
-				if (aliasedPlatformOS instanceof Collection)
-					platformOSes = ((Collection<?>) aliasedPlatformOS).toArray();
-				else
-					platformOSes = aliasedPlatformOS == null ? new Object[0] : new Object[] {aliasedPlatformOS};
-				for (int j = 0; j < osNames.length && !match; j++) {
-					Object aliasedName = aliasMapper.aliasOSName(osNames[j]);
-					for (int k = 0; k < platformOSes.length; k++) {
-						if (aliasedName instanceof String) {
-							if (platformOSes[k].equals(aliasedName))
-								match = true;
-						} else {
-							for (Iterator<?> iAliases = ((Collection<?>) aliasedName).iterator(); iAliases.hasNext() && !match;)
-								if (platformOSes[k].equals(iAliases.next()))
-									match = true;
+				if (platformOS instanceof Collection) {
+					@SuppressWarnings("unchecked")
+					Collection<String> platformOSTemp = (Collection<String>) platformOS;
+					platformOSAliases = platformOSTemp;
+				} else if (platformOS instanceof String) {
+					platformOSAliases = aliasMapper.getOSNameAliases((String) platformOS);
+				} else {
+					platformOSAliases = Collections.emptyList();
+				}
+				osNamesLoop: for (String osName : osNames) {
+					String canonicalOSName = aliasMapper.getCanonicalOSName(osName);
+					for (String osAlias : platformOSAliases) {
+						if (osAlias.equalsIgnoreCase(canonicalOSName)) {
+							match = true;
+							break osNamesLoop;
 						}
 					}
 				}
@@ -97,14 +97,26 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 			if (processors.length == 0)
 				match = true;
 			else {
+				Collection<String> platformProcessorAliases;
 				Object platformProcessor = platformProps[i].get(Constants.FRAMEWORK_PROCESSOR);
-				Object aliasedPlatformProcessor = platformProcessor == null || !(platformProcessor instanceof String) ? platformProcessor : aliasMapper.aliasProcessor((String) platformProcessor);
-				if (aliasedPlatformProcessor != null)
-					for (int j = 0; j < processors.length && !match; j++) {
-						String aliasedProcessor = aliasMapper.aliasProcessor(processors[j]);
-						if (aliasedPlatformProcessor.equals(aliasedProcessor))
+				if (platformProcessor instanceof Collection) {
+					@SuppressWarnings("unchecked")
+					Collection<String> platformProcessorTemp = (Collection<String>) platformProcessor;
+					platformProcessorAliases = platformProcessorTemp;
+				} else if (platformProcessor instanceof String) {
+					platformProcessorAliases = aliasMapper.getProcessorAliases((String) platformProcessor);
+				} else {
+					platformProcessorAliases = Collections.emptyList();
+				}
+				processorLoop: for (String processor : processors) {
+					String canonicalProcessor = aliasMapper.getCanonicalProcessor(processor);
+					for (String processorAlias : platformProcessorAliases) {
+						if (processorAlias.equalsIgnoreCase(canonicalProcessor)) {
 							match = true;
+							break processorLoop;
+						}
 					}
+				}
 			}
 			if (!match)
 				return false;

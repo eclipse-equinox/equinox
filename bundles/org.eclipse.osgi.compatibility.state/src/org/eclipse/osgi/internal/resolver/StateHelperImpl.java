@@ -12,7 +12,7 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
-import org.eclipse.osgi.internal.baseadaptor.ArrayMap;
+import org.eclipse.osgi.framework.util.ArrayMap;
 import org.eclipse.osgi.internal.container.ComputeNodeOrder;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Constants;

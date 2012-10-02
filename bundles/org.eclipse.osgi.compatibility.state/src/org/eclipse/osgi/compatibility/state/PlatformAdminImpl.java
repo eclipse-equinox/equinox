@@ -75,9 +75,9 @@ public class PlatformAdminImpl implements PlatformAdmin {
 				ModuleRevision current = module.getCurrentRevision();
 				BundleDescription description = converter.createDescription(current);
 				state.addBundle(description);
-				state.setPlatformProperties(asDictionary(equinoxContainer.getConfiguration().asMap()));
+				state.setPlatformProperties(asDictionary(equinoxContainer.getConfiguration().getInitialConfig()));
 			}
-			state.setTimeStamp(database.getTimestamp());
+			state.setTimeStamp(database.getRevisionsTimestamp());
 			// TODO add hooks to get the resolution correct
 			// TODO add listeners to keep state copy in sync
 		} finally {

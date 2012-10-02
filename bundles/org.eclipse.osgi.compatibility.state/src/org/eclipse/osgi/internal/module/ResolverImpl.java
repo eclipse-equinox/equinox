@@ -13,8 +13,8 @@ package org.eclipse.osgi.internal.module;
 
 import java.security.AccessController;
 import java.util.*;
+import org.eclipse.osgi.framework.util.ArrayMap;
 import org.eclipse.osgi.framework.util.SecureAction;
-import org.eclipse.osgi.internal.baseadaptor.ArrayMap;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
