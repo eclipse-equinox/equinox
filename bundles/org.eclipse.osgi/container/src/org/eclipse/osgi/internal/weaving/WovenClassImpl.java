@@ -12,6 +12,7 @@ package org.eclipse.osgi.internal.weaving;
 
 import java.security.*;
 import java.util.*;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.serviceregistry.HookContext;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
@@ -40,8 +41,9 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 	private Throwable error;
 	private ServiceRegistration<?> errorHook;
 	private Class<?> clazz;
+	final EquinoxContainer container;
 
-	public WovenClassImpl(String className, byte[] bytes, BundleEntry entry, ProtectionDomain domain, BundleLoader loader, ServiceRegistry registry, Map<ServiceRegistration<?>, Boolean> blacklist) {
+	public WovenClassImpl(String className, byte[] bytes, BundleEntry entry, ProtectionDomain domain, BundleLoader loader, EquinoxContainer container, Map<ServiceRegistration<?>, Boolean> blacklist) {
 		super();
 		this.className = className;
 		this.validBytes = this.resultBytes = bytes;
@@ -49,8 +51,10 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		this.dynamicImports = new DynamicImportList(this);
 		this.domain = domain;
 		this.loader = loader;
-		this.registry = registry;
+		this.registry = container.getServiceRegistry();
+		this.container = container;
 		this.blackList = blacklist;
+		setState(TRANSFORMING);
 	}
 
 	public byte[] getBytes() {
@@ -105,6 +109,16 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		// weaving has completed; save the class and mark complete
 		this.clazz = clazz;
 		hookFlags |= FLAG_WEAVINGCOMPLETE;
+		// Only notify listeners if weaving hooks were called.
+		if ((hookFlags & FLAG_HOOKCALLED) == 0)
+			return;
+		// Only notify listeners if they haven't already been notified of
+		// the terminal TRANSFORMING_FAILED state.
+		if (error != null)
+			return;
+		// If clazz is null, a class definition failure occurred.
+		setState(clazz == null ? DEFINE_FAILED : DEFINED);
+		notifyWovenClassListeners();
 	}
 
 	public String getClassName() {
@@ -173,6 +187,45 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		return weavingHookName;
 	}
 
+	private void notifyWovenClassListeners() {
+		final HookContext context = new HookContext() {
+			@Override
+			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
+				if (!(hook instanceof WovenClassListener))
+					return;
+				try {
+					((WovenClassListener) hook).modified(WovenClassImpl.this);
+				} catch (Exception e) {
+					WovenClassImpl.this.container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, hookRegistration.getReference().getBundle(), e);
+				}
+			}
+
+			@Override
+			public String getHookClassName() {
+				return WovenClassListener.class.getName();
+			}
+
+			@Override
+			public String getHookMethodName() {
+				return "modified"; //$NON-NLS-1$
+			}
+		};
+		if (System.getSecurityManager() == null)
+			registry.notifyHooksPrivileged(context);
+		else {
+			try {
+				AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+					public Object run() {
+						registry.notifyHooksPrivileged(context);
+						return null;
+					}
+				});
+			} catch (PrivilegedActionException e) {
+				throw (RuntimeException) e.getException();
+			}
+		}
+	}
+
 	byte[] callHooks() throws Throwable {
 		SecurityManager sm = System.getSecurityManager();
 		byte[] wovenBytes = null;
@@ -197,6 +250,11 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 				wovenBytes = resultBytes;
 				newImports = dynamicImports;
 				setHooksComplete();
+				// Make sure setHooksComplete() has been called. The woven class
+				// must be immutable in TRANSFORMED or TRANSFORMING_FAILED.
+				// If error is not null, a weaving hook threw an exception.
+				setState(error == null ? TRANSFORMED : TRANSFORMING_FAILED);
+				notifyWovenClassListeners();
 			}
 		}
 
@@ -224,5 +282,16 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 
 	public ServiceRegistration<?> getErrorHook() {
 		return errorHook;
+	}
+
+	private int state;
+
+	@Override
+	public int getState() {
+		return state;
+	}
+
+	private void setState(int value) {
+		state = value;
 	}
 }
