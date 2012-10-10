@@ -872,8 +872,9 @@ public class ResolverImpl implements Resolver {
 			return null;
 		Set<String> bundleConstraints = new HashSet<String>();
 		Set<String> packageConstraints = new HashSet<String>();
+		Collection<GenericConstraint> multiRequirementWithMultiSuppliers = new ArrayList<GenericConstraint>();
 		// first try out the initial selections
-		List<ResolverConstraint> initialConflicts = getConflicts(bundles, packageConstraints, bundleConstraints);
+		List<ResolverConstraint> initialConflicts = getConflicts(bundles, packageConstraints, bundleConstraints, multiRequirementWithMultiSuppliers);
 		if (initialConflicts == null || "tryFirst".equals(usesMode) || usesCalculationTimeout) { //$NON-NLS-1$
 			groupingChecker.clear();
 			// the first combination have no conflicts or 
@@ -899,7 +900,19 @@ public class ResolverImpl implements Resolver {
 					selectedSupplier.setSubstitute(null);
 			}
 		}
-
+		if (!multiRequirementWithMultiSuppliers.isEmpty()) {
+			groupingChecker.clear();
+			for (GenericConstraint multiConstraint : multiRequirementWithMultiSuppliers) {
+				VersionSupplier[] matchingSuppliers = multiConstraint.getMatchingCapabilities();
+				if (matchingSuppliers != null) {
+					for (VersionSupplier supplier : matchingSuppliers) {
+						if (groupingChecker.isConsistent(multiConstraint.getBundle(), (GenericCapability) supplier) != null) {
+							multiConstraint.removePossibleSupplier(supplier);
+						}
+					}
+				}
+			}
+		}
 		// do not need to keep uses data in memory
 		groupingChecker.clear();
 		return conflicts;
@@ -936,7 +949,7 @@ public class ResolverImpl implements Resolver {
 			// first count the conflicts for the bundles with conflicts from the best combination
 			// this significantly reduces the time it takes to populate the GroupingChecker for cases where
 			// the combination is no better.
-			List<ResolverConstraint> conflicts = getConflicts(bestConflictBundles, null, null);
+			List<ResolverConstraint> conflicts = getConflicts(bestConflictBundles, null, null, null);
 			int conflictCount = getConflictCount(conflicts);
 			if (conflictCount >= bestConflictCount) {
 				if (DEBUG_USES)
@@ -947,7 +960,7 @@ public class ResolverImpl implements Resolver {
 			}
 			// this combination improves upon the conflicts for the bundles which conflict with the current best combination;
 			// do an complete conflict count
-			conflicts = getConflicts(bundles, null, null);
+			conflicts = getConflicts(bundles, null, null, null);
 			conflictCount = getConflictCount(conflicts);
 			if (conflictCount < bestConflictCount) {
 				// this combination is better that the current best combination; save this combination as the current best
@@ -1012,15 +1025,15 @@ public class ResolverImpl implements Resolver {
 		return result;
 	}
 
-	private List<ResolverConstraint> getConflicts(ResolverBundle[] bundles, Set<String> packageConstraints, Set<String> bundleConstraints) {
+	private List<ResolverConstraint> getConflicts(ResolverBundle[] bundles, Set<String> packageConstraints, Set<String> bundleConstraints, Collection<GenericConstraint> multiRequirementWithMultiSuppliers) {
 		groupingChecker.clear();
 		List<ResolverConstraint> conflicts = null;
 		for (int i = 0; i < bundles.length; i++)
-			conflicts = addConflicts(bundles[i], packageConstraints, bundleConstraints, conflicts);
+			conflicts = addConflicts(bundles[i], packageConstraints, bundleConstraints, multiRequirementWithMultiSuppliers, conflicts);
 		return conflicts;
 	}
 
-	private List<ResolverConstraint> addConflicts(ResolverBundle bundle, Set<String> packageConstraints, Set<String> bundleConstraints, List<ResolverConstraint> conflicts) {
+	private List<ResolverConstraint> addConflicts(ResolverBundle bundle, Set<String> packageConstraints, Set<String> bundleConstraints, Collection<GenericConstraint> multiRequirementWithMultiSuppliers, List<ResolverConstraint> conflicts) {
 		BundleConstraint[] requires = bundle.getRequires();
 		for (int i = 0; i < requires.length; i++) {
 			ResolverBundle selectedSupplier = (ResolverBundle) requires[i].getSelectedSupplier();
@@ -1049,10 +1062,28 @@ public class ResolverImpl implements Resolver {
 			VersionSupplier[] suppliers = capabilityRequirement.getMatchingCapabilities();
 			if (suppliers == null)
 				continue;
+
+			if (multiRequirementWithMultiSuppliers != null && capabilityRequirement.isMultiple() && suppliers.length > 1) {
+				multiRequirementWithMultiSuppliers.add(capabilityRequirement);
+			}
+			// search for at least one capability that does not conflict
+			// in case of single cardinality there will only be one matching supplier
+			// in case of multiple there may be multiple suppliers, but we only need one or more to not conflict with the class space
+			Collection<PackageRoots[][]> capabilityConflicts = null;
 			for (VersionSupplier supplier : suppliers) {
 				PackageRoots[][] conflict = groupingChecker.isConsistent(bundle, (GenericCapability) supplier);
 				if (conflict != null) {
+					if (capabilityConflicts == null)
+						capabilityConflicts = new ArrayList<PackageRoots[][]>(1);
+					capabilityConflicts.add(conflict);
+				}
+			}
+			if (capabilityConflicts != null) {
+				for (PackageRoots[][] conflict : capabilityConflicts) {
 					addConflictNames(conflict, packageConstraints, bundleConstraints);
+				}
+				if (capabilityConflicts.size() == suppliers.length) {
+					// every capability conflicted
 					if (conflicts == null)
 						conflicts = new ArrayList<ResolverConstraint>(1);
 					conflicts.add(capabilityRequirement);
@@ -1126,7 +1157,7 @@ public class ResolverImpl implements Resolver {
 			}
 			GenericConstraint[] genericRequires = bundle.getGenericRequires();
 			for (GenericConstraint genericRequire : genericRequires)
-				if (genericRequire.getNumPossibleSuppliers() > 1 && genericRequire.supplierHasUses())
+				if (genericRequire.getNumPossibleSuppliers() > 1 && !genericRequire.isMultiple())
 					multipleGenericSupplierList.add(genericRequire);
 		}
 		List<ResolverConstraint[]> results = new ArrayList<ResolverConstraint[]>();

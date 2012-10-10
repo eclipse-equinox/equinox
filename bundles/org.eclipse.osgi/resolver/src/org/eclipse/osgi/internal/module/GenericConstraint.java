@@ -17,12 +17,13 @@ import org.osgi.framework.Constants;
 public class GenericConstraint extends ResolverConstraint {
 
 	private final boolean effective;
-	private boolean supplierHasUses;
+	private final boolean multiple;
 
 	GenericConstraint(ResolverBundle bundle, GenericSpecification constraint) {
 		super(bundle, constraint);
 		String effectiveDirective = constraint.getRequirement().getDirectives().get(Constants.EFFECTIVE_DIRECTIVE);
 		effective = effectiveDirective == null || Constants.EFFECTIVE_RESOLVE.equals(effectiveDirective);
+		multiple = (constraint.getResolution() & GenericSpecification.RESOLUTION_MULTIPLE) != 0;
 	}
 
 	boolean isOptional() {
@@ -34,7 +35,7 @@ public class GenericConstraint extends ResolverConstraint {
 	}
 
 	boolean isMultiple() {
-		return !supplierHasUses && (((GenericSpecification) constraint).getResolution() & GenericSpecification.RESOLUTION_MULTIPLE) != 0;
+		return multiple;
 	}
 
 	boolean isEffective() {
@@ -50,22 +51,5 @@ public class GenericConstraint extends ResolverConstraint {
 			return getPossibleSuppliers();
 		VersionSupplier supplier = getSelectedSupplier();
 		return supplier == null ? null : new VersionSupplier[] {supplier};
-	}
-
-	@Override
-	void addPossibleSupplier(VersionSupplier supplier) {
-		// if there is a supplier with uses constraints then we no longer allow multiples
-		supplierHasUses |= ((GenericCapability) supplier).getUsesDirective() != null;
-		super.addPossibleSupplier(supplier);
-	}
-
-	@Override
-	void clearPossibleSuppliers() {
-		super.clearPossibleSuppliers();
-		supplierHasUses = false;
-	}
-
-	boolean supplierHasUses() {
-		return supplierHasUses;
 	}
 }

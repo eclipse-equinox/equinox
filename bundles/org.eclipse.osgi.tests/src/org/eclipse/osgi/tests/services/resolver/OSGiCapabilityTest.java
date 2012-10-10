@@ -415,6 +415,110 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		checkUsedCapability(c4v130, p5v100Capability);
 	}
 
+	public void testOSGiCardinalityUses() throws BundleException {
+		State state = buildEmptyState();
+		long bundleID = 0;
+		Dictionary manifest;
+
+		manifest = loadManifest("p5.v100.osgi.MF");
+		BundleDescription p5v100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("p5.v101.osgi.MF");
+		BundleDescription p5v101 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("p5.v110.osgi.MF");
+		BundleDescription p5v110 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("p6.v100.osgi.MF");
+		BundleDescription p6v100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("p6.v110.osgi.MF");
+		BundleDescription p6v110 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("p7.v100.osgi.MF");
+		BundleDescription p7v100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("p7.v110.osgi.MF");
+		BundleDescription p7v110 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("c6.v100.osgi.MF");
+		BundleDescription c6v100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("c6.v110.osgi.MF");
+		BundleDescription c6v110 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("c6.v120.osgi.MF");
+		BundleDescription c6v120 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("c6.v130.osgi.MF");
+		BundleDescription c6v130 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("c6.v140.osgi.MF");
+		BundleDescription c6v140 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		state.addBundle(p5v100);
+		state.addBundle(p5v101);
+		state.addBundle(p5v110);
+		state.addBundle(p6v100);
+		state.addBundle(p6v110);
+		state.addBundle(p7v100);
+		state.addBundle(p7v110);
+		state.addBundle(c6v100);
+		state.addBundle(c6v110);
+		state.addBundle(c6v120);
+		state.addBundle(c6v130);
+		state.addBundle(c6v140);
+
+		state.resolve();
+
+		assertTrue("p5v100", p5v100.isResolved());
+		assertTrue("p5v100", p5v101.isResolved());
+		assertTrue("p5v110", p5v110.isResolved());
+		assertTrue("p6v100", p6v100.isResolved());
+		assertTrue("p6v110", p6v110.isResolved());
+		assertTrue("p7v100", p7v100.isResolved());
+		assertTrue("p7v110", p7v110.isResolved());
+		assertTrue("c6v100", c6v100.isResolved());
+		assertTrue("c6v110", c6v110.isResolved());
+		assertTrue("c6v120", c6v120.isResolved());
+		assertTrue("c6v130", c6v130.isResolved());
+		assertTrue("c6v140", c6v140.isResolved());
+
+		state.linkDynamicImport(c6v120, "p6");
+		state.linkDynamicImport(c6v120, "p7");
+
+		GenericDescription[] p5v100Capability = p5v100.getSelectedGenericCapabilities();
+		GenericDescription[] p5v101Capability = p5v101.getSelectedGenericCapabilities();
+		List expectedCapabilityList = new ArrayList();
+		expectedCapabilityList.addAll(Arrays.asList(p5v100Capability));
+		expectedCapabilityList.addAll(Arrays.asList(p5v101Capability));
+		for (Iterator iCapabilities = expectedCapabilityList.iterator(); iCapabilities.hasNext();) {
+			if (!"namespace.5".equals(((GenericDescription) iCapabilities.next()).getType())) {
+				iCapabilities.remove();
+			}
+		}
+
+		ExportPackageDescription[] p6v100Exports = p6v100.getSelectedExports();
+		ExportPackageDescription[] p7v100Exports = p7v100.getSelectedExports();
+		ExportPackageDescription[] expectedPackages = new ExportPackageDescription[] {p6v100Exports[0], p7v100Exports[0]};
+
+		checkUsedImports(c6v100, expectedPackages);
+		checkUsedImports(c6v110, expectedPackages);
+		checkUsedImports(c6v120, expectedPackages);
+
+		BundleDescription[] expectedRequired = new BundleDescription[] {p6v100, p7v100};
+		checkUsedRequires(c6v130, expectedRequired);
+		checkUsedRequires(c6v140, expectedRequired);
+
+		GenericDescription[] expectedCapabilities = (GenericDescription[]) expectedCapabilityList.toArray(new GenericDescription[expectedCapabilityList.size()]);
+		checkUsedCapability(c6v100, expectedCapabilities);
+		checkUsedCapability(c6v110, expectedCapabilities);
+		checkUsedCapability(c6v120, expectedCapabilities);
+		checkUsedCapability(c6v130, expectedCapabilities);
+		checkUsedCapability(c6v140, expectedCapabilities);
+
+		manifest = loadManifest("c6.v150.osgi.MF");
+		BundleDescription c6v150 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("c6.v160.osgi.MF");
+		BundleDescription c6v160 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		state.addBundle(c6v150);
+		state.addBundle(c6v160);
+		state.resolve();
+
+		assertFalse("c6v150", c6v150.isResolved());
+		assertFalse("c6v160", c6v160.isResolved());
+	}
+
 	public void testDeclaringIdentityCapability() {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
