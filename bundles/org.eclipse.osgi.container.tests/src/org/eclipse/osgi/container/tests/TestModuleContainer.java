@@ -1304,6 +1304,28 @@ public class TestModuleContainer {
 		Assert.assertNotNull("f1 wiring is null.", f1Wiring);
 	}
 
+	@Test
+	public void testRequireBundleUses() throws BundleException, IOException, ResolutionException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+
+		Module b1 = installDummyModule("require.b1.MF", "b1", container);
+		installDummyModule("require.b2.MF", "b2", container);
+		installDummyModule("require.b3.MF", "b3", container);
+		installDummyModule("require.b4.MF", "b4", container);
+
+		try {
+			container.resolve(null, false);
+		} catch (ResolutionException e) {
+			// This is allowed to happen here
+		}
+		Assert.assertEquals("b1 should not resolve.", State.INSTALLED, b1.getState());
+	}
+
 	private DummyContainerAdaptor createDummyAdaptor() {
 		return new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.<String, String> emptyMap());
 	}
