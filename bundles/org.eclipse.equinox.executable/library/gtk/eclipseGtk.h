@@ -25,7 +25,7 @@ struct GTK_PTRS {
 	void		(*gtk_fixed_set_has_window)	(GtkFixed *, gboolean);
 	GtkWidget*	(*gtk_image_new_from_pixbuf)(GdkPixbuf*);
 	gboolean	(*gtk_init_check)			(int*, char***);
-	gboolean	(*gtk_init_with_args)		(int*, char***, const char *, GOptionEntry *, const char *, GError **);
+	gboolean	(*gtk_init_with_args)		(int*, char***, const char *, void *, const char *, GError **);
 	GtkWidget*	(*gtk_message_dialog_new)	(GtkWindow*, GtkDialogFlags, GtkMessageType, GtkButtonsType, const gchar*, ...);
 	void		(*gtk_scrolled_window_set_policy)(GtkScrolledWindow*, GtkPolicyType, GtkPolicyType);
 	GtkWidget*	(*gtk_scrolled_window_new)	(GtkAdjustment*, GtkAdjustment*);
