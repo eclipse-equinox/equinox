@@ -25,6 +25,7 @@ struct GTK_PTRS {
 	void		(*gtk_fixed_set_has_window)	(GtkFixed *, gboolean);
 	GtkWidget*	(*gtk_image_new_from_pixbuf)(GdkPixbuf*);
 	gboolean	(*gtk_init_check)			(int*, char***);
+	gboolean	(*gtk_init_with_args)		(int*, char***, const char *, GOptionEntry *, const char *, GError **);
 	GtkWidget*	(*gtk_message_dialog_new)	(GtkWindow*, GtkDialogFlags, GtkMessageType, GtkButtonsType, const gchar*, ...);
 	void		(*gtk_scrolled_window_set_policy)(GtkScrolledWindow*, GtkPolicyType, GtkPolicyType);
 	GtkWidget*	(*gtk_scrolled_window_new)	(GtkAdjustment*, GtkAdjustment*);
@@ -45,6 +46,7 @@ struct GTK_PTRS {
 	void		(*g_object_unref)			(gpointer);
 	GObject*	(*g_object_new)				(GType, const gchar*, ...);
 	guint       (*g_timeout_add)			(guint, GSourceFunc, gpointer);
+	void		(*g_error_free)				(GError *);
 
 #ifdef SOLARIS
 	GString* 	(*g_string_insert_c) 		(GString *, gssize, gchar);
