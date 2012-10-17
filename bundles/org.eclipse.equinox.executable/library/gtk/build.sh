@@ -141,7 +141,6 @@ case $OS in
 				PATH=$PATH:/opt/hp-gcc/bin:/opt/gtk_64bit/bin
 				PKG_CONFIG_PATH="/opt/gtk_64bit/lib/hpux64/pkgconfig"
 				;;
-			*)
 		esac
 		;;
 		export PATH PKG_CONFIG_PATH
