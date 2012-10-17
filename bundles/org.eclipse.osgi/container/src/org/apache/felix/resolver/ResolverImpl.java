@@ -171,8 +171,11 @@ public class ResolverImpl implements Resolver
                         ? m_usesPermutations.remove(0)
                         : m_importPermutations.remove(0);
 //allCandidates.dump();
-
-                    Map<Resource, Object> resultCache = new HashMap<Resource, Object>(allResources.size());
+                    // Reuse a resultCache map for checking package consistency
+                    // for all resources.
+                    Map<Resource, Object> resultCache =
+                        new HashMap<Resource, Object>(allResources.size());
+                    // Check the package space consistency for all 'root' resources.
                     for (Resource resource : allResources)
                     {
                         Resource target = resource;
@@ -201,9 +204,6 @@ public class ResolverImpl implements Resolver
                         }
                         catch (ResolutionException ex)
                         {
-                            // must clear the result cache so it will get re-populated
-                            // using a new permutation if it exists
-                            resultCache.clear();
                             rethrow = ex;
                         }
                     }
@@ -977,7 +977,9 @@ public class ResolverImpl implements Resolver
         Set<Requirement> mutated = null;
 
         // Check for conflicting imports from fragments.
-        // TODO is this only needed for imports or are generic and bundle requirements also needed?
+        // TODO: Is this only needed for imports or are generic and bundle requirements also needed?
+        //       I think this is only a special case for fragment imports because they can overlap
+        //       host imports, which is not allowed in normal metadata.
         for (Entry<String, List<Blame>> entry : pkgs.m_importedPkgs.entrySet())
         {
             if (entry.getValue().size() > 1)
@@ -1093,7 +1095,7 @@ public class ResolverImpl implements Resolver
 
             if (rethrow != null)
             {
-                if (mutated.size() > 0)
+                if (!mutated.isEmpty())
                 {
                     m_usesPermutations.add(permutation);
                 }
@@ -1108,7 +1110,7 @@ public class ResolverImpl implements Resolver
 
         // Check if there are any uses conflicts with imported and required packages.
         // We combine the imported and required packages here into one map.
-        // Imported packages are added after required packages because they shadow or override 
+        // Imported packages are added after required packages because they shadow or override
         // the packages from required bundles.
         Map<String, List<Blame>> allImportRequirePkgs = new HashMap<String, List<Blame>>(pkgs.m_requiredPkgs);
         allImportRequirePkgs.putAll(pkgs.m_importedPkgs);
@@ -1193,7 +1195,7 @@ public class ResolverImpl implements Resolver
                 if (rethrow != null)
                 {
                     // Add uses permutation if we mutated any candidates.
-                    if (mutated.size() > 0)
+                    if (!mutated.isEmpty())
                     {
                         m_usesPermutations.add(permutation);
                     }
@@ -1231,9 +1233,11 @@ public class ResolverImpl implements Resolver
         for (Requirement req : resource.getRequirements(null))
         {
             List<Capability> cands = allCandidates.getCandidates(req);
-            if (cands != null && !cands.isEmpty()) {
+            if (cands != null && !cands.isEmpty())
+            {
                 Capability cap = cands.get(0);
-                if (!resource.equals(cap.getResource())) {
+                if (!resource.equals(cap.getResource()))
+                {
                     try
                     {
                         checkPackageSpaceConsistency(
