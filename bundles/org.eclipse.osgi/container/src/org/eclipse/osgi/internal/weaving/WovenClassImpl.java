@@ -41,6 +41,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 	private Throwable error;
 	private ServiceRegistration<?> errorHook;
 	private Class<?> clazz;
+	private int state;
 	final EquinoxContainer container;
 
 	public WovenClassImpl(String className, byte[] bytes, BundleEntry entry, ProtectionDomain domain, BundleLoader loader, EquinoxContainer container, Map<ServiceRegistration<?>, Boolean> blacklist) {
@@ -283,8 +284,6 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 	public ServiceRegistration<?> getErrorHook() {
 		return errorHook;
 	}
-
-	private int state;
 
 	@Override
 	public int getState() {
