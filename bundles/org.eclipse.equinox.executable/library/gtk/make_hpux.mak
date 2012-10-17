@@ -85,7 +85,7 @@ eclipseNix.o: ../eclipseNix.c
 	$(CC) $(CFLAGS) -c ../eclipseNix.c -o $@
 
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
-	$(CC) -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
+	$(CC) ${M_ARCH} -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
 	$(CC) $(LFLAGS) -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
