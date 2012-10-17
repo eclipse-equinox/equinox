@@ -543,6 +543,11 @@ final class ModuleResolver {
 				return;
 			}
 
+			if (requirement.getRevision().getBundle() == null) {
+				// this container is not modeling a real framework, no permission check is done
+				return;
+			}
+
 			candidates: while (iCandidates.hasNext()) {
 				ModuleCapability candidate = iCandidates.next();
 				// TODO this is a hack for when a bundle imports and exports the same package
