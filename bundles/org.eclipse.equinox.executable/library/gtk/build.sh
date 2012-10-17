@@ -142,7 +142,6 @@ case $OS in
 				PKG_CONFIG_PATH="/opt/gtk_64bit/lib/hpux64/pkgconfig"
 				;;
 		esac
-		;;
 		export PATH PKG_CONFIG_PATH
 		[ -d /opt/java1.5 ] && defaultJavaHome="/opt/java1.5"
 	;;
