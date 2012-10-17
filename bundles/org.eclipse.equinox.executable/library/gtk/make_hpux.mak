@@ -40,9 +40,9 @@ DLL = $(PROGRAM_LIBRARY)
 LIBS = -L$(MOTIF_HOME)/lib -L$(X11_HOME)/lib -lpthread -lrt
 GTK_LIBS = -DGTK_LIB="\"libgtk-x11-2.0.so\"" -DGDK_LIB="\"libgdk-x11-2.0.so\"" -DPIXBUF_LIB="\"libgdk_pixbuf-2.0.so\"" \
  -DGOBJ_LIB="\"libgobject-2.0.so\"" -DX11_LIB="\"libX11.so\""
-LFLAGS = -shared -static-libgcc
+LFLAGS = ${M_ARCH} -shared -static-libgcc
 # -Wl,--export-dynamic
-CFLAGS = -O -s \
+CFLAGS = ${M_ARCH} -O -s \
 	-DNETSCAPE_FIX \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \

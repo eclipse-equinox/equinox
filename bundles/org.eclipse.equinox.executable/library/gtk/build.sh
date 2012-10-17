@@ -51,6 +51,30 @@ if [ "${CC}" = "" ]; then
 	export CC
 fi
 
+# Parse the command line arguments and override the default values.
+extraArgs=""
+while [ "$1" != "" ]; do
+    if [ "$1" = "-os" ] && [ "$2" != "" ]; then
+        defaultOS="$2"
+        shift
+    elif [ "$1" = "-arch" ] && [ "$2" != "" ]; then
+        defaultOSArch="$2"
+        shift
+    elif [ "$1" = "-ws" ] && [ "$2" != "" ]; then
+        defaultWS="$2"
+        shift
+    elif [ "$1" = "-output" ] && [ "$2" != "" ]; then
+        programOutput="$2"
+        shift
+    elif [ "$1" = "-java" ] && [ "$2" != "" ]; then
+        javaHome="$2"
+        shift
+    else
+        extraArgs="$extraArgs $1"
+    fi
+    shift
+done
+
 case $OS in
 	"Linux")
 		makefile="make_linux.mak"
@@ -108,9 +132,19 @@ case $OS in
 	"HP-UX")
 		makefile="make_hpux.mak"
 		defaultOS="hpux"
-		defaultOSArch="ia64_32"
-		PATH=$PATH:/opt/hp-gcc/bin:/opt/gtk2.6/bin:/opt/gtk2.6/lib/pkgconfig
-		export PATH
+		case $defaultOSArch in
+			"ia64_32")
+				PATH=$PATH:/opt/hp-gcc/bin:/opt/gtk2.6/bin
+				PKG_CONFIG_PATH="/opt/gtk2.6/lib/pkgconfig"
+				;;
+			"ia64")
+				PATH=$PATH:/opt/hp-gcc/bin:/opt/gtk_64bit/bin
+				PKG_CONFIG_PATH="/opt/gtk_64bit/lib/hpux64/pkgconfig"
+				;;
+			*)
+		esac
+		;;
+		export PATH PKG_CONFIG_PATH
 		[ -d /opt/java1.5 ] && defaultJavaHome="/opt/java1.5"
 	;;
 	"SunOS")
@@ -144,29 +178,7 @@ case $OS in
 	;;
 esac
 export CC
-# Parse the command line arguments and override the default values.
-extraArgs=""
-while [ "$1" != "" ]; do
-    if [ "$1" = "-os" ] && [ "$2" != "" ]; then
-        defaultOS="$2"
-        shift
-    elif [ "$1" = "-arch" ] && [ "$2" != "" ]; then
-        defaultOSArch="$2"
-        shift
-    elif [ "$1" = "-ws" ] && [ "$2" != "" ]; then
-        defaultWS="$2"
-        shift
-    elif [ "$1" = "-output" ] && [ "$2" != "" ]; then
-        programOutput="$2"
-        shift
-    elif [ "$1" = "-java" ] && [ "$2" != "" ]; then
-        javaHome="$2"
-        shift
-    else
-        extraArgs="$extraArgs $1"
-    fi
-    shift
-done
+
 
 # Set up environment variables needed by the makefiles.
 PROGRAM_OUTPUT="$programOutput"
@@ -193,6 +205,9 @@ if [ "$defaultOSArch" = "ppc64" ];  then
 	export M_ARCH
 elif [ "$defaultOSArch" = "s390" ];  then
 	M_ARCH=-m31
+	export M_ARCH
+elif [ "$defaultOSArch" = "ia64" ];  then
+	M_ARCH=-mlp64
 	export M_ARCH
 fi
 
