@@ -1312,7 +1312,6 @@ public class TestModuleContainer {
 		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
 
 		container.resolve(Arrays.asList(systemBundle), true);
-
 		Module b1 = installDummyModule("require.b1.MF", "b1", container);
 		installDummyModule("require.b2.MF", "b2", container);
 		installDummyModule("require.b3.MF", "b3", container);
@@ -1324,6 +1323,110 @@ public class TestModuleContainer {
 			// This is allowed to happen here
 		}
 		Assert.assertEquals("b1 should not resolve.", State.INSTALLED, b1.getState());
+	}
+
+	@Test
+	public void testMultiCardinalityUses() throws BundleException, IOException, ResolutionException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+
+		Module p5v100 = installDummyModule("p5_v100.MF", "p5_v100", container);
+		Module p5v101 = installDummyModule("p5_v101.MF", "p5_v101", container);
+		Module p5v110 = installDummyModule("p5_v110.MF", "p5_v110", container);
+		Module p5v111 = installDummyModule("p5_v111.MF", "p5_v111", container);
+		Module p6v100 = installDummyModule("p6_v100.MF", "p6_v100", container);
+		Module p6v110 = installDummyModule("p6_v110.MF", "p6_v110", container);
+		Module p7v100 = installDummyModule("p7_v100.MF", "p7_v100", container);
+		Module p7v110 = installDummyModule("p7_v110.MF", "p7_v110", container);
+
+		container.resolve(null, false);
+
+		Module c6v100 = installDummyModule("c6_v100.MF", "c6_v100", container);
+		Module c6v110 = installDummyModule("c6_v110.MF", "c6_v110", container);
+		Module c6v130 = installDummyModule("c6_v130.MF", "c6_v130", container);
+		Module c6v140 = installDummyModule("c6_v140.MF", "c6_v140", container);
+		Module c6v150 = installDummyModule("c6_v150.MF", "c6_v150", container);
+		Module c6v170 = installDummyModule("c6_v170.MF", "c6_v170", container);
+
+		//		Module c6v180 = installDummyModule("c6_v180.MF", "c6_v180", container);
+		//		Module c6v120 = installDummyModule("c6_v120.MF", "c6_v120", container);
+
+		container.resolve(null, false);
+
+		final String namespace5 = "namespace.5";
+		List<ModuleWire> p5v100Provided = p5v100.getCurrentRevision().getWiring().getProvidedModuleWires(namespace5);
+		List<ModuleWire> p5v101Provided = p5v101.getCurrentRevision().getWiring().getProvidedModuleWires(namespace5);
+		List<ModuleWire> p5v110Provided = p5v110.getCurrentRevision().getWiring().getProvidedModuleWires(namespace5);
+		List<ModuleWire> p5v111Provided = p5v111.getCurrentRevision().getWiring().getProvidedModuleWires(namespace5);
+
+		ModuleWiring c6v100Wiring = c6v100.getCurrentRevision().getWiring();
+		List<ModuleWire> c6v100Required = c6v100Wiring.getRequiredModuleWires(namespace5);
+		Assert.assertEquals("Wrong number of capabilities", 2, c6v100Required.size());
+		assertWires(c6v100Required, p5v100Provided, p5v101Provided);
+
+		ModuleWiring c6v110Wiring = c6v110.getCurrentRevision().getWiring();
+		List<ModuleWire> c6v110Required = c6v110Wiring.getRequiredModuleWires(namespace5);
+		Assert.assertEquals("Wrong number of capabilities", 2, c6v110Required.size());
+		assertWires(c6v110Required, p5v100Provided, p5v101Provided);
+
+		ModuleWiring c6v130Wiring = c6v130.getCurrentRevision().getWiring();
+		List<ModuleWire> c6v130Required = c6v130Wiring.getRequiredModuleWires(namespace5);
+		Assert.assertEquals("Wrong number of capabilities", 2, c6v130Required.size());
+		assertWires(c6v130Required, p5v100Provided, p5v101Provided);
+
+		ModuleWiring c6v140Wiring = c6v140.getCurrentRevision().getWiring();
+		List<ModuleWire> c6v140Required = c6v140Wiring.getRequiredModuleWires(namespace5);
+		Assert.assertEquals("Wrong number of capabilities", 2, c6v140Required.size());
+		assertWires(c6v140Required, p5v100Provided, p5v101Provided);
+
+		ModuleWiring c6v150Wiring = c6v150.getCurrentRevision().getWiring();
+		List<ModuleWire> c6v150Required = c6v150Wiring.getRequiredModuleWires(namespace5);
+		Assert.assertEquals("Wrong number of capabilities", 2, c6v150Required.size());
+		assertWires(c6v150Required, p5v110Provided, p5v111Provided);
+
+		ModuleWiring c6v170Wiring = c6v170.getCurrentRevision().getWiring();
+		List<ModuleWire> c6v170Required = c6v170Wiring.getRequiredModuleWires(namespace5);
+		Assert.assertEquals("Wrong number of capabilities", 2, c6v170Required.size());
+		assertWires(c6v170Required, p5v110Provided, p5v111Provided);
+
+		Module c6v160 = installDummyModule("c6_v160.MF", "c6_v160", container);
+
+		try {
+			container.resolve(null, false);
+		} catch (ResolutionException e) {
+			// expected
+		}
+
+		Assert.assertNull("Bundle should not be resolved: " + c6v160, c6v160.getCurrentRevision().getWiring());
+
+		container.uninstall(c6v160);
+
+		Module c6v180 = installDummyModule("c6_v180.MF", "c6_v180", container);
+
+		try {
+			container.resolve(null, false);
+		} catch (ResolutionException e) {
+			// expected
+		}
+
+		Assert.assertNull("Bundle should not be resolved: " + c6v180, c6v180.getCurrentRevision().getWiring());
+
+		container.uninstall(c6v180);
+	}
+
+	private static void assertWires(List<ModuleWire> required, List<ModuleWire>... provided) {
+		for (ModuleWire requiredWire : required) {
+			for (List<ModuleWire> providedList : provided) {
+				if (providedList.contains(requiredWire)) {
+					return;
+				}
+			}
+			Assert.fail("Could not find required wire in expected provider wires: " + requiredWire);
+		}
 	}
 
 	private DummyContainerAdaptor createDummyAdaptor() {
