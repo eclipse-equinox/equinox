@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -430,7 +430,7 @@ public class BaseData implements BundleData {
 		List<String> result = new ArrayList<String>(classpath.length);
 		for (int i = 0; i < classpath.length; i++) {
 			if (Debug.DEBUG_LOADER)
-				Debug.println("  found classpath entry " + classpath[i].getValueComponents()); //$NON-NLS-1$
+				Debug.println("  found classpath entry " + Arrays.toString(classpath[i].getValueComponents())); //$NON-NLS-1$
 			String[] paths = classpath[i].getValueComponents();
 			for (int j = 0; j < paths.length; j++) {
 				result.add(paths[j]);
