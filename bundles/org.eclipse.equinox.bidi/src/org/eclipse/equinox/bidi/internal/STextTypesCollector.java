@@ -87,7 +87,7 @@ public class STextTypesCollector implements IRegistryEventListener {
 		for (int i = 0; i < extensions.length; i++) {
 			IConfigurationElement[] confElements = extensions[i].getConfigurationElements();
 			for (int j = 0; j < confElements.length; j++) {
-				if (CE_NAME != confElements[j].getName())
+				if (!CE_NAME.equals(confElements[j].getName()))
 					STextActivator.logError("BiDi types: unexpected element name " + confElements[j].getName(), new IllegalArgumentException()); //$NON-NLS-1$
 				String type = confElements[j].getAttribute(ATTR_TYPE);
 				Object handler;
