@@ -664,18 +664,20 @@ public abstract class StateImpl implements State {
 
 	BundleDescription[] getFragments(final BundleDescription host) {
 		final List<BundleDescription> fragments = new ArrayList<BundleDescription>();
-		for (Iterator<KeyedElement> iter = bundleDescriptions.iterator(); iter.hasNext();) {
-			BundleDescription bundle = (BundleDescription) iter.next();
-			HostSpecification hostSpec = bundle.getHost();
+		synchronized (this.monitor) {
+			for (Iterator<KeyedElement> iter = bundleDescriptions.iterator(); iter.hasNext();) {
+				BundleDescription bundle = (BundleDescription) iter.next();
+				HostSpecification hostSpec = bundle.getHost();
 
-			if (hostSpec != null) {
-				BundleDescription[] hosts = hostSpec.getHosts();
-				if (hosts != null)
-					for (int i = 0; i < hosts.length; i++)
-						if (hosts[i] == host) {
-							fragments.add(bundle);
-							break;
-						}
+				if (hostSpec != null) {
+					BundleDescription[] hosts = hostSpec.getHosts();
+					if (hosts != null)
+						for (int i = 0; i < hosts.length; i++)
+							if (hosts[i] == host) {
+								fragments.add(bundle);
+								break;
+							}
+				}
 			}
 		}
 		return fragments.toArray(new BundleDescription[fragments.size()]);
