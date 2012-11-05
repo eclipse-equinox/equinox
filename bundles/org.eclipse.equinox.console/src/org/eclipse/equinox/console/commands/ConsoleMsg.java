@@ -107,6 +107,10 @@ public class ConsoleMsg extends NLS {
 	public static String STARTLEVEL_INITIAL_BUNDLE_STARTLEVEL;
 	public static String STARTLEVEL_POSITIVE_INTEGER;
 	
+	public static String THREADS_THREAD_DOES_NOT_EXIST;
+	public static String THREADS_THREAD_STOPPED_BY_CONSOLE;
+	public static String THREADS_UNRECOGNIZED_ACTION;
+	
 	public static final String CONSOLE_HELP_EXIT_COMMAND_DESCRIPTION = "exit immediately (System.exit)";
 	public static final String CONSOLE_HELP_LAUNCH_COMMAND_DESCRIPTION = "start the OSGi Framework";
 	public static final String CONSOLE_HELP_SHUTDOWN_COMMAND_DESCRIPTION = "shutdown the OSGi Framework";
@@ -151,6 +155,11 @@ public class ConsoleMsg extends NLS {
 	public static final String CONSOLE_HELP_SETPROP_COMMAND_ARGUMENTS_DESCRIPTION = "list of properties with values to be set; the format is <key>=<value> and the pairs are separated with space if more than one";
 	public static final String CONSOLE_HELP_SS_COMMAND_DESCRIPTION = "display installed bundles (short status)";
 	public static final String CONSOLE_THREADS_COMMAND_DESCRIPTION = "display threads and thread groups";
+	public static final String CONSOLE_THREADS_COMMAND_ACTION_DESCRIPTION = "perform the specified action on the named thread; supported actions are {stop}";
+	public static final String CONSOLE_THREADS_COMMAND_ACTION_THROWABLE_DESCRIPTION = "perform the specified action on the named thread using the provided throwable; supported actions are {stop}";
+	public static final String CONSOLE_THREADS_COMMAND_ARG_ACTION_DESCRIPTION = "the action to perform";
+	public static final String CONSOLE_THREADS_COMMAND_ARG_THREAD_DESCRIPTION = "the thread on which to perform the action";
+	public static final String CONSOLE_THREADS_COMMAND_ARG_THROWABLE_DESCRIPTION = "the class of the throwable to be used in conjunction with the action (default = java.lang.IllegalStateException)";
 	public static final String CONSOLE_HELP_SL_COMMAND_DESCRIPTION = "display the start level for the specified bundle, or for the framework if no bundle specified";
 	public static final String CONSOLE_HELP_SL_COMMAND_ARGUMENT_DESCRIPTION = "bundle to get the start level";
 	public static final String CONSOLE_HELP_SETFWSL_COMMAND_DESCRIPTION = "set the framework start level";

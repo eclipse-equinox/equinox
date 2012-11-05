@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -1450,7 +1451,27 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_DESCRIPTION)
 	public void t() throws Exception {
-		threads();
+		t(null, null);
+	}
+	
+	@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ACTION_DESCRIPTION)
+	public void t(@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_ACTION_DESCRIPTION) String action, @Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THREAD_DESCRIPTION) String thread) throws Exception {
+		t(action, thread, null);
+	}
+	
+	@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ACTION_THROWABLE_DESCRIPTION)
+	public void t(@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_ACTION_DESCRIPTION) String action, @Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THREAD_DESCRIPTION) String thread, @Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THROWABLE_DESCRIPTION) Class<? extends Throwable> throwable) throws Exception {
+		threads(action, thread, throwable);
+	}
+
+	@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_DESCRIPTION)
+	public void threads() throws Exception {
+		threads(null, null);
+	}
+	
+	@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ACTION_DESCRIPTION)
+	public void threads(@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_ACTION_DESCRIPTION) String action, @Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THREAD_DESCRIPTION) String thread) throws Exception {
+		threads(action, thread, null);
 	}
 
 	/**
@@ -1458,8 +1479,8 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 * in the embedded system.
 	 *
 	 */
-	@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_DESCRIPTION)
-	public void threads() throws Exception {
+	@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ACTION_THROWABLE_DESCRIPTION)
+	public void threads(@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_ACTION_DESCRIPTION) String action, @Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THREAD_DESCRIPTION) String thread, @Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THROWABLE_DESCRIPTION) Class<? extends Throwable> throwable) throws Exception {
 
 		ThreadGroup[] threadGroups = getThreadGroups();
 		Util.sortByString(threadGroups);
@@ -1467,6 +1488,58 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		ThreadGroup tg = getTopThreadGroup();
 		Thread[] threads = new Thread[tg.activeCount()];
 		int count = tg.enumerate(threads, true);
+		
+		// Was an action specified?
+		if (action != null) {
+			// An action was specified. Process it here and return without
+			// listing all of the threads.
+			if ("stop".equals(action)) {
+				// A thread needs to be stopped.
+				// Locate the thread with the specified name.
+				Thread t = null;
+				for (int i = 0; i < threads.length; i++) {
+					if (threads[i].getName().equals(thread)) {
+						// Found the thread. Stop the loop.
+						t = threads[i];
+						break;
+					}
+				}
+				if (t == null) {
+					// Did not find a thread with the specified name.
+					System.out.println(NLS.bind(ConsoleMsg.THREADS_THREAD_DOES_NOT_EXIST, thread));
+					return;
+				}
+				String message = NLS.bind(ConsoleMsg.THREADS_THREAD_STOPPED_BY_CONSOLE, t.getName());
+				// Instantiate the specified exception, if any.
+				Throwable toThrow;
+				// Was an exception specified?
+				if (throwable == null)
+					// If not, use the default.
+					toThrow = new IllegalStateException(message);
+				else {
+					// Instantiate the throwable with the message, if possible.
+					// Otherwise use the default constructor.
+					try {
+						toThrow = throwable.getConstructor(String.class).newInstance(message);
+					}
+					catch (Exception e) {
+						toThrow = throwable.newInstance();
+					}
+				}
+				// Initialize the cause. Its stack trace will be that of the current thread.
+				toThrow.initCause(new RuntimeException(message));
+				// Set the stack trace to that of the target thread.
+				toThrow.setStackTrace(t.getStackTrace());
+				// Stop the thread using the specified throwable.
+				t.stop(toThrow);
+				return;
+			}
+			// An unrecognized action was specified.
+			System.out.println(ConsoleMsg.THREADS_UNRECOGNIZED_ACTION);
+			return;
+		}
+			
+		// No need to sort if an action was specified.
 		Util.sortByString(threads);
 
 		StringBuffer sb = new StringBuffer(120);
