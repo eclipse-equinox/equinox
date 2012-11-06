@@ -126,7 +126,9 @@ case $OS in
 	"AIX")
 		makefile="make_aix.mak"
 		defaultOS="aix"
-		defaultOSArch="ppc64"
+		if [ -z "$defaultOSArch" ]; then
+			defaultOSArch="ppc64"
+		fi
 		[ -d /bluebird/teamswt/swt-builddir/JDKs/AIX/PPC64/j564/sdk ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/AIX/PPC64/j564/sdk"
 	;;
 	"HP-UX")
