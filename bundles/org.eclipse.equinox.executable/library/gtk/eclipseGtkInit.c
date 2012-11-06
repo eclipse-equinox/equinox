@@ -13,71 +13,69 @@
 #include "eclipseCommon.h"
 #include <dlfcn.h>
 #include <string.h>
+#include <stdlib.h>
 
 struct GTK_PTRS gtk = { 1 }; /* initialize the first field "not_initialized" so we can tell when we've loaded the pointers */
 
 /* tables to help initialize the function pointers */
-/* functions from libgtk-x11-2.0 */
-static FN_TABLE gtkFunctions[] = { 	FN_TABLE_ENTRY(gtk_adjustment_new),
-									FN_TABLE_ENTRY(gtk_box_set_child_packing),
-									FN_TABLE_ENTRY(gtk_container_add),
-									FN_TABLE_ENTRY(gtk_dialog_run),
-									FN_TABLE_ENTRY(gtk_fixed_new),
-									FN_TABLE_ENTRY(gtk_fixed_set_has_window),
-									FN_TABLE_ENTRY(gtk_image_new_from_pixbuf),
-									FN_TABLE_ENTRY(gtk_init_check),
-									FN_TABLE_ENTRY(gtk_init_with_args),
-									FN_TABLE_ENTRY(gtk_message_dialog_new),
-									FN_TABLE_ENTRY(gtk_scrolled_window_set_policy),
-									FN_TABLE_ENTRY(gtk_scrolled_window_new),
-									FN_TABLE_ENTRY(gtk_set_locale),
-									FN_TABLE_ENTRY(gtk_signal_connect_full),
-									FN_TABLE_ENTRY(gtk_vbox_new),
-									FN_TABLE_ENTRY(gtk_widget_destroy),
-									FN_TABLE_ENTRY(gtk_widget_destroyed),
-									FN_TABLE_ENTRY(gtk_widget_show_all),
-									FN_TABLE_ENTRY(gtk_window_new),
-									FN_TABLE_ENTRY(gtk_window_resize),
-									FN_TABLE_ENTRY(gtk_window_set_title),
-									FN_TABLE_ENTRY(gtk_window_set_decorated),
-									FN_TABLE_ENTRY(gtk_window_set_position),
-									{ NULL, NULL }
-								 };
-/* functions from libgdk-x11-2.0 */
-static FN_TABLE gdkFunctions[] = {	FN_TABLE_ENTRY(gdk_set_program_class), 
-									FN_TABLE_ENTRY(gdk_display), /* not a function */
-									{ NULL, NULL } 
-						  		 };
+/* functions from libgtk-x11-2.0 or libgtk-3.so.0*/
+static FN_TABLE gtkFunctions[] = {
+	FN_TABLE_ENTRY(gtk_container_add, 1),
+	FN_TABLE_ENTRY(gtk_dialog_run, 1),
+	FN_TABLE_ENTRY(gtk_image_new_from_pixbuf, 1),
+	FN_TABLE_ENTRY(gtk_init_check, 1),
+	FN_TABLE_ENTRY(gtk_init_with_args, 0),
+	FN_TABLE_ENTRY(gtk_message_dialog_new, 1),
+	FN_TABLE_ENTRY(gtk_set_locale, 0),
+	FN_TABLE_ENTRY(gtk_widget_destroy, 1),
+	FN_TABLE_ENTRY(gtk_widget_destroyed, 1),
+	FN_TABLE_ENTRY(gtk_widget_show_all, 1),
+	FN_TABLE_ENTRY(gtk_window_new, 1),
+	FN_TABLE_ENTRY(gtk_window_resize, 1),
+	FN_TABLE_ENTRY(gtk_window_set_title, 1),
+	FN_TABLE_ENTRY(gtk_window_set_decorated, 1),
+	FN_TABLE_ENTRY(gtk_window_set_position, 1),
+	{ NULL, NULL }
+};
+/* functions from libgdk-x11-2.0 or libgdk-3.so.0*/
+static FN_TABLE gdkFunctions[] = {
+	FN_TABLE_ENTRY(gdk_set_program_class, 1),
+	FN_TABLE_ENTRY(gdk_display_get_default, 1),
+	FN_TABLE_ENTRY(gdk_x11_display_get_xdisplay, 1),
+	{ NULL, NULL }
+};
 /* functions from libgdk_pixbuf-2.0 */
-static FN_TABLE pixFunctions[] = { 	FN_TABLE_ENTRY(gdk_pixbuf_new_from_file),
-									FN_TABLE_ENTRY(gdk_pixbuf_get_width),
-									FN_TABLE_ENTRY(gdk_pixbuf_get_height),
-									{ NULL, NULL }
-						  		 };
+static FN_TABLE pixFunctions[] = {
+	FN_TABLE_ENTRY(gdk_pixbuf_new_from_file, 1),
+	FN_TABLE_ENTRY(gdk_pixbuf_get_width, 1),
+	FN_TABLE_ENTRY(gdk_pixbuf_get_height, 1),
+	{ NULL, NULL }
+};
 /* functions from libgobject-2.0 */
-static FN_TABLE gobjFunctions[] = {	FN_TABLE_ENTRY(g_log_set_handler),
-									FN_TABLE_ENTRY(g_log_remove_handler),
-									FN_TABLE_ENTRY(g_main_context_iteration),
-									FN_TABLE_ENTRY(g_object_unref),
-									FN_TABLE_ENTRY(g_timeout_add),
-									FN_TABLE_ENTRY(g_error_free),
+static FN_TABLE gobjFunctions[] = {
+	FN_TABLE_ENTRY(g_signal_connect_data, 1),
+	FN_TABLE_ENTRY(g_main_context_iteration, 1),
+	FN_TABLE_ENTRY(g_object_unref, 1),
+	FN_TABLE_ENTRY(g_timeout_add, 1),
+	FN_TABLE_ENTRY(g_error_free, 1),
 #ifdef SOLARIS
-									FN_TABLE_ENTRY(g_string_insert_c),
+	FN_TABLE_ENTRY(g_string_insert_c, 1),
 #endif
-									{ NULL, NULL }
-						   		  };
+	{ NULL, NULL }
+};
 
 /* functions from libX11 */
-static FN_TABLE x11Functions[] = {	FN_TABLE_ENTRY(XGetSelectionOwner),
-									FN_TABLE_ENTRY(XSetSelectionOwner),
-									FN_TABLE_ENTRY(XCreateWindow),
-									FN_TABLE_ENTRY(XChangeProperty),
-									FN_TABLE_ENTRY(XSync),
-									FN_TABLE_ENTRY(XRootWindow),
-									FN_TABLE_ENTRY(XDefaultScreen),
-									FN_TABLE_ENTRY(XInternAtom),
-									{ NULL, NULL } 
-								};
+static FN_TABLE x11Functions[] = {
+	FN_TABLE_ENTRY(XGetSelectionOwner, 1),
+	FN_TABLE_ENTRY(XSetSelectionOwner, 1),
+	FN_TABLE_ENTRY(XCreateWindow, 1),
+	FN_TABLE_ENTRY(XChangeProperty, 1),
+	FN_TABLE_ENTRY(XSync, 1),
+	FN_TABLE_ENTRY(XRootWindow, 1),
+	FN_TABLE_ENTRY(XDefaultScreen, 1),
+	FN_TABLE_ENTRY(XInternAtom, 1),
+	{ NULL, NULL }
+};
 
 
 static int loadGtkSymbols( void * library, FN_TABLE * table) {
@@ -85,10 +83,11 @@ static int loadGtkSymbols( void * library, FN_TABLE * table) {
 	void * fn;
 	for (i = 0; table[i].fnName != NULL; i++) {
 		fn = findSymbol(library, table[i].fnName);
-		if (fn != 0)
+		if (fn != 0) {
 			*(table[i].fnPtr) = fn;
-		else
-			return -1;
+		} else {
+			if (table[i].required) return -1;
+		}
 	}
 	return 0;
 }
@@ -100,11 +99,19 @@ int loadGtk() {
 #define DLFLAGS RTLD_LAZY
 #endif
 
-	void * objLib = dlopen(GOBJ_LIB, DLFLAGS);
-	void * gdkLib = dlopen(GDK_LIB, DLFLAGS);
-	void * pixLib = dlopen(PIXBUF_LIB, DLFLAGS);
-	void * gtkLib = dlopen(GTK_LIB, DLFLAGS);
-	void * x11Lib = dlopen(X11_LIB, DLFLAGS);
+	void *gdkLib = NULL, *gtkLib = NULL, *objLib = NULL, *pixLib = NULL, *x11Lib = NULL;
+
+	if (getenv("org.eclipse.swt.gtk3")) {
+		gdkLib = dlopen(GDK3_LIB, DLFLAGS);
+		gtkLib = dlopen(GTK3_LIB, DLFLAGS);
+	}
+	if (!gdkLib || !gdkLib) {
+		gdkLib = dlopen(GDK_LIB, DLFLAGS);
+		gtkLib = dlopen(GTK_LIB, DLFLAGS);
+	}
+	objLib = dlopen(GOBJ_LIB, DLFLAGS);
+	pixLib = dlopen(PIXBUF_LIB, DLFLAGS);
+	x11Lib = dlopen(X11_LIB, DLFLAGS);
 	
 	/* initialize ptr struct to 0's */
 	memset(&gtk, 0, sizeof(struct GTK_PTRS));

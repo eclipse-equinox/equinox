@@ -50,8 +50,6 @@ static char*  argVM_JAVA[]        = { NULL };
 /* Define local variables . */
 static long			splashHandle = 0;
 static GtkWidget*   shellHandle = 0;
-static GdkPixbuf*	pixbuf = 0;
-static GtkWidget*   image = 0;
 
 static sem_t* mutex;
 static Atom appWindowAtom, launcherWindowAtom;
@@ -113,10 +111,6 @@ int executeWithLock(char *name, LockFunc func) {
 	sigaction(SIGINT, &intAction, NULL);
 	sigaction(SIGQUIT, &quitAction, NULL);
 	return result;
-}
-
-static void log_handler(const gchar* domain, GLogLevelFlags flags,	const gchar* msg, gpointer data) {
-	/* nothing */
 }
 
 /* Create a "SWT_Window_" + APP_NAME string with optional suffix.
@@ -235,10 +229,8 @@ int reuseWorkbench(_TCHAR** filePath, int timeout) {
 /* Create and Display the Splash Window */
 int showSplash( const char* featureImage )
 {
-	GtkAdjustment* vadj, *hadj;
-	int width, height;
-	guint handlerId;
-	GtkWidget* vboxHandle, * scrolledHandle, * handle;
+	GtkWidget *image;
+	GdkPixbuf *pixbuf;
 
 	if (splashHandle != 0)
 		return 0; /* already showing splash */
@@ -253,44 +245,19 @@ int showSplash( const char* featureImage )
 	
 	shellHandle = gtk.gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk.gtk_window_set_decorated((GtkWindow*)(shellHandle), FALSE);
-	gtk.gtk_signal_connect((GtkObject*)shellHandle, "destroy", (GtkSignalFunc)(gtk.gtk_widget_destroyed), &shellHandle);
-	vboxHandle = gtk.gtk_vbox_new(FALSE, 0);
-	if(vboxHandle == 0)
-		return -1;
+	gtk.g_signal_connect_data((gpointer)shellHandle, "destroy", (GtkSignalFunc)(gtk.gtk_widget_destroyed), &shellHandle, NULL, 0);
 		
-	vadj = (GtkAdjustment*)gtk.gtk_adjustment_new(0, 0, 100, 1, 10, 10);
-	hadj = (GtkAdjustment*)gtk.gtk_adjustment_new(0, 0, 100, 1, 10, 10);
-	if (vadj == 0 || hadj == 0) 
-		return -1;
-		
-	scrolledHandle = gtk.gtk_scrolled_window_new(hadj, vadj);
-	
-	gtk.gtk_container_add((GtkContainer*)(vboxHandle), scrolledHandle);
-	gtk.gtk_box_set_child_packing((GtkBox*)(vboxHandle), scrolledHandle, TRUE, TRUE, 0, GTK_PACK_END);
-	gtk.gtk_scrolled_window_set_policy((GtkScrolledWindow*)(scrolledHandle), GTK_POLICY_NEVER, GTK_POLICY_NEVER);
-
-	handle = gtk.gtk_fixed_new();
-	gtk.gtk_fixed_set_has_window((GtkFixed*)(handle), TRUE);
-	((GtkObject*)handle)->flags |= GTK_CAN_FOCUS;	/*GTK_WIDGET_SET_FLAGS(handle, GTK_CAN_FOCUS);*/
-	
-	/* avoid gtk_scrolled_window_add warning */
-	handlerId = gtk.g_log_set_handler("Gtk", G_LOG_LEVEL_WARNING, &log_handler, NULL);
-	gtk.gtk_container_add((GtkContainer*)(scrolledHandle), handle);
-	gtk.g_log_remove_handler("Gtk", handlerId);
-	
-	gtk.gtk_container_add((GtkContainer*)(shellHandle), vboxHandle);
-	
 	pixbuf = gtk.gdk_pixbuf_new_from_file(featureImage, NULL);
 	image = gtk.gtk_image_new_from_pixbuf(pixbuf);
-	gtk.gtk_signal_connect((GtkObject*)(image), "destroy", (GtkSignalFunc)(gtk.gtk_widget_destroyed), &image);
-	gtk.gtk_container_add((GtkContainer*)(handle), image);
+	if (pixbuf) {
+		gtk.g_object_unref(pixbuf);
+	}
+	gtk.gtk_container_add((GtkContainer*)(shellHandle), image);
 	
-	width  = gtk.gdk_pixbuf_get_width(pixbuf);
-	height = gtk.gdk_pixbuf_get_height(pixbuf);
-	gtk.gtk_window_set_position((GtkWindow*)(shellHandle), GTK_WIN_POS_CENTER);
 	if (getOfficialName() != NULL)
 		gtk.gtk_window_set_title((GtkWindow*)(shellHandle), getOfficialName());
-	gtk.gtk_window_resize((GtkWindow*)(shellHandle), width, height);
+	gtk.gtk_window_set_position((GtkWindow*)(shellHandle), GTK_WIN_POS_CENTER);
+	gtk.gtk_window_resize((GtkWindow*)(shellHandle), gtk.gdk_pixbuf_get_width(pixbuf), gtk.gdk_pixbuf_get_height(pixbuf));
 	gtk.gtk_widget_show_all((GtkWidget*)(shellHandle));
 	splashHandle = (long)shellHandle;
 	dispatchMessages();
@@ -309,10 +276,6 @@ jlong getSplashHandle() {
 void takeDownSplash() {
 	if(shellHandle != 0) {
 		gtk.gtk_widget_destroy(shellHandle);
-		if (image != NULL) {
-			gtk.gtk_widget_destroy(image);
-			gtk.g_object_unref(pixbuf);
-		}
 		dispatchMessages();
 		splashHandle = 0;
 		shellHandle = NULL;
