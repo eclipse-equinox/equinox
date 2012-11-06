@@ -38,7 +38,10 @@ DLL_OBJS	= eclipse.o eclipseGtk.o eclipseUtil.o eclipseJNI.o eclipseShm.o eclips
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
 LIBS = -L$(MOTIF_HOME)/lib -L$(X11_HOME)/lib -lpthread -lrt
-GTK_LIBS = -DGTK_LIB="\"libgtk-x11-2.0.so\"" -DGDK_LIB="\"libgdk-x11-2.0.so\"" -DPIXBUF_LIB="\"libgdk_pixbuf-2.0.so\"" \
+GTK_LIBS = \
+ -DGTK_LIB="\"libgtk-x11-2.0.so\"" -DGDK_LIB="\"libgdk-x11-2.0.so\"" \
+ -DGTK3_LIB="\"libgtk-3.so\"" -DGDK3_LIB="\"libgdk-3.so\""
+ -DPIXBUF_LIB="\"libgdk_pixbuf-2.0.so\"" \
  -DGOBJ_LIB="\"libgobject-2.0.so\"" -DX11_LIB="\"libX11.so\""
 LFLAGS = ${M_ARCH} -shared -static-libgcc
 # -Wl,--export-dynamic
