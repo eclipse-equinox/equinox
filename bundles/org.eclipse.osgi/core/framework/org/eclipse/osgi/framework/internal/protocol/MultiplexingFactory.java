@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2006, 2012 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -135,7 +135,10 @@ public abstract class MultiplexingFactory {
 				}
 			}
 		}
-		return null;
+		// Instead of returning null here, this factory is returned;
+		// This means the root factory may provide protocol handlers for call stacks
+		// that have no classes loaded by an bundle class loader.
+		return this;
 	}
 
 	public boolean hasAuthority(Class<?> clazz) {
