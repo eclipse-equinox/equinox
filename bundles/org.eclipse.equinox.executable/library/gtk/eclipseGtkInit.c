@@ -101,7 +101,7 @@ int loadGtk() {
 
 	void *gdkLib = NULL, *gtkLib = NULL, *objLib = NULL, *pixLib = NULL, *x11Lib = NULL;
 
-	if (getenv("org.eclipse.swt.gtk3")) {
+	if (getenv("SWT_GTK3")) {
 		gdkLib = dlopen(GDK3_LIB, DLFLAGS);
 		gtkLib = dlopen(GTK3_LIB, DLFLAGS);
 	}
