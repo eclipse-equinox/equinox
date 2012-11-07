@@ -105,7 +105,7 @@ int loadGtk() {
 		gdkLib = dlopen(GDK3_LIB, DLFLAGS);
 		gtkLib = dlopen(GTK3_LIB, DLFLAGS);
 	}
-	if (!gdkLib || !gdkLib) {
+	if (!gtkLib || !gdkLib) {
 		gdkLib = dlopen(GDK_LIB, DLFLAGS);
 		gtkLib = dlopen(GTK_LIB, DLFLAGS);
 	}
