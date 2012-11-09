@@ -14,7 +14,6 @@ package org.eclipse.osgi.storage;
 import java.io.File;
 import java.util.*;
 import org.eclipse.osgi.container.*;
-import org.eclipse.osgi.container.namespaces.EquinoxNativeEnvironmentNamespace;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
@@ -23,9 +22,11 @@ import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.NativeNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 
 public class NativeCodeFinder {
+	public static final String REQUIREMENT_NATIVE_PATHS_ATTRIBUTE = "native.paths"; //$NON-NLS-1$
 	private static final String[] EMPTY_STRINGS = new String[0];
 	public static final String EXTERNAL_LIB_PREFIX = "external:"; //$NON-NLS-1$
 	private final Generation generation;
@@ -165,21 +166,21 @@ public class NativeCodeFinder {
 			}
 		}
 
-		List<ModuleWire> nativeCode = wiring.getRequiredModuleWires(EquinoxNativeEnvironmentNamespace.NATIVE_ENVIRONMENT_NAMESPACE);
+		List<ModuleWire> nativeCode = wiring.getRequiredModuleWires(NativeNamespace.NATIVE_NAMESPACE);
 		if (nativeCode.isEmpty()) {
 			return Collections.emptyList();
 		}
 
-		// TODO just taking the first paths for the revision, need to sort correctly
+		// just taking the first paths for the revision, we sorted correctly when transforming to the requirement
 		for (ModuleWire moduleWire : nativeCode) {
 			if (moduleWire.getRequirement().getRevision().equals(revision)) {
 				@SuppressWarnings("unchecked")
-				List<String> result = (List<String>) nativeCode.get(0).getRequirement().getAttributes().get(EquinoxNativeEnvironmentNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE);
+				List<String> result = (List<String>) nativeCode.get(0).getRequirement().getAttributes().get(REQUIREMENT_NATIVE_PATHS_ATTRIBUTE);
 				if (result != null)
 					return result;
 				// this must be a multi-clause Bundle-NativeCode header, need to check for the correct one in the index
 				try {
-					FilterImpl filter = FilterImpl.newInstance(moduleWire.getRequirement().getDirectives().get(EquinoxNativeEnvironmentNamespace.REQUIREMENT_FILTER_DIRECTIVE));
+					FilterImpl filter = FilterImpl.newInstance(moduleWire.getRequirement().getDirectives().get(NativeNamespace.REQUIREMENT_FILTER_DIRECTIVE));
 					int index = -1;
 					Map<String, Object> capabilityAttrs = moduleWire.getCapability().getAttributes();
 					for (FilterImpl child : filter.getChildren()) {
@@ -190,7 +191,7 @@ public class NativeCodeFinder {
 					}
 					if (index != -1) {
 						@SuppressWarnings("unchecked")
-						List<String> indexResult = (List<String>) nativeCode.get(0).getRequirement().getAttributes().get(EquinoxNativeEnvironmentNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE + '.' + index);
+						List<String> indexResult = (List<String>) nativeCode.get(0).getRequirement().getAttributes().get(REQUIREMENT_NATIVE_PATHS_ATTRIBUTE + '.' + index);
 						if (indexResult != null)
 							return indexResult;
 					}

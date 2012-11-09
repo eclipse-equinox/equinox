@@ -20,7 +20,6 @@ import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
-import org.eclipse.osgi.container.namespaces.EquinoxNativeEnvironmentNamespace;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.*;
 import org.eclipse.osgi.internal.container.LockSet;
@@ -38,6 +37,7 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.NativeNamespace;
 import org.osgi.framework.wiring.BundleWiring;
 
 public class Storage {
@@ -208,7 +208,7 @@ public class Storage {
 				}
 			}
 			ModuleRevision currentRevision = systemModule.getCurrentRevision();
-			List<ModuleCapability> nativeEnvironments = currentRevision.getModuleCapabilities(EquinoxNativeEnvironmentNamespace.NATIVE_ENVIRONMENT_NAMESPACE);
+			List<ModuleCapability> nativeEnvironments = currentRevision.getModuleCapabilities(NativeNamespace.NATIVE_NAMESPACE);
 			Map<String, String> configMap = equinoxContainer.getConfiguration().getInitialConfig();
 			for (ModuleCapability nativeEnvironment : nativeEnvironments) {
 				nativeEnvironment.setTransientAttrs(configMap);
@@ -513,17 +513,17 @@ public class Storage {
 		language = language == null ? null : language.toLowerCase();
 
 		result.append(", "); //$NON-NLS-1$
-		result.append(EquinoxNativeEnvironmentNamespace.NATIVE_ENVIRONMENT_NAMESPACE).append("; "); //$NON-NLS-1$
+		result.append(NativeNamespace.NATIVE_NAMESPACE).append("; "); //$NON-NLS-1$
 		if (osName != null) {
 			osName = getAliasList(equinoxConfig.getAliasMapper().getOSNameAliases(osName));
-			result.append(EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_NAME_ATTRIBUTE).append(":List<String>=").append(osName).append("; "); //$NON-NLS-1$ //$NON-NLS-2$
+			result.append(NativeNamespace.CAPABILITY_OSNAME_ATTRIBUTE).append(":List<String>=").append(osName).append("; "); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (processor != null) {
 			processor = getAliasList(equinoxConfig.getAliasMapper().getProcessorAliases(processor));
-			result.append(EquinoxNativeEnvironmentNamespace.CAPABILITY_PROCESSOR_ATTRIBUTE).append(":List<String>=").append(processor).append("; "); //$NON-NLS-1$ //$NON-NLS-2$
+			result.append(NativeNamespace.CAPABILITY_PROCESSOR_ATTRIBUTE).append(":List<String>=").append(processor).append("; "); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		result.append(EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_VERSION_ATTRIBUTE).append(":Version").append("=\"").append(osVersion).append("\"; "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		result.append(EquinoxNativeEnvironmentNamespace.CAPABILITY_LANGUAGE_ATTRIBUTE).append("=\"").append(language).append('\"'); //$NON-NLS-1$
+		result.append(NativeNamespace.CAPABILITY_OSVERSION_ATTRIBUTE).append(":Version").append("=\"").append(osVersion).append("\"; "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		result.append(NativeNamespace.CAPABILITY_LANGUAGE_ATTRIBUTE).append("=\"").append(language).append('\"'); //$NON-NLS-1$
 		return result.toString();
 	}
 

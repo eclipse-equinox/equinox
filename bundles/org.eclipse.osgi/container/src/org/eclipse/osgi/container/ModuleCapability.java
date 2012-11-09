@@ -11,7 +11,7 @@
 package org.eclipse.osgi.container;
 
 import java.util.*;
-import org.eclipse.osgi.container.namespaces.EquinoxNativeEnvironmentNamespace;
+import org.osgi.framework.namespace.NativeNamespace;
 import org.osgi.framework.wiring.BundleCapability;
 
 /**
@@ -29,7 +29,7 @@ public final class ModuleCapability implements BundleCapability {
 		this.namespace = namespace;
 		this.directives = directives;
 		this.attributes = attributes;
-		this.transientAttrs = EquinoxNativeEnvironmentNamespace.NATIVE_ENVIRONMENT_NAMESPACE.equals(namespace) ? new HashMap<String, Object>(0) : null;
+		this.transientAttrs = NativeNamespace.NATIVE_NAMESPACE.equals(namespace) ? new HashMap<String, Object>(0) : null;
 		this.revision = revision;
 	}
 

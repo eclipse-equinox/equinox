@@ -14,11 +14,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import org.eclipse.osgi.container.ModuleRevisionBuilder;
-import org.eclipse.osgi.container.namespaces.*;
+import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
+import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.internal.core.Tokenizer;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.framework.FilterImpl;
+import org.eclipse.osgi.storage.NativeCodeFinder;
 import org.eclipse.osgi.storage.Storage;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
@@ -39,6 +41,8 @@ public final class OSGiManifestBuilderFactory {
 	private static final String ATTR_TYPE_SET = "set"; //$NON-NLS-1$
 	private static final String ATTR_TYPE_LIST = "List"; //$NON-NLS-1$
 	private static final String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REQUIRE_BUNDLE};
+	private static final Collection<String> SYSTEM_CAPABILITIES = Collections.unmodifiableCollection(Arrays.asList(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE, NativeNamespace.NATIVE_NAMESPACE));
+	private static final Collection<String> PROHIBITED_CAPABILITIES = Collections.unmodifiableCollection(Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE));
 
 	public static ModuleRevisionBuilder createBuilder(Map<String, String> manifest) throws BundleException {
 		return createBuilder(manifest, null, null, null);
@@ -63,9 +67,9 @@ public final class OSGiManifestBuilderFactory {
 
 		getRequireBundle(builder, ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, manifest.get(Constants.REQUIRE_BUNDLE)));
 
-		getProvideCapabilities(builder, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, manifest.get(Constants.PROVIDE_CAPABILITY)));
+		getProvideCapabilities(builder, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, manifest.get(Constants.PROVIDE_CAPABILITY)), extraCapabilities == null);
 		if (extraCapabilities != null) {
-			getProvideCapabilities(builder, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, extraCapabilities));
+			getProvideCapabilities(builder, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, extraCapabilities), false);
 		}
 		getRequireCapabilities(builder, ManifestElement.parseHeader(Constants.REQUIRE_CAPABILITY, manifest.get(Constants.REQUIRE_CAPABILITY)));
 
@@ -433,7 +437,7 @@ public final class OSGiManifestBuilderFactory {
 		builder.addRequirement(HostNamespace.HOST_NAMESPACE, directives, new HashMap<String, Object>(0));
 	}
 
-	private static void getProvideCapabilities(ModuleRevisionBuilder builder, ManifestElement[] provideElements) throws BundleException {
+	private static void getProvideCapabilities(ModuleRevisionBuilder builder, ManifestElement[] provideElements, boolean chechSystemCapabilities) throws BundleException {
 		if (provideElements == null)
 			return;
 		for (ManifestElement provideElement : provideElements) {
@@ -441,8 +445,10 @@ public final class OSGiManifestBuilderFactory {
 			Map<String, Object> attributes = getAttributes(provideElement);
 			Map<String, String> directives = getDirectives(provideElement);
 			for (String namespace : namespaces) {
-				if (IdentityNamespace.IDENTITY_NAMESPACE.equals(namespace))
-					throw new BundleException("A bundle is not allowed to define a capability in the " + IdentityNamespace.IDENTITY_NAMESPACE + " name space."); //$NON-NLS-1$ //$NON-NLS-2$
+				if (PROHIBITED_CAPABILITIES.contains(namespace) || (chechSystemCapabilities && SYSTEM_CAPABILITIES.contains(namespace))) {
+					throw new BundleException("A bundle is not allowed to define a capability in the " + namespace + " name space."); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+
 				builder.addCapability(namespace, directives, attributes);
 			}
 		}
@@ -772,21 +778,21 @@ public final class OSGiManifestBuilderFactory {
 
 				String filterAttribute = attribute;
 				if (Constants.BUNDLE_NATIVECODE_OSNAME.equals(attribute)) {
-					filterAttribute = EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_NAME_ATTRIBUTE;
+					filterAttribute = NativeNamespace.CAPABILITY_OSNAME_ATTRIBUTE;
 				} else if (Constants.BUNDLE_NATIVECODE_PROCESSOR.equals(attribute)) {
-					filterAttribute = EquinoxNativeEnvironmentNamespace.CAPABILITY_PROCESSOR_ATTRIBUTE;
+					filterAttribute = NativeNamespace.CAPABILITY_PROCESSOR_ATTRIBUTE;
 				} else if (Constants.BUNDLE_NATIVECODE_LANGUAGE.equals(attribute)) {
-					filterAttribute = EquinoxNativeEnvironmentNamespace.CAPABILITY_LANGUAGE_ATTRIBUTE;
+					filterAttribute = NativeNamespace.CAPABILITY_LANGUAGE_ATTRIBUTE;
 					hasLanguage = attrValues.length > 0;
 				} else if (Constants.BUNDLE_NATIVECODE_OSVERSION.equals(attribute)) {
-					filterAttribute = EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_VERSION_ATTRIBUTE;
+					filterAttribute = NativeNamespace.CAPABILITY_OSVERSION_ATTRIBUTE;
 				}
 
 				if (attrValues.length > 1) {
 					filter.append("(|"); //$NON-NLS-1$
 				}
 				for (String attrAlias : attrValues) {
-					if (EquinoxNativeEnvironmentNamespace.CAPABILITY_OS_VERSION_ATTRIBUTE.equals(filterAttribute)) {
+					if (NativeNamespace.CAPABILITY_OSVERSION_ATTRIBUTE.equals(filterAttribute)) {
 						VersionRange range = new VersionRange(attrAlias);
 						if (highestFloor == null || highestFloor.compareTo(range.getLeft()) < 0) {
 							highestFloor = range.getLeft();
@@ -853,20 +859,20 @@ public final class OSGiManifestBuilderFactory {
 		for (int i = 0; i < numNativePaths; i++) {
 			NativeClause nativeClause = nativeClauses.get(i);
 			if (numNativePaths == 1) {
-				attributes.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE, nativeClause.nativePaths);
+				attributes.put(NativeCodeFinder.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE, nativeClause.nativePaths);
 			} else {
-				attributes.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE + '.' + i, nativeClause.nativePaths);
+				attributes.put(NativeCodeFinder.REQUIREMENT_NATIVE_PATHS_ATTRIBUTE + '.' + i, nativeClause.nativePaths);
 			}
 			allNativeFilters.append(nativeClauses.get(i).filter);
 		}
 		allNativeFilters.append(')');
 
 		Map<String, String> directives = new HashMap<String, String>(2);
-		directives.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_FILTER_DIRECTIVE, allNativeFilters.toString());
+		directives.put(NativeNamespace.REQUIREMENT_FILTER_DIRECTIVE, allNativeFilters.toString());
 		if (optional) {
-			directives.put(EquinoxNativeEnvironmentNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE, EquinoxNativeEnvironmentNamespace.RESOLUTION_OPTIONAL);
+			directives.put(NativeNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE, NativeNamespace.RESOLUTION_OPTIONAL);
 		}
 
-		builder.addRequirement(EquinoxNativeEnvironmentNamespace.NATIVE_ENVIRONMENT_NAMESPACE, directives, attributes);
+		builder.addRequirement(NativeNamespace.NATIVE_NAMESPACE, directives, attributes);
 	}
 }
