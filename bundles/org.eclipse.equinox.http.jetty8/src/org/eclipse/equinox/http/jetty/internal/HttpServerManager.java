@@ -299,6 +299,8 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 	private ServletContextHandler createHttpContext(@SuppressWarnings("rawtypes") Dictionary dictionary) {
 		ServletContextHandler httpContext = new ServletContextHandler();
+		// hack in the mime type for xsd until jetty fixes it (bug 393218)
+		httpContext.getMimeTypes().addMimeMapping("xsd", "application/xml"); //$NON-NLS-1$ //$NON-NLS-2$
 		httpContext.setAttribute(INTERNAL_CONTEXT_CLASSLOADER, Thread.currentThread().getContextClassLoader());
 		httpContext.setClassLoader(this.getClass().getClassLoader());
 
