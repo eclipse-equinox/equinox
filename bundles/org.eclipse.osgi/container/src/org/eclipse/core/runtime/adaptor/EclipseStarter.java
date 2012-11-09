@@ -1255,6 +1255,8 @@ public class EclipseStarter {
 		// if check config is unknown and we are in dev mode, 
 		if (getProperty(PROP_DEV) != null && getProperty(PROP_CHECK_CONFIG) == null)
 			setProperty(PROP_CHECK_CONFIG, "true"); //$NON-NLS-1$
+		if (getProperty(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION) == null)
+			setProperty(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION, "true"); //$NON-NLS-1$
 	}
 
 	private static class InitialBundle {

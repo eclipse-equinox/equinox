@@ -242,7 +242,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		devLocation = f;
 
 		contextBootDelegation = "true".equals(configuration.getProperty(PROP_CONTEXT_BOOTDELEGATION, "true")); //$NON-NLS-1$ //$NON-NLS-2$
-		compatibiltyBootDelegation = "true".equals(configuration.getProperty(PROP_COMPATIBILITY_BOOTDELEGATION, "true")); //$NON-NLS-1$ //$NON-NLS-2$
+		compatibiltyBootDelegation = "true".equals(configuration.getProperty(PROP_COMPATIBILITY_BOOTDELEGATION)); //$NON-NLS-1$
 
 		COPY_NATIVES = Boolean.valueOf(configuration.getProperty(PROP_COPY_NATIVES)).booleanValue();
 		String[] libExtensions = ManifestElement.getArrayFromList(configuration.getProperty(EquinoxConfiguration.PROP_FRAMEWORK_LIBRARY_EXTENSIONS, configuration.getProperty(org.osgi.framework.Constants.FRAMEWORK_LIBRARY_EXTENSIONS, getOSLibraryExtDefaults())), ","); //$NON-NLS-1$
