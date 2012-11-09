@@ -48,3 +48,5 @@
 (org.osgi.framework.PackagePermission "java.*" "import")
 # Added for OSGi R4.3
 (org.osgi.framework.CapabilityPermission "osgi.ee" "require")
+# Added for OSGi R6
+(org.osgi.framework.CapabilityPermission "osgi.native" "require")
