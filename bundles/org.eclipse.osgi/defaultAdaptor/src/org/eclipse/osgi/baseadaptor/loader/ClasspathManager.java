@@ -512,17 +512,23 @@ public class ClasspathManager {
 			Thread current = Thread.currentThread();
 			if (lockingThread == current)
 				return false;
-			while (true) {
-				if (lockingThread == null) {
-					classNameLocks.put(classname, current);
-					return true;
-				}
-				try {
+			boolean previousInterruption = Thread.interrupted();
+			try {
+				while (true) {
+					if (lockingThread == null) {
+						classNameLocks.put(classname, current);
+						return true;
+					}
+
 					classNameLocks.wait();
 					lockingThread = classNameLocks.get(classname);
-				} catch (InterruptedException e) {
+				}
+			} catch (InterruptedException e) {
+				current.interrupt();
+				throw (LinkageError) new LinkageError(classname).initCause(e);
+			} finally {
+				if (previousInterruption) {
 					current.interrupt();
-					throw (LinkageError) new LinkageError(classname).initCause(e);
 				}
 			}
 		}
