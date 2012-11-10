@@ -20,7 +20,7 @@ import org.osgi.framework.Constants;
 import org.osgi.resource.Namespace;
 
 /**
- * Native Environment Capability and Requirement Namespace.
+ * Native Capability and Requirement Namespace.
  * 
  * <p>
  * This class defines the names for the attributes and directives for this
@@ -35,7 +35,7 @@ import org.osgi.resource.Namespace;
 public final class NativeNamespace extends Namespace {
 
 	/**
-	 * Namespace name for native environment capabilities and requirements.
+	 * Namespace name for native capabilities and requirements.
 	 */
 	public static final String	NATIVE_NAMESPACE				= "osgi.native";
 
