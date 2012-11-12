@@ -385,7 +385,7 @@ public class Storage {
 		InputStream in;
 		try {
 			in = content.getInputStream();
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			throw new BundleException("Error reading bundle content.", e); //$NON-NLS-1$
 		}
 		boolean isReference = in instanceof ReferenceInputStream;
@@ -569,7 +569,7 @@ public class Storage {
 		InputStream in;
 		try {
 			in = content.getInputStream();
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			throw new BundleException("Error reading bundle content.", e); //$NON-NLS-1$
 		}
 		boolean isReference = in instanceof ReferenceInputStream;
