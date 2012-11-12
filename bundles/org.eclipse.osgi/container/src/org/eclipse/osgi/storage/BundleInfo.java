@@ -42,7 +42,7 @@ public final class BundleInfo {
 		private boolean isDirectory;
 		private boolean hasPackageInfo;
 		private BundleFile bundleFile;
-		private Dictionary<String, String> rawHeaders;
+		private Headers<String, String> rawHeaders;
 		private ModuleRevision revision;
 		private ManifestLocalization headerLocalization;
 		private ProtectionDomain domain;
@@ -91,7 +91,7 @@ public final class BundleInfo {
 			return cachedHeaders;
 		}
 
-		Dictionary<String, String> getRawHeaders() {
+		Headers<String, String> getRawHeaders() {
 			synchronized (genMonitor) {
 				if (rawHeaders == null) {
 					BundleEntry manifest = getBundleFile().getEntry(OSGI_BUNDLE_MANIFEST);
@@ -410,7 +410,7 @@ public final class BundleInfo {
 		return false;
 	}
 
-	static class CachedManifest extends Dictionary<String, String> {
+	static class CachedManifest extends Dictionary<String, String> implements Map<String, String> {
 		private final Map<String, String> cached;
 		private final Generation generation;
 
@@ -455,6 +455,41 @@ public final class BundleInfo {
 		@Override
 		public int size() {
 			return generation.getRawHeaders().size();
+		}
+
+		@Override
+		public boolean containsKey(Object key) {
+			return cached.containsKey(key) || generation.getRawHeaders().containsKey(key);
+		}
+
+		@Override
+		public boolean containsValue(Object value) {
+			return cached.containsValue(value) || generation.getRawHeaders().containsValue(value);
+		}
+
+		@Override
+		public void putAll(Map<? extends String, ? extends String> m) {
+			generation.getRawHeaders().putAll(m);
+		}
+
+		@Override
+		public void clear() {
+			generation.getRawHeaders().clear();
+		}
+
+		@Override
+		public Set<String> keySet() {
+			return generation.getRawHeaders().keySet();
+		}
+
+		@Override
+		public Collection<String> values() {
+			return generation.getRawHeaders().values();
+		}
+
+		@Override
+		public Set<java.util.Map.Entry<String, String>> entrySet() {
+			return generation.getRawHeaders().entrySet();
 		}
 	}
 
