@@ -24,6 +24,7 @@ import org.eclipse.osgi.container.Module.StopOptions;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
@@ -430,6 +431,15 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			}
 		} catch (ResolutionException e) {
 			throw new ClassNotFoundException(name, e);
+		} catch (ClassNotFoundException e) {
+			if (State.LAZY_STARTING.equals(module.getState())) {
+				try {
+					module.start(StartOptions.LAZY_TRIGGER);
+				} catch (BundleException e1) {
+					equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, e.getMessage(), e);
+				}
+			}
+			throw e;
 		}
 		throw new ClassNotFoundException("No class loader available for the bundle.  The bundle is likely a fragment."); //$NON-NLS-1$
 	}
