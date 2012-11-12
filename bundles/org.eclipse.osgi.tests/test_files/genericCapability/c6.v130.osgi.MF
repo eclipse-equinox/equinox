@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: c6.osgi
+Bundle-Version: 1.3
+Require-Capability: 
+ namespace.5; filter:="(version=1.0)"; cardinality:="multiple"
+Require-Bundle: p6.osgi, p7.osgi

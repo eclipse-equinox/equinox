@@ -129,7 +129,10 @@ public abstract class MultiplexingFactory {
 				}
 			}
 		}
-		return null;
+		// Instead of returning null here, this factory is returned;
+		// This means the root factory may provide protocol handlers for call stacks
+		// that have no classes loaded by an bundle class loader.
+		return this;
 	}
 
 	public boolean hasAuthority(Class<?> clazz) {

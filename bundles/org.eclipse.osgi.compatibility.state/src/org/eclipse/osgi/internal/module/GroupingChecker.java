@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2004, 2012 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -145,16 +145,18 @@ public class GroupingChecker {
 		// We also must check any generic capabilities are consistent
 		GenericConstraint[] genericRequires = importingBundle.getGenericRequires();
 		for (GenericConstraint constraint : genericRequires) {
-			if (!constraint.supplierHasUses())
-				continue;
-			GenericCapability supplier = (GenericCapability) constraint.getSelectedSupplier();
-			String[] uses = supplier.getUsesDirective();
-			if (uses != null)
-				for (String usedPackage : uses) {
-					if (usedPackage.equals(matchingExport.getName())) {
-						results = exportingRoots.addConflicts(supplier.getResolverBundle(), usedPackage, null, results);
-					}
+			VersionSupplier[] suppliers = constraint.getMatchingCapabilities();
+			if (suppliers != null) {
+				for (VersionSupplier supplier : suppliers) {
+					String[] uses = ((GenericCapability) supplier).getUsesDirective();
+					if (uses != null)
+						for (String usedPackage : uses) {
+							if (usedPackage.equals(matchingExport.getName())) {
+								results = exportingRoots.addConflicts(supplier.getResolverBundle(), usedPackage, null, results);
+							}
+						}
 				}
+			}
 		}
 		return results;
 	}

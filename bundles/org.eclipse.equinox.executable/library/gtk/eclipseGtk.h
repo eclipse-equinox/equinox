@@ -16,21 +16,14 @@
 #include <gdk/gdkx.h>
 
 struct GTK_PTRS { 
-	short not_initialized;
-	GtkObject*	(*gtk_adjustment_new)		(gdouble, gdouble, gdouble, gdouble, gdouble, gdouble);
-	void		(*gtk_box_set_child_packing)(GtkBox*, GtkWidget*, gboolean, gboolean, guint, GtkPackType);
+	short 		not_initialized;
 	void		(*gtk_container_add)		(GtkContainer*, GtkWidget*);
 	gint		(*gtk_dialog_run)			(GtkDialog *);
-	GtkWidget*	(*gtk_fixed_new)			();
-	void		(*gtk_fixed_set_has_window)	(GtkFixed *, gboolean);
 	GtkWidget*	(*gtk_image_new_from_pixbuf)(GdkPixbuf*);
 	gboolean	(*gtk_init_check)			(int*, char***);
+	gboolean	(*gtk_init_with_args)		(int*, char***, const char *, void *, const char *, GError **);
 	GtkWidget*	(*gtk_message_dialog_new)	(GtkWindow*, GtkDialogFlags, GtkMessageType, GtkButtonsType, const gchar*, ...);
-	void		(*gtk_scrolled_window_set_policy)(GtkScrolledWindow*, GtkPolicyType, GtkPolicyType);
-	GtkWidget*	(*gtk_scrolled_window_new)	(GtkAdjustment*, GtkAdjustment*);
 	gchar*		(*gtk_set_locale)			();
-	gulong 		(*gtk_signal_connect_full)	(GtkObject*, const gchar*, GtkSignalFunc, GtkCallbackMarshal, gpointer, GtkDestroyNotify, gint, gint);
-	GtkWidget*	(*gtk_vbox_new)				(gboolean, gint);
 	void		(*gtk_widget_destroy)		(GtkWidget*);
 	void		(*gtk_widget_destroyed)		(GtkWidget*, GtkWidget**);
 	void		(*gtk_widget_show_all)		(GtkWidget*);
@@ -39,21 +32,24 @@ struct GTK_PTRS {
 	void		(*gtk_window_set_title)		(GtkWindow*, const gchar*);
 	void		(*gtk_window_set_decorated)	(GtkWindow*, gboolean);
 	void		(*gtk_window_set_position)	(GtkWindow*, GtkWindowPosition);
-	 guint		(*g_log_set_handler)		(const gchar*, GLogLevelFlags, GLogFunc, gpointer);
-	void		(*g_log_remove_handler)		(const gchar*, guint);
+
+	gulong 		(*g_signal_connect_data)	(gpointer, const gchar*, GCallback, gpointer, GClosureNotify, GConnectFlags);
 	gboolean	(*g_main_context_iteration)	(GMainContext*, gboolean);
 	void		(*g_object_unref)			(gpointer);
 	GObject*	(*g_object_new)				(GType, const gchar*, ...);
 	guint       (*g_timeout_add)			(guint, GSourceFunc, gpointer);
+	void		(*g_error_free)				(GError *);
 
 #ifdef SOLARIS
 	GString* 	(*g_string_insert_c) 		(GString *, gssize, gchar);
 #endif	
 		
-	GdkPixbuf*	(*gdk_pixbuf_new_from_file)	(const char*, GError **);
-	int			(*gdk_pixbuf_get_width)		(const GdkPixbuf*);
-	int			(*gdk_pixbuf_get_height)	(const GdkPixbuf*);
-	void		(*gdk_set_program_class)	(const char*);
+	GdkDisplay* (*gdk_display_get_default)  		();
+	Display*	(*gdk_x11_display_get_xdisplay)  	(GdkDisplay*);
+	GdkPixbuf*	(*gdk_pixbuf_new_from_file)			(const char*, GError **);
+	int			(*gdk_pixbuf_get_width)				(const GdkPixbuf*);
+	int			(*gdk_pixbuf_get_height)			(const GdkPixbuf*);
+	void		(*gdk_set_program_class)			(const char*);
 	
 	Window 		(*XGetSelectionOwner)		(Display*, Atom);
 	void		(*XSetSelectionOwner)		(Display*, Atom, Window, Time);
@@ -62,17 +58,17 @@ struct GTK_PTRS {
 	void		(*XSync)					(Display*, Bool);
 	int			(*XDefaultScreen)			(Display*);
 	Window		(*XRootWindow)				(Display*, int);
-	Atom 			(*XInternAtom)					(Display*, _Xconst char*, Bool	);
-	Display          **gdk_display;
+	Atom 		(*XInternAtom)				(Display*, _Xconst char*, Bool	);
 };
 
-#define gtk_GDK_DISPLAY *(gtk.gdk_display)
+#define gtk_GDK_DISPLAY gtk.gdk_x11_display_get_xdisplay(gtk.gdk_display_get_default())
 extern struct GTK_PTRS gtk;
 
-#define FN_TABLE_ENTRY(fn) { (void**)& gtk.fn, #fn } 
+#define FN_TABLE_ENTRY(fn, required) { (void**)& gtk.fn, #fn, required }
 typedef struct {
 	void ** fnPtr;
 	char * fnName;
+	int required;
 } FN_TABLE;
 
 /* load the gtk libraries and initialize the function pointers */

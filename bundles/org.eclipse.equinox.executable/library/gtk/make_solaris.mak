@@ -43,7 +43,10 @@ EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
 #LIBS = `pkg-config --libs-only-L gtk+-2.0` -lgtk-x11-2.0 -lgdk_pixbuf-2.0 -lgobject-2.0 -lgdk-x11-2.0 -lglib-2.0 -lthread -ldl -lc
 LIBS = -lthread -ldl -lc -lrt
-GTK_LIBS = -DGTK_LIB="\"libgtk-x11-2.0.so.0\"" -DGDK_LIB="\"libgdk-x11-2.0.so.0\"" -DPIXBUF_LIB="\"libgdk_pixbuf-2.0.so.0\"" -DGOBJ_LIB="\"libgobject-2.0.so.0\"" -DX11_LIB="\"libX11.so.4\""
+GTK_LIBS = \
+ -DGTK_LIB="\"libgtk-x11-2.0.so.0\"" -DGDK_LIB="\"libgdk-x11-2.0.so.0\"" \
+ -DGTK3_LIB="\"libgtk-3.so.0\"" -DGDK3_LIB="\"libgdk-3.so.0\"" \
+ -DPIXBUF_LIB="\"libgdk_pixbuf-2.0.so.0\"" -DGOBJ_LIB="\"libgobject-2.0.so.0\"" -DX11_LIB="\"libX11.so.4\""
 LFLAGS = -G
 CFLAGS = $(OPTFLAG) \
 	-DSOLARIS \
