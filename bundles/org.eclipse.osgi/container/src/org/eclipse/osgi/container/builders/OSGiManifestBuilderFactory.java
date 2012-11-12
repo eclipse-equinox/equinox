@@ -277,7 +277,7 @@ public final class OSGiManifestBuilderFactory {
 			String versionAttr = (String) attributes.remove(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
 			@SuppressWarnings("deprecation")
 			String specVersionAttr = (String) attributes.remove(Constants.PACKAGE_SPECIFICATION_VERSION);
-			Version version = versionAttr == null ? (specVersionAttr == null ? Version.parseVersion(specVersionAttr) : Version.emptyVersion) : Version.parseVersion(versionAttr);
+			Version version = versionAttr == null ? (specVersionAttr == null ? Version.emptyVersion : Version.parseVersion(specVersionAttr)) : Version.parseVersion(versionAttr);
 			attributes.put(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE, version);
 			if (symbolicName != null) {
 				attributes.put(PackageNamespace.CAPABILITY_BUNDLE_SYMBOLICNAME_ATTRIBUTE, symbolicName);
