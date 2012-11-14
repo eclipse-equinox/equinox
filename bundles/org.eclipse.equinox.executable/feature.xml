@@ -42,25 +42,6 @@
          fragment="true"/>
 
    <plugin
-         id="org.eclipse.equinox.launcher.motif.solaris.sparc"
-         os="solaris"
-         ws="motif"
-         arch="sparc"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-   <plugin
-         id="org.eclipse.equinox.launcher.carbon.macosx"
-         os="macosx"
-         ws="carbon"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-   <plugin
          id="org.eclipse.equinox.launcher.cocoa.macosx"
          os="macosx"
          ws="cocoa"
@@ -85,16 +66,6 @@
          os="macosx"
          ws="cocoa"
          arch="x86_64"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-   <plugin
-         id="org.eclipse.equinox.launcher.gtk.linux.ppc"
-         os="linux"
-         ws="gtk"
-         arch="ppc"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -131,16 +102,6 @@
          fragment="true"/>
 
    <plugin
-         id="org.eclipse.equinox.launcher.motif.aix.ppc"
-         os="aix"
-         ws="motif"
-         arch="ppc"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-   <plugin
          id="org.eclipse.equinox.launcher.gtk.aix.ppc64"
          os="aix"
          ws="gtk"
@@ -171,26 +132,6 @@
          fragment="true"/>
 
    <plugin
-         id="org.eclipse.equinox.launcher.motif.hpux.ia64_32"
-         os="hpux"
-         ws="motif"
-         arch="ia64_32"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-   <plugin
-         id="org.eclipse.equinox.launcher.motif.linux.x86"
-         os="linux"
-         ws="motif"
-         arch="x86"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-   <plugin
          id="org.eclipse.equinox.launcher.win32.win32.x86"
          os="win32"
          ws="win32"
@@ -215,16 +156,6 @@
          os="win32"
          ws="win32"
          arch="ia64"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-   <plugin
-         id="org.eclipse.equinox.launcher.wpf.win32.x86"
-         os="win32"
-         ws="wpf"
-         arch="x86"
          download-size="0"
          install-size="0"
          version="0.0.0"
