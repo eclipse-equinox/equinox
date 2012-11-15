@@ -1354,8 +1354,13 @@ public class Main {
 			// add the hash to help prevent collisions
 			appName += File.separator + installDirHash;
 		}
+		appName += '_' + OS_WS_ARCHToString();
 		String userHome = System.getProperty(PROP_USER_HOME);
 		return new File(userHome, appName + "/" + pathAppendage).getAbsolutePath(); //$NON-NLS-1$
+	}
+
+	private String OS_WS_ARCHToString() {
+		return getOS() + '_' + getWS() + '_' + getArch();
 	}
 
 	/**
