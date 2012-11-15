@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,7 +57,11 @@ public abstract class NLS {
 	private static String[] nlSuffixes;
 	private static final String PROP_WARNINGS = "osgi.nls.warnings"; //$NON-NLS-1$
 	private static final String IGNORE = "ignore"; //$NON-NLS-1$
-	private static final boolean ignoreWarnings = IGNORE.equals(FrameworkProperties.getProperty(PROP_WARNINGS));
+	private static final boolean ignoreWarnings = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+		public Boolean run() {
+			return IGNORE.equals(FrameworkProperties.getProperty(PROP_WARNINGS));
+		}
+	});
 
 	/*
 	 * NOTE do not change the name of this field; it is set by the Framework using reflection
