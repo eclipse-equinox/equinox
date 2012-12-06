@@ -717,7 +717,7 @@ public class Storage {
 	}
 
 	private Long getNextRootID() throws BundleException {
-		moduleDatabase.lockRead();
+		moduleDatabase.readLock();
 		try {
 			Long nextID = moduleDatabase.getNextId();
 			boolean lockedID;
@@ -732,7 +732,7 @@ public class Storage {
 			}
 			return nextID;
 		} finally {
-			moduleDatabase.unlockRead();
+			moduleDatabase.readUnlock();
 		}
 	}
 
@@ -890,7 +890,7 @@ public class Storage {
 	void save0() throws IOException {
 		DataOutputStream out = null;
 		boolean lockedLocation = false;
-		moduleDatabase.lockRead();
+		moduleDatabase.readLock();
 		try {
 			lockedLocation = osgiLocation.lock();
 			synchronized (this.saveMonitor) {
@@ -913,7 +913,7 @@ public class Storage {
 			if (lockedLocation) {
 				osgiLocation.release();
 			}
-			moduleDatabase.unlockRead();
+			moduleDatabase.readUnlock();
 		}
 	}
 

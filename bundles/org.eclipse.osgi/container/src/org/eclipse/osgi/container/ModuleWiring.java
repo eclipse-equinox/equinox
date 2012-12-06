@@ -381,13 +381,13 @@ public final class ModuleWiring implements BundleWiring {
 			newRequirements.add(new ModuleRequirement(info.getNamespace(), directives, attributes, revision));
 		}
 		ModuleDatabase moduleDatabase = revision.getRevisions().getContainer().moduleDatabase;
-		moduleDatabase.lockWrite();
+		moduleDatabase.writeLock();
 		try {
 			List<ModuleRequirement> updatedRequirements = new ArrayList<ModuleRequirement>(requirements);
 			updatedRequirements.addAll(newRequirements);
 			requirements = updatedRequirements;
 		} finally {
-			moduleDatabase.unlockWrite();
+			moduleDatabase.writeUnlock();
 		}
 	}
 }
