@@ -7,7 +7,7 @@
       license-feature="org.eclipse.license"
       license-feature-version="1.0.0.qualifier">
 
-   <copyright url="%copyrightURL">
+   <copyright>
       %copyright
    </copyright>
 
