@@ -23,4 +23,18 @@
   <artifactId>org.eclipse.equinox.transforms.hook</artifactId>
   <version>1.0.400-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <configuration>
+          <!-- workaround for build issue
+               Missing Constraint: Bundle-RequiredExecutionEnvironment: J2SE-1.5 -->
+          <executionEnvironment>J2SE-1.5</executionEnvironment>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

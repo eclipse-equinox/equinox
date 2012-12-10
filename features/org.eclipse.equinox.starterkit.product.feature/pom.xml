@@ -61,6 +61,44 @@
           </environments>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.6</version>
+        <executions>
+          <execution>
+            <id>copy-resources-win32.win32.x86</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <overwrite>true</overwrite>
+              <outputDirectory>${basedir}/executables/win32.win32.x86</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>../../../rt.equinox.binaries/org.eclipse.equinox.executable/bin/win32/win32/x86</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-resources-win32.win32.x86_64</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <overwrite>true</overwrite>
+              <outputDirectory>${basedir}/executables/win32.win32.x86_64</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>../../../rt.equinox.binaries/org.eclipse.equinox.executable/bin/win32/win32/x86_64</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 

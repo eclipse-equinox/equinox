@@ -27,6 +27,10 @@
   <version>3.8.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <properties>
+    <tycho.scmUrl>scm:git:git://git.eclipse.org/gitroot/equinox/rt.equinox.bundles.git</tycho.scmUrl>
+  </properties>
+
   <modules>
     <module>bundles/org.eclipse.equinox.security.ui</module>
     <module>features/org.eclipse.equinox.compendium.sdk</module>
