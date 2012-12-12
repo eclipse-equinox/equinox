@@ -597,9 +597,6 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 	@SuppressWarnings("unchecked")
 	private <A> A adapt0(Class<A> adapterType) {
-		if (adapterType.isInstance(this))
-			return (A) this;
-
 		if (AccessControlContext.class.equals(adapterType)) {
 			Generation current = (Generation) module.getCurrentRevision().getRevisionInfo();
 			ProtectionDomain domain = current.getDomain();
