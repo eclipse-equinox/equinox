@@ -427,6 +427,17 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		return result instanceof String ? (String) result : null;
 	}
 
+	public Map<String, String> getConfiguration() {
+		Map<String, String> result = new HashMap<String, String>(configuration.size());
+		for (Object key : configuration.keySet()) {
+			if (key instanceof String) {
+				String skey = (String) key;
+				result.put(skey, configuration.getProperty(skey));
+			}
+		}
+		return result;
+	}
+
 	public Debug getDebug() {
 		return this.debug;
 	}

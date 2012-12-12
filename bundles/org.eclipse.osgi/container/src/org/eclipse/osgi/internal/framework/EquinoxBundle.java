@@ -32,6 +32,10 @@ import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
 import org.eclipse.osgi.signedcontent.*;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.Storage;
+import org.osgi.dto.framework.*;
+import org.osgi.dto.framework.startlevel.BundleStartLevelDTO;
+import org.osgi.dto.framework.startlevel.FrameworkStartLevelDTO;
+import org.osgi.dto.framework.wiring.*;
 import org.osgi.framework.*;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.namespace.HostNamespace;
@@ -637,6 +641,48 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			return (A) revision.getWiring();
 		}
 
+		if (BundleDTO.class.equals(adapterType)) {
+			return (A) DTOBuilder.newBundleDTO(this);
+		}
+
+		if (BundleStartLevelDTO.class.equals(adapterType)) {
+			if (module.getState().equals(State.UNINSTALLED)) {
+				return null;
+			}
+			return (A) DTOBuilder.newBundleStartLevelDTO(module);
+		}
+
+		if (BundleRevisionDTO.class.equals(adapterType)) {
+			if (module.getState().equals(State.UNINSTALLED)) {
+				return null;
+			}
+			return (A) DTOBuilder.newBundleRevisionDTO(module.getCurrentRevision());
+		}
+
+		if (BundleRevisionsDTO.class.equals(adapterType)) {
+			return (A) DTOBuilder.newBundleRevisionsDTO(module.getRevisions());
+		}
+
+		if (BundleWiringDTO.class.equals(adapterType)) {
+			if (module.getState().equals(State.UNINSTALLED)) {
+				return null;
+			}
+			return (A) DTOBuilder.newBundleWiringDTO(module.getCurrentRevision());
+		}
+
+		if (BundleWiringsDTO.class.equals(adapterType)) {
+			return (A) DTOBuilder.newBundleWiringsDTO(module.getRevisions());
+		}
+
+		if (ServiceReferenceDTO[].class.equals(adapterType)) {
+			if (module.getState().equals(State.UNINSTALLED)) {
+				return null;
+			}
+			BundleContextImpl current = getBundleContextImpl();
+			ServiceReference<?>[] references = (current == null) ? null : equinoxContainer.getServiceRegistry().getRegisteredServices(current);
+			return (A) DTOBuilder.newArrayServiceReferenceDTO(references);
+		}
+
 		if (getBundleId() == 0) {
 			if (Framework.class.equals(adapterType)) {
 				return (A) this;
@@ -648,6 +694,16 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 			if (FrameworkWiring.class.equals(adapterType)) {
 				return (A) equinoxContainer.getStorage().getModuleContainer().getFrameworkWiring();
+			}
+
+			if (FrameworkDTO.class.equals(adapterType)) {
+				BundleContextImpl current = getBundleContextImpl();
+				Map<String, String> configuration = equinoxContainer.getConfiguration().getConfiguration();
+				return (A) DTOBuilder.newFrameworkDTO(current, configuration);
+			}
+
+			if (FrameworkStartLevelDTO.class.equals(adapterType)) {
+				return (A) DTOBuilder.newFrameworkStartLevelDTO(equinoxContainer.getStorage().getModuleContainer().getFrameworkStartLevel());
 			}
 		}
 
