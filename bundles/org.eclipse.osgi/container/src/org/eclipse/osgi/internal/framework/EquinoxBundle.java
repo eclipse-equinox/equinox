@@ -639,7 +639,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 		if (getBundleId() == 0) {
 			if (Framework.class.equals(adapterType)) {
-				// TODO
+				return (A) this;
 			}
 
 			if (FrameworkStartLevel.class.equals(adapterType)) {
