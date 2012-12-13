@@ -68,7 +68,7 @@ public class PlatformAdminImpl implements PlatformAdmin {
 		State state = factory.createState(true);
 		StateConverter converter = new StateConverter(state);
 		ModuleDatabase database = equinoxContainer.getStorage().getModuleDatabase();
-		database.lockRead();
+		database.readLock();
 		try {
 			List<Module> modules = equinoxContainer.getStorage().getModuleContainer().getModules();
 			for (Module module : modules) {
@@ -81,7 +81,7 @@ public class PlatformAdminImpl implements PlatformAdmin {
 			// TODO add hooks to get the resolution correct
 			// TODO add listeners to keep state copy in sync
 		} finally {
-			database.unlockRead();
+			database.readUnlock();
 		}
 		return state;
 	}
