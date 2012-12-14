@@ -599,6 +599,14 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		return adapt0(adapterType);
 	}
 
+	private void readLock() {
+		equinoxContainer.getStorage().getModuleDatabase().readLock();
+	}
+
+	private void readUnlock() {
+		equinoxContainer.getStorage().getModuleDatabase().readUnlock();
+	}
+
 	@SuppressWarnings("unchecked")
 	private <A> A adapt0(Class<A> adapterType) {
 		if (AccessControlContext.class.equals(adapterType)) {
@@ -642,7 +650,14 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		}
 
 		if (BundleDTO.class.equals(adapterType)) {
-			return (A) DTOBuilder.newBundleDTO(this);
+			// Unfortunately we need to lock here to make sure the BSN and version
+			// are consistent in case of updates
+			readLock();
+			try {
+				return (A) DTOBuilder.newBundleDTO(this);
+			} finally {
+				readUnlock();
+			}
 		}
 
 		if (BundleStartLevelDTO.class.equals(adapterType)) {
@@ -660,6 +675,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		}
 
 		if (BundleRevisionsDTO.class.equals(adapterType)) {
+			// No need to lock the database here since the ModuleRevisions object does the
+			// proper locking for us.
 			return (A) DTOBuilder.newBundleRevisionsDTO(module.getRevisions());
 		}
 
@@ -667,11 +684,21 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			if (module.getState().equals(State.UNINSTALLED)) {
 				return null;
 			}
-			return (A) DTOBuilder.newBundleWiringDTO(module.getCurrentRevision());
+			readLock();
+			try {
+				return (A) DTOBuilder.newBundleWiringDTO(module.getCurrentRevision());
+			} finally {
+				readUnlock();
+			}
 		}
 
 		if (BundleWiringsDTO.class.equals(adapterType)) {
-			return (A) DTOBuilder.newBundleWiringsDTO(module.getRevisions());
+			readLock();
+			try {
+				return (A) DTOBuilder.newBundleWiringsDTO(module.getRevisions());
+			} finally {
+				readUnlock();
+			}
 		}
 
 		if (ServiceReferenceDTO[].class.equals(adapterType)) {
@@ -699,7 +726,12 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			if (FrameworkDTO.class.equals(adapterType)) {
 				BundleContextImpl current = getBundleContextImpl();
 				Map<String, String> configuration = equinoxContainer.getConfiguration().getConfiguration();
-				return (A) DTOBuilder.newFrameworkDTO(current, configuration);
+				readLock();
+				try {
+					return (A) DTOBuilder.newFrameworkDTO(current, configuration);
+				} finally {
+					readUnlock();
+				}
 			}
 
 			if (FrameworkStartLevelDTO.class.equals(adapterType)) {
