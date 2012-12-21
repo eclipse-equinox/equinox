@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -613,19 +613,21 @@ public class PreferencesService implements IPreferencesService {
 							Preferences node = context.getNode(qualifier);
 							if (node != null) {
 								found = true;
-								if (childPath != null)
+								if (childPath != null && node.nodeExists(childPath))
 									node = node.node(childPath);
 								result.add(node);
 							}
 						}
 					}
 					if (!found) {
-						Preferences node = getRootNode().node(scopeString).node(qualifier);
-						if (childPath != null)
-							node = node.node(childPath);
-						result.add(node);
+						Preferences node = getRootNode().node(scopeString);
+						if (node.nodeExists(qualifier)) {
+							node = node.node(qualifier);
+							if (childPath != null && node.nodeExists(childPath))
+								node = node.node(childPath);
+							result.add(node);
+						}
 					}
-					found = false;
 				}
 
 				public void handleException(Throwable exception) {
