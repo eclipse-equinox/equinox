@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 VMware Inc.
+ * Copyright (c) 2013 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,14 +40,19 @@ public final class RegionBundleFindHook implements FindHook {
 	 */
 	@Override
 	public void find(BundleContext context, Collection<Bundle> bundles) {
-		long bundleID = context.getBundle().getBundleId();
-
+		Bundle finderBundle = getBundle(context);
+		if (finderBundle == null) {
+			// invalid finder bundle; clear out result
+			bundles.clear();
+			return;
+		}
+		long bundleID = finderBundle.getBundleId();
 		if (bundleID == 0 || bundleID == hookImplID) {
 			// The system bundle and the hook impl bundle can see all bundles
 			return;
 		}
 
-		Region finderRegion = getRegion(context);
+		Region finderRegion = this.regionDigraph.getRegion(finderBundle);
 		if (finderRegion == null) {
 			bundles.clear();
 			return;
@@ -81,10 +86,14 @@ public final class RegionBundleFindHook implements FindHook {
 		protected boolean isAllowed(Bundle candidate, RegionFilter filter) {
 			return filter.isAllowed(candidate);
 		}
-
 	}
 
-	private Region getRegion(BundleContext context) {
-		return this.regionDigraph.getRegion(context.getBundle());
+	static Bundle getBundle(BundleContext context) {
+		try {
+			return context.getBundle();
+		} catch (IllegalStateException e) {
+			// happens if the context is invalid
+			return null;
+		}
 	}
 }

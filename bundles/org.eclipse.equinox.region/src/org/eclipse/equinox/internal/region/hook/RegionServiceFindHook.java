@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 VMware Inc.
+ * Copyright (c) 2013 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,7 @@ package org.eclipse.equinox.internal.region.hook;
 
 import java.util.Collection;
 import org.eclipse.equinox.region.*;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
 import org.osgi.framework.hooks.service.FindHook;
 
 /**
@@ -37,11 +36,17 @@ public final class RegionServiceFindHook implements FindHook {
 	 * {@inheritDoc}
 	 */
 	public void find(BundleContext context, String name, String filter, boolean allServices, Collection<ServiceReference<?>> references) {
-		if (context.getBundle().getBundleId() == 0L) {
+		Bundle finderBundle = RegionBundleFindHook.getBundle(context);
+		if (finderBundle == null) {
+			// invalid finder bundle; clear out result
+			references.clear();
+			return;
+		}
+		if (finderBundle.getBundleId() == 0L) {
 			return;
 		}
 
-		Region finderRegion = getRegion(context);
+		Region finderRegion = this.regionDigraph.getRegion(finderBundle);
 		if (finderRegion == null) {
 			references.clear();
 			return;
@@ -77,9 +82,4 @@ public final class RegionServiceFindHook implements FindHook {
 		}
 
 	}
-
-	private Region getRegion(BundleContext context) {
-		return this.regionDigraph.getRegion(context.getBundle());
-	}
-
 }
