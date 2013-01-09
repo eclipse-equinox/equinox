@@ -44,7 +44,7 @@
     <module>bundles/org.eclipse.equinox.launcher.cocoa.macosx.x86_64</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.aix.ppc</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.aix.ppc64</module>
-    <module>bundles/org.eclipse.equinox.launcher.gtk.hpux.ia64_32</module>
+    <module>bundles/org.eclipse.equinox.launcher.gtk.hpux.ia64</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.linux.ppc</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.linux.ppc64</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.linux.s390</module>
