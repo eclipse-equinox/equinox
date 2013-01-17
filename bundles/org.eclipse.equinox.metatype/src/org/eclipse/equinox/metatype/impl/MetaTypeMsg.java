@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation.
+ * Copyright (c) 2005, 2013 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,8 @@ public class MetaTypeMsg extends NLS {
 	public static String MISSING_ATTRIBUTE;
 	public static String INVALID_TYPE;
 	public static String MISSING_DESIGNATE_PID_AND_FACTORYPID;
-	public static String OCD_ID_NOT_FOUND;
+	public static String OCD_PID_NOT_FOUND;
+	public static String OCD_REF_NOT_FOUND;
 	public static String MISSING_ELEMENT;
 	public static String EXCEPTION_MESSAGE;
 	public static String NULL_IS_INVALID;
@@ -35,9 +36,12 @@ public class MetaTypeMsg extends NLS {
 	public static String METADATA_NOT_FOUND;
 	public static String ASK_INVALID_LOCALE;
 	public static String MISSING_REQUIRED_PARAMETER;
-	public static String TOKENIZER_GOT_INVALID_DATA;
 	public static String INVALID_PID_METATYPE_PROVIDER_IGNORED;
+	public static String METADATA_FILE_PARSE_ERROR;
 	public static String METADATA_PARSE_ERROR;
+	public static String INVALID_DEFAULTS_XML;
+	public static String INVALID_OPTIONS_XML;
+	public static String VALUE_NOT_A_NUMBER;
 
 	static {
 		// initialize resource bundles

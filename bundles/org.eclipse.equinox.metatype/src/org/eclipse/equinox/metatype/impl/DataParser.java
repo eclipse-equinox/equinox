@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -158,10 +158,17 @@ public class DataParser {
 		protected ContentHandler _doc_handler;
 		protected boolean _isParsedDataValid = true;
 		protected Map<String, Map<String, String>> extensionAttributes = new HashMap<String, Map<String, String>>();
+		protected String elementId;
+		protected String elementName;
 
 		public AbstractHandler(ContentHandler parentHandler) {
 			this._doc_handler = parentHandler;
 			_dp_xmlReader.setContentHandler(this);
+		}
+
+		protected void init(String name, Attributes attributes) {
+			elementId = attributes.getValue(ID);
+			elementName = name;
 		}
 
 		public void endElement(String namespaceURI, String localName, String qName) {
@@ -171,13 +178,13 @@ public class DataParser {
 		}
 
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-			throw new SAXException(NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, qName));
+			throw new SAXException(NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] {qName, attributes.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 		}
 
 		public void characters(char[] buf, int start, int end) throws SAXException {
 			String s = new String(buf, start, end).trim();
 			if (s.length() > 0) {
-				throw new SAXException(NLS.bind(MetaTypeMsg.UNEXPECTED_TEXT, s));
+				throw new SAXException(NLS.bind(MetaTypeMsg.UNEXPECTED_TEXT, new Object[] {s, elementName, elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 			}
 		}
 
@@ -221,7 +228,7 @@ public class DataParser {
 			if (name.equalsIgnoreCase(METADATA)) {
 				new MetaDataHandler(this).init(name, attributes);
 			} else {
-				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
+				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] {name, attributes.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 			}
 		}
 
@@ -242,6 +249,7 @@ public class DataParser {
 		public void init(String name, Attributes attributes) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is MetaDataHandler():init()"); //$NON-NLS-1$
+			super.init(name, attributes);
 			_dp_localization = attributes.getValue(LOCALIZATION);
 			if (_dp_localization == null) {
 				// Not a problem, because LOCALIZATION is an optional attribute.
@@ -265,7 +273,7 @@ public class DataParser {
 				OcdHandler ocdHandler = new OcdHandler(this);
 				ocdHandler.init(name, atts, _dp_OCDs);
 			} else {
-				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
+				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] {name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 			}
 		}
 
@@ -275,7 +283,7 @@ public class DataParser {
 			if (_dp_designateHandlers.size() == 0) {
 				// Schema defines at least one DESIGNATE is required.
 				_isParsedDataValid = false;
-				logger.log(LogService.LOG_WARNING, "DataParser.finished() " + NLS.bind(MetaTypeMsg.MISSING_ELEMENT, DESIGNATE)); //$NON-NLS-1$
+				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.MISSING_ELEMENT, new Object[] {DESIGNATE, METADATA, elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 				return;
 			}
 			Enumeration<DesignateHandler> designateHandlerKeys = _dp_designateHandlers.elements();
@@ -286,7 +294,7 @@ public class DataParser {
 				if (ocd != null) {
 					designates.add(new Designate.Builder(ocd).bundle(dh._bundle_val).factoryPid(dh._factory_val).merge(dh._merge_val).pid(dh._pid_val).optional(dh._optional_val).build());
 				} else {
-					logger.log(LogService.LOG_ERROR, "DataParser.finished() " + NLS.bind(MetaTypeMsg.OCD_ID_NOT_FOUND, dh._ocdref)); //$NON-NLS-1$
+					logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.OCD_REF_NOT_FOUND, new Object[] {dh._pid_val, dh._factory_val, dh._ocdref, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 
 				}
 			}
@@ -313,12 +321,13 @@ public class DataParser {
 		public void init(String name, Attributes atts, Hashtable<String, ObjectClassDefinitionImpl> ocds_hashtable) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is OcdHandler():init()"); //$NON-NLS-1$
+			super.init(name, atts);
 			_parent_OCDs_hashtable = ocds_hashtable;
 			collectExtensionAttributes(atts);
 			String ocd_name_val = atts.getValue(NAME);
 			if (ocd_name_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes, Hashtable) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, NAME, name)); //$NON-NLS-1$
+				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {NAME, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 				return;
 			}
 
@@ -330,7 +339,7 @@ public class DataParser {
 			_refID = atts.getValue(ID);
 			if (_refID == null) {
 				_isParsedDataValid = false;
-				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes, Hashtable) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, ID, name)); //$NON-NLS-1$
+				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {ID, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 				return;
 			}
 
@@ -354,7 +363,7 @@ public class DataParser {
 				if (iconHandler._isParsedDataValid)
 					icons.add(iconHandler._icon);
 			} else {
-				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
+				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] {name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 			}
 		}
 
@@ -365,7 +374,7 @@ public class DataParser {
 			if (_ad_vector.size() == 0) {
 				// Schema defines at least one AD is required.
 				_isParsedDataValid = false;
-				logger.log(LogService.LOG_ERROR, "DataParser.finished() " + NLS.bind(MetaTypeMsg.MISSING_ELEMENT, AD, _refID)); //$NON-NLS-1$
+				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ELEMENT, new Object[] {AD, OCD, elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 				return;
 			}
 			// OCD gets all parsed ADs.
@@ -393,10 +402,11 @@ public class DataParser {
 		public void init(String name, Attributes atts) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is IconHandler:init()"); //$NON-NLS-1$
+			super.init(name, atts);
 			String icon_resource_val = atts.getValue(RESOURCE);
 			if (icon_resource_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, RESOURCE, name)); //$NON-NLS-1$
+				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {RESOURCE, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 				return;
 			}
 
@@ -424,6 +434,8 @@ public class DataParser {
 		Vector<String> _optionLabel_vector = new Vector<String>(7);
 		Vector<String> _optionValue_vector = new Vector<String>(7);
 
+		private String ad_defaults_str;
+
 		public AttributeDefinitionHandler(ContentHandler handler) {
 			super(handler);
 		}
@@ -431,6 +443,7 @@ public class DataParser {
 		public void init(String name, Attributes atts, Vector<AttributeDefinitionImpl> ad_vector) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is AttributeDefinitionHandler():init()"); //$NON-NLS-1$
+			super.init(name, atts);
 			_parent_ADs_vector = ad_vector;
 			collectExtensionAttributes(atts);
 			String ad_name_val = atts.getValue(NAME);
@@ -446,14 +459,14 @@ public class DataParser {
 			String ad_id_val = atts.getValue(ID);
 			if (ad_id_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes, Vector) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, ID, name)); //$NON-NLS-1$
+				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {ID, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 				return;
 			}
 
 			String ad_type_val = atts.getValue(TYPE);
 			if (ad_type_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes, Vector) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, TYPE, name)); //$NON-NLS-1$
+				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {TYPE, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 				return;
 			}
 			if (ad_type_val.equalsIgnoreCase(STRING)) {
@@ -478,7 +491,7 @@ public class DataParser {
 				_dataType = AttributeDefinition.PASSWORD;
 			} else {
 				_isParsedDataValid = false;
-				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes, Vector) " + NLS.bind(MetaTypeMsg.INVALID_TYPE, new Object[] {ad_type_val, _dp_url, _dp_bundle.getBundleId()})); //$NON-NLS-1$
+				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.INVALID_TYPE, new Object[] {ad_type_val, ad_id_val, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 				return;
 			}
 
@@ -501,7 +514,7 @@ public class DataParser {
 				// Not a problem, because MAX is an optional attribute.
 			}
 
-			String ad_defaults_str = atts.getValue(DEFAULT);
+			ad_defaults_str = atts.getValue(DEFAULT);
 			if (ad_defaults_str == null) {
 				// Not a problem, because DEFAULT is an optional attribute.
 			}
@@ -514,10 +527,6 @@ public class DataParser {
 			}
 
 			_ad = new AttributeDefinitionImpl(ad_id_val, ad_name_val, ad_description_val, _dataType, ad_cardinality_val, convert(ad_min_val, _dataType), convert(ad_max_val, _dataType), Boolean.valueOf(ad_required_val).booleanValue(), _dp_localization, logger, extensionAttributes);
-
-			if (ad_defaults_str != null) {
-				_ad.setDefaultValue(ad_defaults_str, true);
-			}
 		}
 
 		public void startElement(String uri, String localName, String qName, Attributes atts) {
@@ -537,7 +546,7 @@ public class DataParser {
 					_optionValue_vector.addElement(optionHandler._value_val);
 				}
 			} else {
-				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
+				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] {name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 			}
 		}
 
@@ -546,8 +555,20 @@ public class DataParser {
 			logger.log(LogService.LOG_DEBUG, "Here is AttributeDefinitionHandler():finished()"); //$NON-NLS-1$
 			if (!_isParsedDataValid)
 				return;
-
+			int numOfValues = _optionValue_vector.size();
 			_ad.setOption(_optionLabel_vector, _optionValue_vector, true);
+			String[] values = _ad.getOptionValues();
+			if (values == null)
+				values = new String[0];
+			if (numOfValues != values.length)
+				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_OPTIONS_XML, new Object[] {elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+
+			if (ad_defaults_str != null) {
+				_ad.setDefaultValue(ad_defaults_str, true);
+				if (_ad.getDefaultValue() == null)
+					logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_DEFAULTS_XML, new Object[] {ad_defaults_str, elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+			}
+
 			_parent_ADs_vector.addElement(_ad);
 		}
 	}
@@ -567,17 +588,18 @@ public class DataParser {
 		public void init(String name, Attributes atts) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is OptionHandler:init()"); //$NON-NLS-1$
+			super.init(name, atts);
 			_label_val = atts.getValue(LABEL);
 			if (_label_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, LABEL, name)); //$NON-NLS-1$
+				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {LABEL, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 				return;
 			}
 
 			_value_val = atts.getValue(VALUE);
 			if (_value_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, VALUE, name)); //$NON-NLS-1$
+				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {VALUE, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 				return;
 			}
 		}
@@ -646,13 +668,13 @@ public class DataParser {
 		}
 
 		public void init(String name, Attributes atts) {
-
 			logger.log(LogService.LOG_DEBUG, "Here is DesignateHandler():init()"); //$NON-NLS-1$
+			super.init(name, atts);
 			_pid_val = atts.getValue(PID);
 			_factory_val = atts.getValue(FACTORY);
 			if (_pid_val == null && _factory_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogService.LOG_ERROR, MetaTypeMsg.MISSING_DESIGNATE_PID_AND_FACTORYPID);
+				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_DESIGNATE_PID_AND_FACTORYPID, new Object[] {elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 				return;
 			}
 
@@ -695,7 +717,7 @@ public class DataParser {
 					_ocdref = objectHandler._ocdref;
 				}
 			} else {
-				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
+				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] {name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 			}
 		}
 
@@ -708,7 +730,7 @@ public class DataParser {
 			if (_ocdref == null) {
 				_isParsedDataValid = false;
 				// Schema defines at least one OBJECT is required.
-				logger.log(LogService.LOG_ERROR, "DataParser.finished() " + NLS.bind(MetaTypeMsg.MISSING_ELEMENT, OBJECT, _pid_val)); //$NON-NLS-1$
+				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ELEMENT, new Object[] {OBJECT, DESIGNATE, elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 				return;
 
 			}
@@ -729,10 +751,11 @@ public class DataParser {
 		public void init(String name, Attributes atts) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is ObjectHandler():init()"); //$NON-NLS-1$
+			super.init(name, atts);
 			_ocdref = atts.getValue(OCDREF);
 			if (_ocdref == null) {
 				_isParsedDataValid = false;
-				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, OCDREF, name)); //$NON-NLS-1$
+				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {OCDREF, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 				return;
 			}
 		}
@@ -750,7 +773,7 @@ public class DataParser {
 				attributeHandler.init(name, atts);
 				// The ATTRIBUTE element is only used by RFC94, do nothing for it here.
 			} else {
-				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
+				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] {name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 			}
 		}
 	}
@@ -772,17 +795,18 @@ public class DataParser {
 		public void init(String name, Attributes atts) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is AttributeHandler():init()"); //$NON-NLS-1$
+			super.init(name, atts);
 			_adref_val = atts.getValue(ADREF);
 			if (_adref_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, ADREF, name)); //$NON-NLS-1$
+				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {ADREF, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 				return;
 			}
 
 			_content_val = atts.getValue(CONTENT);
 			if (_content_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, CONTENT, name)); //$NON-NLS-1$
+				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {CONTENT, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 				return;
 			}
 		}

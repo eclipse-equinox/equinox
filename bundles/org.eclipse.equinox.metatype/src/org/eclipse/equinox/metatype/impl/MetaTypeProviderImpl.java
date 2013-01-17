@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,7 +59,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 		_isThereMeta = readMetaFiles(bundle, parser);
 
 		if (!_isThereMeta) {
-			logger.log(LogService.LOG_DEBUG, NLS.bind(MetaTypeMsg.METADATA_NOT_FOUND, new Long(bundle.getBundleId()), bundle.getSymbolicName()));
+			logger.log(LogService.LOG_DEBUG, NLS.bind(MetaTypeMsg.METADATA_NOT_FOUND, bundle.getSymbolicName(), bundle.getBundleId()));
 		}
 	}
 
@@ -106,7 +106,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 					}
 				}
 			} catch (Exception e) {
-				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.METADATA_PARSE_ERROR, new Object[] {entry, bundle.getBundleId()}), e);
+				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.METADATA_FILE_PARSE_ERROR, new Object[] {entry, bundle.getBundleId(), bundle.getSymbolicName()}), e);
 			}
 		}
 		return result;
@@ -134,7 +134,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 			ocd.setResourceBundle(locale, _bundle);
 			return ocd;
 		} else {
-			throw new IllegalArgumentException(NLS.bind(MetaTypeMsg.OCD_ID_NOT_FOUND, pid));
+			throw new IllegalArgumentException(NLS.bind(MetaTypeMsg.OCD_PID_NOT_FOUND, pid));
 		}
 	}
 

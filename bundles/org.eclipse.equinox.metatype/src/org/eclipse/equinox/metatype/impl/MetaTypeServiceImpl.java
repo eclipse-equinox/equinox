@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.impl;
 
-import org.eclipse.equinox.metatype.EquinoxMetaTypeInformation;
-import org.eclipse.equinox.metatype.EquinoxMetaTypeService;
-
 import java.security.AccessController;
-import java.security.PrivilegedExceptionAction;
+import java.security.PrivilegedAction;
 import java.util.Hashtable;
 import javax.xml.parsers.*;
+import org.eclipse.equinox.metatype.EquinoxMetaTypeInformation;
+import org.eclipse.equinox.metatype.EquinoxMetaTypeService;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.log.LogService;
@@ -56,29 +55,28 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 	 * Internal Method - to get MetaTypeProvider object.
 	 */
 	private EquinoxMetaTypeInformation getMetaTypeProvider(final Bundle b) {
+		// Avoid synthetic accessor method warnings.
 		final LogService loggerTemp = this.logger;
 		final ServiceTracker<Object, Object> tracker = this.metaTypeProviderTracker;
-		try {
-			Long bID = new Long(b.getBundleId());
-			synchronized (_mtps) {
-				if (_mtps.containsKey(bID))
-					return _mtps.get(bID);
-				// Avoid synthetic accessor method warnings.
-
-				EquinoxMetaTypeInformation mti = AccessController.doPrivileged(new PrivilegedExceptionAction<EquinoxMetaTypeInformation>() {
-					public EquinoxMetaTypeInformation run() throws ParserConfigurationException, SAXException {
-						MetaTypeInformationImpl impl = new MetaTypeInformationImpl(b, newParser(), loggerTemp);
-						if (!impl._isThereMeta)
-							return new MetaTypeProviderTracker(b, loggerTemp, tracker);
-						return impl;
+		Long bID = new Long(b.getBundleId());
+		synchronized (_mtps) {
+			if (_mtps.containsKey(bID))
+				return _mtps.get(bID);
+			EquinoxMetaTypeInformation mti = AccessController.doPrivileged(new PrivilegedAction<EquinoxMetaTypeInformation>() {
+				public EquinoxMetaTypeInformation run() {
+					MetaTypeInformationImpl impl = null;
+					try {
+						impl = new MetaTypeInformationImpl(b, newParser(), loggerTemp);
+					} catch (Exception e) {
+						loggerTemp.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.METADATA_PARSE_ERROR, b.getBundleId(), b.getSymbolicName()), e);
 					}
-				});
-				_mtps.put(bID, mti);
-				return mti;
-			}
-		} catch (Exception e) {
-			logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.EXCEPTION_MESSAGE, e.getMessage()), e);
-			return new MetaTypeProviderTracker(b, loggerTemp, tracker);
+					if (impl == null || !impl._isThereMeta)
+						return new MetaTypeProviderTracker(b, loggerTemp, tracker);
+					return impl;
+				}
+			});
+			_mtps.put(bID, mti);
+			return mti;
 		}
 	}
 

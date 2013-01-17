@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,11 +58,9 @@ public class ValueTokenizer {
 					// at the end of the loop.
 					if (i + 1 < values_str.length()) {
 						buffer.append(values_str.charAt(++i));
-					} else {
-						// If the ESCAPE character occurs as the last character
-						// of the string, log the error and ignore it.
-						logger.log(LogService.LOG_ERROR, "ValueTokenizer.ValueTokenizer(String) " + MetaTypeMsg.TOKENIZER_GOT_INVALID_DATA); //$NON-NLS-1$
 					}
+					// If the ESCAPE character occurs as the last character
+					// of the string, ignore it.
 					break;
 				default :
 					// For all other characters, add them to the current token
@@ -149,6 +147,7 @@ public class ValueTokenizer {
 		if (values.isEmpty()) {
 			return MetaTypeMsg.NULL_IS_INVALID;
 		}
+		String s = null;
 		try {
 			// A value must match the cardinality.
 			int cardinality = Math.abs(ad.getCardinality());
@@ -164,7 +163,7 @@ public class ValueTokenizer {
 			}
 			// Now inspect each token.
 			for (Iterator<String> i = values.iterator(); i.hasNext();) {
-				String s = i.next();
+				s = i.next();
 				// If options were declared and the value does not match one of them, the value is not valid.
 				if (!ad._values.isEmpty() && !ad._values.contains(s)) {
 					return NLS.bind(MetaTypeMsg.VALUE_OUT_OF_OPTION, s);
@@ -265,9 +264,11 @@ public class ValueTokenizer {
 			}
 			// No problems detected
 			return ""; //$NON-NLS-1$
-		} catch (Throwable t) {
-			String message = NLS.bind(MetaTypeMsg.EXCEPTION_MESSAGE, t.getClass().getName(), t.getMessage());
-			logger.log(LogService.LOG_DEBUG, message, t);
+		} catch (NumberFormatException e) {
+			return NLS.bind(MetaTypeMsg.VALUE_NOT_A_NUMBER, s);
+		} catch (Exception e) {
+			String message = NLS.bind(MetaTypeMsg.EXCEPTION_MESSAGE, e.getClass().getName(), e.getMessage());
+			logger.log(LogService.LOG_DEBUG, message, e);
 			return message;
 		}
 	}

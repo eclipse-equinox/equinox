@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -213,11 +213,11 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	 */
 	void setOption(Vector<String> labels, Vector<String> values, boolean needValidation) {
 		if ((labels == null) || (values == null)) {
-			logger.log(LogService.LOG_ERROR, "AttributeDefinitionImpl.setOption(Vector, Vector, boolean) " + MetaTypeMsg.NULL_OPTIONS); //$NON-NLS-1$
+			logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.NULL_OPTIONS, getID()));
 			return;
 		}
 		if (labels.size() != values.size()) {
-			logger.log(LogService.LOG_ERROR, "AttributeDefinitionImpl.setOption(Vector, Vector, boolean) " + MetaTypeMsg.INCONSISTENT_OPTIONS); //$NON-NLS-1$
+			logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.INCONSISTENT_OPTIONS, getID()));
 			return;
 		}
 		_labels = labels;
@@ -228,7 +228,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 				_values.set(index, vt.getValuesAsString());
 				String reason = vt.validate(this);
 				if ((reason != null) && reason.length() > 0) {
-					logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_OPTIONS, _values.get(index), reason));
+					logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_OPTIONS, new Object[] {_values.get(index), getID(), reason}));
 					_labels.remove(index);
 					_values.remove(index);
 					index--; // Because this one has been removed.
@@ -254,7 +254,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 		ValueTokenizer vt = new ValueTokenizer(defaults_str, logger);
 		String reason = vt.validate(this);
 		if ((reason != null) && reason.length() > 0) {
-			logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_DEFAULTS, vt.getValuesAsString(), reason));
+			logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_DEFAULTS, new Object[] {vt.getValuesAsString(), getID(), reason}));
 			return;
 		}
 		String[] defaults = vt.getValuesAsArray();
