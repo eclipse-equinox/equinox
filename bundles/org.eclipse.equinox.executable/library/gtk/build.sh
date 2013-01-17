@@ -40,12 +40,6 @@ defaultJava=DEFAULT_JAVA_JNI
 defaultJavaHome=""
 javaHome=""
 makefile=""
-if [ "$OS" = "" ];  then
-    OS=`uname -s`
-fi
-if [ "$MODEL" = "" ];  then
-    MODEL=`uname -m`
-fi
 if [ "${CC}" = "" ]; then
 	CC=cc
 	export CC
@@ -74,19 +68,26 @@ while [ "$1" != "" ]; do
     fi
     shift
 done
+if [ "$defaultOS" = "" ];  then
+    defaultOS=`uname -s`
+fi
+if [ "$defaultOSArch" = "" ];  then
+	defaultOSArch=`uname -m`
+fi
 
-case $OS in
-	"Linux")
+
+case $defaultOS in
+	"Linux" | "linux")
 		makefile="make_linux.mak"
 		defaultOS="linux"
-		case $MODEL in
+		case $defaultOSArch in
 			"x86_64")
 				defaultOSArch="x86_64"
 				defaultJava=DEFAULT_JAVA_EXEC
 				[ -d /bluebird/teamswt/swt-builddir/build/JRE/x64/jdk1.6.0_14 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/build/JRE/x64/jdk1.6.0_14"
 				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
-			i?86)
+			i?86 | "x86")
 				defaultOSArch="x86"
 				[ -d /bluebird/teamswt/swt-builddir/build/JRE/x32/jdk1.6.0_14 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/build/JRE/x32/jdk1.6.0_14"
 				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
@@ -123,7 +124,7 @@ case $OS in
 				;;
 		esac
 		;;
-	"AIX")
+	"AIX" | "aix")
 		makefile="make_aix.mak"
 		defaultOS="aix"
 		if [ -z "$defaultOSArch" ]; then
@@ -131,7 +132,7 @@ case $OS in
 		fi
 		[ -d /bluebird/teamswt/swt-builddir/JDKs/AIX/PPC64/j564/sdk ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/AIX/PPC64/j564/sdk"
 	;;
-	"HP-UX")
+	"HP-UX" | "hpux")
 		makefile="make_hpux.mak"
 		defaultOS="hpux"
 		case $defaultOSArch in
@@ -147,7 +148,7 @@ case $OS in
 		export PATH PKG_CONFIG_PATH
 		[ -d /opt/java1.5 ] && defaultJavaHome="/opt/java1.5"
 	;;
-	"SunOS")
+	"SunOS" | "solaris")
 		makefile="make_solaris.mak"
 		defaultOS="solaris"
 		OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
@@ -158,7 +159,7 @@ case $OS in
 		    PROC=`uname -p`
 		fi
 		case ${PROC} in
-			"i386")
+			"i386" | "x86")
 				defaultOSArch="x86"
 				[ -d /bluebird/teamswt/swt-builddir/build/JRE/Solaris_x86/jdk1.6.0_14 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/build/JRE/Solaris_x86/jdk1.6.0_14"
 				CC=cc
