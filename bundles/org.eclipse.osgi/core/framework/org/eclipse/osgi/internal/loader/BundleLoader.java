@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -548,7 +548,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// skip the first class; it is the ClassContext class
 		for (int i = 1; i < context.length; i++)
 			// find the first class in the context which is not BundleLoader or instanceof ClassLoader
-			if (context[i] != BundleLoader.class && !ClassLoader.class.isAssignableFrom(context[i])) {
+			if (context[i] != BundleLoader.class && !ClassLoader.class.isAssignableFrom(context[i]) && !context[i].getName().equals("java.lang.J9VMInternals")) { //$NON-NLS-1$
 				// only find in parent if the class is not "Class" (Class#forName case) or if the class is not loaded with a BundleClassLoader
 				ClassLoader cl = getClassLoader(context[i]);
 				if (cl != FW_CLASSLOADER) { // extra check incase an adaptor adds another class into the stack besides an instance of ClassLoader
