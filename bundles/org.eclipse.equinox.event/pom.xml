@@ -24,17 +24,4 @@
   <artifactId>org.eclipse.equinox.event</artifactId>
   <version>1.3.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.5</source>
-          <target>jsr14</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
