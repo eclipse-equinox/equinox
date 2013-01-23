@@ -26,6 +26,7 @@ public class AllTests {
 		suite.addTestSuite(UnresolvedBundleTest.class);
 		suite.addTestSuite(GetDefaultValueTest.class);
 		suite.addTestSuite(IconTest.class);
+		suite.addTestSuite(Bug395196Test.class);
 		return suite;
 	}
 }

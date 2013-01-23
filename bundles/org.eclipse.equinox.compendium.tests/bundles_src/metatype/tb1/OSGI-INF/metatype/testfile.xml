@@ -53,10 +53,19 @@
 		<AD id="23"	cardinality="4"		default=",,"	type="String"/>		<!-- String[3]{"","",""} -->
 		<AD id="24"	cardinality="-8"	default=",,,,"	type="Password"/>	<!-- String[5]{"","","","",""} -->
 	</OCD>
+	<ocd id="ocd3" name="testRejectDefaultValueWhenNotAnOption">
+		<ad id="ocd3-ad1" default="" type="String">
+			<option label="Male" value="male"/>
+			<option label="Female" value="female"/>
+		</ad>
+	</ocd>
 	<Designate pid="org.eclipse.equinox.metatype.tests.tb1">
 		<Object ocdref="ocd1"/>
 	</Designate>
 	<Designate pid="org.eclipse.equinox.metatype.tests.tb1.getDefaultValues">
 		<Object ocdref="ocd2"/>
+	</Designate>
+	<Designate pid="org.eclipse.equinox.metatype.tests.tb1.testRejectDefaultValueWhenNotAnOption">
+		<Object ocdref="ocd3"/>
 	</Designate>
 </md:MetaData>
