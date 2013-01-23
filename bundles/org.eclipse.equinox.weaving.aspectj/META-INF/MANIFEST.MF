@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: WeavingService Plug-in (Incubation)
 Bundle-SymbolicName: org.eclipse.equinox.weaving.aspectj
-Bundle-Version: 1.0.100.qualifier
+Bundle-Version: 1.0.200.qualifier
 Bundle-Activator: org.eclipse.equinox.weaving.aspectj.AspectJWeavingActivator
 Import-Package: org.aspectj.weaver;version="1.6.3";resolution:=optional,
  org.aspectj.weaver.loadtime;version="1.6.3";resolution:=optional,
