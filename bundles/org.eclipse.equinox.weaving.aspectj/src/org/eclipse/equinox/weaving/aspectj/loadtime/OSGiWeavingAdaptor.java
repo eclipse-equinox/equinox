@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,7 +79,8 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
         }
 
         /**
-         * Callback when we need to define a generated class in the JVM
+         * Callback when we need to define a generated class in the JVM (version
+         * for older AspectJ versions)
          */
         public void acceptClass(final String name, final byte[] bytes) {
             try {
@@ -90,6 +91,15 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
                 throwable.printStackTrace();
             }
             classesToBeDefined.offer(new GeneratedClass(name, bytes));
+        }
+
+        /**
+         * Callback when we need to define a generated class in the JVM (version
+         * for newer AspectJ versions, but we can ignore the originalBytes here)
+         */
+        public void acceptClass(final String name, final byte[] originalBytes,
+                final byte[] weavedBytes) {
+            acceptClass(name, weavedBytes);
         }
 
         public void defineGeneratedClasses() {
