@@ -109,6 +109,7 @@ public class EclipseStarter {
 	public static final String PROP_FRAMEWORK_SHAPE = "osgi.framework.shape"; //$NON-NLS-1$ //the shape of the fwk (jar, or folder)
 	public static final String PROP_NOSHUTDOWN = "osgi.noShutdown"; //$NON-NLS-1$
 	private static final String PROP_FORCED_RESTART = "osgi.forcedRestart"; //$NON-NLS-1$
+	private static final String PROP_IGNORE_USER_CONFIGURATION = "eclipse.ignoreUserConfiguration"; //$NON-NLS-1$
 
 	public static final String PROP_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 	public static final String PROP_EXITDATA = "eclipse.exitdata"; //$NON-NLS-1$
@@ -1127,6 +1128,8 @@ public class EclipseStarter {
 	}
 
 	private static void loadConfigurationInfo() {
+		if (Boolean.TRUE.toString().equals(System.getProperty(PROP_IGNORE_USER_CONFIGURATION)))
+			return;
 		Location configArea = LocationManager.getConfigurationLocation();
 		if (configArea == null)
 			return;
