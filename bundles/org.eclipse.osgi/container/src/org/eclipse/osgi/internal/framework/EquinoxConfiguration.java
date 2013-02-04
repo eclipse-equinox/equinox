@@ -176,6 +176,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public final static String CLASS_LOADER_TYPE_PARALLEL = "parallel"; //$NON-NLS-1$
 
 	public static final String PROP_FORCED_RESTART = "osgi.forcedRestart"; //$NON-NLS-1$
+	public static final String PROP_IGNORE_USER_CONFIGURATION = "eclipse.ignoreUserConfiguration"; //$NON-NLS-1$
 
 	private final static Collection<String> populateInitConfig = Arrays.asList(PROP_OSGI_ARCH, PROP_OSGI_OS, PROP_OSGI_WS, PROP_OSGI_NL, FRAMEWORK_OS_NAME, FRAMEWORK_OS_VERSION, FRAMEWORK_PROCESSOR, FRAMEWORK_LANGUAGE);
 

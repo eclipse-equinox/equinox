@@ -45,7 +45,7 @@
                 <phase>generate-resources</phase>
                 <configuration>
                   <target>
-                    <ant antfile="build.xml" dir="library/gtk/" target="build_eclipse_cbi" />
+                    <ant antfile="build.xml" dir="library/gtk/" target="build_eclipse" />
                   </target>
                 </configuration>
                 <goals>
@@ -98,7 +98,7 @@
                 <phase>generate-resources</phase>
                 <configuration>
                   <target>
-                    <ant antfile="build.xml" dir="library/gtk/" target="build_eclipse_cbi" />
+                    <ant antfile="build.xml" dir="library/gtk/" target="build_eclipse" />
                   </target>
                 </configuration>
                 <goals>
@@ -151,7 +151,7 @@
                 <phase>generate-resources</phase>
                 <configuration>
                   <target>
-                    <ant antfile="build.xml" dir="library/win32/" target="build_eclipse_cbi" />
+                    <ant antfile="build.xml" dir="library/win32/" target="build_eclipse" />
                   </target>
                 </configuration>
                 <goals>
@@ -204,7 +204,7 @@
                 <phase>generate-resources</phase>
                 <configuration>
                   <target>
-                    <ant antfile="build.xml" dir="library/win32/" target="build_eclipse_cbi" />
+                    <ant antfile="build.xml" dir="library/win32/" target="build_eclipse" />
                   </target>
                 </configuration>
                 <goals>
@@ -257,7 +257,7 @@
                 <phase>generate-resources</phase>
                 <configuration>
                   <target>
-                    <ant antfile="build.xml" dir="library/carbon/" target="build_eclipse_cbi" />
+                    <ant antfile="build.xml" dir="library/carbon/" target="build_eclipse" />
                   </target>
                 </configuration>
                 <goals>

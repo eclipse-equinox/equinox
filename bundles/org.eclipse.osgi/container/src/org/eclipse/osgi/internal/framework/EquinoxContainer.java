@@ -106,6 +106,8 @@ public class EquinoxContainer {
 	}
 
 	private static void loadConfig(EquinoxConfiguration equinoxConfig, EquinoxLocations equinoxLocations) {
+		if (Boolean.TRUE.toString().equals(equinoxConfig.getConfiguration(EquinoxConfiguration.PROP_IGNORE_USER_CONFIGURATION)))
+			return;
 		Location configArea = equinoxLocations.getConfigurationLocation();
 		if (configArea == null)
 			return;

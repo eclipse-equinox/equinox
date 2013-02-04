@@ -27,6 +27,10 @@
   <version>3.8.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <properties>
+    <tycho.scmUrl>scm:git:git://git.eclipse.org/gitroot/equinox/rt.equinox.framework.git</tycho.scmUrl>
+  </properties>
+
   <modules>
     <module>bundles/org.eclipse.osgi</module>
     <module>bundles/org.eclipse.osgi.services</module>
@@ -40,7 +44,7 @@
     <module>bundles/org.eclipse.equinox.launcher.cocoa.macosx.x86_64</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.aix.ppc</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.aix.ppc64</module>
-    <module>bundles/org.eclipse.equinox.launcher.gtk.hpux.ia64_32</module>
+    <module>bundles/org.eclipse.equinox.launcher.gtk.hpux.ia64</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.linux.ppc</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.linux.ppc64</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.linux.s390</module>
