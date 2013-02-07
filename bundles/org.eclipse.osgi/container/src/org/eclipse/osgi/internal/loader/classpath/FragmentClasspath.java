@@ -21,9 +21,9 @@ import org.eclipse.osgi.storage.BundleInfo.Generation;
  * @since 3.2
  */
 public class FragmentClasspath {
-	private Generation generation;
+	private final Generation generation;
 	// Note that PDE has internal dependency on this field type/name (bug 267238)
-	private ClasspathEntry[] entries;
+	private final ClasspathEntry[] entries;
 
 	public FragmentClasspath(Generation generation, ClasspathEntry[] entries) {
 		this.generation = generation;

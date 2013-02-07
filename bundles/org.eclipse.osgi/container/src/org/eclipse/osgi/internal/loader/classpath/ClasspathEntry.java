@@ -11,8 +11,7 @@
 
 package org.eclipse.osgi.internal.loader.classpath;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.security.ProtectionDomain;
 import java.util.jar.Manifest;
 import org.eclipse.osgi.framework.util.KeyedElement;
@@ -30,13 +29,25 @@ import org.eclipse.osgi.storage.bundlefile.BundleFile;
  * @since 3.2
  */
 public class ClasspathEntry {
+	static final class PDEData {
+		final String fileName;
+		final String symbolicName;
+
+		PDEData(BundleFile bundlefile, String symbolicName) {
+			File file = bundlefile.getBaseFile();
+			this.fileName = file == null ? null : file.getAbsolutePath();
+			this.symbolicName = symbolicName;
+		}
+	}
+
 	private final BundleFile bundlefile;
 	private final ProtectionDomain domain;
 	private final Manifest manifest;
 	private KeyedHashSet userObjects = null;
 
 	// TODO Note that PDE has internal dependency on this field type/name (bug 267238)
-	//private volatile BaseData data;
+	@SuppressWarnings("unused")
+	private final PDEData data;
 
 	/**
 	 * Constructs a ClasspathElement with the specified bundlefile and domain
@@ -46,6 +57,7 @@ public class ClasspathEntry {
 	public ClasspathEntry(BundleFile bundlefile, ProtectionDomain domain, Generation generation) {
 		this.bundlefile = bundlefile;
 		this.domain = domain;
+		this.data = new PDEData(bundlefile, generation.getRevision().getSymbolicName());
 		this.manifest = getManifest(bundlefile, generation);
 	}
 
