@@ -18,12 +18,12 @@ import java.net.URL;
 import java.security.*;
 import java.util.ArrayList;
 import java.util.List;
-import org.eclipse.osgi.container.ModuleCapability;
-import org.eclipse.osgi.container.ModuleRevision;
+import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
-import org.osgi.framework.BundleException;
+import org.osgi.framework.*;
+import org.osgi.resource.Capability;
 
 public class FrameworkExtensionInstaller {
 	private static final ClassLoader CL = FrameworkExtensionInstaller.class.getClassLoader();
@@ -65,15 +65,15 @@ public class FrameworkExtensionInstaller {
 		this.configuration = configuraiton;
 	}
 
-	public void addExtensionContent(final ModuleRevision revision) throws BundleException {
+	public void addExtensionContent(final ModuleRevision revision, final Module systemModule) throws BundleException {
 		if (System.getSecurityManager() == null) {
-			addExtensionContent0(revision);
+			addExtensionContent0(revision, systemModule);
 		} else {
 			try {
 				AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 					@Override
 					public Object run() throws BundleException {
-						addExtensionContent0(revision);
+						addExtensionContent0(revision, systemModule);
 						return null;
 					}
 				});
@@ -83,7 +83,7 @@ public class FrameworkExtensionInstaller {
 		}
 	}
 
-	void addExtensionContent0(ModuleRevision revision) throws BundleException {
+	void addExtensionContent0(ModuleRevision revision, Module systemModule) throws BundleException {
 		if (CL == null || ADD_FWK_URL_METHOD == null) {
 			return;
 		}
@@ -108,6 +108,12 @@ public class FrameworkExtensionInstaller {
 			CL.loadClass("thisIsNotAClass"); //$NON-NLS-1$
 		} catch (ClassNotFoundException e) {
 			// do nothing
+		}
+		if (systemModule != null) {
+			BundleContext systemContext = systemModule.getBundle().getBundleContext();
+			if (systemContext != null) {
+				startExtensionActivator(revision, systemContext);
+			}
 		}
 	}
 
@@ -142,4 +148,24 @@ public class FrameworkExtensionInstaller {
 		}
 		return results.toArray(new File[results.size()]);
 	}
+
+	public void startExtensionActivator(ModuleRevision extensionRevision, BundleContext context) {
+		List<Capability> metadata = extensionRevision.getCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
+		if (metadata.isEmpty()) {
+			return;
+		}
+
+		String activatorName = (String) metadata.get(0).getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATOR);
+		if (activatorName == null) {
+			return;
+		}
+		try {
+			Class<?> activatorClass = Class.forName(activatorName);
+			BundleActivator activator = (BundleActivator) activatorClass.newInstance();
+			activator.start(context);
+		} catch (Exception e) {
+			// TODO should log something
+		}
+	}
+
 }

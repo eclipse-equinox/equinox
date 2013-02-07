@@ -14,6 +14,7 @@ package org.eclipse.osgi.internal.framework;
 import java.util.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParserFactory;
+import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.hookregistry.ActivatorHookFactory;
@@ -31,6 +32,7 @@ import org.eclipse.osgi.storage.BundleLocalizationImpl;
 import org.eclipse.osgi.storage.url.BundleResourceHandler;
 import org.eclipse.osgi.storage.url.BundleURLConverter;
 import org.osgi.framework.*;
+import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -97,7 +99,7 @@ public class SystemBundleActivator implements BundleActivator {
 		register(bc, SAXParserFactory.class, new ParsingService(true, setTccl), false, null);
 		register(bc, DocumentBuilderFactory.class, new ParsingService(false, setTccl), false, null);
 
-		startHookActivators(bundle.getEquinoxContainer(), bc);
+		startExtensionActivators(bundle.getEquinoxContainer(), bc);
 	}
 
 	private void installSecurityManager(EquinoxConfiguration configuration) throws BundleException {
@@ -172,7 +174,9 @@ public class SystemBundleActivator implements BundleActivator {
 		}
 	}
 
-	private void startHookActivators(EquinoxContainer container, BundleContext context) throws Exception {
+	private void startExtensionActivators(EquinoxContainer container, BundleContext context) throws Exception {
+		// First start the hook registry activators
+		// TODO not sure we really need these anymore
 		HookRegistry hookRegistry = container.getConfiguration().getHookRegistry();
 		List<ActivatorHookFactory> activatorHookFactories = hookRegistry.getActivatorHookFactories();
 		hookActivators = new ArrayList<BundleActivator>(activatorHookFactories.size());
@@ -180,6 +184,16 @@ public class SystemBundleActivator implements BundleActivator {
 			BundleActivator activatorHook = activatorFactory.createActivator();
 			activatorHook.start(context);
 			hookActivators.add(activatorHook);
+		}
+		// start the extension bundle activators.  In Equinox we let
+		// framework extensions define Bundle-Activator headers.
+		ModuleWiring systemWiring = (ModuleWiring) context.getBundle().adapt(BundleWiring.class);
+		if (systemWiring != null) {
+			List<ModuleWire> extensionWires = systemWiring.getProvidedModuleWires(HostNamespace.HOST_NAMESPACE);
+			for (ModuleWire extensionWire : extensionWires) {
+				ModuleRevision extensionRevision = extensionWire.getRequirer();
+				container.getStorage().getExtensionInstaller().startExtensionActivator(extensionRevision, context);
+			}
 		}
 	}
 

@@ -159,7 +159,7 @@ public class Storage {
 		}
 		for (ModuleWire hostWire : systemWiring.getProvidedModuleWires(HostNamespace.HOST_NAMESPACE)) {
 			try {
-				getExtensionInstaller().addExtensionContent(hostWire.getRequirer());
+				getExtensionInstaller().addExtensionContent(hostWire.getRequirer(), null);
 			} catch (BundleException e) {
 				getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, e.getMessage(), e);
 			}

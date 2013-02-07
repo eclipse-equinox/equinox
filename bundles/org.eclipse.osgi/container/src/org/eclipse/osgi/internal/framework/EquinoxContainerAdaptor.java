@@ -112,9 +112,10 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 					ModuleWiring wiring = current.getWiring();
 					if (wiring != null) {
 						List<ModuleWire> hosts = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
-						if (!hosts.isEmpty() && hosts.get(0).getProvider().getRevisions().getModule().getId().longValue() == 0) {
+						Module host = hosts.isEmpty() ? null : hosts.get(0).getProvider().getRevisions().getModule();
+						if (host != null && host.getId().longValue() == 0) {
 							try {
-								storage.getExtensionInstaller().addExtensionContent(current);
+								storage.getExtensionInstaller().addExtensionContent(current, host);
 							} catch (BundleException e) {
 								publishContainerEvent(ContainerEvent.ERROR, module, e);
 							}

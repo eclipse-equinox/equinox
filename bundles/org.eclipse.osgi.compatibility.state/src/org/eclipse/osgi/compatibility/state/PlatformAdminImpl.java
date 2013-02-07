@@ -17,23 +17,24 @@ import org.eclipse.osgi.internal.module.ResolverImpl;
 import org.eclipse.osgi.internal.resolver.StateHelperImpl;
 import org.eclipse.osgi.internal.resolver.StateObjectFactoryImpl;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
+import org.osgi.framework.*;
 
 public class PlatformAdminImpl implements PlatformAdmin {
-	private final StateHelper stateHelper = new StateHelperImpl();
 	private final StateObjectFactory factory = new StateObjectFactoryImpl();
 	private final Object monitor = new Object();
 	private EquinoxContainer equinoxContainer;
 	private State systemState;
+	private ServiceRegistration<PlatformAdmin> reg;
 
-	@SuppressWarnings("unused")
-	// this is used by DS to activate us
-	private void activate(BundleContext context) {
+	void start(BundleContext context) {
 		synchronized (this.monitor) {
 			equinoxContainer = ((BundleContextImpl) context).getContainer();
 		}
-		context.registerService(PlatformAdmin.class, this, null);
+		this.reg = context.registerService(PlatformAdmin.class, this, null);
+	}
+
+	void stop(BundleContext context) {
+		this.reg.unregister();
 	}
 
 	@Override

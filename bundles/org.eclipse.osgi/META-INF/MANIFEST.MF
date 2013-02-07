@@ -82,4 +82,3 @@ Eclipse-SystemBundle: true
 Main-Class: org.eclipse.core.runtime.adaptor.EclipseStarter
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BundleShape: jar
-Service-Component: OSGI-INF/PlatformAdmin.xml
