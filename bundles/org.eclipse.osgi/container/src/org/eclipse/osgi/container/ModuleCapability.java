@@ -62,7 +62,7 @@ public final class ModuleCapability implements BundleCapability {
 	}
 
 	public void setTransientAttrs(Map<String, ?> transientAttrs) {
-		if (transientAttrs == null) {
+		if (this.transientAttrs == null) {
 			throw new UnsupportedOperationException(namespace + ": namespace does not support transient attributes."); //$NON-NLS-1$
 		}
 		this.transientAttrs.clear();
