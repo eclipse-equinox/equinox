@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,11 +39,13 @@ public class EclipseLogHook implements HookConfigurator, AdaptorHook {
 	private final EclipseLogWriter perfWriter;
 
 	public EclipseLogHook() {
-		String logFileProp = FrameworkProperties.getProperty(EclipseStarter.PROP_LOGFILE);
-		boolean enabled = "true".equals(FrameworkProperties.getProperty(PROP_LOG_ENABLED, "true")); //$NON-NLS-1$ //$NON-NLS-2$
-		if (logFileProp != null) {
-			logWriter = new EclipseLogWriter(new File(logFileProp), EQUINOX_LOGGER_NAME, enabled);
-		} else {
+		String logFilePath = FrameworkProperties.getProperty(EclipseStarter.PROP_LOGFILE);
+		if (logFilePath == null) {
+			logFilePath = Long.toString(System.currentTimeMillis()) + EclipseLogHook.LOG_EXT;
+		}
+
+		File logFile = new File(logFilePath);
+		if (!logFile.isAbsolute()) {
 			Location location = LocationManager.getConfigurationLocation();
 			File configAreaDirectory = null;
 			if (location != null)
@@ -51,21 +53,25 @@ public class EclipseLogHook implements HookConfigurator, AdaptorHook {
 				configAreaDirectory = new File(location.getURL().getFile());
 
 			if (configAreaDirectory != null) {
-				String logFileName = Long.toString(System.currentTimeMillis()) + EclipseLogHook.LOG_EXT;
-				File logFile = new File(configAreaDirectory, logFileName);
-				FrameworkProperties.setProperty(EclipseStarter.PROP_LOGFILE, logFile.getAbsolutePath());
-				logWriter = new EclipseLogWriter(logFile, EQUINOX_LOGGER_NAME, enabled);
-			} else
-				logWriter = new EclipseLogWriter((Writer) null, EQUINOX_LOGGER_NAME, enabled);
+				logFile = new File(configAreaDirectory, logFilePath);
+			} else {
+				logFile = null;
+
+			}
 		}
 
-		File logFile = logWriter.getFile();
+		boolean enabled = "true".equals(FrameworkProperties.getProperty(PROP_LOG_ENABLED, "true")); //$NON-NLS-1$ //$NON-NLS-2$
 		if (logFile != null) {
+			FrameworkProperties.setProperty(EclipseStarter.PROP_LOGFILE, logFile.getAbsolutePath());
+			logWriter = new EclipseLogWriter(logFile, EQUINOX_LOGGER_NAME, enabled);
+
 			File perfLogFile = new File(logFile.getParentFile(), "performance.log"); //$NON-NLS-1$
 			perfWriter = new EclipseLogWriter(perfLogFile, PERF_LOGGER_NAME, true);
 		} else {
+			logWriter = new EclipseLogWriter((Writer) null, EQUINOX_LOGGER_NAME, enabled);
 			perfWriter = new EclipseLogWriter((Writer) null, PERF_LOGGER_NAME, true);
 		}
+
 		if ("true".equals(FrameworkProperties.getProperty(EclipseStarter.PROP_CONSOLE_LOG))) //$NON-NLS-1$
 			logWriter.setConsoleLog(true);
 		logServiceManager = new LogServiceManager(logWriter, perfWriter);
