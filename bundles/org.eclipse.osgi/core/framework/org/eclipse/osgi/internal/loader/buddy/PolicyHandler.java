@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,7 +51,7 @@ public class PolicyHandler implements SynchronousBundleListener {
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();
 			if (!token.equals("")) //$NON-NLS-1$
-				list.add(token);
+				list.add(token.toLowerCase());
 		}
 		return list.isEmpty() ? new Object[0] : list.toArray(new Object[list.size()]);
 	}
@@ -91,7 +91,9 @@ public class PolicyHandler implements SynchronousBundleListener {
 					policiesSnapshot[policyOrder] = new SystemPolicy(policedLoader.getParentClassLoader());
 					return (IBuddyPolicy) policiesSnapshot[policyOrder];
 				}
-
+				// Not a valid buddy policy
+				policedLoader.getBundle().getFramework().publishFrameworkEvent(FrameworkEvent.ERROR, policedLoader.getBundle(), new RuntimeException("Invalid buddy policy: " + buddyName)); //$NON-NLS-1$
+				policiesSnapshot[policyOrder] = null;
 				//			//Buddy policy can be provided by service implementations
 				//			BundleContext fwkCtx = policedLoader.bundle.framework.systemBundle.context;
 				//			ServiceReference[] matchingBuddies = null;

@@ -1488,6 +1488,17 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	public void testBuddyClassLoadingInvalid() throws Exception {
+		Bundle invalidA = installer.installBundle("buddy.invalid.a"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {invalidA});
+		invalidA.getResource("doesNotExist");
+		try {
+			invalidA.loadClass("does.not.Exist");
+		} catch (ClassNotFoundException e) {
+			// expected
+		}
+	}
+
 	public void testBundleReference01() throws Exception {
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
 		Class clazz = test.loadClass("test1.Activator"); //$NON-NLS-1$
