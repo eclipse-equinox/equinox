@@ -71,8 +71,11 @@ static char * findLib(char * command);
 #define MAX_LOCATION_LENGTH 40 /* none of the jvmLocations strings should be longer than this */
 #define MAX_JVMLIB_LENGTH   15 /* none of the jvmLibs strings should be longer than this */
 static const char* jvmLocations[] = { "../lib/" JAVA_ARCH "/client",
-									  "../lib/" JAVA_ARCH "/server", "../jre/lib/" JAVA_ARCH "/client",
-									  "../jre/lib/" JAVA_ARCH "/server", NULL };
+									  "../lib/" JAVA_ARCH "/server",
+									  "../jre/lib/" JAVA_ARCH "/client",
+									  "../jre/lib/" JAVA_ARCH "/server", 
+									  "../jre/lib/client",
+									  "../jre/lib/server", NULL };
 static const char* jvmLibs[] = { "libjvm.dylib", "libjvm.jnilib", "libjvm.so", NULL };
 
 /* Define the window system arguments for the various Java VMs. */
@@ -474,43 +477,6 @@ char** getArgVM( char* vm )
 	return result;
 }
 
-char * getJavaVersion(char* command) {
-	FILE *fp;
-	char buffer[4096];
-	char *version = NULL, *firstChar;
-    int numChars = 0;
-	sprintf(buffer,"%s -version 2>&1", command);
-	fp = popen(buffer, "r");
-	if (fp == NULL) {
-		return NULL;
-	}
-	while (fgets(buffer, sizeof(buffer)-1, fp) != NULL) {
-		if (!version) {
-			firstChar = (char *) (strchr(buffer, '"') + 1);
-			if (firstChar != NULL)
-				numChars = (int)  (strrchr(buffer, '"') - firstChar);
-
-			/* Allocate a buffer and copy the version string into it. */
-			if (numChars > 0)
-			{
-				version = malloc( numChars + 1 );
-				strncpy(version, firstChar, numChars);
-				version[numChars] = '\0';
-			}
-		}
-		if (strstr(buffer, "Java HotSpot(TM)") || strstr(buffer, "OpenJDK")) {
-			isSUN = 1;
-			break;
-		}
-		if (strstr(buffer, "IBM") != NULL) {
-			isSUN = 0;
-			break;
-		}
-	}
-	pclose(fp);
-	return version;
-}
-
 char * getJavaHome() {
 	FILE *fp;
 	char path[4096];
@@ -534,8 +500,8 @@ char * getJavaHome() {
 
 char * findVMLibrary( char* command ) {
 	char *start, *end;
-	char *version;
-	int length, isJDK7;
+	char *version, *result, *cmd;
+	int length;
 	
 	/*check first to see if command already points to the library */
 	if (strcmp(command, JAVA_FRAMEWORK) == 0) {
@@ -561,29 +527,20 @@ char * findVMLibrary( char* command ) {
 			free(version);
 		} 
 	}
-	char *java_home = NULL, *cmd = command;
+	cmd = command;
 	if (strstr(cmd, "/JavaVM.framework/") != NULL && (strstr(cmd, "/Current/") != NULL || strstr(cmd, "/A/") != NULL)) {
-		java_home = cmd = getJavaHome();
+		cmd = getJavaHome();
 	}
-	version = getJavaVersion(cmd);
-	isJDK7 = version && versionCmp(version, "1.7.0") >= 0;
-	if (version) free(version);
-	if (isJDK7) {
-		start = strstr(cmd, "/Contents/");
-		if (start != NULL){
-			start[0] = 0;
-			return cmd;
-		}
-	}
-	if (java_home) free(java_home);
-	if (strstr(command, "/JavaVM.framework/") == NULL) {
-		char * lib = findLib(command);
+	result = JAVA_FRAMEWORK;
+	if (strstr(cmd, "/JavaVM.framework/") == NULL) {
+		char * lib = findLib(cmd);
 		if (lib != NULL) {
 			adjustLibraryPath(lib);
-			return lib;
+			result = lib;
 		}
 	}
-	return JAVA_FRAMEWORK;
+	if (cmd != command) free(cmd);
+	return result;
 }
 
 static char * findLib(char * command) {
