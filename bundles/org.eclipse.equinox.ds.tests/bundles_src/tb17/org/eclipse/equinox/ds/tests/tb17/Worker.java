@@ -12,6 +12,7 @@
 package org.eclipse.equinox.ds.tests.tb17;
 
 import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Properties;
 
 import org.eclipse.equinox.ds.tests.tbc.PropertiesProvider;
@@ -32,7 +33,7 @@ public class Worker implements PropertiesProvider, ComponentContextProvider {
 
     Object prop = properties.get(ComponentConstants.COMPONENT_NAME);
     if (prop != null) {
-      Properties serviceProps = new Properties();
+      Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
       serviceProps.put(ComponentConstants.COMPONENT_NAME, prop);
       sr = ctxt.getBundleContext().registerService(PropertiesProvider.class.getName(), this, serviceProps);
     }

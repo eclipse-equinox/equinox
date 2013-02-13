@@ -12,6 +12,7 @@
 package org.eclipse.equinox.ds.tests.tb16;
 
 import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Properties;
 
 import org.eclipse.equinox.ds.tests.tbc.PropertiesProvider;
@@ -31,7 +32,7 @@ public class TargetProperties implements PropertiesProvider, ComponentContextPro
 
     Object prop = properties.get("serial.num");
     if (prop != null) {
-      Properties serviceProps = new Properties();
+      Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
       serviceProps.put("serial.num", prop);
       sr = ctxt.getBundleContext().registerService(getClass().getName(), this, serviceProps);
     }
