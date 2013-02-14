@@ -38,6 +38,7 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.namespace.NativeNamespace;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
 
 public class Storage {
@@ -498,12 +499,12 @@ public class Storage {
 		StringBuilder result = new StringBuilder();
 
 		String systemCapabilities = equinoxConfig.getConfiguration(Constants.FRAMEWORK_SYSTEMCAPABILITIES);
-		if (systemCapabilities != null) {
+		if (systemCapabilities != null && systemCapabilities.trim().length() > 0) {
 			result.append(systemCapabilities).append(", "); //$NON-NLS-1$
 		}
 
 		String extraSystemCapabilities = equinoxConfig.getConfiguration(Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA);
-		if (extraSystemCapabilities != null) {
+		if (extraSystemCapabilities != null && extraSystemCapabilities.trim().length() > 0) {
 			result.append(extraSystemCapabilities).append(", "); //$NON-NLS-1$
 		}
 
@@ -561,7 +562,7 @@ public class Storage {
 		}
 
 		String extraSystemPackages = equinoxConfig.getConfiguration(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
-		if (extraSystemPackages != null) {
+		if (extraSystemPackages != null && extraSystemPackages.trim().length() > 0) {
 			if (result.length() > 0) {
 				result.append(", "); //$NON-NLS-1$
 			}
