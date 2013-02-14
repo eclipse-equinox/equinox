@@ -1,0 +1,12 @@
+*.obj
+eclipse.exe
+eclipse.res
+*.pdb
+*.exp
+*.lib
+eclipse_*.dll
+com_*.dll
+eclipsec.exe
+eclipsec.exe.manifest
+eclipse_*.dll.manifest
+eclipse.exe.manifest

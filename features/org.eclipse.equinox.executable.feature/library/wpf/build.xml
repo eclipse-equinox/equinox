@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project default="build_eclipse" basedir=".">
+
+<target name="build_eclipse">
+	<exec dir="." executable="${basedir}\build.bat">
+		<arg line="install"/>
+	</exec>
+	<eclipse.refreshLocal resource="org.eclipse.equinox.executable" depth="infinite" />		
+</target>
+
+<target name="clean">
+	<tstamp/>
+	<exec dir="." executable="${basedir}\build.bat">
+		<arg line="clean"/>
+	</exec>
+</target>
+
+</project>

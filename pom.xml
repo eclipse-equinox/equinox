@@ -37,7 +37,6 @@
     <module>bundles/org.eclipse.osgi.util</module>
     <module>bundles/org.eclipse.osgi/supplement</module>
     
-    <module>bundles/org.eclipse.equinox.executable</module>
     <module>bundles/org.eclipse.equinox.launcher</module>
     <module>bundles/org.eclipse.equinox.launcher.carbon.macosx</module>
     <module>bundles/org.eclipse.equinox.launcher.cocoa.macosx</module>
@@ -63,6 +62,7 @@
     <module>bundles/org.eclipse.equinox.launcher.wpf.win32.x86</module>
 
     <module>bundles/org.eclipse.osgi.tests</module>
+    <module>features/org.eclipse.equinox.executable.feature</module>
     <module>features/org.eclipse.equinox.core.sdk</module>
   </modules>
 

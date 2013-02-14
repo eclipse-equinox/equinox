@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?><?fileVersion 4.0.0?><cproject>
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="converted.config.1797282818">
+			<storageModule buildSystemId="org.eclipse.cdt.core.defaultConfigDataProvider" id="converted.config.1797282818" moduleId="org.eclipse.cdt.core.settings" name="convertedConfig">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.PE" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MachO" point="org.eclipse.cdt.core.BinaryParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+			<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
+				<buildTargets>
+					<target name="linux-all" path="library/gtk" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>make</buildCommand>
+						<buildArguments>-f make_linux.mak DEFAULT_OS_ARCH=x86_64 JAVA_HOME=/usr/java/ibm-150</buildArguments>
+						<buildTarget>all</buildTarget>
+						<stopOnError>false</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+						<runAllBuilders>true</runAllBuilders>
+					</target>
+					<target name="clean" path="library/gtk" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>make</buildCommand>
+						<buildArguments>-f make_linux.mak</buildArguments>
+						<buildTarget>clean</buildTarget>
+						<stopOnError>false</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+						<runAllBuilders>true</runAllBuilders>
+					</target>
+					<target name="all" path="library/carbon" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>make</buildCommand>
+						<buildArguments>-f make_macosx.mak</buildArguments>
+						<buildTarget>all</buildTarget>
+						<stopOnError>false</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+						<runAllBuilders>true</runAllBuilders>
+					</target>
+					<target name="clean" path="library/carbon" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>make</buildCommand>
+						<buildArguments>-f make_macosx.mak</buildArguments>
+						<buildTarget>clean</buildTarget>
+						<stopOnError>false</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+						<runAllBuilders>true</runAllBuilders>
+					</target>
+					<target name="all-mingw" path="library/win32" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>make</buildCommand>
+						<buildArguments>-f make_mingw.mak JAVA_HOME=C:/Dev/Java/IBM-1.6.0-20090519-SR5</buildArguments>
+						<buildTarget>all</buildTarget>
+						<stopOnError>false</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+						<runAllBuilders>true</runAllBuilders>
+					</target>
+					<target name="clean" path="library/win32" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>make</buildCommand>
+						<buildArguments>-f make_mingw.mak</buildArguments>
+						<buildTarget>clean</buildTarget>
+						<stopOnError>false</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+						<runAllBuilders>true</runAllBuilders>
+					</target>
+					<target name="linux-all" path="library/motif" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>make</buildCommand>
+						<buildArguments>-f make_linux.mak JAVA_HOME=/usr/java/1.5 DEFAULT_WS=motif MOTIF_HOME=/eclipse/motif21</buildArguments>
+						<buildTarget>all</buildTarget>
+						<stopOnError>false</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+						<runAllBuilders>true</runAllBuilders>
+					</target>
+					<target name="clean" path="library/motif" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>make</buildCommand>
+						<buildArguments>-f make_linux.mak</buildArguments>
+						<buildTarget>clean</buildTarget>
+						<stopOnError>false</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+						<runAllBuilders>true</runAllBuilders>
+					</target>
+				</buildTargets>
+			</storageModule>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile"/>
+		<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
+			<buildOutputProvider>
+				<openAction enabled="true" filePath=""/>
+				<parser enabled="true"/>
+			</buildOutputProvider>
+			<scannerInfoProvider id="specsFile">
+				<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+				<parser enabled="true"/>
+			</scannerInfoProvider>
+		</profile>
+		<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile">
+			<buildOutputProvider>
+				<openAction enabled="false" filePath=""/>
+				<parser enabled="true"/>
+			</buildOutputProvider>
+			<scannerInfoProvider id="makefileGenerator">
+				<runAction arguments="-f ${project_name}_scd.mk" command="make" useDefault="true"/>
+				<parser enabled="false"/>
+			</scannerInfoProvider>
+		</profile>
+		<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfile">
+			<buildOutputProvider>
+				<openAction enabled="false" filePath=""/>
+				<parser enabled="true"/>
+			</buildOutputProvider>
+			<scannerInfoProvider id="specsFile">
+				<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+				<parser enabled="false"/>
+			</scannerInfoProvider>
+		</profile>
+		<profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfile">
+			<buildOutputProvider>
+				<openAction enabled="false" filePath=""/>
+				<parser enabled="true"/>
+			</buildOutputProvider>
+			<scannerInfoProvider id="specsFile">
+				<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+				<parser enabled="false"/>
+			</scannerInfoProvider>
+		</profile>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.pathentry">
+		<pathentry kind="mac" name="JNIEXPORT" path="" value=""/>
+		<pathentry kind="mac" name="JNICALL" path="" value=""/>
+		<pathentry include="/usr/X11R6/include" kind="inc" path="" system="true"/>
+		<pathentry include="/opt/gnome/include/gtk-2.0" kind="inc" path="" system="true"/>
+		<pathentry include="/opt/gnome/include/glib-2.0" kind="inc" path="" system="true"/>
+		<pathentry include="/usr/include/gtk-2.0" kind="inc" path="" system="true"/>
+		<pathentry include="/usr/lib64/gtk-2.0/include" kind="inc" path="" system="true"/>
+		<pathentry include="/usr/include/atk-1.0" kind="inc" path="" system="true"/>
+		<pathentry include="/usr/include/glib-2.0 " kind="inc" path="" system="true"/>
+		<pathentry include="/usr/lib64/glib-2.0/include" kind="inc" path="" system="true"/>
+		<pathentry kind="src" path=""/>
+		<pathentry kind="out" path=""/>
+		<pathentry kind="con" path="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO"/>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+</cproject>
