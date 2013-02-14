@@ -312,12 +312,14 @@ public class ModuleDatabase {
 		checkWrite();
 
 		String name = revision.getSymbolicName();
-		Collection<ModuleRevision> sameName = revisionByName.get(name);
-		if (sameName == null) {
-			sameName = new ArrayList<ModuleRevision>(1);
-			revisionByName.put(name, sameName);
+		if (name != null) {
+			Collection<ModuleRevision> sameName = revisionByName.get(name);
+			if (sameName == null) {
+				sameName = new ArrayList<ModuleRevision>(1);
+				revisionByName.put(name, sameName);
+			}
+			sameName.add(revision);
 		}
-		sameName.add(revision);
 	}
 
 	/**
@@ -381,13 +383,7 @@ public class ModuleDatabase {
 		try {
 			ModuleRevision oldRevision = module.getCurrentRevision();
 			ModuleRevision newRevision = builder.addRevision(module, revisionInfo);
-			String name = newRevision.getSymbolicName();
-			Collection<ModuleRevision> sameName = revisionByName.get(name);
-			if (sameName == null) {
-				sameName = new ArrayList<ModuleRevision>(1);
-				revisionByName.put(name, sameName);
-			}
-			sameName.add(newRevision);
+			addToRevisionByName(newRevision);
 			addCapabilities(newRevision);
 
 			// remove the old revision by name
