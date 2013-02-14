@@ -950,9 +950,8 @@ final class ModuleResolver {
 			if (versionCompare != 0)
 				return versionCompare;
 
-			// We assume all resources here come from us and are ModuleRevision objects
-			ModuleRevision m1 = (ModuleRevision) c1.getResource();
-			ModuleRevision m2 = (ModuleRevision) c2.getResource();
+			ModuleRevision m1 = getModuleRevision(c1);
+			ModuleRevision m2 = getModuleRevision(c2);
 			Long id1 = m1.getRevisions().getModule().getId();
 			Long id2 = m2.getRevisions().getModule().getId();
 
@@ -965,6 +964,19 @@ final class ModuleResolver {
 				return index2 - index1;
 			}
 			return id1.compareTo(id2);
+		}
+
+		ModuleRevision getModuleRevision(Capability c) {
+			// We assume all capabilities here either come from us and have ModuleRevision resources or
+			// they are HostedCapabilities which have ModuleRevision resources as the host revision
+			if (c instanceof HostedCapability) {
+				c = ((HostedCapability) c).getDeclaredCapability();
+			}
+			if (c instanceof ModuleCapability) {
+				return ((ModuleCapability) c).getRevision();
+			}
+			// TODO is there some bug in the resolver?
+			return null;
 		}
 	}
 }
