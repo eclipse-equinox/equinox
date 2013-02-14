@@ -473,7 +473,17 @@ public class Storage {
 			}
 		}
 		if (generation.getBundleInfo().getBundleId() != 0) {
-			return OSGiManifestBuilderFactory.createBuilder(mapHeaders);
+			ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(mapHeaders);
+			if ((builder.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+				for (ModuleRevisionBuilder.GenericInfo reqInfo : builder.getRequirements()) {
+					if (HostNamespace.HOST_NAMESPACE.equals(reqInfo.getNamespace())) {
+						if (HostNamespace.EXTENSION_BOOTCLASSPATH.equals(reqInfo.getDirectives().get(HostNamespace.REQUIREMENT_EXTENSION_DIRECTIVE))) {
+							throw new BundleException("Boot classpath extensions are not supported.", BundleException.UNSUPPORTED_OPERATION, new UnsupportedOperationException()); //$NON-NLS-1$
+						}
+					}
+				}
+			}
+			return builder;
 		}
 		// First we must make sure the VM profile has been loaded
 		loadVMProfile(generation);
