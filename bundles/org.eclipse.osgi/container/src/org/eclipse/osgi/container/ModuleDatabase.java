@@ -1038,7 +1038,7 @@ public class ModuleDatabase {
 			// prime the object table with all the required wires
 			out.writeInt(wirings.size());
 			for (ModuleWiring wiring : wirings.values()) {
-				List<ModuleWire> requiredWires = wiring.getRequiredModuleWires(null);
+				List<ModuleWire> requiredWires = wiring.getPersistentRequiredWires();
 				out.writeInt(requiredWires.size());
 				for (ModuleWire wire : requiredWires) {
 					writeWire(wire, out, objectTable);
