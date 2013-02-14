@@ -344,12 +344,12 @@ public final class ModuleContainer {
 					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
 				}
 			}
-			moduleDatabase.uninstall(module);
 			if (Module.RESOLVED_SET.contains(previousState)) {
 				// set the state to installed and publish unresolved event
 				module.setState(State.INSTALLED);
 				adaptor.publishModuleEvent(ModuleEvent.UNRESOLVED, module, module);
 			}
+			moduleDatabase.uninstall(module);
 			module.setState(State.UNINSTALLED);
 		} finally {
 			module.unlockStateChange(ModuleEvent.UNINSTALLED);
