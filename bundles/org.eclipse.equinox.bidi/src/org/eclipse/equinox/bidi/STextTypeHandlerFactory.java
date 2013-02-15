@@ -28,13 +28,52 @@ import org.eclipse.equinox.bidi.internal.STextTypesCollector;
  * <p>
  * The {@link #getHandler} method in this class can be used to get a 
  * structured text handler reference for one of the handlers defined in this
- * package or for additional structured text handlers registered by plug-ins.
+ * package or for additional structured text handlers registered by plug-ins via
+ * the <code>org.eclipse.equinox.bidi.bidiTypes</code> extension point.
  * Text handler references can be used when invoking 
  * {@link STextExpertFactory#getStatefulExpert(STextTypeHandler, STextEnvironment)}.
+ * <p>
+ * This class can be used without OSGi running, but only the structured text types declared
+ * in {@link STextTypeHandlerFactory} and as string constants in this class are available in that mode.
+ * </p>
  *  
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
-final public class STextTypeHandlerFactory {
+public final class STextTypeHandlerFactory {
+
+	/**
+	 * Structured text handler identifier for comma-delimited lists, such as:
+	 * <pre>
+	 *  part1,part2,part3
+	 * </pre>
+	 */
+	public static final String COMMA_DELIMITED = "comma"; //$NON-NLS-1$
+
+	/**
+	 * Structured text handler identifier for e-mail addresses.
+	 */
+	public static final String EMAIL = "email"; //$NON-NLS-1$
+
+	/**
+	 * Structured text handler identifier for directory and file paths.
+	 */
+	public static final String FILE = "file"; //$NON-NLS-1$
+
+	/**
+	 * Structured text handler identifier for Java code, 
+	 * possibly spanning multiple lines.
+	 */
+	public static final String JAVA = "java"; //$NON-NLS-1$
+
+	/**
+	 *  Structured text handler identifier for basic arithmetic expressions.
+	 *  <p>
+	 *  Currently supported operators are: <code>+-/*()=</code>
+	 *  </p></p>
+	 *  This set my be extended in the future.
+	 *  <p>
+	 */
+	public static final String MATH = "math"; //$NON-NLS-1$
 
 	/**
 	 * Structured text handler identifier for property file statements. It expects the following format:
@@ -43,6 +82,26 @@ final public class STextTypeHandlerFactory {
 	 * </pre>
 	 */
 	public static final String PROPERTY = "property"; //$NON-NLS-1$
+
+	/**
+	 * Structured text handler identifier for regular expressions, 
+	 * possibly spanning multiple lines.
+	 */
+	public static final String REGEXP = "regex"; //$NON-NLS-1$
+
+	/**
+	 * Structured text handler identifier for SQL statements, 
+	 * possibly spanning multiple lines.
+	 */
+	public static final String SQL = "sql"; //$NON-NLS-1$
+
+	/**
+	 * Structured text handler identifier for strings with the following format:
+	 * <pre>
+	 *  system(user)
+	 * </pre>
+	 */
+	public static final String SYSTEM_USER = "system"; //$NON-NLS-1$
 
 	/**
 	 * Structured text handler identifier for compound names. It expects text to be made of one or more 
@@ -54,64 +113,16 @@ final public class STextTypeHandlerFactory {
 	public static final String UNDERSCORE = "underscore"; //$NON-NLS-1$
 
 	/**
-	 * Structured text handler identifier for comma-delimited lists, such as:
-	 * <pre>
-	 *  part1,part2,part3
-	 * </pre>
-	 */
-	public static final String COMMA_DELIMITED = "comma"; //$NON-NLS-1$
-
-	/**
-	 * Structured text handler identifier for strings with the following format:
-	 * <pre>
-	 *  system(user)
-	 * </pre>
-	 */
-	public static final String SYSTEM_USER = "system"; //$NON-NLS-1$
-
-	/**
-	 * Structured text handler identifier for directory and file paths.
-	 */
-	public static final String FILE = "file"; //$NON-NLS-1$
-
-	/**
-	 * Structured text handler identifier for e-mail addresses.
-	 */
-	public static final String EMAIL = "email"; //$NON-NLS-1$
-
-	/**
 	 * Structured text handler identifier for URLs.
 	 */
 	public static final String URL = "url"; //$NON-NLS-1$
-
-	/**
-	 * Structured text handler identifier for regular expressions, 
-	 * possibly spanning multiple lines.
-	 */
-	public static final String REGEXP = "regex"; //$NON-NLS-1$
 
 	/**
 	 * Structured text handler identifier for XPath expressions.
 	 */
 	public static final String XPATH = "xpath"; //$NON-NLS-1$
 
-	/**
-	 * Structured text handler identifier for Java code, 
-	 * possibly spanning multiple lines.
-	 */
-	public static final String JAVA = "java"; //$NON-NLS-1$
-
-	/**
-	 * Structured text handler identifier for SQL statements, 
-	 * possibly spanning multiple lines.
-	 */
-	public static final String SQL = "sql"; //$NON-NLS-1$
-
-	/**
-	 *  Structured text handler identifier for arithmetic expressions, 
-	 *  possibly with a RTL base direction.
-	 */
-	public static final String RTL_ARITHMETIC = "math"; //$NON-NLS-1$
+	// *** New types must be added to STextTypesCollector#getDefaultTypeHandlers()! 
 
 	/**
 	 * Prevents instantiation

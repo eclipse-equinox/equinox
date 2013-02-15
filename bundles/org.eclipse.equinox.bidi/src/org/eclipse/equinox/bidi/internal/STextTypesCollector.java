@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.equinox.bidi.internal;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import org.eclipse.core.runtime.*;
+import org.eclipse.equinox.bidi.STextTypeHandlerFactory;
 import org.eclipse.equinox.bidi.custom.STextTypeHandler;
+import org.eclipse.equinox.bidi.internal.consumable.*;
 
 /**
  * Provides services related to registered structured text handlers.
@@ -33,7 +34,8 @@ public class STextTypesCollector implements IRegistryEventListener {
 
 	private STextTypesCollector() {
 		IExtensionRegistry registry = RegistryFactory.getRegistry();
-		registry.addListener(this, EXT_POINT);
+		if (registry != null)
+			registry.addListener(this, EXT_POINT);
 	}
 
 	/**
@@ -81,6 +83,11 @@ public class STextTypesCollector implements IRegistryEventListener {
 			factories.clear();
 
 		IExtensionRegistry registry = RegistryFactory.getRegistry();
+		if (registry == null) {
+			types.putAll(getDefaultTypeHandlers());
+			return;
+		}
+
 		IExtensionPoint extPoint = registry.getExtensionPoint(EXT_POINT);
 		IExtension[] extensions = extPoint.getExtensions();
 
@@ -121,5 +128,31 @@ public class STextTypesCollector implements IRegistryEventListener {
 	public void removed(IExtensionPoint[] extensionPoints) {
 		types = null;
 		factories = null;
+	}
+
+	/**
+	 * Returns the default structured text type handlers. These handlers are
+	 * also supported without OSGi running.
+	 * 
+	 * @return a map from structured text type handler identifier (key type: {@link String})
+	 *         to structured text type handler (value type: {@link STextTypeHandler}).
+	 */
+	public static Map getDefaultTypeHandlers() {
+		Map types = new LinkedHashMap();
+
+		types.put(STextTypeHandlerFactory.COMMA_DELIMITED, new STextComma());
+		types.put(STextTypeHandlerFactory.EMAIL, new STextEmail());
+		types.put(STextTypeHandlerFactory.FILE, new STextFile());
+		types.put(STextTypeHandlerFactory.JAVA, new STextJava());
+		types.put(STextTypeHandlerFactory.MATH, new STextMath());
+		types.put(STextTypeHandlerFactory.PROPERTY, new STextProperty());
+		types.put(STextTypeHandlerFactory.REGEXP, new STextRegex());
+		types.put(STextTypeHandlerFactory.SQL, new STextSql());
+		types.put(STextTypeHandlerFactory.SYSTEM_USER, new STextSystem());
+		types.put(STextTypeHandlerFactory.UNDERSCORE, new STextUnderscore());
+		types.put(STextTypeHandlerFactory.URL, new STextURL());
+		types.put(STextTypeHandlerFactory.XPATH, new STextXPath());
+
+		return Collections.unmodifiableMap(types);
 	}
 }

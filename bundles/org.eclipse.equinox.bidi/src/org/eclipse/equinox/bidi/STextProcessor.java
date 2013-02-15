@@ -21,6 +21,10 @@ import org.eclipse.equinox.bidi.custom.STextTypeHandler;
  *  restore the original text
  *  (for more explanations, please see the 
  *  <a href="package-summary.html">package documentation</a>).
+ * <p>
+ * This class can be used without OSGi running (but only the structured text types declared
+ * in {@link STextTypeHandlerFactory} are available in that mode).
+ * </p>
  *
  *  @noextend This class is not intended to be subclassed by clients.
  *  @noinstantiate This class is not intended to be instantiated by clients.

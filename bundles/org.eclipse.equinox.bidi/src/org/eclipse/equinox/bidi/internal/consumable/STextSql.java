@@ -34,7 +34,7 @@ import org.eclipse.equinox.bidi.internal.STextActivator;
  */
 public class STextSql extends STextTypeHandler {
 	private static final byte WS = Character.DIRECTIONALITY_WHITESPACE;
-	static final String lineSep = STextActivator.getInstance().getProperty("line.separator"); //$NON-NLS-1$
+	static final String lineSep = STextActivator.getProperty("line.separator"); //$NON-NLS-1$
 	private static final Integer STATE_LITERAL = new Integer(2);
 	private static final Integer STATE_SLASH_ASTER_COMMENT = new Integer(4);
 

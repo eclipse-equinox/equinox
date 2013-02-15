@@ -18,7 +18,7 @@ import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * Provides services related to OSGI bundles.
+ * Provides services related to OSGi bundles.
  */
 public class STextActivator implements BundleActivator {
 
@@ -43,12 +43,27 @@ public class STextActivator implements BundleActivator {
 		bundleContext = null;
 	}
 
+	/**
+	 * @return the bundle instance, or <code>null</code> iff OSGi is not running
+	 */
 	public static STextActivator getInstance() {
 		return instance;
 	}
 
-	public String getProperty(String key) {
-		return bundleContext.getProperty(key);
+	/**
+	 * Returns the value of the specified property. If OSGi is not running or the key is not found in
+	 * the Framework properties, the system properties are then searched.
+	 * <p>
+	 * This method can be used without OSGi running.
+	 * </p>
+	 *
+	 * @param key the name of the requested property
+	 * @return the value of the requested property, or {@code null} if the property is undefined
+	 */
+	public static String getProperty(String key) {
+		if (instance != null)
+			return instance.bundleContext.getProperty(key);
+		return System.getProperty(key);
 	}
 
 	public Locale getDefaultLocale() {
@@ -81,10 +96,12 @@ public class STextActivator implements BundleActivator {
 	}
 
 	static public void logError(String message, Exception e) {
-		FrameworkLog frameworkLog = instance.getFrameworkLog();
-		if (frameworkLog != null) {
-			frameworkLog.log(new FrameworkLogEntry("org.eclipse.equinox.bidi", FrameworkLogEntry.ERROR, 1, message, 0, e, null)); //$NON-NLS-1$
-			return;
+		if (instance != null) {
+			FrameworkLog frameworkLog = instance.getFrameworkLog();
+			if (frameworkLog != null) {
+				frameworkLog.log(new FrameworkLogEntry("org.eclipse.equinox.bidi", FrameworkLogEntry.ERROR, 1, message, 0, e, null)); //$NON-NLS-1$
+				return;
+			}
 		}
 		System.err.println(message);
 		if (e != null)

@@ -7,21 +7,6 @@
          name="%bidiExtensionName"
          point="org.eclipse.equinox.bidi.bidiTypes">
       <typeDescription
-            description="%sqlProcessorName"
-            class="org.eclipse.equinox.bidi.internal.consumable.STextSql"
-            type="sql">
-      </typeDescription>
-      <typeDescription
-            description="%regexProcessorName"
-            class="org.eclipse.equinox.bidi.internal.consumable.STextRegex"
-            type="regex">
-      </typeDescription>
-      <typeDescription
-            description="%javaProcessorName"
-            class="org.eclipse.equinox.bidi.internal.consumable.STextJava"
-            type="java">
-      </typeDescription>
-      <typeDescription
             class="org.eclipse.equinox.bidi.internal.consumable.STextComma"
             description="%commaProcessorName"
             type="comma">
@@ -37,6 +22,11 @@
             type="file">
       </typeDescription>
       <typeDescription
+            class="org.eclipse.equinox.bidi.internal.consumable.STextJava"
+            description="%javaProcessorName"
+            type="java">
+      </typeDescription>
+      <typeDescription
             class="org.eclipse.equinox.bidi.internal.consumable.STextMath"
             description="%mathProcessorName"
             type="math">
@@ -45,6 +35,16 @@
             class="org.eclipse.equinox.bidi.internal.consumable.STextProperty"
             description="%propertyProcessorName"
             type="property">
+      </typeDescription>
+      <typeDescription
+            description="%regexProcessorName"
+            class="org.eclipse.equinox.bidi.internal.consumable.STextRegex"
+            type="regex">
+      </typeDescription>
+      <typeDescription
+            description="%sqlProcessorName"
+            class="org.eclipse.equinox.bidi.internal.consumable.STextSql"
+            type="sql">
       </typeDescription>
       <typeDescription
             class="org.eclipse.equinox.bidi.internal.consumable.STextSystem"

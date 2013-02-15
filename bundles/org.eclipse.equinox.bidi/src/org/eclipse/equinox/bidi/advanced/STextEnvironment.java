@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.advanced;
 
+import java.util.Locale;
 import org.eclipse.equinox.bidi.internal.STextActivator;
 
 /**
@@ -115,8 +116,10 @@ public class STextEnvironment {
 				language = lang.substring(0, 2);
 			else
 				language = lang;
-		} else
-			language = STextActivator.getInstance().getDefaultLocale().getLanguage();
+		} else {
+			Locale defaultLocale = STextActivator.getInstance() != null ? STextActivator.getInstance().getDefaultLocale() : Locale.getDefault();
+			language = defaultLocale.getLanguage();
+		}
 		this.mirrored = mirrored;
 		this.orientation = orientation >= ORIENT_LTR && orientation <= ORIENT_IGNORE ? orientation : ORIENT_UNKNOWN;
 	}
@@ -172,7 +175,7 @@ public class STextEnvironment {
 	 */
 	public boolean isProcessingNeeded() {
 		if (processingNeeded == null) {
-			String osName = STextActivator.getInstance().getProperty("os.name"); //$NON-NLS-1$/
+			String osName = STextActivator.getProperty("os.name"); //$NON-NLS-1$/
 			if (osName != null)
 				osName = osName.toLowerCase();
 			boolean supportedOS = osName.startsWith("windows") || osName.startsWith("linux") || osName.startsWith("mac"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

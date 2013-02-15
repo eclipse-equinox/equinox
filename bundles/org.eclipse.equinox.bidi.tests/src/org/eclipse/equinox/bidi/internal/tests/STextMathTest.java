@@ -22,8 +22,8 @@ public class STextMathTest extends STextTestBase {
 	private STextEnvironment envLTR = new STextEnvironment("ar", false, STextEnvironment.ORIENT_LTR);
 	private STextEnvironment envRTL = new STextEnvironment("ar", false, STextEnvironment.ORIENT_RTL);
 
-	private ISTextExpert expertLTR = STextExpertFactory.getExpert(STextTypeHandlerFactory.RTL_ARITHMETIC, envLTR);
-	private ISTextExpert expertRTL = STextExpertFactory.getExpert(STextTypeHandlerFactory.RTL_ARITHMETIC, envRTL);
+	private ISTextExpert expertLTR = STextExpertFactory.getExpert(STextTypeHandlerFactory.MATH, envLTR);
+	private ISTextExpert expertRTL = STextExpertFactory.getExpert(STextTypeHandlerFactory.MATH, envRTL);
 
 	private void verifyOneLine(String msg, String data, String resLTR, String resRTL) {
 		String lean = toUT16(data);
