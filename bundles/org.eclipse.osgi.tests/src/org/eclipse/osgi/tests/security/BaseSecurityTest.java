@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -167,6 +167,8 @@ public class BaseSecurityTest extends CoreTest {
 	protected static void setAuthorizationEnabled(ConfigurationSessionTestSuite suite) {
 		try {
 			suite.getSetup().setSystemProperty("osgi.signedcontent.support", "all"); //$NON-NLS-1$//$NON-NLS-2$
+			// TODO work around to tolerate the registry compatiblity inner jar not being signed (bug 401098)
+			suite.getSetup().setSystemProperty("osgi.support.class.certificate", "false"); //$NON-NLS-1$//$NON-NLS-2$
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
