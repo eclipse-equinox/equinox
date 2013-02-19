@@ -506,7 +506,7 @@ public final class ModuleContainer {
 	}
 
 	private boolean applyDelta(Map<ModuleRevision, ModuleWiring> deltaWiring, Collection<Module> modulesResolved, long timestamp) {
-		Collection<Module> modulesLocked = new ArrayList<Module>(modulesResolved.size());
+		List<Module> modulesLocked = new ArrayList<Module>(modulesResolved.size());
 		// now attempt to apply the delta
 		try {
 			// acquire the necessary RESOLVED state change lock
@@ -537,6 +537,7 @@ public final class ModuleContainer {
 					}
 				}
 				moduleDatabase.mergeWiring(deltaWiring);
+				moduleDatabase.sortModules(modulesLocked, Sort.BY_DEPENDENCY, Sort.BY_START_LEVEL);
 			} finally {
 				moduleDatabase.writeUnlock();
 			}
@@ -590,7 +591,7 @@ public final class ModuleContainer {
 
 	private Collection<Module> unresolve0(Collection<Module> initial) {
 		Map<ModuleRevision, ModuleWiring> wiringCopy;
-		Collection<Module> refreshTriggers;
+		List<Module> refreshTriggers;
 		Collection<ModuleRevision> toRemoveRevisions;
 		Collection<ModuleWiring> toRemoveWirings;
 		Map<ModuleWiring, Collection<ModuleWire>> toRemoveWireLists;
@@ -600,11 +601,12 @@ public final class ModuleContainer {
 			checkSystemExtensionRefresh(initial);
 			timestamp = moduleDatabase.getRevisionsTimestamp();
 			wiringCopy = moduleDatabase.getWiringsCopy();
-			refreshTriggers = getRefreshClosure(initial, wiringCopy);
+			refreshTriggers = new ArrayList<Module>(getRefreshClosure(initial, wiringCopy));
 			toRemoveRevisions = new ArrayList<ModuleRevision>();
 			toRemoveWirings = new ArrayList<ModuleWiring>();
 			toRemoveWireLists = new HashMap<ModuleWiring, Collection<ModuleWire>>();
-			for (Module module : refreshTriggers) {
+			for (Iterator<Module> iTriggers = refreshTriggers.iterator(); iTriggers.hasNext();) {
+				Module module = iTriggers.next();
 				boolean first = true;
 				for (ModuleRevision revision : module.getRevisions().getModuleRevisions()) {
 					ModuleWiring removedWiring = wiringCopy.remove(revision);
@@ -625,7 +627,12 @@ public final class ModuleContainer {
 					}
 					first = false;
 				}
+				if (module.getState().equals(State.UNINSTALLED)) {
+					iTriggers.remove();
+				}
 			}
+			moduleDatabase.sortModules(refreshTriggers, Sort.BY_START_LEVEL, Sort.BY_DEPENDENCY);
+			Collections.reverse(refreshTriggers);
 		} finally {
 			moduleDatabase.readUnlock();
 		}
@@ -931,7 +938,7 @@ public final class ModuleContainer {
 		}
 	}
 
-	Collection<Module> getRefreshClosure(Collection<Module> initial, Map<ModuleRevision, ModuleWiring> wiringCopy) {
+	Set<Module> getRefreshClosure(Collection<Module> initial, Map<ModuleRevision, ModuleWiring> wiringCopy) {
 		Set<Module> refreshClosure = new HashSet<Module>();
 		if (initial == null) {
 			initial = new HashSet<Module>();
