@@ -554,6 +554,18 @@ public final class ModuleContainer {
 		for (Module module : modulesLocked) {
 			adaptor.publishModuleEvent(ModuleEvent.RESOLVED, module, module);
 		}
+		// This is questionable behavior according to the spec but this was the way equinox previously behaved
+		// Need to auto-start any persistently started bundles
+		for (Module module : modulesLocked) {
+			if (module.holdsTransitionEventLock(ModuleEvent.STARTED) || module.getId() == 0) {
+				continue;
+			}
+			try {
+				module.start(StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
+			} catch (BundleException e) {
+				adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
+			}
+		}
 		return true;
 	}
 
