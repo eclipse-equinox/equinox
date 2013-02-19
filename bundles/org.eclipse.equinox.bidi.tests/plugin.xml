@@ -5,7 +5,7 @@
          id="id2"
          point="org.eclipse.equinox.bidi.bidiTypes">
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.tests.STextTest"
+            class="org.eclipse.equinox.bidi.internal.tests.StructuredTextTest"
             description="Test"
             type="test.ID">
       </typeDescription>

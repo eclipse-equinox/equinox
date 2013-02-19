@@ -1,20 +1,17 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <html>
-<head>
-<META name="Author" content="Matitiahu Allouche">
-</head>
 <body bgcolor="white">
 <p>
 This package provides classes for users  who need finer control
 on structured text handling.
 In particular, the user should use the methods in the
-<a href="ISTextExpert.html">ISTextExpert</a> class
+<a href="IStructuredTextExpert.html">IStructuredTextExpert</a> class
 in the following cases:</p>
 <ul>
   <li>The structured type handler to use is not one of those
-      predefined in {@link <a href="../STextTypeHandlerFactory.html">
-      STextTypeHandlerFactory</a>}.</li>
-  <li>A non-default {@link <a href="STextEnvironment.html">
+      predefined in {@link <a href="../StructuredTextTypeHandlerFactory.html">
+      StructuredTextTypeHandlerFactory</a>}.</li>
+  <li>A non-default {@link <a href="StructuredTextEnvironment.html">
       environment</a>} needs to be specified.</li>
   <li>A call to a method processing a piece of text may create a state
       which affects the processing of the next piece of text.</li>
@@ -25,26 +22,26 @@ in the following cases:</p>
 Note that the basic functions are provided in package
 {@link <a href="../package-summary.html">
 org.eclipse.equinox.bidi</a>} and its
-{@link <a href="../STextProcessor.html">STextProcessor</a>} class.
+{@link <a href="../StructuredTextProcessor.html">StructuredTextProcessor</a>} class.
 </p><p>
 To access the more sophisticated methods for processing structured text,
 the user should proceed as follows:</p>
 <ul>
   <li>The user has to obtain an appropriate 
-      <code>ISTextExpert</code> instance using the methods in 
-      <a href="STextExpertFactory.html">STextExpertFactory</a>.</li>
+      <code>IStructuredTextExpert</code> instance using the methods in 
+      <a href="StructuredTextExpertFactory.html">StructuredTextExpertFactory</a>.</li>
   <li>The user may then invoke the more sophisticated methods provided by
-      <a href="ISTextExpert.html">ISTextExpert</a> 
+      <a href="IStructuredTextExpert.html">IStructuredTextExpert</a> 
       for processing the structured text.</li>
   <li>If those methods should work in an environment different from the default,
       the user may specify properties of the environment using the class
-      <a href="STextEnvironment.html">STextEnvironment</a>.
+      <a href="StructuredTextEnvironment.html">StructuredTextEnvironment</a>.
       <p>
-      This should be done before obtaining a <code>ISTextExpert</code> instance, 
+      This should be done before obtaining a <code>IStructuredTextExpert</code> instance, 
       and the specific environment must be specified when invoking 
-      <code>STextExpertFactory</code> methods. This will 
+      <code>StructuredTextExpertFactory</code> methods. This will 
       associate a type handler with the given environment and provide
-      a customized <code>ISTextExpert</code> instance to the user.</p></li>
+      a customized <code>IStructuredTextExpert</code> instance to the user.</p></li>
 </ul>
 
 </body>

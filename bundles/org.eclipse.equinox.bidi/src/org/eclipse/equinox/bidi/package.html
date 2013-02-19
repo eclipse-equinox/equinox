@@ -1,8 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <html>
-<head>
-<META name="Author" content="Matitiahu Allouche">
-</head>
 <body bgcolor="white">
 
 This package provides classes for processing bidirectional 
@@ -44,11 +41,11 @@ called <b><i>lean</i></b> text while the text with added directional
 formatting characters is called <b><i>full</i></b> text.
 </p><p>
 The class {@link
-<a href="STextProcessor.html"><b>STextProcessor</b></a>}
+<a href="StructuredTextProcessor.html"><b>StructuredTextProcessor</b></a>}
 is the main tool for processing structured text.  It facilitates
 handling several types of structured text, each type being handled
 by a specific
-{@link <a href="custom/STextTypeHandler.html">
+{@link <a href="custom/StructuredTextTypeHandler.html">
 <b><i>type handler</i></b></a>} :</p>
 <ul>
   <li>property (name=value)</li>
@@ -66,10 +63,10 @@ by a specific
 </ul>
 <p>
 For each of these types, an identifier is defined in
-{@link <a href="STextTypeHandlerFactory.html">
-<b><i>STextTypeHandlerFactory</i></b></a>} :</p>
+{@link <a href="StructuredTextTypeHandlerFactory.html">
+<b><i>StructuredTextTypeHandlerFactory</i></b></a>} :</p>
 These identifiers can be used as argument in some methods of
-<b>STextProcessor</b> to specify the type of handler to apply.
+<b>StructuredTextProcessor</b> to specify the type of handler to apply.
 </p><p>
 The classes included in this package are intended for users who
 need to process structured text in the most straightforward
@@ -78,7 +75,7 @@ manner, when the following conditions are satisfied:
   <li>There exists an appropriate handler for the type of the
       structured text.</li>
   <li>There is no need to specify non-default conditions related
-      to the {@link <a href="advanced/STextEnvironment.html">
+      to the {@link <a href="advanced/StructuredTextEnvironment.html">
       environment</a>}.</li>
   <li>The only operations needed are to transform <i>lean</i> text
       into <i>full</i> text or vice versa.</li>

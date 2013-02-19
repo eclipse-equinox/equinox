@@ -1,68 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.2"?>
 <plugin>
-   <extension-point id="bidiTypes" name="%bidiExpressionPointName" schema="schema/STextType.exsd"/>
+   <extension-point id="bidiTypes" name="%bidiExpressionPointName" schema="schema/StructuredTextType.exsd"/>
    <extension
          id="bidi"
          name="%bidiExtensionName"
          point="org.eclipse.equinox.bidi.bidiTypes">
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.consumable.STextComma"
+            class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextComma"
             description="%commaProcessorName"
             type="comma">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.consumable.STextEmail"
+            class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextEmail"
             description="%emailProcessorName"
             type="email">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.consumable.STextFile"
+            class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextFile"
             description="%fileProcessorName"
             type="file">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.consumable.STextJava"
+            class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextJava"
             description="%javaProcessorName"
             type="java">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.consumable.STextMath"
+            class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextMath"
             description="%mathProcessorName"
             type="math">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.consumable.STextProperty"
+            class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextProperty"
             description="%propertyProcessorName"
             type="property">
       </typeDescription>
       <typeDescription
             description="%regexProcessorName"
-            class="org.eclipse.equinox.bidi.internal.consumable.STextRegex"
+            class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextRegex"
             type="regex">
       </typeDescription>
       <typeDescription
             description="%sqlProcessorName"
-            class="org.eclipse.equinox.bidi.internal.consumable.STextSql"
+            class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextSql"
             type="sql">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.consumable.STextSystem"
+            class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextSystem"
             description="%systemProcessorName"
             type="system">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.consumable.STextUnderscore"
+            class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextUnderscore"
             description="%underscoreProcessorName"
             type="underscore">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.consumable.STextURL"
+            class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextURL"
             description="%urlProcessorName"
             type="url">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.consumable.STextXPath"
+            class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextXPath"
             description="%xpathProcessorName"
             type="xpath">
       </typeDescription>

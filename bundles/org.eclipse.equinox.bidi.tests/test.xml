@@ -21,7 +21,7 @@
     <ant target="core-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="data-dir" value="${bidi-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
-      <property name="classname" value="org.eclipse.equinox.bidi.tests.STextTestSuite"/>
+      <property name="classname" value="org.eclipse.equinox.bidi.tests.StructuredTextTestSuite"/>
     </ant>
   </target>  
 
