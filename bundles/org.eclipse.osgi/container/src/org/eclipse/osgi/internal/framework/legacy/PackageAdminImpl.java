@@ -125,6 +125,7 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	public RequiredBundle[] getRequiredBundles(String symbolicName) {
+		// TODO need to handle null symbolicName here.
 		Collection<ModuleRevision> revisions = container.getRevisions(symbolicName, null);
 		Collection<RequiredBundle> result = new ArrayList<RequiredBundle>();
 		for (ModuleRevision revision : revisions) {
@@ -288,32 +289,47 @@ public class PackageAdminImpl implements PackageAdmin {
 			}
 			Set<Bundle> importing = new HashSet<Bundle>();
 
-			addRequirers(importing, providerWiring);
-
 			String packageName = getName();
+			addRequirers(importing, providerWiring, packageName);
+
 			List<ModuleWire> providedPackages = providerWiring.getProvidedModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
 			for (ModuleWire packageWire : providedPackages) {
 				if (packageCapability.equals(packageWire.getCapability())) {
 					importing.add(packageWire.getRequirer().getBundle());
 					if (packageWire.getRequirerWiring().isSubstitutedPackage(packageName)) {
-						addRequirers(importing, packageWire.getRequirerWiring());
+						addRequirers(importing, packageWire.getRequirerWiring(), packageName);
 					}
 				}
 			}
 			return importing.toArray(new Bundle[importing.size()]);
 		}
 
-		private static void addRequirers(Set<Bundle> importing, BundleWiring providerWiring) {
-			List<BundleWire> requirerWires = providerWiring.getProvidedWires(BundleNamespace.BUNDLE_NAMESPACE);
-			for (BundleWire requireBundleWire : requirerWires) {
+		private static void addRequirers(Set<Bundle> importing, ModuleWiring wiring, String packageName) {
+			List<ModuleWire> requirerWires = wiring.getProvidedModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
+			for (ModuleWire requireBundleWire : requirerWires) {
 				Bundle requirer = requireBundleWire.getRequirer().getBundle();
 				if (importing.contains(requirer)) {
 					continue;
 				}
 				importing.add(requirer);
+
+				// if reexported then need to add any requirers of the reexporter
 				String reExport = requireBundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE);
+				ModuleWiring requirerWiring = requireBundleWire.getRequirerWiring();
 				if (BundleNamespace.VISIBILITY_REEXPORT.equals(reExport)) {
-					addRequirers(importing, requireBundleWire.getRequirerWiring());
+					addRequirers(importing, requirerWiring, packageName);
+				}
+				// also need to add any importers of the same package as the wiring exports; case of aggregations
+				if (!requirerWiring.equals(wiring)) {
+					List<ModuleWire> providedPackages = requirerWiring.getProvidedModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+					for (ModuleWire packageWire : providedPackages) {
+						if (packageName.equals(packageWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
+							importing.add(packageWire.getRequirer().getBundle());
+							if (packageWire.getRequirerWiring().isSubstitutedPackage(packageName)) {
+								addRequirers(importing, packageWire.getRequirerWiring(), packageName);
+							}
+						}
+					}
 				}
 			}
 		}
