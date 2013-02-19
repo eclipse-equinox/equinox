@@ -472,7 +472,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	@Override
 	public final int compareTo(Module o) {
-		int slcomp = getStartLevel() - o.getStartLevel();
+		int slcomp = this.startlevel - o.startlevel;
 		if (slcomp != 0) {
 			return slcomp;
 		}
