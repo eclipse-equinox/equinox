@@ -19,6 +19,7 @@ import org.eclipse.osgi.storage.Storage;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.service.resolver.ResolutionException;
 
@@ -116,6 +117,9 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 						if (host != null && host.getId().longValue() == 0) {
 							try {
 								storage.getExtensionInstaller().addExtensionContent(current, host);
+								ModuleWiring hostWiring = hosts.get(0).getProviderWiring();
+								BundleLoader loader = (BundleLoader) hostWiring.getModuleLoader();
+								loader.addFragmentExports(hostWiring.getModuleCapabilities(PackageNamespace.PACKAGE_NAMESPACE));
 							} catch (BundleException e) {
 								publishContainerEvent(ContainerEvent.ERROR, module, e);
 							}

@@ -161,6 +161,10 @@ public class BundleLoader implements ModuleLoader {
 		return wiring;
 	}
 
+	public void addFragmentExports(List<ModuleCapability> exports) {
+		initializeExports(exports, exportSources, exportedPackages);
+	}
+
 	private static void initializeExports(List<ModuleCapability> exports, BundleLoaderSources sources, Collection<String> exportNames) {
 		for (ModuleCapability export : exports) {
 			String name = (String) export.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
