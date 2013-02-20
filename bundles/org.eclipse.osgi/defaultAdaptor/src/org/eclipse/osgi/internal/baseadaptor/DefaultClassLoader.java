@@ -152,16 +152,24 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 	}
 
 	/**
-	 * Finds all resources with the specified name.  This method must call
-	 * delegate.findResources(name) to find all the resources.
-	 * @param name The resource path to find.
-	 * @return An Enumeration of all resources found or null if the resource.
-	 * @throws IOException 
+	 * Gets resources for the bundle.  First delegate.findResources(name) is
+	 * called. The delegate will query the system class loader, bundle imports,
+	 * bundle local resources, bundle hosts and fragments.  The delegate will
+	 * call BundleClassLoader.findLocalResources(name) to find a resource local
+	 * to this bundle.
+	 * @param name The resource path to get.
+	 * @return The Enumeration of the resource URLs.
 	 */
-	protected Enumeration<URL> findResources(String name) throws IOException {
+	public Enumeration<URL> getResources(String name) throws IOException {
+		if (Debug.DEBUG_LOADER) {
+			Debug.println("BundleClassLoader[" + delegate + "].getResources(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
 		Enumeration<URL> result = delegate.findResources(name);
-		if (result == null)
-			return EMPTY_ENUMERATION;
+		if (Debug.DEBUG_LOADER) {
+			if (result == null || !result.hasMoreElements()) {
+				Debug.println("BundleClassLoader[" + delegate + "].getResources(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+		}
 		return result;
 	}
 
