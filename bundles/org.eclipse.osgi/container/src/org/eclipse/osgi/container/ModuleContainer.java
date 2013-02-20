@@ -387,11 +387,15 @@ public final class ModuleContainer {
 	 * @see FrameworkWiring#resolveBundles(Collection)
 	 */
 	public void resolve(Collection<Module> triggers, boolean triggersMandatory) throws ResolutionException {
+		resolve(triggers, triggersMandatory, false);
+	}
+
+	private void resolve(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers) throws ResolutionException {
 		if (isRefreshingSystemModule()) {
 			throw new ResolutionException("Unable to resolve while shutting down the framework.");
 		}
 		try {
-			while (!resolve0(triggers, triggersMandatory)) {
+			while (!resolveAndApply(triggers, triggersMandatory, restartTriggers)) {
 				// nothing
 			}
 		} catch (RuntimeException e) {
@@ -402,7 +406,7 @@ public final class ModuleContainer {
 		}
 	}
 
-	private boolean resolve0(Collection<Module> triggers, boolean triggersMandatory) throws ResolutionException {
+	private boolean resolveAndApply(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers) throws ResolutionException {
 		if (triggers == null)
 			triggers = new ArrayList<Module>(0);
 		Collection<ModuleRevision> triggerRevisions = new ArrayList<ModuleRevision>(triggers.size());
@@ -440,7 +444,7 @@ public final class ModuleContainer {
 				modulesResolved.add(deltaRevision.getRevisions().getModule());
 		}
 
-		return applyDelta(deltaWiring, modulesResolved, timestamp);
+		return applyDelta(deltaWiring, modulesResolved, triggers, timestamp, restartTriggers);
 	}
 
 	public ModuleWire resolveDynamic(String dynamicPkgName, ModuleRevision revision) throws ResolutionException {
@@ -500,12 +504,12 @@ public final class ModuleContainer {
 					}
 				}
 			}
-		} while (!applyDelta(deltaWiring, modulesResolved, timestamp));
+		} while (!applyDelta(deltaWiring, modulesResolved, Collections.<Module> emptyList(), timestamp, false));
 
 		return result;
 	}
 
-	private boolean applyDelta(Map<ModuleRevision, ModuleWiring> deltaWiring, Collection<Module> modulesResolved, long timestamp) {
+	private boolean applyDelta(Map<ModuleRevision, ModuleWiring> deltaWiring, Collection<Module> modulesResolved, Collection<Module> triggers, long timestamp, boolean restartTriggers) {
 		List<Module> modulesLocked = new ArrayList<Module>(modulesResolved.size());
 		// now attempt to apply the delta
 		try {
@@ -554,10 +558,24 @@ public final class ModuleContainer {
 		for (Module module : modulesLocked) {
 			adaptor.publishModuleEvent(ModuleEvent.RESOLVED, module, module);
 		}
+
+		// If there are any triggers re-start them now if requested
+		Set<Module> triggerSet = restartTriggers ? new HashSet<Module>(triggers) : Collections.<Module> emptySet();
+		if (restartTriggers) {
+			for (Module module : triggers) {
+				try {
+					if (module.getId() != 0 && Module.RESOLVED_SET.contains(module.getState())) {
+						module.start(StartOptions.TRANSIENT);
+					}
+				} catch (BundleException e) {
+					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
+				}
+			}
+		}
 		// This is questionable behavior according to the spec but this was the way equinox previously behaved
-		// Need to auto-start any persistently started bundles
+		// Need to auto-start any persistently started bundles that got resolved
 		for (Module module : modulesLocked) {
-			if (module.holdsTransitionEventLock(ModuleEvent.STARTED) || module.getId() == 0) {
+			if (module.holdsTransitionEventLock(ModuleEvent.STARTED) || module.getId() == 0 || triggerSet.contains(module)) {
 				continue;
 			}
 			try {
@@ -644,7 +662,6 @@ public final class ModuleContainer {
 				}
 			}
 			moduleDatabase.sortModules(refreshTriggers, Sort.BY_START_LEVEL, Sort.BY_DEPENDENCY);
-			Collections.reverse(refreshTriggers);
 		} finally {
 			moduleDatabase.readUnlock();
 		}
@@ -659,7 +676,9 @@ public final class ModuleContainer {
 		try {
 			// acquire module state change locks
 			try {
-				for (Module refreshModule : refreshTriggers) {
+				// go in reverse order
+				for (ListIterator<Module> iTriggers = refreshTriggers.listIterator(refreshTriggers.size()); iTriggers.hasPrevious();) {
+					Module refreshModule = iTriggers.previous();
 					refreshModule.lockStateChange(ModuleEvent.UNRESOLVED);
 					modulesLocked.add(refreshModule);
 				}
@@ -668,15 +687,17 @@ public final class ModuleContainer {
 				throw new IllegalStateException("Could not acquire state change lock.", e);
 			}
 			// Stop any active bundles and remove non-active modules from the refreshTriggers
-			for (Iterator<Module> iTriggers = refreshTriggers.iterator(); iTriggers.hasNext();) {
-				Module refreshModule = iTriggers.next();
-				if (Module.ACTIVE_SET.contains(refreshModule.getState())) {
+			for (ListIterator<Module> iTriggers = refreshTriggers.listIterator(refreshTriggers.size()); iTriggers.hasPrevious();) {
+				Module refreshModule = iTriggers.previous();
+				State previousState = refreshModule.getState();
+				if (Module.ACTIVE_SET.contains(previousState)) {
 					try {
 						refreshModule.stop(StopOptions.TRANSIENT);
 					} catch (BundleException e) {
 						adaptor.publishContainerEvent(ContainerEvent.ERROR, refreshModule, e);
 					}
-				} else {
+				}
+				if (!State.ACTIVE.equals(previousState)) {
 					iTriggers.remove();
 				}
 			}
@@ -782,14 +803,7 @@ public final class ModuleContainer {
 		initial = initial == null ? null : new ArrayList<Module>(initial);
 		Collection<Module> refreshTriggers = unresolve(initial);
 		if (!isRefreshingSystemModule()) {
-			resolve(refreshTriggers, false);
-			for (Module module : refreshTriggers) {
-				try {
-					module.start(StartOptions.TRANSIENT_RESUME);
-				} catch (BundleException e) {
-					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
-				}
-			}
+			resolve(refreshTriggers, false, true);
 		}
 	}
 
