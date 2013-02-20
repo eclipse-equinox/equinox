@@ -360,6 +360,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		}
 		ModuleEvent event;
 		if (StartOptions.LAZY_TRIGGER.isContained(options)) {
+			setTrigger();
 			if (stateChangeLock.getHoldCount() > 0 && stateTransitionEvents.contains(ModuleEvent.STARTED)) {
 				// nothing to do here; the current thread is activating the bundle.
 				return;
@@ -505,7 +506,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				// continue on to normal starting
 			}
 		} else {
-			if (isLazyActivate(options)) {
+			if (isLazyActivate(options) && !isTriggerSet()) {
 				if (State.LAZY_STARTING.equals(getState())) {
 					// a sync listener must have tried to start this module again with the lazy option
 					return null; // no event to publish; nothing to do
@@ -535,6 +536,30 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				throw (BundleException) t;
 			throw new BundleException("Error starting module.", BundleException.ACTIVATOR_ERROR, t);
 		}
+	}
+
+	private void setTrigger() {
+		ModuleLoader loader = getCurrentLoader();
+		if (loader != null) {
+			loader.getAndSetTrigger();
+		}
+	}
+
+	private boolean isTriggerSet() {
+		ModuleLoader loader = getCurrentLoader();
+		return loader == null ? false : loader.isTriggerSet();
+	}
+
+	private ModuleLoader getCurrentLoader() {
+		ModuleRevision current = getCurrentRevision();
+		if (current == null) {
+			return null;
+		}
+		ModuleWiring wiring = current.getWiring();
+		if (wiring == null) {
+			return null;
+		}
+		return wiring.getModuleLoader();
 	}
 
 	/**

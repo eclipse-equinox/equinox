@@ -21,4 +21,16 @@ public class FragmentLoader implements ModuleLoader {
 		return null;
 	}
 
+	@Override
+	public boolean getAndSetTrigger() {
+		// nothing to do here
+		return false;
+	}
+
+	@Override
+	public boolean isTriggerSet() {
+		// nothing to do here
+		return false;
+	}
+
 }

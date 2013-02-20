@@ -17,6 +17,7 @@ import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.osgi.container.*;
@@ -93,6 +94,7 @@ public class BundleLoader implements ModuleLoader {
 	/* @GuardedBy("classLoaderMonitor") */
 	private ModuleClassLoader classloader;
 	private final ClassLoader parent;
+	private final AtomicBoolean triggerClassLoaded = new AtomicBoolean(false);
 
 	/**
 	 * Returns the package name from the specified class name.
@@ -1051,5 +1053,15 @@ public class BundleLoader implements ModuleLoader {
 		public Class<?>[] getClassContext() {
 			return super.getClassContext();
 		}
+	}
+
+	@Override
+	public boolean getAndSetTrigger() {
+		return triggerClassLoaded.getAndSet(true);
+	}
+
+	@Override
+	public boolean isTriggerSet() {
+		return triggerClassLoaded.get();
 	}
 }

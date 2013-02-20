@@ -43,4 +43,8 @@ public interface ModuleLoader {
 	 * @return TODO
 	 */
 	public ClassLoader getClassLoader();
+
+	public boolean getAndSetTrigger();
+
+	public boolean isTriggerSet();
 }
