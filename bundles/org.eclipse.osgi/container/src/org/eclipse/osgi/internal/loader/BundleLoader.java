@@ -243,24 +243,6 @@ public class BundleLoader implements ModuleLoader {
 	}
 
 	/**
-	 * This method loads a class from the bundle.  The class is searched for in the
-	 * same manner as it would if it was being loaded from a bundle (i.e. all
-	 * hosts, fragments, import, required bundles and local resources are searched.
-	 *
-	 * @param      name     the name of the desired Class.
-	 * @return     the resulting Class
-	 * @exception  java.lang.ClassNotFoundException  if the class definition was not found.
-	 */
-	final public Class<?> loadClass(String name) throws ClassNotFoundException {
-		ModuleClassLoader mcl = getModuleClassLoader();
-		// The instanceof check here is just to be safe.  The javadoc contract stated in BundleClassLoader
-		// mandate that BundleClassLoaders be an instance of ClassLoader.
-		if (name.length() > 0 && name.charAt(0) == '[')
-			return Class.forName(name, false, mcl);
-		return mcl.loadClass(name);
-	}
-
-	/**
 	 * This method gets a resource from the bundle.  The resource is searched 
 	 * for in the same manner as it would if it was being loaded from a bundle 
 	 * (i.e. all hosts, fragments, import, required bundles and 

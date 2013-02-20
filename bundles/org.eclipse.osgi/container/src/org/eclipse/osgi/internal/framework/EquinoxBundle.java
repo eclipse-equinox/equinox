@@ -431,6 +431,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		try {
 			ModuleClassLoader classLoader = getModuleClassLoader();
 			if (classLoader != null) {
+				if (name.length() > 0 && name.charAt(0) == '[')
+					return Class.forName(name, false, classLoader);
 				return classLoader.loadClass(name);
 			}
 		} catch (ResolutionException e) {
