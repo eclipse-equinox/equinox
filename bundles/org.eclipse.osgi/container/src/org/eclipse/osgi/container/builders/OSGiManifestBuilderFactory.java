@@ -504,7 +504,7 @@ public final class OSGiManifestBuilderFactory {
 			}
 			if (policyElements != null) {
 				ManifestElement policy = policyElements[0];
-				String excludeSpec = policy.getDirective(Constants.EXCLUDE_DIRECTIVE);
+				String excludeSpec = policy.getAttribute(EquinoxModuleDataNamespace.LAZYSTART_EXCEPTIONS_ATTRIBUTE);
 				if ("true".equals(policy.getValue())) { //$NON-NLS-1$
 					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY, EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY);
 					if (excludeSpec != null) {

@@ -59,6 +59,9 @@ public class EquinoxModuleDataNamespace extends Namespace {
 	 */
 	public static final String LAZYSTART_HEADER = "Eclipse-LazyStart"; //$NON-NLS-1$
 
+	/** An Eclipse-LazyStart header attribute used to specify exception classes for auto start */
+	public static final String LAZYSTART_EXCEPTIONS_ATTRIBUTE = "exceptions"; //$NON-NLS-1$
+
 	/** 
 	 * The Equinox specific header for specifying the lazy start policy 
 	 * @deprecated use {@link #LAZYSTART_HEADER}
