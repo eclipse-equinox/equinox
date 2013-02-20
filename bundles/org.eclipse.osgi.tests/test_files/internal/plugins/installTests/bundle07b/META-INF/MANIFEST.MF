@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: bundle07
+Bundle-Name: bundle07
+Bundle-Version: 1.0.0.b
+Bundle-Vendor: Eclipse.org
