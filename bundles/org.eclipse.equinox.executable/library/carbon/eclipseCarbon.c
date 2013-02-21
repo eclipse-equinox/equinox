@@ -575,7 +575,7 @@ char * findVMLibrary( char* command ) {
 		char * lib = findLib(cmd);
 		if (lib != NULL) {
 			// This does not seem to be necessary to load the Mac JVM library
-			//adjustLibraryPath(lib);
+			if (0) adjustLibraryPath(lib);
 			result = lib;
 		}
 	}
