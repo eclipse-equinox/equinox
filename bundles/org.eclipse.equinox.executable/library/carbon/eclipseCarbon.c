@@ -477,6 +477,43 @@ char** getArgVM( char* vm )
 	return result;
 }
 
+char * getJavaVersion(char* command) {
+	FILE *fp;
+	char buffer[4096];
+	char *version = NULL, *firstChar;
+    int numChars = 0;
+	sprintf(buffer,"%s -version 2>&1", command);
+	fp = popen(buffer, "r");
+	if (fp == NULL) {
+		return NULL;
+	}
+	while (fgets(buffer, sizeof(buffer)-1, fp) != NULL) {
+		if (!version) {
+			firstChar = (char *) (strchr(buffer, '"') + 1);
+			if (firstChar != NULL)
+				numChars = (int)  (strrchr(buffer, '"') - firstChar);
+
+			/* Allocate a buffer and copy the version string into it. */
+			if (numChars > 0)
+			{
+				version = malloc( numChars + 1 );
+				strncpy(version, firstChar, numChars);
+				version[numChars] = '\0';
+			}
+		}
+		if (strstr(buffer, "Java HotSpot(TM)") || strstr(buffer, "OpenJDK")) {
+			isSUN = 1;
+			break;
+		}
+		if (strstr(buffer, "IBM") != NULL) {
+			isSUN = 0;
+			break;
+		}
+	}
+	pclose(fp);
+	return version;
+}
+
 char * getJavaHome() {
 	FILE *fp;
 	char path[4096];
@@ -531,11 +568,14 @@ char * findVMLibrary( char* command ) {
 	if (strstr(cmd, "/JavaVM.framework/") != NULL && (strstr(cmd, "/Current/") != NULL || strstr(cmd, "/A/") != NULL)) {
 		cmd = getJavaHome();
 	}
+	// This is necessary to initialize isSUN
+	getJavaVersion(cmd);
 	result = JAVA_FRAMEWORK;
 	if (strstr(cmd, "/JavaVM.framework/") == NULL) {
 		char * lib = findLib(cmd);
 		if (lib != NULL) {
-			adjustLibraryPath(lib);
+			// This does not seem to be necessary to load the Mac JVM library
+			//adjustLibraryPath(lib);
 			result = lib;
 		}
 	}
