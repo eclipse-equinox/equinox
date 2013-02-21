@@ -11,6 +11,7 @@
 package org.eclipse.osgi.tests.bundles;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -18,7 +19,6 @@ import org.eclipse.osgi.container.ModuleCapability;
 import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.namespace.NativeNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 
@@ -115,13 +115,13 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 	public void testNativeCode08() throws Exception {
 		setNativeAttribute("nativecodetest", "4");
 		Bundle nativetestC = installer.installBundle("nativetest.c");
-		try {
-			nativetestC.start();
-			fail("Should not be able to start bundle with missing native code path");
-		} catch (BundleException e) {
-			// expected
-			assertEquals("Wrong exception type", BundleException.NATIVECODE_ERROR, e.getType());
-		}
+		nativetestC.start();
+		nativetestC.stop();
+		Object[] results = simpleResults.getResults(1);
+
+		assertTrue("1.0", results.length == 1);
+		// will be null since the native path does not exist
+		assertNull("1.1", results[0]);
 	}
 
 	private String getContent(String file) throws IOException {
@@ -137,7 +137,7 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 		Bundle systemBundle = OSGiTestsActivator.getContext().getBundle(0);
 		ModuleRevision systemRevision = (ModuleRevision) systemBundle.adapt(BundleRevision.class);
 		ModuleCapability nativeCapability = (ModuleCapability) systemRevision.getModuleCapabilities(NativeNamespace.NATIVE_NAMESPACE).get(0);
-		Map attrs = nativeCapability.getAttributes();
+		Map attrs = new HashMap(nativeCapability.getAttributes());
 		attrs.put(key, value);
 		nativeCapability.setTransientAttrs(attrs);
 	}
