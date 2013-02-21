@@ -226,7 +226,7 @@ public class EquinoxContainer {
 							}
 					}
 				}
-			}, "Framework Active Thread"); //$NON-NLS-1$
+			}, "Framework Active Thread: " + toString()); //$NON-NLS-1$
 			fwkThread.setDaemon(false);
 			fwkThread.start();
 		}
