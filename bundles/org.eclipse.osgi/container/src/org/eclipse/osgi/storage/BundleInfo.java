@@ -40,6 +40,7 @@ public final class BundleInfo {
 		private final Dictionary<String, String> cachedHeaders;
 		private File content;
 		private boolean isDirectory;
+		private boolean isReference;
 		private boolean hasPackageInfo;
 		private BundleFile bundleFile;
 		private Headers<String, String> rawHeaders;
@@ -54,10 +55,11 @@ public final class BundleInfo {
 			this.cachedHeaders = new CachedManifest(this, Collections.<String, String> emptyMap());
 		}
 
-		Generation(long generationId, File content, boolean isDirectory, boolean hasPackageInfo, Map<String, String> cached) {
+		Generation(long generationId, File content, boolean isDirectory, boolean isReference, boolean hasPackageInfo, Map<String, String> cached) {
 			this.generationId = generationId;
 			this.content = content;
 			this.isDirectory = isDirectory;
+			this.isReference = isReference;
 			this.hasPackageInfo = hasPackageInfo;
 			this.cachedHeaders = new CachedManifest(this, cached);
 		}
@@ -149,6 +151,12 @@ public final class BundleInfo {
 			}
 		}
 
+		public boolean isReference() {
+			synchronized (this.genMonitor) {
+				return this.isReference;
+			}
+		}
+
 		public boolean hasPackageInfo() {
 			synchronized (this.genMonitor) {
 				return this.hasPackageInfo;
@@ -161,10 +169,11 @@ public final class BundleInfo {
 			}
 		}
 
-		void setContent(File content) {
+		void setContent(File content, boolean isReference) {
 			synchronized (this.genMonitor) {
 				this.content = content;
 				this.isDirectory = content == null ? false : Storage.secureAction.isDirectory(content);
+				this.isReference = isReference;
 			}
 		}
 
@@ -324,9 +333,9 @@ public final class BundleInfo {
 		}
 	}
 
-	Generation restoreGeneration(long generationId, File content, boolean isDirectory, boolean hasPackageInfo, Map<String, String> cached) {
+	Generation restoreGeneration(long generationId, File content, boolean isDirectory, boolean isReference, boolean hasPackageInfo, Map<String, String> cached) {
 		synchronized (this.infoMonitor) {
-			Generation restoredGeneration = new Generation(generationId, content, isDirectory, hasPackageInfo, cached);
+			Generation restoredGeneration = new Generation(generationId, content, isDirectory, isReference, hasPackageInfo, cached);
 			return restoredGeneration;
 		}
 	}

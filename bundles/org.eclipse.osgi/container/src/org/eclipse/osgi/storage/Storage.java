@@ -184,7 +184,7 @@ public class Storage {
 				newGeneration = info.createGeneration();
 
 				File contentFile = getSystemContent();
-				newGeneration.setContent(contentFile);
+				newGeneration.setContent(contentFile, false);
 
 				ModuleRevisionBuilder builder = getBuilder(newGeneration);
 				systemModule = moduleContainer.install(null, Constants.SYSTEM_BUNDLE_LOCATION, builder, newGeneration);
@@ -200,7 +200,7 @@ public class Storage {
 					if (needUpdate(currentRevision, newBuilder)) {
 						newGeneration = currentGeneration.getBundleInfo().createGeneration();
 						File contentFile = getSystemContent();
-						newGeneration.setContent(contentFile);
+						newGeneration.setContent(contentFile, false);
 						moduleContainer.update(systemModule, newBuilder, newGeneration);
 						moduleContainer.refresh(Arrays.asList(systemModule));
 					}
@@ -398,7 +398,7 @@ public class Storage {
 			generation = info.createGeneration();
 
 			File contentFile = getContentFile(staged, isReference, lockedID, generation.getGenerationId());
-			generation.setContent(contentFile);
+			generation.setContent(contentFile, isReference);
 			setStorageHooks(generation);
 
 			ModuleRevisionBuilder builder = getBuilder(generation);
@@ -594,7 +594,7 @@ public class Storage {
 
 		try {
 			File contentFile = getContentFile(staged, isReference, bundleInfo.getBundleId(), newGen.getGenerationId());
-			newGen.setContent(contentFile);
+			newGen.setContent(contentFile, isReference);
 			setStorageHooks(newGen);
 
 			ModuleRevisionBuilder builder = getBuilder(newGen);
@@ -657,6 +657,10 @@ public class Storage {
 			contentFile = staged;
 		}
 		return contentFile;
+	}
+
+	private static String getBundleFilePath(long bundleID, long generationID) {
+		return bundleID + "/" + generationID + "/" + BUNDLE_FILE_NAME; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public File getFile(String path, boolean checkParent) {
@@ -958,12 +962,19 @@ public class Storage {
 			out.writeLong(bundleInfo.getNextGenerationId());
 			out.writeLong(generation.getGenerationId());
 			out.writeBoolean(generation.isDirectory());
+			out.writeBoolean(generation.isReference());
 			out.writeBoolean(generation.hasPackageInfo());
 			if (bundleInfo.getBundleId() == 0) {
 				// just write empty string for system bundle content in this case
 				out.writeUTF(""); //$NON-NLS-1$
 			} else {
-				out.writeUTF(new FilePath(installPath).makeRelative(new FilePath(generation.getContent().getAbsolutePath())));
+				if (generation.isReference()) {
+					// make reference installs relative to the install path
+					out.writeUTF(new FilePath(installPath).makeRelative(new FilePath(generation.getContent().getAbsolutePath())));
+				} else {
+					// make normal installs relative to the storage area
+					out.writeUTF(Storage.getBundleFilePath(bundleInfo.getBundleId(), generation.getGenerationId()));
+				}
 			}
 
 			Dictionary<String, String> headers = generation.getHeaders();
@@ -1030,6 +1041,7 @@ public class Storage {
 			long nextGenId = in.readLong();
 			long generationId = in.readLong();
 			boolean isDirectory = in.readBoolean();
+			boolean isReference = in.readBoolean();
 			boolean hasPackageInfo = in.readBoolean();
 			String contentPath = in.readUTF();
 
@@ -1054,11 +1066,17 @@ public class Storage {
 
 			if (content != null && !content.isAbsolute()) {
 				// make sure it has the absolute location instead
-				content = new File(installPath, contentPath);
+				if (isReference) {
+					// reference installs are relative to the installPath
+					content = new File(installPath, contentPath);
+				} else {
+					// normal installs are relative to the storage area
+					content = getFile(contentPath, true);
+				}
 			}
 
 			BundleInfo info = new BundleInfo(this, infoId, nextGenId);
-			Generation generation = info.restoreGeneration(generationId, content, isDirectory, hasPackageInfo, cachedHeaders);
+			Generation generation = info.restoreGeneration(generationId, content, isDirectory, isReference, hasPackageInfo, cachedHeaders);
 			result.put(infoId, generation);
 			generations.add(generation);
 		}
