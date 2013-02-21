@@ -17,8 +17,6 @@ import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.framework.util.Headers;
-import org.eclipse.osgi.internal.resolver.StateImpl;
-import org.eclipse.osgi.internal.resolver.StateObjectFactoryImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
@@ -3698,84 +3696,6 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("fragment not resolved", aFrag.isResolved());
 	}
 
-	public void testBug338697() throws BundleException, IOException {
-		State state = buildEmptyState();
-		int bundleID = 0;
-
-		Hashtable manifest = new Hashtable();
-
-		manifest.clear();
-		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_VERSION, "1.0"); //$NON-NLS-1$
-		manifest.put(Constants.EXPORT_PACKAGE, "a");
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, "A", bundleID++); //$NON-NLS-1$
-
-		manifest.clear();
-		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_VERSION, "1.0"); //$NON-NLS-1$
-		manifest.put(Constants.IMPORT_PACKAGE, "a,d");
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, "B", bundleID++); //$NON-NLS-1$
-
-		manifest.clear();
-		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_VERSION, "1.0"); //$NON-NLS-1$
-		manifest.put(Constants.IMPORT_PACKAGE, "a,d");
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, "C", bundleID++); //$NON-NLS-1$
-
-		state.addBundle(a);
-		state.addBundle(b);
-		state.addBundle(c);
-		state.resolve();
-
-		assertTrue("a", a.isResolved()); //$NON-NLS-1$
-		assertFalse("b", b.isResolved()); //$NON-NLS-1$
-		assertFalse("c", c.isResolved()); //$NON-NLS-1$
-
-		BundleContext context = OSGiTestsActivator.getContext();
-		File stateCache = context.getDataFile("statecache"); //$NON-NLS-1$
-		stateCache.mkdirs();
-		File stateFile = new File(stateCache, ".state");
-		File lazyFile = new File(stateCache, ".lazy");
-		StateObjectFactoryImpl factory = (StateObjectFactoryImpl) StateObjectFactory.defaultFactory;
-		factory.writeState(state, stateFile, lazyFile);
-		state = null;
-
-		StateImpl systemState = factory.readSystemState(null, stateFile, lazyFile, true, -1);
-		systemState.setResolver(platformAdmin.createResolver());
-		systemState.resolve(new BundleDescription[0]);
-
-		// call twice to force unload
-		systemState.unloadLazyData(systemState.getTimeStamp());
-		systemState.unloadLazyData(systemState.getTimeStamp());
-
-		manifest.clear();
-		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_VERSION, "1.0"); //$NON-NLS-1$
-		manifest.put(Constants.EXPORT_PACKAGE, "d");
-		BundleDescription d = systemState.getFactory().createBundleDescription(systemState, manifest, "C", bundleID++); //$NON-NLS-1$
-		systemState.addBundle(d);
-		systemState.resolve();
-
-		BundleDescription[] bundles = systemState.getBundles();
-		for (int i = 0; i < bundles.length; i++) {
-			assertTrue("Bundle is not resolved: " + bundles[i], bundles[i].isResolved());
-			ExportPackageDescription[] imports = bundles[i].getResolvedImports();
-			for (int j = 0; j < imports.length; j++) {
-				assertNotNull("Bundle has a null import: " + bundles[i] + " " + j, imports[j]);
-				boolean found = false;
-				ExportPackageDescription[] exports = imports[j].getSupplier().getSelectedExports();
-				for (int k = 0; k < exports.length && !found; k++)
-					found = exports[k] == imports[j];
-				if (!found)
-					fail("Found duplicate export: " + imports[j]);
-			}
-		}
-	}
-
 	private ExportPackageDescription[] isConsistent(ExportPackageDescription[] pkgs1, ExportPackageDescription[] pkgs2) {
 		for (int i = 0; i < pkgs1.length; i++)
 			for (int j = 0; j < pkgs2.length; j++)
@@ -3865,57 +3785,6 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("1.2", testFrag100.isResolved()); //$NON-NLS-1$
 		assertFalse("1.3", testFrag101.isResolved()); //$NON-NLS-1$
 		assertTrue("1.4", testDependent.isResolved()); //$NON-NLS-1$
-	}
-
-	public void testBug388299() throws Exception {
-		State state = buildEmptyState();
-		Hashtable manifest = new Hashtable();
-		long bundleID = 0;
-		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "org.eclipse.osgi; singleton:=true"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
-		manifest.put(Constants.PROVIDE_CAPABILITY, "osgi.ee;osgi.ee=test"); //$NON-NLS-1$
-		BundleDescription systemBundle = state.getFactory().createBundleDescription(state, manifest, "test.host100", bundleID++); //$NON-NLS-1$
-
-		manifest = new Hashtable();
-		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.host; singleton:=true"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_VERSION, "1.0.1"); //$NON-NLS-1$
-		BundleDescription testHost = state.getFactory().createBundleDescription(state, manifest, "test.host101", bundleID++); //$NON-NLS-1$
-
-		manifest = new Hashtable();
-		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag; singleton:=true"); //$NON-NLS-1$
-		manifest.put(Constants.FRAGMENT_HOST, "test.host; bundle-version=\"[1.0.0,2.0.0)\""); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
-		manifest.put(Constants.REQUIRE_CAPABILITY, "osgi.ee;filter:=\"(osgi.ee=test)\"");
-		BundleDescription testFrag = state.getFactory().createBundleDescription(state, manifest, "test.frag100", bundleID++); //$NON-NLS-1$
-
-		state.addBundle(systemBundle);
-		state.addBundle(testFrag);
-		state.addBundle(testHost);
-
-		state.resolve();
-
-		assertTrue("1.0", systemBundle.isResolved()); //$NON-NLS-1$
-		assertTrue("1.1", testHost.isResolved()); //$NON-NLS-1$
-		assertTrue("1.2", testFrag.isResolved()); //$NON-NLS-1$
-
-		BundleContext context = OSGiTestsActivator.getContext();
-		File stateCache = context.getDataFile(getName()); //$NON-NLS-1$
-		stateCache.mkdirs();
-		File stateFile = new File(stateCache, ".state");
-		File lazyFile = new File(stateCache, ".lazy");
-		StateObjectFactoryImpl factory = (StateObjectFactoryImpl) StateObjectFactory.defaultFactory;
-		factory.writeState(state, stateFile, lazyFile);
-		state = null;
-
-		StateImpl systemState = factory.readSystemState(null, stateFile, lazyFile, true, -1);
-		try {
-			systemState.getBundle(systemBundle.getBundleId()).getExportPackages();
-		} catch (RuntimeException e) {
-			fail("Load lazy data failed", e);
-		}
 	}
 
 	public void testBug187616() throws BundleException {
