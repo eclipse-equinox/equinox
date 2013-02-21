@@ -441,17 +441,13 @@ public class BundleLoader implements ModuleLoader {
 	 * Finds the resource for a bundle.  This method is used for delegation by the bundle's classloader.
 	 */
 	public URL findResource(String name) {
-		return findResource(name, true);
-	}
-
-	URL findResource(String name, boolean checkParent) {
 		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
 		String pkgName = getResourcePackageName(name);
 		boolean bootDelegation = false;
 		// follow the OSGi delegation model
 		// First check the parent classloader for system resources, if it is a java resource.
-		if (checkParent && parent != null) {
+		if (parent != null) {
 			if (pkgName.startsWith(JAVA_PACKAGE))
 				// 1) if startsWith "java." delegate to parent and terminate search
 				// we never delegate java resource requests past the parent
@@ -511,9 +507,9 @@ public class BundleLoader implements ModuleLoader {
 			result = policy.doBuddyResourceLoading(name);
 		if (result != null)
 			return result;
-		// hack to support backwards compatibiility for bootdelegation
+		// hack to support backwards compatibility for bootdelegation
 		// or last resort; do class context trick to work around VM bugs
-		if (parent != null && !bootDelegation && ((checkParent && container.getConfiguration().compatibiltyBootDelegation) || isRequestFromVM()))
+		if (parent != null && !bootDelegation && (container.getConfiguration().compatibiltyBootDelegation || isRequestFromVM()))
 			// we don't need to continue if the resource is not found here
 			return parent.getResource(name);
 		return result;
@@ -527,41 +523,57 @@ public class BundleLoader implements ModuleLoader {
 		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
 		String pkgName = getResourcePackageName(name);
-		Enumeration<URL> result = null;
+		Enumeration<URL> result = Collections.enumeration(Collections.<URL> emptyList());
+		boolean bootDelegation = false;
+		// follow the OSGi delegation model
+		// First check the parent classloader for system resources, if it is a java resource.
+		if (parent != null) {
+			if (pkgName.startsWith(JAVA_PACKAGE))
+				// 1) if startsWith "java." delegate to parent and terminate search
+				// we never delegate java resource requests past the parent
+				return parent.getResources(name);
+			else if (container.isBootDelegationPackage(pkgName)) {
+				// 2) if part of the bootdelegation list then delegate to parent and continue
+				result = compoundEnumerations(result, parent.getResources(name));
+				bootDelegation = true;
+			}
+		}
 		try {
-			result = searchHooks(name, PRE_RESOURCES);
+			Enumeration<URL> hookResources = searchHooks(name, PRE_RESOURCES);
+			if (hookResources != null) {
+				return compoundEnumerations(result, hookResources);
+			}
 		} catch (ClassNotFoundException e) {
 			// will not happen
 		} catch (FileNotFoundException e) {
-			return null;
-		}
-		if (result != null)
 			return result;
-		// start at step 3 because of the comment above about ClassLoader#getResources
+		}
+
 		// 3) search the imported packages
 		PackageSource source = findImportedSource(pkgName, null);
 		if (source != null)
 			// 3) found import source terminate search at the source
-			return source.getResources(name);
+			return compoundEnumerations(result, source.getResources(name));
 		// 4) search the required bundles
 		source = findRequiredSource(pkgName, null);
 		if (source != null)
 			// 4) attempt to load from source but continue on failure
-			result = source.getResources(name);
+			result = compoundEnumerations(result, source.getResources(name));
 
 		// 5) search the local bundle
 		// compound the required source results with the local ones
 		Enumeration<URL> localResults = findLocalResources(name);
 		result = compoundEnumerations(result, localResults);
 		// 6) attempt to find a dynamic import source; only do this if a required source was not found
-		if (result == null && source == null) {
+		if (source == null && !result.hasMoreElements()) {
 			source = findDynamicSource(pkgName);
 			if (source != null)
-				return source.getResources(name);
+				return compoundEnumerations(result, source.getResources(name));
 		}
-		if (result == null)
+		if (!result.hasMoreElements())
 			try {
-				result = searchHooks(name, POST_RESOURCES);
+				Enumeration<URL> hookResources = searchHooks(name, POST_RESOURCES);
+				result = compoundEnumerations(result, hookResources);
 			} catch (ClassNotFoundException e) {
 				// will not happen
 			} catch (FileNotFoundException e) {
@@ -570,6 +582,13 @@ public class BundleLoader implements ModuleLoader {
 		if (policy != null) {
 			Enumeration<URL> buddyResult = policy.doBuddyResourcesLoading(name);
 			result = compoundEnumerations(result, buddyResult);
+		}
+		// hack to support backwards compatibility for bootdelegation
+		// or last resort; do class context trick to work around VM bugs
+		if (!result.hasMoreElements()) {
+			if (parent != null && !bootDelegation && (container.getConfiguration().compatibiltyBootDelegation || isRequestFromVM()))
+				// we don't need to continue if the resource is not found here
+				return parent.getResources(name);
 		}
 		return result;
 	}
@@ -642,26 +661,6 @@ public class BundleLoader implements ModuleLoader {
 	@Override
 	public List<URL> findEntries(String path, String filePattern, int options) {
 		return getModuleClassLoader().findEntries(path, filePattern, options);
-	}
-
-	/*
-	 * This method is used by Bundle.getResources to do proper parent delegation.
-	 */
-	public Enumeration<URL> getResources(String name) throws IOException {
-		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
-			name = name.substring(1); /* remove leading slash before search */
-		String pkgName = getResourcePackageName(name);
-		// follow the OSGi delegation model
-		// First check the parent classloader for system resources, if it is a java resource.
-		Enumeration<URL> result = null;
-		if (pkgName.startsWith(JAVA_PACKAGE) || container.isBootDelegationPackage(pkgName)) {
-			// 1) if startsWith "java." delegate to parent and terminate search
-			// 2) if part of the bootdelegation list then delegate to parent and continue of failure
-			result = parent == null ? null : parent.getResources(name);
-			if (pkgName.startsWith(JAVA_PACKAGE))
-				return result;
-		}
-		return compoundEnumerations(result, findResources(name));
 	}
 
 	public static <E> Enumeration<E> compoundEnumerations(Enumeration<E> list1, Enumeration<E> list2) {

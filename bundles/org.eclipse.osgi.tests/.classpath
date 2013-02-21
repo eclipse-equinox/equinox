@@ -30,6 +30,7 @@
 	<classpathentry kind="src" output="bundle_tests/buddy.dependent.a" path="bundles_src/buddy.dependent.a"/>
 	<classpathentry kind="src" output="bundle_tests/buddy.dependent.a.test1" path="bundles_src/buddy.dependent.a.test1"/>
 	<classpathentry kind="src" output="bundle_tests/buddy.dependent.a.test2" path="bundles_src/buddy.dependent.a.test2"/>
+	<classpathentry kind="src" output="bundle_tests/buddy.invalid.a" path="bundles_src/buddy.invalid.a"/>
 	<classpathentry kind="src" output="bundle_tests/nativetest.a1" path="bundles_src/nativetest.a1"/>
 	<classpathentry kind="src" output="bundle_tests/nativetest.a2" path="bundles_src/nativetest.a2"/>
 	<classpathentry kind="src" output="bundle_tests/nativetest.b1" path="bundles_src/nativetest.b1"/>

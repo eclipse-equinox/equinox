@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,8 @@ package org.eclipse.osgi.internal.loader.buddy;
 
 import java.net.URL;
 import java.util.*;
+import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
+import org.eclipse.osgi.internal.framework.EquinoxBundle;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -52,7 +54,7 @@ public class PolicyHandler implements SynchronousBundleListener {
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();
 			if (!token.equals("")) //$NON-NLS-1$
-				list.add(token);
+				list.add(token.toLowerCase());
 		}
 		return list.isEmpty() ? new Object[0] : list.toArray(new Object[list.size()]);
 	}
@@ -92,7 +94,10 @@ public class PolicyHandler implements SynchronousBundleListener {
 					policiesSnapshot[policyOrder] = new SystemPolicy(policedLoader.getParentClassLoader());
 					return (IBuddyPolicy) policiesSnapshot[policyOrder];
 				}
-
+				// Not a valid buddy policy
+				EquinoxBundle bundle = (EquinoxBundle) policedLoader.getModuleClassLoader().getBundle();
+				bundle.getModule().getContainer().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, bundle.getModule(), new RuntimeException("Invalid buddy policy: " + buddyName));
+				policiesSnapshot[policyOrder] = null;
 				//			//Buddy policy can be provided by service implementations
 				//			BundleContext fwkCtx = policedLoader.bundle.framework.systemBundle.context;
 				//			ServiceReference[] matchingBuddies = null;

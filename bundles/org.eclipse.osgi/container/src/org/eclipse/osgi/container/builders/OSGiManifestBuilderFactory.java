@@ -819,6 +819,9 @@ public final class OSGiManifestBuilderFactory {
 				if (other == null) {
 					return -1;
 				}
+				if (other.highestFloor == null) {
+					return -1;
+				}
 				int compareVersions = this.highestFloor.compareTo(other.highestFloor);
 				if (compareVersions != 0) {
 					return -(compareVersions);
@@ -827,9 +830,9 @@ public final class OSGiManifestBuilderFactory {
 				return 1;
 			}
 			if (this.hasLanguage) {
-				return other.hasLanguage ? other.manifestIndex - this.manifestIndex : 1;
+				return other.hasLanguage ? this.manifestIndex - other.manifestIndex : 1;
 			}
-			return other.hasLanguage ? -1 : other.manifestIndex - this.manifestIndex;
+			return other.hasLanguage ? -1 : this.manifestIndex - other.manifestIndex;
 		}
 	}
 

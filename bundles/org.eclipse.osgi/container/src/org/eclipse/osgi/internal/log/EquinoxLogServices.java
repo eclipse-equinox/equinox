@@ -1,5 +1,9 @@
 /*******************************************************************************
+<<<<<<< HEAD
  * Copyright (c) 2006, 2012 IBM Corporation and others.
+=======
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
+>>>>>>> master
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,32 +41,38 @@ public class EquinoxLogServices {
 	private final FrameworkLog rootFrameworkLog;
 
 	public EquinoxLogServices(EquinoxConfiguration environmentInfo, Location configuration) {
-		String logFileProp = environmentInfo.getConfiguration(EclipseStarter.PROP_LOGFILE);
-		boolean enabled = "true".equals(environmentInfo.getConfiguration(PROP_LOG_ENABLED, "true")); //$NON-NLS-1$ //$NON-NLS-2$
-		if (logFileProp != null) {
-			logWriter = new EquinoxLogWriter(new File(logFileProp), EQUINOX_LOGGER_NAME, enabled, environmentInfo);
-		} else {
+		String logFilePath = environmentInfo.getConfiguration(EclipseStarter.PROP_LOGFILE);
+		if (logFilePath == null) {
+			logFilePath = Long.toString(System.currentTimeMillis()) + EquinoxLogServices.LOG_EXT;
+		}
+
+		File logFile = new File(logFilePath);
+		if (!logFile.isAbsolute()) {
 			File configAreaDirectory = null;
 			if (configuration != null)
 				// TODO assumes the URL is a file: url
 				configAreaDirectory = new File(configuration.getURL().getFile());
 
 			if (configAreaDirectory != null) {
-				String logFileName = Long.toString(System.currentTimeMillis()) + EquinoxLogServices.LOG_EXT;
-				File logFile = new File(configAreaDirectory, logFileName);
-				environmentInfo.setConfiguration(EclipseStarter.PROP_LOGFILE, logFile.getAbsolutePath());
-				logWriter = new EquinoxLogWriter(logFile, EQUINOX_LOGGER_NAME, enabled, environmentInfo);
-			} else
-				logWriter = new EquinoxLogWriter((Writer) null, EQUINOX_LOGGER_NAME, enabled, environmentInfo);
+				logFile = new File(configAreaDirectory, logFilePath);
+			} else {
+				logFile = null;
+
+			}
 		}
 
-		File logFile = logWriter.getFile();
+		boolean enabled = "true".equals(environmentInfo.getConfiguration(PROP_LOG_ENABLED, "true")); //$NON-NLS-1$ //$NON-NLS-2$
 		if (logFile != null) {
+			environmentInfo.setConfiguration(EclipseStarter.PROP_LOGFILE, logFile.getAbsolutePath());
+			logWriter = new EquinoxLogWriter(logFile, EQUINOX_LOGGER_NAME, enabled, environmentInfo);
+
 			File perfLogFile = new File(logFile.getParentFile(), "performance.log"); //$NON-NLS-1$
 			perfWriter = new EquinoxLogWriter(perfLogFile, PERF_LOGGER_NAME, true, environmentInfo);
 		} else {
+			logWriter = new EquinoxLogWriter((Writer) null, EQUINOX_LOGGER_NAME, enabled, environmentInfo);
 			perfWriter = new EquinoxLogWriter((Writer) null, PERF_LOGGER_NAME, true, environmentInfo);
 		}
+
 		if ("true".equals(environmentInfo.getConfiguration(EclipseStarter.PROP_CONSOLE_LOG))) //$NON-NLS-1$
 			logWriter.setConsoleLog(true);
 		logServiceManager = new LogServiceManager(logWriter, perfWriter);
