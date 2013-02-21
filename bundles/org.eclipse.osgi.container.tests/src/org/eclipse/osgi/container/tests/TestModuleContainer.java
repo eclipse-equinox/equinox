@@ -958,12 +958,9 @@ public class TestModuleContainer {
 				new DummyModuleEvent(lazy1, ModuleEvent.STOPPED, State.RESOLVED),
 				new DummyModuleEvent(lazy1, ModuleEvent.UNRESOLVED, State.INSTALLED),
 				new DummyModuleEvent(lazy1, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(lazy1, ModuleEvent.LAZY_ACTIVATION, State.LAZY_STARTING)));
+				new DummyModuleEvent(lazy1, ModuleEvent.STARTING, State.STARTING),
+				new DummyModuleEvent(lazy1, ModuleEvent.STARTED, State.ACTIVE)));
 		assertEvents(expected, actual, true);
-
-		lazy1.start(StartOptions.LAZY_TRIGGER);
-		// flush events
-		database.getModuleEvents();
 
 		container.update(lazy1, OSGiManifestBuilderFactory.createBuilder(getManifest("lazy1_v1.MF")), null);
 		actual = database.getModuleEvents();
@@ -972,6 +969,16 @@ public class TestModuleContainer {
 				new DummyModuleEvent(lazy1, ModuleEvent.STOPPED, State.RESOLVED),
 				new DummyModuleEvent(lazy1, ModuleEvent.UNRESOLVED, State.INSTALLED),
 				new DummyModuleEvent(lazy1, ModuleEvent.UPDATED, State.INSTALLED),
+				new DummyModuleEvent(lazy1, ModuleEvent.RESOLVED, State.RESOLVED),
+				new DummyModuleEvent(lazy1, ModuleEvent.LAZY_ACTIVATION, State.LAZY_STARTING)));
+		assertEvents(expected, actual, true);
+
+		container.refresh(Arrays.asList(lazy1));
+		actual = database.getModuleEvents();
+		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
+				new DummyModuleEvent(lazy1, ModuleEvent.STOPPING, State.STOPPING),
+				new DummyModuleEvent(lazy1, ModuleEvent.STOPPED, State.RESOLVED),
+				new DummyModuleEvent(lazy1, ModuleEvent.UNRESOLVED, State.INSTALLED),
 				new DummyModuleEvent(lazy1, ModuleEvent.RESOLVED, State.RESOLVED),
 				new DummyModuleEvent(lazy1, ModuleEvent.LAZY_ACTIVATION, State.LAZY_STARTING)));
 		assertEvents(expected, actual, true);
