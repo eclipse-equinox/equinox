@@ -20,10 +20,6 @@ public class SecurityTestSuite extends TestCase {
 		//signed bundle tests - *uses* trust engine
 		suite.addTest(SignedBundleTest.suite());
 		suite.addTest(SignedBundleTest.localSuite());
-		//authorization tests - *uses* signed content tests
-		suite.addTest(AuthorizeAnyTest.suite());
-		suite.addTest(AuthorizeSignedTest.suite());
-		suite.addTest(AuthorizeTrustedTest.suite());
 		suite.addTest(OSGiAPICertificateTest.suite());
 		return suite;
 	}

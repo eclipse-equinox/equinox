@@ -35,14 +35,17 @@ public class InstallTests extends CoreTest {
 		super.setUp();
 	}
 
-	public void testInstallInvalidManifest01() throws BundleException, IOException {
+	public void testInstallNoVersionManifest01() throws BundleException, IOException {
+		// Note that this test case has changed since the removing of plugin.xml conversion
+		// Before this tested that a plugin.xml with no version specified would fail.
+		// It is valid for a bundle to omit Bundle-Version header (and default to version 0.0.0
 		Bundle installed = null;
 		try {
 			installed = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle03"); //$NON-NLS-1$
-			// should have failed with BundleException
-			fail("1.0"); //$NON-NLS-1$
+			// success - should allow manifests with no version.
 		} catch (BundleException be) {
-			// success - the manifest was invalid
+			// should not have failed with BundleException
+			fail("1.0"); //$NON-NLS-1$
 		} finally {
 			if (installed != null)
 				// clean-up - only runs if we end-up accepting an invalid manifest				

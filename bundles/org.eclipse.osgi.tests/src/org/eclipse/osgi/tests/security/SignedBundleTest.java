@@ -79,7 +79,6 @@ public class SignedBundleTest extends BaseSecurityTest {
 	public static Test suite() {
 		ConfigurationSessionTestSuite suite = new ConfigurationSessionTestSuite(BUNDLE_SECURITY_TESTS, "Unit session tests for SignedContent");
 		addDefaultSecurityBundles(suite);
-		setAuthorizationEnabled(suite);
 		suite.addTestSuite(SignedBundleTest.class);
 		return suite;
 	}

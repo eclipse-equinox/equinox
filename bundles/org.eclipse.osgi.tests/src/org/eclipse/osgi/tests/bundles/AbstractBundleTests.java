@@ -11,7 +11,6 @@
 package org.eclipse.osgi.tests.bundles;
 
 import org.eclipse.core.tests.harness.CoreTest;
-import org.eclipse.osgi.internal.baseadaptor.StateManager;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
 
@@ -190,8 +189,4 @@ public class AbstractBundleTests extends CoreTest {
 		return result.toString();
 	}
 
-	public void setPlatformProperties() {
-		StateManager stateManager = (StateManager) installer.getPlatformAdmin();
-		stateManager.getSystemState().setPlatformProperties(System.getProperties());
-	}
 }

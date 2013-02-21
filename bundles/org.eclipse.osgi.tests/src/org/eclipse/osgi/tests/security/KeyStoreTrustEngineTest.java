@@ -188,7 +188,7 @@ public class KeyStoreTrustEngineTest extends TestCase {
 		} finally {
 			safeClose(out);
 		}
-		engine = new KeyStoreTrustEngine(testStoreFile.getPath(), TYPE_DEFAULT, PASSWORD_DEFAULT, "teststore"); //$NON-NLS-1$
+		engine = new KeyStoreTrustEngine(testStoreFile.getPath(), TYPE_DEFAULT, PASSWORD_DEFAULT, "teststore", null); //$NON-NLS-1$
 	}
 
 	/**

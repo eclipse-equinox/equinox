@@ -16,11 +16,11 @@ import java.net.*;
 import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.*;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -114,7 +114,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 		installer.refreshPackages(new Bundle[] {chainTestC, chainTestD});
 
-		Object[] actualEvents = simpleResults.getResults(8);
+		Object[] actualEvents = simpleResults.getResults(12);
 		compareResults(expectedEvents, actualEvents);
 	}
 
@@ -554,7 +554,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			osgiA.start(Bundle.START_TRANSIENT);
 			assertFalse("Bundle is started!!", osgiA.getState() == Bundle.ACTIVE); //$NON-NLS-1$
 		} catch (BundleException e) {
-			assertEquals("Expected invalid operation", BundleException.INVALID_OPERATION, e.getType()); //$NON-NLS-1$
+			assertEquals("Expected invalid operation", BundleException.START_TRANSIENT_ERROR, e.getType()); //$NON-NLS-1$
 		}
 		expectedEvents = new Object[0];
 		actualEvents = simpleResults.getResults(0);
@@ -1167,21 +1167,23 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		installer.resolveBundles(new Bundle[] {host, frag});
 		PackageAdmin packageAdmin = installer.getPackageAdmin();
 		ExportedPackage[] hostExports = packageAdmin.getExportedPackages(host);
-		assertEquals("Number host exports", 3, hostExports == null ? 0 : hostExports.length); //$NON-NLS-1$
+		assertEquals("Number host exports", 4, hostExports == null ? 0 : hostExports.length); //$NON-NLS-1$
 
-		PlatformAdmin platformAdmin = installer.getPlatformAdmin();
-		State systemState = platformAdmin.getState(false);
-		BundleDescription hostDesc = systemState.getBundle(host.getBundleId());
-		ExportPackageDescription[] hostExportDescs = hostDesc.getSelectedExports();
-		assertEquals("Number host export descriptions", 3, hostExportDescs.length); //$NON-NLS-1$
+		BundleWiring hostWiring = (BundleWiring) host.adapt(BundleWiring.class);
+		assertNotNull("No host wiring", hostWiring);
 
-		assertEquals("Check export name", "host.multiple.exports", hostExportDescs[0].getName()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("Check include directive", "Public*", (String) hostExportDescs[0].getDirective("include")); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		List packageCapabilities = hostWiring.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
+		assertEquals("Number host export capabilities", 4, packageCapabilities.size()); //$NON-NLS-1$
 
-		assertEquals("Check export name", "host.multiple.exports.onlyone", hostExportDescs[1].getName()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Check export name", "host.multiple.exports", ((BundleCapability) packageCapabilities.get(0)).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE)); //$NON-NLS-1$//$NON-NLS-2$
+		assertEquals("Check include directive", "Public*", (String) ((BundleCapability) packageCapabilities.get(0)).getDirectives().get(PackageNamespace.CAPABILITY_INCLUDE_DIRECTIVE)); //$NON-NLS-1$//$NON-NLS-2$
 
-		assertEquals("Check export name", "host.multiple.exports", hostExportDescs[2].getName()); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("Check include directive", "private", (String) hostExportDescs[2].getAttributes().get("scope")); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		assertEquals("Check export name", "host.multiple.exports.onlyone", ((BundleCapability) packageCapabilities.get(1)).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE)); //$NON-NLS-1$ //$NON-NLS-2$
+
+		assertEquals("Check export name", "host.multiple.exports", ((BundleCapability) packageCapabilities.get(2)).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE)); //$NON-NLS-1$//$NON-NLS-2$
+		assertEquals("Check scope attribute", "private", (String) ((BundleCapability) packageCapabilities.get(2)).getAttributes().get("scope")); //$NON-NLS-1$//$NON-NLS-2$
+
+		assertEquals("Check export name", "host.multiple.exports.onlyone", ((BundleCapability) packageCapabilities.get(3)).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public void testMultipleExportFragments02() throws Exception {
@@ -1219,8 +1221,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	}
 
 	public void testXFriends() throws Exception {
-		System.setProperty("osgi.resolverMode", "strict"); //$NON-NLS-1$ //$NON-NLS-2$
-		setPlatformProperties();
+		// TODO this will fail since we don't have strict mode in the new framework
 		try {
 			Bundle test1 = installer.installBundle("xfriends.test1"); //$NON-NLS-1$
 			Bundle test2 = installer.installBundle("xfriends.test2"); //$NON-NLS-1$
@@ -1238,8 +1239,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			Object[] actualEvents = simpleResults.getResults(4);
 			compareResults(expectedEvents, actualEvents);
 		} finally {
-			System.getProperties().remove("osgi.resolverMode"); //$NON-NLS-1$
-			setPlatformProperties();
+			// would be used to disable strict mode if we could
 		}
 	}
 
@@ -1539,7 +1539,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Bundle systemBundle = OSGiTestsActivator.getContext().getBundle(0);
 		Enumeration resources = null;
 		try {
-			resources = systemBundle.getResources("hookconfigurators.properties");
+			resources = systemBundle.getResources("systembundle.properties");
 		} catch (IOException e) {
 			fail("Failed to get resources", e);
 		}

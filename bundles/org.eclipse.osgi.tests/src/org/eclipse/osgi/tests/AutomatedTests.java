@@ -44,7 +44,7 @@ public class AutomatedTests extends TestCase {
 		//		suite.addTest(new TestSuite(SimpleTests.class));
 		suite.addTest(new TestSuite(InstallTests.class));
 		suite.addTest(org.eclipse.osgi.tests.eclipseadaptor.AllTests.suite());
-		suite.addTest(org.eclipse.osgi.tests.services.resolver.AllTests.suite());
+		//TODO suite.addTest(org.eclipse.osgi.tests.services.resolver.AllTests.suite());
 		suite.addTest(DebugOptionsTestCase.suite());
 		suite.addTest(org.eclipse.equinox.log.test.AllTests.suite());
 		suite.addTest(org.eclipse.osgi.tests.security.SecurityTestSuite.suite());
@@ -59,7 +59,7 @@ public class AutomatedTests extends TestCase {
 		suite.addTest(EventManagerTests.suite());
 		suite.addTest(FilterTests.suite());
 		suite.addTest(PermissionTests.suite());
-		suite.addTest(org.eclipse.osgi.tests.securityadmin.AllSecurityAdminTests.suite());
+		//TODO suite.addTest(org.eclipse.osgi.tests.securityadmin.AllSecurityAdminTests.suite());
 		suite.addTest(org.eclipse.osgi.tests.resource.AllTests.suite());
 		return suite;
 	}

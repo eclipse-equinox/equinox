@@ -10,14 +10,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.CollisionHook;
@@ -185,7 +183,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 			URL testBundle = OSGiTestsActivator.getContext().getBundle().getEntry("test_files/security/bundles/signed.jar");
 			File testFile = OSGiTestsActivator.getContext().getDataFile("test with space/test.jar");
 			assertTrue(testFile.getParentFile().mkdirs());
-			AdaptorUtil.readFile(testBundle.openStream(), testFile);
+			readFile(testBundle.openStream(), testFile);
 			test = OSGiTestsActivator.getContext().installBundle("reference:" + testFile.toURI().toString());
 		} catch (Exception e) {
 			fail("Unexpected failure", e); //$NON-NLS-1$
@@ -195,6 +193,35 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 					test.uninstall();
 			} catch (BundleException e) {
 				// nothing
+			}
+		}
+	}
+
+	public static void readFile(InputStream in, File file) throws IOException {
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream(file);
+
+			byte buffer[] = new byte[1024];
+			int count;
+			while ((count = in.read(buffer, 0, buffer.length)) > 0) {
+				fos.write(buffer, 0, count);
+			}
+		} finally {
+			if (in != null) {
+				try {
+					in.close();
+				} catch (IOException ee) {
+					// nothing to do here
+				}
+			}
+
+			if (fos != null) {
+				try {
+					fos.close();
+				} catch (IOException ee) {
+					// nothing to do here
+				}
 			}
 		}
 	}

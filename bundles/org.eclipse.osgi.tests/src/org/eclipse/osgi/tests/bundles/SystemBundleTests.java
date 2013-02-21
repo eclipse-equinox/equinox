@@ -1022,6 +1022,14 @@ public class SystemBundleTests extends AbstractBundleTests {
 		if (failureException[0] != null)
 			fail("Error occurred while waiting", failureException[0]); //$NON-NLS-1$
 
+		// we can either have a hack here that waits until the system bundle is active
+		// or we can just try to start it and race with the update() call above
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+
 		openAllBundleFiles(equinox.getBundleContext());
 
 		try {
@@ -1499,6 +1507,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 	}
 
 	public void testBug351519RefreshEnabled() {
+		// TODO this is expected to fail.  Not sure we should implement this
 		doTestBug351519Refresh(Boolean.TRUE);
 	}
 
@@ -1507,6 +1516,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 	}
 
 	public void testBug351519RefreshDefault() {
+		// TODO this is expected to fail.  The default should be enabled if we do implement
 		doTestBug351519Refresh(null);
 	}
 
@@ -1637,8 +1647,8 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		// could make this a more complete check, but with the bug the dynamic wires 
 		// are missing altogether because we fail to save the resolver state cache.
-		assertEquals("Wrong number of wires for wiring1", 3, packages1.size());
-		assertEquals("Wrong number of wires for wiring2", 2, packages2.size());
+		assertEquals("Wrong number of wires for wiring1", 1, packages1.size());
+		assertEquals("Wrong number of wires for wiring2", 1, packages2.size());
 
 		try {
 			equinox.stop();

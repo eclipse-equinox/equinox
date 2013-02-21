@@ -82,7 +82,7 @@ public class BaseSecurityTest extends CoreTest {
 
 		copy(eclipseURL.openStream(), tempEngine);
 
-		KeyStoreTrustEngine dummyTE = new KeyStoreTrustEngine(tempEngine.getAbsolutePath(), "JKS", "changeit".toCharArray(), "temp.jks");
+		KeyStoreTrustEngine dummyTE = new KeyStoreTrustEngine(tempEngine.getAbsolutePath(), "JKS", "changeit".toCharArray(), "temp.jks", null);
 		Hashtable properties = new Hashtable(7);
 		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 
@@ -162,22 +162,6 @@ public class BaseSecurityTest extends CoreTest {
 
 	protected static String getTestJarPath(String jarName) {
 		return "test_files/security/bundles/" + jarName + ".jar";
-	}
-
-	protected static void setAuthorizationEnabled(ConfigurationSessionTestSuite suite) {
-		try {
-			suite.getSetup().setSystemProperty("osgi.signedcontent.support", "all"); //$NON-NLS-1$//$NON-NLS-2$
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	protected static void setAuthorizationPolicy(ConfigurationSessionTestSuite suite, String policy) {
-		try {
-			suite.getSetup().setSystemProperty("osgi.signedcontent.authorization.engine.policy", policy); //$NON-NLS-1$//$NON-NLS-2$
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	protected static void setEclipseTrustEngine(ConfigurationSessionTestSuite suite) {
