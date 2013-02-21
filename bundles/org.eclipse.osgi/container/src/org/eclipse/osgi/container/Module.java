@@ -559,7 +559,12 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		if (wiring == null) {
 			return null;
 		}
-		return wiring.getModuleLoader();
+		try {
+			return wiring.getModuleLoader();
+		} catch (UnsupportedOperationException e) {
+			// just ignore and return null;
+			return null;
+		}
 	}
 
 	/**
