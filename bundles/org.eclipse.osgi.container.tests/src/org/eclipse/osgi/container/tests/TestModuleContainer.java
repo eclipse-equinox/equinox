@@ -997,19 +997,20 @@ public class TestModuleContainer {
 		// actually launch the container
 		systemBundle.start();
 
+		container.getFrameworkStartLevel().setInitialBundleStartLevel(2);
 		Module c4 = installDummyModule("c4_v1.MF", "c4_v1", container);
 		Module lazy1 = installDummyModule("lazy1_v1.MF", "lazy1", container);
 
 		container.resolve(Arrays.asList(c4, lazy1), true);
 
-		Assert.assertEquals("Wrong startlevel.", 1, c4.getStartLevel());
-		Assert.assertEquals("Wrong startlevel.", 1, lazy1.getStartLevel());
-
-		c4.setStartLevel(2);
-		lazy1.setStartLevel(2);
-
 		Assert.assertEquals("Wrong startlevel.", 2, c4.getStartLevel());
 		Assert.assertEquals("Wrong startlevel.", 2, lazy1.getStartLevel());
+
+		c4.setStartLevel(3);
+		lazy1.setStartLevel(3);
+
+		Assert.assertEquals("Wrong startlevel.", 3, c4.getStartLevel());
+		Assert.assertEquals("Wrong startlevel.", 3, lazy1.getStartLevel());
 
 		database.getModuleEvents();
 
@@ -1058,10 +1059,10 @@ public class TestModuleContainer {
 
 		Assert.assertFalse("c4 has activation policy set.", c4.isActivationPolicyUsed());
 		Assert.assertTrue("c4 is not auto started.", c4.isPersistentlyStarted());
-		Assert.assertEquals("c4 has wrong start-level", 2, c4.getStartLevel());
+		Assert.assertEquals("c4 has wrong start-level", 3, c4.getStartLevel());
 		Assert.assertTrue("lazy1 is using activation policy.", lazy1.isActivationPolicyUsed());
 		Assert.assertTrue("lazy1 is not auto started.", lazy1.isPersistentlyStarted());
-		Assert.assertEquals("lazy1 has wrong start-level", 2, lazy1.getStartLevel());
+		Assert.assertEquals("lazy1 has wrong start-level", 3, lazy1.getStartLevel());
 
 		// relaunch the container
 		systemBundle.start();
