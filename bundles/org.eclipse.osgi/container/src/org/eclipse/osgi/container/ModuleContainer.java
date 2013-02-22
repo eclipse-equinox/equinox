@@ -23,6 +23,7 @@ import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.ModuleDatabase.Sort;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.framework.eventmgr.*;
+import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.container.LockSet;
 import org.osgi.framework.*;
 import org.osgi.framework.namespace.HostNamespace;
@@ -37,6 +38,7 @@ import org.osgi.service.resolver.ResolutionException;
  * @since 3.10
  */
 public final class ModuleContainer {
+	private final static SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
 	/**
 	 * Used by install operations to establish a write lock on an install location
@@ -565,7 +567,7 @@ public final class ModuleContainer {
 			for (Module module : triggers) {
 				try {
 					if (module.getId() != 0 && Module.RESOLVED_SET.contains(module.getState())) {
-						module.start(StartOptions.TRANSIENT);
+						secureAction.start(module, StartOptions.TRANSIENT);
 					}
 				} catch (BundleException e) {
 					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
@@ -579,7 +581,7 @@ public final class ModuleContainer {
 				continue;
 			}
 			try {
-				module.start(StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
+				secureAction.start(module, StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
 			} catch (BundleException e) {
 				adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
 			}

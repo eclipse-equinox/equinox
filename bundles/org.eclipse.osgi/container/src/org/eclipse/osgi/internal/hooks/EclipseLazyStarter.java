@@ -11,12 +11,14 @@
 
 package org.eclipse.osgi.internal.hooks;
 
+import java.security.AccessController;
 import java.util.*;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.StartOptions;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
@@ -26,6 +28,8 @@ import org.osgi.framework.*;
 
 public class EclipseLazyStarter extends ClassLoaderHook {
 	private static final EnumSet<State> alreadyActive = EnumSet.of(State.ACTIVE, State.STOPPING, State.UNINSTALLED);
+	private static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
+
 	// holds the current activation trigger class and the ClasspathManagers that need to be activated
 	private final ThreadLocal<List<Object>> activationStack = new ThreadLocal<List<Object>>();
 	// used to store exceptions that occurred while activating a bundle
@@ -99,7 +103,8 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 			long startTime = System.currentTimeMillis();
 			try {
 				// do not persist the start of this bundle
-				managers[i].getGeneration().getRevision().getRevisions().getModule().start(StartOptions.LAZY_TRIGGER);
+				Module m = managers[i].getGeneration().getRevision().getRevisions().getModule();
+				secureAction.start(m, StartOptions.LAZY_TRIGGER);
 			} catch (BundleException e) {
 				Bundle bundle = managers[i].getGeneration().getRevision().getBundle();
 				if (e.getType() == BundleException.STATECHANGE_ERROR) {

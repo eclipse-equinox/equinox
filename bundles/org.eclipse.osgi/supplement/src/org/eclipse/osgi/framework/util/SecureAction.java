@@ -16,6 +16,7 @@ import java.net.*;
 import java.security.*;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
+import org.eclipse.osgi.container.Module;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -405,20 +406,20 @@ public class SecureAction {
 	}
 
 	/**
-	 * Starts a bundle.
-	 * @param bundle the bundle to start
+	 * Starts a module.
+	 * @param module the module to start
 	 * @param options the start options
 	 * @throws BundleException
 	 */
-	public void start(final Bundle bundle, final int options) throws BundleException {
+	public void start(final Module module, final Module.StartOptions... options) throws BundleException {
 		if (System.getSecurityManager() == null) {
-			bundle.start(options);
+			module.start(options);
 			return;
 		}
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 				public Object run() throws BundleException {
-					bundle.start(options);
+					module.start(options);
 					return null;
 				}
 			}, controlContext);
@@ -428,15 +429,6 @@ public class SecureAction {
 				throw (BundleException) e.getException();
 			throw (RuntimeException) e.getException();
 		}
-	}
-
-	/**
-	 * Starts a bundle
-	 * @param bundle
-	 * @throws BundleException
-	 */
-	public void start(final Bundle bundle) throws BundleException {
-		start(bundle, 0);
 	}
 
 	public BundleContext getContext(final Bundle bundle) {
