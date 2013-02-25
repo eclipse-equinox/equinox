@@ -22,7 +22,7 @@
     <relativePath>../../</relativePath>
   </parent>
 
-  <groupId>org.eclipse.equinox.bundles</groupId>
+  <groupId>org.eclipse.equinox</groupId>
   <artifactId>org.eclipse.equinox.security.ui</artifactId>
   <version>1.1.100-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
