@@ -522,6 +522,12 @@ public final class OSGiManifestBuilderFactory {
 
 		// Get the activator
 		String activator = manifest.get(Constants.BUNDLE_ACTIVATOR);
+		if (activator == null && manifest.get(Constants.FRAGMENT_HOST) != null) {
+			// we look for the extension activator for fragments
+			// probably should do this only for framework extensions, but there is no harm to check for others
+			// it is only acted upon for framework extension fragments
+			activator = manifest.get(EquinoxModuleDataNamespace.EXTENSION_ACTIVATOR_HEADER);
+		}
 		if (activator != null) {
 			attributes.put(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATOR, activator);
 		}
