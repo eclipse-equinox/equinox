@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,13 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.resolver;
 
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.State;
-import org.eclipse.osgi.service.resolver.StateObjectFactory;
-import org.osgi.framework.BundleException;
-import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.services.resolver.AbstractStateTest;
-
+import org.osgi.framework.BundleException;
 
 public class TestAttributes_001 extends AbstractStateTest {
 	public TestAttributes_001(String testName) {
@@ -29,10 +25,9 @@ public class TestAttributes_001 extends AbstractStateTest {
 	BundleDescription bundle_4 = null;
 	BundleDescription bundle_5 = null;
 
-	
 	public void testTest_001() {
 		State state = buildEmptyState();
-		StateObjectFactory sof = platformAdmin.getFactory();
+		StateObjectFactory sof = StateObjectFactory.defaultFactory;
 
 		bundle_1 = create_bundle_1(sof);
 		bundle_2 = create_bundle_2(sof);
@@ -48,15 +43,13 @@ public class TestAttributes_001 extends AbstractStateTest {
 		try {
 			state.resolve();
 		} catch (Throwable t) {
-			fail("unexpected exception class=" + t.getClass().getName()
-					+ " message=" + t.getMessage());
+			fail("unexpected exception class=" + t.getClass().getName() + " message=" + t.getMessage());
 			return;
 		}
 		checkBundlesResolved_a();
 		checkWiring_a();
 	} // end of method
 
-	
 	public void checkWiringState_1() {
 	} // end method
 
@@ -90,10 +83,11 @@ public class TestAttributes_001 extends AbstractStateTest {
 		} // end for
 	} // end method
 
-	public void checkWiringState_4() {} // end method
+	public void checkWiringState_4() {
+	} // end method
 
-	public void checkWiringState_5() {} // end method
-	
+	public void checkWiringState_5() {
+	} // end method
 
 	public void checkWiring_a() {
 		checkWiringState_1();
@@ -103,7 +97,6 @@ public class TestAttributes_001 extends AbstractStateTest {
 		checkWiringState_5();
 	} // end method
 
-	
 	public void addBundlesToState_a(State state) {
 		boolean added = false;
 		added = state.addBundle(bundle_1);
@@ -118,7 +111,6 @@ public class TestAttributes_001 extends AbstractStateTest {
 		assertTrue("failed to add bundle ", added);
 	} // end method
 
-	
 	public void checkBundlesResolved_a() {
 		assertTrue("unexpected bundle resolution state", bundle_1.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_2.isResolved());
@@ -127,7 +119,6 @@ public class TestAttributes_001 extends AbstractStateTest {
 		assertTrue("unexpected bundle resolution state", !bundle_5.isResolved());
 	} // end method
 
-	
 	public BundleDescription create_bundle_1(StateObjectFactory sof) {
 		java.util.Dictionary dictionary_1 = new java.util.Properties();
 		BundleDescription bundle = null;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,7 @@ public class TestGenerated_001 extends AbstractStateTest {
 
 	public void testTest_001() {
 		State state = buildEmptyState();
-		StateObjectFactory sof = platformAdmin.getFactory();
+		StateObjectFactory sof = StateObjectFactory.defaultFactory;
 
 		bundle_1 = create_bundle_1(sof);
 		bundle_2 = create_bundle_2(sof);

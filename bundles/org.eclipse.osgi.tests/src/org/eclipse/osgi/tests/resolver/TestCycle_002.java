@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,12 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.resolver;
 
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.State;
-import org.eclipse.osgi.service.resolver.StateObjectFactory;
+import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.services.resolver.AbstractStateTest;
 import org.osgi.framework.BundleException;
-
 
 public class TestCycle_002 extends AbstractStateTest {
 	public TestCycle_002(String testName) {
@@ -26,10 +23,9 @@ public class TestCycle_002 extends AbstractStateTest {
 	BundleDescription bundle_2 = null;
 	BundleDescription bundle_3 = null;
 
-	
 	public void testTest_002() {
 		State state = buildEmptyState();
-		StateObjectFactory sof = platformAdmin.getFactory();
+		StateObjectFactory sof = StateObjectFactory.defaultFactory;
 
 		bundle_1 = create_bundle_1(sof);
 		bundle_2 = create_bundle_2(sof);
@@ -43,26 +39,24 @@ public class TestCycle_002 extends AbstractStateTest {
 		try {
 			state.resolve();
 		} catch (Throwable t) {
-			fail("unexpected exception class=" + t.getClass().getName()
-					+ " message=" + t.getMessage());
+			fail("unexpected exception class=" + t.getClass().getName() + " message=" + t.getMessage());
 			return;
 		}
 		checkBundlesResolved_a();
 		checkWiring_a();
 	} // end of method
 
-	
 	public void checkWiringState_1() {
 		BundleDescription[] requires = bundle_1.getResolvedRequires();
 		assertNotNull("requires array is unexpectedly null", requires);
 		assertTrue("requires array is unexpectedly empty", requires.length > 0);
-		for (int i = 0; i<requires.length; i++) {
+		for (int i = 0; i < requires.length; i++) {
 			String requiresName = requires[i].getName();
 			assertNotNull("package name is null", requiresName);
-			if(requiresName.equals("B")) {
+			if (requiresName.equals("B")) {
 				assertNotNull("Require [B] is not wired when it should be ", requires[i]);
 				assertEquals("Require [B] is wired incorrectly ", requires[i], bundle_2);
-			} else if(requiresName.equals("C")) {
+			} else if (requiresName.equals("C")) {
 				assertNotNull("Require [C] is not wired when it should be ", requires[i]);
 				assertEquals("Require [C] is wired incorrectly ", requires[i], bundle_3);
 			}
@@ -73,13 +67,13 @@ public class TestCycle_002 extends AbstractStateTest {
 		BundleDescription[] requires = bundle_2.getResolvedRequires();
 		assertNotNull("requires array is unexpectedly null", requires);
 		assertTrue("requires array is unexpectedly empty", requires.length > 0);
-		for (int i = 0; i<requires.length; i++) {
+		for (int i = 0; i < requires.length; i++) {
 			String requiresName = requires[i].getName();
 			assertNotNull("package name is null", requiresName);
-			if(requiresName.equals("A")) {
+			if (requiresName.equals("A")) {
 				assertNotNull("Require [A] is not wired when it should be ", requires[i]);
 				assertEquals("Require [A] is wired incorrectly ", requires[i], bundle_1);
-			} else if(requiresName.equals("C")) {
+			} else if (requiresName.equals("C")) {
 				assertNotNull("Require [C] is not wired when it should be ", requires[i]);
 				assertEquals("Require [C] is wired incorrectly ", requires[i], bundle_3);
 			}
@@ -90,19 +84,18 @@ public class TestCycle_002 extends AbstractStateTest {
 		BundleDescription[] requires = bundle_3.getResolvedRequires();
 		assertNotNull("requires array is unexpectedly null", requires);
 		assertTrue("requires array is unexpectedly empty", requires.length > 0);
-		for (int i = 0; i<requires.length; i++) {
+		for (int i = 0; i < requires.length; i++) {
 			String requiresName = requires[i].getName();
 			assertNotNull("package name is null", requiresName);
-			if(requiresName.equals("A")) {
+			if (requiresName.equals("A")) {
 				assertNotNull("Require [A] is not wired when it should be ", requires[i]);
 				assertEquals("Require [A] is wired incorrectly ", requires[i], bundle_1);
-			} else if(requiresName.equals("B")) {
+			} else if (requiresName.equals("B")) {
 				assertNotNull("Require [B] is not wired when it should be ", requires[i]);
 				assertEquals("Require [B] is wired incorrectly ", requires[i], bundle_2);
 			}
 		} // end for
 	} // end method
-
 
 	public void checkWiring_a() {
 		checkWiringState_1();
@@ -110,7 +103,6 @@ public class TestCycle_002 extends AbstractStateTest {
 		checkWiringState_3();
 	} // end method
 
-	
 	public void addBundlesToState_a(State state) {
 		boolean added = false;
 		added = state.addBundle(bundle_1);
@@ -121,14 +113,12 @@ public class TestCycle_002 extends AbstractStateTest {
 		assertTrue("failed to add bundle ", added);
 	} // end method
 
-	
 	public void checkBundlesResolved_a() {
 		assertTrue("unexpected bundle resolution state", bundle_1.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_2.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_3.isResolved());
 	} // end method
 
-	
 	public BundleDescription create_bundle_1(StateObjectFactory sof) {
 		java.util.Dictionary dictionary_1 = new java.util.Properties();
 		BundleDescription bundle = null;
@@ -170,6 +160,5 @@ public class TestCycle_002 extends AbstractStateTest {
 		}
 		return bundle;
 	} // end of method
-
 
 } // end of testcase

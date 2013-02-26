@@ -172,10 +172,10 @@ public class StateResolverTest extends AbstractStateTest {
 		State state = buildComplexState();
 		state.resolve();
 		BundleDescription[] dependent;
-		dependent = platformAdmin.getStateHelper().getDependentBundles(new BundleDescription[] {state.getBundle(2)});
+		dependent = state.getStateHelper().getDependentBundles(new BundleDescription[] {state.getBundle(2)});
 		assertEquals("1.0", 1, dependent.length); //$NON-NLS-1$
 		assertEquals("1.1", state.getBundle(2), dependent[0]); //$NON-NLS-1$
-		dependent = platformAdmin.getStateHelper().getDependentBundles(new BundleDescription[] {state.getBundle(1)});
+		dependent = state.getStateHelper().getDependentBundles(new BundleDescription[] {state.getBundle(1)});
 		assertEquals("2.0", 4, dependent.length); //$NON-NLS-1$
 		assertContains("2.1", dependent, state.getBundle(1)); //$NON-NLS-1$
 		assertContains("2.2", dependent, state.getBundle(2)); //$NON-NLS-1$
@@ -187,30 +187,30 @@ public class StateResolverTest extends AbstractStateTest {
 		State state = buildComplexState();
 		state.resolve();
 		BundleDescription[] prereqs;
-		prereqs = platformAdmin.getStateHelper().getPrerequisites(state.getResolvedBundles());
+		prereqs = state.getStateHelper().getPrerequisites(state.getResolvedBundles());
 		assertEquals("1.0", 6, prereqs.length); //$NON-NLS-1$
-		prereqs = platformAdmin.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(1)});
+		prereqs = state.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(1)});
 		assertEquals("2.0", 2, prereqs.length); //$NON-NLS-1$
 		assertContains("2.1", prereqs, state.getBundle(1)); //$NON-NLS-1$
 		assertContains("2.2", prereqs, state.getBundle(3)); //$NON-NLS-1$
-		prereqs = platformAdmin.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(2)});
+		prereqs = state.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(2)});
 		assertEquals("3.0", 3, prereqs.length); //$NON-NLS-1$
 		assertContains("3.1", prereqs, state.getBundle(1)); //$NON-NLS-1$
 		assertContains("3.2", prereqs, state.getBundle(2)); //$NON-NLS-1$
 		assertContains("3.3", prereqs, state.getBundle(3)); //$NON-NLS-1$
-		prereqs = platformAdmin.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(3)});
+		prereqs = state.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(3)});
 		assertEquals("4.0", 1, prereqs.length); //$NON-NLS-1$
 		assertContains("4.1", prereqs, state.getBundle(3)); //$NON-NLS-1$
-		prereqs = platformAdmin.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(4)});
+		prereqs = state.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(4)});
 		assertEquals("5.0", 3, prereqs.length); //$NON-NLS-1$
 		assertContains("5.1", prereqs, state.getBundle(1)); //$NON-NLS-1$
 		assertContains("5.2", prereqs, state.getBundle(3)); //$NON-NLS-1$
 		assertContains("5.3", prereqs, state.getBundle(4)); //$NON-NLS-1$
-		prereqs = platformAdmin.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(5)});
+		prereqs = state.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(5)});
 		assertEquals("6.0", 2, prereqs.length); //$NON-NLS-1$
 		assertContains("6.1", prereqs, state.getBundle(3)); //$NON-NLS-1$
 		assertContains("6.2", prereqs, state.getBundle(5)); //$NON-NLS-1$
-		prereqs = platformAdmin.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(6)});
+		prereqs = state.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(6)});
 		assertEquals("6.0", 4, prereqs.length); //$NON-NLS-1$
 		assertContains("6.1", prereqs, state.getBundle(1)); //$NON-NLS-1$
 		assertContains("6.2", prereqs, state.getBundle(3)); //$NON-NLS-1$
@@ -302,10 +302,9 @@ public class StateResolverTest extends AbstractStateTest {
 		final String B1_MANIFEST = "Bundle-SymbolicName: org.eclipse.b1\n" + "Bundle-Version: 1.0\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		String B2_LOCATION = "org.eclipse.b2"; //$NON-NLS-1$
 		final String B2_MANIFEST = "Bundle-SymbolicName: org.eclipse.b2\n" + "Bundle-Version: 1.0\n"; //$NON-NLS-1$ //$NON-NLS-2$
-		State state = platformAdmin.getState();
-		state.setResolver(platformAdmin.getResolver());
-		BundleDescription b1 = platformAdmin.getFactory().createBundleDescription(parseManifest(B1_MANIFEST), B1_LOCATION, 1);
-		BundleDescription b2 = platformAdmin.getFactory().createBundleDescription(parseManifest(B2_MANIFEST), B2_LOCATION, 2);
+		State state = buildEmptyState();
+		BundleDescription b1 = state.getFactory().createBundleDescription(parseManifest(B1_MANIFEST), B1_LOCATION, 1);
+		BundleDescription b2 = state.getFactory().createBundleDescription(parseManifest(B2_MANIFEST), B2_LOCATION, 2);
 		state.addBundle(b1);
 		state.addBundle(b2);
 		StateDelta delta = state.resolve();
@@ -331,10 +330,9 @@ public class StateResolverTest extends AbstractStateTest {
 	public void testRemoveAndAdd() throws BundleException {
 		String B_LOCATION = "org.eclipse.b"; //$NON-NLS-1$
 		final String B_MANIFEST = "Bundle-SymbolicName: org.eclipse.b\n" + "Bundle-Version: 1.0\n"; //$NON-NLS-1$ //$NON-NLS-2$
-		State state = platformAdmin.getState();
-		state.setResolver(platformAdmin.getResolver());
-		BundleDescription b1 = platformAdmin.getFactory().createBundleDescription(parseManifest(B_MANIFEST), B_LOCATION, 1);
-		BundleDescription b2 = platformAdmin.getFactory().createBundleDescription(parseManifest(B_MANIFEST), B_LOCATION, 2);
+		State state = buildEmptyState();
+		BundleDescription b1 = state.getFactory().createBundleDescription(parseManifest(B_MANIFEST), B_LOCATION, 1);
+		BundleDescription b2 = state.getFactory().createBundleDescription(parseManifest(B_MANIFEST), B_LOCATION, 2);
 		state.addBundle(b1);
 		StateDelta delta = state.resolve();
 		BundleDelta[] changes = delta.getChanges();
@@ -3197,7 +3195,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("2.2", bCache.isResolved()); //$NON-NLS-1$
 
 		// re-resolve without the custom value
-		state.setResolver(platformAdmin.getResolver());
+		state.setResolver(platformAdminService.getResolver());
 		state.resolve(false);
 		// both should fail to resolve
 		assertFalse("3.1", aCache.isResolved()); //$NON-NLS-1$

@@ -26,7 +26,7 @@ public class AllTests extends TestCase {
 		TestSuite suite = new TestSuite(AllTests.class.getName());
 		suite.addTest(SubstitutableExportsTest.suite());
 		suite.addTest(DisabledInfoTest.suite());
-		suite.addTest(PlatformAdminTest.suite());
+		// TODO suite.addTest(PlatformAdminTest.suite());
 		suite.addTest(StateResolverTest.suite());
 		suite.addTest(StateCycleTest.suite());
 		suite.addTest(StateComparisonTest.suite());

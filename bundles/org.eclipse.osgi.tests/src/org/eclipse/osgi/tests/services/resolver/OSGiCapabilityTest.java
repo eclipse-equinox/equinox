@@ -249,7 +249,7 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 
 		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(), p1Frag.getSelectedGenericCapabilities()[0]);
 
-		state.setResolver(platformAdmin.createResolver());
+		state.setResolver(platformAdminService.createResolver());
 		state.resolve(new BundleDescription[] {p1});
 
 		assertTrue("p1", p1.isResolved());
@@ -293,7 +293,7 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		try {
 			state.getFactory().writeState(state, stateDir);
 			state = state.getFactory().readState(stateDir);
-			state.setResolver(platformAdmin.createResolver());
+			state.setResolver(platformAdminService.createResolver());
 		} catch (IOException e) {
 			fail("Error writing/reading state.", e);
 		}

@@ -23,7 +23,7 @@ public class BundleTests {
 		suite.addTest(BundleExceptionTests.suite());
 		suite.addTest(SubstituteExportsBundleTests.suite());
 		suite.addTest(PackageAdminBundleTests.suite());
-		suite.addTest(PlatformAdminBundleTests.suite());
+		//suite.addTest(PlatformAdminBundleTests.suite());
 		suite.addTest(ExtensionBundleTests.suite());
 		suite.addTest(ClassLoadingBundleTests.suite());
 		suite.addTest(NativeCodeBundleTests.suite());

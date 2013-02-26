@@ -15,13 +15,19 @@ import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
 
 public abstract class AbstractStateTest extends OSGiTest {
-	protected PlatformAdmin platformAdmin;
+	private ServiceReference platformAdminRef;
+	protected PlatformAdmin platformAdminService;
 
 	protected void setUp() throws Exception {
-		super.setUp();
-		platformAdmin = new SimplePlatformAdmin(getRandomLocation().toFile(), OSGiTestsActivator.getContext());
+		platformAdminRef = OSGiTestsActivator.getContext().getServiceReference(PlatformAdmin.class);
+		platformAdminService = (PlatformAdmin) OSGiTestsActivator.getContext().getService(platformAdminRef);
+	}
+
+	protected void tearDown() throws Exception {
+		OSGiTestsActivator.getContext().ungetService(platformAdminRef);
 	}
 
 	public AbstractStateTest(String testName) {
@@ -106,9 +112,9 @@ public abstract class AbstractStateTest extends OSGiTest {
 		if (original.getSupplier() != null) {
 			Object o = original.getSupplier();
 			if (o instanceof BundleDescription)
-				assertEquals(tag + ".5", (BundleDescription)original.getSupplier(), (BundleDescription)copy.getSupplier());
+				assertEquals(tag + ".5", (BundleDescription) original.getSupplier(), (BundleDescription) copy.getSupplier());
 			else
-				assertEquals(tag + ".5", (ExportPackageDescription)original.getSupplier(), (ExportPackageDescription)copy.getSupplier());
+				assertEquals(tag + ".5", (ExportPackageDescription) original.getSupplier(), (ExportPackageDescription) copy.getSupplier());
 		}
 	}
 
@@ -224,9 +230,7 @@ public abstract class AbstractStateTest extends OSGiTest {
 	}
 
 	public State buildEmptyState() {
-		State state = platformAdmin.getState();
-		state.setResolver(platformAdmin.getResolver());
-		return state;
+		return StateObjectFactory.defaultFactory.createState(true);
 	}
 
 	public State buildInitialState() throws BundleException {
