@@ -29,9 +29,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
+
 import org.osgi.framework.namespace.BundleNamespace;
 import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
 import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Namespace;
@@ -1727,7 +1729,16 @@ public class ResolverImpl implements Resolver
                         {
                             if (!rc.getWirings().containsKey(cand.getResource()))
                             {
-                                populateWireMap(rc, cand.getResource(),
+                                Resource target = cand.getResource();
+                                // need to special case identity capability since it may be from a fragment
+                                if (IdentityNamespace.IDENTITY_NAMESPACE.equals(cand.getNamespace())) {
+                                    if (Util.isFragment(target)) {
+                                        target = allCandidates.getCandidates(target.getRequirements(HostNamespace.HOST_NAMESPACE).get(0))
+                                                .iterator().next().getResource();
+                                        target = allCandidates.getWrappedHost(target);
+                                    }
+                                }
+                                populateWireMap(rc, target,
                                     resourcePkgMap, wireMap, allCandidates);
                             }
                             Wire wire = new WireImpl(

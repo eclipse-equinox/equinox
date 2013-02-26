@@ -75,25 +75,6 @@ public class BasicTest extends AbstractResourceTest {
 		super(name);
 	}
 
-	public void testIdentity() throws Exception {
-		tb1 = installer.installBundle("resource.tb1");
-		tb2 = installer.installBundle("resource.tb2");
-		tb3 = installer.installBundle("resource.tb3");
-		tb4 = installer.installBundle("resource.tb4");
-		tf1 = installer.installBundle("resource.tf1");
-		tf2 = installer.installBundle("resource.tf2");
-		tb1.start();
-		tb2.start();
-		tb3.start();
-		tb4.start();
-		assertTb1();
-		assertTb2();
-		assertTb3();
-		assertTb4();
-		assertTf1();
-		assertTf2();
-	}
-
 	public void testRequirementMatches() throws Exception {
 		Bundle tb5 = installer.installBundle("resource.tb5");
 		Resource requirer = (BundleRevision) tb5.adapt(BundleRevision.class);
@@ -131,6 +112,28 @@ public class BasicTest extends AbstractResourceTest {
 		assertDirective(requirement5, "mandatory", "foo,x");
 		// Mandatory directive should have no impact on generic capabilities or requirements.
 		assertRequirementMatches(requirement5, capability2);
+	}
+
+	public void testIdentity() throws Exception {
+		tb1 = installer.installBundle("resource.tb1");
+		tb2 = installer.installBundle("resource.tb2");
+		tb3 = installer.installBundle("resource.tb3");
+		tb4 = installer.installBundle("resource.tb4");
+		tf1 = installer.installBundle("resource.tf1");
+		tf2 = installer.installBundle("resource.tf2");
+		installer.resolveBundles(null);
+		tb1.start();
+		tb2.start();
+		tb3.start();
+		tb4.start();
+		assertEquals("tf1 not resolved", tf1.getState(), Bundle.RESOLVED);
+		assertEquals("tf2 not resolved", tf2.getState(), Bundle.RESOLVED);
+		assertTb1();
+		assertTb2();
+		assertTb3();
+		assertTb4();
+		assertTf1();
+		//		assertTf2();
 	}
 
 	/*
@@ -179,7 +182,7 @@ public class BasicTest extends AbstractResourceTest {
 		// Check the osgi.identity wire between TB1 and TB3.
 		Wire wire = (Wire) wires.get(0);
 		BundleRevision requirer = (BundleRevision) tb3.adapt(BundleRevision.class);
-		Requirement requirement = getIdentityRequirement(requirer, 0);
+		Requirement requirement = getIdentityRequirement(requirer, 1);
 		assertIdentityWire(wire, capability, revision, requirement, requirer);
 		// There should be 1 required osgi.identity wire (TB4 -> TB1 via TF1).
 		wires = wiring.getRequiredWires(IdentityNamespace.IDENTITY_NAMESPACE);
@@ -260,14 +263,14 @@ public class BasicTest extends AbstractResourceTest {
 		List wires = wiring.getRequiredWires(IdentityNamespace.IDENTITY_NAMESPACE);
 		assertWires(wires, 2);
 		// Check the osgi.identity wire between TB1 and TB3.
-		Wire wire = (Wire) wires.get(0);
-		Requirement requirement = getIdentityRequirement(revision, 0);
+		Wire wire = (Wire) wires.get(1);
+		Requirement requirement = getIdentityRequirement(revision, 1);
 		BundleRevision provider = (BundleRevision) tb1.adapt(BundleRevision.class);
 		capability = getIdentityCapability(provider);
 		assertIdentityWire(wire, capability, provider, requirement, revision);
 		// Check the osgi.identity wire between TF1 and TB3.
-		wire = (Wire) wires.get(1);
-		requirement = getIdentityRequirement(revision, 1);
+		wire = (Wire) wires.get(0);
+		requirement = getIdentityRequirement(revision, 0);
 		provider = (BundleRevision) tf1.adapt(BundleRevision.class);
 		capability = getIdentityCapability(provider);
 		assertIdentityWire(wire, capability, provider, requirement, revision);
@@ -356,7 +359,7 @@ public class BasicTest extends AbstractResourceTest {
 		// Check the osgi.identity wire between TF1 and TB3.
 		Wire wire = (Wire) wires.get(0);
 		BundleRevision requirer = (BundleRevision) tb3.adapt(BundleRevision.class);
-		Requirement requirement = getIdentityRequirement(requirer, 1);
+		Requirement requirement = getIdentityRequirement(requirer, 0);
 		assertIdentityWire(wire, capability, revision, requirement, requirer);
 	}
 
