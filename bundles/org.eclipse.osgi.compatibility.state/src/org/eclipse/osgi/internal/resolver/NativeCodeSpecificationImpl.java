@@ -68,22 +68,25 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 			if (osNames.length == 0)
 				match = true;
 			else {
-				Collection<String> platformOSAliases;
+				Collection<?> platformOSAliases;
 				Object platformOS = platformProps[i].get(Constants.FRAMEWORK_OS_NAME);
 				if (platformOS instanceof Collection) {
-					@SuppressWarnings("unchecked")
-					Collection<String> platformOSTemp = (Collection<String>) platformOS;
-					platformOSAliases = platformOSTemp;
+					platformOSAliases = (Collection<?>) platformOS;
 				} else if (platformOS instanceof String) {
+					platformOS = aliasMapper.getCanonicalOSName((String) platformOS);
 					platformOSAliases = aliasMapper.getOSNameAliases((String) platformOS);
 				} else {
-					platformOSAliases = Collections.emptyList();
+					platformOSAliases = Collections.singleton(platformOS);
 				}
 				osNamesLoop: for (String osName : osNames) {
 					String canonicalOSName = aliasMapper.getCanonicalOSName(osName);
-					for (String osAlias : platformOSAliases) {
-						if (osAlias.equalsIgnoreCase(canonicalOSName)) {
-							match = true;
+					for (Object osAlias : platformOSAliases) {
+						if (osAlias instanceof String) {
+							match = (((String) osAlias).equalsIgnoreCase(canonicalOSName));
+						} else {
+							match = osAlias.equals(canonicalOSName);
+						}
+						if (match) {
 							break osNamesLoop;
 						}
 					}
@@ -97,22 +100,25 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 			if (processors.length == 0)
 				match = true;
 			else {
-				Collection<String> platformProcessorAliases;
+				Collection<?> platformProcessorAliases;
 				Object platformProcessor = platformProps[i].get(Constants.FRAMEWORK_PROCESSOR);
 				if (platformProcessor instanceof Collection) {
-					@SuppressWarnings("unchecked")
-					Collection<String> platformProcessorTemp = (Collection<String>) platformProcessor;
-					platformProcessorAliases = platformProcessorTemp;
+					platformProcessorAliases = (Collection<?>) platformProcessor;
 				} else if (platformProcessor instanceof String) {
+					platformProcessor = aliasMapper.getCanonicalProcessor((String) platformProcessor);
 					platformProcessorAliases = aliasMapper.getProcessorAliases((String) platformProcessor);
 				} else {
-					platformProcessorAliases = Collections.emptyList();
+					platformProcessorAliases = Collections.singletonList(platformProcessor);
 				}
 				processorLoop: for (String processor : processors) {
 					String canonicalProcessor = aliasMapper.getCanonicalProcessor(processor);
-					for (String processorAlias : platformProcessorAliases) {
-						if (processorAlias.equalsIgnoreCase(canonicalProcessor)) {
-							match = true;
+					for (Object processorAlias : platformProcessorAliases) {
+						if (processorAlias instanceof String) {
+							match = ((String) processorAlias).equalsIgnoreCase(canonicalProcessor);
+						} else {
+							match = processorAlias.equals(canonicalProcessor);
+						}
+						if (match) {
 							break processorLoop;
 						}
 					}

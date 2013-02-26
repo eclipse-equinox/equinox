@@ -70,7 +70,7 @@ public class AliasMapper {
 	}
 
 	public String getCanonicalProcessor(String processor) {
-		String result = processorCanonicalTable.get(processor).toLowerCase();
+		String result = processorCanonicalTable.get(processor.toLowerCase());
 		return result == null ? processor : result;
 	}
 
