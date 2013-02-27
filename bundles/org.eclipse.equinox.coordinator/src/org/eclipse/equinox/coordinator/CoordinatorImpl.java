@@ -13,6 +13,7 @@ package org.eclipse.equinox.coordinator;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -45,7 +46,7 @@ public class CoordinatorImpl implements Coordinator {
 	// Coordination IDs must be unique across all using bundles.
 	private static final Map<Long, CoordinationImpl> idToCoordination = new HashMap<Long, CoordinationImpl>();
 	// Coordination participation must be tracked across all using bundles.
-	private static final Map<Participant, CoordinationImpl> participantToCoordination = new IdentityHashMap<Participant, CoordinationImpl>();
+	private static final Map<Participant, CoordinationImpl> participantToCoordination = Collections.synchronizedMap(new IdentityHashMap<Participant, CoordinationImpl>());
 
 	private static ThreadLocal<WeakCoordinationStack> coordinationStack = new ThreadLocal<WeakCoordinationStack>() {
 		@Override
