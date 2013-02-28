@@ -30,7 +30,6 @@
 #include "NgWinBMPFileFormat.h"
 #endif
 #include <mach-o/dyld.h>
-#include <pthread.h>
 
 #define startupJarName "startup.jar"
 #define LAUNCHER "-launcher"
@@ -80,15 +79,6 @@ static const char* jvmLibs[] = { "libjvm.dylib", "libjvm.jnilib", "libjvm.so", N
 
 /* Define the window system arguments for the various Java VMs. */
 static char*  argVM_JAVA[] = { "-XstartOnFirstThread", NULL };
-
-/* thread stuff */
-typedef struct {
-	_TCHAR * libPath;
-	_TCHAR ** vmArgs;
-	_TCHAR ** progArgs;
-	_TCHAR * jarFile;
-	JavaResults* result;
-} StartVMArgs;
 
 #ifdef COCOA
 static NSWindow* window = nil;
@@ -163,10 +153,6 @@ static NSWindow* window = nil;
 @end
 #endif
 
-static CFRunLoopRef loopRef = NULL;
-static void * startThread(void * init); 
-static void runEventLoop(CFRunLoopRef ref);
-static void dummyCallback(void * info) {}
 #ifndef COCOA
 static CFMutableArrayRef files;
 static EventHandlerRef appHandler;
@@ -710,69 +696,7 @@ JavaResults* launchJavaVM( _TCHAR* args[] )
 
 JavaResults* startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile )
 {
-	if (secondThread == 0) {
-		/* Set an environment variable that tells the AWT (if started) we started the JVM on the main thread. */
-		char firstThreadEnvVariable[80];
-		sprintf(firstThreadEnvVariable, "JAVA_STARTED_ON_FIRST_THREAD_%d", getpid());
-		setenv(firstThreadEnvVariable, "1", 1);
-		return startJavaJNI(libPath, vmArgs, progArgs, jarFile);
-	}
-
-	/* else, --launcher.secondThread was specified, create a new thread and run the 
-	 * vm on it.  This main thread will run the CFRunLoop 
-	 */
-	pthread_t thread;
-	struct rlimit limit = {0, 0};
-	int stackSize = 0;
-	if (getrlimit(RLIMIT_STACK, &limit) == 0) {
-		if (limit.rlim_cur != 0) {
-			stackSize = limit.rlim_cur;
-		}
-	}
-	
-	/* initialize thread attributes */
-	pthread_attr_t attributes;
-	pthread_attr_init(&attributes);
-	pthread_attr_setscope(&attributes, PTHREAD_SCOPE_SYSTEM);
-	pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
-	if (stackSize != 0)
-		pthread_attr_setstacksize(&attributes, stackSize);
-	
-	/* arguments to start the vm */
-	StartVMArgs args;
-	args.libPath = libPath;
-	args.vmArgs = vmArgs;
-	args.progArgs = progArgs;
-	args.jarFile = jarFile;
-	args.result = 0;
-	
-	loopRef = CFRunLoopGetCurrent();
-	
-	/* create the thread */
-	pthread_create( &thread, &attributes, &startThread, &args);
-	pthread_attr_destroy(&attributes);
-		
-	runEventLoop(loopRef);
-	
-	return args.result;
-}
-
-void * startThread(void * init) {
-	StartVMArgs *args = (StartVMArgs *) init;
-	args->result = startJavaJNI(args->libPath, args->vmArgs, args->progArgs, args->jarFile);
-	return NULL;
-}
-
-void runEventLoop(CFRunLoopRef ref) {
-	CFRunLoopSourceContext sourceContext = { .version = 0, .info = NULL, .retain = NULL, .release = NULL,
-											 .copyDescription = NULL, .equal = NULL, .hash = NULL, 
-											 .schedule = NULL, .cancel = NULL, .perform = &dummyCallback };
-	
-	CFRunLoopSourceRef sourceRef = CFRunLoopSourceCreate(NULL, 0, &sourceContext);
-	CFRunLoopAddSource(ref, sourceRef,  kCFRunLoopCommonModes);
-	
-	CFRunLoopRun();
-	CFRelease(sourceRef);
+	return startJavaJNI(libPath, vmArgs, progArgs, jarFile);
 }
 
 #ifndef COCOA
