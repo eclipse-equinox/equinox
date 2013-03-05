@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,8 +28,8 @@ public class CoordinationWeakReference extends WeakReference<CoordinationReferen
 			try {
 				c.fail(Coordination.ORPHANED);
 			}
-			catch (Throwable t) {
-				c.getLogService().log(LogService.LOG_ERROR, NLS.bind(Messages.OrphanedCoordinationError, c.getName(), c.getId()), t);
+			catch (Exception e) {
+				c.getLogService().log(LogService.LOG_WARNING, NLS.bind(Messages.OrphanedCoordinationError, c.getName(), c.getId()), e);
 			}
 			finally {
 				try {
@@ -39,10 +39,10 @@ public class CoordinationWeakReference extends WeakReference<CoordinationReferen
 					// This is expected since we already failed the coordination...
 					if (!Coordination.ORPHANED.equals(e.getCause()))
 						// ...but only if the cause is ORPHANED.
-						c.getLogService().log(LogService.LOG_ERROR, NLS.bind(Messages.OrphanedCoordinationError, c.getName(), c.getId()), e);
+						c.getLogService().log(LogService.LOG_DEBUG, NLS.bind(Messages.OrphanedCoordinationError, c.getName(), c.getId()), e);
 				}
-				catch (Throwable t) {
-					c.getLogService().log(LogService.LOG_ERROR, NLS.bind(Messages.OrphanedCoordinationError, c.getName(), c.getId()), t);
+				catch (Exception e) {
+					c.getLogService().log(LogService.LOG_WARNING, NLS.bind(Messages.OrphanedCoordinationError, c.getName(), c.getId()), e);
 				}
 			}
 		}
