@@ -16,14 +16,13 @@ import java.util.regex.Pattern;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.util.ManifestElement;
+import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.namespace.*;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Namespace;
 
 public class Capabilities {
-	public static final Pattern MANDATORY_ATTR = Pattern.compile("\\(([^(=<>]+)\\s*[=<>]\\s*[^)]+\\)");
-
 	static class NamespaceSet {
 		private final String name;
 		private final Map<String, Set<ModuleCapability>> indexes = new HashMap<String, Set<ModuleCapability>>();
@@ -151,7 +150,7 @@ public class Capabilities {
 			return result;
 		}
 
-		private List<ModuleCapability> match(FilterImpl f, Set<ModuleCapability> candidates) {
+		private List<ModuleCapability> match(Filter f, Set<ModuleCapability> candidates) {
 			List<ModuleCapability> result = new ArrayList<ModuleCapability>(1);
 			for (ModuleCapability candidate : candidates) {
 				if (matches(f, candidate, matchMandatory)) {
@@ -162,7 +161,9 @@ public class Capabilities {
 		}
 	}
 
-	public static boolean matches(FilterImpl f, Capability candidate, boolean matchMandatory) {
+	public static final Pattern MANDATORY_ATTR = Pattern.compile("\\(([^(=<>]+)\\s*[=<>]\\s*[^)]+\\)"); //$NON-NLS-1$
+
+	public static boolean matches(Filter f, Capability candidate, boolean matchMandatory) {
 		if (f != null && !f.matches(candidate.getAttributes())) {
 			return false;
 		}
