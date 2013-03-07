@@ -99,10 +99,10 @@ public final class PrivilegedRunner implements ObjectCreator {
 				 * if security manager is set - then privileged execution is
 				 * started
 				 */
-				return (context != null)
-				// 
-				? AccessController.doPrivileged(runner, (AccessControlContext) context)
-						: AccessController.doPrivileged(runner);
+				if (context != null) {
+					return AccessController.doPrivileged(runner, (AccessControlContext) context);
+				}
+				return AccessController.doPrivileged(runner);
 			}
 			/* if no security manager is set - simply run the action */
 			return runner.run();

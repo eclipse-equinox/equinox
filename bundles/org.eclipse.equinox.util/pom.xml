@@ -34,7 +34,7 @@
             <artifactId>tycho-compiler-plugin</artifactId>
             <configuration>
               <source>1.5</source>
-              <target>jsr14</target>
+              <target>1.5</target>
             </configuration>
           </plugin>
         </plugins>

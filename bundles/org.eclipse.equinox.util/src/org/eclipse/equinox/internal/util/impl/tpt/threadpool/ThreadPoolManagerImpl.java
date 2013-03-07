@@ -81,9 +81,11 @@ public class ThreadPoolManagerImpl extends ObjectPool implements TimerListener, 
 	}
 
 	public Object getInstance() throws Exception {
-		Object result = (ServiceFactoryImpl.privileged()) ? AccessController.doPrivileged(this) : new Executor();
+		if (ServiceFactoryImpl.privileged()) {
+			return AccessController.doPrivileged(this);
+		}
 
-		return result;
+		return new Executor();
 	}
 
 	public Object run() {
