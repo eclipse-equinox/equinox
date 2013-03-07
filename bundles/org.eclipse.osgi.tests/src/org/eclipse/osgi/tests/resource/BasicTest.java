@@ -133,7 +133,7 @@ public class BasicTest extends AbstractResourceTest {
 		assertTb3();
 		assertTb4();
 		assertTf1();
-		//		assertTf2();
+		assertTf2();
 	}
 
 	/*
@@ -368,29 +368,36 @@ public class BasicTest extends AbstractResourceTest {
 	 * Requirements:
 	 * 		osgi.wiring.host;osgi.wiring.host=resource.tb1;version=1.0.0
 	 * Capabilities:
-	 * 		None
+	 * 		osgi.identity;osgi.identity=resource.tf2;version=1.0.0;type=osgi.fragment
 	 * Wires:
 	 * 		TB1 <-> osgi.wiring.host
 	 */
 	private void assertTf2() {
-		final BundleRevision revision = (BundleRevision) tf2.adapt(BundleRevision.class);
-		assertNotIdentityCapability(new CapabilityProvider() {
-			public List getCapabilities(String namespace) {
-				return revision.getDeclaredCapabilities(namespace);
-			}
-		});
-		final Resource resource = revision;
-		assertNotIdentityCapability(new CapabilityProvider() {
-			public List getCapabilities(String namespace) {
-				return resource.getCapabilities(namespace);
-			}
-		});
-		final BundleWiring wiring = (BundleWiring) tf2.adapt(BundleWiring.class);
-		assertNotIdentityCapability(new CapabilityProvider() {
-			public List getCapabilities(String namespace) {
-				return wiring.getCapabilities(namespace);
-			}
-		});
+		// Get the revision for TF2.
+		BundleRevision revision = (BundleRevision) tf2.adapt(BundleRevision.class);
+		// Make sure TF1's symbolic name and version match the manifest.
+		String symbolicName = revision.getSymbolicName();
+		assertSymbolicName("resource.tf2", symbolicName);
+		Version version = revision.getVersion();
+		assertVersion("0.0.0", version);
+		// Make sure TF1's type is correct.
+		String type = getType(revision);
+		assertType(IdentityNamespace.TYPE_FRAGMENT, type);
+		// Check TF1's osgi.identity capability from the revision.
+		Capability capability = getIdentityCapability(revision);
+		assertIdentityCapability(capability, symbolicName, version, type, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
+		// Check TF1's osgi.identity capability from the resource.
+		Resource resource = revision;
+		capability = getIdentityCapability(resource);
+		assertIdentityCapability(capability, symbolicName, version, type, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
+		// Check TF1's osgi.identity capability from the wiring.
+		BundleWiring wiring = (BundleWiring) tf2.adapt(BundleWiring.class);
+		capability = getIdentityCapability(wiring);
+		assertIdentityCapability(capability, symbolicName, version, type, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
+		// There should be 0 provided osgi.identity wire (TF1 -> TB3).
+		List wires = wiring.getProvidedWires(IdentityNamespace.IDENTITY_NAMESPACE);
+		assertWires(wires, 0);
+
 	}
 
 	private void assertAttribute(Requirement requirement, String name, Object expected) {
