@@ -1727,20 +1727,28 @@ public class ResolverImpl implements Resolver
                         if (!cand.getNamespace().startsWith("osgi.wiring.")
                             || !resource.equals(cand.getResource()))
                         {
+                            // If we don't already have wires for the candidate,
+                            // then recursively populate them.
                             if (!rc.getWirings().containsKey(cand.getResource()))
                             {
-                                Resource target = cand.getResource();
-                                // need to special case identity capability since it may be from a fragment
-                                if (IdentityNamespace.IDENTITY_NAMESPACE.equals(cand.getNamespace())) {
-                                    if (Util.isFragment(target)) {
-                                        target = allCandidates.getCandidates(target.getRequirements(HostNamespace.HOST_NAMESPACE).get(0))
-                                                .iterator().next().getResource();
-                                        target = allCandidates.getWrappedHost(target);
-                                    }
+                                // Need to special case the candidate for identity
+                                // capabilities since it may be from a fragment and
+                                // we don't want to populate wires for the fragment,
+                                // but rather the host to which it is attached.
+                                Resource targetCand = cand.getResource();
+                                if (IdentityNamespace.IDENTITY_NAMESPACE.equals(cand.getNamespace())
+                                    && Util.isFragment(targetCand))
+                                {
+                                    targetCand = allCandidates.getCandidates(
+                                        targetCand.getRequirements(HostNamespace.HOST_NAMESPACE).get(0))
+                                            .iterator().next().getResource();
+                                    targetCand = allCandidates.getWrappedHost(targetCand);
                                 }
-                                populateWireMap(rc, target,
+
+                                populateWireMap(rc, targetCand,
                                     resourcePkgMap, wireMap, allCandidates);
                             }
+
                             Wire wire = new WireImpl(
                                 unwrappedResource,
                                 getDeclaredRequirement(req),
