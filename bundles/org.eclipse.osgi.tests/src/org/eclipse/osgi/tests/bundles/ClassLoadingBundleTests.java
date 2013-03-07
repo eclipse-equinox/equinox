@@ -347,6 +347,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	}
 
 	public void testFragmentExportPackage() throws Exception {
+		// TODO Expected to fail.  Will not let fragments attach to already resolved hosts
 		Bundle hostA = installer.installBundle("fragment.test.attach.host.a"); //$NON-NLS-1$
 		assertTrue("Host resolve", installer.resolveBundles(new Bundle[] {hostA})); //$NON-NLS-1$
 
@@ -1292,6 +1293,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	}
 
 	public void testBug207847() throws BundleException {
+		// TODO expected to fail; will not attach fragments to already resolved hosts
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
 		installer.resolveBundles(new Bundle[] {test});
 		test.start();
