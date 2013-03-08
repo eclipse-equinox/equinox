@@ -1343,15 +1343,20 @@ public class DSTest extends TestCase {
     assertTrue("The second service from the breakable circularity with dynamic optional reference should be available",
         checkAvailability(DYN_BREAKABLE + "2"));
 
+    
     // check that the breakable circuit with dynamic optional reference has
     // bound correctly
+    ServiceReference dynBreak1Ref = getContext().getServiceReference(DYN_BREAKABLE + "1");
+    Object dynBreak1 = getContext().getService(dynBreak1Ref);
     ServiceReference dynBreak2Ref = getContext().getServiceReference(DYN_BREAKABLE + "2");
     Object dynBreak2 = getContext().getService(dynBreak2Ref);
+    sleep0(timeout * 2); // sleep to allow the delayed bind for the broken reference cycle to be done
     try {
-      assertEquals("The DynamicCircuit2 component should have one bound object", 1, ((BoundTester) dynBreak2)
-          .getBoundObjectsCount());
-      assertNotNull("The DynamicCircuit2 component should have one non-null bound object", ((BoundTester) dynBreak2)
-          .getBoundService(0));
+    	assertNotNull("The DynamicCircuit1 component should be available", dynBreak1);
+    	assertEquals("The DynamicCircuit2 component should have one bound object", 1, ((BoundTester) dynBreak2)
+    			.getBoundObjectsCount());
+    	assertNotNull("The DynamicCircuit2 component should have one non-null bound object", ((BoundTester) dynBreak2)
+    			.getBoundService(0));
     } finally {
       getContext().ungetService(dynBreak2Ref);
     }

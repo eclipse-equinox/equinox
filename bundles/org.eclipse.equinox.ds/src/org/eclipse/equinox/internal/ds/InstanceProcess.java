@@ -785,26 +785,26 @@ public class InstanceProcess {
 		}
 
 		if (producerSCP != null) {
-			if (producerSCP.serviceComponent.serviceFactory) {
-				// producer is a service factory - there is a new instance for
-				// every
-				// bundle, so see if one of the instances is used by this bundle
-				if (!producerSCP.instances.isEmpty()) {
-					Bundle bundle = consumerSCP.bc.getBundle();
-					for (int i = 0; i < producerSCP.instances.size(); i++) {
-						ComponentInstanceImpl producerComponentInstance = (ComponentInstanceImpl) producerSCP.instances.elementAt(i);
-						if (producerComponentInstance.getComponentContext().getUsingBundle().equals(bundle)) {
-							// a producer already exists, so no cycle possible
-							return false;
+			if (producerSCP.getState() == Component.STATE_ACTIVE) {
+				if (producerSCP.serviceComponent.serviceFactory) {
+					// producer is a service factory - there is a new instance for every
+					// bundle, so see if one of the instances is used by this bundle
+					if (!producerSCP.instances.isEmpty()) {
+						Bundle bundle = consumerSCP.bc.getBundle();
+						for (int i = 0; i < producerSCP.instances.size(); i++) {
+							ComponentInstanceImpl producerComponentInstance = (ComponentInstanceImpl) producerSCP.instances.elementAt(i);
+							if (producerComponentInstance.getComponentContext().getUsingBundle().equals(bundle)) {
+								// a producer already exists, so no cycle possible
+								return false;
+							}
 						}
 					}
-				}
-			} else {
-				// producer is not a service factory - there will only ever be
-				// one
-				// instance - if it exists then no cycle possible
-				if (!producerSCP.instances.isEmpty()) {
-					return false;
+				} else {
+					// producer is not a service factory - there will only ever be one
+					// instance - if it exists then no cycle possible
+					if (!producerSCP.instances.isEmpty()) {
+						return false;
+					}
 				}
 			}
 		}
@@ -812,10 +812,12 @@ public class InstanceProcess {
 		// producer scp is not active - do not activate it because that could
 		// cause circularity
 
-		// if reference has bind method and policy=dynamic, activate later and
-		// bind
+		// if reference has bind method and policy=dynamic, activate later and bind
 		if (reference.reference.bind != null && reference.policy == ComponentReference.POLICY_DYNAMIC) {
 			// delay bind by putting on the queue later
+			if (Activator.DEBUG) {
+				Activator.log.debug("[SCR] Adding reference for delayed binding. Reference is " + reference.reference.name, null); //$NON-NLS-1$
+			}
 			delayedBindList.addElement(reference);
 		}
 

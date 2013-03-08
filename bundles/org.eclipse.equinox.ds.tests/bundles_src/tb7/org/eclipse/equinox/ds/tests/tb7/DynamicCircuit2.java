@@ -19,41 +19,49 @@ import org.osgi.service.component.ComponentContext;
 
 public class DynamicCircuit2 implements BoundTester {
 
-  private ServiceReference mateRef;
-  private ComponentContext ctxt;
-  
-  public void activate(ComponentContext ctxt) {
-    this.ctxt = ctxt;
-  }
-  
-  public void deactivate(ComponentContext ctxt) {
-    this.ctxt = null;
-  }
-  
-  public int getBoundObjectsCount() {
-    return (mateRef != null ? 1 : 0);
-  }
+	private DynamicCircuit1 service;
+	private ComponentContext ctxt;
+	private boolean boundObjectActivated = false;
 
-  public Object getBoundService(int index) {
-    return ctxt.locateService("referencedComponent", mateRef);
-  }
+	public void activate(ComponentContext ctxt) {
+		this.ctxt = ctxt;
+	}
 
-  public ServiceReference getBoundServiceRef(int index) {
-    return mateRef;
-  }
+	public void deactivate(ComponentContext ctxt) {
+		this.ctxt = null;
+	}
 
-  public Dictionary getProperties() {
-    return null;
-  }
+	public int getBoundObjectsCount() {
+		return (service != null ? 1 : 0);
+	}
 
-  public void bind(ServiceReference mateRef) {
-    this.mateRef = mateRef;
-  }
-  
-  public void unbind(ServiceReference mateRef) {
-    if (this.mateRef == mateRef) {
-      this.mateRef = null;
-    }
-  }
-  
+	public Object getBoundService(int index) {
+		if (!isBoundServiceActivated()) {
+			System.err.println("The bound service must be active at the time of the bind operation");
+			return null;
+		}
+		return service;
+	}
+
+	public ServiceReference getBoundServiceRef(int index) {
+		return null;
+	}
+
+	public Dictionary getProperties() {
+		return null;
+	}
+
+	public void bind(DynamicCircuit1 service) {
+		this.service = service;
+		boundObjectActivated = service.isActivated();
+	}
+
+	public void unbind(DynamicCircuit1 service) {
+		this.service = null;
+	}
+
+	public boolean isBoundServiceActivated() {
+		return boundObjectActivated;
+	}
+
 }
