@@ -15,13 +15,14 @@
 package org.eclipse.equinox.weaving.hooks;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.equinox.service.weaving.CacheEntry;
 import org.eclipse.equinox.weaving.adaptors.Debug;
 import org.eclipse.equinox.weaving.adaptors.IWeavingAdaptor;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
 
 /**
  * This is a wrapper for bundle files that allows the weaving runtime to create
@@ -43,9 +44,14 @@ public class WeavingBundleFile extends AbstractWeavingBundleFile {
      * @throws IOException
      */
     public WeavingBundleFile(final BundleAdaptorProvider adaptorProvider,
-            final BundleFile bundleFile) throws IOException {
+            final BundleFile bundleFile) {
         super(adaptorProvider, bundleFile);
-        this.url = delegate.getBaseFile().toURL();
+        try {
+            this.url = delegate.getBaseFile().toURL();
+        } catch (final MalformedURLException e) {
+            throw new RuntimeException(
+                    "Unexpected error getting bundle file URL.", e);
+        }
     }
 
     @Override

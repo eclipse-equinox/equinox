@@ -11,9 +11,8 @@
 
 package org.eclipse.equinox.service.weaving;
 
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.State;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.BundleRevision;
 
 /**
  * This is the central interface for other bundles to implement when they would
@@ -32,16 +31,14 @@ public interface IWeavingServiceFactory {
      * 
      * @param loader The classloader of the bundle for which to create a weaver
      * @param bundle The bundle for which to create the weaver
-     * @param resolverState The state service of the OSGi runtime
-     * @param bundleDesciption The description of the bundle for which to create
-     *            a weaver
+     * @param bundleRevision The revision of the bundle for which to create a
+     *            weaver
      * @param supplementerRegistry The supplementer registry which is used by
      *            the core equinox aspects hook
      * @return The created weaver for the given bundle
      */
     public IWeavingService createWeavingService(ClassLoader loader,
-            Bundle bundle, State resolverState,
-            BundleDescription bundleDesciption,
+            Bundle bundle, BundleRevision bundleRevision,
             ISupplementerRegistry supplementerRegistry);
 
 }

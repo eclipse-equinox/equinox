@@ -28,15 +28,14 @@ import org.eclipse.equinox.service.weaving.IWeavingService;
 import org.eclipse.equinox.weaving.aspectj.loadtime.AspectResolver;
 import org.eclipse.equinox.weaving.aspectj.loadtime.OSGiWeavingAdaptor;
 import org.eclipse.equinox.weaving.aspectj.loadtime.OSGiWeavingContext;
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.State;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.BundleRevision;
 
 public class AspectJWeavingService implements IWeavingService {
 
     private List<Definition> aspectDefinitions;
 
-    private BundleDescription bundleDescription;
+    private BundleRevision bundleRevision;
 
     private boolean enabled;
 
@@ -52,23 +51,23 @@ public class AspectJWeavingService implements IWeavingService {
     }
 
     public AspectJWeavingService(final ClassLoader loader, final Bundle bundle,
-            final State state, final BundleDescription bundleDescription,
+            final BundleRevision bundleRevision,
             final ISupplementerRegistry supplementerRegistry,
             final AspectAdmin aspectAdmin) {
-        this.bundleDescription = bundleDescription;
+        this.bundleRevision = bundleRevision;
 
-        final AspectResolver aspectResolver = new AspectResolver(state,
+        final AspectResolver aspectResolver = new AspectResolver(
                 supplementerRegistry, aspectAdmin, AspectJWeavingStarter
                         .getDefault().getContext());
         final AspectConfiguration aspectConfig = aspectResolver
-                .resolveAspectsFor(bundle, bundleDescription);
+                .resolveAspectsFor(bundle, bundleRevision);
         this.namespaceAddOn = aspectConfig.getFingerprint();
         this.aspectDefinitions = aspectConfig.getAspectDefinitions();
 
         this.enabled = this.aspectDefinitions.size() > 0;
         if (this.enabled) {
             this.weavingContext = new OSGiWeavingContext(loader,
-                    bundleDescription, aspectDefinitions);
+                    bundleRevision, aspectDefinitions);
             this.weavingAdaptor = new OSGiWeavingAdaptor(loader,
                     weavingContext, namespaceAddOn.toString());
         } else {
@@ -78,6 +77,10 @@ public class AspectJWeavingService implements IWeavingService {
                                 + bundle.getSymbolicName() + "'");
             }
         }
+    }
+
+    private void ensureAdaptorInit() {
+        weavingAdaptor.initialize();
     }
 
     /**
@@ -122,7 +125,7 @@ public class AspectJWeavingService implements IWeavingService {
     public String getKey() {
         if (AspectJWeavingStarter.DEBUG)
             System.out.println("> WeavingService.getKey() bundle="
-                    + bundleDescription.getSymbolicName());
+                    + bundleRevision.getSymbolicName());
 
         final String namespace = namespaceAddOn.toString();
 
@@ -142,8 +145,8 @@ public class AspectJWeavingService implements IWeavingService {
         if (enabled) {
             if (AspectJWeavingStarter.DEBUG)
                 System.out.println("> WeavingService.preProcess() bundle="
-                        + bundleDescription.getSymbolicName() + ", name="
-                        + name + ", bytes=" + classbytes.length);
+                        + bundleRevision.getSymbolicName() + ", name=" + name
+                        + ", bytes=" + classbytes.length);
             byte[] newBytes;
             ensureAdaptorInit();
 
@@ -156,10 +159,6 @@ public class AspectJWeavingService implements IWeavingService {
         } else {
             return null;
         }
-    }
-
-    private void ensureAdaptorInit() {
-        weavingAdaptor.initialize();
     }
 
 }

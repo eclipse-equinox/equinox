@@ -20,9 +20,8 @@ import java.util.Set;
 
 import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.eclipse.equinox.service.weaving.Supplementer;
-import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
-import org.eclipse.osgi.framework.adaptor.BundleData;
-import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegateHook;
+import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
+import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 
 /**
  * This class implements the delegate hook for the class loader to allow
@@ -35,7 +34,7 @@ import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegateHook;
  * information to broaden type and resource visibility according to the
  * supplementer registry information.
  */
-public class WeavingLoaderDelegateHook implements ClassLoaderDelegateHook {
+public class WeavingLoaderDelegateHook extends ClassLoaderHook {
 
     private final ThreadLocal<Set<String>> postFindClassCalls = new ThreadLocal<Set<String>>() {
 
@@ -77,14 +76,14 @@ public class WeavingLoaderDelegateHook implements ClassLoaderDelegateHook {
     }
 
     /**
-     * @see org.eclipse.osgi.framework.adaptor.ClassLoaderDelegateHook#postFindClass(java.lang.String,
-     *      org.eclipse.osgi.framework.adaptor.BundleClassLoader,
-     *      org.eclipse.osgi.framework.adaptor.BundleData)
+     * 
+     * @see org.eclipse.osgi.internal.hookregistry.ClassLoaderHook#postFindClass(java.lang.String,
+     *      org.eclipse.osgi.internal.loader.ModuleClassLoader)
      */
-    public Class postFindClass(final String name,
-            final BundleClassLoader classLoader, final BundleData data)
-            throws ClassNotFoundException {
-        final long bundleID = data.getBundleID();
+    @Override
+    public Class<?> postFindClass(final String name,
+            final ModuleClassLoader classLoader) throws ClassNotFoundException {
+        final long bundleID = classLoader.getBundle().getBundleId();
 
         final String callKey = bundleID + name;
         if (postFindClassCalls.get().contains(callKey)) {
@@ -115,24 +114,14 @@ public class WeavingLoaderDelegateHook implements ClassLoaderDelegateHook {
     }
 
     /**
-     * @see org.eclipse.osgi.framework.adaptor.ClassLoaderDelegateHook#postFindLibrary(java.lang.String,
-     *      org.eclipse.osgi.framework.adaptor.BundleClassLoader,
-     *      org.eclipse.osgi.framework.adaptor.BundleData)
+     * 
+     * @see org.eclipse.osgi.internal.hookregistry.ClassLoaderHook#postFindResource(java.lang.String,
+     *      org.eclipse.osgi.internal.loader.ModuleClassLoader)
      */
-    public String postFindLibrary(final String name,
-            final BundleClassLoader classLoader, final BundleData data) {
-        return null;
-    }
-
-    /**
-     * @see org.eclipse.osgi.framework.adaptor.ClassLoaderDelegateHook#postFindResource(java.lang.String,
-     *      org.eclipse.osgi.framework.adaptor.BundleClassLoader,
-     *      org.eclipse.osgi.framework.adaptor.BundleData)
-     */
+    @Override
     public URL postFindResource(final String name,
-            final BundleClassLoader classLoader, final BundleData data)
-            throws FileNotFoundException {
-        final long bundleID = data.getBundleID();
+            final ModuleClassLoader classLoader) throws FileNotFoundException {
+        final long bundleID = classLoader.getBundle().getBundleId();
 
         final String callKey = bundleID + name;
         if (postFindResourceCalls.get().contains(callKey)) {
@@ -164,14 +153,14 @@ public class WeavingLoaderDelegateHook implements ClassLoaderDelegateHook {
     }
 
     /**
-     * @see org.eclipse.osgi.framework.adaptor.ClassLoaderDelegateHook#postFindResources(java.lang.String,
-     *      org.eclipse.osgi.framework.adaptor.BundleClassLoader,
-     *      org.eclipse.osgi.framework.adaptor.BundleData)
+     * 
+     * @see org.eclipse.osgi.internal.hookregistry.ClassLoaderHook#postFindResources(java.lang.String,
+     *      org.eclipse.osgi.internal.loader.ModuleClassLoader)
      */
-    public Enumeration postFindResources(final String name,
-            final BundleClassLoader classLoader, final BundleData data)
-            throws FileNotFoundException {
-        final long bundleID = data.getBundleID();
+    @Override
+    public Enumeration<URL> postFindResources(final String name,
+            final ModuleClassLoader classLoader) throws FileNotFoundException {
+        final long bundleID = classLoader.getBundle().getBundleId();
 
         final String callKey = bundleID + name;
         if (postFindResourcesCalls.get().contains(callKey)) {
@@ -185,7 +174,7 @@ public class WeavingLoaderDelegateHook implements ClassLoaderDelegateHook {
             if (supplementers != null) {
                 for (int i = 0; i < supplementers.length; i++) {
                     try {
-                        final Enumeration<?> resource = supplementers[i]
+                        final Enumeration<URL> resource = supplementers[i]
                                 .getSupplementerHost().getResources(name);
                         if (resource != null) {
                             // TODO: if more than one enumeration is found, we should return all items
@@ -202,49 +191,4 @@ public class WeavingLoaderDelegateHook implements ClassLoaderDelegateHook {
 
         return null;
     }
-
-    /**
-     * @see org.eclipse.osgi.framework.adaptor.ClassLoaderDelegateHook#preFindClass(java.lang.String,
-     *      org.eclipse.osgi.framework.adaptor.BundleClassLoader,
-     *      org.eclipse.osgi.framework.adaptor.BundleData)
-     */
-    public Class preFindClass(final String name,
-            final BundleClassLoader classLoader, final BundleData data)
-            throws ClassNotFoundException {
-        return null;
-    }
-
-    /**
-     * @see org.eclipse.osgi.framework.adaptor.ClassLoaderDelegateHook#preFindLibrary(java.lang.String,
-     *      org.eclipse.osgi.framework.adaptor.BundleClassLoader,
-     *      org.eclipse.osgi.framework.adaptor.BundleData)
-     */
-    public String preFindLibrary(final String name,
-            final BundleClassLoader classLoader, final BundleData data)
-            throws FileNotFoundException {
-        return null;
-    }
-
-    /**
-     * @see org.eclipse.osgi.framework.adaptor.ClassLoaderDelegateHook#preFindResource(java.lang.String,
-     *      org.eclipse.osgi.framework.adaptor.BundleClassLoader,
-     *      org.eclipse.osgi.framework.adaptor.BundleData)
-     */
-    public URL preFindResource(final String name,
-            final BundleClassLoader classLoader, final BundleData data)
-            throws FileNotFoundException {
-        return null;
-    }
-
-    /**
-     * @see org.eclipse.osgi.framework.adaptor.ClassLoaderDelegateHook#preFindResources(java.lang.String,
-     *      org.eclipse.osgi.framework.adaptor.BundleClassLoader,
-     *      org.eclipse.osgi.framework.adaptor.BundleData)
-     */
-    public Enumeration preFindResources(final String name,
-            final BundleClassLoader classLoader, final BundleData data)
-            throws FileNotFoundException {
-        return null;
-    }
-
 }

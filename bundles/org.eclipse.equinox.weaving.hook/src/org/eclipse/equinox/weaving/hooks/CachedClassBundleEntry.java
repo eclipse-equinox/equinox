@@ -16,7 +16,7 @@ import java.io.InputStream;
 import java.net.URL;
 
 import org.eclipse.equinox.weaving.adaptors.IWeavingAdaptor;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 
 public class CachedClassBundleEntry extends BundleEntry {
 

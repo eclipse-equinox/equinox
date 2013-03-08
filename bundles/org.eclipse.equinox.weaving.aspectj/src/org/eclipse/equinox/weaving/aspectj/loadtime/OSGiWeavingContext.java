@@ -20,7 +20,7 @@ import org.aspectj.weaver.loadtime.DefaultWeavingContext;
 import org.aspectj.weaver.loadtime.definition.Definition;
 import org.aspectj.weaver.tools.WeavingAdaptor;
 import org.eclipse.equinox.weaving.aspectj.AspectJWeavingStarter;
-import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.osgi.framework.wiring.BundleRevision;
 
 /**
  * The weaving context for AspectJs load-time weaving API that deals with the
@@ -30,18 +30,17 @@ public class OSGiWeavingContext extends DefaultWeavingContext {
 
     private final List<Definition> aspectDefinitions;
 
-    private final BundleDescription bundleDescription;
+    private final BundleRevision bundleRevision;
 
     public OSGiWeavingContext(final ClassLoader loader,
-            final BundleDescription bundleDescription,
+            final BundleRevision bundleRevision,
             final List<Definition> aspectDefinitions) {
         super(loader);
-        this.bundleDescription = bundleDescription;
+        this.bundleRevision = bundleRevision;
         this.aspectDefinitions = aspectDefinitions;
         if (AspectJWeavingStarter.DEBUG)
             System.out.println("- WeavingContext.WeavingContext() locader="
-                    + loader + ", bundle="
-                    + bundleDescription.getSymbolicName());
+                    + loader + ", bundle=" + bundleRevision.getSymbolicName());
     }
 
     /**
@@ -49,7 +48,7 @@ public class OSGiWeavingContext extends DefaultWeavingContext {
      */
     @Override
     public String getClassLoaderName() {
-        return bundleDescription.getSymbolicName();
+        return bundleRevision.getSymbolicName();
     }
 
     /**
@@ -75,12 +74,12 @@ public class OSGiWeavingContext extends DefaultWeavingContext {
      */
     @Override
     public String getId() {
-        return bundleDescription.getSymbolicName();
+        return bundleRevision.getSymbolicName();
     }
 
     @Override
     public String toString() {
-        return getClass().getName() + "[" + bundleDescription.getSymbolicName()
+        return getClass().getName() + "[" + bundleRevision.getSymbolicName()
                 + "]";
     }
 

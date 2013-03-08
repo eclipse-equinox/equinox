@@ -12,14 +12,12 @@
 
 package org.eclipse.equinox.weaving.hooks;
 
-import java.io.IOException;
-
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
 
 public class BaseWeavingBundleFile extends WeavingBundleFile {
 
     public BaseWeavingBundleFile(final BundleAdaptorProvider adaptorProvider,
-            final BundleFile bundleFile) throws IOException {
+            final BundleFile bundleFile) {
         super(adaptorProvider, bundleFile);
     }
 }

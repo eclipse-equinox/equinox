@@ -13,7 +13,6 @@
 
 package org.eclipse.equinox.weaving.hooks;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,12 +22,12 @@ import org.eclipse.equinox.weaving.adaptors.Debug;
 import org.eclipse.equinox.weaving.adaptors.IWeavingAdaptor;
 import org.eclipse.equinox.weaving.adaptors.WeavingAdaptor;
 import org.eclipse.equinox.weaving.adaptors.WeavingAdaptorFactory;
-import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
-import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
-import org.eclipse.osgi.baseadaptor.loader.ClasspathEntry;
-import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;
+import org.eclipse.osgi.internal.loader.ModuleClassLoader;
+import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
+import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
+import org.eclipse.osgi.storage.BundleInfo.Generation;
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -49,23 +48,47 @@ public class WeavingHook extends AbstractWeavingHook {
         this.adaptors = new HashMap<Long, IWeavingAdaptor>();
     }
 
-    /**
-     * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#frameworkStart(org.osgi.framework.BundleContext)
-     */
     @Override
-    public void frameworkStart(final BundleContext context)
-            throws BundleException {
-        //		Debug.println("? AspectJHook.frameworkStart() context=" + context + ", fdo=" + FrameworkDebugOptions.getDefault());
-        initialize(context);
+    public void classLoaderCreated(final ModuleClassLoader classLoader) {
+        if (Debug.DEBUG_GENERAL)
+            Debug.println("> AspectJHook.initializedClassLoader() bundle="
+                    + classLoader.getBundle().getSymbolicName()
+                    + ", loader="
+                    + classLoader
+                    + ", bundleFile="
+                    + classLoader.getClasspathManager().getGeneration()
+                            .getBundleFile());
+
+        final IWeavingAdaptor adaptor = createAspectJAdaptor(classLoader
+                .getClasspathManager().getGeneration());
+        adaptor.setModuleClassLoader(classLoader);
+        adaptor.initialize();
+        this.adaptors.put(classLoader.getBundle().getBundleId(), adaptor);
+
+        if (Debug.DEBUG_GENERAL)
+            Debug.println("< AspectJHook.initializedClassLoader() adaptor="
+                    + adaptor);
     }
 
-    /**
-     * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#frameworkStop(org.osgi.framework.BundleContext)
-     */
-    @Override
-    public void frameworkStop(final BundleContext context)
-            throws BundleException {
-        adaptorFactory.dispose(context);
+    private IWeavingAdaptor createAspectJAdaptor(final Generation generation) {
+        if (Debug.DEBUG_GENERAL)
+            Debug.println("> AspectJHook.createAspectJAdaptor() location="
+                    + generation.getRevision().getRevisions().getModule()
+                            .getLocation());
+        IWeavingAdaptor adaptor = null;
+
+        if (adaptorFactory != null) {
+            adaptor = new WeavingAdaptor(generation, adaptorFactory, null, null);
+        } else {
+            if (Debug.DEBUG_GENERAL)
+                Debug.println("- AspectJHook.createAspectJAdaptor() factory="
+                        + adaptorFactory);
+        }
+
+        if (Debug.DEBUG_GENERAL)
+            Debug.println("< AspectJHook.createAspectJAdaptor() adaptor="
+                    + adaptor);
+        return adaptor;
     }
 
     public IWeavingAdaptor getAdaptor(final long bundleID) {
@@ -84,28 +107,37 @@ public class WeavingHook extends AbstractWeavingHook {
         return null;
     }
 
-    /**
-     * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#initializedClassLoader(org.eclipse.osgi.baseadaptor.loader.BaseClassLoader,
-     *      org.eclipse.osgi.baseadaptor.BaseData)
-     */
-    @Override
-    public void initializedClassLoader(final BaseClassLoader baseClassLoader,
-            final BaseData data) {
+    private void initialize(final BundleContext context) {
         if (Debug.DEBUG_GENERAL)
-            Debug
-                    .println("> AspectJHook.initializedClassLoader() bundle="
-                            + data.getSymbolicName() + ", loader="
-                            + baseClassLoader + ", data=" + data
-                            + ", bundleFile=" + data.getBundleFile());
+            Debug.println("> AspectJHook.initialize() context=" + context);
 
-        final IWeavingAdaptor adaptor = createAspectJAdaptor(data);
-        adaptor.setBaseClassLoader(baseClassLoader);
-        adaptor.initialize();
-        this.adaptors.put(data.getBundleID(), adaptor);
+        this.bundleContext = context;
+
+        final ISupplementerRegistry supplementerRegistry = getSupplementerRegistry();
+        adaptorFactory.initialize(context, supplementerRegistry);
+
+        final ServiceReference serviceReference = context
+                .getServiceReference(PackageAdmin.class.getName());
+        final PackageAdmin packageAdmin = (PackageAdmin) context
+                .getService(serviceReference);
+
+        supplementerRegistry.setBundleContext(context);
+        supplementerRegistry.setPackageAdmin(packageAdmin);
+        context.addBundleListener(new SupplementBundleListener(
+                supplementerRegistry));
+
+        // final re-build supplementer final registry state for final installed bundles
+        final Bundle[] installedBundles = context.getBundles();
+        for (int i = 0; i < installedBundles.length; i++) {
+            supplementerRegistry.addSupplementer(installedBundles[i], false);
+        }
+        for (int i = 0; i < installedBundles.length; i++) {
+            supplementerRegistry.addSupplementedBundle(installedBundles[i]);
+        }
 
         if (Debug.DEBUG_GENERAL)
-            Debug.println("< AspectJHook.initializedClassLoader() adaptor="
-                    + adaptor);
+            Debug.println("< AspectJHook.initialize() adaptorFactory="
+                    + adaptorFactory);
     }
 
     /**
@@ -160,92 +192,51 @@ public class WeavingHook extends AbstractWeavingHook {
         this.adaptors.remove(bundleID);
     }
 
-    @Override
+    /**
+     * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#frameworkStart(org.osgi.framework.BundleContext)
+     */
+    public void start(final BundleContext context) throws BundleException {
+        //		Debug.println("? AspectJHook.frameworkStart() context=" + context + ", fdo=" + FrameworkDebugOptions.getDefault());
+        initialize(context);
+    }
+
+    /**
+     * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#frameworkStop(org.osgi.framework.BundleContext)
+     */
+    public void stop(final BundleContext context) throws BundleException {
+        adaptorFactory.dispose(context);
+    }
+
+    /**
+     * @see org.eclipse.osgi.internal.hookregistry.BundleFileWrapperFactoryHook#wrapBundleFile(org.eclipse.osgi.storage.bundlefile.BundleFile,
+     *      org.eclipse.osgi.storage.BundleInfo.Generation, boolean)
+     */
     public BundleFile wrapBundleFile(final BundleFile bundleFile,
-            final Object content, final BaseData data, final boolean base)
-            throws IOException {
+            final Generation generation, final boolean base) {
         BundleFile wrapped = null;
         if (Debug.DEBUG_BUNDLE)
-            Debug
-                    .println("> AspectJBundleFileWrapperFactoryHook.wrapBundleFile() bundle="
-                            + data.getSymbolicName()
-                            + " bundleFile="
-                            + bundleFile
-                            + ", content="
-                            + content
-                            + ", data="
-                            + data
-                            + ", base="
-                            + base
-                            + ", baseFile="
-                            + bundleFile.getBaseFile());
+            Debug.println("> AspectJBundleFileWrapperFactoryHook.wrapBundleFile() bundle="
+                    + generation.getRevision().getSymbolicName()
+                    + " bundleFile="
+                    + bundleFile
+                    + ", generation="
+                    + generation
+                    + ", base="
+                    + base
+                    + ", baseFile="
+                    + bundleFile.getBaseFile());
 
         if (base) {
-            wrapped = new BaseWeavingBundleFile(new BundleAdaptorProvider(data,
-                    this), bundleFile);
+            wrapped = new BaseWeavingBundleFile(new BundleAdaptorProvider(
+                    generation, this), bundleFile);
         } else {
-            wrapped = new WeavingBundleFile(new BundleAdaptorProvider(data,
-                    this), bundleFile);
+            wrapped = new WeavingBundleFile(new BundleAdaptorProvider(
+                    generation, this), bundleFile);
         }
         if (Debug.DEBUG_BUNDLE)
-            Debug
-                    .println("< AspectJBundleFileWrapperFactoryHook.wrapBundleFile() wrapped="
-                            + wrapped);
+            Debug.println("< AspectJBundleFileWrapperFactoryHook.wrapBundleFile() wrapped="
+                    + wrapped);
         return wrapped;
-    }
-
-    private IWeavingAdaptor createAspectJAdaptor(final BaseData baseData) {
-        if (Debug.DEBUG_GENERAL)
-            Debug.println("> AspectJHook.createAspectJAdaptor() location="
-                    + baseData.getLocation());
-        IWeavingAdaptor adaptor = null;
-
-        if (adaptorFactory != null) {
-            adaptor = new WeavingAdaptor(baseData, adaptorFactory, null, null,
-                    null);
-        } else {
-            if (Debug.DEBUG_GENERAL)
-                Debug.println("- AspectJHook.createAspectJAdaptor() factory="
-                        + adaptorFactory);
-        }
-
-        if (Debug.DEBUG_GENERAL)
-            Debug.println("< AspectJHook.createAspectJAdaptor() adaptor="
-                    + adaptor);
-        return adaptor;
-    }
-
-    private void initialize(final BundleContext context) {
-        if (Debug.DEBUG_GENERAL)
-            Debug.println("> AspectJHook.initialize() context=" + context);
-
-        this.bundleContext = context;
-
-        final ISupplementerRegistry supplementerRegistry = getSupplementerRegistry();
-        adaptorFactory.initialize(context, supplementerRegistry);
-
-        final ServiceReference serviceReference = context
-                .getServiceReference(PackageAdmin.class.getName());
-        final PackageAdmin packageAdmin = (PackageAdmin) context
-                .getService(serviceReference);
-
-        supplementerRegistry.setBundleContext(context);
-        supplementerRegistry.setPackageAdmin(packageAdmin);
-        context.addBundleListener(new SupplementBundleListener(
-                supplementerRegistry));
-
-        // final re-build supplementer final registry state for final installed bundles
-        final Bundle[] installedBundles = context.getBundles();
-        for (int i = 0; i < installedBundles.length; i++) {
-            supplementerRegistry.addSupplementer(installedBundles[i], false);
-        }
-        for (int i = 0; i < installedBundles.length; i++) {
-            supplementerRegistry.addSupplementedBundle(installedBundles[i]);
-        }
-
-        if (Debug.DEBUG_GENERAL)
-            Debug.println("< AspectJHook.initialize() adaptorFactory="
-                    + adaptorFactory);
     }
 
 }

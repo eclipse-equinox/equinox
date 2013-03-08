@@ -19,16 +19,18 @@ import java.net.URL;
 import java.util.Enumeration;
 
 import org.eclipse.equinox.weaving.adaptors.IWeavingAdaptor;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
+import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
 
 public abstract class AbstractWeavingBundleFile extends BundleFile {
 
-    protected BundleFile delegate;
-
     private final BundleAdaptorProvider adaptorProvider;
 
-    public AbstractWeavingBundleFile(final BundleAdaptorProvider adaptorProvider,
+    protected BundleFile delegate;
+
+    public AbstractWeavingBundleFile(
+            final BundleAdaptorProvider adaptorProvider,
             final BundleFile bundleFile) {
         super(bundleFile.getBaseFile());
         this.adaptorProvider = adaptorProvider;
@@ -36,7 +38,7 @@ public abstract class AbstractWeavingBundleFile extends BundleFile {
     }
 
     /**
-     * @see org.eclipse.osgi.baseadaptor.bundlefile.BundleFile#close()
+     * @see BundleFile#close()
      */
     @Override
     public void close() throws IOException {
@@ -44,7 +46,7 @@ public abstract class AbstractWeavingBundleFile extends BundleFile {
     }
 
     /**
-     * @see org.eclipse.osgi.baseadaptor.bundlefile.BundleFile#containsDir(java.lang.String)
+     * @see BundleFile#containsDir(java.lang.String)
      */
     @Override
     public boolean containsDir(final String dir) {
@@ -59,7 +61,7 @@ public abstract class AbstractWeavingBundleFile extends BundleFile {
     }
 
     /**
-     * @see org.eclipse.osgi.baseadaptor.bundlefile.BundleFile#getBaseFile()
+     * @see BundleFile#getBaseFile()
      */
     @Override
     public File getBaseFile() {
@@ -68,7 +70,7 @@ public abstract class AbstractWeavingBundleFile extends BundleFile {
     }
 
     /**
-     * @see org.eclipse.osgi.baseadaptor.bundlefile.BundleFile#getEntry(java.lang.String)
+     * @see BundleFile#getEntry(java.lang.String)
      */
     @Override
     public BundleEntry getEntry(final String path) {
@@ -76,16 +78,15 @@ public abstract class AbstractWeavingBundleFile extends BundleFile {
     }
 
     /**
-     * @see org.eclipse.osgi.baseadaptor.bundlefile.BundleFile#getEntryPaths(java.lang.String)
+     * @see BundleFile#getEntryPaths(java.lang.String)
      */
     @Override
-    public Enumeration getEntryPaths(final String path) {
+    public Enumeration<String> getEntryPaths(final String path) {
         return delegate.getEntryPaths(path);
     }
 
     /**
-     * @see org.eclipse.osgi.baseadaptor.bundlefile.BundleFile#getFile(java.lang.String,
-     *      boolean)
+     * @see BundleFile#getFile(java.lang.String, boolean)
      */
     @Override
     public File getFile(final String path, final boolean nativeCode) {
@@ -93,26 +94,17 @@ public abstract class AbstractWeavingBundleFile extends BundleFile {
     }
 
     /**
-     * @deprecated
+     * @see BundleFile#getResourceURL(java.lang.String,
+     *      org.eclipse.osgi.container.Module, int)
      */
-    @Deprecated
     @Override
-    public URL getResourceURL(final String path, final long hostBundleID) {
-        return delegate.getResourceURL(path, hostBundleID);
-    }
-
-    /**
-     * @deprecated
-     */
-    @Deprecated
-    @Override
-    public URL getResourceURL(final String path, final long hostBundleID,
+    public URL getResourceURL(final String path, final Module hostModule,
             final int index) {
-        return delegate.getResourceURL(path, hostBundleID, index);
+        return delegate.getResourceURL(path, hostModule, index);
     }
 
     /**
-     * @see org.eclipse.osgi.baseadaptor.bundlefile.BundleFile#open()
+     * @see BundleFile#open()
      */
     @Override
     public void open() throws IOException {

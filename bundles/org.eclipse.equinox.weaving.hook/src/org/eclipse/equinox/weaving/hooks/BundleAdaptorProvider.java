@@ -12,27 +12,29 @@
 package org.eclipse.equinox.weaving.hooks;
 
 import org.eclipse.equinox.weaving.adaptors.IWeavingAdaptor;
-import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.framework.internal.core.BundleFragment;
+import org.eclipse.osgi.storage.BundleInfo.Generation;
+import org.osgi.framework.wiring.BundleRevision;
 
 public class BundleAdaptorProvider {
 
     private final IAdaptorProvider adaptorProvider;
 
-    private final BaseData baseData;
+    private final Generation generation;
 
-    public BundleAdaptorProvider(final BaseData data,
+    public BundleAdaptorProvider(final Generation generation,
             final IAdaptorProvider adaptorProvider) {
-        this.baseData = data;
+        this.generation = generation;
         this.adaptorProvider = adaptorProvider;
     }
 
     public IWeavingAdaptor getAdaptor() {
-        if (this.baseData.getBundle() instanceof BundleFragment) {
-            return this.adaptorProvider.getHostBundleAdaptor(this.baseData
-                    .getBundleID());
+
+        if ((generation.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+            return this.adaptorProvider.getHostBundleAdaptor(this.generation
+                    .getBundleInfo().getBundleId());
         } else {
-            return this.adaptorProvider.getAdaptor(this.baseData.getBundleID());
+            return this.adaptorProvider.getAdaptor(this.generation
+                    .getBundleInfo().getBundleId());
         }
     }
 

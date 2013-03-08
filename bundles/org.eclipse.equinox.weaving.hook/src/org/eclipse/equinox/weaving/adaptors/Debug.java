@@ -11,23 +11,23 @@
 
 package org.eclipse.equinox.weaving.adaptors;
 
-import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
+import org.eclipse.osgi.service.debug.DebugOptions;
 
 public class Debug {
 
     public static final String ASPECTJ_OSGI = "org.eclipse.equinox.weaving.hook"; //$NON-NLS-1$
 
-    public static boolean DEBUG_BUNDLE;
+    public static boolean DEBUG_BUNDLE = false;
 
     public static String DEBUG_BUNDLENAME;
 
-    public static boolean DEBUG_CACHE;
+    public static boolean DEBUG_CACHE = false;
 
-    public static boolean DEBUG_GENERAL;
+    public static boolean DEBUG_GENERAL = false;
 
-    public static boolean DEBUG_SUPPLEMENTS;
+    public static boolean DEBUG_SUPPLEMENTS = false;
 
-    public static boolean DEBUG_WEAVE;
+    public static boolean DEBUG_WEAVE = false;
 
     public static final String OPTION_DEBUG_BUNDLE = ASPECTJ_OSGI
             + "/debug/bundle"; //$NON-NLS-1$
@@ -46,21 +46,21 @@ public class Debug {
     public static final String OPTION_DEBUG_WEAVE = ASPECTJ_OSGI
             + "/debug/weave"; //$NON-NLS-1$
 
-    static {
-        final FrameworkDebugOptions fdo = FrameworkDebugOptions.getDefault();
-        if (fdo != null) {
-            DEBUG_GENERAL = fdo.getBooleanOption(OPTION_DEBUG_GENERAL, false);
-            DEBUG_BUNDLE = fdo.getBooleanOption(OPTION_DEBUG_BUNDLE, false);
-            DEBUG_WEAVE = fdo.getBooleanOption(OPTION_DEBUG_WEAVE, false);
-            DEBUG_CACHE = fdo.getBooleanOption(OPTION_DEBUG_CACHE, false);
-            DEBUG_BUNDLENAME = fdo.getOption(OPTION_DEBUG_BUNDLENAME, "");
-            DEBUG_SUPPLEMENTS = fdo.getBooleanOption(OPTION_DEBUG_SUPPLEMENTS,
-                    false);
-        }
-    }
-
     public static boolean bundleNameMatches(final String name) {
         return name.equals(DEBUG_BUNDLENAME);
+    }
+
+    public static void init(final DebugOptions options) {
+        if (options != null) {
+            DEBUG_GENERAL = options.getBooleanOption(OPTION_DEBUG_GENERAL,
+                    false);
+            DEBUG_BUNDLE = options.getBooleanOption(OPTION_DEBUG_BUNDLE, false);
+            DEBUG_WEAVE = options.getBooleanOption(OPTION_DEBUG_WEAVE, false);
+            DEBUG_CACHE = options.getBooleanOption(OPTION_DEBUG_CACHE, false);
+            DEBUG_BUNDLENAME = options.getOption(OPTION_DEBUG_BUNDLENAME, "");
+            DEBUG_SUPPLEMENTS = options.getBooleanOption(
+                    OPTION_DEBUG_SUPPLEMENTS, false);
+        }
     }
 
     public static void println(final String s) {

@@ -15,9 +15,8 @@ import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.eclipse.equinox.service.weaving.IWeavingService;
 import org.eclipse.equinox.service.weaving.IWeavingServiceFactory;
 import org.eclipse.equinox.weaving.aspectj.loadtime.AspectAdminImpl;
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.State;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.BundleRevision;
 
 /**
  * The factory to create AspectJ-based weavers.
@@ -28,23 +27,20 @@ public class AspectJWeavingServiceFactory implements IWeavingServiceFactory {
 
     private final AspectAdminImpl aspectDefinitionRegistry;
 
-    public AspectJWeavingServiceFactory(final AspectAdminImpl aspectDefinitionRegistry) {
+    public AspectJWeavingServiceFactory(
+            final AspectAdminImpl aspectDefinitionRegistry) {
         this.aspectDefinitionRegistry = aspectDefinitionRegistry;
     }
 
     /**
-     * @see org.eclipse.equinox.service.weaving.IWeavingServiceFactory#createWeavingService(java.lang.ClassLoader,
-     *      org.osgi.framework.Bundle, org.eclipse.osgi.service.resolver.State,
-     *      org.eclipse.osgi.service.resolver.BundleDescription,
-     *      org.eclipse.equinox.service.weaving.ISupplementerRegistry)
+     * @see org.eclipse.equinox.service.weaving.IWeavingServiceFactory#createWeavingService(ClassLoader,
+     *      Bundle, BundleRevision, ISupplementerRegistry)
      */
     public IWeavingService createWeavingService(final ClassLoader loader,
-            final Bundle bundle, final State resolverState,
-            final BundleDescription bundleDesciption,
+            final Bundle bundle, final BundleRevision bundleRevision,
             final ISupplementerRegistry supplementerRegistry) {
-        return new AspectJWeavingService(loader, bundle, resolverState,
-                bundleDesciption, supplementerRegistry,
-                aspectDefinitionRegistry);
+        return new AspectJWeavingService(loader, bundle, bundleRevision,
+                supplementerRegistry, aspectDefinitionRegistry);
     }
 
 }
