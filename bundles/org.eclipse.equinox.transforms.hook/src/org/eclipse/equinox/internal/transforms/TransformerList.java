@@ -13,6 +13,8 @@ package org.eclipse.equinox.internal.transforms;
 
 import java.util.HashMap;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.log.EquinoxLogServices;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -30,16 +32,18 @@ public class TransformerList extends ServiceTracker {
 	 * Local cache of transformers.
 	 */
 	private HashMap transformers = new HashMap();
+	private final EquinoxLogServices logServices;
 
 	/**
 	 * Create a new instance of this list.
 	 * @param context the context to track
 	 * @throws InvalidSyntaxException thrown if there's an issue listening for changes to the given transformer type
 	 */
-	public TransformerList(BundleContext context) throws InvalidSyntaxException {
+	public TransformerList(BundleContext context, EquinoxLogServices logServices) throws InvalidSyntaxException {
 		super(context, context.createFilter("(&(objectClass=" //$NON-NLS-1$
 				+ Object.class.getName() + ")(" + TransformTuple.TRANSFORMER_TYPE //$NON-NLS-1$
 				+ "=*))"), null); //$NON-NLS-1$
+		this.logServices = logServices;
 		open();
 	}
 
@@ -87,9 +91,9 @@ public class TransformerList extends ServiceTracker {
 					transformer = new ProxyStreamTransformer(object);
 					transformers.put(type, transformer);
 				} catch (SecurityException e) {
-					TransformerHook.log(FrameworkLogEntry.ERROR, "Problem creating transformer", e); //$NON-NLS-1$
+					logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Problem creating transformer", e); //$NON-NLS-1$
 				} catch (NoSuchMethodException e) {
-					TransformerHook.log(FrameworkLogEntry.ERROR, "Problem creating transformer", e); //$NON-NLS-1$
+					logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Problem creating transformer", e); //$NON-NLS-1$
 				}
 			}
 		}

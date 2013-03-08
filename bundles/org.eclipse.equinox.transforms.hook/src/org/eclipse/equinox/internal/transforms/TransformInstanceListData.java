@@ -14,6 +14,7 @@ package org.eclipse.equinox.internal.transforms;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import org.eclipse.osgi.internal.log.EquinoxLogServices;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -44,16 +45,19 @@ public class TransformInstanceListData extends ServiceTracker {
 	 * Map from bundle ID -> boolean representing whether or not a given bundle currently has any transforms registered against it.
 	 */
 	private Map bundleIdToTransformPresence = new HashMap();
+	private final EquinoxLogServices logServices;
 
 	/**
 	 * Create a new transform list bound to the given context. If new transforms are registered against the given context the contents of this list will change.
 	 * @param context the bundle context
+	 * @param logServices 
 	 * @throws InvalidSyntaxException thrown if there's an issue listening for changes to the given transformer type
 	 */
-	public TransformInstanceListData(BundleContext context) throws InvalidSyntaxException {
+	public TransformInstanceListData(BundleContext context, EquinoxLogServices logServices) throws InvalidSyntaxException {
 		super(context, context.createFilter("(&(objectClass=" //$NON-NLS-1$
 				+ URL.class.getName() + ")(" + TransformTuple.TRANSFORMER_TYPE //$NON-NLS-1$
 				+ "=*))"), null); //$NON-NLS-1$
+		this.logServices = logServices;
 		open();
 	}
 
@@ -128,7 +132,7 @@ public class TransformInstanceListData extends ServiceTracker {
 			URL url = (URL) getService(serviceReference);
 			TransformTuple[] transforms;
 			try {
-				transforms = CSVParser.parse(url);
+				transforms = CSVParser.parse(url, logServices);
 				TransformTuple[] existing = (TransformTuple[]) transformerToTuple.get(type);
 				if (existing != null) {
 					TransformTuple[] newTransforms = new TransformTuple[existing.length + transforms.length];

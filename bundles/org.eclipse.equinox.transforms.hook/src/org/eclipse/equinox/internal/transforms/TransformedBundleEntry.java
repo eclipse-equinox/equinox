@@ -14,8 +14,9 @@ package org.eclipse.equinox.internal.transforms;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 
 /**
  * This class is capable of providing a transformed version of an entry contained within a base bundle entity.
@@ -85,9 +86,8 @@ public class TransformedBundleEntry extends BundleEntry {
 				stream = new ByteArrayInputStream(tempBuffer.toByteArray());
 			}
 		} catch (IOException e) {
-			TransformerHook.log(FrameworkLogEntry.ERROR, "Problem calculating size of stream for file.  Stream may now be corrupted : " //$NON-NLS-1$
+			bundleFile.getGeneration().getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Problem calculating size of stream for file.  Stream may now be corrupted : " //$NON-NLS-1$
 					+ getName(), e);
-
 		}
 		return tempBuffer.size();
 

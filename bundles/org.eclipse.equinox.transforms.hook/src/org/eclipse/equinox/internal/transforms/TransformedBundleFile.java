@@ -16,12 +16,12 @@ import java.util.Enumeration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.equinox.internal.transforms.LazyInputStream.InputStreamProvider;
-import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.baseadaptor.bundlefile.*;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
-import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
+import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.storage.BundleInfo.Generation;
+import org.eclipse.osgi.storage.*;
+import org.eclipse.osgi.storage.bundlefile.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 
@@ -31,10 +31,11 @@ import org.osgi.framework.Bundle;
  */
 public class TransformedBundleFile extends BundleFile {
 
-	private BundleFile delegate;
-	private BaseData data;
-	private TransformerList transformers;
-	private TransformInstanceListData templates;
+	private final BundleFile delegate;
+	private final TransformerList transformers;
+	private final TransformInstanceListData templates;
+	private final Generation generation;
+	private final Debug debug;
 
 	/**
 	 * Create a wrapped bundle file.  
@@ -44,11 +45,17 @@ public class TransformedBundleFile extends BundleFile {
 	 * @param data the original data
 	 * @param delegate the original file
 	 */
-	public TransformedBundleFile(TransformerList transformers, TransformInstanceListData templates, BaseData data, BundleFile delegate) {
+	public TransformedBundleFile(TransformerList transformers, TransformInstanceListData templates, Generation generation, BundleFile delegate) {
+		super(delegate.getBaseFile());
 		this.transformers = transformers;
 		this.templates = templates;
-		this.data = data;
+		this.generation = generation;
 		this.delegate = delegate;
+		this.debug = generation.getBundleInfo().getStorage().getConfiguration().getDebug();
+	}
+
+	Generation getGeneration() {
+		return generation;
 	}
 
 	public void close() throws IOException {
@@ -70,7 +77,7 @@ public class TransformedBundleFile extends BundleFile {
 	public BundleEntry getEntry(String path) {
 
 		final BundleEntry original = delegate.getEntry(path);
-		if (data.getBundle() == null || path == null || original == null)
+		if (generation.getRevision().getBundle() == null || path == null || original == null)
 			return original;
 
 		LazyInputStream stream = new LazyInputStream(new InputStreamProvider() {
@@ -79,7 +86,7 @@ public class TransformedBundleFile extends BundleFile {
 				return original.getInputStream();
 			}
 		});
-		InputStream wrappedStream = getInputStream(stream, data.getBundle(), path);
+		InputStream wrappedStream = getInputStream(stream, generation.getRevision().getBundle(), path);
 		if (wrappedStream == null)
 			return original;
 		return new TransformedBundleEntry(this, original, wrappedStream);
@@ -114,8 +121,9 @@ public class TransformedBundleFile extends BundleFile {
 					try {
 						return transformer.getInputStream(inputStream, transformTuple.transformerUrl);
 					} catch (IOException e) {
-						TransformerHook.log(FrameworkLogEntry.ERROR, "Problem obtaining transformed stream from transformer : " //$NON-NLS-1$
+						generation.getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Problem obtaining transformed stream from transformer : " //$NON-NLS-1$
 								+ transformer.getClass().getName(), e);
+
 					}
 				}
 			}
@@ -156,7 +164,7 @@ public class TransformedBundleFile extends BundleFile {
 			if (nested != null) {
 				if (nested.exists()) {
 					/* the entry is already cached */
-					if (Debug.DEBUG_GENERAL)
+					if (debug.DEBUG_GENERAL)
 						Debug.println("File already present: " + nested.getPath()); //$NON-NLS-1$
 					if (nested.isDirectory())
 						// must ensure the complete directory is extracted (bug
@@ -165,9 +173,9 @@ public class TransformedBundleFile extends BundleFile {
 				} else {
 					if (originalFile.isDirectory()) {
 						if (!nested.mkdirs()) {
-							if (Debug.DEBUG_GENERAL)
+							if (debug.DEBUG_GENERAL)
 								Debug.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
-							throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
+							throw new IOException(NLS.bind(StorageMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
 						}
 						extractDirectory(path);
 					} else {
@@ -176,26 +184,27 @@ public class TransformedBundleFile extends BundleFile {
 							return null;
 						// if (in instanceof )
 						/* the entry has not been cached */
-						if (Debug.DEBUG_GENERAL)
+						if (debug.DEBUG_GENERAL)
 							Debug.println("Creating file: " + nested.getPath()); //$NON-NLS-1$
 						/* create the necessary directories */
 						File dir = new File(nested.getParent());
 						if (!dir.exists() && !dir.mkdirs()) {
-							if (Debug.DEBUG_GENERAL)
+							if (debug.DEBUG_GENERAL)
 								Debug.println("Unable to create directory: " + dir.getPath()); //$NON-NLS-1$
-							throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, dir.getAbsolutePath()));
+							throw new IOException(NLS.bind(StorageMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, dir.getAbsolutePath()));
 						}
 						/* copy the entry to the cache */
-						AdaptorUtil.readFile(in, nested);
-						if (nativeCode)
-							setPermissions(nested);
+						StorageUtil.readFile(in, nested);
+						if (nativeCode) {
+							generation.getBundleInfo().getStorage().setPermissions(nested);
+						}
 					}
 				}
 
 				return nested;
 			}
 		} catch (IOException e) {
-			if (Debug.DEBUG_GENERAL)
+			if (debug.DEBUG_GENERAL)
 				Debug.printStackTrace(e);
 		}
 		return null;
@@ -212,7 +221,7 @@ public class TransformedBundleFile extends BundleFile {
 	private boolean hasTransforms(String path) {
 		if (!transformers.hasTransformers())
 			return false;
-		return templates.hasTransformsFor(data.getBundle());
+		return templates.hasTransformsFor(generation.getRevision().getBundle());
 	}
 
 	/**
@@ -238,8 +247,6 @@ public class TransformedBundleFile extends BundleFile {
 	}
 
 	protected File getExtractFile(String entryName) {
-		if (data == null)
-			return null;
 		String path = ".tf"; /* put all these entries in this subdir *///$NON-NLS-1$
 		String name = entryName.replace('/', File.separatorChar);
 		/*
@@ -249,7 +256,7 @@ public class TransformedBundleFile extends BundleFile {
 			path = path.concat(name);
 		else
 			path = path + File.separator + name;
-		return data.getExtractFile(path);
+		return generation.getExtractFile(path);
 	}
 
 	public int hashCode() {

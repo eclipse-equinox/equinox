@@ -17,6 +17,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.log.EquinoxLogServices;
 
 /**
  * This class is used by the transformer hook to parse urls provided by transform developers that specifies the particular transforms that should be utilized for a particular transformer.  
@@ -33,7 +35,7 @@ public class CSVParser {
 	 * @return an array of tuples derived from the contents of the file
 	 * @throws IOException thrown if there are issues parsing the file
 	 */
-	public static TransformTuple[] parse(URL transformMapURL) throws IOException {
+	public static TransformTuple[] parse(URL transformMapURL, EquinoxLogServices logServices) throws IOException {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(transformMapURL.openStream()));
 		String currentLine = null;
 		List list = new ArrayList();
@@ -61,14 +63,14 @@ public class CSVParser {
 						tuple.transformerUrl = transformerURL;
 						list.add(tuple);
 					} catch (IOException e) {
-						TransformerHook.log(FrameworkLogEntry.ERROR, "Could not add transform :" + transformerURL.toString(), e); //$NON-NLS-1$
+						logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Could not add transform :" + transformerURL.toString(), e); //$NON-NLS-1$
 					}
 				} catch (PatternSyntaxException e) {
-					TransformerHook.log(FrameworkLogEntry.ERROR, "Could not add compile transform matching regular expression", e); //$NON-NLS-1$
+					logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Could not add compile transform matching regular expression", e); //$NON-NLS-1$
 				}
 
 			} catch (NoSuchElementException e) {
-				TransformerHook.log(FrameworkLogEntry.ERROR, "Could not parse transform file record :" + currentLine, e); //$NON-NLS-1$
+				logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Could not parse transform file record :" + currentLine, e); //$NON-NLS-1$
 			}
 		}
 		return (TransformTuple[]) list.toArray(new TransformTuple[list.size()]);
