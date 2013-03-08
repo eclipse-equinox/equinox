@@ -42,9 +42,6 @@ public class SecurityCategoryPage extends PreferencePage implements IWorkbenchPr
 		storageLinkArea.getControl().setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
 
 		Dialog.applyDialogFont(pageArea);
-		//PreferenceLinkArea certsLinkArea = new PreferenceLinkArea(pageArea, SWT.NONE, "org.eclipse.equinox.security.ui.certificates", SecurityUIMsg.CATPAGE_LABEL_CERTIFICATES, (IWorkbenchPreferenceContainer) getContainer(), null); //$NON-NLS-1$
-		//certsLinkArea.getControl().setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
-
 		return pageArea;
 	}
 }

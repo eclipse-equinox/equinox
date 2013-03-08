@@ -11,17 +11,6 @@
    </extension>
 
 
-<!--
-   <extension point="org.eclipse.ui.preferencePages">
-      <page
-         name="%certificates"
-         class="org.eclipse.equinox.internal.security.ui.preferences.CertificatesPage"
-         id="org.eclipse.equinox.security.ui.certificates"
-         category="org.eclipse.equinox.security.ui.category">
-      </page>
-   </extension>
--->
-
    <extension point="org.eclipse.ui.preferencePages">
       <page
          name="%storage"
@@ -40,23 +29,6 @@
       </page>
    </extension>
 
-   
-<!--   
-   <extension
-         point="org.eclipse.ui.importWizards">
-      <wizard
-            category="org.eclipse.ui.Basic"
-            class="org.eclipse.equinox.internal.security.ui.wizard.CertificateImportWizard"
-            icon="icons/full/obj16/signed_yes_tbl.gif"
-            id="org.eclipse.equinox.security.ui.importWizards.ImportWizard"
-            name="%certificateFile">
-         <description>
-            %certificateFileDescription
-         </description>
-         <selection class="org.eclipse.core.resources.IResource" /> 
-      </wizard>
-   </extension>
--->   
    <!-- The default UI password provider -->
    <extension
          id="DefaultPasswordProvider"
