@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
+import java.util.ListIterator;
+import org.osgi.resource.Requirement;
+
 import java.security.Permission;
 import java.util.*;
 import org.apache.felix.resolver.ResolverImpl;
@@ -529,12 +532,24 @@ final class ModuleResolver {
 		private List<Capability> filterProviders(Requirement requirement, List<ModuleCapability> candidates) {
 			ListIterator<ModuleCapability> iCandidates = candidates.listIterator();
 			filterDisabled(iCandidates);
+			filterResolvedHosts(requirement, iCandidates);
 			removeNonEffectiveCapabilities(iCandidates);
 			removeSubstituted(iCandidates);
 			filterPermissions((BundleRequirement) requirement, iCandidates);
 			hook.filterMatches((BundleRequirement) requirement, Converters.asListBundleCapability(candidates));
 			Collections.sort(candidates, this);
 			return Converters.asListCapability(candidates);
+		}
+
+		private void filterResolvedHosts(Requirement requirement, ListIterator<ModuleCapability> iCandidates) {
+			if (HostNamespace.HOST_NAMESPACE.equals(requirement.getNamespace())) {
+				rewind(iCandidates);
+				while (iCandidates.hasNext()) {
+					if (wirings.containsKey(iCandidates.next().getRevision())) {
+						iCandidates.remove();
+					}
+				}
+			}
 		}
 
 		private void filterPermissions(BundleRequirement requirement, ListIterator<ModuleCapability> iCandidates) {
