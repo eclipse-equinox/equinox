@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.equinox.bidi.internal.consumable;
+package org.eclipse.equinox.bidi.internal.tests;
 
 import org.eclipse.equinox.bidi.advanced.IStructuredTextExpert;
 import org.eclipse.equinox.bidi.custom.StructuredTextCharTypes;

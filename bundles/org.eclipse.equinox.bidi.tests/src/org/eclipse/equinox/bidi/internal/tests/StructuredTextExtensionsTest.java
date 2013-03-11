@@ -19,6 +19,9 @@ import org.eclipse.equinox.bidi.advanced.*;
  */
 public class StructuredTextExtensionsTest extends StructuredTextTestBase {
 
+	private static final String PROPERTY = "property";
+	private static final String SYSTEM_USER = "system";
+
 	private StructuredTextEnvironment env = StructuredTextEnvironment.DEFAULT;
 	private StructuredTextEnvironment envArabic = new StructuredTextEnvironment("ar", false, StructuredTextEnvironment.ORIENT_LTR);
 	private StructuredTextEnvironment envHebrew = new StructuredTextEnvironment("he", false, StructuredTextEnvironment.ORIENT_LTR);
@@ -40,7 +43,7 @@ public class StructuredTextExtensionsTest extends StructuredTextTestBase {
 		assertEquals(label + " data = " + data, result, toPseudo(full));
 	}
 
-	public void testExtensions() {
+	public void testDefaultExtensions() {
 		String data;
 
 		expert = StructuredTextExpertFactory.getExpert(StructuredTextTypeHandlerFactory.COMMA_DELIMITED, env);
@@ -77,11 +80,6 @@ public class StructuredTextExtensionsTest extends StructuredTextTestBase {
 		doTest1("Java #8", "X+Y+Z */ B;  ", "X+Y+Z @*/ B;  ");
 		doTest1("Java #9", "A = //B+C* D;", "A@ = //B+C* D;");
 		doTest1("Java #10", "A = //B+C`|D+E;", "A@ = //B+C`|D@+E;");
-
-		expert = StructuredTextExpertFactory.getExpert(StructuredTextTypeHandlerFactory.PROPERTY, env);
-		doTest1("Property #0", "NAME,VAL1,VAL2", "NAME,VAL1,VAL2");
-		doTest1("Property #1", "NAME=VAL1,VAL2", "NAME@=VAL1,VAL2");
-		doTest1("Property #2", "NAME=VAL1,VAL2=VAL3", "NAME@=VAL1,VAL2=VAL3");
 
 		expert = StructuredTextExpertFactory.getStatefulExpert(StructuredTextTypeHandlerFactory.REGEXP, env);
 		data = toUT16("ABC(?") + "#" + toUT16("DEF)GHI");
@@ -185,9 +183,6 @@ public class StructuredTextExtensionsTest extends StructuredTextTestBase {
 		doTest1("SQL #12", "ABC\"DEF \"\" G I\" JKL,MN", "ABC@\"DEF \"\" G I\"@ JKL@,MN");
 		doTest1("SQL #13", "ABC--DEF GHI`|JKL MN", "ABC@--DEF GHI`|JKL@ MN");
 
-		expert = StructuredTextExpertFactory.getExpert(StructuredTextTypeHandlerFactory.SYSTEM_USER, env);
-		doTest1("System #1", "HOST(JACK)", "HOST@(JACK)");
-
 		expert = StructuredTextExpertFactory.getExpert(StructuredTextTypeHandlerFactory.UNDERSCORE, env);
 		doTest1("Underscore #1", "A_B_C_d_e_F_G", "A@_B@_C_d_e_F@_G");
 
@@ -208,5 +203,15 @@ public class StructuredTextExtensionsTest extends StructuredTextTestBase {
 		doTest3("DelimsEsc #5", "DEF.GHI (A\\\\\\):C) ;JK ", "DEF@.GHI @(A\\\\\\):C) @;JK ");
 		doTest3("DelimsEsc #6", "DEF.GHI (A\\\\):C ;JK ", "DEF@.GHI @(A\\\\)@:C @;JK ");
 		doTest3("DelimsEsc #7", "DEF.GHI (A\\):C ;JK ", "DEF@.GHI @(A\\):C ;JK ");
+	}
+
+	public void testTestExtensions() {
+		expert = StructuredTextExpertFactory.getExpert(PROPERTY, env);
+		doTest1("Property #0", "NAME,VAL1,VAL2", "NAME,VAL1,VAL2");
+		doTest1("Property #1", "NAME=VAL1,VAL2", "NAME@=VAL1,VAL2");
+		doTest1("Property #2", "NAME=VAL1,VAL2=VAL3", "NAME@=VAL1,VAL2=VAL3");
+
+		expert = StructuredTextExpertFactory.getExpert(SYSTEM_USER, env);
+		doTest1("System #1", "HOST(JACK)", "HOST@(JACK)");
 	}
 }

@@ -9,7 +9,22 @@
             description="Test"
             type="test.ID">
       </typeDescription>
-
+      
+      <typeDescription
+            class="org.eclipse.equinox.bidi.internal.tests.StructuredTextMath"
+            description="Processor for arithmetic expressions"
+            type="math">
+      </typeDescription>
+      <typeDescription
+            class="org.eclipse.equinox.bidi.internal.tests.StructuredTextProperty"
+            description="Processor for property file lines (incomplete: only handles '=')"
+            type="property">
+      </typeDescription>
+      <typeDescription
+            class="org.eclipse.equinox.bidi.internal.tests.StructuredTextSystem"
+            description="%Processor for system(user) statements"
+            type="system">
+      </typeDescription>
    </extension>
 
 </plugin>

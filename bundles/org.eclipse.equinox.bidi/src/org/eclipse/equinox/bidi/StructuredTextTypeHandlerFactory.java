@@ -34,7 +34,7 @@ import org.eclipse.equinox.bidi.internal.StructuredTextTypesCollector;
  * {@link StructuredTextExpertFactory#getStatefulExpert(StructuredTextTypeHandler, StructuredTextEnvironment)}.
  * <p>
  * This class can be used without OSGi running, but only the structured text types declared
- * in {@link StructuredTextTypeHandlerFactory} and as string constants in this class are available in that mode.
+ * as string constants in this class are available in that mode.
  * </p>
  *  
  * @noinstantiate This class is not intended to be instantiated by clients.
@@ -66,24 +66,6 @@ public final class StructuredTextTypeHandlerFactory {
 	public static final String JAVA = "java"; //$NON-NLS-1$
 
 	/**
-	 *  Structured text handler identifier for basic arithmetic expressions.
-	 *  <p>
-	 *  Currently supported operators are: <code>+-/*()=</code>
-	 *  </p></p>
-	 *  This set my be extended in the future.
-	 *  <p>
-	 */
-	public static final String MATH = "math"; //$NON-NLS-1$
-
-	/**
-	 * Structured text handler identifier for property file statements. It expects the following format:
-	 * <pre>
-	 *  name=value
-	 * </pre>
-	 */
-	public static final String PROPERTY = "property"; //$NON-NLS-1$
-
-	/**
 	 * Structured text handler identifier for regular expressions, 
 	 * possibly spanning multiple lines.
 	 */
@@ -94,14 +76,6 @@ public final class StructuredTextTypeHandlerFactory {
 	 * possibly spanning multiple lines.
 	 */
 	public static final String SQL = "sql"; //$NON-NLS-1$
-
-	/**
-	 * Structured text handler identifier for strings with the following format:
-	 * <pre>
-	 *  system(user)
-	 * </pre>
-	 */
-	public static final String SYSTEM_USER = "system"; //$NON-NLS-1$
 
 	/**
 	 * Structured text handler identifier for compound names. It expects text to be made of one or more 
@@ -132,12 +106,18 @@ public final class StructuredTextTypeHandlerFactory {
 	}
 
 	/**
-	 *  Obtains a structured text handler of a given type.
-	 *  
-	 *  @param id the string identifying a structured text handler.
-	 *  
-	 *  @return a handler of the required type, or <code>null</code> 
-	 *          if the type is unknown.
+	 * Obtains a structured text handler of a given type.
+	 * 
+	 * Supported type ids are:
+	 * <ul>
+	 * <li>the <code>String</code> constants in {@link StructuredTextTypeHandlerFactory}</li>
+	 * <li>if OSGi is running, the types that have been contributed to the
+	 *     <code>org.eclipse.equinox.bidi.bidiTypes</code> extension point.</li>
+	 * </ul>
+	 * 
+	 * @param id the string identifying a structured text handler
+	 * @return a handler of the required type, or <code>null</code> 
+	 *         if the type is unknown
 	 */
 	static public StructuredTextTypeHandler getHandler(String id) {
 		return StructuredTextTypesCollector.getInstance().getHandler(id);

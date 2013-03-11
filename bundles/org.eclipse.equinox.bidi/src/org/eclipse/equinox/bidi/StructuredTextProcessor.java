@@ -14,19 +14,18 @@ import org.eclipse.equinox.bidi.advanced.*;
 import org.eclipse.equinox.bidi.custom.StructuredTextTypeHandler;
 
 /**
- *  Provides methods to process bidirectional text with a specific 
- *  structure. The methods in this class are the most straightforward 
- *  way to add directional formatting characters to the source text to 
- *  ensure correct presentation, or to remove those characters to 
- *  restore the original text
- *  (for more explanations, please see the 
- *  <a href="package-summary.html">package documentation</a>).
+ * Provides methods to process bidirectional text with a specific 
+ * structure. The methods in this class are the most straightforward 
+ * way to add directional formatting characters to the source text to 
+ * ensure correct presentation, or to remove those characters to 
+ * restore the original text
+ * (for more explanations, please see the 
+ * {@link org.eclipse.equinox.bidi package documentation</a>}.
  * <p>
  * This class can be used without OSGi running (but only the structured text types declared
  * in {@link StructuredTextTypeHandlerFactory} are available in that mode).
  * </p>
  *
- *  @noextend This class is not intended to be subclassed by clients.
  *  @noinstantiate This class is not intended to be instantiated by clients.
  */
 public final class StructuredTextProcessor {
@@ -57,25 +56,25 @@ public final class StructuredTextProcessor {
 	}
 
 	/**
-	 *  Processes the given (<i>lean</i>) text and returns a string with appropriate
-	 *  directional formatting characters (<i>full</i> text). This is equivalent to 
-	 *  calling {@link #process(String str, String separators)} with the default
-	 *  set of separators.
-	 *  <p>
-	 *  The processing adds directional formatting characters so that presentation 
-	 *  using the Unicode Bidirectional Algorithm will provide the expected result.
-	 *  The text is segmented according to the provided separators.
-	 *  Each segment has the Unicode Bidi Algorithm applied to it,
-	 *  but as a whole, the string is oriented left to right.
-	 *  </p><p>
-	 *  For example, a file path such as <tt>d:\myfolder\FOLDER\MYFILE.java</tt>
-	 *  (where capital letters indicate RTL text) should render as
-	 *  <tt>d:\myfolder\REDLOF\ELIFYM.java</tt>.
-	 *  </p>
+	 * Processes the given (<i>lean</i>) text and returns a string with appropriate
+	 * directional formatting characters (<i>full</i> text). This is equivalent to 
+	 * calling {@link #process(String str, String separators)} with the default
+	 * set of separators.
+	 * <p>
+	 * The processing adds directional formatting characters so that presentation 
+	 * using the Unicode Bidirectional Algorithm will provide the expected result.
+	 * The text is segmented according to the provided separators.
+	 * Each segment has the Unicode Bidi Algorithm applied to it,
+	 * but as a whole, the string is oriented left to right.
+	 * </p><p>
+	 * For example, a file path such as <tt>d:\myfolder\FOLDER\MYFILE.java</tt>
+	 * (where capital letters indicate RTL text) should render as
+	 * <tt>d:\myfolder\REDLOF\ELIFYM.java</tt>.
+	 * </p>
+	 * 
+	 * @param str the <i>lean</i> text to process
 	 *  
-	 * @param  str the <i>lean</i> text to process.
-	 *  
-	 * @return the processed string (<i>full</i> text).
+	 * @return the processed string (<i>full</i> text)
 	 * 
 	 * @see #deprocess(String)
 	 */
@@ -88,10 +87,10 @@ public final class StructuredTextProcessor {
 	 * it correctly on bidi locales.
 	 * For more details, see {@link #process(String)}.
 	 * 
-	 * @param  str the <i>lean</i> text to process.
-	 * @param  separators characters by which the string will be segmented.
+	 * @param str the <i>lean</i> text to process
+	 * @param separators characters by which the string will be segmented
 	 * 
-	 * @return the processed string (<i>full</i> text).
+	 * @return the processed string (<i>full</i> text)
 	 * 
 	 * @see #deprocess(String)
 	 */
