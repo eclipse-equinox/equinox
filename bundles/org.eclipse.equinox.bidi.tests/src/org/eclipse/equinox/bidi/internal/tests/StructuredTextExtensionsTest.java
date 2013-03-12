@@ -81,7 +81,7 @@ public class StructuredTextExtensionsTest extends StructuredTextTestBase {
 		doTest1("Java #9", "A = //B+C* D;", "A@ = //B+C* D;");
 		doTest1("Java #10", "A = //B+C`|D+E;", "A@ = //B+C`|D@+E;");
 
-		expert = StructuredTextExpertFactory.getStatefulExpert(StructuredTextTypeHandlerFactory.REGEXP, env);
+		expert = StructuredTextExpertFactory.getStatefulExpert(StructuredTextTypeHandlerFactory.REGEX, env);
 		data = toUT16("ABC(?") + "#" + toUT16("DEF)GHI");
 		doTest2("Regex #0.0", data, "A@B@C@(?#DEF)@G@H@I");
 		data = toUT16("ABC(?") + "#" + toUT16("DEF");
@@ -127,7 +127,7 @@ public class StructuredTextExtensionsTest extends StructuredTextTestBase {
 		doTest1("Regex #17.7", "aB*567", "aB*@567");
 
 		env = envArabic;
-		expert = StructuredTextExpertFactory.getExpert(StructuredTextTypeHandlerFactory.REGEXP, env);
+		expert = StructuredTextExpertFactory.getExpert(StructuredTextTypeHandlerFactory.REGEX, env);
 		data = toUT16("#BC(?") + "#" + toUT16("DEF)GHI");
 		doTest2("Regex #0.0", data, "<&#BC(?#DEF)GHI&^");
 		data = toUT16("#BC(?") + "#" + toUT16("DEF");

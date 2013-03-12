@@ -69,7 +69,7 @@ public final class StructuredTextTypeHandlerFactory {
 	 * Structured text handler identifier for regular expressions, 
 	 * possibly spanning multiple lines.
 	 */
-	public static final String REGEXP = "regex"; //$NON-NLS-1$
+	public static final String REGEX = "regex"; //$NON-NLS-1$
 
 	/**
 	 * Structured text handler identifier for SQL statements, 
