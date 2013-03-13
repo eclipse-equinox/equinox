@@ -268,6 +268,10 @@ public class ModuleDatabase {
 	}
 
 	private EnumSet<Settings> getActivationPolicySettings(ModuleRevisionBuilder builder) {
+		// do not do this for fragment bundles
+		if ((builder.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+			return null;
+		}
 		for (GenericInfo info : builder.getCapabilities()) {
 			if (EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE.equals(info.getNamespace())) {
 				if (EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY.equals(info.getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY))) {
