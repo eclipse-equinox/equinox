@@ -414,7 +414,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	}
 
 	public String getConfiguration(String key, String defaultValue) {
-		String result = getProperty(key);
+		String result = getConfiguration(key);
 		return result == null ? defaultValue : result;
 	}
 
