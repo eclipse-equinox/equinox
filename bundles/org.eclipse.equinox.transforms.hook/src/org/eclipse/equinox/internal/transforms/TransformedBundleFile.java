@@ -77,7 +77,7 @@ public class TransformedBundleFile extends BundleFile {
 	public BundleEntry getEntry(String path) {
 
 		final BundleEntry original = delegate.getEntry(path);
-		if (generation.getRevision().getBundle() == null || path == null || original == null)
+		if (generation.getRevision() == null || path == null || original == null)
 			return original;
 
 		LazyInputStream stream = new LazyInputStream(new InputStreamProvider() {
