@@ -20,7 +20,9 @@ import org.osgi.framework.BundleException;
  * A StorageHookFactory hooks into the persistent storage loading and saving of bundle {@link Generation generations}.
  * A factory creates StorageHook instances that get associated with each Generation object installed.<p>
  * @see Generation#getStorageHook(Class)
- * @since 3.2
+ * @param <S> the StorageHook type
+ * @param <L> the load context type
+ * @param <H> the save context type
  */
 public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.StorageHook<S, L>> {
 	protected final String KEY = this.getClass().getName().intern();
@@ -34,24 +36,65 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 	 */
 	public abstract int getStorageVersion();
 
+	/**
+	 * Returns the implementation class name for the hook implementation
+	 * @return the implementation class name for the hook implementation
+	 */
 	public final String getKey() {
 		return KEY;
 	}
 
+	/**
+	 * Returns true if the persisted version is compatible with the 
+	 * current version of this storage hook.  The default implementation
+	 * returns true if the specified version is identical to the current
+	 * version.  Implementations must override this method if they
+	 * want to support other (older) versions for migration purposes.
+	 * @param version the persisted version
+	 * @return true if the persisted version is compatible with 
+	 * the current version.
+	 */
 	public boolean isCompatibleWith(int version) {
 		return getStorageVersion() == version;
 	}
 
+	/**
+	 * Creates a save context object for a storage hook.  The 
+	 * save context is passed to the {@link StorageHook#save(Object, DataOutputStream)}
+	 * for each generation being persisted by the framework.
+	 * @return a save context object
+	 */
 	public S createSaveContext() {
 		return null;
 	}
 
+	/**
+	 * Creates a load context object for a storage hook. The
+	 * load context is passed to the {@link StorageHook#load(Object, DataInputStream)}
+	 * for each generation being loaded from persistent storage
+	 * by the framework.
+	 * @param version the persistent version
+	 * @return the load context object
+	 */
 	public L createLoadContext(int version) {
 		return null;
 	}
 
+	/**
+	 * Creates a storage hook for the specified generation.
+	 * @param generation the generation for the storage hook
+	 * @return a storage hook
+	 */
 	public abstract H createStorageHook(Generation generation);
 
+	/**
+	 * A storage hook for a specific generation object.  This hook
+	 * is responsible for persisting and loading data associated
+	 * with a specific generation.
+	 *
+	 * @param <S> the save context type
+	 * @param <L> the load context type
+	 */
 	public static abstract class StorageHook<S, L> {
 		private final Class<? extends StorageHookFactory<S, L, ? extends StorageHook<S, L>>> factoryClass;
 		private final Generation generation;
@@ -107,6 +150,10 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 			// do nothing by default
 		}
 
+		/**
+		 * The storage hook factory class of this storage hook
+		 * @return the storage hook factory class
+		 */
 		public Class<? extends StorageHookFactory<S, L, ? extends StorageHook<S, L>>> getFactoryClass() {
 			return factoryClass;
 		}

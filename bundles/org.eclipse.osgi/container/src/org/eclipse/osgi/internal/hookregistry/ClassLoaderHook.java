@@ -22,6 +22,9 @@ import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 
+/**
+ * A class loading hook that hooks into a module class loader
+ */
 public abstract class ClassLoaderHook {
 	/**
 	 * Gets called by a classpath manager before defining a class.  This method allows a class loading hook 

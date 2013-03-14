@@ -12,6 +12,16 @@ package org.eclipse.osgi.internal.hookregistry;
 
 import org.osgi.framework.BundleActivator;
 
+/**
+ * A factory for creating bundle activators for an
+ * equinox hook.
+ */
 public interface ActivatorHookFactory {
+	/**
+	 * Creates an activator for an equinox hook.  The returned
+	 * activator will be called when the system bundle is
+	 * started and stopped.
+	 *
+	 */
 	public BundleActivator createActivator();
 }
