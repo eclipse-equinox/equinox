@@ -219,6 +219,9 @@ public class BundleLoader implements ModuleLoader {
 						}
 					});
 				}
+				for (ClassLoaderHook hook : container.getConfiguration().getHookRegistry().getClassLoaderHooks()) {
+					hook.classLoaderCreated(classloader);
+				}
 			}
 			return classloader;
 		}
