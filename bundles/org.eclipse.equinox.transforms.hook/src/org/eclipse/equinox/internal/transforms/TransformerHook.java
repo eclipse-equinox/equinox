@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,17 +27,15 @@ import org.osgi.framework.*;
  * The framework extension that is capable of applying transforms to bundle content.
  */
 public class TransformerHook implements BundleFileWrapperFactoryHook, HookConfigurator, AdaptorHook {
-	private TransformerList transformers;
-	private TransformInstanceListData templates;
+	private volatile TransformerList transformers;
+	private volatile TransformInstanceListData templates;
 	private static BaseAdaptor ADAPTOR;
 
 	/**
 	 * @throws IOException  
 	 */
 	public BundleFile wrapBundleFile(BundleFile bundleFile, Object content, BaseData data, boolean base) throws IOException {
-		if (transformers == null || templates == null)
-			return null;
-		return new TransformedBundleFile(transformers, templates, data, bundleFile);
+		return new TransformedBundleFile(this, data, bundleFile);
 	}
 
 	public void addHooks(HookRegistry hookRegistry) {
@@ -106,5 +104,30 @@ public class TransformerHook implements BundleFileWrapperFactoryHook, HookConfig
 		}
 		FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, severity, 0, msg, 0, t, null);
 		TransformerHook.ADAPTOR.getFrameworkLog().log(entry);
+	}
+
+	public String[] getTransformTypes() {
+		TransformInstanceListData current = templates;
+		return current == null ? new String[0] : current.getTransformTypes();
+	}
+
+	public StreamTransformer getTransformer(String type) {
+		TransformerList current = transformers;
+		return current == null ? null : current.getTransformer(type);
+	}
+
+	public TransformTuple[] getTransformsFor(String type) {
+		TransformInstanceListData current = templates;
+		return current == null ? null : current.getTransformsFor(type);
+	}
+
+	public boolean hasTransformers() {
+		TransformerList current = transformers;
+		return current == null ? false : current.hasTransformers();
+	}
+
+	public boolean hasTransformsFor(Bundle bundle) {
+		TransformInstanceListData current = templates;
+		return current == null ? false : current.hasTransformsFor(bundle);
 	}
 }

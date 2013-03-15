@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,22 +31,19 @@ import org.osgi.framework.Bundle;
  */
 public class TransformedBundleFile extends BundleFile {
 
-	private BundleFile delegate;
-	private BaseData data;
-	private TransformerList transformers;
-	private TransformInstanceListData templates;
+	private final TransformerHook transformerHook;
+	private final BundleFile delegate;
+	private final BaseData data;
 
 	/**
 	 * Create a wrapped bundle file.  
 	 * Requests into this file will be compared to the list of known transformers and transformer templates and if there's a match the transformed entity is returned instead of the original.
-	 * @param transformers the list of known transformers
-	 * @param templates the list of known templates
+	 * @param transformerHook the transformer hook
 	 * @param data the original data
 	 * @param delegate the original file
 	 */
-	public TransformedBundleFile(TransformerList transformers, TransformInstanceListData templates, BaseData data, BundleFile delegate) {
-		this.transformers = transformers;
-		this.templates = templates;
+	public TransformedBundleFile(TransformerHook transformerHook, BaseData data, BundleFile delegate) {
+		this.transformerHook = transformerHook;
 		this.data = data;
 		this.delegate = delegate;
 	}
@@ -98,14 +95,14 @@ public class TransformedBundleFile extends BundleFile {
 	protected InputStream getInputStream(InputStream inputStream, Bundle bundle, String path) {
 		String namespace = bundle.getSymbolicName();
 
-		String[] transformTypes = templates.getTransformTypes();
+		String[] transformTypes = transformerHook.getTransformTypes();
 		if (transformTypes.length == 0)
 			return null;
 		for (int i = 0; i < transformTypes.length; i++) {
-			StreamTransformer transformer = transformers.getTransformer(transformTypes[i]);
+			StreamTransformer transformer = transformerHook.getTransformer(transformTypes[i]);
 			if (transformer == null)
 				continue;
-			TransformTuple[] transformTuples = templates.getTransformsFor(transformTypes[i]);
+			TransformTuple[] transformTuples = transformerHook.getTransformsFor(transformTypes[i]);
 			if (transformTuples == null)
 				continue;
 			for (int j = 0; j < transformTuples.length; j++) {
@@ -210,9 +207,9 @@ public class TransformedBundleFile extends BundleFile {
 	 * a transform associated with it.
 	 */
 	private boolean hasTransforms(String path) {
-		if (!transformers.hasTransformers())
+		if (!transformerHook.hasTransformers())
 			return false;
-		return templates.hasTransformsFor(data.getBundle());
+		return transformerHook.hasTransformsFor(data.getBundle());
 	}
 
 	/**
