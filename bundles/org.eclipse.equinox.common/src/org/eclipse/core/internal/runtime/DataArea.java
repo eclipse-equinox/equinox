@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -97,7 +97,11 @@ public class DataArea {
 		if (debugOptions == null) {
 			return null;
 		}
-		return new Path(debugOptions.getFile().getAbsolutePath());
+		File file = debugOptions.getFile();
+		if (file == null) {
+			return null;
+		}
+		return new Path(file.getAbsolutePath());
 	}
 
 	/**
