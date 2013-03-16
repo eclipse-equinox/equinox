@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -434,7 +434,10 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	public synchronized void setFile(final File traceFile) {
 
 		this.outFile = traceFile;
-		FrameworkProperties.setProperty(PROP_TRACEFILE, this.outFile.getAbsolutePath());
+		if (this.outFile != null)
+			FrameworkProperties.setProperty(PROP_TRACEFILE, this.outFile.getAbsolutePath());
+		else
+			FrameworkProperties.clearProperty(PROP_TRACEFILE);
 		// the file changed so start a new session
 		EclipseDebugTrace.newSession = true;
 	}
