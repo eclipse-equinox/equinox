@@ -1,6 +1,6 @@
-org.aspectj.osgi/debug=false
-org.aspectj.osgi/debug/bundle=false
-org.aspectj.osgi/debug/weave=true
-org.aspectj.osgi/debug/cache=false
-org.aspectj.osgi/debug/supplements=false
-org.aspectj.osgi/debug/bundleName=false
+org.eclipse.equinox.weaving.hook/debug=false
+org.eclipse.equinox.weaving.hook/debug/bundle=false
+org.eclipse.equinox.weaving.hook/debug/weave=true
+org.eclipse.equinox.weaving.hook/debug/cache=false
+org.eclipse.equinox.weaving.hook/debug/supplements=false
+org.eclipse.equinox.weaving.hook/debug/bundleName=false
