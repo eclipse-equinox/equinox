@@ -23,8 +23,8 @@ import org.eclipse.equinox.service.weaving.ICachingServiceFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
-import org.osgi.framework.Constants;
 import org.osgi.framework.SynchronousBundleListener;
+import org.osgi.framework.Version;
 
 /**
  * {@link ICachingService} used as "singleton" OSGi service by
@@ -112,12 +112,8 @@ public class CachingServiceFactory implements ICachingServiceFactory {
      * @return The unique id of the cache for the given bundle
      */
     public String getCacheId(final Bundle bundle) {
-        String bundleVersion = (String) bundle.getHeaders().get(
-                Constants.BUNDLE_VERSION);
-        if (bundleVersion == null || bundleVersion.length() == 0) {
-            bundleVersion = "0.0.0"; //$NON-NLS-1$
-        }
-        return bundle.getSymbolicName() + "_" + bundleVersion; //$NON-NLS-1$
+        final Version v = bundle.getVersion();
+        return bundle.getSymbolicName() + "_" + v; //$NON-NLS-1$
     }
 
     /**

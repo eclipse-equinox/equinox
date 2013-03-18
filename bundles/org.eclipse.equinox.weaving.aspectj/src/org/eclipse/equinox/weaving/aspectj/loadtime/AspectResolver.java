@@ -161,9 +161,10 @@ public class AspectResolver {
             ManifestElement[] requireHeaders = null;
             if (!requiredBundles.isEmpty()) {
                 try {
-                    requireHeaders = ManifestElement.parseHeader(
-                            Constants.REQUIRE_BUNDLE,
-                            bundle.getHeaders().get(Constants.REQUIRE_BUNDLE));
+                    requireHeaders = ManifestElement
+                            .parseHeader(
+                                    Constants.REQUIRE_BUNDLE,
+                                    bundle.getHeaders("").get(Constants.REQUIRE_BUNDLE)); //$NON-NLS-1$
                 } catch (final BundleException e) {
                 }
             }
@@ -194,9 +195,10 @@ public class AspectResolver {
             ManifestElement[] importHeaders = null;
             if (!importedPackages.isEmpty()) {
                 try {
-                    importHeaders = ManifestElement.parseHeader(
-                            Constants.IMPORT_PACKAGE,
-                            bundle.getHeaders().get(Constants.IMPORT_PACKAGE));
+                    importHeaders = ManifestElement
+                            .parseHeader(
+                                    Constants.IMPORT_PACKAGE,
+                                    bundle.getHeaders("").get(Constants.IMPORT_PACKAGE)); //$NON-NLS-1$
                 } catch (final BundleException e) {
                 }
             }
@@ -248,7 +250,7 @@ public class AspectResolver {
             // this bundle
             aspects = aspectAdmin.getAspectDefinition(bundle);
             if (aspects != null) {
-                final String finishedValue = bundle.getHeaders().get(
+                final String finishedValue = bundle.getHeaders("").get( //$NON-NLS-1$
                         AspectAdmin.AOP_BUNDLE_FINISHED_HEADER);
                 if (finishedValue == null
                         || !AspectAdmin.AOP_BUNDLE_FINISHED_VALUE

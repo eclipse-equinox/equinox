@@ -135,7 +135,7 @@ public class AspectAdminImpl implements AspectAdmin, SynchronousBundleListener {
      * @return The path to the aspect definition relately to the given bundle
      */
     public String getDefinitionLocation(final Bundle bundle) {
-        String aopContextHeader = (String) bundle.getHeaders().get(
+        String aopContextHeader = bundle.getHeaders("").get( //$NON-NLS-1$
                 AOP_CONTEXT_LOCATION_HEADER);
         if (aopContextHeader != null) {
             aopContextHeader = aopContextHeader.trim();
@@ -351,7 +351,7 @@ public class AspectAdminImpl implements AspectAdmin, SynchronousBundleListener {
             }
 
             // parse export package headers
-            final Dictionary<?, ?> manifest = bundle.getHeaders();
+            final Dictionary<?, ?> manifest = bundle.getHeaders(""); //$NON-NLS-1$
             final ManifestElement[] exports = ManifestElement.parseHeader(
                     Constants.EXPORT_PACKAGE, (String) manifest
                             .get(Constants.EXPORT_PACKAGE));

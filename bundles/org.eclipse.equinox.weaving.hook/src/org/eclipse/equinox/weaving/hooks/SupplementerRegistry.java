@@ -130,7 +130,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
      */
     public void addSupplementedBundle(final Bundle bundle) {
         try {
-            final Dictionary<?, ?> manifest = bundle.getHeaders();
+            final Dictionary<?, ?> manifest = bundle.getHeaders(""); //$NON-NLS-1$
             final ManifestElement[] imports = ManifestElement.parseHeader(
                     Constants.IMPORT_PACKAGE,
                     (String) manifest.get(Constants.IMPORT_PACKAGE));
@@ -164,7 +164,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
      */
     public void addSupplementer(final Bundle bundle, final boolean updateBundles) {
         try {
-            final Dictionary<?, ?> manifest = bundle.getHeaders();
+            final Dictionary<?, ?> manifest = bundle.getHeaders(""); //$NON-NLS-1$
             final ManifestElement[] supplementBundle = ManifestElement
                     .parseHeader(SUPPLEMENT_BUNDLE,
                             (String) manifest.get(SUPPLEMENT_BUNDLE));
@@ -363,7 +363,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
                 }
 
                 // find out which of the installed bundles matches the new supplementer
-                final Dictionary<?, ?> manifest = bundle.getHeaders();
+                final Dictionary<?, ?> manifest = bundle.getHeaders(""); //$NON-NLS-1$
                 final ManifestElement[] imports = ManifestElement.parseHeader(
                         Constants.IMPORT_PACKAGE,
                         (String) manifest.get(Constants.IMPORT_PACKAGE));
