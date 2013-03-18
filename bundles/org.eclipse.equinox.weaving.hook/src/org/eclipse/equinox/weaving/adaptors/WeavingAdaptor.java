@@ -74,7 +74,7 @@ public class WeavingAdaptor implements IWeavingAdaptor {
 
     private boolean initialized = false;
 
-    private ModuleClassLoader moduleLoader;
+    private final ModuleClassLoader moduleLoader;
 
     private final String symbolicName;
 
@@ -83,18 +83,20 @@ public class WeavingAdaptor implements IWeavingAdaptor {
     public WeavingAdaptor(final Generation generation,
             final WeavingAdaptorFactory serviceFactory,
             final IWeavingService weavingService,
-            final ICachingService cachingService) {
+            final ICachingService cachingService,
+            final ModuleClassLoader classLoader) {
         this.generation = generation;
         this.factory = serviceFactory;
         this.symbolicName = generation.getRevision().getSymbolicName();
+        this.moduleLoader = classLoader;
         if (Debug.DEBUG_GENERAL)
-            Debug.println("- AspectJAdaptor.AspectJAdaptor() bundle="
+            Debug.println("- WeavingAdaptor.WeavingAdaptor() bundle="
                     + symbolicName);
     }
 
     public CacheEntry findClass(final String name, final URL sourceFileURL) {
         if (Debug.DEBUG_CACHE)
-            Debug.println("> AspectJAdaptor.findClass() bundle=" + symbolicName
+            Debug.println("> WeavingAdaptor.findClass() bundle=" + symbolicName
                     + ", url=" + sourceFileURL + ", name=" + name);
         CacheEntry cacheEntry = null;
 
@@ -105,7 +107,7 @@ public class WeavingAdaptor implements IWeavingAdaptor {
         }
 
         if (Debug.DEBUG_CACHE)
-            Debug.println("< AspectJAdaptor.findClass() cacheEntry="
+            Debug.println("< WeavingAdaptor.findClass() cacheEntry="
                     + cacheEntry);
         return cacheEntry;
     }
@@ -119,12 +121,12 @@ public class WeavingAdaptor implements IWeavingAdaptor {
                 identifyRecursionSet.put(this);
 
                 if (Debug.DEBUG_GENERAL)
-                    Debug.println("> AspectJAdaptor.initialize() bundle="
+                    Debug.println("> WeavingAdaptor.initialize() bundle="
                             + symbolicName + ", moduleLoader=" + moduleLoader);
 
                 if (symbolicName.startsWith("org.aspectj")) {
                     if (Debug.DEBUG_GENERAL)
-                        Debug.println("- AspectJAdaptor.initialize() symbolicName="
+                        Debug.println("- WeavingAdaptor.initialize() symbolicName="
                                 + symbolicName
                                 + ", moduleLoader="
                                 + moduleLoader);
@@ -136,20 +138,17 @@ public class WeavingAdaptor implements IWeavingAdaptor {
 
                     final Bundle host = factory.getHost(bundle);
                     if (Debug.DEBUG_GENERAL)
-                        Debug.println("- AspectJAdaptor.initialize() symbolicName="
+                        Debug.println("- WeavingAdaptor.initialize() symbolicName="
                                 + symbolicName + ", host=" + host);
 
                     final Generation hostGeneration = (Generation) ((ModuleRevision) host
                             .adapt(BundleRevision.class)).getRevisionInfo();
-                    //				System.err.println("? AspectJAdaptor.initialize() bundleData=" + hostData);
                     final BundleFile bundleFile = hostGeneration
                             .getBundleFile();
                     if (bundleFile instanceof WeavingBundleFile) {
                         final WeavingBundleFile hostFile = (WeavingBundleFile) bundleFile;
-                        //					System.err.println("? AspectJAdaptor.initialize() bundleFile=" + hostFile);
                         final WeavingAdaptor hostAdaptor = (WeavingAdaptor) hostFile
                                 .getAdaptor();
-                        //					System.err.println("? AspectJAdaptor.initialize() bundleFile=" + hostAdaptor);
                         weavingService = hostAdaptor.weavingService;
                         cachingService = factory.getCachingService(
                                 hostAdaptor.moduleLoader, bundle,
@@ -157,7 +156,7 @@ public class WeavingAdaptor implements IWeavingAdaptor {
                     }
                 } else {
                     if (Debug.DEBUG_GENERAL)
-                        Debug.println("W AspectJAdaptor.initialize() symbolicName="
+                        Debug.println("W WeavingAdaptor.initialize() symbolicName="
                                 + symbolicName + ", baseLoader=" + moduleLoader);
                 }
                 initialized = true;
@@ -165,25 +164,22 @@ public class WeavingAdaptor implements IWeavingAdaptor {
             }
 
             if (Debug.DEBUG_GENERAL)
-                Debug.println("< AspectJAdaptor.initialize() weavingService="
+                Debug.println("< WeavingAdaptor.initialize() weavingService="
                         + (weavingService != null) + ", cachingService="
                         + (cachingService != null));
         }
     }
 
-    public void setModuleClassLoader(final ModuleClassLoader moduleClassLoader) {
-        this.moduleLoader = moduleClassLoader;
-
-        if (Debug.DEBUG_GENERAL)
-            Debug.println("- AspectJAdaptor.setBaseClassLoader() bundle="
-                    + symbolicName + ", moduleLoader=" + moduleLoader);
+    public boolean isInitialized() {
+        return initialized;
     }
 
     public boolean storeClass(final String name, final URL sourceFileURL,
             final Class clazz, final byte[] classbytes) {
         if (Debug.DEBUG_CACHE)
-            Debug.println("> AspectJAdaptor.storeClass() bundle="
-                    + symbolicName + ", url=" + sourceFileURL + ", name="
+            Debug.println("> WeavingAdaptor.storeClass() bundle=" //$NON-NLS-1$
+                    + symbolicName + ", url=" + sourceFileURL
+                    + ", name="
                     + name + ", clazz=" + clazz);
         boolean stored = false;
 
@@ -203,31 +199,31 @@ public class WeavingAdaptor implements IWeavingAdaptor {
                 } else {
                     weavingService.flushGeneratedClasses(moduleLoader);
                     if (Debug.DEBUG_CACHE)
-                        Debug.println("- AspectJAdaptor.storeClass() generatedClassesExistFor=true");
+                        Debug.println("- WeavingAdaptor.storeClass() generatedClassesExistFor=true"); //$NON-NLS-1$
                 }
             } else {
-                stored = cachingService.storeClass("", sourceFileURL, clazz,
+                stored = cachingService.storeClass("", sourceFileURL, clazz, //$NON-NLS-1$
                         classbytes);
                 if (!stored) {
                     if (Debug.DEBUG_CACHE)
-                        Debug.println("E AspectJHook.storeClass() bundle="
-                                + symbolicName + ", name=" + name);
+                        Debug.println("E WeavingAdaptor.storeClass() bundle=" //$NON-NLS-1$
+                                + symbolicName + ", name=" + name); //$NON-NLS-1$
                 }
             }
         }
         if (Debug.DEBUG_CACHE)
-            Debug.println("< AspectJAdaptor.storeClass() stored=" + stored);
+            Debug.println("< WeavingAdaptor.storeClass() stored=" + stored); //$NON-NLS-1$
         return stored;
     }
 
     @Override
     public String toString() {
-        return "AspectJAdaptor[" + symbolicName + "]";
+        return "WeavingAdaptor[" + symbolicName + "]";
     }
 
     public byte[] weaveClass(final String name, final byte[] bytes) {
         if (Debug.DEBUG_WEAVE)
-            Debug.println("> AspectJAdaptor.weaveClass() bundle="
+            Debug.println("> WeavingAdaptor.weaveClass() bundle="
                     + symbolicName + ", name=" + name + ", bytes="
                     + bytes.length);
         byte[] newBytes = null;
@@ -242,7 +238,7 @@ public class WeavingAdaptor implements IWeavingAdaptor {
         }
 
         if (Debug.DEBUG_WEAVE)
-            Debug.println("< AspectJAdaptor.weaveClass() newBytes=" + newBytes);
+            Debug.println("< WeavingAdaptor.weaveClass() newBytes=" + newBytes);
         return newBytes;
     }
 

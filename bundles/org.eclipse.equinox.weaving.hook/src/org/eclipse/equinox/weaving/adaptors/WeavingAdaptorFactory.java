@@ -17,12 +17,10 @@ package org.eclipse.equinox.weaving.adaptors;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.equinox.service.weaving.ICachingService;
 import org.eclipse.equinox.service.weaving.ICachingServiceFactory;
@@ -44,15 +42,15 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class WeavingAdaptorFactory {
 
-    private static final Collection IGNORE_WEAVING_SERVICE_BUNDLES = Arrays
-            .asList(new String[] { "org.eclipse.equinox.weaving.aspectj",
-                    "org.eclipse.equinox.weaving.caching",
-                    "org.eclipse.equinox.weaving.caching.j9",
-                    "org.eclipse.update.configurator",
-                    "org.eclipse.equinox.simpleconfigurator",
-                    "org.eclipse.equinox.common" });
+    private static final Collection<String> IGNORE_WEAVING_SERVICE_BUNDLES = Arrays
+            .asList(new String[] { "org.eclipse.equinox.weaving.aspectj", //$NON-NLS-1$
+                    "org.eclipse.equinox.weaving.caching", //$NON-NLS-1$
+                    "org.eclipse.equinox.weaving.caching.j9", //$NON-NLS-1$
+                    "org.eclipse.update.configurator", //$NON-NLS-1$
+                    "org.eclipse.equinox.simpleconfigurator", //$NON-NLS-1$
+                    "org.eclipse.equinox.common" }); //$NON-NLS-1$
 
-    private static final String WEAVING_SERVICE_DYNAMICS_PROPERTY = "equinox.weaving.service.dynamics";
+    private static final String WEAVING_SERVICE_DYNAMICS_PROPERTY = "equinox.weaving.service.dynamics"; //$NON-NLS-1$
 
     private ServiceTracker cachingServiceFactoryTracker;
 
@@ -66,11 +64,7 @@ public class WeavingAdaptorFactory {
 
     private ServiceListener weavingServiceListener;
 
-    /**
-     * Bundle -> Local weaving service
-     */
-    private final Map weavingServices = Collections
-            .synchronizedMap(new HashMap());
+    private final Map<Bundle, IWeavingService> weavingServices = new ConcurrentHashMap<Bundle, IWeavingService>();
 
     public WeavingAdaptorFactory() {
     }
@@ -79,22 +73,22 @@ public class WeavingAdaptorFactory {
 
         context.removeServiceListener(weavingServiceListener);
         if (Debug.DEBUG_WEAVE)
-            Debug.println("> Removed service listener for weaving service.");
+            Debug.println("> Removed service listener for weaving service."); //$NON-NLS-1$
 
         weavingServiceFactoryTracker.close();
         if (Debug.DEBUG_WEAVE)
-            Debug.println("> Closed service tracker for weaving service.");
+            Debug.println("> Closed service tracker for weaving service."); //$NON-NLS-1$
 
         cachingServiceFactoryTracker.close();
         if (Debug.DEBUG_CACHE)
-            Debug.println("> Closed service tracker for caching service.");
+            Debug.println("> Closed service tracker for caching service."); //$NON-NLS-1$
     }
 
     protected ICachingService getCachingService(final ModuleClassLoader loader,
             final Bundle bundle, final IWeavingService weavingService) {
         if (Debug.DEBUG_CACHE)
-            Debug.println("> AspectJAdaptorFactory.getCachingService() bundle="
-                    + bundle + ", weavingService=" + weavingService);
+            Debug.println("> WeavingAdaptorFactory.getCachingService() bundle=" //$NON-NLS-1$
+                    + bundle + ", weavingService=" + weavingService); //$NON-NLS-1$
         ICachingService service = null;
         String key = "";
 
@@ -108,28 +102,27 @@ public class WeavingAdaptorFactory {
                     bundle, key);
         }
         if (Debug.DEBUG_CACHE)
-            Debug.println("< AspectJAdaptorFactory.getCachingService() service="
-                    + service + ", key='" + key + "'");
+            Debug.println("< WeavingAdaptorFactory.getCachingService() service=" //$NON-NLS-1$
+                    + service + ", key='" + key + "'"); //$NON-NLS-1$
         return service;
     }
 
     public Bundle getHost(final Bundle fragment) {
         if (Debug.DEBUG_GENERAL)
-            Debug.println("> AspectJAdaptorFactory.getHost() fragment="
-                    + fragment);
+            Debug.println("> WeavingAdaptorFactory.getHost() fragment=" + fragment); //$NON-NLS-1$
 
         Bundle host = null;
         if (packageAdminService != null)
             host = packageAdminService.getHosts(fragment)[0];
 
         if (Debug.DEBUG_GENERAL)
-            Debug.println("< AspectJAdaptorFactory.getHost() " + host);
+            Debug.println("< WeavingAdaptorFactory.getHost() " + host); //$NON-NLS-1$
         return host;
     }
 
     protected IWeavingService getWeavingService(final ModuleClassLoader loader) {
         if (Debug.DEBUG_WEAVE)
-            Debug.println("> AspectJAdaptorFactory.getWeavingService() baseClassLoader="
+            Debug.println("> WeavingAdaptorFactory.getWeavingService() baseClassLoader=" //$NON-NLS-1$
                     + loader);
 
         final Generation generation = loader.getClasspathManager()
@@ -144,13 +137,14 @@ public class WeavingAdaptorFactory {
                 weavingService = weavingServiceFactory.createWeavingService(
                         loader, bundle, generation.getRevision(),
                         supplementerRegistry);
-            }
-            synchronized (weavingServices) {
-                weavingServices.put(bundle, weavingService);
+
+                if (weavingService != null) {
+                    weavingServices.put(bundle, weavingService);
+                }
             }
         }
         if (Debug.DEBUG_WEAVE)
-            Debug.println("< AspectJAdaptorFactory.getWeavingService() service="
+            Debug.println("< WeavingAdaptorFactory.getWeavingService() service=" //$NON-NLS-1$
                     + weavingService);
         return weavingService;
     }
@@ -158,7 +152,7 @@ public class WeavingAdaptorFactory {
     public void initialize(final BundleContext context,
             final ISupplementerRegistry supplementerRegistry) {
         if (Debug.DEBUG_GENERAL)
-            Debug.println("> AspectJAdaptorFactory.initialize() context="
+            Debug.println("> WeavingAdaptorFactory.initialize() context=" //$NON-NLS-1$
                     + context);
         this.supplementerRegistry = supplementerRegistry;
 
@@ -170,7 +164,7 @@ public class WeavingAdaptorFactory {
                 IWeavingServiceFactory.class.getName(), null);
         weavingServiceFactoryTracker.open();
         if (Debug.DEBUG_WEAVE)
-            Debug.println("> Opened service tracker for weaving service.");
+            Debug.println("> Opened service tracker for weaving service."); //$NON-NLS-1$
 
         // Service listener for weaving service
         weavingServiceListener = new ServiceListener() {
@@ -179,22 +173,16 @@ public class WeavingAdaptorFactory {
                 if (event.getType() == ServiceEvent.REGISTERED) {
                     final List<Bundle> bundlesToRefresh = new ArrayList<Bundle>();
 
-                    final Iterator bundleEntries = weavingServices.entrySet()
-                            .iterator();
                     synchronized (weavingServices) {
+                        final Iterator<Bundle> bundleEntries = weavingServices
+                                .keySet().iterator();
                         while (bundleEntries.hasNext()) {
-                            final Entry entry = (Entry) bundleEntries.next();
-                            final Bundle bundle = (Bundle) entry.getKey();
-                            if (entry.getValue() == null) {
-                                bundleEntries.remove();
-                                System.err
-                                        .println("bundle update because of weaving service start: "
-                                                + bundle.getSymbolicName());
-                                bundlesToRefresh.add(bundle);
-                                if (Debug.DEBUG_WEAVE)
-                                    Debug.println("> Updated bundle "
-                                            + bundle.getSymbolicName());
-                            }
+                            final Bundle bundle = bundleEntries.next();
+                            bundleEntries.remove();
+                            bundlesToRefresh.add(bundle);
+                            if (Debug.DEBUG_WEAVE)
+                                Debug.println("> Updated bundle " //$NON-NLS-1$
+                                        + bundle.getSymbolicName());
                         }
                     }
 
@@ -208,22 +196,16 @@ public class WeavingAdaptorFactory {
                         && startLevelService.getStartLevel() > 0) {
                     final List<Bundle> bundlesToRefresh = new ArrayList<Bundle>();
 
-                    final Iterator bundleEntries = weavingServices.entrySet()
-                            .iterator();
                     synchronized (weavingServices) {
+                        final Iterator<Bundle> bundleEntries = weavingServices
+                                .keySet().iterator();
                         while (bundleEntries.hasNext()) {
-                            final Entry entry = (Entry) bundleEntries.next();
-                            final Bundle bundle = (Bundle) entry.getKey();
-                            if (entry.getValue() != null) {
-                                bundleEntries.remove();
-                                System.err
-                                        .println("bundle update because of weaving service stop: "
-                                                + bundle.getSymbolicName());
-                                bundlesToRefresh.add(bundle);
-                                if (Debug.DEBUG_WEAVE)
-                                    Debug.println("> Updated bundle "
-                                            + bundle.getSymbolicName());
-                            }
+                            final Bundle bundle = bundleEntries.next();
+                            bundleEntries.remove();
+                            bundlesToRefresh.add(bundle);
+                            if (Debug.DEBUG_WEAVE)
+                                Debug.println("> Updated bundle " //$NON-NLS-1$
+                                        + bundle.getSymbolicName());
                         }
                     }
                     if (bundlesToRefresh.size() > 0) {
@@ -234,15 +216,15 @@ public class WeavingAdaptorFactory {
             }
         };
 
-        if (System.getProperty(WEAVING_SERVICE_DYNAMICS_PROPERTY, "false")
-                .equals("true")) {
-            try {
-                context.addServiceListener(weavingServiceListener,
-                        "(" + Constants.OBJECTCLASS + "="
-                                + IWeavingService.class.getName() + ")");
-            } catch (final InvalidSyntaxException e) { // This is correct!
-            }
+        //        if (System.getProperty(WEAVING_SERVICE_DYNAMICS_PROPERTY, "false")
+        //                .equals("true")) {
+        try {
+            context.addServiceListener(weavingServiceListener, "("
+                    + Constants.OBJECTCLASS + "="
+                    + IWeavingServiceFactory.class.getName() + ")");
+        } catch (final InvalidSyntaxException e) { // This is correct!
         }
+        //        }
 
         // Service tracker for caching service
         cachingServiceFactoryTracker = new ServiceTracker(context,
@@ -254,7 +236,7 @@ public class WeavingAdaptorFactory {
 
     private void initializePackageAdminService(final BundleContext context) {
         if (Debug.DEBUG_GENERAL)
-            Debug.println("> AspectJAdaptorFactory.initializePackageAdminService() context="
+            Debug.println("> AdaptorFactory.initializePackageAdminService() context="
                     + context);
 
         final ServiceReference ref = context
@@ -264,13 +246,13 @@ public class WeavingAdaptorFactory {
         }
 
         if (Debug.DEBUG_GENERAL)
-            Debug.println("< AspectJAdaptorFactory.initializePackageAdminService() "
+            Debug.println("< AdaptorFactory.initializePackageAdminService() "
                     + packageAdminService);
     }
 
     private void initializeStartLevelService(final BundleContext context) {
         if (Debug.DEBUG_GENERAL)
-            Debug.println("> AspectJAdaptorFactory.initializeStartLevelService() context="
+            Debug.println("> AdaptorFactory.initializeStartLevelService() context="
                     + context);
 
         final ServiceReference ref = context
@@ -280,7 +262,7 @@ public class WeavingAdaptorFactory {
         }
 
         if (Debug.DEBUG_GENERAL)
-            Debug.println("< AspectJAdaptorFactory.initializeStartLevelService() "
+            Debug.println("< AdaptorFactory.initializeStartLevelService() "
                     + startLevelService);
     }
 }

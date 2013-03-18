@@ -15,7 +15,6 @@ package org.eclipse.equinox.weaving.adaptors;
 import java.net.URL;
 
 import org.eclipse.equinox.service.weaving.CacheEntry;
-import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 
 public interface IWeavingAdaptor {
 
@@ -23,7 +22,7 @@ public interface IWeavingAdaptor {
 
     public void initialize();
 
-    public void setModuleClassLoader(ModuleClassLoader moduleClassLoader);
+    public boolean isInitialized();
 
     public boolean storeClass(String name, URL sourceFileURL, Class clazz,
             byte[] classbytes);

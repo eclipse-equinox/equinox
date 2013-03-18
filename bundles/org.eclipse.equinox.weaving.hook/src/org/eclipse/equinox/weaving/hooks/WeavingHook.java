@@ -43,7 +43,8 @@ public class WeavingHook extends AbstractWeavingHook {
     private BundleContext bundleContext;
 
     public WeavingHook() {
-        if (Debug.DEBUG_GENERAL) Debug.println("- AspectJHook.<init>()");
+        if (Debug.DEBUG_GENERAL) Debug.println("- WeavingHook.<init>()");
+
         this.adaptorFactory = new WeavingAdaptorFactory();
         this.adaptors = new HashMap<Long, IWeavingAdaptor>();
     }
@@ -51,7 +52,7 @@ public class WeavingHook extends AbstractWeavingHook {
     @Override
     public void classLoaderCreated(final ModuleClassLoader classLoader) {
         if (Debug.DEBUG_GENERAL)
-            Debug.println("> AspectJHook.initializedClassLoader() bundle="
+            Debug.println("> WeavingHook.initializedClassLoader() bundle="
                     + classLoader.getBundle().getSymbolicName()
                     + ", loader="
                     + classLoader
@@ -59,34 +60,34 @@ public class WeavingHook extends AbstractWeavingHook {
                     + classLoader.getClasspathManager().getGeneration()
                             .getBundleFile());
 
-        final IWeavingAdaptor adaptor = createAspectJAdaptor(classLoader
-                .getClasspathManager().getGeneration());
-        adaptor.setModuleClassLoader(classLoader);
-        adaptor.initialize();
+        final IWeavingAdaptor adaptor = createWeavingAdaptor(classLoader
+                .getClasspathManager().getGeneration(), classLoader);
         this.adaptors.put(classLoader.getBundle().getBundleId(), adaptor);
 
         if (Debug.DEBUG_GENERAL)
-            Debug.println("< AspectJHook.initializedClassLoader() adaptor="
+            Debug.println("< WeavingHook.initializedClassLoader() adaptor="
                     + adaptor);
     }
 
-    private IWeavingAdaptor createAspectJAdaptor(final Generation generation) {
+    private IWeavingAdaptor createWeavingAdaptor(final Generation generation,
+            final ModuleClassLoader classLoader) {
         if (Debug.DEBUG_GENERAL)
-            Debug.println("> AspectJHook.createAspectJAdaptor() location="
+            Debug.println("> WeavingHook.createAspectJAdaptor() location="
                     + generation.getRevision().getRevisions().getModule()
                             .getLocation());
         IWeavingAdaptor adaptor = null;
 
         if (adaptorFactory != null) {
-            adaptor = new WeavingAdaptor(generation, adaptorFactory, null, null);
+            adaptor = new WeavingAdaptor(generation, adaptorFactory, null,
+                    null, classLoader);
         } else {
             if (Debug.DEBUG_GENERAL)
-                Debug.println("- AspectJHook.createAspectJAdaptor() factory="
+                Debug.println("- WeavingHook.createAspectJAdaptor() factory="
                         + adaptorFactory);
         }
 
         if (Debug.DEBUG_GENERAL)
-            Debug.println("< AspectJHook.createAspectJAdaptor() adaptor="
+            Debug.println("< WeavingHook.createAspectJAdaptor() adaptor="
                     + adaptor);
         return adaptor;
     }
@@ -109,7 +110,7 @@ public class WeavingHook extends AbstractWeavingHook {
 
     private void initialize(final BundleContext context) {
         if (Debug.DEBUG_GENERAL)
-            Debug.println("> AspectJHook.initialize() context=" + context);
+            Debug.println("> WeavingHook.initialize() context=" + context);
 
         this.bundleContext = context;
 
@@ -136,7 +137,7 @@ public class WeavingHook extends AbstractWeavingHook {
         }
 
         if (Debug.DEBUG_GENERAL)
-            Debug.println("< AspectJHook.initialize() adaptorFactory="
+            Debug.println("< WeavingHook.initialize() adaptorFactory="
                     + adaptorFactory);
     }
 
@@ -196,7 +197,6 @@ public class WeavingHook extends AbstractWeavingHook {
      * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#frameworkStart(org.osgi.framework.BundleContext)
      */
     public void start(final BundleContext context) throws BundleException {
-        //		Debug.println("? AspectJHook.frameworkStart() context=" + context + ", fdo=" + FrameworkDebugOptions.getDefault());
         initialize(context);
     }
 
@@ -215,16 +215,12 @@ public class WeavingHook extends AbstractWeavingHook {
             final Generation generation, final boolean base) {
         BundleFile wrapped = null;
         if (Debug.DEBUG_BUNDLE)
-            Debug.println("> AspectJBundleFileWrapperFactoryHook.wrapBundleFile() bundle="
-                    + generation.getRevision().getSymbolicName()
-                    + " bundleFile="
-                    + bundleFile
-                    + ", generation="
-                    + generation
-                    + ", base="
-                    + base
-                    + ", baseFile="
-                    + bundleFile.getBaseFile());
+            Debug.println("> WeavingHook.wrapBundleFile() bundle="
+                    + (generation.getRevision() != null ? generation
+                            .getRevision().getSymbolicName() : generation
+                            .getBundleInfo().getBundleId()) + " bundleFile="
+                    + bundleFile + ", generation=" + generation + ", base="
+                    + base + ", baseFile=" + bundleFile.getBaseFile());
 
         if (base) {
             wrapped = new BaseWeavingBundleFile(new BundleAdaptorProvider(
@@ -234,8 +230,7 @@ public class WeavingHook extends AbstractWeavingHook {
                     generation, this), bundleFile);
         }
         if (Debug.DEBUG_BUNDLE)
-            Debug.println("< AspectJBundleFileWrapperFactoryHook.wrapBundleFile() wrapped="
-                    + wrapped);
+            Debug.println("< WeavingHook.wrapBundleFile() wrapped=" + wrapped);
         return wrapped;
     }
 
