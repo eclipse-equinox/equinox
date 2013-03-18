@@ -327,7 +327,7 @@ public class BundleLoader implements ModuleLoader {
 			result = source.loadClass(name);
 			if (result != null)
 				return result;
-			throw new ClassNotFoundException(name);
+			throw new ClassNotFoundException(name + " cannot be found by " + this); //$NON-NLS-1$
 		}
 		// 4) search the required bundles
 		source = findRequiredSource(pkgName, null);
@@ -347,7 +347,7 @@ public class BundleLoader implements ModuleLoader {
 				if (result != null)
 					return result;
 				// must throw CNFE if dynamic import source does not have the class
-				throw new ClassNotFoundException(name);
+				throw new ClassNotFoundException(name + " cannot be found by " + this); //$NON-NLS-1$
 			}
 		}
 
@@ -373,7 +373,7 @@ public class BundleLoader implements ModuleLoader {
 			} catch (ClassNotFoundException e) {
 				// we want to generate our own exception below
 			}
-		throw new ClassNotFoundException(name);
+		throw new ClassNotFoundException(name + " cannot be found by " + this); //$NON-NLS-1$
 	}
 
 	@SuppressWarnings("unchecked")

@@ -20,7 +20,7 @@
     <version>3.8.0-SNAPSHOT</version>
     <relativePath>../../</relativePath>
   </parent>
-  <groupId>org.eclipse.equinox.framework</groupId>
+  <groupId>org.eclipse.equinox.feature</groupId>
   <artifactId>org.eclipse.equinox.core.sdk</artifactId>
   <version>3.8.0-SNAPSHOT</version>
   <packaging>eclipse-feature</packaging>
