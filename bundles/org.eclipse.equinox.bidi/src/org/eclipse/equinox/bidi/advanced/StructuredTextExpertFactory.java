@@ -191,11 +191,12 @@ final public class StructuredTextExpertFactory {
 	 *         <code>null</code>, in which case the
 	 *         {@link StructuredTextEnvironment#DEFAULT}
 	 *         environment should be assumed.
-	 * @return the IStructuredTextExpert instance.
-	 * @throws IllegalArgumentException if <code>type</code> is not a known type
-	 *         identifier.
+	 * @return the IStructuredTextExpert instance
+	 * @throws IllegalArgumentException if the <code>handler</code> is <code>null</code>
 	 */
 	static public IStructuredTextExpert getStatefulExpert(StructuredTextTypeHandler handler, StructuredTextEnvironment environment) {
+		if (handler == null)
+			throw new IllegalArgumentException("handler must not be null"); //$NON-NLS-1$
 		if (environment == null)
 			environment = StructuredTextEnvironment.DEFAULT;
 		return new StructuredTextImpl(handler, environment, true);

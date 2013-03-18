@@ -144,11 +144,8 @@ public class StructuredTextTypesCollector implements IRegistryEventListener {
 		types.put(StructuredTextTypeHandlerFactory.EMAIL, new StructuredTextEmail());
 		types.put(StructuredTextTypeHandlerFactory.FILE, new StructuredTextFile());
 		types.put(StructuredTextTypeHandlerFactory.JAVA, new StructuredTextJava());
-		types.put(StructuredTextTypeHandlerFactory.MATH, new StructuredTextMath());
-		types.put(StructuredTextTypeHandlerFactory.PROPERTY, new StructuredTextProperty());
-		types.put(StructuredTextTypeHandlerFactory.REGEXP, new StructuredTextRegex());
+		types.put(StructuredTextTypeHandlerFactory.REGEX, new StructuredTextRegex());
 		types.put(StructuredTextTypeHandlerFactory.SQL, new StructuredTextSql());
-		types.put(StructuredTextTypeHandlerFactory.SYSTEM_USER, new StructuredTextSystem());
 		types.put(StructuredTextTypeHandlerFactory.UNDERSCORE, new StructuredTextUnderscore());
 		types.put(StructuredTextTypeHandlerFactory.URL, new StructuredTextURL());
 		types.put(StructuredTextTypeHandlerFactory.XPATH, new StructuredTextXPath());

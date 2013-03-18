@@ -11,6 +11,21 @@
  *******************************************************************************/
 package org.eclipse.equinox.ds.tests.tb7;
 
+import org.osgi.service.component.ComponentContext;
+
 public class DynamicCircuit1 {
+	boolean active = false;
+
+	public boolean isActivated() {
+		return active;
+	}
+
+	protected void activate(ComponentContext context) {
+		active = true;
+	}
+
+	protected void bind(DynamicCircuit2 service) {
+
+	}
 
 }

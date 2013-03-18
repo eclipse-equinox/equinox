@@ -35,6 +35,8 @@
 	<reference
 		name="referencedComponent"
 		interface="org.eclipse.equinox.ds.tests.tb7.DynamicCircuit2"
+		bind="bind"
+		unbind="unbind"
 	/>
 	</scr:component>		
 	

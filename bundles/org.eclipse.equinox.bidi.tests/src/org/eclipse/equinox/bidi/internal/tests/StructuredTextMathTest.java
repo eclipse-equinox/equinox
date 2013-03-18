@@ -11,7 +11,6 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 import org.eclipse.equinox.bidi.advanced.*;
 
 /**
@@ -22,8 +21,8 @@ public class StructuredTextMathTest extends StructuredTextTestBase {
 	private StructuredTextEnvironment envLTR = new StructuredTextEnvironment("ar", false, StructuredTextEnvironment.ORIENT_LTR);
 	private StructuredTextEnvironment envRTL = new StructuredTextEnvironment("ar", false, StructuredTextEnvironment.ORIENT_RTL);
 
-	private IStructuredTextExpert expertLTR = StructuredTextExpertFactory.getExpert(StructuredTextTypeHandlerFactory.MATH, envLTR);
-	private IStructuredTextExpert expertRTL = StructuredTextExpertFactory.getExpert(StructuredTextTypeHandlerFactory.MATH, envRTL);
+	private IStructuredTextExpert expertLTR = StructuredTextExpertFactory.getStatefulExpert(new StructuredTextMath(), envLTR);
+	private IStructuredTextExpert expertRTL = StructuredTextExpertFactory.getStatefulExpert(new StructuredTextMath(), envRTL);
 
 	private void verifyOneLine(String msg, String data, String resLTR, String resRTL) {
 		String lean = toUT16(data);

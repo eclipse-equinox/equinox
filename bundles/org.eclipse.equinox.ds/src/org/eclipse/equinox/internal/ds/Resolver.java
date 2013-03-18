@@ -522,7 +522,7 @@ public final class Resolver implements WorkPerformer {
 					}
 				} catch (IllegalStateException ise) {
 					//the bundle of the scp is probably already uninstalled
-					scpEnabled.removeElementAt(k);
+					scpEnabled.removeElement(scp);
 					enabledSCPs.removeElementAt(k);
 					continue;
 				}
@@ -580,36 +580,43 @@ public final class Resolver implements WorkPerformer {
 		try {
 			Vector result = (Vector) scpEnabled.clone();
 			for (int k = result.size() - 1; k >= 0; k--) {
-				ServiceComponentProp scp = (ServiceComponentProp) result.elementAt(k);
-				Vector refs = scp.references;
-				boolean toDispose = false;
-				for (int i = 0; refs != null && i < refs.size(); i++) {
-					// Loop though all the references (dependencies)for a given
-					// scp. If a dependency is not met, remove it's associated
-					// scp and re-run the algorithm
-					Reference reference = (Reference) refs.elementAt(i);
-					if (reference != null) {
-						if (serviceRef != null && reference.reference.bind != null && scp.getState() == Component.STATE_ACTIVE && !(reference.dynamicUnbindReference(serviceRef) || reference.staticUnbindReference(serviceRef))) {
-							//make quick test - the service reference is not bound to the current component reference
-							continue;
-						}
-						if (serviceRef != null && !isPossibleMatch(reference, serviceRef)) {
-							// the service reference is not a possible match. Skipping further checks 
-							continue;
-						}
-						boolean resolved = !reference.isRequiredFor(scp.serviceComponent) || reference.hasProviders(this.serviceReferenceTable);
-
-						if (!resolved && scp.isBuilt()) {
-							if (Activator.DEBUG) {
-								Activator.log.debug("Resolver.selectNewlyUnsatisfied(): reference '" + reference.reference.name + "' of component '" + scp.name + "' is not resolved", null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				try {
+					ServiceComponentProp scp = (ServiceComponentProp) result.elementAt(k);
+					Vector refs = scp.references;
+					boolean toDispose = false;
+					for (int i = 0; refs != null && i < refs.size(); i++) {
+						// Loop though all the references (dependencies)for a given
+						// scp. If a dependency is not met, remove it's associated
+						// scp and re-run the algorithm
+						Reference reference = (Reference) refs.elementAt(i);
+						if (reference != null) {
+							if (serviceRef != null && reference.reference.bind != null && scp.getState() == Component.STATE_ACTIVE && !(reference.dynamicUnbindReference(serviceRef) || reference.staticUnbindReference(serviceRef))) {
+								//make quick test - the service reference is not bound to the current component reference
+								continue;
 							}
-							toDispose = true;
-							break;
+							if (serviceRef != null && !isPossibleMatch(reference, serviceRef)) {
+								// the service reference is not a possible match. Skipping further checks 
+								continue;
+							}
+							boolean resolved = !reference.isRequiredFor(scp.serviceComponent) || reference.hasProviders(this.serviceReferenceTable);
+
+							if (!resolved && scp.isBuilt()) {
+								if (Activator.DEBUG) {
+									Activator.log.debug("Resolver.selectNewlyUnsatisfied(): reference '" + reference.reference.name + "' of component '" + scp.name + "' is not resolved", null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								}
+								toDispose = true;
+								break;
+							}
 						}
 					}
-				}
-				if (!toDispose) {
+					if (!toDispose) {
+						result.removeElementAt(k);
+					}
+				} catch (IllegalStateException ise) {
+					//the bundle of the scp is probably already uninstalled
+					scpEnabled.removeElement(result.elementAt(k));
 					result.removeElementAt(k);
+					continue;
 				}
 			}
 			return result;

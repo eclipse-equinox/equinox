@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.2"?>
 <plugin>
-   <extension-point id="bidiTypes" name="%bidiExpressionPointName" schema="schema/StructuredTextType.exsd"/>
+   <extension-point id="bidiTypes" name="%bidiExtensionPointName" schema="schema/bidiTypes.exsd"/>
    <extension
          id="bidi"
          name="%bidiExtensionName"
@@ -27,16 +27,6 @@
             type="java">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextMath"
-            description="%mathProcessorName"
-            type="math">
-      </typeDescription>
-      <typeDescription
-            class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextProperty"
-            description="%propertyProcessorName"
-            type="property">
-      </typeDescription>
-      <typeDescription
             description="%regexProcessorName"
             class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextRegex"
             type="regex">
@@ -45,11 +35,6 @@
             description="%sqlProcessorName"
             class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextSql"
             type="sql">
-      </typeDescription>
-      <typeDescription
-            class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextSystem"
-            description="%systemProcessorName"
-            type="system">
       </typeDescription>
       <typeDescription
             class="org.eclipse.equinox.bidi.internal.consumable.StructuredTextUnderscore"
