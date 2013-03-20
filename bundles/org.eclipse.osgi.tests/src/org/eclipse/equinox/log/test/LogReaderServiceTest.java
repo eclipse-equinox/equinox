@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2012 IBM Corporation and others All rights reserved. This
+ * Copyright (c) 2007, 2013 IBM Corporation and others All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -106,7 +106,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 
 		// this is just a bundle that is harmless to start/stop
 		Bundle testBundle = installer.installBundle("test.logging.a"); //$NON-NLS-1$
-		TestListener listener = new TestListener();
+		TestListener listener = new TestListener(testBundle);
 		reader.addLogListener(listener);
 		synchronized (listener) {
 			testBundle.start();
@@ -139,7 +139,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 
 	public void testLogFrameworkEvent() throws Exception {
 		Bundle testBundle = installer.installBundle("test.logging.a"); //$NON-NLS-1$
-		TestListener listener = new TestListener();
+		TestListener listener = new TestListener(testBundle);
 		reader.addLogListener(listener);
 		synchronized (listener) {
 			installer.refreshPackages(new Bundle[] {testBundle});
