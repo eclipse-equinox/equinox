@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2010, 2011). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2010, 2013). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.osgi.service.coordinator;
 
 import java.util.Collection;
@@ -63,7 +64,7 @@ import java.util.Collection;
  * <pre>
  * void doWork() {
  *   if (coordinator.addParticipant(this)) {
- *      beginWork();
+ *     beginWork();
  *   } else {
  *     beginWork();
  *     finishWork();
@@ -81,7 +82,7 @@ import java.util.Collection;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id$
+ * @author $Id$
  */
 public interface Coordinator {
 
@@ -91,11 +92,11 @@ public interface Coordinator {
 	 * @param name The name of this coordination. The name does not have to be
 	 *        unique but must follow the {@code symbolic-name} syntax from the
 	 *        Core specification.
-	 * @param timeMillis Timeout in milliseconds. A value of 0 means no timeout.
-	 *        If the Coordination is not terminated within the timeout, the
-	 *        Coordinator service will {@link Coordination#fail(Throwable) fail}
-	 *        the Coordination with a {@link Coordination#TIMEOUT TIMEOUT}
-	 *        exception.
+	 * @param timeMillis Timeout in milliseconds. A value of 0 means no timeout
+	 *        is required. If the Coordination is not terminated within the
+	 *        timeout, the Coordinator service will
+	 *        {@link Coordination#fail(Throwable) fail} the Coordination with a
+	 *        {@link Coordination#TIMEOUT TIMEOUT} exception.
 	 * @return The new Coordination object.
 	 * @throws IllegalArgumentException If the specified name does not follow
 	 *         the {@code symbolic-name} syntax or the specified time is
@@ -117,11 +118,11 @@ public interface Coordinator {
 	 * @param name The name of this coordination. The name does not have to be
 	 *        unique but must follow the {@code symbolic-name} syntax from the
 	 *        Core specification.
-	 * @param timeMillis Timeout in milliseconds. A value of 0 means no timeout.
-	 *        If the Coordination is not terminated within the timeout, the
-	 *        Coordinator service will {@link Coordination#fail(Throwable) fail}
-	 *        the Coordination with a {@link Coordination#TIMEOUT TIMEOUT}
-	 *        exception.
+	 * @param timeMillis Timeout in milliseconds. A value of 0 means no timeout
+	 *        is required. If the Coordination is not terminated within the
+	 *        timeout, the Coordinator service will
+	 *        {@link Coordination#fail(Throwable) fail} the Coordination with a
+	 *        {@link Coordination#TIMEOUT TIMEOUT} exception.
 	 * @return A new Coordination object
 	 * @throws IllegalArgumentException If the specified name does not follow
 	 *         the {@code symbolic-name} syntax or the specified time is
