@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 Heiko Seeberger and others.
+ * Copyright (c) 2008, 2013 Heiko Seeberger and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,8 +64,10 @@ public class Activator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     public void stop(final BundleContext context) {
-        cachingServiceFactory.stop();
-        cachingServiceFactoryRegistration.unregister();
+        if (cachingServiceFactoryRegistration != null) {
+            cachingServiceFactory.stop();
+            cachingServiceFactoryRegistration.unregister();
+        }
         if (Log.isDebugEnabled()) {
             Log.debug("Shut down and unregistered SingletonCachingService."); //$NON-NLS-1$
         }
