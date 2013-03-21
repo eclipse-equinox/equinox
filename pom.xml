@@ -39,7 +39,11 @@
     <module>features/org.eclipse.equinox.server.core</module>
     <module>features/org.eclipse.equinox.server.jetty</module>
     <module>features/org.eclipse.equinox.server.p2</module>
+
+<!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=348045
     <module>features/org.eclipse.equinox.server.servletbridge</module>
+-->
+
     <module>features/org.eclipse.equinox.server.simple</module>
     <module>features/org.eclipse.equinox.serverside.sdk</module>
     <module>features/org.eclipse.equinox.starterkit.product.feature</module>
@@ -98,7 +102,11 @@
     <module>bundles/org.eclipse.equinox.metatype</module>
     <module>bundles/org.eclipse.equinox.region</module>
     <module>bundles/org.eclipse.equinox.servletbridge</module>
+
+<!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=348045
     <module>bundles/org.eclipse.equinox.servletbridge.extensionbundle</module>
+-->
+
     <module>bundles/org.eclipse.equinox.servletbridge.template</module>
     <module>bundles/org.eclipse.equinox.slf4j.stub</module>
     <module>bundles/org.eclipse.equinox.transforms.hook</module>
