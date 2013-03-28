@@ -18,8 +18,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 
-import org.apache.felix.service.command.CommandProcessor;
-import org.apache.felix.service.command.CommandSession;
 import org.eclipse.equinox.console.command.adapter.CustomCommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
@@ -29,6 +27,8 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSession;
 
 /**
  * This class provides help for the legacy equinox commands, which are adapted to Gogo commands. 
@@ -116,7 +116,7 @@ public class HelpCommand {
 		}
 		
 		if (command != null) {
-			printLegacyCommandHelp(command);
+			printLegacyCommandHelp(session, command);
 			printGogoCommandHelp(session, command);
 			return;
 		}
@@ -158,7 +158,7 @@ public class HelpCommand {
 		}
 	}
 
-	private void printLegacyCommandHelp(String command) {
+	private void printLegacyCommandHelp(final CommandSession session, String command) {
 		for (CommandProvider provider : legacyCommandProviders) {
 			Method[] methods = provider.getClass().getMethods();
 			for (Method method : methods) {
@@ -168,7 +168,7 @@ public class HelpCommand {
 						Method helpMethod = provider.getClass().getMethod("_help", CommandInterpreter.class);
 						ArrayList<Object> argsList = new ArrayList<Object>();
 						argsList.add(command);
-						retval = helpMethod.invoke(provider, new CustomCommandInterpreter(argsList));
+						retval = helpMethod.invoke(provider, new CustomCommandInterpreter(session, argsList));
 					} catch (Exception e) {
 						System.out.println(provider.getHelp());
 						break;

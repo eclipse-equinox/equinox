@@ -16,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
+import org.apache.felix.service.command.CommandSession;
 import org.eclipse.osgi.framework.console.CommandProvider;
 
 /**
@@ -36,14 +37,14 @@ public class CommandProviderAdapter {
 		this.commands = commands;
 	}
 
-	public Object main(Object[] args) throws Exception {
+	public Object main(CommandSession commandSession, Object[] args) throws Exception {
 		try {
 			// first argument is the command
 			Method command = findCommand("_" + args[0]);
 			ArrayList<Object> argList = new ArrayList<Object>();
 			for (int i = 1; i < args.length; i++)
 				argList.add(args[i]);
-			return command.invoke(commandProvider, new CustomCommandInterpreter(argList));
+			return command.invoke(commandProvider, new CustomCommandInterpreter(commandSession, argList));
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof Exception)
 				throw (Exception) e.getTargetException();
@@ -60,7 +61,7 @@ public class CommandProviderAdapter {
 	}
 
 	// TODO Felix gogo seems to search for _main
-	public Object _main(Object[] args) throws Exception {
-		return main(args);
+	public Object _main(CommandSession commandSession, Object[] args) throws Exception {
+		return main(commandSession, args);
 	}
 }

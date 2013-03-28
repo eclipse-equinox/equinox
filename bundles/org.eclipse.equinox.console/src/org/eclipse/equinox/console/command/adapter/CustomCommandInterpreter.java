@@ -11,10 +11,20 @@
  *******************************************************************************/
 package org.eclipse.equinox.console.command.adapter;
 
-import java.io.*;
-import java.lang.reflect.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.felix.service.command.CommandSession;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.osgi.framework.Bundle;
 
@@ -29,6 +39,7 @@ public class CustomCommandInterpreter implements CommandInterpreter {
   private String tab = "\t"; //$NON-NLS-1$
   private String newline = "\r\n"; //$NON-NLS-1$
   private final Iterator<Object> arguments;
+  private final CommandSession commandSession;
   /**
    * The maximum number of lines to print without user prompt.
    * 0 means no user prompt is required, the window is scrollable.
@@ -38,12 +49,19 @@ public class CustomCommandInterpreter implements CommandInterpreter {
   /** The number of lines printed without user prompt.*/
   protected int currentLineCount;
   
-  public CustomCommandInterpreter(List<Object> args) {
+  public CustomCommandInterpreter(CommandSession commandSession, List<Object> args) {
+	  this.commandSession = commandSession;
 	  arguments = args.iterator();
   }
   
   public Object execute(String cmd) {
-    return null;
+	  try {
+		  return commandSession.execute(cmd);
+	  } catch (RuntimeException e) {
+		  throw e;
+	  } catch (Exception e) {
+		  throw new RuntimeException(e);
+	  } 
   }
 
   public String nextArgument() {
