@@ -14,7 +14,7 @@
   <parent>
     <artifactId>rt.equinox.framework</artifactId>
     <groupId>org.eclipse.equinox.framework</groupId>
-    <version>3.8.0-SNAPSHOT</version>
+    <version>4.3.0-SNAPSHOT</version>
     <relativePath>../../</relativePath>
   </parent>
   <groupId>org.eclipse.equinox.feature</groupId>
@@ -24,6 +24,30 @@
 
   <build>
     <plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version> 1.7 </version>
+        <executions>
+          <execution>
+            <id>repack</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <!-- note that here we reference previously declared dependency -->
+                <unzip src="${project.build.directory}/${project.build.finalName}.jar" dest="${project.build.directory}/tmp" />
+                <copy file="resources/build.properties" todir="${project.build.directory}/tmp"/>
+                <copy file="resources/build.xml" todir="${project.build.directory}/tmp"/>
+                <zip basedir="${project.build.directory}/tmp"
+                  destfile="${project.build.directory}/${project.build.finalName}.jar" />
+                <!-- now the modified jar is available -->
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>xml-maven-plugin</artifactId>
