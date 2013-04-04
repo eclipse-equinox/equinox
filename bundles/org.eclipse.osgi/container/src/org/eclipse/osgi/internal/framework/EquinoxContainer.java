@@ -62,7 +62,7 @@ public class EquinoxContainer {
 
 	private ServiceTracker<SignedContentFactory, SignedContentFactory> signedContentFactory;
 
-	public EquinoxContainer(Map<String, String> configuration) {
+	public EquinoxContainer(Map<String, ?> configuration) {
 		this.equinoxConfig = new EquinoxConfiguration(configuration, new HookRegistry(this));
 		this.equinoxLocations = new EquinoxLocations(this.equinoxConfig);
 		loadConfig(equinoxConfig, equinoxLocations);

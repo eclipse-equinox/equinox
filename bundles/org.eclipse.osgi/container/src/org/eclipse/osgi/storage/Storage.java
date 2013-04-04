@@ -210,7 +210,7 @@ public class Storage {
 			}
 			ModuleRevision currentRevision = systemModule.getCurrentRevision();
 			List<ModuleCapability> nativeEnvironments = currentRevision.getModuleCapabilities(NativeNamespace.NATIVE_NAMESPACE);
-			Map<String, String> configMap = equinoxContainer.getConfiguration().getInitialConfig();
+			Map<String, Object> configMap = equinoxContainer.getConfiguration().getInitialConfig();
 			for (ModuleCapability nativeEnvironment : nativeEnvironments) {
 				nativeEnvironment.setTransientAttrs(configMap);
 			}

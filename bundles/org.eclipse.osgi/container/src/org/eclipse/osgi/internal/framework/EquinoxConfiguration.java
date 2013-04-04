@@ -63,7 +63,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String VARIABLE_DELIM_STRING = "$"; //$NON-NLS-1$
 	public static final char VARIABLE_DELIM_CHAR = '$';
 
-	private final Map<String, String> initialConfig;
+	private final Map<String, Object> initialConfig;
 	private final Properties configuration;
 
 	private final Debug debug;
@@ -180,22 +180,22 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	private final static Collection<String> populateInitConfig = Arrays.asList(PROP_OSGI_ARCH, PROP_OSGI_OS, PROP_OSGI_WS, PROP_OSGI_NL, FRAMEWORK_OS_NAME, FRAMEWORK_OS_VERSION, FRAMEWORK_PROCESSOR, FRAMEWORK_LANGUAGE);
 
-	EquinoxConfiguration(Map<String, String> initialConfiguration, HookRegistry hookRegistry) {
-		this.initialConfig = initialConfiguration == null ? new HashMap<String, String>(0) : new HashMap<String, String>(initialConfiguration);
+	EquinoxConfiguration(Map<String, ?> initialConfiguration, HookRegistry hookRegistry) {
+		this.initialConfig = initialConfiguration == null ? new HashMap<String, Object>(0) : new HashMap<String, Object>(initialConfiguration);
 		this.hookRegistry = hookRegistry;
-		String useSystemPropsValue = initialConfig.get(PROP_USE_SYSTEM_PROPERTIES);
-		boolean useSystemProps = useSystemPropsValue == null ? false : Boolean.parseBoolean(useSystemPropsValue);
+		Object useSystemPropsValue = initialConfig.get(PROP_USE_SYSTEM_PROPERTIES);
+		boolean useSystemProps = useSystemPropsValue == null ? false : Boolean.parseBoolean(useSystemPropsValue.toString());
 		this.configuration = useSystemProps ? System.getProperties() : new Properties();
 		if (useSystemProps) {
 			// system properties override initial configuration
-			for (Map.Entry<String, String> configEntry : initialConfig.entrySet()) {
+			for (Map.Entry<String, Object> configEntry : initialConfig.entrySet()) {
 				if (!this.configuration.containsKey(configEntry.getKey())) {
 					this.configuration.put(configEntry.getKey(), configEntry.getValue());
 				} else {
 					// override the initial config value
 					Object systemValue = this.configuration.get(configEntry.getKey());
-					if (systemValue instanceof String) {
-						configEntry.setValue((String) systemValue);
+					if (systemValue != null) {
+						configEntry.setValue(systemValue);
 					}
 				}
 			}
@@ -272,7 +272,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		PARALLEL_CAPABLE = CLASS_LOADER_TYPE_PARALLEL.equals(getConfiguration(PROP_CLASS_LOADER_TYPE));
 	}
 
-	public Map<String, String> getInitialConfig() {
+	public Map<String, Object> getInitialConfig() {
 		return Collections.unmodifiableMap(initialConfig);
 	}
 

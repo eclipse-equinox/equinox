@@ -87,8 +87,8 @@ public class PlatformAdminImpl implements PlatformAdmin {
 		return state;
 	}
 
-	private Dictionary<String, String> asDictionary(Map<String, String> map) {
-		return new Hashtable<String, String>(map);
+	private Dictionary<String, Object> asDictionary(Map<String, ?> map) {
+		return new Hashtable<String, Object>(map);
 	}
 
 	@Override

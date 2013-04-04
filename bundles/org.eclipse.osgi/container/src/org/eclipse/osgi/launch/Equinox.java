@@ -27,7 +27,7 @@ public class Equinox implements Framework {
 
 	private final Framework systemBundle;
 
-	public Equinox(Map<String, String> configuration) {
+	public Equinox(Map<String, ?> configuration) {
 		EquinoxContainer container = new EquinoxContainer(configuration);
 		systemBundle = (Framework) container.getStorage().getModuleContainer().getModule(0).getBundle();
 	}
