@@ -21,22 +21,4 @@
   <artifactId>org.eclipse.equinox.util</artifactId>
   <version>1.0.400-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
-
-  <profiles>
-    <profile>
-      <id>no-bree-libs</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.eclipse.tycho</groupId>
-            <artifactId>tycho-compiler-plugin</artifactId>
-            <configuration>
-              <source>1.5</source>
-              <target>1.5</target>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>
