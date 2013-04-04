@@ -91,24 +91,41 @@ public class EquinoxEventPublisher {
 		/* Collect snapshot of SynchronousBundleListeners */
 		/* Build the listener snapshot */
 		Map<BundleContextImpl, Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>>> listenersSync;
+		BundleContextImpl systemContext = null;
+		Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>> systemBundleListenersSync = null;
 		synchronized (allSyncBundleListeners) {
 			listenersSync = new HashMap<BundleContextImpl, Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>>>(allSyncBundleListeners.size());
 			for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener>> entry : allSyncBundleListeners.entrySet()) {
 				CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener> listeners = entry.getValue();
 				if (!listeners.isEmpty()) {
+					Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>> listenerEntries = listeners.entrySet();
+					if (entry.getKey().getBundleImpl().getBundleId() == 0) {
+						systemContext = entry.getKey();
+						// record the snapshot; no need to create another copy
+						// because the hooks are not exposed to this set
+						systemBundleListenersSync = listenerEntries;
+					}
 					listenersSync.put(entry.getKey(), listeners.entrySet());
 				}
 			}
 		}
 		/* Collect snapshot of BundleListeners; only if the event is NOT STARTING or STOPPING or LAZY_ACTIVATION */
 		Map<BundleContextImpl, Set<Map.Entry<BundleListener, BundleListener>>> listenersAsync = null;
+		Set<Map.Entry<BundleListener, BundleListener>> systemBundleListenersAsync = null;
 		if ((event.getType() & (BundleEvent.STARTING | BundleEvent.STOPPING | BundleEvent.LAZY_ACTIVATION)) == 0) {
 			synchronized (allBundleListeners) {
 				listenersAsync = new HashMap<BundleContextImpl, Set<Map.Entry<BundleListener, BundleListener>>>(allBundleListeners.size());
 				for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<BundleListener, BundleListener>> entry : allBundleListeners.entrySet()) {
 					CopyOnWriteIdentityMap<BundleListener, BundleListener> listeners = entry.getValue();
 					if (!listeners.isEmpty()) {
-						listenersAsync.put(entry.getKey(), listeners.entrySet());
+						Set<Map.Entry<BundleListener, BundleListener>> listenerEntries = listeners.entrySet();
+						if (entry.getKey().getBundleImpl().getBundleId() == 0) {
+							systemContext = entry.getKey();
+							// record the snapshot; no need to create another copy
+							// because the hooks are not exposed to this set
+							systemBundleListenersAsync = listenerEntries;
+						}
+						listenersAsync.put(entry.getKey(), listenerEntries);
 					}
 				}
 			}
@@ -125,7 +142,16 @@ public class EquinoxEventPublisher {
 		} else {
 			shrinkable = new ShrinkableCollection<BundleContext>(asBundleContexts(listenersSync.keySet()), asBundleContexts(listenersAsync.keySet()));
 		}
+
 		notifyEventHooksPrivileged(event, shrinkable);
+
+		// always add back the system bundle listeners if they were removed
+		if (systemBundleListenersSync != null && !listenersSync.containsKey(systemContext)) {
+			listenersSync.put(systemContext, systemBundleListenersSync);
+		}
+		if (systemBundleListenersAsync != null && !listenersAsync.containsKey(systemContext)) {
+			listenersAsync.put(systemContext, systemBundleListenersAsync);
+		}
 
 		/* Dispatch the event to the snapshot for sync listeners */
 		if (!listenersSync.isEmpty()) {

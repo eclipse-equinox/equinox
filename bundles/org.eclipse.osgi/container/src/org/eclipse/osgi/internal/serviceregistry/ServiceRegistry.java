@@ -291,7 +291,6 @@ public class ServiceRegistry {
 	 *        <code>null</code> for all services.
 	 * @param filterstring The filter criteria.
 	 * @param allservices True if the bundle called getAllServiceReferences.
-	 * @param callHooks True if the references should be filtered using service find hooks.
 	 * @return An array of <code>ServiceReferenceImpl</code> objects or
 	 *         <code>null</code> if no services are registered which satisfy
 	 *         the search.
@@ -300,7 +299,7 @@ public class ServiceRegistry {
 	 * @throws java.lang.IllegalStateException If this BundleContext is no
 	 *         longer valid.
 	 */
-	public ServiceReferenceImpl<?>[] getServiceReferences(final BundleContextImpl context, final String clazz, final String filterstring, final boolean allservices, boolean callHooks) throws InvalidSyntaxException {
+	public ServiceReferenceImpl<?>[] getServiceReferences(final BundleContextImpl context, final String clazz, final String filterstring, final boolean allservices) throws InvalidSyntaxException {
 		if (debug.DEBUG_SERVICES) {
 			Debug.println((allservices ? "getAllServiceReferences(" : "getServiceReferences(") + clazz + ", \"" + filterstring + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
@@ -326,36 +325,20 @@ public class ServiceRegistry {
 			references.add(reference);
 		}
 
-		if (callHooks) {
-			Collection<ServiceReference<?>> shrinkable = new ShrinkableCollection<ServiceReference<?>>(references);
-			notifyFindHooks(context, clazz, filterstring, allservices, shrinkable);
+		Collection<ServiceReferenceImpl<?>> copyReferences = references;
+		if (context.getBundleImpl().getBundleId() == 0) {
+			// Make a copy for the purposes of calling the hooks;
+			// The the removals from the hooks are ignored for the system bundle
+			copyReferences = new ArrayList<ServiceReferenceImpl<?>>(references);
 		}
+		Collection<ServiceReference<?>> shrinkable = new ShrinkableCollection<ServiceReference<?>>(copyReferences);
+		notifyFindHooks(context, clazz, filterstring, allservices, shrinkable);
+
 		int size = references.size();
 		if (size == 0) {
 			return null;
 		}
 		return references.toArray(new ServiceReferenceImpl[size]);
-	}
-
-	/**
-	 * This method performs the same function as calling
-	 * {@link #getServiceReferences(BundleContextImpl, String, String, boolean, boolean)} with a 
-	 * {@code true} callHooks value.
-	 * @param context The BundleContext of the requesting bundle.
-	 * @param clazz The class name with which the service was registered or
-	 *        <code>null</code> for all services.
-	 * @param filterstring The filter criteria.
-	 * @param allservices True if the bundle called getAllServiceReferences.
-	 * @return An array of <code>ServiceReferenceImpl</code> objects or
-	 *         <code>null</code> if no services are registered which satisfy
-	 *         the search.
-	 * @throws InvalidSyntaxException If <code>filter</code> contains an
-	 *         invalid filter string that cannot be parsed.
-	 * @throws java.lang.IllegalStateException If this BundleContext is no
-	 *         longer valid.
-	 */
-	public ServiceReferenceImpl<?>[] getServiceReferences(final BundleContextImpl context, final String clazz, final String filterstring, final boolean allservices) throws InvalidSyntaxException {
-		return getServiceReferences(context, clazz, filterstring, allservices, true);
 	}
 
 	/**
@@ -791,11 +774,18 @@ public class ServiceRegistry {
 	void publishServiceEventPrivileged(final ServiceEvent event) {
 		/* Build the listener snapshot */
 		Map<BundleContextImpl, Set<Map.Entry<ServiceListener, FilteredServiceListener>>> listenerSnapshot;
+		Set<Map.Entry<ServiceListener, FilteredServiceListener>> systemServiceListenersOrig = null;
+		BundleContextImpl systemContext = null;
 		synchronized (serviceEventListeners) {
 			listenerSnapshot = new HashMap<BundleContextImpl, Set<Map.Entry<ServiceListener, FilteredServiceListener>>>(serviceEventListeners.size());
 			for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<ServiceListener, FilteredServiceListener>> entry : serviceEventListeners.entrySet()) {
-				CopyOnWriteIdentityMap<ServiceListener, FilteredServiceListener> listeners = entry.getValue();
+				Map<ServiceListener, FilteredServiceListener> listeners = entry.getValue();
 				if (!listeners.isEmpty()) {
+					if (entry.getKey().getBundleImpl().getBundleId() == 0) {
+						systemContext = entry.getKey();
+						// make a copy that we can use to discard hook removals later
+						systemServiceListenersOrig = listeners.entrySet();
+					}
 					listenerSnapshot.put(entry.getKey(), listeners.entrySet());
 				}
 			}
@@ -808,11 +798,17 @@ public class ServiceRegistry {
 		 */
 		Collection<BundleContext> contexts = asBundleContexts(listenerSnapshot.keySet());
 		notifyEventHooksPrivileged(event, contexts);
-		if (listenerSnapshot.isEmpty()) {
-			return;
+		if (!listenerSnapshot.isEmpty()) {
+			Map<BundleContext, Collection<ListenerInfo>> listeners = new ShrinkableValueCollectionMap<BundleContext, ListenerInfo>(listenerSnapshot);
+			notifyEventListenerHooksPrivileged(event, listeners);
 		}
-		Map<BundleContext, Collection<ListenerInfo>> listeners = new ShrinkableValueCollectionMap<BundleContext, ListenerInfo>(listenerSnapshot);
-		notifyEventListenerHooksPrivileged(event, listeners);
+		// always add back the system service listeners if they were removed
+		if (systemServiceListenersOrig != null) {
+			// No contains key check is done because hooks may have removed
+			// a single listener from the value instead of the whole context key.
+			// It is more simple to just replace with the original snapshot.
+			listenerSnapshot.put(systemContext, systemServiceListenersOrig);
+		}
 		if (listenerSnapshot.isEmpty()) {
 			return;
 		}

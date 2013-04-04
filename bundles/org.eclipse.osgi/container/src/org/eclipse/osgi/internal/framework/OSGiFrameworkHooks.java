@@ -80,6 +80,11 @@ class OSGiFrameworkHooks {
 		}
 
 		private void notifyCollisionHooks(final int operationType, final Bundle target, Collection<Bundle> collisionCandidates) {
+			if (operationType == CollisionHook.INSTALLING && target.getBundleId() == 0) {
+				// Make a copy of the collisions only for calling the hooks;
+				// Any removals from hooks are ignored in this case
+				collisionCandidates = new ArrayList<Bundle>(collisionCandidates);
+			}
 			final Collection<Bundle> shrinkable = new ShrinkableCollection<Bundle>(collisionCandidates);
 			if (System.getSecurityManager() == null) {
 				notifyCollisionHooksPriviledged(operationType, target, shrinkable);
@@ -162,7 +167,7 @@ class OSGiFrameworkHooks {
 		private ServiceReferenceImpl<ResolverHookFactory>[] getHookReferences(ServiceRegistry registry, BundleContextImpl context) {
 			try {
 				@SuppressWarnings("unchecked")
-				ServiceReferenceImpl<ResolverHookFactory>[] result = (ServiceReferenceImpl<ResolverHookFactory>[]) registry.getServiceReferences(context, ResolverHookFactory.class.getName(), null, false, false);
+				ServiceReferenceImpl<ResolverHookFactory>[] result = (ServiceReferenceImpl<ResolverHookFactory>[]) registry.getServiceReferences(context, ResolverHookFactory.class.getName(), null, false);
 				return result;
 			} catch (InvalidSyntaxException e) {
 				// cannot happen; no filter

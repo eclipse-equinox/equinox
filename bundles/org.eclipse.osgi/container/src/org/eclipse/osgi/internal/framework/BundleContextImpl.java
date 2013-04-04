@@ -163,13 +163,12 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		if (m == null) {
 			return null;
 		}
-		if (getBundle().getBundleId() != 0) {
-			List<Bundle> bundles = new ArrayList<Bundle>(1);
-			bundles.add(m.getBundle());
-			notifyFindHooks(this, bundles);
-			if (bundles.isEmpty()) {
-				return null;
-			}
+
+		List<Bundle> bundles = new ArrayList<Bundle>(1);
+		bundles.add(m.getBundle());
+		notifyFindHooks(this, bundles);
+		if (bundles.isEmpty()) {
+			return null;
 		}
 		return m.getBundle();
 	}
@@ -201,6 +200,11 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	}
 
 	private void notifyFindHooks(final BundleContextImpl context, List<Bundle> allBundles) {
+		if (context.getBundleImpl().getBundleId() == 0) {
+			// Make a copy for the purposes of calling the hooks;
+			// The the removals from the hooks are ignored
+			allBundles = new ArrayList<Bundle>(allBundles);
+		}
 		final Collection<Bundle> shrinkable = new ShrinkableCollection<Bundle>(allBundles);
 		if (System.getSecurityManager() == null) {
 			notifyFindHooksPriviledged(context, shrinkable);
