@@ -80,6 +80,7 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 	/**
 	 * Constructs a new DefaultClassLoader.
 	 * @param parent the parent classloader
+	 * @param configuration the equinox configuration
 	 * @param delegate the delegate for this classloader
 	 * @param generation the generation for this class loader
 	 */

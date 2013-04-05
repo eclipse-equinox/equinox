@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
@@ -63,6 +64,26 @@ public abstract class ClassLoaderHook {
 	 * @return The absolute path name of the native library or null.
 	 */
 	public String findLocalLibrary(Generation generation, String libName) {
+		return null;
+	}
+
+	/**
+	 * Gets called by a bundle loader when {@link BundleLoader#getClassLoader()}
+	 * is called the first time in order to allow a hook to create the class loader.
+	 * This should rarely, if ever be overridden.  The default implementation
+	 * returns null indicating the built-in implementation should be used.
+	 * Only one hook is able to provide the implementation of the module class loader
+	 * and the first one to return non-null wins.
+	 * 
+	 * @param parent the parent classloader
+	 * @param configuration the equinox configuration
+	 * @param delegate the delegate for this classloader
+	 * @param generation the generation for this class loader
+	 * @return returns an implementation of a module class loader or <code>null</code>
+	 * if the built-in implemention is to be used.
+	 */
+	public ModuleClassLoader createClassLoader(ClassLoader parent, EquinoxConfiguration configuration, BundleLoader delegate, Generation generation) {
+		// do nothing
 		return null;
 	}
 

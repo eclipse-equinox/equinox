@@ -26,6 +26,7 @@ import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
 import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.internal.loader.buddy.PolicyHandler;
@@ -207,24 +208,38 @@ public class BundleLoader implements ModuleLoader {
 
 	public ModuleClassLoader getModuleClassLoader() {
 		synchronized (classLoaderMonitor) {
+			final List<ClassLoaderHook> hooks = container.getConfiguration().getHookRegistry().getClassLoaderHooks();
 			if (classloader == null) {
 				final Generation generation = (Generation) wiring.getRevision().getRevisionInfo();
 				if (System.getSecurityManager() == null) {
-					classloader = new ModuleClassLoader(parent, generation.getBundleInfo().getStorage().getConfiguration(), this, generation);
+					classloader = createClassLoaderPrivledged(parent, generation.getBundleInfo().getStorage().getConfiguration(), this, generation, hooks);
 				} else {
 					classloader = AccessController.doPrivileged(new PrivilegedAction<ModuleClassLoader>() {
 						@Override
 						public ModuleClassLoader run() {
-							return new ModuleClassLoader(parent, generation.getBundleInfo().getStorage().getConfiguration(), BundleLoader.this, generation);
+							return createClassLoaderPrivledged(parent, generation.getBundleInfo().getStorage().getConfiguration(), BundleLoader.this, generation, hooks);
 						}
 					});
 				}
-				for (ClassLoaderHook hook : container.getConfiguration().getHookRegistry().getClassLoaderHooks()) {
+				for (ClassLoaderHook hook : hooks) {
 					hook.classLoaderCreated(classloader);
 				}
 			}
 			return classloader;
 		}
+	}
+
+	static ModuleClassLoader createClassLoaderPrivledged(ClassLoader parent, EquinoxConfiguration configuration, BundleLoader delegate, Generation generation, List<ClassLoaderHook> hooks) {
+		// allow hooks to extend the ModuleClassLoader implementation
+		for (ClassLoaderHook hook : hooks) {
+			ModuleClassLoader hookClassLoader = hook.createClassLoader(parent, configuration, delegate, generation);
+			if (hookClassLoader != null) {
+				// first one to return non-null wins.
+				return hookClassLoader;
+			}
+		}
+		// just use the default one
+		return new ModuleClassLoader(parent, configuration, delegate, generation);
 	}
 
 	public void close() {
