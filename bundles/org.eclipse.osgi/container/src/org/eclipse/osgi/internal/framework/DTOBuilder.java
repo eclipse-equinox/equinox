@@ -281,7 +281,10 @@ public class DTOBuilder {
 			size = references == null ? 0 : references.length;
 			List<ServiceReferenceDTO> refDTOs = newList(size);
 			for (int i = 0; i < size; i++) {
-				refDTOs.add(getServiceReferenceDTO(references[i]));
+				ServiceReferenceDTO serviceRefDTO = getServiceReferenceDTO(references[i]);
+				if (serviceRefDTO != null) {
+					refDTOs.add(serviceRefDTO);
+				}
 			}
 			dto.services = refDTOs;
 		} catch (InvalidSyntaxException e) {
@@ -303,9 +306,14 @@ public class DTOBuilder {
 		if (dto != null) {
 			return dto;
 		}
+		Bundle b = ref.getBundle();
+		if (b == null) {
+			// service has been unregistered
+			return null;
+		}
 		dto = new ServiceReferenceDTO();
 		objects.put(ref, dto);
-		dto.bundle = ref.getBundle().getBundleId();
+		dto.bundle = b.getBundleId();
 		String[] keys = ref.getPropertyKeys();
 		Map<String, Object> properties = newMap(keys.length);
 		for (String k : keys) {
@@ -338,11 +346,14 @@ public class DTOBuilder {
 
 	private ServiceReferenceDTO[] getArrayServiceReferenceDTO(ServiceReference<?>[] references) {
 		final int length = (references == null) ? 0 : references.length;
-		ServiceReferenceDTO[] refDTOs = new ServiceReferenceDTO[length];
+		List<ServiceReferenceDTO> refDTOs = new ArrayList<ServiceReferenceDTO>(length);
 		for (int i = 0; i < length; i++) {
-			refDTOs[i] = getServiceReferenceDTO(references[i]);
+			ServiceReferenceDTO dto = getServiceReferenceDTO(references[i]);
+			if (dto != null) {
+				refDTOs.add(dto);
+			}
 		}
-		return refDTOs;
+		return refDTOs.toArray(new ServiceReferenceDTO[refDTOs.size()]);
 	}
 
 	private static Object mapValue(Object v) {
