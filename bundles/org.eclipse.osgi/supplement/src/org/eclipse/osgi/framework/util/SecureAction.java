@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -188,6 +188,44 @@ public class SecureAction {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<String>() {
 				public String run() throws IOException {
 					return file.getCanonicalPath();
+				}
+			}, controlContext);
+		} catch (PrivilegedActionException e) {
+			if (e.getException() instanceof IOException)
+				throw (IOException) e.getException();
+			throw (RuntimeException) e.getException();
+		}
+	}
+
+	/**
+	 * Returns the absolute file.  Same as calling
+	 * file.getAbsoluteFile().
+	 * @param file a file object
+	 * @return the absolute file.
+	 */
+	public File getAbsoluteFile(final File file) {
+		if (System.getSecurityManager() == null)
+			return file.getAbsoluteFile();
+		return AccessController.doPrivileged(new PrivilegedAction<File>() {
+			public File run() {
+				return file.getAbsoluteFile();
+			}
+		}, controlContext);
+	}
+
+	/**
+	 * Returns the canonical file.  Same as calling
+	 * file.getCanonicalFile().
+	 * @param file a file object
+	 * @return the canonical file.
+	 */
+	public File getCanonicalFile(final File file) throws IOException {
+		if (System.getSecurityManager() == null)
+			return file.getCanonicalFile();
+		try {
+			return AccessController.doPrivileged(new PrivilegedExceptionAction<File>() {
+				public File run() throws IOException {
+					return file.getCanonicalFile();
 				}
 			}, controlContext);
 		} catch (PrivilegedActionException e) {

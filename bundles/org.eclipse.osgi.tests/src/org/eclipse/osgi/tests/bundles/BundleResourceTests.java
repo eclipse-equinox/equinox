@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.util.Enumeration;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.tests.harness.CoreTest;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
 
@@ -63,6 +64,31 @@ public class BundleResourceTests extends CoreTest {
 		assertNull("found resource!", paths);
 		paths = bundle.getEntryPaths("folder/..");
 		assertNotNull("Did not find resource!", paths);
+	}
+
+	public void testBug395274() throws Exception {
+		String original = FrameworkProperties.setProperty("osgi.strictBundleEntryPath", "true");
+		try {
+			Bundle bundle = installer.installBundle("test"); //$NON-NLS-1$
+			URL path = bundle.getEntry("META-INF./MANIFEST.MF");
+			assertNull("found resource!", path);
+			path = bundle.getEntry("META-INF/MANIFEST.MF");
+			assertNotNull("Did not find resource!", path);
+			path = bundle.getEntry("folder/file1.TXT");
+			assertNull("found resource!", path);
+			path = bundle.getEntry("folder/file1.txt");
+			assertNotNull("Did not find resource!", path);
+			checkEntries(bundle, "/./file1.txt", 1);
+			checkEntries(bundle, "//file1.txt", 1);
+			checkEntries(bundle, "/", 1);
+			checkEntries(bundle, "/.", 1);
+		} finally {
+			if (original != null) {
+				FrameworkProperties.setProperty("osgi.strictBundleEntryPath", original);
+			} else {
+				FrameworkProperties.clearProperty("osgi.strictBundleEntryPath");
+			}
+		}
 	}
 
 	public void testBug328795() throws BundleException {

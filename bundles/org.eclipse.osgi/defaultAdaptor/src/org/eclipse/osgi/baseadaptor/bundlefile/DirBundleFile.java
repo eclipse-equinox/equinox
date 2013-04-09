@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,15 @@ import org.eclipse.osgi.util.NLS;
  */
 public class DirBundleFile extends BundleFile {
 
+	private static final String POINTER_SAME_DIRECTORY_1 = "/.";//$NON-NLS-1$
+	private static final String POINTER_SAME_DIRECTORY_2 = "//";//$NON-NLS-1$
+	private static final String POINTER_UPPER_DIRECTORY = "..";//$NON-NLS-1$
+
+	private static final String PROPERTY_STRICT_BUNDLE_ENTRY_PATH = "osgi.strictBundleEntryPath";//$NON-NLS-1$
+	private static final String PROPERTY_STRICT_BUNDLE_ENTRY_PATH_DEFAULT_VALUE = "false";//$NON-NLS-1$
+
+	private final boolean enableStrictBundleEntryPath;
+
 	/**
 	 * Constructs a DirBundleFile
 	 * @param basefile the base file
@@ -34,23 +43,62 @@ public class DirBundleFile extends BundleFile {
 		if (!BundleFile.secureAction.exists(basefile) || !BundleFile.secureAction.isDirectory(basefile)) {
 			throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_EXCEPTION, basefile));
 		}
+		this.enableStrictBundleEntryPath = Boolean.parseBoolean(BundleFile.secureAction.getProperty(PROPERTY_STRICT_BUNDLE_ENTRY_PATH, PROPERTY_STRICT_BUNDLE_ENTRY_PATH_DEFAULT_VALUE));
 	}
 
 	public File getFile(String path, boolean nativeCode) {
-		boolean checkInBundle = path != null && path.indexOf("..") >= 0; //$NON-NLS-1$
-		File file = new File(basefile, path);
+		final boolean checkInBundle = path != null && path.indexOf(POINTER_UPPER_DIRECTORY) >= 0;
+		File file = new File(this.basefile, path);
 		if (!BundleFile.secureAction.exists(file)) {
 			return null;
 		}
-		// must do an extra check to make sure file is within the bundle (bug 320546)
-		if (checkInBundle) {
-			try {
-				if (!BundleFile.secureAction.getCanonicalPath(file).startsWith(BundleFile.secureAction.getCanonicalPath(basefile)))
+
+		if (!enableStrictBundleEntryPath) {
+			if (checkInBundle) {
+				try {
+					if (!BundleFile.secureAction.getCanonicalPath(file).startsWith(BundleFile.secureAction.getCanonicalPath(basefile)))
+						return null;
+				} catch (IOException e) {
 					return null;
-			} catch (IOException e) {
-				return null;
+				}
+			}
+			return file;
+		}
+		boolean normalize = false;
+		boolean isBundleRoot = false;
+		if (path != null) {
+			isBundleRoot = path.equals("/");//$NON-NLS-1$
+			if (!isBundleRoot) {
+				normalize = checkInBundle || path.indexOf(POINTER_SAME_DIRECTORY_1) >= 0 || path.indexOf(POINTER_SAME_DIRECTORY_2) >= 0;
 			}
 		}
+		File canonicalFile;
+		try {
+			canonicalFile = BundleFile.secureAction.getCanonicalFile(file);
+			if (!isBundleRoot) {
+				File absoluteFile = BundleFile.secureAction.getAbsoluteFile(file);
+				String canonicalPath;
+				String absolutePath;
+				if (normalize) {
+					canonicalPath = canonicalFile.toURI().getPath();
+					absolutePath = absoluteFile.toURI().normalize().getPath();
+				} else {
+					canonicalPath = canonicalFile.getPath();
+					absolutePath = absoluteFile.getPath();
+				}
+				if (!canonicalPath.equals(absolutePath)) {
+					return null;
+				}
+			}
+			// must do an extra check to make sure file is within the bundle (bug 320546)
+			if (checkInBundle) {
+				if (!canonicalFile.getPath().startsWith(BundleFile.secureAction.getCanonicalPath(basefile)))
+					return null;
+			}
+		} catch (IOException e) {
+			return null;
+		}
+
 		return file;
 	}
 
