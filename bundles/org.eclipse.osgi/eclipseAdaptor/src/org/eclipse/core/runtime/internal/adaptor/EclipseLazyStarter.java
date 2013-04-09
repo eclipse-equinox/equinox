@@ -23,7 +23,7 @@ import org.eclipse.osgi.baseadaptor.loader.ClasspathEntry;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.adaptor.StatusException;
-import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;
@@ -35,6 +35,8 @@ import org.osgi.framework.*;
 
 public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, HookConfigurator {
 	private static final boolean throwErrorOnFailedStart = "true".equals(FrameworkProperties.getProperty("osgi.compatibility.errorOnFailedStart", "true")); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+	private static final String OPTION_DEBUG_CYCLES = FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + "/resolver/cycles"; //$NON-NLS-1$
+	private static boolean DEBUG_CYCLES = false;
 	private BaseAdaptor adaptor;
 	// holds the current activation trigger class and the ClasspathManagers that need to be activated
 	private ThreadLocal<List<Object>> activationStack = new ThreadLocal<List<Object>>();
@@ -215,7 +217,7 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 	}
 
 	public void frameworkStopping(BundleContext context) {
-		if (!Debug.DEBUG_ENABLED)
+		if (!DEBUG_CYCLES)
 			return;
 
 		BundleDescription[] allBundles = adaptor.getState().getResolvedBundles();
@@ -231,6 +233,7 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 
 	public void initialize(BaseAdaptor baseAdaptor) {
 		this.adaptor = baseAdaptor;
+		setDebugOptions();
 	}
 
 	/**
@@ -260,6 +263,14 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 		}
 	}
 
+	private void setDebugOptions() {
+		FrameworkDebugOptions options = FrameworkDebugOptions.getDefault();
+		// may be null if debugging is not enabled
+		if (options == null)
+			return;
+		DEBUG_CYCLES = options.getBooleanOption(OPTION_DEBUG_CYCLES, false);
+	}
+
 	private static class TerminatingClassNotFoundException extends ClassNotFoundException implements StatusException {
 		private static final long serialVersionUID = -6730732895632169173L;
 		private Throwable cause;
@@ -276,6 +287,5 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 		public int getStatusCode() {
 			return StatusException.CODE_ERROR;
 		}
-
 	}
 }
