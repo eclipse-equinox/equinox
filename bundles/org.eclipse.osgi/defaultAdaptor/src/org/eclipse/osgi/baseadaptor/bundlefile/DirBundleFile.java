@@ -28,9 +28,6 @@ public class DirBundleFile extends BundleFile {
 	private static final String POINTER_SAME_DIRECTORY_2 = "//";//$NON-NLS-1$
 	private static final String POINTER_UPPER_DIRECTORY = "..";//$NON-NLS-1$
 
-	private static final String PROPERTY_STRICT_BUNDLE_ENTRY_PATH = "osgi.strictBundleEntryPath";//$NON-NLS-1$
-	private static final String PROPERTY_STRICT_BUNDLE_ENTRY_PATH_DEFAULT_VALUE = "false";//$NON-NLS-1$
-
 	private final boolean enableStrictBundleEntryPath;
 
 	/**
@@ -38,12 +35,16 @@ public class DirBundleFile extends BundleFile {
 	 * @param basefile the base file
 	 * @throws IOException
 	 */
-	public DirBundleFile(File basefile) throws IOException {
-		super(basefile);
+	public DirBundleFile(File basefile, boolean enableStrictBundleEntryPath) throws IOException {
+		super(getBaseFile(basefile, enableStrictBundleEntryPath));
 		if (!BundleFile.secureAction.exists(basefile) || !BundleFile.secureAction.isDirectory(basefile)) {
 			throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_EXCEPTION, basefile));
 		}
-		this.enableStrictBundleEntryPath = Boolean.parseBoolean(BundleFile.secureAction.getProperty(PROPERTY_STRICT_BUNDLE_ENTRY_PATH, PROPERTY_STRICT_BUNDLE_ENTRY_PATH_DEFAULT_VALUE));
+		this.enableStrictBundleEntryPath = enableStrictBundleEntryPath;
+	}
+
+	private static File getBaseFile(File basefile, boolean enableStrictBundleEntryPath) throws IOException {
+		return enableStrictBundleEntryPath ? secureAction.getCanonicalFile(basefile) : basefile;
 	}
 
 	public File getFile(String path, boolean nativeCode) {
@@ -54,6 +55,7 @@ public class DirBundleFile extends BundleFile {
 		}
 
 		if (!enableStrictBundleEntryPath) {
+			// must do an extra check to make sure file is within the bundle (bug 320546)
 			if (checkInBundle) {
 				try {
 					if (!BundleFile.secureAction.getCanonicalPath(file).startsWith(BundleFile.secureAction.getCanonicalPath(basefile)))

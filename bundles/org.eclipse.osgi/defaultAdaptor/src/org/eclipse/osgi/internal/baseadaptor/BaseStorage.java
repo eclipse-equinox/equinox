@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.*;
+import java.security.AccessController;
 import java.util.*;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.core.runtime.adaptor.LocationManager;
@@ -31,6 +32,7 @@ import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
+import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
 import org.eclipse.osgi.service.datalocation.Location;
@@ -49,6 +51,10 @@ public class BaseStorage implements SynchronousBundleListener {
 	private static final String OPTION_RESOLVER_READER = RUNTIME_ADAPTOR + "/resolver/reader/timing"; //$NON-NLS-1$	
 	private static final String PROP_FRAMEWORK_EXTENSIONS = "osgi.framework.extensions"; //$NON-NLS-1$
 	private static final String PROP_BUNDLE_STORE = "osgi.bundlestore"; //$NON-NLS-1$
+
+	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
+	private static final String PROPERTY_STRICT_BUNDLE_ENTRY_PATH = "osgi.strictBundleEntryPath";//$NON-NLS-1$
+	private static final String PROPERTY_STRICT_BUNDLE_ENTRY_PATH_DEFAULT_VALUE = "false";//$NON-NLS-1$
 	// The name of the bundle data directory
 	static final String DATA_DIR_NAME = "data"; //$NON-NLS-1$
 	static final String LIB_TEMP = "libtemp"; //$NON-NLS-1$
@@ -740,10 +746,12 @@ public class BaseStorage implements SynchronousBundleListener {
 		// No factories configured or they declined to create the bundle file; do default
 		if (result == null && content instanceof File) {
 			File file = (File) content;
-			if (isDirectory(data, base, file))
-				result = new DirBundleFile(file);
-			else
+			if (isDirectory(data, base, file)) {
+				boolean strictPath = Boolean.parseBoolean(secureAction.getProperty(PROPERTY_STRICT_BUNDLE_ENTRY_PATH, PROPERTY_STRICT_BUNDLE_ENTRY_PATH_DEFAULT_VALUE));
+				result = new DirBundleFile(file, strictPath);
+			} else {
 				result = new ZipBundleFile(file, data, mruList);
+			}
 		}
 
 		if (result == null && content instanceof String) {
