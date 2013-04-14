@@ -1176,7 +1176,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	public void close() throws Exception {
 		if (confirmStop()) {
 			context.getBundle(0).stop();
-			System.exit(0);
 		}
 	}
 
