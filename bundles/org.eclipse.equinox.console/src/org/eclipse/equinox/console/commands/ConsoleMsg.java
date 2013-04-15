@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 IBM Corporation and others.
+ * Copyright (c) 2004, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,6 @@ public class ConsoleMsg extends NLS {
 	public static String CONSOLE_IMPORTS_MESSAGE;
 	public static String CONSOLE_STALE_MESSAGE;
 	public static String CONSOLE_NO_EXPORTED_PACKAGES_NO_PACKAGE_ADMIN_MESSAGE;
-	public static String CONSOLE_NO_EXPORTED_PACKAGES_NO_PLATFORM_ADMIN_MESSAGE;
 	public static String CONSOLE_NO_EXPORTED_PACKAGES_MESSAGE;
 	public static String CONSOLE_REMOVAL_PENDING_MESSAGE;
 	public static String CONSOLE_SERVICES_IN_USE_MESSAGE;
@@ -53,7 +52,6 @@ public class ConsoleMsg extends NLS {
 	public static String CONSOLE_FRAGMENT_MESSAGE;
 	public static String CONSOLE_NO_FRAGMENT_MESSAGE;
 	public static String CONSOLE_NO_NAMED_CLASS_SPACES_MESSAGE;
-	public static String CONSOLE_NAMED_CLASS_SPACE_MESSAGE;
 	public static String CONSOLE_PROVIDED_MESSAGE;
 	public static String CONSOLE_REQUIRED_BUNDLES_MESSAGE;
 	public static String CONSOLE_NO_REQUIRED_BUNDLES_MESSAGE;
@@ -76,7 +74,6 @@ public class ConsoleMsg extends NLS {
 	public static String CONSOLE_REQUIRES_MESSAGE;
 	public static String CONSOLE_CANNOT_ACCESS_SYSTEM_PROPERTIES;
 	public static String CONSOLE_NO_CONSTRAINTS_NO_PLATFORM_ADMIN_MESSAGE;
-	public static String CONSOLE_CANNOT_FIND_BUNDLE_ERROR;
 	public static String CONSOLE_NO_CONSTRAINTS;
 	public static String CONSOLE_DIRECT_CONSTRAINTS;
 	public static String CONSOLE_LEAF_CONSTRAINTS;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2012 IBM Corporation and others.
+ * Copyright (c) 2003, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,13 +20,20 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.felix.service.command.CommandProcessor;
@@ -34,20 +41,10 @@ import org.apache.felix.service.command.Converter;
 import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.Parameter;
 import org.eclipse.equinox.console.command.adapter.Activator;
+import org.eclipse.osgi.report.resolution.ResolutionReport;
+import org.eclipse.osgi.report.resolution.ResolutionReport.Entry;
+import org.eclipse.osgi.report.resolution.ResolutionReport.Listener;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.BundleSpecification;
-import org.eclipse.osgi.service.resolver.DisabledInfo;
-import org.eclipse.osgi.service.resolver.ExportPackageDescription;
-import org.eclipse.osgi.service.resolver.GenericSpecification;
-import org.eclipse.osgi.service.resolver.HostSpecification;
-import org.eclipse.osgi.service.resolver.ImportPackageSpecification;
-import org.eclipse.osgi.service.resolver.NativeCodeSpecification;
-import org.eclipse.osgi.service.resolver.PlatformAdmin;
-import org.eclipse.osgi.service.resolver.ResolverError;
-import org.eclipse.osgi.service.resolver.State;
-import org.eclipse.osgi.service.resolver.StateHelper;
-import org.eclipse.osgi.service.resolver.VersionConstraint;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -58,12 +55,26 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.SynchronousBundleListener;
+import org.osgi.framework.hooks.resolver.ResolverHook;
+import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.framework.namespace.BundleNamespace;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleRevisions;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.framework.wiring.FrameworkWiring;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.service.packageadmin.RequiredBundle;
 import org.osgi.service.permissionadmin.PermissionAdmin;
 import org.osgi.service.startlevel.StartLevel;
 
@@ -139,7 +150,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		"setibsl", "requiredBundles", "classSpaces", "profilelog", "getPackages", "getprop", "diag", "enableBundle", 
 		"disableBundle", "disabledBundles"};
 	
-	private static final String POLICY_CONSOLE = "org.eclipse.equinox.console"; //$NON-NLS-1$
 	
 	/**
 	 *  Constructor.
@@ -783,7 +793,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 *
 	 *  @param bundles bundle(s) to display details for
 	 */
-	@SuppressWarnings({ "deprecation" })
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_BUNDLE_COMMAND_DESCRIPTION)
 	public void bundle(@Descriptor(ConsoleMsg.CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION)Bundle[] bundles) throws Exception {
 		if (bundles.length == 0) {
@@ -792,301 +801,209 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		}
 		
 		for (Bundle bundle : bundles) {
-				long id = bundle.getBundleId();
-				System.out.println(bundle);
+			long id = bundle.getBundleId();
+			System.out.println(bundle);
+			System.out.print("  "); //$NON-NLS-1$
+			System.out.print(NLS.bind(ConsoleMsg.CONSOLE_ID_MESSAGE, String.valueOf(id)));
+			System.out.print(", "); //$NON-NLS-1$
+			System.out.print(NLS.bind(ConsoleMsg.CONSOLE_STATUS_MESSAGE, getStateName(bundle)));
+			if (id != 0) {
+				File dataRoot = bundle.getDataFile(""); //$NON-NLS-1$
+				String root = (dataRoot == null) ? null : dataRoot.getAbsolutePath();
+				System.out.print(NLS.bind(ConsoleMsg.CONSOLE_DATA_ROOT_MESSAGE, root));
+				System.out.println();
+			} else {
+				System.out.println();
+			}
+
+			ServiceReference<?>[] services = bundle.getRegisteredServices();
+			if (services != null) {
 				System.out.print("  "); //$NON-NLS-1$
-				System.out.print(NLS.bind(ConsoleMsg.CONSOLE_ID_MESSAGE, String.valueOf(id)));
-				System.out.print(", "); //$NON-NLS-1$
-				System.out.print(NLS.bind(ConsoleMsg.CONSOLE_STATUS_MESSAGE, getStateName(bundle)));
-				if (id != 0) {
-					File dataRoot = bundle.getDataFile(""); //$NON-NLS-1$
-					String root = (dataRoot == null) ? null : dataRoot.getAbsolutePath();
-					System.out.print(NLS.bind(ConsoleMsg.CONSOLE_DATA_ROOT_MESSAGE, root));
-					System.out.println();
-				} else {
-					System.out.println();
+				System.out.println(ConsoleMsg.CONSOLE_REGISTERED_SERVICES_MESSAGE);
+				for (int j = 0; j < services.length; j++) {
+					System.out.print("    "); //$NON-NLS-1$
+					System.out.println(services[j]);
 				}
+			} else {
+				System.out.print("  "); //$NON-NLS-1$
+				System.out.println(ConsoleMsg.CONSOLE_NO_REGISTERED_SERVICES_MESSAGE);
+			}
 
-				ServiceReference<?>[] services = bundle.getRegisteredServices();
-				if (services != null) {
-					System.out.print("  "); //$NON-NLS-1$
-					System.out.println(ConsoleMsg.CONSOLE_REGISTERED_SERVICES_MESSAGE);
-					for (int j = 0; j < services.length; j++) {
-						System.out.print("    "); //$NON-NLS-1$
-						System.out.println(services[j]);
+			services = bundle.getServicesInUse();
+			if (services != null) {
+				System.out.print("  "); //$NON-NLS-1$
+				System.out.println(ConsoleMsg.CONSOLE_SERVICES_IN_USE_MESSAGE);
+				for (int j = 0; j < services.length; j++) {
+					System.out.print("    "); //$NON-NLS-1$
+					System.out.println(services[j]);
+				}
+			} else {
+				System.out.print("  "); //$NON-NLS-1$
+				System.out.println(ConsoleMsg.CONSOLE_NO_SERVICES_IN_USE_MESSAGE);
+			}
+
+			BundleRevision revision = bundle.adapt(BundleRevision.class);
+			if (revision == null) {
+				continue;
+			}
+
+			BundleWiring wiring = revision.getWiring();
+			if (wiring == null) {
+				continue;
+			}
+			boolean title = true;
+			List<BundleCapability> exports = wiring.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
+			if ( exports.isEmpty()) {
+				System.out.print("  "); //$NON-NLS-1$
+				System.out.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_MESSAGE);
+			} else {
+				title = true;
+
+				for (BundleCapability export : exports) {
+					if (title) {
+						System.out.print("  "); //$NON-NLS-1$
+						System.out.println(ConsoleMsg.CONSOLE_EXPORTED_PACKAGES_MESSAGE);
+						title = false;
 					}
-				} else {
-					System.out.print("  "); //$NON-NLS-1$
-					System.out.println(ConsoleMsg.CONSOLE_NO_REGISTERED_SERVICES_MESSAGE);
-				}
-
-				services = bundle.getServicesInUse();
-				if (services != null) {
-					System.out.print("  "); //$NON-NLS-1$
-					System.out.println(ConsoleMsg.CONSOLE_SERVICES_IN_USE_MESSAGE);
-					for (int j = 0; j < services.length; j++) {
-						System.out.print("    "); //$NON-NLS-1$
-						System.out.println(services[j]);
+					Map<String, Object> exportAttrs = export.getAttributes();
+					System.out.print("    "); //$NON-NLS-1$
+					System.out.print(exportAttrs.get(PackageNamespace.PACKAGE_NAMESPACE));
+					System.out.print("; version=\""); //$NON-NLS-1$
+					System.out.print(exportAttrs.get(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE));
+					System.out.print("\""); //$NON-NLS-1$
+					if (!wiring.isCurrent()) {
+						System.out.println(ConsoleMsg.CONSOLE_EXPORTED_REMOVAL_PENDING_MESSAGE);
+					} else {
+						System.out.println(ConsoleMsg.CONSOLE_EXPORTED_MESSAGE);
 					}
-				} else {
-					System.out.print("  "); //$NON-NLS-1$
-					System.out.println(ConsoleMsg.CONSOLE_NO_SERVICES_IN_USE_MESSAGE);
 				}
 
-				PackageAdmin packageAdmin = activator.getPackageAdmin();
-				if (packageAdmin == null) {
+				if (title) {
 					System.out.print("  "); //$NON-NLS-1$
-					System.out.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_NO_PACKAGE_ADMIN_MESSAGE);
-					continue;
+					System.out.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_MESSAGE);
 				}
-				
-				PlatformAdmin platAdmin = activator.getPlatformAdmin();
-				
-				if (platAdmin != null) {
-					BundleDescription desc = platAdmin.getState(false).getBundle(bundle.getBundleId());
-					if (desc != null) {
-						boolean title = true;
-						
-							ExportPackageDescription[] exports = desc.getExportPackages();
-							if (exports == null || exports.length == 0) {
-								System.out.print("  "); //$NON-NLS-1$
-								System.out.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_MESSAGE);
-							} else {
-								title = true;
+			}
+			title = true;
 
-								for (int i = 0; i < exports.length; i++) {
-									if (title) {
-										System.out.print("  "); //$NON-NLS-1$
-										System.out.println(ConsoleMsg.CONSOLE_EXPORTED_PACKAGES_MESSAGE);
-										title = false;
-									}
-									System.out.print("    "); //$NON-NLS-1$
-									System.out.print(exports[i].getName());
-									System.out.print("; version=\""); //$NON-NLS-1$
-									System.out.print(exports[i].getVersion());
-									System.out.print("\""); //$NON-NLS-1$
-									if (desc.isRemovalPending()) {
-										System.out.println(ConsoleMsg.CONSOLE_EXPORTED_REMOVAL_PENDING_MESSAGE);
-									} else {
-										System.out.println(ConsoleMsg.CONSOLE_EXPORTED_MESSAGE);
-									}
-								}
+			// Get all resolved imports
+			Map<String, List<PackageSource>> packages = getPackagesInternal(wiring);
+			List<BundleRequirement> unresolvedImports = getUnresolvedImports(packages, wiring);
 
-								if (title) {
-									System.out.print("  "); //$NON-NLS-1$
-									System.out.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_MESSAGE);
-								}
-							}
-							title = true;
-							if (desc != null) {
-								List<ImportPackageSpecification> fragmentsImportPackages = new ArrayList<ImportPackageSpecification>();
+			title = printImportedPackages(packages, title);
+			title = printUnwiredDynamicImports(unresolvedImports, title);
 
-								// Get bundle' fragments imports
-								BundleDescription[] fragments = desc.getFragments();
-								for (int i = 0; i < fragments.length; i++) {
-									ImportPackageSpecification[] fragmentImports = fragments[i].getImportPackages();
-									for (int j = 0; j < fragmentImports.length; j++) {
-										fragmentsImportPackages.add(fragmentImports[j]);
-									}
-								}
+			if (title) {
+				System.out.print("  "); //$NON-NLS-1$
+				System.out.println(ConsoleMsg.CONSOLE_NO_IMPORTED_PACKAGES_MESSAGE);
+			}
 
-								// Get all bundle imports
-								ImportPackageSpecification[] importPackages;
-								if (fragmentsImportPackages.size() > 0) {
-									ImportPackageSpecification[] directImportPackages = desc.getImportPackages();
-									importPackages = new ImportPackageSpecification[directImportPackages.length + fragmentsImportPackages.size()];
-
-									for (int i = 0; i < directImportPackages.length; i++) {
-										importPackages[i] = directImportPackages[i];
-									}
-
-									int offset = directImportPackages.length;
-									for (int i = 0; i < fragmentsImportPackages.size(); i++) {
-										importPackages[offset + i] = fragmentsImportPackages.get(i);
-									}
-								} else {
-									importPackages = desc.getImportPackages();
-								}
-
-								// Get all resolved imports
-								ExportPackageDescription[] imports = null;
-								imports = desc.getContainingState().getStateHelper().getVisiblePackages(desc, StateHelper.VISIBLE_INCLUDE_EE_PACKAGES | StateHelper.VISIBLE_INCLUDE_ALL_HOST_WIRES);
-
-								// Get the unresolved optional and dynamic imports
-								List<ImportPackageSpecification> unresolvedImports = new ArrayList<ImportPackageSpecification>();
-
-								for (int i = 0; i < importPackages.length; i++) {
-									if (importPackages[i].getDirective(Constants.RESOLUTION_DIRECTIVE).equals(ImportPackageSpecification.RESOLUTION_OPTIONAL)) {
-										if (importPackages[i].getSupplier() == null) {
-											unresolvedImports.add(importPackages[i]);
-										}
-									} else if (importPackages[i].getDirective(org.osgi.framework.Constants.RESOLUTION_DIRECTIVE).equals(ImportPackageSpecification.RESOLUTION_DYNAMIC)) {
-										boolean isResolvable = false;
-
-										// Check if the dynamic import can be resolved by any of the wired imports, 
-										// and if not - add it to the list of unresolved imports
-										for (int j = 0; j < imports.length; j++) {
-											if (importPackages[i].isSatisfiedBy(imports[j])) {
-												isResolvable = true;
-											}
-										}
-
-										if (isResolvable == false) {
-											unresolvedImports.add(importPackages[i]);
-										}
-									}
-								}
-
-								title = printImportedPackages(imports, title);
-
-								if (desc.isResolved() && (unresolvedImports.isEmpty() == false)) {
-									printUnwiredDynamicImports(unresolvedImports);
-									title = false;
-								}
-							}
-
-							if (title) {
-								System.out.print("  "); //$NON-NLS-1$
-								System.out.println(ConsoleMsg.CONSOLE_NO_IMPORTED_PACKAGES_MESSAGE);
-							}
-
-							if (packageAdmin != null) {
-								System.out.print("  "); //$NON-NLS-1$
-								if ((packageAdmin.getBundleType(bundle) & PackageAdmin.BUNDLE_TYPE_FRAGMENT) > 0) {
-									org.osgi.framework.Bundle[] hosts = packageAdmin.getHosts(bundle);
-									if (hosts != null) {
-										System.out.println(ConsoleMsg.CONSOLE_HOST_MESSAGE);
-										for (int i = 0; i < hosts.length; i++) {
-											System.out.print("    "); //$NON-NLS-1$
-											System.out.println(hosts[i]);
-										}
-									} else {
-										System.out.println(ConsoleMsg.CONSOLE_NO_HOST_MESSAGE);
-									}
-								} else {
-									org.osgi.framework.Bundle[] fragments = packageAdmin.getFragments(bundle);
-									if (fragments != null) {
-										System.out.println(ConsoleMsg.CONSOLE_FRAGMENT_MESSAGE);
-										for (int i = 0; i < fragments.length; i++) {
-											System.out.print("    "); //$NON-NLS-1$
-											System.out.println(fragments[i]);
-										}
-									} else {
-										System.out.println(ConsoleMsg.CONSOLE_NO_FRAGMENT_MESSAGE);
-									}
-								}
-
-								RequiredBundle[] requiredBundles = packageAdmin.getRequiredBundles(null);
-								RequiredBundle requiredBundle = null;
-								if (requiredBundles != null) {
-									for (RequiredBundle rb : requiredBundles) {
-										if (rb.getBundle() == bundle) {
-											requiredBundle = rb;
-											break;
-										}
-									}
-								}
-
-								if (requiredBundle == null) {
-									System.out.print("  "); //$NON-NLS-1$
-									System.out.println(ConsoleMsg.CONSOLE_NO_NAMED_CLASS_SPACES_MESSAGE);
-								} else {
-									System.out.print("  "); //$NON-NLS-1$
-									System.out.println(ConsoleMsg.CONSOLE_NAMED_CLASS_SPACE_MESSAGE);
-									System.out.print("    "); //$NON-NLS-1$
-									System.out.print(requiredBundle);
-									if (requiredBundle.isRemovalPending()) {
-										System.out.println(ConsoleMsg.CONSOLE_REMOVAL_PENDING_MESSAGE);
-									} else {
-										System.out.println(ConsoleMsg.CONSOLE_PROVIDED_MESSAGE);
-									}
-								}
-								title = true;
-								if (requiredBundles != null) {
-									for (RequiredBundle rb : requiredBundles) {
-										if (rb == requiredBundle)
-											continue;
-
-										org.osgi.framework.Bundle[] depBundles = rb.getRequiringBundles();
-										if (depBundles == null)
-											continue;
-
-										for (int j = 0; j < depBundles.length; j++) {
-											if (depBundles[j] == bundle) {
-												if (title) {
-													System.out.print("  "); //$NON-NLS-1$
-													System.out
-															.println(ConsoleMsg.CONSOLE_REQUIRED_BUNDLES_MESSAGE);
-													title = false;
-												}
-												System.out.print("    "); //$NON-NLS-1$
-												System.out.print(rb);
-
-												org.osgi.framework.Bundle provider = rb.getBundle();
-												System.out.print("<"); //$NON-NLS-1$
-												System.out.print(provider);
-												System.out.println(">"); //$NON-NLS-1$
-											}
-										}
-									}
-								}
-								if (title) {
-									System.out.print("  "); //$NON-NLS-1$
-									System.out.println(ConsoleMsg.CONSOLE_NO_REQUIRED_BUNDLES_MESSAGE);
-								}
-
-							}
-						} 
-					System.out.println();
-					System.out.println();
+			System.out.print("  "); //$NON-NLS-1$
+			if ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+				List<BundleWire> hostWires = wiring.getRequiredWires(HostNamespace.HOST_NAMESPACE);
+				if (hostWires.isEmpty()) {
+					System.out.println(ConsoleMsg.CONSOLE_NO_HOST_MESSAGE);
 				} else {
+					System.out.println(ConsoleMsg.CONSOLE_HOST_MESSAGE);
+					for (BundleWire hostWire : hostWires) {
+						System.out.print("    "); //$NON-NLS-1$
+						System.out.println(hostWire.getProvider().getBundle());
+					}
+				}
+			} else {
+				List<BundleWire> fragmentWires = wiring.getProvidedWires(HostNamespace.HOST_NAMESPACE);
+				if (fragmentWires.isEmpty()) {
+					System.out.println(ConsoleMsg.CONSOLE_NO_FRAGMENT_MESSAGE);
+				} else {
+					System.out.println(ConsoleMsg.CONSOLE_FRAGMENT_MESSAGE);
+					for (BundleWire fragmentWire : fragmentWires) {
+						System.out.print("    "); //$NON-NLS-1$
+						System.out.println(fragmentWire.getRequirer().getBundle());
+					}
+				}
+
+				List<BundleWire> requiredBundles = wiring.getRequiredWires(BundleNamespace.BUNDLE_NAMESPACE);
+				title = true;
+				for (BundleWire requiredBundle : requiredBundles) {
+					if (title) {
+						System.out.print("  "); //$NON-NLS-1$
+						System.out.println(ConsoleMsg.CONSOLE_REQUIRED_BUNDLES_MESSAGE);
+						title = false;
+					}
+					System.out.print("    "); //$NON-NLS-1$
+					System.out.println(requiredBundle.getProvider());
+				}
+				if (title) {
 					System.out.print("  "); //$NON-NLS-1$
-					System.out.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_NO_PLATFORM_ADMIN_MESSAGE);
-				}		
+					System.out.println(ConsoleMsg.CONSOLE_NO_REQUIRED_BUNDLES_MESSAGE);
+				}
+
+			}
+	 
+			System.out.println();
+			System.out.println();
+		}		
+	}
+
+	private List<BundleRequirement> getUnresolvedImports(
+			Map<String, List<PackageSource>> packages, BundleWiring wiring) {
+
+		// TODO need to get this information
+		return Collections.emptyList();
+	}
+
+	private boolean printImportedPackages(Map<String, List<PackageSource>> packages, boolean title) {
+		for (List<PackageSource> packageList : packages.values()) {
+			for (PackageSource packageSource : packageList) {
+				if (title) {
+					System.out.print("  "); //$NON-NLS-1$
+					System.out.println(ConsoleMsg.CONSOLE_IMPORTED_PACKAGES_MESSAGE);
+					title = false;
+				}
+				printCapability("    ", packageSource.getCapability(), packageSource.getWire(), PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+			}
+		}
+		return title;
+	}
+
+	private void printCapability(String prepend, BundleCapability capability, BundleWire wire, String versionKey) {
+		Map<String, Object> exportAttrs = capability.getAttributes();
+		System.out.print(prepend);
+		System.out.print(exportAttrs.get(capability.getNamespace()));
+		if (versionKey != null) {
+			System.out.print("; " + versionKey + "=\""); //$NON-NLS-1$
+			System.out.print(exportAttrs.get(versionKey));
+			System.out.print("\""); //$NON-NLS-1$
+		}
+
+		Bundle exporter = wire == null ? capability.getRevision().getBundle() : wire.getProvider().getBundle();
+		if (exporter != null) {
+			System.out.print(" <"); //$NON-NLS-1$
+			System.out.print(exporter);
+			System.out.println(">"); //$NON-NLS-1$
+		} else {
+			System.out.print(" <"); //$NON-NLS-1$
+			System.out.print(ConsoleMsg.CONSOLE_STALE_MESSAGE);
+			System.out.println(">"); //$NON-NLS-1$
 		}
 	}
 
-	private boolean printImportedPackages(ExportPackageDescription[] importedPkgs, boolean title) {
-		for (int i = 0; i < importedPkgs.length; i++) {
+	private boolean printUnwiredDynamicImports(List<BundleRequirement> dynamicImports, boolean title) {
+		for (BundleRequirement importReq : dynamicImports) {
 			if (title) {
 				System.out.print("  "); //$NON-NLS-1$
 				System.out.println(ConsoleMsg.CONSOLE_IMPORTED_PACKAGES_MESSAGE);
 				title = false;
 			}
 			System.out.print("    "); //$NON-NLS-1$
-			System.out.print(importedPkgs[i].getName());
-			System.out.print("; version=\""); //$NON-NLS-1$
-			System.out.print(importedPkgs[i].getVersion());
-			System.out.print("\""); //$NON-NLS-1$
-			Bundle exporter = context.getBundle(importedPkgs[i].getSupplier().getBundleId());
-			if (exporter != null) {
-				System.out.print("<"); //$NON-NLS-1$
-				System.out.print(exporter);
-				System.out.println(">"); //$NON-NLS-1$
-			} else {
-				System.out.print("<"); //$NON-NLS-1$
-				System.out.print(ConsoleMsg.CONSOLE_STALE_MESSAGE);
-				System.out.println(">"); //$NON-NLS-1$
-			}
-		}
-		return title;
-	}
-
-	private void printUnwiredDynamicImports(List<ImportPackageSpecification> dynamicImports) {
-		for (int i = 0; i < dynamicImports.size(); i++) {
-			ImportPackageSpecification importPackage = dynamicImports.get(i);
-			System.out.print("    "); //$NON-NLS-1$
-			System.out.print(importPackage.getName());
-			System.out.print("; version=\""); //$NON-NLS-1$
-			System.out.print(importPackage.getVersionRange());
-			System.out.print("\""); //$NON-NLS-1$
-			System.out.print("<"); //$NON-NLS-1$
+			System.out.print(importReq);
+			System.out.print(";<"); //$NON-NLS-1$
 			System.out.print("unwired"); //$NON-NLS-1$
 			System.out.print(">"); //$NON-NLS-1$
 			System.out.print("<"); //$NON-NLS-1$
-			System.out.print(importPackage.getDirective(org.osgi.framework.Constants.RESOLUTION_DIRECTIVE));
+			System.out.print(importReq.getDirectives().get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE));
 			System.out.println(">"); //$NON-NLS-1$
 		}
+		return title;
 	}
 
 	/**
@@ -1674,54 +1591,57 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_REQUIRED_BUNDLES_COMMAND_DESCRIPTION)
 	public void classSpaces(@Descriptor(ConsoleMsg.CONSOLE_HELP_REQUIRED_BUNDLES_COMMAND_ARGUMENT_DESCRIPTION) String... symbolicName) {
 		PackageAdmin packageAdmin = activator.getPackageAdmin();
-		if (packageAdmin != null) {
-			RequiredBundle[] symBundles = null;
-			String name;
-			if(symbolicName == null || symbolicName.length == 0) {
-				name = null;
-			} else {
-				name = symbolicName[0];
-			}
-			symBundles = packageAdmin.getRequiredBundles(name);
-
-			if (symBundles == null) {
-				System.out.println(ConsoleMsg.CONSOLE_NO_NAMED_CLASS_SPACES_MESSAGE);
-			} else {
-				for (RequiredBundle symBundle : symBundles) {
-
-					System.out.print(symBundle);
-
-					boolean removalPending = symBundle.isRemovalPending();
-					if (removalPending) {
-						System.out.print("("); //$NON-NLS-1$
-						System.out.print(ConsoleMsg.CONSOLE_REMOVAL_PENDING_MESSAGE);
-						System.out.println(")"); //$NON-NLS-1$
-					}
-
-					Bundle provider = symBundle.getBundle();
-					if (provider != null) {
-						System.out.print("<"); //$NON-NLS-1$
-						System.out.print(provider);
-						System.out.println(">"); //$NON-NLS-1$
-
-						Bundle[] requiring = symBundle.getRequiringBundles();
-						if (requiring != null)
-							for (int j = 0; j < requiring.length; j++) {
-								System.out.print("  "); //$NON-NLS-1$
-								System.out.print(requiring[j]);
-								System.out.print(" "); //$NON-NLS-1$
-								System.out.println(ConsoleMsg.CONSOLE_REQUIRES_MESSAGE);
-							}
-					} else {
-						System.out.print("<"); //$NON-NLS-1$
-						System.out.print(ConsoleMsg.CONSOLE_STALE_MESSAGE);
-						System.out.println(">"); //$NON-NLS-1$
-					}
-
+		if (packageAdmin == null) {
+			System.out.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_NO_PACKAGE_ADMIN_MESSAGE);
+			return;
+		}
+		String[] names;
+		if(symbolicName == null || symbolicName.length == 0) {
+			names = null;
+		} else {
+			names = symbolicName;
+		}
+		List<Bundle> bundles = new ArrayList<Bundle>();
+		if (names == null) {
+			bundles.addAll(Arrays.asList(packageAdmin.getBundles(null, null)));
+		} else {
+			for (String name : names) {
+				Bundle[] sameName = packageAdmin.getBundles(name, null);
+				if (sameName != null) {
+					bundles.addAll(Arrays.asList(sameName));
 				}
 			}
+		}
+		if (bundles.isEmpty()) {
+			System.out.println(ConsoleMsg.CONSOLE_NO_NAMED_CLASS_SPACES_MESSAGE);
 		} else {
-			System.out.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_NO_PACKAGE_ADMIN_MESSAGE);
+			for (Bundle bundle : bundles) {
+				BundleRevisions revisions = bundle.adapt(BundleRevisions.class);
+				List<BundleRevision> revisionList = revisions.getRevisions();
+				BundleRevision revision = revisionList.isEmpty() ? null : revisionList.get(0);
+				BundleWiring wiring = revision == null ? null : revision.getWiring();
+				System.out.print(revision);
+				if (wiring == null) {
+					System.out.print("<"); //$NON-NLS-1$
+					System.out.print(ConsoleMsg.CONSOLE_STALE_MESSAGE);
+					System.out.println(">"); //$NON-NLS-1$
+				} else if (!wiring.isCurrent()){
+					System.out.print("<"); //$NON-NLS-1$
+					System.out.print(ConsoleMsg.CONSOLE_REMOVAL_PENDING_MESSAGE);
+					System.out.println(">"); //$NON-NLS-1$
+				} else {
+					System.out.println();
+				}
+				if (wiring != null) {
+					List<BundleWire> requiring = wiring.getProvidedWires(BundleNamespace.BUNDLE_NAMESPACE);
+					for (BundleWire requiringWire : requiring) {
+						System.out.print("  "); //$NON-NLS-1$
+						System.out.print(requiringWire.getRequirer().getBundle());
+						System.out.print(" "); //$NON-NLS-1$
+						System.out.println(ConsoleMsg.CONSOLE_REQUIRES_MESSAGE);
+					}
+				}
+			}
 		}
 	}
 
@@ -1739,15 +1659,125 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 * Lists all packages visible from the specified bundle
 	 * @param bundle bundle to list visible packages
 	 */
+
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_VISIBLE_PACKAGES_COMMAND_DESCRIPTION)
 	public void getPackages(@Descriptor(ConsoleMsg.CONSOLE_HELP_VISIBLE_PACKAGES_COMMAND_ARGUMENTS_DESCRIPTION) Bundle bundle) {
-		PlatformAdmin platformAdmin = activator.getPlatformAdmin();
-		if (platformAdmin == null)
+		BundleRevision revision = bundle.adapt(BundleRevision.class);
+		if (revision == null) {
+			System.out.println("Bundle is uninstalled.");
 			return;
-			BundleDescription bundleDescription = platformAdmin.getState(false).getBundle(bundle.getBundleId());
-			ExportPackageDescription[] exports = platformAdmin.getStateHelper().getVisiblePackages(bundleDescription, StateHelper.VISIBLE_INCLUDE_EE_PACKAGES | StateHelper.VISIBLE_INCLUDE_ALL_HOST_WIRES);
-			for (int i = 0; i < exports.length; i++) {
-				System.out.println(exports[i] + ": " + platformAdmin.getStateHelper().getAccessCode(bundleDescription, exports[i])); //$NON-NLS-1$
+		}
+
+		if ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+			System.out.println("Bundle is a fragment.");
+			return;
+		}
+
+		BundleWiring wiring = revision.getWiring();
+		if (wiring == null) {
+			System.out.println("Bundle is not resolved.");
+			return;
+		}
+		
+		Map<String, List<PackageSource>> packages = getPackagesInternal(wiring);
+		for (List<PackageSource> packageSources : packages.values()) {
+			for (PackageSource packageSource : packageSources) {
+				printCapability("  ", packageSource.getCapability(), packageSource.getWire(), PackageNamespace.PACKAGE_NAMESPACE);
+			}
+		}
+	}
+
+	class PackageSource {
+		private final BundleCapability cap;
+		private final BundleWire wire;
+
+		PackageSource(BundleCapability cap, BundleWire wire) {
+			this.cap = cap;
+			this.wire = wire;
+		}
+
+		BundleCapability getCapability() {
+			return cap;
+		}
+
+		BundleWire getWire() {
+			return wire;
+		}
+	}
+	private Map<String, List<PackageSource>> getPackagesInternal(BundleWiring wiring) {
+		Map<String, List<PackageSource>> packages = new TreeMap<String, List<PackageSource>>();
+		// first get the imported packages
+		List<BundleWire> packageWires = wiring.getRequiredWires(PackageNamespace.PACKAGE_NAMESPACE);
+		Set<String> importedPackageNames = new HashSet<String>();
+		for (BundleWire packageWire : packageWires) {
+			String packageName = (String) packageWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+			importedPackageNames.add(packageName);
+			List<PackageSource> packageSources = new ArrayList<PackageSource>();
+			packageSources.add(new PackageSource(packageWire.getCapability(), packageWire));
+			packages.put(packageName, packageSources);
+		}
+
+		// now get packages from required bundles
+		for (BundleWire requiredWire : wiring.getRequiredWires(BundleNamespace.BUNDLE_NAMESPACE)) {
+			getRequiredBundlePackages(requiredWire, importedPackageNames, packages);
+		}
+
+		return packages;
+	}
+
+	private void getRequiredBundlePackages(BundleWire requiredWire, Set<String> importedPackageNames, Map<String, List<PackageSource>> packages) {
+			BundleWiring providerWiring = requiredWire.getProviderWiring();
+			for (BundleCapability packageCapability : providerWiring.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
+				String packageName = (String) packageCapability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+				if (!importedPackageNames.contains(packageName)) {
+					List<PackageSource> packageSources = packages.get(packageName);
+					if (packageSources == null) {
+						packageSources = new ArrayList<PackageSource>();
+						packages.put(packageName, packageSources);
+					}
+					boolean sourceFound = false;
+					for (PackageSource packageSource : packageSources) {
+						sourceFound |= packageCapability.equals(packageSource);
+						if (sourceFound) {
+							break;
+						}
+					}
+					if (!sourceFound) {
+						packageSources.add(new PackageSource(packageCapability, requiredWire));
+					}
+				}
+			}
+
+			// get substituted packages
+			Set<String> declaredPackageNames = new HashSet<String>();
+			for (BundleCapability declaredPackage : providerWiring.getRevision().getDeclaredCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
+				declaredPackageNames.add((String) declaredPackage.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+			}
+			// and fragments
+			for (BundleWire fragmentWire : providerWiring.getProvidedWires(HostNamespace.HOST_NAMESPACE)) {
+				for (BundleCapability declaredPackage : fragmentWire.getRequirer().getDeclaredCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
+					declaredPackageNames.add((String) declaredPackage.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+				}
+			}
+
+			for (BundleWire packageWire : providerWiring.getRequiredWires(PackageNamespace.PACKAGE_NAMESPACE)) {
+				String packageName = (String) packageWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+				if (declaredPackageNames.contains(packageName)) {
+					List<PackageSource> packageSources = packages.get(packageName);
+					if (packageSources == null) {
+						packageSources = new ArrayList<PackageSource>();
+						packages.put(packageName, packageSources);
+					}
+					packageSources.add(new PackageSource(packageWire.getCapability(), packageWire));
+				}
+			}
+
+			// now get packages from re-exported requires of the required bundle
+			for (BundleWire providerBundleWire : providerWiring.getRequiredWires(BundleNamespace.BUNDLE_NAMESPACE)) {
+				String visibilityDirective = providerBundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE);
+				if (BundleNamespace.VISIBILITY_REEXPORT.equals(visibilityDirective)) {
+					getRequiredBundlePackages(providerBundleWire, importedPackageNames, packages);
+				}
 			}
 	}
 
@@ -1784,9 +1814,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 				return "UNINSTALLED "; //$NON-NLS-1$
 
 			case Bundle.INSTALLED :
-				if (isDisabled(bundle)) {
-					return "<DISABLED>  "; //$NON-NLS-1$	
-				}
 				return "INSTALLED   "; //$NON-NLS-1$
 
 			case Bundle.RESOLVED :
@@ -1809,29 +1836,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			default :
 				return Integer.toHexString(state);
 		}
-	}
-
-	private boolean isDisabled(Bundle bundle) {
-		boolean disabled = false;
-		ServiceReference<?> platformAdminRef = null;
-		try {
-			platformAdminRef = context.getServiceReference(PlatformAdmin.class.getName());
-			if (platformAdminRef != null) {
-				PlatformAdmin platAdmin = (PlatformAdmin) context.getService(platformAdminRef);
-				if (platAdmin != null) {
-					State state = platAdmin.getState(false);
-					BundleDescription bundleDesc = state.getBundle(bundle.getBundleId());
-					DisabledInfo[] disabledInfos = state.getDisabledInfos(bundleDesc);
-					if ((disabledInfos != null) && (disabledInfos.length != 0)) {
-						disabled = true;
-					}
-				}
-			}
-		} finally {
-			if (platformAdminRef != null)
-				context.ungetService(platformAdminRef);
-		}
-		return disabled;
 	}
 
 	/**
@@ -1898,190 +1902,151 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 	
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION)
-	public void diag(@Descriptor(ConsoleMsg.CONSOLE_HELP_DIAG_COMMAND_ARGUMENT_DESCRIPTION) long[] bundleIds) throws Exception {
-		if (bundleIds.length == 0) {
-			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
-			return;
-		}
-		
-		PlatformAdmin platformAdmin = activator.getPlatformAdmin();
-		if (platformAdmin == null) {
-			System.out.println(ConsoleMsg.CONSOLE_NO_CONSTRAINTS_NO_PLATFORM_ADMIN_MESSAGE);
-			return;
-		}
-
-		State systemState = platformAdmin.getState(false);
-		for (long bundleId : bundleIds) {
-			BundleDescription bundle = systemState.getBundle(bundleId);
-			if (bundle == null) {
-				System.out.println(NLS.bind(ConsoleMsg.CONSOLE_CANNOT_FIND_BUNDLE_ERROR, bundleId));
-				continue;
-			}
-			System.out.println(bundle.getLocation() + " [" + bundle.getBundleId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-			VersionConstraint[] unsatisfied = platformAdmin.getStateHelper().getUnsatisfiedConstraints(bundle);
-			ResolverError[] resolverErrors = platformAdmin.getState(false).getResolverErrors(bundle);
-			for (int i = 0; i < resolverErrors.length; i++) {
-				if ((resolverErrors[i].getType() & (ResolverError.MISSING_FRAGMENT_HOST | ResolverError.MISSING_GENERIC_CAPABILITY | ResolverError.MISSING_IMPORT_PACKAGE | ResolverError.MISSING_REQUIRE_BUNDLE)) != 0)
-					continue;
-				System.out.print("  "); //$NON-NLS-1$
-				System.out.println(resolverErrors[i].toString());
-			}
-
-			if (unsatisfied.length == 0 && resolverErrors.length == 0) {
-				System.out.print("  "); //$NON-NLS-1$
-				System.out.println(ConsoleMsg.CONSOLE_NO_CONSTRAINTS);
-			}
-			if (unsatisfied.length > 0) {
-				System.out.print("  "); //$NON-NLS-1$
-				System.out.println(ConsoleMsg.CONSOLE_DIRECT_CONSTRAINTS);
-			}
-			for (int i = 0; i < unsatisfied.length; i++) {
-				System.out.print("    "); //$NON-NLS-1$
-				System.out.println(getResolutionFailureMessage(unsatisfied[i]));
-			}
-			VersionConstraint[] unsatisfiedLeaves = platformAdmin.getStateHelper().getUnsatisfiedLeaves(new BundleDescription[] {bundle});
-			boolean foundLeaf = false;
-			for (int i = 0; i < unsatisfiedLeaves.length; i++) {
-				if (unsatisfiedLeaves[i].getBundle() == bundle)
-					continue;
-				if (!foundLeaf) {
-					foundLeaf = true;
-					System.out.print("  "); //$NON-NLS-1$
-					System.out.println(ConsoleMsg.CONSOLE_LEAF_CONSTRAINTS);
+	public void diag(@Descriptor(ConsoleMsg.CONSOLE_HELP_DIAG_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles) throws Exception {
+		if (bundles.length == 0) {
+			List<Bundle> unresolved = new ArrayList<Bundle>();
+			Bundle[] allBundles = context.getBundles();
+			for (Bundle bundle : allBundles) {
+				BundleRevision revision = bundle.adapt(BundleRevision.class);
+				if (revision != null && revision.getWiring() == null) {
+					unresolved.add(bundle);
 				}
-				System.out.print("    "); //$NON-NLS-1$
-				System.out.println(unsatisfiedLeaves[i].getBundle().getLocation() + " [" + unsatisfiedLeaves[i].getBundle().getBundleId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-				System.out.print("      "); //$NON-NLS-1$
-				System.out.println(getResolutionFailureMessage(unsatisfiedLeaves[i]));
+			}
+			if (unresolved.isEmpty()) {
+				System.out.println("No unresolved bundles.");
+				return;
+			}
+			bundles = unresolved.toArray(new Bundle[unresolved.size()]);
+		}
+		ResolutionReport report = getResolutionReport(bundles);
+		Map<Resource, List<ResolutionReport.Entry>> reportEntries = report.getEntries();
+
+		for (Bundle bundle : bundles) {
+			BundleRevision revision = bundle.adapt(BundleRevision.class);
+			if (revision != null) {
+				printResolutionReport("", revision, reportEntries, null);
 			}
 		}
 	}
-	
-	@Descriptor(ConsoleMsg.CONSOLE_HELP_ENABLE_COMMAND_DESCRIPTION)
-	public void enableBundle(@Descriptor(ConsoleMsg.CONSOLE_HELP_ENABLE_COMMAND_ARGUMENT_DESCRIPTION) long[] bundleIds) throws Exception {
-		if (bundleIds.length == 0) {
-			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
+
+	private void printResolutionReport(String prepend, BundleRevision revision, Map<Resource, List<ResolutionReport.Entry>> reportEntries, Set<BundleRevision> visited) {
+		if (visited == null) {
+			visited = new HashSet<BundleRevision>();
+		}
+		if (visited.contains(revision)) {
 			return;
 		}
-		
-		PlatformAdmin platformAdmin = activator.getPlatformAdmin();
-		if (platformAdmin == null) {
-			System.out.println(ConsoleMsg.CONSOLE_CANNOT_ENABLE_NO_PLATFORM_ADMIN_MESSAGE);
-			return;
-		}
+		visited.add(revision);
+		Bundle bundle = revision.getBundle();
+		System.out.println(prepend + bundle.getLocation() + " [" + bundle.getBundleId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 
-
-		State systemState = platformAdmin.getState(false);
-		for (long bundleId : bundleIds) {
-			BundleDescription bundle = systemState.getBundle(bundleId);
-			if (bundle == null) {
-				System.out.println(NLS.bind(ConsoleMsg.CONSOLE_CANNOT_FIND_BUNDLE_ERROR, bundleId));
-				continue;
-			}
-
-			DisabledInfo[] infos = systemState.getDisabledInfos(bundle);
-			for (int i = 0; i < infos.length; i++) {
-				platformAdmin.removeDisabledInfo(infos[i]);
+		List<ResolutionReport.Entry> revisionEntries = reportEntries.get(revision);
+		if (revisionEntries == null) {
+			System.out.println(prepend + "  " + "No resolution report for the bundle.");
+		} else {
+			for (ResolutionReport.Entry entry : revisionEntries) {
+				printResolutionEntry(prepend + "  ", entry, reportEntries, visited);
 			}
 		}
-
 	}
-	
-	@Descriptor(ConsoleMsg.CONSOLE_HELP_DISABLE_COMMAND_DESCRIPTION)
-	public void disableBundle(@Descriptor(ConsoleMsg.CONSOLE_HELP_DISABLE_COMMAND_ARGUMENT_DESCRIPTION) long[] bundleIds) throws Exception {
-		if (bundleIds.length == 0) {
-			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
-			return;
-		}
-		
-		PlatformAdmin platformAdmin = activator.getPlatformAdmin();
-		if (platformAdmin == null) {
-			System.out.println(ConsoleMsg.CONSOLE_CANNOT_DISABLE_NO_PLATFORM_ADMIN_MESSAGE);
-			return;
-		}
 
-
-		State systemState = platformAdmin.getState(false);
-		for (long bundleId : bundleIds) {
-			BundleDescription bundle = systemState.getBundle(bundleId);
-			if (bundle == null) {
-				System.out.println(NLS.bind(ConsoleMsg.CONSOLE_CANNOT_FIND_BUNDLE_ERROR, bundleId));
-				continue;
+	private void printResolutionEntry(String prepend, ResolutionReport.Entry entry, Map<Resource, List<ResolutionReport.Entry>> reportEntries, Set<BundleRevision> visited) {
+		switch (entry.getType()) {
+		case MISSING_CAPABILITY:
+			System.out.print(prepend);
+			System.out.println("Unresolved requirement: " + entry.getData());
+			break;
+		case SINGLETON_SELECTION:
+			System.out.print(prepend);
+			System.out.println("Another singleton bundle selected: " + entry.getData());
+		    break;
+		case UNRESOLVED_PROVIDER:
+			@SuppressWarnings("unchecked")
+			Map<Requirement, Set<Capability>> unresolvedProviders = (Map<Requirement, Set<Capability>>) entry.getData();
+			for (Map.Entry<Requirement, Set<Capability>> unresolvedRequirement : unresolvedProviders.entrySet()) {
+				// for now only printing the first possible unresolved candidates
+				Set<Capability> unresolvedCapabilities = unresolvedRequirement.getValue();
+				if (!unresolvedCapabilities.isEmpty()) {
+					Capability unresolvedCapability = unresolvedCapabilities.iterator().next();
+					// make sure this is not a case of importing and exporting the same package
+					if (!unresolvedRequirement.getKey().getResource().equals(unresolvedCapability.getResource())) {
+						System.out.print(prepend);
+						System.out.println("Unresolved requirement: " + unresolvedRequirement.getKey());
+						System.out.print(prepend);
+						System.out.println("  -> " + unresolvedCapability);
+						printResolutionReport(prepend + "     ", (BundleRevision) unresolvedCapability.getResource(), reportEntries, visited);
+					}
+				}
 			}
-				DisabledInfo info = new DisabledInfo(POLICY_CONSOLE, ConsoleMsg.CONSOLE_CONSOLE_BUNDLE_DISABLED_MESSAGE, bundle);
-				platformAdmin.addDisabledInfo(info);
-			}
-	}
-	
-	@Descriptor(ConsoleMsg.CONSOLE_HELP_LD_COMMAND_DESCRIPTION)
-	public void disabledBundles() throws Exception {
-		
-		PlatformAdmin platformAdmin = activator.getPlatformAdmin();
-		if (platformAdmin == null) {
-			System.out.println(ConsoleMsg.CONSOLE_CANNOT_LIST_DISABLED_NO_PLATFORM_ADMIN_MESSAGE);
-			return;
-		}
-
-		State systemState = platformAdmin.getState(false);
-		BundleDescription[] disabledBundles = systemState.getDisabledBundles();
-
-		System.out.println(NLS.bind(ConsoleMsg.CONSOLE_DISABLED_COUNT_MESSAGE, String.valueOf(disabledBundles.length)));
-
-		if (disabledBundles.length > 0) {
-			System.out.println();
-		}
-		for (int i = 0; i < disabledBundles.length; i++) {
-			DisabledInfo[] disabledInfos = systemState.getDisabledInfos(disabledBundles[i]);
-
-			System.out.println(NLS.bind(ConsoleMsg.CONSOLE_DISABLED_BUNDLE_HEADER, formatBundleName(disabledBundles[i]), String.valueOf(disabledBundles[i].getBundleId())));
-			System.out.print(NLS.bind(ConsoleMsg.CONSOLE_DISABLED_BUNDLE_REASON, disabledInfos[0].getMessage(), disabledInfos[0].getPolicyName()));
-
-			for (int j = 1; j < disabledInfos.length; j++) {
-				System.out.print(NLS.bind(ConsoleMsg.CONSOLE_DISABLED_BUNDLE_REASON, disabledInfos[j].getMessage(), String.valueOf(disabledInfos[j].getPolicyName())));
-			}
-
-			System.out.println();
+			break;
+		case FILTERED_BY_RESOLVER_HOOK:
+			System.out.println("Bundle was filtered by a resolver hook.");
+			break;
+		default:
+			System.out.println("Unknown error: type=" + entry.getType() + " data=" + entry.getData());
+			break;
 		}
 	}
 	
-	private String formatBundleName(BundleDescription b) {
-		String label = b.getSymbolicName();
-		if (label == null || label.length() == 0)
-			label = b.toString();
-		else
-			label = label + "_" + b.getVersion(); //$NON-NLS-1$
-
-		return label;
-	}
-	
-	private String getResolutionFailureMessage(VersionConstraint unsatisfied) {
-		if (unsatisfied.isResolved())
-			throw new IllegalArgumentException();
-		if (unsatisfied instanceof ImportPackageSpecification) {
-			if (ImportPackageSpecification.RESOLUTION_OPTIONAL.equals(((ImportPackageSpecification) unsatisfied).getDirective(Constants.RESOLUTION_DIRECTIVE)))
-				return NLS.bind(ConsoleMsg.CONSOLE_MISSING_OPTIONAL_IMPORTED_PACKAGE, versionToString(unsatisfied));
-			if (ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(((ImportPackageSpecification) unsatisfied).getDirective(Constants.RESOLUTION_DIRECTIVE)))
-				return NLS.bind(ConsoleMsg.CONSOLE_MISSING_DYNAMIC_IMPORTED_PACKAGE, versionToString(unsatisfied));
-			return NLS.bind(ConsoleMsg.CONSOLE_MISSING_IMPORTED_PACKAGE, versionToString(unsatisfied));
-		} else if (unsatisfied instanceof BundleSpecification) {
-			if (((BundleSpecification) unsatisfied).isOptional())
-				return NLS.bind(ConsoleMsg.CONSOLE_MISSING_OPTIONAL_REQUIRED_BUNDLE, versionToString(unsatisfied));
-			return NLS.bind(ConsoleMsg.CONSOLE_MISSING_REQUIRED_BUNDLE, versionToString(unsatisfied));
-		} else if (unsatisfied instanceof HostSpecification) {
-			return NLS.bind(ConsoleMsg.CONSOLE_MISSING_HOST, versionToString(unsatisfied));
-		} else if (unsatisfied instanceof NativeCodeSpecification) {
-			return NLS.bind(ConsoleMsg.CONSOLE_MISSING_NATIVECODE, unsatisfied.toString());
-		} else if (unsatisfied instanceof GenericSpecification) {
-			return NLS.bind(ConsoleMsg.CONSOLE_MISSING_REQUIRED_CAPABILITY, unsatisfied.toString());
+	private ResolutionReport getResolutionReport(Bundle[] bundles) {
+		DiagReportListener reportListener = new DiagReportListener(bundles);
+		ServiceRegistration<ResolverHookFactory> hookReg = context.registerService(ResolverHookFactory.class, reportListener, null);
+		try {
+			Bundle systemBundle = context.getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
+			FrameworkWiring frameworkWiring = systemBundle.adapt(FrameworkWiring.class);
+			frameworkWiring.resolveBundles(Arrays.asList(bundles));
+			return reportListener.getReport();
+		} finally {
+			hookReg.unregister();
 		}
-		return NLS.bind(ConsoleMsg.CONSOLE_MISSING_REQUIREMENT, unsatisfied.toString());
 	}
-	
-	private static String versionToString(VersionConstraint constraint) {
-		org.eclipse.osgi.service.resolver.VersionRange versionRange = constraint.getVersionRange();
-		if (versionRange == null)
-			return constraint.getName();
-		return constraint.getName() + '_' + versionRange;
+
+	private static class DiagReportListener implements ResolverHookFactory {
+		private final Collection<BundleRevision> targetTriggers = new ArrayList<BundleRevision>();
+		public DiagReportListener(Bundle[] bundles) {
+			for (Bundle bundle : bundles) {
+				BundleRevision revision = bundle.adapt(BundleRevision.class);
+				if (revision != null && revision.getWiring() == null) {
+					targetTriggers.add(revision);
+				}
+			}
+			
+		}
+		volatile ResolutionReport report = null;
+		class DiagResolverHook implements ResolverHook, ResolutionReport.Listener {
+
+			public void handleResolutionReport(ResolutionReport report) {
+				DiagReportListener.this.report = report;
+			}
+
+			public void filterResolvable(Collection<BundleRevision> candidates) {
+				// nothing
+			}
+
+			public void filterSingletonCollisions(BundleCapability singleton,
+					Collection<BundleCapability> collisionCandidates) {
+				// nothing
+			}
+
+			public void filterMatches(BundleRequirement requirement,
+					Collection<BundleCapability> candidates) {
+				// nothing
+			}
+
+			public void end() {
+				// nothing
+			}
+			
+		}
+		public ResolverHook begin(Collection<BundleRevision> triggers) {
+			if (triggers.containsAll(targetTriggers)) {
+				return new DiagResolverHook();
+			}
+			return null;
+		}
+		ResolutionReport getReport() {
+			return report;
+		}
 	}
 
 	/**

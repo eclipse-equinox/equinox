@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2012 IBM Corporation, SAP AG.
+ * Copyright (c) 2010, 2013 IBM Corporation, SAP AG.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,7 +41,6 @@ import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 import org.osgi.service.permissionadmin.PermissionAdmin;
-import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -53,7 +52,6 @@ public class Activator implements BundleActivator {
 	private ServiceTracker<ConditionalPermissionAdmin, ?> condPermAdminTracker;
 	private ServiceTracker<PermissionAdmin, ?> permissionAdminTracker;
 	private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
-	private ServiceTracker<PlatformAdmin, ?> platformAdminTracker;
 	private static boolean isFirstProcessor = true;
 	private static TelnetCommand telnetConnection = null;
 	
@@ -218,9 +216,6 @@ public class Activator implements BundleActivator {
 
 		packageAdminTracker = new ServiceTracker<PackageAdmin, PackageAdmin>(context, PackageAdmin.class, null);
 		packageAdminTracker.open();
-
-		platformAdminTracker = new ServiceTracker<PlatformAdmin, Object>(context, PlatformAdmin.class.getName(), null);
-		platformAdminTracker.open();
 		
 		equinoxCmdProvider = new EquinoxCommandProvider(context, this);
 		equinoxCmdProvider.startService();
@@ -268,10 +263,6 @@ public class Activator implements BundleActivator {
 		return (PackageAdmin) getServiceFromTracker(packageAdminTracker, PackageAdmin.class.getName());
 	}
 
-	public PlatformAdmin getPlatformAdmin() {
-		return (PlatformAdmin) getServiceFromTracker(platformAdminTracker, PlatformAdmin.class.getName());
-	}
-	
 	private static Object getServiceFromTracker(ServiceTracker<?, ?> tracker, String serviceClass) {
 		if (tracker == null)
 			throw new IllegalStateException("Missing service: " + serviceClass);
