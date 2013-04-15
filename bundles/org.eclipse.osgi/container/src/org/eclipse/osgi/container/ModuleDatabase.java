@@ -533,8 +533,9 @@ public class ModuleDatabase {
 	 * {@link ModuleWiring#getRevision() revision},
 	 * {@link ModuleWiring#getModuleCapabilities(String) capabilities},
 	 * {@link ModuleWiring#getModuleRequirements(String) requirements},
-	 * {@link ModuleWiring#getProvidedModuleWires(String) provided wires}, and
-	 * {@link ModuleWiring#getRequiredModuleWires(String) required wires} of 
+	 * {@link ModuleWiring#getProvidedModuleWires(String) provided wires},
+	 * {@link ModuleWiring#getRequiredModuleWires(String) required wires}, and
+	 * {@link ModuleWiring#getSubstitutedNames()} of 
 	 * each wiring are copied into a cloned copy of the wiring.
 	 * <p>
 	 * The returned map of wirings may be safely read from while not holding
