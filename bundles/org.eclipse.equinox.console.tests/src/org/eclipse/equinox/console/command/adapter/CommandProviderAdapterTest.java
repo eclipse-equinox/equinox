@@ -17,9 +17,11 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.felix.service.command.CommandSession;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.junit.Test;
+import org.easymock.EasyMock;
 
 public class CommandProviderAdapterTest {
 
@@ -34,11 +36,12 @@ public class CommandProviderAdapterTest {
 			}
 		}
 		CommandProviderAdapter providerAdapter = new CommandProviderAdapter(provider, m.toArray(new Method[0]));
+		CommandSession session = EasyMock.createMock(CommandSession.class);
 		
-		String result = (String) providerAdapter.main(new Object[] {"test"});
+		String result = (String) providerAdapter.main(session, new Object[] {"test"});
 		assertEquals("Result should be test", "test", result);
 		
-		result = (String) providerAdapter.main(new Object[] {"echo", "hello"});
+		result = (String) providerAdapter.main(session, new Object[] {"echo", "hello"});
 		assertEquals("Result should be hello", "hello", result);
 	}
 

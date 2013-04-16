@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.equinox.serverside.sdk"
       label="%featureName"
-      version="3.8.0.qualifier"
+      version="3.9.0.qualifier"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="1.0.0.qualifier">
@@ -29,10 +29,6 @@
 
    <includes
          id="org.eclipse.equinox.server.p2"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.equinox.server.servletbridge"
          version="0.0.0"/>
 
    <plugin
@@ -146,92 +142,90 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
    <plugin
          id="org.apache.jasper.glassfish"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
    <plugin
          id="org.apache.jasper.glassfish.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
-    <plugin
+
+   <plugin
          id="org.eclipse.jetty.continuation"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>   
-    
-     <plugin
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.continuation.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>   
-    
-     <plugin
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.http"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>   
+         unpack="false"/>
 
-     <plugin
+   <plugin
          id="org.eclipse.jetty.http.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>   
+         unpack="false"/>
 
-    
-     <plugin
+   <plugin
          id="org.eclipse.jetty.io"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
-     <plugin
+   <plugin
          id="org.eclipse.jetty.io.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
-    
-    <plugin
+   <plugin
          id="org.eclipse.jetty.security"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
-    <plugin
+   <plugin
          id="org.eclipse.jetty.security.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
-
-    <plugin
+   <plugin
          id="org.eclipse.jetty.server"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
-    <plugin
+   <plugin
          id="org.eclipse.jetty.server.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
 
    <plugin
          id="org.eclipse.jetty.servlet"
@@ -240,7 +234,7 @@
          version="0.0.0"
          unpack="false"/>
 
-  <plugin
+   <plugin
          id="org.eclipse.jetty.servlet.source"
          download-size="0"
          install-size="0"
@@ -287,14 +281,6 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.servletbridge.extensionbundle"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
          unpack="false"/>
 
 </feature>

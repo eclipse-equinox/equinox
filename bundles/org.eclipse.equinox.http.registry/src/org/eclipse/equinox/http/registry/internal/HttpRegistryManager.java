@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others.
+ * Copyright (c) 2007, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -292,13 +292,25 @@ public class HttpRegistryManager {
 		HttpContext context = getHttpContext(contribution.httpContextId, contribution.contributor);
 		if (context == null)
 			return false;
+
+		Method registerFilterMethod = null;
 		try {
-			Method registerFilterMethod = httpService.getClass().getMethod("registerFilter", new Class[] {String.class, Filter.class, Dictionary.class, HttpContext.class}); //$NON-NLS-1$
+			// First, try the Equinox http service method
+			registerFilterMethod = httpService.getClass().getMethod("registerFilter", new Class[] {String.class, Filter.class, Dictionary.class, HttpContext.class}); //$NON-NLS-1$
 			registerFilterMethod.invoke(httpService, new Object[] {contribution.alias, contribution.filter, contribution.initparams, context});
 			return true;
-		} catch (NoSuchMethodException t) {
+		} catch (NoSuchMethodException e) {
+			// Give the pax-web HttpService impl a try
+			try {
+				registerFilterMethod = httpService.getClass().getMethod("registerFilter", new Class[] {Filter.class, String[].class, String[].class, Dictionary.class, HttpContext.class}); //$NON-NLS-1$
+				registerFilterMethod.invoke(httpService, new Object[] {contribution.filter, new String[] {contribution.alias}, null, contribution.initparams, context});
+				return true;
+			} catch (Throwable t) {
+				// TODO: should log this
+				// for now ignore
+			}
 			// TODO: should log this
-			// for now ignore
+			e.printStackTrace();
 		} catch (Throwable t) {
 			// TODO: should log this
 			t.printStackTrace();

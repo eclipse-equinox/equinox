@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,8 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	static final String DOT_CLASS = ".class"; //$NON-NLS-1$
 	static final String BANG_SLASH = "!/"; //$NON-NLS-1$
 	static final String JAR = "jar"; //$NON-NLS-1$
+	private static final String UNC_PREFIX = "//"; //$NON-NLS-1$
+	private static final String SCHEME_FILE = "file"; //$NON-NLS-1$
 
 	// @GuardedBy("loaders")
 	final ArrayList loaders = new ArrayList(); // package private to avoid synthetic access.
@@ -174,16 +176,54 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	}
 
 	// @GuardedBy("loaders")
-	private void safeAddLoader(URL url) {
-		String path = url.getPath();
-		File file = new File(path);
-		if (file.exists()) {
-			try {
-				loaders.add(new CloseableJarFileLoader(file, verifyJars));
-			} catch (IOException e) {
-				// ignore
+	private boolean safeAddLoader(URL url) {
+		//assume all illegal characters have been properly encoded, so use URI class to unencode
+		try {
+			File file = new File(toURI(url));
+			if (file.exists()) {
+				try {
+					loaders.add(new CloseableJarFileLoader(file, verifyJars));
+					return true;
+				} catch (IOException e) {
+					// ignore
+				}
 			}
+		} catch (URISyntaxException e1) {
+			// ignore
 		}
+
+		return false;
+	}
+
+	private static URI toURI(URL url) throws URISyntaxException {
+		if (!SCHEME_FILE.equals(url.getProtocol())) {
+			throw new IllegalArgumentException("bad prototcol: " + url.getProtocol()); //$NON-NLS-1$
+		}
+		//URL behaves differently across platforms so for file: URLs we parse from string form
+		String pathString = url.toExternalForm().substring(5);
+		//ensure there is a leading slash to handle common malformed URLs such as file:c:/tmp
+		if (pathString.indexOf('/') != 0)
+			pathString = '/' + pathString;
+		else if (pathString.startsWith(UNC_PREFIX) && !pathString.startsWith(UNC_PREFIX, 2)) {
+			//URL encodes UNC path with two slashes, but URI uses four (see bug 207103)
+			pathString = ensureUNCPath(pathString);
+		}
+		return new URI(SCHEME_FILE, null, pathString, null);
+	}
+
+	/**
+	 * Ensures the given path string starts with exactly four leading slashes.
+	 */
+	private static String ensureUNCPath(String path) {
+		int len = path.length();
+		StringBuffer result = new StringBuffer(len);
+		for (int i = 0; i < 4; i++) {
+			//	if we have hit the first non-slash character, add another leading slash
+			if (i >= len || result.length() > 0 || path.charAt(i) != '/')
+				result.append('/');
+		}
+		result.append(path);
+		return result.toString();
 	}
 
 	private static URL[] excludeFileJarURLS(URL[] urls) {
@@ -370,8 +410,8 @@ public class CloseableURLClassLoader extends URLClassLoader {
 				if (closed)
 					throw new IllegalStateException("Cannot add url. CloseableURLClassLoader is closed."); //$NON-NLS-1$
 				loaderURLs.add(url);
-				safeAddLoader(url);
-				return;
+				if (safeAddLoader(url))
+					return;
 			}
 		}
 		super.addURL(url);
