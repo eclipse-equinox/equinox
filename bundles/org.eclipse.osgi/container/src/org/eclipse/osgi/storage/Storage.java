@@ -784,7 +784,8 @@ public class Storage {
 		BundleFile result;
 		try {
 			if (isDirectory) {
-				result = new DirBundleFile(content);
+				boolean strictPath = Boolean.parseBoolean(equinoxContainer.getConfiguration().getConfiguration(EquinoxConfiguration.PROPERTY_STRICT_BUNDLE_ENTRY_PATH, Boolean.FALSE.toString()));
+				result = new DirBundleFile(content, strictPath);
 			} else {
 				result = new ZipBundleFile(content, generation, mruList, getConfiguration().getDebug());
 			}

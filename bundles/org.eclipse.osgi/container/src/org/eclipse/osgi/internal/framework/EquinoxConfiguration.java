@@ -178,6 +178,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String PROP_FORCED_RESTART = "osgi.forcedRestart"; //$NON-NLS-1$
 	public static final String PROP_IGNORE_USER_CONFIGURATION = "eclipse.ignoreUserConfiguration"; //$NON-NLS-1$
 
+	public static final String PROPERTY_STRICT_BUNDLE_ENTRY_PATH = "osgi.strictBundleEntryPath";//$NON-NLS-1$
+
 	private final static Collection<String> populateInitConfig = Arrays.asList(PROP_OSGI_ARCH, PROP_OSGI_OS, PROP_OSGI_WS, PROP_OSGI_NL, FRAMEWORK_OS_NAME, FRAMEWORK_OS_VERSION, FRAMEWORK_PROCESSOR, FRAMEWORK_LANGUAGE);
 
 	EquinoxConfiguration(Map<String, ?> initialConfiguration, HookRegistry hookRegistry) {
@@ -459,6 +461,9 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	@Override
 	public String setProperty(String key, String value) {
+		if (value == null) {
+			return clearConfiguration(key);
+		}
 		return setConfiguration(key, value);
 	}
 

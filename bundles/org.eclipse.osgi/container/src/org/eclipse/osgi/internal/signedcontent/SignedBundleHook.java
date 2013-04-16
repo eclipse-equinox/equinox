@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -202,7 +202,7 @@ public class SignedBundleHook implements ActivatorHookFactory, BundleFileWrapper
 			throw new IllegalArgumentException("null content"); //$NON-NLS-1$
 		BundleFile contentBundleFile;
 		if (content.isDirectory())
-			contentBundleFile = new DirBundleFile(content);
+			contentBundleFile = new DirBundleFile(content, false);
 		else
 			contentBundleFile = new ZipBundleFile(content, null, null, container.getConfiguration().getDebug());
 		SignedBundleFile result = new SignedBundleFile(null, VERIFY_ALL, this);
