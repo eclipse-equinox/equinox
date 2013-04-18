@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2012 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -144,10 +144,15 @@ public class ProxyServlet extends HttpServlet {
 	}
 
 	//Effective unregistration of servlet and resources as defined in HttpService#unregister()
-	synchronized void unregister(String alias, boolean destroy) {
-		ServletRegistration removedRegistration = (ServletRegistration) servletRegistrations.remove(alias);
+	void unregister(String alias, boolean destroy) {
+		ServletRegistration removedRegistration = null;
+		synchronized (this) {
+			removedRegistration = (ServletRegistration) servletRegistrations.remove(alias);
+			if (removedRegistration != null) {
+				registeredServlets.remove(removedRegistration.getServlet());
+			}
+		}
 		if (removedRegistration != null) {
-			registeredServlets.remove(removedRegistration.getServlet());
 			try {
 				if (destroy)
 					removedRegistration.destroy();
@@ -213,8 +218,12 @@ public class ProxyServlet extends HttpServlet {
 			throw new IllegalArgumentException("Invalid alias '" + alias + "'"); //$NON-NLS-1$//$NON-NLS-2$
 	}
 
-	public synchronized void unregisterFilter(Filter filter, boolean destroy) {
-		FilterRegistration removedRegistration = (FilterRegistration) filterRegistrations.remove(filter);
+	public void unregisterFilter(Filter filter, boolean destroy) {
+		FilterRegistration removedRegistration = null;
+		synchronized (this) {
+			removedRegistration = (FilterRegistration) filterRegistrations.remove(filter);
+		}
+
 		if (removedRegistration != null) {
 			try {
 				if (destroy)
