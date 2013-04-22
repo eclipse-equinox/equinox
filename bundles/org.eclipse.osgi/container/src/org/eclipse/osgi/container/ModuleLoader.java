@@ -47,4 +47,6 @@ public interface ModuleLoader {
 	public boolean getAndSetTrigger();
 
 	public boolean isTriggerSet();
+
+	public void loadFragments(Collection<ModuleRevision> fragments);
 }

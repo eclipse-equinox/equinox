@@ -18,6 +18,7 @@ import java.net.URL;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.util.*;
+import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
@@ -304,5 +305,9 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 		if (b == null)
 			return result.toString();
 		return result.append('[').append(b.getSymbolicName()).append(':').append(b.getVersion()).append("(id=").append(b.getBundleId()).append(")]").toString(); //$NON-NLS-1$//$NON-NLS-2$
+	}
+
+	public void loadFragments(Collection<ModuleRevision> fragments) {
+		manager.loadFragments(fragments);
 	}
 }

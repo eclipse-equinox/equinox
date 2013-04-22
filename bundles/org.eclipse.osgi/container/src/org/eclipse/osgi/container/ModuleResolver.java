@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.util.ListIterator;
-import org.osgi.resource.Requirement;
-
 import java.security.Permission;
 import java.util.*;
 import org.apache.felix.resolver.ResolverImpl;
@@ -34,7 +31,7 @@ import org.osgi.service.resolver.*;
  */
 final class ModuleResolver {
 	private static final Collection<String> NON_PAYLOAD_CAPABILITIES = Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE);
-	private static final Collection<String> NON_PAYLOAD_REQUIREMENTS = Arrays.asList(HostNamespace.HOST_NAMESPACE, ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE);
+	static final Collection<String> NON_PAYLOAD_REQUIREMENTS = Arrays.asList(HostNamespace.HOST_NAMESPACE, ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE);
 
 	final ThreadLocal<Boolean> threadResolving = new ThreadLocal<Boolean>() {
 		@Override
@@ -84,7 +81,7 @@ final class ModuleResolver {
 		return generateDelta(result, wiringCopy);
 	}
 
-	private static Map<ModuleRevision, ModuleWiring> generateDelta(Map<Resource, List<Wire>> result, Map<ModuleRevision, ModuleWiring> wiringCopy) {
+	static Map<ModuleRevision, ModuleWiring> generateDelta(Map<Resource, List<Wire>> result, Map<ModuleRevision, ModuleWiring> wiringCopy) {
 		Map<ModuleRevision, Map<ModuleCapability, List<ModuleWire>>> provided = new HashMap<ModuleRevision, Map<ModuleCapability, List<ModuleWire>>>();
 		Map<ModuleRevision, List<ModuleWire>> required = new HashMap<ModuleRevision, List<ModuleWire>>();
 		// First populate the list of provided and required wires for revision
@@ -492,13 +489,13 @@ final class ModuleResolver {
 		ResolveProcess(Collection<ModuleRevision> unresolved, Collection<ModuleRevision> triggers, boolean triggersMandatory, Map<ModuleRevision, ModuleWiring> wirings, ModuleDatabase moduleDatabase) {
 			this.unresolved = unresolved;
 			this.disabled = new HashSet<ModuleRevision>(unresolved);
-			this.triggers = triggers;
+			this.triggers = new ArrayList<ModuleRevision>(triggers);
 			this.triggersMandatory = triggersMandatory;
 			this.optionals = new ArrayList<ModuleRevision>(unresolved);
 			if (this.triggersMandatory) {
 				this.optionals.removeAll(triggers);
 			}
-			this.wirings = wirings;
+			this.wirings = new HashMap<ModuleRevision, ModuleWiring>(wirings);
 			this.moduleDatabase = moduleDatabase;
 			this.dynamicReq = null;
 		}
@@ -530,9 +527,15 @@ final class ModuleResolver {
 		}
 
 		private List<Capability> filterProviders(Requirement requirement, List<ModuleCapability> candidates) {
+			return filterProviders(requirement, candidates, true);
+		}
+
+		private List<Capability> filterProviders(Requirement requirement, List<ModuleCapability> candidates, boolean filterResolvedHosts) {
 			ListIterator<ModuleCapability> iCandidates = candidates.listIterator();
 			filterDisabled(iCandidates);
-			filterResolvedHosts(requirement, iCandidates);
+			if (filterResolvedHosts) {
+				filterResolvedHosts(requirement, iCandidates);
+			}
 			removeNonEffectiveCapabilities(iCandidates);
 			removeSubstituted(iCandidates);
 			filterPermissions((BundleRequirement) requirement, iCandidates);
@@ -654,20 +657,24 @@ final class ModuleResolver {
 				try {
 					filterResolvable();
 					selectSingletons();
-					Map<Resource, List<Wire>> extensionWirings = resolveFrameworkExtensions();
-					if (!extensionWirings.isEmpty()) {
-						result = extensionWirings;
+					// remove disabled from optional and triggers to prevent the resolver from resolving them
+					optionals.removeAll(disabled);
+					if (triggers.removeAll(disabled) && triggersMandatory) {
+						throw new ResolutionException("Could not resolve mandatory modules because another singleton was selected or the module was disabled: " + disabled);
+					}
+					if (dynamicReq != null) {
+						result = resolveDynamic();
 					} else {
-						// remove disabled from optional and triggers to prevent the resolver from resolving them
-						optionals.removeAll(disabled);
-						if (triggers.removeAll(disabled) && triggersMandatory) {
-							throw new ResolutionException("Could not resolve mandatory modules because another singleton was selected or the module was disabled: " + disabled);
+						Map<Resource, List<Wire>> dynamicAttachWirings = resolveNonPayLoadFragments();
+						if (!dynamicAttachWirings.isEmpty()) {
+							// update the copy of wirings to include the new attachments
+							Map<ModuleRevision, ModuleWiring> updatedWirings = generateDelta(dynamicAttachWirings, wirings);
+							for (Map.Entry<ModuleRevision, ModuleWiring> updatedWiring : updatedWirings.entrySet()) {
+								wirings.put(updatedWiring.getKey(), updatedWiring.getValue());
+							}
 						}
-						if (dynamicReq != null) {
-							result = resolveDynamic();
-						} else {
-							result = resolver.resolve(this);
-						}
+						result = resolver.resolve(this);
+						result.putAll(dynamicAttachWirings);
 					}
 					return result;
 				} finally {
@@ -751,47 +758,82 @@ final class ModuleResolver {
 					value.add(capability);
 		}
 
-		private Map<Resource, List<Wire>> resolveFrameworkExtensions() {
-			// special handling only if explicitly asked to resolve an extension as mandatory.
-			ModuleRevision extension = triggersMandatory && triggers.size() == 1 ? triggers.iterator().next() : null;
-			if (extension == null) {
-				return Collections.emptyMap();
+		private Map<Resource, List<Wire>> resolveNonPayLoadFragments() {
+			// This is to support dynamic attachment of fragments that do not
+			// add any payload requirements to their host.
+			// This is needed for framework extensions since the system bundle
+			// host is always resolved.
+			// It is also useful for things like NLS fragments that are installed later
+			// without the need to refresh the host.
+			Collection<ModuleRevision> nonPayLoadFrags = new ArrayList<ModuleRevision>();
+			if (triggersMandatory) {
+				for (ModuleRevision moduleRevision : triggers) {
+					if (nonPayLoad(moduleRevision)) {
+						nonPayLoadFrags.add(moduleRevision);
+					}
+				}
+			}
+			for (ModuleRevision moduleRevision : optionals) {
+				if (nonPayLoad(moduleRevision)) {
+					nonPayLoadFrags.add(moduleRevision);
+				}
 			}
 
-			// Need the system module wiring to attach to.
-			Module systemModule = moduleDatabase.getModule(0);
-			ModuleRevision systemRevision = systemModule == null ? null : systemModule.getCurrentRevision();
-			ModuleWiring systemWiring = systemRevision == null ? null : wirings.get(systemRevision);
-			if (systemWiring == null) {
+			if (nonPayLoadFrags.isEmpty()) {
 				return Collections.emptyMap();
 			}
-
-			// Check all the non-payload requirements are met and a proper host is found
-			Map<Resource, List<Wire>> result = new HashMap<Resource, List<Wire>>(0);
-			if (!disabled.contains(extension)) {
+			Map<Resource, List<Wire>> dynamicAttachment = new HashMap<Resource, List<Wire>>(0);
+			for (ModuleRevision nonPayLoad : nonPayLoadFrags) {
 				List<Wire> nonPayloadWires = new ArrayList<Wire>(0);
-				boolean foundHost = false;
-				boolean payLoadRequirements = false;
-				for (ModuleRequirement requirement : extension.getModuleRequirements(null)) {
-					if (NON_PAYLOAD_REQUIREMENTS.contains(requirement.getNamespace())) {
-						List<ModuleCapability> matching = moduleDatabase.findCapabilities(requirement);
-						for (ModuleCapability candidate : matching) {
-							if (candidate.getRevision().getRevisions().getModule().getId().longValue() == 0) {
-								foundHost |= HostNamespace.HOST_NAMESPACE.equals(requirement.getNamespace());
-								nonPayloadWires.add(new ModuleWire(candidate, candidate.getRevision(), requirement, extension));
+				boolean resolvedReqs = false;
+				for (ModuleRequirement requirement : nonPayLoad.getModuleRequirements(null)) {
+					resolvedReqs = false;
+					List<ModuleCapability> matching = moduleDatabase.findCapabilities(requirement);
+					filterProviders(requirement, matching, false);
+					for (ModuleCapability candidate : matching) {
+						String attachDirective = candidate.getDirectives().get(HostNamespace.CAPABILITY_FRAGMENT_ATTACHMENT_DIRECTIVE);
+						boolean attachAlways = attachDirective == null || HostNamespace.FRAGMENT_ATTACHMENT_ALWAYS.equals(attachDirective);
+						// only do this if the candidate resource is already resolved and it allows dynamic attachment
+						if (attachAlways && wirings.get(candidate.getRevision()) != null) {
+							resolvedReqs = true;
+							// if there are multiple candidates; then check for cardinality
+							if (nonPayloadWires.isEmpty() || Namespace.CARDINALITY_MULTIPLE.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_CARDINALITY_DIRECTIVE))) {
+								nonPayloadWires.add(new ModuleWire(candidate, candidate.getRevision(), requirement, nonPayLoad));
 							}
 						}
-					} else {
-						// oh oh! somehow a payload requirement got into the mix
-						payLoadRequirements |= true;
 					}
-
+					if (!resolvedReqs) {
+						if (Namespace.RESOLUTION_OPTIONAL.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
+							resolvedReqs = true;
+						} else {
+							// could not resolve mandatory requirement
+							break;
+						}
+					}
 				}
-				if (foundHost && !payLoadRequirements) {
-					result.put(extension, nonPayloadWires);
+				if (resolvedReqs) {
+					// be sure to remove the revision from the optional and triggers 
+					// so they no longer attempt to be resolved
+					triggers.remove(nonPayLoad);
+					optionals.remove(nonPayLoad);
+					dynamicAttachment.put(nonPayLoad, nonPayloadWires);
 				}
 			}
-			return result;
+			return dynamicAttachment;
+		}
+
+		private boolean nonPayLoad(ModuleRevision moduleRevision) {
+			if ((moduleRevision.getTypes() & BundleRevision.TYPE_FRAGMENT) == 0) {
+				// not a fragment
+				return false;
+			}
+			for (Requirement req : moduleRevision.getRequirements(null)) {
+				if (!NON_PAYLOAD_REQUIREMENTS.contains(req.getNamespace())) {
+					// fragment adds payload to host
+					return false;
+				}
+			}
+			return true;
 		}
 
 		private Map<Resource, List<Wire>> resolveDynamic() throws ResolutionException {

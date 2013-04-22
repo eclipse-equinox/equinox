@@ -229,6 +229,21 @@ public class BundleLoader implements ModuleLoader {
 		}
 	}
 
+	@Override
+	public void loadFragments(Collection<ModuleRevision> fragments) {
+		synchronized (classLoaderMonitor) {
+			addFragmentExports(wiring.getModuleCapabilities(PackageNamespace.PACKAGE_NAMESPACE));
+			loadClassLoaderFragments(fragments);
+		}
+	}
+
+	/* @GuardedBy("classLoaderMonitor") */
+	void loadClassLoaderFragments(Collection<ModuleRevision> fragments) {
+		if (classloader != null) {
+			classloader.loadFragments(fragments);
+		}
+	}
+
 	static ModuleClassLoader createClassLoaderPrivledged(ClassLoader parent, EquinoxConfiguration configuration, BundleLoader delegate, Generation generation, List<ClassLoaderHook> hooks) {
 		// allow hooks to extend the ModuleClassLoader implementation
 		for (ClassLoaderHook hook : hooks) {

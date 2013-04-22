@@ -525,6 +525,7 @@ public final class ModuleContainer {
 					throw new IllegalStateException("Could not acquire state change lock.", e);
 				}
 			}
+			Map<ModuleWiring, Collection<ModuleRevision>> hostsWithDynamicFrags = new HashMap<ModuleWiring, Collection<ModuleRevision>>(0);
 			moduleDatabase.writeLock();
 			try {
 				if (timestamp != moduleDatabase.getRevisionsTimestamp())
@@ -539,7 +540,22 @@ public final class ModuleContainer {
 						current.setRequiredWires(deltaEntry.getValue().getRequiredModuleWires(null));
 						deltaEntry.setValue(current); // set the real wiring into the delta
 					} else {
-						modulesResolved.add(deltaEntry.getValue().getRevision().getRevisions().getModule());
+						ModuleRevision revision = deltaEntry.getValue().getRevision();
+						modulesResolved.add(revision.getRevisions().getModule());
+						if ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+							for (ModuleWire hostWire : deltaEntry.getValue().getRequiredModuleWires(HostNamespace.HOST_NAMESPACE)) {
+								// check to see if the host revision has a wiring
+								ModuleWiring hostWiring = hostWire.getProvider().getWiring();
+								if (hostWiring != null) {
+									Collection<ModuleRevision> dynamicFragments = hostsWithDynamicFrags.get(hostWiring);
+									if (dynamicFragments == null) {
+										dynamicFragments = new ArrayList<ModuleRevision>();
+										hostsWithDynamicFrags.put(hostWiring, dynamicFragments);
+									}
+									dynamicFragments.add(hostWire.getRequirer());
+								}
+							}
+						}
 					}
 				}
 				moduleDatabase.mergeWiring(deltaWiring);
@@ -550,6 +566,11 @@ public final class ModuleContainer {
 			// set the modules state to resolved
 			for (Module module : modulesLocked) {
 				module.setState(State.RESOLVED);
+			}
+			// attach fragments to already resolved hosts that have
+			// dynamically attached fragments
+			for (Map.Entry<ModuleWiring, Collection<ModuleRevision>> dynamicFragments : hostsWithDynamicFrags.entrySet()) {
+				dynamicFragments.getKey().loadFragments(dynamicFragments.getValue());
 			}
 		} finally {
 			for (Module module : modulesLocked) {

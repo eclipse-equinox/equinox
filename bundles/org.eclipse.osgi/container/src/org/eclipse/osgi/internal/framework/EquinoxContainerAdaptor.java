@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.framework;
 
-import java.util.*;
+import java.util.EnumSet;
+import java.util.Map;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.internal.loader.*;
@@ -18,10 +19,7 @@ import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.Storage;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
-import org.osgi.framework.namespace.HostNamespace;
-import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.service.resolver.ResolutionException;
 
 public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	private final EquinoxContainer container;
@@ -83,53 +81,6 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		EquinoxEventPublisher publisher = container.getEventPublisher();
 		if (publisher != null) {
 			publisher.publishBundleEvent(getType(type), module.getBundle(), origin.getBundle());
-		}
-		checkFrameworkExtensions(type, module);
-	}
-
-	private void checkFrameworkExtensions(ModuleEvent type, Module module) {
-		switch (type) {
-			case INSTALLED : {
-				ModuleRevision current = module.getCurrentRevision();
-				if ((BundleRevision.TYPE_FRAGMENT & current.getTypes()) != 0) {
-					Module systemModule = storage.getModuleContainer().getModule(0);
-					List<ModuleCapability> candidates = systemModule == null ? Collections.<ModuleCapability> emptyList() : systemModule.getCurrentRevision().getModuleCapabilities(HostNamespace.HOST_NAMESPACE);
-					List<ModuleRequirement> hostReqs = current.getModuleRequirements(HostNamespace.HOST_NAMESPACE);
-					if (!hostReqs.isEmpty() && !candidates.isEmpty()) {
-						if (hostReqs.get(0).matches(candidates.get(0))) {
-							try {
-								storage.getModuleContainer().resolve(Arrays.asList(module), true);
-							} catch (ResolutionException e) {
-								publishContainerEvent(ContainerEvent.ERROR, module, e);
-							}
-						}
-					}
-				}
-				break;
-			}
-			case RESOLVED : {
-				ModuleRevision current = module.getCurrentRevision();
-				if ((BundleRevision.TYPE_FRAGMENT & current.getTypes()) != 0) {
-					ModuleWiring wiring = current.getWiring();
-					if (wiring != null) {
-						List<ModuleWire> hosts = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
-						Module host = hosts.isEmpty() ? null : hosts.get(0).getProvider().getRevisions().getModule();
-						if (host != null && host.getId().longValue() == 0) {
-							try {
-								storage.getExtensionInstaller().addExtensionContent(current, host);
-								ModuleWiring hostWiring = hosts.get(0).getProviderWiring();
-								BundleLoader loader = (BundleLoader) hostWiring.getModuleLoader();
-								loader.addFragmentExports(hostWiring.getModuleCapabilities(PackageNamespace.PACKAGE_NAMESPACE));
-							} catch (BundleException e) {
-								publishContainerEvent(ContainerEvent.ERROR, module, e);
-							}
-						}
-					}
-				}
-				break;
-			}
-			default :
-				break;
 		}
 	}
 

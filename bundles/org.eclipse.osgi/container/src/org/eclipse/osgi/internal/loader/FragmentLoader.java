@@ -3,6 +3,7 @@ package org.eclipse.osgi.internal.loader;
 import java.net.URL;
 import java.util.*;
 import org.eclipse.osgi.container.ModuleLoader;
+import org.eclipse.osgi.container.ModuleRevision;
 
 public class FragmentLoader implements ModuleLoader {
 
@@ -31,6 +32,11 @@ public class FragmentLoader implements ModuleLoader {
 	public boolean isTriggerSet() {
 		// nothing to do here
 		return false;
+	}
+
+	@Override
+	public void loadFragments(Collection<ModuleRevision> fragments) {
+		// do nothing
 	}
 
 }

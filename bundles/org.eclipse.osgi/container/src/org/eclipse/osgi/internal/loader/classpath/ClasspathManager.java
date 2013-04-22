@@ -11,8 +11,6 @@
 
 package org.eclipse.osgi.internal.loader.classpath;
 
-import org.eclipse.osgi.storage.StorageMsg;
-
 import java.io.*;
 import java.net.URL;
 import java.util.*;
@@ -60,7 +58,7 @@ public class ClasspathManager {
 	// TODO Note that PDE has internal dependency on this field type/name (bug 267238)
 	private final ClasspathEntry[] entries;
 	// TODO Note that PDE has internal dependency on this field type/name (bug 267238)
-	private final FragmentClasspath[] fragments;
+	private volatile FragmentClasspath[] fragments;
 	// a Map<String,String> where "libname" is the key and libpath" is the value
 	private ArrayMap<String, String> loadedLibraries = null;
 	// used to detect recusive defineClass calls for the same class on the same class loader (bug 345500)
@@ -138,8 +136,9 @@ public class ClasspathManager {
 				}
 			}
 		}
-		for (int i = 0; i < fragments.length; i++)
-			fragments[i].close();
+		FragmentClasspath[] currentFragments = getFragmentClasspaths();
+		for (int i = 0; i < currentFragments.length; i++)
+			currentFragments[i].close();
 	}
 
 	private ClasspathEntry[] buildClasspath(String[] cp, ClasspathManager hostloader, Generation source) {
@@ -199,15 +198,17 @@ public class ClasspathManager {
 		}
 		// need to check in fragments for the classpath entry.
 		// only check for fragments if the generation is the host's generation.
-		if (hostManager.generation == generation)
-			for (int i = 0; i < hostManager.fragments.length; i++) {
-				FragmentClasspath fragCP = hostManager.fragments[i];
+		if (hostManager.generation == generation) {
+			FragmentClasspath[] hostFrags = hostManager.getFragmentClasspaths();
+			for (int i = 0; i < hostFrags.length; i++) {
+				FragmentClasspath fragCP = hostFrags[i];
 				element = hostManager.getClasspath(cp, fragCP.getGeneration());
 				if (element != null) {
 					result.add(element);
 					return true;
 				}
 			}
+		}
 		return false;
 	}
 
@@ -293,6 +294,20 @@ public class ClasspathManager {
 		return null;
 	}
 
+	public synchronized void loadFragments(Collection<ModuleRevision> addedFragments) {
+		List<FragmentClasspath> result = new ArrayList<FragmentClasspath>(Arrays.asList(fragments));
+
+		for (ModuleRevision addedFragment : addedFragments) {
+			Generation fragGeneration = (Generation) addedFragment.getRevisionInfo();
+			String[] cp = getClassPath(addedFragment);
+			ClasspathEntry[] fragEntries = buildClasspath(cp, this, fragGeneration);
+			FragmentClasspath fragClasspath = new FragmentClasspath(fragGeneration, fragEntries);
+			insertFragment(fragClasspath, result);
+		}
+
+		fragments = result.toArray(new FragmentClasspath[result.size()]);
+	}
+
 	private static BundleFile createBundleFile(File content, Generation generation) {
 		if (!content.exists()) {
 			return null;
@@ -350,8 +365,9 @@ public class ClasspathManager {
 			curIndex++;
 		}
 		// look in fragments
-		for (int i = 0; i < fragments.length; i++) {
-			ClasspathEntry[] fragEntries = fragments[i].getEntries();
+		FragmentClasspath[] currentFragments = getFragmentClasspaths();
+		for (int i = 0; i < currentFragments.length; i++) {
+			ClasspathEntry[] fragEntries = currentFragments[i].getEntries();
 			for (int j = 0; j < fragEntries.length; j++) {
 				result = findResourceImpl(resource, fragEntries[j].getBundleFile(), curIndex);
 				if (result != null && (classPathIndex == -1 || classPathIndex == curIndex))
@@ -379,8 +395,9 @@ public class ClasspathManager {
 			classPathIndex++;
 		}
 		// look in fragments
-		for (int i = 0; i < fragments.length; i++) {
-			ClasspathEntry[] fragEntries = fragments[i].getEntries();
+		FragmentClasspath[] currentFragments = getFragmentClasspaths();
+		for (int i = 0; i < currentFragments.length; i++) {
+			ClasspathEntry[] fragEntries = currentFragments[i].getEntries();
 			for (int j = 0; j < fragEntries.length; j++) {
 				URL url = findResourceImpl(resource, fragEntries[j].getBundleFile(), classPathIndex);
 				if (url != null)
@@ -425,8 +442,9 @@ public class ClasspathManager {
 			curIndex++;
 		}
 		// look in fragments
-		for (int i = 0; i < fragments.length; i++) {
-			ClasspathEntry[] fragEntries = fragments[i].getEntries();
+		FragmentClasspath[] currentFragments = getFragmentClasspaths();
+		for (int i = 0; i < currentFragments.length; i++) {
+			ClasspathEntry[] fragEntries = currentFragments[i].getEntries();
 			for (int j = 0; j < fragEntries.length; j++) {
 				result = findEntryImpl(path, fragEntries[j].getBundleFile());
 				if (result != null && (classPathIndex == -1 || classPathIndex == curIndex))
@@ -452,8 +470,9 @@ public class ClasspathManager {
 			}
 		}
 		// look in fragments
-		for (int i = 0; i < fragments.length; i++) {
-			ClasspathEntry[] fragEntries = fragments[i].getEntries();
+		FragmentClasspath[] currentFragments = getFragmentClasspaths();
+		for (int i = 0; i < currentFragments.length; i++) {
+			ClasspathEntry[] fragEntries = currentFragments[i].getEntries();
 			for (int j = 0; j < fragEntries.length; j++) {
 				BundleEntry result = findEntryImpl(path, fragEntries[j].getBundleFile());
 				if (result != null)
@@ -533,8 +552,9 @@ public class ClasspathManager {
 			}
 		}
 		// look in fragments.
-		for (int i = 0; i < fragments.length; i++) {
-			ClasspathEntry[] fragEntries = fragments[i].getEntries();
+		FragmentClasspath[] currentFragments = getFragmentClasspaths();
+		for (int i = 0; i < currentFragments.length; i++) {
+			ClasspathEntry[] fragEntries = currentFragments[i].getEntries();
 			for (int j = 0; j < fragEntries.length; j++) {
 				result = findClassImpl(classname, fragEntries[j], hooks);
 				if (result != null)
@@ -799,7 +819,8 @@ public class ClasspathManager {
 		}
 
 		// look in fragment generations
-		for (FragmentClasspath fragment : fragments) {
+		FragmentClasspath[] currentFragments = getFragmentClasspaths();
+		for (FragmentClasspath fragment : currentFragments) {
 			result = fragment.getGeneration().findLibrary(libname);
 			if (result != null) {
 				return result;

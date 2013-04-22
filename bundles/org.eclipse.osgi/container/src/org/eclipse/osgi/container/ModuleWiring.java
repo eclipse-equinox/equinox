@@ -258,6 +258,14 @@ public final class ModuleWiring implements BundleWiring {
 
 	}
 
+	void loadFragments(Collection<ModuleRevision> fragments) {
+		synchronized (monitor) {
+			if (loader != null) {
+				loader.loadFragments(fragments);
+			}
+		}
+	}
+
 	@Override
 	public List<URL> findEntries(String path, String filePattern, int options) {
 		if (!hasResourcePermission())

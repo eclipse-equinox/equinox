@@ -13,11 +13,14 @@ package org.eclipse.osgi.internal.loader;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Enumeration;
-import org.eclipse.osgi.container.ModuleWiring;
+import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
+import org.osgi.framework.BundleException;
 
 /**
  * The System Bundle's BundleLoader.  This BundleLoader is used by ImportClassLoaders
@@ -98,8 +101,14 @@ public class SystemBundleLoader extends BundleLoader {
 		return classLoader;
 	}
 
+	@Override
 	public ModuleClassLoader getModuleClassLoader() {
 		return moduleClassLoader;
+	}
+
+	@Override
+	void loadClassLoaderFragments(Collection<ModuleRevision> fragments) {
+		moduleClassLoader.loadFragments(fragments);
 	}
 
 	class SystemModuleClassLoader extends ModuleClassLoader {
@@ -111,6 +120,18 @@ public class SystemBundleLoader extends BundleLoader {
 		@Override
 		protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 			return SystemBundleLoader.this.findClass(name);
+		}
+
+		@Override
+		public void loadFragments(Collection<ModuleRevision> fragments) {
+			Module systemModule = getWiring().getRevision().getRevisions().getModule();
+			for (ModuleRevision fragment : fragments) {
+				try {
+					this.getGeneration().getBundleInfo().getStorage().getExtensionInstaller().addExtensionContent(fragment, getWiring().getRevision().getRevisions().getModule());
+				} catch (BundleException e) {
+					systemModule.getContainer().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, systemModule, e);
+				}
+			}
 		}
 	}
 }
