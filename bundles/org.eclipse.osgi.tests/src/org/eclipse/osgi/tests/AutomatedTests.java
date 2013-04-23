@@ -59,7 +59,7 @@ public class AutomatedTests extends TestCase {
 		suite.addTest(EventManagerTests.suite());
 		suite.addTest(FilterTests.suite());
 		suite.addTest(PermissionTests.suite());
-		//TODO suite.addTest(org.eclipse.osgi.tests.securityadmin.AllSecurityAdminTests.suite());
+		suite.addTest(org.eclipse.osgi.tests.securityadmin.AllSecurityAdminTests.suite());
 		suite.addTest(org.eclipse.osgi.tests.resource.AllTests.suite());
 		return suite;
 	}

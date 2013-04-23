@@ -15,7 +15,6 @@ import java.security.*;
 import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.eclipse.osgi.framework.internal.core.Framework;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
@@ -98,7 +97,8 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		File config = OSGiTestsActivator.getContext().getDataFile("testEnableSecurityManager01"); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<String, Object>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
-		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
+		configuration.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
 		Equinox equinox = new Equinox(configuration);
 		try {
 			equinox.init();
@@ -134,7 +134,8 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		File config = OSGiTestsActivator.getContext().getDataFile("testEnableSecurityManager02"); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<String, Object>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
-		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
+		configuration.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
 		Equinox equinox = new Equinox(configuration);
 		try {
 			equinox.init();
@@ -185,7 +186,8 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		File config = OSGiTestsActivator.getContext().getDataFile("testEnableSecurityManager03"); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<String, Object>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
-		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
+		configuration.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
 		Equinox equinox = new Equinox(configuration);
 		try {
 			equinox.init();
@@ -254,7 +256,8 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		File config = OSGiTestsActivator.getContext().getDataFile("testEnableSecurityManager04"); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<String, Object>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
-		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
+		configuration.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
 		Equinox equinox = new Equinox(configuration);
 		try {
 			equinox.init();
@@ -324,7 +327,8 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<String, Object>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
-		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
+		configuration.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
 		Equinox equinox = new Equinox(configuration);
 		try {
 			equinox.init();
@@ -374,7 +378,8 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		File config = OSGiTestsActivator.getContext().getDataFile("testLocalization01"); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<String, Object>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
-		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
+		configuration.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
 		Equinox equinox = new Equinox(configuration);
 		try {
 			equinox.init();
@@ -431,7 +436,8 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		File config = OSGiTestsActivator.getContext().getDataFile("testBug254600"); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<String, Object>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
-		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
+		configuration.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
 		Equinox equinox = new Equinox(configuration);
 		try {
 			equinox.init();
@@ -518,7 +524,8 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		Map<String, Object> configuration = new HashMap<String, Object>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
-		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
+		configuration.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
 		Equinox equinox = new Equinox(configuration);
 		try {
 			equinox.init();
@@ -577,7 +584,8 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<String, Object>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
-		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
+		configuration.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
 		Equinox equinox = new Equinox(configuration);
 		try {
 			equinox.init();
