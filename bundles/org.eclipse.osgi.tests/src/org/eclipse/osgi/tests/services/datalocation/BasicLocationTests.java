@@ -13,22 +13,24 @@ package org.eclipse.osgi.tests.services.datalocation;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
+import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.osgi.framework.*;
+import org.osgi.util.tracker.ServiceTracker;
 
 public class BasicLocationTests extends CoreTest {
 
-	String originalUser = null;
-	String originalInstance = null;
-	String originalConfiguration = null;
-	String originalInstall = null;
 	String prefix = "";
 	boolean windows = Platform.getOS().equals(Platform.OS_WIN32);
+	ServiceTracker<Location, Location> configLocationTracker = null;
+	ServiceTracker<Location, Location> instanceLocationTracker = null;
 
 	public BasicLocationTests(String name) {
 		super(name);
@@ -40,34 +42,27 @@ public class BasicLocationTests extends CoreTest {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		prefix = windows ? "c:" : "";
-		originalUser = System.getProperty(EquinoxLocations.PROP_USER_AREA);
-		originalInstance = System.getProperty(EquinoxLocations.PROP_INSTANCE_AREA);
-		originalConfiguration = System.getProperty(EquinoxLocations.PROP_CONFIG_AREA);
-		originalInstall = System.getProperty(EquinoxLocations.PROP_INSTALL_AREA);
-	}
 
-	private void setProperty(String key, String value) {
-		if (value == null)
-			System.getProperties().remove(key);
-		else
-			System.setProperty(key, value);
+		prefix = windows ? "c:" : "";
+
+		configLocationTracker = new ServiceTracker<Location, Location>(OSGiTestsActivator.getContext(), OSGiTestsActivator.getContext().createFilter(Location.CONFIGURATION_FILTER), null);
+		instanceLocationTracker = new ServiceTracker<Location, Location>(OSGiTestsActivator.getContext(), OSGiTestsActivator.getContext().createFilter(Location.INSTANCE_FILTER), null);
+
+		configLocationTracker.open();
+		instanceLocationTracker.open();
 	}
 
 	protected void tearDown() throws Exception {
-		setProperty(EquinoxLocations.PROP_USER_AREA, originalUser);
-		setProperty(EquinoxLocations.PROP_INSTANCE_AREA, originalInstance);
-		setProperty(EquinoxLocations.PROP_CONFIG_AREA, originalConfiguration);
-		setProperty(EquinoxLocations.PROP_INSTALL_AREA, originalInstall);
-		EquinoxLocations.initializeLocations();
+		configLocationTracker.close();
+		instanceLocationTracker.close();
 		super.tearDown();
 	}
 
-	private void checkSlashes() {
-		checkLocation(EquinoxLocations.getUserLocation(), true, true, null);
-		checkLocation(EquinoxLocations.getInstanceLocation(), true, true, null);
-		checkLocation(EquinoxLocations.getConfigurationLocation(), true, true, null);
-		checkLocation(EquinoxLocations.getInstallLocation(), true, true, null);
+	private void checkSlashes(Map<String, Location> locations) {
+		checkLocation(locations.get(Location.USER_FILTER), true, true, null);
+		checkLocation(locations.get(Location.INSTANCE_FILTER), true, true, null);
+		checkLocation(locations.get(Location.CONFIGURATION_FILTER), true, true, null);
+		checkLocation(locations.get(Location.INSTALL_FILTER), true, true, null);
 	}
 
 	private void checkLocation(Location location, boolean leading, boolean trailing, String scheme) {
@@ -84,7 +79,7 @@ public class BasicLocationTests extends CoreTest {
 	}
 
 	public void testCreateLocation01() {
-		Location configLocation = EquinoxLocations.getConfigurationLocation();
+		Location configLocation = configLocationTracker.getService();
 		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testCreateLocation01");
 		Location testLocation = configLocation.createLocation(null, null, false);
 		try {
@@ -101,7 +96,7 @@ public class BasicLocationTests extends CoreTest {
 	}
 
 	public void testCreateLocation02() {
-		Location configLocation = EquinoxLocations.getConfigurationLocation();
+		Location configLocation = configLocationTracker.getService();
 		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testCreateLocation02");
 		Location testLocation = configLocation.createLocation(null, null, true);
 		try {
@@ -119,7 +114,7 @@ public class BasicLocationTests extends CoreTest {
 	}
 
 	public void testCreateLocation03() {
-		Location configLocation = EquinoxLocations.getConfigurationLocation();
+		Location configLocation = configLocationTracker.getService();
 		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testCreateLocation03");
 		Location testLocation = configLocation.createLocation(null, null, false);
 		try {
@@ -136,7 +131,7 @@ public class BasicLocationTests extends CoreTest {
 	}
 
 	public void testCreateLocation04() {
-		Location configLocation = EquinoxLocations.getConfigurationLocation();
+		Location configLocation = configLocationTracker.getService();
 		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testCreateLocation04");
 		Location testLocation = configLocation.createLocation(null, null, true);
 		try {
@@ -149,7 +144,7 @@ public class BasicLocationTests extends CoreTest {
 	}
 
 	public void testCreateLocation05() {
-		Location configLocation = EquinoxLocations.getConfigurationLocation();
+		Location configLocation = configLocationTracker.getService();
 		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testCreateLocation01");
 		Location testLocation = configLocation.createLocation(null, null, false);
 		try {
@@ -178,10 +173,10 @@ public class BasicLocationTests extends CoreTest {
 	private static final String INSTANCE_DATA_AREA_PREFIX = ".metadata/.plugins/"; //$NON-NLS-1$
 
 	public void testLocationDataArea01() {
-		Location instance = EquinoxLocations.getInstanceLocation();
+		Location instance = instanceLocationTracker.getService();
 		doAllTestLocationDataArea(instance, INSTANCE_DATA_AREA_PREFIX);
 
-		Location configuration = EquinoxLocations.getConfigurationLocation();
+		Location configuration = configLocationTracker.getService();
 		doAllTestLocationDataArea(configuration, "");
 	}
 
@@ -229,7 +224,7 @@ public class BasicLocationTests extends CoreTest {
 	}
 
 	public void testSetLocationWithEmptyLockFile() {
-		Location configLocation = EquinoxLocations.getConfigurationLocation();
+		Location configLocation = configLocationTracker.getService();
 		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testSetLocationWithEmptyLockFile"); //$NON-NLS-1$
 		Location testLocation = configLocation.createLocation(null, null, false);
 		try {
@@ -249,7 +244,7 @@ public class BasicLocationTests extends CoreTest {
 	}
 
 	public void testSetLocationWithRelLockFile() {
-		Location configLocation = EquinoxLocations.getConfigurationLocation();
+		Location configLocation = configLocationTracker.getService();
 		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testSetLocationWithRelLockFile"); //$NON-NLS-1$
 		Location testLocation = configLocation.createLocation(null, null, false);
 		try {
@@ -268,7 +263,7 @@ public class BasicLocationTests extends CoreTest {
 	}
 
 	public void testSetLocationWithAbsLockFile() {
-		Location configLocation = EquinoxLocations.getConfigurationLocation();
+		Location configLocation = configLocationTracker.getService();
 		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testSetLocationWithAbsLockFile"); //$NON-NLS-1$
 		File testLocationLockFile = OSGiTestsActivator.getContext().getDataFile("testLocations/mock.lock"); //$NON-NLS-1$
 		assertTrue(testLocationLockFile.isAbsolute());
@@ -288,75 +283,148 @@ public class BasicLocationTests extends CoreTest {
 		assertTrue("The lock file could not be removed!", testLocationLockFile.delete()); //$NON-NLS-1$
 	}
 
-	public void testSlashes() {
-		setProperty(EquinoxLocations.PROP_USER_AREA, prefix + "/a");
-		setProperty(EquinoxLocations.PROP_INSTANCE_AREA, prefix + "/c/d");
-		setProperty(EquinoxLocations.PROP_CONFIG_AREA, prefix + "/e/f");
-		setProperty(EquinoxLocations.PROP_INSTALL_AREA, "file:" + prefix + "/g");
-		EquinoxLocations.initializeLocations();
-		checkSlashes();
-	}
+	public void testSlashes() throws BundleException, InvalidSyntaxException {
+		Map<String, String> fwkConfig = new HashMap<String, String>();
+		fwkConfig.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
+		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, prefix + "/a");
+		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, prefix + "/c/d");
+		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA, prefix + "/e/f");
+		fwkConfig.put(EquinoxLocations.PROP_INSTALL_AREA, "file:" + prefix + "/g");
 
-	public void testSchemes() {
-		setProperty(EquinoxLocations.PROP_USER_AREA, "http://example.com/a");
-		setProperty(EquinoxLocations.PROP_INSTANCE_AREA, "ftp://example.com/c/d");
-		setProperty(EquinoxLocations.PROP_CONFIG_AREA, "platform:/base/e/f");
-		setProperty(EquinoxLocations.PROP_INSTALL_AREA, "file:" + prefix + "/g");
-		EquinoxLocations.initializeLocations();
-		checkSlashes();
-		checkLocation(EquinoxLocations.getUserLocation(), true, true, "http");
-		checkLocation(EquinoxLocations.getInstanceLocation(), true, true, "ftp");
-		checkLocation(EquinoxLocations.getConfigurationLocation(), true, true, "platform");
-		checkLocation(EquinoxLocations.getInstallLocation(), true, true, "file");
+		Equinox equinox = new Equinox(fwkConfig);
+		equinox.init();
+		try {
+			checkSlashes(getLocations(equinox));
+		} finally {
+			equinox.stop();
+		}
 
 	}
 
-	public void testNone() {
-		setProperty(EquinoxLocations.PROP_USER_AREA, "@none");
-		setProperty(EquinoxLocations.PROP_INSTANCE_AREA, "@none");
-		setProperty(EquinoxLocations.PROP_CONFIG_AREA, "@none");
-		setProperty(EquinoxLocations.PROP_INSTALL_AREA, "file:" + prefix + "/g");
-		EquinoxLocations.initializeLocations();
-		assertNull("User location should be null", EquinoxLocations.getUserLocation());
-		assertNull("Instance location should be null", EquinoxLocations.getUserLocation());
-		assertNull("Configuration location should be null", EquinoxLocations.getUserLocation());
+	private static Map<String, Location> getLocations(Equinox equinox) throws InvalidSyntaxException {
+		Map<String, Location> locations = new HashMap<String, Location>();
+		BundleContext context = equinox.getBundleContext();
+		addLocation(context, Location.CONFIGURATION_FILTER, locations);
+		addLocation(context, Location.INSTALL_FILTER, locations);
+		addLocation(context, Location.INSTANCE_FILTER, locations);
+		addLocation(context, Location.USER_FILTER, locations);
+		return locations;
 	}
 
-	public void testUserDir() {
-		setProperty(EquinoxLocations.PROP_USER_AREA, "@user.dir");
-		setProperty(EquinoxLocations.PROP_INSTANCE_AREA, "@user.dir");
-		setProperty(EquinoxLocations.PROP_CONFIG_AREA, "@user.dir");
-		setProperty(EquinoxLocations.PROP_INSTALL_AREA, "file:" + prefix + "/g");
-		EquinoxLocations.initializeLocations();
-		checkLocation(EquinoxLocations.getUserLocation(), true, true, "file");
-		checkLocation(EquinoxLocations.getInstanceLocation(), true, true, "file");
-		checkLocation(EquinoxLocations.getConfigurationLocation(), true, true, "file");
-		checkLocation(EquinoxLocations.getInstallLocation(), true, true, "file");
+	private static void addLocation(BundleContext context, String filter, Map<String, Location> locations) throws InvalidSyntaxException {
+		Collection<ServiceReference<Location>> locationRefs = context.getServiceReferences(Location.class, filter);
+		if (!locations.isEmpty()) {
+			locations.put(filter, context.getService(locationRefs.iterator().next()));
+		}
 	}
 
-	public void testUserHome() {
-		setProperty(EquinoxLocations.PROP_USER_AREA, "@user.home");
-		setProperty(EquinoxLocations.PROP_INSTANCE_AREA, "@user.home");
-		setProperty(EquinoxLocations.PROP_CONFIG_AREA, "@user.home");
-		setProperty(EquinoxLocations.PROP_INSTALL_AREA, "file:" + prefix + "/g");
-		EquinoxLocations.initializeLocations();
-		checkLocation(EquinoxLocations.getUserLocation(), true, true, "file");
-		checkLocation(EquinoxLocations.getInstanceLocation(), true, true, "file");
-		checkLocation(EquinoxLocations.getConfigurationLocation(), true, true, "file");
-		checkLocation(EquinoxLocations.getInstallLocation(), true, true, "file");
+	public void testSchemes() throws Exception {
+		Map<String, String> fwkConfig = new HashMap<String, String>();
+		fwkConfig.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
+		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "http://example.com/a");
+		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "ftp://example.com/c/d");
+		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA, "platform:/base/e/f");
+		fwkConfig.put(EquinoxLocations.PROP_INSTALL_AREA, "file:" + prefix + "/g");
+
+		Equinox equinox = new Equinox(fwkConfig);
+		equinox.init();
+		try {
+			Map<String, Location> locations = getLocations(equinox);
+			checkSlashes(locations);
+			checkLocation(locations.get(Location.USER_FILTER), true, true, "http");
+			checkLocation(locations.get(Location.INSTANCE_FILTER), true, true, "ftp");
+			checkLocation(locations.get(Location.CONFIGURATION_FILTER), true, true, "platform");
+			checkLocation(locations.get(Location.INSTALL_FILTER), true, true, "file");
+		} finally {
+			equinox.stop();
+		}
 	}
 
-	public void testUNC() {
+	public void testNone() throws Exception {
+		Map<String, String> fwkConfig = new HashMap<String, String>();
+		fwkConfig.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
+		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "@none");
+		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "@none");
+		// TODO framework does not handle no config area well
+		// fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA, "@none");
+		fwkConfig.put(EquinoxLocations.PROP_INSTALL_AREA, "file:" + prefix + "/g");
+
+		Equinox equinox = new Equinox(fwkConfig);
+		equinox.init();
+		try {
+			Map<String, Location> locations = getLocations(equinox);
+			assertNull("User location should be null", locations.get(Location.USER_FILTER));
+			assertNull("Instance location should be null", locations.get(Location.INSTANCE_FILTER));
+			// TODO assertNull("Configuration location should be null", locations.get(Location.CONFIGURATION_FILTER));
+		} finally {
+			equinox.stop();
+		}
+
+	}
+
+	public void testUserDir() throws Exception {
+		Map<String, String> fwkConfig = new HashMap<String, String>();
+		fwkConfig.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
+		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "@user.dir");
+		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "@user.dir");
+		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA, "@user.dir");
+		fwkConfig.put(EquinoxLocations.PROP_INSTALL_AREA, "file:" + prefix + "/g");
+
+		Equinox equinox = new Equinox(fwkConfig);
+		equinox.init();
+		try {
+			Map<String, Location> locations = getLocations(equinox);
+			checkLocation(locations.get(Location.USER_FILTER), true, true, "file");
+			checkLocation(locations.get(Location.INSTANCE_FILTER), true, true, "file");
+			checkLocation(locations.get(Location.CONFIGURATION_FILTER), true, true, "file");
+			checkLocation(locations.get(Location.INSTALL_FILTER), true, true, "file");
+		} finally {
+			equinox.stop();
+		}
+	}
+
+	public void testUserHome() throws Exception {
+		Map<String, String> fwkConfig = new HashMap<String, String>();
+		fwkConfig.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
+		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "@user.home");
+		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "@user.home");
+		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA, "@user.home");
+		fwkConfig.put(EquinoxLocations.PROP_INSTALL_AREA, "file:" + prefix + "/g");
+
+		Equinox equinox = new Equinox(fwkConfig);
+		equinox.init();
+		try {
+			Map<String, Location> locations = getLocations(equinox);
+			checkLocation(locations.get(Location.USER_FILTER), true, true, "file");
+			checkLocation(locations.get(Location.INSTANCE_FILTER), true, true, "file");
+			checkLocation(locations.get(Location.CONFIGURATION_FILTER), true, true, "file");
+			checkLocation(locations.get(Location.INSTALL_FILTER), true, true, "file");
+		} finally {
+			equinox.stop();
+		}
+
+	}
+
+	public void testUNC() throws Exception {
 		if (!windows)
 			return;
-		setProperty(EquinoxLocations.PROP_USER_AREA, "//server/share/a");
-		setProperty(EquinoxLocations.PROP_INSTANCE_AREA, "//server/share/b");
-		setProperty(EquinoxLocations.PROP_CONFIG_AREA, "//server/share/c");
-		setProperty(EquinoxLocations.PROP_INSTALL_AREA, "file://server/share/g");
-		EquinoxLocations.initializeLocations();
-		checkLocation(EquinoxLocations.getUserLocation(), true, true, "file");
-		checkLocation(EquinoxLocations.getInstanceLocation(), true, true, "file");
-		checkLocation(EquinoxLocations.getConfigurationLocation(), true, true, "file");
-		checkLocation(EquinoxLocations.getInstallLocation(), true, true, "file");
+		Map<String, String> fwkConfig = new HashMap<String, String>();
+		fwkConfig.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
+		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "//server/share/a");
+		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "//server/share/b");
+		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA, "//server/share/c");
+		fwkConfig.put(EquinoxLocations.PROP_INSTALL_AREA, "file://server/share/g");
+
+		Equinox equinox = new Equinox(fwkConfig);
+		equinox.init();
+		try {
+			Map<String, Location> locations = getLocations(equinox);
+			checkLocation(locations.get(Location.USER_FILTER), true, true, "file");
+			checkLocation(locations.get(Location.INSTANCE_FILTER), true, true, "file");
+			checkLocation(locations.get(Location.CONFIGURATION_FILTER), true, true, "file");
+			checkLocation(locations.get(Location.INSTALL_FILTER), true, true, "file");
+		} finally {
+			equinox.stop();
+		}
 	}
 }
