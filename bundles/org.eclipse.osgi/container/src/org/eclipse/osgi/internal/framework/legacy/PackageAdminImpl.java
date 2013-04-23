@@ -82,7 +82,7 @@ public class PackageAdminImpl implements PackageAdmin {
 				}
 			}
 		}
-		return allExports.toArray(new ExportedPackage[allExports.size()]);
+		return allExports.isEmpty() ? null : allExports.toArray(new ExportedPackage[allExports.size()]);
 	}
 
 	public ExportedPackage getExportedPackage(String name) {
@@ -137,7 +137,7 @@ public class PackageAdminImpl implements PackageAdmin {
 				}
 			}
 		}
-		return result.toArray(new RequiredBundle[result.size()]);
+		return result.isEmpty() ? null : result.toArray(new RequiredBundle[result.size()]);
 	}
 
 	public Bundle[] getBundles(String symbolicName, String versionRange) {
