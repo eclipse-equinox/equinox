@@ -745,6 +745,10 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		if (Module.class.equals(adapterType)) {
 			return (A) module;
 		}
+		if (ProtectionDomain.class.equals(adapterType)) {
+			Generation current = (Generation) module.getCurrentRevision().getRevisionInfo();
+			return (A) current.getDomain();
+		}
 		return null;
 	}
 
