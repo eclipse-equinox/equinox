@@ -15,7 +15,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.eclipse.osgi.internal.baseadaptor.StateManager;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -77,17 +76,10 @@ public class PlatformAdminTest extends AbstractStateTest {
 	}
 
 	public void testBug184127() throws BundleException {
-		File resolverData = getContext().getDataFile("resolverData");
+		File resolverData = getContext().getDataFile(getName());
 		resolverData.mkdirs();
 
-		File stateFile = new File(resolverData, ".state");
-		File lazyFile = new File(resolverData, ".lazy");
-		stateFile.delete();
-		lazyFile.delete();
-		StateManager sm = new StateManager(stateFile, lazyFile, getContext());
-		State systemState = sm.readSystemState();
-		assertNull("SystemState is not null", systemState);
-		systemState = sm.createSystemState();
+		State systemState = StateObjectFactory.defaultFactory.createState(true);
 
 		Hashtable manifest = new Hashtable();
 		int id = 0;
@@ -138,13 +130,12 @@ public class PlatformAdminTest extends AbstractStateTest {
 		assertTrue("b is not resolved", b.isResolved());
 
 		try {
-			sm.shutdown(stateFile, lazyFile);
+			StateObjectFactory.defaultFactory.writeState(systemState, resolverData);
+			systemState = StateObjectFactory.defaultFactory.readState(resolverData);
 		} catch (IOException e) {
 			fail("failed to shudown StateManager", e);
 		}
 
-		sm = new StateManager(stateFile, lazyFile, getContext());
-		systemState = sm.readSystemState();
 		assertNotNull("SystemState is null", systemState);
 		b = systemState.getBundle("b", null);
 		ExportPackageDescription[] exports = null;
