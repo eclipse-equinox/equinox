@@ -16,7 +16,7 @@ import junit.framework.TestSuite;
 public class AllSecurityAdminTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(AllSecurityAdminTests.class.getName());
-		// TODO suite.addTest(SecurityAdminUnitTests.suite());
+		suite.addTest(SecurityAdminUnitTests.suite());
 		suite.addTest(SecurityManagerTests.suite());
 		return suite;
 	}
