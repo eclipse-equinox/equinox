@@ -8,7 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.container.tests;
+package org.eclipse.osgi.tests.container;
+
+import org.eclipse.osgi.tests.container.dummys.*;
 
 import java.io.IOException;
 import java.net.URL;
@@ -16,7 +18,6 @@ import java.util.*;
 import junit.framework.Assert;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
-import org.eclipse.osgi.container.tests.dummys.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.junit.After;
 import org.junit.Before;

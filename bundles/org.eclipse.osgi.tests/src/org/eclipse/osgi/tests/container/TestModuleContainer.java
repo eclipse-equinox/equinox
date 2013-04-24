@@ -8,7 +8,11 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.container.tests;
+package org.eclipse.osgi.tests.container;
+
+import org.eclipse.osgi.tests.container.dummys.*;
+import org.eclipse.osgi.tests.container.dummys.DummyModuleDatabase.DummyContainerEvent;
+import org.eclipse.osgi.tests.container.dummys.DummyModuleDatabase.DummyModuleEvent;
 
 import java.io.*;
 import java.util.*;
@@ -21,9 +25,6 @@ import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
-import org.eclipse.osgi.container.tests.dummys.*;
-import org.eclipse.osgi.container.tests.dummys.DummyModuleDatabase.DummyContainerEvent;
-import org.eclipse.osgi.container.tests.dummys.DummyModuleDatabase.DummyModuleEvent;
 import org.junit.Test;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;

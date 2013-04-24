@@ -1,4 +1,4 @@
-package org.eclipse.osgi.container.tests.dummys;
+package org.eclipse.osgi.tests.container.dummys;
 
 import java.util.Collection;
 import org.osgi.framework.hooks.resolver.ResolverHook;

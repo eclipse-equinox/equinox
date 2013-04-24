@@ -1,4 +1,4 @@
-package org.eclipse.osgi.container.tests.dummys;
+package org.eclipse.osgi.tests.container.dummys;
 
 import java.util.*;
 import org.eclipse.osgi.report.resolution.ResolutionReport;

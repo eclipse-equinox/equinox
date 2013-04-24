@@ -8,15 +8,16 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.container.tests.dummys;
+package org.eclipse.osgi.tests.container.dummys;
 
+import java.util.EnumSet;
 import org.eclipse.osgi.container.*;
 import org.osgi.framework.Bundle;
 
-public class DummySystemModule extends SystemModule {
+public class DummyModule extends Module {
 
-	public DummySystemModule(ModuleContainer container) {
-		super(container);
+	public DummyModule(Long id, String location, ModuleContainer container, EnumSet<Settings> settings, int startlevel) {
+		super(id, location, container, settings, startlevel);
 	}
 
 	@Override

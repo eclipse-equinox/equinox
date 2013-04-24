@@ -8,17 +8,18 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.container.tests;
+package org.eclipse.osgi.tests.container;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.eclipse.osgi.tests.container.dummys.*;
+
 import java.util.*;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleContainer;
-import org.eclipse.osgi.container.tests.dummys.*;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.junit.Test;
 import org.osgi.framework.Constants;
