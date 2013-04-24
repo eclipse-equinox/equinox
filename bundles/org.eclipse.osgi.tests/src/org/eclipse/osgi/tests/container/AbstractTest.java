@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,14 +10,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.container;
 
-import org.eclipse.osgi.tests.container.dummys.*;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import junit.framework.Assert;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
+import org.eclipse.osgi.tests.container.dummys.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.junit.After;
 import org.junit.Before;
@@ -60,7 +59,7 @@ public abstract class AbstractTest {
 	}
 
 	protected Map<String, String> getManifest(String manifestFile) throws IOException, BundleException {
-		URL manifest = getBundle().getEntry("/manifests/" + manifestFile);
+		URL manifest = getBundle().getEntry("/test_files/containerTests/" + manifestFile);
 		Assert.assertNotNull("Could not find manifest: " + manifestFile, manifest);
 		return ManifestElement.parseBundleManifest(manifest.openStream(), null);
 	}

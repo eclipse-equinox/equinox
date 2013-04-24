@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,12 +15,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.eclipse.osgi.tests.container.dummys.*;
-
 import java.util.*;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleContainer;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
+import org.eclipse.osgi.tests.container.dummys.*;
 import org.junit.Test;
 import org.osgi.framework.Constants;
 import org.osgi.framework.namespace.PackageNamespace;
@@ -172,12 +171,7 @@ public class ResolutionReportTest extends AbstractTest {
 		assertResolutionReportEntriesSize(entries, 1);
 		ResolutionReport.Entry entry = entries.get(0);
 		assertResolutionReportEntryTypeUnresolvedProvider(entry.getType());
-		assertResolutionReportEntryDataUnresolvedProvider(
-				entry.getData(),
-				new UnresolvedProviderEntryBuilder()
-						.requirement(resolutionReportC.getCurrentRevision().getRequirements("resolution.report.d").get(0))
-						.capability(resolutionReportD.getCurrentRevision().getCapabilities("resolution.report.d").get(0))
-						.build());
+		assertResolutionReportEntryDataUnresolvedProvider(entry.getData(), new UnresolvedProviderEntryBuilder().requirement(resolutionReportC.getCurrentRevision().getRequirements("resolution.report.d").get(0)).capability(resolutionReportD.getCurrentRevision().getCapabilities("resolution.report.d").get(0)).build());
 
 		entries = resourceToEntries.get(resolutionReportD.getCurrentRevision());
 		assertResolutionReportEntriesSize(entries, 1);
@@ -203,12 +197,7 @@ public class ResolutionReportTest extends AbstractTest {
 		assertResolutionReportEntriesSize(entries, 1);
 		ResolutionReport.Entry entry = entries.get(0);
 		assertResolutionReportEntryTypeUnresolvedProvider(entry.getType());
-		assertResolutionReportEntryDataUnresolvedProvider(
-				entry.getData(),
-				new UnresolvedProviderEntryBuilder()
-						.requirement(resolutionReportG.getCurrentRevision().getRequirements(PackageNamespace.PACKAGE_NAMESPACE).get(1))
-						.capability(resolutionReportF.getCurrentRevision().getCapabilities(PackageNamespace.PACKAGE_NAMESPACE).get(0))
-						.build());
+		assertResolutionReportEntryDataUnresolvedProvider(entry.getData(), new UnresolvedProviderEntryBuilder().requirement(resolutionReportG.getCurrentRevision().getRequirements(PackageNamespace.PACKAGE_NAMESPACE).get(1)).capability(resolutionReportF.getCurrentRevision().getCapabilities(PackageNamespace.PACKAGE_NAMESPACE).get(0)).build());
 
 		entries = resourceToEntries.get(resolutionReportF.getCurrentRevision());
 		assertResolutionReportEntriesSize(entries, 1);

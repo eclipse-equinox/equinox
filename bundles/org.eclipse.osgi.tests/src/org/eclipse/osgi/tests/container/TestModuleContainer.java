@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,14 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.container;
 
-import org.eclipse.osgi.tests.container.dummys.*;
-import org.eclipse.osgi.tests.container.dummys.DummyModuleDatabase.DummyContainerEvent;
-import org.eclipse.osgi.tests.container.dummys.DummyModuleDatabase.DummyModuleEvent;
-
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
-import junit.framework.Assert;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.StartOptions;
 import org.eclipse.osgi.container.Module.State;
@@ -25,6 +20,10 @@ import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
+import org.eclipse.osgi.tests.container.dummys.*;
+import org.eclipse.osgi.tests.container.dummys.DummyModuleDatabase.DummyContainerEvent;
+import org.eclipse.osgi.tests.container.dummys.DummyModuleDatabase.DummyModuleEvent;
+import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
@@ -61,10 +60,7 @@ public class TestModuleContainer extends AbstractTest {
 		String osName = context.getProperty(OSGI_OS);
 		String wsName = context.getProperty(OSGI_WS);
 		String archName = context.getProperty(OSGI_ARCH);
-		extraCapabilities += EclipsePlatformNamespace.ECLIPSE_PLATFORM_NAMESPACE + "; " +
-				OSGI_OS + "=" + osName + "; " +
-				OSGI_WS + "=" + wsName + "; " +
-				OSGI_ARCH + "=" + archName;
+		extraCapabilities += EclipsePlatformNamespace.ECLIPSE_PLATFORM_NAMESPACE + "; " + OSGI_OS + "=" + osName + "; " + OSGI_WS + "=" + wsName + "; " + OSGI_ARCH + "=" + archName;
 		ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(asMap(systemBundle.getHeaders("")), Constants.SYSTEM_BUNDLE_SYMBOLICNAME, extraPackages, extraCapabilities);
 		container.install(null, systemBundle.getLocation(), builder, null);
 
@@ -424,8 +420,7 @@ public class TestModuleContainer extends AbstractTest {
 				return new ResolverHook() {
 
 					@Override
-					public void filterSingletonCollisions(BundleCapability singleton,
-							Collection<BundleCapability> collisionCandidates) {
+					public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
 						collisionCandidates.clear();
 					}
 
@@ -435,8 +430,7 @@ public class TestModuleContainer extends AbstractTest {
 					}
 
 					@Override
-					public void filterMatches(BundleRequirement requirement,
-							Collection<BundleCapability> candidates) {
+					public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
 						// nothing
 					}
 
@@ -491,8 +485,7 @@ public class TestModuleContainer extends AbstractTest {
 				return new ResolverHook() {
 
 					@Override
-					public void filterSingletonCollisions(BundleCapability singleton,
-							Collection<BundleCapability> collisionCandidates) {
+					public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
 						// nothing
 					}
 
@@ -502,8 +495,7 @@ public class TestModuleContainer extends AbstractTest {
 					}
 
 					@Override
-					public void filterMatches(BundleRequirement requirement,
-							Collection<BundleCapability> candidates) {
+					public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
 						// nothing
 					}
 
@@ -572,14 +564,7 @@ public class TestModuleContainer extends AbstractTest {
 		Module c7 = installDummyModule("c7_v1.MF", "c7_v1", container);
 
 		List<DummyModuleEvent> actual = adaptor.getDatabase().getModuleEvents();
-		List<DummyModuleEvent> expected = Arrays.asList(
-				new DummyModuleEvent(c1, ModuleEvent.INSTALLED, State.INSTALLED),
-				new DummyModuleEvent(c2, ModuleEvent.INSTALLED, State.INSTALLED),
-				new DummyModuleEvent(c3, ModuleEvent.INSTALLED, State.INSTALLED),
-				new DummyModuleEvent(c4, ModuleEvent.INSTALLED, State.INSTALLED),
-				new DummyModuleEvent(c5, ModuleEvent.INSTALLED, State.INSTALLED),
-				new DummyModuleEvent(c6, ModuleEvent.INSTALLED, State.INSTALLED),
-				new DummyModuleEvent(c7, ModuleEvent.INSTALLED, State.INSTALLED));
+		List<DummyModuleEvent> expected = Arrays.asList(new DummyModuleEvent(c1, ModuleEvent.INSTALLED, State.INSTALLED), new DummyModuleEvent(c2, ModuleEvent.INSTALLED, State.INSTALLED), new DummyModuleEvent(c3, ModuleEvent.INSTALLED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.INSTALLED, State.INSTALLED), new DummyModuleEvent(c5, ModuleEvent.INSTALLED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.INSTALLED, State.INSTALLED), new DummyModuleEvent(c7, ModuleEvent.INSTALLED, State.INSTALLED));
 		Assert.assertEquals("Wrong install events.", expected, actual);
 	}
 
@@ -605,14 +590,7 @@ public class TestModuleContainer extends AbstractTest {
 
 		container.resolve(Arrays.asList(c1, c2, c3, c4, c5, c6, c7), true);
 		List<DummyModuleEvent> actual = database.getModuleEvents();
-		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
-				new DummyModuleEvent(c1, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c2, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c3, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c5, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED)));
+		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(c1, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c2, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c3, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c5, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED)));
 		assertEvents(expected, actual, false);
 	}
 
@@ -640,23 +618,8 @@ public class TestModuleContainer extends AbstractTest {
 
 		container.refresh(Arrays.asList(systemBundle));
 		List<DummyModuleEvent> actual = database.getModuleEvents();
-		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
-				new DummyModuleEvent(systemBundle, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c1, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c2, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c3, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c5, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(systemBundle, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c1, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c2, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c3, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c5, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED)));
+		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(systemBundle, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c1, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c2, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c3, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c5, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(systemBundle, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c1, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c2,
+				ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c3, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c5, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED)));
 		assertEvents(expected, actual, false);
 	}
 
@@ -686,16 +649,7 @@ public class TestModuleContainer extends AbstractTest {
 		c7.start();
 
 		List<DummyModuleEvent> actual = database.getModuleEvents();
-		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
-				new DummyModuleEvent(c1, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c2, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c3, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c5, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c7, ModuleEvent.STARTING, State.STARTING),
-				new DummyModuleEvent(c7, ModuleEvent.STARTED, State.ACTIVE)));
+		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(c1, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c2, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c3, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c5, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c7, ModuleEvent.STARTED, State.ACTIVE)));
 		assertEvents(expected, actual, false);
 	}
 
@@ -721,19 +675,8 @@ public class TestModuleContainer extends AbstractTest {
 		database.getModuleEvents();
 		container.refresh(Arrays.asList(c4));
 		List<DummyModuleEvent> actual = database.getModuleEvents();
-		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
-				new DummyModuleEvent(c7, ModuleEvent.STOPPING, State.STOPPING),
-				new DummyModuleEvent(c7, ModuleEvent.STOPPED, State.RESOLVED),
-				new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c5, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c5, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c7, ModuleEvent.STARTING, State.STARTING),
-				new DummyModuleEvent(c7, ModuleEvent.STARTED, State.ACTIVE)));
+		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(c7, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c7, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c5, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c5, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.STARTING,
+				State.STARTING), new DummyModuleEvent(c7, ModuleEvent.STARTED, State.ACTIVE)));
 		assertEvents(expected, actual, false);
 	}
 
@@ -789,28 +732,13 @@ public class TestModuleContainer extends AbstractTest {
 		Assert.assertEquals("Wrong number of removal pending", 0, removalPending.size());
 
 		List<DummyModuleEvent> actual = database.getModuleEvents();
-		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
-				new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c4, ModuleEvent.UPDATED, State.INSTALLED),
-				new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED),
+		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.UPDATED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED),
 
-				new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c6, ModuleEvent.UPDATED, State.INSTALLED),
-				new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED),
+		new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UPDATED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED),
 
-				new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c4, ModuleEvent.UPDATED, State.INSTALLED),
-				new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c6, ModuleEvent.UPDATED, State.INSTALLED),
-				new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED),
+		new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.UPDATED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UPDATED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED),
 
-				new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED)));
+		new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED)));
 		assertEvents(expected, actual, false);
 
 		// uninstall c4
@@ -822,12 +750,9 @@ public class TestModuleContainer extends AbstractTest {
 
 		container.refresh(null);
 		actual = database.getModuleEvents();
-		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
-				new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c4, ModuleEvent.UNINSTALLED, State.UNINSTALLED),
+		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.UNINSTALLED, State.UNINSTALLED),
 
-				new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED)));
+		new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED)));
 		assertEvents(expected, actual, false);
 	}
 
@@ -938,50 +863,29 @@ public class TestModuleContainer extends AbstractTest {
 		lazy1.start(StartOptions.USE_ACTIVATION_POLICY);
 
 		List<DummyModuleEvent> actual = database.getModuleEvents();
-		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
-				new DummyModuleEvent(lazy1, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(lazy1, ModuleEvent.LAZY_ACTIVATION, State.LAZY_STARTING)));
+		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(lazy1, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(lazy1, ModuleEvent.LAZY_ACTIVATION, State.LAZY_STARTING)));
 		assertEvents(expected, actual, true);
 
 		lazy1.start(StartOptions.LAZY_TRIGGER);
 
 		actual = database.getModuleEvents();
-		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
-				new DummyModuleEvent(lazy1, ModuleEvent.STARTING, State.STARTING),
-				new DummyModuleEvent(lazy1, ModuleEvent.STARTED, State.ACTIVE)));
+		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(lazy1, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(lazy1, ModuleEvent.STARTED, State.ACTIVE)));
 		assertEvents(expected, actual, true);
 
 		container.refresh(Arrays.asList(lazy1));
 
 		actual = database.getModuleEvents();
-		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
-				new DummyModuleEvent(lazy1, ModuleEvent.STOPPING, State.STOPPING),
-				new DummyModuleEvent(lazy1, ModuleEvent.STOPPED, State.RESOLVED),
-				new DummyModuleEvent(lazy1, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(lazy1, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(lazy1, ModuleEvent.STARTING, State.STARTING),
-				new DummyModuleEvent(lazy1, ModuleEvent.STARTED, State.ACTIVE)));
+		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(lazy1, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(lazy1, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(lazy1, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(lazy1, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(lazy1, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(lazy1, ModuleEvent.STARTED, State.ACTIVE)));
 		assertEvents(expected, actual, true);
 
 		container.update(lazy1, OSGiManifestBuilderFactory.createBuilder(getManifest("lazy1_v1.MF")), null);
 		actual = database.getModuleEvents();
-		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
-				new DummyModuleEvent(lazy1, ModuleEvent.STOPPING, State.STOPPING),
-				new DummyModuleEvent(lazy1, ModuleEvent.STOPPED, State.RESOLVED),
-				new DummyModuleEvent(lazy1, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(lazy1, ModuleEvent.UPDATED, State.INSTALLED),
-				new DummyModuleEvent(lazy1, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(lazy1, ModuleEvent.LAZY_ACTIVATION, State.LAZY_STARTING)));
+		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(lazy1, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(lazy1, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(lazy1, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(lazy1, ModuleEvent.UPDATED, State.INSTALLED), new DummyModuleEvent(lazy1, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(lazy1, ModuleEvent.LAZY_ACTIVATION, State.LAZY_STARTING)));
 		assertEvents(expected, actual, true);
 
 		container.refresh(Arrays.asList(lazy1));
 		actual = database.getModuleEvents();
-		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
-				new DummyModuleEvent(lazy1, ModuleEvent.STOPPING, State.STOPPING),
-				new DummyModuleEvent(lazy1, ModuleEvent.STOPPED, State.RESOLVED),
-				new DummyModuleEvent(lazy1, ModuleEvent.UNRESOLVED, State.INSTALLED),
-				new DummyModuleEvent(lazy1, ModuleEvent.RESOLVED, State.RESOLVED),
-				new DummyModuleEvent(lazy1, ModuleEvent.LAZY_ACTIVATION, State.LAZY_STARTING)));
+		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(lazy1, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(lazy1, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(lazy1, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(lazy1, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(lazy1, ModuleEvent.LAZY_ACTIVATION, State.LAZY_STARTING)));
 		assertEvents(expected, actual, true);
 	}
 
@@ -1025,15 +929,11 @@ public class TestModuleContainer extends AbstractTest {
 		container.getFrameworkStartLevel().setStartLevel(3);
 
 		List<DummyContainerEvent> actualContainerEvents = database.getContainerEvents(1);
-		List<DummyContainerEvent> expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(
-				new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null)));
+		List<DummyContainerEvent> expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null)));
 		Assert.assertEquals("Wrong container events.", expectedContainerEvents, actualContainerEvents);
 
 		actual = database.getModuleEvents(3);
-		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
-				new DummyModuleEvent(lazy1, ModuleEvent.LAZY_ACTIVATION, State.LAZY_STARTING),
-				new DummyModuleEvent(c4, ModuleEvent.STARTING, State.STARTING),
-				new DummyModuleEvent(c4, ModuleEvent.STARTED, State.ACTIVE)));
+		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(lazy1, ModuleEvent.LAZY_ACTIVATION, State.LAZY_STARTING), new DummyModuleEvent(c4, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c4, ModuleEvent.STARTED, State.ACTIVE)));
 		assertEvents(expected, actual, true);
 
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -1069,28 +969,20 @@ public class TestModuleContainer extends AbstractTest {
 		systemBundle.start();
 
 		actualContainerEvents = database.getContainerEvents();
-		expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(
-				new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null),
-				new DummyContainerEvent(ContainerEvent.STARTED, systemBundle, null)));
+		expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null), new DummyContainerEvent(ContainerEvent.STARTED, systemBundle, null)));
 
 		actual = database.getModuleEvents(2);
-		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
-				new DummyModuleEvent(systemBundle, ModuleEvent.STARTING, State.STARTING),
-				new DummyModuleEvent(systemBundle, ModuleEvent.STARTED, State.ACTIVE)));
+		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(systemBundle, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(systemBundle, ModuleEvent.STARTED, State.ACTIVE)));
 		assertEvents(expected, actual, true);
 
 		container.getFrameworkStartLevel().setStartLevel(3);
 
 		actualContainerEvents = database.getContainerEvents(1);
-		expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(
-				new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null)));
+		expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null)));
 		Assert.assertEquals("Wrong container events.", expectedContainerEvents, actualContainerEvents);
 
 		actual = database.getModuleEvents(3);
-		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(
-				new DummyModuleEvent(lazy1, ModuleEvent.LAZY_ACTIVATION, State.LAZY_STARTING),
-				new DummyModuleEvent(c4, ModuleEvent.STARTING, State.STARTING),
-				new DummyModuleEvent(c4, ModuleEvent.STARTED, State.ACTIVE)));
+		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(lazy1, ModuleEvent.LAZY_ACTIVATION, State.LAZY_STARTING), new DummyModuleEvent(c4, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c4, ModuleEvent.STARTED, State.ACTIVE)));
 		assertEvents(expected, actual, true);
 	}
 
@@ -1139,57 +1031,23 @@ public class TestModuleContainer extends AbstractTest {
 		systemBundle.start();
 
 		actualModuleEvents = database.getModuleEvents(16);
-		List<DummyModuleEvent> expectedModuleEvents = new ArrayList<DummyModuleEvent>(Arrays.asList(
-				new DummyModuleEvent(systemBundle, ModuleEvent.STARTING, State.STARTING),
-				new DummyModuleEvent(c7, ModuleEvent.STARTING, State.STARTING),
-				new DummyModuleEvent(c7, ModuleEvent.STARTED, State.ACTIVE),
-				new DummyModuleEvent(c6, ModuleEvent.STARTING, State.STARTING),
-				new DummyModuleEvent(c6, ModuleEvent.STARTED, State.ACTIVE),
-				new DummyModuleEvent(c5, ModuleEvent.STARTING, State.STARTING),
-				new DummyModuleEvent(c5, ModuleEvent.STARTED, State.ACTIVE),
-				new DummyModuleEvent(c4, ModuleEvent.STARTING, State.STARTING),
-				new DummyModuleEvent(c4, ModuleEvent.STARTED, State.ACTIVE),
-				new DummyModuleEvent(c3, ModuleEvent.STARTING, State.STARTING),
-				new DummyModuleEvent(c3, ModuleEvent.STARTED, State.ACTIVE),
-				new DummyModuleEvent(c2, ModuleEvent.STARTING, State.STARTING),
-				new DummyModuleEvent(c2, ModuleEvent.STARTED, State.ACTIVE),
-				new DummyModuleEvent(c1, ModuleEvent.STARTING, State.STARTING),
-				new DummyModuleEvent(c1, ModuleEvent.STARTED, State.ACTIVE),
-				new DummyModuleEvent(systemBundle, ModuleEvent.STARTED, State.ACTIVE)));
+		List<DummyModuleEvent> expectedModuleEvents = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(systemBundle, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c7, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c7, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c6, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c6, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c5, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c5, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c4, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c4, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c3, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c3, ModuleEvent.STARTED, State.ACTIVE),
+				new DummyModuleEvent(c2, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c2, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c1, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c1, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(systemBundle, ModuleEvent.STARTED, State.ACTIVE)));
 		assertEvents(expectedModuleEvents, actualModuleEvents, false);
 
 		List<DummyContainerEvent> actualContainerEvents = database.getContainerEvents();
-		List<DummyContainerEvent> expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(
-				new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null),
-				new DummyContainerEvent(ContainerEvent.STARTED, systemBundle, null)));
+		List<DummyContainerEvent> expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null), new DummyContainerEvent(ContainerEvent.STARTED, systemBundle, null)));
 		Assert.assertEquals("Wrong container events.", expectedContainerEvents, actualContainerEvents);
 
 		systemBundle.stop();
 
 		actualContainerEvents = database.getContainerEvents();
-		expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(
-				new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null),
-				new DummyContainerEvent(ContainerEvent.STOPPED, systemBundle, null)));
+		expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null), new DummyContainerEvent(ContainerEvent.STOPPED, systemBundle, null)));
 		Assert.assertEquals("Wrong container events.", expectedContainerEvents, actualContainerEvents);
 
 		actualModuleEvents = database.getModuleEvents(16);
-		expectedModuleEvents = new ArrayList<DummyModuleEvent>(Arrays.asList(
-				new DummyModuleEvent(systemBundle, ModuleEvent.STOPPING, State.STOPPING),
-				new DummyModuleEvent(c1, ModuleEvent.STOPPING, State.STOPPING),
-				new DummyModuleEvent(c1, ModuleEvent.STOPPED, State.RESOLVED),
-				new DummyModuleEvent(c2, ModuleEvent.STOPPING, State.STOPPING),
-				new DummyModuleEvent(c2, ModuleEvent.STOPPED, State.RESOLVED),
-				new DummyModuleEvent(c3, ModuleEvent.STOPPING, State.STOPPING),
-				new DummyModuleEvent(c3, ModuleEvent.STOPPED, State.RESOLVED),
-				new DummyModuleEvent(c4, ModuleEvent.STOPPING, State.STOPPING),
-				new DummyModuleEvent(c4, ModuleEvent.STOPPED, State.RESOLVED),
-				new DummyModuleEvent(c5, ModuleEvent.STOPPING, State.STOPPING),
-				new DummyModuleEvent(c5, ModuleEvent.STOPPED, State.RESOLVED),
-				new DummyModuleEvent(c6, ModuleEvent.STOPPING, State.STOPPING),
-				new DummyModuleEvent(c6, ModuleEvent.STOPPED, State.RESOLVED),
-				new DummyModuleEvent(c7, ModuleEvent.STOPPING, State.STOPPING),
-				new DummyModuleEvent(c7, ModuleEvent.STOPPED, State.RESOLVED),
-				new DummyModuleEvent(systemBundle, ModuleEvent.STOPPED, State.RESOLVED)));
+		expectedModuleEvents = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(systemBundle, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c1, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c1, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c2, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c2, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c3, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c3, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c4, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c4, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c5, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c5, ModuleEvent.STOPPED, State.RESOLVED),
+				new DummyModuleEvent(c6, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c6, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c7, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(systemBundle, ModuleEvent.STOPPED, State.RESOLVED)));
 		assertEvents(expectedModuleEvents, actualModuleEvents, false);
 
 	}
