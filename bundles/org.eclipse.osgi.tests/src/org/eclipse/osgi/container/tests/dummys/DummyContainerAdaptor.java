@@ -49,8 +49,7 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	}
 
 	@Override
-	public void publishContainerEvent(ContainerEvent type, Module module,
-			Throwable error, FrameworkListener... listeners) {
+	public void publishContainerEvent(ContainerEvent type, Module module, Throwable error, FrameworkListener... listeners) {
 		moduleDatabase.addEvent(new DummyContainerEvent(type, module, error, listeners));
 
 	}
@@ -62,12 +61,12 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 
 	@Override
 	public Module createModule(String location, long id, EnumSet<Settings> settings, int startlevel) {
-		return new DummyModule(id, location, container, moduleDatabase, settings, startlevel);
+		return new DummyModule(id, location, container, settings, startlevel);
 	}
 
 	@Override
 	public SystemModule createSystemModule() {
-		return new DummySystemModule(container, moduleDatabase);
+		return new DummySystemModule(container);
 	}
 
 	public ModuleContainer getContainer() {

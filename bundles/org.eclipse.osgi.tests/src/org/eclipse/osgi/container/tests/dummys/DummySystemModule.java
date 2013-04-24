@@ -15,11 +15,8 @@ import org.osgi.framework.Bundle;
 
 public class DummySystemModule extends SystemModule {
 
-	private final DummyModuleDatabase database;
-
-	public DummySystemModule(ModuleContainer container, DummyModuleDatabase database) {
+	public DummySystemModule(ModuleContainer container) {
 		super(container);
-		this.database = database;
 	}
 
 	@Override

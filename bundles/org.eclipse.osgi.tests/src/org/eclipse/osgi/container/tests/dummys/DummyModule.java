@@ -16,11 +16,8 @@ import org.osgi.framework.Bundle;
 
 public class DummyModule extends Module {
 
-	private final DummyModuleDatabase database;
-
-	public DummyModule(Long id, String location, ModuleContainer container, DummyModuleDatabase database, EnumSet<Settings> settings, int startlevel) {
+	public DummyModule(Long id, String location, ModuleContainer container, EnumSet<Settings> settings, int startlevel) {
 		super(id, location, container, settings, startlevel);
-		this.database = database;
 	}
 
 	@Override
