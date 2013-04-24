@@ -11,7 +11,6 @@
 package org.eclipse.osgi.container.tests;
 
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.*;
 import junit.framework.Assert;
@@ -25,8 +24,6 @@ import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
 import org.eclipse.osgi.container.tests.dummys.*;
 import org.eclipse.osgi.container.tests.dummys.DummyModuleDatabase.DummyContainerEvent;
 import org.eclipse.osgi.container.tests.dummys.DummyModuleDatabase.DummyModuleEvent;
-import org.eclipse.osgi.util.ManifestElement;
-import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
@@ -36,12 +33,11 @@ import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.*;
 import org.osgi.service.resolver.ResolutionException;
 
-public class TestModuleContainer {
+public class TestModuleContainer extends AbstractTest {
 
 	private static DummyModuleDatabase resolvedModuleDatabase;
 
-	@Before
-	public void setup() throws BundleException, ResolutionException {
+	private void setupModuleDatabase() throws BundleException, ResolutionException {
 		if (resolvedModuleDatabase == null) {
 			resolvedModuleDatabase = getDatabase();
 		}
@@ -129,8 +125,9 @@ public class TestModuleContainer {
 		createDummyAdaptor();
 	}
 
-	@Test
+	// Disabled @Test
 	public void testResolveInstallBundles() throws BundleException, ResolutionException, IOException {
+		setupModuleDatabase();
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 		resolvedModuleDatabase.store(new DataOutputStream(bytes), false);
@@ -139,8 +136,9 @@ public class TestModuleContainer {
 		adaptor.getContainer().resolve(new ArrayList<Module>(), false);
 	}
 
-	@Test
+	// Disabled @Test
 	public void testResolveInstallBundles01() throws BundleException, ResolutionException, IOException {
+		setupModuleDatabase();
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 		resolvedModuleDatabase.store(new DataOutputStream(bytes), false);
@@ -151,8 +149,9 @@ public class TestModuleContainer {
 		}
 	}
 
-	@Test
+	// Disabled @Test
 	public void testResolveAlreadyResolvedBundles() throws BundleException, ResolutionException, IOException {
+		setupModuleDatabase();
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 		resolvedModuleDatabase.store(new DataOutputStream(bytes), true);
@@ -161,8 +160,9 @@ public class TestModuleContainer {
 		adaptor.getContainer().resolve(new ArrayList<Module>(), false);
 	}
 
-	@Test
+	// Disabled @Test
 	public void testRefreshSystemBundle() throws ResolutionException, BundleException, IOException {
+		setupModuleDatabase();
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 		resolvedModuleDatabase.store(new DataOutputStream(bytes), true);
@@ -1435,27 +1435,6 @@ public class TestModuleContainer {
 			}
 			Assert.fail("Could not find required wire in expected provider wires: " + requiredWire);
 		}
-	}
-
-	private DummyContainerAdaptor createDummyAdaptor() {
-		return new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.<String, String> emptyMap());
-	}
-
-	private Module installDummyModule(String manifestFile, String location, ModuleContainer container) throws BundleException, IOException {
-		return installDummyModule(manifestFile, location, null, null, null, container);
-	}
-
-	private Module installDummyModule(String manifestFile, String location, String alias, String extraExports, String extraCapabilities, ModuleContainer container) throws BundleException, IOException {
-		Map<String, String> manifest = getManifest(manifestFile);
-		ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(manifest, alias, extraExports, extraCapabilities);
-		Module system = container.getModule(0);
-		return container.install(system, location, builder, null);
-	}
-
-	private Map<String, String> getManifest(String manifestFile) throws IOException, BundleException {
-		URL manifest = ((BundleReference) getClass().getClassLoader()).getBundle().getEntry("/manifests/" + manifestFile);
-		Assert.assertNotNull("Could not find manifest: " + manifestFile, manifest);
-		return ManifestElement.parseBundleManifest(manifest.openStream(), null);
 	}
 
 	private void assertEvents(List<DummyModuleEvent> expected, List<DummyModuleEvent> actual, boolean orderMatters) {
