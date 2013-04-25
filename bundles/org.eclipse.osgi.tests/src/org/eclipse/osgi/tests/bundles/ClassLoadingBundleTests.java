@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -347,7 +347,6 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	}
 
 	public void testFragmentExportPackage() throws Exception {
-		// TODO Expected to fail.  Will not let fragments attach to already resolved hosts
 		Bundle hostA = installer.installBundle("fragment.test.attach.host.a"); //$NON-NLS-1$
 		assertTrue("Host resolve", installer.resolveBundles(new Bundle[] {hostA})); //$NON-NLS-1$
 
@@ -1293,7 +1292,6 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	}
 
 	public void testBug207847() throws BundleException {
-		// TODO expected to fail; will not attach fragments to already resolved hosts
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
 		installer.resolveBundles(new Bundle[] {test});
 		test.start();
