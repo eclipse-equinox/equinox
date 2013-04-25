@@ -97,7 +97,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 
 	@Override
 	public String getProperty(String key) {
-		return storage.getConfiguration().getProperty(key);
+		return storage.getConfiguration().getConfiguration(key);
 	}
 
 	@Override
