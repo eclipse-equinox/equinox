@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2012 IBM Corporation and others.
+ * Copyright (c) 2008, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1549,7 +1549,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 	}
 
 	public void testBug351519RefreshDefault() {
-		// TODO this is expected to fail.  The default should be enabled if we do implement
+		// Note that for the unity framework this defaults to false
 		doTestBug351519Refresh(null);
 	}
 
@@ -1702,8 +1702,12 @@ public class SystemBundleTests extends AbstractBundleTests {
 		Map<String, Object> configuration = new HashMap<String, Object>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		configuration.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
-		if (refreshDuplicates != null)
+		if (refreshDuplicates != null) {
 			configuration.put("equinox.refresh.duplicate.bsn", refreshDuplicates.toString());
+		} else {
+			// we default to false now
+			refreshDuplicates = Boolean.FALSE;
+		}
 		Equinox equinox = new Equinox(configuration);
 		try {
 			equinox.start();
@@ -1755,7 +1759,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		assertTrue("Could not resolve test bundles", testBundleResolver.resolveBundles(new Bundle[] {tb1v1, tb1v2}));
 		Bundle[] refreshed = testBundleResolver.refreshPackages(new Bundle[] {tb1v1});
-		if (refreshDuplicates == null || refreshDuplicates.booleanValue()) {
+		if (refreshDuplicates) {
 			List refreshedList = Arrays.asList(refreshed);
 			assertEquals("Wrong number of refreshed bundles", 2, refreshed.length);
 			assertTrue("Refreshed bundles does not include v1", refreshedList.contains(tb1v1));
