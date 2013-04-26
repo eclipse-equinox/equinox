@@ -244,7 +244,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		inDevelopmentMode = devMode;
 		devLocation = f;
 
-		contextBootDelegation = "true".equals(configuration.getProperty(PROP_CONTEXT_BOOTDELEGATION)); //$NON-NLS-1$
+		contextBootDelegation = "true".equals(configuration.getProperty(PROP_CONTEXT_BOOTDELEGATION, "true")); //$NON-NLS-1$ //$NON-NLS-2$
 		compatibiltyBootDelegation = "true".equals(configuration.getProperty(PROP_COMPATIBILITY_BOOTDELEGATION)); //$NON-NLS-1$
 
 		COPY_NATIVES = Boolean.valueOf(configuration.getProperty(PROP_COPY_NATIVES)).booleanValue();
