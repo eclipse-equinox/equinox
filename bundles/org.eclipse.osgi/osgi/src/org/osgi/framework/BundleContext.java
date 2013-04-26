@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2012). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2013). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,8 +57,17 @@ import java.util.Dictionary;
  * <p>
  * The {@code BundleContext} object is only valid during the execution of its
  * context bundle; that is, during the period from when the context bundle is in
- * the {@code STARTING}, {@code STOPPING}, and {@code ACTIVE} bundle states. If
- * the {@code BundleContext} object is used subsequently, an
+ * the {@code STARTING}, {@code STOPPING}, and {@code ACTIVE} bundle states.
+ * However, the {@code BundleContext} object become invalid after
+ * {@link BundleActivator#stop(BundleContext)} returns (if the bundle has a
+ * Bundle Activator). The {@code BundleContext} object becomes invalid before
+ * disposing of any remaining registered services and releasing any remaining
+ * services in use. Since those activities can result in other bundles being
+ * called (for example, {@link ServiceListener}s for
+ * {@link ServiceEvent#UNREGISTERING} events and {@link ServiceFactory}s for
+ * unget operations), those other bundles can observe the stopping bundle in the
+ * {@code STOPPING} state but with an invalid {@code BundleContext} object. If
+ * the {@code BundleContext} object is used after it has become invalid, an
  * {@code IllegalStateException} must be thrown. The {@code BundleContext}
  * object must never be reused after its context bundle is stopped.
  * 
@@ -76,7 +85,7 @@ import java.util.Dictionary;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id$
+ * @author $Id$
  */
 
 public interface BundleContext extends BundleReference {
@@ -478,6 +487,29 @@ public interface BundleContext extends BundleReference {
 	 * @since 1.6
 	 */
 	<S> ServiceRegistration<S> registerService(Class<S> clazz, S service, Dictionary<String, ?> properties);
+
+	/**
+	 * Registers the specified service factory object with the specified
+	 * properties under the name of the specified class with the Framework.
+	 * 
+	 * <p>
+	 * This method is otherwise identical to
+	 * {@link #registerService(Class, Object, Dictionary)} and is provided to
+	 * return a type safe {@code ServiceRegistration} when registering a
+	 * {@link ServiceFactory}.
+	 * 
+	 * @param <S> Type of Service.
+	 * @param clazz The class under whose name the service can be located.
+	 * @param factory The {@code ServiceFactory} object.
+	 * @param properties The properties for this service.
+	 * @return A {@code ServiceRegistration} object for use by the bundle
+	 *         registering the service to update the service's properties or to
+	 *         unregister the service.
+	 * @throws IllegalStateException If this BundleContext is no longer valid.
+	 * @see #registerService(Class, Object, Dictionary)
+	 * @since 1.8
+	 */
+	<S> ServiceRegistration<S> registerService(Class<S> clazz, ServiceFactory<S> factory, Dictionary<String, ?> properties);
 
 	/**
 	 * Returns an array of {@code ServiceReference} objects. The returned array
