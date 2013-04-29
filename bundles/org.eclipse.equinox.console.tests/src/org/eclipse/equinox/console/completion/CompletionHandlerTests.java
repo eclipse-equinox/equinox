@@ -28,6 +28,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
 
 public class CompletionHandlerTests {
 
@@ -58,8 +61,15 @@ public class CompletionHandlerTests {
 	
 	@Test
 	public void testGetCandidates() throws Exception {
+		Filter filter = createMock(Filter.class);
+		replay(filter);
+		
 		BundleContext context = createMock(BundleContext.class);
 		expect(context.getServiceReferences(Completer.class.getName(), null)).andReturn(null).anyTimes();
+		expect(context.createFilter("(objectClass=org.eclipse.equinox.console.commands.CommandsTracker)")).andReturn(filter).anyTimes();
+		context.addServiceListener(anyObject(ServiceListener.class), anyObject(String.class));
+		expectLastCall().anyTimes();
+		expect(context.getServiceReferences("org.eclipse.equinox.console.commands.CommandsTracker", null)).andReturn(new ServiceReference[]{}).anyTimes();
 		replay(context);
 		
 		Set<String> variables = new HashSet<String>();

@@ -11,6 +11,7 @@
 
 package org.eclipse.equinox.console.supportability;
 
+import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
@@ -30,6 +31,9 @@ import org.eclipse.equinox.console.completion.common.Completer;
 import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
 
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
@@ -180,8 +184,14 @@ public class ConsoleInputScannerTests {
         res = byteOut.toString();
         Assert.assertTrue("Error processing Ins; expected las, actual " + res.substring(res.length() - 4), res.endsWith("lasa"));
 
+        Filter filter = createMock(Filter.class);
+		replay(filter);
+		
         BundleContext context = createMock(BundleContext.class);
 		expect(context.getServiceReferences(Completer.class.getName(), null)).andReturn(null).anyTimes();
+		expect(context.createFilter("(objectClass=org.eclipse.equinox.console.commands.CommandsTracker)")).andReturn(filter);
+		context.addServiceListener(anyObject(ServiceListener.class), anyObject(String.class));
+		expect(context.getServiceReferences("org.eclipse.equinox.console.commands.CommandsTracker", null)).andReturn(new ServiceReference[]{});
 		replay(context);
 		
 		Set<String> commands = new HashSet<String>();

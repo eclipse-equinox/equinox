@@ -37,6 +37,7 @@ public class HelpCommand {
 	private BundleContext context;
 	private Set<CommandProvider> legacyCommandProviders;
 	private ServiceTracker<CommandProvider, Set<CommandProvider>> commandProvidersTracker;
+	private ServiceTracker<CommandsTracker, CommandsTracker> commandsTrackerTracker;
 	private static final String COMMANDS = ".commands";
 	
     public class CommandProviderCustomizer implements ServiceTrackerCustomizer<CommandProvider, Set<CommandProvider>> {
@@ -76,6 +77,8 @@ public class HelpCommand {
 		legacyCommandProviders = new HashSet<CommandProvider>();
 		commandProvidersTracker = new ServiceTracker<CommandProvider, Set<CommandProvider>>(context, CommandProvider.class.getName(), new CommandProviderCustomizer(context));
 		commandProvidersTracker.open();
+		commandsTrackerTracker = new ServiceTracker<CommandsTracker, CommandsTracker>(context, CommandsTracker.class.getName(), null);
+		commandsTrackerTracker.open();
 	}
 	
 	public void startService() {
@@ -142,9 +145,17 @@ public class HelpCommand {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void printAllGogoCommandsHelp(final CommandSession session, String scope) throws Exception {
-		@SuppressWarnings("unchecked")
-		Set<String> commandNames = (Set<String>) session.get(COMMANDS);
+		CommandsTracker commandsTracker = commandsTrackerTracker.getService();
+		Set<String> commandNames = null;
+		if (commandsTracker != null) {
+			commandNames = commandsTracker.getCommands();
+		}
+		
+		if (commandNames == null || commandNames.isEmpty()) {
+			commandNames = (Set<String>) session.get(COMMANDS);
+		}
 		
 		try {
 			for (String commandName : commandNames) {
@@ -201,4 +212,5 @@ public class HelpCommand {
 			System.out.println("Cannot find felix:help command; bundle org.apache.felix.gogo.command is not started");
 		}
 	}
+	
 }
