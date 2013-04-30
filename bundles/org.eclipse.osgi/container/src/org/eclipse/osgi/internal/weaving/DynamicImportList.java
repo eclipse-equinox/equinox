@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.osgi.internal.weaving;
 import java.util.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Constants;
+import org.osgi.framework.PackagePermission;
 
 /**
  * A list of DynamicImport-Package statements that are to be used for adding new 
@@ -42,14 +43,14 @@ public class DynamicImportList extends AbstractList<String> implements RandomAcc
 	@Override
 	public String set(int index, String element) {
 		wovenClass.checkPermission();
-		validateSyntax(element);
+		validateSyntaxAndCheckPackagePermission(element);
 		return imports.set(index, element);
 	}
 
 	@Override
 	public void add(int index, String element) {
 		wovenClass.checkPermission();
-		validateSyntax(element);
+		validateSyntaxAndCheckPackagePermission(element);
 		imports.add(index, element);
 	}
 
@@ -59,15 +60,21 @@ public class DynamicImportList extends AbstractList<String> implements RandomAcc
 		return imports.remove(index);
 	}
 
-	private void validateSyntax(String imported) {
-		// validate the syntax of imports that are added.
+	private void validateSyntaxAndCheckPackagePermission(String dynamicImportPackageDescription) {
+		ManifestElement[] clauses;
+		// Validate the syntax of imports that are added.
 		try {
-			ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, imported);
-		} catch (Throwable t) {
-			IllegalArgumentException exception = new IllegalArgumentException();
-			exception.initCause(t);
-			throw exception;
+			clauses = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, dynamicImportPackageDescription);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
 		}
-		return;
+		SecurityManager sm = System.getSecurityManager();
+		if (sm == null)
+			return;
+		// Security is enabled. Ensure the weaver has import package permission
+		// for each dynamic import added.
+		for (ManifestElement clause : clauses)
+			for (String pkg : clause.getValueComponents())
+				sm.checkPermission(new PackagePermission(pkg, PackagePermission.IMPORT));
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,13 @@ package org.eclipse.osgi.internal.weaving;
 
 import java.security.*;
 import java.util.*;
+import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.loader.BundleLoader;
+import org.eclipse.osgi.internal.permadmin.BundlePermissions;
 import org.eclipse.osgi.internal.serviceregistry.HookContext;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
+import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.StorageUtil;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.util.ManifestElement;
@@ -267,6 +270,9 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 			for (String newImport : newImports) {
 				try {
 					ManifestElement[] importElements = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, newImport);
+					// Grant implied import package permissions for all dynamic
+					// import packages to the woven bundle.
+					addImpliedImportPackagePermissions(importElements);
 					loader.addDynamicImportPackage(importElements);
 				} catch (BundleException e) {
 					// should not have happened; checked at add.
@@ -275,6 +281,15 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		}
 
 		return wovenBytes;
+	}
+
+	private void addImpliedImportPackagePermissions(ManifestElement[] importElements) {
+		if (System.getSecurityManager() == null)
+			return;
+		ProtectionDomain wovenDomain = ((Generation) ((ModuleRevision) getBundleWiring().getRevision()).getRevisionInfo()).getDomain();
+		for (ManifestElement clause : importElements)
+			for (String pkg : clause.getValueComponents())
+				((BundlePermissions) wovenDomain.getPermissions()).addWovenPermission(new PackagePermission(pkg, PackagePermission.IMPORT));
 	}
 
 	public String toString() {
