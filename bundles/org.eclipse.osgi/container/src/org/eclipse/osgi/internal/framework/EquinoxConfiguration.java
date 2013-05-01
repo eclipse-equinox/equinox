@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -579,11 +579,13 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 				throw new IllegalArgumentException(NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_PROPS_NOT_SET, PROP_FRAMEWORK + ", " + EquinoxLocations.PROP_INSTALL_AREA)); //$NON-NLS-1$
 			URL url = cs.getLocation();
 			// allow props to be preset
-			if (configuration.get(PROP_FRAMEWORK) == null)
-				configuration.put(PROP_FRAMEWORK, url.toExternalForm());
+			if (configuration.get(PROP_FRAMEWORK) == null) {
+				String externalForm = getFrameworkPath(url.toExternalForm(), false);
+				configuration.put(PROP_FRAMEWORK, externalForm);
+			}
 			if (configuration.get(EquinoxLocations.PROP_INSTALL_AREA) == null) {
-				String filePart = url.getFile();
-				configuration.put(EquinoxLocations.PROP_INSTALL_AREA, filePart.substring(0, filePart.lastIndexOf('/')));
+				String filePart = getFrameworkPath(url.getFile(), true);
+				configuration.put(EquinoxLocations.PROP_INSTALL_AREA, filePart);
 			}
 		}
 		// always decode these properties
@@ -736,6 +738,18 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			configuration.put(PROP_OSGI_ARCH, archValue);
 		}
 
+	}
+
+	private static String getFrameworkPath(String path, boolean parent) {
+		if (File.separatorChar == '\\') {
+			// in case on windows the \ is used
+			path = path.replace('\\', '/');
+		}
+		if (parent) {
+			int lastSlash = path.lastIndexOf('/');
+			return lastSlash == -1 ? "/" : path.substring(0, lastSlash); //$NON-NLS-1$
+		}
+		return path;
 	}
 
 	private static int parseVersionInt(String value) {

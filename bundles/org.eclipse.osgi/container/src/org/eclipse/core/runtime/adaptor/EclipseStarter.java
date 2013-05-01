@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2012 IBM Corporation and others.
+ * Copyright (c) 2003, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -878,6 +878,10 @@ public class EclipseStarter {
 		if (url == null)
 			return null;
 		String result = url.getFile();
+		if (File.separatorChar == '\\') {
+			// in case on windows the \ is used
+			result.replace('\\', '/');
+		}
 		if (result.endsWith(".jar")) { //$NON-NLS-1$
 			result = result.substring(0, result.lastIndexOf('/'));
 			if ("folder".equals(getProperty(PROP_FRAMEWORK_SHAPE))) //$NON-NLS-1$
