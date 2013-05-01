@@ -745,6 +745,12 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			// in case on windows the \ is used
 			path = path.replace('\\', '/');
 		}
+		// TODO is there a better way?
+		// this is a hack to get the framework to launch from a self-hosted eclipse instance
+		// we assume the code source will end in the path org.eclipse.osgi/bin/
+		if (path.endsWith("org.eclipse.osgi/bin/")) { //$NON-NLS-1$
+			path = path.substring(0, path.length() - "bin/".length()); //$NON-NLS-1$
+		}
 		if (parent) {
 			int lastSlash = path.lastIndexOf('/');
 			return lastSlash == -1 ? "/" : path.substring(0, lastSlash); //$NON-NLS-1$

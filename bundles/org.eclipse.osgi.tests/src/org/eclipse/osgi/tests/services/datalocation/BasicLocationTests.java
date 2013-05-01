@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -285,7 +285,6 @@ public class BasicLocationTests extends CoreTest {
 
 	public void testSlashes() throws BundleException, InvalidSyntaxException {
 		Map<String, String> fwkConfig = new HashMap<String, String>();
-		fwkConfig.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, prefix + "/a");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, prefix + "/c/d");
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA, prefix + "/e/f");
@@ -320,7 +319,6 @@ public class BasicLocationTests extends CoreTest {
 
 	public void testSchemes() throws Exception {
 		Map<String, String> fwkConfig = new HashMap<String, String>();
-		fwkConfig.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "http://example.com/a");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "ftp://example.com/c/d");
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA, "platform:/base/e/f");
@@ -342,7 +340,6 @@ public class BasicLocationTests extends CoreTest {
 
 	public void testNone() throws Exception {
 		Map<String, String> fwkConfig = new HashMap<String, String>();
-		fwkConfig.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "@none");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "@none");
 		// TODO framework does not handle no config area well
@@ -364,7 +361,6 @@ public class BasicLocationTests extends CoreTest {
 
 	public void testUserDir() throws Exception {
 		Map<String, String> fwkConfig = new HashMap<String, String>();
-		fwkConfig.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "@user.dir");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "@user.dir");
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA, "@user.dir");
@@ -385,7 +381,6 @@ public class BasicLocationTests extends CoreTest {
 
 	public void testUserHome() throws Exception {
 		Map<String, String> fwkConfig = new HashMap<String, String>();
-		fwkConfig.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "@user.home");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "@user.home");
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA, "@user.home");
@@ -409,7 +404,6 @@ public class BasicLocationTests extends CoreTest {
 		if (!windows)
 			return;
 		Map<String, String> fwkConfig = new HashMap<String, String>();
-		fwkConfig.put("osgi.framework", OSGiTestsActivator.getContext().getProperty("osgi.framework"));
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "//server/share/a");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "//server/share/b");
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA, "//server/share/c");
