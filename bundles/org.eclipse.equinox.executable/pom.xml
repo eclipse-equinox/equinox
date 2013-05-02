@@ -316,6 +316,11 @@
                         <include name="**/*"/>
                       </fileset>
                     </copy>
+                    <copy todir="contributed">
+                      <fileset dir="../../../rt.equinox.binaries/org.eclipse.equinox.executable/contributed/">
+                        <include name="**/*"/>
+                      </fileset>
+                    </copy>
 
                     <!-- Things below were copied from custombuildCallbacks.xml, as 
                       Tycho does not support that -->
