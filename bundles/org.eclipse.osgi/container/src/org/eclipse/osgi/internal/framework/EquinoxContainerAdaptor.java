@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.framework;
 
-import java.util.EnumSet;
-import java.util.Map;
+import java.security.ProtectionDomain;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.internal.loader.*;
+import org.eclipse.osgi.internal.permadmin.BundlePermissions;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.Storage;
 import org.osgi.framework.*;
@@ -28,6 +30,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	private final Map<Long, Generation> initial;
 	// The ClassLoader parent to use when creating ModuleClassLoaders.
 	private final ClassLoader moduleClassLoaderParent;
+	private final AtomicLong lastSecurityAdminFlush;
 
 	public EquinoxContainerAdaptor(EquinoxContainer container, Storage storage, Map<Long, Generation> initial) {
 		this.container = container;
@@ -35,6 +38,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		this.hooks = new OSGiFrameworkHooks(container);
 		this.initial = initial;
 		this.moduleClassLoaderParent = getModuleClassLoaderParent(container.getConfiguration());
+		this.lastSecurityAdminFlush = new AtomicLong();
 	}
 
 	private static ClassLoader getModuleClassLoaderParent(EquinoxConfiguration configuration) {
@@ -126,6 +130,22 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		if (current instanceof BundleLoader) {
 			BundleLoader bundleLoader = (BundleLoader) current;
 			bundleLoader.close();
+			long updatedTimestamp = storage.getModuleDatabase().getRevisionsTimestamp();
+			if (System.getSecurityManager() != null && updatedTimestamp != lastSecurityAdminFlush.getAndSet(updatedTimestamp)) {
+				storage.getSecurityAdmin().clearCaches();
+				List<Module> modules = storage.getModuleContainer().getModules();
+				for (Module module : modules) {
+					for (ModuleRevision revision : module.getRevisions().getModuleRevisions()) {
+						Generation generation = (Generation) revision.getRevisionInfo();
+						if (generation != null) {
+							ProtectionDomain domain = generation.getDomain();
+							if (domain != null) {
+								((BundlePermissions) domain.getPermissions()).clearPermissionCache();
+							}
+						}
+					}
+				}
+			}
 		}
 		Generation generation = (Generation) moduleWiring.getRevision().getRevisionInfo();
 		generation.clearManifestCache();

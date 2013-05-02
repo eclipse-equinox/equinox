@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -213,11 +213,11 @@ public final class BundleInfo {
 		}
 
 		public ProtectionDomain getDomain() {
-			if (getBundleId() == 0) {
+			if (getBundleId() == 0 || System.getSecurityManager() == null) {
 				return null;
 			}
 			synchronized (this.genMonitor) {
-				if (domain == null && System.getSecurityManager() != null) {
+				if (domain == null) {
 					if (revision == null) {
 						throw new IllegalStateException("The revision is not yet set for this generation."); //$NON-NLS-1$
 					}

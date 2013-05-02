@@ -92,7 +92,7 @@ public final class BundlePermissions extends PermissionCollection {
 		return bundle;
 	}
 
-	void clearPermissionCache() {
+	public void clearPermissionCache() {
 		if (impliedPermissions != null)
 			impliedPermissions.clearPermissionCache();
 		if (restrictedPermissions != null)

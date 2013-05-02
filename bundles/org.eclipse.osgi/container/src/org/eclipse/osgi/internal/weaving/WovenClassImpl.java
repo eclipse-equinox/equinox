@@ -284,12 +284,13 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 	}
 
 	private void addImpliedImportPackagePermissions(ManifestElement[] importElements) {
-		if (System.getSecurityManager() == null)
-			return;
 		ProtectionDomain wovenDomain = ((Generation) ((ModuleRevision) getBundleWiring().getRevision()).getRevisionInfo()).getDomain();
-		for (ManifestElement clause : importElements)
-			for (String pkg : clause.getValueComponents())
-				((BundlePermissions) wovenDomain.getPermissions()).addWovenPermission(new PackagePermission(pkg, PackagePermission.IMPORT));
+		if (wovenDomain != null) {
+			// security is enabled; add the permissions
+			for (ManifestElement clause : importElements)
+				for (String pkg : clause.getValueComponents())
+					((BundlePermissions) wovenDomain.getPermissions()).addWovenPermission(new PackagePermission(pkg, PackagePermission.IMPORT));
+		}
 	}
 
 	public String toString() {
