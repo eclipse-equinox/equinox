@@ -56,7 +56,7 @@ public class CompletionHandler {
          	if ((cursor - currentToken.length() > 0) && (buf[cursor - currentToken.length() - 1] == VARIABLE_PREFIX)){
         		completers.add(new VariableNamesCompleter(session));
         	}else {
-        		completers.add(new CommandNamesCompleter(session));
+        		completers.add(new CommandNamesCompleter(context, session));
         		completers.add(new FileNamesCompleter());
         	}
         }

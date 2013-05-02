@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.eclipse.equinox.console.commands.CommandsTracker;
 import org.eclipse.equinox.console.commands.DisconnectCommand;
 import org.eclipse.equinox.console.commands.EquinoxCommandProvider;
 import org.eclipse.equinox.console.commands.HelpCommand;
@@ -228,6 +229,9 @@ public class Activator implements BundleActivator {
 		
 		DisconnectCommand disconnectCommand = new DisconnectCommand(context);
 		disconnectCommand.startService();
+		
+		CommandsTracker commandsTracker = new CommandsTracker(context);
+		context.registerService(CommandsTracker.class.getName(), commandsTracker, null);
 
 		startBundle("org.apache.felix.gogo.runtime", true);
 		startBundle("org.apache.felix.gogo.shell", true);

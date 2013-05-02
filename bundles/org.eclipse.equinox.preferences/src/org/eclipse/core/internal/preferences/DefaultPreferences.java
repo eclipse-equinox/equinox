@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Gunnar Wagenknecht - Bug 179695 - [prefs] NPE when using Preferences API without a product
+ *     Thirumala Reddy Mutchukota, Google Inc - Bug 380859 - [prefs] Inconsistency between DefaultPreferences and InstancePreferences
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
@@ -122,14 +123,17 @@ public class DefaultPreferences extends EclipsePreferences {
 			String value = defaultValues.getProperty(fullKey);
 			if (value == null)
 				continue;
-			IPath childPath = new Path(fullKey);
-			String key = childPath.lastSegment();
-			childPath = childPath.removeLastSegments(1);
 			String localQualifier = id;
-			if (id == null) {
-				localQualifier = childPath.segment(0);
-				childPath = childPath.removeFirstSegments(1);
+			String fullPath = fullKey;
+			int firstIndex = fullKey.indexOf(PATH_SEPARATOR);
+			if (id == null && firstIndex > 0) {
+				localQualifier = fullKey.substring(0, firstIndex);
+				fullPath = fullKey.substring(firstIndex, fullKey.length());
 			}
+			String[] splitPath = decodePath(fullPath);
+			String childPath = splitPath[0];
+			childPath = makeRelative(childPath);
+			String key = splitPath[1];
 			if (name().equals(localQualifier)) {
 				value = translatePreference(value, translations);
 				if (EclipsePreferences.DEBUG_PREFERENCE_SET)

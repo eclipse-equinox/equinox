@@ -18,15 +18,22 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.eclipse.equinox.console.commands.CommandsTracker;
 import org.junit.Test;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
 
 public class CommandNamesCompleterTests {
 	
 	private static final String COMMANDS = ".commands";
 
 	@Test
-	public void testGetCandidates() {
+	public void testGetCandidates() throws Exception {
 		Set<String> commands = new HashSet<String>();
 		commands.add("equinox:bundles");
 		commands.add("equinox:diag");
@@ -39,7 +46,17 @@ public class CommandNamesCompleterTests {
 		expect(session.get(COMMANDS)).andReturn(commands).times(4);
 		replay(session);
 		
-		CommandNamesCompleter completer = new CommandNamesCompleter(session);
+		Filter filter = createMock(Filter.class);
+		replay(filter);
+		
+		BundleContext context = createMock(BundleContext.class);
+//		expect(context.createFilter(String.format("(&(%s=*)(%s=*))", CommandProcessor.COMMAND_SCOPE, CommandProcessor.COMMAND_FUNCTION))).andReturn(filter);
+		expect(context.createFilter("(objectClass=org.eclipse.equinox.console.commands.CommandsTracker)")).andReturn(filter);
+		context.addServiceListener(anyObject(ServiceListener.class), anyObject(String.class));
+		expect(context.getServiceReferences("org.eclipse.equinox.console.commands.CommandsTracker", null)).andReturn(new ServiceReference[]{});
+		replay(context);
+		
+		CommandNamesCompleter completer = new CommandNamesCompleter(context, session);
 		Map<String, Integer> candidates;
 		
 		candidates = completer.getCandidates("se", 2);

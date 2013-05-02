@@ -58,7 +58,7 @@ public class FrameworkLauncher {
 	protected static final String LAUNCH_INI = "launch.ini"; //$NON-NLS-1$
 
 	private static final String EXTENSIONBUNDLE_DEFAULT_BSN = "org.eclipse.equinox.servletbridge.extensionbundle"; //$NON-NLS-1$
-	private static final String EXTENSIONBUNDLE_DEFAULT_VERSION = "1.2.0"; //$NON-NLS-1$
+	private static final String EXTENSIONBUNDLE_DEFAULT_VERSION = "1.3.0"; //$NON-NLS-1$
 	private static final String MANIFEST_VERSION = "Manifest-Version"; //$NON-NLS-1$
 	private static final String BUNDLE_MANIFEST_VERSION = "Bundle-ManifestVersion"; //$NON-NLS-1$
 	private static final String BUNDLE_NAME = "Bundle-Name"; //$NON-NLS-1$
