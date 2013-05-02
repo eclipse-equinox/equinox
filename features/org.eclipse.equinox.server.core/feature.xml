@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.equinox.server.core"
       label="%featureName"
-      version="1.2.0.qualifier"
+      version="1.3.0.qualifier"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="1.0.0.qualifier">
@@ -76,6 +76,14 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.osgi.compatibility.state"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
          unpack="false"/>
 
 </feature>
