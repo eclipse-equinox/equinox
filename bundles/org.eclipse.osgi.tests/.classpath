@@ -106,5 +106,6 @@
 	<classpathentry kind="src" output="bundle_tests/test.bug306181b" path="bundles_src/test.bug306181b"/>
 	<classpathentry kind="src" output="bundle_tests/test.logging.a" path="bundles_src/test.logging.a"/>
 	<classpathentry kind="src" output="bundle_tests/geturl" path="bundles_src/geturl"/>
+	<classpathentry kind="src" output="bundle_tests/test.bug375784" path="bundles_src/test.bug375784"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
