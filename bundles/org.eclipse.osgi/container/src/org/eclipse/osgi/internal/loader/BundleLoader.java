@@ -446,17 +446,38 @@ public class BundleLoader implements ModuleLoader {
 		if (context == null || context.length < 2)
 			return false;
 		// skip the first class; it is the ClassContext class
-		for (int i = 1; i < context.length; i++)
-			// find the first class in the context which is not BundleLoader or instanceof ClassLoader
-			if (context[i] != BundleLoader.class && !ClassLoader.class.isAssignableFrom(context[i]) && !context[i].getName().equals("java.lang.J9VMInternals")) { //$NON-NLS-1$
-				// only find in parent if the class is not "Class" (Class#forName case) or if the class is not loaded with a BundleClassLoader
-				ClassLoader cl = getClassLoader(context[i]);
-				if (cl != FW_CLASSLOADER) { // extra check incase an adaptor adds another class into the stack besides an instance of ClassLoader
-					if (Class.class != context[i] && !(cl instanceof ModuleClassLoader))
-						return true;
-					break;
+		for (int i = 1; i < context.length; i++) {
+			Class<?> clazz = context[i];
+			// Find the first class in the context which is not BundleLoader or the ModuleClassLoader;
+			// We ignore ClassLoader because ModuleClassLoader extends it
+			if (clazz != BundleLoader.class && !ModuleClassLoader.class.isAssignableFrom(clazz) && clazz != ClassLoader.class && !clazz.getName().equals("java.lang.J9VMInternals")) { //$NON-NLS-1$
+				if (Class.class == clazz) {
+					// We ignore any requests from Class (e.g Class.forName case)
+					return false;
+				}
+				if (Bundle.class.isAssignableFrom(clazz)) {
+					// We ignore any requests from Bundle (e.g. Bundle.loadClass case)
+					return false;
+				}
+				// only find in parent if the class is not loaded with a ModuleClassLoader
+				ClassLoader cl = getClassLoader(clazz);
+				// extra check incase an adaptor adds another class into the stack besides an instance of ClassLoader
+				if (cl != FW_CLASSLOADER) {
+					// if the class is loaded from a class loader implemented by a bundle then we do not boot delegate
+					ClassLoader last = null;
+					while (cl != null && cl != last) {
+						last = cl;
+						if (cl instanceof ModuleClassLoader) {
+							return false;
+						}
+						cl = getClassLoader(cl.getClass());
+					}
+
+					// request is not from a bundle
+					return true;
 				}
 			}
+		}
 		return false;
 	}
 
