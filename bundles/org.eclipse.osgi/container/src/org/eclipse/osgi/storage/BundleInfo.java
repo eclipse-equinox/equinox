@@ -97,13 +97,18 @@ public final class BundleInfo {
 			synchronized (genMonitor) {
 				if (rawHeaders == null) {
 					BundleEntry manifest = getBundleFile().getEntry(OSGI_BUNDLE_MANIFEST);
-					try {
-						rawHeaders = Headers.parseManifest(manifest.getInputStream());
-					} catch (Exception e) {
-						if (e instanceof RuntimeException) {
-							throw (RuntimeException) e;
+					if (manifest == null) {
+						rawHeaders = new Headers<String, String>(0);
+						rawHeaders.setReadOnly();
+					} else {
+						try {
+							rawHeaders = Headers.parseManifest(manifest.getInputStream());
+						} catch (Exception e) {
+							if (e instanceof RuntimeException) {
+								throw (RuntimeException) e;
+							}
+							throw new RuntimeException("Error occurred getting the bundle manifest.", e); //$NON-NLS-1$
 						}
-						throw new RuntimeException("Error occurred getting the bundle manifest.", e); //$NON-NLS-1$
 					}
 				}
 				return rawHeaders;
