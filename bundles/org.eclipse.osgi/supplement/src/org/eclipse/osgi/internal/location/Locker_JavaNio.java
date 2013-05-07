@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ package org.eclipse.osgi.internal.location;
 import java.io.*;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -42,9 +43,9 @@ public class Locker_JavaNio implements Locker {
 		} catch (IOException ioe) {
 			// print exception if debugging
 			if (debug)
-				System.out.println(NLS.bind(EclipseAdaptorMsg.location_cannotLock, lockFile));
+				System.out.println(NLS.bind(Msg.location_cannotLock, lockFile));
 			// produce a more specific message for clients
-			String specificMessage = NLS.bind(EclipseAdaptorMsg.location_cannotLockNIO, new Object[] {lockFile, ioe.getMessage(), "\"-D" + BasicLocation.PROP_OSGI_LOCKING + "=none\""}); //$NON-NLS-1$ //$NON-NLS-2$
+			String specificMessage = NLS.bind(Msg.location_cannotLockNIO, new Object[] {lockFile, ioe.getMessage(), "\"-D" + BasicLocation.PROP_OSGI_LOCKING + "=none\""}); //$NON-NLS-1$ //$NON-NLS-2$
 			throw new IOException(specificMessage);
 		} catch (OverlappingFileLockException e) {
 			// handle it as null result
@@ -92,9 +93,9 @@ public class Locker_JavaNio implements Locker {
 					tempLock = temp.getChannel().tryLock(0, 1, false);
 				} catch (IOException ioe) {
 					if (debug)
-						System.out.println(NLS.bind(EclipseAdaptorMsg.location_cannotLock, lockFile));
+						System.out.println(NLS.bind(Msg.location_cannotLock, lockFile));
 					// produce a more specific message for clients
-					String specificMessage = NLS.bind(EclipseAdaptorMsg.location_cannotLockNIO, new Object[] {lockFile, ioe.getMessage(), "\"-D" + BasicLocation.PROP_OSGI_LOCKING + "=none\""}); //$NON-NLS-1$ //$NON-NLS-2$
+					String specificMessage = NLS.bind(Msg.location_cannotLockNIO, new Object[] {lockFile, ioe.getMessage(), "\"-D" + BasicLocation.PROP_OSGI_LOCKING + "=none\""}); //$NON-NLS-1$ //$NON-NLS-2$
 					throw new IOException(specificMessage);
 				}
 				if (tempLock != null) {

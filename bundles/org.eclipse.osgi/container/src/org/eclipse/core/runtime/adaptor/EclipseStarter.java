@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
+import org.eclipse.osgi.framework.internal.core.Msg;
+
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.*;
@@ -213,7 +215,7 @@ public class EclipseStarter {
 	 */
 	public static Object run(String[] args, Runnable endSplashHandler) throws Exception {
 		if (running)
-			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ALREADY_RUNNING);
+			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ALREADY_RUNNING);
 		boolean startupFailed = true;
 		try {
 			startup(args, endSplashHandler);
@@ -226,7 +228,7 @@ public class EclipseStarter {
 			if (endSplashHandler != null)
 				endSplashHandler.run();
 			// may use startupFailed to understand where the error happened
-			FrameworkLogEntry logEntry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, startupFailed ? EclipseAdaptorMsg.ECLIPSE_STARTUP_STARTUP_ERROR : EclipseAdaptorMsg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null);
+			FrameworkLogEntry logEntry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, startupFailed ? Msg.ECLIPSE_STARTUP_STARTUP_ERROR : Msg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null);
 			if (log != null)
 				log.log(logEntry);
 			else
@@ -241,7 +243,7 @@ public class EclipseStarter {
 				if (!Boolean.valueOf(getProperty(PROP_NOSHUTDOWN)).booleanValue())
 					shutdown();
 			} catch (Throwable e) {
-				FrameworkLogEntry logEntry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_SHUTDOWN_ERROR, 1, e, null);
+				FrameworkLogEntry logEntry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, Msg.ECLIPSE_STARTUP_SHUTDOWN_ERROR, 1, e, null);
 				if (log != null)
 					log.log(logEntry);
 				else
@@ -252,7 +254,7 @@ public class EclipseStarter {
 		// we only get here if an error happened
 		if (getProperty(PROP_EXITCODE) == null) {
 			setProperty(PROP_EXITCODE, "13"); //$NON-NLS-1$
-			setProperty(PROP_EXITDATA, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_CHECK_LOG, log == null ? null : log.getFile().getPath()));
+			setProperty(PROP_EXITDATA, NLS.bind(Msg.ECLIPSE_STARTUP_ERROR_CHECK_LOG, log == null ? null : log.getFile().getPath()));
 		}
 		return null;
 	}
@@ -278,7 +280,7 @@ public class EclipseStarter {
 	 */
 	public static BundleContext startup(String[] args, Runnable endSplashHandler) throws Exception {
 		if (running)
-			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ALREADY_RUNNING);
+			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ALREADY_RUNNING);
 		processCommandLine(args);
 		finalizeProperties();
 		framework = new Equinox(configuration);
@@ -353,7 +355,7 @@ public class EclipseStarter {
 	 */
 	public static Object run(Object argument) throws Exception {
 		if (!running)
-			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_NOT_RUNNING);
+			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_NOT_RUNNING);
 		// if we are just initializing, do not run the application just return.
 		if (initialize)
 			return new Integer(0);
@@ -427,14 +429,14 @@ public class EclipseStarter {
 			if (bundles[i].getState() != Bundle.ACTIVE) {
 				if (bundles[i].getState() == Bundle.INSTALLED) {
 					// Log that the bundle is not resolved
-					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED, bundles[i].getLocation()), 0, null, null));
+					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED, bundles[i].getLocation()), 0, null, null));
 					continue;
 				}
 				// check that the startlevel allows the bundle to be active (111550)
 				FrameworkStartLevel fwStartLevel = context.getBundle().adapt(FrameworkStartLevel.class);
 				BundleStartLevel bundleStartLevel = bundles[i].adapt(BundleStartLevel.class);
 				if (fwStartLevel != null && (bundleStartLevel.getStartLevel() <= fwStartLevel.getStartLevel())) {
-					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE, bundles[i]), 0, null, null));
+					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE, bundles[i]), 0, null, null));
 				}
 			}
 		}
@@ -614,7 +616,7 @@ public class EclipseStarter {
 			try {
 				URL location = searchForBundle(name, syspath);
 				if (location == null) {
-					FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_BUNDLE_NOT_FOUND, installEntries[i]), 0, null, null);
+					FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_BUNDLE_NOT_FOUND, installEntries[i]), 0, null, null);
 					log.log(entry);
 					// skip this entry
 					continue;
@@ -932,7 +934,7 @@ public class EclipseStarter {
 					curInitBundles[i].uninstall();
 					toRefresh.add(curInitBundles[i]);
 				} catch (BundleException e) {
-					FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_UNINSTALL, curInitBundles[i].getLocation()), 0, e, null);
+					FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_FAILED_UNINSTALL, curInitBundles[i].getLocation()), 0, e, null);
 					log.log(entry);
 				}
 		}
@@ -970,10 +972,10 @@ public class EclipseStarter {
 				if ((osgiBundle.getState() & Bundle.INSTALLED) != 0)
 					toRefresh.add(osgiBundle);
 			} catch (BundleException e) {
-				FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
+				FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
 				log.log(entry);
 			} catch (IOException e) {
-				FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
+				FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
 				log.log(entry);
 			}
 		}
@@ -1031,7 +1033,7 @@ public class EclipseStarter {
 		} catch (BundleException e) {
 			if ((bundle.getState() & Bundle.RESOLVED) != 0) {
 				// only log errors if the bundle is resolved
-				FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_START, bundle.getLocation()), 0, e, null);
+				FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_FAILED_START, bundle.getLocation()), 0, e, null);
 				log.log(entry);
 			}
 		}
@@ -1336,7 +1338,7 @@ public class EclipseStarter {
 	 */
 	static void internalAddFrameworkShutdownHandler(Runnable handler) {
 		if (running)
-			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ALREADY_RUNNING);
+			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ALREADY_RUNNING);
 
 		if (shutdownHandlers == null)
 			shutdownHandlers = new ArrayList<Runnable>();
@@ -1354,7 +1356,7 @@ public class EclipseStarter {
 	 */
 	static void internalRemoveFrameworkShutdownHandler(Runnable handler) {
 		if (running)
-			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ALREADY_RUNNING);
+			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ALREADY_RUNNING);
 
 		if (shutdownHandlers != null)
 			shutdownHandlers.remove(handler);

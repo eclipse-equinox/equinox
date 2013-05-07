@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,11 +14,11 @@ package org.eclipse.core.runtime.internal.adaptor;
 import java.lang.reflect.Method;
 import java.util.Map;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
+import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
-import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
 import org.eclipse.osgi.service.runnable.*;
 import org.osgi.framework.*;
 
@@ -72,7 +72,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 		// here we assume that launch has been called by runtime before we started
 		// TODO this may be a bad assumption but it works for now because we register the app launcher as a service and runtime synchronously calls launch on the service
 		if (failOnNoDefault && runnable == null)
-			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_NO_APPLICATION);
+			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ERROR_NO_APPLICATION);
 		Object result = null;
 		boolean doRelaunch;
 		do {
@@ -82,7 +82,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 				if (!relaunch || (context.getBundle().getState() & Bundle.ACTIVE) == 0)
 					throw e;
 				if (log != null)
-					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null));
+					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, Msg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null));
 			}
 			doRelaunch = (relaunch && (context.getBundle().getState() & Bundle.ACTIVE) != 0);
 		} while (doRelaunch);
@@ -151,6 +151,6 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 			launch.invoke(defaultApp, new Object[] {null});
 			return start(argument);
 		}
-		throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_NO_APPLICATION);
+		throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ERROR_NO_APPLICATION);
 	}
 }

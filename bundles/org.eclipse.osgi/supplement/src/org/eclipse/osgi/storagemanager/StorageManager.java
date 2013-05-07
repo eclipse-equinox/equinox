@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,11 @@ package org.eclipse.osgi.storagemanager;
 import java.io.*;
 import java.security.AccessController;
 import java.util.*;
+import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.internal.reliablefile.*;
 import org.eclipse.osgi.framework.util.SecureAction;
-import org.eclipse.osgi.internal.location.*;
+import org.eclipse.osgi.internal.location.BasicLocation;
+import org.eclipse.osgi.internal.location.Locker;
 
 /**
  * Storage managers provide a facility for tracking the state of a group of files having 
@@ -214,11 +216,11 @@ public final class StorageManager {
 	 */
 	private void add(String managedFile, int fileType) throws IOException {
 		if (!open)
-			throw new IOException(EclipseAdaptorMsg.fileManager_notOpen);
+			throw new IOException(Msg.fileManager_notOpen);
 		if (readOnly)
-			throw new IOException(EclipseAdaptorMsg.fileManager_illegalInReadOnlyMode);
+			throw new IOException(Msg.fileManager_illegalInReadOnlyMode);
 		if (!lock(true))
-			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
+			throw new IOException(Msg.fileManager_cannotLock);
 		try {
 			updateTable();
 			Entry entry = (Entry) table.get(managedFile);
@@ -285,11 +287,11 @@ public final class StorageManager {
 	 */
 	public void update(String[] managedFiles, String[] sources) throws IOException {
 		if (!open)
-			throw new IOException(EclipseAdaptorMsg.fileManager_notOpen);
+			throw new IOException(Msg.fileManager_notOpen);
 		if (readOnly)
-			throw new IOException(EclipseAdaptorMsg.fileManager_illegalInReadOnlyMode);
+			throw new IOException(Msg.fileManager_illegalInReadOnlyMode);
 		if (!lock(true))
-			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
+			throw new IOException(Msg.fileManager_cannotLock);
 		try {
 			updateTable();
 			int[] originalReadIDs = new int[managedFiles.length];
@@ -305,7 +307,7 @@ public final class StorageManager {
 					Entry entry = (Entry) table.get(managedFiles[i]);
 					entry.setReadId(originalReadIDs[i]);
 				}
-				throw new IOException(EclipseAdaptorMsg.fileManager_updateFailed);
+				throw new IOException(Msg.fileManager_updateFailed);
 			}
 			save(); //save only if no errors
 		} finally {
@@ -384,7 +386,7 @@ public final class StorageManager {
 		if (locker == null) {
 			locker = BasicLocation.createLocker(lockFile, lockMode, false);
 			if (locker == null)
-				throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
+				throw new IOException(Msg.fileManager_cannotLock);
 		}
 		boolean locked = locker.lock();
 		if (locked || !wait)
@@ -423,7 +425,7 @@ public final class StorageManager {
 	 */
 	public File lookup(String managedFile, boolean add) throws IOException {
 		if (!open)
-			throw new IOException(EclipseAdaptorMsg.fileManager_notOpen);
+			throw new IOException(Msg.fileManager_notOpen);
 		Entry entry = (Entry) table.get(managedFile);
 		if (entry == null) {
 			if (add) {
@@ -463,13 +465,13 @@ public final class StorageManager {
 	 */
 	public void remove(String managedFile) throws IOException {
 		if (!open)
-			throw new IOException(EclipseAdaptorMsg.fileManager_notOpen);
+			throw new IOException(Msg.fileManager_notOpen);
 		if (readOnly)
-			throw new IOException(EclipseAdaptorMsg.fileManager_illegalInReadOnlyMode);
+			throw new IOException(Msg.fileManager_illegalInReadOnlyMode);
 		// The removal needs to be done eagerly, so the value is effectively removed from the disktable. 
 		// Otherwise, an updateTable() caused by an update(,)  could cause the file to readded to the local table.
 		if (!lock(true))
-			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
+			throw new IOException(Msg.fileManager_cannotLock);
 		try {
 			updateTable();
 			table.remove(managedFile);
@@ -601,7 +603,7 @@ public final class StorageManager {
 			return;
 		//Lock first, so someone else can not start while we're in the middle of cleanup
 		if (doLock && !lock(true))
-			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
+			throw new IOException(Msg.fileManager_cannotLock);
 		try {
 			//Iterate through the temp files and delete them all, except the one representing this storage manager.
 			String[] files = managerRoot.list();
@@ -696,12 +698,12 @@ public final class StorageManager {
 		if (!readOnly) {
 			managerRoot.mkdirs();
 			if (!managerRoot.exists())
-				throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
+				throw new IOException(Msg.fileManager_cannotLock);
 			if (openCleanup)
 				cleanup(true);
 			boolean locked = lock(wait);
 			if (!locked && wait)
-				throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
+				throw new IOException(Msg.fileManager_cannotLock);
 		}
 
 		try {
@@ -726,7 +728,7 @@ public final class StorageManager {
 	 */
 	public File createTempFile(String file) throws IOException {
 		if (readOnly)
-			throw new IOException(EclipseAdaptorMsg.fileManager_illegalInReadOnlyMode);
+			throw new IOException(Msg.fileManager_illegalInReadOnlyMode);
 		File tmpFile = File.createTempFile(file, ReliableFile.tmpExt, base);
 		// bug 350106: do not use deleteOnExit()  If clients really want that the
 		// they can call it themselves.

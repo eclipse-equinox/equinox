@@ -21,6 +21,8 @@ import static org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_EXTENSION;
 import static org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_FRAGMENT;
 import static org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_REQUIREBUNDLE;
 
+import org.eclipse.osgi.framework.internal.core.Msg;
+
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.*;
@@ -29,7 +31,6 @@ import java.util.*;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
-import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.environment.Constants;
@@ -576,7 +577,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		if (configuration.get(PROP_FRAMEWORK) == null || configuration.get(EquinoxLocations.PROP_INSTALL_AREA) == null) {
 			CodeSource cs = EquinoxConfiguration.class.getProtectionDomain().getCodeSource();
 			if (cs == null)
-				throw new IllegalArgumentException(NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_PROPS_NOT_SET, PROP_FRAMEWORK + ", " + EquinoxLocations.PROP_INSTALL_AREA)); //$NON-NLS-1$
+				throw new IllegalArgumentException(NLS.bind(Msg.ECLIPSE_STARTUP_PROPS_NOT_SET, PROP_FRAMEWORK + ", " + EquinoxLocations.PROP_INSTALL_AREA)); //$NON-NLS-1$
 			URL url = cs.getLocation();
 			// allow props to be preset
 			if (configuration.get(PROP_FRAMEWORK) == null) {
@@ -692,7 +693,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 						break;
 					default :
 						// if the user passed us in a bogus value then log a message and use the default
-						System.err.println(NLS.bind(EclipseAdaptorMsg.error_badNL, nlValue));
+						System.err.println(NLS.bind(Msg.error_badNL, nlValue));
 						userLocale = Locale.getDefault();
 						break;
 				}

@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.internal.hooks;
 
+import org.eclipse.osgi.framework.internal.core.Msg;
+
 import java.security.AccessController;
 import java.util.*;
 import org.eclipse.osgi.container.*;
@@ -22,7 +24,6 @@ import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
-import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
@@ -108,11 +109,11 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 			} catch (BundleException e) {
 				Bundle bundle = managers[i].getGeneration().getRevision().getBundle();
 				if (e.getType() == BundleException.STATECHANGE_ERROR) {
-					String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread(), name, null, bundle, new Long(System.currentTimeMillis() - startTime)});
+					String message = NLS.bind(Msg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread(), name, null, bundle, new Long(System.currentTimeMillis() - startTime)});
 					container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, message, e);
 					continue;
 				}
-				String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_ACTIVATION, bundle.getSymbolicName(), Long.toString(bundle.getBundleId()));
+				String message = NLS.bind(Msg.ECLIPSE_CLASSLOADER_ACTIVATION, bundle.getSymbolicName(), Long.toString(bundle.getBundleId()));
 				ClassNotFoundException error = new ClassNotFoundException(message, e);
 				errors.put(managers[i], error);
 				if (container.getConfiguration().throwErrorOnFailedStart) {

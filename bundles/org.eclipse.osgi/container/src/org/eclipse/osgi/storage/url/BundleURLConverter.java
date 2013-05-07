@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,7 @@ package org.eclipse.osgi.storage.url;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-import org.eclipse.osgi.internal.location.EclipseAdaptorMsg;
+import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.util.NLS;
 
@@ -37,7 +37,7 @@ public class BundleURLConverter implements URLConverter {
 			 * was a problem extracting the file to disk. See bug 259241.
 			 **/
 			if (result == null)
-				throw new IOException(NLS.bind(EclipseAdaptorMsg.ECLIPSE_PLUGIN_EXTRACTION_PROBLEM, url));
+				throw new IOException(NLS.bind(Msg.ECLIPSE_PLUGIN_EXTRACTION_PROBLEM, url));
 			return result;
 		}
 		return url;
