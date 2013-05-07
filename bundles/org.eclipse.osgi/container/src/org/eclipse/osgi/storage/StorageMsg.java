@@ -24,24 +24,12 @@ public class StorageMsg extends NLS {
 	public static String ADAPTER_FILEEXIST_EXCEPTION;
 	public static String ADAPTOR_DIRECTORY_CREATE_EXCEPTION;
 	public static String ADAPTOR_DIRECTORY_EXCEPTION;
-	public static String ADAPTOR_EXTENSION_IMPORT_ERROR;
-	public static String ADAPTOR_EXTENSION_NATIVECODE_ERROR;
-	public static String ADAPTOR_EXTENSION_REQUIRE_ERROR;
-	public static String ADAPTOR_STORAGE_EXCEPTION;
-	public static String ADAPTOR_STORAGE_INIT_FAILED_MSG;
-	public static String ADAPTOR_STORAGE_INIT_FAILED_TITLE;
 	public static String ADAPTOR_URL_CREATE_EXCEPTION;
 
 	public static String BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION;
-	public static String BUNDLE_NATIVECODE_EXCEPTION;
 	public static String BUNDLE_READ_EXCEPTION;
 
-	public static String MANIFEST_NOT_FOUND_EXCEPTION;
-
 	public static String RESOURCE_NOT_FOUND_EXCEPTION;
-
-	public static String SYSTEMBUNDLE_MISSING_MANIFEST;
-	public static String SYSTEMBUNDLE_NOTRESOLVED;
 
 	public static String URL_INVALID_BUNDLE_ID;
 	public static String URL_NO_BUNDLE_FOUND;

@@ -16,13 +16,6 @@ public class Msg extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.osgi.framework.internal.core.ExternalMessages"; //$NON-NLS-1$
 
 	public static String MANIFEST_INVALID_HEADER_EXCEPTION;
-	public static String BUNDLE_STATE_CHANGE_EXCEPTION;
-	public static String BUNDLE_UNINSTALLED_EXCEPTION;
-	public static String BUNDLE_UNRESOLVED_EXCEPTION;
-	public static String BUNDLE_UNRESOLVED_STATE_CONFLICT;
-	public static String BUNDLE_UNRESOLVED_UNSATISFIED_CONSTRAINT_EXCEPTION;
-	public static String BUNDLE_INVALID_ACTIVATOR_EXCEPTION;
-	public static String BUNDLE_EXTENSION_PERMISSION;
 
 	public static String SERVICE_ARGUMENT_NULL_EXCEPTION;
 	public static String SERVICE_EMPTY_CLASS_LIST_EXCEPTION;
@@ -30,17 +23,6 @@ public class Msg extends NLS {
 	public static String SERVICE_FACTORY_NOT_INSTANCEOF_CLASS_EXCEPTION;
 	public static String BUNDLE_ACTIVATOR_EXCEPTION;
 	public static String BUNDLE_CONTEXT_INVALID_EXCEPTION;
-
-	public static String BUNDLE_READ_EXCEPTION;
-	public static String BUNDLE_FRAGMENT_CNFE;
-	public static String BUNDLE_FRAGMENT_START;
-	public static String BUNDLE_FRAGMENT_STOP;
-	public static String BUNDLE_TRANSIENT_START_ERROR;
-
-	public static String BUNDLE_CNFE_NOT_RESOLVED;
-	public static String BUNDLE_LOADER_ATTACHMENT_ERROR;
-
-	public static String BUNDLE_NO_CLASSPATH_MATCH;
 
 	public static String FILTER_TERMINATED_ABRUBTLY;
 	public static String FILTER_TRAILING_CHARACTERS;
@@ -51,24 +33,12 @@ public class Msg extends NLS {
 	public static String FILTER_INVALID_VALUE;
 	public static String FILTER_MISSING_VALUE;
 
-	public static String OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION;
-	public static String BUNDLE_INSTALL_RECURSION_EXCEPTION;
-	public static String BUNDLE_INSTALL_SAME_UNIQUEID;
-
-	public static String OSGI_INTERNAL_ERROR;
-	public static String BUNDLE_NOT_IN_FRAMEWORK;
-	public static String BUNDLE_REFRESH_FAILURE;
-	public static String OSGI_SYSTEMBUNDLE_DESCRIPTION_ERROR;
-
 	public static String SERVICE_ALREADY_UNREGISTERED_EXCEPTION;
 
 	public static String SERVICE_FACTORY_EXCEPTION;
 	public static String SERVICE_OBJECT_NULL_EXCEPTION;
 	public static String SERVICE_FACTORY_RECURSION;
 	public static String SERVICE_USE_OVERFLOW;
-
-	public static String STARTLEVEL_EXCEPTION_INVALID_REQUESTED_STARTLEVEL;
-	public static String STARTLEVEL_CANT_CHANGE_SYSTEMBUNDLE_STARTLEVEL;
 
 	public static String BUNDLE_SYSTEMBUNDLE_UNINSTALL_EXCEPTION;
 
@@ -81,7 +51,6 @@ public class Msg extends NLS {
 
 	public static String URL_HANDLER_INCORRECT_TYPE;
 
-	public static String HEADER_REQUIRED;
 	public static String HEADER_PACKAGE_DUPLICATES;
 	public static String HEADER_PACKAGE_JAVA;
 	public static String HEADER_VERSION_ERROR;
