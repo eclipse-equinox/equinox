@@ -21,7 +21,7 @@ public class Activator implements BundleActivator {
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
-		platformAdmin.start(context);
+		platformAdmin.stop(context);
 	}
 
 }
