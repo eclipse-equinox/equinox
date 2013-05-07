@@ -58,7 +58,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	private HashMap<ServiceRegistrationImpl<?>, ServiceUse<?>> servicesInUse;
 
 	/** The current instantiation of the activator. */
-	protected BundleActivator activator;
+	private BundleActivator activator;
 
 	/** private object for locking */
 	private final Object contextLock = new Object();

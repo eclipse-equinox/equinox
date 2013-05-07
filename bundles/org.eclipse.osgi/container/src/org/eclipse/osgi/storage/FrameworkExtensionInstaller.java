@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,14 +20,21 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.hookregistry.ActivatorHookFactory;
+import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.osgi.framework.*;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.resource.Capability;
 
 public class FrameworkExtensionInstaller {
 	private static final ClassLoader CL = FrameworkExtensionInstaller.class.getClassLoader();
 	private static final Method ADD_FWK_URL_METHOD = findAddURLMethod(CL, "addURL"); //$NON-NLS-1$
+	private final List<BundleActivator> hookActivators = new ArrayList<BundleActivator>();
 
 	private static Method findAddURLMethod(ClassLoader cl, String name) {
 		if (cl == null)
@@ -149,7 +156,43 @@ public class FrameworkExtensionInstaller {
 		return results.toArray(new File[results.size()]);
 	}
 
-	public void startExtensionActivator(ModuleRevision extensionRevision, BundleContext context) {
+	public void startExtensionActivators(BundleContext context) {
+		// First start the hook registry activators
+		// TODO not sure we really need these anymore
+		HookRegistry hookRegistry = configuration.getHookRegistry();
+		List<ActivatorHookFactory> activatorHookFactories = hookRegistry.getActivatorHookFactories();
+		for (ActivatorHookFactory activatorFactory : activatorHookFactories) {
+			BundleActivator activator = activatorFactory.createActivator();
+			startActivator(activator, context);
+		}
+		// start the extension bundle activators.  In Equinox we let
+		// framework extensions define Bundle-Activator headers.
+		ModuleWiring systemWiring = (ModuleWiring) context.getBundle().adapt(BundleWiring.class);
+		if (systemWiring != null) {
+			List<ModuleWire> extensionWires = systemWiring.getProvidedModuleWires(HostNamespace.HOST_NAMESPACE);
+			for (ModuleWire extensionWire : extensionWires) {
+				ModuleRevision extensionRevision = extensionWire.getRequirer();
+				startExtensionActivator(extensionRevision, context);
+			}
+		}
+	}
+
+	public void stopExtensionActivators(BundleContext context) {
+		List<BundleActivator> current;
+		synchronized (hookActivators) {
+			current = new ArrayList<BundleActivator>(hookActivators);
+			hookActivators.clear();
+		}
+		for (BundleActivator activator : current) {
+			try {
+				activator.stop(context);
+			} catch (Exception e) {
+				configuration.getHookRegistry().getContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error stopping extension.", e);
+			}
+		}
+	}
+
+	private void startExtensionActivator(ModuleRevision extensionRevision, BundleContext context) {
 		List<Capability> metadata = extensionRevision.getCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
 		if (metadata.isEmpty()) {
 			return;
@@ -162,9 +205,20 @@ public class FrameworkExtensionInstaller {
 		try {
 			Class<?> activatorClass = Class.forName(activatorName);
 			BundleActivator activator = (BundleActivator) activatorClass.newInstance();
-			activator.start(context);
+			startActivator(activator, context);
 		} catch (Exception e) {
-			// TODO should log something
+			configuration.getHookRegistry().getContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error starting extension.", e);
+		}
+	}
+
+	private void startActivator(BundleActivator activator, BundleContext context) {
+		try {
+			activator.start(context);
+			synchronized (hookActivators) {
+				hookActivators.add(activator);
+			}
+		} catch (Exception e) {
+			configuration.getHookRegistry().getContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error activating extension.", e);
 		}
 	}
 
