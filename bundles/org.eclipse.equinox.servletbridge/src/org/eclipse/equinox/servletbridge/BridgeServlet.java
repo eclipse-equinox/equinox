@@ -45,6 +45,23 @@ public class BridgeServlet extends HttpServlet {
 		String enableFrameworkControlsParameter = getServletConfig().getInitParameter("enableFrameworkControls"); //$NON-NLS-1$
 		enableFrameworkControls = (enableFrameworkControlsParameter != null && enableFrameworkControlsParameter.equals("true")); //$NON-NLS-1$
 
+		// Use with caution!! Some classes MUST be initialized with the web-app class loader 
+		String frameworkPreloads = getServletConfig().getInitParameter("_contextPreloads"); //$NON-NLS-1$
+		if (frameworkPreloads != null) {
+			String[] classes = frameworkPreloads.split(","); //$NON-NLS-1$
+			for (int i = 0; i < classes.length; i++) {
+				String clazz = classes[i].trim();
+				if (clazz.length() != 0) {
+					try {
+						this.getClass().getClassLoader().loadClass(clazz);
+					} catch (Exception e) {
+						// best effort -- log problems
+						getServletContext().log("Bridge Servlet _contextPreloads (" + clazz + ") " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+				}
+			}
+		}
+
 		String frameworkLauncherClassParameter = getServletConfig().getInitParameter("frameworkLauncherClass"); //$NON-NLS-1$
 		if (frameworkLauncherClassParameter != null) {
 			try {
