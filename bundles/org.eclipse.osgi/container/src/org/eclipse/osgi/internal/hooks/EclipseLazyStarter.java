@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -125,7 +125,12 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 	}
 
 	private boolean shouldActivateFor(String className, Module module, ModuleRevision revision, ClasspathManager manager) throws ClassNotFoundException {
-		if (!State.LAZY_STARTING.equals(module.getState())) {
+		State state = module.getState();
+		if (!State.LAZY_STARTING.equals(state)) {
+			if (State.STARTING.equals(state) && manager.getClassLoader().getBundleLoader().isTriggerSet()) {
+				// the trigger has been set but we are waiting for the activation to complete
+				return true;
+			}
 			// Don't activate non-starting bundles
 			if (State.RESOLVED.equals(module.getState())) {
 				// handle the resolved case where a previous error occurred
