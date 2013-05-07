@@ -448,6 +448,31 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		compareResults(expectedEvents, actualEvents);
 	}
 
+	public void testOSGiLazyStartDelay() throws Exception {
+		final Bundle osgiD = installer.installBundle("osgi.lazystart.d"); //$NON-NLS-1$
+		final Bundle osgiE = installer.installBundle("osgi.lazystart.e"); //$NON-NLS-1$
+		assertTrue("osgi lazy start resolve", installer.resolveBundles(new Bundle[] {osgiD, osgiE})); //$NON-NLS-1$
+
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					osgiD.loadClass("osgi.lazystart.d.DTest");
+				} catch (ClassNotFoundException e) {
+					// should fail here
+					throw new RuntimeException(e);
+				}
+			}
+		}, "Starting: " + osgiD);
+		t.start();
+
+		Thread.sleep(100);
+		long startTime = System.currentTimeMillis();
+		osgiE.start();
+		long endTime = System.currentTimeMillis() - startTime;
+		assertTrue("Starting of test bundle was too short: " + endTime, endTime > 3000);
+	}
+
 	public void testStartTransientByLoadClass() throws Exception {
 		// install a bundle and set its start-level high, then crank up the framework start-level.  This should result in no events
 		Bundle osgiA = installer.installBundle("osgi.lazystart.a"); //$NON-NLS-1$

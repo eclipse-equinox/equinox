@@ -25,6 +25,8 @@
 	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.a" path="bundles_src/osgi.lazystart.a"/>
 	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.b" path="bundles_src/osgi.lazystart.b"/>
 	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.c" path="bundles_src/osgi.lazystart.c"/>
+	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.d" path="bundles_src/osgi.lazystart.d"/>
+	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.e" path="bundles_src/osgi.lazystart.e"/>
 	<classpathentry kind="src" output="bundle_tests/thread.locktest" path="bundles_src/thread.locktest"/>
 	<classpathentry kind="src" output="bundle_tests/buddy.registered.a" path="bundles_src/buddy.registered.a"/>
 	<classpathentry kind="src" output="bundle_tests/buddy.registered.a.test1" path="bundles_src/buddy.registered.a.test1"/>
