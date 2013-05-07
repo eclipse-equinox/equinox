@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -134,6 +134,7 @@ public class Storage {
 			}
 		}
 		checkSystemBundle();
+		discardBundles();
 		installExtensions();
 		// TODO hack to make sure all bundles are in UNINSTALLED state before system bundle init is called
 		this.moduleContainer.setInitialModuleStates();
@@ -173,6 +174,28 @@ public class Storage {
 			permData.readPermissionData(in);
 		}
 		return permData;
+	}
+
+	private void discardBundles() throws BundleException {
+		for (Module module : moduleContainer.getModules()) {
+			if (module.getId() == Constants.SYSTEM_BUNDLE_ID)
+				continue;
+			ModuleRevision revision = module.getCurrentRevision();
+			Generation generation = (Generation) revision.getRevisionInfo();
+			if (needsDiscarding(generation)) {
+				moduleContainer.uninstall(moduleContainer.getModule(generation.getBundleInfo().getBundleId()));
+				generation.delete();
+			}
+		}
+	}
+
+	private boolean needsDiscarding(Generation generation) {
+		if (!getConfiguration().inCheckConfigurationMode())
+			return false;
+		File content = generation.getContent();
+		if (generation.isDirectory())
+			content = new File(content, "META-INF/MANIFEST.MF"); //$NON-NLS-1$
+		return generation.getLastModified() != secureAction.lastModified(content);
 	}
 
 	private void checkSystemBundle() {
@@ -977,6 +1000,7 @@ public class Storage {
 					out.writeUTF(Storage.getBundleFilePath(bundleInfo.getBundleId(), generation.getGenerationId()));
 				}
 			}
+			out.writeLong(generation.getLastModified());
 
 			Dictionary<String, String> headers = generation.getHeaders();
 			for (String headerKey : cachedHeaderKeys) {
@@ -1045,6 +1069,7 @@ public class Storage {
 			boolean isReference = in.readBoolean();
 			boolean hasPackageInfo = in.readBoolean();
 			String contentPath = in.readUTF();
+			long lastModified = in.readLong();
 
 			Map<String, String> cachedHeaders = new HashMap<String, String>(storedCachedHeaderKeys.size());
 			for (String headerKey : storedCachedHeaderKeys) {
@@ -1077,7 +1102,7 @@ public class Storage {
 			}
 
 			BundleInfo info = new BundleInfo(this, infoId, nextGenId);
-			Generation generation = info.restoreGeneration(generationId, content, isDirectory, isReference, hasPackageInfo, cachedHeaders);
+			Generation generation = info.restoreGeneration(generationId, content, isDirectory, isReference, hasPackageInfo, cachedHeaders, lastModified);
 			result.put(infoId, generation);
 			generations.add(generation);
 		}

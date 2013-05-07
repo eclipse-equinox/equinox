@@ -181,6 +181,9 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public static final String PROPERTY_STRICT_BUNDLE_ENTRY_PATH = "osgi.strictBundleEntryPath";//$NON-NLS-1$
 
+	public static final String PROP_CHECK_CONFIGURATION = "osgi.checkConfiguration"; //$NON-NLS-1$
+	private final boolean inCheckConfigurationMode;
+
 	private final static Collection<String> populateInitConfig = Arrays.asList(PROP_OSGI_ARCH, PROP_OSGI_OS, PROP_OSGI_WS, PROP_OSGI_NL, FRAMEWORK_OS_NAME, FRAMEWORK_OS_VERSION, FRAMEWORK_PROCESSOR, FRAMEWORK_LANGUAGE);
 
 	EquinoxConfiguration(Map<String, ?> initialConfiguration, HookRegistry hookRegistry) {
@@ -273,6 +276,17 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 		CLASS_CERTIFICATE = Boolean.valueOf(getConfiguration(PROP_CLASS_CERTIFICATE_SUPPORT, "true")).booleanValue(); //$NON-NLS-1$
 		PARALLEL_CAPABLE = CLASS_LOADER_TYPE_PARALLEL.equals(getConfiguration(PROP_CLASS_LOADER_TYPE));
+
+		inCheckConfigurationMode = computeCheckConfigurationMode();
+	}
+
+	private boolean computeCheckConfigurationMode() {
+		String osgiCheckConfiguration = configuration.getProperty(PROP_CHECK_CONFIGURATION);
+		// A specified osgi.dev property but unspecified osgi.checkConfiguration
+		// property implies osgi.checkConfiguration = true.
+		if (osgiCheckConfiguration == null && inDevelopmentMode)
+			return true;
+		return Boolean.valueOf(osgiCheckConfiguration);
 	}
 
 	public Map<String, Object> getInitialConfig() {
@@ -312,6 +326,10 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		// For example Mac OS X uses dylib and jnilib (bug 380350)
 		String os = System.getProperty(EquinoxConfiguration.PROP_JVM_OS_NAME);
 		return os == null || !os.startsWith("Mac OS") ? null : "dylib,jnilib"; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public boolean inCheckConfigurationMode() {
+		return inCheckConfigurationMode;
 	}
 
 	public boolean inDevelopmentMode() {

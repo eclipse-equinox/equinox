@@ -49,19 +49,21 @@ public final class BundleInfo {
 		private ProtectionDomain domain;
 		private NativeCodeFinder nativeCodeFinder;
 		private List<StorageHook<?, ?>> storageHooks;
+		private long lastModified;
 
 		Generation(long generationId) {
 			this.generationId = generationId;
 			this.cachedHeaders = new CachedManifest(this, Collections.<String, String> emptyMap());
 		}
 
-		Generation(long generationId, File content, boolean isDirectory, boolean isReference, boolean hasPackageInfo, Map<String, String> cached) {
+		Generation(long generationId, File content, boolean isDirectory, boolean isReference, boolean hasPackageInfo, Map<String, String> cached, long lastModified) {
 			this.generationId = generationId;
 			this.content = content;
 			this.isDirectory = isDirectory;
 			this.isReference = isReference;
 			this.hasPackageInfo = hasPackageInfo;
 			this.cachedHeaders = new CachedManifest(this, cached);
+			this.lastModified = lastModified;
 		}
 
 		public BundleFile getBundleFile() {
@@ -150,6 +152,10 @@ public final class BundleInfo {
 			return this.generationId;
 		}
 
+		public long getLastModified() {
+			return lastModified;
+		}
+
 		public boolean isDirectory() {
 			synchronized (this.genMonitor) {
 				return this.isDirectory;
@@ -179,7 +185,14 @@ public final class BundleInfo {
 				this.content = content;
 				this.isDirectory = content == null ? false : Storage.secureAction.isDirectory(content);
 				this.isReference = isReference;
+				setLastModified(content);
 			}
+		}
+
+		private void setLastModified(File content) {
+			if (isDirectory)
+				content = new File(content, "META-INF/MANIFEST.MF"); //$NON-NLS-1$
+			lastModified = Storage.secureAction.lastModified(content);
 		}
 
 		void setStorageHooks(List<StorageHook<?, ?>> storageHooks, boolean install) {
@@ -338,9 +351,9 @@ public final class BundleInfo {
 		}
 	}
 
-	Generation restoreGeneration(long generationId, File content, boolean isDirectory, boolean isReference, boolean hasPackageInfo, Map<String, String> cached) {
+	Generation restoreGeneration(long generationId, File content, boolean isDirectory, boolean isReference, boolean hasPackageInfo, Map<String, String> cached, long lastModified) {
 		synchronized (this.infoMonitor) {
-			Generation restoredGeneration = new Generation(generationId, content, isDirectory, isReference, hasPackageInfo, cached);
+			Generation restoredGeneration = new Generation(generationId, content, isDirectory, isReference, hasPackageInfo, cached, lastModified);
 			return restoredGeneration;
 		}
 	}
