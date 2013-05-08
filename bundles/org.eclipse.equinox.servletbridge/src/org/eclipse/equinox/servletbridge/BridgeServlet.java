@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 package org.eclipse.equinox.servletbridge;
 
 import java.io.IOException;
+import java.util.StringTokenizer;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
@@ -48,9 +49,9 @@ public class BridgeServlet extends HttpServlet {
 		// Use with caution!! Some classes MUST be initialized with the web-app class loader 
 		String frameworkPreloads = getServletConfig().getInitParameter("_contextPreloads"); //$NON-NLS-1$
 		if (frameworkPreloads != null) {
-			String[] classes = frameworkPreloads.split(","); //$NON-NLS-1$
-			for (int i = 0; i < classes.length; i++) {
-				String clazz = classes[i].trim();
+			StringTokenizer st = new StringTokenizer(frameworkPreloads);
+			while (st.hasMoreElements()) {
+				String clazz = st.nextToken().trim();
 				if (clazz.length() != 0) {
 					try {
 						this.getClass().getClassLoader().loadClass(clazz);
