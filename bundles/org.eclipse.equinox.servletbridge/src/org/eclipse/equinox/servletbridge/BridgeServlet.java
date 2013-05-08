@@ -49,7 +49,7 @@ public class BridgeServlet extends HttpServlet {
 		// Use with caution!! Some classes MUST be initialized with the web-app class loader 
 		String frameworkPreloads = getServletConfig().getInitParameter("_contextPreloads"); //$NON-NLS-1$
 		if (frameworkPreloads != null) {
-			StringTokenizer st = new StringTokenizer(frameworkPreloads);
+			StringTokenizer st = new StringTokenizer(frameworkPreloads, ","); //$NON-NLS-1$
 			while (st.hasMoreElements()) {
 				String clazz = st.nextToken().trim();
 				if (clazz.length() != 0) {
