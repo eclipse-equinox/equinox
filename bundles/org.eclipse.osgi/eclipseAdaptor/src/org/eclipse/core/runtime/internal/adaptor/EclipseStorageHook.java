@@ -456,7 +456,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		String symbolicName = ManifestElement.parseHeader(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME, generatedManifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME))[0].getValue();
 
 		// log a warning about old 2.0 plugins being deprecated and may not be supported in future releases
-		String message = "The plugin \"" + symbolicName + "\" with the version \"" + version + "\" and location \"" + bundledata.getLocation() + "\" is an old style Eclipse 2.0 plugin with no OSGi bundle manifest.  Support for Eclipse 2.0 style plugins will be removed in a furture release."; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
+		String message = "The plugin \"" + symbolicName + "\" with the version \"" + version + "\" and location \"" + bundledata.getLocation() + "\" is an old style Eclipse 2.0 plugin with no OSGi bundle manifest.  Support for Eclipse 2.0 style plugins will be removed in a future release. Refer to the migration guide for details."; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
 		bundledata.getAdaptor().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, message, 0, null, null));
 
 		ManifestElement generatedFrom = ManifestElement.parseHeader(PluginConverterImpl.GENERATED_FROM, generatedManifest.get(PluginConverterImpl.GENERATED_FROM))[0];
