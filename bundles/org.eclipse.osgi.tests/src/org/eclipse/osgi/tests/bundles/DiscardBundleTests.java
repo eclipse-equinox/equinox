@@ -136,15 +136,16 @@ public class DiscardBundleTests extends AbstractBundleTests {
 		doTest(configuration, discard, getJarLocation());
 	}
 
-	private void doTest(Map<String, ?> configuration, boolean discard, String location) throws Exception {
+	private void doTest(Map<String, ?> configuration, boolean discard, File bundleFile) throws Exception {
 		Equinox equinox = new Equinox(configuration);
 		initAndStart(equinox);
 		try {
+			String location = REFERENCE_PROTOCOL + bundleFile.toURI();
 			equinox.getBundleContext().installBundle(location);
 			try {
 				equinox = restart(equinox, configuration);
 				assertNotDiscarded(location, equinox);
-				touchFile(location);
+				touchFile(bundleFile);
 				equinox = restart(equinox, configuration);
 				if (discard)
 					assertDiscarded(location, equinox);
@@ -162,12 +163,12 @@ public class DiscardBundleTests extends AbstractBundleTests {
 		}
 	}
 
-	private String getDirectoryLocation() {
-		return REFERENCE_PROTOCOL + root.toURI() + BUNDLE_DIR;
+	private File getDirectoryLocation() {
+		return new File(root, BUNDLE_DIR);
 	}
 
-	private String getJarLocation() {
-		return REFERENCE_PROTOCOL + root.toURI() + BUNDLE_JAR;
+	private File getJarLocation() {
+		return new File(root, BUNDLE_JAR);
 	}
 
 	private void initAndStart(Equinox equinox) throws BundleException {
@@ -199,10 +200,9 @@ public class DiscardBundleTests extends AbstractBundleTests {
 		}
 	}
 
-	private void touchFile(String location) {
-		File file = new File(location.substring((REFERENCE_PROTOCOL + "file:").length()));
+	private void touchFile(File file) {
 		if (file.isDirectory())
 			file = new File(file, BUNDLE_MANIFEST);
-		assertTrue("Could not set last modified", file.setLastModified(file.lastModified() + 1000));
+		assertTrue("Could not set last modified: " + file, file.setLastModified(file.lastModified() + 1000));
 	}
 }
