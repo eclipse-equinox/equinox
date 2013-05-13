@@ -52,7 +52,7 @@
             <configuration>
               <property name="feature.base" value="."/>
               <target>
-		<chmod file="../../../rt.equinox.binaries/${project.artifactId}/*.so" perm="755"/>
+		<chmod file="../../../rt.equinox.binaries/${project.artifactId}/*.so" perm="755" verbose="true"/>
                 <copy todir="." overwrite="true">
                   <fileset dir="../../../rt.equinox.binaries/${project.artifactId}/">
                     <include name="*.so"/>
