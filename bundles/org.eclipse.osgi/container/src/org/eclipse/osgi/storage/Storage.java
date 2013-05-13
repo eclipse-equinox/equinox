@@ -40,6 +40,7 @@ import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.namespace.NativeNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.service.resolver.ResolutionException;
 
 public class Storage {
 	public static final int VERSION = 1;
@@ -74,7 +75,18 @@ public class Storage {
 	private final FrameworkExtensionInstaller extensionInstaller;
 	private final List<String> cachedHeaderKeys = Arrays.asList(Constants.BUNDLE_SYMBOLICNAME, Constants.BUNDLE_ACTIVATIONPOLICY, "Service-Component"); //$NON-NLS-1$
 
-	public Storage(EquinoxContainer container) throws IOException, BundleException {
+	public static Storage createStorage(EquinoxContainer container) throws IOException, BundleException {
+		Storage storage = new Storage(container);
+		// Do some operations that need to happen on the fully constructed Storage before returning it
+		storage.checkSystemBundle();
+		storage.discardBundles();
+		storage.installExtensions();
+		// TODO hack to make sure all bundles are in UNINSTALLED state before system bundle init is called
+		storage.getModuleContainer().setInitialModuleStates();
+		return storage;
+	}
+
+	private Storage(EquinoxContainer container) throws IOException, BundleException {
 		mruList = new MRUBundleFileList(getBundleFileLimit(container.getConfiguration()));
 		equinoxContainer = container;
 		extensionInstaller = new FrameworkExtensionInstaller(container.getConfiguration());
@@ -133,11 +145,6 @@ public class Storage {
 				}
 			}
 		}
-		checkSystemBundle();
-		discardBundles();
-		installExtensions();
-		// TODO hack to make sure all bundles are in UNINSTALLED state before system bundle init is called
-		this.moduleContainer.setInitialModuleStates();
 	}
 
 	private int getBundleFileLimit(EquinoxConfiguration configuration) {
@@ -177,21 +184,30 @@ public class Storage {
 	}
 
 	private void discardBundles() throws BundleException {
-		for (Module module : moduleContainer.getModules()) {
-			if (module.getId() == Constants.SYSTEM_BUNDLE_ID)
-				continue;
-			ModuleRevision revision = module.getCurrentRevision();
-			Generation generation = (Generation) revision.getRevisionInfo();
-			if (needsDiscarding(generation)) {
-				moduleContainer.uninstall(moduleContainer.getModule(generation.getBundleInfo().getBundleId()));
-				generation.delete();
+		if (getConfiguration().inCheckConfigurationMode()) {
+			Collection<Module> discarded = new ArrayList<Module>(0);
+			for (Module module : moduleContainer.getModules()) {
+				if (module.getId() == Constants.SYSTEM_BUNDLE_ID)
+					continue;
+				ModuleRevision revision = module.getCurrentRevision();
+				Generation generation = (Generation) revision.getRevisionInfo();
+				if (needsDiscarding(generation)) {
+					discarded.add(module);
+					moduleContainer.uninstall(module);
+					generation.delete();
+				}
+			}
+			if (!discarded.isEmpty()) {
+				try {
+					moduleContainer.refresh(discarded);
+				} catch (ResolutionException e) {
+					throw new BundleException("Error discarding bundles.", e); //$NON-NLS-1$
+				}
 			}
 		}
 	}
 
-	private boolean needsDiscarding(Generation generation) {
-		if (!getConfiguration().inCheckConfigurationMode())
-			return false;
+	private static boolean needsDiscarding(Generation generation) {
 		File content = generation.getContent();
 		if (generation.isDirectory())
 			content = new File(content, "META-INF/MANIFEST.MF"); //$NON-NLS-1$

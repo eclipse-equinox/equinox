@@ -21,13 +21,12 @@ import static org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_EXTENSION;
 import static org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_FRAGMENT;
 import static org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_REQUIREBUNDLE;
 
-import org.eclipse.osgi.framework.internal.core.Msg;
-
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.security.CodeSource;
 import java.util.*;
+import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
@@ -277,16 +276,9 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		CLASS_CERTIFICATE = Boolean.valueOf(getConfiguration(PROP_CLASS_CERTIFICATE_SUPPORT, "true")).booleanValue(); //$NON-NLS-1$
 		PARALLEL_CAPABLE = CLASS_LOADER_TYPE_PARALLEL.equals(getConfiguration(PROP_CLASS_LOADER_TYPE));
 
-		inCheckConfigurationMode = computeCheckConfigurationMode();
-	}
-
-	private boolean computeCheckConfigurationMode() {
-		String osgiCheckConfiguration = configuration.getProperty(PROP_CHECK_CONFIGURATION);
 		// A specified osgi.dev property but unspecified osgi.checkConfiguration
 		// property implies osgi.checkConfiguration = true.
-		if (osgiCheckConfiguration == null && inDevelopmentMode)
-			return true;
-		return Boolean.valueOf(osgiCheckConfiguration);
+		inCheckConfigurationMode = Boolean.valueOf(getConfiguration(PROP_CHECK_CONFIGURATION, Boolean.toString(devMode)));
 	}
 
 	public Map<String, Object> getInitialConfig() {
