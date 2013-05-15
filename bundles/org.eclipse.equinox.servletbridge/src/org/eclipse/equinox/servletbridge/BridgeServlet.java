@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 package org.eclipse.equinox.servletbridge;
 
 import java.io.IOException;
+import java.util.StringTokenizer;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
@@ -44,6 +45,23 @@ public class BridgeServlet extends HttpServlet {
 
 		String enableFrameworkControlsParameter = getServletConfig().getInitParameter("enableFrameworkControls"); //$NON-NLS-1$
 		enableFrameworkControls = (enableFrameworkControlsParameter != null && enableFrameworkControlsParameter.equals("true")); //$NON-NLS-1$
+
+		// Use with caution!! Some classes MUST be initialized with the web-app class loader 
+		String frameworkPreloads = getServletConfig().getInitParameter("_contextPreloads"); //$NON-NLS-1$
+		if (frameworkPreloads != null) {
+			StringTokenizer st = new StringTokenizer(frameworkPreloads, ","); //$NON-NLS-1$
+			while (st.hasMoreElements()) {
+				String clazz = st.nextToken().trim();
+				if (clazz.length() != 0) {
+					try {
+						this.getClass().getClassLoader().loadClass(clazz);
+					} catch (Exception e) {
+						// best effort -- log problems
+						getServletContext().log("Bridge Servlet _contextPreloads (" + clazz + ") " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+				}
+			}
+		}
 
 		String frameworkLauncherClassParameter = getServletConfig().getInitParameter("frameworkLauncherClass"); //$NON-NLS-1$
 		if (frameworkLauncherClassParameter != null) {
