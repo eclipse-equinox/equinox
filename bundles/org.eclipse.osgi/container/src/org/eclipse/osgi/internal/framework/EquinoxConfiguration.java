@@ -162,8 +162,6 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String CONTEXTCLASSLOADER_PARENT_FWK = "fwk"; //$NON-NLS-1$
 
 	public static final String PROP_FRAMEWORK_LIBRARY_EXTENSIONS = "osgi.framework.library.extensions"; //$NON-NLS-1$
-	public static final String PROP_FRAMEWORK_THREAD = "osgi.framework.activeThreadType"; //$NON-NLS-1$
-	public static final String FRAMEWORK_THREAD_NORMAL = "normal"; //$NON-NLS-1$
 	public static final String PROP_COPY_NATIVES = "osgi.classloader.copy.natives"; //$NON-NLS-1$
 	public static final String PROP_DEFINE_PACKAGES = "osgi.classloader.define.packages"; //$NON-NLS-1$
 	public static final String PROP_BUNDLE_SETTCCL = "eclipse.bundle.setTCCL"; //$NON-NLS-1$
@@ -182,6 +180,9 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public static final String PROP_CHECK_CONFIGURATION = "osgi.checkConfiguration"; //$NON-NLS-1$
 	private final boolean inCheckConfigurationMode;
+
+	public static final String DEFAULT_STATE_SAVE_DELAY_INTERVAL = "30000"; //$NON-NLS-1$
+	public static final String PROP_STATE_SAVE_DELAY_INTERVAL = "eclipse.stateSaveDelayInterval"; //$NON-NLS-1$
 
 	private final static Collection<String> populateInitConfig = Arrays.asList(PROP_OSGI_ARCH, PROP_OSGI_OS, PROP_OSGI_WS, PROP_OSGI_NL, FRAMEWORK_OS_NAME, FRAMEWORK_OS_VERSION, FRAMEWORK_PROCESSOR, FRAMEWORK_LANGUAGE);
 
@@ -582,6 +583,20 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		}
 	}
 
+	private static void initializeStateSaveDelayIntervalProperty(Properties configuration) {
+		if (!configuration.containsKey(PROP_STATE_SAVE_DELAY_INTERVAL))
+			// Property not specified. Use the default.
+			configuration.setProperty(PROP_STATE_SAVE_DELAY_INTERVAL, DEFAULT_STATE_SAVE_DELAY_INTERVAL);
+		try {
+			// Verify type compatibility.
+			Long.parseLong(configuration.getProperty(PROP_STATE_SAVE_DELAY_INTERVAL));
+		} catch (NumberFormatException e) {
+			// TODO Consider logging here.
+			// The specified value is not type compatible. Use the default.
+			configuration.setProperty(PROP_STATE_SAVE_DELAY_INTERVAL, DEFAULT_STATE_SAVE_DELAY_INTERVAL);
+		}
+	}
+
 	private static void initializeProperties(Properties configuration, AliasMapper aliasMapper) {
 		// initialize some framework properties that must always be set
 		if (configuration.get(PROP_FRAMEWORK) == null || configuration.get(EquinoxLocations.PROP_INSTALL_AREA) == null) {
@@ -748,7 +763,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 				archValue = name;
 			configuration.put(PROP_OSGI_ARCH, archValue);
 		}
-
+		initializeStateSaveDelayIntervalProperty(configuration);
 	}
 
 	private static String getFrameworkPath(String path, boolean parent) {

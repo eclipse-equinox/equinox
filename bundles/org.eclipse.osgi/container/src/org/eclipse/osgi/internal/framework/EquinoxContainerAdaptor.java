@@ -216,4 +216,12 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	public String toString() {
 		return container.toString();
 	}
+
+	@Override
+	public void updatedDatabase() {
+		StorageSaver saver = container.getStorageSaver();
+		if (saver == null)
+			return;
+		saver.save();
+	}
 }

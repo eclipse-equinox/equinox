@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
 import java.util.*;
+import java.util.concurrent.*;
 import org.eclipse.osgi.framework.eventmgr.EventManager;
 import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 import org.eclipse.osgi.framework.internal.core.Msg;
@@ -58,9 +59,11 @@ public class EquinoxContainer {
 	private EquinoxEventPublisher eventPublisher;
 	private ServiceRegistry serviceRegistry;
 	private ContextFinder contextFinder;
-	private boolean initialized = false;
 
 	private ServiceTracker<SignedContentFactory, SignedContentFactory> signedContentFactory;
+
+	private ScheduledExecutorService executor;
+	private StorageSaver storageSaver;
 
 	public EquinoxContainer(Map<String, ?> configuration) {
 		this.equinoxConfig = new EquinoxConfiguration(configuration, new HookRegistry(this));
@@ -68,7 +71,6 @@ public class EquinoxContainer {
 		loadConfig(equinoxConfig, equinoxLocations);
 		this.logServices = new EquinoxLogServices(this.equinoxConfig, this.equinoxLocations.getConfigurationLocation());
 		this.equinoxConfig.getHookRegistry().initialize();
-
 		try {
 			this.storage = Storage.createStorage(this);
 		} catch (IOException e) {
@@ -207,28 +209,8 @@ public class EquinoxContainer {
 			eventPublisher = new EquinoxEventPublisher(this);
 			serviceRegistry = new ServiceRegistry(this);
 			initializeContextFinder();
-			initialized = true;
-			startActiveThread();
-		}
-	}
-
-	private void startActiveThread() {
-		if (EquinoxConfiguration.FRAMEWORK_THREAD_NORMAL.equals(equinoxConfig.getConfiguration(EquinoxConfiguration.PROP_FRAMEWORK_THREAD, EquinoxConfiguration.FRAMEWORK_THREAD_NORMAL))) {
-			Thread fwkThread = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					synchronized (EquinoxContainer.this.monitor) {
-						while (EquinoxContainer.this.initialized)
-							try {
-								EquinoxContainer.this.monitor.wait(1000);
-							} catch (InterruptedException e) {
-								// do nothing
-							}
-					}
-				}
-			}, "Framework Active Thread: " + toString()); //$NON-NLS-1$
-			fwkThread.setDaemon(false);
-			fwkThread.start();
+			executor = Executors.newScheduledThreadPool(1);
+			storageSaver = new StorageSaver(this);
 		}
 	}
 
@@ -238,9 +220,11 @@ public class EquinoxContainer {
 			eventManager = null;
 			eventPublisher = null;
 			serviceRegistry = null;
+			storageSaver.close();
 			storage.close();
-			initialized = false;
-			this.monitor.notifyAll();
+			// Must be done last since it will result in termination of the 
+			// framework active thread.
+			executor.shutdown();
 		}
 	}
 
@@ -276,6 +260,18 @@ public class EquinoxContainer {
 		synchronized (this.monitor) {
 			return eventPublisher;
 		}
+	}
+
+	// TODO Providing access to the ExecutorService has potential issues. For
+	// example, something could shut it down. Make these methods package 
+	// private? Isolate the executor and add utility methods for adding tasks
+	// instead?
+	public ExecutorService getExecutor() {
+		return executor;
+	}
+
+	public ScheduledExecutorService getScheduledExecutor() {
+		return executor;
 	}
 
 	public ServiceRegistry getServiceRegistry() {
@@ -329,5 +325,11 @@ public class EquinoxContainer {
 	public String toString() {
 		String UUID = equinoxConfig == null ? null : equinoxConfig.getConfiguration(Constants.FRAMEWORK_UUID);
 		return "Equinox Container: " + UUID; //$NON-NLS-1$
+	}
+
+	StorageSaver getStorageSaver() {
+		synchronized (this.monitor) {
+			return storageSaver;
+		}
 	}
 }
