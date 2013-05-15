@@ -58,6 +58,7 @@
                     <include name="*.dll"/>
                   </fileset>
                 </copy>
+                <chmod file="./*.so" perm="755" verbose="true"/>
               </target>
             </configuration>
             <goals>
