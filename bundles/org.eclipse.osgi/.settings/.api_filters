@@ -1,177 +1,235 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.osgi" version="2">
-    <resource path="osgi/src/org/osgi/framework/AdaptPermission.java" type="org.osgi.framework.AdaptPermission">
-        <filter comment="Ignore OSGi API" id="337768515">
+    <resource path="META-INF/MANIFEST.MF" type="org.eclipse.osgi.event.BatchBundleListener">
+        <filter comment="Ignore removal of BatchBundleListener" id="305324134">
             <message_arguments>
-                <message_argument value="org.osgi.framework.AdaptPermission"/>
+                <message_argument value="org.eclipse.osgi.event.BatchBundleListener"/>
+                <message_argument value="org.eclipse.osgi_3.10.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="container/src/org/eclipse/osgi/container/ModuleDatabase.java" type="org.eclipse.osgi.container.ModuleDatabase">
+        <filter comment="Ignore Java 6 API usage" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.osgi.container.ModuleDatabase.writeLock()"/>
+                <message_argument value="ReentrantReadWriteLock"/>
+                <message_argument value="getReadHoldCount()"/>
+                <message_argument value="J2SE-1.5"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="container/src/org/eclipse/osgi/internal/signedcontent/SignedContentImpl.java" type="org.eclipse.osgi.internal.signedcontent.SignedContentImpl">
+        <filter comment="Ignore Java 6 API usage" id="647000098">
+            <message_arguments>
+                <message_argument value="org.eclipse.osgi.internal.signedcontent.SignedContentImpl.getDigestInputStream(BundleEntry)"/>
+                <message_argument value="IOException(Throwable)"/>
+                <message_argument value="J2SE-1.5"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="container/src/org/eclipse/osgi/service/resolver/StateObjectFactory.java" type="org.eclipse.osgi.service.resolver.StateObjectFactory$StateObjectFactoryProxy">
+        <filter comment="No need for @since on non-API class" id="1211105284">
+            <message_arguments>
+                <message_argument value="StateObjectFactoryProxy"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="container/src/org/eclipse/osgi/storage/Storage.java" type="org.eclipse.osgi.storage.Storage">
+        <filter comment="Ignore Java 6 API usage" id="647000098">
+            <message_arguments>
+                <message_argument value="org.eclipse.osgi.storage.Storage.loadStorageHookData(List&lt;BundleInfoGeneration&gt;, DataInputStream)"/>
+                <message_argument value="IOException(Throwable)"/>
+                <message_argument value="J2SE-1.5"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/dto/DTO.java" type="org.osgi.dto.DTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.DTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/dto/framework/BundleDTO.java" type="org.osgi.dto.framework.BundleDTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.framework.BundleDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/dto/framework/FrameworkDTO.java" type="org.osgi.dto.framework.FrameworkDTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.framework.FrameworkDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/dto/framework/ServiceReferenceDTO.java" type="org.osgi.dto.framework.ServiceReferenceDTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.framework.ServiceReferenceDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/dto/framework/startlevel/BundleStartLevelDTO.java" type="org.osgi.dto.framework.startlevel.BundleStartLevelDTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.framework.startlevel.BundleStartLevelDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/dto/framework/startlevel/FrameworkStartLevelDTO.java" type="org.osgi.dto.framework.startlevel.FrameworkStartLevelDTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.framework.startlevel.FrameworkStartLevelDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/dto/framework/wiring/BundleRevisionDTO.java" type="org.osgi.dto.framework.wiring.BundleRevisionDTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.framework.wiring.BundleRevisionDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/dto/framework/wiring/BundleRevisionsDTO.java" type="org.osgi.dto.framework.wiring.BundleRevisionsDTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.framework.wiring.BundleRevisionsDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/dto/framework/wiring/BundleWireDTO.java" type="org.osgi.dto.framework.wiring.BundleWireDTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.framework.wiring.BundleWireDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/dto/framework/wiring/BundleWiringDTO.java" type="org.osgi.dto.framework.wiring.BundleWiringDTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.framework.wiring.BundleWiringDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/dto/framework/wiring/BundleWiringsDTO.java" type="org.osgi.dto.framework.wiring.BundleWiringsDTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.framework.wiring.BundleWiringsDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/dto/resource/CapabilityDTO.java" type="org.osgi.dto.resource.CapabilityDTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.resource.CapabilityDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/dto/resource/RequirementDTO.java" type="org.osgi.dto.resource.RequirementDTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.resource.RequirementDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/dto/resource/ResourceDTO.java" type="org.osgi.dto.resource.ResourceDTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.resource.ResourceDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/dto/resource/WireDTO.java" type="org.osgi.dto.resource.WireDTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.resource.WireDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/dto/resource/WiringDTO.java" type="org.osgi.dto.resource.WiringDTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.resource.WiringDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/BundleContext.java" type="org.osgi.framework.BundleContext">
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.8"/>
+                <message_argument value="3.10"/>
+                <message_argument value="registerService(Class&lt;S&gt;, ServiceFactory&lt;S&gt;, Dictionary&lt;String,?&gt;)"/>
             </message_arguments>
         </filter>
     </resource>
     <resource path="osgi/src/org/osgi/framework/Constants.java" type="org.osgi.framework.Constants">
         <filter comment="Ignore OSGi API" id="1209008130">
             <message_arguments>
-                <message_argument value="1.7"/>
-                <message_argument value="3.8"/>
-                <message_argument value="FRAMEWORK_BSNVERSION_MANAGED"/>
-            </message_arguments>
-        </filter>
-        <filter comment="Ignore OSGi APIs" id="1209008130">
-            <message_arguments>
-                <message_argument value="1.7"/>
-                <message_argument value="3.8"/>
-                <message_argument value="RESOLUTION_DYNAMIC"/>
+                <message_argument value="1.8"/>
+                <message_argument value="3.10"/>
+                <message_argument value="SYSTEM_BUNDLE_ID"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/framework/UnfilteredServiceListener.java" type="org.osgi.framework.UnfilteredServiceListener">
-        <filter id="1108344834">
+    <resource path="osgi/src/org/osgi/framework/hooks/weaving/WovenClass.java" type="org.osgi.framework.hooks.weaving.WovenClass">
+        <filter comment="Ignore OSGi API" id="1209008130">
             <message_arguments>
-                <message_argument value="1.7"/>
-                <message_argument value="3.8"/>
-                <message_argument value="org.osgi.framework.UnfilteredServiceListener"/>
+                <message_argument value="1.1"/>
+                <message_argument value="3.10"/>
+                <message_argument value="DEFINED"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.10"/>
+                <message_argument value="DEFINE_FAILED"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.10"/>
+                <message_argument value="TRANSFORMED"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.10"/>
+                <message_argument value="TRANSFORMING"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.10"/>
+                <message_argument value="TRANSFORMING_FAILED"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.10"/>
+                <message_argument value="getState()"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/framework/VersionRange.java" type="org.osgi.framework.VersionRange">
+    <resource path="osgi/src/org/osgi/framework/hooks/weaving/WovenClassListener.java" type="org.osgi.framework.hooks.weaving.WovenClassListener">
         <filter comment="Ignore OSGi API" id="1108344834">
             <message_arguments>
-                <message_argument value="1.7"/>
-                <message_argument value="3.8"/>
-                <message_argument value="org.osgi.framework.VersionRange"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/framework/hooks/bundle/CollisionHook.java" type="org.osgi.framework.hooks.bundle.CollisionHook">
-        <filter comment="Ignore OSGi API" id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.framework.hooks.bundle.CollisionHook"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/framework/namespace/AbstractWiringNamespace.java" type="org.osgi.framework.namespace.AbstractWiringNamespace">
-        <filter comment="Ignore OSGi API" id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.framework.namespace.AbstractWiringNamespace"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/framework/namespace/BundleNamespace.java" type="org.osgi.framework.namespace.BundleNamespace">
-        <filter comment="Ignore OSGi API" id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.framework.namespace.BundleNamespace"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/framework/namespace/ExecutionEnvironmentNamespace.java" type="org.osgi.framework.namespace.ExecutionEnvironmentNamespace">
-        <filter comment="Ignore OSGi API" id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.framework.namespace.ExecutionEnvironmentNamespace"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/framework/namespace/HostNamespace.java" type="org.osgi.framework.namespace.HostNamespace">
-        <filter comment="Ignore OSGi API" id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.framework.namespace.HostNamespace"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/framework/namespace/IdentityNamespace.java" type="org.osgi.framework.namespace.IdentityNamespace">
-        <filter comment="Ignore OSGi API" id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.framework.namespace.IdentityNamespace"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/framework/namespace/PackageNamespace.java" type="org.osgi.framework.namespace.PackageNamespace">
-        <filter comment="Ignore OSGi API" id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.framework.namespace.PackageNamespace"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/framework/wiring/BundleCapability.java" type="org.osgi.framework.wiring.BundleCapability">
-        <filter id="1209008130">
-            <message_arguments>
                 <message_argument value="1.1"/>
-                <message_argument value="3.8"/>
-                <message_argument value="getResource()"/>
+                <message_argument value="3.10"/>
+                <message_argument value="org.osgi.framework.hooks.weaving.WovenClassListener"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/framework/wiring/BundleRequirement.java" type="org.osgi.framework.wiring.BundleRequirement">
-        <filter id="1209008130">
-            <message_arguments>
-                <message_argument value="1.1"/>
-                <message_argument value="3.8"/>
-                <message_argument value="getResource()"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/framework/wiring/BundleWire.java" type="org.osgi.framework.wiring.BundleWire">
-        <filter id="1209008130">
-            <message_arguments>
-                <message_argument value="1.1"/>
-                <message_argument value="3.8"/>
-                <message_argument value="getProvider()"/>
-            </message_arguments>
-        </filter>
-        <filter id="1209008130">
-            <message_arguments>
-                <message_argument value="1.1"/>
-                <message_argument value="3.8"/>
-                <message_argument value="getRequirer()"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/framework/wiring/BundleWiring.java" type="org.osgi.framework.wiring.BundleWiring">
-        <filter id="1209008130">
-            <message_arguments>
-                <message_argument value="1.1"/>
-                <message_argument value="3.8"/>
-                <message_argument value="getResource()"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/resource/Capability.java" type="org.osgi.resource.Capability">
-        <filter id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.resource.Capability"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/resource/Namespace.java" type="org.osgi.resource.Namespace">
+    <resource path="osgi/src/org/osgi/framework/namespace/NativeNamespace.java" type="org.osgi.framework.namespace.NativeNamespace">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.resource.Namespace"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/resource/Requirement.java" type="org.osgi.resource.Requirement">
-        <filter comment="Ignore OSGi API" id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.resource.Requirement"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/resource/Resource.java" type="org.osgi.resource.Resource">
-        <filter comment="Ignore OSGi API" id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.resource.Resource"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/resource/Wire.java" type="org.osgi.resource.Wire">
-        <filter comment="Ignore OSGi API" id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.resource.Wire"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/resource/Wiring.java" type="org.osgi.resource.Wiring">
-        <filter comment="Ignore OSGi API" id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.resource.Wiring"/>
+                <message_argument value="org.osgi.framework.namespace.NativeNamespace"/>
             </message_arguments>
         </filter>
     </resource>
@@ -200,84 +258,6 @@
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
                 <message_argument value="org.osgi.service.resolver.Resolver"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="supplement/src/org/eclipse/core/runtime/internal/adaptor/Locker_JavaNio.java" type="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio">
-        <filter comment="Code is protected when running on a limited environment" id="630194212">
-            <message_arguments>
-                <message_argument value="Locker_JavaNio.fileLock"/>
-                <message_argument value="FileLock"/>
-                <message_argument value="OSGi/Minimum-1.2"/>
-            </message_arguments>
-        </filter>
-        <filter comment="Code is protected when running on a limited environment" id="646971428">
-            <message_arguments>
-                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
-                <message_argument value="FileLock"/>
-                <message_argument value="OSGi/Minimum-1.2"/>
-            </message_arguments>
-        </filter>
-        <filter comment="Code is protected when running on a limited environment" id="646971428">
-            <message_arguments>
-                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
-                <message_argument value="OverlappingFileLockException"/>
-                <message_argument value="OSGi/Minimum-1.2"/>
-            </message_arguments>
-        </filter>
-        <filter comment="Code is protected when running on a limited environment" id="646971428">
-            <message_arguments>
-                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.lock()"/>
-                <message_argument value="OverlappingFileLockException"/>
-                <message_argument value="OSGi/Minimum-1.2"/>
-            </message_arguments>
-        </filter>
-        <filter comment="Code is protected when running on a limited environment" id="647004193">
-            <message_arguments>
-                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
-                <message_argument value="FileChannel"/>
-                <message_argument value="tryLock(long, long, boolean)"/>
-                <message_argument value="OSGi/Minimum-1.2"/>
-            </message_arguments>
-        </filter>
-        <filter comment="Code is protected when running on a limited environment" id="647004193">
-            <message_arguments>
-                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
-                <message_argument value="FileLock"/>
-                <message_argument value="release()"/>
-                <message_argument value="OSGi/Minimum-1.2"/>
-            </message_arguments>
-        </filter>
-        <filter comment="Code is protected when running on a limited environment" id="647004193">
-            <message_arguments>
-                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
-                <message_argument value="RandomAccessFile"/>
-                <message_argument value="getChannel()"/>
-                <message_argument value="OSGi/Minimum-1.2"/>
-            </message_arguments>
-        </filter>
-        <filter comment="Code is protected when running on a limited environment" id="647004193">
-            <message_arguments>
-                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.lock()"/>
-                <message_argument value="FileChannel"/>
-                <message_argument value="tryLock(long, long, boolean)"/>
-                <message_argument value="OSGi/Minimum-1.2"/>
-            </message_arguments>
-        </filter>
-        <filter comment="Code is protected when running on a limited environment" id="647004193">
-            <message_arguments>
-                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.lock()"/>
-                <message_argument value="RandomAccessFile"/>
-                <message_argument value="getChannel()"/>
-                <message_argument value="OSGi/Minimum-1.2"/>
-            </message_arguments>
-        </filter>
-        <filter comment="Code is protected when running on a limited environment" id="647004193">
-            <message_arguments>
-                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.release()"/>
-                <message_argument value="FileLock"/>
-                <message_argument value="release()"/>
-                <message_argument value="OSGi/Minimum-1.2"/>
             </message_arguments>
         </filter>
     </resource>
