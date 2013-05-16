@@ -95,7 +95,7 @@ public class StorageUtil {
 	 * @param   file file or directory to delete
 	 * @return false is the specified files still exists, true otherwise.
 	 */
-	public static boolean rm(File file) {
+	public static boolean rm(File file, boolean DEBUG) {
 		if (file.exists()) {
 			if (file.isDirectory()) {
 				String list[] = file.list();
@@ -103,11 +103,11 @@ public class StorageUtil {
 					int len = list.length;
 					for (int i = 0; i < len; i++) {
 						// we are doing a lot of garbage collecting here
-						rm(new File(file, list[i]));
+						rm(new File(file, list[i]), DEBUG);
 					}
 				}
 			}
-			if (Debug.STATIC_DEBUG_GENERAL) {
+			if (DEBUG) {
 				if (file.isDirectory()) {
 					Debug.println("rmdir " + file.getPath()); //$NON-NLS-1$
 				} else {
@@ -117,7 +117,7 @@ public class StorageUtil {
 
 			boolean success = file.delete();
 
-			if (Debug.STATIC_DEBUG_GENERAL) {
+			if (DEBUG) {
 				if (!success) {
 					Debug.println("  rm failed!!"); //$NON-NLS-1$
 				}

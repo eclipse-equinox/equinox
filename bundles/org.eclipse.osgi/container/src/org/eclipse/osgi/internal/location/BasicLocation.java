@@ -22,28 +22,7 @@ import org.eclipse.osgi.util.NLS;
  * Internal class.
  */
 public class BasicLocation implements Location {
-	public static final String PROP_OSGI_LOCKING = "osgi.locking"; //$NON-NLS-1$
 	private static String DEFAULT_LOCK_FILENAME = ".metadata/.lock"; //$NON-NLS-1$
-
-	static class MockLocker implements Locker {
-		/**
-		 * @throws IOException  
-		 */
-		public boolean lock() throws IOException {
-			// locking always successful
-			return true;
-		}
-
-		public boolean isLocked() {
-			// this lock is never locked
-			return false;
-		}
-
-		public void release() {
-			// nothing to release
-		}
-
-	}
 
 	final private boolean isReadOnly;
 	final private URL defaultValue;
@@ -58,21 +37,6 @@ public class BasicLocation implements Location {
 	// locking related fields
 	private File lockFile;
 	private Locker locker;
-
-	public static Locker createLocker(File lock, String lockMode, boolean debug) {
-		if ("none".equals(lockMode)) //$NON-NLS-1$
-			return new MockLocker();
-
-		if ("java.io".equals(lockMode)) //$NON-NLS-1$
-			return new Locker_JavaIo(lock);
-
-		if ("java.nio".equals(lockMode)) { //$NON-NLS-1$
-			return new Locker_JavaNio(lock, debug);
-		}
-
-		//	Backup case if an invalid value has been specified
-		return new Locker_JavaNio(lock, debug);
-	}
 
 	public BasicLocation(String property, URL defaultValue, boolean isReadOnly, String dataAreaPrefix, EquinoxConfiguration environmentInfo) {
 		this.property = property;
@@ -223,8 +187,8 @@ public class BasicLocation implements Location {
 	private void setLocker(File lock) {
 		if (locker != null)
 			return;
-		String lockMode = environmentInfo.getConfiguration(PROP_OSGI_LOCKING);
-		locker = createLocker(lock, lockMode, debug);
+		String lockMode = environmentInfo.getConfiguration(LocationHelper.PROP_OSGI_LOCKING);
+		locker = LocationHelper.createLocker(lock, lockMode, debug);
 	}
 
 	public synchronized void release() {

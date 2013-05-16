@@ -21,4 +21,24 @@ public interface Locker {
 	public boolean isLocked() throws IOException;
 
 	public void release();
+
+	static class MockLocker implements Locker {
+		/**
+		 * @throws IOException  
+		 */
+		public boolean lock() throws IOException {
+			// locking always successful
+			return true;
+		}
+
+		public boolean isLocked() {
+			// this lock is never locked
+			return false;
+		}
+
+		public void release() {
+			// nothing to release
+		}
+
+	}
 }

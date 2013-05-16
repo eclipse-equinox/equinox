@@ -15,7 +15,7 @@ import java.io.*;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.internal.core.Tokenizer;
-import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.util.SupplementDebug;
 import org.osgi.framework.BundleException;
 
 /**
@@ -355,8 +355,8 @@ public class ManifestElement {
 			StringBuffer headerValue = new StringBuffer(next);
 			headerValues.add(next);
 
-			if (Debug.STATIC_DEBUG_MANIFEST)
-				Debug.print("parseHeader: " + next); //$NON-NLS-1$
+			if (SupplementDebug.STATIC_DEBUG_MANIFEST)
+				System.out.print("parseHeader: " + next); //$NON-NLS-1$
 			boolean directive = false;
 			char c = tokenizer.getChar();
 			// Header values may be a list of ';' separated values.  Just append them all into one value until the first '=' or ','
@@ -379,8 +379,8 @@ public class ManifestElement {
 				if (c == ';' || c == ',' || c == '\0') /* more */{
 					headerValues.add(next);
 					headerValue.append(";").append(next); //$NON-NLS-1$
-					if (Debug.STATIC_DEBUG_MANIFEST)
-						Debug.print(";" + next); //$NON-NLS-1$
+					if (SupplementDebug.STATIC_DEBUG_MANIFEST)
+						System.out.print(";" + next); //$NON-NLS-1$
 				}
 			}
 			// found the header value create a manifestElement for it.
@@ -413,8 +413,8 @@ public class ManifestElement {
 				if (val == null)
 					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
 
-				if (Debug.STATIC_DEBUG_MANIFEST)
-					Debug.print(";" + next + "=" + val); //$NON-NLS-1$ //$NON-NLS-2$
+				if (SupplementDebug.STATIC_DEBUG_MANIFEST)
+					System.out.print(";" + next + "=" + val); //$NON-NLS-1$ //$NON-NLS-2$
 				try {
 					if (directive)
 						manifestElement.addDirective(next, val);
@@ -433,8 +433,8 @@ public class ManifestElement {
 				}
 			}
 			headerElements.add(manifestElement);
-			if (Debug.STATIC_DEBUG_MANIFEST)
-				Debug.println(""); //$NON-NLS-1$
+			if (SupplementDebug.STATIC_DEBUG_MANIFEST)
+				System.out.println(""); //$NON-NLS-1$
 			if (c == ',') /* another manifest element */
 				continue parseloop;
 			if (c == '\0') /* end of value */

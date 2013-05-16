@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ package org.eclipse.osgi.internal.debug;
 import java.io.PrintStream;
 import java.lang.reflect.*;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.util.SupplementDebug;
 import org.eclipse.osgi.service.debug.DebugOptions;
 
 /**
@@ -95,12 +96,6 @@ public class Debug {
 	 */
 	public boolean DEBUG_ENABLED = false;
 
-	// these static debug options are left overs because it would be messy to fix references to them
-	// this means that if multiple frameworks are using this class these debug options may get overwritten
-	public static boolean STATIC_DEBUG_GENERAL = false; // "debug"
-	public static boolean STATIC_DEBUG_MANIFEST = false; // "debug.manifest"
-	public static boolean STATIC_DEBUG_MESSAGE_BUNDLES = false; //"/debug/messageBundles"
-
 	/**
 	 * General debug flag.
 	 */
@@ -173,7 +168,6 @@ public class Debug {
 		}
 		DEBUG_ENABLED = dbgOptions.isDebugEnabled();
 		DEBUG_GENERAL = dbgOptions.getBooleanOption(OPTION_DEBUG_GENERAL, false);
-		STATIC_DEBUG_GENERAL = DEBUG_GENERAL;
 		DEBUG_BUNDLE_TIME = dbgOptions.getBooleanOption(OPTION_DEBUG_BUNDLE_TIME, false) || dbgOptions.getBooleanOption("org.eclipse.core.runtime/timing/startup", false); //$NON-NLS-1$
 		DEBUG_LOADER = dbgOptions.getBooleanOption(OPTION_DEBUG_LOADER, false);
 		DEBUG_EVENTS = dbgOptions.getBooleanOption(OPTION_DEBUG_EVENTS, false);
@@ -181,14 +175,14 @@ public class Debug {
 		DEBUG_HOOKS = dbgOptions.getBooleanOption(OPTION_DEBUG_HOOKS, false);
 		DEBUG_PACKAGES = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGES, false);
 		DEBUG_MANIFEST = dbgOptions.getBooleanOption(OPTION_DEBUG_MANIFEST, false);
-		STATIC_DEBUG_MANIFEST = DEBUG_MANIFEST;
+		SupplementDebug.STATIC_DEBUG_MANIFEST = DEBUG_MANIFEST;
 		DEBUG_FILTER = dbgOptions.getBooleanOption(OPTION_DEBUG_FILTER, false);
 		DEBUG_SECURITY = dbgOptions.getBooleanOption(OPTION_DEBUG_SECURITY, false);
 		DEBUG_STARTLEVEL = dbgOptions.getBooleanOption(OPTION_DEBUG_STARTLEVEL, false);
 		DEBUG_PACKAGEADMIN = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN, false);
 		DEBUG_PACKAGEADMIN_TIMING = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN_TIMING, false) || dbgOptions.getBooleanOption("org.eclipse.core.runtime/debug", false); //$NON-NLS-1$
 		DEBUG_MESSAGE_BUNDLES = dbgOptions.getBooleanOption(OPTION_DEBUG_MESSAGE_BUNDLES, false);
-		STATIC_DEBUG_MESSAGE_BUNDLES = DEBUG_MESSAGE_BUNDLES;
+		SupplementDebug.STATIC_DEBUG_MESSAGE_BUNDLES = DEBUG_MESSAGE_BUNDLES;
 		MONITOR_ACTIVATION = dbgOptions.getBooleanOption(OPTION_MONITOR_ACTIVATION, false);
 		DEBUG_LOCATION = dbgOptions.getBooleanOption(OPTION_DEBUG_LOCATION, false);
 	}

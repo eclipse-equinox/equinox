@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,14 +10,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.datalocation;
 
-import org.eclipse.osgi.internal.location.BasicLocation;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import junit.framework.*;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
 import org.eclipse.core.tests.session.SetupManager.SetupException;
+import org.eclipse.osgi.internal.location.LocationHelper;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.environment.Constants;
 import org.eclipse.osgi.tests.OSGiTest;
@@ -135,14 +134,14 @@ public class LocationAreaSessionTest extends OSGiTest {
 	}
 
 	static void doLock(String testLocationDir, String type, boolean release, boolean succeed) {
-		String oldLockingValue = System.setProperty(BasicLocation.PROP_OSGI_LOCKING, type);
+		String oldLockingValue = System.setProperty(LocationHelper.PROP_OSGI_LOCKING, type);
 		try {
 			doLock(testLocationDir, release, succeed);
 		} finally {
 			if (oldLockingValue == null)
-				System.getProperties().remove(BasicLocation.PROP_OSGI_LOCKING);
+				System.getProperties().remove(LocationHelper.PROP_OSGI_LOCKING);
 			else
-				System.setProperty(BasicLocation.PROP_OSGI_LOCKING, oldLockingValue);
+				System.setProperty(LocationHelper.PROP_OSGI_LOCKING, oldLockingValue);
 		}
 	}
 

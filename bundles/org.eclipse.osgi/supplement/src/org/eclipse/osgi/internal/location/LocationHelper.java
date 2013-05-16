@@ -13,11 +13,14 @@ package org.eclipse.osgi.internal.location;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.eclipse.osgi.internal.location.Locker.MockLocker;
 
 /**
  * @since 3.3
  */
 public class LocationHelper {
+	public static final String PROP_OSGI_LOCKING = "osgi.locking"; //$NON-NLS-1$
+
 	/**
 	 * Builds a URL with the given specification
 	 * @param spec the URL specification
@@ -56,4 +59,18 @@ public class LocationHelper {
 		return new URL(url.getProtocol(), url.getHost(), file);
 	}
 
+	public static Locker createLocker(File lock, String lockMode, boolean debug) {
+		if ("none".equals(lockMode)) //$NON-NLS-1$
+			return new MockLocker();
+
+		if ("java.io".equals(lockMode)) //$NON-NLS-1$
+			return new Locker_JavaIo(lock);
+
+		if ("java.nio".equals(lockMode)) { //$NON-NLS-1$
+			return new Locker_JavaNio(lock, debug);
+		}
+
+		//	Backup case if an invalid value has been specified
+		return new Locker_JavaNio(lock, debug);
+	}
 }

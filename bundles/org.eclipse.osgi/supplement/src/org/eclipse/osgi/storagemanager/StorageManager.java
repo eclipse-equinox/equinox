@@ -11,12 +11,10 @@
 package org.eclipse.osgi.storagemanager;
 
 import java.io.*;
-import java.security.AccessController;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.internal.reliablefile.*;
-import org.eclipse.osgi.framework.util.SecureAction;
-import org.eclipse.osgi.internal.location.BasicLocation;
+import org.eclipse.osgi.internal.location.LocationHelper;
 import org.eclipse.osgi.internal.location.Locker;
 
 /**
@@ -88,16 +86,15 @@ import org.eclipse.osgi.internal.location.Locker;
 public final class StorageManager {
 	private static final int FILETYPE_STANDARD = 0;
 	private static final int FILETYPE_RELIABLEFILE = 1;
-	private static final SecureAction secure = AccessController.doPrivileged(SecureAction.createSecureAction());
 	private static final String MANAGER_FOLDER = ".manager"; //$NON-NLS-1$
 	private static final String TABLE_FILE = ".fileTable"; //$NON-NLS-1$
 	private static final String LOCK_FILE = ".fileTableLock"; //$NON-NLS-1$
 	private static final int MAX_LOCK_WAIT = 5000; // 5 seconds 
 	// these should be static but the tests expect to be able to create new managers after changing this setting dynamically
-	private final boolean useReliableFiles = Boolean.valueOf(secure.getProperty("osgi.useReliableFiles")).booleanValue(); //$NON-NLS-1$
-	private final boolean tempCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanTempFiles")).booleanValue(); //$NON-NLS-1$
-	private final boolean openCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanupOnOpen")).booleanValue(); //$NON-NLS-1$
-	private final boolean saveCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanupOnSave")).booleanValue(); //$NON-NLS-1$
+	private final boolean useReliableFiles = Boolean.valueOf(System.getProperty("osgi.useReliableFiles")).booleanValue(); //$NON-NLS-1$
+	private final boolean tempCleanup = Boolean.valueOf(System.getProperty("osgi.embedded.cleanTempFiles")).booleanValue(); //$NON-NLS-1$
+	private final boolean openCleanup = Boolean.valueOf(System.getProperty("osgi.embedded.cleanupOnOpen")).booleanValue(); //$NON-NLS-1$
+	private final boolean saveCleanup = Boolean.valueOf(System.getProperty("osgi.embedded.cleanupOnSave")).booleanValue(); //$NON-NLS-1$
 
 	private class Entry {
 		int readId;
@@ -189,7 +186,7 @@ public final class StorageManager {
 			return;
 		this.instanceFile = File.createTempFile(".tmp", ".instance", managerRoot); //$NON-NLS-1$//$NON-NLS-2$
 		this.instanceFile.deleteOnExit();
-		instanceLocker = BasicLocation.createLocker(instanceFile, lockMode, false);
+		instanceLocker = LocationHelper.createLocker(instanceFile, lockMode, false);
 		instanceLocker.lock();
 	}
 
@@ -384,7 +381,7 @@ public final class StorageManager {
 		if (readOnly)
 			return false;
 		if (locker == null) {
-			locker = BasicLocation.createLocker(lockFile, lockMode, false);
+			locker = LocationHelper.createLocker(lockFile, lockMode, false);
 			if (locker == null)
 				throw new IOException(Msg.fileManager_cannotLock);
 		}
@@ -610,7 +607,7 @@ public final class StorageManager {
 			if (files != null) {
 				for (int i = 0; i < files.length; i++) {
 					if (files[i].endsWith(".instance") && (instanceFile == null || !files[i].equalsIgnoreCase(instanceFile.getName()))) { //$NON-NLS-1$
-						Locker tmpLocker = BasicLocation.createLocker(new File(managerRoot, files[i]), lockMode, false);
+						Locker tmpLocker = LocationHelper.createLocker(new File(managerRoot, files[i]), lockMode, false);
 						if (tmpLocker.lock()) {
 							//If I can lock it is a file that has been left behind by a crash
 							tmpLocker.release();

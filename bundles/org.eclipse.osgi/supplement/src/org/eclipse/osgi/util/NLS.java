@@ -19,7 +19,7 @@ import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.util.SupplementDebug;
 
 /**
  * Common superclass for all message bundle classes.  Provides convenience
@@ -285,7 +285,7 @@ public abstract class NLS {
 				// log it and continue. This means that the field will (most likely) be un-initialized and
 				// will fail later in the code and if so then we will see both the NPE and this error.
 				String value = "NLS missing message: " + field.getName() + " in: " + bundleName; //$NON-NLS-1$ //$NON-NLS-2$
-				if (Debug.STATIC_DEBUG_MESSAGE_BUNDLES)
+				if (SupplementDebug.STATIC_DEBUG_MESSAGE_BUNDLES)
 					System.out.println(value);
 				log(SEVERITY_WARNING, value, null);
 				if (!isAccessible)
@@ -337,7 +337,7 @@ public abstract class NLS {
 			}
 		}
 		computeMissingMessages(bundleName, clazz, fields, fieldArray, isAccessible);
-		if (Debug.STATIC_DEBUG_MESSAGE_BUNDLES)
+		if (SupplementDebug.STATIC_DEBUG_MESSAGE_BUNDLES)
 			System.out.println("Time to load message bundle: " + bundleName + " was " + (System.currentTimeMillis() - start) + "ms."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
@@ -410,7 +410,7 @@ public abstract class NLS {
 				return null;
 			if (fieldObject == null) {
 				final String msg = "NLS unused message: " + key + " in: " + bundleName;//$NON-NLS-1$ //$NON-NLS-2$
-				if (Debug.STATIC_DEBUG_MESSAGE_BUNDLES)
+				if (SupplementDebug.STATIC_DEBUG_MESSAGE_BUNDLES)
 					System.out.println(msg);
 				log(SEVERITY_WARNING, msg, null);
 				return null;

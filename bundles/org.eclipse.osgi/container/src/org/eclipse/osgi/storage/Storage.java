@@ -322,7 +322,7 @@ public class Storage {
 	}
 
 	private void cleanOSGiStorage(Location location, File root) {
-		if (location.isReadOnly() || !StorageUtil.rm(root)) {
+		if (location.isReadOnly() || !StorageUtil.rm(root, getConfiguration().getDebug().DEBUG_GENERAL)) {
 			equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "The -clean (osgi.clean) option was not successful. Unable to clean the storage area: " + root.getAbsolutePath(), null); //$NON-NLS-1$
 		}
 	}
@@ -877,7 +877,7 @@ public class Storage {
 			// and the directory is marked for delete
 			if (delete.exists()) {
 				// if rm fails to delete the directory and .delete was removed
-				if (!StorageUtil.rm(target) && !delete.exists()) {
+				if (!StorageUtil.rm(target, getConfiguration().getDebug().DEBUG_GENERAL) && !delete.exists()) {
 					try {
 						// recreate .delete
 						FileOutputStream out = new FileOutputStream(delete);
@@ -913,7 +913,7 @@ public class Storage {
 	}
 
 	void delete0(File delete) throws IOException {
-		if (!StorageUtil.rm(delete)) {
+		if (!StorageUtil.rm(delete, getConfiguration().getDebug().DEBUG_GENERAL)) {
 			/* create .delete */
 			FileOutputStream out = new FileOutputStream(new File(delete, DELETE_FLAG));
 			out.close();
