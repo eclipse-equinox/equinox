@@ -43,6 +43,7 @@
 
   <modules>
     <module>bundles/org.eclipse.osgi</module>
+    <module>bundles/org.eclipse.osgi.compatibility.state</module>
     <module>bundles/org.eclipse.osgi.services</module>
     <module>bundles/org.eclipse.osgi.util</module>
     <module>bundles/org.eclipse.osgi/supplement</module>

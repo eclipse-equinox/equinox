@@ -80,5 +80,5 @@ Bundle-DocUrl: http://www.eclipse.org
 Eclipse-ExtensibleAPI: true
 Eclipse-SystemBundle: true
 Main-Class: org.eclipse.core.runtime.adaptor.EclipseStarter
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6, J2SE-1.5
 Eclipse-BundleShape: jar
