@@ -36,6 +36,7 @@ public class ServiceRegistry {
 	public static final int SERVICEEVENT = 3;
 
 	static final String findHookName = FindHook.class.getName();
+	@SuppressWarnings("deprecation")
 	static final String eventHookName = EventHook.class.getName();
 	static final String eventListenerHookName = EventListenerHook.class.getName();
 	static final String listenerHookName = ListenerHook.class.getName();
@@ -1167,6 +1168,7 @@ public class ServiceRegistry {
 			Debug.println("notifyServiceEventHooks(" + event.getType() + ":" + event.getServiceReference() + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 		}
 		notifyHooksPrivileged(new HookContext() {
+			@SuppressWarnings("deprecation")
 			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
 				if (hook instanceof EventHook) {
 					((EventHook) hook).event(event, result);
