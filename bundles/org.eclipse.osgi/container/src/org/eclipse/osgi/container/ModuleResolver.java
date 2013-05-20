@@ -533,21 +533,19 @@ final class ModuleResolver {
 		private List<Capability> filterProviders(Requirement requirement, List<ModuleCapability> candidates, boolean filterResolvedHosts) {
 			ListIterator<ModuleCapability> iCandidates = candidates.listIterator();
 			filterDisabled(iCandidates);
-			if (filterResolvedHosts) {
-				filterResolvedHosts(requirement, iCandidates);
-			}
 			removeNonEffectiveCapabilities(iCandidates);
 			removeSubstituted(iCandidates);
 			filterPermissions((BundleRequirement) requirement, iCandidates);
 			hook.filterMatches((BundleRequirement) requirement, Converters.asListBundleCapability(candidates));
+			// filter resolved hosts after calling hooks to allow hooks to see the host capability
+			filterResolvedHosts(requirement, candidates, filterResolvedHosts);
 			Collections.sort(candidates, this);
 			return Converters.asListCapability(candidates);
 		}
 
-		private void filterResolvedHosts(Requirement requirement, ListIterator<ModuleCapability> iCandidates) {
-			if (HostNamespace.HOST_NAMESPACE.equals(requirement.getNamespace())) {
-				rewind(iCandidates);
-				while (iCandidates.hasNext()) {
+		private void filterResolvedHosts(Requirement requirement, List<ModuleCapability> candidates, boolean filterResolvedHosts) {
+			if (filterResolvedHosts && HostNamespace.HOST_NAMESPACE.equals(requirement.getNamespace())) {
+				for (Iterator<ModuleCapability> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
 					if (wirings.containsKey(iCandidates.next().getRevision())) {
 						iCandidates.remove();
 					}
