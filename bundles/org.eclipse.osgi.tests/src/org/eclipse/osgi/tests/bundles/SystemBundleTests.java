@@ -1784,6 +1784,77 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	public void testBug258209_1() throws BundleException {
+		// create a framework to test thread context class loaders
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+
+		ClassLoader current = Thread.currentThread().getContextClassLoader();
+		Equinox equinox = new Equinox(configuration);
+		equinox.init();
+		Thread.currentThread().setContextClassLoader(current);
+
+		BundleContext systemContext = equinox.getBundleContext();
+		Bundle testTCCL = systemContext.installBundle(installer.getBundleLocation("test.tccl")); //$NON-NLS-1$
+		equinox.adapt(FrameworkWiring.class).resolveBundles(Arrays.asList(testTCCL));
+		try {
+			testTCCL.start();
+		} catch (BundleException e) {
+			fail("Unexpected exception starting bundle", e); //$NON-NLS-1$
+		}
+
+		assertEquals("Unexpected state", Bundle.RESOLVED, testTCCL.getState()); //$NON-NLS-1$
+		// this will start the framework on the current thread; test that the correct tccl is used
+		equinox.start();
+		assertEquals("Unexpected state", Bundle.ACTIVE, testTCCL.getState()); //$NON-NLS-1$
+
+		// test that the correct tccl is used for framework update
+		try {
+			equinox.update();
+			checkActive(testTCCL);
+		} catch (Exception e) {
+			fail("Unexpected exception", e); //$NON-NLS-1$
+		}
+		systemContext = equinox.getBundleContext();
+		assertEquals("Unexpected state", Bundle.ACTIVE, testTCCL.getState()); //$NON-NLS-1$
+
+		// test that the correct tccl is used for refresh packages
+		equinox.adapt(FrameworkWiring.class).refreshBundles(Arrays.asList(testTCCL));
+		checkActive(testTCCL);
+		assertEquals("Unexpected state", Bundle.ACTIVE, testTCCL.getState()); //$NON-NLS-1$
+
+		// use the tccl service to start the test bundle.
+		ClassLoader serviceTCCL = null;
+		try {
+			serviceTCCL = (ClassLoader) systemContext.getService(systemContext.getServiceReferences(ClassLoader.class.getName(), "(equinox.classloader.type=contextClassLoader)")[0]);//$NON-NLS-1$
+		} catch (InvalidSyntaxException e) {
+			fail("Unexpected", e);//$NON-NLS-1$
+		}
+		current = Thread.currentThread().getContextClassLoader();
+		Thread.currentThread().setContextClassLoader(serviceTCCL);
+		try {
+			testTCCL.stop();
+			testTCCL.start();
+		} catch (BundleException e) {
+			fail("Unepected", e); //$NON-NLS-1$
+		} finally {
+			Thread.currentThread().setContextClassLoader(current);
+		}
+
+	}
+
+	private void checkActive(Bundle b) {
+		try {
+			// just a hack to make sure we are restarted
+			Thread.sleep(500);
+			if (b.getState() != Bundle.ACTIVE)
+				Thread.sleep(500);
+		} catch (Exception e) {
+			fail("Unexpected exception", e); //$NON-NLS-1$
+		}
+	}
+
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {
 		outputDir.mkdirs();
 
