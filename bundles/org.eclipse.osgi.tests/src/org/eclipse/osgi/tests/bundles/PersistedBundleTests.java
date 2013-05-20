@@ -127,6 +127,14 @@ public class PersistedBundleTests extends AbstractBundleTests {
 		} finally {
 			stopQuietly(equinox1);
 		}
+		// make sure it persisted after successful stop
+		equinox1 = new Equinox(configuration);
+		initAndStart(equinox1);
+		try {
+			assertNotNull("Bundle does not exists", equinox1.getBundleContext().getBundle(getName()));
+		} finally {
+			stopQuietly(equinox1);
+		}
 	}
 
 	/*

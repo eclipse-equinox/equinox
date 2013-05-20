@@ -39,7 +39,7 @@ import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 
 @SuppressWarnings("deprecation")
-public class EquinoxContainer {
+public class EquinoxContainer implements ThreadFactory {
 	public static final String NAME = "org.eclipse.osgi"; //$NON-NLS-1$
 	private static final String CONFIG_FILE = "config.ini"; //$NON-NLS-1$
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
@@ -209,7 +209,7 @@ public class EquinoxContainer {
 			eventPublisher = new EquinoxEventPublisher(this);
 			serviceRegistry = new ServiceRegistry(this);
 			initializeContextFinder();
-			executor = Executors.newScheduledThreadPool(1);
+			executor = Executors.newScheduledThreadPool(1, this);
 			storageSaver = new StorageSaver(this);
 		}
 	}
@@ -262,16 +262,10 @@ public class EquinoxContainer {
 		}
 	}
 
-	// TODO Providing access to the ExecutorService has potential issues. For
-	// example, something could shut it down. Make these methods package 
-	// private? Isolate the executor and add utility methods for adding tasks
-	// instead?
-	public ExecutorService getExecutor() {
-		return executor;
-	}
-
-	public ScheduledExecutorService getScheduledExecutor() {
-		return executor;
+	ScheduledExecutorService getScheduledExecutor() {
+		synchronized (this.monitor) {
+			return executor;
+		}
 	}
 
 	public ServiceRegistry getServiceRegistry() {
@@ -331,5 +325,13 @@ public class EquinoxContainer {
 		synchronized (this.monitor) {
 			return storageSaver;
 		}
+	}
+
+	@Override
+	public Thread newThread(Runnable r) {
+		Thread t = new Thread(r, "Active Thread: " + toString()); //$NON-NLS-1$
+		t.setDaemon(false);
+		t.setPriority(Thread.NORM_PRIORITY);
+		return t;
 	}
 }

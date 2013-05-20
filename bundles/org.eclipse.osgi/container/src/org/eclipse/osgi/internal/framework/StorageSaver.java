@@ -27,7 +27,7 @@ public final class StorageSaver {
 			try {
 				container.getStorage().save();
 			} catch (IOException e) {
-				container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error saving on update", e);
+				container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error saving on update", e); //$NON-NLS-1$
 			}
 		}
 	}
@@ -60,7 +60,7 @@ public final class StorageSaver {
 	}
 
 	private Thread registerShutdownHook() {
-		Thread thread = new Thread(task, "Equinox Shutdown Hook");
+		Thread thread = new Thread(task, "Equinox Shutdown Hook"); //$NON-NLS-1$
 		Runtime.getRuntime().addShutdownHook(thread);
 		return thread;
 	}
