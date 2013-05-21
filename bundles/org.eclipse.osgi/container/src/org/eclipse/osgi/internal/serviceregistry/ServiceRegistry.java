@@ -763,8 +763,8 @@ public class ServiceRegistry {
 		if (System.getSecurityManager() == null) {
 			publishServiceEventPrivileged(event);
 		} else {
-			AccessController.doPrivileged(new PrivilegedAction<Object>() {
-				public Object run() {
+			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				public Void run() {
 					publishServiceEventPrivileged(event);
 					return null;
 				}
@@ -1125,8 +1125,8 @@ public class ServiceRegistry {
 		if (System.getSecurityManager() == null) {
 			notifyFindHooksPrivileged(context, clazz, filterstring, allservices, result);
 		} else {
-			AccessController.doPrivileged(new PrivilegedAction<Object>() {
-				public Object run() {
+			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				public Void run() {
 					notifyFindHooksPrivileged(context, clazz, filterstring, allservices, result);
 					return null;
 				}
@@ -1267,8 +1267,8 @@ public class ServiceRegistry {
 		if (System.getSecurityManager() == null) {
 			notifyNewListenerHookPrivileged(registration);
 		} else {
-			AccessController.doPrivileged(new PrivilegedAction<Object>() {
-				public Object run() {
+			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				public Void run() {
 					notifyNewListenerHookPrivileged(registration);
 					return null;
 				}
@@ -1324,8 +1324,8 @@ public class ServiceRegistry {
 		if (System.getSecurityManager() == null) {
 			notifyListenerHooksPrivileged(listeners, added);
 		} else {
-			AccessController.doPrivileged(new PrivilegedAction<Object>() {
-				public Object run() {
+			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				public Void run() {
 					notifyListenerHooksPrivileged(listeners, added);
 					return null;
 				}

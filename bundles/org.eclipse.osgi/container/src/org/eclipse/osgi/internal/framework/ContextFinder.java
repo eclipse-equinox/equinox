@@ -30,8 +30,8 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 	static ClassLoader finderClassLoader;
 	static Finder contextFinder;
 	static {
-		AccessController.doPrivileged(new PrivilegedAction<Object>() {
-			public Object run() {
+		AccessController.doPrivileged(new PrivilegedAction<Void>() {
+			public Void run() {
 				finderClassLoader = ContextFinder.class.getClassLoader();
 				contextFinder = new Finder();
 				return null;

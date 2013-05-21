@@ -1753,14 +1753,14 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		}
 	}
 
-	private static class SetAccessibleAction implements PrivilegedAction<Object> {
+	private static class SetAccessibleAction implements PrivilegedAction<Void> {
 		private final AccessibleObject accessible;
 
 		SetAccessibleAction(AccessibleObject accessible) {
 			this.accessible = accessible;
 		}
 
-		public Object run() {
+		public Void run() {
 			accessible.setAccessible(true);
 			return null;
 		}

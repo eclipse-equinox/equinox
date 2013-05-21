@@ -143,8 +143,8 @@ public abstract class NLS {
 			load(baseName, clazz);
 			return;
 		}
-		AccessController.doPrivileged(new PrivilegedAction<Object>() {
-			public Object run() {
+		AccessController.doPrivileged(new PrivilegedAction<Void>() {
+			public Void run() {
 				load(baseName, clazz);
 				return null;
 			}

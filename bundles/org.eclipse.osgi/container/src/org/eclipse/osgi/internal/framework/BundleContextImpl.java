@@ -209,8 +209,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		if (System.getSecurityManager() == null) {
 			notifyFindHooksPriviledged(context, shrinkable);
 		} else {
-			AccessController.doPrivileged(new PrivilegedAction<Object>() {
-				public Object run() {
+			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				public Void run() {
 					notifyFindHooksPriviledged(context, shrinkable);
 					return null;
 				}
@@ -757,8 +757,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 */
 	private void startActivator(final BundleActivator bundleActivator) throws BundleException {
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-				public Object run() throws Exception {
+			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+				public Void run() throws Exception {
 					if (bundleActivator != null) {
 						// make sure the context class loader is set correctly
 						Object previousTCCL = setContextFinder();
@@ -812,14 +812,15 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 */
 	protected void stop() throws BundleException {
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-				public Object run() throws Exception {
-					if (activator != null) {
+			final BundleActivator bundleActivator = activator;
+			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+				public Void run() throws Exception {
+					if (bundleActivator != null) {
 						// make sure the context class loader is set correctly
 						Object previousTCCL = setContextFinder();
 						try {
 							/* Stop the bundle synchronously */
-							activator.stop(BundleContextImpl.this);
+							bundleActivator.stop(BundleContextImpl.this);
 						} finally {
 							if (previousTCCL != Boolean.FALSE)
 								Thread.currentThread().setContextClassLoader((ClassLoader) previousTCCL);

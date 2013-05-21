@@ -45,7 +45,7 @@ public class EquinoxSecurityManager extends SecurityManager {
 		}
 	}
 
-	static class CheckPermissionAction implements PrivilegedAction<Object> {
+	static class CheckPermissionAction implements PrivilegedAction<Void> {
 		Permission perm;
 		Object context;
 		EquinoxSecurityManager fsm;
@@ -56,7 +56,7 @@ public class EquinoxSecurityManager extends SecurityManager {
 			this.context = context;
 		}
 
-		public Object run() {
+		public Void run() {
 			fsm.internalCheckPermission(perm, context);
 			return null;
 		}

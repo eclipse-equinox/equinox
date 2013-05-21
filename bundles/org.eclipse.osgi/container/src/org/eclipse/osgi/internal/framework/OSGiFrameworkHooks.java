@@ -89,8 +89,8 @@ class OSGiFrameworkHooks {
 			if (System.getSecurityManager() == null) {
 				notifyCollisionHooksPriviledged(operationType, target, shrinkable);
 			} else {
-				AccessController.doPrivileged(new PrivilegedAction<Object>() {
-					public Object run() {
+				AccessController.doPrivileged(new PrivilegedAction<Void>() {
+					public Void run() {
 						notifyCollisionHooksPriviledged(operationType, target, shrinkable);
 						return null;
 					}

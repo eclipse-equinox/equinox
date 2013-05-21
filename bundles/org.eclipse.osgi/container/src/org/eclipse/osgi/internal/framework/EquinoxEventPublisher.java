@@ -74,8 +74,8 @@ public class EquinoxEventPublisher {
 		if (System.getSecurityManager() == null) {
 			publishBundleEventPrivileged(event);
 		} else {
-			AccessController.doPrivileged(new PrivilegedAction<Object>() {
-				public Object run() {
+			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				public Void run() {
 					publishBundleEventPrivileged(event);
 					return null;
 				}
@@ -221,8 +221,8 @@ public class EquinoxEventPublisher {
 		if (System.getSecurityManager() == null) {
 			publishFrameworkEventPrivileged(event, listeners);
 		} else {
-			AccessController.doPrivileged(new PrivilegedAction<Object>() {
-				public Object run() {
+			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				public Void run() {
 					publishFrameworkEventPrivileged(event, listeners);
 					return null;
 				}

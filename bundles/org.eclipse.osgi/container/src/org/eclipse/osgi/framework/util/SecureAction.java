@@ -435,8 +435,8 @@ public class SecureAction {
 			tracker.open();
 			return;
 		}
-		AccessController.doPrivileged(new PrivilegedAction<Object>() {
-			public Object run() {
+		AccessController.doPrivileged(new PrivilegedAction<Void>() {
+			public Void run() {
 				tracker.open();
 				return null;
 			}
@@ -455,8 +455,8 @@ public class SecureAction {
 			return;
 		}
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-				public Object run() throws BundleException {
+			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+				public Void run() throws BundleException {
 					module.start(options);
 					return null;
 				}

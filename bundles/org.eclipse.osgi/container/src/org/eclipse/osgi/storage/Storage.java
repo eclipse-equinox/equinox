@@ -898,8 +898,8 @@ public class Storage {
 			delete0(delete);
 		} else {
 			try {
-				AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-					public Object run() throws IOException {
+				AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+					public Void run() throws IOException {
 						delete0(delete);
 						return null;
 					}
@@ -928,8 +928,8 @@ public class Storage {
 			save0();
 		} else {
 			try {
-				AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-					public Object run() throws IOException {
+				AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+					public Void run() throws IOException {
 						save0();
 						return null;
 					}

@@ -218,8 +218,8 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 			registry.notifyHooksPrivileged(context);
 		else {
 			try {
-				AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-					public Object run() {
+				AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+					public Void run() {
 						registry.notifyHooksPrivileged(context);
 						return null;
 					}
@@ -239,8 +239,8 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 				registry.notifyHooksPrivileged(this);
 			} else {
 				try {
-					AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-						public Object run() {
+					AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+						public Void run() {
 							registry.notifyHooksPrivileged(WovenClassImpl.this);
 							return null;
 						}

@@ -168,8 +168,8 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 
 	void log(final Bundle bundle, final String name, final Object context, final int level, final String message, final Throwable exception) {
 		if (System.getSecurityManager() != null) {
-			AccessController.doPrivileged(new PrivilegedAction<Object>() {
-				public Object run() {
+			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				public Void run() {
 					logPrivileged(bundle, name, context, level, message, exception);
 					return null;
 				}

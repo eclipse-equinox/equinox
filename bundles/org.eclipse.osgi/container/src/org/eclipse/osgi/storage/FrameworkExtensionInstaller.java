@@ -77,9 +77,9 @@ public class FrameworkExtensionInstaller {
 			addExtensionContent0(revision, systemModule);
 		} else {
 			try {
-				AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+				AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
 					@Override
-					public Object run() throws BundleException {
+					public Void run() throws BundleException {
 						addExtensionContent0(revision, systemModule);
 						return null;
 					}
