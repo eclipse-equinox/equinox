@@ -40,6 +40,8 @@ public class Msg extends NLS {
 	public static String SERVICE_FACTORY_RECURSION;
 	public static String SERVICE_USE_OVERFLOW;
 
+	public static String SERVICE_OBJECTS_UNGET_ARGUMENT_EXCEPTION;
+
 	public static String BUNDLE_SYSTEMBUNDLE_UNINSTALL_EXCEPTION;
 
 	public static String HEADER_DUPLICATE_KEY_EXCEPTION;

@@ -454,10 +454,46 @@ public class ServiceRegistry {
 	 * @see #ungetService(BundleContextImpl, ServiceReferenceImpl)
 	 * @see ServiceFactory
 	 */
-	public Object getService(BundleContextImpl context, ServiceReferenceImpl<?> reference) {
+	public <S> S getService(BundleContextImpl context, ServiceReferenceImpl<S> reference) {
 		/* test for permission to get the service */
 		checkGetServicePermission(reference);
-		return reference.getRegistration().getService(context);
+		return reference.getRegistration().getService(context, ServiceConsumer.singletonConsumer);
+	}
+
+	/**
+	 * Returns the {@link ServiceObjects} object for the service referenced by
+	 * the specified {@code ServiceReference} object.
+	 * 
+	 * <p>
+	 * The {@link ServiceObjects} object can be used to obtain multiple
+	 * service objects for services with {@link Constants#SCOPE_PROTOTYPE
+	 * prototype} scope. For services with {@link Constants#SCOPE_SINGLETON
+	 * singleton} or {@link Constants#SCOPE_BUNDLE bundle} scope, the
+	 * {@link ServiceObjects#getService()} method behaves the same as the
+	 * {@link BundleContext#getService(ServiceReference)} method and the
+	 * {@link ServiceObjects#ungetService(Object)} method behaves the same as
+	 * the {@link BundleContext#ungetService(ServiceReference)} method. That is, only one,
+	 * use-counted service object is available from the {@link ServiceObjects}
+	 * object.
+	 * 
+	 * <p>
+	 * This method will always return {@code null} when the service associated
+	 * with the specified {@code reference} has been unregistered.
+	 * 
+	 * @param <S> Type of Service.
+	 * @param context The BundleContext of the requesting bundle.
+	 * @param reference A reference to the service.
+	 * @return A {@link ServiceObjects} object for the service associated with
+	 *         the specified {@code reference} or {@code null} if the service is
+	 *         not registered.
+	 * @throws SecurityException If the caller does not have the
+	 *         {@code ServicePermission} to get the service using at least one
+	 *         of the named classes the service was registered under and the
+	 *         Java Runtime Environment supports permissions.
+	 */
+	public <S> ServiceObjectsImpl<S> getServiceObjects(BundleContextImpl context, ServiceReferenceImpl<S> reference) {
+		checkGetServicePermission(reference);
+		return reference.getRegistration().getServiceObjects(context);
 	}
 
 	/**
@@ -500,7 +536,7 @@ public class ServiceRegistry {
 	public boolean ungetService(BundleContextImpl context, ServiceReferenceImpl<?> reference) {
 		ServiceRegistrationImpl<?> registration = reference.getRegistration();
 
-		return registration.ungetService(context);
+		return registration.ungetService(context, ServiceConsumer.singletonConsumer, null);
 	}
 
 	/**
@@ -1237,7 +1273,7 @@ public class ServiceRegistry {
 	 * @param hookContext Context to use when calling the hook service.
 	 */
 	private void notifyHookPrivileged(BundleContextImpl context, ServiceRegistrationImpl<?> registration, HookContext hookContext) {
-		Object hook = registration.getSafeService(context);
+		Object hook = registration.getSafeService(context, ServiceConsumer.singletonConsumer);
 		if (hook == null) { // if the hook is null
 			return;
 		}
@@ -1253,7 +1289,7 @@ public class ServiceRegistry {
 			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, hook.getClass().getName(), hookContext.getHookMethodName()), t);
 			container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
 		} finally {
-			registration.ungetService(context);
+			registration.ungetService(context, ServiceConsumer.singletonConsumer, null);
 		}
 	}
 

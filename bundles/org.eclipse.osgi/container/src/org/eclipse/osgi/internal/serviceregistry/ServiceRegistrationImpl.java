@@ -91,7 +91,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		this.context = context;
 		this.bundle = context.getBundleImpl();
 		this.clazzes = clazzes; /* must be set before calling createProperties. */
-		this.service = service;
+		this.service = service; /* must be set before calling createProperties. */
 		this.serviceid = registry.getNextServiceId(); /* must be set before calling createProperties. */
 		this.contextsUsing = new ArrayList<BundleContextImpl>(10);
 
@@ -252,6 +252,17 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	}
 
 	/**
+	 * Is this registration unregistered?
+	 * 
+	 * @return true if unregistered; otherwise false.
+	 */
+	boolean isUnregistered() {
+		synchronized (registrationLock) {
+			return state == UNREGISTERED;
+		}
+	}
+
+	/**
 	 * Returns a {@link ServiceReferenceImpl} object for this registration.
 	 * The {@link ServiceReferenceImpl} object may be shared with other bundles.
 	 *
@@ -292,6 +303,17 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 
 		props.set(Constants.OBJECTCLASS, clazzes, true);
 		props.set(Constants.SERVICE_ID, new Long(serviceid), true);
+		final String scope;
+		if (service instanceof ServiceFactory) {
+			if (service instanceof PrototypeServiceFactory) {
+				scope = Constants.SCOPE_PROTOTYPE;
+			} else {
+				scope = Constants.SCOPE_BUNDLE;
+			}
+		} else {
+			scope = Constants.SCOPE_SINGLETON;
+		}
+		props.set(Constants.SERVICE_SCOPE, scope, true);
 		props.setReadOnly();
 		Object ranking = props.getProperty(Constants.SERVICE_RANKING);
 
@@ -400,9 +422,9 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		return bundle;
 	}
 
-	Object getSafeService(BundleContextImpl user) {
+	S getSafeService(BundleContextImpl user, ServiceConsumer consumer) {
 		try {
-			return getService(user);
+			return getService(user, consumer);
 		} catch (IllegalStateException e) {
 			// can happen if the user is stopped on another thread
 			return null;
@@ -413,34 +435,35 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	 * Get a service object for the using BundleContext.
 	 *
 	 * @param user BundleContext using service.
+	 * @param consumer The closure for the consumer type.
 	 * @return Service object
 	 */
-	Object getService(BundleContextImpl user) {
-		synchronized (registrationLock) {
-			if (state == UNREGISTERED) { /* service unregistered */
-				return null;
-			}
+	S getService(BundleContextImpl user, ServiceConsumer consumer) {
+		if (isUnregistered()) { /* service unregistered */
+			return null;
 		}
-		if (registry.debug.DEBUG_SERVICES) {
-			Debug.println("getService[" + user.getBundleImpl() + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		}
-
 		Map<ServiceRegistrationImpl<?>, ServiceUse<?>> servicesInUse = user.getServicesInUseMap();
 		if (servicesInUse == null) { /* user is closed */
 			user.checkValid(); /* throw exception */
 		}
+
+		if (registry.debug.DEBUG_SERVICES) {
+			Debug.println("getService[" + user.getBundleImpl() + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
 		/* Use a while loop to support retry if a call to a ServiceFactory fails */
 		while (true) {
-			ServiceUse<?> use;
+			ServiceUse<S> use;
 			boolean added = false;
 			/* Obtain the ServiceUse object for this service by bundle user */
 			synchronized (servicesInUse) {
 				user.checkValid();
-				use = servicesInUse.get(this);
+				@SuppressWarnings("unchecked")
+				ServiceUse<S> u = (ServiceUse<S>) servicesInUse.get(this);
+				use = u;
 				if (use == null) {
 					/* if this is the first use of the service
 					 * optimistically record this service is being used. */
-					use = new ServiceUse<S>(user, this);
+					use = newServiceUse(user);
 					added = true;
 					synchronized (registrationLock) {
 						if (state == UNREGISTERED) { /* service unregistered */
@@ -462,7 +485,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 						continue;
 					}
 				}
-				Object serviceObject = use.getService();
+				S serviceObject = consumer.getService(use);
 				/* if the service factory failed to return an object and
 				 * we created the service use, then remove the 
 				 * optimistically added ServiceUse. */
@@ -480,40 +503,75 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	}
 
 	/**
+	 * Create a new ServiceObjects for the requesting bundle.
+	 * 
+	 * @param user The requesting bundle.
+	 * @return A new ServiceObjects for this service and the requesting bundle.
+	 */
+	ServiceObjectsImpl<S> getServiceObjects(BundleContextImpl user) {
+		if (isUnregistered()) { /* service unregistered */
+			return null;
+		}
+		if (registry.debug.DEBUG_SERVICES) {
+			Debug.println("getServiceObjects[" + user.getBundleImpl() + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+
+		return new ServiceObjectsImpl<S>(user, this);
+	}
+
+	/**
+	 * Create a new ServiceUse object for this service and user.
+	 * 
+	 * @param user The bundle using this service.
+	 * @return The ServiceUse object for the bundle using this service.
+	 */
+	private ServiceUse<S> newServiceUse(BundleContextImpl user) {
+		if (service instanceof ServiceFactory) {
+			if (service instanceof PrototypeServiceFactory) {
+				return new PrototypeServiceFactoryUse<S>(user, this);
+			}
+			return new ServiceFactoryUse<S>(user, this);
+		}
+		return new ServiceUse<S>(user, this);
+	}
+
+	/**
 	 * Unget a service for the using BundleContext.
 	 *
 	 * @param user BundleContext using service.
+	 * @param consumer The closure for the consumer type.
+	 * @param serviceObject The service object to release for prototype consumers.
 	 * @return <code>false</code> if the context bundle's use count for the service
 	 *         is zero or if the service has been unregistered,
 	 *         otherwise <code>true</code>.
 	 */
-	boolean ungetService(BundleContextImpl user) {
-		synchronized (registrationLock) {
-			if (state == UNREGISTERED) {
-				return false;
-			}
+	boolean ungetService(BundleContextImpl user, ServiceConsumer consumer, S serviceObject) {
+		if (isUnregistered()) {
+			return false;
+		}
+		Map<ServiceRegistrationImpl<?>, ServiceUse<?>> servicesInUse = user.getServicesInUseMap();
+		if (servicesInUse == null) {
+			return false;
 		}
 
 		if (registry.debug.DEBUG_SERVICES) {
 			Debug.println("ungetService[" + user.getBundleImpl() + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
-		Map<ServiceRegistrationImpl<?>, ServiceUse<?>> servicesInUse = user.getServicesInUseMap();
-		if (servicesInUse == null) {
-			return false;
-		}
-
-		ServiceUse<?> use;
+		ServiceUse<S> use;
 		synchronized (servicesInUse) {
-			use = servicesInUse.get(this);
+			@SuppressWarnings("unchecked")
+			ServiceUse<S> u = (ServiceUse<S>) servicesInUse.get(this);
+			use = u;
 			if (use == null) {
 				return false;
 			}
 		}
 
+		boolean result;
 		synchronized (use) {
-			if (use.ungetService()) {
-				/* use count is now zero */
+			result = consumer.ungetService(use, serviceObject);
+			if (use.isEmpty()) { /* service use can be discarded */
 				synchronized (servicesInUse) {
 					synchronized (registrationLock) {
 						servicesInUse.remove(this);
@@ -522,7 +580,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 				}
 			}
 		}
-		return true;
+		return result;
 	}
 
 	/**
@@ -545,10 +603,12 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		if (servicesInUse == null) {
 			return;
 		}
-		ServiceUse<?> use;
+		ServiceUse<S> use;
 		synchronized (servicesInUse) {
 			synchronized (registrationLock) {
-				use = servicesInUse.remove(this);
+				@SuppressWarnings("unchecked")
+				ServiceUse<S> u = (ServiceUse<S>) servicesInUse.remove(this);
+				use = u;
 				if (use == null) {
 					return;
 				}
@@ -556,7 +616,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 			}
 		}
 		synchronized (use) {
-			use.releaseService();
+			use.release();
 		}
 	}
 

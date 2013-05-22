@@ -622,8 +622,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 				servicesInUse = new HashMap<ServiceRegistrationImpl<?>, ServiceUse<?>>(10);
 		}
 
-		@SuppressWarnings("unchecked")
-		S service = (S) container.getServiceRegistry().getService(this, (ServiceReferenceImpl<S>) reference);
+		S service = container.getServiceRegistry().getService(this, (ServiceReferenceImpl<S>) reference);
 		return service;
 	}
 
@@ -1012,5 +1011,20 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 
 	public EquinoxContainer getContainer() {
 		return container;
+	}
+
+	@Override
+	public <S> ServiceObjects<S> getServiceObjects(ServiceReference<S> reference) {
+		checkValid();
+		if (reference == null)
+			throw new NullPointerException("A null service reference is not allowed."); //$NON-NLS-1$
+		synchronized (contextLock) {
+			if (servicesInUse == null)
+				// Cannot predict how many services a bundle will use, start with a small table.
+				servicesInUse = new HashMap<ServiceRegistrationImpl<?>, ServiceUse<?>>(10);
+		}
+
+		ServiceObjects<S> serviceObjects = container.getServiceRegistry().getServiceObjects(this, (ServiceReferenceImpl<S>) reference);
+		return serviceObjects;
 	}
 }
