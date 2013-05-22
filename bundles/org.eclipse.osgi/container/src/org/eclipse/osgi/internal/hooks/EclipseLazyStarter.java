@@ -11,14 +11,13 @@
 
 package org.eclipse.osgi.internal.hooks;
 
-import org.eclipse.osgi.framework.internal.core.Msg;
-
 import java.security.AccessController;
 import java.util.*;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.StartOptions;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
+import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
@@ -140,7 +139,12 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 					if (error != null)
 						throw error;
 				}
-				return module.isPersistentlyStarted() && module.isActivationPolicyUsed() && isLazyStartable(className, revision);
+				// The module is persistently started and has the lazy activation policy but has not entered the LAZY_STARTING state
+				// There are 2 cases where this can happen
+				// 1) The start-level thread has not gotten to transitioning the bundle to LAZY_STARTING yet
+				// 2) The bundle is marked for eager activation and the start-level thread has not activated it yet
+				// In both cases we need to fire the lazy start trigger to activate the bundle if the start-level is met
+				return module.isPersistentlyStarted() && isLazyStartable(className, revision);
 			}
 			return false;
 		}
@@ -149,17 +153,15 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 	}
 
 	private boolean isLazyStartable(String className, ModuleRevision revision) {
+		if (!revision.hasLazyActivatePolicy()) {
+			return false;
+		}
 		List<ModuleCapability> moduleDatas = revision.getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
 		if (moduleDatas.isEmpty()) {
 			return false;
 		}
 
 		Map<String, Object> moduleDataAttrs = moduleDatas.get(0).getAttributes();
-		String policy = (String) moduleDataAttrs.get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY);
-		if (!EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY.equals(policy)) {
-			return false;
-		}
-
 		@SuppressWarnings("unchecked")
 		List<String> excludes = (List<String>) moduleDataAttrs.get(EquinoxModuleDataNamespace.CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE);
 		@SuppressWarnings("unchecked")

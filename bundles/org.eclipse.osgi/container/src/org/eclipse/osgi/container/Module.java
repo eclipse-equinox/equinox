@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,15 +10,14 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
-import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.osgi.framework.*;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.resource.Capability;
 import org.osgi.service.resolver.ResolutionException;
 
 /**
@@ -138,9 +137,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		 */
 		AUTO_START,
 		/**
-		 * The module has been set to use its activation policy
+		 * The module has been set to use its activation policy.
 		 */
-		USE_ACTIVATION_POLICY,
+		USE_ACTIVATION_POLICY
 	}
 
 	/**
@@ -643,14 +642,8 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		return hasLazyActivatePolicy();
 	}
 
-	private boolean hasLazyActivatePolicy() {
+	boolean hasLazyActivatePolicy() {
 		ModuleRevision current = getCurrentRevision();
-		if (current == null)
-			return false;
-		List<Capability> capabilities = current.getCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
-		if (capabilities.isEmpty())
-			return false;
-		Capability moduleData = capabilities.get(0);
-		return EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY.equals(moduleData.getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY));
+		return current == null ? false : current.hasLazyActivatePolicy();
 	}
 }

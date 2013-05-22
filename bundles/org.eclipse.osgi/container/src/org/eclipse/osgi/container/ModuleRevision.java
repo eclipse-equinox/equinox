@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.osgi.container;
 import java.util.*;
 import java.util.Map.Entry;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
+import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.internal.container.Converters;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
@@ -33,6 +34,7 @@ public final class ModuleRevision implements BundleRevision {
 	private final List<ModuleRequirement> requirements;
 	private final ModuleRevisions revisions;
 	private final Object revisionInfo;
+	private volatile Boolean lazyActivationPolicy = null;
 
 	ModuleRevision(String symbolicName, Version version, int types, List<GenericInfo> capabilityInfos, List<GenericInfo> requirementInfos, ModuleRevisions revisions, Object revisionInfo) {
 		this.symbolicName = symbolicName;
@@ -160,6 +162,26 @@ public final class ModuleRevision implements BundleRevision {
 	 */
 	public Object getRevisionInfo() {
 		return revisionInfo;
+	}
+
+	/**
+	 * A convenience method to quickly determine if this revision
+	 * has declared the lazy activation policy.
+	 * @return true if the lazy activation policy has been declared by this module; otherwise false is returned.
+	 */
+	public boolean hasLazyActivatePolicy() {
+		Boolean currentPolicy = lazyActivationPolicy;
+		if (currentPolicy != null) {
+			return currentPolicy.booleanValue();
+		}
+		boolean lazyPolicy = false;
+		List<Capability> data = getCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
+		if (!data.isEmpty()) {
+			Capability moduleData = data.get(0);
+			lazyPolicy = EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY.equals(moduleData.getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY));
+		}
+		lazyActivationPolicy = Boolean.valueOf(lazyPolicy);
+		return lazyPolicy;
 	}
 
 	boolean isCurrent() {
