@@ -18,6 +18,16 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="container/src/org/eclipse/osgi/internal/serviceregistry/PrototypeServiceFactoryUse.java" type="org.eclipse.osgi.internal.serviceregistry.PrototypeServiceFactoryUse">
+        <filter comment="Ignore Java 6 API usage" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.osgi.internal.serviceregistry.PrototypeServiceFactoryUse&lt;S&gt;.PrototypeServiceFactoryUse(BundleContextImpl, ServiceRegistrationImpl&lt;S&gt;)"/>
+                <message_argument value="Collections"/>
+                <message_argument value="newSetFromMap(Map)"/>
+                <message_argument value="J2SE-1.5"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="container/src/org/eclipse/osgi/internal/signedcontent/SignedContentImpl.java" type="org.eclipse.osgi.internal.signedcontent.SignedContentImpl">
         <filter comment="Ignore Java 6 API usage" id="647000098">
             <message_arguments>
@@ -160,6 +170,13 @@
             <message_arguments>
                 <message_argument value="1.8"/>
                 <message_argument value="3.10"/>
+                <message_argument value="getServiceObjects(ServiceReference&lt;S&gt;)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.8"/>
+                <message_argument value="3.10"/>
                 <message_argument value="registerService(Class&lt;S&gt;, ServiceFactory&lt;S&gt;, Dictionary&lt;String,?&gt;)"/>
             </message_arguments>
         </filter>
@@ -169,7 +186,53 @@
             <message_arguments>
                 <message_argument value="1.8"/>
                 <message_argument value="3.10"/>
+                <message_argument value="SCOPE_BUNDLE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.8"/>
+                <message_argument value="3.10"/>
+                <message_argument value="SCOPE_PROTOTYPE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.8"/>
+                <message_argument value="3.10"/>
+                <message_argument value="SCOPE_SINGLETON"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.8"/>
+                <message_argument value="3.10"/>
+                <message_argument value="SERVICE_SCOPE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.8"/>
+                <message_argument value="3.10"/>
                 <message_argument value="SYSTEM_BUNDLE_ID"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/PrototypeServiceFactory.java" type="org.osgi.framework.PrototypeServiceFactory">
+        <filter comment="Ignore OSGi API" id="1108344834">
+            <message_arguments>
+                <message_argument value="1.8"/>
+                <message_argument value="3.10"/>
+                <message_argument value="org.osgi.framework.PrototypeServiceFactory"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/ServiceObjects.java" type="org.osgi.framework.ServiceObjects">
+        <filter comment="Ignore OSGi API" id="1108344834">
+            <message_arguments>
+                <message_argument value="1.8"/>
+                <message_argument value="3.10"/>
+                <message_argument value="org.osgi.framework.ServiceObjects"/>
             </message_arguments>
         </filter>
     </resource>
