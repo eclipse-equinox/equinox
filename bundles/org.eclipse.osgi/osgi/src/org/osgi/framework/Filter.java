@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2012). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2013). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.osgi.framework;
 
 import java.util.Dictionary;
 import java.util.Map;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * An <a href="http://www.ietf.org/rfc/rfc1960.txt">RFC 1960</a>-based Filter.
@@ -42,8 +43,9 @@ import java.util.Map;
  * @see "Core Specification, Filters, for a description of the filter string syntax."
  * @ThreadSafe
  * @noimplement
- * @version $Id$
+ * @author $Id$
  */
+@ProviderType
 public interface Filter {
 	/**
 	 * Filter using a service's properties.

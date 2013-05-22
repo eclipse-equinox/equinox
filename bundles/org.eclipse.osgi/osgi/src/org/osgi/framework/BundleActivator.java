@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2012). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2013). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.osgi.framework;
+
+import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * Customizes the starting and stopping of a bundle.
@@ -44,9 +46,9 @@ package org.osgi.framework;
  * created by {@code Class.newInstance()}.
  * 
  * @NotThreadSafe
- * @version $Id$
+ * @author $Id$
  */
-
+@ConsumerType
 public interface BundleActivator {
 	/**
 	 * Called when this bundle is started so the Framework can perform the

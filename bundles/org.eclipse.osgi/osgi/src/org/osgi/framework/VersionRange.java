@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2011, 2012). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2011, 2013). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import java.util.StringTokenizer;
  * 
  * @since 1.7
  * @Immutable
- * @version $Id$
+ * @author $Id$
  */
 
 public class VersionRange {
@@ -377,9 +377,11 @@ public class VersionRange {
 	 * 
 	 * @return The string representation of this version range.
 	 */
+	@Override
 	public String toString() {
-		if (versionRangeString != null) {
-			return versionRangeString;
+		String s = versionRangeString;
+		if (s != null) {
+			return s;
 		}
 		String leftVersion = left.toString();
 		if (right == null) {
@@ -402,14 +404,16 @@ public class VersionRange {
 	 * 
 	 * @return An integer which is a hash code value for this object.
 	 */
+	@Override
 	public int hashCode() {
-		if (hash != 0) {
-			return hash;
+		int h = hash;
+		if (h != 0) {
+			return h;
 		}
 		if (empty) {
 			return hash = 31;
 		}
-		int h = 31 + (leftClosed ? 7 : 5);
+		h = 31 + (leftClosed ? 7 : 5);
 		h = 31 * h + left.hashCode();
 		if (right != null) {
 			h = 31 * h + right.hashCode();
@@ -430,6 +434,7 @@ public class VersionRange {
 	 * @return {@code true} if {@code object} is a {@code VersionRange} and is
 	 *         equal to this object; {@code false} otherwise.
 	 */
+	@Override
 	public boolean equals(Object object) {
 		if (object == this) { // quicktest
 			return true;

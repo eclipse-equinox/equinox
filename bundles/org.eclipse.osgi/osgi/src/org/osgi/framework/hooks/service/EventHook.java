@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2008, 2012). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2008, 2013). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.osgi.framework.hooks.service;
 
 import java.util.Collection;
+import org.osgi.annotation.versioning.ConsumerType;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
 
@@ -29,9 +30,9 @@ import org.osgi.framework.ServiceEvent;
  * 
  * @ThreadSafe
  * @deprecated As of 1.1. Replaced by {@link EventListenerHook}.
- * @version $Id$
+ * @author $Id$
  */
-
+@ConsumerType
 public interface EventHook {
 	/**
 	 * Event hook method. This method is called prior to service event delivery

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2010, 2012). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2010, 2013). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.osgi.framework.hooks.weaving;
 
 import java.security.ProtectionDomain;
 import java.util.List;
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.framework.wiring.BundleWiring;
 
 /**
@@ -34,8 +35,9 @@ import org.osgi.framework.wiring.BundleWiring;
  * 
  * @NotThreadSafe
  * @noimplement
- * @version $Id$
+ * @author $Id$
  */
+@ProviderType
 public interface WovenClass {
 	/**
 	 * The woven class is being transformed.
@@ -164,8 +166,10 @@ public interface WovenClass {
 	 * longer be transformed and the returned list will be unmodifiable.
 	 * 
 	 * <p>
-	 * If the Java runtime environment supports permissions, the caller must
-	 * have {@code AdminPermission[bundle,WEAVE]} to modify the returned list.
+	 * If the Java runtime environment supports permissions, any modification to
+	 * the returned list requires {@code AdminPermission[bundle,WEAVE]}.
+	 * Additionally, any add or set modification requires
+	 * {@code PackagePermission[package,IMPORT]}.
 	 * 
 	 * @return A list containing zero or more dynamic import package
 	 *         descriptions to add to the bundle wiring for this woven class.

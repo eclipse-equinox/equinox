@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2004, 2012). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2013). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import java.util.StringTokenizer;
  * 
  * @since 1.3
  * @Immutable
- * @version $Id$
+ * @author $Id$
  */
 
 public class Version implements Comparable<Version> {
@@ -279,6 +279,7 @@ public class Version implements Comparable<Version> {
 	 * 
 	 * @return The string representation of this version identifier.
 	 */
+	@Override
 	public String toString() {
 		return toString0();
 	}
@@ -289,8 +290,9 @@ public class Version implements Comparable<Version> {
 	 * @return The string representation of this version identifier.
 	 */
 	String toString0() {
-		if (versionString != null) {
-			return versionString;
+		String s = versionString;
+		if (s != null) {
+			return s;
 		}
 		int q = qualifier.length();
 		StringBuffer result = new StringBuffer(20 + q);
@@ -311,11 +313,13 @@ public class Version implements Comparable<Version> {
 	 * 
 	 * @return An integer which is a hash code value for this object.
 	 */
+	@Override
 	public int hashCode() {
-		if (hash != 0) {
-			return hash;
+		int h = hash;
+		if (h != 0) {
+			return h;
 		}
-		int h = 31 * 17;
+		h = 31 * 17;
 		h = 31 * h + major;
 		h = 31 * h + minor;
 		h = 31 * h + micro;
@@ -335,6 +339,7 @@ public class Version implements Comparable<Version> {
 	 * @return {@code true} if {@code object} is a {@code Version} and is equal
 	 *         to this object; {@code false} otherwise.
 	 */
+	@Override
 	public boolean equals(Object object) {
 		if (object == this) { // quicktest
 			return true;

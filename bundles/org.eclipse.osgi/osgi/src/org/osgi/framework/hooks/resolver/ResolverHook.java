@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2010, 2012). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2010, 2013). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.osgi.framework.hooks.resolver;
 
 import java.util.Collection;
+import org.osgi.annotation.versioning.ConsumerType;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.namespace.BundleNamespace;
 import org.osgi.framework.namespace.IdentityNamespace;
@@ -130,8 +131,9 @@ import org.osgi.framework.wiring.FrameworkWiring;
  * 
  * @see ResolverHookFactory
  * @NotThreadSafe
- * @version $Id$
+ * @author $Id$
  */
+@ConsumerType
 public interface ResolverHook {
 	/**
 	 * Filter resolvable candidates hook method. This method may be called

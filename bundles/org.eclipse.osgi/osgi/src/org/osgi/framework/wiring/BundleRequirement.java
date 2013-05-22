@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2010, 2012). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2010, 2013). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.osgi.framework.wiring;
 
 import java.util.Map;
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.framework.namespace.AbstractWiringNamespace;
 import org.osgi.resource.Requirement;
 
@@ -26,8 +27,9 @@ import org.osgi.resource.Requirement;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id$
+ * @author $Id$
  */
+@ProviderType
 public interface BundleRequirement extends Requirement {
 	/**
 	 * Returns the bundle revision declaring this requirement.
