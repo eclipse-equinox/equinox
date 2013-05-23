@@ -17,6 +17,7 @@ public class BundleTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(BundleTests.class.getName());
 		suite.addTest(PersistedBundleTests.suite());
+		suite.addTest(CascadeConfigTests.suite());
 		suite.addTest(DiscardBundleTests.suite());
 		suite.addTest(LoggingTests.suite());
 		suite.addTest(BundleResourceTests.suite());
