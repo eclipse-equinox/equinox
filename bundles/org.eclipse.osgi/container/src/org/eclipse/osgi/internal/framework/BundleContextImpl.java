@@ -789,7 +789,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	}
 
 	Object setContextFinder() {
-		if (container.getConfiguration().BUNDLE_SET_TCCL)
+		if (!container.getConfiguration().BUNDLE_SET_TCCL)
 			return Boolean.FALSE;
 		Thread currentThread = Thread.currentThread();
 		ClassLoader previousTCCL = currentThread.getContextClassLoader();
