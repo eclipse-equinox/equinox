@@ -114,7 +114,7 @@ public class Storage {
 			this.childRoot.mkdirs();
 		}
 		Location parent = this.osgiLocation.getParentLocation();
-		parentRoot = parent == null ? null : new File(osgiLocation.getURL().getFile(), EquinoxContainer.NAME);
+		parentRoot = parent == null ? null : new File(parent.getURL().getFile());
 
 		File frameworkInfo = getFile(FRAMEWORK_INFO, true);
 		DataInputStream in = null;
