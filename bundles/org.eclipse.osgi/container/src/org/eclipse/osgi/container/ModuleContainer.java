@@ -453,6 +453,14 @@ public final class ModuleContainer {
 		return applyDelta(deltaWiring, modulesResolved, triggers, timestamp, restartTriggers);
 	}
 
+	/**
+	 * Attempts to resolve the specified dynamic package name request for the specified revision.
+	 * @param dynamicPkgName the package name to attempt a dynamic resolution for
+	 * @param revision the module revision the dynamic resolution request is for
+	 * @return the new resolution wire establishing a dynamic package resolution or null if 
+	 * a dynamic wire could not be established.
+	 * @throws ResolutionException
+	 */
 	public ModuleWire resolveDynamic(String dynamicPkgName, ModuleRevision revision) throws ResolutionException {
 		ModuleWire result;
 		Map<ModuleRevision, ModuleWiring> deltaWiring;
@@ -959,6 +967,10 @@ public final class ModuleContainer {
 		}
 	}
 
+	/**
+	 * Sets all the module states uninstalled exepect for the system module.
+	 * @throws BundleException
+	 */
 	public void setInitialModuleStates() throws BundleException {
 		moduleDatabase.readLock();
 		try {
