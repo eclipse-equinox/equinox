@@ -15,6 +15,7 @@ import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.osgi.container.Module.StartOptions;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.Module.StopOptions;
@@ -76,7 +77,10 @@ public final class ModuleContainer {
 	 */
 	private final ModuleResolver moduleResolver;
 
-	private final Collection<SystemModule> refreshingSystemModule = new ArrayList<SystemModule>(1);
+	/**
+	 * Holds the system module while it is being refreshed
+	 */
+	private final AtomicReference<SystemModule> refreshingSystemModule = new AtomicReference<SystemModule>();
 
 	/**
 	 * Constructs a new container with the specified collision hook, resolver hook, resolver and module database.
@@ -875,9 +879,7 @@ public final class ModuleContainer {
 		loadModules();
 		frameworkStartLevel.open();
 		frameworkWiring.open();
-		synchronized (refreshingSystemModule) {
-			refreshingSystemModule.clear();
-		}
+		refreshingSystemModule.set(null);
 	}
 
 	void close() {
@@ -1067,13 +1069,10 @@ public final class ModuleContainer {
 
 	void refreshSystemModule() {
 		final SystemModule systemModule = (SystemModule) moduleDatabase.getModule(0);
-		synchronized (refreshingSystemModule) {
-			if (refreshingSystemModule.contains(systemModule)) {
-				return;
-			}
-			refreshingSystemModule.add(systemModule);
-			getAdaptor().refreshedSystemModule();
+		if (systemModule == refreshingSystemModule.getAndSet(systemModule)) {
+			return;
 		}
+		getAdaptor().refreshedSystemModule();
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -1093,9 +1092,7 @@ public final class ModuleContainer {
 	}
 
 	boolean isRefreshingSystemModule() {
-		synchronized (refreshingSystemModule) {
-			return !refreshingSystemModule.isEmpty();
-		}
+		return refreshingSystemModule.get() != null;
 	}
 
 	class ContainerWiring implements FrameworkWiring, EventDispatcher<ContainerWiring, FrameworkListener[], Collection<Module>> {
