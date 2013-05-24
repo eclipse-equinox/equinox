@@ -13,14 +13,14 @@ package org.eclipse.osgi.internal.container;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.container.ModuleCapability;
+import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.namespace.*;
-import org.osgi.resource.Capability;
-import org.osgi.resource.Namespace;
+import org.osgi.resource.*;
 
 public class Capabilities {
 	static class NamespaceSet {
@@ -109,7 +109,7 @@ public class Capabilities {
 			}
 		}
 
-		List<ModuleCapability> findCapabilities(ModuleRequirement requirement) {
+		List<ModuleCapability> findCapabilities(Requirement requirement) {
 			if (!name.equals(requirement.getNamespace())) {
 				throw new IllegalArgumentException("Invalid namespace: " + requirement.getNamespace() + ": expecting: " + name);
 			}
@@ -202,7 +202,7 @@ public class Capabilities {
 	/**
 	 * Adds the {@link ModuleRevision#getModuleCapabilities(String) capabilities}
 	 * provided by the specified revision to this database.  These capabilities must 
-	 * become available for lookup with the {@link #findCapabilities(ModuleRequirement)}
+	 * become available for lookup with the {@link #findCapabilities(Requirement)}
 	 * method.
 	 * @param revision the revision which has capabilities to add
 	 */
@@ -221,7 +221,7 @@ public class Capabilities {
 	 * Removes the {@link ModuleRevision#getModuleCapabilities(String) capabilities}
 	 * provided by the specified revision from this database.  These capabilities
 	 * must no longer be available for lookup with the 
-	 * {@link #findCapabilities(ModuleRequirement)} method.
+	 * {@link #findCapabilities(Requirement)} method.
 	 * @param revision
 	 */
 	public void removeCapabilities(ModuleRevision revision) {
@@ -239,7 +239,7 @@ public class Capabilities {
 	 * @param requirement the requirement
 	 * @return the candidates for the requirement
 	 */
-	public List<ModuleCapability> findCapabilities(ModuleRequirement requirement) {
+	public List<ModuleCapability> findCapabilities(Requirement requirement) {
 		NamespaceSet namespaceSet = namespaceSets.get(requirement.getNamespace());
 		if (namespaceSet == null) {
 			return Collections.emptyList();

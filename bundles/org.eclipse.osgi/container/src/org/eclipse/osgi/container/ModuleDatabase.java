@@ -845,7 +845,7 @@ public class ModuleDatabase {
 	/**
 	 * Adds the {@link ModuleRevision#getModuleCapabilities(String) capabilities}
 	 * provided by the specified revision to this database.  These capabilities must 
-	 * become available for lookup with the {@link ModuleDatabase#findCapabilities(ModuleRequirement)}
+	 * become available for lookup with the {@link ModuleDatabase#findCapabilities(Requirement)}
 	 * method.
 	 * <p>
 	 * This method must be called while holding the {@link #writeLock() write} lock.
@@ -860,7 +860,7 @@ public class ModuleDatabase {
 	 * Removes the {@link ModuleRevision#getModuleCapabilities(String) capabilities}
 	 * provided by the specified revision from this database.  These capabilities
 	 * must no longer be available for lookup with the 
-	 * {@link ModuleDatabase#findCapabilities(ModuleRequirement)} method.
+	 * {@link ModuleDatabase#findCapabilities(Requirement)} method.
 	 * <p>
 	 * This method must be called while holding the {@link #writeLock() write} lock.
 	 * @param revision
@@ -880,7 +880,7 @@ public class ModuleDatabase {
 	 * @param requirement the requirement
 	 * @return the candidates for the requirement
 	 */
-	protected List<ModuleCapability> findCapabilities(ModuleRequirement requirement) {
+	protected List<ModuleCapability> findCapabilities(Requirement requirement) {
 		readLock();
 		try {
 			return capabilities.findCapabilities(requirement);
