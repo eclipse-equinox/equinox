@@ -287,7 +287,7 @@ public class BundleHost extends AbstractBundle {
 		if (loader == null)
 			result = bundledata.findLocalResources(name);
 		else
-			result = loader.findResources(name);
+			result = loader.getResources(name);
 		if (result != null && result.hasMoreElements())
 			return result;
 		return null;
