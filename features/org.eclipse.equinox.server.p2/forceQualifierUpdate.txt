@@ -4,3 +4,5 @@ Bug 406851 - Consume new SAT4J
 Bug 406845 - Update repository of ECF in parent pom
 Bug 406845 - Update repository of ECF in parent pom (new update)
 Bug 409051 - Consume new SAT4J (2.3.5)
+Bug 409868 - pickup new build of ECF
+
