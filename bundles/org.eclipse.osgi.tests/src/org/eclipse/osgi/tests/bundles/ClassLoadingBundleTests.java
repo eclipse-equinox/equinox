@@ -1083,7 +1083,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 	}
 
-	public void testBootGetResources() throws Exception {
+	public void testBootGetResources01() throws Exception {
 		if (System.getProperty(Constants.FRAMEWORK_BOOTDELEGATION) != null)
 			return; // cannot really test this if this property is set
 		// make sure there is only one manifest found
@@ -1100,10 +1100,51 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertEquals("host id", test.getBundleId(), bundleId); //$NON-NLS-1$
 	}
 
+	public void testBootGetResources02() throws Exception {
+		// properly test bug 375783 when used as a parent class loader
+		// This will fail on the IBM VM (see bug 409314)
+		if (System.getProperty(Constants.FRAMEWORK_BOOTDELEGATION) != null)
+			return; // cannot really test this if this property is set
+		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {test});
+		BundleWiring wiring = test.adapt(BundleWiring.class);
+		ClassLoader bcl = wiring.getClassLoader();
+		ClassLoader cl = new URLClassLoader(new URL[0], bcl);
+		Enumeration manifests = cl.getResources("META-INF/MANIFEST.MF"); //$NON-NLS-1$
+		assertNotNull("manifests", manifests); //$NON-NLS-1$
+		ArrayList manifestURLs = new ArrayList();
+		while (manifests.hasMoreElements())
+			manifestURLs.add(manifests.nextElement());
+		assertEquals("manifest number", 1, manifestURLs.size()); //$NON-NLS-1$
+		URL manifest = (URL) manifestURLs.get(0);
+		assertEquals("wrong protocol", "bundleresource", manifest.getProtocol());
+		int dotIndex = manifest.getHost().indexOf('.');
+		long bundleId = dotIndex >= 0 && dotIndex < manifest.getHost().length() - 1 ? Long.parseLong(manifest.getHost().substring(0, dotIndex)) : Long.parseLong(manifest.getHost());
+		assertEquals("host id", test.getBundleId(), bundleId); //$NON-NLS-1$
+	}
+
 	public void testMultipleGetResources01() throws Exception {
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
 		// test that we can get multiple resources from a bundle
 		Enumeration resources = test.getResources("data/resource1"); //$NON-NLS-1$
+		assertNotNull("resources", resources); //$NON-NLS-1$
+		ArrayList resourceURLs = new ArrayList();
+		while (resources.hasMoreElements())
+			resourceURLs.add(resources.nextElement());
+		assertEquals("resource number", 2, resourceURLs.size()); //$NON-NLS-1$
+		assertEquals("root resource", "root classpath", readURL((URL) resourceURLs.get(0))); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("stuff resource", "stuff classpath", readURL((URL) resourceURLs.get(1))); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public void testMultipleGetResources01a() throws Exception {
+		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+		// test that we can get multiple resources from a bundle
+		// and use that bundle's class loader as a parent
+		installer.resolveBundles(new Bundle[] {test});
+		BundleWiring wiring = test.adapt(BundleWiring.class);
+		ClassLoader bcl = wiring.getClassLoader();
+		ClassLoader cl = new URLClassLoader(new URL[0], bcl);
+		Enumeration resources = cl.getResources("data/resource1"); //$NON-NLS-1$
 		assertNotNull("resources", resources); //$NON-NLS-1$
 		ArrayList resourceURLs = new ArrayList();
 		while (resources.hasMoreElements())
