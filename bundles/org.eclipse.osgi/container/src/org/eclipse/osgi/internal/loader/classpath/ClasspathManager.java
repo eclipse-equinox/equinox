@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,6 +47,8 @@ public class ClasspathManager {
 	private static final FragmentClasspath[] emptyFragments = new FragmentClasspath[0];
 	private static final String[] DEFAULT_CLASSPATH = new String[] {"."}; //$NON-NLS-1$
 	private final static Class<?>[] NULL_CLASS_RESULT = new Class[2];
+	@SuppressWarnings("unchecked")
+	private static final Enumeration<URL> EMPTY_ENUMERATION = Collections.enumeration(Collections.EMPTY_LIST);
 
 	private final Generation generation;
 	private final ModuleClassLoader classloader;
@@ -381,7 +383,7 @@ public class ClasspathManager {
 	/**
 	 * Finds the local resources by searching the ClasspathEntry objects of the classpath manager.
 	 * @param resource the requested resource name.
-	 * @return an enumeration of the the requested resources or null if the resources do not exist
+	 * @return an enumeration of the the requested resources
 	 */
 	public Enumeration<URL> findLocalResources(String resource) {
 		List<URL> resources = new ArrayList<URL>(6);
@@ -407,7 +409,7 @@ public class ClasspathManager {
 		}
 		if (resources.size() > 0)
 			return Collections.enumeration(resources);
-		return null;
+		return EMPTY_ENUMERATION;
 	}
 
 	private URL findResourceImpl(String name, BundleFile bundlefile, int index) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -478,18 +478,20 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		if (isFragment()) {
 			return null;
 		}
-
+		ModuleClassLoader classLoader = null;
 		try {
-			ModuleClassLoader classLoader = getModuleClassLoader();
-			if (classLoader != null) {
-				Enumeration<URL> result = classLoader.getResources(name);
-				return result.hasMoreElements() ? result : null;
-			}
+			classLoader = getModuleClassLoader();
 		} catch (ResolutionException e) {
 			// ignore
 		}
+		Enumeration<URL> result = null;
+		if (classLoader != null) {
+			result = classLoader.getResources(name);
+		} else {
+			result = new ClasspathManager((Generation) module.getCurrentRevision().getRevisionInfo(), null).findLocalResources(name);
+		}
+		return result != null && result.hasMoreElements() ? result : null;
 
-		return new ClasspathManager((Generation) module.getCurrentRevision().getRevisionInfo(), null).findLocalResources(name);
 	}
 
 	@Override

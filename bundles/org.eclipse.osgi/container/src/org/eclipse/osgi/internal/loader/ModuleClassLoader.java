@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,9 +50,6 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 	 */
 	protected static final PermissionCollection ALLPERMISSIONS;
 	private static final boolean REGISTERED_AS_PARALLEL;
-
-	@SuppressWarnings("unchecked")
-	private static final Enumeration<URL> EMPTY_ENUMERATION = Collections.enumeration(Collections.EMPTY_LIST);
 
 	static {
 		AllPermission allPerm = new AllPermission();
@@ -140,6 +137,11 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 		}
 	}
 
+	@Override
+	protected Class<?> findClass(String name) throws ClassNotFoundException {
+		return findLocalClass(name);
+	}
+
 	/**
 	 * Gets a resource for the bundle.  First delegate.findResource(name) is 
 	 * called. The delegate will query the system class loader, bundle imports,
@@ -165,6 +167,11 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 		return (null);
 	}
 
+	@Override
+	protected URL findResource(String name) {
+		return findLocalResource(name);
+	}
+
 	/**
 	 * Gets resources for the bundle.  First delegate.findResources(name) is
 	 * called. The delegate will query the system class loader, bundle imports,
@@ -185,6 +192,12 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 			}
 		}
 		return result;
+	}
+
+	@SuppressWarnings("unused")
+	@Override
+	protected Enumeration<URL> findResources(String name) throws IOException {
+		return findLocalResources(name);
 	}
 
 	/**
