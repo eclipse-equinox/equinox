@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2004, 2012). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2013). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.osgi.service.condpermadmin;
 
 import java.util.Dictionary;
+import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * The interface implemented by a Condition. Conditions are bound to Permissions
@@ -24,8 +25,9 @@ import java.util.Dictionary;
  * Info can only be used if the associated Conditions are satisfied.
  * 
  * @ThreadSafe
- * @version $Id$
+ * @author $Id$
  */
+@ConsumerType
 public interface Condition {
 	/**
 	 * A Condition object that will always evaluate to true and that is never

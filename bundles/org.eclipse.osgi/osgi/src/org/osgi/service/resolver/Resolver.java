@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2006, 2012). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2006, 2013). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package org.osgi.service.resolver;
 
 import java.util.List;
 import java.util.Map;
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
 
@@ -30,9 +31,9 @@ import org.osgi.resource.Wire;
  * by the caller.
  * 
  * @ThreadSafe
- * @noimplement
- * @version $Id$
+ * @author $Id$
  */
+@ProviderType
 public interface Resolver {
 	/**
 	 * Resolve the specified resolve context and return any new resources and

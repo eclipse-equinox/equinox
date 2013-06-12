@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2005, 2012). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2013). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.osgi.service.condpermadmin;
 
 import java.security.AccessControlContext;
 import java.util.Enumeration;
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
 /**
@@ -27,9 +28,9 @@ import org.osgi.service.permissionadmin.PermissionInfo;
  * the Conditional Permission Table.
  * 
  * @ThreadSafe
- * @noimplement
- * @version $Id$
+ * @author $Id$
  */
+@ProviderType
 public interface ConditionalPermissionAdmin {
 	/**
 	 * Create a new Conditional Permission Info in the Conditional Permission

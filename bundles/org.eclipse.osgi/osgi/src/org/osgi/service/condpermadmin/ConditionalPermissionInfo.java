@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2004, 2012). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2013). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.osgi.service.condpermadmin;
 
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
 /**
@@ -24,9 +25,9 @@ import org.osgi.service.permissionadmin.PermissionInfo;
  * Permission Admin service.
  * 
  * @Immutable
- * @noimplement
- * @version $Id$
+ * @author $Id$
  */
+@ProviderType
 public interface ConditionalPermissionInfo {
 	/**
 	 * This string is used to indicate that a row in the Conditional Permission

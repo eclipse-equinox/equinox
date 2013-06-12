@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2004, 2012). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2013). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import java.util.List;
  * </ul>
  * 
  * @Immutable
- * @version $Id$
+ * @author $Id$
  */
 public class ConditionInfo {
 	private final String	type;
@@ -205,6 +205,7 @@ public class ConditionInfo {
 	 * 
 	 * @return The string representation of this {@code ConditionInfo}.
 	 */
+	@Override
 	public String toString() {
 		return getEncoded();
 	}
@@ -242,6 +243,7 @@ public class ConditionInfo {
 	 *         the same type and args as this {@code ConditionInfo} object;
 	 *         {@code false} otherwise.
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) {
 			return true;
@@ -268,7 +270,7 @@ public class ConditionInfo {
 	 * 
 	 * @return A hash code value for this object.
 	 */
-
+	@Override
 	public int hashCode() {
 		int h = 31 * 17 + type.hashCode();
 		for (int i = 0; i < args.length; i++) {

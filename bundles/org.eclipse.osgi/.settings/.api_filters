@@ -296,6 +296,15 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="osgi/src/org/osgi/framework/wiring/FrameworkWiring.java" type="org.osgi.framework.wiring.FrameworkWiring">
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.2"/>
+                <message_argument value="3.10"/>
+                <message_argument value="findProviders(Requirement)"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="osgi/src/org/osgi/service/resolver/HostedCapability.java" type="org.osgi.service.resolver.HostedCapability">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>

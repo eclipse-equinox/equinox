@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2001, 2012). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2013). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.osgi.service.permissionadmin;
+
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The Permission Admin service allows management agents to manage the
@@ -55,9 +57,9 @@ package org.osgi.service.permissionadmin;
  * {@code getDefaultPermissions}.
  * 
  * @ThreadSafe
- * @noimplement
- * @version $Id$
+ * @author $Id$
  */
+@ProviderType
 public interface PermissionAdmin {
 	/**
 	 * Gets the permissions assigned to the bundle with the specified location.
