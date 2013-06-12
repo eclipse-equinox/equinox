@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -248,7 +248,30 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	}
 
 	public String toString() {
-		return values.toString();
+		StringBuilder sb = new StringBuilder();
+		sb.append('{');
+
+		for (int i = 0; i < size; i++) {
+			if (i != 0) {
+				sb.append(", "); //$NON-NLS-1$
+			}
+			K header = headers[i];
+			if (header == this) {
+				sb.append("(this Dictionary)"); //$NON-NLS-1$
+			} else {
+				sb.append(header);
+			}
+			sb.append('=');
+			V value = values[i];
+			if (value == this) {
+				sb.append("(this Dictionary)"); //$NON-NLS-1$
+			} else {
+				sb.append(value);
+			}
+		}
+
+		sb.append('}');
+		return sb.toString();
 	}
 
 	public static Headers<String, String> parseManifest(InputStream in) throws BundleException {
