@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,13 +25,14 @@ import org.eclipse.osgi.container.ModuleDatabase.Sort;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.framework.util.SecureAction;
+import org.eclipse.osgi.internal.container.Converters;
 import org.eclipse.osgi.internal.container.LockSet;
 import org.osgi.framework.*;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
-import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.framework.wiring.FrameworkWiring;
+import org.osgi.framework.wiring.*;
+import org.osgi.resource.Requirement;
 import org.osgi.service.resolver.ResolutionException;
 
 /**
@@ -1180,6 +1181,11 @@ public final class ModuleContainer {
 			} finally {
 				moduleDatabase.readUnlock();
 			}
+		}
+
+		@Override
+		public Collection<BundleCapability> findProviders(Requirement requirement) {
+			return Converters.asListBundleCapability(moduleDatabase.findCapabilities(requirement));
 		}
 
 		private Collection<Module> getModules(final Collection<Bundle> bundles) {
