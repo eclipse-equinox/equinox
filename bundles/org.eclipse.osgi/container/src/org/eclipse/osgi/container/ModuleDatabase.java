@@ -347,7 +347,6 @@ public class ModuleDatabase {
 			// remove the revisions by name
 			List<ModuleRevision> revisions = uninstalling.getModuleRevisions();
 			for (ModuleRevision revision : revisions) {
-				removeCapabilities(revision);
 				String name = revision.getSymbolicName();
 				if (name != null) {
 					Collection<ModuleRevision> sameName = revisionByName.get(name);
@@ -360,6 +359,7 @@ public class ModuleDatabase {
 				ModuleWiring oldWiring = wirings.get(revision);
 				if (oldWiring == null) {
 					module.getRevisions().removeRevision(revision);
+					removeCapabilities(revision);
 				}
 			}
 
