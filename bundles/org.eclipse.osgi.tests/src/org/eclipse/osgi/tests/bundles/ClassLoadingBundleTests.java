@@ -1428,6 +1428,21 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	public void testUninstallInUse01() throws BundleException {
+		Bundle exporter1 = installer.installBundle("exporter.importer1"); //$NON-NLS-1$
+		BundleRevision iExporter1 = exporter1.adapt(BundleRevision.class);
+		Bundle exporter2 = installer.installBundle("exporter.importer2"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {exporter1, exporter2});
+		exporter1.uninstall();
+		Bundle importer = installer.installBundle("exporter.importer4"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {importer});
+		BundleWiring importerWiring = importer.adapt(BundleWiring.class);
+		assertNotNull("Bundle b has no wiring.", importerWiring);
+		List<BundleWire> bImports = importerWiring.getRequiredWires(PackageNamespace.PACKAGE_NAMESPACE);
+		assertEquals("Wrong number of imported packages.", 1, bImports.size());
+		assertEquals("Wrong exporter.", iExporter1, bImports.get(0).getProvider());
+	}
+
 	public void testBug207847() throws BundleException {
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
 		installer.resolveBundles(new Bundle[] {test});
