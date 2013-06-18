@@ -19,6 +19,7 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.*;
+import java.util.zip.ZipFile;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.framework.EquinoxBundle;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
@@ -201,10 +202,14 @@ public class SignedBundleHook implements ActivatorHookFactory, BundleFileWrapper
 		if (content == null)
 			throw new IllegalArgumentException("null content"); //$NON-NLS-1$
 		BundleFile contentBundleFile;
-		if (content.isDirectory())
+		if (content.isDirectory()) {
 			contentBundleFile = new DirBundleFile(content, false);
-		else
+		} else {
+			// make sure we have a ZipFile first, this will throw an IOException if not valid
+			ZipFile temp = new ZipFile(content);
+			temp.close();
 			contentBundleFile = new ZipBundleFile(content, null, null, container.getConfiguration().getDebug());
+		}
 		SignedBundleFile result = new SignedBundleFile(null, VERIFY_ALL, this);
 		try {
 			result.setBundleFile(contentBundleFile);
