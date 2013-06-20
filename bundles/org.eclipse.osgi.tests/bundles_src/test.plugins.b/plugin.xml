@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin
+   id="test.plugins.b"
+   name="test.plugins.b"
+   version="1.0"
+   provider-name="Eclipse.org">
+   <requires>
+      <import plugin="x1" version="1.0.0" match="perfect"/>
+      <import plugin="x2" version="1.0.0" match="equivalent"/>
+      <import plugin="x3" version="1.0.0" match="compatible"/>
+      <import plugin="x4" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="x5" version="1.0.0"/>
+      <import plugin="x6" version="1.0.0" export="true"/>
+      <import plugin="x7" version="1.0.0" optional="true"/>
+   </requires>
+   
+</plugin>
