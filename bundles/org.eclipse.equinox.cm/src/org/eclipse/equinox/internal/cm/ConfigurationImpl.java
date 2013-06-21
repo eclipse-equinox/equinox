@@ -302,4 +302,10 @@ class ConfigurationImpl implements Configuration {
 			unlock();
 		}
 	}
+
+	public long getChangeCount() {
+		// TODO as of 1.5 CM
+		return 0;
+	}
+
 }
