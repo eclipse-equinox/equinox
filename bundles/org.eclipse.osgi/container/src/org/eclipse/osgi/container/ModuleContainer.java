@@ -32,6 +32,7 @@ import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.*;
+import org.osgi.resource.Namespace;
 import org.osgi.resource.Requirement;
 import org.osgi.service.resolver.ResolutionException;
 
@@ -510,12 +511,16 @@ public final class ModuleContainer {
 			// Save the result
 			ModuleWiring wiring = deltaWiring.get(revision);
 			if (wiring != null) {
-				List<ModuleWire> wires = wiring.getRequiredModuleWires(null);
-				result = wires.isEmpty() ? null : wires.get(wires.size() - 1);
-				// Doing a sanity check, may not be necessary
-				if (result != null) {
-					if (!PackageNamespace.PACKAGE_NAMESPACE.equals(result.getCapability().getNamespace()) || !dynamicPkgName.equals(result.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
-						throw new ResolutionException("Resolver provided an invalid dynamic wire: " + result);
+				List<ModuleWire> wires = wiring.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+				// work backwards to find the first wire with the dynamic requirement that matches package name
+				for (int i = wires.size() - 1; i >= 0; i--) {
+					ModuleWire wire = wires.get(i);
+					if (dynamicPkgName.equals(wire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
+						result = wire;
+						break;
+					}
+					if (!PackageNamespace.RESOLUTION_DYNAMIC.equals(wire.getRequirement().getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
+						break;
 					}
 				}
 			}

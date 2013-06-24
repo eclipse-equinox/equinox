@@ -1057,7 +1057,7 @@ public class TestModuleContainer extends AbstractTest {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
-		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, null, null, "osgi.ee; osgi.ee=JavaSE; version:Version=\"1.5.0\"", container);
 
 		container.resolve(Arrays.asList(systemBundle), true);
 
@@ -1066,9 +1066,18 @@ public class TestModuleContainer extends AbstractTest {
 
 		container.resolve(Arrays.asList(c1, dynamic1), true);
 
-		ModuleWire dynamicWire = container.resolveDynamic("c1.b", dynamic1.getCurrentRevision());
+		ModuleWire dynamicWire = container.resolveDynamic("org.osgi.framework", dynamic1.getCurrentRevision());
+		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
+		Assert.assertEquals("Wrong package found.", "org.osgi.framework", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+
+		dynamicWire = container.resolveDynamic("org.osgi.framework.wiring", dynamic1.getCurrentRevision());
+		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
+		Assert.assertEquals("Wrong package found.", "org.osgi.framework.wiring", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+
+		dynamicWire = container.resolveDynamic("c1.b", dynamic1.getCurrentRevision());
 		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
 		Assert.assertEquals("Wrong package found.", "c1.b", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+
 	}
 
 	@Test
@@ -1076,7 +1085,7 @@ public class TestModuleContainer extends AbstractTest {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
-		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, null, null, "osgi.ee; osgi.ee=JavaSE; version:Version=\"1.5.0\"", container);
 
 		container.resolve(Arrays.asList(systemBundle), true);
 
