@@ -144,9 +144,9 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		/**
 		 * Validates the data in this storage hook, if the data is invalid then an illegal state 
 		 * exception is thrown
-		 * @throws IllegalArgumentException if the data is invalid
+		 * @throws IllegalStateException if the data is invalid
 		 */
-		public void validate() throws IllegalArgumentException {
+		public void validate() throws IllegalStateException {
 			// do nothing by default
 		}
 

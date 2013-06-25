@@ -304,6 +304,14 @@ public final class BundleInfo {
 			}
 			return currentFinder.findLibrary(libname);
 		}
+
+		List<StorageHook<?, ?>> getStorageHooks() {
+			synchronized (this.genMonitor) {
+				// TODO Not sure if the extra protection of returning a copy is
+				// necessary but played it safe.
+				return new ArrayList<StorageHook<?, ?>>(storageHooks);
+			}
+		}
 	}
 
 	private final Storage storage;

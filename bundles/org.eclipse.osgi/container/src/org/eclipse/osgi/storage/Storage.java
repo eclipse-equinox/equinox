@@ -79,7 +79,7 @@ public class Storage {
 		Storage storage = new Storage(container);
 		// Do some operations that need to happen on the fully constructed Storage before returning it
 		storage.checkSystemBundle();
-		storage.discardBundles();
+		storage.discardBundlesOnLoad();
 		storage.installExtensions();
 		// TODO hack to make sure all bundles are in UNINSTALLED state before system bundle init is called
 		storage.getModuleContainer().setInitialModuleStates();
@@ -183,35 +183,44 @@ public class Storage {
 		return permData;
 	}
 
-	private void discardBundles() throws BundleException {
-		if (getConfiguration().inCheckConfigurationMode()) {
-			Collection<Module> discarded = new ArrayList<Module>(0);
-			for (Module module : moduleContainer.getModules()) {
-				if (module.getId() == Constants.SYSTEM_BUNDLE_ID)
-					continue;
-				ModuleRevision revision = module.getCurrentRevision();
-				Generation generation = (Generation) revision.getRevisionInfo();
-				if (needsDiscarding(generation)) {
-					discarded.add(module);
-					moduleContainer.uninstall(module);
-					generation.delete();
-				}
+	private void discardBundlesOnLoad() throws BundleException {
+		Collection<Module> discarded = new ArrayList<Module>(0);
+		for (Module module : moduleContainer.getModules()) {
+			if (module.getId() == Constants.SYSTEM_BUNDLE_ID)
+				continue;
+			ModuleRevision revision = module.getCurrentRevision();
+			Generation generation = (Generation) revision.getRevisionInfo();
+			if (needsDiscarding(generation)) {
+				discarded.add(module);
+				moduleContainer.uninstall(module);
+				generation.delete();
 			}
-			if (!discarded.isEmpty()) {
-				try {
-					moduleContainer.refresh(discarded);
-				} catch (ResolutionException e) {
-					throw new BundleException("Error discarding bundles.", e); //$NON-NLS-1$
-				}
+		}
+		if (!discarded.isEmpty()) {
+			try {
+				moduleContainer.refresh(discarded);
+			} catch (ResolutionException e) {
+				throw new BundleException("Error discarding bundles.", e); //$NON-NLS-1$
 			}
 		}
 	}
 
-	private static boolean needsDiscarding(Generation generation) {
-		File content = generation.getContent();
-		if (generation.isDirectory())
-			content = new File(content, "META-INF/MANIFEST.MF"); //$NON-NLS-1$
-		return generation.getLastModified() != secureAction.lastModified(content);
+	private boolean needsDiscarding(Generation generation) {
+		for (StorageHook<?, ?> hook : generation.getStorageHooks()) {
+			try {
+				hook.validate();
+			} catch (IllegalStateException e) {
+				// TODO Logging?
+				return true;
+			}
+		}
+		if (getConfiguration().inCheckConfigurationMode()) {
+			File content = generation.getContent();
+			if (generation.isDirectory())
+				content = new File(content, "META-INF/MANIFEST.MF"); //$NON-NLS-1$
+			return generation.getLastModified() != secureAction.lastModified(content);
+		}
+		return false;
 	}
 
 	private void checkSystemBundle() {
