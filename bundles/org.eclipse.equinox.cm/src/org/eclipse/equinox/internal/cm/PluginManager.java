@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,14 +11,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.cm;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Dictionary;
-import java.util.TreeSet;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
+import java.util.*;
+import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationPlugin;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -40,11 +34,11 @@ public class PluginManager {
 		pluginTracker.close();
 	}
 
-	public void modifyConfiguration(ServiceReference managedReference, Dictionary properties) {
+	public void modifyConfiguration(ServiceReference<?> managedReference, Dictionary<String, Object> properties) {
 		if (properties == null)
 			return;
 
-		ServiceReference[] references = pluginTracker.getServiceReferences();
+		ServiceReference<ConfigurationPlugin>[] references = pluginTracker.getServiceReferences();
 		for (int i = 0; i < references.length; ++i) {
 			String[] pids = (String[]) references[i].getProperty(ConfigurationPlugin.CM_TARGET);
 			if (pids != null) {
@@ -52,20 +46,21 @@ public class PluginManager {
 				if (!Arrays.asList(pids).contains(pid))
 					continue;
 			}
-			ConfigurationPlugin plugin = (ConfigurationPlugin) pluginTracker.getService(references[i]);
+			ConfigurationPlugin plugin = pluginTracker.getService(references[i]);
 			if (plugin != null)
 				plugin.modifyConfiguration(managedReference, properties);
 		}
 	}
 
-	private static class PluginTracker extends ServiceTracker {
+	private static class PluginTracker extends ServiceTracker<ConfigurationPlugin, ConfigurationPlugin> {
 		final Integer ZERO = new Integer(0);
-		private TreeSet serviceReferences = new TreeSet(new Comparator() {
-			public int compare(Object o1, Object o2) {
-				return getRank((ServiceReference) o1).compareTo(getRank((ServiceReference) o2));
+		private TreeSet<ServiceReference<ConfigurationPlugin>> serviceReferences = new TreeSet<ServiceReference<ConfigurationPlugin>>(new Comparator<ServiceReference<ConfigurationPlugin>>() {
+			public int compare(ServiceReference<ConfigurationPlugin> s1, ServiceReference<ConfigurationPlugin> s2) {
+
+				return getRank(s1).compareTo(getRank(s2));
 			}
 
-			private Integer getRank(ServiceReference ref) {
+			private Integer getRank(ServiceReference<ConfigurationPlugin> ref) {
 				Object ranking = ref.getProperty(ConfigurationPlugin.CM_RANKING);
 				if (ranking == null || !(ranking instanceof Integer))
 					return ZERO;
@@ -81,24 +76,25 @@ public class PluginManager {
 		 * Rather than returning null if no references are present, it
 		 * returns an empty array.
 		 */
-		public ServiceReference[] getServiceReferences() {
+		@SuppressWarnings("unchecked")
+		public ServiceReference<ConfigurationPlugin>[] getServiceReferences() {
 			synchronized (serviceReferences) {
-				return (ServiceReference[]) serviceReferences.toArray(new ServiceReference[0]);
+				return serviceReferences.toArray(new ServiceReference[serviceReferences.size()]);
 			}
 		}
 
-		public Object addingService(ServiceReference reference) {
+		public ConfigurationPlugin addingService(ServiceReference<ConfigurationPlugin> reference) {
 			synchronized (serviceReferences) {
 				serviceReferences.add(reference);
 			}
 			return context.getService(reference);
 		}
 
-		public void modifiedService(ServiceReference reference, Object service) {
+		public void modifiedService(ServiceReference<ConfigurationPlugin> reference, ConfigurationPlugin service) {
 			// nothing to do
 		}
 
-		public void removedService(ServiceReference reference, Object service) {
+		public void removedService(ServiceReference<ConfigurationPlugin> reference, ConfigurationPlugin service) {
 			synchronized (serviceReferences) {
 				serviceReferences.remove(reference);
 			}

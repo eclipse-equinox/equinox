@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -128,7 +128,7 @@ public class ReliableFile {
 	private File referenceFile;
 
 	/** List of checksum file objects: File => specific ReliableFile generation */
-	private static Hashtable cacheFiles = new Hashtable(20);
+	private static Hashtable<File, CacheInfo> cacheFiles = new Hashtable<File, CacheInfo>(20);
 
 	private File inputFile = null;
 	private File outputFile = null;
@@ -195,7 +195,7 @@ public class ReliableFile {
 			String[] files = parent.list();
 			if (files == null)
 				return null;
-			ArrayList list = new ArrayList(defaultMaxGenerations);
+			List<Integer> list = new ArrayList<Integer>(defaultMaxGenerations);
 			if (file.exists())
 				list.add(new Integer(0)); //base file exists
 			for (int i = 0; i < files.length; i++) {
@@ -265,7 +265,7 @@ public class ReliableFile {
 			InputStream is = null;
 			CacheInfo info;
 			synchronized (cacheFiles) {
-				info = (CacheInfo) cacheFiles.get(file);
+				info = cacheFiles.get(file);
 				long timeStamp = file.lastModified();
 				if (info == null || timeStamp != info.timeStamp) {
 					try {
@@ -356,7 +356,7 @@ public class ReliableFile {
 		}
 
 		try {
-			CacheInfo info = (CacheInfo) cacheFiles.get(inputFile);
+			CacheInfo info = cacheFiles.get(inputFile);
 			appendChecksum = info.checksum;
 			OutputStream os = new FileOutputStream(tmpFile);
 			if (info.filetype == FILETYPE_NOSIGNATURE) {
@@ -445,7 +445,7 @@ public class ReliableFile {
 			//  backup files.
 			for (int idx = 0, count = generationCount - rmCount; idx < count; idx++) {
 				File file = new File(parent, name + '.' + generations[idx]);
-				CacheInfo info = (CacheInfo) cacheFiles.get(file);
+				CacheInfo info = cacheFiles.get(file);
 				if (info != null) {
 					if (info.filetype == FILETYPE_CORRUPT)
 						rmCount--;
@@ -625,7 +625,7 @@ public class ReliableFile {
 		if (!directory.isDirectory())
 			throw new IOException("Not a valid directory"); //$NON-NLS-1$
 		String files[] = directory.list();
-		HashSet list = new HashSet(files.length / 2);
+		Set<String> list = new HashSet<String>(files.length / 2);
 		for (int idx = 0; idx < files.length; idx++) {
 			String file = files[idx];
 			int pos = file.lastIndexOf('.');
@@ -644,8 +644,8 @@ public class ReliableFile {
 		}
 		files = new String[list.size()];
 		int idx = 0;
-		for (Iterator iter = list.iterator(); iter.hasNext();) {
-			files[idx++] = (String) iter.next();
+		for (Iterator<String> iter = list.iterator(); iter.hasNext();) {
+			files[idx++] = iter.next();
 		}
 		return files;
 	}
@@ -697,7 +697,7 @@ public class ReliableFile {
 	 */
 	int getSignatureSize() throws IOException {
 		if (inputFile != null) {
-			CacheInfo info = (CacheInfo) cacheFiles.get(inputFile);
+			CacheInfo info = cacheFiles.get(inputFile);
 			if (info != null) {
 				switch (info.filetype) {
 					case FILETYPE_VALID :

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Cognos Incorporated, IBM Corporation and others..
+ * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.cm;
 
-import java.io.IOException;
 import org.osgi.framework.*;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -31,18 +30,18 @@ class ConfigurationAdminImpl implements ConfigurationAdmin {
 		this.bundle = bundle;
 	}
 
-	public Configuration createFactoryConfiguration(String factoryPid) throws IOException {
+	public Configuration createFactoryConfiguration(String factoryPid) {
 		checkPID(factoryPid);
 		return configurationStore.createFactoryConfiguration(factoryPid, bundle.getLocation());
 	}
 
-	public Configuration createFactoryConfiguration(String factoryPid, String location) throws IOException {
+	public Configuration createFactoryConfiguration(String factoryPid, String location) {
 		checkPID(factoryPid);
 		this.configurationAdminFactory.checkConfigurationPermission();
 		return configurationStore.createFactoryConfiguration(factoryPid, location);
 	}
 
-	public Configuration getConfiguration(String pid) throws IOException {
+	public Configuration getConfiguration(String pid) {
 		checkPID(pid);
 		ConfigurationImpl config = configurationStore.getConfiguration(pid, bundle.getLocation());
 		if (config.getBundleLocation(false) != null && !config.getBundleLocation(false).equals(bundle.getLocation()))
@@ -51,13 +50,13 @@ class ConfigurationAdminImpl implements ConfigurationAdmin {
 		return config;
 	}
 
-	public Configuration getConfiguration(String pid, String location) throws IOException {
+	public Configuration getConfiguration(String pid, String location) {
 		checkPID(pid);
 		this.configurationAdminFactory.checkConfigurationPermission();
 		return configurationStore.getConfiguration(pid, location);
 	}
 
-	public Configuration[] listConfigurations(String filterString) throws IOException, InvalidSyntaxException {
+	public Configuration[] listConfigurations(String filterString) throws InvalidSyntaxException {
 		if (filterString == null)
 			filterString = "(" + Constants.SERVICE_PID + "=*)"; //$NON-NLS-1$ //$NON-NLS-2$
 

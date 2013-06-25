@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,25 +14,25 @@ package org.eclipse.equinox.internal.cm;
 import java.security.Permission;
 import java.util.Dictionary;
 import org.osgi.framework.*;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationPermission;
-import org.osgi.service.log.LogService;
 
 /**
  * ConfigurationAdminFactory provides a Configuration Admin ServiceFactory but more significantly
  * launches the whole implementation.
  */
 
-public class ConfigurationAdminFactory implements ServiceFactory, BundleListener {
+public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAdmin>, BundleListener {
 
 	private final Permission configurationPermission = new ConfigurationPermission("*", ConfigurationPermission.CONFIGURE); //$NON-NLS-1$
 	private final EventDispatcher eventDispatcher;
 	private final PluginManager pluginManager;
-	private final LogService log;
+	private final LogTracker log;
 	private final ManagedServiceTracker managedServiceTracker;
 	private final ManagedServiceFactoryTracker managedServiceFactoryTracker;
 	private final ConfigurationStore configurationStore;
 
-	public ConfigurationAdminFactory(BundleContext context, LogService log) {
+	public ConfigurationAdminFactory(BundleContext context, LogTracker log) {
 		this.log = log;
 		configurationStore = new ConfigurationStore(this, context);
 		eventDispatcher = new EventDispatcher(context, log);
@@ -55,13 +55,13 @@ public class ConfigurationAdminFactory implements ServiceFactory, BundleListener
 		pluginManager.stop();
 	}
 
-	public Object getService(Bundle bundle, ServiceRegistration registration) {
-		ServiceReference reference = registration.getReference();
+	public ConfigurationAdmin getService(Bundle bundle, ServiceRegistration<ConfigurationAdmin> registration) {
+		ServiceReference<ConfigurationAdmin> reference = registration.getReference();
 		eventDispatcher.setServiceReference(reference);
 		return new ConfigurationAdminImpl(this, configurationStore, bundle);
 	}
 
-	public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
+	public void ungetService(Bundle bundle, ServiceRegistration<ConfigurationAdmin> registration, ConfigurationAdmin service) {
 		// do nothing
 	}
 
@@ -102,7 +102,7 @@ public class ConfigurationAdminFactory implements ServiceFactory, BundleListener
 			managedServiceTracker.notifyDeleted(config);
 	}
 
-	void modifyConfiguration(ServiceReference reference, Dictionary properties) {
+	void modifyConfiguration(ServiceReference<?> reference, Dictionary<String, Object> properties) {
 		pluginManager.modifyConfiguration(reference, properties);
 	}
 }

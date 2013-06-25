@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation.
+ * Copyright (c) 2007, 2013 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,7 @@ package org.eclipse.equinox.internal.cm;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.*;
-import org.osgi.service.cm.ConfigurationEvent;
-import org.osgi.service.cm.ConfigurationListener;
+import org.osgi.service.cm.*;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
@@ -35,17 +34,17 @@ public class ConfigurationEventAdapter implements ConfigurationListener {
 	public static final String SERVICE_PID = "service.pid"; //$NON-NLS-1$
 
 	private final BundleContext context;
-	private ServiceRegistration configListenerRegistration;
-	private final ServiceTracker eventAdminTracker;
+	private ServiceRegistration<ConfigurationListener> configListenerRegistration;
+	private final ServiceTracker<EventAdmin, EventAdmin> eventAdminTracker;
 
 	public ConfigurationEventAdapter(BundleContext context) {
 		this.context = context;
-		eventAdminTracker = new ServiceTracker(context, EventAdmin.class.getName(), null);
+		eventAdminTracker = new ServiceTracker<EventAdmin, EventAdmin>(context, EventAdmin.class, null);
 	}
 
 	public void start() throws Exception {
 		eventAdminTracker.open();
-		configListenerRegistration = context.registerService(ConfigurationListener.class.getName(), this, null);
+		configListenerRegistration = context.registerService(ConfigurationListener.class, this, null);
 	}
 
 	public void stop() throws Exception {
@@ -55,7 +54,7 @@ public class ConfigurationEventAdapter implements ConfigurationListener {
 	}
 
 	public void configurationEvent(ConfigurationEvent event) {
-		EventAdmin eventAdmin = (EventAdmin) eventAdminTracker.getService();
+		EventAdmin eventAdmin = eventAdminTracker.getService();
 		if (eventAdmin == null) {
 			return;
 		}
@@ -71,21 +70,21 @@ public class ConfigurationEventAdapter implements ConfigurationListener {
 				return;
 		}
 		String topic = TOPIC + TOPIC_SEPARATOR + typename;
-		ServiceReference ref = event.getReference();
+		ServiceReference<ConfigurationAdmin> ref = event.getReference();
 		if (ref == null) {
 			throw new RuntimeException("ServiceEvent.getServiceReference() is null"); //$NON-NLS-1$
 		}
-		Hashtable properties = new Hashtable();
+		Hashtable<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(CM_PID, event.getPid());
 		if (event.getFactoryPid() != null) {
 			properties.put(CM_FACTORY_PID, event.getFactoryPid());
 		}
 		putServiceReferenceProperties(properties, ref);
-		Event convertedEvent = new Event(topic, (Dictionary) properties);
+		Event convertedEvent = new Event(topic, (Dictionary<String, Object>) properties);
 		eventAdmin.postEvent(convertedEvent);
 	}
 
-	public void putServiceReferenceProperties(Hashtable properties, ServiceReference ref) {
+	private void putServiceReferenceProperties(Hashtable<String, Object> properties, ServiceReference<?> ref) {
 		properties.put(SERVICE, ref);
 		properties.put(SERVICE_ID, ref.getProperty(org.osgi.framework.Constants.SERVICE_ID));
 		Object o = ref.getProperty(org.osgi.framework.Constants.SERVICE_PID);

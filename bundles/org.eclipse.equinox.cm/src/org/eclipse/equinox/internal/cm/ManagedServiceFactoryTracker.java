@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,14 +22,14 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * ManagedServiceFactoryTracker tracks... ManagedServiceFactory(s) and notifies them about related configuration changes
  */
-class ManagedServiceFactoryTracker extends ServiceTracker {
+class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory, ManagedServiceFactory> {
 
 	final ConfigurationAdminFactory configurationAdminFactory;
 	private final ConfigurationStore configurationStore;
 
 	// managedServiceFactoryReferences guards both managedServiceFactories and managedServiceFactoryReferences
-	private final Map managedServiceFactories = new HashMap();
-	private final Map managedServiceFactoryReferences = new HashMap();
+	private final Map<String, ManagedServiceFactory> managedServiceFactories = new HashMap<String, ManagedServiceFactory>();
+	private final Map<String, ServiceReference<ManagedServiceFactory>> managedServiceFactoryReferences = new HashMap<String, ServiceReference<ManagedServiceFactory>>();
 
 	private final SerializedTaskQueue queue = new SerializedTaskQueue("ManagedServiceFactory Update Queue"); //$NON-NLS-1$
 
@@ -42,7 +42,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker {
 	protected void notifyDeleted(ConfigurationImpl config) {
 		config.checkLocked();
 		String factoryPid = config.getFactoryPid(false);
-		ServiceReference reference = getManagedServiceFactoryReference(factoryPid);
+		ServiceReference<ManagedServiceFactory> reference = getManagedServiceFactoryReference(factoryPid);
 		if (reference != null && config.bind(reference.getBundle()))
 			asynchDeleted(getManagedServiceFactory(factoryPid), config.getPid(false));
 	}
@@ -50,20 +50,20 @@ class ManagedServiceFactoryTracker extends ServiceTracker {
 	protected void notifyUpdated(ConfigurationImpl config) {
 		config.checkLocked();
 		String factoryPid = config.getFactoryPid();
-		ServiceReference reference = getManagedServiceFactoryReference(factoryPid);
+		ServiceReference<ManagedServiceFactory> reference = getManagedServiceFactoryReference(factoryPid);
 		if (reference != null && config.bind(reference.getBundle())) {
-			Dictionary properties = config.getProperties();
+			Dictionary<String, Object> properties = config.getProperties();
 			configurationAdminFactory.modifyConfiguration(reference, properties);
 			asynchUpdated(getManagedServiceFactory(factoryPid), config.getPid(), properties);
 		}
 	}
 
-	public Object addingService(ServiceReference reference) {
+	public ManagedServiceFactory addingService(ServiceReference<ManagedServiceFactory> reference) {
 		String factoryPid = (String) reference.getProperty(Constants.SERVICE_PID);
 		if (factoryPid == null)
 			return null;
 
-		ManagedServiceFactory service = (ManagedServiceFactory) context.getService(reference);
+		ManagedServiceFactory service = context.getService(reference);
 		if (service == null)
 			return null;
 
@@ -73,7 +73,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker {
 		return service;
 	}
 
-	public void modifiedService(ServiceReference reference, Object service) {
+	public void modifiedService(ServiceReference<ManagedServiceFactory> reference, ManagedServiceFactory service) {
 		String factoryPid = (String) reference.getProperty(Constants.SERVICE_PID);
 		synchronized (configurationStore) {
 			if (getManagedServiceFactory(factoryPid) == service)
@@ -84,7 +84,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker {
 		}
 	}
 
-	public void removedService(ServiceReference reference, Object service) {
+	public void removedService(ServiceReference<ManagedServiceFactory> reference, ManagedServiceFactory service) {
 		String factoryPid = (String) reference.getProperty(Constants.SERVICE_PID);
 		synchronized (configurationStore) {
 			remove(reference, factoryPid);
@@ -92,7 +92,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker {
 		context.ungetService(reference);
 	}
 
-	private void add(ServiceReference reference, String factoryPid, ManagedServiceFactory service) {
+	private void add(ServiceReference<ManagedServiceFactory> reference, String factoryPid, ManagedServiceFactory service) {
 		ConfigurationImpl[] configs = configurationStore.getFactoryConfigurations(factoryPid);
 		try {
 			for (int i = 0; i < configs.length; ++i)
@@ -103,7 +103,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker {
 					if (configs[i].isDeleted()) {
 						// ignore this config
 					} else if (configs[i].bind(reference.getBundle())) {
-						Dictionary properties = configs[i].getProperties();
+						Dictionary<String, Object> properties = configs[i].getProperties();
 						configurationAdminFactory.modifyConfiguration(reference, properties);
 						asynchUpdated(service, configs[i].getPid(), properties);
 					} else {
@@ -117,7 +117,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker {
 		}
 	}
 
-	private void remove(ServiceReference reference, String factoryPid) {
+	private void remove(ServiceReference<ManagedServiceFactory> reference, String factoryPid) {
 		ConfigurationImpl[] configs = configurationStore.getFactoryConfigurations(factoryPid);
 		try {
 			for (int i = 0; i < configs.length; ++i)
@@ -129,7 +129,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker {
 		}
 	}
 
-	private boolean trackManagedServiceFactory(String factoryPid, ServiceReference reference, ManagedServiceFactory service) {
+	private boolean trackManagedServiceFactory(String factoryPid, ServiceReference<ManagedServiceFactory> reference, ManagedServiceFactory service) {
 		synchronized (managedServiceFactoryReferences) {
 			if (managedServiceFactoryReferences.containsKey(factoryPid)) {
 				configurationAdminFactory.log(LogService.LOG_WARNING, ManagedServiceFactory.class.getName() + " already registered for " + Constants.SERVICE_PID + "=" + factoryPid); //$NON-NLS-1$ //$NON-NLS-2$
@@ -141,7 +141,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker {
 		}
 	}
 
-	private void untrackManagedServiceFactory(String factoryPid, ServiceReference reference) {
+	private void untrackManagedServiceFactory(String factoryPid, ServiceReference<ManagedServiceFactory> reference) {
 		synchronized (managedServiceFactoryReferences) {
 			managedServiceFactoryReferences.remove(factoryPid);
 			managedServiceFactories.remove(factoryPid);
@@ -150,22 +150,21 @@ class ManagedServiceFactoryTracker extends ServiceTracker {
 
 	private ManagedServiceFactory getManagedServiceFactory(String factoryPid) {
 		synchronized (managedServiceFactoryReferences) {
-			return (ManagedServiceFactory) managedServiceFactories.get(factoryPid);
+			return managedServiceFactories.get(factoryPid);
 		}
 	}
 
-	private ServiceReference getManagedServiceFactoryReference(String factoryPid) {
+	private ServiceReference<ManagedServiceFactory> getManagedServiceFactoryReference(String factoryPid) {
 		synchronized (managedServiceFactoryReferences) {
-			return (ServiceReference) managedServiceFactoryReferences.get(factoryPid);
+			return managedServiceFactoryReferences.get(factoryPid);
 		}
 	}
 
 	private String getPidForManagedServiceFactory(Object service) {
 		synchronized (managedServiceFactoryReferences) {
-			for (Iterator it = managedServiceFactories.entrySet().iterator(); it.hasNext();) {
-				Entry entry = (Entry) it.next();
+			for (Entry<String, ManagedServiceFactory> entry : managedServiceFactories.entrySet()) {
 				if (entry.getValue() == service)
-					return (String) entry.getKey();
+					return entry.getKey();
 			}
 			return null;
 		}
@@ -183,7 +182,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker {
 		});
 	}
 
-	private void asynchUpdated(final ManagedServiceFactory service, final String pid, final Dictionary properties) {
+	private void asynchUpdated(final ManagedServiceFactory service, final String pid, final Dictionary<String, Object> properties) {
 		queue.put(new Runnable() {
 			public void run() {
 				try {

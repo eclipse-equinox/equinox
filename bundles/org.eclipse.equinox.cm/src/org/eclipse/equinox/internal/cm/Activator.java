@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 Cognos Incorporated, IBM Corporation
+ * Copyright (c) 2006, 2013 Cognos Incorporated, IBM Corporation
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 public class Activator implements BundleActivator {
 	private static final String EVENT_ADMIN_CLASS = "org.osgi.service.event.EventAdmin"; //$NON-NLS-1$
 	private LogTracker logTracker;
-	private ServiceRegistration registration;
+	private ServiceRegistration<ConfigurationAdmin> registration;
 	private ConfigurationAdminFactory factory;
 	private ConfigurationEventAdapter eventAdapter;
 	private static BundleContext bundleContext;
@@ -50,7 +50,7 @@ public class Activator implements BundleActivator {
 		factory = new ConfigurationAdminFactory(context, logTracker);
 		factory.start();
 		context.addBundleListener(factory);
-		registration = context.registerService(ConfigurationAdmin.class.getName(), factory, null);
+		registration = context.registerService(ConfigurationAdmin.class, factory, null);
 	}
 
 	public void stop(BundleContext context) throws Exception {

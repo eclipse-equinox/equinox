@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ class ConfigurationStore {
 	private final ConfigurationAdminFactory configurationAdminFactory;
 	private static final String STORE_DIR = "store"; //$NON-NLS-1$
 	private static final String PID_EXT = ".pid"; //$NON-NLS-1$
-	private final Map configurations = new HashMap();
+	private final Map<String, ConfigurationImpl> configurations = new HashMap<String, ConfigurationImpl>();
 	private int createdPidCount = 0;
 	private final File store;
 
@@ -52,7 +52,8 @@ class ConfigurationStore {
 			try {
 				ris = new ReliableFileInputStream(configurationFiles[i]);
 				ois = new ObjectInputStream(ris);
-				Dictionary dictionary = (Dictionary) ois.readObject();
+				@SuppressWarnings("unchecked")
+				Dictionary<String, Object> dictionary = (Dictionary<String, Object>) ois.readObject();
 				ConfigurationImpl config = new ConfigurationImpl(configurationAdminFactory, this, dictionary);
 				configurations.put(config.getPid(), config);
 			} catch (IOException e) {
@@ -92,9 +93,9 @@ class ConfigurationStore {
 
 		config.checkLocked();
 		final File configFile = new File(store, pid + PID_EXT);
-		final Dictionary configProperties = config.getAllProperties();
+		final Dictionary<String, Object> configProperties = config.getAllProperties();
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
+			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 				public Object run() throws Exception {
 					writeConfigurationFile(configFile, configProperties);
 					return null;
@@ -105,7 +106,7 @@ class ConfigurationStore {
 		}
 	}
 
-	void writeConfigurationFile(File configFile, Dictionary configProperties) throws IOException {
+	void writeConfigurationFile(File configFile, Dictionary<String, Object> configProperties) throws IOException {
 		OutputStream ros = null;
 		ObjectOutputStream oos = null;
 		try {
@@ -136,7 +137,7 @@ class ConfigurationStore {
 		if (store == null)
 			return; // no persistent store
 		final File configFile = new File(store, pid + PID_EXT);
-		AccessController.doPrivileged(new PrivilegedAction() {
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
 			public Object run() {
 				deleteConfigurationFile(configFile);
 				return null;
@@ -150,7 +151,7 @@ class ConfigurationStore {
 	}
 
 	public synchronized ConfigurationImpl getConfiguration(String pid, String location) {
-		ConfigurationImpl config = (ConfigurationImpl) configurations.get(pid);
+		ConfigurationImpl config = configurations.get(pid);
 		if (config == null) {
 			config = new ConfigurationImpl(configurationAdminFactory, this, null, pid, location);
 			configurations.put(pid, config);
@@ -166,25 +167,25 @@ class ConfigurationStore {
 	}
 
 	public synchronized ConfigurationImpl findConfiguration(String pid) {
-		return (ConfigurationImpl) configurations.get(pid);
+		return configurations.get(pid);
 	}
 
 	public synchronized ConfigurationImpl[] getFactoryConfigurations(String factoryPid) {
-		List resultList = new ArrayList();
-		for (Iterator it = configurations.values().iterator(); it.hasNext();) {
-			ConfigurationImpl config = (ConfigurationImpl) it.next();
+		List<ConfigurationImpl> resultList = new ArrayList<ConfigurationImpl>();
+		for (Iterator<ConfigurationImpl> it = configurations.values().iterator(); it.hasNext();) {
+			ConfigurationImpl config = it.next();
 			String otherFactoryPid = config.getFactoryPid();
 			if (otherFactoryPid != null && otherFactoryPid.equals(factoryPid))
 				resultList.add(config);
 		}
-		return (ConfigurationImpl[]) resultList.toArray(new ConfigurationImpl[0]);
+		return resultList.toArray(new ConfigurationImpl[resultList.size()]);
 	}
 
 	public synchronized ConfigurationImpl[] listConfigurations(Filter filter) {
-		List resultList = new ArrayList();
-		for (Iterator it = configurations.values().iterator(); it.hasNext();) {
-			ConfigurationImpl config = (ConfigurationImpl) it.next();
-			Dictionary properties = config.getAllProperties();
+		List<ConfigurationImpl> resultList = new ArrayList<ConfigurationImpl>();
+		for (Iterator<ConfigurationImpl> it = configurations.values().iterator(); it.hasNext();) {
+			ConfigurationImpl config = it.next();
+			Dictionary<String, Object> properties = config.getAllProperties();
 			if (properties != null && filter.match(properties))
 				resultList.add(config);
 		}
@@ -193,8 +194,8 @@ class ConfigurationStore {
 	}
 
 	public synchronized void unbindConfigurations(Bundle bundle) {
-		for (Iterator it = configurations.values().iterator(); it.hasNext();) {
-			ConfigurationImpl config = (ConfigurationImpl) it.next();
+		for (Iterator<ConfigurationImpl> it = configurations.values().iterator(); it.hasNext();) {
+			ConfigurationImpl config = it.next();
 			config.unbind(bundle);
 		}
 	}

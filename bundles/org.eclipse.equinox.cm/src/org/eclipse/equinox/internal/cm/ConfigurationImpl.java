@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,7 +49,7 @@ class ConfigurationImpl implements Configuration {
 		this.bundleLocation = bundleLocation;
 	}
 
-	public ConfigurationImpl(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, Dictionary dictionary) {
+	public ConfigurationImpl(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, Dictionary<String, ?> dictionary) {
 		this.configurationAdminFactory = configurationAdminFactory;
 		this.configurationStore = configurationStore;
 		pid = (String) dictionary.get(Constants.SERVICE_PID);
@@ -119,7 +119,7 @@ class ConfigurationImpl implements Configuration {
 		}
 	}
 
-	public void delete() throws IOException {
+	public void delete() {
 		try {
 			lock();
 			checkDeleted();
@@ -187,14 +187,14 @@ class ConfigurationImpl implements Configuration {
 		return getPid(true);
 	}
 
-	public Dictionary getProperties() {
+	public Dictionary<String, Object> getProperties() {
 		try {
 			lock();
 			checkDeleted();
 			if (dictionary == null)
 				return null;
 
-			Dictionary copy = dictionary.copy();
+			Dictionary<String, Object> copy = dictionary.copy();
 			copy.put(Constants.SERVICE_PID, pid);
 			if (factoryPid != null)
 				copy.put(ConfigurationAdmin.SERVICE_FACTORYPID, factoryPid);
@@ -205,12 +205,12 @@ class ConfigurationImpl implements Configuration {
 		}
 	}
 
-	protected Dictionary getAllProperties() {
+	protected Dictionary<String, Object> getAllProperties() {
 		try {
 			lock();
 			if (deleted)
 				return null;
-			Dictionary copy = getProperties();
+			Dictionary<String, Object> copy = getProperties();
 			if (copy == null)
 				return null;
 			String boundLocation = getBundleLocation(false);
@@ -247,7 +247,7 @@ class ConfigurationImpl implements Configuration {
 		}
 	}
 
-	public void update(Dictionary properties) throws IOException {
+	public void update(Dictionary<String, ?> properties) throws IOException {
 		try {
 			lock();
 			checkDeleted();
@@ -260,11 +260,11 @@ class ConfigurationImpl implements Configuration {
 		}
 	}
 
-	private void updateDictionary(Dictionary properties) {
+	private void updateDictionary(Dictionary<String, ?> properties) {
 		ConfigurationDictionary newDictionary = new ConfigurationDictionary();
-		Enumeration keys = properties.keys();
+		Enumeration<String> keys = properties.keys();
 		while (keys.hasMoreElements()) {
-			Object key = keys.nextElement();
+			String key = keys.nextElement();
 			if (newDictionary.get(key) == null) {
 				Object value = properties.get(key);
 				if (value.getClass().isArray()) {
@@ -273,7 +273,7 @@ class ConfigurationImpl implements Configuration {
 					System.arraycopy(value, 0, copyOfArray, 0, arrayLength);
 					newDictionary.put(key, copyOfArray);
 				} else if (value instanceof Collection)
-					newDictionary.put(key, new Vector((Collection) value));
+					newDictionary.put(key, new Vector<Object>((Collection<?>) value));
 				else
 					newDictionary.put(key, properties.get(key));
 			} else

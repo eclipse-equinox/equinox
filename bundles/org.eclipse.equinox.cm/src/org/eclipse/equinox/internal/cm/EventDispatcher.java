@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,7 @@ package org.eclipse.equinox.internal.cm;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.ConfigurationEvent;
-import org.osgi.service.cm.ConfigurationListener;
+import org.osgi.service.cm.*;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -25,15 +24,15 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 
 public class EventDispatcher {
-	final ServiceTracker tracker;
+	final ServiceTracker<ConfigurationListener, ConfigurationListener> tracker;
 	private final SerializedTaskQueue queue = new SerializedTaskQueue("ConfigurationListener Event Queue"); //$NON-NLS-1$
 	/** @GuardedBy this */
-	private ServiceReference configAdminReference;
-	final LogService log;
+	private ServiceReference<ConfigurationAdmin> configAdminReference;
+	final LogTracker log;
 
-	public EventDispatcher(BundleContext context, LogService log) {
+	public EventDispatcher(BundleContext context, LogTracker log) {
 		this.log = log;
-		tracker = new ServiceTracker(context, ConfigurationListener.class.getName(), null);
+		tracker = new ServiceTracker<ConfigurationListener, ConfigurationListener>(context, ConfigurationListener.class, null);
 	}
 
 	public void start() {
@@ -47,7 +46,7 @@ public class EventDispatcher {
 		}
 	}
 
-	synchronized void setServiceReference(ServiceReference reference) {
+	synchronized void setServiceReference(ServiceReference<ConfigurationAdmin> reference) {
 		if (configAdminReference == null)
 			configAdminReference = reference;
 	}
@@ -57,15 +56,15 @@ public class EventDispatcher {
 		if (event == null)
 			return;
 
-		ServiceReference[] refs = tracker.getServiceReferences();
+		ServiceReference<ConfigurationListener>[] refs = tracker.getServiceReferences();
 		if (refs == null)
 			return;
 
 		for (int i = 0; i < refs.length; ++i) {
-			final ServiceReference ref = refs[i];
+			final ServiceReference<ConfigurationListener> ref = refs[i];
 			queue.put(new Runnable() {
 				public void run() {
-					ConfigurationListener listener = (ConfigurationListener) tracker.getService(ref);
+					ConfigurationListener listener = tracker.getService(ref);
 					if (listener == null) {
 						return;
 					}
