@@ -11,7 +11,11 @@
 <project name="Launcher Build" basedir="." default="build">
 	<property name="gitTag" value="master" />
 	
-	<property name="keyfile" value="C:\BUILD\ssh\swtbuild_dsa_private" /> 
+	<target name="init_keyfile">
+		<condition property="keyfile" value="C:\BUILD\ssh\swtbuild_dsa_private" else="/var/lib/hudson/swt/swtbuild_dsa_private">
+			<os family="windows"/>
+		</condition>
+	</target>
 	
 	<available file="${basedir}/launcher.properties" property="launcherProperties" value="${basedir}/launcher.properties" />
 	
@@ -142,7 +146,7 @@
 		<delete dir="${tmpdir}"/>
 	</target>
 	
-	<target name="buildRemote" if="remote">
+	<target name="buildRemote" if="remote" depends="init_keyfile">
 		<echo message="Machine: ${machine}" />
 		<property name="remotebuilddir" value="~/build"/>
 		<property name="remotetmpdir" value="${remotebuilddir}/${fragmentFolder}.${gitTag}"/>
