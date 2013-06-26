@@ -120,20 +120,33 @@ static int isLibrary( _TCHAR* vm ){
 	return (_tcsicmp(ch, _T_ECLIPSE(".so")) == 0) || (_tcsicmp(ch, _T_ECLIPSE(".jnilib")) == 0) || (_tcsicmp(ch, _T_ECLIPSE(".dylib")) == 0);
 }
 
+static void loadVMBundle( char * bundle ) {
+	CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (const UInt8 *)bundle, strlen(bundle), true);
+	javaVMBundle = CFBundleCreate(kCFAllocatorDefault, url);
+	CFRelease(url);
+}
+
 /* Load the specified shared library
  */
 void * loadLibrary( char * library ){
 	if (!isLibrary(library)) {
-		CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (const UInt8 *)library, strlen(library), true);
-		javaVMBundle = CFBundleCreate(kCFAllocatorDefault, url);
-		CFRelease(url);
+		loadVMBundle(library);
 		return (void*) &javaVMBundle;
-	} else {
-		void * result= dlopen(library, RTLD_NOW);
-		if(result == 0) 
-			printf("%s\n",dlerror());
-		return result;
 	}
+	_TCHAR *bundle = strdup(library), *start;
+	if (strstr(bundle, "libjvm") && (start = strstr(bundle, "/Contents/")) != NULL) {
+		start[0] = NULL;
+		loadVMBundle(bundle);
+		free(bundle);
+		if (javaVMBundle) {
+			return (void*) &javaVMBundle;
+		}
+	}
+	free(bundle);
+	void * result= dlopen(library, RTLD_NOW);
+	if(result == 0) 
+		printf("%s\n",dlerror());
+	return result;
 }
 
 /* Unload the shared library
