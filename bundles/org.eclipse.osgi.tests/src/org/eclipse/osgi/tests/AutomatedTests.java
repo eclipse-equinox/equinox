@@ -15,6 +15,7 @@ import org.eclipse.osgi.tests.bundles.BundleTests;
 import org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase;
 import org.eclipse.osgi.tests.eventmgr.EventManagerTests;
 import org.eclipse.osgi.tests.filter.FilterTests;
+import org.eclipse.osgi.tests.hooks.framework.AllFrameworkHookTests;
 import org.eclipse.osgi.tests.internal.plugins.InstallTests;
 import org.eclipse.osgi.tests.listeners.ExceptionHandlerTests;
 import org.eclipse.osgi.tests.misc.MiscTests;
@@ -43,6 +44,7 @@ public class AutomatedTests extends TestCase {
 		TestSuite suite = new TestSuite(AutomatedTests.class.getName());
 		//		suite.addTest(new TestSuite(SimpleTests.class));
 		suite.addTest(org.eclipse.osgi.tests.container.AllTests.suite());
+		suite.addTest(AllFrameworkHookTests.suite());
 		suite.addTest(new TestSuite(InstallTests.class));
 		suite.addTest(org.eclipse.osgi.tests.eclipseadaptor.AllTests.suite());
 		suite.addTest(org.eclipse.osgi.tests.services.resolver.AllTests.suite());
