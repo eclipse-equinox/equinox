@@ -129,7 +129,6 @@ public abstract class AbstractFrameworkHookTests extends CoreTest {
 
 	private void setUpBundleInstaller() throws Exception {
 		bundleInstaller = new BundleInstaller(BUNDLES_ROOT, getContext());
-		bundleInstaller.refreshPackages(null);
 	}
 
 	private void setUpClassLoader() throws Exception {
