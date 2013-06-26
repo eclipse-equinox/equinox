@@ -307,9 +307,7 @@ public final class BundleInfo {
 
 		List<StorageHook<?, ?>> getStorageHooks() {
 			synchronized (this.genMonitor) {
-				// TODO Not sure if the extra protection of returning a copy is
-				// necessary but played it safe.
-				return new ArrayList<StorageHook<?, ?>>(storageHooks);
+				return this.storageHooks;
 			}
 		}
 	}
