@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 IBM Corporation and others.
+ * Copyright (c) 2004, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,7 @@ import org.osgi.util.tracker.ServiceTracker;
 public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements URLStreamHandlerFactory {
 	protected static final String URLSTREAMHANDLERCLASS = "org.osgi.service.url.URLStreamHandlerService"; //$NON-NLS-1$
 	protected static final String PROTOCOL_HANDLER_PKGS = "java.protocol.handler.pkgs"; //$NON-NLS-1$
-	private static final String PROTOCOL_REFERENCE = "reference"; //$NON-NLS-1$
+	public static final String PROTOCOL_REFERENCE = "reference"; //$NON-NLS-1$
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
 	private ServiceTracker<URLStreamHandlerService, URLStreamHandlerService> handlerTracker;

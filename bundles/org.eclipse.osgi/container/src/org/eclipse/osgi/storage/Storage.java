@@ -11,8 +11,7 @@
 package org.eclipse.osgi.storage;
 
 import java.io.*;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
 import java.security.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -27,11 +26,14 @@ import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.*;
 import org.eclipse.osgi.internal.hookregistry.*;
 import org.eclipse.osgi.internal.hookregistry.StorageHookFactory.StorageHook;
+import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.internal.log.EquinoxLogServices;
 import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
+import org.eclipse.osgi.internal.url.URLStreamHandlerFactoryImpl;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.bundlefile.*;
+import org.eclipse.osgi.storage.url.reference.Handler;
 import org.eclipse.osgi.storage.url.reference.ReferenceInputStream;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
@@ -410,13 +412,13 @@ public class Storage {
 
 	private URLConnection getContentConnection(final String spec) throws IOException {
 		if (System.getSecurityManager() == null) {
-			return new URL(spec).openConnection();
+			return createURL(spec).openConnection();
 		}
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<URLConnection>() {
 				@Override
 				public URLConnection run() throws IOException {
-					return new URL(spec).openConnection();
+					return createURL(spec).openConnection();
 				}
 			});
 		} catch (PrivilegedActionException e) {
@@ -424,6 +426,13 @@ public class Storage {
 				throw (IOException) e.getException();
 			throw (RuntimeException) e.getException();
 		}
+	}
+
+	URL createURL(String spec) throws MalformedURLException {
+		if (spec.startsWith(URLStreamHandlerFactoryImpl.PROTOCOL_REFERENCE)) {
+			return new URL(null, spec, new Handler(equinoxContainer.getConfiguration().getConfiguration(EquinoxLocations.PROP_INSTALL_AREA)));
+		}
+		return new URL(spec);
 	}
 
 	public Generation install(Module origin, String bundleLocation, URLConnection content) throws BundleException {

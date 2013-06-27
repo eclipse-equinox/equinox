@@ -11,8 +11,6 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
-import org.eclipse.osgi.framework.internal.core.Msg;
-
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.*;
@@ -21,17 +19,20 @@ import java.security.ProtectionDomain;
 import java.util.*;
 import org.eclipse.core.runtime.internal.adaptor.*;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
+import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.FilePath;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
-import org.eclipse.osgi.internal.location.*;
+import org.eclipse.osgi.internal.location.EquinoxLocations;
+import org.eclipse.osgi.internal.location.LocationHelper;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.service.runnable.ApplicationLauncher;
 import org.eclipse.osgi.service.runnable.StartupMonitor;
+import org.eclipse.osgi.storage.url.reference.Handler;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -473,8 +474,8 @@ public class EclipseStarter {
 		File fileLocation = null;
 		boolean reference = false;
 		try {
-			new URL(name); // quick check to see if the name is a valid URL
-			url = new URL(new File(parent).toURL(), name);
+			createURL(name); // quick check to see if the name is a valid URL
+			url = createURL(new File(parent).toURL(), name);
 		} catch (MalformedURLException e) {
 			// TODO this is legacy support for non-URL names.  It should be removed eventually.
 			// if name was not a URL then construct one.  
@@ -482,7 +483,7 @@ public class EclipseStarter {
 			// be robust as it is temporary..
 			File child = new File(name);
 			fileLocation = child.isAbsolute() ? child : new File(parent, name);
-			url = new URL(REFERENCE_PROTOCOL, null, fileLocation.toURL().toExternalForm());
+			url = createURL(REFERENCE_PROTOCOL, null, fileLocation.toURL().toExternalForm());
 			reference = true;
 		}
 		// if the name was a URL then see if it is relative.  If so, insert syspath.
@@ -496,7 +497,7 @@ public class EclipseStarter {
 					File child = new File(baseSpec.substring(5));
 					baseURL = child.isAbsolute() ? child.toURL() : new File(parent, child.getPath()).toURL();
 				} else
-					baseURL = new URL(baseSpec);
+					baseURL = createURL(baseSpec);
 			}
 
 			fileLocation = new File(baseURL.getFile());
@@ -509,7 +510,7 @@ public class EclipseStarter {
 		if (reference) {
 			String result = searchFor(fileLocation.getName(), new File(fileLocation.getParent()).getAbsolutePath());
 			if (result != null)
-				url = new URL(REFERENCE_PROTOCOL, null, FILE_SCHEME + result);
+				url = createURL(REFERENCE_PROTOCOL, null, FILE_SCHEME + result);
 			else
 				return null;
 		}
@@ -1051,7 +1052,7 @@ public class EclipseStarter {
 			return location;
 		if (!location.getProtocol().equals(REFERENCE_PROTOCOL))
 			return location; // we can only make reference urls relative
-		URL nonReferenceLocation = new URL(location.getPath());
+		URL nonReferenceLocation = createURL(location.getPath());
 		// if some URL component does not match, return the original location
 		if (!base.getProtocol().equals(nonReferenceLocation.getProtocol()))
 			return location;
@@ -1067,10 +1068,32 @@ public class EclipseStarter {
 			// restore original trailing slash 
 			urlPath += '/';
 		// couldn't use File to create URL here because it prepends the path with user.dir 
-		URL relativeURL = new URL(base.getProtocol(), base.getHost(), base.getPort(), urlPath);
+		URL relativeURL = createURL(base.getProtocol(), base.getHost(), base.getPort(), urlPath);
 		// now make it back to a reference URL
-		relativeURL = new URL(REFERENCE_SCHEME + relativeURL.toExternalForm());
+		relativeURL = createURL(REFERENCE_SCHEME + relativeURL.toExternalForm());
 		return relativeURL;
+	}
+
+	private static URL createURL(String spec) throws MalformedURLException {
+		return createURL(null, spec);
+	}
+
+	private static URL createURL(URL urlContext, String spec) throws MalformedURLException {
+		if (context != null && spec.startsWith(REFERENCE_SCHEME)) {
+			return new URL(urlContext, spec, new Handler(context.getProperty(EquinoxLocations.PROP_INSTALL_AREA)));
+		}
+		return new URL(urlContext, spec);
+	}
+
+	private static URL createURL(String protocol, String host, String file) throws MalformedURLException {
+		return createURL(protocol, host, -1, file);
+	}
+
+	private static URL createURL(String protocol, String host, int port, String file) throws MalformedURLException {
+		if (context != null && REFERENCE_PROTOCOL.equalsIgnoreCase(protocol)) {
+			return new URL(protocol, host, port, file, new Handler(context.getProperty(EquinoxLocations.PROP_INSTALL_AREA)));
+		}
+		return new URL(protocol, host, port, file);
 	}
 
 	private static File makeRelative(File base, File location) {

@@ -24,6 +24,7 @@ import org.osgi.framework.launch.Framework;
  * hooks. See bug 407416.
  */
 public class StorageHookTests extends AbstractFrameworkHookTests {
+	private static final String TEST_BUNDLE = "test";
 	private static final String HOOK_CONFIGURATOR_BUNDLE = "storage.hooks.a";
 	private static final String HOOK_CONFIGURATOR_CLASS = "org.eclipse.osgi.tests.hooks.framework.storage.a.TestHookConfigurator";
 	private static final String HOOK_CONFIGURATOR_FIELD_INVALID = "invalid";
@@ -61,8 +62,9 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	protected void setUp() throws Exception {
 		super.setUp();
 		String loc = bundleInstaller.getBundleLocation(HOOK_CONFIGURATOR_BUNDLE);
-		location = loc.substring(loc.indexOf("file:"));
-		classLoader.addURL(new URL(location));
+		loc = loc.substring(loc.indexOf("file:"));
+		classLoader.addURL(new URL(loc));
+		location = bundleInstaller.getBundleLocation(TEST_BUNDLE);
 		File file = OSGiTestsActivator.getContext().getDataFile(getName());
 		configuration = new HashMap<String, String>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, file.getAbsolutePath());
