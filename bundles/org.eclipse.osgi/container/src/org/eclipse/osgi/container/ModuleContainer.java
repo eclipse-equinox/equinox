@@ -776,6 +776,8 @@ public final class ModuleContainer {
 					moduleWiring.invalidate();
 				}
 				moduleDatabase.setWiring(wiringCopy);
+				// check for any removal pendings
+				moduleDatabase.cleanupRemovalPending();
 			} finally {
 				moduleDatabase.writeUnlock();
 			}

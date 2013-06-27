@@ -423,7 +423,7 @@ public class ModuleDatabase {
 	 * a removal pending wiring as removable if all dependent
 	 * wiring are also removal pending.
 	 */
-	private void cleanupRemovalPending() {
+	void cleanupRemovalPending() {
 		// sanity check
 		checkWrite();
 		Collection<ModuleRevision> removalPending = getRemovalPending();
