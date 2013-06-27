@@ -12,7 +12,6 @@
 package org.eclipse.equinox.internal.cm;
 
 import java.util.*;
-import java.util.Map.Entry;
 import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
@@ -27,9 +26,8 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 	final ConfigurationAdminFactory configurationAdminFactory;
 	private final ConfigurationStore configurationStore;
 
-	// managedServiceFactoryReferences guards both managedServiceFactories and managedServiceFactoryReferences
-	private final Map<String, ManagedServiceFactory> managedServiceFactories = new HashMap<String, ManagedServiceFactory>();
-	private final Map<String, ServiceReference<ManagedServiceFactory>> managedServiceFactoryReferences = new HashMap<String, ServiceReference<ManagedServiceFactory>>();
+	/** @GuardedBy targets*/
+	private final TargetMap targets = new TargetMap();
 
 	private final SerializedTaskQueue queue = new SerializedTaskQueue("ManagedServiceFactory Update Queue"); //$NON-NLS-1$
 
@@ -39,134 +37,227 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 		this.configurationStore = configurationStore;
 	}
 
-	protected void notifyDeleted(ConfigurationImpl config) {
+	void notifyDeleted(ConfigurationImpl config) {
 		config.checkLocked();
+		String configLoc = config.getLocation();
+		if (configLoc == null) {
+			return;
+		}
+		boolean isMultiple = configLoc.startsWith("?"); //$NON-NLS-1$
 		String factoryPid = config.getFactoryPid(false);
-		ServiceReference<ManagedServiceFactory> reference = getManagedServiceFactoryReference(factoryPid);
-		if (reference != null && config.bind(reference.getBundle()))
-			asynchDeleted(getManagedServiceFactory(factoryPid), config.getPid(false));
-	}
-
-	protected void notifyUpdated(ConfigurationImpl config) {
-		config.checkLocked();
-		String factoryPid = config.getFactoryPid();
-		ServiceReference<ManagedServiceFactory> reference = getManagedServiceFactoryReference(factoryPid);
-		if (reference != null && config.bind(reference.getBundle())) {
-			Dictionary<String, Object> properties = config.getProperties();
-			configurationAdminFactory.modifyConfiguration(reference, properties);
-			asynchUpdated(getManagedServiceFactory(factoryPid), config.getPid(), properties);
+		List<ServiceReference<ManagedServiceFactory>> references = getManagedServiceFactoryReferences(factoryPid);
+		for (ServiceReference<ManagedServiceFactory> ref : references) {
+			if (!hasMoreSpecificConfigPids(ref, factoryPid)) {
+				boolean hasLocPermission = configurationAdminFactory.checkTargetPermission(configLoc, ref);
+				ManagedServiceFactory serviceFactory = getService(ref);
+				if (hasLocPermission && serviceFactory != null) {
+					if (isMultiple || ConfigurationAdminImpl.getLocation(ref.getBundle()).equals(configLoc)) {
+						asynchDeleted(serviceFactory, config.getPid(false));
+					}
+				}
+			}
 		}
 	}
 
-	public ManagedServiceFactory addingService(ServiceReference<ManagedServiceFactory> reference) {
-		String factoryPid = (String) reference.getProperty(Constants.SERVICE_PID);
-		if (factoryPid == null)
-			return null;
+	void notifyUpdated(ConfigurationImpl config) {
+		config.checkLocked();
+		String configLoc = config.getLocation();
+		boolean isMultiple = configLoc != null && configLoc.startsWith("?"); //$NON-NLS-1$
+		String factoryPid = config.getFactoryPid();
+		List<ServiceReference<ManagedServiceFactory>> references = getManagedServiceFactoryReferences(factoryPid);
+		for (ServiceReference<ManagedServiceFactory> ref : references) {
+			if (!hasMoreSpecificConfigPids(ref, factoryPid)) {
+				boolean hasLocPermission = configurationAdminFactory.checkTargetPermission(configLoc, ref);
+				ManagedServiceFactory serviceFactory = getService(ref);
+				if (hasLocPermission && serviceFactory != null) {
+					if (isMultiple || config.bind(ConfigurationAdminImpl.getLocation(ref.getBundle()))) {
+						Dictionary<String, Object> properties = config.getProperties();
+						configurationAdminFactory.modifyConfiguration(ref, properties);
+						asynchUpdated(serviceFactory, config.getPid(), properties);
+					}
+				}
+			}
+		}
+	}
 
+	void notifyUpdateLocation(ConfigurationImpl config, String oldLocation) {
+		config.checkLocked();
+		String configLoc = config.getLocation();
+		if (configLoc == null ? oldLocation == null : configLoc.equals(oldLocation)) {
+			// same location do nothing
+			return;
+		}
+		boolean oldIsMultiple = oldLocation != null && oldLocation.startsWith("?"); //$NON-NLS-1$
+		boolean newIsMultiple = configLoc != null && configLoc.startsWith("?"); //$NON-NLS-1$
+		String factoryPid = config.getFactoryPid();
+		List<ServiceReference<ManagedServiceFactory>> references = getManagedServiceFactoryReferences(factoryPid);
+		for (ServiceReference<ManagedServiceFactory> ref : references) {
+			if (!hasMoreSpecificConfigPids(ref, factoryPid)) {
+				boolean hasOldPermission = configurationAdminFactory.checkTargetPermission(oldLocation, ref);
+				boolean hasNewPermission = configurationAdminFactory.checkTargetPermission(configLoc, ref);
+				ManagedServiceFactory serviceFactory = getService(ref);
+				if (serviceFactory != null) {
+					boolean delete = false;
+					boolean update = false;
+					String targetLocation = ConfigurationAdminImpl.getLocation(ref.getBundle());
+					if (hasOldPermission != hasNewPermission) {
+						if (hasOldPermission) {
+							delete = oldIsMultiple || targetLocation.equals(oldLocation);
+						} else {
+							update = newIsMultiple || config.bind(targetLocation);
+						}
+					} else {
+						// location has changed, this may be a bound configuration
+						if (targetLocation.equals(oldLocation)) {
+							delete = true;
+						} else {
+							update = newIsMultiple || config.bind(targetLocation);
+						}
+					}
+					if (delete) {
+						asynchDeleted(serviceFactory, config.getPid());
+					} else if (update) {
+						Dictionary<String, Object> properties = config.getProperties();
+						configurationAdminFactory.modifyConfiguration(ref, properties);
+						asynchUpdated(serviceFactory, config.getPid(), properties);
+					}
+					// do not break on !isMultiple since we need to check if the other refs apply no matter what
+				}
+			}
+		}
+	}
+
+	private boolean hasMoreSpecificConfigPids(ServiceReference<ManagedServiceFactory> ref, String pid) {
+		List<List<String>> qualifiedPidsLists;
+		synchronized (targets) {
+			qualifiedPidsLists = targets.getQualifiedPids(ref);
+		}
+		for (List<String> qualifiedPids : qualifiedPidsLists) {
+			for (String qualifiedPid : qualifiedPids) {
+				if (qualifiedPid.length() <= pid.length() || !qualifiedPid.startsWith(pid)) {
+					break;
+				}
+				ConfigurationImpl config = configurationStore.findConfiguration(qualifiedPid);
+				if (config != null) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public ManagedServiceFactory addingService(ServiceReference<ManagedServiceFactory> reference) {
 		ManagedServiceFactory service = context.getService(reference);
 		if (service == null)
 			return null;
 
 		synchronized (configurationStore) {
-			add(reference, factoryPid, service);
+			addReference(reference, service);
 		}
 		return service;
 	}
 
 	public void modifiedService(ServiceReference<ManagedServiceFactory> reference, ManagedServiceFactory service) {
-		String factoryPid = (String) reference.getProperty(Constants.SERVICE_PID);
+		List<String> newPids = TargetMap.getPids(reference.getProperty(Constants.SERVICE_PID));
+		synchronized (targets) {
+			List<List<String>> previousPids = targets.getQualifiedPids(reference);
+			if (newPids.size() == previousPids.size()) {
+				boolean foundAll = false;
+				for (String newPid : newPids) {
+					foundAll = false;
+					for (List<String> pids : previousPids) {
+						if (pids.contains(newPid)) {
+							foundAll = true;
+							break;
+						}
+					}
+					if (!foundAll) {
+						break;
+					}
+				}
+				if (foundAll) {
+					return;
+				}
+			}
+		}
 		synchronized (configurationStore) {
-			if (getManagedServiceFactory(factoryPid) == service)
-				return;
-			String previousPid = getPidForManagedServiceFactory(service);
-			remove(reference, previousPid);
+			untrackManagedServiceFactory(reference);
 			addingService(reference);
 		}
 	}
 
 	public void removedService(ServiceReference<ManagedServiceFactory> reference, ManagedServiceFactory service) {
-		String factoryPid = (String) reference.getProperty(Constants.SERVICE_PID);
 		synchronized (configurationStore) {
-			remove(reference, factoryPid);
+			untrackManagedServiceFactory(reference);
 		}
 		context.ungetService(reference);
 	}
 
-	private void add(ServiceReference<ManagedServiceFactory> reference, String factoryPid, ManagedServiceFactory service) {
-		ConfigurationImpl[] configs = configurationStore.getFactoryConfigurations(factoryPid);
-		try {
-			for (int i = 0; i < configs.length; ++i)
-				configs[i].lock();
+	private void addReference(ServiceReference<ManagedServiceFactory> reference, ManagedServiceFactory service) {
+		List<List<String>> qualifiedPidLists = trackManagedServiceFactory(reference);
+		updateManagedServiceFactory(qualifiedPidLists, reference, service);
+	}
 
-			if (trackManagedServiceFactory(factoryPid, reference, service)) {
-				for (int i = 0; i < configs.length; ++i) {
-					if (configs[i].isDeleted()) {
-						// ignore this config
-					} else if (configs[i].bind(reference.getBundle())) {
-						Dictionary<String, Object> properties = configs[i].getProperties();
-						configurationAdminFactory.modifyConfiguration(reference, properties);
-						asynchUpdated(service, configs[i].getPid(), properties);
-					} else {
-						configurationAdminFactory.log(LogService.LOG_WARNING, "Configuration for " + Constants.SERVICE_PID + "=" + configs[i].getPid() + " could not be bound to " + reference.getBundle().getLocation()); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+	private void updateManagedServiceFactory(List<List<String>> qualifiedPidLists, ServiceReference<ManagedServiceFactory> reference, ManagedServiceFactory serviceFactory) {
+		for (List<String> qualifiedPids : qualifiedPidLists) {
+			qualifiedPids: for (String qualifiedPid : qualifiedPids) {
+				ConfigurationImpl[] configs = configurationStore.getFactoryConfigurations(qualifiedPid);
+				try {
+					for (int i = 0; i < configs.length; ++i) {
+						configs[i].lock();
 					}
+					boolean foundConfig = false;
+					for (int i = 0; i < configs.length; ++i) {
+						if (configs[i].isDeleted()) {
+							// ignore this config
+						} else {
+							String location = configs[i].getLocation();
+							boolean shouldBind = location == null || !location.startsWith("?"); //$NON-NLS-1$
+							boolean hasLocPermission = configurationAdminFactory.checkTargetPermission(location, reference);
+							if (hasLocPermission) {
+								if (shouldBind && configs[i].bind(ConfigurationAdminImpl.getLocation(reference.getBundle())) || !shouldBind) {
+									Dictionary<String, Object> properties = configs[i].getProperties();
+									configurationAdminFactory.modifyConfiguration(reference, properties);
+									asynchUpdated(serviceFactory, configs[i].getPid(), properties);
+									foundConfig = true;
+								} else {
+									configurationAdminFactory.log(LogService.LOG_WARNING, "Configuration for " + Constants.SERVICE_PID + "=" + configs[i].getPid() + " could not be bound to " + ConfigurationAdminImpl.getLocation(reference.getBundle())); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+								}
+							}
+						}
+					}
+					if (foundConfig) {
+						break qualifiedPids;
+					}
+				} finally {
+					for (int i = 0; i < configs.length; ++i)
+						configs[i].unlock();
 				}
 			}
-		} finally {
-			for (int i = 0; i < configs.length; ++i)
-				configs[i].unlock();
+		}
+
+	}
+
+	private List<List<String>> trackManagedServiceFactory(ServiceReference<ManagedServiceFactory> reference) {
+		synchronized (targets) {
+			return targets.add(reference);
 		}
 	}
 
-	private void remove(ServiceReference<ManagedServiceFactory> reference, String factoryPid) {
-		ConfigurationImpl[] configs = configurationStore.getFactoryConfigurations(factoryPid);
-		try {
-			for (int i = 0; i < configs.length; ++i)
-				configs[i].lock();
-			untrackManagedServiceFactory(factoryPid, reference);
-		} finally {
-			for (int i = 0; i < configs.length; ++i)
-				configs[i].unlock();
+	private void untrackManagedServiceFactory(ServiceReference<ManagedServiceFactory> reference) {
+		synchronized (targets) {
+			targets.remove(reference);
 		}
 	}
 
-	private boolean trackManagedServiceFactory(String factoryPid, ServiceReference<ManagedServiceFactory> reference, ManagedServiceFactory service) {
-		synchronized (managedServiceFactoryReferences) {
-			if (managedServiceFactoryReferences.containsKey(factoryPid)) {
-				configurationAdminFactory.log(LogService.LOG_WARNING, ManagedServiceFactory.class.getName() + " already registered for " + Constants.SERVICE_PID + "=" + factoryPid); //$NON-NLS-1$ //$NON-NLS-2$
-				return false;
-			}
-			managedServiceFactoryReferences.put(factoryPid, reference);
-			managedServiceFactories.put(factoryPid, service);
-			return true;
-		}
-	}
-
-	private void untrackManagedServiceFactory(String factoryPid, ServiceReference<ManagedServiceFactory> reference) {
-		synchronized (managedServiceFactoryReferences) {
-			managedServiceFactoryReferences.remove(factoryPid);
-			managedServiceFactories.remove(factoryPid);
-		}
-	}
-
-	private ManagedServiceFactory getManagedServiceFactory(String factoryPid) {
-		synchronized (managedServiceFactoryReferences) {
-			return managedServiceFactories.get(factoryPid);
-		}
-	}
-
-	private ServiceReference<ManagedServiceFactory> getManagedServiceFactoryReference(String factoryPid) {
-		synchronized (managedServiceFactoryReferences) {
-			return managedServiceFactoryReferences.get(factoryPid);
-		}
-	}
-
-	private String getPidForManagedServiceFactory(Object service) {
-		synchronized (managedServiceFactoryReferences) {
-			for (Entry<String, ManagedServiceFactory> entry : managedServiceFactories.entrySet()) {
-				if (entry.getValue() == service)
-					return entry.getKey();
-			}
-			return null;
+	private List<ServiceReference<ManagedServiceFactory>> getManagedServiceFactoryReferences(String pid) {
+		synchronized (targets) {
+			@SuppressWarnings("rawtypes")
+			List temp = targets.getTargets(pid);
+			@SuppressWarnings("unchecked")
+			List<ServiceReference<ManagedServiceFactory>> refs = temp;
+			Collections.sort(refs, Collections.reverseOrder());
+			return refs;
 		}
 	}
 
@@ -183,6 +274,9 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 	}
 
 	private void asynchUpdated(final ManagedServiceFactory service, final String pid, final Dictionary<String, Object> properties) {
+		if (properties == null) {
+			return;
+		}
 		queue.put(new Runnable() {
 			public void run() {
 				try {

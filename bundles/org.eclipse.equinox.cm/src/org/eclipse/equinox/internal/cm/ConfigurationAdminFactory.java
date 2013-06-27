@@ -24,7 +24,7 @@ import org.osgi.service.cm.ConfigurationPermission;
 
 public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAdmin>, BundleListener {
 
-	private final Permission configurationPermission = new ConfigurationPermission("*", ConfigurationPermission.CONFIGURE); //$NON-NLS-1$
+	static private final Permission allConfigurationPermission = new ConfigurationPermission("*", ConfigurationPermission.CONFIGURE); //$NON-NLS-1$
 	private final EventDispatcher eventDispatcher;
 	private final PluginManager pluginManager;
 	private final LogTracker log;
@@ -70,10 +70,33 @@ public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAd
 			configurationStore.unbindConfigurations(event.getBundle());
 	}
 
-	public void checkConfigurationPermission() throws SecurityException {
+	public void checkConfigurePermission(String location, String forBundleLocation) throws SecurityException {
 		SecurityManager sm = System.getSecurityManager();
-		if (sm != null)
-			sm.checkPermission(configurationPermission);
+		if (sm != null) {
+			if (!forBundleLocation.equals(location)) {
+				if (location == null) {
+					sm.checkPermission(allConfigurationPermission);
+				} else {
+					sm.checkPermission(new ConfigurationPermission(location, ConfigurationPermission.CONFIGURE));
+				}
+			}
+		}
+	}
+
+	public boolean checkTargetPermission(String location, ServiceReference<?> ref) {
+		SecurityManager sm = System.getSecurityManager();
+		if (sm != null) {
+			Bundle b = ref.getBundle();
+			if (location != null && b != null) {
+				String forBundleLocation = ConfigurationAdminImpl.getLocation(b);
+				if (!forBundleLocation.equals(location)) {
+					if (location != null) {
+						return b.hasPermission(new ConfigurationPermission(location, ConfigurationPermission.TARGET));
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 	void log(int level, String message) {
@@ -100,6 +123,14 @@ public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAd
 			managedServiceFactoryTracker.notifyDeleted(config);
 		else
 			managedServiceTracker.notifyDeleted(config);
+	}
+
+	void notifyLocationChanged(ConfigurationImpl config, String oldLocation, boolean isFactory) {
+		if (isFactory) {
+			managedServiceFactoryTracker.notifyUpdateLocation(config, oldLocation);
+		} else {
+			managedServiceTracker.notifyUpdateLocation(config, oldLocation);
+		}
 	}
 
 	void modifyConfiguration(ServiceReference<?> reference, Dictionary<String, Object> properties) {

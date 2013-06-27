@@ -87,10 +87,10 @@ public class ManagedServiceFactoryTest extends TestCase {
 		synchronized (lock) {
 			reg2 = Activator.getBundleContext().registerService(ManagedServiceFactory.class.getName(), msf, dict);
 			locked = true;
-			lock.wait(100);
-			assertTrue(locked);
-			assertEquals(1, updateCount);
-			locked = false;
+			lock.wait(5000);
+			if (locked)
+				fail("should have updated");
+			assertEquals(2, updateCount);
 		}
 		reg.unregister();
 		reg2.unregister();
@@ -163,6 +163,7 @@ public class ManagedServiceFactoryTest extends TestCase {
 
 		config.delete();
 		config = cm.createFactoryConfiguration("test2");
+		config.update(props);
 		dict.put(Constants.SERVICE_PID, "test2");
 		synchronized (lock) {
 			reg.setProperties(dict);

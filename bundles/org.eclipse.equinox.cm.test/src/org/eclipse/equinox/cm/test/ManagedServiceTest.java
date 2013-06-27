@@ -78,10 +78,10 @@ public class ManagedServiceTest extends TestCase {
 		synchronized (lock) {
 			reg2 = Activator.getBundleContext().registerService(ManagedService.class.getName(), ms, dict);
 			locked = true;
-			lock.wait(100);
-			assertTrue(locked);
-			assertEquals(1, updateCount);
-			locked = false;
+			lock.wait(5000);
+			if (locked)
+				fail("should have updated");
+			assertEquals(2, updateCount);
 		}
 		reg.unregister();
 		reg2.unregister();
@@ -171,26 +171,51 @@ public class ManagedServiceTest extends TestCase {
 		}
 
 		String location = config.getBundleLocation();
-		config.setBundleLocation("bogus");
+
+		synchronized (lock) {
+			config.setBundleLocation("bogus");
+			locked = true;
+			lock.wait(5000);
+			if (locked)
+				fail("should have updated");
+			assertEquals(3, updateCount);
+		}
+
 		synchronized (lock) {
 			config.update();
 			locked = true;
 			lock.wait(100);
 			assertTrue(locked);
-			assertEquals(2, updateCount);
+			assertEquals(3, updateCount);
 			locked = false;
 		}
-		config.setBundleLocation(location);
+
+		synchronized (lock) {
+			config.setBundleLocation(location);
+			locked = true;
+			lock.wait(5000);
+			if (locked)
+				fail("should have updated");
+			assertEquals(4, updateCount);
+		}
 
 		dict.remove(Constants.SERVICE_PID);
 		synchronized (lock) {
 			reg.setProperties(dict);
+			locked = true;
+			lock.wait(100);
+			assertTrue(locked);
+			assertEquals(4, updateCount);
+			locked = false;
+		}
+
+		synchronized (lock) {
 			props.put("testkey", "testvalue2");
 			config.update(props);
 			locked = true;
 			lock.wait(100);
 			assertTrue(locked);
-			assertEquals(2, updateCount);
+			assertEquals(4, updateCount);
 			locked = false;
 		}
 
@@ -203,7 +228,7 @@ public class ManagedServiceTest extends TestCase {
 			lock.wait(5000);
 			if (locked)
 				fail("should have updated");
-			assertEquals(3, updateCount);
+			assertEquals(5, updateCount);
 		}
 
 		synchronized (lock) {
@@ -212,7 +237,7 @@ public class ManagedServiceTest extends TestCase {
 			lock.wait(5000);
 			if (locked)
 				fail("should have updated");
-			assertEquals(4, updateCount);
+			assertEquals(6, updateCount);
 		}
 		reg.unregister();
 	}

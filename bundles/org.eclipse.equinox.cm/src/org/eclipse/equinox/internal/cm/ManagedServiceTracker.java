@@ -12,7 +12,6 @@
 package org.eclipse.equinox.internal.cm;
 
 import java.util.*;
-import java.util.Map.Entry;
 import org.osgi.framework.*;
 import org.osgi.service.cm.*;
 import org.osgi.service.log.LogService;
@@ -26,9 +25,8 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 	final ConfigurationAdminFactory configurationAdminFactory;
 	private final ConfigurationStore configurationStore;
 
-	// managedServiceReferences guards both managedServices and managedServiceReferences
-	private final Map<String, ManagedService> managedServices = new HashMap<String, ManagedService>();
-	private final Map<String, ServiceReference<ManagedService>> managedServiceReferences = new HashMap<String, ServiceReference<ManagedService>>();
+	/** @GuardedBy targets*/
+	private final TargetMap targets = new TargetMap();
 
 	private final SerializedTaskQueue queue = new SerializedTaskQueue("ManagedService Update Queue"); //$NON-NLS-1$
 
@@ -38,140 +36,236 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 		this.configurationStore = configurationStore;
 	}
 
-	protected void notifyDeleted(ConfigurationImpl config) {
+	void notifyDeleted(ConfigurationImpl config) {
 		config.checkLocked();
+		String configLoc = config.getLocation();
+		if (configLoc == null) {
+			return;
+		}
+		boolean isMultiple = configLoc.startsWith("?"); //$NON-NLS-1$
 		String pid = config.getPid(false);
-		ServiceReference<ManagedService> reference = getManagedServiceReference(pid);
-		if (reference != null && config.bind(reference.getBundle()))
-			asynchUpdated(getManagedService(pid), null);
-	}
-
-	protected void notifyUpdated(ConfigurationImpl config) {
-		config.checkLocked();
-		String pid = config.getPid();
-		ServiceReference<ManagedService> reference = getManagedServiceReference(pid);
-		if (reference != null && config.bind(reference.getBundle())) {
-			Dictionary<String, Object> properties = config.getProperties();
-			configurationAdminFactory.modifyConfiguration(reference, properties);
-			asynchUpdated(getManagedService(pid), properties);
+		List<ServiceReference<ManagedService>> references = getManagedServiceReferences(pid);
+		for (ServiceReference<ManagedService> ref : references) {
+			if (!hasMoreSpecificConfigPids(ref, pid)) {
+				boolean hasLocPermission = configurationAdminFactory.checkTargetPermission(configLoc, ref);
+				ManagedService service = getService(ref);
+				if (hasLocPermission && service != null) {
+					if (isMultiple || ConfigurationAdminImpl.getLocation(ref.getBundle()).equals(configLoc)) {
+						// search for other matches
+						List<List<String>> qualifiedPidLists;
+						synchronized (targets) {
+							qualifiedPidLists = targets.getQualifiedPids(ref);
+						}
+						updateManagedService(qualifiedPidLists, ref, service);
+					}
+				}
+			}
 		}
 	}
 
-	public ManagedService addingService(ServiceReference<ManagedService> reference) {
-		String pid = (String) reference.getProperty(Constants.SERVICE_PID);
-		if (pid == null)
-			return null;
+	void notifyUpdated(ConfigurationImpl config) {
+		config.checkLocked();
+		String configLoc = config.getLocation();
+		boolean isMultiple = configLoc != null && configLoc.startsWith("?"); //$NON-NLS-1$
+		String pid = config.getPid();
+		List<ServiceReference<ManagedService>> references = getManagedServiceReferences(pid);
+		for (ServiceReference<ManagedService> ref : references) {
+			if (!hasMoreSpecificConfigPids(ref, pid)) {
+				boolean hasLocPermission = configurationAdminFactory.checkTargetPermission(configLoc, ref);
+				ManagedService service = getService(ref);
+				if (hasLocPermission && service != null) {
+					if (isMultiple || config.bind(ConfigurationAdminImpl.getLocation(ref.getBundle()))) {
+						Dictionary<String, Object> properties = config.getProperties();
+						configurationAdminFactory.modifyConfiguration(ref, properties);
+						asynchUpdated(service, properties);
+					}
+				}
+			}
+		}
+	}
 
+	void notifyUpdateLocation(ConfigurationImpl config, String oldLocation) {
+		config.checkLocked();
+		String configLoc = config.getLocation();
+		if (configLoc == null ? oldLocation == null : configLoc.equals(oldLocation)) {
+			// same location do nothing
+			return;
+		}
+		boolean oldIsMultiple = oldLocation != null && oldLocation.startsWith("?"); //$NON-NLS-1$
+		boolean newIsMultiple = configLoc != null && configLoc.startsWith("?"); //$NON-NLS-1$
+		String pid = config.getPid();
+		List<ServiceReference<ManagedService>> references = getManagedServiceReferences(pid);
+		for (ServiceReference<ManagedService> ref : references) {
+			if (!hasMoreSpecificConfigPids(ref, pid)) {
+				boolean hasOldPermission = configurationAdminFactory.checkTargetPermission(oldLocation, ref);
+				boolean hasNewPermission = configurationAdminFactory.checkTargetPermission(configLoc, ref);
+				ManagedService service = getService(ref);
+				if (service != null) {
+					boolean delete = false;
+					boolean update = false;
+					String targetLocation = ConfigurationAdminImpl.getLocation(ref.getBundle());
+					if (hasOldPermission != hasNewPermission) {
+						if (hasOldPermission) {
+							delete = oldIsMultiple || targetLocation.equals(oldLocation);
+						} else {
+							update = newIsMultiple || config.bind(targetLocation);
+						}
+					} else {
+						// location has changed, this may be a bound configuration
+						if (targetLocation.equals(oldLocation)) {
+							delete = true;
+						} else {
+							update = newIsMultiple || config.bind(targetLocation);
+						}
+					}
+					if (delete) {
+						// search for other matches
+						List<List<String>> qualifiedPidLists;
+						synchronized (targets) {
+							qualifiedPidLists = targets.getQualifiedPids(ref);
+						}
+						updateManagedService(qualifiedPidLists, ref, service);
+					} else if (update) {
+						Dictionary<String, Object> properties = config.getProperties();
+						configurationAdminFactory.modifyConfiguration(ref, properties);
+						asynchUpdated(service, properties);
+					}
+					// do not break on !isMultiple since we need to check if the other refs apply no matter what
+				}
+			}
+		}
+	}
+
+	private boolean hasMoreSpecificConfigPids(ServiceReference<ManagedService> ref, String pid) {
+		List<List<String>> qualifiedPidsLists;
+		synchronized (targets) {
+			qualifiedPidsLists = targets.getQualifiedPids(ref);
+		}
+		for (List<String> qualifiedPids : qualifiedPidsLists) {
+			for (String qualifiedPid : qualifiedPids) {
+				if (qualifiedPid.length() <= pid.length() || !qualifiedPid.startsWith(pid)) {
+					break;
+				}
+				ConfigurationImpl config = configurationStore.findConfiguration(qualifiedPid);
+				if (config != null) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public ManagedService addingService(ServiceReference<ManagedService> reference) {
 		ManagedService service = context.getService(reference);
 		if (service == null)
 			return null;
 
 		synchronized (configurationStore) {
-			add(reference, pid, service);
+			addReference(reference, service);
 		}
 		return service;
 	}
 
 	public void modifiedService(ServiceReference<ManagedService> reference, ManagedService service) {
-		String pid = (String) reference.getProperty(Constants.SERVICE_PID);
+		List<String> newPids = TargetMap.getPids(reference.getProperty(Constants.SERVICE_PID));
+		synchronized (targets) {
+			List<List<String>> previousPids = targets.getQualifiedPids(reference);
+			if (newPids.size() == previousPids.size()) {
+				boolean foundAll = false;
+				for (String newPid : newPids) {
+					foundAll = false;
+					for (List<String> pids : previousPids) {
+						if (pids.contains(newPid)) {
+							foundAll = true;
+							break;
+						}
+					}
+					if (!foundAll) {
+						break;
+					}
+				}
+				if (foundAll) {
+					return;
+				}
+			}
+		}
 		synchronized (configurationStore) {
-			if (getManagedService(pid) == service)
-				return;
-			String previousPid = getPidForManagedService(service);
-			remove(reference, previousPid);
+			untrackManagedService(reference);
 			addingService(reference);
 		}
 	}
 
 	public void removedService(ServiceReference<ManagedService> reference, ManagedService service) {
-		String pid = (String) reference.getProperty(Constants.SERVICE_PID);
 		synchronized (configurationStore) {
-			remove(reference, pid);
+			untrackManagedService(reference);
 		}
 		context.ungetService(reference);
 	}
 
-	private void add(ServiceReference<ManagedService> reference, String pid, ManagedService service) {
-		ConfigurationImpl config = configurationStore.findConfiguration(pid);
-		if (config == null) {
-			if (trackManagedService(pid, reference, service)) {
-				asynchUpdated(service, null);
-			}
-		} else {
-			try {
-				config.lock();
-				if (trackManagedService(pid, reference, service)) {
-					if (config.getFactoryPid() != null) {
-						configurationAdminFactory.log(LogService.LOG_WARNING, "Configuration for " + Constants.SERVICE_PID + "=" + pid + " should only be used by a " + ManagedServiceFactory.class.getName()); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-					} else if (config.isDeleted()) {
-						asynchUpdated(service, null);
-					} else if (config.bind(reference.getBundle())) {
-						Dictionary<String, Object> properties = config.getProperties();
-						configurationAdminFactory.modifyConfiguration(reference, properties);
-						asynchUpdated(service, properties);
-					} else {
-						configurationAdminFactory.log(LogService.LOG_WARNING, "Configuration for " + Constants.SERVICE_PID + "=" + pid + " could not be bound to " + reference.getBundle().getLocation()); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+	private void addReference(ServiceReference<ManagedService> reference, ManagedService service) {
+		List<List<String>> qualifiedPidLists = trackManagedService(reference);
+		updateManagedService(qualifiedPidLists, reference, service);
+	}
+
+	private void updateManagedService(List<List<String>> qualifiedPidLists, ServiceReference<ManagedService> reference, ManagedService service) {
+		for (List<String> qualifiedPids : qualifiedPidLists) {
+			boolean foundConfig = false;
+			qualifiedPids: for (String qualifiedPid : qualifiedPids) {
+				ConfigurationImpl config = configurationStore.findConfiguration(qualifiedPid);
+				if (config != null) {
+					try {
+						config.lock();
+						if (!config.isDeleted()) {
+							if (config.getFactoryPid() != null) {
+								configurationAdminFactory.log(LogService.LOG_WARNING, "Configuration for " + Constants.SERVICE_PID + "=" + qualifiedPid + " should only be used by a " + ManagedServiceFactory.class.getName()); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+							}
+							String location = config.getLocation();
+							boolean shouldBind = location == null || !location.startsWith("?"); //$NON-NLS-1$
+							boolean hasLocPermission = configurationAdminFactory.checkTargetPermission(location, reference);
+							if (hasLocPermission) {
+								if ((shouldBind && config.bind(ConfigurationAdminImpl.getLocation(reference.getBundle()))) || !shouldBind) {
+									Dictionary<String, Object> properties = config.getProperties();
+									configurationAdminFactory.modifyConfiguration(reference, properties);
+									asynchUpdated(service, properties);
+									foundConfig = true;
+									break qualifiedPids;
+								}
+								configurationAdminFactory.log(LogService.LOG_WARNING, "Configuration for " + Constants.SERVICE_PID + "=" + qualifiedPid + " could not be bound to " + ConfigurationAdminImpl.getLocation(reference.getBundle())); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+							}
+						}
+					} finally {
+						config.unlock();
 					}
 				}
-			} finally {
-				config.unlock();
+			}
+			if (!foundConfig) {
+				// This seems questionable to me, but is required for the spec.
+				// if a ManagedService has multiple pids, watch out!!
+				asynchUpdated(service, null);
 			}
 		}
 	}
 
-	private void remove(ServiceReference<ManagedService> reference, String pid) {
-		ConfigurationImpl config = configurationStore.findConfiguration(pid);
-		if (config == null) {
-			untrackManagedService(pid, reference);
-		} else {
-			try {
-				config.lock();
-				untrackManagedService(pid, reference);
-			} finally {
-				config.unlock();
-			}
+	private List<List<String>> trackManagedService(ServiceReference<ManagedService> reference) {
+		synchronized (targets) {
+			return targets.add(reference);
 		}
 	}
 
-	private boolean trackManagedService(String pid, ServiceReference<ManagedService> reference, ManagedService service) {
-		synchronized (managedServiceReferences) {
-			if (managedServiceReferences.containsKey(pid)) {
-				String message = ManagedService.class.getName() + " already registered for " + Constants.SERVICE_PID + "=" + pid; //$NON-NLS-1$ //$NON-NLS-2$
-				configurationAdminFactory.log(LogService.LOG_WARNING, message);
-				return false;
-			}
-			managedServiceReferences.put(pid, reference);
-			managedServices.put(pid, service);
-			return true;
+	private void untrackManagedService(ServiceReference<ManagedService> reference) {
+		synchronized (targets) {
+			targets.remove(reference);
 		}
 	}
 
-	private void untrackManagedService(String pid, ServiceReference<ManagedService> reference) {
-		synchronized (managedServiceReferences) {
-			managedServiceReferences.remove(pid);
-			managedServices.remove(pid);
-		}
-	}
-
-	private ManagedService getManagedService(String pid) {
-		synchronized (managedServiceReferences) {
-			return managedServices.get(pid);
-		}
-	}
-
-	private ServiceReference<ManagedService> getManagedServiceReference(String pid) {
-		synchronized (managedServiceReferences) {
-			return managedServiceReferences.get(pid);
-		}
-	}
-
-	private String getPidForManagedService(Object service) {
-		synchronized (managedServiceReferences) {
-			for (Entry<String, ManagedService> entry : managedServices.entrySet()) {
-				if (entry.getValue() == service)
-					return entry.getKey();
-			}
-			return null;
+	private List<ServiceReference<ManagedService>> getManagedServiceReferences(String pid) {
+		synchronized (targets) {
+			@SuppressWarnings("rawtypes")
+			List temp = targets.getTargets(pid);
+			@SuppressWarnings("unchecked")
+			List<ServiceReference<ManagedService>> refs = temp;
+			Collections.sort(refs, Collections.reverseOrder());
+			return refs;
 		}
 	}
 

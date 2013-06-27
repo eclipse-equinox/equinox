@@ -23,7 +23,10 @@ import org.osgi.service.cm.*;
  * The lock and unlock methods are used for synchronization. Operations outside of
  * ConfigurationImpl that expect to have control of the lock should call checkLocked
  */
-class ConfigurationImpl implements Configuration {
+class ConfigurationImpl {
+	final static String LOCATION_BOUND = "org.eclipse.equinox.cm.location.bound"; //$NON-NLS-1$
+	final static String PROPERTIES_NULL = "org.eclipse.equinox.cm.properties.null"; //$NON-NLS-1$
+	final static String CHANGE_COUNT = "org.eclipse.equinox.cm.change.count"; //$NON-NLS-1$
 
 	private final ConfigurationAdminFactory configurationAdminFactory;
 	private final ConfigurationStore configurationStore;
@@ -35,11 +38,15 @@ class ConfigurationImpl implements Configuration {
 	/** @GuardedBy this*/
 	private boolean deleted = false;
 	/** @GuardedBy this*/
-	private Bundle boundBundle;
+	private boolean bound = false;
 	/** @GuardedBy this*/
 	private int lockedCount = 0;
 	/** @GuardedBy this*/
 	private Thread lockHolder = null;
+	/** @GuardedBy this*/
+	private long changeCount;
+	/** @GuardedBy this*/
+	private Object storageToken;
 
 	public ConfigurationImpl(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, String factoryPid, String pid, String bundleLocation) {
 		this.configurationAdminFactory = configurationAdminFactory;
@@ -47,18 +54,27 @@ class ConfigurationImpl implements Configuration {
 		this.factoryPid = factoryPid;
 		this.pid = pid;
 		this.bundleLocation = bundleLocation;
+		this.changeCount = 0;
 	}
 
-	public ConfigurationImpl(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, Dictionary<String, ?> dictionary) {
+	public ConfigurationImpl(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, Dictionary<String, ?> dictionary, Object storageToken) {
 		this.configurationAdminFactory = configurationAdminFactory;
 		this.configurationStore = configurationStore;
 		pid = (String) dictionary.get(Constants.SERVICE_PID);
 		factoryPid = (String) dictionary.get(ConfigurationAdmin.SERVICE_FACTORYPID);
 		bundleLocation = (String) dictionary.get(ConfigurationAdmin.SERVICE_BUNDLELOCATION);
-		updateDictionary(dictionary);
+		Boolean boundProp = (Boolean) dictionary.remove(LOCATION_BOUND);
+		this.bound = boundProp == null ? false : boundProp.booleanValue();
+		Long changeCountProp = (Long) dictionary.remove(CHANGE_COUNT);
+		this.changeCount = changeCountProp == null ? 0 : changeCountProp.longValue();
+		Boolean nullProps = (Boolean) dictionary.remove(PROPERTIES_NULL);
+		if (nullProps == null || !nullProps.booleanValue()) {
+			updateDictionary(dictionary);
+		}
+		this.storageToken = storageToken;
 	}
 
-	protected synchronized void lock() {
+	synchronized void lock() {
 		Thread current = Thread.currentThread();
 		if (lockHolder != current) {
 			boolean interrupted = false;
@@ -80,7 +96,7 @@ class ConfigurationImpl implements Configuration {
 		lockHolder = current;
 	}
 
-	protected synchronized void unlock() {
+	synchronized void unlock() {
 		Thread current = Thread.currentThread();
 		if (lockHolder != current)
 			throw new IllegalStateException("Thread not lock owner"); //$NON-NLS-1$
@@ -92,44 +108,75 @@ class ConfigurationImpl implements Configuration {
 		}
 	}
 
-	protected synchronized void checkLocked() {
+	synchronized void checkLocked() {
 		Thread current = Thread.currentThread();
 		if (lockHolder != current)
 			throw new IllegalStateException("Thread not lock owner"); //$NON-NLS-1$
 	}
 
-	protected boolean bind(Bundle bundle) {
+	boolean bind(String callerLocation) {
 		try {
 			lock();
-			if (boundBundle == null && (bundleLocation == null || bundleLocation.equals(bundle.getLocation())))
-				boundBundle = bundle;
-			return (boundBundle == bundle);
+			if (bundleLocation == null) {
+				bundleLocation = callerLocation;
+				bound = true;
+				try {
+					save();
+				} catch (IOException e) {
+					// TODO Log or throw runtime exception here?
+					e.printStackTrace();
+				}
+				configurationAdminFactory.dispatchEvent(ConfigurationEvent.CM_LOCATION_CHANGED, factoryPid, pid);
+			}
+			return (callerLocation.equals(bundleLocation));
 		} finally {
 			unlock();
 		}
 	}
 
-	protected void unbind(Bundle bundle) {
+	boolean isBound() {
 		try {
 			lock();
-			if (boundBundle == bundle)
-				boundBundle = null;
+			return bound;
+		} finally {
+			unlock();
+		}
+	}
+
+	void unbind(Bundle bundle) {
+		try {
+			lock();
+			String callerLocation = ConfigurationAdminImpl.getLocation(bundle);
+			if (bound && callerLocation.equals(bundleLocation)) {
+				bundleLocation = null;
+				bound = false;
+				try {
+					save();
+				} catch (IOException e) {
+					// TODO What should we do here?  throw a runtime exception or log?
+					e.printStackTrace();
+				}
+				configurationAdminFactory.notifyLocationChanged(this, callerLocation, factoryPid != null);
+			}
 		} finally {
 			unlock();
 		}
 	}
 
 	public void delete() {
+		Object deleteToken;
 		try {
 			lock();
 			checkDeleted();
 			deleted = true;
 			configurationAdminFactory.notifyConfigurationDeleted(this, factoryPid != null);
 			configurationAdminFactory.dispatchEvent(ConfigurationEvent.CM_DELETED, factoryPid, pid);
+			deleteToken = storageToken;
+			storageToken = null;
 		} finally {
 			unlock();
 		}
-		configurationStore.removeConfiguration(pid);
+		configurationStore.removeConfiguration(pid, deleteToken);
 	}
 
 	private void checkDeleted() {
@@ -137,27 +184,30 @@ class ConfigurationImpl implements Configuration {
 			throw new IllegalStateException("deleted"); //$NON-NLS-1$
 	}
 
-	public String getBundleLocation() {
-		return getBundleLocation(true);
+	String getLocation() {
+		try {
+			lock();
+			return bundleLocation;
+		} finally {
+			unlock();
+		}
 	}
 
-	protected String getBundleLocation(boolean checkPermission) {
+	public String getBundleLocation(String forBundleLocation) {
 		try {
 			lock();
 			checkDeleted();
-			if (checkPermission)
-				configurationAdminFactory.checkConfigurationPermission();
+			if (forBundleLocation != null && !forBundleLocation.equals(bundleLocation))
+				configurationAdminFactory.checkConfigurePermission(bundleLocation, forBundleLocation);
 			if (bundleLocation != null)
 				return bundleLocation;
-			if (boundBundle != null)
-				return boundBundle.getLocation();
 			return null;
 		} finally {
 			unlock();
 		}
 	}
 
-	protected String getFactoryPid(boolean checkDeleted) {
+	String getFactoryPid(boolean checkDeleted) {
 		try {
 			lock();
 			if (checkDeleted)
@@ -172,7 +222,7 @@ class ConfigurationImpl implements Configuration {
 		return getFactoryPid(true);
 	}
 
-	protected String getPid(boolean checkDeleted) {
+	String getPid(boolean checkDeleted) {
 		try {
 			lock();
 			if (checkDeleted)
@@ -195,40 +245,72 @@ class ConfigurationImpl implements Configuration {
 				return null;
 
 			Dictionary<String, Object> copy = dictionary.copy();
-			copy.put(Constants.SERVICE_PID, pid);
-			if (factoryPid != null)
-				copy.put(ConfigurationAdmin.SERVICE_FACTORYPID, factoryPid);
-
+			fileAutoProperties(copy, this, false, false);
 			return copy;
 		} finally {
 			unlock();
 		}
 	}
 
-	protected Dictionary<String, Object> getAllProperties() {
+	Dictionary<String, Object> getAllProperties(boolean includeStorageKeys) {
 		try {
 			lock();
 			if (deleted)
 				return null;
 			Dictionary<String, Object> copy = getProperties();
-			if (copy == null)
-				return null;
-			String boundLocation = getBundleLocation(false);
-			if (boundLocation != null)
-				copy.put(ConfigurationAdmin.SERVICE_BUNDLELOCATION, boundLocation);
+			if (copy == null) {
+				if (!includeStorageKeys) {
+					return null;
+				}
+				copy = new ConfigurationDictionary();
+			}
+			fileAutoProperties(copy, this, true, includeStorageKeys);
 			return copy;
 		} finally {
 			unlock();
 		}
 	}
 
-	public void setBundleLocation(String bundleLocation) {
+	private static void fileAutoProperties(Dictionary<String, Object> dictionary, ConfigurationImpl config, boolean includeLoc, boolean includeStorageKey) {
+		dictionary.put(Constants.SERVICE_PID, config.getPid(false));
+		String factoryPid = config.getFactoryPid(false);
+		if (factoryPid != null) {
+			dictionary.put(ConfigurationAdmin.SERVICE_FACTORYPID, factoryPid);
+		}
+		if (includeLoc) {
+			String loc = config.getLocation();
+			if (loc != null) {
+				dictionary.put(ConfigurationAdmin.SERVICE_BUNDLELOCATION, loc);
+			}
+		}
+		if (includeStorageKey) {
+			if (config.dictionary == null) {
+				dictionary.put(PROPERTIES_NULL, Boolean.TRUE);
+			}
+			dictionary.put(CHANGE_COUNT, Long.valueOf(config.getChangeCount()));
+			if (config.isBound()) {
+				dictionary.put(LOCATION_BOUND, Boolean.TRUE);
+			}
+		}
+	}
+
+	public void setBundleLocation(String bundleLocation, String forBundleLocation) {
 		try {
 			lock();
 			checkDeleted();
-			configurationAdminFactory.checkConfigurationPermission();
+			configurationAdminFactory.checkConfigurePermission(this.bundleLocation, forBundleLocation);
+			configurationAdminFactory.checkConfigurePermission(bundleLocation, forBundleLocation);
+			String oldLocation = this.bundleLocation;
 			this.bundleLocation = bundleLocation;
-			boundBundle = null; // always reset the boundBundle when setBundleLocation is called
+			this.bound = false;
+			try {
+				save();
+			} catch (IOException e) {
+				// TODO What should we do here?  throw a runtime exception or log?
+				e.printStackTrace();
+			}
+			configurationAdminFactory.notifyLocationChanged(this, oldLocation, factoryPid != null);
+			configurationAdminFactory.dispatchEvent(ConfigurationEvent.CM_LOCATION_CHANGED, factoryPid, pid);
 		} finally {
 			unlock();
 		}
@@ -240,7 +322,8 @@ class ConfigurationImpl implements Configuration {
 			checkDeleted();
 			if (dictionary == null)
 				dictionary = new ConfigurationDictionary();
-			configurationStore.saveConfiguration(pid, this);
+			changeCount++;
+			save();
 			configurationAdminFactory.notifyConfigurationUpdated(this, factoryPid != null);
 		} finally {
 			unlock();
@@ -252,12 +335,18 @@ class ConfigurationImpl implements Configuration {
 			lock();
 			checkDeleted();
 			updateDictionary(properties);
-			configurationStore.saveConfiguration(pid, this);
+			changeCount++;
+			save();
 			configurationAdminFactory.notifyConfigurationUpdated(this, factoryPid != null);
 			configurationAdminFactory.dispatchEvent(ConfigurationEvent.CM_UPDATED, factoryPid, pid);
 		} finally {
 			unlock();
 		}
+	}
+
+	private void save() throws IOException {
+		checkLocked();
+		storageToken = configurationStore.saveConfiguration(pid, this, this.storageToken);
 	}
 
 	private void updateDictionary(Dictionary<String, ?> properties) {
@@ -287,14 +376,14 @@ class ConfigurationImpl implements Configuration {
 	}
 
 	public boolean equals(Object obj) {
-		return (obj instanceof Configuration) && pid.equals(((Configuration) obj).getPid());
+		return (obj instanceof ConfigurationImpl) && pid.equals(((ConfigurationImpl) obj).getPid());
 	}
 
 	public int hashCode() {
 		return pid.hashCode();
 	}
 
-	protected boolean isDeleted() {
+	boolean isDeleted() {
 		try {
 			lock();
 			return deleted;
@@ -304,8 +393,77 @@ class ConfigurationImpl implements Configuration {
 	}
 
 	public long getChangeCount() {
-		// TODO as of 1.5 CM
-		return 0;
+		try {
+			lock();
+			checkDeleted();
+			return changeCount;
+		} finally {
+			unlock();
+		}
 	}
 
+	Configuration getConfiguration(String forBundleLocation) {
+		return new ConfigurationForBundle(forBundleLocation);
+	}
+
+	class ConfigurationForBundle implements Configuration {
+		private final String forBundleLocation;
+
+		ConfigurationForBundle(String forBundleLocation) {
+			this.forBundleLocation = forBundleLocation;
+		}
+
+		public String getPid() {
+			return getImpl().getPid();
+		}
+
+		public Dictionary<String, Object> getProperties() {
+			return getImpl().getProperties();
+		}
+
+		public void update(Dictionary<String, ?> properties) throws IOException {
+			getImpl().update(properties);
+		}
+
+		public void delete() {
+			getImpl().delete();
+		}
+
+		public String getFactoryPid() {
+			return getImpl().getFactoryPid();
+		}
+
+		public void update() throws IOException {
+			getImpl().update();
+		}
+
+		public void setBundleLocation(String location) {
+			getImpl().setBundleLocation(location, forBundleLocation);
+		}
+
+		public String getBundleLocation() {
+			return getImpl().getBundleLocation(forBundleLocation);
+		}
+
+		public long getChangeCount() {
+			return getImpl().getChangeCount();
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (!(other instanceof ConfigurationForBundle)) {
+				return false;
+			}
+			return getImpl().equals(((ConfigurationForBundle) other).getImpl());
+		}
+
+		@Override
+		public int hashCode() {
+			return getImpl().hashCode();
+		}
+
+		private ConfigurationImpl getImpl() {
+			return ConfigurationImpl.this;
+		}
+	}
 }

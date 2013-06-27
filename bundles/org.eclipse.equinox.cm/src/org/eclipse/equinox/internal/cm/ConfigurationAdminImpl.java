@@ -11,6 +11,10 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.cm;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.List;
 import org.osgi.framework.*;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -21,55 +25,90 @@ import org.osgi.service.cm.ConfigurationAdmin;
 class ConfigurationAdminImpl implements ConfigurationAdmin {
 
 	private final ConfigurationAdminFactory configurationAdminFactory;
-	private final Bundle bundle;
+	private final String bundleLocation;
 	private final ConfigurationStore configurationStore;
 
 	public ConfigurationAdminImpl(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, Bundle bundle) {
 		this.configurationAdminFactory = configurationAdminFactory;
 		this.configurationStore = configurationStore;
-		this.bundle = bundle;
+		this.bundleLocation = ConfigurationAdminImpl.getLocation(bundle);
 	}
 
 	public Configuration createFactoryConfiguration(String factoryPid) {
-		checkPID(factoryPid);
-		return configurationStore.createFactoryConfiguration(factoryPid, bundle.getLocation());
+		return internalGetConfiguration(factoryPid, bundleLocation, true, true);
+
 	}
 
 	public Configuration createFactoryConfiguration(String factoryPid, String location) {
-		checkPID(factoryPid);
-		this.configurationAdminFactory.checkConfigurationPermission();
-		return configurationStore.createFactoryConfiguration(factoryPid, location);
+		return internalGetConfiguration(factoryPid, location, true, false);
 	}
 
 	public Configuration getConfiguration(String pid) {
-		checkPID(pid);
-		ConfigurationImpl config = configurationStore.getConfiguration(pid, bundle.getLocation());
-		if (config.getBundleLocation(false) != null && !config.getBundleLocation(false).equals(bundle.getLocation()))
-			this.configurationAdminFactory.checkConfigurationPermission();
-		config.bind(bundle);
-		return config;
+		return internalGetConfiguration(pid, bundleLocation, false, true);
 	}
 
 	public Configuration getConfiguration(String pid, String location) {
+		return internalGetConfiguration(pid, location, false, false);
+	}
+
+	private Configuration internalGetConfiguration(String pid, String location, boolean factory, boolean bind) {
 		checkPID(pid);
-		this.configurationAdminFactory.checkConfigurationPermission();
-		return configurationStore.getConfiguration(pid, location);
+		this.configurationAdminFactory.checkConfigurePermission(location, bundleLocation);
+
+		ConfigurationImpl config;
+		if (factory) {
+			config = configurationStore.createFactoryConfiguration(pid, location);
+		} else {
+			config = configurationStore.getConfiguration(pid, location);
+		}
+
+		String configLocation = config.getLocation();
+		if (bind) {
+			if (configLocation != null) {
+				this.configurationAdminFactory.checkConfigurePermission(configLocation, bundleLocation);
+			} else {
+				config.bind(bundleLocation);
+			}
+		} else {
+			this.configurationAdminFactory.checkConfigurePermission(configLocation, bundleLocation);
+		}
+		return config.getConfiguration(bundleLocation);
 	}
 
 	public Configuration[] listConfigurations(String filterString) throws InvalidSyntaxException {
 		if (filterString == null)
 			filterString = "(" + Constants.SERVICE_PID + "=*)"; //$NON-NLS-1$ //$NON-NLS-2$
 
-		try {
-			this.configurationAdminFactory.checkConfigurationPermission();
-		} catch (SecurityException e) {
-			filterString = "(&(" + ConfigurationAdmin.SERVICE_BUNDLELOCATION + "=" + bundle.getLocation() + ")" + filterString + ")"; //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
+		ConfigurationImpl[] configs = configurationStore.listConfigurations(FrameworkUtil.createFilter(filterString));
+		if (configs == null) {
+			return null;
 		}
-		return configurationStore.listConfigurations(FrameworkUtil.createFilter(filterString));
+
+		List<Configuration> result = new ArrayList<Configuration>(configs.length);
+		SecurityManager sm = System.getSecurityManager();
+		for (int i = 0; i < configs.length; i++) {
+			try {
+				if (sm != null) {
+					this.configurationAdminFactory.checkConfigurePermission(configs[i].getLocation(), bundleLocation);
+				}
+				result.add(configs[i].getConfiguration(bundleLocation));
+			} catch (SecurityException e) {
+				// ignore;
+			}
+		}
+		return result.size() == 0 ? null : result.toArray(new Configuration[result.size()]);
 	}
 
 	private void checkPID(String pid) {
 		if (pid == null)
 			throw new IllegalArgumentException("PID cannot be null"); //$NON-NLS-1$
+	}
+
+	static String getLocation(final Bundle bundle) {
+		return AccessController.doPrivileged(new PrivilegedAction<String>() {
+			public String run() {
+				return bundle.getLocation();
+			}
+		});
 	}
 }

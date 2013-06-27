@@ -25,6 +25,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class EventDispatcher {
 	final ServiceTracker<ConfigurationListener, ConfigurationListener> tracker;
+	final ServiceTracker<SynchronousConfigurationListener, SynchronousConfigurationListener> syncTracker;
 	private final SerializedTaskQueue queue = new SerializedTaskQueue("ConfigurationListener Event Queue"); //$NON-NLS-1$
 	/** @GuardedBy this */
 	private ServiceReference<ConfigurationAdmin> configAdminReference;
@@ -33,14 +34,17 @@ public class EventDispatcher {
 	public EventDispatcher(BundleContext context, LogTracker log) {
 		this.log = log;
 		tracker = new ServiceTracker<ConfigurationListener, ConfigurationListener>(context, ConfigurationListener.class, null);
+		syncTracker = new ServiceTracker<SynchronousConfigurationListener, SynchronousConfigurationListener>(context, SynchronousConfigurationListener.class, null);
 	}
 
 	public void start() {
 		tracker.open();
+		syncTracker.open();
 	}
 
 	public void stop() {
 		tracker.close();
+		syncTracker.close();
 		synchronized (this) {
 			configAdminReference = null;
 		}
@@ -56,6 +60,19 @@ public class EventDispatcher {
 		if (event == null)
 			return;
 
+		ServiceReference<SynchronousConfigurationListener>[] syncRefs = syncTracker.getServiceReferences();
+		if (syncRefs != null) {
+			for (ServiceReference<SynchronousConfigurationListener> ref : syncRefs) {
+				SynchronousConfigurationListener syncListener = syncTracker.getService(ref);
+				if (syncListener != null) {
+					try {
+						syncListener.configurationEvent(event);
+					} catch (Throwable t) {
+						log.log(LogService.LOG_ERROR, t.getMessage(), t);
+					}
+				}
+			}
+		}
 		ServiceReference<ConfigurationListener>[] refs = tracker.getServiceReferences();
 		if (refs == null)
 			return;

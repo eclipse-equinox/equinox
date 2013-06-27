@@ -16,6 +16,7 @@ import java.security.*;
 import java.util.*;
 import org.eclipse.equinox.internal.cm.reliablefile.*;
 import org.osgi.framework.*;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.log.LogService;
 
 /**
@@ -28,7 +29,8 @@ class ConfigurationStore {
 
 	private final ConfigurationAdminFactory configurationAdminFactory;
 	private static final String STORE_DIR = "store"; //$NON-NLS-1$
-	private static final String PID_EXT = ".pid"; //$NON-NLS-1$
+	private static final String DATA_PRE = "data"; //$NON-NLS-1$
+	private static final String CFG_EXT = ".cfg"; //$NON-NLS-1$
 	private final Map<String, ConfigurationImpl> configurations = new HashMap<String, ConfigurationImpl>();
 	private int createdPidCount = 0;
 	private final File store;
@@ -43,7 +45,7 @@ class ConfigurationStore {
 		File[] configurationFiles = store.listFiles();
 		for (int i = 0; i < configurationFiles.length; ++i) {
 			String configurationFileName = configurationFiles[i].getName();
-			if (!configurationFileName.endsWith(PID_EXT))
+			if (!configurationFileName.endsWith(CFG_EXT))
 				continue;
 
 			InputStream ris = null;
@@ -54,7 +56,15 @@ class ConfigurationStore {
 				ois = new ObjectInputStream(ris);
 				@SuppressWarnings("unchecked")
 				Dictionary<String, Object> dictionary = (Dictionary<String, Object>) ois.readObject();
-				ConfigurationImpl config = new ConfigurationImpl(configurationAdminFactory, this, dictionary);
+				// before adding, make sure the bundle exists if the location is set
+				String location = (String) dictionary.get(ConfigurationAdmin.SERVICE_BUNDLELOCATION);
+				if (location != null && context.getBundle(location) == null) {
+					Boolean boundProp = (Boolean) dictionary.remove(ConfigurationImpl.LOCATION_BOUND);
+					if (boundProp != null && boundProp.booleanValue()) {
+						dictionary.remove(ConfigurationAdmin.SERVICE_BUNDLELOCATION);
+					}
+				}
+				ConfigurationImpl config = new ConfigurationImpl(configurationAdminFactory, this, dictionary, configurationFiles[i]);
 				configurations.put(config.getPid(), config);
 			} catch (IOException e) {
 				String message = e.getMessage();
@@ -87,18 +97,21 @@ class ConfigurationStore {
 		}
 	}
 
-	public void saveConfiguration(String pid, ConfigurationImpl config) throws IOException {
+	public Object saveConfiguration(String pid, ConfigurationImpl config, final Object token) throws IOException {
 		if (store == null)
-			return; // no persistent store
+			return null; // no persistent store
 
 		config.checkLocked();
-		final File configFile = new File(store, pid + PID_EXT);
-		final Dictionary<String, Object> configProperties = config.getAllProperties();
+		final Dictionary<String, Object> configProperties = config.getAllProperties(true);
+		if (configProperties == null) {
+			return null;
+		}
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-				public Object run() throws Exception {
-					writeConfigurationFile(configFile, configProperties);
-					return null;
+			return AccessController.doPrivileged(new PrivilegedExceptionAction<File>() {
+				public File run() throws Exception {
+					File toFile = token == null ? File.createTempFile(DATA_PRE, CFG_EXT, store) : (File) token;
+					writeConfigurationFile(toFile, configProperties);
+					return toFile;
 				}
 			});
 		} catch (PrivilegedActionException e) {
@@ -132,14 +145,13 @@ class ConfigurationStore {
 		}
 	}
 
-	public synchronized void removeConfiguration(String pid) {
+	public synchronized void removeConfiguration(String pid, final Object token) {
 		configurations.remove(pid);
-		if (store == null)
+		if (store == null || token == null)
 			return; // no persistent store
-		final File configFile = new File(store, pid + PID_EXT);
 		AccessController.doPrivileged(new PrivilegedAction<Object>() {
 			public Object run() {
-				deleteConfigurationFile(configFile);
+				deleteConfigurationFile((File) token);
 				return null;
 			}
 		});
@@ -185,7 +197,7 @@ class ConfigurationStore {
 		List<ConfigurationImpl> resultList = new ArrayList<ConfigurationImpl>();
 		for (Iterator<ConfigurationImpl> it = configurations.values().iterator(); it.hasNext();) {
 			ConfigurationImpl config = it.next();
-			Dictionary<String, Object> properties = config.getAllProperties();
+			Dictionary<String, Object> properties = config.getAllProperties(false);
 			if (properties != null && filter.match(properties))
 				resultList.add(config);
 		}
@@ -193,9 +205,12 @@ class ConfigurationStore {
 		return size == 0 ? null : (ConfigurationImpl[]) resultList.toArray(new ConfigurationImpl[size]);
 	}
 
-	public synchronized void unbindConfigurations(Bundle bundle) {
-		for (Iterator<ConfigurationImpl> it = configurations.values().iterator(); it.hasNext();) {
-			ConfigurationImpl config = it.next();
+	public void unbindConfigurations(Bundle bundle) {
+		ConfigurationImpl[] copy;
+		synchronized (this) {
+			copy = configurations.values().toArray(new ConfigurationImpl[configurations.size()]);
+		}
+		for (ConfigurationImpl config : copy) {
 			config.unbind(bundle);
 		}
 	}
