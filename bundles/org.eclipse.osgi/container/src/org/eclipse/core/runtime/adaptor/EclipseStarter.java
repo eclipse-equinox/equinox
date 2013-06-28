@@ -145,7 +145,7 @@ public class EclipseStarter {
 
 	private synchronized static String getProperty(String key) {
 		if (equinoxConfig != null) {
-			return equinoxConfig.getProperty(key);
+			return equinoxConfig.getConfiguration(key);
 		}
 		return getConfiguration().get(key);
 	}
