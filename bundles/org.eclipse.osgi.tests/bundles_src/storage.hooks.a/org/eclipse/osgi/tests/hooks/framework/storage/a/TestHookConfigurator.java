@@ -56,11 +56,17 @@ public class TestHookConfigurator implements HookConfigurator {
 
 		@Override
 		public TestStorageHook createStorageHook(Generation generation) {
-			return new TestStorageHook(generation, TestStorageHookFactory.class);
+			createStorageHookCalled = true;
+			Class<?> factoryClass = TestStorageHookFactory.class;
+			if (invalidFactoryClass)
+				factoryClass = StorageHookFactory.class;
+			return new TestStorageHook(generation, factoryClass);
 		}
 	}
 
+	public static volatile boolean createStorageHookCalled;
 	public static volatile boolean invalid;
+	public static volatile boolean invalidFactoryClass;
 	public static volatile boolean validateCalled;
 
 	public void addHooks(HookRegistry hookRegistry) {

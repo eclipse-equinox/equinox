@@ -16,18 +16,17 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 
-/*
- * The framework must discard bundles that are not valid according to storage 
- * hooks. See bug 407416.
- */
 public class StorageHookTests extends AbstractFrameworkHookTests {
 	private static final String TEST_BUNDLE = "test";
 	private static final String HOOK_CONFIGURATOR_BUNDLE = "storage.hooks.a";
 	private static final String HOOK_CONFIGURATOR_CLASS = "org.eclipse.osgi.tests.hooks.framework.storage.a.TestHookConfigurator";
+	private static final String HOOK_CONFIGURATOR_FIELD_CREATE_STORAGE_HOOK_CALLED = "createStorageHookCalled";
 	private static final String HOOK_CONFIGURATOR_FIELD_INVALID = "invalid";
+	private static final String HOOK_CONFIGURATOR_FIELD_INVALID_FACTORY_CLASS = "invalidFactoryClass";
 	private static final String HOOK_CONFIGURATOR_FIELD_VALIDATE_CALLED = "validateCalled";
 
 	private Map<String, String> configuration;
@@ -59,6 +58,56 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertBundleNotDiscarded();
 	}
 
+	/*
+	 * A storage hook with the wrong factory class should cause bundle
+	 * installation to fail.
+	 */
+	public void testWrongStorageHookFactoryClassOnBundleInstall() throws Exception {
+		setFactoryClassInvalid(true);
+		initAndStartFramework();
+		try {
+			installBundle();
+			fail("Bundle install should have failed");
+		} catch (BundleException e) {
+			assertBundleException(e);
+		}
+		assertCreateStorageHookCalled();
+	}
+
+	/*
+	 * A storage hook with the wrong factory class should cause bundle update
+	 * to fail.
+	 */
+	public void testWrongStorageHookFactoryClassOnBundleUpdate() throws Exception {
+		initAndStartFramework();
+		installBundle();
+		setFactoryClassInvalid(true);
+		try {
+			updateBundle();
+			fail("Bundle update should have failed");
+		} catch (BundleException e) {
+			assertBundleException(e);
+		}
+		assertCreateStorageHookCalled();
+	}
+
+	/*
+	 * A storage hook with the wrong factory class should cause a framework
+	 * restart with persisted bundles to fail.
+	 */
+	public void testWrongStorageHookFactoryClassOnFrameworkRestart() throws Exception {
+		initAndStartFramework();
+		installBundle();
+		setFactoryClassInvalid(true);
+		try {
+			restartFramework();
+			fail("Framework restart should have failed");
+		} catch (IllegalStateException e) {
+			assertThrowable(e);
+		}
+		assertCreateStorageHookCalled();
+	}
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		String loc = bundleInstaller.getBundleLocation(HOOK_CONFIGURATOR_BUNDLE);
@@ -82,13 +131,26 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertBundleDiscarded(location, framework);
 	}
 
+	private void assertBundleException(BundleException e) {
+		assertThrowable(e.getCause());
+	}
+
 	private void assertBundleNotDiscarded() {
 		assertBundleNotDiscarded(location, framework);
 	}
 
+	private void assertCreateStorageHookCalled() throws Exception {
+		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
+		assertTrue("Storage hook factory createStorageHook not called by framework", clazz.getField(HOOK_CONFIGURATOR_FIELD_CREATE_STORAGE_HOOK_CALLED).getBoolean(null));
+	}
+
+	private void assertThrowable(Throwable t) {
+		assertTrue("Unexpected exception", t != null && (t instanceof IllegalStateException) && t.getMessage().startsWith("The factory class "));
+	}
+
 	private void assertStorageHookValidateCalled() throws Exception {
 		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
-		assertTrue("Storage hook not called by framework", clazz.getField(HOOK_CONFIGURATOR_FIELD_VALIDATE_CALLED).getBoolean(null));
+		assertTrue("Storage hook validate not called by framework", clazz.getField(HOOK_CONFIGURATOR_FIELD_VALIDATE_CALLED).getBoolean(null));
 	}
 
 	private void initAndStartFramework() throws Exception {
@@ -101,16 +163,27 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 
 	private void resetStorageHook() throws Exception {
 		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
+		clazz.getField(HOOK_CONFIGURATOR_FIELD_CREATE_STORAGE_HOOK_CALLED).set(null, false);
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_INVALID).set(null, false);
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_VALIDATE_CALLED).set(null, false);
+		clazz.getField(HOOK_CONFIGURATOR_FIELD_INVALID_FACTORY_CLASS).set(null, false);
 	}
 
 	private void restartFramework() throws Exception {
 		framework = restart(framework, configuration);
 	}
 
+	private void setFactoryClassInvalid(boolean value) throws Exception {
+		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
+		clazz.getField(HOOK_CONFIGURATOR_FIELD_INVALID_FACTORY_CLASS).set(null, value);
+	}
+
 	private void setStorageHookInvalid(boolean value) throws Exception {
 		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_INVALID).set(null, value);
+	}
+
+	private void updateBundle() throws Exception {
+		framework.getBundleContext().getBundle(location).update();
 	}
 }
