@@ -502,7 +502,7 @@ public class Storage {
 		for (Iterator<StorageHookFactory<?, ?, ?>> iFactories = factories.iterator(); iFactories.hasNext();) {
 			@SuppressWarnings("unchecked")
 			StorageHookFactory<Object, Object, StorageHook<Object, Object>> next = (StorageHookFactory<Object, Object, StorageHook<Object, Object>>) iFactories.next();
-			StorageHook<Object, Object> hook = next.createStorageHook(generation);
+			StorageHook<Object, Object> hook = next.createStorageHookAndValidateFactoryClass(generation);
 			hooks.add(hook);
 		}
 		generation.setStorageHooks(Collections.unmodifiableList(hooks), true);
@@ -1169,7 +1169,7 @@ public class Storage {
 							if (generation.getBundleInfo().getBundleId() == 0) {
 								continue; // ignore system bundle
 							}
-							StorageHook<Object, Object> hook = factory.createStorageHook(generation);
+							StorageHook<Object, Object> hook = factory.createStorageHookAndValidateFactoryClass(generation);
 							hook.load(loadContext, temp);
 							getHooks(hookMap, generation).add(hook);
 						}
@@ -1179,7 +1179,7 @@ public class Storage {
 							if (generation.getBundleInfo().getBundleId() == 0) {
 								continue; // ignore system bundle
 							}
-							StorageHook<Object, Object> hook = factory.createStorageHook(generation);
+							StorageHook<Object, Object> hook = factory.createStorageHookAndValidateFactoryClass(generation);
 							hook.initialize(generation.getHeaders());
 							getHooks(hookMap, generation).add(hook);
 						}
@@ -1200,7 +1200,7 @@ public class Storage {
 				if (generation.getBundleInfo().getBundleId() == 0) {
 					continue; // ignore system bundle
 				}
-				StorageHook<Object, Object> hook = next.createStorageHook(generation);
+				StorageHook<Object, Object> hook = next.createStorageHookAndValidateFactoryClass(generation);
 				try {
 					hook.initialize(generation.getHeaders());
 					getHooks(hookMap, generation).add(hook);

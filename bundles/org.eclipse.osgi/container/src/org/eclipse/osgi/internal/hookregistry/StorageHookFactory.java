@@ -88,6 +88,26 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 	public abstract H createStorageHook(Generation generation);
 
 	/**
+	 * Creates a storage hook for the specified generation and checks that the
+	 * factory class of the storage hook equals the class of this storage hook
+	 * factory.
+	 * 
+	 * @param generation - The generation for which a storage hook should be
+	 *        created.
+	 * @return A newly created storage hook.
+	 * @throws IllegalStateException - If the factory class of the storage hook
+	 *         is not equal to the class of this storage hook factory.
+	 */
+	public final H createStorageHookAndValidateFactoryClass(Generation generation) {
+		H result = createStorageHook(generation);
+		Class<?> factoryClass = getClass();
+		Class<?> factoryClassOfStorageHook = result.getFactoryClass();
+		if (!factoryClass.equals(factoryClassOfStorageHook))
+			throw new IllegalStateException(String.format("The factory class '%s' of storage hook '%s' does not match the creating factory class of '%s'", factoryClassOfStorageHook.getName(), result, factoryClass.getName())); //$NON-NLS-1$
+		return result;
+	}
+
+	/**
 	 * A storage hook for a specific generation object.  This hook
 	 * is responsible for persisting and loading data associated
 	 * with a specific generation.
