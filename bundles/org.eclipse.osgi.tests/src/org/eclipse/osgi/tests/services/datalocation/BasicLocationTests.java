@@ -285,6 +285,7 @@ public class BasicLocationTests extends CoreTest {
 
 	public void testSlashes() throws BundleException, InvalidSyntaxException {
 		Map<String, String> fwkConfig = new HashMap<String, String>();
+		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, prefix + "/a");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, prefix + "/c/d");
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA, prefix + "/e/f");
@@ -319,6 +320,7 @@ public class BasicLocationTests extends CoreTest {
 
 	public void testSchemes() throws Exception {
 		Map<String, String> fwkConfig = new HashMap<String, String>();
+		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "http://example.com/a");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "ftp://example.com/c/d");
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA, "platform:/base/e/f");
@@ -340,6 +342,7 @@ public class BasicLocationTests extends CoreTest {
 
 	public void testNone() throws Exception {
 		Map<String, String> fwkConfig = new HashMap<String, String>();
+		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "@none");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "@none");
 		// TODO framework does not handle no config area well
@@ -362,6 +365,7 @@ public class BasicLocationTests extends CoreTest {
 	public void testUserDir() throws Exception {
 		Map<String, String> fwkConfig = new HashMap<String, String>();
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "@user.dir");
+		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "@user.dir");
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA, "@user.dir");
 		fwkConfig.put(EquinoxLocations.PROP_INSTALL_AREA, "file:" + prefix + "/g");
@@ -381,6 +385,7 @@ public class BasicLocationTests extends CoreTest {
 
 	public void testUserHome() throws Exception {
 		Map<String, String> fwkConfig = new HashMap<String, String>();
+		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "@user.home");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "@user.home");
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA, "@user.home");
@@ -404,6 +409,7 @@ public class BasicLocationTests extends CoreTest {
 		if (!windows)
 			return;
 		Map<String, String> fwkConfig = new HashMap<String, String>();
+		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "//server/share/a");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "//server/share/b");
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA, "//server/share/c");
