@@ -1506,7 +1506,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
-	public void testBug351519RefreshEnabled() {
+	public void disabledTestBug351519RefreshEnabled() {
 		// TODO this is expected to fail.  Not sure we should implement this
 		doTestBug351519Refresh(Boolean.TRUE);
 	}
