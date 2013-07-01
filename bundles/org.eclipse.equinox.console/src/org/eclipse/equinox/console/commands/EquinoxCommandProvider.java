@@ -42,8 +42,6 @@ import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.Parameter;
 import org.eclipse.equinox.console.command.adapter.Activator;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
-import org.eclipse.osgi.report.resolution.ResolutionReport.Entry;
-import org.eclipse.osgi.report.resolution.ResolutionReport.Listener;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
