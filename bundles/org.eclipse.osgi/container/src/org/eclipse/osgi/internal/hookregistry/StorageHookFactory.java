@@ -85,7 +85,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 	 * @param generation the generation for the storage hook
 	 * @return a storage hook
 	 */
-	public abstract H createStorageHook(Generation generation);
+	protected abstract H createStorageHook(Generation generation);
 
 	/**
 	 * Creates a storage hook for the specified generation and checks that the

@@ -55,7 +55,7 @@ public class TestHookConfigurator implements HookConfigurator {
 		}
 
 		@Override
-		public TestStorageHook createStorageHook(Generation generation) {
+		protected TestStorageHook createStorageHook(Generation generation) {
 			createStorageHookCalled = true;
 			Class<?> factoryClass = TestStorageHookFactory.class;
 			if (invalidFactoryClass)
