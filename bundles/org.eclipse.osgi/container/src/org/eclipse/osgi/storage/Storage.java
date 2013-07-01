@@ -15,6 +15,7 @@ import java.net.*;
 import java.security.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
@@ -35,6 +36,7 @@ import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.bundlefile.*;
 import org.eclipse.osgi.storage.url.reference.Handler;
 import org.eclipse.osgi.storage.url.reference.ReferenceInputStream;
+import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -118,30 +120,23 @@ public class Storage {
 		Location parent = this.osgiLocation.getParentLocation();
 		parentRoot = parent == null ? null : new File(parent.getURL().getFile());
 
-		File frameworkInfo = getFile(FRAMEWORK_INFO, true);
-		DataInputStream in = null;
-		if (frameworkInfo.exists()) {
-			try {
-				in = new DataInputStream(new BufferedInputStream(new FileInputStream(frameworkInfo)));
-			} catch (IOException e) {
-				// do nothing
-			}
-		}
+		InputStream info = getInfoInputStream();
+		DataInputStream data = info == null ? null : new DataInputStream(new BufferedInputStream(info));
 		try {
-			Map<Long, Generation> generations = loadGenerations(in);
-			this.permissionData = loadPermissionData(in);
+			Map<Long, Generation> generations = loadGenerations(data);
+			this.permissionData = loadPermissionData(data);
 			this.securityAdmin = new SecurityAdmin(null, this.permissionData);
 			this.adaptor = new EquinoxContainerAdaptor(equinoxContainer, this, generations);
 			this.moduleDatabase = new ModuleDatabase(adaptor);
 			this.moduleContainer = new ModuleContainer(this.adaptor, this.moduleDatabase);
-			if (in != null) {
-				moduleDatabase.load(in);
+			if (data != null) {
+				moduleDatabase.load(data);
 				lastSavedTimestamp = moduleDatabase.getTimestamp();
 			}
 		} finally {
-			if (in != null) {
+			if (data != null) {
 				try {
-					in.close();
+					data.close();
 				} catch (IOException e) {
 					// just move on
 				}
@@ -961,15 +956,15 @@ public class Storage {
 	}
 
 	void save0() throws IOException {
+		StorageManager childStorageManager = null;
 		DataOutputStream out = null;
-		boolean lockedLocation = false;
 		moduleDatabase.readLock();
 		try {
-			lockedLocation = osgiLocation.lock();
 			synchronized (this.saveMonitor) {
 				if (lastSavedTimestamp == moduleDatabase.getTimestamp())
 					return;
-				out = new DataOutputStream(new FileOutputStream(getFile(FRAMEWORK_INFO, false)));
+				childStorageManager = getChildStorageManager();
+				out = new DataOutputStream(new BufferedOutputStream(childStorageManager.getOutputStream(FRAMEWORK_INFO)));
 				saveGenerations(out);
 				savePermissionData(out);
 				moduleDatabase.store(out, true);
@@ -983,8 +978,8 @@ public class Storage {
 					// tried our best
 				}
 			}
-			if (lockedLocation) {
-				osgiLocation.release();
+			if (childStorageManager != null) {
+				childStorageManager.close();
 			}
 			moduleDatabase.readUnlock();
 		}
@@ -1647,5 +1642,54 @@ public class Storage {
 
 	public SecurityAdmin getSecurityAdmin() {
 		return securityAdmin;
+	}
+
+	protected StorageManager getChildStorageManager() throws IOException {
+		StorageManager sManager = new StorageManager(childRoot, isReadOnly() ? "none" : null, isReadOnly()); //$NON-NLS-1$
+		try {
+			sManager.open(!isReadOnly());
+		} catch (IOException ex) {
+			if (getConfiguration().getDebug().DEBUG_GENERAL) {
+				Debug.println("Error reading framework.info: " + ex.getMessage()); //$NON-NLS-1$
+				Debug.printStackTrace(ex);
+			}
+			String message = NLS.bind(StorageMsg.ECLIPSE_STARTUP_FILEMANAGER_OPEN_ERROR, ex.getMessage());
+			equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, message, ex);
+			getConfiguration().setProperty(EclipseStarter.PROP_EXITCODE, "15"); //$NON-NLS-1$
+			String errorDialog = "<title>" + StorageMsg.ADAPTOR_STORAGE_INIT_FAILED_TITLE + "</title>" + NLS.bind(StorageMsg.ADAPTOR_STORAGE_INIT_FAILED_MSG, childRoot) + "\n" + ex.getMessage(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			getConfiguration().setProperty(EclipseStarter.PROP_EXITDATA, errorDialog);
+			throw ex;
+		}
+		return sManager;
+	}
+
+	private InputStream getInfoInputStream() throws IOException {
+		StorageManager storageManager = getChildStorageManager();
+		InputStream storageStream = null;
+		try {
+			storageStream = storageManager.getInputStream(FRAMEWORK_INFO);
+		} catch (IOException ex) {
+			if (getConfiguration().getDebug().DEBUG_GENERAL) {
+				Debug.println("Error reading framework.info: " + ex.getMessage()); //$NON-NLS-1$
+				Debug.printStackTrace(ex);
+			}
+		} finally {
+			storageManager.close();
+		}
+		if (storageStream == null && parentRoot != null) {
+			StorageManager parentStorageManager = null;
+			try {
+				parentStorageManager = new StorageManager(parentRoot, "none", true); //$NON-NLS-1$
+				parentStorageManager.open(false);
+				storageStream = parentStorageManager.getInputStream(FRAMEWORK_INFO);
+			} catch (IOException e1) {
+				// That's ok we will regenerate the framework.info
+			} finally {
+				if (parentStorageManager != null) {
+					parentStorageManager.close();
+				}
+			}
+		}
+		return storageStream;
 	}
 }

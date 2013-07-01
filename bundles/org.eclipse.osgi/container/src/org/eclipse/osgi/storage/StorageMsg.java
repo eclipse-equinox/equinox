@@ -25,6 +25,9 @@ public class StorageMsg extends NLS {
 	public static String ADAPTOR_DIRECTORY_CREATE_EXCEPTION;
 	public static String ADAPTOR_DIRECTORY_EXCEPTION;
 	public static String ADAPTOR_URL_CREATE_EXCEPTION;
+	public static String ADAPTOR_STORAGE_INIT_FAILED_MSG;
+	public static String ADAPTOR_STORAGE_INIT_FAILED_TITLE;
+	public static String ECLIPSE_STARTUP_FILEMANAGER_OPEN_ERROR;
 
 	public static String BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION;
 	public static String BUNDLE_READ_EXCEPTION;
