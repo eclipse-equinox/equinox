@@ -68,7 +68,6 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			return new EquinoxSystemModule(moduleContainer);
 		}
 
-		@SuppressWarnings("unused")
 		@Override
 		public void stop(final int options) throws BundleException {
 			getEquinoxContainer().checkAdminPermission(this, AdminPermission.EXECUTE);

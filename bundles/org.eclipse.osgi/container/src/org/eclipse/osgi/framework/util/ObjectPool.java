@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2012 IBM Corporation and others.
+ * Copyright (c) 2009, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,8 +16,8 @@ import java.util.WeakHashMap;
 import org.eclipse.osgi.internal.debug.Debug;
 
 public class ObjectPool {
-	private static String OPTION_DEBUG_OBJECTPOOL_ADDS = Debug.ECLIPSE_OSGI + "/debug/objectPool/adds"; //$NON-NLS-1$
-	private static String OPTION_DEBUG_OBJECTPOOL_DUPS = Debug.ECLIPSE_OSGI + "/debug/objectPool/dups"; //$NON-NLS-1$
+	//private static String OPTION_DEBUG_OBJECTPOOL_ADDS = Debug.ECLIPSE_OSGI + "/debug/objectPool/adds"; //$NON-NLS-1$
+	//private static String OPTION_DEBUG_OBJECTPOOL_DUPS = Debug.ECLIPSE_OSGI + "/debug/objectPool/dups"; //$NON-NLS-1$
 	// TODO need to set these
 	private static final boolean DEBUG_OBJECTPOOL_ADDS = false;
 	private static final boolean DEBUG_OBJECTPOOL_DUPS = false;
