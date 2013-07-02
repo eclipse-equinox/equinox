@@ -122,23 +122,25 @@ public class Capabilities {
 					return Collections.emptyList();
 				}
 			}
+			Object syntheticAttr = requirement.getAttributes().get(SYNTHETIC_REQUIREMENT);
+			boolean synthetic = syntheticAttr instanceof Boolean ? ((Boolean) syntheticAttr).booleanValue() : false;
 
 			List<ModuleCapability> result;
 			if (filterSpec == null) {
-				result = match(null, all);
+				result = match(null, all, synthetic);
 			} else {
 				String indexKey = f.getPrimaryKeyValue(name);
 				if (indexKey == null) {
-					result = match(f, all);
+					result = match(f, all, synthetic);
 				} else {
 					Set<ModuleCapability> indexed = indexes.get(indexKey);
 					if (indexed == null) {
 						result = new ArrayList<ModuleCapability>(0);
 					} else {
-						result = match(f, indexed);
+						result = match(f, indexed, synthetic);
 					}
 					if (!nonStringIndexes.isEmpty()) {
-						List<ModuleCapability> nonStringResult = match(f, nonStringIndexes);
+						List<ModuleCapability> nonStringResult = match(f, nonStringIndexes, synthetic);
 						for (ModuleCapability capability : nonStringResult) {
 							if (!result.contains(capability)) {
 								result.add(capability);
@@ -150,10 +152,10 @@ public class Capabilities {
 			return result;
 		}
 
-		private List<ModuleCapability> match(Filter f, Set<ModuleCapability> candidates) {
+		private List<ModuleCapability> match(Filter f, Set<ModuleCapability> candidates, boolean synthetic) {
 			List<ModuleCapability> result = new ArrayList<ModuleCapability>(1);
 			for (ModuleCapability candidate : candidates) {
-				if (matches(f, candidate, matchMandatory)) {
+				if (matches(f, candidate, !synthetic && matchMandatory)) {
 					result.add(candidate);
 				}
 			}
@@ -162,6 +164,7 @@ public class Capabilities {
 	}
 
 	public static final Pattern MANDATORY_ATTR = Pattern.compile("\\(([^(=<>]+)\\s*[=<>]\\s*[^)]+\\)"); //$NON-NLS-1$
+	public static final String SYNTHETIC_REQUIREMENT = "org.eclipse.osgi.container.synthetic"; //$NON-NLS-1$
 
 	public static boolean matches(Filter f, Capability candidate, boolean matchMandatory) {
 		if (f != null && !f.matches(candidate.getAttributes())) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.container;
 
-import java.util.Collection;
-import java.util.List;
+import java.security.Permission;
+import java.util.*;
+import org.osgi.framework.*;
+import org.osgi.framework.namespace.*;
 import org.osgi.framework.wiring.*;
 import org.osgi.resource.*;
 
-public class Converters {
+public class InternalUtils {
 
 	/**
 	 * Coerce the generic type of a list from List<BundleCapability>
@@ -104,4 +106,59 @@ public class Converters {
 	public static Collection<Resource> asCollectionResource(Collection<? extends Resource> c) {
 		return (Collection<Resource>) c;
 	}
+
+	public static void filterCapabilityPermissions(Collection<? extends BundleCapability> capabilities) {
+		if (System.getSecurityManager() == null) {
+			return;
+		}
+		for (Iterator<? extends BundleCapability> iCapabilities = capabilities.iterator(); iCapabilities.hasNext();) {
+			BundleCapability capability = iCapabilities.next();
+			Permission permission = getProvidePermission(capability);
+			Bundle provider = capability.getRevision().getBundle();
+			if (provider != null && !provider.hasPermission(permission)) {
+				iCapabilities.remove();
+			}
+		}
+	}
+
+	public static Permission getRequirePermission(BundleCapability candidate) {
+		String name = candidate.getNamespace();
+		if (PackageNamespace.PACKAGE_NAMESPACE.equals(name)) {
+			return new PackagePermission(getPermisionName(candidate), candidate.getRevision().getBundle(), PackagePermission.IMPORT);
+		}
+		if (HostNamespace.HOST_NAMESPACE.equals(name)) {
+			return new BundlePermission(getPermisionName(candidate), BundlePermission.FRAGMENT);
+		}
+		if (BundleNamespace.BUNDLE_NAMESPACE.equals(name)) {
+			return new BundlePermission(getPermisionName(candidate), BundlePermission.REQUIRE);
+		}
+		return new CapabilityPermission(name, candidate.getAttributes(), candidate.getRevision().getBundle(), CapabilityPermission.REQUIRE);
+	}
+
+	public static Permission getProvidePermission(BundleCapability candidate) {
+		String name = candidate.getNamespace();
+		if (PackageNamespace.PACKAGE_NAMESPACE.equals(name)) {
+			return new PackagePermission(getPermisionName(candidate), PackagePermission.EXPORTONLY);
+		}
+		if (HostNamespace.HOST_NAMESPACE.equals(name)) {
+			return new BundlePermission(getPermisionName(candidate), BundlePermission.HOST);
+		}
+		if (BundleNamespace.BUNDLE_NAMESPACE.equals(name)) {
+			return new BundlePermission(getPermisionName(candidate), BundlePermission.PROVIDE);
+		}
+		return new CapabilityPermission(name, CapabilityPermission.PROVIDE);
+	}
+
+	private static String getPermisionName(BundleCapability candidate) {
+		Object name = candidate.getAttributes().get(candidate.getNamespace());
+		if (name instanceof String) {
+			return (String) name;
+		}
+		if (name instanceof Collection) {
+			Collection<?> names = (Collection<?>) name;
+			return names.isEmpty() ? "unknown" : names.iterator().next().toString(); //$NON-NLS-1$
+		}
+		return "unknown"; //$NON-NLS-1$
+	}
+
 }

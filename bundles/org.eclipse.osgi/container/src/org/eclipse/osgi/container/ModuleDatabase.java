@@ -76,11 +76,6 @@ public class ModuleDatabase {
 	private final Map<Long, Module> modulesById;
 
 	/**
-	 * A map of revision collections by symbolic name
-	 */
-	private final Map<String, Collection<ModuleRevision>> revisionByName;
-
-	/**
 	 * A map of revision wiring objects.
 	 */
 	private final Map<ModuleRevision, ModuleWiring> wirings;
@@ -140,7 +135,6 @@ public class ModuleDatabase {
 		this.adaptor = adaptor;
 		this.modulesByLocations = new HashMap<String, Module>();
 		this.modulesById = new HashMap<Long, Module>();
-		this.revisionByName = new HashMap<String, Collection<ModuleRevision>>();
 		this.wirings = new HashMap<ModuleRevision, ModuleWiring>();
 		// Start at id 1 because 0 is reserved for the system bundle
 		this.nextId = new AtomicLong(1);
@@ -179,42 +173,6 @@ public class ModuleDatabase {
 		readLock();
 		try {
 			return modulesById.get(id);
-		} finally {
-			readUnlock();
-		}
-	}
-
-	/**
-	 * Returns a snapshot collection of revisions with the specified name 
-	 * and version.  If version is {@code null} then all revisions with
-	 * the specified name are returned.
-	 * <p>
-	 * A read operation protected by the {@link #readLock() read} lock.
-	 * @param name the name of the modules
-	 * @param version the version of the modules or {@code null}
-	 * @return a snapshot collection of revisions with the specified name
-	 * and version.
-	 */
-	final Collection<ModuleRevision> getRevisions(String name, Version version) {
-		readLock();
-		try {
-			Collection<ModuleRevision> existingRevisions = revisionByName.get(name);
-
-			if (existingRevisions == null) {
-				return Collections.emptyList();
-			}
-
-			if (version == null) {
-				return new ArrayList<ModuleRevision>(existingRevisions);
-			}
-
-			Collection<ModuleRevision> sameVersion = new ArrayList<ModuleRevision>(1);
-			for (ModuleRevision revision : existingRevisions) {
-				if (revision.getVersion().equals(version)) {
-					sameVersion.add(revision);
-				}
-			}
-			return sameVersion;
 		} finally {
 			readUnlock();
 		}
@@ -306,24 +264,8 @@ public class ModuleDatabase {
 		if (settings != null)
 			moduleSettings.put(id, settings);
 		ModuleRevision newRevision = module.getCurrentRevision();
-		addToRevisionByName(newRevision);
 		addCapabilities(newRevision);
 		return module;
-	}
-
-	private void addToRevisionByName(ModuleRevision revision) {
-		// sanity check
-		checkWrite();
-
-		String name = revision.getSymbolicName();
-		if (name != null) {
-			Collection<ModuleRevision> sameName = revisionByName.get(name);
-			if (sameName == null) {
-				sameName = new ArrayList<ModuleRevision>(1);
-				revisionByName.put(name, sameName);
-			}
-			sameName.add(revision);
-		}
 	}
 
 	/**
@@ -347,13 +289,6 @@ public class ModuleDatabase {
 			// remove the revisions by name
 			List<ModuleRevision> revisions = uninstalling.getModuleRevisions();
 			for (ModuleRevision revision : revisions) {
-				String name = revision.getSymbolicName();
-				if (name != null) {
-					Collection<ModuleRevision> sameName = revisionByName.get(name);
-					if (sameName != null) {
-						sameName.remove(revision);
-					}
-				}
 				// if the revision does not have a wiring it can safely be removed
 				// from the revisions for the module
 				ModuleWiring oldWiring = wirings.get(revision);
@@ -387,17 +322,7 @@ public class ModuleDatabase {
 		try {
 			ModuleRevision oldRevision = module.getCurrentRevision();
 			ModuleRevision newRevision = builder.addRevision(module, revisionInfo);
-			addToRevisionByName(newRevision);
 			addCapabilities(newRevision);
-
-			// remove the old revision by name
-			String oldName = oldRevision.getSymbolicName();
-			if (oldName != null) {
-				Collection<ModuleRevision> oldSameName = revisionByName.get(oldName);
-				if (oldSameName != null) {
-					oldSameName.remove(oldRevision);
-				}
-			}
 
 			// if the old revision does not have a wiring it can safely be removed
 			ModuleWiring oldWiring = wirings.get(oldRevision);

@@ -15,9 +15,13 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.internal.container.Capabilities;
+import org.eclipse.osgi.internal.container.InternalUtils;
 import org.osgi.framework.*;
 import org.osgi.framework.namespace.*;
 import org.osgi.framework.wiring.*;
+import org.osgi.resource.Namespace;
+import org.osgi.resource.Requirement;
 import org.osgi.service.packageadmin.*;
 
 @Deprecated
@@ -58,19 +62,11 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	public ExportedPackage[] getExportedPackages(Bundle bundle) {
-		Collection<ModuleRevision> revisions;
-		if (bundle != null) {
-			Module module = StartLevelImpl.getModule(bundle);
-			revisions = module == null ? Collections.<ModuleRevision> emptyList() : module.getRevisions().getModuleRevisions();
-		} else {
-			revisions = new HashSet<ModuleRevision>();
-			for (Module module : container.getModules()) {
-				revisions.addAll(module.getRevisions().getModuleRevisions());
-			}
-			for (ModuleRevision revision : container.getRemovalPending()) {
-				revisions.add(revision);
-			}
+		if (bundle == null) {
+			return getExportedPackages((String) null);
 		}
+		Module module = StartLevelImpl.getModule(bundle);
+		Collection<ModuleRevision> revisions = module == null ? Collections.<ModuleRevision> emptyList() : module.getRevisions().getModuleRevisions();
 
 		Collection<ExportedPackage> allExports = new ArrayList<ExportedPackage>();
 		for (ModuleRevision revision : revisions) {
@@ -86,7 +82,7 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	public ExportedPackage getExportedPackage(String name) {
-		ExportedPackage[] allExports = getExportedPackages((Bundle) null);
+		ExportedPackage[] allExports = getExportedPackages(name);
 		if (allExports == null)
 			return null;
 		ExportedPackage result = null;
@@ -106,13 +102,21 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	public ExportedPackage[] getExportedPackages(String name) {
-		ExportedPackage[] allExports = getExportedPackages((Bundle) null);
-		if (allExports == null)
-			return null;
-		List<ExportedPackage> result = new ArrayList<ExportedPackage>(1); // rare to have more than one
-		for (int i = 0; i < allExports.length; i++)
-			if (name.equals(allExports[i].getName()))
-				result.add(allExports[i]);
+		String filter = "(" + PackageNamespace.PACKAGE_NAMESPACE + "=" + (name == null ? "*" : name) + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$
+		Map<String, String> directives = Collections.<String, String> singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter);
+		Map<String, Boolean> attributes = Collections.singletonMap(Capabilities.SYNTHETIC_REQUIREMENT, Boolean.TRUE);
+		Requirement packageReq = container.createRequirement(PackageNamespace.PACKAGE_NAMESPACE, directives, attributes);
+		Collection<BundleCapability> packageCaps = container.getFrameworkWiring().findProviders(packageReq);
+		InternalUtils.filterCapabilityPermissions(packageCaps);
+		List<ExportedPackage> result = new ArrayList<ExportedPackage>();
+		for (BundleCapability capability : packageCaps) {
+			ModuleWiring wiring = (ModuleWiring) capability.getRevision().getWiring();
+			if (wiring != null) {
+				if (!wiring.getSubstitutedNames().contains(capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
+					result.add(new ExportedPackageImpl((ModuleCapability) capability, wiring));
+				}
+			}
+		}
 		return (result.size() == 0 ? null : result.toArray(new ExportedPackage[result.size()]));
 	}
 
@@ -125,16 +129,17 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	public RequiredBundle[] getRequiredBundles(String symbolicName) {
-		// TODO need to handle null symbolicName here.
-		Collection<ModuleRevision> revisions = container.getRevisions(symbolicName, null);
+		String filter = "(" + BundleNamespace.BUNDLE_NAMESPACE + "=" + (symbolicName == null ? "*" : symbolicName) + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$
+		Map<String, String> directives = Collections.<String, String> singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter);
+		Map<String, Boolean> attributes = Collections.singletonMap(Capabilities.SYNTHETIC_REQUIREMENT, Boolean.TRUE);
+		Requirement bundleReq = container.createRequirement(BundleNamespace.BUNDLE_NAMESPACE, directives, attributes);
+		Collection<BundleCapability> bundleCaps = container.getFrameworkWiring().findProviders(bundleReq);
+		InternalUtils.filterCapabilityPermissions(bundleCaps);
 		Collection<RequiredBundle> result = new ArrayList<RequiredBundle>();
-		for (ModuleRevision revision : revisions) {
-			ModuleWiring wiring = revision.getWiring();
+		for (BundleCapability capability : bundleCaps) {
+			BundleWiring wiring = capability.getRevision().getWiring();
 			if (wiring != null) {
-				List<ModuleCapability> bundleCapabilities = wiring.getModuleCapabilities(BundleNamespace.BUNDLE_NAMESPACE);
-				for (ModuleCapability bundleCapability : bundleCapabilities) {
-					result.add(new RequiredBundleImpl(bundleCapability, wiring));
-				}
+				result.add(new RequiredBundleImpl(capability, wiring));
 			}
 		}
 		return result.isEmpty() ? null : result.toArray(new RequiredBundle[result.size()]);
@@ -144,40 +149,34 @@ public class PackageAdminImpl implements PackageAdmin {
 		if (symbolicName == null) {
 			throw new IllegalArgumentException();
 		}
-		Collection<ModuleRevision> revisions = container.getRevisions(symbolicName, null);
-		if (revisions.isEmpty()) {
+		VersionRange range = versionRange == null ? null : new VersionRange(versionRange);
+		String filter = (range != null ? "(&" : "") + "(" + IdentityNamespace.IDENTITY_NAMESPACE + "=" + symbolicName + ")" + (range != null ? range.toFilterString(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE) + ")" : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+		Requirement identityReq = container.createRequirement(IdentityNamespace.IDENTITY_NAMESPACE, Collections.<String, String> singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter), Collections.<String, Object> emptyMap());
+		Collection<BundleCapability> identityCaps = container.getFrameworkWiring().findProviders(identityReq);
+
+		if (identityCaps.isEmpty()) {
 			return null;
 		}
-		List<ModuleRevision> sorted = new LinkedList<ModuleRevision>(revisions);
-		Collections.sort(sorted, new Comparator<ModuleRevision>() {
-			@Override
-			public int compare(ModuleRevision m1, ModuleRevision m2) {
-				return m2.getVersion().compareTo(m1.getVersion());
-			}
-		});
-		if (versionRange != null) {
-			VersionRange range = new VersionRange(versionRange);
-			for (Iterator<ModuleRevision> iSorted = sorted.iterator(); iSorted.hasNext();) {
-				if (!range.includes(iSorted.next().getVersion())) {
-					iSorted.remove();
-				}
+		List<Bundle> sorted = new ArrayList<Bundle>();
+		for (BundleCapability capability : identityCaps) {
+			Bundle b = capability.getRevision().getBundle();
+			// a sanity check incase this is an old revision
+			if (symbolicName.equals(b.getSymbolicName()) && !sorted.contains(b)) {
+				sorted.add(b);
 			}
 		}
+		Collections.sort(sorted, new Comparator<Bundle>() {
+			@Override
+			public int compare(Bundle b1, Bundle b2) {
+				return b2.getVersion().compareTo(b1.getVersion());
+			}
+		});
 
 		if (sorted.isEmpty()) {
 			return null;
 		}
 
-		// This code depends on the array of bundles being in descending
-		// version order.
-		Bundle[] result = new Bundle[sorted.size()];
-		int i = 0;
-		for (ModuleRevision revision : sorted) {
-			result[i] = revision.getBundle();
-			i++;
-		}
-
-		return result;
+		return sorted.toArray(new Bundle[sorted.size()]);
 	}
 
 	public Bundle[] getFragments(Bundle bundle) {
@@ -356,10 +355,10 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	private static class RequiredBundleImpl implements RequiredBundle {
-		private final ModuleCapability bundleCapability;
-		private final ModuleWiring providerWiring;
+		private final BundleCapability bundleCapability;
+		private final BundleWiring providerWiring;
 
-		public RequiredBundleImpl(ModuleCapability bundleCapability, ModuleWiring providerWiring) {
+		public RequiredBundleImpl(BundleCapability bundleCapability, BundleWiring providerWiring) {
 			this.bundleCapability = bundleCapability;
 			this.providerWiring = providerWiring;
 		}
@@ -416,6 +415,5 @@ public class PackageAdminImpl implements PackageAdmin {
 		public String toString() {
 			return bundleCapability.toString();
 		}
-
 	}
 }

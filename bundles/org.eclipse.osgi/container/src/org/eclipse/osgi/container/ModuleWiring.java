@@ -13,7 +13,7 @@ package org.eclipse.osgi.container;
 import java.net.URL;
 import java.util.*;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
-import org.eclipse.osgi.internal.container.Converters;
+import org.eclipse.osgi.internal.container.InternalUtils;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.namespace.HostNamespace;
@@ -141,13 +141,13 @@ public final class ModuleWiring implements BundleWiring {
 
 	@Override
 	public List<BundleCapability> getCapabilities(String namespace) {
-		return Converters.asListBundleCapability(getModuleCapabilities(namespace));
+		return InternalUtils.asListBundleCapability(getModuleCapabilities(namespace));
 
 	}
 
 	@Override
 	public List<BundleRequirement> getRequirements(String namespace) {
-		return Converters.asListBundleRequirement(getModuleRequirements(namespace));
+		return InternalUtils.asListBundleRequirement(getModuleRequirements(namespace));
 	}
 
 	/**
@@ -198,12 +198,12 @@ public final class ModuleWiring implements BundleWiring {
 
 	@Override
 	public List<BundleWire> getProvidedWires(String namespace) {
-		return Converters.asListBundleWire(getWires(namespace, providedWires));
+		return InternalUtils.asListBundleWire(getWires(namespace, providedWires));
 	}
 
 	@Override
 	public List<BundleWire> getRequiredWires(String namespace) {
-		return Converters.asListBundleWire(getWires(namespace, requiredWires));
+		return InternalUtils.asListBundleWire(getWires(namespace, requiredWires));
 	}
 
 	private List<ModuleWire> getWires(String namespace, List<ModuleWire> allWires) {
@@ -292,22 +292,22 @@ public final class ModuleWiring implements BundleWiring {
 
 	@Override
 	public List<Capability> getResourceCapabilities(String namespace) {
-		return Converters.asListCapability(getCapabilities(namespace));
+		return InternalUtils.asListCapability(getCapabilities(namespace));
 	}
 
 	@Override
 	public List<Requirement> getResourceRequirements(String namespace) {
-		return Converters.asListRequirement(getRequirements(namespace));
+		return InternalUtils.asListRequirement(getRequirements(namespace));
 	}
 
 	@Override
 	public List<Wire> getProvidedResourceWires(String namespace) {
-		return Converters.asListWire(getWires(namespace, providedWires));
+		return InternalUtils.asListWire(getWires(namespace, providedWires));
 	}
 
 	@Override
 	public List<Wire> getRequiredResourceWires(String namespace) {
-		return Converters.asListWire(getWires(namespace, requiredWires));
+		return InternalUtils.asListWire(getWires(namespace, requiredWires));
 	}
 
 	@Override

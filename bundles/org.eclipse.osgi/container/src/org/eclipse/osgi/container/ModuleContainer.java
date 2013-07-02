@@ -25,11 +25,10 @@ import org.eclipse.osgi.container.ModuleDatabase.Sort;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.framework.util.SecureAction;
-import org.eclipse.osgi.internal.container.Converters;
+import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.internal.container.LockSet;
 import org.osgi.framework.*;
-import org.osgi.framework.namespace.HostNamespace;
-import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.framework.namespace.*;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.*;
 import org.osgi.resource.Namespace;
@@ -134,16 +133,15 @@ public final class ModuleContainer {
 	}
 
 	/**
-	 * Returns a snapshot collection of revisions with the specified name 
-	 * and version.  If version is {@code null} then all revisions with
-	 * the specified name are returned.
-	 * @param name the name of the modules
-	 * @param version the version of the modules or {@code null}
-	 * @return a snapshot collection of revisions with the specified name
-	 * and version.
+	 * Creates a synthetic requirement that is not associated with any module revision.
+	 * This is useful for calling {@link FrameworkWiring#findProviders(Requirement)}.
+	 * @param namespace the requirement namespace
+	 * @param directives the requriement directives
+	 * @param attributes the requirement attributes
+	 * @return a synthetic requirement
 	 */
-	public Collection<ModuleRevision> getRevisions(String name, Version version) {
-		return moduleDatabase.getRevisions(name, version);
+	public Requirement createRequirement(String namespace, Map<String, String> directives, Map<String, ?> attributes) {
+		return new ModuleRequirement(namespace, directives, attributes, null);
 	}
 
 	/**
@@ -190,10 +188,11 @@ public final class ModuleContainer {
 				if (existingLocation == null) {
 					// Collect existing current revisions with the same name and version as the revision we want to install
 					// This is to perform the collision check below
-					Collection<ModuleRevision> existingRevisionNames = moduleDatabase.getRevisions(name, builder.getVersion());
-					if (!existingRevisionNames.isEmpty()) {
+					List<ModuleCapability> sameIdentity = moduleDatabase.findCapabilities(getIdentityRequirement(name, builder.getVersion()));
+					if (!sameIdentity.isEmpty()) {
 						collisionCandidates = new ArrayList<Module>(1);
-						for (ModuleRevision equinoxRevision : existingRevisionNames) {
+						for (ModuleCapability identity : sameIdentity) {
+							ModuleRevision equinoxRevision = identity.getRevision();
 							if (!equinoxRevision.isCurrent())
 								continue; // only pay attention to current revisions
 							// need to prevent duplicates here; this is in case a revisions object contains multiple revision objects.
@@ -269,10 +268,11 @@ public final class ModuleContainer {
 			try {
 				// Collect existing bundles with the same name and version as the bundle we want to install
 				// This is to perform the collision check below
-				Collection<ModuleRevision> existingRevisionNames = moduleDatabase.getRevisions(name, builder.getVersion());
-				if (!existingRevisionNames.isEmpty()) {
+				List<ModuleCapability> sameIdentity = moduleDatabase.findCapabilities(getIdentityRequirement(name, builder.getVersion()));
+				if (!sameIdentity.isEmpty()) {
 					collisionCandidates = new ArrayList<Module>(1);
-					for (ModuleRevision equinoxRevision : existingRevisionNames) {
+					for (ModuleCapability identity : sameIdentity) {
+						ModuleRevision equinoxRevision = identity.getRevision();
 						if (!equinoxRevision.isCurrent())
 							continue;
 						Module m = equinoxRevision.getRevisions().getModule();
@@ -1115,6 +1115,13 @@ public final class ModuleContainer {
 		return refreshingSystemModule.get() != null;
 	}
 
+	static Requirement getIdentityRequirement(String name, Version version) {
+		version = version == null ? Version.emptyVersion : version;
+		String filter = "(&(" + IdentityNamespace.IDENTITY_NAMESPACE + "=" + name + ")(" + IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE + "=" + version.toString() + "))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+		Map<String, String> directives = Collections.<String, String> singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter);
+		return new ModuleRequirement(IdentityNamespace.IDENTITY_NAMESPACE, directives, Collections.<String, Object> emptyMap(), null);
+	}
+
 	class ContainerWiring implements FrameworkWiring, EventDispatcher<ContainerWiring, FrameworkListener[], Collection<Module>> {
 		private final Object monitor = new Object();
 		private EventManager refreshThread = null;
@@ -1192,7 +1199,7 @@ public final class ModuleContainer {
 
 		@Override
 		public Collection<BundleCapability> findProviders(Requirement requirement) {
-			return Converters.asListBundleCapability(moduleDatabase.findCapabilities(requirement));
+			return InternalUtils.asListBundleCapability(moduleDatabase.findCapabilities(requirement));
 		}
 
 		private Collection<Module> getModules(final Collection<Bundle> bundles) {

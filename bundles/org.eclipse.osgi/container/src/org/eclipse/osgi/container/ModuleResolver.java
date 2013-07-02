@@ -14,7 +14,7 @@ import java.security.Permission;
 import java.util.*;
 import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
-import org.eclipse.osgi.internal.container.Converters;
+import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.report.resolution.*;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry.Type;
@@ -162,7 +162,7 @@ final class ModuleResolver {
 		List<ModuleWire> providedWires = new ArrayList<ModuleWire>();
 		addProvidedWires(providedWireMap, providedWires, capabilities);
 
-		filterCapabilityPermissions(capabilities);
+		InternalUtils.filterCapabilityPermissions(capabilities);
 		return new ModuleWiring(revision, capabilities, requirements, providedWires, requiredWires, substituted);
 	}
 
@@ -365,22 +365,8 @@ final class ModuleResolver {
 			}
 		}
 
-		filterCapabilityPermissions(existingCapabilities);
+		InternalUtils.filterCapabilityPermissions(existingCapabilities);
 		return new ModuleWiring(revision, existingCapabilities, existingRequirements, existingProvidedWires, existingRequiredWires, Collections.EMPTY_LIST);
-	}
-
-	private static void filterCapabilityPermissions(List<ModuleCapability> capabilities) {
-		if (System.getSecurityManager() == null) {
-			return;
-		}
-		for (Iterator<ModuleCapability> iCapabilities = capabilities.iterator(); iCapabilities.hasNext();) {
-			ModuleCapability capability = iCapabilities.next();
-			Permission permission = getProvidePermission(capability);
-			Bundle provider = capability.getRevision().getBundle();
-			if (provider != null && !provider.hasPermission(permission)) {
-				iCapabilities.remove();
-			}
-		}
 	}
 
 	static boolean isSingleton(ModuleRevision revision) {
@@ -407,46 +393,6 @@ final class ModuleResolver {
 		}
 		Object version = c.getAttributes().get(versionAttr);
 		return version instanceof Version ? (Version) version : Version.emptyVersion;
-	}
-
-	static Permission getRequirePermission(BundleCapability candidate) {
-		String name = candidate.getNamespace();
-		if (PackageNamespace.PACKAGE_NAMESPACE.equals(name)) {
-			return new PackagePermission(getPermisionName(candidate), candidate.getRevision().getBundle(), PackagePermission.IMPORT);
-		}
-		if (HostNamespace.HOST_NAMESPACE.equals(name)) {
-			return new BundlePermission(getPermisionName(candidate), BundlePermission.FRAGMENT);
-		}
-		if (BundleNamespace.BUNDLE_NAMESPACE.equals(name)) {
-			return new BundlePermission(getPermisionName(candidate), BundlePermission.REQUIRE);
-		}
-		return new CapabilityPermission(name, candidate.getAttributes(), candidate.getRevision().getBundle(), CapabilityPermission.REQUIRE);
-	}
-
-	static Permission getProvidePermission(BundleCapability candidate) {
-		String name = candidate.getNamespace();
-		if (PackageNamespace.PACKAGE_NAMESPACE.equals(name)) {
-			return new PackagePermission(getPermisionName(candidate), PackagePermission.EXPORTONLY);
-		}
-		if (HostNamespace.HOST_NAMESPACE.equals(name)) {
-			return new BundlePermission(getPermisionName(candidate), BundlePermission.HOST);
-		}
-		if (BundleNamespace.BUNDLE_NAMESPACE.equals(name)) {
-			return new BundlePermission(getPermisionName(candidate), BundlePermission.PROVIDE);
-		}
-		return new CapabilityPermission(name, CapabilityPermission.PROVIDE);
-	}
-
-	private static String getPermisionName(BundleCapability candidate) {
-		Object name = candidate.getAttributes().get(candidate.getNamespace());
-		if (name instanceof String) {
-			return (String) name;
-		}
-		if (name instanceof Collection) {
-			Collection<?> names = (Collection<?>) name;
-			return names.isEmpty() ? "unknown" : names.iterator().next().toString(); //$NON-NLS-1$
-		}
-		return "unknown"; //$NON-NLS-1$
 	}
 
 	class ResolveProcess extends ResolveContext implements Comparator<Capability> {
@@ -536,11 +482,11 @@ final class ModuleResolver {
 			removeNonEffectiveCapabilities(iCandidates);
 			removeSubstituted(iCandidates);
 			filterPermissions((BundleRequirement) requirement, iCandidates);
-			hook.filterMatches((BundleRequirement) requirement, Converters.asListBundleCapability(candidates));
+			hook.filterMatches((BundleRequirement) requirement, InternalUtils.asListBundleCapability(candidates));
 			// filter resolved hosts after calling hooks to allow hooks to see the host capability
 			filterResolvedHosts(requirement, candidates, filterResolvedHosts);
 			Collections.sort(candidates, this);
-			return Converters.asListCapability(candidates);
+			return InternalUtils.asListCapability(candidates);
 		}
 
 		private void filterResolvedHosts(Requirement requirement, List<ModuleCapability> candidates, boolean filterResolvedHosts) {
@@ -572,8 +518,8 @@ final class ModuleResolver {
 						continue candidates;
 					}
 				}
-				Permission requirePermission = getRequirePermission(candidate);
-				Permission providePermission = getProvidePermission(candidate);
+				Permission requirePermission = InternalUtils.getRequirePermission(candidate);
+				Permission providePermission = InternalUtils.getProvidePermission(candidate);
 				if (!requirement.getRevision().getBundle().hasPermission(requirePermission) || !candidate.getRevision().getBundle().hasPermission(providePermission)) {
 					iCandidates.remove();
 				}
@@ -624,14 +570,14 @@ final class ModuleResolver {
 		@Override
 		public Collection<Resource> getMandatoryResources() {
 			if (triggersMandatory) {
-				return Converters.asCollectionResource(triggers);
+				return InternalUtils.asCollectionResource(triggers);
 			}
 			return super.getMandatoryResources();
 		}
 
 		@Override
 		public Collection<Resource> getOptionalResources() {
-			return Converters.asCollectionResource(optionals);
+			return InternalUtils.asCollectionResource(optionals);
 		}
 
 		Map<Resource, List<Wire>> resolve() throws ResolutionException {
@@ -641,7 +587,7 @@ final class ModuleResolver {
 			threadResolving.set(Boolean.TRUE);
 			try {
 				try {
-					hook = adaptor.getResolverHookFactory().begin(Converters.asListBundleRevision((List<? extends BundleRevision>) triggers));
+					hook = adaptor.getResolverHookFactory().begin(InternalUtils.asListBundleRevision((List<? extends BundleRevision>) triggers));
 				} catch (RuntimeException e) {
 					if (e.getCause() instanceof BundleException) {
 						BundleException be = (BundleException) e.getCause();
@@ -839,7 +785,7 @@ final class ModuleResolver {
 				throw new ResolutionException("Dynamic import resolution not supported by the resolver: " + resolver.getClass());
 			}
 			List<Capability> dynamicMatches = filterProviders(dynamicReq.getOriginal(), moduleDatabase.findCapabilities(dynamicReq));
-			Collection<Resource> ondemandFragments = Converters.asCollectionResource(moduleDatabase.getFragmentRevisions());
+			Collection<Resource> ondemandFragments = InternalUtils.asCollectionResource(moduleDatabase.getFragmentRevisions());
 
 			return ((ResolverImpl) resolver).resolve(this, dynamicReq.getRevision(), dynamicReq.getOriginal(), dynamicMatches, ondemandFragments);
 
@@ -847,7 +793,7 @@ final class ModuleResolver {
 
 		private void filterResolvable() {
 			Collection<ModuleRevision> enabledCandidates = new ArrayList<ModuleRevision>(unresolved);
-			hook.filterResolvable(Converters.asListBundleRevision((List<? extends BundleRevision>) enabledCandidates));
+			hook.filterResolvable(InternalUtils.asListBundleRevision((List<? extends BundleRevision>) enabledCandidates));
 			disabled.removeAll(enabledCandidates);
 			for (ModuleRevision revision : disabled)
 				reportBuilder.addEntry(revision, Entry.Type.FILTERED_BY_RESOLVER_HOOK, null);

@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
-import org.eclipse.osgi.internal.container.Converters;
+import org.eclipse.osgi.internal.container.InternalUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.IdentityNamespace;
@@ -83,12 +83,12 @@ public final class ModuleRevision implements BundleRevision {
 
 	@Override
 	public List<BundleCapability> getDeclaredCapabilities(String namespace) {
-		return Converters.asListBundleCapability(getModuleCapabilities(namespace));
+		return InternalUtils.asListBundleCapability(getModuleCapabilities(namespace));
 	}
 
 	@Override
 	public List<BundleRequirement> getDeclaredRequirements(String namespace) {
-		return Converters.asListBundleRequirement(getModuleRequirements(namespace));
+		return InternalUtils.asListBundleRequirement(getModuleRequirements(namespace));
 	}
 
 	/**
@@ -139,12 +139,12 @@ public final class ModuleRevision implements BundleRevision {
 
 	@Override
 	public List<Capability> getCapabilities(String namespace) {
-		return Converters.asListCapability(getDeclaredCapabilities(namespace));
+		return InternalUtils.asListCapability(getDeclaredCapabilities(namespace));
 	}
 
 	@Override
 	public List<Requirement> getRequirements(String namespace) {
-		return Converters.asListRequirement(getDeclaredRequirements(namespace));
+		return InternalUtils.asListRequirement(getDeclaredRequirements(namespace));
 	}
 
 	/**
