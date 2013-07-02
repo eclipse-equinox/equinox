@@ -1327,6 +1327,9 @@ public final class ModuleContainer {
 		@Override
 		public void setInitialBundleStartLevel(int startlevel) {
 			checkAdminPermission(getBundle(), AdminPermission.STARTLEVEL);
+			if (startlevel < 1) {
+				throw new IllegalArgumentException("Cannot set the start level to less than 1: " + startlevel);
+			}
 			moduleDatabase.setInitialModuleStartLevel(startlevel);
 		}
 
