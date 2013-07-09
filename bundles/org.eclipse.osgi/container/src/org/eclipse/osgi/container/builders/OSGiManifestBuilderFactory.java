@@ -446,7 +446,7 @@ public final class OSGiManifestBuilderFactory {
 			Map<String, String> directives = getDirectives(provideElement);
 			for (String namespace : namespaces) {
 				if (PROHIBITED_CAPABILITIES.contains(namespace) || (chechSystemCapabilities && SYSTEM_CAPABILITIES.contains(namespace))) {
-					throw new BundleException("A bundle is not allowed to define a capability in the " + namespace + " name space."); //$NON-NLS-1$ //$NON-NLS-2$
+					throw new BundleException("A bundle is not allowed to define a capability in the " + namespace + " name space.", BundleException.MANIFEST_ERROR); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 
 				builder.addCapability(namespace, directives, attributes);
@@ -683,7 +683,7 @@ public final class OSGiManifestBuilderFactory {
 				// do another sanity check
 				FilterImpl.newInstance(filterSpec);
 			} catch (InvalidSyntaxException e1) {
-				throw new BundleException("Error converting required execution environment.", e1); //$NON-NLS-1$
+				throw new BundleException("Error converting required execution environment.", BundleException.MANIFEST_ERROR, e1); //$NON-NLS-1$
 			}
 		}
 		return filterSpec;
@@ -808,7 +808,7 @@ public final class OSGiManifestBuilderFactory {
 						try {
 							filter.append('(').append(filterAttribute).append("~=").append(Storage.sanitizeFilterInput(attrAlias)).append(')'); //$NON-NLS-1$
 						} catch (InvalidSyntaxException e) {
-							throw new BundleException("Bad native attribute: " + attrAlias, e); //$NON-NLS-1$
+							throw new BundleException("Bad native attribute: " + attrAlias, BundleException.MANIFEST_ERROR, e); //$NON-NLS-1$
 						}
 					}
 				}
