@@ -70,7 +70,7 @@ public abstract class SystemModule extends Module {
 	}
 
 	public ContainerEvent waitForStop(long timeout) throws InterruptedException {
-		final boolean waitForEver = timeout == 0;
+		final boolean waitForever = timeout == 0;
 		final long start = System.currentTimeMillis();
 		final Thread current = Thread.currentThread();
 		long timeLeft = timeout;
@@ -82,7 +82,6 @@ public abstract class SystemModule extends Module {
 		} else {
 			stateLocked = stateChangeLock.tryLock(timeLeft, TimeUnit.MILLISECONDS);
 		}
-		timeLeft = waitForEver ? 0 : start + timeout - System.currentTimeMillis();
 		if (stateLocked) {
 			synchronized (forStop) {
 				try {
@@ -96,17 +95,13 @@ public abstract class SystemModule extends Module {
 				} finally {
 					stateChangeLock.unlock();
 				}
-				if (event == null) {
-					do {
-						forStop.wait(timeLeft);
-						event = forStop.remove(current);
-						if (!waitForEver) {
-							timeLeft = start + timeout - System.currentTimeMillis();
-							if (timeLeft == 0) {
-								timeLeft = -1;
-							}
-						}
-					} while (event == null && timeLeft >= 0);
+				timeLeft = waitForever ? 0 : start + timeout - System.currentTimeMillis();
+				while (event == null && (waitForever || timeLeft > 0)) {
+					forStop.wait(timeLeft);
+					event = forStop.remove(current);
+					if (!waitForever) {
+						timeLeft = start + timeout - System.currentTimeMillis();
+					}
 				}
 			}
 		}
