@@ -750,10 +750,34 @@ public class TestModuleContainer extends AbstractTest {
 
 		container.refresh(null);
 		actual = database.getModuleEvents();
-		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.UNINSTALLED, State.UNINSTALLED),
-
-		new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED)));
+		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.UNINSTALLED, State.UNINSTALLED), new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED)));
 		assertEvents(expected, actual, false);
+
+		// Test bug 411833
+		// install c4 again and resolve c6
+		c4 = installDummyModule("c4_v1.MF", "c4_v1", container);
+		container.resolve(Arrays.asList(c6), true);
+		// throw out installed and resolved events
+		database.getModuleEvents();
+
+		removalPending = container.getRemovalPending();
+		Assert.assertEquals("Wrong number of removal pending", 0, removalPending.size());
+
+		c4Revision0 = c4.getCurrentRevision();
+		// uninstall c4, but refresh c6 instead
+		// this should result in removal pending c4 to be removed.
+		container.uninstall(c4);
+		removalPending = container.getRemovalPending();
+		Assert.assertEquals("Wrong number of removal pending", 1, removalPending.size());
+		Assert.assertTrue("Wrong module removalPending: " + removalPending, removalPending.containsAll(Arrays.asList(c4Revision0)));
+
+		container.refresh(Collections.singletonList(c6));
+		actual = database.getModuleEvents();
+		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.UNINSTALLED, State.UNINSTALLED), new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED)));
+		assertEvents(expected, actual, false);
+
+		removalPending = container.getRemovalPending();
+		Assert.assertEquals("Wrong number of removal pending", 0, removalPending.size());
 	}
 
 	@Test
