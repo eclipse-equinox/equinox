@@ -74,8 +74,10 @@
     <module>bundles/org.eclipse.equinox.launcher.wpf.win32.x86</module>
 
     <module>bundles/org.eclipse.osgi.tests</module>
+
     <module>features/org.eclipse.equinox.executable.feature</module>
     <module>features/org.eclipse.equinox.core.sdk</module>
+    <module>features/org.eclipse.osgi.compatibility.plugins.feature</module>
   </modules>
 
 </project>
