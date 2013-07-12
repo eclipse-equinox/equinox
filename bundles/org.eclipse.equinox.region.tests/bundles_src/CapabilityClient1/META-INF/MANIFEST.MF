@@ -5,4 +5,4 @@ Bundle-SymbolicName: CapabilityClient1
 Bundle-Version: 1.0.0
 Export-Package: pkg2.a;version="1.0.0",
  pkg2.b;version="1.0.0"
-Require-Capability: CapabilityProvider2; filtler:=(name=CapabilityProvider2)
+Require-Capability: CapabilityProvider2; filter:=(name=CapabilityProvider2)
