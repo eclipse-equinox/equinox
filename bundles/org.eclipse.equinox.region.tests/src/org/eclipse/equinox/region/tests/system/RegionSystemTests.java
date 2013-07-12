@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -188,6 +188,46 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertEquals(BC1, Bundle.INSTALLED, bundles.get(BC1).getState());
 		assertEquals(SC1, Bundle.INSTALLED, bundles.get(SC1).getState());
 		assertEquals(CC1, Bundle.INSTALLED, bundles.get(CC1).getState());
+	}
+
+	public void testPersistenceBug343020() throws BundleException, InvalidSyntaxException {
+		// get the system region
+		Region systemRegion = digraph.getRegion(0);
+		// create a test region
+		Region testRegion = digraph.createRegion(getName());
+
+		RegionFilterBuilder builder = digraph.createRegionFilterBuilder();
+		// Import the system bundle from the systemRegion
+		builder.allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)");
+		// import PP1
+		builder.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)");
+		digraph.connect(testRegion, builder.build(), systemRegion);
+		// install CP2
+		Bundle cp2 = bundleInstaller.installBundle(CP2, testRegion);
+
+		bundleInstaller.resolveBundles(new Bundle[] {cp2});
+		assertEquals("Wrong state for pc1.", Bundle.INSTALLED, cp2.getState());
+
+		regionBundle.stop();
+
+		// install PP1 there is no region alive
+		bundleInstaller.installBundle(PP1);
+
+		// start region bundle and confirm we can resolve cp2 now
+		startRegionBundle();
+
+		bundleInstaller.refreshPackages(new Bundle[] {cp2});
+		assertEquals("Wrong state for pc1.", Bundle.RESOLVED, cp2.getState());
+
+		// stop region bundle to test uninstalling bundles while stopped
+		regionBundle.stop();
+		cp2.uninstall();
+
+		startRegionBundle();
+		testRegion = digraph.getRegion(getName());
+		assertNotNull("No test region found.", testRegion);
+		Set<Long> testIds = testRegion.getBundleIds();
+		assertEquals("Wrong number of test ids.", 0, testIds.size());
 	}
 
 	public void testCyclicRegions0() throws BundleException, InvalidSyntaxException, InterruptedException {
