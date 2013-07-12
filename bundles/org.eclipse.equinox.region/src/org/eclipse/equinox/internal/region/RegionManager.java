@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 VMware Inc.
+ * Copyright (c) 2008, 2013 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,8 +57,29 @@ public final class RegionManager implements BundleActivator {
 			this.domain = REGION_DOMAIN_PROP;
 		digraph = loadRegionDigraph();
 		registerRegionHooks(digraph);
+		// after registering the region hooks we need to verify no ophans exist
+		// if they do then we assume the need to be in the kernel region
+		checkForOrphans(digraph);
 		digraphMBean = registerDigraphMbean(digraph);
 		registerRegionDigraph(digraph);
+	}
+
+	private void checkForOrphans(StandardRegionDigraph regionDigraph) {
+		// we assume the system bundle is in the root region.
+		Region rootRegion = regionDigraph.getRegion(0);
+		if (rootRegion != null) {
+			Bundle[] bundles = bundleContext.getBundles();
+			for (Bundle bundle : bundles) {
+				if (regionDigraph.getRegion(bundle) == null) {
+					// we have an orphan; add it to the root region
+					try {
+						rootRegion.addBundle(bundle.getBundleId());
+					} catch (BundleException e) {
+						// ignore, someone added the bundle to another region since we checked
+					}
+				}
+			}
+		}
 	}
 
 	public void stop(BundleContext bc) throws IOException {

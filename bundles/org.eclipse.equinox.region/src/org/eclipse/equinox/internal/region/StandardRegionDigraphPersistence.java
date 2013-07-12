@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -113,7 +113,7 @@ final class StandardRegionDigraphPersistence implements RegionDigraphPersistence
 		// read the number of regions
 		int numRegions = in.readInt();
 		for (int i = 0; i < numRegions; i++) {
-			readRegion(in, digraph);
+			readRegion(in, digraph, bundleContext);
 		}
 		// read each edge
 		// read number of tail regions
@@ -129,7 +129,7 @@ final class StandardRegionDigraphPersistence implements RegionDigraphPersistence
 		return digraph;
 	}
 
-	private static Region readRegion(DataInputStream in, RegionDigraph digraph) throws IOException, BundleException {
+	private static Region readRegion(DataInputStream in, RegionDigraph digraph, BundleContext context) throws IOException, BundleException {
 		// read region name
 		String name = in.readUTF();
 		Region region = digraph.createRegion(name);
@@ -137,7 +137,9 @@ final class StandardRegionDigraphPersistence implements RegionDigraphPersistence
 		// read number of bundles
 		int numIds = in.readInt();
 		for (int i = 0; i < numIds; i++) {
-			region.addBundle(in.readLong());
+			long id = in.readLong();
+			if (context == null || context.getBundle(id) != null)
+				region.addBundle(id);
 		}
 		return region;
 	}
