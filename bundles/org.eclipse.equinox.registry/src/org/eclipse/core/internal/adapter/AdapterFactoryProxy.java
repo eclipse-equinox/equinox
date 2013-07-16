@@ -1,10 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2004, 2013 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  * 
- * Contributors: IBM - Initial API and implementation
+ * Contributors: 
+ * 	IBM - Initial API and implementation
+ * 	Oracle - Fix for bug 408506
  ******************************************************************************/
 package org.eclipse.core.internal.adapter;
 
@@ -130,13 +132,14 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 		}
 		if (!force && !isActive)
 			return null;
-		//set to true to prevent repeated attempts to load a broken factory
-		factoryLoaded = true;
 		try {
 			factory = (IAdapterFactory) element.createExecutableExtension("class"); //$NON-NLS-1$
 		} catch (CoreException e) {
 			String msg = NLS.bind(RegistryMessages.adapters_cantInstansiate, getAdaptableType(), element.getContributor().getName());
 			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, msg, e));
+		} finally {
+			//set to true to prevent repeated attempts to load a broken factory
+			factoryLoaded = true;
 		}
 		return factory;
 	}
