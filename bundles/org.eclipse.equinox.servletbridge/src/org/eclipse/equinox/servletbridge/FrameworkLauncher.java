@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,7 +45,6 @@ public class FrameworkLauncher {
 	protected static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 	protected static final String FRAMEWORK_BUNDLE_NAME = "org.eclipse.osgi"; //$NON-NLS-1$
 	protected static final String STARTER = "org.eclipse.core.runtime.adaptor.EclipseStarter"; //$NON-NLS-1$
-	protected static final String FRAMEWORKPROPERTIES = "org.eclipse.osgi.framework.internal.core.FrameworkProperties"; //$NON-NLS-1$
 	protected static final String NULL_IDENTIFIER = "@null"; //$NON-NLS-1$
 	protected static final String OSGI_FRAMEWORK = "osgi.framework"; //$NON-NLS-1$
 	protected static final String OSGI_FRAMEWORK_EXTENSIONS = "osgi.framework.extensions"; //$NON-NLS-1$
@@ -507,20 +506,24 @@ public class FrameworkLauncher {
 		Method registerFrameworkShutdownHandler = null;
 		try {
 			registerFrameworkShutdownHandler = starterClazz.getDeclaredMethod("internalAddFrameworkShutdownHandler", new Class[] {Runnable.class}); //$NON-NLS-1$
+			if (!registerFrameworkShutdownHandler.isAccessible()) {
+				registerFrameworkShutdownHandler.setAccessible(true);
+			}
+			Runnable restartHandler = createRestartHandler(starterClazz);
+			registerFrameworkShutdownHandler.invoke(null, new Object[] {restartHandler});
 		} catch (NoSuchMethodException e) {
 			// Ok. However we will not support restart events. Log this as info
 			context.log(starterClazz.getName() + " does not support setting a shutdown handler. Restart handling is disabled."); //$NON-NLS-1$
 			return;
 		}
-		if (!registerFrameworkShutdownHandler.isAccessible())
-			registerFrameworkShutdownHandler.setAccessible(true);
-		Runnable restartHandler = createRestartHandler();
-		registerFrameworkShutdownHandler.invoke(null, new Object[] {restartHandler});
+
 	}
 
-	private Runnable createRestartHandler() throws ClassNotFoundException, NoSuchMethodException {
-		Class frameworkPropertiesClazz = frameworkClassLoader.loadClass(FRAMEWORKPROPERTIES);
-		final Method getProperty = frameworkPropertiesClazz.getMethod("getProperty", new Class[] {String.class}); //$NON-NLS-1$
+	private Runnable createRestartHandler(Class starterClazz) throws ClassNotFoundException, NoSuchMethodException {
+		final Method getProperty = starterClazz.getDeclaredMethod("getProperty", new Class[] {String.class}); //$NON-NLS-1$
+		if (!getProperty.isAccessible()) {
+			getProperty.setAccessible(true);
+		}
 		Runnable restartHandler = new Runnable() {
 			public void run() {
 				try {
