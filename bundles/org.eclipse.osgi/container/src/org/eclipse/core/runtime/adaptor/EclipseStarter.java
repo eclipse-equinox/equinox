@@ -812,7 +812,6 @@ public class EclipseStarter {
 		if (configArgIndex == 0) {
 			frameworkArgs = new String[0];
 			appArgs = args;
-			equinoxConfig.setAppArgs(args);
 			return;
 		}
 		appArgs = new String[args.length - configArgIndex];
