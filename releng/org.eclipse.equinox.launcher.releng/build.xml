@@ -173,7 +173,7 @@
 				</not>
 			</or>
 		</condition>
-		<condition property="build_cmd" value="unix2dos *; if cmd /c build.bat" else="if sh build.sh">
+		<condition property="build_cmd" value="unix2dos *; unix2dos win32/*; unix2dos wpf/*; if cmd /c build.bat" else="if sh build.sh">
 			<equals arg1="${os}" arg2="win32"/>
 		</condition>
 		<condition property="exit_cmd" value="exit;" else="">
@@ -185,7 +185,7 @@
 			username="${userName}" 
 			keyfile="${keyfile}" 
 			trust="true"
-	 		command="rm -rf ${remotetmpdir}; mkdir ${remotetmpdir}; cd ${remotetmpdir}; unzip -aa ${remotebuilddir}/${zip_file}; cd ${lib_dir}; ${build_cmd} -os ${os} -ws ${ws} -arch ${arch} ${javaParam} all; then ${exit_cmd} cd; else cd; rm -rf ${remotetmpdir}; rm ${remotebuilddir}/${zip_file}; exit 1; fi"/>
+	 		command="rm -rf ${remotetmpdir}; mkdir ${remotetmpdir}; cd ${remotetmpdir}; unzip -aa ${remotebuilddir}/${zip_file}; cd ${lib_dir}; ${build_cmd} -os ${os} -ws ${ws} -arch ${arch} ${javaParam} all; then ${exit_cmd} cd; ${exit_cmd} else cd; rm -rf ${remotetmpdir}; rm ${remotebuilddir}/${zip_file}; exit 1; fi"/>
 		<condition property="mac_suffix" value="/Eclipse.app/Contents/MacOS" else="">
 			<equals arg1="macosx" arg2="${os}" />
 		</condition>
