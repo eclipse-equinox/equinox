@@ -29,7 +29,7 @@ int createSharedData(_TCHAR** id, int size) {
 	if (id != NULL) {
 		*id = malloc(18 * sizeof(_TCHAR));
 #ifdef WIN64
-		_stprintf(*id, _T_ECLIPSE("%lx_%lx"), GetCurrentProcessId(), (DWORDLONG) mapHandle);
+		_stprintf(*id, _T_ECLIPSE("%lx_%I64x"), GetCurrentProcessId(), (DWORDLONG) mapHandle);
 #else
 		_stprintf(*id, _T_ECLIPSE("%lx_%lx"), GetCurrentProcessId(), (DWORD) mapHandle);
 #endif
@@ -44,10 +44,11 @@ static int getShmID(const _TCHAR* id, LPDWORD processID, LPHANDLE handle) {
 		DWORD i1;
 #ifdef WIN64
 		DWORDLONG i2;
+		if (_stscanf(id, _T_ECLIPSE("%lx_%I64x"), &i1, &i2) != 2) return -1;
 #else
 		DWORD i2;
-#endif
 		if (_stscanf(id, _T_ECLIPSE("%lx_%lx"), &i1, &i2) != 2) return -1;
+#endif
 		*processID = (DWORD)i1;
 		*handle = (HANDLE)i2;
 		return 0;
