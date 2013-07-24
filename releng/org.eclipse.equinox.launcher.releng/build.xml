@@ -149,7 +149,12 @@
 	
 	<target name="buildRemote" if="remote" depends="init_keyfile">
 		<echo message="Machine: ${machine}" />
-		<property name="remotebuilddir" value="~/build"/>
+		<condition property="remotebuilddir" value="c:/build" else="~/build/">
+			<or>
+				<equals arg1="${os}" arg2="win32"/>
+				<equals arg1="${os}" arg2="wce_ppc"/>
+			</or>
+		</condition>
 		<property name="remotetmpdir" value="${remotebuilddir}/${fragmentFolder}.${gitTag}"/>
 		<property name="zip_file" value="${fragmentFolder}.${gitTag}.library.zip"/>
 		<property file="${localGit}/rt.equinox.framework/bundles/org.eclipse.equinox.executable/library/make_version.mak" />
