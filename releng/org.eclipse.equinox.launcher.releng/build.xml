@@ -98,9 +98,10 @@
 		<property name="localGit" value="../../.." />
 		
 		<!-- windows is built locally, everything else is remote -->
-		<condition property="local" >
+		<!-- Building every thing remote now
+		condition property="local" >
 			<equals arg1="${os}" arg2="win32"/>
-		</condition>
+		</condition-->
 		<condition property="remote" >
 			<not> <isset property="local"/> </not>
 		</condition>
