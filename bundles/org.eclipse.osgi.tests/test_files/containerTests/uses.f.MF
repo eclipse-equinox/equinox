@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: uses.f
+Bundle-Version: 1.0
+Export-Package: 
+ uses2; version="2.0"

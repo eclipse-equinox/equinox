@@ -1225,6 +1225,88 @@ public class TestModuleContainer extends AbstractTest {
 		Assert.assertEquals("b1 should not resolve.", State.INSTALLED, b1.getState());
 	}
 
+	/*
+	 * Test that a resolve process does not blow up because of one unresolvable uses constraint issue
+	 */
+	@Test
+	public void testUses1() throws BundleException, IOException, ResolutionException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+		Module uses_a = installDummyModule("uses.a.MF", "a", container);
+		Module uses_b = installDummyModule("uses.b.MF", "b", container);
+		Module uses_c = installDummyModule("uses.c.MF", "c", container);
+
+		try {
+			container.resolve(null, false);
+		} catch (ResolutionException e) {
+			// should not happen here
+			Assert.fail(e.getMessage());
+		}
+		Assert.assertEquals("a should resolve.", State.RESOLVED, uses_a.getState());
+		Assert.assertEquals("b should resolve.", State.RESOLVED, uses_b.getState());
+		Assert.assertEquals("c should not resolve.", State.INSTALLED, uses_c.getState());
+	}
+
+	/*
+	 * Test that split packages are handled ok with uses constraints
+	 */
+	@Test
+	public void testUses2() throws BundleException, IOException, ResolutionException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+		Module uses_a = installDummyModule("uses.a.MF", "a", container);
+		Module uses_b = installDummyModule("uses.b.MF", "b", container);
+		Module uses_d = installDummyModule("uses.d.MF", "d", container);
+
+		try {
+			container.resolve(null, false);
+		} catch (ResolutionException e) {
+			// should not happen here
+			Assert.fail(e.getMessage());
+		}
+		Assert.assertEquals("a should resolve.", State.RESOLVED, uses_a.getState());
+		Assert.assertEquals("b should resolve.", State.RESOLVED, uses_b.getState());
+		Assert.assertEquals("d should resolve.", State.RESOLVED, uses_d.getState());
+	}
+
+	/*
+	 * Test that split packages are handled ok with uses constraints
+	 */
+	@Test
+	public void testUses3() throws BundleException, IOException, ResolutionException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+		Module uses_a = installDummyModule("uses.a.MF", "a", container);
+		Module uses_b = installDummyModule("uses.b.MF", "b", container);
+		Module uses_e = installDummyModule("uses.e.MF", "e", container);
+		Module uses_f = installDummyModule("uses.f.MF", "f", container);
+		Module uses_g = installDummyModule("uses.g.MF", "g", container);
+
+		try {
+			container.resolve(null, false);
+		} catch (ResolutionException e) {
+			// should not happen here
+			Assert.fail(e.getMessage());
+		}
+		Assert.assertEquals("a should resolve.", State.RESOLVED, uses_a.getState());
+		Assert.assertEquals("b should resolve.", State.RESOLVED, uses_b.getState());
+		Assert.assertEquals("e should resolve.", State.RESOLVED, uses_e.getState());
+		Assert.assertEquals("f should resolve.", State.RESOLVED, uses_f.getState());
+		Assert.assertEquals("g should not resolve.", State.INSTALLED, uses_g.getState());
+	}
+
 	@Test
 	public void testMultiCardinalityUses() throws BundleException, IOException, ResolutionException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
