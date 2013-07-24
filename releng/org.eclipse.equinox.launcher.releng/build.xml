@@ -174,11 +174,11 @@
 			</or>
 		</condition>
 		<condition property="build_cmd" value="unix2dos *; if cmd /c build.bat" else="if sh build.sh">
-			<equals arg1="${swt.os}" arg2="win32"/>
+			<equals arg1="${os}" arg2="win32"/>
 		</condition>
 		<condition property="exit_cmd" value="exit;" else="">
 			<or>
-				<equals arg1="${swt.os}" arg2="win32"/>
+				<equals arg1="${os}" arg2="win32"/>
 			</or>
 		</condition>
 		<sshexec host="${machine}" 
