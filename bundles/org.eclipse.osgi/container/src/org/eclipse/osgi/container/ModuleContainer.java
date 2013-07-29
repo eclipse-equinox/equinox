@@ -475,6 +475,11 @@ public final class ModuleContainer {
 			Collection<ModuleRevision> unresolved = new ArrayList<ModuleRevision>();
 			moduleDatabase.readLock();
 			try {
+				// need to check that another thread has not done the work already
+				result = findExistingDynamicWire(revision.getWiring(), dynamicPkgName);
+				if (result != null) {
+					return result;
+				}
 				dynamicReqs = getDynamicRequirements(dynamicPkgName, revision);
 				if (dynamicReqs.isEmpty()) {
 					// do nothing
@@ -510,23 +515,28 @@ public final class ModuleContainer {
 
 			// Save the result
 			ModuleWiring wiring = deltaWiring.get(revision);
-			if (wiring != null) {
-				List<ModuleWire> wires = wiring.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
-				// work backwards to find the first wire with the dynamic requirement that matches package name
-				for (int i = wires.size() - 1; i >= 0; i--) {
-					ModuleWire wire = wires.get(i);
-					if (dynamicPkgName.equals(wire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
-						result = wire;
-						break;
-					}
-					if (!PackageNamespace.RESOLUTION_DYNAMIC.equals(wire.getRequirement().getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
-						break;
-					}
-				}
-			}
+			result = findExistingDynamicWire(wiring, dynamicPkgName);
 		} while (!applyDelta(deltaWiring, modulesResolved, Collections.<Module> emptyList(), timestamp, false));
 
 		return result;
+	}
+
+	private ModuleWire findExistingDynamicWire(ModuleWiring wiring, String dynamicPkgName) {
+		if (wiring == null) {
+			return null;
+		}
+		List<ModuleWire> wires = wiring.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+		// work backwards to find the first wire with the dynamic requirement that matches package name
+		for (int i = wires.size() - 1; i >= 0; i--) {
+			ModuleWire wire = wires.get(i);
+			if (dynamicPkgName.equals(wire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
+				return wire;
+			}
+			if (!PackageNamespace.RESOLUTION_DYNAMIC.equals(wire.getRequirement().getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
+				return null;
+			}
+		}
+		return null;
 	}
 
 	private boolean applyDelta(Map<ModuleRevision, ModuleWiring> deltaWiring, Collection<Module> modulesResolved, Collection<Module> triggers, long timestamp, boolean restartTriggers) {
