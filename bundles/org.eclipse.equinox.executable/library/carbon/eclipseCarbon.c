@@ -101,6 +101,59 @@ static NSWindow* window = nil;
 	window = nil;
 }
 
++ (int)show: (NSString *) featureImage {
+	ProcessSerialNumber psn;
+	if (GetCurrentProcess(&psn) == noErr) {
+		TransformProcessType(&psn, kProcessTransformToForegroundApplication);
+		SetFrontProcess(&psn);
+	}
+	if (window != NULL)
+		return 0; /*already showing */
+	if (featureImage == NULL)
+		return ENOENT;
+
+	int result = ENOENT;
+	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	[NSApplication sharedApplication];
+	NSImage* image = [[NSImage alloc] initByReferencingFile: featureImage];
+	[featureImage release];
+	if (image != NULL) {
+		NSImageRep* imageRep = [image bestRepresentationForDevice: [[NSScreen mainScreen] deviceDescription]];
+		NSRect rect = {{0, 0}, {[imageRep pixelsWide], [imageRep pixelsHigh]}};
+		[image setSize: NSMakeSize([imageRep pixelsWide], [imageRep pixelsHigh])];
+		[image autorelease];
+		window = [[KeyWindow alloc] initWithContentRect: rect styleMask: NSBorderlessWindowMask backing: NSBackingStoreBuffered defer: 0];
+		if (window != nil) {
+			[window center];
+			[window setBackgroundColor: [NSColor colorWithPatternImage: image]];
+			[window makeKeyAndOrderFront: nil];
+			dispatchMessages();
+			result = 0;		
+		}
+	}
+	[pool release];
+	return result;
+}
+
++ (void)shutdown {
+	if (window != 0) {
+		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+		[window close];
+		window = nil;
+		[pool release];
+	}
+}
+
++ (void)dispatch {
+	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	NSEvent* event;
+	NSApplication* application = [NSApplication sharedApplication];
+	while ((event = [application nextEventMatchingMask: 0 untilDate: nil inMode: NSDefaultRunLoopMode dequeue: TRUE]) != nil) {
+		[application sendEvent: event];
+	}
+	[pool release];	
+}
+
 @end
 
 @interface AppleEventDelegate : NSObject
@@ -185,50 +238,36 @@ int reuseWorkbench(_TCHAR** filePath, int timeout) {
  */
 int showSplash( const _TCHAR* featureImage )
 {
-	if (window != NULL)
-		return 0; /*already showing */
-	if (featureImage == NULL)
-		return ENOENT;
-	
-	int result = ENOENT;
+	int result = 0;
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-	[NSApplication sharedApplication];
-	NSImage* image = [[NSImage alloc] initByReferencingFile: [NSString stringWithUTF8String: featureImage]];
-	if (image != NULL) {
-		NSImageRep* imageRep = [image bestRepresentationForDevice: [[NSScreen mainScreen] deviceDescription]];
-		NSRect rect = {{0, 0}, {[imageRep pixelsWide], [imageRep pixelsHigh]}};
-		[image setSize: NSMakeSize([imageRep pixelsWide], [imageRep pixelsHigh])];
-		[image autorelease];
-		window = [[KeyWindow alloc] initWithContentRect: rect styleMask: NSBorderlessWindowMask backing: NSBackingStoreBuffered defer: 0];
-		if (window != nil) {
-			[window center];
-			[window setBackgroundColor: [NSColor colorWithPatternImage: image]];
-			[window makeKeyAndOrderFront: nil];
-			dispatchMessages();
-			result = 0;		
-		}
+	NSString *str = [[NSString stringWithUTF8String: featureImage] retain];
+	if ([NSThread isMainThread]) {
+		result = [KeyWindow show: str];
+	} else {
+		[KeyWindow performSelectorOnMainThread: @selector(show:) withObject: str waitUntilDone: 0];
 	}
 	[pool release];
 	return result;
 }
 
 void takeDownSplash() {
-	if (window != 0) {
-		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-		[window close];
-		window = nil;
-		[pool release];
+	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	if ([NSThread isMainThread]) {
+		[KeyWindow shutdown];
+	} else {
+		[KeyWindow performSelectorOnMainThread: @selector(shutdown) withObject: nil waitUntilDone: 0];
 	}
+	[pool release];
 }	
 
 void dispatchMessages() {
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-	NSEvent* event;
-	NSApplication* application = [NSApplication sharedApplication];
-	while ((event = [application nextEventMatchingMask: 0 untilDate: nil inMode: NSDefaultRunLoopMode dequeue: TRUE]) != nil) {
-		[application sendEvent: event];
+	if ([NSThread isMainThread]) {
+		[KeyWindow dispatch];
+	} else {
+		[KeyWindow performSelectorOnMainThread: @selector(dispatch) withObject: nil waitUntilDone: 0];
 	}
-	[pool release];	
+	[pool release];
 }
 
 #else
