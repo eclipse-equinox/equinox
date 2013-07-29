@@ -14,6 +14,7 @@ import java.io.*;
 import java.net.*;
 import java.security.PrivilegedAction;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -1852,6 +1853,95 @@ public class SystemBundleTests extends AbstractBundleTests {
 				Thread.sleep(500);
 		} catch (Exception e) {
 			fail("Unexpected exception", e); //$NON-NLS-1$
+		}
+	}
+
+	public void testBug413879() {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Unexpected exception in start()", e); //$NON-NLS-1$
+		}
+
+		BundleContext systemContext = equinox.getBundleContext();
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+
+		Bundle test1 = null;
+		try {
+			test1 = systemContext.installBundle(installer.getBundleLocation("substitutes.a"));
+		} catch (BundleException e) {
+			fail("Unexpected error installing bundle", e);//$NON-NLS-1$
+		}
+
+		final Bundle testFinal1 = test1;
+		ServiceRegistration reg = systemContext.registerService(WeavingHook.class, new WeavingHook() {
+			public void weave(WovenClass wovenClass) {
+				if (!testFinal1.equals(wovenClass.getBundleWiring().getBundle()))
+					return;
+				if (!"substitutes.x.Ax".equals(wovenClass.getClassName()))
+					return;
+				List dynamicImports = wovenClass.getDynamicImports();
+				dynamicImports.add("*");
+			}
+		}, null);
+
+		ServiceRegistration<ResolverHookFactory> resolverHookReg = systemContext.registerService(ResolverHookFactory.class, new ResolverHookFactory() {
+			@Override
+			public ResolverHook begin(Collection<BundleRevision> triggers) {
+				// just trying to delay the resolve so that we get two threads trying to apply off the same snapshot
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					throw new RuntimeException(e);
+				}
+				return null;
+			}
+		}, null);
+
+		final Set<Throwable> errors = Collections.newSetFromMap(new ConcurrentHashMap<Throwable, Boolean>());
+		try {
+			Runnable dynamicLoadClass = new Runnable() {
+				@Override
+				public void run() {
+					try {
+						testFinal1.loadClass("substitutes.x.Ax");
+						testFinal1.loadClass("org.osgi.framework.hooks.bundle.FindHook");
+					} catch (Throwable t) {
+						errors.add(t);
+					}
+				}
+			};
+			Thread t1 = new Thread(dynamicLoadClass, getName() + "-1");
+			Thread t2 = new Thread(dynamicLoadClass, getName() + "-2");
+			t1.start();
+			t2.start();
+			t1.join();
+			t2.join();
+		} catch (Throwable t) {
+			fail("Unexpected testing bundle", t);
+		} finally {
+			reg.unregister();
+			resolverHookReg.unregister();
+		}
+		// put the framework back to the RESOLVED state
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+
+		if (!errors.isEmpty()) {
+			fail("Failed to resolve dynamic", errors.iterator().next());
 		}
 	}
 
