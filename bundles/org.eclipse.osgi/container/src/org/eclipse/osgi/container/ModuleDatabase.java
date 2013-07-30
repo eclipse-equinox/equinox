@@ -27,9 +27,9 @@ import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.container.ComputeNodeOrder;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
+import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.resource.Requirement;
-import org.osgi.resource.Wire;
+import org.osgi.resource.*;
 import org.osgi.service.resolver.Resolver;
 
 /**
@@ -603,7 +603,13 @@ public class ModuleDatabase {
 				continue;
 			}
 			for (ModuleWire wire : wiring.getRequiredModuleWires(null)) {
-				references.add(new Module[] {wire.getRequirer().getRevisions().getModule(), wire.getProvider().getRevisions().getModule()});
+				ModuleRequirement req = wire.getRequirement();
+				// Add all requirements that are not package requirements.
+				// Only add package requirements that are not dynamic
+				// TODO may want to consider only adding package, bundle and host requirements, other generic requirement are not that interesting
+				if (!PackageNamespace.PACKAGE_NAMESPACE.equals(req.getNamespace()) || !PackageNamespace.RESOLUTION_DYNAMIC.equals(req.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
+					references.add(new Module[] {wire.getRequirer().getRevisions().getModule(), wire.getProvider().getRevisions().getModule()});
+				}
 			}
 		}
 
