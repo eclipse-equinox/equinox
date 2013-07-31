@@ -1945,6 +1945,66 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	public void testBug414070() throws BundleException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+		equinox.init();
+
+		BundleContext systemContext = equinox.getBundleContext();
+		Bundle systemBundle = systemContext.getBundle();
+
+		Bundle chainTest = systemContext.installBundle(installer.getBundleLocation("chain.test")); //$NON-NLS-1$
+
+		final Bundle chainTestD = systemContext.installBundle(installer.getBundleLocation("chain.test.d")); //$NON-NLS-1$
+		Bundle chainTestA = systemContext.installBundle(installer.getBundleLocation("chain.test.a")); //$NON-NLS-1$
+		Bundle chainTestB = systemContext.installBundle(installer.getBundleLocation("chain.test.b")); //$NON-NLS-1$
+		Bundle chainTestC = systemContext.installBundle(installer.getBundleLocation("chain.test.c")); //$NON-NLS-1$
+		systemContext.registerService(WeavingHook.class, new WeavingHook() {
+			public void weave(WovenClass wovenClass) {
+				if (!chainTestD.equals(wovenClass.getBundleWiring().getBundle()))
+					return;
+				if (!"chain.test.d.DMultipleChain1".equals(wovenClass.getClassName()))
+					return;
+				List dynamicImports = wovenClass.getDynamicImports();
+				dynamicImports.add("*");
+			}
+		}, null);
+
+		equinox.start();
+
+		chainTest.loadClass("chain.test.TestMultiChain").newInstance(); //$NON-NLS-1$
+		// force a dynamic wire to cause a cycle
+		chainTestD.loadClass("chain.test.a.AMultiChain1");
+
+		// make sure all bundles are active now
+		assertEquals("A is not active.", Bundle.ACTIVE, chainTestA.getState());
+		assertEquals("B is not active.", Bundle.ACTIVE, chainTestB.getState());
+		assertEquals("C is not active.", Bundle.ACTIVE, chainTestC.getState());
+		assertEquals("D is not active.", Bundle.ACTIVE, chainTestD.getState());
+		// record STOPPING order
+		final List<Bundle> stoppingOrder = new ArrayList<Bundle>();
+		systemContext.addBundleListener(new SynchronousBundleListener() {
+			@Override
+			public void bundleChanged(BundleEvent event) {
+				if (event.getType() == BundleEvent.STOPPING) {
+					stoppingOrder.add(event.getBundle());
+				}
+			}
+		});
+		equinox.stop();
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			fail("Unexpected interruption.", e);
+		}
+
+		List<Bundle> expectedOrder = Arrays.asList(systemBundle, chainTest, chainTestA, chainTestB, chainTestC, chainTestD);
+		assertEquals("Wrong stopping order", expectedOrder.toArray(), stoppingOrder.toArray());
+	}
+
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {
 		outputDir.mkdirs();
 
