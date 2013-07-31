@@ -13,13 +13,13 @@ package org.eclipse.osgi.internal.framework;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import org.eclipse.osgi.container.Module;
-import org.eclipse.osgi.container.ModuleCollisionHook;
+import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.util.ArrayMap;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.serviceregistry.*;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
+import org.eclipse.osgi.storage.Storage;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.CollisionHook;
@@ -32,8 +32,8 @@ class OSGiFrameworkHooks {
 	private final ResolverHookFactory resolverHookFactory;
 	private final ModuleCollisionHook collisionHook;
 
-	OSGiFrameworkHooks(EquinoxContainer container) {
-		resolverHookFactory = new CoreResolverHookFactory(container);
+	OSGiFrameworkHooks(EquinoxContainer container, Storage storage) {
+		resolverHookFactory = new CoreResolverHookFactory(container, storage);
 		collisionHook = new BundleCollisionHook(container);
 	}
 
@@ -148,10 +148,12 @@ class OSGiFrameworkHooks {
 
 		final Debug debug;
 		final EquinoxContainer container;
+		final Storage storage;
 
-		public CoreResolverHookFactory(EquinoxContainer container) {
+		public CoreResolverHookFactory(EquinoxContainer container, Storage storage) {
 			this.container = container;
 			this.debug = container.getConfiguration().getDebug();
+			this.storage = storage;
 		}
 
 		void handleHookException(Throwable t, Object hook, String method) {
@@ -179,11 +181,13 @@ class OSGiFrameworkHooks {
 			if (debug.DEBUG_HOOKS) {
 				Debug.println("ResolverHook.begin"); //$NON-NLS-1$
 			}
+			ModuleContainer mContainer = storage.getModuleContainer();
+			Module systemModule = mContainer == null ? null : mContainer.getModule(0);
 			ServiceRegistry registry = container.getServiceRegistry();
-			if (registry == null) {
-				return new CoreResolverHook(Collections.<HookReference> emptyList());
+			if (registry == null || systemModule == null) {
+				return new CoreResolverHook(Collections.<HookReference> emptyList(), systemModule);
 			}
-			Module systemModule = container.getStorage().getModuleContainer().getModule(0);
+
 			BundleContextImpl context = (BundleContextImpl) EquinoxContainer.secureAction.getContext(systemModule.getBundle());
 
 			ServiceReferenceImpl<ResolverHookFactory>[] refs = getHookReferences(registry, context);
@@ -200,7 +204,7 @@ class OSGiFrameworkHooks {
 						} catch (Throwable t) {
 							// need to force an end call on the ResolverHooks we got and release them
 							try {
-								new CoreResolverHook(hookRefs).end();
+								new CoreResolverHook(hookRefs, systemModule).end();
 							} catch (Throwable endError) {
 								// we are already in failure mode; just continue
 							}
@@ -209,21 +213,37 @@ class OSGiFrameworkHooks {
 					}
 				}
 			}
-			return new CoreResolverHook(hookRefs);
+			return new CoreResolverHook(hookRefs, systemModule);
 		}
 
 		class CoreResolverHook implements ResolutionReport.Listener, ResolverHook {
 			private final List<HookReference> hooks;
+			private final Module systemModule;
 
 			private volatile ResolutionReport report;
 
-			CoreResolverHook(List<HookReference> hooks) {
+			CoreResolverHook(List<HookReference> hooks, Module systemModule) {
 				this.hooks = hooks;
+				this.systemModule = systemModule;
 			}
 
 			public void filterResolvable(Collection<BundleRevision> candidates) {
 				if (debug.DEBUG_HOOKS) {
 					Debug.println("ResolverHook.filterResolvable(" + candidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				if (systemModule == null || !Module.RESOLVED_SET.contains(systemModule.getState())) {
+					// only allow the system bundle and its fragments resolve during boot up
+					for (Iterator<BundleRevision> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
+						BundleRevision revision = iCandidates.next();
+						if ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) == 0) {
+							// host bundle; check if it is the system bundle
+							if (revision.getBundle().getBundleId() != 0) {
+								iCandidates.remove();
+							}
+						}
+						// just leave all fragments.  Only the ones that are system bundle fragments will resolve
+						// since we removed all the other possible hosts.
+					}
 				}
 				if (hooks.isEmpty())
 					return;

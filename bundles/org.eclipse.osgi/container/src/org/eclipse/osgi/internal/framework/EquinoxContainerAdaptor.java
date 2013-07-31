@@ -35,7 +35,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	public EquinoxContainerAdaptor(EquinoxContainer container, Storage storage, Map<Long, Generation> initial) {
 		this.container = container;
 		this.storage = storage;
-		this.hooks = new OSGiFrameworkHooks(container);
+		this.hooks = new OSGiFrameworkHooks(container, storage);
 		this.initial = initial;
 		this.moduleClassLoaderParent = getModuleClassLoaderParent(container.getConfiguration());
 		this.lastSecurityAdminFlush = new AtomicLong();
