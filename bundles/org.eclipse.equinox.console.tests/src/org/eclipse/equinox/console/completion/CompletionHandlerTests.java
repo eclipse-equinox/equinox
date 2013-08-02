@@ -67,7 +67,7 @@ public class CompletionHandlerTests {
 		BundleContext context = createMock(BundleContext.class);
 		expect(context.getServiceReferences(Completer.class.getName(), null)).andReturn(null).anyTimes();
 		expect(context.createFilter("(objectClass=org.eclipse.equinox.console.commands.CommandsTracker)")).andReturn(filter).anyTimes();
-		context.addServiceListener(anyObject(ServiceListener.class), anyObject(String.class));
+		context.addServiceListener(isA(ServiceListener.class), isA(String.class));
 		expectLastCall().anyTimes();
 		expect(context.getServiceReferences("org.eclipse.equinox.console.commands.CommandsTracker", null)).andReturn(new ServiceReference[]{}).anyTimes();
 		replay(context);

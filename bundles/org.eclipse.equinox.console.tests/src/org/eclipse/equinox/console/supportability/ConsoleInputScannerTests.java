@@ -11,7 +11,7 @@
 
 package org.eclipse.equinox.console.supportability;
 
-import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
@@ -190,7 +190,7 @@ public class ConsoleInputScannerTests {
         BundleContext context = createMock(BundleContext.class);
 		expect(context.getServiceReferences(Completer.class.getName(), null)).andReturn(null).anyTimes();
 		expect(context.createFilter("(objectClass=org.eclipse.equinox.console.commands.CommandsTracker)")).andReturn(filter);
-		context.addServiceListener(anyObject(ServiceListener.class), anyObject(String.class));
+		context.addServiceListener(isA(ServiceListener.class), isA(String.class));
 		expect(context.getServiceReferences("org.eclipse.equinox.console.commands.CommandsTracker", null)).andReturn(new ServiceReference[]{});
 		replay(context);
 		

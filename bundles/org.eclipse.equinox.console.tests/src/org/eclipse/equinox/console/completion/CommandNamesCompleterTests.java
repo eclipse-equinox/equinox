@@ -18,13 +18,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
-import org.eclipse.equinox.console.commands.CommandsTracker;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 
@@ -52,7 +49,7 @@ public class CommandNamesCompleterTests {
 		BundleContext context = createMock(BundleContext.class);
 //		expect(context.createFilter(String.format("(&(%s=*)(%s=*))", CommandProcessor.COMMAND_SCOPE, CommandProcessor.COMMAND_FUNCTION))).andReturn(filter);
 		expect(context.createFilter("(objectClass=org.eclipse.equinox.console.commands.CommandsTracker)")).andReturn(filter);
-		context.addServiceListener(anyObject(ServiceListener.class), anyObject(String.class));
+		context.addServiceListener(isA(ServiceListener.class), isA(String.class));
 		expect(context.getServiceReferences("org.eclipse.equinox.console.commands.CommandsTracker", null)).andReturn(new ServiceReference[]{});
 		replay(context);
 		
