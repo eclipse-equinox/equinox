@@ -11,13 +11,18 @@
  *******************************************************************************/
 package org.eclipse.equinox.ds.tests.tbc;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import junit.framework.TestCase;
 
@@ -2935,6 +2940,69 @@ public class DSTest extends TestCase {
     Bundle b = installer.installBundle(bundle);
     return b;
   }
+  
+  private Bundle installBundleAsDirectory(String bundle) throws Exception {
+	  BundleContext context = getContext();
+	  String location = installer.getBundleLocation(bundle);
+	  String reference = "reference:";
+	  if (location.startsWith(reference))
+		  // Remove the "reference" protocol from the URL.
+		  // (1) So that when running from a workspace, the test will modify a
+		  // copy of the component.xml.
+		  // (2) When running from a server, to get a readable input stream when 
+		  // extracting the JAR into a directory.
+		  location = location.substring(location.indexOf(':') + 1);
+	  if (!location.endsWith(".jar"))
+		  // If the bundle is already a directory, go ahead and install it in
+		  // the typical fashion. Leave the "reference" protocol out.
+		  return context.installBundle(location);
+	  // The bundle is a JAR file and needs to be extracted and copied as a
+	  // directory to the data storage area of the test harness bundle.
+	  File file = context.getBundle().getDataFile(bundle);
+	  ZipInputStream in = new ZipInputStream(new URL(location).openStream());
+	  try {
+		  for (ZipEntry ze = in.getNextEntry(); ze != null; ze = in.getNextEntry()) {
+			  String name = ze.getName();
+			  // Is the entry a directory?
+			  if (ze.isDirectory())
+				  // If so, continue to the next entry. Directories will be
+				  // created later.
+				  continue;
+			  // If not, the contents of the file must be copied.
+			  File destination;
+			  // Does the file entry contain a directory?
+			  int index = name.lastIndexOf('/');
+			  if (index == -1)
+				  // If not, just create the destination file.
+				  destination = new File(file, name);
+			  else {
+				  // If so, make sure the directory exists.
+				  File dir = new File(file, name.substring(0, index));
+				  dir.mkdirs();
+				  // Then create the destination file.
+				  destination = new File(dir, name.substring(index));
+			  }
+			  // Now copy the contents of the file entry to the destination.
+			  byte[] bytes = new byte[1024];
+			  int read;
+			  FileOutputStream out = new FileOutputStream(destination);
+			  try {
+				  while ((read = in.read(bytes)) != -1)
+					  out.write(bytes, 0, read);
+			  }
+			  finally {
+				  out.close();
+			  }
+			  in.closeEntry();
+		  }
+	  }
+	  finally {
+		  in.close();
+	  }
+	  // Add the "reference" protocol back when running from a server so the
+	  // framework sees the modified component.xml in the bundle data storage.
+	  return context.installBundle(reference + file.toURI());
+  }
 
   private void uninstallBundle(Bundle bundle) throws BundleException {
     installer.uninstallBundle(bundle);
@@ -2998,5 +3066,50 @@ public class DSTest extends TestCase {
       sleep0(2 * timeout);
     }
   }
-
+  
+  /*
+   * This test requires the bundle to be installed as a directory using a 
+   * reference URL. Otherwise, necessary file updates will not occur, and the 
+   * test will no longer be valid.
+   */
+  public void testComponentDefinitionReloadedOnBundleUpdateInDevModeWhenUsingWildcardInServiceComponentHeader() throws Exception {
+	  // Enable component caching in DS.
+	  System.setProperty("equinox.ds.dbstore", Boolean.TRUE.toString());
+	  // Set dev mode.
+	  System.setProperty("osgi.checkConfiguration", Boolean.TRUE.toString());
+	  
+	  String serviceName = "org.eclipse.equinox.ds.tests.tb26.Component";
+	  // component.xml = conmponent1.xml initially.
+	  Bundle b = installBundleAsDirectory("tb26");
+	  try {
+		  b.start();
+		  waitBundleStart();
+		  
+		  // The component service should be Component1.
+		  BundleContext context = getContext();
+		  ServiceReference<?> ref = context.getServiceReference(serviceName);
+		  assertNotNull(ref);
+		  Object service = context.getService(ref);
+		  Class clazz = service.getClass();
+		  assertEquals("org.eclipse.equinox.ds.tests.tb26.impl.Component1", clazz.getName());
+		  
+		  // Update component.xml with component2.xml.
+		  clazz.getMethod("update", (Class[])null).invoke(service, (Object[])null);
+		  
+		  // Force a component update in DS.
+		  b.stop();
+		  b.start();
+		  waitBundleStart();
+		  
+		  // The component service should now be Component2.
+		  ref = context.getServiceReference(serviceName);
+		  assertNotNull(ref);
+		  service = context.getService(ref);
+		  clazz = service.getClass();
+		  assertEquals("org.eclipse.equinox.ds.tests.tb26.impl.Component2", clazz.getName());
+	  }
+	  finally {
+		  uninstallBundle(b);
+	  }
+  }
 }

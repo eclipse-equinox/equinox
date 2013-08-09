@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<scr:component 
+			name="org.eclipse.equinox.ds.tests.tb26.Component1"
+			enabled="true"
+			immediate="true"
+			xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+		<implementation class="org.eclipse.equinox.ds.tests.tb26.impl.Component1"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tb26.Component"/>
+		</service>
+	</scr:component>
+</root>

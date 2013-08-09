@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.equinox.ds.tests.tb26
+Service-Component: OSGI-INF/*.xml
+Export-Package: org.eclipse.equinox.ds.tests.tb26
+Import-Package: org.osgi.service.component,
+ org.osgi.framework,
+ org.eclipse.osgi.service.urlconversion,
+ org.osgi.util.tracker
