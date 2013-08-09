@@ -14,8 +14,7 @@ package org.eclipse.equinox.internal.ds;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.*;
 import org.eclipse.equinox.internal.ds.model.DeclarationParser;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
@@ -58,55 +57,40 @@ public abstract class ComponentStorage {
 		if (dsHeader == null)
 			return components;
 		ManifestElement[] elements = ManifestElement.parseHeader(ComponentConstants.SERVICE_COMPONENT, dsHeader);
+		Collection/*<URL>*/urlCollection = computeComponentDefinitionUrls(bundle, elements);
 		// the parser is not thread safe!!!
 		synchronized (parser) {
-			// process all definition file
-			for (int i = 0; i < elements.length; i++) {
-				String[] definitionFiles = elements[i].getValueComponents();
-				for (int j = 0; j < definitionFiles.length; j++) {
-					String definitionFile = definitionFiles[j];
-					int ind = definitionFile.lastIndexOf('/');
-					String path = ind != -1 ? definitionFile.substring(0, ind) : "/"; //$NON-NLS-1$
-					InputStream is = null;
-
-					Enumeration urls = bundle.findEntries(path, ind != -1 ? definitionFile.substring(ind + 1) : definitionFile, false);
-					if (urls == null || !urls.hasMoreElements()) {
-						Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.COMPONENT_XML_NOT_FOUND, bundle.getSymbolicName(), definitionFile), null);
-						continue;
+			// illegal components are ignored, but framework event is posted for
+			// them; however, it will continue and try to load any legal
+			// definitions
+			URL url;
+			for (Iterator/*<URL>*/urls = urlCollection.iterator(); urls.hasNext();) {
+				url = (URL) urls.next();
+				if (Activator.DEBUG) {
+					Activator.log.debug("ComponentStorage.parseXMLDeclaration(): loading " + url.toString(), null); //$NON-NLS-1$
+				}
+				InputStream is = null;
+				try {
+					is = url.openStream();
+					if (is == null) {
+						Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.CANT_OPEN_STREAM_TO_COMPONENT_XML, url), null);
+					} else {
+						int compSize = components.size();
+						parser.parse(is, bundle, components, url.toString());
+						if (compSize == components.size()) {
+							Activator.log(bundle.getBundleContext(), LogService.LOG_WARNING, NLS.bind(Messages.NO_COMPONENTS_FOUND, url), null);
+						}
 					}
-
-					// illegal components are ignored, but framework event is posted for
-					// them; however, it will continue and try to load any legal
-					// definitions
-					URL url;
-					while (urls.hasMoreElements()) {
-						url = (URL) urls.nextElement();
-						if (Activator.DEBUG) {
-							Activator.log.debug("ComponentStorage.parseXMLDeclaration(): loading " + url.toString(), null); //$NON-NLS-1$
-						}
-						try {
-							is = url.openStream();
-							if (is == null) {
-								Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.CANT_OPEN_STREAM_TO_COMPONENT_XML, url), null);
-							} else {
-								int compSize = components.size();
-								parser.parse(is, bundle, components, url.toString());
-								if (compSize == components.size()) {
-									Activator.log(bundle.getBundleContext(), LogService.LOG_WARNING, NLS.bind(Messages.NO_COMPONENTS_FOUND, url), null);
-								}
-							}
-						} catch (IOException ie) {
-							Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.ERROR_OPENING_COMP_XML, url), ie);
-						} catch (Throwable t) {
-							Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.ILLEGAL_DEFINITION_FILE, url), t);
-						} finally {
-							if (is != null) {
-								is.close();
-							}
-						}
-					} // end while
-				} // end for definitionFiles
-			} // end for elements
+				} catch (IOException ie) {
+					Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.ERROR_OPENING_COMP_XML, url), ie);
+				} catch (Throwable t) {
+					Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.ILLEGAL_DEFINITION_FILE, url), t);
+				} finally {
+					if (is != null) {
+						is.close();
+					}
+				}
+			} // end while
 
 			components = parser.components;
 			// make sure the clean-up the parser cache, for the next bundle to
@@ -114,6 +98,29 @@ public abstract class ComponentStorage {
 			parser.components = null;
 		}
 		return components;
+	}
+
+	protected Collection/*<URL>*/computeComponentDefinitionUrls(Bundle bundle, ManifestElement[] elements) {
+		Collection/*<URL>*/result = new ArrayList/*<URL>*/(5);
+		// process all definition file
+		for (int i = 0; i < elements.length; i++) {
+			String[] definitionFiles = elements[i].getValueComponents();
+			for (int j = 0; j < definitionFiles.length; j++) {
+				String definitionFile = definitionFiles[j];
+				int ind = definitionFile.lastIndexOf('/');
+				String path = ind != -1 ? definitionFile.substring(0, ind) : "/"; //$NON-NLS-1$
+
+				Enumeration/*<URL>*/urls = bundle.findEntries(path, ind != -1 ? definitionFile.substring(ind + 1) : definitionFile, false);
+				if (urls == null || !urls.hasMoreElements()) {
+					Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.COMPONENT_XML_NOT_FOUND, bundle.getSymbolicName(), definitionFile), null);
+					continue;
+				}
+
+				while (urls.hasMoreElements())
+					result.add(urls.nextElement());
+			}
+		}
+		return result;
 	}
 
 }

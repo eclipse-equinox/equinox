@@ -14,8 +14,7 @@ package org.eclipse.equinox.internal.ds.storage.file;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Dictionary;
-import java.util.Vector;
+import java.util.*;
 import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.model.ServiceComponent;
 import org.eclipse.equinox.internal.util.io.ExternalizableDictionary;
@@ -228,19 +227,17 @@ public class FileStorage extends ComponentStorage {
 		if (bundle == null)
 			return 0;
 		long result = 0;
-		ManifestElement[] elements = parseManifestHeader(bundle);
-		for (int i = 0; i < elements.length; i++) {
-			URL componentURL = bundle.getEntry(elements[i].getValue());
-			if (componentURL != null) {
-				try {
-					URLConnection connection = componentURL.openConnection();
-					long lastModified = connection.getLastModified();
-					if (lastModified > result)
-						result = lastModified;
-				} catch (IOException e) {
-					//last modified cannot be calculated. should force reparse 
-					return Long.MAX_VALUE;
-				}
+		Collection/*<URL>*/urls = computeComponentDefinitionUrls(bundle, parseManifestHeader(bundle));
+		for (Iterator/*<URL>*/i = urls.iterator(); i.hasNext();) {
+			URL url = (URL) i.next();
+			try {
+				URLConnection connection = url.openConnection();
+				long lastModified = connection.getLastModified();
+				if (lastModified > result)
+					result = lastModified;
+			} catch (IOException e) {
+				//last modified cannot be calculated. should force reparse 
+				return Long.MAX_VALUE;
 			}
 		}
 		return result;
