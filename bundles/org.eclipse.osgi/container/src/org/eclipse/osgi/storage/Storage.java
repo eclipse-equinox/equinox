@@ -28,6 +28,7 @@ import org.eclipse.osgi.internal.framework.*;
 import org.eclipse.osgi.internal.hookregistry.*;
 import org.eclipse.osgi.internal.hookregistry.StorageHookFactory.StorageHook;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
+import org.eclipse.osgi.internal.location.LocationHelper;
 import org.eclipse.osgi.internal.log.EquinoxLogServices;
 import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
 import org.eclipse.osgi.internal.url.URLStreamHandlerFactoryImpl;
@@ -1645,7 +1646,8 @@ public class Storage {
 	}
 
 	protected StorageManager getChildStorageManager() throws IOException {
-		StorageManager sManager = new StorageManager(childRoot, isReadOnly() ? "none" : null, isReadOnly()); //$NON-NLS-1$
+		String locking = getConfiguration().getConfiguration(LocationHelper.PROP_OSGI_LOCKING, LocationHelper.LOCKING_NIO);
+		StorageManager sManager = new StorageManager(childRoot, isReadOnly() ? LocationHelper.LOCKING_NONE : locking, isReadOnly());
 		try {
 			sManager.open(!isReadOnly());
 		} catch (IOException ex) {
@@ -1679,7 +1681,7 @@ public class Storage {
 		if (storageStream == null && parentRoot != null) {
 			StorageManager parentStorageManager = null;
 			try {
-				parentStorageManager = new StorageManager(parentRoot, "none", true); //$NON-NLS-1$
+				parentStorageManager = new StorageManager(parentRoot, LocationHelper.LOCKING_NONE, true);
 				parentStorageManager.open(false);
 				storageStream = parentStorageManager.getInputStream(FRAMEWORK_INFO);
 			} catch (IOException e1) {

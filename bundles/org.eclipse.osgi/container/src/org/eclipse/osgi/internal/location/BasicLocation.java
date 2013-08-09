@@ -187,7 +187,7 @@ public class BasicLocation implements Location {
 	private void setLocker(File lock) {
 		if (locker != null)
 			return;
-		String lockMode = environmentInfo.getConfiguration(LocationHelper.PROP_OSGI_LOCKING);
+		String lockMode = environmentInfo.getConfiguration(LocationHelper.PROP_OSGI_LOCKING, LocationHelper.LOCKING_NIO);
 		locker = LocationHelper.createLocker(lock, lockMode, debug);
 	}
 

@@ -20,6 +20,9 @@ import org.eclipse.osgi.internal.location.Locker.MockLocker;
  */
 public class LocationHelper {
 	public static final String PROP_OSGI_LOCKING = "osgi.locking"; //$NON-NLS-1$
+	public static final String LOCKING_NONE = "none"; //$NON-NLS-1$
+	public static final String LOCKING_IO = "java.io"; //$NON-NLS-1$
+	public static final String LOCKING_NIO = "java.nio"; //$NON-NLS-1$
 
 	/**
 	 * Builds a URL with the given specification
@@ -60,13 +63,17 @@ public class LocationHelper {
 	}
 
 	public static Locker createLocker(File lock, String lockMode, boolean debug) {
-		if ("none".equals(lockMode)) //$NON-NLS-1$
+		if (lockMode == null) {
+			// try to get the lockMode from the system properties
+			lockMode = System.getProperty(PROP_OSGI_LOCKING);
+		}
+		if (LOCKING_NONE.equals(lockMode)) {
 			return new MockLocker();
-
-		if ("java.io".equals(lockMode)) //$NON-NLS-1$
+		}
+		if (LOCKING_IO.equals(lockMode)) {
 			return new Locker_JavaIo(lock);
-
-		if ("java.nio".equals(lockMode)) { //$NON-NLS-1$
+		}
+		if (LOCKING_NIO.equals(lockMode)) {
 			return new Locker_JavaNio(lock, debug);
 		}
 
