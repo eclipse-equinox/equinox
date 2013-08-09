@@ -18,8 +18,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
+import org.osgi.framework.*;
 
 /*
  * The framework must persist data according to the value of the 
@@ -142,22 +141,45 @@ public class PersistedBundleTests extends AbstractBundleTests {
 	 * periodic persistence.
 	 */
 	public void testPeriodicPersistence() throws Exception {
+		// Specify periodic persistence in the configuration.
 		Map<String, Object> configuration = createConfiguration();
 		configuration.put(ECLIPSE_STATESAVEDELAYINTERVAL, PERIODIC_PERSISTENCE);
+		// Create an equinox instance that will be responsible for persisting
+		// the bundle once the first period elapses.
 		Equinox equinox1 = new Equinox(configuration);
 		initAndStart(equinox1);
 		try {
+			// The bundle has not yet been installed.
 			assertNull("Bundle exists", equinox1.getBundleContext().getBundle(getName()));
+			// Install the bundle.
 			equinox1.getBundleContext().installBundle(getName(), new BundleBuilder().symbolicName(getName()).build());
+			// Create a second equinox instance to ensure the first instance
+			// has not yet persisted the bundle.
 			Equinox equinox2 = new Equinox(configuration);
 			initAndStart(equinox2);
 			try {
+				// The bundle should not have been persisted and therefore be
+				// unknown to the second equinox instance. This check must 
+				// happen before the first period elapses.
 				assertNull("Bundle exists", equinox2.getBundleContext().getBundle(getName()));
 				stopQuietly(equinox2);
+				// Ensure the first period elapses so the bundle has time to be
+				// persisted.
 				Thread.sleep(Long.valueOf(PERIODIC_PERSISTENCE));
-				equinox2 = new Equinox(configuration);
-				initAndStart(equinox2);
-				assertNotNull("Bundle does not exist", equinox2.getBundleContext().getBundle(getName()));
+				Bundle b = null;
+				// Provide a buffer, if needed, after the first period elapses
+				// to ensure the first instance has time to persist the bundle.
+				for (int i = 0; i < 5; i++) {
+					equinox2 = new Equinox(configuration);
+					initAndStart(equinox2);
+					b = equinox2.getBundleContext().getBundle(getName());
+					if (b != null)
+						break;
+					Thread.sleep(1000);
+				}
+				// The persisted bundle should now be visible to the second
+				// equinox instance.
+				assertNotNull("Bundle does not exist", b);
 			} finally {
 				stopQuietly(equinox2);
 			}
