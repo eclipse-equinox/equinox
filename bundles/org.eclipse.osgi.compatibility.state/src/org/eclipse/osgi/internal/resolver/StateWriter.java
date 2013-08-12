@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2012 IBM Corporation and others.
+ * Copyright (c) 2003, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -679,10 +679,12 @@ class StateWriter {
 	}
 
 	public void saveStateDeprecated(StateImpl state, DataOutputStream output) throws IOException {
-		try {
-			writeStateDeprecated(state, output);
-		} finally {
-			output.close();
+		synchronized (state.monitor) {
+			try {
+				writeStateDeprecated(state, output);
+			} finally {
+				output.close();
+			}
 		}
 	}
 
