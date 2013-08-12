@@ -2005,6 +2005,34 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong stopping order", expectedOrder.toArray(), stoppingOrder.toArray());
 	}
 
+	public void testBug412228() throws BundleException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+		equinox.init();
+
+		BundleContext systemContext = equinox.getBundleContext();
+
+		Bundle b = systemContext.installBundle(installer.getBundleLocation("test.bug412228"));
+		b.start();
+		equinox.start();
+
+		long startTime = System.currentTimeMillis();
+		equinox.stop();
+		try {
+			equinox.waitForStop(500);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			fail("Unexpected interruption.", e);
+		}
+		long stopTime = System.currentTimeMillis() - startTime;
+		if (stopTime > 2000) {
+			fail("waitForStop time took too long: " + stopTime);
+		}
+
+	}
+
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {
 		outputDir.mkdirs();
 
