@@ -18,7 +18,8 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 
 /*
  * The framework must persist data according to the value of the 
@@ -65,7 +66,7 @@ public class PersistedBundleTests extends AbstractBundleTests {
 
 	private static final String IMMEDIATE_PERSISTENCE = "0";
 	private static final String NO_PERSISTENCE = "-1";
-	private static final String PERIODIC_PERSISTENCE = "5000";
+	private static final String PERIODIC_PERSISTENCE = "4000";
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -163,23 +164,14 @@ public class PersistedBundleTests extends AbstractBundleTests {
 				// happen before the first period elapses.
 				assertNull("Bundle exists", equinox2.getBundleContext().getBundle(getName()));
 				stopQuietly(equinox2);
-				// Ensure the first period elapses so the bundle has time to be
-				// persisted.
-				Thread.sleep(Long.valueOf(PERIODIC_PERSISTENCE));
-				Bundle b = null;
-				// Provide a buffer, if needed, after the first period elapses
-				// to ensure the first instance has time to persist the bundle.
-				for (int i = 0; i < 5; i++) {
-					equinox2 = new Equinox(configuration);
-					initAndStart(equinox2);
-					b = equinox2.getBundleContext().getBundle(getName());
-					if (b != null)
-						break;
-					Thread.sleep(1000);
-				}
+				// Ensure the first instance is given a reasonable amount of
+				// time to persist the bundle.
+				Thread.sleep(Long.valueOf(PERIODIC_PERSISTENCE) + 2000);
+				equinox2 = new Equinox(configuration);
+				initAndStart(equinox2);
 				// The persisted bundle should now be visible to the second
 				// equinox instance.
-				assertNotNull("Bundle does not exist", b);
+				assertNotNull("Bundle does not exist", equinox2.getBundleContext().getBundle(getName()));
 			} finally {
 				stopQuietly(equinox2);
 			}
