@@ -3088,10 +3088,10 @@ public class DSTest extends TestCase {
 		  // The component service should be Component1.
 		  BundleContext context = getContext();
 		  ServiceReference<?> ref = context.getServiceReference(serviceName);
-		  assertNotNull(ref);
+		  assertNotNull("Component service not registered on start", ref);
 		  Object service = context.getService(ref);
 		  Class clazz = service.getClass();
-		  assertEquals("org.eclipse.equinox.ds.tests.tb26.impl.Component1", clazz.getName());
+		  assertEquals("Wrong Component service", "org.eclipse.equinox.ds.tests.tb26.impl.Component1", clazz.getName());
 		  
 		  // Update component.xml with component2.xml.
 		  clazz.getMethod("update", (Class[])null).invoke(service, (Object[])null);
@@ -3103,10 +3103,10 @@ public class DSTest extends TestCase {
 		  
 		  // The component service should now be Component2.
 		  ref = context.getServiceReference(serviceName);
-		  assertNotNull(ref);
+		  assertNotNull("Component service not registered on restart", ref);
 		  service = context.getService(ref);
 		  clazz = service.getClass();
-		  assertEquals("org.eclipse.equinox.ds.tests.tb26.impl.Component2", clazz.getName());
+		  assertEquals("Wrong component service", "org.eclipse.equinox.ds.tests.tb26.impl.Component2", clazz.getName());
 	  }
 	  finally {
 		  uninstallBundle(b);
