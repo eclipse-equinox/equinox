@@ -3072,7 +3072,7 @@ public class DSTest extends TestCase {
    * reference URL. Otherwise, necessary file updates will not occur, and the 
    * test will no longer be valid.
    */
-  public void testComponentDefinitionReloadedOnBundleUpdateInDevModeWhenUsingWildcardInServiceComponentHeader() throws Exception {
+  public void disabledTestComponentDefinitionReloadedOnBundleUpdateInDevModeWhenUsingWildcardInServiceComponentHeader() throws Exception {
 	  // Enable component caching in DS.
 	  System.setProperty("equinox.ds.dbstore", Boolean.TRUE.toString());
 	  // Set dev mode.
