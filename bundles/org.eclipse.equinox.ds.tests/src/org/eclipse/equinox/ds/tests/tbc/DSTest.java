@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2012 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2013 by ProSyst Software GmbH and others.
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
