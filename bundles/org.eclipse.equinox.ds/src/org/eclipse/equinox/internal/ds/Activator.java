@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2010 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2013 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -381,7 +381,8 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 	}
 
 	private static void dumpOnConsole(String prefix, BundleContext bundleContext, String msg, Throwable t, boolean printInErr) {
-		String message = prefix + bundleContext.getBundle().getBundleId() + " " + msg; //$NON-NLS-1$
+		String id = (bundleContext == null) ? "SCR " : bundleContext.getBundle().getBundleId() + " "; //$NON-NLS-1$//$NON-NLS-2$
+		String message = prefix + id + msg;
 		if (printInErr) {
 			System.err.println(message);
 		} else {
