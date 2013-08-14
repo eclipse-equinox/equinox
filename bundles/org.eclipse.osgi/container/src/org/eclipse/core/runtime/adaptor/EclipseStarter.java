@@ -882,7 +882,7 @@ public class EclipseStarter {
 		String result = url.getFile();
 		if (File.separatorChar == '\\') {
 			// in case on windows the \ is used
-			result.replace('\\', '/');
+			result = result.replace('\\', '/');
 		}
 		if (result.endsWith(".jar")) { //$NON-NLS-1$
 			result = result.substring(0, result.lastIndexOf('/'));
