@@ -6,3 +6,4 @@ Import-Package: org.osgi.service.component,
  org.osgi.framework,
  org.eclipse.osgi.service.urlconversion,
  org.osgi.util.tracker
+ 
