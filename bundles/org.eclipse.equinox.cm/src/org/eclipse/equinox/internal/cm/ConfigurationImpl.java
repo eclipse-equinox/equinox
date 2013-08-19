@@ -48,13 +48,14 @@ class ConfigurationImpl implements Configuration {
 	/** @GuardedBy this*/
 	private Object storageToken;
 
-	public ConfigurationImpl(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, String factoryPid, String pid, String bundleLocation) {
+	public ConfigurationImpl(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, String factoryPid, String pid, String bundleLocation, boolean bind) {
 		this.configurationAdminFactory = configurationAdminFactory;
 		this.configurationStore = configurationStore;
 		this.factoryPid = factoryPid;
 		this.pid = pid;
 		this.bundleLocation = bundleLocation;
 		this.changeCount = 0;
+		this.bound = bind;
 	}
 
 	public ConfigurationImpl(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, Dictionary<String, ?> dictionary, Object storageToken) {
@@ -157,6 +158,7 @@ class ConfigurationImpl implements Configuration {
 					e.printStackTrace();
 				}
 				configurationAdminFactory.notifyLocationChanged(this, callerLocation, factoryPid != null);
+				configurationAdminFactory.dispatchEvent(ConfigurationEvent.CM_LOCATION_CHANGED, factoryPid, pid);
 			}
 		} finally {
 			unlock();

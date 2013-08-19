@@ -57,9 +57,9 @@ class ConfigurationAdminImpl implements ConfigurationAdmin {
 
 		ConfigurationImpl config;
 		if (factory) {
-			config = configurationStore.createFactoryConfiguration(pid, location);
+			config = configurationStore.createFactoryConfiguration(pid, location, bind);
 		} else {
-			config = configurationStore.getConfiguration(pid, location);
+			config = configurationStore.getConfiguration(pid, location, bind);
 		}
 
 		String configLocation = config.getLocation();

@@ -162,18 +162,18 @@ class ConfigurationStore {
 		configFile.delete();
 	}
 
-	public synchronized ConfigurationImpl getConfiguration(String pid, String location) {
+	public synchronized ConfigurationImpl getConfiguration(String pid, String location, boolean bind) {
 		ConfigurationImpl config = configurations.get(pid);
 		if (config == null) {
-			config = new ConfigurationImpl(configurationAdminFactory, this, null, pid, location);
+			config = new ConfigurationImpl(configurationAdminFactory, this, null, pid, location, bind);
 			configurations.put(pid, config);
 		}
 		return config;
 	}
 
-	public synchronized ConfigurationImpl createFactoryConfiguration(String factoryPid, String location) {
+	public synchronized ConfigurationImpl createFactoryConfiguration(String factoryPid, String location, boolean bind) {
 		String pid = factoryPid + "-" + new Date().getTime() + "-" + createdPidCount++; //$NON-NLS-1$ //$NON-NLS-2$
-		ConfigurationImpl config = new ConfigurationImpl(configurationAdminFactory, this, factoryPid, pid, location);
+		ConfigurationImpl config = new ConfigurationImpl(configurationAdminFactory, this, factoryPid, pid, location, bind);
 		configurations.put(pid, config);
 		return config;
 	}
