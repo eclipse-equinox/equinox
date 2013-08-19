@@ -74,10 +74,6 @@ public abstract class Component {
 		return new FileInputStream(getResourceAsFile(name));
 	}
 	
-	private FileOutputStream getResourceAsFileOutputStream(String name) throws Exception {
-		return new FileOutputStream(getResourceAsFile(name));
-	}
-	
 	private URI getResourceAsUri(String name) throws Exception {
 		URL url = getResource(name);
 		URLConverter converter = tracker.getService();
@@ -106,12 +102,15 @@ public abstract class Component {
 	}
 	
 	private void writeResource(String name, byte[] content) throws Exception {
-		FileOutputStream fos = getResourceAsFileOutputStream(name);
+		File file = getResourceAsFile(name);
+		FileOutputStream fos = new FileOutputStream(file);
 		try {
 			fos.write(content);
 		}
 		finally {
 			closeSilently(fos);
 		}
+		// Ensure the update will be detected.
+		file.setLastModified(file.lastModified() + 1000);
 	}
 }
