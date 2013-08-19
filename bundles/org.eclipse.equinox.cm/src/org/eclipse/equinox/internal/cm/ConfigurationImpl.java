@@ -23,7 +23,7 @@ import org.osgi.service.cm.*;
  * The lock and unlock methods are used for synchronization. Operations outside of
  * ConfigurationImpl that expect to have control of the lock should call checkLocked
  */
-class ConfigurationImpl {
+class ConfigurationImpl implements Configuration {
 	final static String LOCATION_BOUND = "org.eclipse.equinox.cm.location.bound"; //$NON-NLS-1$
 	final static String PROPERTIES_NULL = "org.eclipse.equinox.cm.properties.null"; //$NON-NLS-1$
 	final static String CHANGE_COUNT = "org.eclipse.equinox.cm.change.count"; //$NON-NLS-1$
@@ -193,12 +193,11 @@ class ConfigurationImpl {
 		}
 	}
 
-	public String getBundleLocation(String forBundleLocation) {
+	public String getBundleLocation() {
 		try {
 			lock();
 			checkDeleted();
-			if (forBundleLocation != null && !forBundleLocation.equals(bundleLocation))
-				configurationAdminFactory.checkConfigurePermission(bundleLocation, forBundleLocation);
+			configurationAdminFactory.checkConfigurePermission(bundleLocation, null);
 			if (bundleLocation != null)
 				return bundleLocation;
 			return null;
@@ -294,12 +293,12 @@ class ConfigurationImpl {
 		}
 	}
 
-	public void setBundleLocation(String bundleLocation, String forBundleLocation) {
+	public void setBundleLocation(String bundleLocation) {
 		try {
 			lock();
 			checkDeleted();
-			configurationAdminFactory.checkConfigurePermission(this.bundleLocation, forBundleLocation);
-			configurationAdminFactory.checkConfigurePermission(bundleLocation, forBundleLocation);
+			configurationAdminFactory.checkConfigurePermission(this.bundleLocation, null);
+			configurationAdminFactory.checkConfigurePermission(bundleLocation, null);
 			String oldLocation = this.bundleLocation;
 			this.bundleLocation = bundleLocation;
 			this.bound = false;
@@ -399,71 +398,6 @@ class ConfigurationImpl {
 			return changeCount;
 		} finally {
 			unlock();
-		}
-	}
-
-	Configuration getConfiguration(String forBundleLocation) {
-		return new ConfigurationForBundle(forBundleLocation);
-	}
-
-	class ConfigurationForBundle implements Configuration {
-		private final String forBundleLocation;
-
-		ConfigurationForBundle(String forBundleLocation) {
-			this.forBundleLocation = forBundleLocation;
-		}
-
-		public String getPid() {
-			return getImpl().getPid();
-		}
-
-		public Dictionary<String, Object> getProperties() {
-			return getImpl().getProperties();
-		}
-
-		public void update(Dictionary<String, ?> properties) throws IOException {
-			getImpl().update(properties);
-		}
-
-		public void delete() {
-			getImpl().delete();
-		}
-
-		public String getFactoryPid() {
-			return getImpl().getFactoryPid();
-		}
-
-		public void update() throws IOException {
-			getImpl().update();
-		}
-
-		public void setBundleLocation(String location) {
-			getImpl().setBundleLocation(location, forBundleLocation);
-		}
-
-		public String getBundleLocation() {
-			return getImpl().getBundleLocation(forBundleLocation);
-		}
-
-		public long getChangeCount() {
-			return getImpl().getChangeCount();
-		}
-
-		@Override
-		public boolean equals(Object other) {
-			if (!(other instanceof ConfigurationForBundle)) {
-				return false;
-			}
-			return getImpl().equals(((ConfigurationForBundle) other).getImpl());
-		}
-
-		@Override
-		public int hashCode() {
-			return getImpl().hashCode();
-		}
-
-		private ConfigurationImpl getImpl() {
-			return ConfigurationImpl.this;
 		}
 	}
 }

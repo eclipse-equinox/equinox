@@ -72,7 +72,7 @@ class ConfigurationAdminImpl implements ConfigurationAdmin {
 		} else {
 			this.configurationAdminFactory.checkConfigurePermission(configLocation, bundleLocation);
 		}
-		return config.getConfiguration(bundleLocation);
+		return config;
 	}
 
 	public Configuration[] listConfigurations(String filterString) throws InvalidSyntaxException {
@@ -91,7 +91,7 @@ class ConfigurationAdminImpl implements ConfigurationAdmin {
 				if (sm != null) {
 					this.configurationAdminFactory.checkConfigurePermission(configs[i].getLocation(), bundleLocation);
 				}
-				result.add(configs[i].getConfiguration(bundleLocation));
+				result.add(configs[i]);
 			} catch (SecurityException e) {
 				// ignore;
 			}

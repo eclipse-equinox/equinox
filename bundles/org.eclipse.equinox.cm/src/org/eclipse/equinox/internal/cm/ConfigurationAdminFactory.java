@@ -73,7 +73,7 @@ public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAd
 	public void checkConfigurePermission(String location, String forBundleLocation) throws SecurityException {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null) {
-			if (!forBundleLocation.equals(location)) {
+			if (forBundleLocation == null || !forBundleLocation.equals(location)) {
 				if (location == null) {
 					sm.checkPermission(allConfigurationPermission);
 				} else {
