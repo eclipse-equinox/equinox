@@ -1205,6 +1205,31 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
+	public void testDynamicImport05() throws BundleException, IOException, ResolutionException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, null, null, "osgi.ee; osgi.ee=JavaSE; version:Version=\"1.5.0\"", container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+
+		Module c1 = installDummyModule("c1_v1.MF", "c1_v1", container);
+		Module c4 = installDummyModule("c4_v1.MF", "c4_v1", container);
+		Module dynamic3 = installDummyModule("dynamic3_v1.MF", "dynamic3_v1", container);
+		Module dynamic3Frag = installDummyModule("dynamic3.frag_v1.MF", "dynamic3.frag_v1", container);
+
+		container.resolve(Arrays.asList(c1, c4, dynamic3, dynamic3Frag), true);
+
+		ModuleWire dynamicWire = container.resolveDynamic("c4.a", dynamic3.getCurrentRevision());
+		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
+		Assert.assertEquals("Wrong package found.", "c4.a", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+
+		dynamicWire = container.resolveDynamic("c4.b", dynamic3.getCurrentRevision());
+		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
+		Assert.assertEquals("Wrong package found.", "c4.b", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+	}
+
+	@Test
 	public void testRequireBundleUses() throws BundleException, IOException, ResolutionException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();

@@ -1,0 +1,5 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: dynamic3.frag
+Bundle-Version: 1.0.0
+Fragment-Host: dynamic3
+Import-Package: c1.b

@@ -18,7 +18,8 @@ import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.report.resolution.*;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry.Type;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Version;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.namespace.*;
 import org.osgi.framework.wiring.*;
@@ -280,17 +281,25 @@ final class ModuleResolver {
 				}
 				if (!fragmentRequirement.getNamespace().equals(currentNamespace)) {
 					currentNamespace = fragmentRequirement.getNamespace();
+					boolean isDynamic = isDynamic(fragmentRequirement);
 					fastForward(iRequirements);
 					while (iRequirements.hasPrevious()) {
-						if (iRequirements.previous().getNamespace().equals(currentNamespace)) {
-							iRequirements.next(); // put position after the last one
-							break;
+						ModuleRequirement previous = iRequirements.previous();
+						if (previous.getNamespace().equals(currentNamespace)) {
+							if (isDynamic || !isDynamic(previous)) {
+								iRequirements.next(); // put position after the last one
+								break;
+							}
 						}
 					}
 				}
 				iRequirements.add(fragmentRequirement);
 			}
 		}
+	}
+
+	private static boolean isDynamic(ModuleRequirement requirement) {
+		return PackageNamespace.PACKAGE_NAMESPACE.equals(requirement.getNamespace()) && PackageNamespace.RESOLUTION_DYNAMIC.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE));
 	}
 
 	private static void addProvidedWires(Map<ModuleCapability, List<ModuleWire>> toAdd, List<ModuleWire> existing, final List<ModuleCapability> orderedCapabilities) {
