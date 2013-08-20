@@ -47,6 +47,66 @@ import org.osgi.service.resolver.ResolutionException;
 public class EquinoxBundle implements Bundle, BundleReference {
 
 	static class SystemBundle extends EquinoxBundle implements Framework {
+		class SystemBundleHeaders extends Dictionary<String, String> {
+			private final Dictionary<String, String> headers;
+
+			public SystemBundleHeaders(Dictionary<String, String> headers) {
+				this.headers = headers;
+			}
+
+			public Enumeration<String> elements() {
+				return headers.elements();
+			}
+
+			public String get(Object key) {
+				if (!(key instanceof String))
+					return null;
+				if (org.osgi.framework.Constants.EXPORT_PACKAGE.equalsIgnoreCase((String) key)) {
+					return getExtra(org.osgi.framework.Constants.EXPORT_PACKAGE, org.osgi.framework.Constants.FRAMEWORK_SYSTEMPACKAGES, org.osgi.framework.Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
+				} else if (org.osgi.framework.Constants.PROVIDE_CAPABILITY.equalsIgnoreCase((String) key)) {
+					return getExtra(org.osgi.framework.Constants.PROVIDE_CAPABILITY, org.osgi.framework.Constants.FRAMEWORK_SYSTEMCAPABILITIES, org.osgi.framework.Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA);
+				}
+				return headers.get(key);
+			}
+
+			private String getExtra(String header, String systemProp, String systemExtraProp) {
+				String systemValue = getEquinoxContainer().getConfiguration().getConfiguration(systemProp);
+				String systemExtraValue = getEquinoxContainer().getConfiguration().getConfiguration(systemExtraProp);
+				if (systemValue == null)
+					systemValue = systemExtraValue;
+				else if (systemExtraValue != null && systemExtraValue.trim().length() > 0)
+					systemValue += ", " + systemExtraValue; //$NON-NLS-1$
+				String result = headers.get(header);
+				if (systemValue != null && systemValue.trim().length() > 0) {
+					if (result != null)
+						result += ", " + systemValue; //$NON-NLS-1$
+					else
+						result = systemValue;
+				}
+				return result;
+			}
+
+			public boolean isEmpty() {
+				return headers.isEmpty();
+			}
+
+			public Enumeration<String> keys() {
+				return headers.keys();
+			}
+
+			public String put(String key, String value) {
+				return headers.put(key, value);
+			}
+
+			public String remove(Object key) {
+				return headers.remove(key);
+			}
+
+			public int size() {
+				return headers.size();
+			}
+
+		}
 
 		SystemBundle(ModuleContainer moduleContainer, EquinoxContainer equinoxContainer) {
 			super(moduleContainer, equinoxContainer);
@@ -102,6 +162,10 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			throw new BundleException(Msg.BUNDLE_SYSTEMBUNDLE_UNINSTALL_EXCEPTION, BundleException.INVALID_OPERATION);
 		}
 
+		@Override
+		public Dictionary<String, String> getHeaders(String locale) {
+			return new SystemBundleHeaders(super.getHeaders(locale));
+		}
 	}
 
 	private final EquinoxContainer equinoxContainer;
