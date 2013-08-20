@@ -17,6 +17,7 @@ import java.util.*;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.container.InternalUtils;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.osgi.framework.*;
 import org.osgi.framework.namespace.*;
 import org.osgi.framework.wiring.*;
@@ -148,6 +149,10 @@ public class PackageAdminImpl implements PackageAdmin {
 	public Bundle[] getBundles(String symbolicName, String versionRange) {
 		if (symbolicName == null) {
 			throw new IllegalArgumentException();
+		}
+		if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(symbolicName)) {
+			// need to alias system.bundle to the implementation BSN
+			symbolicName = EquinoxContainer.NAME;
 		}
 		VersionRange range = versionRange == null ? null : new VersionRange(versionRange);
 		String filter = (range != null ? "(&" : "") + "(" + IdentityNamespace.IDENTITY_NAMESPACE + "=" + symbolicName + ")" + (range != null ? range.toFilterString(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE) + ")" : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$

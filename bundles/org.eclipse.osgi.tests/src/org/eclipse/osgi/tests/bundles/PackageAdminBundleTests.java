@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others.
+ * Copyright (c) 2007, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.ExportedPackage;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 public class PackageAdminBundleTests extends AbstractBundleTests {
 	public class TestListener implements SynchronousBundleListener {
@@ -247,6 +248,14 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 		} finally {
 			OSGiTestsActivator.getContext().removeBundleListener(testListener);
 		}
+	}
+
+	public void testBug415447() {
+		PackageAdmin pa = installer.getPackageAdmin();
+		Bundle[] systemBundles = pa.getBundles(Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null);
+		assertNotNull("No system bundles found.", systemBundles);
+		assertEquals("Srong number of system bundles.", 1, systemBundles.length);
+		assertEquals("Wrong system bundle found.", OSGiTestsActivator.getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION), systemBundles[0]);
 	}
 
 	private String getMessage(Throwable[] results) {
