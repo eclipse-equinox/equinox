@@ -36,14 +36,6 @@ public class ConsoleManager {
 		this.context = context;
 		if (!"true".equals(enabled) || "none".equals(consolePort)) { //$NON-NLS-1$ //$NON-NLS-2$
 			this.consoleBundle = "false".equals(enabled) ? CONSOLE_BUNDLE : enabled; //$NON-NLS-1$
-			if (consolePort == null || consolePort.length() > 0) {
-				// no -console was specified or it has specified none or a port for telnet;
-				// need to make sure the gogo shell does not create an interactive console on standard in/out
-				equinoxConfig.setProperty("gosh.args", "--nointeractive"); //$NON-NLS-1$//$NON-NLS-2$
-			} else {
-				// Need to make sure we don't shutdown the framework if no console is around (bug 362412)
-				equinoxConfig.setProperty("gosh.args", "--noshutdown"); //$NON-NLS-1$//$NON-NLS-2$
-			}
 			return;
 		}
 		this.consoleBundle = "unknown"; //$NON-NLS-1$

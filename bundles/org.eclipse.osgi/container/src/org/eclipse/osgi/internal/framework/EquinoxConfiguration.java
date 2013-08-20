@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.net.*;
 import java.security.CodeSource;
 import java.util.*;
+import org.eclipse.core.runtime.internal.adaptor.ConsoleManager;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
@@ -764,6 +765,17 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			configuration.put(PROP_OSGI_ARCH, archValue);
 		}
 		initializeStateSaveDelayIntervalProperty(configuration);
+
+		String consoleProp = configuration.getProperty(ConsoleManager.PROP_CONSOLE);
+		consoleProp = consoleProp == null ? null : consoleProp.trim();
+		if (consoleProp == null || consoleProp.length() > 0) {
+			// no -console was specified or it has specified none or a port for telnet;
+			// need to make sure the gogo shell does not create an interactive console on standard in/out
+			configuration.put("gosh.args", "--nointeractive"); //$NON-NLS-1$//$NON-NLS-2$
+		} else {
+			// Need to make sure we don't shutdown the framework if no console is around (bug 362412)
+			configuration.put("gosh.args", "--noshutdown"); //$NON-NLS-1$//$NON-NLS-2$
+		}
 	}
 
 	private static String getFrameworkPath(String path, boolean parent) {
