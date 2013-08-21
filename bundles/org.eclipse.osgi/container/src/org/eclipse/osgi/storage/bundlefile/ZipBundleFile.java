@@ -68,7 +68,9 @@ public class ZipBundleFile extends BundleFile {
 					generation.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, r.getRevisions().getModule(), e);
 				}
 			}
-			throw new RuntimeException("Failed to open bundle file.", e);
+			// TODO not sure if throwing a runtime exception is better
+			// throw new RuntimeException("Failed to open bundle file.", e);
+			return false;
 		}
 	}
 
