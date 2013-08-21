@@ -25,6 +25,7 @@ import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.container.ComputeNodeOrder;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.PackageNamespace;
@@ -233,11 +234,14 @@ public class ModuleDatabase {
 		for (GenericInfo info : builder.getCapabilities()) {
 			if (EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE.equals(info.getNamespace())) {
 				if (EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY.equals(info.getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY))) {
-					// TODO hack until p2 is fixed (bug 177641)
-					EnumSet<Settings> settings = EnumSet.noneOf(Settings.class);
-					settings.add(Settings.USE_ACTIVATION_POLICY);
-					settings.add(Settings.AUTO_START);
-					return settings;
+					String compatibilityStartLazy = adaptor.getProperty(EquinoxConfiguration.PROP_COMPATIBILITY_START_LAZY);
+					if (compatibilityStartLazy == null || Boolean.valueOf(compatibilityStartLazy)) {
+						// TODO hack until p2 is fixed (bug 177641)
+						EnumSet<Settings> settings = EnumSet.noneOf(Settings.class);
+						settings.add(Settings.USE_ACTIVATION_POLICY);
+						settings.add(Settings.AUTO_START);
+						return settings;
+					}
 				}
 				return null;
 			}

@@ -143,6 +143,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String PROP_CONTEXT_BOOTDELEGATION = "osgi.context.bootdelegation"; //$NON-NLS-1$
 	public static final String PROP_COMPATIBILITY_BOOTDELEGATION = "osgi.compatibility.bootdelegation"; //$NON-NLS-1$
 	public static final String PROP_COMPATIBILITY_ERROR_FAILED_START = "osgi.compatibility.errorOnFailedStart"; //$NON-NLS-1$
+	public static final String PROP_COMPATIBILITY_START_LAZY = "osgi.compatibility.eagerStart.LazyActivation"; //$NON-NLS-1$
 
 	public static final String PROP_OSGI_OS = "osgi.os"; //$NON-NLS-1$
 	public static final String PROP_OSGI_WS = "osgi.ws"; //$NON-NLS-1$
