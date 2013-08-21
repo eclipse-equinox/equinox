@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2004, 2013 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -16,7 +16,6 @@ import java.util.*;
 import org.eclipse.osgi.framework.util.ArrayMap;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.debug.Debug;
-import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.internal.module.GroupingChecker.PackageRoots;
@@ -2152,6 +2151,8 @@ public class ResolverImpl implements Resolver {
 	}
 
 	private void setDebugOptions() {
+		//TODO do not have access to debug options here
+		/*
 		FrameworkDebugOptions options = null; //FrameworkDebugOptions.getDefault();
 		// may be null if debugging is not enabled
 		if (options == null)
@@ -2163,6 +2164,7 @@ public class ResolverImpl implements Resolver {
 		DEBUG_GENERICS = options.getBooleanOption(OPTION_GENERICS, false);
 		DEBUG_USES = options.getBooleanOption(OPTION_USES, false);
 		DEBUG_CYCLES = options.getBooleanOption(OPTION_CYCLES, false);
+		*/
 	}
 
 	// LOGGING METHODS
