@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others
+ * Copyright (c) 2007, 2013 IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,7 +44,7 @@ public class ConfigurationAdminTest extends TestCase {
 
 	public void testCreateConfigNullPid() throws Exception {
 		try {
-			Configuration config = cm.getConfiguration(null);
+			cm.getConfiguration(null);
 		} catch (IllegalArgumentException e) {
 			return;
 		}
@@ -58,7 +58,7 @@ public class ConfigurationAdminTest extends TestCase {
 
 	public void testCreateConfigNullPidWithLocation() throws Exception {
 		try {
-			Configuration config = cm.getConfiguration(null, null);
+			cm.getConfiguration(null, null);
 		} catch (IllegalArgumentException e) {
 			return;
 		}
@@ -96,7 +96,7 @@ public class ConfigurationAdminTest extends TestCase {
 
 	public void testCreateFactoryConfigNullPid() throws Exception {
 		try {
-			Configuration config = cm.createFactoryConfiguration(null);
+			cm.createFactoryConfiguration(null);
 		} catch (IllegalArgumentException e) {
 			return;
 		}
@@ -110,7 +110,7 @@ public class ConfigurationAdminTest extends TestCase {
 
 	public void testCreateFactoryConfigNullPidWithLocation() throws Exception {
 		try {
-			Configuration config = cm.createFactoryConfiguration(null, null);
+			cm.createFactoryConfiguration(null, null);
 		} catch (IllegalArgumentException e) {
 			return;
 		}
