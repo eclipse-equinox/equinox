@@ -30,14 +30,6 @@ import org.osgi.framework.wiring.BundleRevision;
 
 public class ResolverImpl implements Resolver {
 	// Debug fields
-	private static final String RESOLVER = EquinoxContainer.NAME + "/resolver"; //$NON-NLS-1$
-	private static final String OPTION_DEBUG = RESOLVER + "/debug";//$NON-NLS-1$
-	private static final String OPTION_WIRING = RESOLVER + "/wiring"; //$NON-NLS-1$
-	private static final String OPTION_IMPORTS = RESOLVER + "/imports"; //$NON-NLS-1$
-	private static final String OPTION_REQUIRES = RESOLVER + "/requires"; //$NON-NLS-1$
-	private static final String OPTION_GENERICS = RESOLVER + "/generics"; //$NON-NLS-1$
-	private static final String OPTION_USES = RESOLVER + "/uses"; //$NON-NLS-1$
-	private static final String OPTION_CYCLES = RESOLVER + "/cycles"; //$NON-NLS-1$
 	public static boolean DEBUG = false;
 	public static boolean DEBUG_WIRING = false;
 	public static boolean DEBUG_IMPORTS = false;
@@ -2150,6 +2142,16 @@ public class ResolverImpl implements Resolver {
 		flush();
 	}
 
+	/*
+	private static final String RESOLVER = EquinoxContainer.NAME + "/resolver"; //$NON-NLS-1$
+	private static final String OPTION_DEBUG = RESOLVER + "/debug";//$NON-NLS-1$
+	private static final String OPTION_WIRING = RESOLVER + "/wiring"; //$NON-NLS-1$
+	private static final String OPTION_IMPORTS = RESOLVER + "/imports"; //$NON-NLS-1$
+	private static final String OPTION_REQUIRES = RESOLVER + "/requires"; //$NON-NLS-1$
+	private static final String OPTION_GENERICS = RESOLVER + "/generics"; //$NON-NLS-1$
+	private static final String OPTION_USES = RESOLVER + "/uses"; //$NON-NLS-1$
+	private static final String OPTION_CYCLES = RESOLVER + "/cycles"; //$NON-NLS-1$
+	*/
 	private void setDebugOptions() {
 		//TODO do not have access to debug options here
 		/*
