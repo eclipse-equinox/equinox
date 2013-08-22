@@ -785,23 +785,30 @@ public class Storage {
 	}
 
 	private Long getNextRootID() throws BundleException {
-		moduleDatabase.readLock();
-		try {
-			Long nextID = moduleDatabase.getNextId();
-			boolean lockedID;
+		// Try up to 10 times
+		for (int i = 0; i < 10; i++) {
+			moduleDatabase.readLock();
 			try {
-				lockedID = idLocks.tryLock(nextID, 5, TimeUnit.SECONDS);
+				Long nextID = moduleDatabase.getNextId();
+				try {
+					if (idLocks.tryLock(nextID, 0, TimeUnit.SECONDS)) {
+						return nextID;
+					}
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR, e); //$NON-NLS-1$
+				}
+			} finally {
+				moduleDatabase.readUnlock();
+			}
+			// sleep to allow another thread to get the database lock
+			try {
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
-				throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR, e); //$NON-NLS-1$
 			}
-			if (!lockedID) {
-				throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR); //$NON-NLS-1$
-			}
-			return nextID;
-		} finally {
-			moduleDatabase.readUnlock();
 		}
+		throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR); //$NON-NLS-1$
 	}
 
 	/**
