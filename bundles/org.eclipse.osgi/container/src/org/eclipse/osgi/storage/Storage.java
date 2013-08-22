@@ -452,6 +452,8 @@ public class Storage {
 
 			File contentFile = getContentFile(staged, isReference, lockedID, generation.getGenerationId());
 			generation.setContent(contentFile, isReference);
+			// Check that we can open the bundle file
+			generation.getBundleFile().open();
 			setStorageHooks(generation);
 
 			ModuleRevisionBuilder builder = getBuilder(generation);
