@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,8 +49,6 @@ public class WeavingAdaptorFactory {
                     "org.eclipse.update.configurator", //$NON-NLS-1$
                     "org.eclipse.equinox.simpleconfigurator", //$NON-NLS-1$
                     "org.eclipse.equinox.common" }); //$NON-NLS-1$
-
-    private static final String WEAVING_SERVICE_DYNAMICS_PROPERTY = "equinox.weaving.service.dynamics"; //$NON-NLS-1$
 
     private ServiceTracker cachingServiceFactoryTracker;
 
