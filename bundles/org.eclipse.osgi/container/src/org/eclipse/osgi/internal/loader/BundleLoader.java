@@ -37,7 +37,6 @@ import org.osgi.framework.*;
 import org.osgi.framework.namespace.BundleNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.service.resolver.ResolutionException;
 
 /**
  * This object is responsible for all classloader delegation for a bundle.
@@ -1014,17 +1013,13 @@ public class BundleLoader implements ModuleLoader {
 	private PackageSource findDynamicSource(String pkgName) {
 		if (!isExportedPackage(pkgName) && isDynamicallyImported(pkgName)) {
 			ModuleRevision revision = wiring.getRevision();
-			try {
-				ModuleWire dynamicWire = revision.getRevisions().getModule().getContainer().resolveDynamic(pkgName, revision);
-				if (dynamicWire != null) {
-					PackageSource source = createExportPackageSource(dynamicWire, null);
-					synchronized (importedSources) {
-						importedSources.add(source);
-					}
-					return source;
+			ModuleWire dynamicWire = revision.getRevisions().getModule().getContainer().resolveDynamic(pkgName, revision);
+			if (dynamicWire != null) {
+				PackageSource source = createExportPackageSource(dynamicWire, null);
+				synchronized (importedSources) {
+					importedSources.add(source);
 				}
-			} catch (ResolutionException e) {
-				// do nothing;
+				return source;
 			}
 		}
 		return null;

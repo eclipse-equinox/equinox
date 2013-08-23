@@ -37,18 +37,19 @@ public abstract class SystemModule extends Module {
 				return;
 			getRevisions().getContainer().open();
 			if (getState().equals(State.INSTALLED)) {
-				try {
-					getRevisions().getContainer().resolve(Arrays.asList((Module) this), true);
-				} catch (ResolutionException e) {
+				ModuleResolutionReport report = getRevisions().getContainer().resolve(Arrays.asList((Module) this), true);
+				ResolutionException e = report.getResoltuionException();
+				if (e != null) {
 					if (e.getCause() instanceof BundleException) {
 						throw (BundleException) e.getCause();
 					}
-					throw new BundleException("Could not resolve module.", BundleException.RESOLVE_ERROR, e);
+				}
+				if (getState().equals(State.INSTALLED)) {
+					String reportMessage = ModuleResolutionReport.getResolutionReport("", getCurrentRevision(), report.getEntries(), null);
+					throw new BundleException("Could not resolve module: " + reportMessage, BundleException.RESOLVE_ERROR);
 				}
 			}
-			if (getState().equals(State.INSTALLED)) {
-				throw new BundleException("Could not resolve module.", BundleException.RESOLVE_ERROR);
-			}
+
 			setState(State.STARTING);
 			publishEvent(ModuleEvent.STARTING);
 			try {

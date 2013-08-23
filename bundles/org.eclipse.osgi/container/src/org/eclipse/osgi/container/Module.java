@@ -385,18 +385,19 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			if (State.ACTIVE.equals(getState()))
 				return;
 			if (getState().equals(State.INSTALLED)) {
-				try {
-					getRevisions().getContainer().resolve(Arrays.asList(this), true);
-				} catch (ResolutionException e) {
+				ModuleResolutionReport report = getRevisions().getContainer().resolve(Arrays.asList(this), true);
+				ResolutionException e = report.getResoltuionException();
+				if (e != null) {
 					if (e.getCause() instanceof BundleException) {
 						throw (BundleException) e.getCause();
 					}
-					throw new BundleException("Could not resolve module.", BundleException.RESOLVE_ERROR, e);
+				}
+				if (getState().equals(State.INSTALLED)) {
+					String reportMessage = ModuleResolutionReport.getResolutionReport("", getCurrentRevision(), report.getEntries(), null);
+					throw new BundleException("Could not resolve module: " + reportMessage, BundleException.RESOLVE_ERROR, e);
 				}
 			}
-			if (getState().equals(State.INSTALLED)) {
-				throw new BundleException("Could not resolve module.", BundleException.RESOLVE_ERROR);
-			}
+
 			try {
 				event = doStart(options);
 			} catch (BundleException e) {
@@ -600,7 +601,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	@Override
 	public String toString() {
-		return "[id=" + id + "]";
+		return getCurrentRevision() + " [id=" + id + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private void persistStartOptions(StartOptions... options) {

@@ -27,12 +27,12 @@ import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.internal.container.LockSet;
+import org.eclipse.osgi.report.resolution.ResolutionReport.Entry;
 import org.osgi.framework.*;
 import org.osgi.framework.namespace.*;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.*;
-import org.osgi.resource.Namespace;
-import org.osgi.resource.Requirement;
+import org.osgi.resource.*;
 import org.osgi.service.resolver.ResolutionException;
 
 /**
@@ -391,30 +391,34 @@ public final class ModuleContainer {
 	 *    current revisions.
 	 * @param triggersMandatory true if the triggers must be resolved.  This will result in 
 	 *   a {@link ResolutionException} if set to true and one of the triggers could not be resolved.
-	 * @throws ResolutionException if a resolution error occurs
 	 * @see FrameworkWiring#resolveBundles(Collection)
 	 */
-	public void resolve(Collection<Module> triggers, boolean triggersMandatory) throws ResolutionException {
-		resolve(triggers, triggersMandatory, false);
+	public ModuleResolutionReport resolve(Collection<Module> triggers, boolean triggersMandatory) {
+		return resolve(triggers, triggersMandatory, false);
 	}
 
-	private void resolve(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers) throws ResolutionException {
+	private ModuleResolutionReport resolve(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers) {
 		if (isRefreshingSystemModule()) {
-			throw new ResolutionException("Unable to resolve while shutting down the framework.");
+			return new ModuleResolutionReport(null, Collections.<Resource, List<Entry>> emptyMap(), new ResolutionException("Unable to resolve while shutting down the framework."));
 		}
-		try {
-			while (!resolveAndApply(triggers, triggersMandatory, restartTriggers)) {
-				// nothing
+		ModuleResolutionReport report = null;
+		do {
+			try {
+				report = resolveAndApply(triggers, triggersMandatory, restartTriggers);
+			} catch (RuntimeException e) {
+				if (e.getCause() instanceof BundleException) {
+					BundleException be = (BundleException) e.getCause();
+					if (be.getType() == BundleException.REJECTED_BY_HOOK) {
+						return new ModuleResolutionReport(null, Collections.<Resource, List<Entry>> emptyMap(), new ResolutionException(be));
+					}
+				}
+				throw e;
 			}
-		} catch (RuntimeException e) {
-			if (e.getCause() instanceof BundleException) {
-				throw new ResolutionException(e.getCause());
-			}
-			throw e;
-		}
+		} while (report == null);
+		return report;
 	}
 
-	private boolean resolveAndApply(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers) throws ResolutionException {
+	private ModuleResolutionReport resolveAndApply(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers) {
 		if (triggers == null)
 			triggers = new ArrayList<Module>(0);
 		Collection<ModuleRevision> triggerRevisions = new ArrayList<ModuleRevision>(triggers.size());
@@ -442,9 +446,11 @@ public final class ModuleContainer {
 			moduleDatabase.readUnlock();
 		}
 
-		Map<ModuleRevision, ModuleWiring> deltaWiring = moduleResolver.resolveDelta(triggerRevisions, triggersMandatory, unresolved, wiringClone, moduleDatabase);
+		ModuleResolutionReport report = moduleResolver.resolveDelta(triggerRevisions, triggersMandatory, unresolved, wiringClone, moduleDatabase);
+		Map<Resource, List<Wire>> resolutionResult = report.getResolutionResult();
+		Map<ModuleRevision, ModuleWiring> deltaWiring = resolutionResult == null ? Collections.<ModuleRevision, ModuleWiring> emptyMap() : ModuleResolver.generateDelta(resolutionResult, wiringClone);
 		if (deltaWiring.isEmpty())
-			return true; // nothing to do
+			return report; // nothing to do
 
 		Collection<Module> modulesResolved = new ArrayList<Module>();
 		for (ModuleRevision deltaRevision : deltaWiring.keySet()) {
@@ -452,7 +458,7 @@ public final class ModuleContainer {
 				modulesResolved.add(deltaRevision.getRevisions().getModule());
 		}
 
-		return applyDelta(deltaWiring, modulesResolved, triggers, timestamp, restartTriggers);
+		return applyDelta(deltaWiring, modulesResolved, triggers, timestamp, restartTriggers) ? report : null;
 	}
 
 	/**
@@ -461,9 +467,8 @@ public final class ModuleContainer {
 	 * @param revision the module revision the dynamic resolution request is for
 	 * @return the new resolution wire establishing a dynamic package resolution or null if 
 	 * a dynamic wire could not be established.
-	 * @throws ResolutionException
 	 */
-	public ModuleWire resolveDynamic(String dynamicPkgName, ModuleRevision revision) throws ResolutionException {
+	public ModuleWire resolveDynamic(String dynamicPkgName, ModuleRevision revision) {
 		ModuleWire result;
 		Map<ModuleRevision, ModuleWiring> deltaWiring;
 		Collection<Module> modulesResolved;
@@ -499,7 +504,9 @@ public final class ModuleContainer {
 
 			deltaWiring = null;
 			for (DynamicModuleRequirement dynamicReq : dynamicReqs) {
-				deltaWiring = moduleResolver.resolveDynamicDelta(dynamicReq, unresolved, wiringClone, moduleDatabase);
+				ModuleResolutionReport report = moduleResolver.resolveDynamicDelta(dynamicReq, unresolved, wiringClone, moduleDatabase);
+				Map<Resource, List<Wire>> resolutionResult = report.getResolutionResult();
+				deltaWiring = resolutionResult == null ? Collections.<ModuleRevision, ModuleWiring> emptyMap() : ModuleResolver.generateDelta(resolutionResult, wiringClone);
 				if (deltaWiring.get(revision) != null) {
 					break;
 				}
@@ -849,15 +856,15 @@ public final class ModuleContainer {
 	 * Refreshes the specified collection of modules.
 	 * @param initial the modules to refresh or {@code null} to refresh the
 	 *     removal pending.
-	 * @throws ResolutionException
 	 * @see FrameworkWiring#refreshBundles(Collection, FrameworkListener...)
 	 */
-	public void refresh(Collection<Module> initial) throws ResolutionException {
+	public ModuleResolutionReport refresh(Collection<Module> initial) {
 		initial = initial == null ? null : new ArrayList<Module>(initial);
 		Collection<Module> refreshTriggers = unresolve(initial);
 		if (!isRefreshingSystemModule()) {
-			resolve(refreshTriggers, false, true);
+			return resolve(refreshTriggers, false, true);
 		}
+		return new ModuleResolutionReport(null, null, null);
 	}
 
 	/**
@@ -1161,11 +1168,8 @@ public final class ModuleContainer {
 		public boolean resolveBundles(Collection<Bundle> bundles) {
 			checkAdminPermission(getBundle(), AdminPermission.RESOLVE);
 			Collection<Module> modules = getModules(bundles);
-			try {
-				resolve(modules, false);
-			} catch (ResolutionException e) {
-				return false;
-			}
+			resolve(modules, false);
+
 			if (modules == null) {
 				modules = ModuleContainer.this.getModules();
 			}
@@ -1234,8 +1238,6 @@ public final class ModuleContainer {
 		public void dispatchEvent(ContainerWiring eventListener, FrameworkListener[] frameworkListeners, int eventAction, Collection<Module> eventObject) {
 			try {
 				refresh(eventObject);
-			} catch (ResolutionException e) {
-				adaptor.publishContainerEvent(ContainerEvent.ERROR, moduleDatabase.getModule(0), e);
 			} finally {
 				adaptor.publishContainerEvent(ContainerEvent.REFRESH, moduleDatabase.getModule(0), null, frameworkListeners);
 			}

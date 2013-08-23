@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.resource.Resource;
+import org.osgi.service.resolver.ResolutionException;
 
 /**
  * A resolution report is associated with a single resolve process.  Entries
@@ -156,4 +157,15 @@ public interface ResolutionReport {
 	 * @return all resolution report entries associated with this report.
 	 */
 	Map<Resource, List<Entry>> getEntries();
+
+	/**
+	 * Returns the resolution exception associated with the resolve process
+	 * or {@code null} if there is no resolution exception.  For some resolve
+	 * operations a resolution exception may not be thrown even if the 
+	 * resolve process could not resolve some resources.  For example, if
+	 * the resources are optional resources to resolve.
+	 * @return thee resolution exception or {@code null} if there is 
+	 * no resolution exception.
+	 */
+	ResolutionException getResoltuionException();
 }

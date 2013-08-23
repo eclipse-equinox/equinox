@@ -187,7 +187,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testSimpleUnResolveable() throws BundleException, IOException, ResolutionException {
+	public void testSimpleUnResolveable() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
@@ -197,17 +197,13 @@ public class TestModuleContainer extends AbstractTest {
 		Module c7 = installDummyModule("c7_v1.MF", "c7", container);
 		installDummyModule("c6_v1.MF", "c6", container);
 
-		try {
-			container.resolve(Arrays.asList(c7), true);
-			// Expected a resolution exception
-			Assert.fail("Expected a resolution exception");
-		} catch (ResolutionException e) {
-			// expected
-		}
+		ModuleResolutionReport report = container.resolve(Arrays.asList(c7), true);
+		Assert.assertNotNull("Expected a resolution exception", report.getResoltuionException());
 
 		// Should resolve now
 		installDummyModule("c4_v1.MF", "c4", container);
-		container.resolve(Arrays.asList(c7), true);
+		report = container.resolve(Arrays.asList(c7), true);
+		Assert.assertNull("Unexpected resoltuion exception", report.getResoltuionException());
 	}
 
 	@Test
@@ -1230,7 +1226,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testRequireBundleUses() throws BundleException, IOException, ResolutionException {
+	public void testRequireBundleUses() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
@@ -1242,11 +1238,8 @@ public class TestModuleContainer extends AbstractTest {
 		installDummyModule("require.b3.MF", "b3", container);
 		installDummyModule("require.b4.MF", "b4", container);
 
-		try {
-			container.resolve(null, false);
-		} catch (ResolutionException e) {
-			// This is allowed to happen here
-		}
+		container.resolve(null, false);
+
 		Assert.assertEquals("b1 should not resolve.", State.INSTALLED, b1.getState());
 	}
 
@@ -1254,7 +1247,7 @@ public class TestModuleContainer extends AbstractTest {
 	 * Test that a resolve process does not blow up because of one unresolvable uses constraint issue
 	 */
 	@Test
-	public void testUses1() throws BundleException, IOException, ResolutionException {
+	public void testUses1() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
@@ -1265,12 +1258,8 @@ public class TestModuleContainer extends AbstractTest {
 		Module uses_b = installDummyModule("uses.b.MF", "b", container);
 		Module uses_c = installDummyModule("uses.c.MF", "c", container);
 
-		try {
-			container.resolve(null, false);
-		} catch (ResolutionException e) {
-			// should not happen here
-			Assert.fail(e.getMessage());
-		}
+		container.resolve(null, false);
+
 		Assert.assertEquals("a should resolve.", State.RESOLVED, uses_a.getState());
 		Assert.assertEquals("b should resolve.", State.RESOLVED, uses_b.getState());
 		Assert.assertEquals("c should not resolve.", State.INSTALLED, uses_c.getState());
@@ -1291,12 +1280,8 @@ public class TestModuleContainer extends AbstractTest {
 		Module uses_b = installDummyModule("uses.b.MF", "b", container);
 		Module uses_d = installDummyModule("uses.d.MF", "d", container);
 
-		try {
-			container.resolve(null, false);
-		} catch (ResolutionException e) {
-			// should not happen here
-			Assert.fail(e.getMessage());
-		}
+		container.resolve(null, false);
+
 		Assert.assertEquals("a should resolve.", State.RESOLVED, uses_a.getState());
 		Assert.assertEquals("b should resolve.", State.RESOLVED, uses_b.getState());
 		Assert.assertEquals("d should resolve.", State.RESOLVED, uses_d.getState());
@@ -1319,12 +1304,8 @@ public class TestModuleContainer extends AbstractTest {
 		Module uses_f = installDummyModule("uses.f.MF", "f", container);
 		Module uses_g = installDummyModule("uses.g.MF", "g", container);
 
-		try {
-			container.resolve(null, false);
-		} catch (ResolutionException e) {
-			// should not happen here
-			Assert.fail(e.getMessage());
-		}
+		container.resolve(null, false);
+
 		Assert.assertEquals("a should resolve.", State.RESOLVED, uses_a.getState());
 		Assert.assertEquals("b should resolve.", State.RESOLVED, uses_b.getState());
 		Assert.assertEquals("e should resolve.", State.RESOLVED, uses_e.getState());
@@ -1402,11 +1383,7 @@ public class TestModuleContainer extends AbstractTest {
 
 		Module c6v160 = installDummyModule("c6_v160.MF", "c6_v160", container);
 
-		try {
-			container.resolve(null, false);
-		} catch (ResolutionException e) {
-			// expected
-		}
+		container.resolve(null, false);
 
 		Assert.assertNull("Bundle should not be resolved: " + c6v160, c6v160.getCurrentRevision().getWiring());
 
@@ -1414,11 +1391,7 @@ public class TestModuleContainer extends AbstractTest {
 
 		Module c6v180 = installDummyModule("c6_v180.MF", "c6_v180", container);
 
-		try {
-			container.resolve(null, false);
-		} catch (ResolutionException e) {
-			// expected
-		}
+		container.resolve(null, false);
 
 		Assert.assertNull("Bundle should not be resolved: " + c6v180, c6v180.getCurrentRevision().getWiring());
 

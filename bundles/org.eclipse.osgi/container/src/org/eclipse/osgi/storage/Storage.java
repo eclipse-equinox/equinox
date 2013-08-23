@@ -45,7 +45,6 @@ import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.namespace.NativeNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.service.resolver.ResolutionException;
 
 public class Storage {
 	public static final int VERSION = 1;
@@ -195,11 +194,7 @@ public class Storage {
 			}
 		}
 		if (!discarded.isEmpty()) {
-			try {
-				moduleContainer.refresh(discarded);
-			} catch (ResolutionException e) {
-				throw new BundleException("Error discarding bundles.", e); //$NON-NLS-1$
-			}
+			moduleContainer.refresh(discarded);
 		}
 	}
 

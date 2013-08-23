@@ -70,16 +70,14 @@ final class ModuleResolver {
 	 * merged into the moduleDatabase
 	 * @throws ResolutionException
 	 */
-	Map<ModuleRevision, ModuleWiring> resolveDelta(Collection<ModuleRevision> triggers, boolean triggersMandatory, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDatabase moduleDatabase) throws ResolutionException {
+	ModuleResolutionReport resolveDelta(Collection<ModuleRevision> triggers, boolean triggersMandatory, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDatabase moduleDatabase) {
 		ResolveProcess resolveProcess = new ResolveProcess(unresolved, triggers, triggersMandatory, wiringCopy, moduleDatabase);
-		Map<Resource, List<Wire>> result = resolveProcess.resolve();
-		return generateDelta(result, wiringCopy);
+		return resolveProcess.resolve();
 	}
 
-	Map<ModuleRevision, ModuleWiring> resolveDynamicDelta(DynamicModuleRequirement dynamicReq, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDatabase moduleDatabase) throws ResolutionException {
+	ModuleResolutionReport resolveDynamicDelta(DynamicModuleRequirement dynamicReq, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDatabase moduleDatabase) {
 		ResolveProcess resolveProcess = new ResolveProcess(unresolved, dynamicReq, wiringCopy, moduleDatabase);
-		Map<Resource, List<Wire>> result = resolveProcess.resolve();
-		return generateDelta(result, wiringCopy);
+		return resolveProcess.resolve();
 	}
 
 	static Map<ModuleRevision, ModuleWiring> generateDelta(Map<Resource, List<Wire>> result, Map<ModuleRevision, ModuleWiring> wiringCopy) {
@@ -589,8 +587,10 @@ final class ModuleResolver {
 			return InternalUtils.asCollectionResource(optionals);
 		}
 
-		Map<Resource, List<Wire>> resolve() throws ResolutionException {
+		ModuleResolutionReport resolve() {
 			if (threadResolving.get().booleanValue()) {
+				// throw up a runtime exception, if this is caused by a resolver hook
+				// then it will get caught at the call to the resolver hook and a proper exception is thrown
 				throw new IllegalStateException("Detected a recursive resolve operation.");
 			}
 			threadResolving.set(Boolean.TRUE);
@@ -601,12 +601,14 @@ final class ModuleResolver {
 					if (e.getCause() instanceof BundleException) {
 						BundleException be = (BundleException) e.getCause();
 						if (be.getType() == BundleException.REJECTED_BY_HOOK) {
-							throw new ResolutionException(be);
+							return new ModuleResolutionReport(null, Collections.<Resource, List<Entry>> emptyMap(), new ResolutionException(be));
 						}
 					}
 					throw e;
 				}
 				Map<Resource, List<Wire>> result = null;
+				ResolutionException re = null;
+				ModuleResolutionReport report;
 				try {
 					filterResolvable();
 					selectSingletons();
@@ -629,13 +631,16 @@ final class ModuleResolver {
 						result = resolver.resolve(this);
 						result.putAll(dynamicAttachWirings);
 					}
-					return result;
+				} catch (ResolutionException e) {
+					re = e;
 				} finally {
 					computeUnresolvedProviderResolutionReportEntries(result);
+					report = reportBuilder.build(result, re);
 					if (hook instanceof ResolutionReport.Listener)
-						((ResolutionReport.Listener) hook).handleResolutionReport(reportBuilder.build());
+						((ResolutionReport.Listener) hook).handleResolutionReport(report);
 					hook.end();
 				}
+				return report;
 			} finally {
 				threadResolving.set(Boolean.FALSE);
 			}

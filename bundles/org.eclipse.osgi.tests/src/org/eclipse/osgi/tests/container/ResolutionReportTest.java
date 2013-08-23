@@ -12,12 +12,11 @@ package org.eclipse.osgi.tests.container;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.*;
-import org.eclipse.osgi.container.Module;
-import org.eclipse.osgi.container.ModuleContainer;
+import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.eclipse.osgi.tests.container.dummys.*;
 import org.junit.Test;
@@ -26,7 +25,6 @@ import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.resource.*;
-import org.osgi.service.resolver.ResolutionException;
 
 public class ResolutionReportTest extends AbstractTest {
 	// TODO Add test for dynamic resolution in conjunction with UNRESOLVED_PROVIDER entries.
@@ -54,7 +52,7 @@ public class ResolutionReportTest extends AbstractTest {
 	@Test
 	public void testResolutionReportBuilder() {
 		org.eclipse.osgi.container.ModuleResolutionReport.Builder builder = new org.eclipse.osgi.container.ModuleResolutionReport.Builder();
-		ResolutionReport report = builder.build();
+		ResolutionReport report = builder.build(null, null);
 		assertNotNull("Resolution report was null", report);
 	}
 
@@ -213,21 +211,13 @@ public class ResolutionReportTest extends AbstractTest {
 	// TODO Need to test both mandatory and optional triggers.
 
 	private void assertResolutionDoesNotSucceed(ModuleContainer container, Collection<Module> modules) {
-		try {
-			container.resolve(modules, true);
-			fail("Resolution should not have succeeded");
-		} catch (ResolutionException e) {
-			// Okay.
-		}
+		ModuleResolutionReport report = container.resolve(modules, true);
+		assertNotNull("Resolution should not have succeeded", report.getResoltuionException());
 	}
 
 	private void assertResolutionSucceeds(ModuleContainer container, Collection<Module> modules) {
-		try {
-			container.resolve(modules, false);
-			// Okay
-		} catch (ResolutionException e) {
-			fail("Unexpected resolution exception");
-		}
+		ModuleResolutionReport report = container.resolve(modules, false);
+		assertNull("Unexpected resolution exception", report.getResoltuionException());
 	}
 
 	private void assertResolutionReportEntriesNotNull(Map<Resource, List<ResolutionReport.Entry>> entries) {
