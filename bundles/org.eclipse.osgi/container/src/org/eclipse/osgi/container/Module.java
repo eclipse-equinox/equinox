@@ -286,6 +286,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 */
 	protected final void lockStateChange(ModuleEvent transitionEvent) throws BundleException {
 		boolean previousInterruption = Thread.interrupted();
+		boolean invalid = false;
 		try {
 			boolean acquired = stateChangeLock.tryLock(5, TimeUnit.SECONDS);
 			if (acquired) {
@@ -310,16 +311,17 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 						break;
 				}
 				if (!isValidTransition) {
+					invalid = true;
 					stateChangeLock.unlock();
 				} else {
 					stateTransitionEvents.add(transitionEvent);
 					return;
 				}
 			}
-			throw new BundleException("Unable to acquire the state change lock for the module: " + transitionEvent, BundleException.STATECHANGE_ERROR);
+			throw new BundleException("Unable to acquire the state change lock for the module: " + toString() + " " + transitionEvent + " " + stateTransitionEvents + (invalid ? " isInvalid" : ""), BundleException.STATECHANGE_ERROR);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new BundleException("Unable to acquire the state change lock for the module.", BundleException.STATECHANGE_ERROR, e);
+			throw new BundleException("Unable to acquire the state change lock for the module: " + toString() + " " + transitionEvent, BundleException.STATECHANGE_ERROR, e);
 		} finally {
 			if (previousInterruption) {
 				Thread.currentThread().interrupt();
