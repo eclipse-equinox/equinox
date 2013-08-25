@@ -550,21 +550,23 @@ public final class ModuleContainer {
 		List<Module> modulesLocked = new ArrayList<Module>(modulesResolved.size());
 		// now attempt to apply the delta
 		try {
-			// acquire the necessary RESOLVED state change lock
-			for (Module module : modulesResolved) {
-				try {
-					module.lockStateChange(ModuleEvent.RESOLVED);
-					modulesLocked.add(module);
-				} catch (BundleException e) {
-					// TODO throw some appropriate exception
-					throw new IllegalStateException("Could not acquire state change lock.", e);
-				}
-			}
 			Map<ModuleWiring, Collection<ModuleRevision>> hostsWithDynamicFrags = new HashMap<ModuleWiring, Collection<ModuleRevision>>(0);
 			moduleDatabase.writeLock();
 			try {
 				if (timestamp != moduleDatabase.getRevisionsTimestamp())
 					return false; // need to try again
+				// Acquire the necessary RESOLVED state change lock.
+				// Note this is done while holding the write lock to avoid multiple threads trying to compete over
+				// locking multiple modules; otherwise out of order locks between modules can happen
+				for (Module module : modulesResolved) {
+					try {
+						module.lockStateChange(ModuleEvent.RESOLVED);
+						modulesLocked.add(module);
+					} catch (BundleException e) {
+						// TODO throw some appropriate exception
+						throw new IllegalStateException("Could not acquire state change lock.", e);
+					}
+				}
 				Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDatabase.getWiringsCopy();
 				for (Map.Entry<ModuleRevision, ModuleWiring> deltaEntry : deltaWiring.entrySet()) {
 					ModuleWiring current = wiringCopy.get(deltaEntry.getKey());
@@ -732,8 +734,13 @@ public final class ModuleContainer {
 		Collection<Module> modulesLocked = new ArrayList<Module>(refreshTriggers.size());
 		Collection<Module> modulesUnresolved = new ArrayList<Module>();
 		try {
-			// acquire module state change locks
+			// Acquire module state change locks.
+			// Note this is done while holding the write lock to avoid multiple threads trying to compete over
+			// locking multiple modules; otherwise out of order locks between modules can happen		
+			moduleDatabase.writeLock();
 			try {
+				if (timestamp != moduleDatabase.getRevisionsTimestamp())
+					return null; // need to try again
 				// go in reverse order
 				for (ListIterator<Module> iTriggers = refreshTriggers.listIterator(refreshTriggers.size()); iTriggers.hasPrevious();) {
 					Module refreshModule = iTriggers.previous();
@@ -743,7 +750,10 @@ public final class ModuleContainer {
 			} catch (BundleException e) {
 				// TODO throw some appropriate exception
 				throw new IllegalStateException("Could not acquire state change lock.", e);
+			} finally {
+				moduleDatabase.writeUnlock();
 			}
+			// Must not hold the module database lock while stopping bundles
 			// Stop any active bundles and remove non-active modules from the refreshTriggers
 			for (ListIterator<Module> iTriggers = refreshTriggers.listIterator(refreshTriggers.size()); iTriggers.hasPrevious();) {
 				Module refreshModule = iTriggers.previous();
