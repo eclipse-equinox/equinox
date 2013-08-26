@@ -21,4 +21,27 @@
   <artifactId>org.eclipse.equinox.weaving.aspectj</artifactId>
   <version>1.0.400-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
+
+
+  <build>
+    <plugins>
+        <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>target-platform-configuration</artifactId>
+            <configuration>
+                <dependency-resolution>
+                    <extraRequirements>
+                        <!-- this guarantees proper reactor build order  -->
+                        <requirement>
+                            <type>eclipse-plugin</type>
+                            <id>org.aspectj.weaver</id>
+                            <versionRange>0.0.0</versionRange>
+                        </requirement>
+                    </extraRequirements>
+                </dependency-resolution>
+            </configuration>
+        </plugin>
+    </plugins>
+  </build>
+
 </project>
