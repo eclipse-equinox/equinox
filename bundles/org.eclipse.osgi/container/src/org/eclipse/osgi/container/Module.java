@@ -368,8 +368,10 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			}
 		}
 		BundleException startError = null;
+		boolean lockedStarted = false;
 		lockStateChange(ModuleEvent.STARTED);
 		try {
+			lockedStarted = true;
 			checkValid();
 			if (StartOptions.TRANSIENT_IF_AUTO_START.isContained(options) && !settings.contains(Settings.AUTO_START)) {
 				// Do nothing
@@ -387,13 +389,25 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			if (State.ACTIVE.equals(getState()))
 				return;
 			if (getState().equals(State.INSTALLED)) {
-				ModuleResolutionReport report = getRevisions().getContainer().resolve(Arrays.asList(this), true);
+				// must unlock to avoid out of order locks when multiple unresolved
+				// bundles are started at the same time from different threads
+				unlockStateChange(ModuleEvent.STARTED);
+				lockedStarted = false;
+				ModuleResolutionReport report;
+				try {
+					report = getRevisions().getContainer().resolve(Arrays.asList(this), true);
+				} finally {
+					lockStateChange(ModuleEvent.STARTED);
+					lockedStarted = true;
+				}
 				ResolutionException e = report.getResoltuionException();
 				if (e != null) {
 					if (e.getCause() instanceof BundleException) {
 						throw (BundleException) e.getCause();
 					}
 				}
+				if (State.ACTIVE.equals(getState()))
+					return;
 				if (getState().equals(State.INSTALLED)) {
 					String reportMessage = ModuleResolutionReport.getResolutionReport("", getCurrentRevision(), report.getEntries(), null);
 					throw new BundleException("Could not resolve module: " + reportMessage, BundleException.RESOLVE_ERROR, e);
@@ -410,7 +424,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				event = ModuleEvent.STOPPED;
 			}
 		} finally {
-			unlockStateChange(ModuleEvent.STARTED);
+			if (lockedStarted) {
+				unlockStateChange(ModuleEvent.STARTED);
+			}
 		}
 
 		if (event != null) {

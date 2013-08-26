@@ -30,20 +30,34 @@ public abstract class SystemModule extends Module {
 
 	public final void init() throws BundleException {
 		getRevisions().getContainer().checkAdminPermission(getBundle(), AdminPermission.EXECUTE);
+		boolean lockedStarted = false;
 		lockStateChange(ModuleEvent.STARTED);
 		try {
+			lockedStarted = true;
 			checkValid();
 			if (ACTIVE_SET.contains(getState()))
 				return;
 			getRevisions().getContainer().open();
 			if (getState().equals(State.INSTALLED)) {
-				ModuleResolutionReport report = getRevisions().getContainer().resolve(Arrays.asList((Module) this), true);
+				// must unlock to avoid out of order locks when multiple unresolved
+				// bundles are started at the same time from different threads
+				unlockStateChange(ModuleEvent.STARTED);
+				lockedStarted = false;
+				ModuleResolutionReport report;
+				try {
+					report = getRevisions().getContainer().resolve(Arrays.asList((Module) this), true);
+				} finally {
+					lockStateChange(ModuleEvent.STARTED);
+					lockedStarted = true;
+				}
 				ResolutionException e = report.getResoltuionException();
 				if (e != null) {
 					if (e.getCause() instanceof BundleException) {
 						throw (BundleException) e.getCause();
 					}
 				}
+				if (ACTIVE_SET.contains(getState()))
+					return;
 				if (getState().equals(State.INSTALLED)) {
 					String reportMessage = ModuleResolutionReport.getResolutionReport("", getCurrentRevision(), report.getEntries(), null);
 					throw new BundleException("Could not resolve module: " + reportMessage, BundleException.RESOLVE_ERROR);
@@ -66,7 +80,9 @@ public abstract class SystemModule extends Module {
 				throw new BundleException("Error initializing container.", BundleException.ACTIVATOR_ERROR, t);
 			}
 		} finally {
-			unlockStateChange(ModuleEvent.STARTED);
+			if (lockedStarted) {
+				unlockStateChange(ModuleEvent.STARTED);
+			}
 		}
 	}
 
