@@ -635,7 +635,7 @@ public final class ModuleContainer {
 		// This is questionable behavior according to the spec but this was the way equinox previously behaved
 		// Need to auto-start any persistently started bundles that got resolved
 		for (Module module : modulesLocked) {
-			if (module.holdsTransitionEventLock(ModuleEvent.STARTED) || module.getId() == 0 || triggerSet.contains(module)) {
+			if (module.inStartResolve() || module.getId() == 0 || triggerSet.contains(module)) {
 				continue;
 			}
 			try {

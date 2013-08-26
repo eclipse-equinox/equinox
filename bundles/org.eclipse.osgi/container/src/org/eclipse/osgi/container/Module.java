@@ -157,6 +157,12 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	final ReentrantLock stateChangeLock = new ReentrantLock();
 	private final EnumSet<ModuleEvent> stateTransitionEvents = EnumSet.noneOf(ModuleEvent.class);
 	private final EnumSet<Settings> settings;
+	private final ThreadLocal<Boolean> inStartResolve = new ThreadLocal<Boolean>() {
+		@Override
+		protected Boolean initialValue() {
+			return Boolean.FALSE;
+		}
+	};
 	private volatile State state = State.INSTALLED;
 	private volatile int startlevel;
 	private volatile long lastModified;
@@ -395,8 +401,10 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				lockedStarted = false;
 				ModuleResolutionReport report;
 				try {
+					inStartResolve.set(Boolean.TRUE);
 					report = getRevisions().getContainer().resolve(Arrays.asList(this), true);
 				} finally {
+					inStartResolve.set(Boolean.FALSE);
 					lockStateChange(ModuleEvent.STARTED);
 					lockedStarted = true;
 				}
@@ -424,6 +432,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				event = ModuleEvent.STOPPED;
 			}
 		} finally {
+			inStartResolve.set(Boolean.FALSE);
 			if (lockedStarted) {
 				unlockStateChange(ModuleEvent.STARTED);
 			}
@@ -664,5 +673,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	boolean hasLazyActivatePolicy() {
 		ModuleRevision current = getCurrentRevision();
 		return current == null ? false : current.hasLazyActivatePolicy();
+	}
+
+	boolean inStartResolve() {
+		return inStartResolve.get().booleanValue();
 	}
 }
