@@ -1398,6 +1398,13 @@ public final class ModuleContainer {
 				}
 				try {
 					int currentSL = getStartLevel();
+					if (currentSL == 0) {
+						// check for an active framework; this is only valid when the system bundle is starting
+						Module systemModule = moduleDatabase.getModule(0);
+						if (systemModule != null && !State.STARTING.equals(systemModule.getState())) {
+							return;
+						}
+					}
 					// Note that we must get a new list of modules each time;
 					// this is because additional modules could have been installed from the previous start-level
 					if (newStartLevel > currentSL) {
