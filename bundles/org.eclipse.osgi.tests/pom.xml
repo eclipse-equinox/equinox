@@ -79,9 +79,7 @@
         </pluginManagement>
       </build>
     </profile>
-  </profiles>
 
-  <profiles>
     <profile>
       <id>eclipse-sign</id>
       <build>
