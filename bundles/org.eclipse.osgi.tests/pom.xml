@@ -81,5 +81,31 @@
     </profile>
   </profiles>
 
+  <profiles>
+    <profile>
+      <id>eclipse-sign</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.cbi.maven.plugins</groupId>
+            <artifactId>eclipse-jarsigner-plugin</artifactId>
+            <version>${cbi-plugins.version}</version>
+            <executions>
+              <execution>
+                <id>sign</id>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <phase>verify</phase>
+              </execution>
+            </executions>
+            <configuration>
+              <excludeInnerJars>true</excludeInnerJars>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>
