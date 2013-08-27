@@ -189,7 +189,7 @@ public class SystemBundleActivator implements BundleActivator {
 	}
 
 	private void unintallSecurityManager() {
-		if (System.getSecurityManager() == setSecurityManagner)
+		if (setSecurityManagner != null && System.getSecurityManager() == setSecurityManagner)
 			System.setSecurityManager(null);
 		setSecurityManagner = null;
 	}
