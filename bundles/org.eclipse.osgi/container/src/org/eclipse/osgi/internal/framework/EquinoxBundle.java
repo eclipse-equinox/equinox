@@ -172,6 +172,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 	private final Module module;
 	private final Object monitor = new Object();
 	private BundleContextImpl context;
+	private volatile SignerInfo[] signerInfos;
 
 	class EquinoxSystemModule extends SystemModule {
 		public EquinoxSystemModule(ModuleContainer container) {
@@ -368,6 +369,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		try {
 			Storage storage = equinoxContainer.getStorage();
 			storage.update(module, storage.getContentConnection(module, null, input));
+			signerInfos = null;
 		} catch (IOException e) {
 			throw new BundleException("Error reading bundle content.", e); //$NON-NLS-1$
 		}
@@ -637,9 +639,14 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		if (factory == null) {
 			return Collections.emptyMap();
 		}
+
 		try {
-			SignedContent signedContent = factory.getSignedContent(this);
-			SignerInfo[] infos = signedContent.getSignerInfos();
+			SignerInfo[] infos = signerInfos;
+			if (infos == null) {
+				SignedContent signedContent = factory.getSignedContent(this);
+				infos = signedContent.getSignerInfos();
+				signerInfos = infos;
+			}
 			if (infos.length == 0)
 				return Collections.emptyMap();
 			Map<X509Certificate, List<X509Certificate>> results = new HashMap<X509Certificate, List<X509Certificate>>(infos.length);
