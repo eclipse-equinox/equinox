@@ -642,9 +642,7 @@ public class EclipseStarter {
 		context.addBundleListener(listener);
 		frameworkWiring.refreshBundles(Arrays.asList(bundles), listener);
 		updateSplash(semaphore, listener);
-		if (isForcedRestart())
-			return true;
-		return false;
+		return isForcedRestart();
 	}
 
 	private static void waitForShutdown() {
@@ -1134,7 +1132,12 @@ public class EclipseStarter {
 
 	private static void updateSplash(Semaphore semaphore, StartupEventListener listener) {
 		ServiceTracker<StartupMonitor, StartupMonitor> monitorTracker = new ServiceTracker<StartupMonitor, StartupMonitor>(context, StartupMonitor.class.getName(), null);
-		monitorTracker.open();
+		try {
+			monitorTracker.open();
+		} catch (IllegalStateException e) {
+			// do nothing; this can happen if the framework shutdown
+			return;
+		}
 		try {
 			while (true) {
 				StartupMonitor monitor = monitorTracker.getService();
@@ -1152,10 +1155,13 @@ public class EclipseStarter {
 			}
 		} finally {
 			if (listener != null) {
-				context.removeFrameworkListener(listener);
-				context.removeBundleListener(listener);
+				try {
+					context.removeBundleListener(listener);
+					monitorTracker.close();
+				} catch (IllegalStateException e) {
+					// do nothing; this can happen if the framework shutdown
+				}
 			}
-			monitorTracker.close();
 		}
 	}
 
