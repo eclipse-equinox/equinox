@@ -28,6 +28,7 @@ import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
+import org.eclipse.osgi.storage.bundlefile.BundleFileWrapper;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -211,9 +212,9 @@ public class WeavingHook extends AbstractWeavingHook {
      * @see org.eclipse.osgi.internal.hookregistry.BundleFileWrapperFactoryHook#wrapBundleFile(org.eclipse.osgi.storage.bundlefile.BundleFile,
      *      org.eclipse.osgi.storage.BundleInfo.Generation, boolean)
      */
-    public BundleFile wrapBundleFile(final BundleFile bundleFile,
+    public BundleFileWrapper wrapBundleFile(final BundleFile bundleFile,
             final Generation generation, final boolean base) {
-        BundleFile wrapped = null;
+        BundleFileWrapper wrapped = null;
         if (Debug.DEBUG_BUNDLE)
             Debug.println("> WeavingHook.wrapBundleFile() bundle="
                     + (generation.getRevision() != null ? generation

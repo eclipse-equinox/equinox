@@ -17,6 +17,7 @@ import org.eclipse.osgi.internal.hookregistry.*;
 import org.eclipse.osgi.internal.log.EquinoxLogServices;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
+import org.eclipse.osgi.storage.bundlefile.BundleFileWrapper;
 import org.osgi.framework.*;
 
 /**
@@ -30,7 +31,7 @@ public class TransformerHook implements BundleFileWrapperFactoryHook, HookConfig
 	/**
 	 * @throws IOException  
 	 */
-	public BundleFile wrapBundleFile(BundleFile bundleFile, Generation generation, boolean base) {
+	public BundleFileWrapper wrapBundleFile(BundleFile bundleFile, Generation generation, boolean base) {
 		if (transformers == null || templates == null)
 			return null;
 		return new TransformedBundleFile(this, generation, bundleFile);

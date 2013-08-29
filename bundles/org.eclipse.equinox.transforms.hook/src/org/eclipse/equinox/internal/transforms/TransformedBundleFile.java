@@ -29,7 +29,7 @@ import org.osgi.framework.Bundle;
  * This class is capable of providing transformed versions of entries contained within a base bundle file.
  * For requests that transform bundle contents into local resources (such as file URLs) the transformed state of the bundle is written to the configuration area.
  */
-public class TransformedBundleFile extends BundleFile {
+public class TransformedBundleFile extends BundleFileWrapper {
 
 	private final TransformerHook transformerHook;
 	private final BundleFile delegate;
@@ -44,7 +44,7 @@ public class TransformedBundleFile extends BundleFile {
 	 * @param delegate the original file
 	 */
 	public TransformedBundleFile(TransformerHook transformerHook, Generation generation, BundleFile delegate) {
-		super(delegate.getBaseFile());
+		super(delegate);
 		this.transformerHook = transformerHook;
 		this.generation = generation;
 		this.delegate = delegate;
@@ -55,20 +55,8 @@ public class TransformedBundleFile extends BundleFile {
 		return generation;
 	}
 
-	public void close() throws IOException {
-		delegate.close();
-	}
-
-	public boolean containsDir(String dir) {
-		return delegate.containsDir(dir);
-	}
-
 	public boolean equals(Object obj) {
 		return delegate.equals(obj);
-	}
-
-	public File getBaseFile() {
-		return delegate.getBaseFile();
 	}
 
 	public BundleEntry getEntry(String path) {
@@ -139,10 +127,6 @@ public class TransformedBundleFile extends BundleFile {
 	private boolean match(Pattern pattern, String string) {
 		Matcher matcher = pattern.matcher(string);
 		return matcher.matches();
-	}
-
-	public Enumeration getEntryPaths(String path) {
-		return delegate.getEntryPaths(path);
 	}
 
 	/**
@@ -258,10 +242,6 @@ public class TransformedBundleFile extends BundleFile {
 
 	public int hashCode() {
 		return delegate.hashCode();
-	}
-
-	public void open() throws IOException {
-		delegate.open();
 	}
 
 	public String toString() {
