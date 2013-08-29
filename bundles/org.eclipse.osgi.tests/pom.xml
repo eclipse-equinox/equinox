@@ -22,6 +22,10 @@
   <version>3.10.0-SNAPSHOT</version>
   <packaging>eclipse-test-plugin</packaging>
 
+  <properties>
+    <defaultSigning-excludeInnerJars>true</defaultSigning-excludeInnerJars>
+  </properties>
+
   <build>
     <plugins>
       <plugin>
@@ -77,31 +81,6 @@
             </plugin>
           </plugins>
         </pluginManagement>
-      </build>
-    </profile>
-
-    <profile>
-      <id>eclipse-sign</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.eclipse.cbi.maven.plugins</groupId>
-            <artifactId>eclipse-jarsigner-plugin</artifactId>
-            <version>${cbi-plugins.version}</version>
-            <executions>
-              <execution>
-                <id>sign</id>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-                <phase>verify</phase>
-              </execution>
-            </executions>
-            <configuration>
-              <excludeInnerJars>true</excludeInnerJars>
-            </configuration>
-          </plugin>
-        </plugins>
       </build>
     </profile>
   </profiles>
