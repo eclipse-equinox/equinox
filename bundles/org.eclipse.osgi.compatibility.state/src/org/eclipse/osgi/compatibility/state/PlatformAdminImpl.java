@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2012, 2013 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -23,17 +23,28 @@ public class PlatformAdminImpl implements PlatformAdmin {
 	private final StateObjectFactory factory = new StateObjectFactoryImpl();
 	private final Object monitor = new Object();
 	private EquinoxContainer equinoxContainer;
+	private BundleContext bc;
 	private State systemState;
+	private PlatformBundleListener synchronizer;
 	private ServiceRegistration<PlatformAdmin> reg;
 
 	void start(BundleContext context) {
 		synchronized (this.monitor) {
 			equinoxContainer = ((BundleContextImpl) context).getContainer();
+			this.bc = context;
 		}
 		this.reg = context.registerService(PlatformAdmin.class, this, null);
 	}
 
 	void stop(BundleContext context) {
+		synchronized (this.monitor) {
+			if (synchronizer != null) {
+				context.removeBundleListener(synchronizer);
+				context.removeFrameworkListener(synchronizer);
+			}
+			synchronizer = null;
+			systemState = null;
+		}
 		this.reg.unregister();
 	}
 
@@ -71,16 +82,20 @@ public class PlatformAdminImpl implements PlatformAdmin {
 		ModuleDatabase database = equinoxContainer.getStorage().getModuleDatabase();
 		database.readLock();
 		try {
+			ModuleContainer container = equinoxContainer.getStorage().getModuleContainer();
 			List<Module> modules = equinoxContainer.getStorage().getModuleContainer().getModules();
 			for (Module module : modules) {
 				ModuleRevision current = module.getCurrentRevision();
 				BundleDescription description = converter.createDescription(current);
 				state.addBundle(description);
-				state.setPlatformProperties(asDictionary(equinoxContainer.getConfiguration().getInitialConfig()));
 			}
+			state.setPlatformProperties(asDictionary(equinoxContainer.getConfiguration().getInitialConfig()));
+			synchronizer = new PlatformBundleListener(state, converter, database, container);
+			state.setResolverHookFactory(synchronizer);
+			bc.addBundleListener(synchronizer);
+			bc.addFrameworkListener(synchronizer);
+			state.resolve();
 			state.setTimeStamp(database.getRevisionsTimestamp());
-			// TODO add hooks to get the resolution correct
-			// TODO add listeners to keep state copy in sync
 		} finally {
 			database.readUnlock();
 		}

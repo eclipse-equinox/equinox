@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2013 IBM Corporation and others. All rights reserved.
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.osgi.compatibility.state;
 
 import java.util.*;
@@ -68,7 +77,7 @@ class StateConverter {
 			}
 		}
 
-		BundleDescription result = state.getFactory().createBundleDescription(resource.getBundle().getBundleId(), symbolicNameSpecification, version, null, requireBundles.toArray(new BundleSpecification[requireBundles.size()]), fragmentHost.size() == 0 ? null : fragmentHost.get(0), importPackages.toArray(new ImportPackageSpecification[importPackages.size()]), exportPackages.toArray(new ExportPackageDescription[exportPackages.size()]), null, null, requireCapabilities.toArray(new GenericSpecification[requireCapabilities.size()]), provideCapabilities.toArray(new GenericDescription[provideCapabilities.size()]), null);
+		BundleDescription result = state.getFactory().createBundleDescription(resource.getBundle().getBundleId(), symbolicNameSpecification, version, resource.getBundle().getLocation(), requireBundles.toArray(new BundleSpecification[requireBundles.size()]), fragmentHost.size() == 0 ? null : fragmentHost.get(0), importPackages.toArray(new ImportPackageSpecification[importPackages.size()]), exportPackages.toArray(new ExportPackageDescription[exportPackages.size()]), null, null, requireCapabilities.toArray(new GenericSpecification[requireCapabilities.size()]), provideCapabilities.toArray(new GenericDescription[provideCapabilities.size()]), null);
 		result.setUserObject(resource);
 		GenericDescription[] genericDescs = result.getGenericCapabilities();
 		for (GenericDescription genericDesc : genericDescs) {
@@ -85,7 +94,7 @@ class StateConverter {
 		String packageName = (String) attributes.remove(PackageNamespace.PACKAGE_NAMESPACE);
 		// remove invalid attributes
 		attributes.remove(PackageNamespace.CAPABILITY_BUNDLE_SYMBOLICNAME_ATTRIBUTE);
-		attributes.remove(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+		attributes.remove(AbstractWiringNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE);
 		String declaration = packageName + toString(attributes, "=", true) + toString(directives, ":=", true); //$NON-NLS-1$//$NON-NLS-2$
 		List<ExportPackageDescription> result = state.getFactory().createExportPackageDescriptions(declaration);
 		for (ExportPackageDescription export : result) {
