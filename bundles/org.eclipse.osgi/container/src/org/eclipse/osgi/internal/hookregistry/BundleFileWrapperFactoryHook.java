@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.osgi.internal.hookregistry;
 
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
+import org.eclipse.osgi.storage.bundlefile.BundleFileWrapper;
 
 /**
  * A factory that wraps bundle file objects.
@@ -27,6 +28,6 @@ public interface BundleFileWrapperFactoryHook {
 	 * @return a wrapped bundle file for the specified content, or null if the bundle content
 	 * is not wrapped.
 	 */
-	BundleFile wrapBundleFile(BundleFile bundleFile, Generation generation, boolean base);
+	BundleFileWrapper wrapBundleFile(BundleFile bundleFile, Generation generation, boolean base);
 
 }

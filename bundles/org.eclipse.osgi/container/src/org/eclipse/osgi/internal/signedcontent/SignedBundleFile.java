@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,15 +11,14 @@
 
 package org.eclipse.osgi.internal.signedcontent;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.security.*;
 import java.security.cert.*;
 import java.util.Date;
-import java.util.Enumeration;
 import org.eclipse.osgi.signedcontent.*;
-import org.eclipse.osgi.storage.bundlefile.BundleEntry;
-import org.eclipse.osgi.storage.bundlefile.BundleFile;
+import org.eclipse.osgi.storage.bundlefile.*;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -27,21 +26,19 @@ import org.eclipse.osgi.util.NLS;
  * signatures. It requires full signing of the manifest by all signers. If no
  * signatures are found, the classes and resources are retrieved without checks.
  */
-public class SignedBundleFile extends BundleFile implements SignedContentConstants, SignedContent {
-	private BundleFile wrappedBundleFile;
+public class SignedBundleFile extends BundleFileWrapper implements SignedContentConstants, SignedContent {
 	SignedContentImpl signedContent;
 	private final int supportFlags;
 	private final SignedBundleHook signedBundleHook;
 
-	SignedBundleFile(SignedContentImpl signedContent, int supportFlags, SignedBundleHook signedBundleHook) {
-		super(null);
+	SignedBundleFile(BundleFile bundleFile, SignedContentImpl signedContent, int supportFlags, SignedBundleHook signedBundleHook) {
+		super(bundleFile);
 		this.signedContent = signedContent;
 		this.supportFlags = supportFlags;
 		this.signedBundleHook = signedBundleHook;
 	}
 
-	void setBundleFile(BundleFile bundleFile) throws IOException, InvalidKeyException, SignatureException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
-		wrappedBundleFile = bundleFile;
+	void initializeSignedContent() throws IOException, InvalidKeyException, SignatureException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
 		if (signedContent == null) {
 			SignatureBlockProcessor signatureProcessor = new SignatureBlockProcessor(this, supportFlags, signedBundleHook);
 			signedContent = signatureProcessor.process();
@@ -50,15 +47,11 @@ public class SignedBundleFile extends BundleFile implements SignedContentConstan
 		}
 	}
 
-	public File getFile(String path, boolean nativeCode) {
-		return wrappedBundleFile.getFile(path, nativeCode);
-	}
-
 	public BundleEntry getEntry(String path) {
 		// strip off leading slashes so we can ensure the path matches the one provided in the manifest.
 		if (path.length() > 0 && path.charAt(0) == '/')
 			path = path.substring(1);
-		BundleEntry be = wrappedBundleFile.getEntry(path);
+		BundleEntry be = getBundleFile().getEntry(path);
 		if ((supportFlags & SignedBundleHook.VERIFY_RUNTIME) == 0 || signedContent == null)
 			return be;
 		if (path.startsWith(META_INF)) {
@@ -80,26 +73,6 @@ public class SignedBundleFile extends BundleFile implements SignedContentConstan
 			return null;
 		}
 		return new SignedBundleEntry(be);
-	}
-
-	public Enumeration<String> getEntryPaths(String path) {
-		return wrappedBundleFile.getEntryPaths(path);
-	}
-
-	public void close() throws IOException {
-		wrappedBundleFile.close();
-	}
-
-	public void open() throws IOException {
-		wrappedBundleFile.open();
-	}
-
-	public boolean containsDir(String dir) {
-		return wrappedBundleFile.containsDir(dir);
-	}
-
-	public File getBaseFile() {
-		return wrappedBundleFile.getBaseFile();
 	}
 
 	class SignedBundleEntry extends BundleEntry {
@@ -136,10 +109,6 @@ public class SignedBundleFile extends BundleFile implements SignedContentConstan
 			return nestedEntry.getFileURL();
 		}
 
-	}
-
-	BundleFile getWrappedBundleFile() {
-		return wrappedBundleFile;
 	}
 
 	SignedContentImpl getSignedContent() {

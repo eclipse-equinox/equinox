@@ -12,14 +12,23 @@ package org.eclipse.osgi.compatibility.plugins;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
+
 import org.eclipse.osgi.framework.util.Headers;
-import org.eclipse.osgi.internal.hookregistry.*;
+import org.eclipse.osgi.internal.hookregistry.ActivatorHookFactory;
+import org.eclipse.osgi.internal.hookregistry.BundleFileWrapperFactoryHook;
+import org.eclipse.osgi.internal.hookregistry.HookConfigurator;
+import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.service.pluginconversion.PluginConversionException;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
-import org.eclipse.osgi.storage.bundlefile.*;
-import org.osgi.framework.*;
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.bundlefile.BundleFile;
+import org.eclipse.osgi.storage.bundlefile.BundleFileWrapper;
+import org.eclipse.osgi.storage.bundlefile.FileBundleEntry;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
 
 public class PluginConverterHook implements HookConfigurator {
 	@Override
@@ -34,26 +43,11 @@ public class PluginConverterHook implements HookConfigurator {
 		hookRegistry.addBundleFileWrapperFactoryHook(new BundleFileWrapperFactoryHook() {
 
 			@Override
-			public BundleFile wrapBundleFile(final BundleFile bundleFile, Generation generation, boolean base) {
+			public BundleFileWrapper wrapBundleFile(final BundleFile bundleFile, Generation generation, boolean base) {
 				if (!base) {
 					return null;
 				}
-				return new BundleFile(bundleFile.getBaseFile()) {
-
-					@Override
-					public void open() throws IOException {
-						bundleFile.open();
-					}
-
-					@Override
-					public File getFile(String path, boolean nativeCode) {
-						return bundleFile.getFile(path, nativeCode);
-					}
-
-					@Override
-					public Enumeration<String> getEntryPaths(String path) {
-						return bundleFile.getEntryPaths(path);
-					}
+				return new BundleFileWrapper(bundleFile) {
 
 					@Override
 					public BundleEntry getEntry(String path) {
@@ -84,16 +78,6 @@ public class PluginConverterHook implements HookConfigurator {
 						} catch (PluginConversionException e) {
 							throw new RuntimeException(e);
 						}
-					}
-
-					@Override
-					public boolean containsDir(String dir) {
-						return bundleFile.containsDir(dir);
-					}
-
-					@Override
-					public void close() throws IOException {
-						bundleFile.close();
 					}
 				};
 			}

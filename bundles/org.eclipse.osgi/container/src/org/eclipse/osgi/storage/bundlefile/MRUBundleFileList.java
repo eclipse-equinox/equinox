@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,6 @@ import org.eclipse.osgi.framework.eventmgr.*;
  * track of open BundleFiles.  The MRU will use the file limit specified by the property
  * &quot;osgi.bundlefile.limit&quot; by default unless the MRU is constructed with a specific
  * file limit.
- * @since 3.2
  */
 public class MRUBundleFileList implements EventDispatcher<Object, Object, BundleFile> {
 	private static final int MIN = 10;

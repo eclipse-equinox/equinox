@@ -24,7 +24,6 @@ import org.eclipse.osgi.util.NLS;
 
 /**
  * A BundleFile that uses a ZipFile as it base file.
- * @since 3.2
  */
 public class ZipBundleFile extends BundleFile {
 
@@ -255,37 +254,53 @@ public class ZipBundleFile extends BundleFile {
 
 	}
 
-	public synchronized Enumeration<String> getEntryPaths(String path) {
-		if (!checkedOpen())
-			return null;
+	@Override
+	public synchronized Enumeration<String> getEntryPaths(String path, boolean recurse) {
 		if (path == null)
 			throw new NullPointerException();
+		// Is the zip file already open or, if not, can it be opened?
+		if (!checkedOpen())
+			return null;
 
+		// Strip any leading '/' off of path.
 		if (path.length() > 0 && path.charAt(0) == '/')
 			path = path.substring(1);
+		// Append a '/', if not already there, to path if not an empty string.
 		if (path.length() > 0 && path.charAt(path.length() - 1) != '/')
-			path = new StringBuffer(path).append("/").toString(); //$NON-NLS-1$
+			path = new StringBuilder(path).append("/").toString(); //$NON-NLS-1$
 
-		List<String> vEntries = new ArrayList<String>();
+		Set<String> vEntries = new HashSet<String>();
+		// Get all zip file entries and add the ones of interest.
 		Enumeration<? extends ZipEntry> entries = zipFile.entries();
 		while (entries.hasMoreElements()) {
 			ZipEntry zipEntry = entries.nextElement();
 			String entryPath = zipEntry.getName();
+			// Is the entry of possible interest? Note that 
+			// string.startsWith("") == true.
 			if (entryPath.startsWith(path)) {
+				// If we get here, we know that the entry is either (1) equal to
+				// path, (2) a file under path, or (3) a subdirectory of path.
 				if (path.length() < entryPath.length()) {
-					if (entryPath.lastIndexOf('/') < path.length()) {
-						vEntries.add(entryPath);
-					} else {
-						entryPath = entryPath.substring(path.length());
-						int slash = entryPath.indexOf('/');
-						entryPath = path + entryPath.substring(0, slash + 1);
-						if (!vEntries.contains(entryPath))
-							vEntries.add(entryPath);
-					}
+					// If we get here, we know that entry is not equal to path.
+					getEntryPaths(path, entryPath.substring(path.length()), recurse, vEntries);
 				}
 			}
 		}
 		return vEntries.size() == 0 ? null : Collections.enumeration(vEntries);
+	}
+
+	private void getEntryPaths(String path, String entry, boolean recurse, Set<String> entries) {
+		if (entry.length() == 0)
+			return;
+		int slash = entry.indexOf('/');
+		if (slash == -1)
+			entries.add(path + entry);
+		else {
+			path = path + entry.substring(0, slash + 1);
+			entries.add(path);
+			if (recurse)
+				getEntryPaths(path, entry.substring(slash + 1), true, entries);
+		}
 	}
 
 	public synchronized void close() throws IOException {

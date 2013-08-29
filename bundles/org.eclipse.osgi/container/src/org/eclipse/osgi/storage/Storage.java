@@ -864,7 +864,7 @@ public class Storage {
 		List<BundleFileWrapperFactoryHook> wrapperFactories = getConfiguration().getHookRegistry().getBundleFileWrapperFactoryHooks();
 		BundleFileWrapperChain wrapped = wrapperFactories.isEmpty() ? null : new BundleFileWrapperChain(bundleFile, null);
 		for (BundleFileWrapperFactoryHook wrapperFactory : wrapperFactories) {
-			BundleFile wrapperBundle = wrapperFactory.wrapBundleFile(bundleFile, generation, isBase);
+			BundleFileWrapper wrapperBundle = wrapperFactory.wrapBundleFile(bundleFile, generation, isBase);
 			if (wrapperBundle != null && wrapperBundle != bundleFile)
 				bundleFile = wrapped = new BundleFileWrapperChain(wrapperBundle, wrapped);
 		}
@@ -1473,12 +1473,13 @@ public class Storage {
 	 * @see BundleWiring#listResources(String, String, int)
 	 */
 	public static List<String> listEntryPaths(List<BundleFile> bundleFiles, String path, String filePattern, int options) {
-		// a list used to store the results of the search
-		List<String> pathList = new ArrayList<String>();
+		// Use LinkedHashSet for optimized performance of contains() plus
+		// ordering guarantees.
+		LinkedHashSet<String> pathList = new LinkedHashSet<String>();
 		Filter patternFilter = null;
 		Hashtable<String, String> patternProps = null;
 		if (filePattern != null) {
-			// Optimization: If the file pattern does not include a wildcard  or escape  char then it must represent a single file.
+			// Optimization: If the file pattern does not include a wildcard  or escape char then it must represent a single file.
 			// Avoid pattern matching and use BundleFile.getEntry() if recursion was not requested.
 			if ((options & BundleWiring.FINDENTRIES_RECURSE) == 0 && filePattern.indexOf('*') == -1 && filePattern.indexOf('\\') == -1) {
 				if (path.length() == 0)
@@ -1489,7 +1490,7 @@ public class Storage {
 					if (bundleFile.getEntry(path) != null && !pathList.contains(path))
 						pathList.add(path);
 				}
-				return pathList;
+				return new ArrayList<String>(pathList);
 			}
 			// For when the file pattern includes a wildcard.
 			try {
@@ -1501,14 +1502,14 @@ public class Storage {
 				// TODO something unexpected happened; log error and return nothing
 				//				Bundle b = context == null ? null : context.getBundle();
 				//				eventPublisher.publishFrameworkEvent(FrameworkEvent.ERROR, b, e);
-				return pathList;
+				return new ArrayList<String>(pathList);
 			}
 		}
 		// find the entry paths for the datas
 		for (BundleFile bundleFile : bundleFiles) {
 			listEntryPaths(bundleFile, path, patternFilter, patternProps, options, pathList);
 		}
-		return pathList;
+		return new ArrayList<String>(pathList);
 	}
 
 	public static String sanitizeFilterInput(String filePattern) throws InvalidSyntaxException {
@@ -1551,10 +1552,16 @@ public class Storage {
 		return buffer == null ? filePattern : buffer.toString();
 	}
 
-	private static List<String> listEntryPaths(BundleFile bundleFile, String path, Filter patternFilter, Hashtable<String, String> patternProps, int options, List<String> pathList) {
+	// Use LinkedHashSet for optimized performance of contains() plus ordering 
+	// guarantees.
+	private static LinkedHashSet<String> listEntryPaths(BundleFile bundleFile, String path, Filter patternFilter, Hashtable<String, String> patternProps, int options, LinkedHashSet<String> pathList) {
 		if (pathList == null)
-			pathList = new ArrayList<String>();
-		Enumeration<String> entryPaths = bundleFile.getEntryPaths(path);
+			pathList = new LinkedHashSet<String>();
+		Enumeration<String> entryPaths;
+		if ((options & BundleWiring.FINDENTRIES_RECURSE) != 0)
+			entryPaths = bundleFile.getEntryPaths(path, true);
+		else
+			entryPaths = bundleFile.getEntryPaths(path);
 		if (entryPaths == null)
 			return pathList;
 		while (entryPaths.hasMoreElements()) {
@@ -1582,9 +1589,6 @@ public class Storage {
 			// prevent duplicates and match on the patternFilter
 			if (!pathList.contains(entry) && (patternFilter == null || patternFilter.matchCase(patternProps)))
 				pathList.add(entry);
-			// recurse only into entries that are directories
-			if (((options & BundleWiring.FINDENTRIES_RECURSE) != 0) && !entry.equals(path) && entry.length() > 0 && lastSlash == (entry.length() - 1))
-				listEntryPaths(bundleFile, entry, patternFilter, patternProps, options, pathList);
 		}
 		return pathList;
 	}

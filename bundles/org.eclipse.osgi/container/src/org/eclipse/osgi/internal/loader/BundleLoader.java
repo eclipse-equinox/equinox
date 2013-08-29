@@ -213,10 +213,11 @@ public class BundleLoader implements ModuleLoader {
 				if (System.getSecurityManager() == null) {
 					classloader = createClassLoaderPrivledged(parent, generation.getBundleInfo().getStorage().getConfiguration(), this, generation, hooks);
 				} else {
+					final ClassLoader cl = parent;
 					classloader = AccessController.doPrivileged(new PrivilegedAction<ModuleClassLoader>() {
 						@Override
 						public ModuleClassLoader run() {
-							return createClassLoaderPrivledged(parent, generation.getBundleInfo().getStorage().getConfiguration(), BundleLoader.this, generation, hooks);
+							return createClassLoaderPrivledged(cl, generation.getBundleInfo().getStorage().getConfiguration(), BundleLoader.this, generation, hooks);
 						}
 					});
 				}
@@ -678,7 +679,9 @@ public class BundleLoader implements ModuleLoader {
 		}
 
 		boolean localSearch = (options & BundleWiring.LISTRESOURCES_LOCAL) != 0;
-		List<String> result = new ArrayList<String>();
+		// Use LinkedHashSet for optimized performance of contains() plus
+		// ordering guarantees.
+		LinkedHashSet<String> result = new LinkedHashSet<String>();
 		Set<String> importedPackages = new HashSet<String>(0);
 		for (String name : packages) {
 			// look for import source

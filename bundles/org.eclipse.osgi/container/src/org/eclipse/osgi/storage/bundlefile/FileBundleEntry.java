@@ -18,7 +18,6 @@ import java.net.URL;
 /**
  * A BundleEntry represented by a File object.  The FileBundleEntry class is
  * used for bundles that are installed as extracted zips on a file system.
- * @since 3.2
  */
 public class FileBundleEntry extends BundleEntry {
 	/**

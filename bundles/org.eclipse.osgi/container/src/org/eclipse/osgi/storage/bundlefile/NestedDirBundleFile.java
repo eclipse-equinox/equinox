@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,6 @@ import java.util.Enumeration;
  * <pre>
  * Bundle-ClassPath: nested.jar,nesteddir/
  * </pre>
- * @since 3.2
  */
 public class NestedDirBundleFile extends BundleFile {
 	private final BundleFile baseBundleFile;
@@ -66,8 +65,8 @@ public class NestedDirBundleFile extends BundleFile {
 		return new StringBuffer(cp).append(path).toString();
 	}
 
-	public Enumeration<String> getEntryPaths(String path) {
-		final Enumeration<String> basePaths = baseBundleFile.getEntryPaths(prependNestedDir(path));
+	public Enumeration<String> getEntryPaths(String path, boolean recurse) {
+		final Enumeration<String> basePaths = baseBundleFile.getEntryPaths(prependNestedDir(path), recurse);
 		final int cpLength = cp.length();
 		if (basePaths == null)
 			return null;

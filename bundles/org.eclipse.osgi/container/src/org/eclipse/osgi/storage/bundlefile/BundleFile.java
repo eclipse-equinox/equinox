@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 IBM Corporation and others.
+ * Copyright (c) 2004, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,10 +25,10 @@ import org.eclipse.osgi.storage.url.bundleresource.Handler;
 /**
  * The BundleFile API is used by Adaptors to read resources out of an 
  * installed Bundle in the Framework.
- * <p>
- * Clients may extend this class.
- * </p>
- * @since 3.2
+ * <p/>
+ * Clients wishing to modify or extend the functionality of this class at
+ * runtime should extend the associated {@link BundleFileWrapper decorator}
+ * instead.
  */
 abstract public class BundleFile {
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
@@ -67,6 +67,18 @@ abstract public class BundleFile {
 	abstract public BundleEntry getEntry(String path);
 
 	/** 
+	 * Performs the same function as calling 
+	 * {@link #getEntryPaths(String, boolean)} with <code>recurse</code> equal
+	 * to <code>false</code>.
+	 * @param path path of the entry to locate in the bundle
+	 * @return an Enumeration of Strings that indicate the paths found or
+	 * null if the path does not exist. 
+	 */
+	public Enumeration<String> getEntryPaths(String path) {
+		return getEntryPaths(path, false);
+	}
+
+	/** 
 	 * Allows to access the entries of the bundle. 
 	 * Since the bundle content is usually a jar, this 
 	 * allows to access the jar contents.
@@ -77,10 +89,14 @@ abstract public class BundleFile {
 	 * themselves. If a returned name is a directory, it finishes with a 
 	 * slash. If a returned name is a file, it does not finish with a slash.
 	 * @param path path of the entry to locate in the bundle
+	 * @param recurse - If <code>true</code>, provide entries for the files and 
+	 *        directories within the directory denoted by <code>path</code> plus
+	 *        all sub-directories and files; otherwise, provide only the entries
+	 *        within the immediate directory.
 	 * @return an Enumeration of Strings that indicate the paths found or
 	 * null if the path does not exist. 
 	 */
-	abstract public Enumeration<String> getEntryPaths(String path);
+	abstract public Enumeration<String> getEntryPaths(String path, boolean recurse);
 
 	/**
 	 * Closes the BundleFile.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,6 @@ import java.util.zip.ZipEntry;
 /**
  * A BundleEntry represented by a ZipEntry in a ZipFile.  The ZipBundleEntry
  * class is used for bundles that are installed as a ZipFile on a file system.
- * @since 3.2
  */
 public class ZipBundleEntry extends BundleEntry {
 	/**

@@ -145,6 +145,10 @@ public class DiscardBundleTests extends AbstractBundleTests {
 			try {
 				equinox = restart(equinox, configuration);
 				assertNotDiscarded(location, equinox);
+				// Attempting to touch the file with equinox still running
+				// will sometimes result in failure presumably due to a locked
+				// file.
+				stop(equinox);
 				touchFile(bundleFile);
 				equinox = restart(equinox, configuration);
 				if (discard)

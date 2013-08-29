@@ -146,26 +146,26 @@ public class SignedBundleHook implements ActivatorHookFactory, BundleFileWrapper
 		}
 	}
 
-	public BundleFile wrapBundleFile(BundleFile bundleFile, Generation generation, boolean base) {
+	public BundleFileWrapper wrapBundleFile(BundleFile bundleFile, Generation generation, boolean base) {
 		try {
 			if (bundleFile != null) {
 				StorageHookImpl hook = generation.getStorageHook(SignedStorageHook.class);
 				SignedBundleFile signedBaseFile;
 				if (base && hook != null) {
-					signedBaseFile = new SignedBundleFile(hook.signedContent, supportSignedBundles, this);
+					signedBaseFile = new SignedBundleFile(bundleFile, hook.signedContent, supportSignedBundles, this);
 					if (hook.signedContent == null) {
-						signedBaseFile.setBundleFile(bundleFile);
+						signedBaseFile.initializeSignedContent();
 						SignedContentImpl signedContent = signedBaseFile.getSignedContent();
 						hook.signedContent = signedContent != null && signedContent.isSigned() ? signedContent : null;
 					}
 				} else
-					signedBaseFile = new SignedBundleFile(null, supportSignedBundles, this);
-				signedBaseFile.setBundleFile(bundleFile);
+					signedBaseFile = new SignedBundleFile(bundleFile, null, supportSignedBundles, this);
+				signedBaseFile.initializeSignedContent();
 				SignedContentImpl signedContent = signedBaseFile.getSignedContent();
 				if (signedContent != null && signedContent.isSigned()) {
 					// only use the signed file if there are certs
 					signedContent.setContent(signedBaseFile);
-					bundleFile = signedBaseFile;
+					return new BundleFileWrapper(signedBaseFile);
 				}
 			}
 		} catch (IOException e) {
@@ -173,7 +173,7 @@ public class SignedBundleHook implements ActivatorHookFactory, BundleFileWrapper
 		} catch (GeneralSecurityException e) {
 			log("Bad bundle file: " + bundleFile.getBaseFile(), FrameworkLogEntry.WARNING, e); //$NON-NLS-1$
 		}
-		return bundleFile;
+		return null;
 	}
 
 	public void addHooks(HookRegistry hookRegistry) {
@@ -210,9 +210,9 @@ public class SignedBundleHook implements ActivatorHookFactory, BundleFileWrapper
 			temp.close();
 			contentBundleFile = new ZipBundleFile(content, null, null, container.getConfiguration().getDebug());
 		}
-		SignedBundleFile result = new SignedBundleFile(null, VERIFY_ALL, this);
+		SignedBundleFile result = new SignedBundleFile(contentBundleFile, null, VERIFY_ALL, this);
 		try {
-			result.setBundleFile(contentBundleFile);
+			result.initializeSignedContent();
 		} catch (InvalidKeyException e) {
 			throw (InvalidKeyException) new InvalidKeyException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content)).initCause(e);
 		} catch (SignatureException e) {

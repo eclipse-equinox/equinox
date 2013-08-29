@@ -13,14 +13,12 @@ package org.eclipse.osgi.storage.bundlefile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.NoSuchElementException;
+import java.util.*;
 import org.eclipse.osgi.storage.StorageMsg;
 import org.eclipse.osgi.util.NLS;
 
 /**
  * A BundleFile that uses a directory as its base file.
- * @since 3.2
  */
 public class DirBundleFile extends BundleFile {
 
@@ -116,35 +114,29 @@ public class DirBundleFile extends BundleFile {
 		return dirPath != null && BundleFile.secureAction.isDirectory(dirPath);
 	}
 
-	public Enumeration<String> getEntryPaths(String path) {
+	public Enumeration<String> getEntryPaths(String path, boolean recurse) {
 		if (path.length() > 0 && path.charAt(0) == '/')
 			path = path.substring(1);
-		final File pathFile = getFile(path, false);
+		File pathFile = getFile(path, false);
 		if (pathFile == null || !BundleFile.secureAction.isDirectory(pathFile))
 			return null;
-		final String[] fileList = BundleFile.secureAction.list(pathFile);
+		String[] fileList = BundleFile.secureAction.list(pathFile);
 		if (fileList == null || fileList.length == 0)
 			return null;
-		final String dirPath = path.length() == 0 || path.charAt(path.length() - 1) == '/' ? path : path + '/';
-		return new Enumeration<String>() {
-			int cur = 0;
+		String dirPath = path.length() == 0 || path.charAt(path.length() - 1) == '/' ? path : path + '/';
 
-			public boolean hasMoreElements() {
-				return fileList != null && cur < fileList.length;
+		LinkedHashSet<String> entries = new LinkedHashSet<String>();
+		for (String s : fileList) {
+			java.io.File childFile = new java.io.File(pathFile, s);
+			StringBuilder sb = new StringBuilder(dirPath).append(s);
+			if (BundleFile.secureAction.isDirectory(childFile)) {
+				sb.append("/"); //$NON-NLS-1$
+				if (recurse)
+					entries.addAll(Collections.list(getEntryPaths(sb.toString(), true)));
 			}
-
-			public String nextElement() {
-				if (!hasMoreElements()) {
-					throw new NoSuchElementException();
-				}
-				java.io.File childFile = new java.io.File(pathFile, fileList[cur]);
-				StringBuffer sb = new StringBuffer(dirPath).append(fileList[cur++]);
-				if (BundleFile.secureAction.isDirectory(childFile)) {
-					sb.append("/"); //$NON-NLS-1$
-				}
-				return sb.toString();
-			}
-		};
+			entries.add(sb.toString());
+		}
+		return Collections.enumeration(entries);
 	}
 
 	public void close() {
