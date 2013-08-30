@@ -269,7 +269,7 @@ public class ZipBundleFile extends BundleFile {
 		if (path.length() > 0 && path.charAt(path.length() - 1) != '/')
 			path = new StringBuilder(path).append("/").toString(); //$NON-NLS-1$
 
-		Set<String> vEntries = new HashSet<String>();
+		LinkedHashSet<String> result = new LinkedHashSet<String>();
 		// Get all zip file entries and add the ones of interest.
 		Enumeration<? extends ZipEntry> entries = zipFile.entries();
 		while (entries.hasMoreElements()) {
@@ -282,14 +282,14 @@ public class ZipBundleFile extends BundleFile {
 				// path, (2) a file under path, or (3) a subdirectory of path.
 				if (path.length() < entryPath.length()) {
 					// If we get here, we know that entry is not equal to path.
-					getEntryPaths(path, entryPath.substring(path.length()), recurse, vEntries);
+					getEntryPaths(path, entryPath.substring(path.length()), recurse, result);
 				}
 			}
 		}
-		return vEntries.size() == 0 ? null : Collections.enumeration(vEntries);
+		return result.size() == 0 ? null : Collections.enumeration(result);
 	}
 
-	private void getEntryPaths(String path, String entry, boolean recurse, Set<String> entries) {
+	private void getEntryPaths(String path, String entry, boolean recurse, LinkedHashSet<String> entries) {
 		if (entry.length() == 0)
 			return;
 		int slash = entry.indexOf('/');

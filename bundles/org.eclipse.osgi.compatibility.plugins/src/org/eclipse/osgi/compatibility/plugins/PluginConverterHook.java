@@ -43,7 +43,7 @@ public class PluginConverterHook implements HookConfigurator {
 		hookRegistry.addBundleFileWrapperFactoryHook(new BundleFileWrapperFactoryHook() {
 
 			@Override
-			public BundleFileWrapper wrapBundleFile(final BundleFile bundleFile, Generation generation, boolean base) {
+			public BundleFileWrapper wrapBundleFile(BundleFile bundleFile, Generation generation, boolean base) {
 				if (!base) {
 					return null;
 				}
@@ -51,7 +51,7 @@ public class PluginConverterHook implements HookConfigurator {
 
 					@Override
 					public BundleEntry getEntry(String path) {
-						BundleEntry entry = bundleFile.getEntry(path);
+						BundleEntry entry = getBundleFile().getEntry(path);
 						if (!PluginConverterImpl.OSGI_BUNDLE_MANIFEST.equals(path)) {
 							return entry;
 						}
@@ -70,7 +70,7 @@ public class PluginConverterHook implements HookConfigurator {
 							}
 						}
 						try {
-							File manifest = converter.convertManifest(bundleFile.getBaseFile(), null, true, null, true, null, false);
+							File manifest = converter.convertManifest(getBaseFile(), null, true, null, true, null, false);
 							if (manifest == null) {
 								return entry;
 							}
