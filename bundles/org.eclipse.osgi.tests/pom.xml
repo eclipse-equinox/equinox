@@ -24,6 +24,7 @@
 
   <properties>
     <defaultSigning-excludeInnerJars>true</defaultSigning-excludeInnerJars>
+    <code.ignoredWarnings>${tests.ignoredWarnings}</code.ignoredWarnings>
   </properties>
 
   <build>
