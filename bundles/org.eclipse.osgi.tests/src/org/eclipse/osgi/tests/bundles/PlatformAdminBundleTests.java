@@ -67,6 +67,17 @@ public class PlatformAdminBundleTests extends AbstractBundleTests {
 		chainTestD.uninstall();
 		installer.refreshPackages(new Bundle[] {chainTestD});
 
+		if (testADesc.isResolved()) {
+			// This is a hack to wait some time to allow package admin event to be fired
+			// to all listeners.
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				fail("Test got interrupted.", e);
+			}
+		}
+
 		assertFalse("testADesc is resolved!!", testADesc.isResolved());
 		assertFalse("testBDesc is resolved!!", testBDesc.isResolved());
 		assertFalse("testCDesc is resolved!!", testCDesc.isResolved());
