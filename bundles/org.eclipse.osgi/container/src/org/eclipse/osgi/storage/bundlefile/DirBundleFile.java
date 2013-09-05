@@ -14,7 +14,7 @@ package org.eclipse.osgi.storage.bundlefile;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import org.eclipse.osgi.storage.StorageMsg;
+import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -36,7 +36,7 @@ public class DirBundleFile extends BundleFile {
 	public DirBundleFile(File basefile, boolean enableStrictBundleEntryPath) throws IOException {
 		super(getBaseFile(basefile, enableStrictBundleEntryPath));
 		if (!BundleFile.secureAction.exists(basefile) || !BundleFile.secureAction.isDirectory(basefile)) {
-			throw new IOException(NLS.bind(StorageMsg.ADAPTOR_DIRECTORY_EXCEPTION, basefile));
+			throw new IOException(NLS.bind(Msg.ADAPTOR_DIRECTORY_EXCEPTION, basefile));
 		}
 		this.enableStrictBundleEntryPath = enableStrictBundleEntryPath;
 	}

@@ -30,6 +30,7 @@ import org.eclipse.osgi.internal.hookregistry.StorageHookFactory.StorageHook;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.internal.location.LocationHelper;
 import org.eclipse.osgi.internal.log.EquinoxLogServices;
+import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
 import org.eclipse.osgi.internal.url.URLStreamHandlerFactoryImpl;
 import org.eclipse.osgi.service.datalocation.Location;
@@ -763,7 +764,7 @@ public class Storage {
 			if (in instanceof ReferenceInputStream) {
 				URL reference = ((ReferenceInputStream) in).getReference();
 				if (!"file".equals(reference.getProtocol())) //$NON-NLS-1$
-					throw new BundleException(NLS.bind(StorageMsg.ADAPTOR_URL_CREATE_EXCEPTION, reference));
+					throw new BundleException(NLS.bind(Msg.ADAPTOR_URL_CREATE_EXCEPTION, reference));
 				return new File(reference.getPath());
 			}
 
@@ -787,7 +788,7 @@ public class Storage {
 			if (outFile != null) {
 				outFile.delete();
 			}
-			throw new BundleException(StorageMsg.BUNDLE_READ_EXCEPTION, BundleException.READ_ERROR, e);
+			throw new BundleException(Msg.BUNDLE_READ_EXCEPTION, BundleException.READ_ERROR, e);
 		}
 	}
 
@@ -1675,10 +1676,10 @@ public class Storage {
 				Debug.println("Error reading framework.info: " + ex.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(ex);
 			}
-			String message = NLS.bind(StorageMsg.ECLIPSE_STARTUP_FILEMANAGER_OPEN_ERROR, ex.getMessage());
+			String message = NLS.bind(Msg.ECLIPSE_STARTUP_FILEMANAGER_OPEN_ERROR, ex.getMessage());
 			equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, message, ex);
 			getConfiguration().setProperty(EclipseStarter.PROP_EXITCODE, "15"); //$NON-NLS-1$
-			String errorDialog = "<title>" + StorageMsg.ADAPTOR_STORAGE_INIT_FAILED_TITLE + "</title>" + NLS.bind(StorageMsg.ADAPTOR_STORAGE_INIT_FAILED_MSG, childRoot) + "\n" + ex.getMessage(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String errorDialog = "<title>" + Msg.ADAPTOR_STORAGE_INIT_FAILED_TITLE + "</title>" + NLS.bind(Msg.ADAPTOR_STORAGE_INIT_FAILED_MSG, childRoot) + "\n" + ex.getMessage(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			getConfiguration().setProperty(EclipseStarter.PROP_EXITDATA, errorDialog);
 			throw ex;
 		}

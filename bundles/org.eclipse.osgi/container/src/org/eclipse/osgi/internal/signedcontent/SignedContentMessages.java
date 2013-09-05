@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,10 +40,7 @@ public class SignedContentMessages extends NLS {
 	public static String Default_Trust_Existing_Cert;
 	public static String Default_Trust_Existing_Alias;
 
-	//	private static final String BUNDLE_PACKAGE = SignedContentMessages.class.getPackage().getName() + ".";
-	private static final String BUNDLE_PACKAGE = "org.eclipse.osgi.internal.signedcontent."; //$NON-NLS-1$
-	private static final String BUNDLE_FILENAME = "SignedContentMessages"; //$NON-NLS-1$
-	private static final String BUNDLE_NAME = BUNDLE_PACKAGE + BUNDLE_FILENAME;
+	private static final String BUNDLE_NAME = "org.eclipse.osgi.internal.signedcontent.SignedContentMessages"; //$NON-NLS-1$
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, SignedContentMessages.class);

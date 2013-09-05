@@ -95,4 +95,21 @@ public class Msg extends NLS {
 	public static String location_notFileProtocol;
 	public static String location_noLockFile;
 	public static String ECLIPSE_PLUGIN_EXTRACTION_PROBLEM;
+
+	public static String ADAPTER_FILEEXIST_EXCEPTION;
+	public static String ADAPTOR_DIRECTORY_CREATE_EXCEPTION;
+	public static String ADAPTOR_DIRECTORY_EXCEPTION;
+	public static String ADAPTOR_URL_CREATE_EXCEPTION;
+	public static String ADAPTOR_STORAGE_INIT_FAILED_MSG;
+	public static String ADAPTOR_STORAGE_INIT_FAILED_TITLE;
+	public static String ECLIPSE_STARTUP_FILEMANAGER_OPEN_ERROR;
+
+	public static String BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION;
+	public static String BUNDLE_READ_EXCEPTION;
+
+	public static String RESOURCE_NOT_FOUND_EXCEPTION;
+
+	public static String URL_INVALID_BUNDLE_ID;
+	public static String URL_NO_BUNDLE_FOUND;
+	public static String URL_NO_BUNDLE_ID;
 }
