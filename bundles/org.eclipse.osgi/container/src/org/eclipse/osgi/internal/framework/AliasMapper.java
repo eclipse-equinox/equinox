@@ -13,8 +13,8 @@ package org.eclipse.osgi.internal.framework;
 import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
-import org.eclipse.osgi.framework.internal.core.Tokenizer;
 import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.util.Tokenizer;
 
 /**
  * This class maps aliases.

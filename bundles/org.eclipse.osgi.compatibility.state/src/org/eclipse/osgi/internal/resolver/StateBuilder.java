@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2012 IBM Corporation and others.
+ * Copyright (c) 2003, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,9 +14,9 @@ package org.eclipse.osgi.internal.resolver;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Msg;
-import org.eclipse.osgi.framework.internal.core.Tokenizer;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.framework.FilterImpl;
+import org.eclipse.osgi.internal.util.Tokenizer;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.resolver.VersionRange;
 import org.eclipse.osgi.util.ManifestElement;
