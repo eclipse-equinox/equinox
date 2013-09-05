@@ -11,8 +11,8 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
-import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
+import org.eclipse.osgi.internal.messages.Msg;
 import org.osgi.framework.*;
 
 /**

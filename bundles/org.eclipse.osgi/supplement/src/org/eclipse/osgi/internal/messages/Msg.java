@@ -8,12 +8,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.framework.internal.core;
+package org.eclipse.osgi.internal.messages;
 
 import org.eclipse.osgi.util.NLS;
 
 public class Msg extends NLS {
-	private static final String BUNDLE_NAME = "org.eclipse.osgi.framework.internal.core.ExternalMessages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.osgi.internal.messages.ExternalMessages"; //$NON-NLS-1$
 
 	public static String MANIFEST_INVALID_HEADER_EXCEPTION;
 

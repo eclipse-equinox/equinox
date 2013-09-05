@@ -15,7 +15,7 @@ package org.eclipse.osgi.internal.location;
 import java.io.*;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
-import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.util.NLS;
 
 /**

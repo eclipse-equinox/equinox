@@ -13,8 +13,8 @@ package org.eclipse.osgi.internal.location;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.util.NLS;
 

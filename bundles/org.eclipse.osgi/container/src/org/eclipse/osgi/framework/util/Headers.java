@@ -14,7 +14,7 @@ package org.eclipse.osgi.framework.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleException;

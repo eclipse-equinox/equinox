@@ -13,7 +13,7 @@ package org.eclipse.osgi.storage.url;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.util.NLS;
 

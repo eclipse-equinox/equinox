@@ -12,10 +12,10 @@ package org.eclipse.osgi.storagemanager;
 
 import java.io.*;
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.internal.reliablefile.*;
 import org.eclipse.osgi.internal.location.LocationHelper;
 import org.eclipse.osgi.internal.location.Locker;
+import org.eclipse.osgi.internal.messages.Msg;
 
 /**
  * Storage managers provide a facility for tracking the state of a group of files having 

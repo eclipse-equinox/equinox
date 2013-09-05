@@ -13,7 +13,7 @@ package org.eclipse.osgi.util;
 
 import java.io.*;
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.internal.util.SupplementDebug;
 import org.eclipse.osgi.internal.util.Tokenizer;
 import org.osgi.framework.BundleException;

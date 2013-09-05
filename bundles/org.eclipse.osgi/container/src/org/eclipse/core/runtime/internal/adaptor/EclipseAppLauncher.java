@@ -14,11 +14,11 @@ package org.eclipse.core.runtime.internal.adaptor;
 import java.lang.reflect.Method;
 import java.util.Map;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
-import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.service.runnable.*;
 import org.osgi.framework.*;
 
