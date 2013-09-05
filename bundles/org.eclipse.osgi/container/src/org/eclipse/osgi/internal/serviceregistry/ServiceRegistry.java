@@ -97,6 +97,7 @@ public class ServiceRegistry {
 		serviceEventListeners = new HashMap<BundleContextImpl, CopyOnWriteIdentityMap<ServiceListener, FilteredServiceListener>>(initialCapacity);
 		Module systemModule = container.getStorage().getModuleContainer().getModule(0);
 		systemBundleContext = (BundleContextImpl) systemModule.getBundle().getBundleContext();
+		systemBundleContext.provisionServicesInUseMap();
 	}
 
 	/**

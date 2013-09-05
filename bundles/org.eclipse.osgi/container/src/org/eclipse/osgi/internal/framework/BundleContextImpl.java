@@ -616,12 +616,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		checkValid();
 		if (reference == null)
 			throw new NullPointerException("A null service reference is not allowed."); //$NON-NLS-1$
-		synchronized (contextLock) {
-			if (servicesInUse == null)
-				// Cannot predict how many services a bundle will use, start with a small table.
-				servicesInUse = new HashMap<ServiceRegistrationImpl<?>, ServiceUse<?>>(10);
-		}
-
+		provisionServicesInUseMap();
 		S service = container.getServiceRegistry().getService(this, (ServiceReferenceImpl<S>) reference);
 		return service;
 	}
@@ -858,6 +853,18 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	}
 
 	/**
+	 * Provision the map of ServiceRegistrationImpl to ServiceUse for services being
+	 * used by this context.
+	 */
+	public void provisionServicesInUseMap() {
+		synchronized (contextLock) {
+			if (servicesInUse == null)
+				// Cannot predict how many services a bundle will use, start with a small table.
+				servicesInUse = new HashMap<ServiceRegistrationImpl<?>, ServiceUse<?>>(10);
+		}
+	}
+
+	/**
 	 * Bottom level event dispatcher for the BundleContext.
 	 *
 	 * @param originalListener listener object registered under.
@@ -1018,12 +1025,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		checkValid();
 		if (reference == null)
 			throw new NullPointerException("A null service reference is not allowed."); //$NON-NLS-1$
-		synchronized (contextLock) {
-			if (servicesInUse == null)
-				// Cannot predict how many services a bundle will use, start with a small table.
-				servicesInUse = new HashMap<ServiceRegistrationImpl<?>, ServiceUse<?>>(10);
-		}
-
+		provisionServicesInUseMap();
 		ServiceObjects<S> serviceObjects = container.getServiceRegistry().getServiceObjects(this, (ServiceReferenceImpl<S>) reference);
 		return serviceObjects;
 	}
