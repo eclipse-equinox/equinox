@@ -33,9 +33,8 @@ public class ClasspathEntry {
 		final String fileName;
 		final String symbolicName;
 
-		PDEData(BundleFile bundlefile, String symbolicName) {
-			File file = bundlefile.getBaseFile();
-			this.fileName = file == null ? null : file.getAbsolutePath();
+		PDEData(File baseFile, String symbolicName) {
+			this.fileName = baseFile == null ? null : baseFile.getAbsolutePath();
 			this.symbolicName = symbolicName;
 		}
 	}
@@ -57,7 +56,7 @@ public class ClasspathEntry {
 	public ClasspathEntry(BundleFile bundlefile, ProtectionDomain domain, Generation generation) {
 		this.bundlefile = bundlefile;
 		this.domain = domain;
-		this.data = new PDEData(bundlefile, generation.getRevision().getSymbolicName());
+		this.data = new PDEData(generation.getBundleFile().getBaseFile(), generation.getRevision().getSymbolicName());
 		this.manifest = getManifest(bundlefile, generation);
 	}
 
