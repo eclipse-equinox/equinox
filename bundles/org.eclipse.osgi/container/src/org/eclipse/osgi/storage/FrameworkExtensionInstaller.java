@@ -105,9 +105,9 @@ public class FrameworkExtensionInstaller {
 			try {
 				callAddURLMethod(StorageUtil.encodeFileURL(files[i]));
 			} catch (InvocationTargetException e) {
-				throw new BundleException("Error adding extension content.", e);
+				throw new BundleException("Error adding extension content.", e); //$NON-NLS-1$
 			} catch (MalformedURLException e) {
-				throw new BundleException("Error adding extension content.", e);
+				throw new BundleException("Error adding extension content.", e); //$NON-NLS-1$
 			}
 		}
 		try {
@@ -187,7 +187,7 @@ public class FrameworkExtensionInstaller {
 			try {
 				activator.stop(context);
 			} catch (Exception e) {
-				configuration.getHookRegistry().getContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error stopping extension.", e);
+				configuration.getHookRegistry().getContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error stopping extension.", e); //$NON-NLS-1$
 			}
 		}
 	}
@@ -207,7 +207,7 @@ public class FrameworkExtensionInstaller {
 			BundleActivator activator = (BundleActivator) activatorClass.newInstance();
 			startActivator(activator, context);
 		} catch (Exception e) {
-			configuration.getHookRegistry().getContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error starting extension.", e);
+			configuration.getHookRegistry().getContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error activating extension.", e); //$NON-NLS-1$
 		}
 	}
 
@@ -218,7 +218,7 @@ public class FrameworkExtensionInstaller {
 				hookActivators.add(activator);
 			}
 		} catch (Exception e) {
-			configuration.getHookRegistry().getContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error activating extension.", e);
+			configuration.getHookRegistry().getContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error activating extension.", e); //$NON-NLS-1$
 		}
 	}
 

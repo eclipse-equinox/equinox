@@ -136,7 +136,7 @@ public abstract class ModuleContainerAdaptor {
 	 * @return a new {@link ModuleLoader} for the specified wiring.
 	 */
 	public ModuleLoader createModuleLoader(ModuleWiring wiring) {
-		throw new UnsupportedOperationException("Container adaptor does not support module class loaders.");
+		throw new UnsupportedOperationException("Container adaptor does not support module class loaders."); //$NON-NLS-1$
 	}
 
 	/**

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
+import org.eclipse.osgi.internal.messages.Msg;
+
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.osgi.container.ModuleContainer.ContainerStartLevel;
@@ -59,8 +61,8 @@ public abstract class SystemModule extends Module {
 				if (ACTIVE_SET.contains(getState()))
 					return;
 				if (getState().equals(State.INSTALLED)) {
-					String reportMessage = ModuleResolutionReport.getResolutionReport("", getCurrentRevision(), report.getEntries(), null);
-					throw new BundleException("Could not resolve module: " + reportMessage, BundleException.RESOLVE_ERROR);
+					String reportMessage = ModuleResolutionReport.getResolutionReport("", getCurrentRevision(), report.getEntries(), null); //$NON-NLS-1$
+					throw new BundleException(Msg.Module_ResolveError + reportMessage, BundleException.RESOLVE_ERROR);
 				}
 			}
 
@@ -77,7 +79,7 @@ public abstract class SystemModule extends Module {
 				if (t instanceof BundleException) {
 					throw (BundleException) t;
 				}
-				throw new BundleException("Error initializing container.", BundleException.ACTIVATOR_ERROR, t);
+				throw new BundleException("Error initializing container.", BundleException.ACTIVATOR_ERROR, t); //$NON-NLS-1$
 			}
 		} finally {
 			if (lockedStarted) {
@@ -179,7 +181,7 @@ public abstract class SystemModule extends Module {
 					stateChangeLock.unlock();
 				}
 			} else {
-				throw new BundleException("Could not lock the system bundle state for shutdown.");
+				throw new BundleException(Msg.SystemModule_LockError);
 			}
 		} catch (InterruptedException e) {
 			getRevisions().getContainer().adaptor.publishContainerEvent(ContainerEvent.ERROR, this, e);

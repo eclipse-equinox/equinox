@@ -15,6 +15,7 @@ import java.util.*;
 import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.internal.container.InternalUtils;
+import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.*;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry.Type;
@@ -591,7 +592,7 @@ final class ModuleResolver {
 			if (threadResolving.get().booleanValue()) {
 				// throw up a runtime exception, if this is caused by a resolver hook
 				// then it will get caught at the call to the resolver hook and a proper exception is thrown
-				throw new IllegalStateException("Detected a recursive resolve operation.");
+				throw new IllegalStateException(Msg.ModuleResolver_RecursiveError);
 			}
 			threadResolving.set(Boolean.TRUE);
 			try {
@@ -615,7 +616,7 @@ final class ModuleResolver {
 					// remove disabled from optional and triggers to prevent the resolver from resolving them
 					optionals.removeAll(disabled);
 					if (triggers.removeAll(disabled) && triggersMandatory) {
-						throw new ResolutionException("Could not resolve mandatory modules because another singleton was selected or the module was disabled: " + disabled);
+						throw new ResolutionException(Msg.ModuleResolver_SingletonDisabledError + disabled);
 					}
 					if (dynamicReq != null) {
 						result = resolveDynamic();
@@ -796,7 +797,7 @@ final class ModuleResolver {
 
 		private Map<Resource, List<Wire>> resolveDynamic() throws ResolutionException {
 			if (!(resolver instanceof ResolverImpl)) {
-				throw new ResolutionException("Dynamic import resolution not supported by the resolver: " + resolver.getClass());
+				throw new ResolutionException("Dynamic import resolution not supported by the resolver: " + resolver.getClass()); //$NON-NLS-1$
 			}
 			List<Capability> dynamicMatches = filterProviders(dynamicReq.getOriginal(), moduleDatabase.findCapabilities(dynamicReq));
 			Collection<Resource> ondemandFragments = InternalUtils.asCollectionResource(moduleDatabase.getFragmentRevisions());

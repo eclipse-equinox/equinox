@@ -85,7 +85,7 @@ public class ModuleRequirement implements BundleRequirement {
 		return namespace + ModuleRevision.toString(attributes, false) + ModuleRevision.toString(directives, true);
 	}
 
-	private static final String PACKAGENAME_FILTER_COMPONENT = PackageNamespace.PACKAGE_NAMESPACE + "=";
+	private static final String PACKAGENAME_FILTER_COMPONENT = PackageNamespace.PACKAGE_NAMESPACE + "="; //$NON-NLS-1$
 
 	DynamicModuleRequirement getDynamicPackageRequirement(ModuleRevision host, String dynamicPkgName) {
 		if (!PackageNamespace.PACKAGE_NAMESPACE.equals(namespace)) {
@@ -110,10 +110,10 @@ public class ModuleRequirement implements BundleRequirement {
 		}
 		String filterPackageName = dynamicFilter.substring(packageNameBegin, packageNameEnd);
 		String specificPackageFilter = null;
-		if ("*".equals(filterPackageName)) {
+		if ("*".equals(filterPackageName)) { //$NON-NLS-1$
 			// matches all
 			specificPackageFilter = dynamicFilter.replace(PACKAGENAME_FILTER_COMPONENT + filterPackageName, PACKAGENAME_FILTER_COMPONENT + dynamicPkgName);
-		} else if (filterPackageName.endsWith(".*")) {
+		} else if (filterPackageName.endsWith(".*")) { //$NON-NLS-1$
 			if (dynamicPkgName.startsWith(filterPackageName.substring(0, filterPackageName.length() - 1))) {
 				specificPackageFilter = dynamicFilter.replace(PACKAGENAME_FILTER_COMPONENT + filterPackageName, PACKAGENAME_FILTER_COMPONENT + dynamicPkgName);
 			}

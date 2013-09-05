@@ -709,7 +709,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
 			}
-			throw new BundleException("Error loading bundle activator.", BundleException.ACTIVATOR_ERROR, e);
+			throw new BundleException(Msg.BundleContextImpl_LoadActivatorError, BundleException.ACTIVATOR_ERROR, e);
 		}
 
 		if (activator != null) {

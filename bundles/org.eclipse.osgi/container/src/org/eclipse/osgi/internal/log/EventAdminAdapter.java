@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,8 +34,8 @@ public class EventAdminAdapter implements ServiceTrackerCustomizer<Object, Objec
 	public EventAdminAdapter(BundleContext context, ExtendedLogReaderServiceFactory logReaderServiceFactory) {
 		this.context = context;
 		this.logReaderServiceFactory = logReaderServiceFactory;
-		eventAdminTracker = new ServiceTracker<Object, Object>(context, "org.osgi.service.event.EventAdmin", this);
-		eventHandlerTracker = new ServiceTracker<Object, Object>(context, "org.osgi.service.event.EventHandler", this);
+		eventAdminTracker = new ServiceTracker<Object, Object>(context, "org.osgi.service.event.EventAdmin", this); //$NON-NLS-1$
+		eventHandlerTracker = new ServiceTracker<Object, Object>(context, "org.osgi.service.event.EventHandler", this); //$NON-NLS-1$
 	}
 
 	public void start() {

@@ -113,7 +113,7 @@ public final class ModuleRevisions implements BundleRevisions {
 			uninstalled = true;
 			// save off the current revision
 			if (revisions.isEmpty()) {
-				throw new IllegalStateException("Revisions is empty on uninstall!");
+				throw new IllegalStateException("Revisions is empty on uninstall!"); //$NON-NLS-1$
 			}
 			uninstalledCurrent = revisions.get(0);
 		}

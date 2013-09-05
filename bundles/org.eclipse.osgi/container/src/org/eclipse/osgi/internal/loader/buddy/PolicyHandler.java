@@ -96,7 +96,7 @@ public class PolicyHandler implements SynchronousBundleListener {
 				}
 				// Not a valid buddy policy
 				EquinoxBundle bundle = (EquinoxBundle) policedLoader.getModuleClassLoader().getBundle();
-				bundle.getModule().getContainer().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, bundle.getModule(), new RuntimeException("Invalid buddy policy: " + buddyName));
+				bundle.getModule().getContainer().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, bundle.getModule(), new RuntimeException("Invalid buddy policy: " + buddyName)); //$NON-NLS-1$
 				policiesSnapshot[policyOrder] = null;
 				//			//Buddy policy can be provided by service implementations
 				//			BundleContext fwkCtx = policedLoader.bundle.framework.systemBundle.context;

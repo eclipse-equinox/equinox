@@ -187,13 +187,13 @@ public final class OSGiManifestBuilderFactory {
 			}
 		} else {
 			if (manifest.get(Constants.IMPORT_PACKAGE) != null)
-				throw new BundleException("Extension bundles cannot import packages.", BundleException.MANIFEST_ERROR);
+				throw new BundleException(Msg.OSGiManifestBuilderFactory_ExtensionImportError, BundleException.MANIFEST_ERROR);
 			if (manifest.get(Constants.REQUIRE_BUNDLE) != null)
-				throw new BundleException("Extension bundles cannot require bundles.", BundleException.MANIFEST_ERROR);
+				throw new BundleException(Msg.OSGiManifestBuilderFactory_ExtensionReqBundleError, BundleException.MANIFEST_ERROR);
 			if (manifest.get(Constants.REQUIRE_CAPABILITY) != null)
-				throw new BundleException("Extension bundles cannot require bundles.", BundleException.MANIFEST_ERROR);
+				throw new BundleException(Msg.OSGiManifestBuilderFactory_ExtensionReqCapError, BundleException.MANIFEST_ERROR);
 			if (manifest.get(Constants.BUNDLE_NATIVECODE) != null)
-				throw new BundleException("Extension bundles cannot have native code.", BundleException.MANIFEST_ERROR);
+				throw new BundleException(Msg.OSGiManifestBuilderFactory_ExtensionNativeError, BundleException.MANIFEST_ERROR);
 
 		}
 	}
@@ -211,7 +211,7 @@ public final class OSGiManifestBuilderFactory {
 			builder.setVersion((version != null) ? Version.parseVersion(version) : Version.emptyVersion);
 		} catch (IllegalArgumentException ex) {
 			if (manifestVersion >= 2) {
-				String message = NLS.bind("Invalid Manifest header \"{0}\": {1}", Constants.BUNDLE_VERSION, version);
+				String message = NLS.bind(Msg.OSGiManifestBuilderFactory_InvalidManifestError, Constants.BUNDLE_VERSION, version);
 				throw new BundleException(message, BundleException.MANIFEST_ERROR, ex);
 			}
 			// prior to R4 the Bundle-Version header was not interpreted by the Framework;

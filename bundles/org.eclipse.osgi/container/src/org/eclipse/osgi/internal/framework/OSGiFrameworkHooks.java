@@ -75,7 +75,7 @@ class OSGiFrameworkHooks {
 					return;
 				}
 				default :
-					throw new IllegalStateException("Bad configuration: " + container.getConfiguration().BSN_VERSION);
+					throw new IllegalStateException("Bad configuration: " + container.getConfiguration().BSN_VERSION); //$NON-NLS-1$
 			}
 		}
 

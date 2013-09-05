@@ -27,7 +27,9 @@ import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.internal.container.LockSet;
+import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.namespace.*;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
@@ -170,14 +172,14 @@ public final class ModuleContainer {
 				locationLocked = locationLocks.tryLock(location, 5, TimeUnit.SECONDS);
 				nameLocked = name != null && nameLocks.tryLock(name, 5, TimeUnit.SECONDS);
 				if (!locationLocked) {
-					throw new BundleException("Failed to obtain location lock for installation: " + location, BundleException.STATECHANGE_ERROR);
+					throw new BundleException("Failed to obtain location lock for installation: " + location, BundleException.STATECHANGE_ERROR); //$NON-NLS-1$
 				}
 				if (name != null && !nameLocked) {
-					throw new BundleException("Failed to obtain symbolic name lock for installation: " + name, BundleException.STATECHANGE_ERROR);
+					throw new BundleException("Failed to obtain symbolic name lock for installation: " + name, BundleException.STATECHANGE_ERROR); //$NON-NLS-1$
 				}
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
-				throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR, e);
+				throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR, e); //$NON-NLS-1$
 			}
 
 			Module existingLocation = null;
@@ -211,7 +213,7 @@ public final class ModuleContainer {
 					BundleContext context = bundle == null ? null : bundle.getBundleContext();
 					if (context != null && context.getBundle(existingLocation.getId()) == null) {
 						Bundle b = existingLocation.getBundle();
-						throw new BundleException("Bundle \"" + b.getSymbolicName() + "\" version \"" + b.getVersion() + "\" is already installed at location: " + location, BundleException.REJECTED_BY_HOOK);
+						throw new BundleException(NLS.bind(Msg.ModuleContainer_NameCollisionWithLocation, new Object[] {b.getSymbolicName(), b.getVersion(), location}), BundleException.REJECTED_BY_HOOK);
 					}
 				}
 				return existingLocation;
@@ -222,7 +224,7 @@ public final class ModuleContainer {
 				adaptor.getModuleCollisionHook().filterCollisions(ModuleCollisionHook.INSTALLING, origin, collisionCandidates);
 			}
 			if (!collisionCandidates.isEmpty()) {
-				throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
+				throw new BundleException(NLS.bind(Msg.ModuleContainer_NameCollision, name, builder.getVersion()), BundleException.DUPLICATE_BUNDLE_ERROR);
 			}
 
 			Module result = moduleDatabase.install(location, builder, revisionInfo);
@@ -256,11 +258,11 @@ public final class ModuleContainer {
 			// Attempt to lock the name
 			try {
 				if (name != null && !(nameLocked = nameLocks.tryLock(name, 5, TimeUnit.SECONDS))) {
-					throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR);
+					throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR); //$NON-NLS-1$
 				}
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
-				throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR, e);
+				throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR, e); //$NON-NLS-1$
 			}
 
 			Collection<Module> collisionCandidates = Collections.emptyList();
@@ -295,7 +297,7 @@ public final class ModuleContainer {
 			}
 
 			if (!collisionCandidates.isEmpty()) {
-				throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
+				throw new BundleException(NLS.bind(Msg.ModuleContainer_NameCollision, name, builder.getVersion()), BundleException.DUPLICATE_BUNDLE_ERROR);
 			}
 
 			module.lockStateChange(ModuleEvent.UPDATED);
@@ -399,7 +401,7 @@ public final class ModuleContainer {
 
 	private ModuleResolutionReport resolve(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers) {
 		if (isRefreshingSystemModule()) {
-			return new ModuleResolutionReport(null, Collections.<Resource, List<Entry>> emptyMap(), new ResolutionException("Unable to resolve while shutting down the framework."));
+			return new ModuleResolutionReport(null, Collections.<Resource, List<Entry>> emptyMap(), new ResolutionException("Unable to resolve while shutting down the framework.")); //$NON-NLS-1$
 		}
 		ModuleResolutionReport report = null;
 		do {
@@ -564,7 +566,7 @@ public final class ModuleContainer {
 						modulesLocked.add(module);
 					} catch (BundleException e) {
 						// TODO throw some appropriate exception
-						throw new IllegalStateException("Could not acquire state change lock.", e);
+						throw new IllegalStateException(Msg.ModuleContainer_StateLockError, e);
 					}
 				}
 				Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDatabase.getWiringsCopy();
@@ -749,7 +751,7 @@ public final class ModuleContainer {
 				}
 			} catch (BundleException e) {
 				// TODO throw some appropriate exception
-				throw new IllegalStateException("Could not acquire state change lock.", e);
+				throw new IllegalStateException(Msg.ModuleContainer_StateLockError, e);
 			} finally {
 				moduleDatabase.writeUnlock();
 			}
@@ -773,7 +775,7 @@ public final class ModuleContainer {
 			// do a sanity check on states of the modules, they must be INSTALLED, RESOLVED or UNINSTALLED
 			for (Module module : modulesLocked) {
 				if (Module.ACTIVE_SET.contains(module.getState())) {
-					throw new IllegalStateException("Module is in the wrong state: " + module + ": " + module.getState());
+					throw new IllegalStateException("Module is in the wrong state: " + module + ": " + module.getState()); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 
@@ -1307,10 +1309,10 @@ public final class ModuleContainer {
 		void setStartLevel(Module module, int startlevel) {
 			checkAdminPermission(module.getBundle(), AdminPermission.EXECUTE);
 			if (module.getId() == 0) {
-				throw new IllegalArgumentException("Cannot set the start level of the system bundle.");
+				throw new IllegalArgumentException(Msg.ModuleContainer_SystemStartLevelError);
 			}
 			if (startlevel < 1) {
-				throw new IllegalArgumentException("Cannot set the start level to less than 1: " + startlevel);
+				throw new IllegalArgumentException(Msg.ModuleContainer_NegativeStartLevelError + startlevel);
 			}
 			if (module.getStartLevel() == startlevel) {
 				return; // do nothing
@@ -1331,11 +1333,11 @@ public final class ModuleContainer {
 		public void setStartLevel(int startlevel, FrameworkListener... listeners) {
 			checkAdminPermission(getBundle(), AdminPermission.STARTLEVEL);
 			if (startlevel < 1) {
-				throw new IllegalArgumentException("Cannot set the start level to less than 1: " + startlevel);
+				throw new IllegalArgumentException(Msg.ModuleContainer_NegativeStartLevelError + startlevel);
 			}
 
 			if (activeStartLevel.get() == 0) {
-				throw new IllegalStateException("The system has not be activated yet.");
+				throw new IllegalStateException(Msg.ModuleContainer_SystemNotActiveError);
 			}
 			// queue start level operation in the background
 			// notice that we only do one start level operation at a time
@@ -1357,7 +1359,7 @@ public final class ModuleContainer {
 		public void setInitialBundleStartLevel(int startlevel) {
 			checkAdminPermission(getBundle(), AdminPermission.STARTLEVEL);
 			if (startlevel < 1) {
-				throw new IllegalArgumentException("Cannot set the start level to less than 1: " + startlevel);
+				throw new IllegalArgumentException(Msg.ModuleContainer_NegativeStartLevelError + startlevel);
 			}
 			moduleDatabase.setInitialModuleStartLevel(startlevel);
 		}

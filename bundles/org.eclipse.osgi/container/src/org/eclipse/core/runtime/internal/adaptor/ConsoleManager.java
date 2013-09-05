@@ -12,7 +12,6 @@ package org.eclipse.core.runtime.internal.adaptor;
 
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.osgi.framework.*;
-import org.osgi.service.packageadmin.PackageAdmin;
 
 public class ConsoleManager {
 
@@ -51,8 +50,8 @@ public class ConsoleManager {
 		if ("none".equals(consolePort)) //$NON-NLS-1$
 			return;
 		// otherwise we need to check for the equinox console bundle and start it
-		ServiceReference<PackageAdmin> paRef = context.getServiceReference(PackageAdmin.class);
-		PackageAdmin pa = paRef == null ? null : context.getService(paRef);
+		ServiceReference<org.osgi.service.packageadmin.PackageAdmin> paRef = context.getServiceReference(org.osgi.service.packageadmin.PackageAdmin.class);
+		org.osgi.service.packageadmin.PackageAdmin pa = paRef == null ? null : context.getService(paRef);
 		Bundle[] consoles = pa.getBundles(consoleBundle, null);
 		if (consoles == null || consoles.length == 0) {
 			if (consolePort != null)

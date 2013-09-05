@@ -42,6 +42,8 @@ public class Msg extends NLS {
 
 	public static String SERVICE_OBJECTS_UNGET_ARGUMENT_EXCEPTION;
 
+	public static String SystemModule_LockError;
+
 	public static String BUNDLE_SYSTEMBUNDLE_UNINSTALL_EXCEPTION;
 
 	public static String HEADER_DUPLICATE_KEY_EXCEPTION;
@@ -112,4 +114,39 @@ public class Msg extends NLS {
 	public static String URL_INVALID_BUNDLE_ID;
 	public static String URL_NO_BUNDLE_FOUND;
 	public static String URL_NO_BUNDLE_ID;
+
+	public static String EclipseStarter_InstallLocation;
+
+	public static String Module_Fragment_InvalidOperation;
+	public static String Module_LockError;
+	public static String Module_ResolveError;
+
+	public static String Module_StartError;
+	public static String Module_StopError;
+	public static String Module_Transient_StartError;
+	public static String Module_UninstalledError;
+
+	public static String ModuleContainer_NameCollision;
+	public static String ModuleContainer_NameCollisionWithLocation;
+	public static String ModuleContainer_NegativeStartLevelError;
+	public static String ModuleContainer_StateLockError;
+	public static String ModuleContainer_SystemNotActiveError;
+	public static String ModuleContainer_SystemStartLevelError;
+
+	public static String ModuleResolutionReport_AnotherSingleton;
+	public static String ModuleResolutionReport_FilteredByHook;
+	public static String ModuleResolutionReport_NoReport;
+	public static String ModuleResolutionReport_Unknown;
+	public static String ModuleResolutionReport_UnresolvedReq;
+
+	public static String ModuleResolver_RecursiveError;
+	public static String ModuleResolver_SingletonDisabledError;
+
+	public static String OSGiManifestBuilderFactory_ExtensionImportError;
+	public static String OSGiManifestBuilderFactory_ExtensionNativeError;
+	public static String OSGiManifestBuilderFactory_ExtensionReqBundleError;
+	public static String OSGiManifestBuilderFactory_ExtensionReqCapError;
+	public static String OSGiManifestBuilderFactory_InvalidManifestError;
+
+	public static String BundleContextImpl_LoadActivatorError;
 }

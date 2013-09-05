@@ -15,6 +15,7 @@ import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
+import org.eclipse.osgi.internal.messages.Msg;
 import org.osgi.framework.*;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
@@ -324,10 +325,10 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 					return;
 				}
 			}
-			throw new BundleException("Unable to acquire the state change lock for the module: " + toString() + " " + transitionEvent + " " + stateTransitionEvents + (invalid ? " isInvalid" : ""), BundleException.STATECHANGE_ERROR);
+			throw new BundleException(Msg.Module_LockError + toString() + " " + transitionEvent + " " + stateTransitionEvents + (invalid ? " invalid" : ""), BundleException.STATECHANGE_ERROR); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new BundleException("Unable to acquire the state change lock for the module: " + toString() + " " + transitionEvent, BundleException.STATECHANGE_ERROR, e);
+			throw new BundleException(Msg.Module_LockError + toString() + " " + transitionEvent, BundleException.STATECHANGE_ERROR, e); //$NON-NLS-1$
 		} finally {
 			if (previousInterruption) {
 				Thread.currentThread().interrupt();
@@ -341,7 +342,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 */
 	protected final void unlockStateChange(ModuleEvent transitionEvent) {
 		if (stateChangeLock.getHoldCount() == 0 || !stateTransitionEvents.contains(transitionEvent))
-			throw new IllegalMonitorStateException("Current thread does not hold the state change lock for: " + transitionEvent);
+			throw new IllegalMonitorStateException("Current thread does not hold the state change lock for: " + transitionEvent); //$NON-NLS-1$
 		stateTransitionEvents.remove(transitionEvent);
 		stateChangeLock.unlock();
 	}
@@ -387,7 +388,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			persistStartOptions(options);
 			if (getStartLevel() > getRevisions().getContainer().getStartLevel()) {
 				if (StartOptions.TRANSIENT.isContained(options)) {
-					throw new BundleException("Cannot transiently start a module whose start level is not met.", BundleException.START_TRANSIENT_ERROR);
+					throw new BundleException(Msg.Module_Transient_StartError, BundleException.START_TRANSIENT_ERROR);
 				}
 				// DO nothing
 				return;
@@ -417,8 +418,8 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				if (State.ACTIVE.equals(getState()))
 					return;
 				if (getState().equals(State.INSTALLED)) {
-					String reportMessage = ModuleResolutionReport.getResolutionReport("", getCurrentRevision(), report.getEntries(), null);
-					throw new BundleException("Could not resolve module: " + reportMessage, BundleException.RESOLVE_ERROR, e);
+					String reportMessage = ModuleResolutionReport.getResolutionReport("", getCurrentRevision(), report.getEntries(), null); //$NON-NLS-1$
+					throw new BundleException(Msg.Module_ResolveError + reportMessage, BundleException.RESOLVE_ERROR, e);
 				}
 			}
 
@@ -440,7 +441,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 		if (event != null) {
 			if (!EnumSet.of(ModuleEvent.STARTED, ModuleEvent.LAZY_ACTIVATION, ModuleEvent.STOPPED).contains(event))
-				throw new IllegalStateException("Wrong event type: " + event);
+				throw new IllegalStateException("Wrong event type: " + event); //$NON-NLS-1$
 			publishEvent(event);
 		}
 
@@ -484,7 +485,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 		if (event != null) {
 			if (!ModuleEvent.STOPPED.equals(event))
-				throw new IllegalStateException("Wrong event type: " + event);
+				throw new IllegalStateException("Wrong event type: " + event); //$NON-NLS-1$
 			publishEvent(event);
 		}
 		if (stopError != null)
@@ -494,7 +495,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	private void checkFragment() throws BundleException {
 		ModuleRevision current = getCurrentRevision();
 		if ((current.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
-			throw new BundleException("Invalid operation on a fragment.", BundleException.INVALID_OPERATION);
+			throw new BundleException(Msg.Module_Fragment_InvalidOperation, BundleException.INVALID_OPERATION);
 		}
 	}
 
@@ -510,7 +511,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	final void checkValid() {
 		if (getState().equals(State.UNINSTALLED))
-			throw new IllegalStateException("Module has been uninstalled.");
+			throw new IllegalStateException(Msg.Module_UninstalledError);
 	}
 
 	private ModuleEvent doStart(StartOptions... options) throws BundleException {
@@ -561,7 +562,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			publishEvent(ModuleEvent.STOPPING);
 			if (t instanceof BundleException)
 				throw (BundleException) t;
-			throw new BundleException("Error starting module.", BundleException.ACTIVATOR_ERROR, t);
+			throw new BundleException(Msg.Module_StartError, BundleException.ACTIVATOR_ERROR, t);
 		}
 	}
 
@@ -612,7 +613,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		} catch (Throwable t) {
 			if (t instanceof BundleException)
 				throw (BundleException) t;
-			throw new BundleException("Error stopping module.", BundleException.ACTIVATOR_ERROR, t);
+			throw new BundleException(Msg.Module_StopError, BundleException.ACTIVATOR_ERROR, t);
 		} finally {
 			// must always set the state to stopped
 			setState(State.RESOLVED);

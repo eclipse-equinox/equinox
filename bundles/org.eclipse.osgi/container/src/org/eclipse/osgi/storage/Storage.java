@@ -280,7 +280,7 @@ public class Storage {
 		try {
 			save();
 		} catch (IOException e) {
-			getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error saving on shutdown", e);
+			getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error saving on shutdown", e); //$NON-NLS-1$
 		}
 
 		// close all the generations

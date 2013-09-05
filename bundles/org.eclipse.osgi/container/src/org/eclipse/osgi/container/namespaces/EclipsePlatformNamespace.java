@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,12 +32,12 @@ public class EclipsePlatformNamespace extends Namespace {
 	 * Namespace name for the eclipse platform.  Unlike typical name spaces
 	 * this namespace is not intended to be used as an attribute.
 	 */
-	public static final String ECLIPSE_PLATFORM_NAMESPACE = "eclipse.platform";
+	public static final String ECLIPSE_PLATFORM_NAMESPACE = "eclipse.platform"; //$NON-NLS-1$
 
 	/**
 	 * Manifest header identifying the eclipse platform for the
 	 * bundle. The framework may run this bundle if filter
 	 * specified by this header matches the running eclipse platform.
 	 */
-	public static final String ECLIPSE_PLATFORM_FILTER_HEADER = "Eclipse-PlatformFilter";
+	public static final String ECLIPSE_PLATFORM_FILTER_HEADER = "Eclipse-PlatformFilter"; //$NON-NLS-1$
 }

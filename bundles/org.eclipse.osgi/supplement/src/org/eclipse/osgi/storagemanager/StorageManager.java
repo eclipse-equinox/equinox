@@ -561,7 +561,7 @@ public final class StorageManager {
 			} catch (IOException ex) {
 				// If IOException is thrown from our custom method.
 				// log and swallow for now.
-				System.out.println("Unexpected IOException is thrown inside cleanupWithLock. Please look below for stacktrace");
+				System.out.println("Unexpected IOException is thrown inside cleanupWithLock. Please look below for stacktrace"); //$NON-NLS-1$
 				ex.printStackTrace(System.out);
 			}
 		}

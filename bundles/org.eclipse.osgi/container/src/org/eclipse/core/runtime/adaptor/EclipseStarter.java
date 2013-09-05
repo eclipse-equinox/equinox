@@ -590,7 +590,7 @@ public class EclipseStarter {
 		}
 		Location installLocation = installLocRef == null ? null : context.getService(installLocRef.iterator().next());
 		if (installLocation == null) {
-			throw new IllegalStateException("No install location found.");
+			throw new IllegalStateException(Msg.EclipseStarter_InstallLocation);
 		}
 		for (int i = 0; i < installEntries.length; i++) {
 			String name = installEntries[i];

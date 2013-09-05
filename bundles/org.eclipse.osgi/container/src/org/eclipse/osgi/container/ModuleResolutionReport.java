@@ -11,6 +11,7 @@
 package org.eclipse.osgi.container;
 
 import java.util.*;
+import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.osgi.resource.*;
 import org.osgi.service.resolver.ResolutionException;
@@ -94,7 +95,7 @@ public class ModuleResolutionReport implements ResolutionReport {
 
 		List<ResolutionReport.Entry> revisionEntries = reportEntries.get(revision);
 		if (revisionEntries == null) {
-			result.append(prepend).append("  ").append("No resolution report for the bundle."); //$NON-NLS-1$
+			result.append(prepend).append("  ").append(Msg.ModuleResolutionReport_NoReport); //$NON-NLS-1$
 		} else {
 			for (ResolutionReport.Entry entry : revisionEntries) {
 				printResolutionEntry(result, prepend + "  ", entry, reportEntries, visited); //$NON-NLS-1$
@@ -106,10 +107,10 @@ public class ModuleResolutionReport implements ResolutionReport {
 	private static void printResolutionEntry(StringBuilder result, String prepend, ResolutionReport.Entry entry, Map<Resource, List<ResolutionReport.Entry>> reportEntries, Set<ModuleRevision> visited) {
 		switch (entry.getType()) {
 			case MISSING_CAPABILITY :
-				result.append(prepend).append("Unresolved requirement: ").append(entry.getData()).append('\n');
+				result.append(prepend).append(Msg.ModuleResolutionReport_UnresolvedReq).append(entry.getData()).append('\n');
 				break;
 			case SINGLETON_SELECTION :
-				result.append(prepend).append("Another singleton bundle selected: ").append(entry.getData()).append('\n');
+				result.append(prepend).append(Msg.ModuleResolutionReport_AnotherSingleton).append(entry.getData()).append('\n');
 				break;
 			case UNRESOLVED_PROVIDER :
 				@SuppressWarnings("unchecked")
@@ -121,7 +122,7 @@ public class ModuleResolutionReport implements ResolutionReport {
 						Capability unresolvedCapability = unresolvedCapabilities.iterator().next();
 						// make sure this is not a case of importing and exporting the same package
 						if (!unresolvedRequirement.getKey().getResource().equals(unresolvedCapability.getResource())) {
-							result.append(prepend).append("Unresolved requirement: ").append(unresolvedRequirement.getKey()).append('\n');
+							result.append(prepend).append(Msg.ModuleResolutionReport_UnresolvedReq).append(unresolvedRequirement.getKey()).append('\n');
 							result.append(prepend).append("  -> ").append(unresolvedCapability).append('\n'); //$NON-NLS-1$
 							result.append(getResolutionReport(prepend + "     ", (ModuleRevision) unresolvedCapability.getResource(), reportEntries, visited)); //$NON-NLS-1$
 						}
@@ -129,10 +130,10 @@ public class ModuleResolutionReport implements ResolutionReport {
 				}
 				break;
 			case FILTERED_BY_RESOLVER_HOOK :
-				result.append("Bundle was filtered by a resolver hook.").append('\n');
+				result.append(Msg.ModuleResolutionReport_FilteredByHook).append('\n');
 				break;
 			default :
-				result.append("Unknown error: ").append("type=").append(entry.getType()).append(" data=").append(entry.getData()).append('\n'); //$NON-NLS-2$ //$NON-NLS-3$
+				result.append(Msg.ModuleResolutionReport_Unknown).append("type=").append(entry.getType()).append(" data=").append(entry.getData()).append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
 				break;
 		}
 	}

@@ -37,7 +37,7 @@ public class Capabilities {
 
 		void addCapability(ModuleCapability capability) {
 			if (!name.equals(capability.getNamespace())) {
-				throw new IllegalArgumentException("Invalid namespace: " + capability.getNamespace() + ": expecting: " + name);
+				throw new IllegalArgumentException("Invalid namespace: " + capability.getNamespace() + ": expecting: " + name); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			all.add(capability);
 			// by convention we index by the namespace attribute
@@ -75,7 +75,7 @@ public class Capabilities {
 
 		void removeCapability(ModuleCapability capability) {
 			if (!name.equals(capability.getNamespace())) {
-				throw new IllegalArgumentException("Invalid namespace: " + capability.getNamespace() + ": expecting: " + name);
+				throw new IllegalArgumentException("Invalid namespace: " + capability.getNamespace() + ": expecting: " + name); //$NON-NLS-1$//$NON-NLS-2$
 			}
 			all.remove(capability);
 			// by convention we index by the namespace attribute
@@ -111,7 +111,7 @@ public class Capabilities {
 
 		List<ModuleCapability> findCapabilities(Requirement requirement) {
 			if (!name.equals(requirement.getNamespace())) {
-				throw new IllegalArgumentException("Invalid namespace: " + requirement.getNamespace() + ": expecting: " + name);
+				throw new IllegalArgumentException("Invalid namespace: " + requirement.getNamespace() + ": expecting: " + name); //$NON-NLS-1$//$NON-NLS-2$
 			}
 			FilterImpl f = null;
 			String filterSpec = requirement.getDirectives().get(Namespace.REQUIREMENT_FILTER_DIRECTIVE);

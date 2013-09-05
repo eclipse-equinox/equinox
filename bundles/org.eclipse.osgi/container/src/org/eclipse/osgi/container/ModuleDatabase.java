@@ -651,7 +651,7 @@ public class ModuleDatabase {
 
 	private void checkWrite() {
 		if (monitor.getWriteHoldCount() == 0)
-			throw new IllegalMonitorStateException("Must hold the write lock.");
+			throw new IllegalMonitorStateException("Must hold the write lock."); //$NON-NLS-1$
 	}
 
 	/**

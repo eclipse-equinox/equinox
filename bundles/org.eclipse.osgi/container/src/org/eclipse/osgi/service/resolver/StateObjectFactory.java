@@ -503,7 +503,7 @@ public interface StateObjectFactory {
 						error = e;
 					}
 					if (error != null) {
-						throw new UnsupportedOperationException("Not able to create StateObjectFactory implementation: " + IMPL_NAME, error);
+						throw new UnsupportedOperationException("Not able to create StateObjectFactory implementation: " + IMPL_NAME, error); //$NON-NLS-1$
 					}
 				}
 				return implementation;
