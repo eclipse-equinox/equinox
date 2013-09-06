@@ -47,7 +47,7 @@ import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
 
 public class Storage {
-	public static final int VERSION = 1;
+	public static final int VERSION = 2;
 	public static final String BUNDLE_DATA_DIR = "data"; //$NON-NLS-1$
 	public static final String BUNDLE_FILE_NAME = "bundleFile"; //$NON-NLS-1$
 	public static final String FRAMEWORK_INFO = "framework.info"; //$NON-NLS-1$
@@ -123,7 +123,15 @@ public class Storage {
 		InputStream info = getInfoInputStream();
 		DataInputStream data = info == null ? null : new DataInputStream(new BufferedInputStream(info));
 		try {
-			Map<Long, Generation> generations = loadGenerations(data);
+			Map<Long, Generation> generations;
+			try {
+				generations = loadGenerations(data);
+			} catch (IllegalArgumentException e) {
+				equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, "Incompatible version.  Starting with empty framework.", e); //$NON-NLS-1$
+				generations = new HashMap<Long, Generation>(0);
+				data = null;
+				cleanOSGiStorage(osgiLocation, childRoot);
+			}
 			this.permissionData = loadPermissionData(data);
 			this.securityAdmin = new SecurityAdmin(null, this.permissionData);
 			this.adaptor = new EquinoxContainerAdaptor(equinoxContainer, this, generations);
@@ -221,7 +229,7 @@ public class Storage {
 		Generation newGeneration = null;
 		try {
 			if (systemModule == null) {
-				BundleInfo info = new BundleInfo(this, 0, 0);
+				BundleInfo info = new BundleInfo(this, 0, Constants.SYSTEM_BUNDLE_LOCATION, 0);
 				newGeneration = info.createGeneration();
 
 				File contentFile = getSystemContent();
@@ -442,7 +450,7 @@ public class Storage {
 		Generation generation = null;
 		Long lockedID = getNextRootID();
 		try {
-			BundleInfo info = new BundleInfo(this, lockedID, 0);
+			BundleInfo info = new BundleInfo(this, lockedID, bundleLocation, 0);
 			generation = info.createGeneration();
 
 			File contentFile = getContentFile(staged, isReference, lockedID, generation.getGenerationId());
@@ -1019,6 +1027,7 @@ public class Storage {
 		for (Generation generation : generations) {
 			BundleInfo bundleInfo = generation.getBundleInfo();
 			out.writeLong(bundleInfo.getBundleId());
+			out.writeUTF(bundleInfo.getLocation());
 			out.writeLong(bundleInfo.getNextGenerationId());
 			out.writeLong(generation.getGenerationId());
 			out.writeBoolean(generation.isDirectory());
@@ -1085,9 +1094,9 @@ public class Storage {
 			return new HashMap<Long, Generation>(0);
 		}
 		int version = in.readInt();
-		if (version < VERSION)
-			throw new IOException("Perstence version is not correct for loading: " + version + " expecting: " + VERSION); //$NON-NLS-1$ //$NON-NLS-2$
-
+		if (version != VERSION) {
+			throw new IllegalArgumentException("Perstence version is not correct for loading: " + version + " expecting: " + VERSION); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		int numCachedHeaders = in.readInt();
 		List<String> storedCachedHeaderKeys = new ArrayList<String>(numCachedHeaders);
 		for (int i = 0; i < numCachedHeaders; i++) {
@@ -1099,6 +1108,7 @@ public class Storage {
 		List<Generation> generations = new ArrayList<BundleInfo.Generation>(numInfos);
 		for (int i = 0; i < numInfos; i++) {
 			long infoId = in.readLong();
+			String infoLocation = (String) ObjectPool.intern(in.readUTF());
 			long nextGenId = in.readLong();
 			long generationId = in.readLong();
 			boolean isDirectory = in.readBoolean();
@@ -1137,7 +1147,7 @@ public class Storage {
 				}
 			}
 
-			BundleInfo info = new BundleInfo(this, infoId, nextGenId);
+			BundleInfo info = new BundleInfo(this, infoId, infoLocation, nextGenId);
 			Generation generation = info.restoreGeneration(generationId, content, isDirectory, isReference, hasPackageInfo, cachedHeaders, lastModified);
 			result.put(infoId, generation);
 			generations.add(generation);

@@ -314,18 +314,24 @@ public final class BundleInfo {
 
 	private final Storage storage;
 	private final long bundleId;
+	private final String location;
 	private long nextGenerationId;
 	private final Object infoMonitor = new Object();
 	private LockSet<Long> generationLocks;
 
-	public BundleInfo(Storage storage, long bundleId, long nextGenerationId) {
+	public BundleInfo(Storage storage, long bundleId, String location, long nextGenerationId) {
 		this.storage = storage;
 		this.bundleId = bundleId;
+		this.location = location;
 		this.nextGenerationId = nextGenerationId;
 	}
 
 	public long getBundleId() {
 		return bundleId;
+	}
+
+	public String getLocation() {
+		return location;
 	}
 
 	Generation createGeneration() throws BundleException {
