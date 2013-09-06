@@ -20,9 +20,8 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
-import org.eclipse.osgi.storage.*;
+import org.eclipse.osgi.storage.StorageUtil;
 import org.eclipse.osgi.storage.bundlefile.*;
-import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 
 /**
@@ -154,9 +153,7 @@ public class TransformedBundleFile extends BundleFileWrapper {
 				} else {
 					if (originalFile.isDirectory()) {
 						if (!nested.mkdirs()) {
-							if (debug.DEBUG_GENERAL)
-								Debug.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
-							throw new IOException(NLS.bind(StorageMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
+							throw new IOException("Unable to create directory: " + nested.getAbsolutePath()); //$NON-NLS-1$
 						}
 						extractDirectory(path);
 					} else {
@@ -170,9 +167,7 @@ public class TransformedBundleFile extends BundleFileWrapper {
 						/* create the necessary directories */
 						File dir = new File(nested.getParent());
 						if (!dir.exists() && !dir.mkdirs()) {
-							if (debug.DEBUG_GENERAL)
-								Debug.println("Unable to create directory: " + dir.getPath()); //$NON-NLS-1$
-							throw new IOException(NLS.bind(StorageMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, dir.getAbsolutePath()));
+							throw new IOException("Unable to create directory: " + dir.getAbsolutePath());
 						}
 						/* copy the entry to the cache */
 						StorageUtil.readFile(in, nested);
