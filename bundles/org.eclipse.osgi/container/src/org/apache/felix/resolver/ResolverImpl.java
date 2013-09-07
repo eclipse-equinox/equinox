@@ -214,7 +214,7 @@ public class ResolverImpl implements Resolver
                     }
                 }
 
-                Collection<Resource> faultyResources = null;
+                Map<Resource, ResolutionException> faultyResources = null;
                 do
                 {
                     rethrow = null;
@@ -230,7 +230,7 @@ public class ResolverImpl implements Resolver
                         ? usesPermutations.remove(0)
                         : importPermutations.remove(0);
 //allCandidates.dump();
-                    Collection<Resource> currentFaultyResources = null;
+                    Map<Resource, ResolutionException> currentFaultyResources = null;
                     // Reuse a resultCache map for checking package consistency
                     // for all resources.
                     Map<Resource, Object> resultCache =
@@ -266,9 +266,9 @@ public class ResolverImpl implements Resolver
                         {
                             rethrow = ex;
                             if (currentFaultyResources == null) {
-                            	currentFaultyResources = new ArrayList();
+                            	currentFaultyResources = new HashMap<Resource, ResolutionException>();
                             }
-                           	currentFaultyResources.add(resource);
+                           	currentFaultyResources.put(resource, ex);
                         }
                     }
                     if (currentFaultyResources != null) {
@@ -290,7 +290,13 @@ public class ResolverImpl implements Resolver
                 if (rethrow != null)
                 {
                     if (faultyResources != null) {
-                        retry = (optionalResources.removeAll(faultyResources) || ondemandFragments.removeAll(faultyResources));
+                    	Set<Resource> resourceKeys = faultyResources.keySet();
+                        retry = (optionalResources.removeAll(resourceKeys) || ondemandFragments.removeAll(resourceKeys));
+                        // remove mandatory resources and log optional resource exceptions
+                        resourceKeys.removeAll(mandatoryResources);
+                        for (Map.Entry<Resource, ResolutionException> usesError : faultyResources.entrySet()) {
+    						m_logger.logUsesConstraintViolation(usesError.getKey(), usesError.getValue());
+    					}
                     }
                     if (!retry) {
                         throw rethrow;

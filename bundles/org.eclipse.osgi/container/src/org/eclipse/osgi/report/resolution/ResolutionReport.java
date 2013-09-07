@@ -109,8 +109,6 @@ public interface ResolutionReport {
 			 * Resource</code>, which represents the singleton with which the
 			 * resource collided.
 			 */
-			// TODO Should the data present all of the colliding singletons
-			// rather than multiple entries each containing a single collision?
 			SINGLETON_SELECTION,
 			/**
 			 * Indicates a resource failed to resolve because one or more
@@ -118,7 +116,13 @@ public interface ResolutionReport {
 			 * were not resolved. The structure of the data is <code>
 			 * Map&lt;Requirement, Set&lt;Capability&gt;&gt;</code>.
 			 */
-			UNRESOLVED_PROVIDER
+			UNRESOLVED_PROVIDER,
+			/**
+			 * Indicates a resource failed to resolve because of a uses
+			 * constraint violation.  The structure of the data is
+			 * <code>ResolutionException</code>.
+			 */
+			USES_CONSTRAINT_VIOLATION
 		}
 
 		// TODO Can this make use of generics? Or should this be Map<String, Object>
@@ -163,8 +167,8 @@ public interface ResolutionReport {
 	 * or {@code null} if there is no resolution exception.  For some resolve
 	 * operations a resolution exception may not be thrown even if the 
 	 * resolve process could not resolve some resources.  For example, if
-	 * the resources are optional resources to resolve.
-	 * @return thee resolution exception or {@code null} if there is 
+	 * the resources are not optional resources to resolve.
+	 * @return the resolution exception or {@code null} if there is 
 	 * no resolution exception.
 	 */
 	ResolutionException getResoltuionException();

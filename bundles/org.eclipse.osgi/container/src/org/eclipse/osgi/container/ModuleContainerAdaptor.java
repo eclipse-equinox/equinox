@@ -12,13 +12,10 @@ package org.eclipse.osgi.container;
 
 import java.io.DataInputStream;
 import java.util.EnumSet;
-import org.apache.felix.resolver.Logger;
-import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.container.Module.Settings;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
-import org.osgi.service.resolver.Resolver;
 
 /**
  * Adapts the behavior of a container.
@@ -75,16 +72,6 @@ public abstract class ModuleContainerAdaptor {
 		 * The module has been updated.
 		 */
 		UPDATED
-	}
-
-	/**
-	 * Returns the resolver the container will use.  This implementation will
-	 * return the default implementation of the resolver.  Override this method
-	 * to provide an alternative resolver implementation for the container.
-	 * @return the resolver the container will use.
-	 */
-	public Resolver getResolver() {
-		return new ResolverImpl(new Logger(4));
 	}
 
 	/**

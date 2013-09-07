@@ -12,6 +12,7 @@ package org.eclipse.osgi.container;
 
 import java.security.Permission;
 import java.util.*;
+import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.internal.container.InternalUtils;
@@ -42,7 +43,6 @@ final class ModuleResolver {
 		}
 	};
 	final ModuleContainerAdaptor adaptor;
-	final Resolver resolver;
 
 	/**
 	 * Constructs the module resolver with the specified resolver hook factory
@@ -51,7 +51,6 @@ final class ModuleResolver {
 	 */
 	ModuleResolver(ModuleContainerAdaptor adaptor) {
 		this.adaptor = adaptor;
-		this.resolver = adaptor.getResolver();
 	}
 
 	/**
@@ -404,6 +403,26 @@ final class ModuleResolver {
 	}
 
 	class ResolveProcess extends ResolveContext implements Comparator<Capability> {
+		class ResolveLogger extends Logger {
+			private Map<Resource, ResolutionException> errors = null;
+
+			public ResolveLogger() {
+				super(0);
+			}
+
+			@Override
+			public void logUsesConstraintViolation(Resource resource, ResolutionException error) {
+				if (errors == null) {
+					errors = new HashMap<Resource, ResolutionException>();
+				}
+				errors.put(resource, error);
+			}
+
+			Map<Resource, ResolutionException> getUsesConstraintViolations() {
+				return errors == null ? Collections.<Resource, ResolutionException> emptyMap() : errors;
+			}
+		}
+
 		private final ModuleResolutionReport.Builder reportBuilder = new ModuleResolutionReport.Builder();
 		/*
 		 * Contains the revisions that were requested to be resolved and is not
@@ -610,6 +629,7 @@ final class ModuleResolver {
 				Map<Resource, List<Wire>> result = null;
 				ResolutionException re = null;
 				ModuleResolutionReport report;
+				ResolveLogger logger = new ResolveLogger();
 				try {
 					filterResolvable();
 					selectSingletons();
@@ -629,13 +649,14 @@ final class ModuleResolver {
 								wirings.put(updatedWiring.getKey(), updatedWiring.getValue());
 							}
 						}
-						result = resolver.resolve(this);
+						result = new ResolverImpl(logger).resolve(this);
 						result.putAll(dynamicAttachWirings);
 					}
 				} catch (ResolutionException e) {
 					re = e;
 				} finally {
 					computeUnresolvedProviderResolutionReportEntries(result);
+					computeUsesConstraintViolations(logger.getUsesConstraintViolations());
 					report = reportBuilder.build(result, re);
 					if (hook instanceof ResolutionReport.Listener)
 						((ResolutionReport.Listener) hook).handleResolutionReport(report);
@@ -644,6 +665,12 @@ final class ModuleResolver {
 				return report;
 			} finally {
 				threadResolving.set(Boolean.FALSE);
+			}
+		}
+
+		private void computeUsesConstraintViolations(Map<Resource, ResolutionException> usesConstraintViolations) {
+			for (Map.Entry<Resource, ResolutionException> usesConstraintViolation : usesConstraintViolations.entrySet()) {
+				reportBuilder.addEntry(usesConstraintViolation.getKey(), Type.USES_CONSTRAINT_VIOLATION, usesConstraintViolation.getValue());
 			}
 		}
 
@@ -796,14 +823,10 @@ final class ModuleResolver {
 		}
 
 		private Map<Resource, List<Wire>> resolveDynamic() throws ResolutionException {
-			if (!(resolver instanceof ResolverImpl)) {
-				throw new ResolutionException("Dynamic import resolution not supported by the resolver: " + resolver.getClass()); //$NON-NLS-1$
-			}
 			List<Capability> dynamicMatches = filterProviders(dynamicReq.getOriginal(), moduleDatabase.findCapabilities(dynamicReq));
 			Collection<Resource> ondemandFragments = InternalUtils.asCollectionResource(moduleDatabase.getFragmentRevisions());
 
-			return ((ResolverImpl) resolver).resolve(this, dynamicReq.getRevision(), dynamicReq.getOriginal(), dynamicMatches, ondemandFragments);
-
+			return new ResolverImpl(new Logger(0)).resolve(this, dynamicReq.getRevision(), dynamicReq.getOriginal(), dynamicMatches, ondemandFragments);
 		}
 
 		private void filterResolvable() {

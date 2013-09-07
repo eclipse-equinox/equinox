@@ -132,6 +132,10 @@ public class ModuleResolutionReport implements ResolutionReport {
 			case FILTERED_BY_RESOLVER_HOOK :
 				result.append(Msg.ModuleResolutionReport_FilteredByHook).append('\n');
 				break;
+			case USES_CONSTRAINT_VIOLATION :
+				result.append(prepend).append(Msg.ModuleResolutionReport_UsesConstraintError).append('\n');
+				result.append("  ").append(entry.getData()); //$NON-NLS-1$
+				break;
 			default :
 				result.append(Msg.ModuleResolutionReport_Unknown).append("type=").append(entry.getType()).append(" data=").append(entry.getData()).append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
 				break;

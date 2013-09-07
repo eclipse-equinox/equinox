@@ -138,6 +138,7 @@ public class Msg extends NLS {
 	public static String ModuleResolutionReport_NoReport;
 	public static String ModuleResolutionReport_Unknown;
 	public static String ModuleResolutionReport_UnresolvedReq;
+	public static String ModuleResolutionReport_UsesConstraintError;
 
 	public static String ModuleResolver_RecursiveError;
 	public static String ModuleResolver_SingletonDisabledError;

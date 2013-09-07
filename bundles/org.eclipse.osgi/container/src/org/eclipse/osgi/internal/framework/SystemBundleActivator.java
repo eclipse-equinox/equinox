@@ -11,6 +11,9 @@
 
 package org.eclipse.osgi.internal.framework;
 
+import org.apache.felix.resolver.Logger;
+
+import org.apache.felix.resolver.ResolverImpl;
 import java.util.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParserFactory;
@@ -73,7 +76,7 @@ public class SystemBundleActivator implements BundleActivator {
 		register(bc, PermissionAdmin.class, sa, null);
 		register(bc, ConditionalPermissionAdmin.class, sa, null);
 
-		register(bc, Resolver.class, bundle.getEquinoxContainer().getStorage().getAdaptor().getResolver(), null);
+		register(bc, Resolver.class, new ResolverImpl(new Logger(0)), null);
 
 		register(bc, DebugOptions.class, dbgOptions, null);
 
