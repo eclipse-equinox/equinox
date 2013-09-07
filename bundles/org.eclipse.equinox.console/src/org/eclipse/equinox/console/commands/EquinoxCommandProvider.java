@@ -1976,7 +1976,14 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 				}
 			}
 			break;
+		case USES_CONSTRAINT_VIOLATION :
+			System.out.print(prepend);
+			System.out.println("Bundle was not resolved because of a uses contraint violation.");
+			System.out.print(prepend + "  ");
+			System.out.println(entry.getData());
+			break;
 		case FILTERED_BY_RESOLVER_HOOK:
+			System.out.print(prepend);
 			System.out.println("Bundle was filtered by a resolver hook.");
 			break;
 		default:
