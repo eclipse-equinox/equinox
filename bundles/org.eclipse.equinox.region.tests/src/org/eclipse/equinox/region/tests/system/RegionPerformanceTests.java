@@ -39,7 +39,6 @@ public class RegionPerformanceTests extends AbstractRegionSystemTest {
 	}
 
 	public void testGetBundlesNoRegions() throws BundleException {
-		regionBundle.stop();
 		doTestGetBundles(null, null);
 	}
 
@@ -59,7 +58,6 @@ public class RegionPerformanceTests extends AbstractRegionSystemTest {
 	}
 
 	public void testGetServicesNoRegions() throws BundleException {
-		regionBundle.stop();
 		doTestGetServices(null, null);
 	}
 

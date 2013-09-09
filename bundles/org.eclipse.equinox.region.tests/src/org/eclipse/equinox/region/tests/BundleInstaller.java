@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,8 +28,8 @@ public class BundleInstaller {
 	private final ServiceTracker<URLConverter, URLConverter> converter;
 	private final FrameworkWiring frameworkWiring;
 
-	public BundleInstaller(String bundlesRoot, Bundle contextBundle, Bundle testBundle) throws InvalidSyntaxException {
-		BundleContext bc = contextBundle.getBundleContext();
+	public BundleInstaller(String bundlesRoot, Bundle testBundle) throws InvalidSyntaxException {
+		BundleContext bc = testBundle.getBundleContext();
 		Bundle systemBundle = bc.getBundle(0);
 		context = systemBundle.getBundleContext();
 		frameworkWiring = systemBundle.adapt(FrameworkWiring.class);

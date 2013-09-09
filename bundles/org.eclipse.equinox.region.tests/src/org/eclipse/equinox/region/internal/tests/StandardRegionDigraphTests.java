@@ -9,7 +9,7 @@
  *    SpringSource, a division of VMware - initial API and implementation and/or initial documentation
  *******************************************************************************/
 
-package org.eclipse.equinox.internal.region;
+package org.eclipse.equinox.region.internal.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -47,7 +47,7 @@ public class StandardRegionDigraphTests {
 		StubBundle stubSystemBundle = new StubBundle(0L, "osgi.framework", new Version("0"), "loc");
 		StubBundleContext stubBundleContext = new StubBundleContext();
 		stubBundleContext.addInstalledBundle(stubSystemBundle);
-		this.digraph = new StandardRegionDigraph(stubBundleContext, new ThreadLocal<Region>());
+		this.digraph = RegionReflectionUtils.newStandardRegionDigraph(stubBundleContext, new ThreadLocal<Region>());
 
 		this.mockRegion1 = EasyMock.createMock(Region.class);
 		EasyMock.expect(this.mockRegion1.getName()).andReturn("mockRegion1").anyTimes();
@@ -186,7 +186,7 @@ public class StandardRegionDigraphTests {
 	@Test
 	public void testCopyRegion() throws BundleException, InvalidSyntaxException {
 		replayMocks(); // needed to allow teardown to succeed.
-		RegionDigraph testDigraph = new StandardRegionDigraph(null);
+		RegionDigraph testDigraph = RegionReflectionUtils.newStandardRegionDigraph();
 		long bundleId = 1;
 		Region a = testDigraph.createRegion(REGION_A);
 		a.addBundle(bundleId++);
@@ -337,7 +337,7 @@ public class StandardRegionDigraphTests {
 	@Test
 	public void testVisitRegions() throws BundleException, InvalidSyntaxException {
 		replayMocks(); // needed to allow teardown to succeed.
-		RegionDigraph testDigraph = new StandardRegionDigraph(null);
+		RegionDigraph testDigraph = RegionReflectionUtils.newStandardRegionDigraph();
 		Region a = testDigraph.createRegion(REGION_A);
 		Region b = testDigraph.createRegion(REGION_B);
 		Region c = testDigraph.createRegion(REGION_C);

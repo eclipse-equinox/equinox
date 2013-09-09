@@ -139,96 +139,96 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		sc1Tracker.close();
 	}
 
-	public void testPersistence() throws BundleException, InvalidSyntaxException {
-		// get the system region
-		Region systemRegion = digraph.getRegion(0);
-		Map<String, Bundle> bundles = new HashMap<String, Bundle>();
-		// create a disconnected test region for each test bundle
-		for (String location : ALL) {
-			Region testRegion = digraph.createRegion(location);
-			bundles.put(location, bundleInstaller.installBundle(location, testRegion));
-			// Import the system bundle from the systemRegion
-			digraph.connect(testRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(), systemRegion);
-			// must import Boolean services into systemRegion to test
-			digraph.connect(systemRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build(), testRegion);
-		}
-
-		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
-		assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
-		assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
-		assertEquals(CP1, Bundle.RESOLVED, bundles.get(CP1).getState());
-		assertEquals(PP2, Bundle.INSTALLED, bundles.get(PP2).getState());
-		assertEquals(SP2, Bundle.INSTALLED, bundles.get(SP2).getState());
-		assertEquals(CP2, Bundle.INSTALLED, bundles.get(CP2).getState());
-		assertEquals(BC1, Bundle.INSTALLED, bundles.get(BC1).getState());
-		assertEquals(SC1, Bundle.INSTALLED, bundles.get(SC1).getState());
-		assertEquals(CC1, Bundle.INSTALLED, bundles.get(CC1).getState());
-
-		regionBundle.stop();
-		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
-		assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
-		assertEquals(SP1, Bundle.RESOLVED, bundles.get(SP1).getState());
-		assertEquals(CP1, Bundle.RESOLVED, bundles.get(CP1).getState());
-		assertEquals(PP2, Bundle.RESOLVED, bundles.get(PP2).getState());
-		assertEquals(SP2, Bundle.RESOLVED, bundles.get(SP2).getState());
-		assertEquals(CP2, Bundle.RESOLVED, bundles.get(CP2).getState());
-		assertEquals(BC1, Bundle.RESOLVED, bundles.get(BC1).getState());
-		assertEquals(SC1, Bundle.RESOLVED, bundles.get(SC1).getState());
-		assertEquals(CC1, Bundle.RESOLVED, bundles.get(CC1).getState());
-
-		startRegionBundle();
-
-		bundleInstaller.refreshPackages(bundles.values().toArray(new Bundle[bundles.size()]));
-		assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
-		assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
-		assertEquals(CP1, Bundle.RESOLVED, bundles.get(CP1).getState());
-		assertEquals(PP2, Bundle.INSTALLED, bundles.get(PP2).getState());
-		assertEquals(SP2, Bundle.INSTALLED, bundles.get(SP2).getState());
-		assertEquals(CP2, Bundle.INSTALLED, bundles.get(CP2).getState());
-		assertEquals(BC1, Bundle.INSTALLED, bundles.get(BC1).getState());
-		assertEquals(SC1, Bundle.INSTALLED, bundles.get(SC1).getState());
-		assertEquals(CC1, Bundle.INSTALLED, bundles.get(CC1).getState());
-	}
-
-	public void testPersistenceBug343020() throws BundleException, InvalidSyntaxException {
-		// get the system region
-		Region systemRegion = digraph.getRegion(0);
-		// create a test region
-		Region testRegion = digraph.createRegion(getName());
-
-		RegionFilterBuilder builder = digraph.createRegionFilterBuilder();
-		// Import the system bundle from the systemRegion
-		builder.allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)");
-		// import PP1
-		builder.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)");
-		digraph.connect(testRegion, builder.build(), systemRegion);
-		// install CP2
-		Bundle cp2 = bundleInstaller.installBundle(CP2, testRegion);
-
-		bundleInstaller.resolveBundles(new Bundle[] {cp2});
-		assertEquals("Wrong state for pc1.", Bundle.INSTALLED, cp2.getState());
-
-		regionBundle.stop();
-
-		// install PP1 there is no region alive
-		bundleInstaller.installBundle(PP1);
-
-		// start region bundle and confirm we can resolve cp2 now
-		startRegionBundle();
-
-		bundleInstaller.refreshPackages(new Bundle[] {cp2});
-		assertEquals("Wrong state for pc1.", Bundle.RESOLVED, cp2.getState());
-
-		// stop region bundle to test uninstalling bundles while stopped
-		regionBundle.stop();
-		cp2.uninstall();
-
-		startRegionBundle();
-		testRegion = digraph.getRegion(getName());
-		assertNotNull("No test region found.", testRegion);
-		Set<Long> testIds = testRegion.getBundleIds();
-		assertEquals("Wrong number of test ids.", 0, testIds.size());
-	}
+	//	public void testPersistence() throws BundleException, InvalidSyntaxException {
+	//		// get the system region
+	//		Region systemRegion = digraph.getRegion(0);
+	//		Map<String, Bundle> bundles = new HashMap<String, Bundle>();
+	//		// create a disconnected test region for each test bundle
+	//		for (String location : ALL) {
+	//			Region testRegion = digraph.createRegion(location);
+	//			bundles.put(location, bundleInstaller.installBundle(location, testRegion));
+	//			// Import the system bundle from the systemRegion
+	//			digraph.connect(testRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(), systemRegion);
+	//			// must import Boolean services into systemRegion to test
+	//			digraph.connect(systemRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build(), testRegion);
+	//		}
+	//
+	//		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
+	//		assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
+	//		assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
+	//		assertEquals(CP1, Bundle.RESOLVED, bundles.get(CP1).getState());
+	//		assertEquals(PP2, Bundle.INSTALLED, bundles.get(PP2).getState());
+	//		assertEquals(SP2, Bundle.INSTALLED, bundles.get(SP2).getState());
+	//		assertEquals(CP2, Bundle.INSTALLED, bundles.get(CP2).getState());
+	//		assertEquals(BC1, Bundle.INSTALLED, bundles.get(BC1).getState());
+	//		assertEquals(SC1, Bundle.INSTALLED, bundles.get(SC1).getState());
+	//		assertEquals(CC1, Bundle.INSTALLED, bundles.get(CC1).getState());
+	//
+	//		regionBundle.stop();
+	//		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
+	//		assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
+	//		assertEquals(SP1, Bundle.RESOLVED, bundles.get(SP1).getState());
+	//		assertEquals(CP1, Bundle.RESOLVED, bundles.get(CP1).getState());
+	//		assertEquals(PP2, Bundle.RESOLVED, bundles.get(PP2).getState());
+	//		assertEquals(SP2, Bundle.RESOLVED, bundles.get(SP2).getState());
+	//		assertEquals(CP2, Bundle.RESOLVED, bundles.get(CP2).getState());
+	//		assertEquals(BC1, Bundle.RESOLVED, bundles.get(BC1).getState());
+	//		assertEquals(SC1, Bundle.RESOLVED, bundles.get(SC1).getState());
+	//		assertEquals(CC1, Bundle.RESOLVED, bundles.get(CC1).getState());
+	//
+	//		startRegionBundle();
+	//
+	//		bundleInstaller.refreshPackages(bundles.values().toArray(new Bundle[bundles.size()]));
+	//		assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
+	//		assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
+	//		assertEquals(CP1, Bundle.RESOLVED, bundles.get(CP1).getState());
+	//		assertEquals(PP2, Bundle.INSTALLED, bundles.get(PP2).getState());
+	//		assertEquals(SP2, Bundle.INSTALLED, bundles.get(SP2).getState());
+	//		assertEquals(CP2, Bundle.INSTALLED, bundles.get(CP2).getState());
+	//		assertEquals(BC1, Bundle.INSTALLED, bundles.get(BC1).getState());
+	//		assertEquals(SC1, Bundle.INSTALLED, bundles.get(SC1).getState());
+	//		assertEquals(CC1, Bundle.INSTALLED, bundles.get(CC1).getState());
+	//	}
+	//
+	//	public void testPersistenceBug343020() throws BundleException, InvalidSyntaxException {
+	//		// get the system region
+	//		Region systemRegion = digraph.getRegion(0);
+	//		// create a test region
+	//		Region testRegion = digraph.createRegion(getName());
+	//
+	//		RegionFilterBuilder builder = digraph.createRegionFilterBuilder();
+	//		// Import the system bundle from the systemRegion
+	//		builder.allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)");
+	//		// import PP1
+	//		builder.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)");
+	//		digraph.connect(testRegion, builder.build(), systemRegion);
+	//		// install CP2
+	//		Bundle cp2 = bundleInstaller.installBundle(CP2, testRegion);
+	//
+	//		bundleInstaller.resolveBundles(new Bundle[] {cp2});
+	//		assertEquals("Wrong state for pc1.", Bundle.INSTALLED, cp2.getState());
+	//
+	//		regionBundle.stop();
+	//
+	//		// install PP1 there is no region alive
+	//		bundleInstaller.installBundle(PP1);
+	//
+	//		// start region bundle and confirm we can resolve cp2 now
+	//		startRegionBundle();
+	//
+	//		bundleInstaller.refreshPackages(new Bundle[] {cp2});
+	//		assertEquals("Wrong state for pc1.", Bundle.RESOLVED, cp2.getState());
+	//
+	//		// stop region bundle to test uninstalling bundles while stopped
+	//		regionBundle.stop();
+	//		cp2.uninstall();
+	//
+	//		startRegionBundle();
+	//		testRegion = digraph.getRegion(getName());
+	//		assertNotNull("No test region found.", testRegion);
+	//		Set<Long> testIds = testRegion.getBundleIds();
+	//		assertEquals("Wrong number of test ids.", 0, testIds.size());
+	//	}
 
 	public void testCyclicRegions0() throws BundleException, InvalidSyntaxException, InterruptedException {
 		doCyclicRegions(0);
@@ -459,14 +459,6 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertEquals("Wrong bundle", sp1Bundle.getBundleId(), bundleIds[0]);
 		name = (String) server.getAttribute(sp1Name, "Name");
 		assertEquals("Wrong name", SP1, name);
-
-		regionBundle.stop();
-
-		// Now make sure we have no mbeans
-		digraphs = server.queryMBeans(digraphName, null);
-		assertEquals("Wrong number of digraphs", 0, digraphs.size());
-		regions = server.queryMBeans(null, regionNameAllQuery);
-		assertEquals("Wrong number of regions", 0, regions.size());
 	}
 
 	public void testBundleCollisionDisconnectedRegions() throws BundleException, InvalidSyntaxException {
@@ -593,7 +585,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 	public void testDefaultRegion() throws BundleException {
 		digraph.setDefaultRegion(null);
 
-		Region systemRegion = digraph.getRegion(regionBundle);
+		Region systemRegion = digraph.getRegion(0);
 		Region pp1Region = digraph.createRegion(PP1);
 
 		Bundle pp1Bundle = bundleInstaller.installBundle(PP1, null);

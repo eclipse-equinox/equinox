@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 VMware Inc.
+ * Copyright (c) 2011, 2013 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,7 @@ import java.util.Map.Entry;
 import org.eclipse.equinox.region.Region;
 import org.osgi.framework.BundleException;
 
-final class StandardBundleIdToRegionMapping implements BundleIdToRegionMapping {
+public final class StandardBundleIdToRegionMapping implements BundleIdToRegionMapping {
 
 	private final Object monitor = new Object();
 

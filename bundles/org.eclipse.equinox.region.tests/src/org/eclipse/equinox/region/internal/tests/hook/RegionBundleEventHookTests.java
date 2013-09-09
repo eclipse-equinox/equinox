@@ -9,7 +9,7 @@
  *    SpringSource, a division of VMware - initial API and implementation and/or initial documentation
  *******************************************************************************/
 
-package org.eclipse.equinox.internal.region.hook;
+package org.eclipse.equinox.region.internal.tests.hook;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -17,9 +17,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.HashSet;
 import org.easymock.EasyMock;
-import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
+import org.eclipse.equinox.region.internal.tests.RegionReflectionUtils;
 import org.eclipse.virgo.teststubs.osgi.framework.StubBundle;
 import org.eclipse.virgo.teststubs.osgi.framework.StubBundleContext;
 import org.junit.*;
@@ -39,7 +39,7 @@ public class RegionBundleEventHookTests {
 
 	private ThreadLocal<Region> threadLocal;
 
-	private StandardRegionDigraph digraph;
+	private RegionDigraph digraph;
 
 	private Region mockRegion1;
 
@@ -74,7 +74,7 @@ public class RegionBundleEventHookTests {
 		StubBundle stubSystemBundle = new StubBundle(0L, "osgi.framework", new Version("0"), "loc");
 		StubBundleContext stubBundleContext = new StubBundleContext();
 		stubBundleContext.addInstalledBundle(stubSystemBundle);
-		this.digraph = new StandardRegionDigraph(stubBundleContext, new ThreadLocal<Region>());
+		this.digraph = RegionReflectionUtils.newStandardRegionDigraph(stubBundleContext, new ThreadLocal<Region>());
 		this.digraph.createRegion("mockRegion1");
 		this.digraph.createRegion("mockRegion2");
 		this.mockRegion1 = digraph.getRegion("mockRegion1");
@@ -97,7 +97,7 @@ public class RegionBundleEventHookTests {
 				// nothing
 			}
 		};
-		EventHook eventHook = new RegionBundleEventHook(this.mockRegionDigraph, mockFindHook, this.threadLocal);
+		EventHook eventHook = RegionReflectionUtils.newRegionBundleEventHook(this.mockRegionDigraph, mockFindHook, this.threadLocal);
 		eventHook.event(this.bundleEvent, this.contexts);
 		assertEquals(1, this.contexts.size());
 	}
@@ -111,7 +111,7 @@ public class RegionBundleEventHookTests {
 				bundles.clear();
 			}
 		};
-		EventHook eventHook = new RegionBundleEventHook(this.mockRegionDigraph, mockFindHook, this.threadLocal);
+		EventHook eventHook = RegionReflectionUtils.newRegionBundleEventHook(this.mockRegionDigraph, mockFindHook, this.threadLocal);
 		eventHook.event(this.bundleEvent, this.contexts);
 		assertTrue(this.contexts.isEmpty());
 	}
@@ -127,12 +127,12 @@ public class RegionBundleEventHookTests {
 		};
 
 		this.digraph.setDefaultRegion(null);
-		EventHook eventHook = new RegionBundleEventHook(this.digraph, mockFindHook, this.threadLocal);
+		EventHook eventHook = RegionReflectionUtils.newRegionBundleEventHook(this.digraph, mockFindHook, this.threadLocal);
 		eventHook.event(this.installedEvent1, this.contexts);
 		assertTrue(this.digraph.getRegion(this.eventBundle1).equals(this.mockRegion1));
 
 		this.digraph.setDefaultRegion(this.mockRegion2);
-		eventHook = new RegionBundleEventHook(this.digraph, mockFindHook, this.threadLocal);
+		eventHook = RegionReflectionUtils.newRegionBundleEventHook(this.digraph, mockFindHook, this.threadLocal);
 		eventHook.event(this.installedEvent2, this.contexts);
 		assertTrue(this.digraph.getRegion(this.eventBundle2).equals(this.mockRegion2));
 

@@ -25,7 +25,7 @@ import org.osgi.framework.*;
  * <strong>Concurrent Semantics</strong><br />
  * Thread safe.
  */
-final class StandardRegionDigraphPersistence implements RegionDigraphPersistence {
+public final class StandardRegionDigraphPersistence implements RegionDigraphPersistence {
 
 	private static final String PERSISTENT_NAME = "equinox region digraph"; //$NON-NLS-1$
 

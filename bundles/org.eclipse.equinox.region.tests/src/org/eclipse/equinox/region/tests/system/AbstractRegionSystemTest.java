@@ -17,8 +17,6 @@ import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.tests.BundleInstaller;
 import org.osgi.framework.*;
-import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.framework.wiring.BundleWiring;
 
 /*
  * Here are the dependencies between the bundles:
@@ -52,38 +50,25 @@ public class AbstractRegionSystemTest extends TestCase {
 	public static final String SINGLETON2 = "Singleton2";
 
 	protected BundleInstaller bundleInstaller;
-	protected Bundle regionBundle;
 	protected RegionDigraph digraph;
+	protected Bundle testsBundle;
 	ServiceReference<RegionDigraph> digraphReference;
 
 	@Override
 	protected void setUp() throws Exception {
-		// this is a fragment of the region impl bundle
-		// this line makes sure the region impl bundle is started
-		regionBundle = FrameworkUtil.getBundle(this.getClass());
-
-		startRegionBundle();
-
-		// fun code to get our fragment bundle
-		Bundle testBundle = regionBundle.adapt(BundleWiring.class).getProvidedWires(BundleRevision.HOST_NAMESPACE).get(0).getRequirerWiring().getBundle();
-		bundleInstaller = new BundleInstaller("bundle_tests", regionBundle, testBundle); //$NON-NLS-1$
-	}
-
-	protected void startRegionBundle() throws BundleException {
-		regionBundle.start();
-		BundleContext context = regionBundle.getBundleContext();
-		assertNotNull("No context found", context);
+		testsBundle = FrameworkUtil.getBundle(this.getClass());;
+		BundleContext context = getContext();
 
 		digraphReference = context.getServiceReference(RegionDigraph.class);
 		assertNotNull("No digraph found", digraphReference);
 		digraph = context.getService(digraphReference);
 		assertNotNull("No digraph found");
+
+		bundleInstaller = new BundleInstaller("bundle_tests", testsBundle); //$NON-NLS-1$
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		if ((regionBundle.getState() & Bundle.ACTIVE) == 0)
-			startRegionBundle();
 		for (Region region : digraph) {
 			if (!region.contains(0)) {
 				digraph.removeRegion(region);
@@ -91,11 +76,11 @@ public class AbstractRegionSystemTest extends TestCase {
 		}
 		bundleInstaller.shutdown();
 		if (digraphReference != null)
-			regionBundle.getBundleContext().ungetService(digraphReference);
+			getContext().ungetService(digraphReference);
 	}
 
 	protected BundleContext getContext() {
-		BundleContext context = regionBundle.getBundleContext();
+		BundleContext context = testsBundle.getBundleContext();
 		assertNotNull("No context available", context);
 		return context;
 	}

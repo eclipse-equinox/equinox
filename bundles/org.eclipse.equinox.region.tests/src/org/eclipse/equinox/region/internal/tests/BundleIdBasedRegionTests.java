@@ -9,7 +9,7 @@
  *   VMware Inc. - initial contribution
  *******************************************************************************/
 
-package org.eclipse.equinox.internal.region;
+package org.eclipse.equinox.region.internal.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -58,7 +58,7 @@ public class BundleIdBasedRegionTests {
 
 	private ThreadLocal<Region> threadLocal;
 
-	private BundleIdToRegionMapping bundleIdToRegionMapping;
+	private Object bundleIdToRegionMapping;
 
 	@Before
 	public void setUp() throws Exception {
@@ -96,7 +96,7 @@ public class BundleIdBasedRegionTests {
 		this.mockGraph = EasyMock.createMock(RegionDigraph.class);
 		this.mockGraph.connect(EasyMock.isA(Region.class), EasyMock.eq(this.mockRegionFilter), EasyMock.eq(this.mockRegion));
 		EasyMock.expectLastCall().anyTimes();
-		this.bundleIdToRegionMapping = new StandardBundleIdToRegionMapping();
+		this.bundleIdToRegionMapping = RegionReflectionUtils.newStandardBundleIdToRegionMapping();
 	}
 
 	private void replayMocks() {
@@ -116,12 +116,12 @@ public class BundleIdBasedRegionTests {
 		assertEquals(REGION_NAME, r.getName());
 	}
 
-	private BundleIdBasedRegion createDefaultBundleIdBasedRegion() {
+	private Region createDefaultBundleIdBasedRegion() {
 		return createBundleIdBasedRegion(REGION_NAME);
 	}
 
-	private BundleIdBasedRegion createBundleIdBasedRegion(String regionName) {
-		return new BundleIdBasedRegion(regionName, this.mockGraph, this.bundleIdToRegionMapping, this.mockBundleContext, this.threadLocal);
+	private Region createBundleIdBasedRegion(String regionName) {
+		return RegionReflectionUtils.newBundleIdBasedRegion(regionName, this.mockGraph, this.bundleIdToRegionMapping, this.mockBundleContext, this.threadLocal);
 	}
 
 	private void defaultSetUp() {
@@ -220,7 +220,7 @@ public class BundleIdBasedRegionTests {
 		EasyMock.expect(this.mockGraph.getEdges(EasyMock.isA(Region.class))).andReturn(new HashSet<FilteredRegion>()).anyTimes();
 		EasyMock.expect(this.mockRegion.contains(EasyMock.eq(BUNDLE_ID))).andReturn(true).anyTimes();
 		EasyMock.expect(this.mockRegion2.contains(EasyMock.eq(BUNDLE_ID))).andReturn(false).anyTimes();
-		this.bundleIdToRegionMapping.associateBundleWithRegion(BUNDLE_ID, mockRegion);
+		RegionReflectionUtils.associateBundleWithRegion(this.bundleIdToRegionMapping, BUNDLE_ID, mockRegion);
 
 		replayMocks();
 

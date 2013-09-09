@@ -11,8 +11,8 @@
 package org.eclipse.equinox.region.tests;
 
 import junit.framework.*;
-import org.eclipse.equinox.internal.region.*;
-import org.eclipse.equinox.internal.region.hook.*;
+import org.eclipse.equinox.region.internal.tests.*;
+import org.eclipse.equinox.region.internal.tests.hook.*;
 import org.eclipse.equinox.region.tests.system.Bug346127Test;
 import org.eclipse.equinox.region.tests.system.RegionSystemTests;
 

@@ -9,15 +9,15 @@
  *   VMware Inc. - initial contribution
  *******************************************************************************/
 
-package org.eclipse.equinox.internal.region.hook;
+package org.eclipse.equinox.region.internal.tests.hook;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.*;
-import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.region.*;
+import org.eclipse.equinox.region.internal.tests.RegionReflectionUtils;
 import org.eclipse.virgo.teststubs.osgi.framework.StubBundle;
 import org.eclipse.virgo.teststubs.osgi.framework.StubBundleContext;
 import org.junit.*;
@@ -63,7 +63,7 @@ public class RegionResolverHookTests {
 
 	private static final String BUNDLE_D = "BundleD";
 
-	private StandardRegionDigraph digraph;
+	private RegionDigraph digraph;
 
 	private ResolverHook resolverHook;
 
@@ -84,8 +84,8 @@ public class RegionResolverHookTests {
 		StubBundle stubSystemBundle = new StubBundle(0L, "osgi.framework", new Version("0"), "loc");
 		StubBundleContext stubBundleContext = new StubBundleContext();
 		stubBundleContext.addInstalledBundle(stubSystemBundle);
-		this.digraph = new StandardRegionDigraph(stubBundleContext, this.threadLocal);
-		this.resolverHook = new RegionResolverHook(this.digraph);
+		this.digraph = RegionReflectionUtils.newStandardRegionDigraph(stubBundleContext, this.threadLocal);
+		this.resolverHook = RegionReflectionUtils.newRegionResolverHook(this.digraph);
 		this.candidates = new HashSet<BundleCapability>();
 
 		// Create regions A, B, C, D containing bundles A, B, C, D, respectively.

@@ -9,15 +9,15 @@
  *   VMware Inc. - initial contribution
  *******************************************************************************/
 
-package org.eclipse.equinox.internal.region.hook;
+package org.eclipse.equinox.region.internal.tests.hook;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.*;
-import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.region.*;
+import org.eclipse.equinox.region.internal.tests.RegionReflectionUtils;
 import org.eclipse.virgo.teststubs.osgi.framework.StubBundle;
 import org.eclipse.virgo.teststubs.osgi.framework.StubBundleContext;
 import org.junit.*;
@@ -48,7 +48,7 @@ public class RegionBundleCollisionHookTests {
 
 	private static final String BUNDLE_D = "BundleD";
 
-	private StandardRegionDigraph digraph;
+	private RegionDigraph digraph;
 
 	private CollisionHook collisionFindHook;
 
@@ -70,8 +70,8 @@ public class RegionBundleCollisionHookTests {
 		StubBundleContext stubBundleContext = new StubBundleContext();
 		stubBundleContext.addInstalledBundle(stubSystemBundle);
 		this.threadLocal = new ThreadLocal<Region>();
-		this.digraph = new StandardRegionDigraph(stubBundleContext, this.threadLocal);
-		this.collisionFindHook = new RegionBundleCollisionHook(this.digraph, this.threadLocal);
+		this.digraph = RegionReflectionUtils.newStandardRegionDigraph(stubBundleContext, this.threadLocal);
+		this.collisionFindHook = RegionReflectionUtils.newRegionBundleCollisionHook(this.digraph, this.threadLocal);
 		this.candidates = new HashSet<Bundle>();
 
 		// Create regions A, B, C, D containing bundles A, B, C, D, respectively.

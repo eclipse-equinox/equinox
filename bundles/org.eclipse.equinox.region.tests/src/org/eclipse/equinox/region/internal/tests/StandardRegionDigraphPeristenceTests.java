@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2012 VMware Inc.
+ * Copyright (c) 2011, 2013 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,7 @@
  *    SpringSource, a division of VMware - initial API and implementation and/or initial documentation
  *******************************************************************************/
 
-package org.eclipse.equinox.internal.region;
+package org.eclipse.equinox.region.internal.tests;
 
 import java.io.*;
 import java.util.*;
@@ -23,6 +23,8 @@ import org.osgi.framework.*;
 public class StandardRegionDigraphPeristenceTests {
 
 	private RegionDigraph digraph;
+
+	private RegionDigraphPersistence persistence;
 
 	private StubBundleContext systemBundleContext;
 
@@ -38,7 +40,8 @@ public class StandardRegionDigraphPeristenceTests {
 		systemBundleContext = (StubBundleContext) stubSystemBundle.getBundleContext();
 		systemBundleContext.addInstalledBundle(stubSystemBundle);
 		threadLocal = new ThreadLocal<Region>();
-		this.digraph = new StandardRegionDigraph(systemBundleContext, threadLocal);
+		this.digraph = RegionReflectionUtils.newStandardRegionDigraph(systemBundleContext, threadLocal);
+		this.persistence = digraph.getRegionDigraphPersistence();
 		Region boot = digraph.createRegion(BOOT_REGION);
 		boot.addBundle(stubSystemBundle);
 
@@ -141,7 +144,7 @@ public class StandardRegionDigraphPeristenceTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testInvalidPersistentName() throws IOException, InvalidSyntaxException, BundleException {
+	public void testInvalidPersistentName() throws IOException {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		DataOutputStream dataOut = new DataOutputStream(output);
 		dataOut.writeUTF("test");
@@ -151,7 +154,7 @@ public class StandardRegionDigraphPeristenceTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testInvalidPersistentVersion() throws IOException, InvalidSyntaxException, BundleException {
+	public void testInvalidPersistentVersion() throws IOException {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		DataOutputStream dataOut = new DataOutputStream(output);
 		dataOut.writeUTF("virgo region digraph");
@@ -161,13 +164,12 @@ public class StandardRegionDigraphPeristenceTests {
 		readDigraph(byteArray);
 	}
 
-	private void readDigraph(byte[] byteArray) throws IOException, InvalidSyntaxException, BundleException {
+	private void readDigraph(byte[] byteArray) throws IOException {
 		ByteArrayInputStream input = new ByteArrayInputStream(byteArray);
-		DataInputStream dataIn = new DataInputStream(input);
 		try {
-			StandardRegionDigraphPersistence.readRegionDigraph(dataIn, null, null);
+			persistence.load(input);
 		} finally {
-			dataIn.close();
+			input.close();
 		}
 	}
 
@@ -178,32 +180,30 @@ public class StandardRegionDigraphPeristenceTests {
 		doTest(10);
 	}
 
-	private RegionDigraph copy(RegionDigraph toCopy) throws IOException, InvalidSyntaxException, BundleException {
+	private RegionDigraph copy(RegionDigraph toCopy) throws IOException {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		DataOutputStream dataOut = new DataOutputStream(output);
-		StandardRegionDigraphPersistence.writeRegionDigraph(new DataOutputStream(output), digraph);
-		dataOut.close();
+		persistence.save(digraph, output);
+		output.close();
 
-		DataInputStream dataIn = new DataInputStream(new ByteArrayInputStream(output.toByteArray()));
-		RegionDigraph copy = StandardRegionDigraphPersistence.readRegionDigraph(dataIn, null, null);
-		dataIn.close();
+		InputStream input = new ByteArrayInputStream(output.toByteArray());
+		RegionDigraph copy = persistence.load(input);
+		input.close();
 		return copy;
 	}
 
-	private void doTest(int iterations) throws IOException, InvalidSyntaxException, BundleException {
+	private void doTest(int iterations) throws IOException {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		DataOutputStream dataOut = new DataOutputStream(output);
 		for (int i = 0; i < iterations; i++) {
-			StandardRegionDigraphPersistence.writeRegionDigraph(new DataOutputStream(output), digraph);
+			persistence.save(digraph, output);
 		}
-		dataOut.close();
+		output.close();
 
-		DataInputStream dataIn = new DataInputStream(new ByteArrayInputStream(output.toByteArray()));
+		InputStream input = new ByteArrayInputStream(output.toByteArray());
 		for (int i = 0; i < iterations; i++) {
-			RegionDigraph copy = StandardRegionDigraphPersistence.readRegionDigraph(dataIn, null, null);
+			RegionDigraph copy = persistence.load(input);
 			assertEquals(digraph, copy);
 		}
-		dataIn.close();
+		input.close();
 	}
 
 	private RegionFilter createFilter(String... input) throws InvalidSyntaxException {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,19 +11,12 @@
 
 package org.eclipse.equinox.internal.region;
 
+import java.util.*;
 import org.eclipse.equinox.region.RegionFilter;
 import org.eclipse.equinox.region.RegionFilterBuilder;
+import org.osgi.framework.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.osgi.framework.Filter;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
-
-final class StandardRegionFilterBuilder implements RegionFilterBuilder {
+public final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 
 	private final static String ALL_SPEC = "(|(!(all=*))(all=*))"; //$NON-NLS-1$
 

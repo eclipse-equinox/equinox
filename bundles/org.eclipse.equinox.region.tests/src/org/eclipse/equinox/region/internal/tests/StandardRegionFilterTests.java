@@ -9,7 +9,7 @@
  *    SpringSource, a division of VMware - initial API and implementation and/or initial documentation
  *******************************************************************************/
 
-package org.eclipse.equinox.internal.region;
+package org.eclipse.equinox.region.internal.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -18,6 +18,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.*;
 import org.easymock.EasyMock;
 import org.eclipse.equinox.region.RegionFilter;
+import org.eclipse.equinox.region.RegionFilterBuilder;
 import org.eclipse.virgo.teststubs.osgi.framework.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -68,11 +69,11 @@ public class StandardRegionFilterTests {
 
 	private RegionFilter createBundleFilter(String bundleSymbolicName, Version bundleVersion) throws InvalidSyntaxException {
 		String filter = "(&(" + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + "=" + bundleSymbolicName + ")(" + Constants.BUNDLE_VERSION_ATTRIBUTE + ">=" + bundleVersion + "))";
-		return new StandardRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, filter).build();
+		return RegionReflectionUtils.newStandardRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, filter).build();
 	}
 
 	private RegionFilter createRegionFilter(String namespace, Collection<String> filters) throws InvalidSyntaxException {
-		StandardRegionFilterBuilder builder = new StandardRegionFilterBuilder();
+		RegionFilterBuilder builder = RegionReflectionUtils.newStandardRegionFilterBuilder();
 		for (String filter : filters) {
 			builder.allow(namespace, filter);
 		}
@@ -87,13 +88,13 @@ public class StandardRegionFilterTests {
 
 	@Test
 	public void testBundleAllNotAllowed() {
-		RegionFilter regionFilter = new StandardRegionFilterBuilder().build();
+		RegionFilter regionFilter = RegionReflectionUtils.newStandardRegionFilterBuilder().build();
 		assertFalse(regionFilter.isAllowed(stubBundle));
 	}
 
 	@Test
 	public void testBundleAllAllowed() {
-		RegionFilter regionFilter = new StandardRegionFilterBuilder().allowAll(RegionFilter.VISIBLE_BUNDLE_NAMESPACE).build();
+		RegionFilter regionFilter = RegionReflectionUtils.newStandardRegionFilterBuilder().allowAll(RegionFilter.VISIBLE_BUNDLE_NAMESPACE).build();
 		assertTrue(regionFilter.isAllowed(stubBundle));
 	}
 
@@ -112,13 +113,13 @@ public class StandardRegionFilterTests {
 
 	@Test
 	public void testCapabilityAllNotAllowed() {
-		RegionFilter regionFilter = new StandardRegionFilterBuilder().build();
+		RegionFilter regionFilter = RegionReflectionUtils.newStandardRegionFilterBuilder().build();
 		assertFalse(regionFilter.isAllowed(barPackage));
 	}
 
 	@Test
 	public void testCapabilityAllAllowed() {
-		RegionFilter regionFilter = new StandardRegionFilterBuilder().allowAll(RegionFilter.VISIBLE_PACKAGE_NAMESPACE).build();
+		RegionFilter regionFilter = RegionReflectionUtils.newStandardRegionFilterBuilder().allowAll(RegionFilter.VISIBLE_PACKAGE_NAMESPACE).build();
 		assertTrue(regionFilter.isAllowed(barPackage));
 	}
 
@@ -138,13 +139,13 @@ public class StandardRegionFilterTests {
 
 	@Test
 	public void testServiceAllNotAllowed() {
-		RegionFilter regionFilter = new StandardRegionFilterBuilder().build();
+		RegionFilter regionFilter = RegionReflectionUtils.newStandardRegionFilterBuilder().build();
 		assertFalse(regionFilter.isAllowed(fooService.getReference()));
 	}
 
 	@Test
 	public void testServiceAllAllowed() {
-		RegionFilter regionFilter = new StandardRegionFilterBuilder().allowAll(RegionFilter.VISIBLE_SERVICE_NAMESPACE).build();
+		RegionFilter regionFilter = RegionReflectionUtils.newStandardRegionFilterBuilder().allowAll(RegionFilter.VISIBLE_SERVICE_NAMESPACE).build();
 		assertTrue(regionFilter.isAllowed(fooService.getReference()));
 	}
 
@@ -157,14 +158,14 @@ public class StandardRegionFilterTests {
 
 	@Test
 	public void testAllNamespace() throws InvalidSyntaxException {
-		RegionFilter regionFilterNotAllowed = new StandardRegionFilterBuilder().allow(RegionFilter.VISIBLE_ALL_NAMESPACE, "(all=namespace)").build();
+		RegionFilter regionFilterNotAllowed = RegionReflectionUtils.newStandardRegionFilterBuilder().allow(RegionFilter.VISIBLE_ALL_NAMESPACE, "(all=namespace)").build();
 		assertFalse(regionFilterNotAllowed.isAllowed(stubBundle));
 		assertFalse(regionFilterNotAllowed.isAllowed(fooPackage));
 		assertFalse(regionFilterNotAllowed.isAllowed(barPackage));
 		assertFalse(regionFilterNotAllowed.isAllowed(fooService.getReference()));
 		assertFalse(regionFilterNotAllowed.isAllowed(barService.getReference()));
 
-		RegionFilter regionFilterAllAllowed = new StandardRegionFilterBuilder().allowAll(RegionFilter.VISIBLE_ALL_NAMESPACE).build();
+		RegionFilter regionFilterAllAllowed = RegionReflectionUtils.newStandardRegionFilterBuilder().allowAll(RegionFilter.VISIBLE_ALL_NAMESPACE).build();
 		assertTrue(regionFilterAllAllowed.isAllowed(stubBundle));
 		assertTrue(regionFilterAllAllowed.isAllowed(fooPackage));
 		assertTrue(regionFilterAllAllowed.isAllowed(barPackage));

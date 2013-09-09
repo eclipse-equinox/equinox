@@ -9,7 +9,7 @@
  *    SpringSource, a division of VMware - initial API and implementation and/or initial documentation
  *******************************************************************************/
 
-package org.eclipse.equinox.internal.region.hook;
+package org.eclipse.equinox.region.internal.tests.hook;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -17,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.HashSet;
 import org.easymock.EasyMock;
+import org.eclipse.equinox.region.internal.tests.RegionReflectionUtils;
 import org.eclipse.virgo.teststubs.osgi.framework.*;
 import org.junit.*;
 import org.osgi.framework.*;
@@ -59,7 +60,7 @@ public class RegionServiceEventHookTests {
 				// nothing
 			}
 		};
-		EventHook eventHook = new RegionServiceEventHook(this.mockFindHook);
+		EventHook eventHook = RegionReflectionUtils.newRegionServiceEventHook(this.mockFindHook);
 		eventHook.event(this.serviceEvent, this.contexts);
 		assertEquals(1, this.contexts.size());
 	}
@@ -73,7 +74,7 @@ public class RegionServiceEventHookTests {
 				references.clear();
 			}
 		};
-		EventHook eventHook = new RegionServiceEventHook(this.mockFindHook);
+		EventHook eventHook = RegionReflectionUtils.newRegionServiceEventHook(this.mockFindHook);
 		eventHook.event(this.serviceEvent, this.contexts);
 		assertTrue(this.contexts.isEmpty());
 	}

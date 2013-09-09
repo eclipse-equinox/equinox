@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 VMware Inc.
+ * Copyright (c) 2011, 2013 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,7 +67,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 
 	private volatile Region defaultRegion;
 
-	StandardRegionDigraph(StandardRegionDigraph origin) throws BundleException {
+	public StandardRegionDigraph(StandardRegionDigraph origin) throws BundleException {
 		this(null, null, origin);
 
 	}

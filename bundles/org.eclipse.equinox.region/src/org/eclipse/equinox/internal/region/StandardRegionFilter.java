@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2012 VMware Inc and others.
+ * Copyright (c) 2011, 2013 VMware Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,11 +18,11 @@ import org.osgi.framework.*;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
 
-final class StandardRegionFilter implements RegionFilter {
+public final class StandardRegionFilter implements RegionFilter {
 	private static final String BUNDLE_ID_ATTR = "id"; //$NON-NLS-1$
 	private final Map<String, Collection<Filter>> filters;
 
-	StandardRegionFilter(Map<String, Collection<Filter>> filters) {
+	public StandardRegionFilter(Map<String, Collection<Filter>> filters) {
 		if (filters == null) {
 			throw new IllegalArgumentException("filters must not be null."); //$NON-NLS-1$
 		}

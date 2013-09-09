@@ -29,7 +29,7 @@ import org.osgi.framework.*;
  * <strong>Concurrent Semantics</strong><br />
  * Thread safe.
  */
-final class BundleIdBasedRegion implements Region {
+public final class BundleIdBasedRegion implements Region {
 	private static final Pattern invalidName = Pattern.compile("[:=\\n*?,\"\\\\]"); //$NON-NLS-1$
 	private static final String REGION_LOCATION_DELIMITER = "#"; //$NON-NLS-1$
 
@@ -45,7 +45,7 @@ final class BundleIdBasedRegion implements Region {
 
 	private final ThreadLocal<Region> threadLocal;
 
-	BundleIdBasedRegion(String regionName, RegionDigraph regionDigraph, BundleIdToRegionMapping bundleIdToRegionMapping, BundleContext bundleContext, ThreadLocal<Region> threadLocal) {
+	public BundleIdBasedRegion(String regionName, RegionDigraph regionDigraph, BundleIdToRegionMapping bundleIdToRegionMapping, BundleContext bundleContext, ThreadLocal<Region> threadLocal) {
 		BundleIdBasedRegion.validateName(regionName);
 		if (regionDigraph == null)
 			throw new IllegalArgumentException("The region digraph must not be null"); //$NON-NLS-1$
