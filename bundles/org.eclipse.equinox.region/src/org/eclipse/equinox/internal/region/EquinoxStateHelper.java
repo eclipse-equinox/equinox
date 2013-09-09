@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,8 +11,7 @@
 package org.eclipse.equinox.internal.region;
 
 import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.PlatformAdmin;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleRevision;
 
 /**
@@ -39,35 +38,20 @@ public class EquinoxStateHelper {
 			}
 			return null;
 		}
-
-		public long getStateTimeStamp(BundleContext context) {
-			ServiceReference<PlatformAdmin> ref = context.getServiceReference(PlatformAdmin.class);
-			if (ref == null)
-				return -1;
-			PlatformAdmin pa = context.getService(ref);
-			if (pa == null)
-				return -1;
-			try {
-				return pa.getState(false).getTimeStamp();
-			} finally {
-				context.ungetService(ref);
-			}
-		}
 	}
 
 	public static final long getBundleId(BundleRevision revision) {
-		// For testability, use the bundle revision's bundle before casting to ResolverBundle.
+		// For testability, use the bundle revision's bundle before casting to BundleDescription.
 		Bundle bundle = revision.getBundle();
 		if (bundle != null) {
 			return bundle.getBundleId();
 		}
+		// Note that this bit of code is never useful at runtime since the framework never uses BundleDescriptions.
+		// It is only useful if the region hooks are used with the old Equinox State API
 		Long result = equinoxSupport == null ? null : equinoxSupport.getBundleId(revision);
 		if (result == null)
 			throw new RuntimeException(String.format("Cannot determine bundle id of BundleRevision '%s'", revision)); //$NON-NLS-1$
 		return result;
 	}
 
-	public static final long getStateTimeStamp(BundleContext context) {
-		return equinoxSupport == null ? -1 : equinoxSupport.getStateTimeStamp(context);
-	}
 }
