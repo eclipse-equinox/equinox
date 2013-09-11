@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<md:MetaData 
+		xmlns:md="http://www.org.osgi/xmlns/metatype/v1.0.0/md" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		xsi:schemaLocation="http://www.org.osgi/xmlns/metatype/v1.0.0/md metatype.xsd">
+	<OCD id="getMinMax" name="getMinMax">
+		<AD id="getMax" type="Integer" max="0"/>
+		<AD id="getMaxNull" type="Integer" min="0"/>
+		<AD id="getMin" type="Integer" min="5"/>
+		<AD id="getMinNull" type="Integer" max="25"/>
+		<AD id="getMaxAsNotANumber" type="String" max="1.0.0"/>
+		<AD id="getMinAsNotANumber" type="String" min="foo"/>
+		<AD id="minMaxValidUsingInt" type="Password" min="8" max="16"/>
+		<AD id="minMaxValidUsingString" type="String" min="1" max="1.2"/>
+	</OCD>
+	<Designate pid="org.eclipse.equinox.metatype.tests.getMinMax.tb1">
+		<Object ocdref="getMinMax"/>
+	</Designate>
+</md:MetaData>
