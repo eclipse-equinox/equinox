@@ -80,11 +80,13 @@ class OSGiFrameworkHooks {
 		}
 
 		private void notifyCollisionHooks(final int operationType, final Bundle target, Collection<Bundle> collisionCandidates) {
-			if (operationType == CollisionHook.INSTALLING && target.getBundleId() == 0) {
-				// Make a copy of the collisions only for calling the hooks;
-				// Any removals from hooks are ignored in this case
-				collisionCandidates = new ArrayList<Bundle>(collisionCandidates);
-			}
+			// TODO open question in the specification for ignoring collision hooks for the system bundle
+			// For now we will NOT ignore them
+			//if (operationType == CollisionHook.INSTALLING && target.getBundleId() == 0) {
+			// Make a copy of the collisions only for calling the hooks;
+			// Any removals from hooks are ignored in this case
+			//	collisionCandidates = new ArrayList<Bundle>(collisionCandidates);
+			//}
 			final Collection<Bundle> shrinkable = new ShrinkableCollection<Bundle>(collisionCandidates);
 			if (System.getSecurityManager() == null) {
 				notifyCollisionHooksPriviledged(operationType, target, shrinkable);
