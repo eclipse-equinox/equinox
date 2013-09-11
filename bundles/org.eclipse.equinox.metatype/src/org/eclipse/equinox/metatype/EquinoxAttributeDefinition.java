@@ -23,5 +23,21 @@ import org.osgi.service.metatype.AttributeDefinition;
  *
  */
 public interface EquinoxAttributeDefinition extends AttributeDefinition, Extendable {
-	// Empty interface to support extendable attribute definitions.
+	/**
+	 * Get the maximum value this attribute may hold as specified by the 
+	 * optional "max" XML attribute of the &lt;AD&gt; element.
+	 * 
+	 * @return The maximum value this attribute may hold, or <code>null</code>
+	 *         if unspecified.
+	 */
+	public String getMax();
+
+	/**
+	 * Get the minimum value this attribute may hold as specified by the 
+	 * optional "min" XML attribute of the &lt;AD&gt; element.
+	 * 
+	 * @return The minimum value this attribute may hold, or <code>null</code>
+	 *         if unspecified.
+	 */
+	public String getMin();
 }

@@ -123,8 +123,7 @@ public class DataParser {
 		// PASSWORD should be treated like STRING.
 			case AttributeDefinition.PASSWORD :
 			case AttributeDefinition.STRING :
-				// Both the min and max of STRING are Integers.
-				return new Integer(value);
+				return value;
 			case AttributeDefinition.LONG :
 				return new Long(value);
 			case AttributeDefinition.INTEGER :

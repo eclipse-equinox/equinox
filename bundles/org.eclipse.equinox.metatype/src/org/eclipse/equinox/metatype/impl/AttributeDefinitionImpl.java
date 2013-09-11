@@ -313,4 +313,12 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	public Set<String> getExtensionUris() {
 		return helper.getExtensionUris();
 	}
+
+	public String getMax() {
+		return _maxValue == null ? null : String.valueOf(_maxValue);
+	}
+
+	public String getMin() {
+		return _minValue == null ? null : String.valueOf(_minValue);
+	}
 }

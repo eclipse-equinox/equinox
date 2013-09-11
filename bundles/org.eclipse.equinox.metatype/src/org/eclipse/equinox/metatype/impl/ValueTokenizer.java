@@ -142,6 +142,25 @@ public class ValueTokenizer {
 		return buffer.toString();
 	}
 
+	private boolean validateString(AttributeDefinitionImpl ad, String value) {
+		// Try validating the string length.
+		try {
+			// All or nothing. If either min or max is not null and cannot be
+			// parsed as an integer, do the string comparison instead.
+			Integer min = ad._minValue == null ? null : Integer.valueOf((String) ad._minValue);
+			Integer max = ad._maxValue == null ? null : Integer.valueOf((String) ad._maxValue);
+			if (min != null && value.length() < min)
+				return true;
+			if (max != null && value.length() > max)
+				return true;
+		} catch (NumberFormatException e) {
+			// Either min or max was not an integer. Do a string comparison.
+			if ((ad._minValue != null && value.compareTo((String) ad._minValue) < 0) || (ad._maxValue != null && value.compareTo((String) ad._maxValue) > 0))
+				return true;
+		}
+		return false;
+	}
+
 	public String validate(AttributeDefinitionImpl ad) {
 		// An empty list means the original value was null. Null is never valid.
 		if (values.isEmpty()) {
@@ -173,11 +192,7 @@ public class ValueTokenizer {
 				switch (ad._dataType) {
 					case AttributeDefinition.PASSWORD :
 					case AttributeDefinition.STRING :
-						if (ad._minValue != null && s.length() < (Integer) ad._minValue) {
-							rangeError = true;
-						} else if (ad._maxValue != null && s.length() > (Integer) ad._maxValue) {
-							rangeError = true;
-						}
+						rangeError = validateString(ad, s);
 						break;
 					case AttributeDefinition.INTEGER :
 						Integer intVal = new Integer(s);

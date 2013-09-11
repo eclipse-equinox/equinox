@@ -10,11 +10,10 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.impl;
 
-import org.eclipse.equinox.metatype.*;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import org.eclipse.equinox.metatype.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.cm.ManagedService;
@@ -272,6 +271,14 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 							@SuppressWarnings("unchecked")
 							public Set<String> getExtensionUris() {
 								return Collections.EMPTY_SET;
+							}
+
+							public String getMax() {
+								return null;
+							}
+
+							public String getMin() {
+								return null;
 							}
 						});
 					}
