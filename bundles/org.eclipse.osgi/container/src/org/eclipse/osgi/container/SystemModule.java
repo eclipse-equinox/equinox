@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import org.eclipse.osgi.internal.messages.Msg;
-
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.osgi.container.ModuleContainer.ContainerStartLevel;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
+import org.eclipse.osgi.internal.messages.Msg;
 import org.osgi.framework.*;
 import org.osgi.service.resolver.ResolutionException;
 
@@ -61,7 +60,7 @@ public abstract class SystemModule extends Module {
 				if (ACTIVE_SET.contains(getState()))
 					return;
 				if (getState().equals(State.INSTALLED)) {
-					String reportMessage = ModuleResolutionReport.getResolutionReport("", getCurrentRevision(), report.getEntries()); //$NON-NLS-1$
+					String reportMessage = report.getResolutionReportMessage(getCurrentRevision());
 					throw new BundleException(Msg.Module_ResolveError + reportMessage, BundleException.RESOLVE_ERROR);
 				}
 			}

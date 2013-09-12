@@ -13,7 +13,6 @@ package org.eclipse.osgi.container;
 import java.util.*;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.*;
 import org.osgi.service.resolver.ResolutionException;
@@ -84,19 +83,7 @@ public class ModuleResolutionReport implements ResolutionReport {
 		return resolutionResult;
 	}
 
-	/**
-	 * Returns a message giving an explanation of a resolution report for the specific bundle revision.
-	 * @param prepend a string to prepend each line in the message.  This is useful if you need to indent the message.
-	 * A value of <code>null</code> is treated as empty string.
-	 * @param revision The bundle revision to get a report for
-	 * @param reportEntries The report entries from a resolution report
-	 * @return The explanation of the resolution report for the specified revision.
-	 */
-	public static String getResolutionReport(String prepend, BundleRevision revision, Map<Resource, List<ResolutionReport.Entry>> reportEntries) {
-		return getResolutionReport0(prepend, revision, reportEntries, null);
-	}
-
-	private static String getResolutionReport0(String prepend, BundleRevision revision, Map<Resource, List<ResolutionReport.Entry>> reportEntries, Set<BundleRevision> visited) {
+	private static String getResolutionReport0(String prepend, ModuleRevision revision, Map<Resource, List<ResolutionReport.Entry>> reportEntries, Set<BundleRevision> visited) {
 		if (prepend == null) {
 			prepend = ""; //$NON-NLS-1$
 		}
@@ -108,15 +95,7 @@ public class ModuleResolutionReport implements ResolutionReport {
 		}
 		visited.add(revision);
 		StringBuilder result = new StringBuilder();
-		String id = null;
-		if (revision instanceof ModuleRevision) {
-			id = ((ModuleRevision) revision).getRevisions().getModule().getId().toString();
-		} else {
-			Bundle b = revision.getBundle();
-			if (b != null) {
-				id = Long.toString(b.getBundleId());
-			}
-		}
+		String id = revision.getRevisions().getModule().getId().toString();
 		result.append(prepend).append(revision.getSymbolicName()).append(" [").append(id).append("]").append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
 
 		List<ResolutionReport.Entry> revisionEntries = reportEntries.get(revision);
@@ -166,5 +145,10 @@ public class ModuleResolutionReport implements ResolutionReport {
 				result.append(Msg.ModuleResolutionReport_Unknown).append("type=").append(entry.getType()).append(" data=").append(entry.getData()).append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
 				break;
 		}
+	}
+
+	@Override
+	public String getResolutionReportMessage(Resource resource) {
+		return getResolutionReport0(null, (ModuleRevision) resource, getEntries(), null);
 	}
 }

@@ -172,4 +172,14 @@ public interface ResolutionReport {
 	 * no resolution exception.
 	 */
 	ResolutionException getResoltuionException();
+
+	/**
+	 * Returns a resolution report message for the given resource.
+	 * The resource must be included as an {@link #getEntries entry} for this resolution report.
+	 * This is a convenience method intended to help display messaged for resolution
+	 * errors.
+	 * @param resource the resource to get the resolution report message for.
+	 * @return a resolution report message.
+	 */
+	String getResolutionReportMessage(Resource resource);
 }
