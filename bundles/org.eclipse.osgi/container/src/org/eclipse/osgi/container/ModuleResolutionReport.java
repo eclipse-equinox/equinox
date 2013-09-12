@@ -13,6 +13,8 @@ package org.eclipse.osgi.container;
 import java.util.*;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.*;
 import org.osgi.service.resolver.ResolutionException;
 
@@ -82,16 +84,40 @@ public class ModuleResolutionReport implements ResolutionReport {
 		return resolutionResult;
 	}
 
-	public static String getResolutionReport(String prepend, ModuleRevision revision, Map<Resource, List<ResolutionReport.Entry>> reportEntries, Set<ModuleRevision> visited) {
+	/**
+	 * Returns a message giving an explanation of a resolution report for the specific bundle revision.
+	 * @param prepend a string to prepend each line in the message.  This is useful if you need to indent the message.
+	 * A value of <code>null</code> is treated as empty string.
+	 * @param revision The bundle revision to get a report for
+	 * @param reportEntries The report entries from a resolution report
+	 * @return The explanation of the resolution report for the specified revision.
+	 */
+	public static String getResolutionReport(String prepend, BundleRevision revision, Map<Resource, List<ResolutionReport.Entry>> reportEntries) {
+		return getResolutionReport0(prepend, revision, reportEntries, null);
+	}
+
+	private static String getResolutionReport0(String prepend, BundleRevision revision, Map<Resource, List<ResolutionReport.Entry>> reportEntries, Set<BundleRevision> visited) {
+		if (prepend == null) {
+			prepend = ""; //$NON-NLS-1$
+		}
 		if (visited == null) {
-			visited = new HashSet<ModuleRevision>();
+			visited = new HashSet<BundleRevision>();
 		}
 		if (visited.contains(revision)) {
 			return ""; //$NON-NLS-1$
 		}
 		visited.add(revision);
 		StringBuilder result = new StringBuilder();
-		result.append(prepend).append(revision.getSymbolicName()).append(" [").append(revision.getRevisions().getModule().getId()).append("]").append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
+		String id = null;
+		if (revision instanceof ModuleRevision) {
+			id = ((ModuleRevision) revision).getRevisions().getModule().getId().toString();
+		} else {
+			Bundle b = revision.getBundle();
+			if (b != null) {
+				id = Long.toString(b.getBundleId());
+			}
+		}
+		result.append(prepend).append(revision.getSymbolicName()).append(" [").append(id).append("]").append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
 
 		List<ResolutionReport.Entry> revisionEntries = reportEntries.get(revision);
 		if (revisionEntries == null) {
@@ -104,7 +130,7 @@ public class ModuleResolutionReport implements ResolutionReport {
 		return result.toString();
 	}
 
-	private static void printResolutionEntry(StringBuilder result, String prepend, ResolutionReport.Entry entry, Map<Resource, List<ResolutionReport.Entry>> reportEntries, Set<ModuleRevision> visited) {
+	private static void printResolutionEntry(StringBuilder result, String prepend, ResolutionReport.Entry entry, Map<Resource, List<ResolutionReport.Entry>> reportEntries, Set<BundleRevision> visited) {
 		switch (entry.getType()) {
 			case MISSING_CAPABILITY :
 				result.append(prepend).append(Msg.ModuleResolutionReport_UnresolvedReq).append(entry.getData()).append('\n');
@@ -124,7 +150,7 @@ public class ModuleResolutionReport implements ResolutionReport {
 						if (!unresolvedRequirement.getKey().getResource().equals(unresolvedCapability.getResource())) {
 							result.append(prepend).append(Msg.ModuleResolutionReport_UnresolvedReq).append(unresolvedRequirement.getKey()).append('\n');
 							result.append(prepend).append("  -> ").append(unresolvedCapability).append('\n'); //$NON-NLS-1$
-							result.append(getResolutionReport(prepend + "     ", (ModuleRevision) unresolvedCapability.getResource(), reportEntries, visited)); //$NON-NLS-1$
+							result.append(getResolutionReport0(prepend + "     ", (ModuleRevision) unresolvedCapability.getResource(), reportEntries, visited)); //$NON-NLS-1$
 						}
 					}
 				}

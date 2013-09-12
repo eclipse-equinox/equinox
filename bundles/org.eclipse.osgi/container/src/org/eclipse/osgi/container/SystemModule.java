@@ -61,7 +61,7 @@ public abstract class SystemModule extends Module {
 				if (ACTIVE_SET.contains(getState()))
 					return;
 				if (getState().equals(State.INSTALLED)) {
-					String reportMessage = ModuleResolutionReport.getResolutionReport("", getCurrentRevision(), report.getEntries(), null); //$NON-NLS-1$
+					String reportMessage = ModuleResolutionReport.getResolutionReport("", getCurrentRevision(), report.getEntries()); //$NON-NLS-1$
 					throw new BundleException(Msg.Module_ResolveError + reportMessage, BundleException.RESOLVE_ERROR);
 				}
 			}
