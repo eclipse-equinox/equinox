@@ -65,9 +65,6 @@ import org.osgi.framework.wiring.BundleRevisions;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.framework.wiring.FrameworkWiring;
-import org.osgi.resource.Capability;
-import org.osgi.resource.Requirement;
-import org.osgi.resource.Resource;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
@@ -1916,79 +1913,11 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			bundles = unresolved.toArray(new Bundle[unresolved.size()]);
 		}
 		ResolutionReport report = getResolutionReport(bundles);
-		Map<Resource, List<ResolutionReport.Entry>> reportEntries = report.getEntries();
-
 		for (Bundle bundle : bundles) {
 			BundleRevision revision = bundle.adapt(BundleRevision.class);
 			if (revision != null) {
-				printResolutionReport("", revision, reportEntries, null);
+				System.out.println(report.getResolutionReportMessage(revision));
 			}
-		}
-	}
-
-	private void printResolutionReport(String prepend, BundleRevision revision, Map<Resource, List<ResolutionReport.Entry>> reportEntries, Set<BundleRevision> visited) {
-		if (visited == null) {
-			visited = new HashSet<BundleRevision>();
-		}
-		if (visited.contains(revision)) {
-			return;
-		}
-		visited.add(revision);
-		Bundle bundle = revision.getBundle();
-		System.out.println(prepend + bundle.getLocation() + " [" + bundle.getBundleId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-
-		List<ResolutionReport.Entry> revisionEntries = reportEntries.get(revision);
-		if (revisionEntries == null) {
-			System.out.println(prepend + "  " + "No resolution report for the bundle.");
-		} else {
-			for (ResolutionReport.Entry entry : revisionEntries) {
-				printResolutionEntry(prepend + "  ", entry, reportEntries, visited);
-			}
-		}
-	}
-
-	private void printResolutionEntry(String prepend, ResolutionReport.Entry entry, Map<Resource, List<ResolutionReport.Entry>> reportEntries, Set<BundleRevision> visited) {
-		switch (entry.getType()) {
-		case MISSING_CAPABILITY:
-			System.out.print(prepend);
-			System.out.println("Unresolved requirement: " + entry.getData());
-			break;
-		case SINGLETON_SELECTION:
-			System.out.print(prepend);
-			System.out.println("Another singleton bundle selected: " + entry.getData());
-		    break;
-		case UNRESOLVED_PROVIDER:
-			@SuppressWarnings("unchecked")
-			Map<Requirement, Set<Capability>> unresolvedProviders = (Map<Requirement, Set<Capability>>) entry.getData();
-			for (Map.Entry<Requirement, Set<Capability>> unresolvedRequirement : unresolvedProviders.entrySet()) {
-				// for now only printing the first possible unresolved candidates
-				Set<Capability> unresolvedCapabilities = unresolvedRequirement.getValue();
-				if (!unresolvedCapabilities.isEmpty()) {
-					Capability unresolvedCapability = unresolvedCapabilities.iterator().next();
-					// make sure this is not a case of importing and exporting the same package
-					if (!unresolvedRequirement.getKey().getResource().equals(unresolvedCapability.getResource())) {
-						System.out.print(prepend);
-						System.out.println("Unresolved requirement: " + unresolvedRequirement.getKey());
-						System.out.print(prepend);
-						System.out.println("  -> " + unresolvedCapability);
-						printResolutionReport(prepend + "     ", (BundleRevision) unresolvedCapability.getResource(), reportEntries, visited);
-					}
-				}
-			}
-			break;
-		case USES_CONSTRAINT_VIOLATION :
-			System.out.print(prepend);
-			System.out.println("Bundle was not resolved because of a uses contraint violation.");
-			System.out.print(prepend + "  ");
-			System.out.println(entry.getData());
-			break;
-		case FILTERED_BY_RESOLVER_HOOK:
-			System.out.print(prepend);
-			System.out.println("Bundle was filtered by a resolver hook.");
-			break;
-		default:
-			System.out.println("Unknown error: type=" + entry.getType() + " data=" + entry.getData());
-			break;
 		}
 	}
 	
