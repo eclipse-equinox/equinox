@@ -292,8 +292,7 @@ public class ResolverImpl implements Resolver
                     if (faultyResources != null) {
                     	Set<Resource> resourceKeys = faultyResources.keySet();
                         retry = (optionalResources.removeAll(resourceKeys) || ondemandFragments.removeAll(resourceKeys));
-                        // remove mandatory resources and log optional resource exceptions
-                        resourceKeys.removeAll(mandatoryResources);
+                        // log all the resolution exceptions for the uses constraint violations
                         for (Map.Entry<Resource, ResolutionException> usesError : faultyResources.entrySet()) {
     						m_logger.logUsesConstraintViolation(usesError.getKey(), usesError.getValue());
     					}
