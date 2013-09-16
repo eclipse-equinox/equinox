@@ -1,3 +1,4 @@
 # To force a version qualifier update add the bug here
 Bug 403352 - Update all parent versions to match our build stream
-Bug 406691 - should we update Jetty prereq to 8.1.10.v20130312 
+Bug 406691 - should we update Jetty prereq to 8.1.10.v20130312
+Bug 417264 - We should update our version of Jetty
