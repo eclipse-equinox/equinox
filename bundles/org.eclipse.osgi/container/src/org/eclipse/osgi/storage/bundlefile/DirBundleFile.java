@@ -131,8 +131,11 @@ public class DirBundleFile extends BundleFile {
 			StringBuilder sb = new StringBuilder(dirPath).append(s);
 			if (BundleFile.secureAction.isDirectory(childFile)) {
 				sb.append("/"); //$NON-NLS-1$
-				if (recurse)
-					entries.addAll(Collections.list(getEntryPaths(sb.toString(), true)));
+				if (recurse) {
+					Enumeration<String> e = getEntryPaths(sb.toString(), true);
+					if (e != null)
+						entries.addAll(Collections.list(e));
+				}
 			}
 			entries.add(sb.toString());
 		}
