@@ -1422,7 +1422,11 @@ public final class ModuleContainer {
 							decStartLevel(toStartLevel, moduleDatabase.getSortedModules(Sort.BY_START_LEVEL, Sort.BY_DEPENDENCY));
 						}
 					}
-					adaptor.publishContainerEvent(ContainerEvent.START_LEVEL, module, null, listeners);
+					if (currentSL > 0 && newStartLevel > 0) {
+						// Only fire the start level event if we are not in the middle
+						// of launching or shutting down the framework
+						adaptor.publishContainerEvent(ContainerEvent.START_LEVEL, module, null, listeners);
+					}
 				} catch (Error e) {
 					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e, listeners);
 					throw e;

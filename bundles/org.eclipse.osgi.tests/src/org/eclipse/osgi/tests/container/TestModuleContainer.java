@@ -31,13 +31,12 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.*;
-import org.osgi.service.resolver.ResolutionException;
 
 public class TestModuleContainer extends AbstractTest {
 
 	private static DummyModuleDatabase resolvedModuleDatabase;
 
-	private void setupModuleDatabase() throws BundleException, ResolutionException {
+	private void setupModuleDatabase() throws BundleException {
 		if (resolvedModuleDatabase == null) {
 			resolvedModuleDatabase = getDatabase();
 		}
@@ -47,7 +46,7 @@ public class TestModuleContainer extends AbstractTest {
 	private static final String OSGI_WS = "osgi.ws";
 	private static final String OSGI_ARCH = "osgi.arch";
 
-	private DummyModuleDatabase getDatabase() throws BundleException, ResolutionException {
+	private DummyModuleDatabase getDatabase() throws BundleException {
 		BundleContext context = ((BundleReference) getClass().getClassLoader()).getBundle().getBundleContext();
 
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
@@ -123,7 +122,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	// Disabled @Test
-	public void testResolveInstallBundles() throws BundleException, ResolutionException, IOException {
+	public void testResolveInstallBundles() throws BundleException, IOException {
 		setupModuleDatabase();
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -134,7 +133,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	// Disabled @Test
-	public void testResolveInstallBundles01() throws BundleException, ResolutionException, IOException {
+	public void testResolveInstallBundles01() throws BundleException, IOException {
 		setupModuleDatabase();
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -147,7 +146,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	// Disabled @Test
-	public void testResolveAlreadyResolvedBundles() throws BundleException, ResolutionException, IOException {
+	public void testResolveAlreadyResolvedBundles() throws BundleException, IOException {
 		setupModuleDatabase();
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -158,7 +157,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	// Disabled @Test
-	public void testRefreshSystemBundle() throws ResolutionException, BundleException, IOException {
+	public void testRefreshSystemBundle() throws BundleException, IOException {
 		setupModuleDatabase();
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -169,7 +168,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testSimpleResolve() throws BundleException, IOException, ResolutionException {
+	public void testSimpleResolve() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
@@ -207,7 +206,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testMultiHost() throws BundleException, IOException, ResolutionException {
+	public void testMultiHost() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
@@ -219,7 +218,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testFragments01() throws ResolutionException, BundleException, IOException {
+	public void testFragments01() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		Module systemModule = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
@@ -250,7 +249,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testFragments02() throws ResolutionException, BundleException, IOException {
+	public void testFragments02() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		Module systemModule = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
@@ -269,7 +268,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testExecutionEnvironment() throws BundleException, IOException, ResolutionException {
+	public void testExecutionEnvironment() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		String extraCapabilities = "osgi.ee; osgi.ee=JavaSE; version:List<Version>=\"1.3, 1.4, 1.5, 1.6, 1.7\"";
@@ -298,7 +297,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testPlatformFilter01() throws BundleException, IOException, ResolutionException {
+	public void testPlatformFilter01() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		String extraCapabilities = EclipsePlatformNamespace.ECLIPSE_PLATFORM_NAMESPACE + "; osgi.os=foo; osgi.arch=bar";
@@ -313,7 +312,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testPlatformFilter02() throws BundleException, IOException, ResolutionException {
+	public void testPlatformFilter02() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		String extraCapabilities = EclipsePlatformNamespace.ECLIPSE_PLATFORM_NAMESPACE + "; osgi.os=baz; osgi.arch=boz";
@@ -393,7 +392,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testSingleton01() throws BundleException, IOException, ResolutionException {
+	public void testSingleton01() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		Module s1 = installDummyModule("singleton1_v1.MF", "s1_v1", container);
@@ -408,7 +407,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testSingleton02() throws BundleException, IOException, ResolutionException {
+	public void testSingleton02() throws BundleException, IOException {
 		ResolverHookFactory resolverHookFactory = new ResolverHookFactory() {
 
 			@Override
@@ -452,7 +451,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testSingleton03() throws BundleException, IOException, ResolutionException {
+	public void testSingleton03() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		Module s1 = installDummyModule("singleton1_v1.MF", "s1_v1", container);
@@ -472,7 +471,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testSingleton04() throws BundleException, IOException, ResolutionException {
+	public void testSingleton04() throws BundleException, IOException {
 		final Collection<BundleRevision> disabled = new ArrayList<BundleRevision>();
 		ResolverHookFactory resolverHookFactory = new ResolverHookFactory() {
 
@@ -565,7 +564,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testEventsResolved() throws BundleException, IOException, ResolutionException {
+	public void testEventsResolved() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		DummyModuleDatabase database = adaptor.getDatabase();
@@ -591,7 +590,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testEventsRefresh() throws BundleException, IOException, ResolutionException {
+	public void testEventsRefresh() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		DummyModuleDatabase database = adaptor.getDatabase();
@@ -620,7 +619,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testEventsStart() throws BundleException, IOException, ResolutionException {
+	public void testEventsStart() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		DummyModuleDatabase database = adaptor.getDatabase();
@@ -650,7 +649,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testEventsStartRefresh() throws BundleException, IOException, ResolutionException {
+	public void testEventsStartRefresh() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		DummyModuleDatabase database = adaptor.getDatabase();
@@ -677,7 +676,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testRemovalPending() throws ResolutionException, BundleException, IOException {
+	public void testRemovalPending() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		DummyModuleDatabase database = adaptor.getDatabase();
@@ -777,7 +776,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testSubstitutableExports01() throws ResolutionException, BundleException, IOException {
+	public void testSubstitutableExports01() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
@@ -813,7 +812,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testSubstitutableExports02() throws BundleException, IOException, ResolutionException {
+	public void testSubstitutableExports02() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
@@ -863,7 +862,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testLazy01() throws BundleException, IOException, ResolutionException {
+	public void testLazy01() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		DummyModuleDatabase database = adaptor.getDatabase();
@@ -910,7 +909,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testSettings01() throws BundleException, IOException, ResolutionException {
+	public void testSettings01() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		DummyModuleDatabase database = adaptor.getDatabase();
@@ -1007,9 +1006,18 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testEventsStartLevel() throws BundleException, IOException, ResolutionException {
+	public void testEventsStartLevelBeginningAt100() throws BundleException, IOException {
+		doTestEventsStartLevel(100);
+	}
+
+	@Test
+	public void testEventsStartLevelBeginningAt1() throws BundleException, IOException {
+		doTestEventsStartLevel(1);
+	}
+
+	private void doTestEventsStartLevel(int beginningStartLevel) throws BundleException, IOException {
 		Map<String, String> configuration = new HashMap<String, String>();
-		configuration.put(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, "100");
+		configuration.put(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, String.valueOf(beginningStartLevel));
 
 		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), configuration);
 		ModuleContainer container = adaptor.getContainer();
@@ -1050,30 +1058,65 @@ public class TestModuleContainer extends AbstractTest {
 
 		systemBundle.start();
 
-		actualModuleEvents = database.getModuleEvents(16);
-		List<DummyModuleEvent> expectedModuleEvents = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(systemBundle, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c7, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c7, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c6, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c6, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c5, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c5, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c4, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c4, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c3, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c3, ModuleEvent.STARTED, State.ACTIVE),
-				new DummyModuleEvent(c2, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c2, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c1, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c1, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(systemBundle, ModuleEvent.STARTED, State.ACTIVE)));
-		assertEvents(expectedModuleEvents, actualModuleEvents, false);
+		if (beginningStartLevel == 1) {
+			actualModuleEvents = database.getModuleEvents(2);
+			List<DummyModuleEvent> expectedModuleEvents = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(systemBundle, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(systemBundle, ModuleEvent.STARTED, State.ACTIVE)));
+			assertEvents(expectedModuleEvents, actualModuleEvents, true);
 
-		List<DummyContainerEvent> actualContainerEvents = database.getContainerEvents();
-		List<DummyContainerEvent> expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null), new DummyContainerEvent(ContainerEvent.STARTED, systemBundle, null)));
-		Assert.assertEquals("Wrong container events.", expectedContainerEvents, actualContainerEvents);
+			List<DummyContainerEvent> actualContainerEvents = database.getContainerEvents();
+			List<DummyContainerEvent> expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(new DummyContainerEvent(ContainerEvent.STARTED, systemBundle, null)));
+			Assert.assertEquals("Wrong container events.", expectedContainerEvents, actualContainerEvents);
+
+			container.getFrameworkStartLevel().setStartLevel(100);
+			actualModuleEvents = database.getModuleEvents(14);
+			expectedModuleEvents = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(c7, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c7, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c6, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c6, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c5, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c5, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c4, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c4, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c3, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c3, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c2, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c2,
+					ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c1, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c1, ModuleEvent.STARTED, State.ACTIVE)));
+
+			actualContainerEvents = database.getContainerEvents(1);
+			expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null)));
+			Assert.assertEquals("Wrong container events.", expectedContainerEvents, actualContainerEvents);
+		} else {
+			actualModuleEvents = database.getModuleEvents(16);
+			List<DummyModuleEvent> expectedModuleEvents = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(systemBundle, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c7, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c7, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c6, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c6, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c5, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c5, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c4, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c4, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c3, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c3, ModuleEvent.STARTED,
+					State.ACTIVE), new DummyModuleEvent(c2, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c2, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(c1, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c1, ModuleEvent.STARTED, State.ACTIVE), new DummyModuleEvent(systemBundle, ModuleEvent.STARTED, State.ACTIVE)));
+			assertEvents(expectedModuleEvents, actualModuleEvents, true);
+
+			List<DummyContainerEvent> actualContainerEvents = database.getContainerEvents();
+			List<DummyContainerEvent> expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(new DummyContainerEvent(ContainerEvent.STARTED, systemBundle, null)));
+			Assert.assertEquals("Wrong container events.", expectedContainerEvents, actualContainerEvents);
+		}
+
+		if (beginningStartLevel == 1) {
+			container.getFrameworkStartLevel().setStartLevel(1);
+			actualModuleEvents = database.getModuleEvents(14);
+			List<DummyModuleEvent> expectedModuleEvents = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(c1, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c1, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c2, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c2, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c3, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c3, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c4, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c4, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c5, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c5, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c6, ModuleEvent.STOPPING,
+					State.STOPPING), new DummyModuleEvent(c6, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c7, ModuleEvent.STOPPED, State.RESOLVED)));
+			assertEvents(expectedModuleEvents, actualModuleEvents, true);
+
+			List<DummyContainerEvent> actualContainerEvents = database.getContainerEvents(1);
+			List<DummyContainerEvent> expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null)));
+			Assert.assertEquals("Wrong container events.", expectedContainerEvents, actualContainerEvents);
+		}
 
 		systemBundle.stop();
 
-		actualContainerEvents = database.getContainerEvents();
-		expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(new DummyContainerEvent(ContainerEvent.START_LEVEL, systemBundle, null), new DummyContainerEvent(ContainerEvent.STOPPED, systemBundle, null)));
+		if (beginningStartLevel == 1) {
+			actualModuleEvents = database.getModuleEvents(2);
+			List<DummyModuleEvent> expectedModuleEvents = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(systemBundle, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(systemBundle, ModuleEvent.STOPPED, State.RESOLVED)));
+			assertEvents(expectedModuleEvents, actualModuleEvents, true);
+		} else {
+			actualModuleEvents = database.getModuleEvents(16);
+			List<DummyModuleEvent> expectedModuleEvents = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(systemBundle, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c1, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c1, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c2, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c2, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c3, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c3, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c4, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c4, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c5, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c5, ModuleEvent.STOPPED,
+					State.RESOLVED), new DummyModuleEvent(c6, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c6, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c7, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(systemBundle, ModuleEvent.STOPPED, State.RESOLVED)));
+			assertEvents(expectedModuleEvents, actualModuleEvents, true);
+		}
+		List<DummyContainerEvent> actualContainerEvents = database.getContainerEvents();
+		List<DummyContainerEvent> expectedContainerEvents = new ArrayList<DummyContainerEvent>(Arrays.asList(new DummyContainerEvent(ContainerEvent.STOPPED, systemBundle, null)));
 		Assert.assertEquals("Wrong container events.", expectedContainerEvents, actualContainerEvents);
-
-		actualModuleEvents = database.getModuleEvents(16);
-		expectedModuleEvents = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(systemBundle, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c1, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c1, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c2, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c2, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c3, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c3, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c4, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c4, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c5, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c5, ModuleEvent.STOPPED, State.RESOLVED),
-				new DummyModuleEvent(c6, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c6, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c7, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(systemBundle, ModuleEvent.STOPPED, State.RESOLVED)));
-		assertEvents(expectedModuleEvents, actualModuleEvents, false);
-
 	}
 
 	@Test
-	public void testDynamicImport01() throws BundleException, IOException, ResolutionException {
+	public void testDynamicImport01() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
@@ -1101,7 +1144,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testDynamicImport02() throws BundleException, IOException, ResolutionException {
+	public void testDynamicImport02() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
@@ -1130,7 +1173,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testDynamicImport03() throws BundleException, IOException, ResolutionException {
+	public void testDynamicImport03() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		DummyModuleDatabase database = adaptor.getDatabase();
@@ -1166,7 +1209,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testDynamicImport04() throws BundleException, IOException, ResolutionException {
+	public void testDynamicImport04() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		DummyModuleDatabase database = adaptor.getDatabase();
@@ -1201,7 +1244,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testDynamicImport05() throws BundleException, IOException, ResolutionException {
+	public void testDynamicImport05() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
@@ -1269,7 +1312,7 @@ public class TestModuleContainer extends AbstractTest {
 	 * Test that split packages are handled ok with uses constraints
 	 */
 	@Test
-	public void testUses2() throws BundleException, IOException, ResolutionException {
+	public void testUses2() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
@@ -1291,7 +1334,7 @@ public class TestModuleContainer extends AbstractTest {
 	 * Test that split packages are handled ok with uses constraints
 	 */
 	@Test
-	public void testUses3() throws BundleException, IOException, ResolutionException {
+	public void testUses3() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
@@ -1314,7 +1357,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testMultiCardinalityUses() throws BundleException, IOException, ResolutionException {
+	public void testMultiCardinalityUses() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
