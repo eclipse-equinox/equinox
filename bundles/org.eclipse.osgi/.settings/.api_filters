@@ -236,6 +236,24 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="osgi/src/org/osgi/framework/Version.java" type="org.osgi.framework.Version">
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.8"/>
+                <message_argument value="3.10"/>
+                <message_argument value="valueOf(String)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/VersionRange.java" type="org.osgi.framework.VersionRange">
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.8"/>
+                <message_argument value="3.10"/>
+                <message_argument value="valueOf(String)"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="osgi/src/org/osgi/framework/hooks/weaving/WovenClass.java" type="org.osgi.framework.hooks.weaving.WovenClass">
         <filter comment="Ignore OSGi API" id="1209008130">
             <message_arguments>
