@@ -50,7 +50,7 @@ public class EquinoxContainer implements ThreadFactory {
 	private final Storage storage;
 	private final PackageAdmin packageAdmin;
 	private final StartLevel startLevel;
-	private final String[] bootDelegation;
+	private final Set<String> bootDelegation;
 	private final String[] bootDelegationStems;
 	private final boolean bootDelegateAll;
 
@@ -86,7 +86,7 @@ public class EquinoxContainer implements ThreadFactory {
 		// TODO ideally this should be in equinox configuration or perhaps in storage
 		String bootDelegationProp = equinoxConfig.getConfiguration(Constants.FRAMEWORK_BOOTDELEGATION);
 		String[] bootPackages = ManifestElement.getArrayFromList(bootDelegationProp, ","); //$NON-NLS-1$
-		List<String> exactMatch = new ArrayList<String>(bootPackages.length);
+		HashSet<String> exactMatch = new HashSet<String>(bootPackages.length);
 		List<String> stemMatch = new ArrayList<String>(bootPackages.length);
 		boolean delegateAllValue = false;
 		for (int i = 0; i < bootPackages.length; i++) {
@@ -103,7 +103,7 @@ public class EquinoxContainer implements ThreadFactory {
 			}
 		}
 		bootDelegateAll = delegateAllValue;
-		bootDelegation = exactMatch.isEmpty() ? null : exactMatch.toArray(new String[exactMatch.size()]);
+		bootDelegation = exactMatch;
 		bootDelegationStems = stemMatch.isEmpty() ? null : stemMatch.toArray(new String[stemMatch.size()]);
 	}
 
@@ -192,10 +192,8 @@ public class EquinoxContainer implements ThreadFactory {
 	public boolean isBootDelegationPackage(String name) {
 		if (bootDelegateAll)
 			return true;
-		if (bootDelegation != null)
-			for (int i = 0; i < bootDelegation.length; i++)
-				if (name.equals(bootDelegation[i]))
-					return true;
+		if (bootDelegation.contains(name))
+			return true;
 		if (bootDelegationStems != null)
 			for (int i = 0; i < bootDelegationStems.length; i++)
 				if (name.startsWith(bootDelegationStems[i]))
