@@ -238,55 +238,15 @@
    <plugin
          id="org.eclipse.equinox.security.macosx"
          os="macosx"
-         arch="x86"
          download-size="0"
          install-size="0"
          version="0.0.0"
          fragment="true"
          unpack="false"/>
 
-   <plugin
-         id="org.eclipse.equinox.security.macosx"
-         os="macosx"
-         arch="x86_64"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.security.macosx"
-         os="macosx"
-         arch="ppc"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
+    <plugin
          id="org.eclipse.equinox.security.macosx.source"
          os="macosx"
-         arch="x86"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.security.macosx.source"
-         os="macosx"
-         arch="x86_64"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.security.macosx.source"
-         os="macosx"
-         arch="ppc"
          download-size="0"
          install-size="0"
          version="0.0.0"
