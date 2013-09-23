@@ -653,12 +653,12 @@ public final class ModuleContainer {
 		// TODO Will likely need to optimize this
 		if ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 			// only do this for hosts
-			return null;
+			return Collections.emptyList();
 		}
 		ModuleWiring wiring = revision.getWiring();
 		if (wiring == null) {
 			// not resolved!
-			return null;
+			return Collections.emptyList();
 		}
 		List<DynamicModuleRequirement> result = new ArrayList<ModuleRequirement.DynamicModuleRequirement>(1);
 		// check the dynamic import packages
