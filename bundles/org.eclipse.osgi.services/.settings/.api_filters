@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.osgi.services" version="2">
+    <resource path="META-INF/MANIFEST.MF" type="org.osgi.service.io.ConnectionFactory">
+        <filter comment="Ignore OSGi API" id="305324134">
+            <message_arguments>
+                <message_argument value="org.osgi.service.io.ConnectionFactory"/>
+                <message_argument value="org.eclipse.osgi.services_3.4.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.osgi.service.io.ConnectorService">
+        <filter comment="Ignore OSGi API" id="305324134">
+            <message_arguments>
+                <message_argument value="org.osgi.service.io.ConnectorService"/>
+                <message_argument value="org.eclipse.osgi.services_3.4.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/cm/Configuration.java" type="org.osgi.service.cm.Configuration">
+        <filter comment="Ignore OSGi API" id="403804204">
+            <message_arguments>
+                <message_argument value="org.osgi.service.cm.Configuration"/>
+                <message_argument value="getChangeCount()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.5"/>
+                <message_argument value="3.4"/>
+                <message_argument value="getChangeCount()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/cm/SynchronousConfigurationListener.java" type="org.osgi.service.cm.SynchronousConfigurationListener">
+        <filter comment="Ignore OSGi API" id="1108344834">
+            <message_arguments>
+                <message_argument value="1.5"/>
+                <message_argument value="3.4"/>
+                <message_argument value="org.osgi.service.cm.SynchronousConfigurationListener"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>
