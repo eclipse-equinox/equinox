@@ -29,6 +29,7 @@ import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
+import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.eclipse.osgi.signedcontent.*;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.Storage;
@@ -42,7 +43,6 @@ import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.*;
-import org.osgi.service.resolver.ResolutionException;
 
 public class EquinoxBundle implements Bundle, BundleReference {
 
@@ -463,13 +463,9 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			return null;
 		}
 
-		try {
-			ModuleClassLoader classLoader = getModuleClassLoader();
-			if (classLoader != null) {
-				return classLoader.getResource(name);
-			}
-		} catch (ResolutionException e) {
-			// ignore
+		ModuleClassLoader classLoader = getModuleClassLoader(false);
+		if (classLoader != null) {
+			return classLoader.getResource(name);
 		}
 
 		return new ClasspathManager((Generation) module.getCurrentRevision().getRevisionInfo(), null).findLocalResource(name);
@@ -493,16 +489,19 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			throw new ClassNotFoundException(name, e);
 		}
 		checkValid();
+		if (isFragment()) {
+			throw new ClassNotFoundException("Can not load a class from a fragment bundle: " + this); //$NON-NLS-1$
+		}
 		try {
-			ModuleClassLoader classLoader = getModuleClassLoader();
+			ModuleClassLoader classLoader = getModuleClassLoader(true);
 			if (classLoader != null) {
 				if (name.length() > 0 && name.charAt(0) == '[')
 					return Class.forName(name, false, classLoader);
 				return classLoader.loadClass(name);
 			}
-		} catch (ResolutionException e) {
-			throw new ClassNotFoundException(name, e);
 		} catch (ClassNotFoundException e) {
+			// This is an equinox-ism.  Not sure it is worth it to offer an option to disable ...
+			// On failure attempt to activate lazy activating bundles.
 			if (State.LAZY_STARTING.equals(module.getState())) {
 				try {
 					module.start(StartOptions.LAZY_TRIGGER);
@@ -512,11 +511,15 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			}
 			throw e;
 		}
-		throw new ClassNotFoundException("No class loader available for the bundle.  The bundle is likely a fragment."); //$NON-NLS-1$
+		throw new ClassNotFoundException("No class loader available for the bundle: " + this); //$NON-NLS-1$
 	}
 
-	private ModuleClassLoader getModuleClassLoader() throws ResolutionException {
-		resolve();
+	private ModuleClassLoader getModuleClassLoader(boolean logResolveError) {
+		ResolutionReport report = resolve();
+		if (logResolveError && !Module.RESOLVED_SET.contains(module.getState())) {
+			String reportMessage = report.getResolutionReportMessage(module.getCurrentRevision());
+			equinoxContainer.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, this, new BundleException(reportMessage, BundleException.RESOLVE_ERROR));
+		}
 		return AccessController.doPrivileged(new PrivilegedAction<ModuleClassLoader>() {
 			@Override
 			public ModuleClassLoader run() {
@@ -543,12 +546,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		if (isFragment()) {
 			return null;
 		}
-		ModuleClassLoader classLoader = null;
-		try {
-			classLoader = getModuleClassLoader();
-		} catch (ResolutionException e) {
-			// ignore
-		}
+		ModuleClassLoader classLoader = getModuleClassLoader(false);
 		Enumeration<URL> result = null;
 		if (classLoader != null) {
 			result = classLoader.getResources(name);
@@ -556,7 +554,6 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			result = new ClasspathManager((Generation) module.getCurrentRevision().getRevisionInfo(), null).findLocalResources(name);
 		}
 		return result != null && result.hasMoreElements() ? result : null;
-
 	}
 
 	@Override
@@ -596,11 +593,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			return null;
 		}
 		checkValid();
-		try {
-			resolve();
-		} catch (ResolutionException e) {
-			// ignore
-		}
+		resolve();
 		return Storage.findEntries(getGenerations(), path, filePattern, recurse ? BundleWiring.FINDENTRIES_RECURSE : 0);
 	}
 
@@ -890,10 +883,11 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		}
 	}
 
-	void resolve() throws ResolutionException {
+	ResolutionReport resolve() {
 		if (!Module.RESOLVED_SET.contains(module.getState())) {
-			module.getContainer().resolve(Arrays.asList(module), true);
+			return module.getContainer().resolve(Arrays.asList(module), true);
 		}
+		return null;
 	}
 
 	List<Generation> getGenerations() {
