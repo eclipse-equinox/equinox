@@ -51,6 +51,8 @@ public abstract class SystemModule extends Module {
 					lockStateChange(ModuleEvent.STARTED);
 					lockedStarted = true;
 				}
+				// need to check valid again in case someone uninstalled the bundle
+				checkValid();
 				ResolutionException e = report.getResoltuionException();
 				if (e != null) {
 					if (e.getCause() instanceof BundleException) {
