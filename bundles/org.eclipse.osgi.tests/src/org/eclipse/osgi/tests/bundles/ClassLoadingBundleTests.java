@@ -1974,6 +1974,17 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertTrue("end is not called", endCalled[0]);
 	}
 
+	public void testLoadClassUnresolved() throws Exception {
+		Bundle chainTest = installer.installBundle("chain.test"); //$NON-NLS-1$
+		assertFalse("Should not resolve bundle: " + chainTest, installer.resolveBundles(new Bundle[] {chainTest}));
+		try {
+			fail("Should not be able to load class: " + chainTest.loadClass("chain.test.TestSingleChain")); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			// expected
+		}
+
+	}
+
 	private void doTestArrayTypeLoad(String name) {
 		try {
 			Class arrayType = OSGiTestsActivator.getContext().getBundle().loadClass(name);
