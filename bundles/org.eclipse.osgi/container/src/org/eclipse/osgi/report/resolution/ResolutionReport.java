@@ -167,7 +167,7 @@ public interface ResolutionReport {
 	 * or {@code null} if there is no resolution exception.  For some resolve
 	 * operations a resolution exception may not be thrown even if the 
 	 * resolve process could not resolve some resources.  For example, if
-	 * the resources are not optional resources to resolve.
+	 * the resources are optional resources to resolve.
 	 * @return the resolution exception or {@code null} if there is 
 	 * no resolution exception.
 	 */

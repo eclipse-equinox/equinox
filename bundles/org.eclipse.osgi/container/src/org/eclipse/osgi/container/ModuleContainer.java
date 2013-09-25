@@ -394,6 +394,7 @@ public final class ModuleContainer {
 	 * @param triggersMandatory true if the triggers must be resolved.  This will result in 
 	 *   a {@link ResolutionException} if set to true and one of the triggers could not be resolved.
 	 * @see FrameworkWiring#resolveBundles(Collection)
+	 * @return A resolution report for the resolve operation
 	 */
 	public ModuleResolutionReport resolve(Collection<Module> triggers, boolean triggersMandatory) {
 		return resolve(triggers, triggersMandatory, false);
