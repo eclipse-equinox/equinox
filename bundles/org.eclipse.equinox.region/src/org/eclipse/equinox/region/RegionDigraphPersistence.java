@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,9 +11,7 @@
 
 package org.eclipse.equinox.region;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 /**
  * A region digraph persistence is used to persist the state of a {@link RegionDigraph}.
@@ -21,6 +19,7 @@ import java.io.OutputStream;
  * <strong>Concurrent Semantics</strong><br />
  * 
  * Implementations of this interface must be thread safe.
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface RegionDigraphPersistence {
 
