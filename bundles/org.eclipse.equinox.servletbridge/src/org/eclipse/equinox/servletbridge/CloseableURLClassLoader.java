@@ -289,7 +289,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		JarURLConnection connection = (JarURLConnection) resourceURL.openConnection();
 		int lastDot = name.lastIndexOf('.');
 		if (lastDot != -1) {
-			String packageName = name.substring(0, lastDot + 1);
+			String packageName = name.substring(0, lastDot);
 			Package pkg = getPackage(packageName);
 			if (pkg != null) {
 				checkForSealedPackage(pkg, packageName, manifest, connection.getJarFileURL());
