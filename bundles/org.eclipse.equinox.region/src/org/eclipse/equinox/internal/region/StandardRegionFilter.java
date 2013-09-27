@@ -35,12 +35,10 @@ public final class StandardRegionFilter implements RegionFilter {
 	}
 
 	public boolean isAllowed(Bundle bundle) {
-		HashMap<String, Object> attrs = new HashMap<String, Object>(3);
+		HashMap<String, Object> attrs = new HashMap<String, Object>(4);
 		String bsn = bundle.getSymbolicName();
 		if (bsn != null) {
-			// TODO the javadoc says to use the bundle-symbolic-name attribute; leaving this for behavior compatibility
 			attrs.put(VISIBLE_BUNDLE_NAMESPACE, bsn);
-			// This is the correct attribute to use according to the javadoc
 			attrs.put(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, bsn);
 		}
 		attrs.put(org.osgi.framework.Constants.BUNDLE_VERSION_ATTRIBUTE, bundle.getVersion());
@@ -49,7 +47,7 @@ public final class StandardRegionFilter implements RegionFilter {
 	}
 
 	public boolean isAllowed(BundleRevision bundle) {
-		HashMap<String, Object> attrs = new HashMap<String, Object>(3);
+		HashMap<String, Object> attrs = new HashMap<String, Object>(4);
 		String bsn = bundle.getSymbolicName();
 		if (bsn != null) {
 			attrs.put(VISIBLE_BUNDLE_NAMESPACE, bsn);
@@ -93,7 +91,7 @@ public final class StandardRegionFilter implements RegionFilter {
 	public boolean isAllowed(ServiceReference<?> service) {
 		if (match(filters.get(VISIBLE_SERVICE_NAMESPACE), service))
 			return true;
-		return match(filters.get(VISIBLE_ALL_NAMESPACE), service);
+		return matchAll(VISIBLE_SERVICE_NAMESPACE, service);
 	}
 
 	public boolean isAllowed(BundleCapability capability) {
@@ -107,7 +105,49 @@ public final class StandardRegionFilter implements RegionFilter {
 	public boolean isAllowed(String namespace, Map<String, ?> attributes) {
 		if (match(filters.get(namespace), attributes))
 			return true;
-		return match(filters.get(VISIBLE_ALL_NAMESPACE), attributes);
+		return matchAll(namespace, attributes);
+	}
+
+	private boolean matchAll(final String namespace, final Map<String, ?> attributes) {
+		Collection<Filter> allMatching = filters.get(VISIBLE_ALL_NAMESPACE);
+		if (allMatching == null) {
+			return false;
+		}
+		return match(allMatching, new AbstractMap<String, Object>() {
+			@Override
+			public Object get(Object key) {
+				if (RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE.equals(key)) {
+					return namespace;
+				}
+				return attributes.get(key);
+			}
+
+			@Override
+			public Set<java.util.Map.Entry<String, Object>> entrySet() {
+				throw new UnsupportedOperationException();
+			}
+		});
+	}
+
+	private boolean matchAll(final String namespace, final ServiceReference<?> service) {
+		Collection<Filter> allMatching = filters.get(VISIBLE_ALL_NAMESPACE);
+		if (allMatching == null) {
+			return false;
+		}
+		return match(allMatching, new AbstractMap<String, Object>() {
+			@Override
+			public Object get(Object key) {
+				if (RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE.equals(key)) {
+					return namespace;
+				}
+				return service.getProperty((String) key);
+			}
+
+			@Override
+			public Set<java.util.Map.Entry<String, Object>> entrySet() {
+				throw new UnsupportedOperationException();
+			}
+		});
 	}
 
 	public Map<String, Collection<String>> getSharingPolicy() {

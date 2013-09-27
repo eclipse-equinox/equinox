@@ -172,4 +172,14 @@ public class StandardRegionFilterTests {
 		assertTrue(regionFilterAllAllowed.isAllowed(fooService.getReference()));
 		assertTrue(regionFilterAllAllowed.isAllowed(barService.getReference()));
 	}
+
+	@Test
+	public void testNegativeAllNamespace() throws InvalidSyntaxException {
+		RegionFilter negateServices = RegionReflectionUtils.newStandardRegionFilterBuilder().allow(RegionFilter.VISIBLE_ALL_NAMESPACE, "(!(" + RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE + "=" + RegionFilter.VISIBLE_SERVICE_NAMESPACE + "))").build();
+		assertTrue(negateServices.isAllowed(stubBundle));
+		assertTrue(negateServices.isAllowed(fooPackage));
+		assertTrue(negateServices.isAllowed(barPackage));
+		assertFalse(negateServices.isAllowed(fooService.getReference()));
+		assertFalse(negateServices.isAllowed(barService.getReference()));
+	}
 }

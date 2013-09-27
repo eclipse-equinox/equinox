@@ -267,6 +267,8 @@ public class RegionServiceFindHookTests {
 		for (String filter : filters) {
 			builder.allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, filter);
 		}
+		String negateFilter = "(!(|" + "(" + RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE + "=" + RegionFilter.VISIBLE_SERVICE_NAMESPACE + ")" + "(" + RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE + "=" + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + ")" + "))";
+		builder.allow(RegionFilter.VISIBLE_ALL_NAMESPACE, negateFilter);
 		return builder.build();
 	}
 

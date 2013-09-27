@@ -105,7 +105,16 @@ public class RegionBundleFindHookTests {
 
 	@Test
 	public void testFindConnectedRegionAllowed() throws BundleException, InvalidSyntaxException {
-		RegionFilter filter = createFilter(BUNDLE_B);
+		doTestFindConnectedRegionAllowed(false);
+	}
+
+	@Test
+	public void testFindConnectedRegionAllowedWithNegate() throws BundleException, InvalidSyntaxException {
+		doTestFindConnectedRegionAllowed(true);
+	}
+
+	private void doTestFindConnectedRegionAllowed(boolean negate) throws BundleException, InvalidSyntaxException {
+		RegionFilter filter = createFilter(negate, BUNDLE_B);
 		region(REGION_A).connectRegion(region(REGION_B), filter);
 
 		this.candidates.add(bundle(BUNDLE_B));
@@ -115,7 +124,16 @@ public class RegionBundleFindHookTests {
 
 	@Test
 	public void testFindConnectedRegionFiltering() throws BundleException, InvalidSyntaxException {
-		region(REGION_A).connectRegion(region(REGION_B), createFilter(BUNDLE_B));
+		doTestFindConnectedRegionFiltering(false);
+	}
+
+	@Test
+	public void testFindConnectedRegionFilteringWithNegate() throws BundleException, InvalidSyntaxException {
+		doTestFindConnectedRegionFiltering(true);
+	}
+
+	private void doTestFindConnectedRegionFiltering(boolean negate) throws BundleException, InvalidSyntaxException {
+		region(REGION_A).connectRegion(region(REGION_B), createFilter(negate, BUNDLE_B));
 		Bundle x = createBundle(BUNDLE_X);
 		region(REGION_B).addBundle(x);
 
@@ -128,8 +146,17 @@ public class RegionBundleFindHookTests {
 
 	@Test
 	public void testFindTransitive() throws BundleException, InvalidSyntaxException {
-		region(REGION_A).connectRegion(region(REGION_B), createFilter(BUNDLE_C));
-		region(REGION_B).connectRegion(region(REGION_C), createFilter(BUNDLE_C));
+		doTestFindTransitive(false);
+	}
+
+	@Test
+	public void testFindTransitiveWithNegate() throws BundleException, InvalidSyntaxException {
+		doTestFindTransitive(true);
+	}
+
+	private void doTestFindTransitive(boolean negate) throws BundleException, InvalidSyntaxException {
+		region(REGION_A).connectRegion(region(REGION_B), createFilter(negate, BUNDLE_C));
+		region(REGION_B).connectRegion(region(REGION_C), createFilter(negate, BUNDLE_C));
 		region(REGION_C).addBundle(bundle(BUNDLE_X));
 
 		this.candidates.add(bundle(BUNDLE_B));
@@ -139,30 +166,39 @@ public class RegionBundleFindHookTests {
 		assertTrue(this.candidates.contains(bundle(BUNDLE_C)));
 		assertFalse(this.candidates.contains(bundle(BUNDLE_B)));
 		assertFalse(this.candidates.contains(bundle(BUNDLE_X)));
-
 	}
 
 	@Test
 	public void testFindInCyclicGraph() throws BundleException, InvalidSyntaxException {
+		doTestFindInCyclicGraph(false);
+	}
+
+	@Test
+	public void testFindInCyclicGraphWithNegate() throws BundleException, InvalidSyntaxException {
+
+		doTestFindInCyclicGraph(true);
+	}
+
+	private void doTestFindInCyclicGraph(boolean negate) throws BundleException, InvalidSyntaxException {
 		region(REGION_D).addBundle(bundle(BUNDLE_X));
 
-		region(REGION_A).connectRegion(region(REGION_B), createFilter(BUNDLE_D, BUNDLE_X));
-		region(REGION_B).connectRegion(region(REGION_A), createFilter());
+		region(REGION_A).connectRegion(region(REGION_B), createFilter(negate, BUNDLE_D, BUNDLE_X));
+		region(REGION_B).connectRegion(region(REGION_A), createFilter(negate));
 
-		region(REGION_B).connectRegion(region(REGION_D), createFilter(BUNDLE_D));
-		region(REGION_D).connectRegion(region(REGION_B), createFilter());
+		region(REGION_B).connectRegion(region(REGION_D), createFilter(negate, BUNDLE_D));
+		region(REGION_D).connectRegion(region(REGION_B), createFilter(negate));
 
-		region(REGION_B).connectRegion(region(REGION_C), createFilter(BUNDLE_X));
-		region(REGION_C).connectRegion(region(REGION_B), createFilter());
+		region(REGION_B).connectRegion(region(REGION_C), createFilter(negate, BUNDLE_X));
+		region(REGION_C).connectRegion(region(REGION_B), createFilter(negate));
 
-		region(REGION_C).connectRegion(region(REGION_D), createFilter(BUNDLE_X));
-		region(REGION_D).connectRegion(region(REGION_C), createFilter());
+		region(REGION_C).connectRegion(region(REGION_D), createFilter(negate, BUNDLE_X));
+		region(REGION_D).connectRegion(region(REGION_C), createFilter(negate));
 
-		region(REGION_A).connectRegion(region(REGION_C), createFilter());
-		region(REGION_C).connectRegion(region(REGION_A), createFilter());
+		region(REGION_A).connectRegion(region(REGION_C), createFilter(negate));
+		region(REGION_C).connectRegion(region(REGION_A), createFilter(negate));
 
-		region(REGION_D).connectRegion(region(REGION_A), createFilter());
-		region(REGION_A).connectRegion(region(REGION_D), createFilter());
+		region(REGION_D).connectRegion(region(REGION_A), createFilter(negate));
+		region(REGION_A).connectRegion(region(REGION_D), createFilter(negate));
 
 		// Find from region A.
 		this.candidates.add(bundle(BUNDLE_B));
@@ -221,7 +257,7 @@ public class RegionBundleFindHookTests {
 		return this.regions.get(regionName);
 	}
 
-	private RegionFilter createFilter(String... bundleSymbolicNames) throws InvalidSyntaxException {
+	private RegionFilter createFilter(boolean negate, String... bundleSymbolicNames) throws InvalidSyntaxException {
 		Collection<String> filters = new ArrayList<String>(bundleSymbolicNames.length);
 		for (String bundleSymbolicName : bundleSymbolicNames) {
 			filters.add('(' + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + '=' + bundleSymbolicName + ')');
@@ -229,6 +265,11 @@ public class RegionBundleFindHookTests {
 		RegionFilterBuilder builder = digraph.createRegionFilterBuilder();
 		for (String filter : filters) {
 			builder.allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, filter);
+		}
+
+		if (negate) {
+			String negateFilter = "(!(|" + "(" + RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE + "=" + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + ")" + "(" + RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE + "=" + RegionFilter.VISIBLE_BUNDLE_LIFECYCLE_NAMESPACE + ")" + "))";
+			builder.allow(RegionFilter.VISIBLE_ALL_NAMESPACE, negateFilter);
 		}
 		return builder.build();
 	}

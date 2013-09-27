@@ -60,17 +60,39 @@ public interface RegionFilter {
 
 	/**
 	 * Name space for sharing bundles. The filters specified in this name space will be use to match against a bundle's
-	 * symbolic name and version. The attribute {@link Constants#BUNDLE_SYMBOLICNAME_ATTRIBUTE bundle-symbolic-name} is
-	 * used for the symbolic name and the attribute {@link Constants#BUNDLE_VERSION_ATTRIBUTE bundle-version} is used
-	 * for the bundle version.
+	 * symbolic name and version. The attributes {@link Constants#BUNDLE_SYMBOLICNAME_ATTRIBUTE bundle-symbolic-name}
+	 * and org.eclipse.equinox.allow.bundle are used for the symbolic name and the attribute 
+	 * {@link Constants#BUNDLE_VERSION_ATTRIBUTE bundle-version} is used for the bundle version.
+	 * This name space will share the complete bundle and all of its capabilities with another
+	 * region.  This includes bundle events, services, and all other generic capabilities.
 	 */
 	public static final String VISIBLE_BUNDLE_NAMESPACE = "org.eclipse.equinox.allow.bundle"; //$NON-NLS-1$
+
+	/**
+	 * Name space for sharing bundle lifecycle operations.  The filters specified in this name space will be use to 
+	 * match against a bundle's symbolic name and version. The attributes {@link Constants#BUNDLE_SYMBOLICNAME_ATTRIBUTE
+	 * bundle-symbolic-name} and org.eclipse.equinox.allow.bundle are used for the symbolic name and the 
+	 * attribute {@link Constants#BUNDLE_VERSION_ATTRIBUTE bundle-version} is used for the bundle version.
+	 * This name space is only used to control the lifecycle layer of the framework.  For example, the visible bundles
+	 * available from a bundle context, the access to bundle events etc.  It will not share any other capabilities
+	 * provided by the bundle.
+	 */
+	public static final String VISIBLE_BUNDLE_LIFECYCLE_NAMESPACE = "org.eclipse.equinox.allow.bundle.lifecycle"; //$NON-NLS-1$
 
 	/**
 	 * Name space for matching against all capabilities. The filters specified in this name space will be used to match
 	 * all capabilities.
 	 */
 	public static final String VISIBLE_ALL_NAMESPACE = "org.eclipse.equinox.allow.all"; //$NON-NLS-1$
+
+	/**
+	 * An attribute used to hold the namespace for which the attributes belong to when using the 
+	 * {@link #VISIBLE_ALL_NAMESPACE} namespace to mach all capabilities.  This can be useful
+	 * for excluding some namespaces from the all namespace.  For example, 
+	 * <q>(!(org.eclipse.equinox.allow.all.namespace=osgi.wiring.package))</q> will allow everything
+	 * except package capabilities.
+	 */
+	public static final String VISIBLE_ALL_NAMESPACE_ATTRIBUTE = "org.eclipse.equinox.allow.all.namespace"; //$NON-NLS-1$
 
 	/**
 	 * Determines whether this filter allows the given bundle.  A

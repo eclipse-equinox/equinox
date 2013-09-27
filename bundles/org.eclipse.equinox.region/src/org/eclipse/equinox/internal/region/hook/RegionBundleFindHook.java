@@ -12,9 +12,9 @@
 package org.eclipse.equinox.internal.region.hook;
 
 import java.util.Collection;
+import java.util.HashMap;
 import org.eclipse.equinox.region.*;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
+import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.FindHook;
 
 /**
@@ -84,7 +84,18 @@ public final class RegionBundleFindHook implements FindHook {
 		 */
 		@Override
 		protected boolean isAllowed(Bundle candidate, RegionFilter filter) {
-			return filter.isAllowed(candidate);
+			return filter.isAllowed(candidate) || isLifecycleAllowed(filter, candidate);
+		}
+
+		private boolean isLifecycleAllowed(RegionFilter filter, Bundle bundle) {
+			HashMap<String, Object> attrs = new HashMap<String, Object>(4);
+			String bsn = bundle.getSymbolicName();
+			if (bsn != null) {
+				attrs.put(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, bsn);
+				attrs.put(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, bsn);
+			}
+			attrs.put(org.osgi.framework.Constants.BUNDLE_VERSION_ATTRIBUTE, bundle.getVersion());
+			return filter.isAllowed(RegionFilter.VISIBLE_BUNDLE_LIFECYCLE_NAMESPACE, attrs);
 		}
 	}
 
