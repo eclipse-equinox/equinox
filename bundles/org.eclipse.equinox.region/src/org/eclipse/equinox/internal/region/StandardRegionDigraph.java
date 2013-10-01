@@ -413,11 +413,23 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 			if (check && this.updateCount.get() != replacement.originUpdateCount) {
 				throw new BundleException("The origin update count has changed since the replacement copy was created.", BundleException.INVALID_OPERATION); //$NON-NLS-1$
 			}
+			Map<String, Region> nameToRegion = new HashMap<String, Region>();
+			for (Region region : regions) {
+				nameToRegion.put(region.getName(), region);
+			}
 			this.regions.clear();
 			this.edges.clear();
 			this.bundleIdToRegionMapping.clear();
 			for (Region original : filteredRegions.keySet()) {
-				Region copy = this.createRegion(original.getName());
+				Region copy = nameToRegion.get(original.getName());
+				if (copy != null) {
+					// reuse the previous region object
+					regions.add(copy);
+					edges.put(copy, EMPTY_EDGE_SET);
+				} else {
+					// create a new one
+					copy = this.createRegion(original.getName());
+				}
 				for (Long id : original.getBundleIds()) {
 					copy.addBundle(id);
 				}
