@@ -16,6 +16,8 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.container.Module.StartOptions;
@@ -23,6 +25,8 @@ import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.Module.StopOptions;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
+import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
+import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
@@ -108,13 +112,146 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 		}
 
+		final List<FrameworkListener> initListeners = new ArrayList<FrameworkListener>(0);
+
+		class EquinoxSystemModule extends SystemModule {
+			public EquinoxSystemModule(ModuleContainer container) {
+				super(container);
+			}
+
+			@Override
+			public Bundle getBundle() {
+				return SystemBundle.this;
+			}
+
+			@Override
+			protected void cleanup(ModuleRevision revision) {
+				// Nothing to do
+			}
+
+			@Override
+			protected void initWorker() throws BundleException {
+				getEquinoxContainer().getConfiguration().setConfiguration(Constants.FRAMEWORK_UUID, new UniversalUniqueIdentifier().toString());
+				getEquinoxContainer().init();
+				addInitFrameworkListeners();
+				startWorker0();
+			}
+
+			@Override
+			protected void stopWorker() throws BundleException {
+				super.stopWorker();
+				stopWorker0();
+				getEquinoxContainer().close();
+			}
+
+			void asyncStop() throws BundleException {
+				lockStateChange(ModuleEvent.STOPPED);
+				try {
+					if (Module.ACTIVE_SET.contains(getState())) {
+						// TODO this still has a chance of a race condition:
+						// multiple threads could get started if stop is called over and over
+						Thread t = new Thread(new Runnable() {
+							@Override
+							public void run() {
+								try {
+									stop();
+								} catch (BundleException e) {
+									// TODO not sure we can even log if this fails
+									e.printStackTrace();
+								}
+							}
+						}, "Framework stop"); //$NON-NLS-1$
+						t.start();
+					}
+				} finally {
+					unlockStateChange(ModuleEvent.STOPPED);
+				}
+			}
+
+			void asyncUpdate() throws BundleException {
+				lockStateChange(ModuleEvent.UPDATED);
+				try {
+					if (Module.ACTIVE_SET.contains(getState())) {
+						Thread t = new Thread(new Runnable() {
+							@Override
+							public void run() {
+								try {
+									update();
+								} catch (BundleException e) {
+									e.printStackTrace();
+									// TODO not sure we can even log if this fails
+								}
+							}
+						}, "Framework update"); //$NON-NLS-1$
+						t.start();
+					}
+				} finally {
+					unlockStateChange(ModuleEvent.UPDATED);
+				}
+			}
+		}
+
 		SystemBundle(ModuleContainer moduleContainer, EquinoxContainer equinoxContainer) {
 			super(moduleContainer, equinoxContainer);
 		}
 
 		@Override
 		public void init() throws BundleException {
-			((SystemModule) getModule()).init();
+			this.init((FrameworkListener[]) null);
+		}
+
+		public void init(FrameworkListener... listeners) throws BundleException {
+			if (listeners != null) {
+				initListeners.addAll(Arrays.asList(listeners));
+			}
+			try {
+				((SystemModule) getModule()).init();
+			} finally {
+				if (!initListeners.isEmpty()) {
+					flushFrameworkEvents();
+					removeInitListeners();
+				}
+			}
+		}
+
+		private void flushFrameworkEvents() {
+			EventDispatcher<Object, Object, CountDownLatch> dispatcher = new EventDispatcher<Object, Object, CountDownLatch>() {
+				@Override
+				public void dispatchEvent(Object eventListener, Object listenerObject, int eventAction, CountDownLatch flushedSignal) {
+					// Signal that we have flushed all events
+					flushedSignal.countDown();
+				}
+			};
+
+			ListenerQueue<Object, Object, CountDownLatch> queue = getEquinoxContainer().newListenerQueue();
+			queue.queueListeners(Collections.<Object, Object> singletonMap(dispatcher, dispatcher).entrySet(), dispatcher);
+
+			// fire event with the flushedSignal latch
+			CountDownLatch flushedSignal = new CountDownLatch(1);
+			queue.dispatchEventAsynchronous(0, flushedSignal);
+
+			try {
+				// Wait for the flush signal; timeout after 30 seconds
+				flushedSignal.await(30, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				// ignore but reset the interrupted flag
+				Thread.currentThread().interrupt();
+			}
+		}
+
+		void addInitFrameworkListeners() {
+			BundleContext context = createBundleContext(false);
+			for (FrameworkListener initListener : initListeners) {
+				context.addFrameworkListener(initListener);
+			}
+		}
+
+		void removeInitListeners() {
+			BundleContext context = createBundleContext(false);
+			for (FrameworkListener initListener : initListeners) {
+				context.removeFrameworkListener(initListener);
+			}
+			initListeners.clear();
 		}
 
 		@Override
@@ -173,82 +310,6 @@ public class EquinoxBundle implements Bundle, BundleReference {
 	private final Object monitor = new Object();
 	private BundleContextImpl context;
 	private volatile SignerInfo[] signerInfos;
-
-	class EquinoxSystemModule extends SystemModule {
-		public EquinoxSystemModule(ModuleContainer container) {
-			super(container);
-		}
-
-		@Override
-		public Bundle getBundle() {
-			return EquinoxBundle.this;
-		}
-
-		@Override
-		protected void cleanup(ModuleRevision revision) {
-			// Nothing to do
-		}
-
-		@Override
-		protected void initWorker() throws BundleException {
-			equinoxContainer.getConfiguration().setConfiguration(Constants.FRAMEWORK_UUID, new UniversalUniqueIdentifier().toString());
-			equinoxContainer.init();
-			startWorker0();
-		}
-
-		@Override
-		protected void stopWorker() throws BundleException {
-			super.stopWorker();
-			stopWorker0();
-			equinoxContainer.close();
-		}
-
-		void asyncStop() throws BundleException {
-			lockStateChange(ModuleEvent.STOPPED);
-			try {
-				if (Module.ACTIVE_SET.contains(getState())) {
-					// TODO this still has a chance of a race condition:
-					// multiple threads could get started if stop is called over and over
-					Thread t = new Thread(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								stop();
-							} catch (BundleException e) {
-								// TODO not sure we can even log if this fails
-								e.printStackTrace();
-							}
-						}
-					}, "Framework stop"); //$NON-NLS-1$
-					t.start();
-				}
-			} finally {
-				unlockStateChange(ModuleEvent.STOPPED);
-			}
-		}
-
-		void asyncUpdate() throws BundleException {
-			lockStateChange(ModuleEvent.UPDATED);
-			try {
-				if (Module.ACTIVE_SET.contains(getState())) {
-					Thread t = new Thread(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								update();
-							} catch (BundleException e) {
-								e.printStackTrace();
-								// TODO not sure we can even log if this fails
-							}
-						}
-					}, "Framework update"); //$NON-NLS-1$
-					t.start();
-				}
-			} finally {
-				unlockStateChange(ModuleEvent.UPDATED);
-			}
-		}
-	}
 
 	private class EquinoxModule extends Module {
 

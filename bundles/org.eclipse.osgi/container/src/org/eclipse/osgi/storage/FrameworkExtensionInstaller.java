@@ -20,9 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
-import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.framework.util.ArrayMap;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
-import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.hookregistry.ActivatorHookFactory;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
@@ -34,7 +33,7 @@ import org.osgi.resource.Capability;
 public class FrameworkExtensionInstaller {
 	private static final ClassLoader CL = FrameworkExtensionInstaller.class.getClassLoader();
 	private static final Method ADD_FWK_URL_METHOD = findAddURLMethod(CL, "addURL"); //$NON-NLS-1$
-	private final List<BundleActivator> hookActivators = new ArrayList<BundleActivator>();
+	private final ArrayMap<BundleActivator, Bundle> hookActivators = new ArrayMap<BundleActivator, Bundle>(5);
 
 	private static Method findAddURLMethod(ClassLoader cl, String name) {
 		if (cl == null)
@@ -163,7 +162,7 @@ public class FrameworkExtensionInstaller {
 		List<ActivatorHookFactory> activatorHookFactories = hookRegistry.getActivatorHookFactories();
 		for (ActivatorHookFactory activatorFactory : activatorHookFactories) {
 			BundleActivator activator = activatorFactory.createActivator();
-			startActivator(activator, context);
+			startActivator(activator, context, null);
 		}
 		// start the extension bundle activators.  In Equinox we let
 		// framework extensions define Bundle-Activator headers.
@@ -178,16 +177,16 @@ public class FrameworkExtensionInstaller {
 	}
 
 	public void stopExtensionActivators(BundleContext context) {
-		List<BundleActivator> current;
+		ArrayMap<BundleActivator, Bundle> current;
 		synchronized (hookActivators) {
-			current = new ArrayList<BundleActivator>(hookActivators);
+			current = new ArrayMap<BundleActivator, Bundle>(hookActivators.getKeys(), hookActivators.getValues());
 			hookActivators.clear();
 		}
 		for (BundleActivator activator : current) {
 			try {
 				activator.stop(context);
 			} catch (Exception e) {
-				configuration.getHookRegistry().getContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error stopping extension.", e); //$NON-NLS-1$
+				configuration.getHookRegistry().getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, current.get(activator), e);
 			}
 		}
 	}
@@ -205,20 +204,20 @@ public class FrameworkExtensionInstaller {
 		try {
 			Class<?> activatorClass = Class.forName(activatorName);
 			BundleActivator activator = (BundleActivator) activatorClass.newInstance();
-			startActivator(activator, context);
+			startActivator(activator, context, extensionRevision.getBundle());
 		} catch (Exception e) {
-			configuration.getHookRegistry().getContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error activating extension.", e); //$NON-NLS-1$
+			configuration.getHookRegistry().getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, extensionRevision.getBundle(), e);
 		}
 	}
 
-	private void startActivator(BundleActivator activator, BundleContext context) {
+	private void startActivator(BundleActivator activator, BundleContext context, Bundle b) {
 		try {
 			activator.start(context);
 			synchronized (hookActivators) {
-				hookActivators.add(activator);
+				hookActivators.put(activator, b);
 			}
 		} catch (Exception e) {
-			configuration.getHookRegistry().getContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error activating extension.", e); //$NON-NLS-1$
+			configuration.getHookRegistry().getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, b, e);
 		}
 	}
 

@@ -14,6 +14,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.framework.util.ArrayMap;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.messages.Msg;
@@ -29,7 +30,7 @@ import org.osgi.framework.wiring.*;
 
 class OSGiFrameworkHooks {
 	static final String collisionHookName = CollisionHook.class.getName();
-	private final ResolverHookFactory resolverHookFactory;
+	private final CoreResolverHookFactory resolverHookFactory;
 	private final ModuleCollisionHook collisionHook;
 
 	OSGiFrameworkHooks(EquinoxContainer container, Storage storage) {
@@ -80,13 +81,7 @@ class OSGiFrameworkHooks {
 		}
 
 		private void notifyCollisionHooks(final int operationType, final Bundle target, Collection<Bundle> collisionCandidates) {
-			// TODO open question in the specification for ignoring collision hooks for the system bundle
-			// For now we will NOT ignore them
-			//if (operationType == CollisionHook.INSTALLING && target.getBundleId() == 0) {
-			// Make a copy of the collisions only for calling the hooks;
-			// Any removals from hooks are ignored in this case
-			//	collisionCandidates = new ArrayList<Bundle>(collisionCandidates);
-			//}
+			// Note that collision hook results are honored for the system bundle.
 			final Collection<Bundle> shrinkable = new ShrinkableCollection<Bundle>(collisionCandidates);
 			if (System.getSecurityManager() == null) {
 				notifyCollisionHooksPriviledged(operationType, target, shrinkable);
@@ -151,6 +146,7 @@ class OSGiFrameworkHooks {
 		final Debug debug;
 		final EquinoxContainer container;
 		final Storage storage;
+		volatile boolean inInit = false;
 
 		public CoreResolverHookFactory(EquinoxContainer container, Storage storage) {
 			this.container = container;
@@ -233,8 +229,8 @@ class OSGiFrameworkHooks {
 				if (debug.DEBUG_HOOKS) {
 					Debug.println("ResolverHook.filterResolvable(" + candidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				if (systemModule == null || !Module.RESOLVED_SET.contains(systemModule.getState())) {
-					// only allow the system bundle and its fragments resolve during boot up
+				if (isBootInit()) {
+					// only allow the system bundle and its fragments resolve during boot up and init
 					for (Iterator<BundleRevision> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
 						BundleRevision revision = iCandidates.next();
 						if ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) == 0) {
@@ -262,6 +258,10 @@ class OSGiFrameworkHooks {
 						}
 					}
 				}
+			}
+
+			private boolean isBootInit() {
+				return systemModule == null || !Module.RESOLVED_SET.contains(systemModule.getState()) || (systemModule.getState().equals(State.STARTING) && inInit);
 			}
 
 			public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
@@ -354,5 +354,13 @@ class OSGiFrameworkHooks {
 				this.report = report;
 			}
 		}
+	}
+
+	public void initBegin() {
+		resolverHookFactory.inInit = true;
+	}
+
+	public void initEnd() {
+		resolverHookFactory.inInit = false;
 	}
 }

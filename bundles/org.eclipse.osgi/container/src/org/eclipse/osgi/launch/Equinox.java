@@ -168,9 +168,16 @@ public class Equinox implements Framework {
 		systemBundle.init();
 	}
 
+	/**
+	 * @since 3.10
+	 */
+	@Override
+	public void init(FrameworkListener... listeners) throws BundleException {
+		systemBundle.init(listeners);
+	}
+
 	@Override
 	public FrameworkEvent waitForStop(long timeout) throws InterruptedException {
 		return systemBundle.waitForStop(timeout);
 	}
-
 }

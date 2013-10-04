@@ -196,4 +196,18 @@ public abstract class ModuleContainerAdaptor {
 	public void updatedDatabase() {
 		// do nothing by default
 	}
+
+	/**
+	 * This is called when the {@link SystemModule#init()} is running.
+	 */
+	public void initBegin() {
+		// do nothing by default
+	}
+
+	/**
+	 * This is called just before the {@link SystemModule#init()} returns.
+	 */
+	public void initEnd() {
+		// do nothing by default
+	}
 }

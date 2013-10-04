@@ -34,6 +34,7 @@ public abstract class SystemModule extends Module {
 		boolean lockedStarted = false;
 		lockStateChange(ModuleEvent.STARTED);
 		try {
+			getContainer().getAdaptor().initBegin();
 			lockedStarted = true;
 			checkValid();
 			if (ACTIVE_SET.contains(getState()))
@@ -83,6 +84,7 @@ public abstract class SystemModule extends Module {
 				throw new BundleException("Error initializing container.", BundleException.ACTIVATOR_ERROR, t); //$NON-NLS-1$
 			}
 		} finally {
+			getContainer().getAdaptor().initEnd();
 			if (lockedStarted) {
 				unlockStateChange(ModuleEvent.STARTED);
 			}

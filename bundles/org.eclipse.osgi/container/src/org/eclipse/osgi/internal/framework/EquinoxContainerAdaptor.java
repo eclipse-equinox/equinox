@@ -224,4 +224,14 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 			return;
 		saver.save();
 	}
+
+	@Override
+	public void initBegin() {
+		hooks.initBegin();
+	}
+
+	@Override
+	public void initEnd() {
+		hooks.initEnd();
+	}
 }
