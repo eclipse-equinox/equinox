@@ -12,8 +12,6 @@
 package org.eclipse.osgi.storage;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Dictionary;
@@ -182,24 +180,8 @@ public class StorageUtil {
 		return true;
 	}
 
-	@SuppressWarnings("deprecation")
 	public static URL encodeFileURL(File file) throws MalformedURLException {
-		try {
-			Method toURI = File.class.getMethod("toURI", (Class[]) null); //$NON-NLS-1$
-			Object uri = toURI.invoke(file, (Object[]) null);
-			Method toURL = uri.getClass().getMethod("toURL", (Class[]) null); //$NON-NLS-1$
-			return (URL) toURL.invoke(uri, (Object[]) null);
-		} catch (NoSuchMethodException e) {
-			// use toURL.
-		} catch (IllegalAccessException e) {
-			// use toURL.
-		} catch (InvocationTargetException e) {
-			if (e.getTargetException() instanceof MalformedURLException)
-				throw (MalformedURLException) e.getTargetException();
-			// use toURL
-		}
-		// TODO should we do this by hand ourselves?
-		return file.toURL();
+		return file.toURI().toURL();
 	}
 
 	public static byte[] getBytes(InputStream in, int length, int BUF_SIZE) throws IOException {
