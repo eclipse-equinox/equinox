@@ -116,8 +116,8 @@ public class DTOBuilder {
 		objects.put(cap, dto);
 		dto.namespace = cap.getNamespace();
 		dto.resource = getBundleRevisionDTO(cap.getResource());
-		dto.attributes = newMap(cap.getAttributes());
-		dto.directives = newMap(cap.getDirectives());
+		dto.attributes = newAttributesMapDTO(cap.getAttributes());
+		dto.directives = newDirectivesMapDTO(cap.getDirectives());
 		return dto;
 	}
 
@@ -150,8 +150,8 @@ public class DTOBuilder {
 		objects.put(req, dto);
 		dto.namespace = req.getNamespace();
 		dto.resource = getBundleRevisionDTO(req.getResource());
-		dto.attributes = newMap(req.getAttributes());
-		dto.directives = newMap(req.getDirectives());
+		dto.attributes = newAttributesMapDTO(req.getAttributes());
+		dto.directives = newDirectivesMapDTO(req.getDirectives());
 		return dto;
 	}
 
@@ -436,7 +436,40 @@ public class DTOBuilder {
 		return new HashMap<K, V>(size);
 	}
 
-	private static <K, V> Map<K, V> newMap(Map<? extends K, ? extends V> map) {
-		return new HashMap<K, V>(map);
+	/**
+	 * Assumes the input map is always <String,String>.
+	 */
+	private static Map<String, String> newDirectivesMapDTO(Map<String, String> map) {
+		Map<String, String> dto = new HashMap<String, String>(map);
+		return dto;
+	}
+
+	/**
+	 * Assumes the input map always has String keys and the values are of types:
+	 * String, Version, Long, Double or List of the previous types. Lists are copied
+	 * and Version objects are converted to String objects.
+	 */
+	private static Map<String, Object> newAttributesMapDTO(Map<String, Object> map) {
+		Map<String, Object> dto = new HashMap<String, Object>(map);
+		/* Lists are copied and Version objects are converted to String objects. */
+		for (Map.Entry<String, Object> entry : dto.entrySet()) {
+			Object value = entry.getValue();
+			if (value instanceof Version) {
+				entry.setValue(String.valueOf(value));
+				continue;
+			}
+			if (value instanceof List) {
+				List<Object> newList = new ArrayList<Object>((List<?>) value);
+				for (ListIterator<Object> iter = newList.listIterator(); iter.hasNext();) {
+					Object element = iter.next();
+					if (element instanceof Version) {
+						iter.set(String.valueOf(element));
+					}
+				}
+				entry.setValue(newList);
+				continue;
+			}
+		}
+		return dto;
 	}
 }
