@@ -105,12 +105,14 @@ public class DependentPolicy implements IBuddyPolicy {
 
 	private void basicAddImmediateDependents(ModuleWiring wiring) {
 		List<ModuleWire> providedWires = wiring.getProvidedModuleWires(null);
-		for (ModuleWire wire : providedWires) {
-			String namespace = wire.getRequirement().getNamespace();
-			if (PackageNamespace.PACKAGE_NAMESPACE.equals(namespace) || BundleNamespace.BUNDLE_NAMESPACE.equals(namespace)) {
-				ModuleWiring dependent = wire.getRequirerWiring();
-				if (!allDependents.contains(dependent)) {
-					allDependents.add(dependent);
+		if (providedWires != null) {
+			for (ModuleWire wire : providedWires) {
+				String namespace = wire.getRequirement().getNamespace();
+				if (PackageNamespace.PACKAGE_NAMESPACE.equals(namespace) || BundleNamespace.BUNDLE_NAMESPACE.equals(namespace)) {
+					ModuleWiring dependent = wire.getRequirerWiring();
+					if (!allDependents.contains(dependent)) {
+						allDependents.add(dependent);
+					}
 				}
 			}
 		}

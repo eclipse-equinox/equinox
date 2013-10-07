@@ -141,6 +141,7 @@ public class BundleLoader implements ModuleLoader {
 		// init the provided packages set
 		exportSources = new BundleLoaderSources(this);
 		List<ModuleCapability> exports = wiring.getModuleCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
+		exports = exports == null ? new ArrayList<ModuleCapability>(0) : exports;
 		exportedPackages = Collections.synchronizedCollection(exports.size() > 10 ? new HashSet<String>(exports.size()) : new ArrayList<String>(exports.size()));
 		initializeExports(exports, exportSources, exportedPackages);
 
@@ -168,17 +169,19 @@ public class BundleLoader implements ModuleLoader {
 	}
 
 	private static void initializeExports(List<ModuleCapability> exports, BundleLoaderSources sources, Collection<String> exportNames) {
-		for (ModuleCapability export : exports) {
-			String name = (String) export.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
-			if (sources.forceSourceCreation(export)) {
-				if (!exportNames.contains(name)) {
-					// must force filtered and reexport sources to be created early
-					// to prevent lazy normal package source creation.
-					// We only do this for the first export of a package name. 
-					sources.createPackageSource(export, true);
+		if (exports != null) {
+			for (ModuleCapability export : exports) {
+				String name = (String) export.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+				if (sources.forceSourceCreation(export)) {
+					if (!exportNames.contains(name)) {
+						// must force filtered and reexport sources to be created early
+						// to prevent lazy normal package source creation.
+						// We only do this for the first export of a package name. 
+						sources.createPackageSource(export, true);
+					}
 				}
+				exportNames.add(name);
 			}
-			exportNames.add(name);
 		}
 	}
 
@@ -674,8 +677,10 @@ public class BundleLoader implements ModuleLoader {
 		Collection<BundleLoader> visited = new ArrayList<BundleLoader>();
 		visited.add(this); // always add ourselves so we do not recurse back to ourselves
 		List<ModuleWire> requireBundles = wiring.getRequiredModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
-		for (ModuleWire bundleWire : requireBundles) {
-			((BundleLoader) bundleWire.getProviderWiring().getModuleLoader()).addProvidedPackageNames(pkgName, packages, subPackages, visited);
+		if (requireBundles != null) {
+			for (ModuleWire bundleWire : requireBundles) {
+				((BundleLoader) bundleWire.getProviderWiring().getModuleLoader()).addProvidedPackageNames(pkgName, packages, subPackages, visited);
+			}
 		}
 
 		boolean localSearch = (options & BundleWiring.LISTRESOURCES_LOCAL) != 0;
@@ -811,12 +816,14 @@ public class BundleLoader implements ModuleLoader {
 		}
 		// Must search required bundles that are exported first.
 		List<ModuleWire> requireBundles = wiring.getRequiredModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
-		for (ModuleWire bundleWire : requireBundles) {
-			if (local != null || BundleNamespace.VISIBILITY_REEXPORT.equals(bundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE))) {
-				// always add required bundles first if we locally provide the package
-				// This allows a bundle to provide a package from a required bundle without 
-				// re-exporting the whole required bundle.
-				((BundleLoader) bundleWire.getProviderWiring().getModuleLoader()).addExportedProvidersFor(packageName, result, visited);
+		if (requireBundles != null) {
+			for (ModuleWire bundleWire : requireBundles) {
+				if (local != null || BundleNamespace.VISIBILITY_REEXPORT.equals(bundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE))) {
+					// always add required bundles first if we locally provide the package
+					// This allows a bundle to provide a package from a required bundle without 
+					// re-exporting the whole required bundle.
+					((BundleLoader) bundleWire.getProviderWiring().getModuleLoader()).addExportedProvidersFor(packageName, result, visited);
+				}
 			}
 		}
 		// now add the locally provided package.
@@ -842,9 +849,11 @@ public class BundleLoader implements ModuleLoader {
 			}
 		}
 		List<ModuleWire> requireBundles = wiring.getRequiredModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
-		for (ModuleWire bundleWire : requireBundles) {
-			if (BundleNamespace.VISIBILITY_REEXPORT.equals(bundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE))) {
-				((BundleLoader) bundleWire.getProviderWiring().getModuleLoader()).addProvidedPackageNames(packageName, result, subPackages, visited);
+		if (requireBundles != null) {
+			for (ModuleWire bundleWire : requireBundles) {
+				if (BundleNamespace.VISIBILITY_REEXPORT.equals(bundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE))) {
+					((BundleLoader) bundleWire.getProviderWiring().getModuleLoader()).addProvidedPackageNames(packageName, result, subPackages, visited);
+				}
 			}
 		}
 	}
@@ -858,7 +867,7 @@ public class BundleLoader implements ModuleLoader {
 	}
 
 	private void addDynamicImportPackage(List<ModuleRequirement> packageImports) {
-		if (packageImports.isEmpty()) {
+		if (packageImports == null || packageImports.isEmpty()) {
 			return;
 		}
 		List<String> dynamicImports = new ArrayList<String>(packageImports.size());
@@ -1002,10 +1011,12 @@ public class BundleLoader implements ModuleLoader {
 				return importedSources;
 			}
 			List<ModuleWire> importWires = wiring.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
-			for (ModuleWire importWire : importWires) {
-				PackageSource source = createExportPackageSource(importWire, visited);
-				if (source != null) {
-					importedSources.add(source);
+			if (importWires != null) {
+				for (ModuleWire importWire : importWires) {
+					PackageSource source = createExportPackageSource(importWire, visited);
+					if (source != null) {
+						importedSources.add(source);
+					}
 				}
 			}
 			importsInitialized = true;
@@ -1040,8 +1051,10 @@ public class BundleLoader implements ModuleLoader {
 			visited.add(this); // always add ourselves so we do not recurse back to ourselves
 		List<PackageSource> result = new ArrayList<PackageSource>(3);
 		List<ModuleWire> requireBundles = wiring.getRequiredModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
-		for (ModuleWire bundleWire : requireBundles) {
-			((BundleLoader) bundleWire.getProviderWiring().getModuleLoader()).addExportedProvidersFor(pkgName, result, visited);
+		if (requireBundles != null) {
+			for (ModuleWire bundleWire : requireBundles) {
+				((BundleLoader) bundleWire.getProviderWiring().getModuleLoader()).addExportedProvidersFor(pkgName, result, visited);
+			}
 		}
 		// found some so cache the result for next time and return
 		PackageSource source;

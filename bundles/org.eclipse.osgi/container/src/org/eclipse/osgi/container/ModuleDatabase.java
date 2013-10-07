@@ -394,6 +394,7 @@ public class ModuleDatabase {
 				// remove any wires from unresolved wirings that got removed
 				for (Map.Entry<ModuleWiring, Collection<ModuleWire>> entry : toRemoveWireLists.entrySet()) {
 					List<ModuleWire> provided = entry.getKey().getProvidedModuleWires(null);
+					// No null checks; we are holding the write lock here.
 					provided.removeAll(entry.getValue());
 					entry.getKey().setProvidedWires(provided);
 					for (ModuleWire removedWire : entry.getValue()) {
@@ -612,6 +613,7 @@ public class ModuleDatabase {
 			if (wiring == null) {
 				continue;
 			}
+			// No null check; we are holding the database lock here.
 			for (ModuleWire wire : wiring.getRequiredModuleWires(null)) {
 				ModuleRequirement req = wire.getRequirement();
 				// Add all requirements that are not package requirements.

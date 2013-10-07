@@ -160,6 +160,10 @@ public class NativeCodeFinder {
 		}
 		if ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 			List<ModuleWire> hosts = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
+			if (hosts == null) {
+				// unresolved or invalid?  should not be possible
+				return Collections.emptyList();
+			}
 			if (!hosts.isEmpty()) {
 				// just use the first host wiring
 				wiring = hosts.get(0).getProviderWiring();

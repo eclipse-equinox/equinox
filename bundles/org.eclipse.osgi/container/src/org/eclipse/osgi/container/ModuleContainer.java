@@ -536,7 +536,8 @@ public final class ModuleContainer {
 			return null;
 		}
 		List<ModuleWire> wires = wiring.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
-		// work backwards to find the first wire with the dynamic requirement that matches package name
+		// No null check; we are holding the database lock here.
+		// Work backwards to find the first wire with the dynamic requirement that matches package name
 		for (int i = wires.size() - 1; i >= 0; i--) {
 			ModuleWire wire = wires.get(i);
 			if (dynamicPkgName.equals(wire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
@@ -1063,7 +1064,8 @@ public final class ModuleContainer {
 			if (wiring == null)
 				continue;
 			List<ModuleWire> provided = wiring.getProvidedModuleWires(null);
-			// add all requirers of the provided wires
+			// No null checks; we are holding the read lock here.
+			// Add all requirers of the provided wires
 			for (ModuleWire providedWire : provided) {
 				addDependents(providedWire.getRequirer().getRevisions().getModule(), wiringCopy, refreshClosure);
 			}
@@ -1091,7 +1093,8 @@ public final class ModuleContainer {
 		if (wiring == null)
 			return;
 		List<ModuleWire> provided = wiring.getProvidedModuleWires(null);
-		// add all requirers of the provided wires
+		// No null checks; we are holding the read lock here.
+		// Add all requirers of the provided wires
 		for (ModuleWire providedWire : provided) {
 			addDependents(providedWire.getRequirer(), wiringCopy, dependencyClosure);
 		}

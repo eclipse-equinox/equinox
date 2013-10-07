@@ -96,6 +96,10 @@ public class ClasspathManager {
 			return emptyFragments;
 		}
 		List<ModuleWire> fragmentWires = hostloader.getBundleLoader().getWiring().getProvidedModuleWires(HostNamespace.HOST_NAMESPACE);
+		if (fragmentWires == null) {
+			// we don't hold locks while checking the graph, just return if no longer valid
+			return emptyFragments;
+		}
 		List<FragmentClasspath> result = new ArrayList<FragmentClasspath>(fragmentWires.size());
 		for (ModuleWire fragmentWire : fragmentWires) {
 			ModuleRevision revision = fragmentWire.getRequirer();
