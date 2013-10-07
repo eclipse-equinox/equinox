@@ -352,7 +352,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * @param transitionEvent
 	 * @return true if the current thread holds the state change lock for the specified transition event.
 	 */
-	protected final boolean holdsTransitionEventLock(ModuleEvent transitionEvent) {
+	public final boolean holdsTransitionEventLock(ModuleEvent transitionEvent) {
 		return stateChangeLock.getHoldCount() > 0 && stateTransitionEvents.contains(transitionEvent);
 	}
 

@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.Settings;
+import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.internal.loader.*;
 import org.eclipse.osgi.internal.permadmin.BundlePermissions;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
@@ -147,8 +148,20 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 				}
 			}
 		}
-		Generation generation = (Generation) moduleWiring.getRevision().getRevisionInfo();
-		generation.clearManifestCache();
+		clearManifestCache(moduleWiring);
+
+	}
+
+	private void clearManifestCache(ModuleWiring moduleWiring) {
+		boolean frameworkActive = Module.ACTIVE_SET.contains(storage.getModuleContainer().getModule(0).getState());
+		ModuleRevision revision = moduleWiring.getRevision();
+		Module module = revision.getRevisions().getModule();
+		boolean isUninstallingOrUninstalled = State.UNINSTALLED.equals(module.getState()) ^ module.holdsTransitionEventLock(ModuleEvent.UNINSTALLED);
+		if (!frameworkActive || !isUninstallingOrUninstalled) {
+			// only do this when the framework is not active or when the bundle is not uninstalled
+			Generation generation = (Generation) moduleWiring.getRevision().getRevisionInfo();
+			generation.clearManifestCache();
+		}
 	}
 
 	static int getType(ContainerEvent type) {
