@@ -1269,6 +1269,42 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
+	public void testDynamicImport06() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+
+		Module dynamic3 = installDummyModule("dynamic2_v1.MF", "dynamic2_v1", container);
+
+		container.resolve(Arrays.asList(systemBundle, dynamic3), true);
+
+		Module f1 = installDummyModule("f1_v1.MF", "f1_v1", container);
+
+		ModuleWire dynamicWire = container.resolveDynamic("h1.a", dynamic3.getCurrentRevision());
+		Assert.assertNull("Dynamic wire found.", dynamicWire);
+		dynamicWire = container.resolveDynamic("f1.a", dynamic3.getCurrentRevision());
+		Assert.assertNull("Dynamic wire found.", dynamicWire);
+
+		Module h1 = installDummyModule("h1_v1.MF", "h1_v1", container);
+
+		dynamicWire = container.resolveDynamic("h1.a", dynamic3.getCurrentRevision());
+		Assert.assertNotNull("Dynamic wire not found.", dynamicWire);
+		Assert.assertEquals("Wrong package found.", "h1.a", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+
+		dynamicWire = container.resolveDynamic("f1.a", dynamic3.getCurrentRevision());
+		Assert.assertNotNull("Dynamic wire not found.", dynamicWire);
+		Assert.assertEquals("Wrong package found.", "f1.a", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+
+		ModuleWiring h1Wiring = h1.getCurrentRevision().getWiring();
+		Assert.assertNotNull("h1 wiring is null.", h1Wiring);
+
+		ModuleWiring f1Wiring = f1.getCurrentRevision().getWiring();
+		Assert.assertNotNull("f1 wiring is null.", f1Wiring);
+	}
+
+	@Test
 	public void testRequireBundleUses() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
@@ -1369,10 +1405,10 @@ public class TestModuleContainer extends AbstractTest {
 		Module p5v101 = installDummyModule("p5_v101.MF", "p5_v101", container);
 		Module p5v110 = installDummyModule("p5_v110.MF", "p5_v110", container);
 		Module p5v111 = installDummyModule("p5_v111.MF", "p5_v111", container);
-		Module p6v100 = installDummyModule("p6_v100.MF", "p6_v100", container);
-		Module p6v110 = installDummyModule("p6_v110.MF", "p6_v110", container);
-		Module p7v100 = installDummyModule("p7_v100.MF", "p7_v100", container);
-		Module p7v110 = installDummyModule("p7_v110.MF", "p7_v110", container);
+		installDummyModule("p6_v100.MF", "p6_v100", container);
+		installDummyModule("p6_v110.MF", "p6_v110", container);
+		installDummyModule("p7_v100.MF", "p7_v100", container);
+		installDummyModule("p7_v110.MF", "p7_v110", container);
 
 		container.resolve(null, false);
 

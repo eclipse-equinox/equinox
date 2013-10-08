@@ -37,6 +37,7 @@ public final class ModuleWiring implements BundleWiring {
 	private volatile List<ModuleWire> providedWires;
 	private volatile List<ModuleWire> requiredWires;
 	private volatile boolean isValid = true;
+	private Set<String> dynamicMisses;
 
 	ModuleWiring(ModuleRevision revision, List<ModuleCapability> capabilities, List<ModuleRequirement> requirements, List<ModuleWire> providedWires, List<ModuleWire> requiredWires, Collection<String> substitutedPkgNames) {
 		super();
@@ -396,6 +397,30 @@ public final class ModuleWiring implements BundleWiring {
 			requirements = updatedRequirements;
 		} finally {
 			moduleDatabase.writeUnlock();
+		}
+	}
+
+	void addDynamicPackageMiss(String packageName) {
+		synchronized (monitor) {
+			if (dynamicMisses == null) {
+				dynamicMisses = new HashSet<String>(5);
+			}
+			dynamicMisses.add(packageName);
+		}
+	}
+
+	boolean isDynamicPackageMiss(String packageName) {
+		synchronized (monitor) {
+			return dynamicMisses != null && dynamicMisses.contains(packageName);
+		}
+	}
+
+	void removeDynamicPackageMisses(Collection<String> packageNames) {
+		synchronized (monitor) {
+			if (dynamicMisses == null) {
+				return;
+			}
+			dynamicMisses.removeAll(packageNames);
 		}
 	}
 }

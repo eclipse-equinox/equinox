@@ -208,8 +208,10 @@ public class Capabilities {
 	 * become available for lookup with the {@link #findCapabilities(Requirement)}
 	 * method.
 	 * @param revision the revision which has capabilities to add
+	 * @return a collection of package names added for the osgi.wiring.package namespace
 	 */
-	public void addCapabilities(ModuleRevision revision) {
+	public Collection<String> addCapabilities(ModuleRevision revision) {
+		Collection<String> packageNames = null;
 		for (ModuleCapability capability : revision.getModuleCapabilities(null)) {
 			NamespaceSet namespaceSet = namespaceSets.get(capability.getNamespace());
 			if (namespaceSet == null) {
@@ -217,7 +219,19 @@ public class Capabilities {
 				namespaceSets.put(capability.getNamespace(), namespaceSet);
 			}
 			namespaceSet.addCapability(capability);
+			// For the package namespace we return a list of package names.
+			// This is used to clear the dynamic package miss caches.
+			if (PackageNamespace.PACKAGE_NAMESPACE.equals(capability.getNamespace())) {
+				Object packageName = capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+				if (packageName instanceof String) {
+					if (packageNames == null) {
+						packageNames = new ArrayList<String>();
+					}
+					packageNames.add((String) packageName);
+				}
+			}
 		}
+		return packageNames == null ? Collections.<String> emptyList() : packageNames;
 	}
 
 	/**

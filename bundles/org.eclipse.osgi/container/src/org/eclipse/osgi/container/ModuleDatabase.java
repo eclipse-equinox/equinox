@@ -794,9 +794,13 @@ public class ModuleDatabase {
 	 * This method must be called while holding the {@link #writeLock() write} lock.
 	 * @param revision the revision which has capabilities to add
 	 */
-	protected void addCapabilities(ModuleRevision revision) {
+	final void addCapabilities(ModuleRevision revision) {
 		checkWrite();
-		capabilities.addCapabilities(revision);
+		Collection<String> packageNames = capabilities.addCapabilities(revision);
+		// Clear the dynamic miss caches for all the package names added
+		for (ModuleWiring wiring : wirings.values()) {
+			wiring.removeDynamicPackageMisses(packageNames);
+		}
 	}
 
 	/**
@@ -823,7 +827,7 @@ public class ModuleDatabase {
 	 * @param requirement the requirement
 	 * @return the candidates for the requirement
 	 */
-	protected List<ModuleCapability> findCapabilities(Requirement requirement) {
+	final List<ModuleCapability> findCapabilities(Requirement requirement) {
 		readLock();
 		try {
 			return capabilities.findCapabilities(requirement);

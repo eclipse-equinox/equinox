@@ -483,6 +483,15 @@ public final class ModuleContainer {
 			Collection<ModuleRevision> unresolved = new ArrayList<ModuleRevision>();
 			moduleDatabase.readLock();
 			try {
+				ModuleWiring wiring = revision.getWiring();
+				if (wiring == null) {
+					// not resolved!!
+					return null;
+				}
+				if (wiring.isDynamicPackageMiss(dynamicPkgName)) {
+					// cached a miss for this package
+					return null;
+				}
 				// need to check that another thread has not done the work already
 				result = findExistingDynamicWire(revision.getWiring(), dynamicPkgName);
 				if (result != null) {
@@ -490,7 +499,8 @@ public final class ModuleContainer {
 				}
 				dynamicReqs = getDynamicRequirements(dynamicPkgName, revision);
 				if (dynamicReqs.isEmpty()) {
-					// do nothing
+					// save the miss for the package name
+					wiring.addDynamicPackageMiss(dynamicPkgName);
 					return null;
 				}
 				timestamp = moduleDatabase.getRevisionsTimestamp();
@@ -506,6 +516,7 @@ public final class ModuleContainer {
 			}
 
 			deltaWiring = null;
+			boolean foundCandidates = false;
 			for (DynamicModuleRequirement dynamicReq : dynamicReqs) {
 				ModuleResolutionReport report = moduleResolver.resolveDynamicDelta(dynamicReq, unresolved, wiringClone, moduleDatabase);
 				Map<Resource, List<Wire>> resolutionResult = report.getResolutionResult();
@@ -513,9 +524,31 @@ public final class ModuleContainer {
 				if (deltaWiring.get(revision) != null) {
 					break;
 				}
+				// Did not establish a valid wire.
+				// Check to see if any candidates were available.
+				// this is used for caching purposes below
+				List<Entry> revisionEntries = report.getEntries().get(revision);
+				if (revisionEntries == null || revisionEntries.isEmpty()) {
+					foundCandidates = true;
+				} else {
+					// must make sure there is no MISSING_CAPABILITY type entry
+					boolean isMissingCapability = false;
+					for (Entry entry : revisionEntries) {
+						isMissingCapability |= Entry.Type.MISSING_CAPABILITY.equals(entry.getType());
+					}
+					foundCandidates |= !isMissingCapability;
+				}
 			}
-			if (deltaWiring == null || deltaWiring.get(revision) == null)
+			if (deltaWiring == null || deltaWiring.get(revision) == null) {
+				if (!foundCandidates) {
+					ModuleWiring wiring = revision.getWiring();
+					if (wiring != null) {
+						// save the miss for the package name
+						wiring.addDynamicPackageMiss(dynamicPkgName);
+					}
+				}
 				return null; // nothing to do
+			}
 
 			modulesResolved = new ArrayList<Module>();
 			for (ModuleRevision deltaRevision : deltaWiring.keySet()) {

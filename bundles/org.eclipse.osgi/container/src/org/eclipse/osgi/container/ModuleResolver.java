@@ -825,6 +825,10 @@ final class ModuleResolver {
 
 		private Map<Resource, List<Wire>> resolveDynamic() throws ResolutionException {
 			List<Capability> dynamicMatches = filterProviders(dynamicReq.getOriginal(), moduleDatabase.findCapabilities(dynamicReq));
+			if (dynamicMatches.isEmpty())
+				reportBuilder.addEntry(dynamicReq.getResource(), Entry.Type.MISSING_CAPABILITY, dynamicReq.getOriginal());
+			else
+				computeUnresolvedProviders(dynamicReq.getOriginal(), dynamicMatches);
 			Collection<Resource> ondemandFragments = InternalUtils.asCollectionResource(moduleDatabase.getFragmentRevisions());
 
 			return new ResolverImpl(new Logger(0)).resolve(this, dynamicReq.getRevision(), dynamicReq.getOriginal(), dynamicMatches, ondemandFragments);
