@@ -136,11 +136,20 @@ public class Storage {
 			this.permissionData = loadPermissionData(data);
 			this.securityAdmin = new SecurityAdmin(null, this.permissionData);
 			this.adaptor = new EquinoxContainerAdaptor(equinoxContainer, this, generations);
-			this.moduleDatabase = new ModuleDatabase(adaptor);
+			this.moduleDatabase = new ModuleDatabase(this.adaptor);
 			this.moduleContainer = new ModuleContainer(this.adaptor, this.moduleDatabase);
 			if (data != null) {
-				moduleDatabase.load(data);
-				lastSavedTimestamp = moduleDatabase.getTimestamp();
+				try {
+					moduleDatabase.load(data);
+					lastSavedTimestamp = moduleDatabase.getTimestamp();
+				} catch (IllegalArgumentException e) {
+					equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, "Incompatible version.  Starting with empty framework.", e); //$NON-NLS-1$
+					// Clean up the cache.
+					// No need to clean up the database. Nothing got loaded.
+					cleanOSGiStorage(osgiLocation, childRoot);
+					// should free up the generations map
+					generations.clear();
+				}
 			}
 		} finally {
 			if (data != null) {
