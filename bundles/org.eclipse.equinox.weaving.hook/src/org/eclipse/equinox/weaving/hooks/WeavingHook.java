@@ -118,10 +118,9 @@ public class WeavingHook extends AbstractWeavingHook {
         final ISupplementerRegistry supplementerRegistry = getSupplementerRegistry();
         adaptorFactory.initialize(context, supplementerRegistry);
 
-        final ServiceReference serviceReference = context
-                .getServiceReference(PackageAdmin.class.getName());
-        final PackageAdmin packageAdmin = (PackageAdmin) context
-                .getService(serviceReference);
+        final ServiceReference<PackageAdmin> serviceReference = context
+                .getServiceReference(PackageAdmin.class);
+        final PackageAdmin packageAdmin = context.getService(serviceReference);
 
         supplementerRegistry.setBundleContext(context);
         supplementerRegistry.setPackageAdmin(packageAdmin);
@@ -171,7 +170,7 @@ public class WeavingHook extends AbstractWeavingHook {
      *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
      */
     @Override
-    public void recordClassDefine(final String name, final Class clazz,
+    public void recordClassDefine(final String name, final Class<?> clazz,
             final byte[] classbytes, final ClasspathEntry classpathEntry,
             final BundleEntry entry, final ClasspathManager manager) {
         if (clazz == null) {
