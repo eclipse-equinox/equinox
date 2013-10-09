@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2012 SAP AG
+ * Copyright (c) 2011, 2013 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -269,12 +269,13 @@ public class SshCommand {
     }
     
     class SshConfigurator implements ManagedService {
-    	@SuppressWarnings("rawtypes")
-		private Dictionary properties;
-		@SuppressWarnings({ "rawtypes", "unchecked" })
-		public synchronized void updated(Dictionary props) throws ConfigurationException {
+		private Dictionary<String, Object> properties;
+		@Override
+		public synchronized void updated(Dictionary<String, ?> props) throws ConfigurationException {
 			if (props != null) {
-				this.properties = props;
+				@SuppressWarnings("unchecked")
+				Dictionary<String, Object> unchecked = (Dictionary<String, Object>) props;
+				properties = unchecked;
 				properties.put(Constants.SERVICE_PID, SSH_PID);
 			} else {
 				return;
