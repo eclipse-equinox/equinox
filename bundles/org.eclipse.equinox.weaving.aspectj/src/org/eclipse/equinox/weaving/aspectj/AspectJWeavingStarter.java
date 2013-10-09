@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -89,12 +89,12 @@ public class AspectJWeavingStarter implements BundleActivator {
     }
 
     private void loadOptions(final BundleContext context) {
-        // all this is only to get the application args		
+        // all this is only to get the application args
         DebugOptions service = null;
-        final ServiceReference reference = context
-                .getServiceReference(DebugOptions.class.getName());
+        final ServiceReference<DebugOptions> reference = context
+                .getServiceReference(DebugOptions.class);
         if (reference != null)
-            service = (DebugOptions) context.getService(reference);
+            service = context.getService(reference);
         if (service == null) return;
         try {
             DEBUG = service.getBooleanOption(
