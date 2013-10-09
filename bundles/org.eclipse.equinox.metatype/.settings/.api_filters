@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.equinox.metatype" version="2">
+    <resource path="src/org/eclipse/equinox/metatype/impl/MetaTypeInformationImpl.java" type="org.eclipse.equinox.metatype.impl.MetaTypeInformationImpl">
+        <filter comment="This is an implementation, not a client, of MetaTypeInformation; therefore, @noimplement does not apply." id="574668824">
+            <message_arguments>
+                <message_argument value="EquinoxMetaTypeInformation"/>
+                <message_argument value="MetaTypeInformationImpl"/>
+                <message_argument value="MetaTypeInformation"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/eclipse/equinox/metatype/impl/MetaTypeProviderTracker.java" type="org.eclipse.equinox.metatype.impl.MetaTypeProviderTracker">
+        <filter comment="This is an implementation, not a client, of MetaTypeInformation; therefore, @noimplement does not apply." id="574668824">
+            <message_arguments>
+                <message_argument value="EquinoxMetaTypeInformation"/>
+                <message_argument value="MetaTypeProviderTracker"/>
+                <message_argument value="MetaTypeInformation"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/eclipse/equinox/metatype/impl/MetaTypeServiceImpl.java" type="org.eclipse.equinox.metatype.impl.MetaTypeServiceImpl">
+        <filter comment="This is an implementation, not a client, of MetaTypeService; therefore, @noimplement does not apply." id="574668824">
+            <message_arguments>
+                <message_argument value="EquinoxMetaTypeService"/>
+                <message_argument value="MetaTypeServiceImpl"/>
+                <message_argument value="MetaTypeService"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>

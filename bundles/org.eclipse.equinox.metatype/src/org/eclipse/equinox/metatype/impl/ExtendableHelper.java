@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others
+ * Copyright (c) 2011, 2013 IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,16 +10,14 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.impl;
 
-import org.eclipse.equinox.metatype.Extendable;
-
 import java.util.*;
+import org.eclipse.equinox.metatype.Extendable;
 
 public class ExtendableHelper implements Extendable {
 	private final Map<String, Map<String, String>> attributes;
 
-	@SuppressWarnings("unchecked")
 	public ExtendableHelper() {
-		this(Collections.EMPTY_MAP);
+		this(Collections.<String, Map<String, String>> emptyMap());
 	}
 
 	public ExtendableHelper(Map<String, Map<String, String>> attributes) {
