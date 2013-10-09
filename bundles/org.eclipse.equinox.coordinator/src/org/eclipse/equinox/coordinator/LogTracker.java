@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1998, 2011 IBM Corporation and others.
+ * Copyright (c) 1998, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.equinox.coordinator;
 import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.Date;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
@@ -55,13 +56,11 @@ public class LogTracker extends ServiceTracker<LogService, LogService> implement
 		log(null, level, message, exception);
 	}
 
-	public void log(@SuppressWarnings("rawtypes")
-	ServiceReference reference, int level, String message) {
+	public void log(ServiceReference reference, int level, String message) {
 		log(reference, level, message, null);
 	}
 
-	public synchronized void log(@SuppressWarnings("rawtypes")
-	ServiceReference reference, int level, String message, Throwable exception) {
+	public synchronized void log(ServiceReference reference, int level, String message, Throwable exception) {
 		ServiceReference<LogService>[] references = getServiceReferences();
 
 		if (references != null) {
