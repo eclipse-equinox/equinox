@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-SymbolicName: org.eclipse.equinox.console.ssh
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.100.qualifier
 Bundle-Activator: org.eclipse.equinox.console.ssh.Activator
 Bundle-Vendor: %bundleVendor
 Bundle-Localization: plugin
@@ -24,7 +24,7 @@ Import-Package: javax.security.auth;resolution:=optional,
  org.eclipse.equinox.console.common,
  org.eclipse.equinox.console.common.terminal,
  org.osgi.framework,
- org.osgi.service.cm;resolution:=optional,
+ org.osgi.service.cm; version="[1.4, 2.0)"; resolution:=optional,
  org.osgi.util.tracker
 Export-Package: org.eclipse.equinox.console.internal.ssh;x-internal:=true,
  org.eclipse.equinox.console.jaas,
