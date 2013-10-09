@@ -63,7 +63,6 @@ public class TargetMap {
 	}
 
 	public static List<String> getPids(Object pid) {
-		@SuppressWarnings("unchecked")
 		List<String> specifiedPids = Collections.EMPTY_LIST;
 		if (pid == null)
 			return specifiedPids;
@@ -103,13 +102,11 @@ public class TargetMap {
 		return targets;
 	}
 
-	@SuppressWarnings("unchecked")
 	List<ServiceReference<?>> getTargets(String qualifiedPid) {
 		Collection<ServiceReference<?>> targets = qualifiedPidToTargets.get(qualifiedPid);
 		return targets == null ? Collections.EMPTY_LIST : new ArrayList<ServiceReference<?>>(targets);
 	}
 
-	@SuppressWarnings("unchecked")
 	List<List<String>> getQualifiedPids(ServiceReference<?> ref) {
 		List<List<String>> pids = targetToQualifiedPids.get(ref);
 		return pids == null ? Collections.EMPTY_LIST : pids;

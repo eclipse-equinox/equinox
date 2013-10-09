@@ -76,7 +76,6 @@ public class PluginManager {
 		 * Rather than returning null if no references are present, it
 		 * returns an empty array.
 		 */
-		@SuppressWarnings("unchecked")
 		public ServiceReference<ConfigurationPlugin>[] getServiceReferences() {
 			synchronized (serviceReferences) {
 				return serviceReferences.toArray(new ServiceReference[serviceReferences.size()]);
