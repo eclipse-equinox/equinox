@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * A dynamic list of transformers.
  */
-public class TransformerList extends ServiceTracker {
+public class TransformerList extends ServiceTracker<Object, Object> {
 
 	/**
 	 * The stale state of this list.  Set to true every time a new matching service instance is detected.
@@ -31,7 +31,7 @@ public class TransformerList extends ServiceTracker {
 	/**
 	 * Local cache of transformers.
 	 */
-	private HashMap transformers = new HashMap();
+	private HashMap<String, StreamTransformer> transformers = new HashMap<String, StreamTransformer>();
 	private final EquinoxLogServices logServices;
 
 	/**
@@ -57,7 +57,7 @@ public class TransformerList extends ServiceTracker {
 		if (stale) {
 			rebuildTransformersMap();
 		}
-		return (StreamTransformer) transformers.get(type);
+		return transformers.get(type);
 	}
 
 	public synchronized boolean hasTransformers() {
@@ -72,19 +72,19 @@ public class TransformerList extends ServiceTracker {
 	 */
 	private void rebuildTransformersMap() {
 		transformers.clear();
-		ServiceReference[] serviceReferences = getServiceReferences();
+		ServiceReference<Object>[] serviceReferences = getServiceReferences();
 		stale = false;
 		if (serviceReferences == null)
 			return;
 
 		for (int i = 0; i < serviceReferences.length; i++) {
-			ServiceReference serviceReference = serviceReferences[i];
+			ServiceReference<Object> serviceReference = serviceReferences[i];
 			String type = serviceReference.getProperty(TransformTuple.TRANSFORMER_TYPE).toString();
 			if (type == null || transformers.get(type) != null)
 				continue;
 			Object object = getService(serviceReference);
 			if (object instanceof StreamTransformer)
-				transformers.put(type, object);
+				transformers.put(type, (StreamTransformer) object);
 			else {
 				ProxyStreamTransformer transformer;
 				try {
@@ -99,7 +99,7 @@ public class TransformerList extends ServiceTracker {
 		}
 	}
 
-	public Object addingService(ServiceReference reference) {
+	public Object addingService(ServiceReference<Object> reference) {
 		try {
 			return super.addingService(reference);
 		} finally {
@@ -107,12 +107,12 @@ public class TransformerList extends ServiceTracker {
 		}
 	}
 
-	public void modifiedService(ServiceReference reference, Object service) {
+	public void modifiedService(ServiceReference<Object> reference, Object service) {
 		super.modifiedService(reference, service);
 		stale = true;
 	}
 
-	public void removedService(ServiceReference reference, Object service) {
+	public void removedService(ServiceReference<Object> reference, Object service) {
 		super.removedService(reference, service);
 		stale = true;
 	}
