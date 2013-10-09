@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1998, 2010 IBM Corporation and others.
+ * Copyright (c) 1998, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,14 +55,10 @@ public class LogTracker extends ServiceTracker<LogService, LogService> implement
 		log(null, level, message, exception);
 	}
 
-	// Must suppress warnings here because the log service is not
-	@SuppressWarnings("rawtypes")
 	public void log(ServiceReference reference, int level, String message) {
 		log(reference, level, message, null);
 	}
 
-	// Must suppress warnings here because the log service is not
-	@SuppressWarnings("rawtypes")
 	public synchronized void log(ServiceReference reference, int level, String message, Throwable exception) {
 		ServiceReference<LogService>[] references = getServiceReferences();
 
