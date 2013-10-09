@@ -107,9 +107,10 @@ class ConfigurationStore {
 			return null;
 		}
 		try {
+			final File storeCopy = store;
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<File>() {
 				public File run() throws Exception {
-					File toFile = token == null ? File.createTempFile(DATA_PRE, CFG_EXT, store) : (File) token;
+					File toFile = token == null ? File.createTempFile(DATA_PRE, CFG_EXT, storeCopy) : (File) token;
 					writeConfigurationFile(toFile, configProperties);
 					return toFile;
 				}
