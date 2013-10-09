@@ -24,7 +24,9 @@ import org.eclipse.osgi.framework.util.ArrayMap;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.hookregistry.ActivatorHookFactory;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
+import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.wiring.BundleWiring;
@@ -162,7 +164,11 @@ public class FrameworkExtensionInstaller {
 		List<ActivatorHookFactory> activatorHookFactories = hookRegistry.getActivatorHookFactories();
 		for (ActivatorHookFactory activatorFactory : activatorHookFactories) {
 			BundleActivator activator = activatorFactory.createActivator();
-			startActivator(activator, context, null);
+			try {
+				startActivator(activator, context, null);
+			} catch (Exception e) {
+				configuration.getHookRegistry().getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, null, e);
+			}
 		}
 		// start the extension bundle activators.  In Equinox we let
 		// framework extensions define Bundle-Activator headers.
@@ -186,7 +192,9 @@ public class FrameworkExtensionInstaller {
 			try {
 				activator.stop(context);
 			} catch (Exception e) {
-				configuration.getHookRegistry().getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, current.get(activator), e);
+				Bundle b = current.get(activator);
+				BundleException eventException = new BundleException(NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, new Object[] {activator.getClass(), "stop", b == null ? "" : b.getSymbolicName()}), BundleException.ACTIVATOR_ERROR, e); //$NON-NLS-1$ //$NON-NLS-2$
+				configuration.getHookRegistry().getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, b, eventException);
 			}
 		}
 	}
@@ -201,23 +209,28 @@ public class FrameworkExtensionInstaller {
 		if (activatorName == null) {
 			return;
 		}
+
+		BundleActivator activator = null;
 		try {
 			Class<?> activatorClass = Class.forName(activatorName);
-			BundleActivator activator = (BundleActivator) activatorClass.newInstance();
+			activator = (BundleActivator) activatorClass.newInstance();
 			startActivator(activator, context, extensionRevision.getBundle());
 		} catch (Exception e) {
-			configuration.getHookRegistry().getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, extensionRevision.getBundle(), e);
+			BundleException eventException;
+			if (activator == null) {
+				eventException = new BundleException(Msg.BundleContextImpl_LoadActivatorError, BundleException.ACTIVATOR_ERROR, e);
+			} else {
+				eventException = new BundleException(NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, new Object[] {activator.getClass(), "start", extensionRevision.getSymbolicName()}), BundleException.ACTIVATOR_ERROR, e); //$NON-NLS-1$
+			}
+			configuration.getHookRegistry().getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, extensionRevision.getBundle(), eventException);
 		}
+
 	}
 
-	private void startActivator(BundleActivator activator, BundleContext context, Bundle b) {
-		try {
-			activator.start(context);
-			synchronized (hookActivators) {
-				hookActivators.put(activator, b);
-			}
-		} catch (Exception e) {
-			configuration.getHookRegistry().getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, b, e);
+	private void startActivator(BundleActivator activator, BundleContext context, Bundle b) throws Exception {
+		activator.start(context);
+		synchronized (hookActivators) {
+			hookActivators.put(activator, b);
 		}
 	}
 
