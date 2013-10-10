@@ -10,9 +10,30 @@
  *******************************************************************************/
 package org.eclipse.osgi.compatibility.plugins;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -26,7 +47,9 @@ import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.eclipse.osgi.service.resolver.VersionRange;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 
 /**
  * Internal class.
@@ -248,8 +271,19 @@ public class PluginConverterImpl implements PluginConverter {
 			generateTimestamp();
 		}
 	}
+	
+	private <K, V> Map<K, V> convertDictionaryToMap(Dictionary<K, V> dictionary) {
+		if (dictionary == null)
+			return Collections.emptyMap();
+		Map<K, V> result = new HashMap<K, V>(dictionary.size());
+		Enumeration<K> keys = dictionary.keys();
+		while (keys.hasMoreElements()) {
+			K key = keys.nextElement();
+			result.put(key, dictionary.get(key));
+		}
+		return result;
+	}
 
-	@SuppressWarnings("deprecation")
 	public void writeManifest(File generationLocation, Dictionary<String, String> manifestToWrite, boolean compatibilityManifest) throws PluginConversionException {
 		long start = System.currentTimeMillis();
 		try {
@@ -261,7 +295,7 @@ public class PluginConverterImpl implements PluginConverter {
 				throw new PluginConversionException(message);
 			}
 			// replaces any eventual existing file
-			manifestToWrite = new Hashtable<String, String>((Hashtable) manifestToWrite);
+			manifestToWrite = new Hashtable<String, String>(convertDictionaryToMap(manifestToWrite));
 			// MANIFEST.MF files must be written using UTF-8
 			out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(generationLocation), UTF_8));
 			writeEntry(MANIFEST_VERSION, manifestToWrite.remove(MANIFEST_VERSION));
@@ -379,7 +413,6 @@ public class PluginConverterImpl implements PluginConverter {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	private void generateProvidePackage() {
 		Set<String> exports = getExports();
 		if (exports != null && exports.size() != 0) {
@@ -387,7 +420,6 @@ public class PluginConverterImpl implements PluginConverter {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	private void generateRequireBundle() {
 		ArrayList<PluginParser.Prerequisite> requiredBundles = pluginInfo.getRequires();
 		if (requiredBundles.size() == 0)
@@ -423,7 +455,6 @@ public class PluginConverterImpl implements PluginConverter {
 		generatedManifest.put(GENERATED_FROM, Long.toString(getTimeStamp(pluginManifestLocation, manifestType)) + ";" + MANIFEST_TYPE_ATTRIBUTE + "=" + manifestType); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	@SuppressWarnings("deprecation")
 	private void generateEclipseHeaders() {
 		if (pluginInfo.isFragment())
 			return;
