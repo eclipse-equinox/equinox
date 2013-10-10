@@ -1021,7 +1021,7 @@ public final class ModuleContainer {
 			}
 			Map<ModuleRevision, ModuleWiring> wirings = moduleDatabase.getWiringsCopy();
 			for (ModuleWiring wiring : wirings.values()) {
-				wiring.invalidate();
+				wiring.unload();
 			}
 		} finally {
 			if (modules != null) {
@@ -1040,7 +1040,7 @@ public final class ModuleContainer {
 	}
 
 	/**
-	 * Sets all the module states uninstalled exepect for the system module.
+	 * Sets all the module states uninstalled except for the system module.
 	 * @throws BundleException
 	 */
 	public void setInitialModuleStates() throws BundleException {
@@ -1066,7 +1066,7 @@ public final class ModuleContainer {
 			}
 			Map<ModuleRevision, ModuleWiring> wirings = moduleDatabase.getWiringsCopy();
 			for (ModuleWiring wiring : wirings.values()) {
-				wiring.invalidate();
+				wiring.unload();
 			}
 		} finally {
 			moduleDatabase.readUnlock();

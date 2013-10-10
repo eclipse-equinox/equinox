@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,11 +50,13 @@ public class DependentPolicy implements IBuddyPolicy {
 		for (int i = 0; i < allDependents.size() && result == null; i++) {
 			ModuleWiring searchWiring = allDependents.get(i);
 			BundleLoader searchLoader = (BundleLoader) searchWiring.getModuleLoader();
-			try {
-				result = searchLoader.findClass(name);
-			} catch (ClassNotFoundException e) {
-				if (result == null)
-					addDependent(i, searchWiring);
+			if (searchLoader != null) {
+				try {
+					result = searchLoader.findClass(name);
+				} catch (ClassNotFoundException e) {
+					if (result == null)
+						addDependent(i, searchWiring);
+				}
 			}
 		}
 		return result;
@@ -76,9 +78,11 @@ public class DependentPolicy implements IBuddyPolicy {
 		for (int i = 0; i < allDependents.size() && result == null; i++) {
 			ModuleWiring searchWiring = allDependents.get(i);
 			BundleLoader searchLoader = (BundleLoader) searchWiring.getModuleLoader();
-			result = searchLoader.findResource(name);
-			if (result == null) {
-				addDependent(i, searchWiring);
+			if (searchLoader != null) {
+				result = searchLoader.findResource(name);
+				if (result == null) {
+					addDependent(i, searchWiring);
+				}
 			}
 		}
 		return result;
@@ -93,11 +97,13 @@ public class DependentPolicy implements IBuddyPolicy {
 		for (int i = 0; i < allDependents.size(); i++) {
 			ModuleWiring searchWiring = allDependents.get(i);
 			BundleLoader searchLoader = (BundleLoader) searchWiring.getModuleLoader();
-			try {
-				results = BundleLoader.compoundEnumerations(results, searchLoader.findResources(name));
-				addDependent(i, searchWiring);
-			} catch (IOException e) {
-				//Ignore and keep looking
+			if (searchLoader != null) {
+				try {
+					results = BundleLoader.compoundEnumerations(results, searchLoader.findResources(name));
+					addDependent(i, searchWiring);
+				} catch (IOException e) {
+					//Ignore and keep looking
+				}
 			}
 		}
 		return results;

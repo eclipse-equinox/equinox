@@ -730,8 +730,10 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		if (wiring == null) {
 			return null;
 		}
-
 		BundleLoader loader = (BundleLoader) wiring.getModuleLoader();
+		if (loader == null) {
+			return null;
+		}
 		List<Capability> metadata = wiring.getRevision().getCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
 		if (metadata.isEmpty()) {
 			return null;

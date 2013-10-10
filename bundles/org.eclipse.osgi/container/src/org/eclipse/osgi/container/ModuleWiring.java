@@ -233,6 +233,9 @@ public final class ModuleWiring implements BundleWiring {
 			sm.checkPermission(GET_CLASSLOADER_PERM);
 		}
 
+		if (!isValid) {
+			return null;
+		}
 		ModuleLoader current = getModuleLoader();
 		if (current == null) {
 			// must not be valid
@@ -248,10 +251,10 @@ public final class ModuleWiring implements BundleWiring {
 	 */
 	public ModuleLoader getModuleLoader() {
 		synchronized (monitor) {
-			if (!isValid) {
-				return null;
-			}
 			if (loader == null) {
+				if (!isValid) {
+					return null;
+				}
 				loader = revision.getRevisions().getContainer().adaptor.createModuleLoader(this);
 			}
 			return loader;
@@ -271,6 +274,9 @@ public final class ModuleWiring implements BundleWiring {
 	public List<URL> findEntries(String path, String filePattern, int options) {
 		if (!hasResourcePermission())
 			return Collections.emptyList();
+		if (!isValid) {
+			return null;
+		}
 		ModuleLoader current = getModuleLoader();
 		if (current == null) {
 			// must not be valid
@@ -283,6 +289,9 @@ public final class ModuleWiring implements BundleWiring {
 	public Collection<String> listResources(String path, String filePattern, int options) {
 		if (!hasResourcePermission())
 			return Collections.emptyList();
+		if (!isValid) {
+			return null;
+		}
 		ModuleLoader current = getModuleLoader();
 		if (current == null) {
 			// must not be valid
@@ -328,12 +337,26 @@ public final class ModuleWiring implements BundleWiring {
 		this.capabilities = capabilities;
 	}
 
+	void unload() {
+		// When unloading a wiring we need to release the loader.
+		// This is so that the loaders are not pinned when stopping the framework.
+		// Then the framework can be relaunched, at which point new loaders will
+		// get created.
+		invalidate0(true);
+	}
+
 	void invalidate() {
+		invalidate0(false);
+	}
+
+	private void invalidate0(boolean releaseLoader) {
 		ModuleLoader current;
 		synchronized (monitor) {
 			this.isValid = false;
 			current = loader;
-			loader = null;
+			if (releaseLoader) {
+				loader = null;
+			}
 		}
 		revision.getRevisions().getContainer().getAdaptor().invalidateWiring(this, current);
 	}

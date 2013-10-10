@@ -186,8 +186,11 @@ public class BundleLoader implements ModuleLoader {
 	}
 
 	final PackageSource createExportPackageSource(ModuleWire importWire, Collection<BundleLoader> visited) {
-		BundleLoader providerLoader = (BundleLoader) importWire.getProviderWiring().getModuleLoader();
 		String name = (String) importWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+		BundleLoader providerLoader = (BundleLoader) importWire.getProviderWiring().getModuleLoader();
+		if (providerLoader == null) {
+			return createMultiSource(name, new PackageSource[0]);
+		}
 		PackageSource requiredSource = providerLoader.findRequiredSource(name, visited);
 		PackageSource exportSource = providerLoader.exportSources.createPackageSource(importWire.getCapability(), false);
 		if (requiredSource == null)
@@ -678,7 +681,10 @@ public class BundleLoader implements ModuleLoader {
 		List<ModuleWire> requireBundles = wiring.getRequiredModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
 		if (requireBundles != null) {
 			for (ModuleWire bundleWire : requireBundles) {
-				((BundleLoader) bundleWire.getProviderWiring().getModuleLoader()).addProvidedPackageNames(pkgName, packages, subPackages, visited);
+				BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
+				if (loader != null) {
+					loader.addProvidedPackageNames(pkgName, packages, subPackages, visited);
+				}
 			}
 		}
 
@@ -821,7 +827,10 @@ public class BundleLoader implements ModuleLoader {
 					// always add required bundles first if we locally provide the package
 					// This allows a bundle to provide a package from a required bundle without 
 					// re-exporting the whole required bundle.
-					((BundleLoader) bundleWire.getProviderWiring().getModuleLoader()).addExportedProvidersFor(packageName, result, visited);
+					BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
+					if (loader != null) {
+						loader.addExportedProvidersFor(packageName, result, visited);
+					}
 				}
 			}
 		}
@@ -851,7 +860,10 @@ public class BundleLoader implements ModuleLoader {
 		if (requireBundles != null) {
 			for (ModuleWire bundleWire : requireBundles) {
 				if (BundleNamespace.VISIBILITY_REEXPORT.equals(bundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE))) {
-					((BundleLoader) bundleWire.getProviderWiring().getModuleLoader()).addProvidedPackageNames(packageName, result, subPackages, visited);
+					BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
+					if (loader != null) {
+						loader.addProvidedPackageNames(packageName, result, subPackages, visited);
+					}
 				}
 			}
 		}
@@ -1052,7 +1064,10 @@ public class BundleLoader implements ModuleLoader {
 		List<ModuleWire> requireBundles = wiring.getRequiredModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
 		if (requireBundles != null) {
 			for (ModuleWire bundleWire : requireBundles) {
-				((BundleLoader) bundleWire.getProviderWiring().getModuleLoader()).addExportedProvidersFor(pkgName, result, visited);
+				BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
+				if (loader != null) {
+					loader.addExportedProvidersFor(pkgName, result, visited);
+				}
 			}
 		}
 		// found some so cache the result for next time and return

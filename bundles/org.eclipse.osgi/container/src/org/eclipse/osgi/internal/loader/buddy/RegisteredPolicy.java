@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,11 +68,13 @@ public class RegisteredPolicy extends DependentPolicy {
 		for (int i = 0; i < size && result == null; i++) {
 			ModuleWiring searchWiring = allDependents.get(i);
 			BundleLoader searchLoader = (BundleLoader) searchWiring.getModuleLoader();
-			try {
-				result = searchLoader.findClass(name);
-			} catch (ClassNotFoundException e) {
-				//Nothing to do, just keep looking
-				continue;
+			if (searchLoader != null) {
+				try {
+					result = searchLoader.findClass(name);
+				} catch (ClassNotFoundException e) {
+					//Nothing to do, just keep looking
+					continue;
+				}
 			}
 		}
 		return result;
@@ -87,7 +89,9 @@ public class RegisteredPolicy extends DependentPolicy {
 		for (int i = 0; i < size && result == null; i++) {
 			ModuleWiring searchWiring = allDependents.get(i);
 			BundleLoader searchLoader = (BundleLoader) searchWiring.getModuleLoader();
-			result = searchLoader.findResource(name);
+			if (searchLoader != null) {
+				result = searchLoader.findResource(name);
+			}
 		}
 		return result;
 	}
@@ -102,7 +106,9 @@ public class RegisteredPolicy extends DependentPolicy {
 			try {
 				ModuleWiring searchWiring = allDependents.get(i);
 				BundleLoader searchLoader = (BundleLoader) searchWiring.getModuleLoader();
-				results = BundleLoader.compoundEnumerations(results, searchLoader.findResources(name));
+				if (searchLoader != null) {
+					results = BundleLoader.compoundEnumerations(results, searchLoader.findResources(name));
+				}
 			} catch (IOException e) {
 				//Ignore and keep looking
 			}
