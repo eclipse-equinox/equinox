@@ -264,7 +264,6 @@ public class BundleLoader implements ModuleLoader {
 		synchronized (classLoaderMonitor) {
 			if (classloader != null) {
 				classloader.getClasspathManager().close();
-				classloader = null;
 			}
 		}
 	}
