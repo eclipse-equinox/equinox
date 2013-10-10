@@ -7,4 +7,4 @@ Fragment-Host: org.eclipse.osgi;bundle-version="[3.10.0,4.0.0)"
 Export-Package: org.eclipse.equinox.service.weaving,
  org.eclipse.equinox.weaving.adaptors;x-friends:="org.eclipse.equinox.weaving.tests",
  org.eclipse.equinox.weaving.hooks;x-friends:="org.eclipse.equinox.weaving.tests"
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
