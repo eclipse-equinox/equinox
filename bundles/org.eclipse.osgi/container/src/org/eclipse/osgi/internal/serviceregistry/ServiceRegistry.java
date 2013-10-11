@@ -1001,8 +1001,7 @@ public class ServiceRegistry {
 			}
 
 			if ((result == null) || result.isEmpty()) {
-				@SuppressWarnings("unchecked")
-				List<ServiceRegistrationImpl<?>> empty = Collections.EMPTY_LIST;
+				List<ServiceRegistrationImpl<?>> empty = Collections.<ServiceRegistrationImpl<?>> emptyList();
 				return empty;
 			}
 
@@ -1039,8 +1038,7 @@ public class ServiceRegistry {
 		List<ServiceRegistrationImpl<?>> result = publishedServicesByContext.get(context);
 
 		if ((result == null) || result.isEmpty()) {
-			@SuppressWarnings("unchecked")
-			List<ServiceRegistrationImpl<?>> empty = Collections.EMPTY_LIST;
+			List<ServiceRegistrationImpl<?>> empty = Collections.<ServiceRegistrationImpl<?>> emptyList();
 			return empty;
 		}
 

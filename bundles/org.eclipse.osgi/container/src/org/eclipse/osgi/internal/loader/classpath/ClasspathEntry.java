@@ -45,7 +45,6 @@ public class ClasspathEntry {
 	private KeyedHashSet userObjects = null;
 
 	// TODO Note that PDE has internal dependency on this field type/name (bug 267238)
-	@SuppressWarnings("unused")
 	private final PDEData data;
 
 	/**

@@ -855,8 +855,7 @@ public class ClasspathManager {
 		for (FragmentClasspath fragmentClasspath : currentFragments)
 			generations.add(fragmentClasspath.getGeneration());
 
-		@SuppressWarnings("unchecked")
-		List<URL> result = Collections.EMPTY_LIST;
+		List<URL> result = Collections.<URL> emptyList();
 		// now search over all the bundle files
 		Enumeration<URL> eURLs = Storage.findEntries(generations, path, filePattern, options);
 		if (eURLs == null)

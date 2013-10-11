@@ -5,6 +5,5 @@
 	<classpathentry kind="src" path="osgi/src"/>
 	<classpathentry kind="src" path="supplement/src"/>
 	<classpathentry kind="src" path="container/src"/>
-	<classpathentry kind="lib" path="osgi/osgi.annotation.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

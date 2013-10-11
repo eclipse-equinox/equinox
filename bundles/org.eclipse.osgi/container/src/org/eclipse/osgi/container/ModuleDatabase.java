@@ -64,7 +64,7 @@ public class ModuleDatabase {
 	/**
 	 * The adaptor for this database
 	 */
-	private final ModuleContainerAdaptor adaptor;
+	final ModuleContainerAdaptor adaptor;
 
 	/**
 	 * A map of modules by location.
@@ -79,7 +79,7 @@ public class ModuleDatabase {
 	/**
 	 * A map of revision wiring objects.
 	 */
-	private final Map<ModuleRevision, ModuleWiring> wirings;
+	final Map<ModuleRevision, ModuleWiring> wirings;
 
 	/**
 	 * Holds the next id to be assigned to a module when it is installed
@@ -102,7 +102,7 @@ public class ModuleDatabase {
 	/**
 	 * A map of module settings keyed by module id.
 	 */
-	private final Map<Long, EnumSet<Settings>> moduleSettings;
+	final Map<Long, EnumSet<Settings>> moduleSettings;
 
 	/**
 	 * The initial module start level.

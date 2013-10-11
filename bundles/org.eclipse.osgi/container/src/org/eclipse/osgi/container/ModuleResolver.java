@@ -349,7 +349,6 @@ final class ModuleResolver {
 			listIterator.previous();
 	}
 
-	@SuppressWarnings("unchecked")
 	private static ModuleWiring createWiringDelta(ModuleRevision revision, ModuleWiring existingWiring, Map<ModuleCapability, List<ModuleWire>> providedWireMap, List<ModuleWire> requiredWires) {
 		// No null checks are done here on the wires since this is a copy.
 		// Create a ModuleWiring that only contains the new ordered list of provided wires

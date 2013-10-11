@@ -1007,8 +1007,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		@SuppressWarnings("unchecked")
 		ServiceReference<S>[] refs = (ServiceReference<S>[]) getServiceReferences(clazz.getName(), filter);
 		if (refs == null) {
-			@SuppressWarnings("unchecked")
-			Collection<ServiceReference<S>> empty = Collections.EMPTY_LIST;
+			Collection<ServiceReference<S>> empty = Collections.<ServiceReference<S>> emptyList();
 			return empty;
 		}
 		List<ServiceReference<S>> result = new ArrayList<ServiceReference<S>>(refs.length);

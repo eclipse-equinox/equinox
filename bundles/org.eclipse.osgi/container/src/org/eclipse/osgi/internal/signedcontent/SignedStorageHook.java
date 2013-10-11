@@ -46,7 +46,6 @@ public class SignedStorageHook extends StorageHookFactory<List<SignerInfo>, List
 			super(generation, SignedStorageHook.class);
 		}
 
-		@SuppressWarnings("unused")
 		@Override
 		public void initialize(Dictionary<String, String> manifest) throws BundleException {
 			// do nothing

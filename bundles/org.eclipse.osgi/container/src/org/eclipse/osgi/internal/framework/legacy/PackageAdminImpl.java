@@ -251,7 +251,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		return null;
 	}
 
-	public Bundle getBundle(@SuppressWarnings("rawtypes") final Class clazz) {
+	public Bundle getBundle(final Class clazz) {
 		if (System.getSecurityManager() == null)
 			return getBundlePriv(clazz);
 		return AccessController.doPrivileged(new GetBundleAction(this, clazz));

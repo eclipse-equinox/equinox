@@ -189,8 +189,7 @@ class OSGiFrameworkHooks {
 			BundleContextImpl context = (BundleContextImpl) EquinoxContainer.secureAction.getContext(systemModule.getBundle());
 
 			ServiceReferenceImpl<ResolverHookFactory>[] refs = getHookReferences(registry, context);
-			@SuppressWarnings("unchecked")
-			List<HookReference> hookRefs = refs == null ? Collections.EMPTY_LIST : new ArrayList<CoreResolverHookFactory.HookReference>(refs.length);
+			List<HookReference> hookRefs = refs == null ? Collections.<CoreResolverHookFactory.HookReference> emptyList() : new ArrayList<CoreResolverHookFactory.HookReference>(refs.length);
 			if (refs != null) {
 				for (ServiceReferenceImpl<ResolverHookFactory> hookRef : refs) {
 					ResolverHookFactory factory = context.getService(hookRef);
@@ -218,7 +217,7 @@ class OSGiFrameworkHooks {
 			private final List<HookReference> hooks;
 			private final Module systemModule;
 
-			private volatile ResolutionReport report;
+			private volatile ResolutionReport resolutionReport;
 
 			CoreResolverHook(List<HookReference> hooks, Module systemModule) {
 				this.hooks = hooks;
@@ -325,7 +324,7 @@ class OSGiFrameworkHooks {
 						} else {
 							try {
 								if (hookRef.hook instanceof ResolutionReport.Listener)
-									((ResolutionReport.Listener) hookRef.hook).handleResolutionReport(report);
+									((ResolutionReport.Listener) hookRef.hook).handleResolutionReport(resolutionReport);
 								hookRef.hook.end();
 							} catch (Throwable t) {
 								// Must continue on to the next hook.end method
@@ -351,7 +350,7 @@ class OSGiFrameworkHooks {
 
 			@Override
 			public void handleResolutionReport(ResolutionReport report) {
-				this.report = report;
+				resolutionReport = report;
 			}
 		}
 	}

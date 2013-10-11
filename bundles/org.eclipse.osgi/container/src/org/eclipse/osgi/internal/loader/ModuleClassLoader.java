@@ -194,7 +194,6 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 		return result;
 	}
 
-	@SuppressWarnings("unused")
 	@Override
 	protected Enumeration<URL> findResources(String name) throws IOException {
 		return findLocalResources(name);
