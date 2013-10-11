@@ -979,8 +979,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
-	public Dictionary[] getPlatformProperties() {
+	public Dictionary<Object, Object>[] getPlatformProperties() {
 		return platformProperties;
 	}
 

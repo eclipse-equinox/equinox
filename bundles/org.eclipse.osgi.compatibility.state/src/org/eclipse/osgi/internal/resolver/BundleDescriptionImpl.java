@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2012 IBM Corporation and others.
+ * Copyright (c) 2003, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1182,8 +1182,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		public List<BundleWire> getRequiredWires(String namespace) {
 			if (!isInUse())
 				return null;
-			@SuppressWarnings("unchecked")
-			List<BundleWire> result = Collections.EMPTY_LIST;
+			List<BundleWire> result = Collections.<BundleWire> emptyList();
 			Map<String, List<StateWire>> wireMap = getWires();
 			if (namespace == null) {
 				result = new ArrayList<BundleWire>();
@@ -1219,7 +1218,6 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		public ClassLoader getClassLoader() {
 			throw new UnsupportedOperationException();
 		}
-
 
 		public List<URL> findEntries(String path, String filePattern, int options) {
 			return null;

@@ -495,12 +495,11 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		writer.saveStateDeprecated((StateImpl) state, stream);
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<BundleSpecification> createBundleSpecifications(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, declaration);
 			if (elements == null)
-				return Collections.EMPTY_LIST;
+				return Collections.<BundleSpecification> emptyList();
 			List<BundleSpecification> result = new ArrayList<BundleSpecification>(elements.length);
 			for (ManifestElement element : elements)
 				result.add(StateBuilder.createRequiredBundle(element));
@@ -510,12 +509,11 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<HostSpecification> createHostSpecifications(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.FRAGMENT_HOST, declaration);
 			if (elements == null)
-				return Collections.EMPTY_LIST;
+				return Collections.<HostSpecification> emptyList();
 			List<HostSpecification> result = new ArrayList<HostSpecification>(elements.length);
 			for (ManifestElement element : elements)
 				result.add(StateBuilder.createHostSpecification(element, null));
@@ -525,12 +523,11 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<ImportPackageSpecification> createImportPackageSpecifications(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, declaration);
 			if (elements == null)
-				return Collections.EMPTY_LIST;
+				return Collections.<ImportPackageSpecification> emptyList();
 			List<ImportPackageSpecification> result = new ArrayList<ImportPackageSpecification>(elements.length);
 			for (ManifestElement element : elements)
 				StateBuilder.addImportPackages(element, result, 2, false);
@@ -540,36 +537,33 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<GenericDescription> createGenericDescriptions(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, declaration);
 			if (elements == null)
-				return Collections.EMPTY_LIST;
+				return Collections.<GenericDescription> emptyList();
 			return StateBuilder.createOSGiCapabilities(elements, new ArrayList<GenericDescription>(elements.length), (Integer) null);
 		} catch (BundleException e) {
 			throw (IllegalArgumentException) new IllegalArgumentException("Declaration is invalid: " + declaration).initCause(e); //$NON-NLS-1$
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<GenericSpecification> createGenericSpecifications(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.REQUIRE_CAPABILITY, declaration);
 			if (elements == null)
-				return Collections.EMPTY_LIST;
+				return Collections.<GenericSpecification> emptyList();
 			return StateBuilder.createOSGiRequires(elements, new ArrayList<GenericSpecification>(elements.length));
 		} catch (BundleException e) {
 			throw (IllegalArgumentException) new IllegalArgumentException("Declaration is invalid: " + declaration).initCause(e); //$NON-NLS-1$
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<ExportPackageDescription> createExportPackageDescriptions(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, declaration);
 			if (elements == null)
-				return Collections.EMPTY_LIST;
+				return Collections.<ExportPackageDescription> emptyList();
 			List<ExportPackageDescription> result = new ArrayList<ExportPackageDescription>(elements.length);
 			for (ManifestElement element : elements)
 				StateBuilder.addExportPackages(element, result, false);

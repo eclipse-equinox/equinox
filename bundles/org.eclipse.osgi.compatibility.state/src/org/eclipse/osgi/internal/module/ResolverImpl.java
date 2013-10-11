@@ -230,6 +230,7 @@ public class ResolverImpl implements Resolver {
 
 	// Checks a bundle to make sure it is valid.  If this method returns false for
 	// a given bundle, then that bundle will not even be considered for resolution
+	@SuppressWarnings("unchecked")
 	private boolean isResolvable(ResolverBundle bundle, Dictionary<Object, Object>[] platformProperties, Collection<ResolverBundle> hookDisabled) {
 		BundleDescription bundleDesc = bundle.getBundleDescription();
 
@@ -439,7 +440,6 @@ public class ResolverImpl implements Resolver {
 					currentlyResolved[i] = bundleMapping.get(resolvedBundles[i]);
 			}
 			// attempt to resolve all unresolved bundles
-			@SuppressWarnings("unchecked")
 			Collection<ResolverBundle> hookDisabled = Collections.EMPTY_LIST;
 			if (hook != null) {
 				List<ResolverBundle> resolvableBundles = new ArrayList<ResolverBundle>(unresolvedBundles);
@@ -475,7 +475,6 @@ public class ResolverImpl implements Resolver {
 			// Now resolve the rest
 			resolveBundles(toResolve.toArray(new ResolverBundle[toResolve.size()]), platformProperties, hookDisabled);
 
-			@SuppressWarnings("unchecked")
 			Collection<ResolverBundle> optionalResolved = resolveOptional ? resolveOptionalConstraints(currentlyResolved) : Collections.EMPTY_LIST;
 			ResolverHook current = hook;
 			if (current != null) {

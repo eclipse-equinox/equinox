@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -108,11 +108,10 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 		return version instanceof Version ? (Version) version : super.getVersion();
 	}
 
-	@SuppressWarnings("unchecked")
 	public Map<String, String> getDeclaredDirectives() {
 		synchronized (this.monitor) {
 			if (directives == null)
-				return Collections.EMPTY_MAP;
+				return Collections.<String, String> emptyMap();
 			return Collections.unmodifiableMap(directives);
 		}
 	}
@@ -125,7 +124,7 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 					String key = keys.nextElement();
 					Object value = attributes.get(key);
 					if (value instanceof List)
-						value = Collections.unmodifiableList((List<Object>) value);
+						value = Collections.unmodifiableList((List<?>) value);
 					result.put(key, value);
 				}
 			return Collections.unmodifiableMap(result);

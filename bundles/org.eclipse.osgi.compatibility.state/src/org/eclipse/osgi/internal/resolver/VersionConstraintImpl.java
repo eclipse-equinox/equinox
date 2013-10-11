@@ -135,12 +135,10 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 			return namespace;
 		}
 
-		@SuppressWarnings("unchecked")
 		public Map<String, String> getDirectives() {
 			return Collections.unmodifiableMap(getInternalDirectives());
 		}
 
-		@SuppressWarnings("unchecked")
 		public Map<String, Object> getAttributes() {
 			return Collections.unmodifiableMap(getInteralAttributes());
 		}

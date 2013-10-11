@@ -249,10 +249,9 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		return filter.toString();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected Map<String, Object> getInteralAttributes() {
-		return Collections.EMPTY_MAP;
+		return Collections.<String, Object> emptyMap();
 	}
 
 	@Override

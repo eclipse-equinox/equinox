@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,8 +20,7 @@ import java.util.*;
 public class MappedList<K, V> {
 	// the mapping with key -> Object[] mapping
 	protected final HashMap<K, List<V>> internal = new HashMap<K, List<V>>();
-	@SuppressWarnings("unchecked")
-	protected final List<V> empty = Collections.EMPTY_LIST;
+	protected final List<V> empty = Collections.<V> emptyList();
 
 	public void put(K key, V value) {
 		List<V> existing = internal.get(key);

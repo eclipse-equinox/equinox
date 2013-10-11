@@ -49,6 +49,7 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean isSatisfiedBy(BaseDescription supplier) {
 		if (!(supplier instanceof NativeCodeDescription))
 			return false;
@@ -179,14 +180,12 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 		return sb.toString();
 	}
 
-	@SuppressWarnings("unchecked")
 	protected Map<String, String> getInternalDirectives() {
-		return Collections.EMPTY_MAP;
+		return Collections.<String, String> emptyMap();
 	}
 
-	@SuppressWarnings("unchecked")
 	protected Map<String, Object> getInteralAttributes() {
-		return Collections.EMPTY_MAP;
+		return Collections.<String, Object> emptyMap();
 	}
 
 	@Override
