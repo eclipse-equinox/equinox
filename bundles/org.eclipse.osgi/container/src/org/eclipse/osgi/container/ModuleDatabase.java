@@ -1009,7 +1009,7 @@ public class ModuleDatabase {
 		public static void load(ModuleDatabase moduleDatabase, DataInputStream in) throws IOException {
 			int version = in.readInt();
 			if (version > VERSION || VERSION / 1000 != version / 1000)
-				throw new IllegalArgumentException("Perstence version is not correct for loading: " + version + " expecting: " + VERSION); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new IllegalArgumentException("The version of the persistent framework data is not compatible: " + version + " expecting: " + VERSION); //$NON-NLS-1$ //$NON-NLS-2$
 			long revisionsTimeStamp = in.readLong();
 			long allTimeStamp = in.readLong();
 			moduleDatabase.nextId.set(in.readLong());
