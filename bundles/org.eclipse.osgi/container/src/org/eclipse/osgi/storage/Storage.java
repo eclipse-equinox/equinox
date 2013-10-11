@@ -1107,7 +1107,6 @@ public class Storage {
 		if (version != VERSION) {
 			throw new IllegalArgumentException("The version of the persistent framework data is not compatible: " + version + " expecting: " + VERSION); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		// Persistence fda 
 		int numCachedHeaders = in.readInt();
 		List<String> storedCachedHeaderKeys = new ArrayList<String>(numCachedHeaders);
 		for (int i = 0; i < numCachedHeaders; i++) {
