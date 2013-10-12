@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2013 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,7 +57,7 @@ public class Debug {
             DEBUG_BUNDLE = options.getBooleanOption(OPTION_DEBUG_BUNDLE, false);
             DEBUG_WEAVE = options.getBooleanOption(OPTION_DEBUG_WEAVE, false);
             DEBUG_CACHE = options.getBooleanOption(OPTION_DEBUG_CACHE, false);
-            DEBUG_BUNDLENAME = options.getOption(OPTION_DEBUG_BUNDLENAME, ""); //$NON-NLS-1$
+            DEBUG_BUNDLENAME = options.getOption(OPTION_DEBUG_BUNDLENAME, "");
             DEBUG_SUPPLEMENTS = options.getBooleanOption(
                     OPTION_DEBUG_SUPPLEMENTS, false);
         }

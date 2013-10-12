@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2013 Martin Lippert and others.
+ * Copyright (c) 2008, 2009 Martin Lippert and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,24 +75,6 @@ public class Supplementer {
      */
     public void addSupplementedBundle(final Bundle supplementedBundle) {
         this.supplementedBundles.add(supplementedBundle);
-    }
-
-    //knibb
-    //test if two Strings are equal
-    //with wild card support - only supports strings ending in *
-    private boolean equals_wild(final String input, final String match) {
-        if (input.equals(match)) {
-            //its a match so just return true
-            return true;
-        }
-        if (input.endsWith("*") == false) { //$NON-NLS-1$
-            //no wildcards are being used here
-            return false;
-        }
-        final String wild_in = input.substring(0, input.length() - 1);
-        if (match.startsWith(wild_in)) return true;
-
-        return false;
     }
 
     /**
@@ -228,6 +210,24 @@ public class Supplementer {
      */
     public void removeSupplementedBundle(final Bundle supplementedBundle) {
         this.supplementedBundles.remove(supplementedBundle);
+    }
+
+    //knibb
+    //test if two Strings are equal
+    //with wild card support - only supports strings ending in *
+    private boolean equals_wild(final String input, final String match) {
+        if (input.equals(match)) {
+            //its a match so just return true
+            return true;
+        }
+        if (input.endsWith("*") == false) {
+            //no wildcards are being used here
+            return false;
+        }
+        final String wild_in = input.substring(0, input.length() - 1);
+        if (match.startsWith(wild_in)) return true;
+
+        return false;
     }
 
 }
