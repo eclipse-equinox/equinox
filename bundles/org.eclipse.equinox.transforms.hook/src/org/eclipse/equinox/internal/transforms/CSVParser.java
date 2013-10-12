@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2013 IBM Corporation and others.
+ * Copyright (c) 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,7 @@ public class CSVParser {
 	public static TransformTuple[] parse(URL transformMapURL, EquinoxLogServices logServices) throws IOException {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(transformMapURL.openStream()));
 		String currentLine = null;
-		List<TransformTuple> list = new ArrayList<TransformTuple>();
+		List list = new ArrayList();
 		while ((currentLine = reader.readLine()) != null) {
 			if (currentLine.startsWith("#")) { //$NON-NLS-1$
 				continue;
@@ -73,6 +73,6 @@ public class CSVParser {
 				logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Could not parse transform file record :" + currentLine, e); //$NON-NLS-1$
 			}
 		}
-		return list.toArray(new TransformTuple[list.size()]);
+		return (TransformTuple[]) list.toArray(new TransformTuple[list.size()]);
 	}
 }

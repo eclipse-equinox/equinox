@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2013 IBM Corporation and others.
+ * Copyright (c) 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,7 +35,7 @@ public class ProxyStreamTransformer extends StreamTransformer {
 	public ProxyStreamTransformer(Object object) throws SecurityException, NoSuchMethodException {
 		this.object = object;
 		method = object.getClass().getMethod("getInputStream", new Class[] {InputStream.class, URL.class}); //$NON-NLS-1$
-		Class<?> returnType = method.getReturnType();
+		Class returnType = method.getReturnType();
 		if (!returnType.equals(InputStream.class))
 			throw new NoSuchMethodException();
 

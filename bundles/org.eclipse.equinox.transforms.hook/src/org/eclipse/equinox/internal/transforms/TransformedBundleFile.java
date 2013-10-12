@@ -167,7 +167,7 @@ public class TransformedBundleFile extends BundleFileWrapper {
 						/* create the necessary directories */
 						File dir = new File(nested.getParent());
 						if (!dir.exists() && !dir.mkdirs()) {
-							throw new IOException("Unable to create directory: " + dir.getAbsolutePath()); //$NON-NLS-1$
+							throw new IOException("Unable to create directory: " + dir.getAbsolutePath());
 						}
 						/* copy the entry to the cache */
 						StorageUtil.readFile(in, nested);
@@ -212,10 +212,10 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	 * This method is derived from ZipBundleFile#extractDirectory(String).
 	 */
 	protected synchronized File extractDirectory(String dirName) {
-		Enumeration<String> entries = delegate.getEntryPaths(dirName);
+		Enumeration entries = delegate.getEntryPaths(dirName);
 
 		while (entries.hasMoreElements()) {
-			String entryPath = entries.nextElement();
+			String entryPath = (String) entries.nextElement();
 			if (entryPath.startsWith(dirName))
 				getFile(entryPath, false);
 		}

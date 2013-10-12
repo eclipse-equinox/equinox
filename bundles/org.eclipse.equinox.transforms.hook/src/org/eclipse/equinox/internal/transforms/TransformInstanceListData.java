@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2013 IBM Corporation and others.
+ * Copyright (c) 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * Class that represents a dynamic list of TransformTuples that have been registered against a particular transform type.
  */
-public class TransformInstanceListData extends ServiceTracker<URL, URL> {
+public class TransformInstanceListData extends ServiceTracker {
 	/**
 	 * Used when there are no transform data types
 	 */
@@ -34,17 +34,17 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	/**
 	 * Map from transformer class -> tuple array
 	 */
-	private Map<String, TransformTuple[]> transformerToTuple = new HashMap<String, TransformTuple[]>();
+	private Map transformerToTuple = new HashMap();
 
 	/**
 	 * List of all tuples in the system.
 	 */
-	private List<TransformTuple> rawTuples = new ArrayList<TransformTuple>();
+	private List rawTuples = new ArrayList();
 
 	/**
 	 * Map from bundle ID -> boolean representing whether or not a given bundle currently has any transforms registered against it.
 	 */
-	private Map<String, Boolean> bundleIdToTransformPresence = new HashMap<String, Boolean>();
+	private Map bundleIdToTransformPresence = new HashMap();
 	private final EquinoxLogServices logServices;
 
 	/**
@@ -71,7 +71,7 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 
 		if (transformerToTuple.size() == 0)
 			return EMPTY_TYPES;
-		return transformerToTuple.keySet().toArray(new String[transformerToTuple.size()]);
+		return (String[]) transformerToTuple.keySet().toArray(new String[transformerToTuple.size()]);
 	}
 
 	/**
@@ -82,7 +82,7 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 		if (stale)
 			rebuildTransformMap();
 
-		return transformerToTuple.get(type);
+		return (TransformTuple[]) transformerToTuple.get(type);
 	}
 
 	/**
@@ -95,12 +95,12 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 			rebuildTransformMap();
 
 		String bundleName = bundle.getSymbolicName();
-		Boolean hasTransformsFor = bundleIdToTransformPresence.get(bundleName);
+		Boolean hasTransformsFor = (Boolean) bundleIdToTransformPresence.get(bundleName);
 
 		if (hasTransformsFor == null) {
 			hasTransformsFor = Boolean.FALSE;
-			for (Iterator<TransformTuple> i = rawTuples.iterator(); i.hasNext();) {
-				TransformTuple tuple = i.next();
+			for (Iterator i = rawTuples.iterator(); i.hasNext();) {
+				TransformTuple tuple = (TransformTuple) i.next();
 				if (tuple.bundlePattern.matcher(bundleName).matches()) {
 					hasTransformsFor = Boolean.TRUE;
 				}
@@ -120,20 +120,20 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 		rawTuples.clear();
 		bundleIdToTransformPresence.clear();
 
-		ServiceReference<URL>[] serviceReferences = getServiceReferences();
+		ServiceReference[] serviceReferences = getServiceReferences();
 		stale = false;
 		if (serviceReferences == null)
 			return;
 
 		for (int i = 0; i < serviceReferences.length; i++) {
-			ServiceReference<URL> serviceReference = serviceReferences[i];
+			ServiceReference serviceReference = serviceReferences[i];
 			String type = serviceReference.getProperty(TransformTuple.TRANSFORMER_TYPE).toString();
 
-			URL url = getService(serviceReference);
+			URL url = (URL) getService(serviceReference);
 			TransformTuple[] transforms;
 			try {
 				transforms = CSVParser.parse(url, logServices);
-				TransformTuple[] existing = transformerToTuple.get(type);
+				TransformTuple[] existing = (TransformTuple[]) transformerToTuple.get(type);
 				if (existing != null) {
 					TransformTuple[] newTransforms = new TransformTuple[existing.length + transforms.length];
 					System.arraycopy(existing, 0, newTransforms, 0, existing.length);
@@ -152,7 +152,7 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 		}
 	}
 
-	public URL addingService(ServiceReference<URL> reference) {
+	public Object addingService(ServiceReference reference) {
 		try {
 			return super.addingService(reference);
 		} finally {
@@ -160,12 +160,12 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 		}
 	}
 
-	public void modifiedService(ServiceReference<URL> reference, URL service) {
+	public void modifiedService(ServiceReference reference, Object service) {
 		super.modifiedService(reference, service);
 		stale = true;
 	}
 
-	public void removedService(ServiceReference<URL> reference, URL service) {
+	public void removedService(ServiceReference reference, Object service) {
 		super.removedService(reference, service);
 		stale = true;
 	}
