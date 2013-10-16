@@ -81,12 +81,11 @@ public class ClasspathEntry {
 	 * @param key the key of the user object to get
 	 * @return a user object which is keyed by the specified key
 	 */
-	public Object getUserObject(Object key) {
+	public synchronized Object getUserObject(Object key) {
 		if (userObjects == null)
 			return null;
-		synchronized (userObjects) {
-			return userObjects.getByKey(key);
-		}
+		return userObjects.getByKey(key);
+
 	}
 
 	/**
@@ -96,9 +95,7 @@ public class ClasspathEntry {
 	public synchronized void addUserObject(KeyedElement userObject) {
 		if (userObjects == null)
 			userObjects = new KeyedHashSet(5, false);
-		synchronized (userObjects) {
-			userObjects.add(userObject);
-		}
+		userObjects.add(userObject);
 	}
 
 	private static Manifest getManifest(BundleFile cpBundleFile, Generation generation) {

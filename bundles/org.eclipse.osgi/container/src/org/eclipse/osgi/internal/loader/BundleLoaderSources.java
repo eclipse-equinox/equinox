@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2012 IBM Corporation and others.
+ * Copyright (c) 2003, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,17 +29,14 @@ public class BundleLoaderSources {
 	}
 
 	PackageSource getPackageSource(String pkgName) {
-		// getByKey is called outside of a synch block because we really do not
-		// care too much of duplicates getting created.  Only the first one will
-		// successfully get stored into pkgSources
-		PackageSource pkgSource = (PackageSource) pkgSources.getByKey(pkgName);
-		if (pkgSource == null) {
-			pkgSource = new SingleSourcePackage(pkgName, loader);
-			synchronized (pkgSources) {
+		synchronized (pkgSources) {
+			PackageSource pkgSource = (PackageSource) pkgSources.getByKey(pkgName);
+			if (pkgSource == null) {
+				pkgSource = new SingleSourcePackage(pkgName, loader);
 				pkgSources.add(pkgSource);
 			}
+			return pkgSource;
 		}
-		return pkgSource;
 	}
 
 	boolean forceSourceCreation(ModuleCapability packageCapability) {
@@ -65,14 +62,13 @@ public class BundleLoaderSources {
 		}
 
 		if (storeSource) {
-			// if the package source is not null then store the source only if it is not already present;
-			// getByKey is called outside of a synch block because we really do not
-			// care too much of duplicates getting created.  Only the first one will
-			// successfully get stored into pkgSources
-			if (pkgSource != null && pkgSources.getByKey(name) == null)
+			if (pkgSource != null) {
 				synchronized (pkgSources) {
-					pkgSources.add(pkgSource);
+					if (pkgSources.getByKey(name) == null) {
+						pkgSources.add(pkgSource);
+					}
 				}
+			}
 		} else {
 			// we are not storing the special case sources, but pkgSource == null this means this
 			// is a normal package source; get it and return it.

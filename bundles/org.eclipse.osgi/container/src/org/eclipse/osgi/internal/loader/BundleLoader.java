@@ -666,13 +666,14 @@ public class BundleLoader implements ModuleLoader {
 		List<String> packages = new ArrayList<String>();
 		// search imported package names
 		KeyedHashSet importSources = getImportedSources(null);
-		if (importSources != null) {
-			KeyedElement[] imports = importSources.elements();
-			for (KeyedElement keyedElement : imports) {
-				String id = ((PackageSource) keyedElement).getId();
-				if (id.equals(pkgName) || (subPackages && isSubPackage(pkgName, id)))
-					packages.add(id);
-			}
+		KeyedElement[] imports;
+		synchronized (importSources) {
+			imports = importSources.elements();
+		}
+		for (KeyedElement keyedElement : imports) {
+			String id = ((PackageSource) keyedElement).getId();
+			if (id.equals(pkgName) || (subPackages && isSubPackage(pkgName, id)))
+				packages.add(id);
 		}
 
 		// now add package names from required bundles
@@ -1009,14 +1010,12 @@ public class BundleLoader implements ModuleLoader {
 
 	private PackageSource findImportedSource(String pkgName, Collection<BundleLoader> visited) {
 		KeyedHashSet imports = getImportedSources(visited);
-		if (imports == null)
-			return null;
 		synchronized (imports) {
 			return (PackageSource) imports.getByKey(pkgName);
 		}
 	}
 
-	public KeyedHashSet getImportedSources(Collection<BundleLoader> visited) {
+	private KeyedHashSet getImportedSources(Collection<BundleLoader> visited) {
 		synchronized (importedSources) {
 			if (importsInitialized) {
 				return importedSources;
