@@ -666,6 +666,9 @@ public final class ModuleContainer {
 					}
 				} catch (BundleException e) {
 					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
+				} catch (IllegalStateException e) {
+					// been uninstalled
+					continue;
 				}
 			}
 		}
@@ -679,6 +682,9 @@ public final class ModuleContainer {
 				secureAction.start(module, StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
 			} catch (BundleException e) {
 				adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
+			} catch (IllegalStateException e) {
+				// been uninstalled
+				continue;
 			}
 		}
 		return true;
