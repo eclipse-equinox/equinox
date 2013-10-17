@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name:  test.uninstall.start1
+Bundle-SymbolicName: test.uninstall.start1
+Bundle-Version: 1.0.0
+Bundle-Activator: test.uninstall.start1.Activator
+Import-Package: org.osgi.framework
+

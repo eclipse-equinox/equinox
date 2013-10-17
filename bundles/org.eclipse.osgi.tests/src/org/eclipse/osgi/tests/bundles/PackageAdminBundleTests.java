@@ -13,12 +13,14 @@ package org.eclipse.osgi.tests.bundles;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
+import org.osgi.framework.hooks.resolver.ResolverHook;
+import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.framework.wiring.*;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 
@@ -256,6 +258,59 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 		assertNotNull("No system bundles found.", systemBundles);
 		assertEquals("Srong number of system bundles.", 1, systemBundles.length);
 		assertEquals("Wrong system bundle found.", OSGiTestsActivator.getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION), systemBundles[0]);
+	}
+
+	public void testUninstallWhileResolving() throws BundleException {
+		ServiceRegistration<ResolverHookFactory> resolverHookReg = getContext().registerService(ResolverHookFactory.class, new ResolverHookFactory() {
+
+			@Override
+			public ResolverHook begin(Collection<BundleRevision> triggers) {
+				return new ResolverHook() {
+
+					@Override
+					public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
+						// Nothing
+					}
+
+					@Override
+					public void filterResolvable(Collection<BundleRevision> candidates) {
+						// prevent all resolves
+						candidates.clear();
+					}
+
+					@Override
+					public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
+						// nothing
+					}
+
+					@Override
+					public void end() {
+						// nothing
+					}
+				};
+			}
+		}, null);
+		try {
+			Bundle b1 = installer.installBundle("test.uninstall.start1"); //$NON-NLS-1$
+			Bundle b2 = installer.installBundle("test.uninstall.start2"); //$NON-NLS-1$
+			try {
+				b1.start();
+			} catch (BundleException e) {
+				// expected
+			}
+			try {
+				b2.start();
+			} catch (BundleException e) {
+				// expected
+			}
+			resolverHookReg.unregister();
+			resolverHookReg = null;
+			getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION).adapt(FrameworkWiring.class).resolveBundles(Arrays.asList(b1, b2));
+		} finally {
+			if (resolverHookReg != null) {
+				resolverHookReg.unregister();
+			}
+		}
 	}
 
 	private String getMessage(Throwable[] results) {

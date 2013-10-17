@@ -118,5 +118,7 @@
 	<classpathentry kind="src" output="bundle_tests/test.plugins.f" path="bundles_src/test.plugins.f"/>
 	<classpathentry kind="src" output="bundle_tests/test.plugins.g" path="bundles_src/test.plugins.g"/>
 	<classpathentry kind="src" output="bundle_tests/test.bug412228" path="bundles_src/test.bug412228"/>
+	<classpathentry kind="src" output="bundle_tests/test.uninstall.start1" path="bundles_src/test.uninstall.start1"/>
+	<classpathentry kind="src" output="bundle_tests/test.uninstall.start2" path="bundles_src/test.uninstall.start2"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
