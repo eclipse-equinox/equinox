@@ -245,6 +245,7 @@ int showSplash( const char* featureImage )
 	
 	shellHandle = gtk.gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk.gtk_window_set_decorated((GtkWindow*)(shellHandle), FALSE);
+	gtk.gtk_window_set_type_hint((GtkWindow*)(shellHandle), 4 /*GDK_WINDOW_TYPE_HINT_SPLASHSCREEN*/);
 	gtk.g_signal_connect_data((gpointer)shellHandle, "destroy", (GtkSignalFunc)(gtk.gtk_widget_destroyed), &shellHandle, NULL, 0);
 		
 	pixbuf = gtk.gdk_pixbuf_new_from_file(featureImage, NULL);

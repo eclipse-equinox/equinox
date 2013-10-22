@@ -34,6 +34,7 @@ static FN_TABLE gtkFunctions[] = {
 	FN_TABLE_ENTRY(gtk_window_resize, 1),
 	FN_TABLE_ENTRY(gtk_window_set_title, 1),
 	FN_TABLE_ENTRY(gtk_window_set_decorated, 1),
+	FN_TABLE_ENTRY(gtk_window_set_type_hint, 1),
 	FN_TABLE_ENTRY(gtk_window_set_position, 1),
 	{ NULL, NULL }
 };
