@@ -972,6 +972,9 @@ public class EquinoxBundle implements Bundle, BundleReference {
 	}
 
 	public String toString() {
-		return getModule().getCurrentRevision().toString();
+		String name = getSymbolicName();
+		if (name == null)
+			name = "unknown"; //$NON-NLS-1$
+		return (name + '_' + getVersion() + " [" + getBundleId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }
