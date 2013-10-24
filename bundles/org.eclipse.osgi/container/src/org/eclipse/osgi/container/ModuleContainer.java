@@ -27,8 +27,10 @@ import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.internal.container.LockSet;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry;
+import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.namespace.*;
@@ -1338,6 +1340,11 @@ public final class ModuleContainer {
 		private final Object eventManagerLock = new Object();
 		private EventManager startLevelThread = null;
 		private final Object frameworkStartLevelLock = new Object();
+		private final boolean debugStartLevel;
+		{
+			DebugOptions options = getAdaptor().getDebugOptions();
+			debugStartLevel = options == null ? false : options.getBooleanOption(Debug.OPTION_DEBUG_STARTLEVEL, false);
+		}
 
 		@Override
 		public Bundle getBundle() {
@@ -1382,6 +1389,9 @@ public final class ModuleContainer {
 			if (activeStartLevel.get() == 0) {
 				throw new IllegalStateException(Msg.ModuleContainer_SystemNotActiveError);
 			}
+			if (debugStartLevel) {
+				Debug.println("StartLevel: setStartLevel: " + startlevel); //$NON-NLS-1$
+			}
 			// queue start level operation in the background
 			// notice that we only do one start level operation at a time
 			CopyOnWriteIdentityMap<Module, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<Module, FrameworkListener[]>();
@@ -1414,9 +1424,15 @@ public final class ModuleContainer {
 					doContainerStartLevel(module, startlevel, listeners);
 					break;
 				case MODULE_STARTLEVEL :
+					if (debugStartLevel) {
+						Debug.println("StartLevel: changing bundle startlevel; " + toString(module) + "; newSL=" + startlevel + "; activeSL=" + getStartLevel()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
 					try {
 						if (getStartLevel() < startlevel) {
 							if (Module.ACTIVE_SET.contains(module.getState())) {
+								if (debugStartLevel) {
+									Debug.println("StartLevel: stopping bundle; " + toString(module) + "; with startLevel=" + startlevel); //$NON-NLS-1$ //$NON-NLS-2$
+								}
 								// Note that we don't need to hold the state change lock
 								// here when checking the active status because no other
 								// thread will successfully be able to start this bundle
@@ -1424,6 +1440,9 @@ public final class ModuleContainer {
 								module.stop(StopOptions.TRANSIENT);
 							}
 						} else {
+							if (debugStartLevel) {
+								Debug.println("StartLevel: resuming bundle; " + toString(module) + "; with startLevel=" + startlevel); //$NON-NLS-1$ //$NON-NLS-2$
+							}
 							module.start(StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
 						}
 					} catch (BundleException e) {
@@ -1456,12 +1475,18 @@ public final class ModuleContainer {
 						for (int i = currentSL; i < newStartLevel; i++) {
 							int toStartLevel = i + 1;
 							activeStartLevel.set(toStartLevel);
+							if (debugStartLevel) {
+								Debug.println("StartLevel: incremented active start level to; " + toStartLevel); //$NON-NLS-1$
+							}
 							incStartLevel(toStartLevel, moduleDatabase.getSortedModules(Sort.BY_START_LEVEL));
 						}
 					} else {
 						for (int i = currentSL; i > newStartLevel; i--) {
 							int toStartLevel = i - 1;
 							activeStartLevel.set(toStartLevel);
+							if (debugStartLevel) {
+								Debug.println("StartLevel: decremented active start level to " + toStartLevel); //$NON-NLS-1$
+							}
 							decStartLevel(toStartLevel, moduleDatabase.getSortedModules(Sort.BY_START_LEVEL, Sort.BY_DEPENDENCY));
 						}
 					}
@@ -1498,6 +1523,9 @@ public final class ModuleContainer {
 					} else if (moduleStartLevel == toStartLevel) {
 						boolean isLazyStart = module.isLazyActivate();
 						if (lazyOnly ? isLazyStart : !isLazyStart) {
+							if (debugStartLevel) {
+								Debug.println("StartLevel: resuming bundle; " + toString(module) + "; with startLevel=" + moduleStartLevel); //$NON-NLS-1$ //$NON-NLS-2$
+							}
 							try {
 								module.start(StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
 							} catch (BundleException e) {
@@ -1533,6 +1561,9 @@ public final class ModuleContainer {
 					}
 					try {
 						if (Module.ACTIVE_SET.contains(module.getState())) {
+							if (debugStartLevel) {
+								Debug.println("StartLevel: stopping bundle; " + toString(module) + "; with startLevel=" + moduleStartLevel); //$NON-NLS-1$ //$NON-NLS-2$
+							}
 							// Note that we don't need to hold the state change lock
 							// here when checking the active status because no other
 							// thread will successfully be able to start this bundle
@@ -1578,6 +1609,11 @@ public final class ModuleContainer {
 					startLevelThread = null;
 				}
 			}
+		}
+
+		private String toString(Module m) {
+			Bundle b = m.getBundle();
+			return b != null ? b.toString() : m.toString();
 		}
 	}
 }
