@@ -95,6 +95,7 @@ public class Debug {
 	 * Indicates if tracing is enabled
 	 */
 	public boolean DEBUG_ENABLED = false;
+	public static final String OPTION_CACHED_MANIFEST = ECLIPSE_OSGI + "/debug/cachedmanifest"; //$NON-NLS-1$
 
 	/**
 	 * General debug flag.
@@ -162,6 +163,8 @@ public class Debug {
 
 	public boolean DEBUG_LOCATION = false; // debug/location
 
+	public boolean DEBUG_CACHED_MANIFEST = false;
+
 	public Debug(DebugOptions dbgOptions) {
 		if (dbgOptions == null) {
 			return;
@@ -185,6 +188,7 @@ public class Debug {
 		SupplementDebug.STATIC_DEBUG_MESSAGE_BUNDLES = DEBUG_MESSAGE_BUNDLES;
 		MONITOR_ACTIVATION = dbgOptions.getBooleanOption(OPTION_MONITOR_ACTIVATION, false);
 		DEBUG_LOCATION = dbgOptions.getBooleanOption(OPTION_DEBUG_LOCATION, false);
+		DEBUG_CACHED_MANIFEST = dbgOptions.getBooleanOption(OPTION_CACHED_MANIFEST, false);
 	}
 
 	/**

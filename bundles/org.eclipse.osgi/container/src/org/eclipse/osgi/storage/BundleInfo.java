@@ -468,6 +468,9 @@ public final class BundleInfo {
 			if (cached.containsKey(key)) {
 				return cached.get(key);
 			}
+			if (!cached.isEmpty() && generation.getBundleInfo().getStorage().getConfiguration().getDebug().DEBUG_CACHED_MANIFEST) {
+				Debug.println("Header key is not cached: " + key + "; for bundle: " + generation.getBundleInfo().getBundleId()); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			return generation.getRawHeaders().get(key);
 		}
 
