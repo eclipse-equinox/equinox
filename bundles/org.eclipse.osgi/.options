@@ -2,6 +2,8 @@
 
 # Turn on general debugging for org.eclipse.osgi
 org.eclipse.osgi/debug=false
+# Prints out location debug information
+org.eclipse.osgi/debug/location = false
 # Prints out class loading debug information
 org.eclipse.osgi/debug/loader=false
 # Prints out event (FrameworkEvent/BundleEvent/ServiceEvent) and listener debug information
@@ -29,7 +31,6 @@ org.eclipse.osgi/debug/objectPool/dups=false
 
 # Eclipse adaptor options
 org.eclipse.osgi/eclipseadaptor/debug = false
-org.eclipse.osgi/eclipseadaptor/debug/location = false
 org.eclipse.osgi/eclipseadaptor/debug/cachedmanifest = false
 org.eclipse.osgi/eclipseadaptor/debug/platformadmin=false
 org.eclipse.osgi/eclipseadaptor/debug/platformadmin/resolver=false
