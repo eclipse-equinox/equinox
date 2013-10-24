@@ -712,11 +712,20 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		}
 
 		if (activator != null) {
+			long start = 0;
+			if (debug.DEBUG_BUNDLE_TIME) {
+				start = System.currentTimeMillis();
+				Debug.println("Starting " + bundle); //$NON-NLS-1$
+			}
 			try {
 				startActivator(activator);
 			} catch (BundleException be) {
 				activator = null;
 				throw be;
+			} finally {
+				if (debug.DEBUG_BUNDLE_TIME) {
+					Debug.println("End starting " + bundle + " " + (System.currentTimeMillis() - start)); //$NON-NLS-1$ //$NON-NLS-2$
+				}
 			}
 		}
 
