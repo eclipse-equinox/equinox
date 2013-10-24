@@ -12,7 +12,6 @@
 package org.eclipse.osgi.internal.debug;
 
 import java.io.PrintStream;
-import java.lang.reflect.*;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.util.SupplementDebug;
 import org.eclipse.osgi.service.debug.DebugOptions;
@@ -34,7 +33,6 @@ public class Debug {
 	/**
 	 * Bundle time Debug option key.
 	 */
-	// TODO remove this or use it somewhere
 	public static final String OPTION_DEBUG_BUNDLE_TIME = ECLIPSE_OSGI + "/debug/bundleTime"; //$NON-NLS-1$
 	/**
 	 * Loader Debug option key.
@@ -52,10 +50,6 @@ public class Debug {
 	 * Services Debug option key.
 	 */
 	public static final String OPTION_DEBUG_HOOKS = ECLIPSE_OSGI + "/debug/hooks"; //$NON-NLS-1$
-	/**
-	 * Packages Debug option key.
-	 */
-	public static final String OPTION_DEBUG_PACKAGES = ECLIPSE_OSGI + "/debug/packages"; //$NON-NLS-1$
 	/**
 	 * Manifest Debug option key.
 	 */
@@ -91,10 +85,6 @@ public class Debug {
 
 	public static final String OPTION_DEBUG_LOCATION = ECLIPSE_OSGI + "/debug/location"; //$NON-NLS-1$
 
-	/**
-	 * Indicates if tracing is enabled
-	 */
-	public boolean DEBUG_ENABLED = false;
 	public static final String OPTION_CACHED_MANIFEST = ECLIPSE_OSGI + "/debug/cachedmanifest"; //$NON-NLS-1$
 
 	/**
@@ -122,11 +112,6 @@ public class Debug {
 	 * Hooks debug flag.
 	 */
 	public boolean DEBUG_HOOKS = false; // "debug.hooks"
-	/**
-	 * Packages debug flag.
-	 */
-	// TODO remove this or use it somewhere
-	public boolean DEBUG_PACKAGES = false; // "debug.packages"
 	/**
 	 * Manifest debug flag.
 	 */
@@ -169,14 +154,12 @@ public class Debug {
 		if (dbgOptions == null) {
 			return;
 		}
-		DEBUG_ENABLED = dbgOptions.isDebugEnabled();
 		DEBUG_GENERAL = dbgOptions.getBooleanOption(OPTION_DEBUG_GENERAL, false);
 		DEBUG_BUNDLE_TIME = dbgOptions.getBooleanOption(OPTION_DEBUG_BUNDLE_TIME, false) || dbgOptions.getBooleanOption("org.eclipse.core.runtime/timing/startup", false); //$NON-NLS-1$
 		DEBUG_LOADER = dbgOptions.getBooleanOption(OPTION_DEBUG_LOADER, false);
 		DEBUG_EVENTS = dbgOptions.getBooleanOption(OPTION_DEBUG_EVENTS, false);
 		DEBUG_SERVICES = dbgOptions.getBooleanOption(OPTION_DEBUG_SERVICES, false);
 		DEBUG_HOOKS = dbgOptions.getBooleanOption(OPTION_DEBUG_HOOKS, false);
-		DEBUG_PACKAGES = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGES, false);
 		DEBUG_MANIFEST = dbgOptions.getBooleanOption(OPTION_DEBUG_MANIFEST, false);
 		SupplementDebug.STATIC_DEBUG_MANIFEST = DEBUG_MANIFEST;
 		DEBUG_FILTER = dbgOptions.getBooleanOption(OPTION_DEBUG_FILTER, false);
@@ -348,30 +331,5 @@ public class Debug {
 		if (t == null)
 			return;
 		t.printStackTrace(out);
-
-		Method[] methods = t.getClass().getMethods();
-
-		int size = methods.length;
-		Class<?> throwable = Throwable.class;
-
-		for (int i = 0; i < size; i++) {
-			Method method = methods[i];
-
-			if (Modifier.isPublic(method.getModifiers()) && method.getName().startsWith("get") && throwable.isAssignableFrom(method.getReturnType()) && (method.getParameterTypes().length == 0)) { //$NON-NLS-1$
-				try {
-					Throwable nested = (Throwable) method.invoke(t, (Object[]) null);
-
-					if ((nested != null) && (nested != t)) {
-						out.println("Nested Exception:"); //$NON-NLS-1$
-						printStackTrace(nested);
-					}
-				} catch (IllegalAccessException e) {
-					// nothing
-				} catch (InvocationTargetException e) {
-					// nothing
-				}
-			}
-		}
 	}
-
 }
