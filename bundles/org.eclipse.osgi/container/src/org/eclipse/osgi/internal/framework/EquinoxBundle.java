@@ -28,6 +28,7 @@ import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
 import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
@@ -386,6 +387,9 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 	@Override
 	public void start(int options) throws BundleException {
+		if (options == 0 && equinoxContainer.getConfiguration().getDebug().MONITOR_ACTIVATION) {
+			Debug.printStackTrace(new Exception("A persistent start has been called on bundle: " + this)); //$NON-NLS-1$
+		}
 		module.start(getStartOptions(options));
 	}
 
@@ -405,11 +409,14 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 	@Override
 	public void start() throws BundleException {
-		module.start();
+		start(0);
 	}
 
 	@Override
 	public void stop(int options) throws BundleException {
+		if (options == 0 && equinoxContainer.getConfiguration().getDebug().MONITOR_ACTIVATION) {
+			Debug.printStackTrace(new Exception("A persistent stop has been called on bundle: " + this)); //$NON-NLS-1$
+		}
 		module.stop(getStopOptions(options));
 	}
 
@@ -422,7 +429,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 	@Override
 	public void stop() throws BundleException {
-		module.stop();
+		stop(0);
 	}
 
 	@Override
