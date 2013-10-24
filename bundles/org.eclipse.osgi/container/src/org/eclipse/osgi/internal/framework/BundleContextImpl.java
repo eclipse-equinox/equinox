@@ -193,9 +193,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		for (Module module : modules) {
 			bundles.add(module.getBundle());
 		}
-		if (getBundle().getBundleId() != 0) {
-			notifyFindHooks(this, bundles);
-		}
+
+		notifyFindHooks(this, bundles);
 		return bundles.toArray(new Bundle[bundles.size()]);
 	}
 
