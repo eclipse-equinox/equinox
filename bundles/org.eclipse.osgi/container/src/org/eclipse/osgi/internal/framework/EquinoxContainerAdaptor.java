@@ -18,6 +18,7 @@ import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.internal.loader.*;
 import org.eclipse.osgi.internal.permadmin.BundlePermissions;
+import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.Storage;
 import org.osgi.framework.*;
@@ -246,5 +247,10 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	@Override
 	public void initEnd() {
 		hooks.initEnd();
+	}
+
+	@Override
+	public DebugOptions getDebugOptions() {
+		return container.getConfiguration().getDebugOptions();
 	}
 }

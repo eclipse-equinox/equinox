@@ -13,6 +13,7 @@ package org.eclipse.osgi.container;
 import java.io.DataInputStream;
 import java.util.EnumSet;
 import org.eclipse.osgi.container.Module.Settings;
+import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
@@ -209,5 +210,14 @@ public abstract class ModuleContainerAdaptor {
 	 */
 	public void initEnd() {
 		// do nothing by default
+	}
+
+	/**
+	 * Returns the debug options for the module container.
+	 * @return the debug options for the module container, or null if there are no debug options.
+	 */
+	public DebugOptions getDebugOptions() {
+		// be default there are no debug options
+		return null;
 	}
 }
