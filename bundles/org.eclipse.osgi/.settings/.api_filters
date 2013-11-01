@@ -44,15 +44,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="container/src/org/eclipse/osgi/storage/Storage.java" type="org.eclipse.osgi.storage.Storage">
-        <filter comment="Ignore Java 6 API usage" id="647000098">
-            <message_arguments>
-                <message_argument value="org.eclipse.osgi.storage.Storage.loadStorageHookData(List&lt;BundleInfoGeneration&gt;, DataInputStream)"/>
-                <message_argument value="IOException(Throwable)"/>
-                <message_argument value="J2SE-1.5"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="osgi/src/org/osgi/dto/DTO.java" type="org.osgi.dto.DTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
