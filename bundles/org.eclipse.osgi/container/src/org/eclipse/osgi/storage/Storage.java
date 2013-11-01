@@ -455,6 +455,33 @@ public class Storage {
 		} catch (Throwable e) {
 			throw new BundleException("Error reading bundle content.", e); //$NON-NLS-1$
 		}
+
+		// Check if the bundle already exists at this location
+		// before doing the staging and generation creation.
+		// This is important since some installers seem to continually
+		// re-install bundles using the same location each startup
+		Module existingLocation = moduleContainer.getModule(bundleLocation);
+		if (existingLocation != null) {
+			// NOTE this same logic is also in the ModuleContainer
+			// This is necessary because the container does the location locking.
+			// Another thread could win the location lock and install before this thread does.
+			try {
+				in.close();
+			} catch (IOException e) {
+				// ignore
+			}
+			if (origin != null) {
+				// Check that the existing location is visible from the origin module
+				Bundle bundle = origin.getBundle();
+				BundleContext context = bundle == null ? null : bundle.getBundleContext();
+				if (context != null && context.getBundle(existingLocation.getId()) == null) {
+					Bundle b = existingLocation.getBundle();
+					throw new BundleException(NLS.bind(Msg.ModuleContainer_NameCollisionWithLocation, new Object[] {b.getSymbolicName(), b.getVersion(), bundleLocation}), BundleException.REJECTED_BY_HOOK);
+				}
+			}
+			return (Generation) existingLocation.getCurrentRevision().getRevisionInfo();
+		}
+
 		boolean isReference = in instanceof ReferenceInputStream;
 		File staged = stageContent(in, sourceURL);
 		Generation generation = null;
