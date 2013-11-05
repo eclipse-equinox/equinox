@@ -74,11 +74,12 @@ public class ClasspathManager {
 	 * @param classloader the BaseClassLoader for this classpath manager
 	 */
 	public ClasspathManager(Generation generation, ModuleClassLoader classloader) {
-		this.debug = generation.getBundleInfo().getStorage().getConfiguration().getDebug();
-		this.hookRegistry = generation.getBundleInfo().getStorage().getConfiguration().getHookRegistry();
+		EquinoxConfiguration configuration = generation.getBundleInfo().getStorage().getConfiguration();
+		this.debug = configuration.getDebug();
+		this.hookRegistry = configuration.getHookRegistry();
 		this.generation = generation;
 		this.classloader = classloader;
-		this.isParallelClassLoader = classloader != null && classloader.isParallelCapable();
+		this.isParallelClassLoader = classloader != null && (classloader.isRegisteredAsParallel() || configuration.PARALLEL_CAPABLE);
 		String[] cp = getClassPath(generation.getRevision());
 		this.fragments = buildFragmentClasspaths(this.classloader, this);
 		this.entries = buildClasspath(cp, this, this.generation);

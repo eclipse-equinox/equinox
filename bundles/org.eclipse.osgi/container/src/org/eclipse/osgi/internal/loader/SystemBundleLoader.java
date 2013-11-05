@@ -111,7 +111,7 @@ public class SystemBundleLoader extends BundleLoader {
 		moduleClassLoader.loadFragments(fragments);
 	}
 
-	class SystemModuleClassLoader extends ModuleClassLoader {
+	class SystemModuleClassLoader extends EquinoxClassLoader {
 
 		public SystemModuleClassLoader(ClassLoader parent, EquinoxConfiguration configuration, BundleLoader delegate, Generation generation) {
 			super(parent, configuration, delegate, generation);

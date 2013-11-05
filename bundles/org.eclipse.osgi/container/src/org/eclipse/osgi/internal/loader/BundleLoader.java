@@ -260,7 +260,7 @@ public class BundleLoader implements ModuleLoader {
 			}
 		}
 		// just use the default one
-		return new ModuleClassLoader(parent, configuration, delegate, generation);
+		return new EquinoxClassLoader(parent, configuration, delegate, generation);
 	}
 
 	public void close() {

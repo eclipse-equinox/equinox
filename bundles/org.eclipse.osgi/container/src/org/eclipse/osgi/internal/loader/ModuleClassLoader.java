@@ -31,7 +31,7 @@ import org.eclipse.osgi.storage.bundlefile.BundleFileWrapperChain;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleReference;
 
-public class ModuleClassLoader extends ClassLoader implements BundleReference {
+public abstract class ModuleClassLoader extends ClassLoader implements BundleReference {
 	public static class GenerationProtectionDomain extends ProtectionDomain implements BundleReference {
 		private final Generation generation;
 
@@ -49,7 +49,7 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 	 * A PermissionCollection for AllPermissions; shared across all ProtectionDomains when security is disabled
 	 */
 	protected static final PermissionCollection ALLPERMISSIONS;
-	private static final boolean REGISTERED_AS_PARALLEL;
+	protected static final boolean REGISTERED_AS_PARALLEL;
 
 	static {
 		AllPermission allPerm = new AllPermission();
@@ -68,36 +68,53 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 		REGISTERED_AS_PARALLEL = registeredAsParallel;
 	}
 
-	private final EquinoxConfiguration configuration;
-	private final Debug debug;
-	private final BundleLoader delegate;
-	private final Generation generation;
-	// TODO Note that PDE has internal dependency on this field type/name (bug 267238)
-	private final ClasspathManager manager;
-
 	/**
-	 * Constructs a new DefaultClassLoader.
+	 * Constructs a new ModuleClassLoader.
 	 * @param parent the parent classloader
-	 * @param configuration the equinox configuration
-	 * @param delegate the delegate for this classloader
-	 * @param generation the generation for this class loader
 	 */
-	public ModuleClassLoader(ClassLoader parent, EquinoxConfiguration configuration, BundleLoader delegate, Generation generation) {
+	public ModuleClassLoader(ClassLoader parent) {
 		super(parent);
-		this.configuration = configuration;
-		this.debug = configuration.getDebug();
-		this.delegate = delegate;
-		this.generation = generation;
-		this.manager = new ClasspathManager(generation, this);
 	}
 
 	/**
 	 * Returns the generation of the host revision associated with this class loader
 	 * @return the generation for this class loader
 	 */
-	Generation getGeneration() {
-		return this.generation;
-	}
+	protected abstract Generation getGeneration();
+
+	/**
+	 * Returns the Debug object for the Framework instance
+	 * @return the Debug object for the Framework instance
+	 */
+	protected abstract Debug getDebug();
+
+	/**
+	 * Returns the classpath manager for this class loader
+	 * @return the classpath manager for this class loader
+	 */
+	public abstract ClasspathManager getClasspathManager();
+
+	/**
+	 * Returns the configuration for the Framework instance
+	 * @return the configuration for the Framework instance
+	 */
+	protected abstract EquinoxConfiguration getConfiguration();
+
+	/**
+	 * Returns the bundle loader for this class loader
+	 * @return the bundle loader for this class loader
+	 */
+	public abstract BundleLoader getBundleLoader();
+
+	/**
+	 * Returns true if this class loader implementation has been
+	 * registered with the JVM as a parallel class loader.
+	 * This requires Java 7 or later.
+	 * @return true if this class loader implementation has been
+	 * registered with the JVM as a parallel class loader; otherwise
+	 * false is returned.
+	 */
+	public abstract boolean isRegisteredAsParallel();
 
 	/**
 	 * Loads a class for the bundle.  First delegate.findClass(name) is called.
@@ -111,26 +128,26 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 	 * @throws ClassNotFoundException if the class is not found.
 	 */
 	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-		if (debug.DEBUG_LOADER)
-			Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+		if (getDebug().DEBUG_LOADER)
+			Debug.println("BundleClassLoader[" + getBundleLoader() + "].loadClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		try {
 			// Just ask the delegate.  This could result in findLocalClass(name) being called.
-			Class<?> clazz = delegate.findClass(name);
+			Class<?> clazz = getBundleLoader().findClass(name);
 			// resolve the class if asked to.
 			if (resolve)
 				resolveClass(clazz);
 			return (clazz);
 		} catch (Error e) {
-			if (debug.DEBUG_LOADER) {
-				Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			if (getDebug().DEBUG_LOADER) {
+				Debug.println("BundleClassLoader[" + getBundleLoader() + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				Debug.printStackTrace(e);
 			}
 			throw e;
 		} catch (ClassNotFoundException e) {
 			// If the class is not found do not try to look for it locally.
 			// The delegate would have already done that for us.
-			if (debug.DEBUG_LOADER) {
-				Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			if (getDebug().DEBUG_LOADER) {
+				Debug.println("BundleClassLoader[" + getBundleLoader() + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				Debug.printStackTrace(e);
 			}
 			throw e;
@@ -152,16 +169,16 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 	 * @return The URL of the resource or null if it does not exist.
 	 */
 	public URL getResource(String name) {
-		if (debug.DEBUG_LOADER) {
-			Debug.println("BundleClassLoader[" + delegate + "].getResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		if (getDebug().DEBUG_LOADER) {
+			Debug.println("BundleClassLoader[" + getBundleLoader() + "].getResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
-		URL url = delegate.findResource(name);
+		URL url = getBundleLoader().findResource(name);
 		if (url != null)
 			return (url);
 
-		if (debug.DEBUG_LOADER) {
-			Debug.println("BundleClassLoader[" + delegate + "].getResource(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		if (getDebug().DEBUG_LOADER) {
+			Debug.println("BundleClassLoader[" + getBundleLoader() + "].getResource(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		return (null);
@@ -182,13 +199,13 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 	 * @return The Enumeration of the resource URLs.
 	 */
 	public Enumeration<URL> getResources(String name) throws IOException {
-		if (debug.DEBUG_LOADER) {
-			Debug.println("BundleClassLoader[" + delegate + "].getResources(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		if (getDebug().DEBUG_LOADER) {
+			Debug.println("BundleClassLoader[" + getBundleLoader() + "].getResources(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
-		Enumeration<URL> result = delegate.findResources(name);
-		if (debug.DEBUG_LOADER) {
+		Enumeration<URL> result = getBundleLoader().findResources(name);
+		if (getDebug().DEBUG_LOADER) {
 			if (result == null || !result.hasMoreElements()) {
-				Debug.println("BundleClassLoader[" + delegate + "].getResources(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				Debug.println("BundleClassLoader[" + getBundleLoader() + "].getResources(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
 		return result;
@@ -207,7 +224,7 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 	 */
 	protected String findLibrary(String libname) {
 		// let the manager find the library for us
-		return manager.findLibrary(libname);
+		return getClasspathManager().findLibrary(libname);
 	}
 
 	public ClasspathEntry createClassPathEntry(BundleFile bundlefile, Generation entryGeneration) {
@@ -231,25 +248,25 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 	}
 
 	public URL findLocalResource(String resource) {
-		return manager.findLocalResource(resource);
+		return getClasspathManager().findLocalResource(resource);
 	}
 
 	public Enumeration<URL> findLocalResources(String resource) {
-		return manager.findLocalResources(resource);
+		return getClasspathManager().findLocalResources(resource);
 	}
 
 	public Class<?> findLocalClass(String classname) throws ClassNotFoundException {
-		return manager.findLocalClass(classname);
+		return getClasspathManager().findLocalClass(classname);
 	}
 
 	/**
 	 * Creates a ProtectionDomain which uses specified BundleFile and the permissions of the baseDomain
 	 * @param bundlefile The source bundlefile the domain is for.
-	 * @param baseDomain The source domain.
+	 * @param domainGeneration the source generation for the domain
 	 * @return a ProtectionDomain which uses specified BundleFile and the permissions of the baseDomain 
 	 */
 	@SuppressWarnings("deprecation")
-	ProtectionDomain createProtectionDomain(BundleFile bundlefile, Generation domainGeneration) {
+	protected ProtectionDomain createProtectionDomain(BundleFile bundlefile, Generation domainGeneration) {
 		// create a protection domain which knows about the codesource for this classpath entry (bug 89904)
 		ProtectionDomain baseDomain = domainGeneration.getDomain();
 		try {
@@ -270,12 +287,12 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 					wrapper = wrapper.getNext();
 				signedContent = wrapper == null ? null : (SignedContent) wrapper.getWrapped();
 			}
-			if (configuration.CLASS_CERTIFICATE && signedContent != null && signedContent.isSigned()) {
+			if (getConfiguration().CLASS_CERTIFICATE && signedContent != null && signedContent.isSigned()) {
 				SignerInfo[] signers = signedContent.getSignerInfos();
 				if (signers.length > 0)
 					certs = signers[0].getCertificateChain();
 			}
-			return new GenerationProtectionDomain(new CodeSource(bundlefile.getBaseFile().toURL(), certs), permissions, generation);
+			return new GenerationProtectionDomain(new CodeSource(bundlefile.getBaseFile().toURL(), certs), permissions, getGeneration());
 			//return new ProtectionDomain(new CodeSource(bundlefile.getBaseFile().toURL(), certs), permissions);
 		} catch (MalformedURLException e) {
 			// Failed to create our own domain; just return the baseDomain
@@ -283,32 +300,20 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 		}
 	}
 
-	public ClasspathManager getClasspathManager() {
-		return manager;
-	}
-
 	public Bundle getBundle() {
-		return generation.getRevision().getBundle();
-	}
-
-	public boolean isParallelCapable() {
-		return REGISTERED_AS_PARALLEL || configuration.PARALLEL_CAPABLE;
+		return getGeneration().getRevision().getBundle();
 	}
 
 	public List<URL> findEntries(String path, String filePattern, int options) {
-		return manager.findEntries(path, filePattern, options);
+		return getClasspathManager().findEntries(path, filePattern, options);
 	}
 
 	public Collection<String> listResources(String path, String filePattern, int options) {
-		return delegate.listResources(path, filePattern, options);
+		return getBundleLoader().listResources(path, filePattern, options);
 	}
 
 	public Collection<String> listLocalResources(String path, String filePattern, int options) {
-		return manager.listLocalResources(path, filePattern, options);
-	}
-
-	public BundleLoader getBundleLoader() {
-		return delegate;
+		return getClasspathManager().listLocalResources(path, filePattern, options);
 	}
 
 	public String toString() {
@@ -320,6 +325,6 @@ public class ModuleClassLoader extends ClassLoader implements BundleReference {
 	}
 
 	public void loadFragments(Collection<ModuleRevision> fragments) {
-		manager.loadFragments(fragments);
+		getClasspathManager().loadFragments(fragments);
 	}
 }
