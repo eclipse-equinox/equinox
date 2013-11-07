@@ -25,6 +25,7 @@ import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
+import org.eclipse.osgi.internal.loader.ModuleClassLoader.DefineClassResult;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.*;
@@ -53,8 +54,6 @@ public class ClasspathManager {
 
 	private final Generation generation;
 	private final ModuleClassLoader classloader;
-	private final boolean isParallelClassLoader;
-	private final Map<String, Thread> classNameLocks = new HashMap<String, Thread>(5);
 	private final HookRegistry hookRegistry;
 	private final Debug debug;
 
@@ -66,7 +65,6 @@ public class ClasspathManager {
 	private ArrayMap<String, String> loadedLibraries = null;
 	// used to detect recusive defineClass calls for the same class on the same class loader (bug 345500)
 	private ThreadLocal<Collection<String>> currentlyDefining = new ThreadLocal<Collection<String>>();
-	private final Object pkgLock = new Object();
 
 	/**
 	 * Constructs a classpath manager for the given host base data, classpath and base class loader
@@ -79,7 +77,6 @@ public class ClasspathManager {
 		this.hookRegistry = configuration.getHookRegistry();
 		this.generation = generation;
 		this.classloader = classloader;
-		this.isParallelClassLoader = classloader != null && (classloader.isRegisteredAsParallel() || configuration.PARALLEL_CAPABLE);
 		String[] cp = getClassPath(generation.getRevision());
 		this.fragments = buildFragmentClasspaths(this.classloader, this);
 		this.entries = buildClasspath(cp, this, this.generation);
@@ -523,7 +520,7 @@ public class ClasspathManager {
 			for (ClassLoaderHook hook : hooks) {
 				hook.preFindLocalClass(classname, this);
 			}
-			result = findLoadedClass(classname);
+			result = classloader.publicFindLoaded(classname);
 			if (result != null)
 				return result;
 			result = findLocalClassImpl(classname, hooks);
@@ -532,21 +529,6 @@ public class ClasspathManager {
 			for (ClassLoaderHook hook : hooks) {
 				hook.postFindLocalClass(classname, result, this);
 			}
-		}
-	}
-
-	private Class<?> findLoadedClass(String classname) {
-		if (isParallelClassLoader) {
-			boolean initialLock = lockClassName(classname);
-			try {
-				return classloader.publicFindLoaded(classname);
-			} finally {
-				if (initialLock)
-					unlockClassName(classname);
-			}
-		}
-		synchronized (classloader) {
-			return classloader.publicFindLoaded(classname);
 		}
 	}
 
@@ -570,41 +552,6 @@ public class ClasspathManager {
 			}
 		}
 		throw new ClassNotFoundException(classname);
-	}
-
-	private boolean lockClassName(String classname) {
-		synchronized (classNameLocks) {
-			Object lockingThread = classNameLocks.get(classname);
-			Thread current = Thread.currentThread();
-			if (lockingThread == current)
-				return false;
-			boolean previousInterruption = Thread.interrupted();
-			try {
-				while (true) {
-					if (lockingThread == null) {
-						classNameLocks.put(classname, current);
-						return true;
-					}
-
-					classNameLocks.wait();
-					lockingThread = classNameLocks.get(classname);
-				}
-			} catch (InterruptedException e) {
-				current.interrupt();
-				throw (LinkageError) new LinkageError(classname).initCause(e);
-			} finally {
-				if (previousInterruption) {
-					current.interrupt();
-				}
-			}
-		}
-	}
-
-	private void unlockClassName(String classname) {
-		synchronized (classNameLocks) {
-			classNameLocks.remove(classname);
-			classNameLocks.notifyAll();
-		}
 	}
 
 	private Class<?> findClassImpl(String name, ClasspathEntry classpathEntry, List<ClassLoaderHook> hooks) {
@@ -661,39 +608,25 @@ public class ClasspathManager {
 	 * @return the defined class
 	 */
 	private Class<?> defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, List<ClassLoaderHook> hooks) {
-		byte[] modifiedBytes = classbytes;
-		// The result holds two Class objects.  
-		// The first slot to either a pre loaded class or the newly defined class.
-		// The second slot is only set to a newly defined class object if it was successfully defined
-		Class<?>[] result = NULL_CLASS_RESULT;
+		DefineClassResult result = null;
 		try {
 			definePackage(name, classpathEntry);
+			byte[] modifiedBytes = null;
 			for (ClassLoaderHook hook : hooks) {
 				modifiedBytes = hook.processClass(name, classbytes, classpathEntry, entry, this);
 				if (modifiedBytes != null)
 					classbytes = modifiedBytes;
 			}
-			if (isParallelClassLoader) {
-				boolean initialLock = lockClassName(name);
-				try {
-					result = defineClassHoldingLock(name, classbytes, classpathEntry);
-				} finally {
-					if (initialLock)
-						unlockClassName(name);
-				}
-			} else {
-				synchronized (classloader) {
-					result = defineClassHoldingLock(name, classbytes, classpathEntry);
-				}
-			}
+			result = classloader.defineClass(name, classbytes, classpathEntry);
 		} finally {
+			// only pass the newly defined class to the hook
+			Class<?> defined = result != null && result.defined ? result.clazz : null;
 			for (ClassLoaderHook hook : hooks) {
-				// only pass the newly defined class to the hook
-				hook.recordClassDefine(name, result[1], classbytes, classpathEntry, entry, this);
+				hook.recordClassDefine(name, defined, classbytes, classpathEntry, entry, this);
 			}
 		}
 		// return either the pre-loaded class or the newly defined class
-		return result[0];
+		return result == null ? null : result.clazz;
 	}
 
 	private void definePackage(String name, ClasspathEntry classpathEntry) {
@@ -703,12 +636,9 @@ public class ClasspathManager {
 			return;
 		}
 		String packageName = name.substring(0, lastIndex);
-		Object pkg;
-		synchronized (pkgLock) {
-			pkg = classloader.publicGetPackage(packageName);
-			if (pkg != null) {
-				return;
-			}
+		Object pkg = classloader.publicGetPackage(packageName);
+		if (pkg != null) {
+			return;
 		}
 
 		// get info about the package from the classpath entry's manifest.
@@ -748,22 +678,7 @@ public class ClasspathManager {
 
 		// The package is not defined yet define it before we define the class.
 		// TODO still need to seal packages.
-		synchronized (pkgLock) {
-			pkg = classloader.publicGetPackage(packageName);
-			if (pkg == null) {
-				classloader.publicDefinePackage(packageName, specTitle, specVersion, specVendor, implTitle, implVersion, implVendor, null);
-			}
-		}
-	}
-
-	private Class<?>[] defineClassHoldingLock(String name, byte[] classbytes, ClasspathEntry classpathEntry) {
-		Class<?>[] result = new Class[2];
-		// must call findLoadedClass here even if it was called earlier,
-		// the findLoadedClass and defineClass calls must be atomic
-		result[0] = classloader.publicFindLoaded(name);
-		if (result[0] == null)
-			result[0] = result[1] = classloader.defineClass(name, classbytes, classpathEntry);
-		return result;
+		classloader.publicDefinePackage(packageName, specTitle, specVersion, specVendor, implTitle, implVersion, implVendor, null);
 	}
 
 	/**

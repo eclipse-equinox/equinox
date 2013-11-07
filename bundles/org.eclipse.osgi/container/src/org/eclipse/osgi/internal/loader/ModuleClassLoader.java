@@ -69,6 +69,31 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	}
 
 	/**
+	 * Holds the result of a defining a class.
+	 *
+	 */
+	public static class DefineClassResult {
+		/**
+		 * The class object that either got defined or was found as previously loaded.
+		 */
+		public final Class<?> clazz;
+		/**
+		 * Set to true if the class object got defined; set to false if the class
+		 * did not get defined correctly or the class was found as a previously loaded
+		 * class.
+		 */
+		public final boolean defined;
+
+		public DefineClassResult(Class<?> clazz, boolean defined) {
+			this.clazz = clazz;
+			this.defined = defined;
+		}
+	}
+
+	private final Map<String, Thread> classNameLocks = new HashMap<String, Thread>(5);
+	private final Object pkgLock = new Object();
+
+	/**
 	 * Constructs a new ModuleClassLoader.
 	 * @param parent the parent classloader
 	 */
@@ -231,20 +256,66 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 		return new ClasspathEntry(bundlefile, createProtectionDomain(bundlefile, entryGeneration), entryGeneration);
 	}
 
-	public Class<?> defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry) {
-		return defineClass(name, classbytes, 0, classbytes.length, classpathEntry.getDomain());
+	public DefineClassResult defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry) {
+		// Note that we must check findLoadedClass again here since no locks are held between
+		// calling findLoadedClass the first time and defineClass.
+		// This is to allow weavers to get called while holding no locks.
+		// See ClasspathManager.findLocalClass(String)
+		boolean defined = false;
+		Class<?> result = null;
+		if (isRegisteredAsParallel()) {
+			// lock by class name in this case
+			boolean initialLock = lockClassName(name);
+			try {
+				result = findLoadedClass(name);
+				if (result == null) {
+					result = defineClass(name, classbytes, 0, classbytes.length, classpathEntry.getDomain());
+					defined = true;
+				}
+			} finally {
+				if (initialLock) {
+					unlockClassName(name);
+				}
+			}
+		} else {
+			// lock by class loader instance in this case
+			synchronized (this) {
+				result = findLoadedClass(name);
+				if (result == null) {
+					result = defineClass(name, classbytes, 0, classbytes.length, classpathEntry.getDomain());
+					defined = true;
+				}
+			}
+		}
+		return new DefineClassResult(result, defined);
 	}
 
 	public Class<?> publicFindLoaded(String classname) {
-		return findLoadedClass(classname);
+		if (isRegisteredAsParallel()) {
+			boolean initialLock = lockClassName(classname);
+			try {
+				return findLoadedClass(classname);
+			} finally {
+				if (initialLock)
+					unlockClassName(classname);
+			}
+		}
+		synchronized (this) {
+			return findLoadedClass(classname);
+		}
 	}
 
-	public Object publicGetPackage(String pkgname) {
-		return getPackage(pkgname);
+	public Package publicGetPackage(String pkgname) {
+		synchronized (pkgLock) {
+			return getPackage(pkgname);
+		}
 	}
 
-	public Object publicDefinePackage(String name, String specTitle, String specVersion, String specVendor, String implTitle, String implVersion, String implVendor, URL sealBase) {
-		return definePackage(name, specTitle, specVersion, specVendor, implTitle, implVersion, implVendor, sealBase);
+	public Package publicDefinePackage(String name, String specTitle, String specVersion, String specVendor, String implTitle, String implVersion, String implVendor, URL sealBase) {
+		synchronized (pkgLock) {
+			Package pkg = getPackage(name);
+			return pkg != null ? pkg : definePackage(name, specTitle, specVersion, specVendor, implTitle, implVersion, implVendor, sealBase);
+		}
 	}
 
 	public URL findLocalResource(String resource) {
@@ -326,5 +397,40 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 
 	public void loadFragments(Collection<ModuleRevision> fragments) {
 		getClasspathManager().loadFragments(fragments);
+	}
+
+	private boolean lockClassName(String classname) {
+		synchronized (classNameLocks) {
+			Object lockingThread = classNameLocks.get(classname);
+			Thread current = Thread.currentThread();
+			if (lockingThread == current)
+				return false;
+			boolean previousInterruption = Thread.interrupted();
+			try {
+				while (true) {
+					if (lockingThread == null) {
+						classNameLocks.put(classname, current);
+						return true;
+					}
+
+					classNameLocks.wait();
+					lockingThread = classNameLocks.get(classname);
+				}
+			} catch (InterruptedException e) {
+				current.interrupt();
+				throw (LinkageError) new LinkageError(classname).initCause(e);
+			} finally {
+				if (previousInterruption) {
+					current.interrupt();
+				}
+			}
+		}
+	}
+
+	private void unlockClassName(String classname) {
+		synchronized (classNameLocks) {
+			classNameLocks.remove(classname);
+			classNameLocks.notifyAll();
+		}
 	}
 }

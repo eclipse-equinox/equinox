@@ -39,6 +39,7 @@ public class EquinoxClassLoader extends ModuleClassLoader {
 	private final Generation generation;
 	// TODO Note that PDE has internal dependency on this field type/name (bug 267238)
 	private final ClasspathManager manager;
+	private final boolean isRegisteredAsParallel;
 
 	/**
 	 * Constructs a new DefaultClassLoader.
@@ -54,6 +55,7 @@ public class EquinoxClassLoader extends ModuleClassLoader {
 		this.delegate = delegate;
 		this.generation = generation;
 		this.manager = new ClasspathManager(generation, this);
+		this.isRegisteredAsParallel = (ModuleClassLoader.REGISTERED_AS_PARALLEL && EQUINOX_REGISTERED_AS_PARALLEL) || this.configuration.PARALLEL_CAPABLE;
 	}
 
 	protected final Generation getGeneration() {
@@ -65,7 +67,7 @@ public class EquinoxClassLoader extends ModuleClassLoader {
 	}
 
 	public final boolean isRegisteredAsParallel() {
-		return ModuleClassLoader.REGISTERED_AS_PARALLEL && EQUINOX_REGISTERED_AS_PARALLEL;
+		return isRegisteredAsParallel;
 	}
 
 	public final BundleLoader getBundleLoader() {
