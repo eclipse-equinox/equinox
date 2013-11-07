@@ -162,11 +162,14 @@ static NSWindow* window = nil;
 
 @interface AppleEventDelegate : NSObject
 - (void)handleOpenDocuments:(NSAppleEventDescriptor *)event withReplyEvent: (NSAppleEventDescriptor *)replyEvent;
+- (void)handleGetURL:(NSAppleEventDescriptor *)event withReplyEvent: (NSAppleEventDescriptor *)replyEvent;
 @end
 @implementation AppleEventDelegate
-	NSTimer *timer;
+	NSTimer *timerOpenDocuments;
 	NSMutableArray *files;
-	
+	NSTimer *timerOpenUrls;
+	NSMutableArray *urls;
+
 - (void)handleOpenDocuments:(NSAppleEventDescriptor *)event withReplyEvent: (NSAppleEventDescriptor *)replyEvent {
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
     int count = [event numberOfItems];
@@ -195,21 +198,62 @@ static NSWindow* window = nil;
 		}
 	}
 	
-	if (!timer) {
-		timer = [NSTimer scheduledTimerWithTimeInterval: 1.0
+	if (!timerOpenDocuments) {
+		timerOpenDocuments = [NSTimer scheduledTimerWithTimeInterval: 1.0
 												 target: self
-											   selector: @selector(handleTimer:)
+											   selector: @selector(handleOpenDocumentsTimer:)
 											   userInfo: nil
 												repeats: YES];
 	}
 	[pool release];
 }
-- (void) handleTimer: (NSTimer *) timer {
+
+- (void) handleOpenDocumentsTimer: (NSTimer *) timer {
 	NSObject *delegate = [[NSApplication sharedApplication] delegate];
 	if (delegate != NULL && [delegate respondsToSelector: @selector(application:openFiles:)]) {
 		[delegate performSelector:@selector(application:openFiles:)	withObject:[NSApplication sharedApplication] withObject:files];
 		[files release];
-		[timer invalidate];
+		files = NULL;
+		[timerOpenDocuments invalidate];
+	}
+}
+
+- (void)handleGetURL:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)replyEvent {
+	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+
+	NSString *url = [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
+
+	NSObject *delegate = [[NSApplication sharedApplication] delegate];
+	if (delegate != NULL && [delegate respondsToSelector: @selector(application:openUrls:)]) {
+		[delegate performSelector:@selector(application:openUrls:) withObject:[NSApplication sharedApplication] withObject:[NSArray arrayWithObject:url]];
+	} else {
+		if (!urls) {
+			urls = [NSMutableArray arrayWithCapacity:1];
+			[urls retain];
+		}
+
+		[urls addObject:url];
+
+		if (!timerOpenUrls) {
+			timerOpenUrls = [NSTimer scheduledTimerWithTimeInterval: 1.0
+									 target: self
+									 selector: @selector(handleOpenUrlsTimer:)
+									 userInfo: nil
+									 repeats: YES];
+		}
+	}
+
+	[pool release];
+}
+
+- (void) handleOpenUrlsTimer: (NSTimer *) timer {
+	NSObject *delegate = [[NSApplication sharedApplication] delegate];
+	if (delegate != NULL && [delegate respondsToSelector: @selector(application:openUrls:)]) {
+		[delegate performSelector:@selector(application:openUrls:)	withObject:[NSApplication sharedApplication] withObject:urls];
+		[urls release];
+		urls = NULL;
+		[timerOpenUrls invalidate];
+		timerOpenUrls = NULL;
 	}
 }
 @end
@@ -487,6 +531,10 @@ void installAppleEventHandler() {
 				 andSelector:@selector(handleOpenDocuments:withReplyEvent:) 
 			   forEventClass:kCoreEventClass 
 				  andEventID:kAEOpenDocuments];
+	[manager setEventHandler:appleEventDelegate
+				 andSelector:@selector(handleGetURL:withReplyEvent:)
+			   forEventClass:kInternetEventClass
+				  andEventID:kAEGetURL];
 //	[appleEventDelegate release];
 	[pool release];
 #else	
