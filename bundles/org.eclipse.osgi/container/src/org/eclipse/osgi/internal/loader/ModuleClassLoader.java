@@ -433,4 +433,8 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 			classNameLocks.notifyAll();
 		}
 	}
+
+	public void close() {
+		getClasspathManager().close();
+	}
 }
