@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -136,8 +136,8 @@ public class CoordinationImpl {
 					throw new CoordinationException(Messages.EndingThreadNotSame, referent, CoordinationException.WRONG_THREAD);
 				}
 				// Unwind the stack in case there are other coordinations higher
-				// up than this one.
-				while (!coordinator.peek().equals(referent)) {
+				// up than this one. See bug 421487 for why peek() may be null.
+				while (!(coordinator.peek() == null || coordinator.peek().equals(referent))) {
 					try {
 						coordinator.peek().end();
 					} catch (CoordinationException e) {
