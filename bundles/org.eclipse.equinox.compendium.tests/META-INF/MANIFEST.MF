@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-SymbolicName: org.eclipse.equinox.compendium.tests
-Bundle-Version: 1.1.100
+Bundle-Version: 1.2.0
 Bundle-Activator: org.eclipse.equinox.compendium.tests.Activator
 Require-Bundle: org.eclipse.core.runtime
 Eclipse-LazyStart: true
