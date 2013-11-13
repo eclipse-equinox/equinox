@@ -103,7 +103,7 @@ public class CoordinationImpl {
 					// any thread, and there's nothing to compare. If the coordination
 					// is using this thread, then we can't block due to risk of deadlock.
 					if (t == Thread.currentThread()) {
-						throw new CoordinationException(Messages.Deadlock, referent, CoordinationException.DEADLOCK_DETECTED);
+						throw new CoordinationException(NLS.bind(Messages.Deadlock, new Object[]{participant, getName(), getId()}), referent, CoordinationException.DEADLOCK_DETECTED);
 					}
 				}
 			}
@@ -115,10 +115,11 @@ public class CoordinationImpl {
 			try {
 				coordination.join(1000);
 			} catch (InterruptedException e) {
-				coordinator.getLogService().log(LogService.LOG_DEBUG, Messages.LockInterrupted, e);
+				String message = NLS.bind(Messages.LockInterrupted, new Object[]{participant, name, id, coordination.getName(), coordination.getId()});
+				coordinator.getLogService().log(LogService.LOG_DEBUG, message, e);
 				// This thread was interrupted while waiting for the coordination
 				// to terminate.
-				throw new CoordinationException(Messages.LockInterrupted, referent, CoordinationException.LOCK_INTERRUPTED, e);
+				throw new CoordinationException(message, referent, CoordinationException.LOCK_INTERRUPTED, e);
 			}
 		}
 	}
@@ -133,7 +134,7 @@ public class CoordinationImpl {
 				// Coordinations may only be ended by the same thread that
 				// pushed them onto the stack, if any.
 				if (thread != Thread.currentThread()) {
-					throw new CoordinationException(Messages.EndingThreadNotSame, referent, CoordinationException.WRONG_THREAD);
+					throw new CoordinationException(NLS.bind(Messages.EndingThreadNotSame, new Object[]{name, id, thread, Thread.currentThread()}), referent, CoordinationException.WRONG_THREAD);
 				}
 				// Unwind the stack in case there are other coordinations higher
 				// up than this one. See bug 421487 for why peek() may be null.
@@ -154,6 +155,7 @@ public class CoordinationImpl {
 		// Notify participants this coordination has ended. Track whether or
 		// not a partial ending has occurred.
 		Exception exception = null;
+		Participant exceptionParticipant = null;
 		// No additional synchronization is needed here because the participant
 		// list will not be modified post termination.
 		List<Participant> participantsToNotify = new ArrayList<Participant>(this.participants);
@@ -162,10 +164,12 @@ public class CoordinationImpl {
 			try {
 				participant.ended(referent);
 			} catch (Exception e) {
-				coordinator.getLogService().log(LogService.LOG_WARNING, Messages.ParticipantEndedError, e);
+				coordinator.getLogService().log(LogService.LOG_WARNING, NLS.bind(Messages.ParticipantEndedError, new Object[]{participant, name, id}), e);
 				// Only the first exception will be propagated.
-				if (exception == null)
+				if (exception == null) {
 					exception = e;
+					exceptionParticipant = participant;
+				}
 			}
 		}
 		synchronized (this) {
@@ -174,7 +178,7 @@ public class CoordinationImpl {
 		}
 		// If a partial ending has occurred, throw the required exception.
 		if (exception != null) {
-			throw new CoordinationException(Messages.CoordinationPartiallyEnded, referent, CoordinationException.PARTIALLY_ENDED, exception);
+			throw new CoordinationException(NLS.bind(Messages.CoordinationPartiallyEnded, new Object[]{name, id, exceptionParticipant}), referent, CoordinationException.PARTIALLY_ENDED, exception);
 		}
 	}
 
@@ -230,7 +234,7 @@ public class CoordinationImpl {
 					checkTerminated();
 				}
 				catch (InterruptedException e) {
-					throw new CoordinationException(Messages.InterruptedTimeoutExtension, referent, CoordinationException.UNKNOWN, e);
+					throw new CoordinationException(NLS.bind(Messages.InterruptedTimeoutExtension, new Object[]{totalTimeout, getName(), getId(), timeInMillis}), referent, CoordinationException.UNKNOWN, e);
 				}
 			}
 			// Create the new timeout.
@@ -248,7 +252,7 @@ public class CoordinationImpl {
 		coordinator.checkPermission(CoordinationPermission.PARTICIPATE, name);
 		// The reason must not be null.
 		if (reason == null)
-			throw new NullPointerException(Messages.MissingFailureCause);
+			throw new NullPointerException(NLS.bind(Messages.MissingFailureCause, getName(), getId()));
 		// Terminating the coordination must be atomic.
 		synchronized (this) {
 			// If this coordination is terminated, return false. Do not throw a
@@ -269,7 +273,7 @@ public class CoordinationImpl {
 			try {
 				participant.failed(referent);
 			} catch (Exception e) {
-				coordinator.getLogService().log(LogService.LOG_WARNING, Messages.ParticipantFailedError, e);
+				coordinator.getLogService().log(LogService.LOG_WARNING, NLS.bind(Messages.ParticipantFailedError, new Object[]{participant, name, id}), e);
 			}
 		}
 		synchronized (this) {
@@ -390,11 +394,11 @@ public class CoordinationImpl {
 		// must be thrown.
 		if (failure != null) {
 			// The fail() method was called indicating the coordination failed.
-			throw new CoordinationException(Messages.CoordinationFailed, referent, CoordinationException.FAILED, failure);
+			throw new CoordinationException(NLS.bind(Messages.CoordinationFailed, name, id), referent, CoordinationException.FAILED, failure);
 		}
 		// The coordination did not fail, so it either partially ended or
 		// ended successfully.
-		throw new CoordinationException(Messages.CoordinationEnded, referent, CoordinationException.ALREADY_ENDED);
+		throw new CoordinationException(NLS.bind(Messages.CoordinationEnded, name, id), referent, CoordinationException.ALREADY_ENDED);
 	}
 
 	private void terminate() throws CoordinationException {
@@ -425,11 +429,11 @@ public class CoordinationImpl {
 			}
 		}
 		if (!valid)
-			throw new IllegalArgumentException(Messages.InvalidCoordinationName);
+			throw new IllegalArgumentException(NLS.bind(Messages.InvalidCoordinationName, name));
 	}
 
 	private static void validateTimeout(long timeout) {
 		if (timeout < 0)
-			throw new IllegalArgumentException(Messages.InvalidTimeInterval);
+			throw new IllegalArgumentException(NLS.bind(Messages.InvalidTimeInterval, timeout));
 	}
 }

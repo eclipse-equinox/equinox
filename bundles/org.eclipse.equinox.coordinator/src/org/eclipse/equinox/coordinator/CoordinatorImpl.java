@@ -38,7 +38,7 @@ public class CoordinatorImpl implements Coordinator {
 
 	private synchronized static long getNextId() {
 		if (Long.MAX_VALUE == lastId)
-			throw new IllegalStateException(Messages.MaxCoordinationIdExceeded);
+			throw new IllegalStateException(NLS.bind(Messages.MaxCoordinationIdExceeded, lastId));
 		// First ID will be 1.
 		return ++lastId;
 	}
@@ -82,7 +82,7 @@ public class CoordinatorImpl implements Coordinator {
 
 		public void push(CoordinationImpl c) {
 			if (contains(c))
-				throw new CoordinationException(Messages.CoordinationAlreadyExists, c.getReferent(), CoordinationException.ALREADY_PUSHED);
+				throw new CoordinationException(NLS.bind(Messages.CoordinationAlreadyExists, new Object[]{c.getName(), c.getId(), Thread.currentThread()}), c.getReferent(), CoordinationException.ALREADY_PUSHED);
 			c.setThreadAndEnclosingCoordination(Thread.currentThread(), coordinations.isEmpty() ? null : coordinations.getFirst());
 			coordinations.addFirst(c);
 		}
@@ -102,7 +102,7 @@ public class CoordinatorImpl implements Coordinator {
 		this.timer = timer;
 		coordinations = new ArrayList<CoordinationImpl>();
 		if (maxTimeout < 0)
-			throw new IllegalArgumentException(Messages.InvalidTimeInterval);
+			throw new IllegalArgumentException(NLS.bind(Messages.InvalidTimeInterval, maxTimeout));
 		this.maxTimeout = maxTimeout;
 	}
 
@@ -128,7 +128,7 @@ public class CoordinatorImpl implements Coordinator {
 		// Override the requested timeout with the max timeout, if necessary.
 		if (maxTimeout != 0) {
 			if (timeout == 0 || maxTimeout < timeout) {
-				logService.log(LogService.LOG_WARNING, NLS.bind(Messages.MaximumTimeout, timeout, maxTimeout));
+				logService.log(LogService.LOG_WARNING, NLS.bind(Messages.MaximumTimeout, new Object[]{timeout, maxTimeout, name}));
 				timeout = maxTimeout;
 			}
 		}
@@ -145,7 +145,7 @@ public class CoordinatorImpl implements Coordinator {
 		coordination.reference = new CoordinationWeakReference(referent, coordination);
 		synchronized (this) {
 			if (shutdown)
-				throw new IllegalStateException(Messages.CoordinatorShutdown);
+				throw new IllegalStateException(NLS.bind(Messages.CoordinatorShutdown, name, timeout));
 			synchronized (CoordinatorImpl.class) {
 				coordinations.add(coordination);
 				idToCoordination.put(new Long(coordination.getId()), coordination);
@@ -179,7 +179,7 @@ public class CoordinatorImpl implements Coordinator {
 			try {
 				checkPermission(CoordinationPermission.ADMIN, result.getName());
 			} catch (SecurityException e) {
-				logService.log(LogService.LOG_DEBUG, Messages.GetCoordinationNotPermitted, e);
+				logService.log(LogService.LOG_DEBUG, NLS.bind(Messages.GetCoordinationNotPermitted, new Object[]{Thread.currentThread(), result.getName(), result.getId()}), e);
 				result = null;
 			}
 		}
@@ -200,7 +200,7 @@ public class CoordinatorImpl implements Coordinator {
 					checkPermission(CoordinationPermission.ADMIN, coordination.getName());
 					result.add(coordination.getReferent());
 				} catch (SecurityException e) {
-					logService.log(LogService.LOG_DEBUG, Messages.GetCoordinationNotPermitted, e);
+					logService.log(LogService.LOG_DEBUG, NLS.bind(Messages.GetCoordinationNotPermitted, new Object[]{Thread.currentThread(), coordination.getName(), coordination.getId()}), e);
 				}
 			}
 		}
