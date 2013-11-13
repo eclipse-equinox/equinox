@@ -26,6 +26,7 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.wiring.BundleRevision;
 
 public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
+	private static final ClassLoader BOOT_CLASSLOADER = new ClassLoader(Object.class.getClassLoader()) { /* boot class loader */};
 	private final EquinoxContainer container;
 	private final Storage storage;
 	private final OSGiFrameworkHooks hooks;
@@ -51,8 +52,10 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 			type = configuration.getConfiguration(EquinoxConfiguration.PROP_PARENT_CLASSLOADER, Constants.FRAMEWORK_BUNDLE_PARENT_BOOT);
 		}
 
-		if (Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK.equalsIgnoreCase(type) || EquinoxConfiguration.PARENT_CLASSLOADER_FWK.equalsIgnoreCase(type))
-			return EquinoxContainer.class.getClassLoader();
+		if (Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK.equalsIgnoreCase(type) || EquinoxConfiguration.PARENT_CLASSLOADER_FWK.equalsIgnoreCase(type)) {
+			ClassLoader cl = EquinoxContainer.class.getClassLoader();
+			return cl == null ? BOOT_CLASSLOADER : cl;
+		}
 		if (Constants.FRAMEWORK_BUNDLE_PARENT_APP.equalsIgnoreCase(type))
 			return ClassLoader.getSystemClassLoader();
 		if (Constants.FRAMEWORK_BUNDLE_PARENT_EXT.equalsIgnoreCase(type)) {
@@ -60,7 +63,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 			if (appCL != null)
 				return appCL.getParent();
 		}
-		return new ClassLoader(Object.class.getClassLoader()) {/* boot class loader*/};
+		return BOOT_CLASSLOADER;
 
 	}
 
@@ -109,7 +112,9 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	@Override
 	public ModuleLoader createModuleLoader(ModuleWiring wiring) {
 		if (wiring.getBundle().getBundleId() == 0) {
-			return new SystemBundleLoader(wiring, container);
+			ClassLoader cl = EquinoxContainer.class.getClassLoader();
+			cl = cl == null ? BOOT_CLASSLOADER : cl;
+			return new SystemBundleLoader(wiring, container, cl);
 		}
 		if ((wiring.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 			return new FragmentLoader();

@@ -25,6 +25,7 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.security.CodeSource;
+import java.security.ProtectionDomain;
 import java.util.*;
 import org.eclipse.core.runtime.internal.adaptor.ConsoleManager;
 import org.eclipse.osgi.internal.debug.Debug;
@@ -602,10 +603,25 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	private static void initializeProperties(Properties configuration, AliasMapper aliasMapper) {
 		// initialize some framework properties that must always be set
 		if (configuration.get(PROP_FRAMEWORK) == null || configuration.get(EquinoxLocations.PROP_INSTALL_AREA) == null) {
-			CodeSource cs = EquinoxConfiguration.class.getProtectionDomain().getCodeSource();
-			if (cs == null)
-				throw new IllegalArgumentException(NLS.bind(Msg.ECLIPSE_STARTUP_PROPS_NOT_SET, PROP_FRAMEWORK + ", " + EquinoxLocations.PROP_INSTALL_AREA)); //$NON-NLS-1$
-			URL url = cs.getLocation();
+			ProtectionDomain pd = EquinoxConfiguration.class.getProtectionDomain();
+			CodeSource cs = pd == null ? null : pd.getCodeSource();
+			URL url = cs == null ? null : cs.getLocation();
+			if (url == null) {
+				IOException cause = null;
+				// try to determine by loading a resource we know we have
+				URL java6Profile = EquinoxConfiguration.class.getResource("/JavaSE-1.6.profile"); //$NON-NLS-1$
+				if (java6Profile != null && "jar".equals(java6Profile.getProtocol())) { //$NON-NLS-1$
+					try {
+						url = ((JarURLConnection) java6Profile.openConnection()).getJarFileURL();
+					} catch (IOException e) {
+						cause = e;
+					}
+				}
+				if (url == null) {
+					throw new IllegalArgumentException(NLS.bind(Msg.ECLIPSE_STARTUP_PROPS_NOT_SET, PROP_FRAMEWORK + ", " + EquinoxLocations.PROP_INSTALL_AREA), cause); //$NON-NLS-1$
+				}
+			}
+
 			// allow props to be preset
 			if (configuration.get(PROP_FRAMEWORK) == null) {
 				String externalForm = getFrameworkPath(url.toExternalForm(), false);

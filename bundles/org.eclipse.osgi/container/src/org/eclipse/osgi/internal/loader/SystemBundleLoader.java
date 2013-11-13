@@ -31,9 +31,9 @@ public class SystemBundleLoader extends BundleLoader {
 	final ClassLoader classLoader;
 	final ModuleClassLoader moduleClassLoader;
 
-	public SystemBundleLoader(ModuleWiring wiring, EquinoxContainer container) {
-		super(wiring, container, SystemBundleLoader.class.getClassLoader().getParent());
-		this.classLoader = getClass().getClassLoader();
+	public SystemBundleLoader(ModuleWiring wiring, EquinoxContainer container, ClassLoader frameworkLoader) {
+		super(wiring, container, frameworkLoader.getParent());
+		this.classLoader = frameworkLoader;
 		this.moduleClassLoader = new SystemModuleClassLoader(classLoader.getParent(), container.getConfiguration(), this, (Generation) wiring.getRevision().getRevisionInfo());
 	}
 
