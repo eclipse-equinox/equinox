@@ -44,7 +44,7 @@ public class WeavingHookConfigurator extends ClassLoaderHook {
 		ModuleClassLoader classLoader = manager.getClassLoader();
 		BundleLoader loader = classLoader.getBundleLoader();
 		// create a woven class object and add it to the thread local stack
-		WovenClassImpl wovenClass = new WovenClassImpl(name, classbytes, entry, classpathEntry.getDomain(), loader, container, blackList);
+		WovenClassImpl wovenClass = new WovenClassImpl(name, classbytes, entry, classpathEntry, loader, container, blackList);
 		List<WovenClassImpl> wovenClasses = wovenClassStack.get();
 		if (wovenClasses == null) {
 			wovenClasses = new ArrayList<WovenClassImpl>(6);

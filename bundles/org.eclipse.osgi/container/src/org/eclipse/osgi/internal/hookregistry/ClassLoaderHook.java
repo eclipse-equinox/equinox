@@ -29,16 +29,31 @@ import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 public abstract class ClassLoaderHook {
 	/**
 	 * Gets called by a classpath manager before defining a class.  This method allows a class loading hook 
-	 * to process the bytes of a class that is about to be defined.
+	 * to process the bytes of a class that is about to be defined and return a transformed byte array.
 	 * @param name the name of the class being defined
 	 * @param classbytes the bytes of the class being defined
 	 * @param classpathEntry the ClasspathEntry where the class bytes have been read from.
 	 * @param entry the BundleEntry source of the class bytes
 	 * @param manager the class path manager used to define the requested class
-	 * @return a modified array of classbytes or null if the original bytes should be used.
+	 * @return a transformed array of classbytes or null if the original bytes should be used.
 	 */
 	public byte[] processClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
 		return null;
+	}
+
+	/**
+	 * Gets called by a classpath manager before defining a class.  This method allows a class loading hook
+	 * to reject a transformation to the class bytes by a 
+	 * {@link #processClass(String, byte[], ClasspathEntry, BundleEntry, ClasspathManager) processClass} method.
+	 * @param name the name of the class being defined
+	 * @param transformedBytes the transformed bytes of the class being defined
+	 * @param classpathEntry the ClasspathEntry where the class bytes have been read from
+	 * @param entry the BundleEntry source of the class bytes
+	 * @param manager the class path manager used to define the requested class
+	 * @return returns true if the modified bytes should be rejected; otherwise false is returned
+	 */
+	public boolean rejectTransformation(String name, byte[] transformedBytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
+		return false;
 	}
 
 	/**

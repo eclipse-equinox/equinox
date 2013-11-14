@@ -14,7 +14,9 @@ import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.internal.loader.BundleLoader;
+import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
 import org.eclipse.osgi.internal.permadmin.BundlePermissions;
 import org.eclipse.osgi.internal.serviceregistry.HookContext;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
@@ -34,7 +36,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 	private final String className;
 	private final BundleEntry entry;
 	private final List<String> dynamicImports;
-	private final ProtectionDomain domain;
+	private final ClasspathEntry classpathEntry;
 	private final BundleLoader loader;
 	final ServiceRegistry registry;
 	private final Map<ServiceRegistration<?>, Boolean> blackList;
@@ -47,13 +49,13 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 	private int state;
 	final EquinoxContainer container;
 
-	public WovenClassImpl(String className, byte[] bytes, BundleEntry entry, ProtectionDomain domain, BundleLoader loader, EquinoxContainer container, Map<ServiceRegistration<?>, Boolean> blacklist) {
+	public WovenClassImpl(String className, byte[] bytes, BundleEntry entry, ClasspathEntry classpathEntry, BundleLoader loader, EquinoxContainer container, Map<ServiceRegistration<?>, Boolean> blacklist) {
 		super();
 		this.className = className;
 		this.validBytes = this.resultBytes = bytes;
 		this.entry = entry;
 		this.dynamicImports = new DynamicImportList(this);
-		this.domain = domain;
+		this.classpathEntry = classpathEntry;
 		this.loader = loader;
 		this.registry = container.getServiceRegistry();
 		this.container = container;
@@ -130,7 +132,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 	}
 
 	public ProtectionDomain getProtectionDomain() {
-		return domain;
+		return classpathEntry.getDomain();
 	}
 
 	public Class<?> getDefinedClass() {
@@ -234,6 +236,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		SecurityManager sm = System.getSecurityManager();
 		byte[] wovenBytes = null;
 		List<String> newImports = null;
+		boolean rejected = false;
 		try {
 			if (sm == null) {
 				registry.notifyHooksPrivileged(this);
@@ -251,14 +254,22 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 			}
 		} finally {
 			if ((hookFlags & FLAG_HOOKCALLED) != 0) {
-				wovenBytes = resultBytes;
-				newImports = dynamicImports;
+				for (ClassLoaderHook classLoaderHook : container.getConfiguration().getHookRegistry().getClassLoaderHooks()) {
+					rejected |= classLoaderHook.rejectTransformation(className, resultBytes, classpathEntry, entry, loader.getModuleClassLoader().getClasspathManager());
+				}
+				if (!rejected) {
+					wovenBytes = resultBytes;
+					newImports = dynamicImports;
+				}
 				setHooksComplete();
 				// Make sure setHooksComplete() has been called. The woven class
 				// must be immutable in TRANSFORMED or TRANSFORMING_FAILED.
 				// If error is not null, a weaving hook threw an exception.
 				setState(error == null ? TRANSFORMED : TRANSFORMING_FAILED);
-				notifyWovenClassListeners();
+				// only notify listeners if the transformation was not rejected
+				if (!rejected) {
+					notifyWovenClassListeners();
+				}
 			}
 		}
 

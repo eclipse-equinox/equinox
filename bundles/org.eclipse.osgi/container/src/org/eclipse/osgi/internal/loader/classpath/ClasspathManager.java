@@ -27,6 +27,7 @@ import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader.DefineClassResult;
 import org.eclipse.osgi.internal.messages.Msg;
+import org.eclipse.osgi.internal.weaving.WeavingHookConfigurator;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.*;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
@@ -611,11 +612,22 @@ public class ClasspathManager {
 		DefineClassResult result = null;
 		try {
 			definePackage(name, classpathEntry);
-			byte[] modifiedBytes = null;
 			for (ClassLoaderHook hook : hooks) {
-				modifiedBytes = hook.processClass(name, classbytes, classpathEntry, entry, this);
-				if (modifiedBytes != null)
-					classbytes = modifiedBytes;
+				byte[] modifiedBytes = hook.processClass(name, classbytes, classpathEntry, entry, this);
+				if (modifiedBytes != null) {
+					// the WeavingHookConfigurator already calls the rejectTransformation method; avoid calling it again.
+					if (!(hook instanceof WeavingHookConfigurator)) {
+						for (ClassLoaderHook rejectHook : hooks) {
+							if (rejectHook.rejectTransformation(name, modifiedBytes, classpathEntry, entry, this)) {
+								modifiedBytes = null;
+								break;
+							}
+						}
+					}
+					if (modifiedBytes != null) {
+						classbytes = modifiedBytes;
+					}
+				}
 			}
 			result = classloader.defineClass(name, classbytes, classpathEntry);
 		} finally {
