@@ -268,7 +268,18 @@ public class ResolverImpl implements Resolver
                             if (currentFaultyResources == null) {
                             	currentFaultyResources = new HashMap<Resource, ResolutionException>();
                             }
-                           	currentFaultyResources.put(resource, ex);
+                            Resource faultyResource = resource;
+                            // check that the faulty requirement is not from a fragment
+                            for (Requirement faultyReq : ex.getUnresolvedRequirements()) {
+                            	if (faultyReq instanceof WrappedRequirement)
+                                {
+                                    faultyResource =
+                                        ((WrappedRequirement) faultyReq)
+                                        .getDeclaredRequirement().getResource();
+                                    break;
+                            	}
+                            }
+                            currentFaultyResources.put(faultyResource, ex);
                         }
                     }
                     if (currentFaultyResources != null) {
