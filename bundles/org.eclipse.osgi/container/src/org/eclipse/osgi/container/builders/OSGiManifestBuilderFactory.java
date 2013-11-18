@@ -390,6 +390,10 @@ public final class OSGiManifestBuilderFactory {
 			String versionRangeAttr = (String) attributes.remove(BundleNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE);
 			VersionRange versionRange = versionRangeAttr == null ? null : new VersionRange(versionRangeAttr);
 			for (String bundleName : bundleNames) {
+				if (bundleName.equals(builder.getSymbolicName())) {
+					// ignore requirements to ourself
+					continue;
+				}
 				// fill in the filter directive based on the attributes
 				Map<String, String> bundleDirectives = new HashMap<String, String>(directives);
 				StringBuilder filter = new StringBuilder();
