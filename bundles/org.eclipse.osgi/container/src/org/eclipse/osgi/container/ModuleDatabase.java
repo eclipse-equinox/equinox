@@ -180,27 +180,6 @@ public class ModuleDatabase {
 	}
 
 	/**
-	 * Returns a snapshot collection of current revisions which are fragments
-
-	 * @return a snapshot collection of current revisions which are fragments
-	 */
-	final Collection<ModuleRevision> getFragmentRevisions() {
-		Collection<ModuleRevision> fragments = new ArrayList<ModuleRevision>();
-		readLock();
-		try {
-			for (Module module : modulesById.values()) {
-				ModuleRevision revision = module.getCurrentRevision();
-				if (revision != null && ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0)) {
-					fragments.add(revision);
-				}
-			}
-			return fragments;
-		} finally {
-			readUnlock();
-		}
-	}
-
-	/**
 	 * Installs a new revision using the specified builder, location and module.
 	 * <p>
 	 * A write operation protected by the {@link #writeLock() write} lock.

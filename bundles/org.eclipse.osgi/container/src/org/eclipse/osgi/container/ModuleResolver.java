@@ -12,9 +12,9 @@ package org.eclipse.osgi.container;
 
 import java.security.Permission;
 import java.util.*;
-import org.apache.felix.resolver.Logger;
-import org.apache.felix.resolver.ResolverImpl;
+import org.apache.felix.resolver.*;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
+import org.eclipse.osgi.container.namespaces.EquinoxFragmentNamespace;
 import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.*;
@@ -402,7 +402,7 @@ final class ModuleResolver {
 		return version instanceof Version ? (Version) version : Version.emptyVersion;
 	}
 
-	class ResolveProcess extends ResolveContext implements Comparator<Capability> {
+	class ResolveProcess extends ResolveContext implements Comparator<Capability>, FelixResolveContext {
 		class ResolveLogger extends Logger {
 			private Map<Resource, ResolutionException> errors = null;
 
@@ -445,9 +445,14 @@ final class ModuleResolver {
 		private final boolean triggersMandatory;
 		private final ModuleDatabase moduleDatabase;
 		private final Map<ModuleRevision, ModuleWiring> wirings;
+		private final Set<ModuleRevision> previouslyResolved;
 		private final DynamicModuleRequirement dynamicReq;
 		private volatile ResolverHook hook = null;
 		private volatile Map<String, Collection<ModuleRevision>> byName = null;
+		private volatile ModuleRevision currentlyResolving = null;
+		private volatile boolean currentlyResolvingMandatory = false;
+		private final Set<Resource> transitivelyResolveFailures = new LinkedHashSet<Resource>();
+		private final Set<Resource> failedToResolve = new HashSet<Resource>();
 		/*
 		 * Used to generate the UNRESOLVED_PROVIDER resolution report entries.
 		 * 
@@ -469,6 +474,7 @@ final class ModuleResolver {
 				this.optionals.removeAll(triggers);
 			}
 			this.wirings = new HashMap<ModuleRevision, ModuleWiring>(wirings);
+			this.previouslyResolved = new HashSet<ModuleRevision>(wirings.keySet());
 			this.moduleDatabase = moduleDatabase;
 			this.dynamicReq = null;
 		}
@@ -482,6 +488,7 @@ final class ModuleResolver {
 			this.triggersMandatory = false;
 			this.optionals = new ArrayList<ModuleRevision>(unresolved);
 			this.wirings = wirings;
+			this.previouslyResolved = new HashSet<ModuleRevision>(wirings.keySet());
 			this.moduleDatabase = moduleDatabase;
 			this.dynamicReq = dynamicReq;
 		}
@@ -489,13 +496,7 @@ final class ModuleResolver {
 		@Override
 		public List<Capability> findProviders(Requirement requirement) {
 			List<ModuleCapability> candidates = moduleDatabase.findCapabilities(requirement);
-			// TODO Record missing capability here if empty? Then record other
-			// entry types later if an existing capability was filtered?
 			List<Capability> result = filterProviders(requirement, candidates);
-			if (result.isEmpty())
-				reportBuilder.addEntry(requirement.getResource(), Entry.Type.MISSING_CAPABILITY, requirement);
-			else
-				computeUnresolvedProviders(requirement, result);
 			return result;
 		}
 
@@ -510,16 +511,43 @@ final class ModuleResolver {
 			removeSubstituted(iCandidates);
 			filterPermissions((BundleRequirement) requirement, iCandidates);
 			hook.filterMatches((BundleRequirement) requirement, InternalUtils.asListBundleCapability(candidates));
+
 			// filter resolved hosts after calling hooks to allow hooks to see the host capability
 			filterResolvedHosts(requirement, candidates, filterResolvedHosts);
+
+			if (requirement instanceof DynamicModuleRequirement) {
+				requirement = ((DynamicModuleRequirement) requirement).getOriginal();
+			}
+			if (candidates.isEmpty()) {
+				if (!wirings.containsKey(requirement.getResource())) {
+					reportBuilder.addEntry(requirement.getResource(), Entry.Type.MISSING_CAPABILITY, requirement);
+					String resolution = requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
+					if ((resolution == null || Namespace.RESOLUTION_MANDATORY.equals(resolution))) {
+						transitivelyResolveFailures.add(requirement.getResource());
+					}
+				}
+			} else {
+				computeUnresolvedProviders(requirement, candidates);
+			}
+
+			filterFailedToResolve(candidates);
+
 			Collections.sort(candidates, this);
 			return InternalUtils.asListCapability(candidates);
+		}
+
+		private void filterFailedToResolve(List<ModuleCapability> candidates) {
+			for (Iterator<ModuleCapability> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
+				if (failedToResolve.contains(iCandidates.next().getRevision())) {
+					iCandidates.remove();
+				}
+			}
 		}
 
 		private void filterResolvedHosts(Requirement requirement, List<ModuleCapability> candidates, boolean filterResolvedHosts) {
 			if (filterResolvedHosts && HostNamespace.HOST_NAMESPACE.equals(requirement.getNamespace())) {
 				for (Iterator<ModuleCapability> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
-					if (wirings.containsKey(iCandidates.next().getRevision())) {
+					if (previouslyResolved.contains(iCandidates.next().getRevision())) {
 						iCandidates.remove();
 					}
 				}
@@ -596,15 +624,45 @@ final class ModuleResolver {
 
 		@Override
 		public Collection<Resource> getMandatoryResources() {
-			if (triggersMandatory) {
-				return InternalUtils.asCollectionResource(triggers);
+			if (currentlyResolvingMandatory) {
+				return Collections.<Resource> singleton(currentlyResolving);
 			}
-			return super.getMandatoryResources();
+			return Collections.emptyList();
 		}
 
 		@Override
 		public Collection<Resource> getOptionalResources() {
-			return InternalUtils.asCollectionResource(optionals);
+			if (!currentlyResolvingMandatory) {
+				return Collections.<Resource> singleton(currentlyResolving);
+			}
+			return Collections.emptyList();
+		}
+
+		@Override
+		public Collection<Resource> getOndemandResources(Resource host) {
+			String hostBSN = ((ModuleRevision) host).getSymbolicName();
+			if (hostBSN == null) {
+				return Collections.emptyList();
+			}
+			List<ModuleCapability> hostCaps = ((ModuleRevision) host).getModuleCapabilities(HostNamespace.HOST_NAMESPACE);
+			if (hostCaps.isEmpty()) {
+				return Collections.emptyList();
+			}
+			ModuleCapability hostCap = hostCaps.get(0);
+			String matchFilter = "(" + EquinoxFragmentNamespace.FRAGMENT_NAMESPACE + "=" + hostBSN + ")"; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+			Requirement fragmentRequirement = ModuleContainer.createRequirement(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, Collections.<String, String> singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, matchFilter), Collections.<String, Object> emptyMap());
+			List<ModuleCapability> candidates = moduleDatabase.findCapabilities(fragmentRequirement);
+			// filter out disabled fragments and singletons
+			filterDisabled(candidates.listIterator());
+			Collection<Resource> ondemandFragments = new ArrayList<Resource>(candidates.size());
+			for (Iterator<ModuleCapability> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
+				ModuleCapability candidate = iCandidates.next();
+				ModuleRequirement hostReq = candidate.getRevision().getModuleRequirements(HostNamespace.HOST_NAMESPACE).get(0);
+				if (hostReq.matches(hostCap)) {
+					ondemandFragments.add(candidate.getResource());
+				}
+			}
+			return ondemandFragments;
 		}
 
 		ModuleResolutionReport resolve() {
@@ -641,16 +699,26 @@ final class ModuleResolver {
 					if (dynamicReq != null) {
 						result = resolveDynamic();
 					} else {
+						result = new HashMap<Resource, List<Wire>>();
 						Map<Resource, List<Wire>> dynamicAttachWirings = resolveNonPayLoadFragments();
+						applyInterimResultToWiringCopy(dynamicAttachWirings);
 						if (!dynamicAttachWirings.isEmpty()) {
-							// update the copy of wirings to include the new attachments
-							Map<ModuleRevision, ModuleWiring> updatedWirings = generateDelta(dynamicAttachWirings, wirings);
-							for (Map.Entry<ModuleRevision, ModuleWiring> updatedWiring : updatedWirings.entrySet()) {
-								wirings.put(updatedWiring.getKey(), updatedWiring.getValue());
+							// be sure to remove the revisions from the optional and triggers 
+							// so they no longer attempt to be resolved
+							Set<Resource> fragmentResources = dynamicAttachWirings.keySet();
+							triggers.removeAll(fragmentResources);
+							optionals.removeAll(fragmentResources);
+
+							result.putAll(dynamicAttachWirings);
+						}
+						if (triggersMandatory) {
+							for (ModuleRevision mandatory : triggers) {
+								resolveSingleRevision(mandatory, true, logger, result);
 							}
 						}
-						result = new ResolverImpl(logger).resolve(this);
-						result.putAll(dynamicAttachWirings);
+						for (ModuleRevision optional : optionals) {
+							resolveSingleRevision(optional, false, logger, result);
+						}
 					}
 				} catch (ResolutionException e) {
 					re = e;
@@ -665,6 +733,49 @@ final class ModuleResolver {
 				return report;
 			} finally {
 				threadResolving.set(Boolean.FALSE);
+			}
+		}
+
+		private void resolveSingleRevision(ModuleRevision single, boolean isMandatory, ResolveLogger logger, Map<Resource, List<Wire>> result) throws ResolutionException {
+			if (wirings.containsKey(single) || failedToResolve.contains(single)) {
+				return;
+			}
+			currentlyResolving = single;
+			currentlyResolvingMandatory = isMandatory;
+			transitivelyResolveFailures.clear();
+			Map<Resource, List<Wire>> interimResults = null;
+			try {
+				transitivelyResolveFailures.add(single);
+				interimResults = new ResolverImpl(logger).resolve(this);
+				applyInterimResultToWiringCopy(interimResults);
+				// now apply the simple wires to the results
+				for (Map.Entry<Resource, List<Wire>> interimResultEntry : interimResults.entrySet()) {
+					List<Wire> existingWires = result.get(interimResultEntry.getKey());
+					if (existingWires != null) {
+						existingWires.addAll(interimResultEntry.getValue());
+					} else {
+						result.put(interimResultEntry.getKey(), interimResultEntry.getValue());
+					}
+				}
+			} finally {
+				transitivelyResolveFailures.addAll(logger.getUsesConstraintViolations().keySet());
+				if (interimResults != null) {
+					transitivelyResolveFailures.removeAll(interimResults.keySet());
+				}
+				// what is left did not resolve
+				failedToResolve.addAll(transitivelyResolveFailures);
+				currentlyResolving = null;
+				currentlyResolvingMandatory = false;
+			}
+		}
+
+		private void applyInterimResultToWiringCopy(Map<Resource, List<Wire>> interimResult) {
+			if (!interimResult.isEmpty()) {
+				// update the copy of wirings to include interim results
+				Map<ModuleRevision, ModuleWiring> updatedWirings = generateDelta(interimResult, wirings);
+				for (Map.Entry<ModuleRevision, ModuleWiring> updatedWiring : updatedWirings.entrySet()) {
+					wirings.put(updatedWiring.getKey(), updatedWiring.getValue());
+				}
 			}
 		}
 
@@ -798,10 +909,6 @@ final class ModuleResolver {
 					}
 				}
 				if (resolvedReqs) {
-					// be sure to remove the revision from the optional and triggers 
-					// so they no longer attempt to be resolved
-					triggers.remove(nonPayLoad);
-					optionals.remove(nonPayLoad);
 					dynamicAttachment.put(nonPayLoad, nonPayloadWires);
 				}
 			}
@@ -824,13 +931,7 @@ final class ModuleResolver {
 
 		private Map<Resource, List<Wire>> resolveDynamic() throws ResolutionException {
 			List<Capability> dynamicMatches = filterProviders(dynamicReq.getOriginal(), moduleDatabase.findCapabilities(dynamicReq));
-			if (dynamicMatches.isEmpty())
-				reportBuilder.addEntry(dynamicReq.getResource(), Entry.Type.MISSING_CAPABILITY, dynamicReq.getOriginal());
-			else
-				computeUnresolvedProviders(dynamicReq.getOriginal(), dynamicMatches);
-			Collection<Resource> ondemandFragments = InternalUtils.asCollectionResource(moduleDatabase.getFragmentRevisions());
-
-			return new ResolverImpl(new Logger(0)).resolve(this, dynamicReq.getRevision(), dynamicReq.getOriginal(), dynamicMatches, ondemandFragments);
+			return new ResolverImpl(new Logger(0)).resolve(this, dynamicReq.getRevision(), dynamicReq.getOriginal(), dynamicMatches);
 		}
 
 		private void filterResolvable() {
@@ -913,7 +1014,7 @@ final class ModuleResolver {
 				// this is to avoid interacting with the module database
 				Set<ModuleRevision> revisions = new HashSet<ModuleRevision>();
 				revisions.addAll(unresolved);
-				revisions.addAll(wirings.keySet());
+				revisions.addAll(previouslyResolved);
 				current = new HashMap<String, Collection<ModuleRevision>>();
 				for (ModuleRevision revision : revisions) {
 					Collection<ModuleRevision> sameName = current.get(revision.getSymbolicName());
@@ -982,8 +1083,8 @@ final class ModuleResolver {
 			// TODO Ideally this policy should be handled by the ModuleDatabase.
 			// To do that the wirings would have to be provided since the wirings may
 			// be a subset of the current wirings provided by the ModuleDatabase
-			boolean resolved1 = wirings.get(c1.getResource()) != null;
-			boolean resolved2 = wirings.get(c2.getResource()) != null;
+			boolean resolved1 = previouslyResolved.contains(c1.getResource());
+			boolean resolved2 = previouslyResolved.contains(c2.getResource());
 			if (resolved1 != resolved2)
 				return resolved1 ? -1 : 1;
 

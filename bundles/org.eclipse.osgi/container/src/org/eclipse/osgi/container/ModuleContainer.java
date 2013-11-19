@@ -144,7 +144,7 @@ public final class ModuleContainer {
 	 * @param attributes the requirement attributes
 	 * @return a synthetic requirement
 	 */
-	public Requirement createRequirement(String namespace, Map<String, String> directives, Map<String, ?> attributes) {
+	public static Requirement createRequirement(String namespace, Map<String, String> directives, Map<String, ?> attributes) {
 		return new ModuleRequirement(namespace, directives, attributes, null);
 	}
 

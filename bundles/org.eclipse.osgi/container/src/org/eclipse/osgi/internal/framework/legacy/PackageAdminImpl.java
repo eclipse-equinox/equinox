@@ -108,7 +108,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		String filter = "(" + PackageNamespace.PACKAGE_NAMESPACE + "=" + (name == null ? "*" : name) + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$
 		Map<String, String> directives = Collections.<String, String> singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter);
 		Map<String, Boolean> attributes = Collections.singletonMap(Capabilities.SYNTHETIC_REQUIREMENT, Boolean.TRUE);
-		Requirement packageReq = container.createRequirement(PackageNamespace.PACKAGE_NAMESPACE, directives, attributes);
+		Requirement packageReq = ModuleContainer.createRequirement(PackageNamespace.PACKAGE_NAMESPACE, directives, attributes);
 		Collection<BundleCapability> packageCaps = container.getFrameworkWiring().findProviders(packageReq);
 		InternalUtils.filterCapabilityPermissions(packageCaps);
 		List<ExportedPackage> result = new ArrayList<ExportedPackage>();
@@ -135,7 +135,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		String filter = "(" + BundleNamespace.BUNDLE_NAMESPACE + "=" + (symbolicName == null ? "*" : symbolicName) + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$
 		Map<String, String> directives = Collections.<String, String> singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter);
 		Map<String, Boolean> attributes = Collections.singletonMap(Capabilities.SYNTHETIC_REQUIREMENT, Boolean.TRUE);
-		Requirement bundleReq = container.createRequirement(BundleNamespace.BUNDLE_NAMESPACE, directives, attributes);
+		Requirement bundleReq = ModuleContainer.createRequirement(BundleNamespace.BUNDLE_NAMESPACE, directives, attributes);
 		Collection<BundleCapability> bundleCaps = container.getFrameworkWiring().findProviders(bundleReq);
 		InternalUtils.filterCapabilityPermissions(bundleCaps);
 		Collection<RequiredBundle> result = new ArrayList<RequiredBundle>();
@@ -158,7 +158,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		}
 		VersionRange range = versionRange == null ? null : new VersionRange(versionRange);
 		String filter = (range != null ? "(&" : "") + "(" + IdentityNamespace.IDENTITY_NAMESPACE + "=" + symbolicName + ")" + (range != null ? range.toFilterString(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE) + ")" : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
-		Requirement identityReq = container.createRequirement(IdentityNamespace.IDENTITY_NAMESPACE, Collections.<String, String> singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter), Collections.<String, Object> emptyMap());
+		Requirement identityReq = ModuleContainer.createRequirement(IdentityNamespace.IDENTITY_NAMESPACE, Collections.<String, String> singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter), Collections.<String, Object> emptyMap());
 		Collection<BundleCapability> identityCaps = container.getFrameworkWiring().findProviders(identityReq);
 
 		if (identityCaps.isEmpty()) {

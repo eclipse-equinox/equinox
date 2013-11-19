@@ -439,7 +439,8 @@ public final class OSGiManifestBuilderFactory {
 		directives.put(BundleNamespace.REQUIREMENT_FILTER_DIRECTIVE, filter.toString());
 		builder.addRequirement(HostNamespace.HOST_NAMESPACE, directives, new HashMap<String, Object>(0));
 		// Add a fragment capability to advertise what host this resource is providing a fragment for
-		builder.addCapability(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, Collections.<String, String> emptyMap(), Collections.<String, Object> singletonMap(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, hostName));
+		directives = Collections.singletonMap(EquinoxModuleDataNamespace.CAPABILITY_EFFECTIVE_DIRECTIVE, EquinoxModuleDataNamespace.EFFECTIVE_INFORMATION);
+		builder.addCapability(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, directives, Collections.<String, Object> singletonMap(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, hostName));
 	}
 
 	private static void getProvideCapabilities(ModuleRevisionBuilder builder, ManifestElement[] provideElements, boolean chechSystemCapabilities) throws BundleException {
