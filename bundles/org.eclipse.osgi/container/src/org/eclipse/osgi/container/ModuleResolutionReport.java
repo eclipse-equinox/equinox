@@ -75,7 +75,7 @@ public class ModuleResolutionReport implements ResolutionReport {
 	}
 
 	@Override
-	public ResolutionException getResoltuionException() {
+	public ResolutionException getResolutionException() {
 		return resolutionException;
 	}
 

@@ -197,12 +197,12 @@ public class TestModuleContainer extends AbstractTest {
 		installDummyModule("c6_v1.MF", "c6", container);
 
 		ModuleResolutionReport report = container.resolve(Arrays.asList(c7), true);
-		Assert.assertNotNull("Expected a resolution exception", report.getResoltuionException());
+		Assert.assertNotNull("Expected a resolution exception", report.getResolutionException());
 
 		// Should resolve now
 		installDummyModule("c4_v1.MF", "c4", container);
 		report = container.resolve(Arrays.asList(c7), true);
-		Assert.assertNull("Unexpected resoltuion exception", report.getResoltuionException());
+		Assert.assertNull("Unexpected resoltuion exception", report.getResolutionException());
 	}
 
 	@Test

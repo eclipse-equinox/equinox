@@ -54,7 +54,7 @@ public abstract class SystemModule extends Module {
 				}
 				// need to check valid again in case someone uninstalled the bundle
 				checkValid();
-				ResolutionException e = report.getResoltuionException();
+				ResolutionException e = report.getResolutionException();
 				if (e != null) {
 					if (e.getCause() instanceof BundleException) {
 						throw (BundleException) e.getCause();

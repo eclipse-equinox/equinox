@@ -171,7 +171,7 @@ public interface ResolutionReport {
 	 * @return the resolution exception or {@code null} if there is 
 	 * no resolution exception.
 	 */
-	ResolutionException getResoltuionException();
+	ResolutionException getResolutionException();
 
 	/**
 	 * Returns a resolution report message for the given resource.

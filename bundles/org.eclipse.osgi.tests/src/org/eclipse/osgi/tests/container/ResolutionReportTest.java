@@ -212,12 +212,12 @@ public class ResolutionReportTest extends AbstractTest {
 
 	private void assertResolutionDoesNotSucceed(ModuleContainer container, Collection<Module> modules) {
 		ModuleResolutionReport report = container.resolve(modules, true);
-		assertNotNull("Resolution should not have succeeded", report.getResoltuionException());
+		assertNotNull("Resolution should not have succeeded", report.getResolutionException());
 	}
 
 	private void assertResolutionSucceeds(ModuleContainer container, Collection<Module> modules) {
 		ModuleResolutionReport report = container.resolve(modules, false);
-		assertNull("Unexpected resolution exception", report.getResoltuionException());
+		assertNull("Unexpected resolution exception", report.getResolutionException());
 	}
 
 	private void assertResolutionReportEntriesNotNull(Map<Resource, List<ResolutionReport.Entry>> entries) {
