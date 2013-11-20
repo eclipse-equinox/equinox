@@ -14,8 +14,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import org.eclipse.osgi.container.ModuleRevisionBuilder;
-import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
-import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
+import org.eclipse.osgi.container.namespaces.*;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.internal.messages.Msg;
@@ -439,6 +438,8 @@ public final class OSGiManifestBuilderFactory {
 			filter.insert(0, "(&").append(')'); //$NON-NLS-1$
 		directives.put(BundleNamespace.REQUIREMENT_FILTER_DIRECTIVE, filter.toString());
 		builder.addRequirement(HostNamespace.HOST_NAMESPACE, directives, new HashMap<String, Object>(0));
+		// Add a fragment capability to advertise what host this resource is providing a fragment for
+		builder.addCapability(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, Collections.<String, String> emptyMap(), Collections.<String, Object> singletonMap(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, hostName));
 	}
 
 	private static void getProvideCapabilities(ModuleRevisionBuilder builder, ManifestElement[] provideElements, boolean chechSystemCapabilities) throws BundleException {
