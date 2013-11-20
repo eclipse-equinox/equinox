@@ -7,8 +7,3 @@ requires.1.namespace = java.package
 requires.1.name = javax.servlet.http
 requires.1.greedy = false
 requires.1.optional = true
-
-requires.2.namespace = java.package
-requires.2.name = javax.microedition.io
-requires.2.greedy = false
-requires.2.optional = true
