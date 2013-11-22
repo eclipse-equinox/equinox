@@ -138,11 +138,14 @@ public class CoordinationImpl {
 				}
 				// Unwind the stack in case there are other coordinations higher
 				// up than this one. See bug 421487 for why peek() may be null.
-				while (!(coordinator.peek() == null || coordinator.peek().equals(referent))) {
+				for (Coordination peeked = coordinator.peek(); !(peeked == null || referent.equals(peeked)); peeked = coordinator.peek()) {
 					try {
-						coordinator.peek().end();
-					} catch (CoordinationException e) {
-						coordinator.peek().fail(e);
+						peeked.end();
+					}
+					catch (CoordinationException e) {
+						peeked = coordinator.peek();
+						if (peeked != null)
+							peeked.fail(e);
 					}
 				}
 				// A coordination is removed from the thread local stack only when being ended.
