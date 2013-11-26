@@ -222,7 +222,7 @@ public class ServiceComponentProp implements Component, PrivilegedExceptionActio
 					}
 					if (ref.reference.bindMethod == null || ccError != null || !ref.isBound()) {
 						//the bind method is not found and called for some reason or it has thrown exception
-						Activator.log(null, LogService.LOG_ERROR, "Could not bind a reference of component " + name + ". The reference is: " + ref.reference, null); //$NON-NLS-1$ //$NON-NLS-2$
+						Activator.log(null, ref.isOptional() ? LogService.LOG_DEBUG : LogService.LOG_ERROR, "Could not bind a reference of component " + name + ". The reference is: " + ref.reference, null); //$NON-NLS-1$ //$NON-NLS-2$
 						if (ccError != null) {
 							//unbind the already bound references
 							for (int j = i - 1; j >= 0; j--) {
