@@ -16,10 +16,13 @@ import org.apache.felix.resolver.*;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.container.namespaces.EquinoxFragmentNamespace;
 import org.eclipse.osgi.internal.container.InternalUtils;
+import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.*;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry.Type;
+import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 import org.osgi.framework.hooks.resolver.ResolverHook;
@@ -33,6 +36,24 @@ import org.osgi.service.resolver.*;
  * in a module {@link ModuleContainer container}.
  */
 final class ModuleResolver {
+	static final String SEPARATOR = System.getProperty("line.separator"); //$NON-NLS-1$
+	static final char TAB = '\t';
+
+	private static final String OPTION_RESOLVER = EquinoxContainer.NAME + "/resolver"; //$NON-NLS-1$
+	private static final String OPTION_PROVIDERS = OPTION_RESOLVER + "/providers"; //$NON-NLS-1$
+
+	static boolean DEBUG_RESOLVER = false;
+	static boolean DEBUG_PROVIDERS = false;
+
+	private void setDebugOptions() {
+		DebugOptions options = adaptor.getDebugOptions();
+		// may be null if debugging is not enabled
+		if (options == null)
+			return;
+		DEBUG_RESOLVER = options.getBooleanOption(OPTION_RESOLVER, false);
+		DEBUG_PROVIDERS = options.getBooleanOption(OPTION_PROVIDERS, false);
+	}
+
 	private static final Collection<String> NON_PAYLOAD_CAPABILITIES = Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE);
 	static final Collection<String> NON_PAYLOAD_REQUIREMENTS = Arrays.asList(HostNamespace.HOST_NAMESPACE, ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE);
 
@@ -51,6 +72,7 @@ final class ModuleResolver {
 	 */
 	ModuleResolver(ModuleContainerAdaptor adaptor) {
 		this.adaptor = adaptor;
+		setDebugOptions();
 	}
 
 	/**
@@ -241,9 +263,21 @@ final class ModuleResolver {
 	static void removeNonEffectiveCapabilities(ListIterator<ModuleCapability> iCapabilities) {
 		rewind(iCapabilities);
 		while (iCapabilities.hasNext()) {
-			Object effective = iCapabilities.next().getDirectives().get(Namespace.CAPABILITY_EFFECTIVE_DIRECTIVE);
-			if (effective != null && !Namespace.EFFECTIVE_RESOLVE.equals(effective))
+			Capability capability = iCapabilities.next();
+			Object effective = capability.getDirectives().get(Namespace.CAPABILITY_EFFECTIVE_DIRECTIVE);
+			if (effective != null && !Namespace.EFFECTIVE_RESOLVE.equals(effective)) {
 				iCapabilities.remove();
+				if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+					Debug.println(new StringBuilder("RESOLVER: Capability filtered because it was not effective") //$NON-NLS-1$
+							.append(SEPARATOR).append(TAB) //
+							.append(capability) //
+							.append(SEPARATOR).append(TAB).append(TAB) //
+							.append("of resource") //$NON-NLS-1$
+							.append(SEPARATOR).append(TAB).append(TAB).append(TAB) //
+							.append(capability.getResource()) //
+							.toString());
+				}
+			}
 		}
 	}
 
@@ -495,8 +529,32 @@ final class ModuleResolver {
 
 		@Override
 		public List<Capability> findProviders(Requirement requirement) {
+			if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+				Debug.println(new StringBuilder("RESOLVER: Finding capabilities for requirement") //$NON-NLS-1$
+						.append(SEPARATOR).append(TAB) //
+						.append(requirement) //
+						.append(SEPARATOR).append(TAB).append(TAB) //
+						.append("of resource") //$NON-NLS-1$
+						.append(SEPARATOR).append(TAB).append(TAB).append(TAB) //
+						.append(requirement.getResource()) //
+						.toString());
+			}
 			List<ModuleCapability> candidates = moduleDatabase.findCapabilities(requirement);
 			List<Capability> result = filterProviders(requirement, candidates);
+			if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+				StringBuilder builder = new StringBuilder("RESOLVER: Capabilities being returned to the resolver"); //$NON-NLS-1$
+				int i = 0;
+				for (Capability capability : result) {
+					builder.append(SEPARATOR).append(TAB) //
+							.append("[").append(++i).append("] ") //$NON-NLS-1$ //$NON-NLS-2$
+							.append(capability) //
+							.append(SEPARATOR).append(TAB).append(TAB) //
+							.append("of resource") //$NON-NLS-1$
+							.append(SEPARATOR).append(TAB).append(TAB).append(TAB) //
+							.append(capability.getResource());
+				}
+				Debug.println(builder.toString());
+			}
 			return result;
 		}
 
@@ -510,7 +568,29 @@ final class ModuleResolver {
 			removeNonEffectiveCapabilities(iCandidates);
 			removeSubstituted(iCandidates);
 			filterPermissions((BundleRequirement) requirement, iCandidates);
+
+			List<ModuleCapability> filteredMatches = null;
+			if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+				filteredMatches = new ArrayList<ModuleCapability>(candidates);
+			}
 			hook.filterMatches((BundleRequirement) requirement, InternalUtils.asListBundleCapability(candidates));
+			if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+				filteredMatches.removeAll(candidates);
+				if (!filteredMatches.isEmpty()) {
+					StringBuilder builder = new StringBuilder("RESOLVER: Capabilities filtered by ResolverHook.filterMatches"); //$NON-NLS-1$
+					int i = 0;
+					for (Capability capability : filteredMatches) {
+						builder.append(SEPARATOR).append(TAB) //
+								.append("[").append(++i).append("] ") //$NON-NLS-1$ //$NON-NLS-2$
+								.append(capability) //
+								.append(SEPARATOR).append(TAB).append(TAB) //
+								.append("of resource") //$NON-NLS-1$
+								.append(SEPARATOR).append(TAB).append(TAB).append(TAB) //
+								.append(capability.getResource());
+					}
+					Debug.println(builder.toString());
+				}
+			}
 
 			// filter resolved hosts after calling hooks to allow hooks to see the host capability
 			filterResolvedHosts(requirement, candidates, filterResolvedHosts);
@@ -538,8 +618,19 @@ final class ModuleResolver {
 
 		private void filterFailedToResolve(List<ModuleCapability> candidates) {
 			for (Iterator<ModuleCapability> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
-				if (failedToResolve.contains(iCandidates.next().getRevision())) {
+				ModuleCapability capability = iCandidates.next();
+				if (failedToResolve.contains(capability.getRevision())) {
 					iCandidates.remove();
+					if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+						Debug.println(new StringBuilder("RESOLVER: Capability filtered because its resource was not resolved") //$NON-NLS-1$
+								.append(SEPARATOR).append(TAB) //
+								.append(capability) //
+								.append(SEPARATOR).append(TAB).append(TAB) //
+								.append("of resource") //$NON-NLS-1$
+								.append(SEPARATOR).append(TAB).append(TAB).append(TAB) //
+								.append(capability.getResource()) //
+								.toString());
+					}
 				}
 			}
 		}
@@ -575,8 +666,30 @@ final class ModuleResolver {
 				}
 				Permission requirePermission = InternalUtils.getRequirePermission(candidate);
 				Permission providePermission = InternalUtils.getProvidePermission(candidate);
-				if (!requirement.getRevision().getBundle().hasPermission(requirePermission) || !candidate.getRevision().getBundle().hasPermission(providePermission)) {
+				if (!requirement.getRevision().getBundle().hasPermission(requirePermission)) {
 					iCandidates.remove();
+					if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+						Debug.println(new StringBuilder("RESOLVER: Capability filtered because requirer did not have permission") //$NON-NLS-1$
+								.append(SEPARATOR).append(TAB) //
+								.append(candidate) //
+								.append(SEPARATOR).append(TAB).append(TAB) //
+								.append("of resource") //$NON-NLS-1$
+								.append(SEPARATOR).append(TAB).append(TAB).append(TAB) //
+								.append(candidate.getResource()) //
+								.toString());
+					}
+				} else if (!candidate.getRevision().getBundle().hasPermission(providePermission)) {
+					iCandidates.remove();
+					if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+						Debug.println(new StringBuilder("RESOLVER: Capability filtered because provider did not have permission") //$NON-NLS-1$
+								.append(SEPARATOR).append(TAB) //
+								.append(candidate) //
+								.append(SEPARATOR).append(TAB).append(TAB) //
+								.append("of resource") //$NON-NLS-1$
+								.append(SEPARATOR).append(TAB).append(TAB).append(TAB) //
+								.append(candidate.getResource()) //
+								.toString());
+					}
 				}
 			}
 		}
@@ -584,8 +697,20 @@ final class ModuleResolver {
 		private void filterDisabled(ListIterator<ModuleCapability> iCandidates) {
 			rewind(iCandidates);
 			while (iCandidates.hasNext()) {
-				if (disabled.contains(iCandidates.next().getResource()))
+				Capability capability = iCandidates.next();
+				if (disabled.contains(capability.getResource())) {
 					iCandidates.remove();
+					if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+						Debug.println(new StringBuilder("RESOLVER: Capability filtered because it was disabled") //$NON-NLS-1$
+								.append(SEPARATOR).append(TAB) //
+								.append(capability) //
+								.append(SEPARATOR).append(TAB).append(TAB) //
+								.append("of resource") //$NON-NLS-1$
+								.append(SEPARATOR).append(TAB).append(TAB).append(TAB) //
+								.append(capability.getResource()) //
+								.toString());
+					}
+				}
 			}
 		}
 
@@ -596,6 +721,16 @@ final class ModuleResolver {
 				ModuleWiring wiring = wirings.get(capability.getRevision());
 				if (wiring != null && wiring.isSubtituted(capability)) {
 					iCapabilities.remove();
+					if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+						Debug.println(new StringBuilder("RESOLVER: Capability filtered because it was substituted") //$NON-NLS-1$
+								.append(SEPARATOR).append(TAB) //
+								.append(capability) //
+								.append(SEPARATOR).append(TAB).append(TAB) //
+								.append("of resource") //$NON-NLS-1$
+								.append(SEPARATOR).append(TAB).append(TAB).append(TAB) //
+								.append(capability.getResource()) //
+								.toString());
+					}
 				}
 			}
 		}

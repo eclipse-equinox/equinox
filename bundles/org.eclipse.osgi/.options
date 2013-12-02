@@ -38,20 +38,12 @@ org.eclipse.osgi/eclipseadaptor/debug/platformadmin/resolver=false
 org.eclipse.osgi/eclipseadaptor/converter/debug = false
 
 ### OSGi resolver options
-# Turns on debugging for the resolver
-org.eclipse.osgi/resolver/debug = false
-# Prints out wiring information after the resolver has completed the resolve process
-org.eclipse.osgi/resolver/wiring = false
-# Prints out Import-Package information
-org.eclipse.osgi/resolver/imports = false
-# Prints out Require-Bundle information
-org.eclipse.osgi/resolver/requires = false
-# Prints out debug information form the "uses" clause
-org.eclipse.osgi/resolver/uses = false
-# Prints out cycle information
-org.eclipse.osgi/resolver/cycles = false
-# Prints out Eclipse-GenericRequire information
-org.eclipse.osgi/resolver/generics = false
+# General debug option for the resolver. Enabling this option is equivalent to 
+# enabling all other resolver debug options. 
+org.eclipse.osgi/resolver = false
+# Displays information about matching capabilities returned to the resolver and
+# why any were filtered out.
+org.eclipse.osgi/resolver/providers = true
 
 #### Profile settings
 org.eclipse.osgi/profile/startup = false
