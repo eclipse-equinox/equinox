@@ -41,9 +41,11 @@ final class ModuleResolver {
 
 	private static final String OPTION_RESOLVER = EquinoxContainer.NAME + "/resolver"; //$NON-NLS-1$
 	private static final String OPTION_PROVIDERS = OPTION_RESOLVER + "/providers"; //$NON-NLS-1$
+	private static final String OPTION_HOOKS = OPTION_RESOLVER + "/hooks"; //$NON-NLS-1$
 
 	static boolean DEBUG_RESOLVER = false;
 	static boolean DEBUG_PROVIDERS = false;
+	static boolean DEBUG_HOOKS = false;
 
 	private void setDebugOptions() {
 		DebugOptions options = adaptor.getDebugOptions();
@@ -52,6 +54,7 @@ final class ModuleResolver {
 			return;
 		DEBUG_RESOLVER = options.getBooleanOption(OPTION_RESOLVER, false);
 		DEBUG_PROVIDERS = options.getBooleanOption(OPTION_PROVIDERS, false);
+		DEBUG_HOOKS = options.getBooleanOption(OPTION_HOOKS, false);
 	}
 
 	private static final Collection<String> NON_PAYLOAD_CAPABILITIES = Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE);
@@ -570,11 +573,11 @@ final class ModuleResolver {
 			filterPermissions((BundleRequirement) requirement, iCandidates);
 
 			List<ModuleCapability> filteredMatches = null;
-			if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+			if (DEBUG_RESOLVER || DEBUG_PROVIDERS || DEBUG_HOOKS) {
 				filteredMatches = new ArrayList<ModuleCapability>(candidates);
 			}
 			hook.filterMatches((BundleRequirement) requirement, InternalUtils.asListBundleCapability(candidates));
-			if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+			if (DEBUG_RESOLVER || DEBUG_PROVIDERS || DEBUG_HOOKS) {
 				filteredMatches.removeAll(candidates);
 				if (!filteredMatches.isEmpty()) {
 					StringBuilder builder = new StringBuilder("RESOLVER: Capabilities filtered by ResolverHook.filterMatches"); //$NON-NLS-1$
@@ -1073,8 +1076,12 @@ final class ModuleResolver {
 			Collection<ModuleRevision> enabledCandidates = new ArrayList<ModuleRevision>(unresolved);
 			hook.filterResolvable(InternalUtils.asListBundleRevision((List<? extends BundleRevision>) enabledCandidates));
 			disabled.removeAll(enabledCandidates);
-			for (ModuleRevision revision : disabled)
+			for (ModuleRevision revision : disabled) {
 				reportBuilder.addEntry(revision, Entry.Type.FILTERED_BY_RESOLVER_HOOK, null);
+				if (DEBUG_RESOLVER || DEBUG_HOOKS) {
+					Debug.println("RESOLVER: Resource filtered by ResolverHook.filterResolvable: " + revision); //$NON-NLS-1$
+				}
+			}
 		}
 
 		private void selectSingletons() {
@@ -1202,6 +1209,37 @@ final class ModuleResolver {
 				Collection<ModuleRevision> collisionCandidates = new ArrayList<ModuleRevision>(capabilities.size());
 				for (BundleCapability identity : capabilities) {
 					collisionCandidates.add((ModuleRevision) identity.getRevision());
+				}
+				if (DEBUG_RESOLVER || DEBUG_HOOKS) {
+					Collection<ModuleRevision> filteredSingletons = new ArrayList<ModuleRevision>(sameBSN);
+					filteredSingletons.removeAll(collisionCandidates);
+					filteredSingletons.remove(singleton);
+					if (!filteredSingletons.isEmpty()) {
+						StringBuilder builder = new StringBuilder("RESOLVER: Resources filtered by ResolverHook.filterSingletonCollisions") //$NON-NLS-1$
+								.append(SEPARATOR).append(TAB) //
+								.append("Singleton") //$NON-NLS-1$
+								.append(SEPARATOR).append(TAB).append(TAB) //
+								.append(singleton) //
+								.append(" [id=") //$NON-NLS-1$
+								.append(singleton.getRevisions().getModule().getId()) //
+								.append(", location=") //$NON-NLS-1$
+								.append(singleton.getRevisions().getModule().getLocation()) //
+								.append(']') //
+								.append(SEPARATOR).append(TAB) //
+								.append("Collisions"); //$NON-NLS-1$
+						int i = 0;
+						for (ModuleRevision revision : filteredSingletons) {
+							builder.append(SEPARATOR).append(TAB).append(TAB) //
+									.append("[").append(++i).append("] ") //$NON-NLS-1$ //$NON-NLS-2$
+									.append(revision) //
+									.append(" [id=") //$NON-NLS-1$
+									.append(revision.getRevisions().getModule().getId()) //
+									.append(", location=") //$NON-NLS-1$
+									.append(revision.getRevisions().getModule().getLocation()) //
+									.append(']');
+						}
+						Debug.println(builder.toString());
+					}
 				}
 				result.put(singleton, collisionCandidates);
 			}

@@ -43,7 +43,10 @@ org.eclipse.osgi/eclipseadaptor/converter/debug = false
 org.eclipse.osgi/resolver = false
 # Displays information about matching capabilities returned to the resolver and
 # why any were filtered out.
-org.eclipse.osgi/resolver/providers = true
+org.eclipse.osgi/resolver/providers = false
+# Displays information about capabilities or resources that were filtered by 
+# resolver hooks.
+org.eclipse.osgi/resolver/hooks = false
 
 #### Profile settings
 org.eclipse.osgi/profile/startup = false
