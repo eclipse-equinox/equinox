@@ -295,7 +295,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		boolean previousInterruption = Thread.interrupted();
 		boolean invalid = false;
 		try {
-			boolean acquired = stateChangeLock.tryLock(5, TimeUnit.SECONDS);
+			boolean acquired = stateChangeLock.tryLock(revisions.getContainer().getModuleLockTimeout(), TimeUnit.SECONDS);
 			if (acquired) {
 				boolean isValidTransition = true;
 				switch (transitionEvent) {

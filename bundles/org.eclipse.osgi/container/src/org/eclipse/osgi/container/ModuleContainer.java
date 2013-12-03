@@ -28,6 +28,7 @@ import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.internal.container.LockSet;
 import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry;
 import org.eclipse.osgi.service.debug.DebugOptions;
@@ -87,6 +88,8 @@ public final class ModuleContainer {
 	 */
 	private final AtomicReference<SystemModule> refreshingSystemModule = new AtomicReference<SystemModule>();
 
+	private final long moduleLockTimeout;
+
 	/**
 	 * Constructs a new container with the specified collision hook, resolver hook, resolver and module database.
 	 * @param adaptor the adaptor for the container
@@ -98,6 +101,20 @@ public final class ModuleContainer {
 		this.moduleDatabase = moduledataBase;
 		this.frameworkWiring = new ContainerWiring();
 		this.frameworkStartLevel = new ContainerStartLevel();
+		long tempModuleLockTimeout = 5;
+		String moduleLockTimeoutProp = adaptor.getProperty(EquinoxConfiguration.PROP_MODULE_LOCK_TIMEOUT);
+		if (moduleLockTimeoutProp != null) {
+			try {
+				tempModuleLockTimeout = Long.parseLong(moduleLockTimeoutProp);
+				// don't do anything less than one second
+				if (tempModuleLockTimeout < 1) {
+					tempModuleLockTimeout = 1;
+				}
+			} catch (NumberFormatException e) {
+				// will default to 5
+			}
+		}
+		this.moduleLockTimeout = tempModuleLockTimeout;
 	}
 
 	/**
@@ -961,6 +978,10 @@ public final class ModuleContainer {
 
 	void setStartLevel(Module module, int startlevel) {
 		frameworkStartLevel.setStartLevel(module, startlevel);
+	}
+
+	long getModuleLockTimeout() {
+		return this.moduleLockTimeout;
 	}
 
 	void open() {
