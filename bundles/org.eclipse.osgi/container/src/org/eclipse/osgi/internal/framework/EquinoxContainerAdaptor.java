@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.container.Module.State;
+import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.internal.loader.*;
 import org.eclipse.osgi.internal.permadmin.BundlePermissions;
 import org.eclipse.osgi.service.debug.DebugOptions;
@@ -45,6 +46,15 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	}
 
 	private static ClassLoader getModuleClassLoaderParent(EquinoxConfiguration configuration) {
+		// allow hooks to determine the parent class loader
+		for (ClassLoaderHook hook : configuration.getHookRegistry().getClassLoaderHooks()) {
+			ClassLoader parent = hook.getModuleClassLoaderParent(configuration);
+			if (parent != null) {
+				// first one to return non-null wins.
+				return parent;
+			}
+		}
+		// DEFAULT behavior:
 		// check property for specified parent
 		// check the osgi defined property first
 		String type = configuration.getConfiguration(Constants.FRAMEWORK_BUNDLE_PARENT);

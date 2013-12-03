@@ -264,4 +264,17 @@ public abstract class ClassLoaderHook {
 		// do nothing
 	}
 
+	/**
+	 * Returns the parent class loader to be used by all ModuleClassLoaders.
+	 * A {@code null} value may be returned if this hook does not supply the parent.
+	 * Only one hook is able to provide the implementation of the parent class loader
+	 * and the first one to return non-null wins.
+	 * @param configuration the equinox configuration
+	 * @return the parent class loader to be used by all ModuleClassLoaders
+	 */
+	public ClassLoader getModuleClassLoaderParent(EquinoxConfiguration configuration) {
+		// do nothing by default
+		return null;
+	}
+
 }
