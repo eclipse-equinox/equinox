@@ -47,6 +47,8 @@ org.eclipse.osgi/resolver/providers = false
 # Displays information about capabilities or resources that were filtered by 
 # resolver hooks.
 org.eclipse.osgi/resolver/hooks = false
+# Displays information about uses constraint violations.
+org.eclipse.osgi/resolver/uses = false
 
 #### Profile settings
 org.eclipse.osgi/profile/startup = false

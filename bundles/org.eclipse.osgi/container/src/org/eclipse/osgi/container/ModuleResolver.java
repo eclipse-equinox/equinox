@@ -42,10 +42,12 @@ final class ModuleResolver {
 	private static final String OPTION_RESOLVER = EquinoxContainer.NAME + "/resolver"; //$NON-NLS-1$
 	private static final String OPTION_PROVIDERS = OPTION_RESOLVER + "/providers"; //$NON-NLS-1$
 	private static final String OPTION_HOOKS = OPTION_RESOLVER + "/hooks"; //$NON-NLS-1$
+	private static final String OPTION_USES = OPTION_RESOLVER + "/uses"; //$NON-NLS-1$
 
 	static boolean DEBUG_RESOLVER = false;
 	static boolean DEBUG_PROVIDERS = false;
 	static boolean DEBUG_HOOKS = false;
+	static boolean DEBUG_USES = false;
 
 	private void setDebugOptions() {
 		DebugOptions options = adaptor.getDebugOptions();
@@ -55,6 +57,7 @@ final class ModuleResolver {
 		DEBUG_RESOLVER = options.getBooleanOption(OPTION_RESOLVER, false);
 		DEBUG_PROVIDERS = options.getBooleanOption(OPTION_PROVIDERS, false);
 		DEBUG_HOOKS = options.getBooleanOption(OPTION_HOOKS, false);
+		DEBUG_USES = options.getBooleanOption(OPTION_USES, false);
 	}
 
 	private static final Collection<String> NON_PAYLOAD_CAPABILITIES = Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE);
@@ -453,6 +456,18 @@ final class ModuleResolver {
 					errors = new HashMap<Resource, ResolutionException>();
 				}
 				errors.put(resource, error);
+				if (DEBUG_RESOLVER || DEBUG_USES) {
+					Debug.println(new StringBuilder("RESOLVER: Uses constraint violation") //$NON-NLS-1$
+							.append(SEPARATOR).append(TAB) //
+							.append("Resource") //$NON-NLS-1$
+							.append(SEPARATOR).append(TAB).append(TAB) //
+							.append(resource) //
+							.append(SEPARATOR).append(TAB) //
+							.append("Error") //$NON-NLS-1$
+							.append(SEPARATOR).append(TAB).append(TAB) //
+							.append(error.getMessage()) //
+							.toString());
+				}
 			}
 
 			Map<Resource, ResolutionException> getUsesConstraintViolations() {
