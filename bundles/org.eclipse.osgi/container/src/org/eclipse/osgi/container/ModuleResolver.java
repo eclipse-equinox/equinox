@@ -44,12 +44,14 @@ final class ModuleResolver {
 	private static final String OPTION_HOOKS = OPTION_RESOLVER + "/hooks"; //$NON-NLS-1$
 	private static final String OPTION_USES = OPTION_RESOLVER + "/uses"; //$NON-NLS-1$
 	private static final String OPTION_WIRING = OPTION_RESOLVER + "/wiring"; //$NON-NLS-1$
+	private static final String OPTION_REPORT = OPTION_RESOLVER + "/report"; //$NON-NLS-1$
 
 	static boolean DEBUG_RESOLVER = false;
 	static boolean DEBUG_PROVIDERS = false;
 	static boolean DEBUG_HOOKS = false;
 	static boolean DEBUG_USES = false;
 	static boolean DEBUG_WIRING = false;
+	static boolean DEBUG_REPORT = false;
 
 	private void setDebugOptions() {
 		DebugOptions options = adaptor.getDebugOptions();
@@ -61,6 +63,7 @@ final class ModuleResolver {
 		DEBUG_HOOKS = options.getBooleanOption(OPTION_HOOKS, false);
 		DEBUG_USES = options.getBooleanOption(OPTION_USES, false);
 		DEBUG_WIRING = options.getBooleanOption(OPTION_WIRING, false);
+		DEBUG_REPORT = options.getBooleanOption(OPTION_REPORT, false);
 	}
 
 	private static final Collection<String> NON_PAYLOAD_CAPABILITIES = Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE);
@@ -885,6 +888,15 @@ final class ModuleResolver {
 						printWirings(result);
 					}
 					report = reportBuilder.build(result, re);
+					if (DEBUG_RESOLVER || DEBUG_REPORT) {
+						Set<Resource> resources = report.getEntries().keySet();
+						if (!resources.isEmpty()) {
+							Debug.println("RESOLVER: Resolution report"); //$NON-NLS-1$
+							for (Resource resource : report.getEntries().keySet()) {
+								Debug.println(report.getResolutionReportMessage(resource));
+							}
+						}
+					}
 					if (hook instanceof ResolutionReport.Listener)
 						((ResolutionReport.Listener) hook).handleResolutionReport(report);
 					hook.end();

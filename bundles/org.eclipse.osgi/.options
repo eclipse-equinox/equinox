@@ -50,7 +50,9 @@ org.eclipse.osgi/resolver/hooks = false
 # Displays information about uses constraint violations.
 org.eclipse.osgi/resolver/uses = false
 # Displays wiring information after the resolve process completes.
-org.eclipse.osgi/resolver/wiring = true
+org.eclipse.osgi/resolver/wiring = false
+# Displays the resolution report information.
+org.eclipse.osgi/resolver/report = true
 
 #### Profile settings
 org.eclipse.osgi/profile/startup = false
