@@ -43,11 +43,13 @@ final class ModuleResolver {
 	private static final String OPTION_PROVIDERS = OPTION_RESOLVER + "/providers"; //$NON-NLS-1$
 	private static final String OPTION_HOOKS = OPTION_RESOLVER + "/hooks"; //$NON-NLS-1$
 	private static final String OPTION_USES = OPTION_RESOLVER + "/uses"; //$NON-NLS-1$
+	private static final String OPTION_WIRING = OPTION_RESOLVER + "/wiring"; //$NON-NLS-1$
 
 	static boolean DEBUG_RESOLVER = false;
 	static boolean DEBUG_PROVIDERS = false;
 	static boolean DEBUG_HOOKS = false;
 	static boolean DEBUG_USES = false;
+	static boolean DEBUG_WIRING = false;
 
 	private void setDebugOptions() {
 		DebugOptions options = adaptor.getDebugOptions();
@@ -58,6 +60,7 @@ final class ModuleResolver {
 		DEBUG_PROVIDERS = options.getBooleanOption(OPTION_PROVIDERS, false);
 		DEBUG_HOOKS = options.getBooleanOption(OPTION_HOOKS, false);
 		DEBUG_USES = options.getBooleanOption(OPTION_USES, false);
+		DEBUG_WIRING = options.getBooleanOption(OPTION_WIRING, false);
 	}
 
 	private static final Collection<String> NON_PAYLOAD_CAPABILITIES = Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE);
@@ -878,6 +881,9 @@ final class ModuleResolver {
 				} finally {
 					computeUnresolvedProviderResolutionReportEntries(result);
 					computeUsesConstraintViolations(logger.getUsesConstraintViolations());
+					if (DEBUG_RESOLVER || DEBUG_WIRING) {
+						printWirings(result);
+					}
 					report = reportBuilder.build(result, re);
 					if (hook instanceof ResolutionReport.Listener)
 						((ResolutionReport.Listener) hook).handleResolutionReport(report);
@@ -887,6 +893,26 @@ final class ModuleResolver {
 			} finally {
 				threadResolving.set(Boolean.FALSE);
 			}
+		}
+
+		private void printWirings(Map<Resource, List<Wire>> wires) {
+			StringBuilder builder = new StringBuilder("RESOLVER: Wirings for resolved bundles:"); //$NON-NLS-1$
+			for (Map.Entry<Resource, List<Wire>> entry : wires.entrySet()) {
+				builder.append(SEPARATOR).append(TAB) //
+						.append("Resource") //$NON-NLS-1$
+						.append(SEPARATOR).append(TAB).append(TAB) //
+						.append(entry.getKey()) //
+						.append(SEPARATOR).append(TAB) //
+						.append("Wiring"); //$NON-NLS-1$
+				int i = 0;
+				for (Wire wire : entry.getValue()) {
+					builder.append(SEPARATOR).append(TAB).append(TAB) //
+							.append('[').append(++i).append("] ") //$NON-NLS-1$
+							.append(wire);
+				}
+
+			}
+			Debug.println(builder);
 		}
 
 		private void resolveSingleRevision(ModuleRevision single, boolean isMandatory, ResolveLogger logger, Map<Resource, List<Wire>> result) throws ResolutionException {
