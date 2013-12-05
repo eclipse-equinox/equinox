@@ -52,7 +52,7 @@ org.eclipse.osgi/resolver/uses = false
 # Displays wiring information after the resolve process completes.
 org.eclipse.osgi/resolver/wiring = false
 # Displays the resolution report information.
-org.eclipse.osgi/resolver/report = true
+org.eclipse.osgi/resolver/report = false
 
 #### Profile settings
 org.eclipse.osgi/profile/startup = false
