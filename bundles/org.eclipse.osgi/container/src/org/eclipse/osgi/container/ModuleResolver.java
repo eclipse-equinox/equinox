@@ -46,12 +46,12 @@ final class ModuleResolver {
 	private static final String OPTION_WIRING = OPTION_RESOLVER + "/wiring"; //$NON-NLS-1$
 	private static final String OPTION_REPORT = OPTION_RESOLVER + "/report"; //$NON-NLS-1$
 
-	static boolean DEBUG_RESOLVER = false;
-	static boolean DEBUG_PROVIDERS = false;
-	static boolean DEBUG_HOOKS = false;
-	static boolean DEBUG_USES = false;
-	static boolean DEBUG_WIRING = false;
-	static boolean DEBUG_REPORT = false;
+	boolean DEBUG_RESOLVER = false;
+	boolean DEBUG_PROVIDERS = false;
+	boolean DEBUG_HOOKS = false;
+	boolean DEBUG_USES = false;
+	boolean DEBUG_WIRING = false;
+	boolean DEBUG_REPORT = false;
 
 	private void setDebugOptions() {
 		DebugOptions options = adaptor.getDebugOptions();
@@ -114,7 +114,7 @@ final class ModuleResolver {
 		return resolveProcess.resolve();
 	}
 
-	static Map<ModuleRevision, ModuleWiring> generateDelta(Map<Resource, List<Wire>> result, Map<ModuleRevision, ModuleWiring> wiringCopy) {
+	Map<ModuleRevision, ModuleWiring> generateDelta(Map<Resource, List<Wire>> result, Map<ModuleRevision, ModuleWiring> wiringCopy) {
 		Map<ModuleRevision, Map<ModuleCapability, List<ModuleWire>>> provided = new HashMap<ModuleRevision, Map<ModuleCapability, List<ModuleWire>>>();
 		Map<ModuleRevision, List<ModuleWire>> required = new HashMap<ModuleRevision, List<ModuleWire>>();
 		// First populate the list of provided and required wires for revision
@@ -163,7 +163,7 @@ final class ModuleResolver {
 		return delta;
 	}
 
-	private static ModuleWiring createNewWiring(ModuleRevision revision, Map<ModuleRevision, Map<ModuleCapability, List<ModuleWire>>> provided, Map<ModuleRevision, List<ModuleWire>> required) {
+	private ModuleWiring createNewWiring(ModuleRevision revision, Map<ModuleRevision, Map<ModuleCapability, List<ModuleWire>>> provided, Map<ModuleRevision, List<ModuleWire>> required) {
 		Map<ModuleCapability, List<ModuleWire>> providedWireMap = provided.get(revision);
 		if (providedWireMap == null)
 			providedWireMap = Collections.emptyMap();
@@ -272,7 +272,7 @@ final class ModuleResolver {
 		}
 	}
 
-	static void removeNonEffectiveCapabilities(ListIterator<ModuleCapability> iCapabilities) {
+	void removeNonEffectiveCapabilities(ListIterator<ModuleCapability> iCapabilities) {
 		rewind(iCapabilities);
 		while (iCapabilities.hasNext()) {
 			Capability capability = iCapabilities.next();

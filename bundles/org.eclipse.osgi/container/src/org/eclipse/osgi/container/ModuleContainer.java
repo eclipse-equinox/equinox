@@ -470,7 +470,7 @@ public final class ModuleContainer {
 
 		ModuleResolutionReport report = moduleResolver.resolveDelta(triggerRevisions, triggersMandatory, unresolved, wiringClone, moduleDatabase);
 		Map<Resource, List<Wire>> resolutionResult = report.getResolutionResult();
-		Map<ModuleRevision, ModuleWiring> deltaWiring = resolutionResult == null ? Collections.<ModuleRevision, ModuleWiring> emptyMap() : ModuleResolver.generateDelta(resolutionResult, wiringClone);
+		Map<ModuleRevision, ModuleWiring> deltaWiring = resolutionResult == null ? Collections.<ModuleRevision, ModuleWiring> emptyMap() : moduleResolver.generateDelta(resolutionResult, wiringClone);
 		if (deltaWiring.isEmpty())
 			return report; // nothing to do
 
@@ -539,7 +539,7 @@ public final class ModuleContainer {
 			for (DynamicModuleRequirement dynamicReq : dynamicReqs) {
 				ModuleResolutionReport report = moduleResolver.resolveDynamicDelta(dynamicReq, unresolved, wiringClone, moduleDatabase);
 				Map<Resource, List<Wire>> resolutionResult = report.getResolutionResult();
-				deltaWiring = resolutionResult == null ? Collections.<ModuleRevision, ModuleWiring> emptyMap() : ModuleResolver.generateDelta(resolutionResult, wiringClone);
+				deltaWiring = resolutionResult == null ? Collections.<ModuleRevision, ModuleWiring> emptyMap() : moduleResolver.generateDelta(resolutionResult, wiringClone);
 				if (deltaWiring.get(revision) != null) {
 					break;
 				}
