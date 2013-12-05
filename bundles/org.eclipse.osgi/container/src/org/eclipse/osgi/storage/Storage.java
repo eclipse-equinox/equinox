@@ -48,7 +48,7 @@ import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
 
 public class Storage {
-	public static final int VERSION = 2;
+	public static final int VERSION = 3;
 	public static final String BUNDLE_DATA_DIR = "data"; //$NON-NLS-1$
 	public static final String BUNDLE_FILE_NAME = "bundleFile"; //$NON-NLS-1$
 	public static final String FRAMEWORK_INFO = "framework.info"; //$NON-NLS-1$
