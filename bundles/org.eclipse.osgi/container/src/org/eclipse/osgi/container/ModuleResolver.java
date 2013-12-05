@@ -909,6 +909,10 @@ final class ModuleResolver {
 
 		private void printWirings(Map<Resource, List<Wire>> wires) {
 			StringBuilder builder = new StringBuilder("RESOLVER: Wirings for resolved bundles:"); //$NON-NLS-1$
+			if (wires == null) {
+				Debug.println(" null wires!"); //$NON-NLS-1$
+				return;
+			}
 			for (Map.Entry<Resource, List<Wire>> entry : wires.entrySet()) {
 				builder.append(SEPARATOR).append(TAB) //
 						.append("Resource") //$NON-NLS-1$
