@@ -34,6 +34,7 @@ static FN_TABLE gtkFunctions[] = {
 	FN_TABLE_ENTRY(gtk_window_resize, 1),
 	FN_TABLE_ENTRY(gtk_window_set_title, 1),
 	FN_TABLE_ENTRY(gtk_window_set_decorated, 1),
+	FN_TABLE_ENTRY(gtk_window_set_type_hint, 1),
 	FN_TABLE_ENTRY(gtk_window_set_position, 1),
 	{ NULL, NULL }
 };
@@ -100,8 +101,9 @@ int loadGtk() {
 #endif
 
 	void *gdkLib = NULL, *gtkLib = NULL, *objLib = NULL, *pixLib = NULL, *x11Lib = NULL;
-
-	if (getenv("SWT_GTK3")) {
+	
+	char *gtk3 = getenv("SWT_GTK3");
+	if (gtk3 == NULL || strcmp(gtk3,"1") == 0) {
 		gdkLib = dlopen(GDK3_LIB, DLFLAGS);
 		gtkLib = dlopen(GTK3_LIB, DLFLAGS);
 	}

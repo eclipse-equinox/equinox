@@ -150,6 +150,16 @@
 #include <strings.h>
 #endif
 
+#ifdef MACOSX
+
+#ifdef COCOA
+#include <Cocoa/Cocoa.h>
+#else
+#include <Carbon/Carbon.h>
+#endif
+
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -352,6 +362,7 @@ static _TCHAR*  findStartupJar();
 static _TCHAR*  findSplash(_TCHAR* splashArg);
 static _TCHAR** getRelaunchCommand( _TCHAR **vmCommand );
 static const _TCHAR* getVMArch();
+static int      _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[]);
 
 #ifdef _WIN32
 static void     createConsole();
@@ -367,9 +378,91 @@ JNIEXPORT void setInitialArgs(int argc, _TCHAR** argv, _TCHAR* lib) {
 	eclipseLibrary = lib;
 }
 
+#ifdef MACOSX
+
+#include <pthread.h>
+/* thread stuff */
+typedef struct {
+	int argc;
+	_TCHAR ** argv;
+	_TCHAR ** vmArgs;
+	int result;
+} StartVMArgs;
+
+static void * startThread(void * init) {
+	StartVMArgs *args = (StartVMArgs *) init;
+	args->result = _run(args->argc, args->argv, args->vmArgs);
+	return NULL;
+}
+
+static void dummyCallback(void * info) {}
+#endif
+
 /* this method must match the RunMethod typedef in eclipseMain.c */
 /* vmArgs must be NULL terminated                                */
 JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
+{
+    /* Parse command line arguments (looking for the VM to use). */
+    /* Override configuration file arguments */
+    parseArgs( &argc, argv );
+
+#ifdef MACOSX
+	if (secondThread != 0) {
+	
+		/* --launcher.secondThread was specified, create a new thread and run the 
+		 * vm on it.  This main thread will run the CFRunLoop 
+		 */
+		pthread_t thread;
+		struct rlimit limit = {0, 0};
+		int stackSize = 0;
+		if (getrlimit(RLIMIT_STACK, &limit) == 0) {
+			if (limit.rlim_cur != 0) {
+				stackSize = limit.rlim_cur;
+			}
+		}
+		
+		/* initialize thread attributes */
+		pthread_attr_t attributes;
+		pthread_attr_init(&attributes);
+		pthread_attr_setscope(&attributes, PTHREAD_SCOPE_SYSTEM);
+		pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
+		if (stackSize != 0)
+			pthread_attr_setstacksize(&attributes, stackSize);
+		
+		/* arguments to start the vm */
+		StartVMArgs args;
+		args.argc = argc;
+		args.argv = argv;
+		args.vmArgs = vmArgs;
+		args.result = 0;
+		
+		/* create the thread */
+		pthread_create( &thread, &attributes, &startThread, &args);
+		pthread_attr_destroy(&attributes);
+			
+		CFRunLoopSourceContext sourceContext = {
+			.version = 0, .info = NULL, .retain = NULL, .release = NULL,
+			.copyDescription = NULL, .equal = NULL, .hash = NULL, 
+			.schedule = NULL, .cancel = NULL, .perform = &dummyCallback
+		};
+		CFRunLoopSourceRef sourceRef = CFRunLoopSourceCreate(NULL, 0, &sourceContext);
+		CFRunLoopRef loopRef = CFRunLoopGetCurrent();
+		CFRunLoopAddSource(loopRef, sourceRef, kCFRunLoopCommonModes);
+		CFRunLoopRun();
+		CFRelease(sourceRef);
+		
+		return args.result;
+	}
+	
+	char firstThreadEnvVariable[80];
+	sprintf(firstThreadEnvVariable, "JAVA_STARTED_ON_FIRST_THREAD_%d", getpid());
+	setenv(firstThreadEnvVariable, "1", 1);
+#endif
+
+	return _run(argc, argv, vmArgs);
+}
+
+static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 {
     _TCHAR**  vmCommand = NULL;
     _TCHAR**  vmCommandArgs = NULL;
@@ -382,10 +475,6 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	 
 	/* arg[0] should be the full pathname of this program. */
     program = _tcsdup( argv[0] );
-	
-    /* Parse command line arguments (looking for the VM to use). */
-    /* Override configuration file arguments */
-    parseArgs( &argc, argv );
 
 	/* Initialize official program name */
    	officialName = name != NULL ? _tcsdup( name ) : getDefaultOfficialName();

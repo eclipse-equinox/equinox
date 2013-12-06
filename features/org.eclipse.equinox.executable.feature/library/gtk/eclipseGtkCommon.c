@@ -93,7 +93,7 @@ int initWindowSystem(int* pArgc, char* argv[], int showSplash)
     if (gtk.gtk_set_locale) gtk.gtk_set_locale();
     if (gtk.gtk_init_with_args) {
         GError *error = NULL;
-        if (!gtk.gtk_init_with_args(pArgc, &argv, NULL, NULL, NULL, &error)) {
+        if (!gtk.gtk_init_with_args(0, NULL, NULL, NULL, NULL, &error)) {
             if (error) {
                 fprintf(stderr, "%s: %s\n", getOfficialName(), error->message);
                 if (gtk.g_error_free) gtk.g_error_free(error);

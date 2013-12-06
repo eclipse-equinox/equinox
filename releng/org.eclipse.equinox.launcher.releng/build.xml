@@ -129,10 +129,10 @@
 	
 	<target name="buildLocal" if="local" >
 		<property name="tmpdir" value="${basedir}/${fragmentFolder}.${gitTag}"/>
-		<property file="${localGit}/rt.equinox.framework/bundles/org.eclipse.equinox.executable/library/make_version.mak" />
+		<property file="${localGit}/rt.equinox.framework/features/org.eclipse.equinox.executable.feature/library/make_version.mak" />
 		<mkdir dir="${tmpdir}" />
 		<copy todir="${tmpdir}">
-			<fileset dir="${localGit}/rt.equinox.framework/bundles/org.eclipse.equinox.executable/library" includes="**" />
+			<fileset dir="${localGit}/rt.equinox.framework/features/org.eclipse.equinox.executable.feature/library" includes="**" />
 		</copy>
 		<exec dir="${tmpdir}/${ws}" executable="${tmpdir}/${ws}/build.bat" failonerror="true">
 			<arg line="${arch}"/>
@@ -156,8 +156,8 @@
 		</condition>
 		<property name="remotetmpdir" value="${remotebuilddir}/${fragmentFolder}.${gitTag}"/>
 		<property name="zip_file" value="${fragmentFolder}.${gitTag}.library.zip"/>
-		<property file="${localGit}/rt.equinox.framework/bundles/org.eclipse.equinox.executable/library/make_version.mak" />
-		<zip basedir="${localGit}/rt.equinox.framework/bundles/org.eclipse.equinox.executable/library" includes="**" destfile="${basedir}/${zip_file}"/>
+		<property file="${localGit}/rt.equinox.framework/features/org.eclipse.equinox.executable.feature/library/make_version.mak" />
+		<zip basedir="${localGit}/rt.equinox.framework/features/org.eclipse.equinox.executable.feature/library" includes="**" destfile="${basedir}/${zip_file}"/>
 		<scp file="${basedir}/${zip_file}"
 			todir="${userName}@${machine}:${remotebuilddir}" 
 			keyfile="${keyfile}"
@@ -240,9 +240,5 @@
 		<git dir="${localGit}/rt.equinox.binaries" command="commit" arguments="-a -m &quot;Recompiled binaries ${commitMsg}&quot;" />
 		<git dir="${localGit}/rt.equinox.binaries" command="tag" arguments="${tag}" />
 
-		<replaceregexp match="binaryTag=(.*)" replace="binaryTag=${tag}" >
-			<fileset dir="${localGit}/rt.equinox.framework" includes="**/build.properties" />
-		</replaceregexp>
-		<git dir="${localGit}/rt.equinox.framework" command="commit" arguments="-a -m &quot;Binaries ${tag} ${commitMsg}&quot;" />
 	</target>
 </project>

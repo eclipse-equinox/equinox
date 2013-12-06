@@ -58,6 +58,7 @@ GOTO MAKE
 :X86_64
 shift
 set defaultOSArch=x86_64
+set PROCESSOR_ARCHITECTURE=AMD64
 IF x.%JAVA_HOME%==x. set JAVA_HOME=%LAUNCHER_BUILDDIR%\ibm-sdk50-x86_64
 IF "x.%MSSDK%" == "x."   set MSSDK="%LAUNCHER_BUILDDIR%\MSSDKs\Windows Server 2003 SP1 SDK"
 set javaHome=%JAVA_HOME%
@@ -68,6 +69,7 @@ GOTO MAKE
 :IA64
 shift
 set defaultOSArch=ia64
+set PROCESSOR_ARCHITECTURE=AMD64
 IF x.%JAVA_HOME%==x. set JAVA_HOME=%LAUNCHER_BUILDDIR%\ibm-sdk142-ia64
 IF "x.%MSSDK%" == "x."   set MSSDK="%LAUNCHER_BUILDDIR%\MSSDKs\Windows Server 2003 SP1 SDK"
 set javaHome=%JAVA_HOME%

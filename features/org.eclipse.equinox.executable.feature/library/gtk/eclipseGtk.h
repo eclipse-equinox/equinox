@@ -31,6 +31,7 @@ struct GTK_PTRS {
 	void		(*gtk_window_resize)		(GtkWindow*, gint, gint);
 	void		(*gtk_window_set_title)		(GtkWindow*, const gchar*);
 	void		(*gtk_window_set_decorated)	(GtkWindow*, gboolean);
+	void		(*gtk_window_set_type_hint)	(GtkWindow*, int);
 	void		(*gtk_window_set_position)	(GtkWindow*, GtkWindowPosition);
 
 	gulong 		(*g_signal_connect_data)	(gpointer, const gchar*, GCallback, gpointer, GClosureNotify, GConnectFlags);

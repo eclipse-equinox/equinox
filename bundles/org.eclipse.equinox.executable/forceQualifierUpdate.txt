@@ -1,2 +1,0 @@
-# To force a version qualifier update add the bug here
-Bug 407109 - Launcher executable is missing from s390/s390x builds
