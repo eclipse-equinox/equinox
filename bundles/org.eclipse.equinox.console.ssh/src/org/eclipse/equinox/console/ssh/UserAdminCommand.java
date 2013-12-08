@@ -71,7 +71,7 @@ public class UserAdminCommand {
 		}
 		
 		if (password.length() < MINIMAL_PASSWORD_LENGTH) {
-			throw new Exception("Password should be at least 8 symblos");
+			throw new Exception("Password should be at least 8 characters");
 		}
 		
 		SecureUserStore.putUser(username, DigestUtil.encrypt(password), roles);
@@ -111,7 +111,7 @@ public class UserAdminCommand {
 		}
 		
 		if (password.length() < MINIMAL_PASSWORD_LENGTH) {
-			throw new Exception("Password should be at least 8 symblos");
+			throw new Exception("Password should be at least 8 characters");
 		}
 		
 		SecureUserStore.setPassword(username, DigestUtil.encrypt(password));
@@ -359,7 +359,7 @@ public class UserAdminCommand {
 				System.out.println("Password not specified");
 				password = null;
 			} else if (password.length() < MINIMAL_PASSWORD_LENGTH) {
-				System.out.println("Password should be at least 8 symblos");
+				System.out.println("Password should be at least 8 characters");
 				password = null;
 			}
 			
