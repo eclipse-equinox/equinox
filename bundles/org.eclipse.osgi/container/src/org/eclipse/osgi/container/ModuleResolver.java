@@ -662,7 +662,7 @@ final class ModuleResolver {
 		private void filterResolvedHosts(Requirement requirement, List<ModuleCapability> candidates, boolean filterResolvedHosts) {
 			if (filterResolvedHosts && HostNamespace.HOST_NAMESPACE.equals(requirement.getNamespace())) {
 				for (Iterator<ModuleCapability> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
-					if (previouslyResolved.contains(iCandidates.next().getRevision())) {
+					if (wirings.containsKey(iCandidates.next().getRevision())) {
 						iCandidates.remove();
 					}
 				}
