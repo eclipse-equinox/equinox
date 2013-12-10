@@ -225,8 +225,12 @@ public class Storage {
 				return true;
 			}
 		}
+		File content = generation.getContent();
+		if (!content.exists()) {
+			// the content got deleted since last time!
+			return true;
+		}
 		if (getConfiguration().inCheckConfigurationMode()) {
-			File content = generation.getContent();
 			if (generation.isDirectory())
 				content = new File(content, "META-INF/MANIFEST.MF"); //$NON-NLS-1$
 			return generation.getLastModified() != secureAction.lastModified(content);
