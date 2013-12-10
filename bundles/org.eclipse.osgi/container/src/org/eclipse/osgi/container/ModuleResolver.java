@@ -1076,35 +1076,39 @@ final class ModuleResolver {
 			}
 			Map<Resource, List<Wire>> dynamicAttachment = new HashMap<Resource, List<Wire>>(0);
 			for (ModuleRevision nonPayLoad : nonPayLoadFrags) {
-				List<Wire> nonPayloadWires = new ArrayList<Wire>(0);
-				boolean resolvedReqs = false;
+				List<Wire> allNonPayloadWires = new ArrayList<Wire>(0);
 				for (ModuleRequirement requirement : nonPayLoad.getModuleRequirements(null)) {
-					resolvedReqs = false;
 					List<ModuleCapability> matching = moduleDatabase.findCapabilities(requirement);
+					List<Wire> newWires = new ArrayList<Wire>(0);
 					filterProviders(requirement, matching, false);
 					for (ModuleCapability candidate : matching) {
-						String attachDirective = candidate.getDirectives().get(HostNamespace.CAPABILITY_FRAGMENT_ATTACHMENT_DIRECTIVE);
-						boolean attachAlways = attachDirective == null || HostNamespace.FRAGMENT_ATTACHMENT_ALWAYS.equals(attachDirective);
-						// only do this if the candidate resource is already resolved and it allows dynamic attachment
-						if (attachAlways && wirings.get(candidate.getRevision()) != null) {
-							resolvedReqs = true;
-							// if there are multiple candidates; then check for cardinality
-							if (nonPayloadWires.isEmpty() || Namespace.CARDINALITY_MULTIPLE.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_CARDINALITY_DIRECTIVE))) {
-								nonPayloadWires.add(new ModuleWire(candidate, candidate.getRevision(), requirement, nonPayLoad));
+						if (HostNamespace.HOST_NAMESPACE.equals(requirement.getNamespace())) {
+							String attachDirective = candidate.getDirectives().get(HostNamespace.CAPABILITY_FRAGMENT_ATTACHMENT_DIRECTIVE);
+							boolean attachAlways = attachDirective == null || HostNamespace.FRAGMENT_ATTACHMENT_ALWAYS.equals(attachDirective);
+							// only do this if the candidate host is already resolved and it allows dynamic attachment
+							if (!attachAlways || wirings.get(candidate.getRevision()) == null) {
+								continue;
 							}
 						}
-					}
-					if (!resolvedReqs) {
-						if (Namespace.RESOLUTION_OPTIONAL.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
-							resolvedReqs = true;
-						} else {
-							// could not resolve mandatory requirement
-							break;
+						// if there are multiple candidates; then check for cardinality
+						if (newWires.isEmpty() || Namespace.CARDINALITY_MULTIPLE.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_CARDINALITY_DIRECTIVE))) {
+							newWires.add(new ModuleWire(candidate, candidate.getRevision(), requirement, nonPayLoad));
 						}
 					}
+					if (newWires.isEmpty()) {
+						if (!Namespace.RESOLUTION_OPTIONAL.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
+							// could not resolve mandatory requirement;
+							// clear out the wires to prevent resolution
+							allNonPayloadWires.clear();
+							break;
+						}
+					} else {
+						allNonPayloadWires.addAll(newWires);
+					}
 				}
-				if (resolvedReqs) {
-					dynamicAttachment.put(nonPayLoad, nonPayloadWires);
+				if (!allNonPayloadWires.isEmpty()) {
+					// we found some wires to resolve the fragment
+					dynamicAttachment.put(nonPayLoad, allNonPayloadWires);
 				}
 			}
 			return dynamicAttachment;
