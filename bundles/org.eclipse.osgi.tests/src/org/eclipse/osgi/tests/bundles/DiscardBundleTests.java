@@ -98,7 +98,7 @@ public class DiscardBundleTests extends AbstractBundleTests {
 
 	private void doTestDiscardDeletedBundleFile(File bundleFile) throws Exception {
 		Map<String, Object> configuration = createConfiguration();
-		Equinox equinox = new Equinox(createConfiguration());
+		Equinox equinox = new Equinox(configuration);
 		initAndStart(equinox);
 		try {
 			String location = REFERENCE_PROTOCOL + bundleFile.toURI();
