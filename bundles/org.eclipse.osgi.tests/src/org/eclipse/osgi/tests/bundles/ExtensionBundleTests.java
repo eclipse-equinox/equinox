@@ -10,12 +10,17 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
 
 public class ExtensionBundleTests extends AbstractBundleTests {
 	public static Test suite() {
@@ -62,11 +67,21 @@ public class ExtensionBundleTests extends AbstractBundleTests {
 	}
 
 	public void testExtensionBundleWithRequireCapabilityOsgiEeInstalls() {
+		Bundle b = null;
 		try {
-			installer.installBundle("ext.framework.osgiee.b");
+			b = installer.installBundle("ext.framework.osgiee.b", false);
 		} catch (BundleException e) {
 			fail("Extension bundle with Require-Capability only in osgi.ee. namespace failed to install", e);
 		}
+		assertTrue("Could not resolve bundle: " + b, installer.resolveBundles(new Bundle[] {b}));
+		BundleWiring wiring = b.adapt(BundleWiring.class);
+		assertNotNull("No wiring for bundle: " + b, wiring);
+		List<BundleWire> allRequired = wiring.getRequiredWires(null);
+		assertEquals("Wrong number of wires: " + allRequired, 2, allRequired.size());
+		BundleWire hostWire = wiring.getRequiredWires(HostNamespace.HOST_NAMESPACE).get(0);
+		assertEquals("Wrong provider for host: " + hostWire.getProvider().getBundle(), 0, hostWire.getProvider().getBundle().getBundleId());
+		BundleWire eeWire = wiring.getRequiredWires(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE).get(0);
+		assertEquals("Wrong provider for osgi.ee: " + eeWire.getProvider().getBundle(), 0, eeWire.getProvider().getBundle().getBundleId());
 	}
 
 	public void testExtensionBundleWithRequireCapabilityOtherThanOsgiEeFailsToInstall() {
