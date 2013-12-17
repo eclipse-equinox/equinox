@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -13,13 +13,13 @@
  * The java.net.URLClassLoader class allows one to load resources from arbitrary URLs and in particular is optimized to handle
  * "jar" URLs. Unfortunately for jar files this optimization ends up holding the file open which ultimately prevents the file from
  * being deleted or update until the VM is shutdown.
- *   
+ *
  * The CloseableURLClassLoader is meant to replace the URLClassLoader and provides an additional method to allow one to "close" any
  * resources left open. In the current version the CloseableURLClassLoader will only ensure the closing of jar file resources. The
  * jar handling behavior in this class will also provides a construct to allow one to turn off jar file verification in performance
- * sensitive situations where the verification us not necessary. 
- * 
- * also see https://bugs.eclipse.org/bugs/show_bug.cgi?id=190279 
+ * sensitive situations where the verification us not necessary.
+ *
+ * also see https://bugs.eclipse.org/bugs/show_bug.cgi?id=190279
  */
 
 package org.eclipse.equinox.servletbridge;
@@ -77,7 +77,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 
 		/**
 		 * @throws IOException
-		 * Documented to avoid warning 
+		 * Documented to avoid warning
 		 */
 		public JarFile getJarFile() throws IOException {
 			return jarFile;
@@ -330,8 +330,9 @@ public class CloseableURLClassLoader extends URLClassLoader {
 			if (mainAttributes != null)
 				sealed = mainAttributes.getValue(Name.SEALED);
 		}
-		if (Boolean.valueOf(sealed).booleanValue())
+		if (!pkg.isSealed() && Boolean.valueOf(sealed).booleanValue())
 			throw new SecurityException("The package '" + packageName + "' was previously loaded unsealed. Cannot seal package."); //$NON-NLS-1$ //$NON-NLS-2$
+
 	}
 
 	/* (non-Javadoc)
