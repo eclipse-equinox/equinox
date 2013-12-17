@@ -316,23 +316,30 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	}
 
 	private void checkForSealedPackage(Package pkg, String packageName, Manifest manifest, URL jarFileURL) {
-		if (pkg.isSealed() && !pkg.isSealed(jarFileURL))
-			throw new SecurityException("The package '" + packageName + "' was previously loaded and is already sealed."); //$NON-NLS-1$ //$NON-NLS-2$
+		if (pkg.isSealed()) {
+			// previously sealed case
+			if (!pkg.isSealed(jarFileURL)) {
+				// this URL does not seal; ERROR
+				throw new SecurityException("The package '" + packageName + "' was previously loaded and is already sealed."); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		} else {
+			// previously unsealed case
+			String entryPath = packageName.replace('.', '/') + "/"; //$NON-NLS-1$
+			Attributes entryAttributes = manifest.getAttributes(entryPath);
+			String sealed = null;
+			if (entryAttributes != null)
+				sealed = entryAttributes.getValue(Name.SEALED);
 
-		String entryPath = packageName.replace('.', '/') + "/"; //$NON-NLS-1$
-		Attributes entryAttributes = manifest.getAttributes(entryPath);
-		String sealed = null;
-		if (entryAttributes != null)
-			sealed = entryAttributes.getValue(Name.SEALED);
-
-		if (sealed == null) {
-			Attributes mainAttributes = manifest.getMainAttributes();
-			if (mainAttributes != null)
-				sealed = mainAttributes.getValue(Name.SEALED);
+			if (sealed == null) {
+				Attributes mainAttributes = manifest.getMainAttributes();
+				if (mainAttributes != null)
+					sealed = mainAttributes.getValue(Name.SEALED);
+			}
+			if (Boolean.valueOf(sealed).booleanValue()) {
+				// this manifest attempts to seal when package defined previously unsealed; ERROR
+				throw new SecurityException("The package '" + packageName + "' was previously loaded unsealed. Cannot seal package."); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 		}
-		if (!pkg.isSealed() && Boolean.valueOf(sealed).booleanValue())
-			throw new SecurityException("The package '" + packageName + "' was previously loaded unsealed. Cannot seal package."); //$NON-NLS-1$ //$NON-NLS-2$
-
 	}
 
 	/* (non-Javadoc)
