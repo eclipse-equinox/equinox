@@ -187,6 +187,13 @@
                 <message_argument value="BUNDLE_LICENSE"/>
             </message_arguments>
         </filter>
+        <filter comment="Ignore OSGI API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.8"/>
+                <message_argument value="3.10"/>
+                <message_argument value="EXTENSION_BUNDLE_ACTIVATOR"/>
+            </message_arguments>
+        </filter>
         <filter comment="Ignore OSGi API" id="1209008130">
             <message_arguments>
                 <message_argument value="1.8"/>
