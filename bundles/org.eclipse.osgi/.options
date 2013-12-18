@@ -41,6 +41,8 @@ org.eclipse.osgi/eclipseadaptor/converter/debug = false
 # General debug option for the resolver. Enabling this option is equivalent to 
 # enabling all other resolver debug options. 
 org.eclipse.osgi/resolver = false
+# Displays the current root bundle which is being resolved
+org.eclipse.osgi/resolver/roots=false
 # Displays information about matching capabilities returned to the resolver and
 # why any were filtered out.
 org.eclipse.osgi/resolver/providers = false

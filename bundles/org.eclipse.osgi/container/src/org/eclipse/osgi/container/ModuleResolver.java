@@ -40,13 +40,14 @@ final class ModuleResolver {
 	static final char TAB = '\t';
 
 	private static final String OPTION_RESOLVER = EquinoxContainer.NAME + "/resolver"; //$NON-NLS-1$
+	private static final String OPTION_ROOTS = OPTION_RESOLVER + "/roots"; //$NON-NLS-1$
 	private static final String OPTION_PROVIDERS = OPTION_RESOLVER + "/providers"; //$NON-NLS-1$
 	private static final String OPTION_HOOKS = OPTION_RESOLVER + "/hooks"; //$NON-NLS-1$
 	private static final String OPTION_USES = OPTION_RESOLVER + "/uses"; //$NON-NLS-1$
 	private static final String OPTION_WIRING = OPTION_RESOLVER + "/wiring"; //$NON-NLS-1$
 	private static final String OPTION_REPORT = OPTION_RESOLVER + "/report"; //$NON-NLS-1$
 
-	boolean DEBUG_RESOLVER = false;
+	boolean DEBUG_ROOTS = false;
 	boolean DEBUG_PROVIDERS = false;
 	boolean DEBUG_HOOKS = false;
 	boolean DEBUG_USES = false;
@@ -58,12 +59,13 @@ final class ModuleResolver {
 		// may be null if debugging is not enabled
 		if (options == null)
 			return;
-		DEBUG_RESOLVER = options.getBooleanOption(OPTION_RESOLVER, false);
-		DEBUG_PROVIDERS = options.getBooleanOption(OPTION_PROVIDERS, false);
-		DEBUG_HOOKS = options.getBooleanOption(OPTION_HOOKS, false);
-		DEBUG_USES = options.getBooleanOption(OPTION_USES, false);
-		DEBUG_WIRING = options.getBooleanOption(OPTION_WIRING, false);
-		DEBUG_REPORT = options.getBooleanOption(OPTION_REPORT, false);
+		boolean debugAll = options.getBooleanOption(OPTION_RESOLVER, false);
+		DEBUG_ROOTS = debugAll || options.getBooleanOption(OPTION_ROOTS, false);
+		DEBUG_PROVIDERS = debugAll || options.getBooleanOption(OPTION_PROVIDERS, false);
+		DEBUG_HOOKS = debugAll || options.getBooleanOption(OPTION_HOOKS, false);
+		DEBUG_USES = debugAll || options.getBooleanOption(OPTION_USES, false);
+		DEBUG_WIRING = debugAll || options.getBooleanOption(OPTION_WIRING, false);
+		DEBUG_REPORT = debugAll || options.getBooleanOption(OPTION_REPORT, false);
 	}
 
 	private static final Collection<String> NON_PAYLOAD_CAPABILITIES = Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE);
@@ -279,7 +281,7 @@ final class ModuleResolver {
 			Object effective = capability.getDirectives().get(Namespace.CAPABILITY_EFFECTIVE_DIRECTIVE);
 			if (effective != null && !Namespace.EFFECTIVE_RESOLVE.equals(effective)) {
 				iCapabilities.remove();
-				if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+				if (DEBUG_PROVIDERS) {
 					Debug.println(new StringBuilder("RESOLVER: Capability filtered because it was not effective") //$NON-NLS-1$
 							.append(SEPARATOR).append(TAB) //
 							.append(capability) //
@@ -462,7 +464,7 @@ final class ModuleResolver {
 					errors = new HashMap<Resource, ResolutionException>();
 				}
 				errors.put(resource, error);
-				if (DEBUG_RESOLVER || DEBUG_USES) {
+				if (DEBUG_USES) {
 					Debug.println(new StringBuilder("RESOLVER: Uses constraint violation") //$NON-NLS-1$
 							.append(SEPARATOR).append(TAB) //
 							.append("Resource") //$NON-NLS-1$
@@ -553,7 +555,7 @@ final class ModuleResolver {
 
 		@Override
 		public List<Capability> findProviders(Requirement requirement) {
-			if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+			if (DEBUG_PROVIDERS) {
 				Debug.println(new StringBuilder("RESOLVER: Finding capabilities for requirement") //$NON-NLS-1$
 						.append(SEPARATOR).append(TAB) //
 						.append(requirement) //
@@ -565,7 +567,7 @@ final class ModuleResolver {
 			}
 			List<ModuleCapability> candidates = moduleDatabase.findCapabilities(requirement);
 			List<Capability> result = filterProviders(requirement, candidates);
-			if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+			if (DEBUG_PROVIDERS) {
 				StringBuilder builder = new StringBuilder("RESOLVER: Capabilities being returned to the resolver"); //$NON-NLS-1$
 				int i = 0;
 				for (Capability capability : result) {
@@ -594,11 +596,11 @@ final class ModuleResolver {
 			filterPermissions((BundleRequirement) requirement, iCandidates);
 
 			List<ModuleCapability> filteredMatches = null;
-			if (DEBUG_RESOLVER || DEBUG_PROVIDERS || DEBUG_HOOKS) {
+			if (DEBUG_PROVIDERS || DEBUG_HOOKS) {
 				filteredMatches = new ArrayList<ModuleCapability>(candidates);
 			}
 			hook.filterMatches((BundleRequirement) requirement, InternalUtils.asListBundleCapability(candidates));
-			if (DEBUG_RESOLVER || DEBUG_PROVIDERS || DEBUG_HOOKS) {
+			if (DEBUG_PROVIDERS || DEBUG_HOOKS) {
 				filteredMatches.removeAll(candidates);
 				if (!filteredMatches.isEmpty()) {
 					StringBuilder builder = new StringBuilder("RESOLVER: Capabilities filtered by ResolverHook.filterMatches"); //$NON-NLS-1$
@@ -645,7 +647,7 @@ final class ModuleResolver {
 				ModuleCapability capability = iCandidates.next();
 				if (failedToResolve.contains(capability.getRevision())) {
 					iCandidates.remove();
-					if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+					if (DEBUG_PROVIDERS) {
 						Debug.println(new StringBuilder("RESOLVER: Capability filtered because its resource was not resolved") //$NON-NLS-1$
 								.append(SEPARATOR).append(TAB) //
 								.append(capability) //
@@ -692,7 +694,7 @@ final class ModuleResolver {
 				Permission providePermission = InternalUtils.getProvidePermission(candidate);
 				if (!requirement.getRevision().getBundle().hasPermission(requirePermission)) {
 					iCandidates.remove();
-					if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+					if (DEBUG_PROVIDERS) {
 						Debug.println(new StringBuilder("RESOLVER: Capability filtered because requirer did not have permission") //$NON-NLS-1$
 								.append(SEPARATOR).append(TAB) //
 								.append(candidate) //
@@ -704,7 +706,7 @@ final class ModuleResolver {
 					}
 				} else if (!candidate.getRevision().getBundle().hasPermission(providePermission)) {
 					iCandidates.remove();
-					if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+					if (DEBUG_PROVIDERS) {
 						Debug.println(new StringBuilder("RESOLVER: Capability filtered because provider did not have permission") //$NON-NLS-1$
 								.append(SEPARATOR).append(TAB) //
 								.append(candidate) //
@@ -724,7 +726,7 @@ final class ModuleResolver {
 				Capability capability = iCandidates.next();
 				if (disabled.contains(capability.getResource())) {
 					iCandidates.remove();
-					if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+					if (DEBUG_PROVIDERS) {
 						Debug.println(new StringBuilder("RESOLVER: Capability filtered because it was disabled") //$NON-NLS-1$
 								.append(SEPARATOR).append(TAB) //
 								.append(capability) //
@@ -745,7 +747,7 @@ final class ModuleResolver {
 				ModuleWiring wiring = wirings.get(capability.getRevision());
 				if (wiring != null && wiring.isSubtituted(capability)) {
 					iCapabilities.remove();
-					if (DEBUG_RESOLVER || DEBUG_PROVIDERS) {
+					if (DEBUG_PROVIDERS) {
 						Debug.println(new StringBuilder("RESOLVER: Capability filtered because it was substituted") //$NON-NLS-1$
 								.append(SEPARATOR).append(TAB) //
 								.append(capability) //
@@ -884,11 +886,11 @@ final class ModuleResolver {
 				} finally {
 					computeUnresolvedProviderResolutionReportEntries(result);
 					computeUsesConstraintViolations(logger.getUsesConstraintViolations());
-					if (DEBUG_RESOLVER || DEBUG_WIRING) {
+					if (DEBUG_WIRING) {
 						printWirings(result);
 					}
 					report = reportBuilder.build(result, re);
-					if (DEBUG_RESOLVER || DEBUG_REPORT) {
+					if (DEBUG_REPORT) {
 						Set<Resource> resources = report.getEntries().keySet();
 						if (!resources.isEmpty()) {
 							Debug.println("RESOLVER: Resolution report"); //$NON-NLS-1$
@@ -935,6 +937,11 @@ final class ModuleResolver {
 			if (wirings.containsKey(single) || failedToResolve.contains(single)) {
 				return;
 			}
+			long startTime = 0;
+			if (DEBUG_ROOTS) {
+				startTime = System.currentTimeMillis();
+				System.out.print("Resolver: Resolving root bundle: " + single); //$NON-NLS-1$
+			}
 			currentlyResolving = single;
 			currentlyResolvingMandatory = isMandatory;
 			transitivelyResolveFailures.clear();
@@ -961,6 +968,9 @@ final class ModuleResolver {
 				failedToResolve.addAll(transitivelyResolveFailures);
 				currentlyResolving = null;
 				currentlyResolvingMandatory = false;
+			}
+			if (DEBUG_ROOTS) {
+				System.out.println("  [" + (System.currentTimeMillis() - startTime) + "ms]"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 
@@ -1139,7 +1149,7 @@ final class ModuleResolver {
 			disabled.removeAll(enabledCandidates);
 			for (ModuleRevision revision : disabled) {
 				reportBuilder.addEntry(revision, Entry.Type.FILTERED_BY_RESOLVER_HOOK, null);
-				if (DEBUG_RESOLVER || DEBUG_HOOKS) {
+				if (DEBUG_HOOKS) {
 					Debug.println("RESOLVER: Resource filtered by ResolverHook.filterResolvable: " + revision); //$NON-NLS-1$
 				}
 			}
@@ -1271,7 +1281,7 @@ final class ModuleResolver {
 				for (BundleCapability identity : capabilities) {
 					collisionCandidates.add((ModuleRevision) identity.getRevision());
 				}
-				if (DEBUG_RESOLVER || DEBUG_HOOKS) {
+				if (DEBUG_HOOKS) {
 					Collection<ModuleRevision> filteredSingletons = new ArrayList<ModuleRevision>(sameBSN);
 					filteredSingletons.removeAll(collisionCandidates);
 					filteredSingletons.remove(singleton);
