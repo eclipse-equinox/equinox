@@ -162,6 +162,14 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		public abstract void save(S saveContext, DataOutputStream os) throws IOException;
 
 		/**
+		 * Gets called during {@link Generation#delete()} to inform the hook that the generation
+		 * associated with the hook is being deleted.
+		 */
+		public void deletingGeneration() {
+			// do nothing by default
+		}
+
+		/**
 		 * Validates the data in this storage hook, if the data is invalid then an illegal state 
 		 * exception is thrown
 		 * @throws IllegalStateException if the data is invalid

@@ -268,6 +268,12 @@ public final class BundleInfo {
 		}
 
 		public void delete() {
+			List<StorageHook<?, ?>> hooks = getStorageHooks();
+			if (hooks != null) {
+				for (StorageHook<?, ?> hook : hooks) {
+					hook.deletingGeneration();
+				}
+			}
 			synchronized (this.genMonitor) {
 				// make sure the bundle file is closed
 				if (bundleFile != null) {
