@@ -16,8 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
+import org.osgi.framework.*;
 import org.osgi.framework.launch.Framework;
 
 public class StorageHookTests extends AbstractFrameworkHookTests {
@@ -28,6 +27,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	private static final String HOOK_CONFIGURATOR_FIELD_INVALID = "invalid";
 	private static final String HOOK_CONFIGURATOR_FIELD_INVALID_FACTORY_CLASS = "invalidFactoryClass";
 	private static final String HOOK_CONFIGURATOR_FIELD_VALIDATE_CALLED = "validateCalled";
+	private static final String HOOK_CONFIGURATOR_FIELD_DELETING_CALLED = "deletingGenerationCalled";
 
 	private Map<String, String> configuration;
 	private Framework framework;
@@ -108,6 +108,33 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertCreateStorageHookCalled();
 	}
 
+	public void testDeletingGenerationCalledOnDiscard() throws Exception {
+		initAndStartFramework();
+		installBundle();
+		setStorageHookInvalid(true);
+		restartFramework();
+		assertStorageHookDeletingGenerationCalled();
+		assertBundleDiscarded();
+	}
+
+	public void testDeletingGenerationCalledUninstall() throws Exception {
+		initAndStartFramework();
+		installBundle();
+		Bundle b = framework.getBundleContext().getBundle(location);
+		assertNotNull("Missing test bundle.", b);
+		b.uninstall();
+		assertStorageHookDeletingGenerationCalled();
+	}
+
+	public void testDeletingGenerationCalledUpdate() throws Exception {
+		initAndStartFramework();
+		installBundle();
+		Bundle b = framework.getBundleContext().getBundle(location);
+		assertNotNull("Missing test bundle.", b);
+		b.update();
+		assertStorageHookDeletingGenerationCalled();
+	}
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		String loc = bundleInstaller.getBundleLocation(HOOK_CONFIGURATOR_BUNDLE);
@@ -153,6 +180,11 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertTrue("Storage hook validate not called by framework", clazz.getField(HOOK_CONFIGURATOR_FIELD_VALIDATE_CALLED).getBoolean(null));
 	}
 
+	private void assertStorageHookDeletingGenerationCalled() throws Exception {
+		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
+		assertTrue("Storage hook deletingGeneration not called by framework", clazz.getField(HOOK_CONFIGURATOR_FIELD_DELETING_CALLED).getBoolean(null));
+	}
+
 	private void initAndStartFramework() throws Exception {
 		initAndStart(framework);
 	}
@@ -167,6 +199,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_INVALID).set(null, false);
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_VALIDATE_CALLED).set(null, false);
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_INVALID_FACTORY_CLASS).set(null, false);
+		clazz.getField(HOOK_CONFIGURATOR_FIELD_DELETING_CALLED).set(null, false);
 	}
 
 	private void restartFramework() throws Exception {

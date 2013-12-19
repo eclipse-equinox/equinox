@@ -44,6 +44,11 @@ public class TestHookConfigurator implements HookConfigurator {
 				if (TestHookConfigurator.invalid)
 					throw new IllegalStateException();
 			}
+
+			@Override
+			public void deletingGeneration() {
+				TestHookConfigurator.deletingGenerationCalled = true;
+			}
 		}
 
 		public TestStorageHookFactory() {
@@ -68,6 +73,7 @@ public class TestHookConfigurator implements HookConfigurator {
 	public static volatile boolean invalid;
 	public static volatile boolean invalidFactoryClass;
 	public static volatile boolean validateCalled;
+	public static volatile boolean deletingGenerationCalled;
 
 	public void addHooks(HookRegistry hookRegistry) {
 		hookRegistry.addStorageHookFactory(new TestStorageHookFactory());
