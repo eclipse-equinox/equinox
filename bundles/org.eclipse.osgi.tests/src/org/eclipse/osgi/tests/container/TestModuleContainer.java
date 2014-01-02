@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1302,6 +1302,40 @@ public class TestModuleContainer extends AbstractTest {
 
 		ModuleWiring f1Wiring = f1.getCurrentRevision().getWiring();
 		Assert.assertNotNull("f1 wiring is null.", f1Wiring);
+	}
+
+	@Test
+	public void testDynamicImportMiss01() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, null, null, "osgi.ee; osgi.ee=JavaSE; version:Version=\"1.5.0\"", container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+		Module c1 = installDummyModule("c1_v1.MF", "c1_v1", container);
+		Module dynamic1 = installDummyModule("dynamic1_v1.MF", "dynamic1_v1", container);
+
+		container.resolve(Arrays.asList(c1, dynamic1), true);
+
+		DummyResolverHookFactory factory = (DummyResolverHookFactory) adaptor.getResolverHookFactory();
+		DummyResolverHook hook = (DummyResolverHook) factory.getHook();
+		hook.getResolutionReports().clear();
+		ModuleWire dynamicWire = container.resolveDynamic("org.osgi.framework", dynamic1.getCurrentRevision());
+		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
+		Assert.assertEquals("Wrong package found.", "org.osgi.framework", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+
+		Assert.assertEquals("Wrong number of reports.", 1, hook.getResolutionReports().size());
+		hook.getResolutionReports().clear();
+
+		dynamicWire = container.resolveDynamic("does.not.exist", dynamic1.getCurrentRevision());
+		Assert.assertNull("Unexpected Dynamic wire found.", dynamicWire);
+		Assert.assertEquals("Wrong number of reports.", 1, hook.getResolutionReports().size());
+
+		// Try again; no report should be generated a second time
+		hook.getResolutionReports().clear();
+		dynamicWire = container.resolveDynamic("does.not.exist", dynamic1.getCurrentRevision());
+		Assert.assertNull("Unexpected Dynamic wire found.", dynamicWire);
+		Assert.assertEquals("Wrong number of reports.", 0, hook.getResolutionReports().size());
 	}
 
 	@Test
