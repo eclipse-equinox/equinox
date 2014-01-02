@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -344,7 +344,7 @@ final class ModuleResolver {
 		}
 	}
 
-	private static boolean isDynamic(ModuleRequirement requirement) {
+	static boolean isDynamic(Requirement requirement) {
 		return PackageNamespace.PACKAGE_NAMESPACE.equals(requirement.getNamespace()) && PackageNamespace.RESOLUTION_DYNAMIC.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE));
 	}
 
@@ -621,11 +621,8 @@ final class ModuleResolver {
 			// filter resolved hosts after calling hooks to allow hooks to see the host capability
 			filterResolvedHosts(requirement, candidates, filterResolvedHosts);
 
-			if (requirement instanceof DynamicModuleRequirement) {
-				requirement = ((DynamicModuleRequirement) requirement).getOriginal();
-			}
 			if (candidates.isEmpty()) {
-				if (!wirings.containsKey(requirement.getResource())) {
+				if (!wirings.containsKey(requirement.getResource()) || isDynamic(requirement)) {
 					reportBuilder.addEntry(requirement.getResource(), Entry.Type.MISSING_CAPABILITY, requirement);
 					String resolution = requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
 					if ((resolution == null || Namespace.RESOLUTION_MANDATORY.equals(resolution))) {
