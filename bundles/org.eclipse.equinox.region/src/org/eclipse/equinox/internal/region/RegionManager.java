@@ -37,6 +37,7 @@ public final class RegionManager implements BundleActivator {
 	private static final String REGION_KERNEL = "org.eclipse.equinox.region.kernel"; //$NON-NLS-1$
 	private static final String REGION_DOMAIN_PROP = "org.eclipse.equinox.region.domain"; //$NON-NLS-1$
 	private static final String DIGRAPH_FILE = "digraph"; //$NON-NLS-1$
+	private static final String REGION_REGISTER_MBEANS = "org.eclipse.equiknox.region.register.mbeans"; //$NON-NLS-1$
 
 	Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 
@@ -83,7 +84,10 @@ public final class RegionManager implements BundleActivator {
 	}
 
 	public void stop(BundleContext bc) throws IOException {
-		digraphMBean.unregisterMbean();
+		if (digraphMBean != null) {
+			digraphMBean.unregisterMbean();
+			digraphMBean = null;
+		}
 		for (ServiceRegistration<?> registration : registrations)
 			registration.unregister();
 		saveDigraph();
@@ -132,6 +136,9 @@ public final class RegionManager implements BundleActivator {
 	}
 
 	private StandardManageableRegionDigraph registerDigraphMbean(RegionDigraph regionDigraph) {
+		if ("false".equals(this.bundleContext.getProperty(REGION_REGISTER_MBEANS))) { //$NON-NLS-1$
+			return null;
+		}
 		StandardManageableRegionDigraph standardManageableRegionDigraph = new StandardManageableRegionDigraph(regionDigraph, this.domain, this.bundleContext);
 		standardManageableRegionDigraph.registerMBean();
 		return standardManageableRegionDigraph;
