@@ -399,9 +399,9 @@ public class BundleLoader implements ModuleLoader {
 			result = policy.doBuddyClassLoading(name);
 		if (result != null)
 			return result;
-		// hack to support backwards compatibiility for bootdelegation
+		// hack to support backwards compatibility for bootdelegation
 		// or last resort; do class context trick to work around VM bugs
-		if (parent != null && !bootDelegation && ((checkParent && container.getConfiguration().compatibiltyBootDelegation) || isRequestFromVM()))
+		if (parent != null && !bootDelegation && ((checkParent && container.getConfiguration().compatibilityBootDelegation) || isRequestFromVM()))
 			// we don't need to continue if a CNFE is thrown here.
 			try {
 				return parent.loadClass(name);
@@ -568,7 +568,7 @@ public class BundleLoader implements ModuleLoader {
 			return result;
 		// hack to support backwards compatibility for bootdelegation
 		// or last resort; do class context trick to work around VM bugs
-		if (parent != null && !bootDelegation && (container.getConfiguration().compatibiltyBootDelegation || isRequestFromVM()))
+		if (parent != null && !bootDelegation && (container.getConfiguration().compatibilityBootDelegation || isRequestFromVM()))
 			// we don't need to continue if the resource is not found here
 			return parent.getResource(name);
 		return result;
@@ -645,7 +645,7 @@ public class BundleLoader implements ModuleLoader {
 		// hack to support backwards compatibility for bootdelegation
 		// or last resort; do class context trick to work around VM bugs
 		if (!result.hasMoreElements()) {
-			if (parent != null && !bootDelegation && (container.getConfiguration().compatibiltyBootDelegation || isRequestFromVM()))
+			if (parent != null && !bootDelegation && (container.getConfiguration().compatibilityBootDelegation || isRequestFromVM()))
 				// we don't need to continue if the resource is not found here
 				return parent.getResources(name);
 		}
