@@ -57,7 +57,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 		handlerTracker.open();
 	}
 
-	private Class<?> getBuiltIn(String protocol, String builtInHandlers, boolean fromFramework) {
+	private Class<?> getBuiltIn(String protocol, String builtInHandlers) {
 		if (builtInHandlers == null)
 			return null;
 		Class<?> clazz;
@@ -69,10 +69,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 			name.append(protocol);
 			name.append(".Handler"); //$NON-NLS-1$
 			try {
-				if (fromFramework)
-					clazz = secureAction.forName(name.toString());
-				else
-					clazz = secureAction.loadSystemClass(name.toString());
+				clazz = secureAction.loadSystemClass(name.toString());
 				if (clazz != null)
 					return clazz; //this class exists, it is a built in handler	
 			} catch (ClassNotFoundException ex) {
@@ -96,7 +93,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 		try {
 			//first check for built in handlers
 			String builtInHandlers = secureAction.getProperty(PROTOCOL_HANDLER_PKGS);
-			Class<?> clazz = getBuiltIn(protocol, builtInHandlers, false);
+			Class<?> clazz = getBuiltIn(protocol, builtInHandlers);
 			if (clazz != null)
 				return null; // let the VM handle it
 			URLStreamHandler result = null;
