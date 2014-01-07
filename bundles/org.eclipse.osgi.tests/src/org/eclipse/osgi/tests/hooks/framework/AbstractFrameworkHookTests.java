@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -108,18 +108,30 @@ public abstract class AbstractFrameworkHookTests extends CoreTest {
 	}
 
 	protected void stop(Framework framework) throws Exception {
-		framework.stop();
-		FrameworkEvent event = framework.waitForStop(5000);
-		assertEquals("The framework was not stopped", FrameworkEvent.STOPPED, event.getType());
+		stop(framework, false);
 	}
 
 	protected void stopQuietly(Framework framework) {
 		if (framework == null)
 			return;
 		try {
-			stop(framework);
+			stop(framework, true);
 		} catch (Exception e) {
-			// Ignore.
+			// ignore;
+		}
+	}
+
+	private void stop(Framework framework, boolean quietly) throws Exception {
+		try {
+			framework.stop();
+			FrameworkEvent event = framework.waitForStop(10000);
+			if (!quietly) {
+				assertEquals("The framework was not stopped", FrameworkEvent.STOPPED, event.getType());
+			}
+		} catch (Exception e) {
+			if (!quietly) {
+				throw e;
+			}
 		}
 	}
 
