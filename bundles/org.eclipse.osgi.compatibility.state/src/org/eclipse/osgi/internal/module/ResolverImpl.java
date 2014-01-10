@@ -36,6 +36,7 @@ public class ResolverImpl implements Resolver {
 	public static boolean DEBUG_REQUIRES = false;
 	public static boolean DEBUG_GENERICS = false;
 	public static boolean DEBUG_USES = false;
+	public static boolean DEBUG_CONFLICTS = false;
 	public static boolean DEBUG_CYCLES = false;
 	private static int MAX_MULTIPLE_SUPPLIERS_MERGE = 10;
 	private static int MAX_USES_TIME_BASE = 30000; // 30 seconds
@@ -923,6 +924,13 @@ public class ResolverImpl implements Resolver {
 		else
 			timeLimit = usesTimeout;
 
+		if (DEBUG_USES) {
+			System.out.println(multipleSuppliers.length + " Uses constraint were found for the following declarations: "); //$NON-NLS-1$
+			for (ResolverConstraint[] constraint : multipleSuppliers) {
+				System.out.println(Arrays.toString(constraint));
+			}
+		}
+
 		int bestConflictCount = getConflictCount(bestConflicts);
 		ResolverBundle[] bestConflictBundles = getConflictedBundles(bestConflicts);
 		while (bestConflictCount != 0 && getNextCombination(multipleSuppliers)) {
@@ -941,7 +949,7 @@ public class ResolverImpl implements Resolver {
 			int conflictCount = getConflictCount(conflicts);
 			if (conflictCount >= bestConflictCount) {
 				if (DEBUG_USES)
-					System.out.println("Combination is not better that current best: " + conflictCount + ">=" + bestConflictCount); //$NON-NLS-1$ //$NON-NLS-2$
+					System.out.println("Combination is not better than current best: " + conflictCount + ">=" + bestConflictCount); //$NON-NLS-1$ //$NON-NLS-2$
 				// no need to test the other bundles;
 				// this combination is no better for the bundles which conflict with the current best combination
 				continue;
@@ -959,9 +967,12 @@ public class ResolverImpl implements Resolver {
 				if (DEBUG_USES)
 					System.out.println("Combination selected as current best: number of conflicts: " + bestConflictCount); //$NON-NLS-1$
 			} else if (DEBUG_USES) {
-				System.out.println("Combination is not better that current best: " + conflictCount + ">=" + bestConflictCount); //$NON-NLS-1$ //$NON-NLS-2$
+				System.out.println("Combination is not better than current best: " + conflictCount + ">=" + bestConflictCount); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
+
+		if (DEBUG_USES && !usesCalculationTimeout)
+			System.out.println("Uses constraint check has finished after " + (System.currentTimeMillis() - initialTime) + "ms out of " + timeLimit + "ms"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		return bestConflicts;
 	}
 
@@ -1028,6 +1039,10 @@ public class ResolverImpl implements Resolver {
 			PackageRoots[][] conflict = selectedSupplier == null ? null : groupingChecker.isConsistent(bundle, selectedSupplier);
 			if (conflict != null) {
 				addConflictNames(conflict, packageConstraints, bundleConstraints);
+
+				if (DEBUG_CONFLICTS)
+					printConflict(conflict, requires[i], bundle);
+
 				if (conflicts == null)
 					conflicts = new ArrayList<ResolverConstraint>(1);
 				conflicts.add(requires[i]);
@@ -1039,6 +1054,10 @@ public class ResolverImpl implements Resolver {
 			PackageRoots[][] conflict = selectedSupplier == null ? null : groupingChecker.isConsistent(bundle, selectedSupplier);
 			if (conflict != null) {
 				addConflictNames(conflict, packageConstraints, bundleConstraints);
+
+				if (DEBUG_CONFLICTS)
+					printConflict(conflict, imports[i], bundle);
+
 				if (conflicts == null)
 					conflicts = new ArrayList<ResolverConstraint>(1);
 				conflicts.add(imports[i]);
@@ -1079,6 +1098,15 @@ public class ResolverImpl implements Resolver {
 			}
 		}
 		return conflicts;
+	}
+
+	private void printConflict(PackageRoots[][] conflict, ResolverConstraint constraint, ResolverBundle bundle) {
+		System.out.println("Found conflict for bundle: " + bundle + ", when trying to resolve constraint: " + constraint); //$NON-NLS-1$//$NON-NLS-2$
+		for (PackageRoots[] rootConflicts : conflict) {
+			ResolverExport export0 = rootConflicts[0].getRoots()[0];
+			ResolverExport export1 = rootConflicts[1].getRoots()[0];
+			System.out.println("	" + export0 + ", provided by bundle: " + export0.getResolverBundle() + " conflicts with " + export1 + ", provided by bundle: " + export1.getResolverBundle()); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		}
 	}
 
 	// records the conflict names we can use to scope down the list of multiple suppliers
@@ -2149,6 +2177,7 @@ public class ResolverImpl implements Resolver {
 	private static final String OPTION_REQUIRES = RESOLVER + "/requires"; //$NON-NLS-1$
 	private static final String OPTION_GENERICS = RESOLVER + "/generics"; //$NON-NLS-1$
 	private static final String OPTION_USES = RESOLVER + "/uses"; //$NON-NLS-1$
+	private static final String OPTION_CONFLICTS = RESOLVER + "/conflicts"; //$NON-NLS-1$
 	private static final String OPTION_CYCLES = RESOLVER + "/cycles"; //$NON-NLS-1$
 	*/
 	private void setDebugOptions() {
@@ -2164,6 +2193,7 @@ public class ResolverImpl implements Resolver {
 		DEBUG_REQUIRES = options.getBooleanOption(OPTION_REQUIRES, false);
 		DEBUG_GENERICS = options.getBooleanOption(OPTION_GENERICS, false);
 		DEBUG_USES = options.getBooleanOption(OPTION_USES, false);
+		DEBUG_CONFLICTS = options.getBooleanOption(OPTION_CONFLICTS, false);
 		DEBUG_CYCLES = options.getBooleanOption(OPTION_CYCLES, false);
 		*/
 	}
