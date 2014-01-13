@@ -320,8 +320,10 @@
         </filter>
     </resource>
     <resource path="osgi/src/org/osgi/framework/launch/Framework.java" type="org.osgi.framework.launch.Framework">
-        <filter comment="Ignore OSGi API" id="1211105284">
+        <filter comment="Ignore OSGi API" id="1209008130">
             <message_arguments>
+                <message_argument value="1.2"/>
+                <message_argument value="3.10"/>
                 <message_argument value="init(FrameworkListener[])"/>
             </message_arguments>
         </filter>
