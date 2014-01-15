@@ -1,5 +1,5 @@
 ########################################################################
-# Copyright (c) 2003, 2012 IBM Corporation and others.
+# Copyright (c) 2003, 2014 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials 
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -44,4 +44,5 @@ WindowsServer2008 "Windows 2008" "Windows Server 2008" Win2008 Win32 # Microsoft
 WindowsServer2008R2 "Windows 2008 R2" "Windows Server 2008 R2" Win2008R2 Win32 # Microsoft
 WindowsServer2012 "Windows 2012" "Windows Server 2012" Win2012 Win32 # Microsoft
 Windows7 "Windows 7" Win7 Win32 # Microsoft
-Windows8 "Windows 8" Win8 Win32 # Microsoft
+Windows8 "Windows 8" "Windows 8.1" "Windows 8.2" "Windows 8.3" Win8 Win32 # Microsoft
+"Windows NT (unknown)" win32
