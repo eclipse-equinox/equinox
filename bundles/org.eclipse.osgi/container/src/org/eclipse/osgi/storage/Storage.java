@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -128,7 +128,7 @@ public class Storage {
 			try {
 				generations = loadGenerations(data);
 			} catch (IllegalArgumentException e) {
-				equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, "Incompatible version.  Starting with empty framework.", e); //$NON-NLS-1$
+				equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, "The persistent format for the framework data has changed.  The framework will be reinitialized: " + e.getMessage(), null); //$NON-NLS-1$
 				generations = new HashMap<Long, Generation>(0);
 				data = null;
 				cleanOSGiStorage(osgiLocation, childRoot);
@@ -1136,7 +1136,7 @@ public class Storage {
 		}
 		int version = in.readInt();
 		if (version != VERSION) {
-			throw new IllegalArgumentException("The version of the persistent framework data is not compatible: " + version + " expecting: " + VERSION); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new IllegalArgumentException("Found persistent version \"" + version + "\" expecting \"" + VERSION + "\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		int numCachedHeaders = in.readInt();
 		List<String> storedCachedHeaderKeys = new ArrayList<String>(numCachedHeaders);
