@@ -42,10 +42,10 @@ import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
-import org.osgi.framework.namespace.HostNamespace;
-import org.osgi.framework.namespace.NativeNamespace;
-import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.framework.namespace.*;
+import org.osgi.framework.wiring.*;
+import org.osgi.resource.Namespace;
+import org.osgi.resource.Requirement;
 
 public class Storage {
 	public static final int VERSION = 3;
@@ -276,6 +276,17 @@ public class Storage {
 			Map<String, Object> configMap = equinoxContainer.getConfiguration().getInitialConfig();
 			for (ModuleCapability nativeEnvironment : nativeEnvironments) {
 				nativeEnvironment.setTransientAttrs(configMap);
+			}
+			Requirement osgiPackageReq = ModuleContainer.createRequirement(PackageNamespace.PACKAGE_NAMESPACE, Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, "(" + PackageNamespace.PACKAGE_NAMESPACE + "=org.osgi.framework)"), Collections.<String, String> emptyMap()); //$NON-NLS-1$ //$NON-NLS-2$
+			Collection<BundleCapability> osgiPackages = moduleContainer.getFrameworkWiring().findProviders(osgiPackageReq);
+			for (BundleCapability packageCapability : osgiPackages) {
+				if (packageCapability.getRevision().getBundle().getBundleId() == 0) {
+					Version v = (Version) packageCapability.getAttributes().get(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+					if (v != null) {
+						this.equinoxContainer.getConfiguration().setConfiguration(Constants.FRAMEWORK_VERSION, v.toString());
+						break;
+					}
+				}
 			}
 		} catch (Exception e) {
 			if (e instanceof RuntimeException) {
