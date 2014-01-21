@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2013 IBM Corporation and others.
+ * Copyright (c) 2008, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.osgi.tests.bundles;
 
 import java.io.*;
 import java.net.*;
+import java.security.Permission;
 import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -2031,6 +2032,54 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("waitForStop time took too long: " + stopTime);
 		}
 
+	}
+
+	public void testDynamicSecurityManager() throws BundleException {
+		SecurityManager sm = System.getSecurityManager();
+		assertNull("SecurityManager must be null to test.", sm);
+		try {
+			File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+			Map<String, Object> configuration = new HashMap<String, Object>();
+			configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+			Equinox equinox = new Equinox(configuration);
+			try {
+				equinox.start();
+			} catch (BundleException e) {
+				fail("Unexpected exception in start()", e); //$NON-NLS-1$
+			}
+			Bundle substitutesA = null;
+			try {
+				substitutesA = equinox.getBundleContext().installBundle(installer.getBundleLocation("substitutes.a")); //$NON-NLS-1$
+			} catch (BundleException e1) {
+				fail("failed to install a bundle", e1); //$NON-NLS-1$
+			}
+			assertTrue("BundleCould not resolve.", equinox.adapt(FrameworkWiring.class).resolveBundles(Collections.singleton(substitutesA)));
+			substitutesA.adapt(BundleWiring.class).findEntries("/", null, 0);
+			// set security manager after resolving
+			System.setSecurityManager(new SecurityManager() {
+
+				@Override
+				public void checkPermission(Permission perm, Object context) {
+					// do nothing
+				}
+
+				@Override
+				public void checkPermission(Permission perm) {
+					// do nothing
+				}
+			});
+			equinox.stop();
+			try {
+				FrameworkEvent event = equinox.waitForStop(10000);
+				assertEquals("Wrong event.", FrameworkEvent.STOPPED, event.getType());
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				fail("Unexpected interruption.", e);
+			}
+			assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+		} finally {
+			System.setSecurityManager(null);
+		}
 	}
 
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {

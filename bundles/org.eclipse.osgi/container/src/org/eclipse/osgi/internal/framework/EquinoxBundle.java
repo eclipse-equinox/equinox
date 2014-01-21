@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -156,9 +156,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 							public void run() {
 								try {
 									stop();
-								} catch (BundleException e) {
-									// TODO not sure we can even log if this fails
-									e.printStackTrace();
+								} catch (Throwable e) {
+									SystemBundle.this.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error stopping the framework.", e); //$NON-NLS-1$
 								}
 							}
 						}, "Framework stop"); //$NON-NLS-1$
@@ -178,9 +177,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 							public void run() {
 								try {
 									update();
-								} catch (BundleException e) {
-									e.printStackTrace();
-									// TODO not sure we can even log if this fails
+								} catch (Throwable e) {
+									SystemBundle.this.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error updating the framework.", e); //$NON-NLS-1$
 								}
 							}
 						}, "Framework update"); //$NON-NLS-1$

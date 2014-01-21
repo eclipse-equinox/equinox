@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2012 IBM Corporation and others.
+ * Copyright (c) 2008, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -345,7 +345,13 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 
 	private ProtectionDomain createProtectionDomain(Bundle bundle, SecurityAdmin sa) {
 		PermissionInfoCollection impliedPermissions = getImpliedPermission(bundle);
-		PermissionInfo[] restrictedInfos = getFileRelativeInfos(SecurityAdmin.getPermissionInfos(bundle.getEntry("OSGI-INF/permissions.perm")), bundle); //$NON-NLS-1$
+		URL permEntry = null;
+		try {
+			permEntry = bundle.getEntry("OSGI-INF/permissions.perm"); //$NON-NLS-1$
+		} catch (IllegalStateException e) {
+			// bundle may be uninstalled
+		}
+		PermissionInfo[] restrictedInfos = getFileRelativeInfos(SecurityAdmin.getPermissionInfos(permEntry), bundle);
 		PermissionInfoCollection restrictedPermissions = restrictedInfos == null ? null : new PermissionInfoCollection(restrictedInfos);
 		BundlePermissions bundlePermissions = new BundlePermissions(bundle, sa, impliedPermissions, restrictedPermissions);
 		return new ProtectionDomain(null, bundlePermissions);
@@ -372,9 +378,14 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 				if (!"<<ALL FILES>>".equals(permissionInfos[i].getName())) { //$NON-NLS-1$
 					File file = new File(permissionInfos[i].getName());
 					if (!file.isAbsolute()) { // relative name
-						File target = bundle.getDataFile(permissionInfos[i].getName());
-						if (target != null)
-							results[i] = new PermissionInfo(permissionInfos[i].getType(), target.getPath(), permissionInfos[i].getActions());
+						try {
+							File target = bundle.getDataFile(permissionInfos[i].getName());
+							if (target != null)
+								results[i] = new PermissionInfo(permissionInfos[i].getType(), target.getPath(), permissionInfos[i].getActions());
+						} catch (IllegalStateException e) {
+							// can happen if the bundle has been uninstalled;
+							// we just keep the original permission in this case.
+						}
 					}
 				}
 			}
