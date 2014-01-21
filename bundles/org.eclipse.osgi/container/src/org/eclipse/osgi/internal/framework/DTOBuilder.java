@@ -155,22 +155,21 @@ public class DTOBuilder {
 		return dto;
 	}
 
-	public static BundleRevisionsDTO newBundleRevisionsDTO(BundleRevisions revisions) {
-		return new DTOBuilder().getBundleRevisionsDTO(revisions);
+	public static BundleRevisionDTO[] newArrayBundleRevisionDTO(BundleRevisions revisions) {
+		return new DTOBuilder().getArrayBundleRevisionDTO(revisions);
 	}
 
-	private BundleRevisionsDTO getBundleRevisionsDTO(BundleRevisions revisions) {
+	private BundleRevisionDTO[] getArrayBundleRevisionDTO(BundleRevisions revisions) {
 		if (revisions == null) {
 			return null;
 		}
-		BundleRevisionsDTO dto = new BundleRevisionsDTO();
 		List<BundleRevision> revs = revisions.getRevisions();
-		List<BundleRevisionDTO> dtos = newList(revs.size());
-		for (BundleRevision rev : revs) {
-			dtos.add(getBundleRevisionDTO(rev));
+		final int size = revs.size();
+		BundleRevisionDTO[] dtos = new BundleRevisionDTO[size];
+		for (int i = 0; i < size; i++) {
+			dtos[i] = getBundleRevisionDTO(revs.get(i));
 		}
-		dto.revisions = dtos;
-		return dto;
+		return dtos;
 	}
 
 	public static BundleWiringDTO newBundleWiringDTO(BundleRevision revision) {
@@ -236,25 +235,24 @@ public class DTOBuilder {
 		return dto;
 	}
 
-	public static BundleWiringsDTO newBundleWiringsDTO(BundleRevisions revisions) {
-		return new DTOBuilder().getBundleWiringsDTO(revisions);
+	public static BundleWiringDTO[] newArrayBundleWiringDTO(BundleRevisions revisions) {
+		return new DTOBuilder().getArrayBundleWiringDTO(revisions);
 	}
 
-	private BundleWiringsDTO getBundleWiringsDTO(BundleRevisions revisions) {
+	private BundleWiringDTO[] getArrayBundleWiringDTO(BundleRevisions revisions) {
 		if (revisions == null) {
 			return null;
 		}
-		BundleWiringsDTO dto = new BundleWiringsDTO();
 		List<BundleRevision> revs = revisions.getRevisions();
-		List<BundleWiringDTO> dtos = newList(revs.size());
-		for (BundleRevision rev : revs) {
-			BundleWiring wiring = rev.getWiring();
+		final int size = revs.size();
+		BundleWiringDTO[] dtos = new BundleWiringDTO[size];
+		for (int i = 0; i < size; i++) {
+			BundleWiring wiring = revs.get(i).getWiring();
 			if (wiring != null) {
-				dtos.add(getBundleWiringDTO(wiring));
+				dtos[i] = getBundleWiringDTO(wiring);
 			}
 		}
-		dto.wirings = dtos;
-		return dto;
+		return dtos;
 	}
 
 	public static FrameworkDTO newFrameworkDTO(BundleContext systemBundleContext, Map<String, String> configuration) {

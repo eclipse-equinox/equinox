@@ -93,13 +93,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/dto/framework/wiring/BundleRevisionsDTO.java" type="org.osgi.dto.framework.wiring.BundleRevisionsDTO">
-        <filter comment="Ignore OSGi API" id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.dto.framework.wiring.BundleRevisionsDTO"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="osgi/src/org/osgi/dto/framework/wiring/BundleWireDTO.java" type="org.osgi.dto.framework.wiring.BundleWireDTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
@@ -111,13 +104,6 @@
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
                 <message_argument value="org.osgi.dto.framework.wiring.BundleWiringDTO"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/dto/framework/wiring/BundleWiringsDTO.java" type="org.osgi.dto.framework.wiring.BundleWiringsDTO">
-        <filter comment="Ignore OSGi API" id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.dto.framework.wiring.BundleWiringsDTO"/>
             </message_arguments>
         </filter>
     </resource>

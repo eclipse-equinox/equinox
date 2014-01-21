@@ -41,7 +41,8 @@ import org.eclipse.osgi.storage.Storage;
 import org.osgi.dto.framework.*;
 import org.osgi.dto.framework.startlevel.BundleStartLevelDTO;
 import org.osgi.dto.framework.startlevel.FrameworkStartLevelDTO;
-import org.osgi.dto.framework.wiring.*;
+import org.osgi.dto.framework.wiring.BundleRevisionDTO;
+import org.osgi.dto.framework.wiring.BundleWiringDTO;
 import org.osgi.framework.*;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.namespace.HostNamespace;
@@ -807,10 +808,13 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			return (A) DTOBuilder.newBundleRevisionDTO(module.getCurrentRevision());
 		}
 
-		if (BundleRevisionsDTO.class.equals(adapterType)) {
+		if (BundleRevisionDTO[].class.equals(adapterType)) {
+			if (module.getState().equals(State.UNINSTALLED)) {
+				return null;
+			}
 			// No need to lock the database here since the ModuleRevisions object does the
 			// proper locking for us.
-			return (A) DTOBuilder.newBundleRevisionsDTO(module.getRevisions());
+			return (A) DTOBuilder.newArrayBundleRevisionDTO(module.getRevisions());
 		}
 
 		if (BundleWiringDTO.class.equals(adapterType)) {
@@ -825,10 +829,13 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			}
 		}
 
-		if (BundleWiringsDTO.class.equals(adapterType)) {
+		if (BundleWiringDTO[].class.equals(adapterType)) {
+			if (module.getState().equals(State.UNINSTALLED)) {
+				return null;
+			}
 			readLock();
 			try {
-				return (A) DTOBuilder.newBundleWiringsDTO(module.getRevisions());
+				return (A) DTOBuilder.newArrayBundleWiringDTO(module.getRevisions());
 			} finally {
 				readUnlock();
 			}
