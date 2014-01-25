@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Anton Leherbauer (Wind River Systems) - bug 301226
- *     Red Hat Inc. - bug 373640
+ *     Red Hat Inc. - bug 373640, 379102
  *     Ericsson AB (Pascal Rapicault) - bug 304132
  *******************************************************************************/
 package org.eclipse.equinox.launcher;
@@ -140,6 +140,11 @@ public class Main {
 	private static final String EXITDATA = "-exitdata"; //$NON-NLS-1$
 	private static final String NAME = "-name"; //$NON-NLS-1$
 	private static final String LAUNCHER = "-launcher"; //$NON-NLS-1$
+
+	private static final String PROTECT = "-protect"; //$NON-NLS-1$
+	//currently the only level of protection we care about
+	private static final String MASTER = "master"; //$NON-NLS-1$
+
 	private static final String LIBRARY = "--launcher.library"; //$NON-NLS-1$
 	private static final String APPEND_VMARGS = "--launcher.appendVmargs"; //$NON-NLS-1$
 	private static final String OVERRIDE_VMARGS = "--launcher.overrideVmargs"; //$NON-NLS-1$
@@ -235,6 +240,8 @@ public class Main {
 	protected File logFile = null;
 	protected BufferedWriter log = null;
 	protected boolean newSession = true;
+
+	private boolean protectMaster;
 
 	// for variable substitution
 	public static final String VARIABLE_DELIM_STRING = "$"; //$NON-NLS-1$
@@ -562,6 +569,11 @@ public class Main {
 		setupVMProperties();
 		processConfiguration();
 
+		if (protectMaster && (System.getProperty(PROP_SHARED_CONFIG_AREA) == null)) {
+			System.err.println("This application is configured to run in a cascaded mode only."); //$NON-NLS-1$
+			System.setProperty(PROP_EXITCODE, "" + 14); //$NON-NLS-1$
+			return;
+		}
 		// need to ensure that getInstallLocation is called at least once to initialize the value.
 		// Do this AFTER processing the configuration to allow the configuration to set
 		// the install location.  
@@ -1563,6 +1575,16 @@ public class Main {
 				if (i + 1 < args.length && !args[i + 1].startsWith("-")) { //$NON-NLS-1$
 					configArgs[configArgIndex++] = i++;
 					splashLocation = args[i];
+				}
+			}
+
+			// look for the command to use to show the splash screen
+			if (args[i].equalsIgnoreCase(PROTECT)) {
+				found = true;
+				//consume next parameter
+				configArgs[configArgIndex++] = i++;
+				if (args[i].equalsIgnoreCase(MASTER)) {
+					protectMaster = true;
 				}
 			}
 
