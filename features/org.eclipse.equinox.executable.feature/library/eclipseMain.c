@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Andrew Niefer
+ *     Red Hat, Inc - Bug 379102 - Prevent running Eclipse as root (optionally)
  *******************************************************************************/
  
 #include "eclipseUnicode.h"
@@ -34,12 +35,18 @@ static _TCHAR* entryMsg =
 _T_ECLIPSE("There was a problem loading the shared library and \n\
 finding the entry point.");
 
+static _TCHAR* rootMsg =
+_T_ECLIPSE("The %s executable launcher is configured to not start with \n\
+administrative privileges.");
+
 #define NAME         _T_ECLIPSE("-name")
 #define VMARGS       _T_ECLIPSE("-vmargs")		/* special option processing required */
 /* New arguments have the form --launcher.<arg> to avoid collisions */
 #define LIBRARY		  _T_ECLIPSE("--launcher.library")
 #define SUPRESSERRORS _T_ECLIPSE("--launcher.suppressErrors")
 #define INI			  _T_ECLIPSE("--launcher.ini")
+#define PROTECT	      _T_ECLIPSE("-protect")
+#define ROOT		  _T_ECLIPSE("root")		/* the only level of protection we care now */
 
 /* this typedef must match the run method in eclipse.c */
 typedef int (*RunMethod)(int argc, _TCHAR* argv[], _TCHAR* vmArgs[]);
@@ -50,6 +57,7 @@ static _TCHAR** userVMarg     = NULL;     		/* user specific args for the Java V
 static _TCHAR*  programDir	  = NULL;			/* directory where program resides */
 static _TCHAR*  officialName  = NULL;
 static int      suppressErrors = 0;				/* supress error dialogs */
+static int      protectRoot      = 0;				/* check if launcher was run as root */
 
 static int 	 	createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TCHAR ***argv);
 static void  	parseArgs( int* argc, _TCHAR* argv[] );
@@ -58,6 +66,7 @@ static _TCHAR*  findProgram(_TCHAR* argv[]);
 static _TCHAR*  findLibrary(_TCHAR* library, _TCHAR* program);
 static _TCHAR*  checkForIni(int argc, _TCHAR* argv[]);
 static _TCHAR*  getDirFromProgram(_TCHAR* program);
+static int  isRoot();
  
 static int initialArgc;
 static _TCHAR** initialArgv;
@@ -163,6 +172,18 @@ int main( int argc, _TCHAR* argv[] )
 
 	/* Find the eclipse library */
     eclipseLibrary = findLibrary(eclipseLibrary, program);
+
+    /* root check */
+	if(protectRoot && isRoot()){
+		errorMsg = malloc( (_tcslen(rootMsg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
+		_stprintf( errorMsg, rootMsg, officialName );
+        if (!suppressErrors)
+        	displayMessage( officialName, errorMsg );
+        else
+        	_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), officialName, errorMsg);
+        free( errorMsg );
+        exit( 2 );
+	}
 		
 	if(eclipseLibrary != NULL)
 		handle = loadLibrary(eclipseLibrary);
@@ -268,7 +289,11 @@ static void parseArgs( int* pArgc, _TCHAR* argv[] )
         	eclipseLibrary = argv[++index];
         } else if(_tcsicmp(argv[index], SUPRESSERRORS) == 0) {
         	suppressErrors = 1;
-        } 
+        } else if(_tcsicmp(argv[index], PROTECT) == 0) {
+        	if(_tcsicmp(argv[++index], ROOT) == 0){
+        		protectRoot = 1;
+        	}
+        }
     }
 }
 
@@ -465,4 +490,11 @@ static _TCHAR* findLibrary(_TCHAR* library, _TCHAR* program)
 	free(path);
 	
 	return result; 
+}
+
+static int isRoot(){
+#ifdef LINUX
+	return geteuid() == 0;
+#endif
+	return 0;
 }
