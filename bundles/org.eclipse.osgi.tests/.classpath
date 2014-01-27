@@ -41,6 +41,7 @@
 	<classpathentry kind="src" output="bundle_tests/nativetest.b2" path="bundles_src/nativetest.b2"/>
 	<classpathentry kind="src" output="bundle_tests/nativetest.c" path="bundles_src/nativetest.c"/>
 	<classpathentry kind="src" output="bundle_tests/nativetest.d" path="bundles_src/nativetest.d"/>
+	<classpathentry kind="src" output="bundle_tests/nativetest.e" path="bundles_src/nativetest.e"/>
 	<classpathentry kind="src" output="bundle_tests/host.multiple.exports" path="bundles_src/host.multiple.exports"/>
 	<classpathentry kind="src" output="bundle_tests/frag.multiple.exports" path="bundles_src/frag.multiple.exports"/>
 	<classpathentry kind="src" output="bundle_tests/client1.multiple.exports" path="bundles_src/client1.multiple.exports"/>

@@ -124,6 +124,18 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 		assertNull("1.1", results[0]);
 	}
 
+	public void testNativeCode09() throws Exception {
+		setNativeAttribute("nativecodetest", "1");
+
+		Bundle nativetest = installer.installBundle("nativetest.e");
+		nativetest.start();
+		nativetest.stop();
+		Object[] results = simpleResults.getResults(1);
+
+		assertTrue("1.0", results.length == 1);
+		assertEquals("1.1", "libs.test1", getContent((String) results[0]));
+	}
+
 	private String getContent(String file) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
 		try {
