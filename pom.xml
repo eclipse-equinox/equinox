@@ -56,7 +56,6 @@
 
     <module>features/org.eclipse.equinox.server.simple</module>
     <module>features/org.eclipse.equinox.serverside.sdk</module>
-    <module>features/org.eclipse.equinox.starterkit.product.feature</module>
     <module>features/org.eclipse.equinox.weaving.sdk</module>
     <module>bundles/org.eclipse.equinox.bidi.tests</module>
     <module>bundles/org.eclipse.equinox.cm.test</module>
