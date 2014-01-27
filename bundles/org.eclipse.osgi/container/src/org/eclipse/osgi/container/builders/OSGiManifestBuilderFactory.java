@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -790,7 +790,12 @@ public final class OSGiManifestBuilderFactory {
 				sb.append(selectionFilter);
 			}
 			sb.append(')');
-			this.filter = sb.toString();
+			String filterResult = sb.toString();
+			if (filterResult.equals("(&)")) { //$NON-NLS-1$
+				// no matching attributes found just match all osnames
+				filterResult = "(" + NativeNamespace.CAPABILITY_OSNAME_ATTRIBUTE + "=*)"; //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			this.filter = filterResult;
 		}
 
 		private static Object addToNativeCodeFilter(StringBuilder filter, ManifestElement nativeCode, String attribute) throws BundleException {
