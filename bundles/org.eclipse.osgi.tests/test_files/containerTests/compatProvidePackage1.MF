@@ -1,0 +1,5 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: compatReprovide1
+Bundle-Version: 1.0.0
+Export-Package: foo; faa; version=1.0
+Provide-Package: bar, baz; version=1.0, biz

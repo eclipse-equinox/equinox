@@ -28,9 +28,9 @@ import org.junit.Test;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
-import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
-import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.framework.namespace.*;
 import org.osgi.framework.wiring.*;
+import org.osgi.resource.Namespace;
 
 public class TestModuleContainer extends AbstractTest {
 
@@ -1509,6 +1509,81 @@ public class TestModuleContainer extends AbstractTest {
 		Assert.assertNull("Bundle should not be resolved: " + c6v180, c6v180.getCurrentRevision().getWiring());
 
 		container.uninstall(c6v180);
+	}
+
+	@Test
+	public void testCompatSingleton() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+		Module s1 = installDummyModule("compatSingleton1.MF", "s1", container);
+		Module s2 = installDummyModule("compatSingleton2.MF", "s2", container);
+		Module s3 = installDummyModule("compatSingleton3.MF", "s3", container);
+
+		String s1Singleton = s1.getCurrentRevision().getCapabilities(IdentityNamespace.IDENTITY_NAMESPACE).iterator().next().getDirectives().get(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE);
+		String s2Singleton = s2.getCurrentRevision().getCapabilities(IdentityNamespace.IDENTITY_NAMESPACE).iterator().next().getDirectives().get(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE);
+		String s3Singleton = s3.getCurrentRevision().getCapabilities(IdentityNamespace.IDENTITY_NAMESPACE).iterator().next().getDirectives().get(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE);
+
+		Assert.assertEquals("Wrong singleton directive: " + s1, "true", s1Singleton);
+		Assert.assertNull("Wrong singleton directive: " + s2, s2Singleton);
+		Assert.assertEquals("Wrong singleton directive: " + s3, "true", s3Singleton);
+	}
+
+	@Test
+	public void testCompatReprovide() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+		Module b1 = installDummyModule("compatReprovide1.MF", "b1", container);
+		Module b2 = installDummyModule("compatReprovide2.MF", "b2", container);
+		Module b3 = installDummyModule("compatReprovide3.MF", "b3", container);
+
+		String b1Visibility = b1.getCurrentRevision().getRequirements(BundleNamespace.BUNDLE_NAMESPACE).iterator().next().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE);
+		String b2Visibility = b2.getCurrentRevision().getRequirements(BundleNamespace.BUNDLE_NAMESPACE).iterator().next().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE);
+		String b3Visibility = b3.getCurrentRevision().getRequirements(BundleNamespace.BUNDLE_NAMESPACE).iterator().next().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE);
+
+		Assert.assertEquals("Wrong visibility directive: " + b1, BundleNamespace.VISIBILITY_REEXPORT, b1Visibility);
+		Assert.assertNull("Wrong visibility directive: ", b2Visibility);
+		Assert.assertEquals("Wrong visibility directive: " + b2, BundleNamespace.VISIBILITY_REEXPORT, b3Visibility);
+	}
+
+	@Test
+	public void testCompatOptional() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+		Module b1 = installDummyModule("compatOptional1.MF", "b1", container);
+		Module b2 = installDummyModule("compatOptional2.MF", "b2", container);
+		Module b3 = installDummyModule("compatOptional3.MF", "b3", container);
+
+		String b1BundleResolution = b1.getCurrentRevision().getRequirements(BundleNamespace.BUNDLE_NAMESPACE).iterator().next().getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
+		String b2BundleResolution = b2.getCurrentRevision().getRequirements(BundleNamespace.BUNDLE_NAMESPACE).iterator().next().getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
+		String b3BundleResolution = b3.getCurrentRevision().getRequirements(BundleNamespace.BUNDLE_NAMESPACE).iterator().next().getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
+
+		String b1PackageResolution = b1.getCurrentRevision().getRequirements(PackageNamespace.PACKAGE_NAMESPACE).iterator().next().getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
+		String b2PackageResolution = b2.getCurrentRevision().getRequirements(PackageNamespace.PACKAGE_NAMESPACE).iterator().next().getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
+		String b3PackageResolution = b3.getCurrentRevision().getRequirements(PackageNamespace.PACKAGE_NAMESPACE).iterator().next().getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
+
+		Assert.assertEquals("Wrong resolution directive: " + b1, Namespace.RESOLUTION_OPTIONAL, b1BundleResolution);
+		Assert.assertNull("Wrong resolution directive: ", b2BundleResolution);
+		Assert.assertEquals("Wrong resolution directive: " + b2, Namespace.RESOLUTION_OPTIONAL, b3BundleResolution);
+
+		Assert.assertEquals("Wrong resolution directive: " + b1, Namespace.RESOLUTION_OPTIONAL, b1PackageResolution);
+		Assert.assertNull("Wrong resolution directive: ", b2PackageResolution);
+		Assert.assertEquals("Wrong resolution directive: " + b2, Namespace.RESOLUTION_OPTIONAL, b3PackageResolution);
+	}
+
+	@Test
+	public void testCompatProvidePackage() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+		Module b1 = installDummyModule("compatProvidePackage1.MF", "b1", container);
+
+		List<ModuleCapability> packageCaps = b1.getCurrentRevision().getModuleCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
+		Assert.assertEquals("Wrong number of exports", 5, packageCaps.size());
+
+		Assert.assertEquals("Wrong package name.", "foo", packageCaps.get(0).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong package name.", "faa", packageCaps.get(1).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong package name.", "bar", packageCaps.get(2).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong package name.", "baz", packageCaps.get(3).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong package name.", "biz", packageCaps.get(4).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
 	}
 
 	private static void assertWires(List<ModuleWire> required, List<ModuleWire>... provided) {

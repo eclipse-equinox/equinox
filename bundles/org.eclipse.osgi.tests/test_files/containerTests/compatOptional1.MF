@@ -1,0 +1,5 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: compatOptional1
+Bundle-Version: 1.0.0
+Require-Bundle: foo; optional=true
+Import-Package: foo; optional=true
