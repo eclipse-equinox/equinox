@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Kevin Cornell (Rational Software Corporation)
+ *     Holger Voormann - fix for bug 384950 (http://eclip.se/384950)
  *******************************************************************************/
 
 #include "eclipseOS.h"
@@ -111,6 +112,7 @@ static void sendOpenFileMessage(HWND window) {
 	}
 	destroySharedData(id);
 	free(id);
+	SetForegroundWindow(window);
 }
 
 static HWND findSWTMessageWindow() {
