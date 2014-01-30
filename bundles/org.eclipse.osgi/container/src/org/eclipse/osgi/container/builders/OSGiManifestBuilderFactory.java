@@ -26,6 +26,7 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.namespace.*;
 import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.resource.Namespace;
 
 /**
  * @since 3.10
@@ -39,6 +40,8 @@ public final class OSGiManifestBuilderFactory {
 	private static final String ATTR_TYPE_DOUBLE = "double"; //$NON-NLS-1$
 	private static final String ATTR_TYPE_SET = "set"; //$NON-NLS-1$
 	private static final String ATTR_TYPE_LIST = "List"; //$NON-NLS-1$
+	private static final String ATTR_OLD_REPRIVIDE = "reprovide"; //$NON-NLS-1$
+	private static final String HEADER_OLD_PROVIDE_PACKAGE = "Provide-Package"; //$NON-NLS-1$
 	private static final String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REQUIRE_BUNDLE};
 	private static final Collection<String> SYSTEM_CAPABILITIES = Collections.unmodifiableCollection(Arrays.asList(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE, NativeNamespace.NATIVE_NAMESPACE));
 	private static final Collection<String> PROHIBITED_CAPABILITIES = Collections.unmodifiableCollection(Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE));
@@ -59,6 +62,7 @@ public final class OSGiManifestBuilderFactory {
 
 		Collection<Map<String, Object>> exportedPackages = new ArrayList<Map<String, Object>>();
 		getPackageExports(builder, ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, manifest.get(Constants.EXPORT_PACKAGE)), symbolicName, exportedPackages);
+		getPackageExports(builder, ManifestElement.parseHeader(HEADER_OLD_PROVIDE_PACKAGE, manifest.get(HEADER_OLD_PROVIDE_PACKAGE)), symbolicName, exportedPackages);
 		if (extraExports != null) {
 			getPackageExports(builder, ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, extraExports), symbolicName, exportedPackages);
 		}
@@ -247,6 +251,13 @@ public final class OSGiManifestBuilderFactory {
 				directives.remove(BundleNamespace.CAPABILITY_USES_DIRECTIVE);
 				directives.remove(BundleNamespace.CAPABILITY_EFFECTIVE_DIRECTIVE);
 				Map<String, Object> attributes = getAttributes(bsnElement);
+				if (!directives.containsKey(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE)) {
+					// previous versions of equinox treated the singleton attribute as a directive
+					Object singletonAttr = attributes.get(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE);
+					if ("true".equals(singletonAttr)) { //$NON-NLS-1$
+						directives.put(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE, (String) singletonAttr);
+					}
+				}
 				if (!isFragment) {
 					// create the bundle namespace
 					Map<String, Object> bundleAttributes = new HashMap<String, Object>(attributes);
@@ -330,6 +341,9 @@ public final class OSGiManifestBuilderFactory {
 			VersionRange versionRange = versionRangeAttr == null ? (specVersionRangeAttr == null ? null : new VersionRange(specVersionRangeAttr)) : new VersionRange(versionRangeAttr);
 			String bundleVersionRangeAttr = (String) attributes.remove(PackageNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE);
 			VersionRange bundleVersionRange = bundleVersionRangeAttr == null ? null : new VersionRange(bundleVersionRangeAttr);
+			// the attribute "optional" used to be used in old versions of equinox to specify optional imports
+			// preserving behavior for compatibility
+			Object optionalAttr = attributes.remove(Namespace.RESOLUTION_OPTIONAL);
 			for (String packageName : packageNames) {
 				if (dynamic && importPackageNames.contains(packageName))
 					continue; // already importing this package, don't add a dynamic import for it
@@ -355,6 +369,10 @@ public final class OSGiManifestBuilderFactory {
 				if (dynamic && packageName.indexOf('*') >= 0)
 					packageDirectives.put(PackageNamespace.REQUIREMENT_CARDINALITY_DIRECTIVE, PackageNamespace.CARDINALITY_MULTIPLE);
 
+				// check the old optional attribute
+				if ("true".equals(optionalAttr) && packageDirectives.get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE) == null) { //$NON-NLS-1$
+					packageDirectives.put(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE, Namespace.RESOLUTION_OPTIONAL);
+				}
 				builder.addRequirement(PackageNamespace.PACKAGE_NAMESPACE, packageDirectives, new HashMap<String, Object>(0));
 			}
 		}
@@ -399,6 +417,10 @@ public final class OSGiManifestBuilderFactory {
 			directives.remove(BundleNamespace.REQUIREMENT_EFFECTIVE_DIRECTIVE);
 			String versionRangeAttr = (String) attributes.remove(BundleNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE);
 			VersionRange versionRange = versionRangeAttr == null ? null : new VersionRange(versionRangeAttr);
+			// These two attrs are used as directives in previous versions of equinox
+			// Preserving behavior for compatibility reasons.
+			Object optionalAttr = attributes.remove(Namespace.RESOLUTION_OPTIONAL);
+			Object reprovideAttr = attributes.remove(ATTR_OLD_REPRIVIDE);
 			for (String bundleName : bundleNames) {
 				if (bundleName.equals(builder.getSymbolicName())) {
 					// ignore requirements to ourself
@@ -417,6 +439,13 @@ public final class OSGiManifestBuilderFactory {
 					// need to add (&...)
 					filter.insert(0, "(&").append(')'); //$NON-NLS-1$
 				bundleDirectives.put(BundleNamespace.REQUIREMENT_FILTER_DIRECTIVE, filter.toString());
+				// check the old compatibility attributes
+				if ("true".equals(optionalAttr) && bundleDirectives.get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE) == null) { //$NON-NLS-1$
+					bundleDirectives.put(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE, Namespace.RESOLUTION_OPTIONAL);
+				}
+				if ("true".equals(reprovideAttr) && bundleDirectives.get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE) == null) { //$NON-NLS-1$
+					bundleDirectives.put(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE, BundleNamespace.VISIBILITY_REEXPORT);
+				}
 				builder.addRequirement(BundleNamespace.BUNDLE_NAMESPACE, bundleDirectives, new HashMap<String, Object>(0));
 			}
 		}
