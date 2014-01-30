@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 IBM Corporation and others.
+ * Copyright (c) 2004, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,6 +78,7 @@ public class BundleLoader implements ModuleLoader {
 	private final KeyedHashSet requiredSources = new KeyedHashSet(false);
 	/* cache of imported packages. Key is packagename, Value is PackageSource */
 	private final KeyedHashSet importedSources = new KeyedHashSet(false);
+	private final List<ModuleWire> requiredBundleWires;
 
 	/* @GuardedBy("importedSources") */
 	private boolean importsInitialized = false;
@@ -147,6 +148,9 @@ public class BundleLoader implements ModuleLoader {
 
 		// init the dynamic imports tables
 		addDynamicImportPackage(wiring.getModuleRequirements(PackageNamespace.PACKAGE_NAMESPACE));
+
+		// initialize the required bundle wires
+		requiredBundleWires = Collections.unmodifiableList(wiring.getRequiredModuleWires(BundleNamespace.BUNDLE_NAMESPACE));
 
 		//Initialize the policy handler
 		List<ModuleCapability> moduleDatas = wiring.getRevision().getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
@@ -679,13 +683,10 @@ public class BundleLoader implements ModuleLoader {
 		// now add package names from required bundles
 		Collection<BundleLoader> visited = new ArrayList<BundleLoader>();
 		visited.add(this); // always add ourselves so we do not recurse back to ourselves
-		List<ModuleWire> requireBundles = wiring.getRequiredModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
-		if (requireBundles != null) {
-			for (ModuleWire bundleWire : requireBundles) {
-				BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
-				if (loader != null) {
-					loader.addProvidedPackageNames(pkgName, packages, subPackages, visited);
-				}
+		for (ModuleWire bundleWire : requiredBundleWires) {
+			BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
+			if (loader != null) {
+				loader.addProvidedPackageNames(pkgName, packages, subPackages, visited);
 			}
 		}
 
@@ -821,17 +822,14 @@ public class BundleLoader implements ModuleLoader {
 			return; // should not continue to required bundles in this case
 		}
 		// Must search required bundles that are exported first.
-		List<ModuleWire> requireBundles = wiring.getRequiredModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
-		if (requireBundles != null) {
-			for (ModuleWire bundleWire : requireBundles) {
-				if (local != null || BundleNamespace.VISIBILITY_REEXPORT.equals(bundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE))) {
-					// always add required bundles first if we locally provide the package
-					// This allows a bundle to provide a package from a required bundle without 
-					// re-exporting the whole required bundle.
-					BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
-					if (loader != null) {
-						loader.addExportedProvidersFor(packageName, result, visited);
-					}
+		for (ModuleWire bundleWire : requiredBundleWires) {
+			if (local != null || BundleNamespace.VISIBILITY_REEXPORT.equals(bundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE))) {
+				// always add required bundles first if we locally provide the package
+				// This allows a bundle to provide a package from a required bundle without 
+				// re-exporting the whole required bundle.
+				BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
+				if (loader != null) {
+					loader.addExportedProvidersFor(packageName, result, visited);
 				}
 			}
 		}
@@ -857,14 +855,11 @@ public class BundleLoader implements ModuleLoader {
 					result.add(substituted);
 			}
 		}
-		List<ModuleWire> requireBundles = wiring.getRequiredModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
-		if (requireBundles != null) {
-			for (ModuleWire bundleWire : requireBundles) {
-				if (BundleNamespace.VISIBILITY_REEXPORT.equals(bundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE))) {
-					BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
-					if (loader != null) {
-						loader.addProvidedPackageNames(packageName, result, subPackages, visited);
-					}
+		for (ModuleWire bundleWire : requiredBundleWires) {
+			if (BundleNamespace.VISIBILITY_REEXPORT.equals(bundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE))) {
+				BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
+				if (loader != null) {
+					loader.addProvidedPackageNames(packageName, result, subPackages, visited);
 				}
 			}
 		}
@@ -1060,13 +1055,10 @@ public class BundleLoader implements ModuleLoader {
 		if (!visited.contains(this))
 			visited.add(this); // always add ourselves so we do not recurse back to ourselves
 		List<PackageSource> result = new ArrayList<PackageSource>(3);
-		List<ModuleWire> requireBundles = wiring.getRequiredModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
-		if (requireBundles != null) {
-			for (ModuleWire bundleWire : requireBundles) {
-				BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
-				if (loader != null) {
-					loader.addExportedProvidersFor(pkgName, result, visited);
-				}
+		for (ModuleWire bundleWire : requiredBundleWires) {
+			BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
+			if (loader != null) {
+				loader.addExportedProvidersFor(pkgName, result, visited);
 			}
 		}
 		// found some so cache the result for next time and return
