@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2012). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2012, 2014). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,18 +30,23 @@ import org.osgi.dto.DTO;
  */
 public class BundleStartLevelDTO extends DTO {
     /**
+     * The id of the bundle associated with this start level.
+     */
+    public long    bundle;
+
+    /**
      * The assigned start level value for the bundle.
      */
-    public int                startLevel;
+    public int     startLevel;
 
     /**
      * The bundle's autostart setting indicates that the activation policy
      * declared in the bundle manifest must be used.
      */
-    public boolean            activationPolicyUsed;
+    public boolean activationPolicyUsed;
 
     /**
      * The bundle's autostart setting indicates it must be started.
      */
-    public boolean            persistentlyStarted;
+    public boolean persistentlyStarted;
 }

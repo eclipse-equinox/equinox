@@ -25,26 +25,19 @@ import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.*;
 
 public class DTOBuilder {
-	private final Map<Object, Object> objects;
+	private final Map<BundleRevision, BundleRevisionDTO> resources;
+	private final Map<BundleWiring, BundleWiringDTO.NodeDTO> wiringnodes;
 
 	private DTOBuilder() {
-		objects = new IdentityHashMap<Object, Object>();
+		resources = new IdentityHashMap<BundleRevision, BundleRevisionDTO>();
+		wiringnodes = new IdentityHashMap<BundleWiring, BundleWiringDTO.NodeDTO>();
 	}
 
 	public static BundleDTO newBundleDTO(Bundle bundle) {
-		return new DTOBuilder().getBundleDTO(bundle);
-	}
-
-	private BundleDTO getBundleDTO(Bundle bundle) {
 		if (bundle == null) {
 			return null;
 		}
-		BundleDTO dto = (BundleDTO) objects.get(bundle);
-		if (dto != null) {
-			return dto;
-		}
-		dto = new BundleDTO();
-		objects.put(bundle, dto);
+		BundleDTO dto = new BundleDTO();
 		dto.id = bundle.getBundleId();
 		dto.lastModified = bundle.getLastModified();
 		dto.state = bundle.getState();
@@ -53,11 +46,12 @@ public class DTOBuilder {
 		return dto;
 	}
 
-	public static BundleStartLevelDTO newBundleStartLevelDTO(BundleStartLevel bsl) {
+	public static BundleStartLevelDTO newBundleStartLevelDTO(Bundle b, BundleStartLevel bsl) {
 		if (bsl == null) {
 			return null;
 		}
 		BundleStartLevelDTO dto = new BundleStartLevelDTO();
+		dto.bundle = b.getBundleId();
 		dto.activationPolicyUsed = bsl.isActivationPolicyUsed();
 		dto.persistentlyStarted = bsl.isPersistentlyStarted();
 		dto.startLevel = bsl.getStartLevel();
@@ -65,20 +59,30 @@ public class DTOBuilder {
 	}
 
 	public static BundleRevisionDTO newBundleRevisionDTO(BundleRevision revision) {
-		return new DTOBuilder().getBundleRevisionDTO(revision);
+		BundleRevisionDTO dto = new DTOBuilder().getBundleRevisionDTO(revision);
+		return dto;
+	}
+
+	private int getResourceId(BundleRevision revision) {
+		BundleRevisionDTO dto = getBundleRevisionDTO(revision);
+		if (dto == null) {
+			return 0;
+		}
+		return dto.id;
 	}
 
 	private BundleRevisionDTO getBundleRevisionDTO(BundleRevision revision) {
 		if (revision == null) {
 			return null;
 		}
-		BundleRevisionDTO dto = (BundleRevisionDTO) objects.get(revision);
+		BundleRevisionDTO dto = resources.get(revision);
 		if (dto != null) {
 			return dto;
 		}
 		dto = new BundleRevisionDTO();
-		objects.put(revision, dto);
-		dto.bundle = getBundleDTO(revision.getBundle());
+		dto.id = identifier(revision);
+		resources.put(revision, dto);
+		dto.bundle = revision.getBundle().getBundleId();
 		dto.symbolicName = revision.getSymbolicName();
 		dto.type = revision.getTypes();
 		dto.version = revision.getVersion().toString();
@@ -91,13 +95,7 @@ public class DTOBuilder {
 		if (caps == null) {
 			return null;
 		}
-		@SuppressWarnings("unchecked")
-		List<CapabilityDTO> dtos = (List<CapabilityDTO>) objects.get(caps);
-		if (dtos != null) {
-			return dtos;
-		}
-		dtos = newList(caps.size());
-		objects.put(caps, dtos);
+		List<CapabilityDTO> dtos = newList(caps.size());
 		for (BundleCapability cap : caps) {
 			dtos.add(getCapabilityDTO(cap));
 		}
@@ -108,16 +106,33 @@ public class DTOBuilder {
 		if (cap == null) {
 			return null;
 		}
-		CapabilityDTO dto = (CapabilityDTO) objects.get(cap);
-		if (dto != null) {
-			return dto;
-		}
-		dto = new CapabilityDTO();
-		objects.put(cap, dto);
+		CapabilityDTO dto = new CapabilityDTO();
+		dto.id = identifier(cap);
 		dto.namespace = cap.getNamespace();
-		dto.resource = getBundleRevisionDTO(cap.getResource());
+		dto.resource = getResourceId(cap.getRevision());
 		dto.attributes = newAttributesMapDTO(cap.getAttributes());
 		dto.directives = newDirectivesMapDTO(cap.getDirectives());
+		return dto;
+	}
+
+	private List<CapabilityRefDTO> getListCapabilityRefDTO(List<BundleCapability> caps) {
+		if (caps == null) {
+			return null;
+		}
+		List<CapabilityRefDTO> dtos = newList(caps.size());
+		for (BundleCapability cap : caps) {
+			dtos.add(getCapabilityRefDTO(cap));
+		}
+		return dtos;
+	}
+
+	private CapabilityRefDTO getCapabilityRefDTO(BundleCapability cap) {
+		if (cap == null) {
+			return null;
+		}
+		CapabilityRefDTO dto = new CapabilityRefDTO();
+		dto.capability = identifier(cap);
+		dto.resource = getResourceId(cap.getRevision());
 		return dto;
 	}
 
@@ -125,13 +140,7 @@ public class DTOBuilder {
 		if (reqs == null) {
 			return null;
 		}
-		@SuppressWarnings("unchecked")
-		List<RequirementDTO> dtos = (List<RequirementDTO>) objects.get(reqs);
-		if (dtos != null) {
-			return dtos;
-		}
-		dtos = newList(reqs.size());
-		objects.put(reqs, dtos);
+		List<RequirementDTO> dtos = newList(reqs.size());
 		for (BundleRequirement req : reqs) {
 			dtos.add(getRequirementDTO(req));
 		}
@@ -142,24 +151,37 @@ public class DTOBuilder {
 		if (req == null) {
 			return null;
 		}
-		RequirementDTO dto = (RequirementDTO) objects.get(req);
-		if (dto != null) {
-			return dto;
-		}
-		dto = new RequirementDTO();
-		objects.put(req, dto);
+		RequirementDTO dto = new RequirementDTO();
+		dto.id = identifier(req);
 		dto.namespace = req.getNamespace();
-		dto.resource = getBundleRevisionDTO(req.getResource());
+		dto.resource = getResourceId(req.getRevision());
 		dto.attributes = newAttributesMapDTO(req.getAttributes());
 		dto.directives = newDirectivesMapDTO(req.getDirectives());
 		return dto;
 	}
 
-	public static BundleRevisionDTO[] newArrayBundleRevisionDTO(BundleRevisions revisions) {
-		return new DTOBuilder().getArrayBundleRevisionDTO(revisions);
+	private List<RequirementRefDTO> getListRequirementRefDTO(List<BundleRequirement> reqs) {
+		if (reqs == null) {
+			return null;
+		}
+		List<RequirementRefDTO> dtos = newList(reqs.size());
+		for (BundleRequirement req : reqs) {
+			dtos.add(getRequirementRefDTO(req));
+		}
+		return dtos;
 	}
 
-	private BundleRevisionDTO[] getArrayBundleRevisionDTO(BundleRevisions revisions) {
+	private RequirementRefDTO getRequirementRefDTO(BundleRequirement req) {
+		if (req == null) {
+			return null;
+		}
+		RequirementRefDTO dto = new RequirementRefDTO();
+		dto.requirement = identifier(req);
+		dto.resource = getResourceId(req.getRevision());
+		return dto;
+	}
+
+	public static BundleRevisionDTO[] newArrayBundleRevisionDTO(BundleRevisions revisions) {
 		if (revisions == null) {
 			return null;
 		}
@@ -167,7 +189,7 @@ public class DTOBuilder {
 		final int size = revs.size();
 		BundleRevisionDTO[] dtos = new BundleRevisionDTO[size];
 		for (int i = 0; i < size; i++) {
-			dtos[i] = getBundleRevisionDTO(revs.get(i));
+			dtos[i] = new DTOBuilder().getBundleRevisionDTO(revs.get(i));
 		}
 		return dtos;
 	}
@@ -176,24 +198,46 @@ public class DTOBuilder {
 		if (revision == null) {
 			return null;
 		}
-		return new DTOBuilder().getBundleWiringDTO(revision.getWiring());
+		BundleWiringDTO dto = new DTOBuilder().getBundleWiringDTO(revision.getWiring());
+		return dto;
 	}
 
 	private BundleWiringDTO getBundleWiringDTO(BundleWiring wiring) {
 		if (wiring == null) {
 			return null;
 		}
-		BundleWiringDTO dto = (BundleWiringDTO) objects.get(wiring);
+		BundleWiringDTO dto = new BundleWiringDTO();
+		dto.bundle = wiring.getBundle().getBundleId();
+		dto.root = getWiringId(wiring);
+		dto.nodes = new HashSet<BundleWiringDTO.NodeDTO>(wiringnodes.values());
+		dto.resources = new HashSet<BundleRevisionDTO>(resources.values());
+		return dto;
+	}
+
+	private int getWiringId(BundleWiring wiring) {
+		BundleWiringDTO.NodeDTO dto = getBundleWiringNodeDTO(wiring);
+		if (dto == null) {
+			return 0;
+		}
+		return dto.id;
+	}
+
+	private BundleWiringDTO.NodeDTO getBundleWiringNodeDTO(BundleWiring wiring) {
+		if (wiring == null) {
+			return null;
+		}
+		BundleWiringDTO.NodeDTO dto = wiringnodes.get(wiring);
 		if (dto != null) {
 			return dto;
 		}
-		dto = new BundleWiringDTO();
-		objects.put(wiring, dto);
+		dto = new BundleWiringDTO.NodeDTO();
+		dto.id = identifier(wiring);
+		wiringnodes.put(wiring, dto);
 		dto.current = wiring.isCurrent();
 		dto.inUse = wiring.isInUse();
-		dto.resource = getBundleRevisionDTO(wiring.getRevision());
-		dto.capabilities = getListCapabilityDTO(wiring.getCapabilities(null));
-		dto.requirements = getListRequirementDTO(wiring.getRequirements(null));
+		dto.resource = getResourceId(wiring.getRevision());
+		dto.capabilities = getListCapabilityRefDTO(wiring.getCapabilities(null));
+		dto.requirements = getListRequirementRefDTO(wiring.getRequirements(null));
 		dto.providedWires = getListBundleWireDTO(wiring.getProvidedWires(null));
 		dto.requiredWires = getListBundleWireDTO(wiring.getRequiredWires(null));
 		return dto;
@@ -203,13 +247,7 @@ public class DTOBuilder {
 		if (wires == null) {
 			return null;
 		}
-		@SuppressWarnings("unchecked")
-		List<WireDTO> dtos = (List<WireDTO>) objects.get(wires);
-		if (dtos != null) {
-			return dtos;
-		}
-		dtos = newList(wires.size());
-		objects.put(wires, dtos);
+		List<WireDTO> dtos = newList(wires.size());
 		for (BundleWire wire : wires) {
 			dtos.add(getBundleWireDTO(wire));
 		}
@@ -220,46 +258,33 @@ public class DTOBuilder {
 		if (wire == null) {
 			return null;
 		}
-		BundleWireDTO dto = (BundleWireDTO) objects.get(wire);
-		if (dto != null) {
-			return dto;
-		}
-		dto = new BundleWireDTO();
-		objects.put(wire, dto);
-		dto.capability = getCapabilityDTO(wire.getCapability());
-		dto.requirement = getRequirementDTO(wire.getRequirement());
-		dto.provider = getBundleRevisionDTO(wire.getProvider());
-		dto.requirer = getBundleRevisionDTO(wire.getRequirer());
-		dto.providerWiring = getBundleWiringDTO(wire.getProviderWiring());
-		dto.requirerWiring = getBundleWiringDTO(wire.getRequirerWiring());
+		BundleWireDTO dto = new BundleWireDTO();
+		dto.capability = getCapabilityRefDTO(wire.getCapability());
+		dto.requirement = getRequirementRefDTO(wire.getRequirement());
+		dto.provider = getResourceId(wire.getProvider());
+		dto.requirer = getResourceId(wire.getRequirer());
+		dto.providerWiring = getWiringId(wire.getProviderWiring());
+		dto.requirerWiring = getWiringId(wire.getRequirerWiring());
 		return dto;
 	}
 
 	public static BundleWiringDTO[] newArrayBundleWiringDTO(BundleRevisions revisions) {
-		return new DTOBuilder().getArrayBundleWiringDTO(revisions);
-	}
-
-	private BundleWiringDTO[] getArrayBundleWiringDTO(BundleRevisions revisions) {
 		if (revisions == null) {
 			return null;
 		}
 		List<BundleRevision> revs = revisions.getRevisions();
 		final int size = revs.size();
-		BundleWiringDTO[] dtos = new BundleWiringDTO[size];
+		List<BundleWiringDTO> dtos = new ArrayList<BundleWiringDTO>(size);
 		for (int i = 0; i < size; i++) {
 			BundleWiring wiring = revs.get(i).getWiring();
 			if (wiring != null) {
-				dtos[i] = getBundleWiringDTO(wiring);
+				dtos.add(new DTOBuilder().getBundleWiringDTO(wiring)); // use new DTOBuilder for each wiring dto
 			}
 		}
-		return dtos;
+		return dtos.toArray(new BundleWiringDTO[dtos.size()]);
 	}
 
 	public static FrameworkDTO newFrameworkDTO(BundleContext systemBundleContext, Map<String, String> configuration) {
-		return new DTOBuilder().getFrameworkDTO(systemBundleContext, configuration);
-	}
-
-	private FrameworkDTO getFrameworkDTO(BundleContext systemBundleContext, Map<String, String> configuration) {
 		FrameworkDTO dto = new FrameworkDTO();
 		dto.properties = asProperties(configuration);
 		if (systemBundleContext == null) {
@@ -271,7 +296,7 @@ public class DTOBuilder {
 		int size = bundles == null ? 0 : bundles.length;
 		List<BundleDTO> bundleDTOs = newList(size);
 		for (int i = 0; i < size; i++) {
-			bundleDTOs.add(getBundleDTO(bundles[i]));
+			bundleDTOs.add(newBundleDTO(bundles[i]));
 		}
 		dto.bundles = bundleDTOs;
 		try {
@@ -296,26 +321,25 @@ public class DTOBuilder {
 		return (Map<String, Object>) m;
 	}
 
-	private ServiceReferenceDTO getServiceReferenceDTO(ServiceReference<?> ref) {
+	private static ServiceReferenceDTO getServiceReferenceDTO(ServiceReference<?> ref) {
 		if (ref == null) {
 			return null;
-		}
-		ServiceReferenceDTO dto = (ServiceReferenceDTO) objects.get(ref);
-		if (dto != null) {
-			return dto;
 		}
 		Bundle b = ref.getBundle();
 		if (b == null) {
 			// service has been unregistered
 			return null;
 		}
-		dto = new ServiceReferenceDTO();
-		objects.put(ref, dto);
+		ServiceReferenceDTO dto = new ServiceReferenceDTO();
 		dto.bundle = b.getBundleId();
 		String[] keys = ref.getPropertyKeys();
 		Map<String, Object> properties = newMap(keys.length);
 		for (String k : keys) {
-			properties.put(k, mapValue(ref.getProperty(k)));
+			Object v = ref.getProperty(k);
+			if (Constants.SERVICE_ID.equals(k)) {
+				dto.id = ((Long) v).longValue();
+			}
+			properties.put(k, mapValue(v));
 		}
 		dto.properties = properties;
 		Bundle[] using = ref.getUsingBundles();
@@ -339,10 +363,6 @@ public class DTOBuilder {
 	}
 
 	public static ServiceReferenceDTO[] newArrayServiceReferenceDTO(ServiceReference<?>[] references) {
-		return new DTOBuilder().getArrayServiceReferenceDTO(references);
-	}
-
-	private ServiceReferenceDTO[] getArrayServiceReferenceDTO(ServiceReference<?>[] references) {
 		final int length = (references == null) ? 0 : references.length;
 		List<ServiceReferenceDTO> refDTOs = new ArrayList<ServiceReferenceDTO>(length);
 		for (int i = 0; i < length; i++) {
@@ -469,5 +489,9 @@ public class DTOBuilder {
 			}
 		}
 		return dto;
+	}
+
+	private static int identifier(Object o) {
+		return System.identityHashCode(o);
 	}
 }

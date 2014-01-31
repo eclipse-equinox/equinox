@@ -798,7 +798,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			if (module.getState().equals(State.UNINSTALLED)) {
 				return null;
 			}
-			return (A) DTOBuilder.newBundleStartLevelDTO(module);
+			return (A) DTOBuilder.newBundleStartLevelDTO(this, module);
 		}
 
 		if (BundleRevisionDTO.class.equals(adapterType)) {
