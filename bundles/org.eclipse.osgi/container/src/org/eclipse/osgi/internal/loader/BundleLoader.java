@@ -150,7 +150,8 @@ public class BundleLoader implements ModuleLoader {
 		addDynamicImportPackage(wiring.getModuleRequirements(PackageNamespace.PACKAGE_NAMESPACE));
 
 		// initialize the required bundle wires
-		requiredBundleWires = Collections.unmodifiableList(wiring.getRequiredModuleWires(BundleNamespace.BUNDLE_NAMESPACE));
+		List<ModuleWire> currentRequireBundleWires = wiring.getRequiredModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
+		requiredBundleWires = currentRequireBundleWires == null || currentRequireBundleWires.isEmpty() ? Collections.<ModuleWire> emptyList() : Collections.unmodifiableList(currentRequireBundleWires);
 
 		//Initialize the policy handler
 		List<ModuleCapability> moduleDatas = wiring.getRevision().getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
