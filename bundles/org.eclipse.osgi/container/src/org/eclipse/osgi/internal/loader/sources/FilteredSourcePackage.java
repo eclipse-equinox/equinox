@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 IBM Corporation and others.
+ * Copyright (c) 2004, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,15 +17,13 @@ import org.eclipse.osgi.util.ManifestElement;
 
 public class FilteredSourcePackage extends SingleSourcePackage {
 	private static final char ALL = '*';
-	String[] includes;
-	String[] excludes;
+	private final String[] includes;
+	private final String[] excludes;
 
 	public FilteredSourcePackage(String name, BundleLoader supplier, String includes, String excludes) {
 		super(name, supplier);
-		if (includes != null)
-			this.includes = ManifestElement.getArrayFromList(includes);
-		if (excludes != null)
-			this.excludes = ManifestElement.getArrayFromList(excludes);
+		this.includes = includes != null ? ManifestElement.getArrayFromList(includes) : null;
+		this.excludes = excludes != null ? ManifestElement.getArrayFromList(excludes) : null;
 	}
 
 	public URL getResource(String name) {
