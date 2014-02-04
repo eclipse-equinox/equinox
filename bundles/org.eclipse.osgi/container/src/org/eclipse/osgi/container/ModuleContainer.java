@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -430,7 +430,7 @@ public final class ModuleContainer {
 			} catch (RuntimeException e) {
 				if (e.getCause() instanceof BundleException) {
 					BundleException be = (BundleException) e.getCause();
-					if (be.getType() == BundleException.REJECTED_BY_HOOK) {
+					if (be.getType() == BundleException.REJECTED_BY_HOOK || be.getType() == BundleException.STATECHANGE_ERROR) {
 						return new ModuleResolutionReport(null, Collections.<Resource, List<Entry>> emptyMap(), new ResolutionException(be));
 					}
 				}
@@ -602,18 +602,19 @@ public final class ModuleContainer {
 		return null;
 	}
 
+	private final Object stateLockMonitor = new Object();
+
 	private boolean applyDelta(Map<ModuleRevision, ModuleWiring> deltaWiring, Collection<Module> modulesResolved, Collection<Module> triggers, long timestamp, boolean restartTriggers) {
 		List<Module> modulesLocked = new ArrayList<Module>(modulesResolved.size());
 		// now attempt to apply the delta
 		try {
-			Map<ModuleWiring, Collection<ModuleRevision>> hostsWithDynamicFrags = new HashMap<ModuleWiring, Collection<ModuleRevision>>(0);
-			moduleDatabase.writeLock();
-			try {
-				if (timestamp != moduleDatabase.getRevisionsTimestamp())
-					return false; // need to try again
+			synchronized (stateLockMonitor) {
 				// Acquire the necessary RESOLVED state change lock.
-				// Note this is done while holding the write lock to avoid multiple threads trying to compete over
+				// Note this is done while holding a global lock to avoid multiple threads trying to compete over
 				// locking multiple modules; otherwise out of order locks between modules can happen
+				// NOTE this MUST be done outside of holding the moduleDatabase lock also to avoid
+				// introducing out of order locks between the bundle state change lock and the moduleDatabase
+				// lock.
 				for (Module module : modulesResolved) {
 					try {
 						module.lockStateChange(ModuleEvent.RESOLVED);
@@ -623,6 +624,13 @@ public final class ModuleContainer {
 						throw new IllegalStateException(Msg.ModuleContainer_StateLockError, e);
 					}
 				}
+			}
+			Map<ModuleWiring, Collection<ModuleRevision>> hostsWithDynamicFrags = new HashMap<ModuleWiring, Collection<ModuleRevision>>(0);
+			moduleDatabase.writeLock();
+			try {
+				if (timestamp != moduleDatabase.getRevisionsTimestamp())
+					return false; // need to try again
+
 				Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDatabase.getWiringsCopy();
 				for (Map.Entry<ModuleRevision, ModuleWiring> deltaEntry : deltaWiring.entrySet()) {
 					ModuleWiring current = wiringCopy.get(deltaEntry.getKey());
@@ -796,24 +804,24 @@ public final class ModuleContainer {
 		Collection<Module> modulesLocked = new ArrayList<Module>(refreshTriggers.size());
 		Collection<Module> modulesUnresolved = new ArrayList<Module>();
 		try {
-			// Acquire module state change locks.
-			// Note this is done while holding the write lock to avoid multiple threads trying to compete over
-			// locking multiple modules; otherwise out of order locks between modules can happen		
-			moduleDatabase.writeLock();
-			try {
-				if (timestamp != moduleDatabase.getRevisionsTimestamp())
-					return null; // need to try again
-				// go in reverse order
-				for (ListIterator<Module> iTriggers = refreshTriggers.listIterator(refreshTriggers.size()); iTriggers.hasPrevious();) {
-					Module refreshModule = iTriggers.previous();
-					refreshModule.lockStateChange(ModuleEvent.UNRESOLVED);
-					modulesLocked.add(refreshModule);
+			// Acquire the module state change locks.
+			// Note this is done while holding a global lock to avoid multiple threads trying to compete over
+			// locking multiple modules; otherwise out of order locks between modules can happen
+			// NOTE this MUST be done outside of holding the moduleDatabase lock also to avoid
+			// introducing out of order locks between the bundle state change lock and the moduleDatabase
+			// lock.
+			synchronized (stateLockMonitor) {
+				try {
+					// go in reverse order
+					for (ListIterator<Module> iTriggers = refreshTriggers.listIterator(refreshTriggers.size()); iTriggers.hasPrevious();) {
+						Module refreshModule = iTriggers.previous();
+						refreshModule.lockStateChange(ModuleEvent.UNRESOLVED);
+						modulesLocked.add(refreshModule);
+					}
+				} catch (BundleException e) {
+					// TODO throw some appropriate exception
+					throw new IllegalStateException(Msg.ModuleContainer_StateLockError, e);
 				}
-			} catch (BundleException e) {
-				// TODO throw some appropriate exception
-				throw new IllegalStateException(Msg.ModuleContainer_StateLockError, e);
-			} finally {
-				moduleDatabase.writeUnlock();
 			}
 			// Must not hold the module database lock while stopping bundles
 			// Stop any active bundles and remove non-active modules from the refreshTriggers
