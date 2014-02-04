@@ -114,10 +114,24 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="osgi/src/org/osgi/dto/resource/CapabilityRefDTO.java" type="org.osgi.dto.resource.CapabilityRefDTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.resource.CapabilityRefDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="osgi/src/org/osgi/dto/resource/RequirementDTO.java" type="org.osgi.dto.resource.RequirementDTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
                 <message_argument value="org.osgi.dto.resource.RequirementDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/dto/resource/RequirementRefDTO.java" type="org.osgi.dto.resource.RequirementRefDTO">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.dto.resource.RequirementRefDTO"/>
             </message_arguments>
         </filter>
     </resource>
@@ -222,6 +236,15 @@
                 <message_argument value="1.8"/>
                 <message_argument value="3.10"/>
                 <message_argument value="org.osgi.framework.PrototypeServiceFactory"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/ServiceException.java" type="org.osgi.framework.ServiceException">
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.8"/>
+                <message_argument value="3.10"/>
+                <message_argument value="ASYNC_ERROR"/>
             </message_arguments>
         </filter>
     </resource>
