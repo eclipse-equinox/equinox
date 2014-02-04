@@ -844,8 +844,8 @@ public class Storage {
 	}
 
 	private Long getNextRootID() throws BundleException {
-		// Try up to 10 times
-		for (int i = 0; i < 10; i++) {
+		// Try up to 500 times
+		for (int i = 0; i < 500; i++) {
 			moduleDatabase.readLock();
 			try {
 				Long nextID = moduleDatabase.getNextId();
@@ -862,7 +862,7 @@ public class Storage {
 			}
 			// sleep to allow another thread to get the database lock
 			try {
-				Thread.sleep(500);
+				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
