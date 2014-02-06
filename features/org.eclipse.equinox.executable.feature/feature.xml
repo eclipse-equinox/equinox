@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.equinox.executable"
       label="%featureName"
-      version="3.6.0.qualifier"
+      version="3.6.100.qualifier"
       license-feature="org.eclipse.license"
       license-feature-version="1.0.0.qualifier">
 
