@@ -240,5 +240,9 @@
 		<git dir="${localGit}/rt.equinox.binaries" command="commit" arguments="-a -m &quot;Recompiled binaries ${commitMsg}&quot;" />
 		<git dir="${localGit}/rt.equinox.binaries" command="tag" arguments="${tag}" />
 
+		<replaceregexp match="binaryTag=(.*)" replace="binaryTag=${tag}" >
+			<fileset dir="${localGit}/rt.equinox.framework" includes="**/build.properties" />
+		</replaceregexp>
+		<git dir="${localGit}/rt.equinox.framework" command="commit" arguments="-a -m &quot;Binaries ${tag} ${commitMsg}&quot;" />
 	</target>
 </project>
