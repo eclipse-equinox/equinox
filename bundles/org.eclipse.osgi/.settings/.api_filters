@@ -51,108 +51,108 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/dto/framework/BundleDTO.java" type="org.osgi.dto.framework.BundleDTO">
+    <resource path="osgi/src/org/osgi/framework/dto/BundleDTO.java" type="org.osgi.framework.dto.BundleDTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.dto.framework.BundleDTO"/>
+                <message_argument value="org.osgi.framework.dto.BundleDTO"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/dto/framework/FrameworkDTO.java" type="org.osgi.dto.framework.FrameworkDTO">
+    <resource path="osgi/src/org/osgi/framework/dto/FrameworkDTO.java" type="org.osgi.framework.dto.FrameworkDTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.dto.framework.FrameworkDTO"/>
+                <message_argument value="org.osgi.framework.dto.FrameworkDTO"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/dto/framework/ServiceReferenceDTO.java" type="org.osgi.dto.framework.ServiceReferenceDTO">
+    <resource path="osgi/src/org/osgi/framework/dto/ServiceReferenceDTO.java" type="org.osgi.framework.dto.ServiceReferenceDTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.dto.framework.ServiceReferenceDTO"/>
+                <message_argument value="org.osgi.framework.dto.ServiceReferenceDTO"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/dto/framework/startlevel/BundleStartLevelDTO.java" type="org.osgi.dto.framework.startlevel.BundleStartLevelDTO">
+    <resource path="osgi/src/org/osgi/framework/startlevel/dto/BundleStartLevelDTO.java" type="org.osgi.framework.startlevel.dto.BundleStartLevelDTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.dto.framework.startlevel.BundleStartLevelDTO"/>
+                <message_argument value="org.osgi.framework.startlevel.dto.BundleStartLevelDTO"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/dto/framework/startlevel/FrameworkStartLevelDTO.java" type="org.osgi.dto.framework.startlevel.FrameworkStartLevelDTO">
+    <resource path="osgi/src/org/osgi/framework/startlevel/dto/FrameworkStartLevelDTO.java" type="org.osgi.framework.startlevel.dto.FrameworkStartLevelDTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.dto.framework.startlevel.FrameworkStartLevelDTO"/>
+                <message_argument value="org.osgi.framework.startlevel.dto.FrameworkStartLevelDTO"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/dto/framework/wiring/BundleRevisionDTO.java" type="org.osgi.dto.framework.wiring.BundleRevisionDTO">
+    <resource path="osgi/src/org/osgi/framework/wiring/dto/BundleRevisionDTO.java" type="org.osgi.framework.wiring.dto.BundleRevisionDTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.dto.framework.wiring.BundleRevisionDTO"/>
+                <message_argument value="org.osgi.framework.wiring.dto.BundleRevisionDTO"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/dto/framework/wiring/BundleWireDTO.java" type="org.osgi.dto.framework.wiring.BundleWireDTO">
+    <resource path="osgi/src/org/osgi/framework/wiring/dto/BundleWireDTO.java" type="org.osgi.framework.wiring.dto.BundleWireDTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.dto.framework.wiring.BundleWireDTO"/>
+                <message_argument value="org.osgi.framework.wiring.dto.BundleWireDTO"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/dto/framework/wiring/BundleWiringDTO.java" type="org.osgi.dto.framework.wiring.BundleWiringDTO">
+    <resource path="osgi/src/org/osgi/framework/wiring/dto/BundleWiringDTO.java" type="org.osgi.framework.wiring.dto.BundleWiringDTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.dto.framework.wiring.BundleWiringDTO"/>
+                <message_argument value="org.osgi.framework.wiring.dto.BundleWiringDTO"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/dto/resource/CapabilityDTO.java" type="org.osgi.dto.resource.CapabilityDTO">
+    <resource path="osgi/src/org/osgi/resource/dto/CapabilityDTO.java" type="org.osgi.resource.dto.CapabilityDTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.dto.resource.CapabilityDTO"/>
+                <message_argument value="org.osgi.resource.dto.CapabilityDTO"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/dto/resource/CapabilityRefDTO.java" type="org.osgi.dto.resource.CapabilityRefDTO">
+    <resource path="osgi/src/org/osgi/resource/dto/CapabilityRefDTO.java" type="org.osgi.resource.dto.CapabilityRefDTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.dto.resource.CapabilityRefDTO"/>
+                <message_argument value="org.osgi.resource.dto.CapabilityRefDTO"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/dto/resource/RequirementDTO.java" type="org.osgi.dto.resource.RequirementDTO">
+    <resource path="osgi/src/org/osgi/resource/dto/RequirementDTO.java" type="org.osgi.resource.dto.RequirementDTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.dto.resource.RequirementDTO"/>
+                <message_argument value="org.osgi.resource.dto.RequirementDTO"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/dto/resource/RequirementRefDTO.java" type="org.osgi.dto.resource.RequirementRefDTO">
+    <resource path="osgi/src/org/osgi/resource/dto/RequirementRefDTO.java" type="org.osgi.resource.dto.RequirementRefDTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.dto.resource.RequirementRefDTO"/>
+                <message_argument value="org.osgi.resource.dto.RequirementRefDTO"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/dto/resource/ResourceDTO.java" type="org.osgi.dto.resource.ResourceDTO">
+    <resource path="osgi/src/org/osgi/resource/dto/ResourceDTO.java" type="org.osgi.resource.dto.ResourceDTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.dto.resource.ResourceDTO"/>
+                <message_argument value="org.osgi.resource.dto.ResourceDTO"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/dto/resource/WireDTO.java" type="org.osgi.dto.resource.WireDTO">
+    <resource path="osgi/src/org/osgi/resource/dto/WireDTO.java" type="org.osgi.resource.dto.WireDTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.dto.resource.WireDTO"/>
+                <message_argument value="org.osgi.resource.dto.WireDTO"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/dto/resource/WiringDTO.java" type="org.osgi.dto.resource.WiringDTO">
+    <resource path="osgi/src/org/osgi/resource/dto/WiringDTO.java" type="org.osgi.resource.dto.WiringDTO">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.dto.resource.WiringDTO"/>
+                <message_argument value="org.osgi.resource.dto.WiringDTO"/>
             </message_arguments>
         </filter>
     </resource>

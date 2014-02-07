@@ -11,14 +11,15 @@
 
 package org.eclipse.osgi.internal.framework;
 
+import org.osgi.framework.dto.*;
+
+import org.osgi.framework.startlevel.dto.BundleStartLevelDTO;
+import org.osgi.framework.startlevel.dto.FrameworkStartLevelDTO;
+import org.osgi.framework.wiring.dto.*;
+import org.osgi.resource.dto.*;
 import java.lang.reflect.Array;
 import java.util.*;
 import org.osgi.dto.DTO;
-import org.osgi.dto.framework.*;
-import org.osgi.dto.framework.startlevel.BundleStartLevelDTO;
-import org.osgi.dto.framework.startlevel.FrameworkStartLevelDTO;
-import org.osgi.dto.framework.wiring.*;
-import org.osgi.dto.resource.*;
 import org.osgi.framework.*;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;

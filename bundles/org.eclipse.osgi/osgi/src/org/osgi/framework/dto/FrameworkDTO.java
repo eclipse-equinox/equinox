@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2012). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2012, 2014). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package org.osgi.dto.framework;
+package org.osgi.framework.dto;
 
 import java.util.List;
 import java.util.Map;
 import org.osgi.dto.DTO;
+import org.osgi.framework.BundleContext;
 
 /**
  * Data Transfer Object for a Framework.
@@ -34,20 +35,26 @@ import org.osgi.dto.DTO;
  */
 public class FrameworkDTO extends DTO {
     /**
-     * The bundles that are installed in the framework.
-     */
+	 * The bundles that are installed in the framework.
+	 * 
+	 * @see BundleContext#getBundles()
+	 */
     public List<BundleDTO>           bundles;
 
     /**
-     * The launch properties of the framework.
-     * 
-     * The value type must be a numerical type, Boolean, String, DTO or an array
-     * of any of the former.
-     */
+	 * The launch properties of the framework.
+	 * 
+	 * The value type must be a numerical type, Boolean, String, DTO or an array
+	 * of any of the former.
+	 * 
+	 * @see BundleContext#getProperty(String)
+	 */
     public Map<String, Object>       properties;
 
     /**
-     * The services that are registered in the framework.
-     */
+	 * The services that are registered in the framework.
+	 * 
+	 * @see BundleContext#getServiceReferences(String, String)
+	 */
     public List<ServiceReferenceDTO> services;
 }

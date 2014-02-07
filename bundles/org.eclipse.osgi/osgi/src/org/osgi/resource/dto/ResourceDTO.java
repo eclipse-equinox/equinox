@@ -14,49 +14,38 @@
  * limitations under the License.
  */
 
-package org.osgi.dto.resource;
+package org.osgi.resource.dto;
 
-import java.util.Map;
+import java.util.List;
 import org.osgi.dto.DTO;
+import org.osgi.resource.Resource;
 
 /**
- * Data Transfer Object for a Capability.
+ * Data Transfer Object for a Resource.
  * 
  * @author $Id$
  * @NotThreadSafe
  */
-public class CapabilityDTO extends DTO {
+public class ResourceDTO extends DTO {
     /**
-     * The unique identifier of the capability.
+     * The unique identifier of the resource.
      * 
      * <p>
      * This identifier is transiently assigned and may vary across restarts.
      */
-    public int                 id;
+    public int                  id;
 
     /**
-     * The namespace for the capability.
-     */
-    public String              namespace;
+	 * The capabilities of the resource.
+	 * 
+	 * @see Resource#getCapabilities(String)
+	 */
+    public List<CapabilityDTO>  capabilities;
 
     /**
-     * The directives for the capability.
-     */
-    public Map<String, String> directives;
-
-    /**
-     * The attributes for the capability.
-     * 
-     * <p>
-     * The value type must be a numerical type, Boolean, String, DTO or an array
-     * of any of the former.
-     */
-    public Map<String, Object> attributes;
-
-    /**
-     * The identifier of the resource declaring the capability.
-     * 
-     * @see ResourceDTO#id
-     */
-    public int                 resource;
+	 * The requirements of the resource.
+	 * 
+	 * @see Resource#getRequirements(String)
+	 */
+    public List<RequirementDTO> requirements;
 }

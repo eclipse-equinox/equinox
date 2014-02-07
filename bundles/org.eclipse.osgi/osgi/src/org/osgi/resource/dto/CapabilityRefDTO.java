@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package org.osgi.dto.resource;
+package org.osgi.resource.dto;
 
 import org.osgi.dto.DTO;
 
 /**
- * Data Transfer Object for a reference to a Requirement.
+ * Data Transfer Object for a reference to a Capability.
  * 
  * @author $Id$
  * @NotThreadSafe
  */
-public class RequirementRefDTO extends DTO {
+public class CapabilityRefDTO extends DTO {
     /**
-     * The identifier of the requirement in the resource.
+     * The identifier of the capability in the resource.
      * 
-     * @see RequirementDTO#id
+     * @see CapabilityDTO#id
      */
-    public int requirement;
+    public int capability;
 
     /**
-     * The identifier of the resource declaring the requirement.
+     * The identifier of the resource declaring the capability.
      * 
      * @see ResourceDTO#id
      */

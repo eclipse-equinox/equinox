@@ -14,33 +14,45 @@
  * limitations under the License.
  */
 
-package org.osgi.dto.resource;
+package org.osgi.resource.dto;
 
-import java.util.List;
 import org.osgi.dto.DTO;
+import org.osgi.resource.Wire;
 
 /**
- * Data Transfer Object for a Resource.
+ * Data Transfer Object for a Wire.
  * 
  * @author $Id$
  * @NotThreadSafe
  */
-public class ResourceDTO extends DTO {
+public class WireDTO extends DTO {
     /**
-     * The unique identifier of the resource.
-     * 
-     * <p>
-     * This identifier is transiently assigned and may vary across restarts.
-     */
-    public int                  id;
+	 * Reference to the Capability for the wire.
+	 * 
+	 * @see Wire#getCapability()
+	 */
+    public CapabilityRefDTO  capability;
 
     /**
-     * The capabilities of the resource.
-     */
-    public List<CapabilityDTO>  capabilities;
+	 * Reference to the Requirement for the wire.
+	 * 
+	 * @see Wire#getRequirement()
+	 */
+    public RequirementRefDTO requirement;
 
     /**
-     * The requirements of the resource.
-     */
-    public List<RequirementDTO> requirements;
+	 * The identifier of the provider resource for the wire.
+	 * 
+	 * @see ResourceDTO#id
+	 * @see Wire#getProvider()
+	 */
+    public int               provider;
+
+    /**
+	 * The identifier of the requiring resource for the wire.
+	 * 
+	 * @see ResourceDTO#id
+	 * @see Wire#getRequirer()
+	 */
+    public int               requirer;
 }
