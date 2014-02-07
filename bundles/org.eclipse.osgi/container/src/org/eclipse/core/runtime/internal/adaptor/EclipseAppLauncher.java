@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.core.runtime.internal.adaptor;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -21,16 +22,17 @@ import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.service.runnable.*;
 import org.osgi.framework.*;
+import org.osgi.framework.launch.Framework;
 
 public class EclipseAppLauncher implements ApplicationLauncher {
 	volatile private ParameterizedRunnable runnable = null;
 	private Object appContext = null;
-	private Semaphore runningLock = new Semaphore(1);
-	private Semaphore waitForAppLock = new Semaphore(0);
-	private BundleContext context;
+	private final java.util.concurrent.Semaphore runningLock = new java.util.concurrent.Semaphore(1);
+	private final java.util.concurrent.Semaphore waitForAppLock = new java.util.concurrent.Semaphore(0);
+	private final BundleContext context;
 	private boolean relaunch = false;
-	private boolean failOnNoDefault = false;
-	private FrameworkLog log;
+	private final boolean failOnNoDefault;
+	private final FrameworkLog log;
 	private final EquinoxConfiguration equinoxConfig;
 
 	public EclipseAppLauncher(BundleContext context, boolean relaunch, boolean failOnNoDefault, FrameworkLog log, EquinoxConfiguration equinoxConfig) {
@@ -75,16 +77,37 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ERROR_NO_APPLICATION);
 		Object result = null;
 		boolean doRelaunch;
+		Bundle b = context.getBundle();
 		do {
 			try {
+				if (relaunch) {
+					// need a thread to kick the main thread when the framework stops
+					final Thread mainThread = Thread.currentThread();
+					final BundleContext mainContext = context;
+					new Thread(new Runnable() {
+						@Override
+						public void run() {
+							Framework framework = (Framework) mainContext.getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
+							try {
+								framework.waitForStop(0);
+								// framework is done; tell the main thread to stop
+								mainThread.interrupt();
+							} catch (InterruptedException e) {
+								Thread.interrupted();
+								// just exiting now
+							}
+						}
+					}, "Framework watcher").start(); //$NON-NLS-1$
+
+				}
 				result = runApplication(defaultContext);
 			} catch (Exception e) {
-				if (!relaunch || (context.getBundle().getState() & Bundle.ACTIVE) == 0)
+				if (!relaunch || (b.getState() & Bundle.ACTIVE) == 0)
 					throw e;
 				if (log != null)
 					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, Msg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null));
 			}
-			doRelaunch = (relaunch && (context.getBundle().getState() & Bundle.ACTIVE) != 0);
+			doRelaunch = (relaunch && (b.getState() & Bundle.ACTIVE) != 0);
 		} while (doRelaunch);
 		return result;
 	}
@@ -94,30 +117,36 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 	 * current thread (main).
 	 */
 	private Object runApplication(Object defaultContext) throws Exception {
-		// wait for an application to be launched.
-		waitForAppLock.acquire();
-		// an application is ready; acquire the running lock.
-		// this must happen after we have acquired an application (by acquiring waitForAppLock above).
-		runningLock.acquire();
-		if (EclipseStarter.debug) {
-			String timeString = equinoxConfig.getConfiguration("eclipse.startTime"); //$NON-NLS-1$ 
-			long time = timeString == null ? 0L : Long.parseLong(timeString);
-			System.out.println("Starting application: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$ 
-		}
 		try {
-			// run the actual application on the current thread (main).
-			return runnable.run(appContext != null ? appContext : defaultContext);
-		} finally {
-			// free the runnable application and release the lock to allow another app to be launched.
-			runnable = null;
-			appContext = null;
-			runningLock.release();
+			// wait for an application to be launched.
+			waitForAppLock.acquire();
+			// an application is ready; acquire the running lock.
+			// this must happen after we have acquired an application (by acquiring waitForAppLock above).
+			runningLock.acquire();
+			if (EclipseStarter.debug) {
+				String timeString = equinoxConfig.getConfiguration("eclipse.startTime"); //$NON-NLS-1$ 
+				long time = timeString == null ? 0L : Long.parseLong(timeString);
+				System.out.println("Starting application: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$ 
+			}
+			try {
+				// run the actual application on the current thread (main).
+				return runnable.run(appContext != null ? appContext : defaultContext);
+			} finally {
+				// free the runnable application and release the lock to allow another app to be launched.
+				runnable = null;
+				appContext = null;
+				runningLock.release();
+			}
+		} catch (InterruptedException e) {
+			// ignore; but mark interrupted for others
+			Thread.interrupted();
 		}
+		return null;
 	}
 
 	public void launch(ParameterizedRunnable app, Object applicationContext) {
-		waitForAppLock.acquire(-1); // clear out any pending apps notifications
-		if (!runningLock.acquire(-1)) // check to see if an application is currently running
+		waitForAppLock.tryAcquire(); // clear out any pending apps notifications
+		if (!runningLock.tryAcquire()) // check to see if an application is currently running
 			throw new IllegalStateException("An application is aready running."); //$NON-NLS-1$
 		this.runnable = app;
 		this.appContext = applicationContext;
@@ -128,12 +157,17 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 	public void shutdown() {
 		// this method will aquire and keep the runningLock to prevent
 		// all future application launches.
-		if (runningLock.acquire(-1))
+		if (runningLock.tryAcquire())
 			return; // no application is currently running.
 		ParameterizedRunnable currentRunnable = runnable;
 		if (currentRunnable instanceof ApplicationRunnable) {
 			((ApplicationRunnable) currentRunnable).stop();
-			runningLock.acquire(60000); // timeout after 1 minute.
+			try {
+				runningLock.tryAcquire(1, TimeUnit.MINUTES); // timeout after 1 minute.
+			} catch (InterruptedException e) {
+				// ignore
+				Thread.interrupted();
+			}
 		}
 	}
 

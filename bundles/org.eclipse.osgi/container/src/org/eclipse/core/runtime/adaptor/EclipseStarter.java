@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,8 @@ import java.net.*;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.*;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.internal.adaptor.*;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.log.FrameworkLog;
@@ -400,12 +402,14 @@ public class EclipseStarter {
 	public static void shutdown() throws Exception {
 		if (!running || framework == null)
 			return;
-		if (appLauncherRegistration != null)
-			appLauncherRegistration.unregister();
-		if (splashStreamRegistration != null)
-			splashStreamRegistration.unregister();
-		if (defaultMonitorRegistration != null)
-			defaultMonitorRegistration.unregister();
+		if (framework.getState() == Bundle.ACTIVE) {
+			if (appLauncherRegistration != null)
+				appLauncherRegistration.unregister();
+			if (splashStreamRegistration != null)
+				splashStreamRegistration.unregister();
+			if (defaultMonitorRegistration != null)
+				defaultMonitorRegistration.unregister();
+		}
 		if (appLauncher != null)
 			appLauncher.shutdown();
 		appLauncherRegistration = null;
@@ -416,9 +420,11 @@ public class EclipseStarter {
 			consoleMgr.stopConsole();
 			consoleMgr = null;
 		}
-		framework.stop();
-		framework.waitForStop(0);
-		framework = null;
+		if (framework.getState() == Bundle.ACTIVE) {
+			framework.stop();
+			framework.waitForStop(0);
+			framework = null;
+		}
 		configuration = null;
 		equinoxConfig = null;
 		context = null;
@@ -532,7 +538,7 @@ public class EclipseStarter {
 	 * all basic bundles that are marked to start. 
 	 * Returns null if the framework has been shutdown as a result of refreshPackages
 	 */
-	private static Bundle[] loadBasicBundles() {
+	private static Bundle[] loadBasicBundles() throws InterruptedException {
 		long startTime = System.currentTimeMillis();
 		String osgiBundles = getProperty(PROP_BUNDLES);
 		String osgiExtensions = getProperty(PROP_EXTENSIONS);
@@ -633,7 +639,7 @@ public class EclipseStarter {
 	}
 
 	// returns true if the refreshPackages operation caused the framework to shutdown
-	private static boolean refreshPackages(Bundle[] bundles) {
+	private static boolean refreshPackages(Bundle[] bundles) throws InterruptedException {
 		FrameworkWiring frameworkWiring = context.getBundle().adapt(FrameworkWiring.class);
 		if (frameworkWiring == null)
 			return false;
@@ -1100,7 +1106,7 @@ public class EclipseStarter {
 		return relative;
 	}
 
-	private static void setStartLevel(final int value) {
+	private static void setStartLevel(final int value) throws InterruptedException {
 		FrameworkStartLevel fwkStartLevel = context.getBundle().adapt(FrameworkStartLevel.class);
 		final Semaphore semaphore = new Semaphore(0);
 		StartupEventListener listener = new StartupEventListener(semaphore, FrameworkEvent.STARTLEVEL_CHANGED);
@@ -1130,7 +1136,7 @@ public class EclipseStarter {
 
 	}
 
-	private static void updateSplash(Semaphore semaphore, StartupEventListener listener) {
+	private static void updateSplash(Semaphore semaphore, StartupEventListener listener) throws InterruptedException {
 		ServiceTracker<StartupMonitor, StartupMonitor> monitorTracker = new ServiceTracker<StartupMonitor, StartupMonitor>(context, StartupMonitor.class.getName(), null);
 		try {
 			monitorTracker.open();
@@ -1149,7 +1155,7 @@ public class EclipseStarter {
 					}
 				}
 				// can we acquire the semaphore yet?
-				if (semaphore.acquire(50))
+				if (semaphore.tryAcquire(50, TimeUnit.MILLISECONDS))
 					break; //done
 				//else still working, spin another update
 			}
