@@ -8,3 +8,4 @@ Bug 409868 - pickup new build of ECF
 Bug 414457 - Comparator report indicates problem with org.eclipse.equinox.p2.ui.discovery
 Bug 416293 - build failed due to issue in Starter Kit or p2.core.feature
 Bug 423196 - Filetransfer update for Luna M5: httpcomponents 4.2.5/4.2.6
+Bug 419647 - React to ECF feature restructuring
