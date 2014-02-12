@@ -218,8 +218,8 @@ public class BundleLoader implements ModuleLoader {
 
 	public ModuleClassLoader getModuleClassLoader() {
 		synchronized (classLoaderMonitor) {
-			final List<ClassLoaderHook> hooks = container.getConfiguration().getHookRegistry().getClassLoaderHooks();
 			if (classloader == null) {
+				final List<ClassLoaderHook> hooks = container.getConfiguration().getHookRegistry().getClassLoaderHooks();
 				final Generation generation = (Generation) wiring.getRevision().getRevisionInfo();
 				if (System.getSecurityManager() == null) {
 					classloader = createClassLoaderPrivledged(parent, generation.getBundleInfo().getStorage().getConfiguration(), this, generation, hooks);
