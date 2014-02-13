@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,12 +11,11 @@
 
 package org.eclipse.osgi.internal.framework;
 
-import org.apache.felix.resolver.Logger;
-
-import org.apache.felix.resolver.ResolverImpl;
 import java.util.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParserFactory;
+import org.apache.felix.resolver.Logger;
+import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
@@ -76,7 +75,7 @@ public class SystemBundleActivator implements BundleActivator {
 		register(bc, PermissionAdmin.class, sa, null);
 		register(bc, ConditionalPermissionAdmin.class, sa, null);
 
-		register(bc, Resolver.class, new ResolverImpl(new Logger(0)), null);
+		register(bc, Resolver.class, new ResolverImpl(new Logger(0)), false, null);
 
 		register(bc, DebugOptions.class, dbgOptions, null);
 
