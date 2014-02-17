@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 IBM Corporation and others.
+ * Copyright (c) 2009, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,17 +11,17 @@
 
 package org.eclipse.osgi.tests.debugoptions;
 
-import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
-import org.eclipse.osgi.internal.debug.FrameworkDebugTraceEntry;
-
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.tests.harness.CoreTest;
+import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
+import org.eclipse.osgi.internal.debug.FrameworkDebugTraceEntry;
 import org.eclipse.osgi.service.debug.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.ServiceReference;
@@ -958,6 +958,50 @@ public class DebugOptionsTestCase extends CoreTest {
 		message = decodeString(traceOutput[1].getMessage());
 		assertEquals("option-path value is incorrect", "/debug|path", optionPath); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("Trace message is not correct", "|A message with | multiple || characters.|", message); //$NON-NLS-1$ //$NON-NLS-2$
+		// delete the trace file
+		traceFile.delete();
+	}
+
+	public void testTraceSystemOut() throws IOException {
+		PrintStream old = System.out;
+		File traceFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".trace"); //$NON-NLS-1$
+		OutputStream out = new FileOutputStream(traceFile);
+		final AtomicReference<Boolean> closed = new AtomicReference<Boolean>(Boolean.FALSE);
+		out = new FilterOutputStream(out) {
+
+			@Override
+			public void close() throws IOException {
+				super.close();
+				closed.set(Boolean.TRUE);
+			}
+
+		};
+		System.setOut(new PrintStream(out));
+		try {
+			TestDebugTrace debugTrace = this.createDebugTrace(new File("/does/not/exist/trace.out"));
+			debugOptions.setOption(getName() + "/debug", "true");
+			debugTrace.trace("/debug", "A message to System.out.");
+			debugTrace.trace("/debug", "Another message.");
+			assertFalse("Closed System.out.", closed.get().booleanValue());
+		} finally {
+			System.setOut(old);
+			out.close();
+		}
+		TraceEntry[] traceOutput = null;
+		try {
+			traceOutput = readTraceFile(traceFile);
+		} catch (InvalidTraceEntry e) {
+			fail("Failed 'DebugTrace.trace(option, message)' test as an invalid trace entry was found.  Actual Value: '" + e.getActualValue() + "'.", e); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		assertEquals("Wrong number of entries", 2, traceOutput.length);
+		String optionPath = decodeString(traceOutput[0].getOptionPath());
+		String message = decodeString(traceOutput[0].getMessage());
+		assertEquals("option-path value is incorrect", "/debug", optionPath); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Trace message is not correct", "A message to System.out.", message); //$NON-NLS-1$ //$NON-NLS-2$
+		optionPath = decodeString(traceOutput[1].getOptionPath());
+		message = decodeString(traceOutput[1].getMessage());
+		assertEquals("option-path value is incorrect", "/debug", optionPath); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Trace message is not correct", "Another message.", message); //$NON-NLS-1$ //$NON-NLS-2$
 		// delete the trace file
 		traceFile.delete();
 	}
