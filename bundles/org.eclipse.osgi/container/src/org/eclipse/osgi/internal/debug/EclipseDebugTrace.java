@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2013 IBM Corporation and others.
+ * Copyright (c) 2009, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -356,9 +356,7 @@ class EclipseDebugTrace implements DebugTrace {
 					ex.printStackTrace(System.err);
 				} finally {
 					// close the trace writer
-					if (tracingFile != null) {
-						closeWriter(traceWriter);
-					}
+					closeWriter(traceWriter);
 				}
 			}
 		}
@@ -447,9 +445,7 @@ class EclipseDebugTrace implements DebugTrace {
 					} catch (IOException ioEx) {
 						ioEx.printStackTrace();
 					} finally {
-						if (traceFile != null) {
-							closeWriter(traceWriter);
-						}
+						closeWriter(traceWriter);
 					}
 					backupTraceFileIndex = (++backupTraceFileIndex) % maxTraceFiles;
 				}
@@ -638,18 +634,29 @@ class EclipseDebugTrace implements DebugTrace {
 	 * @return Returns a new Writer object  
 	 */
 	private Writer openWriter(final File traceFile) {
-
-		Writer traceWriter = null;
+		OutputStream out = null;
 		if (traceFile != null) {
 			try {
-				traceWriter = logForStream(secureAction.getFileOutputStream(traceFile, true));
+				out = secureAction.getFileOutputStream(traceFile, true);
 			} catch (IOException ioEx) {
-				traceWriter = logForStream(System.out);
+				// ignore and fall back to system.out
 			}
-		} else {
-			traceWriter = logForStream(System.out);
 		}
-		return traceWriter;
+		if (out == null) {
+			out = new FilterOutputStream(System.out) {
+				/**
+				 * @throws IOException  
+				 */
+				public void close() throws IOException {
+					// We don't want to close System.out
+				}
+
+				public void write(byte[] var0, int var1, int var2) throws IOException {
+					this.out.write(var0, var1, var2);
+				}
+			};
+		}
+		return logForStream(out);
 	}
 
 	/**
