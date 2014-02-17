@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1763,6 +1763,147 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		public Void run() {
 			accessible.setAccessible(true);
 			return null;
+		}
+	}
+
+	static class Range {
+		private char leftRule = 0;
+		private Version leftVersion;
+		private Version rightVersion;
+		private char rightRule = 0;
+		private Collection<Version> excludes = new ArrayList<Version>(0);
+
+		public String toString() {
+			if (rightVersion == null) {
+				return leftVersion.toString();
+			}
+			return leftRule + leftVersion.toString() + ',' + rightVersion.toString() + rightRule;
+		}
+
+		void addExclude(Version exclude) {
+			this.excludes.add(exclude);
+			setLeft(leftRule, leftVersion);
+			setRight(rightRule, rightVersion);
+		}
+
+		boolean setLeft(char leftRule, Version leftVersion) {
+			if (this.leftVersion != null && this.leftVersion != leftVersion)
+				return false;
+			this.leftRule = excludes.contains(leftVersion) ? '(' : leftRule;
+			this.leftVersion = leftVersion;
+			return true;
+		}
+
+		boolean setRight(char rightRule, Version rightVersion) {
+			if (this.rightVersion != null && this.rightVersion != rightVersion)
+				return false;
+			this.rightRule = excludes.contains(rightVersion) ? ')' : rightRule;
+			this.rightVersion = rightVersion;
+			return true;
+		}
+	}
+
+	public Map<String, String> getStandardOSGiAttributes(String... versions) {
+		if (op != AND && op != EQUAL && op != SUBSTRING && op != PRESENT)
+			throw new IllegalArgumentException("Invalid filter for Starndard OSGi Attributes: " + op); //$NON-NLS-1$
+		Map<String, String> result = new HashMap<String, String>();
+		Map<String, Range> versionAttrs = new HashMap<String, Range>();
+		if (versions != null) {
+			for (String versionAttr : versions) {
+				versionAttrs.put(versionAttr, null);
+			}
+		}
+		addAttributes(result, versionAttrs, false);
+		for (Map.Entry<String, Range> entry : versionAttrs.entrySet()) {
+			Range range = entry.getValue();
+			if (range != null) {
+				result.put(entry.getKey(), range.toString());
+			}
+		}
+
+		return result;
+	}
+
+	private void addAttributes(Map<String, String> attributes, Map<String, Range> versionAttrs, boolean not) {
+		if (op == EQUAL) {
+			if (!versionAttrs.containsKey(attr)) {
+				attributes.put(attr, (String) value);
+			} else {
+				// this is an exact range e.g. [value,value]
+				Range currentRange = versionAttrs.get(attr);
+				if (currentRange != null) {
+					if (not) {
+						// this is an expanded form of the filter, e.g.:
+						// [1.0,2.0) -> (&(version>=1.0)(version<=2.0)(!(version=2.0)))
+						currentRange.addExclude(new Version((String) value));
+					} else {
+						throw new IllegalStateException("Invalid range for: " + attr); //$NON-NLS-1$
+					}
+				} else {
+					currentRange = new Range();
+					Version version = new Version((String) value);
+					currentRange.setLeft('[', version);
+					currentRange.setRight(']', version);
+					versionAttrs.put(attr, currentRange);
+				}
+			}
+		} else if (op == SUBSTRING || op == PRESENT) {
+			if (value == null) {
+				attributes.put(attr, "*"); //$NON-NLS-1$
+			} else {
+				StringBuilder builder = new StringBuilder();
+				for (String component : (String[]) value) {
+					if (component == null) {
+						builder.append('*');
+					} else {
+						builder.append(component);
+					}
+				}
+				attributes.put(attr, builder.toString());
+			}
+
+		} else if (op == LESS) {
+			if (!versionAttrs.containsKey(attr))
+				throw new IllegalStateException("Invalid attribute: " + attr); //$NON-NLS-1$
+			Range currentRange = versionAttrs.get(attr);
+			if (currentRange == null) {
+				currentRange = new Range();
+				versionAttrs.put(attr, currentRange);
+			}
+			if (not) {
+				// this must be a range start "(value"
+				if (!currentRange.setLeft('(', new Version((String) value)))
+					throw new IllegalStateException("range start is already processed for attribute: " + attr); //$NON-NLS-1$
+			} else {
+				// this must be a range end "value]"
+				if (!currentRange.setRight(']', new Version((String) value)))
+					throw new IllegalStateException("range end is already processed for attribute: " + attr); //$NON-NLS-1$
+			}
+		} else if (op == GREATER) {
+			if (!versionAttrs.containsKey(attr))
+				throw new IllegalStateException("Invalid attribute: " + attr); //$NON-NLS-1$
+			Range currentRange = versionAttrs.get(attr);
+			if (currentRange == null) {
+				currentRange = new Range();
+				versionAttrs.put(attr, currentRange);
+			}
+			if (not) {
+				// this must be a range end "value)"
+				if (!currentRange.setRight(')', new Version((String) value)))
+					throw new IllegalStateException("range end is already processed for attribute: " + attr); //$NON-NLS-1$
+			} else {
+				// this must be a range start "[value"
+				if (!currentRange.setLeft('[', new Version((String) value)))
+					throw new IllegalStateException("range start is already processed for attribute: " + attr); //$NON-NLS-1$
+			}
+		} else if (op == AND) {
+			for (FilterImpl component : (FilterImpl[]) value) {
+				component.addAttributes(attributes, versionAttrs, false);
+			}
+		} else if (op == NOT) {
+			((FilterImpl) value).addAttributes(attributes, versionAttrs, true);
+		} else {
+			throw new IllegalStateException("Invalid filter for standard OSGi requirements: " + op); //$NON-NLS-1$
 		}
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2013, 2014 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -11,7 +11,7 @@ package org.eclipse.osgi.compatibility.state;
 
 import java.util.*;
 import java.util.Map.Entry;
-import org.eclipse.osgi.compatibility.state.FilterParser.FilterComponent;
+import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
@@ -156,14 +156,13 @@ class StateConverter {
 		String filter = directives.remove(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
 		if (filter == null)
 			throw new IllegalArgumentException("No filter directive found:" + requirement); //$NON-NLS-1$
-		FilterParser parser = new FilterParser(filter);
-		FilterComponent component = null;
+		FilterImpl parser;
 		try {
-			component = parser.parse();
+			parser = FilterImpl.newInstance(filter);
 		} catch (InvalidSyntaxException e) {
 			throw new IllegalArgumentException("Invalid filter directive", e); //$NON-NLS-1$
 		}
-		Map<String, String> matchingAttributes = component.getStandardOSGiAttributes(versions);
+		Map<String, String> matchingAttributes = parser.getStandardOSGiAttributes(versions);
 		String name = matchingAttributes.remove(namespace);
 		if (name == null)
 			throw new IllegalArgumentException("Invalid requirement: " + requirement); //$NON-NLS-1$
