@@ -639,7 +639,8 @@ class EclipseDebugTrace implements DebugTrace {
 			try {
 				out = secureAction.getFileOutputStream(traceFile, true);
 			} catch (IOException ioEx) {
-				// ignore and fall back to system.out
+				// ignore and fall back to system.out; but print error message to indicate what happened
+				System.err.println("Unable to open trace file: " + traceFile + ": " + ioEx.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		if (out == null) {
