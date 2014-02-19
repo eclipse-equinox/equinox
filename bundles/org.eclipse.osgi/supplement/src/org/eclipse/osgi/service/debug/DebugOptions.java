@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -169,14 +169,20 @@ public interface DebugOptions {
 
 	/** 
 	 * Sets the current file used to trace messages to.
+	 * A <code>null</code> value is allowed which indicates
+	 * that <code>System.out</code> will be used
+	 * for trace messages.
 	 * 
 	 * @param newFile The file to be used for tracing messages.
+	 * A <code>null</code> value is allowed.
 	 * @since 3.5
 	 */
 	public abstract void setFile(File newFile);
 
 	/**
 	 * Returns the trace file if it is set, otherwise <code>null</code> is returned.
+	 * A <code>null</code> value indicates that <code>System.out</code> is used
+	 * for trace messages.
 	 * 
 	 * @return the trace file if it is set, otherwise <code>null</code> is returned.
 	 * @since 3.5

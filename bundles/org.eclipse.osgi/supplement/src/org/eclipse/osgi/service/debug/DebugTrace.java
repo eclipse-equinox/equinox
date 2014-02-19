@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 IBM Corporation and others.
+ * Copyright (c) 2009, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ package org.eclipse.osgi.service.debug;
  * and method performing the tracing. 
  * <p>
  * Trace statements may be written to a file, or onto standard output, depending on 
- * how the {@link DebugOptions} is configured.
+ * how the {@link DebugOptions} is configured (See {@link DebugOptions#setFile(java.io.File)}).
  * </p>
  * <p>
  * All methods on this class have an optional <code>option</code> argument.
