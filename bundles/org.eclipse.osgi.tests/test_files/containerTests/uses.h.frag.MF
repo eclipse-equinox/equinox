@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: uses.h.frag
+Bundle-Version: 1.0
+Fragment-Host: uses.h
+Export-Package:  uses2; version="1.0"
+

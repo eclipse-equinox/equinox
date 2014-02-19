@@ -1426,6 +1426,40 @@ public class TestModuleContainer extends AbstractTest {
 		Assert.assertEquals("g should not resolve.", State.INSTALLED, uses_g.getState());
 	}
 
+	/*
+	 * Test that fragments and uses constraints
+	 */
+	@Test
+	public void testUses4() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+		Module uses_h = installDummyModule("uses.h.MF", "h", container);
+		Module uses_h_frag = installDummyModule("uses.h.frag.MF", "h.frag", container);
+
+		container.resolve(null, false);
+
+		Assert.assertEquals("h should resolve.", State.RESOLVED, uses_h.getState());
+		Assert.assertEquals("h.frag should resolve.", State.RESOLVED, uses_h_frag.getState());
+
+		Module uses_i = installDummyModule("uses.i.MF", "i", container);
+		Module uses_j = installDummyModule("uses.j.MF", "j", container);
+
+		container.resolve(null, false);
+
+		Assert.assertEquals("i should resolve.", State.RESOLVED, uses_i.getState());
+		Assert.assertEquals("j should resolve.", State.RESOLVED, uses_j.getState());
+
+		List<BundleWire> requiredWires = uses_j.getCurrentRevision().getWiring().getRequiredWires(null);
+		Assert.assertEquals("Wrong number of wires for j", 2, requiredWires.size());
+		for (BundleWire wire : requiredWires) {
+			Assert.assertEquals("Wrong provider", uses_i.getCurrentRevision(), wire.getProvider());
+		}
+	}
+
 	@Test
 	public void testMultiCardinalityUses() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
