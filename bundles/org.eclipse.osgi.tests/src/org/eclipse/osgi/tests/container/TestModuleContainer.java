@@ -60,8 +60,8 @@ public class TestModuleContainer extends AbstractTest {
 		String wsName = context.getProperty(OSGI_WS);
 		String archName = context.getProperty(OSGI_ARCH);
 		extraCapabilities += EclipsePlatformNamespace.ECLIPSE_PLATFORM_NAMESPACE + "; " + OSGI_OS + "=" + osName + "; " + OSGI_WS + "=" + wsName + "; " + OSGI_ARCH + "=" + archName;
-		ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(asMap(systemBundle.getHeaders("")), Constants.SYSTEM_BUNDLE_SYMBOLICNAME, extraPackages, extraCapabilities);
-		container.install(null, systemBundle.getLocation(), builder, null);
+		ModuleRevisionBuilder systembuilder = OSGiManifestBuilderFactory.createBuilder(asMap(systemBundle.getHeaders("")), Constants.SYSTEM_BUNDLE_SYMBOLICNAME, extraPackages, extraCapabilities);
+		container.install(null, systemBundle.getLocation(), systembuilder, null);
 
 		final List<Throwable> installErrors = new ArrayList<Throwable>(0);
 		// just trying to pound the container with a bunch of installs
@@ -106,7 +106,7 @@ public class TestModuleContainer extends AbstractTest {
 		return adaptor.getDatabase();
 	}
 
-	private static <K, V> Map<K, V> asMap(Dictionary<K, V> dictionary) {
+	static <K, V> Map<K, V> asMap(Dictionary<K, V> dictionary) {
 		Map<K, V> map = new HashMap<K, V>();
 		for (Enumeration<K> eKeys = dictionary.keys(); eKeys.hasMoreElements();) {
 			K key = eKeys.nextElement();
