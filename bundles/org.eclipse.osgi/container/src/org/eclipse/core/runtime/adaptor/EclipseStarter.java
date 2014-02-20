@@ -20,6 +20,7 @@ import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.internal.adaptor.*;
+import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -42,6 +43,7 @@ import org.osgi.framework.launch.Framework;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.FrameworkWiring;
+import org.osgi.resource.Resource;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -376,7 +378,12 @@ public class EclipseStarter {
 			return appLauncher.reStart(argument);
 		} catch (Exception e) {
 			if (log != null && context != null) { // context can be null if OSGi failed to launch (bug 151413)
-				// TODO Should log unresolved bundles here
+				ModuleResolutionReport report = context.getBundle().adapt(Module.class).getContainer().resolve(null, false);
+				for (Resource unresolved : report.getEntries().keySet()) {
+					String bsn = ((ModuleRevision) unresolved).getSymbolicName();
+					FrameworkLogEntry logEntry = new FrameworkLogEntry(bsn != null ? bsn : EquinoxContainer.NAME, FrameworkLogEntry.WARNING, 0, Msg.Module_ResolveError + report.getResolutionReportMessage(unresolved), 1, null, null);
+					log.log(logEntry);
+				}
 			}
 			throw e;
 		}
