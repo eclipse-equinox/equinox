@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -374,6 +374,11 @@ public final class ModuleWiring implements BundleWiring {
 		return substitutedPkgNames.contains(capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
 	}
 
+	/**
+	 * Returns true if the specified package name has been substituted in this wiring
+	 * @param packageName the package name to check
+	 * @return true if the specified package name has been substituted in this wiring
+	 */
 	public boolean isSubstitutedPackage(String packageName) {
 		return substitutedPkgNames.contains(packageName);
 	}
@@ -399,6 +404,13 @@ public final class ModuleWiring implements BundleWiring {
 		return true;
 	}
 
+	/**
+	 * Adds the {@link ModuleRevisionBuilder#getRequirements() requirements} from
+	 * the specified builder to this wiring.  The new requirements must be in the
+	 * {@link PackageNamespace}.  These requirements are transient
+	 * and will not exist when loading up persistent wirings.
+	 * @param builder the builder that defines the new dynamic imports.
+	 */
 	public void addDynamicImports(ModuleRevisionBuilder builder) {
 		List<GenericInfo> newImports = builder.getRequirements();
 		List<ModuleRequirement> newRequirements = new ArrayList<ModuleRequirement>();

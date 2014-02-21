@@ -69,11 +69,6 @@ public class EquinoxModuleDataNamespace extends Namespace {
 	public static final String AUTOSTART_HEADER = "Eclipse-AutoStart"; //$NON-NLS-1$
 
 	/**
-	 * The Equinox specific header that framework extension can used to specify an activator class.
-	 */
-	public static final String EXTENSION_ACTIVATOR_HEADER = "ExtensionBundle-Activator"; //$NON-NLS-1$
-
-	/**
 	 * Namespace name for equinox module data.  Unlike typical name spaces
 	 * this namespace is not intended to be used as an attribute.
 	 */

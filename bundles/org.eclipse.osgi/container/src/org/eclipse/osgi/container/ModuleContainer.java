@@ -30,6 +30,7 @@ import org.eclipse.osgi.internal.container.LockSet;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.messages.Msg;
+import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.util.NLS;
@@ -91,7 +92,7 @@ public final class ModuleContainer {
 	private final long moduleLockTimeout;
 
 	/**
-	 * Constructs a new container with the specified collision hook, resolver hook, resolver and module database.
+	 * Constructs a new container with the specified adaptor, module database.
 	 * @param adaptor the adaptor for the container
 	 * @param moduledataBase the module database
 	 */
@@ -415,15 +416,15 @@ public final class ModuleContainer {
 	 * @see FrameworkWiring#resolveBundles(Collection)
 	 * @return A resolution report for the resolve operation
 	 */
-	public ModuleResolutionReport resolve(Collection<Module> triggers, boolean triggersMandatory) {
+	public ResolutionReport resolve(Collection<Module> triggers, boolean triggersMandatory) {
 		return resolve(triggers, triggersMandatory, false);
 	}
 
-	private ModuleResolutionReport resolve(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers) {
+	private ResolutionReport resolve(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers) {
 		if (isRefreshingSystemModule()) {
 			return new ModuleResolutionReport(null, Collections.<Resource, List<Entry>> emptyMap(), new ResolutionException("Unable to resolve while shutting down the framework.")); //$NON-NLS-1$
 		}
-		ModuleResolutionReport report = null;
+		ResolutionReport report = null;
 		do {
 			try {
 				report = resolveAndApply(triggers, triggersMandatory, restartTriggers);
@@ -440,7 +441,7 @@ public final class ModuleContainer {
 		return report;
 	}
 
-	private ModuleResolutionReport resolveAndApply(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers) {
+	private ResolutionReport resolveAndApply(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers) {
 		if (triggers == null)
 			triggers = new ArrayList<Module>(0);
 		Collection<ModuleRevision> triggerRevisions = new ArrayList<ModuleRevision>(triggers.size());
@@ -936,9 +937,11 @@ public final class ModuleContainer {
 	 * Refreshes the specified collection of modules.
 	 * @param initial the modules to refresh or {@code null} to refresh the
 	 *     removal pending.
+	 * @return a resolution report for the resolve operation that may have
+	 * occurred during the refresh operation.
 	 * @see FrameworkWiring#refreshBundles(Collection, FrameworkListener...)
 	 */
-	public ModuleResolutionReport refresh(Collection<Module> initial) {
+	public ResolutionReport refresh(Collection<Module> initial) {
 		initial = initial == null ? null : new ArrayList<Module>(initial);
 		Collection<Module> refreshTriggers = unresolve(initial);
 		if (!isRefreshingSystemModule()) {

@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.internal.messages.Msg;
+import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.osgi.framework.*;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
@@ -53,8 +54,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		TRANSIENT_IF_AUTO_START,
 		/**
 		 * The module start operation that indicates the module is being started because of a
-		 * lazy start trigger class load.  This option must be used with the 
-		 * {@link StartOptions#TRANSIENT transient} options.
+		 * lazy start trigger class load.
 		 */
 		LAZY_TRIGGER;
 
@@ -400,7 +400,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				// bundles are started at the same time from different threads
 				unlockStateChange(ModuleEvent.STARTED);
 				lockedStarted = false;
-				ModuleResolutionReport report;
+				ResolutionReport report;
 				try {
 					inStartResolve.set(Boolean.TRUE);
 					report = getRevisions().getContainer().resolve(Arrays.asList(this), true);
@@ -600,7 +600,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * Performs any work associated with starting a module.  For example,
 	 * loading and calling start on an activator.
-	 * @throws BundleException 
+	 * @throws BundleException if there was an exception starting the module
 	 */
 	protected void startWorker() throws BundleException {
 		// Do nothing
@@ -623,7 +623,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	/**
-	 * @throws BundleException  
+	 * Performs any work associated with stopping a module.  For example,
+	 * calling stop on an activator.
+	 * @throws BundleException if there was an exception stopping the module
 	 */
 	protected void stopWorker() throws BundleException {
 		// Do nothing
@@ -656,7 +658,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	/**
-	 * The container is done with the revision and it has been complete removed.
+	 * The container is done with the revision and it has been completely removed.
 	 * This method allows the resources behind the revision to be cleaned up.
 	 * @param revision the revision to clean up
 	 */

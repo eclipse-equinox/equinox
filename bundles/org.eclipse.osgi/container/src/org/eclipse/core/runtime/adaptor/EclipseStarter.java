@@ -20,7 +20,8 @@ import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.internal.adaptor.*;
-import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -31,6 +32,7 @@ import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.internal.location.LocationHelper;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.launch.Equinox;
+import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.service.runnable.ApplicationLauncher;
@@ -378,7 +380,7 @@ public class EclipseStarter {
 			return appLauncher.reStart(argument);
 		} catch (Exception e) {
 			if (log != null && context != null) { // context can be null if OSGi failed to launch (bug 151413)
-				ModuleResolutionReport report = context.getBundle().adapt(Module.class).getContainer().resolve(null, false);
+				ResolutionReport report = context.getBundle().adapt(Module.class).getContainer().resolve(null, false);
 				for (Resource unresolved : report.getEntries().keySet()) {
 					String bsn = ((ModuleRevision) unresolved).getSymbolicName();
 					FrameworkLogEntry logEntry = new FrameworkLogEntry(bsn != null ? bsn : EquinoxContainer.NAME, FrameworkLogEntry.WARNING, 0, Msg.Module_ResolveError + report.getResolutionReportMessage(unresolved), 1, null, null);

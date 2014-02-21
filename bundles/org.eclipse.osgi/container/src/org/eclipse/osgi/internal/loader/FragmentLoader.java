@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,25 +15,25 @@ import java.util.*;
 import org.eclipse.osgi.container.ModuleLoader;
 import org.eclipse.osgi.container.ModuleRevision;
 
-public class FragmentLoader implements ModuleLoader {
+public class FragmentLoader extends ModuleLoader {
 
 	@Override
-	public List<URL> findEntries(String path, String filePattern, int options) {
+	protected List<URL> findEntries(String path, String filePattern, int options) {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public Collection<String> listResources(String path, String filePattern, int options) {
+	protected Collection<String> listResources(String path, String filePattern, int options) {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public ClassLoader getClassLoader() {
+	protected ClassLoader getClassLoader() {
 		return null;
 	}
 
 	@Override
-	public boolean getAndSetTrigger() {
+	protected boolean getAndSetTrigger() {
 		// nothing to do here
 		return false;
 	}
@@ -45,7 +45,7 @@ public class FragmentLoader implements ModuleLoader {
 	}
 
 	@Override
-	public void loadFragments(Collection<ModuleRevision> fragments) {
+	protected void loadFragments(Collection<ModuleRevision> fragments) {
 		// do nothing
 	}
 

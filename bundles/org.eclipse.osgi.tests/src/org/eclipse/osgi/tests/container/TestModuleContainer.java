@@ -20,6 +20,7 @@ import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
+import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.eclipse.osgi.tests.container.dummys.*;
 import org.eclipse.osgi.tests.container.dummys.DummyModuleDatabase.DummyContainerEvent;
 import org.eclipse.osgi.tests.container.dummys.DummyModuleDatabase.DummyModuleEvent;
@@ -196,7 +197,7 @@ public class TestModuleContainer extends AbstractTest {
 		Module c7 = installDummyModule("c7_v1.MF", "c7", container);
 		installDummyModule("c6_v1.MF", "c6", container);
 
-		ModuleResolutionReport report = container.resolve(Arrays.asList(c7), true);
+		ResolutionReport report = container.resolve(Arrays.asList(c7), true);
 		Assert.assertNotNull("Expected a resolution exception", report.getResolutionException());
 
 		// Should resolve now

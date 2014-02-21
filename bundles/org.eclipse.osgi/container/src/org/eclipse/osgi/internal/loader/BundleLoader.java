@@ -45,7 +45,7 @@ import org.osgi.framework.wiring.BundleWiring;
  * of a BundleLoader unless it is necessary.
  * @see org.eclipse.osgi.internal.loader.BundleLoaderSources
  */
-public class BundleLoader implements ModuleLoader {
+public class BundleLoader extends ModuleLoader {
 	public final static String DEFAULT_PACKAGE = "."; //$NON-NLS-1$
 	public final static String JAVA_PACKAGE = "java."; //$NON-NLS-1$
 
@@ -241,7 +241,7 @@ public class BundleLoader implements ModuleLoader {
 	}
 
 	@Override
-	public void loadFragments(Collection<ModuleRevision> fragments) {
+	protected void loadFragments(Collection<ModuleRevision> fragments) {
 		synchronized (classLoaderMonitor) {
 			addFragmentExports(wiring.getModuleCapabilities(PackageNamespace.PACKAGE_NAMESPACE));
 			loadClassLoaderFragments(fragments);
@@ -277,7 +277,7 @@ public class BundleLoader implements ModuleLoader {
 	}
 
 	@Override
-	public ClassLoader getClassLoader() {
+	protected ClassLoader getClassLoader() {
 		return getModuleClassLoader();
 	}
 
@@ -663,7 +663,7 @@ public class BundleLoader implements ModuleLoader {
 	}
 
 	@Override
-	public Collection<String> listResources(String path, String filePattern, int options) {
+	protected Collection<String> listResources(String path, String filePattern, int options) {
 		String pkgName = getResourcePackageName(path.endsWith("/") ? path : path + '/'); //$NON-NLS-1$
 		if ((path.length() > 1) && (path.charAt(0) == '/')) /* if name has a leading slash */
 			path = path.substring(1); /* remove leading slash before search */
@@ -728,7 +728,7 @@ public class BundleLoader implements ModuleLoader {
 	}
 
 	@Override
-	public List<URL> findEntries(String path, String filePattern, int options) {
+	protected List<URL> findEntries(String path, String filePattern, int options) {
 		return getModuleClassLoader().findEntries(path, filePattern, options);
 	}
 
@@ -1108,7 +1108,7 @@ public class BundleLoader implements ModuleLoader {
 	}
 
 	@Override
-	public boolean getAndSetTrigger() {
+	protected boolean getAndSetTrigger() {
 		return triggerClassLoaded.getAndSet(true);
 	}
 

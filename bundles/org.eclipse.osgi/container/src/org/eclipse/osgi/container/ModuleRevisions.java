@@ -61,6 +61,11 @@ public final class ModuleRevisions implements BundleRevisions {
 		}
 	}
 
+	/**
+	 * Same as {@link ModuleRevisions#getRevisions()} except it
+	 * returns a list of {@link ModuleRevision}.
+	 * @return the list of module revisions
+	 */
 	public List<ModuleRevision> getModuleRevisions() {
 		synchronized (monitor) {
 			return new ArrayList<ModuleRevision>(revisions);

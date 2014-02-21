@@ -29,6 +29,7 @@ import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Namespace;
 
 /**
+ * A factory for creating {@link ModuleRevisionBuilder}s based on OSGi bundle manifests.
  * @since 3.10
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
@@ -46,10 +47,30 @@ public final class OSGiManifestBuilderFactory {
 	private static final Collection<String> SYSTEM_CAPABILITIES = Collections.unmodifiableCollection(Arrays.asList(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE, NativeNamespace.NATIVE_NAMESPACE));
 	private static final Collection<String> PROHIBITED_CAPABILITIES = Collections.unmodifiableCollection(Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE));
 
+	/**
+	 * Creates a builder for the specified bundle manifest
+	 * @param manifest the bundle manifest
+	 * @return a builder for the specified bundle manifest
+	 * @throws BundleException if the bundle manifest is invalid
+	 */
 	public static ModuleRevisionBuilder createBuilder(Map<String, String> manifest) throws BundleException {
 		return createBuilder(manifest, null, null, null);
 	}
 
+	/**
+	 * Creates a builder for the specified bundle manifest.  An alias can be supplied
+	 * for the symbolic name.  Also extra package exports and extra provided capabilities
+	 * may be specified outside of the supplied manifest.  This is useful for creating
+	 * a builder for the system module which takes into account the configuration
+	 * properties {@link Constants#FRAMEWORK_SYSTEMPACKAGES_EXTRA} and
+	 * {@link Constants#FRAMEWORK_SYSTEMCAPABILITIES_EXTRA}.
+	 * @param manifest the bundle manifest
+	 * @param symbolicNameAlias the symbolic name alias.  A <code>null</code> value is allowed.
+	 * @param extraExports the extra package exports.  A <code>null</code> value is allowed.
+	 * @param extraCapabilities the extra proided capabilities.   A <code>null</code> value is allowed.
+	 * @return a builder for the specified bundle manifest
+	 * @throws BundleException if the bundle manifest is invalid
+	 */
 	public static ModuleRevisionBuilder createBuilder(Map<String, String> manifest, String symbolicNameAlias, String extraExports, String extraCapabilities) throws BundleException {
 		ModuleRevisionBuilder builder = new ModuleRevisionBuilder();
 
@@ -572,7 +593,7 @@ public final class OSGiManifestBuilderFactory {
 			// we look for the extension activator for fragments
 			// probably should do this only for framework extensions, but there is no harm to check for others
 			// it is only acted upon for framework extension fragments
-			activator = manifest.get(EquinoxModuleDataNamespace.EXTENSION_ACTIVATOR_HEADER);
+			activator = manifest.get(Constants.EXTENSION_BUNDLE_ACTIVATOR);
 		}
 		if (activator != null) {
 			attributes.put(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATOR, activator);

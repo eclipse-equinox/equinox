@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,9 +61,17 @@ public final class ModuleCapability implements BundleCapability {
 		return attributes;
 	}
 
+	/**
+	 * Only used by the system module for setting transient attributes associated
+	 * with the {@link NativeNamespace osgi.native} namespace.
+	 * @param transientAttrs
+	 */
 	public void setTransientAttrs(Map<String, ?> transientAttrs) {
 		if (this.transientAttrs == null) {
 			throw new UnsupportedOperationException(namespace + ": namespace does not support transient attributes."); //$NON-NLS-1$
+		}
+		if (!(getResource().getRevisions().getModule() instanceof SystemModule)) {
+			throw new UnsupportedOperationException("Only allowed to set transient attributes for the system module: " + getResource()); //$NON-NLS-1$
 		}
 		this.transientAttrs.clear();
 		this.transientAttrs.putAll(transientAttrs);

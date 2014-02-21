@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -131,6 +131,7 @@ public class ModuleDatabase {
 
 	/**
 	 * Constructs a new empty database.
+	 * @param adaptor the module container adaptor
 	 */
 	public ModuleDatabase(ModuleContainerAdaptor adaptor) {
 		this.adaptor = adaptor;
@@ -727,6 +728,7 @@ public class ModuleDatabase {
 	}
 
 	/**
+	 * Acquires the read lock for this database.
 	 * @see ReadLock#lock()
 	 */
 	public final void readLock() {
@@ -734,6 +736,7 @@ public class ModuleDatabase {
 	}
 
 	/**
+	 * Acquires the write lock for this database.
 	 * Same as {@link WriteLock#lock()} except an illegal
 	 * state exception is thrown if the current thread holds
 	 * one or more read locks.
@@ -751,6 +754,7 @@ public class ModuleDatabase {
 	}
 
 	/**
+	 * Attempts to release the read lock for this database.
 	 * @see ReadLock#unlock()
 	 */
 	public final void readUnlock() {
@@ -758,6 +762,7 @@ public class ModuleDatabase {
 	}
 
 	/**
+	 * Attempts to release the write lock for this database.
 	 * @see WriteLock#unlock()
 	 */
 	public final void writeUnlock() {
@@ -844,7 +849,7 @@ public class ModuleDatabase {
 
 	/**
 	 * Loads information into this database from the input data stream.  This data
-	 * base must be empty and never been modified (the {@link #getRevisionsTimestamp() timestamp} is zero.
+	 * base must be empty and never been modified (the {@link #getRevisionsTimestamp() timestamp} is zero).
 	 * All stored modules are loaded into this database.  If the input stream contains
 	 * wiring then it will also be loaded into this database.
 	 * <p>

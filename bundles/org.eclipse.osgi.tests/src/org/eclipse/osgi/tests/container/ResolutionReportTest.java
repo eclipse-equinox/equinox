@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.*;
-import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.container.ModuleContainer;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.eclipse.osgi.tests.container.dummys.*;
 import org.junit.Test;
@@ -47,13 +48,6 @@ public class ResolutionReportTest extends AbstractTest {
 		container.resolve(Arrays.asList(systemBundle), true);
 		assertEquals("No resolution report listener callback", 1, hook.getResolutionReports().size());
 		assertNotNull("Resolution report was null", hook.getResolutionReports().get(0));
-	}
-
-	@Test
-	public void testResolutionReportBuilder() {
-		org.eclipse.osgi.container.ModuleResolutionReport.Builder builder = new org.eclipse.osgi.container.ModuleResolutionReport.Builder();
-		ResolutionReport report = builder.build(null, null);
-		assertNotNull("Resolution report was null", report);
 	}
 
 	@Test
@@ -211,12 +205,12 @@ public class ResolutionReportTest extends AbstractTest {
 	// TODO Need to test both mandatory and optional triggers.
 
 	private void assertResolutionDoesNotSucceed(ModuleContainer container, Collection<Module> modules) {
-		ModuleResolutionReport report = container.resolve(modules, true);
+		ResolutionReport report = container.resolve(modules, true);
 		assertNotNull("Resolution should not have succeeded", report.getResolutionException());
 	}
 
 	private void assertResolutionSucceeds(ModuleContainer container, Collection<Module> modules) {
-		ModuleResolutionReport report = container.resolve(modules, false);
+		ResolutionReport report = container.resolve(modules, false);
 		assertNull("Unexpected resolution exception", report.getResolutionException());
 	}
 

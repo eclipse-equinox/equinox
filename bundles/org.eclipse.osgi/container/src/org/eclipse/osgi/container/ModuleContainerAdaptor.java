@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,67 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
  * @since 3.10
  */
 public abstract class ModuleContainerAdaptor {
+	/**
+	 * Event types that may be {@link #publishContainerEvent(ContainerEvent, Module, Throwable, FrameworkListener...) published}
+	 * for a container.
+	 *
+	 */
 	public enum ContainerEvent {
-		REFRESH, START_LEVEL, STARTED, STOPPED, STOPPED_UPDATE, STOPPED_REFRESH, STOPPED_TIMEOUT, ERROR, WARNING, INFO
+		/**
+		 * A container {@link ModuleContainer#refresh(java.util.Collection) refresh} operation has completed
+		 */
+		REFRESH,
+
+		/**
+		 * A container {@link ModuleContainer#getFrameworkStartLevel() start level} change has completed.
+		 */
+		START_LEVEL,
+
+		/**
+		 * The container has been started.
+		 */
+		STARTED,
+
+		/**
+		 * This event is returned by {@link SystemModule#waitForStop(long)}
+		 * to indicate that the container has stopped.
+		 */
+		STOPPED,
+
+		/**
+		 * This event is returned by {@link SystemModule#waitForStop(long)}
+		 * to indicate that the container has stopped because of an update
+		 * operation.
+		 */
+		STOPPED_UPDATE,
+
+		/**
+		 * This event is returned by {@link SystemModule#waitForStop(long)}
+		 * to indicate that the container has stopped because of an refresh
+		 * operation.
+		 */
+		STOPPED_REFRESH,
+
+		/**
+		 * This event is returned by {@link SystemModule#waitForStop(long)}
+		 * to indicate that the wait operation has timed out..
+		 */
+		STOPPED_TIMEOUT,
+
+		/**
+		 * An event fired for an error condition.
+		 */
+		ERROR,
+
+		/**
+		 * An event fired for a warning condition.
+		 */
+		WARNING,
+
+		/**
+		 * An event fired for informational purposes only.
+		 */
+		INFO
 	}
 
 	/**

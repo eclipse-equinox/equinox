@@ -22,11 +22,12 @@ import org.osgi.resource.*;
 import org.osgi.service.resolver.ResolutionException;
 
 /**
+ * A resolution report implementation used by the container for resolution operations.
  * @since 3.10
  */
-public class ModuleResolutionReport implements ResolutionReport {
+class ModuleResolutionReport implements ResolutionReport {
 
-	public static class Builder {
+	static class Builder {
 		private final Map<Resource, List<Entry>> resourceToEntries = new HashMap<Resource, List<Entry>>();
 
 		public void addEntry(Resource resource, Entry.Type type, Object data) {
@@ -43,7 +44,7 @@ public class ModuleResolutionReport implements ResolutionReport {
 		}
 	}
 
-	private static class EntryImpl implements Entry {
+	static class EntryImpl implements Entry {
 		private final Object data;
 		private final Type type;
 
