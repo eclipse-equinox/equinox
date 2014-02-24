@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,8 @@ package org.eclipse.core.runtime.preferences;
 
 /**
  * Abstract class used to aid in default preference value initialization.
- * Clients who extend the <code>org.eclipse.core.runtime.preferences</code> 
+ * Clients who extend the <code>org.eclipse.equinox.preferences.preferences</code>
+ * or the <code>org.eclipse.core.runtime.preferences</code> 
  * extension point are able to specify a class within an <code>initializer</code>
  * element. 
  * 
