@@ -1775,6 +1775,7 @@ public class Main {
 		URL baseConfigurationLocation = null;
 		Properties baseConfiguration = null;
 		if (System.getProperty(PROP_CONFIG_AREA) == null) {
+			ensureAbsolute(PROP_BASE_CONFIG_AREA);
 			String baseLocation = System.getProperty(PROP_BASE_CONFIG_AREA);
 			if (baseLocation != null)
 				// here the base config cannot have any symbolic (e..g, @xxx) entries.  It must just
