@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -91,12 +91,6 @@ public final class RegistryFactory {
 	 * </p><p>
 	 * The master token should be passed to the OSGi registry strategy to permit it to perform 
 	 * contributions to the registry.
-	 * </p><p>
-	 * <b>Note:</b> This class/interface is part of an interim API that is still under 
-	 * development and expected to change significantly before reaching stability. 
-	 * It is being made available at this early stage to solicit feedback from pioneering 
-	 * adopters on the understanding that any code that uses this API will almost certainly 
-	 * be broken (repeatedly) as the API evolves.
 	 * </p>
 	 * @param storageDirs array of file system directories or <code>null</code>
 	 * @param cacheReadOnly array of read only attributes or <code>null</code>
@@ -114,12 +108,6 @@ public final class RegistryFactory {
 	 * Attempts to change the default registry provider will cause an exception to be thrown.
 	 * <p>
 	 * The given registry provider must not be <code>null</code>.
-	 * </p><p>
-	 * <b>Note:</b> This class/interface is part of an interim API that is still under 
-	 * development and expected to change significantly before reaching stability. 
-	 * It is being made available at this early stage to solicit feedback from pioneering 
-	 * adopters on the understanding that any code that uses this API will almost certainly 
-	 * be broken (repeatedly) as the API evolves.
 	 * </p>
 	 * @see RegistryFactory#getRegistry()
 	 * @param provider extension registry provider

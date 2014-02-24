@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -291,12 +291,6 @@ public interface IExtensionRegistry {
 	 * {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
 	 * master token and a user token. Master token allows all operations; user token allows 
 	 * non-persisted registry elements to be modified.
-	 * </p><p>
-	 * <b>Note:</b> This class/interface is part of an interim API that is still under 
-	 * development and expected to change significantly before reaching stability. 
-	 * It is being made available at this early stage to solicit feedback from pioneering 
-	 * adopters on the understanding that any code that uses this API will almost certainly 
-	 * be broken (repeatedly) as the API evolves.
 	 * </p>
 	 * @param is stream open on the XML file. The XML file can contain an extension 
 	 * point(s) or/and extension(s) described in the format similar to plugin.xml. The method
@@ -324,12 +318,6 @@ public interface IExtensionRegistry {
 	 * {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
 	 * master token and a user token. Master token allows all operations; user token only
 	 * allows non-persisted registry elements to be modified.
-	 * </p><p>
-	 * <b>Note:</b> This class/interface is part of an interim API that is still under 
-	 * development and expected to change significantly before reaching stability. 
-	 * It is being made available at this early stage to solicit feedback from pioneering 
-	 * adopters on the understanding that any code that uses this API will almost certainly 
-	 * be broken (repeatedly) as the API evolves.
 	 * </p>
 	 * @param extension extension to be removed
 	 * @param token the key used to check permissions
@@ -348,12 +336,6 @@ public interface IExtensionRegistry {
 	 * {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
 	 * master token and a user token. Master token allows all operations; user token only
 	 * allows non-persisted registry elements to be modified.
-	 * </p><p>
-	 * <b>Note:</b> This class/interface is part of an interim API that is still under 
-	 * development and expected to change significantly before reaching stability. 
-	 * It is being made available at this early stage to solicit feedback from pioneering 
-	 * adopters on the understanding that any code that uses this API will almost certainly 
-	 * be broken (repeatedly) as the API evolves.
 	 * </p>
 	 * @param extensionPoint extension point to be removed
 	 * @param token the key used to check permissions
