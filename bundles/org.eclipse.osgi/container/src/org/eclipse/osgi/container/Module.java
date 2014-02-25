@@ -13,8 +13,8 @@ package org.eclipse.osgi.container;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
+import org.eclipse.osgi.internal.container.EquinoxReentrantLock;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.osgi.framework.*;
@@ -155,7 +155,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	private final Long id;
 	private final String location;
 	private final ModuleRevisions revisions;
-	final ReentrantLock stateChangeLock = new ReentrantLock();
+	final EquinoxReentrantLock stateChangeLock = new EquinoxReentrantLock();
 	private final EnumSet<ModuleEvent> stateTransitionEvents = EnumSet.noneOf(ModuleEvent.class);
 	private final EnumSet<Settings> settings;
 	private final ThreadLocal<Boolean> inStartResolve = new ThreadLocal<Boolean>() {
@@ -354,6 +354,15 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 */
 	public final boolean holdsTransitionEventLock(ModuleEvent transitionEvent) {
 		return stateChangeLock.getHoldCount() > 0 && stateTransitionEvents.contains(transitionEvent);
+	}
+
+	/**
+	 * Returns the thread that currently owns the state change lock for this module, or 
+	 * <code>null</code> if not owned.
+	 * @return the owner, or <code>null</code> if not owned.
+	 */
+	public final Thread getStateChangeOwner() {
+		return stateChangeLock.getOwner();
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2013 IBM Corporation and others.
+ * Copyright (c) 2006, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -101,14 +101,14 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 			// Note that another thread may already be starting this bundle;
 			// In this case we will timeout after a default of 5 seconds and record the BundleException
 			long startTime = System.currentTimeMillis();
+			Module m = managers[i].getGeneration().getRevision().getRevisions().getModule();
 			try {
 				// do not persist the start of this bundle
-				Module m = managers[i].getGeneration().getRevision().getRevisions().getModule();
 				secureAction.start(m, StartOptions.LAZY_TRIGGER);
 			} catch (BundleException e) {
 				Bundle bundle = managers[i].getGeneration().getRevision().getBundle();
 				if (e.getType() == BundleException.STATECHANGE_ERROR) {
-					String message = NLS.bind(Msg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread(), name, null, bundle, new Long(System.currentTimeMillis() - startTime)});
+					String message = NLS.bind(Msg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread(), name, m.getStateChangeOwner(), bundle, new Long(System.currentTimeMillis() - startTime)});
 					container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, message, e);
 					continue;
 				}
