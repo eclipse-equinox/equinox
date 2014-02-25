@@ -302,7 +302,8 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		ServiceProperties props = new ServiceProperties(p);
 
 		props.set(Constants.OBJECTCLASS, clazzes, true);
-		props.set(Constants.SERVICE_ID, new Long(serviceid), true);
+		props.set(Constants.SERVICE_ID, Long.valueOf(serviceid), true);
+		props.set(Constants.SERVICE_BUNDLEID, Long.valueOf(bundle.getBundleId()), true);
 		final String scope;
 		if (service instanceof ServiceFactory) {
 			if (service instanceof PrototypeServiceFactory) {

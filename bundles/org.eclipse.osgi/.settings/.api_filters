@@ -226,6 +226,13 @@
             <message_arguments>
                 <message_argument value="1.8"/>
                 <message_argument value="3.10"/>
+                <message_argument value="SERVICE_BUNDLEID"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.8"/>
+                <message_argument value="3.10"/>
                 <message_argument value="SYSTEM_BUNDLE_ID"/>
             </message_arguments>
         </filter>
