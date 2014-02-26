@@ -10,19 +10,21 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.datalocation;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.tests.harness.CoreTest;
+import org.eclipse.equinox.log.SynchronousLogListener;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
+import org.osgi.service.log.*;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class BasicLocationTests extends CoreTest {
@@ -445,5 +447,43 @@ public class BasicLocationTests extends CoreTest {
 		} finally {
 			equinox.stop();
 		}
+	}
+
+	public void testDebugLogOnGetURL() throws Exception {
+		Properties debugOptions = new Properties();
+		debugOptions.put("org.eclipse.osgi/debug/location", "true");
+		File debugOptionsFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".options");
+		debugOptions.store(new FileOutputStream(debugOptionsFile), getName());
+		Map<String, String> fwkConfig = new HashMap<String, String>();
+		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
+		fwkConfig.put(EquinoxLocations.PROP_INSTALL_AREA, "file:" + prefix + "/g");
+		fwkConfig.put(EquinoxConfiguration.PROP_DEBUG, debugOptionsFile.getAbsolutePath());
+		fwkConfig.put("eclipse.consoleLog", "true");
+
+		Equinox equinox = new Equinox(fwkConfig);
+		equinox.init();
+		try {
+			final List<LogEntry> logEntries = new ArrayList<LogEntry>();
+			LogReaderService logReaderService = getLogReaderService(equinox);
+			LogListener logListener = new SynchronousLogListener() {
+				@Override
+				public void logged(LogEntry entry) {
+					logEntries.add(entry);
+				}
+			};
+			logReaderService.addLogListener(logListener);
+			Map<String, Location> locations = getLocations(equinox);
+			Location userLocation = locations.get(Location.USER_FILTER);
+			Location instanceLocation = locations.get(Location.INSTANCE_FILTER);
+			assertNotNull("User locatoin is not null.", userLocation.getURL());
+			assertNotNull("Instance location is not null.", instanceLocation.getURL());
+			assertEquals("Wrong number of log entries", 2, logEntries.size());
+		} finally {
+			equinox.stop();
+		}
+	}
+
+	private LogReaderService getLogReaderService(Equinox equinox) {
+		return equinox.getBundleContext().getService(equinox.getBundleContext().getServiceReference(LogReaderService.class));
 	}
 }
