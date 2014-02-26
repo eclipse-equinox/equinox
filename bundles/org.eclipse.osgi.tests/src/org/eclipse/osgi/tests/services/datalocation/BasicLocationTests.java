@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 IBM Corporation and others.
+ * Copyright (c) 2004, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -313,7 +313,7 @@ public class BasicLocationTests extends CoreTest {
 
 	private static void addLocation(BundleContext context, String filter, Map<String, Location> locations) throws InvalidSyntaxException {
 		Collection<ServiceReference<Location>> locationRefs = context.getServiceReferences(Location.class, filter);
-		if (!locations.isEmpty()) {
+		if (!locationRefs.isEmpty()) {
 			locations.put(filter, context.getService(locationRefs.iterator().next()));
 		}
 	}
@@ -359,7 +359,26 @@ public class BasicLocationTests extends CoreTest {
 		} finally {
 			equinox.stop();
 		}
+	}
 
+	public void testNoDefault() throws Exception {
+		Map<String, String> fwkConfig = new HashMap<String, String>();
+		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
+		fwkConfig.put(EquinoxLocations.PROP_INSTALL_AREA, "file:" + prefix + "/g");
+		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "@noDefault");
+		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "@noDefault");
+
+		Equinox equinox = new Equinox(fwkConfig);
+		equinox.init();
+		try {
+			Map<String, Location> locations = getLocations(equinox);
+			Location userLocation = locations.get(Location.USER_FILTER);
+			Location instanceLocation = locations.get(Location.INSTANCE_FILTER);
+			assertNull("User locatoin is not null.", userLocation.getURL());
+			assertNull("Instance location is not null.", instanceLocation.getURL());
+		} finally {
+			equinox.stop();
+		}
 	}
 
 	public void testUserDir() throws Exception {
