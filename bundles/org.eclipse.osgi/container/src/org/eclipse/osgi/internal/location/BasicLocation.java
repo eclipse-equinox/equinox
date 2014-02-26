@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 IBM Corporation and others.
+ * Copyright (c) 2004, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,10 @@ package org.eclipse.osgi.internal.location;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.log.EquinoxLogServices;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.util.NLS;
@@ -60,8 +63,16 @@ public class BasicLocation implements Location {
 	}
 
 	public synchronized URL getURL() {
-		if (location == null && defaultValue != null)
+		if (location == null && defaultValue != null) {
+			if (debug) {
+				EquinoxLogServices logServices = environmentInfo.getHookRegistry().getContainer().getLogServices();
+				// Note that logServices can be null if we are very early in the startup.
+				if (logServices != null) {
+					logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.INFO, "Called Location.getURL() when it has not been set for: \"" + property + "\"", new RuntimeException("Call stack for Location.getURL()")); //$NON-NLS-1$//$NON-NLS-2$
+				}
+			}
 			setURL(defaultValue, false);
+		}
 		return location;
 	}
 
