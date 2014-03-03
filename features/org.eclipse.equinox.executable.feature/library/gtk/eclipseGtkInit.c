@@ -106,6 +106,20 @@ int loadGtk() {
 	if (gtk3 == NULL || strcmp(gtk3,"1") == 0) {
 		gdkLib = dlopen(GDK3_LIB, DLFLAGS);
 		gtkLib = dlopen(GTK3_LIB, DLFLAGS);
+		if (gtkLib != NULL) {
+			const char * (*func)(int, int, int);
+			dlerror();
+			*(void**) (&func) = dlsym(gtkLib, "gtk_check_version");
+			if (dlerror() == NULL && func) {
+				const char *check = (*func)(3, 9, 0);
+				if (check == NULL) {
+					dlclose(gdkLib);
+					dlclose(gtkLib);
+					gdkLib = gtkLib = NULL;
+					setenv("SWT_GTK3","0",1);
+				}
+			}
+		}
 	}
 	if (!gtkLib || !gdkLib) {
 		gdkLib = dlopen(GDK_LIB, DLFLAGS);
