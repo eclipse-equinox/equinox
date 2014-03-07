@@ -404,7 +404,7 @@ public final class BundleInfo {
 
 	public File getDataFile(String path) {
 		File dataRoot = getStorage().getFile(getBundleId() + "/" + Storage.BUNDLE_DATA_DIR, false); //$NON-NLS-1$
-		if (!Storage.secureAction.exists(dataRoot) && (storage.isReadOnly() || !Storage.secureAction.mkdirs(dataRoot))) {
+		if (!Storage.secureAction.isDirectory(dataRoot) && (storage.isReadOnly() || !(Storage.secureAction.mkdirs(dataRoot) || Storage.secureAction.isDirectory(dataRoot)))) {
 			if (getStorage().getConfiguration().getDebug().DEBUG_GENERAL)
 				Debug.println("Unable to create bundle data directory: " + dataRoot.getAbsolutePath()); //$NON-NLS-1$
 			return null;

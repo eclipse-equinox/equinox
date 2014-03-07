@@ -163,10 +163,11 @@ public class BasicLocation implements Location {
 		if (isLocked())
 			return false;
 		File parentFile = new File(lock.getParent());
-		if (!parentFile.exists())
-			if (!parentFile.mkdirs())
+		if (!parentFile.isDirectory()) {
+			parentFile.mkdirs();
+			if (!parentFile.isDirectory())
 				throw new IOException(NLS.bind(Msg.location_folderReadOnly, parentFile));
-
+		}
 		setLocker(lock);
 		if (locker == null)
 			return true;

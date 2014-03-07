@@ -758,7 +758,8 @@ public class Storage {
 		File contentFile;
 		if (!isReference) {
 			File generationRoot = new File(childRoot, bundleID + "/" + generationID); //$NON-NLS-1$
-			if (!generationRoot.mkdirs()) {
+			generationRoot.mkdirs();
+			if (!generationRoot.isDirectory()) {
 				throw new BundleException("Could not create generation directory: " + generationRoot.getAbsolutePath()); //$NON-NLS-1$
 			}
 			contentFile = new File(generationRoot, BUNDLE_FILE_NAME);
@@ -1682,7 +1683,7 @@ public class Storage {
 			}
 			break;
 		}
-		if (!bundleTempDir.exists()) {
+		if (!bundleTempDir.isDirectory()) {
 			bundleTempDir.mkdirs();
 			bundleTempDir.deleteOnExit();
 			// This is just a safeguard incase the VM is terminated unexpectantly, it also looks like deleteOnExit cannot really work because

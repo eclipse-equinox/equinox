@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -171,7 +171,8 @@ public class ZipBundleFile extends BundleFile {
 						extractDirectory(zipEntry.getName());
 				} else {
 					if (zipEntry.getName().endsWith("/")) { //$NON-NLS-1$
-						if (!nested.mkdirs()) {
+						nested.mkdirs();
+						if (!nested.isDirectory()) {
 							if (debug.DEBUG_GENERAL)
 								Debug.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
 							throw new IOException(NLS.bind(Msg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
@@ -186,7 +187,7 @@ public class ZipBundleFile extends BundleFile {
 							Debug.println("Creating file: " + nested.getPath()); //$NON-NLS-1$
 						/* create the necessary directories */
 						File dir = new File(nested.getParent());
-						if (!dir.exists() && !dir.mkdirs()) {
+						if (!dir.mkdirs() && !dir.isDirectory()) {
 							if (debug.DEBUG_GENERAL)
 								Debug.println("Unable to create directory: " + dir.getPath()); //$NON-NLS-1$
 							throw new IOException(NLS.bind(Msg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, dir.getAbsolutePath()));
