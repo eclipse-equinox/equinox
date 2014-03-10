@@ -25,10 +25,12 @@ import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.hookregistry.StorageHookFactory;
 import org.eclipse.osgi.internal.hookregistry.StorageHookFactory.StorageHook;
+import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.eclipse.osgi.storage.url.BundleResourceHandler;
 import org.eclipse.osgi.storage.url.bundleentry.Handler;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleException;
 
 public final class BundleInfo {
@@ -261,6 +263,35 @@ public final class BundleInfo {
 			}
 			builder.append(path);
 			return getStorage().getFile(builder.toString(), true);
+		}
+
+		public void storeContent(File destination, InputStream in, boolean nativeCode) throws IOException {
+			/* the entry has not been cached */
+			if (getStorage().getConfiguration().getDebug().DEBUG_GENERAL)
+				Debug.println("Creating file: " + destination.getPath()); //$NON-NLS-1$
+			/* create the necessary directories */
+			File dir = new File(destination.getParent());
+			if (!dir.mkdirs() && !dir.isDirectory()) {
+				if (getStorage().getConfiguration().getDebug().DEBUG_GENERAL)
+					Debug.println("Unable to create directory: " + dir.getPath()); //$NON-NLS-1$
+				throw new IOException(NLS.bind(Msg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, dir.getAbsolutePath()));
+			}
+			/* copy the entry to the cache */
+			File tempDest = File.createTempFile("staged", ".tmp", dir); //$NON-NLS-1$ //$NON-NLS-2$
+			StorageUtil.readFile(in, tempDest);
+			if (destination.exists() || !tempDest.renameTo(destination)) {
+				// maybe because some other thread already beat us there.
+				if (destination.exists()) {
+					// just delete our copy that could not get renamed
+					tempDest.delete();
+				} else {
+					throw new IOException("Failed to store the extracted content: " + destination); //$NON-NLS-1$
+				}
+			}
+
+			if (nativeCode) {
+				getBundleInfo().getStorage().setPermissions(destination);
+			}
 		}
 
 		public BundleInfo getBundleInfo() {

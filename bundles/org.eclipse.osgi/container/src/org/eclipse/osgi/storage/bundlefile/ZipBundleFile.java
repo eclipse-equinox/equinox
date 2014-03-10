@@ -18,10 +18,11 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleRevision;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.storage.BundleInfo;
-import org.eclipse.osgi.storage.StorageUtil;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -182,21 +183,7 @@ public class ZipBundleFile extends BundleFile {
 						InputStream in = zipFile.getInputStream(zipEntry);
 						if (in == null)
 							return null;
-						/* the entry has not been cached */
-						if (debug.DEBUG_GENERAL)
-							Debug.println("Creating file: " + nested.getPath()); //$NON-NLS-1$
-						/* create the necessary directories */
-						File dir = new File(nested.getParent());
-						if (!dir.mkdirs() && !dir.isDirectory()) {
-							if (debug.DEBUG_GENERAL)
-								Debug.println("Unable to create directory: " + dir.getPath()); //$NON-NLS-1$
-							throw new IOException(NLS.bind(Msg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, dir.getAbsolutePath()));
-						}
-						/* copy the entry to the cache */
-						StorageUtil.readFile(in, nested);
-						if (nativeCode) {
-							generation.getBundleInfo().getStorage().setPermissions(nested);
-						}
+						generation.storeContent(nested, in, nativeCode);
 					}
 				}
 
@@ -205,6 +192,7 @@ public class ZipBundleFile extends BundleFile {
 		} catch (IOException e) {
 			if (debug.DEBUG_GENERAL)
 				Debug.printStackTrace(e);
+			generation.getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Unable to extract content: " + generation.getRevision() + ": " + entry, e); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return null;
 	}
