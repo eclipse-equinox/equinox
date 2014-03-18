@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.eclipse.equinox.http.servlet
-Bundle-Version: 1.1.400.qualifier
+Bundle-Version: 1.1.500.qualifier
 Bundle-Activator: org.eclipse.equinox.http.servlet.internal.Activator
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: CDC-1.0/Foundation-1.0,
