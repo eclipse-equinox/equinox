@@ -49,6 +49,7 @@
     <module>features/org.eclipse.equinox.server.core</module>
     <module>features/org.eclipse.equinox.server.jetty</module>
     <module>features/org.eclipse.equinox.server.p2</module>
+    <module>features/org.eclipse.equinox.core.sdk</module>
 
 <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=348045
     <module>features/org.eclipse.equinox.server.servletbridge</module>
