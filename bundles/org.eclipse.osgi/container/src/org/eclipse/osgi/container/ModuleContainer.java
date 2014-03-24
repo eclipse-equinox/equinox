@@ -33,6 +33,7 @@ import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry;
 import org.eclipse.osgi.service.debug.DebugOptions;
+import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.namespace.*;
@@ -45,7 +46,7 @@ import org.osgi.service.resolver.ResolutionException;
  * A container for installing, updating, uninstalling and resolve modules.
  * @since 3.10
  */
-public final class ModuleContainer {
+public final class ModuleContainer implements DebugOptionsListener {
 	private final static SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
 	/**
@@ -1364,6 +1365,11 @@ public final class ModuleContainer {
 		}
 	}
 
+	public void optionsChanged(DebugOptions options) {
+		moduleResolver.setDebugOptions();
+		frameworkStartLevel.setDebugOptions();
+	}
+
 	class ContainerStartLevel implements FrameworkStartLevel, EventDispatcher<Module, FrameworkListener[], Integer> {
 		static final int USE_BEGINNING_START_LEVEL = Integer.MIN_VALUE;
 		private static final int FRAMEWORK_STARTLEVEL = 1;
@@ -1372,8 +1378,12 @@ public final class ModuleContainer {
 		private final Object eventManagerLock = new Object();
 		private EventManager startLevelThread = null;
 		private final Object frameworkStartLevelLock = new Object();
-		private final boolean debugStartLevel;
+		private boolean debugStartLevel = false;
 		{
+			setDebugOptions();
+		}
+
+		void setDebugOptions() {
 			DebugOptions options = getAdaptor().getDebugOptions();
 			debugStartLevel = options == null ? false : options.getBooleanOption(Debug.OPTION_DEBUG_STARTLEVEL, false);
 		}

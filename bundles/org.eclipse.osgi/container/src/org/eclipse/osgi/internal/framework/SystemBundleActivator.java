@@ -24,6 +24,7 @@ import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
 import org.eclipse.osgi.internal.url.EquinoxFactoryManager;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
+import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.service.localization.BundleLocalization;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
@@ -97,6 +98,13 @@ public class SystemBundleActivator implements BundleActivator {
 		register(bc, DocumentBuilderFactory.class, new ParsingService(false, setTccl), false, null);
 
 		bundle.getEquinoxContainer().getStorage().getExtensionInstaller().startExtensionActivators(bc);
+
+		// Add an options listener; we already read the options on initialization.
+		// Here we are just allowing the options to change
+		props.clear();
+		props.put(DebugOptions.LISTENER_SYMBOLICNAME, EquinoxContainer.NAME);
+		register(bc, DebugOptionsListener.class, bundle.getEquinoxContainer().getConfiguration().getDebug(), props);
+		register(bc, DebugOptionsListener.class, bundle.getModule().getContainer(), props);
 	}
 
 	private void installSecurityManager(EquinoxConfiguration configuration) throws BundleException {

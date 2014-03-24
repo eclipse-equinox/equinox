@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.messages.Msg;
@@ -126,7 +127,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 			if (EclipseStarter.debug) {
 				String timeString = equinoxConfig.getConfiguration("eclipse.startTime"); //$NON-NLS-1$ 
 				long time = timeString == null ? 0L : Long.parseLong(timeString);
-				System.out.println("Starting application: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$ 
+				Debug.println("Starting application: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$ 
 			}
 			try {
 				// run the actual application on the current thread (main).

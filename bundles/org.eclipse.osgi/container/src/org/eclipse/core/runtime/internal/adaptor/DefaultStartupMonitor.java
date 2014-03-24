@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 IBM Corporation and others.
+ * Copyright (c) 2006, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.core.runtime.internal.adaptor;
 
 import java.lang.reflect.Method;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.service.runnable.StartupMonitor;
 
@@ -61,7 +62,7 @@ public class DefaultStartupMonitor implements StartupMonitor {
 		if (EclipseStarter.debug) {
 			String timeString = equinoxConfig.getConfiguration("eclipse.startTime"); //$NON-NLS-1$ 
 			long time = timeString == null ? 0L : Long.parseLong(timeString);
-			System.out.println("Application Started: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$
+			Debug.println("Application Started: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$
 		}
 		splashHandler.run();
 	}

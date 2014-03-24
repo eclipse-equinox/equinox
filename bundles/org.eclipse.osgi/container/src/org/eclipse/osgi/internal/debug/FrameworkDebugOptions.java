@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,8 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	/** The default name of the .options file if loading when the -debug command-line argument is used */
 	private static final String OPTIONS = ".options"; //$NON-NLS-1$
 
+	/** A lock object used to synchronize access to the trace file */
+	private final static Object writeLock = new Object();
 	/** monitor used to lock the options maps */
 	private final Object lock = new Object();
 	/** A current map of all the options with values set */
@@ -47,6 +49,8 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	protected File outFile = null;
 	/** Is verbose debugging enabled?  Changing this value causes a new tracing session to start. */
 	protected boolean verboseDebug = true;
+	/** A flag to determine if the message being written is done to a new file (i.e. should the header information be written) */
+	private boolean newSession = true;
 	private final EquinoxConfiguration environmentInfo;
 	private volatile BundleContext context;
 	private volatile ServiceTracker<DebugOptionsListener, DebugOptionsListener> listenerTracker;
@@ -346,7 +350,7 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 				if (options != null)
 					return;
 				// notify the trace that a new session is started
-				EclipseDebugTrace.newSession = true;
+				this.newSession = true;
 
 				// enable platform debugging - there is no .options file
 				environmentInfo.setConfiguration(OSGI_DEBUG, ""); //$NON-NLS-1$
@@ -417,15 +421,30 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	 * (non-Javadoc)
 	 * @see org.eclipse.osgi.service.debug.DebugOptions#setFile(java.io.File)
 	 */
-	public synchronized void setFile(final File traceFile) {
+	public void setFile(final File traceFile) {
+		synchronized (lock) {
+			this.outFile = traceFile;
+			if (this.outFile != null)
+				environmentInfo.setConfiguration(PROP_TRACEFILE, this.outFile.getAbsolutePath());
+			else
+				environmentInfo.clearConfiguration(PROP_TRACEFILE);
+			// the file changed so start a new session
+			this.newSession = true;
+		}
+	}
 
-		this.outFile = traceFile;
-		if (this.outFile != null)
-			environmentInfo.setConfiguration(PROP_TRACEFILE, this.outFile.getAbsolutePath());
-		else
-			environmentInfo.clearConfiguration(PROP_TRACEFILE);
-		// the file changed so start a new session
-		EclipseDebugTrace.newSession = true;
+	boolean newSession() {
+		synchronized (lock) {
+			if (newSession) {
+				this.newSession = false;
+				return true;
+			}
+			return false;
+		}
+	}
+
+	Object getWriteLock() {
+		return writeLock;
 	}
 
 	/*
@@ -445,11 +464,12 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	 * (non-Javadoc)
 	 * @see org.eclipse.osgi.service.debug.DebugOptions#setVerbose(boolean)
 	 */
-	public synchronized void setVerbose(final boolean verbose) {
-
-		this.verboseDebug = verbose;
-		// the verbose flag changed so start a new session
-		EclipseDebugTrace.newSession = true;
+	public void setVerbose(final boolean verbose) {
+		synchronized (lock) {
+			this.verboseDebug = verbose;
+			// the verbose flag changed so start a new session
+			this.newSession = true;
+		}
 	}
 
 	/**

@@ -65,8 +65,6 @@ class EclipseDebugTrace implements DebugTrace {
 	private final static String NULL_VALUE = "<null>"; //$NON-NLS-1$
 	/**  */
 	private final static SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
-	/** A lock object used to synchronize access to the trace file */
-	private final static Object writeLock = new Object();
 
 	/******************* Tracing file attributes **************************/
 	/** The default size a trace file can grow before it is rotated */
@@ -92,8 +90,6 @@ class EclipseDebugTrace implements DebugTrace {
 	private String traceClass = null;
 	/** The symbolic name of the bundle being traced */
 	private String bundleSymbolicName = null;
-	/** A flag to determine if the message being written is done to a new file (i.e. should the header information be written) */
-	static boolean newSession = true;
 	/** DebugOptions are used to determine if the specified bundle symbolic name + option-path has debugging enabled */
 	private FrameworkDebugOptions debugOptions = null;
 
@@ -335,7 +331,7 @@ class EclipseDebugTrace implements DebugTrace {
 	private void writeRecord(final FrameworkDebugTraceEntry entry) {
 
 		if (entry != null) {
-			synchronized (EclipseDebugTrace.writeLock) {
+			synchronized (debugOptions.getWriteLock()) {
 				final File tracingFile = debugOptions.getFile(); // the tracing file may be null if it has not been set
 				Writer traceWriter = null;
 				try {
@@ -343,9 +339,8 @@ class EclipseDebugTrace implements DebugTrace {
 					checkTraceFileSize(tracingFile, entry.getTimestamp());
 					// open the trace file
 					traceWriter = openWriter(tracingFile);
-					if (EclipseDebugTrace.newSession) {
+					if (debugOptions.newSession()) {
 						writeSession(traceWriter, entry.getTimestamp());
-						EclipseDebugTrace.newSession = false;
 					}
 					writeMessage(traceWriter, entry);
 					// flush the writer

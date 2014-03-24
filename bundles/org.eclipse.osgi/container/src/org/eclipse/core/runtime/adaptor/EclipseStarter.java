@@ -26,6 +26,7 @@ import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.FilePath;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
@@ -343,7 +344,7 @@ public class EclipseStarter {
 				return Integer.parseInt(level);
 			} catch (NumberFormatException e) {
 				if (debug)
-					System.out.println("Start level = " + level + "  parsed. Using hardcoded default: 6"); //$NON-NLS-1$ //$NON-NLS-2$
+					Debug.println("Start level = " + level + "  parsed. Using hardcoded default: 6"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		return DEFAULT_INITIAL_STARTLEVEL;
 	}
@@ -582,7 +583,7 @@ public class EclipseStarter {
 		startBundles(startInitBundles, lazyInitBundles);
 
 		if (debug)
-			System.out.println("Time to load bundles: " + (System.currentTimeMillis() - startTime)); //$NON-NLS-1$
+			Debug.println("Time to load bundles: " + (System.currentTimeMillis() - startTime)); //$NON-NLS-1$
 		return startInitBundles;
 	}
 

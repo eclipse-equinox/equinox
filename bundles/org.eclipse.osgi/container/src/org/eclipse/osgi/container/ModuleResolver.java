@@ -54,7 +54,7 @@ final class ModuleResolver {
 	boolean DEBUG_WIRING = false;
 	boolean DEBUG_REPORT = false;
 
-	private void setDebugOptions() {
+	void setDebugOptions() {
 		DebugOptions options = adaptor.getDebugOptions();
 		// may be null if debugging is not enabled
 		if (options == null)
@@ -937,7 +937,7 @@ final class ModuleResolver {
 			long startTime = 0;
 			if (DEBUG_ROOTS) {
 				startTime = System.currentTimeMillis();
-				System.out.print("Resolver: Resolving root bundle: " + single); //$NON-NLS-1$
+				Debug.print("Resolver: Resolving root bundle: " + single); //$NON-NLS-1$
 			}
 			currentlyResolving = single;
 			currentlyResolvingMandatory = isMandatory;
@@ -967,7 +967,7 @@ final class ModuleResolver {
 				currentlyResolvingMandatory = false;
 			}
 			if (DEBUG_ROOTS) {
-				System.out.println("  [" + (System.currentTimeMillis() - startTime) + "ms]"); //$NON-NLS-1$ //$NON-NLS-2$
+				Debug.println("  [" + (System.currentTimeMillis() - startTime) + "ms]"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 

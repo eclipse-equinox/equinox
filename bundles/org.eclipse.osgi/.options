@@ -56,24 +56,6 @@ org.eclipse.osgi/resolver/wiring = false
 # Displays the resolution report information.
 org.eclipse.osgi/resolver/report = false
 
-#### Profile settings
-org.eclipse.osgi/profile/startup = false
-org.eclipse.osgi/profile/benchmark = false
-org.eclipse.osgi/profile/debug = false
-
-# Override the default implemenation 
-org.eclipse.osgi/profile/impl = org.eclipse.osgi.internal.profile.DefaultProfileLogger
-
-# Append all profile messages to the filename specified
-org.eclipse.osgi/defaultprofile/logfilename = 
-
-# Output all profile log messages synchronously to the jvm console.
-# By default, all log messages are cached until the log buffer is
-# requested.
-org.eclipse.osgi/defaultprofile/logsynchronously = false
-
-# Specify the size of the default profile implementation log buffer.
-org.eclipse.osgi/defaultprofile/buffersize = 256
 
 #### Monitoring settings
 # monitor class loading
