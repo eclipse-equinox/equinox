@@ -23,7 +23,6 @@
   <packaging>eclipse-plugin</packaging>
 
   <properties>
-    <launcher-binary.version>1500</launcher-binary.version>
     <os>solaris</os>
     <ws>gtk</ws>
     <arch>sparc</arch>

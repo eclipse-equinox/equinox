@@ -22,10 +22,6 @@
   <version>1.1.200-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 
-  <properties>
-    <launcher-binary.version>1500</launcher-binary.version>
-  </properties>
-
   <build>
     <plugins>
       <!-- tycho is not able to automatically determine os/ws/arch of this bundle -->

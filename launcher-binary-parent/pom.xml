@@ -21,11 +21,6 @@
   <artifactId>launcher-binary-parent</artifactId>
   <packaging>pom</packaging>
 
-  <properties>
-    <launcher-binary.version>1407</launcher-binary.version>
-    <launcher-binary.ext>so</launcher-binary.ext>
-  </properties>
-
   <build>
     <plugins>
       <plugin>
