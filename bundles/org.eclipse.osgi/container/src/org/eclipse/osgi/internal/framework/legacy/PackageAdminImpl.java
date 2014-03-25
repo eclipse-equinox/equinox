@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -164,7 +164,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		if (identityCaps.isEmpty()) {
 			return null;
 		}
-		List<Bundle> sorted = new ArrayList<Bundle>();
+		List<Bundle> sorted = new ArrayList<Bundle>(identityCaps.size());
 		for (BundleCapability capability : identityCaps) {
 			Bundle b = capability.getRevision().getBundle();
 			// a sanity check incase this is an old revision
