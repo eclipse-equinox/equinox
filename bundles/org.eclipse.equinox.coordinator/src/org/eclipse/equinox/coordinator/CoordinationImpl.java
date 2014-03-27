@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2013 IBM Corporation and others.
+ * Copyright (c) 2010, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,7 +33,8 @@ public class CoordinationImpl {
 
 	private volatile Throwable failure;
 	private volatile boolean terminated;
-
+	private volatile boolean ending = false;
+	
 	private Date deadline;
 	private CoordinationImpl enclosingCoordination;
 	private Thread thread;
@@ -128,6 +129,23 @@ public class CoordinationImpl {
 		coordinator.checkPermission(CoordinationPermission.INITIATE, name);
 		// Terminating the coordination must be atomic.
 		synchronized (this) {
+			/*
+			 * Set the ending flag to avoid spurious failures for orphans
+			 * It appears the VM can aggressively puts objects on the queue if the last call is done in a finally
+			 * Coordination c = coordinator.begin("name", 0);
+			 * try {
+			 *   ...
+			 * } finally {
+			 *   c.end()
+			 * }
+			 * In some cases it appears that while in the finally call to c.end()
+			 * that c can become put on the queue for GC.
+			 * This makes it eligible for orphan processing which will cause 
+			 * issues below when calling methods that invoke
+			 * CoordinationWeakReference.processOrphanedCoordinations()
+			 * We set an ending flag so that we can detect this
+			 */
+			ending = true;
 			// If this coordination is associated with a thread, an additional
 			// check is required.
 			if (thread != null) {
@@ -333,6 +351,10 @@ public class CoordinationImpl {
 
 	public boolean isTerminated() {
 		return terminated;
+	}
+
+	public boolean isEnding() {
+		return ending;
 	}
 
 	public void join(final long timeInMillis) throws InterruptedException {
