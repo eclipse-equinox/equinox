@@ -48,6 +48,7 @@
      <feature id="org.eclipse.equinox.p2.core.feature"/>
      <feature id="org.eclipse.equinox.p2.extras.feature"/>
      <feature id="org.eclipse.equinox.p2.rcp.feature"/>
+     <feature id="org.eclipse.core.runtime.feature"/>
    </requires>
 
 </feature>
