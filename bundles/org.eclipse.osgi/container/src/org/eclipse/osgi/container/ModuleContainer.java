@@ -1365,6 +1365,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 		}
 	}
 
+	@Override
 	public void optionsChanged(DebugOptions options) {
 		moduleResolver.setDebugOptions();
 		frameworkStartLevel.setDebugOptions();
