@@ -1,0 +1,5 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: sub.k
+Bundle-Version: 1.0.0
+Import-Package: a; version="[1.0, 1.2)",
+ b; version=1.0.1

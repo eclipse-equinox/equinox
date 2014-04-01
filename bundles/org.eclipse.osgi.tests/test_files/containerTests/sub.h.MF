@@ -1,0 +1,7 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: sub.h
+Bundle-Version: 1.0.0
+Export-Package: 
+ a; version="1.0"; uses:="b",
+ b; version="1.0"
+

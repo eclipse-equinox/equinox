@@ -863,6 +863,65 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
+	public void testSubstitutableExports03() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install order does not really matter
+		Module g = installDummyModule("sub.g.MF", "g", container);
+		Module f = installDummyModule("sub.f.MF", "f", container);
+		Module e = installDummyModule("sub.e.MF", "e", container);
+
+		// resolve order does matter so that transitive dependencies are pulled in 
+		// and cause substitution to happen in a certain way
+		container.resolve(Arrays.asList(g, f, e), true);
+
+		ModuleWiring wiringE = e.getCurrentRevision().getWiring();
+		ModuleWiring wiringF = f.getCurrentRevision().getWiring();
+
+		List<ModuleWire> providedWiresE = wiringE.getProvidedModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+		Assert.assertEquals("Wrong number of provided wires.", 3, providedWiresE.size());
+
+		Collection<ModuleRevision> requirers = new HashSet<ModuleRevision>();
+		for (ModuleWire wire : providedWiresE) {
+			requirers.add(wire.getRequirer());
+		}
+		Assert.assertTrue("f does not require.", requirers.remove(f.getCurrentRevision()));
+		Assert.assertTrue("g does not require.", requirers.remove(g.getCurrentRevision()));
+		Assert.assertTrue("No requirers should be left: " + requirers, requirers.isEmpty());
+
+		List<ModuleWire> providedWiresF = wiringF.getProvidedModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+		Assert.assertEquals("Wrong number of provided wires: " + providedWiresF, 0, providedWiresF.size());
+	}
+
+	@Test
+	public void testSubstitutableExports04() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install order does not really matter
+		installDummyModule("sub.h.MF", "h", container);
+		Module i = installDummyModule("sub.i.MF", "i", container);
+		installDummyModule("sub.j.MF", "j", container);
+		Module k = installDummyModule("sub.k.MF", "k", container);
+
+		// resolve order does matter so that transitive dependencies are pulled in 
+		// and cause substitution to happen in a certain way
+		container.resolve(Arrays.asList(k), true);
+
+		ModuleWiring wiringI = i.getCurrentRevision().getWiring();
+		ModuleWiring wiringK = k.getCurrentRevision().getWiring();
+
+		List<ModuleWire> requiredWiresK = wiringK.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+
+		// I should be the provider for all of K
+		Assert.assertEquals("Wrong number of required wires: " + requiredWiresK, 2, requiredWiresK.size());
+		for (ModuleWire moduleWire : requiredWiresK) {
+			Assert.assertEquals("Wrong provider: " + moduleWire.getProviderWiring(), wiringI, moduleWire.getProviderWiring());
+		}
+	}
+
+	@Test
 	public void testLazy01() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
