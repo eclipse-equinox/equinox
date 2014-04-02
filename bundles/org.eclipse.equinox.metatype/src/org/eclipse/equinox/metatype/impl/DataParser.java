@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,6 +65,7 @@ public class DataParser {
 	private static final String BYTE = "Byte"; //$NON-NLS-1$
 	private static final String LONG = "Long"; //$NON-NLS-1$
 	private static final String CHAR = "Char"; //$NON-NLS-1$
+	private static final String CHARACTER = "Character"; //$NON-NLS-1$
 	private static final String BOOLEAN = "Boolean"; //$NON-NLS-1$
 	private static final String SHORT = "Short"; //$NON-NLS-1$
 	private static final String PASSWORD = "Password"; //$NON-NLS-1$
@@ -480,7 +481,7 @@ public class DataParser {
 				_dataType = AttributeDefinition.INTEGER;
 			} else if (ad_type_val.equalsIgnoreCase(BYTE)) {
 				_dataType = AttributeDefinition.BYTE;
-			} else if (ad_type_val.equalsIgnoreCase(CHAR)) {
+			} else if (ad_type_val.equalsIgnoreCase(CHAR) || ad_type_val.equalsIgnoreCase(CHARACTER)) {
 				_dataType = AttributeDefinition.CHARACTER;
 			} else if (ad_type_val.equalsIgnoreCase(BOOLEAN)) {
 				_dataType = AttributeDefinition.BOOLEAN;
