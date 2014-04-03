@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 1
+Export-Package: a
+Import-Package: b

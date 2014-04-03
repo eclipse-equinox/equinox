@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,8 @@ import java.util.Arrays;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
+import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.osgi.framework.*;
 import org.osgi.framework.wiring.FrameworkWiring;
 
 public class PlatformAdminBundleTests extends AbstractBundleTests {
@@ -115,4 +115,20 @@ public class PlatformAdminBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	public void testR3Bundle() throws BundleException, InvalidSyntaxException {
+		PlatformAdmin pa = installer.getPlatformAdmin();
+		State systemState = pa.getState(false);
+		BundleInstaller r3Installer = new BundleInstaller("test_files/platformAdmin", OSGiTestsActivator.getContext());
+		try {
+			Bundle b = r3Installer.installBundle("b1");
+			BundleDescription bDesc = systemState.getBundle(b.getBundleId());
+			assertNotNull("No bundle description.", bDesc);
+			ExportPackageDescription[] exports = bDesc.getExportPackages();
+			ImportPackageSpecification[] imports = bDesc.getImportPackages();
+			assertEquals("Wrong number of exports", 1, exports.length);
+			assertEquals("Wrong number of imports.", 2, imports.length);
+		} finally {
+			r3Installer.shutdown();
+		}
+	}
 }
