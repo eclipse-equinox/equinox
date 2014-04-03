@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -80,7 +80,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 
 		try {
 			ManifestElement[] symbolicNameElements = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicName);
-			if (symbolicNameElements.length > 0) {
+			if (symbolicNameElements != null && symbolicNameElements.length > 0) {
 				ManifestElement bsnElement = symbolicNameElements[0];
 				bundle.setSymbolicName(bsnElement.getValue());
 				bundle.setStateBit(BundleDescriptionImpl.SINGLETON, "true".equals(bsnElement.getDirective(Constants.SINGLETON_DIRECTIVE))); //$NON-NLS-1$
@@ -111,11 +111,20 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setPlatformFilter(platformFilter);
 		bundle.setExecutionEnvironments(executionEnvironments);
 		bundle.setGenericRequires(genericRequires);
-		GenericDescription[] includeIdentity = new GenericDescription[genericCapabilities == null ? 1 : genericCapabilities.length + 1];
-		if (genericCapabilities != null)
-			System.arraycopy(genericCapabilities, 0, includeIdentity, 1, genericCapabilities.length);
-		includeIdentity[0] = StateBuilder.createOsgiIdentityCapability(bundle);
-		bundle.setGenericCapabilities(includeIdentity);
+
+		List<GenericDescription> includeIdentity = new ArrayList<GenericDescription>(genericCapabilities == null ? 1 : genericCapabilities.length + 1);
+		GenericDescription genericIdentity = StateBuilder.createOsgiIdentityCapability(bundle);
+		if (genericIdentity != null) {
+			includeIdentity.add(genericIdentity);
+		}
+		if (genericCapabilities != null) {
+			for (GenericDescription genericDescription : genericCapabilities) {
+				includeIdentity.add(genericDescription);
+			}
+		}
+		if (!includeIdentity.isEmpty()) {
+			bundle.setGenericCapabilities(includeIdentity.toArray(new GenericDescription[includeIdentity.size()]));
+		}
 		bundle.setNativeCodeSpecification(nativeCode);
 		return bundle;
 	}

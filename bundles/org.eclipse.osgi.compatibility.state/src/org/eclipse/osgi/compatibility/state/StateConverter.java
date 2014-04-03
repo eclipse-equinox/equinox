@@ -27,18 +27,19 @@ class StateConverter {
 	}
 
 	BundleDescription createDescription(BundleRevision resource) {
-
+		Version version = Version.emptyVersion;
+		String symbolicNameSpecification = null;
 		Collection<Capability> idList = resource.getCapabilities(IdentityNamespace.IDENTITY_NAMESPACE);
-		if (idList.size() != 1)
+
+		if (idList.size() > 1) {
 			throw new IllegalArgumentException("Bogus osgi.identity: " + idList); //$NON-NLS-1$
-		Capability id = idList.iterator().next();
-
-		Map<String, Object> idAttrs = new HashMap<String, Object>(id.getAttributes());
-
-		String symbolicName = (String) idAttrs.remove(IdentityNamespace.IDENTITY_NAMESPACE);
-		Version version = (Version) idAttrs.remove(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
-
-		String symbolicNameSpecification = symbolicName + toString(idAttrs, "=", true) + toString(id.getDirectives(), ":=", true); //$NON-NLS-1$ //$NON-NLS-2$
+		} else if (idList.size() == 1) {
+			Capability id = idList.iterator().next();
+			Map<String, Object> idAttrs = new HashMap<String, Object>(id.getAttributes());
+			String symbolicName = (String) idAttrs.remove(IdentityNamespace.IDENTITY_NAMESPACE);
+			symbolicNameSpecification = symbolicName + toString(idAttrs, "=", true) + toString(id.getDirectives(), ":=", true); //$NON-NLS-1$ //$NON-NLS-2$
+			version = (Version) idAttrs.remove(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+		}
 
 		List<ExportPackageDescription> exportPackages = new ArrayList<ExportPackageDescription>();
 		List<GenericDescription> provideCapabilities = new ArrayList<GenericDescription>();
