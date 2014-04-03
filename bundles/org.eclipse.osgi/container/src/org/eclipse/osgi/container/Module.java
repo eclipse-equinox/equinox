@@ -15,6 +15,7 @@ import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.internal.container.EquinoxReentrantLock;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.osgi.framework.*;
@@ -212,7 +213,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * Returns the module container this module is contained in.
 	 * @return the module container.
 	 */
-	public ModuleContainer getContainer() {
+	public final ModuleContainer getContainer() {
 		return revisions.getContainer();
 	}
 
@@ -544,6 +545,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				}
 				// continue on to normal starting
 			}
+			if (getContainer().DEBUG_MONITOR_LAZY) {
+				Debug.printStackTrace(new Exception("Module is being lazy activated: " + this)); //$NON-NLS-1$
+			}
 		} else {
 			if (isLazyActivate(options) && !isTriggerSet()) {
 				if (State.LAZY_STARTING.equals(getState())) {
@@ -684,12 +688,12 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		return hasLazyActivatePolicy();
 	}
 
-	boolean hasLazyActivatePolicy() {
+	final boolean hasLazyActivatePolicy() {
 		ModuleRevision current = getCurrentRevision();
 		return current == null ? false : current.hasLazyActivatePolicy();
 	}
 
-	boolean inStartResolve() {
+	final boolean inStartResolve() {
 		return inStartResolve.get().booleanValue();
 	}
 }

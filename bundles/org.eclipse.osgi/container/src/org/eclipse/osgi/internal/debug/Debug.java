@@ -79,6 +79,11 @@ public class Debug implements DebugOptionsListener {
 	 * Monitor activation Debug option key.
 	 */
 	public static final String OPTION_MONITOR_ACTIVATION = ECLIPSE_OSGI + "/monitor/activation"; //$NON-NLS-1$
+
+	/**
+	 * Monitor lazy activation Debug option key
+	 */
+	public static final String OPTION_MONITOR_LAZY = ECLIPSE_OSGI + "/monitor/lazy"; //$NON-NLS-1$
 	/**
 	 * Message bundles Debug option key.
 	 */
@@ -145,7 +150,7 @@ public class Debug implements DebugOptionsListener {
 	/**
 	 * Monitor activation debug flag.
 	 */
-	public boolean MONITOR_ACTIVATION = false; // "monitor/bundles"
+	public boolean MONITOR_ACTIVATION = false; // "monitor/activation"
 
 	public boolean DEBUG_LOCATION = false; // debug/location
 

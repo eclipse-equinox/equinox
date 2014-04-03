@@ -92,6 +92,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	private final long moduleLockTimeout;
 
+	boolean DEBUG_MONITOR_LAZY = false;
+
 	/**
 	 * Constructs a new container with the specified adaptor, module database.
 	 * @param adaptor the adaptor for the container
@@ -117,6 +119,10 @@ public final class ModuleContainer implements DebugOptionsListener {
 			}
 		}
 		this.moduleLockTimeout = tempModuleLockTimeout;
+		DebugOptions debugOptions = adaptor.getDebugOptions();
+		if (debugOptions != null) {
+			this.DEBUG_MONITOR_LAZY = debugOptions.getBooleanOption(Debug.OPTION_MONITOR_LAZY, false);
+		}
 	}
 
 	/**
@@ -1369,6 +1375,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 	public void optionsChanged(DebugOptions options) {
 		moduleResolver.setDebugOptions();
 		frameworkStartLevel.setDebugOptions();
+		if (options != null) {
+			this.DEBUG_MONITOR_LAZY = options.getBooleanOption(Debug.OPTION_MONITOR_LAZY, false);
+		}
 	}
 
 	class ContainerStartLevel implements FrameworkStartLevel, EventDispatcher<Module, FrameworkListener[], Integer> {
