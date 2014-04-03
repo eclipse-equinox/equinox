@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others
+ * Copyright (c) 2011, 2014 IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -20,7 +20,7 @@ import org.osgi.service.metatype.AttributeDefinition;
  * metatype namespace as extension attributes.
  * 
  * @since 1.2
- *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface EquinoxAttributeDefinition extends AttributeDefinition, Extendable {
 	/**
@@ -29,6 +29,7 @@ public interface EquinoxAttributeDefinition extends AttributeDefinition, Extenda
 	 * 
 	 * @return The maximum value this attribute may hold, or <code>null</code>
 	 *         if unspecified.
+	 * @since 1.3
 	 */
 	public String getMax();
 
@@ -38,6 +39,7 @@ public interface EquinoxAttributeDefinition extends AttributeDefinition, Extenda
 	 * 
 	 * @return The minimum value this attribute may hold, or <code>null</code>
 	 *         if unspecified.
+	 * @since 1.3
 	 */
 	public String getMin();
 }
