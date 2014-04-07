@@ -56,8 +56,8 @@ public class Storage {
 	public static final String DELETE_FLAG = ".delete"; //$NON-NLS-1$
 	public static final String LIB_TEMP = "libtemp"; //$NON-NLS-1$
 
-	private static final String J2SE = "J2SE-"; //$NON-NLS-1$
-	private static final String JAVASE = "JavaSE-"; //$NON-NLS-1$
+	private static final String J2SE = "J2SE"; //$NON-NLS-1$
+	private static final String JAVASE = "JavaSE"; //$NON-NLS-1$
 	private static final String PROFILE_EXT = ".profile"; //$NON-NLS-1$
 	private static final String NUL = new String(new byte[] {0});
 
@@ -1349,6 +1349,7 @@ public class Storage {
 		String vmProfile = null;
 		String javaEdition = null;
 		Version javaVersion = null;
+		String embeddedProfileName = "-"; //$NON-NLS-1$
 		if (j2meConfig != null && j2meConfig.length() > 0 && j2meProfiles != null && j2meProfiles.length() > 0) {
 			// save the vmProfile based off of the config and profile
 			// use the last profile; assuming that is the highest one
@@ -1381,7 +1382,26 @@ public class Storage {
 					} catch (IllegalArgumentException e) {
 						// do nothing
 					}
-					vmProfile = javaEdition + javaSpecVersion;
+					// If javaSE 1.8 then check for release file for profile name.
+					Version v18 = new Version("1.8"); //$NON-NLS-1$
+					if (javaVersion != null && v18.compareTo(javaVersion) <= 0) {
+						String javaHome = System.getProperty("java.home"); //$NON-NLS-1$
+						if (javaHome != null) {
+							File release = new File(javaHome, "release"); //$NON-NLS-1$
+							if (release.exists()) {
+								Properties releaseProps = new Properties();
+								try {
+									releaseProps.load(new FileInputStream(release));
+									if (releaseProps.containsKey("JAVA_PROFILE")) { //$NON-NLS-1$
+										embeddedProfileName = "_" + releaseProps.getProperty("JAVA_PROFILE") + "-"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+									}
+								} catch (IOException e) {
+									// ignore
+								}
+							}
+						}
+					}
+					vmProfile = javaEdition + embeddedProfileName + javaSpecVersion;
 				}
 			}
 		}
@@ -1401,7 +1421,7 @@ public class Storage {
 			String javaProfile = vmProfile + PROFILE_EXT;
 			profileIn = findInSystemBundle(systemGeneration, javaProfile);
 			if (profileIn == null)
-				profileIn = getNextBestProfile(systemGeneration, javaEdition, javaVersion);
+				profileIn = getNextBestProfile(systemGeneration, javaEdition, javaVersion, embeddedProfileName);
 		}
 		if (profileIn == null)
 			// the profile url is still null then use the osgi min profile in OSGi by default
@@ -1429,21 +1449,25 @@ public class Storage {
 		return result;
 	}
 
-	private InputStream getNextBestProfile(Generation systemGeneration, String javaEdition, Version javaVersion) {
+	private InputStream getNextBestProfile(Generation systemGeneration, String javaEdition, Version javaVersion, String embeddedProfileName) {
 		if (javaVersion == null || (javaEdition != J2SE && javaEdition != JAVASE))
 			return null; // we cannot automatically choose the next best profile unless this is a J2SE or JavaSE vm
-		InputStream bestProfile = findNextBestProfile(systemGeneration, javaEdition, javaVersion);
+		InputStream bestProfile = findNextBestProfile(systemGeneration, javaEdition, javaVersion, embeddedProfileName);
 		if (bestProfile == null && javaEdition == JAVASE)
 			// if this is a JavaSE VM then search for a lower J2SE profile
-			bestProfile = findNextBestProfile(systemGeneration, J2SE, javaVersion);
+			bestProfile = findNextBestProfile(systemGeneration, J2SE, javaVersion, embeddedProfileName);
+		if (bestProfile == null && !"-".equals(embeddedProfileName)) { //$NON-NLS-1$
+			// Just use the base javaEdition name without the profile name as backup
+			return getNextBestProfile(systemGeneration, javaEdition, javaVersion, "-"); //$NON-NLS-1$
+		}
 		return bestProfile;
 	}
 
-	private InputStream findNextBestProfile(Generation systemGeneration, String javaEdition, Version javaVersion) {
+	private InputStream findNextBestProfile(Generation systemGeneration, String javaEdition, Version javaVersion, String embeddedProfileName) {
 		InputStream result = null;
 		int minor = javaVersion.getMinor();
 		do {
-			result = findInSystemBundle(systemGeneration, javaEdition + javaVersion.getMajor() + "." + minor + PROFILE_EXT); //$NON-NLS-1$
+			result = findInSystemBundle(systemGeneration, javaEdition + embeddedProfileName + javaVersion.getMajor() + "." + minor + PROFILE_EXT); //$NON-NLS-1$
 			minor = minor - 1;
 		} while (result == null && minor > 0);
 		return result;
