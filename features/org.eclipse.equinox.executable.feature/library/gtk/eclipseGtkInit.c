@@ -100,6 +100,11 @@ int loadGtk() {
 #define DLFLAGS RTLD_LAZY
 #endif
 
+	char *overlayScrollbar = getenv("LIBOVERLAY_SCROLLBAR");
+	if (overlayScrollbar == NULL) {
+		setenv("LIBOVERLAY_SCROLLBAR", "0", 0);
+	}
+
 	void *gdkLib = NULL, *gtkLib = NULL, *objLib = NULL, *pixLib = NULL, *x11Lib = NULL;
 	
 	char *gtk3 = getenv("SWT_GTK3");
