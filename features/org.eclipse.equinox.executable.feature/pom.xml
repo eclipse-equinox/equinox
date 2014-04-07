@@ -207,6 +207,59 @@
       </build>
     </profile>
     <profile>
+      <id>build-native-launchers-gtk.linux.ppc64le</id>
+      <activation>
+        <property>
+          <name>native</name>
+          <value>gtk.linux.ppc64le</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version> 1.7 </version>
+            <executions>
+              <execution>
+                <id>compile-executable-natives</id>
+                <phase>generate-resources</phase>
+                <configuration>
+                  <target>
+                    <ant antfile="build.xml" dir="library/gtk/" target="build_eclipse"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+            <dependencies>
+              <dependency>
+                <groupId>bsf</groupId>
+                <artifactId>bsf</artifactId>
+                <version>2.4.0</version>
+              </dependency>
+              <dependency>
+                <groupId>rhino</groupId>
+                <artifactId>js</artifactId>
+                <version>1.7R2</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant-apache-bsf</artifactId>
+                <version>1.8.3</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant-nodeps</artifactId>
+                <version>1.8.1</version>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
       <id>build-native-launchers-win32.win32.x86_64</id>
       <activation>
         <property>

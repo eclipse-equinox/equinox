@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-Vendor: %providerName
+Bundle-SymbolicName: org.eclipse.equinox.launcher.gtk.linux.ppc64le;singleton:=true
+Bundle-Version: 1.0.200.qualifier
+Fragment-Host: org.eclipse.equinox.launcher;bundle-version="[1.0.0,1.4.0)"
+Eclipse-PlatformFilter: (& (osgi.ws=gtk) (osgi.os=linux) (osgi.arch=ppc64le))
+Bundle-Localization: launcher.gtk.linux.ppc64le
+Eclipse-BundleShape: dir
