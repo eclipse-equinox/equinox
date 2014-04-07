@@ -129,6 +129,7 @@ int loadGtk() {
 	if (!gtkLib || !gdkLib) {
 		gdkLib = dlopen(GDK_LIB, DLFLAGS);
 		gtkLib = dlopen(GTK_LIB, DLFLAGS);
+		setenv("SWT_GTK3","0",1);
 	}
 	objLib = dlopen(GOBJ_LIB, DLFLAGS);
 	pixLib = dlopen(PIXBUF_LIB, DLFLAGS);
