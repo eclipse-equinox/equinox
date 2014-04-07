@@ -28,8 +28,8 @@ public class SingleSourcePackage extends PackageSource {
 		return new SingleSourcePackage[] {this};
 	}
 
-	public String toString() {
-		return id + " -> " + supplier; //$NON-NLS-1$
+	public BundleLoader getLoader() {
+		return supplier;
 	}
 
 	public Class<?> loadClass(String name) throws ClassNotFoundException {

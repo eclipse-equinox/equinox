@@ -82,6 +82,25 @@ public abstract class PackageSource implements KeyedElement {
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(id).append(" -> "); //$NON-NLS-1$
+		SingleSourcePackage[] suppliers = getSuppliers();
+		if (suppliers == null) {
+			return builder.append(String.valueOf(null)).toString();
+		}
+		builder.append('[');
+		for (int i = 0; i < suppliers.length; i++) {
+			if (i > 0) {
+				builder.append(',');
+			}
+			builder.append(suppliers[i].getLoader());
+		}
+		builder.append(']');
+		return builder.toString();
+	}
+
 	public abstract Collection<String> listResources(String path, String filePattern);
 
 	/**

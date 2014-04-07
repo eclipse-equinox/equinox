@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -154,7 +154,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	 */
 	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 		if (getDebug().DEBUG_LOADER)
-			Debug.println("BundleClassLoader[" + getBundleLoader() + "].loadClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+			Debug.println("ModuleClassLoader[" + getBundleLoader() + "].loadClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		try {
 			// Just ask the delegate.  This could result in findLocalClass(name) being called.
 			Class<?> clazz = getBundleLoader().findClass(name);
@@ -164,7 +164,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 			return (clazz);
 		} catch (Error e) {
 			if (getDebug().DEBUG_LOADER) {
-				Debug.println("BundleClassLoader[" + getBundleLoader() + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				Debug.println("ModuleClassLoader[" + getBundleLoader() + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				Debug.printStackTrace(e);
 			}
 			throw e;
@@ -172,7 +172,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 			// If the class is not found do not try to look for it locally.
 			// The delegate would have already done that for us.
 			if (getDebug().DEBUG_LOADER) {
-				Debug.println("BundleClassLoader[" + getBundleLoader() + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				Debug.println("ModuleClassLoader[" + getBundleLoader() + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				Debug.printStackTrace(e);
 			}
 			throw e;
@@ -195,7 +195,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	 */
 	public URL getResource(String name) {
 		if (getDebug().DEBUG_LOADER) {
-			Debug.println("BundleClassLoader[" + getBundleLoader() + "].getResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			Debug.println("ModuleClassLoader[" + getBundleLoader() + "].getResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		URL url = getBundleLoader().findResource(name);
@@ -203,7 +203,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 			return (url);
 
 		if (getDebug().DEBUG_LOADER) {
-			Debug.println("BundleClassLoader[" + getBundleLoader() + "].getResource(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			Debug.println("ModuleClassLoader[" + getBundleLoader() + "].getResource(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		return (null);
@@ -225,12 +225,12 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	 */
 	public Enumeration<URL> getResources(String name) throws IOException {
 		if (getDebug().DEBUG_LOADER) {
-			Debug.println("BundleClassLoader[" + getBundleLoader() + "].getResources(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			Debug.println("ModuleClassLoader[" + getBundleLoader() + "].getResources(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		Enumeration<URL> result = getBundleLoader().findResources(name);
 		if (getDebug().DEBUG_LOADER) {
 			if (result == null || !result.hasMoreElements()) {
-				Debug.println("BundleClassLoader[" + getBundleLoader() + "].getResources(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				Debug.println("ModuleClassLoader[" + getBundleLoader() + "].getResources(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
 		return result;

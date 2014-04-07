@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -557,7 +557,7 @@ public class ClasspathManager {
 
 	private Class<?> findClassImpl(String name, ClasspathEntry classpathEntry, List<ClassLoaderHook> hooks) {
 		if (debug.DEBUG_LOADER)
-			Debug.println("BundleClassLoader[" + classpathEntry.getBundleFile() + "].findClassImpl(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+			Debug.println("ModuleClassLoader[" + classloader.getBundleLoader() + " - " + classpathEntry.getBundleFile() + "].findClassImpl(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		String filename = name.replace('.', '/').concat(".class"); //$NON-NLS-1$
 		BundleEntry entry = classpathEntry.getBundleFile().getEntry(filename);
 		if (entry == null)
@@ -572,7 +572,7 @@ public class ClasspathManager {
 			throw (LinkageError) new LinkageError("Error reading class bytes: " + name).initCause(e); //$NON-NLS-1$
 		}
 		if (debug.DEBUG_LOADER) {
-			Debug.println("  read " + classbytes.length + " bytes from " + classpathEntry.getBundleFile() + "/" + filename); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			Debug.println("  read " + classbytes.length + " bytes from " + classpathEntry.getBundleFile() + "!/" + filename); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			Debug.println("  defining class " + name); //$NON-NLS-1$
 		}
 

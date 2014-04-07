@@ -338,7 +338,7 @@ public class BundleLoader extends ModuleLoader {
 
 	private Class<?> findClassInternal(String name, boolean checkParent) throws ClassNotFoundException {
 		if (debug.DEBUG_LOADER)
-			Debug.println("BundleLoader[" + this + "].loadBundleClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			Debug.println("BundleLoader[" + this + "].findClassInternal(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		String pkgName = getPackageName(name);
 		boolean bootDelegation = false;
 		// follow the OSGi delegation model
@@ -363,6 +363,9 @@ public class BundleLoader extends ModuleLoader {
 		// 3) search the imported packages
 		PackageSource source = findImportedSource(pkgName, null);
 		if (source != null) {
+			if (debug.DEBUG_LOADER) {
+				Debug.println("BundleLoader[" + this + "] loading from import package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			// 3) found import source terminate search at the source
 			result = source.loadClass(name);
 			if (result != null)
@@ -371,9 +374,13 @@ public class BundleLoader extends ModuleLoader {
 		}
 		// 4) search the required bundles
 		source = findRequiredSource(pkgName, null);
-		if (source != null)
+		if (source != null) {
+			if (debug.DEBUG_LOADER) {
+				Debug.println("BundleLoader[" + this + "] loading from required bundle package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			// 4) attempt to load from source but continue on failure
 			result = source.loadClass(name);
+		}
 		// 5) search the local bundle
 		if (result == null)
 			result = findLocalClass(name);
@@ -505,6 +512,8 @@ public class BundleLoader extends ModuleLoader {
 	 * Finds the resource for a bundle.  This method is used for delegation by the bundle's classloader.
 	 */
 	public URL findResource(String name) {
+		if (debug.DEBUG_LOADER)
+			Debug.println("BundleLoader[" + this + "].findResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
 		String pkgName = getResourcePackageName(name);
@@ -537,14 +546,22 @@ public class BundleLoader extends ModuleLoader {
 			return result;
 		// 3) search the imported packages
 		PackageSource source = findImportedSource(pkgName, null);
-		if (source != null)
+		if (source != null) {
+			if (debug.DEBUG_LOADER) {
+				Debug.println("BundleLoader[" + this + "] loading from import package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			// 3) found import source terminate search at the source
 			return source.getResource(name);
+		}
 		// 4) search the required bundles
 		source = findRequiredSource(pkgName, null);
-		if (source != null)
+		if (source != null) {
+			if (debug.DEBUG_LOADER) {
+				Debug.println("BundleLoader[" + this + "] loading from required bundle package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			// 4) attempt to load from source but continue on failure
 			result = source.getResource(name);
+		}
 		// 5) search the local bundle
 		if (result == null)
 			result = findLocalResource(name);
@@ -615,15 +632,22 @@ public class BundleLoader extends ModuleLoader {
 
 		// 3) search the imported packages
 		PackageSource source = findImportedSource(pkgName, null);
-		if (source != null)
+		if (source != null) {
+			if (debug.DEBUG_LOADER) {
+				Debug.println("BundleLoader[" + this + "] loading from import package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			// 3) found import source terminate search at the source
 			return compoundEnumerations(result, source.getResources(name));
+		}
 		// 4) search the required bundles
 		source = findRequiredSource(pkgName, null);
-		if (source != null)
+		if (source != null) {
+			if (debug.DEBUG_LOADER) {
+				Debug.println("BundleLoader[" + this + "] loading from required bundle package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			// 4) attempt to load from source but continue on failure
 			result = compoundEnumerations(result, source.getResources(name));
-
+		}
 		// 5) search the local bundle
 		// compound the required source results with the local ones
 		Enumeration<URL> localResults = findLocalResources(name);
@@ -773,7 +797,11 @@ public class BundleLoader extends ModuleLoader {
 	 * @return String
 	 */
 	public final String toString() {
-		return wiring.getRevision().toString();
+		ModuleRevision revision = wiring.getRevision();
+		String name = revision.getSymbolicName();
+		if (name == null)
+			name = "unknown"; //$NON-NLS-1$
+		return name + '_' + revision.getVersion();
 	}
 
 	/**
@@ -1032,10 +1060,16 @@ public class BundleLoader extends ModuleLoader {
 
 	private PackageSource findDynamicSource(String pkgName) {
 		if (!isExportedPackage(pkgName) && isDynamicallyImported(pkgName)) {
+			if (debug.DEBUG_LOADER) {
+				Debug.println("BundleLoader[" + this + "] attempting to resolve dynamic package: " + pkgName); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			ModuleRevision revision = wiring.getRevision();
 			ModuleWire dynamicWire = revision.getRevisions().getModule().getContainer().resolveDynamic(pkgName, revision);
 			if (dynamicWire != null) {
 				PackageSource source = createExportPackageSource(dynamicWire, null);
+				if (debug.DEBUG_LOADER) {
+					Debug.println("BundleLoader[" + this + "] using dynamic import source: " + source); //$NON-NLS-1$ //$NON-NLS-2$
+				}
 				synchronized (importedSources) {
 					importedSources.add(source);
 				}
