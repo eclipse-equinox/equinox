@@ -12,8 +12,6 @@
 package org.eclipse.osgi.internal.framework;
 
 import java.util.*;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.SAXParserFactory;
 import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.internal.debug.Debug;
@@ -32,7 +30,6 @@ import org.eclipse.osgi.storage.BundleLocalizationImpl;
 import org.eclipse.osgi.storage.url.BundleResourceHandler;
 import org.eclipse.osgi.storage.url.BundleURLConverter;
 import org.osgi.framework.*;
-import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.permissionadmin.PermissionAdmin;
@@ -94,9 +91,12 @@ public class SystemBundleActivator implements BundleActivator {
 		register(bc, BundleLocalization.class, new BundleLocalizationImpl(), null);
 
 		boolean setTccl = "true".equals(bundle.getEquinoxContainer().getConfiguration().getConfiguration("eclipse.parsers.setTCCL", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		register(bc, SAXParserFactory.class, new ParsingService(true, setTccl), false, null);
-		register(bc, DocumentBuilderFactory.class, new ParsingService(false, setTccl), false, null);
-
+		try {
+			register(bc, "javax.xml.parsers.SAXParserFactory", new XMLParsingServiceFactory(true, setTccl), false, null); //$NON-NLS-1$
+			register(bc, "javax.xml.parsers.DocumentBuilderFactory", new XMLParsingServiceFactory(false, setTccl), false, null); //$NON-NLS-1$
+		} catch (NoClassDefFoundError e) {
+			// ignore; on a platform with no javax.xml (Java 8 SE compact1 profile)
+		}
 		bundle.getEquinoxContainer().getStorage().getExtensionInstaller().startExtensionActivators(bc);
 
 		// Add an options listener; we already read the options on initialization.
@@ -205,11 +205,15 @@ public class SystemBundleActivator implements BundleActivator {
 	}
 
 	private void register(BundleContext context, Class<?> serviceClass, Object service, Dictionary<String, Object> properties) {
-		register(context, serviceClass, service, true, properties);
+		register(context, serviceClass.getName(), service, true, properties);
+	}
+
+	private void register(BundleContext context, Class<?> serviceClass, Object service, boolean setRanking, Dictionary<String, Object> properties) {
+		register(context, serviceClass.getName(), service, setRanking, properties);
 	}
 
 	@SuppressWarnings("unchecked")
-	private void register(BundleContext context, Class<?> serviceClass, Object service, boolean setRanking, Dictionary<String, Object> properties) {
+	private void register(BundleContext context, String serviceClass, Object service, boolean setRanking, Dictionary<String, Object> properties) {
 		if (properties == null)
 			properties = new Hashtable<String, Object>(7);
 		Dictionary<String, String> headers = context.getBundle().getHeaders();
@@ -218,52 +222,6 @@ public class SystemBundleActivator implements BundleActivator {
 			properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 		}
 		properties.put(Constants.SERVICE_PID, context.getBundle().getBundleId() + "." + service.getClass().getName()); //$NON-NLS-1$
-		registrations.add(context.registerService((Class<Object>) serviceClass, service, properties));
-	}
-
-	private static class ParsingService implements ServiceFactory<Object> {
-		private final boolean isSax;
-		private final boolean setTccl;
-
-		public ParsingService(boolean isSax, boolean setTccl) {
-			this.isSax = isSax;
-			this.setTccl = setTccl;
-		}
-
-		public Object getService(Bundle bundle, ServiceRegistration<Object> registration) {
-			if (!setTccl || bundle == null)
-				return createService();
-			/*
-			 * Set the TCCL while creating jaxp factory instances to the
-			 * requesting bundles class loader.  This is needed to 
-			 * work around bug 285505.  There are issues if multiple 
-			 * xerces implementations are available on the bundles class path
-			 * 
-			 * The real issue is that the ContextFinder will only delegate
-			 * to the framework class loader in this case.  This class
-			 * loader forces the requesting bundle to be delegated to for
-			 * TCCL loads.
-			 */
-			final ClassLoader savedClassLoader = Thread.currentThread().getContextClassLoader();
-			try {
-				BundleWiring wiring = bundle.adapt(BundleWiring.class);
-				ClassLoader cl = wiring == null ? null : wiring.getClassLoader();
-				if (cl != null)
-					Thread.currentThread().setContextClassLoader(cl);
-				return createService();
-			} finally {
-				Thread.currentThread().setContextClassLoader(savedClassLoader);
-			}
-		}
-
-		private Object createService() {
-			if (isSax)
-				return SAXParserFactory.newInstance();
-			return DocumentBuilderFactory.newInstance();
-		}
-
-		public void ungetService(Bundle bundle, ServiceRegistration<Object> registration, Object service) {
-			// Do nothing.
-		}
+		registrations.add(context.registerService(serviceClass, service, properties));
 	}
 }
