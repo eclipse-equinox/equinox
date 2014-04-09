@@ -77,5 +77,18 @@
     <module>features/org.eclipse.equinox.executable.feature</module>
     <module>features/org.eclipse.osgi.compatibility.plugins.feature</module>
   </modules>
-
+  <profiles>
+    <profile>
+      <id>build-native-launchers-gtk.linux.ppc64le</id>
+      <activation>
+        <property>
+          <name>native</name>
+          <value>gtk.linux.ppc64le</value>
+        </property>
+      </activation>
+      <modules>
+        <module>bundles/org.eclipse.equinox.launcher.gtk.linux.ppc64le</module>
+      </modules>
+    </profile>
+  </profiles>
 </project>
