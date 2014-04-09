@@ -292,13 +292,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 
 	public Class<?> publicFindLoaded(String classname) {
 		if (isRegisteredAsParallel()) {
-			boolean initialLock = lockClassName(classname);
-			try {
-				return findLoadedClass(classname);
-			} finally {
-				if (initialLock)
-					unlockClassName(classname);
-			}
+			return findLoadedClass(classname);
 		}
 		synchronized (this) {
 			return findLoadedClass(classname);
