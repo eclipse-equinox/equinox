@@ -600,6 +600,8 @@ public class BundleLoader extends ModuleLoader {
 	 * Finds the resources for a bundle.  This  method is used for delegation by the bundle's classloader.
 	 */
 	public Enumeration<URL> findResources(String name) throws IOException {
+		if (debug.DEBUG_LOADER)
+			Debug.println("BundleLoader[" + this + "].findResources(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		// do not delegate to parent because ClassLoader#getResources already did and it is final!!
 		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
