@@ -22,6 +22,7 @@ import junit.framework.TestSuite;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.Assert;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
@@ -926,6 +927,82 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 		assertNotNull("Stop event is null", stopEvent); //$NON-NLS-1$
 		assertEquals("Wrong stopEvent", FrameworkEvent.STOPPED, stopEvent.getType()); //$NON-NLS-1$
+	}
+
+	public void testChangeEE() throws IOException, BundleException {
+		URL javaSE7Profile = OSGiTestsActivator.getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION).getEntry("JavaSE-1.7.profile");
+		URL javaSE8Profile = OSGiTestsActivator.getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION).getEntry("JavaSE-1.8.profile");
+
+		// configure equinox for javaSE 8
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put("osgi.java.profile", javaSE8Profile.toExternalForm()); //$NON-NLS-1$
+
+		Equinox equinox = new Equinox(configuration);
+		equinox.start();
+
+		// install a bundle that requires java 8
+		BundleContext systemContext = equinox.getBundleContext();
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+		Map<String, String> testHeaders = new HashMap<String, String>();
+		testHeaders.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		testHeaders.put(Constants.BUNDLE_SYMBOLICNAME, getName());
+		testHeaders.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "JavaSE-1.8");
+		File testBundle = createBundle(config, getName(), testHeaders);
+		Bundle b = systemContext.installBundle("reference:file:///" + testBundle.getAbsolutePath()); //$NON-NLS-1$
+		long bid = b.getBundleId();
+
+		// should resolve fine
+		Assert.assertTrue("Could not resolve bundle.", equinox.adapt(FrameworkWiring.class).resolveBundles(Collections.singleton(b)));
+
+		// put the framework back to the RESOLVED state
+		equinox.stop();
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+
+		// configure equinox for java 7
+		configuration.put("osgi.java.profile", javaSE7Profile.toExternalForm());
+		equinox = new Equinox(configuration);
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+		// bundle should fail to resolve
+		b = equinox.getBundleContext().getBundle(bid);
+		Assert.assertFalse("Could resolve bundle.", equinox.adapt(FrameworkWiring.class).resolveBundles(Collections.singleton(b)));
+
+		// put the framework back to the RESOLVED state
+		equinox.stop();
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+
+		// move back to java 8
+		configuration.put("osgi.java.profile", javaSE8Profile.toExternalForm());
+		equinox = new Equinox(configuration);
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+		// bundle should succeed to resolve again
+		b = equinox.getBundleContext().getBundle(bid);
+		Assert.assertTrue("Could not resolve bundle.", equinox.adapt(FrameworkWiring.class).resolveBundles(Collections.singleton(b)));
+
+		// put the framework back to the RESOLVED state
+		equinox.stop();
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
 	}
 
 	public void testMRUBundleFileList() {
@@ -2118,5 +2195,19 @@ public class SystemBundleTests extends AbstractBundleTests {
 			attributes.putValue("Bundle-SymbolicName", "bundle" + id); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return manifest;
+	}
+
+	private static File createBundle(File outputDir, String bundleName, Map<String, String> headers) throws IOException {
+		Manifest m = new Manifest();
+		Attributes attributes = m.getMainAttributes();
+		attributes.putValue("Manifest-Version", "1.0");
+		for (Map.Entry<String, String> entry : headers.entrySet()) {
+			attributes.putValue(entry.getKey(), entry.getValue());
+		}
+		File file = new File(outputDir, "bundle" + bundleName + ".jar"); //$NON-NLS-1$ //$NON-NLS-2$
+		JarOutputStream jos = new JarOutputStream(new FileOutputStream(file), m);
+		jos.flush();
+		jos.close();
+		return file;
 	}
 }

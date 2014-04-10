@@ -324,10 +324,8 @@ public class Storage {
 		if (!currentRevision.getVersion().equals(newBuilder.getVersion())) {
 			return true;
 		}
-		// only do this advanced check if in dev mode
-		if (!equinoxContainer.getConfiguration().inDevelopmentMode()) {
-			return false;
-		}
+
+		// Always do the advanced check for bug 432485 to make sure we have a consistent system bundle
 		List<ModuleCapability> currentCapabilities = currentRevision.getModuleCapabilities(null);
 		List<GenericInfo> newCapabilities = newBuilder.getCapabilities();
 		if (currentCapabilities.size() != newCapabilities.size()) {
