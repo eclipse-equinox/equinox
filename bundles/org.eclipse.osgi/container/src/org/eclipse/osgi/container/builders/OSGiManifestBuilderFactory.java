@@ -20,7 +20,6 @@ import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.internal.util.Tokenizer;
 import org.eclipse.osgi.storage.NativeCodeFinder;
-import org.eclipse.osgi.storage.Storage;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -732,6 +731,35 @@ public final class OSGiManifestBuilderFactory {
 		builder.addRequirement(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE, directives, new HashMap<String, Object>(0));
 	}
 
+	static String escapeFilterInput(final String value) {
+		boolean escaped = false;
+		int inlen = value.length();
+		int outlen = inlen << 1; /* inlen * 2 */
+
+		char[] output = new char[outlen];
+		value.getChars(0, inlen, output, inlen);
+
+		int cursor = 0;
+		for (int i = inlen; i < outlen; i++) {
+			char c = output[i];
+			switch (c) {
+				case '*' :
+				case '\\' :
+				case '(' :
+				case ')' :
+					output[cursor] = '\\';
+					cursor++;
+					escaped = true;
+					break;
+			}
+
+			output[cursor] = c;
+			cursor++;
+		}
+
+		return escaped ? new String(output, 0, cursor) : value;
+	}
+
 	private static String createOSGiEERequirementFilter(String bree) throws BundleException {
 		String[] nameVersion = getOSGiEENameVersion(bree);
 		String eeName = nameVersion[0];
@@ -810,7 +838,7 @@ public final class OSGiManifestBuilderFactory {
 
 		String eeName = ee1 + (ee2 == null ? "" : '/' + ee2); //$NON-NLS-1$
 
-		return new String[] {eeName, v1};
+		return new String[] {escapeFilterInput(eeName), v1};
 	}
 
 	static class NativeClause implements Comparable<NativeClause> {
@@ -848,7 +876,7 @@ public final class OSGiManifestBuilderFactory {
 			this.filter = filterResult;
 		}
 
-		private static Object addToNativeCodeFilter(StringBuilder filter, ManifestElement nativeCode, String attribute) throws BundleException {
+		private static Object addToNativeCodeFilter(StringBuilder filter, ManifestElement nativeCode, String attribute) {
 			Boolean hasLanguage = Boolean.FALSE;
 			Version highestFloor = null;
 			String[] attrValues = nativeCode.getAttributes(attribute);
@@ -877,11 +905,7 @@ public final class OSGiManifestBuilderFactory {
 						}
 						filter.append(range.toFilterString(filterAttribute));
 					} else {
-						try {
-							filter.append('(').append(filterAttribute).append("~=").append(Storage.sanitizeFilterInput(attrAlias)).append(')'); //$NON-NLS-1$
-						} catch (InvalidSyntaxException e) {
-							throw new BundleException("Bad native attribute: " + attrAlias, BundleException.MANIFEST_ERROR, e); //$NON-NLS-1$
-						}
+						filter.append('(').append(filterAttribute).append("~=").append(escapeFilterInput(attrAlias)).append(')'); //$NON-NLS-1$
 					}
 				}
 				if (attrValues.length > 1) {

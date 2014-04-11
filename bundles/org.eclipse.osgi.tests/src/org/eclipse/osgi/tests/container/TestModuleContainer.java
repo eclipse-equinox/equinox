@@ -278,12 +278,16 @@ public class TestModuleContainer extends AbstractTest {
 
 		Module ee1 = installDummyModule("ee1_v1.MF", "ee1", container);
 		Module ee2 = installDummyModule("ee2_v1.MF", "ee2", container);
+		Module ee3 = installDummyModule("ee3_v1.MF", "ee3", container);
 		container.resolve(Arrays.asList(ee1, ee2), true);
+		container.resolve(Arrays.asList(ee3), false);
 
 		ModuleWiring ee1Wiring = ee1.getCurrentRevision().getWiring();
 		ModuleWiring ee2Wiring = ee2.getCurrentRevision().getWiring();
+		ModuleWiring ee3Wiring = ee3.getCurrentRevision().getWiring();
 		Assert.assertNotNull("ee1 is not resolved", ee1Wiring);
 		Assert.assertNotNull("ee2 is not resolved", ee2Wiring);
+		Assert.assertNull("ee3 is resolved", ee3Wiring);
 
 		// make sure the fragment ee requirement did not get merged into the host
 		List<ModuleRequirement> ee1Requirements = ee1Wiring.getModuleRequirements(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE);
