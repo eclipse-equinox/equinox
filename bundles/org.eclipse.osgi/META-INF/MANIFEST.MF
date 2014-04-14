@@ -82,5 +82,5 @@ Bundle-DocUrl: http://www.eclipse.org
 Eclipse-ExtensibleAPI: true
 Eclipse-SystemBundle: true
 Main-Class: org.eclipse.core.runtime.adaptor.EclipseStarter
-Require-Capability: osgi.ee; filter:="(| (&(osgi.ee=JavaSE)(version=1.6)) (&(osgi.ee=JavaSE/compact1)(version=1.8)) )"
+Commentout-Require-Capability: osgi.ee; filter:="(| (&(osgi.ee=JavaSE)(version=1.6)) (&(osgi.ee=JavaSE/compact1)(version=1.8)) )"
 Eclipse-BundleShape: jar
