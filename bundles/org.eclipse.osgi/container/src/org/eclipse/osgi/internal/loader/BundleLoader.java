@@ -451,6 +451,9 @@ public class BundleLoader extends ModuleLoader {
 					result = (E) hook.postFindResources(name, getModuleClassLoader());
 					break;
 			}
+			if (result != null) {
+				return result;
+			}
 		}
 		return result;
 	}
