@@ -151,7 +151,7 @@ public class EquinoxContainer implements ThreadFactory {
 			if (key instanceof String) {
 				String value = result.getProperty((String) key);
 				if (value != null)
-					result.put(key, equinoxConfig.substituteVars(value));
+					result.put(key, equinoxConfig.substituteVars(value, true));
 			}
 		}
 		return result;

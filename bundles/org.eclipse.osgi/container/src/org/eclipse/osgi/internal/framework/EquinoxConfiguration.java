@@ -843,6 +843,10 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	}
 
 	public String substituteVars(String path) {
+		return substituteVars(path, false);
+	}
+
+	public String substituteVars(String path, boolean preserveDelimiters) {
 		StringBuffer buf = new StringBuffer(path.length());
 		StringTokenizer st = new StringTokenizer(path, VARIABLE_DELIM_STRING, true);
 		boolean varStarted = false; // indicates we are processing a var subtitute
@@ -870,12 +874,19 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 							// on J2ME this method does not exist
 						}
 					}
-					if (prop != null)
+					if (prop != null) {
 						// found a value; use it
 						buf.append(prop);
-					else
-						// could not find a value append the var name w/o delims 
+					} else {
+						// could not find a value append the var
+						if (preserveDelimiters) {
+							buf.append(VARIABLE_DELIM_CHAR);
+						}
 						buf.append(var == null ? "" : var); //$NON-NLS-1$
+						if (preserveDelimiters) {
+							buf.append(VARIABLE_DELIM_CHAR);
+						}
+					}
 					varStarted = false;
 					var = null;
 				}

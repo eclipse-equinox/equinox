@@ -2838,12 +2838,15 @@ public class Main {
 							// on J2ME this method does not exist
 						}
 					}
-					if (prop != null)
+					if (prop != null) {
 						// found a value; use it
 						buf.append(prop);
-					else
-						// could not find a value append the var name w/o delims 
+					} else {
+						// could not find a value append the var; keep delemiters
+						buf.append(VARIABLE_DELIM_CHAR);
 						buf.append(var == null ? "" : var); //$NON-NLS-1$
+						buf.append(VARIABLE_DELIM_CHAR);
+					}
 					varStarted = false;
 					var = null;
 				}
