@@ -2083,7 +2083,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong stopping order", expectedOrder.toArray(), stoppingOrder.toArray());
 	}
 
-	public void testBug412228() throws BundleException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+	public void testBug412228() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<String, Object>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
@@ -2107,6 +2107,36 @@ public class SystemBundleTests extends AbstractBundleTests {
 		long stopTime = System.currentTimeMillis() - startTime;
 		if (stopTime > 2000) {
 			fail("waitForStop time took too long: " + stopTime);
+		}
+
+	}
+
+	public void testBug432632() throws BundleException, IOException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		config.mkdirs();
+		// create a config.ini with some system property substitutes
+		Properties configIni = new Properties();
+		configIni.setProperty("test.substitute1", "Some.$test.prop1$.test");
+		configIni.setProperty("test.substitute2", "Some.$test.prop2$.test");
+		configIni.store(new FileOutputStream(new File(config, "config.ini")), "Test config.ini");
+		// Only provide substitution for the first prop
+		System.setProperty("test.prop1", "PASSED");
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+		equinox.init();
+
+		BundleContext systemContext = equinox.getBundleContext();
+		// check for substitution
+		assertEquals("Wrong value for test.substitute1", "Some.PASSED.test", systemContext.getProperty("test.substitute1"));
+		// check that non-substitution keeps $ delimiters.
+		assertEquals("Wrong value for test.substitute2", "Some.$test.prop2$.test", systemContext.getProperty("test.substitute2"));
+		equinox.stop();
+		try {
+			equinox.waitForStop(5000);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			fail("Unexpected interruption.", e);
 		}
 
 	}
