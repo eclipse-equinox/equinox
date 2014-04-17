@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: uses.l
+Bundle-Version: 1.0
+Provide-Capability: uses.l; uses.l=test; uses:=uses.l
+Export-Package: uses.l; uses:=uses.conflict
+Import-Package: uses.conflict; conflict=2; resolution:=optional

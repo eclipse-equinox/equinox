@@ -1524,6 +1524,46 @@ public class TestModuleContainer extends AbstractTest {
 		}
 	}
 
+	/**
+	 * Test optional constraints
+	 * @throws BundleException
+	 * @throws IOException
+	 */
+	@Test
+	public void testUses5Importer() throws BundleException, IOException {
+		doTestUses5("uses.k.importer.MF");
+	}
+
+	@Test
+	public void testUses5ReqCap() throws BundleException, IOException {
+		doTestUses5("uses.k.reqCap.MF");
+	}
+
+	@Test
+	public void testUses5Requirer() throws BundleException, IOException {
+		doTestUses5("uses.k.requirer.MF");
+	}
+
+	public void doTestUses5(String kManifest) throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+		Module uses_k = installDummyModule(kManifest, "k", container);
+		Module uses_l = installDummyModule("uses.l.MF", "l", container);
+		Module uses_m_conflict1 = installDummyModule("uses.m.conflict1.MF", "m.conflict1", container);
+		Module uses_m_conflict2 = installDummyModule("uses.m.conflict2.MF", "m.conflict2", container);
+
+		container.resolve(null, false);
+
+		Assert.assertEquals("k should resolve.", State.RESOLVED, uses_k.getState());
+		Assert.assertEquals("l should resolve.", State.RESOLVED, uses_l.getState());
+		Assert.assertEquals("m.conflict1 should resolve.", State.RESOLVED, uses_m_conflict1.getState());
+		Assert.assertEquals("m.conflict2 should resolve.", State.RESOLVED, uses_m_conflict2.getState());
+	}
+
 	@Test
 	public void testMultiCardinalityUses() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
