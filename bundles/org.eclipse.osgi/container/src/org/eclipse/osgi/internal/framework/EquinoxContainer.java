@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,7 +39,7 @@ import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 
 @SuppressWarnings("deprecation")
-public class EquinoxContainer implements ThreadFactory {
+public class EquinoxContainer implements ThreadFactory, Runnable {
 	public static final String NAME = "org.eclipse.osgi"; //$NON-NLS-1$
 	private static final String CONFIG_FILE = "config.ini"; //$NON-NLS-1$
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
@@ -208,6 +208,8 @@ public class EquinoxContainer implements ThreadFactory {
 			serviceRegistry = new ServiceRegistry(this);
 			initializeContextFinder();
 			executor = Executors.newScheduledThreadPool(1, this);
+			// be sure to initialize the executor threads
+			executor.execute(this);
 			storageSaver = new StorageSaver(this);
 		}
 	}
@@ -332,4 +334,10 @@ public class EquinoxContainer implements ThreadFactory {
 		t.setPriority(Thread.NORM_PRIORITY);
 		return t;
 	}
+
+	@Override
+	public void run() {
+		// Do nothing; just used to ensure the active thread is created during init
+	}
+
 }
