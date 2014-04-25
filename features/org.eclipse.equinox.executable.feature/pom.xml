@@ -23,10 +23,39 @@
   <packaging>eclipse-feature</packaging>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>1.7</version>
+          <dependencies>
+            <dependency>
+              <groupId>bsf</groupId>
+              <artifactId>bsf</artifactId>
+              <version>2.4.0</version>
+            </dependency>
+            <dependency>
+              <groupId>rhino</groupId>
+              <artifactId>js</artifactId>
+              <version>1.7R2</version>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.ant</groupId>
+              <artifactId>ant-apache-bsf</artifactId>
+              <version>1.8.3</version>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.ant</groupId>
+              <artifactId>ant-nodeps</artifactId>
+              <version>1.8.1</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version> 1.7 </version>
         <executions>
           <execution>
             <id>repack</id>
@@ -112,7 +141,6 @@
         <plugins>
           <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
-            <version> 1.7 </version>
             <executions>
               <execution>
                 <id>compile-executable-natives</id>
@@ -127,28 +155,6 @@
                 </goals>
               </execution>
             </executions>
-            <dependencies>
-              <dependency>
-                <groupId>bsf</groupId>
-                <artifactId>bsf</artifactId>
-                <version>2.4.0</version>
-              </dependency>
-              <dependency>
-                <groupId>rhino</groupId>
-                <artifactId>js</artifactId>
-                <version>1.7R2</version>
-              </dependency>
-              <dependency>
-                <groupId>org.apache.ant</groupId>
-                <artifactId>ant-apache-bsf</artifactId>
-                <version>1.8.3</version>
-              </dependency>
-              <dependency>
-                <groupId>org.apache.ant</groupId>
-                <artifactId>ant-nodeps</artifactId>
-                <version>1.8.1</version>
-              </dependency>
-            </dependencies>
           </plugin>
         </plugins>
       </build>
@@ -165,7 +171,6 @@
         <plugins>
           <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
-            <version> 1.7 </version>
             <executions>
               <execution>
                 <id>compile-executable-natives</id>
@@ -180,28 +185,6 @@
                 </goals>
               </execution>
             </executions>
-            <dependencies>
-              <dependency>
-                <groupId>bsf</groupId>
-                <artifactId>bsf</artifactId>
-                <version>2.4.0</version>
-              </dependency>
-              <dependency>
-                <groupId>rhino</groupId>
-                <artifactId>js</artifactId>
-                <version>1.7R2</version>
-              </dependency>
-              <dependency>
-                <groupId>org.apache.ant</groupId>
-                <artifactId>ant-apache-bsf</artifactId>
-                <version>1.8.3</version>
-              </dependency>
-              <dependency>
-                <groupId>org.apache.ant</groupId>
-                <artifactId>ant-nodeps</artifactId>
-                <version>1.8.1</version>
-              </dependency>
-            </dependencies>
           </plugin>
         </plugins>
       </build>
@@ -218,7 +201,6 @@
         <plugins>
           <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
-            <version> 1.7 </version>
             <executions>
               <execution>
                 <id>compile-executable-natives</id>
@@ -233,28 +215,6 @@
                 </goals>
               </execution>
             </executions>
-            <dependencies>
-              <dependency>
-                <groupId>bsf</groupId>
-                <artifactId>bsf</artifactId>
-                <version>2.4.0</version>
-              </dependency>
-              <dependency>
-                <groupId>rhino</groupId>
-                <artifactId>js</artifactId>
-                <version>1.7R2</version>
-              </dependency>
-              <dependency>
-                <groupId>org.apache.ant</groupId>
-                <artifactId>ant-apache-bsf</artifactId>
-                <version>1.8.3</version>
-              </dependency>
-              <dependency>
-                <groupId>org.apache.ant</groupId>
-                <artifactId>ant-nodeps</artifactId>
-                <version>1.8.1</version>
-              </dependency>
-            </dependencies>
           </plugin>
         </plugins>
       </build>
@@ -271,7 +231,6 @@
         <plugins>
           <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
-            <version> 1.7 </version>
             <executions>
               <execution>
                 <id>compile-executable-natives</id>
@@ -286,28 +245,6 @@
                 </goals>
               </execution>
             </executions>
-            <dependencies>
-              <dependency>
-                <groupId>bsf</groupId>
-                <artifactId>bsf</artifactId>
-                <version>2.4.0</version>
-              </dependency>
-              <dependency>
-                <groupId>rhino</groupId>
-                <artifactId>js</artifactId>
-                <version>1.7R2</version>
-              </dependency>
-              <dependency>
-                <groupId>org.apache.ant</groupId>
-                <artifactId>ant-apache-bsf</artifactId>
-                <version>1.8.3</version>
-              </dependency>
-              <dependency>
-                <groupId>org.apache.ant</groupId>
-                <artifactId>ant-nodeps</artifactId>
-                <version>1.8.1</version>
-              </dependency>
-            </dependencies>
           </plugin>
         </plugins>
       </build>
@@ -324,7 +261,6 @@
         <plugins>
           <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
-            <version> 1.7 </version>
             <executions>
               <execution>
                 <id>compile-executable-natives</id>
@@ -339,28 +275,6 @@
                 </goals>
               </execution>
             </executions>
-            <dependencies>
-              <dependency>
-                <groupId>bsf</groupId>
-                <artifactId>bsf</artifactId>
-                <version>2.4.0</version>
-              </dependency>
-              <dependency>
-                <groupId>rhino</groupId>
-                <artifactId>js</artifactId>
-                <version>1.7R2</version>
-              </dependency>
-              <dependency>
-                <groupId>org.apache.ant</groupId>
-                <artifactId>ant-apache-bsf</artifactId>
-                <version>1.8.3</version>
-              </dependency>
-              <dependency>
-                <groupId>org.apache.ant</groupId>
-                <artifactId>ant-nodeps</artifactId>
-                <version>1.8.1</version>
-              </dependency>
-            </dependencies>
           </plugin>
         </plugins>
       </build>
@@ -377,7 +291,6 @@
         <plugins>
           <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
-            <version> 1.7 </version>
             <executions>
               <execution>
                 <id>compile-executable-natives</id>
@@ -392,28 +305,6 @@
                 </goals>
               </execution>
             </executions>
-            <dependencies>
-              <dependency>
-                <groupId>bsf</groupId>
-                <artifactId>bsf</artifactId>
-                <version>2.4.0</version>
-              </dependency>
-              <dependency>
-                <groupId>rhino</groupId>
-                <artifactId>js</artifactId>
-                <version>1.7R2</version>
-              </dependency>
-              <dependency>
-                <groupId>org.apache.ant</groupId>
-                <artifactId>ant-apache-bsf</artifactId>
-                <version>1.8.3</version>
-              </dependency>
-              <dependency>
-                <groupId>org.apache.ant</groupId>
-                <artifactId>ant-nodeps</artifactId>
-                <version>1.8.1</version>
-              </dependency>
-            </dependencies>
           </plugin>
         </plugins>
       </build>
@@ -431,7 +322,6 @@
         <plugins>
           <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
-            <version> 1.7 </version>
             <executions>
               <execution>
                 <id>copy-executable-natives</id>
@@ -476,28 +366,6 @@
                 </goals>
               </execution>
             </executions>
-            <dependencies>
-              <dependency>
-                <groupId>bsf</groupId>
-                <artifactId>bsf</artifactId>
-                <version>2.4.0</version>
-              </dependency>
-              <dependency>
-                <groupId>rhino</groupId>
-                <artifactId>js</artifactId>
-                <version>1.7R2</version>
-              </dependency>
-              <dependency>
-                <groupId>org.apache.ant</groupId>
-                <artifactId>ant-apache-bsf</artifactId>
-                <version>1.8.3</version>
-              </dependency>
-              <dependency>
-                <groupId>org.apache.ant</groupId>
-                <artifactId>ant-nodeps</artifactId>
-                <version>1.8.1</version>
-              </dependency>
-            </dependencies>
           </plugin>
         </plugins>
       </build>
