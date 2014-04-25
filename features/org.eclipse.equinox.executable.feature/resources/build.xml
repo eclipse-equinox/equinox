@@ -198,15 +198,6 @@
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.gtk.s390/${collectingFolder}" includes="launcher" /> 
 	</target>
-	<target name="rootFileslinux_motif_x86">
-		<mkdir dir="${feature.base}/linux.motif.x86/${collectingFolder}"/>
-		<copy todir="${feature.base}/linux.motif.x86/${collectingFolder}" failonerror="true" overwrite="true">
-			<fileset dir="${basedir}/bin/motif/linux/x86" includes="**"			/>
-			<fileset dir="${basedir}/motif_root" includes="**"			/>
-		</copy>
-		<chmod perm="755" dir="${feature.base}/linux.motif.x86/${collectingFolder}" includes="libXm.so.2" /> 
-		<chmod perm="755" dir="${feature.base}/linux.motif.x86/${collectingFolder}" includes="launcher" /> 
-	</target>
 	<target name="rootFilessolaris_gtk_sparc">
 		<mkdir dir="${feature.base}/solaris.gtk.sparc/${collectingFolder}"/>
 		<copy todir="${feature.base}/solaris.gtk.sparc/${collectingFolder}" failonerror="true" overwrite="true">
@@ -220,40 +211,6 @@
 			<fileset dir="${basedir}/bin/gtk/solaris/x86" includes="**"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/solaris.gtk.x86/${collectingFolder}" includes="launcher" /> 
-	</target>
-	<target name="rootFilessolaris_motif_sparc">
-		<mkdir dir="${feature.base}/solaris.motif.sparc/${collectingFolder}"/>
-		<copy todir="${feature.base}/solaris.motif.sparc/${collectingFolder}" failonerror="true" overwrite="true">
-			<fileset dir="${basedir}/contributed/motif/solaris/sparc" includes="**"			/>
-		</copy>
-		<chmod perm="755" dir="${feature.base}/solaris.motif.sparc/${collectingFolder}" includes="launcher" /> 
-	</target>
-	<target name="rootFilesaix_motif_ppc">
-		<mkdir dir="${feature.base}/aix.motif.ppc/${collectingFolder}"/>
-		<copy todir="${feature.base}/aix.motif.ppc/${collectingFolder}" failonerror="true" overwrite="true">
-			<fileset dir="${basedir}/bin/motif/aix/ppc" includes="**"			/>
-		</copy>
-		<chmod perm="755" dir="${feature.base}/aix.motif.ppc/${collectingFolder}" includes="launcher" /> 
-	</target>
-	<target name="rootFileshpux_motif_PA_RISC">
-		<mkdir dir="${feature.base}/hpux.motif.PA_RISC/${collectingFolder}"/>
-		<copy todir="${feature.base}/hpux.motif.PA_RISC/${collectingFolder}" failonerror="true" overwrite="true">
-			<fileset dir="${basedir}/bin/motif/hpux/PA_RISC" includes="**"			/>
-		</copy>
-		<chmod perm="755" dir="${feature.base}/hpux.motif.PA_RISC/${collectingFolder}" includes="launcher" /> 
-	</target>
-	<target name="rootFileshpux_motif_ia64">
-		<mkdir dir="${feature.base}/hpux.motif.ia64/${collectingFolder}"/>
-		<copy todir="${feature.base}/hpux.motif.ia64/${collectingFolder}" failonerror="true" overwrite="true">
-		</copy>
-		<chmod perm="755" dir="${feature.base}/hpux.motif.ia64/${collectingFolder}" includes="launcher" /> 
-	</target>
-	<target name="rootFileshpux_motif_ia64_32">
-		<mkdir dir="${feature.base}/hpux.motif.ia64_32/${collectingFolder}"/>
-		<copy todir="${feature.base}/hpux.motif.ia64_32/${collectingFolder}" failonerror="true" overwrite="true">
-			<fileset dir="${basedir}/bin/motif/hpux/ia64_32" includes="**"			/>
-		</copy>
-		<chmod perm="755" dir="${feature.base}/hpux.motif.ia64_32/${collectingFolder}" includes="launcher" /> 
 	</target>
 	<target name="rootFileshpux_gtk_ia64_32">
 		<mkdir dir="${feature.base}/hpux.gtk.ia64_32/${collectingFolder}"/>
@@ -284,16 +241,10 @@
 		<antcall target="rootFileslinux_gtk_x86_64"/>
 		<antcall target="rootFileslinux_gtk_ia64"/>
 		<antcall target="rootFileslinux_gtk_s390x"/>
-		<antcall target="rootFileslinux_motif_x86"/>
 		<antcall target="rootFilessolaris_gtk_sparc"/>
 		<antcall target="rootFilessolaris_gtk_x86"/>
-		<antcall target="rootFilessolaris_motif_sparc"/>
-		<antcall target="rootFilesaix_motif_ppc"/>
 		<antcall target="rootFilesaix_gtk_ppc64"/>
 		<antcall target="rootFilesaix_gtk_ppc"/>
-		<antcall target="rootFileshpux_motif_PA_RISC"/>
-		<antcall target="rootFileshpux_motif_ia64"/>
-		<antcall target="rootFileshpux_motif_ia64_32"/>
 		<antcall target="rootFileshpux_gtk_ia64_32"/>
 		<antcall target="rootFilesqnx_photon_x86"/>
 	</target>
