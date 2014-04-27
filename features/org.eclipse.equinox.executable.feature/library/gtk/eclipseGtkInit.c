@@ -111,7 +111,7 @@ int loadGtk() {
 	if (gtk3 == NULL || strcmp(gtk3,"1") == 0) {
 		gdkLib = dlopen(GDK3_LIB, DLFLAGS);
 		gtkLib = dlopen(GTK3_LIB, DLFLAGS);
-		if (gtkLib != NULL) {
+		if (gtk3 == NULL && gtkLib != NULL) {
 			const char * (*func)(int, int, int);
 			dlerror();
 			*(void**) (&func) = dlsym(gtkLib, "gtk_check_version");
