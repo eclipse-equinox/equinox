@@ -137,7 +137,7 @@ public class Activator implements BundleActivator {
 		defaultRegistry = RegistryFactory.createRegistry(strategy, masterRegistryKey, userRegistryKey);
 
 		registryRegistration = Activator.getContext().registerService(IExtensionRegistry.class.getName(), defaultRegistry, new Hashtable());
-		defaultProvider = new RegistryProviderOSGI();
+		defaultProvider = new RegistryProviderOSGI(defaultRegistry);
 		// Set the registry provider and specify this as a default registry:
 		RegistryProviderFactory.setDefault(defaultProvider);
 		commandRegistration = EquinoxUtils.registerCommandProvider(Activator.getContext());
@@ -146,7 +146,6 @@ public class Activator implements BundleActivator {
 	private void stopRegistry() {
 		if (defaultRegistry != null) {
 			RegistryProviderFactory.releaseDefault();
-			defaultProvider.release();
 			registryRegistration.unregister();
 			defaultRegistry.stop(masterRegistryKey);
 		}

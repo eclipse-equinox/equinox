@@ -10,40 +10,21 @@
  *******************************************************************************/
 package org.eclipse.core.internal.registry.osgi;
 
-import org.eclipse.core.internal.registry.RegistryMessages;
-import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.spi.IRegistryProvider;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 
 public final class RegistryProviderOSGI implements IRegistryProvider {
 
-	private ServiceTracker registryTracker = null;
+	private final IExtensionRegistry registry;
+
+	public RegistryProviderOSGI(IExtensionRegistry registry) {
+		this.registry = registry;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.equinox.registry.IRegistryProvider#getRegistry()
 	 */
 	public IExtensionRegistry getRegistry() {
-		if (registryTracker == null) {
-			BundleContext context = Activator.getContext();
-			if (context == null) {
-				RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.bundle_not_activated, null));
-				return null;
-			}
-			registryTracker = new ServiceTracker(context, IExtensionRegistry.class.getName(), null);
-			registryTracker.open();
-		}
-		return (IExtensionRegistry) registryTracker.getService();
-	}
-
-	/**
-	 * Release OSGi tracker
-	 */
-	public void release() {
-		if (registryTracker != null) {
-			registryTracker.close();
-			registryTracker = null;
-		}
+		return registry;
 	}
 }
