@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -316,9 +316,16 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		}
 		props.set(Constants.SERVICE_SCOPE, scope, true);
 		props.setReadOnly();
-		Object ranking = props.getProperty(Constants.SERVICE_RANKING);
 
-		serviceranking = (ranking instanceof Integer) ? ((Integer) ranking).intValue() : 0;
+		Object ranking = props.getProperty(Constants.SERVICE_RANKING);
+		if (ranking instanceof Integer) {
+			serviceranking = ((Integer) ranking).intValue();
+		} else {
+			serviceranking = 0;
+			if (ranking != null) {
+				registry.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.WARNING, getBundle(), new ServiceException("Invalid ranking type: " + ranking.getClass(), ServiceException.UNSPECIFIED)); //$NON-NLS-1$
+			}
+		}
 
 		return props;
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 package org.eclipse.osgi.tests.serviceregistry;
 
 import java.util.Hashtable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
@@ -479,6 +481,46 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			if (reg2 != null)
 				reg2.unregister();
 		}
+	}
+
+	public void testInvalidRanking() {
+		final CountDownLatch warning = new CountDownLatch(1);
+		FrameworkListener warningListener = new FrameworkListener() {
+
+			@Override
+			public void frameworkEvent(FrameworkEvent event) {
+				if (FrameworkEvent.WARNING == event.getType() && OSGiTestsActivator.getContext().getBundle().equals(event.getBundle())) {
+					warning.countDown();
+				}
+			}
+		};
+		Runnable runIt = new Runnable() {
+
+			@Override
+			public void run() {
+				// nothing
+			}
+		};
+		Hashtable props = new Hashtable();
+		props.put(getName(), Boolean.TRUE);
+		props.put(Constants.SERVICE_RANKING, "15");
+		ServiceRegistration reg1 = null;
+		try {
+			OSGiTestsActivator.getContext().addFrameworkListener(warningListener);
+			reg1 = getContext().registerService(Runnable.class.getName(), runIt, props);
+		} finally {
+			if (reg1 != null) {
+				reg1.unregister();
+			}
+			OSGiTestsActivator.getContext().removeFrameworkListener(warningListener);
+		}
+
+		try {
+			assertTrue("Timeout waiting for the warning.", warning.await(5, TimeUnit.SECONDS));
+		} catch (InterruptedException e) {
+			fail("Interrupted.", e);
+		}
+
 	}
 
 	private void clearResults(boolean[] results) {
