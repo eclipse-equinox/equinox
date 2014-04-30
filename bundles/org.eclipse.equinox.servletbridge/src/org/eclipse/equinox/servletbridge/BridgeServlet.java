@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2014 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 package org.eclipse.equinox.servletbridge;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.StringTokenizer;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
@@ -60,6 +61,19 @@ public class BridgeServlet extends HttpServlet {
 						getServletContext().log("Bridge Servlet _contextPreloads (" + clazz + ") " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				}
+			}
+		}
+
+		// Forces load of the SSLSocketFactory on the web-app context class loader
+		String initSSLSocketFactory = getServletConfig().getInitParameter("_initSSLSocketFactory"); //$NON-NLS-1$
+		if (!"false".equals(initSSLSocketFactory)) { //$NON-NLS-1$
+			try {
+				Class clazz = this.getClass().getClassLoader().loadClass("javax.net.ssl.SSLSocketFactory"); //$NON-NLS-1$
+				Method getDefaultMethod = clazz.getMethod("getDefault", null); //$NON-NLS-1$
+				getDefaultMethod.invoke(null, null);
+			} catch (Exception e) {
+				// best effort -- log problems
+				getServletContext().log("Bridge Servlet _initSSLSocketFactory - failed - " + e.getMessage()); //$NON-NLS-1$
 			}
 		}
 
