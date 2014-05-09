@@ -331,32 +331,31 @@
                     <!-- We need to get binary bits from binary repo -->
                     <!-- If local binaries had been built, copy will not overwrite 
                       them -->
-                    <copy todir="bin">
+                    <echo message="Copy eclipse binaries to launcher binaries" />  
+                    <copy todir="bin" verbose="true" includeEmptyDirs="false" failonerror="true">
                       <fileset dir="../../../rt.equinox.binaries/org.eclipse.equinox.executable/bin/">
-                        <include name="**/*"/>
+                        <include name="cocoa/macosx/x86/**/*" />
+                        <include name="cocoa/macosx/x86_64/**/*" />
+                        <include name="gtk/aix/ppc/**/*" />
+                        <include name="gtk/aix/ppc64/**/*" />
+                        <include name="gtk/hpux/ia64/**/*" />
+                        <include name="gtk/linux/ppc/**/*" />
+                        <include name="gtk/linux/ppc64/**/*" />
+                        <include name="gtk/linux/x86/**/*" />
+                        <include name="gtk/linux/x86_64/**/*" />
+                        <include name="gtk/solaris/sparc/**/*" />
+                        <include name="gtk/solaris/x86/**/*" />
+                        <include name="win32/win32/x86/**/*" />
+                        <include name="win32/win32/x86_64/**/*" />
                       </fileset>
-                    </copy>
-                    <copy todir="contributed">
                       <fileset dir="../../../rt.equinox.binaries/org.eclipse.equinox.executable/contributed/">
-                        <include name="**/*"/>
+                        <include name="gtk/linux/s390/**/*" />
+                        <include name="gtk/linux/s390x/**/*" />
                       </fileset>
                     </copy>
-                    <!-- Things below were copied from custombuildCallbacks.xml, as 
-                      Tycho does not support that -->
-                    <copy includeEmptyDirs="false" todir="tempBin">
-                      <fileset dir="bin"/>
-                    </copy>
-                    <delete dir="bin"/>
-                    <move todir="bin">
-                      <fileset dir="tempBin"/>
-                    </move>
                     <!-- rename eclipse launchers to "launcher" -->
                     <move todir="bin" verbose="true">
                       <fileset dir="bin"/>
-                      <regexpmapper from="^(.*[/\\])eclipse(.exe)?$" to="\1launcher\2"/>
-                    </move>
-                    <move todir="contributed" verbose="true">
-                      <fileset dir="contributed"/>
                       <regexpmapper from="^(.*[/\\])eclipse(.exe)?$" to="\1launcher\2"/>
                     </move>
                   </target>
