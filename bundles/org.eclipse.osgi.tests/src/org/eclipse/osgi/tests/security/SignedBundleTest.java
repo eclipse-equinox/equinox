@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2012 IBM Corporation and others.
+ * Copyright (c) 2007, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -907,6 +907,22 @@ public class SignedBundleTest extends BaseSecurityTest {
 			} catch (BundleException e) {
 				fail("Failed to uninstall bundle", e);
 			}
+		}
+	}
+
+	public void testBug434711() {
+		try {
+			File nonAsciiFile = getEntryFile(getTestJarPath("bundleWithNonAsciiCharsFilename"));
+
+			assertNotNull("Could not find Non Ascii Chars file!", nonAsciiFile);
+			SignedContent signedContent = getSignedContentFactory().getSignedContent(nonAsciiFile);
+			assertNotNull("SignedContent is null", signedContent);
+			assertTrue("Content is not signed!!", signedContent.isSigned());
+			for (SignedContentEntry entry : signedContent.getSignedEntries()) {
+				entry.verify();
+			}
+		} catch (Exception e) {
+			fail("Unexpected exception", e);
 		}
 	}
 }
