@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -251,6 +251,7 @@ home directory.");
 
 #define XXPERMGEN	  _T_ECLIPSE("-XX:MaxPermSize=")
 #define ACTION_OPENFILE _T_ECLIPSE("openFile")
+#define GTK_VERSION   _T_ECLIPSE("--launcher.GTK_version")
 
 /* constants for ee options file */
 #define EE_EXECUTABLE 			_T_ECLIPSE("-Dee.executable=")
@@ -279,6 +280,7 @@ static _TCHAR**  filePath	  = NULL;			/* list of files to open */
 static _TCHAR*  timeoutString = NULL;			/* timeout value for opening a file */
 static _TCHAR*  defaultAction = NULL;			/* default action for non '-' command line arguments */ 
 static _TCHAR*  iniFile       = NULL;			/* the launcher.ini file set if  --launcher.ini was specified */
+static _TCHAR*  gtkVersionString = NULL;        /* GTK+ version specified by --launcher.GTK_version */
 
 /* variables for ee options */
 static _TCHAR* eeExecutable = NULL;
@@ -327,7 +329,8 @@ static Option options[] = {
     { OPENFILE,		&filePath,		ADJUST_PATH | VALUE_IS_LIST, -1 },
     { TIMEOUT,		&timeoutString, 0,          2 },
     { DEFAULTACTION,&defaultAction, 0,			2 },
-    { WS,			&wsArg,			0,			2 } };
+    { WS,			&wsArg,			0,			2 },
+    { GTK_VERSION,  &gtkVersionString, 0,       2 } };
 static int optionsSize = (sizeof(options) / sizeof(options[0]));
 
 static Option eeOptions[] = {
@@ -482,9 +485,20 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
    	if (defaultAction != NULL) {
    		processDefaultAction(initialArgc, initialArgv);
    	}
-   	
-   	/* try to open the specified file in an already running eclipse */
-   	/* on Mac we are only registering an event handler here, always do this */
+
+	if (gtkVersionString != NULL) {
+		int gtkVersion;
+		_stscanf(gtkVersionString, _T_ECLIPSE("%d"), &gtkVersion);
+
+		if (gtkVersion == 2) {
+			setenv("SWT_GTK3","0",1);
+		} else {
+			setenv("SWT_GTK3","1",1);
+		}
+	}
+
+	/* try to open the specified file in an already running eclipse */
+	/* on Mac we are only registering an event handler here, always do this */
 #ifndef MACOSX
 	if (filePath != NULL && filePath[0] != NULL)
 #endif
