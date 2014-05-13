@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2007, 2014 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -8,7 +8,8 @@
  ******************************************************************************/
 package org.eclipse.osgi.internal.signedcontent;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -127,7 +128,7 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 	 */
 	private void verifyManifestAndSignatureFile(byte[] manifestBytes, byte[] sfBytes) throws SignatureException {
 
-		String sf = new String(sfBytes);
+		String sf = new String(sfBytes, SignedContentConstants.UTF8);
 		sf = stripContinuations(sf);
 
 		// check if there -Digest-Manfiest: header in the file
@@ -162,9 +163,9 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 		}
 	}
 
-	private void populateMDResults(byte mfBuf[], SignerInfo signerInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+	private void populateMDResults(byte mfBuf[], SignerInfo signerInfo) throws NoSuchAlgorithmException {
 		// need to make a string from the MF file data bytes
-		String mfStr = new String(mfBuf, "UTF-8"); //$NON-NLS-1$
+		String mfStr = new String(mfBuf, SignedContentConstants.UTF8);
 
 		// start parsing each entry in the MF String
 		int entryStartOffset = mfStr.indexOf(MF_ENTRY_NEWLN_NAME);
@@ -306,7 +307,7 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 	 * Returns the Base64 encoded digest of the passed set of bytes.
 	 */
 	private static String calculateDigest(MessageDigest digest, byte[] bytes) {
-		return new String(Base64.encode(digest.digest(bytes)));
+		return new String(Base64.encode(digest.digest(bytes)), SignedContentConstants.UTF8);
 	}
 
 	synchronized MessageDigest getMessageDigest(String algorithm) {
@@ -327,7 +328,7 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 	 */
 	private static String getDigAlgFromSF(byte SFBuf[]) {
 		// need to make a string from the MF file data bytes
-		String mfStr = new String(SFBuf);
+		String mfStr = new String(SFBuf, SignedContentConstants.UTF8);
 		String entryStr = null;
 
 		// start parsing each entry in the MF String

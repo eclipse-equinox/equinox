@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2006, 2014 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -194,7 +194,7 @@ public class PKCS7Processor implements SignedContentConstants {
 			eContentBER.stepOver();
 
 			// check time ends w/ 'Z'
-			String dateString = new String(eContentBER.getBytes());
+			String dateString = new String(eContentBER.getBytes(), SignedContentConstants.UTF8);
 			if (!dateString.endsWith("Z")) //$NON-NLS-1$
 				throw new SignatureException("Wrong dateformat used in time-stamp token"); //$NON-NLS-1$
 
