@@ -8,8 +8,7 @@
  ******************************************************************************/
 package org.eclipse.osgi.internal.signedcontent;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -163,9 +162,9 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 		}
 	}
 
-	private void populateMDResults(byte mfBuf[], SignerInfo signerInfo) throws NoSuchAlgorithmException {
+	private void populateMDResults(byte mfBuf[], SignerInfo signerInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		// need to make a string from the MF file data bytes
-		String mfStr = new String(mfBuf);
+		String mfStr = new String(mfBuf, "UTF-8"); //$NON-NLS-1$
 
 		// start parsing each entry in the MF String
 		int entryStartOffset = mfStr.indexOf(MF_ENTRY_NEWLN_NAME);
