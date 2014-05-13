@@ -11,4 +11,5 @@ Bug 423196 - Filetransfer update for Luna M5: httpcomponents 4.2.5/4.2.6
 Bug 419647 - React to ECF feature restructuring
 Bug 429353 - change "includes ECF source" to "requires" in p2.sdk
 Bug 432209 - needs to touch 3 equinox/p2 features, for qualifier change in org.sat4j.pb
+Bug 434703 - equinox-sdk "product build" fails after ECF update
 
