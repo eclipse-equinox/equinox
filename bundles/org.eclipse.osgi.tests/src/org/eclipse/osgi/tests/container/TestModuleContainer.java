@@ -1565,6 +1565,44 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
+	public void testOptionalSubstituted() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+		Module sub_n = installDummyModule("sub.n.MF", "n", container);
+		Module sub_l = installDummyModule("sub.l.MF", "l", container);
+		Module sub_m = installDummyModule("sub.m.MF", "m", container);
+
+		container.resolve(null, false);
+
+		Assert.assertEquals("l should resolve.", State.RESOLVED, sub_l.getState());
+		Assert.assertEquals("m should resolve.", State.RESOLVED, sub_m.getState());
+		Assert.assertEquals("n should resolve.", State.RESOLVED, sub_n.getState());
+	}
+
+	@Test
+	public void testStaticSubstituted() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+		Module sub_n = installDummyModule("sub.n.static.MF", "n", container);
+		Module sub_l = installDummyModule("sub.l.MF", "l", container);
+		Module sub_m = installDummyModule("sub.m.MF", "m", container);
+
+		container.resolve(null, false);
+
+		Assert.assertEquals("l should resolve.", State.RESOLVED, sub_l.getState());
+		Assert.assertEquals("m should resolve.", State.RESOLVED, sub_m.getState());
+		Assert.assertEquals("n should resolve.", State.RESOLVED, sub_n.getState());
+	}
+
+	@Test
 	public void testMultiCardinalityUses() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();

@@ -1,0 +1,6 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: sub.l
+Bundle-Version: 1.0.0
+Export-Package: substituted; version=1.0
+Import-Package: substituted; version=1.0
+
