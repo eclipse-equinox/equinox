@@ -169,6 +169,9 @@ public class EclipseStarter {
 		if (equinoxConfig != null) {
 			return equinoxConfig.setProperty(key, value);
 		}
+		if ("true".equals(getConfiguration().get(EquinoxConfiguration.PROP_USE_SYSTEM_PROPERTIES))) { //$NON-NLS-1$
+			System.setProperty(key, value);
+		}
 		return getConfiguration().put(key, value);
 	}
 
