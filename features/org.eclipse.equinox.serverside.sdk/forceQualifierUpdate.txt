@@ -3,3 +3,5 @@ Bug 403352 - Update all parent versions to match our build stream
  -- Force update for luna
 Bug 417264 - We should update our version of Jetty
 Bug 416718 - We should update our version of Jetty for SR2
+Bug 436039 - Hard to explain build failure in I20140528-0115
+
