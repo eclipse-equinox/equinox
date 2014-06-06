@@ -1070,6 +1070,38 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
+	public void testTimestampSeeding() throws BundleException, IOException, InterruptedException {
+		Assert.assertNotEquals("The timestamps are the same!", createTestContainerAndGetTimestamp(), createTestContainerAndGetTimestamp());
+	}
+
+	private long createTestContainerAndGetTimestamp() throws BundleException, IOException, InterruptedException {
+		// wait here to ensure current time really has increased
+		Thread.sleep(100);
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+		DummyModuleDatabase database = adaptor.getDatabase();
+
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+
+		// actually launch the container
+		systemBundle.start();
+
+		// install some bundles and set some settings
+		container.getFrameworkStartLevel().setInitialBundleStartLevel(2);
+		Module c4 = installDummyModule("c4_v1.MF", "c4_v1", container);
+		Module lazy1 = installDummyModule("lazy1_v1.MF", "lazy1", container);
+
+		container.resolve(Arrays.asList(c4, lazy1), true);
+
+		// set some settings
+		Assert.assertEquals("Wrong startlevel.", 2, c4.getStartLevel());
+		Assert.assertEquals("Wrong startlevel.", 2, lazy1.getStartLevel());
+		return database.getTimestamp();
+	}
+
+	@Test
 	public void testEventsStartLevelBeginningAt100() throws BundleException, IOException {
 		doTestEventsStartLevel(100);
 	}

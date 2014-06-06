@@ -97,6 +97,13 @@ public class ModuleDatabase {
 	 */
 	final AtomicLong allTimeStamp;
 
+	/**
+	 * Holds the construction time which is used to check for empty database on
+	 * load.  This is necessary to ensure the loaded database is consistent with
+	 * what was persisted.
+	 */
+	final long constructionTime;
+
 	private final Capabilities capabilities;
 
 	/**
@@ -140,8 +147,10 @@ public class ModuleDatabase {
 		this.wirings = new HashMap<ModuleRevision, ModuleWiring>();
 		// Start at id 1 because 0 is reserved for the system bundle
 		this.nextId = new AtomicLong(1);
-		this.revisionsTimeStamp = new AtomicLong(0);
-		this.allTimeStamp = new AtomicLong(0);
+		// seed with current time to avoid duplicate timestamps after using -clean
+		this.constructionTime = System.currentTimeMillis();
+		this.revisionsTimeStamp = new AtomicLong(constructionTime);
+		this.allTimeStamp = new AtomicLong(constructionTime);
 		this.moduleSettings = new HashMap<Long, EnumSet<Settings>>();
 		this.capabilities = new Capabilities();
 	}
@@ -865,7 +874,7 @@ public class ModuleDatabase {
 	public final void load(DataInputStream in) throws IOException {
 		writeLock();
 		try {
-			if (allTimeStamp.get() != 0)
+			if (allTimeStamp.get() != constructionTime)
 				throw new IllegalStateException("Can only load into a empty database."); //$NON-NLS-1$
 			Persistence.load(this, in);
 		} finally {
