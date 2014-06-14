@@ -116,7 +116,7 @@ public class ConsoleMsg extends NLS {
 	public static final String CONSOLE_HELP_STOP_COMMAND_DESCRIPTION = "stop the specified bundle(s)";
 	public static final String CONSOLE_HELP_STOP_COMMAND_ARGUMENT_DESCRIPTION = "bundle(s) to stop";
 	public static final String CONSOLE_HELP_INSTALL_COMMAND_DESCRIPTION = "install and optionally start bundle from the given URL";
-	public static final String CONSOLE_HELP_INSTALL_START_OPTION_DESCRIPTION = "spedify if the bundle should be started after installation";
+	public static final String CONSOLE_HELP_INSTALL_START_OPTION_DESCRIPTION = "specify if the bundle should be started after installation";
 	public static final String CONSOLE_HELP_INSTALL_START_ARGUMENT_DESCRIPTION = "Location of bundle to install";
 	public static final String CONSOLE_HELP_UPDATE_COMMAND_DESCRIPTION = "update the specified bundle(s)";
 	public static final String CONSOLE_HELP_UPDATE_COMMAND_ARGUMENT_DESCRIPTION = "bundle(s) to update";
