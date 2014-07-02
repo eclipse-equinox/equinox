@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -3994,6 +3994,37 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("1.0", testNativeBundle1.isResolved()); //$NON-NLS-1$
 		assertTrue("2.0", testNativeBundle2.isResolved()); //$NON-NLS-1$
 		assertTrue("3.0", testNativeBundle3.isResolved()); //$NON-NLS-1$
+	}
+
+	public void testNativeCodeResolution06() throws BundleException {
+		State state = buildEmptyState();
+		Dictionary[] props = new Dictionary[] {new Hashtable(), new Hashtable(), new Hashtable()};
+
+		// empty props[0]
+
+		props[1].put("osgi.ws", "win32"); //$NON-NLS-1$ //$NON-NLS-2$
+		props[1].put("osgi.os", "win32"); //$NON-NLS-1$ //$NON-NLS-2$
+		props[1].put("osgi.arch", "x86_64"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		props[2].put("osgi.ws", "win32"); //$NON-NLS-1$ //$NON-NLS-2$
+		props[2].put("osgi.os", "win32"); //$NON-NLS-1$ //$NON-NLS-2$
+		props[2].put("osgi.arch", "x86"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		state.setPlatformProperties(props);
+
+		Hashtable manifest = new Hashtable();
+		long bundleID = 0;
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "NativeBundle1"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_NATIVECODE, "Bundle-NativeCode: nativefile1.txt;processor=x86;osname=win32"); //$NON-NLS-1$
+		BundleDescription testNativeBundle1 = state.getFactory().createBundleDescription(state, manifest, "NativeBundle", bundleID++); //$NON-NLS-1$
+
+		state.addBundle(testNativeBundle1);
+		state.resolve();
+		assertTrue("1.0", testNativeBundle1.isResolved()); //$NON-NLS-1$
 	}
 
 	public void testMultiStateAdd01() throws BundleException {
