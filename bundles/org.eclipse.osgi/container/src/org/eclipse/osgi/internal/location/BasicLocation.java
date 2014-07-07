@@ -224,6 +224,6 @@ public class BasicLocation implements Location {
 		filename = filename.replace('\\', '/');
 		if (filename.length() > 0 && filename.charAt(0) == '/')
 			filename.substring(1);
-		return new URL(prefix + dataAreaPrefix + filename);
+		return LocationHelper.buildURL(prefix + dataAreaPrefix + filename, false);
 	}
 }
