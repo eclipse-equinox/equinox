@@ -115,8 +115,27 @@ public class PackageAdminImpl implements PackageAdmin {
 		for (BundleCapability capability : packageCaps) {
 			ModuleWiring wiring = (ModuleWiring) capability.getRevision().getWiring();
 			if (wiring != null) {
-				if (!wiring.getSubstitutedNames().contains(capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
-					result.add(new ExportedPackageImpl((ModuleCapability) capability, wiring));
+				Collection<ModuleWiring> wirings = Collections.emptyList();
+				if ((capability.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+					// This is a fragment, just get all the host wirings
+					List<ModuleWire> hostWires = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
+					if (hostWires != null && !hostWires.isEmpty()) {
+						wirings = new ArrayList<ModuleWiring>(hostWires.size());
+						for (ModuleWire hostWire : hostWires) {
+							ModuleWiring hostWiring = hostWire.getProviderWiring();
+							if (hostWiring != null) {
+								wirings.add(hostWiring);
+							}
+						}
+					}
+				} else {
+					// just a single host wiring
+					wirings = Collections.singletonList(wiring);
+				}
+				for (ModuleWiring moduleWiring : wirings) {
+					if (!moduleWiring.getSubstitutedNames().contains(capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
+						result.add(new ExportedPackageImpl((ModuleCapability) capability, moduleWiring));
+					}
 				}
 			}
 		}
