@@ -1651,6 +1651,15 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	public void testBuddyClassloadingBug438904() throws Exception {
+		Bundle host = installer.installBundle("test.bug438904.host");
+		Bundle frag = installer.installBundle("test.bug438904.frag");
+		Bundle global = installer.installBundle("test.bug438904.global");
+		installer.resolveBundles(new Bundle[] {host, frag, global});
+		global.loadClass("test.bug438904.host.Test1");
+		global.loadClass("test.bug438904.frag.Test2");
+	}
+
 	public void testBundleReference01() throws Exception {
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
 		Class clazz = test.loadClass("test1.Activator"); //$NON-NLS-1$

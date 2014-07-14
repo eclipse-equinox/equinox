@@ -124,5 +124,8 @@
 	<classpathentry kind="src" output="bundle_tests/ext.framework.osgiee.a.jar" path="bundles_src/ext.framework.osgiee.a"/>
 	<classpathentry kind="src" output="bundle_tests/ext.framework.osgiee.b.jar" path="bundles_src/ext.framework.osgiee.b"/>
 	<classpathentry kind="src" output="bundle_tests/classloader.hooks.a" path="bundles_src/classloader.hooks.a"/>
+	<classpathentry kind="src" output="bundle_tests/test.bug438904.host" path="bundles_src/test.bug438904.host"/>
+	<classpathentry kind="src" output="bundle_tests/test.bug438904.frag" path="bundles_src/test.bug438904.frag"/>
+	<classpathentry kind="src" output="bundle_tests/test.bug438904.global" path="bundles_src/test.bug438904.global"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

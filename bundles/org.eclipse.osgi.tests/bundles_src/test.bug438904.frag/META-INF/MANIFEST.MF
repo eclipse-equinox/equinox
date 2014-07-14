@@ -1,0 +1,3 @@
+Bundle-SymbolicName: test.bug438904.host
+Bundle-Version: 1.0
+Export-Package: test.bug438904.host
