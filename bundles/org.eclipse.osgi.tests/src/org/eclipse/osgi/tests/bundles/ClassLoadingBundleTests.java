@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2013 IBM Corporation and others.
+ * Copyright (c) 2006, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -2022,5 +2022,13 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			fail("Unexpected exception reading url: " + url.toExternalForm(), e); //$NON-NLS-1$
 		}
 		return sb.toString();
+	}
+
+	public void testDefaultLocalUninstall() throws Exception {
+		Bundle test = installer.installBundle("security.a"); //$NON-NLS-1$
+		test.uninstall();
+		Dictionary<String, String> headers = test.getHeaders();
+		String bundleName = headers.get(Constants.BUNDLE_NAME);
+		assertEquals("Wrong bundle name header.", "default", bundleName);
 	}
 }

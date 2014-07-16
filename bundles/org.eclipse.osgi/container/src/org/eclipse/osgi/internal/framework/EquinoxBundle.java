@@ -10,12 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.framework;
 
-import org.osgi.framework.dto.*;
-
-import org.osgi.framework.startlevel.dto.BundleStartLevelDTO;
-import org.osgi.framework.startlevel.dto.FrameworkStartLevelDTO;
-import org.osgi.framework.wiring.dto.BundleRevisionDTO;
-import org.osgi.framework.wiring.dto.BundleWiringDTO;
 import java.io.*;
 import java.net.URL;
 import java.security.*;
@@ -45,11 +39,16 @@ import org.eclipse.osgi.signedcontent.*;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.Storage;
 import org.osgi.framework.*;
+import org.osgi.framework.dto.*;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
+import org.osgi.framework.startlevel.dto.BundleStartLevelDTO;
+import org.osgi.framework.startlevel.dto.FrameworkStartLevelDTO;
 import org.osgi.framework.wiring.*;
+import org.osgi.framework.wiring.dto.BundleRevisionDTO;
+import org.osgi.framework.wiring.dto.BundleWiringDTO;
 
 public class EquinoxBundle implements Bundle, BundleReference {
 
@@ -450,6 +449,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 	@Override
 	public void uninstall() throws BundleException {
+		// be sure to prime the headers with default local; calling priv method to avoid permission check
+		privGetHeaders(null);
 		Storage storage = equinoxContainer.getStorage();
 		storage.getModuleContainer().uninstall(module);
 	}
@@ -462,6 +463,10 @@ public class EquinoxBundle implements Bundle, BundleReference {
 	@Override
 	public Dictionary<String, String> getHeaders(String locale) {
 		equinoxContainer.checkAdminPermission(this, AdminPermission.METADATA);
+		return privGetHeaders(locale);
+	}
+
+	private Dictionary<String, String> privGetHeaders(String locale) {
 		Generation current = (Generation) module.getCurrentRevision().getRevisionInfo();
 		return current.getHeaders(locale);
 	}
