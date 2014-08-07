@@ -2189,6 +2189,23 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	static final String nullTest = "null.test";
+
+	public void testNullConfigurationValue() throws BundleException {
+		System.setProperty(nullTest, "system");
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(nullTest, null);
+		Equinox equinox = new Equinox(configuration);
+		equinox.start();
+		String nullValue = equinox.getBundleContext().getProperty(nullTest);
+		assertNull(nullTest + " is not null: " + nullValue, nullValue);
+		String systemNullValue = System.getProperty(nullTest);
+		assertEquals("Wrong system null value.", "system", systemNullValue);
+		equinox.stop();
+	}
+
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {
 		outputDir.mkdirs();
 
