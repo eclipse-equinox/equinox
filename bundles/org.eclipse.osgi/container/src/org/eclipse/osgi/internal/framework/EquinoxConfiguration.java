@@ -191,13 +191,26 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	private final static Collection<String> populateInitConfig = Arrays.asList(PROP_OSGI_ARCH, PROP_OSGI_OS, PROP_OSGI_WS, PROP_OSGI_NL, FRAMEWORK_OS_NAME, FRAMEWORK_OS_VERSION, FRAMEWORK_PROCESSOR, FRAMEWORK_LANGUAGE);
 
+	private final static Object NULL_CONFIG = new Object() {
+		public String toString() {
+			return "null"; //$NON-NLS-1$
+		}
+	};
+
 	EquinoxConfiguration(Map<String, ?> initialConfiguration, HookRegistry hookRegistry) {
 		this.initialConfig = initialConfiguration == null ? new HashMap<String, Object>(0) : new HashMap<String, Object>(initialConfiguration);
 		this.hookRegistry = hookRegistry;
 		Object useSystemPropsValue = initialConfig.get(PROP_USE_SYSTEM_PROPERTIES);
 		boolean useSystemProps = useSystemPropsValue == null ? false : Boolean.parseBoolean(useSystemPropsValue.toString());
 		this.configuration = useSystemProps ? System.getProperties() : new Properties();
-		this.configuration.putAll(initialConfig);
+		// do this the hard way to handle null values
+		for (Map.Entry<String, ?> initialEntry : initialConfiguration.entrySet()) {
+			if (initialEntry.getValue() == null) {
+				this.configuration.put(initialEntry.getKey(), NULL_CONFIG);
+			} else {
+				this.configuration.put(initialEntry.getKey(), initialEntry.getValue());
+			}
+		}
 
 		initializeProperties(this.configuration, aliasMapper);
 		for (String initialKey : populateInitConfig) {
@@ -429,18 +442,22 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public String clearConfiguration(String key) {
 		Object result = configuration.remove(key);
+		configuration.put(key, NULL_CONFIG);
 		return result instanceof String ? (String) result : null;
 	}
 
 	public Map<String, String> getConfiguration() {
-		Map<String, String> result = new HashMap<String, String>(configuration.size());
-		for (Object key : configuration.keySet()) {
-			if (key instanceof String) {
-				String skey = (String) key;
-				result.put(skey, configuration.getProperty(skey));
+		// must sync on configuration to avoid concurrent modification exception
+		synchronized (configuration) {
+			Map<String, String> result = new HashMap<String, String>(configuration.size());
+			for (Object key : configuration.keySet()) {
+				if (key instanceof String) {
+					String skey = (String) key;
+					result.put(skey, configuration.getProperty(skey));
+				}
 			}
+			return result;
 		}
-		return result;
 	}
 
 	public Debug getDebug() {
@@ -458,7 +475,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	@Override
 	public String getProperty(String key) {
 		String result = getConfiguration(key);
-		return result == null ? System.getProperty(key) : result;
+		return result == null && !this.configuration.containsKey(key) ? System.getProperty(key) : result;
 	}
 
 	@Override
