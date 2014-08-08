@@ -1,6 +1,6 @@
 #!/bin/sh
 #*******************************************************************************
-# Copyright (c) 2000, 2010 IBM Corporation and others.
+# Copyright (c) 2000, 2014 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at 
@@ -104,6 +104,12 @@ case $defaultOS in
 				[ -d /bluebird/teamswt/swt-builddir/JDKs/PPC64/ibm-java2-ppc64-50 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/PPC64/ibm-java2-ppc64-50"
 				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
+			"ppc64le")
+				defaultOSArch="ppc64le"
+				defaultJava=DEFAULT_JAVA_EXEC
+				[ -d /bluebird/teamswt/swt-builddir/JDKs/PPC64LE/ibm-java2-ppc64le-50 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/PPC64LE/ibm-java2-ppc64le-50"
+				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
+				;;
 			"s390")
 				defaultOSArch="s390"
 				defaultJava=DEFAULT_JAVA_EXEC
@@ -197,7 +203,7 @@ elif [ -z "$JAVA_HOME" -a -n  "$defaultJavaHome" ]; then
 	export JAVA_HOME
 fi
 
-if [ "$defaultOSArch" = "ppc64" ];  then
+if [ "$defaultOSArch" = "ppc64" -o $defaultOSArch = "ppc64le" ];  then
 	if [ "$defaultOS" = "aix" ];  then
 		M_ARCH=-maix64
 	else

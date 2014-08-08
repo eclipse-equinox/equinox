@@ -34,9 +34,9 @@
 
 	<target name="build.update.jar" depends="init" description="Build the feature jar of: org.eclipse.platform.launchers for an update site.">
 	</target>
-	
+
 	<target name="publish.bin.parts" depends="init" if="p2.publish.parts">
-		<eclipse.gatherFeature 
+		<eclipse.gatherFeature
 		   metadataRepository="${p2.build.repo}"
 		   artifactRepository="${p2.build.repo}"
 		   buildResultFolder="${basedir}"
@@ -47,7 +47,7 @@
 	<target name="gather.bin.parts" depends="init" if="feature.base">
 		<subant target="rootFiles${os}_${ws}_${arch}" buildpath="." failonerror="false" inheritall="true"/>
 	</target>
-	
+
 	<target name="rootFileswin32_win32_x86">
 		<mkdir dir="${feature.base}/win32.win32.x86/${collectingFolder}"/>
 		<copy todir="${feature.base}/win32.win32.x86/${collectingFolder}" failonerror="true" overwrite="true">
@@ -55,9 +55,9 @@
 				<include name="launcher.exe"/>
 			</fileset>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/win32.win32.x86/${collectingFolder}" includes="launcher.exe" /> 
+		<chmod perm="755" dir="${feature.base}/win32.win32.x86/${collectingFolder}" includes="launcher.exe" />
 	</target>
-	
+
 	<target name="rootFileswin32_win32_x86_64">
 		<mkdir dir="${feature.base}/win32.win32.x86_64/${collectingFolder}"/>
 		<copy todir="${feature.base}/win32.win32.x86_64/${collectingFolder}" failonerror="true" overwrite="true">
@@ -65,9 +65,9 @@
 				<include name="launcher.exe"/>
 			</fileset>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/win32.win32.x86_64/${collectingFolder}" includes="launcher.exe" /> 
+		<chmod perm="755" dir="${feature.base}/win32.win32.x86_64/${collectingFolder}" includes="launcher.exe" />
 	</target>
-	
+
 	<target name="rootFileswin32_win32_ia64">
 		<mkdir dir="${feature.base}/win32.win32.ia64/${collectingFolder}"/>
 		<copy todir="${feature.base}/win32.win32.ia64/${collectingFolder}" failonerror="true" overwrite="true">
@@ -75,9 +75,9 @@
 				<include name="launcher.exe"/>
 			</fileset>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/win32.win32.ia64/${collectingFolder}" includes="launcher.exe" /> 
+		<chmod perm="755" dir="${feature.base}/win32.win32.ia64/${collectingFolder}" includes="launcher.exe" />
 	</target>
-			
+
 	<target name="rootFileswin32_wpf_x86">
 		<mkdir dir="${feature.base}/win32.wpf.x86/${collectingFolder}"/>
 		<copy todir="${feature.base}/win32.wpf.x86/${collectingFolder}/" failonerror="true" overwrite="true">
@@ -85,48 +85,48 @@
 				<include name="launcher.exe"/>
 			</fileset>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/win32.wpf.x86/${collectingFolder}" includes="launcher.exe" /> 
+		<chmod perm="755" dir="${feature.base}/win32.wpf.x86/${collectingFolder}" includes="launcher.exe" />
 	</target>
-		
+
 	<target name="rootFilesmacosx_carbon_ppc">
 		<mkdir dir="${feature.base}/macosx.carbon.ppc/${collectingFolder}"/>
 		<copy todir="${feature.base}/macosx.carbon.ppc/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/carbon/macosx/ppc" includes="**"			/>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/macosx.carbon.ppc/${collectingFolder}" includes="${launcherName}" /> 
-		<chmod perm="755" dir="${feature.base}/macosx.carbon.ppc/${collectingFolder}" includes="Eclipse.app/Contents/MacOS/launcher" /> 
+		<chmod perm="755" dir="${feature.base}/macosx.carbon.ppc/${collectingFolder}" includes="${launcherName}" />
+		<chmod perm="755" dir="${feature.base}/macosx.carbon.ppc/${collectingFolder}" includes="Eclipse.app/Contents/MacOS/launcher" />
 	</target>
 	<target name="rootFilesmacosx_carbon_x86">
 		<mkdir dir="${feature.base}/macosx.carbon.x86/${collectingFolder}"/>
 		<copy todir="${feature.base}/macosx.carbon.x86/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/carbon/macosx/x86" includes="**"			/>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/macosx.carbon.x86/${collectingFolder}" includes="${launcherName}" /> 
-		<chmod perm="755" dir="${feature.base}/macosx.carbon.x86/${collectingFolder}" includes="Eclipse.app/Contents/MacOS/launcher" /> 
+		<chmod perm="755" dir="${feature.base}/macosx.carbon.x86/${collectingFolder}" includes="${launcherName}" />
+		<chmod perm="755" dir="${feature.base}/macosx.carbon.x86/${collectingFolder}" includes="Eclipse.app/Contents/MacOS/launcher" />
 	</target>
 	<target name="rootFilesmacosx_cocoa_ppc">
 		<mkdir dir="${feature.base}/macosx.cocoa.ppc/${collectingFolder}"/>
 		<copy todir="${feature.base}/macosx.cocoa.ppc/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/cocoa/macosx/ppc" includes="**"			/>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/macosx.cocoa.ppc/${collectingFolder}" includes="${launcherName}" /> 
-		<chmod perm="755" dir="${feature.base}/macosx.cocoa.ppc/${collectingFolder}" includes="Eclipse.app/Contents/MacOS/launcher" /> 
+		<chmod perm="755" dir="${feature.base}/macosx.cocoa.ppc/${collectingFolder}" includes="${launcherName}" />
+		<chmod perm="755" dir="${feature.base}/macosx.cocoa.ppc/${collectingFolder}" includes="Eclipse.app/Contents/MacOS/launcher" />
 	</target>
 	<target name="rootFilesmacosx_cocoa_x86">
 		<mkdir dir="${feature.base}/macosx.cocoa.x86/${collectingFolder}"/>
 		<copy todir="${feature.base}/macosx.cocoa.x86/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/cocoa/macosx/x86" includes="**"			/>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/macosx.cocoa.x86/${collectingFolder}" includes="${launcherName}" /> 
-		<chmod perm="755" dir="${feature.base}/macosx.cocoa.x86/${collectingFolder}" includes="Eclipse.app/Contents/MacOS/launcher" /> 
+		<chmod perm="755" dir="${feature.base}/macosx.cocoa.x86/${collectingFolder}" includes="${launcherName}" />
+		<chmod perm="755" dir="${feature.base}/macosx.cocoa.x86/${collectingFolder}" includes="Eclipse.app/Contents/MacOS/launcher" />
 	</target>
 	<target name="rootFilesmacosx_cocoa_x86_64">
 		<mkdir dir="${feature.base}/macosx.cocoa.x86_64/${collectingFolder}"/>
 		<copy todir="${feature.base}/macosx.cocoa.x86_64/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/cocoa/macosx/x86_64" includes="**"			/>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/macosx.cocoa.x86_64/${collectingFolder}" includes="${launcherName}" /> 
-		<chmod perm="755" dir="${feature.base}/macosx.cocoa.x86_64/${collectingFolder}" includes="Eclipse.app/Contents/MacOS/launcher" /> 
+		<chmod perm="755" dir="${feature.base}/macosx.cocoa.x86_64/${collectingFolder}" includes="${launcherName}" />
+		<chmod perm="755" dir="${feature.base}/macosx.cocoa.x86_64/${collectingFolder}" includes="Eclipse.app/Contents/MacOS/launcher" />
 	</target>
 	<target name="rootFileslinux_gtk_x86">
 		<mkdir dir="${feature.base}/linux.gtk.x86/${collectingFolder}"/>
@@ -134,7 +134,7 @@
 			<fileset dir="${basedir}/bin/gtk/linux/x86" includes="**"			/>
 			<fileset dir="${basedir}/gtk_root" includes="**"			/>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/linux.gtk.x86/${collectingFolder}" includes="launcher" /> 
+		<chmod perm="755" dir="${feature.base}/linux.gtk.x86/${collectingFolder}" includes="launcher" />
 	</target>
 	<target name="rootFileslinux_gtk_ppc">
 		<mkdir dir="${feature.base}/linux.gtk.ppc/${collectingFolder}"/>
@@ -150,7 +150,15 @@
 			<fileset dir="${basedir}/bin/gtk/linux/ppc64" includes="**"			/>
 			<fileset dir="${basedir}/gtk_root" includes="**"			/>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/linux.gtk.ppc64/${collectingFolder}" includes="launcher" /> 
+		<chmod perm="755" dir="${feature.base}/linux.gtk.ppc64/${collectingFolder}" includes="launcher" />
+	</target>
+	<target name="rootFileslinux_gtk_ppc64le">
+		<mkdir dir="${feature.base}/linux.gtk.ppc64le/${collectingFolder}"/>
+		<copy todir="${feature.base}/linux.gtk.ppc64le/${collectingFolder}" failonerror="true" overwrite="true">
+			<fileset dir="${basedir}/bin/gtk/linux/ppc64le" includes="**"			/>
+			<fileset dir="${basedir}/gtk_root" includes="**"			/>
+		</copy>
+		<chmod perm="755" dir="${feature.base}/linux.gtk.ppc64le/${collectingFolder}" includes="launcher" />
 	</target>
 	<target name="rootFilesaix_gtk_ppc64">
 		<mkdir dir="${feature.base}/aix.gtk.ppc64/${collectingFolder}"/>
@@ -158,7 +166,7 @@
 			<fileset dir="${basedir}/bin/gtk/aix/ppc64" includes="**"			/>
 			<fileset dir="${basedir}/gtk_root" includes="**"			/>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/aix.gtk.ppc64/${collectingFolder}" includes="launcher" /> 
+		<chmod perm="755" dir="${feature.base}/aix.gtk.ppc64/${collectingFolder}" includes="launcher" />
 	</target>
 	<target name="rootFilesaix_gtk_ppc">
 		<mkdir dir="${feature.base}/aix.gtk.ppc/${collectingFolder}"/>
@@ -166,7 +174,7 @@
 			<fileset dir="${basedir}/bin/gtk/aix/ppc" includes="**"			/>
 			<fileset dir="${basedir}/gtk_root" includes="**"			/>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/aix.gtk.ppc/${collectingFolder}" includes="launcher" /> 
+		<chmod perm="755" dir="${feature.base}/aix.gtk.ppc/${collectingFolder}" includes="launcher" />
 	</target>
 	<target name="rootFileslinux_gtk_x86_64">
 		<mkdir dir="${feature.base}/linux.gtk.x86_64/${collectingFolder}"/>
@@ -174,13 +182,13 @@
 			<fileset dir="${basedir}/bin/gtk/linux/x86_64" includes="**"			/>
 			<fileset dir="${basedir}/gtk_root" includes="**"			/>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/linux.gtk.x86_64/${collectingFolder}" includes="launcher" /> 
+		<chmod perm="755" dir="${feature.base}/linux.gtk.x86_64/${collectingFolder}" includes="launcher" />
 	</target>
 	<target name="rootFileslinux_gtk_ia64">
 		<mkdir dir="${feature.base}/linux.gtk.ia64/${collectingFolder}"/>
 		<copy todir="${feature.base}/linux.gtk.ia64/${collectingFolder}" failonerror="true" overwrite="true">
 		</copy>
-		<chmod perm="755" dir="${feature.base}/linux.gtk.ia64/${collectingFolder}" includes="launcher" /> 
+		<chmod perm="755" dir="${feature.base}/linux.gtk.ia64/${collectingFolder}" includes="launcher" />
 	</target>
 	<target name="rootFileslinux_gtk_s390x">
 		<mkdir dir="${feature.base}/linux.gtk.s390x/${collectingFolder}"/>
@@ -188,7 +196,7 @@
 			<fileset dir="${basedir}/contributed/gtk/linux/s390x" includes="**"			/>
 			<fileset dir="${basedir}/gtk_root" includes="**"			/>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/linux.gtk.s390x/${collectingFolder}" includes="launcher" /> 
+		<chmod perm="755" dir="${feature.base}/linux.gtk.s390x/${collectingFolder}" includes="launcher" />
 	</target>
 	<target name="rootFileslinux_gtk_s390">
 		<mkdir dir="${feature.base}/linux.gtk.s390/${collectingFolder}"/>
@@ -196,35 +204,35 @@
 			<fileset dir="${basedir}/contributed/gtk/linux/s390" includes="**"			/>
 			<fileset dir="${basedir}/gtk_root" includes="**"			/>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/linux.gtk.s390/${collectingFolder}" includes="launcher" /> 
+		<chmod perm="755" dir="${feature.base}/linux.gtk.s390/${collectingFolder}" includes="launcher" />
 	</target>
 	<target name="rootFilessolaris_gtk_sparc">
 		<mkdir dir="${feature.base}/solaris.gtk.sparc/${collectingFolder}"/>
 		<copy todir="${feature.base}/solaris.gtk.sparc/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/gtk/solaris/sparc" includes="**"			/>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/solaris.gtk.sparc/${collectingFolder}" includes="launcher" /> 
+		<chmod perm="755" dir="${feature.base}/solaris.gtk.sparc/${collectingFolder}" includes="launcher" />
 	</target>
 	<target name="rootFilessolaris_gtk_x86">
 		<mkdir dir="${feature.base}/solaris.gtk.x86/${collectingFolder}"/>
 		<copy todir="${feature.base}/solaris.gtk.x86/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/gtk/solaris/x86" includes="**"			/>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/solaris.gtk.x86/${collectingFolder}" includes="launcher" /> 
+		<chmod perm="755" dir="${feature.base}/solaris.gtk.x86/${collectingFolder}" includes="launcher" />
 	</target>
 	<target name="rootFileshpux_gtk_ia64_32">
 		<mkdir dir="${feature.base}/hpux.gtk.ia64_32/${collectingFolder}"/>
 		<copy todir="${feature.base}/hpux.gtk.ia64_32/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/gtk/hpux/ia64_32" includes="**"			/>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/hpux.gtk.ia64_32/${collectingFolder}" includes="launcher" /> 
+		<chmod perm="755" dir="${feature.base}/hpux.gtk.ia64_32/${collectingFolder}" includes="launcher" />
 	</target>
 	<target name="rootFilesqnx_photon_x86">
 		<mkdir dir="${feature.base}/qnx.photon.x86/${collectingFolder}"/>
 		<copy todir="${feature.base}/qnx.photon.x86/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/photon/qnx/x86" includes="**"			/>
 		</copy>
-		<chmod perm="755" dir="${feature.base}/qnx.photon.x86/${collectingFolder}" includes="launcher" /> 
+		<chmod perm="755" dir="${feature.base}/qnx.photon.x86/${collectingFolder}" includes="launcher" />
 	</target>
 	<target name="rootFilesgroup_group_group">
 		<antcall target="rootFileswin32_win32_x86"/>
@@ -238,6 +246,7 @@
 		<antcall target="rootFileslinux_gtk_x86"/>
 		<antcall target="rootFileslinux_gtk_ppc"/>
 		<antcall target="rootFileslinux_gtk_ppc64"/>
+		<antcall target="rootFileslinux_gtk_ppc64le"/>
 		<antcall target="rootFileslinux_gtk_x86_64"/>
 		<antcall target="rootFileslinux_gtk_ia64"/>
 		<antcall target="rootFileslinux_gtk_s390x"/>
@@ -263,7 +272,7 @@
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
 	</target>
-	
+
 	<target name="gather.sources">
 	</target>
 

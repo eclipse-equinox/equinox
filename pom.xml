@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright (c) 2012 Eclipse Foundation.
+  Copyright (c) 2012, 2014 Eclipse Foundation.
   All rights reserved. This program and the accompanying materials
   are made available under the terms of the Eclipse Distribution License v1.0
   which accompanies this distribution, and is available at
@@ -57,6 +57,7 @@
     <module>bundles/org.eclipse.equinox.launcher.gtk.hpux.ia64</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.linux.ppc</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.linux.ppc64</module>
+    <module>bundles/org.eclipse.equinox.launcher.gtk.linux.ppc64le</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.linux.s390</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.linux.s390x</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.linux.x86</module>
@@ -73,18 +74,4 @@
     <module>features/org.eclipse.equinox.executable.feature</module>
     <module>features/org.eclipse.osgi.compatibility.plugins.feature</module>
   </modules>
-  <profiles>
-    <profile>
-      <id>build-native-launchers-gtk.linux.ppc64le</id>
-      <activation>
-        <property>
-          <name>native</name>
-          <value>gtk.linux.ppc64le</value>
-        </property>
-      </activation>
-      <modules>
-        <module>bundles/org.eclipse.equinox.launcher.gtk.linux.ppc64le</module>
-      </modules>
-    </profile>
-  </profiles>
 </project>
