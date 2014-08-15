@@ -39,10 +39,6 @@
           <testClass>org.eclipse.osgi.tests.AutomatedTests</testClass>
           <dependencies>
             <dependency>
-              <artifactId>org.eclipse.core.runtime.compatibility.registry</artifactId>
-              <type>eclipse-plugin</type>
-            </dependency>
-            <dependency>
               <artifactId>org.eclipse.jdt.junit4.runtime</artifactId>
               <type>eclipse-plugin</type>
             </dependency>
