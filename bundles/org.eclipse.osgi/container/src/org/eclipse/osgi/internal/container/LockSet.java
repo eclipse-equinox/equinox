@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,19 +40,13 @@ public class LockSet<T> {
 				locks.put(t, lock);
 			}
 		}
-		boolean obtained = lock.tryLock(time, unit);
+		boolean obtained = !lock.isHeldByCurrentThread() && lock.tryLock(time, unit);
 		if (obtained) {
 			synchronized (monitor) {
-				if (lock.getHoldCount() > 1) {
-					// we don't allow reentrant locks
-					lock.unlock();
-					obtained = false;
-				} else {
-					// must check that another thread did not remove the lock
-					// when unlocking while we were waiting to obtain the lock
-					if (!locks.containsKey(t)) {
-						locks.put(t, lock);
-					}
+				// must check that another thread did not remove the lock
+				// when unlocking while we were waiting to obtain the lock
+				if (!locks.containsKey(t)) {
+					locks.put(t, lock);
 				}
 			}
 		}
