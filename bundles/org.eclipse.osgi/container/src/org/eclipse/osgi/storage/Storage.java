@@ -861,7 +861,7 @@ public class Storage {
 			}
 			// sleep to allow another thread to get the database lock
 			try {
-				Thread.sleep(10);
+				Thread.sleep(50);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
