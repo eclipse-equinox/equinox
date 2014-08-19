@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2000, 2011 IBM Corporation and others.
+ *  Copyright (c) 2000, 2015 IBM Corporation and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  *  Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
 package org.eclipse.core.internal.runtime;
 
@@ -61,7 +62,7 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 
 	public static FrameworkLogEntry getLog(IStatus status) {
 		Throwable t = status.getException();
-		ArrayList childlist = new ArrayList();
+		ArrayList<FrameworkLogEntry> childlist = new ArrayList<FrameworkLogEntry>();
 
 		int stackCode = t instanceof CoreException ? 1 : 0;
 		// ensure a substatus inside a CoreException is properly logged 
@@ -79,7 +80,7 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 			}
 		}
 
-		FrameworkLogEntry[] children = (FrameworkLogEntry[]) (childlist.size() == 0 ? null : childlist.toArray(new FrameworkLogEntry[childlist.size()]));
+		FrameworkLogEntry[] children = childlist.size() == 0 ? null : childlist.toArray(new FrameworkLogEntry[childlist.size()]);
 
 		return new FrameworkLogEntry(status, status.getPlugin(), status.getSeverity(), status.getCode(), status.getMessage(), stackCode, t, children);
 	}

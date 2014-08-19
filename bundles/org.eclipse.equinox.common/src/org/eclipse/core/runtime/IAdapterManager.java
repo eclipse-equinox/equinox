@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -31,10 +32,13 @@ package org.eclipse.core.runtime;
  * 
  * <pre>
  *  IAdapterFactory pr = new IAdapterFactory() {
+ *  	{@literal @}Override
  *  	public Class[] getAdapterList() {
  *  		return new Class[] { com.example.acme.Sticky.class };
  *  	}
- *  	public Object getAdapter(Object adaptableObject, Class adapterType) {
+ *
+ *  	{@literal @}Override
+ *  	public &lt;T&gt; T getAdapter(Object adaptableObject, Class&lt;T&gt; adapterType) {
  *  		IResource res = (IResource) adaptableObject;
  *  		QualifiedName key = new QualifiedName(&quot;com.example.acme&quot;, &quot;sticky-note&quot;);
  *  		try {
@@ -101,7 +105,7 @@ public interface IAdapterManager {
 	 * is returned if there are none.
 	 * @since 3.1
 	 */
-	public String[] computeAdapterTypes(Class adaptableClass);
+	public String[] computeAdapterTypes(Class<?> adaptableClass);
 
 	/**
 	 * Returns the class search order for a given class. The search order from a 
@@ -121,7 +125,7 @@ public interface IAdapterManager {
 	 * search order will minimally  contain the target class.
 	 * @since 3.1
 	 */
-	public Class[] computeClassOrder(Class clazz);
+	public <T> Class<? super T>[] computeClassOrder(Class<T> clazz);
 
 	/**
 	 * Returns an object which is an instance of the given class associated
@@ -134,11 +138,11 @@ public interface IAdapterManager {
 	 * @param adaptable the adaptable object being queried (usually an instance
 	 * of <code>IAdaptable</code>)
 	 * @param adapterType the type of adapter to look up
-	 * @return an object castable to the given adapter type, or <code>null</code>
+	 * @return an object of the given adapter type, or <code>null</code>
 	 * if the given adaptable object does not have an available adapter of the
 	 * given type
 	 */
-	public Object getAdapter(Object adaptable, Class adapterType);
+	public <T> T getAdapter(Object adaptable, Class<T> adapterType);
 
 	/**
 	 * Returns an object which is an instance of the given class name associated
@@ -235,7 +239,7 @@ public interface IAdapterManager {
 	 * @see #unregisterAdapters(IAdapterFactory)
 	 * @see #unregisterAdapters(IAdapterFactory, Class)
 	 */
-	public void registerAdapters(IAdapterFactory factory, Class adaptable);
+	public void registerAdapters(IAdapterFactory factory, Class<?> adaptable);
 
 	/**
 	 * Removes the given adapter factory completely from the list of registered
@@ -258,5 +262,5 @@ public interface IAdapterManager {
 	 * registered
 	 * @see #registerAdapters(IAdapterFactory, Class)
 	 */
-	public void unregisterAdapters(IAdapterFactory factory, Class adaptable);
+	public void unregisterAdapters(IAdapterFactory factory, Class<?> adaptable);
 }

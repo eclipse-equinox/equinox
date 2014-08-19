@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Julian Chen - fix for bug #92572, jclRM
+ *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
 package org.eclipse.core.internal.runtime;
 
@@ -21,7 +22,7 @@ import org.eclipse.core.runtime.*;
  */
 public final class RuntimeLog {
 
-	private static ArrayList logListeners = new ArrayList(5);
+	private static ArrayList<ILogListener> logListeners = new ArrayList<ILogListener>(5);
 
 	/**
 	 * Keep the messages until the first log listener is registered.
@@ -29,7 +30,7 @@ public final class RuntimeLog {
 	 * all status messages accumulated during the period when no log
 	 * listener was available.
 	 */
-	private static ArrayList queuedMessages = new ArrayList(5);
+	private static ArrayList<IStatus> queuedMessages = new ArrayList<IStatus>(5);
 
 	private static PlatformLogWriter logWriter;
 
@@ -89,7 +90,7 @@ public final class RuntimeLog {
 					queuedMessages.add(status);
 					return;
 				}
-				listeners = (ILogListener[]) logListeners.toArray(new ILogListener[logListeners.size()]);
+				listeners = logListeners.toArray(new ILogListener[logListeners.size()]);
 			}
 		}
 		if (writer != null) {
@@ -141,7 +142,7 @@ public final class RuntimeLog {
 		synchronized (logListeners) {
 			if (queuedMessages.isEmpty())
 				return;
-			queued = (IStatus[]) queuedMessages.toArray(new IStatus[queuedMessages.size()]);
+			queued = queuedMessages.toArray(new IStatus[queuedMessages.size()]);
 			queuedMessages.clear();
 		}
 		for (int i = 0; i < queued.length; i++) {
@@ -153,7 +154,7 @@ public final class RuntimeLog {
 		// create array to avoid concurrent access
 		ILogListener[] listeners;
 		synchronized (logListeners) {
-			listeners = (ILogListener[]) logListeners.toArray(new ILogListener[logListeners.size()]);
+			listeners = logListeners.toArray(new ILogListener[logListeners.size()]);
 		}
 		for (int i = 0; i < listeners.length; i++) {
 			try {

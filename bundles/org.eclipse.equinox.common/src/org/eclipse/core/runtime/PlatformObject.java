@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -23,7 +24,7 @@ import org.eclipse.core.internal.runtime.AdapterManager;
  * the <code>getAdapter</code> request to an implementation
  * of the {@link IAdapterManager} service. The method would look like:
  * <pre>
- *     public Object getAdapter(Class adapter) {
+ *     public &lt;T&gt; T getAdapter(Class&lt;T&gt; adapter) {
  *         IAdapterManager manager = ...;//lookup the IAdapterManager service         
  *         return manager.getAdapter(this, adapter);
  *     }
@@ -62,7 +63,8 @@ public abstract class PlatformObject implements IAdaptable {
 	 * @return the adapted object or <code>null</code>
 	 * @see IAdaptable#getAdapter(Class)
 	 */
-	public Object getAdapter(Class adapter) {
+	@Override
+	public <T> T getAdapter(Class<T> adapter) {
 		return AdapterManager.getDefault().getAdapter(this, adapter);
 	}
 }

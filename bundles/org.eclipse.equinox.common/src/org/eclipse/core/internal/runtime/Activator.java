@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
 package org.eclipse.core.internal.runtime;
 
@@ -39,18 +40,18 @@ public class Activator implements BundleActivator {
 	/**
 	 * Table to keep track of all the URL converter services.
 	 */
-	private static Map urlTrackers = new HashMap();
+	private static Map<String, ServiceTracker<Object, URLConverter>> urlTrackers = new HashMap<String, ServiceTracker<Object, URLConverter>>();
 	private static BundleContext bundleContext;
 	private static Activator singleton;
-	private ServiceRegistration platformURLConverterService = null;
-	private ServiceRegistration adapterManagerService = null;
-	private ServiceTracker installLocationTracker = null;
-	private ServiceTracker instanceLocationTracker = null;
-	private ServiceTracker configLocationTracker = null;
-	private ServiceTracker bundleTracker = null;
-	private ServiceTracker debugTracker = null;
-	private ServiceTracker logTracker = null;
-	private ServiceTracker localizationTracker = null;
+	private ServiceRegistration<URLConverter> platformURLConverterService = null;
+	private ServiceRegistration<IAdapterManager> adapterManagerService = null;
+	private ServiceTracker<Object, Location> installLocationTracker = null;
+	private ServiceTracker<Object, Location> instanceLocationTracker = null;
+	private ServiceTracker<Object, Location> configLocationTracker = null;
+	private ServiceTracker<Object, PackageAdmin> bundleTracker = null;
+	private ServiceTracker<Object, DebugOptions> debugTracker = null;
+	private ServiceTracker<Object, FrameworkLog> logTracker = null;
+	private ServiceTracker<Object, BundleLocalization> localizationTracker = null;
 
 	/*
 	 * Returns the singleton for this Activator. Callers should be aware that
@@ -67,22 +68,22 @@ public class Activator implements BundleActivator {
 		bundleContext = context;
 		singleton = this;
 		RuntimeLog.setLogWriter(getPlatformWriter(context));
-		Dictionary urlProperties = new Hashtable();
+		Dictionary<String, Object> urlProperties = new Hashtable<String, Object>();
 		urlProperties.put("protocol", "platform"); //$NON-NLS-1$ //$NON-NLS-2$
-		platformURLConverterService = context.registerService(URLConverter.class.getName(), new PlatformURLConverter(), urlProperties);
-		adapterManagerService = context.registerService(IAdapterManager.class.getName(), AdapterManager.getDefault(), null);
+		platformURLConverterService = context.registerService(URLConverter.class, new PlatformURLConverter(), urlProperties);
+		adapterManagerService = context.registerService(IAdapterManager.class, AdapterManager.getDefault(), null);
 		installPlatformURLSupport();
 	}
 
 	private PlatformLogWriter getPlatformWriter(BundleContext context) {
-		ServiceReference logRef = context.getServiceReference(ExtendedLogService.class.getName());
-		ServiceReference readerRef = context.getServiceReference(ExtendedLogReaderService.class.getName());
-		ServiceReference packageAdminRef = context.getServiceReference(PackageAdmin.class.getName());
+		ServiceReference<ExtendedLogService> logRef = context.getServiceReference(ExtendedLogService.class);
+		ServiceReference<ExtendedLogReaderService> readerRef = context.getServiceReference(ExtendedLogReaderService.class);
+		ServiceReference<PackageAdmin> packageAdminRef = context.getServiceReference(PackageAdmin.class);
 		if (logRef == null || readerRef == null || packageAdminRef == null)
 			return null;
-		ExtendedLogService logService = (ExtendedLogService) context.getService(logRef);
-		ExtendedLogReaderService readerService = (ExtendedLogReaderService) context.getService(readerRef);
-		PackageAdmin packageAdmin = (PackageAdmin) context.getService(packageAdminRef);
+		ExtendedLogService logService = context.getService(logRef);
+		ExtendedLogReaderService readerService = context.getService(readerRef);
+		PackageAdmin packageAdmin = context.getService(packageAdminRef);
 		if (logService == null || readerService == null || packageAdmin == null)
 			return null;
 		PlatformLogWriter writer = new PlatformLogWriter(logService, packageAdmin, context.getBundle());
@@ -101,10 +102,10 @@ public class Activator implements BundleActivator {
 			} catch (InvalidSyntaxException e) {
 				// should not happen
 			}
-			configLocationTracker = new ServiceTracker(bundleContext, filter, null);
+			configLocationTracker = new ServiceTracker<Object, Location>(bundleContext, filter, null);
 			configLocationTracker.open();
 		}
-		return (Location) configLocationTracker.getService();
+		return configLocationTracker.getService();
 	}
 
 	/*
@@ -112,10 +113,10 @@ public class Activator implements BundleActivator {
 	 */
 	public DebugOptions getDebugOptions() {
 		if (debugTracker == null) {
-			debugTracker = new ServiceTracker(bundleContext, DebugOptions.class.getName(), null);
+			debugTracker = new ServiceTracker<Object, DebugOptions>(bundleContext, DebugOptions.class.getName(), null);
 			debugTracker.open();
 		}
-		return (DebugOptions) debugTracker.getService();
+		return debugTracker.getService();
 	}
 
 	/*
@@ -123,10 +124,10 @@ public class Activator implements BundleActivator {
 	 */
 	public FrameworkLog getFrameworkLog() {
 		if (logTracker == null) {
-			logTracker = new ServiceTracker(bundleContext, FrameworkLog.class.getName(), null);
+			logTracker = new ServiceTracker<Object, FrameworkLog>(bundleContext, FrameworkLog.class.getName(), null);
 			logTracker.open();
 		}
-		return (FrameworkLog) logTracker.getService();
+		return logTracker.getService();
 	}
 
 	/*
@@ -140,10 +141,10 @@ public class Activator implements BundleActivator {
 			} catch (InvalidSyntaxException e) {
 				// ignore this.  It should never happen as we have tested the above format.
 			}
-			instanceLocationTracker = new ServiceTracker(bundleContext, filter, null);
+			instanceLocationTracker = new ServiceTracker<Object, Location>(bundleContext, filter, null);
 			instanceLocationTracker.open();
 		}
-		return (Location) instanceLocationTracker.getService();
+		return instanceLocationTracker.getService();
 	}
 
 	/**
@@ -172,10 +173,10 @@ public class Activator implements BundleActivator {
 	 */
 	private PackageAdmin getBundleAdmin() {
 		if (bundleTracker == null) {
-			bundleTracker = new ServiceTracker(getContext(), PackageAdmin.class.getName(), null);
+			bundleTracker = new ServiceTracker<Object, PackageAdmin>(getContext(), PackageAdmin.class.getName(), null);
 			bundleTracker.open();
 		}
-		return (PackageAdmin) bundleTracker.getService();
+		return bundleTracker.getService();
 	}
 
 	/*
@@ -199,10 +200,10 @@ public class Activator implements BundleActivator {
 			} catch (InvalidSyntaxException e) {
 				// should not happen
 			}
-			installLocationTracker = new ServiceTracker(bundleContext, filter, null);
+			installLocationTracker = new ServiceTracker<Object, Location>(bundleContext, filter, null);
 			installLocationTracker.open();
 		}
-		return (Location) installLocationTracker.getService();
+		return installLocationTracker.getService();
 	}
 
 	/**
@@ -232,10 +233,10 @@ public class Activator implements BundleActivator {
 			if (context == null) {
 				throw new MissingResourceException(CommonMessages.activator_resourceBundleNotStarted, bundle.getSymbolicName(), ""); //$NON-NLS-1$
 			}
-			localizationTracker = new ServiceTracker(context, BundleLocalization.class.getName(), null);
+			localizationTracker = new ServiceTracker<Object, BundleLocalization>(context, BundleLocalization.class.getName(), null);
 			localizationTracker.open();
 		}
-		BundleLocalization location = (BundleLocalization) localizationTracker.getService();
+		BundleLocalization location = localizationTracker.getService();
 		ResourceBundle result = null;
 		if (location != null)
 			result = location.getLocalization(bundle, locale);
@@ -303,12 +304,12 @@ public class Activator implements BundleActivator {
 	private static void closeURLTrackerServices() {
 		synchronized (urlTrackers) {
 			if (!urlTrackers.isEmpty()) {
-				for (Iterator iter = urlTrackers.keySet().iterator(); iter.hasNext();) {
-					String key = (String) iter.next();
-					ServiceTracker tracker = (ServiceTracker) urlTrackers.get(key);
+				for (Iterator<String> iter = urlTrackers.keySet().iterator(); iter.hasNext();) {
+					String key = iter.next();
+					ServiceTracker<Object, URLConverter> tracker = urlTrackers.get(key);
 					tracker.close();
 				}
-				urlTrackers = new HashMap();
+				urlTrackers = new HashMap<String, ServiceTracker<Object, URLConverter>>();
 			}
 		}
 	}
@@ -320,7 +321,7 @@ public class Activator implements BundleActivator {
 	public static URLConverter getURLConverter(URL url) {
 		String protocol = url.getProtocol();
 		synchronized (urlTrackers) {
-			ServiceTracker tracker = (ServiceTracker) urlTrackers.get(protocol);
+			ServiceTracker<Object, URLConverter> tracker = urlTrackers.get(protocol);
 			if (tracker == null) {
 				// get the right service based on the protocol
 				String FILTER_PREFIX = "(&(objectClass=" + URLConverter.class.getName() + ")(protocol="; //$NON-NLS-1$ //$NON-NLS-2$
@@ -331,12 +332,12 @@ public class Activator implements BundleActivator {
 				} catch (InvalidSyntaxException e) {
 					return null;
 				}
-				tracker = new ServiceTracker(getContext(), filter, null);
+				tracker = new ServiceTracker<Object, URLConverter>(getContext(), filter, null);
 				tracker.open();
 				// cache it in the registry
 				urlTrackers.put(protocol, tracker);
 			}
-			return (URLConverter) tracker.getService();
+			return tracker.getService();
 		}
 	}
 
@@ -353,7 +354,7 @@ public class Activator implements BundleActivator {
 		if (service != null)
 			PlatformURLBaseConnection.startup(service.getURL());
 
-		Hashtable properties = new Hashtable(1);
+		Hashtable<String, String[]> properties = new Hashtable<String, String[]>(1);
 		properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[] {PlatformURLHandler.PROTOCOL});
 		getContext().registerService(URLStreamHandlerService.class.getName(), new PlatformURLHandler(), properties);
 	}

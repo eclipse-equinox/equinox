@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -32,12 +33,12 @@ public interface IAdapterFactory {
 	 * @param adaptableObject the adaptable object being queried
 	 *   (usually an instance of <code>IAdaptable</code>)
 	 * @param adapterType the type of adapter to look up
-	 * @return a object castable to the given adapter type, 
+	 * @return a object of the given adapter type, 
 	 *    or <code>null</code> if this adapter factory 
 	 *    does not have an adapter of the given type for the
 	 *    given object
 	 */
-	public Object getAdapter(Object adaptableObject, Class adapterType);
+	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType);
 
 	/**
 	 * Returns the collection of adapter types handled by this
@@ -50,5 +51,5 @@ public interface IAdapterFactory {
 	 *
 	 * @return the collection of adapter types
 	 */
-	public Class[] getAdapterList();
+	public Class<?>[] getAdapterList();
 }

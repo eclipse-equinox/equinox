@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
 package org.eclipse.core.internal.boot;
 
@@ -388,7 +389,7 @@ public abstract class PlatformURLConnection extends URLConnection {
 	static void shutdown() {
 		if (indexName != null && cacheLocation != null) {
 			// weed out "not found" entries
-			Enumeration keys = cacheIndex.keys();
+			Enumeration<Object> keys = cacheIndex.keys();
 			String key;
 			Object value;
 			while (keys.hasMoreElements()) {

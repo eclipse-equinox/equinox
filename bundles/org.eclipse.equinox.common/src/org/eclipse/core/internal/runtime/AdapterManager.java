@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     David Green - fix factories with non-standard class loading (bug 200068) 
  *     Filip Hrbek - fix thread safety problem described in bug 305863
+ *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
 package org.eclipse.core.internal.runtime;
 
@@ -42,7 +43,7 @@ public final class AdapterManager implements IAdapterManager {
 	 * map wrapper class.  The inner map is not synchronized, but it is immutable
 	 * so synchronization is not necessary.
 	 */
-	private Map adapterLookup;
+	private Map<String, Map<String, IAdapterFactory>> adapterLookup;
 
 	/**
 	 * Cache of classes for a given type name. Avoids too many loadClass calls.
@@ -52,7 +53,7 @@ public final class AdapterManager implements IAdapterManager {
 	 * controlled by the classLookupLock field.  Note the field can still be
 	 * nulled concurrently without holding the lock.
 	 */
-	private Map classLookup;
+	private Map<IAdapterFactory, Map<String, Class<?>>> classLookup;
 
 	/**
 	 * The lock object controlling access to the classLookup data structure.
@@ -65,16 +66,16 @@ public final class AdapterManager implements IAdapterManager {
 	 * Thread safety note: The map is synchronized using a synchronized
 	 * map wrapper class.  The arrays within the map are immutable.
 	 */
-	private Map classSearchOrderLookup;
+	private Map<Class<?>, Class<?>[]> classSearchOrderLookup;
 
 	/**
 	 * Map of factories, keyed by <code>String</code>, fully qualified class name of
 	 * the adaptable class that the factory provides adapters for. Value is a <code>List</code>
 	 * of <code>IAdapterFactory</code>.
 	 */
-	private final HashMap factories;
+	private final HashMap<String, List<IAdapterFactory>> factories;
 
-	private final ArrayList lazyFactoryProviders;
+	private final ArrayList<IAdapterManagerProvider> lazyFactoryProviders;
 
 	private static final AdapterManager singleton = new AdapterManager();
 
@@ -86,8 +87,8 @@ public final class AdapterManager implements IAdapterManager {
 	 * Private constructor to block instance creation.
 	 */
 	private AdapterManager() {
-		factories = new HashMap(5);
-		lazyFactoryProviders = new ArrayList(1);
+		factories = new HashMap<String, List<IAdapterFactory>>(5);
+		lazyFactoryProviders = new ArrayList<IAdapterManagerProvider>(1);
 	}
 
 	/**
@@ -95,12 +96,12 @@ public final class AdapterManager implements IAdapterManager {
 	 * the given table. Each entry will be keyed by the adapter class name (supplied in
 	 * IAdapterFactory.getAdapterList).
 	 */
-	private void addFactoriesFor(String typeName, Map table) {
-		List factoryList = (List) getFactories().get(typeName);
+	private void addFactoriesFor(String typeName, Map<String, IAdapterFactory> table) {
+		List<IAdapterFactory> factoryList = getFactories().get(typeName);
 		if (factoryList == null)
 			return;
 		for (int i = 0, imax = factoryList.size(); i < imax; i++) {
-			IAdapterFactory factory = (IAdapterFactory) factoryList.get(i);
+			IAdapterFactory factory = factoryList.get(i);
 			if (factory instanceof IAdapterFactoryExt) {
 				String[] adapters = ((IAdapterFactoryExt) factory).getAdapterNames();
 				for (int j = 0; j < adapters.length; j++) {
@@ -108,7 +109,7 @@ public final class AdapterManager implements IAdapterManager {
 						table.put(adapters[j], factory);
 				}
 			} else {
-				Class[] adapters = factory.getAdapterList();
+				Class<?>[] adapters = factory.getAdapterList();
 				for (int j = 0; j < adapters.length; j++) {
 					String adapterName = adapters[j].getName();
 					if (table.get(adapterName) == null)
@@ -118,30 +119,30 @@ public final class AdapterManager implements IAdapterManager {
 		}
 	}
 
-	private void cacheClassLookup(IAdapterFactory factory, Class clazz) {
+	private void cacheClassLookup(IAdapterFactory factory, Class<?> clazz) {
 		synchronized (classLookupLock) {
 			//cache reference to lookup to protect against concurrent flush
-			Map lookup = classLookup;
+			Map<IAdapterFactory, Map<String, Class<?>>> lookup = classLookup;
 			if (lookup == null)
-				classLookup = lookup = new HashMap(4);
-			HashMap classes = (HashMap) lookup.get(factory);
+				classLookup = lookup = new HashMap<IAdapterFactory, Map<String, Class<?>>>(4);
+			Map<String, Class<?>> classes = lookup.get(factory);
 			if (classes == null) {
-				classes = new HashMap(4);
+				classes = new HashMap<String, Class<?>>(4);
 				lookup.put(factory, classes);
 			}
 			classes.put(clazz.getName(), clazz);
 		}
 	}
 
-	private Class cachedClassForName(IAdapterFactory factory, String typeName) {
+	private Class<?> cachedClassForName(IAdapterFactory factory, String typeName) {
 		synchronized (classLookupLock) {
-			Class clazz = null;
+			Class<?> clazz = null;
 			//cache reference to lookup to protect against concurrent flush
-			Map lookup = classLookup;
+			Map<IAdapterFactory, Map<String, Class<?>>> lookup = classLookup;
 			if (lookup != null) {
-				HashMap classes = (HashMap) lookup.get(factory);
+				Map<String, Class<?>> classes = lookup.get(factory);
 				if (classes != null) {
-					clazz = (Class) classes.get(typeName);
+					clazz = classes.get(typeName);
 				}
 			}
 			return clazz;
@@ -153,8 +154,8 @@ public final class AdapterManager implements IAdapterManager {
 	 * if that class does not exist or belongs to a plug-in that has not
 	 * yet been loaded.
 	 */
-	private Class classForName(IAdapterFactory factory, String typeName) {
-		Class clazz = cachedClassForName(factory, typeName);
+	private Class<?> classForName(IAdapterFactory factory, String typeName) {
+		Class<?> clazz = cachedClassForName(factory, typeName);
 		if (clazz == null) {
 			if (factory instanceof IAdapterFactoryExt)
 				factory = ((IAdapterFactoryExt) factory).loadFactory(false);
@@ -166,7 +167,7 @@ public final class AdapterManager implements IAdapterManager {
 					// but the adaptor factory can load it in some other way. See bug 200068.
 					if (typeName == null)
 						return null;
-					Class[] adapterList = factory.getAdapterList();
+					Class<?>[] adapterList = factory.getAdapterList();
 					clazz = null;
 					for (int i = 0; i < adapterList.length; i++) {
 						if (typeName.equals(adapterList[i].getName())) {
@@ -186,9 +187,9 @@ public final class AdapterManager implements IAdapterManager {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IAdapterManager#getAdapterTypes(java.lang.Class)
 	 */
-	public String[] computeAdapterTypes(Class adaptable) {
-		Set types = getFactories(adaptable).keySet();
-		return (String[]) types.toArray(new String[types.size()]);
+	public String[] computeAdapterTypes(Class<? extends Object> adaptable) {
+		Set<String> types = getFactories(adaptable).keySet();
+		return types.toArray(new String[types.size()]);
 	}
 
 	/**
@@ -197,16 +198,16 @@ public final class AdapterManager implements IAdapterManager {
 	 * a table of adapter class name to factory object.
 	 * @param adaptable
 	 */
-	private Map getFactories(Class adaptable) {
+	private Map<String, IAdapterFactory> getFactories(Class<? extends Object> adaptable) {
 		//cache reference to lookup to protect against concurrent flush
-		Map lookup = adapterLookup;
+		Map<String, Map<String, IAdapterFactory>> lookup = adapterLookup;
 		if (lookup == null)
-			adapterLookup = lookup = Collections.synchronizedMap(new HashMap(30));
-		Map table = (Map) lookup.get(adaptable.getName());
+			adapterLookup = lookup = Collections.synchronizedMap(new HashMap<String, Map<String, IAdapterFactory>>(30));
+		Map<String, IAdapterFactory> table = lookup.get(adaptable.getName());
 		if (table == null) {
 			// calculate adapters for the class
-			table = new HashMap(4);
-			Class[] classes = computeClassOrder(adaptable);
+			table = new HashMap<String, IAdapterFactory>(4);
+			Class<?>[] classes = computeClassOrder(adaptable);
 			for (int i = 0; i < classes.length; i++)
 				addFactoriesFor(classes[i].getName(), table);
 			// cache the table
@@ -219,54 +220,55 @@ public final class AdapterManager implements IAdapterManager {
 	 * Returns the super-type search order starting with <code>adaptable</code>. 
 	 * The search order is defined in this class' comment.
 	 */
-	public Class[] computeClassOrder(Class adaptable) {
-		Class[] classes = null;
+	@SuppressWarnings("unchecked")
+	public <T> Class<? super T>[] computeClassOrder(Class<T> adaptable) {
+		Class<?>[] classes = null;
 		//cache reference to lookup to protect against concurrent flush
-		Map lookup = classSearchOrderLookup;
+		Map<Class<?>, Class<?>[]> lookup = classSearchOrderLookup;
 		if (lookup == null)
-			classSearchOrderLookup = lookup = Collections.synchronizedMap(new HashMap());
+			classSearchOrderLookup = lookup = Collections.synchronizedMap(new HashMap<Class<?>, Class<?>[]>());
 		else
-			classes = (Class[]) lookup.get(adaptable);
+			classes = lookup.get(adaptable);
 		// compute class order only if it hasn't been cached before
 		if (classes == null) {
 			classes = doComputeClassOrder(adaptable);
 			lookup.put(adaptable, classes);
 		}
-		return classes;
+		return (Class<? super T>[]) classes;
 	}
 
 	/**
 	 * Computes the super-type search order starting with <code>adaptable</code>. 
 	 * The search order is defined in this class' comment.
 	 */
-	private Class[] doComputeClassOrder(Class adaptable) {
-		List classes = new ArrayList();
-		Class clazz = adaptable;
-		Set seen = new HashSet(4);
+	private Class<?>[] doComputeClassOrder(Class<?> adaptable) {
+		List<Class<?>> classes = new ArrayList<Class<?>>();
+		Class<?> clazz = adaptable;
+		Set<Class<?>> seen = new HashSet<Class<?>>(4);
 		//first traverse class hierarchy
 		while (clazz != null) {
 			classes.add(clazz);
 			clazz = clazz.getSuperclass();
 		}
 		//now traverse interface hierarchy for each class
-		Class[] classHierarchy = (Class[]) classes.toArray(new Class[classes.size()]);
+		Class<?>[] classHierarchy = classes.toArray(new Class[classes.size()]);
 		for (int i = 0; i < classHierarchy.length; i++)
 			computeInterfaceOrder(classHierarchy[i].getInterfaces(), classes, seen);
-		return (Class[]) classes.toArray(new Class[classes.size()]);
+		return classes.toArray(new Class[classes.size()]);
 	}
 
-	private void computeInterfaceOrder(Class[] interfaces, Collection classes, Set seen) {
-		List newInterfaces = new ArrayList(interfaces.length);
+	private void computeInterfaceOrder(Class<?>[] interfaces, Collection<Class<?>> classes, Set<Class<?>> seen) {
+		List<Class<?>> newInterfaces = new ArrayList<Class<?>>(interfaces.length);
 		for (int i = 0; i < interfaces.length; i++) {
-			Class interfac = interfaces[i];
+			Class<?> interfac = interfaces[i];
 			if (seen.add(interfac)) {
 				//note we cannot recurse here without changing the resulting interface order
 				classes.add(interfac);
 				newInterfaces.add(interfac);
 			}
 		}
-		for (Iterator it = newInterfaces.iterator(); it.hasNext();)
-			computeInterfaceOrder(((Class) it.next()).getInterfaces(), classes, seen);
+		for (Class<?> clazz : newInterfaces)
+			computeInterfaceOrder(clazz.getInterfaces(), classes, seen);
 	}
 
 	/**
@@ -286,15 +288,16 @@ public final class AdapterManager implements IAdapterManager {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IAdapterManager#getAdapter(java.lang.Object, java.lang.Class)
 	 */
-	public Object getAdapter(Object adaptable, Class adapterType) {
+	@SuppressWarnings("unchecked")
+	public <T> T getAdapter(Object adaptable, Class<T> adapterType) {
 		Assert.isNotNull(adaptable);
 		Assert.isNotNull(adapterType);
-		IAdapterFactory factory = (IAdapterFactory) getFactories(adaptable.getClass()).get(adapterType.getName());
-		Object result = null;
+		IAdapterFactory factory = getFactories(adaptable.getClass()).get(adapterType.getName());
+		T result = null;
 		if (factory != null)
 			result = factory.getAdapter(adaptable, adapterType);
 		if (result == null && adapterType.isInstance(adaptable))
-			return adaptable;
+			return (T) adaptable;
 		return result;
 	}
 
@@ -316,12 +319,12 @@ public final class AdapterManager implements IAdapterManager {
 	 * if no plugin activations are desired.
 	 */
 	private Object getAdapter(Object adaptable, String adapterType, boolean force) {
-		IAdapterFactory factory = (IAdapterFactory) getFactories(adaptable.getClass()).get(adapterType);
+		IAdapterFactory factory = getFactories(adaptable.getClass()).get(adapterType);
 		if (force && factory instanceof IAdapterFactoryExt)
 			factory = ((IAdapterFactoryExt) factory).loadFactory(true);
 		Object result = null;
 		if (factory != null) {
-			Class clazz = classForName(factory, adapterType);
+			Class<?> clazz = classForName(factory, adapterType);
 			if (clazz != null)
 				result = factory.getAdapter(adaptable, clazz);
 		}
@@ -338,7 +341,7 @@ public final class AdapterManager implements IAdapterManager {
 	 * @see org.eclipse.core.runtime.IAdapterManager#queryAdapter(java.lang.Object, java.lang.String)
 	 */
 	public int queryAdapter(Object adaptable, String adapterTypeName) {
-		IAdapterFactory factory = (IAdapterFactory) getFactories(adaptable.getClass()).get(adapterTypeName);
+		IAdapterFactory factory = getFactories(adaptable.getClass()).get(adapterTypeName);
 		if (factory == null)
 			return NONE;
 		if (factory instanceof IAdapterFactoryExt) {
@@ -359,7 +362,7 @@ public final class AdapterManager implements IAdapterManager {
 	/*
 	 * @see IAdapterManager#registerAdapters
 	 */
-	public synchronized void registerAdapters(IAdapterFactory factory, Class adaptable) {
+	public synchronized void registerAdapters(IAdapterFactory factory, Class<?> adaptable) {
 		registerFactory(factory, adaptable.getName());
 		flushLookup();
 	}
@@ -368,9 +371,9 @@ public final class AdapterManager implements IAdapterManager {
 	 * @see IAdapterManager#registerAdapters
 	 */
 	public void registerFactory(IAdapterFactory factory, String adaptableType) {
-		List list = (List) factories.get(adaptableType);
+		List<IAdapterFactory> list = factories.get(adaptableType);
 		if (list == null) {
-			list = new ArrayList(5);
+			list = new ArrayList<IAdapterFactory>(5);
 			factories.put(adaptableType, list);
 		}
 		list.add(factory);
@@ -380,16 +383,16 @@ public final class AdapterManager implements IAdapterManager {
 	 * @see IAdapterManager#unregisterAdapters
 	 */
 	public synchronized void unregisterAdapters(IAdapterFactory factory) {
-		for (Iterator it = factories.values().iterator(); it.hasNext();)
-			((List) it.next()).remove(factory);
+		for (List<IAdapterFactory> list : factories.values())
+			list.remove(factory);
 		flushLookup();
 	}
 
 	/*
 	 * @see IAdapterManager#unregisterAdapters
 	 */
-	public synchronized void unregisterAdapters(IAdapterFactory factory, Class adaptable) {
-		List factoryList = (List) factories.get(adaptable.getName());
+	public synchronized void unregisterAdapters(IAdapterFactory factory, Class<?> adaptable) {
+		List<IAdapterFactory> factoryList = factories.get(adaptable.getName());
 		if (factoryList == null)
 			return;
 		factoryList.remove(factory);
@@ -418,10 +421,10 @@ public final class AdapterManager implements IAdapterManager {
 		}
 	}
 
-	public HashMap getFactories() {
+	public HashMap<String, List<IAdapterFactory>> getFactories() {
 		synchronized (lazyFactoryProviders) {
 			while (lazyFactoryProviders.size() > 0) {
-				IAdapterManagerProvider provider = (IAdapterManagerProvider) lazyFactoryProviders.remove(0);
+				IAdapterManagerProvider provider = lazyFactoryProviders.remove(0);
 				if (provider.addFactories(this))
 					flushLookup();
 			}

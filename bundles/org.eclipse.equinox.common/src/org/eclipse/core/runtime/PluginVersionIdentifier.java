@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -155,7 +156,7 @@ public final class PluginVersionIdentifier {
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_doubleSeparatorVersion, s));
 
 		StringTokenizer st = new StringTokenizer(s, SEPARATOR);
-		Vector elements = new Vector(4);
+		Vector<String> elements = new Vector<String>(4);
 
 		while (st.hasMoreTokens())
 			elements.addElement(st.nextToken());
@@ -169,7 +170,7 @@ public final class PluginVersionIdentifier {
 
 		int[] numbers = new int[3];
 		try {
-			numbers[0] = Integer.parseInt((String) elements.elementAt(0));
+			numbers[0] = Integer.parseInt(elements.elementAt(0));
 			if (numbers[0] < 0)
 				Assert.isTrue(false, NLS.bind(CommonMessages.parse_postiveMajor, s));
 		} catch (NumberFormatException nfe) {
@@ -178,7 +179,7 @@ public final class PluginVersionIdentifier {
 
 		try {
 			if (elementSize >= 2) {
-				numbers[1] = Integer.parseInt((String) elements.elementAt(1));
+				numbers[1] = Integer.parseInt(elements.elementAt(1));
 				if (numbers[1] < 0)
 					Assert.isTrue(false, NLS.bind(CommonMessages.parse_postiveMinor, s));
 			} else
@@ -189,7 +190,7 @@ public final class PluginVersionIdentifier {
 
 		try {
 			if (elementSize >= 3) {
-				numbers[2] = Integer.parseInt((String) elements.elementAt(2));
+				numbers[2] = Integer.parseInt(elements.elementAt(2));
 				if (numbers[2] < 0)
 					Assert.isTrue(false, NLS.bind(CommonMessages.parse_postiveService, s));
 			} else

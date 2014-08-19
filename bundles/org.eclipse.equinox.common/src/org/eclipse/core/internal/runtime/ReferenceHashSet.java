@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
 package org.eclipse.core.internal.runtime;
 
@@ -17,18 +18,18 @@ import java.lang.ref.*;
  * This API is EXPERIMENTAL and provided as early access.
  * @since 3.1
  */
-public class ReferenceHashSet {
+public class ReferenceHashSet<T> {
 
-	private interface HashedReference {
+	private interface HashedReference<T> {
 		int hashCode();
 
-		Object get();
+		T get();
 	}
 
-	private class HashableWeakReference extends WeakReference implements HashedReference {
+	private class HashableWeakReference<U> extends WeakReference<U> implements HashedReference<U> {
 		public int hashCode;
 
-		public HashableWeakReference(Object referent, ReferenceQueue queue) {
+		public HashableWeakReference(U referent, ReferenceQueue<? super U> queue) {
 			super(referent, queue);
 			this.hashCode = referent.hashCode();
 		}
@@ -36,8 +37,9 @@ public class ReferenceHashSet {
 		public boolean equals(Object obj) {
 			if (!(obj instanceof HashableWeakReference))
 				return false;
-			Object referent = super.get();
-			Object other = ((HashableWeakReference) obj).get();
+			U referent = super.get();
+			@SuppressWarnings("unchecked")
+			Object other = ((HashableWeakReference<?>) obj).get();
 			if (referent == null)
 				return other == null;
 			return referent.equals(other);
@@ -55,10 +57,10 @@ public class ReferenceHashSet {
 		}
 	}
 
-	private class HashableSoftReference extends SoftReference implements HashedReference {
+	private class HashableSoftReference<U> extends SoftReference<U> implements HashedReference<U> {
 		public int hashCode;
 
-		public HashableSoftReference(Object referent, ReferenceQueue queue) {
+		public HashableSoftReference(U referent, ReferenceQueue<? super U> queue) {
 			super(referent, queue);
 			this.hashCode = referent.hashCode();
 		}
@@ -67,7 +69,8 @@ public class ReferenceHashSet {
 			if (!(obj instanceof HashableWeakReference))
 				return false;
 			Object referent = super.get();
-			Object other = ((HashableWeakReference) obj).get();
+			@SuppressWarnings("unchecked")
+			Object other = ((HashableWeakReference<?>) obj).get();
 			if (referent == null)
 				return other == null;
 			return referent.equals(other);
@@ -85,10 +88,10 @@ public class ReferenceHashSet {
 		}
 	}
 
-	private class StrongReference implements HashedReference {
-		private Object referent;
+	private class StrongReference<U> implements HashedReference<U> {
+		private U referent;
 
-		public StrongReference(Object referent, ReferenceQueue queue) {
+		public StrongReference(U referent, ReferenceQueue<? super U> queue) {
 			this.referent = referent;
 		}
 
@@ -96,7 +99,7 @@ public class ReferenceHashSet {
 			return referent.hashCode();
 		}
 
-		public Object get() {
+		public U get() {
 			return referent;
 		}
 
@@ -105,18 +108,19 @@ public class ReferenceHashSet {
 		}
 	}
 
-	HashedReference[] values;
+	HashedReference<T>[] values;
 
 	public int elementSize; // number of elements in the table
 
 	int threshold;
 
-	ReferenceQueue referenceQueue = new ReferenceQueue();
+	ReferenceQueue<T> referenceQueue = new ReferenceQueue<T>();
 
 	public ReferenceHashSet() {
 		this(5);
 	}
 
+	@SuppressWarnings("unchecked")
 	public ReferenceHashSet(int size) {
 		this.elementSize = 0;
 		this.threshold = size; // size represents the expected
@@ -142,14 +146,14 @@ public class ReferenceHashSet {
 	 */
 	final public static int WEAK = 2;
 
-	private HashedReference toReference(int type, Object referent) {
+	private HashedReference<T> toReference(int type, T referent) {
 		switch (type) {
 			case HARD :
-				return new StrongReference(referent, referenceQueue);
+				return new StrongReference<T>(referent, referenceQueue);
 			case SOFT :
-				return new HashableSoftReference(referent, referenceQueue);
+				return new HashableSoftReference<T>(referent, referenceQueue);
 			case WEAK :
-				return new HashableWeakReference(referent, referenceQueue);
+				return new HashableWeakReference<T>(referent, referenceQueue);
 			default :
 				throw new Error();
 		}
@@ -160,12 +164,12 @@ public class ReferenceHashSet {
 	 * given object already exists, do nothing. Returns the existing object or
 	 * the new object if not found.
 	 */
-	public Object add(Object obj, int referenceType) {
+	public T add(T obj, int referenceType) {
 		cleanupGarbageCollectedValues();
 		int index = (obj.hashCode() & 0x7FFFFFFF) % this.values.length;
-		HashedReference currentValue;
+		HashedReference<T> currentValue;
 		while ((currentValue = this.values[index]) != null) {
-			Object referent;
+			T referent;
 			if (obj.equals(referent = currentValue.get())) {
 				return referent;
 			}
@@ -180,13 +184,13 @@ public class ReferenceHashSet {
 		return obj;
 	}
 
-	private void addValue(HashedReference value) {
+	private void addValue(HashedReference<T> value) {
 		Object obj = value.get();
 		if (obj == null)
 			return;
 		int valuesLength = this.values.length;
 		int index = (value.hashCode() & 0x7FFFFFFF) % valuesLength;
-		HashedReference currentValue;
+		HashedReference<T> currentValue;
 		while ((currentValue = this.values[index]) != null) {
 			if (obj.equals(currentValue.get())) {
 				return;
@@ -201,12 +205,12 @@ public class ReferenceHashSet {
 	}
 
 	private void cleanupGarbageCollectedValues() {
-		HashedReference toBeRemoved;
-		while ((toBeRemoved = (HashedReference) this.referenceQueue.poll()) != null) {
+		HashedReference<?> toBeRemoved;
+		while ((toBeRemoved = (HashedReference<?>) this.referenceQueue.poll()) != null) {
 			int hashCode = toBeRemoved.hashCode();
 			int valuesLength = this.values.length;
 			int index = (hashCode & 0x7FFFFFFF) % valuesLength;
-			HashedReference currentValue;
+			HashedReference<T> currentValue;
 			while ((currentValue = this.values[index]) != null) {
 				if (currentValue == toBeRemoved) {
 					// replace the value at index with the last value with the
@@ -225,7 +229,7 @@ public class ReferenceHashSet {
 		}
 	}
 
-	public boolean contains(Object obj) {
+	public boolean contains(T obj) {
 		return get(obj) != null;
 	}
 
@@ -233,13 +237,13 @@ public class ReferenceHashSet {
 	 * Return the object that is in this set and that is equals to the given
 	 * object. Return null if not found.
 	 */
-	public Object get(Object obj) {
+	public T get(T obj) {
 		cleanupGarbageCollectedValues();
 		int valuesLength = this.values.length;
 		int index = (obj.hashCode() & 0x7FFFFFFF) % valuesLength;
-		HashedReference currentValue;
+		HashedReference<T> currentValue;
 		while ((currentValue = this.values[index]) != null) {
-			Object referent;
+			T referent;
 			if (obj.equals(referent = currentValue.get())) {
 				return referent;
 			}
@@ -249,9 +253,9 @@ public class ReferenceHashSet {
 	}
 
 	private void rehash() {
-		ReferenceHashSet newHashSet = new ReferenceHashSet(this.elementSize * 2); // double the number of expected elements
+		ReferenceHashSet<T> newHashSet = new ReferenceHashSet<T>(this.elementSize * 2); // double the number of expected elements
 		newHashSet.referenceQueue = this.referenceQueue;
-		HashedReference currentValue;
+		HashedReference<T> currentValue;
 		for (int i = 0, length = this.values.length; i < length; i++)
 			if ((currentValue = this.values[i]) != null)
 				newHashSet.addValue(currentValue);
@@ -265,11 +269,11 @@ public class ReferenceHashSet {
 	 * Removes the object that is in this set and that is equals to the given
 	 * object. Return the object that was in the set, or null if not found.
 	 */
-	public Object remove(Object obj) {
+	public Object remove(T obj) {
 		cleanupGarbageCollectedValues();
 		int valuesLength = this.values.length;
 		int index = (obj.hashCode() & 0x7FFFFFFF) % valuesLength;
-		HashedReference currentValue;
+		HashedReference<T> currentValue;
 		while ((currentValue = this.values[index]) != null) {
 			Object referent;
 			if (obj.equals(referent = currentValue.get())) {
@@ -290,7 +294,7 @@ public class ReferenceHashSet {
 	public String toString() {
 		StringBuffer buffer = new StringBuffer("{"); //$NON-NLS-1$
 		for (int i = 0, length = this.values.length; i < length; i++) {
-			HashedReference value = this.values[i];
+			HashedReference<T> value = this.values[i];
 			if (value != null) {
 				Object ref = value.get();
 				if (ref != null) {

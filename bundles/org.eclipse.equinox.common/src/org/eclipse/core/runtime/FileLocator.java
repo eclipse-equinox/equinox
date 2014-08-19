@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2014 IBM Corporation and others.
+ * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -80,7 +81,7 @@ public final class FileLocator {
 	 * @return a URL for the given path or <code>null</code>.  The actual form
 	 * 	of the returned URL is not specified.
 	 */
-	public static URL find(Bundle bundle, IPath path, Map override) {
+	public static URL find(Bundle bundle, IPath path, Map<String, String> override) {
 		return FindSupport.find(bundle, path, override);
 	}
 
@@ -102,7 +103,7 @@ public final class FileLocator {
 	 * 
 	 * @since org.eclipse.equinox.common 3.3
 	 */
-	public static URL[] findEntries(Bundle bundle, IPath path, Map override) {
+	public static URL[] findEntries(Bundle bundle, IPath path, Map<String, String> override) {
 		return FindSupport.findEntries(bundle, path, override);
 	}
 

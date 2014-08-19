@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2012 IBM Corporation and others.
+ * Copyright (c) 2003, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
 package org.eclipse.core.internal.runtime;
 
@@ -88,7 +89,7 @@ public class ResourceTranslator {
 
 	private static boolean hasRuntime21(Bundle b) {
 		try {
-			ManifestElement[] prereqs = ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, (String) b.getHeaders("").get(Constants.REQUIRE_BUNDLE)); //$NON-NLS-1$
+			ManifestElement[] prereqs = ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, b.getHeaders("").get(Constants.REQUIRE_BUNDLE)); //$NON-NLS-1$
 			if (prereqs == null)
 				return false;
 			for (int i = 0; i < prereqs.length; i++) {
@@ -103,16 +104,16 @@ public class ResourceTranslator {
 	}
 
 	private static ClassLoader createTempClassloader(Bundle b) {
-		ArrayList classpath = new ArrayList();
+		ArrayList<URL> classpath = new ArrayList<URL>();
 		addClasspathEntries(b, classpath);
 		addBundleRoot(b, classpath);
 		addDevEntries(b, classpath);
 		addFragments(b, classpath);
 		URL[] urls = new URL[classpath.size()];
-		return new URLClassLoader((URL[]) classpath.toArray(urls));
+		return new URLClassLoader(classpath.toArray(urls));
 	}
 
-	private static void addFragments(Bundle host, ArrayList classpath) {
+	private static void addFragments(Bundle host, ArrayList<URL> classpath) {
 		Activator activator = Activator.getDefault();
 		if (activator == null)
 			return;
@@ -126,10 +127,10 @@ public class ResourceTranslator {
 		}
 	}
 
-	private static void addClasspathEntries(Bundle b, ArrayList classpath) {
+	private static void addClasspathEntries(Bundle b, ArrayList<URL> classpath) {
 		ManifestElement[] classpathElements;
 		try {
-			classpathElements = ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH, (String) b.getHeaders("").get(Constants.BUNDLE_CLASSPATH)); //$NON-NLS-1$
+			classpathElements = ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH, b.getHeaders("").get(Constants.BUNDLE_CLASSPATH)); //$NON-NLS-1$
 			if (classpathElements == null)
 				return;
 			for (int i = 0; i < classpathElements.length; i++) {
@@ -142,11 +143,11 @@ public class ResourceTranslator {
 		}
 	}
 
-	private static void addBundleRoot(Bundle b, ArrayList classpath) {
+	private static void addBundleRoot(Bundle b, ArrayList<URL> classpath) {
 		classpath.add(b.getEntry("/")); //$NON-NLS-1$
 	}
 
-	private static void addDevEntries(Bundle b, ArrayList classpath) {
+	private static void addDevEntries(Bundle b, ArrayList<URL> classpath) {
 		if (!DevClassPathHelper.inDevelopmentMode())
 			return;
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
 package org.eclipse.core.internal.runtime;
 
@@ -31,7 +32,7 @@ public class FindSupport {
 	private static String[] NL_JAR_VARIANTS = buildNLVariants(Activator.getContext() == null ? System.getProperty(PROP_NL) : Activator.getContext().getProperty(PROP_NL));
 
 	private static String[] buildNLVariants(String nl) {
-		ArrayList result = new ArrayList();
+		ArrayList<String> result = new ArrayList<String>();
 		IPath base = new Path("nl"); //$NON-NLS-1$
 
 		IPath path = new Path(nl.replace('_', '/'));
@@ -43,7 +44,7 @@ public class FindSupport {
 			path = path.removeLastSegments(1);
 		}
 
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	/**
@@ -56,7 +57,7 @@ public class FindSupport {
 	/**
 	 * See doc on {@link FileLocator#find(Bundle, IPath, Map)} 
 	 */
-	public static URL find(Bundle b, IPath path, Map override) {
+	public static URL find(Bundle b, IPath path, Map<String, String> override) {
 		return find(b, path, override, null);
 	}
 
@@ -70,13 +71,13 @@ public class FindSupport {
 	/**
 	 * See doc on {@link FileLocator#findEntries(Bundle, IPath, Map)}
 	 */
-	public static URL[] findEntries(Bundle bundle, IPath path, Map override) {
-		ArrayList results = new ArrayList(1);
+	public static URL[] findEntries(Bundle bundle, IPath path, Map<String, String> override) {
+		ArrayList<URL> results = new ArrayList<URL>(1);
 		find(bundle, path, override, results);
-		return (URL[]) results.toArray(new URL[results.size()]);
+		return results.toArray(new URL[results.size()]);
 	}
 
-	private static URL find(Bundle b, IPath path, Map override, ArrayList multiple) {
+	private static URL find(Bundle b, IPath path, Map<String, String> override, ArrayList<URL> multiple) {
 		if (path == null)
 			return null;
 
@@ -116,12 +117,12 @@ public class FindSupport {
 		return null;
 	}
 
-	private static URL findOS(Bundle b, IPath path, Map override, ArrayList multiple) {
+	private static URL findOS(Bundle b, IPath path, Map<String, String> override, ArrayList<URL> multiple) {
 		String os = null;
 		if (override != null)
 			try {
 				// check for override
-				os = (String) override.get("$os$"); //$NON-NLS-1$
+				os = override.get("$os$"); //$NON-NLS-1$
 			} catch (ClassCastException e) {
 				// just in case
 			}
@@ -136,7 +137,7 @@ public class FindSupport {
 		if (override != null)
 			try {
 				// check for override
-				osArch = (String) override.get("$arch$"); //$NON-NLS-1$
+				osArch = override.get("$arch$"); //$NON-NLS-1$
 			} catch (ClassCastException e) {
 				// just in case
 			}
@@ -167,12 +168,12 @@ public class FindSupport {
 		return findInFragments(b, path, multiple);
 	}
 
-	private static URL findWS(Bundle b, IPath path, Map override, ArrayList multiple) {
+	private static URL findWS(Bundle b, IPath path, Map<String, String> override, ArrayList<URL> multiple) {
 		String ws = null;
 		if (override != null)
 			try {
 				// check for override
-				ws = (String) override.get("$ws$"); //$NON-NLS-1$
+				ws = override.get("$ws$"); //$NON-NLS-1$
 			} catch (ClassCastException e) {
 				// just in case
 			}
@@ -196,13 +197,13 @@ public class FindSupport {
 		return findInFragments(b, path, multiple);
 	}
 
-	private static URL findNL(Bundle b, IPath path, Map override, ArrayList multiple) {
+	private static URL findNL(Bundle b, IPath path, Map<String, String> override, ArrayList<URL> multiple) {
 		String nl = null;
 		String[] nlVariants = null;
 		if (override != null)
 			try {
 				// check for override
-				nl = (String) override.get("$nl$"); //$NON-NLS-1$
+				nl = override.get("$nl$"); //$NON-NLS-1$
 			} catch (ClassCastException e) {
 				// just in case
 			}
@@ -228,14 +229,14 @@ public class FindSupport {
 		return findInFragments(b, path, multiple);
 	}
 
-	private static URL findInPlugin(Bundle b, IPath filePath, ArrayList multiple) {
+	private static URL findInPlugin(Bundle b, IPath filePath, ArrayList<URL> multiple) {
 		URL result = b.getEntry(filePath.toString());
 		if (result != null && multiple != null)
 			multiple.add(result);
 		return result;
 	}
 
-	private static URL findInFragments(Bundle b, IPath filePath, ArrayList multiple) {
+	private static URL findInFragments(Bundle b, IPath filePath, ArrayList<URL> multiple) {
 		Activator activator = Activator.getDefault();
 		if (activator == null)
 			return null;

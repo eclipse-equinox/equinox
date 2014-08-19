@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
 package org.eclipse.core.internal.boot;
 
@@ -23,7 +24,7 @@ import org.osgi.service.url.AbstractURLStreamHandlerService;
  */
 public class PlatformURLHandler extends AbstractURLStreamHandlerService {
 
-	private static Hashtable connectionType = new Hashtable();
+	private static Hashtable<String, Constructor<?>> connectionType = new Hashtable<String, Constructor<?>>();
 
 	// URL protocol designations
 	public static final String PROTOCOL = "platform"; //$NON-NLS-1$
@@ -54,7 +55,7 @@ public class PlatformURLHandler extends AbstractURLStreamHandlerService {
 			throw new MalformedURLException(NLS.bind(CommonMessages.url_invalidURL, url.toExternalForm()));
 
 		String type = spec.substring(0, ix);
-		Constructor construct = (Constructor) connectionType.get(type);
+		Constructor<?> construct = connectionType.get(type);
 		if (construct == null)
 			throw new MalformedURLException(NLS.bind(CommonMessages.url_badVariant, type));
 
@@ -68,15 +69,15 @@ public class PlatformURLHandler extends AbstractURLStreamHandlerService {
 		return connection;
 	}
 
-	public static void register(String type, Class connectionClass) {
+	public static void register(String type, Class<?> connectionClass) {
 		try {
-			Constructor c = connectionClass.getConstructor(new Class[] {URL.class});
+			Constructor<?> c = connectionClass.getConstructor(new Class[] {URL.class});
 			connectionType.put(type, c);
 		} catch (NoSuchMethodException e) {
 			//don't register connection classes that don't conform to the spec
 		}
 	}
-	
+
 	public static void unregister(String type) {
 		connectionType.remove(type);
 	}

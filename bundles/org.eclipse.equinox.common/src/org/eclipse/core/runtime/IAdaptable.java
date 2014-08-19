@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -20,7 +21,7 @@ package org.eclipse.core.runtime;
  * For example,
  * <pre>
  *     IAdaptable a = [some adaptable];
- *     IFoo x = (IFoo)a.getAdapter(IFoo.class);
+ *     IFoo x = a.getAdapter(IFoo.class);
  *     if (x != null)
  *         [do IFoo things with x]
  * </pre>
@@ -41,9 +42,9 @@ public interface IAdaptable {
 	 * no such object can be found.
 	 *
 	 * @param adapter the adapter class to look up
-	 * @return a object castable to the given class, 
+	 * @return a object of the given class, 
 	 *    or <code>null</code> if this object does not
 	 *    have an adapter for the given class
 	 */
-	public Object getAdapter(Class adapter);
+	public <T> T getAdapter(Class<T> adapter);
 }
