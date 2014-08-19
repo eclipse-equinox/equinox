@@ -185,10 +185,13 @@ public class EclipseStarter {
 	private synchronized static Map<String, String> getConfiguration() {
 		if (configuration == null) {
 			configuration = new HashMap<String, String>();
-			// TODO hack
-			String useSystemProperties = System.getProperty(EquinoxConfiguration.PROP_USE_SYSTEM_PROPERTIES, "true"); //$NON-NLS-1$
-			if ("true".equals(useSystemProperties)) { //$NON-NLS-1$
+			// TODO hack to set these to defaults for EclipseStarter
+			// Note that this hack does not allow these properties to be specified in config.ini
+			if (System.getProperty(EquinoxConfiguration.PROP_USE_SYSTEM_PROPERTIES) == null) {
 				configuration.put(EquinoxConfiguration.PROP_USE_SYSTEM_PROPERTIES, "true"); //$NON-NLS-1$
+			}
+			if (System.getProperty(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION) == null) {
+				configuration.put(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION, "true"); //$NON-NLS-1$
 			}
 		}
 		return configuration;
@@ -293,7 +296,6 @@ public class EclipseStarter {
 		if (running)
 			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ALREADY_RUNNING);
 		processCommandLine(args);
-		finalizeProperties();
 		framework = new Equinox(configuration);
 		framework.init();
 		context = framework.getBundleContext();
@@ -1302,14 +1304,6 @@ public class EclipseStarter {
 			return result;
 
 		return ((String) left[3]).compareTo((String) right[3]); // compare qualifier
-	}
-
-	private static void finalizeProperties() {
-		// if check config is unknown and we are in dev mode, 
-		if (getProperty(PROP_DEV) != null && getProperty(PROP_CHECK_CONFIG) == null)
-			setProperty(PROP_CHECK_CONFIG, "true"); //$NON-NLS-1$
-		if (getProperty(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION) == null)
-			setProperty(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION, "true"); //$NON-NLS-1$
 	}
 
 	private static class InitialBundle {
