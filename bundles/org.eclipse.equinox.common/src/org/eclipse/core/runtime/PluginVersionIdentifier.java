@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -204,7 +204,7 @@ public final class PluginVersionIdentifier {
 		result[1] = new Integer(numbers[1]);
 		result[2] = new Integer(numbers[2]);
 		if (elementSize >= 4)
-			result[3] = (String) elements.elementAt(3);
+			result[3] = elements.elementAt(3);
 		else
 			result[3] = ""; //$NON-NLS-1$
 		return result;
@@ -305,8 +305,7 @@ public final class PluginVersionIdentifier {
 			return true;
 		if ((getMajorComponent() == id.getMajorComponent()) && (getMinorComponent() == id.getMinorComponent()) && (getServiceComponent() == id.getServiceComponent()) && (getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0))
 			return true;
-		else
-			return false;
+		return false;
 	}
 
 	/**
@@ -343,8 +342,7 @@ public final class PluginVersionIdentifier {
 			return false;
 		if (getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0)
 			return true;
-		else
-			return false;
+		return false;
 	}
 
 	/**
@@ -377,8 +375,7 @@ public final class PluginVersionIdentifier {
 			return false;
 		if (getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0)
 			return true;
-		else
-			return false;
+		return false;
 	}
 
 	/**
@@ -399,8 +396,7 @@ public final class PluginVersionIdentifier {
 			return false;
 		if ((getMajorComponent() != id.getMajorComponent()) || (getMinorComponent() != id.getMinorComponent()) || (getServiceComponent() != id.getServiceComponent()) || (!getQualifierComponent().equals(id.getQualifierComponent())))
 			return false;
-		else
-			return true;
+		return true;
 	}
 
 	/**
@@ -417,8 +413,7 @@ public final class PluginVersionIdentifier {
 		if (id == null) {
 			if (getMajorComponent() == 0 && getMinorComponent() == 0 && getServiceComponent() == 0 && getQualifierComponent().equals("")) //$NON-NLS-1$
 				return false;
-			else
-				return true;
+			return true;
 		}
 
 		if (getMajorComponent() > id.getMajorComponent())
@@ -435,8 +430,7 @@ public final class PluginVersionIdentifier {
 			return false;
 		if (getQualifierComponent().compareTo(id.getQualifierComponent()) > 0)
 			return true;
-		else
-			return false;
+		return false;
 
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -246,7 +246,7 @@ public final class FileLocator {
 			return new File(rootEntry.getPath());
 		if ("jar".equals(rootEntry.getProtocol())) { //$NON-NLS-1$
 			String path = rootEntry.getPath();
-			if (path.startsWith("file:")) {
+			if (path.startsWith("file:")) { //$NON-NLS-1$
 				// strip off the file: and the !/
 				path = path.substring(5, path.length() - 2);
 				return new File(path);
