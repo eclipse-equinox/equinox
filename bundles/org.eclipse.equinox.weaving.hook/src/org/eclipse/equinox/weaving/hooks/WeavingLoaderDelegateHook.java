@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 Martin Lippert and others.
+ * Copyright (c) 2008, 2014 Martin Lippert and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *   Martin Lippert            initial implementation
  *   Martin Lippert            fragment handling fixed
@@ -22,12 +22,13 @@ import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.eclipse.equinox.service.weaving.Supplementer;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
+import org.osgi.framework.Bundle;
 
 /**
  * This class implements the delegate hook for the class loader to allow
  * supplemented bundles find types and resources from theirs supplementer
  * bundles
- * 
+ *
  * This works together with the supplementer registry to handle the
  * supplementing mechanism. The supplementer registry controls which bundle is
  * supplemented by which other bundle. This hook implementation uses this
@@ -65,7 +66,7 @@ public class WeavingLoaderDelegateHook extends ClassLoaderHook {
     /**
      * Create the hook instance for broaden the visibility according to the
      * supplementing mechansism.
-     * 
+     *
      * @param supplementerRegistry The supplementer registry to be used by this
      *            hook for information retrieval which bundles are supplemented
      *            by which other bundles (needs to not be null)
@@ -76,7 +77,7 @@ public class WeavingLoaderDelegateHook extends ClassLoaderHook {
     }
 
     /**
-     * 
+     *
      * @see org.eclipse.osgi.internal.hookregistry.ClassLoaderHook#postFindClass(java.lang.String,
      *      org.eclipse.osgi.internal.loader.ModuleClassLoader)
      */
@@ -97,10 +98,13 @@ public class WeavingLoaderDelegateHook extends ClassLoaderHook {
             if (supplementers != null) {
                 for (int i = 0; i < supplementers.length; i++) {
                     try {
-                        final Class<?> clazz = supplementers[i]
-                                .getSupplementerHost().loadClass(name);
-                        if (clazz != null) {
-                            return clazz;
+                        final Bundle bundle = supplementers[i]
+                                .getSupplementerHost();
+                        if (bundle.getState() != Bundle.UNINSTALLED) {
+                            final Class<?> clazz = bundle.loadClass(name);
+                            if (clazz != null) {
+                                return clazz;
+                            }
                         }
                     } catch (final ClassNotFoundException e) {
                     }
@@ -114,7 +118,7 @@ public class WeavingLoaderDelegateHook extends ClassLoaderHook {
     }
 
     /**
-     * 
+     *
      * @see org.eclipse.osgi.internal.hookregistry.ClassLoaderHook#postFindResource(java.lang.String,
      *      org.eclipse.osgi.internal.loader.ModuleClassLoader)
      */
@@ -153,7 +157,7 @@ public class WeavingLoaderDelegateHook extends ClassLoaderHook {
     }
 
     /**
-     * 
+     *
      * @see org.eclipse.osgi.internal.hookregistry.ClassLoaderHook#postFindResources(java.lang.String,
      *      org.eclipse.osgi.internal.loader.ModuleClassLoader)
      */

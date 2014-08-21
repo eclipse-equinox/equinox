@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2013 IBM Corporation and others.
+ * Copyright (c) 2006, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
- *   David Knibb               initial implementation      
- *   Matthew Webster           Eclipse 3.2 changes 
- *   Martin Lippert            supplementing mechanism reworked     
+ *   David Knibb               initial implementation
+ *   Matthew Webster           Eclipse 3.2 changes
+ *   Martin Lippert            supplementing mechanism reworked
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.hooks;
@@ -127,13 +127,18 @@ public class WeavingHook extends AbstractWeavingHook {
         context.addBundleListener(new SupplementBundleListener(
                 supplementerRegistry));
 
-        // final re-build supplementer final registry state for final installed bundles
+        // re-build supplementer registry state for installed bundles
         final Bundle[] installedBundles = context.getBundles();
         for (int i = 0; i < installedBundles.length; i++) {
-            supplementerRegistry.addSupplementer(installedBundles[i], false);
+            if (installedBundles[i].getState() != Bundle.UNINSTALLED) {
+                supplementerRegistry
+                        .addSupplementer(installedBundles[i], false);
+            }
         }
         for (int i = 0; i < installedBundles.length; i++) {
-            supplementerRegistry.addSupplementedBundle(installedBundles[i]);
+            if (installedBundles[i].getState() != Bundle.UNINSTALLED) {
+                supplementerRegistry.addSupplementedBundle(installedBundles[i]);
+            }
         }
 
         if (Debug.DEBUG_GENERAL)
