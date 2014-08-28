@@ -2206,6 +2206,22 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.stop();
 	}
 
+	public void testSystemNLFragment() throws BundleException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put("osgi.nl", "zh");
+		Equinox equinox = new Equinox(configuration);
+		equinox.start();
+		equinox.getHeaders();
+		BundleContext systemContext = equinox.getBundleContext();
+		Bundle systemNLS = systemContext.installBundle(installer.getBundleLocation("test.system.nls"));
+		equinox.adapt(FrameworkWiring.class).resolveBundles(Collections.singleton(systemNLS));
+		assertEquals("Wrong fragment state", Bundle.RESOLVED, systemNLS.getState());
+		assertEquals("Wrong header value.", "TEST NAME", equinox.getHeaders().get(Constants.BUNDLE_NAME));
+		equinox.stop();
+	}
+
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {
 		outputDir.mkdirs();
 
