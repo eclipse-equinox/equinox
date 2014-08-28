@@ -34,8 +34,7 @@ import org.eclipse.osgi.internal.loader.sources.*;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
-import org.osgi.framework.namespace.BundleNamespace;
-import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.framework.namespace.*;
 import org.osgi.framework.wiring.BundleWiring;
 
 /**
@@ -245,6 +244,16 @@ public class BundleLoader extends ModuleLoader {
 		synchronized (classLoaderMonitor) {
 			addFragmentExports(wiring.getModuleCapabilities(PackageNamespace.PACKAGE_NAMESPACE));
 			loadClassLoaderFragments(fragments);
+			clearManifestLocalizationCache();
+		}
+	}
+
+	protected void clearManifestLocalizationCache() {
+		Generation hostGen = (Generation) wiring.getRevision().getRevisionInfo();
+		hostGen.clearManifestCache();
+		for (ModuleWire fragmentWire : wiring.getProvidedModuleWires(HostNamespace.HOST_NAMESPACE)) {
+			Generation fragGen = (Generation) fragmentWire.getRequirer().getRevisionInfo();
+			fragGen.clearManifestCache();
 		}
 	}
 
