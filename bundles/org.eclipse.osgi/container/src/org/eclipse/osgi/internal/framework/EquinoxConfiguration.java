@@ -204,7 +204,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		boolean useSystemProps = useSystemPropsValue == null ? false : Boolean.parseBoolean(useSystemPropsValue.toString());
 		this.configuration = useSystemProps ? System.getProperties() : new Properties();
 		// do this the hard way to handle null values
-		for (Map.Entry<String, ?> initialEntry : initialConfiguration.entrySet()) {
+		for (Map.Entry<String, ?> initialEntry : this.initialConfig.entrySet()) {
 			if (initialEntry.getValue() == null) {
 				this.configuration.put(initialEntry.getKey(), NULL_CONFIG);
 			} else {
