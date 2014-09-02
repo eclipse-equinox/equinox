@@ -296,7 +296,7 @@ public class EclipseStarter {
 		if (running)
 			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ALREADY_RUNNING);
 		processCommandLine(args);
-		framework = new Equinox(configuration);
+		framework = new Equinox(getConfiguration());
 		framework.init();
 		context = framework.getBundleContext();
 		ServiceReference<FrameworkLog> logRef = context.getServiceReference(FrameworkLog.class);
