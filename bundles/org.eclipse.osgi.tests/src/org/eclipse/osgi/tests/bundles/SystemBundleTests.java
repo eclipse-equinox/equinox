@@ -2222,6 +2222,10 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.stop();
 	}
 
+	public void testNullConfiguration() {
+		new Equinox(null);
+	}
+
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {
 		outputDir.mkdirs();
 
