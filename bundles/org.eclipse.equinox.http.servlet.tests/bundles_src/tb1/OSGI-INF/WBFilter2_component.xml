@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true">
+   <implementation class="org.eclipse.equinox.http.servlet.tests.wb.t2.WBFilter2"/>
+   <service>
+      <provide interface="javax.servlet.Filter"/>
+   </service>
+   <property name="char" type="Character" value="b"/>
+   <property name="osgi.http.whiteboard.filter.pattern" type="String" value="/WBServlet2/*"/>
+</scr:component>

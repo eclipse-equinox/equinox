@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true">
+	<implementation class="org.eclipse.equinox.http.servlet.tests.tb1.TestServlet5"/>
+	<reference interface="org.osgi.service.http.HttpService"
+		bind="setHttpService"/>
+	<reference interface="org.osgi.service.http.runtime.HttpServiceRuntime"
+		bind="setHttpServiceRuntime"/>
+</scr:component>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true">
+   <implementation class="org.eclipse.equinox.http.servlet.tests.wb.t1.WBServlet1"/>
+   <service>
+      <provide interface="javax.servlet.Servlet"/>
+   </service>
+   <property name="osgi.http.whiteboard.servlet.pattern" value="/WBServlet1/*"/>
+</scr:component>
