@@ -283,6 +283,10 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		// A specified osgi.dev property but unspecified osgi.checkConfiguration
 		// property implies osgi.checkConfiguration = true.
 		inCheckConfigurationMode = Boolean.valueOf(getConfiguration(PROP_CHECK_CONFIGURATION, Boolean.toString(devMode)));
+		// Must ensure the check configuration property is set if in osgi.dev mode (bug 443340)
+		if (inCheckConfigurationMode && getConfiguration(PROP_CHECK_CONFIGURATION) == null) {
+			setConfiguration(PROP_CHECK_CONFIGURATION, "true"); //$NON-NLS-1$
+		}
 	}
 
 	public Map<String, Object> getInitialConfig() {
