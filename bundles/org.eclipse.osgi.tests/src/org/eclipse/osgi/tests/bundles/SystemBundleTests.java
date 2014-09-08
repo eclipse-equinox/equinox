@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
@@ -2224,6 +2225,25 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 	public void testNullConfiguration() {
 		new Equinox(null);
+	}
+
+	public void testOSGiDevSetsCheckConfiguration() throws BundleException {
+		String originalCheckConfiguration = System.clearProperty(EquinoxConfiguration.PROP_CHECK_CONFIGURATION);
+		try {
+			File config = OSGiTestsActivator.getContext().getDataFile(getName());
+			Map<String, Object> configuration = new HashMap<String, Object>();
+			configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+			configuration.put("osgi.dev", "true");
+			Equinox equinox = new Equinox(configuration);
+			equinox.start();
+			BundleContext systemContext = equinox.getBundleContext();
+			assertEquals("Wrong value for: " + EquinoxConfiguration.PROP_CHECK_CONFIGURATION, "true", systemContext.getProperty(EquinoxConfiguration.PROP_CHECK_CONFIGURATION));
+			equinox.stop();
+		} finally {
+			if (originalCheckConfiguration != null) {
+				System.setProperty(EquinoxConfiguration.PROP_CHECK_CONFIGURATION, originalCheckConfiguration);
+			}
+		}
 	}
 
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {
