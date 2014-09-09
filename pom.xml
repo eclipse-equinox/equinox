@@ -50,7 +50,6 @@
     <module>bundles/org.eclipse.osgi/supplement</module>
     
     <module>bundles/org.eclipse.equinox.launcher</module>
-    <module>bundles/org.eclipse.equinox.launcher.cocoa.macosx</module>
     <module>bundles/org.eclipse.equinox.launcher.cocoa.macosx.x86_64</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.aix.ppc</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.aix.ppc64</module>
