@@ -187,12 +187,8 @@ public class EclipseStarter {
 			configuration = new HashMap<String, String>();
 			// TODO hack to set these to defaults for EclipseStarter
 			// Note that this hack does not allow these properties to be specified in config.ini
-			if (System.getProperty(EquinoxConfiguration.PROP_USE_SYSTEM_PROPERTIES) == null) {
-				configuration.put(EquinoxConfiguration.PROP_USE_SYSTEM_PROPERTIES, "true"); //$NON-NLS-1$
-			}
-			if (System.getProperty(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION) == null) {
-				configuration.put(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION, "true"); //$NON-NLS-1$
-			}
+			configuration.put(EquinoxConfiguration.PROP_USE_SYSTEM_PROPERTIES, System.getProperty(EquinoxConfiguration.PROP_USE_SYSTEM_PROPERTIES, "true")); //$NON-NLS-1$
+			configuration.put(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION, System.getProperty(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION, "true")); //$NON-NLS-1$
 		}
 		return configuration;
 	}
