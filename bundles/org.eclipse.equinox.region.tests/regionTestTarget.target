@@ -17,7 +17,7 @@
 <environment>
 <os>macosx</os>
 <ws>cocoa</ws>
-<arch>x86</arch>
+<arch>x86_64</arch>
 <nl>en_US</nl>
 </environment>
 <launcherArgs>
