@@ -727,33 +727,10 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		// if the user didn't set the locale with a command line argument then use the default.
 		String nlValue = configuration.getProperty(PROP_OSGI_NL);
 		if (nlValue != null) {
-			StringTokenizer tokenizer = new StringTokenizer(nlValue, "_"); //$NON-NLS-1$
-			int segments = tokenizer.countTokens();
-			try {
-				Locale userLocale = null;
-				switch (segments) {
-					case 1 :
-						// use the 2 arg constructor to maintain compatibility with 1.3.1
-						userLocale = new Locale(tokenizer.nextToken(), ""); //$NON-NLS-1$
-						break;
-					case 2 :
-						userLocale = new Locale(tokenizer.nextToken(), tokenizer.nextToken());
-						break;
-					case 3 :
-						userLocale = new Locale(tokenizer.nextToken(), tokenizer.nextToken(), tokenizer.nextToken());
-						break;
-					default :
-						// if the user passed us in a bogus value then log a message and use the default
-						System.err.println(NLS.bind(Msg.error_badNL, nlValue));
-						userLocale = Locale.getDefault();
-						break;
-				}
-				Locale.setDefault(userLocale);
-				// TODO what the heck is this for?? why not just use osgi.nl
-				configuration.put(PROP_OSGI_NL_USER, nlValue);
-			} catch (NoSuchElementException e) {
-				// fall through and use the default
-			}
+			Locale userLocale = toLocale(nlValue, Locale.getDefault());
+			Locale.setDefault(userLocale);
+			// TODO what the heck is this for?? why not just use osgi.nl
+			configuration.put(PROP_OSGI_NL_USER, nlValue);
 		}
 		nlValue = Locale.getDefault().toString();
 		configuration.put(PROP_OSGI_NL, nlValue);
@@ -922,5 +899,80 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			// found a case of $var at the end of the path with no trailing $; just append it as is.
 			buf.append(VARIABLE_DELIM_CHAR).append(var);
 		return buf.toString();
+	}
+
+	/**
+	 * <p>
+	 * Converts a String to a Locale.
+	 * </p>
+	 * 
+	 * <p>
+	 * This method takes the string format of a locale and creates the locale object from it.
+	 * </p>
+	 * 
+	 * <p>
+	 * This method validates the input strictly. The language code must be lowercase. The country
+	 * code must be uppercase. The separator must be an underscore. The length must be correct.
+	 * </p>
+	 * 
+	 * <p>
+	 * This method is inspired by <code>org.apache.commons.lang.LocaleUtils.toLocale(String)</code>
+	 * by fixing the parsing error for uncommon Locales like having a language and a variant code
+	 * but no country code, or a Locale that only consists of a country code.
+	 * </p>
+	 * 
+	 * @param str
+	 *            the locale String to convert
+	 * @param defaultLocale
+	 *            the Locale that should be returned in case of an invalid Locale String
+	 * @return a Locale that matches the specified locale String. If the given input String is
+	 *         <code>null</code> or can not be parsed because of an invalid format, the given
+	 *         default {@link Locale} will be returned.
+	 */
+	public static Locale toLocale(String str, Locale defaultLocale) {
+		if (str == null) {
+			System.err.println("Given locale String is null - Default Locale will be used instead."); //$NON-NLS-1$
+			return defaultLocale;
+		}
+
+		String language = ""; //$NON-NLS-1$
+		String country = ""; //$NON-NLS-1$
+		String variant = ""; //$NON-NLS-1$
+
+		String[] localeParts = str.split("_"); //$NON-NLS-1$
+		if (localeParts.length == 0 || localeParts.length > 3 || (localeParts.length == 1 && localeParts[0].length() == 0)) {
+			System.err.println(NLS.bind(Msg.error_badNL, str));
+			return defaultLocale;
+		}
+
+		if (localeParts[0].length() > 0 && !localeParts[0].matches("[a-zA-Z]{2,8}")) { //$NON-NLS-1$
+			System.err.println(NLS.bind(Msg.error_badNL, str));
+			return defaultLocale;
+		}
+
+		language = localeParts[0];
+
+		if (localeParts.length > 1) {
+			if (localeParts[1].length() > 0 && !localeParts[1].matches("[a-zA-Z]{2}|[0-9]{3}")) { //$NON-NLS-1$
+				if (language.length() > 0) {
+					System.err.println(NLS.bind(Msg.error_badNL_language, str));
+					return new Locale(language);
+				}
+				System.err.println(NLS.bind(Msg.error_badNL, str));
+				return defaultLocale;
+			}
+
+			country = localeParts[1];
+		}
+
+		if (localeParts.length == 3) {
+			if (localeParts[2].length() == 0) {
+				System.err.println(NLS.bind(Msg.error_badNL_language_country, str));
+				return new Locale(language, country);
+			}
+			variant = localeParts[2];
+		}
+
+		return new Locale(language, country, variant);
 	}
 }

@@ -90,6 +90,8 @@ public class Msg extends NLS {
 	public static String ECLIPSE_STARTUP_APP_ERROR;
 	public static String ECLIPSE_STARTUP_PROPS_NOT_SET;
 	public static String error_badNL;
+	public static String error_badNL_language;
+	public static String error_badNL_language_country;
 	public static String location_cannotLock;
 	public static String location_cannotLockNIO;
 	public static String location_folderReadOnly;
