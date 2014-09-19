@@ -364,7 +364,7 @@ public class ContextController implements ServletContextHelperContext {
 
 		ServletDTO servletDTO = new ServletDTO();
 
-		servletDTO.asyncSupported = false;
+		servletDTO.asyncSupported = asyncSupported;
 		servletDTO.initParams = initparams;
 		servletDTO.name = servletName;
 		servletDTO.patterns = sort(patterns);
