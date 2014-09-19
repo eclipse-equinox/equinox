@@ -29,8 +29,8 @@ public class NamedDispatcherAdaptor implements RequestDispatcher {
 	public void forward(ServletRequest req, ServletResponse resp)
 		throws IOException, ServletException {
 
-		if (req instanceof HttpServletRequestBuilder)
-			req = ((HttpServletRequestBuilder) req).getRequest();
+		if (req instanceof HttpServletRequestBuilder.RequestGetter)
+			req = ((HttpServletRequestBuilder.RequestGetter) req).getOriginalRequest();
 
 		doDispatch((HttpServletRequest)req, (HttpServletResponse)resp);
 	}
@@ -38,8 +38,8 @@ public class NamedDispatcherAdaptor implements RequestDispatcher {
 	public void include(ServletRequest req, ServletResponse resp)
 		throws IOException, ServletException {
 
-		if (req instanceof HttpServletRequestBuilder)
-			req = ((HttpServletRequestBuilder) req).getRequest();
+		if (req instanceof HttpServletRequestBuilder.RequestGetter)
+			req = ((HttpServletRequestBuilder.RequestGetter) req).getOriginalRequest();
 
 		doDispatch((HttpServletRequest)req, (HttpServletResponse)resp);
 	}

@@ -25,6 +25,10 @@ import org.osgi.service.http.HttpContext;
 
 public class HttpServletRequestBuilder {
 
+	static interface RequestGetter {
+		HttpServletRequest getOriginalRequest();
+	}
+
 	private DispatchTargets dispatchTargets;
 	private EndpointRegistration<?> servletRegistration;
 	private final HttpServletRequest request;
@@ -75,12 +79,18 @@ public class HttpServletRequestBuilder {
 		isRequestDispatcherInclude = request.getAttribute(HttpServletRequestBuilder.INCLUDE_REQUEST_URI_ATTRIBUTE) != null;
 
 		this.requestProxy = (HttpServletRequest)Proxy.newProxyInstance(
-			getClass().getClassLoader(), new Class[] {HttpServletRequest.class},
+			getClass().getClassLoader(),
+			new Class[] {HttpServletRequest.class, RequestGetter.class},
 			new InvocationHandler() {
 
 				@Override
 				public Object invoke(Object proxy, Method method, Object[] args)
 					throws Throwable {
+
+					if (method.getName().equals("getOriginalRequest")) {
+						return getOriginalRequest();
+					}
+
 					return HttpServletRequestBuilder.this.invoke(proxy, method, args);
 				}
 
@@ -121,10 +131,6 @@ public class HttpServletRequestBuilder {
 			return remoteUser;
 
 		return request.getRemoteUser();
-	}
-
-	public HttpServletRequest getRequest() {
-		return request;
 	}
 
 	public String getPathInfo() {
@@ -286,6 +292,10 @@ public class HttpServletRequestBuilder {
 					servletRequestAttributeEvent);
 			}
 		}
+	}
+
+	HttpServletRequest getOriginalRequest() {
+		return request;
 	}
 
 }

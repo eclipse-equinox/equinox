@@ -25,15 +25,15 @@ public class RequestDispatcherAdaptor implements RequestDispatcher {
 	}
 
 	public void forward(ServletRequest req, ServletResponse resp) throws ServletException, IOException {
-		if (req instanceof HttpServletRequestBuilder)
-			req = ((HttpServletRequestBuilder) req).getRequest();
+		if (req instanceof HttpServletRequestBuilder.RequestGetter)
+			req = ((HttpServletRequestBuilder.RequestGetter) req).getOriginalRequest();
 
 		requestDispatcher.forward(req, resp);
 	}
 
 	public void include(ServletRequest req, ServletResponse resp) throws ServletException, IOException {
-		if (req instanceof HttpServletRequestBuilder)
-			req = ((HttpServletRequestBuilder) req).getRequest();
+		if (req instanceof HttpServletRequestBuilder.RequestGetter)
+			req = ((HttpServletRequestBuilder.RequestGetter) req).getOriginalRequest();
 
 		requestDispatcher.include(req, resp);
 	}
