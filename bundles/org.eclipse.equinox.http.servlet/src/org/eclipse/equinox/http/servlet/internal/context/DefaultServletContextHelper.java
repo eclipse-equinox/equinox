@@ -13,51 +13,15 @@
 
 package org.eclipse.equinox.http.servlet.internal.context;
 
-import java.io.IOException;
-import java.net.URL;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.context.ServletContextHelperContext;
 
 public class DefaultServletContextHelper extends ServletContextHelper
 	implements HttpContext {
 
 	public DefaultServletContextHelper(Bundle bundle) {
 		super(bundle);
-
-		this.defaultContext = new ServletContextHelperContext() {
-
-			@Override
-			public ServletContextHelper getParentContext(
-				ServletContextHelper context) {
-
-				return null;
-			}
-
-		};
 	}
-
-	@Override
-	public boolean handleSecurity(
-			HttpServletRequest request, HttpServletResponse response)
-		throws IOException {
-
-		return handleSecurity(defaultContext, request, response);
-	}
-
-	@Override
-	public String getMimeType(String name) {
-		return getMimeType(defaultContext, name);
-	}
-
-	@Override
-	public URL getResource(String name) {
-		return getResource(defaultContext, name);
-	}
-
-	private final ServletContextHelperContext defaultContext;
 
 }

@@ -28,7 +28,6 @@ import org.eclipse.equinox.http.servlet.internal.util.*;
 import org.osgi.framework.*;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.context.ServletContextHelperContext;
 import org.osgi.service.http.runtime.dto.*;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
@@ -36,7 +35,7 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * @author Raymond Augé
  */
-public class ContextController implements ServletContextHelperContext {
+public class ContextController {
 
 	public ContextController(
 		Bundle bundle, ServletContextHelper servletContextHelper,
@@ -276,7 +275,7 @@ public class ContextController implements ServletContextHelperContext {
 		}
 
 		Servlet servlet = new ResourceServlet(
-			prefix, this, servletContextHelper, AccessController.getContext());
+			prefix, servletContextHelper, AccessController.getContext());
 
 		ResourceDTO resourceDTO = new ResourceDTO();
 
@@ -616,12 +615,6 @@ public class ContextController implements ServletContextHelperContext {
 		return listenerRegistrations;
 	}
 
-	@Override
-	public ServletContextHelper getParentContext(ServletContextHelper context) {
-		//TODO
-		return null;
-	}
-
 	public ProxyContext getProxyContext() {
 		checkShutdown();
 
@@ -942,20 +935,16 @@ public class ContextController implements ServletContextHelperContext {
 		return new ServletContextHelper(curBundle) {
 
 			@Override
-			public String getMimeType(
-				ServletContextHelperContext context, String name) {
-
-				return servletContextHelper.getMimeType(context, name);
+			public String getMimeType(String name) {
+				return servletContextHelper.getMimeType(name);
 			}
 
 			@Override
 			public boolean handleSecurity(
-					ServletContextHelperContext context,
 					HttpServletRequest request, HttpServletResponse response)
 				throws IOException {
 
-				return servletContextHelper.handleSecurity(
-					context, request, response);
+				return servletContextHelper.handleSecurity(request, response);
 			}
 
 		};

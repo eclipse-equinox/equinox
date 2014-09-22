@@ -17,7 +17,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.security.*;
 import javax.servlet.http.*;
-import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
 import org.osgi.service.http.context.ServletContextHelper;
 
@@ -28,17 +27,15 @@ public class ResourceServlet extends HttpServlet {
 	private static final String IF_NONE_MATCH = "If-None-Match"; //$NON-NLS-1$
 	private static final String ETAG = "ETag"; //$NON-NLS-1$
 
-	private ContextController contextController;
 	private String internalName;
 	private ServletContextHelper servletContextHelper;
 	private AccessControlContext acc;
 
-	public ResourceServlet(String internalName, ContextController contextController, ServletContextHelper servletContextHelper, AccessControlContext acc) {
+	public ResourceServlet(String internalName, ServletContextHelper servletContextHelper, AccessControlContext acc) {
 		this.internalName = internalName;
 		if (internalName.equals(Const.SLASH)) {
 			this.internalName = Const.BLANK;
 		}
-		this.contextController = contextController;
 		this.servletContextHelper = servletContextHelper;
 		this.acc = acc;
 	}
@@ -50,7 +47,7 @@ public class ResourceServlet extends HttpServlet {
 			if (pathInfo == null)
 				pathInfo = Const.BLANK;
 			String resourcePath = internalName + pathInfo;
-			URL resourceURL = servletContextHelper.getResource(contextController, resourcePath);
+			URL resourceURL = servletContextHelper.getResource(resourcePath);
 			if (resourceURL != null)
 				writeResource(req, resp, resourcePath, resourceURL);
 			else
@@ -93,7 +90,7 @@ public class ResourceServlet extends HttpServlet {
 					if (contentLength != -1)
 						resp.setContentLength(contentLength);
 
-					String contentType = servletContextHelper.getMimeType(contextController, resourcePath);
+					String contentType = servletContextHelper.getMimeType(resourcePath);
 					if (contentType == null)
 						contentType = getServletConfig().getServletContext().getMimeType(resourcePath);
 

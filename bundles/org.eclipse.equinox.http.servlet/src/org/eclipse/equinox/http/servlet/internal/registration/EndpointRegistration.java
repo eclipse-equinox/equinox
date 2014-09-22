@@ -140,7 +140,7 @@ public abstract class EndpointRegistration<D extends DTO>
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(classLoader);
-			if (servletContextHelper.handleSecurity(contextController, req, resp))
+			if (servletContextHelper.handleSecurity(req, resp))
 				getT().service(req, resp);
 		} finally {
 			Thread.currentThread().setContextClassLoader(original);

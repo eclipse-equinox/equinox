@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.context.ServletContextHelperContext;
 
 /**
  * @author Raymond Augé
@@ -42,12 +41,7 @@ public class ServletContextHelperWrapper
 	}
 
 	@Override
-	public String getMimeType(ServletContextHelperContext context, String name) {
-		return _httpContext.getMimeType(name);
-	}
-
-	@Override
-	public String getRealPath(ServletContextHelperContext context, String path) {
+	public String getRealPath(String path) {
 		return null;
 	}
 
@@ -57,14 +51,7 @@ public class ServletContextHelperWrapper
 	}
 
 	@Override
-	public URL getResource(ServletContextHelperContext context, String name) {
-		return _httpContext.getResource(name);
-	}
-
-	@Override
-	public Set<String> getResourcePaths(
-		ServletContextHelperContext context ,String path) {
-
+	public Set<String> getResourcePaths(String path) {
 		if ((path == null) || (_bundle == null)) {
 			return null;
 		}
@@ -88,15 +75,6 @@ public class ServletContextHelperWrapper
 	@Override
 	public boolean handleSecurity(
 			HttpServletRequest request, HttpServletResponse response)
-		throws IOException {
-
-		return _httpContext.handleSecurity(request, response);
-	}
-
-	@Override
-	public boolean handleSecurity(
-			ServletContextHelperContext context, HttpServletRequest request,
-			HttpServletResponse response)
 		throws IOException {
 
 		return _httpContext.handleSecurity(request, response);

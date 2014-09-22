@@ -192,8 +192,8 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	 * @see HttpService#registerServlet(String, Servlet, Dictionary, HttpContext)
 	 */
 	public synchronized void registerServlet(
-			String alias, Servlet servlet,
-			Dictionary<String, String> initparams, HttpContext httpContext)
+			String alias, Servlet servlet, Dictionary initparams,
+			HttpContext httpContext)
 		throws ServletException, NamespaceException {
 
 		checkShutdown();

@@ -125,7 +125,7 @@ public class ServletContextAdaptor {
 			mimeType = AccessController.doPrivileged(
 				new PrivilegedExceptionAction<String>() {
 					public String run() throws Exception {
-						return servletContextHelper.getMimeType(contextController, name);
+						return servletContextHelper.getMimeType(name);
 					}
 				}, acc
 			);
@@ -153,7 +153,7 @@ public class ServletContextAdaptor {
 			return AccessController.doPrivileged(
 				new PrivilegedExceptionAction<String>() {
 					public String run() throws Exception {
-						return servletContextHelper.getRealPath(contextController, path);
+						return servletContextHelper.getRealPath(path);
 					}
 				}, acc
 			);
@@ -180,7 +180,7 @@ public class ServletContextAdaptor {
 			return AccessController.doPrivileged(
 				new PrivilegedExceptionAction<URL>() {
 					public URL run() throws Exception {
-						return servletContextHelper.getResource(contextController, name);
+						return servletContextHelper.getResource(name);
 					}
 				}, acc
 			);
@@ -218,7 +218,7 @@ public class ServletContextAdaptor {
 			return AccessController.doPrivileged(
 				new PrivilegedExceptionAction<Set<String>>() {
 					public Set<String> run() throws Exception {
-						return servletContextHelper.getResourcePaths(contextController, name);
+						return servletContextHelper.getResourcePaths(name);
 					}
 				}, acc
 			);

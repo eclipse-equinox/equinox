@@ -84,7 +84,7 @@ public class FilterRegistration
 		try {
 			Thread.currentThread().setContextClassLoader(classLoader);
 
-			if (servletContextHelper.handleSecurity(contextController, request, response)) {
+			if (servletContextHelper.handleSecurity(request, response)) {
 				getT().doFilter(request, response, chain);
 			}
 		}
