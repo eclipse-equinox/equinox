@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * Context for HTTP Requests.
@@ -53,10 +52,8 @@ import org.osgi.annotation.versioning.ConsumerType;
  * </ul>
  * 
  * 
- * @ThreadSafe
  * @author $Id$
  */
-@ConsumerType
 public interface HttpContext {
 	/**
 	 * {@code HttpServletRequest} attribute specifying the name of the
@@ -151,17 +148,17 @@ public interface HttpContext {
 	 * <p>
 	 * Called by the Http Service to map a resource name to a URL. For servlet
 	 * registrations, Http Service will call this method to support the
-	 * <code>ServletContext</code> methods <code>getResource</code> and
-	 * <code>getResourceAsStream</code>. For resource registrations, Http
-	 * Service will call this method to locate the named resource. The context
-	 * can control from where resources come. For example, the resource can be
+	 * {@code ServletContext} methods {@code getResource} and
+	 * {@code getResourceAsStream}. For resource registrations, Http Service
+	 * will call this method to locate the named resource. The context can
+	 * control from where resources come. For example, the resource can be
 	 * mapped to a file in the bundle's persistent storage area via
-	 * <code>bundleContext.getDataFile(name).toURL()</code> or to a resource in
-	 * the context's bundle via <code>getClass().getResource(name)</code>
+	 * {@code bundleContext.getDataFile(name).toURL()} or to a resource in the
+	 * context's bundle via {@code getClass().getResource(name)}
 	 * 
 	 * @param name the name of the requested resource
 	 * @return URL that Http Service can use to read the resource or
-	 *         <code>null</code> if the resource does not exist.
+	 *         {@code null} if the resource does not exist.
 	 */
 	public URL getResource(String name);
 

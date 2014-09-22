@@ -248,7 +248,7 @@ public final class HttpWhiteboardConstants {
 	 * <p>
 	 * The specified regular expressions are used to determine whether a request
 	 * should be mapped to the servlet filter. The regular expressions must
-	 * follow the syntax defined in {@link java.util.regex.Pattern}. Filter
+	 * follow the syntax defined in {@code java.util.regex.Pattern}. Filter
 	 * services without this service property or the
 	 * {@link #HTTP_WHITEBOARD_FILTER_SERVLET} or the
 	 * {@link #HTTP_WHITEBOARD_FILTER_PATTERN} service property must be ignored.
@@ -257,7 +257,7 @@ public final class HttpWhiteboardConstants {
 	 * The value of this service property must be of type {@code String},
 	 * {@code String[]}, or {@code Collection<String>}.
 	 * 
-	 * @see java.util.regex.Pattern
+	 * @see "java.util.regex.Pattern"
 	 */
 	public static final String	HTTP_WHITEBOARD_FILTER_REGEX			= "osgi.http.whiteboard.filter.regex";
 

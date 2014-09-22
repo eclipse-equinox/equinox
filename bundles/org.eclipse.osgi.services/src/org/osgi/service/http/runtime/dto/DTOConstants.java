@@ -69,4 +69,21 @@ public final class DTOConstants {
 	 * The value of {@code FAILURE_REASON_SERVICE_NOT_GETTABLE} is 5.
 	 */
 	public static final int	FAILURE_REASON_SERVICE_NOT_GETTABLE			= 5;
+
+	/**
+	 * The service is registered in the servlet registry but the provided
+	 * registration properties are invalid.
+	 * <p>
+	 * The value of {@code FAILURE_REASON_VALIDATION_FAILED} is 6.
+	 */
+	public static final int	FAILURE_REASON_VALIDATION_FAILED			= 6;
+
+	/**
+	 * The service is not registered as a prototype scoped service and is
+	 * already used with one servlet context and therefore can't be used with
+	 * another servlet context.
+	 * <p>
+	 * The value of {@code FAILURE_REASON_SERVICE_ALREAY_USED} is 7.
+	 */
+	public static final int	FAILURE_REASON_SERVICE_ALREAY_USED			= 7;
 }

@@ -175,7 +175,6 @@ public abstract class ServletContextHelper {
 	 * {@code getAuthType} and {@code getRemoteUser} methods, respectively, on
 	 * the request.
 	 * 
-	 * @param context The servlet context helper context for this call.
 	 * @param request The HTTP request.
 	 * @param response The HTTP response.
 	 * @return {@code true} if the request should be serviced, {@code false} if
@@ -185,14 +184,9 @@ public abstract class ServletContextHelper {
 	 *         the Http Whiteboard Service will terminate the request and close
 	 *         the socket.
 	 */
-	public boolean handleSecurity(final ServletContextHelperContext context,
-			                      final HttpServletRequest request, 
+	public boolean handleSecurity(final HttpServletRequest request,
 			                      final HttpServletResponse response)
 			throws IOException {
-		final ServletContextHelper parent = context.getParentContext(this);
-		if ( parent != null ) {
-			return parent.handleSecurity(context, request, response);
-		}
 		return true;
 	}
 
@@ -212,12 +206,11 @@ public abstract class ServletContextHelper {
 	 * via {@code bundleContext.getDataFile(name).toURL()} or to a resource in
 	 * the context's bundle via {@code getClass().getResource(name)}
 	 * 
-	 * @param context The servlet context helper context for this call.
 	 * @param name The name of the requested resource.
 	 * @return A URL that Http Whiteboard Service can use to read the resource
 	 *         or {@code null} if the resource does not exist.
 	 */
-	public URL getResource(final ServletContextHelperContext context, String name) {
+	public URL getResource(String name) {
 		final Bundle localBundle = this.bundle;
 		if (name != null && localBundle != null) {
 			if (name.startsWith("/")) {
@@ -240,17 +233,12 @@ public abstract class ServletContextHelper {
 	 * will call this method to determine the MIME type for the
 	 * {@code Content-Type} header in the response.
 	 *
-	 * @param context The servlet context helper context for this call.
 	 * @param name The name for which to determine the MIME type.
 	 * @return The MIME type (e.g. text/html) of the specified name or
 	 *         {@code null} to indicate that the Http Service should determine
 	 *         the MIME type itself.
 	 */
-	public String getMimeType(final ServletContextHelperContext context, final String name) {
-		final ServletContextHelper parent = context.getParentContext(this);
-		if (parent != null) {
-			parent.getMimeType(context, name);
-		}
+	public String getMimeType(final String name) {
 		return null;
 	}
 
@@ -264,14 +252,13 @@ public abstract class ServletContextHelper {
 	 * {@code ServletContext} method {@code getResourcePaths} for whiteboard
 	 * services.
 	 * 
-	 * @param context The servlet context helper context for this call.
 	 * @param path the partial path used to match the resources, which must
 	 *        start with a /
 	 * @return a Set containing the directory listing, or null if there are no
 	 *         resources in the web application whose path begins with the
 	 *         supplied path.
 	 */
-	public Set<String> getResourcePaths(final ServletContextHelperContext context, final String path) {
+	public Set<String> getResourcePaths(final String path) {
 		final Bundle localBundle = this.bundle;
 		if (path != null && localBundle != null) {
 			final Enumeration<URL> e = localBundle.findEntries(path, null, false);
@@ -294,11 +281,10 @@ public abstract class ServletContextHelper {
 	 * {@code ServletContext} method {@code getRealPath} for whiteboard
 	 * services.
 	 * 
-	 * @param context The servlet context helper context for this call.
 	 * @param path the virtual path to be translated to a real path
 	 * @return the real path, or null if the translation cannot be performed
 	 */
-	public String getRealPath(final ServletContextHelperContext context, final String path) {
+	public String getRealPath(final String path) {
 		return null;
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2014). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2013). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,16 @@ package org.osgi.service.http;
 import java.util.Dictionary;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The Http Service allows other bundles in the OSGi environment to dynamically
  * register resources and servlets into the URI namespace of Http Service. A
  * bundle may later unregister its resources or servlets.
  * 
- * @ThreadSafe
+ * @noimplement
  * @author $Id$
  * @see HttpContext
  */
-@ProviderType
 public interface HttpService {
 	/**
 	 * Registers a servlet into the URI namespace.
@@ -78,7 +76,7 @@ public interface HttpService {
 	 * @throws java.lang.IllegalArgumentException if any of the arguments are
 	 *         invalid
 	 */
-	public void registerServlet(String alias, Servlet servlet, Dictionary<String, String> initparams, HttpContext context) throws ServletException, NamespaceException;
+	public void registerServlet(String alias, Servlet servlet, Dictionary initparams, HttpContext context) throws ServletException, NamespaceException;
 
 	/**
 	 * Registers resources into the URI namespace.
