@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.0.0">
+	<OCD name="%configurationName" id="server.config" description="%configurationDescription">
+		<AD id="http.enabled" type="Boolean" default="true"/>
+		<AD id="http.port" type="Integer" default="0"/>
+		<AD id="http.host" type="String" cardinality="1"/>
+		<AD id="http.nio"  type="Boolean" default="true"/>
+		<AD id="https.enabled" type="Boolean" default="false"/>
+		<AD id="https.port" type="Integer" default="0"/>
+		<AD id="https.host" type="String" cardinality="1"/>
+		<AD id="ssl.keystore" type="String" cardinality="1"/>
+		<AD id="ssl.password" type="String" cardinality="1"/>
+		<AD id="ssl.keypassword" type="String" cardinality="1"/>
+		<AD id="ssl.needclientauth" type="Boolean" cardinality="1"/>
+		<AD id="ssl.wantclientauth" type="Boolean" cardinality="1"/>
+		<AD id="ssl.protocol" type="String" cardinality="1"/>
+		<AD id="ssl.algorithm" type="String" cardinality="1"/>
+		<AD id="ssl.keystoretype" type="String" cardinality="1"/>
+		<AD id="context.path" type="String" cardinality="1"/>
+		<AD id="context.sessioninactiveinterval" type="Integer" cardinality="1"/>
+		<AD id="other.info" type="String" cardinality="1"/>
+	</OCD>
+	<Designate pid="org.eclipse.equinox.http.jetty.config.designate" factoryPid="org.eclipse.equinox.http.jetty.config" bundle="*">
+		<Object ocdref="server.config"/>
+	</Designate>
+</MetaData>
