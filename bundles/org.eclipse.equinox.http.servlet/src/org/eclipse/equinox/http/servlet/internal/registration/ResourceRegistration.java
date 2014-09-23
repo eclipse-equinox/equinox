@@ -11,9 +11,8 @@
 
 package org.eclipse.equinox.http.servlet.internal.registration;
 
-import org.eclipse.equinox.http.servlet.internal.context.ContextController;
-
 import javax.servlet.Servlet;
+import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.dto.ResourceDTO;
 /**
@@ -24,9 +23,9 @@ public class ResourceRegistration extends EndpointRegistration<ResourceDTO> {
 	public ResourceRegistration(
 		Servlet servlet, ResourceDTO resourceDTO,
 		ServletContextHelper servletContextHelper,
-		ContextController contextController) {
+		ContextController contextController, boolean legacyMatching) {
 
-		super(servlet, resourceDTO, servletContextHelper, contextController);
+		super(servlet, resourceDTO, servletContextHelper, contextController, legacyMatching);
 
 		name = servlet.getClass().getName().concat("#").concat(getD().prefix); //$NON-NLS-1$
 	}

@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
+import org.eclipse.equinox.http.servlet.internal.util.Const;
 import org.osgi.dto.DTO;
 import org.osgi.service.http.context.ServletContextHelper;
 
@@ -29,15 +30,17 @@ public abstract class EndpointRegistration<D extends DTO>
 	private ServletContextHelper servletContextHelper; //The context used during the registration of the servlet
 	private ContextController contextController;
 	private ClassLoader classLoader;
+	private boolean legacyMatching;
 
 	public EndpointRegistration(
 		Servlet servlet, D d, ServletContextHelper servletContextHelper,
-		ContextController contextController) {
+		ContextController contextController, boolean legacyMatching) {
 
 		super(servlet, d);
 
 		this.servletContextHelper = servletContextHelper;
 		this.contextController = contextController;
+		this.legacyMatching = legacyMatching;
 		classLoader = contextController.getClassLoader();
 	}
 
@@ -127,6 +130,12 @@ public abstract class EndpointRegistration<D extends DTO>
 		}
 
 		for (String pattern : patterns) {
+			if (legacyMatching && (match == Match.REGEX) &&
+				!pattern.endsWith(Const.SLASH_STAR)) {
+
+				pattern += Const.SLASH_STAR;
+			}
+
 			if (doMatch(pattern, servletPath, pathInfo, extension, match)) {
 				return pattern;
 			}

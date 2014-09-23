@@ -86,7 +86,7 @@ public class ContextServletTrackerCustomizer
 		try {
 			return contextController.addServletRegistration(
 				servlet, asyncSupported, errorPages, initParams, patterns,
-				serviceId.longValue(), servletName);
+				serviceId.longValue(), servletName, false);
 		}
 		catch (ServletException se) {
 			httpServiceRuntime.log(se.getMessage(), se);

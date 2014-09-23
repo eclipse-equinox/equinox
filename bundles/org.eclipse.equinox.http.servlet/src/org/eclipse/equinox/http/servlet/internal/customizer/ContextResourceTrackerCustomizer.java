@@ -64,7 +64,7 @@ public class ContextResourceTrackerCustomizer
 			HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
 
 		return contextController.addResourceRegistration(
-			patterns, prefix, serviceId.longValue());
+			patterns, prefix, serviceId.longValue(), false);
 	}
 
 	@Override

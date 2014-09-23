@@ -181,7 +181,8 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 		ResourceRegistration resourceRegistration =
 			contextController.addResourceRegistration(
-				patterns, prefix, legacyServiceIdGenerator.decrementAndGet());
+				patterns, prefix, legacyServiceIdGenerator.decrementAndGet(),
+				false);
 
 		for (String pattern : patterns) {
 			contextRegistrations.put(pattern, resourceRegistration);
@@ -248,7 +249,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 		ServletRegistration servletRegistration =
 			contextController.addServletRegistration(
 				servlet, asyncSupported, errorPages, initparams, patterns,
-				legacyServiceIdGenerator.decrementAndGet(), name);
+				legacyServiceIdGenerator.decrementAndGet(), name, false);
 
 		if (patterns != null) {
 			for (String pattern : patterns) {

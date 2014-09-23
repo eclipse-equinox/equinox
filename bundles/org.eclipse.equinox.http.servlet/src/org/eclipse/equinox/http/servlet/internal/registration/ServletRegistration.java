@@ -25,9 +25,9 @@ public class ServletRegistration extends EndpointRegistration<ServletDTO> {
 	public ServletRegistration(
 		Servlet servlet, ServletDTO servletDTO, ErrorPageDTO errorPageDTO,
 		ServletContextHelper servletContextHelper,
-		ContextController contextController) {
+		ContextController contextController, boolean legacyMatching) {
 
-		super(servlet, servletDTO, servletContextHelper, contextController);
+		super(servlet, servletDTO, servletContextHelper, contextController, legacyMatching);
 
 		this.errorPageDTO = errorPageDTO;
 	}

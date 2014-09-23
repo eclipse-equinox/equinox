@@ -255,11 +255,11 @@ public class ContextController {
 		}
 
 		return addResourceRegistration(
-			new String[] {pattern}, prefix, serviceId);
+			new String[] {pattern}, prefix, serviceId, true);
 	}
 
 	public ResourceRegistration addResourceRegistration(
-		String[] patterns, String prefix, long serviceId) {
+		String[] patterns, String prefix, long serviceId, boolean legacyMatching) {
 
 		checkShutdown();
 
@@ -290,7 +290,7 @@ public class ContextController {
 		ServletContext servletContext = createServletContext(
 			bundle, curServletContextHelper);
 		ResourceRegistration resourceRegistration = new ResourceRegistration(
-			servlet, resourceDTO, curServletContextHelper, this);
+			servlet, resourceDTO, curServletContextHelper, this, legacyMatching);
 		ServletConfig servletConfig = new ServletConfigImpl(
 			resourceRegistration.getName(), new HashMap<String, String>(),
 			servletContext);
@@ -333,13 +333,13 @@ public class ContextController {
 		return addServletRegistration(
 			servlet, false, Const.EMPTY_ARRAY,
 			new UMDictionaryMap<String, String>(initparams),
-			new String[] {pattern}, serviceId, servletName);
+			new String[] {pattern}, serviceId, servletName, true);
 	}
 
 	public ServletRegistration addServletRegistration(
 			Servlet servlet, boolean asyncSupported, String[] errorPages,
 			Map<String, String> initparams, String[] patterns, long serviceId,
-			String servletName)
+			String servletName, boolean legacyMatching)
 		throws ServletException {
 
 		checkShutdown();
@@ -408,7 +408,7 @@ public class ContextController {
 		ServletContext servletContext = createServletContext(
 			bundle, curServletContextHelper);
 		ServletRegistration servletRegistration = new ServletRegistration(
-			servlet, servletDTO, errorPageDTO, curServletContextHelper, this);
+			servlet, servletDTO, errorPageDTO, curServletContextHelper, this, legacyMatching);
 		ServletConfig servletConfig = new ServletConfigImpl(
 			servletName, initparams, servletContext);
 
