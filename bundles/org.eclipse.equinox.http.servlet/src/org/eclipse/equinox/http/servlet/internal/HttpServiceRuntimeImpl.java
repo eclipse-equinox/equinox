@@ -642,7 +642,7 @@ public class HttpServiceRuntimeImpl
 		int pos = requestURI.lastIndexOf('/');
 
 		String servletPath = requestURI;
-		String pathInfo = Const.BLANK;
+		String pathInfo = null;
 
 		if (match == Match.DEFAULT_SERVLET) {
 			pathInfo = servletPath;
