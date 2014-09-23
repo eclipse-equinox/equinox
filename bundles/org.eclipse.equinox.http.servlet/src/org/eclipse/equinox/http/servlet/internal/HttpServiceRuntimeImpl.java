@@ -661,7 +661,7 @@ public class HttpServiceRuntimeImpl
 				}
 			}
 
-			if (extension != null) {
+			if ((match == Match.EXACT) || (extension != null)) {
 				break;
 			}
 
