@@ -10,7 +10,7 @@
 	<key>CFBundleIconFile</key>
 		<string>Eclipse.icns</string>
 	<key>CFBundleIdentifier</key>
-		<string>org.eclipse.eclipse</string>
+		<string>org.eclipse.Eclipse</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 	<key>CFBundleName</key>
@@ -65,12 +65,8 @@
 			-->
 			<string>-keyring</string><string>~/.eclipse_keyring</string>
 			<string>-showlocation</string>
-			<!-- WARNING:
-				If you try to add a single VM argument (-vmargs) here,
-				*all* vmargs specified in eclipse.ini will be ignored.
-				We recommend to add all arguments in eclipse.ini
-			 -->
 		</array>
 </dict>
 
 </plist>
+
