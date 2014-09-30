@@ -22,6 +22,7 @@ import junit.framework.TestSuite;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.service.datalocation.Location;
+import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.junit.Assert;
 import org.osgi.framework.*;
@@ -2204,6 +2205,30 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertNull(nullTest + " is not null: " + nullValue, nullValue);
 		String systemNullValue = System.getProperty(nullTest);
 		assertEquals("Wrong system null value.", "system", systemNullValue);
+		equinox.stop();
+	}
+
+	public void testNullConfigurationValueSystemProperties() throws BundleException {
+		System.setProperty(nullTest, "system");
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put("osgi.framework.useSystemProperties", "true");
+		configuration.put(nullTest, null);
+		Equinox equinox = new Equinox(configuration);
+		equinox.start();
+
+		String nullValue = equinox.getBundleContext().getProperty(nullTest);
+		assertNull(nullTest + " is not null: " + nullValue, nullValue);
+		assertNull("Did not get null system value.", System.getProperties().get(nullTest));
+
+		// also test EnvironmentInfo effects on system properties
+		ServiceReference<EnvironmentInfo> envRef = equinox.getBundleContext().getServiceReference(EnvironmentInfo.class);
+		EnvironmentInfo envInfo = equinox.getBundleContext().getService(envRef);
+		envInfo.setProperty(getName(), getName());
+		assertEquals("Got wrong value from system properties.", System.getProperty(getName()), getName());
+		envInfo.setProperty(getName(), null);
+		assertNull("Did not get null system value.", System.getProperties().get(getName()));
 		equinox.stop();
 	}
 

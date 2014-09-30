@@ -67,6 +67,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	private final Map<String, Object> initialConfig;
 	private final Properties configuration;
+	private final boolean useSystemProperties;
 
 	private final Debug debug;
 	private final DebugOptions debugOptions;
@@ -201,12 +202,16 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		this.initialConfig = initialConfiguration == null ? new HashMap<String, Object>(0) : new HashMap<String, Object>(initialConfiguration);
 		this.hookRegistry = hookRegistry;
 		Object useSystemPropsValue = initialConfig.get(PROP_USE_SYSTEM_PROPERTIES);
-		boolean useSystemProps = useSystemPropsValue == null ? false : Boolean.parseBoolean(useSystemPropsValue.toString());
-		this.configuration = useSystemProps ? System.getProperties() : new Properties();
+		this.useSystemProperties = useSystemPropsValue == null ? false : Boolean.parseBoolean(useSystemPropsValue.toString());
+		this.configuration = useSystemProperties ? System.getProperties() : new Properties();
 		// do this the hard way to handle null values
 		for (Map.Entry<String, ?> initialEntry : this.initialConfig.entrySet()) {
 			if (initialEntry.getValue() == null) {
-				this.configuration.put(initialEntry.getKey(), NULL_CONFIG);
+				if (useSystemProperties) {
+					this.configuration.remove(initialEntry.getKey());
+				} else {
+					this.configuration.put(initialEntry.getKey(), NULL_CONFIG);
+				}
 			} else {
 				this.configuration.put(initialEntry.getKey(), initialEntry.getValue());
 			}
@@ -446,7 +451,9 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public String clearConfiguration(String key) {
 		Object result = configuration.remove(key);
-		configuration.put(key, NULL_CONFIG);
+		if (!useSystemProperties) {
+			configuration.put(key, NULL_CONFIG);
+		}
 		return result instanceof String ? (String) result : null;
 	}
 
