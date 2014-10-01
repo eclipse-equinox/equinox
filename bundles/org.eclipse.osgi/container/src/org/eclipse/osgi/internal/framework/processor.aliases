@@ -20,6 +20,8 @@ Ignite psc1k                            # PTSC
 Mips                                    # SGI
 PArisc                                  # Hewlett Packard PA Risc
 PowerPC power ppc                       # Motorola/IBM Power PC
+PowerPC-64 ppc64                        # IBM Power PC 64-bit Big Endian
+PowerPC-64-LE ppc64le                   # IBM Power PC 64-bit Little Endian
 Sparc                                   # SUN
 x86 pentium i386 i486 i586 i686         # Intel
 s390                                    # IBM System 390
