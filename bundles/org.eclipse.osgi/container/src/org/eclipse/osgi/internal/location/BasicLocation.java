@@ -45,7 +45,13 @@ public class BasicLocation implements Location {
 		this.property = property;
 		this.defaultValue = defaultValue;
 		this.isReadOnly = isReadOnly;
-		this.dataAreaPrefix = dataAreaPrefix == null ? "" : dataAreaPrefix; //$NON-NLS-1$
+		// make sure the prefix ends with '/' if it is not empty/null
+		String tempDataAreaPrefix = dataAreaPrefix == null ? "" : dataAreaPrefix; //$NON-NLS-1$
+		tempDataAreaPrefix = tempDataAreaPrefix.replace('\\', '/');
+		if (tempDataAreaPrefix.length() > 0 && tempDataAreaPrefix.charAt(tempDataAreaPrefix.length() - 1) != '/') {
+			tempDataAreaPrefix += '/';
+		}
+		this.dataAreaPrefix = tempDataAreaPrefix;
 		this.environmentInfo = environmentInfo;
 		this.debug = environmentInfo.getDebug().DEBUG_LOCATION;
 	}
@@ -223,7 +229,7 @@ public class BasicLocation implements Location {
 			prefix += '/';
 		filename = filename.replace('\\', '/');
 		if (filename.length() > 0 && filename.charAt(0) == '/')
-			filename.substring(1);
+			filename = filename.substring(1);
 		String spec = prefix + dataAreaPrefix + filename;
 		boolean trailingSlash = spec.length() > 0 && spec.charAt(spec.length() - 1) == '/';
 		return LocationHelper.buildURL(spec, trailingSlash);

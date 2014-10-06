@@ -188,6 +188,7 @@ public class BasicLocationTests extends CoreTest {
 		doTestLocateDataArea(location, dataAreaPrefix, "test/multiple/paths");
 		doTestLocateDataArea(location, dataAreaPrefix, "test/multiple/../paths");
 		doTestLocateDataArea(location, dataAreaPrefix, "test\\multiple\\paths");
+		doTestLocateDataArea(location, dataAreaPrefix, "/test/begin/slash");
 
 		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/" + getName());
 		Location createdLocation = location.createLocation(null, null, false);
@@ -201,6 +202,7 @@ public class BasicLocationTests extends CoreTest {
 		doTestLocateDataArea(createdLocation, dataAreaPrefix, "test/multiple/paths");
 		doTestLocateDataArea(createdLocation, dataAreaPrefix, "test/multiple/../paths");
 		doTestLocateDataArea(location, dataAreaPrefix, "test\\multiple\\paths");
+		doTestLocateDataArea(location, dataAreaPrefix, "/test/begin/slash");
 
 		createdLocation = location.createLocation(null, null, false);
 		try {
@@ -222,6 +224,9 @@ public class BasicLocationTests extends CoreTest {
 		assertNotNull("Data area is null.", dataArea);
 
 		namespace = namespace.replace('\\', '/');
+		if (namespace.startsWith("/")) {
+			namespace = namespace.substring(1);
+		}
 		assertTrue("Data area is not the expected value: " + dataArea.toExternalForm(), dataArea.toExternalForm().endsWith(dataAreaPrefix + namespace));
 	}
 
