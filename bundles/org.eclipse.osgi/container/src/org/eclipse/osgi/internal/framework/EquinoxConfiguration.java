@@ -192,11 +192,14 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	private final static Collection<String> populateInitConfig = Arrays.asList(PROP_OSGI_ARCH, PROP_OSGI_OS, PROP_OSGI_WS, PROP_OSGI_NL, FRAMEWORK_OS_NAME, FRAMEWORK_OS_VERSION, FRAMEWORK_PROCESSOR, FRAMEWORK_LANGUAGE);
 
-	private final static Object NULL_CONFIG = new Object() {
-		public String toString() {
-			return "null"; //$NON-NLS-1$
-		}
-	};
+	/**
+	 * Value of {@link #configuration} properties that should be considered
+	 * <code>null</code> and for which access should not fall back to
+	 * {@link System#getProperty(String)}.
+	 * The instance must be compared by identity (==, not equals) and must not
+	 * be leaked outside this class.
+	 */
+	private final static String NULL_CONFIG = new String("org.eclipse.equinox.configuration.null.value"); //$NON-NLS-1$
 
 	EquinoxConfiguration(Map<String, ?> initialConfiguration, HookRegistry hookRegistry) {
 		this.initialConfig = initialConfiguration == null ? new HashMap<String, Object>(0) : new HashMap<String, Object>(initialConfiguration);
@@ -217,9 +220,9 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			}
 		}
 
-		initializeProperties(this.configuration, aliasMapper);
+		initializeProperties();
 		for (String initialKey : populateInitConfig) {
-			String value = this.configuration.getProperty(initialKey);
+			String value = getConfiguration(initialKey);
 			if (value != null) {
 				this.initialConfig.put(initialKey, value);
 			}
@@ -228,7 +231,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		this.debugOptions = new FrameworkDebugOptions(this);
 		this.debug = new Debug(this.debugOptions);
 
-		String osgiDev = configuration.getProperty(PROP_DEV);
+		String osgiDev = getConfiguration(PROP_DEV);
 		File f = null;
 		boolean devMode = false;
 		if (osgiDev != null) {
@@ -256,20 +259,20 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		inDevelopmentMode = devMode;
 		devLocation = f;
 
-		contextBootDelegation = "true".equals(configuration.getProperty(PROP_CONTEXT_BOOTDELEGATION, "true")); //$NON-NLS-1$ //$NON-NLS-2$
-		compatibilityBootDelegation = "true".equals(configuration.getProperty(PROP_COMPATIBILITY_BOOTDELEGATION)); //$NON-NLS-1$
+		contextBootDelegation = "true".equals(getConfiguration(PROP_CONTEXT_BOOTDELEGATION, "true")); //$NON-NLS-1$ //$NON-NLS-2$
+		compatibilityBootDelegation = "true".equals(getConfiguration(PROP_COMPATIBILITY_BOOTDELEGATION)); //$NON-NLS-1$
 
-		COPY_NATIVES = Boolean.valueOf(configuration.getProperty(PROP_COPY_NATIVES)).booleanValue();
-		String[] libExtensions = ManifestElement.getArrayFromList(configuration.getProperty(EquinoxConfiguration.PROP_FRAMEWORK_LIBRARY_EXTENSIONS, configuration.getProperty(org.osgi.framework.Constants.FRAMEWORK_LIBRARY_EXTENSIONS, getOSLibraryExtDefaults())), ","); //$NON-NLS-1$
+		COPY_NATIVES = Boolean.valueOf(getConfiguration(PROP_COPY_NATIVES)).booleanValue();
+		String[] libExtensions = ManifestElement.getArrayFromList(getConfiguration(EquinoxConfiguration.PROP_FRAMEWORK_LIBRARY_EXTENSIONS, getConfiguration(org.osgi.framework.Constants.FRAMEWORK_LIBRARY_EXTENSIONS, getOSLibraryExtDefaults())), ","); //$NON-NLS-1$
 		for (int i = 0; i < libExtensions.length; i++)
 			if (libExtensions[i].length() > 0 && libExtensions[i].charAt(0) != '.')
 				libExtensions[i] = '.' + libExtensions[i];
 		LIB_EXTENSIONS = Collections.unmodifiableList(Arrays.asList(libExtensions));
 		ECLIPSE_LIB_VARIANTS = buildEclipseLibraryVariants(getWS(), getOS(), getOSArch(), getNL());
 		ECLIPSE_NL_JAR_VARIANTS = buildNLJarVariants(getNL());
-		DEFINE_PACKAGE_ATTRIBUTES = !"noattributes".equals(configuration.getProperty(PROP_DEFINE_PACKAGES)); //$NON-NLS-1$
+		DEFINE_PACKAGE_ATTRIBUTES = !"noattributes".equals(getConfiguration(PROP_DEFINE_PACKAGES)); //$NON-NLS-1$
 
-		String bsnVersion = configuration.getProperty(org.osgi.framework.Constants.FRAMEWORK_BSNVERSION);
+		String bsnVersion = getConfiguration(org.osgi.framework.Constants.FRAMEWORK_BSNVERSION);
 		if (org.osgi.framework.Constants.FRAMEWORK_BSNVERSION_SINGLE.equals(bsnVersion)) {
 			BSN_VERSION = BSN_VERSION_SINGLE;
 		} else if (org.osgi.framework.Constants.FRAMEWORK_BSNVERSION_MULTIPLE.equals(bsnVersion)) {
@@ -358,19 +361,19 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	}
 
 	public String getOSArch() {
-		return this.configuration.getProperty(PROP_OSGI_ARCH);
+		return getConfiguration(PROP_OSGI_ARCH);
 	}
 
 	public String getNL() {
-		return this.configuration.getProperty(PROP_OSGI_NL);
+		return getConfiguration(PROP_OSGI_NL);
 	}
 
 	public String getOS() {
-		return this.configuration.getProperty(PROP_OSGI_OS);
+		return getConfiguration(PROP_OSGI_OS);
 	}
 
 	public String getWS() {
-		return this.configuration.getProperty(PROP_OSGI_WS);
+		return getConfiguration(PROP_OSGI_WS);
 	}
 
 	public void setAllArgs(String[] allArgs) {
@@ -436,7 +439,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	}
 
 	public String getConfiguration(String key) {
-		return configuration.getProperty(key);
+		String result = configuration.getProperty(key);
+		return result == NULL_CONFIG ? null : result;
 	}
 
 	public String getConfiguration(String key, String defaultValue) {
@@ -446,7 +450,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public String setConfiguration(String key, String value) {
 		Object result = configuration.put(key, value);
-		return result instanceof String ? (String) result : null;
+		return result instanceof String && result != NULL_CONFIG ? (String) result : null;
 	}
 
 	public String clearConfiguration(String key) {
@@ -454,7 +458,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		if (!useSystemProperties) {
 			configuration.put(key, NULL_CONFIG);
 		}
-		return result instanceof String ? (String) result : null;
+		return result instanceof String && result != NULL_CONFIG ? (String) result : null;
 	}
 
 	public Map<String, String> getConfiguration() {
@@ -464,7 +468,10 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			for (Object key : configuration.keySet()) {
 				if (key instanceof String) {
 					String skey = (String) key;
-					result.put(skey, configuration.getProperty(skey));
+					String sValue = configuration.getProperty(skey);
+					if (sValue != NULL_CONFIG) {
+						result.put(skey, sValue);
+					}
 				}
 			}
 			return result;
@@ -485,8 +492,12 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	@Override
 	public String getProperty(String key) {
-		String result = getConfiguration(key);
-		return result == null && !this.configuration.containsKey(key) ? System.getProperty(key) : result;
+		// have to access configuration directly instead of using getConfiguration to get access to NULL_CONFIG values
+		String result = configuration.getProperty(key);
+		if (result == NULL_CONFIG) {
+			return null;
+		}
+		return result == null ? System.getProperty(key) : result;
 	}
 
 	@Override
@@ -601,23 +612,23 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		}
 	}
 
-	private static void initializeStateSaveDelayIntervalProperty(Properties configuration) {
-		if (!configuration.containsKey(PROP_STATE_SAVE_DELAY_INTERVAL))
+	private void initializeStateSaveDelayIntervalProperty() {
+		if (getConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL) == null)
 			// Property not specified. Use the default.
-			configuration.setProperty(PROP_STATE_SAVE_DELAY_INTERVAL, DEFAULT_STATE_SAVE_DELAY_INTERVAL);
+			setConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL, DEFAULT_STATE_SAVE_DELAY_INTERVAL);
 		try {
 			// Verify type compatibility.
-			Long.parseLong(configuration.getProperty(PROP_STATE_SAVE_DELAY_INTERVAL));
+			Long.parseLong(getConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL));
 		} catch (NumberFormatException e) {
 			// TODO Consider logging here.
 			// The specified value is not type compatible. Use the default.
-			configuration.setProperty(PROP_STATE_SAVE_DELAY_INTERVAL, DEFAULT_STATE_SAVE_DELAY_INTERVAL);
+			setConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL, DEFAULT_STATE_SAVE_DELAY_INTERVAL);
 		}
 	}
 
-	private static void initializeProperties(Properties configuration, AliasMapper aliasMapper) {
+	private void initializeProperties() {
 		// initialize some framework properties that must always be set
-		if (configuration.get(PROP_FRAMEWORK) == null || configuration.get(EquinoxLocations.PROP_INSTALL_AREA) == null) {
+		if (getConfiguration(PROP_FRAMEWORK) == null || getConfiguration(EquinoxLocations.PROP_INSTALL_AREA) == null) {
 			ProtectionDomain pd = EquinoxConfiguration.class.getProtectionDomain();
 			CodeSource cs = pd == null ? null : pd.getCodeSource();
 			URL url = cs == null ? null : cs.getLocation();
@@ -638,37 +649,37 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			}
 
 			// allow props to be preset
-			if (configuration.get(PROP_FRAMEWORK) == null) {
+			if (getConfiguration(PROP_FRAMEWORK) == null) {
 				String externalForm = getFrameworkPath(url.toExternalForm(), false);
-				configuration.put(PROP_FRAMEWORK, externalForm);
+				setConfiguration(PROP_FRAMEWORK, externalForm);
 			}
-			if (configuration.get(EquinoxLocations.PROP_INSTALL_AREA) == null) {
+			if (getConfiguration(EquinoxLocations.PROP_INSTALL_AREA) == null) {
 				String filePart = getFrameworkPath(url.getFile(), true);
-				configuration.put(EquinoxLocations.PROP_INSTALL_AREA, filePart);
+				setConfiguration(EquinoxLocations.PROP_INSTALL_AREA, filePart);
 			}
 		}
 		// always decode these properties
-		configuration.put(PROP_FRAMEWORK, decode(configuration.getProperty(PROP_FRAMEWORK)));
-		configuration.put(EquinoxLocations.PROP_INSTALL_AREA, decode(configuration.getProperty(EquinoxLocations.PROP_INSTALL_AREA)));
+		setConfiguration(PROP_FRAMEWORK, decode(getConfiguration(PROP_FRAMEWORK)));
+		setConfiguration(EquinoxLocations.PROP_INSTALL_AREA, decode(getConfiguration(EquinoxLocations.PROP_INSTALL_AREA)));
 
-		configuration.put(FRAMEWORK_VENDOR, ECLIPSE_FRAMEWORK_VENDOR);
-		String value = configuration.getProperty(FRAMEWORK_PROCESSOR);
+		setConfiguration(FRAMEWORK_VENDOR, ECLIPSE_FRAMEWORK_VENDOR);
+		String value = getConfiguration(FRAMEWORK_PROCESSOR);
 		if (value == null) {
 			value = System.getProperty(PROP_JVM_OS_ARCH);
 			if (value != null) {
-				configuration.put(FRAMEWORK_PROCESSOR, aliasMapper.getCanonicalProcessor(value));
+				setConfiguration(FRAMEWORK_PROCESSOR, aliasMapper.getCanonicalProcessor(value));
 			}
 		}
 
-		value = configuration.getProperty(FRAMEWORK_OS_NAME);
+		value = getConfiguration(FRAMEWORK_OS_NAME);
 		if (value == null) {
 			value = System.getProperty(PROP_JVM_OS_NAME);
 			if (value != null) {
-				configuration.put(FRAMEWORK_OS_NAME, aliasMapper.getCanonicalOSName(value));
+				setConfiguration(FRAMEWORK_OS_NAME, aliasMapper.getCanonicalOSName(value));
 			}
 		}
 
-		value = configuration.getProperty(FRAMEWORK_OS_VERSION);
+		value = getConfiguration(FRAMEWORK_OS_VERSION);
 		if (value == null) {
 			value = System.getProperty(PROP_JVM_OS_VERSION);
 			if (value != null) {
@@ -707,19 +718,19 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 					// must be an invalid qualifier; just ignore it
 					value = new Version(major, minor, micro).toString();
 				}
-				configuration.put(FRAMEWORK_OS_VERSION, value);
+				setConfiguration(FRAMEWORK_OS_VERSION, value);
 			}
 		}
-		value = configuration.getProperty(FRAMEWORK_LANGUAGE);
+		value = getConfiguration(FRAMEWORK_LANGUAGE);
 		if (value == null)
 			// set the value of the framework language property
-			configuration.put(FRAMEWORK_LANGUAGE, Locale.getDefault().getLanguage());
+			setConfiguration(FRAMEWORK_LANGUAGE, Locale.getDefault().getLanguage());
 		// set the support properties for fragments and require-bundle (bug 173090)
-		configuration.put(SUPPORTS_FRAMEWORK_FRAGMENT, "true"); //$NON-NLS-1$
-		configuration.put(SUPPORTS_FRAMEWORK_REQUIREBUNDLE, "true"); //$NON-NLS-1$
-		configuration.put(SUPPORTS_FRAMEWORK_EXTENSION, "true"); //$NON-NLS-1$
-		if (FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT.equals(configuration.get(FRAMEWORK_STORAGE_CLEAN))) {
-			configuration.put(PROP_CLEAN, "true"); //$NON-NLS-1$
+		setConfiguration(SUPPORTS_FRAMEWORK_FRAGMENT, "true"); //$NON-NLS-1$
+		setConfiguration(SUPPORTS_FRAMEWORK_REQUIREBUNDLE, "true"); //$NON-NLS-1$
+		setConfiguration(SUPPORTS_FRAMEWORK_EXTENSION, "true"); //$NON-NLS-1$
+		if (FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT.equals(getConfiguration(FRAMEWORK_STORAGE_CLEAN))) {
+			setConfiguration(PROP_CLEAN, "true"); //$NON-NLS-1$
 		}
 
 		/*
@@ -732,35 +743,35 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		 */
 
 		// if the user didn't set the locale with a command line argument then use the default.
-		String nlValue = configuration.getProperty(PROP_OSGI_NL);
+		String nlValue = getConfiguration(PROP_OSGI_NL);
 		if (nlValue != null) {
 			Locale userLocale = toLocale(nlValue, Locale.getDefault());
 			Locale.setDefault(userLocale);
 			// TODO what the heck is this for?? why not just use osgi.nl
-			configuration.put(PROP_OSGI_NL_USER, nlValue);
+			setConfiguration(PROP_OSGI_NL_USER, nlValue);
 		}
 		nlValue = Locale.getDefault().toString();
-		configuration.put(PROP_OSGI_NL, nlValue);
+		setConfiguration(PROP_OSGI_NL, nlValue);
 
 		// if the user didn't set the operating system with a command line 
 		// argument then use the default.
-		String osValue = configuration.getProperty(PROP_OSGI_OS);
+		String osValue = getConfiguration(PROP_OSGI_OS);
 		if (osValue == null) {
 			osValue = guessOS(System.getProperty(PROP_JVM_OS_NAME));
-			configuration.put(PROP_OSGI_OS, osValue);
+			setConfiguration(PROP_OSGI_OS, osValue);
 		}
 
 		// if the user didn't set the window system with a command line 
 		// argument then use the default.
-		String wsValue = configuration.getProperty(PROP_OSGI_WS);
+		String wsValue = getConfiguration(PROP_OSGI_WS);
 		if (wsValue == null) {
 			wsValue = guessWS(osValue);
-			configuration.put(PROP_OSGI_WS, wsValue);
+			setConfiguration(PROP_OSGI_WS, wsValue);
 		}
 
 		// if the user didn't set the system architecture with a command line 
 		// argument then use the default.
-		String archValue = configuration.getProperty(PROP_OSGI_ARCH);
+		String archValue = getConfiguration(PROP_OSGI_ARCH);
 		if (archValue == null) {
 			String name = System.getProperty(PROP_JVM_OS_ARCH);
 			// Map i386 architecture to x86
@@ -771,19 +782,19 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 				archValue = Constants.ARCH_X86_64;
 			else
 				archValue = name;
-			configuration.put(PROP_OSGI_ARCH, archValue);
+			setConfiguration(PROP_OSGI_ARCH, archValue);
 		}
-		initializeStateSaveDelayIntervalProperty(configuration);
+		initializeStateSaveDelayIntervalProperty();
 
-		String consoleProp = configuration.getProperty(ConsoleManager.PROP_CONSOLE);
+		String consoleProp = getConfiguration(ConsoleManager.PROP_CONSOLE);
 		consoleProp = consoleProp == null ? null : consoleProp.trim();
 		if (consoleProp == null || consoleProp.length() > 0) {
 			// no -console was specified or it has specified none or a port for telnet;
 			// need to make sure the gogo shell does not create an interactive console on standard in/out
-			configuration.put("gosh.args", "--nointeractive"); //$NON-NLS-1$//$NON-NLS-2$
+			setConfiguration("gosh.args", "--nointeractive"); //$NON-NLS-1$//$NON-NLS-2$
 		} else {
 			// Need to make sure we don't shutdown the framework if no console is around (bug 362412)
-			configuration.put("gosh.args", "--noshutdown"); //$NON-NLS-1$//$NON-NLS-2$
+			setConfiguration("gosh.args", "--noshutdown"); //$NON-NLS-1$//$NON-NLS-2$
 		}
 	}
 

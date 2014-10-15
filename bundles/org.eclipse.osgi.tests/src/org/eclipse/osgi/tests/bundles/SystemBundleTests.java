@@ -19,7 +19,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
@@ -2205,6 +2207,80 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertNull(nullTest + " is not null: " + nullValue, nullValue);
 		String systemNullValue = System.getProperty(nullTest);
 		assertEquals("Wrong system null value.", "system", systemNullValue);
+		equinox.stop();
+	}
+
+	public void testNullConfigurationValueRequiredProperty() throws BundleException {
+		final String systemProcessor = System.getProperty(Constants.FRAMEWORK_PROCESSOR);
+		assertNotNull(systemProcessor);
+		try {
+			System.setProperty(Constants.FRAMEWORK_PROCESSOR, "hyperflux");
+			File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+			Map<String, Object> configuration = new HashMap<String, Object>();
+			configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+			configuration.put(Constants.FRAMEWORK_PROCESSOR, null);
+			Equinox equinox = new Equinox(configuration);
+			equinox.start();
+			String processor = equinox.getBundleContext().getProperty(Constants.FRAMEWORK_PROCESSOR);
+			assertEquals("Wrong " + Constants.FRAMEWORK_PROCESSOR, systemProcessor, processor);
+			String systemValue = System.getProperty(Constants.FRAMEWORK_PROCESSOR);
+			assertEquals("Wrong system value.", "hyperflux", systemValue);
+			equinox.stop();
+		} finally {
+			System.setProperty(Constants.FRAMEWORK_PROCESSOR, systemProcessor);
+		}
+	}
+
+	public void testAllNullConfigurationValues() throws BundleException {
+		Collection<String> requiredProperties = Arrays.asList( // prevent bad formatting...
+				Constants.FRAMEWORK_EXECUTIONENVIRONMENT, //
+				Constants.FRAMEWORK_LANGUAGE, //
+				Constants.FRAMEWORK_OS_NAME, //
+				Constants.FRAMEWORK_OS_VERSION, //
+				Constants.FRAMEWORK_PROCESSOR, //
+				Constants.FRAMEWORK_STORAGE, //
+				Constants.FRAMEWORK_SYSTEMCAPABILITIES, //
+				Constants.FRAMEWORK_SYSTEMPACKAGES, //
+				Constants.FRAMEWORK_UUID, //
+				Constants.FRAMEWORK_VENDOR, //
+				Constants.FRAMEWORK_VERSION, //
+				Constants.SUPPORTS_FRAMEWORK_EXTENSION, //
+				Constants.SUPPORTS_FRAMEWORK_FRAGMENT, //
+				Constants.SUPPORTS_FRAMEWORK_REQUIREBUNDLE, //
+				EquinoxConfiguration.PROP_FRAMEWORK, //
+				EquinoxConfiguration.PROP_OSGI_ARCH, //
+				EquinoxConfiguration.PROP_OSGI_OS, //
+				EquinoxConfiguration.PROP_OSGI_WS, //
+				EquinoxConfiguration.PROP_OSGI_WS, //
+				EquinoxConfiguration.PROP_OSGI_NL, //
+				EquinoxConfiguration.PROP_STATE_SAVE_DELAY_INTERVAL, //
+				"gosh.args", //
+				EquinoxLocations.PROP_HOME_LOCATION_AREA, //
+				EquinoxLocations.PROP_CONFIG_AREA, //
+				EquinoxLocations.PROP_INSTALL_AREA, //
+				EclipseStarter.PROP_LOGFILE //
+				);
+		Properties systemProperties = (Properties) System.getProperties().clone();
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		for (Object key : systemProperties.keySet()) {
+			configuration.put((String) key, null);
+		}
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+		equinox.start();
+		for (Object key : systemProperties.keySet()) {
+			String property = (String) key;
+			String value = equinox.getBundleContext().getProperty(property);
+			if (requiredProperties.contains(property)) {
+				assertNotNull(property + " is null", value);
+			} else {
+				assertNull(property + " is not null", value);
+			}
+			String systemValue = System.getProperty(property);
+			assertEquals("Wrong system value for " + property, systemProperties.getProperty(property), systemValue);
+		}
+		assertEquals(systemProperties, System.getProperties());
 		equinox.stop();
 	}
 
