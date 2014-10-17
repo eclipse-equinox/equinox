@@ -183,6 +183,10 @@ public class ResponseStateHandler {
 			null, String.valueOf(status), null, null, null, null, Match.EXACT, null);
 
 		if (errorDispatchTargets == null) {
+			HttpServletResponse wrappedResponse = (HttpServletResponse)wrapper.getResponse();
+
+			wrappedResponse.sendError(status);
+
 			return;
 		}
 
