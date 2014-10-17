@@ -186,7 +186,10 @@ public class HttpServletRequestBuilder {
 					return null;
 				}
 
-				pathInfoAttribute = pathInfoAttribute.substring(servletPath.length());
+				if (pathInfoAttribute.startsWith(servletPath)) {
+					pathInfoAttribute = pathInfoAttribute.substring(servletPath.length());
+				}
+
 				if (pathInfoAttribute.length() == 0)
 					return null;
 
