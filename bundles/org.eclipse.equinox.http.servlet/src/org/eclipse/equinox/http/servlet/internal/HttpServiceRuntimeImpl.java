@@ -582,18 +582,12 @@ public class HttpServiceRuntimeImpl
 			dispatchTargets.getContextController();
 		DispatcherType dispatcherType = DispatcherType.REQUEST;
 
-		if (request.getAttribute("javax.servlet.include.request_uri") != null) {
-			request.setAttribute(
-				"javax.servlet.include.request_uri", requestURI);
-			request.setAttribute(
-				"javax.servlet.include.context_path",
-				contextController.getContextPath());
-			request.setAttribute(
-				"javax.servlet.include.servlet_path",
-				dispatchTargets.getServletPath());
-			request.setAttribute(
-				"javax.servlet.include.path_info",
-				dispatchTargets.getPathInfo());
+		if (request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null) {
+			request.setAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH, contextController.getContextPath());
+			request.setAttribute(RequestDispatcher.INCLUDE_PATH_INFO, dispatchTargets.getPathInfo());
+			request.setAttribute(RequestDispatcher.INCLUDE_QUERY_STRING, request.getQueryString());
+			request.setAttribute(RequestDispatcher.INCLUDE_REQUEST_URI, requestURI);
+			request.setAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH, dispatchTargets.getServletPath());
 
 			dispatcherType = DispatcherType.INCLUDE;
 		}
