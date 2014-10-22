@@ -79,12 +79,14 @@ public class ContextFilterTrackerCustomizer
 			serviceReference.getProperty(
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_SERVLET));
 		String[] servlets = servletList.toArray(new String[servletList.size()]);
-		List<String> regexList = StringPlus.from(
-			serviceReference.getProperty(
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX));
 
-		// TODO add this
-		String[] regex = regexList.toArray(new String[regexList.size()]);
+		// TODO add regex support - 140.5
+
+		// List<String> regexList = StringPlus.from(
+		//	serviceReference.getProperty(
+		//		HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX));
+
+		// String[] regex = regexList.toArray(new String[regexList.size()]);
 
 		Filter filter = bundleContext.getService(serviceReference);
 		String name = parseName(serviceReference.getProperty(
