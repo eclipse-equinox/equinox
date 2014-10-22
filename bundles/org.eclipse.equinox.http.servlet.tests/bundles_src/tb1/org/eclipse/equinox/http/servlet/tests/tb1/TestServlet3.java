@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,22 +27,17 @@ import org.eclipse.equinox.http.servlet.tests.tb.AbstractTestServlet;
 public class TestServlet3 extends AbstractTestServlet {
 	private static final long serialVersionUID = 1L;
 
-	private String getSessionCookieConfigComment() {
-		ServletContext context = getServletContext();
-		SessionCookieConfig cookieConfig = context.getSessionCookieConfig();  // This is a Servlet 3.0 API.
-		return cookieConfig.getComment();
-	}
-
 	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) throws ServletException, IOException {
 		String expected = "Equinox";  //$NON-NLS-1$
-		setSessionCookieConfigComment(expected);
-		String actual = getSessionCookieConfigComment();
-		boolean ok = actual.equals(expected);
-		if (ok == false) {
+		try {
+			// Not a terribly useful test, but previous test assumed we could call setComment on a SessionCookieConfig
+			// after ServletContext initialization.  This is not allowed by the servlet specification.
+			// Just verifying that an ISE is thrown now.
+			setSessionCookieConfigComment(expected);
 			writer.print(AbstractTestServlet.STATUS_ERROR);
-			return;
+		} catch (IllegalStateException e) {
+			super.handleDoGet(request, writer);
 		}
-		super.handleDoGet(request, writer);
 	}
 	
 	private void setSessionCookieConfigComment(String comment) {
