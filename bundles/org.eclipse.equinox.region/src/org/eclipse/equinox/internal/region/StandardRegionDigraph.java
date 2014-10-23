@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2013 VMware Inc.
+ * Copyright (c) 2011, 2014 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -114,6 +114,10 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	 * {@inheritDoc}
 	 */
 	public Region createRegion(String regionName) throws BundleException {
+		return createRegion(regionName, true);
+	}
+
+	private Region createRegion(String regionName, boolean notify) throws BundleException {
 		Region region = new BundleIdBasedRegion(regionName, this, this, this.bundleContext, this.threadLocal);
 		synchronized (this.monitor) {
 			if (getRegion(regionName) != null) {
@@ -123,7 +127,9 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 			this.edges.put(region, EMPTY_EDGE_SET);
 			incrementUpdateCount();
 		}
-		notifyAdded(region);
+		if (notify) {
+			notifyAdded(region);
+		}
 		return region;
 	}
 
@@ -344,9 +350,9 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	}
 
 	private Set<RegionLifecycleListener> getListeners() {
-		Set<RegionLifecycleListener> listeners = new HashSet<RegionLifecycleListener>();
 		if (this.bundleContext == null)
-			return listeners;
+			return Collections.emptySet();
+		Set<RegionLifecycleListener> listeners = new HashSet<RegionLifecycleListener>();
 		try {
 			Collection<ServiceReference<RegionLifecycleListener>> listenerServiceReferences = this.bundleContext.getServiceReferences(RegionLifecycleListener.class, null);
 			for (ServiceReference<RegionLifecycleListener> listenerServiceReference : listenerServiceReferences) {
@@ -408,7 +414,16 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		StandardRegionDigraph replacement = (StandardRegionDigraph) digraph;
 		if (check && replacement.origin != this)
 			throw new IllegalArgumentException("The replacement digraph is not a copy of this digraph."); //$NON-NLS-1$
+
+		// notify removing first, and outside the monitor lock
+		final Set<Region> removed = getRegions();
+		removed.removeAll(replacement.getRegions());
+		for (Region region : removed) {
+			notifyRemoving(region);
+		}
+
 		Map<Region, Set<FilteredRegion>> filteredRegions = replacement.getFilteredRegions();
+		final Set<Region> added = new HashSet<Region>();
 		synchronized (this.monitor) {
 			if (check && this.updateCount.get() != replacement.originUpdateCount) {
 				throw new BundleException("The origin update count has changed since the replacement copy was created.", BundleException.INVALID_OPERATION); //$NON-NLS-1$
@@ -428,7 +443,9 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 					edges.put(copy, EMPTY_EDGE_SET);
 				} else {
 					// create a new one
-					copy = this.createRegion(original.getName());
+					copy = this.createRegion(original.getName(), false);
+					// collect added for notifying later ouside the lock
+					added.add(copy);
 				}
 				for (Long id : original.getBundleIds()) {
 					copy.addBundle(id);
@@ -445,6 +462,10 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 			if (check) {
 				replacement.originUpdateCount = this.updateCount.get();
 			}
+		}
+		// Now notify of additions outside the lock
+		for (Region region : added) {
+			notifyAdded(region);
 		}
 	}
 
