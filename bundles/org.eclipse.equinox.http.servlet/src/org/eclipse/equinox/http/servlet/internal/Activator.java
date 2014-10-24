@@ -95,6 +95,7 @@ public class Activator
 		HttpServlet httpServlet = context.getService(serviceReference);
 
 		if (!(httpServlet instanceof ProxyServlet)) {
+			context.ungetService(serviceReference);
 			return null;
 		}
 
