@@ -22,7 +22,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  * @author Raymond Augé
  */
 public class FilterTrackerCustomizer
-	extends RegistrationServiceTrackerCustomizer<Filter, Filter> {
+	extends RegistrationServiceTrackerCustomizer<Filter, ServiceReference<Filter>> {
 
 	public FilterTrackerCustomizer(
 		BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime) {
@@ -31,7 +31,7 @@ public class FilterTrackerCustomizer
 	}
 
 	@Override
-	public Filter addingService(ServiceReference<Filter> serviceReference) {
+	public ServiceReference<Filter> addingService(ServiceReference<Filter> serviceReference) {
 		if (!httpServiceRuntime.matches(serviceReference)) {
 			// TODO no match runtime
 
@@ -48,23 +48,23 @@ public class FilterTrackerCustomizer
 
 		if (contextController == null) {
 			// TODO no match context
-
+			// what happens if it matches later?
 			return null;
 		}
 
-		return bundleContext.getService(serviceReference);
+		return serviceReference;
 	}
 
 	@Override
 	public void modifiedService(
-		ServiceReference<Filter> serviceReference, Filter filter) {
+		ServiceReference<Filter> serviceReference, ServiceReference<Filter> filter) {
+		// TODO what happens if the HTTP_WHITEBOARD_CONTEXT_SELECT property changed?
 	}
 
 	@Override
 	public void removedService(
-		ServiceReference<Filter> serviceReference, Filter filter) {
-
-		bundleContext.ungetService(serviceReference);
+		ServiceReference<Filter> serviceReference, ServiceReference<Filter> filter) {
+		// TODO no clean up of selected context?
 	}
 
 }

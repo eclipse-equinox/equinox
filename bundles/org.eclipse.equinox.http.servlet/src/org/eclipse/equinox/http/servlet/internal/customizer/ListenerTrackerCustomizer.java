@@ -22,7 +22,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  * @author Raymond Augé
  */
 public class ListenerTrackerCustomizer
-	extends RegistrationServiceTrackerCustomizer<EventListener, EventListener> {
+	extends RegistrationServiceTrackerCustomizer<EventListener, ServiceReference<EventListener>> {
 
 	public ListenerTrackerCustomizer(
 		BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime) {
@@ -31,7 +31,7 @@ public class ListenerTrackerCustomizer
 	}
 
 	@Override
-	public EventListener addingService(
+	public ServiceReference<EventListener> addingService(
 		ServiceReference<EventListener> serviceReference) {
 
 		if (!httpServiceRuntime.matches(serviceReference)) {
@@ -50,27 +50,27 @@ public class ListenerTrackerCustomizer
 
 		if (contextController == null) {
 			// TODO no match context
-
+			// What happens if there is a new context registered later that does match?
 			return null;
 		}
 
-		return bundleContext.getService(serviceReference);
+		return serviceReference;
 	}
 
 	@Override
 	public void
 		modifiedService(
 			ServiceReference<EventListener> serviceReference,
-			EventListener eventListener) {
+			ServiceReference<EventListener> eventListener) {
+		// TODO what if the context selector changes?
 	}
 
 	@Override
 	public void
 		removedService(
 			ServiceReference<EventListener> serviceReference,
-			EventListener eventListener) {
-
-		bundleContext.ungetService(serviceReference);
+			ServiceReference<EventListener> eventListener) {
+		// TODO no clean up of context selected?
 	}
 
 }

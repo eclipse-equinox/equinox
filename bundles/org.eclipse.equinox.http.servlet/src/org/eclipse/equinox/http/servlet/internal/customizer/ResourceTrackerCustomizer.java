@@ -22,7 +22,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  * @author Raymond Augé
  */
 public class ResourceTrackerCustomizer
-	extends RegistrationServiceTrackerCustomizer<Servlet, Servlet> {
+	extends RegistrationServiceTrackerCustomizer<Servlet, ServiceReference<Servlet>> {
 
 	public ResourceTrackerCustomizer(
 		BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime) {
@@ -31,7 +31,7 @@ public class ResourceTrackerCustomizer
 	}
 
 	@Override
-	public Servlet addingService(ServiceReference<Servlet> serviceReference) {
+	public ServiceReference<Servlet> addingService(ServiceReference<Servlet> serviceReference) {
 		if (!httpServiceRuntime.matches(serviceReference)) {
 			// TODO no match runtime
 
@@ -48,23 +48,23 @@ public class ResourceTrackerCustomizer
 
 		if (contextController == null) {
 			// TODO no match context
-
+			// what if it matches later
 			return null;
 		}
 
-		return bundleContext.getService(serviceReference);
+		return serviceReference;
 	}
 
 	@Override
 	public void modifiedService(
-		ServiceReference<Servlet> serviceReference, Servlet servlet) {
+		ServiceReference<Servlet> serviceReference, ServiceReference<Servlet> servlet) {
+		// TODO what if it changes to not match
 	}
 
 	@Override
 	public void removedService(
-		ServiceReference<Servlet> serviceReference, Servlet servlet) {
-
-		bundleContext.ungetService(serviceReference);
+		ServiceReference<Servlet> serviceReference, ServiceReference<Servlet> servlet) {
+		// TODO no clean up of selected context?
 	}
 
 }

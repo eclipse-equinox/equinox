@@ -58,25 +58,25 @@ public class HttpServiceRuntimeImpl
 		contextServiceTracker.open();
 
 		listenerServiceTracker =
-			new ServiceTracker<EventListener, EventListener>(
+			new ServiceTracker<EventListener, ServiceReference<EventListener>>(
 				bundleContext, EventListener.class,
 				new ListenerTrackerCustomizer(bundleContext, this));
 
 		listenerServiceTracker.open();
 
-		filterServiceTracker = new ServiceTracker<Filter, Filter>(
+		filterServiceTracker = new ServiceTracker<Filter, ServiceReference<Filter>>(
 			bundleContext, getFilteFilter(),
 			new FilterTrackerCustomizer(bundleContext, this));
 
 		filterServiceTracker.open();
 
-		servletServiceTracker = new ServiceTracker<Servlet, Servlet>(
+		servletServiceTracker = new ServiceTracker<Servlet, ServiceReference<Servlet>>(
 			bundleContext, getServletFilter(),
 			new ServletTrackerCustomizer(bundleContext, this));
 
 		servletServiceTracker.open();
 
-		resourceServiceTracker = new ServiceTracker<Servlet, Servlet>(
+		resourceServiceTracker = new ServiceTracker<Servlet, ServiceReference<Servlet>>(
 			bundleContext, getResourceFilter(),
 			new ResourceTrackerCustomizer(bundleContext, this));
 
@@ -704,13 +704,13 @@ public class HttpServiceRuntimeImpl
 	private ServiceTracker<ServletContextHelper, ContextController> contextServiceTracker;
 	private ConcurrentMap<ContextController, ServletContextHelper> controllerMap =
 		new ConcurrentHashMap<ContextController, ServletContextHelper>();
-	private ServiceTracker<Filter, Filter> filterServiceTracker;
+	private ServiceTracker<Filter, ServiceReference<Filter>> filterServiceTracker;
 	private AtomicLong legacyServiceIdGenerator = new AtomicLong(0);
-	private ServiceTracker<EventListener, EventListener> listenerServiceTracker;
+	private ServiceTracker<EventListener, ServiceReference<EventListener>> listenerServiceTracker;
 	private ServletContext parentServletContext;
 	private Set<Servlet> registeredServlets = new HashSet<Servlet>();
 	private Set<String> registeredContextNames = new ConcurrentSkipListSet<String>();
-	private ServiceTracker<Servlet, Servlet> resourceServiceTracker;
-	private ServiceTracker<Servlet, Servlet> servletServiceTracker;
+	private ServiceTracker<Servlet, ServiceReference<Servlet>> resourceServiceTracker;
+	private ServiceTracker<Servlet, ServiceReference<Servlet>> servletServiceTracker;
 
 }
