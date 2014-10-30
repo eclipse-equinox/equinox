@@ -36,8 +36,7 @@ public class ServletTrackerCustomizer
 
 		if (!httpServiceRuntime.matches(serviceReference)) {
 			// TODO no match runtime
-
-			return null;
+			return serviceReference;
 		}
 
 		String contextSelector = (String)serviceReference.getProperty(
@@ -60,7 +59,9 @@ public class ServletTrackerCustomizer
 	@Override
 	public void modifiedService(
 		ServiceReference<Servlet> serviceReference, ServiceReference<Servlet> servlet) {
-		// TODO What if it changes to no longer match?
+
+		removedService(serviceReference, servlet);
+		addingService(serviceReference);
 	}
 
 	@Override

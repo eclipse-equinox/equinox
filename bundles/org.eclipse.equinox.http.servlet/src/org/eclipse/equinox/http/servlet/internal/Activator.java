@@ -35,6 +35,7 @@ public class Activator
 
 	private static final String DEFAULT_SERVICE_DESCRIPTION = "Equinox Servlet Bridge"; //$NON-NLS-1$
 	private static final String DEFAULT_SERVICE_VENDOR = "Eclipse.org"; //$NON-NLS-1$
+	private static final String PROP_GLOBAL_WHITEBOARD = "equinox.http.global.whiteboard"; //$NON-NLS-1$
 	private static final String[] HTTP_SERVICES_CLASSES = new String[] {
 		HttpService.class.getName(), ExtendedHttpService.class.getName()
 	};
@@ -139,9 +140,11 @@ public class Activator
 		}
 
 		// white board support
-
+		// determine if the system bundle context should be used:
+		boolean useSystemContext = Boolean.valueOf(context.getProperty(PROP_GLOBAL_WHITEBOARD));
+		BundleContext trackingContext = useSystemContext ? context.getBundle(Constants.SYSTEM_BUNDLE_LOCATION).getBundleContext() : context;
 		HttpServiceRuntimeImpl httpServiceRuntime = new HttpServiceRuntimeImpl(
-			context, servletContext,
+			trackingContext, servletContext,
 			new UMDictionaryMap<String, Object>(serviceProperties));
 
 		ServiceRegistration<HttpServiceRuntime> hsrRegistration =

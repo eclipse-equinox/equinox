@@ -34,8 +34,7 @@ public class ResourceTrackerCustomizer
 	public ServiceReference<Servlet> addingService(ServiceReference<Servlet> serviceReference) {
 		if (!httpServiceRuntime.matches(serviceReference)) {
 			// TODO no match runtime
-
-			return null;
+			return serviceReference;
 		}
 
 		String contextSelector = (String)serviceReference.getProperty(
@@ -48,8 +47,7 @@ public class ResourceTrackerCustomizer
 
 		if (contextController == null) {
 			// TODO no match context
-			// what if it matches later
-			return null;
+			return serviceReference;
 		}
 
 		return serviceReference;
@@ -58,7 +56,9 @@ public class ResourceTrackerCustomizer
 	@Override
 	public void modifiedService(
 		ServiceReference<Servlet> serviceReference, ServiceReference<Servlet> servlet) {
-		// TODO what if it changes to not match
+
+		removedService(serviceReference, servlet);
+		addingService(serviceReference);
 	}
 
 	@Override

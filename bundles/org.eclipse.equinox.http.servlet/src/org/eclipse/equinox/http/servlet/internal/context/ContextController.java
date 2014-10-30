@@ -14,6 +14,7 @@ package org.eclipse.equinox.http.servlet.internal.context;
 import java.io.IOException;
 import java.security.AccessController;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.*;
 import javax.servlet.Filter;
 import javax.servlet.http.*;
@@ -37,8 +38,29 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class ContextController {
 
+	public static final class ServiceHolder<S> {
+		final ServiceObjects<S> serviceObjects;
+		final S service;
+		public ServiceHolder(ServiceObjects<S> serviceObjects) {
+			this.serviceObjects = serviceObjects;
+			this.service = serviceObjects.getService();
+		}
+		public ServiceHolder(S service) {
+			this.service = service;
+			this.serviceObjects = null;
+		}
+		public S get() {
+			return service;
+		}
+		public void release() {
+			if (serviceObjects != null && service != null) {
+				serviceObjects.ungetService(service);
+			}
+		}
+	}
+
 	public ContextController(
-		Bundle bundle, ServletContextHelper servletContextHelper,
+		Bundle bundle, BundleContext trackingContextParam, ServletContextHelper servletContextHelper,
 		ProxyContext proxyContext, HttpServiceRuntimeImpl httpServiceRuntime,
 		List<String> contextNames, String contextPath, long serviceId,
 		Set<Servlet> registeredServlets, Map<String, Object> attributes) {
@@ -67,126 +89,128 @@ public class ContextController {
 
 		this.initParams = Collections.unmodifiableMap(initParams);
 
-		bundleContext = bundle.getBundleContext();
+		trackingContext = trackingContextParam;
 
 		listenerServiceTracker = new ServiceTracker<EventListener, ListenerRegistration>(
-			bundleContext, EventListener.class,
+			trackingContext, EventListener.class,
 			new ContextListenerTrackerCustomizer(
-				bundleContext, httpServiceRuntime, this));
+				trackingContext, httpServiceRuntime, this));
 
 		listenerServiceTracker.open();
 
-		filterServiceTracker = new ServiceTracker<Filter, FilterRegistration>(
-			bundleContext, getFilteFilter(),
+		filterServiceTracker = new ServiceTracker<Filter, AtomicReference<FilterRegistration>>(
+			trackingContext, getFilteFilter(),
 			new ContextFilterTrackerCustomizer(
-				bundleContext, httpServiceRuntime, this));
+				trackingContext, httpServiceRuntime, this));
 
 		filterServiceTracker.open();
 
-		servletServiceTracker =  new ServiceTracker<Servlet, ServletRegistration>(
-			bundleContext, getServletFilter(),
+		servletServiceTracker =  new ServiceTracker<Servlet, AtomicReference<ServletRegistration>>(
+			trackingContext, getServletFilter(),
 			new ContextServletTrackerCustomizer(
-				bundleContext, httpServiceRuntime, this));
+				trackingContext, httpServiceRuntime, this));
 
 		servletServiceTracker.open();
 
-		resourceServiceTracker = new ServiceTracker<Servlet, ResourceRegistration>(
-			bundleContext, getResourceFilter(),
+		resourceServiceTracker = new ServiceTracker<Servlet, AtomicReference<ResourceRegistration>>(
+			trackingContext, getResourceFilter(),
 			new ContextResourceTrackerCustomizer(
-				bundleContext, httpServiceRuntime, this));
+				trackingContext, httpServiceRuntime, this));
 
 		resourceServiceTracker.open();
 	}
 
 	public FilterRegistration addFilterRegistration(
-			String alias, Filter filter, Dictionary<String, String> initparams,
+			String alias, ServiceHolder<Filter> filterHolder, Dictionary<String, String> initparams,
 			long serviceId)
 		throws ServletException {
-
-		checkShutdown();
-
-		if (filter == null) {
-			throw new IllegalArgumentException("Filter cannot be null");
-		}
 
 		String filterName = initparams.get(Const.FILTER_NAME);
 
 		filterName = (filterName != null) ? filterName :
-			filter.getClass().getName();
+			filterHolder.get().getClass().getName();
 
 		int filterPriority = findFilterPriority(initparams);
 
 		return addFilterRegistration(
-			filter, false, DISPATCHER, filterPriority,
+			filterHolder, false, DISPATCHER, filterPriority,
 			new UMDictionaryMap<String, String>(initparams), filterName,
 			new String[] {alias}, serviceId, Const.EMPTY_ARRAY);
 	}
 
 	public FilterRegistration addFilterRegistration(
-			Filter filter, boolean asyncSupported, String[] dispatcher,
+			ServiceHolder<Filter> filterHolder, boolean asyncSupported, String[] dispatcher,
 			int filterPriority, Map<String, String> initparams, String name,
 			String[] patterns, long serviceId, String[] servletNames)
 		throws ServletException {
 
-		checkShutdown();
+		FilterRegistration result = null;
+		Filter filter = filterHolder.get();
+		try {
+			checkShutdown();
 
-		if (((patterns == null) || (patterns.length == 0)) &&
-			((servletNames == null) || servletNames.length == 0)) {
+			if (((patterns == null) || (patterns.length == 0)) &&
+				((servletNames == null) || servletNames.length == 0)) {
 
-			throw new IllegalArgumentException(
-				"Patterns or servletNames must contain a value.");
-		}
+				throw new IllegalArgumentException(
+					"Patterns or servletNames must contain a value.");
+			}
 
-		if (patterns != null) {
-			for (String pattern : patterns) {
-				checkPattern(pattern);
+			if (patterns != null) {
+				for (String pattern : patterns) {
+					checkPattern(pattern);
+				}
+			}
+
+			if (filter == null) {
+				throw new IllegalArgumentException("Filter cannot be null");
+			}
+
+			if (name == null) {
+				name = filter.getClass().getName();
+			}
+
+			for (FilterRegistration filterRegistration : filterRegistrations) {
+				if (filterRegistration.getT().equals(filter)) {
+					throw new RegisteredFilterException(filter);
+				}
+			}
+
+			dispatcher = checkDispatcher(dispatcher);
+
+			FilterDTO filterDTO = new FilterDTO();
+
+			filterDTO.asyncSupported = asyncSupported;
+			filterDTO.dispatcher = sort(dispatcher);
+			filterDTO.initParams = initparams;
+			filterDTO.name = name;
+			filterDTO.patterns = sort(patterns);
+			// TODO
+			//filterDTO.regexps = sort(regexps);
+			filterDTO.serviceId = serviceId;
+			filterDTO.servletContextId = contextServiceId;
+			filterDTO.servletNames = sort(servletNames);
+
+			ServletContextHelper curServletContextHelper = getServletContextHelper(
+				bundle);
+
+			ServletContext servletContext = createServletContext(
+				bundle, curServletContextHelper);
+			FilterRegistration newRegistration  = new FilterRegistration(
+				filterHolder, filterDTO, filterPriority, curServletContextHelper, this);
+			FilterConfig filterConfig = new FilterConfigImpl(
+				name, initparams, servletContext);
+
+			newRegistration.init(filterConfig);
+
+			filterRegistrations.add(newRegistration);
+			result = newRegistration;
+		} finally {
+			if (result == null) {
+				filterHolder.release();
 			}
 		}
-
-		if (name == null) {
-			name = filter.getClass().getName();
-		}
-
-		if (filter == null) {
-			throw new IllegalArgumentException("Filter cannot be null");
-		}
-
-		for (FilterRegistration filterRegistration : filterRegistrations) {
-			if (filterRegistration.getT().equals(filter)) {
-				throw new RegisteredFilterException(filter);
-			}
-		}
-
-		dispatcher = checkDispatcher(dispatcher);
-
-		FilterDTO filterDTO = new FilterDTO();
-
-		filterDTO.asyncSupported = asyncSupported;
-		filterDTO.dispatcher = sort(dispatcher);
-		filterDTO.initParams = initparams;
-		filterDTO.name = name;
-		filterDTO.patterns = sort(patterns);
-		// TODO
-		//filterDTO.regexps = sort(regexps);
-		filterDTO.serviceId = serviceId;
-		filterDTO.servletContextId = contextServiceId;
-		filterDTO.servletNames = sort(servletNames);
-
-		ServletContextHelper curServletContextHelper = getServletContextHelper(
-			bundle);
-
-		ServletContext servletContext = createServletContext(
-			bundle, curServletContextHelper);
-		FilterRegistration filterRegistration = new FilterRegistration(
-			filter, filterDTO, filterPriority, curServletContextHelper, this);
-		FilterConfig filterConfig = new FilterConfigImpl(
-			name, initparams, servletContext);
-
-		filterRegistration.init(filterConfig);
-
-		filterRegistrations.add(filterRegistration);
-
-		return filterRegistration;
+		return result;
 	}
 
 	public ListenerRegistration addListenerRegistration(
@@ -290,7 +314,7 @@ public class ContextController {
 		ServletContext servletContext = createServletContext(
 			bundle, curServletContextHelper);
 		ResourceRegistration resourceRegistration = new ResourceRegistration(
-			servlet, resourceDTO, curServletContextHelper, this, legacyMatching);
+			new ServiceHolder<Servlet>(servlet), resourceDTO, curServletContextHelper, this, legacyMatching);
 		ServletConfig servletConfig = new ServletConfigImpl(
 			resourceRegistration.getName(), new HashMap<String, String>(),
 			servletContext);
@@ -310,17 +334,17 @@ public class ContextController {
 	}
 
 	public ServletRegistration addServletRegistration(
-			String pattern, Servlet servlet,
+			String pattern, ServiceHolder<Servlet> servletHolder,
 			Dictionary<String, String> initparams, long serviceId)
 		throws ServletException {
 
 		checkShutdown();
 
-		if (servlet == null) {
+		if (servletHolder.get() == null) {
 			throw new IllegalArgumentException("Servlet cannot be null");
 		}
 
-		String servletName = servlet.getClass().getName();
+		String servletName = servletHolder.get().getClass().getName();
 
 		if ((initparams != null) && (initparams.get(Const.SERVLET_NAME) != null)) {
 			servletName = initparams.get(Const.SERVLET_NAME);
@@ -331,13 +355,13 @@ public class ContextController {
 		}
 
 		return addServletRegistration(
-			servlet, false, Const.EMPTY_ARRAY,
+			servletHolder, false, Const.EMPTY_ARRAY,
 			new UMDictionaryMap<String, String>(initparams),
 			new String[] {pattern}, serviceId, servletName, true);
 	}
 
 	public ServletRegistration addServletRegistration(
-			Servlet servlet, boolean asyncSupported, String[] errorPages,
+			ServiceHolder<Servlet> servletHolder, boolean asyncSupported, String[] errorPages,
 			Map<String, String> initparams, String[] patterns, long serviceId,
 			String servletName, boolean legacyMatching)
 		throws ServletException {
@@ -357,7 +381,8 @@ public class ContextController {
 			}
 		}
 
-		if (servlet == null) {
+		Servlet servlet = servletHolder.get();
+		if (servletHolder.get() == null) {
 			throw new IllegalArgumentException("Servlet cannot be null");
 		}
 
@@ -408,7 +433,7 @@ public class ContextController {
 		ServletContext servletContext = createServletContext(
 			bundle, curServletContextHelper);
 		ServletRegistration servletRegistration = new ServletRegistration(
-			servlet, servletDTO, errorPageDTO, curServletContextHelper, this, legacyMatching);
+			new ServiceHolder<Servlet>(servlet), servletDTO, errorPageDTO, curServletContextHelper, this, legacyMatching);
 		ServletConfig servletConfig = new ServletConfigImpl(
 			servletName, initparams, servletContext);
 
@@ -964,7 +989,7 @@ public class ContextController {
 		sb.append("=*)))"); //$NON-NLS-1$
 
 		try {
-			return bundleContext.createFilter(sb.toString());
+			return trackingContext.createFilter(sb.toString());
 		}
 		catch (InvalidSyntaxException ise) {
 			throw new IllegalArgumentException(ise);
@@ -983,7 +1008,7 @@ public class ContextController {
 		sb.append("=*))"); //$NON-NLS-1$
 
 		try {
-			return bundleContext.createFilter(sb.toString());
+			return trackingContext.createFilter(sb.toString());
 		}
 		catch (InvalidSyntaxException ise) {
 			throw new IllegalArgumentException(ise);
@@ -1004,7 +1029,7 @@ public class ContextController {
 		sb.append("=*)))"); //$NON-NLS-1$
 
 		try {
-			return bundleContext.createFilter(sb.toString());
+			return trackingContext.createFilter(sb.toString());
 		}
 		catch (InvalidSyntaxException ise) {
 			throw new IllegalArgumentException(ise);
@@ -1027,21 +1052,21 @@ public class ContextController {
 	private Map<String, Object> attributes;
 	private Map<String, String> initParams;
 	private final Bundle bundle;
-	private final BundleContext bundleContext;
+	private final BundleContext trackingContext;
 	private List<String> contextNames;
 	private final String contextPath;
 	private final long contextServiceId;
 	private final Set<EndpointRegistration<?>> endpointRegistrations = new HashSet<EndpointRegistration<?>>();
 	private EventListeners eventListeners = new EventListeners();
 	private final Set<FilterRegistration> filterRegistrations = new HashSet<FilterRegistration>();
-	private ServiceTracker<Filter, FilterRegistration> filterServiceTracker;
+	private ServiceTracker<Filter, AtomicReference<FilterRegistration>> filterServiceTracker;
 	private HttpServiceRuntimeImpl httpServiceRuntime;
 	private ServiceTracker<EventListener, ListenerRegistration> listenerServiceTracker;
 	private final Set<ListenerRegistration> listenerRegistrations = new HashSet<ListenerRegistration>();
 	private ProxyContext proxyContext;
 	private Set<Servlet> registeredServlets;
-	private ServiceTracker<Servlet, ServletRegistration> servletServiceTracker;
-	private ServiceTracker<Servlet, ResourceRegistration> resourceServiceTracker;
+	private ServiceTracker<Servlet, AtomicReference<ServletRegistration>> servletServiceTracker;
+	private ServiceTracker<Servlet, AtomicReference<ResourceRegistration>> resourceServiceTracker;
 	ServletContextHelper servletContextHelper;
 	private boolean shutdown;
 

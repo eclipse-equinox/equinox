@@ -34,8 +34,7 @@ public class FilterTrackerCustomizer
 	public ServiceReference<Filter> addingService(ServiceReference<Filter> serviceReference) {
 		if (!httpServiceRuntime.matches(serviceReference)) {
 			// TODO no match runtime
-
-			return null;
+			return serviceReference;
 		}
 
 		String contextSelector = (String)serviceReference.getProperty(
@@ -48,8 +47,7 @@ public class FilterTrackerCustomizer
 
 		if (contextController == null) {
 			// TODO no match context
-			// what happens if it matches later?
-			return null;
+			return serviceReference;
 		}
 
 		return serviceReference;
@@ -58,7 +56,9 @@ public class FilterTrackerCustomizer
 	@Override
 	public void modifiedService(
 		ServiceReference<Filter> serviceReference, ServiceReference<Filter> filter) {
-		// TODO what happens if the HTTP_WHITEBOARD_CONTEXT_SELECT property changed?
+
+		removedService(serviceReference, filter);
+		addingService(serviceReference);
 	}
 
 	@Override

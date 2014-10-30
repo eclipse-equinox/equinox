@@ -16,6 +16,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
+import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
 import org.osgi.dto.DTO;
@@ -27,17 +28,18 @@ import org.osgi.service.http.context.ServletContextHelper;
 public abstract class EndpointRegistration<D extends DTO>
 	extends MatchableRegistration<Servlet, D> {
 
+	private final ServiceHolder<Servlet> servletHolder;
 	private ServletContextHelper servletContextHelper; //The context used during the registration of the servlet
 	private ContextController contextController;
 	private ClassLoader classLoader;
 	private boolean legacyMatching;
 
 	public EndpointRegistration(
-		Servlet servlet, D d, ServletContextHelper servletContextHelper,
+		ServiceHolder<Servlet> servletHolder, D d, ServletContextHelper servletContextHelper,
 		ContextController contextController, boolean legacyMatching) {
 
-		super(servlet, d);
-
+		super(servletHolder.get(), d);
+		this.servletHolder = servletHolder;
 		this.servletContextHelper = servletContextHelper;
 		this.contextController = contextController;
 		this.legacyMatching = legacyMatching;
@@ -54,6 +56,7 @@ public abstract class EndpointRegistration<D extends DTO>
 
 			super.destroy();
 			getT().destroy();
+			servletHolder.release();
 		}
 		finally {
 			destroyContextAttributes();

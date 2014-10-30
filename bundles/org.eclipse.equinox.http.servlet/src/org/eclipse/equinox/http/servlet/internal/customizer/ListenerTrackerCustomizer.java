@@ -36,8 +36,7 @@ public class ListenerTrackerCustomizer
 
 		if (!httpServiceRuntime.matches(serviceReference)) {
 			// TODO no match runtime
-
-			return null;
+			return serviceReference;
 		}
 
 		String contextSelector = (String)serviceReference.getProperty(
@@ -50,8 +49,7 @@ public class ListenerTrackerCustomizer
 
 		if (contextController == null) {
 			// TODO no match context
-			// What happens if there is a new context registered later that does match?
-			return null;
+			return serviceReference;
 		}
 
 		return serviceReference;
@@ -62,7 +60,9 @@ public class ListenerTrackerCustomizer
 		modifiedService(
 			ServiceReference<EventListener> serviceReference,
 			ServiceReference<EventListener> eventListener) {
-		// TODO what if the context selector changes?
+
+		removedService(serviceReference, eventListener);
+		addingService(serviceReference);
 	}
 
 	@Override

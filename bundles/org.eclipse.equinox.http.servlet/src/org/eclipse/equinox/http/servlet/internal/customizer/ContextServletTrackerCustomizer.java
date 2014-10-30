@@ -13,10 +13,12 @@ package org.eclipse.equinox.http.servlet.internal.customizer;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
+import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
 import org.eclipse.equinox.http.servlet.internal.registration.ServletRegistration;
 import org.eclipse.equinox.http.servlet.internal.util.StringPlus;
 import org.osgi.framework.*;
@@ -26,7 +28,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  * @author Raymond Augé
  */
 public class ContextServletTrackerCustomizer
-	extends RegistrationServiceTrackerCustomizer<Servlet, ServletRegistration> {
+	extends RegistrationServiceTrackerCustomizer<Servlet, AtomicReference<ServletRegistration>> {
 
 	public ContextServletTrackerCustomizer(
 		BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime,
@@ -38,28 +40,26 @@ public class ContextServletTrackerCustomizer
 	}
 
 	@Override
-	public ServletRegistration addingService(
+	public AtomicReference<ServletRegistration> addingService(
 		ServiceReference<Servlet> serviceReference) {
 
+		AtomicReference<ServletRegistration> result = new AtomicReference<ServletRegistration>();
 		if (!httpServiceRuntime.matches(serviceReference)) {
-			// TODO no match runtime
-
-			return null;
+			return result;
 		}
 
 		String contextSelector = (String)serviceReference.getProperty(
 			HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
 
 		if (!contextController.matches(contextSelector)) {
-			// TODO no match context
-
-			return null;
+			return result;
 		}
 
-		Servlet servlet = bundleContext.getService(serviceReference);
+		ServiceHolder<Servlet> servletHolder = new ServiceHolder<Servlet>(bundleContext.getServiceObjects(serviceReference));
 
-		if (httpServiceRuntime.getRegisteredServlets().contains(servlet)) {
-			return null;
+		if (httpServiceRuntime.getRegisteredServlets().contains(servletHolder.get())) {
+			servletHolder.release();
+			return result;
 		}
 
 		boolean asyncSupported = parseBoolean(
@@ -81,12 +81,12 @@ public class ContextServletTrackerCustomizer
 
 		String servletName = parseName(
 			serviceReference.getProperty(
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME), servlet);
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME), servletHolder.get());
 
 		try {
-			return contextController.addServletRegistration(
-				servlet, asyncSupported, errorPages, initParams, patterns,
-				serviceId.longValue(), servletName, false);
+			result.set(contextController.addServletRegistration(
+				servletHolder, asyncSupported, errorPages, initParams, patterns,
+				serviceId.longValue(), servletName, false));
 		}
 		catch (ServletException se) {
 			httpServiceRuntime.log(se.getMessage(), se);
@@ -94,23 +94,28 @@ public class ContextServletTrackerCustomizer
 
 		// TODO error?
 
-		return null;
+		return result;
 	}
 
 	@Override
 	public void modifiedService(
 		ServiceReference<Servlet> serviceReference,
-		ServletRegistration servletRegistration) {
+		AtomicReference<ServletRegistration> servletReference) {
+
+		removedService(serviceReference, servletReference);
+		AtomicReference<ServletRegistration> added = addingService(serviceReference);
+		servletReference.set(added.get());
 	}
 
 	@Override
 	public void removedService(
 		ServiceReference<Servlet> serviceReference,
-		ServletRegistration servletRegistration) {
-
-		bundleContext.ungetService(serviceReference);
-
-		servletRegistration.destroy();
+		AtomicReference<ServletRegistration> servletReference) {
+		ServletRegistration registration = servletReference.get();
+		if (registration != null) {
+			// destroy will unget the service object we were using
+			registration.destroy();
+		}
 	}
 
 	private ContextController contextController;

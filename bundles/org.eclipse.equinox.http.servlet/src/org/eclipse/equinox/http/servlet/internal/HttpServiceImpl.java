@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.*;
 import org.eclipse.equinox.http.servlet.ExtendedHttpService;
 import org.eclipse.equinox.http.servlet.internal.context.*;
+import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
 import org.eclipse.equinox.http.servlet.internal.error.*;
 import org.eclipse.equinox.http.servlet.internal.registration.*;
 import org.eclipse.equinox.http.servlet.internal.registration.FilterRegistration;
@@ -87,7 +88,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 		FilterRegistration filterRegistration =
 			contextController.addFilterRegistration(
-				alias, filter, initparams,
+				alias, new ServiceHolder<Filter>(filter), initparams,
 				legacyServiceIdGenerator.decrementAndGet());
 
 		contextRegistrations.put(filter, filterRegistration);
@@ -112,7 +113,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 		FilterRegistration filterRegistration =
 			contextController.addFilterRegistration(
-				filter, asyncSupported, dispatcher, filterPriority, initparams,
+				new ServiceHolder<Filter>(filter), asyncSupported, dispatcher, filterPriority, initparams,
 				name, patterns, legacyServiceIdGenerator.decrementAndGet(),
 				servletNames);
 
@@ -217,7 +218,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 		ServletRegistration servletRegistration =
 			contextController.addServletRegistration(
-				alias, servlet, initparams,
+				alias, new ServiceHolder<Servlet>(servlet), initparams,
 				legacyServiceIdGenerator.decrementAndGet());
 
 		contextRegistrations.put(alias, servletRegistration);
@@ -248,7 +249,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 		ServletRegistration servletRegistration =
 			contextController.addServletRegistration(
-				servlet, asyncSupported, errorPages, initparams, patterns,
+				new ServiceHolder<Servlet>(servlet), asyncSupported, errorPages, initparams, patterns,
 				legacyServiceIdGenerator.decrementAndGet(), name, false);
 
 		if (patterns != null) {

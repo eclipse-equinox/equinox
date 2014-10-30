@@ -17,6 +17,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
+import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
 import org.eclipse.equinox.http.servlet.internal.servlet.FilterChainImpl;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
 import org.osgi.service.http.context.ServletContextHelper;
@@ -27,18 +28,19 @@ public class FilterRegistration
 	extends MatchableRegistration<Filter, FilterDTO>
 	implements Comparable<FilterRegistration> {
 
+	private final ServiceHolder<Filter> filterHolder;
 	private final ServletContextHelper servletContextHelper; //The context used during the registration of the filter
 	private final ClassLoader classLoader;
 	private final int priority;
 	private final ContextController contextController;
 
 	public FilterRegistration(
-		Filter filter, FilterDTO filterDTO, int priority,
+		ServiceHolder<Filter> filterHolder, FilterDTO filterDTO, int priority,
 		ServletContextHelper servletContextHelper,
 		ContextController contextController) {
 
-		super(filter, filterDTO);
-
+		super(filterHolder.get(), filterDTO);
+		this.filterHolder = filterHolder;
 		this.priority = priority;
 		this.servletContextHelper = servletContextHelper;
 		this.contextController = contextController;
@@ -62,6 +64,7 @@ public class FilterRegistration
 			contextController.getFilterRegistrations().remove(this);
 			super.destroy();
 			getT().destroy();
+			filterHolder.release();
 		}
 		finally {
 			destroyContextAttributes();

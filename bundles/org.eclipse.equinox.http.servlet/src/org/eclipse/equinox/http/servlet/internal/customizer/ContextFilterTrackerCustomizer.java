@@ -13,10 +13,12 @@ package org.eclipse.equinox.http.servlet.internal.customizer;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.Filter;
 import javax.servlet.ServletException;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
+import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
 import org.eclipse.equinox.http.servlet.internal.registration.FilterRegistration;
 import org.eclipse.equinox.http.servlet.internal.util.StringPlus;
 import org.osgi.framework.*;
@@ -26,7 +28,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  * @author Raymond Augé
  */
 public class ContextFilterTrackerCustomizer
-	extends RegistrationServiceTrackerCustomizer<Filter, FilterRegistration> {
+	extends RegistrationServiceTrackerCustomizer<Filter, AtomicReference<FilterRegistration>> {
 
 	public ContextFilterTrackerCustomizer(
 		BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime,
@@ -38,20 +40,20 @@ public class ContextFilterTrackerCustomizer
 	}
 
 	@Override
-	public FilterRegistration addingService(
+	public AtomicReference<FilterRegistration> addingService(
 		ServiceReference<Filter> serviceReference) {
 
+		AtomicReference<FilterRegistration> result = new AtomicReference<FilterRegistration>();
 		if (!httpServiceRuntime.matches(serviceReference)) {
 			// TODO no match runtime
-
-			return null;
+			return result;
 		}
 
 		String contextSelector = (String)serviceReference.getProperty(
 			HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
 
 		if (!contextController.matches(contextSelector)) {
-			return null;
+			return result;
 		}
 
 		boolean asyncSupported = parseBoolean(
@@ -88,14 +90,14 @@ public class ContextFilterTrackerCustomizer
 
 		// String[] regex = regexList.toArray(new String[regexList.size()]);
 
-		Filter filter = bundleContext.getService(serviceReference);
+		ServiceHolder<Filter> filterHolder = new ServiceHolder<Filter>(bundleContext.getServiceObjects(serviceReference));
 		String name = parseName(serviceReference.getProperty(
-			HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME), filter);
+			HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME), filterHolder.get());
 
 		try {
-			return contextController.addFilterRegistration(
-				filter, asyncSupported, dispatchers, filterPriority.intValue(),
-				initParams, name, patterns, serviceId.longValue(), servlets);
+			result.set(contextController.addFilterRegistration(
+				filterHolder, asyncSupported, dispatchers, filterPriority.intValue(),
+				initParams, name, patterns, serviceId.longValue(), servlets));
 		}
 		catch (ServletException se) {
 			httpServiceRuntime.log(se.getMessage(), se);
@@ -103,23 +105,28 @@ public class ContextFilterTrackerCustomizer
 
 		// TODO error?
 
-		return null;
+		return result;
 	}
 
 	@Override
 	public void modifiedService(
 		ServiceReference<Filter> serviceReference,
-		FilterRegistration filterRegistration) {
+		AtomicReference<FilterRegistration> filterReference) {
+
+		removedService(serviceReference, filterReference);
+		AtomicReference<FilterRegistration> added = addingService(serviceReference);
+		filterReference.set(added.get());
 	}
 
 	@Override
 	public void removedService(
 		ServiceReference<Filter> serviceReference,
-		FilterRegistration filterRegistration) {
-
-		bundleContext.ungetService(serviceReference);
-
-		filterRegistration.destroy();
+		AtomicReference<FilterRegistration> filterReference) {
+		FilterRegistration registration = filterReference.get();
+		if (registration != null) {
+			// Destroy now ungets the object we are using
+			registration.destroy();
+		}
 	}
 
 	private ContextController contextController;

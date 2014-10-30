@@ -12,6 +12,7 @@
 package org.eclipse.equinox.http.servlet.internal.customizer;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.Servlet;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
@@ -24,7 +25,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  * @author Raymond Augé
  */
 public class ContextResourceTrackerCustomizer
-	extends RegistrationServiceTrackerCustomizer<Servlet, ResourceRegistration> {
+	extends RegistrationServiceTrackerCustomizer<Servlet, AtomicReference<ResourceRegistration>> {
 
 	public ContextResourceTrackerCustomizer(
 		BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime,
@@ -36,13 +37,12 @@ public class ContextResourceTrackerCustomizer
 	}
 
 	@Override
-	public ResourceRegistration addingService(
+	public AtomicReference<ResourceRegistration> addingService(
 		ServiceReference<Servlet> serviceReference) {
-
+		AtomicReference<ResourceRegistration> result = new AtomicReference<ResourceRegistration>();
 		if (!httpServiceRuntime.matches(serviceReference)) {
 			// TODO no match runtime
-
-			return null;
+			return result;
 		}
 
 		String contextSelector = (String)serviceReference.getProperty(
@@ -50,8 +50,7 @@ public class ContextResourceTrackerCustomizer
 
 		if (!contextController.matches(contextSelector)) {
 			// TODO no match context
-
-			return null;
+			return result;
 		}
 
 		List<String> patternList = StringPlus.from(
@@ -63,24 +62,30 @@ public class ContextResourceTrackerCustomizer
 		String prefix = (String)serviceReference.getProperty(
 			HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
 
-		return contextController.addResourceRegistration(
-			patterns, prefix, serviceId.longValue(), false);
+		result.set(contextController.addResourceRegistration(
+			patterns, prefix, serviceId.longValue(), false));
+		return result;
 	}
 
 	@Override
 	public void modifiedService(
 		ServiceReference<Servlet> serviceReference,
-		ResourceRegistration resourceRegistration) {
+		AtomicReference<ResourceRegistration> resourceReference) {
+
+		removedService(serviceReference, resourceReference);
+		AtomicReference<ResourceRegistration> added = addingService(serviceReference);
+		resourceReference.set(added.get());
 	}
 
 	@Override
 	public void removedService(
 		ServiceReference<Servlet> serviceReference,
-		ResourceRegistration resourceRegistration) {
-
-		bundleContext.ungetService(serviceReference);
-
-		resourceRegistration.destroy();
+		AtomicReference<ResourceRegistration> resourceReference) {
+		ResourceRegistration registration = resourceReference.get();
+		if (registration != null) {
+			// destroy will unget the service object we were using
+			registration.destroy();
+		}
 	}
 
 	private ContextController contextController;

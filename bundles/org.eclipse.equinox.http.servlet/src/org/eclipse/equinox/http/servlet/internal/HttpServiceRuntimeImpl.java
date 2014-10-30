@@ -16,6 +16,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.*;
 import javax.servlet.Filter;
 import javax.servlet.http.*;
@@ -41,7 +42,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public class HttpServiceRuntimeImpl
 	implements
 		HttpServiceRuntime,
-		ServiceTrackerCustomizer<ServletContextHelper, ContextController> {
+		ServiceTrackerCustomizer<ServletContextHelper, AtomicReference<ContextController>> {
 
 	public HttpServiceRuntimeImpl(
 		BundleContext bundleContext, ServletContext parentServletContext,
@@ -52,7 +53,7 @@ public class HttpServiceRuntimeImpl
 		this.attributes = Collections.unmodifiableMap(attributes);
 
 		contextServiceTracker =
-			new ServiceTracker<ServletContextHelper, ContextController>(
+			new ServiceTracker<ServletContextHelper, AtomicReference<ContextController>>(
 				bundleContext, ServletContextHelper.class, this);
 
 		contextServiceTracker.open();
@@ -84,11 +85,12 @@ public class HttpServiceRuntimeImpl
 	}
 
 	@Override
-	public synchronized ContextController addingService(
+	public synchronized AtomicReference<ContextController> addingService(
 		ServiceReference<ServletContextHelper> serviceReference) {
 
+		AtomicReference<ContextController> result = new AtomicReference<ContextController>();
 		if (!matches(serviceReference)) {
-			return null;
+			return result;
 		}
 
 		List<String> contextNames = StringPlus.from(
@@ -101,7 +103,7 @@ public class HttpServiceRuntimeImpl
 					HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME +
 						" is null. Ignoring!");
 
-			return null;
+			return result;
 		}
 
 		for (String contextName : contextNames) {
@@ -109,7 +111,7 @@ public class HttpServiceRuntimeImpl
 				parentServletContext.log(
 					"ContextName " + contextName + " is already in use. Ignoring!");
 
-				return null;
+				return result;
 			}
 		}
 
@@ -134,9 +136,10 @@ public class HttpServiceRuntimeImpl
 
 		properties.putAll(attributes);
 
-		return addServletContextHelper(
+		result.set(addServletContextHelper(
 			serviceReference.getBundle(), servletContextHelper, contextNames,
-			contextPath, serviceId, properties);
+			contextPath, serviceId, properties));
+		return result;
 	}
 
 	public ContextController addServletContextHelper(
@@ -421,19 +424,23 @@ public class HttpServiceRuntimeImpl
 	@Override
 	public synchronized void modifiedService(
 		ServiceReference<ServletContextHelper> serviceReference,
-		ContextController contextController) {
+		AtomicReference<ContextController> contextController) {
 
-		// do nothing
+		removedService(serviceReference, contextController);
+		AtomicReference<ContextController> added = addingService(serviceReference);
+		contextController.set(added.get());
 	}
 
 	@Override
 	public synchronized void removedService(
 		ServiceReference<ServletContextHelper> serviceReference,
-		ContextController contextController) {
+		AtomicReference<ContextController> contextControllerRef) {
 
+		ContextController contextController = contextControllerRef.get();
+		if (contextController != null) {
+			removeContextController(contextController);
+		}
 		bundleContext.ungetService(serviceReference);
-
-		removeContextController(contextController);
 	}
 
 	public void removeContextController(ContextController contextController) {
@@ -511,7 +518,7 @@ public class HttpServiceRuntimeImpl
 		Map<String, Object> initParams) {
 
 		ContextController contextController = new ContextController(
-			bundle, servletContextHelper, new ProxyContext(parentServletContext),
+			bundle, bundleContext, servletContextHelper, new ProxyContext(parentServletContext),
 			this, contextNames, contextPath, serviceId, registeredServlets,
 			initParams);
 
@@ -701,7 +708,7 @@ public class HttpServiceRuntimeImpl
 	private BundleContext bundleContext;
 	private ConcurrentMap<String, Set<ContextController>> contextPathMap =
 		new ConcurrentHashMap<String, Set<ContextController>>();
-	private ServiceTracker<ServletContextHelper, ContextController> contextServiceTracker;
+	private ServiceTracker<ServletContextHelper, AtomicReference<ContextController>> contextServiceTracker;
 	private ConcurrentMap<ContextController, ServletContextHelper> controllerMap =
 		new ConcurrentHashMap<ContextController, ServletContextHelper>();
 	private ServiceTracker<Filter, ServiceReference<Filter>> filterServiceTracker;
