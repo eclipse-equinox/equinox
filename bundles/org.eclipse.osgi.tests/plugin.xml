@@ -27,7 +27,7 @@
          id="testCardinality01"
          point="org.eclipse.core.runtime.applications">
       <application
-            cardinality="10"
+            cardinality="5"
             thread="any"
             visible="true">
          <run

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -665,8 +665,12 @@ public class ApplicationAdminTest extends OSGiTest {
 		ArrayList instances = new ArrayList();
 		int i = 0;
 		try {
-			for (; i <= cardinality; i++)
+			for (; i <= cardinality; i++) {
 				instances.add(app.launch(null));
+				if (i == cardinality && hasMax) {
+					fail("Expected an ApplicationException.");
+				}
+			}
 		} catch (ApplicationException e) {
 			if (!hasMax || i != cardinality)
 				fail("Unexpected ApplicationException", e); //$NON-NLS-1$
@@ -680,7 +684,7 @@ public class ApplicationAdminTest extends OSGiTest {
 	}
 
 	public void testCardinality01() {
-		doTestCardinality01(PI_OSGI_TESTS + ".testCardinality01", 10, true); //$NON-NLS-1$
+		doTestCardinality01(PI_OSGI_TESTS + ".testCardinality01", 5, true); //$NON-NLS-1$
 	}
 
 	public void testCardinality02() {
