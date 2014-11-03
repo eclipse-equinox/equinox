@@ -96,7 +96,7 @@ public class Storage {
 		mruList = new MRUBundleFileList(getBundleFileLimit(container.getConfiguration()));
 		equinoxContainer = container;
 		extensionInstaller = new FrameworkExtensionInstaller(container.getConfiguration());
-		allowRestrictedProvides = Boolean.parseBoolean(container.getConfiguration().getConfiguration(EquinoxConfiguration.PROP_TOLERATE_PROVIDE));
+		allowRestrictedProvides = Boolean.parseBoolean(container.getConfiguration().getConfiguration(EquinoxConfiguration.PROP_ALLOW_RESTRICTED_PROVIDES));
 
 		// we need to set the install path as soon as possible so we can determine
 		// the absolute location of install relative URLs
