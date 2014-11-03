@@ -189,7 +189,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String PROP_STATE_SAVE_DELAY_INTERVAL = "eclipse.stateSaveDelayInterval"; //$NON-NLS-1$
 
 	public static final String PROP_MODULE_LOCK_TIMEOUT = "osgi.module.lock.timeout"; //$NON-NLS-1$
-	public static final String PROP_TOLERATE_PROVIDE = "osgi.tolerate.provide.restricted"; //$NON-NLS-1$
+	public static final String PROP_TOLERATE_PROVIDE = "osgi.equinox.allow.restricted.provides"; //$NON-NLS-1$
 
 	private final static Collection<String> populateInitConfig = Arrays.asList(PROP_OSGI_ARCH, PROP_OSGI_OS, PROP_OSGI_WS, PROP_OSGI_NL, FRAMEWORK_OS_NAME, FRAMEWORK_OS_VERSION, FRAMEWORK_PROCESSOR, FRAMEWORK_LANGUAGE);
 

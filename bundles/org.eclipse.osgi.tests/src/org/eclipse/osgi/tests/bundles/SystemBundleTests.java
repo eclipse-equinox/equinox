@@ -2351,7 +2351,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<String, Object>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
-		configuration.put("osgi.tolerate.provide.restricted", "true");
+		configuration.put("osgi.equinox.allow.restricted.provides", "true");
 
 		Equinox equinox = new Equinox(configuration);
 		equinox.start();
@@ -2362,7 +2362,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		testBundle.uninstall();
 		equinox.stop();
 
-		configuration.remove("osgi.tolerate.provide.restricted");
+		configuration.remove("osgi.equinox.allow.restricted.provides");
 		equinox = new Equinox(configuration);
 		equinox.start();
 		systemContext = equinox.getBundleContext();
@@ -2375,7 +2375,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 		equinox.stop();
 
-		configuration.put("osgi.tolerate.provide.restricted", "false");
+		configuration.put("osgi.equinox.allow.restricted.provides", "false");
 		equinox = new Equinox(configuration);
 		equinox.start();
 		systemContext = equinox.getBundleContext();
