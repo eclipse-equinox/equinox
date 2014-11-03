@@ -66,7 +66,7 @@ public final class OSGiManifestBuilderFactory {
 	 * @param manifest the bundle manifest
 	 * @param symbolicNameAlias the symbolic name alias.  A <code>null</code> value is allowed.
 	 * @param extraExports the extra package exports.  A <code>null</code> value is allowed.
-	 * @param extraCapabilities the extra proided capabilities.   A <code>null</code> value is allowed.
+	 * @param extraCapabilities the extra provided capabilities.   A <code>null</code> value is allowed.
 	 * @return a builder for the specified bundle manifest
 	 * @throws BundleException if the bundle manifest is invalid
 	 */
@@ -83,7 +83,7 @@ public final class OSGiManifestBuilderFactory {
 		Collection<Map<String, Object>> exportedPackages = new ArrayList<Map<String, Object>>();
 		getPackageExports(builder, ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, manifest.get(Constants.EXPORT_PACKAGE)), symbolicName, exportedPackages);
 		getPackageExports(builder, ManifestElement.parseHeader(HEADER_OLD_PROVIDE_PACKAGE, manifest.get(HEADER_OLD_PROVIDE_PACKAGE)), symbolicName, exportedPackages);
-		if (extraExports != null) {
+		if (extraExports != null && !extraExports.isEmpty()) {
 			getPackageExports(builder, ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, extraExports), symbolicName, exportedPackages);
 		}
 		getPackageImports(builder, manifest, exportedPackages, manifestVersion);
@@ -91,7 +91,7 @@ public final class OSGiManifestBuilderFactory {
 		getRequireBundle(builder, ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, manifest.get(Constants.REQUIRE_BUNDLE)));
 
 		getProvideCapabilities(builder, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, manifest.get(Constants.PROVIDE_CAPABILITY)), extraCapabilities == null);
-		if (extraCapabilities != null) {
+		if (extraCapabilities != null && !extraCapabilities.isEmpty()) {
 			getProvideCapabilities(builder, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, extraCapabilities), false);
 		}
 		getRequireCapabilities(builder, ManifestElement.parseHeader(Constants.REQUIRE_CAPABILITY, manifest.get(Constants.REQUIRE_CAPABILITY)));
@@ -503,7 +503,7 @@ public final class OSGiManifestBuilderFactory {
 		builder.addCapability(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, directives, Collections.<String, Object> singletonMap(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, hostName));
 	}
 
-	private static void getProvideCapabilities(ModuleRevisionBuilder builder, ManifestElement[] provideElements, boolean chechSystemCapabilities) throws BundleException {
+	private static void getProvideCapabilities(ModuleRevisionBuilder builder, ManifestElement[] provideElements, boolean checkSystemCapabilities) throws BundleException {
 		if (provideElements == null)
 			return;
 		for (ManifestElement provideElement : provideElements) {
@@ -511,7 +511,7 @@ public final class OSGiManifestBuilderFactory {
 			Map<String, Object> attributes = getAttributes(provideElement);
 			Map<String, String> directives = getDirectives(provideElement);
 			for (String namespace : namespaces) {
-				if (PROHIBITED_CAPABILITIES.contains(namespace) || (chechSystemCapabilities && SYSTEM_CAPABILITIES.contains(namespace))) {
+				if (PROHIBITED_CAPABILITIES.contains(namespace) || (checkSystemCapabilities && SYSTEM_CAPABILITIES.contains(namespace))) {
 					throw new BundleException("A bundle is not allowed to define a capability in the " + namespace + " name space.", BundleException.MANIFEST_ERROR); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 

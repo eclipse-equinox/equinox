@@ -2347,6 +2347,48 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	public void testProvideOSGiEEandNative() throws BundleException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put("osgi.tolerate.provide.restricted", "true");
+
+		Equinox equinox = new Equinox(configuration);
+		equinox.start();
+		BundleContext systemContext = equinox.getBundleContext();
+		Bundle testBundle = systemContext.installBundle(installer.getBundleLocation("test.bug449484"));
+		equinox.adapt(FrameworkWiring.class).resolveBundles(Collections.singleton(testBundle));
+		assertEquals("Wrong bundle state", Bundle.RESOLVED, testBundle.getState());
+		testBundle.uninstall();
+		equinox.stop();
+
+		configuration.remove("osgi.tolerate.provide.restricted");
+		equinox = new Equinox(configuration);
+		equinox.start();
+		systemContext = equinox.getBundleContext();
+		try {
+			testBundle = systemContext.installBundle(installer.getBundleLocation("test.bug449484"));
+			testBundle.uninstall();
+			fail("Expected to fail to install bundle with restricted provide capabilities.");
+		} catch (BundleException e) {
+			// expected
+		}
+		equinox.stop();
+
+		configuration.put("osgi.tolerate.provide.restricted", "false");
+		equinox = new Equinox(configuration);
+		equinox.start();
+		systemContext = equinox.getBundleContext();
+		try {
+			testBundle = systemContext.installBundle(installer.getBundleLocation("test.bug449484"));
+			testBundle.uninstall();
+			fail("Expected to fail to install bundle with restricted provide capabilities.");
+		} catch (BundleException e) {
+			// expected
+		}
+		equinox.stop();
+	}
+
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {
 		outputDir.mkdirs();
 

@@ -79,6 +79,7 @@ public class Storage {
 	private final MRUBundleFileList mruList;
 	private final FrameworkExtensionInstaller extensionInstaller;
 	private final List<String> cachedHeaderKeys = Arrays.asList(Constants.BUNDLE_SYMBOLICNAME, Constants.BUNDLE_ACTIVATIONPOLICY, "Service-Component"); //$NON-NLS-1$
+	private final boolean tolerateProvideEE;
 
 	public static Storage createStorage(EquinoxContainer container) throws IOException, BundleException {
 		Storage storage = new Storage(container);
@@ -95,6 +96,7 @@ public class Storage {
 		mruList = new MRUBundleFileList(getBundleFileLimit(container.getConfiguration()));
 		equinoxContainer = container;
 		extensionInstaller = new FrameworkExtensionInstaller(container.getConfiguration());
+		tolerateProvideEE = Boolean.parseBoolean(container.getConfiguration().getConfiguration(EquinoxConfiguration.PROP_TOLERATE_PROVIDE));
 
 		// we need to set the install path as soon as possible so we can determine
 		// the absolute location of install relative URLs
@@ -582,7 +584,7 @@ public class Storage {
 			}
 		}
 		if (generation.getBundleInfo().getBundleId() != 0) {
-			ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(mapHeaders);
+			ModuleRevisionBuilder builder = tolerateProvideEE ? OSGiManifestBuilderFactory.createBuilder(mapHeaders, null, null, "") : OSGiManifestBuilderFactory.createBuilder(mapHeaders); //$NON-NLS-1$
 			if ((builder.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 				for (ModuleRevisionBuilder.GenericInfo reqInfo : builder.getRequirements()) {
 					if (HostNamespace.HOST_NAMESPACE.equals(reqInfo.getNamespace())) {
