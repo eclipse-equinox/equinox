@@ -17,6 +17,13 @@
 
 struct GTK_PTRS gtk = { 1 }; /* initialize the first field "not_initialized" so we can tell when we've loaded the pointers */
 
+static _TCHAR* minVerMsg = _T_ECLIPSE("Starting from the Eclipse Mars (4.5) release, \nGTK+ versions below 2.18.0 are not supported.\n\nGTK+ version found is");
+static _TCHAR* minVerTitle = _T_ECLIPSE("Unsupported GTK+ 2 version found");
+static _TCHAR* gtkInitFail = _T_ECLIPSE("Unable to initialize GTK+\n");
+static int minGtkMajorVersion = 2;
+static int minGtkMinorVersion = 18;
+static int minGtkMicroVersion = 0;
+
 /* tables to help initialize the function pointers */
 /* functions from libgtk-x11-2.0 or libgtk-3.so.0*/
 static FN_TABLE gtkFunctions[] = {
@@ -78,7 +85,6 @@ static FN_TABLE x11Functions[] = {
 	{ NULL, NULL }
 };
 
-
 static int loadGtkSymbols( void * library, FN_TABLE * table) {
 	int i = 0;
 	void * fn;
@@ -112,23 +118,105 @@ int loadGtk() {
 		gdkLib = dlopen(GDK3_LIB, DLFLAGS);
 		gtkLib = dlopen(GTK3_LIB, DLFLAGS);
 	}
-	if (!gtkLib || !gdkLib) {
+	if (!gtkLib || !gdkLib) { //if GTK+ 2
 		gdkLib = dlopen(GDK_LIB, DLFLAGS);
 		gtkLib = dlopen(GTK_LIB, DLFLAGS);
 		setenv("SWT_GTK3","0",1);
+
+		const char * (*func)(int, int, int);
+		dlerror();
+
+		char *gtk_version_check_ok = getenv("ECLIPSE_GTK_OK");
+		if (gtk_version_check_ok == NULL) {
+			*(void**) (&func) = dlsym(gtkLib, "gtk_check_version");
+			if (dlerror() == NULL && func) {
+				const char *check = (*func)(minGtkMajorVersion, minGtkMinorVersion, minGtkMicroVersion);
+				if ((check != NULL) && (gtk.not_initialized == 1)) {
+					GtkWidget* dialog;
+					gint result;
+					int gtkMajorVersion, gtkMinorVersion, gtkMicroVersion;
+					void *gtkMajorPtr, *gtkMinorPtr, *gtkMicroPtr;
+
+					/* this code is applicable for GTK+ 2 only*/
+					dlerror();
+					gtkMajorPtr = dlsym(gtkLib, "gtk_major_version");
+					if ((dlerror() != NULL) || (gtkMajorPtr == NULL)) return -1;
+					gtkMajorVersion = *(int *)gtkMajorPtr;
+
+					gtkMinorPtr = dlsym(gtkLib, "gtk_minor_version");
+					if ((dlerror() != NULL) || (gtkMinorPtr == NULL)) return -1;
+					gtkMinorVersion = *(int *)gtkMinorPtr;
+
+					gtkMicroPtr = dlsym(gtkLib, "gtk_micro_version");
+					if ((dlerror() != NULL) || (gtkMicroPtr == NULL)) return -1;
+					gtkMicroVersion = *(int *)gtkMicroPtr;
+
+
+					printf("%s %d.%d.%d\n", minVerMsg, gtkMajorVersion, gtkMinorVersion, gtkMicroVersion);
+
+					objLib = dlopen(GOBJ_LIB, DLFLAGS);
+					pixLib = dlopen(PIXBUF_LIB, DLFLAGS);
+					x11Lib = dlopen(X11_LIB, DLFLAGS);
+
+					memset(&gtk, 0, sizeof(struct GTK_PTRS));
+
+					if ( gtkLib == NULL || loadGtkSymbols(gtkLib, gtkFunctions)  != 0) return -1;
+					if ( gdkLib == NULL || loadGtkSymbols(gdkLib, gdkFunctions)  != 0) return -1;
+					if ( pixLib == NULL || loadGtkSymbols(pixLib, pixFunctions)  != 0) return -1;
+					if ( objLib == NULL || loadGtkSymbols(objLib, gobjFunctions) != 0) return -1;
+					if ( x11Lib == NULL || loadGtkSymbols(x11Lib, x11Functions)  != 0) return -1;
+
+					/* Initialize GTK. */
+					if (gtk.gtk_set_locale) gtk.gtk_set_locale();
+					if (gtk.gtk_init_with_args) {
+						GError *error = NULL;
+							if (!gtk.gtk_init_with_args(0, NULL, NULL, NULL, NULL, &error)) {
+								printf("%s", gtkInitFail);
+								exit (1);
+							}
+					}
+					dialog = gtk.gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
+							GTK_MESSAGE_ERROR, GTK_BUTTONS_YES_NO,
+							"%s %d.%d.%d\nDo you want to continue with unsupported GTK+ version?", minVerMsg, gtkMajorVersion, gtkMinorVersion, gtkMicroVersion);
+					gtk.gtk_window_set_title((GtkWindow*)dialog, minVerTitle);
+					result = gtk.gtk_dialog_run((GtkDialog*)dialog);
+					switch (result) {
+						case GTK_RESPONSE_YES:
+							gtk.gtk_widget_destroy(dialog);
+							setenv("ECLIPSE_GTK_OK", "1", 1);
+							return 0;
+							break;
+						default:
+							gtk.gtk_widget_destroy(dialog);
+							dlclose(gdkLib);
+							dlclose(gtkLib);
+							gdkLib = gtkLib = NULL;
+							setenv("ECLIPSE_GTK_OK", "0", 1);
+							exit (1);
+					}
+				}
+			}
+		} else if (strcmp(gtk_version_check_ok, "0") == 0) {
+			exit (1);
+		} else {
+			setenv("ECLIPSE_GTK_OK", "1", 1);
+		}
+
 	}
+
+
 	objLib = dlopen(GOBJ_LIB, DLFLAGS);
 	pixLib = dlopen(PIXBUF_LIB, DLFLAGS);
 	x11Lib = dlopen(X11_LIB, DLFLAGS);
-	
+
 	/* initialize ptr struct to 0's */
 	memset(&gtk, 0, sizeof(struct GTK_PTRS));
-	
+
 	if ( gtkLib == NULL || loadGtkSymbols(gtkLib, gtkFunctions)  != 0) return -1;
 	if ( gdkLib == NULL || loadGtkSymbols(gdkLib, gdkFunctions)  != 0) return -1;
 	if ( pixLib == NULL || loadGtkSymbols(pixLib, pixFunctions)  != 0) return -1;
 	if ( objLib == NULL || loadGtkSymbols(objLib, gobjFunctions) != 0) return -1;
 	if ( x11Lib == NULL || loadGtkSymbols(x11Lib, x11Functions) != 0) return -1;
-	
+
 	return 0;
 }
