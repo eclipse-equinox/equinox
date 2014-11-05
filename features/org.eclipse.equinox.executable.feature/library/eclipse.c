@@ -486,6 +486,9 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
    		processDefaultAction(initialArgc, initialArgv);
    	}
 
+#ifndef _WIN32
+#ifndef MACOSX
+
 	if (gtkVersionString != NULL) {
 		int gtkVersion;
 		_stscanf(gtkVersionString, _T_ECLIPSE("%d"), &gtkVersion);
@@ -496,6 +499,8 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 			setenv("SWT_GTK3","1",1);
 		}
 	}
+#endif
+#endif
 
 	/* try to open the specified file in an already running eclipse */
 	/* on Mac we are only registering an event handler here, always do this */
