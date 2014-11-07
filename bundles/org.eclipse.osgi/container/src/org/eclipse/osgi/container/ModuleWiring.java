@@ -12,6 +12,7 @@ package org.eclipse.osgi.container;
 
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
 import org.eclipse.osgi.internal.container.InternalUtils;
 import org.osgi.framework.AdminPermission;
@@ -37,7 +38,7 @@ public final class ModuleWiring implements BundleWiring {
 	private volatile List<ModuleWire> providedWires;
 	private volatile List<ModuleWire> requiredWires;
 	private volatile boolean isValid = true;
-	private Set<String> dynamicMisses;
+	private final AtomicReference<Set<String>> dynamicMissRef = new AtomicReference<Set<String>>();
 
 	ModuleWiring(ModuleRevision revision, List<ModuleCapability> capabilities, List<ModuleRequirement> requirements, List<ModuleWire> providedWires, List<ModuleWire> requiredWires, Collection<String> substitutedPkgNames) {
 		super();
@@ -436,26 +437,24 @@ public final class ModuleWiring implements BundleWiring {
 	}
 
 	void addDynamicPackageMiss(String packageName) {
-		synchronized (monitor) {
-			if (dynamicMisses == null) {
-				dynamicMisses = new HashSet<String>(5);
-			}
-			dynamicMisses.add(packageName);
+		Set<String> misses = dynamicMissRef.get();
+		if (misses == null) {
+			dynamicMissRef.compareAndSet(null, Collections.synchronizedSet(new HashSet<String>()));
+			misses = dynamicMissRef.get();
 		}
+
+		misses.add(packageName);
 	}
 
 	boolean isDynamicPackageMiss(String packageName) {
-		synchronized (monitor) {
-			return dynamicMisses != null && dynamicMisses.contains(packageName);
-		}
+		Set<String> misses = dynamicMissRef.get();
+		return misses != null && misses.contains(packageName);
 	}
 
 	void removeDynamicPackageMisses(Collection<String> packageNames) {
-		synchronized (monitor) {
-			if (dynamicMisses == null) {
-				return;
-			}
-			dynamicMisses.removeAll(packageNames);
+		Set<String> misses = dynamicMissRef.get();
+		if (misses != null) {
+			misses.removeAll(packageNames);
 		}
 	}
 }
