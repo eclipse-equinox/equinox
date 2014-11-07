@@ -12,8 +12,10 @@ package org.eclipse.osgi.container;
 
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
+import org.eclipse.osgi.internal.container.AtomicLazyInitializer;
 import org.eclipse.osgi.internal.container.InternalUtils;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
@@ -27,17 +29,27 @@ import org.osgi.resource.*;
  * @since 3.10
  */
 public final class ModuleWiring implements BundleWiring {
+	class LoaderInitializer implements Callable<ModuleLoader> {
+		@Override
+		public ModuleLoader call() throws Exception {
+			if (!isValid) {
+				return null;
+			}
+			return getRevision().getRevisions().getContainer().adaptor.createModuleLoader(ModuleWiring.this);
+		}
+	}
+
 	private static final RuntimePermission GET_CLASSLOADER_PERM = new RuntimePermission("getClassLoader"); //$NON-NLS-1$
 	private static final String DYNAMICALLY_ADDED_IMPORT_DIRECTIVE = "x.dynamically.added"; //$NON-NLS-1$
 	private final ModuleRevision revision;
 	private volatile List<ModuleCapability> capabilities;
 	private volatile List<ModuleRequirement> requirements;
 	private final Collection<String> substitutedPkgNames;
-	private final Object monitor = new Object();
-	private ModuleLoader loader = null;
+	private final AtomicLazyInitializer<ModuleLoader> loader = new AtomicLazyInitializer<ModuleLoader>();
+	private final LoaderInitializer loaderInitializer = new LoaderInitializer();
 	private volatile List<ModuleWire> providedWires;
 	private volatile List<ModuleWire> requiredWires;
-	private volatile boolean isValid = true;
+	volatile boolean isValid = true;
 	private final AtomicReference<Set<String>> dynamicMissRef = new AtomicReference<Set<String>>();
 
 	ModuleWiring(ModuleRevision revision, List<ModuleCapability> capabilities, List<ModuleRequirement> requirements, List<ModuleWire> providedWires, List<ModuleWire> requiredWires, Collection<String> substitutedPkgNames) {
@@ -251,23 +263,14 @@ public final class ModuleWiring implements BundleWiring {
 	 * @return the module loader for this wiring.
 	 */
 	public ModuleLoader getModuleLoader() {
-		synchronized (monitor) {
-			if (loader == null) {
-				if (!isValid) {
-					return null;
-				}
-				loader = revision.getRevisions().getContainer().adaptor.createModuleLoader(this);
-			}
-			return loader;
-		}
+		return loader.getInitialized(loaderInitializer);
 
 	}
 
 	void loadFragments(Collection<ModuleRevision> fragments) {
-		synchronized (monitor) {
-			if (loader != null) {
-				loader.loadFragments(fragments);
-			}
+		ModuleLoader current = loader.get();
+		if (current != null) {
+			current.loadFragments(fragments);
 		}
 	}
 
@@ -351,21 +354,14 @@ public final class ModuleWiring implements BundleWiring {
 	}
 
 	private void invalidate0(boolean releaseLoader) {
-		ModuleLoader current;
-		synchronized (monitor) {
-			this.isValid = false;
-			current = loader;
-			if (releaseLoader) {
-				loader = null;
-			}
-		}
+		// set the isValid to false first
+		isValid = false;
+		ModuleLoader current = releaseLoader ? loader.getAndClear() : loader.get();
 		revision.getRevisions().getContainer().getAdaptor().invalidateWiring(this, current);
 	}
 
 	void validate() {
-		synchronized (monitor) {
-			this.isValid = true;
-		}
+		this.isValid = true;
 	}
 
 	boolean isSubtituted(ModuleCapability capability) {
