@@ -278,6 +278,13 @@ public class BundleLoader extends ModuleLoader {
 	}
 
 	public void close() {
+		if (policy != null) {
+			Module systemModule = container.getStorage().getModuleContainer().getModule(0);
+			BundleContext context = systemModule.getBundle().getBundleContext();
+			if (context != null) {
+				policy.close(context);
+			}
+		}
 		synchronized (classLoaderMonitor) {
 			if (classloader != null) {
 				classloader.close();
