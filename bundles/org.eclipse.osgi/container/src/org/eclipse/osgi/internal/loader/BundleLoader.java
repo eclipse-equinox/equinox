@@ -1025,8 +1025,7 @@ public class BundleLoader extends ModuleLoader {
 				ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(dynamicImportMap);
 				wiring.addDynamicImports(builder);
 			} catch (BundleException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 
 		}
