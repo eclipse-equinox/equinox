@@ -234,7 +234,7 @@ public abstract class ModuleContainerAdaptor {
 	 * module as well as for the module database.  Care must be taken not to introduce
 	 * deadlock.
 	 * @param moduleWiring the module wiring being invalidated
-	 * @param current the current module loader associated with the wiring
+	 * @param current the current module loader associated with the wiring, may be <code>null</code>.
 	 */
 	public void invalidateWiring(ModuleWiring moduleWiring, ModuleLoader current) {
 		// do nothing by default
