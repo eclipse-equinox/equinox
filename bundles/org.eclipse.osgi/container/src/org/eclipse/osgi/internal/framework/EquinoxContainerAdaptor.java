@@ -147,25 +147,24 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		if (current instanceof BundleLoader) {
 			BundleLoader bundleLoader = (BundleLoader) current;
 			bundleLoader.close();
-			long updatedTimestamp = storage.getModuleDatabase().getRevisionsTimestamp();
-			if (System.getSecurityManager() != null && updatedTimestamp != lastSecurityAdminFlush.getAndSet(updatedTimestamp)) {
-				storage.getSecurityAdmin().clearCaches();
-				List<Module> modules = storage.getModuleContainer().getModules();
-				for (Module module : modules) {
-					for (ModuleRevision revision : module.getRevisions().getModuleRevisions()) {
-						Generation generation = (Generation) revision.getRevisionInfo();
-						if (generation != null) {
-							ProtectionDomain domain = generation.getDomain();
-							if (domain != null) {
-								((BundlePermissions) domain.getPermissions()).clearPermissionCache();
-							}
+		}
+		long updatedTimestamp = storage.getModuleDatabase().getRevisionsTimestamp();
+		if (System.getSecurityManager() != null && updatedTimestamp != lastSecurityAdminFlush.getAndSet(updatedTimestamp)) {
+			storage.getSecurityAdmin().clearCaches();
+			List<Module> modules = storage.getModuleContainer().getModules();
+			for (Module module : modules) {
+				for (ModuleRevision revision : module.getRevisions().getModuleRevisions()) {
+					Generation generation = (Generation) revision.getRevisionInfo();
+					if (generation != null) {
+						ProtectionDomain domain = generation.getDomain();
+						if (domain != null) {
+							((BundlePermissions) domain.getPermissions()).clearPermissionCache();
 						}
 					}
 				}
 			}
 		}
 		clearManifestCache(moduleWiring);
-
 	}
 
 	private void clearManifestCache(ModuleWiring moduleWiring) {
