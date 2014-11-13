@@ -354,11 +354,17 @@ public interface IPath extends Cloneable {
 	/**
 	 * Returns a copy of this path with the given number of segments
 	 * removed from the beginning. The device id is preserved. 
-	 * The number must be greater or equal zero.
-	 * If the count is zero, this path is returned.
-	 * The resulting path will always be a relative path with respect
-	 * to this path.  If the number equals or exceeds the number
+	 * The count must be greater or equal zero.
+	 * <p>
+	 * If the count is zero, this path is returned. This is the only case where
+	 * the returned path can be absolute. Use {@link #makeRelative()} if necessary.
+	 * </p><p>
+	 * If the count is greater than zero, the resulting path will
+	 * always be a relative path.
+	 * </p><p>
+	 * If the count equals or exceeds the number
 	 * of segments in this path, an empty relative path is returned.
+	 * </p>
 	 *
 	 * @param count the number of segments to remove
 	 * @return the new path
