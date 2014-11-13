@@ -12,7 +12,6 @@
 package org.eclipse.equinox.http.servlet.tests;
 
 import java.io.IOException;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,7 +27,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.eclipse.equinox.http.servlet.ExtendedHttpService;
@@ -44,10 +42,11 @@ import org.eclipse.equinox.http.servlet.tests.util.BaseServletContextListener;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServletRequestAttributeListener;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServletRequestListener;
 import org.eclipse.equinox.http.servlet.tests.util.ServletRequestAdvisor;
-
+import org.junit.Assert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
@@ -59,7 +58,6 @@ import org.osgi.service.http.runtime.dto.ServletContextDTO;
 import org.osgi.service.http.runtime.dto.ServletDTO;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
-@SuppressWarnings("deprecation")
 public class ServletTest extends TestCase {
 
 	@Override
@@ -1636,6 +1634,108 @@ public class ServletTest extends TestCase {
 			uninstallBundle(bundle);
 		}
 		Assert.assertEquals(expected, actual);
+	}
+
+	private static final String PROTOTYPE = "prototype/";
+	private static final String CONFIGURE = "configure";
+	private static final String UNREGISTER = "unregister";
+	private static final String STATUS_PARAM = "servlet.init.status";
+	private static final String TEST_PROTOTYPE_NAME = "test.prototype.name";
+	public void testWBServletChangeInitParams() throws Exception{
+			String actual;
+
+			Map<String, String> params = new HashMap<String, String>();
+			params.put(TEST_PROTOTYPE_NAME, getName());
+			params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + getName());
+			params.put(STATUS_PARAM, getName());
+			actual = doRequest(CONFIGURE, params);
+			Assert.assertEquals(getName(), actual);
+			actual = requestAdvisor.request(getName());
+			Assert.assertEquals(getName(), actual);
+
+			// change the init param
+			params.put(STATUS_PARAM, "changed");
+			doRequest(CONFIGURE, params);
+			actual = requestAdvisor.request(getName());
+			Assert.assertEquals("changed", actual);
+	}
+
+	public void testWBServletChangePattern() throws Exception{
+		String actual;
+
+		Map<String, String> params = new HashMap<String, String>();
+		params.put(TEST_PROTOTYPE_NAME, getName());
+		params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + getName());
+		params.put(STATUS_PARAM, getName());
+		actual = doRequest(CONFIGURE, params);
+		Assert.assertEquals(getName(), actual);
+		actual = requestAdvisor.request(getName());
+		Assert.assertEquals(getName(), actual);
+
+		// change the pattern
+		params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/changed");
+		doRequest(CONFIGURE, params);
+		actual = requestAdvisor.request("changed");
+		Assert.assertEquals(getName(), actual);
+	}
+
+	public void testWBServletChangeRanking() throws Exception{
+		String actual;
+
+		// Configure two servlets with the second one registered ranking higher
+		Map<String, String> params1 = new HashMap<String, String>();
+		params1.put(TEST_PROTOTYPE_NAME, getName() + 1);
+		params1.put(Constants.SERVICE_RANKING, "1");
+		params1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + getName());
+		params1.put(STATUS_PARAM, getName() + 1);
+		actual = doRequest(CONFIGURE, params1);
+		Assert.assertEquals(getName() + 1, actual);
+
+		Map<String, String> params2 = new HashMap<String, String>();
+		params2.put(TEST_PROTOTYPE_NAME, getName() + 2);
+		params2.put(Constants.SERVICE_RANKING, "2");
+		params2.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + getName());
+		params2.put(STATUS_PARAM, getName() + 2);
+		actual = doRequest(CONFIGURE, params2);
+		Assert.assertEquals(getName() + 2, actual);
+
+		// Confirm the second registered (higher ranked) gets used
+		actual = requestAdvisor.request(getName());
+		Assert.assertEquals(getName() + 2, actual);
+
+		// change the ranking to use the first servlet registered
+		params2.put(Constants.SERVICE_RANKING, "0");
+		doRequest(CONFIGURE, params2);
+		actual = requestAdvisor.request(getName());
+		Assert.assertEquals(getName() + 1, actual);
+
+		// Unregister the first servlet should cause the second servlet to be used
+		actual = doRequest(UNREGISTER, Collections.singletonMap(TEST_PROTOTYPE_NAME, getName() + 1));
+		Assert.assertEquals(getName() + 1, actual);
+
+		// Confirm the second registered is used
+		actual = requestAdvisor.request(getName());
+		Assert.assertEquals(getName() + 2, actual);
+	}
+
+	private String doRequest(String action, Map<String, String> params) throws IOException {
+		StringBuilder requestInfo = new StringBuilder(PROTOTYPE);
+		requestInfo.append(action);
+		if (!params.isEmpty()) {
+			boolean firstParam = true;
+			for (Map.Entry<String, String> param : params.entrySet()) {
+				if (firstParam) {
+					requestInfo.append('?');
+					firstParam = false;
+				} else {
+					requestInfo.append('&');
+				}
+				requestInfo.append(param.getKey());
+				requestInfo.append('=');
+				requestInfo.append(param.getValue());
+			}
+		}
+		return requestAdvisor.request(requestInfo.toString());
 	}
 
 	private BundleContext getBundleContext() {

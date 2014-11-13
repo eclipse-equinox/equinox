@@ -10,8 +10,15 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.tests.bundle;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
+import javax.servlet.Servlet;
+
+import org.eclipse.equinox.http.servlet.tests.util.TestServletPrototype;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /*
  * The Bundle-Activator for the bundle. Ideally this class is kept as small as
@@ -33,6 +40,10 @@ public class Activator extends Object implements BundleActivator {
 
 	public void start(BundleContext bundleContext) throws Exception {
 		this.bundleContext = bundleContext;
+		Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+		serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/prototype/*");
+		TestServletPrototype testDriver = new TestServletPrototype(bundleContext);
+		bundleContext.registerService(Servlet.class, testDriver, serviceProps);
 	}
 	
 	public void stop(BundleContext bundleContext) throws Exception {
