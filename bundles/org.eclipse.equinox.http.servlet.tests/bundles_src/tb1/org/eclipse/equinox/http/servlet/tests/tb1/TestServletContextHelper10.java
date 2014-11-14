@@ -46,7 +46,7 @@ public class TestServletContextHelper10 extends AbstractTestServlet {
 
 		servletContextHelper = new ServletContextHelper(bundle) {};
 
-		service.registerServletContextHelper(servletContextHelper, bundle, new String[] {"a"}, "/a", null);
+		service.registerServletContextHelper(servletContextHelper, bundle, "a", "/a", null);
 		service.registerServlet(this, "S1", new String[] {regexAlias()}, null, false, null, "a");
 		service.registerFilter(f1, "F1", new String[] {regexAlias()}, null, null, false, 0, new Hashtable<String, String>(), "a");
 	}

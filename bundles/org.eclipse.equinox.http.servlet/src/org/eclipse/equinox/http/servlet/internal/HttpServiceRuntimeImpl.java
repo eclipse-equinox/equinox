@@ -93,11 +93,9 @@ public class HttpServiceRuntimeImpl
 			return result;
 		}
 
-		List<String> contextNames = StringPlus.from(
-			serviceReference.getProperty(
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
+		String contextName = (String) serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
 
-		if (contextNames.isEmpty()) {
+		if (contextName == null) {
 			parentServletContext.log(
 				"This context's property " +
 					HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME +
@@ -106,13 +104,10 @@ public class HttpServiceRuntimeImpl
 			return result;
 		}
 
-		for (String contextName : contextNames) {
-			if (registeredContextNames.contains(contextName)) {
-				parentServletContext.log(
-					"ContextName " + contextName + " is already in use. Ignoring!");
-
+		if (registeredContextNames.contains(contextName)) {
+			parentServletContext.log(
+				"ContextName " + contextName + " is already in use. Ignoring!");
 				return result;
-			}
 		}
 
 		String contextPath = (String)serviceReference.getProperty(
@@ -137,14 +132,14 @@ public class HttpServiceRuntimeImpl
 		properties.putAll(attributes);
 
 		result.set(addServletContextHelper(
-			serviceReference.getBundle(), servletContextHelper, contextNames,
+			serviceReference.getBundle(), servletContextHelper, contextName,
 			contextPath, serviceId, properties));
 		return result;
 	}
 
 	public ContextController addServletContextHelper(
 		Bundle bundle, ServletContextHelper servletContextHelper,
-		List<String> contextNames, String contextPath, long serviceId,
+		String contextName, String contextPath, long serviceId,
 		Map<String, Object> properties) {
 
 		if (servletContextHelper == null) {
@@ -156,7 +151,7 @@ public class HttpServiceRuntimeImpl
 				"ServletContextHelper is already registered.");
 		}
 
-		if ((contextNames == null) || (contextNames.size() < 1)) {
+		if (contextName == null) {
 			throw new NullContextNamesException();
 		}
 
@@ -165,13 +160,11 @@ public class HttpServiceRuntimeImpl
 		}
 
 		ContextController contextController = createContextController(
-			bundle, servletContextHelper, contextNames, contextPath, serviceId,
+			bundle, servletContextHelper, contextName, contextPath, serviceId,
 			properties);
 
 		if (contextController != null) {
-			for (String contextName : contextNames) {
-				registeredContextNames.add(contextName);
-			}
+			registeredContextNames.add(contextName);
 		}
 
 		controllerMap.putIfAbsent(contextController, servletContextHelper);
@@ -451,9 +444,7 @@ public class HttpServiceRuntimeImpl
 			contextControllers.remove(contextController);
 		}
 
-		for (String contextName : contextController.getContextNames()) {
-			registeredContextNames.remove(contextName);
-		}
+		registeredContextNames.remove(contextController.getContextName());
 
 		controllerMap.remove(contextController);
 
@@ -514,12 +505,12 @@ public class HttpServiceRuntimeImpl
 
 	private ContextController createContextController(
 		Bundle bundle, ServletContextHelper servletContextHelper,
-		List<String> contextNames, String contextPath, long serviceId,
+		String contextName, String contextPath, long serviceId,
 		Map<String, Object> initParams) {
 
 		ContextController contextController = new ContextController(
 			bundle, bundleContext, servletContextHelper, new ProxyContext(parentServletContext),
-			this, contextNames, contextPath, serviceId, registeredServlets,
+			this, contextName, contextPath, serviceId, registeredServlets,
 			initParams);
 
 		Set<ContextController> contextControllers = getContextControllerPathSet(

@@ -147,21 +147,20 @@ public class Activator
 			trackingContext, servletContext,
 			new UMDictionaryMap<String, Object>(serviceProperties));
 
+		proxyServlet.setHttpServiceRuntimeImpl(httpServiceRuntime);
+
+		// imperative API support;
+		// the http service must be registered first so we can get its service id
+		HttpServiceFactory httpServiceFactory = new HttpServiceFactory(
+			httpServiceRuntime);
+		ServiceRegistration<?> hsfRegistration = context.registerService(
+			HTTP_SERVICES_CLASSES, httpServiceFactory, serviceProperties);
+
+		serviceProperties.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ID_ATTRIBUTE, hsfRegistration.getReference().getProperty(Constants.SERVICE_ID));
 		ServiceRegistration<HttpServiceRuntime> hsrRegistration =
 			context.registerService(
 				HttpServiceRuntime.class, httpServiceRuntime,
 				serviceProperties);
-
-		proxyServlet.setHttpServiceRuntimeImpl(httpServiceRuntime);
-
-		// imperative API support
-
-		HttpServiceFactory httpServiceFactory = new HttpServiceFactory(
-			httpServiceRuntime);
-
-		ServiceRegistration<?> hsfRegistration = context.registerService(
-			HTTP_SERVICES_CLASSES, httpServiceFactory, serviceProperties);
-
 		return new HttpTuple(
 			proxyServlet, httpServiceFactory, hsfRegistration,
 			httpServiceRuntime, hsrRegistration);

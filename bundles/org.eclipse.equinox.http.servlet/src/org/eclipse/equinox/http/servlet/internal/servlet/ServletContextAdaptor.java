@@ -65,7 +65,7 @@ public class ServletContextAdaptor {
 		this.contextController = contextController;
 		this.proxyContext = contextController.getProxyContext();
 		this.servletContext = proxyContext.getServletContext();
-		this.contextName = contextController.getContextNames().get(0);
+		this.contextName = contextController.getContextName();
 		this.servletContextHelper = servletContextHelper;
 		this.eventListeners = eventListeners;
 		this.acc = acc;

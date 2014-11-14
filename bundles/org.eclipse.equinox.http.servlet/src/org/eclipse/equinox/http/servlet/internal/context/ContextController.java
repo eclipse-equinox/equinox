@@ -62,20 +62,20 @@ public class ContextController {
 	public ContextController(
 		Bundle bundle, BundleContext trackingContextParam, ServletContextHelper servletContextHelper,
 		ProxyContext proxyContext, HttpServiceRuntimeImpl httpServiceRuntime,
-		List<String> contextNames, String contextPath, long serviceId,
+		String contextName, String contextPath, long serviceId,
 		Set<Servlet> registeredServlets, Map<String, Object> attributes) {
 
 		this.bundle = bundle;
 		this.servletContextHelper = servletContextHelper;
 		this.proxyContext = proxyContext;
 		this.httpServiceRuntime = httpServiceRuntime;
-		this.contextNames = contextNames;
+		this.contextName = contextName;
 		this.contextPath = contextPath;
 		this.contextServiceId = serviceId;
 		this.registeredServlets = registeredServlets;
 
 		attributes = new HashMap<String, Object>(attributes);
-		attributes.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, contextNames);
+		attributes.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, contextName);
 		attributes.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
 		attributes.put(Constants.SERVICE_ID, serviceId);
 
@@ -460,7 +460,7 @@ public class ContextController {
 
 		eventListeners = null;
 		registeredServlets = null;
-		contextNames = null;
+		contextName = null;
 		proxyContext = null;
 
 		shutdown = true;
@@ -470,10 +470,10 @@ public class ContextController {
 		return bundle.adapt(BundleWiring.class).getClassLoader();
 	}
 
-	public List<String> getContextNames() {
+	public String getContextName() {
 		checkShutdown();
 
-		return contextNames;
+		return contextName;
 	}
 
 	public String getContextPath() {
@@ -669,7 +669,7 @@ public class ContextController {
 		servletContextDTO.contextName = servletContext.getServletContextName();
 		servletContextDTO.contextPath = servletContext.getContextPath();
 		servletContextDTO.initParams = initParams;
-		servletContextDTO.names = getContextNames().toArray(new String[0]);
+		servletContextDTO.name = getContextName();
 		servletContextDTO.serviceId = getServiceId();
 
 		// TODO
@@ -715,7 +715,7 @@ public class ContextController {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + '[' + getContextNames().get(0) + ']';
+		return getClass().getSimpleName() + '[' + getContextName() + ']';
 	}
 
 	private void addEnpointRegistrationsToRequestInfo(
@@ -1053,7 +1053,7 @@ public class ContextController {
 	private Map<String, String> initParams;
 	private final Bundle bundle;
 	private final BundleContext trackingContext;
-	private List<String> contextNames;
+	private String contextName;
 	private final String contextPath;
 	private final long contextServiceId;
 	private final Set<EndpointRegistration<?>> endpointRegistrations = new HashSet<EndpointRegistration<?>>();

@@ -20,6 +20,7 @@ import org.osgi.service.http.context.ServletContextHelper;
 
 /**
  * @since 1.1
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType
 public interface ExtendedHttpService extends HttpService {
@@ -133,9 +134,8 @@ public interface ExtendedHttpService extends HttpService {
 	/**
 	 * @param servletContextHelper the servletContextHelper object to register
 	 * @param bundle the bundle to which the servletContextHelper is attached
-	 * @param contextNames the contextNames to use for the servletContextHelper
-	 *        registration, the first one in the list is considered the official
-	 *        name and the others are aliases (at least 1 required)
+	 * @param contextName the context name to use for the servletContextHelper
+	 *        registration.
 	 * @param contextPath optional property for defining an additional context
 	 *        path for the context.
 	 * @param initparams initialization arguments for the servlet context helper
@@ -149,7 +149,7 @@ public interface ExtendedHttpService extends HttpService {
 	 */
 	public void registerServletContextHelper(
 			ServletContextHelper servletContextHelper, Bundle bundle,
-			String[] contextNames, String contextPath,
+			String contextName, String contextPath,
 			Map<String, String> initparams)
 		throws ServletException;
 

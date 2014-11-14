@@ -784,7 +784,7 @@ public class ServletTest extends TestCase {
 			ServletContextDTO servletContextDTO = servletContextDTOs[0];
 
 			Assert.assertNotNull(servletContextDTO.contextName);
-			Assert.assertTrue(servletContextDTO.names.length > 0);
+			Assert.assertNotNull(servletContextDTO.name);
 		}
 		finally {
 			uninstallBundle(bundle);
@@ -1204,7 +1204,7 @@ public class ServletTest extends TestCase {
 
 		try {
 			extendedHttpService.registerServletContextHelper(
-				servletContextHelper, bundle, new String[] {"a"}, null, null);
+				servletContextHelper, bundle, "a", null, null);
 		}
 		catch (Exception e) {
 			Assert.fail();
@@ -1224,7 +1224,7 @@ public class ServletTest extends TestCase {
 
 		try {
 			extendedHttpService.registerServletContextHelper(
-				servletContextHelper, bundle, new String[] {"a"}, null, null);
+				servletContextHelper, bundle, "a", null, null);
 
 			extendedHttpService.unregisterServletContextHelper(
 				servletContextHelper);
@@ -1275,7 +1275,7 @@ public class ServletTest extends TestCase {
 
 		try {
 			extendedHttpService.registerServletContextHelper(
-				servletContextHelper, bundle, new String[] {"a"}, null, null);
+				servletContextHelper, bundle, "a", null, null);
 
 			extendedHttpService.registerServlet(
 				s1, "S1", new String[] {"/s1"}, null, false, null, "a");
@@ -1302,7 +1302,7 @@ public class ServletTest extends TestCase {
 
 		try {
 			extendedHttpService.registerServletContextHelper(
-				servletContextHelper, bundle, new String[] {"a"}, null, null);
+				servletContextHelper, bundle, "a", null, null);
 
 			extendedHttpService.registerServlet(
 				s1, "S1", new String[] {"/s1"}, null, false, null, "a");
@@ -1329,7 +1329,7 @@ public class ServletTest extends TestCase {
 
 		try {
 			extendedHttpService.registerServletContextHelper(
-				servletContextHelper, bundle, new String[] {"a"}, "/a", null);
+				servletContextHelper, bundle, "a", "/a", null);
 
 			extendedHttpService.registerServlet(
 				s1, "S1", new String[] {"/s1"}, null, false, null, "a");
@@ -1359,7 +1359,7 @@ public class ServletTest extends TestCase {
 
 		try {
 			extendedHttpService.registerServletContextHelper(
-				servletContextHelper, bundle, new String[] {"a"}, "/a", null);
+				servletContextHelper, bundle, "a", "/a", null);
 
 			extendedHttpService.registerServlet(
 				s1, "S1", new String[] {"/s"}, null, false, null, null);
@@ -1442,7 +1442,7 @@ public class ServletTest extends TestCase {
 
 		try{
 			extendedHttpService.registerServletContextHelper(
-				servletContextHelper, bundle, new String[] {"a"}, "/a", null);
+				servletContextHelper, bundle, "a", "/a", null);
 
 			BaseServletContextListener scl1 =
 				new BaseServletContextListener();
@@ -1469,7 +1469,7 @@ public class ServletTest extends TestCase {
 
 		try {
 			extendedHttpService.registerServletContextHelper(
-				servletContextHelper, bundle, new String[] {"a"}, "/a", null);
+				servletContextHelper, bundle, "a", "/a", null);
 
 			extendedHttpService.registerListener(scl1, "a");
 

@@ -26,7 +26,6 @@ import org.eclipse.equinox.http.servlet.internal.registration.*;
 import org.eclipse.equinox.http.servlet.internal.registration.FilterRegistration;
 import org.eclipse.equinox.http.servlet.internal.registration.Registration;
 import org.eclipse.equinox.http.servlet.internal.registration.ServletRegistration;
-import org.eclipse.equinox.http.servlet.internal.util.StringPlus;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.*;
 import org.osgi.service.http.context.ServletContextHelper;
@@ -267,7 +266,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 	public synchronized void registerServletContextHelper(
 			ServletContextHelper servletContextHelper, Bundle bundle,
-			String[] contextNames, String contextPath,
+			String contextName, String contextPath,
 			Map<String, String> initparams)
 		throws ServletException {
 
@@ -289,7 +288,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 		ContextController contextController =
 			httpServiceRuntime.addServletContextHelper(
-				bundle, servletContextHelper, StringPlus.from(contextNames),
+				bundle, servletContextHelper, contextName,
 				contextPath, legacyServiceIdGenerator.decrementAndGet(),
 				properties);
 
@@ -643,7 +642,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 		contextController = httpServiceRuntime.addServletContextHelper(
 			bundle, servletContextHelper,
-			Collections.singletonList(calculatedContextSelector),
+			calculatedContextSelector,
 			null, legacyServiceIdGenerator.decrementAndGet(),
 			httpServiceRuntime.getAttributes());
 
