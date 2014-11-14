@@ -303,7 +303,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	public synchronized void unregister(String alias) {
 		checkShutdown();
 
-		EndpointRegistration<?> endpointRegistration = null;
+		boolean foundEndpoint = false;
 
 		for (HttpContext httpContext : contextMap.keySet()) {
 			ContextController contextController = getContextController(
@@ -312,10 +312,11 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 			Map<Object, Registration<?, ?>> contextRegistrations =
 				getContextRegistrations(contextController);
 
-			endpointRegistration =
+			EndpointRegistration<?> endpointRegistration =
 				(EndpointRegistration<?>)contextRegistrations.remove(alias);
 
 			if (endpointRegistration != null) {
+				foundEndpoint = true;
 				for (String pattern : endpointRegistration.getPatterns()) {
 					contextRegistrations.remove(pattern);
 				}
@@ -324,7 +325,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 			}
 		}
 
-		if (endpointRegistration == null) {
+		if (!foundEndpoint) {
 			throw new IllegalArgumentException("Alias not found: " + alias);
 		}
 	}
