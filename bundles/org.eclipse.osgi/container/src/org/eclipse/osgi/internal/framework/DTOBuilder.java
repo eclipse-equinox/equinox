@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,19 +11,18 @@
 
 package org.eclipse.osgi.internal.framework;
 
-import org.osgi.framework.dto.*;
-
-import org.osgi.framework.startlevel.dto.BundleStartLevelDTO;
-import org.osgi.framework.startlevel.dto.FrameworkStartLevelDTO;
-import org.osgi.framework.wiring.dto.*;
-import org.osgi.resource.dto.*;
 import java.lang.reflect.Array;
 import java.util.*;
 import org.osgi.dto.DTO;
 import org.osgi.framework.*;
+import org.osgi.framework.dto.*;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
+import org.osgi.framework.startlevel.dto.BundleStartLevelDTO;
+import org.osgi.framework.startlevel.dto.FrameworkStartLevelDTO;
 import org.osgi.framework.wiring.*;
+import org.osgi.framework.wiring.dto.*;
+import org.osgi.resource.dto.*;
 
 public class DTOBuilder {
 	private final Map<BundleRevision, BundleRevisionDTO> resources;
@@ -364,7 +363,10 @@ public class DTOBuilder {
 	}
 
 	public static ServiceReferenceDTO[] newArrayServiceReferenceDTO(ServiceReference<?>[] references) {
-		final int length = (references == null) ? 0 : references.length;
+		if (references == null) {
+			return null;
+		}
+		final int length = references.length;
 		List<ServiceReferenceDTO> refDTOs = new ArrayList<ServiceReferenceDTO>(length);
 		for (int i = 0; i < length; i++) {
 			ServiceReferenceDTO dto = getServiceReferenceDTO(references[i]);
