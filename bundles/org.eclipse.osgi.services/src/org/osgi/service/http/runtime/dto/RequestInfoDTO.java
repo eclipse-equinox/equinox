@@ -31,30 +31,30 @@ public class RequestInfoDTO extends DTO {
 	public String				path;
 
 	/**
-	 * The service id of the {@code ServletContext} for this request.
+	 * The service id of the servlet context processing the request represented
+	 * by this DTO.
 	 */
 	public long		servletContextId;
 	
 	/**
-	 * The filters processing this request.
+	 * The servlet filters processing this request. If no servlet filters are
+	 * called for processing this request, an empty array is returned.
 	 */
 	public FilterDTO[] filterDTOs;
 	
 	/**
-	 * The servlet processing this request. 
-	 * If the request is processed by a servlet, this field
-	 * points to the DTO of the servlet. If the request is
-	 * processed by another type of component like a resource, this
-	 * field is null.
+	 * The servlet processing this request. If the request is processed by a
+	 * servlet, this field points to the DTO of the servlet. If the request is
+	 * processed by another type of component like a resource, this field is
+	 * {@code null}.
 	 */
 	public ServletDTO servletDTO;
 
 	/**
-	 * The resource processing this request. 
-	 * If the request is processed by a resource, this field
-	 * points to the DTO of the resource. If the request is
-	 * processed by another type of component like a servlet, this
-	 * field is null.
+	 * The resource processing this request. If the request is processed by a
+	 * resource, this field points to the DTO of the resource. If the request is
+	 * processed by another type of component like a servlet, this field is
+	 * {@code null}.
 	 */
 	public ResourceDTO resourceDTO;
 }

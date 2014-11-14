@@ -28,17 +28,17 @@ public final class HttpServiceRuntimeConstants {
 	}
 
 	/**
-	 * Http service runtime registration property specifying the endpoints upon
-	 * which the Http service runtime is listening.
+	 * Http Runtime Service registration property specifying the endpoints upon
+	 * which the Http Service Runtime is listening.
 	 * 
 	 * <p>
 	 * An endpoint value is a URL or a relative path, to which the Http service
 	 * runtime is listening. For example, {@code http://192.168.1.10:8080/} or
 	 * {@code /myapp/}. A relative path may be used if the scheme and authority
 	 * parts of the URL are not known, e.g. in a bridged Http Service
-	 * implementation. If the Http Service implementation is serving the root context and
-	 * neither scheme nor authority is known, the value of the property is "/".
-	 * Both, a URL and a relative path, must end with a slash.
+	 * implementation. If the Http Service implementation is serving the root
+	 * context and neither scheme nor authority is known, the value of the
+	 * property is "/". Both, a URL and a relative path, must end with a slash.
 	 * <p>
 	 * An Http Service Runtime can be listening on multiple endpoints.
 	 * 
@@ -47,4 +47,18 @@ public final class HttpServiceRuntimeConstants {
 	 * {@code String[]}, or {@code Collection<String>}.
 	 */
 	public static final String	HTTP_SERVICE_ENDPOINT_ATTRIBUTE			= "osgi.http.endpoint";
+
+	/**
+	 * Http Runtime Service registration property to associate the Http Runtime
+	 * Service with a Http Service implementation.
+	 * 
+	 * <p>
+	 * If this Http Whiteboard implementation also implements the Http Service
+	 * Specification this property is set to the {@code service.id} of the
+	 * {@code HttpService} provided by this implementation.
+	 * 
+	 * <p>
+	 * The value of this attribute must be of type {@code Integer}.
+	 */
+	public static final String	HTTP_SERVICE_ID_ATTRIBUTE		= "osgi.http.service.id";
 }
