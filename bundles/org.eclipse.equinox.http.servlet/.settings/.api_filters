@@ -70,12 +70,6 @@
         <filter id="403804204">
             <message_arguments>
                 <message_argument value="org.eclipse.equinox.http.servlet.ExtendedHttpService"/>
-                <message_argument value="unregisterServlet(Servlet)"/>
-            </message_arguments>
-        </filter>
-        <filter id="403804204">
-            <message_arguments>
-                <message_argument value="org.eclipse.equinox.http.servlet.ExtendedHttpService"/>
                 <message_argument value="unregisterServlet(Servlet, String)"/>
             </message_arguments>
         </filter>
@@ -83,6 +77,11 @@
             <message_arguments>
                 <message_argument value="org.eclipse.equinox.http.servlet.ExtendedHttpService"/>
                 <message_argument value="unregisterServletContextHelper(ServletContextHelper)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Add restriction for the provider type" id="403853384">
+            <message_arguments>
+                <message_argument value="org.eclipse.equinox.http.servlet.ExtendedHttpService"/>
             </message_arguments>
         </filter>
     </resource>
