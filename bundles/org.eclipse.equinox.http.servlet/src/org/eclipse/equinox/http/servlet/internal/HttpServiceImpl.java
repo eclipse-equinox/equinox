@@ -133,7 +133,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 		ListenerRegistration listenerRegistration =
 			contextController.addListenerRegistration(
-				eventListener, legacyServiceIdGenerator.decrementAndGet());
+				new ServiceHolder<EventListener>(eventListener), legacyServiceIdGenerator.decrementAndGet());
 
 		contextRegistrations.put(eventListener, listenerRegistration);
 	}

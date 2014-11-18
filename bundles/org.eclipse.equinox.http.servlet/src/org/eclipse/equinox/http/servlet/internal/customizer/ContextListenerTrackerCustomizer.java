@@ -12,9 +12,11 @@
 package org.eclipse.equinox.http.servlet.internal.customizer;
 
 import java.util.EventListener;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
+import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
 import org.eclipse.equinox.http.servlet.internal.registration.ListenerRegistration;
 import org.osgi.framework.*;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
@@ -23,7 +25,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  * @author Raymond Augé
  */
 public class ContextListenerTrackerCustomizer
-	extends RegistrationServiceTrackerCustomizer<EventListener, ListenerRegistration> {
+	extends RegistrationServiceTrackerCustomizer<EventListener,  AtomicReference<ListenerRegistration>> {
 
 	public ContextListenerTrackerCustomizer(
 		BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime,
@@ -35,54 +37,59 @@ public class ContextListenerTrackerCustomizer
 	}
 
 	@Override
-	public ListenerRegistration addingService(
+	public AtomicReference<ListenerRegistration> addingService(
 		ServiceReference<EventListener> serviceReference) {
 
+		AtomicReference<ListenerRegistration> result = new AtomicReference<ListenerRegistration>();
 		if (!httpServiceRuntime.matches(serviceReference)) {
-			// TODO no match runtime
-
-			return null;
+			return result;
 		}
 
 		String contextSelector = (String)serviceReference.getProperty(
 			HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
 
 		if (!contextController.matches(contextSelector)) {
-			return null;
+			return result;
 		}
 
-		Long serviceId = (Long)serviceReference.getProperty(
-			Constants.SERVICE_ID);
-		EventListener eventListener = bundleContext.getService(
-			serviceReference);
 
+		ServiceHolder<EventListener> listenerHolder = new ServiceHolder<EventListener>(bundleContext.getServiceObjects(serviceReference));
+		Long serviceId = (Long)serviceReference.getProperty(Constants.SERVICE_ID);
 		try {
-			return contextController.addListenerRegistration(
-				eventListener, serviceId.longValue());
+			result.set(contextController.addListenerRegistration(
+				listenerHolder, serviceId.longValue()));
 		}
 		catch (ServletException se) {
 			httpServiceRuntime.log(se.getMessage(), se);
+		} finally {
+			if (result.get() == null) {
+				listenerHolder.release();
+			}
 		}
 
-		return null;
+		return result;
 	}
 
 	@Override
 	public void
 		modifiedService(
 			ServiceReference<EventListener> serviceReference,
-			ListenerRegistration listenerRegistration) {
+			AtomicReference<ListenerRegistration> listenerRegistration) {
+		removedService(serviceReference, listenerRegistration);
+		addingService(serviceReference);
 	}
 
 	@Override
 	public void
 		removedService(
 			ServiceReference<EventListener> serviceReference,
-			ListenerRegistration listenerRegistration) {
+			AtomicReference<ListenerRegistration> listenerReference) {
 
-		bundleContext.ungetService(serviceReference);
-
-		listenerRegistration.destroy();
+		ListenerRegistration listenerRegistration = listenerReference.get();
+		if (listenerRegistration != null) {
+			// Destroy now ungets the object we are using
+			listenerRegistration.destroy();
+		}
 	}
 
 	private ContextController contextController;

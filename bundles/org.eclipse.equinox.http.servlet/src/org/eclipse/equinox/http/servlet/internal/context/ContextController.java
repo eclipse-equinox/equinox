@@ -91,7 +91,7 @@ public class ContextController {
 
 		trackingContext = trackingContextParam;
 
-		listenerServiceTracker = new ServiceTracker<EventListener, ListenerRegistration>(
+		listenerServiceTracker = new ServiceTracker<EventListener, AtomicReference<ListenerRegistration>>(
 			trackingContext, EventListener.class,
 			new ContextListenerTrackerCustomizer(
 				trackingContext, httpServiceRuntime, this));
@@ -214,11 +214,12 @@ public class ContextController {
 	}
 
 	public ListenerRegistration addListenerRegistration(
-			EventListener eventListener, long serviceId)
+			ServiceHolder<EventListener> listenerHolder, long serviceId)
 		throws ServletException {
 
 		checkShutdown();
 
+		EventListener eventListener = listenerHolder.get();
 		List<Class<? extends EventListener>> classes = getListenerClasses(
 			eventListener);
 
@@ -246,7 +247,7 @@ public class ContextController {
 		ServletContext servletContext = createServletContext(
 			bundle, curServletContextHelper);
 		ListenerRegistration listenerRegistration = new ListenerRegistration(
-			eventListener, classes, listenerDTO, servletContext,
+			listenerHolder, classes, listenerDTO, servletContext,
 			curServletContextHelper, this);
 
 		if (classes.contains(ServletContextListener.class)) {
@@ -1061,7 +1062,7 @@ public class ContextController {
 	private final Set<FilterRegistration> filterRegistrations = new HashSet<FilterRegistration>();
 	private ServiceTracker<Filter, AtomicReference<FilterRegistration>> filterServiceTracker;
 	private HttpServiceRuntimeImpl httpServiceRuntime;
-	private ServiceTracker<EventListener, ListenerRegistration> listenerServiceTracker;
+	private ServiceTracker<EventListener, AtomicReference<ListenerRegistration>> listenerServiceTracker;
 	private final Set<ListenerRegistration> listenerRegistrations = new HashSet<ListenerRegistration>();
 	private ProxyContext proxyContext;
 	private Set<Servlet> registeredServlets;

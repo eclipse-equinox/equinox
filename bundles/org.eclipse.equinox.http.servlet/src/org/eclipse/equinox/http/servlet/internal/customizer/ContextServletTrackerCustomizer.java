@@ -90,6 +90,10 @@ public class ContextServletTrackerCustomizer
 		}
 		catch (ServletException se) {
 			httpServiceRuntime.log(se.getMessage(), se);
+		} finally {
+			if (result.get() == null) {
+				servletHolder.release();
+			}
 		}
 
 		// TODO error?

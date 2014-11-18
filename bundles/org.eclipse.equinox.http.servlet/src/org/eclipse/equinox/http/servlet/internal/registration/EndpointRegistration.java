@@ -56,11 +56,11 @@ public abstract class EndpointRegistration<D extends DTO>
 
 			super.destroy();
 			getT().destroy();
-			servletHolder.release();
 		}
 		finally {
 			destroyContextAttributes();
 			Thread.currentThread().setContextClassLoader(original);
+			servletHolder.release();
 		}
 	}
 

@@ -64,11 +64,11 @@ public class FilterRegistration
 			contextController.getFilterRegistrations().remove(this);
 			super.destroy();
 			getT().destroy();
-			filterHolder.release();
 		}
 		finally {
 			destroyContextAttributes();
 			Thread.currentThread().setContextClassLoader(original);
+			filterHolder.release();
 		}
 	}
 

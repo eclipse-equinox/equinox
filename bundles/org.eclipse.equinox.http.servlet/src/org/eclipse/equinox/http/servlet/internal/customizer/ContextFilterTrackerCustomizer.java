@@ -101,6 +101,10 @@ public class ContextFilterTrackerCustomizer
 		}
 		catch (ServletException se) {
 			httpServiceRuntime.log(se.getMessage(), se);
+		} finally {
+			if (result.get() == null) {
+				filterHolder.release();
+			}
 		}
 
 		// TODO error?

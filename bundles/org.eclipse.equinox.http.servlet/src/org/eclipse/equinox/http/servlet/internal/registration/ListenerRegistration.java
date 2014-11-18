@@ -16,6 +16,7 @@ import java.util.EventListener;
 import java.util.List;
 import javax.servlet.*;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
+import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.dto.ListenerDTO;
 
@@ -24,6 +25,7 @@ import org.osgi.service.http.runtime.dto.ListenerDTO;
  */
 public class ListenerRegistration extends Registration<EventListener, ListenerDTO> {
 
+	private final ServiceHolder<EventListener> listenerHolder;
 	private final List<Class<? extends EventListener>> classes;
 	private final EventListener proxy;
 	private final ServletContext servletContext;
@@ -32,13 +34,13 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 	private ClassLoader classLoader;
 
 	public ListenerRegistration(
-		EventListener eventListener, List<Class<? extends EventListener>> classes,
+		ServiceHolder<EventListener> listenerHolder, List<Class<? extends EventListener>> classes,
 		ListenerDTO listenerDTO, ServletContext servletContext,
 		ServletContextHelper servletContextHelper,
 		ContextController contextController) {
 
-		super(eventListener, listenerDTO);
-
+		super(listenerHolder.get(), listenerDTO);
+		this.listenerHolder = listenerHolder;
 		this.classes = classes;
 		this.servletContext = servletContext;
 		this.servletContextHelper = servletContextHelper;
@@ -76,6 +78,7 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 		finally {
 			destroyContextAttributes();
 			Thread.currentThread().setContextClassLoader(original);
+			listenerHolder.release();
 		}
 	}
 
