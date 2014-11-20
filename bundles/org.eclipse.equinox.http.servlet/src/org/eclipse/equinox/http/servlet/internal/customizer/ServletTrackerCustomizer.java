@@ -50,7 +50,7 @@ public class ServletTrackerCustomizer
 		if (contextController == null) {
 			// TODO no match context
 			// What if it matches later?
-			return null;
+			return serviceReference;
 		}
 
 		return serviceReference;
