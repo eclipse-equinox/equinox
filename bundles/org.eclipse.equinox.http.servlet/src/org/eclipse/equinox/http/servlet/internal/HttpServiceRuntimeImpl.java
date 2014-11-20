@@ -21,7 +21,7 @@ import javax.servlet.*;
 import javax.servlet.Filter;
 import javax.servlet.http.*;
 import org.eclipse.equinox.http.servlet.internal.context.*;
-import org.eclipse.equinox.http.servlet.internal.customizer.*;
+import org.eclipse.equinox.http.servlet.internal.customizer.ContextControllerManager;
 import org.eclipse.equinox.http.servlet.internal.error.NullContextNamesException;
 import org.eclipse.equinox.http.servlet.internal.error.NullServletContextHelperException;
 import org.eclipse.equinox.http.servlet.internal.servlet.*;
@@ -61,25 +61,25 @@ public class HttpServiceRuntimeImpl
 		listenerServiceTracker =
 			new ServiceTracker<EventListener, ServiceReference<EventListener>>(
 				bundleContext, EventListener.class,
-				new ListenerTrackerCustomizer(bundleContext, this));
+				new ContextControllerManager<EventListener>(this));
 
 		listenerServiceTracker.open();
 
 		filterServiceTracker = new ServiceTracker<Filter, ServiceReference<Filter>>(
 			bundleContext, getFilteFilter(),
-			new FilterTrackerCustomizer(bundleContext, this));
+			new ContextControllerManager<Filter>(this));
 
 		filterServiceTracker.open();
 
 		servletServiceTracker = new ServiceTracker<Servlet, ServiceReference<Servlet>>(
 			bundleContext, getServletFilter(),
-			new ServletTrackerCustomizer(bundleContext, this));
+			new ContextControllerManager<Servlet>(this));
 
 		servletServiceTracker.open();
 
 		resourceServiceTracker = new ServiceTracker<Servlet, ServiceReference<Servlet>>(
 			bundleContext, getResourceFilter(),
-			new ResourceTrackerCustomizer(bundleContext, this));
+			new ContextControllerManager<Servlet>(this));
 
 		resourceServiceTracker.open();
 	}
