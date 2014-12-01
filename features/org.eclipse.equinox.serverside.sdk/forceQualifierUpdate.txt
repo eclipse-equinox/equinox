@@ -6,4 +6,5 @@ Bug 416718 - We should update our version of Jetty for SR2
 Bug 436039 - Hard to explain build failure in I20140528-0115
 Bug 436758 - Installing a bundle that requires Java 7 when running 6 with -clean cannot recover
 Bug 448567 - Update Orbit for M3
+Bug 453678 - Upgrade to Jetty 9.2.5 for Mars M4, and 9.3 for Mars M5
 
