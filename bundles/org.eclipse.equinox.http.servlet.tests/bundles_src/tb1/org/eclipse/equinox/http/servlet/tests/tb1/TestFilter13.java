@@ -13,17 +13,22 @@ package org.eclipse.equinox.http.servlet.tests.tb1;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 import javax.servlet.Filter;
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
-import org.eclipse.equinox.http.servlet.ExtendedHttpService;
 import org.eclipse.equinox.http.servlet.tests.tb.AbstractTestServlet;
 import org.eclipse.equinox.http.servlet.tests.util.BaseFilter;
-
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /*
  * This servlet is registered with the HttpService via the immediate DS
@@ -31,20 +36,24 @@ import org.osgi.service.http.NamespaceException;
  */
 public class TestFilter13 extends AbstractTestServlet {
 	private static final long serialVersionUID = 1L;
-
+	private final Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 	@Override
 	public void activate(ComponentContext componentContext) throws ServletException, NamespaceException {
-		ExtendedHttpService service = (ExtendedHttpService)getHttpService();
-		service.registerServlet(extensionAlias(), this, null, null);
-		service.registerFilter(
-			f1, "F1", new String[] {extensionAlias()}, null, null, false, 0, null, null);
+		Dictionary<String, String> servletProps = new Hashtable<String, String>();
+		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, extensionAlias());
+		registrations.add(componentContext.getBundleContext().registerService(Servlet.class, this, servletProps));
+
+		Dictionary<String, String> filterProps = new Hashtable<String, String>();
+		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
+		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, extensionAlias());
+		registrations.add(componentContext.getBundleContext().registerService(Filter.class, f1, filterProps));
 	}
 
 	@Override
 	public void deactivate() {
-		ExtendedHttpService service = (ExtendedHttpService)getHttpService();
-		service.unregister(extensionAlias(), null);
-		service.unregisterFilter(f1, null);
+		for (ServiceRegistration<?> registration : registrations) {
+			registration.unregister();
+		}
 	}
 
 	@Override

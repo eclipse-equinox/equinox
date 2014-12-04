@@ -12,8 +12,12 @@
 package org.eclipse.equinox.http.servlet.tests;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Dictionary;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -48,6 +52,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.service.http.context.ServletContextHelper;
@@ -444,304 +449,6 @@ public class ServletTest extends TestCase {
 		Assert.fail();
 	}
 
-	public void test_Registration1_1() throws Exception {
-		String expected = "Patterns or servletNames must contain a value.";
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			extendedHttpService.registerServlet(
-				new BaseServlet(), "S1", null, null, false, null, null);
-		}
-		catch(IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Registration2_1() throws Exception {
-		String pattern = "blah";
-		String expected = "Invalid pattern '" + pattern + "'";
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			extendedHttpService.registerServlet(
-				new BaseServlet(), "S1", new String[] {pattern}, null, false, null, null);
-		}
-		catch(IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Registration3_1() throws Exception {
-		String pattern = "/blah/";
-		String expected = "Invalid pattern '" + pattern + "'";
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			extendedHttpService.registerServlet(
-				new BaseServlet(), "S1", new String[] {pattern}, null, false, null, null);
-		}
-		catch(IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Registration4_1() throws Exception {
-		String pattern = "/blah";
-		String expected = "Pattern already in use: " + pattern;
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			extendedHttpService.registerServlet(
-				new BaseServlet(), "S1", new String[] {pattern}, null, false, null, null);
-			extendedHttpService.registerServlet(
-				new BaseServlet(), "S1", new String[] {pattern}, null, false, null, null);
-		}
-		catch(NamespaceException ne) {
-			Assert.assertEquals(expected, ne.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Registration5_1() throws Exception {
-		String pattern = "/blah";
-		String expected = "Servlet cannot be null";
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			extendedHttpService.registerServlet(
-				null, "S1", new String[] {pattern}, null, false, null, null);
-		}
-		catch(IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Registration6_1() throws Exception {
-		String expected = "Servlet has already been registered:";
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			Servlet servlet = new BaseServlet();
-
-			extendedHttpService.registerServlet(
-				servlet, "S1", new String[] {"/blah1"}, null, false, null, null);
-			extendedHttpService.registerServlet(
-				servlet, "S1", new String[] {"/blah2"}, null, false, null, null);
-		}
-		catch(ServletException se) {
-			Assert.assertTrue(se.getMessage().startsWith(expected));
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Registration7() throws Exception {
-		String expected = "Filter cannot be null";
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			extendedHttpService.registerFilter("/*", null, new Hashtable<String, String>(), null);
-		}
-		catch(IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Registration7_1() throws Exception {
-		String expected = "Filter cannot be null";
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			extendedHttpService.registerFilter(
-				null, "F1", new String[] {"/*"}, null, null, false, 0, null, null);
-		}
-		catch(IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Registration7_2() throws Exception {
-		String expected = "Patterns or servletNames must contain a value.";
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			Filter f1 = new EmptyFilter();
-
-			extendedHttpService.registerFilter(
-				f1, "F1", null, null, null, false, 0, null, null);
-		}
-		catch(IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Registration7_3() throws Exception {
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			Filter f1 = new EmptyFilter();
-
-			extendedHttpService.registerFilter(
-				f1, "F1", null, new String[] {"blah"}, null, false, 0, null, null);
-		}
-		catch(Exception e) {
-			Assert.fail();
-		}
-	}
-
-	public void test_Registration7_4() throws Exception {
-		String dispatcher = "BAD";
-		String expected = "Invalid dispatcher '" + dispatcher + "'";
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			Filter f1 = new EmptyFilter();
-
-			extendedHttpService.registerFilter(
-				f1, "F1", new String[] {"/*"}, null, new String[] {dispatcher}, false, 0, null, null);
-		}
-		catch(IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Registration7_5() throws Exception {
-		String contextSelector = "blah";
-		String expected = "No valid ServletContextHelper for filter '(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" + contextSelector + ")'";
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			Filter f1 = new EmptyFilter();
-
-			extendedHttpService.registerFilter(
-				f1, "F1", new String[] {"/*"}, null, null, false, 0, null, contextSelector);
-		}
-		catch(IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Registration8() throws Exception {
-		String expected = "Filter has already been registered: ";
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			Filter f1 = new Filter() {
-				@Override
-				public void destroy() {/**/}
-				@Override
-				public void doFilter(ServletRequest arg0, ServletResponse arg1, FilterChain arg2) throws IOException, ServletException {/**/}
-				@Override
-				public void init(FilterConfig arg0) throws ServletException {/**/}
-			};
-
-			extendedHttpService.registerFilter("/*", f1, new Hashtable<String, String>(), null);
-			extendedHttpService.registerFilter("/*", f1, new Hashtable<String, String>(), null);
-		}
-		catch(ServletException se) {
-			Assert.assertTrue(se.getMessage().startsWith(expected));
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Registration8_1() throws Exception {
-		String expected = "Filter has already been registered: ";
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			Filter f1 = new EmptyFilter();
-
-			extendedHttpService.registerFilter(
-				f1, "F1", new String[] {"/*"}, null, null, false, 0, null, null);
-			extendedHttpService.registerFilter(
-				f1, "F1", new String[] {"/*"}, null, null, false, 0, null, null);
-		}
-		catch(ServletException se) {
-			Assert.assertTrue(se.getMessage().startsWith(expected));
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Registration9() throws Exception {
-		String expected = "Prefix cannot be null";
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			extendedHttpService.registerResources("/blah", null, null);
-		}
-		catch(IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Registration10() throws Exception {
-		String prefix = "/blah2/";
-		String expected = "Invalid prefix '" + prefix + "'";
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			extendedHttpService.registerResources("/blah1", prefix, null);
-		}
-		catch(IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
 	public void test_Registration11() throws Exception {
 		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
 
@@ -866,110 +573,16 @@ public class ServletTest extends TestCase {
 	}
 
 	public void test_Resource5() throws Exception {
-		String expected = "Patterns must contain a value.";
-		String prefix =
-			"/" + getClass().getPackage().getName().replaceAll("\\.", "/");
-
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			extendedHttpService.registerResources((String[])null, prefix, null);
-		}
-		catch (IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Resource5_1() throws Exception {
 		String expected = "dcbabcd";
 		String actual;
 		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
 		try {
 			bundle.start();
-			actual = requestAdvisor.request("TestResource4/resource1.txt");
+			actual = requestAdvisor.request("TestResource5/resource1.txt");
 		} finally {
 			uninstallBundle(bundle);
 		}
 		Assert.assertEquals(expected, actual);
-	}
-
-	public void test_Resource6() throws Exception {
-		String expected = "Patterns must contain a value.";
-		String prefix =
-			"/" + getClass().getPackage().getName().replaceAll("\\.", "/");
-
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			extendedHttpService.registerResources(new String[0], prefix, null);
-		}
-		catch (IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Resource7() throws Exception {
-		String expected = "Prefix cannot be null";
-
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			extendedHttpService.registerResources(
-				new String[] {"/files/*"}, null, null);
-		}
-		catch (IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Resource8() throws Exception {
-		String pattern = "files/*";
-		String expected = "Invalid pattern '" + pattern + "'";
-
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			extendedHttpService.registerResources(
-				new String[] {pattern}, "/tmp", null);
-		}
-		catch (IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_Resource9() throws Exception {
-		String pattern = "/files/";
-		String expected = "Invalid pattern '" + pattern + "'";
-
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			extendedHttpService.registerResources(
-				new String[] {pattern}, "/tmp", null);
-		}
-		catch (IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
 	}
 
 	public void test_Runtime() throws Exception {
@@ -1156,192 +769,67 @@ public class ServletTest extends TestCase {
 
 	}
 
-	public void test_ServletContextHelper1() throws Exception {
-		String expected = "ServletContexHelper cannot be null.";
-
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			extendedHttpService.registerServletContextHelper(null, null, null, null, null);
-		}
-		catch (IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_ServletContextHelper2() throws Exception {
-		String expected = "ContextNames must contain a value.";
-
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			BundleContext bundleContext = getBundleContext();
-			Bundle bundle = bundleContext.getBundle();
-
-			ServletContextHelper servletContextHelper = new ServletContextHelper(bundle) {};
-
-			extendedHttpService.registerServletContextHelper(
-				servletContextHelper, bundle, null, null, null);
-		}
-		catch (IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_ServletContextHelper3() throws Exception {
-		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-		BundleContext bundleContext = getBundleContext();
-		Bundle bundle = bundleContext.getBundle();
-		ServletContextHelper servletContextHelper = new ServletContextHelper(bundle){};
-
-		try {
-			extendedHttpService.registerServletContextHelper(
-				servletContextHelper, bundle, "a", null, null);
-		}
-		catch (Exception e) {
-			Assert.fail();
-		}
-		finally {
-			extendedHttpService.unregisterServletContextHelper(
-				servletContextHelper);
-		}
-	}
-
-	public void test_ServletContextHelper4() throws Exception {
-		String expected = "ServletContextHelper not found: ";
-		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-		BundleContext bundleContext = getBundleContext();
-		Bundle bundle = bundleContext.getBundle();
-		ServletContextHelper servletContextHelper = new ServletContextHelper(bundle){};
-
-		try {
-			extendedHttpService.registerServletContextHelper(
-				servletContextHelper, bundle, "a", null, null);
-
-			extendedHttpService.unregisterServletContextHelper(
-				servletContextHelper);
-
-			try {
-				extendedHttpService.unregisterServletContextHelper(
-					servletContextHelper);
-
-				Assert.fail();
-			}
-			catch (IllegalArgumentException iae) {
-				Assert.assertTrue(iae.getMessage().startsWith(expected));
-			}
-		}
-		catch (Exception e) {
-			Assert.fail();
-		}
-	}
-
-	public void test_ServletContextHelper5() throws Exception {
-		String contextSelector = "a";
-		String expected = "No valid ServletContextHelper for filter '(" +
-			HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" +
-				contextSelector + ")'";
-
-		try {
-			ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
-			Servlet s1 = new BaseServlet();
-			extendedHttpService.registerServlet(
-				s1, "S1", new String[] {"/s1"}, null, false, null, "a");
-		}
-		catch (IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
-
-			return;
-		}
-
-		Assert.fail();
-	}
-
-	public void test_ServletContextHelper6() throws Exception {
-		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-		BundleContext bundleContext = getBundleContext();
-		Bundle bundle = bundleContext.getBundle();
-		ServletContextHelper servletContextHelper = new ServletContextHelper(bundle){};
-		Servlet s1 = new BaseServlet();
-
-		try {
-			extendedHttpService.registerServletContextHelper(
-				servletContextHelper, bundle, "a", null, null);
-
-			extendedHttpService.registerServlet(
-				s1, "S1", new String[] {"/s1"}, null, false, null, "a");
-		}
-		catch (IllegalArgumentException iae) {
-			Assert.fail();
-		}
-		finally {
-			extendedHttpService.unregisterServlet(s1, "a");
-			extendedHttpService.unregisterServletContextHelper(
-				servletContextHelper);
-		}
-	}
-
 	public void test_ServletContextHelper7() throws Exception {
 		String expected = "a";
 
-		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
 		BundleContext bundleContext = getBundleContext();
 		Bundle bundle = bundleContext.getBundle();
 
 		ServletContextHelper servletContextHelper = new ServletContextHelper(bundle){};
 		Servlet s1 = new BaseServlet("a");
 
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 		try {
-			extendedHttpService.registerServletContextHelper(
-				servletContextHelper, bundle, "a", null, null);
+			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
+			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
-			extendedHttpService.registerServlet(
-				s1, "S1", new String[] {"/s1"}, null, false, null, "a");
+			Dictionary<String, String> servletProps = new Hashtable<String, String>();
+			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
+			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1");
+			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+			registrations.add(bundleContext.registerService(Servlet.class, s1, servletProps));
 
 			String actual = requestAdvisor.request("s1");
 
 			Assert.assertEquals(expected, actual);
 		}
 		finally {
-			extendedHttpService.unregisterServlet(s1, "a");
-			extendedHttpService.unregisterServletContextHelper(
-				servletContextHelper);
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
 		}
 	}
 
 	public void test_ServletContextHelper8() throws Exception {
 		String expected = "b";
 
-		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
 		BundleContext bundleContext = getBundleContext();
 		Bundle bundle = bundleContext.getBundle();
 		ServletContextHelper servletContextHelper = new ServletContextHelper(bundle){};
 		Servlet s1 = new BaseServlet("b");
 
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 		try {
-			extendedHttpService.registerServletContextHelper(
-				servletContextHelper, bundle, "a", "/a", null);
+			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
+			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
-			extendedHttpService.registerServlet(
-				s1, "S1", new String[] {"/s1"}, null, false, null, "a");
+			Dictionary<String, String> servletProps = new Hashtable<String, String>();
+			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
+			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1");
+			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+			registrations.add(bundleContext.registerService(Servlet.class, s1, servletProps));
 
 			String actual = requestAdvisor.request("a/s1");
 
 			Assert.assertEquals(expected, actual);
 		}
 		finally {
-			extendedHttpService.unregisterServlet(s1, "a");
-			extendedHttpService.unregisterServletContextHelper(
-				servletContextHelper);
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
 		}
 	}
 
@@ -1349,7 +837,6 @@ public class ServletTest extends TestCase {
 		String expected1 = "c";
 		String expected2 = "d";
 
-		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
 		BundleContext bundleContext = getBundleContext();
 		Bundle bundle = bundleContext.getBundle();
 
@@ -1357,15 +844,23 @@ public class ServletTest extends TestCase {
 		Servlet s1 = new BaseServlet(expected1);
 		Servlet s2 = new BaseServlet(expected2);
 
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 		try {
-			extendedHttpService.registerServletContextHelper(
-				servletContextHelper, bundle, "a", "/a", null);
+			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
+			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
-			extendedHttpService.registerServlet(
-				s1, "S1", new String[] {"/s"}, null, false, null, null);
+			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
+			registrations.add(bundleContext.registerService(Servlet.class, s1, servletProps1));
 
-			extendedHttpService.registerServlet(
-				s2, "S1", new String[] {"/s"}, null, false, null, "a");
+			Dictionary<String, String> servletProps2 = new Hashtable<String, String>();
+			servletProps2.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
+			servletProps2.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
+			servletProps2.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+			registrations.add(bundleContext.registerService(Servlet.class, s2, servletProps2));
 
 			String actual = requestAdvisor.request("s");
 
@@ -1376,10 +871,9 @@ public class ServletTest extends TestCase {
 			Assert.assertEquals(expected2, actual);
 		}
 		finally {
-			extendedHttpService.unregisterServlet(s1, null);
-			extendedHttpService.unregisterServlet(s2, "a");
-			extendedHttpService.unregisterServletContextHelper(
-				servletContextHelper);
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
 		}
 	}
 
@@ -1421,193 +915,253 @@ public class ServletTest extends TestCase {
 	}
 
 	public void test_Listener1() throws Exception {
-		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
-
 		BaseServletContextListener scl1 =
 			new BaseServletContextListener();
 
-		extendedHttpService.registerListener(scl1, null);
-		extendedHttpService.unregisterListener(scl1, null);
+		Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+		ServiceRegistration<EventListener> registration = getBundleContext().registerService(EventListener.class, scl1, listenerProps);
+		registration.unregister();
+
 
 		Assert.assertTrue(scl1.initialized.get());
 		Assert.assertTrue(scl1.destroyed.get());
 	}
 
 	public void test_Listener2() throws Exception {
-		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
 		BundleContext bundleContext = getBundleContext();
 		Bundle bundle = bundleContext.getBundle();
 
 		ServletContextHelper servletContextHelper = new ServletContextHelper(bundle){};
-
-		try{
-			extendedHttpService.registerServletContextHelper(
-				servletContextHelper, bundle, "a", "/a", null);
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
+			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
 			BaseServletContextListener scl1 =
-				new BaseServletContextListener();
-
-			extendedHttpService.registerListener(scl1, "a");
-			extendedHttpService.unregisterListener(scl1, "a");
+					new BaseServletContextListener();
+			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+			ServiceRegistration<EventListener> registration = getBundleContext().registerService(EventListener.class, scl1, listenerProps);
+			registration.unregister();
 
 			Assert.assertTrue(scl1.initialized.get());
 			Assert.assertTrue(scl1.destroyed.get());
 		}
 		finally {
-			extendedHttpService.unregisterServletContextHelper(
-				servletContextHelper);
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
 		}
 	}
 
 	public void test_Listener3() throws Exception {
-		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
 		BundleContext bundleContext = getBundleContext();
 		Bundle bundle = bundleContext.getBundle();
 
 		ServletContextHelper servletContextHelper = new ServletContextHelper(bundle){};
 		BaseServletContextListener scl1 = new BaseServletContextListener();
-
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 		try {
-			extendedHttpService.registerServletContextHelper(
-				servletContextHelper, bundle, "a", "/a", null);
+			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
+			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
-			extendedHttpService.registerListener(scl1, "a");
+			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+			registrations.add(bundleContext.registerService(EventListener.class, scl1, listenerProps));
 
 			Assert.assertTrue(scl1.initialized.get());
 		}
 		finally {
-			extendedHttpService.unregisterListener(scl1, "a");
-			extendedHttpService.unregisterServletContextHelper(
-				servletContextHelper);
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
 			Assert.assertTrue(scl1.destroyed.get());
 		}
 	}
 
 	public void test_Listener4() throws Exception {
-		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
 
 		BaseServletContextAttributeListener scal1 =
 			new BaseServletContextAttributeListener();
-
-		extendedHttpService.registerListener(scal1, null);
-
 		Servlet s1 = new BaseServlet("a");
-		extendedHttpService.registerServlet(
-			s1, "S1", new String[] {"/s"}, null, false, null, null);
 
-		requestAdvisor.request("s");
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			registrations.add(getBundleContext().registerService(EventListener.class, scal1, listenerProps));
 
-		Assert.assertTrue(scal1.added.get());
-		Assert.assertFalse(scal1.replaced.get());
-		Assert.assertFalse(scal1.removed.get());
+			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
+			registrations.add(getBundleContext().registerService(Servlet.class, s1, servletProps1));
 
-		requestAdvisor.request("s");
+			requestAdvisor.request("s");
 
-		Assert.assertTrue(scal1.added.get());
-		Assert.assertTrue(scal1.replaced.get());
-		Assert.assertFalse(scal1.removed.get());
+			Assert.assertTrue(scal1.added.get());
+			Assert.assertFalse(scal1.replaced.get());
+			Assert.assertFalse(scal1.removed.get());
 
-		requestAdvisor.request("s");
+			requestAdvisor.request("s");
 
-		Assert.assertTrue(scal1.added.get());
-		Assert.assertTrue(scal1.replaced.get());
-		Assert.assertTrue(scal1.removed.get());
+			Assert.assertTrue(scal1.added.get());
+			Assert.assertTrue(scal1.replaced.get());
+			Assert.assertFalse(scal1.removed.get());
+
+			requestAdvisor.request("s");
+
+			Assert.assertTrue(scal1.added.get());
+			Assert.assertTrue(scal1.replaced.get());
+			Assert.assertTrue(scal1.removed.get());
+
+		}
+		finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+		}
 	}
 
 	public void test_Listener5() throws Exception {
-		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
 
 		BaseServletRequestListener srl1 = new BaseServletRequestListener();
 
-		extendedHttpService.registerListener(srl1, null);
-
 		Servlet s1 = new BaseServlet("a");
-		extendedHttpService.registerServlet(
-			s1, "S1", new String[] {"/s"}, null, false, null, null);
 
-		requestAdvisor.request("s");
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			registrations.add(getBundleContext().registerService(EventListener.class, srl1, listenerProps));
 
-		Assert.assertTrue(srl1.initialized.get());
-		Assert.assertTrue(srl1.destroyed.get());
+			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
+			registrations.add(getBundleContext().registerService(Servlet.class, s1, servletProps1));
+
+			requestAdvisor.request("s");
+
+			Assert.assertTrue(srl1.initialized.get());
+			Assert.assertTrue(srl1.destroyed.get());
+		}
+		finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+		}
 	}
 
 	public void test_Listener6() throws Exception {
-		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
 
 		BaseServletRequestAttributeListener sral1 = new BaseServletRequestAttributeListener();
 
-		extendedHttpService.registerListener(sral1, null);
-
 		Servlet s1 = new BaseServlet("a");
-		extendedHttpService.registerServlet(
-			s1, "S1", new String[] {"/s"}, null, false, null, null);
 
-		requestAdvisor.request("s");
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			registrations.add(getBundleContext().registerService(EventListener.class, sral1, listenerProps));
 
-		Assert.assertTrue(sral1.added.get());
-		Assert.assertTrue(sral1.replaced.get());
-		Assert.assertTrue(sral1.removed.get());
+			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
+			registrations.add(getBundleContext().registerService(Servlet.class, s1, servletProps1));
+
+			requestAdvisor.request("s");
+
+			Assert.assertTrue(sral1.added.get());
+			Assert.assertTrue(sral1.replaced.get());
+			Assert.assertTrue(sral1.removed.get());
+		}
+		finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+		}
 	}
 
 	public void test_Listener7() throws Exception {
-		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
 
 		BaseHttpSessionAttributeListener hsal1 =
 			new BaseHttpSessionAttributeListener();
 
-		extendedHttpService.registerListener(hsal1, null);
-
 		Servlet s1 = new BaseServlet("test_Listener7");
-		extendedHttpService.registerServlet(
-			s1, "S1", new String[] {"/s"}, null, false, null, null);
 
-		Map<String, List<String>> responseMap = requestAdvisor.request("s", null);
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			registrations.add(getBundleContext().registerService(EventListener.class, hsal1, listenerProps));
 
-		Assert.assertTrue(hsal1.added.get());
-		Assert.assertFalse(hsal1.replaced.get());
-		Assert.assertFalse(hsal1.removed.get());
+			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
+			registrations.add(getBundleContext().registerService(Servlet.class, s1, servletProps1));
 
-		List<String> list = responseMap.get("Set-Cookie");
+			Map<String, List<String>> responseMap = requestAdvisor.request("s", null);
 
-		String sessionId = "";
+			Assert.assertTrue(hsal1.added.get());
+			Assert.assertFalse(hsal1.replaced.get());
+			Assert.assertFalse(hsal1.removed.get());
 
-		for (String string : list) {
-			if (string.startsWith("JSESSIONID=")) {
-				sessionId = string;
+			List<String> list = responseMap.get("Set-Cookie");
 
-				int pos = sessionId.indexOf(';');
-				if (pos != -1) {
-					sessionId = sessionId.substring(0, pos);
+			String sessionId = "";
+
+			for (String string : list) {
+				if (string.startsWith("JSESSIONID=")) {
+					sessionId = string;
+
+					int pos = sessionId.indexOf(';');
+					if (pos != -1) {
+						sessionId = sessionId.substring(0, pos);
+					}
 				}
 			}
+
+			Map<String, List<String>> requestHeaders = new HashMap<String, List<String>>();
+			requestHeaders.put("Cookie", Arrays.asList(sessionId));
+
+			requestAdvisor.request("s", requestHeaders);
+
+			Assert.assertTrue(hsal1.added.get());
+			Assert.assertTrue(hsal1.replaced.get());
+			Assert.assertFalse(hsal1.removed.get());
+
+			requestAdvisor.request("s", requestHeaders);
+
+			Assert.assertTrue(hsal1.added.get());
+			Assert.assertTrue(hsal1.replaced.get());
+			Assert.assertTrue(hsal1.removed.get());
 		}
-
-		Map<String, List<String>> requestHeaders = new HashMap<String, List<String>>();
-		requestHeaders.put("Cookie", Arrays.asList(sessionId));
-
-		requestAdvisor.request("s", requestHeaders);
-
-		Assert.assertTrue(hsal1.added.get());
-		Assert.assertTrue(hsal1.replaced.get());
-		Assert.assertFalse(hsal1.removed.get());
-
-		requestAdvisor.request("s", requestHeaders);
-
-		Assert.assertTrue(hsal1.added.get());
-		Assert.assertTrue(hsal1.replaced.get());
-		Assert.assertTrue(hsal1.removed.get());
+		finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+		}
 	}
 
 	public void test_Listener8() throws Exception {
-		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
 
 		Servlet s1 = new BaseAsyncServlet("test_Listener8");
-		extendedHttpService.registerServlet(
-			s1, "S1", new String[] {"/s"}, null, true, null, null);
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			Dictionary<String, Object> servletProps1 = new Hashtable<String, Object>();
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, true);
+			registrations.add(getBundleContext().registerService(Servlet.class, s1, servletProps1));
 
-		String output1 = requestAdvisor.request("s");
+			String output1 = requestAdvisor.request("s");
 
-		Assert.assertTrue(output1, output1.endsWith("test_Listener8"));
+			Assert.assertTrue(output1, output1.endsWith("test_Listener8"));
+		}
+		finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+		}
 	}
 
 	public void test_WBServlet1() throws Exception {

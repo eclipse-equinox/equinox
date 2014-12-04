@@ -13,6 +13,10 @@ package org.eclipse.equinox.http.servlet.tests.tb1;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 import javax.servlet.Filter;
 import javax.servlet.RequestDispatcher;
@@ -22,12 +26,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.equinox.http.servlet.ExtendedHttpService;
 import org.eclipse.equinox.http.servlet.tests.tb.AbstractTestServlet;
 import org.eclipse.equinox.http.servlet.tests.util.BaseFilter;
-
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /*
  * This servlet is registered with the HttpService via the immediate DS
@@ -35,19 +39,24 @@ import org.osgi.service.http.NamespaceException;
  */
 public class TestErrorPage2 extends AbstractTestServlet {
 	private static final long serialVersionUID = 1L;
-
+	private final Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 	@Override
 	public void activate(ComponentContext componentContext) throws ServletException, NamespaceException {
-		ExtendedHttpService service = (ExtendedHttpService)getHttpService();
-		service.registerServlet(this, "S1", new String[] {regexAlias()}, null, false, null, null);
-		service.registerServlet(errorServlet, "E1", null, new String[] {MyException.class.getName()}, false, null, null);
+		Dictionary<String, String> servletProps = new Hashtable<String, String>();
+		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
+		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, regexAlias());
+		registrations.add(componentContext.getBundleContext().registerService(Servlet.class, this, servletProps));
+		Dictionary<String, Object> errorProps = new Hashtable<String, Object>();
+		errorProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E1");
+		errorProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, new String[] {MyException.class.getName()});
+		registrations.add(componentContext.getBundleContext().registerService(Servlet.class, errorServlet, errorProps));
 	}
 
 	@Override
 	public void deactivate() {
-		ExtendedHttpService service = (ExtendedHttpService)getHttpService();
-		service.unregisterServlet(this, null);
-		service.unregisterServlet(errorServlet, null);
+		for (ServiceRegistration<?> registration : registrations) {
+			registration.unregister();
+		}
 	}
 
 	@Override

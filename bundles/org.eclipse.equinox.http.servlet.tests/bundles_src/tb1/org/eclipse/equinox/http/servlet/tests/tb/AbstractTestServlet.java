@@ -81,6 +81,10 @@ public abstract class AbstractTestServlet extends HttpServlet {
 		return service;
 	}
 
+	protected Map<String, Object> getProperties() {
+		return properties;
+	}
+
 	protected String getSimpleClassName() {
 		Class<?> clazz = getClass();
 		return clazz.getSimpleName();
