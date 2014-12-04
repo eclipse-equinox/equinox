@@ -26,6 +26,10 @@ public class Const {
 	public static final String SERVLET_NAME = "servlet-name"; //$NON-NLS-1$
 	public static final String SLASH = "/"; //$NON-NLS-1$
 	public static final String SLASH_STAR = "/*"; //$NON-NLS-1$
+	public static final String EQUINOX_LEGACY_MATCHING_PROP = "equinox.legacy.matching"; //$NON-NLS-1$
+	public static final String EQUINOX_LEGACY_CONTEXT_SELECT = "equinox.context.select"; //$NON-NLS-1$
+	public static final String SERVLET_INIT_PREFIX = "servlet.init."; //$NON-NLS-1$
+	public static final String FILTER_INIT_PREFIX = "filter.init."; //$NON-NLS-1$
 
 	public static enum Dispatcher {
 

@@ -16,10 +16,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
-import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
 import org.eclipse.equinox.http.servlet.internal.registration.ListenerRegistration;
-import org.osgi.framework.*;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * @author Raymond Augé
@@ -45,26 +44,16 @@ public class ContextListenerTrackerCustomizer
 			return result;
 		}
 
-		String contextSelector = (String)serviceReference.getProperty(
-			HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
-
-		if (!contextController.matches(contextSelector)) {
+		if (!contextController.matches(serviceReference)) {
 			return result;
 		}
 
 
-		ServiceHolder<EventListener> listenerHolder = new ServiceHolder<EventListener>(bundleContext.getServiceObjects(serviceReference));
-		Long serviceId = (Long)serviceReference.getProperty(Constants.SERVICE_ID);
 		try {
-			result.set(contextController.addListenerRegistration(
-				listenerHolder, serviceId.longValue()));
+			result.set(contextController.addListenerRegistration(serviceReference));
 		}
 		catch (ServletException se) {
 			httpServiceRuntime.log(se.getMessage(), se);
-		} finally {
-			if (result.get() == null) {
-				listenerHolder.release();
-			}
 		}
 
 		return result;

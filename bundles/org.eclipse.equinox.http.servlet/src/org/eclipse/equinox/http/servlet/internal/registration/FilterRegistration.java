@@ -20,6 +20,7 @@ import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
 import org.eclipse.equinox.http.servlet.internal.servlet.FilterChainImpl;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.dto.FilterDTO;
 
@@ -44,7 +45,7 @@ public class FilterRegistration
 		this.priority = priority;
 		this.servletContextHelper = servletContextHelper;
 		this.contextController = contextController;
-		classLoader = contextController.getClassLoader();
+		classLoader = filterHolder.getBundle().adapt(BundleWiring.class).getClassLoader();
 	}
 
 	public int compareTo(FilterRegistration otherFilterRegistration) {
@@ -60,8 +61,9 @@ public class FilterRegistration
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(classLoader);
-
+			contextController.getHttpServiceRuntime().getRegisteredObjects().remove(this.getT());
 			contextController.getFilterRegistrations().remove(this);
+			contextController.ungetServletContextHelper(filterHolder.getBundle());
 			super.destroy();
 			getT().destroy();
 		}

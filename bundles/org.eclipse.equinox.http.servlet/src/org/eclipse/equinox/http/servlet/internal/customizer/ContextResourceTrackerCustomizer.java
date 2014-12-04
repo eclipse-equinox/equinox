@@ -11,15 +11,13 @@
 
 package org.eclipse.equinox.http.servlet.internal.customizer;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.Servlet;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.registration.ResourceRegistration;
-import org.eclipse.equinox.http.servlet.internal.util.StringPlus;
-import org.osgi.framework.*;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * @author Raymond Augé
@@ -41,29 +39,14 @@ public class ContextResourceTrackerCustomizer
 		ServiceReference<Servlet> serviceReference) {
 		AtomicReference<ResourceRegistration> result = new AtomicReference<ResourceRegistration>();
 		if (!httpServiceRuntime.matches(serviceReference)) {
-			// TODO no match runtime
 			return result;
 		}
 
-		String contextSelector = (String)serviceReference.getProperty(
-			HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
-
-		if (!contextController.matches(contextSelector)) {
-			// TODO no match context
+		if (!contextController.matches(serviceReference)) {
 			return result;
 		}
 
-		List<String> patternList = StringPlus.from(
-			serviceReference.getProperty(
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN));
-		String[] patterns = patternList.toArray(new String[patternList.size()]);
-		Long serviceId = (Long)serviceReference.getProperty(
-			Constants.SERVICE_ID);
-		String prefix = (String)serviceReference.getProperty(
-			HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
-
-		result.set(contextController.addResourceRegistration(
-			patterns, prefix, serviceId.longValue(), false));
+		result.set(contextController.addResourceRegistration(serviceReference));
 		return result;
 	}
 

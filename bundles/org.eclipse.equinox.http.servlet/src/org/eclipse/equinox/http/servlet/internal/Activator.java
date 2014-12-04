@@ -36,6 +36,7 @@ public class Activator
 	private static final String DEFAULT_SERVICE_DESCRIPTION = "Equinox Servlet Bridge"; //$NON-NLS-1$
 	private static final String DEFAULT_SERVICE_VENDOR = "Eclipse.org"; //$NON-NLS-1$
 	private static final String PROP_GLOBAL_WHITEBOARD = "equinox.http.global.whiteboard"; //$NON-NLS-1$
+	public static final String UNIQUE_SERVICE_ID = "equinox.http.id"; //$NON-NLS-1$
 	private static final String[] HTTP_SERVICES_CLASSES = new String[] {
 		HttpService.class.getName(), ExtendedHttpService.class.getName()
 	};
@@ -139,12 +140,14 @@ public class Activator
 				httpServiceEndpoints);
 		}
 
+		// need a unique id for our service to match old HttpService HttpContext
+		serviceProperties.put(UNIQUE_SERVICE_ID, new Random().nextLong());
 		// white board support
 		// determine if the system bundle context should be used:
 		boolean useSystemContext = Boolean.valueOf(context.getProperty(PROP_GLOBAL_WHITEBOARD));
 		BundleContext trackingContext = useSystemContext ? context.getBundle(Constants.SYSTEM_BUNDLE_LOCATION).getBundleContext() : context;
 		HttpServiceRuntimeImpl httpServiceRuntime = new HttpServiceRuntimeImpl(
-			trackingContext, servletContext,
+			trackingContext, context, servletContext,
 			new UMDictionaryMap<String, Object>(serviceProperties));
 
 		proxyServlet.setHttpServiceRuntimeImpl(httpServiceRuntime);

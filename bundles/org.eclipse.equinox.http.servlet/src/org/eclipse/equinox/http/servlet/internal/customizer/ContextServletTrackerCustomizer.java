@@ -11,18 +11,14 @@
 
 package org.eclipse.equinox.http.servlet.internal.customizer;
 
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
-import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
 import org.eclipse.equinox.http.servlet.internal.registration.ServletRegistration;
-import org.eclipse.equinox.http.servlet.internal.util.StringPlus;
-import org.osgi.framework.*;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * @author Raymond Augé
@@ -48,54 +44,16 @@ public class ContextServletTrackerCustomizer
 			return result;
 		}
 
-		String contextSelector = (String)serviceReference.getProperty(
-			HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
-
-		if (!contextController.matches(contextSelector)) {
+		if (!contextController.matches(serviceReference)) {
 			return result;
 		}
-
-		ServiceHolder<Servlet> servletHolder = new ServiceHolder<Servlet>(bundleContext.getServiceObjects(serviceReference));
-
-		if (httpServiceRuntime.getRegisteredServlets().contains(servletHolder.get())) {
-			servletHolder.release();
-			return result;
-		}
-
-		boolean asyncSupported = parseBoolean(
-			serviceReference,
-			HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED);
-		List<String> errorPageList = StringPlus.from(
-			serviceReference.getProperty(
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE));
-		String[] errorPages = errorPageList.toArray(
-			new String[errorPageList.size()]);
-		Map<String, String> initParams = parseInitParams(
-			serviceReference, "servlet.init.");
-		List<String> patternList = StringPlus.from(
-			serviceReference.getProperty(
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN));
-		String[] patterns = patternList.toArray(new String[patternList.size()]);
-		Long serviceId = (Long)serviceReference.getProperty(
-			Constants.SERVICE_ID);
-
-		String servletName = parseName(
-			serviceReference.getProperty(
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME), servletHolder.get());
 
 		try {
-			result.set(contextController.addServletRegistration(
-				servletHolder, asyncSupported, errorPages, initParams, patterns,
-				serviceId.longValue(), servletName, false));
+			result.set(contextController.addServletRegistration(serviceReference));
 		}
 		catch (ServletException se) {
 			httpServiceRuntime.log(se.getMessage(), se);
-		} finally {
-			if (result.get() == null) {
-				servletHolder.release();
-			}
 		}
-
 		// TODO error?
 
 		return result;

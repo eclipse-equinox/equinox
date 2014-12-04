@@ -13,11 +13,6 @@
 
 package org.eclipse.equinox.http.servlet.internal;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import org.eclipse.equinox.http.servlet.internal.context.ContextController;
-import org.eclipse.equinox.http.servlet.internal.registration.Registration;
 import org.osgi.framework.*;
 import org.osgi.service.http.HttpService;
 
@@ -27,8 +22,6 @@ import org.osgi.service.http.HttpService;
 public class HttpServiceFactory implements ServiceFactory<HttpService> {
 
 	private final HttpServiceRuntimeImpl httpServiceRuntime;
-	private final ConcurrentMap<ContextController, Map<Object, Registration<?, ?>>> registrations =
-		new ConcurrentHashMap<ContextController, Map<Object, Registration<?, ?>>>();
 
 	public HttpServiceFactory(HttpServiceRuntimeImpl httpServiceRuntime) {
 		this.httpServiceRuntime = httpServiceRuntime;
@@ -37,7 +30,7 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
 	public HttpService getService(
 		Bundle bundle, ServiceRegistration<HttpService> serviceRegistration) {
 
-		return new HttpServiceImpl(bundle, httpServiceRuntime, registrations);
+		return new HttpServiceImpl(bundle, httpServiceRuntime);
 	}
 
 	public void ungetService(

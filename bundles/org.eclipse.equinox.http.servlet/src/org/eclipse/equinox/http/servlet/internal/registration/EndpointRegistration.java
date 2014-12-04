@@ -20,18 +20,19 @@ import org.eclipse.equinox.http.servlet.internal.context.ContextController.Servi
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
 import org.osgi.dto.DTO;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.context.ServletContextHelper;
 
 /**
  * @author Raymond Augé
  */
 public abstract class EndpointRegistration<D extends DTO>
-	extends MatchableRegistration<Servlet, D> {
+	extends MatchableRegistration<Servlet, D> implements Comparable<EndpointRegistration<?>>{
 
 	private final ServiceHolder<Servlet> servletHolder;
-	private ServletContextHelper servletContextHelper; //The context used during the registration of the servlet
-	private ContextController contextController;
-	private ClassLoader classLoader;
+	private final ServletContextHelper servletContextHelper; //The context used during the registration of the servlet
+	private final ContextController contextController;
+	private final ClassLoader classLoader;
 	private boolean legacyMatching;
 
 	public EndpointRegistration(
@@ -43,7 +44,7 @@ public abstract class EndpointRegistration<D extends DTO>
 		this.servletContextHelper = servletContextHelper;
 		this.contextController = contextController;
 		this.legacyMatching = legacyMatching;
-		classLoader = contextController.getClassLoader();
+		classLoader = servletHolder.getBundle().adapt(BundleWiring.class).getClassLoader();
 	}
 
 	public void destroy() {
@@ -52,7 +53,8 @@ public abstract class EndpointRegistration<D extends DTO>
 			Thread.currentThread().setContextClassLoader(classLoader);
 
 			contextController.getEndpointRegistrations().remove(this);
-			contextController.getRegisteredServlets().remove(this);
+			contextController.getHttpServiceRuntime().getRegisteredObjects().remove(this.getT());
+			contextController.ungetServletContextHelper(servletHolder.getBundle());
 
 			super.destroy();
 			getT().destroy();
@@ -167,6 +169,11 @@ public abstract class EndpointRegistration<D extends DTO>
 	private void destroyContextAttributes() {
 		contextController.getProxyContext().destroyContextAttributes(
 			servletContextHelper);
+	}
+
+	@Override
+	public int compareTo(EndpointRegistration<?> o) {
+		return servletHolder.compareTo(o.servletHolder);
 	}
 
 }
