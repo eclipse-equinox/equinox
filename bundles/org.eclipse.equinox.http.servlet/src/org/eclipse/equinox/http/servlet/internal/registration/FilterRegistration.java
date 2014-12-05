@@ -20,6 +20,9 @@ import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
 import org.eclipse.equinox.http.servlet.internal.servlet.FilterChainImpl;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
+import org.eclipse.equinox.http.servlet.internal.util.Const;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.dto.FilterDTO;
@@ -34,6 +37,7 @@ public class FilterRegistration
 	private final ClassLoader classLoader;
 	private final int priority;
 	private final ContextController contextController;
+	private final boolean initDestoyWithContextController;
 
 	public FilterRegistration(
 		ServiceHolder<Filter> filterHolder, FilterDTO filterDTO, int priority,
@@ -46,6 +50,22 @@ public class FilterRegistration
 		this.servletContextHelper = servletContextHelper;
 		this.contextController = contextController;
 		classLoader = filterHolder.getBundle().adapt(BundleWiring.class).getClassLoader();
+		String legacyContextFilter = (String) filterHolder.getServiceReference().getProperty(Const.EQUINOX_LEGACY_CONTEXT_SELECT);
+		if (legacyContextFilter != null) {
+			// This is a legacy Filter registration.  
+			// This filter tells us the real context controller,
+			// backed by an HttpContext that should be used to init/destroy this Filter
+			org.osgi.framework.Filter f = null;
+			try {
+				 f = FrameworkUtil.createFilter(legacyContextFilter);
+			}
+			catch (InvalidSyntaxException e) {
+				// nothing
+			}
+			initDestoyWithContextController = f == null || contextController.matches(f);
+		} else {
+			initDestoyWithContextController = true;
+		}
 	}
 
 	public int compareTo(FilterRegistration otherFilterRegistration) {
@@ -58,6 +78,9 @@ public class FilterRegistration
 	}
 
 	public void destroy() {
+		if (!initDestoyWithContextController) {
+			return;
+		}
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(classLoader);
@@ -120,6 +143,9 @@ public class FilterRegistration
 
 	//Delegate the init call to the actual filter
 	public void init(FilterConfig filterConfig) throws ServletException {
+		if (!initDestoyWithContextController) {
+			return;
+		}
 		boolean initialized = false;
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
