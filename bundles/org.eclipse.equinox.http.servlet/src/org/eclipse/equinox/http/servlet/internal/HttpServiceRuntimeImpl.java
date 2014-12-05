@@ -50,6 +50,12 @@ public class HttpServiceRuntimeImpl
 
 		this.trackingContext = trackingContext;
 		this.consumingContext = consumingContext;
+
+		this.servletServiceFilter = createServletFilter(consumingContext);
+		this.resourceServiceFilter = createResourceFilter(consumingContext);
+		this.filterServiceFilter = createFilterFilter(consumingContext);
+		this.listenerServiceFilter = createListenerFilter(consumingContext);
+
 		this.parentServletContext = parentServletContext;
 		this.attributes = Collections.unmodifiableMap(attributes);
 		this.targetFilter = "(" + Activator.UNIQUE_SERVICE_ID + "=" + attributes.get(Activator.UNIQUE_SERVICE_ID) + ")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -216,27 +222,6 @@ public class HttpServiceRuntimeImpl
 		return null;
 	}
 
-	public org.osgi.framework.Filter getFilterFilter() {
-		StringBuilder sb = new StringBuilder();
-
-		sb.append("(&(objectClass="); //$NON-NLS-1$
-		sb.append(Filter.class.getName());
-		sb.append(")(|("); //$NON-NLS-1$
-		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN);
-		sb.append("=*)("); //$NON-NLS-1$
-		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX);
-		sb.append("=*)("); //$NON-NLS-1$
-		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_SERVLET);
-		sb.append("=*)))"); //$NON-NLS-1$
-
-		try {
-			return trackingContext.createFilter(sb.toString());
-		}
-		catch (InvalidSyntaxException ise) {
-			throw new IllegalArgumentException(ise);
-		}
-	}
-
 	public Set<Object> getRegisteredObjects() {
 		return registeredObjects;
 	}
@@ -245,23 +230,6 @@ public class HttpServiceRuntimeImpl
 		return StringPlus.from(
 			attributes.get(
 				HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT_ATTRIBUTE));
-	}
-
-	public org.osgi.framework.Filter getResourceFilter() {
-		StringBuilder sb = new StringBuilder();
-
-		sb.append("(&("); //$NON-NLS-1$
-		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
-		sb.append("=*)("); //$NON-NLS-1$
-		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN);
-		sb.append("=*))"); //$NON-NLS-1$
-
-		try {
-			return trackingContext.createFilter(sb.toString());
-		}
-		catch (InvalidSyntaxException ise) {
-			throw new IllegalArgumentException(ise);
-		}
 	}
 
 	@Override
@@ -281,27 +249,6 @@ public class HttpServiceRuntimeImpl
 		runtimeDTO.servletContextDTOs = getServletContextDTOs();
 
 		return runtimeDTO;
-	}
-
-	public org.osgi.framework.Filter getServletFilter() {
-		StringBuilder sb = new StringBuilder();
-
-		sb.append("(&(objectClass="); //$NON-NLS-1$
-		sb.append(Servlet.class.getName());
-		sb.append(")(|("); //$NON-NLS-1$
-		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE);
-		sb.append("=*)("); //$NON-NLS-1$
-		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN);
-		sb.append("=*))(!("); //$NON-NLS-1$
-		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
-		sb.append("=*)))"); //$NON-NLS-1$
-
-		try {
-			return trackingContext.createFilter(sb.toString());
-		}
-		catch (InvalidSyntaxException ise) {
-			throw new IllegalArgumentException(ise);
-		}
 	}
 
 	public void log(String message, Throwable t) {
@@ -906,6 +853,101 @@ public class HttpServiceRuntimeImpl
 		}
 	}
 
+	private static org.osgi.framework.Filter createResourceFilter(BundleContext context) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("(&("); //$NON-NLS-1$
+		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
+		sb.append("=*)("); //$NON-NLS-1$
+		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN);
+		sb.append("=*))"); //$NON-NLS-1$
+
+		try {
+			return context.createFilter(sb.toString());
+		}
+		catch (InvalidSyntaxException ise) {
+			throw new IllegalArgumentException(ise);
+		}
+	}
+
+	private static org.osgi.framework.Filter createServletFilter(BundleContext context) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("(&(objectClass="); //$NON-NLS-1$
+		sb.append(Servlet.class.getName());
+		sb.append(")(|("); //$NON-NLS-1$
+		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE);
+		sb.append("=*)("); //$NON-NLS-1$
+		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN);
+		sb.append("=*))(!("); //$NON-NLS-1$
+		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
+		sb.append("=*)))"); //$NON-NLS-1$
+
+		try {
+			return context.createFilter(sb.toString());
+		}
+		catch (InvalidSyntaxException ise) {
+			throw new IllegalArgumentException(ise);
+		}
+	}
+
+	private static org.osgi.framework.Filter createFilterFilter(BundleContext context) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("(&(objectClass="); //$NON-NLS-1$
+		sb.append(Filter.class.getName());
+		sb.append(")(|("); //$NON-NLS-1$
+		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN);
+		sb.append("=*)("); //$NON-NLS-1$
+		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX);
+		sb.append("=*)("); //$NON-NLS-1$
+		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_SERVLET);
+		sb.append("=*)))"); //$NON-NLS-1$
+
+		try {
+			return context.createFilter(sb.toString());
+		}
+		catch (InvalidSyntaxException ise) {
+			throw new IllegalArgumentException(ise);
+		}
+	}
+
+	private static org.osgi.framework.Filter createListenerFilter(BundleContext context) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("(|"); //$NON-NLS-1$
+		sb.append("(objectClass=").append(ServletContextListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append("(objectClass=").append(ServletContextAttributeListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append("(objectClass=").append(ServletRequestListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append("(objectClass=").append(ServletRequestAttributeListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append("(objectClass=").append(HttpSessionListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append("(objectClass=").append(HttpSessionAttributeListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(")"); //$NON-NLS-1$
+
+		try {
+			return context.createFilter(sb.toString());
+		}
+		catch (InvalidSyntaxException ise) {
+			throw new IllegalArgumentException(ise);
+		}
+	}
+
+	public org.osgi.framework.Filter getListenerFilter() {
+		return listenerServiceFilter;
+	}
+
+	public org.osgi.framework.Filter getFilterFilter() {
+		return filterServiceFilter;
+	}
+
+	public org.osgi.framework.Filter getServletFilter() {
+		return servletServiceFilter;
+	}
+
+	public org.osgi.framework.Filter getResourceFilter() {
+		return resourceServiceFilter;
+	}
+
 	private Map<String, Object> attributes;
 	private final String targetFilter;
 	private final ServiceRegistration<ServletContextHelper> defaultContextReg;
@@ -913,6 +955,11 @@ public class HttpServiceRuntimeImpl
 
 	private BundleContext trackingContext;
 	private BundleContext consumingContext;
+
+	private final org.osgi.framework.Filter servletServiceFilter;
+	private final org.osgi.framework.Filter resourceServiceFilter;
+	private final org.osgi.framework.Filter filterServiceFilter;
+	private final org.osgi.framework.Filter listenerServiceFilter;
 
 	// BEGIN of old HttpService support
 	private Map<HttpContext, HttpContextHelperFactory> httpContextHelperFactories =
@@ -993,7 +1040,9 @@ public class HttpServiceRuntimeImpl
 		public void ungetService(
 			Bundle bundle, ServiceRegistration<Filter> registration,
 			Filter service) {
+			// do nothing
 		}
 		
 	}
+
 }

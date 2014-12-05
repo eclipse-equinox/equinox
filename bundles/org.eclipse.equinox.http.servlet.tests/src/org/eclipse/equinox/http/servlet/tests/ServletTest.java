@@ -27,9 +27,14 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContextAttributeListener;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestAttributeListener;
+import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpSessionAttributeListener;
 
 import junit.framework.TestCase;
 
@@ -919,7 +924,7 @@ public class ServletTest extends TestCase {
 			new BaseServletContextListener();
 
 		Dictionary<String, String> listenerProps = new Hashtable<String, String>();
-		ServiceRegistration<EventListener> registration = getBundleContext().registerService(EventListener.class, scl1, listenerProps);
+		ServiceRegistration<ServletContextListener> registration = getBundleContext().registerService(ServletContextListener.class, scl1, listenerProps);
 		registration.unregister();
 
 
@@ -943,7 +948,7 @@ public class ServletTest extends TestCase {
 					new BaseServletContextListener();
 			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
-			ServiceRegistration<EventListener> registration = getBundleContext().registerService(EventListener.class, scl1, listenerProps);
+			ServiceRegistration<ServletContextListener> registration = getBundleContext().registerService(ServletContextListener.class, scl1, listenerProps);
 			registration.unregister();
 
 			Assert.assertTrue(scl1.initialized.get());
@@ -971,7 +976,7 @@ public class ServletTest extends TestCase {
 
 			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
-			registrations.add(bundleContext.registerService(EventListener.class, scl1, listenerProps));
+			registrations.add(bundleContext.registerService(ServletContextListener.class, scl1, listenerProps));
 
 			Assert.assertTrue(scl1.initialized.get());
 		}
@@ -992,7 +997,7 @@ public class ServletTest extends TestCase {
 		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 		try {
 			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
-			registrations.add(getBundleContext().registerService(EventListener.class, scal1, listenerProps));
+			registrations.add(getBundleContext().registerService(ServletContextAttributeListener.class, scal1, listenerProps));
 
 			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
@@ -1034,7 +1039,7 @@ public class ServletTest extends TestCase {
 		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 		try {
 			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
-			registrations.add(getBundleContext().registerService(EventListener.class, srl1, listenerProps));
+			registrations.add(getBundleContext().registerService(ServletRequestListener.class, srl1, listenerProps));
 
 			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
@@ -1062,7 +1067,7 @@ public class ServletTest extends TestCase {
 		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 		try {
 			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
-			registrations.add(getBundleContext().registerService(EventListener.class, sral1, listenerProps));
+			registrations.add(getBundleContext().registerService(ServletRequestAttributeListener.class, sral1, listenerProps));
 
 			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
@@ -1092,7 +1097,7 @@ public class ServletTest extends TestCase {
 		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 		try {
 			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
-			registrations.add(getBundleContext().registerService(EventListener.class, hsal1, listenerProps));
+			registrations.add(getBundleContext().registerService(HttpSessionAttributeListener.class, hsal1, listenerProps));
 
 			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
@@ -1142,7 +1147,7 @@ public class ServletTest extends TestCase {
 		}
 	}
 
-	public void test_Listener8() throws Exception {
+	public void test_Async1() throws Exception {
 
 		Servlet s1 = new BaseAsyncServlet("test_Listener8");
 		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();

@@ -127,7 +127,7 @@ public class ContextController {
 		
 
 		listenerServiceTracker = new ServiceTracker<EventListener, AtomicReference<ListenerRegistration>>(
-			trackingContext, EventListener.class,
+			trackingContext, httpServiceRuntime.getListenerFilter(),
 			new ContextListenerTrackerCustomizer(
 				trackingContext, httpServiceRuntime, this));
 
