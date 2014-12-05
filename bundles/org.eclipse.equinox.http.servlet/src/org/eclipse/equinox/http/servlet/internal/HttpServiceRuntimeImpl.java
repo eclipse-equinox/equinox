@@ -645,7 +645,7 @@ public class HttpServiceRuntimeImpl
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_TARGET, targetFilter);
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, alias);
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, filterName);
-				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)"); //$NON-NLS-1$ //$NON-NLS-2$
+				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + Const.EQUINOX_LEGACY_CONTEXT_HELPER + "=true)"); //$NON-NLS-1$ //$NON-NLS-2$
 				props.put(Const.EQUINOX_LEGACY_CONTEXT_SELECT, factory.getFilter());
 				props.put(Const.EQUINOX_LEGACY_MATCHING_PROP, Boolean.TRUE);
 				props.put(Constants.SERVICE_RANKING, findFilterPriority(initparams));
@@ -885,10 +885,11 @@ public class HttpServiceRuntimeImpl
 			HttpContextHelperFactory factory = httpContextHelperFactories.get(httpContext);
 			if (factory == null) {
 				factory = new HttpContextHelperFactory(httpContext);
-				Dictionary<String, String> props = new Hashtable<String, String>();
+				Dictionary<String, Object> props = new Hashtable<String, Object>();
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, httpContext.toString());
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/"); //$NON-NLS-1$
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_TARGET, targetFilter);
+				props.put(Const.EQUINOX_LEGACY_CONTEXT_HELPER, Boolean.TRUE);
 				factory.setRegistration(consumingContext.registerService(ServletContextHelper.class, factory, props));
 				httpContextHelperFactories.put(httpContext, factory);
 			}
