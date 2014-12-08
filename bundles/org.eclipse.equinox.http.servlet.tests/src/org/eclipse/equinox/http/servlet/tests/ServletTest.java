@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
-import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -39,6 +38,7 @@ import javax.servlet.http.HttpSessionAttributeListener;
 import junit.framework.TestCase;
 
 import org.eclipse.equinox.http.servlet.ExtendedHttpService;
+import org.eclipse.equinox.http.servlet.context.ContextPathCustomizer;
 import org.eclipse.equinox.http.servlet.tests.bundle.Activator;
 import org.eclipse.equinox.http.servlet.tests.bundle.BundleAdvisor;
 import org.eclipse.equinox.http.servlet.tests.bundle.BundleInstaller;
@@ -56,6 +56,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
@@ -1200,6 +1201,7 @@ public class ServletTest extends TestCase {
 	private static final String UNREGISTER = "unregister";
 	private static final String STATUS_PARAM = "servlet.init.status";
 	private static final String TEST_PROTOTYPE_NAME = "test.prototype.name";
+	private static final String TEST_PATH_CUSTOMIZER_NAME = "test.path.customizer.name";
 	public void testWBServletChangeInitParams() throws Exception{
 			String actual;
 
@@ -1277,6 +1279,84 @@ public class ServletTest extends TestCase {
 		Assert.assertEquals(getName() + 2, actual);
 	}
 
+	public void testWBServletDefaultContextAdaptor1() throws Exception{
+		Dictionary<String, String> helperProps = new Hashtable<String, String>();
+		helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "testContext" + getName());
+		helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/testContext");
+		helperProps.put(TEST_PATH_CUSTOMIZER_NAME, getName());
+		ServiceRegistration<ServletContextHelper> helperReg = getBundleContext().registerService(ServletContextHelper.class, new TestServletContextHelperFactory(), helperProps);
+
+		ServiceRegistration<ContextPathCustomizer> pathAdaptorReg = null;
+		try {
+			Map<String, String> params = new HashMap<String, String>();
+			params.put(TEST_PROTOTYPE_NAME, getName());
+			params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + getName());
+			params.put(STATUS_PARAM, getName());
+			params.put("servlet.init." + TEST_PATH_CUSTOMIZER_NAME, getName());
+			String actual = doRequest(CONFIGURE, params);
+			Assert.assertEquals(getName(), actual);
+
+			actual = requestAdvisor.request(getName());
+			Assert.assertEquals(getName(), actual);
+
+			ContextPathCustomizer pathAdaptor = new TestContextPathAdaptor("(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" + "testContext" + getName() + ")", null, getName());
+			pathAdaptorReg = getBundleContext().registerService(ContextPathCustomizer.class, pathAdaptor, null);
+
+			actual = requestAdvisor.request("testContext/" + getName());
+			Assert.assertEquals(getName(), actual);
+
+			pathAdaptorReg.unregister();
+			pathAdaptorReg = null;
+
+			actual = requestAdvisor.request(getName());
+			Assert.assertEquals(getName(), actual);
+		} finally {
+			helperReg.unregister();
+			if (pathAdaptorReg != null) {
+				pathAdaptorReg.unregister();
+			}
+		}
+	}
+
+	public void testWBServletDefaultContextAdaptor2() throws Exception{
+		Dictionary<String, String> helperProps = new Hashtable<String, String>();
+		helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "testContext" + getName());
+		helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/testContext");
+		helperProps.put(TEST_PATH_CUSTOMIZER_NAME, getName());
+		ServiceRegistration<ServletContextHelper> helperReg = getBundleContext().registerService(ServletContextHelper.class, new TestServletContextHelperFactory(), helperProps);
+
+		ServiceRegistration<ContextPathCustomizer> pathAdaptorReg = null;
+		try {
+			Map<String, String> params = new HashMap<String, String>();
+			params.put(TEST_PROTOTYPE_NAME, getName());
+			params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + getName());
+			params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" + "testContext" + getName() + ")");
+			params.put(STATUS_PARAM, getName());
+			params.put("servlet.init." + TEST_PATH_CUSTOMIZER_NAME, getName());
+			String actual = doRequest(CONFIGURE, params);
+			Assert.assertEquals(getName(), actual);
+
+			actual = requestAdvisor.request("testContext/" + getName());
+			Assert.assertEquals(getName(), actual);
+
+			ContextPathCustomizer pathAdaptor = new TestContextPathAdaptor(null, "testPrefix", getName());
+			pathAdaptorReg = getBundleContext().registerService(ContextPathCustomizer.class, pathAdaptor, null);
+
+			actual = requestAdvisor.request("testPrefix/testContext/" + getName());
+			Assert.assertEquals(getName(), actual);
+
+			pathAdaptorReg.unregister();
+			pathAdaptorReg = null;
+
+			actual = requestAdvisor.request("testContext/" + getName());
+			Assert.assertEquals(getName(), actual);
+		} finally {
+			helperReg.unregister();
+			if (pathAdaptorReg != null) {
+				pathAdaptorReg.unregister();
+			}
+		}
+	}
 	private String doRequest(String action, Map<String, String> params) throws IOException {
 		StringBuilder requestInfo = new StringBuilder(PROTOTYPE);
 		requestInfo.append(action);
@@ -1387,4 +1467,55 @@ public class ServletTest extends TestCase {
 		public void init(FilterConfig arg0) throws ServletException {/**/}
 	}
 
+	static class TestServletContextHelperFactory implements ServiceFactory<ServletContextHelper> {
+		static class TestServletContextHelper extends ServletContextHelper {
+			public TestServletContextHelper(Bundle bundle) {
+				super(bundle);
+			}};
+		@Override
+		public ServletContextHelper getService(Bundle bundle, ServiceRegistration<ServletContextHelper> registration) {
+			return new TestServletContextHelper(bundle);
+		}
+
+		@Override
+		public void ungetService(Bundle bundle, ServiceRegistration<ServletContextHelper> registration,
+				ServletContextHelper service) {
+			// nothing
+		}
+		
+	}
+
+	static class TestContextPathAdaptor extends ContextPathCustomizer {
+		private final String defaultFilter;
+		private final String contextPrefix;
+		private final String testName;
+		
+		/**
+		 * @param defaultFilter
+		 * @param contextPrefix
+		 */
+		public TestContextPathAdaptor(String defaultFilter, String contextPrefix, String testName) {
+			super();
+			this.defaultFilter = defaultFilter;
+			this.contextPrefix = contextPrefix;
+			this.testName = testName;
+		}
+
+		@Override
+		public String getDefaultContextSelectFilter(ServiceReference<?> httpWhiteBoardService) {
+			if (testName.equals(httpWhiteBoardService.getProperty("servlet.init." + TEST_PATH_CUSTOMIZER_NAME))) {
+				return defaultFilter;
+			}
+			return null;
+		}
+
+		@Override
+		public String getContextPathPrefix(ServiceReference<ServletContextHelper> helper) {
+			if (testName.equals(helper.getProperty(TEST_PATH_CUSTOMIZER_NAME))) {
+				return contextPrefix;
+			}
+			return null;
+		}
+		
+	}
 }

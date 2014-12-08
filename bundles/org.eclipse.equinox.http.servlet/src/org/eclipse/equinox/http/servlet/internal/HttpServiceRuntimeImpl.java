@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.*;
 import javax.servlet.Filter;
 import javax.servlet.http.*;
+import org.eclipse.equinox.http.servlet.context.ContextPathCustomizer;
 import org.eclipse.equinox.http.servlet.internal.context.*;
 import org.eclipse.equinox.http.servlet.internal.error.*;
 import org.eclipse.equinox.http.servlet.internal.servlet.*;
@@ -64,6 +65,11 @@ public class HttpServiceRuntimeImpl
 			new ServiceTracker<ServletContextHelper, AtomicReference<ContextController>>(
 				trackingContext, ServletContextHelper.class, this);
 
+		contextPathCustomizerHolder = new ContextPathCustomizerHolder(consumingContext, contextServiceTracker);
+		contextPathAdaptorTracker = new ServiceTracker<ContextPathCustomizer, ContextPathCustomizer>(
+			consumingContext, ContextPathCustomizer.class, contextPathCustomizerHolder);
+		contextPathAdaptorTracker.open();
+
 		contextServiceTracker.open();
 
 		Hashtable<String, Object> defaultContextProps = new Hashtable<String, Object>();
@@ -106,6 +112,7 @@ public class HttpServiceRuntimeImpl
 		if (contextPath == null || contextPath.equals(Const.SLASH)) {
 			contextPath = Const.BLANK;
 		}
+		contextPath = adaptContextPath(contextPath, serviceReference);
 
 		long serviceId = (Long)serviceReference.getProperty(
 			Constants.SERVICE_ID);
@@ -122,6 +129,28 @@ public class HttpServiceRuntimeImpl
 			serviceReference, contextName,
 			contextPath, serviceId, properties));
 		return result;
+	}
+
+	private String adaptContextPath(String contextPath, ServiceReference<ServletContextHelper> helper) {
+		ContextPathCustomizer pathAdaptor = contextPathCustomizerHolder.getHighestRanked();
+		if (pathAdaptor != null) {
+			String contextPrefix = pathAdaptor.getContextPathPrefix(helper);
+			if (contextPrefix != null && !contextPrefix.isEmpty() && !contextPrefix.equals(Const.SLASH)) {
+				if (!contextPrefix.startsWith(Const.SLASH)) {
+					contextPrefix = Const.SLASH + contextPrefix;
+				}
+				return contextPrefix + contextPath;
+			}
+		}
+		return contextPath;
+	}
+
+	public String getDefaultContextSelectFilter(ServiceReference<?> httpWhiteBoardService) {
+		ContextPathCustomizer pathAdaptor = contextPathCustomizerHolder.getHighestRanked();
+		if (pathAdaptor != null) {
+			return pathAdaptor.getDefaultContextSelectFilter(httpWhiteBoardService);
+		}
+		return null;
 	}
 
 	public ContextController addServletContextHelper(
@@ -172,7 +201,10 @@ public class HttpServiceRuntimeImpl
 
 	public void destroy() {
 		defaultContextReg.unregister();
+
 		contextServiceTracker.close();
+		contextPathAdaptorTracker.close();
+
 		controllerMap.clear();
 		contextPathMap.clear();
 		registeredObjects.clear();
@@ -185,6 +217,7 @@ public class HttpServiceRuntimeImpl
 		parentServletContext = null;
 		registeredObjects = null;
 		contextServiceTracker = null;
+		contextPathCustomizerHolder = null;
 	}
 
 	public boolean doDispatch(
@@ -208,18 +241,6 @@ public class HttpServiceRuntimeImpl
 		}
 
 		return initParameters;
-	}
-
-	public ContextController getContextController(
-		org.osgi.framework.Filter targetFilter) {
-
-		for (ContextController contextController : controllerMap.keySet()) {
-			if (contextController.matches(targetFilter)) {
-				return contextController;
-			}
-		}
-
-		return null;
 	}
 
 	public Set<Object> getRegisteredObjects() {
@@ -981,6 +1002,8 @@ public class HttpServiceRuntimeImpl
 	private Set<String> registeredContextNames = new ConcurrentSkipListSet<String>();
 
 	private ServiceTracker<ServletContextHelper, AtomicReference<ContextController>> contextServiceTracker;
+	private ServiceTracker<ContextPathCustomizer, ContextPathCustomizer> contextPathAdaptorTracker;
+	private ContextPathCustomizerHolder contextPathCustomizerHolder;
 
 	static class DefaultServletContextHelperFactory implements ServiceFactory<ServletContextHelper> {
 		@Override
@@ -1045,4 +1068,65 @@ public class HttpServiceRuntimeImpl
 		
 	}
 
+	static class ContextPathCustomizerHolder implements ServiceTrackerCustomizer<ContextPathCustomizer, ContextPathCustomizer> {
+		private final BundleContext context;
+		private final ServiceTracker<ServletContextHelper, AtomicReference<ContextController>> contextServiceTracker;
+		private final NavigableMap<ServiceReference<ContextPathCustomizer>, ContextPathCustomizer> pathCustomizers =
+			new TreeMap<ServiceReference<ContextPathCustomizer>, ContextPathCustomizer>(Collections.reverseOrder());
+
+		public ContextPathCustomizerHolder(
+			BundleContext context,
+			ServiceTracker<ServletContextHelper, AtomicReference<ContextController>> contextServiceTracker) {
+			super();
+			this.context = context;
+			this.contextServiceTracker = contextServiceTracker;
+		}
+
+		@Override
+		public ContextPathCustomizer addingService(
+			ServiceReference<ContextPathCustomizer> reference) {
+			ContextPathCustomizer service = context.getService(reference);
+			boolean reset = false;
+			synchronized (pathCustomizers) {
+				pathCustomizers.put(reference, service);
+				reset = pathCustomizers.firstKey().equals(reference);
+			}
+			if (reset) {
+				contextServiceTracker.close();
+				contextServiceTracker.open();
+			}
+			return service;
+		}
+
+		@Override
+		public void modifiedService(
+			ServiceReference<ContextPathCustomizer> reference,
+			ContextPathCustomizer service) {
+			removedService(reference, service);
+			addingService(reference);
+		}
+		@Override
+		public void removedService(
+			ServiceReference<ContextPathCustomizer> reference,
+			ContextPathCustomizer service) {
+			boolean reset = false;
+			synchronized (pathCustomizers) {
+				ServiceReference<ContextPathCustomizer> currentFirst = pathCustomizers.firstKey();
+				pathCustomizers.remove(reference);
+				reset = currentFirst.equals(reference);
+			}
+			if (reset) {
+				contextServiceTracker.close();
+				contextServiceTracker.open();
+			}
+			context.ungetService(reference);
+		}
+
+		ContextPathCustomizer getHighestRanked() {
+			synchronized (pathCustomizers) {
+				Map.Entry<ServiceReference<ContextPathCustomizer>, ContextPathCustomizer> firstEntry = pathCustomizers.firstEntry();
+				return firstEntry == null ? null : firstEntry.getValue();
+			}
+		}
+	}
 }

@@ -760,9 +760,12 @@ public class ContextController {
 		String contextSelector = (String) whiteBoardService.getProperty(
 			HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
 		if (contextSelector == null) {
-			contextSelector = "(" + //$NON-NLS-1$
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" //$NON-NLS-1$
-				+ HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME + ")"; //$NON-NLS-1$
+			contextSelector = httpServiceRuntime.getDefaultContextSelectFilter(whiteBoardService);
+			if (contextSelector == null) {
+				contextSelector = "(" + //$NON-NLS-1$
+					HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" //$NON-NLS-1$
+					+ HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME + ")"; //$NON-NLS-1$
+			}
 		}
 
 		if (!contextSelector.startsWith(Const.OPEN_PAREN)) {
