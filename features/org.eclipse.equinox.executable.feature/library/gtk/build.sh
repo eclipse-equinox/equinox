@@ -211,8 +211,15 @@ if [ "$defaultOSArch" = "ppc64" -o $defaultOSArch = "ppc64le" ];  then
 	fi
 	export M_ARCH
 elif [ "$defaultOSArch" = "s390" ];  then
+	if [ "${JAVA_HOME}" = "" ]; then
+		export JAVA_HOME="/home/swtbuild/java5/s390/ibm-java2-s390-50"
+	fi
 	M_ARCH=-m31
 	export M_ARCH
+elif [ "$defaultOSArch" = "s390x" ];  then
+	if [ "${JAVA_HOME}" = "" ]; then
+		export JAVA_HOME="/home/swtbuild/java5/s390x/ibm-java2-s390x-50"
+	fi
 elif [ "$defaultOSArch" = "ia64" ];  then
 	M_ARCH=-mlp64
 	export M_ARCH
