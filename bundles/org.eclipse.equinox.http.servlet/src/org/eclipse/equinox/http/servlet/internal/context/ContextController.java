@@ -67,7 +67,13 @@ public class ContextController {
 		}
 		public void release() {
 			if (serviceObjects != null && service != null) {
-				serviceObjects.ungetService(service);
+				try {
+					serviceObjects.ungetService(service);
+				} catch (IllegalStateException e) {
+					// this can happen if the whiteboard bundle is in the process of stopping
+					// and the framework is in the middle of auto-unregistering any services
+					// the bundle forgot to unregister on stop
+				}
 			}
 		}
 
@@ -1010,7 +1016,13 @@ public class ContextController {
 
 	public void ungetServletContextHelper(Bundle curBundle) {
 		BundleContext context = curBundle.getBundleContext();
-		context.ungetService(servletContextHelperRef);
+		try {
+			context.ungetService(servletContextHelperRef);
+		} catch (IllegalStateException e) {
+			// this can happen if the whiteboard bundle is in the process of stopping
+			// and the framework is in the middle of auto-unregistering any services
+			// the bundle forgot to unregister on stop
+		}
 	}
 
 	private String[] sort(String[] values) {
