@@ -1115,7 +1115,10 @@ public class HttpServiceRuntimeImpl
 				pathCustomizers.remove(reference);
 				reset = currentFirst.equals(reference);
 			}
-			if (reset) {
+
+			// only reset if the tracker is still open
+			if (reset && contextServiceTracker.getTrackingCount() >= 0) {
+
 				contextServiceTracker.close();
 				contextServiceTracker.open();
 			}
