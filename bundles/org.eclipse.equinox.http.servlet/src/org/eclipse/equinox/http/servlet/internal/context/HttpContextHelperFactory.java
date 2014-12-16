@@ -62,6 +62,18 @@ public class HttpContextHelperFactory
 		}
 	}
 
+	public ServiceReference<ServletContextHelper> getServiceReference() {
+		ServiceRegistration<ServletContextHelper> reg = registrationRef.get();
+		if (reg != null) {
+			try {
+				return reg.getReference();
+			} catch (IllegalStateException e) {
+				// do nothing
+			}
+		}
+		return null;
+	}
+
 	public String getFilter() {
 		return filterRef.get();
 	}
