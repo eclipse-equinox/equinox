@@ -70,6 +70,25 @@ Export-Service: org.osgi.service.packageadmin.PackageAdmin,
  org.osgi.service.permissionadmin.PermissionAdmin,
  org.osgi.service.startlevel.StartLevel,
  org.eclipse.osgi.service.debug.DebugOptions
+Provide-Capability: osgi.service; objectClass:List<String>="org.osgi.service.log.LogReaderService, org.eclipse.equinox.log.ExtendedLogReaderService",
+ osgi.service; objectClass:List<String>="org.osgi.service.log.LogService, org.eclipse.equinox.log.ExtendedLogService",
+ osgi.service; objectClass:List<String>="org.eclipse.osgi.framework.log.FrameworkLog",
+ osgi.service; objectClass:List<String>="org.eclipse.osgi.service.datalocation.Location"; type="osgi.user.area",
+ osgi.service; objectClass:List<String>="org.eclipse.osgi.service.datalocation.Location"; type="osgi.instance.area",
+ osgi.service; objectClass:List<String>="org.eclipse.osgi.service.datalocation.Location"; type="osgi.configuration.area",
+ osgi.service; objectClass:List<String>="org.eclipse.osgi.service.datalocation.Location"; type="osgi.install.area",
+ osgi.service; objectClass:List<String>="org.eclipse.osgi.service.datalocation.Location"; type="eclipse.home.location",
+ osgi.service; objectClass:List<String>="org.eclipse.osgi.service.environment.EnvironmentInfo",
+ osgi.service; objectClass:List<String>="org.osgi.service.packageadmin.PackageAdmin",
+ osgi.service; objectClass:List<String>="org.osgi.service.startlevel.StartLevel",
+ osgi.service; objectClass:List<String>="org.osgi.service.permissionadmin.PermissionAdmin",
+ osgi.service; objectClass:List<String>="org.osgi.service.condpermadmin.ConditionalPermissionAdmin",
+ osgi.service; objectClass:List<String>="org.osgi.service.resolver.Resolver",
+ osgi.service; objectClass:List<String>="org.eclipse.osgi.service.debug.DebugOptions",
+ osgi.service; objectClass:List<String>="org.eclipse.osgi.service.urlconversion.URLConverter",
+ osgi.service; objectClass:List<String>="org.eclipse.osgi.service.localization.BundleLocalization",
+ osgi.service; objectClass:List<String>="org.eclipse.osgi.service.security.TrustEngine",
+ osgi.service; objectClass:List<String>="org.eclipse.osgi.signedcontent.SignedContentFactory"
 Bundle-Name: %systemBundle
 Bundle-SymbolicName: org.eclipse.osgi; singleton:=true
 Bundle-Activator: org.eclipse.osgi.internal.framework.SystemBundleActivator
