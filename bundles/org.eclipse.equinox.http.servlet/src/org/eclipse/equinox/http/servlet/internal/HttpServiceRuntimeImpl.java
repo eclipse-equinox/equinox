@@ -213,7 +213,7 @@ public class HttpServiceRuntimeImpl
 		trackingContext = null;
 		consumingContext = null;
 		contextPathMap = null;
-		legacyServiceIdGenerator = null;
+		legacyIdGenerator = null;
 		parentServletContext = null;
 		registeredObjects = null;
 		contextServiceTracker = null;
@@ -385,8 +385,8 @@ public class HttpServiceRuntimeImpl
 		return null;
 	}
 
-	AtomicLong getLegacyServiceIdGenerator() {
-		return legacyServiceIdGenerator;
+	long generateLegacyId() {
+		return legacyIdGenerator.getAndIncrement();
 	}
 
 	private ContextController createContextController(
@@ -892,7 +892,7 @@ public class HttpServiceRuntimeImpl
 			if (factory == null) {
 				factory = new HttpContextHelperFactory(httpContext);
 				Dictionary<String, Object> props = new Hashtable<String, Object>();
-				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, httpContext.toString());
+				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, httpContext.getClass().getName() + "-" + generateLegacyId()); //$NON-NLS-1$
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/"); //$NON-NLS-1$
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_TARGET, targetFilter);
 				props.put(Const.EQUINOX_LEGACY_CONTEXT_HELPER, Boolean.TRUE);
@@ -1036,7 +1036,7 @@ public class HttpServiceRuntimeImpl
 	private ConcurrentMap<ContextController, ServiceReference<ServletContextHelper>> controllerMap =
 		new ConcurrentHashMap<ContextController, ServiceReference<ServletContextHelper>>();
 
-	private AtomicLong legacyServiceIdGenerator = new AtomicLong(0);
+	private AtomicLong legacyIdGenerator = new AtomicLong(0);
 
 	private Set<Object> registeredObjects = Collections.newSetFromMap(new ConcurrentHashMap<Object, Boolean>());
 	private Set<String> registeredContextNames = new ConcurrentSkipListSet<String>();
