@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2013 IBM Corporation and others.
+ * Copyright (c) 2006, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,7 +71,16 @@ public class EquinoxLogServices {
 
 		if ("true".equals(environmentInfo.getConfiguration(EclipseStarter.PROP_CONSOLE_LOG))) //$NON-NLS-1$
 			logWriter.setConsoleLog(true);
-		logServiceManager = new LogServiceManager(logWriter, perfWriter);
+		String logHistoryMaxProp = environmentInfo.getConfiguration(EquinoxConfiguration.PROP_LOG_HISTORY_MAX);
+		int logHistoryMax = 0;
+		if (logHistoryMaxProp != null) {
+			try {
+				logHistoryMax = Integer.parseInt(logHistoryMaxProp);
+			} catch (NumberFormatException e) {
+				// ignore and use 0
+			}
+		}
+		logServiceManager = new LogServiceManager(logHistoryMax, logWriter, perfWriter);
 		eclipseLogFactory = new EquinoxLogFactory(logWriter, logServiceManager);
 		rootFrameworkLog = eclipseLogFactory.createFrameworkLog(null, logWriter);
 	}

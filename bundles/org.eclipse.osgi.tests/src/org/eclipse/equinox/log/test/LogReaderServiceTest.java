@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others All rights reserved. This
+ * Copyright (c) 2007, 2014 IBM Corporation and others All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -8,7 +8,10 @@
  *******************************************************************************/
 package org.eclipse.equinox.log.test;
 
-import java.util.Hashtable;
+import java.io.File;
+import java.util.*;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
 import org.osgi.framework.*;
@@ -146,5 +149,75 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 			listener.waitForLogEntry();
 		}
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
+	}
+
+	public void testLogHistory1() throws BundleException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(EquinoxConfiguration.PROP_LOG_HISTORY_MAX, "10");
+		Equinox equinox = new Equinox(configuration);
+		equinox.start();
+
+		try {
+			LogService testLog = equinox.getBundleContext().getService(equinox.getBundleContext().getServiceReference(LogService.class));
+			LogReaderService testReader = equinox.getBundleContext().getService(equinox.getBundleContext().getServiceReference(LogReaderService.class));
+			assertEquals("Expecting no logs.", 0, countLogEntries(testReader.getLog(), 0));
+			// log 9 things
+			for (int i = 0; i < 9; i++) {
+				testLog.log(LogService.LOG_WARNING, String.valueOf(i));
+			}
+			assertEquals("Wrong number of logs.", 9, countLogEntries(testReader.getLog(), 0));
+
+			// log 9 more things
+			for (int i = 9; i < 18; i++) {
+				testLog.log(LogService.LOG_WARNING, String.valueOf(i));
+			}
+
+			// should only be the last 10 logs (8 - 17)
+			assertEquals("Wrong number of logs.", 10, countLogEntries(testReader.getLog(), 8));
+		} finally {
+			try {
+				equinox.stop();
+			} catch (BundleException e) {
+				// ignore
+			}
+		}
+	}
+
+	public void testLogHistory2() throws BundleException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+		equinox.start();
+
+		try {
+			LogService testLog = equinox.getBundleContext().getService(equinox.getBundleContext().getServiceReference(LogService.class));
+			LogReaderService testReader = equinox.getBundleContext().getService(equinox.getBundleContext().getServiceReference(LogReaderService.class));
+			assertEquals("Expecting no logs.", 0, countLogEntries(testReader.getLog(), 0));
+			// log 9 things
+			for (int i = 0; i < 9; i++) {
+				testLog.log(LogService.LOG_WARNING, String.valueOf(i));
+			}
+			assertEquals("Wrong number of logs.", 0, countLogEntries(testReader.getLog(), 0));
+		} finally {
+			try {
+				equinox.stop();
+			} catch (BundleException e) {
+				// ignore
+			}
+		}
+	}
+
+	private int countLogEntries(Enumeration logEntries, int startingMessage) {
+		int count = 0;
+		while (logEntries.hasMoreElements()) {
+			LogEntry entry = (LogEntry) logEntries.nextElement();
+			assertEquals("Wrong log message.", String.valueOf(startingMessage), entry.getMessage());
+			startingMessage++;
+			count++;
+		}
+		return count;
 	}
 }

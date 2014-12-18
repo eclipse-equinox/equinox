@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2013 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2014 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -53,6 +53,8 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	private ArrayMap<LogListener, Object[]> listeners = new ArrayMap<LogListener, Object[]>(5);
 	private LogFilter[] filters = null;
 	private final ThreadLocal<int[]> nestedCallCount = new ThreadLocal<int[]>();
+	private final LinkedList<LogEntry> history;
+	private final int maxHistory;
 
 	static boolean safeIsLoggable(LogFilter filter, Bundle bundle, String name, int level) {
 		try {
@@ -93,6 +95,15 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 			// Catch linkage errors as these are generally recoverable but let other Errors propagate (see bug 222001)
 			getErrorStream().println("LogListener.logged threw a non-fatal unchecked exception as follows:"); //$NON-NLS-1$
 			e.printStackTrace(getErrorStream());
+		}
+	}
+
+	public ExtendedLogReaderServiceFactory(int maxHistory) {
+		this.maxHistory = maxHistory;
+		if (maxHistory > 0) {
+			history = new LinkedList<LogEntry>();
+		} else {
+			history = null;
 		}
 	}
 
@@ -181,6 +192,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 
 	void logPrivileged(Bundle bundle, String name, Object context, int level, String message, Throwable exception) {
 		LogEntry logEntry = new ExtendedLogEntryImpl(bundle, name, context, level, message, exception);
+		storeEntry(logEntry);
 		ArrayMap<LogListener, Object[]> listenersCopy;
 		listenersLock.readLock();
 		try {
@@ -208,6 +220,17 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 			}
 		} finally {
 			decrementNestedCount();
+		}
+	}
+
+	private void storeEntry(LogEntry logEntry) {
+		if (history != null) {
+			synchronized (history) {
+				if (history.size() == maxHistory) {
+					history.removeFirst();
+				}
+				history.addLast(logEntry);
+			}
 		}
 	}
 
@@ -264,6 +287,11 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	}
 
 	Enumeration<?> getLog() {
-		return EMPTY_ENUMERATION;
+		if (history == null) {
+			return EMPTY_ENUMERATION;
+		}
+		synchronized (history) {
+			return Collections.enumeration(new ArrayList<LogEntry>(history));
+		}
 	}
 }
