@@ -114,6 +114,11 @@ int loadGtk() {
 		setenv("LIBOVERLAY_SCROLLBAR", "0", 0);
 	}
 
+	char *oxygenGtkHack = getenv("OXYGEN_DISABLE_INNER_SHADOWS_HACK");
+	if (oxygenGtkHack == NULL) {
+		setenv("OXYGEN_DISABLE_INNER_SHADOWS_HACK", "1", 0);
+	}
+
 	void *gdkLib = NULL, *gtkLib = NULL, *objLib = NULL, *pixLib = NULL, *x11Lib = NULL;
 	
 	char *gtk3 = getenv("SWT_GTK3");
