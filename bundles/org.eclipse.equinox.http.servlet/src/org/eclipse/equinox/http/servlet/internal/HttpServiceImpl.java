@@ -15,6 +15,7 @@ package org.eclipse.equinox.http.servlet.internal;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.*;
 import java.util.Dictionary;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -26,7 +27,7 @@ import org.osgi.service.http.*;
 public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 	final Bundle bundle; //The bundle associated with this instance of http service
-	private final HttpServiceRuntimeImpl httpServiceRuntime;
+	final HttpServiceRuntimeImpl httpServiceRuntime;
 	private boolean shutdown = false; // We prevent use of this instance if HttpServiceFactory.ungetService has called unregisterAliases.
 
 	class DefaultHttpContext implements HttpContext {
@@ -76,44 +77,80 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	}
 
 	/**
+	 * @throws ServletException 
 	 * @see HttpService#registerFilter(String, Filter, Dictionary, HttpContext)
 	 */
 	public synchronized void registerFilter(
-			String alias, Filter filter, Dictionary<String, String> initparams,
+			final String alias, final Filter filter, 
+			final Dictionary<String, String> initparams,
 			HttpContext httpContext)
 		throws ServletException {
 
 		checkShutdown();
 
-		httpContext = httpContext == null ? createDefaultHttpContext() : httpContext;
-		httpServiceRuntime.registerHttpServiceFilter(bundle, alias, filter, initparams, httpContext);
+		final HttpContext finalHttpContext = httpContext == null ? createDefaultHttpContext() : httpContext;
+		try {
+			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+				@Override
+				public Void run() throws ServletException {
+					httpServiceRuntime.registerHttpServiceFilter(bundle, alias, filter, initparams, finalHttpContext);
+					return null;
+				}
+			});
+		}
+		catch (PrivilegedActionException e) {
+			unchecked(e.getException());
+		}
+
 	}
 
 	/**
+	 * @throws NamespaceException 
 	 * @see HttpService#registerResources(String, String, HttpContext)
 	 */
 	public synchronized void registerResources(
-			String alias, String name, HttpContext httpContext)
+			final String alias, final String name, HttpContext httpContext)
 		throws NamespaceException {
 
 		checkShutdown();
+		final HttpContext finalHttpContext = httpContext == null ? createDefaultHttpContext() : httpContext;
+		try {
+			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+				@Override
+				public Void run() throws NamespaceException {
+					httpServiceRuntime.registerHttpServiceResources(bundle, alias, name, finalHttpContext);
+					return null;
+				}
+			});
+		} catch (PrivilegedActionException e) {
+			unchecked(e.getException());
+		}
 
-		httpContext = httpContext == null ? createDefaultHttpContext() : httpContext;
-		httpServiceRuntime.registerHttpServiceResources(bundle, alias, name, httpContext);
 	}
 
 	/**
+	 * @throws ServletException 
+	 * @throws NamespaceException 
 	 * @see HttpService#registerServlet(String, Servlet, Dictionary, HttpContext)
 	 */
 	public synchronized void registerServlet(
-			String alias, Servlet servlet, Dictionary initparams,
-			HttpContext httpContext)
+			final String alias, final Servlet servlet, 
+			final Dictionary initparams, HttpContext httpContext)
 		throws ServletException, NamespaceException {
 
 		checkShutdown();
-
-		httpContext = httpContext == null ? createDefaultHttpContext() : httpContext;
-		httpServiceRuntime.registerHttpServiceServlet(bundle, alias, servlet, initparams, httpContext);
+		final HttpContext finalHttpContext = httpContext == null ? createDefaultHttpContext() : httpContext;
+		try {
+			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+				@Override
+				public Void run() throws NamespaceException, ServletException {
+					httpServiceRuntime.registerHttpServiceServlet(bundle, alias, servlet, initparams, finalHttpContext);
+					return null;
+				}
+			});
+		} catch (PrivilegedActionException e) {
+			unchecked(e.getException());
+		}
 	}
 
 	/**
@@ -148,4 +185,12 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 		}
 	}
 
+	private static <T> T unchecked(Exception exception) {
+		return HttpServiceImpl.<T, RuntimeException> unchecked0(exception);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T, E extends Exception> T unchecked0(Exception exception) throws E {
+		throw (E) exception;
+	}
 }
