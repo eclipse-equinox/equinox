@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Raymond Augé and others.
+ * Copyright (c) 2014, 2015 Raymond Augé and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -609,6 +609,7 @@ public class HttpServiceRuntimeImpl
 			HttpContextHelperFactory factory = getOrRegisterHttpContextHelperFactory(bundle, httpContext);
 			
 			HttpServiceObjectRegistration objectRegistration = null;
+			ServiceRegistration<Filter> registration = null;
 			try {
 				Dictionary<String, Object> props = new Hashtable<String, Object>();
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_TARGET, targetFilter);
@@ -619,7 +620,13 @@ public class HttpServiceRuntimeImpl
 				props.put(Const.EQUINOX_LEGACY_MATCHING_PROP, Boolean.TRUE);
 				props.put(Constants.SERVICE_RANKING, findFilterPriority(initparams));
 				fillInitParams(props, initparams, Const.FILTER_INIT_PREFIX);
-				ServiceRegistration<Filter> registration = bundle.getBundleContext().registerService(Filter.class, new LegacyFilterFactory(filter), props);
+
+				LegacyFilterFactory filterFactory = new LegacyFilterFactory(filter);
+				registration = bundle.getBundleContext().registerService(Filter.class, filterFactory, props);
+
+				// check that init got called and did not throw an exception
+				filterFactory.checkForError();
+
 				objectRegistration = new HttpServiceObjectRegistration(filter, registration, factory, bundle);
 				Set<HttpServiceObjectRegistration> objectRegistrations = bundleRegistrations.get(bundle);
 				if (objectRegistrations == null) {
@@ -633,6 +640,9 @@ public class HttpServiceRuntimeImpl
 					// something bad happened above (likely going to throw a runtime exception)
 					// need to clean up the factory reference
 					decrementFactoryUseCount(factory);
+					if (registration != null) {
+						registration.unregister();
+					}
 				}
 			}
 		}
@@ -753,10 +763,12 @@ public class HttpServiceRuntimeImpl
 		ContextController.checkPattern(alias);
 
 		synchronized (legacyMappings) {
-			if (getRegisteredObjects().contains(servlet)) {
+			LegacyServlet legacyServlet = new LegacyServlet(servlet);
+			if (getRegisteredObjects().contains(legacyServlet)) {
 				throw new ServletAlreadyRegisteredException(servlet);
 			}
 			HttpServiceObjectRegistration objectRegistration = null;
+			ServiceRegistration<Servlet> registration = null;
 			HttpContextHelperFactory factory = getOrRegisterHttpContextHelperFactory(bundle, httpContext);
 			try {
 				String fullAlias = getFullAlias(alias, factory);
@@ -777,7 +789,12 @@ public class HttpServiceRuntimeImpl
 				props.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
 				props.put(Const.EQUINOX_LEGACY_MATCHING_PROP, Boolean.TRUE);
 				fillInitParams(props, initparams, Const.SERVLET_INIT_PREFIX);
-				ServiceRegistration<Servlet> registration = bundle.getBundleContext().registerService(Servlet.class, servlet, props);
+
+				registration = bundle.getBundleContext().registerService(Servlet.class, legacyServlet, props);
+
+				// check that init got called and did not throw an exception
+				legacyServlet.checkForError();
+
 				objectRegistration = new HttpServiceObjectRegistration(fullAlias, registration, factory, bundle);
 
 				Set<HttpServiceObjectRegistration> objectRegistrations = bundleRegistrations.get(bundle);
@@ -800,6 +817,9 @@ public class HttpServiceRuntimeImpl
 					// something bad happened above (likely going to throw a runtime exception)
 					// need to clean up the factory reference
 					decrementFactoryUseCount(factory);
+					if (registration != null) {
+						registration.unregister();
+					}
 				}
 			}
 		}
@@ -1068,44 +1088,124 @@ public class HttpServiceRuntimeImpl
 		}
 	}
 
-	static class LegacyFilterFactory implements PrototypeServiceFactory<Filter> {
+	static class LegacyServiceObject {
+		final AtomicReference<Exception> error = new AtomicReference<Exception>(new ServletException("The init() method was never called.")); //$NON-NLS-1$
+		public void checkForError() {
+			Exception result = error.get();
+			if (result != null) {
+				HttpServiceImpl.unchecked(result);
+			}
+		}
+	}
+
+	public static class LegacyFilterFactory extends LegacyServiceObject implements PrototypeServiceFactory<Filter> {
 		final Filter filter;
-		
+
 		public LegacyFilterFactory(Filter filter) {
 			this.filter = filter;
 		}
 
 		@Override
-		public Filter getService(
-			Bundle bundle, ServiceRegistration<Filter> registration) {
-			return new Filter() {
-				
-				@Override
-				public void init(FilterConfig filterConfig) throws ServletException {
-					filter.init(filterConfig);
-				}
-				
-				@Override
-				public void doFilter(
-					ServletRequest request, ServletResponse response, FilterChain chain)
-					throws IOException, ServletException {
-					filter.doFilter(request, response, chain);
-				}
-				
-				@Override
-				public void destroy() {
-					filter.destroy();
-				}
-			};
+		public Filter getService(Bundle bundle, ServiceRegistration<Filter> registration) {
+			return new LegacyFilter();
 		}
 
 		@Override
 		public void ungetService(
-			Bundle bundle, ServiceRegistration<Filter> registration,
-			Filter service) {
+			Bundle bundle, ServiceRegistration<Filter> registration, Filter service) {
 			// do nothing
 		}
+
+		// NOTE we do not do the same equals check here for filter that we do for servlet
+		// this is because we must allow filter to be applied to all context helpers
+		// TODO this means it is still possible that init() will get called if the same filter
+		// is registered multiple times.  This is unfortunate but is an error case on the client anyway.
+		class LegacyFilter implements Filter {
+			/**
+			 * @throws ServletException  
+			 */
+			@Override
+			public void init(FilterConfig filterConfig) throws ServletException {
+				try {
+					filter.init(filterConfig);
+					error.set(null);
+				} catch (Exception e){
+					error.set(e);
+					HttpServiceImpl.unchecked(e);
+				}
+			}
+			
+			@Override
+			public void doFilter(
+				ServletRequest request, ServletResponse response, FilterChain chain)
+				throws IOException, ServletException {
+				filter.doFilter(request, response, chain);
+			}
+			
+			@Override
+			public void destroy() {
+				filter.destroy();
+			}
+		}
+	}
+
+	static class LegacyServlet extends LegacyServiceObject implements Servlet {
+		final Servlet servlet;
 		
+		public LegacyServlet(Servlet servlet) {
+			this.servlet = servlet;
+		}
+
+		/**
+		 * @throws ServletException  
+		 */
+		@Override
+		public void init(ServletConfig config)
+			throws ServletException {
+			try {
+				servlet.init(config);
+				error.set(null);
+			} catch (Exception e){
+				error.set(e);
+				HttpServiceImpl.unchecked(e);
+			}
+		}
+
+		@Override
+		public ServletConfig getServletConfig() {
+			return servlet.getServletConfig();
+		}
+
+		@Override
+		public void
+			service(ServletRequest req, ServletResponse res)
+				throws ServletException, IOException {
+			servlet.service(req, res);
+		}
+
+		@Override
+		public String getServletInfo() {
+			return servlet.getServletInfo();
+		}
+
+		@Override
+		public void destroy() {
+			servlet.destroy();
+		}
+
+		@Override
+		public int hashCode() {
+			return servlet.hashCode();
+		}
+
+		@SuppressWarnings("rawtypes")
+		@Override
+		public boolean equals(Object other) {
+			if (other instanceof LegacyServlet) {
+				other = ((LegacyServlet) other).servlet;
+			}
+			return servlet.equals(other);
+		}
 	}
 
 	static class ContextPathCustomizerHolder implements ServiceTrackerCustomizer<ContextPathCustomizer, ContextPathCustomizer> {

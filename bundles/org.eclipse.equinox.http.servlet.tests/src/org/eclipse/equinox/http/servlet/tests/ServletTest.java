@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2014 IBM Corporation and others.
+ * Copyright (c) 2011, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
@@ -33,6 +34,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpSessionAttributeListener;
 
 import junit.framework.TestCase;
@@ -524,6 +526,104 @@ public class ServletTest extends TestCase {
 		Assert.assertEquals("/blah1/*", resourceDTO.patterns[0]);
 		Assert.assertEquals("/foo", resourceDTO.prefix);
 		Assert.assertTrue(resourceDTO.serviceId < 0);
+	}
+
+	public void test_Registration14() throws Exception {
+		Servlet initError = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void init(ServletConfig config) throws ServletException {
+				throw new ServletException("Init error.");
+			}
+			
+		};
+		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
+		try {
+			extendedHttpService.registerServlet("/foo", initError, null, null);
+			fail("Expected an init failure.");
+		} catch (ServletException e) {
+			//expected
+			assertEquals("Wrong exception message.", "Init error.", e.getMessage());
+		}
+	}
+
+	public void test_Registration15() throws Exception {
+		Servlet initError = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void init(ServletConfig config) throws ServletException {
+				throw new IllegalStateException("Init error.");
+			}
+			
+		};
+		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
+		try {
+			extendedHttpService.registerServlet("/foo", initError, null, null);
+			fail("Expected an init failure.");
+		} catch (IllegalStateException e) {
+			//expected
+			assertEquals("Wrong exception message.", "Init error.", e.getMessage());
+		}
+	}
+
+	public void test_Registration16() throws Exception {
+		Filter initError = new Filter() {
+			
+			@Override
+			public void init(FilterConfig filterConfig) throws ServletException {
+				throw new IllegalStateException("Init error.");
+			}
+			
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
+					ServletException {
+				// nothing
+			}
+			
+			@Override
+			public void destroy() {
+				// nothing
+			}
+		};
+		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
+		try {
+			extendedHttpService.registerFilter("/foo", initError, null, null);
+			fail("Expected an init failure.");
+		} catch (IllegalStateException e) {
+			//expected
+			assertEquals("Wrong exception message.", "Init error.", e.getMessage());
+		}
+	}
+
+	public void test_Registration17() throws Exception {
+		Filter initError = new Filter() {
+			
+			@Override
+			public void init(FilterConfig filterConfig) throws ServletException {
+				throw new ServletException("Init error.");
+			}
+			
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
+					ServletException {
+				// nothing
+			}
+			
+			@Override
+			public void destroy() {
+				// nothing
+			}
+		};
+		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
+		try {
+			extendedHttpService.registerFilter("/foo", initError, null, null);
+			fail("Expected an init failure.");
+		} catch (ServletException e) {
+			//expected
+			assertEquals("Wrong exception message.", "Init error.", e.getMessage());
+		}
 	}
 
 	public void test_Resource1() throws Exception {
