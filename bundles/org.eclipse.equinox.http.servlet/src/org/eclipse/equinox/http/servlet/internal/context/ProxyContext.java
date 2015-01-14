@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2015 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import org.eclipse.equinox.http.servlet.internal.servlet.HttpServletRequestBuilder;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
-import org.osgi.service.http.context.ServletContextHelper;
 
 /**
  * The ProxyContext provides something similar to a ServletContext for all servlets and resources under a particular ProxyServlet.
@@ -32,8 +31,8 @@ public class ProxyContext {
 	private static final String JAVAX_SERVLET_CONTEXT_TEMPDIR = "javax.servlet.context.tempdir"; //$NON-NLS-1$
 
 	private String servletPath;
-	private HashMap<ServletContextHelper, ContextAttributes> attributesMap =
-		new HashMap<ServletContextHelper, ContextAttributes>();
+	private HashMap<ContextController, ContextAttributes> attributesMap =
+		new HashMap<ContextController, ContextAttributes>();
 	File proxyContextTempDir;
 	private ServletContext servletContext;
 
@@ -62,34 +61,34 @@ public class ProxyContext {
 	}
 
 	public synchronized void createContextAttributes(
-		ServletContextHelper servletContextHelper) {
+		ContextController controller) {
 
-		ContextAttributes attributes = attributesMap.get(servletContextHelper);
+		ContextAttributes attributes = attributesMap.get(controller);
 		if (attributes == null) {
-			attributes = new ContextAttributes(servletContextHelper);
-			attributesMap.put(servletContextHelper, attributes);
+			attributes = new ContextAttributes(controller);
+			attributesMap.put(controller, attributes);
 		}
 		attributes.addReference();
 	}
 
 	public synchronized void destroyContextAttributes(
-		ServletContextHelper servletContextHelper) {
+		ContextController controller) {
 
-		ContextAttributes attributes = attributesMap.get(servletContextHelper);
+		ContextAttributes attributes = attributesMap.get(controller);
 		if (attributes == null) {
 			throw new IllegalStateException("too many calls");
 		}
 		attributes.removeReference();
 		if (attributes.referenceCount() == 0) {
-			attributesMap.remove(servletContextHelper);
+			attributesMap.remove(controller);
 			attributes.destroy();
 		}
 	}
 
 	public synchronized Dictionary<String, Object> getContextAttributes(
-		ServletContextHelper servletContextHelper) {
+		ContextController controller) {
 
-		return attributesMap.get(servletContextHelper);
+		return attributesMap.get(controller);
 	}
 
 	public ServletContext getServletContext() {
@@ -119,11 +118,11 @@ public class ProxyContext {
 		private static final long serialVersionUID = 1916670423277243587L;
 		private int referenceCount;
 
-		public ContextAttributes(ServletContextHelper servletContextHelper) {
+		public ContextAttributes(ContextController controller) {
 			if (proxyContextTempDir != null) {
 				File contextTempDir = new File(
 					proxyContextTempDir,
-					"hc_" + servletContextHelper.hashCode()); //$NON-NLS-1$
+					"hc_" + controller.hashCode()); //$NON-NLS-1$
 
 				contextTempDir.mkdirs();
 

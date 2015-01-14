@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Raymond Augé and others.
+ * Copyright (c) 2015 Raymond Augé and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,6 @@ import javax.servlet.*;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.dto.ListenerDTO;
 
 /**
@@ -30,21 +29,18 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 	private final List<Class<? extends EventListener>> classes;
 	private final EventListener proxy;
 	private final ServletContext servletContext;
-	private final ServletContextHelper servletContextHelper; //The context used during the registration of the servlet
 	private final ContextController contextController;
 	private final ClassLoader classLoader;
 
 	public ListenerRegistration(
 		ServiceHolder<EventListener> listenerHolder, List<Class<? extends EventListener>> classes,
 		ListenerDTO listenerDTO, ServletContext servletContext,
-		ServletContextHelper servletContextHelper,
 		ContextController contextController) {
 
 		super(listenerHolder.get(), listenerDTO);
 		this.listenerHolder = listenerHolder;
 		this.classes = classes;
 		this.servletContext = servletContext;
-		this.servletContextHelper = servletContextHelper;
 		this.contextController = contextController;
 
 		classLoader = listenerHolder.getBundle().adapt(BundleWiring.class).getClassLoader();
@@ -104,10 +100,6 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 		return servletContext;
 	}
 
-	public ServletContextHelper getServletContextHelper() {
-		return servletContextHelper;
-	}
-
 	@Override
 	public EventListener getT() {
 		return proxy;
@@ -115,12 +107,12 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 
 	private void createContextAttributes() {
 		contextController.getProxyContext().createContextAttributes(
-			servletContextHelper);
+			contextController);
 	}
 
 	private void destroyContextAttributes() {
 		contextController.getProxyContext().destroyContextAttributes(
-			servletContextHelper);
+			contextController);
 	}
 
 	private class EventListenerInvocationHandler implements InvocationHandler {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Raymond Augé and others.
+ * Copyright (c) 2015 Raymond Augé and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -276,7 +276,7 @@ public class ContextController {
 		ServletContext servletContext = createServletContext(
 			filterHolder.getBundle(), curServletContextHelper);
 		FilterRegistration newRegistration  = new FilterRegistration(
-			filterHolder, filterDTO, filterPriority, curServletContextHelper, this);
+			filterHolder, filterDTO, filterPriority, this);
 		FilterConfig filterConfig = new FilterConfigImpl(
 			name, filterInitParams, servletContext);
 
@@ -339,8 +339,7 @@ public class ContextController {
 		ServletContext servletContext = createServletContext(
 			listenerHolder.getBundle(), curServletContextHelper);
 		ListenerRegistration listenerRegistration = new ListenerRegistration(
-			listenerHolder, classes, listenerDTO, servletContext,
-			curServletContextHelper, this);
+			listenerHolder, classes, listenerDTO, servletContext, this);
 
 		if (classes.contains(ServletContextListener.class)) {
 			ServletContextListener servletContextListener =

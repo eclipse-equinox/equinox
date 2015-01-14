@@ -163,12 +163,12 @@ public abstract class EndpointRegistration<D extends DTO>
 
 	private void createContextAttributes() {
 		contextController.getProxyContext().createContextAttributes(
-			servletContextHelper);
+			contextController);
 	}
 
 	private void destroyContextAttributes() {
 		contextController.getProxyContext().destroyContextAttributes(
-			servletContextHelper);
+			contextController);
 	}
 
 	@Override

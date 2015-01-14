@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2014 IBM Corporation and others.
+ * Copyright (c) 2011, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,6 @@ import org.eclipse.equinox.http.servlet.internal.util.Const;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.dto.FilterDTO;
 
 //This class wraps the filter object registered in the HttpService.registerFilter call, to manage the context classloader when handleRequests are being asked.
@@ -33,7 +32,6 @@ public class FilterRegistration
 	implements Comparable<FilterRegistration> {
 
 	private final ServiceHolder<Filter> filterHolder;
-	private final ServletContextHelper servletContextHelper; //The context used during the registration of the filter
 	private final ClassLoader classLoader;
 	private final int priority;
 	private final ContextController contextController;
@@ -41,13 +39,11 @@ public class FilterRegistration
 
 	public FilterRegistration(
 		ServiceHolder<Filter> filterHolder, FilterDTO filterDTO, int priority,
-		ServletContextHelper servletContextHelper,
 		ContextController contextController) {
 
 		super(filterHolder.get(), filterDTO);
 		this.filterHolder = filterHolder;
 		this.priority = priority;
-		this.servletContextHelper = servletContextHelper;
 		this.contextController = contextController;
 		classLoader = filterHolder.getBundle().adapt(BundleWiring.class).getClassLoader();
 		String legacyContextFilter = (String) filterHolder.getServiceReference().getProperty(Const.EQUINOX_LEGACY_CONTEXT_SELECT);
@@ -111,10 +107,7 @@ public class FilterRegistration
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(classLoader);
-
-			if (servletContextHelper.handleSecurity(request, response)) {
-				getT().doFilter(request, response, chain);
-			}
+			getT().doFilter(request, response, chain);
 		}
 		finally {
 			Thread.currentThread().setContextClassLoader(original);
@@ -135,10 +128,6 @@ public class FilterRegistration
 	@Override
 	public int hashCode() {
 		return Long.valueOf(getD().serviceId).hashCode();
-	}
-
-	public ServletContextHelper getServletContextHelper() {
-		return servletContextHelper;
 	}
 
 	//Delegate the init call to the actual filter
@@ -193,12 +182,12 @@ public class FilterRegistration
 
 	private void createContextAttributes() {
 		contextController.getProxyContext().createContextAttributes(
-			servletContextHelper);
+			contextController);
 	}
 
 	private void destroyContextAttributes() {
 		contextController.getProxyContext().destroyContextAttributes(
-			servletContextHelper);
+			contextController);
 	}
 
 }
