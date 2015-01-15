@@ -451,6 +451,8 @@ final class ModuleResolver {
 	}
 
 	class ResolveProcess extends ResolveContext implements Comparator<Capability>, FelixResolveContext {
+		private static final int RESOLVE_REVISIONS_BATCH_SIZE = 100;
+
 		class ResolveLogger extends Logger {
 			private Map<Resource, ResolutionException> errors = null;
 
@@ -501,7 +503,7 @@ final class ModuleResolver {
 		 */
 		private final Collection<ModuleRevision> disabled;
 		private final Collection<ModuleRevision> triggers;
-		private final Collection<ModuleRevision> optionals;
+		private final List<ModuleRevision> optionals;
 		private final boolean triggersMandatory;
 		private final ModuleDatabase moduleDatabase;
 		private final Map<ModuleRevision, ModuleWiring> wirings;
@@ -509,7 +511,7 @@ final class ModuleResolver {
 		private final DynamicModuleRequirement dynamicReq;
 		private volatile ResolverHook hook = null;
 		private volatile Map<String, Collection<ModuleRevision>> byName = null;
-		private volatile ModuleRevision currentlyResolving = null;
+		private volatile List<Resource> currentlyResolving = null;
 		private volatile boolean currentlyResolvingMandatory = false;
 		private final Set<Resource> transitivelyResolveFailures = new LinkedHashSet<Resource>();
 		private final Set<Resource> failedToResolve = new HashSet<Resource>();
@@ -783,7 +785,7 @@ final class ModuleResolver {
 		@Override
 		public Collection<Resource> getMandatoryResources() {
 			if (currentlyResolvingMandatory) {
-				return Collections.<Resource> singleton(currentlyResolving);
+				return Collections.unmodifiableList(currentlyResolving);
 			}
 			return Collections.emptyList();
 		}
@@ -791,7 +793,7 @@ final class ModuleResolver {
 		@Override
 		public Collection<Resource> getOptionalResources() {
 			if (!currentlyResolvingMandatory) {
-				return Collections.<Resource> singleton(currentlyResolving);
+				return Collections.unmodifiableList(currentlyResolving);
 			}
 			return Collections.emptyList();
 		}
@@ -870,13 +872,10 @@ final class ModuleResolver {
 							result.putAll(dynamicAttachWirings);
 						}
 						if (triggersMandatory) {
-							for (ModuleRevision mandatory : triggers) {
-								resolveSingleRevision(mandatory, true, logger, result);
-							}
+							resolveRevisionsInBatch(triggers, true, logger, result);
 						}
-						for (ModuleRevision optional : optionals) {
-							resolveSingleRevision(optional, false, logger, result);
-						}
+
+						resolveRevisionsInBatch(optionals, false, logger, result);
 					}
 				} catch (ResolutionException e) {
 					re = e;
@@ -930,21 +929,42 @@ final class ModuleResolver {
 			Debug.println(builder);
 		}
 
-		private void resolveSingleRevision(ModuleRevision single, boolean isMandatory, ResolveLogger logger, Map<Resource, List<Wire>> result) throws ResolutionException {
-			if (wirings.containsKey(single) || failedToResolve.contains(single)) {
-				return;
+		private void resolveRevisionsInBatch(Collection<ModuleRevision> revisions, boolean isMandatory, ResolveLogger logger, Map<Resource, List<Wire>> result) throws ResolutionException {
+			long startTime = System.currentTimeMillis();
+			long initialFreeMemory = Runtime.getRuntime().freeMemory();
+			long maxUsedMemory = 0;
+
+			List<Resource> toResolve = new ArrayList<Resource>();
+			while (revisions.size() > 0) {
+				Resource single = revisions.iterator().next();
+				revisions.remove(single);
+				if (DEBUG_ROOTS) {
+					Debug.println("Resolver: Resolving root bundle: " + single); //$NON-NLS-1$
+				}
+				if (!wirings.containsKey(single) && !failedToResolve.contains(single)) {
+					toResolve.add(single);
+				}
+				if (toResolve.size() == RESOLVE_REVISIONS_BATCH_SIZE || revisions.size() == 0) {
+					resolveRevisions(toResolve, isMandatory, logger, result);
+					toResolve.clear();
+				}
+				maxUsedMemory = Math.max(maxUsedMemory, Runtime.getRuntime().freeMemory() - initialFreeMemory);
 			}
-			long startTime = 0;
+
 			if (DEBUG_ROOTS) {
-				startTime = System.currentTimeMillis();
-				Debug.print("Resolver: Resolving root bundle: " + single); //$NON-NLS-1$
+				Debug.println("Resolver: resolve batch size:  " + RESOLVE_REVISIONS_BATCH_SIZE); //$NON-NLS-1$ //$NON-NLS-2$
+				Debug.println("Resolver: time to resolve:  " + (System.currentTimeMillis() - startTime) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
+				Debug.println("Resolver: max used memory: " + maxUsedMemory / (1024 * 1024) + "Mo"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			currentlyResolving = single;
+		}
+
+		private void resolveRevisions(List<Resource> revisions, boolean isMandatory, ResolveLogger logger, Map<Resource, List<Wire>> result) throws ResolutionException {
+			currentlyResolving = revisions;
 			currentlyResolvingMandatory = isMandatory;
 			transitivelyResolveFailures.clear();
 			Map<Resource, List<Wire>> interimResults = null;
 			try {
-				transitivelyResolveFailures.add(single);
+				transitivelyResolveFailures.addAll(revisions);
 				interimResults = new ResolverImpl(logger).resolve(this);
 				applyInterimResultToWiringCopy(interimResults);
 				// now apply the simple wires to the results
@@ -965,9 +985,6 @@ final class ModuleResolver {
 				failedToResolve.addAll(transitivelyResolveFailures);
 				currentlyResolving = null;
 				currentlyResolvingMandatory = false;
-			}
-			if (DEBUG_ROOTS) {
-				Debug.println("  [" + (System.currentTimeMillis() - startTime) + "ms]"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 
