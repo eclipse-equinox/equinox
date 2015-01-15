@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 IBM Corporation and others.
+ * Copyright (c) 2012, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.container.namespaces.EquinoxFragmentNamespace;
 import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.*;
@@ -54,6 +55,9 @@ final class ModuleResolver {
 	boolean DEBUG_WIRING = false;
 	boolean DEBUG_REPORT = false;
 
+	private final int DEFAULT_BATCH_SIZE = 100;
+	final int resolverRevisionBatchSize;
+
 	void setDebugOptions() {
 		DebugOptions options = adaptor.getDebugOptions();
 		// may be null if debugging is not enabled
@@ -87,6 +91,17 @@ final class ModuleResolver {
 	ModuleResolver(ModuleContainerAdaptor adaptor) {
 		this.adaptor = adaptor;
 		setDebugOptions();
+		String batchSizeConfig = this.adaptor.getProperty(EquinoxConfiguration.PROP_RESOLVER_REVISION_BATCH_SIZE);
+		int tempBatchSize;
+		try {
+			tempBatchSize = batchSizeConfig == null ? DEFAULT_BATCH_SIZE : Integer.parseInt(batchSizeConfig);
+		} catch (NumberFormatException e) {
+			tempBatchSize = DEFAULT_BATCH_SIZE;
+		}
+		if (tempBatchSize < 1) {
+			tempBatchSize = DEFAULT_BATCH_SIZE;
+		}
+		this.resolverRevisionBatchSize = tempBatchSize;
 	}
 
 	/**
@@ -934,17 +949,19 @@ final class ModuleResolver {
 			long initialFreeMemory = Runtime.getRuntime().freeMemory();
 			long maxUsedMemory = 0;
 
+			// make a copy so we do not modify the input
+			revisions = new LinkedList<ModuleRevision>(revisions);
 			List<Resource> toResolve = new ArrayList<Resource>();
-			while (revisions.size() > 0) {
-				Resource single = revisions.iterator().next();
-				revisions.remove(single);
+			for (Iterator<ModuleRevision> iResources = revisions.iterator(); iResources.hasNext();) {
+				ModuleRevision single = iResources.next();
+				iResources.remove();
 				if (DEBUG_ROOTS) {
 					Debug.println("Resolver: Resolving root bundle: " + single); //$NON-NLS-1$
 				}
 				if (!wirings.containsKey(single) && !failedToResolve.contains(single)) {
 					toResolve.add(single);
 				}
-				if (toResolve.size() == RESOLVE_REVISIONS_BATCH_SIZE || revisions.size() == 0) {
+				if (toResolve.size() == resolverRevisionBatchSize || !iResources.hasNext()) {
 					resolveRevisions(toResolve, isMandatory, logger, result);
 					toResolve.clear();
 				}
@@ -952,7 +969,7 @@ final class ModuleResolver {
 			}
 
 			if (DEBUG_ROOTS) {
-				Debug.println("Resolver: resolve batch size:  " + RESOLVE_REVISIONS_BATCH_SIZE); //$NON-NLS-1$ //$NON-NLS-2$
+				Debug.println("Resolver: resolve batch size:  " + RESOLVE_REVISIONS_BATCH_SIZE); //$NON-NLS-1$
 				Debug.println("Resolver: time to resolve:  " + (System.currentTimeMillis() - startTime) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
 				Debug.println("Resolver: max used memory: " + maxUsedMemory / (1024 * 1024) + "Mo"); //$NON-NLS-1$ //$NON-NLS-2$
 			}

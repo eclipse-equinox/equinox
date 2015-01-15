@@ -1794,6 +1794,29 @@ public class TestModuleContainer extends AbstractTest {
 		Assert.assertEquals("Wrong package name.", "biz", packageCaps.get(4).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
 	}
 
+	@Test
+	public void testBug457118() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+		Module e = installDummyModule("bug457118.e.MF", "e", container);
+		Module a = installDummyModule("bug457118.a.MF", "a", container);
+		Module b = installDummyModule("bug457118.b.MF", "b", container);
+		Module c = installDummyModule("bug457118.c.MF", "c", container);
+		Module d = installDummyModule("bug457118.d.MF", "d", container);
+
+		container.resolve(null, true);
+
+		Assert.assertEquals("e should resolve.", State.RESOLVED, e.getState());
+		Assert.assertEquals("a should resolve.", State.RESOLVED, a.getState());
+		Assert.assertEquals("b should resolve.", State.RESOLVED, b.getState());
+		Assert.assertEquals("c should resolve.", State.RESOLVED, c.getState());
+		Assert.assertEquals("d should resolve.", State.RESOLVED, d.getState());
+	}
+
 	private static void assertWires(List<ModuleWire> required, List<ModuleWire>... provided) {
 		for (ModuleWire requiredWire : required) {
 			for (List<ModuleWire> providedList : provided) {
