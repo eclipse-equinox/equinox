@@ -466,7 +466,6 @@ final class ModuleResolver {
 	}
 
 	class ResolveProcess extends ResolveContext implements Comparator<Capability>, FelixResolveContext {
-		private static final int RESOLVE_REVISIONS_BATCH_SIZE = 100;
 
 		class ResolveLogger extends Logger {
 			private Map<Resource, ResolutionException> errors = null;
@@ -969,7 +968,7 @@ final class ModuleResolver {
 			}
 
 			if (DEBUG_ROOTS) {
-				Debug.println("Resolver: resolve batch size:  " + RESOLVE_REVISIONS_BATCH_SIZE); //$NON-NLS-1$
+				Debug.println("Resolver: resolve batch size:  " + resolverRevisionBatchSize); //$NON-NLS-1$
 				Debug.println("Resolver: time to resolve:  " + (System.currentTimeMillis() - startTime) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
 				Debug.println("Resolver: max used memory: " + maxUsedMemory / (1024 * 1024) + "Mo"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
