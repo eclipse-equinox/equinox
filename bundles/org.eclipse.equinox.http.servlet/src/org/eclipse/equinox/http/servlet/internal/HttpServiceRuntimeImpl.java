@@ -1198,7 +1198,6 @@ public class HttpServiceRuntimeImpl
 			return servlet.hashCode();
 		}
 
-		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean equals(Object other) {
 			if (other instanceof LegacyServlet) {

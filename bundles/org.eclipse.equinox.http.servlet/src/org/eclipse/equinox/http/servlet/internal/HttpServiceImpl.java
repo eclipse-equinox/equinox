@@ -78,7 +78,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 	/**
 	 * @throws ServletException 
-	 * @see HttpService#registerFilter(String, Filter, Dictionary, HttpContext)
+	 * @see ExtendedHttpService#registerFilter(String, Filter, Dictionary, HttpContext)
 	 */
 	public synchronized void registerFilter(
 			final String alias, final Filter filter, 
