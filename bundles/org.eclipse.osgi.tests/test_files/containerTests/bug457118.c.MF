@@ -3,4 +3,4 @@ Bundle-SymbolicName: c
 Bundle-Version: 1.0.0
 Export-Package: 
  c; version=1.0; uses:="d"
-Require-Bundle: d; visibility:=reexport
+Require-Bundle: d; bundle-version="[1.0,1.1)"; visibility:=reexport

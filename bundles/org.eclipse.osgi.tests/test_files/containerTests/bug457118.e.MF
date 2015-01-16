@@ -3,4 +3,5 @@ Bundle-SymbolicName: e
 Bundle-Version: 1.0.0
 Export-Package: 
  e; version=1.0; uses:="a"
+Import-Package: d; version="[1.0, 1.1)"
 Require-Bundle: a

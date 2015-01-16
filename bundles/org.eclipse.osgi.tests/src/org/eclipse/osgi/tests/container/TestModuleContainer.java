@@ -1808,6 +1808,11 @@ public class TestModuleContainer extends AbstractTest {
 		Module c = installDummyModule("bug457118.c.MF", "c", container);
 		Module d = installDummyModule("bug457118.d.MF", "d", container);
 
+		Module a2 = installDummyModule("bug457118.a2.MF", "a2", container);
+		Module b2 = installDummyModule("bug457118.b2.MF", "b2", container);
+		Module c2 = installDummyModule("bug457118.c2.MF", "c2", container);
+		Module d2 = installDummyModule("bug457118.d2.MF", "d2", container);
+
 		container.resolve(null, true);
 
 		Assert.assertEquals("e should resolve.", State.RESOLVED, e.getState());
@@ -1815,6 +1820,10 @@ public class TestModuleContainer extends AbstractTest {
 		Assert.assertEquals("b should resolve.", State.RESOLVED, b.getState());
 		Assert.assertEquals("c should resolve.", State.RESOLVED, c.getState());
 		Assert.assertEquals("d should resolve.", State.RESOLVED, d.getState());
+
+		List<ModuleWire> bundleWires = e.getCurrentRevision().getWiring().getRequiredModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
+		Assert.assertEquals("Wrong number of bundle wires: " + bundleWires, 1, bundleWires.size());
+		Assert.assertEquals("Wrong bundle provider", a.getCurrentRevision(), bundleWires.get(0).getProvider());
 	}
 
 	private static void assertWires(List<ModuleWire> required, List<ModuleWire>... provided) {

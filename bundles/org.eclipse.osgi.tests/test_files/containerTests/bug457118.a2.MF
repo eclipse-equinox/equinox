@@ -1,0 +1,6 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: a
+Bundle-Version: 1.1.0
+Export-Package: 
+ a; version=1.0; uses:="b,c"
+Require-Bundle: b; bundle-version="[1.1,1.2)", c; bundle-version="[1.1,1.2)"
