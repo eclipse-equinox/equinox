@@ -875,6 +875,26 @@ public class ServletTest extends TestCase {
 
 	}
 
+	public void test_ServletContext1_2() throws Exception {
+		String expected = "/org/eclipse/equinox/http/servlet/tests/tb1/resource1.txt";
+		String actual;
+		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		try {
+			bundle.start();
+			actual = requestAdvisor.request("TestServletContext1");
+			Assert.assertEquals(expected, actual);
+			bundle.stop();
+			bundle.start();
+			bundle.stop();
+			bundle.start();
+			actual = requestAdvisor.request("TestServletContext1");
+		} finally {
+			uninstallBundle(bundle);
+		}
+
+		Assert.assertEquals(expected, actual);
+	}
+
 	public void test_ServletContextHelper7() throws Exception {
 		String expected = "a";
 
