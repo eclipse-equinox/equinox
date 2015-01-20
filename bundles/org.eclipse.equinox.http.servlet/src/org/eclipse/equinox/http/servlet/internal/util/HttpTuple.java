@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Raymond Augé and others.
+ * Copyright (c) 2014, 2015 Raymond Augé and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,8 +11,7 @@
 
 package org.eclipse.equinox.http.servlet.internal.util;
 
-import org.eclipse.equinox.http.servlet.internal.HttpServiceFactory;
-import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
+import org.eclipse.equinox.http.servlet.internal.*;
 import org.eclipse.equinox.http.servlet.internal.servlet.ProxyServlet;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.runtime.HttpServiceRuntime;
@@ -34,6 +33,7 @@ public class HttpTuple {
 	}
 
 	public void destroy() {
+		Activator.unregisterHttpService(proxyServlet);
 		proxyServlet.setHttpServiceRuntimeImpl(null);
 		hsfRegistration.unregister();
 		hsrRegistration.unregister();
