@@ -109,8 +109,8 @@ extern JavaResults* startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* prog
 /* do any platform specific processing of the user vmargs */
 extern void processVMArgs(_TCHAR **vmargs[] );
 
-/* is this a Sun VM, returns 0 if we don't know */
-extern int isSunVM( _TCHAR * javaVM, _TCHAR * jniLib );
+/* is this a Sun/Oracle VM whose version is < 8 (then it needs extra perm gen space), returns 0 if we don't know */
+extern int isMaxPermSizeVM( _TCHAR * javaVM, _TCHAR * jniLib );
 
 /* an array of paths that will need to be on the search path to load the vm shared library */
 extern _TCHAR ** getVMLibrarySearchPath(_TCHAR * vmLibrary);

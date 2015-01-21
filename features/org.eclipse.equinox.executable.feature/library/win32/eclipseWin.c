@@ -577,7 +577,7 @@ JavaResults* startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[],
 	return startJavaJNI(libPath, vmArgs, progArgs, jarFile);
 }
 
-int isSunVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
+int isMaxPermSizeVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
 	_TCHAR *vm = (jniLib != NULL) ? jniLib : javaVM;
 	int result = 0;
 	DWORD infoSize;

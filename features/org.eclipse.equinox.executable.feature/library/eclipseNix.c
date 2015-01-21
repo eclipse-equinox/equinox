@@ -174,61 +174,42 @@ JavaResults* startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[],
 	return startJavaJNI(libPath, vmArgs, progArgs, jarFile);
 }
 
-int isSunVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
-	int descriptors[2];
-	int result = 0;
-	int pid = -1;
-	
-	if (javaVM == NULL)
+int isMaxPermSizeVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
+	FILE *fp = NULL;
+	_TCHAR buffer[4096];
+	_TCHAR *version = NULL, *firstChar;
+	int numChars = 0, result = 0;
+	_stprintf(buffer,"%s -version 2>&1", javaVM);
+	fp = popen(buffer, "r");
+	if (fp == NULL) {
 		return 0;
-	
-	/* create pipe, [0] is read end, [1] is write end */
-	if (pipe(descriptors) != 0)
-		return 0; /* error */
-	
-	pid = fork();
-	if (pid == 0 ) {
-		/* child, connect stdout & stderr to write end of the pipe*/
-		dup2(descriptors[1], STDERR_FILENO);
-		dup2(descriptors[1], STDOUT_FILENO);
-		
-		/* close descriptors */
-		close(descriptors[0]);
-		close(descriptors[1]);
-		
-		{
-			/* exec java -version */
-			_TCHAR *args [] = { javaVM, _T_ECLIPSE("-version"), NULL };
-			execv(args[0], args);
-			/* if we make it here, there was a problem with exec, just exit */
-			exit(0);
+	}
+	while (fgets(buffer, sizeof(buffer)-1, fp) != NULL) {
+		if (!version) {
+			firstChar = (_TCHAR *) (_tcschr(buffer, '"') + 1);
+			if (firstChar != NULL)
+				numChars = (int)  (_tcsrchr(buffer, '"') - firstChar);
+
+			/* Allocate a buffer and copy the version string into it. */
+			if (numChars > 0) {
+				version = malloc( numChars + 1 );
+				_tcsncpy(version, firstChar, numChars);
+				version[numChars] = '\0';
+			}
 		}
-	} else if (pid > 0){
-		/* parent */
-		FILE * stream = NULL;
-		int status = 0;
-		close(descriptors[1]);
-		stream = fdopen( descriptors[0], "r");
-		if (stream != NULL) {
-			_TCHAR buffer[256];
-			while ( fgets(buffer, 256, stream) != NULL) {
-				if (_tcsstr(buffer, _T_ECLIPSE("Java HotSpot(TM)")) || _tcsstr(buffer, _T_ECLIPSE("OpenJDK"))) {
+		if (_tcsstr(buffer, "Java HotSpot(TM)") || _tcsstr(buffer, "OpenJDK")) {
+			if (version != NULL) {
+				if (version[0] == '1' && ((int)(version[2] - '0') < 8)) {
 					result = 1;
-					break;
-				}
-				if (_tcsstr(buffer, _T_ECLIPSE("IBM")) != NULL) {
-					result = 0;
-					break;
 				}
 			}
-			fclose(stream);
-			close(descriptors[0]);
+			break;
 		}
-		waitpid(pid, &status, 0);
-	} else {
-		/* failed to fork */
-		close(descriptors[0]);
-		close(descriptors[1]);
+		if (_tcsstr(buffer, "IBM") != NULL) {
+			result = 0;
+			break;
+		}
 	}
+	pclose(fp);
 	return result;
 }

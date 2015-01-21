@@ -968,7 +968,7 @@ static void mergeUserVMArgs(_TCHAR **vmArgs[]) {
 }
 
 static void adjustVMArgs(_TCHAR *javaVM, _TCHAR *jniLib, _TCHAR **vmArgv[]) {
-	/* Sun VMs need some extra perm gen space */
+	/* Sun/Oracle VMs below version 8 need some extra perm gen space */
 	/* Detecting Sun VM is expensive - only do so if necessary */
 	if (permGen != NULL) {
 		int specified = 0, i = -1;
@@ -981,7 +981,7 @@ static void adjustVMArgs(_TCHAR *javaVM, _TCHAR *jniLib, _TCHAR **vmArgv[]) {
 			}
 		}
 
-		if (!specified && isSunVM(javaVM, jniLib)) {
+		if (!specified && isMaxPermSizeVM(javaVM, jniLib)) {
 			_TCHAR ** oldArgs = *vmArgv;
 			_TCHAR *newArg = malloc((_tcslen(XXPERMGEN) + _tcslen(permGen) + 1) * sizeof(_TCHAR));
 			_stprintf(newArg, _T_ECLIPSE("%s%s"), XXPERMGEN, permGen);

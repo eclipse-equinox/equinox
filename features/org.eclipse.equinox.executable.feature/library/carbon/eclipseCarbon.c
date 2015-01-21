@@ -45,7 +45,7 @@ char *findCommand(char *command);
 char*  defaultVM     = "java";
 char*  vmLibrary	 = "JavaVM";
 char*  shippedVMDir  = "../../../jre/Contents/Home/jre/bin/";
-int isSUN = 0;
+int isSunMaxPermSizeVM = 0;
 
 static void adjustLibraryPath(char * vmLibrary);
 static char * findLib(char * command);
@@ -532,11 +532,15 @@ char * getJavaVersion(char* command) {
 			}
 		}
 		if (strstr(buffer, "Java HotSpot(TM)") || strstr(buffer, "OpenJDK")) {
-			isSUN = 1;
+			if (version != NULL) {
+				if (version[0] == '1' && ((int)(version[2] - '0') < 8)) {
+					isSunMaxPermSizeVM = 1;
+				}
+			}
 			break;
 		}
 		if (strstr(buffer, "IBM") != NULL) {
-			isSUN = 0;
+			isSunMaxPermSizeVM = 0;
 			break;
 		}
 	}
@@ -598,7 +602,7 @@ char * findVMLibrary( char* command ) {
 	if (strstr(cmd, "/JavaVM.framework/") != NULL && (strstr(cmd, "/Current/") != NULL || strstr(cmd, "/A/") != NULL)) {
 		cmd = getJavaHome();
 	}
-	// This is necessary to initialize isSUN
+	// This is necessary to initialize isSunMaxPermSizeVM
 	getJavaVersion(cmd);
 	result = JAVA_FRAMEWORK;
 	if (strstr(cmd, "/JavaVM.framework/") == NULL) {
@@ -858,6 +862,6 @@ void processVMArgs(char **vmargs[] )
 	}
 }
 
-int isSunVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
-	return isSUN;
+int isMaxPermSizeVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
+	return isSunMaxPermSizeVM;
 }
