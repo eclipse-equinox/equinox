@@ -5,4 +5,5 @@ Bug 417264 - We should update our version of Jetty
 Bug 416718 - We should update our version of Jetty for SR2
 Bug 448567 - Update Orbit for M3
 Bug 453678 - Upgrade to Jetty 9.2.5 for Mars M4, and 9.3 for Mars M5
+Bug 458346 - Unusual, hard to decipher error in I-build
 

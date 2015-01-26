@@ -8,4 +8,5 @@ Bug 436758 - Installing a bundle that requires Java 7 when running 6 with -clean
 Bug 448567 - Update Orbit for M3
 Bug 453678 - Upgrade to Jetty 9.2.5 for Mars M4, and 9.3 for Mars M5
 Bug 457171 - adopt and adjust to new jasper.glassfish bundle from Orbit
+Bug 458346 - Unusual, hard to decipher error in I-build
 

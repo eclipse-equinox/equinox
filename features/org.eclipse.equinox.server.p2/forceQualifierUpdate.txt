@@ -16,4 +16,5 @@ Bug 436039 - Hard to explain build failure in I20140528-0115
 Bug 436758 - Installing a bundle that requires Java 7 when running 6 with -clean cannot recover
 Bug 444669 - Update to new ECF, with new HTTPComponents
 Bug 453675 - touch org.eclipse.equinox.server.p2 for new httpcomponents
+Bug 458346 - Unusual, hard to decipher error in I-build
 
