@@ -78,6 +78,7 @@ typedef struct {
 } TRANSLATIONS;
 
 #define COMPANY_NAME_KEY _T_ECLIPSE("\\StringFileInfo\\%04x%04x\\CompanyName")
+#define PRODUCT_VERSION_KEY _T_ECLIPSE("\\StringFileInfo\\%04x%04x\\ProductVersion")
 #define SUN_MICROSYSTEMS _T_ECLIPSE("Sun Microsystems")
 #define ORACLE 			 _T_ECLIPSE("Oracle")
 
@@ -584,9 +585,9 @@ int isMaxPermSizeVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
 	DWORD handle;
 	void * info;
 	
-	_TCHAR * key, *value;
+	_TCHAR *key, *value, *versionKey, *version;
 	size_t i;
-	int valueSize;
+	int valueSize, versionSize;
 	
 	if (vm == NULL)
 		return 0;
@@ -598,22 +599,25 @@ int isMaxPermSizeVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
 			TRANSLATIONS * translations;
 			int translationsSize;
 			VerQueryValue(info,  _T_ECLIPSE("\\VarFileInfo\\Translation"), (void *) &translations, &translationsSize);
-			
+
 			/* this size is only right because %04x is 4 characters */
-			key = malloc( (_tcslen(COMPANY_NAME_KEY) + 1) * sizeof(_TCHAR));
+			key = malloc((_tcslen(COMPANY_NAME_KEY) + 1) * sizeof(_TCHAR));
+			versionKey = malloc((_tcslen(PRODUCT_VERSION_KEY) + 1) * sizeof(_TCHAR));
 			for (i = 0; i < (translationsSize / sizeof(TRANSLATIONS)); i++) {
 				_stprintf(key, COMPANY_NAME_KEY, translations[i].language, translations[i].codepage);
-				
 				VerQueryValue(info, key, (void *)&value, &valueSize);
-				if (_tcsncmp(value, SUN_MICROSYSTEMS, _tcslen(SUN_MICROSYSTEMS)) == 0) {
-					result = 1;
-					break;
-				} else if (_tcsncmp(value, ORACLE, _tcslen(ORACLE)) == 0) {
-					result = 1;
+
+				if ((_tcsncmp(value, SUN_MICROSYSTEMS, _tcslen(SUN_MICROSYSTEMS)) == 0) || (_tcsncmp(value, ORACLE, _tcslen(ORACLE)) == 0)) {
+					_stprintf(versionKey, PRODUCT_VERSION_KEY, translations[i].language, translations[i].codepage);
+					VerQueryValue(info, versionKey, (void *)&version, &versionSize);
+					if ((version[0] - '0') < 8) {
+						result = 1;
+					}
 					break;
 				}
 			}
 			free(key);
+			free(versionKey);
 		}
 		free(info);
 	}

@@ -175,6 +175,9 @@ JavaResults* startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[],
 }
 
 int isMaxPermSizeVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
+	if (javaVM == NULL) {
+		return 0;
+	}
 	FILE *fp = NULL;
 	_TCHAR buffer[4096];
 	_TCHAR *version = NULL, *firstChar;
@@ -199,8 +202,12 @@ int isMaxPermSizeVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
 		}
 		if (_tcsstr(buffer, "Java HotSpot(TM)") || _tcsstr(buffer, "OpenJDK")) {
 			if (version != NULL) {
-				if (version[0] == '1' && ((int)(version[2] - '0') < 8)) {
-					result = 1;
+				_TCHAR *value = _tcstok(version, ".");
+				if (value != NULL && (_tcstol(value, NULL, 10) == 1)) {
+					value = _tcstok(NULL, ".");
+					if (_tcstol(value, NULL, 10) < 8) {
+						result = 1;
+					}
 				}
 			}
 			break;

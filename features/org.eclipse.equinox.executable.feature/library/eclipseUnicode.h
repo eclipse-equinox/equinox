@@ -96,6 +96,7 @@
 #define _tgetcwd getcwd
 #define _tgetenv getenv
 #define _tcstol strtol
+#define _tcstok strtok
 #ifndef LINUX
 #define _totupper toupper
 #endif /* LINUX */

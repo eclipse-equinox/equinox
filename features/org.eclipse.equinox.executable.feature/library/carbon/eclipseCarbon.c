@@ -533,8 +533,12 @@ char * getJavaVersion(char* command) {
 		}
 		if (strstr(buffer, "Java HotSpot(TM)") || strstr(buffer, "OpenJDK")) {
 			if (version != NULL) {
-				if (version[0] == '1' && ((int)(version[2] - '0') < 8)) {
-					isSunMaxPermSizeVM = 1;
+				_TCHAR *value = strtok(version, ".");
+				if (value != NULL && (strtol(value, NULL, 10) == 1)) {
+					value = strtok(NULL, ".");
+					if (strtol(value, NULL, 10) < 8) {
+						result = 1;
+					}
 				}
 			}
 			break;
