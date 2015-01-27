@@ -537,7 +537,7 @@ char * getJavaVersion(char* command) {
 				if (value != NULL && (strtol(value, NULL, 10) == 1)) {
 					value = strtok(NULL, ".");
 					if (strtol(value, NULL, 10) < 8) {
-						result = 1;
+						isSunMaxPermSizeVM = 1;
 					}
 				}
 			}
