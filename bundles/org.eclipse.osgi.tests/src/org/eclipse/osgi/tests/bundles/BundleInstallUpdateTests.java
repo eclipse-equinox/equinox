@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2011 IBM Corporation and others.
+ * Copyright (c) 2009, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -270,6 +270,24 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 			}
 		} finally {
 			reg.unregister();
+		}
+	}
+
+	public void testInstallWithInterruption() {
+		Bundle test = null;
+		Thread.currentThread().interrupt();
+		try {
+			test = installer.installBundle("test"); //$NON-NLS-1$
+		} catch (BundleException e) {
+			fail("Unexpected failure", e); //$NON-NLS-1$
+		} finally {
+			Thread.interrupted();
+			try {
+				if (test != null)
+					test.uninstall();
+			} catch (BundleException e) {
+				// nothing
+			}
 		}
 	}
 }
