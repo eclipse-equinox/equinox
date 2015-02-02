@@ -13,6 +13,7 @@ package org.eclipse.osgi.internal.container;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /*
@@ -28,31 +29,56 @@ import java.util.concurrent.locks.ReentrantLock;
  * long ids).
  */
 public class LockSet<T> {
-	private final Map<T, ReentrantLock> locks = new HashMap<T, ReentrantLock>();
-	private final Object monitor = new Object();
+	static final class LockHolder {
+		private final AtomicInteger useCount = new AtomicInteger(0);
+		private final ReentrantLock lock = new ReentrantLock();
+
+		int incrementUseCount() {
+			return useCount.incrementAndGet();
+		}
+
+		int decremementUseCount() {
+			return useCount.decrementAndGet();
+		}
+
+		boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+			return !lock.isHeldByCurrentThread() && lock.tryLock(time, unit);
+		}
+
+		void unlock() {
+			lock.unlock();
+		}
+	}
+
+	private final Map<T, LockHolder> locks = new HashMap<T, LockHolder>();
 
 	public boolean tryLock(T t, long time, TimeUnit unit) throws InterruptedException {
-		ReentrantLock lock;
-		synchronized (monitor) {
-			lock = locks.get(t);
-			if (lock == null) {
-				lock = new ReentrantLock();
-				locks.put(t, lock);
-			}
-		}
-		boolean previousInterruption = Thread.interrupted();
+		final boolean previousInterruption = Thread.interrupted();
 		try {
-			boolean obtained = !lock.isHeldByCurrentThread() && lock.tryLock(time, unit);
-			if (obtained) {
-				synchronized (monitor) {
-					// must check that another thread did not remove the lock
-					// when unlocking while we were waiting to obtain the lock
-					if (!locks.containsKey(t)) {
-						locks.put(t, lock);
+			LockHolder lock;
+			synchronized (locks) {
+				lock = locks.get(t);
+				if (lock == null) {
+					lock = new LockHolder();
+					locks.put(t, lock);
+				}
+				lock.incrementUseCount();
+			}
+			// all interested threads have the lock object and the use count is the number of such threads
+			boolean acquired = false;
+			try {
+				acquired = lock.tryLock(time, unit);
+				return acquired;
+			} finally {
+				if (!acquired) {
+					synchronized (locks) {
+						// If, after failing to acquire the lock, no other thread is using the lock, discard it.
+						if (lock.decremementUseCount() == 0) {
+							locks.remove(t);
+						}
 					}
 				}
 			}
-			return obtained;
 		} finally {
 			if (previousInterruption) {
 				Thread.currentThread().interrupt();
@@ -61,20 +87,15 @@ public class LockSet<T> {
 	}
 
 	public void unlock(T t) {
-		synchronized (monitor) {
-			ReentrantLock lock = locks.get(t);
+		synchronized (locks) {
+			LockHolder lock = locks.get(t);
 			if (lock == null)
 				throw new IllegalStateException("No lock found."); //$NON-NLS-1$
-			if (lock.getHoldCount() == 1) {
-				// We are about to remove the last hold;
-				// Clear out the lock from the map;
-				// This forces a new lock to get created if the same object is locked again;
-				// Must remove before unlocking to avoid removing a lock that may be waiting to
-				// be obtained by another thread in tryLock
+			lock.unlock();
+			// If, after unlocking, no other thread is using the lock, discard it.
+			if (lock.decremementUseCount() == 0) {
 				locks.remove(t);
 			}
-			lock.unlock();
 		}
 	}
-
 }
