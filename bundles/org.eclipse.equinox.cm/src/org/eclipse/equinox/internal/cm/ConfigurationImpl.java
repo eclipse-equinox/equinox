@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2015 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,12 +8,14 @@
  * Contributors:
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
+ *     IBH SYSTEMS GmbH - replace custom lock with a ReentrantLock, bug 459002
  *******************************************************************************/
 package org.eclipse.equinox.internal.cm;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.*;
@@ -40,13 +42,10 @@ class ConfigurationImpl implements Configuration {
 	/** @GuardedBy this*/
 	private boolean bound = false;
 	/** @GuardedBy this*/
-	private int lockedCount = 0;
-	/** @GuardedBy this*/
-	private Thread lockHolder = null;
-	/** @GuardedBy this*/
 	private long changeCount;
 	/** @GuardedBy this*/
 	private Object storageToken;
+	private final ReentrantLock lock = new ReentrantLock();
 
 	public ConfigurationImpl(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, String factoryPid, String pid, String bundleLocation, boolean bind) {
 		this.configurationAdminFactory = configurationAdminFactory;
@@ -75,43 +74,16 @@ class ConfigurationImpl implements Configuration {
 		this.storageToken = storageToken;
 	}
 
-	synchronized void lock() {
-		Thread current = Thread.currentThread();
-		if (lockHolder != current) {
-			boolean interrupted = false;
-			try {
-				while (lockedCount != 0)
-					try {
-						wait();
-					} catch (InterruptedException e) {
-						// although we don't handle an interrupt we should still 
-						// save and restore the interrupt for others further up the stack
-						interrupted = true;
-					}
-			} finally {
-				if (interrupted)
-					current.interrupt(); // restore interrupted status
-			}
-		}
-		lockedCount++;
-		lockHolder = current;
+	void lock() {
+		lock.lock();
 	}
 
-	synchronized void unlock() {
-		Thread current = Thread.currentThread();
-		if (lockHolder != current)
-			throw new IllegalStateException("Thread not lock owner"); //$NON-NLS-1$
-
-		lockedCount--;
-		if (lockedCount == 0) {
-			lockHolder = null;
-			notify();
-		}
+	void unlock() {
+		lock.unlock();
 	}
 
-	synchronized void checkLocked() {
-		Thread current = Thread.currentThread();
-		if (lockHolder != current)
+	void checkLocked() {
+		if (!lock.isHeldByCurrentThread())
 			throw new IllegalStateException("Thread not lock owner"); //$NON-NLS-1$
 	}
 
