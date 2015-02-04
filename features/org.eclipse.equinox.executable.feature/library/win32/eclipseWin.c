@@ -585,7 +585,7 @@ int isMaxPermSizeVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
 	DWORD handle;
 	void * info;
 	
-	_TCHAR *key, *value, *versionKey, *version;
+	_TCHAR *key, *value, *versionKey, *version, *majorVersion = NULL;
 	size_t i;
 	int valueSize, versionSize;
 	
@@ -610,7 +610,10 @@ int isMaxPermSizeVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
 				if ((_tcsncmp(value, SUN_MICROSYSTEMS, _tcslen(SUN_MICROSYSTEMS)) == 0) || (_tcsncmp(value, ORACLE, _tcslen(ORACLE)) == 0)) {
 					_stprintf(versionKey, PRODUCT_VERSION_KEY, translations[i].language, translations[i].codepage);
 					VerQueryValue(info, versionKey, (void *)&version, &versionSize);
-					if ((version[0] - '0') < 8) {
+					if (versionSize > 1) {
+						majorVersion = _tcstok(version, ".");
+					}
+					if ((majorVersion != NULL) && (_tcstol(majorVersion, NULL, 10) < 8)) {
 						result = 1;
 					}
 					break;
