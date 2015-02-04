@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2015 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -194,13 +194,17 @@ class ConfigurationStore {
 		return resultList.toArray(new ConfigurationImpl[resultList.size()]);
 	}
 
-	public synchronized ConfigurationImpl[] listConfigurations(Filter filter) {
+	public ConfigurationImpl[] listConfigurations(Filter filter) {
 		List<ConfigurationImpl> resultList = new ArrayList<ConfigurationImpl>();
-		for (Iterator<ConfigurationImpl> it = configurations.values().iterator(); it.hasNext();) {
+		synchronized (this) {
+			resultList.addAll(configurations.values());
+		}
+		for (Iterator<ConfigurationImpl> it = resultList.iterator(); it.hasNext();) {
 			ConfigurationImpl config = it.next();
 			Dictionary<String, Object> properties = config.getAllProperties(false);
-			if (properties != null && filter.match(properties))
-				resultList.add(config);
+			if (properties == null || !filter.match(properties)) {
+				it.remove();
+			}
 		}
 		int size = resultList.size();
 		return size == 0 ? null : (ConfigurationImpl[]) resultList.toArray(new ConfigurationImpl[size]);
