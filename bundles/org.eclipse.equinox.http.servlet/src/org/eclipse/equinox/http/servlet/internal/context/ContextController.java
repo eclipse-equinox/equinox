@@ -541,6 +541,7 @@ public class ContextController {
 	}
 
 	public void destroy() {
+		flushActiveSessions();
 		resourceServiceTracker.close();
 		servletServiceTracker.close();
 		filterServiceTracker.close();
@@ -1034,6 +1035,34 @@ public class ContextController {
 		return values;
 	}
 
+	public void addActiveSession(HttpSession containerSession, HttpSessionAdaptor sessionAdaptor) {
+		synchronized (activeSessions) {
+			activeSessions.put(containerSession, sessionAdaptor);
+		}
+	}
+	private void flushActiveSessions() {
+		Collection<HttpSessionAdaptor> currentActiveSessions;
+		synchronized (activeSessions) {
+			currentActiveSessions = new ArrayList<HttpSessionAdaptor>(activeSessions.values());
+			activeSessions.clear();
+		}
+		for (HttpSessionAdaptor httpSessionAdaptor : currentActiveSessions) {
+			httpSessionAdaptor.invalidate();
+		}
+	}
+
+	public HttpSessionAdaptor getSessionAdaptor(
+		HttpSession session, ServletContext servletContext) {
+		synchronized (activeSessions) {
+			HttpSessionAdaptor sessionAdaptor = activeSessions.get(session);
+			if (sessionAdaptor == null) {
+				sessionAdaptor = new HttpSessionAdaptor(session, servletContext, this);
+				activeSessions.put(session, sessionAdaptor);
+			}
+			return sessionAdaptor;
+		}
+	}
+
 	private static final String[] DISPATCHER =
 		new String[] {Const.Dispatcher.REQUEST.toString()};
 
@@ -1047,6 +1076,7 @@ public class ContextController {
 	private final Set<EndpointRegistration<?>> endpointRegistrations = new ConcurrentSkipListSet<EndpointRegistration<?>>();
 	private final EventListeners eventListeners = new EventListeners();
 	private final Set<FilterRegistration> filterRegistrations = new HashSet<FilterRegistration>();
+	private final Map<HttpSession, HttpSessionAdaptor> activeSessions = new WeakHashMap<HttpSession, HttpSessionAdaptor>();
 
 	private final HttpServiceRuntimeImpl httpServiceRuntime;
 	private final Set<ListenerRegistration> listenerRegistrations = new HashSet<ListenerRegistration>();

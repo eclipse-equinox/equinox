@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2015 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,88 +12,78 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal.servlet;
 
-import java.util.Enumeration;
-import java.util.List;
-import javax.servlet.Servlet;
+import java.util.*;
 import javax.servlet.ServletContext;
 import javax.servlet.http.*;
-import org.eclipse.equinox.http.servlet.internal.util.EventListeners;
+import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 
-// This class adapts HttpSessions in order to return the right ServletContext
+// This class adapts HttpSessions in order to return the right ServletContext and attributes
 public class HttpSessionAdaptor implements HttpSession {
 
-	private EventListeners eventListeners;
-	private HttpSession session;
-	private Servlet servlet;
+	private final ContextController controller;
+	private final HttpSession session;
+	private final ServletContext servletContext;
+	private final String attributePrefix;
 
 	public HttpSessionAdaptor(
-		HttpSession session, Servlet servlet, EventListeners eventListeners) {
+		HttpSession session, ServletContext servletContext, ContextController controller) {
 
 		this.session = session;
-		this.servlet = servlet;
-		this.eventListeners = eventListeners;
+		this.servletContext = servletContext;
+		this.controller = controller;
+		this.attributePrefix = "equinox.http." + controller.getContextName(); //$NON-NLS-1$
 	}
 
 	public ServletContext getServletContext() {
-		return servlet.getServletConfig().getServletContext();
+		return servletContext;
 	}
 
 	public Object getAttribute(String arg0) {
-		return session.getAttribute(arg0);
+		return session.getAttribute(attributePrefix + arg0);
 	}
 
 	public Enumeration<String> getAttributeNames() {
-		return session.getAttributeNames();
+		return Collections.enumeration(getAttributeNames0());
 	}
 
-	public long getCreationTime() {
-		return session.getCreationTime();
-	}
-
-	public String getId() {
-		return session.getId();
-	}
-
-	public long getLastAccessedTime() {
-		return session.getLastAccessedTime();
-	}
-
-	public int getMaxInactiveInterval() {
-		return session.getMaxInactiveInterval();
-	}
-
-	/**@deprecated*/
-	public javax.servlet.http.HttpSessionContext getSessionContext() {
-		return session.getSessionContext();
+	private Collection<String> getAttributeNames0() {
+		Collection<String> result = new ArrayList<String>();
+		Enumeration<String> containerSessionAttributes = session.getAttributeNames();
+		while(containerSessionAttributes.hasMoreElements()) {
+			String attribute = containerSessionAttributes.nextElement();
+			if (attribute.startsWith(attributePrefix)) {
+				result.add(attribute.substring(attributePrefix.length()));
+			}
+		}
+		return result;
 	}
 
 	/**@deprecated*/
 	public Object getValue(String arg0) {
-		return session.getValue(arg0);
+		return getAttribute(arg0);
 	}
 
 	/**@deprecated*/
 	public String[] getValueNames() {
-		return session.getValueNames();
+		Collection<String> result = getAttributeNames0();
+		return result.toArray(new String[result.size()]);
 	}
 
 	public void invalidate() {
-		session.invalidate();
-	}
-
-	public boolean isNew() {
-		return session.isNew();
+		for (String attribute : getAttributeNames0()) {
+			removeAttribute(attribute);
+		}
 	}
 
 	/**@deprecated*/
 	public void putValue(String arg0, Object arg1) {
-		session.putValue(arg0, arg1);
+		setAttribute(arg0, arg1);
 	}
 
 	public void removeAttribute(String arg0) {
-		session.removeAttribute(arg0);
+		session.removeAttribute(attributePrefix + arg0);
 
-		List<HttpSessionAttributeListener> listeners = eventListeners.get(
+		List<HttpSessionAttributeListener> listeners = controller.getEventListeners().get(
 			HttpSessionAttributeListener.class);
 
 		if (listeners.isEmpty()) {
@@ -101,7 +91,7 @@ public class HttpSessionAdaptor implements HttpSession {
 		}
 
 		HttpSessionBindingEvent httpSessionBindingEvent =
-			new HttpSessionBindingEvent(session, arg0);
+			new HttpSessionBindingEvent(this, arg0);
 
 		for (HttpSessionAttributeListener httpSessionAttributeListener : listeners) {
 			httpSessionAttributeListener.attributeRemoved(
@@ -111,29 +101,14 @@ public class HttpSessionAdaptor implements HttpSession {
 
 	/**@deprecated*/
 	public void removeValue(String arg0) {
-		session.removeValue(arg0);
-
-		List<HttpSessionAttributeListener> listeners = eventListeners.get(
-			HttpSessionAttributeListener.class);
-
-		if (listeners.isEmpty()) {
-			return;
-		}
-
-		HttpSessionBindingEvent httpSessionBindingEvent =
-			new HttpSessionBindingEvent(session, arg0);
-
-		for (HttpSessionAttributeListener httpSessionAttributeListener : listeners) {
-			httpSessionAttributeListener.attributeRemoved(
-				httpSessionBindingEvent);
-		}
+		removeAttribute(arg0);
 	}
 
 	public void setAttribute(String arg0, Object arg1) {
-		boolean added = (session.getAttribute(arg0) == null);
-		session.setAttribute(arg0, arg1);
+		boolean added = (session.getAttribute(attributePrefix + arg0) == null);
+		session.setAttribute(attributePrefix + arg0, arg1);
 
-		List<HttpSessionAttributeListener> listeners = eventListeners.get(
+		List<HttpSessionAttributeListener> listeners = controller.getEventListeners().get(
 			HttpSessionAttributeListener.class);
 
 		if (listeners.isEmpty()) {
@@ -141,7 +116,7 @@ public class HttpSessionAdaptor implements HttpSession {
 		}
 
 		HttpSessionBindingEvent httpSessionBindingEvent =
-			new HttpSessionBindingEvent(session, arg0, arg1);
+			new HttpSessionBindingEvent(this, arg0, arg1);
 
 		for (HttpSessionAttributeListener httpSessionAttributeListener : listeners) {
 			if (added) {
@@ -156,7 +131,38 @@ public class HttpSessionAdaptor implements HttpSession {
 	}
 
 	public void setMaxInactiveInterval(int arg0) {
+		// Not sure this can be done per context helper
 		session.setMaxInactiveInterval(arg0);
 	}
 
+	public long getCreationTime() {
+		// Not sure this can be done per context helper
+		return session.getCreationTime();
+	}
+
+	public String getId() {
+		// Not sure this can be done per context helper
+		return session.getId();
+	}
+
+	public long getLastAccessedTime() {
+		// Not sure this can be done per context helper
+		return session.getLastAccessedTime();
+	}
+
+	public int getMaxInactiveInterval() {
+		// Not sure this can be done per context helper
+		return session.getMaxInactiveInterval();
+	}
+
+	/**@deprecated*/
+	public javax.servlet.http.HttpSessionContext getSessionContext() {
+		// Not sure this can be done per context helper and I think null is returned anyway
+		return session.getSessionContext();
+	}
+
+	public boolean isNew() {
+		// Not sure this can be done per context helper
+		return session.isNew();
+	}
 }
