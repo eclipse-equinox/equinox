@@ -33,18 +33,22 @@ public abstract class EndpointRegistration<D extends DTO>
 	private final ServletContextHelper servletContextHelper; //The context used during the registration of the servlet
 	private final ContextController contextController;
 	private final ClassLoader classLoader;
-	private boolean legacyMatching;
+	private boolean legacyRegistration;
 
 	public EndpointRegistration(
 		ServiceHolder<Servlet> servletHolder, D d, ServletContextHelper servletContextHelper,
-		ContextController contextController, boolean legacyMatching) {
+		ContextController contextController, boolean legacyRegistration) {
 
 		super(servletHolder.get(), d);
 		this.servletHolder = servletHolder;
 		this.servletContextHelper = servletContextHelper;
 		this.contextController = contextController;
-		this.legacyMatching = legacyMatching;
-		classLoader = servletHolder.getBundle().adapt(BundleWiring.class).getClassLoader();
+		if (legacyRegistration) {
+			// legacy registrations used the current TCCL at registration time
+			classLoader = Thread.currentThread().getContextClassLoader();
+		} else {
+			classLoader = servletHolder.getBundle().adapt(BundleWiring.class).getClassLoader();
+		}
 	}
 
 	public void destroy() {
@@ -135,7 +139,7 @@ public abstract class EndpointRegistration<D extends DTO>
 		}
 
 		for (String pattern : patterns) {
-			if (legacyMatching && (match == Match.REGEX) &&
+			if (legacyRegistration && (match == Match.REGEX) &&
 				!pattern.endsWith(Const.SLASH_STAR)) {
 
 				pattern += Const.SLASH_STAR;

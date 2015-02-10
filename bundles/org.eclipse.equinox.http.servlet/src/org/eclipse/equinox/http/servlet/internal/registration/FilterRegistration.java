@@ -39,13 +39,18 @@ public class FilterRegistration
 
 	public FilterRegistration(
 		ServiceHolder<Filter> filterHolder, FilterDTO filterDTO, int priority,
-		ContextController contextController) {
+		ContextController contextController, boolean legacyRegistration) {
 
 		super(filterHolder.get(), filterDTO);
 		this.filterHolder = filterHolder;
 		this.priority = priority;
 		this.contextController = contextController;
-		classLoader = filterHolder.getBundle().adapt(BundleWiring.class).getClassLoader();
+		if (legacyRegistration) {
+			// legacy filter registrations used the current TCCL at registration time
+			classLoader = Thread.currentThread().getContextClassLoader();
+		} else {
+			classLoader = filterHolder.getBundle().adapt(BundleWiring.class).getClassLoader();
+		}
 		String legacyContextFilter = (String) filterHolder.getServiceReference().getProperty(Const.EQUINOX_LEGACY_CONTEXT_SELECT);
 		if (legacyContextFilter != null) {
 			// This is a legacy Filter registration.  

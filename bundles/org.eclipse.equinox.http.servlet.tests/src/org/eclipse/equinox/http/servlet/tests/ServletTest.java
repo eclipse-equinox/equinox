@@ -18,9 +18,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -35,6 +37,8 @@ import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionAttributeListener;
 
 import junit.framework.TestCase;
@@ -624,6 +628,77 @@ public class ServletTest extends TestCase {
 			//expected
 			assertEquals("Wrong exception message.", "Init error.", e.getMessage());
 		}
+	}
+
+	public void test_RegistrationTCCL1() {
+		final Set<String> filterTCCL = Collections.synchronizedSet(new HashSet<String>());
+		final Set<String> servletTCCL = Collections.synchronizedSet(new HashSet<String>());
+		Filter tcclFilter = new Filter() {
+			
+			@Override
+			public void init(FilterConfig filterConfig) throws ServletException {
+				filterTCCL.add(Thread.currentThread().getContextClassLoader().getClass().getName());
+			}
+			
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
+					ServletException {
+				filterTCCL.add(Thread.currentThread().getContextClassLoader().getClass().getName());
+				chain.doFilter(request, response);
+			}
+			
+			@Override
+			public void destroy() {
+				filterTCCL.add(Thread.currentThread().getContextClassLoader().getClass().getName());
+			}
+		};
+		HttpServlet tcclServlet = new HttpServlet() {
+
+			@Override
+			public void destroy() {
+				super.destroy();
+				servletTCCL.add(Thread.currentThread().getContextClassLoader().getClass().getName());
+			}
+
+			@Override
+			public void init(ServletConfig config) throws ServletException {
+				super.init(config);
+				servletTCCL.add(Thread.currentThread().getContextClassLoader().getClass().getName());
+			}
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
+					IOException {
+				servletTCCL.add(Thread.currentThread().getContextClassLoader().getClass().getName());
+				response.getWriter().print(Thread.currentThread().getContextClassLoader().getClass().getName());
+			}
+
+		};
+		String expected = Thread.currentThread().getContextClassLoader().getClass().getName();
+		String actual = null;
+		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
+		try {
+			extendedHttpService.registerFilter("/tccl", tcclFilter, null, null);
+			extendedHttpService.registerServlet("/tccl", tcclServlet, null, null);
+			actual = requestAdvisor.request("tccl");
+		} catch (Exception e) {
+			fail("Unexpected exception: " + e);
+		} finally {
+			try {
+				extendedHttpService.unregister("/tccl");
+				extendedHttpService.unregisterFilter(tcclFilter);
+			} catch (IllegalArgumentException e) {
+				// ignore
+			}
+		}
+		assertEquals(expected, actual);
+		assertEquals("Wrong filterTCCL size: " + filterTCCL, 1, filterTCCL.size());
+		assertTrue("Wrong filterTCCL: " + filterTCCL, filterTCCL.contains(expected));
+		assertEquals("Wrong httpTCCL size: " + servletTCCL, 1, servletTCCL.size());
+		assertTrue("Wrong servletTCCL: " + servletTCCL, servletTCCL.contains(expected));
+
 	}
 
 	public void test_Resource1() throws Exception {

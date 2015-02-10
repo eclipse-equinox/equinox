@@ -24,9 +24,9 @@ public class ResourceRegistration extends EndpointRegistration<ResourceDTO> {
 	public ResourceRegistration(
 		ServiceHolder<Servlet> servletHolder, ResourceDTO resourceDTO,
 		ServletContextHelper servletContextHelper,
-		ContextController contextController, boolean legacyMatching) {
+		ContextController contextController, boolean legacyRegistration) {
 
-		super(servletHolder, resourceDTO, servletContextHelper, contextController, legacyMatching);
+		super(servletHolder, resourceDTO, servletContextHelper, contextController, legacyRegistration);
 
 		name = servletHolder.get().getClass().getName().concat("#").concat(getD().prefix); //$NON-NLS-1$
 	}

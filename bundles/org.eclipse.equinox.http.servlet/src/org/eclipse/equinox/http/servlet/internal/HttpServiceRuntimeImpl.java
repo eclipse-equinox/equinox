@@ -617,7 +617,7 @@ public class HttpServiceRuntimeImpl
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, filterName);
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + Const.EQUINOX_LEGACY_CONTEXT_HELPER + "=true)"); //$NON-NLS-1$ //$NON-NLS-2$
 				props.put(Const.EQUINOX_LEGACY_CONTEXT_SELECT, factory.getFilter());
-				props.put(Const.EQUINOX_LEGACY_MATCHING_PROP, Boolean.TRUE);
+				props.put(Const.EQUINOX_LEGACY_REGISTRATION_PROP, Boolean.TRUE);
 				props.put(Constants.SERVICE_RANKING, findFilterPriority(initparams));
 				fillInitParams(props, initparams, Const.FILTER_INIT_PREFIX);
 
@@ -723,7 +723,7 @@ public class HttpServiceRuntimeImpl
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX, name);
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, factory.getFilter());
 				props.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
-				props.put(Const.EQUINOX_LEGACY_MATCHING_PROP, Boolean.TRUE);
+				props.put(Const.EQUINOX_LEGACY_REGISTRATION_PROP, Boolean.TRUE);
 				ServiceRegistration<?> registration = bundle.getBundleContext().registerService(String.class, "resource", props); //$NON-NLS-1$
 				objectRegistration = new HttpServiceObjectRegistration(fullAlias, registration, factory, bundle);
 
@@ -787,7 +787,7 @@ public class HttpServiceRuntimeImpl
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, servletName);
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, factory.getFilter());
 				props.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
-				props.put(Const.EQUINOX_LEGACY_MATCHING_PROP, Boolean.TRUE);
+				props.put(Const.EQUINOX_LEGACY_REGISTRATION_PROP, Boolean.TRUE);
 				fillInitParams(props, initparams, Const.SERVLET_INIT_PREFIX);
 
 				registration = bundle.getBundleContext().registerService(Servlet.class, legacyServlet, props);

@@ -189,6 +189,7 @@ public class ContextController {
 
 	private FilterRegistration doAddFilterRegistration(ServiceHolder<Filter> filterHolder, ServiceReference<Filter> filterRef) throws ServletException {
 
+		boolean legacyRegistration = ServiceProperties.parseBoolean(filterRef, Const.EQUINOX_LEGACY_REGISTRATION_PROP);
 		boolean asyncSupported = ServiceProperties.parseBoolean(
 			filterRef, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED);
 
@@ -199,6 +200,10 @@ public class ContextController {
 			new String[dispatcherList.size()]);
 		Long serviceId = (Long)filterRef.getProperty(
 			Constants.SERVICE_ID);
+		if (legacyRegistration) {
+			// this is a legacy registration; use a negative id for the DTO
+			serviceId = -serviceId;
+		}
 		Integer filterPriority = (Integer)filterRef.getProperty(
 			Constants.SERVICE_RANKING);
 		if (filterPriority == null) {
@@ -276,7 +281,7 @@ public class ContextController {
 		ServletContext servletContext = createServletContext(
 			filterHolder.getBundle(), curServletContextHelper);
 		FilterRegistration newRegistration  = new FilterRegistration(
-			filterHolder, filterDTO, filterPriority, this);
+			filterHolder, filterDTO, filterPriority, this, legacyRegistration);
 		FilterConfig filterConfig = new FilterConfigImpl(
 			name, filterInitParams, servletContext);
 
@@ -360,7 +365,7 @@ public class ContextController {
 
 		checkShutdown();
 
-		boolean legacyMatching = ServiceProperties.parseBoolean(resourceRef, Const.EQUINOX_LEGACY_MATCHING_PROP);
+		boolean legacyRegistration = ServiceProperties.parseBoolean(resourceRef, Const.EQUINOX_LEGACY_REGISTRATION_PROP);
 		Integer rankProp = (Integer) resourceRef.getProperty(Constants.SERVICE_RANKING);
 		int serviceRanking = rankProp == null ? 0 : rankProp.intValue();
 		List<String> patternList = StringPlus.from(
@@ -369,7 +374,7 @@ public class ContextController {
 		String[] patterns = patternList.toArray(new String[patternList.size()]);
 		Long serviceId = (Long)resourceRef.getProperty(
 			Constants.SERVICE_ID);
-		if (legacyMatching) {
+		if (legacyRegistration) {
 			// this is a legacy registration; use a negative id for the DTO
 			serviceId = -serviceId;
 		}
@@ -404,7 +409,7 @@ public class ContextController {
 			bundle, curServletContextHelper);
 		ResourceRegistration resourceRegistration = new ResourceRegistration(
 			new ServiceHolder<Servlet>(servlet, bundle, serviceId, serviceRanking),
-			resourceDTO, curServletContextHelper, this, legacyMatching);
+			resourceDTO, curServletContextHelper, this, legacyRegistration);
 		ServletConfig servletConfig = new ServletConfigImpl(
 			resourceRegistration.getName(), new HashMap<String, String>(),
 			servletContext);
@@ -452,7 +457,7 @@ public class ContextController {
 
 		boolean asyncSupported = ServiceProperties.parseBoolean(
 			servletRef,	HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED);
-		boolean legacyMatching = ServiceProperties.parseBoolean(servletRef, Const.EQUINOX_LEGACY_MATCHING_PROP);
+		boolean legacyRegistration = ServiceProperties.parseBoolean(servletRef, Const.EQUINOX_LEGACY_REGISTRATION_PROP);
 		List<String> errorPageList = StringPlus.from(
 			servletRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE));
 		String[] errorPages = errorPageList.toArray(new String[errorPageList.size()]);
@@ -462,7 +467,7 @@ public class ContextController {
 			servletRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN));
 		String[] patterns = patternList.toArray(new String[patternList.size()]);
 		Long serviceId = (Long)servletRef.getProperty(Constants.SERVICE_ID);
-		if (legacyMatching) {
+		if (legacyRegistration) {
 			// this is a legacy registration; use a negative id for the DTO
 			serviceId = -serviceId;
 		}
@@ -529,7 +534,7 @@ public class ContextController {
 		ServletContext servletContext = createServletContext(
 			servletHolder.getBundle(), curServletContextHelper);
 		ServletRegistration servletRegistration = new ServletRegistration(
-			servletHolder, servletDTO, errorPageDTO, curServletContextHelper, this, legacyMatching);
+			servletHolder, servletDTO, errorPageDTO, curServletContextHelper, this, legacyRegistration);
 		ServletConfig servletConfig = new ServletConfigImpl(
 			servletName, servletInitParams, servletContext);
 

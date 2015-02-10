@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Raymond Augé and others.
+ * Copyright (c) 2014, 2015 Raymond Augé and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,7 @@ public class Const {
 	public static final String SERVLET_NAME = "servlet-name"; //$NON-NLS-1$
 	public static final String SLASH = "/"; //$NON-NLS-1$
 	public static final String SLASH_STAR = "/*"; //$NON-NLS-1$
-	public static final String EQUINOX_LEGACY_MATCHING_PROP = "equinox.legacy.matching"; //$NON-NLS-1$
+	public static final String EQUINOX_LEGACY_REGISTRATION_PROP = "equinox.legacy.registration"; //$NON-NLS-1$
 	public static final String EQUINOX_LEGACY_CONTEXT_SELECT = "equinox.context.select"; //$NON-NLS-1$
 	public static final String EQUINOX_LEGACY_CONTEXT_HELPER = "equinox.legacy.context.helper"; //$NON-NLS-1$
 	public static final String EQUINOX_LEGACY_HTTP_CONTEXT_INITIATING_ID = "equinox.legacy.http.context.initiating.id"; //$NON-NLS-1$
