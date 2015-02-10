@@ -288,10 +288,14 @@ public class ServletContextAdaptor {
 
 		try {
 			Method m = contextToHandlerMethods.get(method);
-			if (m != null) {
-				return m.invoke(this, args);
+			try {
+				if (m != null) {
+					return m.invoke(this, args);
+				}
+				return method.invoke(servletContext, args);
+			} catch (InvocationTargetException e) {
+				throw e.getCause();
 			}
-			return method.invoke(servletContext, args);
 		}
 		finally {
 			servletContextTL.remove();

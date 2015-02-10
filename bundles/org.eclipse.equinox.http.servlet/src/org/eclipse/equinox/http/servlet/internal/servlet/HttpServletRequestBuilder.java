@@ -102,15 +102,20 @@ public class HttpServletRequestBuilder {
 		return requestProxy;
 	}
 
-	Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+	
+	Object invoke(Object proxy, Method method, Object[] args) throws Throwable{
 		requestTL.set((HttpServletRequest)proxy);
 
 		try {
 			Method m = requestToHandlerMethods.get(method);
-			if (m != null) {
-				return m.invoke(this, args);
+			try {
+				if (m != null) {
+					return m.invoke(this, args);
+				}
+				return method.invoke(request, args);
+			} catch (InvocationTargetException e) {
+				throw e.getCause();
 			}
-			return method.invoke(request, args);
 		}
 		finally {
 			requestTL.remove();

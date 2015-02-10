@@ -128,8 +128,11 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 
 			try {
 				Thread.currentThread().setContextClassLoader(classLoader);
-
-				return method.invoke(ListenerRegistration.super.getT(), args);
+				try {
+					return method.invoke(ListenerRegistration.super.getT(), args);
+				} catch (InvocationTargetException e) {
+					throw e.getCause();
+				}
 			}
 			finally {
 				Thread.currentThread().setContextClassLoader(original);
