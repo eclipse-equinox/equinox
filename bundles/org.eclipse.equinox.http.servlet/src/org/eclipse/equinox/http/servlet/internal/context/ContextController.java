@@ -1040,11 +1040,6 @@ public class ContextController {
 		return values;
 	}
 
-	public void addActiveSession(HttpSession containerSession, HttpSessionAdaptor sessionAdaptor) {
-		synchronized (activeSessions) {
-			activeSessions.put(containerSession, sessionAdaptor);
-		}
-	}
 	private void flushActiveSessions() {
 		Collection<HttpSessionAdaptor> currentActiveSessions;
 		synchronized (activeSessions) {
@@ -1056,16 +1051,30 @@ public class ContextController {
 		}
 	}
 
+	public void removeActiveSession(HttpSession session) {
+		synchronized (activeSessions) {
+			activeSessions.remove(session);
+		}
+	}
+
 	public HttpSessionAdaptor getSessionAdaptor(
 		HttpSession session, ServletContext servletContext) {
+		boolean created = false;
+		HttpSessionAdaptor sessionAdaptor;
 		synchronized (activeSessions) {
-			HttpSessionAdaptor sessionAdaptor = activeSessions.get(session);
+			sessionAdaptor = activeSessions.get(session);
 			if (sessionAdaptor == null) {
-				sessionAdaptor = new HttpSessionAdaptor(session, servletContext, this);
+				created = true;
+				sessionAdaptor = HttpSessionAdaptor.createHttpSessionAdaptor(session, servletContext, this);
 				activeSessions.put(session, sessionAdaptor);
 			}
-			return sessionAdaptor;
 		}
+		if (created) {
+			for (HttpSessionListener listener : eventListeners.get(HttpSessionListener.class)) {
+				listener.sessionCreated(new HttpSessionEvent(sessionAdaptor));
+			}
+		}
+		return sessionAdaptor;
 	}
 
 	private static final String[] DISPATCHER =
@@ -1081,7 +1090,7 @@ public class ContextController {
 	private final Set<EndpointRegistration<?>> endpointRegistrations = new ConcurrentSkipListSet<EndpointRegistration<?>>();
 	private final EventListeners eventListeners = new EventListeners();
 	private final Set<FilterRegistration> filterRegistrations = new HashSet<FilterRegistration>();
-	private final Map<HttpSession, HttpSessionAdaptor> activeSessions = new WeakHashMap<HttpSession, HttpSessionAdaptor>();
+	private final Map<HttpSession, HttpSessionAdaptor> activeSessions = new HashMap<HttpSession, HttpSessionAdaptor>();
 
 	private final HttpServiceRuntimeImpl httpServiceRuntime;
 	private final Set<ListenerRegistration> listenerRegistrations = new HashSet<ListenerRegistration>();

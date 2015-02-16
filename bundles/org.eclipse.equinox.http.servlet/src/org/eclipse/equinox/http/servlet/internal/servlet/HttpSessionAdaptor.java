@@ -19,13 +19,101 @@ import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 
 // This class adapts HttpSessions in order to return the right ServletContext and attributes
 public class HttpSessionAdaptor implements HttpSession {
+	static class ParentSessionListener implements HttpSessionBindingListener {
+		private static final String PARENT_SESSION_LISTENER_KEY = "org.eclipse.equinox.http.parent.session.listener"; //$NON-NLS-1$
+		final Map<HttpSession, Set<HttpSessionAdaptor>> innerSessions = new HashMap<HttpSession, Set<HttpSessionAdaptor>>();
+		@Override
+		public void valueBound(HttpSessionBindingEvent event) {
+			// Add a Set to indicate this session is valid
+			synchronized (innerSessions) {
+				innerSessions.put(event.getSession(), new HashSet<HttpSessionAdaptor>());
+			}
+		}
 
+		@Override
+		public void valueUnbound(HttpSessionBindingEvent event) {
+			// Here we assume the unbound event is signifying the session is being invalidated.
+			// Must invalidate the inner sessions
+			Set<HttpSessionAdaptor> innerSessionsToInvalidate;
+			synchronized (innerSessions) {
+				// remove the set to mark the outer session as invalid
+				innerSessionsToInvalidate = innerSessions.remove(event.getSession());
+			}
+			for (HttpSessionAdaptor innerSession : innerSessionsToInvalidate) {
+				innerSession.invalidate();
+			}
+		}
+
+		void addHttpSessionAdaptor(HttpSessionAdaptor innerSession) {
+			synchronized (innerSessions) {
+				if (innerSession.session.getAttribute(PARENT_SESSION_LISTENER_KEY) == null) {
+					innerSession.session.setAttribute(PARENT_SESSION_LISTENER_KEY, this);
+				}
+				innerSessions.get(innerSession.session).add(innerSession);
+			}
+		}
+
+		void removeHttpSessionAdaptor(HttpSessionAdaptor innerSession) {
+			synchronized (innerSessions) {
+				Set<HttpSessionAdaptor> sessions = innerSessions.get(innerSession.session);
+				if (sessions != null) {
+					sessions.remove(innerSession);
+				}
+			}
+		}
+	}
+
+	class HttpSessionAttributeWrapper implements HttpSessionBindingListener, HttpSessionActivationListener {
+		final String name;
+		final Object value;
+
+		public HttpSessionAttributeWrapper(String name, Object value) {
+			this.name = name;
+			this.value = value;
+		}
+		@Override
+		public void valueBound(HttpSessionBindingEvent event) {
+			if (value instanceof HttpSessionBindingListener) {
+				((HttpSessionBindingListener) value).valueBound(new HttpSessionBindingEvent(HttpSessionAdaptor.this, name, value));
+			}
+		}
+
+		@Override
+		public void valueUnbound(HttpSessionBindingEvent event) {
+			if (value instanceof HttpSessionBindingListener) {
+				((HttpSessionBindingListener) value).valueUnbound(new HttpSessionBindingEvent(HttpSessionAdaptor.this, name, value));
+			}
+		}
+
+		@Override
+		public void sessionWillPassivate(HttpSessionEvent se) {
+			if (value instanceof HttpSessionActivationListener) {
+				((HttpSessionActivationListener) value).sessionWillPassivate(new HttpSessionEvent(HttpSessionAdaptor.this));
+			}
+		}
+
+		@Override
+		public void sessionDidActivate(HttpSessionEvent se) {
+			if (value instanceof HttpSessionActivationListener) {
+				((HttpSessionActivationListener) value).sessionDidActivate(new HttpSessionEvent(HttpSessionAdaptor.this));
+			}
+		}
+	}
+
+	private static final ParentSessionListener parentSessionListener = new ParentSessionListener();
 	private final ContextController controller;
 	private final HttpSession session;
 	private final ServletContext servletContext;
 	private final String attributePrefix;
 
-	public HttpSessionAdaptor(
+	static public HttpSessionAdaptor createHttpSessionAdaptor(
+		HttpSession session, ServletContext servletContext, ContextController controller) {
+		HttpSessionAdaptor sessionAdaptor = new HttpSessionAdaptor(session, servletContext, controller);
+		parentSessionListener.addHttpSessionAdaptor(sessionAdaptor);
+		return sessionAdaptor;
+	}
+
+	private HttpSessionAdaptor(
 		HttpSession session, ServletContext servletContext, ContextController controller) {
 
 		this.session = session;
@@ -39,7 +127,11 @@ public class HttpSessionAdaptor implements HttpSession {
 	}
 
 	public Object getAttribute(String arg0) {
-		return session.getAttribute(attributePrefix + arg0);
+		Object result = session.getAttribute(attributePrefix + arg0);
+		if (result instanceof HttpSessionAttributeWrapper) {
+			result = ((HttpSessionAttributeWrapper) result).value;
+		}
+		return result;
 	}
 
 	public Enumeration<String> getAttributeNames() {
@@ -70,9 +162,14 @@ public class HttpSessionAdaptor implements HttpSession {
 	}
 
 	public void invalidate() {
+		for(HttpSessionListener listener : controller.getEventListeners().get(HttpSessionListener.class)) {
+			listener.sessionDestroyed(new HttpSessionEvent(this));
+		}
 		for (String attribute : getAttributeNames0()) {
 			removeAttribute(attribute);
 		}
+		parentSessionListener.removeHttpSessionAdaptor(this);
+		controller.removeActiveSession(session);
 	}
 
 	/**@deprecated*/
@@ -104,9 +201,12 @@ public class HttpSessionAdaptor implements HttpSession {
 		removeAttribute(arg0);
 	}
 
-	public void setAttribute(String arg0, Object arg1) {
-		boolean added = (session.getAttribute(attributePrefix + arg0) == null);
-		session.setAttribute(attributePrefix + arg0, arg1);
+	public void setAttribute(String name, Object value) {
+		boolean added = (session.getAttribute(attributePrefix + name) == null);
+		if (value instanceof HttpSessionBindingListener || value instanceof HttpSessionActivationListener) {
+			value = new HttpSessionAttributeWrapper(name, value);
+		}
+		session.setAttribute(attributePrefix + name, value);
 
 		List<HttpSessionAttributeListener> listeners = controller.getEventListeners().get(
 			HttpSessionAttributeListener.class);
@@ -116,7 +216,7 @@ public class HttpSessionAdaptor implements HttpSession {
 		}
 
 		HttpSessionBindingEvent httpSessionBindingEvent =
-			new HttpSessionBindingEvent(this, arg0, arg1);
+			new HttpSessionBindingEvent(this, name, value);
 
 		for (HttpSessionAttributeListener httpSessionAttributeListener : listeners) {
 			if (added) {

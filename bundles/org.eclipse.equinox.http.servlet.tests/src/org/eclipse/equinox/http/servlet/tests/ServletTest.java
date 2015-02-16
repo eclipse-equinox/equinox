@@ -12,6 +12,9 @@
 package org.eclipse.equinox.http.servlet.tests;
 
 import java.io.IOException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,6 +26,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -39,7 +43,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionAttributeListener;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
 
 import junit.framework.TestCase;
 
@@ -699,6 +708,98 @@ public class ServletTest extends TestCase {
 		assertEquals("Wrong httpTCCL size: " + servletTCCL, 1, servletTCCL.size());
 		assertTrue("Wrong servletTCCL: " + servletTCCL, servletTCCL.contains(expected));
 
+	}
+
+	public void test_Sessions01() {
+		final AtomicBoolean valueBound = new AtomicBoolean(false);
+		final AtomicBoolean valueUnbound = new AtomicBoolean(false);
+		final HttpSessionBindingListener bindingListener = new HttpSessionBindingListener() {
+			
+			@Override
+			public void valueUnbound(HttpSessionBindingEvent event) {
+				valueUnbound.set(true);
+			}
+			
+			@Override
+			public void valueBound(HttpSessionBindingEvent event) {
+				valueBound.set(true);
+			}
+		};
+		final AtomicBoolean sessionCreated = new AtomicBoolean(false);
+		final AtomicBoolean sessionDestroyed = new AtomicBoolean(false);
+		HttpSessionListener sessionListener = new HttpSessionListener() {
+			
+			@Override
+			public void sessionDestroyed(HttpSessionEvent se) {
+				sessionDestroyed.set(true);
+			}
+			
+			@Override
+			public void sessionCreated(HttpSessionEvent se) {
+				sessionCreated.set(true);
+			}
+		};
+		HttpServlet sessionServlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
+					IOException {
+				HttpSession session = request.getSession();
+				if (session.getAttribute("test.attribute") == null) {
+					session.setAttribute("test.attribute", bindingListener);
+					response.getWriter().print("created");
+				} else {
+					session.invalidate();
+					response.getWriter().print("invalidated");
+				}
+			}
+
+		};
+		ServiceRegistration<Servlet> servletReg = null;
+		ServiceRegistration<HttpSessionListener> sessionListenerReg = null;
+		Dictionary<String, Object> servletProps = new Hashtable<String, Object>();
+		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/sessions");
+		String actual = null;
+		CookieHandler previous = CookieHandler.getDefault();
+		CookieHandler.setDefault(new CookieManager( null, CookiePolicy.ACCEPT_ALL ) );
+		try {
+			servletReg = getBundleContext().registerService(Servlet.class, sessionServlet, servletProps);
+			// TODO need to use the listener property here when it is defined
+			sessionListenerReg = getBundleContext().registerService(HttpSessionListener.class, sessionListener, null);
+
+			// first call will create the session
+			actual = requestAdvisor.request("sessions");
+			assertEquals("Wrong result", "created", actual);
+			assertTrue("No sessionCreated called", sessionCreated.get());
+			assertTrue("No valueBound called", valueBound.get());
+
+			// second call will invalidate the session
+			actual = requestAdvisor.request("sessions");
+			assertEquals("Wrong result", "invalidated", actual);
+			assertTrue("No sessionDestroyed called", sessionDestroyed.get());
+			assertTrue("No valueUnbound called", valueUnbound.get());
+
+			sessionCreated.set(false);
+			sessionDestroyed.set(false);
+			valueBound.set(false);
+			valueUnbound.set(false);
+			// calling again should create the session again
+			actual = requestAdvisor.request("sessions");
+			assertEquals("Wrong result", "created", actual);
+			assertTrue("No sessionCreated called", sessionCreated.get());
+			assertTrue("No valueBound called", valueBound.get());
+		} catch (Exception e) {
+			fail("Unexpected exception: " + e);
+		} finally {
+			if (servletReg != null) {
+				servletReg.unregister();
+			}
+			if (sessionListenerReg != null) {
+				sessionListenerReg.unregister();
+			}
+			CookieHandler.setDefault(previous);
+		}
 	}
 
 	public void test_Resource1() throws Exception {
