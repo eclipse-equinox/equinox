@@ -64,7 +64,6 @@
 				<string>-vm</string><string>/Library/Java/JavaVirtualMachines/1.8.0.jdk/Contents/Home/bin/java</string>
 			-->
 			<string>-keyring</string><string>~/.eclipse_keyring</string>
-			<string>-showlocation</string>
 		</array>
 </dict>
 
