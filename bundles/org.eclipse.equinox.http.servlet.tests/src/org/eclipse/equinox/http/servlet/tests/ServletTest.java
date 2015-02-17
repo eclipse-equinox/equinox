@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.tests;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -74,6 +75,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.hooks.service.FindHook;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.service.http.context.ServletContextHelper;
@@ -1179,6 +1181,53 @@ public class ServletTest extends TestCase {
 		}
 	}
 
+	public void test_ServletContextHelperVisibility() throws Exception {
+		String expected1 = "c";
+
+		BundleContext bundleContext = getBundleContext();
+		Bundle bundle = bundleContext.getBundle();
+
+		ServletContextHelper servletContextHelper = new ServletContextHelper(bundle){};
+		Servlet s1 = new BaseServlet(expected1);
+
+		
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			// register a hook that hides the helper from the registering bundle
+			registrations.add(bundleContext.registerService(FindHook.class, new FindHook() {
+				
+				@Override
+				public void find(BundleContext context, String name, String filter, boolean allServices,
+						Collection<ServiceReference<?>> references) {
+					if (ServletContextHelper.class.getName().equals(name) && context.getBundle().equals(getBundleContext().getBundle())) {
+						references.clear();
+					}
+				}
+			}, null));
+
+			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
+			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
+
+			Dictionary<String, String> servletProps2 = new Hashtable<String, String>();
+			servletProps2.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
+			servletProps2.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
+			servletProps2.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+			registrations.add(bundleContext.registerService(Servlet.class, s1, servletProps2));
+
+			try {
+				requestAdvisor.request("a/s");
+			} catch (FileNotFoundException e) {
+				// expected
+			}
+		} finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+		}
+	}
+
 	public void test_ServletContextHelper10() throws Exception {
 		String expected = "cac";
 		String actual;
@@ -1653,6 +1702,9 @@ public class ServletTest extends TestCase {
 			}
 		}
 	}
+
+	
+
 	private String doRequest(String action, Map<String, String> params) throws IOException {
 		StringBuilder requestInfo = new StringBuilder(PROTOTYPE);
 		requestInfo.append(action);
