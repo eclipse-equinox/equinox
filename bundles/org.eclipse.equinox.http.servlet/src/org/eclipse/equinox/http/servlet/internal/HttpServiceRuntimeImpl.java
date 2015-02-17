@@ -995,6 +995,8 @@ public class HttpServiceRuntimeImpl
 	private static org.osgi.framework.Filter createListenerFilter(BundleContext context) {
 		StringBuilder sb = new StringBuilder();
 
+		sb.append("(&"); //$NON-NLS-1$
+		sb.append("(").append(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER).append("~=true)"); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append("(|"); //$NON-NLS-1$
 		sb.append("(objectClass=").append(ServletContextListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append("(objectClass=").append(ServletContextAttributeListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1002,6 +1004,7 @@ public class HttpServiceRuntimeImpl
 		sb.append("(objectClass=").append(ServletRequestAttributeListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append("(objectClass=").append(HttpSessionListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append("(objectClass=").append(HttpSessionAttributeListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(")"); //$NON-NLS-1$
 		sb.append(")"); //$NON-NLS-1$
 
 		try {

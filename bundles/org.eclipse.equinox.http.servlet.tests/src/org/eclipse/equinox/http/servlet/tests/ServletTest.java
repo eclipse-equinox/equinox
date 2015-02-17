@@ -767,8 +767,9 @@ public class ServletTest extends TestCase {
 		CookieHandler.setDefault(new CookieManager( null, CookiePolicy.ACCEPT_ALL ) );
 		try {
 			servletReg = getBundleContext().registerService(Servlet.class, sessionServlet, servletProps);
-			// TODO need to use the listener property here when it is defined
-			sessionListenerReg = getBundleContext().registerService(HttpSessionListener.class, sessionListener, null);
+			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
+			sessionListenerReg = getBundleContext().registerService(HttpSessionListener.class, sessionListener, listenerProps);
 
 			// first call will create the session
 			actual = requestAdvisor.request("sessions");
@@ -1270,6 +1271,7 @@ public class ServletTest extends TestCase {
 			new BaseServletContextListener();
 
 		Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+		listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 		ServiceRegistration<ServletContextListener> registration = getBundleContext().registerService(ServletContextListener.class, scl1, listenerProps);
 		registration.unregister();
 
@@ -1294,6 +1296,7 @@ public class ServletTest extends TestCase {
 					new BaseServletContextListener();
 			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			ServiceRegistration<ServletContextListener> registration = getBundleContext().registerService(ServletContextListener.class, scl1, listenerProps);
 			registration.unregister();
 
@@ -1322,6 +1325,7 @@ public class ServletTest extends TestCase {
 
 			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			registrations.add(bundleContext.registerService(ServletContextListener.class, scl1, listenerProps));
 
 			Assert.assertTrue(scl1.initialized.get());
@@ -1343,6 +1347,7 @@ public class ServletTest extends TestCase {
 		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 		try {
 			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			registrations.add(getBundleContext().registerService(ServletContextAttributeListener.class, scal1, listenerProps));
 
 			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
@@ -1385,6 +1390,7 @@ public class ServletTest extends TestCase {
 		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 		try {
 			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			registrations.add(getBundleContext().registerService(ServletRequestListener.class, srl1, listenerProps));
 
 			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
@@ -1413,6 +1419,7 @@ public class ServletTest extends TestCase {
 		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 		try {
 			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			registrations.add(getBundleContext().registerService(ServletRequestAttributeListener.class, sral1, listenerProps));
 
 			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
@@ -1443,6 +1450,7 @@ public class ServletTest extends TestCase {
 		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 		try {
 			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			registrations.add(getBundleContext().registerService(HttpSessionAttributeListener.class, hsal1, listenerProps));
 
 			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();

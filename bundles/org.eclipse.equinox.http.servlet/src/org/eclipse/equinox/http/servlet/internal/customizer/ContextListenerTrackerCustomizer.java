@@ -40,6 +40,7 @@ public class ContextListenerTrackerCustomizer
 		ServiceReference<EventListener> serviceReference) {
 
 		AtomicReference<ListenerRegistration> result = new AtomicReference<ListenerRegistration>();
+		//TODO need to validate that the listener prop is really a String value
 		if (!httpServiceRuntime.matches(serviceReference)) {
 			return result;
 		}
