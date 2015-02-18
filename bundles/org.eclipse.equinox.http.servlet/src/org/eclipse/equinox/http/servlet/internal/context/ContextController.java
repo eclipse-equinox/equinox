@@ -127,13 +127,8 @@ public class ContextController {
 
 		this.attributes = attributes;
 
-		Map<String, String> attributeStringValues = new HashMap<String, String>();
-
-		for (String key : this.attributes.keySet()) {
-			attributeStringValues.put(key, String.valueOf(attributes.get(key)));
-		}
-
-		this.initParams = Collections.unmodifiableMap(attributeStringValues);
+		this.initParams = ServiceProperties.parseInitParams(
+			servletContextHelperRef, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX);
 
 		this.trackingContext = trackingContextParam;
 		this.consumingContext = consumingContext;
@@ -217,7 +212,7 @@ public class ContextController {
 			filterPriority = Integer.valueOf(0);
 		}
 		Map<String, String> filterInitParams = ServiceProperties.parseInitParams(
-			filterRef, Const.FILTER_INIT_PREFIX);
+			filterRef, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX);
 		List<String> patternList = StringPlus.from(
 			filterRef.getProperty(
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN));
@@ -469,7 +464,7 @@ public class ContextController {
 			servletRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE));
 		String[] errorPages = errorPageList.toArray(new String[errorPageList.size()]);
 		Map<String, String> servletInitParams = ServiceProperties.parseInitParams(
-			servletRef, Const.SERVLET_INIT_PREFIX);
+			servletRef, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX);
 		List<String> patternList = StringPlus.from(
 			servletRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN));
 		String[] patterns = patternList.toArray(new String[patternList.size()]);

@@ -30,8 +30,6 @@ public class Const {
 	public static final String EQUINOX_LEGACY_CONTEXT_SELECT = "equinox.context.select"; //$NON-NLS-1$
 	public static final String EQUINOX_LEGACY_CONTEXT_HELPER = "equinox.legacy.context.helper"; //$NON-NLS-1$
 	public static final String EQUINOX_LEGACY_HTTP_CONTEXT_INITIATING_ID = "equinox.legacy.http.context.initiating.id"; //$NON-NLS-1$
-	public static final String SERVLET_INIT_PREFIX = "servlet.init."; //$NON-NLS-1$
-	public static final String FILTER_INIT_PREFIX = "filter.init."; //$NON-NLS-1$
 
 	public static enum Dispatcher {
 

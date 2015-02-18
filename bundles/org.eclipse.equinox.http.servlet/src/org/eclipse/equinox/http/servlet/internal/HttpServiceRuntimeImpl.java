@@ -619,7 +619,7 @@ public class HttpServiceRuntimeImpl
 				props.put(Const.EQUINOX_LEGACY_CONTEXT_SELECT, factory.getFilter());
 				props.put(Const.EQUINOX_LEGACY_REGISTRATION_PROP, Boolean.TRUE);
 				props.put(Constants.SERVICE_RANKING, findFilterPriority(initparams));
-				fillInitParams(props, initparams, Const.FILTER_INIT_PREFIX);
+				fillInitParams(props, initparams, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX);
 
 				LegacyFilterFactory filterFactory = new LegacyFilterFactory(filter);
 				registration = bundle.getBundleContext().registerService(Filter.class, filterFactory, props);
@@ -788,7 +788,7 @@ public class HttpServiceRuntimeImpl
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, factory.getFilter());
 				props.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
 				props.put(Const.EQUINOX_LEGACY_REGISTRATION_PROP, Boolean.TRUE);
-				fillInitParams(props, initparams, Const.SERVLET_INIT_PREFIX);
+				fillInitParams(props, initparams, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX);
 
 				registration = bundle.getBundleContext().registerService(Servlet.class, legacyServlet, props);
 

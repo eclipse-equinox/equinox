@@ -12,8 +12,7 @@
 
 package org.eclipse.equinox.http.servlet.internal.util;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import org.osgi.framework.ServiceReference;
 
 public class ServiceProperties {
@@ -45,7 +44,7 @@ public class ServiceProperties {
 			}
 		}
 
-		return initParams;
+		return Collections.unmodifiableMap(initParams);
 	}
 
 	static public String parseName(Object property, Object object) {

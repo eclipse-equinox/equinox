@@ -1266,6 +1266,56 @@ public class ServletTest extends TestCase {
 		}
 	}
 
+	public void test_ServletContextHelper12() throws Exception {
+		String expected1 = "a,b,1";
+
+		BundleContext bundleContext = getBundleContext();
+		Bundle bundle = bundleContext.getBundle();
+
+		ServletContextHelper servletContextHelper = new ServletContextHelper(bundle){};
+		Servlet s1 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(
+					HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+
+				StringBuilder builder = new StringBuilder();
+				builder.append(request.getServletContext().getInitParameter("a")).append(',');
+				builder.append(request.getServletContext().getInitParameter("b")).append(',');
+				builder.append(request.getServletContext().getInitParameter("c"));
+				response.getWriter().print(builder.toString());
+			}
+		};
+
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			Dictionary<String, Object> contextProps = new Hashtable<String, Object>();
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX + "a", "a");
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX + "b", "b");
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX + "c", new Integer(1));
+			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
+
+			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+			registrations.add(bundleContext.registerService(Servlet.class, s1, servletProps1));
+
+			String actual = requestAdvisor.request("a/s");
+
+			Assert.assertEquals(expected1, actual);
+		}
+		finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+		}
+	}
+
 	public void test_Listener1() throws Exception {
 		BaseServletContextListener scl1 =
 			new BaseServletContextListener();
