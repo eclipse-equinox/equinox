@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -199,6 +199,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#addFileExtension
 	 */
+	@Override
 	public IPath addFileExtension(String extension) {
 		if (isRoot() || isEmpty() || hasTrailingSeparator())
 			return this;
@@ -212,6 +213,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#addTrailingSeparator
 	 */
+	@Override
 	public IPath addTrailingSeparator() {
 		if (hasTrailingSeparator() || isRoot()) {
 			return this;
@@ -226,6 +228,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#append(IPath)
 	 */
+	@Override
 	public IPath append(IPath tail) {
 		//optimize some easy cases
 		if (tail == null || tail.segmentCount() == 0)
@@ -256,6 +259,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#append(java.lang.String)
 	 */
+	@Override
 	public IPath append(String tail) {
 		//optimize addition of a single segment
 		if (tail.indexOf(SEPARATOR) == -1 && tail.indexOf("\\") == -1 && tail.indexOf(DEVICE_SEPARATOR) == -1) { //$NON-NLS-1$
@@ -309,6 +313,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * Clones this object.
 	 */
+	@Override
 	public Object clone() {
 		try {
 			return super.clone();
@@ -509,6 +514,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * Compares objects for equality.
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -534,6 +540,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#getDevice
 	 */
+	@Override
 	public String getDevice() {
 		return device;
 	}
@@ -541,6 +548,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#getFileExtension
 	 */
+	@Override
 	public String getFileExtension() {
 		if (hasTrailingSeparator()) {
 			return null;
@@ -559,6 +567,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * Computes the hash code for this object.
 	 */
+	@Override
 	public int hashCode() {
 		return separators & HASH_MASK;
 	}
@@ -566,6 +575,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#hasTrailingSeparator2
 	 */
+	@Override
 	public boolean hasTrailingSeparator() {
 		return (separators & HAS_TRAILING) != 0;
 	}
@@ -610,6 +620,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#isAbsolute
 	 */
+	@Override
 	public boolean isAbsolute() {
 		//it's absolute if it has a leading separator
 		return (separators & HAS_LEADING) != 0;
@@ -618,6 +629,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#isEmpty
 	 */
+	@Override
 	public boolean isEmpty() {
 		//true if no segments and no leading prefix
 		return segments.length == 0 && ((separators & ALL_SEPARATORS) != HAS_LEADING);
@@ -627,6 +639,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#isPrefixOf
 	 */
+	@Override
 	public boolean isPrefixOf(IPath anotherPath) {
 		if (device == null) {
 			if (anotherPath.getDevice() != null) {
@@ -654,6 +667,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#isRoot
 	 */
+	@Override
 	public boolean isRoot() {
 		//must have no segments, a leading separator, and not be a UNC path.
 		return this == ROOT || (segments.length == 0 && ((separators & ALL_SEPARATORS) == HAS_LEADING));
@@ -662,6 +676,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#isUNC
 	 */
+	@Override
 	public boolean isUNC() {
 		if (device != null)
 			return false;
@@ -671,6 +686,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#isValidPath(String)
 	 */
+	@Override
 	public boolean isValidPath(String path) {
 		Path test = new Path(path);
 		for (int i = 0, max = test.segmentCount(); i < max; i++)
@@ -682,6 +698,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#isValidSegment(String)
 	 */
+	@Override
 	public boolean isValidSegment(String segment) {
 		int size = segment.length();
 		if (size == 0)
@@ -699,6 +716,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#lastSegment()
 	 */
+	@Override
 	public String lastSegment() {
 		int len = segments.length;
 		return len == 0 ? null : segments[len - 1];
@@ -707,6 +725,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#makeAbsolute()
 	 */
+	@Override
 	public IPath makeAbsolute() {
 		if (isAbsolute()) {
 			return this;
@@ -725,6 +744,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#makeRelative()
 	 */
+	@Override
 	public IPath makeRelative() {
 		if (!isAbsolute()) {
 			return this;
@@ -736,6 +756,7 @@ public class Path implements IPath, Cloneable {
 	 * {@inheritDoc}
 	 * @since org.eclipse.equinox.common 3.5
 	 */
+	@Override
 	public IPath makeRelativeTo(IPath base) {
 		//can't make relative if devices are not equal
 		if (device != base.getDevice() && (device == null || !device.equalsIgnoreCase(base.getDevice())))
@@ -756,6 +777,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#makeUNC(boolean)
 	 */
+	@Override
 	public IPath makeUNC(boolean toUNC) {
 		// if we are already in the right form then just return
 		if (!(toUNC ^ isUNC()))
@@ -774,6 +796,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#matchingFirstSegments(IPath)
 	 */
+	@Override
 	public int matchingFirstSegments(IPath anotherPath) {
 		Assert.isNotNull(anotherPath);
 		int anotherPathLen = anotherPath.segmentCount();
@@ -791,6 +814,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#removeFileExtension()
 	 */
+	@Override
 	public IPath removeFileExtension() {
 		String extension = getFileExtension();
 		if (extension == null || extension.equals("")) { //$NON-NLS-1$
@@ -804,6 +828,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#removeFirstSegments(int)
 	 */
+	@Override
 	public IPath removeFirstSegments(int count) {
 		if (count == 0)
 			return this;
@@ -822,6 +847,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#removeLastSegments(int)
 	 */
+	@Override
 	public IPath removeLastSegments(int count) {
 		if (count == 0)
 			return this;
@@ -839,6 +865,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#removeTrailingSeparator()
 	 */
+	@Override
 	public IPath removeTrailingSeparator() {
 		if (!hasTrailingSeparator()) {
 			return this;
@@ -849,6 +876,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#segment(int)
 	 */
+	@Override
 	public String segment(int index) {
 		if (index >= segments.length)
 			return null;
@@ -858,6 +886,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#segmentCount()
 	 */
+	@Override
 	public int segmentCount() {
 		return segments.length;
 	}
@@ -865,6 +894,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#segments()
 	 */
+	@Override
 	public String[] segments() {
 		String[] segmentCopy = new String[segments.length];
 		System.arraycopy(segments, 0, segmentCopy, 0, segments.length);
@@ -874,6 +904,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#setDevice(String)
 	 */
+	@Override
 	public IPath setDevice(String value) {
 		if (value != null) {
 			Assert.isTrue(value.indexOf(IPath.DEVICE_SEPARATOR) == (value.length() - 1), "Last character should be the device separator"); //$NON-NLS-1$
@@ -888,6 +919,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#toFile()
 	 */
+	@Override
 	public File toFile() {
 		return new File(toOSString());
 	}
@@ -895,6 +927,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#toOSString()
 	 */
+	@Override
 	public String toOSString() {
 		//Note that this method is identical to toString except
 		//it uses the OS file separator instead of the path separator
@@ -935,6 +968,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#toPortableString()
 	 */
+	@Override
 	public String toPortableString() {
 		int resultSize = computeLength();
 		if (resultSize <= 0)
@@ -962,6 +996,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#toString()
 	 */
+	@Override
 	public String toString() {
 		int resultSize = computeLength();
 		if (resultSize <= 0)
@@ -999,6 +1034,7 @@ public class Path implements IPath, Cloneable {
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#uptoSegment(int)
 	 */
+	@Override
 	public IPath uptoSegment(int count) {
 		if (count == 0)
 			return new Path(device, NO_SEGMENTS, separators & (HAS_LEADING | IS_UNC));

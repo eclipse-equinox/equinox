@@ -21,6 +21,7 @@ import java.lang.ref.*;
 public class ReferenceHashSet<T> {
 
 	private interface HashedReference<T> {
+		@Override
 		int hashCode();
 
 		T get();
@@ -34,6 +35,7 @@ public class ReferenceHashSet<T> {
 			this.hashCode = referent.hashCode();
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			if (!(obj instanceof HashableWeakReference))
 				return false;
@@ -45,10 +47,12 @@ public class ReferenceHashSet<T> {
 			return referent.equals(other);
 		}
 
+		@Override
 		public int hashCode() {
 			return this.hashCode;
 		}
 
+		@Override
 		public String toString() {
 			Object referent = super.get();
 			if (referent == null)
@@ -65,6 +69,7 @@ public class ReferenceHashSet<T> {
 			this.hashCode = referent.hashCode();
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			if (!(obj instanceof HashableWeakReference))
 				return false;
@@ -76,10 +81,12 @@ public class ReferenceHashSet<T> {
 			return referent.equals(other);
 		}
 
+		@Override
 		public int hashCode() {
 			return this.hashCode;
 		}
 
+		@Override
 		public String toString() {
 			Object referent = super.get();
 			if (referent == null)
@@ -95,14 +102,17 @@ public class ReferenceHashSet<T> {
 			this.referent = referent;
 		}
 
+		@Override
 		public int hashCode() {
 			return referent.hashCode();
 		}
 
+		@Override
 		public U get() {
 			return referent;
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			return referent.equals(obj);
 		}
@@ -291,6 +301,7 @@ public class ReferenceHashSet<T> {
 		return this.elementSize;
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer buffer = new StringBuffer("{"); //$NON-NLS-1$
 		for (int i = 0, length = this.values.length; i < length; i++) {

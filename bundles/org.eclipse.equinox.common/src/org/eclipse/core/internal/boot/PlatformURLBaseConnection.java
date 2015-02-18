@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ public class PlatformURLBaseConnection extends PlatformURLConnection {
 	/* (non-Javadoc)
 	 * @see org.eclipse.equinox.internal.url.PlatformURLConnection#allowCaching()
 	 */
+	@Override
 	protected boolean allowCaching() {
 		return true;
 	}
@@ -44,6 +45,7 @@ public class PlatformURLBaseConnection extends PlatformURLConnection {
 	/* (non-Javadoc)
 	 * @see org.eclipse.equinox.internal.url.PlatformURLConnection#resolve()
 	 */
+	@Override
 	protected URL resolve() throws IOException {
 		String spec = url.getFile().trim();
 		if (spec.startsWith("/")) //$NON-NLS-1$

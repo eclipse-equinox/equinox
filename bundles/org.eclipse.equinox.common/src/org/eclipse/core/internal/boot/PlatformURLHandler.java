@@ -44,6 +44,7 @@ public class PlatformURLHandler extends AbstractURLStreamHandlerService {
 	/* (non-Javadoc)
 	 * @see org.osgi.service.url.AbstractURLStreamHandlerService#openConnection(java.net.URL)
 	 */
+	@Override
 	public URLConnection openConnection(URL url) throws IOException {
 		// Note: openConnection() method is made public (rather than protected)
 		//       to enable request delegation from proxy handlers

@@ -56,6 +56,7 @@ import org.osgi.framework.Version;
  * @see java.lang.String#compareTo(java.lang.String)
  * @deprecated clients should use {@link org.osgi.framework.Version} instead
  */
+@Deprecated
 public final class PluginVersionIdentifier {
 
 	private Version version;
@@ -218,6 +219,7 @@ public final class PluginVersionIdentifier {
 	 * @param object an object to compare
 	 * @return whether or not the two objects are equal
 	 */
+	@Override
 	public boolean equals(Object object) {
 		if (!(object instanceof PluginVersionIdentifier))
 			return false;
@@ -230,6 +232,7 @@ public final class PluginVersionIdentifier {
 	 *
 	 * @return an integer which is a hash code value for this object.
 	 */
+	@Override
 	public int hashCode() {
 		return version.hashCode();
 	}
@@ -442,6 +445,7 @@ public final class PluginVersionIdentifier {
 	 *
 	 * @return the string representation of this plug-in version identifier
 	 */
+	@Override
 	public String toString() {
 		return version.toString();
 	}

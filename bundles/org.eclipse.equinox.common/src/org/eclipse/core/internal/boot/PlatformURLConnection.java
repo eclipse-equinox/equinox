@@ -88,6 +88,7 @@ public abstract class PlatformURLConnection extends URLConnection {
 		return false;
 	}
 
+	@Override
 	public void connect() throws IOException {
 		connect(false);
 	}
@@ -228,6 +229,7 @@ public abstract class PlatformURLConnection extends URLConnection {
 		return null;
 	}
 
+	@Override
 	public synchronized InputStream getInputStream() throws IOException {
 		if (!connected)
 			connect();

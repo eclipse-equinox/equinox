@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -136,6 +136,7 @@ public interface IPath extends Cloneable {
 	 * @return <code>true</code> if the paths are equivalent,
 	 *    and <code>false</code> if they are not
 	 */
+	@Override
 	public boolean equals(Object obj);
 
 	/**
@@ -507,6 +508,7 @@ public interface IPath extends Cloneable {
 	 * @return a string representation of this path
 	 * @see Path
 	 */
+	@Override
 	public String toString();
 
 	/**

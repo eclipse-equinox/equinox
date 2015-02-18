@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -99,6 +99,7 @@ public class MultiStatus extends Status {
 	/* (Intentionally not javadoc'd)
 	 * Implements the corresponding method on <code>IStatus</code>.
 	 */
+	@Override
 	public IStatus[] getChildren() {
 		return children;
 	}
@@ -106,6 +107,7 @@ public class MultiStatus extends Status {
 	/* (Intentionally not javadoc'd)
 	 * Implements the corresponding method on <code>IStatus</code>.
 	 */
+	@Override
 	public boolean isMultiStatus() {
 		return true;
 	}
@@ -134,6 +136,7 @@ public class MultiStatus extends Status {
 	 * Returns a string representation of the status, suitable 
 	 * for debugging purposes only.
 	 */
+	@Override
 	public String toString() {
 		StringBuffer buf = new StringBuffer(super.toString());
 		buf.append(" children=["); //$NON-NLS-1$

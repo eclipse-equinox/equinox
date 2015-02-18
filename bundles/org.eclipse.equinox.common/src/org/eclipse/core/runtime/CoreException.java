@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,6 +50,7 @@ public class CoreException extends Exception {
 	  * @return the cause for this exception
 	  * @since 3.4
 	  */
+	@Override
 	public Throwable getCause() {
 		return status.getException();
 	}
@@ -84,6 +85,7 @@ public class CoreException extends Exception {
 	 * any nested exception that it may have embedded in
 	 * its Status object.
 	 */
+	@Override
 	public void printStackTrace() {
 		printStackTrace(System.err);
 	}
@@ -95,6 +97,7 @@ public class CoreException extends Exception {
 	 * 
 	 * @param output the stream to write to
 	 */
+	@Override
 	public void printStackTrace(PrintStream output) {
 		synchronized (output) {
 			super.printStackTrace(output);
@@ -109,6 +112,7 @@ public class CoreException extends Exception {
 	 * 
 	 * @param output the stream to write to
 	 */
+	@Override
 	public void printStackTrace(PrintWriter output) {
 		synchronized (output) {
 			super.printStackTrace(output);

@@ -187,6 +187,7 @@ public final class AdapterManager implements IAdapterManager {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IAdapterManager#getAdapterTypes(java.lang.Class)
 	 */
+	@Override
 	public String[] computeAdapterTypes(Class<? extends Object> adaptable) {
 		Set<String> types = getFactories(adaptable).keySet();
 		return types.toArray(new String[types.size()]);
@@ -220,6 +221,7 @@ public final class AdapterManager implements IAdapterManager {
 	 * Returns the super-type search order starting with <code>adaptable</code>. 
 	 * The search order is defined in this class' comment.
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> Class<? super T>[] computeClassOrder(Class<T> adaptable) {
 		Class<?>[] classes = null;
@@ -288,6 +290,7 @@ public final class AdapterManager implements IAdapterManager {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IAdapterManager#getAdapter(java.lang.Object, java.lang.Class)
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Object adaptable, Class<T> adapterType) {
 		Assert.isNotNull(adaptable);
@@ -304,6 +307,7 @@ public final class AdapterManager implements IAdapterManager {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IAdapterManager#getAdapter(java.lang.Object, java.lang.Class)
 	 */
+	@Override
 	public Object getAdapter(Object adaptable, String adapterType) {
 		Assert.isNotNull(adaptable);
 		Assert.isNotNull(adapterType);
@@ -333,6 +337,7 @@ public final class AdapterManager implements IAdapterManager {
 		return result;
 	}
 
+	@Override
 	public boolean hasAdapter(Object adaptable, String adapterTypeName) {
 		return getFactories(adaptable.getClass()).get(adapterTypeName) != null;
 	}
@@ -340,6 +345,7 @@ public final class AdapterManager implements IAdapterManager {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IAdapterManager#queryAdapter(java.lang.Object, java.lang.String)
 	 */
+	@Override
 	public int queryAdapter(Object adaptable, String adapterTypeName) {
 		IAdapterFactory factory = getFactories(adaptable.getClass()).get(adapterTypeName);
 		if (factory == null)
@@ -355,6 +361,7 @@ public final class AdapterManager implements IAdapterManager {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IAdapterManager#loadAdapter(java.lang.Object, java.lang.String)
 	 */
+	@Override
 	public Object loadAdapter(Object adaptable, String adapterTypeName) {
 		return getAdapter(adaptable, adapterTypeName, true);
 	}
@@ -362,6 +369,7 @@ public final class AdapterManager implements IAdapterManager {
 	/*
 	 * @see IAdapterManager#registerAdapters
 	 */
+	@Override
 	public synchronized void registerAdapters(IAdapterFactory factory, Class<?> adaptable) {
 		registerFactory(factory, adaptable.getName());
 		flushLookup();
@@ -382,6 +390,7 @@ public final class AdapterManager implements IAdapterManager {
 	/*
 	 * @see IAdapterManager#unregisterAdapters
 	 */
+	@Override
 	public synchronized void unregisterAdapters(IAdapterFactory factory) {
 		for (List<IAdapterFactory> list : factories.values())
 			list.remove(factory);
@@ -391,6 +400,7 @@ public final class AdapterManager implements IAdapterManager {
 	/*
 	 * @see IAdapterManager#unregisterAdapters
 	 */
+	@Override
 	public synchronized void unregisterAdapters(IAdapterFactory factory, Class<?> adaptable) {
 		List<IAdapterFactory> factoryList = factories.get(adaptable.getName());
 		if (factoryList == null)

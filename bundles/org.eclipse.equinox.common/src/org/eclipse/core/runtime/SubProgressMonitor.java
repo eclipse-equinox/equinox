@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -110,6 +110,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 	 * <code> is specified, then the given string will be prepended to
 	 * every string passed to <code>subTask(String)</code>.
 	 */
+	@Override
 	public void beginTask(String name, int totalWork) {
 		nestedBeginTasks++;
 		// Ignore nested begin task calls.
@@ -128,6 +129,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 	/* (Intentionally not javadoc'd)
 	 * Implements the method <code>IProgressMonitor.done</code>.
 	 */
+	@Override
 	public void done() {
 		// Ignore if more done calls than beginTask calls or if we are still
 		// in some nested beginTasks
@@ -146,6 +148,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 	/* (Intentionally not javadoc'd)
 	 * Implements the internal method <code>IProgressMonitor.internalWorked</code>.
 	 */
+	@Override
 	public void internalWorked(double work) {
 		if (usedUp || nestedBeginTasks != 1) {
 			return;
@@ -162,6 +165,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 	/* (Intentionally not javadoc'd)
 	 * Implements the method <code>IProgressMonitor.subTask</code>.
 	 */
+	@Override
 	public void subTask(String name) {
 		if ((style & SUPPRESS_SUBTASK_LABEL) != 0) {
 			return;
@@ -177,6 +181,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 	/* (Intentionally not javadoc'd)
 	 * Implements the method <code>IProgressMonitor.worked</code>.
 	 */
+	@Override
 	public void worked(int work) {
 		internalWorked(work);
 	}

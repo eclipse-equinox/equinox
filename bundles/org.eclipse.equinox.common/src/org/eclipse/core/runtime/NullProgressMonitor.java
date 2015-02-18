@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ public class NullProgressMonitor implements IProgressMonitor {
 	 * 
 	 * @see IProgressMonitor#beginTask(String, int)
 	 */
+	@Override
 	public void beginTask(String name, int totalWork) {
 		// do nothing
 	}
@@ -52,6 +53,7 @@ public class NullProgressMonitor implements IProgressMonitor {
 	 * 
 	 * @see IProgressMonitor#done()
 	 */
+	@Override
 	public void done() {
 		// do nothing
 	}
@@ -62,6 +64,7 @@ public class NullProgressMonitor implements IProgressMonitor {
 	 * 
 	 * @see IProgressMonitor#internalWorked(double)
 	 */
+	@Override
 	public void internalWorked(double work) {
 		// do nothing
 	}
@@ -75,6 +78,7 @@ public class NullProgressMonitor implements IProgressMonitor {
 	 * @see IProgressMonitor#isCanceled()
 	 * @see IProgressMonitor#setCanceled(boolean)
 	 */
+	@Override
 	public boolean isCanceled() {
 		return cancelled;
 	}
@@ -87,6 +91,7 @@ public class NullProgressMonitor implements IProgressMonitor {
 	 * @see IProgressMonitor#isCanceled()
 	 * @see IProgressMonitor#setCanceled(boolean)
 	 */
+	@Override
 	public void setCanceled(boolean cancelled) {
 		this.cancelled = cancelled;
 	}
@@ -98,6 +103,7 @@ public class NullProgressMonitor implements IProgressMonitor {
 	 * 
 	 * @see IProgressMonitor#setTaskName(String)
 	 */
+	@Override
 	public void setTaskName(String name) {
 		// do nothing
 	}
@@ -109,6 +115,7 @@ public class NullProgressMonitor implements IProgressMonitor {
 	 * 
 	 * @see IProgressMonitor#subTask(String)
 	 */
+	@Override
 	public void subTask(String name) {
 		// do nothing
 	}
@@ -120,6 +127,7 @@ public class NullProgressMonitor implements IProgressMonitor {
 	 * 
 	 * @see IProgressMonitor#worked(int)
 	 */
+	@Override
 	public void worked(int work) {
 		// do nothing
 	}

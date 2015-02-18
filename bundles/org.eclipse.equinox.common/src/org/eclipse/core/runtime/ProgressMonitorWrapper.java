@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,7 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	 *
 	 * @see IProgressMonitor#beginTask(String, int)
 	 */
+	@Override
 	public void beginTask(String name, int totalWork) {
 		progressMonitor.beginTask(name, totalWork);
 	}
@@ -56,6 +57,7 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	 * @see IProgressMonitorWithBlocking#clearBlocked()
 	 * @since 3.0
 	 */
+	@Override
 	public void clearBlocked() {
 		if (progressMonitor instanceof IProgressMonitorWithBlocking)
 			((IProgressMonitorWithBlocking) progressMonitor).clearBlocked();
@@ -69,6 +71,7 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	 *
 	 * @see IProgressMonitor#done()
 	 */
+	@Override
 	public void done() {
 		progressMonitor.done();
 	}
@@ -90,6 +93,7 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	 *
 	 * @see IProgressMonitor#internalWorked(double)
 	 */
+	@Override
 	public void internalWorked(double work) {
 		progressMonitor.internalWorked(work);
 	}
@@ -102,6 +106,7 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	 *
 	 * @see IProgressMonitor#isCanceled()
 	 */
+	@Override
 	public boolean isCanceled() {
 		return progressMonitor.isCanceled();
 	}
@@ -115,6 +120,7 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	 * @see IProgressMonitorWithBlocking#setBlocked(IStatus)
 	 * @since 3.0
 	 */
+	@Override
 	public void setBlocked(IStatus reason) {
 		if (progressMonitor instanceof IProgressMonitorWithBlocking)
 			((IProgressMonitorWithBlocking) progressMonitor).setBlocked(reason);
@@ -128,6 +134,7 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	 *
 	 * @see IProgressMonitor#setCanceled(boolean)
 	 */
+	@Override
 	public void setCanceled(boolean b) {
 		progressMonitor.setCanceled(b);
 	}
@@ -140,6 +147,7 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	 *
 	 * @see IProgressMonitor#setTaskName(String)
 	 */
+	@Override
 	public void setTaskName(String name) {
 		progressMonitor.setTaskName(name);
 	}
@@ -152,6 +160,7 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	 *
 	 * @see IProgressMonitor#subTask(String)
 	 */
+	@Override
 	public void subTask(String name) {
 		progressMonitor.subTask(name);
 	}
@@ -164,6 +173,7 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	 *
 	 * @see IProgressMonitor#worked(int)
 	 */
+	@Override
 	public void worked(int work) {
 		progressMonitor.worked(work);
 	}
