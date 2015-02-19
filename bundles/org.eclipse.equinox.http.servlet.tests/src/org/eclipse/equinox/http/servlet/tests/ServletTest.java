@@ -771,15 +771,27 @@ public class ServletTest extends TestCase {
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			sessionListenerReg = getBundleContext().registerService(HttpSessionListener.class, sessionListener, listenerProps);
 
+			sessionCreated.set(false);
+			valueBound.set(false);
+			sessionDestroyed.set(false);
+			valueUnbound.set(false);
 			// first call will create the session
 			actual = requestAdvisor.request("sessions");
 			assertEquals("Wrong result", "created", actual);
 			assertTrue("No sessionCreated called", sessionCreated.get());
 			assertTrue("No valueBound called", valueBound.get());
+			assertFalse("sessionDestroyed was called", sessionDestroyed.get());
+			assertFalse("valueUnbound was called", valueUnbound.get());
 
+			sessionCreated.set(false);
+			valueBound.set(false);
+			sessionDestroyed.set(false);
+			valueUnbound.set(false);
 			// second call will invalidate the session
 			actual = requestAdvisor.request("sessions");
 			assertEquals("Wrong result", "invalidated", actual);
+			assertFalse("sessionCreated was called", sessionCreated.get());
+			assertFalse("valueBound was called", valueBound.get());
 			assertTrue("No sessionDestroyed called", sessionDestroyed.get());
 			assertTrue("No valueUnbound called", valueUnbound.get());
 

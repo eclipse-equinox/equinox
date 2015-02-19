@@ -21,12 +21,12 @@ import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 public class HttpSessionAdaptor implements HttpSession {
 	static class ParentSessionListener implements HttpSessionBindingListener {
 		private static final String PARENT_SESSION_LISTENER_KEY = "org.eclipse.equinox.http.parent.session.listener"; //$NON-NLS-1$
-		final Map<HttpSession, Set<HttpSessionAdaptor>> innerSessions = new HashMap<HttpSession, Set<HttpSessionAdaptor>>();
+		final Map<String, Set<HttpSessionAdaptor>> innerSessions = new HashMap<String, Set<HttpSessionAdaptor>>();
 		@Override
 		public void valueBound(HttpSessionBindingEvent event) {
 			// Add a Set to indicate this session is valid
 			synchronized (innerSessions) {
-				innerSessions.put(event.getSession(), new HashSet<HttpSessionAdaptor>());
+				innerSessions.put(event.getSession().getId(), new HashSet<HttpSessionAdaptor>());
 			}
 		}
 
@@ -37,7 +37,7 @@ public class HttpSessionAdaptor implements HttpSession {
 			Set<HttpSessionAdaptor> innerSessionsToInvalidate;
 			synchronized (innerSessions) {
 				// remove the set to mark the outer session as invalid
-				innerSessionsToInvalidate = innerSessions.remove(event.getSession());
+				innerSessionsToInvalidate = innerSessions.remove(event.getSession().getId());
 			}
 			for (HttpSessionAdaptor innerSession : innerSessionsToInvalidate) {
 				innerSession.invalidate();
@@ -49,13 +49,13 @@ public class HttpSessionAdaptor implements HttpSession {
 				if (innerSession.session.getAttribute(PARENT_SESSION_LISTENER_KEY) == null) {
 					innerSession.session.setAttribute(PARENT_SESSION_LISTENER_KEY, this);
 				}
-				innerSessions.get(innerSession.session).add(innerSession);
+				innerSessions.get(innerSession.session.getId()).add(innerSession);
 			}
 		}
 
 		void removeHttpSessionAdaptor(HttpSessionAdaptor innerSession) {
 			synchronized (innerSessions) {
-				Set<HttpSessionAdaptor> sessions = innerSessions.get(innerSession.session);
+				Set<HttpSessionAdaptor> sessions = innerSessions.get(innerSession.session.getId());
 				if (sessions != null) {
 					sessions.remove(innerSession);
 				}
