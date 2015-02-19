@@ -143,7 +143,6 @@
 <mapEntry key="org.eclipse.wst.sse.core/format" value="false"/>
 <mapEntry key="org.eclipse.wst.sse.ui/extendedconfigurationbuilder" value="false"/>
 <mapEntry key="org.eclipse.birt.chart.engine/model.util" value="false"/>
-<mapEntry key="org.eclipse.team.cvs.ssh/debug" value="false"/>
 <mapEntry key="org.eclipse.wst.dtd.ui/projectionperf" value="false"/>
 <mapEntry key="org.eclipse.ui/trace/handlers.verbose" value="false"/>
 <mapEntry key="org.eclipse.osgi/debug/startlevel" value="false"/>
@@ -251,7 +250,6 @@
 <mapEntry key="org.eclipse.wst.sse.core/structureddocument" value="false"/>
 <mapEntry key="org.eclipse.ui/trace/graphics" value="false"/>
 <mapEntry key="org.eclipse.jdt.core/debug/resolution" value="false"/>
-<mapEntry key="org.eclipse.team.cvs.ssh/ssh_protocol" value="false"/>
 <mapEntry key="org.eclipse.core.resources/perf/snapshot" value="1000"/>
 <mapEntry key="org.eclipse.equinox.ds/print_on_console" value="true"/>
 <mapEntry key="org.eclipse.help/debug/search" value="false"/>
