@@ -1,12 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2012 IBM Corporation and others.
+ * Copyright (c) 2008, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Christian Georgi (SAP SE) - Bug 460430: environment variable for secure store
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.storage;
 
@@ -28,6 +29,11 @@ public class SecurePreferencesMapper {
 	 * Command line argument specifying default location
 	 */
 	final private static String KEYRING_ARGUMENT = "-eclipse.keyring"; //$NON-NLS-1$
+
+	/**
+	 * Environment variable name for the location
+	 */
+	final private static String KEYRING_ENVIRONMENT = "ECLIPSE_KEYRING"; //$NON-NLS-1$
 
 	/**
 	 * Command line argument specifying default password
@@ -85,7 +91,12 @@ public class SecurePreferencesMapper {
 			}
 		}
 
-		// 2) process location
+		// 2) process location from environment
+		String environmentKeyring = System.getenv(KEYRING_ENVIRONMENT);
+		if (location == null && environmentKeyring != null)
+			location = getKeyringFile(environmentKeyring).toURL();
+
+		// 3) process default location
 		if (location == null)
 			location = StorageUtils.getDefaultLocation();
 		if (!StorageUtils.isFile(location))
