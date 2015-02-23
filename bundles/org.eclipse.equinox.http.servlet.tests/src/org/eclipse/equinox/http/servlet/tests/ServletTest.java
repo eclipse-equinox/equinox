@@ -375,6 +375,32 @@ public class ServletTest extends TestCase {
 		Assert.assertEquals(expected, actual);
 	}
 
+	public void test_Filter18() throws Exception {
+		String expected = "dbcacbd";
+		String actual;
+		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		try {
+			bundle.start();
+			actual = requestAdvisor.request("TestFilter18/foo/bar/baz");
+		} finally {
+			uninstallBundle(bundle);
+		}
+		Assert.assertEquals(expected, actual);
+	}
+
+	public void test_Filter19() throws Exception {
+		String expected = "dfbcacbfd";
+		String actual;
+		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		try {
+			bundle.start();
+			actual = requestAdvisor.request("TestFilter18/foo/bar/baz/with/path/info");
+		} finally {
+			uninstallBundle(bundle);
+		}
+		Assert.assertEquals(expected, actual);
+	}
+
 	public void test_Registration1() throws Exception {
 		String expected = "Alias cannot be null";
 		try {
