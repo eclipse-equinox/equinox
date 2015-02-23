@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.equinox.http.servlet.tests.tb.AbstractTestServlet;
 import org.eclipse.equinox.http.servlet.tests.util.BaseFilter;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.NamespaceException;
@@ -34,7 +35,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  * This servlet is registered with the HttpService via the immediate DS
  * component OSGI-INF/testServlet1_component.xml.
  */
-public class TestFilter11 extends AbstractTestServlet {
+public class TestFilter17 extends AbstractTestServlet {
 	private static final long serialVersionUID = 1L;
 	private final Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 
@@ -42,23 +43,36 @@ public class TestFilter11 extends AbstractTestServlet {
 	public void activate(ComponentContext componentContext) throws ServletException, NamespaceException {
 
 		Dictionary<String, String> servletProps = new Hashtable<String, String>();
-		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, regexAlias());
+		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "TestFilter17");
+		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/TestFilter17/foo/bar/baz");
 		registrations.add(componentContext.getBundleContext().registerService(Servlet.class, this, servletProps));
 
-		Dictionary<String, String> filterProps = new Hashtable<String, String>();
+		// Should order like: ebcdadcbe
+
+		// b
+		Dictionary<String, Object> filterProps = new Hashtable<String, Object>();
 		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
-		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, regexAlias());
+		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/TestFilter17/foo/bar/*");
 		registrations.add(componentContext.getBundleContext().registerService(Filter.class, f1, filterProps));
 
-		filterProps = new Hashtable<String, String>();
+		// c
+		filterProps = new Hashtable<String, Object>();
 		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F2");
-		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, regexAlias());
+		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/TestFilter17/*");
 		registrations.add(componentContext.getBundleContext().registerService(Filter.class, f2, filterProps));
 
-		filterProps = new Hashtable<String, String>();
+		// d
+		filterProps = new Hashtable<String, Object>();
 		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F3");
-		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, regexAlias());
+		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/TestFilter17/foo/*");
 		registrations.add(componentContext.getBundleContext().registerService(Filter.class, f3, filterProps));
+
+		// e
+		filterProps = new Hashtable<String, Object>();
+		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F4");
+		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_SERVLET, "TestFilter17");
+		filterProps.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
+		registrations.add(componentContext.getBundleContext().registerService(Filter.class, f4, filterProps));
 	}
 
 	@Override
@@ -73,7 +87,8 @@ public class TestFilter11 extends AbstractTestServlet {
 		writer.print('a');
 	}
 
-	Filter f1 = new BaseFilter('c');
-	Filter f2 = new BaseFilter('b');
+	Filter f1 = new BaseFilter('b');
+	Filter f2 = new BaseFilter('c');
 	Filter f3 = new BaseFilter('d');
+	Filter f4 = new BaseFilter('e');
 }

@@ -51,10 +51,12 @@ public class TestFilter16 extends AbstractTestServlet {
 		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, extensionAlias());
 		registrations.add(componentContext.getBundleContext().registerService(Filter.class, f1, filterProps));
 
+		filterProps = new Hashtable<String, Object>();
 		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F2");
 		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, extensionAlias());
 		registrations.add(componentContext.getBundleContext().registerService(Filter.class, f2, filterProps));
 
+		filterProps = new Hashtable<String, Object>();
 		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F3");
 		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, extensionAlias());
 		filterProps.put(Constants.SERVICE_RANKING, 1);
