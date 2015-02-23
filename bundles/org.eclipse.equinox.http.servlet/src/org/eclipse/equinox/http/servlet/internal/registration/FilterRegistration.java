@@ -81,7 +81,7 @@ public class FilterRegistration
 			Math.abs(otherFilterRegistration.getD().serviceId)) ? 1 : -1;
 	}
 
-	public synchronized void destroy() {
+	public void destroy() {
 		if (!initDestoyWithContextController) {
 			return;
 		}
