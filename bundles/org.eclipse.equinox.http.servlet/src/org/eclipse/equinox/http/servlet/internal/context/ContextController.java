@@ -217,18 +217,14 @@ public class ContextController {
 			filterRef.getProperty(
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN));
 		String[] patterns = patternList.toArray(new String[patternList.size()]);
+		List<String> regexList = StringPlus.from(
+			filterRef.getProperty(
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX));
+		String[] regexs = regexList.toArray(new String[regexList.size()]);
 		List<String> servletList = StringPlus.from(
 			filterRef.getProperty(
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_SERVLET));
 		String[] servletNames = servletList.toArray(new String[servletList.size()]);
-
-		// TODO add regex support - 140.5
-
-		// List<String> regexList = StringPlus.from(
-		//	serviceReference.getProperty(
-		//		HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX));
-
-		// String[] regex = regexList.toArray(new String[regexList.size()]);
 
 		String name = ServiceProperties.parseName(filterRef.getProperty(
 			HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME), filterHolder.get());
@@ -236,10 +232,11 @@ public class ContextController {
 		Filter filter = filterHolder.get();
 
 		if (((patterns == null) || (patterns.length == 0)) &&
-			((servletNames == null) || servletNames.length == 0)) {
+			((regexs == null) || (regexs.length == 0)) &&
+			((servletNames == null) || (servletNames.length == 0))) {
 
 			throw new IllegalArgumentException(
-				"Patterns or servletNames must contain a value.");
+				"Patterns, regex or servletNames must contain a value.");
 		}
 
 		if (patterns != null) {
@@ -271,8 +268,7 @@ public class ContextController {
 		filterDTO.initParams = filterInitParams;
 		filterDTO.name = name;
 		filterDTO.patterns = sort(patterns);
-		// TODO
-		//filterDTO.regexps = sort(regexps);
+		filterDTO.regexs = regexs;
 		filterDTO.serviceId = serviceId;
 		filterDTO.servletContextId = contextServiceId;
 		filterDTO.servletNames = sort(servletNames);

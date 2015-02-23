@@ -13,6 +13,7 @@ package org.eclipse.equinox.http.servlet.internal.registration;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,6 +37,7 @@ public class FilterRegistration
 	private final int priority;
 	private final ContextController contextController;
 	private final boolean initDestoyWithContextController;
+	private final Pattern[] compiledRegexs;
 
 	public FilterRegistration(
 		ServiceHolder<Filter> filterHolder, FilterDTO filterDTO, int priority,
@@ -45,6 +47,7 @@ public class FilterRegistration
 		this.filterHolder = filterHolder;
 		this.priority = priority;
 		this.contextController = contextController;
+		this.compiledRegexs = getCompiledRegex(filterDTO);
 		if (legacyRegistration) {
 			// legacy filter registrations used the current TCCL at registration time
 			classLoader = Thread.currentThread().getContextClassLoader();
@@ -78,7 +81,7 @@ public class FilterRegistration
 			Math.abs(otherFilterRegistration.getD().serviceId)) ? 1 : -1;
 	}
 
-	public void destroy() {
+	public synchronized void destroy() {
 		if (!initDestoyWithContextController) {
 			return;
 		}
@@ -169,9 +172,31 @@ public class FilterRegistration
 			}
 		}
 
+		StringBuilder sb = new StringBuilder();
+
+		if (servletPath != null) {
+			sb.append(servletPath);
+		}
+
+		if (pathInfo != null) {
+			sb.append(pathInfo);
+		}
+
+		String path = sb.toString();
+
+		if (path.length() <= 0) {
+			return null;
+		}
+
 		for (String pattern : getD().patterns) {
-			if (doMatch(pattern, servletPath, pathInfo, extension)) {
+			if (doPatternMatch(pattern, path, extension)) {
 				return pattern;
+			}
+		}
+
+		for (Pattern regex : compiledRegexs) {
+			if (regex.matcher(path).matches()) {
+				return regex.toString();
 			}
 		}
 
@@ -188,29 +213,24 @@ public class FilterRegistration
 			contextController);
 	}
 
-	protected boolean isPathWildcardMatch(
-		String pattern, String servletPath, String pathInfo) {
-
+	protected boolean isPathWildcardMatch(String pattern, String path) {
 		int cpl = pattern.length() - 2;
 
-		if (pattern.endsWith("/*") && servletPath.regionMatches(0, pattern, 0, cpl)) { //$NON-NLS-1$
+		if (pattern.endsWith("/*") && path.regionMatches(0, pattern, 0, cpl)) { //$NON-NLS-1$
 			return true;
 		}
 
 		return false;
 	}
 
-	protected boolean doMatch(
-			String pattern, String servletPath, String pathInfo, String extension)
+	protected boolean doPatternMatch(String pattern, String path, String extension)
 		throws IllegalArgumentException {
 
 		if (pattern.indexOf("/*.") == 0) { //$NON-NLS-1$
 			pattern = pattern.substring(1);
 		}
 
-		if ((pattern.charAt(0) == '/') && (servletPath != null) &&
-			isPathWildcardMatch(pattern, servletPath, pathInfo)) {
-
+		if ((pattern.charAt(0) == '/') && (path != null) && isPathWildcardMatch(pattern, path)) {
 			return true;
 		}
 
@@ -219,6 +239,20 @@ public class FilterRegistration
 		}
 
 		return false;
+	}
+
+	private Pattern[] getCompiledRegex(FilterDTO filterDTO) {
+		if (filterDTO.regexs == null) {
+			return new Pattern[0];
+		}
+
+		Pattern[] patterns = new Pattern[filterDTO.regexs.length];
+
+		for (int i = 0; i < filterDTO.regexs.length; i++) {
+			patterns[i] = Pattern.compile(filterDTO.regexs[i]);
+		}
+
+		return patterns;
 	}
 
 }

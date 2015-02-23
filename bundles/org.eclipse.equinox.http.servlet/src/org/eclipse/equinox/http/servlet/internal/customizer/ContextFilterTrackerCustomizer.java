@@ -13,7 +13,6 @@ package org.eclipse.equinox.http.servlet.internal.customizer;
 
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.Filter;
-import javax.servlet.ServletException;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.registration.FilterRegistration;
@@ -51,8 +50,8 @@ public class ContextFilterTrackerCustomizer
 		try {
 			result.set(contextController.addFilterRegistration(serviceReference));
 		}
-		catch (ServletException se) {
-			httpServiceRuntime.log(se.getMessage(), se);
+		catch (Exception e) {
+			httpServiceRuntime.log(e.getMessage(), e);
 		}
 
 		// TODO error?
