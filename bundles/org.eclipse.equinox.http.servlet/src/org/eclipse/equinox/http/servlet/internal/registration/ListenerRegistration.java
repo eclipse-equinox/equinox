@@ -48,7 +48,7 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 		createContextAttributes();
 
 		proxy = (EventListener)Proxy.newProxyInstance(
-			classLoader, classes.toArray(new Class[0]),
+			getClass().getClassLoader(), classes.toArray(new Class[0]),
 			new EventListenerInvocationHandler());
 	}
 
