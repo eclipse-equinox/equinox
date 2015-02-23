@@ -489,12 +489,16 @@ public class ServletTest extends TestCase {
 
 		ServletContextDTO[] servletContextDTOs = runtimeDTO.servletContextDTOs;
 
-		ServletDTO servletDTO = servletContextDTOs[0].servletDTOs[0];
+		for (ServletContextDTO servletContextDTO : servletContextDTOs) {
+			if (servletContextDTO.name.startsWith("org.eclipse.equinox.http.servlet.internal.HttpServiceImpl$")) {
+				ServletDTO servletDTO = servletContextDTO.servletDTOs[0];
 
-		Assert.assertFalse(servletDTO.asyncSupported);
-		Assert.assertEquals(servlet.getClass().getName(), servletDTO.name);
-		Assert.assertEquals("/blah1", servletDTO.patterns[0]);
-		Assert.assertTrue(servletDTO.serviceId < 0);
+				Assert.assertFalse(servletDTO.asyncSupported);
+				Assert.assertEquals(servlet.getClass().getName(), servletDTO.name);
+				Assert.assertEquals("/blah1", servletDTO.patterns[0]);
+				Assert.assertTrue(servletDTO.serviceId < 0);
+			}
+		}
 	}
 
 	public void test_Registration12() throws Exception {
@@ -536,11 +540,15 @@ public class ServletTest extends TestCase {
 
 		ServletContextDTO[] servletContextDTOs = runtimeDTO.servletContextDTOs;
 
-		ResourceDTO resourceDTO = servletContextDTOs[0].resourceDTOs[0];
+		for (ServletContextDTO servletContextDTO : servletContextDTOs) {
+			if (servletContextDTO.name.startsWith("org.eclipse.equinox.http.servlet.internal.HttpServiceImpl$")) {
+				ResourceDTO resourceDTO = servletContextDTO.resourceDTOs[0];
 
-		Assert.assertEquals("/blah1/*", resourceDTO.patterns[0]);
-		Assert.assertEquals("/foo", resourceDTO.prefix);
-		Assert.assertTrue(resourceDTO.serviceId < 0);
+				Assert.assertEquals("/blah1/*", resourceDTO.patterns[0]);
+				Assert.assertEquals("/foo", resourceDTO.prefix);
+				Assert.assertTrue(resourceDTO.serviceId < 0);
+			}
+		}
 	}
 
 	public void test_Registration14() throws Exception {
