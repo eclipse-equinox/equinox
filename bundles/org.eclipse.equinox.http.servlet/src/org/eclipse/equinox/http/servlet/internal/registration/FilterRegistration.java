@@ -159,25 +159,18 @@ public class FilterRegistration
 
 	@Override
 	public String match(
-		String name, String servletPath, String pathInfo, String extension,
-		Match match) {
+		String name, String servletPath, String pathInfo, String extension, Match match) {
 
-		if (name != null) {
-			if (getD().servletNames == null) {
-				return null;
-			}
-
+		if ((name != null) && (getD().servletNames != null)) {
 			for (String servletName : getD().servletNames) {
 				if (servletName.equals(name)) {
 					return name;
 				}
 			}
-
-			return null;
 		}
 
 		for (String pattern : getD().patterns) {
-			if (doMatch(pattern, servletPath, pathInfo, extension, match)) {
+			if (doMatch(pattern, servletPath, pathInfo, extension)) {
 				return pattern;
 			}
 		}
@@ -193,6 +186,39 @@ public class FilterRegistration
 	private void destroyContextAttributes() {
 		contextController.getProxyContext().destroyContextAttributes(
 			contextController);
+	}
+
+	protected boolean isPathWildcardMatch(
+		String pattern, String servletPath, String pathInfo) {
+
+		int cpl = pattern.length() - 2;
+
+		if (pattern.endsWith("/*") && servletPath.regionMatches(0, pattern, 0, cpl)) { //$NON-NLS-1$
+			return true;
+		}
+
+		return false;
+	}
+
+	protected boolean doMatch(
+			String pattern, String servletPath, String pathInfo, String extension)
+		throws IllegalArgumentException {
+
+		if (pattern.indexOf("/*.") == 0) { //$NON-NLS-1$
+			pattern = pattern.substring(1);
+		}
+
+		if ((pattern.charAt(0) == '/') && (servletPath != null) &&
+			isPathWildcardMatch(pattern, servletPath, pathInfo)) {
+
+			return true;
+		}
+
+		if ((pattern.indexOf("*.") == 0)) { //$NON-NLS-1$
+			return pattern.substring(2).equals(extension);
+		}
+
+		return false;
 	}
 
 }

@@ -611,75 +611,43 @@ public class ContextController {
 				this, endpointRegistration, servletPath, pathInfo, pattern);
 		}
 
-		String originalServletPath = servletPath;
-		String originalPathInfo = pathInfo;
+		if (requestURI != null) {
+			int x = requestURI.lastIndexOf('.');
+
+			if (x != -1) {
+				extension = requestURI.substring(x + 1);
+			}
+		}
 
 		List<FilterRegistration> matchingFilterRegistrations =
 			new ArrayList<FilterRegistration>();
 
-		for (Match curMatch : Match.values()) {
-			collectFilters(
-				matchingFilterRegistrations, servletName, requestURI, curMatch);
-		}
+		collectFilters(
+			matchingFilterRegistrations, endpointRegistration.getName(), requestURI,
+			servletPath, pathInfo, extension);
 
 		addFilterRegistrationsToRequestInfo(
 			matchingFilterRegistrations, requestInfoDTO);
 
 		return new DispatchTargets(
-			this, endpointRegistration, matchingFilterRegistrations,
-			originalServletPath, originalPathInfo, pattern);
+			this, endpointRegistration, matchingFilterRegistrations, servletPath,
+			pathInfo, pattern);
 	}
 
 	private void collectFilters(
 		List<FilterRegistration> matchingFilterRegistrations,
-		String servletName, String requestURI, Match match) {
+		String servletName, String requestURI, String servletPath, String pathInfo, String extension) {
 
-		String servletPath = requestURI;
-		String pathInfo = "";
-		String extension = null;
+		for (FilterRegistration filterRegistration : filterRegistrations) {
+			if ((filterRegistration.match(
+					servletName, servletPath, pathInfo, extension, null) != null) &&
+				!matchingFilterRegistrations.contains(filterRegistration)) {
 
-		int pos = -1;
+				matchingFilterRegistrations.add(filterRegistration);
 
-		if (requestURI != null) {
-			pos = requestURI.lastIndexOf('/');
-
-			if (match == Match.EXTENSION) {
-				int x = requestURI.lastIndexOf('.');
-
-				if (x != -1) {
-					extension = requestURI.substring(x + 1);
-				}
-
-				if (extension == null) {
-					return;
-				}
+				filterRegistration.addReference();
 			}
 		}
-
-		do {
-			for (FilterRegistration filterRegistration : filterRegistrations) {
-				if ((filterRegistration.match(
-						servletName, servletPath, pathInfo, extension, match) != null) &&
-					!matchingFilterRegistrations.contains(filterRegistration)) {
-
-					matchingFilterRegistrations.add(filterRegistration);
-
-					filterRegistration.addReference();
-				}
-			}
-
-			if (pos > -1) {
-				String newServletPath = requestURI.substring(0, pos);
-				pathInfo = requestURI.substring(pos);
-				servletPath = newServletPath;
-				pos = servletPath.lastIndexOf('/');
-
-				continue;
-			}
-
-			break;
-		}
-		while (true);
 	}
 
 	public Set<EndpointRegistration<?>> getEndpointRegistrations() {
@@ -1111,7 +1079,7 @@ public class ContextController {
 	private final long contextServiceId;
 	private final Set<EndpointRegistration<?>> endpointRegistrations = new ConcurrentSkipListSet<EndpointRegistration<?>>();
 	private final EventListeners eventListeners = new EventListeners();
-	private final Set<FilterRegistration> filterRegistrations = new HashSet<FilterRegistration>();
+	private final Set<FilterRegistration> filterRegistrations = new ConcurrentSkipListSet<FilterRegistration>();
 	private final Map<HttpSession, HttpSessionAdaptor> activeSessions = new HashMap<HttpSession, HttpSessionAdaptor>();
 
 	private final HttpServiceRuntimeImpl httpServiceRuntime;
