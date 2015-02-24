@@ -78,19 +78,18 @@ public class ContextListenerTrackerCustomizer
 	}
 
 	@Override
-	public void
-		modifiedService(
-			ServiceReference<EventListener> serviceReference,
-			AtomicReference<ListenerRegistration> listenerRegistration) {
+	public void modifiedService(
+		ServiceReference<EventListener> serviceReference,
+		AtomicReference<ListenerRegistration> listenerRegistration) {
+
 		removedService(serviceReference, listenerRegistration);
 		addingService(serviceReference);
 	}
 
 	@Override
-	public void
-		removedService(
-			ServiceReference<EventListener> serviceReference,
-			AtomicReference<ListenerRegistration> listenerReference) {
+	public void removedService(
+		ServiceReference<EventListener> serviceReference,
+		AtomicReference<ListenerRegistration> listenerReference) {
 
 		ListenerRegistration listenerRegistration = listenerReference.get();
 		if (listenerRegistration != null) {
