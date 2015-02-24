@@ -108,7 +108,8 @@ public class ContextListenerTrackerCustomizer
 		failedListenerDTO.failureReason = failureReason;
 		failedListenerDTO.serviceId = (Long)serviceReference.getProperty(Constants.SERVICE_ID);
 		failedListenerDTO.servletContextId = contextController.getServiceId();
-		failedListenerDTO.types = new String[0];
+		failedListenerDTO.types = StringPlus.from(
+			serviceReference.getProperty(Constants.OBJECTCLASS)).toArray(new String[0]);
 
 		contextController.getHttpServiceRuntime().recordFailedListenerDTO(serviceReference, failedListenerDTO);
 	}

@@ -322,8 +322,7 @@ public class ContextController {
 
 
 		EventListener eventListener = listenerHolder.get();
-		List<Class<? extends EventListener>> classes = getListenerClasses(
-			eventListener);
+		List<Class<? extends EventListener>> classes = getListenerClasses(listenerRef);
 
 		if (classes.isEmpty()) {
 			throw new IllegalArgumentException(
@@ -986,27 +985,29 @@ public class ContextController {
 	}
 
 	private List<Class<? extends EventListener>> getListenerClasses(
-		EventListener eventListener) {
+		ServiceReference<EventListener> serviceReference) {
+
+		List<String> objectClassList = StringPlus.from(serviceReference.getProperty(Constants.OBJECTCLASS));
 
 		List<Class<? extends EventListener>> classes =
 			new ArrayList<Class<? extends EventListener>>();
 
-		if (ServletContextListener.class.isInstance(eventListener)) {
+		if (objectClassList.contains(ServletContextListener.class.getName())) {
 			classes.add(ServletContextListener.class);
 		}
-		if (ServletContextAttributeListener.class.isInstance(eventListener)) {
+		if (objectClassList.contains(ServletContextAttributeListener.class.getName())) {
 			classes.add(ServletContextAttributeListener.class);
 		}
-		if (ServletRequestListener.class.isInstance(eventListener)) {
+		if (objectClassList.contains(ServletRequestListener.class.getName())) {
 			classes.add(ServletRequestListener.class);
 		}
-		if (ServletRequestAttributeListener.class.isInstance(eventListener)) {
+		if (objectClassList.contains(ServletRequestAttributeListener.class.getName())) {
 			classes.add(ServletRequestAttributeListener.class);
 		}
-		if (HttpSessionListener.class.isInstance(eventListener)) {
+		if (objectClassList.contains(HttpSessionListener.class.getName())) {
 			classes.add(HttpSessionListener.class);
 		}
-		if (HttpSessionAttributeListener.class.isInstance(eventListener)) {
+		if (objectClassList.contains(HttpSessionAttributeListener.class.getName())) {
 			classes.add(HttpSessionAttributeListener.class);
 		}
 
