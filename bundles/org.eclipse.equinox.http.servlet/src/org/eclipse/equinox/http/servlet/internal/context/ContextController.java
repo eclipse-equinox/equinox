@@ -162,7 +162,7 @@ public class ContextController {
 
 		servletServiceTracker.open();
 
-		resourceServiceTracker = new ServiceTracker<Servlet, AtomicReference<ResourceRegistration>>(
+		resourceServiceTracker = new ServiceTracker<Object, AtomicReference<ResourceRegistration>>(
 			trackingContext, httpServiceRuntime.getResourceFilter(),
 			new ContextResourceTrackerCustomizer(
 				trackingContext, httpServiceRuntime, this));
@@ -1120,5 +1120,5 @@ public class ContextController {
 	private final ServiceTracker<Filter, AtomicReference<FilterRegistration>> filterServiceTracker;
 	private final ServiceTracker<EventListener, AtomicReference<ListenerRegistration>> listenerServiceTracker;
 	private final ServiceTracker<Servlet, AtomicReference<ServletRegistration>> servletServiceTracker;
-	private final ServiceTracker<Servlet, AtomicReference<ResourceRegistration>> resourceServiceTracker;
+	private final ServiceTracker<Object, AtomicReference<ResourceRegistration>> resourceServiceTracker;
 }

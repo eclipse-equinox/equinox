@@ -61,6 +61,18 @@ public class DTOUtil {
 		return clone;
 	}
 
+	public static FailedResourceDTO clone(FailedResourceDTO original) {
+		FailedResourceDTO clone = new FailedResourceDTO();
+
+		clone.failureReason = original.failureReason;
+		clone.patterns = original.patterns;
+		clone.prefix = original.prefix;
+		clone.serviceId = original.serviceId;
+		clone.servletContextId = original.servletContextId;
+
+		return clone;
+	}
+
 	public static FailedServletContextDTO clone(FailedServletContextDTO original) {
 		FailedServletContextDTO clone = new FailedServletContextDTO();
 
