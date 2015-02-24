@@ -33,6 +33,23 @@ public class DTOUtil {
 		return clone;
 	}
 
+	public static FailedFilterDTO clone(FailedFilterDTO original) {
+		FailedFilterDTO clone = new FailedFilterDTO();
+
+		clone.asyncSupported = original.asyncSupported;
+		clone.dispatcher = original.dispatcher;
+		clone.failureReason = original.failureReason;
+		clone.initParams = original.initParams;
+		clone.name = original.name;
+		clone.patterns = original.patterns;
+		clone.regexs = original.regexs;
+		clone.serviceId = original.serviceId;
+		clone.servletContextId = original.servletContextId;
+		clone.servletNames = original.servletNames;
+
+		return clone;
+	}
+
 	public static FailedListenerDTO clone(FailedListenerDTO original) {
 		FailedListenerDTO clone = new FailedListenerDTO();
 

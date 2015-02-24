@@ -175,6 +175,7 @@ public class HttpServiceRuntimeImpl
 		controllerMap.clear();
 		registeredObjects.clear();
 
+		failedFilterDTOs.clear();
 		failedListenerDTOs.clear();
 		failedServletContextDTOs.clear();
 
@@ -215,7 +216,7 @@ public class HttpServiceRuntimeImpl
 		// TODO
 
 		runtimeDTO.failedErrorPageDTOs = null;
-		runtimeDTO.failedFilterDTOs = null;
+		runtimeDTO.failedFilterDTOs = getFailedFilterDTOs();
 		runtimeDTO.failedListenerDTOs = getFailedListenerDTOs();
 		runtimeDTO.failedResourceDTOs = null;
 		runtimeDTO.failedServletContextDTOs = getFailedServletContextDTO();
@@ -459,6 +460,18 @@ public class HttpServiceRuntimeImpl
 		while (true);
 
 		return null;
+	}
+
+	private FailedFilterDTO[] getFailedFilterDTOs() {
+		Collection<FailedFilterDTO> ffDTOs = failedFilterDTOs.values();
+
+		List<FailedFilterDTO> copies = new ArrayList<FailedFilterDTO>();
+
+		for (FailedFilterDTO failedFilterDTO : ffDTOs) {
+			copies.add(DTOUtil.clone(failedFilterDTO));
+		}
+
+		return copies.toArray(new FailedFilterDTO[copies.size()]);
 	}
 
 	private FailedListenerDTO[] getFailedListenerDTOs() {
@@ -955,6 +968,17 @@ public class HttpServiceRuntimeImpl
 		return resourceServiceFilter;
 	}
 
+	public void recordFailedFilterDTO(
+		ServiceReference<Filter> serviceReference,
+		FailedFilterDTO failedFilterDTO) {
+
+		if (failedFilterDTOs.containsKey(serviceReference)) {
+			return;
+		}
+
+		failedFilterDTOs.put(serviceReference, failedFilterDTO);
+	}
+
 	public void recordFailedListenerDTO(
 		ServiceReference<EventListener> serviceReference,
 		FailedListenerDTO failedListenerDTO) {
@@ -989,6 +1013,12 @@ public class HttpServiceRuntimeImpl
 		failedServletContextDTOs.put(serviceReference, failedServletContextDTO);
 	}
 
+	public void removeFailedFilterDTO(
+		ServiceReference<Filter> serviceReference) {
+
+		failedFilterDTOs.remove(serviceReference);
+	}
+
 	public void removeFailedListenerDTO(
 		ServiceReference<EventListener> serviceReference) {
 
@@ -1021,6 +1051,8 @@ public class HttpServiceRuntimeImpl
 	private ConcurrentMap<ServiceReference<ServletContextHelper>, ContextController> controllerMap =
 		new ConcurrentHashMap<ServiceReference<ServletContextHelper>, ContextController>();
 
+	private final ConcurrentMap<ServiceReference<Filter>, FailedFilterDTO> failedFilterDTOs =
+		new ConcurrentHashMap<ServiceReference<Filter>, FailedFilterDTO>();
 	private final ConcurrentMap<ServiceReference<EventListener>, FailedListenerDTO> failedListenerDTOs =
 		new ConcurrentHashMap<ServiceReference<EventListener>, FailedListenerDTO>();
 	private final ConcurrentMap<ServiceReference<ServletContextHelper>, FailedServletContextDTO> failedServletContextDTOs =
