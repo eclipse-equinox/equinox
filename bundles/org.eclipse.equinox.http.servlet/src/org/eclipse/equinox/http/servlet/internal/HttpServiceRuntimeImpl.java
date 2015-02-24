@@ -13,8 +13,8 @@ package org.eclipse.equinox.http.servlet.internal;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.*;
@@ -24,8 +24,7 @@ import org.eclipse.equinox.http.servlet.context.ContextPathCustomizer;
 import org.eclipse.equinox.http.servlet.internal.context.*;
 import org.eclipse.equinox.http.servlet.internal.error.*;
 import org.eclipse.equinox.http.servlet.internal.servlet.*;
-import org.eclipse.equinox.http.servlet.internal.util.Const;
-import org.eclipse.equinox.http.servlet.internal.util.StringPlus;
+import org.eclipse.equinox.http.servlet.internal.util.*;
 import org.osgi.framework.*;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
@@ -89,45 +88,34 @@ public class HttpServiceRuntimeImpl
 			return result;
 		}
 
-		String contextName = (String) serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
+		String contextName = (String)serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
+		String contextPath = (String)serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH);
 
-		if (contextName == null) {
-			parentServletContext.log(
-				"This context's property " +
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME +
-						" is null. Ignoring!");
+		try {
+			if (contextName == null) {
+				throw new IllegalContextNameException(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + " is null. Ignoring!"); //$NON-NLS-1$
+			}
 
-			return result;
+			if (contextPath == null) {
+				throw new IllegalContextPathException(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH + " is null. Ignoring!"); //$NON-NLS-1$
+			}
+
+			contextPath = adaptContextPath(contextPath, serviceReference);
+
+			ContextController contextController = new ContextController(
+				trackingContext, consumingContext, serviceReference, new ProxyContext(parentServletContext),
+				this, contextName, contextPath);
+
+			controllerMap.put(serviceReference, contextController);
+
+			result.set(contextController);
+		}
+		catch (Exception e) {
+			parentServletContext.log(e.getMessage(), e);
+
+			recordFailedServletContextDTO(serviceReference, contextName, contextPath, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
 		}
 
-		if (registeredContextNames.contains(contextName)) {
-			parentServletContext.log(
-				"ContextName " + contextName + " is already in use. Ignoring!");
-				return result;
-		}
-
-		String contextPath = (String)serviceReference.getProperty(
-			HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH);
-
-		if (contextPath == null || contextPath.equals(Const.SLASH)) {
-			contextPath = Const.BLANK;
-		}
-		contextPath = adaptContextPath(contextPath, serviceReference);
-
-		long serviceId = (Long)serviceReference.getProperty(
-			Constants.SERVICE_ID);
-
-		Map<String, Object> properties = new HashMap<String, Object>();
-
-		for (String key : serviceReference.getPropertyKeys()) {
-			properties.put(key, serviceReference.getProperty(key));
-		}
-
-		properties.putAll(attributes);
-
-		result.set(addServletContextHelper(
-			serviceReference, contextName,
-			contextPath, serviceId, properties));
 		return result;
 	}
 
@@ -153,36 +141,6 @@ public class HttpServiceRuntimeImpl
 		return null;
 	}
 
-	public ContextController addServletContextHelper(
-		ServiceReference<ServletContextHelper> servletContextHelperRef,
-		String contextName, String contextPath, long serviceId,
-		Map<String, Object> properties) {
-
-		if (servletContextHelperRef == null) {
-			throw new NullServletContextHelperException();
-		}
-
-		if (contextName == null) {
-			throw new NullContextNamesException();
-		}
-
-		if (contextPath == null) {
-			contextPath = Const.BLANK;
-		}
-
-		ContextController contextController = createContextController(
-			servletContextHelperRef, contextName, contextPath, serviceId,
-			properties);
-
-		if (contextController != null) {
-			registeredContextNames.add(contextName);
-		}
-
-		controllerMap.putIfAbsent(contextController, servletContextHelperRef);
-
-		return contextController;
-	}
-
 	@Override
 	public RequestInfoDTO calculateRequestInfoDTO(String path) {
 		RequestInfoDTO requestInfoDTO = new RequestInfoDTO();
@@ -206,13 +164,13 @@ public class HttpServiceRuntimeImpl
 		contextPathAdaptorTracker.close();
 
 		controllerMap.clear();
-		contextPathMap.clear();
 		registeredObjects.clear();
+
+		failedServletContextDTOs.clear();
 
 		attributes = null;
 		trackingContext = null;
 		consumingContext = null;
-		contextPathMap = null;
 		legacyIdGenerator = null;
 		parentServletContext = null;
 		registeredObjects = null;
@@ -226,21 +184,6 @@ public class HttpServiceRuntimeImpl
 		throws ServletException, IOException {
 
 		return doDispatch(request, response, path, null);
-	}
-
-	public Map<String, Object> getAttributes() {
-		return attributes;
-	}
-
-	public Map<String, String> getAttributesAsInitParams() {
-		Map<String, String> initParameters = new HashMap<String, String>();
-
-		for (Entry<String, Object> entry : getAttributes().entrySet()) {
-			initParameters.put(
-				entry.getKey(), String.valueOf(entry.getValue()));
-		}
-
-		return initParameters;
 	}
 
 	public Set<Object> getRegisteredObjects() {
@@ -265,7 +208,7 @@ public class HttpServiceRuntimeImpl
 		runtimeDTO.failedFilterDTOs = null;
 		runtimeDTO.failedListenerDTOs = null;
 		runtimeDTO.failedResourceDTOs = null;
-		runtimeDTO.failedServletContextDTOs = null;
+		runtimeDTO.failedServletContextDTOs = getFailedServletContextDTO();
 		runtimeDTO.failedServletDTOs = null;
 		runtimeDTO.servletContextDTOs = getServletContextDTOs();
 
@@ -317,57 +260,26 @@ public class HttpServiceRuntimeImpl
 
 		ContextController contextController = contextControllerRef.get();
 		if (contextController != null) {
-			removeContextController(contextController);
+			contextController.destroy();
 		}
+		controllerMap.remove(serviceReference);
+		failedServletContextDTOs.remove(serviceReference);
 		trackingContext.ungetService(serviceReference);
 	}
 
-	public void removeContextController(ContextController contextController) {
-		Set<ContextController> contextControllers = getContextControllerPathSet(
-			contextController.getContextPath(), false);
-
-		if (contextControllers != null) {
-			contextControllers.remove(contextController);
-		}
-
-		registeredContextNames.remove(contextController.getContextName());
-
-		controllerMap.remove(contextController);
-
-		contextController.destroy();
-	}
-
-	Set<ContextController> getContextControllerPathSet(
-		String contextPath, boolean add) {
-
-		if (contextPath == null) {
-			contextPath = "";
-		}
-
-		Set<ContextController> set = contextPathMap.get(contextPath);
-
-		if ((set == null) && add) {
-			set = new HashSet<ContextController>();
-
-			Set<ContextController> existingSet =
-				contextPathMap.putIfAbsent(contextPath, set);
-
-			if (existingSet != null) {
-				set = existingSet;
-			}
-		}
-
-		return set;
-	}
-
-	Set<ContextController> getContextControllers(String requestURI) {
+	Collection<ContextController> getContextControllers(String requestURI) {
 		int pos = requestURI.lastIndexOf('/');
 
 		do {
-			Set<ContextController> contextControllers = contextPathMap.get(
-				requestURI);
+			List<ContextController> contextControllers = new ArrayList<ContextController>();
 
-			if (contextControllers != null) {
+			for (ContextController contextController : controllerMap.values()) {
+				if (contextController.getContextPath().equals(requestURI)) {
+					contextControllers.add(contextController);
+				}
+			}
+
+			if (!contextControllers.isEmpty()) {
 				return contextControllers;
 			}
 
@@ -387,26 +299,6 @@ public class HttpServiceRuntimeImpl
 
 	long generateLegacyId() {
 		return legacyIdGenerator.getAndIncrement();
-	}
-
-	private ContextController createContextController(
-		ServiceReference<ServletContextHelper> servletContextHelperRef,
-		String contextName, String contextPath, long serviceId,
-		Map<String, Object> initParams) {
-
-		ContextController contextController = new ContextController(
-			trackingContext, consumingContext, servletContextHelperRef,
-			new ProxyContext(parentServletContext),
-			this, contextName, contextPath, serviceId, initParams);
-
-		Set<ContextController> contextControllers = getContextControllerPathSet(
-			contextPath, true);
-
-		contextControllers.add(contextController);
-
-		contextPathMap.put(contextPath, contextControllers);
-
-		return contextController;
 	}
 
 	private boolean doDispatch(
@@ -505,7 +397,7 @@ public class HttpServiceRuntimeImpl
 		HttpServletRequest request, String requestURI, String extension,
 		Match match, RequestInfoDTO requestInfoDTO) {
 
-		Set<ContextController> contextControllers = getContextControllers(
+		Collection<ContextController> contextControllers = getContextControllers(
 			requestURI);
 
 		if ((contextControllers == null) || contextControllers.isEmpty()) {
@@ -559,11 +451,23 @@ public class HttpServiceRuntimeImpl
 		return null;
 	}
 
+	private FailedServletContextDTO[] getFailedServletContextDTO() {
+		Collection<FailedServletContextDTO> fscDTOs = failedServletContextDTOs.values();
+
+		List<FailedServletContextDTO> copies = new ArrayList<FailedServletContextDTO>();
+
+		for (FailedServletContextDTO failedServletContextDTO : fscDTOs) {
+			copies.add(DTOUtil.clone(failedServletContextDTO));
+		}
+
+		return copies.toArray(new FailedServletContextDTO[copies.size()]);
+	}
+
 	private ServletContextDTO[] getServletContextDTOs() {
 		List<ServletContextDTO> servletContextDTOs =
 			new ArrayList<ServletContextDTO>();
 
-		for (ContextController contextController : controllerMap.keySet()) {
+		for (ContextController contextController : controllerMap.values()) {
 			servletContextDTOs.add(contextController.getServletContextDTO());
 		}
 
@@ -912,7 +816,7 @@ public class HttpServiceRuntimeImpl
 			if (factory == null) {
 				factory = new HttpContextHelperFactory(httpContext);
 				Dictionary<String, Object> props = new Hashtable<String, Object>();
-				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, httpContext.getClass().getName() + "-" + generateLegacyId()); //$NON-NLS-1$
+				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, httpContext.getClass().getName().replaceAll("[^a-zA-Z_0-9\\-]", "_") + "-" + generateLegacyId()); //$NON-NLS-1$
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/"); //$NON-NLS-1$
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_TARGET, targetFilter);
 				props.put(Const.EQUINOX_LEGACY_CONTEXT_HELPER, Boolean.TRUE);
@@ -1031,6 +935,29 @@ public class HttpServiceRuntimeImpl
 		return resourceServiceFilter;
 	}
 
+	private void recordFailedServletContextDTO(
+		ServiceReference<ServletContextHelper> serviceReference, String contextName,
+		String contextPath, int failureReason) {
+
+		FailedServletContextDTO failedServletContextDTO = new FailedServletContextDTO();
+
+		failedServletContextDTO.attributes = Collections.emptyMap();
+		failedServletContextDTO.contextName = contextName;
+		failedServletContextDTO.contextPath = contextPath;
+		failedServletContextDTO.errorPageDTOs = new ErrorPageDTO[0];
+		failedServletContextDTO.failureReason = failureReason;
+		failedServletContextDTO.filterDTOs = new FilterDTO[0];
+		failedServletContextDTO.initParams = ServiceProperties.parseInitParams(
+			serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX);
+		failedServletContextDTO.listenerDTOs = new ListenerDTO[0];
+		failedServletContextDTO.name = contextName;
+		failedServletContextDTO.resourceDTOs = new ResourceDTO[0];
+		failedServletContextDTO.serviceId = (Long)serviceReference.getProperty(Constants.SERVICE_ID);
+		failedServletContextDTO.servletDTOs = new ServletDTO[0];
+
+		failedServletContextDTOs.put(serviceReference, failedServletContextDTO);
+	}
+
 	private Map<String, Object> attributes;
 	private final String targetFilter;
 	private final ServiceRegistration<ServletContextHelper> defaultContextReg;
@@ -1047,22 +974,22 @@ public class HttpServiceRuntimeImpl
 	// BEGIN of old HttpService support
 	private Map<HttpContext, HttpContextHelperFactory> httpContextHelperFactories =
 		Collections.synchronizedMap(new HashMap<HttpContext, HttpContextHelperFactory>());
-	private Map<Object, HttpServiceObjectRegistration> legacyMappings = 
+	private Map<Object, HttpServiceObjectRegistration> legacyMappings =
 		Collections.synchronizedMap(new HashMap<Object, HttpServiceObjectRegistration>());
 	private Map<Bundle, Set<HttpServiceObjectRegistration>> bundleRegistrations =
 		new HashMap<Bundle, Set<HttpServiceObjectRegistration>>();
 	private Map<Bundle, Map<String, String>> bundleAliasCustomizations = new HashMap<Bundle, Map<String,String>>();
 	// END of old HttpService support
 
-	private ConcurrentMap<String, Set<ContextController>> contextPathMap =
-		new ConcurrentHashMap<String, Set<ContextController>>();
-	private ConcurrentMap<ContextController, ServiceReference<ServletContextHelper>> controllerMap =
-		new ConcurrentHashMap<ContextController, ServiceReference<ServletContextHelper>>();
+	private ConcurrentMap<ServiceReference<ServletContextHelper>, ContextController> controllerMap =
+		new ConcurrentHashMap<ServiceReference<ServletContextHelper>, ContextController>();
+
+	private final ConcurrentMap<ServiceReference<ServletContextHelper>, FailedServletContextDTO> failedServletContextDTOs =
+		new ConcurrentHashMap<ServiceReference<ServletContextHelper>, FailedServletContextDTO>();
 
 	private AtomicLong legacyIdGenerator = new AtomicLong(0);
 
 	private Set<Object> registeredObjects = Collections.newSetFromMap(new ConcurrentHashMap<Object, Boolean>());
-	private Set<String> registeredContextNames = new ConcurrentSkipListSet<String>();
 
 	private ServiceTracker<ServletContextHelper, AtomicReference<ContextController>> contextServiceTracker;
 	private ServiceTracker<ContextPathCustomizer, ContextPathCustomizer> contextPathAdaptorTracker;

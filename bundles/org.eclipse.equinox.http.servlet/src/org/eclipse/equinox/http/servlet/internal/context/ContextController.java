@@ -11,16 +11,19 @@
 
 package org.eclipse.equinox.http.servlet.internal.context;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.AccessController;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 import javax.servlet.*;
 import javax.servlet.Filter;
 import javax.servlet.http.*;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.customizer.*;
-import org.eclipse.equinox.http.servlet.internal.error.RegisteredFilterException;
+import org.eclipse.equinox.http.servlet.internal.error.*;
 import org.eclipse.equinox.http.servlet.internal.registration.*;
 import org.eclipse.equinox.http.servlet.internal.registration.FilterRegistration;
 import org.eclipse.equinox.http.servlet.internal.registration.ServletRegistration;
@@ -106,26 +109,31 @@ public class ContextController {
 		BundleContext trackingContextParam, BundleContext consumingContext,
 		ServiceReference<ServletContextHelper> servletContextHelperRef,
 		ProxyContext proxyContext, HttpServiceRuntimeImpl httpServiceRuntime,
-		String contextName, String contextPath, long serviceId,
-		Map<String, Object> attributes) {
+		String contextName, String contextPath) {
+
+		validate(contextName, contextPath);
 
 		this.servletContextHelperRef = servletContextHelperRef;
+
+		long serviceId = (Long)servletContextHelperRef.getProperty(Constants.SERVICE_ID);
+
 		StringBuilder filterBuilder = new StringBuilder();
 		filterBuilder.append('(');
 		filterBuilder.append(Constants.SERVICE_ID);
 		filterBuilder.append('=');
-		filterBuilder.append(servletContextHelperRef.getProperty(Constants.SERVICE_ID));
+		filterBuilder.append(serviceId);
 		filterBuilder.append(')');
 		this.servletContextHelperRefFilter = filterBuilder.toString();
 		this.proxyContext = proxyContext;
 		this.httpServiceRuntime = httpServiceRuntime;
 		this.contextName = contextName;
+
+		if (contextPath.equals(Const.SLASH)) {
+			contextPath = Const.BLANK;
+		}
+
 		this.contextPath = contextPath;
 		this.contextServiceId = serviceId;
-
-		attributes = new HashMap<String, Object>(attributes);
-
-		this.attributes = attributes;
 
 		this.initParams = ServiceProperties.parseInitParams(
 			servletContextHelperRef, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX);
@@ -784,7 +792,7 @@ public class ContextController {
 	}
 
 	public boolean matches(org.osgi.framework.Filter targetFilter) {
-		return targetFilter.matches(attributes);
+		return targetFilter.match(servletContextHelperRef);
 	}
 
 	@Override
@@ -1063,11 +1071,26 @@ public class ContextController {
 		return sessionAdaptor;
 	}
 
+	private void validate(String preValidationContextName, String preValidationContextPath) {
+		if (!contextNamePattern.matcher(preValidationContextName).matches()) {
+			throw new IllegalContextNameException("The context name '" + preValidationContextName + "' does not follow Bundle-SymbolicName syntax."); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+
+		try {
+			@SuppressWarnings("unused")
+			URI uri = new URI(Const.HTTP, Const.LOCALHOST, preValidationContextPath, null);
+		}
+		catch (URISyntaxException use) {
+			throw new IllegalContextPathException("The context path '" + preValidationContextPath + "' is not valid URI path syntax."); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+	}
+
 	private static final String[] DISPATCHER =
 		new String[] {Const.Dispatcher.REQUEST.toString()};
 
-	private Map<String, Object> attributes;
-	private Map<String, String> initParams;
+	private static final Pattern contextNamePattern = Pattern.compile("^([a-zA-Z_0-9\\-]+\\.)*[a-zA-Z_0-9\\-]+$"); //$NON-NLS-1$
+
+	private final Map<String, String> initParams;
 	private final BundleContext trackingContext;
 	private final BundleContext consumingContext;
 	private final String contextName;

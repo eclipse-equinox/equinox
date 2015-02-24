@@ -22,6 +22,8 @@ public class Const {
 	public static final String EQUAL = "="; //$NON-NLS-1$
 	public static final String FILTER_NAME = "filter-name"; //$NON-NLS-1$
 	public static final String FILTER_PRIORITY = "filter-priority"; //$NON-NLS-1$
+	public static final String HTTP = "http"; //$NON-NLS-1$
+	public static final String LOCALHOST = "localhost"; //$NON-NLS-1$
 	public static final String OPEN_PAREN = "("; //$NON-NLS-1$
 	public static final String SERVLET_NAME = "servlet-name"; //$NON-NLS-1$
 	public static final String SLASH = "/"; //$NON-NLS-1$
