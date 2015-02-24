@@ -954,13 +954,16 @@ final class ModuleResolver {
 			for (Iterator<ModuleRevision> iResources = revisions.iterator(); iResources.hasNext();) {
 				ModuleRevision single = iResources.next();
 				iResources.remove();
-				if (DEBUG_ROOTS) {
-					Debug.println("Resolver: Resolving root bundle: " + single); //$NON-NLS-1$
-				}
 				if (!wirings.containsKey(single) && !failedToResolve.contains(single)) {
 					toResolve.add(single);
 				}
 				if (toResolve.size() == resolverRevisionBatchSize || !iResources.hasNext()) {
+					if (DEBUG_ROOTS) {
+						Debug.println("Resolver: resolving " + toResolve.size() + " in batch."); //$NON-NLS-1$ //$NON-NLS-2$
+						for (Resource root : toResolve) {
+							Debug.println("    Resolving root bundle: " + root); //$NON-NLS-1$
+						}
+					}
 					resolveRevisions(toResolve, isMandatory, logger, result);
 					toResolve.clear();
 				}
@@ -983,8 +986,14 @@ final class ModuleResolver {
 				transitivelyResolveFailures.addAll(revisions);
 				interimResults = new ResolverImpl(logger).resolve(this);
 				applyInterimResultToWiringCopy(interimResults);
+				if (DEBUG_ROOTS) {
+					Debug.println("Resolver: resolved " + interimResults.size() + " bundles."); //$NON-NLS-1$ //$NON-NLS-2$
+				}
 				// now apply the simple wires to the results
 				for (Map.Entry<Resource, List<Wire>> interimResultEntry : interimResults.entrySet()) {
+					if (DEBUG_ROOTS) {
+						Debug.println("    Resolved bundle: " + interimResultEntry.getKey()); //$NON-NLS-1$
+					}
 					List<Wire> existingWires = result.get(interimResultEntry.getKey());
 					if (existingWires != null) {
 						existingWires.addAll(interimResultEntry.getValue());
