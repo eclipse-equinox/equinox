@@ -1078,7 +1078,9 @@ public class ContextController {
 
 	private void validate(String preValidationContextName, String preValidationContextPath) {
 		if (!contextNamePattern.matcher(preValidationContextName).matches()) {
-			throw new IllegalContextNameException("The context name '" + preValidationContextName + "' does not follow Bundle-SymbolicName syntax."); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new IllegalContextNameException(
+				"The context name '" + preValidationContextName + "' does not follow Bundle-SymbolicName syntax.", //$NON-NLS-1$ //$NON-NLS-2$
+				DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
 		}
 
 		try {
@@ -1086,7 +1088,9 @@ public class ContextController {
 			URI uri = new URI(Const.HTTP, Const.LOCALHOST, preValidationContextPath, null);
 		}
 		catch (URISyntaxException use) {
-			throw new IllegalContextPathException("The context path '" + preValidationContextPath + "' is not valid URI path syntax."); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new IllegalContextPathException(
+				"The context path '" + preValidationContextPath + "' is not valid URI path syntax.", //$NON-NLS-1$ //$NON-NLS-2$
+				DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
 		}
 	}
 

@@ -14,12 +14,20 @@ package org.eclipse.equinox.http.servlet.internal.error;
 /**
  * @author Raymond Augé
  */
-public class IllegalContextPathException extends HttpWhiteboardFailureException {
+public class HttpWhiteboardFailureException extends IllegalArgumentException {
 
-	private static final long serialVersionUID = 3286236189163243168L;
+	private static final long serialVersionUID = 1944632136470074075L;
 
-	public IllegalContextPathException(String message, int failureReason) {
-		super(message, failureReason);
+	public HttpWhiteboardFailureException(String message, int failureReason) {
+		super(message);
+
+		this.failureReason = failureReason;
 	}
+
+	public int getFailureReason() {
+		return failureReason;
+	}
+
+	private final int failureReason;
 
 }

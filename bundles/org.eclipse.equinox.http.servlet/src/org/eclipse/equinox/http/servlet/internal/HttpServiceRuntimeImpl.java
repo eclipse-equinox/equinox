@@ -93,11 +93,15 @@ public class HttpServiceRuntimeImpl
 
 		try {
 			if (contextName == null) {
-				throw new IllegalContextNameException(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + " is null. Ignoring!"); //$NON-NLS-1$
+				throw new IllegalContextNameException(
+					HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + " is null. Ignoring!", //$NON-NLS-1$
+					DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
 			}
 
 			if (contextPath == null) {
-				throw new IllegalContextPathException(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH + " is null. Ignoring!"); //$NON-NLS-1$
+				throw new IllegalContextPathException(
+					HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH + " is null. Ignoring!", //$NON-NLS-1$
+					DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
 			}
 
 			contextPath = adaptContextPath(contextPath, serviceReference);
@@ -109,6 +113,11 @@ public class HttpServiceRuntimeImpl
 			controllerMap.put(serviceReference, contextController);
 
 			result.set(contextController);
+		}
+		catch (HttpWhiteboardFailureException hwfe) {
+			parentServletContext.log(hwfe.getMessage(), hwfe);
+
+			recordFailedServletContextDTO(serviceReference, contextName, contextPath, hwfe.getFailureReason());
 		}
 		catch (Exception e) {
 			parentServletContext.log(e.getMessage(), e);
@@ -166,6 +175,7 @@ public class HttpServiceRuntimeImpl
 		controllerMap.clear();
 		registeredObjects.clear();
 
+		failedListenerDTOs.clear();
 		failedServletContextDTOs.clear();
 
 		attributes = null;
@@ -206,7 +216,7 @@ public class HttpServiceRuntimeImpl
 
 		runtimeDTO.failedErrorPageDTOs = null;
 		runtimeDTO.failedFilterDTOs = null;
-		runtimeDTO.failedListenerDTOs = null;
+		runtimeDTO.failedListenerDTOs = getFailedListenerDTOs();
 		runtimeDTO.failedResourceDTOs = null;
 		runtimeDTO.failedServletContextDTOs = getFailedServletContextDTO();
 		runtimeDTO.failedServletDTOs = null;
@@ -449,6 +459,18 @@ public class HttpServiceRuntimeImpl
 		while (true);
 
 		return null;
+	}
+
+	private FailedListenerDTO[] getFailedListenerDTOs() {
+		Collection<FailedListenerDTO> flDTOs = failedListenerDTOs.values();
+
+		List<FailedListenerDTO> copies = new ArrayList<FailedListenerDTO>();
+
+		for (FailedListenerDTO failedListenerDTO : flDTOs) {
+			copies.add(DTOUtil.clone(failedListenerDTO));
+		}
+
+		return copies.toArray(new FailedListenerDTO[copies.size()]);
 	}
 
 	private FailedServletContextDTO[] getFailedServletContextDTO() {
@@ -933,6 +955,17 @@ public class HttpServiceRuntimeImpl
 		return resourceServiceFilter;
 	}
 
+	public void recordFailedListenerDTO(
+		ServiceReference<EventListener> serviceReference,
+		FailedListenerDTO failedListenerDTO) {
+
+		if (failedListenerDTOs.containsKey(serviceReference)) {
+			return;
+		}
+
+		failedListenerDTOs.put(serviceReference, failedListenerDTO);
+	}
+
 	private void recordFailedServletContextDTO(
 		ServiceReference<ServletContextHelper> serviceReference, String contextName,
 		String contextPath, int failureReason) {
@@ -954,6 +987,12 @@ public class HttpServiceRuntimeImpl
 		failedServletContextDTO.servletDTOs = new ServletDTO[0];
 
 		failedServletContextDTOs.put(serviceReference, failedServletContextDTO);
+	}
+
+	public void removeFailedListenerDTO(
+		ServiceReference<EventListener> serviceReference) {
+
+		failedListenerDTOs.remove(serviceReference);
 	}
 
 	private Map<String, Object> attributes;
@@ -982,6 +1021,8 @@ public class HttpServiceRuntimeImpl
 	private ConcurrentMap<ServiceReference<ServletContextHelper>, ContextController> controllerMap =
 		new ConcurrentHashMap<ServiceReference<ServletContextHelper>, ContextController>();
 
+	private final ConcurrentMap<ServiceReference<EventListener>, FailedListenerDTO> failedListenerDTOs =
+		new ConcurrentHashMap<ServiceReference<EventListener>, FailedListenerDTO>();
 	private final ConcurrentMap<ServiceReference<ServletContextHelper>, FailedServletContextDTO> failedServletContextDTOs =
 		new ConcurrentHashMap<ServiceReference<ServletContextHelper>, FailedServletContextDTO>();
 
@@ -1199,4 +1240,5 @@ public class HttpServiceRuntimeImpl
 			}
 		}
 	}
+
 }

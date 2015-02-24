@@ -14,12 +14,12 @@ package org.eclipse.equinox.http.servlet.internal.error;
 /**
  * @author Raymond Augé
  */
-public class IllegalContextNameException extends IllegalArgumentException {
+public class IllegalContextNameException extends HttpWhiteboardFailureException {
 
 	private static final long serialVersionUID = -8790109985246626513L;
 
-	public IllegalContextNameException(String message) {
-		super(message);
+	public IllegalContextNameException(String message, int failureReason) {
+		super(message, failureReason);
 	}
 
 }

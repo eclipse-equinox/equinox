@@ -33,6 +33,17 @@ public class DTOUtil {
 		return clone;
 	}
 
+	public static FailedListenerDTO clone(FailedListenerDTO original) {
+		FailedListenerDTO clone = new FailedListenerDTO();
+
+		clone.failureReason = original.failureReason;
+		clone.serviceId = original.serviceId;
+		clone.servletContextId = original.servletContextId;
+		clone.types = original.types;
+
+		return clone;
+	}
+
 	public static FailedServletContextDTO clone(FailedServletContextDTO original) {
 		FailedServletContextDTO clone = new FailedServletContextDTO();
 
