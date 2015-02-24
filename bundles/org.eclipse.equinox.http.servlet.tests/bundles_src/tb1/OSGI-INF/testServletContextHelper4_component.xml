@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="sch4" immediate="true">
+	<implementation class="org.eclipse.equinox.http.servlet.tests.tb1.TestServletContextHelper1"/>
+	<service><provide interface="org.osgi.service.http.context.ServletContextHelper"/></service>
+	<property name="osgi.http.whiteboard.context.name" type="String" value="test.sch.four"/>
+	<property name="osgi.http.whiteboard.context.path" type="String" value="test$sch$4"/>
+</scr:component>

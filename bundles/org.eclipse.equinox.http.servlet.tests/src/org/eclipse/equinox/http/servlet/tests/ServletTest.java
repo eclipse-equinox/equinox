@@ -1133,6 +1133,26 @@ public class ServletTest extends TestCase {
 		Assert.assertEquals(expected, actual);
 	}
 
+	public void test_ServletContextHelper1() throws Exception {
+		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		try {
+			bundle.start();
+			BundleContext bundleContext = getBundleContext();
+			ServiceReference<HttpServiceRuntime> serviceReference =
+				bundleContext.getServiceReference(HttpServiceRuntime.class);
+			HttpServiceRuntime runtime = bundleContext.getService(serviceReference);
+
+			RuntimeDTO runtimeDTO = runtime.getRuntimeDTO();
+			Assert.assertEquals(4, runtimeDTO.failedServletContextDTOs.length);
+			bundle.stop();
+
+			runtimeDTO = runtime.getRuntimeDTO();
+			Assert.assertEquals(0, runtimeDTO.failedServletContextDTOs.length);
+		} finally {
+			uninstallBundle(bundle);
+		}
+	}
+
 	public void test_ServletContextHelper7() throws Exception {
 		String expected = "a";
 
@@ -1146,6 +1166,7 @@ public class ServletTest extends TestCase {
 		try {
 			Dictionary<String, String> contextProps = new Hashtable<String, String>();
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/");
 			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
 			Dictionary<String, String> servletProps = new Hashtable<String, String>();
