@@ -598,7 +598,7 @@ public class ServletTest extends TestCase {
 			public void init(ServletConfig config) throws ServletException {
 				throw new ServletException("Init error.");
 			}
-			
+
 		};
 		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
 		try {
@@ -618,7 +618,7 @@ public class ServletTest extends TestCase {
 			public void init(ServletConfig config) throws ServletException {
 				throw new IllegalStateException("Init error.");
 			}
-			
+
 		};
 		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
 		try {
@@ -632,18 +632,18 @@ public class ServletTest extends TestCase {
 
 	public void test_Registration16() throws Exception {
 		Filter initError = new Filter() {
-			
+
 			@Override
 			public void init(FilterConfig filterConfig) throws ServletException {
 				throw new IllegalStateException("Init error.");
 			}
-			
+
 			@Override
 			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
 					ServletException {
 				// nothing
 			}
-			
+
 			@Override
 			public void destroy() {
 				// nothing
@@ -661,18 +661,18 @@ public class ServletTest extends TestCase {
 
 	public void test_Registration17() throws Exception {
 		Filter initError = new Filter() {
-			
+
 			@Override
 			public void init(FilterConfig filterConfig) throws ServletException {
 				throw new ServletException("Init error.");
 			}
-			
+
 			@Override
 			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
 					ServletException {
 				// nothing
 			}
-			
+
 			@Override
 			public void destroy() {
 				// nothing
@@ -692,19 +692,19 @@ public class ServletTest extends TestCase {
 		final Set<String> filterTCCL = Collections.synchronizedSet(new HashSet<String>());
 		final Set<String> servletTCCL = Collections.synchronizedSet(new HashSet<String>());
 		Filter tcclFilter = new Filter() {
-			
+
 			@Override
 			public void init(FilterConfig filterConfig) throws ServletException {
 				filterTCCL.add(Thread.currentThread().getContextClassLoader().getClass().getName());
 			}
-			
+
 			@Override
 			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
 					ServletException {
 				filterTCCL.add(Thread.currentThread().getContextClassLoader().getClass().getName());
 				chain.doFilter(request, response);
 			}
-			
+
 			@Override
 			public void destroy() {
 				filterTCCL.add(Thread.currentThread().getContextClassLoader().getClass().getName());
@@ -763,12 +763,12 @@ public class ServletTest extends TestCase {
 		final AtomicBoolean valueBound = new AtomicBoolean(false);
 		final AtomicBoolean valueUnbound = new AtomicBoolean(false);
 		final HttpSessionBindingListener bindingListener = new HttpSessionBindingListener() {
-			
+
 			@Override
 			public void valueUnbound(HttpSessionBindingEvent event) {
 				valueUnbound.set(true);
 			}
-			
+
 			@Override
 			public void valueBound(HttpSessionBindingEvent event) {
 				valueBound.set(true);
@@ -777,12 +777,12 @@ public class ServletTest extends TestCase {
 		final AtomicBoolean sessionCreated = new AtomicBoolean(false);
 		final AtomicBoolean sessionDestroyed = new AtomicBoolean(false);
 		HttpSessionListener sessionListener = new HttpSessionListener() {
-			
+
 			@Override
 			public void sessionDestroyed(HttpSessionEvent se) {
 				sessionDestroyed.set(true);
 			}
-			
+
 			@Override
 			public void sessionCreated(HttpSessionEvent se) {
 				sessionCreated.set(true);
@@ -1271,12 +1271,12 @@ public class ServletTest extends TestCase {
 		ServletContextHelper servletContextHelper = new ServletContextHelper(bundle){};
 		Servlet s1 = new BaseServlet(expected1);
 
-		
+
 		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 		try {
 			// register a hook that hides the helper from the registering bundle
 			registrations.add(bundleContext.registerService(FindHook.class, new FindHook() {
-				
+
 				@Override
 				public void find(BundleContext context, String name, String filter, boolean allServices,
 						Collection<ServiceReference<?>> references) {
@@ -1841,7 +1841,7 @@ public class ServletTest extends TestCase {
 		}
 	}
 
-	
+
 
 	private String doRequest(String action, Map<String, String> params) throws IOException {
 		StringBuilder requestInfo = new StringBuilder(PROTOTYPE);
@@ -1968,14 +1968,14 @@ public class ServletTest extends TestCase {
 				ServletContextHelper service) {
 			// nothing
 		}
-		
+
 	}
 
 	static class TestContextPathAdaptor extends ContextPathCustomizer {
 		private final String defaultFilter;
 		private final String contextPrefix;
 		private final String testName;
-		
+
 		/**
 		 * @param defaultFilter
 		 * @param contextPrefix
@@ -2002,6 +2002,6 @@ public class ServletTest extends TestCase {
 			}
 			return null;
 		}
-		
+
 	}
 }

@@ -140,7 +140,6 @@ public class ContextController {
 
 		this.trackingContext = trackingContextParam;
 		this.consumingContext = consumingContext;
-		
 
 		listenerServiceTracker = new ServiceTracker<EventListener, AtomicReference<ListenerRegistration>>(
 			trackingContext, httpServiceRuntime.getListenerFilter(),
@@ -298,7 +297,7 @@ public class ContextController {
 	}
 
 	public ListenerRegistration addListenerRegistration(ServiceReference<EventListener> listenerRef) throws ServletException {
-		
+
 		checkShutdown();
 
 		ServiceHolder<EventListener> listenerHolder = new ServiceHolder<EventListener>(consumingContext.getServiceObjects(listenerRef));
@@ -433,7 +432,7 @@ public class ContextController {
 	}
 
 	public ServletRegistration addServletRegistration(ServiceReference<Servlet> servletRef) throws ServletException {
-		
+
 		checkShutdown();
 
 		ServiceHolder<Servlet> servletHolder = new ServiceHolder<Servlet>(consumingContext.getServiceObjects(servletRef));

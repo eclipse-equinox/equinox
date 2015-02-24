@@ -511,7 +511,7 @@ public class HttpServiceRuntimeImpl
 				filterName = initparams.get(Const.FILTER_NAME);
 			}
 			HttpContextHelperFactory factory = getOrRegisterHttpContextHelperFactory(bundle, httpContext);
-			
+
 			HttpServiceObjectRegistration objectRegistration = null;
 			ServiceRegistration<Filter> registration = null;
 			try {
@@ -605,8 +605,8 @@ public class HttpServiceRuntimeImpl
 			pattern = pattern.substring(1);
 		}
 		else if (!pattern.contains("*.") && //$NON-NLS-1$
-				 !pattern.endsWith(Const.SLASH_STAR) &&
-				 !pattern.endsWith(Const.SLASH)) {
+				!pattern.endsWith(Const.SLASH_STAR) &&
+				!pattern.endsWith(Const.SLASH)) {
 			pattern += Const.SLASH_STAR;
 		}
 
@@ -764,7 +764,7 @@ public class HttpServiceRuntimeImpl
 			}
 			decrementFactoryUseCount(objectRegistration.factory);
 			legacyMappings.remove(aliasCustomization);
-			
+
 		}
 	}
 
@@ -1052,7 +1052,7 @@ public class HttpServiceRuntimeImpl
 		// is registered multiple times.  This is unfortunate but is an error case on the client anyway.
 		class LegacyFilter implements Filter {
 			/**
-			 * @throws ServletException  
+			 * @throws ServletException
 			 */
 			@Override
 			public void init(FilterConfig filterConfig) throws ServletException {
@@ -1064,14 +1064,14 @@ public class HttpServiceRuntimeImpl
 					HttpServiceImpl.unchecked(e);
 				}
 			}
-			
+
 			@Override
 			public void doFilter(
 				ServletRequest request, ServletResponse response, FilterChain chain)
 				throws IOException, ServletException {
 				filter.doFilter(request, response, chain);
 			}
-			
+
 			@Override
 			public void destroy() {
 				filter.destroy();
@@ -1081,13 +1081,13 @@ public class HttpServiceRuntimeImpl
 
 	static class LegacyServlet extends LegacyServiceObject implements Servlet {
 		final Servlet servlet;
-		
+
 		public LegacyServlet(Servlet servlet) {
 			this.servlet = servlet;
 		}
 
 		/**
-		 * @throws ServletException  
+		 * @throws ServletException
 		 */
 		@Override
 		public void init(ServletConfig config)
