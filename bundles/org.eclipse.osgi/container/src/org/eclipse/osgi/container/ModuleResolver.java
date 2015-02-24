@@ -571,18 +571,22 @@ final class ModuleResolver {
 
 		@Override
 		public List<Capability> findProviders(Requirement requirement) {
+			return findProviders0(requirement, requirement);
+		}
+
+		private List<Capability> findProviders0(Requirement origReq, Requirement lookupReq) {
 			if (DEBUG_PROVIDERS) {
 				Debug.println(new StringBuilder("RESOLVER: Finding capabilities for requirement") //$NON-NLS-1$
 						.append(SEPARATOR).append(TAB) //
-						.append(requirement) //
+						.append(origReq) //
 						.append(SEPARATOR).append(TAB).append(TAB) //
 						.append("of resource") //$NON-NLS-1$
 						.append(SEPARATOR).append(TAB).append(TAB).append(TAB) //
-						.append(requirement.getResource()) //
+						.append(origReq.getResource()) //
 						.toString());
 			}
-			List<ModuleCapability> candidates = moduleDatabase.findCapabilities(requirement);
-			List<Capability> result = filterProviders(requirement, candidates);
+			List<ModuleCapability> candidates = moduleDatabase.findCapabilities(lookupReq);
+			List<Capability> result = filterProviders(origReq, candidates);
 			if (DEBUG_PROVIDERS) {
 				StringBuilder builder = new StringBuilder("RESOLVER: Capabilities being returned to the resolver"); //$NON-NLS-1$
 				int i = 0;
@@ -1178,7 +1182,7 @@ final class ModuleResolver {
 		}
 
 		private Map<Resource, List<Wire>> resolveDynamic() throws ResolutionException {
-			List<Capability> dynamicMatches = filterProviders(dynamicReq.getOriginal(), moduleDatabase.findCapabilities(dynamicReq));
+			List<Capability> dynamicMatches = findProviders0(dynamicReq.getOriginal(), dynamicReq);
 			return new ResolverImpl(new Logger(0)).resolve(this, dynamicReq.getRevision(), dynamicReq.getOriginal(), dynamicMatches);
 		}
 
