@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,9 @@ package org.eclipse.osgi.storage.bundlefile;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Enumeration;
+import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.internal.hookregistry.BundleFileWrapperFactoryHook;
 import org.eclipse.osgi.storage.BundleInfo;
 
@@ -82,5 +84,10 @@ public class BundleFileWrapper extends BundleFile {
 	@Override
 	public boolean containsDir(String dir) {
 		return bundleFile.containsDir(dir);
+	}
+
+	@Override
+	public URL getResourceURL(String path, Module hostModule, int index) {
+		return bundleFile.getResourceURL(path, hostModule, index);
 	}
 }
