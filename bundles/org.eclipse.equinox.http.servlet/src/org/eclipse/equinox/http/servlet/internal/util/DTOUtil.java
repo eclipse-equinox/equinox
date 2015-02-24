@@ -80,6 +80,21 @@ public class DTOUtil {
 		return clone;
 	}
 
+	public static FailedServletDTO clone(FailedServletDTO original) {
+		FailedServletDTO clone = new FailedServletDTO();
+
+		clone.asyncSupported = original.asyncSupported;
+		clone.failureReason = original.failureReason;
+		clone.initParams = clone.initParams;
+		clone.name = original.name;
+		clone.patterns = original.patterns;
+		clone.serviceId = original.serviceId;
+		clone.servletContextId = original.servletContextId;
+		clone.servletInfo = original.servletInfo;
+
+		return clone;
+	}
+
 	public static FilterDTO clone(FilterDTO original) {
 		FilterDTO clone = new FilterDTO();
 

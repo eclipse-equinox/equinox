@@ -13,12 +13,15 @@ package org.eclipse.equinox.http.servlet.internal.customizer;
 
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
+import org.eclipse.equinox.http.servlet.internal.error.HttpWhiteboardFailureException;
 import org.eclipse.equinox.http.servlet.internal.registration.ServletRegistration;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import org.eclipse.equinox.http.servlet.internal.util.*;
+import org.osgi.framework.*;
+import org.osgi.service.http.runtime.dto.DTOConstants;
+import org.osgi.service.http.runtime.dto.FailedServletDTO;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /**
  * @author Raymond Augé
@@ -51,10 +54,16 @@ public class ContextServletTrackerCustomizer
 		try {
 			result.set(contextController.addServletRegistration(serviceReference));
 		}
-		catch (ServletException se) {
-			httpServiceRuntime.log(se.getMessage(), se);
+		catch (HttpWhiteboardFailureException hwfe) {
+			httpServiceRuntime.log(hwfe.getMessage(), hwfe);
+
+			recordFailedServletDTO(serviceReference, hwfe.getFailureReason());
 		}
-		// TODO error?
+		catch (Exception e) {
+			httpServiceRuntime.log(e.getMessage(), e);
+
+			recordFailedServletDTO(serviceReference, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
+		}
 
 		return result;
 	}
@@ -78,6 +87,27 @@ public class ContextServletTrackerCustomizer
 			// destroy will unget the service object we were using
 			registration.destroy();
 		}
+
+		contextController.getHttpServiceRuntime().removeFailedServletDTOs(serviceReference);
+	}
+
+	private void recordFailedServletDTO(
+		ServiceReference<Servlet> serviceReference, int failureReason) {
+
+		FailedServletDTO failedServletDTO = new FailedServletDTO();
+
+		failedServletDTO.asyncSupported = (Boolean)serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED);
+		failedServletDTO.failureReason = failureReason;
+		failedServletDTO.initParams = ServiceProperties.parseInitParams(
+			serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX);
+		failedServletDTO.name = (String)serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
+		failedServletDTO.patterns = StringPlus.from(
+			serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN)).toArray(new String[0]);
+		failedServletDTO.serviceId = (Long)serviceReference.getProperty(Constants.SERVICE_ID);
+		failedServletDTO.servletContextId = contextController.getServiceId();
+		failedServletDTO.servletInfo = Const.BLANK;
+
+		contextController.getHttpServiceRuntime().recordFailedServletDTO(serviceReference, failedServletDTO);
 	}
 
 	private ContextController contextController;
