@@ -958,7 +958,7 @@ public class HttpServiceRuntimeImpl
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("(&"); //$NON-NLS-1$
-		sb.append("(").append(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER).append("~=true)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append("(").append(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER).append("=*)"); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append("(|"); //$NON-NLS-1$
 		sb.append("(objectClass=").append(ServletContextListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append("(objectClass=").append(ServletContextAttributeListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
