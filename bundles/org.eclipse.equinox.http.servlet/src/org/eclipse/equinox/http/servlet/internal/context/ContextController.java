@@ -725,14 +725,11 @@ public class ContextController {
 		ServletContext servletContext = getProxyContext().getServletContext();
 
 		servletContextDTO.attributes = getAttributes(servletContext);
-		servletContextDTO.contextName = servletContext.getServletContextName();
-		servletContextDTO.contextPath = servletContext.getContextPath();
+		servletContextDTO.contextName = getContextName();
+		servletContextDTO.contextPath = getContextPath();
 		servletContextDTO.initParams = initParams;
 		servletContextDTO.name = getContextName();
 		servletContextDTO.serviceId = getServiceId();
-
-		// TODO
-		servletContextDTO.errorPageDTOs = new ErrorPageDTO[0];
 
 		collectEndpointDTOs(servletContextDTO);
 		collectFilterDTOs(servletContextDTO);
@@ -922,18 +919,27 @@ public class ContextController {
 	private void collectEndpointDTOs(
 		ServletContextDTO servletContextDTO) {
 
+		List<ErrorPageDTO> errorPageDTOs = new ArrayList<ErrorPageDTO>();
 		List<ResourceDTO> resourceDTOs = new ArrayList<ResourceDTO>();
 		List<ServletDTO> servletDTOs = new ArrayList<ServletDTO>();
 
 		for (EndpointRegistration<?> endpointRegistration : endpointRegistrations) {
 			if (endpointRegistration instanceof ResourceRegistration) {
-				resourceDTOs.add((ResourceDTO)endpointRegistration.getD());
+				resourceDTOs.add(DTOUtil.clone((ResourceDTO)endpointRegistration.getD()));
 			}
 			else {
-				servletDTOs.add((ServletDTO)endpointRegistration.getD());
+				ServletRegistration servletRegistration = (ServletRegistration)endpointRegistration;
+				servletDTOs.add(DTOUtil.clone(servletRegistration.getD()));
+
+				ErrorPageDTO errorPageDTO = servletRegistration.getErrorPageDTO();
+				if (errorPageDTO != null) {
+					errorPageDTOs.add(DTOUtil.clone(errorPageDTO));
+				}
 			}
 		}
 
+		servletContextDTO.errorPageDTOs = errorPageDTOs.toArray(
+			new ErrorPageDTO[errorPageDTOs.size()]);
 		servletContextDTO.resourceDTOs = resourceDTOs.toArray(
 			new ResourceDTO[resourceDTOs.size()]);
 		servletContextDTO.servletDTOs = servletDTOs.toArray(
@@ -946,7 +952,7 @@ public class ContextController {
 		List<FilterDTO> filterDTOs = new ArrayList<FilterDTO>();
 
 		for (FilterRegistration filterRegistration : filterRegistrations) {
-			filterDTOs.add(filterRegistration.getD());
+			filterDTOs.add(DTOUtil.clone(filterRegistration.getD()));
 		}
 
 		servletContextDTO.filterDTOs = filterDTOs.toArray(
@@ -959,7 +965,7 @@ public class ContextController {
 		List<ListenerDTO> listenerDTOs = new ArrayList<ListenerDTO>();
 
 		for (ListenerRegistration listenerRegistration : listenerRegistrations) {
-			listenerDTOs.add(listenerRegistration.getD());
+			listenerDTOs.add(DTOUtil.clone(listenerRegistration.getD()));
 		}
 
 		servletContextDTO.listenerDTOs = listenerDTOs.toArray(
