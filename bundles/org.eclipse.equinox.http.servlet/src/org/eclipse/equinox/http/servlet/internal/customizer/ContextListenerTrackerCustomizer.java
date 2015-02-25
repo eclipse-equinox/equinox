@@ -17,7 +17,6 @@ import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.error.HttpWhiteboardFailureException;
 import org.eclipse.equinox.http.servlet.internal.registration.ListenerRegistration;
-import org.eclipse.equinox.http.servlet.internal.util.Const;
 import org.eclipse.equinox.http.servlet.internal.util.StringPlus;
 import org.osgi.framework.*;
 import org.osgi.service.http.runtime.dto.DTOConstants;
@@ -55,7 +54,11 @@ public class ContextListenerTrackerCustomizer
 		try {
 			String listener = (String)serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
 
-			if (!listener.equalsIgnoreCase(Const.TRUE)) {
+			if (Boolean.FALSE.toString().equalsIgnoreCase(listener)) {
+				return result;
+			}
+
+			if (!Boolean.TRUE.toString().equalsIgnoreCase(listener)) {
 				throw new HttpWhiteboardFailureException(
 					HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER + "=" + listener + " is not a valid option. Ignoring!", //$NON-NLS-1$ //$NON-NLS-2$
 					DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
