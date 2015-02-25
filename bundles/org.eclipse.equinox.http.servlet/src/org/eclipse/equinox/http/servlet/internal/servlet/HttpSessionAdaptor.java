@@ -21,13 +21,10 @@ import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 public class HttpSessionAdaptor implements HttpSession {
 	static class ParentSessionListener implements HttpSessionBindingListener {
 		private static final String PARENT_SESSION_LISTENER_KEY = "org.eclipse.equinox.http.parent.session.listener"; //$NON-NLS-1$
-		final Map<String, Set<HttpSessionAdaptor>> innerSessions = new HashMap<String, Set<HttpSessionAdaptor>>();
+		final Set<HttpSessionAdaptor> innerSessions = new HashSet<HttpSessionAdaptor>();
 		@Override
 		public void valueBound(HttpSessionBindingEvent event) {
-			// Add a Set to indicate this session is valid
-			synchronized (innerSessions) {
-				innerSessions.put(event.getSession().getId(), new HashSet<HttpSessionAdaptor>());
-			}
+			// do nothing
 		}
 
 		@Override
@@ -36,28 +33,39 @@ public class HttpSessionAdaptor implements HttpSession {
 			// Must invalidate the inner sessions
 			Set<HttpSessionAdaptor> innerSessionsToInvalidate;
 			synchronized (innerSessions) {
-				// remove the set to mark the outer session as invalid
-				innerSessionsToInvalidate = innerSessions.remove(event.getSession().getId());
+				// copy the sessions to invalidate and clear the set
+				innerSessionsToInvalidate = new HashSet<HttpSessionAdaptor>(innerSessions);
+				innerSessions.clear();
 			}
 			for (HttpSessionAdaptor innerSession : innerSessionsToInvalidate) {
 				innerSession.invalidate();
 			}
 		}
 
-		void addHttpSessionAdaptor(HttpSessionAdaptor innerSession) {
-			synchronized (innerSessions) {
-				if (innerSession.session.getAttribute(PARENT_SESSION_LISTENER_KEY) == null) {
-					innerSession.session.setAttribute(PARENT_SESSION_LISTENER_KEY, this);
+		static void addHttpSessionAdaptor(HttpSessionAdaptor innerSession) {
+			ParentSessionListener parentListener;
+			// need to have a global lock here because we must ensure that this is added only once
+			synchronized (ParentSessionListener.class) {
+				parentListener = (ParentSessionListener) innerSession.session.getAttribute(PARENT_SESSION_LISTENER_KEY);
+				if (parentListener == null) {
+					parentListener = new ParentSessionListener();
+					innerSession.session.setAttribute(PARENT_SESSION_LISTENER_KEY, parentListener);
 				}
-				innerSessions.get(innerSession.session.getId()).add(innerSession);
+			}
+			synchronized (parentListener.innerSessions) {
+				parentListener.innerSessions.add(innerSession);
 			}
 		}
 
-		void removeHttpSessionAdaptor(HttpSessionAdaptor innerSession) {
-			synchronized (innerSessions) {
-				Set<HttpSessionAdaptor> sessions = innerSessions.get(innerSession.session.getId());
-				if (sessions != null) {
-					sessions.remove(innerSession);
+		static void removeHttpSessionAdaptor(HttpSessionAdaptor innerSession) {
+			ParentSessionListener parentListener;
+			// need to have a global lock here because we must ensure that this is added only once
+			synchronized (ParentSessionListener.class) {
+				parentListener = (ParentSessionListener) innerSession.session.getAttribute(PARENT_SESSION_LISTENER_KEY);
+			}
+			if (parentListener != null) {
+				synchronized (parentListener.innerSessions) {
+					parentListener.innerSessions.remove(innerSession);
 				}
 			}
 		}
@@ -100,7 +108,6 @@ public class HttpSessionAdaptor implements HttpSession {
 		}
 	}
 
-	private static final ParentSessionListener parentSessionListener = new ParentSessionListener();
 	private final ContextController controller;
 	private final HttpSession session;
 	private final ServletContext servletContext;
@@ -109,7 +116,7 @@ public class HttpSessionAdaptor implements HttpSession {
 	static public HttpSessionAdaptor createHttpSessionAdaptor(
 		HttpSession session, ServletContext servletContext, ContextController controller) {
 		HttpSessionAdaptor sessionAdaptor = new HttpSessionAdaptor(session, servletContext, controller);
-		parentSessionListener.addHttpSessionAdaptor(sessionAdaptor);
+		ParentSessionListener.addHttpSessionAdaptor(sessionAdaptor);
 		return sessionAdaptor;
 	}
 
@@ -168,7 +175,7 @@ public class HttpSessionAdaptor implements HttpSession {
 		for (String attribute : getAttributeNames0()) {
 			removeAttribute(attribute);
 		}
-		parentSessionListener.removeHttpSessionAdaptor(this);
+		ParentSessionListener.removeHttpSessionAdaptor(this);
 		controller.removeActiveSession(session);
 	}
 
