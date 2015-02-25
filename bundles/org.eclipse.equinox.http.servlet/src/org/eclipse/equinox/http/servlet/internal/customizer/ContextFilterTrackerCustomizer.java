@@ -17,8 +17,7 @@ import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.error.HttpWhiteboardFailureException;
 import org.eclipse.equinox.http.servlet.internal.registration.FilterRegistration;
-import org.eclipse.equinox.http.servlet.internal.util.ServiceProperties;
-import org.eclipse.equinox.http.servlet.internal.util.StringPlus;
+import org.eclipse.equinox.http.servlet.internal.util.*;
 import org.osgi.framework.*;
 import org.osgi.service.http.runtime.dto.DTOConstants;
 import org.osgi.service.http.runtime.dto.FailedFilterDTO;
@@ -97,7 +96,8 @@ public class ContextFilterTrackerCustomizer
 
 		FailedFilterDTO failedFilterDTO = new FailedFilterDTO();
 
-		failedFilterDTO.asyncSupported = (Boolean)serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED);
+		failedFilterDTO.asyncSupported = BooleanPlus.from(
+			serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED), false);
 		failedFilterDTO.dispatcher = StringPlus.from(
 			serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER)).toArray(new String[0]);
 		failedFilterDTO.failureReason = failureReason;

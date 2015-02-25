@@ -96,7 +96,8 @@ public class ContextServletTrackerCustomizer
 
 		FailedServletDTO failedServletDTO = new FailedServletDTO();
 
-		failedServletDTO.asyncSupported = (Boolean)serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED);
+		failedServletDTO.asyncSupported = BooleanPlus.from(
+			serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED), false);
 		failedServletDTO.failureReason = failureReason;
 		failedServletDTO.initParams = ServiceProperties.parseInitParams(
 			serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX);
