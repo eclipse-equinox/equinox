@@ -556,7 +556,6 @@ public class ServletTest extends TestCase {
 
 			ServletContextDTO servletContextDTO = servletContextDTOs[0];
 
-			Assert.assertNotNull(servletContextDTO.contextName);
 			Assert.assertNotNull(servletContextDTO.name);
 		}
 		finally {
@@ -949,7 +948,6 @@ public class ServletTest extends TestCase {
 
 			ServletContextDTO servletContextDTO = servletContextDTOs[0];
 
-			Assert.assertNotNull(servletContextDTO.contextName);
 		} finally {
 			uninstallBundle(bundle);
 		}

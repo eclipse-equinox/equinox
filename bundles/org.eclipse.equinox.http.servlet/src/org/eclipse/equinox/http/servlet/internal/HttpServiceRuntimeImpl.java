@@ -1032,7 +1032,6 @@ public class HttpServiceRuntimeImpl
 		FailedServletContextDTO failedServletContextDTO = new FailedServletContextDTO();
 
 		failedServletContextDTO.attributes = Collections.emptyMap();
-		failedServletContextDTO.contextName = contextName;
 		failedServletContextDTO.contextPath = contextPath;
 		failedServletContextDTO.errorPageDTOs = new ErrorPageDTO[0];
 		failedServletContextDTO.failureReason = failureReason;

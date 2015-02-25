@@ -77,7 +77,6 @@ public class DTOUtil {
 		FailedServletContextDTO clone = new FailedServletContextDTO();
 
 		clone.attributes = original.attributes;
-		clone.contextName = original.contextName;
 		clone.contextPath = original.contextPath;
 		clone.errorPageDTOs = original.errorPageDTOs;
 		clone.failureReason = original.failureReason;
