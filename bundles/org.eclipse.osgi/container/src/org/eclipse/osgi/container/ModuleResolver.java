@@ -55,7 +55,7 @@ final class ModuleResolver {
 	boolean DEBUG_WIRING = false;
 	boolean DEBUG_REPORT = false;
 
-	private final int DEFAULT_BATCH_SIZE = 100;
+	private final int DEFAULT_BATCH_SIZE = 1;
 	final int resolverRevisionBatchSize;
 
 	void setDebugOptions() {
