@@ -13,9 +13,11 @@ package org.eclipse.equinox.http.servlet.tests;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -67,7 +69,9 @@ import org.eclipse.equinox.http.servlet.tests.util.BaseServletContextListener;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServletRequestAttributeListener;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServletRequestListener;
 import org.eclipse.equinox.http.servlet.tests.util.ServletRequestAdvisor;
+
 import org.junit.Assert;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -150,6 +154,26 @@ public class ServletTest extends TestCase {
 		actual = response.get("responseBody").get(0);
 
 		Assert.assertEquals("500", responseCode);
+		Assert.assertTrue(
+			"Expected <" + expected + "*> but got <" + actual + ">", actual.startsWith(expected));
+	}
+
+	public void test_ErrorPage3() throws Exception {
+		String expected = "400 ERROR :";
+		String actual = null;
+		Map<String, List<String>> response = Collections.emptyMap();
+		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		try {
+			bundle.start();
+			response = requestAdvisor.request("TestErrorPage3/a", null);
+		}
+		finally {
+			uninstallBundle(bundle);
+		}
+		String responseCode = response.get("responseCode").get(0);
+		actual = response.get("responseBody").get(0);
+
+		Assert.assertEquals("400", responseCode);
 		Assert.assertTrue(
 			"Expected <" + expected + "*> but got <" + actual + ">", actual.startsWith(expected));
 	}
