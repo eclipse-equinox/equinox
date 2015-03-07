@@ -173,7 +173,7 @@ public class ResponseStateHandler {
 
 		int status = wrapper.getStatus();
 
-		if (status <= 400) {
+		if (status < 400) {
 			return;
 		}
 
