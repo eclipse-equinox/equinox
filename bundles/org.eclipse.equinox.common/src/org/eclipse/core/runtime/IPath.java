@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Patrick Tasse - Add extra constructor to Path class (bug 454959)
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -129,6 +130,7 @@ public interface IPath extends Cloneable {
 	 * Equality for paths is defined to be: same sequence of segments,
 	 * same absolute/relative status, and same device.
 	 * Trailing separators are disregarded.
+	 * The paths' file systems are disregarded.
 	 * Paths are not generally considered equal to objects other than paths.
 	 * </p>
 	 *
@@ -239,11 +241,11 @@ public interface IPath extends Cloneable {
 	public boolean isUNC();
 
 	/**
-	 * Returns whether the given string is syntactically correct as
-	 * a path.  The device id is the prefix up to and including the device
-	 * separator for the local file system; the path proper is everything to 
-	 * the right of it, or the entire string if there is no device separator. 
-	 * When the platform location is a file system with no meaningful device
+	 * Returns whether the given string is syntactically correct as a path, on
+	 * this path's file system. The device id is the prefix up to and including
+	 * the device separator for the file system of this path; the path proper is
+	 * everything to the right of it, or the entire string if there is no device
+	 * separator. When this path's file system has no meaningful device
 	 * separator, the entire string is treated as the path proper.
 	 * The device id is not checked for validity; the path proper is correct 
 	 * if each of the segments in its canonicalized form is valid.
@@ -256,14 +258,14 @@ public interface IPath extends Cloneable {
 	public boolean isValidPath(String path);
 
 	/**
-	 * Returns whether the given string is valid as a segment in 
-	 * a path. The rules for valid segments are as follows:
+	 * Returns whether the given string is valid as a segment in this path.
+	 * The rules for valid segments are as follows:
 	 * <ul>
-	 * <li> the empty string is not valid
-	 * <li> any string containing the slash character ('/') is not valid
-	 * <li>any string containing segment or device separator characters
-	 * on the local file system, such as the backslash ('\') and colon (':')
-	 * on some file systems.
+	 * <li>the empty string is not valid
+	 * <li>any string containing the slash character ('/') is not valid
+	 * <li>any string containing segment or device separator characters on this
+	 * path's file system, such as the backslash ('\') and colon (':') on some
+	 * file systems, is not valid
 	 * </ul>
 	 *
 	 * @param segment the path segment to check

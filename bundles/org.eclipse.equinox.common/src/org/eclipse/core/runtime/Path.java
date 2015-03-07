@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Patrick Tasse - Add extra constructor to Path class (bug 454959)
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -31,12 +32,17 @@ import java.util.Arrays;
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class Path implements IPath, Cloneable {
-	/** masks for separator values */
+	/** masks for flag values */
 	private static final int HAS_LEADING = 1;
 	private static final int IS_UNC = 2;
 	private static final int HAS_TRAILING = 4;
+	private static final int IS_FOR_WINDOWS = 8;
 
 	private static final int ALL_SEPARATORS = HAS_LEADING | IS_UNC | HAS_TRAILING;
+	private static final int ALL_FLAGS = HAS_LEADING | IS_UNC | HAS_TRAILING | IS_FOR_WINDOWS;
+
+	/** Constant value indicating if the current platform is Windows */
+	private static final boolean RUNNING_ON_WINDOWS = java.io.File.separatorChar == '\\';
 
 	/** Constant empty string value. */
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
@@ -44,33 +50,29 @@ public class Path implements IPath, Cloneable {
 	/** Constant value indicating no segments */
 	private static final String[] NO_SEGMENTS = new String[0];
 
-	/** Constant value containing the empty path with no device. */
+	/** Constant value containing the empty path with no device on the local file system. */
 	public static final Path EMPTY = new Path(EMPTY_STRING);
 
 	/** Mask for all bits that are involved in the hash code */
-	private static final int HASH_MASK = ~HAS_TRAILING;
+	private static final int HASH_MASK = ~(HAS_TRAILING | IS_FOR_WINDOWS);
 
 	/** Constant root path string (<code>"/"</code>). */
 	private static final String ROOT_STRING = "/"; //$NON-NLS-1$
 
-	/** Constant value containing the root path with no device. */
+	/** Constant value containing the root path with no device on the local file system. */
 	public static final Path ROOT = new Path(ROOT_STRING);
-
-	/** Constant value indicating if the current platform is Windows */
-	private static final boolean WINDOWS = java.io.File.separatorChar == '\\';
 
 	/** The device id string. May be null if there is no device. */
 	private String device = null;
 
-	//Private implementation note: the segments and separators 
-	//arrays are never modified, so that they can be shared between 
-	//path instances
+	//Private implementation note: the segments array and flag bitmap
+	//are never modified, so that they can be shared between path instances
 
 	/** The path segments */
 	private String[] segments;
 
-	/** flags indicating separators (has leading, is UNC, has trailing) */
-	private int separators;
+	/** flags indicating separators (has leading, is UNC, has trailing, is for Windows) */
+	private int flags;
 
 	/** 
 	 * Constructs a new path from the given string path.
@@ -103,7 +105,7 @@ public class Path implements IPath, Cloneable {
 		int firstMatch = pathString.indexOf(DEVICE_SEPARATOR) + 1;
 		//no extra work required if no device characters
 		if (firstMatch <= 0)
-			return new Path().initialize(null, pathString);
+			return new Path().initialize(null, pathString, RUNNING_ON_WINDOWS);
 		//if we find a single colon, then the path has a device
 		String devicePart = null;
 		int pathLength = pathString.length();
@@ -113,7 +115,7 @@ public class Path implements IPath, Cloneable {
 		}
 		//optimize for no colon literals
 		if (pathString.indexOf(DEVICE_SEPARATOR) == -1)
-			return new Path().initialize(devicePart, pathString);
+			return new Path().initialize(devicePart, pathString, RUNNING_ON_WINDOWS);
 		//contract colon literals
 		char[] chars = pathString.toCharArray();
 		int readOffset = 0, writeOffset = 0, length = chars.length;
@@ -123,7 +125,40 @@ public class Path implements IPath, Cloneable {
 					break;
 			chars[writeOffset++] = chars[readOffset++];
 		}
-		return new Path().initialize(devicePart, new String(chars, 0, writeOffset));
+		return new Path().initialize(devicePart, new String(chars, 0, writeOffset), RUNNING_ON_WINDOWS);
+	}
+
+	/**
+	 * Constructs a new POSIX path from the given string path. The string path
+	 * must represent a valid file system path on a POSIX file system. The path
+	 * is canonicalized and double slashes are removed except at the beginning
+	 * (to handle UNC paths). All forward slashes ('/') are treated as segment
+	 * delimiters. This factory method should be used if the string path is for
+	 * a POSIX file system.
+	 *
+	 * @param fullPath the string path
+	 * @see #isValidPosixPath(String)
+	 * @since 3.7
+	 */
+	public static Path forPosix(String fullPath) {
+		return new Path(fullPath, false);
+	}
+
+	/**
+	 * Constructs a new Windows path from the given string path. The string path
+	 * must represent a valid file system path on the Windows file system. The
+	 * path is canonicalized and double slashes are removed except at the
+	 * beginning (to handle UNC paths). All forward slashes ('/') are treated as
+	 * segment delimiters, and any segment ('\') and device (':') delimiters for
+	 * the Windows file system are also respected. This factory method should be
+	 * used if the string path is for the Windows file system.
+	 *
+	 * @param fullPath the string path
+	 * @see #isValidWindowsPath(String)
+	 * @since 3.7
+	 */
+	public static Path forWindows(String fullPath) {
+		return new Path(fullPath, true);
 	}
 
 	/* (Intentionally not included in javadoc)
@@ -142,25 +177,13 @@ public class Path implements IPath, Cloneable {
 	 * slashes ('/') are treated as segment delimiters, and any
 	 * segment and device delimiters for the local file system are
 	 * also respected (such as colon (':') and backslash ('\') on some file systems).
+	 * This constructor should be used if the string path if for the local file system.
 	 *
 	 * @param fullPath the string path
 	 * @see #isValidPath(String)
 	 */
 	public Path(String fullPath) {
-		String devicePart = null;
-		if (WINDOWS) {
-			//convert backslash to forward slash
-			fullPath = fullPath.indexOf('\\') == -1 ? fullPath : fullPath.replace('\\', SEPARATOR);
-			//extract device
-			int i = fullPath.indexOf(DEVICE_SEPARATOR);
-			if (i != -1) {
-				//remove leading slash from device part to handle output of URL.getFile()
-				int start = fullPath.charAt(0) == SEPARATOR ? 1 : 0;
-				devicePart = fullPath.substring(start, i + 1);
-				fullPath = fullPath.substring(i + 1, fullPath.length());
-			}
-		}
-		initialize(devicePart, fullPath);
+		this(fullPath, RUNNING_ON_WINDOWS);
 	}
 
 	/** 
@@ -178,22 +201,52 @@ public class Path implements IPath, Cloneable {
 	 * @see #setDevice(String)
 	 */
 	public Path(String device, String path) {
-		if (WINDOWS) {
+		if (RUNNING_ON_WINDOWS) {
 			//convert backslash to forward slash
 			path = path.indexOf('\\') == -1 ? path : path.replace('\\', SEPARATOR);
 		}
-		initialize(device, path);
+		initialize(device, path, RUNNING_ON_WINDOWS);
+	}
+
+	/** 
+	 * Constructs a new path from the given string path. The string path must
+	 * represent a valid file system path on the specified file system. The path
+	 * is canonicalized and double slashes are removed except at the beginning
+	 * (to handle UNC paths). All forward slashes ('/') are treated as segment
+	 * delimiters, and any segment and device delimiters for the specified file
+	 * system are also respected (such as colon (':') and backslash ('\') on
+	 * Windows).
+	 *
+	 * @param fullPath the string path
+	 * @param forWindows true if the string path is for the Windows file system
+	 * @since 3.7
+	 */
+	private Path(String fullPath, boolean forWindows) {
+		String devicePart = null;
+		if (forWindows) {
+			//convert backslash to forward slash
+			fullPath = fullPath.indexOf('\\') == -1 ? fullPath : fullPath.replace('\\', SEPARATOR);
+			//extract device
+			int i = fullPath.indexOf(DEVICE_SEPARATOR);
+			if (i != -1) {
+				//remove leading slash from device part to handle output of URL.getFile()
+				int start = fullPath.charAt(0) == SEPARATOR ? 1 : 0;
+				devicePart = fullPath.substring(start, i + 1);
+				fullPath = fullPath.substring(i + 1, fullPath.length());
+			}
+		}
+		initialize(devicePart, fullPath, forWindows);
 	}
 
 	/* (Intentionally not included in javadoc)
 	 * Private constructor.
 	 */
-	private Path(String device, String[] segments, int _separators) {
+	private Path(String device, String[] segments, int flags) {
 		// no segment validations are done for performance reasons	
 		this.segments = segments;
 		this.device = device;
-		//hash code is cached in all but the bottom three bits of the separators field
-		this.separators = (computeHashCode() << 3) | (_separators & ALL_SEPARATORS);
+		//hash code is cached in all but the bottom four bits of the flags field
+		this.flags = (computeHashCode() << 4) | (flags & ALL_FLAGS);
 	}
 
 	/* (Intentionally not included in javadoc)
@@ -207,7 +260,7 @@ public class Path implements IPath, Cloneable {
 		String[] newSegments = new String[len];
 		System.arraycopy(segments, 0, newSegments, 0, len - 1);
 		newSegments[len - 1] = segments[len - 1] + '.' + extension;
-		return new Path(device, newSegments, separators);
+		return new Path(device, newSegments, flags);
 	}
 
 	/* (Intentionally not included in javadoc)
@@ -220,9 +273,9 @@ public class Path implements IPath, Cloneable {
 		}
 		//XXX workaround, see 1GIGQ9V
 		if (isEmpty()) {
-			return new Path(device, segments, HAS_LEADING);
+			return new Path(device, segments, (flags & IS_FOR_WINDOWS) | HAS_LEADING);
 		}
-		return new Path(device, segments, separators | HAS_TRAILING);
+		return new Path(device, segments, flags | HAS_TRAILING);
 	}
 
 	/* (Intentionally not included in javadoc)
@@ -234,9 +287,10 @@ public class Path implements IPath, Cloneable {
 		if (tail == null || tail.segmentCount() == 0)
 			return this;
 		//these call chains look expensive, but in most cases they are no-ops
-		if (this.isEmpty())
+		//the tail must be for the same platform as this instance
+		if (this.isEmpty() && ((flags & IS_FOR_WINDOWS) == 0) == tail.isValidSegment(":")) //$NON-NLS-1$
 			return tail.setDevice(device).makeRelative().makeUNC(isUNC());
-		if (this.isRoot())
+		if (this.isRoot() && ((flags & IS_FOR_WINDOWS) == 0) == tail.isValidSegment(":")) //$NON-NLS-1$
 			return tail.setDevice(device).makeAbsolute().makeUNC(isUNC());
 
 		//concatenate the two segment arrays
@@ -248,7 +302,7 @@ public class Path implements IPath, Cloneable {
 			newSegments[myLen + i] = tail.segment(i);
 		}
 		//use my leading separators and the tail's trailing separator
-		Path result = new Path(device, newSegments, (separators & (HAS_LEADING | IS_UNC)) | (tail.hasTrailingSeparator() ? HAS_TRAILING : 0));
+		Path result = new Path(device, newSegments, (flags & (HAS_LEADING | IS_UNC | IS_FOR_WINDOWS)) | (tail.hasTrailingSeparator() ? HAS_TRAILING : 0));
 		String tailFirstSegment = newSegments[myLen];
 		if (tailFirstSegment.equals("..") || tailFirstSegment.equals(".")) { //$NON-NLS-1$ //$NON-NLS-2$
 			result.canonicalize();
@@ -277,10 +331,10 @@ public class Path implements IPath, Cloneable {
 			String[] newSegments = new String[myLen + 1];
 			System.arraycopy(segments, 0, newSegments, 0, myLen);
 			newSegments[myLen] = tail;
-			return new Path(device, newSegments, separators & ~HAS_TRAILING);
+			return new Path(device, newSegments, flags & ~HAS_TRAILING);
 		}
 		//go with easy implementation
-		return append(new Path(tail));
+		return append(new Path(tail, (flags & IS_FOR_WINDOWS) != 0));
 	}
 
 	/**
@@ -301,9 +355,9 @@ public class Path implements IPath, Cloneable {
 				collapseParentReferences();
 				//paths of length 0 have no trailing separator
 				if (segments.length == 0)
-					separators &= (HAS_LEADING | IS_UNC);
+					flags &= (HAS_LEADING | IS_UNC);
 				//recompute hash because canonicalize affects hash
-				separators = (separators & ALL_SEPARATORS) | (computeHashCode() << 3);
+				flags = (flags & ALL_FLAGS) | (computeHashCode() << 4);
 				return true;
 			}
 		}
@@ -423,9 +477,9 @@ public class Path implements IPath, Cloneable {
 		int length = 0;
 		if (device != null)
 			length += device.length();
-		if ((separators & HAS_LEADING) != 0)
+		if ((flags & HAS_LEADING) != 0)
 			length++;
-		if ((separators & IS_UNC) != 0)
+		if ((flags & IS_UNC) != 0)
 			length++;
 		//add the segment lengths
 		int max = segments.length;
@@ -436,7 +490,7 @@ public class Path implements IPath, Cloneable {
 			//add the separator lengths
 			length += max - 1;
 		}
-		if ((separators & HAS_TRAILING) != 0)
+		if ((flags & HAS_TRAILING) != 0)
 			length++;
 		return length;
 	}
@@ -522,7 +576,7 @@ public class Path implements IPath, Cloneable {
 			return false;
 		Path target = (Path) obj;
 		//check leading separators and hash code
-		if ((separators & HASH_MASK) != (target.separators & HASH_MASK))
+		if ((flags & HASH_MASK) != (target.flags & HASH_MASK))
 			return false;
 		String[] targetSegments = target.segments;
 		int i = segments.length;
@@ -569,7 +623,7 @@ public class Path implements IPath, Cloneable {
 	 */
 	@Override
 	public int hashCode() {
-		return separators & HASH_MASK;
+		return flags & HASH_MASK;
 	}
 
 	/* (Intentionally not included in javadoc)
@@ -577,42 +631,45 @@ public class Path implements IPath, Cloneable {
 	 */
 	@Override
 	public boolean hasTrailingSeparator() {
-		return (separators & HAS_TRAILING) != 0;
+		return (flags & HAS_TRAILING) != 0;
 	}
 
 	/*
 	 * Initialize the current path with the given string.
 	 */
-	private IPath initialize(String deviceString, String path) {
+	private IPath initialize(String deviceString, String path, boolean forWindows) {
 		Assert.isNotNull(path);
 		this.device = deviceString;
 
 		path = collapseSlashes(path);
 		int len = path.length();
 
-		//compute the separators array
+		//compute the flags bitmap
 		if (len < 2) {
 			if (len == 1 && path.charAt(0) == SEPARATOR) {
-				this.separators = HAS_LEADING;
+				this.flags = HAS_LEADING;
 			} else {
-				this.separators = 0;
+				this.flags = 0;
 			}
 		} else {
 			boolean hasLeading = path.charAt(0) == SEPARATOR;
 			boolean isUNC = hasLeading && path.charAt(1) == SEPARATOR;
 			//UNC path of length two has no trailing separator
 			boolean hasTrailing = !(isUNC && len == 2) && path.charAt(len - 1) == SEPARATOR;
-			separators = hasLeading ? HAS_LEADING : 0;
+			flags = hasLeading ? HAS_LEADING : 0;
 			if (isUNC)
-				separators |= IS_UNC;
+				flags |= IS_UNC;
 			if (hasTrailing)
-				separators |= HAS_TRAILING;
+				flags |= HAS_TRAILING;
+		}
+		if (forWindows) {
+			flags |= IS_FOR_WINDOWS;
 		}
 		//compute segments and ensure canonical form
 		segments = computeSegments(path);
 		if (!canonicalize()) {
 			//compute hash now because canonicalize didn't need to do it
-			separators = (separators & ALL_SEPARATORS) | (computeHashCode() << 3);
+			flags = (flags & ALL_FLAGS) | (computeHashCode() << 4);
 		}
 		return this;
 	}
@@ -623,7 +680,7 @@ public class Path implements IPath, Cloneable {
 	@Override
 	public boolean isAbsolute() {
 		//it's absolute if it has a leading separator
-		return (separators & HAS_LEADING) != 0;
+		return (flags & HAS_LEADING) != 0;
 	}
 
 	/* (Intentionally not included in javadoc)
@@ -632,8 +689,7 @@ public class Path implements IPath, Cloneable {
 	@Override
 	public boolean isEmpty() {
 		//true if no segments and no leading prefix
-		return segments.length == 0 && ((separators & ALL_SEPARATORS) != HAS_LEADING);
-
+		return segments.length == 0 && ((flags & ALL_SEPARATORS) != HAS_LEADING);
 	}
 
 	/* (Intentionally not included in javadoc)
@@ -670,7 +726,7 @@ public class Path implements IPath, Cloneable {
 	@Override
 	public boolean isRoot() {
 		//must have no segments, a leading separator, and not be a UNC path.
-		return this == ROOT || (segments.length == 0 && ((separators & ALL_SEPARATORS) == HAS_LEADING));
+		return this == ROOT || (segments.length == 0 && ((flags & ALL_SEPARATORS) == HAS_LEADING));
 	}
 
 	/* (Intentionally not included in javadoc)
@@ -680,7 +736,7 @@ public class Path implements IPath, Cloneable {
 	public boolean isUNC() {
 		if (device != null)
 			return false;
-		return (separators & IS_UNC) != 0;
+		return (flags & IS_UNC) != 0;
 	}
 
 	/* (Intentionally not included in javadoc)
@@ -688,9 +744,63 @@ public class Path implements IPath, Cloneable {
 	 */
 	@Override
 	public boolean isValidPath(String path) {
-		Path test = new Path(path);
+		return isValidPath(path, (flags & IS_FOR_WINDOWS) != 0);
+	}
+
+	/**
+	 * Returns whether the given string is syntactically correct as a path on a
+	 * POSIX file system. The path is correct if each of the segments in its
+	 * canonicalized form is valid.
+	 *
+	 * @param path the path to check
+	 * @return <code>true</code> if the given string is a valid path,
+	 *    and <code>false</code> otherwise
+	 * @see #isValidPosixSegment(String)
+	 * @since 3.7
+	 */
+	public static boolean isValidPosixPath(String path) {
+		return isValidPath(path, false);
+	}
+
+	/**
+	 * Returns whether the given string is syntactically correct as a path on
+	 * the Windows file system. The device id is the prefix up to and including
+	 * the device separator (':'); the path proper is everything to the right of
+	 * it, or the entire string if there is no device separator. The device id
+	 * is not checked for validity; the path proper is correct if each of the
+	 * segments in its canonicalized form is valid.
+	 *
+	 * @param path the path to check
+	 * @return <code>true</code> if the given string is a valid path,
+	 *    and <code>false</code> otherwise
+	 * @see #isValidWindowsSegment(String)
+	 * @since 3.7
+	 */
+	public static boolean isValidWindowsPath(String path) {
+		return isValidPath(path, true);
+	}
+
+	/**
+	 * Returns whether the given string is syntactically correct as a path on
+	 * the specified file system. The device id is the prefix up to and
+	 * including the device separator for the specified file system; the path
+	 * proper is everything to the right of it, or the entire string if there is
+	 * no device separator. When the specified platform is a file system with no
+	 * meaningful device separator, the entire string is treated as the path
+	 * proper. The device id is not checked for validity; the path proper is
+	 * correct if each of the segments in its canonicalized form is valid.
+	 *
+	 * @param path the path to check
+	 * @param forWindows true if the path is for the Windows file system
+	 * @return <code>true</code> if the given string is a valid path,
+	 *    and <code>false</code> otherwise
+	 * @see #isValidSegment(String, boolean)
+	 * @since 3.7
+	 */
+	private static boolean isValidPath(String path, boolean forWindows) {
+		Path test = new Path(path, forWindows);
 		for (int i = 0, max = test.segmentCount(); i < max; i++)
-			if (!isValidSegment(test.segment(i)))
+			if (!Path.isValidSegment(test.segment(i), forWindows))
 				return false;
 		return true;
 	}
@@ -700,6 +810,63 @@ public class Path implements IPath, Cloneable {
 	 */
 	@Override
 	public boolean isValidSegment(String segment) {
+		return isValidSegment(segment, (flags & IS_FOR_WINDOWS) != 0);
+	}
+
+	/**
+	 * Returns whether the given string is valid as a segment in a path on a
+	 * POSIX file system. The rules for valid segments are as follows:
+	 * <ul>
+	 * <li>the empty string is not valid
+	 * <li>any string containing the slash character ('/') is not valid
+	 * </ul>
+	 *
+	 * @param segment the path segment to check
+	 * @return <code>true</code> if the given path segment is valid,
+	 *    and <code>false</code> otherwise
+	 * @since 3.7
+	 */
+	public static boolean isValidPosixSegment(String segment) {
+		return isValidSegment(segment, false);
+	}
+
+	/**
+	 * Returns whether the given string is valid as a segment in a path on the
+	 * Windows file system. The rules for valid segments are as follows:
+	 * <ul>
+	 * <li>the empty string is not valid
+	 * <li>any string containing the slash character ('/') is not valid
+	 * <li>any string containing segment ('\') or device (':') separator
+	 * characters is not valid
+	 * </ul>
+	 *
+	 * @param segment the path segment to check
+	 * @return <code>true</code> if the given path segment is valid,
+	 *    and <code>false</code> otherwise
+	 * @since 3.7
+	 */
+	public static boolean isValidWindowsSegment(String segment) {
+		return isValidSegment(segment, true);
+	}
+
+	/**
+	 * Returns whether the given string is valid as a segment in a path on the
+	 * specified file system. The rules for valid segments are as follows:
+	 * <ul>
+	 * <li>the empty string is not valid
+	 * <li>any string containing the slash character ('/') is not valid
+	 * <li>any string containing segment or device separator characters on the
+	 * specified file system, such as the backslash ('\') and colon (':') on
+	 * Windows, is not valid
+	 * </ul>
+	 *
+	 * @param segment the path segment to check
+	 * @param forWindows true if the path is for the Windows file system
+	 * @return <code>true</code> if the given path segment is valid,
+	 *    and <code>false</code> otherwise
+	 * @since 3.7
+	 */
+	private static boolean isValidSegment(String segment, boolean forWindows) {
 		int size = segment.length();
 		if (size == 0)
 			return false;
@@ -707,7 +874,7 @@ public class Path implements IPath, Cloneable {
 			char c = segment.charAt(i);
 			if (c == '/')
 				return false;
-			if (WINDOWS && (c == '\\' || c == ':'))
+			if (forWindows && (c == '\\' || c == ':'))
 				return false;
 		}
 		return true;
@@ -730,7 +897,7 @@ public class Path implements IPath, Cloneable {
 		if (isAbsolute()) {
 			return this;
 		}
-		Path result = new Path(device, segments, separators | HAS_LEADING);
+		Path result = new Path(device, segments, flags | HAS_LEADING);
 		//may need canonicalizing if it has leading ".." or "." segments
 		if (result.segmentCount() > 0) {
 			String first = result.segment(0);
@@ -749,7 +916,7 @@ public class Path implements IPath, Cloneable {
 		if (!isAbsolute()) {
 			return this;
 		}
-		return new Path(device, segments, separators & HAS_TRAILING);
+		return new Path(device, segments, flags & (HAS_TRAILING | IS_FOR_WINDOWS));
 	}
 
 	/**
@@ -771,7 +938,7 @@ public class Path implements IPath, Cloneable {
 		Arrays.fill(newSegments, 0, differenceLength, ".."); //$NON-NLS-1$
 		//append the segments of this path not in common with the base
 		System.arraycopy(segments, commonLength, newSegments, differenceLength, newSegmentLength - differenceLength);
-		return new Path(null, newSegments, separators & HAS_TRAILING);
+		return new Path(null, newSegments, flags & (HAS_TRAILING | IS_FOR_WINDOWS));
 	}
 
 	/* (Intentionally not included in javadoc)
@@ -783,12 +950,12 @@ public class Path implements IPath, Cloneable {
 		if (!(toUNC ^ isUNC()))
 			return this;
 
-		int newSeparators = this.separators;
+		int newSeparators = this.flags;
 		if (toUNC) {
 			newSeparators |= HAS_LEADING | IS_UNC;
 		} else {
 			//mask out the UNC bit
-			newSeparators &= HAS_LEADING | HAS_TRAILING;
+			newSeparators &= HAS_LEADING | HAS_TRAILING | IS_FOR_WINDOWS;
 		}
 		return new Path(toUNC ? null : device, segments, newSeparators);
 	}
@@ -833,7 +1000,7 @@ public class Path implements IPath, Cloneable {
 		if (count == 0)
 			return this;
 		if (count >= segments.length) {
-			return new Path(device, NO_SEGMENTS, 0);
+			return new Path(device, NO_SEGMENTS, flags & IS_FOR_WINDOWS);
 		}
 		Assert.isLegal(count > 0);
 		int newSize = segments.length - count;
@@ -841,7 +1008,7 @@ public class Path implements IPath, Cloneable {
 		System.arraycopy(this.segments, count, newSegments, 0, newSize);
 
 		//result is always a relative path
-		return new Path(device, newSegments, separators & HAS_TRAILING);
+		return new Path(device, newSegments, flags & (HAS_TRAILING | IS_FOR_WINDOWS));
 	}
 
 	/* (Intentionally not included in javadoc)
@@ -853,13 +1020,13 @@ public class Path implements IPath, Cloneable {
 			return this;
 		if (count >= segments.length) {
 			//result will have no trailing separator
-			return new Path(device, NO_SEGMENTS, separators & (HAS_LEADING | IS_UNC));
+			return new Path(device, NO_SEGMENTS, flags & (HAS_LEADING | IS_UNC | IS_FOR_WINDOWS));
 		}
 		Assert.isLegal(count > 0);
 		int newSize = segments.length - count;
 		String[] newSegments = new String[newSize];
 		System.arraycopy(this.segments, 0, newSegments, 0, newSize);
-		return new Path(device, newSegments, separators);
+		return new Path(device, newSegments, flags);
 	}
 
 	/* (Intentionally not included in javadoc)
@@ -870,7 +1037,7 @@ public class Path implements IPath, Cloneable {
 		if (!hasTrailingSeparator()) {
 			return this;
 		}
-		return new Path(device, segments, separators & (HAS_LEADING | IS_UNC));
+		return new Path(device, segments, flags & (HAS_LEADING | IS_UNC | IS_FOR_WINDOWS));
 	}
 
 	/* (Intentionally not included in javadoc)
@@ -913,7 +1080,7 @@ public class Path implements IPath, Cloneable {
 		if (value == device || (value != null && value.equals(device)))
 			return this;
 
-		return new Path(value, segments, separators);
+		return new Path(value, segments, flags);
 	}
 
 	/* (Intentionally not included in javadoc)
@@ -942,13 +1109,13 @@ public class Path implements IPath, Cloneable {
 			device.getChars(0, size, result, offset);
 			offset += size;
 		}
-		if ((separators & HAS_LEADING) != 0)
+		if ((flags & HAS_LEADING) != 0)
 			result[offset++] = FILE_SEPARATOR;
-		if ((separators & IS_UNC) != 0)
+		if ((flags & IS_UNC) != 0)
 			result[offset++] = FILE_SEPARATOR;
 		int len = segments.length - 1;
 		if (len >= 0) {
-			//append all but the last segment, with separators
+			//append all but the last segment, with file separators
 			for (int i = 0; i < len; i++) {
 				int size = segments[i].length();
 				segments[i].getChars(0, size, result, offset);
@@ -960,7 +1127,7 @@ public class Path implements IPath, Cloneable {
 			segments[len].getChars(0, size, result, offset);
 			offset += size;
 		}
-		if ((separators & HAS_TRAILING) != 0)
+		if ((flags & HAS_TRAILING) != 0)
 			result[offset++] = FILE_SEPARATOR;
 		return new String(result);
 	}
@@ -976,9 +1143,9 @@ public class Path implements IPath, Cloneable {
 		StringBuffer result = new StringBuffer(resultSize);
 		if (device != null)
 			result.append(device);
-		if ((separators & HAS_LEADING) != 0)
+		if ((flags & HAS_LEADING) != 0)
 			result.append(SEPARATOR);
-		if ((separators & IS_UNC) != 0)
+		if ((flags & IS_UNC) != 0)
 			result.append(SEPARATOR);
 		int len = segments.length;
 		//append all segments with separators
@@ -987,7 +1154,7 @@ public class Path implements IPath, Cloneable {
 				encodeSegment(segments[i], result);
 			else
 				result.append(segments[i]);
-			if (i < len - 1 || (separators & HAS_TRAILING) != 0)
+			if (i < len - 1 || (flags & HAS_TRAILING) != 0)
 				result.append(SEPARATOR);
 		}
 		return result.toString();
@@ -1008,9 +1175,9 @@ public class Path implements IPath, Cloneable {
 			device.getChars(0, size, result, offset);
 			offset += size;
 		}
-		if ((separators & HAS_LEADING) != 0)
+		if ((flags & HAS_LEADING) != 0)
 			result[offset++] = SEPARATOR;
-		if ((separators & IS_UNC) != 0)
+		if ((flags & IS_UNC) != 0)
 			result[offset++] = SEPARATOR;
 		int len = segments.length - 1;
 		if (len >= 0) {
@@ -1026,7 +1193,7 @@ public class Path implements IPath, Cloneable {
 			segments[len].getChars(0, size, result, offset);
 			offset += size;
 		}
-		if ((separators & HAS_TRAILING) != 0)
+		if ((flags & HAS_TRAILING) != 0)
 			result[offset++] = SEPARATOR;
 		return new String(result);
 	}
@@ -1037,12 +1204,12 @@ public class Path implements IPath, Cloneable {
 	@Override
 	public IPath uptoSegment(int count) {
 		if (count == 0)
-			return new Path(device, NO_SEGMENTS, separators & (HAS_LEADING | IS_UNC));
+			return new Path(device, NO_SEGMENTS, flags & (HAS_LEADING | IS_UNC | IS_FOR_WINDOWS));
 		if (count >= segments.length)
 			return this;
 		Assert.isTrue(count > 0, "Invalid parameter to Path.uptoSegment"); //$NON-NLS-1$
 		String[] newSegments = new String[count];
 		System.arraycopy(segments, 0, newSegments, 0, count);
-		return new Path(device, newSegments, separators);
+		return new Path(device, newSegments, flags);
 	}
 }
