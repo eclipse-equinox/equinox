@@ -89,7 +89,6 @@ _TCHAR* getIniFile(_TCHAR* program, int consoleLauncher){
 	bname = basename(basec);
 	config_file = realloc(config_file, strlen(dname) + strlen(bname) + 16 * sizeof(char));
 	sprintf(config_file, "%s/Eclipse/%s.ini", dname, bname);
-	printf("ini location is %s", config_file);
 	free(dirc);
 	free(basec);
 	free(dname);
