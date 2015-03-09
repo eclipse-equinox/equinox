@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal.servlet;
 
+import java.io.Serializable;
 import java.util.*;
 import javax.servlet.ServletContext;
 import javax.servlet.http.*;
@@ -19,7 +20,8 @@ import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 
 // This class adapts HttpSessions in order to return the right ServletContext and attributes
 public class HttpSessionAdaptor implements HttpSession {
-	static class ParentSessionListener implements HttpSessionBindingListener {
+	static class ParentSessionListener implements HttpSessionBindingListener, Serializable {
+		private static final long serialVersionUID = 4626167646903550760L;
 		private static final String PARENT_SESSION_LISTENER_KEY = "org.eclipse.equinox.http.parent.session.listener"; //$NON-NLS-1$
 		final Set<HttpSessionAdaptor> innerSessions = new HashSet<HttpSessionAdaptor>();
 		@Override
