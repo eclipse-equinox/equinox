@@ -3,9 +3,52 @@
 <project default="build_eclipse" basedir=".">
 
 <target name="build_eclipse">
+
+	<loadresource property="WS">
+    <string value="${native}"/>
+    <filterchain>
+      <tokenfilter>
+				<replaceregex pattern="([A-Za-z0-9_]+)\.([A-Za-z0-9_]+)\.([A-Za-z0-9_]+)" replace="\1"/>
+      </tokenfilter>
+    </filterchain>
+  </loadresource>
+
+	<condition property="WS_ARG" value="-ws ${WS}" else="">
+	    <isset property="native" />
+	</condition>
+
+  <loadresource property="OS">
+    <string value="${native}"/>
+    <filterchain>
+      <tokenfilter>
+				<replaceregex pattern="([A-Za-z0-9_]+)\.([A-Za-z0-9_]+)\.([A-Za-z0-9_]+)" replace="\2"/>
+      </tokenfilter>
+    </filterchain>
+  </loadresource>
+
+	<condition property="OS_ARG" value="-os ${OS}" else="">
+	    <isset property="native" />
+	</condition>
+
+ <loadresource property="ARCH">
+    <string value="${native}"/>
+    <filterchain>
+      <tokenfilter>
+        <replaceregex pattern="([A-Za-z0-9_]+)\.([A-Za-z0-9_]+)\.([A-Za-z0-9_]+)" replace="\3"/>
+      </tokenfilter>
+    </filterchain>
+  </loadresource>
+
+	<condition property="ARCH_ARG" value="-arch ${ARCH}" else="">
+	    <isset property="native" />
+	</condition>
+
 	<exec dir="." executable="sh">
 		<arg line="${basedir}/build.sh"/>
 		<arg line="install"/>
+		<arg line="${WS_ARG}"/>
+		<arg line="${OS_ARG}"/>
+		<arg line="${ARCH_ARG}"/>
 	</exec>
 </target>
 
