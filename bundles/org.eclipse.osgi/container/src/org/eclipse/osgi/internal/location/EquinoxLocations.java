@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rapicorp, Inc - Support for Mac Layout (bug 431116)
  *******************************************************************************/
 package org.eclipse.osgi.internal.location;
 
@@ -151,21 +152,14 @@ public class EquinoxLocations {
 		// check for mac os; the os check is copied from EclipseEnvironmentInfo.
 		String macosx = org.eclipse.osgi.service.environment.Constants.OS_MACOSX;
 		if (macosx.equals(equinoxConfig.getOS()))
-			launcherDir = getMacOSEclipsoeHomeLocation(launcherDir);
+			launcherDir = getMacOSEclipseHomeLocation(launcherDir);
 		return (launcherDir.exists() && launcherDir.isDirectory()) ? launcherDir.getAbsolutePath() : null;
 	}
 
-	private static File getMacOSEclipsoeHomeLocation(File launcherDir) {
-		// TODO for now we go up three directories from the launcher dir as long as the parent dir is named MacOS; is this always the case?
-		// TODO not sure if case is important
+	private static File getMacOSEclipseHomeLocation(File launcherDir) {
 		if (!launcherDir.getName().equalsIgnoreCase("macos")) //$NON-NLS-1$
 			return launcherDir; // don't do the up three stuff if not in macos directory
-		String launcherParent = launcherDir.getParent();
-		if (launcherParent != null)
-			launcherParent = new File(launcherParent).getParent();
-		if (launcherParent != null)
-			launcherParent = new File(launcherParent).getParent();
-		return launcherParent == null ? null : new File(launcherParent);
+		return new File(launcherDir.getParent(), "Eclipse"); //$NON-NLS-1$
 	}
 
 	@SuppressWarnings("deprecation")
