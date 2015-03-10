@@ -178,6 +178,26 @@ public class ServletTest extends TestCase {
 			"Expected <" + expected + "*> but got <" + actual + ">", actual.startsWith(expected));
 	}
 
+	public void test_ErrorPage4() throws Exception {
+		String expected = "401 ERROR :";
+		String actual = null;
+		Map<String, List<String>> response = Collections.emptyMap();
+		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		try {
+			bundle.start();
+			response = requestAdvisor.request("TestErrorPage4/a", null);
+		}
+		finally {
+			uninstallBundle(bundle);
+		}
+		String responseCode = response.get("responseCode").get(0);
+		actual = response.get("responseBody").get(0);
+
+		Assert.assertEquals("401", responseCode);
+		Assert.assertTrue(
+			"Expected <" + expected + "*> but got <" + actual + ">", actual.startsWith(expected));
+	}
+
 	public void test_Filter1() throws Exception {
 		String expected = "bab";
 		String actual;
