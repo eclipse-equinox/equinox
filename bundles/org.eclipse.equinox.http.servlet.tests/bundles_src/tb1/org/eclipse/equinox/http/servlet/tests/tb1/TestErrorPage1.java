@@ -13,12 +13,12 @@ package org.eclipse.equinox.http.servlet.tests.tb1;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import javax.servlet.Filter;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.equinox.http.servlet.tests.tb.AbstractTestServlet;
-import org.eclipse.equinox.http.servlet.tests.util.BaseFilter;
+
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.NamespaceException;
@@ -66,7 +66,6 @@ public class TestErrorPage1 extends AbstractTestServlet {
 		response.sendError(403);
 	}
 
-	Filter f1 = new BaseFilter('b');
 	Servlet errorServlet = new HttpServlet() {
 
 		@Override
