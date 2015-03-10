@@ -123,6 +123,18 @@
                   <goal>run</goal>
                 </goals>
               </execution>
+              <execution>
+                <id>clean-executable-natives</id>
+                <phase>clean</phase>
+                <configuration>
+                  <target>
+                    <ant antfile="build.xml" dir="library/gtk/" target="clean"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
             </executions>
           </plugin>
         </plugins>
@@ -147,6 +159,18 @@
                 <configuration>
                   <target>
                     <ant antfile="build.xml" dir="library/gtk/" target="build_eclipse"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>clean-executable-natives</id>
+                <phase>clean</phase>
+                <configuration>
+                  <target>
+                    <ant antfile="build.xml" dir="library/gtk/" target="clean"/>
                   </target>
                 </configuration>
                 <goals>
@@ -183,6 +207,18 @@
                   <goal>run</goal>
                 </goals>
               </execution>
+              <execution>
+                <id>clean-executable-natives</id>
+                <phase>clean</phase>
+                <configuration>
+                  <target>
+                    <ant antfile="build.xml" dir="library/gtk/" target="clean"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
             </executions>
           </plugin>
         </plugins>
@@ -207,6 +243,18 @@
                 <configuration>
                   <target>
                     <ant antfile="build.xml" dir="library/win32/" target="build_eclipse"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>clean-executable-natives</id>
+                <phase>clean</phase>
+                <configuration>
+                  <target>
+                    <ant antfile="build.xml" dir="library/win32/" target="clean"/>
                   </target>
                 </configuration>
                 <goals>
@@ -243,6 +291,18 @@
                   <goal>run</goal>
                 </goals>
               </execution>
+              <execution>
+                <id>clean-executable-natives</id>
+                <phase>clean</phase>
+                <configuration>
+                  <target>
+                    <ant antfile="build.xml" dir="library/win32/" target="clean"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
             </executions>
           </plugin>
         </plugins>
@@ -267,6 +327,18 @@
                 <configuration>
                   <target>
                     <ant antfile="build.xml" dir="library/carbon/" target="build_eclipse"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>clean-executable-natives</id>
+                <phase>clean</phase>
+                <configuration>
+                  <target>
+                    <ant antfile="build.xml" dir="library/carbon/" target="clean"/>
                   </target>
                 </configuration>
                 <goals>
