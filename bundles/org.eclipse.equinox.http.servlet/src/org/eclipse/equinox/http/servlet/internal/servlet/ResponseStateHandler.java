@@ -126,6 +126,27 @@ public class ResponseStateHandler {
 
 		HttpServletResponseWrapper wrapper = (HttpServletResponseWrapper)response;
 
+		HttpServletResponseWrapperImpl wrapperImpl = null;
+
+		while (true) {
+			if (wrapper instanceof HttpServletResponseWrapperImpl) {
+				wrapperImpl = (HttpServletResponseWrapperImpl)wrapper;
+			}
+			else if (wrapper.getResponse() instanceof HttpServletResponseWrapper) {
+				wrapper = (HttpServletResponseWrapper)wrapper.getResponse();
+
+				continue;
+			}
+
+			break;
+		}
+
+		if (wrapperImpl == null) {
+			throw new IllegalStateException("Can't locate response impl"); //$NON-NLS-1$
+		}
+
+		HttpServletResponse wrappedResponse = (HttpServletResponse)wrapperImpl.getResponse();
+
 		ContextController contextController = dispatchTargets.getContextController();
 		Class<? extends Exception> clazz = exception.getClass();
 		String className = clazz.getName();
@@ -143,23 +164,20 @@ public class ResponseStateHandler {
 
 		request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, exception);
 		request.setAttribute(RequestDispatcher.ERROR_EXCEPTION_TYPE, className);
-
-		if (request.getAttribute(RequestDispatcher.ERROR_MESSAGE) == null) {
-			request.setAttribute(RequestDispatcher.ERROR_MESSAGE, exception.getMessage());
-		}
-
+		request.setAttribute(RequestDispatcher.ERROR_MESSAGE, exception.getMessage());
 		request.setAttribute(
 			RequestDispatcher.ERROR_REQUEST_URI, request.getRequestURI());
 		request.setAttribute(
 			RequestDispatcher.ERROR_SERVLET_NAME,
 			errorDispatchTargets.getServletRegistration().getName());
+		request.setAttribute(
+			RequestDispatcher.ERROR_STATUS_CODE,
+			HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
 		ResponseStateHandler responseStateHandler = new ResponseStateHandler(
 			request, response, errorDispatchTargets, DispatcherType.ERROR);
 
 		responseStateHandler.processRequest();
-
-		HttpServletResponse wrappedResponse = (HttpServletResponse)wrapper.getResponse();
 
 		wrappedResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	}
@@ -173,9 +191,30 @@ public class ResponseStateHandler {
 
 		int status = wrapper.getStatus();
 
-		if (status < 400) {
+		if (status < HttpServletResponse.SC_OK) {
 			return;
 		}
+
+		HttpServletResponseWrapperImpl wrapperImpl = null;
+
+		while (true) {
+			if (wrapper instanceof HttpServletResponseWrapperImpl) {
+				wrapperImpl = (HttpServletResponseWrapperImpl)wrapper;
+			}
+			else if (wrapper.getResponse() instanceof HttpServletResponseWrapper) {
+				wrapper = (HttpServletResponseWrapper)wrapper.getResponse();
+
+				continue;
+			}
+
+			break;
+		}
+
+		if (wrapperImpl == null) {
+			throw new IllegalStateException("Can't locate response impl"); //$NON-NLS-1$
+		}
+
+		HttpServletResponse wrappedResponse = (HttpServletResponse)wrapperImpl.getResponse();
 
 		ContextController contextController = dispatchTargets.getContextController();
 
@@ -183,13 +222,13 @@ public class ResponseStateHandler {
 			null, String.valueOf(status), null, null, null, null, Match.EXACT, null);
 
 		if (errorDispatchTargets == null) {
-			HttpServletResponse wrappedResponse = (HttpServletResponse)wrapper.getResponse();
-
-			wrappedResponse.sendError(status);
+			wrappedResponse.sendError(status, wrapperImpl.getMessage());
 
 			return;
 		}
 
+		request.setAttribute(
+			RequestDispatcher.ERROR_MESSAGE, wrapperImpl.getMessage());
 		request.setAttribute(
 			RequestDispatcher.ERROR_REQUEST_URI, request.getRequestURI());
 		request.setAttribute(
@@ -201,8 +240,6 @@ public class ResponseStateHandler {
 			request, response, errorDispatchTargets, DispatcherType.ERROR);
 
 		responseStateHandler.processRequest();
-
-		HttpServletResponse wrappedResponse = (HttpServletResponse)wrapper.getResponse();
 
 		wrappedResponse.setStatus(status);
 	}

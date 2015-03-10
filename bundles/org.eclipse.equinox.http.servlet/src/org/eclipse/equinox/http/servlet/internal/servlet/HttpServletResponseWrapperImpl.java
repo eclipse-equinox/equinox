@@ -25,14 +25,33 @@ public class HttpServletResponseWrapperImpl extends HttpServletResponseWrapper {
 	}
 
 	@Override
-	public void sendError(int status) throws IOException {
+	public void flushBuffer() throws IOException {
+		if (this.status > -1) {
+			return;
+		}
+
+		super.flushBuffer();
+	}
+
+	@Override
+	public void sendError(int status) {
 		this.status = status;
 	}
 
 	@Override
-	public void sendError(int status, String message) throws IOException {
+	public void sendError(int status, String message) {
 		this.status = status;
 		this.message = message;
+	}
+
+	@Override
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	@Override
+	public void setStatus(int status, String message) {
+		sendError(status, message);
 	}
 
 	public String getMessage() {
@@ -44,7 +63,7 @@ public class HttpServletResponseWrapperImpl extends HttpServletResponseWrapper {
 		return status;
 	}
 
-	private int status;
+	private int status = -1;
 	private String message;
 
 }
