@@ -14,7 +14,7 @@ package org.eclipse.core.internal.preferences.exchange;
  * Provides initialization of the legacy preferences as described in
  * the Plugin class.
  * 
- * @depreceated
+ * @deprecated
  */
 public interface ILegacyPreferences {
 	/**
