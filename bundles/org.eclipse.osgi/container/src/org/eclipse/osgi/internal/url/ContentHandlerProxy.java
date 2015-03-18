@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2012 IBM Corporation and others.
+ * Copyright (c) 2003, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,8 +71,12 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 	public ServiceReference<ContentHandler> addingService(ServiceReference<ContentHandler> reference) {
 		//check to see if our contentType is being registered by another service
 		Object prop = reference.getProperty(URLConstants.URL_CONTENT_MIMETYPE);
-		if (!(prop instanceof String[]))
+		if (prop instanceof String) {
+			prop = new String[] {(String) prop};
+		}
+		if (!(prop instanceof String[])) {
 			return null;
+		}
 		String[] contentTypes = (String[]) prop;
 		for (int i = 0; i < contentTypes.length; i++) {
 			if (contentTypes[i].equals(contentType)) {

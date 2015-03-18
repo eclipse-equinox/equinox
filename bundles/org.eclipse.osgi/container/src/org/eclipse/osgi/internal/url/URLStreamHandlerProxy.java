@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2012 IBM Corporation and others.
+ * Copyright (c) 2003, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -156,8 +156,12 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	public ServiceReference<URLStreamHandlerService> addingService(ServiceReference<URLStreamHandlerService> reference) {
 		//check to see if our protocol is being registered by another service
 		Object prop = reference.getProperty(URLConstants.URL_HANDLER_PROTOCOL);
-		if (!(prop instanceof String[]))
+		if (prop instanceof String) {
+			prop = new String[] {(String) prop};
+		}
+		if (!(prop instanceof String[])) {
 			return null;
+		}
 		String[] protocols = (String[]) prop;
 		for (int i = 0; i < protocols.length; i++) {
 			if (protocols[i].equals(protocol)) {
