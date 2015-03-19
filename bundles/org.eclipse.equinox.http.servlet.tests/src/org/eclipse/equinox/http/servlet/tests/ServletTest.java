@@ -1913,7 +1913,46 @@ public class ServletTest extends TestCase {
 		}
 	}
 
+	public void testWBServletDefaultContextAdaptor3() throws Exception{
+		// test the ContextPathCustomizer with a ServletContextHelper that has a '/' context path
+		Dictionary<String, String> helperProps = new Hashtable<String, String>();
+		helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "testContext" + getName());
+		helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/");
+		helperProps.put(TEST_PATH_CUSTOMIZER_NAME, getName());
+		ServiceRegistration<ServletContextHelper> helperReg = getBundleContext().registerService(ServletContextHelper.class, new TestServletContextHelperFactory(), helperProps);
 
+		ServiceRegistration<ContextPathCustomizer> pathAdaptorReg = null;
+		try {
+			Map<String, String> params = new HashMap<String, String>();
+			params.put(TEST_PROTOTYPE_NAME, getName());
+			params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + getName());
+			params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" + "testContext" + getName() + ")");
+			params.put(STATUS_PARAM, getName());
+			params.put("servlet.init." + TEST_PATH_CUSTOMIZER_NAME, getName());
+			String actual = doRequest(CONFIGURE, params);
+			Assert.assertEquals(getName(), actual);
+
+			actual = requestAdvisor.request(getName());
+			Assert.assertEquals(getName(), actual);
+
+			ContextPathCustomizer pathAdaptor = new TestContextPathAdaptor(null, "testPrefix", getName());
+			pathAdaptorReg = getBundleContext().registerService(ContextPathCustomizer.class, pathAdaptor, null);
+
+			actual = requestAdvisor.request("testPrefix/" + getName());
+			Assert.assertEquals(getName(), actual);
+
+			pathAdaptorReg.unregister();
+			pathAdaptorReg = null;
+
+			actual = requestAdvisor.request(getName());
+			Assert.assertEquals(getName(), actual);
+		} finally {
+			helperReg.unregister();
+			if (pathAdaptorReg != null) {
+				pathAdaptorReg.unregister();
+			}
+		}
+	}
 
 	private String doRequest(String action, Map<String, String> params) throws IOException {
 		StringBuilder requestInfo = new StringBuilder(PROTOTYPE);

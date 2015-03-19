@@ -136,6 +136,10 @@ public class HttpServiceRuntimeImpl
 				if (!contextPrefix.startsWith(Const.SLASH)) {
 					contextPrefix = Const.SLASH + contextPrefix;
 				}
+				// make sure we do not append SLASH context path here
+				if (contextPath == null || contextPath.equals(Const.SLASH)) {
+					contextPath = Const.BLANK;
+				}
 				return contextPrefix + contextPath;
 			}
 		}
