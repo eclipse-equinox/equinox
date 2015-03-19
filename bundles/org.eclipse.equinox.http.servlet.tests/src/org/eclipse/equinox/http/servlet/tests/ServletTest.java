@@ -51,7 +51,6 @@ import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionIdListener;
 import javax.servlet.http.HttpSessionListener;
 
 import junit.framework.TestCase;
@@ -62,10 +61,8 @@ import org.eclipse.equinox.http.servlet.tests.bundle.Activator;
 import org.eclipse.equinox.http.servlet.tests.bundle.BundleAdvisor;
 import org.eclipse.equinox.http.servlet.tests.bundle.BundleInstaller;
 import org.eclipse.equinox.http.servlet.tests.util.BaseAsyncServlet;
-import org.eclipse.equinox.http.servlet.tests.util.BaseChangeSessionIdServlet;
 import org.eclipse.equinox.http.servlet.tests.util.BaseHttpContext;
 import org.eclipse.equinox.http.servlet.tests.util.BaseHttpSessionAttributeListener;
-import org.eclipse.equinox.http.servlet.tests.util.BaseHttpSessionIdListener;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServlet;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServletContextAttributeListener;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServletContextListener;
@@ -1668,33 +1665,6 @@ public class ServletTest extends TestCase {
 			Assert.assertTrue(hsal1.added.get());
 			Assert.assertTrue(hsal1.replaced.get());
 			Assert.assertTrue(hsal1.removed.get());
-		}
-		finally {
-			for (ServiceRegistration<?> registration : registrations) {
-				registration.unregister();
-			}
-		}
-	}
-
-	public void test_Listener8() throws Exception {
-		BaseHttpSessionIdListener hsil1 = new BaseHttpSessionIdListener();
-
-		Servlet s1 = new BaseChangeSessionIdServlet("test_Listener8");
-
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
-		try {
-			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
-			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
-			registrations.add(getBundleContext().registerService(HttpSessionIdListener.class, hsil1, listenerProps));
-
-			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
-			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S8");
-			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
-			registrations.add(getBundleContext().registerService(Servlet.class, s1, servletProps1));
-
-			requestAdvisor.request("s");
-
-			Assert.assertTrue(hsil1.changed.get());
 		}
 		finally {
 			for (ServiceRegistration<?> registration : registrations) {
