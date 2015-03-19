@@ -54,7 +54,7 @@ public class HttpServiceRuntimeImpl
 		this.servletServiceFilter = createServletFilter(consumingContext);
 		this.resourceServiceFilter = createResourceFilter(consumingContext);
 		this.filterServiceFilter = createFilterFilter(consumingContext);
-		this.listenerServiceFilter = createListenerFilter(consumingContext, parentServletContext);
+		this.listenerServiceFilter = createListenerFilter(consumingContext);
 
 		this.parentServletContext = parentServletContext;
 		this.attributes = Collections.unmodifiableMap(attributes);
@@ -954,7 +954,7 @@ public class HttpServiceRuntimeImpl
 		}
 	}
 
-	private static org.osgi.framework.Filter createListenerFilter(BundleContext context, ServletContext servletContext) {
+	private static org.osgi.framework.Filter createListenerFilter(BundleContext context) {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("(&"); //$NON-NLS-1$
@@ -966,11 +966,6 @@ public class HttpServiceRuntimeImpl
 		sb.append("(objectClass=").append(ServletRequestAttributeListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append("(objectClass=").append(HttpSessionListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append("(objectClass=").append(HttpSessionAttributeListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
-
-		if ((servletContext.getMajorVersion() >= 3) && (servletContext.getMinorVersion() > 0)) {
-			sb.append("(objectClass=").append(javax.servlet.http.HttpSessionIdListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-
 		sb.append(")"); //$NON-NLS-1$
 		sb.append(")"); //$NON-NLS-1$
 
@@ -1085,12 +1080,6 @@ public class HttpServiceRuntimeImpl
 		ServiceReference<Servlet> serviceReference) {
 
 		failedServletDTOs.remove(serviceReference);
-	}
-
-	public void fireSessionIdChanged(String oldSessionId) {
-		for (ContextController contextController : controllerMap.values()) {
-			contextController.fireSessionIdChanged(oldSessionId);
-		}
 	}
 
 	private Map<String, Object> attributes;

@@ -1010,13 +1010,6 @@ public class ContextController {
 			classes.add(HttpSessionAttributeListener.class);
 		}
 
-		ServletContext servletContext = proxyContext.getServletContext();
-		if ((servletContext.getMajorVersion() >= 3) && (servletContext.getMinorVersion() > 0)) {
-			if (objectClassList.contains(javax.servlet.http.HttpSessionIdListener.class.getName())) {
-				classes.add(javax.servlet.http.HttpSessionIdListener.class);
-			}
-		}
-
 		return classes;
 	}
 
@@ -1060,30 +1053,6 @@ public class ContextController {
 	public void removeActiveSession(HttpSession session) {
 		synchronized (activeSessions) {
 			activeSessions.remove(session);
-		}
-	}
-
-	public void fireSessionIdChanged(String oldSessionId) {
-		ServletContext servletContext = proxyContext.getServletContext();
-		if ((servletContext.getMajorVersion() <= 3) && (servletContext.getMinorVersion() < 1)) {
-			return;
-		}
-
-		List<javax.servlet.http.HttpSessionIdListener> listeners = eventListeners.get(javax.servlet.http.HttpSessionIdListener.class);
-
-		if (listeners.isEmpty()) {
-			return;
-		}
-
-		Collection<HttpSessionAdaptor> currentActiveSessions;
-		synchronized (activeSessions) {
-			currentActiveSessions = new ArrayList<HttpSessionAdaptor>(activeSessions.values());
-		}
-		for (HttpSessionAdaptor httpSessionAdaptor : currentActiveSessions) {
-			HttpSessionEvent httpSessionEvent = new HttpSessionEvent(httpSessionAdaptor);
-			for (javax.servlet.http.HttpSessionIdListener listener : listeners) {
-				listener.sessionIdChanged(httpSessionEvent, oldSessionId);
-			}
 		}
 	}
 

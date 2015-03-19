@@ -48,10 +48,6 @@ public class ProxyServlet extends HttpServlet {
 		this.httpServiceRuntimeImpl = httpServiceRuntimeImpl;
 	}
 
-	public void sessionIdChanged(String oldSessionId) {
-		httpServiceRuntimeImpl.fireSessionIdChanged(oldSessionId);
-	}
-
 	/**
 	 * @see HttpServlet#service(ServletRequest, ServletResponse)
 	 */
