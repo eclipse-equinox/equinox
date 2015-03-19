@@ -14,8 +14,12 @@ package org.eclipse.equinox.http.jetty.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import javax.servlet.*;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionIdListener;
 import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.jetty.JettyCustomizer;
 import org.eclipse.equinox.http.servlet.HttpServiceServlet;
@@ -127,6 +131,13 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 		httpContext.addServlet(holder, "/*"); //$NON-NLS-1$
 		server.setHandler(httpContext);
+
+		SessionManager sessionManager = httpContext.getSessionHandler().getSessionManager();
+		try {
+			sessionManager.addEventListener((HttpSessionIdListener) holder.getServlet());
+		} catch (ServletException e) {
+			throw new ConfigurationException(pid, e.getMessage(), e);
+		}
 
 		try {
 			server.start();
@@ -298,14 +309,22 @@ public class HttpServerManager implements ManagedServiceFactory {
 		}
 	}
 
-	public static class InternalHttpServiceServlet implements Servlet {
+	public static class InternalHttpServiceServlet implements HttpSessionIdListener, Servlet {
 		//		private static final long serialVersionUID = 7477982882399972088L;
 		private Servlet httpServiceServlet = new HttpServiceServlet();
 		private ClassLoader contextLoader;
+		private Method method;
 
 		public void init(ServletConfig config) throws ServletException {
 			ServletContext context = config.getServletContext();
 			contextLoader = (ClassLoader) context.getAttribute(INTERNAL_CONTEXT_CLASSLOADER);
+
+			Class<?> clazz = httpServiceServlet.getClass();
+			try {
+				method = clazz.getMethod("sessionIdChanged", new Class<?>[] {String.class});
+			} catch (Exception e) {
+				throw new ServletException(e);
+			}
 
 			Thread thread = Thread.currentThread();
 			ClassLoader current = thread.getContextClassLoader();
@@ -346,6 +365,23 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 		public String getServletInfo() {
 			return httpServiceServlet.getServletInfo();
+		}
+
+		public void sessionIdChanged(HttpSessionEvent event, String oldSessionId) {
+			Thread thread = Thread.currentThread();
+			ClassLoader current = thread.getContextClassLoader();
+			thread.setContextClassLoader(contextLoader);
+			try {
+				method.invoke(httpServiceServlet, oldSessionId);
+			} catch (IllegalAccessException e) {
+				// not likely
+			} catch (IllegalArgumentException e) {
+				// not likely
+			} catch (InvocationTargetException e) {
+				throw new RuntimeException(e.getCause());
+			} finally {
+				thread.setContextClassLoader(current);
+			}
 		}
 	}
 
