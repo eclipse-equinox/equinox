@@ -89,8 +89,8 @@ _TCHAR* getIniFile(_TCHAR* program, int consoleLauncher){
 	bname = basename(basec);
 	config_file = realloc(config_file, strlen(dname) + strlen(bname) + 16 * sizeof(char));
 	sprintf(config_file, "%s/Eclipse/%s.ini", dname, bname);
-	free(dname);
-	free(bname);
+	free(dirc);
+	free(basec);
 #else
 	/* Append the extension */
 	strcat(config_file, ".ini");
