@@ -562,6 +562,11 @@ public class HttpServiceRuntimeImpl
 
 		ContextController.checkPattern(alias);
 
+		// need to make sure exact matching aliases are converted to wildcard pattern matches
+		if (!alias.endsWith(Const.SLASH_STAR) && !alias.startsWith("*.")) { //$NON-NLS-1$
+			alias = alias + Const.SLASH_STAR;
+		}
+
 		synchronized (legacyMappings) {
 			if (getRegisteredObjects().contains(filter)) {
 				throw new RegisteredFilterException(filter);

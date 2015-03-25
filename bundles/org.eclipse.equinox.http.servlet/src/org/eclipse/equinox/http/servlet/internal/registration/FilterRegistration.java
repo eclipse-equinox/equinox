@@ -214,13 +214,16 @@ public class FilterRegistration
 	}
 
 	protected boolean isPathWildcardMatch(String pattern, String path) {
-		int cpl = pattern.length() - 2;
-
-		if (pattern.endsWith("/*") && path.regionMatches(0, pattern, 0, cpl)) { //$NON-NLS-1$
-			return true;
+		if (path == null) {
+			return false;
 		}
-
-		return false;
+		// first try wild card matching if the pattern requests it
+		if (pattern.endsWith("/*")) { //$NON-NLS-1$
+			int pathPatternLength = pattern.length() - 2;
+			return path.regionMatches(0, pattern, 0, pathPatternLength);
+		}
+		// now do exact matching
+		return pattern.equals(path);
 	}
 
 	protected boolean doPatternMatch(String pattern, String path, String extension)
@@ -229,15 +232,17 @@ public class FilterRegistration
 		if (pattern.indexOf("/*.") == 0) { //$NON-NLS-1$
 			pattern = pattern.substring(1);
 		}
-
-		if ((pattern.charAt(0) == '/') && (path != null) && isPathWildcardMatch(pattern, path)) {
-			return true;
+		// first try prefix path matching; taking into account wild cards if necessary
+		if ((pattern.charAt(0) == '/')) {
+			return isPathWildcardMatch(pattern, path);
 		}
 
-		if ((pattern.indexOf("*.") == 0)) { //$NON-NLS-1$
+		// next try extension matching if requested
+		if (pattern.charAt(0) == '*') {
 			return pattern.substring(2).equals(extension);
 		}
 
+		// this is really an invalid case that should have gotten caught at registration time
 		return false;
 	}
 

@@ -448,6 +448,97 @@ public class ServletTest extends TestCase {
 		Assert.assertEquals(expected, actual);
 	}
 
+	static class TestFilter implements Filter {
+		AtomicBoolean called = new AtomicBoolean(false);
+		@Override
+		public void init(FilterConfig filterConfig) throws ServletException {
+			// nothing
+		}
+
+		@Override
+		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+				throws IOException, ServletException {
+			called.set(true);
+			chain.doFilter(request, response);
+		}
+
+		@Override
+		public void destroy() {
+			// nothing
+		}
+		void clear() {
+			called.set(false);
+		}
+
+		public boolean getCalled() {
+			return called.get();
+		}
+	}
+	public void test_Filter20() throws Exception {
+		// Make sure legacy filter registrations match against all controllers that are for legacy HttpContext
+		// Make sure legacy filter registrations match as if they are prefix matching with wildcards
+		String expected = "a";
+		TestFilter testFilter1 = new TestFilter();
+		TestFilter testFilter2 = new TestFilter();
+		Servlet testServlet = new BaseServlet(expected);
+		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
+		extendedHttpService.registerFilter("/hello", testFilter1, null, extendedHttpService.createDefaultHttpContext());
+		extendedHttpService.registerFilter("/hello/*", testFilter2, null, extendedHttpService.createDefaultHttpContext());
+		extendedHttpService.registerServlet("/hello", testServlet, null, extendedHttpService.createDefaultHttpContext());
+
+		String actual = requestAdvisor.request("hello");
+		Assert.assertEquals(expected, actual);
+		Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
+		Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
+
+		testFilter1.clear();
+		testFilter2.clear();
+		actual = requestAdvisor.request("hello/test");
+		Assert.assertEquals(expected, actual);
+		Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
+		Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
+	}
+
+	public void test_Filter21() throws Exception {
+		Collection<ServiceRegistration<? extends Object>> registrations = new ArrayList<ServiceRegistration<? extends Object>>();
+		// Make sure exact path matching is honored by filters registrations
+		String expected = "a";
+		TestFilter testFilter1 = new TestFilter();
+		TestFilter testFilter2 = new TestFilter();
+		Servlet testServlet = new BaseServlet(expected);
+
+		Dictionary<String, String> props = new Hashtable<String, String>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/hello");
+		registrations.add(getBundleContext().registerService(Filter.class, testFilter1, props));
+
+		props = new Hashtable<String, String>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F2");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/hello/*");
+		registrations.add(getBundleContext().registerService(Filter.class, testFilter2, props));
+
+		props = new Hashtable<String, String>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/hello/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, testServlet, props));
+
+		try {
+			String actual = requestAdvisor.request("hello");
+			Assert.assertEquals(expected, actual);
+			Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
+			Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
+	
+			testFilter1.clear();
+			testFilter2.clear();
+			actual = requestAdvisor.request("hello/test");
+			Assert.assertEquals(expected, actual);
+			Assert.assertFalse("testFilter1 got called.", testFilter1.getCalled());
+			Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
+		} finally {
+			for (ServiceRegistration<? extends Object> serviceRegistration : registrations) {
+				serviceRegistration.unregister();
+			}
+		}
+	}
 	public void test_Registration1() throws Exception {
 		String expected = "Alias cannot be null";
 		try {
@@ -2054,15 +2145,6 @@ public class ServletTest extends TestCase {
 	private BundleInstaller installer;
 	private BundleAdvisor advisor;
 	private ServletRequestAdvisor requestAdvisor;
-
-	class EmptyFilter implements Filter {
-		@Override
-		public void destroy() {/**/}
-		@Override
-		public void doFilter(ServletRequest arg0, ServletResponse arg1, FilterChain arg2) throws IOException, ServletException {/**/}
-		@Override
-		public void init(FilterConfig arg0) throws ServletException {/**/}
-	}
 
 	static class TestServletContextHelperFactory implements ServiceFactory<ServletContextHelper> {
 		static class TestServletContextHelper extends ServletContextHelper {
