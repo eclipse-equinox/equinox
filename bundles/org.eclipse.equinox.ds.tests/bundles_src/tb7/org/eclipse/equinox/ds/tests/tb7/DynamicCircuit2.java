@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2009 by ProSyst Software GmbH
+ * Copyright (c) 1997-2015 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,15 +20,12 @@ import org.osgi.service.component.ComponentContext;
 public class DynamicCircuit2 implements BoundTester {
 
 	private DynamicCircuit1 service;
-	private ComponentContext ctxt;
 	private boolean boundObjectActivated = false;
 
 	public void activate(ComponentContext ctxt) {
-		this.ctxt = ctxt;
 	}
 
 	public void deactivate(ComponentContext ctxt) {
-		this.ctxt = null;
 	}
 
 	public int getBoundObjectsCount() {
