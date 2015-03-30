@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -133,8 +133,11 @@ void * loadLibrary( char * library ){
 		loadVMBundle(library);
 		return (void*) &javaVMBundle;
 	}
+
 	_TCHAR *bundle = strdup(library), *start;
-	if (strstr(bundle, "libjvm") && (start = strstr(bundle, "/Contents/")) != NULL) {
+
+	// check if it's a JVM bundle
+	if (strstr(bundle, "libjvm") && (start = strstr(bundle, "/Contents/Home/")) != NULL) {
 		start[0] = NULL;
 		loadVMBundle(bundle);
 		free(bundle);
@@ -142,6 +145,7 @@ void * loadLibrary( char * library ){
 			return (void*) &javaVMBundle;
 		}
 	}
+
 	free(bundle);
 	void * result= dlopen(library, RTLD_NOW);
 	if(result == 0) 
