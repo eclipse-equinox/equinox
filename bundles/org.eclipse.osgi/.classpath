@@ -7,6 +7,11 @@
 			<attribute name="ignore_optional_problems" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="src" path="felix/src">
+		<attributes>
+			<attribute name="ignore_optional_problems" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="src" path="supplement/src"/>
 	<classpathentry kind="src" path="container/src"/>
 	<classpathentry kind="output" path="bin"/>
