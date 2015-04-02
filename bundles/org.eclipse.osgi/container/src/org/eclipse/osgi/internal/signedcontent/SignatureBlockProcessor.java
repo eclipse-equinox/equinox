@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2014 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2007, 2015 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -163,7 +163,7 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 		}
 	}
 
-	private void populateMDResults(byte mfBuf[], SignerInfo signerInfo) throws NoSuchAlgorithmException {
+	private void populateMDResults(byte mfBuf[], SignerInfo signerInfo) {
 		// need to make a string from the MF file data bytes
 		String mfStr = new String(mfBuf, SignedContentConstants.UTF8);
 
@@ -262,7 +262,7 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 		return resultsList;
 	}
 
-	private static String getDigestAlgorithmFromString(String digestLines) throws NoSuchAlgorithmException {
+	private static String getDigestAlgorithmFromString(String digestLines) {
 		if (digestLines != null) {
 			// String sDigestLine = digestLines[i];
 			int indexDigest = digestLines.indexOf(MF_DIGEST_PART);

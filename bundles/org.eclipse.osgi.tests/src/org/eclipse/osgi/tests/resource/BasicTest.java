@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,9 @@ package org.eclipse.osgi.tests.resource;
 
 import java.util.*;
 import java.util.Map.Entry;
-import junit.framework.*;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import org.junit.Assert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.IdentityNamespace;
@@ -77,7 +79,7 @@ public class BasicTest extends AbstractResourceTest {
 
 	public void testRequirementMatches() throws Exception {
 		Bundle tb5 = installer.installBundle("resource.tb5");
-		Resource requirer = (BundleRevision) tb5.adapt(BundleRevision.class);
+		Resource requirer = tb5.adapt(BundleRevision.class);
 		Capability capability1 = createCapability1();
 		List requirements = requirer.getRequirements(capability1.getNamespace());
 		assertRequirements(requirements, 3);
@@ -150,7 +152,7 @@ public class BasicTest extends AbstractResourceTest {
 	 */
 	private void assertTb1() {
 		// Get the revision for TB1.
-		BundleRevision revision = (BundleRevision) tb1.adapt(BundleRevision.class);
+		BundleRevision revision = tb1.adapt(BundleRevision.class);
 		// Make sure TB1's symbolic name and version match the manifest.
 		String symbolicName = revision.getSymbolicName();
 		assertSymbolicName("resource.tb1", symbolicName);
@@ -173,7 +175,7 @@ public class BasicTest extends AbstractResourceTest {
 		capability = getIdentityCapability(resource);
 		assertIdentityCapability(capability, symbolicName, version, type, arbitraryAttrs, arbitraryDirs);
 		// Check TB1's osgi.identity capability from the wiring.
-		BundleWiring wiring = (BundleWiring) tb1.adapt(BundleWiring.class);
+		BundleWiring wiring = tb1.adapt(BundleWiring.class);
 		capability = getIdentityCapability(wiring);
 		assertIdentityCapability(capability, symbolicName, version, type, arbitraryAttrs, arbitraryDirs);
 		// There should be 1 provided osgi.identity wire (TB1 -> TB3).
@@ -181,7 +183,7 @@ public class BasicTest extends AbstractResourceTest {
 		assertWires(wires, 1);
 		// Check the osgi.identity wire between TB1 and TB3.
 		Wire wire = (Wire) wires.get(0);
-		BundleRevision requirer = (BundleRevision) tb3.adapt(BundleRevision.class);
+		BundleRevision requirer = tb3.adapt(BundleRevision.class);
 		Requirement requirement = getIdentityRequirement(requirer, 1);
 		assertIdentityWire(wire, capability, revision, requirement, requirer);
 		// There should be 1 required osgi.identity wire (TB4 -> TB1 via TF1).
@@ -189,9 +191,9 @@ public class BasicTest extends AbstractResourceTest {
 		assertWires(wires, 1);
 		// Check the osgi.identity wire between TB4 and TB1 (via TF1).
 		wire = (Wire) wires.get(0);
-		BundleRevision provider = (BundleRevision) tb4.adapt(BundleRevision.class);
+		BundleRevision provider = tb4.adapt(BundleRevision.class);
 		capability = getIdentityCapability(provider);
-		requirement = getIdentityRequirement((BundleRevision) tf1.adapt(BundleRevision.class), 0);
+		requirement = getIdentityRequirement(tf1.adapt(BundleRevision.class), 0);
 		assertIdentityWire(wire, capability, provider, requirement, revision);
 	}
 
@@ -205,7 +207,7 @@ public class BasicTest extends AbstractResourceTest {
 	 * 		None
 	 */
 	private void assertTb2() {
-		final BundleRevision revision = (BundleRevision) tb2.adapt(BundleRevision.class);
+		final BundleRevision revision = tb2.adapt(BundleRevision.class);
 		assertNotIdentityCapability(new CapabilityProvider() {
 			public List getCapabilities(String namespace) {
 				return revision.getDeclaredCapabilities(namespace);
@@ -217,7 +219,7 @@ public class BasicTest extends AbstractResourceTest {
 				return resource.getCapabilities(namespace);
 			}
 		});
-		final BundleWiring wiring = (BundleWiring) tb2.adapt(BundleWiring.class);
+		final BundleWiring wiring = tb2.adapt(BundleWiring.class);
 		assertNotIdentityCapability(new CapabilityProvider() {
 			public List getCapabilities(String namespace) {
 				return wiring.getCapabilities(namespace);
@@ -239,7 +241,7 @@ public class BasicTest extends AbstractResourceTest {
 	 */
 	private void assertTb3() {
 		// Get the revision for TB3.
-		BundleRevision revision = (BundleRevision) tb3.adapt(BundleRevision.class);
+		BundleRevision revision = tb3.adapt(BundleRevision.class);
 		// Make sure TB3's symbolic name and version match the manifest.
 		String symbolicName = revision.getSymbolicName();
 		assertSymbolicName("resource.tb3", symbolicName);
@@ -256,7 +258,7 @@ public class BasicTest extends AbstractResourceTest {
 		capability = getIdentityCapability(resource);
 		assertIdentityCapability(capability, symbolicName, version, type, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
 		// Check TB3's osgi.identity capability from the wiring.
-		BundleWiring wiring = (BundleWiring) tb3.adapt(BundleWiring.class);
+		BundleWiring wiring = tb3.adapt(BundleWiring.class);
 		capability = getIdentityCapability(wiring);
 		assertIdentityCapability(capability, symbolicName, version, type, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
 		// There should be 2 required osgi.identity wires (TB1 -> TB3 and TF1 -> TB3).
@@ -265,13 +267,13 @@ public class BasicTest extends AbstractResourceTest {
 		// Check the osgi.identity wire between TB1 and TB3.
 		Wire wire = (Wire) wires.get(1);
 		Requirement requirement = getIdentityRequirement(revision, 1);
-		BundleRevision provider = (BundleRevision) tb1.adapt(BundleRevision.class);
+		BundleRevision provider = tb1.adapt(BundleRevision.class);
 		capability = getIdentityCapability(provider);
 		assertIdentityWire(wire, capability, provider, requirement, revision);
 		// Check the osgi.identity wire between TF1 and TB3.
 		wire = (Wire) wires.get(0);
 		requirement = getIdentityRequirement(revision, 0);
-		provider = (BundleRevision) tf1.adapt(BundleRevision.class);
+		provider = tf1.adapt(BundleRevision.class);
 		capability = getIdentityCapability(provider);
 		assertIdentityWire(wire, capability, provider, requirement, revision);
 	}
@@ -288,7 +290,7 @@ public class BasicTest extends AbstractResourceTest {
 	 */
 	private void assertTb4() {
 		// Get the revision for TB4.
-		BundleRevision revision = (BundleRevision) tb4.adapt(BundleRevision.class);
+		BundleRevision revision = tb4.adapt(BundleRevision.class);
 		// Make sure TB4's symbolic name and version match the manifest.
 		String symbolicName = revision.getSymbolicName();
 		assertSymbolicName("resource.tb4", symbolicName);
@@ -304,7 +306,7 @@ public class BasicTest extends AbstractResourceTest {
 		// Check TB4's osgi.identity capability from the resource.
 		capability = getIdentityCapability(resource);
 		assertIdentityCapability(capability, symbolicName, version, type, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
-		BundleWiring wiring = (BundleWiring) tb4.adapt(BundleWiring.class);
+		BundleWiring wiring = tb4.adapt(BundleWiring.class);
 		// Check TB4's osgi.identity capability from the wiring.
 		capability = getIdentityCapability(wiring);
 		assertIdentityCapability(capability, symbolicName, version, type, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
@@ -314,9 +316,9 @@ public class BasicTest extends AbstractResourceTest {
 		// Check the osgi.identity wire between TB4 and TB1 (via TF1).
 		Wire wire = (Wire) wires.get(0);
 		// The requirer will be TB1's revision since fragment requirements are merged into the host...
-		BundleRevision requirer = (BundleRevision) tb1.adapt(BundleRevision.class);
+		BundleRevision requirer = tb1.adapt(BundleRevision.class);
 		// ...but the requirement will come from the fragment.
-		Requirement requirement = getIdentityRequirement((BundleRevision) tf1.adapt(BundleRevision.class), 0);
+		Requirement requirement = getIdentityRequirement(tf1.adapt(BundleRevision.class), 0);
 		assertIdentityWire(wire, capability, revision, requirement, requirer);
 	}
 
@@ -333,7 +335,7 @@ public class BasicTest extends AbstractResourceTest {
 	 */
 	private void assertTf1() {
 		// Get the revision for TF1.
-		BundleRevision revision = (BundleRevision) tf1.adapt(BundleRevision.class);
+		BundleRevision revision = tf1.adapt(BundleRevision.class);
 		// Make sure TF1's symbolic name and version match the manifest.
 		String symbolicName = revision.getSymbolicName();
 		assertSymbolicName("resource.tf1", symbolicName);
@@ -350,7 +352,7 @@ public class BasicTest extends AbstractResourceTest {
 		capability = getIdentityCapability(resource);
 		assertIdentityCapability(capability, symbolicName, version, type, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
 		// Check TF1's osgi.identity capability from the wiring.
-		BundleWiring wiring = (BundleWiring) tf1.adapt(BundleWiring.class);
+		BundleWiring wiring = tf1.adapt(BundleWiring.class);
 		capability = getIdentityCapability(wiring);
 		assertIdentityCapability(capability, symbolicName, version, type, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
 		// There should be 1 provided osgi.identity wire (TF1 -> TB3).
@@ -358,7 +360,7 @@ public class BasicTest extends AbstractResourceTest {
 		assertWires(wires, 1);
 		// Check the osgi.identity wire between TF1 and TB3.
 		Wire wire = (Wire) wires.get(0);
-		BundleRevision requirer = (BundleRevision) tb3.adapt(BundleRevision.class);
+		BundleRevision requirer = tb3.adapt(BundleRevision.class);
 		Requirement requirement = getIdentityRequirement(requirer, 0);
 		assertIdentityWire(wire, capability, revision, requirement, requirer);
 	}
@@ -374,7 +376,7 @@ public class BasicTest extends AbstractResourceTest {
 	 */
 	private void assertTf2() {
 		// Get the revision for TF2.
-		BundleRevision revision = (BundleRevision) tf2.adapt(BundleRevision.class);
+		BundleRevision revision = tf2.adapt(BundleRevision.class);
 		// Make sure TF1's symbolic name and version match the manifest.
 		String symbolicName = revision.getSymbolicName();
 		assertSymbolicName("resource.tf2", symbolicName);
@@ -391,7 +393,7 @@ public class BasicTest extends AbstractResourceTest {
 		capability = getIdentityCapability(resource);
 		assertIdentityCapability(capability, symbolicName, version, type, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
 		// Check TF1's osgi.identity capability from the wiring.
-		BundleWiring wiring = (BundleWiring) tf2.adapt(BundleWiring.class);
+		BundleWiring wiring = tf2.adapt(BundleWiring.class);
 		capability = getIdentityCapability(wiring);
 		assertIdentityCapability(capability, symbolicName, version, type, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
 		// There should be 0 provided osgi.identity wire (TF1 -> TB3).

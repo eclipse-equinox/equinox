@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -233,7 +233,7 @@ public class InstallTests extends CoreTest {
 		try {
 			assertEquals("1.0", "bundle02", installed.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
 			assertEquals("1.1", Bundle.INSTALLED, installed.getState()); //$NON-NLS-1$
-			assertEquals("1.2", new Version("2.0"), new Version((String) installed.getHeaders().get(Constants.BUNDLE_VERSION))); //$NON-NLS-1$ //$NON-NLS-2$
+			assertEquals("1.2", new Version("2.0"), new Version(installed.getHeaders().get(Constants.BUNDLE_VERSION))); //$NON-NLS-1$ //$NON-NLS-2$
 		} finally {
 			// clean-up
 			installed.uninstall();
@@ -248,7 +248,7 @@ public class InstallTests extends CoreTest {
 			assertEquals("1.0", "bundle04", installed.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
 			assertEquals("1.1", Bundle.INSTALLED, installed.getState()); //$NON-NLS-1$
 			assertEquals("1.2", "1.3.7", installed.getHeaders().get(Constants.BUNDLE_VERSION)); //$NON-NLS-1$ //$NON-NLS-2$
-			String symbolicNameString = (String) installed.getHeaders().get(Constants.BUNDLE_SYMBOLICNAME);
+			String symbolicNameString = installed.getHeaders().get(Constants.BUNDLE_SYMBOLICNAME);
 			assertNotNull("1.3", symbolicNameString); //$NON-NLS-1$
 			ManifestElement[] symbolicNameHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameString);
 			assertEquals("1.4", 1, symbolicNameHeader.length); //$NON-NLS-1$
@@ -268,7 +268,7 @@ public class InstallTests extends CoreTest {
 			assertEquals("1.0", "bundle05", installed.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
 			assertEquals("1.1", Bundle.INSTALLED, installed.getState()); //$NON-NLS-1$
 			assertEquals("1.2", "1.3.8", installed.getHeaders().get(Constants.BUNDLE_VERSION)); //$NON-NLS-1$ //$NON-NLS-2$
-			String symbolicNameString = (String) installed.getHeaders().get(Constants.BUNDLE_SYMBOLICNAME);
+			String symbolicNameString = installed.getHeaders().get(Constants.BUNDLE_SYMBOLICNAME);
 			assertNotNull("1.3", symbolicNameString); //$NON-NLS-1$
 			ManifestElement[] symbolicNameHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameString);
 			assertEquals("1.4", 1, symbolicNameHeader.length); //$NON-NLS-1$
@@ -288,7 +288,7 @@ public class InstallTests extends CoreTest {
 			assertEquals("1.0", "bundle06", installed.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
 			assertEquals("1.1", Bundle.INSTALLED, installed.getState()); //$NON-NLS-1$
 			assertEquals("1.2", "1.3.9", installed.getHeaders().get(Constants.BUNDLE_VERSION)); //$NON-NLS-1$ //$NON-NLS-2$
-			String symbolicNameString = (String) installed.getHeaders().get(Constants.BUNDLE_SYMBOLICNAME);
+			String symbolicNameString = installed.getHeaders().get(Constants.BUNDLE_SYMBOLICNAME);
 			assertNotNull("1.3", symbolicNameString); //$NON-NLS-1$
 			ManifestElement[] symbolicNameHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameString);
 			assertEquals("1.4", 1, symbolicNameHeader.length); //$NON-NLS-1$

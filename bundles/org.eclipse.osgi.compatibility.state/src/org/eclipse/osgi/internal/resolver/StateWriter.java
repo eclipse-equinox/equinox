@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -546,7 +546,7 @@ class StateWriter {
 			out.writeByte(3);
 			writeGenericSpecification((GenericSpecificationImpl) requirement, out);
 		} else
-			throw new IllegalArgumentException("Unknown requiement type: " + requirement.getClass());
+			throw new IllegalArgumentException("Unknown requiement type: " + requirement.getClass()); //$NON-NLS-1$
 
 		BaseDescription capability = wire.getDeclaredCapability();
 		if (capability instanceof BundleDescription)
@@ -556,7 +556,7 @@ class StateWriter {
 		else if (capability instanceof GenericDescription)
 			writeGenericDescription((GenericDescription) capability, out);
 		else
-			throw new IllegalArgumentException("Unknown capability type: " + requirement.getClass());
+			throw new IllegalArgumentException("Unknown capability type: " + requirement.getClass()); //$NON-NLS-1$
 
 		writeBundleDescription(wire.getRequirementHost(), out, false);
 		writeBundleDescription(wire.getCapabilityHost(), out, false);

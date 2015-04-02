@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1808,10 +1808,10 @@ public class TestModuleContainer extends AbstractTest {
 		Module c = installDummyModule("bug457118.c.MF", "c", container);
 		Module d = installDummyModule("bug457118.d.MF", "d", container);
 
-		Module a2 = installDummyModule("bug457118.a2.MF", "a2", container);
-		Module b2 = installDummyModule("bug457118.b2.MF", "b2", container);
-		Module c2 = installDummyModule("bug457118.c2.MF", "c2", container);
-		Module d2 = installDummyModule("bug457118.d2.MF", "d2", container);
+		installDummyModule("bug457118.a2.MF", "a2", container);
+		installDummyModule("bug457118.b2.MF", "b2", container);
+		installDummyModule("bug457118.c2.MF", "c2", container);
+		installDummyModule("bug457118.d2.MF", "d2", container);
 
 		container.resolve(null, true);
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,8 @@ import org.eclipse.osgi.internal.loader.ModuleClassLoader.DefineClassResult;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.internal.weaving.WeavingHookConfigurator;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
-import org.eclipse.osgi.storage.*;
+import org.eclipse.osgi.storage.NativeCodeFinder;
+import org.eclipse.osgi.storage.Storage;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.eclipse.osgi.util.NLS;
@@ -49,7 +50,6 @@ import org.osgi.framework.namespace.HostNamespace;
 public class ClasspathManager {
 	private static final FragmentClasspath[] emptyFragments = new FragmentClasspath[0];
 	private static final String[] DEFAULT_CLASSPATH = new String[] {"."}; //$NON-NLS-1$
-	private final static Class<?>[] NULL_CLASS_RESULT = new Class[2];
 	@SuppressWarnings("unchecked")
 	private static final Enumeration<URL> EMPTY_ENUMERATION = Collections.enumeration(Collections.EMPTY_LIST);
 
@@ -557,7 +557,7 @@ public class ClasspathManager {
 
 	private Class<?> findClassImpl(String name, ClasspathEntry classpathEntry, List<ClassLoaderHook> hooks) {
 		if (debug.DEBUG_LOADER)
-			Debug.println("ModuleClassLoader[" + classloader.getBundleLoader() + " - " + classpathEntry.getBundleFile() + "].findClassImpl(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+			Debug.println("ModuleClassLoader[" + classloader.getBundleLoader() + " - " + classpathEntry.getBundleFile() + "].findClassImpl(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
 		String filename = name.replace('.', '/').concat(".class"); //$NON-NLS-1$
 		BundleEntry entry = classpathEntry.getBundleFile().getEntry(filename);
 		if (entry == null)

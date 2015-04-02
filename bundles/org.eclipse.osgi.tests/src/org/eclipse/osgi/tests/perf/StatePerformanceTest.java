@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,7 @@ public class StatePerformanceTest extends BasePerformanceTest {
 		super(name);
 	}
 
-	private State storeAndRetrieve(State toStore) throws IOException {
+	State storeAndRetrieve(State toStore) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		toStore.getFactory().writeState(toStore, baos);
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
@@ -54,19 +54,19 @@ public class StatePerformanceTest extends BasePerformanceTest {
 		runner.run(this, localName, 10, repetitions);
 	}
 
-	public void testResolution100() throws IOException {
+	public void testResolution100() {
 		testResolution(100, 500, null, AllTests.DEGRADATION_RESOLUTION);
 	}
 
-	public void testResolution1000() throws IOException {
+	public void testResolution1000() {
 		testResolution(1000, 15, "State Resolution", null);
 	}
 
-	public void testResolution500() throws IOException {
+	public void testResolution500() {
 		testResolution(500, 50, null, AllTests.DEGRADATION_RESOLUTION);
 	}
 
-	public void testResolution5000() throws IOException {
+	public void testResolution5000() {
 		testResolution(5000, 1, null, AllTests.DEGRADATION_RESOLUTION);
 	}
 

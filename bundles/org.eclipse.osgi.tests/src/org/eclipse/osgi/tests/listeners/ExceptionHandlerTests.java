@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,10 @@ package org.eclipse.osgi.tests.listeners;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.Assert;
 import org.osgi.framework.*;
 
 public class ExceptionHandlerTests extends TestCase {
@@ -48,7 +48,7 @@ public class ExceptionHandlerTests extends TestCase {
 			event = null;
 			return tmp;
 		}
-	};
+	}
 
 	
 	protected void setUp() throws Exception {

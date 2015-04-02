@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -148,7 +148,7 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 	private void setNativeAttribute(String key, String value) {
 		Bundle systemBundle = OSGiTestsActivator.getContext().getBundle(0);
 		ModuleRevision systemRevision = (ModuleRevision) systemBundle.adapt(BundleRevision.class);
-		ModuleCapability nativeCapability = (ModuleCapability) systemRevision.getModuleCapabilities(NativeNamespace.NATIVE_NAMESPACE).get(0);
+		ModuleCapability nativeCapability = systemRevision.getModuleCapabilities(NativeNamespace.NATIVE_NAMESPACE).get(0);
 		Map attrs = new HashMap(nativeCapability.getAttributes());
 		attrs.put(key, value);
 		nativeCapability.setTransientAttrs(attrs);

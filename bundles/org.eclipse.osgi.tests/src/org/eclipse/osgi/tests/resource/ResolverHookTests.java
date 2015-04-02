@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,7 +76,7 @@ public class ResolverHookTests extends AbstractResourceTest {
 		try {
 			Bundle tb1v1 = installer.installBundle("singleton.tb1v1");
 			Bundle tb1v2 = installer.installBundle("singleton.tb1v2");
-			assertFalse(((FrameworkWiring) getContext().getBundle(0).adapt(FrameworkWiring.class)).resolveBundles(Arrays.asList(new Bundle[] {tb1v1, tb1v2})));
+			assertFalse(getContext().getBundle(0).adapt(FrameworkWiring.class).resolveBundles(Arrays.asList(new Bundle[] {tb1v1, tb1v2})));
 			assertTrue("ResolverHook was not called", called[0]);
 			if (error[0] != null)
 				throw error[0];

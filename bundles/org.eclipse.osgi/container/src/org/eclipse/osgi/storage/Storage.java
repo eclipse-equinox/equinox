@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 IBM Corporation and others.
+ * Copyright (c) 2012, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,8 @@ import org.eclipse.osgi.framework.util.*;
 import org.eclipse.osgi.internal.container.LockSet;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.*;
-import org.eclipse.osgi.internal.hookregistry.*;
+import org.eclipse.osgi.internal.hookregistry.BundleFileWrapperFactoryHook;
+import org.eclipse.osgi.internal.hookregistry.StorageHookFactory;
 import org.eclipse.osgi.internal.hookregistry.StorageHookFactory.StorageHook;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.internal.location.LocationHelper;
@@ -92,7 +93,7 @@ public class Storage {
 		return storage;
 	}
 
-	private Storage(EquinoxContainer container) throws IOException, BundleException {
+	private Storage(EquinoxContainer container) throws IOException {
 		mruList = new MRUBundleFileList(getBundleFileLimit(container.getConfiguration()));
 		equinoxContainer = container;
 		extensionInstaller = new FrameworkExtensionInstaller(container.getConfiguration());

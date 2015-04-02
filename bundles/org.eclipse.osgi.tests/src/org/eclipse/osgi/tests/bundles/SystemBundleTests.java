@@ -1290,7 +1290,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		Bundle geturlBundle = systemContext1.installBundle(installer.getBundleLocation("geturl"));
 		geturlBundle.start();
-		PrivilegedAction geturlAction = (PrivilegedAction) systemContext1.getService(systemContext1.getServiceReference(PrivilegedAction.class));
+		PrivilegedAction geturlAction = systemContext1.getService(systemContext1.getServiceReference(PrivilegedAction.class));
 		try {
 			geturlAction.run();
 		} catch (Exception e) {
@@ -1718,8 +1718,8 @@ public class SystemBundleTests extends AbstractBundleTests {
 		test1 = systemContext.getBundle(testID1);
 		test2 = systemContext.getBundle(testID2);
 
-		BundleRevision rev1 = (BundleRevision) test1.adapt(BundleRevision.class);
-		BundleRevision rev2 = (BundleRevision) test2.adapt(BundleRevision.class);
+		BundleRevision rev1 = test1.adapt(BundleRevision.class);
+		BundleRevision rev2 = test2.adapt(BundleRevision.class);
 		BundleWiring wiring1 = rev1.getWiring();
 		BundleWiring wiring2 = rev2.getWiring();
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2014 IBM Corporation and others.
+ * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1192,7 +1192,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Bundle test2 = installer.installBundle("test2"); //$NON-NLS-1$
 
 		assertTrue("Could not resolve test2 bundle", installer.resolveBundles(new Bundle[] {test2}));
-		BundleWiring test2Wiring = (BundleWiring) test2.adapt(BundleWiring.class);
+		BundleWiring test2Wiring = test2.adapt(BundleWiring.class);
 		Collection resources = test2Wiring.listResources("/", "*", 0);
 		assertTrue("could not find resource", resources.contains("resource2"));
 		resources = test2Wiring.listResources("data/", "resource2", 0);
@@ -1306,14 +1306,14 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		ExportedPackage[] hostExports = packageAdmin.getExportedPackages(host);
 		assertEquals("Number host exports", 4, hostExports == null ? 0 : hostExports.length); //$NON-NLS-1$
 
-		BundleWiring hostWiring = (BundleWiring) host.adapt(BundleWiring.class);
+		BundleWiring hostWiring = host.adapt(BundleWiring.class);
 		assertNotNull("No host wiring", hostWiring);
 
 		List packageCapabilities = hostWiring.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
 		assertEquals("Number host export capabilities", 4, packageCapabilities.size()); //$NON-NLS-1$
 
 		assertEquals("Check export name", "host.multiple.exports", ((BundleCapability) packageCapabilities.get(0)).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE)); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("Check include directive", "Public*", (String) ((BundleCapability) packageCapabilities.get(0)).getDirectives().get(PackageNamespace.CAPABILITY_INCLUDE_DIRECTIVE)); //$NON-NLS-1$//$NON-NLS-2$
+		assertEquals("Check include directive", "Public*", ((BundleCapability) packageCapabilities.get(0)).getDirectives().get(PackageNamespace.CAPABILITY_INCLUDE_DIRECTIVE)); //$NON-NLS-1$//$NON-NLS-2$
 
 		assertEquals("Check export name", "host.multiple.exports.onlyone", ((BundleCapability) packageCapabilities.get(1)).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE)); //$NON-NLS-1$ //$NON-NLS-2$
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2014 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,7 +74,7 @@ public class BasicLocation implements Location {
 				EquinoxLogServices logServices = environmentInfo.getHookRegistry().getContainer().getLogServices();
 				// Note that logServices can be null if we are very early in the startup.
 				if (logServices != null) {
-					logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.INFO, "Called Location.getURL() when it has not been set for: \"" + property + "\"", new RuntimeException("Call stack for Location.getURL()")); //$NON-NLS-1$//$NON-NLS-2$
+					logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.INFO, "Called Location.getURL() when it has not been set for: \"" + property + "\"", new RuntimeException("Call stack for Location.getURL()")); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 				}
 			}
 			setURL(defaultValue, false);
