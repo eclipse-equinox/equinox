@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -115,28 +115,45 @@ public class ManifestLocalization {
 		String localizationHeader = rawHeaders.get(Constants.BUNDLE_LOCALIZATION);
 		if (localizationHeader == null)
 			localizationHeader = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
+
+		BundleResourceBundle result = cache.get(localeString);
+		if (result != null)
+			return result.isEmpty() ? null : result;
+
+		// Collect all the necessary inputstreams to create the resource bundle without
+		// holding any locks.  Finding resources and inputstreams from the wirings requires a
+		// read lock on the module database.  We must not hold the cache lock while doing this;
+		// otherwise out of order locks will be possible when the resolver needs to clear the cache
+		String[] nlVarients = buildNLVariants(localeString);
+		InputStream[] nlStreams = new InputStream[nlVarients.length];
+		for (int i = nlVarients.length - 1; i >= 0; i--) {
+
+			URL url = findResource(localizationHeader + (nlVarients[i].equals("") ? nlVarients[i] : '_' + nlVarients[i]) + ".properties"); //$NON-NLS-1$ //$NON-NLS-2$
+			if (url != null) {
+				try {
+					nlStreams[i] = url.openStream();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
+		}
+
 		synchronized (cache) {
-			BundleResourceBundle result = cache.get(localeString);
-			if (result != null)
-				return result.isEmpty() ? null : result;
-			String[] nlVarients = buildNLVariants(localeString);
 			BundleResourceBundle parent = null;
 			for (int i = nlVarients.length - 1; i >= 0; i--) {
 				BundleResourceBundle varientBundle = null;
-				URL varientURL = findResource(localizationHeader + (nlVarients[i].equals("") ? nlVarients[i] : '_' + nlVarients[i]) + ".properties"); //$NON-NLS-1$ //$NON-NLS-2$
-				if (varientURL == null) {
+				InputStream varientStream = nlStreams[i];
+				if (varientStream == null) {
 					varientBundle = cache.get(nlVarients[i]);
 				} else {
-					InputStream resourceStream = null;
 					try {
-						resourceStream = varientURL.openStream();
-						varientBundle = new LocalizationResourceBundle(resourceStream);
+						varientBundle = new LocalizationResourceBundle(varientStream);
 					} catch (IOException e) {
 						// ignore and continue
 					} finally {
-						if (resourceStream != null) {
+						if (varientStream != null) {
 							try {
-								resourceStream.close();
+								varientStream.close();
 							} catch (IOException e3) {
 								//Ignore exception
 							}
