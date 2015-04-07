@@ -159,8 +159,8 @@ public class ExtendedLogReaderServiceTest extends TestCase {
 	private long getCurrentThreadId() {
 		Thread current = Thread.currentThread();
 		try {
-			Method getId = Thread.class.getMethod("getId", null);
-			Long id = (Long) getId.invoke(current, null);
+			Method getId = Thread.class.getMethod("getId");
+			Long id = (Long) getId.invoke(current);
 			return id.longValue();
 		} catch (Throwable t) {
 			return -1;
