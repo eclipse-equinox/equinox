@@ -13,7 +13,8 @@ package org.eclipse.equinox.http.servlet.tests;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -30,12 +31,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
@@ -1267,6 +1270,64 @@ public class ServletTest extends TestCase {
 		}
 
 		Assert.assertEquals(expected, actual);
+	}
+
+	public void testServletContextUnsupportedOperations() {
+		final AtomicReference<ServletContext> contextHolder = new AtomicReference<ServletContext>();
+		Servlet unsupportedServlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public void init(ServletConfig config) throws ServletException {
+				contextHolder.set(config.getServletContext());
+			}
+		};
+
+		ServiceRegistration<Servlet> servletReg = null;
+		Dictionary<String, Object> servletProps = new Hashtable<String, Object>();
+		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/sessions");
+		try {
+			servletReg = getBundleContext().registerService(Servlet.class, unsupportedServlet, servletProps);
+		} catch (Exception e) {
+			fail("Unexpected exception: " + e);
+		} finally {
+			if (servletReg != null) {
+				servletReg.unregister();
+			}
+		}
+		ServletContext context = contextHolder.get();
+		assertNotNull("Null context.", context);
+		for(Method m : getUnsupportedMethods()) {
+			checkMethod(m, context);
+		}
+	}
+
+	private void checkMethod(Method m, ServletContext context) throws RuntimeException {
+		Class<?>[] types = m.getParameterTypes();
+		Object[] params = new Object[types.length];
+		try {
+			m.invoke(context, params);
+			fail("Expected an exception.");
+		} catch (IllegalAccessException e) {
+			fail("unexpected: " + e);
+		} catch (InvocationTargetException e) {
+			Throwable cause = e.getTargetException();
+			if (!(cause instanceof UnsupportedOperationException)) {
+				fail("unexpected exception for " + m.getName() + ": " + cause);
+			}
+		}
+
+	}
+
+	static private List<Method> getUnsupportedMethods() {
+		List<Method> methods = new ArrayList<Method>();
+		Class<ServletContext> contextClass = ServletContext.class;
+		for(Method m : contextClass.getMethods()) {
+			String name = m.getName();
+			if (name.equals("addFilter") || name.equals("addListener") || name.equals("addServlet") || name.equals("createFilter") || name.equals("createListener") || name.equals("createServlet") | name.equals("declareRoles")) {
+				methods.add(m);
+			}
+		}
+		return methods;
 	}
 
 	public void test_ServletContextHelper1() throws Exception {

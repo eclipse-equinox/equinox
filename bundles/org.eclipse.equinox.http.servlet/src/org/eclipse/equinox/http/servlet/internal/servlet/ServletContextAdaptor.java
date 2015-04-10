@@ -255,7 +255,51 @@ public class ServletContextAdaptor {
 		}
 	}
 
-	public void setAttribute(String attributeName, Object attributeValue) {
+	public void addFilter(String arg1, Class<? extends Filter> arg2) {
+		throw new UnsupportedOperationException();
+	}
+	public void addFilter(String arg1, String arg2) {
+		throw new UnsupportedOperationException();
+	}
+	public void addFilter(String arg1, Filter arg2) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void addListener(Class<?> arg1){
+		throw new UnsupportedOperationException();
+	}
+	public void addListener(String arg1){
+		throw new UnsupportedOperationException();
+	}
+	public void addListener(EventListener arg1){
+		throw new UnsupportedOperationException();
+	}
+
+	public void addServlet(String arg1, Class<? extends Servlet> arg2) {
+		throw new UnsupportedOperationException();
+	}
+	public void addServlet(String arg1, String arg2) {
+		throw new UnsupportedOperationException();
+	}
+	public void addServlet(String arg1, Servlet arg2) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void createFilter(Class<?> arg1) {
+		throw new UnsupportedOperationException();
+    }
+	public void createServlet(Class<?> arg1) {
+		throw new UnsupportedOperationException();
+    }
+    public void createListener(Class<?> arg1) {
+    	throw new UnsupportedOperationException();
+    }
+
+    public void declareRoles(String... arg1) {
+    	throw new UnsupportedOperationException();
+    }
+
+    public void setAttribute(String attributeName, Object attributeValue) {
 		Dictionary<String, Object> attributes = getContextAttributes();
 		boolean added = (attributes.get(attributeName) == null);
 		attributes.put(attributeName, attributeValue);
