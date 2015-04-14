@@ -722,9 +722,9 @@ public class ContextController {
 
 		ServletContext servletContext = getProxyContext().getServletContext();
 
-		servletContextDTO.attributes = getAttributes(servletContext);
+		servletContextDTO.attributes = getDTOAttributes(servletContext);
 		servletContextDTO.contextPath = getContextPath();
-		servletContextDTO.initParams = initParams;
+		servletContextDTO.initParams = new HashMap<String, String>(initParams);
 		servletContextDTO.name = getContextName();
 		servletContextDTO.serviceId = getServiceId();
 
@@ -969,7 +969,7 @@ public class ContextController {
 			new ListenerDTO[listenerDTOs.size()]);
 	}
 
-	private Map<String, Object> getAttributes(ServletContext servletContext) {
+	private Map<String, Object> getDTOAttributes(ServletContext servletContext) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		for (Enumeration<String> names = servletContext.getAttributeNames();
@@ -977,7 +977,7 @@ public class ContextController {
 
 			String name = names.nextElement();
 
-			map.put(name, servletContext.getAttribute(name));
+			map.put(name, DTOUtil.mapValue(servletContext.getAttribute(name)));
 		}
 
 		return Collections.unmodifiableMap(map);
