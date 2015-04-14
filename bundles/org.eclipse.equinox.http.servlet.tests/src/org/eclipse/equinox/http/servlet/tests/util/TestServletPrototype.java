@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2015 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *     Raymond Augé <raymond.auge@liferay.com> - Bug 436698
+ *******************************************************************************/
 package org.eclipse.equinox.http.servlet.tests.util;
 
 import java.io.IOException;
@@ -15,7 +26,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.equinox.http.servlet.tests.tb.AbstractTestServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -41,10 +51,10 @@ public class TestServletPrototype extends HttpServlet {
 		PrintWriter writer = response.getWriter();
 
 		try {
-			handleDoGet(request, writer);
+			handleDoGet(request, response, writer);
 		}
 		finally {
-			writer.close();
+			//writer.close();
 		}
 	}
 
@@ -84,7 +94,7 @@ public class TestServletPrototype extends HttpServlet {
 
 	}
 
-	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) throws ServletException, IOException {
+	protected void handleDoGet(HttpServletRequest request, HttpServletResponse response, PrintWriter writer) throws ServletException, IOException {
 		String pathInfo = request.getPathInfo();
 		if ("/lastGet".equals(pathInfo)) {
 			writer.print(lastGetName.getAndSet(null));
@@ -101,6 +111,11 @@ public class TestServletPrototype extends HttpServlet {
 			Factory factory = factories.remove(prototypeName);
 			factory.unregister();
 			writer.print(prototypeName);
+		} else if ("/error".equals(pathInfo)) {
+			String errorCode = request.getParameter("test.error.code");
+			if (errorCode != null) {
+				response.sendError(Integer.parseInt(errorCode));
+			}
 		}
 	}
 

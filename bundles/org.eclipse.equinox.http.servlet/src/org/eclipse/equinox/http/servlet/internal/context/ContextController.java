@@ -507,22 +507,37 @@ public class ContextController {
 			errorPageDTO = new ErrorPageDTO();
 
 			errorPageDTO.asyncSupported = asyncSupported;
-			long[] errorCodes = new long[0];
 			List<String> exceptions = new ArrayList<String>();
+			// Not sure if it is important to maintain order of insertion or natural ordering here.
+			// Using insertion ordering with linked hash set.
+			Set<Long> errorCodeSet = new LinkedHashSet<Long>();
 
 			for(String errorPage : errorPages) {
 				try {
-					long longValue = Long.parseLong(errorPage);
-
-					errorCodes = Arrays.copyOf(errorCodes, errorCodes.length + 1);
-
-					errorCodes[errorCodes.length - 1] = longValue;
+					if ("4xx".equals(errorPage)) { //$NON-NLS-1$
+						for (long code = 400; code < 500; code++) {
+							errorCodeSet.add(code);
+						}
+					} else if ("5xx".equals(errorPage)) { //$NON-NLS-1$
+						for (long code = 500; code < 600; code++) {
+							errorCodeSet.add(code);
+						}
+					} else {
+						long code = Long.parseLong(errorPage);
+						errorCodeSet.add(code);
+					}
 				}
 				catch (NumberFormatException nfe) {
 					exceptions.add(errorPage);
 				}
 			}
 
+			long[] errorCodes = new long[errorCodeSet.size()];
+			int i = 0;
+			for(Long code : errorCodeSet) {
+				errorCodes[i] = code;
+				i++;
+			}
 			errorPageDTO.errorCodes = errorCodes;
 			errorPageDTO.exceptions = exceptions.toArray(new String[exceptions.size()]);
 			errorPageDTO.initParams = servletInitParams;

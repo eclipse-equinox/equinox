@@ -13,6 +13,7 @@ package org.eclipse.equinox.http.servlet.tests;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.CookieHandler;
@@ -36,6 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -113,10 +115,14 @@ public class ServletTest extends TestCase {
 
 	@Override
 	public void tearDown() throws Exception {
+		for (ServiceRegistration<? extends Object> serviceRegistration : registrations) {
+			serviceRegistration.unregister();
+		}
 		stopJetty();
 		stopBundles();
 		requestAdvisor = null;
 		advisor = null;
+		registrations.clear();
 		try {
 			installer.shutdown();
 		} finally {
@@ -202,6 +208,27 @@ public class ServletTest extends TestCase {
 		Assert.assertEquals("401", responseCode);
 		Assert.assertTrue(
 			"Expected <" + expected + "*> but got <" + actual + ">", actual.startsWith(expected));
+	}
+
+	public void test_ErrorPage5() throws Exception {
+		Dictionary<String, Object> errorProps = new Hashtable<String, Object>();
+		errorProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E5.4xx");
+		errorProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, "4xx");
+		registrations.add(getBundleContext().registerService(Servlet.class, new ErrorServlet("4xx"), errorProps));
+		errorProps = new Hashtable<String, Object>();
+		errorProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E5.5xx");
+		errorProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, "5xx");
+		registrations.add(getBundleContext().registerService(Servlet.class, new ErrorServlet("5xx"), errorProps));
+		for(String expectedCode: Arrays.asList("400", "450", "499", "500", "550", "599")) {
+			Map<String, List<String>> response = doRequestGetResponse(ERROR, Collections.singletonMap(TEST_ERROR_CODE, expectedCode));
+			String expectedResponse = expectedCode.charAt(0) + "xx : " + expectedCode + " : ERROR";
+			String actualCode = response.get("responseCode").get(0);
+			String actualResponse = response.get("responseBody").get(0);
+
+			Assert.assertEquals(expectedCode, actualCode);
+			Assert.assertTrue(
+				"Expected <" + expectedResponse + "*> but got <" + actualResponse + ">", actualResponse.startsWith(expectedResponse));
+		}
 	}
 
 	public void test_Filter1() throws Exception {
@@ -503,7 +530,6 @@ public class ServletTest extends TestCase {
 	}
 
 	public void test_Filter21() throws Exception {
-		Collection<ServiceRegistration<? extends Object>> registrations = new ArrayList<ServiceRegistration<? extends Object>>();
 		// Make sure exact path matching is honored by filters registrations
 		String expected = "a";
 		TestFilter testFilter1 = new TestFilter();
@@ -524,23 +550,17 @@ public class ServletTest extends TestCase {
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/hello/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, testServlet, props));
 
-		try {
-			String actual = requestAdvisor.request("hello");
-			Assert.assertEquals(expected, actual);
-			Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
-			Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
+		String actual = requestAdvisor.request("hello");
+		Assert.assertEquals(expected, actual);
+		Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
+		Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
 	
-			testFilter1.clear();
-			testFilter2.clear();
-			actual = requestAdvisor.request("hello/test");
-			Assert.assertEquals(expected, actual);
-			Assert.assertFalse("testFilter1 got called.", testFilter1.getCalled());
-			Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
-		} finally {
-			for (ServiceRegistration<? extends Object> serviceRegistration : registrations) {
-				serviceRegistration.unregister();
-			}
-		}
+		testFilter1.clear();
+		testFilter2.clear();
+		actual = requestAdvisor.request("hello/test");
+		Assert.assertEquals(expected, actual);
+		Assert.assertFalse("testFilter1 got called.", testFilter1.getCalled());
+		Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
 	}
 	public void test_Registration1() throws Exception {
 		String expected = "Alias cannot be null";
@@ -1906,9 +1926,11 @@ public class ServletTest extends TestCase {
 	private static final String PROTOTYPE = "prototype/";
 	private static final String CONFIGURE = "configure";
 	private static final String UNREGISTER = "unregister";
+	private static final String ERROR = "error";
 	private static final String STATUS_PARAM = "servlet.init.status";
 	private static final String TEST_PROTOTYPE_NAME = "test.prototype.name";
 	private static final String TEST_PATH_CUSTOMIZER_NAME = "test.path.customizer.name";
+	private static final String TEST_ERROR_CODE = "test.error.code";
 	public void testWBServletChangeInitParams() throws Exception{
 			String actual;
 
@@ -2107,6 +2129,10 @@ public class ServletTest extends TestCase {
 	}
 
 	private String doRequest(String action, Map<String, String> params) throws IOException {
+		return doRequestGetResponse(action, params).get("responseBody").get(0);
+	}
+
+	private Map<String, List<String>> doRequestGetResponse(String action, Map<String, String> params) throws IOException {
 		StringBuilder requestInfo = new StringBuilder(PROTOTYPE);
 		requestInfo.append(action);
 		if (!params.isEmpty()) {
@@ -2123,7 +2149,7 @@ public class ServletTest extends TestCase {
 				requestInfo.append(param.getValue());
 			}
 		}
-		return requestAdvisor.request(requestInfo.toString());
+		return requestAdvisor.request(requestInfo.toString(), null);
 	}
 
 	private BundleContext getBundleContext() {
@@ -2206,6 +2232,7 @@ public class ServletTest extends TestCase {
 	private BundleInstaller installer;
 	private BundleAdvisor advisor;
 	private ServletRequestAdvisor requestAdvisor;
+	private final Collection<ServiceRegistration<? extends Object>> registrations = new ArrayList<ServiceRegistration<? extends Object>>();
 
 	static class TestServletContextHelperFactory implements ServiceFactory<ServletContextHelper> {
 		static class TestServletContextHelper extends ServletContextHelper {
@@ -2258,4 +2285,34 @@ public class ServletTest extends TestCase {
 		}
 
 	}
+
+	static class ErrorServlet extends HttpServlet{
+		private static final long serialVersionUID = 1L;
+		private final String errorCode;
+
+		public ErrorServlet(String errorCode) {
+			super();
+			this.errorCode = errorCode;
+		}
+
+		@Override
+		protected void service(
+				HttpServletRequest request, HttpServletResponse response)
+			throws ServletException ,IOException {
+
+			if (response.isCommitted()) {
+				System.out.println("Problem?");
+
+				return;
+			}
+
+			PrintWriter writer = response.getWriter();
+
+			String requestURI = (String)request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
+			Integer status = (Integer)request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+
+			writer.print(errorCode + " : " + status + " : ERROR : " + requestURI);
+		}
+
+	};
 }
