@@ -58,16 +58,18 @@ public class ResponseStateHandler {
 				servletRequestListener.requestInitialized(servletRequestEvent);
 			}
 
-			if (matchingFilterRegistrations.isEmpty()) {
-				registration.service(request, response);
-			}
-			else {
-				Collections.sort(matchingFilterRegistrations);
+			if (registration.getServletContextHelper().handleSecurity(request, response)) {
+				if (matchingFilterRegistrations.isEmpty()) {
+					registration.service(request, response);
+				}
+				else {
+					Collections.sort(matchingFilterRegistrations);
 
-				FilterChain chain = new FilterChainImpl(
-					matchingFilterRegistrations, registration, dispatcherType);
+					FilterChain chain = new FilterChainImpl(
+						matchingFilterRegistrations, registration, dispatcherType);
 
-				chain.doFilter(request, response);
+					chain.doFilter(request, response);
+				}
 			}
 		}
 		catch (IOException ioe) {

@@ -1613,6 +1613,78 @@ public class ServletTest extends TestCase {
 		}
 	}
 
+	public void test_ServletContextHelper13() throws Exception {
+		BundleContext bundleContext = getBundleContext();
+		Bundle bundle = bundleContext.getBundle();
+
+		// test that the helper handlesecurity is called before the filter by setting an attribute on the request
+		ServletContextHelper servletContextHelper = new ServletContextHelper(bundle){
+
+			@Override
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+				request.setAttribute(getName(), Boolean.TRUE);
+				return super.handleSecurity(request, response);
+			}
+			
+		};
+		Filter f1 = new Filter() {
+
+			@Override
+			public void init(FilterConfig filterConfig) throws ServletException {
+			}
+
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+					throws IOException, ServletException {
+				if (request.getAttribute(getName()) == Boolean.TRUE) {
+					request.setAttribute(getName() + ".fromFilter", Boolean.TRUE);
+				}
+				chain.doFilter(request, response);
+			}
+
+			@Override
+			public void destroy() {
+			}
+			
+		};
+		Servlet s1 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+				res.getWriter().print(req.getAttribute(getName() + ".fromFilter"));
+			}
+			
+		};
+
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/");
+			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
+
+			Dictionary<String, String> filterProps = new Hashtable<String, String>();
+			filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");
+			filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+			registrations.add(bundleContext.registerService(Filter.class, f1, filterProps));
+
+			Dictionary<String, String> servletProps = new Hashtable<String, String>();
+			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
+			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1");
+			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+			registrations.add(bundleContext.registerService(Servlet.class, s1, servletProps));
+
+			String actual = requestAdvisor.request("s1");
+
+			Assert.assertEquals(Boolean.TRUE.toString(), actual);
+		}
+		finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+		}
+	}
+
 	public void test_Listener1() throws Exception {
 		BaseServletContextListener scl1 =
 			new BaseServletContextListener();
