@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -9,6 +9,7 @@
  *    IBM Corporation - initial API and implementation
  * 	  Andre Weinand (OTI Labs)
  *    David Green - OpenJDK bsd port integration
+ *    Rapicorp, Inc - Default the configuration to Application Support (bug 461725)
  */
  
 /* MacOS X Carbon specific logic for displaying the splash screen. */
@@ -18,6 +19,8 @@
 #include "eclipseJNI.h"
 #include "eclipseUtil.h"
 
+#include <sys/xattr.h>
+ #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <CoreServices/CoreServices.h>
@@ -38,6 +41,7 @@
 #define DEBUG 0
 
 static _TCHAR* noForkingMsg = _T_ECLIPSE("Internal Error, forking the jvm is not supported on MacOS.\n");
+static const _TCHAR* INSTALL_UUID = _T_ECLIPSE("eclipse.uuid");
 
 char *findCommand(char *command);
 
@@ -868,4 +872,38 @@ void processVMArgs(char **vmargs[] )
 
 int isMaxPermSizeVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
 	return isSunMaxPermSizeVM;
+}
+
+NSString* getApplicationSupport() {
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+	NSString *documentsDirectory = [paths objectAtIndex:0];
+	return documentsDirectory;
+
+}
+
+NSString* getCFBundleIdentifier() {
+	CFBundleRef mainBundle= CFBundleGetMainBundle();
+	return (NSString*) CFBundleGetIdentifier(mainBundle);
+}
+
+const char* getUUID() {
+	const char * installPath = [[[NSBundle mainBundle] resourcePath] fileSystemRepresentation];
+	int bufferLength = getxattr(installPath, INSTALL_UUID,  NULL, 0, 0, 0);
+	if (bufferLength != -1) {
+		char *buffer = malloc(bufferLength + 1);
+		buffer[bufferLength] = '\0';
+		getxattr(installPath, INSTALL_UUID, buffer, bufferLength, 0, 0);
+		return buffer;
+	}
+
+	NSString * timestamp = [NSString stringWithFormat:@"%f",[[NSDate date] timeIntervalSince1970] * 1000];
+	const char* timestampAsChar = [timestamp UTF8String];
+    setxattr(installPath, INSTALL_UUID, timestampAsChar, strlen(timestampAsChar), 0, 0);
+    return timestampAsChar;
+}
+
+_TCHAR* getFolderForApplicationData() {
+	NSString* bundleId = getCFBundleIdentifier();
+	NSString* appSupport = getApplicationSupport();
+	return [[NSString stringWithFormat:@"%@/%@_%s", appSupport, bundleId, getUUID()] UTF8String];
 }

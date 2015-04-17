@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rapicorp, Inc - Default the configuration to Application Support (bug 461725)
  *******************************************************************************/
 package org.eclipse.equinox.launcher;
 
@@ -32,6 +33,8 @@ public class JNIBridge {
 	private native void _show_splash(String bitmap);
 
 	private native void _takedown_splash();
+
+	private native String _get_os_recommended_folder();
 
 	private native int OleInitialize(int reserved);
 
@@ -190,5 +193,17 @@ public class JNIBridge {
 			}
 		}
 		return true;
+	}
+
+	public String getOSRecommendedFolder() {
+		try {
+			return _get_os_recommended_folder();
+		} catch (UnsatisfiedLinkError e) {
+			if (!libraryLoaded) {
+				loadLibrary();
+				return getOSRecommendedFolder();
+			}
+			return null;
+		}
 	}
 }

@@ -30,6 +30,7 @@ typedef jint (JNICALL *JNI_createJavaVM)(JavaVM **pvm, JNIEnv **env, void *args)
 #define show_splash			Java_org_eclipse_equinox_launcher_JNIBridge__1show_1splash
 #define get_splash_handle 	Java_org_eclipse_equinox_launcher_JNIBridge__1get_1splash_1handle
 #define takedown_splash 	Java_org_eclipse_equinox_launcher_JNIBridge__1takedown_1splash
+#define get_os_recommended_folder 	    Java_org_eclipse_equinox_launcher_JNIBridge__1get_1os_1recommended_1folder
 
 #ifdef __cplusplus
 extern "C" {
@@ -69,6 +70,12 @@ JNIEXPORT void JNICALL show_splash(JNIEnv *, jobject, jstring);
  * Signature: ()V
  */
 JNIEXPORT void JNICALL takedown_splash(JNIEnv *, jobject);
+
+/*
+ * org_eclipse_equinox_launcher_JNIBridge#_get_os_recommended_folder
+ * Signature: ()Ljava/lang/String
+ */
+JNIEXPORT jstring JNICALL get_os_recommended_folder(JNIEnv *, jobject);
 
 #ifdef __cplusplus
 }

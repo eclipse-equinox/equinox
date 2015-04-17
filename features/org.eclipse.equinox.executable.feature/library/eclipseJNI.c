@@ -30,7 +30,8 @@ static JNINativeMethod natives[] = {{"_update_splash", "()V", (void *)&update_sp
 									{"_set_exit_data", "(Ljava/lang/String;Ljava/lang/String;)V", (void *)&set_exit_data},
 									{"_set_launcher_info", "(Ljava/lang/String;Ljava/lang/String;)V", (void *)&set_launcher_info},
 									{"_show_splash", "(Ljava/lang/String;)V", (void *)&show_splash},
-									{"_takedown_splash", "()V", (void *)&takedown_splash}};
+									{"_takedown_splash", "()V", (void *)&takedown_splash},
+									{"_get_os_recommended_folder", "()Ljava/lang/String;", (void *)&get_os_recommended_folder}};
 
 /* local methods */
 static jstring newJavaString(JNIEnv *env, _TCHAR * str);
@@ -132,6 +133,14 @@ JNIEXPORT void JNICALL show_splash(JNIEnv * env, jobject obj, jstring s){
 
 JNIEXPORT void JNICALL takedown_splash(JNIEnv * env, jobject obj){
 	takeDownSplash();
+}
+
+JNIEXPORT jstring JNICALL get_os_recommended_folder(JNIEnv * env, jobject obj){
+#ifdef MACOSX
+	return newJavaString(env, getFolderForApplicationData());
+#else
+	return NULL;
+#endif
 }
 
 /*
