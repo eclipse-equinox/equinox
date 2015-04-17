@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2012, 2014). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2012, 2015). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,8 +181,8 @@ public final class HttpWhiteboardConstants {
 	 * <p>
 	 * The service property values may be the name of a fully qualified
 	 * exception class, a three digit HTTP status code, the value "4xx" for all
-	 * error codes in the 400 rage, or the value "5xx" for all error codes in
-	 * the 500 rage. Any value that is not a three digit number, or one of the
+	 * error codes in the 400 range, or the value "5xx" for all error codes in
+	 * the 500 range. Any value that is not a three digit number, or one of the
 	 * two special values is considered to be the name of a fully qualified
 	 * exception class.
 	 * 
