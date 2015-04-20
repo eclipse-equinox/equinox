@@ -44,6 +44,9 @@ WindowsServer2008 "Windows 2008" "Windows Server 2008" Win2008 Win32 # Microsoft
 WindowsServer2008R2 "Windows 2008 R2" "Windows Server 2008 R2" Win2008R2 Win32 # Microsoft
 WindowsServer2012 "Windows 2012" "Windows Server 2012" Win2012 Win32 # Microsoft
 WindowsServer2012R2 "Windows 2012 R2" "Windows Server 2012 R2" Win2012R2 Win32 # Microsoft
+WindowsServer2015 "Windows 2015" "Windows Server 2015" Win2015 Win32 # Microsoft
+WindowsServer2015R2 "Windows 2015 R2" "Windows Server 2015 R2" Win2015R2 Win32 # Microsoft
 Windows7 "Windows 7" Win7 Win32 # Microsoft
 Windows8 "Windows 8" "Windows 8.1" "Windows 8.2" "Windows 8.3" Win8 Win32 # Microsoft
+Windows10 "Windows 10" Win10 Win32 # Microsoft
 "Windows NT (unknown)" win32
