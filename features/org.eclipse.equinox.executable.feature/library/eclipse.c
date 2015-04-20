@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -10,6 +10,7 @@
  *     Kevin Cornell (Rational Software Corporation)
  *	   Markus Schorn (Wind River Systems), bug 193340
  *	   Martin Oberhuber (Wind River) - [149994] Add --launcher.appendVmargs
+ *	   Rapicorp, Inc - Bug 461728 - [Mac] Allow users to specify values in eclipse.ini outside of the installation
  *******************************************************************************/
 
 /* Eclipse Program Launcher
@@ -148,6 +149,7 @@
 #else
 #include <unistd.h>
 #include <strings.h>
+#include <libgen.h>
 #endif
 
 #ifdef MACOSX
@@ -238,6 +240,7 @@ home directory.");
 #define CP			 _T_ECLIPSE("-cp")
 #define CLASSPATH    _T_ECLIPSE("-classpath")
 #define JAR 		 _T_ECLIPSE("-jar")
+#define PROTECT 	 _T_ECLIPSE("-protect")
 
 #define OPENFILE	  _T_ECLIPSE("--launcher.openFile")
 #define DEFAULTACTION _T_ECLIPSE("--launcher.defaultAction")
@@ -282,6 +285,7 @@ static _TCHAR*  timeoutString = NULL;			/* timeout value for opening a file */
 static _TCHAR*  defaultAction = NULL;			/* default action for non '-' command line arguments */ 
 static _TCHAR*  iniFile       = NULL;			/* the launcher.ini file set if  --launcher.ini was specified */
 static _TCHAR*  gtkVersionString = NULL;        /* GTK+ version specified by --launcher.GTK_version */
+static _TCHAR*  protectMode   = NULL;			/* The protection mode */
 
 /* variables for ee options */
 static _TCHAR* eeExecutable = NULL;
@@ -331,7 +335,9 @@ static Option options[] = {
     { TIMEOUT,		&timeoutString, 0,          2 },
     { DEFAULTACTION,&defaultAction, 0,			2 },
     { WS,			&wsArg,			0,			2 },
-    { GTK_VERSION,  &gtkVersionString, 0,       2 } };
+    { GTK_VERSION,  &gtkVersionString, 0,       2 },
+	{ PROTECT,		&protectMode,	0,			2 } };
+
 static int optionsSize = (sizeof(options) / sizeof(options[0]));
 
 static Option eeOptions[] = {
@@ -353,7 +359,7 @@ static int nEEargs = 0;
 /* Local methods */
 static void     parseArgs( int* argc, _TCHAR* argv[] );
 static void 	processDefaultAction(int argc, _TCHAR* argv[]);
-static void 	mergeUserVMArgs( _TCHAR **vmArgs[] );
+static void 	mergeUserVMArgs( _TCHAR **vmArgs[], _TCHAR** launchersIniVMArgs );
 static void     getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **progArgv[] );
 static int 		determineVM(_TCHAR** msg);
 static int 		vmEEProps(_TCHAR* eeFile, _TCHAR** msg);
@@ -367,6 +373,8 @@ static _TCHAR*  findSplash(_TCHAR* splashArg);
 static _TCHAR** getRelaunchCommand( _TCHAR **vmCommand );
 static const _TCHAR* getVMArch();
 static int      _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[]);
+static _TCHAR** mergeConfigurationFilesVMArgs();
+static _TCHAR** extractVMArgs(_TCHAR** launcherIniValues);
 
 #ifdef _WIN32
 static void     createConsole();
@@ -466,6 +474,19 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	return _run(argc, argv, vmArgs);
 }
 
+static void handleVMArgs(_TCHAR** vmArgs[]) {
+	_TCHAR** configFilesVMArgs = mergeConfigurationFilesVMArgs();
+	if (vmArgs == NULL) {
+		*vmArgs = configFilesVMArgs;
+	} else {
+		/* reconcile VM Args from commandline with launcher.ini (append or override),
+		 * this always allocates new memory */
+		mergeUserVMArgs(vmArgs, configFilesVMArgs);
+	}
+	/* platform specific processing of vmargs */
+	processVMArgs(vmArgs);
+}
+
 static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 {
     _TCHAR**  vmCommand = NULL;
@@ -544,14 +565,8 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     	exit( 1 );
     }
 
-    if (vmArgs != NULL) {
-    	/* reconcile VM Args from commandline with launcher.ini (append or override),
-    	 * this always allocates new memory */
-    	mergeUserVMArgs(&vmArgs);
-    	/* platform specific processing of user's vmargs */
-    	processVMArgs(&vmArgs);
-    }
-    
+	handleVMArgs(&vmArgs);
+
     launchMode = determineVM(&msg);
     if (launchMode == -1) {
     	/* problem */
@@ -930,6 +945,41 @@ static _TCHAR** parseArgList( _TCHAR* data ) {
     return execArg;
 }
 
+#ifdef MACOSX
+static _TCHAR* getLauncherFileNameFromConfiguration(_TCHAR* program) {
+	_TCHAR* osPath;
+	_TCHAR* configFile;
+
+	osPath = getFolderForApplicationData();
+
+	char* basec = strdup(program);
+	char* bname = basename(basec);
+	configFile = malloc(_tcslen(osPath) + 1 + strlen(bname) + 5 * sizeof(_TCHAR));
+	sprintf(configFile, "%s/%s.ini", osPath, bname);
+	return configFile;
+}
+#endif
+
+static _TCHAR** getLauncherIniFileFromConfiguration() {
+#ifdef MACOSX
+	if (protectMode == NULL)
+		return NULL;
+	if (strcmp(protectMode, _T_ECLIPSE("base")) == 0) {
+		_TCHAR** configArgv = NULL;
+		int configArgc = 0;
+		int ret = 0;
+
+		ret = readConfigFile(getLauncherFileNameFromConfiguration(program), &configArgc, &configArgv);
+		if (ret == 0)
+			return configArgv;
+		return NULL;
+	}
+	return NULL;
+#else
+	return NULL;
+#endif
+}
+
 /* Return the list of args from the launcher ini file (if it exists). Caller is responsible to free(). */
 static _TCHAR** getConfigArgs() {
 	_TCHAR** configArgv = NULL;
@@ -944,27 +994,43 @@ static _TCHAR** getConfigArgs() {
 	return NULL;
 }
 
-/** Append Commandline VM Args to VM Args that came from the launcher.ini
+/** Append Commandline VM Args to VM Args provided
  *  Always returns new memory even if no new arguments were appended */
-static void mergeUserVMArgs(_TCHAR **vmArgs[]) {
-	_TCHAR** configVMArgs = NULL;
-	_TCHAR** configArgs = NULL;
-
-	if (appendVmargs != 0 && indexOf(VMARGS, initialArgv) > 0) {
-		/* Get vmargs from the launcher.ini, if any */
-		configArgs = getConfigArgs();
-		if (configArgs != NULL) {
-			int vmArg = indexOf(VMARGS, configArgs);
-			if (vmArg >= 0)
-				configVMArgs = configArgs + vmArg + 1;
+static void mergeUserVMArgs(_TCHAR** vmArgs[], _TCHAR** launchersIniVMArgs) {
+	if (appendVmargs == 0) {
+		if (*vmArgs == NULL) {
+			*vmArgs = launchersIniVMArgs;
+			return;
+		} else {
+			//We copy the vmargs, otherwise the last call to free would fail
+			*vmArgs = concatArgs(*vmArgs, NULL);
+			return;
 		}
 	}
 
 	/* This always allocates new memory so we don't need to guess if it is safe
 	 * to free later  */
-	*vmArgs = concatArgs(configVMArgs, *vmArgs);
-	if (configArgs != NULL)
-		free(configArgs);
+	*vmArgs = concatArgs(launchersIniVMArgs, *vmArgs);
+}
+
+static _TCHAR** extractVMArgs(_TCHAR** launcherIniValues) {
+	if (launcherIniValues != NULL) {
+		int vmArg = indexOf(VMARGS, launcherIniValues);
+		if (vmArg >= 0)
+			return launcherIniValues + vmArg + 1;
+	}
+	return NULL;
+}
+
+//Reads the installation eclipse.ini file, reads a eclipse.ini from the configuration location,
+//and merge the VM arguments
+static _TCHAR** mergeConfigurationFilesVMArgs() {
+	_TCHAR** userLauncherIniVMArgs = extractVMArgs(getLauncherIniFileFromConfiguration());
+	_TCHAR** configVMArgs = extractVMArgs(getConfigArgs());
+
+	/* This always allocates new memory so we don't need to guess if it is safe
+	 * to free later  */
+	return concatArgs(configVMArgs, userLauncherIniVMArgs);
 }
 
 static void adjustVMArgs(_TCHAR *javaVM, _TCHAR *jniLib, _TCHAR **vmArgv[]) {
@@ -1018,7 +1084,7 @@ static void getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmA
 
 	/* If the user specified "-vmargs", add them instead of the default VM args. */
 	vmArg = (userVMarg != NULL) ? userVMarg : getArgVM( (launchMode == LAUNCH_JNI) ? jniLib : javaVM ); 
- 	
+
 	adjustVMArgs(javaVM, jniLib, &vmArg);
 	
  	/* Calculate the number of VM arguments. */

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2013 IBM Corporation and others.
+ * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Andrew Niefer
  *     Red Hat, Inc - Bug 379102 - Prevent running Eclipse as root (optionally)
+ *     Rapicorp, Inc - Bug 461728 - [Mac] Allow users to specify values in eclipse.ini outside of the installation
  *******************************************************************************/
  
 #include "eclipseUnicode.h"
@@ -60,7 +61,7 @@ static int      suppressErrors = 0;				/* supress error dialogs */
 static int      protectRoot      = 0;				/* check if launcher was run as root */
 
 static int 	 	createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TCHAR ***argv);
-static void  	parseArgs( int* argc, _TCHAR* argv[] );
+static void  	parseArgs( int* argc, _TCHAR* argv[], int handleVMArgs );
 static _TCHAR* 	getDefaultOfficialName(_TCHAR* program);
 static _TCHAR*  findProgram(_TCHAR* argv[]);
 static _TCHAR*  findLibrary(_TCHAR* library, _TCHAR* program);
@@ -149,12 +150,12 @@ int main( int argc, _TCHAR* argv[] )
     	ret = readIniFile(program, &configArgc, &configArgv);
 	if (ret == 0)
 	{
-		parseArgs (&configArgc, configArgv);
+		parseArgs (&configArgc, configArgv, 0);
 	}
 	
 	/* Parse command line arguments           */
     /* Overrides configuration file arguments */
-    parseArgs( &argc, argv );
+    parseArgs( &argc, argv, 1);
     
     /* Special case - user arguments specified in the config file
 	 * are appended to the user arguments passed from the command line.
@@ -270,7 +271,7 @@ static _TCHAR* findProgram(_TCHAR* argv[]) {
 /*
  * Parse arguments of the command.
  */
-static void parseArgs( int* pArgc, _TCHAR* argv[] )
+static void parseArgs( int* pArgc, _TCHAR* argv[], int handleVMargs )
 {
     int     index;
 
@@ -279,7 +280,7 @@ static void parseArgs( int* pArgc, _TCHAR* argv[] )
 
 	/* For each user defined argument */
     for (index = 0; index < *pArgc; index++){
-        if(_tcsicmp(argv[index], VMARGS) == 0) {
+        if(handleVMargs == 1 && _tcsicmp(argv[index], VMARGS) == 0) {
         	userVMarg = &argv[ index+1 ];
             argv[ index ] = NULL;
             *pArgc = index;
