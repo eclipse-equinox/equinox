@@ -76,6 +76,7 @@ import org.eclipse.equinox.http.servlet.tests.util.BaseServletContextAttributeLi
 import org.eclipse.equinox.http.servlet.tests.util.BaseServletContextListener;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServletRequestAttributeListener;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServletRequestListener;
+import org.eclipse.equinox.http.servlet.tests.util.BufferedServlet;
 import org.eclipse.equinox.http.servlet.tests.util.ServletRequestAdvisor;
 
 import org.junit.Assert;
@@ -1993,6 +1994,27 @@ public class ServletTest extends TestCase {
 			uninstallBundle(bundle);
 		}
 		Assert.assertEquals(expected, actual);
+	}
+
+	public void test_BufferedOutput() throws Exception {
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S9");
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s9");
+			registrations.add(getBundleContext().registerService(Servlet.class, new BufferedServlet(), servletProps1));
+
+			Map<String, List<String>> response = requestAdvisor.request(
+				"s9", Collections.<String, List<String>>emptyMap());
+
+			String responseCode = response.get("responseCode").get(0);
+			Assert.assertEquals("200", responseCode);
+		}
+		finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+		}
 	}
 
 	private static final String PROTOTYPE = "prototype/";
