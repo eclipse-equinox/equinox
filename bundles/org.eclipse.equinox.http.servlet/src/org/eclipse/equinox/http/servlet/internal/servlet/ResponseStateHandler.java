@@ -193,7 +193,7 @@ public class ResponseStateHandler {
 
 		int status = wrapper.getStatus();
 
-		if (status < HttpServletResponse.SC_OK) {
+		if (status < HttpServletResponse.SC_BAD_REQUEST) {
 			return;
 		}
 
