@@ -176,8 +176,11 @@ public class ResponseStateHandler {
 			RequestDispatcher.ERROR_STATUS_CODE,
 			HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
+		HttpServletResponseWrapper wrapperResponse =
+			new HttpServletResponseWrapperImpl(wrappedResponse);
+
 		ResponseStateHandler responseStateHandler = new ResponseStateHandler(
-			request, response, errorDispatchTargets, DispatcherType.ERROR);
+			request, wrapperResponse, errorDispatchTargets, DispatcherType.ERROR);
 
 		responseStateHandler.processRequest();
 
@@ -238,8 +241,11 @@ public class ResponseStateHandler {
 			errorDispatchTargets.getServletRegistration().getName());
 		request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, status);
 
+		HttpServletResponseWrapper wrapperResponse =
+			new HttpServletResponseWrapperImpl(wrappedResponse);
+
 		ResponseStateHandler responseStateHandler = new ResponseStateHandler(
-			request, response, errorDispatchTargets, DispatcherType.ERROR);
+			request, wrapperResponse, errorDispatchTargets, DispatcherType.ERROR);
 
 		responseStateHandler.processRequest();
 
