@@ -191,8 +191,11 @@ public class ServletTest extends TestCase {
 			"Expected <" + expected + "*> but got <" + actual + ">", actual.startsWith(expected));
 	}
 
+	/**
+	 * This case should NOT hit the error servlet because the response is already
+	 * committed. However, setting the response code is perfectly allowed.
+	 */
 	public void test_ErrorPage4() throws Exception {
-		String expected = "401 ERROR :";
 		String actual = null;
 		Map<String, List<String>> response = Collections.emptyMap();
 		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
@@ -207,8 +210,7 @@ public class ServletTest extends TestCase {
 		actual = response.get("responseBody").get(0);
 
 		Assert.assertEquals("401", responseCode);
-		Assert.assertTrue(
-			"Expected <" + expected + "*> but got <" + actual + ">", actual.startsWith(expected));
+		Assert.assertEquals("", actual);
 	}
 
 	public void test_ErrorPage5() throws Exception {
@@ -230,6 +232,87 @@ public class ServletTest extends TestCase {
 			Assert.assertTrue(
 				"Expected <" + expectedResponse + "*> but got <" + actualResponse + ">", actualResponse.startsWith(expectedResponse));
 		}
+	}
+
+	/**
+	 * This test should also not hit the error servlet as we've only set the
+	 * status. As per the Servlet spec this should not trigger error handling.
+	 */
+	public void test_ErrorPage6() throws Exception {
+		Servlet servlet = new HttpServlet() {
+
+			@Override
+			protected void service(
+				HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+
+				response.getWriter().write("Hello!");
+				response.setStatus(444);
+			}
+
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E6");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/TestErrorPage6/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+		props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E6.error");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, "444");
+		registrations.add(getBundleContext().registerService(Servlet.class, new ErrorServlet("444"), props));
+
+		Map<String, List<String>> response = requestAdvisor.request("TestErrorPage6/a", null);
+
+		String responseCode = response.get("responseCode").get(0);
+		String responseBody = response.get("responseBody").get(0);
+
+		Assert.assertEquals("444", responseCode);
+		Assert.assertNotEquals("444 : 444 : ERROR : /TestErrorPage6/a", responseBody);
+	}
+
+	/**
+	 * This test should also not hit the error servlet as we've only set the
+	 * status. As per the Servlet spec this should not trigger error handling.
+	 */
+	public void test_ErrorPage7() throws Exception {
+		final int status = 422;
+
+		Servlet servlet = new HttpServlet() {
+			@Override
+			protected void doGet(
+				HttpServletRequest req, HttpServletResponse resp)
+				throws ServletException, IOException {
+
+				resp.setStatus(status);
+
+				PrintWriter printWriter = new PrintWriter(
+					resp.getOutputStream());
+
+				printWriter.println("{");
+				printWriter.println("error: 'An error message',");
+				printWriter.println("code: 'An error code'");
+				printWriter.println("}");
+
+				printWriter.flush();
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E7");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/TestErrorPage7/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+		props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E7.error");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, String.valueOf(status));
+		registrations.add(getBundleContext().registerService(Servlet.class, new ErrorServlet(String.valueOf(status)), props));
+
+		Map<String, List<String>> response = requestAdvisor.request("TestErrorPage7/a", null);
+
+		String responseCode = response.get("responseCode").get(0);
+		String responseBody = response.get("responseBody").get(0);
+
+		Assert.assertEquals(String.valueOf(status), responseCode);
+		Assert.assertNotEquals(status + " : " + status + " : ERROR : /TestErrorPage7/a", responseBody);
 	}
 
 	public void test_Filter1() throws Exception {

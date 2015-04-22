@@ -97,28 +97,32 @@ public class ServletRequestAdvisor extends Object {
 		String spec = createUrlSpec(value);
 		log("Requesting " + spec); //$NON-NLS-1$
 		URL url = new URL(spec);
-		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+
+		connection.setInstanceFollowRedirects(false);
+		connection.setConnectTimeout(150 * 1000);
+		connection.setReadTimeout(150 * 1000);
 
 		if (headers != null) {
 			for(Map.Entry<String, List<String>> entry : headers.entrySet()) {
 				for(String entryValue : entry.getValue()) {
-					conn.setRequestProperty(entry.getKey(), entryValue);
+					connection.setRequestProperty(entry.getKey(), entryValue);
 				}
 			}
 		}
 
-		int responseCode = conn.getResponseCode();
+		int responseCode = connection.getResponseCode();
 
-		Map<String, List<String>> map = new HashMap<String, List<String>>(conn.getHeaderFields());
+		Map<String, List<String>> map = new HashMap<String, List<String>>(connection.getHeaderFields());
 		map.put("responseCode", Collections.singletonList(String.valueOf(responseCode)));
 
 		InputStream stream;
 
 		if (responseCode >= 400) {
-			stream = conn.getErrorStream();
+			stream = connection.getErrorStream();
 		}
 		else {
-			stream = conn.getInputStream();
+			stream = connection.getInputStream();
 		}
 
 		try {
