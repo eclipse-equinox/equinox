@@ -72,18 +72,26 @@ public class ResponseStateHandler {
 				}
 			}
 		}
-		catch (IOException ioe) {
-			setException(ioe);
+		catch (Exception e) {
+			if (!(e instanceof IOException) &&
+				!(e instanceof RuntimeException) &&
+				!(e instanceof ServletException)) {
 
-			if (dispatcherType != DispatcherType.REQUEST) {
-				throw ioe;
+				e = new ServletException(e);
 			}
-		}
-		catch (ServletException se) {
-			setException(se);
+
+			setException(e);
 
 			if (dispatcherType != DispatcherType.REQUEST) {
-				throw se;
+				if (e instanceof RuntimeException) {
+					throw (RuntimeException)e;
+				}
+				else if (e instanceof IOException) {
+					throw (IOException)e;
+				}
+				else if (e instanceof ServletException) {
+					throw (ServletException)e;
+				}
 			}
 		}
 		finally {
@@ -163,11 +171,15 @@ public class ResponseStateHandler {
 			null, className, null, null, null, null, Match.EXACT, null);
 
 		if (errorDispatchTargets == null) {
-			if (exception instanceof ServletException) {
+			if (exception instanceof RuntimeException) {
+				throw (RuntimeException)exception;
+			}
+			else if (exception instanceof IOException) {
+				throw (IOException)exception;
+			}
+			else if (exception instanceof ServletException) {
 				throw (ServletException)exception;
 			}
-
-			throw (IOException)exception;
 		}
 
 		request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, exception);
