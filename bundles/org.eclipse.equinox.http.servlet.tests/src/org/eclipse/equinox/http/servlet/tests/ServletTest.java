@@ -315,6 +315,64 @@ public class ServletTest extends TestCase {
 		Assert.assertNotEquals(status + " : " + status + " : ERROR : /TestErrorPage7/a", responseBody);
 	}
 
+	public void test_ErrorPage8() throws Exception {
+		Servlet servlet = new HttpServlet() {
+			@Override
+			protected void doGet(
+				HttpServletRequest req, HttpServletResponse resp)
+				throws ServletException, IOException {
+
+				throw new RuntimeException();
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E8");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/TestErrorPage8/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+		props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E8.error");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, RuntimeException.class.getName());
+		registrations.add(getBundleContext().registerService(Servlet.class, new ErrorServlet("500"), props));
+
+		Map<String, List<String>> response = requestAdvisor.request("TestErrorPage8/a", null);
+
+		String responseCode = response.get("responseCode").get(0);
+		String responseBody = response.get("responseBody").get(0);
+
+		Assert.assertEquals("500", responseCode);
+		Assert.assertEquals("500 : 500 : ERROR : /TestErrorPage8/a", responseBody);
+	}
+
+	public void test_ErrorPage9() throws Exception {
+		Servlet servlet = new HttpServlet() {
+			@Override
+			protected void doGet(
+				HttpServletRequest req, HttpServletResponse resp)
+				throws ServletException, IOException {
+
+				throw new IOException();
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E9");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/TestErrorPage9/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+		props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E9.error");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, IOException.class.getName());
+		registrations.add(getBundleContext().registerService(Servlet.class, new ErrorServlet("500"), props));
+
+		Map<String, List<String>> response = requestAdvisor.request("TestErrorPage9/a", null);
+
+		String responseCode = response.get("responseCode").get(0);
+		String responseBody = response.get("responseBody").get(0);
+
+		Assert.assertEquals("500", responseCode);
+		Assert.assertEquals("500 : 500 : ERROR : /TestErrorPage9/a", responseBody);
+	}
+
 	public void test_Filter1() throws Exception {
 		String expected = "bab";
 		String actual;
