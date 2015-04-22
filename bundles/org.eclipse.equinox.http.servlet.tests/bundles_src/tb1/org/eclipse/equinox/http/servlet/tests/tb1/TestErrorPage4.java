@@ -69,6 +69,7 @@ public class TestErrorPage4 extends AbstractTestServlet {
 	}
 
 	Servlet errorServlet = new HttpServlet() {
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		protected void service(

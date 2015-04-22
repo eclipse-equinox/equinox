@@ -240,6 +240,7 @@ public class ServletTest extends TestCase {
 	 */
 	public void test_ErrorPage6() throws Exception {
 		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -278,6 +279,8 @@ public class ServletTest extends TestCase {
 		final int status = 422;
 
 		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			protected void doGet(
 				HttpServletRequest req, HttpServletResponse resp)
@@ -317,6 +320,8 @@ public class ServletTest extends TestCase {
 
 	public void test_ErrorPage8() throws Exception {
 		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			protected void doGet(
 				HttpServletRequest req, HttpServletResponse resp)
@@ -346,6 +351,8 @@ public class ServletTest extends TestCase {
 
 	public void test_ErrorPage9() throws Exception {
 		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			protected void doGet(
 				HttpServletRequest req, HttpServletResponse resp)
@@ -1248,9 +1255,6 @@ public class ServletTest extends TestCase {
 			ServletContextDTO[] servletContextDTOs = runtimeDTO.servletContextDTOs;
 
 			Assert.assertTrue(servletContextDTOs.length > 0);
-
-			ServletContextDTO servletContextDTO = servletContextDTOs[0];
-
 		} finally {
 			uninstallBundle(bundle);
 		}

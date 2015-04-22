@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author Raymond Augé
  */
 public class BaseAsyncServlet extends BaseServlet {
+	private static final long serialVersionUID = 1L;
 
 	ScheduledThreadPoolExecutor executor =
 		(ScheduledThreadPoolExecutor)Executors.newScheduledThreadPool(4);

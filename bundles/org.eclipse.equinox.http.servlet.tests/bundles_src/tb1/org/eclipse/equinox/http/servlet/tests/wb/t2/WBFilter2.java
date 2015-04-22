@@ -22,7 +22,7 @@ public class WBFilter2 extends AbstractWhiteboardTestFilter {
 
 	char c;
 
-	private void activate(ComponentContext componentContext) {
+	protected void activate(ComponentContext componentContext) {
 		c = (Character)componentContext.getProperties().get("char");
 	}
 

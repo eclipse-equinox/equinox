@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class BufferedServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
 
 	static final char[] value = String.format("%01023d", 1).toCharArray();
 

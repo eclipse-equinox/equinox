@@ -68,6 +68,7 @@ public class TestErrorPage2 extends AbstractTestServlet {
 
 	Filter f1 = new BaseFilter('b');
 	Servlet errorServlet = new HttpServlet() {
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		protected void service(
@@ -91,6 +92,7 @@ public class TestErrorPage2 extends AbstractTestServlet {
 	};
 
 	public class MyException extends ServletException {
+		private static final long serialVersionUID = 1L;
 	}
 
 }

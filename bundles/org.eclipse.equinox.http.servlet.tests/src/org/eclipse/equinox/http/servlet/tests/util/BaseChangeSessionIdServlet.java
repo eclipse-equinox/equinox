@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 public class BaseChangeSessionIdServlet extends BaseServlet {
+	private static final long serialVersionUID = 1L;
 
 	public BaseChangeSessionIdServlet(String content) {
 		super(content);

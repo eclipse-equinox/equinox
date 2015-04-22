@@ -23,6 +23,7 @@ import org.eclipse.equinox.http.servlet.tests.tb.AbstractWhiteboardTestServlet;
  * @author Raymond Augé
  */
 public class WBServlet2 extends AbstractWhiteboardTestServlet {
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) throws ServletException, IOException {
