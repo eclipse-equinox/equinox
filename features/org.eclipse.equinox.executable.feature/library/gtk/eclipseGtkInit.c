@@ -139,7 +139,6 @@ int loadGtk() {
 			const char *check = (*func)(minGtkMajorVersion, minGtkMinorVersion, minGtkMicroVersion);
 			if (check != NULL) {
 				GtkWidget* dialog;
-				gint result;
 				int gtkMajorVersion, gtkMinorVersion, gtkMicroVersion;
 				void *gtkMajorPtr, *gtkMinorPtr, *gtkMicroPtr;
 
@@ -185,7 +184,7 @@ int loadGtk() {
 						gtkMinorVersion, gtkMicroVersion, upgradeWarning1, minGtkMajorVersion,
 						minGtkMinorVersion, minGtkMicroVersion, upgradeWarning2);
 				gtk.gtk_window_set_title((GtkWindow*)dialog, minVerTitle);
-				result = gtk.gtk_dialog_run((GtkDialog*)dialog);
+				gtk.gtk_dialog_run((GtkDialog*)dialog);
 				gtk.gtk_widget_destroy(dialog);
 				dlclose(gdkLib);
 				dlclose(gtkLib);

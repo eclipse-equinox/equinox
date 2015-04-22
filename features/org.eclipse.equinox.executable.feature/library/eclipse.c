@@ -847,7 +847,6 @@ static void parseArgs(int* pArgc, _TCHAR* argv[]) {
 	int remArgs;
 	int index;
 	int i;
-	_TCHAR * c;
 
 	/* For each user defined argument (excluding the program) */
 	for (index = 1; index < *pArgc; index++) {
@@ -865,7 +864,6 @@ static void parseArgs(int* pArgc, _TCHAR* argv[]) {
 		/* If the option is recognized by the launcher */
 		if (option != NULL) {
 			int optional = 0;
-			c = option->name;
 			/* If the option requires a value and there is one, extract the value. */
 			if (option->value != NULL) {
 				if (option->flag & VALUE_IS_FLAG)
