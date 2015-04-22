@@ -11,7 +11,6 @@
 
 package org.eclipse.equinox.http.servlet.internal.servlet;
 
-import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
@@ -25,12 +24,12 @@ public class HttpServletResponseWrapperImpl extends HttpServletResponseWrapper {
 	}
 
 	@Override
-	public void flushBuffer() throws IOException {
-		if (this.status > -1) {
-			return;
+	public boolean isCommitted() {
+		if (this.status != -1) {
+			return true;
 		}
 
-		super.flushBuffer();
+		return super.isCommitted();
 	}
 
 	@Override
@@ -42,16 +41,6 @@ public class HttpServletResponseWrapperImpl extends HttpServletResponseWrapper {
 	public void sendError(int status, String message) {
 		this.status = status;
 		this.message = message;
-	}
-
-	@Override
-	public void setStatus(int status) {
-		this.status = status;
-	}
-
-	@Override
-	public void setStatus(int status, String message) {
-		sendError(status, message);
 	}
 
 	public String getMessage() {
