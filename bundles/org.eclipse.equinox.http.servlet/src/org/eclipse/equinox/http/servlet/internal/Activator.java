@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2015 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -159,7 +159,7 @@ public class Activator
 		ServiceRegistration<?> hsfRegistration = context.registerService(
 			HTTP_SERVICES_CLASSES, httpServiceFactory, serviceProperties);
 
-		serviceProperties.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ID_ATTRIBUTE, hsfRegistration.getReference().getProperty(Constants.SERVICE_ID));
+		serviceProperties.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ID_ATTRIBUTE, Collections.singletonList(hsfRegistration.getReference().getProperty(Constants.SERVICE_ID)));
 		ServiceRegistration<HttpServiceRuntime> hsrRegistration =
 			context.registerService(
 				HttpServiceRuntime.class, httpServiceRuntime,
