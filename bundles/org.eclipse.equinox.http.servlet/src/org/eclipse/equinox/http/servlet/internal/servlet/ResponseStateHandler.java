@@ -149,6 +149,12 @@ public class ResponseStateHandler {
 
 		HttpServletResponse wrappedResponse = (HttpServletResponse)wrapperImpl.getResponse();
 
+		if (wrappedResponse.isCommitted()) {
+			// There's nothing we can do here.
+
+			return;
+		}
+
 		ContextController contextController = dispatchTargets.getContextController();
 		Class<? extends Exception> clazz = exception.getClass();
 		String className = clazz.getName();
@@ -220,6 +226,12 @@ public class ResponseStateHandler {
 		}
 
 		HttpServletResponse wrappedResponse = (HttpServletResponse)wrapperImpl.getResponse();
+
+		if (wrappedResponse.isCommitted() || (wrapperImpl.getStatus() == -1)) {
+			// There's nothing we can do here.
+
+			return;
+		}
 
 		ContextController contextController = dispatchTargets.getContextController();
 
