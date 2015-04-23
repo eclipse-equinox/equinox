@@ -1125,7 +1125,7 @@ static void getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmA
      * VMARGS + vmArg + requiredVMargs
      *  + NULL)
      */
-    totalProgArgs  = 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 1 + argc + 2 + 1 + nVMarg + nEEargs + nReqVMarg + 1;
+    totalProgArgs  = 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 1 + argc + 2 + 1 + nVMarg + nEEargs + nReqVMarg + 1;
 	*progArgv = malloc( totalProgArgs * sizeof( _TCHAR* ) );
     dst = 0;
     
@@ -1165,6 +1165,12 @@ static void getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmA
 	(*progArgv)[ dst++ ] = STARTUP;
 	(*progArgv)[ dst++ ] = jarFile;
     
+	/* the protect mode */
+	if (protectMode) {
+		(*progArgv)[ dst++ ] = PROTECT;
+		(*progArgv)[ dst++ ] = protectMode;
+	}
+
 	/* override or append vm args */
 	(*progArgv)[ dst++ ] = appendVmargs ? APPEND_VMARGS : OVERRIDE_VMARGS;
 
