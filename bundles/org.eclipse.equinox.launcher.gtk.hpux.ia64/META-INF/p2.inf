@@ -1,2 +1,2 @@
 # bug 407433 - launcher .so files need exec permissions on HPUX
-instructions.install = chmod(targetDir:${artifact.location},targetFile:eclipse_1609.so,permissions:755);
+instructions.install = chmod(targetDir:${artifact.location},targetFile:eclipse_1610.so,permissions:755);
