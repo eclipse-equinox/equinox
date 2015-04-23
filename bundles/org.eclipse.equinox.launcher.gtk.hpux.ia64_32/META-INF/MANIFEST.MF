@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.eclipse.equinox.launcher.gtk.hpux.ia64_32
-Bundle-Version: 1.0.100.qualifier
+Bundle-Version: 1.0.200.qualifier
 Fragment-Host: org.eclipse.equinox.launcher;bundle-version="1.0.0"
 Eclipse-PlatformFilter: (& (osgi.ws=gtk) (osgi.os=hpux) (osgi.arch=ia64_32))
 Bundle-Localization: launcher.gtk.hpux.ia64_32
