@@ -43,12 +43,4 @@
          id="org.eclipse.equinox.core.feature"
          version="0.0.0"/>
 
-   <requires>
-     <feature id="org.eclipse.equinox.p2.sdk"/>
-     <feature id="org.eclipse.equinox.p2.core.feature"/>
-     <feature id="org.eclipse.equinox.p2.extras.feature"/>
-     <feature id="org.eclipse.equinox.p2.rcp.feature"/>
-     <feature id="org.eclipse.core.runtime.feature"/>
-   </requires>
-
 </feature>
