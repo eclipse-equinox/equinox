@@ -285,7 +285,7 @@ static _TCHAR*  timeoutString = NULL;			/* timeout value for opening a file */
 static _TCHAR*  defaultAction = NULL;			/* default action for non '-' command line arguments */ 
 static _TCHAR*  iniFile       = NULL;			/* the launcher.ini file set if  --launcher.ini was specified */
 static _TCHAR*  gtkVersionString = NULL;        /* GTK+ version specified by --launcher.GTK_version */
-static _TCHAR*  protectMode   = NULL;			/* The protection mode */
+static _TCHAR*  protectMode   = NULL;			/* Process -protectMode to trigger the reading of the eclipse.ini in the configuration (at this point mac specific) */
 
 /* variables for ee options */
 static _TCHAR* eeExecutable = NULL;

@@ -58,7 +58,7 @@ static _TCHAR** userVMarg     = NULL;     		/* user specific args for the Java V
 static _TCHAR*  programDir	  = NULL;			/* directory where program resides */
 static _TCHAR*  officialName  = NULL;
 static int      suppressErrors = 0;				/* supress error dialogs */
-static int      protectRoot      = 0;				/* check if launcher was run as root */
+static int      protectRoot      = 0;				/* check if launcher was run as root. This argument is also handled in eclipse.c */
 
 static int 	 	createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TCHAR ***argv);
 static void  	parseArgs( int* argc, _TCHAR* argv[], int handleVMArgs );
@@ -271,7 +271,7 @@ static _TCHAR* findProgram(_TCHAR* argv[]) {
 /*
  * Parse arguments of the command.
  */
-static void parseArgs( int* pArgc, _TCHAR* argv[], int handleVMargs )
+static void parseArgs( int* pArgc, _TCHAR* argv[], int useVMargs )
 {
     int     index;
 
@@ -280,8 +280,10 @@ static void parseArgs( int* pArgc, _TCHAR* argv[], int handleVMargs )
 
 	/* For each user defined argument */
     for (index = 0; index < *pArgc; index++){
-        if(handleVMargs == 1 && _tcsicmp(argv[index], VMARGS) == 0) {
-        	userVMarg = &argv[ index+1 ];
+        if(_tcsicmp(argv[index], VMARGS) == 0) {
+        	if (useVMargs == 1)	{ //Use the VMargs as the user specified vmArgs
+        		userVMarg = &argv[ index+1 ];
+        	}
             argv[ index ] = NULL;
             *pArgc = index;
         } else if(_tcsicmp(argv[index], NAME) == 0) {
