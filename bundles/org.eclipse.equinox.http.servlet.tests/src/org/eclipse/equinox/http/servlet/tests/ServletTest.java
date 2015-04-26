@@ -380,6 +380,39 @@ public class ServletTest extends TestCase {
 		Assert.assertEquals("500 : 500 : ERROR : /TestErrorPage9/a", responseBody);
 	}
 
+	public void test_ErrorPage10() throws Exception {
+		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void doGet(
+				HttpServletRequest req, HttpServletResponse resp)
+				throws ServletException, IOException {
+
+				resp.getWriter().write("some output");
+				resp.flushBuffer();
+
+				throw new IOException();
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E10");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/TestErrorPage10/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+
+		try {
+			requestAdvisor.request("TestErrorPage10/a");
+		}
+		catch (Exception e) {
+			Assert.assertTrue(e instanceof IOException);
+
+			return;
+		}
+
+		Assert.fail("Expecting java.io.IOException: Premature EOF");
+	}
+
 	public void test_Filter1() throws Exception {
 		String expected = "bab";
 		String actual;
