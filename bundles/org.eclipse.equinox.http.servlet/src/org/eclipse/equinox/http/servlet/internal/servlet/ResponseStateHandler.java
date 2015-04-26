@@ -83,15 +83,7 @@ public class ResponseStateHandler {
 			setException(e);
 
 			if (dispatcherType != DispatcherType.REQUEST) {
-				if (e instanceof RuntimeException) {
-					throw (RuntimeException)e;
-				}
-				else if (e instanceof IOException) {
-					throw (IOException)e;
-				}
-				else if (e instanceof ServletException) {
-					throw (ServletException)e;
-				}
+				throwException(e);
 			}
 		}
 		finally {
@@ -131,7 +123,7 @@ public class ResponseStateHandler {
 
 	private void handleException() throws IOException, ServletException {
 		if (!(response instanceof HttpServletResponseWrapper)) {
-			return;
+			throw new IllegalStateException("Response isn't a wrapper"); //$NON-NLS-1$
 		}
 
 		HttpServletResponseWrapper wrapper = (HttpServletResponseWrapper)response;
@@ -158,9 +150,7 @@ public class ResponseStateHandler {
 		HttpServletResponse wrappedResponse = (HttpServletResponse)wrapperImpl.getResponse();
 
 		if (wrappedResponse.isCommitted()) {
-			// There's nothing we can do here.
-
-			return;
+			throwException(exception);
 		}
 
 		ContextController contextController = dispatchTargets.getContextController();
@@ -171,15 +161,7 @@ public class ResponseStateHandler {
 			null, className, null, null, null, null, Match.EXACT, null);
 
 		if (errorDispatchTargets == null) {
-			if (exception instanceof RuntimeException) {
-				throw (RuntimeException)exception;
-			}
-			else if (exception instanceof IOException) {
-				throw (IOException)exception;
-			}
-			else if (exception instanceof ServletException) {
-				throw (ServletException)exception;
-			}
+			throwException(exception);
 		}
 
 		request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, exception);
@@ -207,7 +189,7 @@ public class ResponseStateHandler {
 
 	private void handleResponseCode() throws IOException, ServletException {
 		if (!(response instanceof HttpServletResponseWrapper)) {
-			return;
+			throw new IllegalStateException("Response isn't a wrapper"); //$NON-NLS-1$
 		}
 
 		HttpServletResponseWrapper wrapper = (HttpServletResponseWrapper)response;
@@ -271,9 +253,23 @@ public class ResponseStateHandler {
 		ResponseStateHandler responseStateHandler = new ResponseStateHandler(
 			request, wrapperResponse, errorDispatchTargets, DispatcherType.ERROR);
 
-		responseStateHandler.processRequest();
-
 		wrappedResponse.setStatus(status);
+
+		responseStateHandler.processRequest();
+	}
+
+	private void throwException(Exception e)
+		throws IOException, ServletException {
+
+		if (e instanceof RuntimeException) {
+			throw (RuntimeException)e;
+		}
+		else if (e instanceof IOException) {
+			throw (IOException)e;
+		}
+		else if (e instanceof ServletException) {
+			throw (ServletException)e;
+		}
 	}
 
 	private DispatchTargets dispatchTargets;
