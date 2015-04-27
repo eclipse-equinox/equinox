@@ -46,7 +46,7 @@ administrative privileges.");
 #define LIBRARY		  _T_ECLIPSE("--launcher.library")
 #define SUPRESSERRORS _T_ECLIPSE("--launcher.suppressErrors")
 #define INI			  _T_ECLIPSE("--launcher.ini")
-#define PROTECT	      _T_ECLIPSE("-protect")
+#define PROTECT	      _T_ECLIPSE("-protect")	/* This argument is also handled in eclipse.c for Mac specific processing */
 #define ROOT		  _T_ECLIPSE("root")		/* the only level of protection we care now */
 
 /* this typedef must match the run method in eclipse.c */
@@ -54,11 +54,11 @@ typedef int (*RunMethod)(int argc, _TCHAR* argv[], _TCHAR* vmArgs[]);
 typedef void (*SetInitialArgs)(int argc, _TCHAR*argv[], _TCHAR* library);
 
 static _TCHAR*  name          = NULL;			/* program name */
-static _TCHAR** userVMarg     = NULL;     		/* user specific args for the Java VM  */
+static _TCHAR** userVMarg     = NULL;     		/* user specific args for the Java VM */
 static _TCHAR*  programDir	  = NULL;			/* directory where program resides */
 static _TCHAR*  officialName  = NULL;
 static int      suppressErrors = 0;				/* supress error dialogs */
-static int      protectRoot      = 0;				/* check if launcher was run as root. This argument is also handled in eclipse.c */
+static int      protectRoot      = 0;				/* check if launcher was run as root, currently works only on Linux/UNIX platforms */
 
 static int 	 	createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TCHAR ***argv);
 static void  	parseArgs( int* argc, _TCHAR* argv[], int handleVMArgs );
