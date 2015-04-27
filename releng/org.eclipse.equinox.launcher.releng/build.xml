@@ -194,7 +194,7 @@
 		<condition property="mac_suffix" value="/Eclipse.app/Contents/MacOS" else="">
 			<equals arg1="macosx" arg2="${os}" />
 		</condition>
-		<condition property="exe" value="eclipse.exe" else="eclipse">
+		<condition property="exe" value="eclipse*.exe" else="eclipse">
 			<or>
 				<equals arg1="${os}" arg2="win32"/>
 			</or>
