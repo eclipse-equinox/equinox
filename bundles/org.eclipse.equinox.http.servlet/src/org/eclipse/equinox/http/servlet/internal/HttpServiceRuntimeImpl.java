@@ -210,7 +210,7 @@ public class HttpServiceRuntimeImpl
 	public List<String> getHttpServiceEndpoints() {
 		return StringPlus.from(
 			attributes.get(
-				HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT_ATTRIBUTE));
+				HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT));
 	}
 
 	@Override

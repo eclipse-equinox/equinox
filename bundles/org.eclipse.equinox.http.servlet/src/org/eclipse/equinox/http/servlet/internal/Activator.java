@@ -133,10 +133,10 @@ public class Activator
 		}
 
 		if (serviceProperties.get(
-				HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT_ATTRIBUTE) == null) {
+				HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT) == null) {
 
 			serviceProperties.put(
-				HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT_ATTRIBUTE,
+				HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT,
 				httpServiceEndpoints);
 		}
 
@@ -159,7 +159,7 @@ public class Activator
 		ServiceRegistration<?> hsfRegistration = context.registerService(
 			HTTP_SERVICES_CLASSES, httpServiceFactory, serviceProperties);
 
-		serviceProperties.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ID_ATTRIBUTE, Collections.singletonList(hsfRegistration.getReference().getProperty(Constants.SERVICE_ID)));
+		serviceProperties.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ID, Collections.singletonList(hsfRegistration.getReference().getProperty(Constants.SERVICE_ID)));
 		ServiceRegistration<HttpServiceRuntime> hsrRegistration =
 			context.registerService(
 				HttpServiceRuntime.class, httpServiceRuntime,
@@ -193,7 +193,7 @@ public class Activator
 			servletContext.log(
 				"The http container does not support servlet 3.0+. " +
 					"Therefore, the value of " +
-						HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT_ATTRIBUTE +
+						HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT +
 							" cannot be calculated.");
 
 			return new String[0];
