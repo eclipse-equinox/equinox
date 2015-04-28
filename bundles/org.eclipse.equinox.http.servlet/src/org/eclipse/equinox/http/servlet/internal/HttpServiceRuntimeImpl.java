@@ -26,6 +26,7 @@ import org.eclipse.equinox.http.servlet.internal.error.*;
 import org.eclipse.equinox.http.servlet.internal.servlet.*;
 import org.eclipse.equinox.http.servlet.internal.util.*;
 import org.osgi.framework.*;
+import org.osgi.framework.dto.ServiceReferenceDTO;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.service.http.context.ServletContextHelper;
@@ -217,7 +218,7 @@ public class HttpServiceRuntimeImpl
 	public RuntimeDTO getRuntimeDTO() {
 		RuntimeDTO runtimeDTO = new RuntimeDTO();
 
-		runtimeDTO.attributes = serializeAttributes();
+		runtimeDTO.serviceDTO = getServiceDTO();
 
 		// TODO FailedErrorDTOs
 
@@ -230,6 +231,19 @@ public class HttpServiceRuntimeImpl
 		runtimeDTO.servletContextDTOs = getServletContextDTOs();
 
 		return runtimeDTO;
+	}
+
+	private ServiceReferenceDTO getServiceDTO() {
+		ServiceReferenceDTO[] services = consumingContext.getBundle().adapt(ServiceReferenceDTO[].class);
+		for (ServiceReferenceDTO serviceDTO : services) {
+			String[] serviceTypes = (String[]) serviceDTO.properties.get(Constants.OBJECTCLASS);
+			for (String type : serviceTypes) {
+				if (HttpServiceRuntime.class.getName().equals(type)) {
+					return serviceDTO;
+				}
+			}
+		}
+		return null;
 	}
 
 	public void log(String message, Throwable t) {
@@ -538,17 +552,6 @@ public class HttpServiceRuntimeImpl
 		return servletContextDTOs.toArray(
 			new ServletContextDTO[servletContextDTOs.size()]);
 	}
-
-	private Map<String, String> serializeAttributes() {
-		Map<String, String> temp = new HashMap<String, String>();
-
-		for (Map.Entry<String, Object> entry : attributes.entrySet()) {
-			temp.put(entry.getKey(), String.valueOf(entry.getValue()));
-		}
-
-		return temp;
-	}
-
 
 	public void registerHttpServiceFilter(
 		Bundle bundle, String alias, Filter filter, Dictionary<String, String> initparams, HttpContext httpContext) throws ServletException {
