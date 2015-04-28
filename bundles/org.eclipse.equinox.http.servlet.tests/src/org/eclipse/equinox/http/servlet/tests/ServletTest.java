@@ -413,6 +413,33 @@ public class ServletTest extends TestCase {
 		Assert.fail("Expecting java.io.IOException: Premature EOF");
 	}
 
+	public void test_ErrorPage11() throws Exception {
+		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void doGet(
+				HttpServletRequest req, HttpServletResponse resp)
+				throws ServletException, IOException {
+
+				resp.sendError(403);
+				resp.getOutputStream().flush();
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E10");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/TestErrorPage11/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+
+		try {
+			requestAdvisor.request("TestErrorPage11/a");
+		} catch (IOException e) {
+			// This is expected because of old behavior
+			// TODO is this really the correct behavior though
+		}
+	}
+
 	public void test_Filter1() throws Exception {
 		String expected = "bab";
 		String actual;
