@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Raymond Augé and others.
+ * Copyright (c) 2014, 2015 Raymond Augé and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -221,9 +221,14 @@ public class ResponseStateHandler {
 
 		HttpServletResponse wrappedResponse = (HttpServletResponse)wrapperImpl.getResponse();
 
-		if (wrappedResponse.isCommitted() || (wrapperImpl.getStatus() == -1)) {
-			// There's nothing we can do here.
-
+		if (status == -1) {
+			// There's nothing more we can do here.
+			return;
+		}
+		if (wrappedResponse.isCommitted()) {
+			// the response is committed already, but we need to propagate the error code anyway
+			wrappedResponse.sendError(status, wrapperImpl.getMessage());
+			// There's nothing more we can do here.
 			return;
 		}
 
