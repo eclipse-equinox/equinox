@@ -636,7 +636,23 @@ public class Main {
 	}
 
 	private void invokeFramework(String[] passThruArgs, URL[] bootPath) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, Error, Exception, InvocationTargetException {
-		String type = System.getProperty(PROP_FRAMEWORK_PARENT_CLASSLOADER, System.getProperty(PROP_PARENT_CLASSLOADER, PARENT_CLASSLOADER_BOOT));
+		String type = PARENT_CLASSLOADER_BOOT;
+		try {
+			String javaVersion = System.getProperty("java.version"); //$NON-NLS-1$
+			if (javaVersion != null && new Identifier(javaVersion).isGreaterEqualTo(new Identifier("1.9"))) { //$NON-NLS-1$
+				// Workaround for bug 466683. Some org.w3c.dom.* packages that used to be available from
+				// JavaSE's boot classpath are only available from the extension path in Java 9 b62.
+				type = PARENT_CLASSLOADER_EXT;
+			}
+		} catch (SecurityException e) {
+			// If the security manager won't allow us to get the system property, continue for
+			// now and let things fail later on their own if necessary.
+		} catch (NumberFormatException e) {
+			// If the version string was in a format that we don't understand, continue and
+			// let things fail later on their own if necessary.
+		}
+		type = System.getProperty(PROP_PARENT_CLASSLOADER, type);
+		type = System.getProperty(PROP_FRAMEWORK_PARENT_CLASSLOADER, type);
 		ClassLoader parent = null;
 		if (PARENT_CLASSLOADER_APP.equalsIgnoreCase(type))
 			parent = ClassLoader.getSystemClassLoader();
