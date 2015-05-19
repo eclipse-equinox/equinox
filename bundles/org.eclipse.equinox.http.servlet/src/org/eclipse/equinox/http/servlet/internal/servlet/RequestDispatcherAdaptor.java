@@ -14,6 +14,7 @@ package org.eclipse.equinox.http.servlet.internal.servlet;
 
 import java.io.IOException;
 import javax.servlet.*;
+import javax.servlet.http.HttpServletRequestWrapper;
 
 //This class unwraps the request so it can be processed by the underlying servlet container.
 public class RequestDispatcherAdaptor implements RequestDispatcher {
@@ -25,8 +26,19 @@ public class RequestDispatcherAdaptor implements RequestDispatcher {
 	}
 
 	public void forward(ServletRequest req, ServletResponse resp) throws ServletException, IOException {
-		if (req instanceof HttpServletRequestBuilder.RequestGetter)
-			req = ((HttpServletRequestBuilder.RequestGetter) req).getOriginalRequest();
+		while (true) {
+			if (req instanceof HttpServletRequestBuilder.RequestGetter) {
+				req = ((HttpServletRequestBuilder.RequestGetter) req).getOriginalRequest();
+				break;
+			}
+
+			if (req instanceof HttpServletRequestWrapper) {
+				req = ((HttpServletRequestWrapper)req).getRequest();
+				continue;
+			}
+
+			break;
+		}
 
 		requestDispatcher.forward(req, resp);
 	}

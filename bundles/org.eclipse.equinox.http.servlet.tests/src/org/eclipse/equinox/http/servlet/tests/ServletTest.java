@@ -50,7 +50,9 @@ import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingEvent;
@@ -771,6 +773,95 @@ public class ServletTest extends TestCase {
 		Assert.assertFalse("testFilter1 got called.", testFilter1.getCalled());
 		Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
 	}
+
+
+
+	public void basicFilterTest22( String servlet1Pattern, String servlet2Pattern, String filterPattern, String expected, String[] dispatchers ) throws Exception {
+		Servlet servlet1 = new BaseServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response)
+					throws ServletException, IOException {
+				request.getRequestDispatcher("/f22/index.jsp").forward(request, response);
+			}
+		};
+
+		Servlet servlet2 = new BaseServlet("a");
+
+		Filter filter = new TestFilter() {
+
+			@Override
+			public void doFilter(
+					ServletRequest request, ServletResponse response, FilterChain chain)
+				throws IOException, ServletException {
+
+				response.getWriter().write('b');
+
+				chain.doFilter(
+					new HttpServletRequestWrapper((HttpServletRequest) request),
+					new HttpServletResponseWrapper((HttpServletResponse) response));
+
+				response.getWriter().write('b');
+			}
+
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, servlet1Pattern);
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
+
+		props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, servlet2Pattern);
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
+
+		props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F22");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, dispatchers);
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, filterPattern);
+		registrations.add(getBundleContext().registerService(Filter.class, filter, props));
+
+		String response = requestAdvisor.request("f22/a");
+
+		Assert.assertEquals(expected, response);
+	}
+
+	public void test_Filter22a() throws Exception {
+		basicFilterTest22 ( "/f22/*", "*.jsp", "/f22/*", "a", new String[] {"REQUEST"} );
+	}
+
+	public void test_Filter22b() throws Exception {
+		basicFilterTest22 ( "/*", "*.jsp", "/*", "a", new String[] {"REQUEST"} );
+	}
+
+	public void test_Filter22c() throws Exception {
+		basicFilterTest22 ( "/f22/*", "*.jsp", "*.jsp", "a", new String[] {"REQUEST"} );
+	}
+
+	public void test_Filter22d() throws Exception {
+		basicFilterTest22 ( "/f22/*", "*.jsp", "/f22/*", "bab", new String[] {"FORWARD"} );
+	}
+
+	public void test_Filter22e() throws Exception {
+		basicFilterTest22 ( "/*", "*.jsp", "/*", "bab", new String[] {"FORWARD"} );
+	}
+
+	public void test_Filter22f() throws Exception {
+		basicFilterTest22 ( "/f22/*", "*.jsp", "*.jsp", "bab", new String[] {"FORWARD"} );
+	}
+
+	public void test_Filter22g() throws Exception {
+		basicFilterTest22 ( "/f22/*", "*.jsp", "/f22/*", "bab", new String[] {"REQUEST", "FORWARD"} );
+	}
+
+	public void test_Filter22h() throws Exception {
+		basicFilterTest22 ( "/*", "*.jsp", "/*", "bab", new String[] {"REQUEST", "FORWARD"} );
+	}
+
+	public void test_Filter22i() throws Exception {
+		basicFilterTest22 ( "/f22/*", "*.jsp", "*.jsp", "bab", new String[] {"REQUEST", "FORWARD"} );
+	}
+
 	public void test_Registration1() throws Exception {
 		String expected = "Alias cannot be null";
 		try {

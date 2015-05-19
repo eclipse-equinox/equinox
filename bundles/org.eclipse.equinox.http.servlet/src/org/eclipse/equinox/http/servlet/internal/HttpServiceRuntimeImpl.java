@@ -398,6 +398,9 @@ public class HttpServiceRuntimeImpl
 
 			dispatcherType = DispatcherType.INCLUDE;
 		}
+		else if (request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI) != null) {
+			dispatcherType = DispatcherType.FORWARD;
+		}
 
 		HttpServletRequest wrappedRequest = new HttpServletRequestBuilder(
 			request, dispatchTargets).build();
