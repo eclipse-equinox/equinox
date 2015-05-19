@@ -52,6 +52,7 @@ CFLAGS = ${M_ARCH} -g -s -Wall\
 	-fpic \
 	-DLINUX \
 	-DMOZILLA_FIX \
+	-D__$(DEFAULT_OS_ARCH)__ \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
