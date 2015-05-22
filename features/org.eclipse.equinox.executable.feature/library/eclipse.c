@@ -527,13 +527,6 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 #endif
 #endif
 
-#ifdef LINUX
-#ifdef __ppc64le__
-	/* set the swt gtk3 flag to 0 so that we use only GTK2 on ppc64le platform */
-	setenv("SWT_GTK3","0",1);
-#endif
-#endif
-
 	/* try to open the specified file in an already running eclipse */
 	/* on Mac we are only registering an event handler here, always do this */
 #ifndef MACOSX
