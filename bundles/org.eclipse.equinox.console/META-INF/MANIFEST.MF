@@ -26,3 +26,5 @@ Import-Package: org.apache.felix.service.command;status=provisional;version="0.8
 Export-Package: org.eclipse.equinox.console.common,
  org.eclipse.equinox.console.common.terminal,
  org.eclipse.equinox.console.completion.common
+Require-Bundle: org.apache.felix.gogo.runtime;bundle-version="0.10.0",
+ org.apache.felix.gogo.shell;bundle-version="0.10.0"
