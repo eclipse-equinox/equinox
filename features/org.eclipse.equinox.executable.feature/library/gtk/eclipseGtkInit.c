@@ -137,17 +137,17 @@ int loadGtk() {
 			setenv("GDK_CORE_DEVICE_EVENTS", "1", 0);
 		}
 #ifdef __ppc64le__
+		/* Adding a temporary version check for GTK3 till we verify with lower versions of GTK3 */
 		if (gtkLib != NULL) {
 			const char * (*func)(int, int, int);
 			dlerror();
 			*(void**) (&func) = dlsym(gtkLib, "gtk_check_version");
 			if (dlerror() == NULL && func) {
 				const char *check = (*func)(minGtk3MajorVersion, minGtk3MinorVersion, minGtk3MicroVersion);
-				if (check != NULL) {
+				if ((check != NULL) && (gtk3 == NULL)) {
 					dlclose(gdkLib);
 					dlclose(gtkLib);
 					gdkLib = gtkLib = NULL;
-					setenv("SWT_GTK3","0",0);
 				}
 			}
 		}
