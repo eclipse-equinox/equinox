@@ -87,7 +87,8 @@ public class BundleFileWrapper extends BundleFile {
 	}
 
 	@Override
-	public URL getResourceURL(String path, Module hostModule, int index) {
-		return bundleFile.getResourceURL(path, hostModule, index);
+	protected URL createResourceURL(BundleEntry bundleEntry, Module hostModule, int index, String path) {
+		return bundleFile.createResourceURL(bundleEntry, hostModule, index, path);
 	}
+
 }

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.hooks.framework;
 
-import java.io.File;
+import java.io.*;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,7 +59,28 @@ public class BundleFileWrapperFactoryHookTests extends AbstractFrameworkHookTest
 		initAndStartFramework();
 
 		Bundle b = installBundle();
-		URL url = b.getResource("data/resource1");
-		assertTrue("Wrong protocol used: " + url, "jar".equals(url.getProtocol()) || "file".equals(url.getProtocol()));
+		URL url1 = b.getResource("data/resource1");
+		assertEquals("Wrong protocol used: " + url1, "custom", url1.getProtocol());
+		assertEquals("Wrong content found.", "CUSTOM_CONTENT", readURL(url1));
+	}
+
+	private String readURL(URL url) {
+		StringBuffer sb = new StringBuffer();
+		try {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+			try {
+				for (String line = reader.readLine(); line != null;) {
+					sb.append(line);
+					line = reader.readLine();
+					if (line != null)
+						sb.append('\n');
+				}
+			} finally {
+				reader.close();
+			}
+		} catch (IOException e) {
+			fail("Unexpected exception reading url: " + url.toExternalForm(), e); //$NON-NLS-1$
+		}
+		return sb.toString();
 	}
 }

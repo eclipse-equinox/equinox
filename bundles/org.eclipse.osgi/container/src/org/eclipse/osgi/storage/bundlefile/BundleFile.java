@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -119,7 +119,14 @@ abstract public class BundleFile {
 	abstract public boolean containsDir(String dir);
 
 	/**
-	 * Returns a URL to access the contents of the entry specified by the path
+	 * Returns a URL to access the contents of the entry specified by the path.
+	 * This method first calls {@link #getEntry(String)} to locate the entry
+	 * at the specified path.  If no entry is found {@code null} is returned;
+	 * otherwise {@link #createResourceURL(BundleEntry, Module, int, String)}
+	 * is called in order to create the URL.  Subclasses should not override
+	 * this method.  Instead the methods {@link #getEntry(String)} and/or
+	 * {@link #createResourceURL(BundleEntry, Module, int, String)} may be
+	 * overriden to augment the behavior.
 	 * @param path the path to the resource
 	 * @param hostModule the host module
 	 * @param index the resource index
@@ -129,6 +136,18 @@ abstract public class BundleFile {
 		BundleEntry bundleEntry = getEntry(path);
 		if (bundleEntry == null)
 			return null;
+		return createResourceURL(bundleEntry, hostModule, index, path);
+	}
+
+	/**
+	 * Creates a URL to access the content of the specified entry
+	 * @param bundleEntry the bundle entry
+	 * @param hostModule the host module
+	 * @param index the resource index
+	 * @param path
+	 * @return a URL to access the contents of the specified entry
+	 */
+	protected URL createResourceURL(BundleEntry bundleEntry, Module hostModule, int index, String path) {
 		long hostBundleID = hostModule.getId();
 		path = fixTrailingSlash(path, bundleEntry);
 		try {
