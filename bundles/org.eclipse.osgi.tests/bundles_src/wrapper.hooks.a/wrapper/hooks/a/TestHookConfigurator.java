@@ -53,7 +53,9 @@ public class TestHookConfigurator implements HookConfigurator {
 									return original.getLocalURL();
 								}
 
-								@SuppressWarnings("unused")
+								/**
+								 * @throws IOException  
+								 */
 								@Override
 								public InputStream getInputStream() throws IOException {
 									return new ByteArrayInputStream(content);
