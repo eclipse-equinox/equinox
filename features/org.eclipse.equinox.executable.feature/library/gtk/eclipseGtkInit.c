@@ -26,11 +26,6 @@ static _TCHAR* upgradeWarning2 = _T_ECLIPSE("\nor use an older version of Eclips
 static int minGtkMajorVersion = 2;
 static int minGtkMinorVersion = 18;
 static int minGtkMicroVersion = 0;
-#ifdef __ppc64le__
-static int minGtk3MajorVersion = 3;
-static int minGtk3MinorVersion = 10;
-static int minGtk3MicroVersion = 9;
-#endif
 
 /* tables to help initialize the function pointers */
 /* functions from libgtk-x11-2.0 or libgtk-3.so.0*/
@@ -136,23 +131,6 @@ int loadGtk() {
 		if (gdkCoreDeviceEvents == NULL) {
 			setenv("GDK_CORE_DEVICE_EVENTS", "1", 0);
 		}
-#ifdef __ppc64le__
-		/* Adding a temporary version check for GTK3 till we verify with lower versions of GTK3 */
-		if (gtkLib != NULL) {
-			const char * (*func)(int, int, int);
-			dlerror();
-			*(void**) (&func) = dlsym(gtkLib, "gtk_check_version");
-			if (dlerror() == NULL && func) {
-				const char *check = (*func)(minGtk3MajorVersion, minGtk3MinorVersion, minGtk3MicroVersion);
-				if ((check != NULL) && (gtk3 == NULL)) {
-					dlclose(gdkLib);
-					dlclose(gtkLib);
-					gdkLib = gtkLib = NULL;
-				}
-			}
-		}
-#endif
-
 	}
 	if (!gtkLib || !gdkLib) { //if GTK+ 2
 		gdkLib = dlopen(GDK_LIB, DLFLAGS);
