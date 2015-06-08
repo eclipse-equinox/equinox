@@ -39,6 +39,7 @@ import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.bundlefile.*;
 import org.eclipse.osgi.storage.url.reference.Handler;
 import org.eclipse.osgi.storage.url.reference.ReferenceInputStream;
+import org.eclipse.osgi.storagemanager.ManagedOutputStream;
 import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
@@ -1026,20 +1027,29 @@ public class Storage {
 
 	void save0() throws IOException {
 		StorageManager childStorageManager = null;
+		ManagedOutputStream mos = null;
 		DataOutputStream out = null;
+		boolean success = false;
 		moduleDatabase.readLock();
 		try {
 			synchronized (this.saveMonitor) {
 				if (lastSavedTimestamp == moduleDatabase.getTimestamp())
 					return;
 				childStorageManager = getChildStorageManager();
-				out = new DataOutputStream(new BufferedOutputStream(childStorageManager.getOutputStream(FRAMEWORK_INFO)));
+				mos = childStorageManager.getOutputStream(FRAMEWORK_INFO);
+				out = new DataOutputStream(new BufferedOutputStream(mos));
 				saveGenerations(out);
 				savePermissionData(out);
 				moduleDatabase.store(out, true);
 				lastSavedTimestamp = moduleDatabase.getTimestamp();
+				success = true;
 			}
 		} finally {
+			if (!success) {
+				if (mos != null) {
+					mos.abort();
+				}
+			}
 			if (out != null) {
 				try {
 					out.close();
