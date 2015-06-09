@@ -43,7 +43,7 @@ char *findCommand(char *command);
 /* Global Variables */
 char*  defaultVM     = "java";
 char*  vmLibrary	 = "JavaVM";
-char*  shippedVMDir  = "../../jre/Contents/Home/jre/bin/"; // relative to launcher
+char*  shippedVMDir  = "../../jre/Contents/Home/bin/"; // relative to launcher
 int isSunMaxPermSizeVM = 0;
 
 static void adjustLibraryPath(char * vmLibrary);
