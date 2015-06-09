@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
  *    David Green - OpenJDK bsd port integration
  *    Rapicorp, Inc - Default the configuration to Application Support (bug 461725)
  *    Mikael Barbero - Rename *Carbon* files to *Cocoa* (bug 383545)
+ *    Christian Georgi (SAP SE) - Fix VM path for new file layout (bug 469766)
  */
 
 /* MacOS X Cocoa specific logic for displaying the splash screen. */
@@ -42,7 +43,7 @@ char *findCommand(char *command);
 /* Global Variables */
 char*  defaultVM     = "java";
 char*  vmLibrary	 = "JavaVM";
-char*  shippedVMDir  = "../../../jre/Contents/Home/jre/bin/";
+char*  shippedVMDir  = "../../jre/Contents/Home/jre/bin/"; // relative to launcher
 int isSunMaxPermSizeVM = 0;
 
 static void adjustLibraryPath(char * vmLibrary);
