@@ -1589,6 +1589,32 @@ public class ServletTest extends TestCase {
 		Assert.assertEquals(expected, actual);
 	}
 
+	public void test_ServletContext2() throws Exception {
+		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(
+				HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+
+				getServletContext().setAttribute("name", null);
+			}
+
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/S1/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+
+		Map<String, List<String>> response = requestAdvisor.request("S1/a", null);
+
+		String responseCode = response.get("responseCode").get(0);
+
+		Assert.assertEquals("200", responseCode);
+	}
+
 	public void testServletContextUnsupportedOperations() {
 		final AtomicReference<ServletContext> contextHolder = new AtomicReference<ServletContext>();
 		Servlet unsupportedServlet = new HttpServlet() {
