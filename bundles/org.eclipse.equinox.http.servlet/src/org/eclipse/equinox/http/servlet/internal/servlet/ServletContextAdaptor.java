@@ -299,7 +299,13 @@ public class ServletContextAdaptor {
     	throw new UnsupportedOperationException();
     }
 
-    public void setAttribute(String attributeName, Object attributeValue) {
+	public void setAttribute(String attributeName, Object attributeValue) {
+		if (attributeValue == null) {
+			removeAttribute(attributeName);
+
+			return;
+		}
+
 		Dictionary<String, Object> attributes = getContextAttributes();
 		boolean added = (attributes.get(attributeName) == null);
 		attributes.put(attributeName, attributeValue);
