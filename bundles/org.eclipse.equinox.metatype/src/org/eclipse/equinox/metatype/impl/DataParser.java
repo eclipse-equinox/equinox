@@ -144,7 +144,7 @@ public class DataParser {
 			case AttributeDefinition.BIGDECIMAL :
 				return new BigDecimal(value);
 			case AttributeDefinition.BOOLEAN :
-				return new Boolean(value);
+				return Boolean.valueOf(value);
 			default :
 				// Unknown data type
 				return null;

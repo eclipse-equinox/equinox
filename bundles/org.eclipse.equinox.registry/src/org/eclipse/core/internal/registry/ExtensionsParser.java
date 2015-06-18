@@ -696,7 +696,7 @@ public class ExtensionsParser extends DefaultHandler {
 	 * if Eclipse version specified in the plugin.xml (<?eclipse version="3.2"?>) is at least 3.2.
 	 */
 	private void initializeExtractNamespace() {
-		extractNamespaces = new Boolean(versionAtLeast(VERSION_3_2)).booleanValue();
+		extractNamespaces = Boolean.valueOf(versionAtLeast(VERSION_3_2)).booleanValue();
 	}
 
 	/**

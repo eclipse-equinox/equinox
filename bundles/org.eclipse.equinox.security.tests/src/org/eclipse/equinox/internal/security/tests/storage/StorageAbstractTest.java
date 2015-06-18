@@ -88,7 +88,7 @@ public class StorageAbstractTest extends TestCase {
 		if (requiredID != null)
 			options.put(IProviderHints.REQUIRED_MODULE_ID, requiredID);
 
-		options.put(IProviderHints.PROMPT_USER, new Boolean(false));
+		options.put(IProviderHints.PROMPT_USER, Boolean.FALSE);
 		return options;
 	}
 

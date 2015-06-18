@@ -121,7 +121,7 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 				initparams.put(paramName, paramValue);
 			}
 
-			boolean loadOnStartup = new Boolean(servletElement.getAttribute(LOAD_ON_STARTUP)).booleanValue();
+			boolean loadOnStartup = Boolean.valueOf(servletElement.getAttribute(LOAD_ON_STARTUP)).booleanValue();
 			if (loadOnStartup)
 				wrapper.setLoadOnStartup();
 

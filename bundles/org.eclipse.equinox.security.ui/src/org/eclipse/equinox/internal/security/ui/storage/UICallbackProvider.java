@@ -133,7 +133,7 @@ public class UICallbackProvider implements IUICallbacks {
 		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 			public void run() {
 				boolean reply = MessageDialog.openConfirm(StorageUtils.getShell(), SecUIMessages.generalDialogTitle, msg);
-				result[0] = new Boolean(reply);
+				result[0] = Boolean.valueOf(reply);
 			}
 		});
 		return result[0];

@@ -190,14 +190,14 @@ public class WireReDispatcher implements WireAdminListener {
 			Wire wire = event.getWire();
 			if (wire != null) {
 				props.put(WA_WIRE, wire);
-				props.put(WA_WIRE_CONNECTED, new Boolean(wire.isConnected()));
+				props.put(WA_WIRE_CONNECTED, wire.isConnected() ? Boolean.TRUE : Boolean.FALSE);
 				if (wire.getFlavors() != null) {
 					props.put(WA_WIRE_FLAVORS, wire.getFlavors());
 				}
 				if (wire.getScope() != null) {
 					props.put(WA_WIRE_SCOPE, wire.getScope());
 				}
-				props.put(WA_WIRE_VALID, new Boolean(wire.isValid()));
+				props.put(WA_WIRE_VALID, wire.isValid() ? Boolean.TRUE : Boolean.FALSE);
 			}
 			Throwable throwable = event.getThrowable();
 			if (throwable != null) {

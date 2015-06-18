@@ -185,9 +185,9 @@ public class StructuredTextEnvironment {
 						"ar".equals(language) || //$NON-NLS-1$
 						"fa".equals(language) || //$NON-NLS-1$
 						"ur".equals(language); //$NON-NLS-1$
-				processingNeeded = new Boolean(isBidi);
+				processingNeeded = Boolean.valueOf(isBidi);
 			} else {
-				processingNeeded = new Boolean(false);
+				processingNeeded = Boolean.FALSE;
 			}
 		}
 		return processingNeeded.booleanValue();

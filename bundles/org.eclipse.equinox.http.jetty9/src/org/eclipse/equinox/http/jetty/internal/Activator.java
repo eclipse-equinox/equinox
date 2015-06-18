@@ -108,7 +108,7 @@ public class Activator implements BundleActivator {
 
 		// HTTP Enabled (default is true)
 		String httpEnabledProperty = context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTP_ENABLED);
-		Boolean httpEnabled = (httpEnabledProperty == null) ? Boolean.TRUE : new Boolean(httpEnabledProperty);
+		Boolean httpEnabled = (httpEnabledProperty == null) ? Boolean.TRUE : Boolean.valueOf(httpEnabledProperty);
 		defaultSettings.put(JettyConstants.HTTP_ENABLED, httpEnabled);
 
 		// HTTP Port
@@ -132,7 +132,7 @@ public class Activator implements BundleActivator {
 			defaultSettings.put(JettyConstants.HTTP_HOST, httpHost);
 
 		// HTTPS Enabled (default is false)
-		Boolean httpsEnabled = new Boolean(context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTPS_ENABLED));
+		Boolean httpsEnabled = Boolean.valueOf(context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTPS_ENABLED));
 		defaultSettings.put(JettyConstants.HTTPS_ENABLED, httpsEnabled);
 
 		if (httpsEnabled.booleanValue()) {
@@ -171,11 +171,11 @@ public class Activator implements BundleActivator {
 
 			String needclientauth = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_NEEDCLIENTAUTH);
 			if (needclientauth != null)
-				defaultSettings.put(JettyConstants.SSL_NEEDCLIENTAUTH, new Boolean(needclientauth));
+				defaultSettings.put(JettyConstants.SSL_NEEDCLIENTAUTH, Boolean.valueOf(needclientauth));
 
 			String wantclientauth = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_WANTCLIENTAUTH);
 			if (wantclientauth != null)
-				defaultSettings.put(JettyConstants.SSL_WANTCLIENTAUTH, new Boolean(wantclientauth));
+				defaultSettings.put(JettyConstants.SSL_WANTCLIENTAUTH, Boolean.valueOf(wantclientauth));
 
 			String protocol = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_PROTOCOL);
 			if (protocol != null)

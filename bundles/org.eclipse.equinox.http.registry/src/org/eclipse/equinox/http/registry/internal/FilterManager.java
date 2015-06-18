@@ -120,7 +120,7 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 				initparams.put(paramName, paramValue);
 			}
 
-			boolean loadOnStartup = new Boolean(filterElement.getAttribute(LOAD_ON_STARTUP)).booleanValue();
+			boolean loadOnStartup = Boolean.valueOf(filterElement.getAttribute(LOAD_ON_STARTUP)).booleanValue();
 			if (loadOnStartup)
 				wrapper.setLoadOnStartup();
 

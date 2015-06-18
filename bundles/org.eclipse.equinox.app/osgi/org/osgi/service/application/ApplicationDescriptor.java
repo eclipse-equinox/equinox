@@ -205,7 +205,7 @@ public abstract class ApplicationDescriptor {
 			}
 		}
 		/* replace the container's lock with the application model's lock, that's the correct */
-		props.put(APPLICATION_LOCKED, new Boolean(locked[0]));
+		props.put(APPLICATION_LOCKED, Boolean.valueOf(locked[0]));
 		return props;
 	}
 

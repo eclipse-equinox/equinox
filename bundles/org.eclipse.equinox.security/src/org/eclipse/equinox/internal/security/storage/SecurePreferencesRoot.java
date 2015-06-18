@@ -246,7 +246,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			// if this is (a headless run or JUnit) and prompt hint is not set up, set it to "false"
 			boolean supressPrompts = !CallbacksProvider.getDefault().runningUI() || InternalExchangeUtils.isJUnitApp();
 			if (supressPrompts && container != null && !container.hasOption(IProviderHints.PROMPT_USER)) {
-				((SecurePreferencesContainer) container).setOption(IProviderHints.PROMPT_USER, new Boolean(false));
+				((SecurePreferencesContainer) container).setOption(IProviderHints.PROMPT_USER, Boolean.FALSE);
 				addedNoPrompt = true;
 			}
 

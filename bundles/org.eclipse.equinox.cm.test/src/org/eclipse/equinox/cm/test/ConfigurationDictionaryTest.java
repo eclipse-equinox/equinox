@@ -52,7 +52,7 @@ public class ConfigurationDictionaryTest extends TestCase {
 			dict.put("6", new Byte((byte) 1));
 			dict.put("7", new Short((short) 1));
 			dict.put("8", new Character('a'));
-			dict.put("9", new Boolean(true));
+			dict.put("9", Boolean.TRUE);
 			dict.put("10", new String[] {"x"});
 			dict.put("11", new Integer[] {new Integer(1)});
 			dict.put("12", new Long[] {new Long(1)});
@@ -61,7 +61,7 @@ public class ConfigurationDictionaryTest extends TestCase {
 			dict.put("15", new Byte[] {new Byte((byte) 1)});
 			dict.put("16", new Short[] {new Short((short) 1)});
 			dict.put("17", new Character[] {new Character('a')});
-			dict.put("18", new Boolean[] {new Boolean(true)});
+			dict.put("18", new Boolean[] {Boolean.TRUE});
 			dict.put("19", new int[] {1});
 			dict.put("20", new long[] {1});
 			dict.put("21", new float[] {1});
@@ -80,7 +80,7 @@ public class ConfigurationDictionaryTest extends TestCase {
 			v.add(new Byte((byte) 1));
 			v.add(new Short((short) 1));
 			v.add(new Character('a'));
-			v.add(new Boolean(true));
+			v.add(Boolean.TRUE);
 			dict.put("28", v);
 			Collection c = new ArrayList();
 			c.add(new String("x"));
@@ -91,7 +91,7 @@ public class ConfigurationDictionaryTest extends TestCase {
 			c.add(new Byte((byte) 1));
 			c.add(new Short((short) 1));
 			c.add(new Character('a'));
-			c.add(new Boolean(true));
+			c.add(Boolean.TRUE);
 			dict.put("29", c);
 		} catch (IllegalArgumentException e) {
 			fail(e.getMessage());
