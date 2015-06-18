@@ -59,7 +59,7 @@ public abstract class FilterTests extends TestCase {
 		props.put("floatvalue", new Float(1.01));
 		props.put("doublevalue", new Double(2.01));
 		props.put("charvalue", new Character('A'));
-		props.put("booleanvalue", new Boolean(true));
+		props.put("booleanvalue", Boolean.TRUE);
 		props.put("weirdvalue", new Hashtable());
 		props.put("primintarrayvalue", new int[] {1, 2, 3});
 		props.put("primlongarrayvalue", new long[] {1, 2, 3});

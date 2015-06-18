@@ -620,7 +620,7 @@ class RequiresHolder {
 		// Get the visibility of all directly required bundles
 		for (int i = 0; i < required.length; i++) {
 			if (required[i].getSupplier() != null) {
-				resolvedBundlesExported.put((BundleDescription) required[i].getSupplier(), new Boolean(required[i].isExported()));
+				resolvedBundlesExported.put((BundleDescription) required[i].getSupplier(), Boolean.valueOf(required[i].isExported()));
 				resolved.remove(required[i].getSupplier());
 			}
 		}
@@ -633,7 +633,7 @@ class RequiresHolder {
 				BundleSpecification[] fragmentRequiredBundles = fragments[i].getRequiredBundles();
 				for (int j = 0; j < fragmentRequiredBundles.length; j++) {
 					if (resolved.contains(fragmentRequiredBundles[j].getSupplier())) {
-						resolvedBundlesExported.put((BundleDescription) fragmentRequiredBundles[j].getSupplier(), new Boolean(fragmentRequiredBundles[j].isExported()));
+						resolvedBundlesExported.put((BundleDescription) fragmentRequiredBundles[j].getSupplier(), Boolean.valueOf(fragmentRequiredBundles[j].isExported()));
 						resolved.remove(fragmentRequiredBundles[j].getSupplier());
 					}
 				}

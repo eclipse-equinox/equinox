@@ -164,7 +164,7 @@ public class ApplicationAdminTest extends OSGiTest {
 		list.add(new Byte((byte) 0));
 		list.add(new Short((short) 1));
 		list.add(new Character((char) 0));
-		list.add(new Boolean(true));
+		list.add(Boolean.TRUE);
 		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		args.put("test.arg5", new String[0]); //$NON-NLS-1$
@@ -186,7 +186,7 @@ public class ApplicationAdminTest extends OSGiTest {
 		args.put("test.arg18", new Byte((byte) 0)); //$NON-NLS-1$
 		args.put("test.arg19", new Short((short) 1)); //$NON-NLS-1$
 		args.put("test.arg20", new Character((char) 0)); //$NON-NLS-1$
-		args.put("test.arg21", new Boolean(true)); //$NON-NLS-1$
+		args.put("test.arg21", Boolean.TRUE); //$NON-NLS-1$
 		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		Map testMap = new HashMap();
