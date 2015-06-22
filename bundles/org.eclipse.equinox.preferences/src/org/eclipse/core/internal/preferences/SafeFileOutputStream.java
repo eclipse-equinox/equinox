@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,10 +8,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     James Blackburn (Broadcom Corp.) - ongoing development
+ *     Andrey Loskutov <loskutov@gmx.de> - Bug 468787
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 /**
  * This class should be used when there's a file already in the
@@ -20,7 +23,7 @@ import java.io.*;
  * Basically, the new contents are written to a temporary location.
  * If everything goes OK, it is moved to the right place.
  * This class handles buffering of output stream contents.
- * 
+ *
  * Copied from org.eclipse.core.internal.localstore.SafeFileOutputStream
  */
 public class SafeFileOutputStream extends OutputStream {
@@ -75,26 +78,32 @@ public class SafeFileOutputStream extends OutputStream {
 	protected void copy(File sourceFile, File destinationFile) throws IOException {
 		if (!sourceFile.exists())
 			return;
-		if (sourceFile.renameTo(destinationFile))
-			return;
-		InputStream source = null;
-		OutputStream destination = null;
 		try {
-			source = new BufferedInputStream(new FileInputStream(sourceFile));
-			destination = new BufferedOutputStream(new FileOutputStream(destinationFile));
-			transferStreams(source, destination);
-		} finally {
-			try {
-				if (source != null)
-					source.close();
-			} finally {
-				//ignore secondary exception
+			Files.move(sourceFile.toPath(), destinationFile.toPath(), new StandardCopyOption[] {StandardCopyOption.REPLACE_EXISTING});
+		} catch (IOException e) {
+			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=468787
+			if (!sourceFile.exists() && destinationFile.exists()) {
+				return;
 			}
+			InputStream source = null;
+			OutputStream destination = null;
 			try {
-				if (destination != null)
-					destination.close();
+				source = new BufferedInputStream(new FileInputStream(sourceFile));
+				destination = new BufferedOutputStream(new FileOutputStream(destinationFile));
+				transferStreams(source, destination);
 			} finally {
-				//ignore secondary exception
+				try {
+					if (source != null)
+						source.close();
+				} finally {
+					//ignore secondary exception
+				}
+				try {
+					if (destination != null)
+						destination.close();
+				} finally {
+					//ignore secondary exception
+				}
 			}
 		}
 	}
