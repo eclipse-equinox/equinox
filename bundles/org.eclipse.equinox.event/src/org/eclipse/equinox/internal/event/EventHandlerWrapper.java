@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,7 @@
 
 package org.eclipse.equinox.internal.event;
 
-import java.security.Permission;
+import java.security.*;
 import java.util.Collection;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -24,16 +24,16 @@ import org.osgi.service.log.LogService;
  *
  */
 public class EventHandlerWrapper {
-	private final ServiceReference<EventHandler> reference;
+	final ServiceReference<EventHandler> reference;
 	private final LogService log;
-	private final BundleContext context;
+	final BundleContext context;
 	private EventHandler handler;
 	private String[] topics;
 	private Filter filter;
 
 	/**
 	 * Create an EventHandlerWrapper. 
-
+	
 	 * @param reference Reference to the EventHandler
 	 * @param context Bundle Context of the Event Admin bundle
 	 * @param log LogService object for logging
@@ -128,7 +128,11 @@ public class EventHandlerWrapper {
 		// we don't have the handler, so lets get it outside the sync region
 		EventHandler tempHandler = null;
 		try {
-			tempHandler = context.getService(reference);
+			tempHandler = AccessController.doPrivileged(new PrivilegedAction<EventHandler>() {
+				public EventHandler run() {
+					return context.getService(reference);
+				}
+			});
 		} catch (IllegalStateException e) {
 			// ignore; event admin may have stopped
 		}
@@ -199,7 +203,7 @@ public class EventHandlerWrapper {
 			if (event.getTopic().startsWith("org/osgi/service/log/LogEntry")) { //$NON-NLS-1$
 				Object exception = event.getProperty("exception"); //$NON-NLS-1$
 				if (exception instanceof LogTopicException)
-					return; // avoid endless event dispatching
+					return;// avoid endless event dispatching
 				// wrap exception in a LogTopicException to detect endless event dispatching
 				t = new LogTopicException(t);
 			}
