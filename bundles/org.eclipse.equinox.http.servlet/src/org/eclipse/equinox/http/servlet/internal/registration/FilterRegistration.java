@@ -41,22 +41,22 @@ public class FilterRegistration
 
 	public FilterRegistration(
 		ServiceHolder<Filter> filterHolder, FilterDTO filterDTO, int priority,
-		ContextController contextController, boolean legacyRegistration) {
+		ContextController contextController, ClassLoader legacyTCCL) {
 
 		super(filterHolder.get(), filterDTO);
 		this.filterHolder = filterHolder;
 		this.priority = priority;
 		this.contextController = contextController;
 		this.compiledRegexs = getCompiledRegex(filterDTO);
-		if (legacyRegistration) {
+		if (legacyTCCL != null) {
 			// legacy filter registrations used the current TCCL at registration time
-			classLoader = Thread.currentThread().getContextClassLoader();
+			classLoader = legacyTCCL;
 		} else {
 			classLoader = filterHolder.getBundle().adapt(BundleWiring.class).getClassLoader();
 		}
 		String legacyContextFilter = (String) filterHolder.getServiceReference().getProperty(Const.EQUINOX_LEGACY_CONTEXT_SELECT);
 		if (legacyContextFilter != null) {
-			// This is a legacy Filter registration.  
+			// This is a legacy Filter registration.
 			// This filter tells us the real context controller,
 			// backed by an HttpContext that should be used to init/destroy this Filter
 			org.osgi.framework.Filter f = null;

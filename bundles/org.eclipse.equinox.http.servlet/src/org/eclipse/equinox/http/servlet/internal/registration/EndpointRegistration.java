@@ -37,16 +37,16 @@ public abstract class EndpointRegistration<D extends DTO>
 
 	public EndpointRegistration(
 		ServiceHolder<Servlet> servletHolder, D d, ServletContextHelper servletContextHelper,
-		ContextController contextController, boolean legacyRegistration) {
+		ContextController contextController, ClassLoader legacyTCCL) {
 
 		super(servletHolder.get(), d);
 		this.servletHolder = servletHolder;
 		this.servletContextHelper = servletContextHelper;
 		this.contextController = contextController;
-		this.legacyRegistration = legacyRegistration;
+		this.legacyRegistration = legacyTCCL != null;
 		if (this.legacyRegistration) {
 			// legacy registrations used the current TCCL at registration time
-			classLoader = Thread.currentThread().getContextClassLoader();
+			classLoader = legacyTCCL;
 		} else {
 			classLoader = servletHolder.getBundle().adapt(BundleWiring.class).getClassLoader();
 		}
