@@ -105,6 +105,11 @@ public class ServletTest extends TestCase {
 
 	@Override
 	public void setUp() throws Exception {
+		// Quiet logging for tests
+		System.setProperty("/.LEVEL", "OFF");
+		System.setProperty("org.eclipse.jetty.server.LEVEL", "OFF");
+		System.setProperty("org.eclipse.jetty.servlet.LEVEL", "OFF");
+
 		System.setProperty("org.osgi.service.http.port", "8090");
 		BundleContext bundleContext = getBundleContext();
 		installer = new BundleInstaller(ServletTest.TEST_BUNDLES_BINARY_DIRECTORY, bundleContext);
