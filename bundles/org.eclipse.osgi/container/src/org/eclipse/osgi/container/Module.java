@@ -159,12 +159,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	final EquinoxReentrantLock stateChangeLock = new EquinoxReentrantLock();
 	private final EnumSet<ModuleEvent> stateTransitionEvents = EnumSet.noneOf(ModuleEvent.class);
 	private final EnumSet<Settings> settings;
-	private final ThreadLocal<Boolean> inStartResolve = new ThreadLocal<Boolean>() {
-		@Override
-		protected Boolean initialValue() {
-			return Boolean.FALSE;
-		}
-	};
+	private final ThreadLocal<Boolean> inStartResolve = new ThreadLocal<Boolean>();
 	private volatile State state = State.INSTALLED;
 	private volatile int startlevel;
 	private volatile long lastModified;
@@ -694,6 +689,10 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	final boolean inStartResolve() {
-		return inStartResolve.get().booleanValue();
+		Boolean value = inStartResolve.get();
+		if (value == null) {
+			return false;
+		}
+		return value.booleanValue();
 	}
 }

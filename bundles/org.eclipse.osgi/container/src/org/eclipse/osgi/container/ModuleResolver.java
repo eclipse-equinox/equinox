@@ -75,12 +75,7 @@ final class ModuleResolver {
 	private static final Collection<String> NON_PAYLOAD_CAPABILITIES = Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE);
 	static final Collection<String> NON_PAYLOAD_REQUIREMENTS = Arrays.asList(HostNamespace.HOST_NAMESPACE, ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE);
 
-	final ThreadLocal<Boolean> threadResolving = new ThreadLocal<Boolean>() {
-		@Override
-		protected Boolean initialValue() {
-			return Boolean.FALSE;
-		}
-	};
+	final ThreadLocal<Boolean> threadResolving = new ThreadLocal<Boolean>();
 	final ModuleContainerAdaptor adaptor;
 
 	/**
@@ -844,7 +839,7 @@ final class ModuleResolver {
 		}
 
 		ModuleResolutionReport resolve() {
-			if (threadResolving.get().booleanValue()) {
+			if (threadResolving()) {
 				// throw up a runtime exception, if this is caused by a resolver hook
 				// then it will get caught at the call to the resolver hook and a proper exception is thrown
 				throw new IllegalStateException(Msg.ModuleResolver_RecursiveError);
@@ -1409,5 +1404,13 @@ final class ModuleResolver {
 			// TODO is there some bug in the resolver?
 			return null;
 		}
+	}
+
+	protected boolean threadResolving() {
+		Boolean resolvingValue = this.threadResolving.get();
+		if (resolvingValue == null) {
+			return false;
+		}
+		return resolvingValue.booleanValue();
 	}
 }
