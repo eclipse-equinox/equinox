@@ -8,6 +8,9 @@
 # Contributors:
 #     IBM Corporation - initial API and implementation
 ###############################################################################
+
+# NOTE: The JavaSE-1.9 profile is not yet finalized.
+
 org.osgi.framework.system.packages = \
  javax.accessibility,\
  javax.activation,\
@@ -202,8 +205,8 @@ org.osgi.framework.system.capabilities = \
  osgi.ee; osgi.ee="JavaSE/compact3"; version:List<Version>="1.8"
 osgi.java.profile.name = JavaSE-1.9
 org.eclipse.jdt.core.compiler.compliance=1.9
-org.eclipse.jdt.core.compiler.source=1.9
+org.eclipse.jdt.core.compiler.source=1.8
 org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode=enabled
-org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.9
+org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.8
 org.eclipse.jdt.core.compiler.problem.assertIdentifier=error
 org.eclipse.jdt.core.compiler.problem.enumIdentifier=error
