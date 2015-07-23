@@ -18,6 +18,7 @@ import java.util.*;
 import javax.management.*;
 import org.eclipse.equinox.region.*;
 import org.osgi.framework.*;
+import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.wiring.*;
@@ -527,6 +528,33 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			} catch (IOException e) {
 				fail("Failed to open bunldle location: " + e.getMessage());
 			}
+		}
+	}
+
+	public void testBundleCollisionUninstalledBundle() throws BundleException {
+		Region region1 = digraph.createRegion(getName() + 1);
+		Region region2 = digraph.createRegion(getName() + 2);
+		Region region3 = digraph.createRegion(getName() + 3);
+		// install the same bundle into the first two regions.  Should be no collision
+		bundleInstaller.installBundle(PP1, region1);
+		bundleInstaller.installBundle(PP1, region2);
+
+		ServiceRegistration<CollisionHook> collisionHookREg = getContext().registerService(CollisionHook.class, new CollisionHook() {
+			@Override
+			public void filterCollisions(int operationType, Bundle target, Collection<Bundle> collisionCandidates) {
+				for (Bundle bundle : collisionCandidates) {
+					try {
+						bundle.uninstall();
+					} catch (BundleException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}, new Hashtable<String, Object>(Collections.singletonMap(Constants.SERVICE_RANKING, Integer.MAX_VALUE)));
+		try {
+			bundleInstaller.installBundle(PP1, region3);
+		} finally {
+			collisionHookREg.unregister();
 		}
 	}
 

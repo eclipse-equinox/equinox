@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 VMware Inc.
+ * Copyright (c) 2011, 2015 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,6 +68,10 @@ public final class RegionBundleCollisionHook implements CollisionHook {
 			// does not collide from the perspective of the collision candidate regions
 			for (Bundle collisionCandidate : collisionCandidates) {
 				Region candidateRegion = regionDigraph.getRegion(collisionCandidate);
+				if (candidateRegion == null) {
+					// we assume the candidate has been uninstalled; do not consider the candidate as a collision
+					continue;
+				}
 				// we know the collision candidates all have the BSN/Version that collide.
 				// we use the collision candidate and pretend it is part of the target region
 				// to see if we can see it from the candidateRegion
