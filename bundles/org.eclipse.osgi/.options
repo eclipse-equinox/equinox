@@ -30,6 +30,8 @@ org.eclipse.osgi/debug/objectPool/adds=false
 org.eclipse.osgi/debug/objectPool/dups=false
 # Debug the caching of bundle headers
 org.eclipse.osgi/debug/cachedmanifest = false
+# Debug the lifecycle operations of the framework/systemBundle
+org.eclipse.osgi/debug/systemBundle=false
 
 # Eclipse adaptor options
 org.eclipse.osgi/eclipseadaptor/debug = false

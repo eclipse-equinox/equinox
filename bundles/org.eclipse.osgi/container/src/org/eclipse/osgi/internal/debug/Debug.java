@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2014 IBM Corporation and others.
+ * Copyright (c) 2003, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -93,6 +93,8 @@ public class Debug implements DebugOptionsListener {
 
 	public static final String OPTION_CACHED_MANIFEST = ECLIPSE_OSGI + "/debug/cachedmanifest"; //$NON-NLS-1$
 
+	public static final String OPTION_DEBUG_SYSTEM_BUNDLE = ECLIPSE_OSGI + "/debug/systemBundle"; //$NON-NLS-1$
+
 	/**
 	 * General debug flag.
 	 */
@@ -156,6 +158,8 @@ public class Debug implements DebugOptionsListener {
 
 	public boolean DEBUG_CACHED_MANIFEST = false;
 
+	public boolean DEBUG_SYSTEM_BUNDLE = false; // debug/systemBundle
+
 	public Debug(DebugOptions dbgOptions) {
 		optionsChanged(dbgOptions);
 	}
@@ -180,6 +184,7 @@ public class Debug implements DebugOptionsListener {
 		MONITOR_ACTIVATION = dbgOptions.getBooleanOption(OPTION_MONITOR_ACTIVATION, false);
 		DEBUG_LOCATION = dbgOptions.getBooleanOption(OPTION_DEBUG_LOCATION, false);
 		DEBUG_CACHED_MANIFEST = dbgOptions.getBooleanOption(OPTION_CACHED_MANIFEST, false);
+		DEBUG_SYSTEM_BUNDLE = dbgOptions.getBooleanOption(OPTION_DEBUG_SYSTEM_BUNDLE, false);
 	}
 
 	/**

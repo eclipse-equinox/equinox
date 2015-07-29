@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 IBM Corporation and others.
+ * Copyright (c) 2012, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,10 +19,7 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.osgi.container.*;
-import org.eclipse.osgi.container.Module.Settings;
-import org.eclipse.osgi.container.Module.StartOptions;
-import org.eclipse.osgi.container.Module.State;
-import org.eclipse.osgi.container.Module.StopOptions;
+import org.eclipse.osgi.container.Module.*;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
@@ -147,6 +144,9 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			}
 
 			void asyncStop() throws BundleException {
+				if (getEquinoxContainer().getConfiguration().getDebug().DEBUG_SYSTEM_BUNDLE) {
+					Debug.printStackTrace(new Exception("Framework has been requested to stop.")); //$NON-NLS-1$
+				}
 				lockStateChange(ModuleEvent.STOPPED);
 				try {
 					if (Module.ACTIVE_SET.contains(getState())) {
@@ -170,6 +170,9 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			}
 
 			void asyncUpdate() throws BundleException {
+				if (getEquinoxContainer().getConfiguration().getDebug().DEBUG_SYSTEM_BUNDLE) {
+					Debug.printStackTrace(new Exception("Framework has been requested to update (restart).")); //$NON-NLS-1$
+				}
 				lockStateChange(ModuleEvent.UPDATED);
 				try {
 					if (Module.ACTIVE_SET.contains(getState())) {
@@ -202,7 +205,14 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 		public void init(FrameworkListener... listeners) throws BundleException {
 			if (listeners != null) {
+				if (getEquinoxContainer().getConfiguration().getDebug().DEBUG_SYSTEM_BUNDLE) {
+					Debug.println("Initializing framework with framework listeners: " + listeners); //$NON-NLS-1$
+				}
 				initListeners.addAll(Arrays.asList(listeners));
+			} else {
+				if (getEquinoxContainer().getConfiguration().getDebug().DEBUG_SYSTEM_BUNDLE) {
+					Debug.println("Initializing framework with framework no listeners"); //$NON-NLS-1$
+				}
 			}
 			try {
 				((SystemModule) getModule()).init();
