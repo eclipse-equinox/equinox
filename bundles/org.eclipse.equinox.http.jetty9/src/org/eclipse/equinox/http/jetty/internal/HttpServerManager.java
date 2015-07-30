@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
@@ -68,7 +69,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 	@SuppressWarnings("unchecked")
 	public synchronized void updated(String pid, @SuppressWarnings("rawtypes") Dictionary dictionary) throws ConfigurationException {
 		deleted(pid);
-		Server server = new Server();
+		Server server = new Server(new QueuedThreadPool(getMaxThreads(dictionary), getMinThreads(dictionary)));
 
 		JettyCustomizer customizer = createJettyCustomizer(dictionary);
 
@@ -261,6 +262,28 @@ public class HttpServerManager implements ManagedServiceFactory {
 			httpsEnabled = Boolean.parseBoolean(httpsEnabledObj.toString());
 		}
 		return httpsEnabled;
+	}
+
+	private int getMaxThreads(@SuppressWarnings("rawtypes") Dictionary dictionary) {
+		Integer maxThreads = 200;
+		Object maxThreadsObj = dictionary.get(JettyConstants.HTTP_MAXTHREADS);
+		if (maxThreadsObj instanceof Integer) {
+			maxThreads = (Integer) maxThreadsObj;
+		} else if (maxThreadsObj instanceof String) {
+			maxThreads = Integer.parseInt(maxThreadsObj.toString());
+		}
+		return maxThreads;
+	}
+
+	private int getMinThreads(@SuppressWarnings("rawtypes") Dictionary dictionary) {
+		Integer minThreads = 8;
+		Object minThreadsObj = dictionary.get(JettyConstants.HTTP_MINTHREADS);
+		if (minThreadsObj instanceof Integer) {
+			minThreads = (Integer) minThreadsObj;
+		} else if (minThreadsObj instanceof String) {
+			minThreads = Integer.parseInt(minThreadsObj.toString());
+		}
+		return minThreads;
 	}
 
 	private ServletContextHandler createHttpContext(@SuppressWarnings("rawtypes") Dictionary dictionary) {

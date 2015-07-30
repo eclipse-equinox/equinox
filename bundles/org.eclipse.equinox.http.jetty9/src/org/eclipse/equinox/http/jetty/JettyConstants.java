@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,6 +55,18 @@ public interface JettyConstants {
 	 * name="https.port" type="Integer" (default: 0 -- first available port)
 	 */
 	public static final String HTTPS_PORT = "https.port"; //$NON-NLS-1$
+
+	/**
+	 * name="http.maxThreads" type="Integer" (default: 200 -- max number of threads)
+	 * @since 1.2
+	 */
+	public static final String HTTP_MAXTHREADS = "http.maxThreads"; //$NON-NLS-1$
+
+	/**
+	 * name="http.maxThreads" type="Integer" (default: 8 -- max number of threads)
+	 * @since 1.2
+	 */
+	public static final String HTTP_MINTHREADS = "http.minThreads"; //$NON-NLS-1$
 
 	/**
 	 * name="ssl.keystore" type="String"

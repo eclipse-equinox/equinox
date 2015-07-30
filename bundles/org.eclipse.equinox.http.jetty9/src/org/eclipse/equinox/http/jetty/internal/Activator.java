@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2015 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -134,6 +134,28 @@ public class Activator implements BundleActivator {
 		// HTTPS Enabled (default is false)
 		Boolean httpsEnabled = Boolean.valueOf(context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTPS_ENABLED));
 		defaultSettings.put(JettyConstants.HTTPS_ENABLED, httpsEnabled);
+
+		// minimum number of threads
+		String minThreadsProperty = context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTP_MINTHREADS);
+		if (minThreadsProperty != null) {
+			try {
+				int minThreads = Integer.parseInt(minThreadsProperty);
+				defaultSettings.put(JettyConstants.HTTP_MINTHREADS, new Integer(minThreads));
+			} catch (NumberFormatException e) {
+				//(log this) ignore and use default
+			}
+		}
+
+		// maximum number of threads
+		String maxThreadsProperty = context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTP_MAXTHREADS);
+		if (maxThreadsProperty != null) {
+			try {
+				int maxThreads = Integer.parseInt(maxThreadsProperty);
+				defaultSettings.put(JettyConstants.HTTP_MAXTHREADS, new Integer(maxThreads));
+			} catch (NumberFormatException e) {
+				//(log this) ignore and use default
+			}
+		}
 
 		if (httpsEnabled.booleanValue()) {
 			// HTTPS Port
