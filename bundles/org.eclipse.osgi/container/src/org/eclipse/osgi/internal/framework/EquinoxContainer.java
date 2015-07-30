@@ -157,17 +157,26 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	}
 
 	void close() {
+		EventManager currentEventManager;
+		StorageSaver currentSaver;
+		Storage currentStorage;
+		ScheduledExecutorService currentExecutor;
 		synchronized (this.monitor) {
-			eventManager.close();
+			currentEventManager = eventManager;
 			eventManager = null;
 			eventPublisher = null;
 			serviceRegistry = null;
-			storageSaver.close();
-			storage.close();
-			// Must be done last since it will result in termination of the 
-			// framework active thread.
-			executor.shutdown();
+			currentSaver = storageSaver;
+			currentStorage = storage;
+			currentExecutor = executor;
 		}
+		// do this outside of the lock to avoid deadlock
+		currentEventManager.close();
+		currentSaver.close();
+		currentStorage.close();
+		// Must be done last since it will result in termination of the 
+		// framework active thread.
+		currentExecutor.shutdown();
 	}
 
 	private void initializeContextFinder() {
