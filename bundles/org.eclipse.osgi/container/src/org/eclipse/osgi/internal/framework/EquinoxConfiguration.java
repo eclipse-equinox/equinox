@@ -27,12 +27,14 @@ import java.net.*;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.core.runtime.internal.adaptor.ConsoleManager;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.internal.messages.Msg;
+import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.environment.Constants;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
@@ -44,6 +46,7 @@ import org.osgi.framework.Version;
  * Internal class.
  */
 public class EquinoxConfiguration implements EnvironmentInfo {
+	private static final String CONFIG_FILE = "config.ini"; //$NON-NLS-1$
 	// While we recognize the SunOS operating system, we change
 	// this internally to be Solaris.
 	private static final String INTERNAL_OS_SUNOS = "SunOS"; //$NON-NLS-1$
@@ -65,14 +68,13 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String VARIABLE_DELIM_STRING = "$"; //$NON-NLS-1$
 	public static final char VARIABLE_DELIM_CHAR = '$';
 
-	private final Map<String, Object> initialConfig;
-	private final Properties configuration;
-	private final boolean useSystemProperties;
+	private final ConfigValues configValues;
 
 	private final Debug debug;
 	private final DebugOptions debugOptions;
 	private final HookRegistry hookRegistry;
 	private final AliasMapper aliasMapper = new AliasMapper();
+	private final EquinoxLocations equinoxLocations;
 
 	private volatile String[] allArgs;
 	private volatile String[] frameworkArgs;
@@ -194,46 +196,286 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public static final String PROP_RESOLVER_REVISION_BATCH_SIZE = "equinox.resolver.revision.batch.size"; //$NON-NLS-1$
 
-	private final static Collection<String> populateInitConfig = Arrays.asList(PROP_OSGI_ARCH, PROP_OSGI_OS, PROP_OSGI_WS, PROP_OSGI_NL, FRAMEWORK_OS_NAME, FRAMEWORK_OS_VERSION, FRAMEWORK_PROCESSOR, FRAMEWORK_LANGUAGE);
+	public static final String PROP_DEFAULT_SUFFIX = ".default"; //$NON-NLS-1$
+	public static final Collection<String> PROP_WITH_ECLIPSE_STARTER_DEFAULTS = Collections.singletonList(PROP_COMPATIBILITY_BOOTDELEGATION);
 
-	/**
-	 * Value of {@link #configuration} properties that should be considered
-	 * <code>null</code> and for which access should not fall back to
-	 * {@link System#getProperty(String)}.
-	 * The instance must be compared by identity (==, not equals) and must not
-	 * be leaked outside this class.
-	 */
-	private final static String NULL_CONFIG = new String("org.eclipse.equinox.configuration.null.value"); //$NON-NLS-1$
+	public static final class ConfigValues {
+		/**
+		 * Value of {@link #configuration} properties that should be considered
+		 * <code>null</code> and for which access should not fall back to
+		 * {@link System#getProperty(String)}.
+		 * The instance must be compared by identity (==, not equals) and must not
+		 * be leaked outside this class.
+		 */
+		private final static String NULL_CONFIG = new String("org.eclipse.equinox.configuration.null.value"); //$NON-NLS-1$
+		private final static Collection<String> populateInitConfig = Arrays.asList(PROP_OSGI_ARCH, PROP_OSGI_OS, PROP_OSGI_WS, PROP_OSGI_NL, FRAMEWORK_OS_NAME, FRAMEWORK_OS_VERSION, FRAMEWORK_PROCESSOR, FRAMEWORK_LANGUAGE);
+
+		private final boolean useSystemProperties;
+		private final Map<String, Object> initialConfig;
+		private final Properties configuration;
+
+		public ConfigValues(Map<String, ?> initialConfiguration) {
+			this.initialConfig = initialConfiguration == null ? new HashMap<String, Object>(0) : new HashMap<String, Object>(initialConfiguration);
+			Object useSystemPropsValue = initialConfig.get(PROP_USE_SYSTEM_PROPERTIES);
+			this.useSystemProperties = useSystemPropsValue == null ? false : Boolean.parseBoolean(useSystemPropsValue.toString());
+			this.configuration = useSystemProperties ? System.getProperties() : new Properties();
+			// do this the hard way to handle null values
+			for (Map.Entry<String, ?> initialEntry : this.initialConfig.entrySet()) {
+				if (initialEntry.getValue() == null) {
+					if (useSystemProperties) {
+						this.configuration.remove(initialEntry.getKey());
+					} else {
+						this.configuration.put(initialEntry.getKey(), NULL_CONFIG);
+					}
+				} else {
+					this.configuration.put(initialEntry.getKey(), initialEntry.getValue());
+				}
+			}
+		}
+
+		void loadConfigIni(URL configIni) {
+			if (configIni != null) {
+				mergeConfiguration(loadProperties(configIni));
+			}
+		}
+
+		void finalizeValues() {
+			// populate initConfig after loading the configIni
+			for (String initialKey : populateInitConfig) {
+				String value = getConfiguration(initialKey);
+				if (value != null) {
+					this.initialConfig.put(initialKey, value);
+				}
+			}
+
+			// look for special case EclipseStarter defaults
+			for (String keyWithEclipseStarterDefault : PROP_WITH_ECLIPSE_STARTER_DEFAULTS) {
+				String currentValue = getConfiguration(keyWithEclipseStarterDefault);
+				if (currentValue == null) {
+					String defaultValue = getConfiguration(keyWithEclipseStarterDefault + PROP_DEFAULT_SUFFIX);
+					if (defaultValue != null) {
+						setConfiguration(keyWithEclipseStarterDefault, defaultValue);
+					}
+				}
+			}
+
+			// set other defaults
+			if (FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT.equals(getConfiguration(FRAMEWORK_STORAGE_CLEAN))) {
+				setConfiguration(PROP_CLEAN, "true"); //$NON-NLS-1$
+			}
+
+			if (getConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL) == null)
+				// Property not specified. Use the default.
+				setConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL, DEFAULT_STATE_SAVE_DELAY_INTERVAL);
+			try {
+				// Verify type compatibility.
+				Long.parseLong(getConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL));
+			} catch (NumberFormatException e) {
+				// TODO Consider logging here.
+				// The specified value is not type compatible. Use the default.
+				setConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL, DEFAULT_STATE_SAVE_DELAY_INTERVAL);
+			}
+
+			String consoleProp = getConfiguration(ConsoleManager.PROP_CONSOLE);
+			consoleProp = consoleProp == null ? null : consoleProp.trim();
+			if (consoleProp == null || consoleProp.length() > 0) {
+				// no -console was specified or it has specified none or a port for telnet;
+				// need to make sure the gogo shell does not create an interactive console on standard in/out
+				setConfiguration("gosh.args", "--nointeractive"); //$NON-NLS-1$//$NON-NLS-2$
+			} else {
+				// Need to make sure we don't shutdown the framework if no console is around (bug 362412)
+				setConfiguration("gosh.args", "--noshutdown"); //$NON-NLS-1$//$NON-NLS-2$
+			}
+		}
+
+		private void mergeConfiguration(Properties source) {
+			for (Enumeration<?> e = source.keys(); e.hasMoreElements();) {
+				String key = (String) e.nextElement();
+				String value = source.getProperty(key);
+				if (getConfiguration(key) == null) {
+					setProperty(key, value);
+					initialConfig.put(key, value);
+				} else {
+					initialConfig.put(key, getConfiguration(key));
+				}
+			}
+		}
+
+		private Properties loadProperties(URL location) {
+			Properties result = new Properties();
+			if (location == null)
+				return result;
+			try {
+				InputStream in = location.openStream();
+				try {
+					result.load(in);
+				} finally {
+					in.close();
+				}
+			} catch (IOException e) {
+				// its ok if there is no file.  We'll just use the defaults for everything
+				// TODO but it might be nice to log something with gentle wording (i.e., it is not an error)
+			}
+			return substituteVars(result);
+		}
+
+		private Properties substituteVars(Properties result) {
+			if (result == null) {
+				//nothing todo.
+				return null;
+			}
+			for (Enumeration<Object> eKeys = result.keys(); eKeys.hasMoreElements();) {
+				Object key = eKeys.nextElement();
+				if (key instanceof String) {
+					String value = result.getProperty((String) key);
+					if (value != null)
+						result.put(key, substituteVars(value, true));
+				}
+			}
+			return result;
+		}
+
+		public String substituteVars(String path, boolean preserveDelimiters) {
+			StringBuffer buf = new StringBuffer(path.length());
+			StringTokenizer st = new StringTokenizer(path, VARIABLE_DELIM_STRING, true);
+			boolean varStarted = false; // indicates we are processing a var subtitute
+			String var = null; // the current var key
+			while (st.hasMoreElements()) {
+				String tok = st.nextToken();
+				if (VARIABLE_DELIM_STRING.equals(tok)) {
+					if (!varStarted) {
+						varStarted = true; // we found the start of a var
+						var = ""; //$NON-NLS-1$
+					} else {
+						// we have found the end of a var
+						String prop = null;
+						// get the value of the var from system properties
+						if (var != null && var.length() > 0)
+							prop = getProperty(var);
+						if (prop == null) {
+							try {
+								// try using the System.getenv method if it exists (bug 126921)
+								Method getenv = System.class.getMethod("getenv", new Class[] {String.class}); //$NON-NLS-1$
+								prop = (String) getenv.invoke(null, new Object[] {var});
+							} catch (Throwable t) {
+								// do nothing; 
+								// on 1.4 VMs this throws an error
+								// on J2ME this method does not exist
+							}
+						}
+						if (prop != null) {
+							// found a value; use it
+							buf.append(prop);
+						} else {
+							// could not find a value append the var
+							if (preserveDelimiters) {
+								buf.append(VARIABLE_DELIM_CHAR);
+							}
+							buf.append(var == null ? "" : var); //$NON-NLS-1$
+							if (preserveDelimiters) {
+								buf.append(VARIABLE_DELIM_CHAR);
+							}
+						}
+						varStarted = false;
+						var = null;
+					}
+				} else {
+					if (!varStarted)
+						buf.append(tok); // the token is not part of a var
+					else
+						var = tok; // the token is the var key; save the key to process when we find the end token
+				}
+			}
+			if (var != null)
+				// found a case of $var at the end of the path with no trailing $; just append it as is.
+				buf.append(VARIABLE_DELIM_CHAR).append(var);
+			return buf.toString();
+		}
+
+		public String getProperty(String key) {
+			// have to access configuration directly instead of using getConfiguration to get access to NULL_CONFIG values
+			String result = configuration.getProperty(key);
+			if (result == NULL_CONFIG) {
+				return null;
+			}
+			return result == null ? System.getProperty(key) : result;
+		}
+
+		public String setProperty(String key, String value) {
+			if (value == null) {
+				return clearConfiguration(key);
+			}
+			return setConfiguration(key, value);
+		}
+
+		public String getConfiguration(String key) {
+			String result = configuration.getProperty(key);
+			return result == NULL_CONFIG ? null : result;
+		}
+
+		public String getConfiguration(String key, String defaultValue) {
+			String result = getConfiguration(key);
+			return result == null ? defaultValue : result;
+		}
+
+		public String setConfiguration(String key, String value) {
+			Object result = configuration.put(key, value);
+			return result instanceof String && result != NULL_CONFIG ? (String) result : null;
+		}
+
+		public String clearConfiguration(String key) {
+			Object result = configuration.remove(key);
+			if (!useSystemProperties) {
+				configuration.put(key, NULL_CONFIG);
+			}
+			return result instanceof String && result != NULL_CONFIG ? (String) result : null;
+		}
+
+		public Map<String, String> getConfiguration() {
+			// must sync on configuration to avoid concurrent modification exception
+			synchronized (configuration) {
+				Map<String, String> result = new HashMap<String, String>(configuration.size());
+				for (Object key : configuration.keySet()) {
+					if (key instanceof String) {
+						String skey = (String) key;
+						String sValue = configuration.getProperty(skey);
+						if (sValue != NULL_CONFIG) {
+							result.put(skey, sValue);
+						}
+					}
+				}
+				return result;
+			}
+		}
+
+		public Map<String, Object> getInitialConfig() {
+			return Collections.unmodifiableMap(initialConfig);
+		}
+	}
 
 	EquinoxConfiguration(Map<String, ?> initialConfiguration, HookRegistry hookRegistry) {
-		this.initialConfig = initialConfiguration == null ? new HashMap<String, Object>(0) : new HashMap<String, Object>(initialConfiguration);
 		this.hookRegistry = hookRegistry;
-		Object useSystemPropsValue = initialConfig.get(PROP_USE_SYSTEM_PROPERTIES);
-		this.useSystemProperties = useSystemPropsValue == null ? false : Boolean.parseBoolean(useSystemPropsValue.toString());
-		this.configuration = useSystemProperties ? System.getProperties() : new Properties();
-		// do this the hard way to handle null values
-		for (Map.Entry<String, ?> initialEntry : this.initialConfig.entrySet()) {
-			if (initialEntry.getValue() == null) {
-				if (useSystemProperties) {
-					this.configuration.remove(initialEntry.getKey());
-				} else {
-					this.configuration.put(initialEntry.getKey(), NULL_CONFIG);
-				}
-			} else {
-				this.configuration.put(initialEntry.getKey(), initialEntry.getValue());
-			}
-		}
+		// Care must be taken to bootstrap of the config values properly
+		// A separate class is used to hold the configuration maps so that we can pass them
+		// to the EquionxLocations before the EquinoxConfiguration has been fully constructed
+		this.configValues = new ConfigValues(initialConfiguration);
 
+		// We need to initialize some properties always before constructing the EquinoxLocations
 		initializeProperties();
-		for (String initialKey : populateInitConfig) {
-			String value = getConfiguration(initialKey);
-			if (value != null) {
-				this.initialConfig.put(initialKey, value);
-			}
-		}
+
+		// At this point we do not know if we want to debug locations because we have not detemined if osgi.debug is set yet
+		// We use an AttomicBoolean to hold the setting so we can set it after the config.ini has been loaded
+		AtomicBoolean debugLocations = new AtomicBoolean();
+		this.equinoxLocations = new EquinoxLocations(this.configValues, this.hookRegistry.getContainer(), debugLocations);
+		this.configValues.loadConfigIni(getConfigIni(equinoxLocations));
+		this.configValues.finalizeValues();
 
 		this.debugOptions = new FrameworkDebugOptions(this);
 		this.debug = new Debug(this.debugOptions);
+		// finally we know if locations should be debugged.
+		debugLocations.set(debug.DEBUG_LOCATION);
+
+		// Finally we can set all our variables according to the configuration values
 
 		String osgiDev = getConfiguration(PROP_DEV);
 		File f = null;
@@ -285,7 +527,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			BSN_VERSION = BSN_VERSION_MANAGED;
 		}
 
-		BUNDLE_SET_TCCL = "true".equals(getConfiguration("eclipse.bundle.setTCCL", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		BUNDLE_SET_TCCL = "true".equals(getConfiguration(PROP_BUNDLE_SETTCCL, "true")); //$NON-NLS-1$ //$NON-NLS-2$
 
 		throwErrorOnFailedStart = "true".equals(getConfiguration(PROP_COMPATIBILITY_ERROR_FAILED_START, "true")); //$NON-NLS-1$//$NON-NLS-2$
 
@@ -301,8 +543,22 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		}
 	}
 
+	private URL getConfigIni(EquinoxLocations equinoxLocations2) {
+		if (Boolean.TRUE.toString().equals(getConfiguration(EquinoxConfiguration.PROP_IGNORE_USER_CONFIGURATION)))
+			return null;
+		Location configArea = equinoxLocations.getConfigurationLocation();
+		if (configArea == null)
+			return null;
+		try {
+			return new URL(configArea.getURL().toExternalForm() + CONFIG_FILE);
+		} catch (MalformedURLException e) {
+			// its ok.  This should never happen
+		}
+		return null;
+	}
+
 	public Map<String, Object> getInitialConfig() {
-		return Collections.unmodifiableMap(initialConfig);
+		return this.configValues.getInitialConfig();
 	}
 
 	private static List<String> buildEclipseLibraryVariants(String ws, String os, String arch, String nl) {
@@ -443,43 +699,23 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	}
 
 	public String getConfiguration(String key) {
-		String result = configuration.getProperty(key);
-		return result == NULL_CONFIG ? null : result;
+		return this.configValues.getConfiguration(key);
 	}
 
 	public String getConfiguration(String key, String defaultValue) {
-		String result = getConfiguration(key);
-		return result == null ? defaultValue : result;
+		return this.configValues.getConfiguration(key, defaultValue);
 	}
 
 	public String setConfiguration(String key, String value) {
-		Object result = configuration.put(key, value);
-		return result instanceof String && result != NULL_CONFIG ? (String) result : null;
+		return this.configValues.setConfiguration(key, value);
 	}
 
 	public String clearConfiguration(String key) {
-		Object result = configuration.remove(key);
-		if (!useSystemProperties) {
-			configuration.put(key, NULL_CONFIG);
-		}
-		return result instanceof String && result != NULL_CONFIG ? (String) result : null;
+		return this.configValues.clearConfiguration(key);
 	}
 
 	public Map<String, String> getConfiguration() {
-		// must sync on configuration to avoid concurrent modification exception
-		synchronized (configuration) {
-			Map<String, String> result = new HashMap<String, String>(configuration.size());
-			for (Object key : configuration.keySet()) {
-				if (key instanceof String) {
-					String skey = (String) key;
-					String sValue = configuration.getProperty(skey);
-					if (sValue != NULL_CONFIG) {
-						result.put(skey, sValue);
-					}
-				}
-			}
-			return result;
-		}
+		return this.configValues.getConfiguration();
 	}
 
 	public Debug getDebug() {
@@ -496,20 +732,12 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	@Override
 	public String getProperty(String key) {
-		// have to access configuration directly instead of using getConfiguration to get access to NULL_CONFIG values
-		String result = configuration.getProperty(key);
-		if (result == NULL_CONFIG) {
-			return null;
-		}
-		return result == null ? System.getProperty(key) : result;
+		return this.configValues.getProperty(key);
 	}
 
 	@Override
 	public String setProperty(String key, String value) {
-		if (value == null) {
-			return clearConfiguration(key);
-		}
-		return setConfiguration(key, value);
+		return this.configValues.setProperty(key, value);
 	}
 
 	public AliasMapper getAliasMapper() {
@@ -603,35 +831,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		}
 	}
 
-	void mergeConfiguration(Properties source) {
-		for (Enumeration<?> e = source.keys(); e.hasMoreElements();) {
-			String key = (String) e.nextElement();
-			String value = source.getProperty(key);
-			if (getConfiguration(key) == null) {
-				setProperty(key, value);
-				initialConfig.put(key, value);
-			} else {
-				initialConfig.put(key, getConfiguration(key));
-			}
-		}
-	}
-
-	private void initializeStateSaveDelayIntervalProperty() {
-		if (getConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL) == null)
-			// Property not specified. Use the default.
-			setConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL, DEFAULT_STATE_SAVE_DELAY_INTERVAL);
-		try {
-			// Verify type compatibility.
-			Long.parseLong(getConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL));
-		} catch (NumberFormatException e) {
-			// TODO Consider logging here.
-			// The specified value is not type compatible. Use the default.
-			setConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL, DEFAULT_STATE_SAVE_DELAY_INTERVAL);
-		}
-	}
-
 	private void initializeProperties() {
-		// initialize some framework properties that must always be set
+		// initialize some framework properties that must always be set AND cannot be set with config.ini
 		if (getConfiguration(PROP_FRAMEWORK) == null || getConfiguration(EquinoxLocations.PROP_INSTALL_AREA) == null) {
 			ProtectionDomain pd = EquinoxConfiguration.class.getProtectionDomain();
 			CodeSource cs = pd == null ? null : pd.getCodeSource();
@@ -733,9 +934,6 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		setConfiguration(SUPPORTS_FRAMEWORK_FRAGMENT, "true"); //$NON-NLS-1$
 		setConfiguration(SUPPORTS_FRAMEWORK_REQUIREBUNDLE, "true"); //$NON-NLS-1$
 		setConfiguration(SUPPORTS_FRAMEWORK_EXTENSION, "true"); //$NON-NLS-1$
-		if (FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT.equals(getConfiguration(FRAMEWORK_STORAGE_CLEAN))) {
-			setConfiguration(PROP_CLEAN, "true"); //$NON-NLS-1$
-		}
 
 		/*
 		 * Initializes the execution context for this run of the platform.  The context
@@ -787,18 +985,6 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			else
 				archValue = name;
 			setConfiguration(PROP_OSGI_ARCH, archValue);
-		}
-		initializeStateSaveDelayIntervalProperty();
-
-		String consoleProp = getConfiguration(ConsoleManager.PROP_CONSOLE);
-		consoleProp = consoleProp == null ? null : consoleProp.trim();
-		if (consoleProp == null || consoleProp.length() > 0) {
-			// no -console was specified or it has specified none or a port for telnet;
-			// need to make sure the gogo shell does not create an interactive console on standard in/out
-			setConfiguration("gosh.args", "--nointeractive"); //$NON-NLS-1$//$NON-NLS-2$
-		} else {
-			// Need to make sure we don't shutdown the framework if no console is around (bug 362412)
-			setConfiguration("gosh.args", "--noshutdown"); //$NON-NLS-1$//$NON-NLS-2$
 		}
 	}
 
@@ -867,60 +1053,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	}
 
 	public String substituteVars(String path, boolean preserveDelimiters) {
-		StringBuffer buf = new StringBuffer(path.length());
-		StringTokenizer st = new StringTokenizer(path, VARIABLE_DELIM_STRING, true);
-		boolean varStarted = false; // indicates we are processing a var subtitute
-		String var = null; // the current var key
-		while (st.hasMoreElements()) {
-			String tok = st.nextToken();
-			if (VARIABLE_DELIM_STRING.equals(tok)) {
-				if (!varStarted) {
-					varStarted = true; // we found the start of a var
-					var = ""; //$NON-NLS-1$
-				} else {
-					// we have found the end of a var
-					String prop = null;
-					// get the value of the var from system properties
-					if (var != null && var.length() > 0)
-						prop = getProperty(var);
-					if (prop == null) {
-						try {
-							// try using the System.getenv method if it exists (bug 126921)
-							Method getenv = System.class.getMethod("getenv", new Class[] {String.class}); //$NON-NLS-1$
-							prop = (String) getenv.invoke(null, new Object[] {var});
-						} catch (Throwable t) {
-							// do nothing; 
-							// on 1.4 VMs this throws an error
-							// on J2ME this method does not exist
-						}
-					}
-					if (prop != null) {
-						// found a value; use it
-						buf.append(prop);
-					} else {
-						// could not find a value append the var
-						if (preserveDelimiters) {
-							buf.append(VARIABLE_DELIM_CHAR);
-						}
-						buf.append(var == null ? "" : var); //$NON-NLS-1$
-						if (preserveDelimiters) {
-							buf.append(VARIABLE_DELIM_CHAR);
-						}
-					}
-					varStarted = false;
-					var = null;
-				}
-			} else {
-				if (!varStarted)
-					buf.append(tok); // the token is not part of a var
-				else
-					var = tok; // the token is the var key; save the key to process when we find the end token
-			}
-		}
-		if (var != null)
-			// found a case of $var at the end of the path with no trailing $; just append it as is.
-			buf.append(VARIABLE_DELIM_CHAR).append(var);
-		return buf.toString();
+		return this.configValues.substituteVars(path, preserveDelimiters);
 	}
 
 	/**
@@ -996,5 +1129,9 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		}
 
 		return new Locale(language, country, variant);
+	}
+
+	public EquinoxLocations getEquinoxLocations() {
+		return equinoxLocations;
 	}
 }

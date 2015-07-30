@@ -17,6 +17,7 @@ import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.*;
+import javax.net.SocketFactory;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
@@ -2385,6 +2386,62 @@ public class SystemBundleTests extends AbstractBundleTests {
 			testBundle.uninstall();
 			fail("Expected to fail to install bundle with restricted provide capabilities.");
 		} catch (BundleException e) {
+			// expected
+		}
+		equinox.stop();
+	}
+
+	public void testBootDelegationConfigIni() throws BundleException, IOException, InterruptedException {
+		String compatBootDelegate = "osgi.compatibility.bootdelegation";
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		config.mkdirs();
+		Properties configIni = new Properties();
+		// use config.ini to override the default for the embedded case.
+		// note that the embedded case the default for this setting is false
+		configIni.setProperty(compatBootDelegate, "true");
+		configIni.store(new FileWriter(new File(config, "config.ini")), null);
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+		equinox.start();
+		BundleContext systemContext = equinox.getBundleContext();
+		assertEquals("Wrong value for: " + compatBootDelegate, "true", systemContext.getProperty(compatBootDelegate));
+
+		File bundleFile = null;
+		try {
+			File baseDir = new File(config, "bundles");
+			baseDir.mkdirs();
+			bundleFile = createBundle(baseDir, getName(), true, true);
+		} catch (IOException e) {
+			fail("Unexpected error creating bundles.", e);
+		}
+		Bundle b = null;
+		try {
+			b = systemContext.installBundle("reference:file:///" + bundleFile.getAbsolutePath()); //$NON-NLS-1$
+		} catch (BundleException e) {
+			fail("Unexpected install error", e); //$NON-NLS-1$
+		}
+		try {
+			b.loadClass(SocketFactory.class.getName());
+		} catch (ClassNotFoundException e) {
+			fail("Expected to be able to load the class from boot.", e);
+		}
+		long bId = b.getBundleId();
+		equinox.stop();
+		equinox.waitForStop(5000);
+
+		// remove the setting to ensure false is used for the embedded case
+		configIni.remove(compatBootDelegate);
+		configIni.store(new FileWriter(new File(config, "config.ini")), null);
+		equinox = new Equinox(configuration);
+		equinox.start();
+
+		systemContext = equinox.getBundleContext();
+		b = systemContext.getBundle(bId);
+		try {
+			b.loadClass(SocketFactory.class.getName());
+			fail("Expected to fail to load the class from boot.");
+		} catch (ClassNotFoundException e) {
 			// expected
 		}
 		equinox.stop();

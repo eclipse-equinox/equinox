@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2014 IBM Corporation and others.
+ * Copyright (c) 2003, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -186,9 +186,17 @@ public class EclipseStarter {
 		if (configuration == null) {
 			configuration = new HashMap<String, String>();
 			// TODO hack to set these to defaults for EclipseStarter
-			// Note that this hack does not allow these properties to be specified in config.ini
+			// Note that this hack does not allow this property to be specified in config.ini
 			configuration.put(EquinoxConfiguration.PROP_USE_SYSTEM_PROPERTIES, System.getProperty(EquinoxConfiguration.PROP_USE_SYSTEM_PROPERTIES, "true")); //$NON-NLS-1$
-			configuration.put(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION, System.getProperty(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION, "true")); //$NON-NLS-1$
+			// we handle this compatibility setting special for EclipseStarter
+			String systemCompatibilityBoot = System.getProperty(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION);
+			if (systemCompatibilityBoot != null) {
+				// The system properties have a specific setting; use it
+				configuration.put(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION, systemCompatibilityBoot);
+			} else {
+				// set a default value; but this value can be overriden by the config.ini
+				configuration.put(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION + EquinoxConfiguration.PROP_DEFAULT_SUFFIX, "true"); //$NON-NLS-1$
+			}
 		}
 		return configuration;
 	}

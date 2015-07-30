@@ -13,8 +13,9 @@ package org.eclipse.osgi.internal.location;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration.ConfigValues;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.log.EquinoxLogServices;
 import org.eclipse.osgi.internal.messages.Msg;
@@ -31,8 +32,9 @@ public class BasicLocation implements Location {
 	final private URL defaultValue;
 	final private String property;
 	final private String dataAreaPrefix;
-	final private EquinoxConfiguration environmentInfo;
-	final private boolean debug;
+	final private ConfigValues configValues;
+	final private AtomicBoolean debug;
+	final private EquinoxContainer container;
 
 	private URL location = null;
 	private Location parent;
@@ -41,7 +43,7 @@ public class BasicLocation implements Location {
 	private File lockFile;
 	private Locker locker;
 
-	public BasicLocation(String property, URL defaultValue, boolean isReadOnly, String dataAreaPrefix, EquinoxConfiguration environmentInfo) {
+	public BasicLocation(String property, URL defaultValue, boolean isReadOnly, String dataAreaPrefix, ConfigValues configValues, EquinoxContainer container, AtomicBoolean debug) {
 		this.property = property;
 		this.defaultValue = defaultValue;
 		this.isReadOnly = isReadOnly;
@@ -52,8 +54,9 @@ public class BasicLocation implements Location {
 			tempDataAreaPrefix += '/';
 		}
 		this.dataAreaPrefix = tempDataAreaPrefix;
-		this.environmentInfo = environmentInfo;
-		this.debug = environmentInfo.getDebug().DEBUG_LOCATION;
+		this.configValues = configValues;
+		this.container = container;
+		this.debug = debug;
 	}
 
 	public boolean allowsDefault() {
@@ -70,8 +73,8 @@ public class BasicLocation implements Location {
 
 	public synchronized URL getURL() {
 		if (location == null && defaultValue != null) {
-			if (debug) {
-				EquinoxLogServices logServices = environmentInfo.getHookRegistry().getContainer().getLogServices();
+			if (debug.get()) {
+				EquinoxLogServices logServices = container.getLogServices();
 				// Note that logServices can be null if we are very early in the startup.
 				if (logServices != null) {
 					logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.INFO, "Called Location.getURL() when it has not been set for: \"" + property + "\"", new RuntimeException("Call stack for Location.getURL()")); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
@@ -135,7 +138,7 @@ public class BasicLocation implements Location {
 		lockFile = file;
 		location = value;
 		if (property != null)
-			environmentInfo.setConfiguration(property, location.toExternalForm());
+			configValues.setConfiguration(property, location.toExternalForm());
 		return lock;
 	}
 
@@ -205,8 +208,8 @@ public class BasicLocation implements Location {
 	private void setLocker(File lock) {
 		if (locker != null)
 			return;
-		String lockMode = environmentInfo.getConfiguration(LocationHelper.PROP_OSGI_LOCKING, LocationHelper.LOCKING_NIO);
-		locker = LocationHelper.createLocker(lock, lockMode, debug);
+		String lockMode = configValues.getConfiguration(LocationHelper.PROP_OSGI_LOCKING, LocationHelper.LOCKING_NIO);
+		locker = LocationHelper.createLocker(lock, lockMode, debug.get());
 	}
 
 	public synchronized void release() {
@@ -215,7 +218,7 @@ public class BasicLocation implements Location {
 	}
 
 	public Location createLocation(Location parentLocation, URL defaultLocation, boolean readonly) {
-		BasicLocation result = new BasicLocation(null, defaultLocation, readonly, dataAreaPrefix, environmentInfo);
+		BasicLocation result = new BasicLocation(null, defaultLocation, readonly, dataAreaPrefix, configValues, container, debug);
 		result.setParent(parentLocation);
 		return result;
 	}

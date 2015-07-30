@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import junit.framework.TestSuite;
 public class AllTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(AllTests.class.getName());
+		suite.addTest(EclipseStarterConfigIniTest.suite());
 		suite.addTest(EclipseStarterConfigurationAreaTest.suite());
 		suite.addTest(ReadOnlyConfigurationAreaTest.suite());
 		suite.addTest(MovableConfigurationAreaTest.suite());

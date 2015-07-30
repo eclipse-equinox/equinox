@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2014 IBM Corporation and others.
+ * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,8 @@ public class EquinoxLogServices {
 	private final EquinoxLogWriter perfWriter;
 	private final FrameworkLog rootFrameworkLog;
 
-	public EquinoxLogServices(EquinoxConfiguration environmentInfo, Location configuration) {
+	public EquinoxLogServices(EquinoxConfiguration environmentInfo) {
+		Location configuration = environmentInfo.getEquinoxLocations().getConfigurationLocation();
 		String logFilePath = environmentInfo.getConfiguration(EclipseStarter.PROP_LOGFILE);
 		if (logFilePath == null) {
 			logFilePath = Long.toString(System.currentTimeMillis()) + EquinoxLogServices.LOG_EXT;
