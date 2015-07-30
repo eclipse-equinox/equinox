@@ -126,7 +126,7 @@ public class WeavingAdaptor implements IWeavingAdaptor {
                     Debug.println("> WeavingAdaptor.initialize() bundle=" //$NON-NLS-1$
                             + symbolicName + ", moduleLoader=" + moduleLoader); //$NON-NLS-1$
 
-                if (symbolicName.startsWith("org.aspectj")) { //$NON-NLS-1$
+                if (symbolicName != null && symbolicName.startsWith("org.aspectj")) { //$NON-NLS-1$
                     if (Debug.DEBUG_GENERAL)
                         Debug.println("- WeavingAdaptor.initialize() symbolicName=" //$NON-NLS-1$
                                 + symbolicName + ", moduleLoader=" //$NON-NLS-1$
