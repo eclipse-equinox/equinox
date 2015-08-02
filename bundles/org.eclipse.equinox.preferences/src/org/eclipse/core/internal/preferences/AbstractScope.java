@@ -22,9 +22,7 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
  */
 public abstract class AbstractScope implements IScopeContext {
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getName()
-	 */
+
 	@Override
 	public abstract String getName();
 
@@ -40,15 +38,11 @@ public abstract class AbstractScope implements IScopeContext {
 		return (IEclipsePreferences) PreferencesService.getDefault().getRootNode().node(getName()).node(qualifier);
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getLocation()
-	 */
+
 	@Override
 	public abstract IPath getLocation();
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -62,9 +56,7 @@ public abstract class AbstractScope implements IScopeContext {
 		return location == null ? other.getLocation() == null : location.equals(other.getLocation());
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
+
 	@Override
 	public int hashCode() {
 		return getName().hashCode();

@@ -57,9 +57,7 @@ public final class InstanceScope extends AbstractScope {
 		super();
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getLocation()
-	 */
+
 	@Override
 	public IPath getLocation() {
 		// Return null. The instance location usually corresponds to the state
@@ -67,17 +65,13 @@ public final class InstanceScope extends AbstractScope {
 		return null;
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getName()
-	 */
+
 	@Override
 	public String getName() {
 		return SCOPE;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getNode(java.lang.String)
-	 */
+
 	@Override
 	public IEclipsePreferences getNode(String qualifier) {
 		return super.getNode(qualifier);

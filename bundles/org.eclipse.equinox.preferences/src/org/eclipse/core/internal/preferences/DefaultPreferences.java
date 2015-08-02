@@ -236,9 +236,7 @@ public class DefaultPreferences extends EclipsePreferences {
 			applyDefaults(null, productCustomization, productTranslation);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.osgi.service.prefs.Preferences#flush()
-	 */
+
 	@Override
 	public void flush() {
 		// default values are not persisted
@@ -270,9 +268,7 @@ public class DefaultPreferences extends EclipsePreferences {
 		return loadedNodes.contains(node.name());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.internal.preferences.EclipsePreferences#load()
-	 */
+
 	@Override
 	protected void load() {
 		setInitializingBundleDefaults();
@@ -287,9 +283,7 @@ public class DefaultPreferences extends EclipsePreferences {
 		applyCommandLineDefaults();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.internal.preferences.EclipsePreferences#internalPut(java.lang.String, java.lang.String)
-	 */
+
 	@Override
 	protected String internalPut(String key, String newValue) {
 		// set the value in this node
@@ -414,9 +408,7 @@ public class DefaultPreferences extends EclipsePreferences {
 		loadedNodes.add(name());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.osgi.service.prefs.Preferences#sync()
-	 */
+
 	@Override
 	public void sync() {
 		// default values are not persisted

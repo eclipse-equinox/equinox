@@ -57,9 +57,7 @@ public class BundleDefaultPreferences extends EclipsePreferences {
 			return;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.internal.preferences.EclipsePreferences#getLoadLevel()
-	 */
+
 	@Override
 	protected IEclipsePreferences getLoadLevel() {
 		if (loadLevel == null) {
@@ -76,25 +74,19 @@ public class BundleDefaultPreferences extends EclipsePreferences {
 		return loadLevel;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.internal.preferences.EclipsePreferences#isAlreadyLoaded(org.eclipse.core.runtime.preferences.IEclipsePreferences)
-	 */
+
 	@Override
 	protected boolean isAlreadyLoaded(IEclipsePreferences node) {
 		return loadedNodes.contains(node.name());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.internal.preferences.EclipsePreferences#loaded()
-	 */
+
 	@Override
 	protected void loaded() {
 		loadedNodes.add(name());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.internal.preferences.EclipsePreferences#load()
-	 */
+
 	@Override
 	protected void load() {
 		// ensure that the same node in the "default" scope is loaded so this one is
@@ -106,9 +98,7 @@ public class BundleDefaultPreferences extends EclipsePreferences {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.internal.preferences.EclipsePreferences#internalCreate(org.eclipse.core.internal.preferences.EclipsePreferences, java.lang.String, java.lang.Object)
-	 */
+
 	@Override
 	protected EclipsePreferences internalCreate(EclipsePreferences nodeParent, String nodeName, Object context) {
 		return new BundleDefaultPreferences(nodeParent, nodeName);

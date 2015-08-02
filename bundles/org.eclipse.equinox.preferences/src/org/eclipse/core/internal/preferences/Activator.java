@@ -56,9 +56,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 */
 	private ServiceRegistration osgiPreferencesService = null;
 
-	/* (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
+
 	@Override
 	public void start(BundleContext context) throws Exception {
 		bundleContext = context;
@@ -76,9 +74,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		registryServiceTracker.open();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
+
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		PreferencesOSGiUtils.getDefault().closeServices();
@@ -101,9 +97,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		return bundleContext;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-	 */
+
 	@Override
 	public synchronized Object addingService(ServiceReference reference) {
 		Object service = bundleContext.getService(reference);
@@ -129,17 +123,13 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		return service;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
-	 */
+
 	@Override
 	public void modifiedService(ServiceReference reference, Object service) {
 		// nothing to do
 	}
 
-	/* (non-Javadoc)
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
-	 */
+
 	@Override
 	public synchronized void removedService(ServiceReference reference, Object service) {
 		PreferencesService.getDefault().setRegistryHelper(null);

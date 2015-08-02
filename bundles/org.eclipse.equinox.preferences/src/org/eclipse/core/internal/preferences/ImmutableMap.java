@@ -146,9 +146,7 @@ public abstract class ImmutableMap implements Cloneable {
 			return this;
 		}
 
-		/* (non-Javadoc
-		 * Method declared on IStringPoolParticipant
-		 */
+
 		@Override
 		public void shareStrings(StringPool set) {
 			//copy elements for thread safety
@@ -265,9 +263,7 @@ public abstract class ImmutableMap implements Cloneable {
 	 */
 	public abstract ImmutableMap removeKey(String key);
 
-	/* (non-Javadoc
-	 * Method declared on IStringPoolParticipant
-	 */
+
 	public void shareStrings(StringPool set) {
 		// nothing to do
 	}

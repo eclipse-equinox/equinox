@@ -27,9 +27,7 @@ public class RootPreferences extends EclipsePreferences {
 		super(null, ""); //$NON-NLS-1$
 	}
 
-	/*
-	 * @see org.osgi.service.prefs.Preferences#flush()
-	 */
+
 	@Override
 	public void flush() throws BackingStoreException {
 		// flush all children
@@ -49,9 +47,7 @@ public class RootPreferences extends EclipsePreferences {
 			throw exception;
 	}
 
-	/*
-	 * @see EclipsePreferences#getChild(String, Plugin)
-	 */
+
 	protected synchronized IEclipsePreferences getChild(String key, Object context) {
 		if (children == null)
 			return null;
@@ -66,9 +62,7 @@ public class RootPreferences extends EclipsePreferences {
 		return child;
 	}
 
-	/*
-	 * @see EclipsePreferences#getChildren()
-	 */
+
 	protected synchronized IEclipsePreferences[] getChildren() {
 		//must perform lazy initialization of child nodes
 		String[] childNames = new String[0];
@@ -84,9 +78,7 @@ public class RootPreferences extends EclipsePreferences {
 		return childNodes;
 	}
 
-	/*
-	 * @see Preferences#node(String)
-	 */
+
 	@Override
 	public Preferences node(String path) {
 		return getNode(path, true); // create if not found
@@ -113,9 +105,7 @@ public class RootPreferences extends EclipsePreferences {
 		return child.node(endIndex == -1 ? "" : path.substring(endIndex + 1)); //$NON-NLS-1$
 	}
 
-	/*
-	 * @see org.osgi.service.prefs.Preferences#sync()
-	 */
+
 	@Override
 	public void sync() throws BackingStoreException {
 		// sync all children

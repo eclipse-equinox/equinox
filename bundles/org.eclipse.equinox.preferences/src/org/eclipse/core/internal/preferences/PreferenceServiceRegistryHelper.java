@@ -252,9 +252,7 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IRegistryChangeListener#registryChanged(org.eclipse.core.runtime.IRegistryChangeEvent)
-	 */
+
 	@Override
 	public void registryChanged(IRegistryChangeEvent event) {
 		IExtensionDelta[] deltasOld = event.getExtensionDeltas(IPreferencesConstants.RUNTIME_NAME, IPreferencesConstants.PT_PREFERENCES);

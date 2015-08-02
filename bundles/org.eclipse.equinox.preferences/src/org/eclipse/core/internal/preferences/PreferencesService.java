@@ -82,9 +82,7 @@ public class PreferencesService implements IPreferencesService {
 		initializeDefaultScopes();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#applyPreferences(org.eclipse.core.runtime.preferences.IEclipsePreferences, org.eclipse.core.runtime.preferences.IPreferenceFilter[])
-	 */
+
 	@Override
 	public void applyPreferences(IEclipsePreferences tree, IPreferenceFilter[] filters) throws CoreException {
 		if (filters == null || filters.length == 0)
@@ -106,9 +104,7 @@ public class PreferencesService implements IPreferencesService {
 		}
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#applyPreferences(org.eclipse.core.runtime.preferences.IExportedPreferences)
-	 */
+
 	@Override
 	public IStatus applyPreferences(IExportedPreferences preferences) throws CoreException {
 		// TODO investigate refactoring to merge with new #apply(IEclipsePreferences, IPreferenceFilter[]) APIs
@@ -394,9 +390,7 @@ public class PreferencesService implements IPreferencesService {
 		return scope.create(root, key);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#exportPreferences(IEclipsePreferences, IPreferenceFilter[], OutputStream)
-	 */
+
 	@Override
 	public void exportPreferences(IEclipsePreferences node, IPreferenceFilter[] filters, OutputStream stream) throws CoreException {
 		if (filters == null || filters.length == 0)
@@ -408,9 +402,7 @@ public class PreferencesService implements IPreferencesService {
 		}
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#exportPreferences(org.eclipse.core.runtime.preferences.IEclipsePreferences, java.io.OutputStream, java.lang.String[])
-	 */
+
 	@Override
 	public IStatus exportPreferences(IEclipsePreferences node, OutputStream output, String[] excludesList) throws CoreException {
 		// TODO investigate refactoring to merge with new #export(IEclipsePreferences, IPreferenceFilter[]) APIs
@@ -462,9 +454,7 @@ public class PreferencesService implements IPreferencesService {
 		return result[0];
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#get(java.lang.String, java.lang.String, org.osgi.service.prefs.Preferences[])
-	 */
+
 	@Override
 	public String get(String key, String defaultValue, Preferences[] nodes) {
 		if (nodes == null)
@@ -480,9 +470,7 @@ public class PreferencesService implements IPreferencesService {
 		return defaultValue;
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#getBoolean(java.lang.String, java.lang.String, boolean, org.eclipse.core.runtime.preferences.IScope[])
-	 */
+
 	@Override
 	public boolean getBoolean(String qualifier, String key, boolean defaultValue, IScopeContext[] scopes) {
 		String result = get(EclipsePreferences.decodePath(key)[1], null, getNodes(qualifier, key, scopes));
@@ -519,27 +507,21 @@ public class PreferencesService implements IPreferencesService {
 		return null;
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#getByteArray(java.lang.String, java.lang.String, byte[], org.eclipse.core.runtime.preferences.IScope[])
-	 */
+
 	@Override
 	public byte[] getByteArray(String qualifier, String key, byte[] defaultValue, IScopeContext[] scopes) {
 		String result = get(EclipsePreferences.decodePath(key)[1], null, getNodes(qualifier, key, scopes));
 		return result == null ? defaultValue : Base64.decode(result.getBytes());
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#getDefaultLookupOrder(java.lang.String, java.lang.String)
-	 */
+
 	@Override
 	public String[] getDefaultLookupOrder(String qualifier, String key) {
 		LookupOrder order = (LookupOrder) defaultsRegistry.get(getRegistryKey(qualifier, key));
 		return order == null ? null : order.getOrder();
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#getDouble(java.lang.String, java.lang.String, double, org.eclipse.core.runtime.preferences.IScope[])
-	 */
+
 	@Override
 	public double getDouble(String qualifier, String key, double defaultValue, IScopeContext[] scopes) {
 		String value = get(EclipsePreferences.decodePath(key)[1], null, getNodes(qualifier, key, scopes));
@@ -552,9 +534,7 @@ public class PreferencesService implements IPreferencesService {
 		}
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#getFloat(java.lang.String, java.lang.String, float, org.eclipse.core.runtime.preferences.IScope[])
-	 */
+
 	@Override
 	public float getFloat(String qualifier, String key, float defaultValue, IScopeContext[] scopes) {
 		String value = get(EclipsePreferences.decodePath(key)[1], null, getNodes(qualifier, key, scopes));
@@ -567,9 +547,7 @@ public class PreferencesService implements IPreferencesService {
 		}
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#getInt(java.lang.String, java.lang.String, int, org.eclipse.core.runtime.preferences.IScope[])
-	 */
+
 	@Override
 	public int getInt(String qualifier, String key, int defaultValue, IScopeContext[] scopes) {
 		String value = get(EclipsePreferences.decodePath(key)[1], null, getNodes(qualifier, key, scopes));
@@ -582,13 +560,9 @@ public class PreferencesService implements IPreferencesService {
 		}
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#getRootNode()
-	 */
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#getLong(java.lang.String, java.lang.String, long, org.eclipse.core.runtime.preferences.IScope[])
-	 */
+
+
 	@Override
 	public long getLong(String qualifier, String key, long defaultValue, IScopeContext[] scopes) {
 		String value = get(EclipsePreferences.decodePath(key)[1], null, getNodes(qualifier, key, scopes));
@@ -601,9 +575,7 @@ public class PreferencesService implements IPreferencesService {
 		}
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#getLookupOrder(java.lang.String, java.lang.String)
-	 */
+
 	@Override
 	public String[] getLookupOrder(String qualifier, String key) {
 		String[] order = getDefaultLookupOrder(qualifier, key);
@@ -690,17 +662,13 @@ public class PreferencesService implements IPreferencesService {
 		return path.substring(startIndex + 1, endIndex);
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#getString(java.lang.String, java.lang.String, java.lang.String, org.eclipse.core.runtime.preferences.IScope[])
-	 */
+
 	@Override
 	public String getString(String qualifier, String key, String defaultValue, IScopeContext[] scopes) {
 		return get(EclipsePreferences.decodePath(key)[1], defaultValue, getNodes(qualifier, key, scopes));
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#importPreferences(java.io.InputStream)
-	 */
+
 	@Override
 	public IStatus importPreferences(InputStream input) throws CoreException {
 		if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
@@ -855,9 +823,7 @@ public class PreferencesService implements IPreferencesService {
 		return properties.getProperty(VERSION_KEY) == null;
 	}
 
-	/* (non-Javadoc)
-	 * @see IPreferencesService#matches(IEclipsePreferences, IPreferenceFilter[])
-	 */
+
 	@Override
 	public IPreferenceFilter[] matches(IEclipsePreferences tree, IPreferenceFilter[] filters) throws CoreException {
 		if (filters == null || filters.length == 0)
@@ -888,9 +854,7 @@ public class PreferencesService implements IPreferencesService {
 		return result;
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#readPreferences(java.io.InputStream)
-	 */
+
 	@Override
 	public IExportedPreferences readPreferences(InputStream input) throws CoreException {
 		if (input == null)
@@ -946,9 +910,7 @@ public class PreferencesService implements IPreferencesService {
 		return scope.equals(sub);
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#setDefaultLookupOrder(java.lang.String, java.lang.String, java.lang.String[])
-	 */
+
 	@Override
 	public void setDefaultLookupOrder(String qualifier, String key, String[] order) {
 		String registryKey = getRegistryKey(qualifier, key);

@@ -28,9 +28,7 @@ public class ExportedPreferences extends EclipsePreferences implements IExported
 		super(parent, name);
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IExportedPreferences#isExportRoot()
-	 */
+
 	@Override
 	public boolean isExportRoot() {
 		return isExportRoot;
