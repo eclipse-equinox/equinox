@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,6 +87,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		/* (non-Javadoc)
 		 * @see java.util.Hashtable#keys()
 		 */
+		@Override
 		public synchronized Enumeration keys() {
 			TreeSet set = new TreeSet();
 			for (Enumeration e = super.keys(); e.hasMoreElements();)
@@ -97,8 +98,10 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		/* (non-Javadoc)
 		 * @see java.util.Hashtable#entrySet()
 		 */
+		@Override
 		public Set entrySet() {
 			TreeSet set = new TreeSet(new Comparator() {
+				@Override
 				public int compare(Object e1, Object e2) {
 					String s1 = (String) ((Map.Entry) e1).getKey();
 					String s2 = (String) ((Map.Entry) e2).getKey();
@@ -125,6 +128,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#absolutePath()
 	 */
+	@Override
 	public String absolutePath() {
 		if (cachedPath == null) {
 			if (parent == null)
@@ -142,6 +146,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		return cachedPath;
 	}
 
+	@Override
 	public void accept(IPreferenceNodeVisitor visitor) throws BackingStoreException {
 		if (!visitor.visit(this))
 			return;
@@ -163,6 +168,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.eclipse.core.runtime.IEclipsePreferences#addNodeChangeListener(org.eclipse.core.runtime.IEclipsePreferences.INodeChangeListener)
 	 */
+	@Override
 	public void addNodeChangeListener(INodeChangeListener listener) {
 		checkRemoved();
 		if (nodeChangeListeners == null)
@@ -175,6 +181,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.eclipse.core.runtime.IEclipsePreferences#addPreferenceChangeListener(org.eclipse.core.runtime.IEclipsePreferences.IPreferenceChangeListener)
 	 */
+	@Override
 	public void addPreferenceChangeListener(IPreferenceChangeListener listener) {
 		checkRemoved();
 		if (preferenceChangeListeners == null)
@@ -203,6 +210,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#childrenNames()
 	 */
+	@Override
 	public String[] childrenNames() throws BackingStoreException {
 		// illegal state if this node has been removed
 		checkRemoved();
@@ -228,6 +236,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#clear()
 	 */
+	@Override
 	public void clear() {
 		// illegal state if this node has been removed
 		checkRemoved();
@@ -375,6 +384,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.eclipse.core.runtime.preferences.IScope#create(org.eclipse.core.runtime.preferences.IEclipsePreferences)
 	 */
+	@Override
 	public IEclipsePreferences create(IEclipsePreferences nodeParent, String nodeName) {
 		return create((EclipsePreferences) nodeParent, nodeName, null);
 	}
@@ -423,6 +433,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#flush()
 	 */
+	@Override
 	public void flush() throws BackingStoreException {
 		IEclipsePreferences toFlush = null;
 		synchronized (childAndPropertyLock) {
@@ -480,6 +491,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#get(java.lang.String, java.lang.String)
 	 */
+	@Override
 	public String get(String key, String defaultValue) {
 		String value = internalGet(key);
 		return value == null ? defaultValue : value;
@@ -488,6 +500,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#getBoolean(java.lang.String, boolean)
 	 */
+	@Override
 	public boolean getBoolean(String key, boolean defaultValue) {
 		String value = internalGet(key);
 		return value == null ? defaultValue : TRUE.equalsIgnoreCase(value);
@@ -496,6 +509,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#getByteArray(java.lang.String, byte[])
 	 */
+	@Override
 	public byte[] getByteArray(String key, byte[] defaultValue) {
 		String value = internalGet(key);
 		return value == null ? defaultValue : Base64.decode(value.getBytes());
@@ -551,6 +565,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#getDouble(java.lang.String, double)
 	 */
+	@Override
 	public double getDouble(String key, double defaultValue) {
 		String value = internalGet(key);
 		double result = defaultValue;
@@ -566,6 +581,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#getFloat(java.lang.String, float)
 	 */
+	@Override
 	public float getFloat(String key, float defaultValue) {
 		String value = internalGet(key);
 		float result = defaultValue;
@@ -581,6 +597,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#getInt(java.lang.String, int)
 	 */
+	@Override
 	public int getInt(String key, int defaultValue) {
 		String value = internalGet(key);
 		int result = defaultValue;
@@ -607,6 +624,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#getLong(java.lang.String, long)
 	 */
+	@Override
 	public long getLong(String key, long defaultValue) {
 		String value = internalGet(key);
 		long result = defaultValue;
@@ -705,6 +723,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#keys()
 	 */
+	@Override
 	public String[] keys() {
 		// illegal state if this node has been removed
 		synchronized (childAndPropertyLock) {
@@ -801,6 +820,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#name()
 	 */
+	@Override
 	public String name() {
 		return name;
 	}
@@ -808,6 +828,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#node(java.lang.String)
 	 */
+	@Override
 	public Preferences node(String pathName) {
 		return internalNode(pathName, true, null);
 	}
@@ -819,10 +840,12 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		for (int i = 0; i < listeners.length; i++) {
 			final INodeChangeListener listener = (INodeChangeListener) listeners[i];
 			ISafeRunnable job = new ISafeRunnable() {
+				@Override
 				public void handleException(Throwable exception) {
 					// already logged in Platform#run()
 				}
 
+				@Override
 				public void run() throws Exception {
 					if (added)
 						listener.added(event);
@@ -837,6 +860,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#nodeExists(java.lang.String)
 	 */
+	@Override
 	public boolean nodeExists(String path) throws BackingStoreException {
 		// short circuit for checking this node
 		if (path.length() == 0)
@@ -871,6 +895,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#parent()
 	 */
+	@Override
 	public Preferences parent() {
 		// illegal state if this node has been removed
 		checkRemoved();
@@ -888,10 +913,12 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		for (int i = 0; i < listeners.length; i++) {
 			final IPreferenceChangeListener listener = (IPreferenceChangeListener) listeners[i];
 			ISafeRunnable job = new ISafeRunnable() {
+				@Override
 				public void handleException(Throwable exception) {
 					// already logged in Platform#run()
 				}
 
+				@Override
 				public void run() throws Exception {
 					listener.preferenceChange(event);
 				}
@@ -903,6 +930,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#put(java.lang.String, java.lang.String)
 	 */
+	@Override
 	public void put(String key, String newValue) {
 		if (key == null || newValue == null)
 			throw new NullPointerException();
@@ -916,6 +944,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#putBoolean(java.lang.String, boolean)
 	 */
+	@Override
 	public void putBoolean(String key, boolean value) {
 		if (key == null)
 			throw new NullPointerException();
@@ -930,6 +959,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#putByteArray(java.lang.String, byte[])
 	 */
+	@Override
 	public void putByteArray(String key, byte[] value) {
 		if (key == null || value == null)
 			throw new NullPointerException();
@@ -944,6 +974,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#putDouble(java.lang.String, double)
 	 */
+	@Override
 	public void putDouble(String key, double value) {
 		if (key == null)
 			throw new NullPointerException();
@@ -958,6 +989,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#putFloat(java.lang.String, float)
 	 */
+	@Override
 	public void putFloat(String key, float value) {
 		if (key == null)
 			throw new NullPointerException();
@@ -972,6 +1004,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#putInt(java.lang.String, int)
 	 */
+	@Override
 	public void putInt(String key, int value) {
 		if (key == null)
 			throw new NullPointerException();
@@ -986,6 +1019,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#putLong(java.lang.String, long)
 	 */
+	@Override
 	public void putLong(String key, long value) {
 		if (key == null)
 			throw new NullPointerException();
@@ -1000,6 +1034,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#remove(java.lang.String)
 	 */
+	@Override
 	public void remove(String key) {
 		String oldValue;
 		synchronized (childAndPropertyLock) {
@@ -1017,6 +1052,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#removeNode()
 	 */
+	@Override
 	public void removeNode() throws BackingStoreException {
 		// illegal state if this node has been removed
 		checkRemoved();
@@ -1074,6 +1110,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.eclipse.core.runtime.IEclipsePreferences#removeNodeChangeListener(org.eclipse.core.runtime.IEclipsePreferences.removeNodeChangeListener)
 	 */
+	@Override
 	public void removeNodeChangeListener(INodeChangeListener listener) {
 		checkRemoved();
 		if (nodeChangeListeners == null)
@@ -1088,6 +1125,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.eclipse.core.runtime.IEclipsePreferences#removePreferenceChangeListener(org.eclipse.core.runtime.IEclipsePreferences.IPreferenceChangeListener)
 	 */
+	@Override
 	public void removePreferenceChangeListener(IPreferenceChangeListener listener) {
 		checkRemoved();
 		if (preferenceChangeListeners == null)
@@ -1260,6 +1298,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * @see org.osgi.service.prefs.Preferences#sync()
 	 */
 
+	@Override
 	public void sync() throws BackingStoreException {
 		// illegal state if this node has been removed
 		checkRemoved();
@@ -1278,6 +1317,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	public String toDeepDebugString() {
 		final StringBuffer buffer = new StringBuffer();
 		IPreferenceNodeVisitor visitor = new IPreferenceNodeVisitor() {
+			@Override
 			public boolean visit(IEclipsePreferences node) throws BackingStoreException {
 				buffer.append(node);
 				buffer.append('\n');
@@ -1302,6 +1342,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		return buffer.toString();
 	}
 
+	@Override
 	public String toString() {
 		return absolutePath();
 	}

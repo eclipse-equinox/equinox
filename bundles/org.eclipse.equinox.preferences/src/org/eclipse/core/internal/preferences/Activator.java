@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,6 +59,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	/* (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		bundleContext = context;
 		// Open the services first before processing the command-line args, order is important! (Bug 150288)
@@ -78,6 +79,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	/* (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		PreferencesOSGiUtils.getDefault().closeServices();
 		if (registryServiceTracker != null) {
@@ -102,6 +104,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	/* (non-Javadoc)
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
 	 */
+	@Override
 	public synchronized Object addingService(ServiceReference reference) {
 		Object service = bundleContext.getService(reference);
 		// this check is important as it avoids early loading of PreferenceServiceRegistryHelper and allows
@@ -129,6 +132,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	/* (non-Javadoc)
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
 	 */
+	@Override
 	public void modifiedService(ServiceReference reference, Object service) {
 		// nothing to do
 	}
@@ -136,6 +140,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	/* (non-Javadoc)
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
 	 */
+	@Override
 	public synchronized void removedService(ServiceReference reference, Object service) {
 		PreferencesService.getDefault().setRegistryHelper(null);
 		bundleContext.ungetService(reference);

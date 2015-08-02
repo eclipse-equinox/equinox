@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,6 +60,7 @@ public final class InstanceScope extends AbstractScope {
 	/*
 	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getLocation()
 	 */
+	@Override
 	public IPath getLocation() {
 		// Return null. The instance location usually corresponds to the state
 		// location of the bundle and we don't know what bundle we are dealing with.
@@ -69,6 +70,7 @@ public final class InstanceScope extends AbstractScope {
 	/*
 	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getName()
 	 */
+	@Override
 	public String getName() {
 		return SCOPE;
 	}
@@ -76,6 +78,7 @@ public final class InstanceScope extends AbstractScope {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getNode(java.lang.String)
 	 */
+	@Override
 	public IEclipsePreferences getNode(String qualifier) {
 		return super.getNode(qualifier);
 	}

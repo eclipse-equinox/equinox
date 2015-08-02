@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -162,6 +162,7 @@ public class DefaultPreferences extends EclipsePreferences {
 		return false;
 	}
 
+	@Override
 	public boolean nodeExists(String path) throws BackingStoreException {
 		// use super implementation for empty and absolute paths
 		if (path.length() == 0 || path.charAt(0) == IPath.SEPARATOR)
@@ -238,10 +239,12 @@ public class DefaultPreferences extends EclipsePreferences {
 	/* (non-Javadoc)
 	 * @see org.osgi.service.prefs.Preferences#flush()
 	 */
+	@Override
 	public void flush() {
 		// default values are not persisted
 	}
 
+	@Override
 	protected IEclipsePreferences getLoadLevel() {
 		if (loadLevel == null) {
 			if (qualifier == null)
@@ -257,10 +260,12 @@ public class DefaultPreferences extends EclipsePreferences {
 		return loadLevel;
 	}
 
+	@Override
 	protected EclipsePreferences internalCreate(EclipsePreferences nodeParent, String nodeName, Object context) {
 		return new DefaultPreferences(nodeParent, nodeName, context);
 	}
 
+	@Override
 	protected boolean isAlreadyLoaded(IEclipsePreferences node) {
 		return loadedNodes.contains(node.name());
 	}
@@ -268,6 +273,7 @@ public class DefaultPreferences extends EclipsePreferences {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.internal.preferences.EclipsePreferences#load()
 	 */
+	@Override
 	protected void load() {
 		setInitializingBundleDefaults();
 		try {
@@ -284,6 +290,7 @@ public class DefaultPreferences extends EclipsePreferences {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.internal.preferences.EclipsePreferences#internalPut(java.lang.String, java.lang.String)
 	 */
+	@Override
 	protected String internalPut(String key, String newValue) {
 		// set the value in this node
 		String result = super.internalPut(key, newValue);
@@ -402,6 +409,7 @@ public class DefaultPreferences extends EclipsePreferences {
 		return result;
 	}
 
+	@Override
 	protected void loaded() {
 		loadedNodes.add(name());
 	}
@@ -409,6 +417,7 @@ public class DefaultPreferences extends EclipsePreferences {
 	/* (non-Javadoc)
 	 * @see org.osgi.service.prefs.Preferences#sync()
 	 */
+	@Override
 	public void sync() {
 		// default values are not persisted
 	}

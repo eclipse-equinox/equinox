@@ -54,6 +54,7 @@ public class SafeFileOutputStream extends OutputStream {
 		output = new BufferedOutputStream(new FileOutputStream(temp));
 	}
 
+	@Override
 	public void close() throws IOException {
 		try {
 			output.close();
@@ -108,6 +109,7 @@ public class SafeFileOutputStream extends OutputStream {
 		}
 	}
 
+	@Override
 	public void flush() throws IOException {
 		try {
 			output.flush();
@@ -131,6 +133,7 @@ public class SafeFileOutputStream extends OutputStream {
 		}
 	}
 
+	@Override
 	public void write(int b) throws IOException {
 		try {
 			output.write(b);

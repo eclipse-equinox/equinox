@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,14 +69,17 @@ public class ConfigurationPreferences extends EclipsePreferences {
 			location = computeLocation(baseLocation, qualifier);
 	}
 
+	@Override
 	protected IPath getLocation() {
 		return location;
 	}
 
+	@Override
 	protected boolean isAlreadyLoaded(IEclipsePreferences node) {
 		return loadedNodes.contains(node.name());
 	}
 
+	@Override
 	protected void loaded() {
 		loadedNodes.add(name());
 	}
@@ -84,6 +87,7 @@ public class ConfigurationPreferences extends EclipsePreferences {
 	/*
 	 * Return the node at which these preferences are loaded/saved.
 	 */
+	@Override
 	protected IEclipsePreferences getLoadLevel() {
 		if (loadLevel == null) {
 			if (qualifier == null)
@@ -115,6 +119,7 @@ public class ConfigurationPreferences extends EclipsePreferences {
 		}
 	}
 
+	@Override
 	protected EclipsePreferences internalCreate(EclipsePreferences nodeParent, String nodeName, Object context) {
 		return new ConfigurationPreferences(nodeParent, nodeName);
 	}

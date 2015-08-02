@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 IBM Corporation and others.
+ * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -255,6 +255,7 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IRegistryChangeListener#registryChanged(org.eclipse.core.runtime.IRegistryChangeEvent)
 	 */
+	@Override
 	public void registryChanged(IRegistryChangeEvent event) {
 		IExtensionDelta[] deltasOld = event.getExtensionDeltas(IPreferencesConstants.RUNTIME_NAME, IPreferencesConstants.PT_PREFERENCES);
 		IExtensionDelta[] deltasNew = event.getExtensionDeltas(IPreferencesConstants.PREFERS_NAME, IPreferencesConstants.PT_PREFERENCES);
@@ -292,10 +293,12 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		try {
 			final AbstractPreferenceInitializer initializer = (AbstractPreferenceInitializer) element.createExecutableExtension(ATTRIBUTE_CLASS);
 			ISafeRunnable job = new ISafeRunnable() {
+				@Override
 				public void handleException(Throwable exception) {
 					// already logged in Platform#run()
 				}
 
+				@Override
 				public void run() throws Exception {
 					initializer.initializeDefaultPreferences();
 				}

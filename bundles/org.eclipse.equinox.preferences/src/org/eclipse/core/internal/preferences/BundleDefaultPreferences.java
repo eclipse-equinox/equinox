@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,6 +60,7 @@ public class BundleDefaultPreferences extends EclipsePreferences {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.internal.preferences.EclipsePreferences#getLoadLevel()
 	 */
+	@Override
 	protected IEclipsePreferences getLoadLevel() {
 		if (loadLevel == null) {
 			if (qualifier == null)
@@ -78,6 +79,7 @@ public class BundleDefaultPreferences extends EclipsePreferences {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.internal.preferences.EclipsePreferences#isAlreadyLoaded(org.eclipse.core.runtime.preferences.IEclipsePreferences)
 	 */
+	@Override
 	protected boolean isAlreadyLoaded(IEclipsePreferences node) {
 		return loadedNodes.contains(node.name());
 	}
@@ -85,6 +87,7 @@ public class BundleDefaultPreferences extends EclipsePreferences {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.internal.preferences.EclipsePreferences#loaded()
 	 */
+	@Override
 	protected void loaded() {
 		loadedNodes.add(name());
 	}
@@ -92,6 +95,7 @@ public class BundleDefaultPreferences extends EclipsePreferences {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.internal.preferences.EclipsePreferences#load()
 	 */
+	@Override
 	protected void load() {
 		// ensure that the same node in the "default" scope is loaded so this one is 
 		// initialized properly
@@ -105,6 +109,7 @@ public class BundleDefaultPreferences extends EclipsePreferences {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.internal.preferences.EclipsePreferences#internalCreate(org.eclipse.core.internal.preferences.EclipsePreferences, java.lang.String, java.lang.Object)
 	 */
+	@Override
 	protected EclipsePreferences internalCreate(EclipsePreferences nodeParent, String nodeName, Object context) {
 		return new BundleDefaultPreferences(nodeParent, nodeName);
 	}

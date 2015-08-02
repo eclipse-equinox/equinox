@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ public abstract class AbstractScope implements IScopeContext {
 	/*
 	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getName()
 	 */
+	@Override
 	public abstract String getName();
 
 	/*
@@ -32,6 +33,7 @@ public abstract class AbstractScope implements IScopeContext {
 	 * 
 	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getNode(java.lang.String)
 	 */
+	@Override
 	public IEclipsePreferences getNode(String qualifier) {
 		if (qualifier == null)
 			throw new IllegalArgumentException();
@@ -41,11 +43,13 @@ public abstract class AbstractScope implements IScopeContext {
 	/*
 	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getLocation()
 	 */
+	@Override
 	public abstract IPath getLocation();
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -61,6 +65,7 @@ public abstract class AbstractScope implements IScopeContext {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return getName().hashCode();
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,6 +65,7 @@ public final class DefaultScope extends AbstractScope {
 	/*
 	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getName()
 	 */
+	@Override
 	public String getName() {
 		return SCOPE;
 	}
@@ -72,6 +73,7 @@ public final class DefaultScope extends AbstractScope {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getNode(java.lang.String)
 	 */
+	@Override
 	public IEclipsePreferences getNode(String qualifier) {
 		return super.getNode(qualifier);
 	}
@@ -79,6 +81,7 @@ public final class DefaultScope extends AbstractScope {
 	/*
 	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getLocation()
 	 */
+	@Override
 	public IPath getLocation() {
 		// We don't persist defaults so return null.
 		return null;

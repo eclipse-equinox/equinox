@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,10 +56,12 @@ public class ScopeDescriptor {
 		final String[][] result = new String[1][];
 		final BackingStoreException[] bse = new BackingStoreException[1];
 		ISafeRunnable code = new ISafeRunnable() {
+			@Override
 			public void run() throws Exception {
 				result[0] = storage.childrenNames(path);
 			}
 
+			@Override
 			public void handleException(Throwable exception) {
 				if (exception instanceof BackingStoreException)
 					bse[0] = (BackingStoreException) exception;
@@ -79,10 +81,12 @@ public class ScopeDescriptor {
 		final Properties[] result = new Properties[1];
 		final BackingStoreException[] bse = new BackingStoreException[1];
 		ISafeRunnable code = new ISafeRunnable() {
+			@Override
 			public void run() throws Exception {
 				result[0] = storage.load(path);
 			}
 
+			@Override
 			public void handleException(Throwable exception) {
 				if (exception instanceof BackingStoreException)
 					bse[0] = (BackingStoreException) exception;
@@ -101,10 +105,12 @@ public class ScopeDescriptor {
 			return;
 		final BackingStoreException[] bse = new BackingStoreException[1];
 		ISafeRunnable code = new ISafeRunnable() {
+			@Override
 			public void run() throws Exception {
 				storage.save(path, properties);
 			}
 
+			@Override
 			public void handleException(Throwable exception) {
 				if (exception instanceof BackingStoreException)
 					bse[0] = (BackingStoreException) exception;
@@ -129,10 +135,12 @@ public class ScopeDescriptor {
 		if (storage == null)
 			return;
 		SafeRunner.run(new ISafeRunnable() {
+			@Override
 			public void run() throws Exception {
 				storage.removed(path);
 			}
 
+			@Override
 			public void handleException(Throwable exception) {
 				// ignore here, error will be logged in saferunner
 			}
