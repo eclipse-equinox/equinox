@@ -27,7 +27,7 @@ import java.util.HashMap;
  */
 public final class StringPool {
 	private int savings;
-	private final HashMap map = new HashMap();
+	private final HashMap<String, String> map = new HashMap<>();
 
 	/**
 	 * Adds a <code>String</code> to the pool.  Returns a <code>String</code>

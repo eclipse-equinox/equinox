@@ -28,7 +28,7 @@ public class ConfigurationPreferences extends EclipsePreferences {
 	private IPath location;
 	private IEclipsePreferences loadLevel;
 	// cache which nodes have been loaded from disk
-	private static Set loadedNodes = Collections.synchronizedSet(new HashSet());
+	private static Set<String> loadedNodes = Collections.synchronizedSet(new HashSet<String>());
 	private static boolean initialized = false;
 	private static IPath baseLocation;
 

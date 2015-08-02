@@ -22,7 +22,7 @@ public class ScopeDescriptor {
 
 	String name;
 	AbstractPreferenceStorage storage;
-	Set loadedNodes = Collections.synchronizedSet(new HashSet());
+	Set<String> loadedNodes = Collections.synchronizedSet(new HashSet<String>());
 
 	public ScopeDescriptor(AbstractPreferenceStorage storage) {
 		super();

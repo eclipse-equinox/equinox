@@ -47,9 +47,9 @@ public class PreferencesService implements IPreferencesService {
 
 	private static PreferencesService instance;
 	static final RootPreferences root = new RootPreferences();
-	private static final Map defaultsRegistry = Collections.synchronizedMap(new HashMap());
+	private static final Map<String, LookupOrder> defaultsRegistry = Collections.synchronizedMap(new HashMap<String, LookupOrder>());
 	private Object registryHelper = null;
-	private Map defaultScopes = new HashMap();
+	private final Map<String, EclipsePreferences> defaultScopes = new HashMap<>();
 
 	/**
 	 * The last time analysis was done to remove duplicate strings
@@ -149,7 +149,7 @@ public class PreferencesService implements IPreferencesService {
 					globalNode = (IEclipsePreferences) root.node(node.absolutePath());
 
 				// the list for properties to remove
-				List propsToRemove = new ArrayList();
+				List<String> propsToRemove = new ArrayList<>();
 				for (int i = 0; i < globalNode.keys().length; i++) {
 					propsToRemove.add(globalNode.keys()[i]);
 				}
@@ -177,8 +177,8 @@ public class PreferencesService implements IPreferencesService {
 				}
 
 				String keyToRemove = null;
-				for (Iterator it = propsToRemove.iterator(); it.hasNext();) {
-					keyToRemove = (String) it.next();
+				for (Iterator<String> it = propsToRemove.iterator(); it.hasNext();) {
+					keyToRemove = it.next();
 					keyToRemove = keyToRemove.intern();
 					if (EclipsePreferences.DEBUG_PREFERENCE_SET)
 						PrefsMessages.message("Removing: " + globalNode.absolutePath() + '/' + keyToRemove); //$NON-NLS-1$
@@ -235,7 +235,7 @@ public class PreferencesService implements IPreferencesService {
 	private Properties convertFromLegacy(Properties properties) {
 		Properties result = new Properties();
 		String prefix = IPath.SEPARATOR + InstanceScope.SCOPE + IPath.SEPARATOR;
-		for (Iterator i = properties.keySet().iterator(); i.hasNext();) {
+		for (Iterator<?> i = properties.keySet().iterator(); i.hasNext();) {
 			String key = (String) i.next();
 			String value = properties.getProperty(key);
 			if (value != null) {
@@ -259,7 +259,7 @@ public class PreferencesService implements IPreferencesService {
 	 */
 	private IExportedPreferences convertFromProperties(Properties properties) {
 		IExportedPreferences result = ExportedPreferences.newRoot();
-		for (Iterator i = properties.keySet().iterator(); i.hasNext();) {
+		for (Iterator<?> i = properties.keySet().iterator(); i.hasNext();) {
 			String path = (String) i.next();
 			String value = properties.getProperty(path);
 			if (path.charAt(0) == EXPORT_ROOT_PREFIX) {
@@ -363,7 +363,7 @@ public class PreferencesService implements IPreferencesService {
 			copyFromTo(source.node(children[i]), destination.node(children[i]), keys, depth);
 	}
 
-	public WeakReference applyRuntimeDefaults(String name, WeakReference pluginReference) {
+	public WeakReference<Object> applyRuntimeDefaults(String name, WeakReference<Object> pluginReference) {
 		if (registryHelper == null)
 			return null;
 		return ((PreferenceServiceRegistryHelper) registryHelper).applyRuntimeDefaults(name, pluginReference);
@@ -381,7 +381,7 @@ public class PreferencesService implements IPreferencesService {
 	}
 
 	public IEclipsePreferences createNode(String key) {
-		IScope scope = (IScope) defaultScopes.get(key);
+		IScope scope = defaultScopes.get(key);
 		if (scope == null) {
 			if (registryHelper == null)
 				return new EclipsePreferences(root, key);
@@ -517,7 +517,7 @@ public class PreferencesService implements IPreferencesService {
 
 	@Override
 	public String[] getDefaultLookupOrder(String qualifier, String key) {
-		LookupOrder order = (LookupOrder) defaultsRegistry.get(getRegistryKey(qualifier, key));
+		LookupOrder order = defaultsRegistry.get(getRegistryKey(qualifier, key));
 		return order == null ? null : order.getOrder();
 	}
 
@@ -591,7 +591,7 @@ public class PreferencesService implements IPreferencesService {
 	private Preferences[] getNodes(final String qualifier, String key, final IScopeContext[] contexts) {
 		String[] order = getLookupOrder(qualifier, key);
 		final String childPath = EclipsePreferences.makeRelative(EclipsePreferences.decodePath(key)[0]);
-		final ArrayList result = new ArrayList();
+		final ArrayList<Preferences> result = new ArrayList<>();
 		for (int i = 0; i < order.length; i++) {
 			final String scopeString = order[i];
 			SafeRunner.run(new ISafeRunnable() {
@@ -625,7 +625,7 @@ public class PreferencesService implements IPreferencesService {
 				}
 			});
 		}
-		return (Preferences[]) result.toArray(new Preferences[result.size()]);
+		return result.toArray(new Preferences[result.size()]);
 	}
 
 	/*
@@ -681,11 +681,11 @@ public class PreferencesService implements IPreferencesService {
 	 * then apply the resulting tree to the main preference tree.
 	 */
 	private void internalApply(IEclipsePreferences tree, IPreferenceFilter[] filters) throws BackingStoreException {
-		ArrayList trees = new ArrayList();
+		ArrayList<IEclipsePreferences> trees = new ArrayList<>();
 		for (int i = 0; i < filters.length; i++)
 			trees.add(trimTree(tree, filters[i]));
 		// merge the union of the matching filters
-		IEclipsePreferences toApply = mergeTrees((IEclipsePreferences[]) trees.toArray(new IEclipsePreferences[trees.size()]));
+		IEclipsePreferences toApply = mergeTrees(trees.toArray(new IEclipsePreferences[trees.size()]));
 
 		// fire an event to give people a chance to modify the tree
 		toApply = firePreApplyEvent(toApply);
@@ -709,10 +709,10 @@ public class PreferencesService implements IPreferencesService {
 	 * Then export the resulting tree to the given output stream.
 	 */
 	private void internalExport(IEclipsePreferences node, IPreferenceFilter filters[], OutputStream output) throws BackingStoreException, CoreException {
-		ArrayList trees = new ArrayList();
+		ArrayList<IEclipsePreferences> trees = new ArrayList<>();
 		for (int i = 0; i < filters.length; i++)
 			trees.add(trimTree(node, filters[i]));
-		IEclipsePreferences toExport = mergeTrees((IEclipsePreferences[]) trees.toArray(new IEclipsePreferences[trees.size()]));
+		IEclipsePreferences toExport = mergeTrees(trees.toArray(new IEclipsePreferences[trees.size()]));
 		exportPreferences(toExport, output, (String[]) null);
 	}
 
@@ -728,7 +728,7 @@ public class PreferencesService implements IPreferencesService {
 		// see if this node is applicable by going over all our scopes
 		for (int i = 0; i < scopes.length; i++) {
 			String scope = scopes[i];
-			Map mapping = filter.getMapping(scope);
+			Map<String, PreferenceFilterEntry[]> mapping = filter.getMapping(scope);
 			// if the mapping is null then we match everything
 			if (mapping == null) {
 				// if we are the root check to see if the scope exists
@@ -742,8 +742,8 @@ public class PreferencesService implements IPreferencesService {
 				continue;
 			}
 			// iterate over the list of declared nodes
-			for (Iterator iter = mapping.keySet().iterator(); iter.hasNext();) {
-				String nodePath = (String) iter.next();
+			for (Iterator<String> iter = mapping.keySet().iterator(); iter.hasNext();) {
+				String nodePath = iter.next();
 				String nodeFullPath = '/' + scope + '/' + nodePath;
 				// if this subtree isn't in a hierarchy we are interested in, then go to the next one
 				if (!nodeFullPath.startsWith(treePath))
@@ -755,7 +755,7 @@ public class PreferencesService implements IPreferencesService {
 					PreferenceFilterEntry[] entries;
 					// protect against wrong classes since this is user-code
 					try {
-						entries = (PreferenceFilterEntry[]) mapping.get(nodePath);
+						entries = mapping.get(nodePath);
 					} catch (ClassCastException e) {
 						log(createStatusError(PrefsMessages.preferences_classCastFilterEntry, e));
 						continue;
@@ -788,11 +788,11 @@ public class PreferencesService implements IPreferencesService {
 	 * Internal method that collects the matching filters for the given tree and returns them.
 	 */
 	private IPreferenceFilter[] internalMatches(IEclipsePreferences tree, IPreferenceFilter[] filters) throws BackingStoreException {
-		ArrayList result = new ArrayList();
+		ArrayList<IPreferenceFilter> result = new ArrayList<>();
 		for (int i = 0; i < filters.length; i++)
 			if (internalMatches(tree, filters[i]))
 				result.add(filters[i]);
-		return (IPreferenceFilter[]) result.toArray(new IPreferenceFilter[result.size()]);
+		return result.toArray(new IPreferenceFilter[result.size()]);
 	}
 
 	/*
@@ -954,7 +954,7 @@ public class PreferencesService implements IPreferencesService {
 		// see if this node is applicable by going over all our scopes
 		for (int i = 0; i < scopes.length; i++) {
 			String scope = scopes[i];
-			Map mapping = filter.getMapping(scope);
+			Map<String, PreferenceFilterEntry[]> mapping = filter.getMapping(scope);
 			// if the mapping is null then copy everything if the scope matches
 			if (mapping == null) {
 				// if we are the root node then check our children
@@ -966,8 +966,8 @@ public class PreferencesService implements IPreferencesService {
 				continue;
 			}
 			// iterate over the list of declared nodes
-			for (Iterator iter = mapping.keySet().iterator(); iter.hasNext();) {
-				String nodePath = (String) iter.next();
+			for (Iterator<String> iter = mapping.keySet().iterator(); iter.hasNext();) {
+				String nodePath = iter.next();
 				String nodeFullPath = '/' + scope + '/' + nodePath;
 				// if this subtree isn't in a hierarchy we are interested in, then go to the next one
 				if (!nodeFullPath.startsWith(treePath))
@@ -980,19 +980,19 @@ public class PreferencesService implements IPreferencesService {
 					PreferenceFilterEntry[] entries;
 					// protect against wrong classes since this is passed in by the user
 					try {
-						entries = (PreferenceFilterEntry[]) mapping.get(nodePath);
+						entries = mapping.get(nodePath);
 					} catch (ClassCastException e) {
 						log(createStatusError(PrefsMessages.preferences_classCastFilterEntry, e));
 						continue;
 					}
 					String[] keys = null;
 					if (entries != null) {
-						ArrayList list = new ArrayList();
+						ArrayList<String> list = new ArrayList<>();
 						for (int j = 0; j < entries.length; j++) {
 							if (entries[j] != null)
 								addMatchedKeys(list, entries[j], child.keys());
 						}
-						keys = (String[]) list.toArray(new String[list.size()]);
+						keys = list.toArray(new String[list.size()]);
 					}
 					// do infinite depth if there are no keys specified since the parent matched.
 					copyFromTo(tree.node(childPath), result.node(childPath), keys, keys == null ? -1 : 0);
@@ -1005,7 +1005,7 @@ public class PreferencesService implements IPreferencesService {
 	/*
 	 * Internal method that adds to the given list the matching preferences for entry with or without specific match type.
 	 */
-	private void addMatchedKeys(ArrayList list, PreferenceFilterEntry entry, String[] keys) {
+	private void addMatchedKeys(ArrayList<String> list, PreferenceFilterEntry entry, String[] keys) {
 		String matchType = entry.getMatchType();
 		if (matchType == null) {
 			list.add(entry.getKey());

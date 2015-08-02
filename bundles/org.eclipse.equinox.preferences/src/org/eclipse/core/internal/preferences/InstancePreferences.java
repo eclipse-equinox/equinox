@@ -29,7 +29,7 @@ public class InstancePreferences extends EclipsePreferences {
 	private IEclipsePreferences loadLevel;
 	private IPath location;
 	// cache which nodes have been loaded from disk
-	private static Set loadedNodes = Collections.synchronizedSet(new HashSet());
+	private static Set<String> loadedNodes = Collections.synchronizedSet(new HashSet<String>());
 	private static boolean initialized = false;
 	private static IPath baseLocation;
 
@@ -145,7 +145,7 @@ public class InstancePreferences extends EclipsePreferences {
 		}
 
 		// Store values in the preferences object
-		for (Iterator i = values.keySet().iterator(); i.hasNext();) {
+		for (Iterator<?> i = values.keySet().iterator(); i.hasNext();) {
 			String key = (String) i.next();
 			String value = values.getProperty(key);
 			// value shouldn't be null but check just in case...

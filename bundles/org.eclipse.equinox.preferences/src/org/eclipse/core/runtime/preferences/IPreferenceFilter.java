@@ -72,6 +72,6 @@ public interface IPreferenceFilter {
 	 * @return the mapping table
 	 * @see PreferenceFilterEntry
 	 */
-	public Map getMapping(String scope);
+	public Map<String, PreferenceFilterEntry[]> getMapping(String scope);
 
 }

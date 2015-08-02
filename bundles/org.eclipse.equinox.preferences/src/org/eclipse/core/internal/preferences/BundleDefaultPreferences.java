@@ -27,7 +27,7 @@ import org.eclipse.core.runtime.preferences.*;
  */
 public class BundleDefaultPreferences extends EclipsePreferences {
 
-	private static Set loadedNodes = Collections.synchronizedSet(new HashSet());
+	private static Set<String> loadedNodes = Collections.synchronizedSet(new HashSet<String>());
 	private String qualifier;
 	private int segmentCount;
 	private IEclipsePreferences loadLevel;

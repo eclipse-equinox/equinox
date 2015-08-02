@@ -13,6 +13,7 @@ package org.eclipse.core.internal.preferences;
 
 import java.io.*;
 import java.util.*;
+import java.util.Map.Entry;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.preferences.*;
@@ -49,11 +50,11 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 
 	private String cachedPath;
 	protected ImmutableMap properties = ImmutableMap.EMPTY;
-	protected Map children;
+	protected Map<String, Object> children;
 	/**
 	 * Protects write access to properties and children.
 	 */
-	private Object childAndPropertyLock = new Object();
+	private final Object childAndPropertyLock = new Object();
 	protected boolean dirty = false;
 	protected boolean loading = false;
 	protected final String name;
@@ -86,25 +87,25 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 
 
 		@Override
-		public synchronized Enumeration keys() {
-			TreeSet set = new TreeSet();
-			for (Enumeration e = super.keys(); e.hasMoreElements();)
+		public synchronized Enumeration<Object> keys() {
+			TreeSet<Object> set = new TreeSet<>();
+			for (Enumeration<?> e = super.keys(); e.hasMoreElements();)
 				set.add(e.nextElement());
 			return Collections.enumeration(set);
 		}
 
 
 		@Override
-		public Set entrySet() {
-			TreeSet set = new TreeSet(new Comparator() {
+		public Set<Entry<Object, Object>> entrySet() {
+			TreeSet<Entry<Object, Object>> set = new TreeSet<>(new Comparator<Entry<Object, Object>>() {
 				@Override
-				public int compare(Object e1, Object e2) {
-					String s1 = (String) ((Map.Entry) e1).getKey();
-					String s2 = (String) ((Map.Entry) e2).getKey();
+				public int compare(Entry<Object, Object> e1, Entry<Object, Object> e2) {
+					String s1 = (String) e1.getKey();
+					String s2 = (String) e2.getKey();
 					return s1.compareTo(s2);
 				}
 			});
-			for (Iterator i = super.entrySet().iterator(); i.hasNext();)
+			for (Iterator<Entry<Object, Object>> i = super.entrySet().iterator(); i.hasNext();)
 				set.add(i.next());
 			return set;
 		}
@@ -153,7 +154,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		//Thread safety: synchronize method to protect modification of children field
 		synchronized (childAndPropertyLock) {
 			if (children == null)
-				children = Collections.synchronizedMap(new HashMap());
+				children = Collections.synchronizedMap(new HashMap<String, Object>());
 			children.put(childName, child == null ? (Object) childName : child);
 			return child;
 		}
@@ -217,7 +218,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		synchronized (childAndPropertyLock) {
 			if (children == null || children.size() == 0)
 				return EMPTY_STRING_ARRAY;
-			return (String[]) children.keySet().toArray(EMPTY_STRING_ARRAY);
+			return children.keySet().toArray(EMPTY_STRING_ARRAY);
 		}
 	}
 
@@ -242,7 +243,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		if (root == null)
 			return EMPTY_STRING_ARRAY;
 		IPath dir = root.append(DEFAULT_PREFERENCES_DIRNAME);
-		final ArrayList result = new ArrayList();
+		final ArrayList<String> result = new ArrayList<>();
 		final String extension = '.' + PREFS_FILE_EXTENSION;
 		File file = dir.toFile();
 		File[] totalFiles = file.listFiles();
@@ -257,7 +258,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 				}
 			}
 		}
-		return (String[]) result.toArray(EMPTY_STRING_ARRAY);
+		return result.toArray(EMPTY_STRING_ARRAY);
 	}
 
 	protected IPath computeLocation(IPath root, String qualifier) {
@@ -274,7 +275,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			// ignore for now
 		}
 		table.remove(VERSION_KEY);
-		for (Iterator i = table.keySet().iterator(); i.hasNext();) {
+		for (Iterator<?> i = table.keySet().iterator(); i.hasNext();) {
 			String fullKey = (String) i.next();
 			String value = table.getProperty(fullKey);
 			if (value != null) {
@@ -528,14 +529,14 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * Thread safe way to obtain all children of this node. Never returns null.
 	 */
 	protected IEclipsePreferences[] getChildren(boolean create) {
-		ArrayList result = new ArrayList();
+		ArrayList<IEclipsePreferences> result = new ArrayList<>();
 		String[] names = internalChildNames();
 		for (int i = 0; i < names.length; i++) {
 			IEclipsePreferences child = getChild(names[i], null, create);
 			if (child != null)
 				result.add(child);
 		}
-		return (IEclipsePreferences[]) result.toArray(EMPTY_NODE_ARRAY);
+		return result.toArray(EMPTY_NODE_ARRAY);
 	}
 
 

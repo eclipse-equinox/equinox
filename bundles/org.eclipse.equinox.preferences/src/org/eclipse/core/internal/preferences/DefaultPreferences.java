@@ -33,7 +33,7 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class DefaultPreferences extends EclipsePreferences {
 	// cache which nodes have been loaded from disk
-	private static Set loadedNodes = Collections.synchronizedSet(new HashSet());
+	private static Set<String> loadedNodes = Collections.synchronizedSet(new HashSet<String>());
 	private static final String KEY_PREFIX = "%"; //$NON-NLS-1$
 	private static final String KEY_DOUBLE_PREFIX = "%%"; //$NON-NLS-1$
 	private static final IPath NL_DIR = new Path("$nl$"); //$NON-NLS-1$
@@ -48,7 +48,7 @@ public class DefaultPreferences extends EclipsePreferences {
 	// cached values
 	private String qualifier;
 	private int segmentCount;
-	private WeakReference pluginReference;
+	private WeakReference<Object> pluginReference;
 
 	public static String pluginCustomizationFile = null;
 
@@ -61,7 +61,7 @@ public class DefaultPreferences extends EclipsePreferences {
 
 	private DefaultPreferences(EclipsePreferences parent, String name, Object context) {
 		this(parent, name);
-		this.pluginReference = new WeakReference(context);
+		this.pluginReference = new WeakReference<>(context);
 	}
 
 	private DefaultPreferences(EclipsePreferences parent, String name) {
@@ -118,7 +118,7 @@ public class DefaultPreferences extends EclipsePreferences {
 	 * 	key=value
 	 */
 	private void applyDefaults(String id, Properties defaultValues, Properties translations) {
-		for (Enumeration e = defaultValues.keys(); e.hasMoreElements();) {
+		for (Enumeration<?> e = defaultValues.keys(); e.hasMoreElements();) {
 			String fullKey = (String) e.nextElement();
 			String value = defaultValues.getProperty(fullKey);
 			if (value == null)
@@ -150,7 +150,7 @@ public class DefaultPreferences extends EclipsePreferences {
 	private boolean containsNode(Properties props, IPath path) {
 		if (props == null)
 			return false;
-		for (Enumeration e = props.keys(); e.hasMoreElements();) {
+		for (Enumeration<?> e = props.keys(); e.hasMoreElements();) {
 			String fullKey = (String) e.nextElement();
 			if (props.getProperty(fullKey) == null)
 				continue;
@@ -182,9 +182,9 @@ public class DefaultPreferences extends EclipsePreferences {
 		if (productCustomization == null) {
 			BundleContext context = Activator.getContext();
 			if (context != null) {
-				ServiceTracker productTracker = new ServiceTracker(context, IProductPreferencesService.class.getName(), null);
+				ServiceTracker<?, IProductPreferencesService> productTracker = new ServiceTracker<>(context, IProductPreferencesService.class, null);
 				productTracker.open();
-				IProductPreferencesService productSpecials = (IProductPreferencesService) productTracker.getService();
+				IProductPreferencesService productSpecials = productTracker.getService();
 				if (productSpecials != null) {
 					productCustomization = productSpecials.getProductCustomization();
 					productTranslation = productSpecials.getProductTranslation();
@@ -219,7 +219,7 @@ public class DefaultPreferences extends EclipsePreferences {
 	 * extension to the plug-in default customizer extension point.
 	 */
 	private void applyRuntimeDefaults() {
-		WeakReference ref = PreferencesService.getDefault().applyRuntimeDefaults(name(), pluginReference);
+		WeakReference<Object> ref = PreferencesService.getDefault().applyRuntimeDefaults(name(), pluginReference);
 		if (ref != null)
 			pluginReference = ref;
 	}

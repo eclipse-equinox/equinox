@@ -24,11 +24,11 @@ import org.osgi.util.tracker.ServiceTracker;
  * @since org.eclipse.equinox.preferences 3.2
  */
 public class PreferencesOSGiUtils {
-	private ServiceTracker initTracker = null;
-	private ServiceTracker debugTracker = null;
-	private ServiceTracker bundleTracker = null;
-	private ServiceTracker configurationLocationTracker = null;
-	private ServiceTracker instanceLocationTracker = null;
+	private ServiceTracker<?, ILegacyPreferences> initTracker;
+	private ServiceTracker<?, DebugOptions> debugTracker;
+	private ServiceTracker<?, PackageAdmin> bundleTracker;
+	private ServiceTracker<?, ?> configurationLocationTracker;
+	private ServiceTracker<?, ?> instanceLocationTracker;
 
 	private static final PreferencesOSGiUtils singleton = new PreferencesOSGiUtils();
 
@@ -51,13 +51,13 @@ public class PreferencesOSGiUtils {
 			return;
 		}
 
-		initTracker = new ServiceTracker(context, ILegacyPreferences.class.getName(), null);
+		initTracker = new ServiceTracker<>(context, ILegacyPreferences.class, null);
 		initTracker.open(true);
 
-		debugTracker = new ServiceTracker(context, DebugOptions.class.getName(), null);
+		debugTracker = new ServiceTracker<>(context, DebugOptions.class, null);
 		debugTracker.open();
 
-		bundleTracker = new ServiceTracker(context, PackageAdmin.class.getName(), null);
+		bundleTracker = new ServiceTracker<>(context, PackageAdmin.class, null);
 		bundleTracker.open();
 
 		// locations
@@ -68,7 +68,7 @@ public class PreferencesOSGiUtils {
 		} catch (InvalidSyntaxException e) {
 			// ignore this.  It should never happen as we have tested the above format.
 		}
-		configurationLocationTracker = new ServiceTracker(context, filter, null);
+		configurationLocationTracker = new ServiceTracker<>(context, filter, null);
 		configurationLocationTracker.open();
 
 		try {
@@ -76,7 +76,7 @@ public class PreferencesOSGiUtils {
 		} catch (InvalidSyntaxException e) {
 			// ignore this.  It should never happen as we have tested the above format.
 		}
-		instanceLocationTracker = new ServiceTracker(context, filter, null);
+		instanceLocationTracker = new ServiceTracker<>(context, filter, null);
 		instanceLocationTracker.open();
 	}
 
@@ -105,7 +105,7 @@ public class PreferencesOSGiUtils {
 
 	public ILegacyPreferences getLegacyPreferences() {
 		if (initTracker != null)
-			return (ILegacyPreferences) initTracker.getService();
+			return initTracker.getService();
 		if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
 			PrefsMessages.message("Legacy preference tracker is not set"); //$NON-NLS-1$
 		return null;
@@ -117,7 +117,7 @@ public class PreferencesOSGiUtils {
 				PrefsMessages.message("Debug tracker is not set"); //$NON-NLS-1$
 			return defaultValue;
 		}
-		DebugOptions options = (DebugOptions) debugTracker.getService();
+		DebugOptions options = debugTracker.getService();
 		if (options != null) {
 			String value = options.getOption(option);
 			if (value != null)
@@ -132,7 +132,7 @@ public class PreferencesOSGiUtils {
 				PrefsMessages.message("Bundle tracker is not set"); //$NON-NLS-1$
 			return null;
 		}
-		PackageAdmin packageAdmin = (PackageAdmin) bundleTracker.getService();
+		PackageAdmin packageAdmin = bundleTracker.getService();
 		if (packageAdmin == null)
 			return null;
 		Bundle[] bundles = packageAdmin.getBundles(bundleName, null);

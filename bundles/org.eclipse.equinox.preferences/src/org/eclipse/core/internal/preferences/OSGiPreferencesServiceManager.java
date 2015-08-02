@@ -28,7 +28,7 @@ import org.osgi.service.prefs.Preferences;
  * Also deletes saved preferences for bundles which are uninstalled.
  * </p>
  */
-public class OSGiPreferencesServiceManager implements ServiceFactory, BundleListener {
+public class OSGiPreferencesServiceManager implements ServiceFactory<org.osgi.service.prefs.PreferencesService>, BundleListener {
 
 	private static final String ORG_ECLIPSE_CORE_INTERNAL_PREFERENCES_OSGI = "org.eclipse.core.internal.preferences.osgi"; //$NON-NLS-1$
 
@@ -47,7 +47,7 @@ public class OSGiPreferencesServiceManager implements ServiceFactory, BundleList
 
 			//get list of currently installed bundles
 			Bundle[] allBundles = context.getBundles();
-			Set bundleQualifiers = new TreeSet();
+			Set<String> bundleQualifiers = new TreeSet<>();
 			for (int i = 0; i < allBundles.length; i++) {
 				bundleQualifiers.add(getQualifier(allBundles[i]));
 			}
@@ -71,7 +71,7 @@ public class OSGiPreferencesServiceManager implements ServiceFactory, BundleList
 	 * Creates a new OSGiPreferencesServiceImpl for each bundle.
 	 */
 	@Override
-	public Object getService(Bundle bundle, ServiceRegistration registration) {
+	public org.osgi.service.prefs.PreferencesService getService(Bundle bundle, ServiceRegistration<org.osgi.service.prefs.PreferencesService> registration) {
 		String qualifier = getQualifier(bundle);
 		//remember we created prefs for this bundle
 		Preferences bundlesNode = getBundlesNode();
@@ -97,7 +97,7 @@ public class OSGiPreferencesServiceManager implements ServiceFactory, BundleList
 	 * Flush the bundle's preferences.
 	 */
 	@Override
-	public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
+	public void ungetService(Bundle bundle, ServiceRegistration<org.osgi.service.prefs.PreferencesService> registration, org.osgi.service.prefs.PreferencesService service) {
 		try {
 			//new InstanceScope().getNode(getQualifier(bundle)).flush();
 			ConfigurationScope.INSTANCE.getNode(getQualifier(bundle)).flush();

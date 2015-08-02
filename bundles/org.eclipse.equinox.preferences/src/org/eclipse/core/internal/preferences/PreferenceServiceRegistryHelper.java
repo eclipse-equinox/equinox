@@ -34,10 +34,10 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	private static final String ELEMENT_MODIFIER = "modifier"; //$NON-NLS-1$
 	// Store this around for performance
 	private final static IExtension[] EMPTY_EXTENSION_ARRAY = new IExtension[0];
-	private static final Map scopeRegistry = Collections.synchronizedMap(new HashMap());
+	private static final Map<String, Object> scopeRegistry = Collections.synchronizedMap(new HashMap<String, Object>());
 	private ListenerList modifyListeners;
-	private PreferencesService service;
-	private IExtensionRegistry registry;
+	private final PreferencesService service;
+	private final IExtensionRegistry registry;
 
 	/*
 	 * Create and return an IStatus object with ERROR severity and the
@@ -104,7 +104,7 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	 * to see if there is a preference initializer registered and if so, then run it.
 	 * Otherwise call the legacy Plugin preference initialization code.
 	 */
-	public WeakReference applyRuntimeDefaults(String name, WeakReference pluginReference) {
+	public WeakReference<Object> applyRuntimeDefaults(String name, WeakReference<Object> pluginReference) {
 		IExtension[] extensions = getPrefExtensions();
 		if (extensions.length == 0) {
 			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
@@ -145,7 +145,7 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		ILegacyPreferences initService = PreferencesOSGiUtils.getDefault().getLegacyPreferences();
 		if (initService != null)
 			plugin = initService.init(plugin, name);
-		return new WeakReference(plugin);
+		return new WeakReference<>(plugin);
 	}
 
 	/*
