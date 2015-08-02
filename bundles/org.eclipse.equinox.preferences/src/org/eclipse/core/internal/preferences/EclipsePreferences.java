@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Julian Chen - fix for bug #92572, jclRM
@@ -24,13 +24,13 @@ import org.osgi.service.prefs.Preferences;
  * Represents a node in the Eclipse preference node hierarchy. This class
  * is used as a default implementation/super class for those nodes which
  * belong to scopes which are contributed by the Platform.
- * 
+ *
  * Implementation notes:
- * 
+ *
  *  - For thread safety, we always synchronize on <tt>writeLock</tt> when writing
  * the children or properties fields.  Must ensure we don't synchronize when calling
  * client code such as listeners.
- * 
+ *
  * @since 3.0
  */
 public class EclipsePreferences implements IEclipsePreferences, IScope {
@@ -311,7 +311,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 
 	/*
 	 * Helper method to persist a Properties object to the filesystem. We use this
-	 * helper so we can remove the date/timestamp that Properties#store always 
+	 * helper so we can remove the date/timestamp that Properties#store always
 	 * puts in the file.
 	 */
 	protected static void write(Properties properties, IPath location) throws BackingStoreException {
@@ -353,7 +353,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		return string.substring(string.indexOf(separator) + separator.length());
 	}
 
-	/* 
+	/*
 	 * Helper method to convert this node to a Properties file suitable
 	 * for persistence.
 	 */
@@ -446,9 +446,9 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	/*
-	 * Do the real flushing in a non-synchronized internal method so sub-classes 
+	 * Do the real flushing in a non-synchronized internal method so sub-classes
 	 * (mainly ProjectPreferences and ProfilePreferences) don't cause deadlocks.
-	 * 
+	 *
 	 * If this node is not responsible for persistence (a load level), then this method
 	 * returns the node that should be flushed. Returns null if this method performed
 	 * the flush.
@@ -475,7 +475,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		// any work to do?
 		if (!dirty)
 			return null;
-		//remove dirty bit before saving, to ensure that concurrent 
+		//remove dirty bit before saving, to ensure that concurrent
 		//changes during save mark the store as dirty
 		dirty = false;
 		try {
@@ -540,7 +540,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 				return null;
 			if (value instanceof IEclipsePreferences)
 				return (IEclipsePreferences) value;
-			// if we aren't supposed to create this node, then 
+			// if we aren't supposed to create this node, then
 			// just return null
 			if (!create)
 				return null;
@@ -674,7 +674,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		if (path.length() == 0)
 			return this;
 
-		// if we have an absolute path use the root relative to 
+		// if we have an absolute path use the root relative to
 		// this node instead of the global root
 		// in case we have a different hierarchy. (e.g. export)
 		if (path.charAt(0) == IPath.SEPARATOR)
@@ -735,7 +735,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/**
 	 * Loads the preference node. This method returns silently if the node does not exist
 	 * in the backing store (for example non-existent project).
-	 * 
+	 *
 	 * @throws BackingStoreException if the node exists in the backing store but it
 	 * could not be loaded
 	 */
@@ -1056,12 +1056,12 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	public void removeNode() throws BackingStoreException {
 		// illegal state if this node has been removed
 		checkRemoved();
-		// clear all the property values. do it "the long way" so 
+		// clear all the property values. do it "the long way" so
 		// everyone gets notification
 		String[] keys = keys();
 		for (int i = 0; i < keys.length; i++)
 			remove(keys[i]);
-		// don't remove the global root or the scope root from the 
+		// don't remove the global root or the scope root from the
 		// parent but remove all its children
 		if (parent != null && !(parent instanceof RootPreferences)) {
 			// remove the node from the parent's collection and notify listeners
@@ -1140,7 +1140,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/**
 	 * Saves the preference node. This method returns silently if the node does not exist
 	 * in the backing store (for example non-existent project)
-	 * 
+	 *
 	 * @throws BackingStoreException if the node exists in the backing store but it
 	 * could not be saved
 	 */
@@ -1178,11 +1178,11 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * all preference key and value strings to the provided pool.  If an added
 	 * string was already in the pool, all references will be replaced with the
 	 * canonical copy of the string.
-	 * 
+	 *
 	 * @param pool The pool to share strings in
 	 */
 	public void shareStrings(StringPool pool) {
-		//thread safety: copy reference in case of concurrent change	
+		//thread safety: copy reference in case of concurrent change
 		ImmutableMap temp;
 		synchronized (childAndPropertyLock) {
 			temp = properties;
@@ -1197,7 +1197,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * Encode the given path and key combo to a form which is suitable for
 	 * persisting or using when searching. If the key contains a slash character
-	 * then we must use a double-slash to indicate the end of the 
+	 * then we must use a double-slash to indicate the end of the
 	 * path/the beginning of the key.
 	 */
 	public static String encodePath(String path, String key) {
@@ -1268,7 +1268,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		// check to see if we have an indicator which tells us where the path ends
 		int index = fullPath.indexOf(DOUBLE_SLASH);
 		if (index == -1) {
-			// we don't have a double-slash telling us where the path ends 
+			// we don't have a double-slash telling us where the path ends
 			// so the path is up to the last slash character
 			int lastIndex = fullPath.lastIndexOf(IPath.SEPARATOR);
 			if (lastIndex == -1) {

@@ -21,17 +21,17 @@ import org.osgi.service.prefs.Preferences;
  * <p>
  * Clients may implement this interface.
  * </p>
- * 
+ *
  * @see org.osgi.service.prefs.Preferences
  * @since 3.0
  */
 public interface IEclipsePreferences extends Preferences {
 
 	/**
-	 * An event object which describes the details of a change in the 
-	 * preference node hierarchy. The child node is the one which 
+	 * An event object which describes the details of a change in the
+	 * preference node hierarchy. The child node is the one which
 	 * was added or removed.
-	 * 
+	 *
 	 * @see IEclipsePreferences.INodeChangeListener
 	 * @since 3.0
 	 */
@@ -45,7 +45,7 @@ public interface IEclipsePreferences extends Preferences {
 
 		/**
 		 * Constructor for a new node change event object.
-		 * 
+		 *
 		 * @param parent the parent node
 		 * @param child the child node
 		 */
@@ -57,7 +57,7 @@ public interface IEclipsePreferences extends Preferences {
 		/**
 		 * Return the parent node for this event. This is the parent
 		 * of the node which was added or removed.
-		 * 
+		 *
 		 * @return the parent node
 		 */
 		public Preferences getParent() {
@@ -84,7 +84,7 @@ public interface IEclipsePreferences extends Preferences {
 	 * <p>
 	 * Clients may implement this interface.
 	 * </p>
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	public interface INodeChangeListener {
@@ -92,7 +92,7 @@ public interface IEclipsePreferences extends Preferences {
 		/**
 		 * Notification that a child node was added to the preference hierarchy.
 		 * The given event must not be <code>null</code>.
-		 * 
+		 *
 		 * @param event an event specifying the details about the new node
 		 * @see IEclipsePreferences.NodeChangeEvent
 		 * @see IEclipsePreferences#addNodeChangeListener(IEclipsePreferences.INodeChangeListener)
@@ -103,7 +103,7 @@ public interface IEclipsePreferences extends Preferences {
 		/**
 		 * Notification that a child node was removed from the preference hierarchy.
 		 * The given event must not be <code>null</code>.
-		 * 
+		 *
 		 * @param event an event specifying the details about the removed node
 		 * @see IEclipsePreferences.NodeChangeEvent
 		 * @see IEclipsePreferences#addNodeChangeListener(IEclipsePreferences.INodeChangeListener)
@@ -115,7 +115,7 @@ public interface IEclipsePreferences extends Preferences {
 	/**
 	 * An event object describing the details of a change to a preference
 	 * in the preference store.
-	 * 
+	 *
 	 * @see IEclipsePreferences.IPreferenceChangeListener
 	 * @since 3.0
 	 */
@@ -133,10 +133,10 @@ public interface IEclipsePreferences extends Preferences {
 		 * Constructor for a new preference change event. The node and the
 		 * key must not be <code>null</code>. The old and new preference
 		 * values must be either a <code>String</code> or <code>null</code>.
-		 * 
+		 *
 		 * @param node the node on which the change occurred
 		 * @param key the preference key
-		 * @param oldValue the old preference value, as a <code>String</code> 
+		 * @param oldValue the old preference value, as a <code>String</code>
 		 * 	or <code>null</code>
 		 * @param newValue the new preference value, as a <code>String</code>
 		 * 	or <code>null</code>
@@ -153,7 +153,7 @@ public interface IEclipsePreferences extends Preferences {
 		/**
 		 * Return the preference node on which the change occurred.
 		 * Must not be <code>null</code>.
-		 * 
+		 *
 		 * @return the node
 		 */
 		public Preferences getNode() {
@@ -163,7 +163,7 @@ public interface IEclipsePreferences extends Preferences {
 		/**
 		 * Return the key of the preference which was changed.
 		 * Must not be <code>null</code>.
-		 * 
+		 *
 		 * @return the preference key
 		 */
 		public String getKey() {
@@ -171,10 +171,10 @@ public interface IEclipsePreferences extends Preferences {
 		}
 
 		/**
-		 * Return the new value for the preference encoded as a 
-		 * <code>String</code>, or <code>null</code> if the 
+		 * Return the new value for the preference encoded as a
+		 * <code>String</code>, or <code>null</code> if the
 		 * preference was removed.
-		 * 
+		 *
 		 * @return the new value or <code>null</code>
 		 */
 		public Object getNewValue() {
@@ -182,10 +182,10 @@ public interface IEclipsePreferences extends Preferences {
 		}
 
 		/**
-		 * Return the old value for the preference encoded as a 
-		 * <code>String</code>, or <code>null</code> if the 
+		 * Return the old value for the preference encoded as a
+		 * <code>String</code>, or <code>null</code> if the
 		 * preference was removed or if it cannot be determined.
-		 * 
+		 *
 		 * @return the old value or <code>null</code>
 		 */
 		public Object getOldValue() {
@@ -198,7 +198,7 @@ public interface IEclipsePreferences extends Preferences {
 	 * <p>
 	 * Clients may implement this interface.
 	 * </p>
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	public interface IPreferenceChangeListener {
@@ -207,7 +207,7 @@ public interface IEclipsePreferences extends Preferences {
 		 * Notification that a preference value has changed in the preference store.
 		 * The given event object describes the change details and must not
 		 * be <code>null</code>.
-		 * 
+		 *
 		 * @param event the event details
 		 * @see IEclipsePreferences.PreferenceChangeEvent
 		 * @see IEclipsePreferences#addPreferenceChangeListener(IEclipsePreferences.IPreferenceChangeListener)
@@ -220,7 +220,7 @@ public interface IEclipsePreferences extends Preferences {
 	 * Register the given listener for changes to this node. Duplicate calls
 	 * to this method with the same listener will have no effect. The given
 	 * listener argument must not be <code>null</code>.
-	 *  
+	 *
 	 * @param listener the node change listener to add
 	 * @throws IllegalStateException if this node or an ancestor has been removed
 	 * @see #removeNodeChangeListener(IEclipsePreferences.INodeChangeListener)
@@ -232,7 +232,7 @@ public interface IEclipsePreferences extends Preferences {
 	 * De-register the given listener from receiving event change notifications
 	 * for this node. Calling this method with a listener which is not registered
 	 * has no effect. The given listener argument must not be <code>null</code>.
-	 * 
+	 *
 	 * @param listener the node change listener to remove
 	 * @throws IllegalStateException if this node or an ancestor has been removed
 	 * @see #addNodeChangeListener(IEclipsePreferences.INodeChangeListener)
@@ -244,7 +244,7 @@ public interface IEclipsePreferences extends Preferences {
 	 * Register the given listener for notification of preference changes to this node.
 	 * Calling this method multiple times with the same listener has no effect. The
 	 * given listener argument must not be <code>null</code>.
-	 * 
+	 *
 	 * @param listener the preference change listener to register
 	 * @throws IllegalStateException if this node or an ancestor has been removed
 	 * @see #removePreferenceChangeListener(IEclipsePreferences.IPreferenceChangeListener)
@@ -256,7 +256,7 @@ public interface IEclipsePreferences extends Preferences {
 	 * De-register the given listener from receiving notification of preference changes
 	 * to this node. Calling this method multiple times with the same listener has no
 	 * effect. The given listener argument must not be <code>null</code>.
-	 * 
+	 *
 	 * @param listener the preference change listener to remove
 	 * @throws IllegalStateException if this node or an ancestor has been removed
 	 * @see #addPreferenceChangeListener(IEclipsePreferences.IPreferenceChangeListener)
@@ -268,15 +268,15 @@ public interface IEclipsePreferences extends Preferences {
 	 * Remove this node from the preference hierarchy. If this node is the scope
 	 * root, then do not remove this node, only remove this node's children.
 	 * <p>
-	 * Functionally equivalent to calling {@link Preferences#removeNode()}. 
-	 * See the spec of {@link Preferences#removeNode()} for more details. 
+	 * Functionally equivalent to calling {@link Preferences#removeNode()}.
+	 * See the spec of {@link Preferences#removeNode()} for more details.
 	 * </p>
 	 * <p>
 	 * Implementors must send the appropriate {@link NodeChangeEvent}
 	 * to listeners who are registered on this node's parent.
 	 * </p>
 	 * <p>
-	 * When this node is removed, its associated preference and node change 
+	 * When this node is removed, its associated preference and node change
 	 * listeners should be removed as well.
 	 * </p>
 	 * @throws BackingStoreException if there was a problem removing this node
@@ -290,7 +290,7 @@ public interface IEclipsePreferences extends Preferences {
 	 * Return the preferences node with the given path. The given path must
 	 * not be <code>null</code>.
 	 * <p>
-	 * See the spec of {@link Preferences#node(String)} for more details. 
+	 * See the spec of {@link Preferences#node(String)} for more details.
 	 * </p>
 	 * <p>
 	 * Note that if the node does not yet exist and is created, then the appropriate
@@ -306,8 +306,8 @@ public interface IEclipsePreferences extends Preferences {
 	public Preferences node(String path);
 
 	/**
-	 * Accepts the given visitor. The visitor's <code>visit</code> method 
-	 * is called with this node. If the visitor returns <code>true</code>, 
+	 * Accepts the given visitor. The visitor's <code>visit</code> method
+	 * is called with this node. If the visitor returns <code>true</code>,
 	 * this method visits this node's children.
 	 *
 	 * @param visitor the visitor

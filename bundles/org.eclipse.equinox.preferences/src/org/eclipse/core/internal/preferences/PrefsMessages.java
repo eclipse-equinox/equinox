@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,7 +62,7 @@ public class PrefsMessages extends NLS {
 	}
 
 	/**
-	 * Print a debug message to the console. 
+	 * Print a debug message to the console.
 	 * Pre-pend the message with the current date and the name of the current thread.
 	 */
 	public static void message(String message) {

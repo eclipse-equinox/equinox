@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -15,13 +15,13 @@ import org.eclipse.core.runtime.ListenerList;
 /**
  * A class which holds onto a listener list object for a given path.
  * Typically the path is the absolute path of a preference node.
- * 
+ *
  * @since 3.1
  */
 public class ListenerRegistry {
 
 	/**
-	 * Specialized map-like data structure for storing change listeners. 
+	 * Specialized map-like data structure for storing change listeners.
 	 */
 	private static class ListenerMap {
 		private static final int GROW_SIZE = 10;
@@ -97,7 +97,7 @@ public class ListenerRegistry {
 		/**
 		 * Remove the association specified by the given key.
 		 * Do nothing if none exists.
-		 * 
+		 *
 		 * Note: Should consider shrinking the array. Hold off for now
 		 * as we don't expect #remove to be a common code path.
 		 */
@@ -137,7 +137,7 @@ public class ListenerRegistry {
 	}
 
 	/**
-	 * Remove the given listener from this path's collection of 
+	 * Remove the given listener from this path's collection of
 	 * listeners. If it is not associated with this path, then do nothing.
 	 */
 	public synchronized void remove(String path, Object listener) {

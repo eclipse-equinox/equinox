@@ -4,10 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Semion Chichelnitsky (semion@il.ibm.com) - bug 208564     
+ *     Semion Chichelnitsky (semion@il.ibm.com) - bug 208564
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
@@ -133,7 +133,7 @@ public class PreferencesService implements IPreferencesService {
 					globalNode = (IEclipsePreferences) root.node(node.absolutePath());
 				ExportedPreferences epNode = (ExportedPreferences) node;
 
-				// if this node is an export root then we need to remove 
+				// if this node is an export root then we need to remove
 				// it from the global preferences before continuing.
 				boolean removed = false;
 				if (epNode.isExportRoot()) {
@@ -231,9 +231,9 @@ public class PreferencesService implements IPreferencesService {
 	}
 
 	/*
-	 * Convert the given properties file from legacy format to 
-	 * one which is Eclipse 3.0 compliant. 
-	 * 
+	 * Convert the given properties file from legacy format to
+	 * one which is Eclipse 3.0 compliant.
+	 *
 	 * Convert the plug-in version indicator entries to export roots.
 	 */
 	private Properties convertFromLegacy(Properties properties) {
@@ -346,11 +346,11 @@ public class PreferencesService implements IPreferencesService {
 
 	/**
 	 * Copy key/value pairs from the source to the destination. If the key list is null
-	 * then copy all associations. 
-	 * 
+	 * then copy all associations.
+	 *
 	 * If the depth is 0, then this operation is performed only on the source node. Otherwise
 	 * it is performed on the source node's subtree.
-	 * 
+	 *
 	 * @param depth one of 0 or -1
 	 */
 	void copyFromTo(Preferences source, Preferences destination, String[] keys, int depth) throws BackingStoreException {
@@ -437,7 +437,7 @@ public class PreferencesService implements IPreferencesService {
 	}
 
 	/*
-	 * Give clients a chance to modify the tree before it is applied globally 
+	 * Give clients a chance to modify the tree before it is applied globally
 	 */
 	private IEclipsePreferences firePreApplyEvent(IEclipsePreferences tree) {
 		if (registryHelper == null)
@@ -847,7 +847,7 @@ public class PreferencesService implements IPreferencesService {
 	/*
 	 * Returns a boolean value indicating whether or not the given Properties
 	 * object is the result of a preference export previous to Eclipse 3.0.
-	 * 
+	 *
 	 * Check the contents of the file. In Eclipse 3.0 we printed out a file
 	 * version key.
 	 */
@@ -1060,9 +1060,9 @@ public class PreferencesService implements IPreferencesService {
 
 	/**
 	 * Compares two plugin version identifiers to see if their preferences
-	 * are compatible.  If they are not compatible, a warning message is 
+	 * are compatible.  If they are not compatible, a warning message is
 	 * added to the given multi-status, according to the following rules:
-	 * 
+	 *
 	 * - plugins that differ in service number: no status
 	 * - plugins that differ in minor version: WARNING status
 	 * - plugins that differ in major version:

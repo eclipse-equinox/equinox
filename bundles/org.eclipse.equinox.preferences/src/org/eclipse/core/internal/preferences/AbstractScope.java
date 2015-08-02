@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 /**
  * Abstract super-class for scope context object contributed
  * by the Platform.
- * 
+ *
  * @since 3.0
  */
 public abstract class AbstractScope implements IScopeContext {
@@ -30,7 +30,7 @@ public abstract class AbstractScope implements IScopeContext {
 
 	/*
 	 * Default path hierarchy for nodes is /<scope>/<qualifier>.
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getNode(java.lang.String)
 	 */
 	@Override

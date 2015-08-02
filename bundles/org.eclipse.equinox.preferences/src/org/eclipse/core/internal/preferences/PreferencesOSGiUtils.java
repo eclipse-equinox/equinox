@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -19,8 +19,8 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * This class contains a set of helper OSGI methods for the Preferences plugin.
- * The closeServices() method should be called before the plugin is stopped. 
- * 
+ * The closeServices() method should be called before the plugin is stopped.
+ *
  * @since org.eclipse.equinox.preferences 3.2
  */
 public class PreferencesOSGiUtils {

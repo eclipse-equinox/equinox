@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -20,7 +20,7 @@ import org.eclipse.osgi.service.datalocation.Location;
 /**
  * Object representing the configuration scope in the Eclipse preferences
  * hierarchy. Can be used as a context for searching for preference
- * values (in the IPreferencesService APIs) or for determining the 
+ * values (in the IPreferencesService APIs) or for determining the
  * correct preference node to set values in the store.
  * <p>
  * Configuration preferences are stored on a per configuration basis in the
@@ -42,7 +42,7 @@ import org.eclipse.osgi.service.datalocation.Location;
 public final class ConfigurationScope extends AbstractScope {
 
 	/**
-	 * String constant (value of <code>"configuration"</code>) used for the 
+	 * String constant (value of <code>"configuration"</code>) used for the
 	 * scope name for the configuration preference scope.
 	 */
 	public static final String SCOPE = "configuration"; //$NON-NLS-1$
@@ -50,7 +50,7 @@ public final class ConfigurationScope extends AbstractScope {
 	/**
 	 * Singleton instance of a Configuration Scope object. Typical usage is:
 	 * <code>ConfigurationScope.INSTANCE.getNode(...);</code>
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public static final IScopeContext INSTANCE = new ConfigurationScope();

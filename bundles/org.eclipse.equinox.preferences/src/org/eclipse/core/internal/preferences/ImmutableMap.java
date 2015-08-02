@@ -13,7 +13,7 @@ package org.eclipse.core.internal.preferences;
 
 /**
  * Hash table of {String --> String}.
- * 
+ *
  * This map handles collisions using linear probing.  When elements are
  * removed, the entire table is rehashed.  Thus this map has good space
  * characteristics, good insertion and iteration performance, but slower
@@ -220,7 +220,7 @@ public abstract class ImmutableMap implements Cloneable {
 	protected static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 	/**
-	 * Returns the value associated with this key in the map, or 
+	 * Returns the value associated with this key in the map, or
 	 * <code>null</code> if the key is not present in the map.
 	 * @param key
 	 * @return The value associated with this key, or <code>null</code>
@@ -236,7 +236,7 @@ public abstract class ImmutableMap implements Cloneable {
 	/**
 	 * Destructively adds a key/value pair to this map. The caller must ensure
 	 * there is enough room in this map to proceed.
-	 * 
+	 *
 	 * @param key
 	 * @param value
 	 */
@@ -250,7 +250,7 @@ public abstract class ImmutableMap implements Cloneable {
 	/**
 	 * Returns a new map that is equal to this one, except with the given
 	 * key/value pair added.
-	 * 
+	 *
 	 * @param key
 	 * @param value
 	 * @return The map containing the given key/value pair

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,7 @@
 package org.eclipse.core.runtime.preferences;
 
 /**
- * Clients contributing a scope to the Eclipse preference system must 
+ * Clients contributing a scope to the Eclipse preference system must
  * implement this interface to aid Eclipse in creating a new node for the
  * hierarchy.
  * <p>
@@ -29,7 +29,7 @@ public interface IScope {
 	 * <p>
 	 * Implementors should note that the node might not have been added to the
 	 * child list of the parent yet, and therefore might not be able to be referenced
-	 * through navigation from the root node. 
+	 * through navigation from the root node.
 	 * </p>
 	 * @param parent the node's parent
 	 * @param name the name of the node

@@ -1,10 +1,10 @@
 /*******************************************************************************
  * Copyright (c) 2009, 2015 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials 
+ * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -18,11 +18,11 @@ import org.eclipse.core.runtime.preferences.*;
 /**
  * This class represents a preference node in the "bundle_defaults" scope. This scope is
  * used to represent default values which are set by the bundle in either its preference
- * initializer or in a file included with the bundle. 
- * 
+ * initializer or in a file included with the bundle.
+ *
  * This differs from the regular default scope because it does not contain values set
  * by the product preference customization or the command-line.
- * 
+ *
  * @since 3.3
  */
 public class BundleDefaultPreferences extends EclipsePreferences {
@@ -97,7 +97,7 @@ public class BundleDefaultPreferences extends EclipsePreferences {
 	 */
 	@Override
 	protected void load() {
-		// ensure that the same node in the "default" scope is loaded so this one is 
+		// ensure that the same node in the "default" scope is loaded so this one is
 		// initialized properly
 		String relativePath = DefaultPreferences.getScopeRelativePath(absolutePath());
 		if (relativePath != null) {

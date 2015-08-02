@@ -4,21 +4,22 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.osgi.service.prefs.*;
+import org.osgi.service.prefs.BackingStoreException;
+import org.osgi.service.prefs.Preferences;
 import org.osgi.service.prefs.PreferencesService;
 
 /**
  * <p>
  * Implements OSGi PreferencesService using the Eclipse preference system.
  * </p>
- * 
+ *
  * <p>
  * Note: Eclipse preferences are accessible through the OSGi Preferences API and vice
  *  versa.
@@ -65,8 +66,8 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 		}
 
 		/**
-		 * Override node(String pathName) to be more strict about forbidden names - 
-		 * EclipsePreferences implementation does a best-effort instead of throwing 
+		 * Override node(String pathName) to be more strict about forbidden names -
+		 * EclipsePreferences implementation does a best-effort instead of throwing
 		 * {@link IllegalArgumentException}.
 		 */
 		@Override
@@ -74,7 +75,7 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 			pathName = fixPath(pathName);
 
 			if ((pathName.length() > 1 && pathName.endsWith("/")) //$NON-NLS-1$
-					|| pathName.indexOf("//") != -1) { //$NON-NLS-1$				
+					|| pathName.indexOf("//") != -1) { //$NON-NLS-1$
 				throw new IllegalArgumentException();
 			}
 			return new OSGiLocalRootPreferences(wrapped.node(pathName), root);
@@ -84,11 +85,11 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 		 * <p>
 		 * Override getByteArray(String key, byte [] defaultValue) to be more strict when
 		 * decoding byte values.  EclipsePreferences implementation pads bytes if they are not 4
-		 * bytes long, but the OSGi TCK expects this function to return null if the length of 
-		 * the byte array is not an even multiple of 4. 
+		 * bytes long, but the OSGi TCK expects this function to return null if the length of
+		 * the byte array is not an even multiple of 4.
 		 * </p>
 		 * <p>
-		 * Also catches any decoding exceptions and returns the default value instead of 
+		 * Also catches any decoding exceptions and returns the default value instead of
 		 * propagating the exception.
 		 * </p>
 		 */

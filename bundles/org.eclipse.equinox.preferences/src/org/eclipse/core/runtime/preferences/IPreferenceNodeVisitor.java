@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,9 @@ package org.eclipse.core.runtime.preferences;
 
 import org.osgi.service.prefs.BackingStoreException;
 
-/** 
+/**
  * This interface is implemented by objects that visit preference nodes.
- * <p> 
+ * <p>
  * Usage:
  * <pre>
  * class Visitor implements IPreferenceNodeVisitor {
@@ -35,7 +35,7 @@ import org.osgi.service.prefs.BackingStoreException;
  */
 public interface IPreferenceNodeVisitor {
 
-	/** 
+	/**
 	 * Visits the given preference node.
 	 *
 	 * @param node the node to visit

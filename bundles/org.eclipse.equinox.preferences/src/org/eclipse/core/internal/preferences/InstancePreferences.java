@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -159,7 +159,7 @@ public class InstancePreferences extends EclipsePreferences {
 			}
 		}
 
-		// Delete the old file so we don't try and load it next time. 
+		// Delete the old file so we don't try and load it next time.
 		if (!prefFile.delete())
 			//Only print out message in failure case if we are debugging.
 			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)

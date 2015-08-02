@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,23 +13,23 @@ package org.eclipse.core.runtime.preferences;
 import org.eclipse.core.runtime.IPath;
 
 /**
- * Clients implement this interface to provide context to a 
- * particular scope. Instances of implementations of this interface are 
- * passed to the {@link IPreferencesService} for use in 
+ * Clients implement this interface to provide context to a
+ * particular scope. Instances of implementations of this interface are
+ * passed to the {@link IPreferencesService} for use in
  * preference searching.
  * <p>
  * Clients may implement this interface.
  * </p>
- * 
+ *
  * @see IPreferencesService
  * @since 3.0
  */
 public interface IScopeContext {
 
 	/**
-	 * Return the name of the scope that this context is associated with. 
+	 * Return the name of the scope that this context is associated with.
 	 * Must not be <code>null</code>.
-	 * 
+	 *
 	 * @return the name of the scope
 	 */
 	public String getName();
@@ -37,15 +37,15 @@ public interface IScopeContext {
 	/**
 	 * Return the preferences node that contains the preferences for the
 	 * given qualifier or <code>null</code> if the node cannot be determined.
-	 * The given qualifier must not be <code>null</code> but may be a path 
+	 * The given qualifier must not be <code>null</code> but may be a path
 	 * to a sub-node within the scope.
 	 * <p>
-	 * An example of a qualifier in Eclipse 2.1 would be the plug-in identifier that 
-	 * the preference is associated with (e.g. the "org.eclipse.core.resources" 
+	 * An example of a qualifier in Eclipse 2.1 would be the plug-in identifier that
+	 * the preference is associated with (e.g. the "org.eclipse.core.resources"
 	 * plug-in defines the "description.autobuild" preference).
 	 * </p><p>
 	 * This method can be used to determine the appropriate preferences node
-	 * to aid in setting key/value pairs. For instance: 
+	 * to aid in setting key/value pairs. For instance:
 	 * <code>new InstanceScope().getNode("org.eclipse.core.resources");</code>
 	 * returns the preference node in the instance scope where the preferences
 	 * for "org.eclipse.core.resources" are stored.

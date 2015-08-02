@@ -1,10 +1,10 @@
 /*******************************************************************************
  * Copyright (c) 2006, 2015 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials 
+ * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -101,7 +101,7 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 
 	/*
 	 * Apply the runtime defaults for the bundle with the given name. Check
-	 * to see if there is a preference initializer registered and if so, then run it. 
+	 * to see if there is a preference initializer registered and if so, then run it.
 	 * Otherwise call the legacy Plugin preference initialization code.
 	 */
 	public WeakReference applyRuntimeDefaults(String name, WeakReference pluginReference) {
@@ -313,7 +313,7 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	}
 
 	/*
-	 * A preference scope defined by the given element was added to the extension 
+	 * A preference scope defined by the given element was added to the extension
 	 * registry. Add it to our registry and make it a child of the root.
 	 */
 	private void scopeAdded(IConfigurationElement element) {

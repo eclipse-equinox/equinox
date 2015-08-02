@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,7 @@ public interface IExportedPreferences extends IEclipsePreferences {
 	 * when the preferences were exported, and <code>false</code>
 	 * otherwise.  This information is used during the import to clear
 	 * nodes when importing a node's (and its children's) preferences.
-	 * 
+	 *
 	 * @return <code>true</code> if this node is an export root
 	 * 	and <code>false</code> otherwise
 	 */

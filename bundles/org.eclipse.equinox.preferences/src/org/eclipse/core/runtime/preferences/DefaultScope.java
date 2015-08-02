@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.IPath;
 /**
  * Object representing the default scope in the Eclipse preferences
  * hierarchy. Can be used as a context for searching for preference
- * values (in the IPreferencesService APIs) or for determining the 
+ * values (in the IPreferencesService APIs) or for determining the
  * correct preference node to set values in the store.
  * <p>
  * Default preferences are not persisted to disk.
@@ -27,11 +27,11 @@ import org.eclipse.core.runtime.IPath;
  * </p>
  * <p>
  * Note about product preference customization:
- * Clients who define their own org.eclipse.core.runtime.IProduct 
+ * Clients who define their own org.eclipse.core.runtime.IProduct
  * are able to specify a product key of "<code>preferenceCustomization</code>".
  * (defined as a constant in org.eclipse.ui.branding.IProductConstants)
- * Its value is either a {@link java.net.URL} or a file-system path to a 
- * file whose contents are used to customize default preferences. 
+ * Its value is either a {@link java.net.URL} or a file-system path to a
+ * file whose contents are used to customize default preferences.
  * </p>
  * <p>
  * This class is not intended to be subclassed. This class may be instantiated.
@@ -41,7 +41,7 @@ import org.eclipse.core.runtime.IPath;
 public final class DefaultScope extends AbstractScope {
 
 	/**
-	 * String constant (value of <code>"default"</code>) used for the 
+	 * String constant (value of <code>"default"</code>) used for the
 	 * scope name for the default preference scope.
 	 */
 	public static final String SCOPE = "default"; //$NON-NLS-1$
@@ -49,7 +49,7 @@ public final class DefaultScope extends AbstractScope {
 	/**
 	 * Singleton instance of a Default Scope object. Typical usage is:
 	 * <code>DefaultScope.INSTANCE.getNode(...);</code>
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public static final IScopeContext INSTANCE = new DefaultScope();

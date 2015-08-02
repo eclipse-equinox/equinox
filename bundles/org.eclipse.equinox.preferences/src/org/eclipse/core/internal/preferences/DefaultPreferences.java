@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Gunnar Wagenknecht - Bug 179695 - [prefs] NPE when using Preferences API without a product
@@ -82,7 +82,7 @@ public class DefaultPreferences extends EclipsePreferences {
 
 	/*
 	 * Apply the values set in the bundle's install directory.
-	 * 
+	 *
 	 * In Eclipse 2.1 this is equivalent to:
 	 *		/eclipse/plugins/<pluginID>/prefs.ini
 	 */
@@ -210,11 +210,11 @@ public class DefaultPreferences extends EclipsePreferences {
 	}
 
 	/*
-	 * Runtime defaults are the ones which are specified in code at runtime. 
-	 * 
+	 * Runtime defaults are the ones which are specified in code at runtime.
+	 *
 	 * In the Eclipse 2.1 world they were the ones which were specified in the
 	 * over-ridden Plugin#initializeDefaultPluginPreferences() method.
-	 * 
+	 *
 	 * In Eclipse 3.0 they are set in the code which is indicated by the
 	 * extension to the plug-in default customizer extension point.
 	 */
@@ -227,7 +227,7 @@ public class DefaultPreferences extends EclipsePreferences {
 	/*
 	 * Apply the default values as specified by the file
 	 * in the product extension.
-	 * 
+	 *
 	 * In Eclipse 2.1 this is equivalent to the plugin_customization.ini
 	 * file in the primary feature's plug-in directory.
 	 */
@@ -334,7 +334,7 @@ public class DefaultPreferences extends EclipsePreferences {
 	}
 
 	/*
-	 * Are we in the middle of initializing defaults from the bundle 
+	 * Are we in the middle of initializing defaults from the bundle
 	 * initializer or found in the bundle itself? Look on the load level in
 	 * case we are in a sub-node.
 	 */
@@ -348,7 +348,7 @@ public class DefaultPreferences extends EclipsePreferences {
 	}
 
 	/*
-	 * Return a path which is relative to the scope of this node. 
+	 * Return a path which is relative to the scope of this node.
 	 * e.g. com.example.foo for /instance/com.example.foo
 	 */
 	protected static String getScopeRelativePath(String absolutePath) {

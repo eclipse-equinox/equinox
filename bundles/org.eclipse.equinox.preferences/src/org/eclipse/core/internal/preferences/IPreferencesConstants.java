@@ -1,17 +1,17 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
 /**
- * Container for the constants used by this plugin. 
+ * Container for the constants used by this plugin.
  * @since org.eclipse.equinox.preferences 1.0
  */
 public interface IPreferencesConstants {
@@ -47,7 +47,7 @@ public interface IPreferencesConstants {
 	 */
 	public static final String PREFERENCES_DEFAULT_OVERRIDE_FILE_NAME = PREFERENCES_DEFAULT_OVERRIDE_BASE_NAME + ".ini"; //$NON-NLS-1$
 
-	/** 
+	/**
 	 * The simple identifier constant (value "<code>preferences</code>") of
 	 * the extension point of the Core Runtime plug-in where plug-ins declare
 	 * extensions to the preference facility. A plug-in may define any number

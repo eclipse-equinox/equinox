@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Danail Nachev (ProSyst) - bug 188070
@@ -21,7 +21,7 @@ import org.osgi.service.prefs.Preferences;
 /**
  * <p>
  * Class used to manage OSGi Preferences Service.  Creates a new OSGiPreferencesServiceImpl
- * object for every bundle that gets the Preferences Service.  When a bundle ungets the 
+ * object for every bundle that gets the Preferences Service.  When a bundle ungets the
  * Preference Service, it's preferences are flushed to disk.
  * </p>
  * <p>
@@ -89,7 +89,7 @@ public class OSGiPreferencesServiceManager implements ServiceFactory, BundleList
 	 * Store preferences per bundle id
 	 */
 	private String getQualifier(Bundle bundle) {
-		String qualifier = "org.eclipse.core.runtime.preferences.OSGiPreferences." + bundle.getBundleId(); //$NON-NLS-1$		
+		String qualifier = "org.eclipse.core.runtime.preferences.OSGiPreferences." + bundle.getBundleId(); //$NON-NLS-1$
 		return qualifier;
 	}
 

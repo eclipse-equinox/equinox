@@ -1,6 +1,6 @@
 /*
- * Copyright (c) OSGi Alliance (2001, 2010). All Rights Reserved.
- * 
+ * Copyright (c) OSGi Alliance (2001, 2015). All Rights Reserved.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,13 +17,13 @@ package org.osgi.service.prefs;
 
 /**
  * A node in a hierarchical collection of preference data.
- * 
+ *
  * <p>
  * This interface allows applications to store and retrieve user and system
  * preference data. This data is stored persistently in an
  * implementation-dependent backing store. Typical implementations include flat
  * files, OS-specific registries, directory servers and SQL databases.
- * 
+ *
  * <p>
  * For each bundle, there is a separate tree of nodes for each user, and one for
  * system preferences. The precise description of "user" and "system" will vary
@@ -32,26 +32,26 @@ package org.osgi.service.prefs;
  * with the user via a servlet. Typical information stored in the system
  * preference tree might include installation data, or things like high score
  * information for a game program.
- * 
+ *
  * <p>
  * Nodes in a preference tree are named in a similar fashion to directories in a
  * hierarchical file system. Every node in a preference tree has a <i>node name
  * </i> (which is not necessarily unique), a unique <i>absolute path name </i>,
  * and a path name <i>relative </i> to each ancestor including itself.
- * 
+ *
  * <p>
  * The root node has a node name of the empty {@code String} object ("").
  * Every other node has an arbitrary node name, specified at the time it is
  * created. The only restrictions on this name are that it cannot be the empty
  * string, and it cannot contain the slash character ('/').
- * 
+ *
  * <p>
  * The root node has an absolute path name of {@code "/"}. Children of the
  * root node have absolute path names of {@code "/" + } <i>&lt;node name&gt;
  * </i>. All other nodes have absolute path names of <i>&lt;parent's absolute
  * path name&gt; </i> {@code  + "/" + } <i>&lt;node name&gt; </i>. Note that
  * all absolute path names begin with the slash character.
- * 
+ *
  * <p>
  * A node <i>n </i>'s path name relative to its ancestor <i>a </i> is simply the
  * string that must be appended to <i>a </i>'s absolute path name in order to
@@ -65,7 +65,7 @@ package org.osgi.service.prefs;
  * <li>Every node's path name relative to the root is its absolute path name
  * with the initial slash character removed.
  * </ul>
- * 
+ *
  * <p>
  * Note finally that:
  * <ul>
@@ -74,7 +74,7 @@ package org.osgi.service.prefs;
  * the slash character.
  * <li>Any string that conforms to these two rules is a valid path name.
  * </ul>
- * 
+ *
  * <p>
  * Each {@code Preference} node has zero or more properties associated with
  * it, where a property consists of a name and a value. The bundle writer is
@@ -82,22 +82,22 @@ package org.osgi.service.prefs;
  * type {@code String},{@code long},{@code int},{@code boolean},
  * {@code byte[]},{@code float}, or {@code double} but they can
  * always be accessed as if they were {@code String} objects.
- * 
+ *
  * <p>
  * All node name and property name comparisons are case-sensitive.
- * 
+ *
  * <p>
  * All of the methods that modify preference data are permitted to operate
  * asynchronously; they may return immediately, and changes will eventually
  * propagate to the persistent backing store, with an implementation-dependent
  * delay. The {@code flush} method may be used to synchronously force updates
  * to the backing store.
- * 
+ *
  * <p>
  * Implementations must automatically attempt to flush to the backing store any
  * pending updates for a bundle's preferences when the bundle is stopped or
  * otherwise ungets the Preferences Service.
- * 
+ *
  * <p>
  * The methods in this class may be invoked concurrently by multiple threads in
  * a single Java Virtual Machine (JVM) without the need for external
@@ -106,14 +106,14 @@ package org.osgi.service.prefs;
  * preference data in the same backing store, the data store will not be
  * corrupted, but no other guarantees are made concerning the consistency of the
  * preference data.
- * 
+ *
  * @noimplement
  * @version $Id$
  */
 public interface Preferences {
 	/**
 	 * Associates the specified value with the specified key in this node.
-	 * 
+	 *
 	 * @param key key with which the specified value is to be associated.
 	 * @param value value to be associated with the specified key.
 	 * @throws NullPointerException if {@code key} or {@code value} is
@@ -127,7 +127,7 @@ public interface Preferences {
 	 * Returns the value associated with the specified {@code key} in this
 	 * node. Returns the specified default if there is no value associated with
 	 * the {@code key}, or the backing store is inaccessible.
-	 * 
+	 *
 	 * @param key key whose associated value is to be returned.
 	 * @param def the value to be returned in the event that this node has no
 	 *        value associated with {@code key} or the backing store is
@@ -144,7 +144,7 @@ public interface Preferences {
 	/**
 	 * Removes the value associated with the specified {@code key} in this
 	 * node, if any.
-	 * 
+	 *
 	 * @param key key whose mapping is to be removed from this node.
 	 * @see #get(String,String)
 	 * @throws IllegalStateException if this node (or an ancestor) has been
@@ -155,7 +155,7 @@ public interface Preferences {
 	/**
 	 * Removes all of the properties (key-value associations) in this node. This
 	 * call has no effect on any descendants of this node.
-	 * 
+	 *
 	 * @throws BackingStoreException if this operation cannot be completed due
 	 *         to a failure in the backing store, or inability to communicate
 	 *         with it.
@@ -171,7 +171,7 @@ public interface Preferences {
 	 * associated string is the one that would be returned if the {@code int}
 	 * value were passed to {@code Integer.toString(int)}. This method is
 	 * intended for use in conjunction with {@link #getInt} method.
-	 * 
+	 *
 	 * <p>
 	 * Implementor's note: it is <i>not </i> necessary that the property value
 	 * be represented by a {@code String} object in the backing store. If the
@@ -180,7 +180,7 @@ public interface Preferences {
 	 * {@code Preferences} API, which allows the value to be read as an
 	 * {@code int} (with {@code getInt} or a {@code String} (with
 	 * {@code get}) type.
-	 * 
+	 *
 	 * @param key key with which the string form of value is to be associated.
 	 * @param value {@code value} whose string form is to be associated with
 	 *        {@code key}.
@@ -201,7 +201,7 @@ public interface Preferences {
 	 * {@code NumberFormatException} if the associated {@code value} were
 	 * passed. This method is intended for use in conjunction with the
 	 * {@link #putInt} method.
-	 * 
+	 *
 	 * @param key key whose associated value is to be returned as an
 	 *        {@code int}.
 	 * @param def the value to be returned in the event that this node has no
@@ -227,16 +227,16 @@ public interface Preferences {
 	 * the {@code long} value were passed to {@code Long.toString(long)}.
 	 * This method is intended for use in conjunction with the {@link #getLong}
 	 * method.
-	 * 
+	 *
 	 * <p>
 	 * Implementor's note: it is <i>not </i> necessary that the {@code value}
 	 * be represented by a {@code String} type in the backing store. If the
 	 * backing store supports {@code long} values, it is not unreasonable to
-	 * use them. This implementation detail is not visible through the {@code 
+	 * use them. This implementation detail is not visible through the {@code
 	 * Preferences} API, which allows the value to be read as a
 	 * {@code long} (with {@code getLong} or a {@code String} (with
 	 * {@code get}) type.
-	 * 
+	 *
 	 * @param key {@code key} with which the string form of {@code value}
 	 *        is to be associated.
 	 * @param value {@code value} whose string form is to be associated with
@@ -258,7 +258,7 @@ public interface Preferences {
 	 * {@code NumberFormatException} if the associated {@code value} were
 	 * passed. This method is intended for use in conjunction with the
 	 * {@link #putLong} method.
-	 * 
+	 *
 	 * @param key {@code key} whose associated value is to be returned as a
 	 *        {@code long} value.
 	 * @param def the value to be returned in the event that this node has no
@@ -283,7 +283,7 @@ public interface Preferences {
 	 * associated string is "true" if the value is {@code true}, and "false"
 	 * if it is {@code false}. This method is intended for use in
 	 * conjunction with the {@link #getBoolean} method.
-	 * 
+	 *
 	 * <p>
 	 * Implementor's note: it is <i>not </i> necessary that the value be
 	 * represented by a string in the backing store. If the backing store
@@ -292,7 +292,7 @@ public interface Preferences {
 	 * } API, which allows the value to be read as a {@code boolean}
 	 * (with {@code getBoolean}) or a {@code String} (with {@code get})
 	 * type.
-	 * 
+	 *
 	 * @param key {@code key} with which the string form of value is to be
 	 *        associated.
 	 * @param value value whose string form is to be associated with
@@ -312,12 +312,12 @@ public interface Preferences {
 	 * represents {@code false}. Case is ignored, so, for example, "TRUE"
 	 * and "False" are also valid. This method is intended for use in
 	 * conjunction with the {@link #putBoolean} method.
-	 * 
+	 *
 	 * <p>
 	 * Returns the specified default if there is no value associated with the
 	 * {@code key}, the backing store is inaccessible, or if the associated
 	 * value is something other than "true" or "false", ignoring case.
-	 * 
+	 *
 	 * @param key {@code key} whose associated value is to be returned as a
 	 *        {@code boolean}.
 	 * @param def the value to be returned in the event that this node has no
@@ -343,7 +343,7 @@ public interface Preferences {
 	 * if the {@code float} value were passed to
 	 * {@code Float.toString(float)}. This method is intended for use in
 	 * conjunction with the {@link #getFloat} method.
-	 * 
+	 *
 	 * <p>
 	 * Implementor's note: it is <i>not </i> necessary that the value be
 	 * represented by a string in the backing store. If the backing store
@@ -351,7 +351,7 @@ public interface Preferences {
 	 * This implementation detail is not visible through the {@code Preferences
 	 * } API, which allows the value to be read as a {@code float} (with
 	 * {@code getFloat}) or a {@code String} (with {@code get}) type.
-	 * 
+	 *
 	 * @param key {@code key} with which the string form of value is to be
 	 *        associated.
 	 * @param value value whose string form is to be associated with
@@ -373,7 +373,7 @@ public interface Preferences {
 	 * {@code NumberFormatException} if the associated value were passed.
 	 * This method is intended for use in conjunction with the {@link #putFloat}
 	 * method.
-	 * 
+	 *
 	 * @param key {@code key} whose associated value is to be returned as a
 	 *        {@code float} value.
 	 * @param def the value to be returned in the event that this node has no
@@ -399,7 +399,7 @@ public interface Preferences {
 	 * if the {@code double} value were passed to
 	 * {@code Double.toString(double)}. This method is intended for use in
 	 * conjunction with the {@link #getDouble} method
-	 * 
+	 *
 	 * <p>
 	 * Implementor's note: it is <i>not </i> necessary that the value be
 	 * represented by a string in the backing store. If the backing store
@@ -408,7 +408,7 @@ public interface Preferences {
 	 * } API, which allows the value to be read as a {@code double} (with
 	 * {@code getDouble}) or a {@code String} (with {@code get})
 	 * type.
-	 * 
+	 *
 	 * @param key {@code key} with which the string form of value is to be
 	 *        associated.
 	 * @param value value whose string form is to be associated with
@@ -430,7 +430,7 @@ public interface Preferences {
 	 * a {@code NumberFormatException} if the associated value were passed.
 	 * This method is intended for use in conjunction with the
 	 * {@link #putDouble} method.
-	 * 
+	 *
 	 * @param key {@code key} whose associated value is to be returned as a
 	 *        {@code double} value.
 	 * @param def the value to be returned in the event that this node has no
@@ -459,16 +459,16 @@ public interface Preferences {
 	 * the <i>Base64 Alphabet </i>; it will not contain any newline characters.
 	 * This method is intended for use in conjunction with the
 	 * {@link #getByteArray} method.
-	 * 
+	 *
 	 * <p>
 	 * Implementor's note: it is <i>not </i> necessary that the value be
 	 * represented by a {@code String} type in the backing store. If the
 	 * backing store supports {@code byte[]} values, it is not unreasonable
-	 * to use them. This implementation detail is not visible through the {@code 
+	 * to use them. This implementation detail is not visible through the {@code
 	 * Preferences} API, which allows the value to be read as an a
 	 * {@code byte[]} object (with {@code getByteArray}) or a
 	 * {@code String} object (with {@code get}).
-	 * 
+	 *
 	 * @param key {@code key} with which the string form of {@code value}
 	 *        is to be associated.
 	 * @param value {@code value} whose string form is to be associated with
@@ -491,12 +491,12 @@ public interface Preferences {
 	 * characters from the <i>Base64 Alphabet </i>; no newline characters or
 	 * extraneous characters are permitted. This method is intended for use in
 	 * conjunction with the {@link #putByteArray} method.
-	 * 
+	 *
 	 * <p>
 	 * Returns the specified default if there is no value associated with the
 	 * {@code key}, the backing store is inaccessible, or if the associated
 	 * value is not a valid Base64 encoded byte array (as defined above).
-	 * 
+	 *
 	 * @param key {@code key} whose associated value is to be returned as a
 	 *        {@code byte[]} object.
 	 * @param def the value to be returned in the event that this node has no
@@ -520,7 +520,7 @@ public interface Preferences {
 	 * Returns all of the keys that have an associated value in this node. (The
 	 * returned array will be of size zero if this node has no preferences and
 	 * not {@code null}!)
-	 * 
+	 *
 	 * @return an array of the keys that have an associated value in this node.
 	 * @throws BackingStoreException if this operation cannot be completed due
 	 *         to a failure in the backing store, or inability to communicate
@@ -533,7 +533,7 @@ public interface Preferences {
 	/**
 	 * Returns the names of the children of this node. (The returned array will
 	 * be of size zero if this node has no children and not {@code null}!)
-	 * 
+	 *
 	 * @return the names of the children of this node.
 	 * @throws BackingStoreException if this operation cannot be completed due
 	 *         to a failure in the backing store, or inability to communicate
@@ -545,7 +545,7 @@ public interface Preferences {
 
 	/**
 	 * Returns the parent of this node, or {@code null} if this is the root.
-	 * 
+	 *
 	 * @return the parent of this node.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
 	 *         removed with the {@link #removeNode()} method.
@@ -560,13 +560,13 @@ public interface Preferences {
 	 * (which begin with any character other than {@code '/'}) are
 	 * interpreted relative to this node itself. The empty string ({@code ""})
 	 * is a valid relative pathname, referring to this node itself.
-	 * 
+	 *
 	 * <p>
 	 * If the returned node did not exist prior to this call, this node and any
 	 * ancestors that were created by this call are not guaranteed to become
 	 * persistent until the {@code flush} method is called on the returned
 	 * node (or one of its descendants).
-	 * 
+	 *
 	 * @param pathName the path name of the {@code Preferences} object to
 	 *        return.
 	 * @return the specified {@code Preferences} object.
@@ -585,14 +585,14 @@ public interface Preferences {
 	 * begin with any character other than {@code '/'}) are interpreted
 	 * relative to this node itself. The pathname {@code ""} is valid, and
 	 * refers to this node itself.
-	 * 
+	 *
 	 * <p>
 	 * If this node (or an ancestor) has already been removed with the
 	 * {@link #removeNode()} method, it <i>is </i> legal to invoke this method,
 	 * but only with the pathname {@code ""}; the invocation will return
 	 * {@code false}. Thus, the idiom {@code p.nodeExists("")} may be
 	 * used to test whether {@code p} has been removed.
-	 * 
+	 *
 	 * @param pathName the path name of the node whose existence is to be
 	 *        checked.
 	 * @return true if the specified node exists.
@@ -617,11 +617,11 @@ public interface Preferences {
 	 * instance will fail with an {@code IllegalStateException}. (The
 	 * methods defined on {@code Object} can still be invoked on a node after
 	 * it has been removed; they will not throw {@code IllegalStateException}.)
-	 * 
+	 *
 	 * <p>
 	 * The removal is not guaranteed to be persistent until the {@code flush}
 	 * method is called on the parent of this node.
-	 * 
+	 *
 	 * @throws IllegalStateException if this node (or an ancestor) has already
 	 *         been removed with the {@link #removeNode()} method.
 	 * @throws BackingStoreException if this operation cannot be completed due
@@ -633,7 +633,7 @@ public interface Preferences {
 
 	/**
 	 * Returns this node's name, relative to its parent.
-	 * 
+	 *
 	 * @return this node's name, relative to its parent.
 	 */
 	public String name();
@@ -649,7 +649,7 @@ public interface Preferences {
 	 * <li>Illegal names - The only illegal path names are those that contain
 	 * multiple consecutive slashes, or that end in slash and are not the root.
 	 * </ul>
-	 * 
+	 *
 	 * @return this node's absolute path name.
 	 */
 	public String absolutePath();
@@ -657,22 +657,22 @@ public interface Preferences {
 	/**
 	 * Forces any changes in the contents of this node and its descendants to
 	 * the persistent store.
-	 * 
+	 *
 	 * <p>
 	 * Once this method returns successfully, it is safe to assume that all
 	 * changes made in the subtree rooted at this node prior to the method
 	 * invocation have become permanent.
-	 * 
+	 *
 	 * <p>
 	 * Implementations are free to flush changes into the persistent store at
 	 * any time. They do not need to wait for this method to be called.
-	 * 
+	 *
 	 * <p>
 	 * When a flush occurs on a newly created node, it is made persistent, as
 	 * are any ancestors (and descendants) that have yet to be made persistent.
 	 * Note however that any properties value changes in ancestors are <i>not
 	 * </i> guaranteed to be made persistent.
-	 * 
+	 *
 	 * @throws BackingStoreException if this operation cannot be completed due
 	 *         to a failure in the backing store, or inability to communicate
 	 *         with it.
@@ -688,7 +688,7 @@ public interface Preferences {
 	 * to the {@code sync} invocation. As a side-effect, forces any changes
 	 * in the contents of this node and its descendants to the persistent store,
 	 * as if the {@code flush} method had been invoked on this node.
-	 * 
+	 *
 	 * @throws BackingStoreException if this operation cannot be completed due
 	 *         to a failure in the backing store, or inability to communicate
 	 *         with it.

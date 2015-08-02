@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -36,7 +36,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	private static final String PROP_CUSTOMIZATION = "eclipse.pluginCustomization"; //$NON-NLS-1$
 
 	/**
-	 * Track the registry service - only register preference service if the registry is 
+	 * Track the registry service - only register preference service if the registry is
 	 * available
 	 */
 	private ServiceTracker registryServiceTracker;
