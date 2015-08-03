@@ -201,8 +201,12 @@ public class Activator
 
 		String contextPath = servletContext.getContextPath();
 
-		ServletRegistration servletRegistration =
-			servletContext.getServletRegistration(servletName);
+		ServletRegistration servletRegistration = null;
+		try {
+			servletRegistration = servletContext.getServletRegistration(servletName);
+		} catch (UnsupportedOperationException e) {
+			servletContext.log("Could not find the servlet registration for the servlet: " + servletName, e); //$NON-NLS-1$
+		}
 
 		if (servletRegistration == null) {
 			return new String[0];
