@@ -63,7 +63,7 @@ public class DevClassPathHelper {
 	public static String[] getArrayFromList(String prop) {
 		if (prop == null || prop.trim().equals("")) //$NON-NLS-1$
 			return new String[0];
-		Vector<String> list = new Vector<String>();
+		Vector<String> list = new Vector<>();
 		StringTokenizer tokens = new StringTokenizer(prop, ","); //$NON-NLS-1$
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();

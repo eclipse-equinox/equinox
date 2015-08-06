@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.*;
  */
 public final class RuntimeLog {
 
-	private static ArrayList<ILogListener> logListeners = new ArrayList<ILogListener>(5);
+	private static ArrayList<ILogListener> logListeners = new ArrayList<>(5);
 
 	/**
 	 * Keep the messages until the first log listener is registered.
@@ -30,7 +30,7 @@ public final class RuntimeLog {
 	 * all status messages accumulated during the period when no log
 	 * listener was available.
 	 */
-	private static ArrayList<IStatus> queuedMessages = new ArrayList<IStatus>(5);
+	private static ArrayList<IStatus> queuedMessages = new ArrayList<>(5);
 
 	private static PlatformLogWriter logWriter;
 

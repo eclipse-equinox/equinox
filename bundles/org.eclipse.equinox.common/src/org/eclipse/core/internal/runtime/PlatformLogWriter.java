@@ -62,7 +62,7 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 
 	public static FrameworkLogEntry getLog(IStatus status) {
 		Throwable t = status.getException();
-		ArrayList<FrameworkLogEntry> childlist = new ArrayList<FrameworkLogEntry>();
+		ArrayList<FrameworkLogEntry> childlist = new ArrayList<>();
 
 		int stackCode = t instanceof CoreException ? 1 : 0;
 		// ensure a substatus inside a CoreException is properly logged 

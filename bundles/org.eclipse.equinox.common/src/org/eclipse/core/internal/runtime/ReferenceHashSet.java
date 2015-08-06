@@ -124,7 +124,7 @@ public class ReferenceHashSet<T> {
 
 	int threshold;
 
-	ReferenceQueue<T> referenceQueue = new ReferenceQueue<T>();
+	ReferenceQueue<T> referenceQueue = new ReferenceQueue<>();
 
 	public ReferenceHashSet() {
 		this(5);
@@ -159,11 +159,11 @@ public class ReferenceHashSet<T> {
 	private HashedReference<T> toReference(int type, T referent) {
 		switch (type) {
 			case HARD :
-				return new StrongReference<T>(referent, referenceQueue);
+				return new StrongReference<>(referent, referenceQueue);
 			case SOFT :
-				return new HashableSoftReference<T>(referent, referenceQueue);
+				return new HashableSoftReference<>(referent, referenceQueue);
 			case WEAK :
-				return new HashableWeakReference<T>(referent, referenceQueue);
+				return new HashableWeakReference<>(referent, referenceQueue);
 			default :
 				throw new Error();
 		}
@@ -263,7 +263,7 @@ public class ReferenceHashSet<T> {
 	}
 
 	private void rehash() {
-		ReferenceHashSet<T> newHashSet = new ReferenceHashSet<T>(this.elementSize * 2); // double the number of expected elements
+		ReferenceHashSet<T> newHashSet = new ReferenceHashSet<>(this.elementSize * 2); // double the number of expected elements
 		newHashSet.referenceQueue = this.referenceQueue;
 		HashedReference<T> currentValue;
 		for (int i = 0, length = this.values.length; i < length; i++)

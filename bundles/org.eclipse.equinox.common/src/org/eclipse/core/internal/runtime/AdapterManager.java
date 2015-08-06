@@ -87,8 +87,8 @@ public final class AdapterManager implements IAdapterManager {
 	 * Private constructor to block instance creation.
 	 */
 	private AdapterManager() {
-		factories = new HashMap<String, List<IAdapterFactory>>(5);
-		lazyFactoryProviders = new ArrayList<IAdapterManagerProvider>(1);
+		factories = new HashMap<>(5);
+		lazyFactoryProviders = new ArrayList<>(1);
 	}
 
 	/**
@@ -124,10 +124,10 @@ public final class AdapterManager implements IAdapterManager {
 			//cache reference to lookup to protect against concurrent flush
 			Map<IAdapterFactory, Map<String, Class<?>>> lookup = classLookup;
 			if (lookup == null)
-				classLookup = lookup = new HashMap<IAdapterFactory, Map<String, Class<?>>>(4);
+				classLookup = lookup = new HashMap<>(4);
 			Map<String, Class<?>> classes = lookup.get(factory);
 			if (classes == null) {
-				classes = new HashMap<String, Class<?>>(4);
+				classes = new HashMap<>(4);
 				lookup.put(factory, classes);
 			}
 			classes.put(clazz.getName(), clazz);
@@ -207,7 +207,7 @@ public final class AdapterManager implements IAdapterManager {
 		Map<String, IAdapterFactory> table = lookup.get(adaptable.getName());
 		if (table == null) {
 			// calculate adapters for the class
-			table = new HashMap<String, IAdapterFactory>(4);
+			table = new HashMap<>(4);
 			Class<?>[] classes = computeClassOrder(adaptable);
 			for (int i = 0; i < classes.length; i++)
 				addFactoriesFor(classes[i].getName(), table);
@@ -244,9 +244,9 @@ public final class AdapterManager implements IAdapterManager {
 	 * The search order is defined in this class' comment.
 	 */
 	private Class<?>[] doComputeClassOrder(Class<?> adaptable) {
-		List<Class<?>> classes = new ArrayList<Class<?>>();
+		List<Class<?>> classes = new ArrayList<>();
 		Class<?> clazz = adaptable;
-		Set<Class<?>> seen = new HashSet<Class<?>>(4);
+		Set<Class<?>> seen = new HashSet<>(4);
 		//first traverse class hierarchy
 		while (clazz != null) {
 			classes.add(clazz);
@@ -260,7 +260,7 @@ public final class AdapterManager implements IAdapterManager {
 	}
 
 	private void computeInterfaceOrder(Class<?>[] interfaces, Collection<Class<?>> classes, Set<Class<?>> seen) {
-		List<Class<?>> newInterfaces = new ArrayList<Class<?>>(interfaces.length);
+		List<Class<?>> newInterfaces = new ArrayList<>(interfaces.length);
 		for (int i = 0; i < interfaces.length; i++) {
 			Class<?> interfac = interfaces[i];
 			if (seen.add(interfac)) {
@@ -381,7 +381,7 @@ public final class AdapterManager implements IAdapterManager {
 	public void registerFactory(IAdapterFactory factory, String adaptableType) {
 		List<IAdapterFactory> list = factories.get(adaptableType);
 		if (list == null) {
-			list = new ArrayList<IAdapterFactory>(5);
+			list = new ArrayList<>(5);
 			factories.put(adaptableType, list);
 		}
 		list.add(factory);

@@ -104,7 +104,7 @@ public class ResourceTranslator {
 	}
 
 	private static ClassLoader createTempClassloader(Bundle b) {
-		ArrayList<URL> classpath = new ArrayList<URL>();
+		ArrayList<URL> classpath = new ArrayList<>();
 		addClasspathEntries(b, classpath);
 		addBundleRoot(b, classpath);
 		addDevEntries(b, classpath);

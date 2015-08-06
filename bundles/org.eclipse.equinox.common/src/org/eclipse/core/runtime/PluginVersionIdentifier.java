@@ -157,7 +157,7 @@ public final class PluginVersionIdentifier {
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_doubleSeparatorVersion, s));
 
 		StringTokenizer st = new StringTokenizer(s, SEPARATOR);
-		Vector<String> elements = new Vector<String>(4);
+		Vector<String> elements = new Vector<>(4);
 
 		while (st.hasMoreTokens())
 			elements.addElement(st.nextToken());

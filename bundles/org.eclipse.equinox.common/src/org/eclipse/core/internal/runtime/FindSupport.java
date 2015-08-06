@@ -32,7 +32,7 @@ public class FindSupport {
 	private static String[] NL_JAR_VARIANTS = buildNLVariants(Activator.getContext() == null ? System.getProperty(PROP_NL) : Activator.getContext().getProperty(PROP_NL));
 
 	private static String[] buildNLVariants(String nl) {
-		ArrayList<String> result = new ArrayList<String>();
+		ArrayList<String> result = new ArrayList<>();
 		IPath base = new Path("nl"); //$NON-NLS-1$
 
 		IPath path = new Path(nl.replace('_', '/'));
@@ -72,7 +72,7 @@ public class FindSupport {
 	 * See doc on {@link FileLocator#findEntries(Bundle, IPath, Map)}
 	 */
 	public static URL[] findEntries(Bundle bundle, IPath path, Map<String, String> override) {
-		ArrayList<URL> results = new ArrayList<URL>(1);
+		ArrayList<URL> results = new ArrayList<>(1);
 		find(bundle, path, override, results);
 		return results.toArray(new URL[results.size()]);
 	}
