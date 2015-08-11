@@ -485,12 +485,9 @@ public class BundleLoader extends ModuleLoader {
 		for (int i = 1; i < context.length; i++) {
 			Class<?> clazz = context[i];
 			// Find the first class in the context which is not BundleLoader or the ModuleClassLoader;
-			// We ignore ClassLoader because ModuleClassLoader extends it
-			if (clazz != BundleLoader.class && !ModuleClassLoader.class.isAssignableFrom(clazz) && clazz != ClassLoader.class && !clazz.getName().equals("java.lang.J9VMInternals")) { //$NON-NLS-1$
-				if (Class.class == clazz) {
-					// We ignore any requests from Class (e.g Class.forName case)
-					return false;
-				}
+			// We ignore ClassLoader because ModuleClassLoader extends it.
+			// We ignore Class because of Class.forName (bug 471551)
+			if (clazz != BundleLoader.class && !ModuleClassLoader.class.isAssignableFrom(clazz) && clazz != ClassLoader.class && clazz != Class.class && !clazz.getName().equals("java.lang.J9VMInternals")) { //$NON-NLS-1$
 				if (Bundle.class.isAssignableFrom(clazz)) {
 					// We ignore any requests from Bundle (e.g. Bundle.loadClass case)
 					return false;
@@ -980,7 +977,8 @@ public class BundleLoader extends ModuleLoader {
 				String name = packages[i];
 				if (isDynamicallyImported(name))
 					continue;
-				if (name.equals("*")) { /* shortcut *///$NON-NLS-1$
+				if (name.equals("*")) { //$NON-NLS-1$
+					// shortcut
 					dynamicAllPackages = true;
 					return;
 				}

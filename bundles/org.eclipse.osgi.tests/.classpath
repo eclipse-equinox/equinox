@@ -128,8 +128,9 @@
 	<classpathentry kind="src" output="bundle_tests/test.bug438904.frag" path="bundles_src/test.bug438904.frag"/>
 	<classpathentry kind="src" output="bundle_tests/test.bug438904.global" path="bundles_src/test.bug438904.global"/>
 	<classpathentry kind="src" output="bundle_tests/test.system.nls"  path="bundles_src/test.system.nls"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug449484" path="bundles_src/test.bug449484"/>	
+	<classpathentry kind="src" output="bundle_tests/test.bug449484" path="bundles_src/test.bug449484"/>
 	<classpathentry kind="src" output="bundle_tests/wrapper.hooks.a" path="bundles_src/wrapper.hooks.a"/>
 	<classpathentry kind="src" output="bundle_tests/test.protocol.handler" path="bundles_src/test.protocol.handler"/>
+	<classpathentry kind="src" output="bundle_tests/test.bug471551" path="bundles_src/test.bug471551"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

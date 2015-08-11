@@ -2447,6 +2447,25 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.stop();
 	}
 
+	public void testContextBootDelegation() throws BundleException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		config.mkdirs();
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+
+		equinox.start();
+		BundleContext systemContext = equinox.getBundleContext();
+		try {
+			Bundle b = systemContext.installBundle(installer.getBundleLocation("test.bug471551"));
+			b.start();
+		} catch (BundleException e) {
+			fail("Unexpected error", e); //$NON-NLS-1$
+		}
+
+		equinox.stop();
+	}
+
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {
 		outputDir.mkdirs();
 
