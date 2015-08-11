@@ -136,7 +136,7 @@ public class ContextController {
 		this.contextServiceId = serviceId;
 
 		this.initParams = ServiceProperties.parseInitParams(
-			servletContextHelperRef, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX);
+			servletContextHelperRef, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX, proxyContext.getServletContext());
 
 		this.trackingContext = trackingContextParam;
 		this.consumingContext = consumingContext;
