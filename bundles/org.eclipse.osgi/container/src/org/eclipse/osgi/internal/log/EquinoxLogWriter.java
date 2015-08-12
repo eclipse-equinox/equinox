@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,10 +40,12 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	/** The line separator used in the log output */
 	private static final String LINE_SEPARATOR;
+
 	static {
 		String s = System.getProperty("line.separator"); //$NON-NLS-1$
 		LINE_SEPARATOR = s == null ? "\n" : s; //$NON-NLS-1$
 	}
+
 	//Constants for rotating log file
 	/** The default size a log file can grow before it is rotated */
 	private static final int DEFAULT_LOG_SIZE = 1000;
@@ -112,7 +114,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	public EquinoxLogWriter(Writer writer, String loggerName, boolean enabled, EquinoxConfiguration environmentInfo) {
 		if (writer == null)
 			// log to System.err by default
-			this.writer = logForStream(System.err);
+			this.writer = logForErrorStream();
 		else
 			this.writer = writer;
 		this.loggerName = loggerName;
@@ -244,10 +246,10 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 				try {
 					writer = logForStream(secureAction.getFileOutputStream(outFile, true));
 				} catch (IOException e) {
-					writer = logForStream(System.err);
+					writer = logForErrorStream();
 				}
 			} else {
-				writer = logForStream(System.err);
+				writer = logForErrorStream();
 			}
 		}
 	}
@@ -290,7 +292,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 			System.err.println("Logging to the console instead.");//$NON-NLS-1$
 			//we failed to write, so dump log entry to console instead
 			try {
-				writer = logForStream(System.err);
+				writer = logForErrorStream();
 				writeLog(0, logEntry);
 				writer.flush();
 			} catch (Exception e2) {
@@ -445,6 +447,13 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 		} catch (UnsupportedEncodingException e) {
 			return new BufferedWriter(new OutputStreamWriter(output));
 		}
+	}
+
+	/**
+	 * Always use the default encoding for System.err
+	 */
+	private Writer logForErrorStream() {
+		return new BufferedWriter(new OutputStreamWriter(System.err));
 	}
 
 	/**
