@@ -12,14 +12,14 @@
 package org.eclipse.equinox.http.servlet.internal.servlet;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.context.DispatchTargets;
 import org.eclipse.equinox.http.servlet.internal.registration.EndpointRegistration;
 import org.eclipse.equinox.http.servlet.internal.registration.FilterRegistration;
-import org.eclipse.equinox.http.servlet.internal.util.EventListeners;
 
 /**
  * @author Raymond Augé
@@ -37,20 +37,20 @@ public class ResponseStateHandler {
 	}
 
 	public void processRequest() throws IOException, ServletException {
-		ContextController contextController = dispatchTargets.getContextController();
-		EventListeners eventListeners = contextController.getEventListeners();
-		List<ServletRequestListener> servletRequestListeners = Collections.emptyList();
-		EndpointRegistration<?> registration = dispatchTargets.getServletRegistration();
-		List<FilterRegistration> matchingFilterRegistrations = dispatchTargets.getMatchingFilterRegistrations();
+		List<ServletRequestListener> servletRequestListeners = getServletRequestListener();
+		EndpointRegistration<?> endpoint = dispatchTargets.getServletRegistration();
+		List<FilterRegistration> filters = dispatchTargets.getMatchingFilterRegistrations();
+
+		endpoint.addReference();
+
+		for (FilterRegistration filterRegistration : filters) {
+			filterRegistration.addReference();
+		}
 
 		ServletRequestEvent servletRequestEvent = null;
 
-		if (dispatcherType == DispatcherType.REQUEST) {
-			servletRequestListeners = eventListeners.get(ServletRequestListener.class);
-
-			if (!servletRequestListeners.isEmpty()) {
-				servletRequestEvent = new ServletRequestEvent(registration.getServletContext(), request);
-			}
+		if ((dispatcherType == DispatcherType.REQUEST) && !servletRequestListeners.isEmpty()) {
+			servletRequestEvent = new ServletRequestEvent(endpoint.getServletContext(), request);
 		}
 
 		try {
@@ -58,15 +58,15 @@ public class ResponseStateHandler {
 				servletRequestListener.requestInitialized(servletRequestEvent);
 			}
 
-			if (registration.getServletContextHelper().handleSecurity(request, response)) {
-				if (matchingFilterRegistrations.isEmpty()) {
-					registration.service(request, response);
+			if (endpoint.getServletContextHelper().handleSecurity(request, response)) {
+				if (filters.isEmpty()) {
+					endpoint.service(request, response);
 				}
 				else {
-					Collections.sort(matchingFilterRegistrations);
+					Collections.sort(filters);
 
 					FilterChain chain = new FilterChainImpl(
-						matchingFilterRegistrations, registration, dispatcherType);
+						filters, endpoint, dispatcherType);
 
 					chain.doFilter(request, response);
 				}
@@ -87,19 +87,18 @@ public class ResponseStateHandler {
 			}
 		}
 		finally {
-			registration.removeReference();
+			endpoint.removeReference();
 
-			for (Iterator<FilterRegistration> it =
-					matchingFilterRegistrations.iterator(); it.hasNext();) {
-
-				FilterRegistration filterRegistration = it.next();
+			for (FilterRegistration filterRegistration : filters) {
 				filterRegistration.removeReference();
 			}
 
-			handleErrors();
+			if (dispatcherType == DispatcherType.REQUEST) {
+				handleErrors();
 
-			for (ServletRequestListener servletRequestListener : servletRequestListeners) {
-				servletRequestListener.requestDestroyed(servletRequestEvent);
+				for (ServletRequestListener servletRequestListener : servletRequestListeners) {
+					servletRequestListener.requestDestroyed(servletRequestEvent);
+				}
 			}
 		}
 	}
@@ -108,11 +107,11 @@ public class ResponseStateHandler {
 		this.exception = exception;
 	}
 
-	private void handleErrors() throws IOException, ServletException {
-		if (dispatcherType != DispatcherType.REQUEST) {
-			return;
-		}
+	private List<ServletRequestListener> getServletRequestListener() {
+		return dispatchTargets.getContextController().getEventListeners().get(ServletRequestListener.class);
+	}
 
+	private void handleErrors() throws IOException, ServletException {
 		if (exception != null) {
 			handleException();
 		}
@@ -158,7 +157,7 @@ public class ResponseStateHandler {
 		String className = clazz.getName();
 
 		DispatchTargets errorDispatchTargets = contextController.getDispatchTargets(
-			null, className, null, null, null, null, Match.EXACT, null);
+			className, null, null, null, null, Match.EXACT, null);
 
 		if (errorDispatchTargets == null) {
 			throwException(exception);
@@ -235,7 +234,7 @@ public class ResponseStateHandler {
 		ContextController contextController = dispatchTargets.getContextController();
 
 		DispatchTargets errorDispatchTargets = contextController.getDispatchTargets(
-			null, String.valueOf(status), null, null, null, null, Match.EXACT, null);
+			String.valueOf(status), null, null, null, null, Match.EXACT, null);
 
 		if (errorDispatchTargets == null) {
 			wrappedResponse.sendError(status, wrapperImpl.getMessage());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Raymond Augé and others.
+ * Copyright (c) 2014, 2015 Raymond Augé and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 package org.eclipse.equinox.http.servlet.internal.registration;
 
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
+import org.eclipse.equinox.http.servlet.internal.util.Const;
 import org.osgi.dto.DTO;
 
 /**
@@ -33,7 +34,7 @@ public abstract class MatchableRegistration<T, D extends DTO>
 
 		int cpl = pattern.length() - 2;
 
-		if (pattern.endsWith("/*") && servletPath.regionMatches(0, pattern, 0, cpl)) { //$NON-NLS-1$
+		if (pattern.endsWith(Const.SLASH_STAR) && servletPath.regionMatches(0, pattern, 0, cpl)) {
 			if ((pattern.length() > 2) && !pattern.startsWith(servletPath)) {
 				return false;
 			}
@@ -55,7 +56,7 @@ public abstract class MatchableRegistration<T, D extends DTO>
 			return pattern.equals(servletPath);
 		}
 
-		if (pattern.indexOf("/*.") == 0) { //$NON-NLS-1$
+		if (pattern.indexOf(Const.SLASH_STAR_DOT) == 0) {
 			pattern = pattern.substring(1);
 		}
 
@@ -71,8 +72,17 @@ public abstract class MatchableRegistration<T, D extends DTO>
 			}
 		}
 
-		if ((match == Match.EXTENSION) && (pattern.indexOf("*.") == 0)) { //$NON-NLS-1$
-			return pattern.substring(2).equals(extension);
+		if (match == Match.EXTENSION) {
+			int index = pattern.lastIndexOf(Const.STAR_DOT);
+			String patterPrefix = Const.BLANK;
+
+			if (index > 0) {
+				patterPrefix = pattern.substring(0, index - 1);
+			}
+
+			if ((index != -1) && (servletPath.equals(patterPrefix))) {
+				return pattern.endsWith(Const.DOT + extension);
+			}
 		}
 
 		return false;

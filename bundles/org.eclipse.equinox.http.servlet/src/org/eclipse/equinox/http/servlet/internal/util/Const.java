@@ -18,6 +18,7 @@ public class Const {
 
 	public static final String BLANK = ""; //$NON-NLS-1$
 	public static final String CLOSE_PAREN = ")"; //$NON-NLS-1$
+	public static final String DOT = "."; //$NON-NLS-1$
 	public static final String[] EMPTY_ARRAY = new String[0];
 	public static final String EQUAL = "="; //$NON-NLS-1$
 	public static final String FILTER_NAME = "filter-name"; //$NON-NLS-1$
@@ -28,6 +29,8 @@ public class Const {
 	public static final String SERVLET_NAME = "servlet-name"; //$NON-NLS-1$
 	public static final String SLASH = "/"; //$NON-NLS-1$
 	public static final String SLASH_STAR = "/*"; //$NON-NLS-1$
+	public static final String SLASH_STAR_DOT = "/*."; //$NON-NLS-1$
+	public static final String STAR_DOT = "*."; //$NON-NLS-1$
 	public static final String EQUINOX_LEGACY_TCCL_PROP = "equinox.legacy.tccl"; //$NON-NLS-1$
 	public static final String EQUINOX_LEGACY_CONTEXT_SELECT = "equinox.context.select"; //$NON-NLS-1$
 	public static final String EQUINOX_LEGACY_CONTEXT_HELPER = "equinox.legacy.context.helper"; //$NON-NLS-1$

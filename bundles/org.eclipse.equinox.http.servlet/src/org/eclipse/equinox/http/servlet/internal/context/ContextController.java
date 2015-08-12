@@ -594,13 +594,86 @@ public class ContextController {
 	}
 
 	public DispatchTargets getDispatchTargets(
-		HttpServletRequest request, String servletName, String requestURI,
-		String servletPath, String pathInfo, String extension, Match match,
+		String path, RequestInfoDTO requestInfoDTO) {
+
+		// perfect match
+		DispatchTargets dispatchTargets = getDispatchTargets(
+			path, null, Match.EXACT, requestInfoDTO);
+
+		if (dispatchTargets == null) {
+			// extension match
+			String extension = Path.findExtension(path);
+
+			dispatchTargets = getDispatchTargets(
+				path, extension, Match.EXTENSION,
+				requestInfoDTO);
+		}
+
+		if (dispatchTargets == null) {
+			// regex match
+			dispatchTargets = getDispatchTargets(
+				path, null, Match.REGEX, requestInfoDTO);
+		}
+
+		if (dispatchTargets == null) {
+			// handle '/' aliases
+			dispatchTargets = getDispatchTargets(
+				path, null, Match.DEFAULT_SERVLET,
+				requestInfoDTO);
+		}
+
+		return dispatchTargets;
+	}
+
+	private DispatchTargets getDispatchTargets(
+		String path, String extension, Match match,
+		RequestInfoDTO requestInfoDTO) {
+
+		int pos = path.lastIndexOf('/');
+
+		String servletPath = path;
+		String pathInfo = null;
+
+		if (match == Match.DEFAULT_SERVLET) {
+			pathInfo = servletPath;
+			servletPath = Const.SLASH;
+		}
+
+		do {
+			DispatchTargets dispatchTargets = getDispatchTargets(
+				null, path, servletPath, pathInfo,
+				extension, match, requestInfoDTO);
+
+			if (dispatchTargets != null) {
+				return dispatchTargets;
+			}
+
+			if (match == Match.EXACT) {
+				break;
+			}
+
+			if (pos > -1) {
+				String newServletPath = path.substring(0, pos);
+				pathInfo = path.substring(pos);
+				servletPath = newServletPath;
+				pos = servletPath.lastIndexOf('/');
+
+				continue;
+			}
+
+			break;
+		}
+		while (true);
+
+		return null;
+	}
+
+	public DispatchTargets getDispatchTargets(
+		String servletName, String requestURI, String servletPath,
+		String pathInfo, String extension, Match match,
 		RequestInfoDTO requestInfoDTO) {
 
 		checkShutdown();
-
-		getProxyContext().initializeServletPath(request);
 
 		EndpointRegistration<?> endpointRegistration = null;
 		String pattern = null;
@@ -619,7 +692,10 @@ public class ContextController {
 			return null;
 		}
 
-		endpointRegistration.addReference();
+		if (match == Match.EXTENSION) {
+			servletPath = servletPath + pathInfo;
+			pathInfo = null;
+		}
 
 		addEnpointRegistrationsToRequestInfo(
 			endpointRegistration, requestInfoDTO);
@@ -662,8 +738,6 @@ public class ContextController {
 				!matchingFilterRegistrations.contains(filterRegistration)) {
 
 				matchingFilterRegistrations.add(filterRegistration);
-
-				filterRegistration.addReference();
 			}
 		}
 	}
