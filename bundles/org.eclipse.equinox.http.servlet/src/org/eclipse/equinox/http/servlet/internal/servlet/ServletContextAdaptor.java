@@ -139,7 +139,7 @@ public class ServletContextAdaptor {
 
 	public RequestDispatcher getNamedDispatcher(String servletName) {
 		DispatchTargets dispatchTargets = contextController.getDispatchTargets(
-			servletName, null, null, null, null, Match.EXACT, null);
+			servletName, null, null, null, null, null, Match.EXACT, null);
 
 		if (dispatchTargets == null) {
 			return null;

@@ -199,29 +199,32 @@ public class HttpServiceRuntimeImpl
 	public DispatchTargets getDispatchTargets(
 		String path, RequestInfoDTO requestInfoDTO) {
 
+		String queryString = Path.findQueryString(path);
+		String requestURI = Path.stripQueryString(path);
+
 		// perfect match
 		DispatchTargets dispatchTargets = getDispatchTargets(
-			path, null, Match.EXACT, requestInfoDTO);
+			requestURI, null, queryString, Match.EXACT, requestInfoDTO);
 
 		if (dispatchTargets == null) {
 			// extension match
-			String extension = Path.findExtension(path);
+			String extension = Path.findExtension(requestURI);
 
 			dispatchTargets = getDispatchTargets(
-				path, extension, Match.EXTENSION,
+				requestURI, extension, queryString, Match.EXTENSION,
 				requestInfoDTO);
 		}
 
 		if (dispatchTargets == null) {
 			// regex match
 			dispatchTargets = getDispatchTargets(
-				path, null, Match.REGEX, requestInfoDTO);
+				requestURI, null, queryString, Match.REGEX, requestInfoDTO);
 		}
 
 		if (dispatchTargets == null) {
 			// handle '/' aliases
 			dispatchTargets = getDispatchTargets(
-				path, null, Match.DEFAULT_SERVLET,
+				requestURI, null, queryString, Match.DEFAULT_SERVLET,
 				requestInfoDTO);
 		}
 
@@ -371,7 +374,7 @@ public class HttpServiceRuntimeImpl
 	}
 
 	private DispatchTargets getDispatchTargets(
-		String requestURI, String extension, Match match,
+		String requestURI, String extension, String queryString, Match match,
 		RequestInfoDTO requestInfoDTO) {
 
 		Collection<ContextController> contextControllers = getContextControllers(
@@ -401,7 +404,7 @@ public class HttpServiceRuntimeImpl
 				DispatchTargets dispatchTargets =
 					contextController.getDispatchTargets(
 						null, requestURI, servletPath, pathInfo,
-						extension, match, requestInfoDTO);
+						extension, queryString, match, requestInfoDTO);
 
 				if (dispatchTargets != null) {
 					return dispatchTargets;

@@ -17,6 +17,12 @@ package org.eclipse.equinox.http.servlet.internal.util;
 public class Path {
 
 	public static String findExtension(String path) {
+		int index = path.indexOf('?');
+
+		if (index != -1) {
+			path = path.substring(0, index);
+		}
+
 		String lastSegment = path.substring(path.lastIndexOf('/') + 1);
 
 		int dot = lastSegment.lastIndexOf('.');
@@ -26,6 +32,28 @@ public class Path {
 		}
 
 		return lastSegment.substring(dot + 1);
+	}
+
+	public static String findQueryString(String path) {
+		String queryString = null;
+
+		int index = path.indexOf('?');
+
+		if (index != -1) {
+			queryString = path.substring(index + 1);
+		}
+
+		return queryString;
+	}
+
+	public static String stripQueryString(String path) {
+		int index = path.indexOf('?');
+
+		if (index != -1) {
+			path = path.substring(0, index);
+		}
+
+		return path;
 	}
 
 }

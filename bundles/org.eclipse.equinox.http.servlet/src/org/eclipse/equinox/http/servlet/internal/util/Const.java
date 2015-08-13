@@ -16,6 +16,7 @@ package org.eclipse.equinox.http.servlet.internal.util;
  */
 public class Const {
 
+	public static final String AMP = "&"; //$NON-NLS-1$
 	public static final String BLANK = ""; //$NON-NLS-1$
 	public static final String CLOSE_PAREN = ")"; //$NON-NLS-1$
 	public static final String DOT = "."; //$NON-NLS-1$
@@ -35,6 +36,7 @@ public class Const {
 	public static final String EQUINOX_LEGACY_CONTEXT_SELECT = "equinox.context.select"; //$NON-NLS-1$
 	public static final String EQUINOX_LEGACY_CONTEXT_HELPER = "equinox.legacy.context.helper"; //$NON-NLS-1$
 	public static final String EQUINOX_LEGACY_HTTP_CONTEXT_INITIATING_ID = "equinox.legacy.http.context.initiating.id"; //$NON-NLS-1$
+	public static final String UTF8 = "UTF-8"; //$NON-NLS-1$
 
 	public static enum Dispatcher {
 

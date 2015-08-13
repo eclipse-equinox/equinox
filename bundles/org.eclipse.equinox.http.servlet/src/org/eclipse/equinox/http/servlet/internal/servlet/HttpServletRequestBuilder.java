@@ -12,14 +12,12 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal.servlet;
 
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.context.DispatchTargets;
-import org.eclipse.equinox.http.servlet.internal.util.Const;
-import org.eclipse.equinox.http.servlet.internal.util.EventListeners;
+import org.eclipse.equinox.http.servlet.internal.util.*;
 import org.osgi.service.http.HttpContext;
 
 public class HttpServletRequestBuilder extends HttpServletRequestWrapper {
@@ -27,6 +25,7 @@ public class HttpServletRequestBuilder extends HttpServletRequestWrapper {
 	private Stack<DispatchTargets> dispatchTargets = new Stack<DispatchTargets>();
 	private final HttpServletRequest request;
 	private final DispatcherType dispatcherType;
+	private Map<String, String[]> parameterMap;
 
 	static final String INCLUDE_REQUEST_URI_ATTRIBUTE = "javax.servlet.include.request_uri"; //$NON-NLS-1$
 	static final String INCLUDE_CONTEXT_PATH_ATTRIBUTE = "javax.servlet.include.context_path"; //$NON-NLS-1$
@@ -79,6 +78,51 @@ public class HttpServletRequestBuilder extends HttpServletRequestWrapper {
 
 	public DispatcherType getDispatcherType() {
 		return dispatcherType;
+	}
+
+	public String getParameter(String name) {
+		String[] values = getParameterValues(name);
+		if ((values == null) || (values.length == 0)) {
+			return null;
+		}
+		return values[0];
+	}
+
+	public Map<String, String[]> getParameterMap() {
+		if (this.parameterMap != null) {
+			return this.parameterMap;
+		}
+		Map<String, String[]> parameterMap = new HashMap<String, String[]>(this.dispatchTargets.peek().getParameterMap());
+		for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+			String[] values = parameterMap.get(entry.getKey());
+			if (values == null) {
+				values = new String[0];
+			}
+			values = Params.append(values, entry.getValue());
+			parameterMap.put(entry.getKey(), values);
+		}
+		this.parameterMap = Collections.unmodifiableMap(parameterMap);
+		return this.parameterMap;
+	}
+
+	public Enumeration<String> getParameterNames() {
+		return Collections.enumeration(getParameterMap().keySet());
+	}
+
+	public String[] getParameterValues(String name) {
+		return getParameterMap().get(name);
+	}
+
+	@Override
+	public String getQueryString() {
+		String queryStringA = this.dispatchTargets.peek().getQueryString();
+		String queryStringB = request.getQueryString();
+		if ((queryStringA != null) && (queryStringA.length() > 0) &&
+			(queryStringB != null) && (queryStringB.length() > 0)) {
+
+			return queryStringA + Const.AMP + queryStringB;
+		}
+		return queryStringB;
 	}
 
 	public ServletContext getServletContext() {
@@ -204,10 +248,14 @@ public class HttpServletRequestBuilder extends HttpServletRequestWrapper {
 
 	public synchronized void pop() {
 		this.dispatchTargets.pop();
+		this.parameterMap = null;
+		getParameterMap();
 	}
 
 	public synchronized void push(DispatchTargets dispatchTargets) {
 		this.dispatchTargets.push(dispatchTargets);
+		this.parameterMap = null;
+		getParameterMap();
 	}
 
 	public void removeAttribute(String name) {

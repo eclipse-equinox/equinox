@@ -157,7 +157,7 @@ public class ResponseStateHandler {
 		String className = clazz.getName();
 
 		DispatchTargets errorDispatchTargets = contextController.getDispatchTargets(
-			className, null, null, null, null, Match.EXACT, null);
+			className, null, null, null, null, null, Match.EXACT, null);
 
 		if (errorDispatchTargets == null) {
 			throwException(exception);
@@ -234,7 +234,7 @@ public class ResponseStateHandler {
 		ContextController contextController = dispatchTargets.getContextController();
 
 		DispatchTargets errorDispatchTargets = contextController.getDispatchTargets(
-			String.valueOf(status), null, null, null, null, Match.EXACT, null);
+			String.valueOf(status), null, null, null, null, null, Match.EXACT, null);
 
 		if (errorDispatchTargets == null) {
 			wrappedResponse.sendError(status, wrapperImpl.getMessage());

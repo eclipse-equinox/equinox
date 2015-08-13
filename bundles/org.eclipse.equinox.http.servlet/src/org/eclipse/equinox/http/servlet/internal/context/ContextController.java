@@ -596,29 +596,32 @@ public class ContextController {
 	public DispatchTargets getDispatchTargets(
 		String path, RequestInfoDTO requestInfoDTO) {
 
+		String queryString = Path.findQueryString(path);
+		String requestURI = Path.stripQueryString(path);
+
 		// perfect match
 		DispatchTargets dispatchTargets = getDispatchTargets(
-			path, null, Match.EXACT, requestInfoDTO);
+			requestURI, null, queryString, Match.EXACT, requestInfoDTO);
 
 		if (dispatchTargets == null) {
 			// extension match
-			String extension = Path.findExtension(path);
+			String extension = Path.findExtension(requestURI);
 
 			dispatchTargets = getDispatchTargets(
-				path, extension, Match.EXTENSION,
+				requestURI, extension, queryString, Match.EXTENSION,
 				requestInfoDTO);
 		}
 
 		if (dispatchTargets == null) {
 			// regex match
 			dispatchTargets = getDispatchTargets(
-				path, null, Match.REGEX, requestInfoDTO);
+				requestURI, null, queryString, Match.REGEX, requestInfoDTO);
 		}
 
 		if (dispatchTargets == null) {
 			// handle '/' aliases
 			dispatchTargets = getDispatchTargets(
-				path, null, Match.DEFAULT_SERVLET,
+				requestURI, null, queryString, Match.DEFAULT_SERVLET,
 				requestInfoDTO);
 		}
 
@@ -626,12 +629,12 @@ public class ContextController {
 	}
 
 	private DispatchTargets getDispatchTargets(
-		String path, String extension, Match match,
+		String requestURI, String extension, String queryString, Match match,
 		RequestInfoDTO requestInfoDTO) {
 
-		int pos = path.lastIndexOf('/');
+		int pos = requestURI.lastIndexOf('/');
 
-		String servletPath = path;
+		String servletPath = requestURI;
 		String pathInfo = null;
 
 		if (match == Match.DEFAULT_SERVLET) {
@@ -641,8 +644,8 @@ public class ContextController {
 
 		do {
 			DispatchTargets dispatchTargets = getDispatchTargets(
-				null, path, servletPath, pathInfo,
-				extension, match, requestInfoDTO);
+				null, requestURI, servletPath, pathInfo,
+				extension, queryString, match, requestInfoDTO);
 
 			if (dispatchTargets != null) {
 				return dispatchTargets;
@@ -653,8 +656,8 @@ public class ContextController {
 			}
 
 			if (pos > -1) {
-				String newServletPath = path.substring(0, pos);
-				pathInfo = path.substring(pos);
+				String newServletPath = requestURI.substring(0, pos);
+				pathInfo = requestURI.substring(pos);
 				servletPath = newServletPath;
 				pos = servletPath.lastIndexOf('/');
 
@@ -670,18 +673,14 @@ public class ContextController {
 
 	public DispatchTargets getDispatchTargets(
 		String servletName, String requestURI, String servletPath,
-		String pathInfo, String extension, Match match,
+		String pathInfo, String extension, String queryString, Match match,
 		RequestInfoDTO requestInfoDTO) {
 
 		checkShutdown();
 
 		EndpointRegistration<?> endpointRegistration = null;
-		String pattern = null;
-
 		for (EndpointRegistration<?> curEndpointRegistration : endpointRegistrations) {
-			if ((pattern = curEndpointRegistration.match(
-					servletName, servletPath, pathInfo, extension, match)) != null) {
-
+			if (curEndpointRegistration.match(servletName, servletPath, pathInfo, extension, match) != null) {
 				endpointRegistration = curEndpointRegistration;
 
 				break;
@@ -702,7 +701,7 @@ public class ContextController {
 
 		if (filterRegistrations.isEmpty()) {
 			return new DispatchTargets(
-				this, endpointRegistration, servletPath, pathInfo, pattern);
+				this, endpointRegistration, requestURI, servletPath, pathInfo, queryString);
 		}
 
 		if (requestURI != null) {
@@ -724,8 +723,8 @@ public class ContextController {
 			matchingFilterRegistrations, requestInfoDTO);
 
 		return new DispatchTargets(
-			this, endpointRegistration, matchingFilterRegistrations, servletPath,
-			pathInfo, pattern);
+			this, endpointRegistration, matchingFilterRegistrations, requestURI, servletPath,
+			pathInfo, queryString);
 	}
 
 	private void collectFilters(
