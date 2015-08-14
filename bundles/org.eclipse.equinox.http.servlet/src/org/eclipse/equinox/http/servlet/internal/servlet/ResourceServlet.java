@@ -43,7 +43,7 @@ public class ResourceServlet extends HttpServlet {
 	public void service(HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		String method = req.getMethod();
 		if (method.equals("GET") || method.equals("POST") || method.equals("HEAD")) { //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-			String pathInfo = HttpServletRequestBuilder.getDispatchPathInfo(req);
+			String pathInfo = HttpServletRequestBuilderWrapperImpl.getDispatchPathInfo(req);
 			if (pathInfo == null)
 				pathInfo = Const.BLANK;
 			String resourcePath = internalName + pathInfo;

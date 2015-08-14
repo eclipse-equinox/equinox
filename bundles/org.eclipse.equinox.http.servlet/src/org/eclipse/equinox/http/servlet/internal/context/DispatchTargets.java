@@ -78,12 +78,12 @@ public class DispatchTargets {
 			request.setAttribute(RequestDispatcher.FORWARD_SERVLET_PATH, request.getServletPath());
 		}
 
-		HttpServletRequestBuilder httpRuntimeRequest = HttpServletRequestBuilder.findHttpRuntimeRequest(request);
+		HttpServletRequestBuilderWrapperImpl httpRuntimeRequest = HttpServletRequestBuilderWrapperImpl.findHttpRuntimeRequest(request);
 		boolean pushedState = false;
 
 		try {
 			if (httpRuntimeRequest == null) {
-				httpRuntimeRequest = new HttpServletRequestBuilder(request, this, dispatcherType);
+				httpRuntimeRequest = new HttpServletRequestBuilderWrapperImpl(request, this, dispatcherType);
 				request = httpRuntimeRequest;
 				response = new HttpServletResponseWrapperImpl(response);
 			}
@@ -145,9 +145,9 @@ public class DispatchTargets {
 		return endpointRegistration;
 	}
 
-	private Map<String, String[]> queryStringToParameterMap(String queryString) {
+	private static Map<String, String[]> queryStringToParameterMap(String queryString) {
 		if ((queryString == null) || (queryString.length() == 0)) {
-			return emptyMap;
+			return Collections.emptyMap();
 		}
 
 		try {
@@ -170,8 +170,6 @@ public class DispatchTargets {
 			throw new RuntimeException(unsupportedEncodingException);
 		}
 	}
-
-	private static final Map<String, String[]> emptyMap = new HashMap<String, String[]>();
 
 	private final ContextController contextController;
 	private final EndpointRegistration<?> endpointRegistration;

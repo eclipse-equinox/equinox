@@ -61,7 +61,7 @@ public class ProxyServlet extends HttpServlet {
 
 		checkRuntime();
 
-		String alias = HttpServletRequestBuilder.getDispatchPathInfo(request);
+		String alias = HttpServletRequestBuilderWrapperImpl.getDispatchPathInfo(request);
 
 		if (alias == null) {
 			alias = Const.SLASH;

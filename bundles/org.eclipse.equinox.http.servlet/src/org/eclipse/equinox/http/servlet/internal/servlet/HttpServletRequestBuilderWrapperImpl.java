@@ -20,7 +20,7 @@ import org.eclipse.equinox.http.servlet.internal.context.DispatchTargets;
 import org.eclipse.equinox.http.servlet.internal.util.*;
 import org.osgi.service.http.HttpContext;
 
-public class HttpServletRequestBuilder extends HttpServletRequestWrapper {
+public class HttpServletRequestBuilderWrapperImpl extends HttpServletRequestWrapper {
 
 	private Stack<DispatchTargets> dispatchTargets = new Stack<DispatchTargets>();
 	private final HttpServletRequest request;
@@ -32,12 +32,12 @@ public class HttpServletRequestBuilder extends HttpServletRequestWrapper {
 	static final String INCLUDE_SERVLET_PATH_ATTRIBUTE = "javax.servlet.include.servlet_path"; //$NON-NLS-1$
 	static final String INCLUDE_PATH_INFO_ATTRIBUTE = "javax.servlet.include.path_info"; //$NON-NLS-1$
 
-	public static HttpServletRequestBuilder findHttpRuntimeRequest(
+	public static HttpServletRequestBuilderWrapperImpl findHttpRuntimeRequest(
 		HttpServletRequest request) {
 
 		while (request instanceof HttpServletRequestWrapper) {
-			if (request instanceof HttpServletRequestBuilder) {
-				return (HttpServletRequestBuilder)request;
+			if (request instanceof HttpServletRequestBuilderWrapperImpl) {
+				return (HttpServletRequestBuilderWrapperImpl)request;
 			}
 
 			request = (HttpServletRequest)((HttpServletRequestWrapper)request).getRequest();
@@ -46,7 +46,7 @@ public class HttpServletRequestBuilder extends HttpServletRequestWrapper {
 		return null;
 	}
 
-	public HttpServletRequestBuilder(HttpServletRequest request, DispatchTargets dispatchTargets, DispatcherType dispatcherType) {
+	public HttpServletRequestBuilderWrapperImpl(HttpServletRequest request, DispatchTargets dispatchTargets, DispatcherType dispatcherType) {
 		super(request);
 		this.request = request;
 		this.dispatchTargets.push(dispatchTargets);
@@ -92,16 +92,13 @@ public class HttpServletRequestBuilder extends HttpServletRequestWrapper {
 		if (this.parameterMap != null) {
 			return this.parameterMap;
 		}
-		Map<String, String[]> parameterMap = new HashMap<String, String[]>(this.dispatchTargets.peek().getParameterMap());
+		Map<String, String[]> copy = new HashMap<String, String[]>(this.dispatchTargets.peek().getParameterMap());
 		for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
-			String[] values = parameterMap.get(entry.getKey());
-			if (values == null) {
-				values = new String[0];
-			}
+			String[] values = copy.get(entry.getKey());
 			values = Params.append(values, entry.getValue());
-			parameterMap.put(entry.getKey(), values);
+			copy.put(entry.getKey(), values);
 		}
-		this.parameterMap = Collections.unmodifiableMap(parameterMap);
+		this.parameterMap = Collections.unmodifiableMap(copy);
 		return this.parameterMap;
 	}
 
@@ -146,18 +143,18 @@ public class HttpServletRequestBuilder extends HttpServletRequestWrapper {
 	public Object getAttribute(String attributeName) {
 		String servletPath = dispatchTargets.peek().getServletPath();
 		if (dispatcherType == DispatcherType.INCLUDE) {
-			if (attributeName.equals(HttpServletRequestBuilder.INCLUDE_CONTEXT_PATH_ATTRIBUTE)) {
-				String contextPath = (String) request.getAttribute(HttpServletRequestBuilder.INCLUDE_CONTEXT_PATH_ATTRIBUTE);
+			if (attributeName.equals(HttpServletRequestBuilderWrapperImpl.INCLUDE_CONTEXT_PATH_ATTRIBUTE)) {
+				String contextPath = (String) request.getAttribute(HttpServletRequestBuilderWrapperImpl.INCLUDE_CONTEXT_PATH_ATTRIBUTE);
 				if (contextPath == null || contextPath.equals(Const.SLASH))
 					contextPath = Const.BLANK;
 
-				String includeServletPath = (String) request.getAttribute(HttpServletRequestBuilder.INCLUDE_SERVLET_PATH_ATTRIBUTE);
+				String includeServletPath = (String) request.getAttribute(HttpServletRequestBuilderWrapperImpl.INCLUDE_SERVLET_PATH_ATTRIBUTE);
 				if (includeServletPath == null || includeServletPath.equals(Const.SLASH))
 					includeServletPath = Const.BLANK;
 
 				return contextPath + includeServletPath;
-			} else if (attributeName.equals(HttpServletRequestBuilder.INCLUDE_SERVLET_PATH_ATTRIBUTE)) {
-				String attributeServletPath = (String) request.getAttribute(HttpServletRequestBuilder.INCLUDE_SERVLET_PATH_ATTRIBUTE);
+			} else if (attributeName.equals(HttpServletRequestBuilderWrapperImpl.INCLUDE_SERVLET_PATH_ATTRIBUTE)) {
+				String attributeServletPath = (String) request.getAttribute(HttpServletRequestBuilderWrapperImpl.INCLUDE_SERVLET_PATH_ATTRIBUTE);
 				if (attributeServletPath != null) {
 					return attributeServletPath;
 				}
@@ -165,8 +162,8 @@ public class HttpServletRequestBuilder extends HttpServletRequestWrapper {
 					return Const.BLANK;
 				}
 				return servletPath;
-			} else if (attributeName.equals(HttpServletRequestBuilder.INCLUDE_PATH_INFO_ATTRIBUTE)) {
-				String pathInfoAttribute = (String) request.getAttribute(HttpServletRequestBuilder.INCLUDE_PATH_INFO_ATTRIBUTE);
+			} else if (attributeName.equals(HttpServletRequestBuilderWrapperImpl.INCLUDE_PATH_INFO_ATTRIBUTE)) {
+				String pathInfoAttribute = (String) request.getAttribute(HttpServletRequestBuilderWrapperImpl.INCLUDE_PATH_INFO_ATTRIBUTE);
 				if (servletPath.equals(Const.SLASH)) {
 					return pathInfoAttribute;
 				}
@@ -252,8 +249,8 @@ public class HttpServletRequestBuilder extends HttpServletRequestWrapper {
 		getParameterMap();
 	}
 
-	public synchronized void push(DispatchTargets dispatchTargets) {
-		this.dispatchTargets.push(dispatchTargets);
+	public synchronized void push(DispatchTargets toPush) {
+		this.dispatchTargets.push(toPush);
 		this.parameterMap = null;
 		getParameterMap();
 	}

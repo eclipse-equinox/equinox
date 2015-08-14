@@ -16,7 +16,7 @@ import java.io.File;
 import java.util.*;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import org.eclipse.equinox.http.servlet.internal.servlet.HttpServletRequestBuilder;
+import org.eclipse.equinox.http.servlet.internal.servlet.HttpServletRequestBuilderWrapperImpl;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
 
 /**
@@ -53,7 +53,7 @@ public class ProxyContext {
 
 	synchronized void initializeServletPath(HttpServletRequest req) {
 		if (servletPath == null)
-			servletPath = HttpServletRequestBuilder.getDispatchServletPath(req);
+			servletPath = HttpServletRequestBuilderWrapperImpl.getDispatchServletPath(req);
 	}
 
 	public synchronized String getServletPath() {

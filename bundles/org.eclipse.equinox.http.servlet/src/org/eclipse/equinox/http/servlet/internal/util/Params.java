@@ -24,10 +24,18 @@ public class Params {
 	}
 
 	public static String[] append(String[] params, String... values) {
-		for (String value : values) {
-			params = append(params, value);
+		String[] tmp = values;
+		int length = 0;
+		if (params != null) {
+			length = params.length;
+			tmp = new String[params.length + values.length];
+			System.arraycopy(params, 0, tmp, 0, params.length);
 		}
-		return params;
+		for (int i = 0; i < values.length; i++) {
+			tmp[length + i] =
+				(values[i] == null) ? Const.BLANK : values[i];
+		}
+		return tmp;
 	}
 
 }

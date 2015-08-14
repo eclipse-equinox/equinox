@@ -17,11 +17,7 @@ package org.eclipse.equinox.http.servlet.internal.util;
 public class Path {
 
 	public static String findExtension(String path) {
-		int index = path.indexOf('?');
-
-		if (index != -1) {
-			path = path.substring(0, index);
-		}
+		path = stripQueryString(path);
 
 		String lastSegment = path.substring(path.lastIndexOf('/') + 1);
 
