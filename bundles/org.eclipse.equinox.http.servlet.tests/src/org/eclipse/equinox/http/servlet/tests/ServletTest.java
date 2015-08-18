@@ -1075,6 +1075,21 @@ public class ServletTest extends TestCase {
 		Assert.fail();
 	}
 
+	public void test_unregister() throws Exception {
+		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
+
+		Servlet servlet = new BaseServlet();
+		Filter filter = new TestFilter();
+
+		extendedHttpService.registerServlet("/s1", servlet, null, null);
+		extendedHttpService.registerFilter("/f1", filter, null, null);
+		extendedHttpService.registerResources("/r1", "/resources", null);
+
+		extendedHttpService.unregister("/s1");
+		extendedHttpService.unregisterFilter(filter);
+		extendedHttpService.unregister("/r1");
+	}
+
 	public void test_Registration11() throws Exception {
 		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
 

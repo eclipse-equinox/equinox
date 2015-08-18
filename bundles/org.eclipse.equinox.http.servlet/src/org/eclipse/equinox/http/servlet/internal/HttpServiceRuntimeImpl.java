@@ -691,14 +691,14 @@ public class HttpServiceRuntimeImpl
 
 		// check the pattern against the original input
 		ContextController.checkPattern(alias);
-		String originalAlias = alias;
 
+		String pattern = alias;
 		// need to make sure exact matching aliases are converted to wildcard pattern matches
-		if (!alias.endsWith(Const.SLASH_STAR) && !alias.startsWith(Const.STAR_DOT) && !alias.contains(Const.SLASH_STAR_DOT)) {
-			if (alias.endsWith(Const.SLASH)) {
-				alias = alias + '*';
+		if (!pattern.endsWith(Const.SLASH_STAR) && !pattern.startsWith(Const.STAR_DOT) && !pattern.contains(Const.SLASH_STAR_DOT)) {
+			if (pattern.endsWith(Const.SLASH)) {
+				pattern = pattern + '*';
 			} else {
-				alias = alias + Const.SLASH_STAR;
+				pattern = pattern + Const.SLASH_STAR;
 			}
 		}
 
@@ -714,7 +714,7 @@ public class HttpServiceRuntimeImpl
 				String fullAlias = getFullAlias(alias, factory);
 				HttpServiceObjectRegistration existing = legacyMappings.get(fullAlias);
 				if (existing != null) {
-					throw new PatternInUseException(originalAlias);
+					throw new PatternInUseException(alias);
 				}
 				String servletName = servlet.getClass().getName();
 				if ((initparams != null) && (initparams.get(Const.SERVLET_NAME) != null)) {
@@ -723,7 +723,7 @@ public class HttpServiceRuntimeImpl
 
 				Dictionary<String, Object> props = new Hashtable<String, Object>();
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_TARGET, targetFilter);
-				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, alias);
+				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, pattern);
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, servletName);
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, factory.getFilter());
 				props.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
