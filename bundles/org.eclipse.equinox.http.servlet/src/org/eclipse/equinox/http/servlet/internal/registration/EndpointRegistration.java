@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
-import org.eclipse.equinox.http.servlet.internal.util.Const;
 import org.osgi.dto.DTO;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.context.ServletContextHelper;
@@ -33,7 +32,6 @@ public abstract class EndpointRegistration<D extends DTO>
 	private final ServletContextHelper servletContextHelper; //The context used during the registration of the servlet
 	private final ContextController contextController;
 	private final ClassLoader classLoader;
-	private final boolean legacyRegistration;
 
 	public EndpointRegistration(
 		ServiceHolder<Servlet> servletHolder, D d, ServletContextHelper servletContextHelper,
@@ -43,8 +41,7 @@ public abstract class EndpointRegistration<D extends DTO>
 		this.servletHolder = servletHolder;
 		this.servletContextHelper = servletContextHelper;
 		this.contextController = contextController;
-		this.legacyRegistration = legacyTCCL != null;
-		if (this.legacyRegistration) {
+		if (legacyTCCL != null) {
 			// legacy registrations used the current TCCL at registration time
 			classLoader = legacyTCCL;
 		} else {
@@ -140,12 +137,6 @@ public abstract class EndpointRegistration<D extends DTO>
 		}
 
 		for (String pattern : patterns) {
-			if (legacyRegistration && (match == Match.REGEX) &&
-				!pattern.endsWith(Const.SLASH_STAR)) {
-
-				pattern += Const.SLASH_STAR;
-			}
-
 			if (doMatch(pattern, servletPath, pathInfo, extension, match)) {
 				return pattern;
 			}

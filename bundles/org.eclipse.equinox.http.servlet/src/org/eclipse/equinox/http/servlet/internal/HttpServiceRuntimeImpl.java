@@ -515,8 +515,12 @@ public class HttpServiceRuntimeImpl
 		ContextController.checkPattern(alias);
 
 		// need to make sure exact matching aliases are converted to wildcard pattern matches
-		if (!alias.endsWith(Const.SLASH_STAR) && !alias.startsWith("*.")) { //$NON-NLS-1$
-			alias = alias + Const.SLASH_STAR;
+		if (!alias.endsWith(Const.SLASH_STAR) && !alias.startsWith(Const.STAR_DOT) && !alias.contains(Const.SLASH_STAR_DOT)) {
+			if (alias.endsWith(Const.SLASH)) {
+				alias = alias + '*';
+			} else {
+				alias = alias + Const.SLASH_STAR;
+			}
 		}
 
 		synchronized (legacyMappings) {
@@ -685,7 +689,18 @@ public class HttpServiceRuntimeImpl
 			throw new IllegalArgumentException("Servlet cannot be null");
 		}
 
+		// check the pattern against the original input
 		ContextController.checkPattern(alias);
+		String originalAlias = alias;
+
+		// need to make sure exact matching aliases are converted to wildcard pattern matches
+		if (!alias.endsWith(Const.SLASH_STAR) && !alias.startsWith(Const.STAR_DOT) && !alias.contains(Const.SLASH_STAR_DOT)) {
+			if (alias.endsWith(Const.SLASH)) {
+				alias = alias + '*';
+			} else {
+				alias = alias + Const.SLASH_STAR;
+			}
+		}
 
 		synchronized (legacyMappings) {
 			LegacyServlet legacyServlet = new LegacyServlet(servlet);
@@ -699,7 +714,7 @@ public class HttpServiceRuntimeImpl
 				String fullAlias = getFullAlias(alias, factory);
 				HttpServiceObjectRegistration existing = legacyMappings.get(fullAlias);
 				if (existing != null) {
-					throw new PatternInUseException(alias);
+					throw new PatternInUseException(originalAlias);
 				}
 				String servletName = servlet.getClass().getName();
 				if ((initparams != null) && (initparams.get(Const.SERVLET_NAME) != null)) {

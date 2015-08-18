@@ -160,10 +160,8 @@ public class FilterRegistration
 		}
 	}
 
-	@Override
 	public String match(
-		String name, String servletPath, String pathInfo, String extension, Match match) {
-
+		String name, String requestURI, String extension, Match match) {
 		if ((name != null) && (getD().servletNames != null)) {
 			for (String servletName : getD().servletNames) {
 				if (servletName.equals(name)) {
@@ -172,35 +170,30 @@ public class FilterRegistration
 			}
 		}
 
-		StringBuilder sb = new StringBuilder();
-
-		if (servletPath != null) {
-			sb.append(servletPath);
-		}
-
-		if (pathInfo != null) {
-			sb.append(pathInfo);
-		}
-
-		String path = sb.toString();
-
-		if (path.length() <= 0) {
+		if (requestURI == null || requestURI.isEmpty()) {
 			return null;
 		}
 
 		for (String pattern : getD().patterns) {
-			if (doPatternMatch(pattern, path, extension)) {
+			if (doPatternMatch(pattern, requestURI, extension)) {
 				return pattern;
 			}
 		}
 
 		for (Pattern regex : compiledRegexs) {
-			if (regex.matcher(path).matches()) {
+			if (regex.matcher(requestURI).matches()) {
 				return regex.toString();
 			}
 		}
 
 		return null;
+	}
+
+	@Override
+	public String match(
+		String name, String servletPath, String pathInfo, String extension, Match match) {
+		// TODO need to rework match for filters to remove this method
+		throw new UnsupportedOperationException("Should not be calling this method on FilterRegistration"); //$NON-NLS-1$
 	}
 
 	private void createContextAttributes() {
@@ -220,7 +213,10 @@ public class FilterRegistration
 		// first try wild card matching if the pattern requests it
 		if (pattern.endsWith("/*")) { //$NON-NLS-1$
 			int pathPatternLength = pattern.length() - 2;
-			return path.regionMatches(0, pattern, 0, pathPatternLength);
+			if (path.regionMatches(0, pattern, 0, pathPatternLength)) {
+				return path.length() <= pathPatternLength || path.charAt(pathPatternLength) == '/';
+			}
+			return false;
 		}
 		// now do exact matching
 		return pattern.equals(path);
@@ -229,12 +225,25 @@ public class FilterRegistration
 	protected boolean doPatternMatch(String pattern, String path, String extension)
 		throws IllegalArgumentException {
 
-		if (pattern.indexOf("/*.") == 0) { //$NON-NLS-1$
+		if (pattern.indexOf(Const.SLASH_STAR_DOT) == 0) {
 			pattern = pattern.substring(1);
 		}
+		int extensionMatchIndex = pattern.indexOf(Const.SLASH_STAR_DOT);
+		String extensionWithPrefixMatch = null;
+		if (extensionMatchIndex >= 0 && pattern.lastIndexOf('/') == extensionMatchIndex) {
+			extensionWithPrefixMatch = pattern.substring(extensionMatchIndex + 3);
+			pattern = pattern.substring(0, extensionMatchIndex + 2);
+		}
+
 		// first try prefix path matching; taking into account wild cards if necessary
 		if ((pattern.charAt(0) == '/')) {
-			return isPathWildcardMatch(pattern, path);
+			if (isPathWildcardMatch(pattern, path)) {
+				if (extensionWithPrefixMatch != null) {
+					return extensionWithPrefixMatch.equals(extension);
+				}
+				return true;
+			}
+			return false;
 		}
 
 		// next try extension matching if requested

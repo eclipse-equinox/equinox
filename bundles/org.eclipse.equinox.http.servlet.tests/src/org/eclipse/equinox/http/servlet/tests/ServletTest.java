@@ -892,6 +892,79 @@ public class ServletTest extends TestCase {
 		basicFilterTest22 ( "/f22/*", "*.jsp", "*.jsp", "bab", new String[] {"REQUEST", "FORWARD"} );
 	}
 
+	public void test_Filter23a() throws Exception {
+		// Make sure legacy filter registrations match as if they are prefix matching with extension matching
+		String expected = "a";
+		TestFilter testFilter1 = new TestFilter();
+		TestFilter testFilter2 = new TestFilter();
+		TestFilter testFilter3 = new TestFilter();
+		Servlet testServlet = new BaseServlet(expected);
+		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
+		extendedHttpService.registerFilter("*.ext", testFilter1, null, extendedHttpService.createDefaultHttpContext());
+		extendedHttpService.registerFilter("/hello/*.ext", testFilter2, null, extendedHttpService.createDefaultHttpContext());
+		extendedHttpService.registerFilter("/hello/test/*.ext", testFilter3, null, extendedHttpService.createDefaultHttpContext());
+		extendedHttpService.registerServlet("/hello", testServlet, null, extendedHttpService.createDefaultHttpContext());
+
+		String actual = requestAdvisor.request("hello/test/request");
+		Assert.assertEquals(expected, actual);
+		Assert.assertFalse("testFilter1 did get called.", testFilter1.getCalled());
+		Assert.assertFalse("testFilter2 did get called.", testFilter2.getCalled());
+		Assert.assertFalse("testFilter3 did get called.", testFilter3.getCalled());
+
+		testFilter1.clear();
+		testFilter2.clear();
+		testFilter3.clear();
+		actual = requestAdvisor.request("hello/test/request.ext");
+		Assert.assertEquals(expected, actual);
+		Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
+		Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
+		Assert.assertTrue("testFilter3 did not get called.", testFilter3.getCalled());
+	}
+
+	public void test_Filter23b() throws Exception {
+		// Make sure legacy filter registrations match as if they are prefix matching wildcard, but make sure the prefix is checked
+		String expected = "a";
+		TestFilter testFilter1 = new TestFilter();
+		TestFilter testFilter2 = new TestFilter();
+		Servlet testServlet = new BaseServlet(expected);
+		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
+		extendedHttpService.registerFilter("/", testFilter1, null, extendedHttpService.createDefaultHttpContext());
+		extendedHttpService.registerFilter("/hello", testFilter2, null, extendedHttpService.createDefaultHttpContext());
+		extendedHttpService.registerServlet("/", testServlet, null, extendedHttpService.createDefaultHttpContext());
+
+		String actual = requestAdvisor.request("hello_test/request");
+		Assert.assertEquals(expected, actual);
+		Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
+		Assert.assertFalse("testFilter2 did get called.", testFilter2.getCalled());
+
+		actual = requestAdvisor.request("hello/request");
+		Assert.assertEquals(expected, actual);
+		Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
+		Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
+	}
+
+	public void test_Filter23c() throws Exception {
+		// Test WB servlet with default servlet pattern "/" and filter matching against it.
+		String expected = "a";
+		TestFilter testFilter1 = new TestFilter();
+		TestFilter testFilter2 = new TestFilter();
+		Servlet testServlet = new BaseServlet(expected);
+
+		getBundleContext().registerService(Filter.class, testFilter1, new Hashtable<String, String>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*")));
+		getBundleContext().registerService(Filter.class, testFilter2, new Hashtable<String, String>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/hello/*")));
+		getBundleContext().registerService(Servlet.class, testServlet, new Hashtable<String, String>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/")));
+
+		String actual = requestAdvisor.request("hello_test/request");
+		Assert.assertEquals(expected, actual);
+		Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
+		Assert.assertFalse("testFilter2 did get called.", testFilter2.getCalled());
+
+		actual = requestAdvisor.request("hello/request");
+		Assert.assertEquals(expected, actual);
+		Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
+		Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
+	}
+
 	public void test_Registration1() throws Exception {
 		String expected = "Alias cannot be null";
 		try {
