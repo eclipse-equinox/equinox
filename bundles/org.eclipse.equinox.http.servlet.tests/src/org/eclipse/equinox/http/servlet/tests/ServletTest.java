@@ -62,6 +62,7 @@ import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionIdListener;
 import javax.servlet.http.HttpSessionListener;
+import javax.servlet.http.Part;
 
 import junit.framework.TestCase;
 
@@ -1857,6 +1858,100 @@ public class ServletTest extends TestCase {
 		String result = requestAdvisor.request("Servlet13A/a?p=1&p=2");
 
 		Assert.assertEquals("p=3&p=4&p=1&p=2|p=1&p=2|3|[3, 4, 1, 2]", result);
+	}
+
+	private static String getSubmittedFileName(Part part) {
+		for (String cd : part.getHeader("content-disposition").split(";")) {
+			if (cd.trim().startsWith("filename")) {
+				String fileName = cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
+				return fileName.substring(fileName.lastIndexOf('/') + 1).substring(fileName.lastIndexOf('\\') + 1); // MSIE fix.
+			}
+		}
+		return null;
+	}
+
+	/*
+	 * 3.1 file uploads
+	 */
+	public void test_Servlet16() throws Exception {
+		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+				throws IOException, ServletException {
+
+				Part part = req.getPart("file");
+				Assert.assertNotNull(part);
+
+				String submittedFileName = part.getSubmittedFileName();
+				String contentType = part.getContentType();
+				long size = part.getSize();
+
+				PrintWriter writer = resp.getWriter();
+
+				writer.write(submittedFileName);
+				writer.write("|");
+				writer.write(contentType);
+				writer.write("|" + size);
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+
+		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
+
+		map.put("file", Arrays.<Object>asList(getClass().getResource("resource1.txt")));
+
+		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
+
+		Assert.assertEquals("200", result.get("responseCode").get(0));
+		Assert.assertEquals("resource1.txt|text/plain|1", result.get("responseBody").get(0));
+	}
+
+	/*
+	 * 3.0 file uploads
+	 */
+	public void test_Servlet17() throws Exception {
+		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+				throws IOException, ServletException {
+
+				Part part = req.getPart("file");
+				Assert.assertNotNull(part);
+
+				String submittedFileName = getSubmittedFileName(part);
+				String contentType = part.getContentType();
+				long size = part.getSize();
+
+				PrintWriter writer = resp.getWriter();
+
+				writer.write(submittedFileName);
+				writer.write("|");
+				writer.write(contentType);
+				writer.write("|" + size);
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+
+		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
+
+		map.put("file", Arrays.<Object>asList(getClass().getResource("blue.png")));
+
+		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
+
+		Assert.assertEquals("200", result.get("responseCode").get(0));
+		Assert.assertEquals("blue.png|image/png|292", result.get("responseBody").get(0));
 	}
 
 	public void test_ServletContext1() throws Exception {

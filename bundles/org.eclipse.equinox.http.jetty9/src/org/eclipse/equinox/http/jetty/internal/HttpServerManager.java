@@ -129,6 +129,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 		ServletContextHandler httpContext = createHttpContext(dictionary);
 		if (null != customizer)
 			httpContext = (ServletContextHandler) customizer.customizeContext(httpContext, dictionary);
+		setupMultiPartConfig(dictionary, holder);
 
 		httpContext.addServlet(holder, "/*"); //$NON-NLS-1$
 		server.setHandler(httpContext);
@@ -422,4 +423,10 @@ public class HttpServerManager implements ManagedServiceFactory {
 		}
 		return directory.delete();
 	}
+
+	private void setupMultiPartConfig(@SuppressWarnings("rawtypes") Dictionary dictionary, ServletHolder holder) {
+		MultipartConfigElement multipartConfigElement = new MultipartConfigElement(System.getProperty("java.io.tmpdir")); //$NON-NLS-1$
+		holder.getRegistration().setMultipartConfig(multipartConfigElement);
+	}
+
 }
