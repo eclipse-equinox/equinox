@@ -215,7 +215,28 @@ public class TestModuleContainer extends AbstractTest {
 		Module h1v2 = installDummyModule("h1_v2.MF", "h1_v2", container);
 		Module f1v1 = installDummyModule("f1_v1.MF", "f1_v1", container);
 		Module b3 = installDummyModule("b3_v1.MF", "b3_v1", container);
-		container.resolve(Arrays.asList(h1v1, h1v2, f1v1, b3), true);
+		ResolutionReport report = container.resolve(Arrays.asList(h1v1, h1v2, f1v1, b3), true);
+		Assert.assertNull("Expected no resolution exception.", report.getResolutionException());
+	}
+
+	@Test
+	public void testMissingHost() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+		installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+		Module f1v1 = installDummyModule("f1_v1.MF", "f1_v1", container);
+		Module b3 = installDummyModule("b3_v1.MF", "b3_v1", container);
+		ResolutionReport report = container.resolve(Arrays.asList(f1v1, b3), true);
+		Assert.assertNotNull("Expected a resolution exception.", report.getResolutionException());
+
+		Module h1v1 = installDummyModule("h1_v1.MF", "h1_v1", container);
+		report = container.resolve(Arrays.asList(b3), true);
+		Assert.assertNull("Expected no resolution exception.", report.getResolutionException());
+		ModuleWiring wiring = b3.getCurrentRevision().getWiring();
+		List<ModuleWire> packageWires = wiring.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+		Assert.assertEquals("Expected 1 import.", 1, packageWires.size());
+		ModuleWire pkgWire = packageWires.get(0);
+		Assert.assertEquals("Wrong host exporter.", pkgWire.getProviderWiring().getRevision(), h1v1.getCurrentRevision());
 	}
 
 	@Test
@@ -1228,15 +1249,17 @@ public class TestModuleContainer extends AbstractTest {
 		ModuleWire dynamicWire = container.resolveDynamic("org.osgi.framework", dynamic1.getCurrentRevision());
 		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
 		Assert.assertEquals("Wrong package found.", "org.osgi.framework", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong provider for the wire found.", systemBundle.getCurrentRevision(), dynamicWire.getProvider());
 
 		dynamicWire = container.resolveDynamic("org.osgi.framework.wiring", dynamic1.getCurrentRevision());
 		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
 		Assert.assertEquals("Wrong package found.", "org.osgi.framework.wiring", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong provider for the wire found.", systemBundle.getCurrentRevision(), dynamicWire.getProvider());
 
 		dynamicWire = container.resolveDynamic("c1.b", dynamic1.getCurrentRevision());
 		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
 		Assert.assertEquals("Wrong package found.", "c1.b", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
-
+		Assert.assertEquals("Wrong provider for the wire found.", c1.getCurrentRevision(), dynamicWire.getProvider());
 	}
 
 	@Test
@@ -1258,14 +1281,17 @@ public class TestModuleContainer extends AbstractTest {
 		ModuleWire dynamicWire = container.resolveDynamic("c1.b", dynamic1.getCurrentRevision());
 		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
 		Assert.assertEquals("Wrong package found.", "c1.b", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong provider for the wire found.", c1.getCurrentRevision(), dynamicWire.getProvider());
 
 		dynamicWire = container.resolveDynamic("c4.a", dynamic1.getCurrentRevision());
 		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
 		Assert.assertEquals("Wrong package found.", "c4.a", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong provider for the wire found.", c4.getCurrentRevision(), dynamicWire.getProvider());
 
 		dynamicWire = container.resolveDynamic("c4.b", dynamic1.getCurrentRevision());
 		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
 		Assert.assertEquals("Wrong package found.", "c4.b", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong provider for the wire found.", c4.getCurrentRevision(), dynamicWire.getProvider());
 	}
 
 	@Test
@@ -1290,6 +1316,7 @@ public class TestModuleContainer extends AbstractTest {
 		dynamicWire = container.resolveDynamic("c1.a", dynamic3.getCurrentRevision());
 		Assert.assertNotNull("Dynamic wire not found.", dynamicWire);
 		Assert.assertEquals("Wrong package found.", "c1.a", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong provider for the wire found.", c1v1.getCurrentRevision(), dynamicWire.getProvider());
 
 		ModuleWiring c1v1Wiring = c1v1.getCurrentRevision().getWiring();
 		Assert.assertNotNull("c1 wiring is null.", c1v1Wiring);
@@ -1327,10 +1354,12 @@ public class TestModuleContainer extends AbstractTest {
 		dynamicWire = container.resolveDynamic("h1.a", dynamic3.getCurrentRevision());
 		Assert.assertNotNull("Dynamic wire not found.", dynamicWire);
 		Assert.assertEquals("Wrong package found.", "h1.a", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong provider for the wire found.", h1.getCurrentRevision(), dynamicWire.getProvider());
 
 		dynamicWire = container.resolveDynamic("f1.a", dynamic3.getCurrentRevision());
 		Assert.assertNotNull("Dynamic wire not found.", dynamicWire);
 		Assert.assertEquals("Wrong package found.", "f1.a", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong provider for the wire found.", h1.getCurrentRevision(), dynamicWire.getProvider());
 
 		ModuleWiring h1Wiring = h1.getCurrentRevision().getWiring();
 		Assert.assertNotNull("h1 wiring is null.", h1Wiring);
@@ -1358,10 +1387,12 @@ public class TestModuleContainer extends AbstractTest {
 		ModuleWire dynamicWire = container.resolveDynamic("c4.a", dynamic3.getCurrentRevision());
 		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
 		Assert.assertEquals("Wrong package found.", "c4.a", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong provider for the wire found.", c4.getCurrentRevision(), dynamicWire.getProvider());
 
 		dynamicWire = container.resolveDynamic("c4.b", dynamic3.getCurrentRevision());
 		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
 		Assert.assertEquals("Wrong package found.", "c4.b", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong provider for the wire found.", c4.getCurrentRevision(), dynamicWire.getProvider());
 	}
 
 	@Test
@@ -1378,7 +1409,8 @@ public class TestModuleContainer extends AbstractTest {
 
 		Module f1 = installDummyModule("f1_v1.MF", "f1_v1", container);
 
-		ModuleWire dynamicWire = container.resolveDynamic("h1.a", dynamic3.getCurrentRevision());
+		ModuleWire dynamicWire;
+		dynamicWire = container.resolveDynamic("h1.a", dynamic3.getCurrentRevision());
 		Assert.assertNull("Dynamic wire found.", dynamicWire);
 		dynamicWire = container.resolveDynamic("f1.a", dynamic3.getCurrentRevision());
 		Assert.assertNull("Dynamic wire found.", dynamicWire);
@@ -1388,16 +1420,36 @@ public class TestModuleContainer extends AbstractTest {
 		dynamicWire = container.resolveDynamic("h1.a", dynamic3.getCurrentRevision());
 		Assert.assertNotNull("Dynamic wire not found.", dynamicWire);
 		Assert.assertEquals("Wrong package found.", "h1.a", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong host revision found.", h1.getCurrentRevision(), dynamicWire.getProvider());
 
 		dynamicWire = container.resolveDynamic("f1.a", dynamic3.getCurrentRevision());
 		Assert.assertNotNull("Dynamic wire not found.", dynamicWire);
 		Assert.assertEquals("Wrong package found.", "f1.a", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong host revision found.", h1.getCurrentRevision(), dynamicWire.getProvider());
 
 		ModuleWiring h1Wiring = h1.getCurrentRevision().getWiring();
 		Assert.assertNotNull("h1 wiring is null.", h1Wiring);
 
 		ModuleWiring f1Wiring = f1.getCurrentRevision().getWiring();
 		Assert.assertNotNull("f1 wiring is null.", f1Wiring);
+	}
+
+	@Test
+	public void testDynamicImport07() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+
+		Module dynamic3 = installDummyModule("dynamic2_v1.MF", "dynamic2_v1", container);
+
+		Assert.assertNull("Expected no resolution exception.", container.resolve(Arrays.asList(systemBundle, dynamic3), true).getResolutionException());
+
+		installDummyModule("c6_v1.MF", "c6_v1", container);
+
+		ModuleWire dynamicWire = container.resolveDynamic("c6", dynamic3.getCurrentRevision());
+		Assert.assertNull("Dynamic wire found.", dynamicWire);
 	}
 
 	@Test
@@ -1419,6 +1471,7 @@ public class TestModuleContainer extends AbstractTest {
 		ModuleWire dynamicWire = container.resolveDynamic("org.osgi.framework", dynamic1.getCurrentRevision());
 		Assert.assertNotNull("No dynamic wire found.", dynamicWire);
 		Assert.assertEquals("Wrong package found.", "org.osgi.framework", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong provider for the wire found.", systemBundle.getCurrentRevision(), dynamicWire.getProvider());
 
 		Assert.assertEquals("Wrong number of reports.", 1, hook.getResolutionReports().size());
 		hook.getResolutionReports().clear();
