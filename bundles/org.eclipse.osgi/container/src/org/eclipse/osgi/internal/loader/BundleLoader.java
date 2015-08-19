@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2014 IBM Corporation and others.
+ * Copyright (c) 2004, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -321,12 +321,17 @@ public class BundleLoader extends ModuleLoader {
 	 * @throws ClassNotFoundException 
 	 */
 	public Class<?> findLocalClass(String name) throws ClassNotFoundException {
-		if (debug.DEBUG_LOADER)
+		long start = 0;
+		if (debug.DEBUG_LOADER) {
 			Debug.println("BundleLoader[" + this + "].findLocalClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			start = System.currentTimeMillis();
+		}
 		try {
 			Class<?> clazz = getModuleClassLoader().findLocalClass(name);
-			if (debug.DEBUG_LOADER && clazz != null)
-				Debug.println("BundleLoader[" + this + "] found local class " + name); //$NON-NLS-1$ //$NON-NLS-2$
+			if (debug.DEBUG_LOADER && clazz != null) {
+				long time = System.currentTimeMillis() - start;
+				Debug.println("BundleLoader[" + this + "] found local class " + name + " " + time + "ms"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			}
 			return clazz;
 		} catch (ClassNotFoundException e) {
 			if (e.getCause() instanceof BundleException) {
