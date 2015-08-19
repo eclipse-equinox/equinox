@@ -1453,6 +1453,39 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
+	public void testDynamicImport08() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+		DummyModuleDatabase database = adaptor.getDatabase();
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+
+		Module dynamic2 = installDummyModule("dynamic2_v1.MF", "dynamic2_v1", container);
+
+		container.resolve(Arrays.asList(systemBundle, dynamic2), true);
+
+		Module h1 = installDummyModule("h1_v1.MF", "h1_v1", container);
+		Module f1 = installDummyModule("f1_v1.MF", "f1_v1", container);
+		database.getModuleEvents();
+		// make sure h1 is not resolved
+		ModuleWiring h1Wiring = h1.getCurrentRevision().getWiring();
+		Assert.assertNull("h1 got resolved somehow.", h1Wiring);
+		// do not resolve the host first; make sure it gets pulled in while attempting to resolve 
+		// to a fragment capability.
+		ModuleWire dynamicWire = container.resolveDynamic("f1.a", dynamic2.getCurrentRevision());
+		Assert.assertNotNull("Dynamic wire not found.", dynamicWire);
+		Assert.assertEquals("Wrong package found.", "f1.a", dynamicWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		Assert.assertEquals("Wrong provider for the wire found.", h1.getCurrentRevision(), dynamicWire.getProvider());
+
+		h1Wiring = h1.getCurrentRevision().getWiring();
+		Assert.assertNotNull("h1 wiring is null.", h1Wiring);
+
+		ModuleWiring f1Wiring = f1.getCurrentRevision().getWiring();
+		Assert.assertNotNull("f1 wiring is null.", f1Wiring);
+	}
+
+	@Test
 	public void testDynamicImportMiss01() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
