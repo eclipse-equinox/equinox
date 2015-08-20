@@ -20,7 +20,7 @@ import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.messages.Msg;
-import org.eclipse.osgi.report.resolution.*;
+import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry.Type;
 import org.eclipse.osgi.service.debug.DebugOptions;
@@ -900,6 +900,9 @@ final class ModuleResolver {
 					}
 					report = reportBuilder.build(result, re);
 					if (DEBUG_REPORT) {
+						if (report.getResolutionException() != null) {
+							Debug.printStackTrace(report.getResolutionException());
+						}
 						Set<Resource> resources = report.getEntries().keySet();
 						if (!resources.isEmpty()) {
 							Debug.println("RESOLVER: Resolution report"); //$NON-NLS-1$

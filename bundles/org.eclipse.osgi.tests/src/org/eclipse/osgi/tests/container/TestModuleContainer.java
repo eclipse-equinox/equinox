@@ -20,6 +20,7 @@ import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.eclipse.osgi.tests.container.dummys.*;
 import org.eclipse.osgi.tests.container.dummys.DummyModuleDatabase.DummyContainerEvent;
@@ -1558,6 +1559,42 @@ public class TestModuleContainer extends AbstractTest {
 		Assert.assertEquals("a should resolve.", State.RESOLVED, uses_a.getState());
 		Assert.assertEquals("b should resolve.", State.RESOLVED, uses_b.getState());
 		Assert.assertEquals("c should not resolve.", State.INSTALLED, uses_c.getState());
+	}
+
+	@Test
+	public void testUses1Dynamic() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor(new DummyDebugOptions(Collections.singletonMap("org.eclipse.osgi/resolver/report", "true")));
+		ModuleContainer container = adaptor.getContainer();
+
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+		Module uses_a = installDummyModule("uses.a.MF", "a", container);
+		Module uses_b = installDummyModule("uses.b.MF", "b", container);
+		Module uses_c_dynamic = installDummyModule("uses.c.dynamic.MF", "c", container);
+
+		container.resolve(null, false);
+
+		Assert.assertEquals("a should resolve.", State.RESOLVED, uses_a.getState());
+		Assert.assertEquals("b should resolve.", State.RESOLVED, uses_b.getState());
+		Assert.assertEquals("c should resolve.", State.RESOLVED, uses_c_dynamic.getState());
+
+		ModuleWire dynamicWire = container.resolveDynamic("uses1", uses_c_dynamic.getCurrentRevision());
+		Assert.assertNotNull("No dynamic wire.", dynamicWire);
+
+		PrintStream originalOut = Debug.out;
+		ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+		PrintStream testOut = new PrintStream(bytesOut);
+		Debug.out = testOut;
+		try {
+			dynamicWire = container.resolveDynamic("uses2", uses_c_dynamic.getCurrentRevision());
+			Assert.assertNull("Dynamic wire found.", dynamicWire);
+		} finally {
+			Debug.out = originalOut;
+			testOut.close();
+		}
+		String traceOutput = bytesOut.toString();
+		Assert.assertTrue("Wrong traceOutput: " + traceOutput, traceOutput.startsWith("org.osgi.service.resolver.ResolutionException"));
 	}
 
 	/*

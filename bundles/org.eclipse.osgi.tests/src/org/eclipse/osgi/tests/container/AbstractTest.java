@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.*;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
+import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.tests.container.dummys.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.junit.*;
@@ -46,6 +47,10 @@ public abstract class AbstractTest {
 
 	protected DummyContainerAdaptor createDummyAdaptor(ResolverHook hook) {
 		return new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.<String, String> emptyMap(), new DummyResolverHookFactory(hook));
+	}
+
+	protected DummyContainerAdaptor createDummyAdaptor(DebugOptions debugOptions) {
+		return new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.<String, String> emptyMap(), new DummyResolverHookFactory(), debugOptions);
 	}
 
 	protected Bundle getBundle() {
