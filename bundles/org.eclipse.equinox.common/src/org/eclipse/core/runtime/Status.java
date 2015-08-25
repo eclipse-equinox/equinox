@@ -132,73 +132,46 @@ public class Status implements IStatus {
 		setException(null);
 	}
 
-	/* (Intentionally not javadoc'd)
-	 * Implements the corresponding method on <code>IStatus</code>.
-	 */
 	@Override
 	public IStatus[] getChildren() {
 		return theEmptyStatusArray;
 	}
 
-	/* (Intentionally not javadoc'd)
-	 * Implements the corresponding method on <code>IStatus</code>.
-	 */
 	@Override
 	public int getCode() {
 		return code;
 	}
 
-	/* (Intentionally not javadoc'd)
-	 * Implements the corresponding method on <code>IStatus</code>.
-	 */
 	@Override
 	public Throwable getException() {
 		return exception;
 	}
 
-	/* (Intentionally not javadoc'd)
-	 * Implements the corresponding method on <code>IStatus</code>.
-	 */
 	@Override
 	public String getMessage() {
 		return message;
 	}
 
-	/* (Intentionally not javadoc'd)
-	 * Implements the corresponding method on <code>IStatus</code>.
-	 */
 	@Override
 	public String getPlugin() {
 		return pluginId;
 	}
 
-	/* (Intentionally not javadoc'd)
-	 * Implements the corresponding method on <code>IStatus</code>.
-	 */
 	@Override
 	public int getSeverity() {
 		return severity;
 	}
 
-	/* (Intentionally not javadoc'd)
-	 * Implements the corresponding method on <code>IStatus</code>.
-	 */
 	@Override
 	public boolean isMultiStatus() {
 		return false;
 	}
 
-	/* (Intentionally not javadoc'd)
-	 * Implements the corresponding method on <code>IStatus</code>.
-	 */
 	@Override
 	public boolean isOK() {
 		return severity == OK;
 	}
 
-	/* (Intentionally not javadoc'd)
-	 * Implements the corresponding method on <code>IStatus</code>.
-	 */
 	@Override
 	public boolean matches(int severityMask) {
 		return (severity & severityMask) != 0;

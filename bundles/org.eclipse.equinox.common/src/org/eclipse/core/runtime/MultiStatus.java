@@ -96,17 +96,11 @@ public class MultiStatus extends Status {
 		}
 	}
 
-	/* (Intentionally not javadoc'd)
-	 * Implements the corresponding method on <code>IStatus</code>.
-	 */
 	@Override
 	public IStatus[] getChildren() {
 		return children;
 	}
 
-	/* (Intentionally not javadoc'd)
-	 * Implements the corresponding method on <code>IStatus</code>.
-	 */
 	@Override
 	public boolean isMultiStatus() {
 		return true;

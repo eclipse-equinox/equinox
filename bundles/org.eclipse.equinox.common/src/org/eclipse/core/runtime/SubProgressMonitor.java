@@ -100,8 +100,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 		this.style = style;
 	}
 
-	/* (Intentionally not javadoc'd)
-	 * Implements the method <code>IProgressMonitor.beginTask</code>.
+	/**
 	 *
 	 * Starts a new main task. Since this progress monitor is a sub
 	 * progress monitor, the given name will NOT be used to update
@@ -126,9 +125,6 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 		}
 	}
 
-	/* (Intentionally not javadoc'd)
-	 * Implements the method <code>IProgressMonitor.done</code>.
-	 */
 	@Override
 	public void done() {
 		// Ignore if more done calls than beginTask calls or if we are still
@@ -145,9 +141,6 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 		sentToParent = 0;
 	}
 
-	/* (Intentionally not javadoc'd)
-	 * Implements the internal method <code>IProgressMonitor.internalWorked</code>.
-	 */
 	@Override
 	public void internalWorked(double work) {
 		if (usedUp || nestedBeginTasks != 1) {
@@ -162,9 +155,6 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 		}
 	}
 
-	/* (Intentionally not javadoc'd)
-	 * Implements the method <code>IProgressMonitor.subTask</code>.
-	 */
 	@Override
 	public void subTask(String name) {
 		if ((style & SUPPRESS_SUBTASK_LABEL) != 0) {
@@ -178,9 +168,6 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 		super.subTask(label);
 	}
 
-	/* (Intentionally not javadoc'd)
-	 * Implements the method <code>IProgressMonitor.worked</code>.
-	 */
 	@Override
 	public void worked(int work) {
 		internalWorked(work);
