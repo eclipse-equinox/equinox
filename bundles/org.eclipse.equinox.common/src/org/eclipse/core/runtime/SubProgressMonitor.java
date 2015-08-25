@@ -37,8 +37,9 @@ package org.eclipse.core.runtime;
  * This class may be instantiated or subclassed by clients.
  * </p>
  * 
- * @see SubMonitor
+ * @deprecated use {@link SubMonitor} instead
  */
+@Deprecated
 public class SubProgressMonitor extends ProgressMonitorWrapper {
 
 	/**
