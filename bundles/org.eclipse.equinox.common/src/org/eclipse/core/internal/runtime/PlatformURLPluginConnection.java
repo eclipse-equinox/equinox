@@ -34,9 +34,6 @@ public class PlatformURLPluginConnection extends PlatformURLConnection {
 		super(url);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.internal.url.PlatformURLConnection#allowCaching()
-	 */
 	@Override
 	protected boolean allowCaching() {
 		return true;
@@ -68,9 +65,6 @@ public class PlatformURLPluginConnection extends PlatformURLConnection {
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.internal.url.PlatformURLConnection#resolve()
-	 */
 	@Override
 	protected URL resolve() throws IOException {
 		String spec = url.getFile().trim();
@@ -96,9 +90,6 @@ public class PlatformURLPluginConnection extends PlatformURLConnection {
 		isRegistered = true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.internal.url.PlatformURLConnection#getAuxillaryURLs()
-	 */
 	@Override
 	public URL[] getAuxillaryURLs() throws IOException {
 		if (target == null) {

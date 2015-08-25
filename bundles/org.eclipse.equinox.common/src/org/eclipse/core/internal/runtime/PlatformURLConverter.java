@@ -26,9 +26,6 @@ import org.eclipse.osgi.service.urlconversion.URLConverter;
  */
 public class PlatformURLConverter implements URLConverter {
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.osgi.service.urlconversion.URLConverter#toFileURL(java.net.URL)
-	 */
 	@Override
 	public URL toFileURL(URL url) throws IOException {
 		URLConnection connection = url.openConnection();
@@ -41,9 +38,6 @@ public class PlatformURLConverter implements URLConverter {
 		return FileLocator.toFileURL(result);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.osgi.service.urlconversion.URLConverter#resolve(java.net.URL)
-	 */
 	@Override
 	public URL resolve(URL url) throws IOException {
 		URLConnection connection = url.openConnection();

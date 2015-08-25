@@ -30,9 +30,6 @@ public class PlatformURLMetaConnection extends PlatformURLConnection {
 		super(url);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.internal.url.PlatformURLConnection#resolve()
-	 */
 	@Override
 	protected URL resolve() throws IOException {
 		String spec = url.getFile().trim();
@@ -63,9 +60,6 @@ public class PlatformURLMetaConnection extends PlatformURLConnection {
 		isRegistered = true;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.net.URLConnection#getOutputStream()
-	 */
 	@Override
 	public OutputStream getOutputStream() throws IOException {
 		//This is not optimal but connection is a private instance variable in super.

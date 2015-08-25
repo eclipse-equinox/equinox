@@ -509,17 +509,11 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 		return delta;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IProgressMonitor#isCanceled()
-	 */
 	@Override
 	public boolean isCanceled() {
 		return root.isCanceled();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IProgressMonitor#setTaskName(java.lang.String)
-	 */
 	@Override
 	public void setTaskName(String name) {
 		if ((flags & SUPPRESS_SETTASKNAME) == 0)
@@ -547,9 +541,6 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 		setWorkRemaining(totalWork);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IProgressMonitor#done()
-	 */
 	@Override
 	public void done() {
 		cleanupActiveChild();
@@ -563,9 +554,6 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 		usedForChildren = 0.0d;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IProgressMonitor#internalWorked(double)
-	 */
 	@Override
 	public void internalWorked(double work) {
 		cleanupActiveChild();
@@ -575,26 +563,17 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 			root.worked(delta);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IProgressMonitor#subTask(java.lang.String)
-	 */
 	@Override
 	public void subTask(String name) {
 		if ((flags & SUPPRESS_SUBTASK) == 0)
 			root.subTask(name);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IProgressMonitor#worked(int)
-	 */
 	@Override
 	public void worked(int work) {
 		internalWorked(work);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IProgressMonitor#setCanceled(boolean)
-	 */
 	@Override
 	public void setCanceled(boolean b) {
 		root.setCanceled(b);
@@ -766,17 +745,11 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 		child.done();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IProgressMonitorWithBlocking#clearBlocked()
-	 */
 	@Override
 	public void clearBlocked() {
 		root.clearBlocked();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IProgressMonitorWithBlocking#setBlocked(org.eclipse.core.runtime.IStatus)
-	 */
 	@Override
 	public void setBlocked(IStatus reason) {
 		root.setBlocked(reason);
