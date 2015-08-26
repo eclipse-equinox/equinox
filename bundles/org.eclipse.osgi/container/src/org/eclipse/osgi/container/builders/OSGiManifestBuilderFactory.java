@@ -957,10 +957,16 @@ public final class OSGiManifestBuilderFactory {
 		}
 		Collections.sort(nativeClauses);
 
-		Map<String, Object> attributes = new HashMap<String, Object>(2);
 		int numNativePaths = nativeClauses.size();
+		if (numNativePaths == 0) {
+			String msg = "No native code clauses found in the value of " + Constants.BUNDLE_NATIVECODE + ": " + manifest.get(Constants.BUNDLE_NATIVECODE); //$NON-NLS-1$//$NON-NLS-2$
+			throw new BundleException(msg, BundleException.MANIFEST_ERROR);
+		}
 		StringBuilder allNativeFilters = new StringBuilder();
-		allNativeFilters.append("(|"); //$NON-NLS-1$
+		if (numNativePaths > 1) {
+			allNativeFilters.append("(|"); //$NON-NLS-1$
+		}
+		Map<String, Object> attributes = new HashMap<String, Object>(2);
 		for (int i = 0; i < numNativePaths; i++) {
 			NativeClause nativeClause = nativeClauses.get(i);
 			if (numNativePaths == 1) {
@@ -970,7 +976,9 @@ public final class OSGiManifestBuilderFactory {
 			}
 			allNativeFilters.append(nativeClauses.get(i).filter);
 		}
-		allNativeFilters.append(')');
+		if (numNativePaths > 1) {
+			allNativeFilters.append(')');
+		}
 
 		Map<String, String> directives = new HashMap<String, String>(2);
 		directives.put(NativeNamespace.REQUIREMENT_FILTER_DIRECTIVE, allNativeFilters.toString());

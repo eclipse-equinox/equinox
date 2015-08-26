@@ -1955,6 +1955,16 @@ public class TestModuleContainer extends AbstractTest {
 		Assert.assertEquals("Wrong bundle provider", a.getCurrentRevision(), bundleWires.get(0).getProvider());
 	}
 
+	@Test
+	public void testBadNativeCode() throws IOException {
+		try {
+			OSGiManifestBuilderFactory.createBuilder(getManifest("bad.native.code.MF"));
+		} catch (BundleException e) {
+			Assert.assertEquals("Wrong exception type.", BundleException.MANIFEST_ERROR, e.getType());
+		}
+
+	}
+
 	private static void assertWires(List<ModuleWire> required, List<ModuleWire>... provided) {
 		for (ModuleWire requiredWire : required) {
 			for (List<ModuleWire> providedList : provided) {
