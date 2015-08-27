@@ -80,12 +80,12 @@ public class DispatchTargets {
 			request.setAttribute(RequestDispatcher.FORWARD_SERVLET_PATH, request.getServletPath());
 		}
 
-		HttpServletRequestBuilderWrapperImpl httpRuntimeRequest = HttpServletRequestBuilderWrapperImpl.findHttpRuntimeRequest(request);
+		HttpServletRequestWrapperImpl httpRuntimeRequest = HttpServletRequestWrapperImpl.findHttpRuntimeRequest(request);
 		boolean pushedState = false;
 
 		try {
 			if (httpRuntimeRequest == null) {
-				httpRuntimeRequest = new HttpServletRequestBuilderWrapperImpl(request, this, dispatcherType);
+				httpRuntimeRequest = new HttpServletRequestWrapperImpl(request, this, dispatcherType);
 				request = httpRuntimeRequest;
 				response = new HttpServletResponseWrapperImpl(response);
 			}

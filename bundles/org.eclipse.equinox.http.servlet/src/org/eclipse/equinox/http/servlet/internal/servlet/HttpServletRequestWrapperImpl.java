@@ -20,7 +20,7 @@ import org.eclipse.equinox.http.servlet.internal.context.DispatchTargets;
 import org.eclipse.equinox.http.servlet.internal.util.*;
 import org.osgi.service.http.HttpContext;
 
-public class HttpServletRequestBuilderWrapperImpl extends HttpServletRequestWrapper {
+public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 	private Stack<DispatchTargets> dispatchTargets = new Stack<DispatchTargets>();
 	private final HttpServletRequest request;
@@ -32,12 +32,12 @@ public class HttpServletRequestBuilderWrapperImpl extends HttpServletRequestWrap
 	static final String INCLUDE_SERVLET_PATH_ATTRIBUTE = "javax.servlet.include.servlet_path"; //$NON-NLS-1$
 	static final String INCLUDE_PATH_INFO_ATTRIBUTE = "javax.servlet.include.path_info"; //$NON-NLS-1$
 
-	public static HttpServletRequestBuilderWrapperImpl findHttpRuntimeRequest(
+	public static HttpServletRequestWrapperImpl findHttpRuntimeRequest(
 		HttpServletRequest request) {
 
 		while (request instanceof HttpServletRequestWrapper) {
-			if (request instanceof HttpServletRequestBuilderWrapperImpl) {
-				return (HttpServletRequestBuilderWrapperImpl)request;
+			if (request instanceof HttpServletRequestWrapperImpl) {
+				return (HttpServletRequestWrapperImpl)request;
 			}
 
 			request = (HttpServletRequest)((HttpServletRequestWrapper)request).getRequest();
@@ -46,7 +46,7 @@ public class HttpServletRequestBuilderWrapperImpl extends HttpServletRequestWrap
 		return null;
 	}
 
-	public HttpServletRequestBuilderWrapperImpl(HttpServletRequest request, DispatchTargets dispatchTargets, DispatcherType dispatcherType) {
+	public HttpServletRequestWrapperImpl(HttpServletRequest request, DispatchTargets dispatchTargets, DispatcherType dispatcherType) {
 		super(request);
 		this.request = request;
 		this.dispatchTargets.push(dispatchTargets);
@@ -143,18 +143,18 @@ public class HttpServletRequestBuilderWrapperImpl extends HttpServletRequestWrap
 	public Object getAttribute(String attributeName) {
 		String servletPath = dispatchTargets.peek().getServletPath();
 		if (dispatcherType == DispatcherType.INCLUDE) {
-			if (attributeName.equals(HttpServletRequestBuilderWrapperImpl.INCLUDE_CONTEXT_PATH_ATTRIBUTE)) {
-				String contextPath = (String) request.getAttribute(HttpServletRequestBuilderWrapperImpl.INCLUDE_CONTEXT_PATH_ATTRIBUTE);
+			if (attributeName.equals(HttpServletRequestWrapperImpl.INCLUDE_CONTEXT_PATH_ATTRIBUTE)) {
+				String contextPath = (String) request.getAttribute(HttpServletRequestWrapperImpl.INCLUDE_CONTEXT_PATH_ATTRIBUTE);
 				if (contextPath == null || contextPath.equals(Const.SLASH))
 					contextPath = Const.BLANK;
 
-				String includeServletPath = (String) request.getAttribute(HttpServletRequestBuilderWrapperImpl.INCLUDE_SERVLET_PATH_ATTRIBUTE);
+				String includeServletPath = (String) request.getAttribute(HttpServletRequestWrapperImpl.INCLUDE_SERVLET_PATH_ATTRIBUTE);
 				if (includeServletPath == null || includeServletPath.equals(Const.SLASH))
 					includeServletPath = Const.BLANK;
 
 				return contextPath + includeServletPath;
-			} else if (attributeName.equals(HttpServletRequestBuilderWrapperImpl.INCLUDE_SERVLET_PATH_ATTRIBUTE)) {
-				String attributeServletPath = (String) request.getAttribute(HttpServletRequestBuilderWrapperImpl.INCLUDE_SERVLET_PATH_ATTRIBUTE);
+			} else if (attributeName.equals(HttpServletRequestWrapperImpl.INCLUDE_SERVLET_PATH_ATTRIBUTE)) {
+				String attributeServletPath = (String) request.getAttribute(HttpServletRequestWrapperImpl.INCLUDE_SERVLET_PATH_ATTRIBUTE);
 				if (attributeServletPath != null) {
 					return attributeServletPath;
 				}
@@ -162,8 +162,8 @@ public class HttpServletRequestBuilderWrapperImpl extends HttpServletRequestWrap
 					return Const.BLANK;
 				}
 				return servletPath;
-			} else if (attributeName.equals(HttpServletRequestBuilderWrapperImpl.INCLUDE_PATH_INFO_ATTRIBUTE)) {
-				String pathInfoAttribute = (String) request.getAttribute(HttpServletRequestBuilderWrapperImpl.INCLUDE_PATH_INFO_ATTRIBUTE);
+			} else if (attributeName.equals(HttpServletRequestWrapperImpl.INCLUDE_PATH_INFO_ATTRIBUTE)) {
+				String pathInfoAttribute = (String) request.getAttribute(HttpServletRequestWrapperImpl.INCLUDE_PATH_INFO_ATTRIBUTE);
 				if (servletPath.equals(Const.SLASH)) {
 					return pathInfoAttribute;
 				}
