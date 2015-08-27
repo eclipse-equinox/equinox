@@ -27,11 +27,6 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	private final DispatcherType dispatcherType;
 	private Map<String, String[]> parameterMap;
 
-	static final String INCLUDE_REQUEST_URI_ATTRIBUTE = "javax.servlet.include.request_uri"; //$NON-NLS-1$
-	static final String INCLUDE_CONTEXT_PATH_ATTRIBUTE = "javax.servlet.include.context_path"; //$NON-NLS-1$
-	static final String INCLUDE_SERVLET_PATH_ATTRIBUTE = "javax.servlet.include.servlet_path"; //$NON-NLS-1$
-	static final String INCLUDE_PATH_INFO_ATTRIBUTE = "javax.servlet.include.path_info"; //$NON-NLS-1$
-
 	public static HttpServletRequestWrapperImpl findHttpRuntimeRequest(
 		HttpServletRequest request) {
 
@@ -143,18 +138,18 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	public Object getAttribute(String attributeName) {
 		String servletPath = dispatchTargets.peek().getServletPath();
 		if (dispatcherType == DispatcherType.INCLUDE) {
-			if (attributeName.equals(HttpServletRequestWrapperImpl.INCLUDE_CONTEXT_PATH_ATTRIBUTE)) {
-				String contextPath = (String) request.getAttribute(HttpServletRequestWrapperImpl.INCLUDE_CONTEXT_PATH_ATTRIBUTE);
+			if (attributeName.equals(RequestDispatcher.INCLUDE_CONTEXT_PATH)) {
+				String contextPath = (String) request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH);
 				if (contextPath == null || contextPath.equals(Const.SLASH))
 					contextPath = Const.BLANK;
 
-				String includeServletPath = (String) request.getAttribute(HttpServletRequestWrapperImpl.INCLUDE_SERVLET_PATH_ATTRIBUTE);
+				String includeServletPath = (String) request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
 				if (includeServletPath == null || includeServletPath.equals(Const.SLASH))
 					includeServletPath = Const.BLANK;
 
 				return contextPath + includeServletPath;
-			} else if (attributeName.equals(HttpServletRequestWrapperImpl.INCLUDE_SERVLET_PATH_ATTRIBUTE)) {
-				String attributeServletPath = (String) request.getAttribute(HttpServletRequestWrapperImpl.INCLUDE_SERVLET_PATH_ATTRIBUTE);
+			} else if (attributeName.equals(RequestDispatcher.INCLUDE_SERVLET_PATH)) {
+				String attributeServletPath = (String) request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
 				if (attributeServletPath != null) {
 					return attributeServletPath;
 				}
@@ -162,8 +157,8 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 					return Const.BLANK;
 				}
 				return servletPath;
-			} else if (attributeName.equals(HttpServletRequestWrapperImpl.INCLUDE_PATH_INFO_ATTRIBUTE)) {
-				String pathInfoAttribute = (String) request.getAttribute(HttpServletRequestWrapperImpl.INCLUDE_PATH_INFO_ATTRIBUTE);
+			} else if (attributeName.equals(RequestDispatcher.INCLUDE_PATH_INFO)) {
+				String pathInfoAttribute = (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
 				if (servletPath.equals(Const.SLASH)) {
 					return pathInfoAttribute;
 				}
@@ -210,14 +205,14 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 	public static String getDispatchPathInfo(HttpServletRequest req) {
 		if (req.getDispatcherType() == DispatcherType.INCLUDE)
-			return (String) req.getAttribute(INCLUDE_PATH_INFO_ATTRIBUTE);
+			return (String) req.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
 
 		return req.getPathInfo();
 	}
 
 	public static String getDispatchServletPath(HttpServletRequest req) {
 		if (req.getDispatcherType() == DispatcherType.INCLUDE) {
-			String servletPath = (String) req.getAttribute(INCLUDE_SERVLET_PATH_ATTRIBUTE);
+			String servletPath = (String) req.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
 			return (servletPath == null) ? Const.BLANK : servletPath;
 		}
 		return req.getServletPath();
