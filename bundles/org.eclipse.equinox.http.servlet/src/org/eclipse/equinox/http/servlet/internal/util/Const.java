@@ -38,10 +38,4 @@ public class Const {
 	public static final String EQUINOX_LEGACY_HTTP_CONTEXT_INITIATING_ID = "equinox.legacy.http.context.initiating.id"; //$NON-NLS-1$
 	public static final String UTF8 = "UTF-8"; //$NON-NLS-1$
 
-	public static enum Dispatcher {
-
-		ASYNC, ERROR, FORWARD, INCLUDE, REQUEST
-
-	}
-
 }

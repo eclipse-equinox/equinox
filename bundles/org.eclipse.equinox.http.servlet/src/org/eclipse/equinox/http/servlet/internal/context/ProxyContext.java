@@ -15,8 +15,6 @@ package org.eclipse.equinox.http.servlet.internal.context;
 import java.io.File;
 import java.util.*;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import org.eclipse.equinox.http.servlet.internal.servlet.HttpServletRequestBuilderWrapperImpl;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
 
 /**
@@ -49,11 +47,6 @@ public class ProxyContext {
 	public void destroy() {
 		if (proxyContextTempDir != null)
 			deleteDirectory(proxyContextTempDir);
-	}
-
-	synchronized void initializeServletPath(HttpServletRequest req) {
-		if (servletPath == null)
-			servletPath = HttpServletRequestBuilderWrapperImpl.getDispatchServletPath(req);
 	}
 
 	public synchronized String getServletPath() {

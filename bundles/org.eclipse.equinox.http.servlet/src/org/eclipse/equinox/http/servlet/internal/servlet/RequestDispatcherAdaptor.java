@@ -23,16 +23,21 @@ public class RequestDispatcherAdaptor implements RequestDispatcher {
 
 	private final DispatchTargets dispatchTargets;
 	private final String path;
+	private final String string;
 
 	public RequestDispatcherAdaptor(
 		DispatchTargets dispatchTargets, String path) {
 
 		this.dispatchTargets = dispatchTargets;
 		this.path = path;
+
+		this.string = getClass().getSimpleName() + '[' + path + ", " + dispatchTargets + ']';
 	}
 
 	public void forward(ServletRequest request, ServletResponse response)
 		throws IOException, ServletException {
+
+		response.resetBuffer();
 
 		dispatchTargets.doDispatch(
 			(HttpServletRequest)request, (HttpServletResponse)response,
@@ -45,6 +50,11 @@ public class RequestDispatcherAdaptor implements RequestDispatcher {
 		dispatchTargets.doDispatch(
 			(HttpServletRequest)request, (HttpServletResponse)response,
 			path, DispatcherType.INCLUDE);
+	}
+
+	@Override
+	public String toString() {
+		return string;
 	}
 
 }

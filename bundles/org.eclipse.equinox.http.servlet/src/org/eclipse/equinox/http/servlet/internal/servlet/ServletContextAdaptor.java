@@ -65,7 +65,6 @@ public class ServletContextAdaptor {
 		this.contextController = contextController;
 		this.proxyContext = contextController.getProxyContext();
 		this.servletContext = proxyContext.getServletContext();
-		this.contextName = contextController.getContextName();
 		this.servletContextHelper = servletContextHelper;
 		this.eventListeners = eventListeners;
 		this.acc = acc;
@@ -74,6 +73,8 @@ public class ServletContextAdaptor {
 		BundleWiring bundleWiring = this.bundle.adapt(BundleWiring.class);
 
 		this.classLoader = bundleWiring.getClassLoader();
+
+		this.string = getClass().getSimpleName() + '[' + contextController + ']';
 	}
 
 	public ServletContext createServletContext() {
@@ -240,7 +241,7 @@ public class ServletContextAdaptor {
 	}
 
 	public String getServletContextName() {
-		return contextName;
+		return contextController.getContextName();
 	}
 
 	public void removeAttribute(String attributeName) {
@@ -342,6 +343,10 @@ public class ServletContextAdaptor {
 		}
 	}
 
+	public String toString() {
+		return string;
+	}
+
 	Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		servletContextTL.set((ServletContext)proxy);
 
@@ -379,11 +384,11 @@ public class ServletContextAdaptor {
 	private final Bundle bundle;
 	private final ClassLoader classLoader;
 	private final ContextController contextController;
-	private final String contextName;
 	private final EventListeners eventListeners;
 	private final ProxyContext proxyContext;
 	private final ServletContext servletContext;
 	final ServletContextHelper servletContextHelper;
 	private final ThreadLocal<ServletContext> servletContextTL = new ThreadLocal<ServletContext>();
+	private final String string;
 
 }

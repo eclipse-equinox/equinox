@@ -141,6 +141,8 @@ public class ContextController {
 		this.trackingContext = trackingContextParam;
 		this.consumingContext = consumingContext;
 
+		this.string = getClass().getSimpleName() + '[' + contextName + ", " + consumingContext.getBundle() + ']'; //$NON-NLS-1$
+
 		listenerServiceTracker = new ServiceTracker<EventListener, AtomicReference<ListenerRegistration>>(
 			trackingContext, httpServiceRuntime.getListenerFilter(),
 			new ContextListenerTrackerCustomizer(
@@ -880,7 +882,7 @@ public class ContextController {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + '[' + getContextName() + ']';
+		return string;
 	}
 
 	private void addEnpointRegistrationsToRequestInfo(
@@ -945,7 +947,7 @@ public class ContextController {
 
 		for (String type : dispatcher) {
 			try {
-				Const.Dispatcher.valueOf(type);
+				DispatcherType.valueOf(type);
 			}
 			catch (IllegalArgumentException iae) {
 				throw new IllegalArgumentException(
@@ -1215,7 +1217,7 @@ public class ContextController {
 	}
 
 	private static final String[] DISPATCHER =
-		new String[] {Const.Dispatcher.REQUEST.toString()};
+		new String[] {DispatcherType.REQUEST.toString()};
 
 	private static final Pattern contextNamePattern = Pattern.compile("^([a-zA-Z_0-9\\-]+\\.)*[a-zA-Z_0-9\\-]+$"); //$NON-NLS-1$
 
@@ -1236,6 +1238,7 @@ public class ContextController {
 	private final ServiceReference<ServletContextHelper> servletContextHelperRef;
 	private final String servletContextHelperRefFilter;
 	private boolean shutdown;
+	private final String string;
 
 	private final ServiceTracker<Filter, AtomicReference<FilterRegistration>> filterServiceTracker;
 	private final ServiceTracker<EventListener, AtomicReference<ListenerRegistration>> listenerServiceTracker;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Raymond Augé and others.
+ * Copyright (c) 2014, 2015 Raymond Augé and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -169,6 +169,11 @@ public abstract class EndpointRegistration<D extends DTO>
 	@Override
 	public int compareTo(EndpointRegistration<?> o) {
 		return servletHolder.compareTo(o.servletHolder);
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + '[' + getD().toString() + ']';
 	}
 
 }

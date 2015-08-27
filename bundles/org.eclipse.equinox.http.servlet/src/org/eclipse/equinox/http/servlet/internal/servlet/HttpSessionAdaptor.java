@@ -150,6 +150,7 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 	private transient final HttpSession session;
 	private transient final ServletContext servletContext;
 	private transient final String attributePrefix;
+	private final String string;
 
 	static public HttpSessionAdaptor createHttpSessionAdaptor(
 		HttpSession session, ServletContext servletContext, ContextController controller) {
@@ -165,6 +166,8 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 		this.servletContext = servletContext;
 		this.controller = controller;
 		this.attributePrefix = "equinox.http." + controller.getContextName(); //$NON-NLS-1$
+
+		this.string = getClass().getSimpleName() + '[' + session.getId() + ", " + attributePrefix + ']'; //$NON-NLS-1$
 	}
 
 	public ContextController getController() {
@@ -285,5 +288,10 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 	public boolean isNew() {
 		// Not sure this can be done per context helper
 		return session.isNew();
+	}
+
+	@Override
+	public String toString() {
+		return string;
 	}
 }

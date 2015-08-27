@@ -54,6 +54,8 @@ public class DispatchTargets {
 		this.pathInfo = pathInfo;
 		this.parameterMap = queryStringToParameterMap(queryString);
 		this.queryString = queryString;
+
+		this.string = getClass().getSimpleName() + '[' + contextController.getFullContextPath() + requestURI + ", " + endpointRegistration.toString() + ']'; //$NON-NLS-1$
 	}
 
 	public boolean doDispatch(
@@ -145,6 +147,11 @@ public class DispatchTargets {
 		return endpointRegistration;
 	}
 
+	@Override
+	public String toString() {
+		return string;
+	}
+
 	private static Map<String, String[]> queryStringToParameterMap(String queryString) {
 		if ((queryString == null) || (queryString.length() == 0)) {
 			return Collections.emptyMap();
@@ -179,5 +186,6 @@ public class DispatchTargets {
 	private final String queryString;
 	private final String requestURI;
 	private final String servletPath;
+	private final String string;
 
 }
