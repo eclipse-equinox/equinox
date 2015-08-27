@@ -31,13 +31,11 @@ public class RequestDispatcherAdaptor implements RequestDispatcher {
 		this.dispatchTargets = dispatchTargets;
 		this.path = path;
 
-		this.string = getClass().getSimpleName() + '[' + path + ", " + dispatchTargets + ']';
+		this.string = getClass().getSimpleName() + '[' + path + ", " + dispatchTargets + ']'; //$NON-NLS-1$
 	}
 
 	public void forward(ServletRequest request, ServletResponse response)
 		throws IOException, ServletException {
-
-		response.resetBuffer();
 
 		dispatchTargets.doDispatch(
 			(HttpServletRequest)request, (HttpServletResponse)response,
