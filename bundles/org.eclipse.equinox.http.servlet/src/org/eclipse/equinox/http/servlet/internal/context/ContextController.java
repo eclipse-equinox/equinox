@@ -703,7 +703,8 @@ public class ContextController {
 
 		if (filterRegistrations.isEmpty()) {
 			return new DispatchTargets(
-				this, endpointRegistration, requestURI, servletPath, pathInfo, queryString);
+				this, endpointRegistration, servletName, requestURI, servletPath,
+				pathInfo, queryString);
 		}
 
 		if (requestURI != null) {
@@ -725,8 +726,8 @@ public class ContextController {
 			matchingFilterRegistrations, requestInfoDTO);
 
 		return new DispatchTargets(
-			this, endpointRegistration, matchingFilterRegistrations, requestURI, servletPath,
-			pathInfo, queryString);
+			this, endpointRegistration, matchingFilterRegistrations, servletName,
+			requestURI, servletPath, pathInfo, queryString);
 	}
 
 	private void collectFilters(

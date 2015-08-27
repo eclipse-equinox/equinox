@@ -22,10 +22,121 @@ import org.osgi.service.http.HttpContext;
 
 public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
-	private Stack<DispatchTargets> dispatchTargets = new Stack<DispatchTargets>();
+	public class State {
+
+		public State(
+			DispatchTargets dispatchTargets,
+			DispatcherType dispatcherType, Map<String, Object> previousAttributes,
+			Map<String, String[]> previousParams, String previousQueryString) {
+
+			this.dispatchTargets = dispatchTargets;
+			this.dispatcherType = dispatcherType;
+
+			Map<String, Object> attributesCopy = new HashMap<String, Object>();
+
+			attributesCopy.putAll(previousAttributes);
+
+			this.attributes = attributesCopy;
+
+			Map<String, String[]> parameterMapCopy = new HashMap<String, String[]>();
+
+			// add the dispatchers query string parameters first
+			for (Map.Entry<String, String[]> entry : dispatchTargets.getParameterMap().entrySet()) {
+				String[] values = parameterMapCopy.get(entry.getKey());
+				values = Params.append(values, entry.getValue());
+				parameterMapCopy.put(entry.getKey(), values);
+			}
+
+			// add the previous dispatcher's parameters next
+			if (previousParams != null) {
+				for (Map.Entry<String, String[]> entry : previousParams.entrySet()) {
+					String[] values = parameterMapCopy.get(entry.getKey());
+					values = Params.append(values, entry.getValue());
+					parameterMapCopy.put(entry.getKey(), values);
+				}
+			}
+
+			this.parameterMap = parameterMapCopy;
+
+			String queryStringCopy = previousQueryString;
+
+			if ((dispatchTargets.getQueryString() != null) && (dispatchTargets.getQueryString().length() > 0) &&
+				(queryStringCopy != null) && (queryStringCopy.length() > 0)) {
+
+				queryStringCopy = dispatchTargets.getQueryString() + Const.AMP + queryStringCopy;
+			}
+
+			this.queryString = queryStringCopy;
+			this.previousQueryString = previousQueryString;
+
+			this.string = getClass().getSimpleName() + '[' + dispatcherType + ", " + dispatchTargets + ", " + queryString + ']'; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+
+		public Map<String, Object> getAttributes() {
+			return attributes;
+		}
+
+		public DispatcherType getDispatcherType() {
+			return dispatcherType;
+		}
+
+		public DispatchTargets getDispatchTargets() {
+			return dispatchTargets;
+		}
+
+		public Map<String, Object> getOverloadedAttributes() {
+			return overloadedAttributes;
+		}
+
+		public Map<String, String[]> getParameterMap() {
+			return parameterMap;
+		}
+
+		public String getPreviousQueryString() {
+			return previousQueryString;
+		}
+
+		public String getQueryString() {
+			return queryString;
+		}
+
+		@Override
+		public String toString() {
+			return string;
+		}
+
+		private final Map<String, Object> attributes;
+		private final DispatchTargets dispatchTargets;
+		private final DispatcherType dispatcherType;
+		private final Map<String, Object> overloadedAttributes = new HashMap<String, Object>();
+		private final Map<String, String[]> parameterMap;
+		private final String previousQueryString;
+		private final String queryString;
+		private final String string;
+
+	}
+
+	private static final String[] dispatcherAttributes = new String[] {
+		RequestDispatcher.FORWARD_CONTEXT_PATH,
+		RequestDispatcher.FORWARD_PATH_INFO,
+		RequestDispatcher.FORWARD_QUERY_STRING,
+		RequestDispatcher.FORWARD_REQUEST_URI,
+		RequestDispatcher.FORWARD_SERVLET_PATH,
+		RequestDispatcher.INCLUDE_CONTEXT_PATH,
+		RequestDispatcher.INCLUDE_PATH_INFO,
+		RequestDispatcher.INCLUDE_QUERY_STRING,
+		RequestDispatcher.INCLUDE_REQUEST_URI,
+		RequestDispatcher.INCLUDE_SERVLET_PATH
+	};
+
+	private final ThreadLocal<Deque<State>> state = new ThreadLocal<Deque<State>>() {
+		@Override
+		protected Deque<State> initialValue() {
+			return new ArrayDeque<State>();
+		}
+	};
+
 	private final HttpServletRequest request;
-	private final DispatcherType dispatcherType;
-	private Map<String, String[]> parameterMap;
 
 	public static HttpServletRequestWrapperImpl findHttpRuntimeRequest(
 		HttpServletRequest request) {
@@ -44,8 +155,19 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	public HttpServletRequestWrapperImpl(HttpServletRequest request, DispatchTargets dispatchTargets, DispatcherType dispatcherType) {
 		super(request);
 		this.request = request;
-		this.dispatchTargets.push(dispatchTargets);
-		this.dispatcherType = dispatcherType;
+
+		Map<String, Object> attributes = new HashMap<String, Object>();
+
+		for (Enumeration<String> names = request.getAttributeNames(); names.hasMoreElements();) {
+			String name = names.nextElement();
+			attributes.put(name, request.getAttribute(name));
+		}
+
+		this.getState().push(new State(dispatchTargets, dispatcherType, attributes, request.getParameterMap(), request.getQueryString()));
+	}
+
+	public void destroy() {
+		state.remove();
 	}
 
 	public String getAuthType() {
@@ -65,14 +187,17 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	}
 
 	public String getPathInfo() {
-		if (dispatcherType == DispatcherType.INCLUDE)
-			return request.getPathInfo();
-
-		return dispatchTargets.peek().getPathInfo();
+		State current = currentState();
+		State original = originalState();
+		if (current.getDispatchTargets().getServletName() != null)
+			return original.getDispatchTargets().getRequestURI();
+		if (current.getDispatcherType() == DispatcherType.INCLUDE)
+			return original.getDispatchTargets().getPathInfo();
+		return current.getDispatchTargets().getPathInfo();
 	}
 
 	public DispatcherType getDispatcherType() {
-		return dispatcherType;
+		return currentState().getDispatcherType();
 	}
 
 	public String getParameter(String name) {
@@ -84,17 +209,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	}
 
 	public Map<String, String[]> getParameterMap() {
-		if (this.parameterMap != null) {
-			return this.parameterMap;
-		}
-		Map<String, String[]> copy = new HashMap<String, String[]>(this.dispatchTargets.peek().getParameterMap());
-		for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
-			String[] values = copy.get(entry.getKey());
-			values = Params.append(values, entry.getValue());
-			copy.put(entry.getKey(), values);
-		}
-		this.parameterMap = Collections.unmodifiableMap(copy);
-		return this.parameterMap;
+		return currentState().getParameterMap();
 	}
 
 	public Enumeration<String> getParameterNames() {
@@ -107,87 +222,103 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 	@Override
 	public String getQueryString() {
-		String queryStringA = this.dispatchTargets.peek().getQueryString();
-		String queryStringB = request.getQueryString();
-		if ((queryStringA != null) && (queryStringA.length() > 0) &&
-			(queryStringB != null) && (queryStringB.length() > 0)) {
-
-			return queryStringA + Const.AMP + queryStringB;
-		}
-		return queryStringB;
+		return currentState().getQueryString();
 	}
 
 	public ServletContext getServletContext() {
-		return dispatchTargets.peek().getServletRegistration().getServletContext();
+		return currentState().getDispatchTargets().getServletRegistration().getServletContext();
 	}
 
 	public String getServletPath() {
-		if (dispatcherType == DispatcherType.INCLUDE)
-			return request.getServletPath();
-
-		if (dispatchTargets.peek().getServletPath().equals(Const.SLASH)) {
+		if (currentState().getDispatchTargets().getServletName() != null)
 			return Const.BLANK;
-		}
-		return dispatchTargets.peek().getServletPath();
+		if (currentState().getDispatcherType() == DispatcherType.INCLUDE)
+			return originalState().getDispatchTargets().getServletPath();
+		return currentState().getDispatchTargets().getServletPath();
 	}
 
 	public String getContextPath() {
-		return dispatchTargets.peek().getContextController().getFullContextPath();
+		if (currentState().getDispatcherType() == DispatcherType.INCLUDE)
+			return originalState().getDispatchTargets().getContextController().getFullContextPath();
+		return currentState().getDispatchTargets().getContextController().getFullContextPath();
+	}
+
+	@Override
+	public String getRequestURI() {
+		State current = currentState();
+		DispatchTargets currentDispatchTargets = current.getDispatchTargets();
+		if ((currentDispatchTargets.getServletName() != null) ||
+			(current.getDispatcherType() == DispatcherType.INCLUDE)) {
+			return originalState().getDispatchTargets().getRequestURI();
+		}
+		return currentDispatchTargets.getRequestURI();
 	}
 
 	public Object getAttribute(String attributeName) {
-		String servletPath = dispatchTargets.peek().getServletPath();
-		if (dispatcherType == DispatcherType.INCLUDE) {
-			if (attributeName.equals(RequestDispatcher.INCLUDE_CONTEXT_PATH)) {
-				String contextPath = (String) request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH);
-				if (contextPath == null || contextPath.equals(Const.SLASH))
-					contextPath = Const.BLANK;
+		State current = currentState();
+		DispatchTargets currentDispatchTargets = current.getDispatchTargets();
 
-				String includeServletPath = (String) request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
-				if (includeServletPath == null || includeServletPath.equals(Const.SLASH))
-					includeServletPath = Const.BLANK;
+		if (Arrays.binarySearch(dispatcherAttributes, attributeName) > -1) {
+			if (currentDispatchTargets.getServletName() != null) {
+				return null;
+			}
 
-				return contextPath + includeServletPath;
-			} else if (attributeName.equals(RequestDispatcher.INCLUDE_SERVLET_PATH)) {
-				String attributeServletPath = (String) request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
-				if (attributeServletPath != null) {
-					return attributeServletPath;
-				}
-				if (servletPath.equals(Const.SLASH)) {
-					return Const.BLANK;
-				}
-				return servletPath;
-			} else if (attributeName.equals(RequestDispatcher.INCLUDE_PATH_INFO)) {
-				String pathInfoAttribute = (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
-				if (servletPath.equals(Const.SLASH)) {
-					return pathInfoAttribute;
-				}
-
-				if ((pathInfoAttribute == null) || (pathInfoAttribute.length() == 0)) {
-					return null;
-				}
-
-				if (pathInfoAttribute.startsWith(servletPath)) {
-					pathInfoAttribute = pathInfoAttribute.substring(servletPath.length());
-				}
-
-				if (pathInfoAttribute.length() == 0)
-					return null;
-
-				return pathInfoAttribute;
+			if (current.getOverloadedAttributes().containsKey(attributeName)) {
+				return current.getOverloadedAttributes().get(attributeName);
 			}
 		}
 
-		return request.getAttribute(attributeName);
+		if (current.getDispatcherType() == DispatcherType.INCLUDE) {
+			if (attributeName.equals(RequestDispatcher.INCLUDE_CONTEXT_PATH)) {
+				return currentDispatchTargets.getContextController().getFullContextPath();
+			} else if (attributeName.equals(RequestDispatcher.INCLUDE_PATH_INFO)) {
+				return currentDispatchTargets.getPathInfo();
+			} else if (attributeName.equals(RequestDispatcher.INCLUDE_QUERY_STRING)) {
+				return currentDispatchTargets.getQueryString();
+			} else if (attributeName.equals(RequestDispatcher.INCLUDE_REQUEST_URI)) {
+				return currentDispatchTargets.getRequestURI();
+			} else if (attributeName.equals(RequestDispatcher.INCLUDE_SERVLET_PATH)) {
+				return currentDispatchTargets.getServletPath();
+			}
+		}
+		if (current.getDispatcherType() == DispatcherType.FORWARD) {
+			State original = originalState();
+			DispatchTargets originalDispatchTargets = original.getDispatchTargets();
+
+			if (attributeName.equals(RequestDispatcher.FORWARD_CONTEXT_PATH)) {
+				return originalDispatchTargets.getContextController().getFullContextPath();
+			} else if (attributeName.equals(RequestDispatcher.FORWARD_PATH_INFO)) {
+				return originalDispatchTargets.getPathInfo();
+			} else if (attributeName.equals(RequestDispatcher.FORWARD_QUERY_STRING)) {
+				return original.getQueryString();
+			} else if (attributeName.equals(RequestDispatcher.FORWARD_REQUEST_URI)) {
+				return originalDispatchTargets.getRequestURI();
+			} else if (attributeName.equals(RequestDispatcher.FORWARD_SERVLET_PATH)) {
+				return originalDispatchTargets.getServletPath();
+			}
+		}
+
+		return current.getAttributes().get(attributeName);
+	}
+
+	@Override
+	public Enumeration<String> getAttributeNames() {
+		State current = currentState();
+
+		Set<String> names = new HashSet<String>();
+		names.addAll(current.getAttributes().keySet());
+		names.addAll(current.getOverloadedAttributes().keySet());
+
+		return Collections.enumeration(names);
 	}
 
 	public RequestDispatcher getRequestDispatcher(String path) {
-		ContextController contextController =
-			this.dispatchTargets.peek().getContextController();
+		State current = currentState();
+		ContextController contextController = current.getDispatchTargets().getContextController();
 
 		// support relative paths
 		if (!path.startsWith(Const.SLASH)) {
-			path = this.dispatchTargets.peek().getServletPath() + Const.SLASH + path;
+			path = current.getDispatchTargets().getServletPath() + Const.SLASH + path;
 		}
 		// if the path starts with the full context path strip it
 		else if (path.startsWith(contextController.getFullContextPath())) {
@@ -210,19 +341,12 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		return req.getPathInfo();
 	}
 
-	public static String getDispatchServletPath(HttpServletRequest req) {
-		if (req.getDispatcherType() == DispatcherType.INCLUDE) {
-			String servletPath = (String) req.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
-			return (servletPath == null) ? Const.BLANK : servletPath;
-		}
-		return req.getServletPath();
-	}
-
 	public HttpSession getSession() {
 		HttpSession session = request.getSession();
 		if (session != null) {
-			return dispatchTargets.peek().getContextController().getSessionAdaptor(
-				session, dispatchTargets.peek().getServletRegistration().getT().getServletConfig().getServletContext());
+			DispatchTargets dispatchTargets = currentState().getDispatchTargets();
+			return dispatchTargets.getContextController().getSessionAdaptor(
+				session, dispatchTargets.getServletRegistration().getT().getServletConfig().getServletContext());
 		}
 
 		return null;
@@ -231,29 +355,35 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	public HttpSession getSession(boolean create) {
 		HttpSession session = request.getSession(create);
 		if (session != null) {
-			return dispatchTargets.peek().getContextController().getSessionAdaptor(
-				session, dispatchTargets.peek().getServletRegistration().getT().getServletConfig().getServletContext());
+			DispatchTargets dispatchTargets = currentState().getDispatchTargets();
+			return dispatchTargets.getContextController().getSessionAdaptor(
+				session, dispatchTargets.getServletRegistration().getT().getServletConfig().getServletContext());
 		}
 
 		return null;
 	}
 
 	public synchronized void pop() {
-		this.dispatchTargets.pop();
-		this.parameterMap = null;
-		getParameterMap();
+		getState().pop();
 	}
 
-	public synchronized void push(DispatchTargets toPush) {
-		this.dispatchTargets.push(toPush);
-		this.parameterMap = null;
-		getParameterMap();
+	public synchronized void push(DispatchTargets dispatchTargets, DispatcherType dispatcherType) {
+		State previous = getState().peek();
+		getState().push(new State(dispatchTargets, dispatcherType, previous.getAttributes(), previous.getParameterMap(), previous.getQueryString()));
 	}
 
 	public void removeAttribute(String name) {
-		request.removeAttribute(name);
+		State current = getState().peek();
 
-		EventListeners eventListeners = dispatchTargets.peek().getContextController().getEventListeners();
+		if ((Arrays.binarySearch(dispatcherAttributes, name) > -1) &&
+			current.getOverloadedAttributes().containsKey(name)) {
+			current.getOverloadedAttributes().remove(name);
+		}
+		else {
+			current.getAttributes().remove(name);
+		}
+
+		EventListeners eventListeners = current.getDispatchTargets().getContextController().getEventListeners();
 
 		List<ServletRequestAttributeListener> listeners = eventListeners.get(
 			ServletRequestAttributeListener.class);
@@ -264,7 +394,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 		ServletRequestAttributeEvent servletRequestAttributeEvent =
 			new ServletRequestAttributeEvent(
-				dispatchTargets.peek().getServletRegistration().getServletContext(), this, name, null);
+				current.getDispatchTargets().getServletRegistration().getServletContext(), this, name, null);
 
 		for (ServletRequestAttributeListener servletRequestAttributeListener : listeners) {
 			servletRequestAttributeListener.attributeRemoved(
@@ -273,10 +403,20 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	}
 
 	public void setAttribute(String name, Object value) {
-		boolean added = (request.getAttribute(name) == null);
-		request.setAttribute(name, value);
+		State current = getState().peek();
 
-		EventListeners eventListeners = dispatchTargets.peek().getContextController().getEventListeners();
+		boolean added = !current.getAttributes().containsKey(name);
+
+		if (Arrays.binarySearch(dispatcherAttributes, name) > -1) {
+			added = !current.getOverloadedAttributes().containsKey(name);
+
+			current.getOverloadedAttributes().put(name, value);
+		}
+		else {
+			current.getAttributes().put(name, value);
+		}
+
+		EventListeners eventListeners = current.getDispatchTargets().getContextController().getEventListeners();
 
 		List<ServletRequestAttributeListener> listeners = eventListeners.get(
 			ServletRequestAttributeListener.class);
@@ -287,7 +427,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 		ServletRequestAttributeEvent servletRequestAttributeEvent =
 			new ServletRequestAttributeEvent(
-				dispatchTargets.peek().getServletRegistration().getServletContext(), this, name, value);
+				current.getDispatchTargets().getServletRegistration().getServletContext(), this, name, value);
 
 		for (ServletRequestAttributeListener servletRequestAttributeListener : listeners) {
 			if (added) {
@@ -299,6 +439,18 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 					servletRequestAttributeEvent);
 			}
 		}
+	}
+
+	private State currentState() {
+		return getState().peek();
+	}
+
+	private State originalState() {
+		return getState().peekLast();
+	}
+
+	private Deque<State> getState() {
+		return state.get();
 	}
 
 }

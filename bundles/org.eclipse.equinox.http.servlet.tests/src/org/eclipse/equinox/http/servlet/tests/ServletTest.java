@@ -784,8 +784,6 @@ public class ServletTest extends TestCase {
 		Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
 	}
 
-
-
 	public void basicFilterTest22( String servlet1Pattern, String servlet2Pattern, String filterPattern, String expected, String[] dispatchers ) throws Exception {
 		final AtomicReference<HttpServletRequestWrapper> httpServletRequestWrapper = new AtomicReference<HttpServletRequestWrapper>();
 		final AtomicReference<HttpServletResponseWrapper> httpServletResponseWrapper = new AtomicReference<HttpServletResponseWrapper>();
@@ -1628,42 +1626,6 @@ public class ServletTest extends TestCase {
 		Assert.assertEquals(expected, actual);
 	}
 
-	public void test_Servlet8() throws Exception {
-		Servlet servlet8 = new HttpServlet() {
-
-			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				RequestDispatcher requestDispatcher =
-					request.getRequestDispatcher("/S8/target");
-
-				requestDispatcher.include(request, response);
-			}
-
-		};
-
-		Servlet servlet8Target = new HttpServlet() {
-
-			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				response.getWriter().print("s8target");
-			}
-
-		};
-
-		HttpService httpService = getHttpService();
-
-		HttpContext httpContext = httpService.createDefaultHttpContext();
-
-		httpService.registerServlet("/S8", servlet8, null, httpContext);
-		httpService.registerServlet("/S8/target", servlet8Target, null, httpContext);
-
-		Assert.assertEquals("s8target", requestAdvisor.request("S8"));
-	}
-
 	public void test_Servlet9() throws Exception {
 		String expected = "Equinox Jetty-based Http Service";
 		String actual;
@@ -1762,102 +1724,6 @@ public class ServletTest extends TestCase {
 		String result = requestAdvisor.request("Servlet13/a?p=1&p=2");
 
 		Assert.assertEquals("p=1&p=2|1|[1, 2]", result);
-	}
-
-	public void test_Servlet14() throws Exception {
-		Servlet sA = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
-
-				RequestDispatcher requestDispatcher = req.getRequestDispatcher("/Servlet13B/a?p=3&p=4");
-
-				requestDispatcher.include(req, resp);
-			}
-		};
-		Servlet sB = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
-
-				PrintWriter writer = resp.getWriter();
-				writer.write(req.getQueryString());
-				writer.write("|");
-				writer.write((String)req.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING));
-				writer.write("|");
-				writer.write(req.getParameter("p"));
-				writer.write("|");
-				writer.write(Arrays.toString(req.getParameterValues("p")));
-			}
-		};
-
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S13A");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet13A/*");
-		registrations.add(getBundleContext().registerService(Servlet.class, sA, props));
-
-		props = new Hashtable<String, Object>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S13B");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet13B/*");
-		registrations.add(getBundleContext().registerService(Servlet.class, sB, props));
-
-		String result = requestAdvisor.request("Servlet13A/a?p=1&p=2");
-
-		Assert.assertEquals("p=3&p=4&p=1&p=2|p=3&p=4|3|[3, 4, 1, 2]", result);
-	}
-
-	public void test_Servlet15() throws Exception {
-		Servlet sA = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
-
-				RequestDispatcher requestDispatcher = req.getRequestDispatcher("/Servlet13B/a?p=3&p=4");
-
-				requestDispatcher.forward(req, resp);
-			}
-		};
-		Servlet sB = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
-
-				PrintWriter writer = resp.getWriter();
-				writer.write(req.getQueryString());
-				writer.write("|");
-				writer.write((String)req.getAttribute(RequestDispatcher.FORWARD_QUERY_STRING));
-				writer.write("|");
-				writer.write(req.getParameter("p"));
-				writer.write("|");
-				writer.write(Arrays.toString(req.getParameterValues("p")));
-			}
-		};
-
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S13A");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet13A/*");
-		registrations.add(getBundleContext().registerService(Servlet.class, sA, props));
-
-		props = new Hashtable<String, Object>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S13B");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet13B/*");
-		registrations.add(getBundleContext().registerService(Servlet.class, sB, props));
-
-		String result = requestAdvisor.request("Servlet13A/a?p=1&p=2");
-
-		Assert.assertEquals("p=3&p=4&p=1&p=2|p=1&p=2|3|[3, 4, 1, 2]", result);
 	}
 
 	private static String getSubmittedFileName(Part part) {
@@ -2764,14 +2630,14 @@ public class ServletTest extends TestCase {
 		}
 	}
 
-	private static final String PROTOTYPE = "prototype/";
-	private static final String CONFIGURE = "configure";
-	private static final String UNREGISTER = "unregister";
-	private static final String ERROR = "error";
-	private static final String STATUS_PARAM = "servlet.init.status";
-	private static final String TEST_PROTOTYPE_NAME = "test.prototype.name";
-	private static final String TEST_PATH_CUSTOMIZER_NAME = "test.path.customizer.name";
-	private static final String TEST_ERROR_CODE = "test.error.code";
+	protected static final String PROTOTYPE = "prototype/";
+	protected static final String CONFIGURE = "configure";
+	protected static final String UNREGISTER = "unregister";
+	protected static final String ERROR = "error";
+	protected static final String STATUS_PARAM = "servlet.init.status";
+	protected static final String TEST_PROTOTYPE_NAME = "test.prototype.name";
+	protected static final String TEST_PATH_CUSTOMIZER_NAME = "test.path.customizer.name";
+	protected static final String TEST_ERROR_CODE = "test.error.code";
 	public void testWBServletChangeInitParams() throws Exception{
 			String actual;
 
@@ -3058,15 +2924,15 @@ public class ServletTest extends TestCase {
 		installer.uninstallBundle(bundle);
 	}
 
-	private static final String EQUINOX_DS_BUNDLE = "org.eclipse.equinox.ds";
-	private static final String EQUINOX_JETTY_BUNDLE = "org.eclipse.equinox.http.jetty";
-	private static final String JETTY_PROPERTY_PREFIX = "org.eclipse.equinox.http.jetty.";
-	private static final String OSGI_HTTP_PORT_PROPERTY = "org.osgi.service.http.port";
-	private static final String STATUS_OK = "OK";
-	private static final String TEST_BUNDLES_BINARY_DIRECTORY = "/bundles_bin/";
-	private static final String TEST_BUNDLE_1 = "tb1";
+	protected static final String EQUINOX_DS_BUNDLE = "org.eclipse.equinox.ds";
+	protected static final String EQUINOX_JETTY_BUNDLE = "org.eclipse.equinox.http.jetty";
+	protected static final String JETTY_PROPERTY_PREFIX = "org.eclipse.equinox.http.jetty.";
+	protected static final String OSGI_HTTP_PORT_PROPERTY = "org.osgi.service.http.port";
+	protected static final String STATUS_OK = "OK";
+	protected static final String TEST_BUNDLES_BINARY_DIRECTORY = "/bundles_bin/";
+	protected static final String TEST_BUNDLE_1 = "tb1";
 
-	private static final String[] BUNDLES = new String[] {
+	protected static final String[] BUNDLES = new String[] {
 		ServletTest.EQUINOX_DS_BUNDLE
 	};
 

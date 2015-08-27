@@ -15,7 +15,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
-import javax.servlet.*;
+import javax.servlet.DispatcherType;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eclipse.equinox.http.servlet.internal.registration.EndpointRegistration;
@@ -31,24 +32,25 @@ public class DispatchTargets {
 
 	public DispatchTargets(
 		ContextController contextController,
-		EndpointRegistration<?> endpointRegistration,
+		EndpointRegistration<?> endpointRegistration, String servletName,
 		String requestURI, String servletPath, String pathInfo, String queryString) {
 
 		this(
 			contextController, endpointRegistration,
-			Collections.<FilterRegistration>emptyList(), requestURI, servletPath, pathInfo,
-			queryString);
+			Collections.<FilterRegistration>emptyList(), servletName, requestURI,
+			servletPath, pathInfo, queryString);
 	}
 
 	public DispatchTargets(
 		ContextController contextController,
 		EndpointRegistration<?> endpointRegistration,
-		List<FilterRegistration> matchingFilterRegistrations,
+		List<FilterRegistration> matchingFilterRegistrations, String servletName,
 		String requestURI, String servletPath, String pathInfo, String queryString) {
 
 		this.contextController = contextController;
 		this.endpointRegistration = endpointRegistration;
 		this.matchingFilterRegistrations = matchingFilterRegistrations;
+		this.servletName = servletName;
 		this.requestURI = requestURI;
 		this.servletPath = servletPath;
 		this.pathInfo = pathInfo;
@@ -63,23 +65,6 @@ public class DispatchTargets {
 			String path, DispatcherType dispatcherType)
 		throws ServletException, IOException {
 
-		if (dispatcherType == DispatcherType.INCLUDE) {
-			request.setAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH, contextController.getContextPath());
-			request.setAttribute(RequestDispatcher.INCLUDE_PATH_INFO, getPathInfo());
-			request.setAttribute(RequestDispatcher.INCLUDE_QUERY_STRING, getQueryString());
-			request.setAttribute(RequestDispatcher.INCLUDE_REQUEST_URI, getRequestURI());
-			request.setAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH, getServletPath());
-		}
-		else if (dispatcherType == DispatcherType.FORWARD) {
-			response.resetBuffer();
-
-			request.setAttribute(RequestDispatcher.FORWARD_CONTEXT_PATH, request.getContextPath());
-			request.setAttribute(RequestDispatcher.FORWARD_PATH_INFO, request.getPathInfo());
-			request.setAttribute(RequestDispatcher.FORWARD_QUERY_STRING, request.getQueryString());
-			request.setAttribute(RequestDispatcher.FORWARD_REQUEST_URI, request.getRequestURI());
-			request.setAttribute(RequestDispatcher.FORWARD_SERVLET_PATH, request.getServletPath());
-		}
-
 		HttpServletRequestWrapperImpl httpRuntimeRequest = HttpServletRequestWrapperImpl.findHttpRuntimeRequest(request);
 		boolean pushedState = false;
 
@@ -90,7 +75,7 @@ public class DispatchTargets {
 				response = new HttpServletResponseWrapperImpl(response);
 			}
 			else {
-				httpRuntimeRequest.push(this);
+				httpRuntimeRequest.push(this, dispatcherType);
 				pushedState = true;
 			}
 
@@ -111,6 +96,9 @@ public class DispatchTargets {
 		finally {
 			if (pushedState) {
 				httpRuntimeRequest.pop();
+			}
+			else {
+				httpRuntimeRequest.destroy();
 			}
 		}
 	}
@@ -136,7 +124,14 @@ public class DispatchTargets {
 	}
 
 	public String getRequestURI() {
-		return requestURI;
+		if (requestURI == null) {
+			return null;
+		}
+		return getContextController().getFullContextPath() + requestURI;
+	}
+
+	public String getServletName() {
+		return servletName;
 	}
 
 	public String getServletPath() {
@@ -186,6 +181,7 @@ public class DispatchTargets {
 	private final String queryString;
 	private final String requestURI;
 	private final String servletPath;
+	private final String servletName;
 	private final String string;
 
 }

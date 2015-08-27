@@ -37,6 +37,8 @@ public class RequestDispatcherAdaptor implements RequestDispatcher {
 	public void forward(ServletRequest request, ServletResponse response)
 		throws IOException, ServletException {
 
+		response.resetBuffer();
+
 		dispatchTargets.doDispatch(
 			(HttpServletRequest)request, (HttpServletResponse)response,
 			path, DispatcherType.FORWARD);
