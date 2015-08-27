@@ -97,7 +97,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		this.bundleCollisionHook = hook;
 
 		this.serviceFindHook = new RegionServiceFindHook(this);
-		this.serviceEventHook = new RegionServiceEventHook(serviceFindHook);
+		this.serviceEventHook = new RegionServiceEventHook(this);
 		this.origin = origin;
 		if (origin != null) {
 			synchronized (origin.monitor) {

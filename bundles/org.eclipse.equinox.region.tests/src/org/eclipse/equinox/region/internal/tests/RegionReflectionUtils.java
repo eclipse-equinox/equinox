@@ -193,10 +193,10 @@ public class RegionReflectionUtils {
 		return (ResolverHook) newInstance(regionResolverHook, classParams, constructorArgs);
 	}
 
-	public static org.osgi.framework.hooks.service.EventHook newRegionServiceEventHook(org.osgi.framework.hooks.service.FindHook findHook) {
+	public static org.osgi.framework.hooks.service.EventHook newRegionServiceEventHook(RegionDigraph digraph) {
 		Class<?> regionServiceEventHook = loadRegionImplClass(RegionServiceEventHook);
-		Class<?>[] classParams = new Class<?>[] {org.osgi.framework.hooks.service.FindHook.class};
-		Object[] constructorArgs = new Object[] {findHook};
+		Class<?>[] classParams = new Class<?>[] {RegionDigraph.class};
+		Object[] constructorArgs = new Object[] {digraph};
 		return (org.osgi.framework.hooks.service.EventHook) newInstance(regionServiceEventHook, classParams, constructorArgs);
 	}
 

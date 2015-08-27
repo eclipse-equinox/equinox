@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 VMware Inc.
+ * Copyright (c) 2015 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,6 +47,10 @@ public final class RegionServiceFindHook implements FindHook {
 		}
 
 		Region finderRegion = this.regionDigraph.getRegion(finderBundle);
+		RegionServiceFindHook.find(finderRegion, references);
+	}
+
+	static void find(Region finderRegion, Collection<ServiceReference<?>> references) {
 		if (finderRegion == null) {
 			references.clear();
 			return;
@@ -59,7 +63,7 @@ public final class RegionServiceFindHook implements FindHook {
 		references.retainAll(allowed);
 	}
 
-	class Visitor extends RegionDigraphVisitorBase<ServiceReference<?>> {
+	static class Visitor extends RegionDigraphVisitorBase<ServiceReference<?>> {
 
 		Visitor(Collection<ServiceReference<?>> candidates) {
 			super(candidates);
