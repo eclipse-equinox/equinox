@@ -692,13 +692,13 @@ public class HttpServiceRuntimeImpl
 		// check the pattern against the original input
 		ContextController.checkPattern(alias);
 
-		String pattern = alias;
-		// need to make sure exact matching aliases are converted to wildcard pattern matches
-		if (!pattern.endsWith(Const.SLASH_STAR) && !pattern.startsWith(Const.STAR_DOT) && !pattern.contains(Const.SLASH_STAR_DOT)) {
-			if (pattern.endsWith(Const.SLASH)) {
-				pattern = pattern + '*';
+		Object pattern = alias;
+		// need to make sure exact matching aliases are converted to exact matching + wildcard pattern matching
+		if (!alias.endsWith(Const.SLASH_STAR) && !alias.startsWith(Const.STAR_DOT) && !alias.contains(Const.SLASH_STAR_DOT)) {
+			if (alias.endsWith(Const.SLASH)) {
+				pattern = new String[] {alias, alias + '*'};
 			} else {
-				pattern = pattern + Const.SLASH_STAR;
+				pattern = new String[] {alias, alias + Const.SLASH_STAR};
 			}
 		}
 

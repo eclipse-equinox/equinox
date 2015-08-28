@@ -1726,6 +1726,39 @@ public class ServletTest extends TestCase {
 		Assert.assertEquals("p=1&p=2|1|[1, 2]", result);
 	}
 
+	public void test_ServletExactMatchPrecidence() throws Exception {
+		Servlet sA = new HttpServlet() {
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+
+				response.getWriter().write('a');
+			}
+
+		};
+
+		Servlet sB = new HttpServlet() {
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+
+				response.getWriter().write('b');
+			}
+
+		};
+
+		HttpService httpService = getHttpService();
+
+		HttpContext httpContext = httpService.createDefaultHttpContext();
+
+		httpService.registerServlet("*.txt", sA, null, httpContext);
+		httpService.registerServlet("/files/help.txt", sB, null, httpContext);
+
+		Assert.assertEquals("b", requestAdvisor.request("files/help.txt"));
+	}
+
 	private static String getSubmittedFileName(Part part) {
 		for (String cd : part.getHeader("content-disposition").split(";")) {
 			if (cd.trim().startsWith("filename")) {
