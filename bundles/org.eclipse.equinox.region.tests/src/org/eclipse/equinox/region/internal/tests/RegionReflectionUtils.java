@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -172,10 +172,10 @@ public class RegionReflectionUtils {
 		return (CollisionHook) newInstance(regionBundleCollisionHook, classParams, constructorArgs);
 	}
 
-	public static EventHook newRegionBundleEventHook(RegionDigraph digraph, FindHook findHook, ThreadLocal<Region> threadLocal) {
+	public static EventHook newRegionBundleEventHook(RegionDigraph digraph, ThreadLocal<Region> threadLocal, long bundleId) {
 		Class<?> regionBundleEventHook = loadRegionImplClass(RegionBundleEventHook);
-		Class<?>[] classParams = new Class<?>[] {RegionDigraph.class, FindHook.class, ThreadLocal.class};
-		Object[] constructorArgs = new Object[] {digraph, findHook, threadLocal};
+		Class<?>[] classParams = new Class<?>[] {RegionDigraph.class, ThreadLocal.class, long.class};
+		Object[] constructorArgs = new Object[] {digraph, threadLocal, bundleId};
 		return (EventHook) newInstance(regionBundleEventHook, classParams, constructorArgs);
 	}
 

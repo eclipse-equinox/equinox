@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 VMware Inc.
+ * Copyright (c) 2011, 2015 VMware Inc. and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,6 @@ import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.EventHook;
-import org.osgi.framework.hooks.bundle.FindHook;
 
 /**
  * {@link RegionBundleEventHook} manages the visibility of bundle events across regions according to the
@@ -33,14 +32,14 @@ public final class RegionBundleEventHook implements EventHook {
 
 	private final RegionDigraph regionDigraph;
 
-	private final FindHook bundleFindHook;
-
 	private final ThreadLocal<Region> threadLocal;
 
-	public RegionBundleEventHook(RegionDigraph regionDigraph, FindHook bundleFindBook, ThreadLocal<Region> threadLocal) {
+	private final long hookImplID;
+
+	public RegionBundleEventHook(RegionDigraph regionDigraph, ThreadLocal<Region> threadLocal, long hookImplID) {
 		this.regionDigraph = regionDigraph;
-		this.bundleFindHook = bundleFindBook;
 		this.threadLocal = threadLocal;
+		this.hookImplID = hookImplID;
 	}
 
 	/**
@@ -52,10 +51,35 @@ public final class RegionBundleEventHook implements EventHook {
 		if (event.getType() == BundleEvent.INSTALLED) {
 			bundleInstalled(eventBundle, event.getOrigin());
 		}
+		Map<Region, Boolean> regionAccess = new HashMap<Region, Boolean>();
 		Iterator<BundleContext> i = contexts.iterator();
 		while (i.hasNext()) {
-			if (!find(i.next(), eventBundle)) {
+			Bundle bundle = RegionBundleFindHook.getBundle(i.next());
+			if (bundle == null) {
+				// no bundle for context remove access from it
 				i.remove();
+				continue;
+			}
+
+			long bundleID = bundle.getBundleId();
+			if (bundleID == 0 || bundleID == hookImplID) {
+				// The system bundle and the hook impl bundle can see all bundles
+				continue;
+			}
+			Region region = regionDigraph.getRegion(bundle);
+			if (region == null) {
+				// no region for context remove access from it
+				i.remove();
+			} else {
+				Boolean accessible = regionAccess.get(region);
+				if (accessible == null) {
+					// we have not checked this region's access do it now
+					accessible = isAccessible(region, eventBundle);
+					regionAccess.put(region, accessible);
+				}
+				if (!accessible) {
+					i.remove();
+				}
 			}
 		}
 		if (event.getType() == BundleEvent.UNINSTALLED) {
@@ -63,10 +87,10 @@ public final class RegionBundleEventHook implements EventHook {
 		}
 	}
 
-	private boolean find(BundleContext finderBundleContext, Bundle candidateBundle) {
+	private boolean isAccessible(Region region, Bundle candidateBundle) {
 		Collection<Bundle> candidates = new ArrayList<Bundle>(1);
 		candidates.add(candidateBundle);
-		this.bundleFindHook.find(finderBundleContext, candidates);
+		RegionBundleFindHook.find(region, candidates);
 		return !candidates.isEmpty();
 	}
 

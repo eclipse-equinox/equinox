@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2015 VMware Inc.
+ * Copyright (c) 2011, 2015 VMware Inc. and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -94,21 +94,21 @@ public class RegionServiceEventHookTests {
 	}
 
 	@Test
-	public void testFindInSameRegion() {
+	public void testEventInSameRegion() {
 		Collection<BundleContext> contexts = bundleContexts(BUNDLE_A);
 		this.serviceEventHook.event(serviceEvent(BUNDLE_A), contexts);
 		assertTrue(contexts.contains(bundleContext(BUNDLE_A)));
 	}
 
 	@Test
-	public void testFindInDisconnectedRegion() {
+	public void testEventInDisconnectedRegion() {
 		Collection<BundleContext> contexts = bundleContexts(BUNDLE_A);
 		this.serviceEventHook.event(serviceEvent(BUNDLE_B), contexts);
 		assertFalse(contexts.contains(bundleContext(BUNDLE_A)));
 	}
 
 	@Test
-	public void testFindConnectedRegionAllowed() throws BundleException, InvalidSyntaxException {
+	public void testEventConnectedRegionAllowed() throws BundleException, InvalidSyntaxException {
 		RegionFilter filter = createFilter(BUNDLE_B);
 		region(REGION_A).connectRegion(region(REGION_B), filter);
 
@@ -118,7 +118,7 @@ public class RegionServiceEventHookTests {
 	}
 
 	@Test
-	public void testFindConnectedRegionFiltering() throws BundleException, InvalidSyntaxException {
+	public void testEventConnectedRegionFiltering() throws BundleException, InvalidSyntaxException {
 		region(REGION_A).connectRegion(region(REGION_B), createFilter(BUNDLE_B));
 		Bundle x = createBundle(BUNDLE_X);
 		region(REGION_B).addBundle(x);
@@ -131,7 +131,7 @@ public class RegionServiceEventHookTests {
 	}
 
 	@Test
-	public void testFindTransitive() throws BundleException, InvalidSyntaxException {
+	public void testEventTransitive() throws BundleException, InvalidSyntaxException {
 		region(REGION_A).connectRegion(region(REGION_B), createFilter(BUNDLE_C));
 		region(REGION_B).connectRegion(region(REGION_C), createFilter(BUNDLE_C));
 		region(REGION_C).addBundle(bundle(BUNDLE_X));
@@ -147,11 +147,10 @@ public class RegionServiceEventHookTests {
 		assertFalse(contexts.contains(bundleContext(BUNDLE_B)));
 		assertTrue(contexts.contains(bundleContext(BUNDLE_X)));
 		assertFalse(contexts.contains(bundleContext(BUNDLE_A)));
-
 	}
 
 	@Test
-	public void testFindTransitiveDups() throws BundleException, InvalidSyntaxException {
+	public void testEventTransitiveDups() throws BundleException, InvalidSyntaxException {
 		region(REGION_A).connectRegion(region(REGION_B), createFilter(BUNDLE_C));
 		region(REGION_A).connectRegion(region(REGION_C), createFilter(DUPLICATE_FIlTER));
 		region(REGION_A).connectRegion(region(REGION_D), createFilter(DUPLICATE_FIlTER));
@@ -177,7 +176,7 @@ public class RegionServiceEventHookTests {
 	}
 
 	@Test
-	public void testFindInCyclicGraph() throws BundleException, InvalidSyntaxException {
+	public void testEventInCyclicGraph() throws BundleException, InvalidSyntaxException {
 		region(REGION_D).addBundle(bundle(BUNDLE_X));
 
 		region(REGION_A).connectRegion(region(REGION_B), createFilter(BUNDLE_D, BUNDLE_X));
@@ -220,7 +219,7 @@ public class RegionServiceEventHookTests {
 	}
 
 	@Test
-	public void testFindFromSystemBundle() {
+	public void testEventFromSystemBundle() {
 		Bundle systemBundle = new StubBundle(0L, "sys", BUNDLE_VERSION, "");
 		Collection<BundleContext> contexts = new ArrayList<BundleContext>(Arrays.asList(systemBundle.getBundleContext()));
 		this.serviceEventHook.event(serviceEvent(BUNDLE_A), contexts);
@@ -228,7 +227,7 @@ public class RegionServiceEventHookTests {
 	}
 
 	@Test
-	public void testFindFromBundleInNoRegion() {
+	public void testEventFromBundleInNoRegion() {
 		Bundle stranger = createBundle("stranger");
 		Collection<BundleContext> contexts = new ArrayList<BundleContext>(Arrays.asList(stranger.getBundleContext()));
 		this.serviceEventHook.event(serviceEvent(BUNDLE_A), contexts);

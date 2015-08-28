@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2014 VMware Inc.
+ * Copyright (c) 2011, 2015 VMware Inc. and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,7 +87,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		this.resolverHookFactory = new RegionResolverHookFactory(this);
 
 		this.bundleFindHook = new RegionBundleFindHook(this, bundleContext == null ? 0 : bundleContext.getBundle().getBundleId());
-		this.bundleEventHook = new RegionBundleEventHook(this, this.bundleFindHook, this.threadLocal);
+		this.bundleEventHook = new RegionBundleEventHook(this, this.threadLocal, bundleContext == null ? 0 : bundleContext.getBundle().getBundleId());
 		Object hook;
 		try {
 			hook = new RegionBundleCollisionHook(this, this.threadLocal);
