@@ -298,7 +298,12 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 			}
 		}
 
-		return current.getAttributes().get(attributeName);
+		Map<String, Object> attributes = current.getAttributes();
+		if (attributes.containsKey(attributeName)) {
+			return attributes.get(attributeName);
+		}
+
+		return request.getAttribute(attributeName);
 	}
 
 	@Override
