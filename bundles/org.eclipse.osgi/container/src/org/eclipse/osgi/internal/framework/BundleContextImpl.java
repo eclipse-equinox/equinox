@@ -702,7 +702,12 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 *            method failed
 	 */
 	protected void start() throws BundleException {
+		long start = 0;
 		try {
+			if (debug.DEBUG_BUNDLE_TIME) {
+				start = System.currentTimeMillis();
+				Debug.println("Finding activator for " + bundle); //$NON-NLS-1$
+			}
 			activator = loadBundleActivator();
 		} catch (Exception e) {
 			if (e instanceof RuntimeException) {
@@ -712,9 +717,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		}
 
 		if (activator != null) {
-			long start = 0;
 			if (debug.DEBUG_BUNDLE_TIME) {
-				start = System.currentTimeMillis();
 				Debug.println("Starting " + bundle); //$NON-NLS-1$
 			}
 			try {
