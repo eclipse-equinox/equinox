@@ -869,6 +869,8 @@ public class PreferencesService implements IPreferencesService {
 			properties.load(input);
 		} catch (IOException e) {
 			throw new CoreException(createStatusError(PrefsMessages.preferences_importProblems, e));
+		} catch (IllegalArgumentException e) {
+			throw new CoreException(createStatusError(PrefsMessages.preferences_importProblems, e));
 		} finally {
 			try {
 				input.close();

@@ -75,6 +75,8 @@ public abstract class AbstractPreferenceStorage {
 			result.load(input);
 		} catch (IOException e) {
 			throw new BackingStoreException(PrefsMessages.preferences_loadProblems, e);
+		} catch (IllegalArgumentException e) {
+			throw new BackingStoreException(PrefsMessages.preferences_loadProblems, e);
 		} finally {
 			if (input != null)
 				try {

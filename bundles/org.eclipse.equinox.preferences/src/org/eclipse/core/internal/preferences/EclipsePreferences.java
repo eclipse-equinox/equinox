@@ -735,6 +735,10 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			String message = NLS.bind(PrefsMessages.preferences_loadException, location);
 			log(new Status(IStatus.INFO, PrefsMessages.OWNER_NAME, IStatus.INFO, message, e));
 			throw new BackingStoreException(message);
+		} catch (IllegalArgumentException e) {
+			String message = NLS.bind(PrefsMessages.preferences_loadException, location);
+			log(new Status(IStatus.INFO, PrefsMessages.OWNER_NAME, IStatus.INFO, message, e));
+			throw new BackingStoreException(message);
 		} finally {
 			if (input != null)
 				try {

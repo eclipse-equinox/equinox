@@ -130,6 +130,11 @@ public class InstancePreferences extends EclipsePreferences {
 			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
 				PrefsMessages.message("IOException encountered loading legacy preference file " + prefFile); //$NON-NLS-1$
 			return;
+		} catch (IllegalArgumentException e) {
+			// problems loading preference store - quietly ignore
+			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+				PrefsMessages.message("IllegalArgumentException encountered loading legacy preference file " + prefFile); //$NON-NLS-1$
+			return;
 		} finally {
 			if (input != null) {
 				try {

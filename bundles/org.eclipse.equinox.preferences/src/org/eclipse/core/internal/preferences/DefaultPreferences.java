@@ -368,6 +368,11 @@ public class DefaultPreferences extends EclipsePreferences {
 				PrefsMessages.message("Problem opening stream to preference customization file: " + url); //$NON-NLS-1$
 				e.printStackTrace();
 			}
+		} catch (IllegalArgumentException e) {
+			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
+				PrefsMessages.message("Problem opening stream to preference customization file: " + url); //$NON-NLS-1$
+				e.printStackTrace();
+			}
 		} finally {
 			if (input != null)
 				try {
@@ -389,6 +394,10 @@ public class DefaultPreferences extends EclipsePreferences {
 			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
 				PrefsMessages.message("Preference customization file not found: " + filename); //$NON-NLS-1$
 		} catch (IOException e) {
+			String message = NLS.bind(PrefsMessages.preferences_loadException, filename);
+			IStatus status = new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, message, e);
+			RuntimeLog.log(status);
+		} catch (IllegalArgumentException e) {
 			String message = NLS.bind(PrefsMessages.preferences_loadException, filename);
 			IStatus status = new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, message, e);
 			RuntimeLog.log(status);
