@@ -225,6 +225,90 @@
       </build>
     </profile>
     <profile>
+      <id>build-native-launchers-gtk.linux.arm</id>
+      <activation>
+        <property>
+          <name>native</name>
+          <value>gtk.linux.arm</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>compile-executable-natives</id>
+                <phase>generate-resources</phase>
+                <configuration>
+                  <target>
+                    <ant antfile="build.xml" dir="library/gtk/" target="build_eclipse"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>clean-executable-natives</id>
+                <phase>clean</phase>
+                <configuration>
+                  <target>
+                    <ant antfile="build.xml" dir="library/gtk/" target="clean"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>build-native-launchers-gtk.linux.aarch64</id>
+      <activation>
+        <property>
+          <name>native</name>
+          <value>gtk.linux.aarch64</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>compile-executable-natives</id>
+                <phase>generate-resources</phase>
+                <configuration>
+                  <target>
+                    <ant antfile="build.xml" dir="library/gtk/" target="build_eclipse"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>clean-executable-natives</id>
+                <phase>clean</phase>
+                <configuration>
+                  <target>
+                    <ant antfile="build.xml" dir="library/gtk/" target="clean"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
       <id>build-native-launchers-win32.win32.x86_64</id>
       <activation>
         <property>
@@ -379,6 +463,8 @@
                         <include name="gtk/aix/ppc/**/*"/>
                         <include name="gtk/aix/ppc64/**/*"/>
                         <include name="gtk/hpux/ia64/**/*"/>
+                        <include name="gtk/linux/arm/**/*"/>
+                        <include name="gtk/linux/aarch64/**/*"/>
                         <include name="gtk/linux/ppc/**/*"/>
                         <include name="gtk/linux/ppc64/**/*"/>
                         <include name="gtk/linux/ppc64le/**/*"/>

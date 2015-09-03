@@ -49,6 +49,30 @@
         </repository>
       </repositories>
     </profile>
+    <profile>
+      <id>build-native-launchers-gtk.linux.arm</id>
+      <activation>
+	<property>
+	  <name>native</name>
+	  <value>gtk.linux.arm</value>
+        </property>
+      </activation>
+      <modules>
+	<module>bundles/org.eclipse.equinox.launcher.gtk.linux.arm</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>build-native-launchers-gtk.linux.aarch64</id>
+      <activation>
+	<property>
+	  <name>native</name>
+	  <value>gtk.linux.aarch64</value>
+        </property>
+      </activation>
+      <modules>
+	<module>bundles/org.eclipse.equinox.launcher.gtk.linux.aarch64</module>
+      </modules>
+    </profile>
   </profiles>
 
   <modules>
