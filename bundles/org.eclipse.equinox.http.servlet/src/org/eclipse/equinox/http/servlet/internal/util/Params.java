@@ -24,6 +24,9 @@ public class Params {
 	}
 
 	public static String[] append(String[] params, String... values) {
+		if (values == null) {
+			values = new String[] {null};
+		}
 		String[] tmp = values;
 		int length = 0;
 		if (params != null) {
