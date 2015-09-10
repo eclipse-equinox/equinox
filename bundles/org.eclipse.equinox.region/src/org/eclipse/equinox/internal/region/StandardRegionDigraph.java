@@ -16,8 +16,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.eclipse.equinox.internal.region.hook.*;
 import org.eclipse.equinox.region.*;
 import org.osgi.framework.*;
-import org.osgi.framework.hooks.bundle.EventHook;
-import org.osgi.framework.hooks.bundle.FindHook;
+import org.osgi.framework.hooks.bundle.*;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 
 /**
@@ -53,7 +52,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 
 	private final SubgraphTraverser subgraphTraverser;
 
-	private final Object bundleCollisionHook;
+	private final org.osgi.framework.hooks.bundle.CollisionHook bundleCollisionHook;
 	private final org.osgi.framework.hooks.bundle.EventHook bundleEventHook;
 	private final org.osgi.framework.hooks.bundle.FindHook bundleFindHook;
 	@SuppressWarnings("deprecation")
@@ -88,13 +87,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 
 		this.bundleFindHook = new RegionBundleFindHook(this, bundleContext == null ? 0 : bundleContext.getBundle().getBundleId());
 		this.bundleEventHook = new RegionBundleEventHook(this, this.threadLocal, bundleContext == null ? 0 : bundleContext.getBundle().getBundleId());
-		Object hook;
-		try {
-			hook = new RegionBundleCollisionHook(this, this.threadLocal);
-		} catch (Throwable t) {
-			hook = null;
-		}
-		this.bundleCollisionHook = hook;
+		this.bundleCollisionHook = new RegionBundleCollisionHook(this, this.threadLocal);
 
 		this.serviceFindHook = new RegionServiceFindHook(this);
 		this.serviceEventHook = new RegionServiceEventHook(this);
@@ -477,7 +470,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		return resolverHookFactory;
 	}
 
-	Object getBundleCollisionHook() {
+	CollisionHook getBundleCollisionHook() {
 		return bundleCollisionHook;
 	}
 

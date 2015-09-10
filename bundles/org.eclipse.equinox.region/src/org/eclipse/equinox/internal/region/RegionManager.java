@@ -12,14 +12,12 @@
 package org.eclipse.equinox.internal.region;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 import org.eclipse.equinox.internal.region.management.StandardManageableRegionDigraph;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.*;
-import org.osgi.framework.hooks.bundle.EventHook;
-import org.osgi.framework.hooks.bundle.FindHook;
+import org.osgi.framework.hooks.bundle.*;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 
 /**
@@ -38,6 +36,7 @@ public final class RegionManager implements BundleActivator {
 	private static final String REGION_DOMAIN_PROP = "org.eclipse.equinox.region.domain"; //$NON-NLS-1$
 	private static final String DIGRAPH_FILE = "digraph"; //$NON-NLS-1$
 	private static final String REGION_REGISTER_MBEANS = "org.eclipse.equinox.region.register.mbeans"; //$NON-NLS-1$
+	private static final Dictionary<String, Object> MAX_RANKING = new Hashtable<String, Object>(Collections.singletonMap(Constants.SERVICE_RANKING, Integer.MAX_VALUE));
 
 	Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 
@@ -62,7 +61,7 @@ public final class RegionManager implements BundleActivator {
 		// if they do then we assume the need to be in the kernel region
 		checkForOrphans(digraph);
 		digraphMBean = registerDigraphMbean(digraph);
-		registerRegionDigraph(digraph);
+		registerService(RegionDigraph.class, digraph);
 	}
 
 	private void checkForOrphans(StandardRegionDigraph regionDigraph) {
@@ -144,47 +143,19 @@ public final class RegionManager implements BundleActivator {
 		return standardManageableRegionDigraph;
 	}
 
-	private void registerRegionHooks(StandardRegionDigraph regionDigraph) {
-		registerResolverHookFactory(regionDigraph.getResolverHookFactory());
-
-		registerBundleCollisionHook(regionDigraph.getBundleCollisionHook());
-		registerBundleFindHook(regionDigraph.getBundleFindHook());
-		registerBundleEventHook(regionDigraph.getBundleEventHook());
-
-		registerServiceFindHook(regionDigraph.getServiceFindHook());
-		registerServiceEventHook(regionDigraph.getServiceEventHook());
-	}
-
-	private void registerRegionDigraph(RegionDigraph regionDigraph) {
-		this.registrations.add(this.bundleContext.registerService(RegionDigraph.class, regionDigraph, null));
-	}
-
-	private void registerServiceFindHook(org.osgi.framework.hooks.service.FindHook serviceFindHook) {
-		this.registrations.add(this.bundleContext.registerService(org.osgi.framework.hooks.service.FindHook.class, serviceFindHook, null));
-	}
-
 	@SuppressWarnings("deprecation")
-	private void registerServiceEventHook(org.osgi.framework.hooks.service.EventHook serviceEventHook) {
-		this.registrations.add(this.bundleContext.registerService(org.osgi.framework.hooks.service.EventHook.class, serviceEventHook, null));
+	private void registerRegionHooks(StandardRegionDigraph regionDigraph) {
+		registerService(ResolverHookFactory.class, regionDigraph.getResolverHookFactory());
+
+		registerService(CollisionHook.class, regionDigraph.getBundleCollisionHook());
+		registerService(FindHook.class, regionDigraph.getBundleFindHook());
+		registerService(EventHook.class, regionDigraph.getBundleEventHook());
+
+		registerService(org.osgi.framework.hooks.service.FindHook.class, regionDigraph.getServiceFindHook());
+		registerService(org.osgi.framework.hooks.service.EventHook.class, regionDigraph.getServiceEventHook());
 	}
 
-	private void registerBundleFindHook(FindHook findHook) {
-		this.registrations.add(this.bundleContext.registerService(FindHook.class, findHook, null));
+	private <S> void registerService(Class<S> clazz, S service) {
+		this.registrations.add(this.bundleContext.registerService(clazz, service, MAX_RANKING));
 	}
-
-	private void registerBundleEventHook(EventHook eventHook) {
-		this.registrations.add(this.bundleContext.registerService(EventHook.class, eventHook, null));
-
-	}
-
-	private void registerBundleCollisionHook(Object collisionHook) {
-		if (collisionHook != null) {
-			this.registrations.add(this.bundleContext.registerService("org.osgi.framework.hooks.bundle.CollisionHook", collisionHook, null)); //$NON-NLS-1$
-		}
-	}
-
-	private void registerResolverHookFactory(ResolverHookFactory resolverHookFactory) {
-		this.registrations.add(this.bundleContext.registerService(ResolverHookFactory.class, resolverHookFactory, null));
-	}
-
 }

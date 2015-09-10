@@ -741,7 +741,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 	}
 
-	public void testHigherRankedEventHook() throws BundleException {
+	public void testHigherRankedEventHookResolve() throws BundleException {
 		final List<BundleEvent> events = new CopyOnWriteArrayList<BundleEvent>();
 		SynchronousBundleListener listener = new SynchronousBundleListener() {
 			@Override
@@ -770,7 +770,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			bundleEventHook.unregister();
 		}
 
-		for (int eventType : new int[] {BundleEvent.INSTALLED, BundleEvent.RESOLVED, BundleEvent.STARTING, BundleEvent.STARTED}) {
+		// Had to change the expected order to be out of order now since region hooks are always first
+		for (int eventType : new int[] {BundleEvent.RESOLVED, BundleEvent.INSTALLED, BundleEvent.STARTING, BundleEvent.STARTED}) {
 			if (events.isEmpty()) {
 				fail("No events left, expecting event: " + eventType);
 			}
@@ -778,6 +779,32 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			assertEquals("Wrong event type.", eventType, event.getType());
 			assertEquals("Wrong bundle.", b, event.getBundle());
 		}
+	}
+
+	public void testHigherRankedEventHookUninstall() throws BundleException {
+		// register a higher ranked bundle EventHook that causes a bundle to resolve while processing INSTALLED events
+		ServiceRegistration<EventHook> bundleEventHook = getContext().registerService(EventHook.class, new EventHook() {
+			@Override
+			public void event(BundleEvent event, Collection<BundleContext> contexts) {
+				// force uninstall if event is INSTALLED (evil)
+				if (event.getType() == BundleEvent.INSTALLED) {
+					try {
+						event.getBundle().uninstall();
+					} catch (BundleException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}, new Hashtable<String, Object>(Collections.singletonMap(Constants.SERVICE_RANKING, Integer.MAX_VALUE)));
+		Bundle b = null;
+		try {
+			// install a bundle with no dependencies
+			b = bundleInstaller.installBundle(CP1);
+		} finally {
+			bundleEventHook.unregister();
+		}
+
+		assertNull("Found region for uninstalled bundle.", digraph.getRegion(b));
 	}
 
 }
