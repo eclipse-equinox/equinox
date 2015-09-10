@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2013 VMware Inc.
+ * Copyright (c) 2011, 2015 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -118,8 +118,12 @@ public final class RegionResolverHook implements ResolverHook {
 
 	@Override
 	public void filterResolvable(Collection<BundleRevision> candidates) {
-		// do nothing
-		// may want to consider only allowing candidates contained in the region of the trigger revisions?
+		// filter any revisions that have no region
+		for (Iterator<BundleRevision> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
+			if (getRegion(iCandidates.next()) == null) {
+				iCandidates.remove();
+			}
+		}
 	}
 
 	@Override

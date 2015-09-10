@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2013 IBM Corporation and others.
+ * Copyright (c) 2011, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,10 +15,12 @@ import java.lang.management.ManagementFactory;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.management.*;
 import org.eclipse.equinox.region.*;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.CollisionHook;
+import org.osgi.framework.hooks.bundle.EventHook;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.wiring.*;
@@ -738,4 +740,44 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		}
 
 	}
+
+	public void testHigherRankedEventHook() throws BundleException {
+		final List<BundleEvent> events = new CopyOnWriteArrayList<BundleEvent>();
+		SynchronousBundleListener listener = new SynchronousBundleListener() {
+			@Override
+			public void bundleChanged(BundleEvent event) {
+				events.add(event);
+			}
+		};
+		getContext().addBundleListener(listener);
+		// register a higher ranked bundle EventHook that causes a bundle to resolve while processing INSTALLED events
+		ServiceRegistration<EventHook> bundleEventHook = getContext().registerService(EventHook.class, new EventHook() {
+			@Override
+			public void event(BundleEvent event, Collection<BundleContext> contexts) {
+				// force resolution if event is INSTALLED
+				if (event.getType() == BundleEvent.INSTALLED) {
+					getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION).adapt(FrameworkWiring.class).resolveBundles(Collections.singleton(event.getBundle()));
+				}
+			}
+		}, new Hashtable<String, Object>(Collections.singletonMap(Constants.SERVICE_RANKING, Integer.MAX_VALUE)));
+		Bundle b = null;
+		try {
+			// install a bundle with no dependencies
+			b = bundleInstaller.installBundle(CP1);
+			b.start();
+		} finally {
+			getContext().removeBundleListener(listener);
+			bundleEventHook.unregister();
+		}
+
+		for (int eventType : new int[] {BundleEvent.INSTALLED, BundleEvent.RESOLVED, BundleEvent.STARTING, BundleEvent.STARTED}) {
+			if (events.isEmpty()) {
+				fail("No events left, expecting event: " + eventType);
+			}
+			BundleEvent event = events.remove(0);
+			assertEquals("Wrong event type.", eventType, event.getType());
+			assertEquals("Wrong bundle.", b, event.getBundle());
+		}
+	}
+
 }

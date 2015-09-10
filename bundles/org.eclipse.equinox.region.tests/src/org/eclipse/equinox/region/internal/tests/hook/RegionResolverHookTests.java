@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 VMware Inc.
+ * Copyright (c) 2012, 2015 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -108,6 +108,13 @@ public class RegionResolverHookTests {
 		this.candidates.add(packageCapability(BUNDLE_A, PACKAGE_A));
 		this.resolverHook.filterMatches(bundleRequirement(BUNDLE_A), this.candidates);
 		assertTrue(this.candidates.contains(packageCapability(BUNDLE_A, PACKAGE_A)));
+	}
+
+	@Test
+	public void testNoRegionResolvable() {
+		Collection<BundleRevision> resolvable = new ArrayList<BundleRevision>(Collections.singleton(new StubBundleRevision(bundle(BUNDLE_X))));
+		this.resolverHook.filterResolvable(resolvable);
+		assertTrue("Resolvable is not empty" + resolvable, resolvable.isEmpty());
 	}
 
 	@Test
@@ -317,7 +324,6 @@ public class RegionResolverHookTests {
 
 	@Test
 	public void testUnimplementedMethods() {
-		this.resolverHook.filterResolvable(null);
 		this.resolverHook.end();
 	}
 
