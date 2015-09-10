@@ -36,7 +36,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	// bundle id modifications of all regions in this digraph
 	private final Object monitor = new Object();
 
-	private final Set<Region> regions = new HashSet<Region>();
+	private final Map<String, Region> regions = new HashMap<String, Region>();
 
 	// Alien calls may be made to the following object while this.monitor is locked
 	// as this.monitor is higher in the lock hierarchy than this object's own monitor.
@@ -116,7 +116,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 			if (getRegion(regionName) != null) {
 				throw new BundleException("Region '" + regionName + "' already exists", BundleException.UNSUPPORTED_OPERATION); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			this.regions.add(region);
+			this.regions.put(region.getName(), region);
 			this.edges.put(region, EMPTY_EDGE_SET);
 			incrementUpdateCount();
 		}
@@ -160,8 +160,8 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 			}
 
 			checkFilterDoesNotAllowExistingBundle(tailRegion, filter);
-			tailAdded = this.regions.add(tailRegion);
-			headAdded = this.regions.add(headRegion);
+			tailAdded = this.regions.put(tailRegion.getName(), tailRegion) == null;
+			headAdded = this.regions.put(headRegion.getName(), headRegion) == null;
 			connections.add(new StandardFilteredRegion(headRegion, filter));
 			this.edges.put(tailRegion, Collections.unmodifiableSet(connections));
 			incrementUpdateCount();
@@ -184,7 +184,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	public Iterator<Region> iterator() {
 		synchronized (this.monitor) {
 			Set<Region> snapshot = new HashSet<Region>(this.regions.size());
-			snapshot.addAll(this.regions);
+			snapshot.addAll(this.regions.values());
 			return snapshot.iterator();
 		}
 	}
@@ -226,12 +226,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	 */
 	public Region getRegion(String regionName) {
 		synchronized (this.monitor) {
-			for (Region region : this) {
-				if (regionName.equals(region.getName())) {
-					return region;
-				}
-			}
-			return null;
+			return regions.get(regionName);
 		}
 	}
 
@@ -262,7 +257,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 			if (this.defaultRegion != null && this.defaultRegion.equals(region)) {
 				this.defaultRegion = null;
 			}
-			this.regions.remove(region);
+			this.regions.remove(region.getName());
 			this.edges.remove(region);
 			for (Region r : this.edges.keySet()) {
 				Set<FilteredRegion> edgeSet = this.edges.get(r);
@@ -319,7 +314,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	public Set<Region> getRegions() {
 		Set<Region> result = new HashSet<Region>();
 		synchronized (this.monitor) {
-			result.addAll(this.regions);
+			result.addAll(this.regions.values());
 		}
 		return result;
 	}
@@ -421,10 +416,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 			if (check && this.updateCount.get() != replacement.originUpdateCount) {
 				throw new BundleException("The origin update count has changed since the replacement copy was created.", BundleException.INVALID_OPERATION); //$NON-NLS-1$
 			}
-			Map<String, Region> nameToRegion = new HashMap<String, Region>();
-			for (Region region : regions) {
-				nameToRegion.put(region.getName(), region);
-			}
+			Map<String, Region> nameToRegion = new HashMap<String, Region>(regions);
 			this.regions.clear();
 			this.edges.clear();
 			this.bundleIdToRegionMapping.clear();
@@ -432,7 +424,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 				Region copy = nameToRegion.get(original.getName());
 				if (copy != null) {
 					// reuse the previous region object
-					regions.add(copy);
+					regions.put(copy.getName(), copy);
 					edges.put(copy, EMPTY_EDGE_SET);
 				} else {
 					// create a new one
@@ -541,7 +533,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	}
 
 	private void checkRegionExists(Region region) {
-		if (!this.regions.contains(region)) {
+		if (this.regions.get(region.getName()) == null) {
 			throw new IllegalStateException("Operation not allowed on region " + region.getName() + " which is not part of a digraph"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}

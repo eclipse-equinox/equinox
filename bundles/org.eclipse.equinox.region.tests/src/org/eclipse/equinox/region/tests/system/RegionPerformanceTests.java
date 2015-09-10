@@ -38,7 +38,7 @@ public class RegionPerformanceTests extends AbstractRegionSystemTest {
 		runner.run(this, fingerPrintName, 10, 300);
 	}
 
-	public void testGetBundlesNoRegions() throws BundleException {
+	public void testGetBundlesNoRegions() {
 		doTestGetBundles(null, null);
 	}
 
@@ -57,7 +57,7 @@ public class RegionPerformanceTests extends AbstractRegionSystemTest {
 		doTestGetBundles(null, null);
 	}
 
-	public void testGetServicesNoRegions() throws BundleException {
+	public void testGetServicesNoRegions() {
 		doTestGetServices(null, null);
 	}
 
@@ -68,12 +68,31 @@ public class RegionPerformanceTests extends AbstractRegionSystemTest {
 
 	public void testGetServices100Regions() throws BundleException {
 		createRegions(100);
-		doTestGetBundles(null, null);
+		doTestGetServices(null, null);
 	}
 
 	public void testGetServices1000Regions() throws BundleException {
 		createRegions(1000);
-		doTestGetBundles(null, null);
+		doTestGetServices(null, null);
+	}
+
+	public void testGetRegionByNameNoRegions() {
+		doTestGetRegionByName(null, null);
+	}
+
+	public void testGetRegionByName10Regions() throws BundleException {
+		createRegions(10);
+		doTestGetRegionByName(null, null);
+	}
+
+	public void testGetRegionByName100Regions() throws BundleException {
+		createRegions(100);
+		doTestGetRegionByName(null, null);
+	}
+
+	public void testGetRegionByName1000Regions() throws BundleException {
+		createRegions(1000);
+		doTestGetRegionByName(null, null);
 	}
 
 	private void doTestGetServices(String fingerPrintName, String degradation) {
@@ -84,6 +103,20 @@ public class RegionPerformanceTests extends AbstractRegionSystemTest {
 					context.getServiceReferences(RegionDigraph.class, null);
 				} catch (InvalidSyntaxException e) {
 					fail(e.getMessage());
+				}
+			}
+		};
+		runner.setRegressionReason(degradation);
+		runner.run(this, fingerPrintName, 10, 2000);
+	}
+
+	private void doTestGetRegionByName(String fingerPrintName, String degradation) {
+		final RegionDigraph current = digraph;
+		final Region[] regions = current.getRegions().toArray(new Region[0]);
+		PerformanceTestRunner runner = new PerformanceTestRunner() {
+			protected void test() {
+				for (Region region : regions) {
+					current.getRegion(region.getName());
 				}
 			}
 		};
