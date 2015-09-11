@@ -315,6 +315,10 @@ public class Activator implements BundleActivator {
 	 * find one.
 	 */
 	public static URLConverter getURLConverter(URL url) {
+		BundleContext ctx = getContext();
+		if (url == null || ctx == null) {
+			return null;
+		}
 		String protocol = url.getProtocol();
 		synchronized (urlTrackers) {
 			ServiceTracker<Object, URLConverter> tracker = urlTrackers.get(protocol);
@@ -324,7 +328,7 @@ public class Activator implements BundleActivator {
 				String FILTER_POSTFIX = "))"; //$NON-NLS-1$
 				Filter filter = null;
 				try {
-					filter = getContext().createFilter(FILTER_PREFIX + protocol + FILTER_POSTFIX);
+					filter = ctx.createFilter(FILTER_PREFIX + protocol + FILTER_POSTFIX);
 				} catch (InvalidSyntaxException e) {
 					return null;
 				}
