@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.management.*;
 import org.eclipse.equinox.region.*;
+import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.bundle.EventHook;
@@ -807,4 +808,55 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertNull("Found region for uninstalled bundle.", digraph.getRegion(b));
 	}
 
+	public void testReconnect() throws BundleException, InvalidSyntaxException {
+		// get the system region
+		Region systemRegion = digraph.getRegion(0);
+		Map<String, Bundle> bundles = new HashMap<String, Bundle>();
+		// create a disconnected test region for each test bundle
+		for (String location : new String[] {PP1, SP1}) {
+			Region testRegion = digraph.createRegion(location);
+			bundles.put(location, bundleInstaller.installBundle(location, testRegion));
+			// Import the system bundle from the systemRegion
+			digraph.connect(testRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(), systemRegion);
+			// must import Boolean services into systemRegion to test
+			digraph.connect(systemRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build(), testRegion);
+		}
+
+		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
+		assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
+		assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
+
+		// now make a connection that does not let the necessary package through
+		RegionFilter badRegionFilter = digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=bad)").build();
+
+		Set<FilteredRegion> edges = digraph.getRegion(SP1).getEdges();
+		assertEquals("Wrong number of edges.", 1, edges.size());
+
+		// use reconnnect and verify a new edge is added if the connection did not exist already
+		assertNull("Found existing connection.", digraph.reconnect(digraph.getRegion(SP1), badRegionFilter, digraph.getRegion(PP1)));
+		edges = digraph.getRegion(SP1).getEdges();
+		assertEquals("Wrong number of edges.", 2, edges.size());
+
+		// still should not resolve
+		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
+		assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
+		assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
+
+		// reconnect to let the package though
+		RegionFilter goodRegionFilter = digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)").build();
+		RegionFilter existingFilter = digraph.reconnect(digraph.getRegion(SP1), goodRegionFilter, digraph.getRegion(PP1));
+		assertEquals("Wrong existing filter found.", badRegionFilter, existingFilter);
+
+		// number of edges must remain 2 since we use reconnect
+		edges = digraph.getRegion(SP1).getEdges();
+		assertEquals("Wrong number of edges.", 2, edges.size());
+		// should resolve now
+
+		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
+		for (Bundle bundle : bundles.values()) {
+			assertEquals("Bundle did not resolve: " + bundle.getSymbolicName(), Bundle.RESOLVED, bundle.getState());
+			bundle.start();
+		}
+
+	}
 }

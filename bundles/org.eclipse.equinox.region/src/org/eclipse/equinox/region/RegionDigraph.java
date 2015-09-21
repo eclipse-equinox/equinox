@@ -134,7 +134,7 @@ public interface RegionDigraph extends Iterable<Region> {
 	Region getRegion(long bundleId);
 
 	/**
-	 * Connects a given tail region to a given head region via an edge labelled with the given {@link RegionFilter}. The
+	 * Connects a given tail region to a given head region via an edge labeled with the given {@link RegionFilter}. The
 	 * tail region may then, subject to the region filter, see bundles, packages, and services visible in the head
 	 * region.
 	 * <p>
@@ -152,6 +152,27 @@ public interface RegionDigraph extends Iterable<Region> {
 	 * @throws BundleException if the edge was not created
 	 */
 	void connect(Region tailRegion, RegionFilter filter, Region headRegion) throws BundleException;
+
+	/**
+	 * Connects a given tail region to a given head region via an edge labeled with the given {@link RegionFilter}. The
+	 * tail region may then, subject to the region filter, see bundles, packages, and services visible in the head
+	 * region.
+	 * <p>
+	 * The given head and tail regions are added to the digraph if they are not already present.
+	 * <p>
+	 * If the given tail region is already connected to the given head region, then the existing 
+	 * {@link RegionFilter filter} is replaced by the given {@link RegionFilter}.
+	 * <p>
+	 * If the given head and the given tail are identical, then BundleException with exception type
+	 * UNSUPPORTED_OPERATION is thrown.
+	 * 
+	 * @param tailRegion the region at the tail of the new edge
+	 * @param filter a {@link RegionFilter} which labels the new edge
+	 * @param headRegion the region at the head of the new edge
+	 * @return the existing region filter that was replaced or <code>null</code>.
+	 * @throws BundleException if the edge was not created
+	 */
+	RegionFilter reconnect(Region tailRegion, RegionFilter filter, Region headRegion) throws BundleException;
 
 	/**
 	 * Gets a {@link Set} containing a snapshot of the {@link FilteredRegion FilteredRegions} attached to the given tail

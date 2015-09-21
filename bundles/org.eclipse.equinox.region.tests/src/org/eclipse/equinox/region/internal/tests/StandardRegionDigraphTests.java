@@ -129,6 +129,15 @@ public class StandardRegionDigraphTests {
 	}
 
 	@Test
+	public void testReConnection() throws BundleException {
+		setDefaultFilters();
+		replayMocks();
+
+		this.digraph.connect(this.mockRegion1, this.regionFilter1, this.mockRegion2);
+		this.digraph.reconnect(this.mockRegion1, this.regionFilter2, this.mockRegion2);
+	}
+
+	@Test
 	public void testGetEdges() throws BundleException {
 		setDefaultFilters();
 		replayMocks();
@@ -144,6 +153,21 @@ public class StandardRegionDigraphTests {
 		for (FilteredRegion edge : edges) {
 			if (edge.getRegion().equals(this.mockRegion2)) {
 				assertEquals(this.regionFilter1, edge.getFilter());
+			} else if (edge.getRegion().equals(this.mockRegion3)) {
+				assertEquals(this.regionFilter2, edge.getFilter());
+			} else {
+				fail("unexpected edge");
+			}
+		}
+
+		this.digraph.reconnect(this.mockRegion1, this.regionFilter2, this.mockRegion2);
+
+		edges = this.digraph.getEdges(this.mockRegion1);
+		assertEquals(2, edges.size());
+
+		for (FilteredRegion edge : edges) {
+			if (edge.getRegion().equals(this.mockRegion2)) {
+				assertEquals(this.regionFilter2, edge.getFilter());
 			} else if (edge.getRegion().equals(this.mockRegion3)) {
 				assertEquals(this.regionFilter2, edge.getFilter());
 			} else {

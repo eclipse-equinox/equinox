@@ -130,6 +130,17 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	 * {@inheritDoc}
 	 */
 	public void connect(Region tailRegion, RegionFilter filter, Region headRegion) throws BundleException {
+		createConnection(tailRegion, filter, headRegion, false);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public RegionFilter reconnect(Region tailRegion, RegionFilter filter, Region headRegion) throws BundleException {
+		return createConnection(tailRegion, filter, headRegion, true);
+	}
+
+	private RegionFilter createConnection(Region tailRegion, RegionFilter filter, Region headRegion, boolean replace) throws BundleException {
 		if (tailRegion == null)
 			throw new IllegalArgumentException("The tailRegion must not be null."); //$NON-NLS-1$
 		if (filter == null)
@@ -144,6 +155,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		if (headRegion.getRegionDigraph() != this)
 			throw new IllegalArgumentException("The headRegion does not belong to this digraph."); //$NON-NLS-1$
 
+		FilteredRegion existing = null;
 		boolean tailAdded = false;
 		boolean headAdded = false;
 		synchronized (this.monitor) {
@@ -154,7 +166,11 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 				connections = new HashSet<FilteredRegion>(connections);
 				for (FilteredRegion edge : connections) {
 					if (headRegion.equals(edge.getRegion())) {
-						throw new BundleException("Region '" + tailRegion + "' is already connected to region '" + headRegion, BundleException.UNSUPPORTED_OPERATION); //$NON-NLS-1$ //$NON-NLS-2$
+						if (replace) {
+							existing = edge;
+						} else {
+							throw new BundleException("Region '" + tailRegion + "' is already connected to region '" + headRegion, BundleException.UNSUPPORTED_OPERATION); //$NON-NLS-1$ //$NON-NLS-2$
+						}
 					}
 				}
 			}
@@ -162,6 +178,9 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 			checkFilterDoesNotAllowExistingBundle(tailRegion, filter);
 			tailAdded = this.regions.put(tailRegion.getName(), tailRegion) == null;
 			headAdded = this.regions.put(headRegion.getName(), headRegion) == null;
+			if (existing != null) {
+				connections.remove(existing);
+			}
 			connections.add(new StandardFilteredRegion(headRegion, filter));
 			this.edges.put(tailRegion, Collections.unmodifiableSet(connections));
 			incrementUpdateCount();
@@ -172,6 +191,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		if (headAdded) {
 			notifyAdded(headRegion);
 		}
+		return existing == null ? null : existing.getFilter();
 	}
 
 	private void checkFilterDoesNotAllowExistingBundle(Region tailRegion, RegionFilter filter) {
