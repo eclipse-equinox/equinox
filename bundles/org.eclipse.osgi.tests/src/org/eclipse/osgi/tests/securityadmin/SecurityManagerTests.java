@@ -19,6 +19,11 @@ import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
 import org.osgi.framework.*;
+import org.osgi.framework.hooks.resolver.ResolverHook;
+import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.framework.wiring.*;
+import org.osgi.resource.Namespace;
 import org.osgi.service.condpermadmin.*;
 import org.osgi.service.packageadmin.*;
 import org.osgi.service.permissionadmin.PermissionInfo;
@@ -649,6 +654,88 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			equinox.stop();
 		} catch (BundleException e) {
 			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+	}
+
+	public void testDynamicImportWithSecurity() throws BundleException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+
+		BundleContext systemContext = equinox.getBundleContext();
+
+		// register a no-op resolver hook to test security
+		ResolverHookFactory dummyHook = new ResolverHookFactory() {
+
+			@Override
+			public ResolverHook begin(Collection<BundleRevision> triggers) {
+				return new ResolverHook() {
+
+					@Override
+					public void filterResolvable(Collection<BundleRevision> candidates) {
+						// nothing
+					}
+
+					@Override
+					public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
+						// nothing
+					}
+
+					@Override
+					public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
+						// always remove candidates for dynamic import
+						if (PackageNamespace.RESOLUTION_DYNAMIC.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
+							candidates.clear();
+						}
+					}
+
+					@Override
+					public void end() {
+						// nothing
+					}
+
+				};
+			}
+		};
+		systemContext.registerService(ResolverHookFactory.class, dummyHook, null);
+
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+		// try installing host and fragment to test bug 245678
+		String testDynamicImportLocation = installer.getBundleLocation("test.dynamicimport"); //$NON-NLS-1$
+		// set the security for the bundle
+		ConditionalPermissionAdmin ca = (ConditionalPermissionAdmin) systemContext.getService(systemContext.getServiceReference(ConditionalPermissionAdmin.class.getName()));
+		ConditionalPermissionUpdate update = ca.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(ca.newConditionalPermissionInfo(null, null, new PermissionInfo[] {allPackagePermission}, ConditionalPermissionInfo.ALLOW));
+		assertTrue("Cannot commit rows", update.commit()); //$NON-NLS-1$
+
+		Bundle testDynamicImport = systemContext.installBundle(testDynamicImportLocation);
+
+		try {
+			testDynamicImport.start();
+		} catch (BundleException e) {
+			fail("Did not start test bundle successfully.", e);
+		}
+
+		// put the framework back to the RESOLVED state
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
 		}
 		try {
 			equinox.waitForStop(10000);

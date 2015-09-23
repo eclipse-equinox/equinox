@@ -164,15 +164,21 @@ class OSGiFrameworkHooks {
 			throw new RuntimeException(message, new BundleException(message, BundleException.REJECTED_BY_HOOK, t));
 		}
 
-		private ServiceReferenceImpl<ResolverHookFactory>[] getHookReferences(ServiceRegistry registry, BundleContextImpl context) {
-			try {
-				@SuppressWarnings("unchecked")
-				ServiceReferenceImpl<ResolverHookFactory>[] result = (ServiceReferenceImpl<ResolverHookFactory>[]) registry.getServiceReferences(context, ResolverHookFactory.class.getName(), null, false);
-				return result;
-			} catch (InvalidSyntaxException e) {
-				// cannot happen; no filter
-				return null;
-			}
+		private ServiceReferenceImpl<ResolverHookFactory>[] getHookReferences(final ServiceRegistry registry, final BundleContextImpl context) {
+			return AccessController.doPrivileged(new PrivilegedAction<ServiceReferenceImpl<ResolverHookFactory>[]>() {
+				@Override
+				public ServiceReferenceImpl<ResolverHookFactory>[] run() {
+					try {
+						@SuppressWarnings("unchecked")
+						ServiceReferenceImpl<ResolverHookFactory>[] result = (ServiceReferenceImpl<ResolverHookFactory>[]) registry.getServiceReferences(context, ResolverHookFactory.class.getName(), null, false);
+						return result;
+					} catch (InvalidSyntaxException e) {
+						// cannot happen; no filter
+						return null;
+					}
+				}
+			});
+
 		}
 
 		public ResolverHook begin(Collection<BundleRevision> triggers) {
@@ -192,7 +198,7 @@ class OSGiFrameworkHooks {
 			List<HookReference> hookRefs = refs == null ? Collections.<CoreResolverHookFactory.HookReference> emptyList() : new ArrayList<CoreResolverHookFactory.HookReference>(refs.length);
 			if (refs != null) {
 				for (ServiceReferenceImpl<ResolverHookFactory> hookRef : refs) {
-					ResolverHookFactory factory = context.getService(hookRef);
+					ResolverHookFactory factory = EquinoxContainer.secureAction.getService(hookRef, context);
 					if (factory != null) {
 						try {
 							ResolverHook hook = factory.begin(triggers);
