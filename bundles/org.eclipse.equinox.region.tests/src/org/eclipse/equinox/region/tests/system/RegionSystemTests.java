@@ -808,7 +808,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertNull("Found region for uninstalled bundle.", digraph.getRegion(b));
 	}
 
-	public void testReconnect() throws BundleException, InvalidSyntaxException {
+	public void testReplaceConnection() throws BundleException, InvalidSyntaxException {
 		// get the system region
 		Region systemRegion = digraph.getRegion(0);
 		Map<String, Bundle> bundles = new HashMap<String, Bundle>();
@@ -832,8 +832,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		Set<FilteredRegion> edges = digraph.getRegion(SP1).getEdges();
 		assertEquals("Wrong number of edges.", 1, edges.size());
 
-		// use reconnnect and verify a new edge is added if the connection did not exist already
-		assertNull("Found existing connection.", digraph.reconnect(digraph.getRegion(SP1), badRegionFilter, digraph.getRegion(PP1)));
+		// use replace and verify a new edge is added if the connection did not exist already
+		assertNull("Found existing connection.", digraph.replaceConnection(digraph.getRegion(SP1), badRegionFilter, digraph.getRegion(PP1)));
 		edges = digraph.getRegion(SP1).getEdges();
 		assertEquals("Wrong number of edges.", 2, edges.size());
 
@@ -844,7 +844,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 		// reconnect to let the package though
 		RegionFilter goodRegionFilter = digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)").build();
-		RegionFilter existingFilter = digraph.reconnect(digraph.getRegion(SP1), goodRegionFilter, digraph.getRegion(PP1));
+		RegionFilter existingFilter = digraph.replaceConnection(digraph.getRegion(SP1), goodRegionFilter, digraph.getRegion(PP1));
 		assertEquals("Wrong existing filter found.", badRegionFilter, existingFilter);
 
 		// number of edges must remain 2 since we use reconnect
@@ -858,5 +858,17 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			bundle.start();
 		}
 
+		// now remove the connection
+		existingFilter = digraph.replaceConnection(digraph.getRegion(SP1), null, digraph.getRegion(PP1));
+		assertEquals("Wrong existing filter found.", goodRegionFilter, existingFilter);
+		edges = digraph.getRegion(SP1).getEdges();
+		assertEquals("Wrong number of edges.", 1, edges.size());
+
+		bundleInstaller.refreshPackages(bundles.values().toArray(new Bundle[bundles.size()]));
+		// should not resolve again
+		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
+		assertEquals(PP1, Bundle.ACTIVE, bundles.get(PP1).getState());
+		assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
 	}
+
 }

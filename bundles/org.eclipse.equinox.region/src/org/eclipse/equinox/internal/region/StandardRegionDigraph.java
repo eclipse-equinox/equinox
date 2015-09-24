@@ -136,14 +136,14 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	/**
 	 * {@inheritDoc}
 	 */
-	public RegionFilter reconnect(Region tailRegion, RegionFilter filter, Region headRegion) throws BundleException {
+	public RegionFilter replaceConnection(Region tailRegion, RegionFilter filter, Region headRegion) throws BundleException {
 		return createConnection(tailRegion, filter, headRegion, true);
 	}
 
 	private RegionFilter createConnection(Region tailRegion, RegionFilter filter, Region headRegion, boolean replace) throws BundleException {
 		if (tailRegion == null)
 			throw new IllegalArgumentException("The tailRegion must not be null."); //$NON-NLS-1$
-		if (filter == null)
+		if (!replace && filter == null)
 			throw new IllegalArgumentException("The filter must not be null."); //$NON-NLS-1$
 		if (headRegion == null)
 			throw new IllegalArgumentException("The headRegion must not be null."); //$NON-NLS-1$
@@ -176,12 +176,18 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 			}
 
 			checkFilterDoesNotAllowExistingBundle(tailRegion, filter);
+
 			tailAdded = this.regions.put(tailRegion.getName(), tailRegion) == null;
 			headAdded = this.regions.put(headRegion.getName(), headRegion) == null;
+
 			if (existing != null) {
 				connections.remove(existing);
 			}
-			connections.add(new StandardFilteredRegion(headRegion, filter));
+
+			if (filter != null) {
+				connections.add(new StandardFilteredRegion(headRegion, filter));
+			}
+
 			this.edges.put(tailRegion, Collections.unmodifiableSet(connections));
 			incrementUpdateCount();
 		}

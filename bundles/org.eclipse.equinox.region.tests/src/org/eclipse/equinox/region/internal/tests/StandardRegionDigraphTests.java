@@ -129,12 +129,23 @@ public class StandardRegionDigraphTests {
 	}
 
 	@Test
-	public void testReConnection() throws BundleException {
+	public void testReplaceConnection() throws BundleException {
 		setDefaultFilters();
 		replayMocks();
 
-		this.digraph.connect(this.mockRegion1, this.regionFilter1, this.mockRegion2);
-		this.digraph.reconnect(this.mockRegion1, this.regionFilter2, this.mockRegion2);
+		RegionFilter existing;
+
+		existing = this.digraph.replaceConnection(this.mockRegion1, this.regionFilter1, this.mockRegion2);
+		assertEquals("Wrong existing filter.", null, existing);
+
+		existing = this.digraph.replaceConnection(this.mockRegion1, this.regionFilter2, this.mockRegion2);
+		assertEquals("Wrong existing filter.", this.regionFilter1, existing);
+
+		existing = this.digraph.replaceConnection(this.mockRegion1, null, this.mockRegion2);
+		assertEquals("Wrong existing filter.", this.regionFilter2, existing);
+
+		existing = this.digraph.replaceConnection(this.mockRegion1, this.regionFilter1, this.mockRegion2);
+		assertEquals("Wrong existing filter.", null, existing);
 	}
 
 	@Test
@@ -160,7 +171,7 @@ public class StandardRegionDigraphTests {
 			}
 		}
 
-		this.digraph.reconnect(this.mockRegion1, this.regionFilter2, this.mockRegion2);
+		this.digraph.replaceConnection(this.mockRegion1, this.regionFilter2, this.mockRegion2);
 
 		edges = this.digraph.getEdges(this.mockRegion1);
 		assertEquals(2, edges.size());
