@@ -2,17 +2,18 @@
  * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at 
+ * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *    IBM Corporation - initial API and implementation
  * 	  Andre Weinand (OTI Labs)
  *    David Green - OpenJDK bsd port integration
  *    Rapicorp, Inc - Default the configuration to Application Support (bug 461725)
+ *    Mikael Barbero - Rename *Carbon* files to *Cocoa* (bug 383545)
  */
- 
-/* MacOS X Carbon specific logic for displaying the splash screen. */
+
+/* MacOS X Cocoa specific logic for displaying the splash screen. */
 
 #include "eclipseOS.h"
 #include "eclipseCommon.h"
@@ -24,14 +25,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <CoreServices/CoreServices.h>
-#ifdef COCOA
 #include <Cocoa/Cocoa.h>
-#else
-#include <Carbon/Carbon.h>
-#include "NgCommon.h"
-#include "NgImageData.h"
-#include "NgWinBMPFileFormat.h"
-#endif
 #include <mach-o/dyld.h>
 
 #define startupJarName "startup.jar"
@@ -77,9 +71,9 @@ static const char* jvmLocations[] = {
 	"../lib/" JAVA_ARCH "/client",
 	"../lib/" JAVA_ARCH "/server",
 	"../lib/client",
-	"../lib/server", 
+	"../lib/server",
 	"../jre/lib/" JAVA_ARCH "/client",
-	"../jre/lib/" JAVA_ARCH "/server", 
+	"../jre/lib/" JAVA_ARCH "/server",
 	"../jre/lib/client",
 	"../jre/lib/server",
 	NULL
@@ -132,7 +126,7 @@ static NSWindow* window = nil;
 			[window setBackgroundColor: [NSColor colorWithPatternImage: image]];
 			[window makeKeyAndOrderFront: nil];
 			dispatchMessages();
-			result = 0;		
+			result = 0;
 		}
 	}
 	[pool release];
@@ -155,7 +149,7 @@ static NSWindow* window = nil;
 	while ((event = [application nextEventMatchingMask: 0 untilDate: nil inMode: NSDefaultRunLoopMode dequeue: TRUE]) != nil) {
 		[application sendEvent: event];
 	}
-	[pool release];	
+	[pool release];
 }
 
 @end
@@ -174,12 +168,12 @@ static NSWindow* window = nil;
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
     int count = [event numberOfItems];
     int index = 1;
-    
+
  	if (!files) {
 		files = [NSMutableArray arrayWithCapacity:count];
 		[files retain];
 	}
-		
+
 	for (index = 1; index<=count; index++) {
 		CFURLRef url = NULL;
 		NSAppleEventDescriptor *desc = [event descriptorAtIndex:index], *coerceDesc;
@@ -197,7 +191,7 @@ static NSWindow* window = nil;
 			CFRelease(url);
 		}
 	}
-	
+
 	if (!timerOpenDocuments) {
 		timerOpenDocuments = [NSTimer scheduledTimerWithTimeInterval: 1.0
 												 target: self
@@ -306,7 +300,7 @@ void takeDownSplash() {
 		[KeyWindow performSelectorOnMainThread: @selector(shutdown) withObject: nil waitUntilDone: 0];
 	}
 	[pool release];
-}	
+}
 
 void dispatchMessages() {
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
@@ -336,14 +330,14 @@ static OSStatus drawProc (EventHandlerCallRef eventHandlerCallRef, EventRef even
 	if (image) {
 		ControlRef control;
 		CGContextRef context;
-		
+
 		GetEventParameter(eventRef, kEventParamDirectObject, typeControlRef, NULL, 4, NULL, &control);
 		GetEventParameter(eventRef, kEventParamCGContextRef, typeCGContextRef, NULL, 4, NULL, &context);
-		
+
 		HIRect rect;
 		HIViewGetBounds(control, &rect);
 		HIViewDrawCGImage(context, &rect, image);
-	} 
+	}
 	return result;
 }
 
@@ -356,7 +350,7 @@ void loadImageFns()
 {
 	static int initialized = 0;
 	static CFBundleRef bundle = NULL;
-	
+
 	if (!initialized) {
 		if (!bundle) bundle = CFBundleGetBundleWithIdentifier(CFSTR("com.apple.Carbon"));
 		if (bundle) createAtIndex = (CGImageSourceCreateImageAtIndex_FUNC)CFBundleGetFunctionPointerForName(bundle, CFSTR("CGImageSourceCreateImageAtIndex"));
@@ -369,7 +363,7 @@ static OSStatus appleEventProc(EventHandlerCallRef inCaller, EventRef theEvent, 
 	EventRecord eventRecord;
 	Boolean release = false;
 	EventQueueRef queue;
-	
+
 	queue = GetCurrentEventQueue();
 	if (IsEventInQueue (queue, theEvent)) {
 		RetainEvent (theEvent);
@@ -400,13 +394,13 @@ static void timerProc(EventLoopTimerRef timer, void *userData) {
 	RemoveEventHandler(appHandler);
 	AERemoveEventHandler(kCoreEventClass, kAEOpenDocuments, NewAEEventHandlerUPP(openDocumentsProc), false);
 }
- 
+
 static pascal OSErr openDocumentsProc(const AppleEvent *theAppleEvent, AppleEvent *reply, long handlerRefcon) {
     AEDescList  docList;
     FSRef       theFSRef;
     long        index;
     long        count = 0;
-    
+
     AEGetParamDesc(theAppleEvent, keyDirectObject, typeAEList, &docList);
 	AECountItems(&docList, &count);
 	for(index = 1; index <= count; index++) {
@@ -414,8 +408,8 @@ static pascal OSErr openDocumentsProc(const AppleEvent *theAppleEvent, AppleEven
 		CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &theFSRef);
 		CFStringRef pathName = CFURLCopyFileSystemPath(url, kCFURLPOSIXPathStyle);
 		if (!files) {
-			files = CFArrayCreateMutable(kCFAllocatorDefault, count, &kCFTypeArrayCallBacks);		
-            InstallEventLoopTimer(GetMainEventLoop(), 1, 1, NewEventLoopTimerUPP(timerProc), NULL, NULL); 
+			files = CFArrayCreateMutable(kCFAllocatorDefault, count, &kCFTypeArrayCallBacks);
+            InstallEventLoopTimer(GetMainEventLoop(), 1, 1, NewEventLoopTimerUPP(timerProc), NULL, NULL);
 		}
 		CFArrayAppendValue(files, pathName);
 		CFRelease(pathName);
@@ -437,12 +431,12 @@ int showSplash( const _TCHAR* featureImage )
 	EventTypeSpec draw = {kEventClassControl, kEventControlDraw};
 	EventTypeSpec dispose = {kEventClassWindow, kEventWindowDispose};
 	ControlRef root;
-	
+
 	if(window != NULL)
 		return 0; /*already showing */
 	if (featureImage == NULL)
 		return ENOENT;
-	
+
 	loadImageFns();
 	if (createWithURL && createAtIndex) {
 		CFStringRef imageString = CFStringCreateWithCString(kCFAllocatorDefault, featureImage, kCFStringEncodingUTF8);
@@ -456,15 +450,15 @@ int showSplash( const _TCHAR* featureImage )
 				CFRelease(url);
 			}
 		}
-		CFRelease(imageString);		
+		CFRelease(imageString);
 	} else {
 		image = loadBMPImage(featureImage);
 	}
-	
-	/*If the splash image data could not be loaded, return an error.*/ 
+
+	/*If the splash image data could not be loaded, return an error.*/
 	if (image == NULL)
 		return ENOENT;
-		
+
 	w = CGImageGetWidth(image);
 	h = CGImageGetHeight(image);
 
@@ -477,17 +471,17 @@ int showSplash( const _TCHAR* featureImage )
 	wRect.top+= (deviceHeight-h)/3;
 	wRect.right= wRect.left + w;
 	wRect.bottom= wRect.top + h;
-	
+
 	attributes = kWindowStandardHandlerAttribute | kWindowCompositingAttribute;
 	attributes &= GetAvailableWindowAttributes(kSheetWindowClass);
 	CreateNewWindow(kSheetWindowClass, attributes, &wRect, &window);
 	if (window != NULL) {
 		GetRootControl(window, &root);
-		wRect.left = wRect.top = 0;	
+		wRect.left = wRect.top = 0;
 		wRect.right = w;
 		wRect.bottom = h;
 		CreateUserPaneControl(window, &wRect, kControlSupportsEmbedding | kControlSupportsFocus | kControlGetsFocusOnClick, &pane);
-		HIViewAddSubview(root, pane);	
+		HIViewAddSubview(root, pane);
 
 		InstallEventHandler(GetControlEventTarget(pane), (EventHandlerUPP)drawProc, 1, &draw, NULL, NULL);
 		InstallEventHandler(GetWindowEventTarget(window), (EventHandlerUPP)disposeProc, 1, &dispose, NULL, NULL);
@@ -506,20 +500,20 @@ void takeDownSplash() {
 	if(image){
 		CGImageRelease(image);
 		image = NULL;
-	}	
-}	
+	}
+}
 
 void dispatchMessages() {
 	EventRef event;
 	EventTargetRef target;
-	
+
 	target = GetEventDispatcherTarget();
 	while( ReceiveNextEvent(0, NULL, kEventDurationNoWait, true, &event) == noErr ) {
 		SendEventToEventTarget(event, target);
 		ReleaseEvent(event);
 	}
 }
-#endif	
+#endif
 
 void installAppleEventHandler() {
 #ifdef COCOA
@@ -527,9 +521,9 @@ void installAppleEventHandler() {
 	AppleEventDelegate *appleEventDelegate = [[AppleEventDelegate alloc] init];
 	[NSApplication sharedApplication];
 	NSAppleEventManager *manager = [NSAppleEventManager sharedAppleEventManager];
-	[manager setEventHandler:appleEventDelegate 
-				 andSelector:@selector(handleOpenDocuments:withReplyEvent:) 
-			   forEventClass:kCoreEventClass 
+	[manager setEventHandler:appleEventDelegate
+				 andSelector:@selector(handleOpenDocuments:withReplyEvent:)
+			   forEventClass:kCoreEventClass
 				  andEventID:kAEOpenDocuments];
 	[manager setEventHandler:appleEventDelegate
 				 andSelector:@selector(handleGetURL:withReplyEvent:)
@@ -537,7 +531,7 @@ void installAppleEventHandler() {
 				  andEventID:kAEGetURL];
 //	[appleEventDelegate release];
 	[pool release];
-#else	
+#else
 	EventTypeSpec kEvents[] = { {kEventClassAppleEvent, kEventAppleEvent} };
 	InstallApplicationEventHandler(NewEventHandlerUPP(appleEventProc), GetEventTypeCount(kEvents), kEvents, 0, &appHandler);
 	AEInstallEventHandler(kCoreEventClass, kAEOpenDocuments, NewAEEventHandlerUPP(openDocumentsProc), 0, false);
@@ -549,7 +543,7 @@ jlong getSplashHandle() {
 }
 
 /* Get the window system specific VM arguments */
-char** getArgVM( char* vm ) 
+char** getArgVM( char* vm )
 {
 	char** result;
 
@@ -629,13 +623,13 @@ char * findVMLibrary( char* command ) {
 	char *start, *end;
 	char *version, *result, *cmd;
 	int length;
-	
+
 	/*check first to see if command already points to the library */
 	if (strcmp(command, JAVA_FRAMEWORK) == 0) {
 		return JAVA_FRAMEWORK;
 	}
-		
-	/* select a version to use based on the command */	
+
+	/* select a version to use based on the command */
 	start = strstr(command, "/Versions/");
 	if (start != NULL){
 		start += 10;
@@ -645,14 +639,14 @@ char * findVMLibrary( char* command ) {
 			version = malloc(length + 1);
 			strncpy(version, start, length);
 			version[length] = 0;
-			
+
 			/*only set a version if it starts with a number */
 			if(strtol(version, NULL, 10) != 0 || version[0] == '0') {
 				setenv("JAVA_JVM_VERSION", version, 1);
 			}
-			
+
 			free(version);
-		} 
+		}
 	}
 	cmd = command;
 	if (strstr(cmd, "/JavaVM.framework/") != NULL && (strstr(cmd, "/Current/") != NULL || strstr(cmd, "/A/") != NULL)) {
@@ -705,7 +699,7 @@ static char * findLib(char * command) {
 			while (jvmLocations[++i] != NULL) {
 				sprintf(location, "%s%c%s", jvmLocations[i], dirSeparator, jvmLib);
 				/*fprintf(stderr,"checking path: %s\n",path);*/
-				if (stat(path, &stats) == 0 && (stats.st_mode & S_IFREG) != 0) 
+				if (stat(path, &stats) == 0 && (stats.st_mode & S_IFREG) != 0)
 				{ /* found it */
 					return path;
 				}
@@ -751,14 +745,14 @@ static void adjustLibraryPath(char * vmLibrary) {
 	}
 
 	c = concatStrings(paths);
-	
+
 	/* set the value for LD_LIBRARY_PATH */
 	length = strlen(ldPath);
 	newPath = malloc((_tcslen(c) + length + 1) * sizeof(_TCHAR));
 	_stprintf(newPath, _T_ECLIPSE("%s%s"), c, ldPath);
 	setenv(LIB_PATH_VAR, newPath, 1);
 	free(newPath);
-	
+
 	/* set the value for DYLD_FALLBACK_LIBRARY_PATH */
 	length = strlen(dylibPath);
 	newPath =  malloc((_tcslen(c) + length + 1) * sizeof(_TCHAR));
@@ -766,7 +760,7 @@ static void adjustLibraryPath(char * vmLibrary) {
 	setenv(DYLD_FALLBACK_VAR, newPath, 1);
 	free(newPath);
 	free(c);
-	
+
 	for (i = 0; i < numPaths; i++)
 		free(paths[i]);
 	free(paths);
@@ -804,7 +798,7 @@ JavaResults* startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[],
 }
 
 #ifndef COCOA
-void disposeData(void *info, void *data, size_t size) 
+void disposeData(void *info, void *data, size_t size)
 {
 	DisposePtr(data);
 }
@@ -817,7 +811,7 @@ void disposeData(void *info, void *data, size_t size)
  *
  * returned value: the PixMapHandle newly created if successful. 0 otherwise.
  */
-static CGImageRef loadBMPImage (const char *bmpPathname) { 
+static CGImageRef loadBMPImage (const char *bmpPathname) {
 	ng_stream_t in;
 	ng_bitmap_image_t image;
 	ng_err_t err= ERR_OK;
@@ -846,14 +840,14 @@ static CGImageRef loadBMPImage (const char *bmpPathname) {
 		NgError (ERR_NG, "Error unsupported depth - only support 24 bit");
 		return 0;
 	}
-	
+
 	int width= (int)NgBitmapImageWidth(&image);
 	int height= (int)NgBitmapImageHeight(&image);
 	int rowBytes= width * 4;
 	int alphainfo = kCGImageAlphaNoneSkipFirst | (NgIsMSB() ? 0 : kCGBitmapByteOrder32Little);
 	data = (UBYTE1*)NewPtr(rowBytes * height);
 	CGDataProviderRef provider = CGDataProviderCreateWithData(0, data, rowBytes * height, (CGDataProviderReleaseDataCallback)disposeData);
-	
+
 	ref = CGImageCreate(width, height, 8, 32, width * 4, CGColorSpaceCreateDeviceRGB(), alphainfo, provider, NULL, 1, 0);
 	CGDataProviderRelease(provider);
 
@@ -878,39 +872,39 @@ void processVMArgs(char **vmargs[] )
 	int pid = 0, pidLength = 1, temp = 0;
 	char * name = NULL, *icon = NULL;
 	char * c;
-	
+
 	if( *vmargs == NULL)
 		return;
-	
+
 	while( (*vmargs)[++i] != NULL ) {
 		/*-Xdock:icon -> APP_ICON_<pid>*/
 		if(_tcsncmp((*vmargs)[i], DOCK_ICON_PREFIX, _tcslen(DOCK_ICON_PREFIX)) == 0) {
 			icon = (*vmargs)[i] + _tcslen(DOCK_ICON_PREFIX);
-		} 
+		}
 		/*-Xdock:name -> APP_NAME_<pid>*/
 		else if(_tcsncmp((*vmargs)[i], DOCK_NAME_PREFIX, _tcslen(DOCK_NAME_PREFIX)) == 0) {
 			name = (*vmargs)[i] + _tcslen(DOCK_NAME_PREFIX);
 		}
-		if (name != NULL && icon != NULL) 
+		if (name != NULL && icon != NULL)
 			break;
 	}
-	
+
 	if (name == NULL && icon == NULL)
 		return;	/* don't need to do anything */
-	
+
 	temp = pid = getpid();
 	/* how many digits in pid? */
 	while (temp > 9) {
 		pidLength++;
 		temp /= 10;
 	}
-	
+
 	if (name != NULL) {
 		c = malloc( (_tcslen(APP_NAME_PATTERN) + pidLength + 1) * sizeof(char*));
 		_stprintf( c, APP_NAME_PATTERN, pid );
 		setenv(c, name, 1);
 	}
-	
+
 	if (icon != NULL) {
 		c = malloc( (_tcslen(icon) + _tcslen(APP_ICON_PATTERN) + pidLength + 1) * sizeof(char*));
 		_stprintf( c, APP_ICON_PATTERN, pid );

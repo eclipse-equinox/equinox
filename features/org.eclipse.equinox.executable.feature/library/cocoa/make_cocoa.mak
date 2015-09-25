@@ -1,5 +1,5 @@
 #**********************************************************************
-# Copyright (c) 2000, 2008 IBM Corporation and others.
+# Copyright (c) 2000, 2015 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
 #
 # Contributors:
 #     Kevin Cornell (Rational Software Corporation)
+#     Mikael Barbero
 #**********************************************************************
 include ../make_version.mak
 # Makefile for creating the Cocoa eclipse launcher program.
@@ -25,9 +26,9 @@ endif
 PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).so
 
 # Define the object modules to be compiled and flags.
-MAIN_OBJS = eclipseMain.o eclipseCarbonMain.o
-COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseCarbonCommon.o
-DLL_OBJS	= eclipse.o eclipseCarbon.o eclipseUtil.o eclipseJNI.o eclipseShm.o
+MAIN_OBJS = eclipseMain.o eclipseCocoaMain.o
+COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseCocoaCommon.o
+DLL_OBJS	= eclipse.o eclipseCocoa.o eclipseUtil.o eclipseJNI.o eclipseShm.o
 #NgImageData.o NgWinBMPFileFormat.o NgCommon.o
 
 EXEC = $(PROGRAM_OUTPUT)
@@ -49,8 +50,8 @@ all: $(EXEC) $(DLL)
 eclipse.o: ../eclipse.c ../eclipseOS.h ../eclipseCommon.h ../eclipseJNI.h
 	$(CC) $(CFLAGS) -c ../eclipse.c -o $@
 
-eclipseCarbonMain.o : eclipseCarbonMain.c
-	$(CC) $(CFLAGS) -c eclipseCarbonMain.c -o $@
+eclipseCocoaMain.o : eclipseCocoaMain.c
+	$(CC) $(CFLAGS) -c eclipseCocoaMain.c -o $@
 
 eclipseMain.o: ../eclipseUnicode.h ../eclipseCommon.h eclipseMain.c ../eclipseMain.c
 	$(CC) $(CFLAGS) -c eclipseMain.c -o $@

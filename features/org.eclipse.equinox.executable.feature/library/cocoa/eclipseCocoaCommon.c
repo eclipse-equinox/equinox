@@ -2,14 +2,15 @@
  * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at 
+ * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Andrew Niefer
+ *     Mikael Barbero
  *******************************************************************************/
- 
+
 #include "eclipseCommon.h"
 #include "eclipseOS.h"
 
@@ -17,11 +18,7 @@
 #include <dlfcn.h>
 #include <unistd.h>
 #include <CoreServices/CoreServices.h>
-#ifdef COCOA
 #include <Cocoa/Cocoa.h>
-#else
-#include <Carbon/Carbon.h>
-#endif
 #include <mach-o/dyld.h>
 
 char   dirSeparator  = '/';
@@ -50,7 +47,7 @@ static void init() {
 
 /* Initialize Window System
  *
- * Initialize Carbon.
+ * Initialize Cocoa.
  */
 int initWindowSystem( int* pArgc, char* argv[], int showSplash )
 {
@@ -58,10 +55,10 @@ int initWindowSystem( int* pArgc, char* argv[], int showSplash )
 	/*debug("install dir: %s\n", homeDir);*/
 	if (homeDir != NULL)
 		chdir(homeDir);
-    
+
 	if (showSplash)
 		init();
-	
+
 	return 0;
 }
 
@@ -72,7 +69,7 @@ void displayMessage(char *title, char *message)
 
 	/* try to break the message into a first sentence and the rest */
 	char *pos= strstr(message, ". ");
-	if (pos != NULL) {	
+	if (pos != NULL) {
 		char *to, *from, *buffer= calloc(pos-message+2, sizeof(char));
 		/* copy and replace line separators with blanks */
 		for (to= buffer, from= message; from <= pos; from++, to++) {
@@ -86,9 +83,9 @@ void displayMessage(char *title, char *message)
 	} else {
 		inError= CFStringCreateWithCString(kCFAllocatorDefault, message, kCFStringEncodingUTF8);
 	}
-	
+
 	init();
-	
+
 #ifdef COCOA
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	NSAlert* alert = [NSAlert alertWithMessageText: (NSString*)(inDescription != nil ? inError : nil) defaultButton: nil alternateButton: nil otherButton: nil informativeTextWithFormat: (NSString*)(inDescription != nil ? inDescription : inError)];
@@ -148,7 +145,7 @@ void * loadLibrary( char * library ){
 
 	free(bundle);
 	void * result= dlopen(library, RTLD_NOW);
-	if(result == 0) 
+	if(result == 0)
 		printf("%s\n",dlerror());
 	return result;
 }
@@ -161,7 +158,7 @@ void unloadLibrary( void * handle ){
 	else
 		dlclose(handle);
 }
- 
+
 /* Find the given symbol in the shared library
  */
 void * findSymbol( void * handle, char * symbol ){
@@ -180,16 +177,16 @@ char * resolveSymlinks( char * path ) {
 	CFStringRef string;
 	FSRef fsRef;
 	Boolean isFolder, wasAliased;
-	
+
 	if(path == NULL)
 		return path;
-		
+
 	string = CFStringCreateWithCString(kCFAllocatorDefault, path, kCFStringEncodingUTF8);
 	url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, string, kCFURLPOSIXPathStyle, false);
 	CFRelease(string);
 	if(url == NULL)
 		return path;
-	
+
 	if(CFURLGetFSRef(url, &fsRef)) {
 		if( FSResolveAliasFile(&fsRef, true, &isFolder, &wasAliased) == noErr) {
 			resolved = CFURLCreateFromFSRef(kCFAllocatorDefault, &fsRef);
@@ -206,7 +203,7 @@ char * resolveSymlinks( char * path ) {
 				CFRelease(resolved);
 			}
 		}
-	}	
-	CFRelease(url); 
+	}
+	CFRelease(url);
 	return result;
 }
