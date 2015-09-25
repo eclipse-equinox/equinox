@@ -49,17 +49,10 @@ int main( int argc, char* argv[] ) {
 	SInt32 systemVersion= 0;
 	if (Gestalt(gestaltSystemVersion, &systemVersion) == noErr) {
 		systemVersion &= 0xffff;
-#ifdef COCOA
 		if (systemVersion < 0x1050) {
 			displayMessage("Error", "This application requires Mac OS X 10.5 (Leopard) or greater.");
 			return 0;
 		}
-#else
-		if (systemVersion < 0x1020) {
-			displayMessage("Error", "This application requires Jaguar (Mac OS X >= 10.2)");
-			return 0;
-		}
-#endif
 	}
 
 	fgConsoleLog= fopen("/dev/console", "w");

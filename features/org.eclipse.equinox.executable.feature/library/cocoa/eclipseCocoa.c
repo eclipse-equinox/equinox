@@ -51,9 +51,6 @@ static char * findLib(char * command);
 #ifdef i386
 #define JAVA_ARCH "i386"
 #define JAVA_HOME_ARCH "i386"
-#elif defined(__ppc__) || defined(__powerpc64__)
-#define JAVA_ARCH "ppc"
-#define JAVA_HOME_ARCH "ppc"
 #elif defined(__amd64__) || defined(__x86_64__)
 #define JAVA_ARCH "amd64"
 #define JAVA_HOME_ARCH "x86_64"
@@ -83,7 +80,6 @@ static const char* jvmLibs[] = { "libjvm.dylib", "libjvm.jnilib", "libjvm.so", N
 /* Define the window system arguments for the various Java VMs. */
 static char*  argVM_JAVA[] = { "-XstartOnFirstThread", NULL };
 
-#ifdef COCOA
 static NSWindow* window = nil;
 @interface KeyWindow : NSWindow { }
 - (BOOL)canBecomeKeyWindow;
@@ -251,15 +247,6 @@ static NSWindow* window = nil;
 	}
 }
 @end
-#endif
-
-#ifndef COCOA
-static CFMutableArrayRef files;
-static EventHandlerRef appHandler;
-static int SWT_CLASS = 'SWT-';
-static int SWT_OPEN_FILE_KIND = 1;
-static int SWT_OPEN_FILE_PARAM = 'odoc';
-#endif
 
 int main() {
 	return -1;
@@ -271,8 +258,6 @@ int reuseWorkbench(_TCHAR** filePath, int timeout) {
 	installAppleEventHandler();
 	return 0;
 }
-
-#ifdef COCOA
 
 /* Show the Splash Window
  *
@@ -312,211 +297,7 @@ void dispatchMessages() {
 	[pool release];
 }
 
-#else
-static WindowRef window;
-static ControlRef pane = NULL;
-static CGImageRef image = NULL;
-static CGImageRef loadBMPImage(const char *image);
-
-typedef CGImageSourceRef (*CGImageSourceCreateWithURL_FUNC) (CFURLRef, CFDictionaryRef);
-typedef CGImageRef (*CGImageSourceCreateImageAtIndex_FUNC)(CGImageSourceRef, size_t, CFDictionaryRef);
-static CGImageSourceCreateWithURL_FUNC createWithURL = NULL;
-static CGImageSourceCreateImageAtIndex_FUNC createAtIndex = NULL;
-
-static pascal OSErr openDocumentsProc(const AppleEvent *theAppleEvent, AppleEvent *reply, long handlerRefcon);
-
-static OSStatus drawProc (EventHandlerCallRef eventHandlerCallRef, EventRef eventRef, void * data) {
-	int result = CallNextEventHandler(eventHandlerCallRef, eventRef);
-	if (image) {
-		ControlRef control;
-		CGContextRef context;
-
-		GetEventParameter(eventRef, kEventParamDirectObject, typeControlRef, NULL, 4, NULL, &control);
-		GetEventParameter(eventRef, kEventParamCGContextRef, typeCGContextRef, NULL, 4, NULL, &context);
-
-		HIRect rect;
-		HIViewGetBounds(control, &rect);
-		HIViewDrawCGImage(context, &rect, image);
-	}
-	return result;
-}
-
-static OSStatus disposeProc (EventHandlerCallRef eventHandlerCallRef, EventRef eventRef, void * data) {
-	window = NULL;
-	return eventNotHandledErr;
-}
-
-void loadImageFns()
-{
-	static int initialized = 0;
-	static CFBundleRef bundle = NULL;
-
-	if (!initialized) {
-		if (!bundle) bundle = CFBundleGetBundleWithIdentifier(CFSTR("com.apple.Carbon"));
-		if (bundle) createAtIndex = (CGImageSourceCreateImageAtIndex_FUNC)CFBundleGetFunctionPointerForName(bundle, CFSTR("CGImageSourceCreateImageAtIndex"));
-		if (bundle) createWithURL = (CGImageSourceCreateWithURL_FUNC)CFBundleGetFunctionPointerForName(bundle, CFSTR("CGImageSourceCreateWithURL"));
-		initialized = 1;
-	}
-}
-
-static OSStatus appleEventProc(EventHandlerCallRef inCaller, EventRef theEvent, void* inRefcon) {
-	EventRecord eventRecord;
-	Boolean release = false;
-	EventQueueRef queue;
-
-	queue = GetCurrentEventQueue();
-	if (IsEventInQueue (queue, theEvent)) {
-		RetainEvent (theEvent);
-		release = true;
-		RemoveEventFromQueue (queue, theEvent);
-	}
-	ConvertEventRefToEventRecord (theEvent, &eventRecord);
-	AEProcessAppleEvent (&eventRecord);
-	if (release) ReleaseEvent (theEvent);
-	return noErr;
-}
-
-static void timerProc(EventLoopTimerRef timer, void *userData) {
-	EventTargetRef target = GetApplicationEventTarget();
-	CFIndex count = CFArrayGetCount  (files);
-	int i;
-	for (i=0; i<count; i++) {
-		CFStringRef file = (CFStringRef) CFArrayGetValueAtIndex(files, i);
-		EventRef event = NULL;
-		CreateEvent (NULL, SWT_CLASS, SWT_OPEN_FILE_KIND, 0, kEventAttributeNone, &event);
-		SetEventParameter (event, SWT_OPEN_FILE_PARAM, typeCFStringRef, sizeof(file), &file);
-		OSStatus status = SendEventToEventTarget(event, target);
-		ReleaseEvent(event);
-		if (status == eventNotHandledErr) return;
-	}
-	CFRelease(files);
-	RemoveEventLoopTimer(timer);
-	RemoveEventHandler(appHandler);
-	AERemoveEventHandler(kCoreEventClass, kAEOpenDocuments, NewAEEventHandlerUPP(openDocumentsProc), false);
-}
-
-static pascal OSErr openDocumentsProc(const AppleEvent *theAppleEvent, AppleEvent *reply, long handlerRefcon) {
-    AEDescList  docList;
-    FSRef       theFSRef;
-    long        index;
-    long        count = 0;
-
-    AEGetParamDesc(theAppleEvent, keyDirectObject, typeAEList, &docList);
-	AECountItems(&docList, &count);
-	for(index = 1; index <= count; index++) {
-        AEGetNthPtr(&docList, index, typeFSRef, NULL, NULL, &theFSRef, sizeof(FSRef), NULL);
-		CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &theFSRef);
-		CFStringRef pathName = CFURLCopyFileSystemPath(url, kCFURLPOSIXPathStyle);
-		if (!files) {
-			files = CFArrayCreateMutable(kCFAllocatorDefault, count, &kCFTypeArrayCallBacks);
-            InstallEventLoopTimer(GetMainEventLoop(), 1, 1, NewEventLoopTimerUPP(timerProc), NULL, NULL);
-		}
-		CFArrayAppendValue(files, pathName);
-		CFRelease(pathName);
-		CFRelease(url);
-    }
-    AEDisposeDesc(&docList);
-    return noErr;
-}
-
-/* Show the Splash Window
- *
- * Create the splash window, load the bitmap and display the splash window.
- */
-int showSplash( const _TCHAR* featureImage )
-{
-	Rect wRect;
-	int w, h, deviceWidth, deviceHeight;
-	int attributes;
-	EventTypeSpec draw = {kEventClassControl, kEventControlDraw};
-	EventTypeSpec dispose = {kEventClassWindow, kEventWindowDispose};
-	ControlRef root;
-
-	if(window != NULL)
-		return 0; /*already showing */
-	if (featureImage == NULL)
-		return ENOENT;
-
-	loadImageFns();
-	if (createWithURL && createAtIndex) {
-		CFStringRef imageString = CFStringCreateWithCString(kCFAllocatorDefault, featureImage, kCFStringEncodingUTF8);
-		if(imageString != NULL) {
-			CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, imageString, kCFURLPOSIXPathStyle, false);
-			if(url != NULL) {
-				CGImageSourceRef imageSource = createWithURL(url, NULL);
-				if(imageSource != NULL) {
-					image = createAtIndex(imageSource, 0, NULL);
-				}
-				CFRelease(url);
-			}
-		}
-		CFRelease(imageString);
-	} else {
-		image = loadBMPImage(featureImage);
-	}
-
-	/*If the splash image data could not be loaded, return an error.*/
-	if (image == NULL)
-		return ENOENT;
-
-	w = CGImageGetWidth(image);
-	h = CGImageGetHeight(image);
-
-	GetAvailableWindowPositioningBounds(GetMainDevice(), &wRect);
-
-	deviceWidth= wRect.right - wRect.left;
-	deviceHeight= wRect.bottom - wRect.top;
-
-	wRect.left+= (deviceWidth-w)/2;
-	wRect.top+= (deviceHeight-h)/3;
-	wRect.right= wRect.left + w;
-	wRect.bottom= wRect.top + h;
-
-	attributes = kWindowStandardHandlerAttribute | kWindowCompositingAttribute;
-	attributes &= GetAvailableWindowAttributes(kSheetWindowClass);
-	CreateNewWindow(kSheetWindowClass, attributes, &wRect, &window);
-	if (window != NULL) {
-		GetRootControl(window, &root);
-		wRect.left = wRect.top = 0;
-		wRect.right = w;
-		wRect.bottom = h;
-		CreateUserPaneControl(window, &wRect, kControlSupportsEmbedding | kControlSupportsFocus | kControlGetsFocusOnClick, &pane);
-		HIViewAddSubview(root, pane);
-
-		InstallEventHandler(GetControlEventTarget(pane), (EventHandlerUPP)drawProc, 1, &draw, NULL, NULL);
-		InstallEventHandler(GetWindowEventTarget(window), (EventHandlerUPP)disposeProc, 1, &dispose, NULL, NULL);
-		ShowWindow(window);
-		dispatchMessages();
-	}
-
-	return 0;
-}
-
-void takeDownSplash() {
-	if( window != 0) {
-		DisposeWindow(window);
-		window = NULL;
-	}
-	if(image){
-		CGImageRelease(image);
-		image = NULL;
-	}
-}
-
-void dispatchMessages() {
-	EventRef event;
-	EventTargetRef target;
-
-	target = GetEventDispatcherTarget();
-	while( ReceiveNextEvent(0, NULL, kEventDurationNoWait, true, &event) == noErr ) {
-		SendEventToEventTarget(event, target);
-		ReleaseEvent(event);
-	}
-}
-#endif
-
 void installAppleEventHandler() {
-#ifdef COCOA
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	AppleEventDelegate *appleEventDelegate = [[AppleEventDelegate alloc] init];
 	[NSApplication sharedApplication];
@@ -531,11 +312,6 @@ void installAppleEventHandler() {
 				  andEventID:kAEGetURL];
 //	[appleEventDelegate release];
 	[pool release];
-#else
-	EventTypeSpec kEvents[] = { {kEventClassAppleEvent, kEventAppleEvent} };
-	InstallApplicationEventHandler(NewEventHandlerUPP(appleEventProc), GetEventTypeCount(kEvents), kEvents, 0, &appHandler);
-	AEInstallEventHandler(kCoreEventClass, kAEOpenDocuments, NewAEEventHandlerUPP(openDocumentsProc), 0, false);
-#endif
 }
 
 jlong getSplashHandle() {
@@ -796,70 +572,6 @@ JavaResults* startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[],
 {
 	return startJavaJNI(libPath, vmArgs, progArgs, jarFile);
 }
-
-#ifndef COCOA
-void disposeData(void *info, void *data, size_t size)
-{
-	DisposePtr(data);
-}
-
-/**
- * loadBMPImage
- * Create a QuickDraw PixMap representing the given BMP file.
- *
- * bmpPathname: absolute path and name to the bmp file
- *
- * returned value: the PixMapHandle newly created if successful. 0 otherwise.
- */
-static CGImageRef loadBMPImage (const char *bmpPathname) {
-	ng_stream_t in;
-	ng_bitmap_image_t image;
-	ng_err_t err= ERR_OK;
-	CGImageRef ref;
-	UBYTE1* data = NULL;
-
-	NgInit();
-
-	if (NgStreamInit(&in, (char*) bmpPathname) != ERR_OK) {
-		NgError(ERR_NG, "Error can't open BMP file");
-		return 0;
-	}
-
-	NgBitmapImageInit(&image);
-	err= NgBmpDecoderReadImage (&in, &image);
-	NgStreamClose(&in);
-
-	if (err != ERR_OK) {
-		NgBitmapImageFree(&image);
-		return 0;
-	}
-
-	UBYTE4 srcDepth= NgBitmapImageBitCount(&image);
-	if (srcDepth != 24) {	/* We only support image depth of 24 bits */
-		NgBitmapImageFree(&image);
-		NgError (ERR_NG, "Error unsupported depth - only support 24 bit");
-		return 0;
-	}
-
-	int width= (int)NgBitmapImageWidth(&image);
-	int height= (int)NgBitmapImageHeight(&image);
-	int rowBytes= width * 4;
-	int alphainfo = kCGImageAlphaNoneSkipFirst | (NgIsMSB() ? 0 : kCGBitmapByteOrder32Little);
-	data = (UBYTE1*)NewPtr(rowBytes * height);
-	CGDataProviderRef provider = CGDataProviderCreateWithData(0, data, rowBytes * height, (CGDataProviderReleaseDataCallback)disposeData);
-
-	ref = CGImageCreate(width, height, 8, 32, width * 4, CGColorSpaceCreateDeviceRGB(), alphainfo, provider, NULL, 1, 0);
-	CGDataProviderRelease(provider);
-
-	/* 24 bit source to direct screen destination */
-	NgBitmapImageBlitDirectToDirect(NgBitmapImageImageData(&image), NgBitmapImageBytesPerRow(&image), width, height,
-		data, 32, rowBytes, NgIsMSB(), 0xff0000, 0x00ff00, 0x0000ff);
-
-	NgBitmapImageFree(&image);
-
-	return ref;
-}
-#endif
 
 #define DOCK_ICON_PREFIX "-Xdock:icon="
 #define DOCK_NAME_PREFIX "-Xdock:name="

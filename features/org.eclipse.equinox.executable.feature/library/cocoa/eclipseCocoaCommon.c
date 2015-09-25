@@ -35,11 +35,7 @@ static void init() {
 			TransformProcessType(&psn, kProcessTransformToForegroundApplication);
 			SetFrontProcess(&psn);
 		}
-#ifdef COCOA
 		[NSApplication sharedApplication];
-#else
-		ClearMenuBar();
-#endif
 		initialized= true;
 	}
 }
@@ -86,23 +82,12 @@ void displayMessage(char *title, char *message)
 
 	init();
 
-#ifdef COCOA
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	NSAlert* alert = [NSAlert alertWithMessageText: (NSString*)(inDescription != nil ? inError : nil) defaultButton: nil alternateButton: nil otherButton: nil informativeTextWithFormat: (NSString*)(inDescription != nil ? inDescription : inError)];
 	[[alert window] setTitle: [NSString stringWithUTF8String: title]];
 	[alert setAlertStyle: NSCriticalAlertStyle];
 	[alert runModal];
 	[pool release];
-#else
-	DialogRef outAlert;
-	OSStatus status= CreateStandardAlert(kAlertStopAlert, inError, inDescription, NULL, &outAlert);
-	if (status == noErr) {
-		DialogItemIndex outItemHit;
-		RunStandardAlert(outAlert, NULL, &outItemHit);
-	} else {
-		/*debug("%s: displayMessage: %s\n", title, message);*/
-	}
-#endif
 	CFRelease(inError);
 	if (inDescription != NULL)
 		CFRelease(inDescription);
