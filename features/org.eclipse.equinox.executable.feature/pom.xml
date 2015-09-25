@@ -410,7 +410,7 @@
                 <phase>generate-resources</phase>
                 <configuration>
                   <target>
-                    <ant antfile="build.xml" dir="library/carbon/" target="build_eclipse"/>
+                    <ant antfile="build.xml" dir="library/cocoa/" target="build_eclipse"/>
                   </target>
                 </configuration>
                 <goals>
@@ -422,7 +422,7 @@
                 <phase>clean</phase>
                 <configuration>
                   <target>
-                    <ant antfile="build.xml" dir="library/carbon/" target="clean"/>
+                    <ant antfile="build.xml" dir="library/cocoa/" target="clean"/>
                   </target>
                 </configuration>
                 <goals>
