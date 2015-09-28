@@ -22,16 +22,18 @@ public interface ICoreRunnable {
 	 * The provided monitor can be used to report progress and respond to
 	 * cancellation.  If the progress monitor has been canceled, the runnable
 	 * should finish its execution at the earliest convenience and throw
-	 * a {@link CoreException} with a status of severity {@link IStatus#CANCEL}.
-	 * The singleton cancel status {@link Status#CANCEL_STATUS} can be used for
-	 * this purpose.  The monitor is only valid for the duration of the invocation
-	 * of this method.
+	 * an {@link OperationCanceledException}.  A {@link CoreException} with a status
+	 * of severity {@link IStatus#CANCEL} has the same effect as
+	 * an {@link OperationCanceledException}.
 	 *
-	 * @param monitor the monitor to be used for reporting progress and
-	 *     responding to cancellation. The monitor is never {@code null}.
-	 *     It is the caller's responsibility to call {@link IProgressMonitor#done()}
-	 *     after this method returns or throws an exception.
+	 * @param monitor a progress monitor, or {@code null} if progress reporting and
+	 *     cancellation are not desired.  The monitor is only valid for the duration
+	 *     of the invocation of this method.  The receiver is not responsible for
+	 *     calling {@link IProgressMonitor#done()} on the given monitor, and
+	 *     the caller must not rely on {@link IProgressMonitor#done()} having been
+	 *     called by the receiver.
 	 * @exception CoreException if this operation fails.
+	 * @exception OperationCanceledException if the operation is canceled.
 	 */
 	public void run(IProgressMonitor monitor) throws CoreException;
 }
