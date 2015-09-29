@@ -44,6 +44,7 @@ public interface IStatus {
 	 * This constant is also used as the status code representing the nominal case.
 	 * @see #getSeverity()
 	 * @see #isOK()
+	 * @see Status#OK_STATUS
 	 */
 	public static final int OK = 0;
 
@@ -69,6 +70,7 @@ public interface IStatus {
 	 * cancelation
 	 * @see #getSeverity()
 	 * @see #matches(int)
+	 * @see Status#CANCEL_STATUS
 	 * @since 3.0
 	 */
 	public static final int CANCEL = 0x08;
