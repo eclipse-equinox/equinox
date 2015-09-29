@@ -13,6 +13,7 @@ package org.eclipse.equinox.region.internal.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.*;
@@ -42,8 +43,10 @@ public class StandardRegionFilterTests {
 
 	private BundleCapability barPackage;
 
+	private BundleCapability fooServiceCapability;
 	private ServiceRegistration<Object> fooService;
 
+	private BundleCapability barServiceCapability;
 	private ServiceRegistration<Object> barService;
 
 	@Before
@@ -59,12 +62,26 @@ public class StandardRegionFilterTests {
 		EasyMock.expect(fooPackage.getAttributes()).andReturn(fooAttrs).anyTimes();
 		EasyMock.replay(fooPackage);
 
+		this.fooServiceCapability = EasyMock.createMock(BundleCapability.class);
+		Map<String, Object> fooServiceAttrs = new HashMap<String, Object>();
+		fooServiceAttrs.put(Constants.OBJECTCLASS, "foo.Service");
+		EasyMock.expect(fooServiceCapability.getNamespace()).andReturn(RegionFilter.VISIBLE_OSGI_SERVICE_NAMESPACE).anyTimes();
+		EasyMock.expect(fooServiceCapability.getAttributes()).andReturn(fooServiceAttrs).anyTimes();
+		EasyMock.replay(fooServiceCapability);
+
 		this.barPackage = EasyMock.createMock(BundleCapability.class);
 		Map<String, Object> barAttrs = new HashMap<String, Object>();
 		barAttrs.put(BundleRevision.PACKAGE_NAMESPACE, "bar");
 		EasyMock.expect(barPackage.getNamespace()).andReturn(BundleRevision.PACKAGE_NAMESPACE).anyTimes();
 		EasyMock.expect(barPackage.getAttributes()).andReturn(barAttrs).anyTimes();
 		EasyMock.replay(barPackage);
+
+		this.barServiceCapability = EasyMock.createMock(BundleCapability.class);
+		Map<String, Object> barServiceAttrs = new HashMap<String, Object>();
+		barServiceAttrs.put(Constants.OBJECTCLASS, "bar.Service");
+		EasyMock.expect(barServiceCapability.getNamespace()).andReturn(RegionFilter.VISIBLE_OSGI_SERVICE_NAMESPACE).anyTimes();
+		EasyMock.expect(barServiceCapability.getAttributes()).andReturn(barServiceAttrs).anyTimes();
+		EasyMock.replay(barServiceCapability);
 	}
 
 	private RegionFilter createBundleFilter(String bundleSymbolicName, Version bundleVersion) throws InvalidSyntaxException {
@@ -130,30 +147,76 @@ public class StandardRegionFilterTests {
 		assertEquals(Arrays.asList(this.packageImportPolicy), regionFilter.getSharingPolicy().get(RegionFilter.VISIBLE_PACKAGE_NAMESPACE));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testServiceAllowed() throws InvalidSyntaxException {
 		RegionFilter regionFilter = createRegionFilter(RegionFilter.VISIBLE_SERVICE_NAMESPACE, Arrays.asList(serviceImportPolicy));
 		assertTrue(regionFilter.isAllowed(fooService.getReference()));
+		assertTrue(regionFilter.isAllowed(fooServiceCapability));
 		assertEquals(Arrays.asList(serviceImportPolicy), regionFilter.getSharingPolicy().get(RegionFilter.VISIBLE_SERVICE_NAMESPACE));
+
+		regionFilter = createRegionFilter(RegionFilter.VISIBLE_OSGI_SERVICE_NAMESPACE, Arrays.asList(serviceImportPolicy));
+		assertTrue(regionFilter.isAllowed(fooService.getReference()));
+		assertTrue(regionFilter.isAllowed(fooServiceCapability));
+		assertNull(regionFilter.getSharingPolicy().get(RegionFilter.VISIBLE_SERVICE_NAMESPACE));
+		assertEquals(Arrays.asList(serviceImportPolicy), regionFilter.getSharingPolicy().get(RegionFilter.VISIBLE_OSGI_SERVICE_NAMESPACE));
 	}
 
 	@Test
 	public void testServiceAllNotAllowed() {
 		RegionFilter regionFilter = RegionReflectionUtils.newStandardRegionFilterBuilder().build();
 		assertFalse(regionFilter.isAllowed(fooService.getReference()));
+		assertFalse(regionFilter.isAllowed(fooServiceCapability));
 	}
 
 	@Test
 	public void testServiceAllAllowed() {
+		@SuppressWarnings("deprecation")
 		RegionFilter regionFilter = RegionReflectionUtils.newStandardRegionFilterBuilder().allowAll(RegionFilter.VISIBLE_SERVICE_NAMESPACE).build();
 		assertTrue(regionFilter.isAllowed(fooService.getReference()));
+		assertTrue(regionFilter.isAllowed(fooServiceCapability));
+
+		regionFilter = RegionReflectionUtils.newStandardRegionFilterBuilder().allowAll(RegionFilter.VISIBLE_OSGI_SERVICE_NAMESPACE).build();
+		assertTrue(regionFilter.isAllowed(fooService.getReference()));
+		assertTrue(regionFilter.isAllowed(fooServiceCapability));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testServiceNotAllowed() throws InvalidSyntaxException {
 		RegionFilter regionFilter = createRegionFilter(RegionFilter.VISIBLE_SERVICE_NAMESPACE, Arrays.asList(serviceImportPolicy));
 		assertFalse(regionFilter.isAllowed(barService.getReference()));
+		assertFalse(regionFilter.isAllowed(barServiceCapability));
 		assertEquals(Arrays.asList(serviceImportPolicy), regionFilter.getSharingPolicy().get(RegionFilter.VISIBLE_SERVICE_NAMESPACE));
+		assertEquals(Arrays.asList(serviceImportPolicy), regionFilter.getSharingPolicy().get(RegionFilter.VISIBLE_OSGI_SERVICE_NAMESPACE));
+
+		regionFilter = createRegionFilter(RegionFilter.VISIBLE_OSGI_SERVICE_NAMESPACE, Arrays.asList(serviceImportPolicy));
+		assertFalse(regionFilter.isAllowed(barService.getReference()));
+		assertFalse(regionFilter.isAllowed(barServiceCapability));
+		assertNull(regionFilter.getSharingPolicy().get(RegionFilter.VISIBLE_SERVICE_NAMESPACE));
+		assertEquals(Arrays.asList(serviceImportPolicy), regionFilter.getSharingPolicy().get(RegionFilter.VISIBLE_OSGI_SERVICE_NAMESPACE));
+	}
+
+	@SuppressWarnings("deprecation")
+	@Test
+	public void testAllNamespaceForService() throws InvalidSyntaxException {
+		RegionFilter negateNonServices = RegionReflectionUtils.newStandardRegionFilterBuilder().allow(RegionFilter.VISIBLE_ALL_NAMESPACE, "(" + RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE + "=" + RegionFilter.VISIBLE_SERVICE_NAMESPACE + ")").build();
+		assertFalse(negateNonServices.isAllowed(stubBundle));
+		assertFalse(negateNonServices.isAllowed(fooPackage));
+		assertFalse(negateNonServices.isAllowed(barPackage));
+		assertTrue(negateNonServices.isAllowed(fooService.getReference()));
+		assertTrue(negateNonServices.isAllowed(fooServiceCapability));
+		assertTrue(negateNonServices.isAllowed(barService.getReference()));
+		assertTrue(negateNonServices.isAllowed(barServiceCapability));
+
+		negateNonServices = RegionReflectionUtils.newStandardRegionFilterBuilder().allow(RegionFilter.VISIBLE_ALL_NAMESPACE, "(" + RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE + "=" + RegionFilter.VISIBLE_OSGI_SERVICE_NAMESPACE + ")").build();
+		assertFalse(negateNonServices.isAllowed(stubBundle));
+		assertFalse(negateNonServices.isAllowed(fooPackage));
+		assertFalse(negateNonServices.isAllowed(barPackage));
+		assertTrue(negateNonServices.isAllowed(fooService.getReference()));
+		assertTrue(negateNonServices.isAllowed(fooServiceCapability));
+		assertTrue(negateNonServices.isAllowed(barService.getReference()));
+		assertTrue(negateNonServices.isAllowed(barServiceCapability));
 	}
 
 	@Test
@@ -163,16 +226,21 @@ public class StandardRegionFilterTests {
 		assertFalse(regionFilterNotAllowed.isAllowed(fooPackage));
 		assertFalse(regionFilterNotAllowed.isAllowed(barPackage));
 		assertFalse(regionFilterNotAllowed.isAllowed(fooService.getReference()));
+		assertFalse(regionFilterNotAllowed.isAllowed(fooServiceCapability));
 		assertFalse(regionFilterNotAllowed.isAllowed(barService.getReference()));
+		assertFalse(regionFilterNotAllowed.isAllowed(barServiceCapability));
 
 		RegionFilter regionFilterAllAllowed = RegionReflectionUtils.newStandardRegionFilterBuilder().allowAll(RegionFilter.VISIBLE_ALL_NAMESPACE).build();
 		assertTrue(regionFilterAllAllowed.isAllowed(stubBundle));
 		assertTrue(regionFilterAllAllowed.isAllowed(fooPackage));
 		assertTrue(regionFilterAllAllowed.isAllowed(barPackage));
-		assertTrue(regionFilterAllAllowed.isAllowed(fooService.getReference()));
-		assertTrue(regionFilterAllAllowed.isAllowed(barService.getReference()));
+		assertFalse(regionFilterNotAllowed.isAllowed(fooService.getReference()));
+		assertFalse(regionFilterNotAllowed.isAllowed(fooServiceCapability));
+		assertFalse(regionFilterNotAllowed.isAllowed(barService.getReference()));
+		assertFalse(regionFilterNotAllowed.isAllowed(barServiceCapability));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testNegativeAllNamespace() throws InvalidSyntaxException {
 		RegionFilter negateServices = RegionReflectionUtils.newStandardRegionFilterBuilder().allow(RegionFilter.VISIBLE_ALL_NAMESPACE, "(!(" + RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE + "=" + RegionFilter.VISIBLE_SERVICE_NAMESPACE + "))").build();
@@ -180,6 +248,17 @@ public class StandardRegionFilterTests {
 		assertTrue(negateServices.isAllowed(fooPackage));
 		assertTrue(negateServices.isAllowed(barPackage));
 		assertFalse(negateServices.isAllowed(fooService.getReference()));
+		assertFalse(negateServices.isAllowed(fooServiceCapability));
 		assertFalse(negateServices.isAllowed(barService.getReference()));
+		assertFalse(negateServices.isAllowed(barServiceCapability));
+
+		negateServices = RegionReflectionUtils.newStandardRegionFilterBuilder().allow(RegionFilter.VISIBLE_ALL_NAMESPACE, "(!(" + RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE + "=" + RegionFilter.VISIBLE_OSGI_SERVICE_NAMESPACE + "))").build();
+		assertTrue(negateServices.isAllowed(stubBundle));
+		assertTrue(negateServices.isAllowed(fooPackage));
+		assertTrue(negateServices.isAllowed(barPackage));
+		assertFalse(negateServices.isAllowed(fooService.getReference()));
+		assertFalse(negateServices.isAllowed(fooServiceCapability));
+		assertFalse(negateServices.isAllowed(barService.getReference()));
+		assertFalse(negateServices.isAllowed(barServiceCapability));
 	}
 }

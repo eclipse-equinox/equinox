@@ -55,8 +55,15 @@ public interface RegionFilter {
 	/**
 	 * Name space for sharing services. The filters specified in this name space will be used to match
 	 * {@link ServiceReference services}.
+	 * @deprecated use the {@link RegionFilter#VISIBLE_OSGI_SERVICE_NAMESPACE osgi.service} namespace instead.
 	 */
 	public static final String VISIBLE_SERVICE_NAMESPACE = "org.eclipse.equinox.allow.service"; //$NON-NLS-1$
+
+	/**
+	 * Name space for sharing services.  The filters specified in this name space will be used to match
+	 * {@link ServiceReference services} as well as {@code osgi.service} capabilities.
+	 */
+	public static final String VISIBLE_OSGI_SERVICE_NAMESPACE = "osgi.service"; //$NON-NLS-1$
 
 	/**
 	 * Name space for sharing bundles. The filters specified in this name space will be use to match against a bundle's
@@ -87,7 +94,7 @@ public interface RegionFilter {
 
 	/**
 	 * An attribute used to hold the namespace for which the attributes belong to when using the 
-	 * {@link #VISIBLE_ALL_NAMESPACE} namespace to mach all capabilities.  This can be useful
+	 * {@link #VISIBLE_ALL_NAMESPACE} namespace to match all capabilities.  This can be useful
 	 * for excluding some namespaces from the all namespace.  For example, 
 	 * <q>(!(org.eclipse.equinox.allow.all.namespace=osgi.wiring.package))</q> will allow everything
 	 * except package capabilities.
@@ -120,7 +127,7 @@ public interface RegionFilter {
 	 * Determines whether this filter allows the given service reference.  A
 	 * service is allowed if its service properties successfully matches one
 	 * or more filters specified using the 
-	 * {@link RegionFilter#VISIBLE_SERVICE_NAMESPACE} name space.
+	 * {@link RegionFilter#VISIBLE_OSGI_SERVICE_NAMESPACE} name space.
 	 * 
 	 * @param service the service reference of the service
 	 * @return <code>true</code> if the service is allowed and <code>false</code>otherwise
@@ -149,9 +156,9 @@ public interface RegionFilter {
 	 * The name space can be any generic name space including but not limited to the following:
 	 * {@link #VISIBLE_BUNDLE_NAMESPACE}, {@link #VISIBLE_PACKAGE_NAMESPACE}, 
 	 * {@link #VISIBLE_HOST_NAMESPACE}, {@link #VISIBLE_REQUIRE_NAMESPACE} and 
-	 * {@link #VISIBLE_SERVICE_NAMESPACE}.  Any other generic capability 
-	 * {@link RegionFilterBuilder#allow(String, String) name spaces} can also 
-	 * be allowed by the region filter.
+	 * {@link #VISIBLE_OSGI_SERVICE_NAMESPACE}.
+	 * Any other generic capability {@link RegionFilterBuilder#allow(String, String) name spaces} 
+	 * can also be allowed by the region filter.
 	 * 
 	 * @param namespace the name space
 	 * @param attributes the attributes to check if they are allowed

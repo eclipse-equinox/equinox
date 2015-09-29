@@ -89,9 +89,9 @@ public final class StandardRegionFilter implements RegionFilter {
 	}
 
 	public boolean isAllowed(ServiceReference<?> service) {
-		if (match(filters.get(VISIBLE_SERVICE_NAMESPACE), service))
+		if (match(filters.get(VISIBLE_OSGI_SERVICE_NAMESPACE), service))
 			return true;
-		return matchAll(VISIBLE_SERVICE_NAMESPACE, service);
+		return matchAll(VISIBLE_OSGI_SERVICE_NAMESPACE, service);
 	}
 
 	public boolean isAllowed(BundleCapability capability) {
@@ -108,15 +108,22 @@ public final class StandardRegionFilter implements RegionFilter {
 		return matchAll(namespace, attributes);
 	}
 
+	@SuppressWarnings("deprecation")
+	static final String[] serviceNamespaces = new String[] {VISIBLE_OSGI_SERVICE_NAMESPACE, VISIBLE_SERVICE_NAMESPACE};
+
 	private boolean matchAll(final String namespace, final Map<String, ?> attributes) {
 		Collection<Filter> allMatching = filters.get(VISIBLE_ALL_NAMESPACE);
 		if (allMatching == null) {
 			return false;
 		}
 		return match(allMatching, new AbstractMap<String, Object>() {
+			@SuppressWarnings("deprecation")
 			@Override
 			public Object get(Object key) {
 				if (RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE.equals(key)) {
+					if (VISIBLE_SERVICE_NAMESPACE.equals(namespace) || VISIBLE_OSGI_SERVICE_NAMESPACE.equals(namespace)) {
+						return serviceNamespaces;
+					}
 					return namespace;
 				}
 				return attributes.get(key);
@@ -135,9 +142,13 @@ public final class StandardRegionFilter implements RegionFilter {
 			return false;
 		}
 		return match(allMatching, new AbstractMap<String, Object>() {
+			@SuppressWarnings("deprecation")
 			@Override
 			public Object get(Object key) {
 				if (RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE.equals(key)) {
+					if (VISIBLE_SERVICE_NAMESPACE.equals(namespace) || VISIBLE_OSGI_SERVICE_NAMESPACE.equals(namespace)) {
+						return serviceNamespaces;
+					}
 					return namespace;
 				}
 				return service.getProperty((String) key);
