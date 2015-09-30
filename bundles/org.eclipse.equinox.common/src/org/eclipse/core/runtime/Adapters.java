@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 478685
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -78,6 +79,19 @@ public class Adapters {
 		}
 
 		return null;
+	}
+
+	/**
+	 * If it is possible to adapt the given object to the given type, this
+	 * returns the adapter.
+	 * <p>
+	 * Convenient method for calling <code>getAdapter(Object, Class, true)</code>.
+	 * <p>
+	 * See  {@link #getAdapter(Object, Class, boolean)}.
+	 *
+	 */
+	public static <T> T adapt(Object sourceObject, Class<T> adapter) {
+		return getAdapter(sourceObject, adapter, true);
 	}
 
 	private static Object queryAdapterManager(Object sourceObject, String adapterId, boolean allowActivation) {
