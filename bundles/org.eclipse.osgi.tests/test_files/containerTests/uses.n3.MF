@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: uses.n3
+Bundle-Version: 1.0
+Export-Package: 
+ uses.n.a; version="1.0"; uses:="uses.n"
+Import-Package: uses.n; version="[1.0,2.0)"

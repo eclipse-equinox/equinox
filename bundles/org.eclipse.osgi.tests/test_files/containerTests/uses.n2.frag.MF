@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: uses.n2.frag
+Bundle-Version: 1.0
+Fragment-Host: uses.n2
+Require-Bundle: uses.n3

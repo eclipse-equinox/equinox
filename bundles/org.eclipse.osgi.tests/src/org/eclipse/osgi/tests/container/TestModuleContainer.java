@@ -756,11 +756,11 @@ public class TestModuleContainer extends AbstractTest {
 		List<DummyModuleEvent> actual = database.getModuleEvents();
 		List<DummyModuleEvent> expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.UPDATED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED),
 
-		new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UPDATED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED),
+				new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UPDATED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED),
 
-		new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.UPDATED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UPDATED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED),
+				new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.UPDATED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UPDATED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED),
 
-		new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED)));
+				new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED)));
 		assertEvents(expected, actual, false);
 
 		// uninstall c4
@@ -1723,6 +1723,28 @@ public class TestModuleContainer extends AbstractTest {
 		Assert.assertEquals("l should resolve.", State.RESOLVED, uses_l.getState());
 		Assert.assertEquals("m.conflict1 should resolve.", State.RESOLVED, uses_m_conflict1.getState());
 		Assert.assertEquals("m.conflict2 should resolve.", State.RESOLVED, uses_m_conflict2.getState());
+	}
+
+	@Test
+	public void testUses6FragConflicts() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+
+		container.resolve(Arrays.asList(systemBundle), true);
+		Module uses_n1 = installDummyModule("uses.n1.MF", "n1", container);
+		installDummyModule("uses.n2.MF", "n2", container);
+		Module uses_n2_frag = installDummyModule("uses.n2.frag.MF", "n2.frag", container);
+		Module uses_n3 = installDummyModule("uses.n3.MF", "n3", container);
+		ResolutionReport report = container.resolve(null, false);
+		Assert.assertNull("resolution report has a resolution exception.", report.getResolutionException());
+
+		Assert.assertEquals("n1 should resolve.", State.RESOLVED, uses_n1.getState());
+		// TODO The following should be true, but on the current resolver in Mars the host is thrown away also
+		//Assert.assertEquals("n2 should resolve.", State.RESOLVED, uses_n2.getState());
+		Assert.assertEquals("n2.frag should not resolve.", State.INSTALLED, uses_n2_frag.getState());
+		Assert.assertEquals("n3 should resolve.", State.RESOLVED, uses_n3.getState());
 	}
 
 	@Test
