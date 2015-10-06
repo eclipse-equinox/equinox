@@ -11,6 +11,7 @@
  *     Red Hat Inc. - bug 373640, 379102
  *     Ericsson AB (Pascal Rapicault) - bug 304132
  *     Rapicorp, Inc - Default the configuration to Application Support (bug 461725)
+ *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 221969
  *******************************************************************************/
 package org.eclipse.equinox.launcher;
 
@@ -1531,6 +1532,10 @@ public class Main {
 				else
 					message += ".  See the log file\n" + logFile.getAbsolutePath(); //$NON-NLS-1$
 				System.getProperties().put(PROP_EXITDATA, message);
+			} else {
+				// we have an exit code of 13, in most cases the user tries to start a 32/64 bit Eclipse
+				// on a 64/32 bit Eclipse
+				log("Are you trying to start an 64/32-bit Eclipse on a 32/64-JVM? These must be the same, as Eclipse uses native code.");
 			}
 			// Return "unlucky" 13 as the exit code. The executable will recognize
 			// this constant and display a message to the user telling them that
