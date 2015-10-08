@@ -7,7 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 478685
+ *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 478685, 478864
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -45,7 +45,7 @@ public class Adapters {
 	 *         adapter type, or null if no such representation exists
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T getAdapter(Object sourceObject, Class<T> adapter, boolean allowActivation) {
+	public static <T> T adapt(Object sourceObject, Class<T> adapter, boolean allowActivation) {
 		if (sourceObject == null) {
 			return null;
 		}
@@ -82,16 +82,27 @@ public class Adapters {
 	}
 
 	/**
+	 * Temporary method for the transition during the I-builds
+	 *
+	 * Planned to be deleted after the transition
+	 *
+	 * @noreference
+	 */
+	public static <T> T getAdapter(Object sourceObject, Class<T> adapter, boolean allowActivation) {
+		return adapt(sourceObject, adapter, allowActivation);
+	}
+
+	/**
 	 * If it is possible to adapt the given object to the given type, this
 	 * returns the adapter.
 	 * <p>
-	 * Convenient method for calling <code>getAdapter(Object, Class, true)</code>.
+	 * Convenient method for calling <code>adapt(Object, Class, true)</code>.
 	 * <p>
-	 * See  {@link #getAdapter(Object, Class, boolean)}.
+	 * See  {@link #adapt(Object, Class, boolean)}.
 	 *
 	 */
 	public static <T> T adapt(Object sourceObject, Class<T> adapter) {
-		return getAdapter(sourceObject, adapter, true);
+		return adapt(sourceObject, adapter, true);
 	}
 
 	private static Object queryAdapterManager(Object sourceObject, String adapterId, boolean allowActivation) {
