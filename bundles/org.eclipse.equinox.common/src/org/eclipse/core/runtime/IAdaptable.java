@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
+ *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 478864
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -42,7 +43,7 @@ public interface IAdaptable {
 	 * associated with this object. Returns <code>null</code> if
 	 * no such object can be found.
 	 * <p>
-	 * Clients may implement this method but should generally call {@link Adapters#getAdapter(Object, Class, boolean)}
+	 * Clients may implement this method but should generally call {@link Adapters#adapt(Object, Class, boolean)}
 	 * rather than invoking it directly.
 	 *
 	 * @param adapter the adapter class to look up

@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
+ *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 478864
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -136,7 +137,7 @@ public interface IAdapterManager {
 	 * only suitable factory is not yet loaded, this method will return <code>null</code>.
 	 * <p>
 	 * In most cases, it is preferable for client code to use
-	 * {@link Adapters#getAdapter(Object, Class, boolean)} rather than calling this 
+	 * {@link Adapters#adapt(Object, Class, boolean)} rather than calling this 
 	 * method directly since doing so will also detect interfaces supplied by the 
 	 * {@link IAdaptable} interface
 	 * 
@@ -160,7 +161,7 @@ public interface IAdapterManager {
 	 * <code>loadAdapter</code> method instead.
 	 * <p>
 	 * In most cases, it is preferable for client code to use
-	 * {@link Adapters#getAdapter(Object, Class, boolean)} rather than calling this 
+	 * {@link Adapters#adapt(Object, Class, boolean)} rather than calling this 
 	 * method directly since doing so will also detect interfaces supplied by the 
 	 * {@link IAdaptable} interface
 	 * 
@@ -225,7 +226,7 @@ public interface IAdapterManager {
 	 * activation by using <code>getAdapter</code> instead.
 	 * <p>
 	 * In most cases, it is preferable for client code to use
-	 * {@link Adapters#getAdapter(Object, Class, boolean)} rather than calling this 
+	 * {@link Adapters#adapt(Object, Class, boolean)} rather than calling this 
 	 * method directly since doing so will also detect interfaces supplied by the 
 	 * {@link IAdaptable} interface.
 	 * 
