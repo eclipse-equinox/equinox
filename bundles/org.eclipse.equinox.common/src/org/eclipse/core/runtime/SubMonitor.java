@@ -758,7 +758,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * {@link #split} is called, the result becomes the new active child and any unused progress
 	 * from the previously-active child is consumed.</p>
 	 * 
-	 * <p>This is property makes it unnecessary to call done() on a SubMonitor instance, since child
+	 * <p>This makes it unnecessary to call done() on a SubMonitor instance, since child
 	 * monitors are automatically cleaned up the next time the parent is touched.</p> 
 	 * 
 	 * <code><pre> 
