@@ -7,7 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 478685, 478864
+ *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 478685, 478864, 479849
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -79,17 +79,6 @@ public class Adapters {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Temporary method for the transition during the I-builds
-	 *
-	 * Planned to be deleted after the transition
-	 *
-	 * @noreference
-	 */
-	public static <T> T getAdapter(Object sourceObject, Class<T> adapter, boolean allowActivation) {
-		return adapt(sourceObject, adapter, allowActivation);
 	}
 
 	/**
