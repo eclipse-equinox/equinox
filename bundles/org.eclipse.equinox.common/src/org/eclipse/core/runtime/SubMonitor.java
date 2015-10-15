@@ -11,6 +11,7 @@
  *     Stefan Xenos - bug 174040 - SubMonitor#convert doesn't always set task name
  *     Stefan Xenos - bug 206942 - updated javadoc to recommend better constants for infinite progress
  *     Stefan Xenos (Google) - bug 475747 - Support efficient, convenient cancellation checks in SubMonitor
+ *     Stefan Xenos (Google) - bug 476924 - Add a SUPPRESS_ISCANCELED flag to SubMonitor
  *     IBM Corporation - ongoing maintenance
  *******************************************************************************/
 package org.eclipse.core.runtime;
@@ -358,7 +359,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	private final int flags;
 
 	/**
-	 * May be passed as a flag to split. Indicates that the calls
+	 * May be passed as a flag to {@link #split}. Indicates that the calls
 	 * to subTask on the child should be ignored. Without this flag,
 	 * calling subTask on the child will result in a call to subTask
 	 * on its parent.
@@ -366,7 +367,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	public static final int SUPPRESS_SUBTASK = 0x0001;
 
 	/**
-	 * May be passed as a flag to split. Indicates that strings
+	 * May be passed as a flag to {@link #split}. Indicates that strings
 	 * passed into beginTask should be ignored. If this flag is
 	 * specified, then the progress monitor instance will accept null 
 	 * as the first argument to beginTask. Without this flag, any 
@@ -376,7 +377,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	public static final int SUPPRESS_BEGINTASK = 0x0002;
 
 	/**
-	 * May be passed as a flag to split. Indicates that strings
+	 * May be passed as a flag to {@link #split}. Indicates that strings
 	 * passed into setTaskName should be ignored. If this string
 	 * is omitted, then a call to setTaskName on the child will 
 	 * result in a call to setTaskName on the parent.
@@ -384,13 +385,20 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	public static final int SUPPRESS_SETTASKNAME = 0x0004;
 
 	/**
-	 * May be passed as a flag to split. Indicates that strings
+	 * May be passed as a flag to {@link #split}. Indicates that isCanceled
+	 * should always return false.
+	 * @since 3.8
+	 */
+	public static final int SUPPRESS_ISCANCELED = 0x0008;
+
+	/**
+	 * May be passed as a flag to {@link #split}. Indicates that strings
 	 * passed to setTaskName, subTask, and beginTask should all be ignored.
 	 */
 	public static final int SUPPRESS_ALL_LABELS = SUPPRESS_SETTASKNAME | SUPPRESS_BEGINTASK | SUPPRESS_SUBTASK;
 
 	/**
-	 * May be passed as a flag to split. Indicates that strings
+	 * May be passed as a flag to {@link #split}. Indicates that strings
 	 * passed to setTaskName, subTask, and beginTask should all be propagated
 	 * to the parent.
 	 */
@@ -399,13 +407,13 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	/**
 	 * Bitwise combination of all flags which may be passed in to the public interface on {@link #split}
 	 */
-	private static final int ALL_PUBLIC_FLAGS = SUPPRESS_ALL_LABELS;
+	private static final int ALL_PUBLIC_FLAGS = SUPPRESS_ALL_LABELS | SUPPRESS_ISCANCELED;
 
 	/**
 	 * Bitwise combination of all flags which are inherited directly from a parent SubMonitor to its immediate
 	 * children. All other flags are either not inherited or are inherited from more complicated logic in {@link #split}
 	 */
-	private static final int ALL_INHERITED_FLAGS = SUPPRESS_SUBTASK;
+	private static final int ALL_INHERITED_FLAGS = SUPPRESS_SUBTASK | SUPPRESS_ISCANCELED;
 
 	/**
 	 * Creates a new SubMonitor that will report its progress via
@@ -553,7 +561,10 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 
 	@Override
 	public boolean isCanceled() {
-		return root.isCanceled();
+		if ((flags & SUPPRESS_ISCANCELED) == 0) {
+			return root.isCanceled();
+		}
+		return false;
 	}
 
 	@Override
@@ -871,21 +882,23 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 		int oldUsedForParent = this.usedForParent;
 		SubMonitor result = newChild(totalWork, suppressFlags);
 
-		int ticksTheChildWillReportToParent = result.totalParent;
+		if ((flags & SUPPRESS_ISCANCELED) == 0) {
+			int ticksTheChildWillReportToParent = result.totalParent;
 
-		// If the new child reports a nonzero amount of progress.
-		if (ticksTheChildWillReportToParent > 0) {
-			// Don't check for cancellation if the child is consuming 100% of its parent since whatever code created
-			// the parent already performed this check.
-			if (oldUsedForParent > 0 || usedForParent < totalParent) {
-				// Treat this as a nontrivial operation and check for cancellation unconditionally.
-				root.checkForCancellation();
-			}
-		} else {
-			// This is a trivial operation. Only perform a cancellation check after the counter expires.
-			if (++root.cancellationCheckCounter >= TRIVIAL_OPERATIONS_BEFORE_CANCELLATION_CHECK) {
-				root.cancellationCheckCounter = 0;
-				root.checkForCancellation();
+			// If the new child reports a nonzero amount of progress.
+			if (ticksTheChildWillReportToParent > 0) {
+				// Don't check for cancellation if the child is consuming 100% of its parent since whatever code created
+				// the parent already performed this check.
+				if (oldUsedForParent > 0 || usedForParent < totalParent) {
+					// Treat this as a nontrivial operation and check for cancellation unconditionally.
+					root.checkForCancellation();
+				}
+			} else {
+				// This is a trivial operation. Only perform a cancellation check after the counter expires.
+				if (++root.cancellationCheckCounter >= TRIVIAL_OPERATIONS_BEFORE_CANCELLATION_CHECK) {
+					root.cancellationCheckCounter = 0;
+					root.checkForCancellation();
+				}
 			}
 		}
 		return result;
