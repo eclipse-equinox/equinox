@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Lars.Vogel <Lars.Vogel@vogella.com> - Bug 479914
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -36,8 +37,8 @@ package org.eclipse.core.runtime;
  * <pre>
  *     void someMethod(IProgressMonitor pm) {
  *        SubMonitor subMonitor = SubMonitor.convert(pm, "Main Task", 100);
- *        doSomeWork(subMonitor.newChild(60));
- *        doSomeMoreWork(subMonitor.newChild(40));
+ *        doSomeWork(subMonitor.spit(60));
+ *        doSomeMoreWork(subMonitor.split(40));
  *     }
  * </pre>
  * <p>
@@ -47,9 +48,9 @@ package org.eclipse.core.runtime;
  * to {@link SubMonitor#convert}. Keep the returned SubMonitor around as a local variable and refer
  * to it instead of the root monitor for the remainder of the method.</li>
  * <li>All calls to {@link #SubProgressMonitor(IProgressMonitor, int)} should be replaced by calls to
- * {@link SubMonitor#newChild(int)}.</li>
+ * {@link SubMonitor#split(int)}.</li>
  * <li>If a SubProgressMonitor is constructed using the SUPPRESS_SUBTASK_LABEL flag, replace it with the
- * two-argument version of {@link SubMonitor#newChild(int, int)} using {@link SubMonitor#SUPPRESS_SUBTASK}
+ * two-argument version of {@link SubMonitor#split(int, int)} using {@link SubMonitor#SUPPRESS_SUBTASK}
  * as the second argument.</li>
  * <li>It is not necessary to call done on an instance of {@link SubMonitor}.</li> 
  * </ul>
