@@ -13,10 +13,11 @@ package org.eclipse.osgi.internal.framework;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.internal.debug.Debug;
-import org.eclipse.osgi.internal.serviceregistry.HookContext;
-import org.eclipse.osgi.internal.serviceregistry.ShrinkableCollection;
+import org.eclipse.osgi.internal.serviceregistry.*;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.bundle.EventHook;
@@ -24,6 +25,7 @@ import org.osgi.framework.hooks.bundle.EventHook;
 public class EquinoxEventPublisher {
 	static final String eventHookName = EventHook.class.getName();
 	static final String collisionHookName = CollisionHook.class.getName();
+	static final int FRAMEWORK_STOPPED_MASK = (FrameworkEvent.STOPPED | FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED | FrameworkEvent.STOPPED_UPDATE);
 
 	static final int BUNDLEEVENT = 1;
 	static final int BUNDLEEVENTSYNC = 2;
@@ -31,6 +33,10 @@ public class EquinoxEventPublisher {
 	static final int FRAMEWORKEVENT = 4;
 
 	private final EquinoxContainer container;
+
+	private Object monitor = new Object();
+	private EventManager eventManager;
+
 	/*
 	 * The following maps objects keep track of event listeners
 	 * by BundleContext.  Each element is a Map that is the set
@@ -49,6 +55,45 @@ public class EquinoxEventPublisher {
 
 	public EquinoxEventPublisher(EquinoxContainer container) {
 		this.container = container;
+	}
+
+	void init() {
+		// create our event manager on init()
+		resetEventManager(new EventManager("Framework Event Dispatcher: " + toString())); //$NON-NLS-1$
+	}
+
+	void close() {
+		// ensure we have flushed any events in the queue
+		flushFrameworkEvents();
+		// close and clear out the event manager
+		resetEventManager(null);
+		// make sure we clear out all the remaining listeners
+		allBundleListeners.clear();
+		allSyncBundleListeners.clear();
+		allFrameworkListeners.clear();
+	}
+
+	private void resetEventManager(EventManager newEventManager) {
+		EventManager currentEventManager;
+		synchronized (this.monitor) {
+			currentEventManager = eventManager;
+			eventManager = newEventManager;
+		}
+		if (currentEventManager != null) {
+			currentEventManager.close();
+		}
+	}
+
+	public <K, V, E> ListenerQueue<K, V, E> newListenerQueue() {
+		synchronized (this.monitor) {
+			return new ListenerQueue<K, V, E>(eventManager);
+		}
+	}
+
+	private boolean isEventManagerSet() {
+		synchronized (this.monitor) {
+			return eventManager != null;
+		}
 	}
 
 	/**
@@ -84,6 +129,9 @@ public class EquinoxEventPublisher {
 	}
 
 	void publishBundleEventPrivileged(BundleEvent event) {
+		if (!isEventManagerSet()) {
+			return;
+		}
 		/*
 		 * We must collect the snapshots of the sync and async listeners
 		 * BEFORE we dispatch the event.
@@ -155,7 +203,7 @@ public class EquinoxEventPublisher {
 
 		/* Dispatch the event to the snapshot for sync listeners */
 		if (!listenersSync.isEmpty()) {
-			ListenerQueue<SynchronousBundleListener, SynchronousBundleListener, BundleEvent> queue = container.newListenerQueue();
+			ListenerQueue<SynchronousBundleListener, SynchronousBundleListener, BundleEvent> queue = newListenerQueue();
 			for (Map.Entry<BundleContextImpl, Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>>> entry : listenersSync.entrySet()) {
 				@SuppressWarnings({"rawtypes", "unchecked"})
 				EventDispatcher<SynchronousBundleListener, SynchronousBundleListener, BundleEvent> dispatcher = (EventDispatcher) entry.getKey();
@@ -167,7 +215,7 @@ public class EquinoxEventPublisher {
 
 		/* Dispatch the event to the snapshot for async listeners */
 		if ((listenersAsync != null) && !listenersAsync.isEmpty()) {
-			ListenerQueue<BundleListener, BundleListener, BundleEvent> queue = container.newListenerQueue();
+			ListenerQueue<BundleListener, BundleListener, BundleEvent> queue = newListenerQueue();
 			for (Map.Entry<BundleContextImpl, Set<Map.Entry<BundleListener, BundleListener>>> entry : listenersAsync.entrySet()) {
 				@SuppressWarnings({"rawtypes", "unchecked"})
 				EventDispatcher<BundleListener, BundleListener, BundleEvent> dispatcher = (EventDispatcher) entry.getKey();
@@ -183,21 +231,24 @@ public class EquinoxEventPublisher {
 			Debug.println("notifyBundleEventHooks(" + event.getType() + ":" + event.getBundle() + ", " + result + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$  
 		}
 
-		container.getServiceRegistry().notifyHooksPrivileged(new HookContext() {
-			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
-				if (hook instanceof EventHook) {
-					((EventHook) hook).event(event, result);
+		ServiceRegistry serviceRegistry = container.getServiceRegistry();
+		if (serviceRegistry != null) {
+			serviceRegistry.notifyHooksPrivileged(new HookContext() {
+				public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
+					if (hook instanceof EventHook) {
+						((EventHook) hook).event(event, result);
+					}
 				}
-			}
 
-			public String getHookClassName() {
-				return eventHookName;
-			}
+				public String getHookClassName() {
+					return eventHookName;
+				}
 
-			public String getHookMethodName() {
-				return "event"; //$NON-NLS-1$
-			}
-		});
+				public String getHookMethodName() {
+					return "event"; //$NON-NLS-1$
+				}
+			});
+		}
 	}
 
 	/**
@@ -231,6 +282,9 @@ public class EquinoxEventPublisher {
 	}
 
 	public void publishFrameworkEventPrivileged(FrameworkEvent event, FrameworkListener... callerListeners) {
+		if (!isEventManagerSet()) {
+			return;
+		}
 		// Build the listener snapshot
 		Map<BundleContextImpl, Set<Map.Entry<FrameworkListener, FrameworkListener>>> listenerSnapshot;
 		synchronized (allFrameworkListeners) {
@@ -245,7 +299,7 @@ public class EquinoxEventPublisher {
 		// If framework event hook were defined they would be called here
 
 		// deliver the event to the snapshot
-		ListenerQueue<FrameworkListener, FrameworkListener, FrameworkEvent> queue = container.newListenerQueue();
+		ListenerQueue<FrameworkListener, FrameworkListener, FrameworkEvent> queue = newListenerQueue();
 
 		// add the listeners specified by the caller first
 		if (callerListeners != null && callerListeners.length > 0) {
@@ -271,6 +325,10 @@ public class EquinoxEventPublisher {
 		}
 
 		queue.dispatchEventAsynchronous(FRAMEWORKEVENT, event);
+		// close down the publisher if we got the stopped event
+		if ((event.getType() & FRAMEWORK_STOPPED_MASK) != 0) {
+			close();
+		}
 	}
 
 	/**
@@ -344,14 +402,42 @@ public class EquinoxEventPublisher {
 	}
 
 	void removeAllListeners(BundleContextImpl context) {
-		synchronized (allBundleListeners) {
-			allBundleListeners.remove(context);
-		}
-		synchronized (allSyncBundleListeners) {
-			allSyncBundleListeners.remove(context);
+		// leave any left over listeners until the framework STOPPED event
+		if (context.getBundleImpl().getBundleId() != 0) {
+			synchronized (allBundleListeners) {
+				allBundleListeners.remove(context);
+			}
+			synchronized (allSyncBundleListeners) {
+				allSyncBundleListeners.remove(context);
+			}
 		}
 		synchronized (allFrameworkListeners) {
 			allFrameworkListeners.remove(context);
+		}
+	}
+
+	void flushFrameworkEvents() {
+		EventDispatcher<Object, Object, CountDownLatch> dispatcher = new EventDispatcher<Object, Object, CountDownLatch>() {
+			@Override
+			public void dispatchEvent(Object eventListener, Object listenerObject, int eventAction, CountDownLatch flushedSignal) {
+				// Signal that we have flushed all events
+				flushedSignal.countDown();
+			}
+		};
+
+		ListenerQueue<Object, Object, CountDownLatch> queue = newListenerQueue();
+		queue.queueListeners(Collections.<Object, Object> singletonMap(dispatcher, dispatcher).entrySet(), dispatcher);
+
+		// fire event with the flushedSignal latch
+		CountDownLatch flushedSignal = new CountDownLatch(1);
+		queue.dispatchEventAsynchronous(0, flushedSignal);
+
+		try {
+			// Wait for the flush signal; timeout after 30 seconds
+			flushedSignal.await(30, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			// ignore but reset the interrupted flag
+			Thread.currentThread().interrupt();
 		}
 	}
 }

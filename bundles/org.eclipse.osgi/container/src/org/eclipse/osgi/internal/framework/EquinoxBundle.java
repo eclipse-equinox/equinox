@@ -16,14 +16,10 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.*;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
-import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
-import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.loader.BundleLoader;
@@ -218,34 +214,9 @@ public class EquinoxBundle implements Bundle, BundleReference {
 				((SystemModule) getModule()).init();
 			} finally {
 				if (!initListeners.isEmpty()) {
-					flushFrameworkEvents();
+					getEquinoxContainer().getEventPublisher().flushFrameworkEvents();
 					removeInitListeners();
 				}
-			}
-		}
-
-		private void flushFrameworkEvents() {
-			EventDispatcher<Object, Object, CountDownLatch> dispatcher = new EventDispatcher<Object, Object, CountDownLatch>() {
-				@Override
-				public void dispatchEvent(Object eventListener, Object listenerObject, int eventAction, CountDownLatch flushedSignal) {
-					// Signal that we have flushed all events
-					flushedSignal.countDown();
-				}
-			};
-
-			ListenerQueue<Object, Object, CountDownLatch> queue = getEquinoxContainer().newListenerQueue();
-			queue.queueListeners(Collections.<Object, Object> singletonMap(dispatcher, dispatcher).entrySet(), dispatcher);
-
-			// fire event with the flushedSignal latch
-			CountDownLatch flushedSignal = new CountDownLatch(1);
-			queue.dispatchEventAsynchronous(0, flushedSignal);
-
-			try {
-				// Wait for the flush signal; timeout after 30 seconds
-				flushedSignal.await(30, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {
-				// ignore but reset the interrupted flag
-				Thread.currentThread().interrupt();
 			}
 		}
 

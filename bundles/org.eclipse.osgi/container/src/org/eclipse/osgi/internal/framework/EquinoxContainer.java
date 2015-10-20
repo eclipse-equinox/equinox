@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.security.AccessController;
 import java.util.*;
 import java.util.concurrent.*;
-import org.eclipse.osgi.framework.eventmgr.EventManager;
 import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
@@ -47,10 +46,10 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	private final Set<String> bootDelegation;
 	private final String[] bootDelegationStems;
 	private final boolean bootDelegateAll;
+	private final EquinoxEventPublisher eventPublisher;
 
 	private final Object monitor = new Object();
-	private EventManager eventManager;
-	private EquinoxEventPublisher eventPublisher;
+
 	private ServiceRegistry serviceRegistry;
 	private ContextFinder contextFinder;
 
@@ -72,6 +71,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		}
 		this.packageAdmin = new PackageAdminImpl(storage.getModuleContainer());
 		this.startLevel = new StartLevelImpl(storage.getModuleContainer());
+		this.eventPublisher = new EquinoxEventPublisher(this);
 
 		// set the boot delegation according to the osgi boot delegation property
 		// TODO unfortunately this has to be done after constructing storage so the vm profile is loaded
@@ -144,9 +144,8 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	}
 
 	void init() {
+		eventPublisher.init();
 		synchronized (this.monitor) {
-			eventManager = new EventManager("Framework Event Dispatcher: " + toString()); //$NON-NLS-1$
-			eventPublisher = new EquinoxEventPublisher(this);
 			serviceRegistry = new ServiceRegistry(this);
 			initializeContextFinder();
 			executor = Executors.newScheduledThreadPool(1, this);
@@ -157,21 +156,16 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	}
 
 	void close() {
-		EventManager currentEventManager;
 		StorageSaver currentSaver;
 		Storage currentStorage;
 		ScheduledExecutorService currentExecutor;
 		synchronized (this.monitor) {
-			currentEventManager = eventManager;
-			eventManager = null;
-			eventPublisher = null;
 			serviceRegistry = null;
 			currentSaver = storageSaver;
 			currentStorage = storage;
 			currentExecutor = executor;
 		}
 		// do this outside of the lock to avoid deadlock
-		currentEventManager.close();
 		currentSaver.close();
 		currentStorage.close();
 		// Must be done last since it will result in termination of the 
@@ -232,9 +226,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	}
 
 	public <K, V, E> ListenerQueue<K, V, E> newListenerQueue() {
-		synchronized (this.monitor) {
-			return new ListenerQueue<K, V, E>(eventManager);
-		}
+		return eventPublisher.newListenerQueue();
 	}
 
 	void checkAdminPermission(Bundle bundle, String action) {

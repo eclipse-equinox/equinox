@@ -16,6 +16,7 @@ import java.security.Permission;
 import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.*;
 import javax.net.SocketFactory;
 import junit.framework.Test;
@@ -1926,7 +1927,16 @@ public class SystemBundleTests extends AbstractBundleTests {
 		} finally {
 			Thread.currentThread().setContextClassLoader(current);
 		}
-
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
 	}
 
 	private void checkActive(Bundle b) {
@@ -2445,6 +2455,43 @@ public class SystemBundleTests extends AbstractBundleTests {
 			// expected
 		}
 		equinox.stop();
+	}
+
+	public void testSystemBundleListener() throws BundleException, InterruptedException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		config.mkdirs();
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+		equinox.start();
+		BundleContext systemContext = equinox.getBundleContext();
+
+		final AtomicInteger stoppingEvent = new AtomicInteger();
+		final AtomicInteger stoppedEvent = new AtomicInteger();
+
+		BundleListener systemBundleListener = new SynchronousBundleListener() {
+
+			@Override
+			public void bundleChanged(BundleEvent event) {
+				if (event.getBundle().getBundleId() == 0) {
+					switch (event.getType()) {
+						case BundleEvent.STOPPING :
+							stoppingEvent.incrementAndGet();
+							break;
+						case BundleEvent.STOPPED :
+							stoppedEvent.incrementAndGet();
+						default :
+							break;
+					}
+				}
+			}
+		};
+		systemContext.addBundleListener(systemBundleListener);
+
+		equinox.stop();
+		equinox.waitForStop(5000);
+		assertEquals("Wrong number of STOPPING events", 1, stoppingEvent.get());
+		assertEquals("Wrong number of STOPPED events", 1, stoppedEvent.get());
 	}
 
 	public void testContextBootDelegation() throws BundleException {
