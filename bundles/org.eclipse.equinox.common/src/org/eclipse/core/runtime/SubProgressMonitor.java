@@ -37,7 +37,7 @@ package org.eclipse.core.runtime;
  * <pre>
  *     void someMethod(IProgressMonitor pm) {
  *        SubMonitor subMonitor = SubMonitor.convert(pm, "Main Task", 100);
- *        doSomeWork(subMonitor.spit(60));
+ *        doSomeWork(subMonitor.split(60));
  *        doSomeMoreWork(subMonitor.split(40));
  *     }
  * </pre>
