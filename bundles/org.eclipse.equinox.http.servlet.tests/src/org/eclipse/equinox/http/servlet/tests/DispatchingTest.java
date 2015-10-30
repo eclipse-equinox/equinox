@@ -24,6 +24,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
@@ -948,6 +949,59 @@ public class DispatchingTest extends TestCase {
 		String result = requestAdvisor.request("Servlet13A/a?p=1&p=2");
 
 		Assert.assertEquals("p=3&p=4&p=1&p=2|p=3&p=4|3|[3, 4, 1, 2]", result);
+	}
+
+	public void test_Bug479115() throws Exception {
+		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void doGet(
+				final HttpServletRequest req, final HttpServletResponse resp)
+				throws ServletException, IOException {
+
+				final AtomicReference<String[]> results = new AtomicReference<String[]>();
+
+				Thread thread = new Thread() {
+
+					@Override
+					public void run() {
+						String[] parts = new String[2];
+
+						parts[0] = req.getContextPath();
+						parts[1] = req.getRequestURI();
+
+						results.set(parts);
+					}
+
+				};
+
+				thread.start();
+
+				try {
+					thread.join();
+				}
+				catch (InterruptedException ie) {
+					throw new IOException(ie);
+				}
+
+				Assert.assertNotNull(results.get());
+
+				PrintWriter writer = resp.getWriter();
+				writer.write(results.get()[0]);
+				writer.write("|");
+				writer.write(results.get()[1]);
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "Bug479115");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Bug479115/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+
+		String result = requestAdvisor.request("Bug479115/a");
+
+		Assert.assertEquals("|/Bug479115/a", result);
 	}
 
 	private String doRequest(String action, Map<String, String> params) throws IOException {

@@ -129,12 +129,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		RequestDispatcher.INCLUDE_SERVLET_PATH
 	};
 
-	private final ThreadLocal<Deque<State>> state = new ThreadLocal<Deque<State>>() {
-		@Override
-		protected Deque<State> initialValue() {
-			return new ArrayDeque<State>();
-		}
-	};
+	private final Deque<State> state = new ArrayDeque<State>();
 
 	private final HttpServletRequest request;
 
@@ -167,7 +162,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	}
 
 	public void destroy() {
-		state.remove();
+		state.clear();
 	}
 
 	public String getAuthType() {
@@ -455,7 +450,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	}
 
 	private Deque<State> getState() {
-		return state.get();
+		return state;
 	}
 
 }
