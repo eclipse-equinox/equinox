@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2015 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -151,9 +151,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 		if (service == null)
 			return null;
 
-		synchronized (configurationStore) {
-			addReference(reference, service);
-		}
+		addReference(reference, service);
 		return service;
 	}
 
@@ -180,16 +178,14 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 				}
 			}
 		}
-		synchronized (configurationStore) {
-			untrackManagedServiceFactory(reference);
-			addingService(reference);
-		}
+		
+		untrackManagedServiceFactory(reference);
+		addingService(reference);
 	}
 
 	public void removedService(ServiceReference<ManagedServiceFactory> reference, ManagedServiceFactory service) {
-		synchronized (configurationStore) {
-			untrackManagedServiceFactory(reference);
-		}
+		untrackManagedServiceFactory(reference);
+		
 		context.ungetService(reference);
 	}
 
