@@ -183,16 +183,13 @@ class ConfigurationStore {
 		return configurations.get(pid);
 	}
 
-	public ConfigurationImpl[] getFactoryConfigurations(String factoryPid) {
+	public synchronized ConfigurationImpl[] getFactoryConfigurations(String factoryPid) {
 		List<ConfigurationImpl> resultList = new ArrayList<ConfigurationImpl>();
-		synchronized (this) {
-			resultList.addAll(configurations.values());
-		}
-		for (Iterator<ConfigurationImpl> it = resultList.iterator(); it.hasNext();) {
+		for (Iterator<ConfigurationImpl> it = configurations.values().iterator(); it.hasNext();) {
 			ConfigurationImpl config = it.next();
 			String otherFactoryPid = config.getFactoryPid();
-			if (otherFactoryPid == null || !otherFactoryPid.equals(factoryPid))
-				it.remove();
+			if (otherFactoryPid != null && otherFactoryPid.equals(factoryPid))
+				resultList.add(config);
 		}
 		return resultList.toArray(new ConfigurationImpl[resultList.size()]);
 	}
