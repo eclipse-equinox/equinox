@@ -24,7 +24,10 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.*;
 import org.eclipse.osgi.internal.container.LockSet;
 import org.eclipse.osgi.internal.debug.Debug;
-import org.eclipse.osgi.internal.framework.*;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.framework.EquinoxContainerAdaptor;
+import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.internal.hookregistry.BundleFileWrapperFactoryHook;
 import org.eclipse.osgi.internal.hookregistry.StorageHookFactory;
 import org.eclipse.osgi.internal.hookregistry.StorageHookFactory.StorageHook;
@@ -230,14 +233,15 @@ public class Storage {
 			}
 		}
 		File content = generation.getContent();
+		if (getConfiguration().inCheckConfigurationMode()) {
+			if (generation.isDirectory()) {
+				content = new File(content, "META-INF/MANIFEST.MF"); //$NON-NLS-1$
+			}
+			return generation.getLastModified() != secureAction.lastModified(content);
+		}
 		if (!content.exists()) {
 			// the content got deleted since last time!
 			return true;
-		}
-		if (getConfiguration().inCheckConfigurationMode()) {
-			if (generation.isDirectory())
-				content = new File(content, "META-INF/MANIFEST.MF"); //$NON-NLS-1$
-			return generation.getLastModified() != secureAction.lastModified(content);
 		}
 		return false;
 	}
