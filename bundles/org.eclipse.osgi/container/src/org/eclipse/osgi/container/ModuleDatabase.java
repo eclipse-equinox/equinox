@@ -1279,9 +1279,9 @@ public class ModuleDatabase {
 			Map<String, Object> attributes = readMap(in);
 			Map<String, ?> directives = readMap(in);
 			if (isCapability) {
-				builder.addCapability(namespace, (Map<String, String>) directives, attributes);
+				builder.basicAddCapability(namespace, (Map<String, String>) directives, attributes);
 			} else {
-				builder.addRequirement(namespace, (Map<String, String>) directives, attributes);
+				builder.basicAddRequirement(namespace, (Map<String, String>) directives, attributes);
 			}
 
 		}

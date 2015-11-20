@@ -237,4 +237,19 @@ public final class ModuleRevisionBuilder {
 	private static <K, V> Map<K, V> copyUnmodifiableMap(Map<K, V> map) {
 		return Collections.unmodifiableMap(new HashMap<K, V>(map));
 	}
+
+	void basicAddCapability(String namespace, Map<String, String> directives, Map<String, Object> attributes) {
+		basicAddGenericInfo(capabilityInfos, namespace, directives, attributes);
+	}
+
+	void basicAddRequirement(String namespace, Map<String, String> directives, Map<String, Object> attributes) {
+		basicAddGenericInfo(requirementInfos, namespace, directives, attributes);
+	}
+
+	private static void basicAddGenericInfo(List<GenericInfo> infos, String namespace, Map<String, String> directives, Map<String, Object> attributes) {
+		if (infos == null) {
+			infos = new ArrayList<GenericInfo>();
+		}
+		infos.add(new GenericInfo(namespace, Collections.unmodifiableMap(directives), Collections.unmodifiableMap(attributes)));
+	}
 }
