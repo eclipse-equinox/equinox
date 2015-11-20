@@ -267,19 +267,19 @@ public final class BundleInfo {
 
 		public void storeContent(File destination, InputStream in, boolean nativeCode) throws IOException {
 			/* the entry has not been cached */
-			if (getStorage().getConfiguration().getDebug().DEBUG_GENERAL)
+			if (getStorage().getConfiguration().getDebug().DEBUG_STORAGE)
 				Debug.println("Creating file: " + destination.getPath()); //$NON-NLS-1$
 			/* create the necessary directories */
 			File dir = new File(destination.getParent());
 			if (!dir.mkdirs() && !dir.isDirectory()) {
-				if (getStorage().getConfiguration().getDebug().DEBUG_GENERAL)
+				if (getStorage().getConfiguration().getDebug().DEBUG_STORAGE)
 					Debug.println("Unable to create directory: " + dir.getPath()); //$NON-NLS-1$
 				throw new IOException(NLS.bind(Msg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, dir.getAbsolutePath()));
 			}
 			/* copy the entry to the cache */
 			File tempDest = File.createTempFile("staged", ".tmp", dir); //$NON-NLS-1$ //$NON-NLS-2$
 			StorageUtil.readFile(in, tempDest);
-			if (destination.exists() || !tempDest.renameTo(destination)) {
+			if (destination.exists() || !StorageUtil.move(tempDest, destination, getStorage().getConfiguration().getDebug().DEBUG_STORAGE)) {
 				// maybe because some other thread already beat us there.
 				if (destination.exists()) {
 					// just delete our copy that could not get renamed
@@ -436,7 +436,7 @@ public final class BundleInfo {
 	public File getDataFile(String path) {
 		File dataRoot = getStorage().getFile(getBundleId() + "/" + Storage.BUNDLE_DATA_DIR, false); //$NON-NLS-1$
 		if (!Storage.secureAction.isDirectory(dataRoot) && (storage.isReadOnly() || !(Storage.secureAction.mkdirs(dataRoot) || Storage.secureAction.isDirectory(dataRoot)))) {
-			if (getStorage().getConfiguration().getDebug().DEBUG_GENERAL)
+			if (getStorage().getConfiguration().getDebug().DEBUG_STORAGE)
 				Debug.println("Unable to create bundle data directory: " + dataRoot.getAbsolutePath()); //$NON-NLS-1$
 			return null;
 		}

@@ -359,7 +359,7 @@ public class Storage {
 	}
 
 	private void cleanOSGiStorage(Location location, File root) {
-		if (location.isReadOnly() || !StorageUtil.rm(root, getConfiguration().getDebug().DEBUG_GENERAL)) {
+		if (location.isReadOnly() || !StorageUtil.rm(root, getConfiguration().getDebug().DEBUG_STORAGE)) {
 			equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "The -clean (osgi.clean) option was not successful. Unable to clean the storage area: " + root.getAbsolutePath(), null); //$NON-NLS-1$
 		}
 	}
@@ -765,7 +765,7 @@ public class Storage {
 				throw new BundleException("Could not create generation directory: " + generationRoot.getAbsolutePath()); //$NON-NLS-1$
 			}
 			contentFile = new File(generationRoot, BUNDLE_FILE_NAME);
-			if (!staged.renameTo(contentFile)) {
+			if (!StorageUtil.move(staged, contentFile, getConfiguration().getDebug().DEBUG_STORAGE)) {
 				throw new BundleException("Error while renaming bundle file to final location: " + contentFile); //$NON-NLS-1$
 			}
 		} else {
@@ -942,7 +942,7 @@ public class Storage {
 	}
 
 	private void compact(File directory) {
-		if (getConfiguration().getDebug().DEBUG_GENERAL)
+		if (getConfiguration().getDebug().DEBUG_STORAGE)
 			Debug.println("compact(" + directory.getPath() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		String list[] = directory.list();
 		if (list == null)
@@ -960,13 +960,13 @@ public class Storage {
 			// and the directory is marked for delete
 			if (delete.exists()) {
 				// if rm fails to delete the directory and .delete was removed
-				if (!StorageUtil.rm(target, getConfiguration().getDebug().DEBUG_GENERAL) && !delete.exists()) {
+				if (!StorageUtil.rm(target, getConfiguration().getDebug().DEBUG_STORAGE) && !delete.exists()) {
 					try {
 						// recreate .delete
 						FileOutputStream out = new FileOutputStream(delete);
 						out.close();
 					} catch (IOException e) {
-						if (getConfiguration().getDebug().DEBUG_GENERAL)
+						if (getConfiguration().getDebug().DEBUG_STORAGE)
 							Debug.println("Unable to write " + delete.getPath() + ": " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				}
@@ -996,7 +996,7 @@ public class Storage {
 	}
 
 	void delete0(File delete) throws IOException {
-		if (!StorageUtil.rm(delete, getConfiguration().getDebug().DEBUG_GENERAL)) {
+		if (!StorageUtil.rm(delete, getConfiguration().getDebug().DEBUG_STORAGE)) {
 			/* create .delete */
 			FileOutputStream out = new FileOutputStream(new File(delete, DELETE_FLAG));
 			out.close();
@@ -1759,7 +1759,7 @@ public class Storage {
 		try {
 			sManager.open(!isReadOnly());
 		} catch (IOException ex) {
-			if (getConfiguration().getDebug().DEBUG_GENERAL) {
+			if (getConfiguration().getDebug().DEBUG_STORAGE) {
 				Debug.println("Error reading framework.info: " + ex.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(ex);
 			}
@@ -1779,7 +1779,7 @@ public class Storage {
 		try {
 			storageStream = storageManager.getInputStream(FRAMEWORK_INFO);
 		} catch (IOException ex) {
-			if (getConfiguration().getDebug().DEBUG_GENERAL) {
+			if (getConfiguration().getDebug().DEBUG_STORAGE) {
 				Debug.println("Error reading framework.info: " + ex.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(ex);
 			}

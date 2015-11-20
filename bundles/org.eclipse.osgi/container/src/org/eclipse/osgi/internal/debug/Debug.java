@@ -40,6 +40,10 @@ public class Debug implements DebugOptionsListener {
 	 */
 	public static final String OPTION_DEBUG_LOADER = ECLIPSE_OSGI + "/debug/loader"; //$NON-NLS-1$
 	/**
+	 * Storage Debug option key.
+	 */
+	public static final String OPTION_DEBUG_STORAGE = ECLIPSE_OSGI + "/debug/storage"; //$NON-NLS-1$
+	/**
 	 * Events Debug option key.
 	 */
 	public static final String OPTION_DEBUG_EVENTS = ECLIPSE_OSGI + "/debug/events"; //$NON-NLS-1$
@@ -108,6 +112,10 @@ public class Debug implements DebugOptionsListener {
 	 */
 	public boolean DEBUG_LOADER = false; // "debug.loader"
 	/**
+	 * Storage debug flag.
+	 */
+	public boolean DEBUG_STORAGE = false; // "debug.storage"
+	/**
 	 * Events debug flag.
 	 */
 	public boolean DEBUG_EVENTS = false; // "debug.events"
@@ -169,6 +177,7 @@ public class Debug implements DebugOptionsListener {
 		DEBUG_GENERAL = dbgOptions.getBooleanOption(OPTION_DEBUG_GENERAL, false);
 		DEBUG_BUNDLE_TIME = dbgOptions.getBooleanOption(OPTION_DEBUG_BUNDLE_TIME, false) || dbgOptions.getBooleanOption("org.eclipse.core.runtime/timing/startup", false); //$NON-NLS-1$
 		DEBUG_LOADER = dbgOptions.getBooleanOption(OPTION_DEBUG_LOADER, false);
+		DEBUG_STORAGE = dbgOptions.getBooleanOption(OPTION_DEBUG_STORAGE, false);
 		DEBUG_EVENTS = dbgOptions.getBooleanOption(OPTION_DEBUG_EVENTS, false);
 		DEBUG_SERVICES = dbgOptions.getBooleanOption(OPTION_DEBUG_SERVICES, false);
 		DEBUG_HOOKS = dbgOptions.getBooleanOption(OPTION_DEBUG_HOOKS, false);
