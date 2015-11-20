@@ -124,7 +124,7 @@ import org.osgi.framework.*;
  * data type will evaluate to <code>false</code> .
  */
 
-public class FilterImpl implements Filter /* since Framework 1.1 */{
+public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	/* public methods in org.osgi.framework.Filter */
 
 	/**
@@ -384,9 +384,9 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				String[] substrings = (String[]) value;
 
 				for (String substr : substrings) {
-					if (substr == null) /* * */{
+					if (substr == null) /* * */ {
 						sb.append('*');
-					} else /* xxx */{
+					} else /* xxx */ {
 						sb.append(encodeValue(substr));
 					}
 				}
@@ -547,6 +547,10 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 		if (value1 instanceof String) {
 			return compare_String(operation, (String) value1, value2);
+		}
+
+		if (value1 instanceof Version) {
+			return compare_Version(operation, (Version) value1, value2);
 		}
 
 		Class<?> clazz = value1.getClass();
@@ -725,8 +729,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				for (int i = 0, size = substrings.length; i < size; i++) {
 					String substr = substrings[i];
 
-					if (i + 1 < size) /* if this is not that last substr */{
-						if (substr == null) /* * */{
+					if (i + 1 < size) /* if this is not that last substr */ {
+						if (substr == null) /* * */ {
 							String substr2 = substrings[i + 1];
 
 							if (substr2 == null) /* ** */
@@ -743,7 +747,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 							pos = index + substr2.length();
 							if (i + 2 < size) // if there are more substrings, increment over the string we just matched; otherwise need to do the last substr check
 								i++;
-						} else /* xxx */{
+						} else /* xxx */ {
 							int len = substr.length();
 
 							if (debug) {
@@ -755,8 +759,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 								return false;
 							}
 						}
-					} else /* last substr */{
-						if (substr == null) /* * */{
+					} else /* last substr */ {
+						if (substr == null) /* * */ {
 							return true;
 						}
 						/* xxx */
@@ -1195,6 +1199,49 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		if (!accessible.isAccessible()) {
 			AccessController.doPrivileged(new SetAccessibleAction(accessible));
 		}
+	}
+
+	private boolean compare_Version(int operation, Version value1, Object value2) {
+		if (operation == SUBSTRING) {
+			if (debug) {
+				Debug.println("SUBSTRING(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+			return false;
+		}
+		try {
+			Version version = Version.valueOf(((String) value2).trim());
+
+			switch (operation) {
+				case EQUAL : {
+					if (debug) {
+						Debug.println("EQUAL(" + value1 + "," + value + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					return value1.equals(version);
+				}
+				case APPROX : {
+					if (debug) {
+						Debug.println("APPROX(" + value1 + "," + value + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					return value1.equals(version);
+				}
+				case GREATER : {
+					if (debug) {
+						Debug.println("GREATER(" + value1 + "," + value + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					return value1.compareTo(version) >= 0;
+				}
+				case LESS : {
+					if (debug) {
+						Debug.println("LESS(" + value1 + "," + value + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					return value1.compareTo(version) <= 0;
+				}
+			}
+		} catch (Exception e) {
+			// if the valueOf or compareTo method throws an exception
+			return false;
+		}
+		return false;
 	}
 
 	private boolean compare_Comparable(int operation, Comparable<Object> value1, Object value2) {
