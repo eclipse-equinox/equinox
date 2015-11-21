@@ -8,12 +8,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Julian Chen - fix for bug #92572, jclRM
+ *     Jan-Ove Weichel (janove.weichel@vogella.com) - bug 474359
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
 import java.io.*;
 import java.util.*;
-import java.util.Map.Entry;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.preferences.*;
@@ -75,40 +75,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		DEBUG_PREFERENCE_GENERAL = PreferencesOSGiUtils.getDefault().getBooleanDebugOption(debugPluginName + "/general", false); //$NON-NLS-1$
 		DEBUG_PREFERENCE_SET = PreferencesOSGiUtils.getDefault().getBooleanDebugOption(debugPluginName + "/set", false); //$NON-NLS-1$
 		DEBUG_PREFERENCE_GET = PreferencesOSGiUtils.getDefault().getBooleanDebugOption(debugPluginName + "/get", false); //$NON-NLS-1$
-	}
-
-	protected class SortedProperties extends Properties {
-
-		private static final long serialVersionUID = 1L;
-
-		public SortedProperties() {
-			super();
-		}
-
-
-		@Override
-		public synchronized Enumeration<Object> keys() {
-			TreeSet<Object> set = new TreeSet<>();
-			for (Enumeration<?> e = super.keys(); e.hasMoreElements();)
-				set.add(e.nextElement());
-			return Collections.enumeration(set);
-		}
-
-
-		@Override
-		public Set<Entry<Object, Object>> entrySet() {
-			TreeSet<Entry<Object, Object>> set = new TreeSet<>(new Comparator<Entry<Object, Object>>() {
-				@Override
-				public int compare(Entry<Object, Object> e1, Entry<Object, Object> e2) {
-					String s1 = (String) e1.getKey();
-					String s2 = (String) e2.getKey();
-					return s1.compareTo(s2);
-				}
-			});
-			for (Iterator<Entry<Object, Object>> i = super.entrySet().iterator(); i.hasNext();)
-				set.add(i.next());
-			return set;
-		}
 	}
 
 	public EclipsePreferences() {

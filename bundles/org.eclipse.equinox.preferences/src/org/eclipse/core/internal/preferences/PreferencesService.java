@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Semion Chichelnitsky (semion@il.ibm.com) - bug 208564
+ *     Jan-Ove Weichel (janove.weichel@vogella.com) - bug 474359
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
@@ -285,7 +286,7 @@ public class PreferencesService implements IPreferencesService {
 	 * excludesList is guaranteed not to be null
 	 */
 	private Properties convertToProperties(IEclipsePreferences preferences, final String[] excludesList) throws BackingStoreException {
-		final Properties result = new Properties();
+		final SortedProperties result = new SortedProperties();
 		final int baseLength = preferences.absolutePath().length();
 
 		// create a visitor to do the export
