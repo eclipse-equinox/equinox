@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2015 IBM Corporation and others.
+ * Copyright (c) 2006, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
+ *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 483464
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -83,6 +84,53 @@ public final class FileLocator {
 	 */
 	public static URL find(Bundle bundle, IPath path, Map<String, String> override) {
 		return FindSupport.find(bundle, path, override);
+	}
+
+	/**
+	 * Returns a URL for the given path in the given bundle.  Returns <code>null</code> if the URL
+	 * could not be computed or created.
+	 * <p>
+	 * This method looks for the path in the given bundle and any attached fragments.
+	 * <code>null</code> is returned if no such entry is found.  Note that
+	 * there is no specific order to the fragments.
+	 * </p><p>
+	 * The following variables may also be used as entries in the provided path:
+	 * <ul>
+	 *     <li>$nl$ - for language specific information</li>
+	 *     <li>$os$ - for operating system specific information</li>
+	 *     <li>$ws$ - for windowing system specific information</li>
+	 * </ul>
+	 * </p><p>
+	 * A path of "$nl$/about.properties" in an environment with a default
+	 * locale of en_CA will return a URL corresponding to the first location
+	 * about.properties is found according to the following order:
+	 * <pre>
+	 *     plugin root/nl/en/CA/about.properties
+	 *     fragment1 root/nl/en/CA/about.properties
+	 *     fragment2 root/nl/en/CA/about.properties
+	 *     ...
+	 *     plugin root/nl/en/about.properties
+	 *     fragment1 root/nl/en/about.properties
+	 *     fragment2 root/nl/en/about.properties
+	 *     ...
+	 *     plugin root/about.properties
+	 *     fragment1 root/about.properties
+	 *     fragment2 root/about.properties
+	 *     ...
+	 * </pre>
+	 * </p><p>
+	 * @see FileLocator#find(Bundle, IPath, Map) for the option to override the current environment variables
+	 * </p>
+	 *
+	 * @param bundle the bundle in which to search
+	 * @param path file path relative to plug-in installation location
+	 * @return a URL for the given path or <code>null</code>.  The actual form
+	 * 	of the returned URL is not specified.
+	 *
+	 * @since 3.9
+	 */
+	public static URL find(Bundle bundle, IPath path) {
+		return FindSupport.find(bundle, path, null);
 	}
 
 	/**
