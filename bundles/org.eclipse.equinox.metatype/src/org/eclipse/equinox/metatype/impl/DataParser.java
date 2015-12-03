@@ -121,7 +121,7 @@ public class DataParser {
 		}
 
 		switch (type) {
-		// PASSWORD should be treated like STRING.
+			// PASSWORD should be treated like STRING.
 			case AttributeDefinition.PASSWORD :
 			case AttributeDefinition.STRING :
 				return value;
@@ -371,12 +371,6 @@ public class DataParser {
 			logger.log(LogService.LOG_DEBUG, "Here is OcdHandler():finished()"); //$NON-NLS-1$
 			if (!_isParsedDataValid)
 				return;
-			if (_ad_vector.size() == 0) {
-				// Schema defines at least one AD is required.
-				_isParsedDataValid = false;
-				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ELEMENT, new Object[] {AD, OCD, elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
-				return;
-			}
 			// OCD gets all parsed ADs.
 			Enumeration<AttributeDefinitionImpl> adKey = _ad_vector.elements();
 			while (adKey.hasMoreElements()) {

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.org.osgi/xmlns/metatype/v1.3.0">
+	<OCD id="no.ad" name="no.ad">
+	</OCD>
+	<Designate pid="no.ad.designate">
+		<Object ocdref="no.ad"/>
+	</Designate>
+</MetaData>

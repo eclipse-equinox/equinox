@@ -27,6 +27,7 @@ public class AllTests {
 		suite.addTestSuite(GetDefaultValueTest.class);
 		suite.addTestSuite(IconTest.class);
 		suite.addTestSuite(Bug395196Test.class);
+		suite.addTestSuite(NoADTest.class);
 		return suite;
 	}
 }
