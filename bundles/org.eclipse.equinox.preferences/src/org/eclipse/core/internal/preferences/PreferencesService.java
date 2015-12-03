@@ -285,7 +285,7 @@ public class PreferencesService implements IPreferencesService {
 	/*
 	 * excludesList is guaranteed not to be null
 	 */
-	private Properties convertToProperties(IEclipsePreferences preferences, final String[] excludesList) throws BackingStoreException {
+	private SortedProperties convertToProperties(IEclipsePreferences preferences, final String[] excludesList) throws BackingStoreException {
 		final SortedProperties result = new SortedProperties();
 		final int baseLength = preferences.absolutePath().length();
 
@@ -409,7 +409,7 @@ public class PreferencesService implements IPreferencesService {
 		// TODO investigate refactoring to merge with new #export(IEclipsePreferences, IPreferenceFilter[]) APIs
 		if (node == null || output == null)
 			throw new IllegalArgumentException();
-		Properties properties = null;
+		SortedProperties properties = null;
 		if (excludesList == null)
 			excludesList = new String[0];
 		try {
