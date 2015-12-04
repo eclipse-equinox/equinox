@@ -1,5 +1,7 @@
 Manifest-Version: 1.0
 Bundle-SymbolicName: org.eclipse.equinox.ds.tests.tb26
+Require-Capability: osgi.extender;
+ filter:="(&(osgi.extender=osgi.component)(version>=1.2)(!(version>=2.0)))"
 Service-Component: OSGI-INF/*.xml
 Export-Package: org.eclipse.equinox.ds.tests.tb26
 Import-Package: org.osgi.service.component,
