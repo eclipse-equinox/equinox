@@ -196,6 +196,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public static final String PROP_RESOLVER_REVISION_BATCH_SIZE = "equinox.resolver.revision.batch.size"; //$NON-NLS-1$
 
+	public static final String PROP_SYSTEM_ORIGINAL_HEADERS = "equinox.system.bundle.headers.original"; //$NON-NLS-1$
+
 	public static final String PROP_DEFAULT_SUFFIX = ".default"; //$NON-NLS-1$
 	public static final Collection<String> PROP_WITH_ECLIPSE_STARTER_DEFAULTS = Collections.singletonList(PROP_COMPATIBILITY_BOOTDELEGATION);
 

@@ -2513,6 +2513,38 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.stop();
 	}
 
+	public void testExtraSystemBundleHeaders() throws BundleException, InterruptedException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		config.mkdirs();
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA, "something.extra; attr1=value2");
+		configuration.put(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, "some.extra.pkg");
+
+		Equinox equinox = new Equinox(configuration);
+		equinox.start();
+		Dictionary<String, String> headers = equinox.getHeaders();
+		String provideCapability = headers.get(Constants.PROVIDE_CAPABILITY);
+		String exportPackage = headers.get(Constants.EXPORT_PACKAGE);
+		assertTrue("Unexpected Provide-Capability header: " + provideCapability, provideCapability.contains("something.extra"));
+		assertTrue("Unexpected Export-Package header: " + exportPackage, exportPackage.contains("some.extra.pkg"));
+		equinox.stop();
+
+		equinox.waitForStop(5000);
+
+		configuration.put(EquinoxConfiguration.PROP_SYSTEM_ORIGINAL_HEADERS, "true");
+		equinox = new Equinox(configuration);
+		equinox.start();
+		headers = equinox.getHeaders();
+		provideCapability = headers.get(Constants.PROVIDE_CAPABILITY);
+		exportPackage = headers.get(Constants.EXPORT_PACKAGE);
+		assertFalse("Unexpected Provide-Capability header: " + provideCapability, provideCapability.contains("something.extra"));
+		assertFalse("Unexpected Export-Package header: " + exportPackage, exportPackage.contains("some.extra.pkg"));
+		equinox.stop();
+
+		equinox.waitForStop(5000);
+	}
+
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {
 		outputDir.mkdirs();
 
