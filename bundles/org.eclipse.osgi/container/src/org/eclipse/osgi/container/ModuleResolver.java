@@ -409,18 +409,12 @@ final class ModuleResolver {
 
 	private static ModuleWiring createWiringDelta(ModuleRevision revision, ModuleWiring existingWiring, Map<ModuleCapability, List<ModuleWire>> providedWireMap, List<ModuleWire> requiredWires) {
 		// No null checks are done here on the wires since this is a copy.
-		// Create a ModuleWiring that only contains the new ordered list of provided wires
 		List<ModuleWire> existingProvidedWires = existingWiring.getProvidedModuleWires(null);
 		List<ModuleCapability> existingCapabilities = existingWiring.getModuleCapabilities(null);
-		addProvidedWires(providedWireMap, existingProvidedWires, existingCapabilities);
-
-		// Also need to include any new required wires that may have be added for fragment hosts
-		// Also will be needed for dynamic imports
 		List<ModuleWire> existingRequiredWires = existingWiring.getRequiredModuleWires(null);
 		List<ModuleRequirement> existingRequirements = existingWiring.getModuleRequirements(null);
-		addRequiredWires(requiredWires, existingRequiredWires, existingRequirements);
 
-		// add newly resolved fragment capabilities and requirements
+		// First, add newly resolved fragment capabilities and requirements
 		if (providedWireMap != null) {
 			List<ModuleCapability> hostCapabilities = revision.getModuleCapabilities(HostNamespace.HOST_NAMESPACE);
 			ModuleCapability hostCapability = hostCapabilities.isEmpty() ? null : hostCapabilities.get(0);
@@ -429,6 +423,13 @@ final class ModuleResolver {
 				addPayloadContent(newHostWires, existingCapabilities.listIterator(), existingRequirements.listIterator());
 			}
 		}
+
+		// Create a ModuleWiring that only contains the new ordered list of provided wires
+		addProvidedWires(providedWireMap, existingProvidedWires, existingCapabilities);
+
+		// Also need to include any new required wires that may have be added for fragment hosts
+		// Also will be needed for dynamic imports
+		addRequiredWires(requiredWires, existingRequiredWires, existingRequirements);
 
 		InternalUtils.filterCapabilityPermissions(existingCapabilities);
 		return new ModuleWiring(revision, existingCapabilities, existingRequirements, existingProvidedWires, existingRequiredWires, Collections.EMPTY_LIST);

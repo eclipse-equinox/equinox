@@ -1987,6 +1987,45 @@ public class TestModuleContainer extends AbstractTest {
 
 	}
 
+	@Test
+	public void testBug483849() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install and resolve host bundle
+		Module host = installDummyModule("bug483849.host.MF", "host", container);
+		ResolutionReport report = container.resolve(Arrays.asList(host), true);
+		Assert.assertNull("Failed to resolve host.", report.getResolutionException());
+
+		// install and dynamically attach a fragment that exports a package and resolve an importer
+		Module frag = installDummyModule("bug483849.frag.MF", "frag", container);
+		Module importer = installDummyModule("bug483849.importer.MF", "importer", container);
+		report = container.resolve(Arrays.asList(frag, importer), true);
+		Assert.assertNull("Failed to resolve test fragment and importer.", report.getResolutionException());
+		// get the count of package exports
+		ModuleWiring wiring = host.getCurrentRevision().getWiring();
+		int originalPackageCnt = wiring.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE).size();
+
+		// update the host to generate a new revision
+		Map<String, String> updateManifest = getManifest("bug483849.host.MF");
+		ModuleRevisionBuilder updateBuilder = OSGiManifestBuilderFactory.createBuilder(updateManifest);
+		container.update(host, updateBuilder, null);
+		// refresh host which should force the importer to re-resolve to the new revision
+		report = container.refresh(Collections.singleton(host));
+
+		ModuleWiring importerWiring = importer.getCurrentRevision().getWiring();
+		Assert.assertNotNull("No wiring for importer.", importerWiring);
+		List<ModuleWire> importerPackageWires = importerWiring.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+		Assert.assertEquals("Wrong number of importer package Wires.", 1, importerPackageWires.size());
+
+		Assert.assertEquals("Wrong provider wiring.", host.getCurrentRevision().getWiring(), importerPackageWires.iterator().next().getProviderWiring());
+		Assert.assertEquals("Wrong provider revision.", host.getCurrentRevision(), importerPackageWires.iterator().next().getProviderWiring().getRevision());
+
+		wiring = host.getCurrentRevision().getWiring();
+		List<BundleCapability> packages = wiring.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
+		Assert.assertEquals("Wrong number of host packages.", originalPackageCnt, packages.size());
+	}
+
 	private static void assertWires(List<ModuleWire> required, List<ModuleWire>... provided) {
 		for (ModuleWire requiredWire : required) {
 			for (List<ModuleWire> providedList : provided) {
