@@ -274,10 +274,14 @@ public class ReferenceMap {
 	 *   if the key maps to no value
 	 */
 	public Object get(int key) {
-		purge();
 		for (IEntry entry = table[indexFor(key)]; entry != null; entry = entry.getNext())
-			if (entry.getKey() == key)
-				return entry.getValue();
+			if (entry.getKey() == key) {
+				Object value = entry.getValue();
+				if (value == null) {
+					purge();
+				}
+				return value;
+			}
 		return null;
 	}
 
@@ -349,8 +353,6 @@ public class ReferenceMap {
 	public void put(int key, Object value) {
 		if (value == null)
 			throw new NullPointerException("null values not allowed"); //$NON-NLS-1$
-
-		purge();
 
 		if (size + 1 > threshold)
 			resize();
