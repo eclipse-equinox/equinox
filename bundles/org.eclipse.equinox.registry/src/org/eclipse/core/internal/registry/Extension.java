@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Andrey Loskutov <loskutov@gmx.de> - bug 484014
  *******************************************************************************/
 package org.eclipse.core.internal.registry;
 
@@ -47,7 +48,11 @@ public class Extension extends RegistryObject {
 	}
 
 	protected String getExtensionPointIdentifier() {
-		return getExtraData()[XPT_NAME];
+		String[] extraData = getExtraData();
+		if (extraData == null) {
+			return null;
+		}
+		return extraData[XPT_NAME];
 	}
 
 	protected String getSimpleIdentifier() {
