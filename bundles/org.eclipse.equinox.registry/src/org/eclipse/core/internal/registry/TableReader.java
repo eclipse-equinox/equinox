@@ -11,7 +11,9 @@
 package org.eclipse.core.internal.registry;
 
 import java.io.*;
+import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.spi.RegistryContributor;
@@ -68,6 +70,8 @@ public class TableReader {
 	private boolean holdObjects = false;
 
 	private ExtensionRegistry registry;
+
+	private SoftReference stringPool;
 
 	void setMainDataFile(File main) throws IOException {
 		mainDataFile = new BufferedRandomInputStream(main);
@@ -148,9 +152,9 @@ public class TableReader {
 			long contributorsFileSize = in.readLong();
 			long namespacesFileSize = in.readLong();
 			long orphansFileSize = in.readLong();
-			String osStamp = in.readUTF();
-			String windowsStamp = in.readUTF();
-			String localeStamp = in.readUTF();
+			String osStamp = readUTF(in);
+			String windowsStamp = readUTF(in);
+			String localeStamp = readUTF(in);
 			boolean multiLanguage = in.readBoolean();
 
 			boolean validTime = (expectedTimestamp == 0 || expectedTimestamp == registryStamp);
@@ -376,7 +380,7 @@ public class TableReader {
 		byte type = in.readByte();
 		if (type == NULL)
 			return null;
-		return in.readUTF();
+		return readUTF(in);
 	}
 
 	public String[] loadExtensionExtraData(int dataPosition) {
@@ -595,7 +599,7 @@ public class TableReader {
 				int size = orphanInput.readInt();
 				HashMap result = new HashMap(size);
 				for (int i = 0; i < size; i++) {
-					String key = orphanInput.readUTF();
+					String key = readUTF(orphanInput);
 					int[] value = readArray(orphanInput);
 					result.put(key, value);
 				}
@@ -642,4 +646,23 @@ public class TableReader {
 		}
 	}
 
+	private String readUTF(DataInputStream in) throws IOException {
+		String value = in.readUTF();
+		Map map = null;
+		if (stringPool != null) {
+			map = (Map) stringPool.get();
+		}
+		if (map == null) {
+			map = new HashMap();
+			stringPool = new SoftReference(map);
+		}
+
+		String pooledString = (String) map.get(value);
+		if (pooledString == null) {
+			map.put(value, value);
+			return value;
+		}
+
+		return pooledString;
+	}
 }
