@@ -1179,7 +1179,7 @@ public class Storage {
 		int numCachedHeaders = in.readInt();
 		List<String> storedCachedHeaderKeys = new ArrayList<String>(numCachedHeaders);
 		for (int i = 0; i < numCachedHeaders; i++) {
-			storedCachedHeaderKeys.add((String) ObjectPool.intern(in.readUTF()));
+			storedCachedHeaderKeys.add(ObjectPool.intern(in.readUTF()));
 		}
 
 		int numInfos = in.readInt();
@@ -1187,7 +1187,7 @@ public class Storage {
 		List<Generation> generations = new ArrayList<BundleInfo.Generation>(numInfos);
 		for (int i = 0; i < numInfos; i++) {
 			long infoId = in.readLong();
-			String infoLocation = (String) ObjectPool.intern(in.readUTF());
+			String infoLocation = ObjectPool.intern(in.readUTF());
 			long nextGenId = in.readLong();
 			long generationId = in.readLong();
 			boolean isDirectory = in.readBoolean();
@@ -1202,7 +1202,7 @@ public class Storage {
 				if (NUL.equals(value)) {
 					value = null;
 				} else {
-					value = (String) ObjectPool.intern(value);
+					value = ObjectPool.intern(value);
 				}
 				cachedHeaders.put(headerKey, value);
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2013 IBM Corporation and others.
+ * Copyright (c) 2009, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,13 +23,14 @@ public class ObjectPool {
 	private static final boolean DEBUG_OBJECTPOOL_DUPS = false;
 	private static Map<Object, WeakReference<Object>> objectCache = new WeakHashMap<Object, WeakReference<Object>>();
 
-	public static Object intern(Object obj) {
+	@SuppressWarnings("unchecked")
+	public static <T> T intern(T obj) {
 		synchronized (objectCache) {
 			WeakReference<Object> ref = objectCache.get(obj);
 			if (ref != null) {
 				Object refValue = ref.get();
 				if (refValue != null) {
-					obj = refValue;
+					obj = (T) refValue;
 					if (DEBUG_OBJECTPOOL_DUPS)
 						Debug.println("[ObjectPool] Found duplicate object: " + getObjectString(obj)); //$NON-NLS-1$
 				}

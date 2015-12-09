@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,9 @@ import org.osgi.resource.Namespace;
  * @since 3.10
  */
 public final class ModuleRevisionBuilder {
+	private final static Class<?> SINGLETON_MAP_CLASS = Collections.singletonMap(null, null).getClass();
+	private final static Class<?> UNMODIFIABLE_MAP_CLASS = Collections.unmodifiableMap(Collections.emptyMap()).getClass();
+
 	/**
 	 * Provides information about a capability or requirement
 	 */
@@ -235,6 +238,14 @@ public final class ModuleRevisionBuilder {
 	}
 
 	private static <K, V> Map<K, V> copyUnmodifiableMap(Map<K, V> map) {
+		int size = map.size();
+		if (size == 0) {
+			return Collections.emptyMap();
+		}
+		if (size == 1) {
+			Map.Entry<K, V> entry = map.entrySet().iterator().next();
+			return Collections.singletonMap(entry.getKey(), entry.getValue());
+		}
 		return Collections.unmodifiableMap(new HashMap<K, V>(map));
 	}
 
@@ -250,6 +261,25 @@ public final class ModuleRevisionBuilder {
 		if (infos == null) {
 			infos = new ArrayList<GenericInfo>();
 		}
-		infos.add(new GenericInfo(namespace, Collections.unmodifiableMap(directives), Collections.unmodifiableMap(attributes)));
+		infos.add(new GenericInfo(namespace, unmodifiableMap(directives), unmodifiableMap(attributes)));
+	}
+
+	@SuppressWarnings("unchecked")
+	static <K, V> Map<K, V> unmodifiableMap(Map<? extends K, ? extends V> map) {
+		int size = map.size();
+		if (size == 0) {
+			return Collections.emptyMap();
+		}
+		if (size == 1) {
+			if (map.getClass() != SINGLETON_MAP_CLASS) {
+				Map.Entry<? extends K, ? extends V> entry = map.entrySet().iterator().next();
+				map = Collections.<K, V> singletonMap(entry.getKey(), entry.getValue());
+			}
+		} else {
+			if (map.getClass() != UNMODIFIABLE_MAP_CLASS) {
+				map = Collections.unmodifiableMap(map);
+			}
+		}
+		return (Map<K, V>) map;
 	}
 }

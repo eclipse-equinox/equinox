@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -128,6 +128,7 @@ public final class OSGiManifestBuilderFactory {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private static void checkImportExportSyntax(String headerKey, ManifestElement[] elements, boolean export, boolean dynamic) throws BundleException {
 		if (elements == null)
 			return;
@@ -543,6 +544,7 @@ public final class OSGiManifestBuilderFactory {
 		builder.addRequirement(EclipsePlatformNamespace.ECLIPSE_PLATFORM_NAMESPACE, directives, Collections.<String, Object> emptyMap());
 	}
 
+	@SuppressWarnings("deprecation")
 	private static void getEquinoxDataCapability(ModuleRevisionBuilder builder, Map<String, String> manifest) throws BundleException {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
@@ -703,7 +705,7 @@ public final class OSGiManifestBuilderFactory {
 		for (String component : tokens) {
 			components.add(convertValue(componentType, component));
 		}
-		return components;
+		return Collections.unmodifiableList(components);
 	}
 
 	private static void convertBREEs(ModuleRevisionBuilder builder, Map<String, String> manifest) throws BundleException {

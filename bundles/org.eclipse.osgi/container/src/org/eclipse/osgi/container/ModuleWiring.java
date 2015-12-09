@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,7 +59,7 @@ public final class ModuleWiring implements BundleWiring {
 		this.requirements = requirements;
 		this.providedWires = providedWires;
 		this.requiredWires = requiredWires;
-		this.substitutedPkgNames = substitutedPkgNames;
+		this.substitutedPkgNames = substitutedPkgNames.isEmpty() ? Collections.<String> emptyList() : substitutedPkgNames;
 	}
 
 	@Override

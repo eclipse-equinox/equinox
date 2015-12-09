@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.osgi.framework.InvalidSyntaxException;
@@ -34,8 +35,8 @@ public class ModuleRequirement implements BundleRequirement {
 
 	ModuleRequirement(String namespace, Map<String, String> directives, Map<String, ?> attributes, ModuleRevision revision) {
 		this.namespace = namespace;
-		this.directives = Collections.unmodifiableMap(directives);
-		this.attributes = Collections.unmodifiableMap(attributes);
+		this.directives = ModuleRevisionBuilder.unmodifiableMap(directives);
+		this.attributes = ModuleRevisionBuilder.unmodifiableMap(attributes);
 		this.revision = revision;
 	}
 
@@ -139,4 +140,5 @@ public class ModuleRequirement implements BundleRequirement {
 			return ModuleRequirement.this;
 		}
 	}
+
 }
