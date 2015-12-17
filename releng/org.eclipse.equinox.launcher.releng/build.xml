@@ -165,7 +165,7 @@
 				</not>
 			</or>
 		</condition>
-		<condition property="build_cmd" value="unix2dos *; unix2dos ${remotetmpdir}/win32/*; unix2dos ${remotetmpdir}/wpf/*; if cmd /c build.bat ${arch} clean all" else="if sh build.sh -os ${os} -ws ${ws} -arch ${arch} ${javaParam} all">
+		<condition property="build_cmd" value="unix2dos *; unix2dos ${remotetmpdir}/win32/*; if cmd /c build.bat ${arch} clean all" else="if sh build.sh -os ${os} -ws ${ws} -arch ${arch} ${javaParam} all">
 			<equals arg1="${os}" arg2="win32"/>
 		</condition>
 		<condition property="exit_cmd" value="exit;" else="">
