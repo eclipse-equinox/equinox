@@ -35,12 +35,12 @@ public class Adapters {
 	 * Otherwise returns null.
 	 * 
 	 * @param sourceObject
-	 *            object to adapt
+	 *            object to adapt, can be null
 	 * @param adapter
 	 *            type to adapt to
 	 * @param allowActivation
-	 *            if true, plugins may be activated if necessary to provide the requested adapter.
-	 *            if false, the method will return null if they cannot be provided from activated plugins.
+	 *            if true, plug-ins may be activated if necessary to provide the requested adapter.
+	 *            if false, the method will return null if an adapter cannot be provided from activated plug-ins.
 	 * @return a representation of sourceObject that is assignable to the
 	 *         adapter type, or null if no such representation exists
 	 */
@@ -85,10 +85,16 @@ public class Adapters {
 	 * If it is possible to adapt the given object to the given type, this
 	 * returns the adapter.
 	 * <p>
-	 * Convenient method for calling <code>adapt(Object, Class, true)</code>.
+	 * Convenience method for calling <code>adapt(Object, Class, true)</code>.
 	 * <p>
-	 * See  {@link #adapt(Object, Class, boolean)}.
-	 *
+	 * See {@link #adapt(Object, Class, boolean)}.
+	 * 
+	 * @param sourceObject
+	 *            object to adapt, can be null
+	 * @param adapter
+	 *            type to adapt to
+	 * @return a representation of sourceObject that is assignable to the
+	 *         adapter type, or null if no such representation exists
 	 */
 	public static <T> T adapt(Object sourceObject, Class<T> adapter) {
 		return adapt(sourceObject, adapter, true);
