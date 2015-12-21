@@ -162,7 +162,7 @@
 			todir="${userName}@${machine}:${remotebuilddir}" 
 			keyfile="${keyfile}"
 			trust="true"/>
-		<condition property="lib_dir" value="${remotetmpdir}/carbon" else="${remotetmpdir}/${ws}" >
+		<condition property="lib_dir" value="${remotetmpdir}/cocoa" else="${remotetmpdir}/${ws}" >
 			<equals arg1="cocoa" arg2="${ws}" />
 		</condition>
 		<condition property="javaParam" value="" else="-java ${javaArg}" >
