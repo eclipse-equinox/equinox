@@ -38,7 +38,7 @@ LIBS = -framework Cocoa
 CFLAGS = -O -s \
 	-Wall \
 	-DCOCOA -xobjective-c \
-  -arch x86_64 \
+	$(ARCHS) \
 	-DMACOSX \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \

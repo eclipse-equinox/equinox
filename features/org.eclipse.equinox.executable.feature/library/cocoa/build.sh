@@ -69,6 +69,7 @@ else
   JAVA_HEADERS="-I$(/usr/libexec/java_home)/include -I$(/usr/libexec/java_home)/include/darwin"
 fi
 
+ARCHS="-arch x86_64"
 export PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS ARCHS PROGRAM_OUTPUT_DIR JAVA_HEADERS
 
 if [ "$extraArgs" != "" ]; then
