@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2015 IBM Corporation and others.
+ * Copyright (c) 2011, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -949,9 +949,9 @@ public class ServletTest extends TestCase {
 		TestFilter testFilter2 = new TestFilter();
 		Servlet testServlet = new BaseServlet(expected);
 
-		getBundleContext().registerService(Filter.class, testFilter1, new Hashtable<String, String>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*")));
-		getBundleContext().registerService(Filter.class, testFilter2, new Hashtable<String, String>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/hello/*")));
-		getBundleContext().registerService(Servlet.class, testServlet, new Hashtable<String, String>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/")));
+		registrations.add(getBundleContext().registerService(Filter.class, testFilter1, new Hashtable<String, String>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*"))));
+		registrations.add(getBundleContext().registerService(Filter.class, testFilter2, new Hashtable<String, String>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/hello/*"))));
+		registrations.add(getBundleContext().registerService(Servlet.class, testServlet, new Hashtable<String, String>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/"))));
 
 		String actual = requestAdvisor.request("hello_test/request");
 		Assert.assertEquals(expected, actual);
@@ -963,6 +963,38 @@ public class ServletTest extends TestCase {
 		Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
 		Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
 	}
+
+	public void test_Filter24() throws Exception {
+		// Test WB servlet and WB testfilter matching against it.
+		// Test filter gets called.
+		// Unregister WB filter.
+		// test filter is NOT called
+		String expected = "a";
+		TestFilter testFilter1 = new TestFilter();
+		Servlet testServlet = new BaseServlet(expected);
+
+		ServiceRegistration<Filter> filterReg = getBundleContext().registerService(Filter.class, testFilter1, new Hashtable<String, String>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/hello/*")));
+		try {
+			registrations.add(getBundleContext().registerService(Servlet.class, testServlet, new Hashtable<String, String>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/hello/*"))));
+
+			String actual = requestAdvisor.request("hello/request");
+			Assert.assertEquals(expected, actual);
+			Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
+
+			filterReg.unregister();
+			filterReg = null;
+			testFilter1.clear();
+
+			actual = requestAdvisor.request("hello/request");
+			Assert.assertEquals(expected, actual);
+			Assert.assertFalse("testFilter1 did get called.", testFilter1.getCalled());
+		} finally {
+			if (filterReg != null) {
+				filterReg.unregister();
+			}
+		}
+	}
+
 
 	public void test_Registration1() throws Exception {
 		String expected = "Alias cannot be null";

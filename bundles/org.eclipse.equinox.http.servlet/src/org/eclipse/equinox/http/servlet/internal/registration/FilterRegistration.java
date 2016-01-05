@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2015 IBM Corporation and others.
+ * Copyright (c) 2011, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,8 +77,11 @@ public class FilterRegistration
 		if (priorityDifference != 0)
 			return -priorityDifference;
 
-		return (Math.abs(getD().serviceId) >
-			Math.abs(otherFilterRegistration.getD().serviceId)) ? 1 : -1;
+		// Note that we use abs here because the DTO service ID may have been negated for legacy filters.
+		// We always compare with the positive id values and we know the positive values are unique.
+		long thisId = Math.abs(getD().serviceId);
+		long otherId = Math.abs(otherFilterRegistration.getD().serviceId);
+		return (thisId < otherId) ? -1 : ((thisId == otherId) ? 0 : 1);
 	}
 
 	public void destroy() {
