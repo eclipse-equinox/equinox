@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2015 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.osgi.tests.container.dummys;
 
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.service.debug.DebugOptions;
@@ -27,6 +28,7 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	private final ModuleContainer container;
 	private final ResolverHookFactory resolverHookFactory;
 	private final DebugOptions debugOptions;
+	private volatile Executor resolverExecutor;
 
 	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, Map<String, String> configuration) {
 		this(collisionHook, configuration, new DummyResolverHookFactory());
@@ -92,6 +94,19 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	@Override
 	public DebugOptions getDebugOptions() {
 		return this.debugOptions;
+	}
+
+	public void setResolverExecutor(Executor executor) {
+		this.resolverExecutor = executor;
+	}
+
+	@Override
+	public Executor getResolverExecutor() {
+		Executor current = this.resolverExecutor;
+		if (current != null) {
+			return current;
+		}
+		return super.getResolverExecutor();
 	}
 
 }

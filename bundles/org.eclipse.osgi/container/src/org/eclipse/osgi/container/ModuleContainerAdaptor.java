@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.osgi.container;
 
 import java.io.DataInputStream;
 import java.util.EnumSet;
+import java.util.concurrent.Executor;
 import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.Constants;
@@ -278,5 +279,19 @@ public abstract class ModuleContainerAdaptor {
 	public DebugOptions getDebugOptions() {
 		// be default there are no debug options
 		return null;
+	}
+
+	/**
+	 * Returns the executor used to perform resolve operations
+	 * @return the executor used to perform resolve operations
+	 * @since 3.11
+	 */
+	public Executor getResolverExecutor() {
+		return new Executor() {
+			@Override
+			public void execute(Runnable command) {
+				command.run();
+			}
+		};
 	}
 }

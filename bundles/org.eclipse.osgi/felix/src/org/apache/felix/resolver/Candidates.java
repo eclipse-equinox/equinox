@@ -24,15 +24,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.felix.resolver.util.CopyOnWriteSet;
 import org.apache.felix.resolver.util.CopyOnWriteList;
+import org.apache.felix.resolver.util.CopyOnWriteSet;
 import org.apache.felix.resolver.util.OpenHashMap;
 import org.apache.felix.resolver.util.OpenHashMapList;
 import org.apache.felix.resolver.util.OpenHashMapSet;
@@ -47,13 +47,21 @@ import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
 import org.osgi.resource.Wiring;
 import org.osgi.service.resolver.HostedCapability;
-import org.osgi.service.resolver.ResolutionException;
 import org.osgi.service.resolver.ResolveContext;
 
 class Candidates
 {
-    public static final int MANDATORY = 0;
-    public static final int OPTIONAL = 1;
+    static class PopulateResult {
+        boolean success;
+        ResolutionError error;
+        List<Requirement> remaining;
+        Map<Requirement, List<Capability>> candidates;
+
+        @Override
+        public String toString() {
+            return success ? "true" : error != null ? error.getMessage() : "???";
+        }
+    }
 
     private final Set<Resource> m_mandatoryResources;
     // Maps a capability to requirements that match it.
@@ -64,10 +72,7 @@ class Candidates
     // when a revision being resolved has fragments to attach to it.
     private final Map<Resource, WrappedResource> m_allWrappedHosts;
     // Map used when populating candidates to hold intermediate and final results.
-    private final Map<Resource, Object> m_populateResultCache;
-
-    // Flag to signal if fragments are present in the candidate map.
-    private boolean m_fragmentsPresent = false;
+    private final OpenHashMap<Resource, PopulateResult> m_populateResultCache;
 
     private final Map<Resource, Boolean> m_validOnDemandResources;
 
@@ -82,8 +87,8 @@ class Candidates
         Set<Resource> mandatoryResources,
         OpenHashMapSet<Capability, Requirement> dependentMap,
         OpenHashMapList<Requirement, Capability> candidateMap,
-        Map<Resource, WrappedResource> wrappedHosts, Map<Resource, Object> populateResultCache,
-        boolean fragmentsPresent,
+        Map<Resource, WrappedResource> wrappedHosts,
+        OpenHashMap<Resource, PopulateResult> populateResultCache,
         Map<Resource, Boolean> onDemandResources,
         Map<Capability, Requirement> substitutableMap,
         OpenHashMapSet<Requirement, Capability> delta)
@@ -93,7 +98,6 @@ class Candidates
         m_candidateMap = candidateMap;
         m_allWrappedHosts = wrappedHosts;
         m_populateResultCache = populateResultCache;
-        m_fragmentsPresent = fragmentsPresent;
         m_validOnDemandResources = onDemandResources;
         m_subtitutableMap = substitutableMap;
         m_delta = delta;
@@ -108,10 +112,44 @@ class Candidates
         m_dependentMap = new OpenHashMapSet<Capability, Requirement>();
         m_candidateMap = new OpenHashMapList<Requirement, Capability>();
         m_allWrappedHosts = new HashMap<Resource, WrappedResource>();
-        m_populateResultCache = new LinkedHashMap<Resource, Object>();
+        m_populateResultCache = new OpenHashMap<Resource, PopulateResult>();
         m_validOnDemandResources = validOnDemandResources;
-        m_subtitutableMap = new LinkedHashMap<Capability, Requirement>();
+        m_subtitutableMap = new OpenHashMap<Capability, Requirement>();
         m_delta = new OpenHashMapSet<Requirement, Capability>(3);
+    }
+
+    public int getNbResources()
+    {
+        return m_populateResultCache.size();
+    }
+
+    public Map<Resource, Resource> getHosts()
+    {
+        Map<Resource, Resource> hosts = new HashMap<Resource, Resource>();
+        for (Resource res : m_mandatoryResources)
+        {
+            if (res instanceof WrappedResource)
+            {
+                res = ((WrappedResource) res).getDeclaredResource();
+            }
+            if (!Util.isFragment(res))
+            {
+                hosts.put(res, getWrappedHost(res));
+            }
+        }
+        for (Capability cap : m_dependentMap.keySet())
+        {
+            Resource res = cap.getResource();
+            if (res instanceof WrappedResource)
+            {
+                res = ((WrappedResource) res).getDeclaredResource();
+            }
+            if (!Util.isFragment(res))
+            {
+                hosts.put(res, getWrappedHost(res));
+            }
+        }
+        return hosts;
     }
 
     /**
@@ -119,269 +157,139 @@ class Candidates
      * original Candidates permutation.
      * @return the delta
      */
-    public Object getDelta() {
+    public Object getDelta()
+    {
         return m_delta;
     }
 
-    /**
-     * Populates candidates for the specified revision. How a revision is
-     * resolved depends on its resolution type as follows:
-     * <ul>
-     * <li><tt>MANDATORY</tt> - must resolve and failure to do so throws an
-     * exception.</li>
-     * <li><tt>OPTIONAL</tt> - attempt to resolve, but no exception is thrown if
-     * the resolve fails.</li>
-     * <li><tt>ON_DEMAND</tt> - only resolve on demand; this only applies to
-     * fragments and will only resolve a fragment if its host is already
-     * selected as a candidate.</li>
-     * </ul>
-     *
-     * @param rc the resolve context used for populating the candidates.
-     * @param resource the resource whose candidates should be populated.
-     * @param resolution indicates the resolution type.
-     */
-    public final void populate(
-        ResolveContext rc, Resource resource, int resolution) throws ResolutionException
+    public void addMandatoryResources(Collection<Resource> resources)
     {
-        // Get the current result cache value, to make sure the revision
-        // hasn't already been populated.
-        Object cacheValue = m_populateResultCache.get(resource);
-        // Has been unsuccessfully populated.
-        if (cacheValue instanceof ResolutionException)
-        {
-            return;
-        }
-        // Has been successfully populated.
-        else if (cacheValue instanceof Boolean)
-        {
-            return;
-        }
-
-        // We will always attempt to populate fragments, since this is necessary
-        // for ondemand attaching of fragment. However, we'll only attempt to
-        // populate optional non-fragment revisions if they aren't already
-        // resolved.
-        boolean isFragment = Util.isFragment(resource);
-        if (!isFragment && rc.getWirings().containsKey(resource))
-        {
-            return;
-        }
-
-        if (resolution == MANDATORY)
-        {
-            m_mandatoryResources.add(resource);
-        }
-        try
-        {
-            // Try to populate candidates for the optional revision.
-            populateResource(rc, resource);
-        }
-        catch (ResolutionException ex)
-        {
-            // Only throw an exception if resolution is mandatory.
-            if (resolution == MANDATORY)
-            {
-                throw ex;
-            }
-        }
+        m_mandatoryResources.addAll(resources);
     }
 
-    /**
-     * Populates candidates for the specified revision.
-     *
-     * @param rc the resolver state used for populating the candidates.
-     * @param resource the revision whose candidates should be populated.
-     */
-// TODO: FELIX3 - Modify to not be recursive.
-    @SuppressWarnings("unchecked")
-    private void populateResource(ResolveContext rc, Resource resource) throws ResolutionException
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public ResolutionError populate(ResolveContext rc, Collection<Resource> resources)
     {
-        // Determine if we've already calculated this revision's candidates.
-        // The result cache will have one of three values:
-        //   1. A resolve exception if we've already attempted to populate the
-        //      revision's candidates but were unsuccessful.
-        //   2. Boolean.TRUE indicating we've already attempted to populate the
-        //      revision's candidates and were successful.
-        //   3. An array containing the cycle count, current map of candidates
-        //      for already processed requirements, and a list of remaining
-        //      requirements whose candidates still need to be calculated.
-        // For case 1, rethrow the exception. For case 2, simply return immediately.
-        // For case 3, this means we have a cycle so we should continue to populate
-        // the candidates where we left off and not record any results globally
-        // until we've popped completely out of the cycle.
-
-        // Keeps track of the number of times we've reentered this method
-        // for the current revision.
-        Integer cycleCount = null;
-
-        // Keeps track of the candidates we've already calculated for the
-        // current revision's requirements.
-        Map<Requirement, List<Capability>> localCandidateMap = null;
-
-        // Keeps track of the current revision's requirements for which we
-        // haven't yet found candidates.
-        List<Requirement> remainingReqs = null;
-
-        // Get the cache value for the current revision.
-        Object cacheValue = m_populateResultCache.get(resource);
-
-        // This is case 1.
-        if (cacheValue instanceof ResolutionException)
+        Set<Resource> toRemove = new HashSet<Resource>();
+        LinkedList<Resource> toPopulate = new LinkedList<Resource>(resources);
+        while (!toPopulate.isEmpty())
         {
-            throw (ResolutionException) cacheValue;
-        }
-        // This is case 2.
-        else if (cacheValue instanceof Boolean)
-        {
-            return;
-        }
-        // This is case 3.
-        else if (cacheValue != null)
-        {
-            // Increment and get the cycle count.
-            cycleCount = (Integer) (((Object[]) cacheValue)[0] = (Integer) ((Object[]) cacheValue)[0] + 1);
-            // Get the already populated candidates.
-            localCandidateMap = (Map) ((Object[]) cacheValue)[1];
-            // Get the remaining requirements.
-            remainingReqs = (List) ((Object[]) cacheValue)[2];
-        }
-
-        // If there is no cache value for the current revision, then this is
-        // the first time we are attempting to populate its candidates, so
-        // do some one-time checks and initialization.
-        if ((remainingReqs == null) && (localCandidateMap == null))
-        {
-            // Record cycle count.
-            cycleCount = 0;
-
-            // Create a local map for populating candidates first, just in case
-            // the revision is not resolvable.
-            localCandidateMap = new HashMap<Requirement, List<Capability>>();
-
-            // Create a modifiable list of the revision's requirements.
-            remainingReqs = new ArrayList<Requirement>(resource.getRequirements(null));
-
-            // Add these value to the result cache so we know we are
-            // in the middle of populating candidates for the current
-            // revision.
-            m_populateResultCache.put(resource,
-                cacheValue = new Object[] { cycleCount, localCandidateMap, remainingReqs });
-        }
-
-        // If we have requirements remaining, then find candidates for them.
-        while (!remainingReqs.isEmpty())
-        {
-            Requirement req = remainingReqs.remove(0);
-
-            // Ignore non-effective and dynamic requirements.
-            String resolution = req.getDirectives()
-                .get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
-            if (!rc.isEffective(req)
-                || ((resolution != null)
-                && resolution.equals(PackageNamespace.RESOLUTION_DYNAMIC)))
+            Resource resource = toPopulate.getFirst();
+            // Get cached result
+            PopulateResult result = m_populateResultCache.get(resource);
+            if (result == null)
+            {
+                result = new PopulateResult();
+                result.candidates = new OpenHashMap<Requirement, List<Capability>>();
+                result.remaining = new ArrayList<Requirement>(resource.getRequirements(null));
+                m_populateResultCache.put(resource, result);
+            }
+            if (result.success || result.error != null)
+            {
+                toPopulate.removeFirst();
+                continue;
+            }
+            if (result.remaining.isEmpty())
+            {
+                toPopulate.removeFirst();
+                result.success = true;
+                addCandidates(result.candidates);
+                result.candidates = null;
+                result.remaining = null;
+                if ((rc instanceof FelixResolveContext) && !Util.isFragment(resource))
+                {
+                    Collection<Resource> ondemandFragments = ((FelixResolveContext) rc).getOndemandResources(resource);
+                    for (Resource fragment : ondemandFragments)
+                    {
+                        Boolean valid = m_validOnDemandResources.get(fragment);
+                        if (valid == null)
+                        {
+                            // Mark this resource as a valid on demand resource
+                            m_validOnDemandResources.put(fragment, Boolean.TRUE);
+                            valid = Boolean.TRUE;
+                        }
+                        if (valid)
+                        {
+                            // This resource is a valid on demand resource;
+                            // populate it now, consider it optional
+                            toPopulate.addFirst(fragment);
+                        }
+                    }
+                }
+                continue;
+            }
+            // We have a requirement to process
+            Requirement requirement = result.remaining.remove(0);
+            if (!isEffective(rc, requirement))
             {
                 continue;
             }
-
-            // Process the candidates, removing any candidates that
-            // cannot resolve.
-            List<Capability> candidates = rc.findProviders(req);
-            ResolutionException rethrow = processCandidates(rc, resource, candidates);
-
-            // First, due to cycles, makes sure we haven't already failed in
-            // a deeper recursion.
-            Object result = m_populateResultCache.get(resource);
-            if (result instanceof ResolutionException)
-            {
-                throw (ResolutionException) result;
-            }
-            // Next, if are no candidates remaining and the requirement is not
-            // not optional, then record and throw a resolve exception.
-            else if (candidates.isEmpty() && !Util.isOptional(req))
+            List<Capability> candidates = rc.findProviders(requirement);
+            LinkedList<Resource> newToPopulate = new LinkedList<Resource>();
+            ResolutionError thrown = processCandidates(rc, newToPopulate, requirement, candidates);
+             if (candidates.isEmpty() && !Util.isOptional(requirement))
             {
                 if (Util.isFragment(resource) && rc.getWirings().containsKey(resource))
                 {
                     // This is a fragment that is already resolved and there is no unresolved hosts to attach it to.
-                    m_populateResultCache.put(resource, Boolean.TRUE);
-                    return;
+                    result.success = true;
                 }
-                String msg = "Unable to resolve " + resource
-                    + ": missing requirement " + req;
-                if (rethrow != null)
+                else
                 {
-                    msg = msg + " [caused by: " + rethrow.getMessage() + "]";
+                    result.error = new MissingRequirementError(requirement, thrown);
+                    toRemove.add(resource);
                 }
-                rethrow = new ResolutionException(msg, null, Collections.singleton(req));
-                m_populateResultCache.put(resource, rethrow);
-                throw rethrow;
+                toPopulate.removeFirst();
             }
-            // Otherwise, if we actually have candidates for the requirement, then
-            // add them to the local candidate map.
-            else if (candidates.size() > 0)
+            else
             {
-                localCandidateMap.put(req, candidates);
+                if (!candidates.isEmpty())
+                {
+                    result.candidates.put(requirement, candidates);
+                }
+                if (!newToPopulate.isEmpty())
+                {
+                    toPopulate.addAll(0, newToPopulate);
+                }
             }
         }
 
-        // If we are exiting from a cycle then decrement
-        // cycle counter, otherwise record the result.
-        if (cycleCount > 0)
+        while (!toRemove.isEmpty())
         {
-            ((Object[]) cacheValue)[0] = cycleCount - 1;
+            Iterator<Resource> iterator = toRemove.iterator();
+            Resource resource = iterator.next();
+            iterator.remove();
+            remove(resource, toRemove);
         }
-        else if (cycleCount == 0)
-        {
-            // Record that the revision was successfully populated.
-            m_populateResultCache.put(resource, Boolean.TRUE);
-            // FELIX-4825: Verify candidate map in case of cycles and optional requirements
-            for (Iterator<Map.Entry<Requirement, List<Capability>>> it = localCandidateMap.entrySet().iterator(); it.hasNext();)
-            {
-                Map.Entry<Requirement, List<Capability>> entry = it.next();
-                for (Iterator<Capability> it2 = entry.getValue().iterator(); it2.hasNext();)
-                {
-                    if (m_populateResultCache.get(it2.next().getResource()) instanceof ResolutionException)
-                    {
-                        it2.remove();
-                    }
-                }
-                if (entry.getValue().isEmpty())
-                {
-                    it.remove();
-                }
-            }
-            // Merge local candidate map into global candidate map.
-            if (localCandidateMap.size() > 0)
-            {
-                add(localCandidateMap);
-            }
-            if ((rc instanceof FelixResolveContext) && !Util.isFragment(resource))
-            {
-                Collection<Resource> ondemandFragments = ((FelixResolveContext) rc).getOndemandResources(resource);
-                for (Resource fragment : ondemandFragments)
-                {
-                    Boolean valid = m_validOnDemandResources.get(fragment);
-                    if (valid == null)
-                    {
-                        // Mark this resource as a valid on demand resource
-                        m_validOnDemandResources.put(fragment, Boolean.TRUE);
-                        valid = Boolean.TRUE;
-                    }
-                    if (valid)
-                    {
-                        // This resource is a valid on demand resource;
-                        // populate it now, consider it optional
-                        populate(rc, fragment, OPTIONAL);
-                    }
-                }
-            }
+        return null;
+    }
+
+    private boolean isEffective(ResolveContext rc, Requirement req) {
+        if (!rc.isEffective(req)) {
+            return false;
         }
+        String res = req.getDirectives().get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
+        return !PackageNamespace.RESOLUTION_DYNAMIC.equals(res);
+    }
+
+    private boolean isMandatory(ResolveContext rc, Requirement requirement) {
+        // The requirement is optional
+        if (Util.isOptional(requirement)) {
+            return false;
+        }
+        // This is a fragment that is already resolved and there is no unresolved hosts to attach it to
+        Resource resource = requirement.getResource();
+        if (Util.isFragment(resource) && rc.getWirings().containsKey(resource)) {
+            return false;
+        }
+        return true;
     }
 
     private void populateSubstitutables()
     {
-        for (Map.Entry<Resource, Object> populated : m_populateResultCache.entrySet())
+        for (Map.Entry<Resource, PopulateResult> populated : m_populateResultCache.fast())
         {
-            if (populated.getValue() instanceof Boolean)
+            if (populated.getValue().success)
             {
                 populateSubstitutables(populated.getKey());
             }
@@ -391,46 +299,43 @@ class Candidates
     private void populateSubstitutables(Resource resource)
     {
         // Collect the package names exported
-        List<Capability> packageExports = resource.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
-        if (packageExports.isEmpty())
-        {
-            return;
-        }
-        List<Requirement> packageImports = resource.getRequirements(PackageNamespace.PACKAGE_NAMESPACE);
-        if (packageImports.isEmpty())
-        {
-            return;
-        }
-        Map<String, List<Capability>> exportNames = new LinkedHashMap<String, List<Capability>>();
-        for (Capability packageExport : packageExports)
-        {
-            String packageName = (String) packageExport.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
-            List<Capability> caps = exportNames.get(packageName);
-            if (caps == null)
-            {
-                caps = new ArrayList<Capability>(1);
-                exportNames.put(packageName, caps);
+        OpenHashMap<String, List<Capability>> exportNames = new OpenHashMap<String, List<Capability>>() {
+            @Override
+            protected List<Capability> compute(String s) {
+                return new ArrayList<Capability>(1);
             }
+        };
+        for (Capability packageExport : resource.getCapabilities(null))
+        {
+            if (!PackageNamespace.PACKAGE_NAMESPACE.equals(packageExport.getNamespace()))
+            {
+                continue;
+            }
+            String packageName = (String) packageExport.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+            List<Capability> caps = exportNames.getOrCompute(packageName);
             caps.add(packageExport);
         }
-        // Check if any requirements substitute one of the exported packages
-        for (Requirement req : packageImports)
+        if (exportNames.isEmpty())
         {
+            return;
+        }
+        // Check if any requirements substitute one of the exported packages
+        for (Requirement req : resource.getRequirements(null))
+        {
+            if (!PackageNamespace.PACKAGE_NAMESPACE.equals(req.getNamespace()))
+            {
+                continue;
+            }
             List<Capability> substitutes = m_candidateMap.get(req);
             if (substitutes != null && !substitutes.isEmpty())
             {
-                String packageName = (String) substitutes.iterator().next().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+                String packageName = (String) substitutes.get(0).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
                 List<Capability> exportedPackages = exportNames.get(packageName);
                 if (exportedPackages != null)
                 {
                     // The package is exported;
                     // Check if the requirement only has the bundle's own export as candidates
-                    substitutes = new ArrayList<Capability>(substitutes);
-                    for (Capability exportedPackage : exportedPackages)
-                    {
-                        substitutes.remove(exportedPackage);
-                    }
-                    if (!substitutes.isEmpty())
+                    if (!exportedPackages.containsAll(substitutes))
                     {
                         for (Capability exportedPackage : exportedPackages)
                         {
@@ -447,9 +352,9 @@ class Candidates
     private static final int SUBSTITUTED = 2;
     private static final int EXPORTED = 3;
 
-    void checkSubstitutes(List<Candidates> importPermutations) throws ResolutionException
+    ResolutionError checkSubstitutes(List<Candidates> importPermutations)
     {
-        Map<Capability, Integer> substituteStatuses = new LinkedHashMap<Capability, Integer>(m_subtitutableMap.size());
+        OpenHashMap<Capability, Integer> substituteStatuses = new OpenHashMap<Capability, Integer>(m_subtitutableMap.size());
         for (Capability substitutable : m_subtitutableMap.keySet())
         {
             // initialize with unprocessed
@@ -462,16 +367,8 @@ class Candidates
         }
 
         // Remove any substituted exports from candidates
-        for (Map.Entry<Capability, Integer> substituteStatus : substituteStatuses.entrySet())
+        for (Map.Entry<Capability, Integer> substituteStatus : substituteStatuses.fast())
         {
-            if (substituteStatus.getValue() == SUBSTITUTED)
-            {
-                if (m_dependentMap.isEmpty())
-                {
-                    // make sure the dependents are populated
-                    populateDependents();
-                }
-            }
             // add a permutation that imports a different candidate for the substituted if possible
             Requirement substitutedReq = m_subtitutableMap.get(substituteStatus.getKey());
             if (substitutedReq != null)
@@ -516,15 +413,14 @@ class Candidates
                             }
                             else
                             {
-                                String msg = "Unable to resolve " + dependent.getResource()
-                                        + ": missing requirement " + dependent;
-                                throw new ResolutionException(msg, null, Collections.singleton(dependent));
+                                return new MissingRequirementError(dependent);
                             }
                         }
                     }
                 }
             }
         }
+        return null;
     }
 
     private boolean isSubstituted(Capability substitutableCap, Map<Capability, Integer> substituteStatuses)
@@ -581,9 +477,9 @@ class Candidates
         return false;
     }
 
-    public void populateDynamic(
+    public ResolutionError populateDynamic(
         ResolveContext rc, Resource resource,
-        Requirement req, List<Capability> candidates) throws ResolutionException
+        Requirement req, List<Capability> candidates)
     {
         // Record the revision associated with the dynamic require
         // as a mandatory revision.
@@ -591,45 +487,50 @@ class Candidates
 
         // Process the candidates, removing any candidates that
         // cannot resolve.
-        ResolutionException rethrow = processCandidates(rc, resource, candidates);
+        // TODO: verify the two following statements
+        LinkedList<Resource> toPopulate = new LinkedList<Resource>();
+        ResolutionError rethrow = processCandidates(rc, toPopulate, req, candidates);
 
         // Add the dynamic imports candidates.
         // Make sure this is done after the call to processCandidates since we want to ensure
         // fragment candidates are properly hosted before adding the candidates list which makes a copy
-        add(req, candidates);
+        addCandidates(req, candidates);
+
+        populate(rc, toPopulate);
+
+        CopyOnWriteList<Capability> caps = m_candidateMap.get(req);
+        if (caps != null)
+        {
+            candidates.retainAll(caps);
+        }
+        else
+        {
+            candidates.clear();
+        }
 
         if (candidates.isEmpty())
         {
             if (rethrow == null)
             {
-                rethrow = new ResolutionException(
-                    "Dynamic import failed.", null, Collections.singleton(req));
+                rethrow = new DynamicImportFailed(req);
             }
-            throw rethrow;
+            return rethrow;
         }
 
-        m_populateResultCache.put(resource, Boolean.TRUE);
+        PopulateResult result = new PopulateResult();
+        result.success = true;
+        m_populateResultCache.put(resource, result);
+        return null;
     }
 
-    /**
-     * This method performs common processing on the given set of candidates.
-     * Specifically, it removes any candidates which cannot resolve and it
-     * synthesizes candidates for any candidates coming from any attached
-     * fragments, since fragment capabilities only appear once, but technically
-     * each host represents a unique capability.
-     *
-     * @param rc the resolver state.
-     * @param resource the revision being resolved.
-     * @param candidates the candidates to process.
-     * @return a resolve exception to be re-thrown, if any, or null.
-     */
-    private ResolutionException processCandidates(
+    private ResolutionError processCandidates(
         ResolveContext rc,
-        Resource resource,
+        LinkedList<Resource> toPopulate,
+        Requirement req,
         List<Capability> candidates)
     {
         // Get satisfying candidates and populate their candidates if necessary.
-        ResolutionException rethrow = null;
+        ResolutionError rethrow = null;
         Set<Capability> fragmentCands = null;
         for (Iterator<Capability> itCandCap = candidates.iterator();
             itCandCap.hasNext();)
@@ -663,21 +564,29 @@ class Candidates
             // of recursion; thus, any avoided recursion results in fewer
             // exceptions to chain when an error does occur.
             if ((isFragment || !rc.getWirings().containsKey(candCap.getResource()))
-                && !candCap.getResource().equals(resource))
+                && !candCap.getResource().equals(req.getResource()))
             {
-                try
+                PopulateResult result = m_populateResultCache.get(candCap.getResource());
+                if (result != null)
                 {
-                    populateResource(rc, candCap.getResource());
-                }
-                catch (ResolutionException ex)
-                {
-                    if (rethrow == null)
+                    if (result.error != null)
                     {
-                        rethrow = ex;
+                        if (rethrow == null)
+                        {
+                            rethrow = result.error;
+                        }
+                        // Remove the candidate since we weren't able to
+                        // populate its candidates.
+                        itCandCap.remove();
                     }
-                    // Remove the candidate since we weren't able to
-                    // populate its candidates.
-                    itCandCap.remove();
+                    else if (!result.success)
+                    {
+                        toPopulate.add(candCap.getResource());
+                    }
+                }
+                else
+                {
+                    toPopulate.add(candCap.getResource());
                 }
             }
         }
@@ -743,15 +652,14 @@ class Candidates
 
     public boolean isPopulated(Resource resource)
     {
-        Object value = m_populateResultCache.get(resource);
-        return ((value != null) && (value instanceof Boolean));
+        PopulateResult value = m_populateResultCache.get(resource);
+        return (value != null && value.success);
     }
 
-    public ResolutionException getResolveException(Resource resource)
+    public ResolutionError getResolutionError(Resource resource)
     {
-        Object value = m_populateResultCache.get(resource);
-        return ((value != null) && (value instanceof ResolutionException))
-            ? (ResolutionException) value : null;
+        PopulateResult value = m_populateResultCache.get(resource);
+        return value != null ? value.error : null;
     }
 
     /**
@@ -764,15 +672,14 @@ class Candidates
      * @param req the requirement to add.
      * @param candidates the candidates matching the requirement.
      */
-    private void add(Requirement req, List<Capability> candidates)
+    private void addCandidates(Requirement req, List<Capability> candidates)
     {
-        if (req.getNamespace().equals(HostNamespace.HOST_NAMESPACE))
-        {
-            m_fragmentsPresent = true;
-        }
-
         // Record the candidates.
         m_candidateMap.put(req, new CopyOnWriteList<Capability>(candidates));
+        for (Capability cap : candidates)
+        {
+            m_dependentMap.getOrCompute(cap).add(req);
+        }
     }
 
     /**
@@ -782,11 +689,11 @@ class Candidates
      *
      * @param candidates the bulk requirements and candidates to add.
      */
-    private void add(Map<Requirement, List<Capability>> candidates)
+    private void addCandidates(Map<Requirement, List<Capability>> candidates)
     {
-        for (Entry<Requirement, List<Capability>> entry : candidates.entrySet())
+        for (Map.Entry<Requirement, List<Capability>> entry : candidates.entrySet())
         {
-            add(entry.getKey(), entry.getValue());
+            addCandidates(entry.getKey(), entry.getValue());
         }
     }
 
@@ -827,7 +734,7 @@ class Candidates
         List<Capability> candidates = m_candidateMap.get(req);
         if (candidates != null && !candidates.isEmpty())
         {
-            return m_candidateMap.get(req).get(0);
+            return candidates.get(0);
         }
         return null;
     }
@@ -842,11 +749,7 @@ class Candidates
             m_candidateMap.remove(req);
         }
         // Update the delta with the removed capability
-        CopyOnWriteSet<Capability> capPath = m_delta.get(req);
-        if (capPath == null) {
-            capPath = new CopyOnWriteSet<Capability>();
-            m_delta.put(req, capPath);
-        }
+        CopyOnWriteSet<Capability> capPath = m_delta.getOrCompute(req);
         capPath.add(cap);
     }
 
@@ -855,11 +758,7 @@ class Candidates
         List<Capability> l = m_candidateMap.get(req);
         l.removeAll(caps);
         // Update candidates delta with the removed capabilities.
-        CopyOnWriteSet<Capability> capPath = m_delta.get(req);
-        if (capPath == null) {
-            capPath = new CopyOnWriteSet<Capability>();
-            m_delta.put(req, capPath);
-        }
+        CopyOnWriteSet<Capability> capPath = m_delta.getOrCompute(req);
         capPath.addAll(caps);
         return l;
     }
@@ -878,20 +777,17 @@ class Candidates
      * satisfied by the fragment will end up having the two hosts as potential
      * candidates, rather than the single fragment.
      *
-     * @throws org.osgi.service.resolver.ResolutionException if the removal of any unselected fragments
+     * @return  ResolutionError if the removal of any unselected fragments
      * result in the root module being unable to resolve.
      */
-    public void prepare(ResolveContext rc) throws ResolutionException
+    public ResolutionError prepare(ResolveContext rc)
     {
         // Maps a host capability to a map containing its potential fragments;
         // the fragment map maps a fragment symbolic name to a map that maps
         // a version to a list of fragments requirements matching that symbolic
         // name and version.
-        Map<Capability, Map<String, Map<Version, List<Requirement>>>> hostFragments = Collections.emptyMap();
-        if (m_fragmentsPresent)
-        {
-            hostFragments = populateDependents();
-        }
+        Map<Capability, Map<String, Map<Version, List<Requirement>>>> hostFragments =
+            getHostFragments();
 
         // This method performs the following steps:
         // 1. Select the fragments to attach to a given host.
@@ -962,9 +858,7 @@ class Candidates
         // Step 3
         for (Resource fragment : unselectedFragments)
         {
-            removeResource(fragment,
-                new ResolutionException(
-                    "Fragment was not selected for attachment: " + fragment));
+            removeResource(fragment, new FragmentNotSelectedError(fragment));
         }
 
         // Step 4
@@ -1081,39 +975,32 @@ class Candidates
         {
             if (!isPopulated(resource))
             {
-                throw getResolveException(resource);
+                return getResolutionError(resource);
             }
         }
 
         populateSubstitutables();
 
-        m_candidateMap.concat();
-        m_dependentMap.concat();
+        m_candidateMap.trim();
+        m_dependentMap.trim();
+
+        return null;
     }
 
     // Maps a host capability to a map containing its potential fragments;
     // the fragment map maps a fragment symbolic name to a map that maps
     // a version to a list of fragments requirements matching that symbolic
     // name and version.
-    private Map<Capability, Map<String, Map<Version, List<Requirement>>>> populateDependents()
+    private Map<Capability, Map<String, Map<Version, List<Requirement>>>> getHostFragments()
     {
         Map<Capability, Map<String, Map<Version, List<Requirement>>>> hostFragments =
             new HashMap<Capability, Map<String, Map<Version, List<Requirement>>>>();
-        for (Entry<Requirement, CopyOnWriteList<Capability>> entry : m_candidateMap.entrySet())
+        for (Entry<Requirement, CopyOnWriteList<Capability>> entry : m_candidateMap.fast())
         {
             Requirement req = entry.getKey();
             List<Capability> caps = entry.getValue();
             for (Capability cap : caps)
             {
-                // Record the requirement as dependent on the capability.
-                CopyOnWriteSet<Requirement> dependents = m_dependentMap.get(cap);
-                if (dependents == null)
-                {
-                    dependents = new CopyOnWriteSet<Requirement>();
-                    m_dependentMap.put(cap, dependents);
-                }
-                dependents.add(req);
-
                 // Keep track of hosts and associated fragments.
                 if (req.getNamespace().equals(HostNamespace.HOST_NAMESPACE))
                 {
@@ -1156,14 +1043,14 @@ class Candidates
      * is no other candidate.
      *
      * @param resource the module to remove.
-     * @throws ResolutionException if removing the module caused the resolve to
-     * fail.
+     * @param ex the resolution error
      */
-    private void removeResource(Resource resource, ResolutionException ex)
-        throws ResolutionException
+    private void removeResource(Resource resource, ResolutionError ex)
     {
         // Add removal reason to result cache.
-        m_populateResultCache.put(resource, ex);
+        PopulateResult result = m_populateResultCache.get(resource);
+        result.success = false;
+        result.error = ex;
         // Remove from dependents.
         Set<Resource> unresolvedResources = new HashSet<Resource>();
         remove(resource, unresolvedResources);
@@ -1186,11 +1073,8 @@ class Candidates
      * @param unresolvedResources a list to containing any additional modules
      * that that became unresolved as a result of removing this module and will
      * also need to be removed.
-     * @throws ResolutionException if removing the module caused the resolve to
-     * fail.
      */
     private void remove(Resource resource, Set<Resource> unresolvedResources)
-        throws ResolutionException
     {
         for (Requirement r : resource.getRequirements(null))
         {
@@ -1232,11 +1116,8 @@ class Candidates
      * @param unresolvedResources a list to containing any additional modules
      * that that became unresolved as a result of removing this module and will
      * also need to be removed.
-     * @throws ResolutionException if removing the module caused the resolve to
-     * fail.
      */
     private void remove(Capability c, Set<Resource> unresolvedResources)
-        throws ResolutionException
     {
         Set<Requirement> dependents = m_dependentMap.remove(c);
         if (dependents != null)
@@ -1250,11 +1131,13 @@ class Candidates
                     m_candidateMap.remove(r);
                     if (!Util.isOptional(r))
                     {
-                        String msg = "Unable to resolve " + r.getResource()
-                            + ": missing requirement " + r;
-                        m_populateResultCache.put(
-                            r.getResource(),
-                            new ResolutionException(msg, null, Collections.singleton(r)));
+                        PopulateResult result = m_populateResultCache.get(r.getResource());
+                        if (result != null)
+                        {
+                            result.success = false;
+                            result.error =
+                                    new MissingRequirementError(r, m_populateResultCache.get(c.getResource()).error);
+                        }
                         unresolvedResources.add(r.getResource());
                     }
                 }
@@ -1276,7 +1159,6 @@ class Candidates
                 m_candidateMap.deepClone(),
                 m_allWrappedHosts,
                 m_populateResultCache,
-                m_fragmentsPresent,
                 m_validOnDemandResources,
                 m_subtitutableMap,
                 m_delta.deepClone());
@@ -1368,6 +1250,68 @@ class Candidates
                 permutate(req, permutations);
             }
         }
+    }
+
+    static class DynamicImportFailed extends ResolutionError {
+
+        private final Requirement requirement;
+
+        public DynamicImportFailed(Requirement requirement) {
+            this.requirement = requirement;
+        }
+
+        public String getMessage() {
+            return "Dynamic import failed.";
+        }
+
+        public Collection<Requirement> getUnresolvedRequirements() {
+            return Collections.singleton(requirement);
+        }
+
+    }
+
+    static class FragmentNotSelectedError extends ResolutionError {
+
+        private final Resource resource;
+
+        public FragmentNotSelectedError(Resource resource) {
+            this.resource = resource;
+        }
+
+        public String getMessage() {
+            return "Fragment was not selected for attachment: " + resource;
+        }
+
+    }
+
+    static class MissingRequirementError extends ResolutionError {
+
+        private final Requirement requirement;
+        private final ResolutionError cause;
+
+        public MissingRequirementError(Requirement requirement) {
+            this(requirement, null);
+        }
+
+        public MissingRequirementError(Requirement requirement, ResolutionError cause) {
+            this.requirement = requirement;
+            this.cause = cause;
+        }
+
+        public String getMessage() {
+            String msg = "Unable to resolve " + requirement.getResource()
+                    + ": missing requirement " + requirement;
+            if (cause != null)
+            {
+                msg = msg + " [caused by: " + cause.getMessage() + "]";
+            }
+            return msg;
+        }
+
+        public Collection<Requirement> getUnresolvedRequirements() {
+            return Collections.singleton(requirement);
+        }
+
     }
 
 }

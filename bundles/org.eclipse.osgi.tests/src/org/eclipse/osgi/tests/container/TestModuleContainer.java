@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2015 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
 import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.eclipse.osgi.tests.container.dummys.*;
 import org.eclipse.osgi.tests.container.dummys.DummyModuleDatabase.DummyContainerEvent;
@@ -1745,6 +1746,93 @@ public class TestModuleContainer extends AbstractTest {
 		//Assert.assertEquals("n2 should resolve.", State.RESOLVED, uses_n2.getState());
 		Assert.assertEquals("n2.frag should not resolve.", State.INSTALLED, uses_n2_frag.getState());
 		Assert.assertEquals("n3 should resolve.", State.RESOLVED, uses_n3.getState());
+	}
+
+	@Test
+	public void testUsesTimeout() throws BundleException {
+		// Always want to go to zero threads when idle
+		int coreThreads = 0;
+		// use the number of processors - 1 because we use the current thread when rejected
+		int maxThreads = Math.max(Runtime.getRuntime().availableProcessors() - 1, 1);
+		// idle timeout; make it short to get rid of threads quickly after resolve
+		int idleTimeout = 5;
+		// use sync queue to force thread creation
+		BlockingQueue<Runnable> queue = new SynchronousQueue<Runnable>();
+		// try to name the threads with useful name
+		ThreadFactory threadFactory = new ThreadFactory() {
+			@Override
+			public Thread newThread(Runnable r) {
+				Thread t = new Thread(r, "Resolver thread - UNIT TEST"); //$NON-NLS-1$
+				t.setDaemon(true);
+				return t;
+			}
+		};
+		// use a rejection policy that simply runs the task in the current thread once the max threads is reached
+		RejectedExecutionHandler rejectHandler = new RejectedExecutionHandler() {
+			@Override
+			public void rejectedExecution(Runnable r, ThreadPoolExecutor exe) {
+				r.run();
+			}
+		};
+		ExecutorService executor = new ThreadPoolExecutor(coreThreads, maxThreads, idleTimeout, TimeUnit.SECONDS, queue, threadFactory, rejectHandler);
+
+		Map<String, String> configuration = new HashMap<String, String>();
+		configuration.put(EquinoxConfiguration.PROP_RESOLVER_BATCH_TIMEOUT, "5000");
+		Map<String, String> debugOpts = Collections.singletonMap("org.eclipse.osgi/resolver/uses", "true");
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), configuration, new DummyResolverHookFactory(), new DummyDebugOptions(debugOpts));
+		adaptor.setResolverExecutor(executor);
+		ModuleContainer container = adaptor.getContainer();
+		for (int i = 1; i <= 1000; i++) {
+			for (Map<String, String> manifest : getUsesTimeoutManifests("test" + i)) {
+				installDummyModule(manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), container);
+			}
+		}
+		ResolutionReport report = container.resolve(container.getModules(), true);
+		Assert.assertNull("Found resolution errors.", report.getResolutionException());
+		for (Module module : container.getModules()) {
+			Assert.assertEquals("Wrong state of module: " + module, State.RESOLVED, module.getState());
+		}
+		executor.shutdown();
+		System.gc();
+		System.gc();
+		System.gc();
+	}
+
+	private List<Map<String, String>> getUsesTimeoutManifests(String prefix) {
+		List<Map<String, String>> result = new ArrayList<Map<String, String>>();
+		// x1 bundle
+		Map<String, String> x1Manifest = new HashMap<String, String>();
+		x1Manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		x1Manifest.put(Constants.BUNDLE_SYMBOLICNAME, prefix + ".x1");
+		x1Manifest.put(Constants.EXPORT_PACKAGE, prefix + ".a; version=1.0; uses:=" + prefix + ".b");
+		x1Manifest.put(Constants.IMPORT_PACKAGE, prefix + ".b; version=\"[1.1,1.2)\"");
+		result.add(x1Manifest);
+		// x2 bundle
+		Map<String, String> x2Manifest = new HashMap<String, String>();
+		x2Manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		x2Manifest.put(Constants.BUNDLE_SYMBOLICNAME, prefix + ".x2");
+		x2Manifest.put(Constants.EXPORT_PACKAGE, prefix + ".a; version=1.1; uses:=" + prefix + ".b");
+		x2Manifest.put(Constants.IMPORT_PACKAGE, prefix + ".b; version=\"[1.0,1.1)\"");
+		result.add(x2Manifest);
+		// y1 bundle
+		Map<String, String> y1Manifest = new HashMap<String, String>();
+		y1Manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		y1Manifest.put(Constants.BUNDLE_SYMBOLICNAME, prefix + ".y1");
+		y1Manifest.put(Constants.EXPORT_PACKAGE, prefix + ".b; version=1.0");
+		result.add(y1Manifest);
+		// y1 bundle
+		Map<String, String> y2Manifest = new HashMap<String, String>();
+		y2Manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		y2Manifest.put(Constants.BUNDLE_SYMBOLICNAME, prefix + ".y2");
+		y2Manifest.put(Constants.EXPORT_PACKAGE, prefix + ".b; version=1.1");
+		result.add(y2Manifest);
+		// z1 bundle
+		Map<String, String> z1Manifest = new HashMap<String, String>();
+		z1Manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		z1Manifest.put(Constants.BUNDLE_SYMBOLICNAME, prefix + ".z1");
+		z1Manifest.put(Constants.IMPORT_PACKAGE, prefix + ".a, " + prefix + ".b");
+		result.add(z1Manifest);
+		return result;
 	}
 
 	@Test

@@ -18,44 +18,32 @@
  */
 package org.apache.felix.resolver;
 
-import java.util.Map;
-import org.osgi.resource.Capability;
-import org.osgi.resource.Resource;
-import org.osgi.service.resolver.HostedCapability;
+import org.osgi.resource.Requirement;
+import org.osgi.service.resolver.ResolutionException;
 
-class SimpleHostedCapability implements HostedCapability
-{
-    private final Resource m_host;
-    private final Capability m_cap;
+import java.util.Collection;
+import java.util.Collections;
 
-    SimpleHostedCapability(Resource host, Capability cap)
-    {
-        m_host = host;
-        m_cap = cap;
+/**
+ * Resolution error.
+ * This class contains all the needed information to build the ResolutionException
+ * without the need to actually compute a user friendly message, which can be
+ * quite time consuming.
+ */
+public abstract class ResolutionError {
+
+    public abstract String getMessage();
+
+    public Collection<Requirement> getUnresolvedRequirements() {
+        return Collections.emptyList();
     }
 
-    public Resource getResource()
-    {
-        return m_host;
+    public ResolutionException toException() {
+        return new ResolutionException(getMessage(), null, getUnresolvedRequirements());
     }
 
-    public Capability getDeclaredCapability()
-    {
-        return m_cap;
-    }
-
-    public String getNamespace()
-    {
-        return m_cap.getNamespace();
-    }
-
-    public Map<String, String> getDirectives()
-    {
-        return m_cap.getDirectives();
-    }
-
-    public Map<String, Object> getAttributes()
-    {
-        return m_cap.getAttributes();
+    @Override
+    public String toString() {
+        return getMessage();
     }
 }

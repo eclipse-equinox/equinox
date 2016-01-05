@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2015 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import static org.osgi.framework.Constants.FRAMEWORK_OS_VERSION;
 import static org.osgi.framework.Constants.FRAMEWORK_PROCESSOR;
 import static org.osgi.framework.Constants.FRAMEWORK_STORAGE_CLEAN;
 import static org.osgi.framework.Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT;
+import static org.osgi.framework.Constants.FRAMEWORK_UUID;
 import static org.osgi.framework.Constants.FRAMEWORK_VENDOR;
 import static org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_EXTENSION;
 import static org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_FRAGMENT;
@@ -195,6 +196,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String PROP_LOG_HISTORY_MAX = "equinox.log.history.max"; //$NON-NLS-1$
 
 	public static final String PROP_RESOLVER_REVISION_BATCH_SIZE = "equinox.resolver.revision.batch.size"; //$NON-NLS-1$
+	public static final String PROP_RESOLVER_BATCH_TIMEOUT = "equinox.resolver.batch.timeout"; //$NON-NLS-1$
 
 	public static final String PROP_SYSTEM_PROVIDE_HEADER = "equinox.system.provide.header"; //$NON-NLS-1$
 	public static final String SYSTEM_PROVIDE_HEADER_ORIGINAL = "original"; //$NON-NLS-1$
@@ -203,6 +205,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public static final String PROP_DEFAULT_SUFFIX = ".default"; //$NON-NLS-1$
 	public static final Collection<String> PROP_WITH_ECLIPSE_STARTER_DEFAULTS = Collections.singletonList(PROP_COMPATIBILITY_BOOTDELEGATION);
+	public static final String PROP_INIT_UUID = "equinox.init.uuid"; //$NON-NLS-1$
 
 	public static final class ConfigValues {
 		/**
@@ -991,6 +994,10 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 				archValue = name;
 			setConfiguration(PROP_OSGI_ARCH, archValue);
 		}
+
+		// set the initial UUID so that it is set as soon as possible
+		String uuid = new UniversalUniqueIdentifier().toString();
+		setConfiguration(FRAMEWORK_UUID, uuid);
 	}
 
 	private static String getFrameworkPath(String path, boolean parent) {

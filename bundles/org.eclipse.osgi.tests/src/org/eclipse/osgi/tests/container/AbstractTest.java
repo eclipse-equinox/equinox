@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2015 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,6 +82,12 @@ public abstract class AbstractTest {
 	protected Module installDummyModule(String manifestFile, String location, String alias, String extraExports, String extraCapabilities, ModuleContainer container) throws BundleException, IOException {
 		Map<String, String> manifest = getManifest(manifestFile);
 		ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(manifest, alias, extraExports, extraCapabilities);
+		Module system = container.getModule(0);
+		return container.install(system, location, builder, null);
+	}
+
+	protected Module installDummyModule(Map<String, String> manifest, String location, ModuleContainer container) throws BundleException {
+		ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(manifest);
 		Module system = container.getModule(0);
 		return container.install(system, location, builder, null);
 	}

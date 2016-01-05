@@ -28,18 +28,20 @@ public class OpenHashMapSet<K, V> extends OpenHashMap<K, CopyOnWriteSet<V>> {
         super(initialCapacity);
     }
 
-    public OpenHashMapSet(int initialCapacity, double minLoadFactor, double maxLoadFactor) {
-        super(initialCapacity, minLoadFactor, maxLoadFactor);
-    }
-
     public OpenHashMapSet<K, V> deepClone() {
         OpenHashMapSet<K, V> copy = (OpenHashMapSet<K, V>) super.clone();
-        Object[] values = copy.values;
-        for (int i = 0, l = values.length; i < l; i++) {
+        Object[] values = copy.value;
+        for (int i = values.length; i-- > 0;) {
             if (values[i] != null) {
                 values[i] = new CopyOnWriteSet<V>((CopyOnWriteSet<V>) values[i]);
             }
         }
         return copy;
     }
+
+    @Override
+    protected CopyOnWriteSet<V> compute(K key) {
+        return new CopyOnWriteSet<V>();
+    }
+
 }

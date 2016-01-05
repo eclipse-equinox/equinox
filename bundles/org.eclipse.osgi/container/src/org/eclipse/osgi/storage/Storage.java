@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2015 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,10 +24,7 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.*;
 import org.eclipse.osgi.internal.container.LockSet;
 import org.eclipse.osgi.internal.debug.Debug;
-import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
-import org.eclipse.osgi.internal.framework.EquinoxContainer;
-import org.eclipse.osgi.internal.framework.EquinoxContainerAdaptor;
-import org.eclipse.osgi.internal.framework.FilterImpl;
+import org.eclipse.osgi.internal.framework.*;
 import org.eclipse.osgi.internal.hookregistry.BundleFileWrapperFactoryHook;
 import org.eclipse.osgi.internal.hookregistry.StorageHookFactory;
 import org.eclipse.osgi.internal.hookregistry.StorageHookFactory.StorageHook;
@@ -75,7 +72,7 @@ public class Storage {
 	private final File parentRoot;
 	private final PermissionData permissionData;
 	private final SecurityAdmin securityAdmin;
-	private final ModuleContainerAdaptor adaptor;
+	private final EquinoxContainerAdaptor adaptor;
 	private final ModuleDatabase moduleDatabase;
 	private final ModuleContainer moduleContainer;
 	private final Object saveMonitor = new Object();
@@ -326,6 +323,7 @@ public class Storage {
 			}
 		}
 		mruList.shutdown();
+		adaptor.shutdownResolverExecutor();
 	}
 
 	private boolean needUpdate(ModuleRevision currentRevision, ModuleRevisionBuilder newBuilder) {
