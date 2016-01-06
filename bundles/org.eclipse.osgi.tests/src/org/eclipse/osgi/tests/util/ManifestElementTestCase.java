@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,9 +11,13 @@
 
 package org.eclipse.osgi.tests.util;
 
+import java.io.*;
+import java.util.*;
 import junit.framework.TestCase;
 import org.eclipse.osgi.util.ManifestElement;
+import org.junit.Assert;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 
 public class ManifestElementTestCase extends TestCase {
 
@@ -52,5 +56,41 @@ public class ManifestElementTestCase extends TestCase {
 
 		assertEquals("2.0", components[0], "external:test1:test2");
 		assertEquals("2.1", components[1], "test3:test4:");
+	}
+
+	private static final List<String> TEST_MANIFEST = Arrays.asList(//
+			"Bundle-ManifestVersion: 2", //
+			"Bundle-SymbolicName: test.", //
+			" bsn", //
+			"Import-Package: test1,", //
+			" test2,", //
+			" test3", //
+			"" //
+	);
+
+	public void testManifestWithCR() throws UnsupportedEncodingException, IOException, BundleException {
+		doManifestTest("\r");
+	}
+
+	public void testManifestWithLF() throws UnsupportedEncodingException, IOException, BundleException {
+		doManifestTest("\n");
+	}
+
+	public void testManifestWithCRLF() throws UnsupportedEncodingException, IOException, BundleException {
+		doManifestTest("\r\n");
+	}
+
+	private void doManifestTest(String newLine) throws UnsupportedEncodingException, IOException, BundleException {
+		Map<String, String> manifest = getManifest(TEST_MANIFEST, newLine);
+		Assert.assertEquals("Wrong Bundle-SymbolicName.", "test.bsn", manifest.get(Constants.BUNDLE_SYMBOLICNAME));
+		Assert.assertEquals("Wrong Import-Package.", "test1,test2,test3", manifest.get(Constants.IMPORT_PACKAGE));
+	}
+
+	private Map<String, String> getManifest(List<String> manifestLines, String newLine) throws UnsupportedEncodingException, IOException, BundleException {
+		StringBuilder manifestText = new StringBuilder();
+		for (String line : manifestLines) {
+			manifestText.append(line).append(newLine);
+		}
+		return ManifestElement.parseBundleManifest(new ByteArrayInputStream(manifestText.toString().getBytes("UTF8")), null);
 	}
 }

@@ -10,9 +10,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.container;
 
+import static java.util.jar.Attributes.Name.MANIFEST_VERSION;
+
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.StartOptions;
 import org.eclipse.osgi.container.Module.State;
@@ -26,6 +30,7 @@ import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.eclipse.osgi.tests.container.dummys.*;
 import org.eclipse.osgi.tests.container.dummys.DummyModuleDatabase.DummyContainerEvent;
 import org.eclipse.osgi.tests.container.dummys.DummyModuleDatabase.DummyModuleEvent;
+import org.eclipse.osgi.util.ManifestElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.framework.*;
@@ -2073,6 +2078,44 @@ public class TestModuleContainer extends AbstractTest {
 			Assert.assertEquals("Wrong exception type.", BundleException.MANIFEST_ERROR, e.getType());
 		}
 
+	}
+
+	@Test
+	public void testUTF8LineContinuation() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+		String utfString = "a.with.é.multibyte";
+		while (utfString.getBytes("UTF8").length < 500) {
+			Map<String, String> manifest = getUTFManifest(utfString);
+			Module testModule = installDummyModule(manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), container);
+			Assert.assertEquals("Wrong bns for the bundle.", utfString, testModule.getCurrentRevision().getSymbolicName());
+
+			ModuleCapability exportPackage = testModule.getCurrentRevision().getModuleCapabilities(PackageNamespace.PACKAGE_NAMESPACE).get(0);
+			ModuleRequirement importPackage = testModule.getCurrentRevision().getModuleRequirements(PackageNamespace.PACKAGE_NAMESPACE).get(0);
+
+			String actualPackageName = (String) exportPackage.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+			Assert.assertEquals("Wrong exported package name.", utfString, actualPackageName);
+
+			Assert.assertTrue("import does not match export: " + importPackage, importPackage.matches(exportPackage));
+
+			utfString = "a" + utfString;
+		}
+	}
+
+	private static Map<String, String> getUTFManifest(String packageName) throws IOException, BundleException {
+		// using manifest class to force a split line right in the middle of a double byte UTF-8 character
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		{
+			Manifest m = new Manifest();
+			Attributes a = m.getMainAttributes();
+			a.put(MANIFEST_VERSION, "1.0");
+			a.putValue(Constants.BUNDLE_MANIFESTVERSION, "2");
+			a.putValue(Constants.BUNDLE_SYMBOLICNAME, packageName);
+			a.putValue(Constants.EXPORT_PACKAGE, packageName);
+			a.putValue(Constants.IMPORT_PACKAGE, packageName);
+			m.write(out);
+		}
+		return ManifestElement.parseBundleManifest(new ByteArrayInputStream(out.toByteArray()), null);
 	}
 
 	@Test

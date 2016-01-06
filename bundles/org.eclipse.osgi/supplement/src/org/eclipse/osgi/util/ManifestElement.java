@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -376,7 +376,7 @@ public class ManifestElement {
 					} else
 						directive = true;
 				}
-				if (c == ';' || c == ',' || c == '\0') /* more */{
+				if (c == ';' || c == ',' || c == '\0') /* more */ {
 					headerValues.add(next);
 					headerValue.append(";").append(next); //$NON-NLS-1$
 					if (SupplementDebug.STATIC_DEBUG_MANIFEST)
@@ -425,7 +425,7 @@ public class ManifestElement {
 					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR, e);
 				}
 				c = tokenizer.getChar();
-				if (c == ';') /* more */{
+				if (c == ';') /* more */ {
 					next = tokenizer.getToken("=:"); //$NON-NLS-1$
 					if (next == null)
 						throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
@@ -501,19 +501,13 @@ public class ManifestElement {
 	public static Map<String, String> parseBundleManifest(InputStream manifest, Map<String, String> headers) throws IOException, BundleException {
 		if (headers == null)
 			headers = new HashMap<String, String>();
-		BufferedReader br;
-		try {
-			br = new BufferedReader(new InputStreamReader(manifest, "UTF8")); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
-			br = new BufferedReader(new InputStreamReader(manifest));
-		}
-		try {
-			String header = null;
-			StringBuffer value = new StringBuffer(256);
-			boolean firstLine = true;
 
+		manifest = new BufferedInputStream(manifest);
+		try {
+
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream(256);
 			while (true) {
-				String line = br.readLine();
+				String line = readLine(manifest, buffer);
 				/* The java.util.jar classes in JDK 1.3 use the value of the last
 				 * encountered manifest header. So we do the same to emulate
 				 * this behavior. We no longer throw a BundleException
@@ -522,26 +516,7 @@ public class ManifestElement {
 
 				if ((line == null) || (line.length() == 0)) /* EOF or empty line */
 				{
-					if (!firstLine) /* flush last line */
-					{
-						headers.put(header, value.toString().trim());
-					}
 					break; /* done processing main attributes */
-				}
-
-				if (line.charAt(0) == ' ') /* continuation */
-				{
-					if (firstLine) /* if no previous line */
-					{
-						throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_SPACE, line), BundleException.MANIFEST_ERROR);
-					}
-					value.append(line.substring(1));
-					continue;
-				}
-
-				if (!firstLine) {
-					headers.put(header, value.toString().trim());
-					value.setLength(0); /* clear StringBuffer */
 				}
 
 				int colon = line.indexOf(':');
@@ -549,18 +524,65 @@ public class ManifestElement {
 				{
 					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_LINE_NOCOLON, line), BundleException.MANIFEST_ERROR);
 				}
-				header = line.substring(0, colon).trim();
-				value.append(line.substring(colon + 1));
-				firstLine = false;
+				String header = line.substring(0, colon).trim();
+				String value = line.substring(colon + 1).trim();
+				headers.put(header, value);
 			}
 		} finally {
 			try {
-				br.close();
+				manifest.close();
 			} catch (IOException ee) {
 				// do nothing
 			}
 		}
 		return headers;
+	}
+
+	private static String readLine(InputStream input, ByteArrayOutputStream buffer) throws IOException {
+		// Read a header 'line'
+		// A header line may span multiple lines with line continuations using a beginning space.
+		// This method reads all the line continuations into a single string.
+		// Care must be taken for cases where double byte UTF characters are split
+		// across line continuations.
+		// This is why BufferedReader.readLine is not used here.  We must process the 
+		// CR LF chars ourselves
+		lineLoop: while (true) {
+			int c = input.read();
+			if (c == '\n') { // LF
+				// next char is either a continuation (space) char or the first char of the next header
+				input.mark(1);
+				c = input.read();
+				if (c != ' ') {
+					// This first char of the next header, reset so we don't loose the char
+					input.reset();
+					break lineLoop;
+				}
+				// This is a continuation, skip the space and read the next char
+				c = input.read();
+			} else if (c == '\r') { // CR
+				// next char is either a continuation (space) char, LF or the first char of the next header
+				input.mark(1);
+				c = input.read();
+				if (c == '\n') { // LF
+					// next char is either a continuation (space) char or the first char of the next header
+					input.mark(1);
+					c = input.read();
+				}
+				if (c != ' ') {
+					// This first char of the next header, reset so we don't loose the char
+					input.reset();
+					break lineLoop;
+				}
+				c = input.read();
+			}
+			if (c == -1) {
+				break lineLoop;
+			}
+			buffer.write(c);
+		}
+		String result = buffer.toString("UTF8"); //$NON-NLS-1$
+		buffer.reset();
+		return result;
 	}
 
 	public String toString() {
