@@ -21,7 +21,8 @@ import java.lang.reflect.Method;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-
+import java.net.HttpRetryException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2898,6 +2899,45 @@ public class ServletTest extends TestCase {
 				pathAdaptorReg.unregister();
 			}
 		}
+	}
+
+	public void testHttpContextSetUser() throws ServletException, NamespaceException, IOException {
+		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
+
+		HttpContext testContext = new HttpContext() {
+			
+			@Override
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+				request.setAttribute(HttpContext.REMOTE_USER, "TEST");
+				request.setAttribute(HttpContext.AUTHENTICATION_TYPE, "Basic");
+				return true;
+			}
+			
+			@Override
+			public URL getResource(String name) {
+				return null;
+			}
+			
+			@Override
+			public String getMimeType(String name) {
+				return null;
+			}
+		};
+		HttpServlet testServlet = new HttpServlet() {
+			@Override
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				resp.setContentType("text/html");
+				PrintWriter out = resp.getWriter();
+				out.print("USER: " + req.getRemoteUser() + " AUTH_TYPE: " + req.getAuthType());
+			}
+			
+		};
+		extendedHttpService.registerServlet("/" + getName(), testServlet, null, testContext);
+
+		String expected = "USER: TEST AUTH_TYPE: Basic";
+		String actual = requestAdvisor.request(getName());
+		Assert.assertEquals(expected, actual);
 	}
 
 	private String doRequest(String action, Map<String, String> params) throws IOException {

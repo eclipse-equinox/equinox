@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2016 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -166,7 +166,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	}
 
 	public String getAuthType() {
-		String authType = (String)request.getAttribute(HttpContext.AUTHENTICATION_TYPE);
+		String authType = (String) this.getAttribute(HttpContext.AUTHENTICATION_TYPE);
 		if (authType != null)
 			return authType;
 
@@ -174,7 +174,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	}
 
 	public String getRemoteUser() {
-		String remoteUser = (String) request.getAttribute(HttpContext.REMOTE_USER);
+		String remoteUser = (String) this.getAttribute(HttpContext.REMOTE_USER);
 		if (remoteUser != null)
 			return remoteUser;
 
