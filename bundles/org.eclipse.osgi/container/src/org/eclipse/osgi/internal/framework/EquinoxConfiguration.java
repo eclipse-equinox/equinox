@@ -195,6 +195,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String PROP_ALLOW_RESTRICTED_PROVIDES = "osgi.equinox.allow.restricted.provides"; //$NON-NLS-1$
 	public static final String PROP_LOG_HISTORY_MAX = "equinox.log.history.max"; //$NON-NLS-1$
 
+	public static final String PROP_RESOLVER_THREAD_COUNT = "equinox.resolver.thead.count"; //$NON-NLS-1$
 	public static final String PROP_RESOLVER_REVISION_BATCH_SIZE = "equinox.resolver.revision.batch.size"; //$NON-NLS-1$
 	public static final String PROP_RESOLVER_BATCH_TIMEOUT = "equinox.resolver.batch.timeout"; //$NON-NLS-1$
 

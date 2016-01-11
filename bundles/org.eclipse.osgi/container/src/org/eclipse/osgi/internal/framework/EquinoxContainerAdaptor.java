@@ -38,17 +38,42 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	private final ClassLoader moduleClassLoaderParent;
 	private final AtomicLong lastSecurityAdminFlush;
 
-	final AtomicLazyInitializer<ExecutorService> executor = new AtomicLazyInitializer<ExecutorService>();
-	final Callable<ExecutorService> lazyExecutorCreator;
+	final AtomicLazyInitializer<Executor> executor = new AtomicLazyInitializer<Executor>();
+	final Callable<Executor> lazyExecutorCreator;
 
-	{
-		lazyExecutorCreator = new Callable<ExecutorService>() {
+	public EquinoxContainerAdaptor(EquinoxContainer container, Storage storage, Map<Long, Generation> initial) {
+		this.container = container;
+		this.storage = storage;
+		this.hooks = new OSGiFrameworkHooks(container, storage);
+		this.initial = initial;
+		this.moduleClassLoaderParent = getModuleClassLoaderParent(container.getConfiguration());
+		this.lastSecurityAdminFlush = new AtomicLong();
+		this.lazyExecutorCreator = createLazyExecutorCreator(container.getConfiguration());
+	}
+
+	private Callable<Executor> createLazyExecutorCreator(EquinoxConfiguration config) {
+		String threadCntProp = config.getConfiguration(EquinoxConfiguration.PROP_RESOLVER_THREAD_COUNT);
+		int threadCntTmp;
+		try {
+			threadCntTmp = threadCntProp == null ? -1 : Integer.parseInt(threadCntProp);
+		} catch (NumberFormatException e) {
+			threadCntTmp = -1;
+		}
+		// use the number of processors - 1 because we use the current thread when rejected
+		final int maxThreads = threadCntTmp <= 0 ? Math.max(Runtime.getRuntime().availableProcessors() - 1, 1) : threadCntTmp;
+		return new Callable<Executor>() {
 			@Override
-			public ExecutorService call() throws Exception {
+			public Executor call() throws Exception {
+				if (maxThreads == 1) {
+					return new Executor() {
+						@Override
+						public void execute(Runnable command) {
+							command.run();
+						}
+					};
+				}
 				// Always want to go to zero threads when idle
 				int coreThreads = 0;
-				// use the number of processors - 1 because we use the current thread when rejected
-				int maxThreads = Math.max(Runtime.getRuntime().availableProcessors() - 1, 1);
 				// idle timeout; make it short to get rid of threads quickly after resolve
 				int idleTimeout = 10;
 				// use sync queue to force thread creation
@@ -72,15 +97,6 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 				return new ThreadPoolExecutor(coreThreads, maxThreads, idleTimeout, TimeUnit.SECONDS, queue, threadFactory, rejectHandler);
 			}
 		};
-	}
-
-	public EquinoxContainerAdaptor(EquinoxContainer container, Storage storage, Map<Long, Generation> initial) {
-		this.container = container;
-		this.storage = storage;
-		this.hooks = new OSGiFrameworkHooks(container, storage);
-		this.initial = initial;
-		this.moduleClassLoaderParent = getModuleClassLoaderParent(container.getConfiguration());
-		this.lastSecurityAdminFlush = new AtomicLong();
 	}
 
 	private static ClassLoader getModuleClassLoaderParent(EquinoxConfiguration configuration) {
@@ -312,9 +328,9 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	}
 
 	public void shutdownResolverExecutor() {
-		ExecutorService current = executor.getAndClear();
-		if (current != null) {
-			current.shutdown();
+		Executor current = executor.getAndClear();
+		if (current instanceof ExecutorService) {
+			((ExecutorService) current).shutdown();
 		}
 	}
 }
