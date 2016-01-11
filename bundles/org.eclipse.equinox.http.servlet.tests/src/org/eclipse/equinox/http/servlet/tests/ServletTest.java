@@ -2637,6 +2637,63 @@ public class ServletTest extends TestCase {
 		}
 	}
 
+	public void test_Listener9() throws Exception {
+		Servlet sA = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void doGet(
+				HttpServletRequest req, HttpServletResponse resp)
+				throws ServletException, IOException {
+
+				RequestDispatcher requestDispatcher = req.getRequestDispatcher("/s9B");
+
+				requestDispatcher.include(req, resp);
+			}
+		};
+		Servlet sB = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void doGet(
+				HttpServletRequest req, HttpServletResponse resp)
+				throws ServletException, IOException {
+
+				PrintWriter writer = resp.getWriter();
+				writer.write("S9 included");
+			}
+		};
+
+		BaseServletRequestListener srl1 = new BaseServletRequestListener();
+
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
+			registrations.add(getBundleContext().registerService(ServletRequestListener.class, srl1, listenerProps));
+
+			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S9A");
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s9A");
+			registrations.add(getBundleContext().registerService(Servlet.class, sA, servletProps1));
+
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S9B");
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s9B");
+			registrations.add(getBundleContext().registerService(Servlet.class, sB, servletProps1));
+
+			String result = requestAdvisor.request("s9A");
+			Assert.assertEquals("S9 included", result);
+
+			Assert.assertEquals(0, srl1.number.get());
+
+		}
+		finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+		}
+	}
+	
 	public void test_Async1() throws Exception {
 
 		Servlet s1 = new BaseAsyncServlet("test_Listener8");

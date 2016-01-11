@@ -49,13 +49,13 @@ public class ResponseStateHandler {
 
 		ServletRequestEvent servletRequestEvent = null;
 
-		if ((dispatcherType == DispatcherType.REQUEST) && !servletRequestListeners.isEmpty()) {
-			servletRequestEvent = new ServletRequestEvent(endpoint.getServletContext(), request);
-		}
-
 		try {
-			for (ServletRequestListener servletRequestListener : servletRequestListeners) {
-				servletRequestListener.requestInitialized(servletRequestEvent);
+
+			if ((dispatcherType == DispatcherType.REQUEST) && !servletRequestListeners.isEmpty()) {
+				servletRequestEvent = new ServletRequestEvent(endpoint.getServletContext(), request);
+				for (ServletRequestListener servletRequestListener : servletRequestListeners) {
+					servletRequestListener.requestInitialized(servletRequestEvent);
+				}
 			}
 
 			if (endpoint.getServletContextHelper().handleSecurity(request, response)) {

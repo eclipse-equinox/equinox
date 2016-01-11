@@ -12,6 +12,7 @@
 package org.eclipse.equinox.http.servlet.tests.util;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
@@ -24,14 +25,18 @@ public class BaseServletRequestListener implements ServletRequestListener {
 	public AtomicBoolean initialized = new AtomicBoolean(false);
 	public AtomicBoolean destroyed = new AtomicBoolean(false);
 
+	public AtomicInteger number = new AtomicInteger();
+
 	@Override
 	public void requestDestroyed(ServletRequestEvent arg0) {
 		destroyed.set(true);
+		number.decrementAndGet();
 	}
 
 	@Override
 	public void requestInitialized(ServletRequestEvent arg0) {
 		initialized.set(true);
+		number.incrementAndGet();
 	}
 
 }
