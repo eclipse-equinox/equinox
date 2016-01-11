@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2013 IBM Corporation and others.
+ * Copyright (c) 2008, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@
 package org.eclipse.equinox.servletbridge;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.*;
 import java.security.*;
 import java.util.*;
@@ -32,6 +33,19 @@ import java.util.jar.*;
 import java.util.jar.Attributes.Name;
 
 public class CloseableURLClassLoader extends URLClassLoader {
+	private static final boolean CLOSEABLE_REGISTERED_AS_PARALLEL;
+	static {
+		boolean registeredAsParallel;
+		try {
+			Method parallelCapableMetod = ClassLoader.class.getDeclaredMethod("registerAsParallelCapable", (Class[]) null); //$NON-NLS-1$
+			parallelCapableMetod.setAccessible(true);
+			registeredAsParallel = ((Boolean) parallelCapableMetod.invoke(null, (Object[]) null)).booleanValue();
+		} catch (Throwable e) {
+			// must do everything to avoid failing in clinit
+			registeredAsParallel = true;
+		}
+		CLOSEABLE_REGISTERED_AS_PARALLEL = registeredAsParallel;
+	}
 	static final String DOT_CLASS = ".class"; //$NON-NLS-1$
 	static final String BANG_SLASH = "!/"; //$NON-NLS-1$
 	static final String JAR = "jar"; //$NON-NLS-1$
@@ -47,6 +61,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 
 	private final AccessControlContext context;
 	private final boolean verifyJars;
+	private final boolean registeredAsParallel;
 
 	private static class CloseableJarURLConnection extends JarURLConnection {
 		private final JarFile jarFile;
@@ -165,6 +180,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	 */
 	public CloseableURLClassLoader(URL[] urls, ClassLoader parent, boolean verifyJars) {
 		super(excludeFileJarURLS(urls), parent);
+		this.registeredAsParallel = CLOSEABLE_REGISTERED_AS_PARALLEL && this.getClass() == CloseableURLClassLoader.class;
 		this.context = AccessController.getContext();
 		this.verifyJars = verifyJars;
 		for (int i = 0; i < urls.length; i++) {
@@ -290,12 +306,15 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		int lastDot = name.lastIndexOf('.');
 		if (lastDot != -1) {
 			String packageName = name.substring(0, lastDot);
-			Package pkg = getPackage(packageName);
-			if (pkg != null) {
-				checkForSealedPackage(pkg, packageName, manifest, connection.getJarFileURL());
-			} else {
-				definePackage(packageName, manifest, connection.getJarFileURL());
+			synchronized (pkgLock) {
+				Package pkg = getPackage(packageName);
+				if (pkg != null) {
+					checkForSealedPackage(pkg, packageName, manifest, connection.getJarFileURL());
+				} else {
+					definePackage(packageName, manifest, connection.getJarFileURL());
+				}
 			}
+
 		}
 		JarEntry entry = connection.getJarEntry();
 		byte[] bytes = new byte[(int) entry.getSize()];
@@ -304,6 +323,20 @@ public class CloseableURLClassLoader extends URLClassLoader {
 			is = new DataInputStream(connection.getInputStream());
 			is.readFully(bytes, 0, bytes.length);
 			CodeSource cs = new CodeSource(connection.getJarFileURL(), entry.getCertificates());
+			if (isRegisteredAsParallel()) {
+				boolean initialLock = lockClassName(name);
+				try {
+					Class clazz = findLoadedClass(name);
+					if (clazz != null) {
+						return clazz;
+					}
+					return defineClass(name, bytes, 0, bytes.length, cs);
+				} finally {
+					if (initialLock) {
+						unlockClassName(name);
+					}
+				}
+			}
 			return defineClass(name, bytes, 0, bytes.length, cs);
 		} finally {
 			if (is != null)
@@ -435,5 +468,47 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		}
 		result.addAll(Arrays.asList(super.getURLs()));
 		return (URL[]) result.toArray(new URL[result.size()]);
+	}
+
+	private final Map classNameLocks = new HashMap(5);
+	private final Object pkgLock = new Object();
+
+	private boolean lockClassName(String classname) {
+		synchronized (classNameLocks) {
+			Object lockingThread = classNameLocks.get(classname);
+			Thread current = Thread.currentThread();
+			if (lockingThread == current)
+				return false;
+			boolean previousInterruption = Thread.interrupted();
+			try {
+				while (true) {
+					if (lockingThread == null) {
+						classNameLocks.put(classname, current);
+						return true;
+					}
+
+					classNameLocks.wait();
+					lockingThread = classNameLocks.get(classname);
+				}
+			} catch (InterruptedException e) {
+				current.interrupt();
+				throw (LinkageError) new LinkageError(classname).initCause(e);
+			} finally {
+				if (previousInterruption) {
+					current.interrupt();
+				}
+			}
+		}
+	}
+
+	private void unlockClassName(String classname) {
+		synchronized (classNameLocks) {
+			classNameLocks.remove(classname);
+			classNameLocks.notifyAll();
+		}
+	}
+
+	protected boolean isRegisteredAsParallel() {
+		return registeredAsParallel;
 	}
 }

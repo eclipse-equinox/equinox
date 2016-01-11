@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2015 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1001,7 +1001,21 @@ public class FrameworkLauncher {
 	 * used in its initialization for matching classes before delegating to it's parent.
 	 * Sometimes also referred to as a ParentLastClassLoader
 	 */
-	protected class ChildFirstURLClassLoader extends CloseableURLClassLoader {
+	protected static class ChildFirstURLClassLoader extends CloseableURLClassLoader {
+		private static final boolean CHILDFIRST_REGISTERED_AS_PARALLEL;
+
+		static {
+			boolean registeredAsParallel;
+			try {
+				Method parallelCapableMetod = ClassLoader.class.getDeclaredMethod("registerAsParallelCapable", (Class[]) null); //$NON-NLS-1$
+				parallelCapableMetod.setAccessible(true);
+				registeredAsParallel = ((Boolean) parallelCapableMetod.invoke(null, (Object[]) null)).booleanValue();
+			} catch (Throwable e) {
+				// must do everything to avoid failing in clinit
+				registeredAsParallel = false;
+			}
+			CHILDFIRST_REGISTERED_AS_PARALLEL = registeredAsParallel;
+		}
 
 		public ChildFirstURLClassLoader(URL[] urls, ClassLoader parent) {
 			super(urls, parent, false);
@@ -1017,7 +1031,16 @@ public class FrameworkLauncher {
 			return resource;
 		}
 
-		protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
+		protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
+			if (isRegisteredAsParallel()) {
+				return loadClass0(name, resolve);
+			}
+			synchronized (this) {
+				return loadClass0(name, resolve);
+			}
+		}
+
+		private Class loadClass0(String name, boolean resolve) throws ClassNotFoundException {
 			Class clazz = findLoadedClass(name);
 			if (clazz == null) {
 				try {
@@ -1041,6 +1064,11 @@ public class FrameworkLauncher {
 		protected PermissionCollection getPermissions(CodeSource codesource) {
 			return allPermissions;
 		}
+
+		protected boolean isRegisteredAsParallel() {
+			return CHILDFIRST_REGISTERED_AS_PARALLEL;
+		}
+
 	}
 
 }
