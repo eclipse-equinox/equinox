@@ -2580,6 +2580,13 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.waitForStop(5000);
 	}
 
+	public void testSystemBundleLoader() {
+		Bundle systemBundle = OSGiTestsActivator.getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
+		BundleWiring wiring = systemBundle.adapt(BundleWiring.class);
+		ClassLoader cl = wiring.getClassLoader();
+		assertNotNull("No system bundle class loader.", cl);
+	}
+
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {
 		outputDir.mkdirs();
 
