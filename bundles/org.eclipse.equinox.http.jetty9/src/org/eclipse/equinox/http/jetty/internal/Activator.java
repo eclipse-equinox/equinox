@@ -1,13 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2016 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
+ *     Raymond Augé - bug fixes
  *******************************************************************************/
 
 package org.eclipse.equinox.http.jetty.internal;
@@ -42,6 +43,9 @@ public class Activator implements BundleActivator {
 	// (default threshold is "warn")
 	private static final String LOG_STDERR_THRESHOLD = "org.eclipse.equinox.http.jetty.log.stderr.threshold"; //$NON-NLS-1$
 
+	// Jetty will not have Servlet 3 multipart
+	private static final String SERVLET3_MULTIPART = "org.eclipse.equinox.http.jetty.servlet3.multipart"; //$NON-NLS-1$
+
 	// The staticServerManager is use by the start and stopServer methods and must be accessed in a static synchronized block
 	// to ensure it is correctly handled in terms of the bundle life-cycle.
 	private static HttpServerManager staticServerManager;
@@ -51,10 +55,15 @@ public class Activator implements BundleActivator {
 	private ServiceRegistration registration;
 
 	public void start(BundleContext context) throws Exception {
-		File jettyWorkDir = new File(context.getDataFile(""), JETTY_WORK_DIR); //$NON-NLS-1$ 
+		File jettyWorkDir = new File(context.getDataFile(""), JETTY_WORK_DIR); //$NON-NLS-1$
 		jettyWorkDir.mkdir();
 		EquinoxStdErrLog.setThresholdLogger(context.getProperty(LOG_STDERR_THRESHOLD));
 		httpServerManager = new HttpServerManager(jettyWorkDir);
+
+		String servlet3multipart = context.getProperty(SERVLET3_MULTIPART);
+		if ((servlet3multipart != null) && Boolean.valueOf(servlet3multipart).booleanValue()) {
+			httpServerManager.setServlet3multipart(Boolean.valueOf(servlet3multipart).booleanValue());
+		}
 
 		String autostart = context.getProperty(AUTOSTART);
 		if ((autostart == null || Boolean.valueOf(autostart).booleanValue()) && !isBundleActivationPolicyUsed(context)) {

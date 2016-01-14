@@ -1,13 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2015 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Red Hat, Inc. - Jetty 9 adoption.
+ *     Raymond Augé - bug fixes
  *******************************************************************************/
 
 package org.eclipse.equinox.http.jetty.internal;
@@ -43,6 +44,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 	private Map<String, Server> servers = new HashMap<String, Server>();
 	private File workDir;
+	private boolean servlet3multipart = false;
 
 	public HttpServerManager(File workDir) {
 		this.workDir = workDir;
@@ -54,7 +56,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 			try {
 				server.stop();
 			} catch (Exception e) {
-				// TODO: consider logging this, but we should still continue cleaning up 
+				// TODO: consider logging this, but we should still continue cleaning up
 				e.printStackTrace();
 			}
 			File contextWorkDir = new File(workDir, DIR_PREFIX + pid.hashCode());
@@ -147,6 +149,10 @@ public class HttpServerManager implements ManagedServiceFactory {
 			throw new ConfigurationException(pid, e.getMessage(), e);
 		}
 		servers.put(pid, server);
+	}
+
+	public void setServlet3multipart(boolean servlet3multipart) {
+		this.servlet3multipart = servlet3multipart;
 	}
 
 	private ServerConnector createHttpsConnector(@SuppressWarnings("rawtypes") Dictionary dictionary, Server server, HttpConfiguration http_config) {
@@ -327,7 +333,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 		try {
 			return (JettyCustomizer) Class.forName(customizerClass).newInstance();
 		} catch (Exception e) {
-			// TODO: consider logging this, but we should still continue 
+			// TODO: consider logging this, but we should still continue
 			e.printStackTrace();
 			return null;
 		}
@@ -425,6 +431,10 @@ public class HttpServerManager implements ManagedServiceFactory {
 	}
 
 	private void setupMultiPartConfig(@SuppressWarnings("rawtypes") Dictionary dictionary, ServletHolder holder) {
+		if (!servlet3multipart) {
+			return;
+		}
+
 		MultipartConfigElement multipartConfigElement = new MultipartConfigElement(System.getProperty("java.io.tmpdir")); //$NON-NLS-1$
 		holder.getRegistration().setMultipartConfig(multipartConfigElement);
 	}

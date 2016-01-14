@@ -1806,6 +1806,11 @@ public class ServletTest extends TestCase {
 	 * 3.1 file uploads
 	 */
 	public void test_Servlet16() throws Exception {
+		String servlet3multipart = getProperty("org.eclipse.equinox.http.jetty.servlet3.multipart");
+		if ((servlet3multipart == null) || !Boolean.valueOf(servlet3multipart).booleanValue()) {
+			return;
+		}
+
 		Servlet servlet = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
 
@@ -1848,6 +1853,11 @@ public class ServletTest extends TestCase {
 	 * 3.0 file uploads
 	 */
 	public void test_Servlet17() throws Exception {
+		String servlet3multipart = getProperty("org.eclipse.equinox.http.jetty.servlet3.multipart");
+		if ((servlet3multipart == null) || !Boolean.valueOf(servlet3multipart).booleanValue()) {
+			return;
+		}
+
 		Servlet servlet = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
 
