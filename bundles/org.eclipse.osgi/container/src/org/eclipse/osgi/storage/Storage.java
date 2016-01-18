@@ -1480,11 +1480,19 @@ public class Storage {
 
 	private InputStream findNextBestProfile(Generation systemGeneration, String javaEdition, Version javaVersion, String embeddedProfileName) {
 		InputStream result = null;
+		int major = javaVersion.getMajor();
 		int minor = javaVersion.getMinor();
 		do {
-			result = findInSystemBundle(systemGeneration, javaEdition + embeddedProfileName + javaVersion.getMajor() + "." + minor + PROFILE_EXT); //$NON-NLS-1$
-			minor = minor - 1;
-		} while (result == null && minor > 0);
+			result = findInSystemBundle(systemGeneration, javaEdition + embeddedProfileName + major + "." + minor + PROFILE_EXT); //$NON-NLS-1$
+			if (minor > 0) {
+				minor -= 1;
+			} else if (major > 9) {
+				major -= 1;
+			} else if (major <= 9 && major > 1) {
+				minor = 8;
+				major = 1;
+			}
+		} while (result == null && minor >= 0);
 		return result;
 	}
 

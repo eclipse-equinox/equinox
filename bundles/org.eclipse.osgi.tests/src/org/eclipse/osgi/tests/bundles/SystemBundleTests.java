@@ -2587,6 +2587,51 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertNotNull("No system bundle class loader.", cl);
 	}
 
+	public void testJavaProfile() {
+		String original = System.getProperty("java.specification.version");
+		try {
+			doTestJavaProfile("9.3.1", "JavaSE-9.0");
+			doTestJavaProfile("9", "JavaSE-9.0");
+			doTestJavaProfile("8.4", "JavaSE-1.8");
+			doTestJavaProfile("1.10.1", "JavaSE-1.8");
+			doTestJavaProfile("1.9", "JavaSE-1.8");
+			doTestJavaProfile("1.8", "JavaSE-1.8");
+			doTestJavaProfile("1.7", "JavaSE-1.7");
+		} finally {
+			System.setProperty("java.specification.version", original);
+		}
+	}
+
+	private void doTestJavaProfile(String javaSpecVersion, String expectedEEName) {
+		System.setProperty("java.specification.version", javaSpecVersion);
+		// create/stop/ test
+		File config = OSGiTestsActivator.getContext().getDataFile(getName() + javaSpecVersion);
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
+		@SuppressWarnings("deprecation")
+		String osgiEE = equinox.getBundleContext().getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
+		// don't do anything; just put the framework back to the RESOLVED state
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+
+		assertTrue("Wrong osgi EE: " + osgiEE, osgiEE.endsWith(expectedEEName));
+	}
+
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {
 		outputDir.mkdirs();
 
