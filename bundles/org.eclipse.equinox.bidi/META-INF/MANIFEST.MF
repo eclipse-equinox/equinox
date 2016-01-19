@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.eclipse.equinox.bidi;singleton:=true
-Bundle-Version: 0.10.100.qualifier
+Bundle-Version: 0.11.0.qualifier
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.2
 Bundle-ActivationPolicy: lazy
