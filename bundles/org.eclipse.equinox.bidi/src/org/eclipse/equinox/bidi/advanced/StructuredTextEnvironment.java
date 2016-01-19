@@ -169,8 +169,15 @@ public class StructuredTextEnvironment {
 	 * depends on the operating system (must be supported by this package)
 	 * and on the language supplied when constructing the instance (it
 	 * must be a language using a bidirectional script).
+	 * <p>
+	 * Note: This API is rarely used any more. E.g. in Eclipse/JFace,
+	 * bidi support is typically controlled by the application via
+	 * {@code org.eclipse.jface.util.BidiUtils#setBidiSupport(boolean)}.
+	 * </p>
 	 * 
 	 * @return <code>true</code> if bidi processing is needed in this environment.
+	 * 
+	 * @deprecated let users control bidi processing independent of the locale
 	 */
 	public boolean isProcessingNeeded() {
 		if (processingNeeded == null) {

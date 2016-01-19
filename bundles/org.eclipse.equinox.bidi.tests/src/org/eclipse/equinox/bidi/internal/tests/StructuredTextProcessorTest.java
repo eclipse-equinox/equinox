@@ -47,7 +47,8 @@ public class StructuredTextProcessorTest extends StructuredTextTestBase {
 	private void doTest1(String data, String result) {
 		Locale.setDefault(Locale.ENGLISH);
 		String full = StructuredTextProcessor.process(toUT16(data));
-		assertEquals("Util #1 full EN - ", data, toPseudo(full));
+		// Since https://bugs.eclipse.org/467836 , processing also works in non-bidi locales:
+		assertEquals("Util #1 full EN - ", result, toPseudo(full));
 		Locale.setDefault(new Locale(HEBREW2));
 		full = StructuredTextProcessor.process(toUT16(data));
 		assertEquals("Util #1 full HE - ", result, toPseudo(full));

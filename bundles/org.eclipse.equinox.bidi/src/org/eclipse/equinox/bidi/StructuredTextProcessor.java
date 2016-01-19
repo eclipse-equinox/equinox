@@ -84,7 +84,7 @@ public final class StructuredTextProcessor {
 
 	/**
 	 * Processes a string that has a particular semantic meaning to render
-	 * it correctly on bidi locales.
+	 * it correctly in bidi environments.
 	 * For more details, see {@link #process(String)}.
 	 * 
 	 * @param str the <i>lean</i> text to process
@@ -103,8 +103,6 @@ public final class StructuredTextProcessor {
 			return str;
 
 		StructuredTextEnvironment env = new StructuredTextEnvironment(null, false, StructuredTextEnvironment.ORIENT_UNKNOWN);
-		if (!env.isProcessingNeeded())
-			return str;
 		// do not process a string if all the following conditions are true:
 		//  a) it has no RTL characters
 		//  b) it starts with a LTR character
@@ -139,7 +137,7 @@ public final class StructuredTextProcessor {
 
 	/**
 	 * Processes a string that has a particular semantic meaning to render
-	 * it correctly on bidi locales.
+	 * it correctly in bidi environments.
 	 * For more details, see {@link #process(String)}.
 	 * 
 	 * @param  str the <i>lean</i> text to process.
@@ -164,8 +162,6 @@ public final class StructuredTextProcessor {
 
 		// make sure that LRE/PDF are added around the string
 		StructuredTextEnvironment env = new StructuredTextEnvironment(null, false, StructuredTextEnvironment.ORIENT_UNKNOWN);
-		if (!env.isProcessingNeeded())
-			return str;
 		IStructuredTextExpert expert = StructuredTextExpertFactory.getExpert(textType, env);
 		return expert.leanToFullText(str);
 	}
@@ -179,9 +175,6 @@ public final class StructuredTextProcessor {
 	 */
 	public static String deprocess(String str) {
 		if ((str == null) || (str.length() <= 1))
-			return str;
-		StructuredTextEnvironment env = new StructuredTextEnvironment(null, false, StructuredTextEnvironment.ORIENT_UNKNOWN);
-		if (!env.isProcessingNeeded())
 			return str;
 
 		StringBuffer buf = new StringBuffer();
@@ -220,10 +213,8 @@ public final class StructuredTextProcessor {
 		if ((str == null) || (str.length() <= 1))
 			return str;
 
-		// make sure that LRE/PDF are added around the string
+		// make sure that LRE/PDF are removed from the string
 		StructuredTextEnvironment env = new StructuredTextEnvironment(null, false, StructuredTextEnvironment.ORIENT_UNKNOWN);
-		if (!env.isProcessingNeeded())
-			return str;
 		IStructuredTextExpert expert = StructuredTextExpertFactory.getExpert(textType, env);
 		return expert.fullToLeanText(str);
 	}
