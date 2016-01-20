@@ -61,8 +61,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	// the parent of an EclipsePreference node is always an EclipsePreference node. (or null)
 	protected final EclipsePreferences parent;
 	protected boolean removed = false;
-	private ListenerList nodeChangeListeners;
-	private ListenerList preferenceChangeListeners;
+	private ListenerList<INodeChangeListener> nodeChangeListeners;
+	private ListenerList<IPreferenceChangeListener> preferenceChangeListeners;
 	private ScopeDescriptor descriptor;
 
 	public static boolean DEBUG_PREFERENCE_GENERAL = false;
@@ -131,7 +131,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	public void addNodeChangeListener(INodeChangeListener listener) {
 		checkRemoved();
 		if (nodeChangeListeners == null)
-			nodeChangeListeners = new ListenerList();
+			nodeChangeListeners = new ListenerList<>();
 		nodeChangeListeners.add(listener);
 		if (DEBUG_PREFERENCE_GENERAL)
 			PrefsMessages.message("Added preference node change listener: " + listener + " to: " + absolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -142,7 +142,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	public void addPreferenceChangeListener(IPreferenceChangeListener listener) {
 		checkRemoved();
 		if (preferenceChangeListeners == null)
-			preferenceChangeListeners = new ListenerList();
+			preferenceChangeListeners = new ListenerList<>();
 		preferenceChangeListeners.add(listener);
 		if (DEBUG_PREFERENCE_GENERAL)
 			PrefsMessages.message("Added preference property change listener: " + listener + " to: " + absolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -769,9 +769,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	protected void fireNodeEvent(final NodeChangeEvent event, final boolean added) {
 		if (nodeChangeListeners == null)
 			return;
-		Object[] listeners = nodeChangeListeners.getListeners();
-		for (int i = 0; i < listeners.length; i++) {
-			final INodeChangeListener listener = (INodeChangeListener) listeners[i];
+		for (final INodeChangeListener listener : nodeChangeListeners) {
 			ISafeRunnable job = new ISafeRunnable() {
 				@Override
 				public void handleException(Throwable exception) {
@@ -837,10 +835,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	protected void firePreferenceEvent(String key, Object oldValue, Object newValue) {
 		if (preferenceChangeListeners == null)
 			return;
-		Object[] listeners = preferenceChangeListeners.getListeners();
 		final PreferenceChangeEvent event = new PreferenceChangeEvent(this, key, oldValue, newValue);
-		for (int i = 0; i < listeners.length; i++) {
-			final IPreferenceChangeListener listener = (IPreferenceChangeListener) listeners[i];
+		for (final IPreferenceChangeListener listener : preferenceChangeListeners) {
 			ISafeRunnable job = new ISafeRunnable() {
 				@Override
 				public void handleException(Throwable exception) {

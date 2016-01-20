@@ -35,7 +35,7 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	// Store this around for performance
 	private final static IExtension[] EMPTY_EXTENSION_ARRAY = new IExtension[0];
 	private static final Map<String, Object> scopeRegistry = Collections.synchronizedMap(new HashMap<String, Object>());
-	private ListenerList modifyListeners;
+	private ListenerList<PreferenceModifyListener> modifyListeners;
 	private final PreferencesService service;
 	private final IExtensionRegistry registry;
 
@@ -93,7 +93,7 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 				log(new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, PrefsMessages.preferences_classCastListener, null));
 				return;
 			}
-			modifyListeners.add(listener);
+			modifyListeners.add((PreferenceModifyListener) listener);
 		} catch (CoreException e) {
 			log(e.getStatus());
 		}
@@ -194,9 +194,9 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	 * Return a list of the preference modify listeners. They are called during preference
 	 * import and given the chance to modify the imported tree.
 	 */
-	public PreferenceModifyListener[] getModifyListeners() {
+	public ListenerList<PreferenceModifyListener> getModifyListeners() {
 		if (modifyListeners == null) {
-			modifyListeners = new ListenerList();
+			modifyListeners = new ListenerList<>();
 			IExtension[] extensions = getPrefExtensions();
 			for (int i = 0; i < extensions.length; i++) {
 				IConfigurationElement[] elements = extensions[i].getConfigurationElements();
@@ -205,10 +205,7 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 						addModifyListener(elements[j]);
 			}
 		}
-		Object[] source = modifyListeners.getListeners();
-		PreferenceModifyListener[] result = new PreferenceModifyListener[source.length];
-		System.arraycopy(source, 0, result, 0, source.length);
-		return result;
+		return modifyListeners;
 	}
 
 	/*

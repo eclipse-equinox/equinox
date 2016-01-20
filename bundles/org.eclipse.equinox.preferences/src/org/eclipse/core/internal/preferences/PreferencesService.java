@@ -436,9 +436,8 @@ public class PreferencesService implements IPreferencesService {
 		if (registryHelper == null)
 			return tree;
 		final IEclipsePreferences[] result = new IEclipsePreferences[] {tree};
-		PreferenceModifyListener[] listeners = ((PreferenceServiceRegistryHelper) registryHelper).getModifyListeners();
-		for (int i = 0; i < listeners.length; i++) {
-			final PreferenceModifyListener listener = listeners[i];
+		ListenerList<PreferenceModifyListener> listeners = ((PreferenceServiceRegistryHelper) registryHelper).getModifyListeners();
+		for (final PreferenceModifyListener listener : listeners) {
 			ISafeRunnable job = new ISafeRunnable() {
 				@Override
 				public void handleException(Throwable exception) {
