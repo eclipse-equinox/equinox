@@ -1,4 +1,0 @@
-# To force a version qualifier update add the bug here
-Bug 403352 - Update all parent versions to match our build stream
- -- Force update for luna
-Bug 416896 - Some Equinox bundles need to be touched to get API descriptions back

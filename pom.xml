@@ -67,7 +67,6 @@
 
     <module>features/org.eclipse.equinox.server.simple</module>
     <module>features/org.eclipse.equinox.serverside.sdk</module>
-    <module>features/org.eclipse.equinox.weaving.sdk</module>
     <module>bundles/org.eclipse.equinox.bidi.tests</module>
     <module>bundles/org.eclipse.equinox.cm.test</module>
     <module>bundles/org.eclipse.equinox.compendium.tests</module>
@@ -78,7 +77,9 @@
 -->
 
     <module>bundles/org.eclipse.equinox.ds.tests</module>
+<!-- removed until the dependency on aspectj is removed. see bug 470000
     <module>bundles/org.eclipse.equinox.region.tests</module>
+-->
     <module>bundles/org.eclipse.equinox.security.tests</module>
     <module>bundles/org.eclipse.equinox.app</module>
     <module>bundles/org.eclipse.equinox.preferences</module>
@@ -130,7 +131,6 @@
     <module>bundles/org.eclipse.equinox.transforms.xslt</module>
     <module>bundles/org.eclipse.equinox.useradmin</module>
     <module>bundles/org.eclipse.equinox.util</module>
-    <module>bundles/org.eclipse.equinox.weaving.aspectj</module>
     <module>bundles/org.eclipse.equinox.weaving.caching</module>
     <module>bundles/org.eclipse.equinox.weaving.caching.j9</module>
     <module>bundles/org.eclipse.equinox.weaving.hook</module>

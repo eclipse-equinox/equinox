@@ -1,4 +1,0 @@
-# To force a version qualifier update add the bug here
-Bug 403352 - Update all parent versions to match our build stream
- -- Force update for luna
-Bug 458346 - Unusual, hard to decipher error in I-build
