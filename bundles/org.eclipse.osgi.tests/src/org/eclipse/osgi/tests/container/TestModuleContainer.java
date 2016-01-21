@@ -11,6 +11,7 @@
 package org.eclipse.osgi.tests.container;
 
 import static java.util.jar.Attributes.Name.MANIFEST_VERSION;
+import static org.junit.Assert.assertEquals;
 
 import java.io.*;
 import java.util.*;
@@ -2155,6 +2156,41 @@ public class TestModuleContainer extends AbstractTest {
 		wiring = host.getCurrentRevision().getWiring();
 		List<BundleCapability> packages = wiring.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
 		Assert.assertEquals("Wrong number of host packages.", originalPackageCnt, packages.size());
+	}
+
+	@Test
+	public void testSystemBundleOnDemandFragments() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install the system.bundle
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
+
+		// install an equinox fragment
+		Map<String, String> equinoxFragManifest = new HashMap<String, String>();
+		equinoxFragManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		equinoxFragManifest.put(Constants.BUNDLE_SYMBOLICNAME, "equinoxFrag");
+		equinoxFragManifest.put(Constants.FRAGMENT_HOST, "org.eclipse.osgi");
+		Module equinoxFrag = installDummyModule(equinoxFragManifest, "equinoxFrag", container);
+
+		// install a system.bundle fragment
+		Map<String, String> systemFragManifest = new HashMap<String, String>();
+		systemFragManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		systemFragManifest.put(Constants.BUNDLE_SYMBOLICNAME, "systemFrag");
+		systemFragManifest.put(Constants.FRAGMENT_HOST, "system.bundle");
+		Module systemFrag = installDummyModule(systemFragManifest, "systemFrag", container);
+
+		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+
+		List<ModuleWire> hostWires = systemBundle.getCurrentRevision().getWiring().getProvidedModuleWires(HostNamespace.HOST_NAMESPACE);
+		assertEquals("Wrong number of fragments.", 2, hostWires.size());
+		Set<ModuleRevision> fragmentRevisions = new HashSet(Arrays.asList(equinoxFrag.getCurrentRevision(), systemFrag.getCurrentRevision()));
+		for (ModuleWire hostWire : hostWires) {
+			if (!fragmentRevisions.remove(hostWire.getRequirer())) {
+				Assert.fail("Unexpected fragment revision: " + hostWire.getRequirer());
+			}
+		}
 	}
 
 	private static void assertWires(List<ModuleWire> required, List<ModuleWire>... provided) {
