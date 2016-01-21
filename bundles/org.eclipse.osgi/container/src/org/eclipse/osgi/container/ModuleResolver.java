@@ -834,29 +834,58 @@ final class ModuleResolver {
 
 		@Override
 		public Collection<Resource> getOndemandResources(Resource host) {
-			String hostBSN = ((ModuleRevision) host).getSymbolicName();
-			if (hostBSN == null) {
-				return Collections.emptyList();
-			}
 			List<ModuleCapability> hostCaps = ((ModuleRevision) host).getModuleCapabilities(HostNamespace.HOST_NAMESPACE);
 			if (hostCaps.isEmpty()) {
 				return Collections.emptyList();
 			}
-			ModuleCapability hostCap = hostCaps.get(0);
-			String matchFilter = "(" + EquinoxFragmentNamespace.FRAGMENT_NAMESPACE + "=" + hostBSN + ")"; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-			Requirement fragmentRequirement = ModuleContainer.createRequirement(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, Collections.<String, String> singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, matchFilter), Collections.<String, Object> emptyMap());
-			List<ModuleCapability> candidates = moduleDatabase.findCapabilities(fragmentRequirement);
-			// filter out disabled fragments and singletons
-			filterDisabled(candidates.listIterator());
-			Collection<Resource> ondemandFragments = new ArrayList<Resource>(candidates.size());
-			for (Iterator<ModuleCapability> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
-				ModuleCapability candidate = iCandidates.next();
-				ModuleRequirement hostReq = candidate.getRevision().getModuleRequirements(HostNamespace.HOST_NAMESPACE).get(0);
-				if (hostReq.matches(hostCap)) {
-					ondemandFragments.add(candidate.getResource());
+
+			Collection<Resource> ondemandFragments = new ArrayList<Resource>();
+			for (String hostBSN : getHostBSNs(hostCaps)) {
+				String matchFilter = "(" + EquinoxFragmentNamespace.FRAGMENT_NAMESPACE + "=" + hostBSN + ")"; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+				Requirement fragmentRequirement = ModuleContainer.createRequirement(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, Collections.<String, String> singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, matchFilter), Collections.<String, Object> emptyMap());
+				List<ModuleCapability> candidates = moduleDatabase.findCapabilities(fragmentRequirement);
+				// filter out disabled fragments and singletons
+				filterDisabled(candidates.listIterator());
+				for (Iterator<ModuleCapability> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
+					ModuleCapability candidate = iCandidates.next();
+					ModuleRequirement hostReq = candidate.getRevision().getModuleRequirements(HostNamespace.HOST_NAMESPACE).get(0);
+					for (ModuleCapability hostCap : hostCaps) {
+						if (hostReq.matches(hostCap)) {
+							ondemandFragments.add(candidate.getResource());
+							break;
+						}
+					}
 				}
 			}
+
 			return ondemandFragments;
+		}
+
+		private Collection<String> getHostBSNs(List<ModuleCapability> hostCaps) {
+			if (hostCaps.size() == 1) {
+				// optimization and likely the only case since you are not supposed to have multiple host caps
+				return getHostBSNs(hostCaps.get(0));
+			}
+			Set<String> result = new HashSet<String>();
+			for (ModuleCapability hostCap : hostCaps) {
+				result.addAll(getHostBSNs(hostCap));
+			}
+			return result;
+		}
+
+		@SuppressWarnings("unchecked")
+		private Collection<String> getHostBSNs(ModuleCapability moduleCapability) {
+			Object namesAttr = moduleCapability.getAttributes().get(HostNamespace.HOST_NAMESPACE);
+			if (namesAttr instanceof String) {
+				return Collections.singletonList((String) namesAttr);
+			}
+			if (namesAttr instanceof String[]) {
+				return Arrays.asList((String[]) namesAttr);
+			}
+			if (namesAttr instanceof Collection) {
+				return (Collection<String>) namesAttr;
+			}
+			return Collections.emptyList();
 		}
 
 		ModuleResolutionReport resolve() {
