@@ -9,6 +9,7 @@
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
  *     Raymond Augé <raymond.auge@liferay.com> - Bug 436698
+ *     Juan Gonzalez <juan.gonzalez@liferay.com> - Bug 486412
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal.servlet;
 
@@ -54,6 +55,19 @@ public class ServletContextAdaptor {
 			}
 		}
 
+		try {
+			Method equalsMethod = Object.class.getMethod("equals", Object.class);  //$NON-NLS-1$
+			Method equalsHandlerMethod = ServletContextAdaptor.class.getMethod("equals", Object.class); //$NON-NLS-1$
+			methods.put(equalsMethod, equalsHandlerMethod);
+
+			Method hashCodeMethod = Object.class.getMethod("hashCode", (Class<?>[])null);  //$NON-NLS-1$
+			Method hashCodeHandlerMethod = ServletContextAdaptor.class.getMethod("hashCode", (Class<?>[])null); //$NON-NLS-1$
+			methods.put(hashCodeMethod, hashCodeHandlerMethod);
+		}
+		catch (NoSuchMethodException e) {
+				// do nothing
+		}
+
 		return methods;
 	}
 
@@ -85,6 +99,21 @@ public class ServletContextAdaptor {
 
 		return (ServletContext)Proxy.newProxyInstance(
 			curClassLoader, interfaces, invocationHandler);
+	}
+
+	public boolean equals (Object obj) {
+		if (obj == null) {
+			return false;
+		}
+
+		if (!(obj instanceof ServletContext))  {
+			return false;
+		}
+
+		ServletContext servletContextObj = (ServletContext) obj;
+
+		return (classLoader.equals(servletContextObj.getClassLoader()) && 
+			getServletContextName().equals(servletContextObj.getServletContextName()));
 	}
 
 	public ClassLoader getClassLoader() {
@@ -242,6 +271,16 @@ public class ServletContextAdaptor {
 
 	public String getServletContextName() {
 		return contextController.getContextName();
+	}
+
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+			+ ((classLoader == null) ? 0 : classLoader.hashCode());
+		result = prime * result
+			+ ((contextName == null) ? 0 : contextName.hashCode());
+		return result;
 	}
 
 	public void removeAttribute(String attributeName) {

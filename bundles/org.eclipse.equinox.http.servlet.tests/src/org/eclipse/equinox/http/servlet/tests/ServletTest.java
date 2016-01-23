@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Raymond Augé <raymond.auge@liferay.com> - Bug 436698
+ *     Juan Gonzalez <juan.gonzalez@liferay.com> - Bug 486412
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.tests;
 
@@ -2693,7 +2694,25 @@ public class ServletTest extends TestCase {
 			}
 		}
 	}
-	
+
+	public void test_Listener10() throws Exception {
+		BaseServletContextListener scl1 =
+			new BaseServletContextListener();
+
+		Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+		listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
+		ServiceRegistration<ServletContextListener> registration = getBundleContext().registerService(ServletContextListener.class, scl1, listenerProps);
+		registration.unregister();
+		
+		ServletContext servletContext = scl1.servletContext;
+		Assert.assertNotNull(servletContext);
+		int hashCode = servletContext.hashCode();
+
+		Assert.assertTrue(servletContext.equals(servletContext));
+
+		Assert.assertEquals(hashCode, servletContext.hashCode());
+	}
+
 	public void test_Async1() throws Exception {
 
 		Servlet s1 = new BaseAsyncServlet("test_Listener8");

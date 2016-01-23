@@ -13,6 +13,7 @@ package org.eclipse.equinox.http.servlet.tests.util;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -23,6 +24,7 @@ public class BaseServletContextListener implements ServletContextListener {
 
 	public AtomicBoolean initialized = new AtomicBoolean(false);
 	public AtomicBoolean destroyed = new AtomicBoolean(false);
+	public ServletContext servletContext;
 
 	@Override
 	public void contextDestroyed(ServletContextEvent servletContextEvent) {
@@ -32,6 +34,7 @@ public class BaseServletContextListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
 		initialized.set(true);
+		servletContext = servletContextEvent.getServletContext();
 	}
 
 }
