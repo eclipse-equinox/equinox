@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2016 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -95,10 +95,9 @@ public class ServletContextAdaptor {
 		Class<?> clazz = getClass();
 		ClassLoader curClassLoader = clazz.getClassLoader();
 		Class<?>[] interfaces = new Class[] {ServletContext.class};
-		InvocationHandler invocationHandler = createInvocationHandler();
 
 		return (ServletContext)Proxy.newProxyInstance(
-			curClassLoader, interfaces, invocationHandler);
+			curClassLoader, interfaces, new AdaptorInvocationHandler());
 	}
 
 	public boolean equals (Object obj) {
@@ -106,14 +105,17 @@ public class ServletContextAdaptor {
 			return false;
 		}
 
-		if (!(obj instanceof ServletContext))  {
+		if (!(obj instanceof ServletContext) && !(Proxy.isProxyClass(obj.getClass())))  {
 			return false;
 		}
 
-		ServletContext servletContextObj = (ServletContext) obj;
+		InvocationHandler invocationHandler = Proxy.getInvocationHandler(obj);
 
-		return (classLoader.equals(servletContextObj.getClassLoader()) && 
-			getServletContextName().equals(servletContextObj.getServletContextName()));
+		if (!(invocationHandler instanceof AdaptorInvocationHandler)) {
+			return false;
+		}
+
+		return hashCode() == obj.hashCode();
 	}
 
 	public ClassLoader getClassLoader() {
@@ -277,9 +279,7 @@ public class ServletContextAdaptor {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-			+ ((classLoader == null) ? 0 : classLoader.hashCode());
-		result = prime * result
-			+ ((contextName == null) ? 0 : contextName.hashCode());
+			+ ((contextController == null) ? 0 : contextController.hashCode());
 		return result;
 	}
 
@@ -405,18 +405,18 @@ public class ServletContextAdaptor {
 		}
 	}
 
-	private InvocationHandler createInvocationHandler() {
-		return new InvocationHandler() {
-			public Object invoke(Object proxy, Method method, Object[] args)
-				throws Throwable {
-
-				return ServletContextAdaptor.this.invoke(proxy, method, args);
-			}
-		};
-	}
-
 	private Dictionary<String, Object> getContextAttributes() {
 		return proxyContext.getContextAttributes(contextController);
+	}
+
+	private class AdaptorInvocationHandler implements InvocationHandler {
+		public AdaptorInvocationHandler() {}
+
+		public Object invoke(Object proxy, Method method, Object[] args)
+			throws Throwable {
+
+			return ServletContextAdaptor.this.invoke(proxy, method, args);
+		}
 	}
 
 	private final AccessControlContext acc;

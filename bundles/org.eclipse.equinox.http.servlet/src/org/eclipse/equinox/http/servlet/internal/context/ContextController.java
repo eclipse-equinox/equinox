@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Raymond Augé and others.
+ * Copyright (c) 2016 Raymond Augé and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -141,7 +141,7 @@ public class ContextController {
 		this.trackingContext = trackingContextParam;
 		this.consumingContext = consumingContext;
 
-		this.string = getClass().getSimpleName() + '[' + contextName + ", " + consumingContext.getBundle() + ']'; //$NON-NLS-1$
+		this.string = getClass().getSimpleName() + '[' + serviceId + "][" + contextName + ", " + consumingContext.getBundle() + ']'; //$NON-NLS-1$
 
 		listenerServiceTracker = new ServiceTracker<EventListener, AtomicReference<ListenerRegistration>>(
 			trackingContext, httpServiceRuntime.getListenerFilter(),
@@ -1215,6 +1215,11 @@ public class ContextController {
 				"The context path '" + preValidationContextPath + "' is not valid URI path syntax.", //$NON-NLS-1$ //$NON-NLS-2$
 				DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
 		}
+	}
+
+	@Override
+	public int hashCode() {
+		return toString().hashCode();
 	}
 
 	private static final String[] DISPATCHER =

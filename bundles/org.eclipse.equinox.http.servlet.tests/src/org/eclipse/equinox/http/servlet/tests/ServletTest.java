@@ -2696,21 +2696,52 @@ public class ServletTest extends TestCase {
 	}
 
 	public void test_Listener10() throws Exception {
-		BaseServletContextListener scl1 =
-			new BaseServletContextListener();
+		BaseServletContextListener scl1 = new BaseServletContextListener();
+		BaseServletContextListener scl2 = new BaseServletContextListener();
+		BaseServletContextListener scl3 = new BaseServletContextListener();
 
 		Dictionary<String, String> listenerProps = new Hashtable<String, String>();
 		listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
-		ServiceRegistration<ServletContextListener> registration = getBundleContext().registerService(ServletContextListener.class, scl1, listenerProps);
-		registration.unregister();
-		
-		ServletContext servletContext = scl1.servletContext;
-		Assert.assertNotNull(servletContext);
-		int hashCode = servletContext.hashCode();
+		registrations.add(getBundleContext().registerService(ServletContextListener.class, scl1, listenerProps));
 
-		Assert.assertTrue(servletContext.equals(servletContext));
+		listenerProps = new Hashtable<String, String>();
+		listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
+		registrations.add(getBundleContext().registerService(ServletContextListener.class, scl2, listenerProps));
 
-		Assert.assertEquals(hashCode, servletContext.hashCode());
+		Dictionary<String, String> contextProps = new Hashtable<String, String>();
+		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
+		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper(){}, contextProps));
+
+		listenerProps = new Hashtable<String, String>();
+		listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
+		listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		registrations.add(getBundleContext().registerService(ServletContextListener.class, scl3, listenerProps));
+
+		ServletContext servletContext1 = scl1.servletContext;
+		ServletContext servletContext2 = scl2.servletContext;
+		ServletContext servletContext3 = scl3.servletContext;
+
+		Assert.assertNotNull(servletContext1);
+		Assert.assertNotNull(servletContext2);
+		Assert.assertNotNull(servletContext3);
+
+		Assert.assertTrue(servletContext1.equals(servletContext1));
+		Assert.assertTrue(servletContext2.equals(servletContext2));
+		Assert.assertTrue(servletContext3.equals(servletContext3));
+
+		Assert.assertTrue(servletContext1.equals(servletContext2));
+		Assert.assertFalse(servletContext1.equals(servletContext3));
+		Assert.assertFalse(servletContext2.equals(servletContext3));
+
+		// Asserts two invocations return the same value
+		Assert.assertEquals(servletContext1.hashCode(), servletContext1.hashCode());
+		Assert.assertEquals(servletContext2.hashCode(), servletContext2.hashCode());
+		Assert.assertEquals(servletContext3.hashCode(), servletContext3.hashCode());
+
+		Assert.assertEquals(servletContext1.hashCode(), servletContext2.hashCode());
+		Assert.assertNotEquals(servletContext1.hashCode(), servletContext3.hashCode());
+		Assert.assertNotEquals(servletContext2.hashCode(), servletContext3.hashCode());
 	}
 
 	public void test_Async1() throws Exception {
@@ -2991,19 +3022,19 @@ public class ServletTest extends TestCase {
 		ExtendedHttpService extendedHttpService = (ExtendedHttpService)getHttpService();
 
 		HttpContext testContext = new HttpContext() {
-			
+
 			@Override
 			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
 				request.setAttribute(HttpContext.REMOTE_USER, "TEST");
 				request.setAttribute(HttpContext.AUTHENTICATION_TYPE, "Basic");
 				return true;
 			}
-			
+
 			@Override
 			public URL getResource(String name) {
 				return null;
 			}
-			
+
 			@Override
 			public String getMimeType(String name) {
 				return null;
@@ -3017,7 +3048,7 @@ public class ServletTest extends TestCase {
 				PrintWriter out = resp.getWriter();
 				out.print("USER: " + req.getRemoteUser() + " AUTH_TYPE: " + req.getAuthType());
 			}
-			
+
 		};
 		extendedHttpService.registerServlet("/" + getName(), testServlet, null, testContext);
 
