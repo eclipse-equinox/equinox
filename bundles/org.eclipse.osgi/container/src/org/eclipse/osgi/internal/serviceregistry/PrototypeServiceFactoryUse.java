@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,9 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
-import java.util.*;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.messages.Msg;
@@ -27,9 +29,9 @@ import org.osgi.framework.*;
  * @ThreadSafe
  */
 public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
-	/** Service objects returned by PrototypeServiceFactory.getService() */
+	/** Service objects returned by PrototypeServiceFactory.getService() and their use count. */
 	/* @GuardedBy("this") */
-	private final Set<S> serviceObjects;
+	private final Map<S, AtomicInteger> serviceObjects;
 
 	/**
 	 * Constructs a service use encapsulating the service object.
@@ -39,7 +41,7 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	 */
 	PrototypeServiceFactoryUse(BundleContextImpl context, ServiceRegistrationImpl<S> registration) {
 		super(context, registration);
-		this.serviceObjects = Collections.newSetFromMap(new IdentityHashMap<S, Boolean>());
+		this.serviceObjects = new IdentityHashMap<S, AtomicInteger>();
 	}
 
 	/**
@@ -60,7 +62,15 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 		if (service == null) {
 			return null;
 		}
-		serviceObjects.add(service);
+		AtomicInteger useCount = serviceObjects.get(service);
+		if (useCount == null) {
+			serviceObjects.put(service, new AtomicInteger(1));
+		} else {
+			if (useCount.getAndIncrement() == Integer.MAX_VALUE) {
+				useCount.getAndDecrement();
+				throw new ServiceException(Msg.SERVICE_USE_OVERFLOW);
+			}
+		}
 		return service;
 	}
 
@@ -76,13 +86,17 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	@Override
 	boolean releaseServiceObject(final S service) {
 		assert Thread.holdsLock(this);
-		if ((service == null) || !serviceObjects.remove(service)) {
+		if ((service == null) || !serviceObjects.containsKey(service)) {
 			throw new IllegalArgumentException(Msg.SERVICE_OBJECTS_UNGET_ARGUMENT_EXCEPTION);
 		}
 		if (debug.DEBUG_SERVICES) {
 			Debug.println("ungetService[factory=" + registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
-		factoryUngetService(service);
+		AtomicInteger useCount = serviceObjects.get(service);
+		if (useCount.decrementAndGet() < 1) {
+			serviceObjects.remove(service);
+			factoryUngetService(service);
+		}
 		return true;
 	}
 
@@ -99,7 +113,7 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	@Override
 	void release() {
 		super.release();
-		for (S service : serviceObjects) {
+		for (S service : serviceObjects.keySet()) {
 			if (debug.DEBUG_SERVICES) {
 				Debug.println("releaseService[factory=" + registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
