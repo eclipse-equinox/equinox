@@ -101,11 +101,11 @@ public class ServletContextAdaptor {
 	}
 
 	public boolean equals (Object obj) {
-		if (obj == null) {
+		if (!(obj instanceof ServletContext)) {
 			return false;
 		}
 
-		if (!(obj instanceof ServletContext) && !(Proxy.isProxyClass(obj.getClass())))  {
+		if (!(Proxy.isProxyClass(obj.getClass())))  {
 			return false;
 		}
 
