@@ -115,7 +115,9 @@ public class ServletContextAdaptor {
 			return false;
 		}
 
-		return hashCode() == obj.hashCode();
+		AdaptorInvocationHandler adaptorInvocationHandler = (AdaptorInvocationHandler)invocationHandler;
+
+		return contextController.equals(adaptorInvocationHandler.getContextController());
 	}
 
 	public ClassLoader getClassLoader() {
@@ -276,11 +278,7 @@ public class ServletContextAdaptor {
 	}
 
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-			+ ((contextController == null) ? 0 : contextController.hashCode());
-		return result;
+		return contextController.hashCode();
 	}
 
 	public void removeAttribute(String attributeName) {
@@ -412,17 +410,22 @@ public class ServletContextAdaptor {
 	private class AdaptorInvocationHandler implements InvocationHandler {
 		public AdaptorInvocationHandler() {}
 
+		public ContextController getContextController() {
+			return contextController;
+		}
+
 		public Object invoke(Object proxy, Method method, Object[] args)
 			throws Throwable {
 
 			return ServletContextAdaptor.this.invoke(proxy, method, args);
 		}
+
 	}
 
 	private final AccessControlContext acc;
 	private final Bundle bundle;
 	private final ClassLoader classLoader;
-	private final ContextController contextController;
+	final ContextController contextController;
 	private final EventListeners eventListeners;
 	private final ProxyContext proxyContext;
 	private final ServletContext servletContext;

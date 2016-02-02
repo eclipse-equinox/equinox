@@ -1217,11 +1217,6 @@ public class ContextController {
 		}
 	}
 
-	@Override
-	public int hashCode() {
-		return toString().hashCode();
-	}
-
 	private static final String[] DISPATCHER =
 		new String[] {DispatcherType.REQUEST.toString()};
 
