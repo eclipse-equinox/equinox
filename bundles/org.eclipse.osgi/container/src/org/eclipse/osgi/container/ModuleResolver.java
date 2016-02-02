@@ -77,8 +77,9 @@ final class ModuleResolver {
 		DEBUG_REPORT = debugAll || options.getBooleanOption(OPTION_REPORT, false);
 	}
 
-	private static final Collection<String> NON_PAYLOAD_CAPABILITIES = Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE);
+	static final Collection<String> NON_PAYLOAD_CAPABILITIES = Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE);
 	static final Collection<String> NON_PAYLOAD_REQUIREMENTS = Arrays.asList(HostNamespace.HOST_NAMESPACE, ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE);
+	static final Collection<String> NON_SUBSTITUTED_REQUIREMENTS = Arrays.asList(PackageNamespace.PACKAGE_NAMESPACE, BundleNamespace.BUNDLE_NAMESPACE);
 
 	final ThreadLocal<Boolean> threadResolving = new ThreadLocal<>();
 	final ModuleContainerAdaptor adaptor;
@@ -542,8 +543,8 @@ final class ModuleResolver {
 		private final Collection<ModuleRevision> triggers;
 		private final Collection<ModuleRevision> optionals;
 		private final boolean triggersMandatory;
-		private final ModuleDatabase moduleDatabase;
-		private final Map<ModuleRevision, ModuleWiring> wirings;
+		final ModuleDatabase moduleDatabase;
+		final Map<ModuleRevision, ModuleWiring> wirings;
 		private final Set<ModuleRevision> previouslyResolved;
 		private final DynamicModuleRequirement dynamicReq;
 		private volatile ResolverHook hook = null;
@@ -636,7 +637,7 @@ final class ModuleResolver {
 			return filterProviders(requirement, candidates, true);
 		}
 
-		private List<Capability> filterProviders(Requirement requirement, List<ModuleCapability> candidates, boolean filterResolvedHosts) {
+		List<Capability> filterProviders(Requirement requirement, List<ModuleCapability> candidates, boolean filterResolvedHosts) {
 			ListIterator<ModuleCapability> iCandidates = candidates.listIterator();
 			filterDisabled(iCandidates);
 			removeNonEffectiveCapabilities(iCandidates);
@@ -1196,6 +1197,96 @@ final class ModuleResolver {
 					value.add(capability);
 		}
 
+		class DynamicFragments {
+			private final ModuleCapability hostCapability;
+			private final Map<String, ModuleRevision> fragments = new HashMap<>();
+			private final Set<ModuleRevision> validProviders = new HashSet<>();
+			boolean fragmentAdded = false;
+
+			DynamicFragments(ModuleWiring hostWiring, ModuleCapability hostCapability) {
+				this.hostCapability = hostCapability;
+				validProviders.add(hostWiring.getRevision());
+				for (ModuleWire hostWire : hostWiring.getProvidedModuleWires(HostNamespace.HOST_NAMESPACE)) {
+					validProviders.add(hostWire.getRequirer());
+					fragments.put(hostWire.getRequirer().getSymbolicName(), hostWire.getRequirer());
+				}
+			}
+
+			void addFragment(ModuleRevision fragment) {
+				ModuleRevision existing = fragments.get(fragment.getSymbolicName());
+				if (existing == null) {
+					fragments.put(fragment.getSymbolicName(), fragment);
+					validProviders.add(fragment);
+					fragmentAdded = true;
+				}
+			}
+
+			Map<Resource, List<Wire>> getNewWires() {
+				if (!fragmentAdded) {
+					return Collections.emptyMap();
+				}
+				Map<Resource, List<Wire>> result = new HashMap<>();
+				boolean retry;
+				do {
+					retry = false;
+					result.clear();
+					fragmentsLoop: for (Iterator<Map.Entry<String, ModuleRevision>> iFragments = fragments.entrySet().iterator(); iFragments.hasNext();) {
+						Map.Entry<String, ModuleRevision> fragmentEntry = iFragments.next();
+						if (wirings.get(fragmentEntry.getValue()) == null) {
+							for (ModuleRequirement req : fragmentEntry.getValue().getModuleRequirements(null)) {
+								ModuleRevision requirer = NON_PAYLOAD_REQUIREMENTS.contains(req.getNamespace()) ? req.getRevision() : hostCapability.getRevision();
+								List<Wire> newWires = result.get(requirer);
+								if (newWires == null) {
+									newWires = new ArrayList<>();
+									result.put(requirer, newWires);
+								}
+								if (HostNamespace.HOST_NAMESPACE.equals(req.getNamespace())) {
+									newWires.add(new ModuleWire(hostCapability, hostCapability.getRevision(), req, requirer));
+								} else {
+									if (failToWire(req, requirer, newWires)) {
+										iFragments.remove();
+										validProviders.remove(req.getRevision());
+										retry = true;
+										break fragmentsLoop;
+									}
+								}
+							}
+						}
+					}
+				} while (retry);
+				return result;
+			}
+
+			private boolean failToWire(ModuleRequirement requirement, ModuleRevision requirer, List<Wire> wires) {
+				List<ModuleCapability> matching = moduleDatabase.findCapabilities(requirement);
+				List<Wire> newWires = new ArrayList<>(0);
+				filterProviders(requirement, matching, false);
+				for (ModuleCapability candidate : matching) {
+					// If the requirer equals the requirement revision then this is a non-payload requirement.
+					// We let non-payload requirements come from anywhere.
+					// Payload requirements must come from the host or one of the fragments attached to the host
+					if (requirer.equals(requirement.getRevision()) || validProviders.contains(candidate.getRevision())) {
+						ModuleRevision provider = NON_PAYLOAD_CAPABILITIES.contains(candidate.getNamespace()) ? candidate.getRevision() : hostCapability.getRevision();
+						// if there are multiple candidates; then check for cardinality
+						if (newWires.isEmpty() || Namespace.CARDINALITY_MULTIPLE.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_CARDINALITY_DIRECTIVE))) {
+							newWires.add(new ModuleWire(candidate, provider, requirement, requirer));
+						}
+					}
+				}
+				if (newWires.isEmpty()) {
+					if (!Namespace.RESOLUTION_OPTIONAL.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
+						// could not resolve mandatory requirement;
+						return true;
+					}
+				}
+				// only create the wire if the namespace is a non-substituted namespace (e.g. NOT package)
+				if (!NON_SUBSTITUTED_REQUIREMENTS.contains(requirement.getNamespace())) {
+					wires.addAll(newWires);
+				}
+				return false;
+			}
+		}
+
 		private Map<Resource, List<Wire>> resolveNonPayLoadFragments() {
 			// This is to support dynamic attachment of fragments that do not
 			// add any payload requirements to their host.
@@ -1203,75 +1294,63 @@ final class ModuleResolver {
 			// host is always resolved.
 			// It is also useful for things like NLS fragments that are installed later
 			// without the need to refresh the host.
-			Collection<ModuleRevision> nonPayLoadFrags = new ArrayList<>();
+			List<ModuleRevision> dynamicAttachableFrags = new ArrayList<>();
 			if (triggersMandatory) {
 				for (ModuleRevision moduleRevision : triggers) {
-					if (nonPayLoad(moduleRevision)) {
-						nonPayLoadFrags.add(moduleRevision);
+					if ((moduleRevision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+						dynamicAttachableFrags.add(moduleRevision);
 					}
 				}
 			}
 			for (ModuleRevision moduleRevision : optionals) {
-				if (nonPayLoad(moduleRevision)) {
-					nonPayLoadFrags.add(moduleRevision);
+				if ((moduleRevision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+					dynamicAttachableFrags.add(moduleRevision);
 				}
 			}
 
-			if (nonPayLoadFrags.isEmpty()) {
+			if (dynamicAttachableFrags.isEmpty()) {
 				return Collections.emptyMap();
 			}
-			Map<Resource, List<Wire>> dynamicAttachment = new HashMap<>(0);
-			for (ModuleRevision nonPayLoad : nonPayLoadFrags) {
-				List<Wire> allNonPayloadWires = new ArrayList<>(0);
-				for (ModuleRequirement requirement : nonPayLoad.getModuleRequirements(null)) {
-					List<ModuleCapability> matching = moduleDatabase.findCapabilities(requirement);
-					List<Wire> newWires = new ArrayList<>(0);
-					filterProviders(requirement, matching, false);
-					for (ModuleCapability candidate : matching) {
-						if (HostNamespace.HOST_NAMESPACE.equals(requirement.getNamespace())) {
-							String attachDirective = candidate.getDirectives().get(HostNamespace.CAPABILITY_FRAGMENT_ATTACHMENT_DIRECTIVE);
+			Collections.sort(dynamicAttachableFrags, new Comparator<ModuleRevision>() {
+				@Override
+				public int compare(ModuleRevision r1, ModuleRevision r2) {
+					// we only care about versions here
+					return -(r1.getVersion().compareTo(r2.getVersion()));
+				}
+			});
+
+			Map<ModuleCapability, DynamicFragments> hostDynamicFragments = new HashMap<>();
+			// first find the hosts to dynamically attach to
+			for (ModuleRevision dynamicAttachableFragment : dynamicAttachableFrags) {
+				List<ModuleRequirement> requirements = dynamicAttachableFragment.getModuleRequirements(null);
+				for (ModuleRequirement requirement : requirements) {
+					if (HostNamespace.HOST_NAMESPACE.equals(requirement.getNamespace())) {
+						List<ModuleCapability> matchingHosts = moduleDatabase.findCapabilities(requirement);
+						filterProviders(requirement, matchingHosts, false);
+						for (ModuleCapability hostCandidate : matchingHosts) {
+							ModuleWiring hostWiring = wirings.get(hostCandidate.getRevision());
+							String attachDirective = hostCandidate.getDirectives().get(HostNamespace.CAPABILITY_FRAGMENT_ATTACHMENT_DIRECTIVE);
 							boolean attachAlways = attachDirective == null || HostNamespace.FRAGMENT_ATTACHMENT_ALWAYS.equals(attachDirective);
 							// only do this if the candidate host is already resolved and it allows dynamic attachment
-							if (!attachAlways || wirings.get(candidate.getRevision()) == null) {
+							if (!attachAlways || hostWiring == null) {
 								continue;
 							}
-						}
-						// if there are multiple candidates; then check for cardinality
-						if (newWires.isEmpty() || Namespace.CARDINALITY_MULTIPLE.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_CARDINALITY_DIRECTIVE))) {
-							newWires.add(new ModuleWire(candidate, candidate.getRevision(), requirement, nonPayLoad));
+							DynamicFragments dynamicFragments = hostDynamicFragments.get(hostCandidate);
+							if (dynamicFragments == null) {
+								dynamicFragments = new DynamicFragments(hostWiring, hostCandidate);
+								hostDynamicFragments.put(hostCandidate, dynamicFragments);
+							}
+							dynamicFragments.addFragment(requirement.getRevision());
 						}
 					}
-					if (newWires.isEmpty()) {
-						if (!Namespace.RESOLUTION_OPTIONAL.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
-							// could not resolve mandatory requirement;
-							// clear out the wires to prevent resolution
-							allNonPayloadWires.clear();
-							break;
-						}
-					} else {
-						allNonPayloadWires.addAll(newWires);
-					}
-				}
-				if (!allNonPayloadWires.isEmpty()) {
-					// we found some wires to resolve the fragment
-					dynamicAttachment.put(nonPayLoad, allNonPayloadWires);
 				}
 			}
-			return dynamicAttachment;
-		}
-
-		private boolean nonPayLoad(ModuleRevision moduleRevision) {
-			if ((moduleRevision.getTypes() & BundleRevision.TYPE_FRAGMENT) == 0) {
-				// not a fragment
-				return false;
+			// now try to get the new wires for each host
+			Map<Resource, List<Wire>> dynamicWires = new HashMap<>();
+			for (DynamicFragments dynamicFragments : hostDynamicFragments.values()) {
+				dynamicWires.putAll(dynamicFragments.getNewWires());
 			}
-			for (Requirement req : moduleRevision.getRequirements(null)) {
-				if (!NON_PAYLOAD_REQUIREMENTS.contains(req.getNamespace())) {
-					// fragment adds payload to host
-					return false;
-				}
-			}
-			return true;
+			return dynamicWires;
 		}
 
 		private Map<Resource, List<Wire>> resolveDynamic() throws ResolutionException {

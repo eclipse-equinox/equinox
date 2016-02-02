@@ -208,23 +208,8 @@ public final class OSGiManifestBuilderFactory {
 				throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_EXTENSION_ERROR, hostName), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 			}
 		} else {
-			if (manifest.get(Constants.IMPORT_PACKAGE) != null)
-				throw new BundleException(Msg.OSGiManifestBuilderFactory_ExtensionImportError, BundleException.MANIFEST_ERROR);
 			if (manifest.get(Constants.REQUIRE_BUNDLE) != null)
 				throw new BundleException(Msg.OSGiManifestBuilderFactory_ExtensionReqBundleError, BundleException.MANIFEST_ERROR);
-			if (manifest.get(Constants.REQUIRE_CAPABILITY) != null) {
-				ManifestElement[] manifestElements = ManifestElement.parseHeader(Constants.REQUIRE_CAPABILITY, manifest.get(Constants.REQUIRE_CAPABILITY));
-				if (manifestElements != null) {
-					for (ManifestElement manifestElement : manifestElements) {
-						for (String value : manifestElement.getValueComponents()) {
-							if (!ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE.equals(value)) {
-								throw new BundleException(NLS.bind(Msg.OSGiManifestBuilderFactory_ExtensionReqCapError, value), BundleException.MANIFEST_ERROR);
-							}
-						}
-					}
-				}
-
-			}
 			if (manifest.get(Constants.BUNDLE_NATIVECODE) != null)
 				throw new BundleException(Msg.OSGiManifestBuilderFactory_ExtensionNativeError, BundleException.MANIFEST_ERROR);
 

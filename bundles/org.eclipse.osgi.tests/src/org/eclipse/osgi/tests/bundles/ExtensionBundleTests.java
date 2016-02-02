@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,6 @@ package org.eclipse.osgi.tests.bundles;
 import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.eclipse.osgi.internal.messages.Msg;
-import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
@@ -82,14 +80,5 @@ public class ExtensionBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong provider for host: " + hostWire.getProvider().getBundle(), 0, hostWire.getProvider().getBundle().getBundleId());
 		BundleWire eeWire = wiring.getRequiredWires(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE).get(0);
 		assertEquals("Wrong provider for osgi.ee: " + eeWire.getProvider().getBundle(), 0, eeWire.getProvider().getBundle().getBundleId());
-	}
-
-	public void testExtensionBundleWithRequireCapabilityOtherThanOsgiEeFailsToInstall() {
-		try {
-			installer.installBundle("ext.framework.osgiee.a");
-			fail("Extension bundle with Require-Capability not in osgi.ee namespace did not fail to install");
-		} catch (BundleException e) {
-			assertTrue(e.getMessage().equals(NLS.bind(Msg.OSGiManifestBuilderFactory_ExtensionReqCapError, "osgi.wiring.package")));
-		}
 	}
 }
