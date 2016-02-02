@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-SymbolicName: ext.framework.osgiee.a
-Fragment-Host: system.bundle; extension:=framework
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.2))",
- osgi.wiring.package;filter:="(osgi.wiring.package=org.osgi.framework)"
