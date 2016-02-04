@@ -1483,7 +1483,9 @@ public class Storage {
 		int major = javaVersion.getMajor();
 		int minor = javaVersion.getMinor();
 		do {
-			result = findInSystemBundle(systemGeneration, javaEdition + embeddedProfileName + major + "." + minor + PROFILE_EXT); //$NON-NLS-1$
+			// If minor is zero then it is not included in the name
+			String profileResourceName = javaEdition + embeddedProfileName + major + ((minor > 0) ? "." + minor : "") + PROFILE_EXT; //$NON-NLS-1$ //$NON-NLS-2$
+			result = findInSystemBundle(systemGeneration, profileResourceName);
 			if (minor > 0) {
 				minor -= 1;
 			} else if (major > 9) {

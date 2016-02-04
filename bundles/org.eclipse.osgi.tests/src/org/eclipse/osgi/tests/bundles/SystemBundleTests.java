@@ -2590,8 +2590,8 @@ public class SystemBundleTests extends AbstractBundleTests {
 	public void testJavaProfile() {
 		String original = System.getProperty("java.specification.version");
 		try {
-			doTestJavaProfile("9.3.1", "JavaSE-9.0");
-			doTestJavaProfile("9", "JavaSE-9.0");
+			doTestJavaProfile("9.3.1", "JavaSE-9");
+			doTestJavaProfile("9", "JavaSE-9");
 			doTestJavaProfile("8.4", "JavaSE-1.8");
 			doTestJavaProfile("1.10.1", "JavaSE-1.8");
 			doTestJavaProfile("1.9", "JavaSE-1.8");

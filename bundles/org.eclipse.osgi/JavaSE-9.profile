@@ -9,7 +9,7 @@
 #     IBM Corporation - initial API and implementation
 ###############################################################################
 
-# NOTE: The JavaSE-1.9 profile is not yet finalized.
+# NOTE: The JavaSE-9 profile is not yet finalized.
 
 org.osgi.framework.system.packages = \
  javax.accessibility,\
@@ -195,7 +195,7 @@ org.osgi.framework.executionenvironment = \
  JavaSE-1.6,\
  JavaSE-1.7,\
  JavaSE-1.8,\
- JavaSE-9.0
+ JavaSE-9
 org.osgi.framework.system.capabilities = \
  osgi.ee; osgi.ee="OSGi/Minimum"; version:List<Version>="1.0, 1.1, 1.2",\
  osgi.ee; osgi.ee="JRE"; version:List<Version>="1.0, 1.1",\
@@ -203,7 +203,7 @@ org.osgi.framework.system.capabilities = \
  osgi.ee; osgi.ee="JavaSE/compact1"; version:List<Version>="1.8, 9.0",\
  osgi.ee; osgi.ee="JavaSE/compact2"; version:List<Version>="1.8, 9.0",\
  osgi.ee; osgi.ee="JavaSE/compact3"; version:List<Version>="1.8, 9.0"
-osgi.java.profile.name = JavaSE-9.0
+osgi.java.profile.name = JavaSE-9
 org.eclipse.jdt.core.compiler.compliance=1.9
 org.eclipse.jdt.core.compiler.source=1.8
 org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode=enabled
