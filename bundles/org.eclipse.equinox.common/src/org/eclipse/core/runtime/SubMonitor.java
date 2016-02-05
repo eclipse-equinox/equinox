@@ -120,9 +120,7 @@ package org.eclipse.core.runtime;
  *              doSomeWork(progress.split(40));
  *                            
  *          } finally {
- *              if (monitor != null) {
- *              	monitor.done();
- *              }
+ *              SubMonitor.done(monitor);
  *          } 
  *      }
  * </pre>
@@ -500,6 +498,21 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 
 		monitor.beginTask(taskName, MINIMUM_RESOLUTION);
 		return new SubMonitor(new RootInfo(monitor), MINIMUM_RESOLUTION, work, SUPPRESS_NONE);
+	}
+
+	/**
+	 * Calls {@link #done()} on the given monitor if is non-null. If the given monitor is null,
+	 * this is a no-op.
+	 * <p>
+	 * This is a convenience method intended to reduce the boilerplate around code which must call
+	 * {@link #done()} on a possibly-null monitor.
+	 * 
+	 * @param monitor a progress monitor or null
+	 */
+	public static void done(IProgressMonitor monitor) {
+		if (monitor != null) {
+			monitor.done();
+		}
 	}
 
 	/**
