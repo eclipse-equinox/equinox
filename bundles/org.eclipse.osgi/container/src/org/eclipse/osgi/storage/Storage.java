@@ -322,6 +322,12 @@ public class Storage {
 				}
 			}
 		}
+		for (ModuleRevision removalPending : moduleContainer.getRemovalPending()) {
+			Generation generation = (Generation) removalPending.getRevisionInfo();
+			if (generation != null) {
+				generation.close();
+			}
+		}
 		mruList.shutdown();
 		adaptor.shutdownResolverExecutor();
 	}
