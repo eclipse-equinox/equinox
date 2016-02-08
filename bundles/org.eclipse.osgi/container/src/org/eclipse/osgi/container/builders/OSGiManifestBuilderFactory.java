@@ -365,10 +365,9 @@ public final class OSGiManifestBuilderFactory {
 			// preserving behavior for compatibility
 			Object optionalAttr = attributes.remove(Namespace.RESOLUTION_OPTIONAL);
 			for (String packageName : packageNames) {
-				if (dynamic && importPackageNames.contains(packageName))
-					continue; // already importing this package, don't add a dynamic import for it
-				importPackageNames.add(packageName);
-
+				if (!dynamic) {
+					importPackageNames.add(packageName);
+				}
 				// fill in the filter directive based on the attributes
 				Map<String, String> packageDirectives = new HashMap<String, String>(directives);
 				StringBuilder filter = new StringBuilder();

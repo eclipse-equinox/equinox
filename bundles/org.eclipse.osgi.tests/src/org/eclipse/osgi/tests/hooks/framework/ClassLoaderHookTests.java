@@ -88,7 +88,7 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 		b.loadClass(TEST_CLASSNAME);
 		// class load must succeed because the badbytes got rejected
 		// make sure we don't have any dynamic imports added
-		assertEquals("Found some imports.", 2, b.adapt(BundleRevision.class).getWiring().getRequirements(PackageNamespace.PACKAGE_NAMESPACE).size());
+		assertEquals("Found some imports.", 0, b.adapt(BundleRevision.class).getWiring().getRequirements(PackageNamespace.PACKAGE_NAMESPACE).size());
 
 		// no don't reject
 		setRejectTransformation(false);
@@ -100,7 +100,7 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 		}
 		// class load must fail because the badbytes got used to define the class
 		// make sure we have a dynamic imports added
-		assertEquals("Found some imports.", 3, b.adapt(BundleRevision.class).getWiring().getRequirements(PackageNamespace.PACKAGE_NAMESPACE).size());
+		assertEquals("Found some imports.", 1, b.adapt(BundleRevision.class).getWiring().getRequirements(PackageNamespace.PACKAGE_NAMESPACE).size());
 	}
 
 	public void testRejectTransformationFromClassLoadingHook() throws Exception {

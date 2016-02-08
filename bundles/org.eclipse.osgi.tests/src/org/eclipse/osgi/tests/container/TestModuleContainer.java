@@ -2103,6 +2103,148 @@ public class TestModuleContainer extends AbstractTest {
 		}
 	}
 
+	@Test
+	public void testDynamicWithOptionalImport() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install the system.bundle
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
+		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+
+		// install an importer
+		Map<String, String> optionalImporterManifest = new HashMap<String, String>();
+		optionalImporterManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		optionalImporterManifest.put(Constants.BUNDLE_SYMBOLICNAME, "importer");
+		optionalImporterManifest.put(Constants.IMPORT_PACKAGE, "exporter; resolution:=optional");
+		optionalImporterManifest.put(Constants.DYNAMICIMPORT_PACKAGE, "exporter");
+		Module optionalImporterModule = installDummyModule(optionalImporterManifest, "optionalImporter", container);
+
+		// unsatisfied optional and dynamic imports do not fail a resolve. 
+		report = container.resolve(Arrays.asList(optionalImporterModule), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+
+		//dynamic and optional imports are same. Optional import is not satisfied we should only see the dynamic import
+		List<BundleRequirement> importReqsList = optionalImporterModule.getCurrentRevision().getWiring().getRequirements(PackageNamespace.PACKAGE_NAMESPACE);
+		assertEquals("Wrong number of imports.", 1, importReqsList.size());
+		assertEquals("Import was not dynamic", PackageNamespace.RESOLUTION_DYNAMIC, importReqsList.get(0).getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE));
+
+		// install a exporter to satisfy existing optional import
+		Map<String, String> exporterManifest = new HashMap<String, String>();
+		exporterManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		exporterManifest.put(Constants.BUNDLE_SYMBOLICNAME, "exporter");
+		exporterManifest.put(Constants.EXPORT_PACKAGE, "exporter");
+		installDummyModule(exporterManifest, "exporter", container);
+
+		ModuleWire dynamicWire = container.resolveDynamic("exporter", optionalImporterModule.getCurrentRevision());
+		Assert.assertNotNull("Expected to find a dynamic wire.", dynamicWire);
+
+		// re-resolve importer
+		container.refresh(Collections.singleton(optionalImporterModule));
+
+		report = container.resolve(Arrays.asList(optionalImporterModule), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+
+		importReqsList = optionalImporterModule.getCurrentRevision().getWiring().getRequirements(PackageNamespace.PACKAGE_NAMESPACE);
+		assertEquals("Wrong number of imports.", 2, importReqsList.size());
+	}
+
+	@Test
+	public void testSubstitutableExport() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install the system.bundle
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
+		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+
+		// install an exporter with substitutable export.
+		Map<String, String> exporterManifest = new HashMap<String, String>();
+		exporterManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		exporterManifest.put(Constants.BUNDLE_SYMBOLICNAME, "exporter");
+		exporterManifest.put(Constants.EXPORT_PACKAGE, "exporter");
+		exporterManifest.put(Constants.IMPORT_PACKAGE, "exporter");
+		Module moduleSubsExport = installDummyModule(exporterManifest, "exporter", container);
+		report = container.resolve(Arrays.asList(moduleSubsExport), true);
+		Assert.assertNull("Failed to resolve", report.getResolutionException());
+		List<BundleRequirement> reqs = moduleSubsExport.getCurrentRevision().getWiring().getRequirements(PackageNamespace.PACKAGE_NAMESPACE);
+		assertEquals("Wrong number of imports.", 0, reqs.size());
+
+		container.uninstall(moduleSubsExport);
+
+		exporterManifest = new HashMap<String, String>();
+		exporterManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		exporterManifest.put(Constants.BUNDLE_SYMBOLICNAME, "substitutableExporter");
+		exporterManifest.put(Constants.EXPORT_PACKAGE, "exporter");
+		exporterManifest.put(Constants.IMPORT_PACKAGE, "exporter; pickme=true");
+
+		moduleSubsExport = installDummyModule(exporterManifest, "substitutableExporter", container);
+
+		exporterManifest = new HashMap<String, String>();
+		exporterManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		exporterManifest.put(Constants.BUNDLE_SYMBOLICNAME, "exporter");
+		exporterManifest.put(Constants.EXPORT_PACKAGE, "exporter; pickme=true");
+
+		Module moduleExport = installDummyModule(exporterManifest, "exporter", container);
+		report = container.resolve(Arrays.asList(moduleSubsExport/* ,moduleExport */), true);
+		Assert.assertNull("Failed to resolve", report.getResolutionException());
+
+		List<BundleCapability> caps = moduleSubsExport.getCurrentRevision().getWiring().getCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
+		assertEquals("Wrong number of capabilities.", 0, caps.size());
+
+		reqs = moduleSubsExport.getCurrentRevision().getWiring().getRequirements(PackageNamespace.PACKAGE_NAMESPACE);
+		assertEquals("Wrong number of imports.", 1, reqs.size());
+
+		ModuleWiring wiring = moduleSubsExport.getCurrentRevision().getWiring();
+		List<ModuleWire> packageWires = wiring.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+		Assert.assertEquals("Unexpected number of wires", 1, packageWires.size());
+		Assert.assertEquals("Wrong exporter", packageWires.get(0).getProviderWiring().getRevision(), moduleExport.getCurrentRevision());
+	}
+
+	@Test
+	public void testR3() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+		// install the system.bundle
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
+		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+
+		//R3 bundle
+		Map<String, String> exporterManifest = new HashMap<String, String>();
+		exporterManifest = new HashMap<String, String>();
+		exporterManifest.put(Constants.BUNDLE_SYMBOLICNAME, "exporter");
+		exporterManifest.put(Constants.EXPORT_PACKAGE, "exporter; version=\"1.1\"");
+
+		Module moduleExport = installDummyModule(exporterManifest, "exporter", container);
+		report = container.resolve(Arrays.asList(moduleExport, moduleExport), true);
+		Assert.assertNull("Failed to resolve", report.getResolutionException());
+		List<BundleRequirement> reqs = moduleExport.getCurrentRevision().getWiring().getRequirements(PackageNamespace.PACKAGE_NAMESPACE);
+		assertEquals("Wrong number of imports.", 0, reqs.size());
+
+		//R3 bundle
+		exporterManifest.clear();
+		exporterManifest.put(Constants.BUNDLE_SYMBOLICNAME, "dynamicExporter");
+		exporterManifest.put(Constants.EXPORT_PACKAGE, "exporter; version=\"1.0\"");
+		exporterManifest.put(Constants.DYNAMICIMPORT_PACKAGE, "exporter");
+		Module moduleWithDynExport = installDummyModule(exporterManifest, "dynamicExporter", container);
+		report = container.resolve(Arrays.asList(moduleWithDynExport), true);
+		Assert.assertNull("Failed to resolve", report.getResolutionException());
+		reqs = moduleWithDynExport.getCurrentRevision().getWiring().getRequirements(PackageNamespace.PACKAGE_NAMESPACE);
+		assertEquals("Wrong number of imports.", 2, reqs.size());
+
+		report = container.resolve(Arrays.asList(moduleWithDynExport), true);
+		Assert.assertNull("Failed to resolve", report.getResolutionException());
+		reqs = moduleWithDynExport.getCurrentRevision().getWiring().getRequirements(PackageNamespace.PACKAGE_NAMESPACE);
+		assertEquals("Wrong number of imports.", 2, reqs.size());
+		ModuleWiring wiring = moduleWithDynExport.getCurrentRevision().getWiring();
+		List<ModuleWire> packageWires = wiring.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+		Assert.assertEquals("Unexpected number of wires", 1, packageWires.size());
+		Assert.assertEquals("Wrong exporter", packageWires.get(0).getProviderWiring().getRevision(), moduleExport.getCurrentRevision());
+	}
+
 	private static Map<String, String> getUTFManifest(String packageName) throws IOException, BundleException {
 		// using manifest class to force a split line right in the middle of a double byte UTF-8 character
 		ByteArrayOutputStream out = new ByteArrayOutputStream();

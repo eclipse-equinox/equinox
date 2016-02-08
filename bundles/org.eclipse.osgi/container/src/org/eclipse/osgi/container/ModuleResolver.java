@@ -254,7 +254,6 @@ final class ModuleResolver {
 						if (substituted == null) {
 							substituted = new ArrayList<String>();
 						}
-						substituted.add(packageName);
 						if (!substituted.contains(packageName)) {
 							substituted.add(packageName);
 						}
@@ -266,6 +265,12 @@ final class ModuleResolver {
 	}
 
 	private static void removeNonEffectiveRequirements(ListIterator<ModuleRequirement> iRequirements, List<ModuleWire> requiredWires) {
+
+		Set<ModuleRequirement> wireRequirements = new HashSet<ModuleRequirement>();
+		for (ModuleWire mw : requiredWires) {
+			wireRequirements.add(mw.getRequirement());
+		}
+
 		rewind(iRequirements);
 		while (iRequirements.hasNext()) {
 			ModuleRequirement requirement = iRequirements.next();
@@ -274,20 +279,15 @@ final class ModuleResolver {
 			if (effective != null && !Namespace.EFFECTIVE_RESOLVE.equals(effective)) {
 				iRequirements.remove();
 			} else {
-				// check the resolution directive
-				Object resolution = requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
-				if (Namespace.RESOLUTION_OPTIONAL.equals(resolution)) {
-					boolean found = false;
-					// need to check the wires to see if the optional requirement is resolved
-					wires: for (ModuleWire wire : requiredWires) {
-						if (wire.getRequirement().equals(requirement)) {
-							found = true;
-							break wires;
-						}
-					}
-					if (!found) {
-						// optional requirement is not resolved
+
+				if (!wireRequirements.contains(requirement)) {
+					if (!PackageNamespace.PACKAGE_NAMESPACE.equals(requirement.getNamespace())) {
 						iRequirements.remove();
+					} else {
+						Object resolution = requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
+						if (!PackageNamespace.RESOLUTION_DYNAMIC.equals(resolution)) {
+							iRequirements.remove();
+						}
 					}
 				}
 			}
