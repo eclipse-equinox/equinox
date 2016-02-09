@@ -185,12 +185,14 @@ public class Storage {
 		if (systemWiring == null) {
 			return;
 		}
+		Collection<ModuleRevision> fragments = new ArrayList<ModuleRevision>();
 		for (ModuleWire hostWire : systemWiring.getProvidedModuleWires(HostNamespace.HOST_NAMESPACE)) {
-			try {
-				getExtensionInstaller().addExtensionContent(hostWire.getRequirer(), null);
-			} catch (BundleException e) {
-				getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, e.getMessage(), e);
-			}
+			fragments.add(hostWire.getRequirer());
+		}
+		try {
+			getExtensionInstaller().addExtensionContent(fragments, null);
+		} catch (BundleException e) {
+			getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, e.getMessage(), e);
 		}
 	}
 

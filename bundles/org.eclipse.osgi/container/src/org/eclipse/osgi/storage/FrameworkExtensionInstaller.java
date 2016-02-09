@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,8 +16,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.util.ArrayMap;
@@ -73,15 +72,15 @@ public class FrameworkExtensionInstaller {
 		this.configuration = configuraiton;
 	}
 
-	public void addExtensionContent(final ModuleRevision revision, final Module systemModule) throws BundleException {
+	public void addExtensionContent(final Collection<ModuleRevision> revisions, final Module systemModule) throws BundleException {
 		if (System.getSecurityManager() == null) {
-			addExtensionContent0(revision, systemModule);
+			addExtensionContent0(revisions, systemModule);
 		} else {
 			try {
 				AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
 					@Override
 					public Void run() throws BundleException {
-						addExtensionContent0(revision, systemModule);
+						addExtensionContent0(revisions, systemModule);
 						return null;
 					}
 				});
@@ -91,26 +90,29 @@ public class FrameworkExtensionInstaller {
 		}
 	}
 
-	void addExtensionContent0(ModuleRevision revision, Module systemModule) throws BundleException {
+	void addExtensionContent0(Collection<ModuleRevision> revisions, Module systemModule) throws BundleException {
 		if (CL == null || ADD_FWK_URL_METHOD == null) {
 			return;
 		}
 
-		File[] files = getExtensionFiles(revision);
-		if (files == null) {
-			return;
-		}
-		for (int i = 0; i < files.length; i++) {
-			if (files[i] == null)
-				continue;
-			try {
-				callAddURLMethod(StorageUtil.encodeFileURL(files[i]));
-			} catch (InvocationTargetException e) {
-				throw new BundleException("Error adding extension content.", e); //$NON-NLS-1$
-			} catch (MalformedURLException e) {
-				throw new BundleException("Error adding extension content.", e); //$NON-NLS-1$
+		for (ModuleRevision revision : revisions) {
+			File[] files = getExtensionFiles(revision);
+			if (files == null) {
+				return;
+			}
+			for (int i = 0; i < files.length; i++) {
+				if (files[i] == null)
+					continue;
+				try {
+					callAddURLMethod(StorageUtil.encodeFileURL(files[i]));
+				} catch (InvocationTargetException e) {
+					throw new BundleException("Error adding extension content.", e); //$NON-NLS-1$
+				} catch (MalformedURLException e) {
+					throw new BundleException("Error adding extension content.", e); //$NON-NLS-1$
+				}
 			}
 		}
+
 		try {
 			// initialize the new urls
 			CL.loadClass("thisIsNotAClass"); //$NON-NLS-1$
@@ -119,8 +121,10 @@ public class FrameworkExtensionInstaller {
 		}
 		if (systemModule != null) {
 			BundleContext systemContext = systemModule.getBundle().getBundleContext();
-			if (systemContext != null) {
-				startExtensionActivator(revision, systemContext);
+			for (ModuleRevision revision : revisions) {
+				if (systemContext != null) {
+					startExtensionActivator(revision, systemContext);
+				}
 			}
 		}
 	}
@@ -215,7 +219,7 @@ public class FrameworkExtensionInstaller {
 			Class<?> activatorClass = Class.forName(activatorName);
 			activator = (BundleActivator) activatorClass.newInstance();
 			startActivator(activator, context, extensionRevision.getBundle());
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			BundleException eventException;
 			if (activator == null) {
 				eventException = new BundleException(Msg.BundleContextImpl_LoadActivatorError, BundleException.ACTIVATOR_ERROR, e);
