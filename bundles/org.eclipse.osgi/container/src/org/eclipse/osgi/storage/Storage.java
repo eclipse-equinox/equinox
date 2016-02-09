@@ -270,7 +270,12 @@ public class Storage {
 						File contentFile = getSystemContent();
 						newGeneration.setContent(contentFile, false);
 						moduleContainer.update(systemModule, newBuilder, newGeneration);
-						moduleContainer.refresh(Arrays.asList(systemModule));
+						moduleContainer.refresh(Collections.singleton(systemModule));
+					} else {
+						if (currentRevision.getWiring() == null) {
+							// must resolve before continuing to ensure extensions get attached
+							moduleContainer.resolve(Collections.singleton(systemModule), true);
+						}
 					}
 				} catch (BundleException e) {
 					throw new IllegalStateException("Could not create a builder for the system bundle.", e); //$NON-NLS-1$

@@ -127,7 +127,7 @@ public class SystemBundleLoader extends BundleLoader {
 			Module systemModule = getWiring().getRevision().getRevisions().getModule();
 			for (ModuleRevision fragment : fragments) {
 				try {
-					this.getGeneration().getBundleInfo().getStorage().getExtensionInstaller().addExtensionContent(fragment, getWiring().getRevision().getRevisions().getModule());
+					this.getGeneration().getBundleInfo().getStorage().getExtensionInstaller().addExtensionContent(fragment, systemModule);
 				} catch (BundleException e) {
 					systemModule.getContainer().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, systemModule, e);
 				}
