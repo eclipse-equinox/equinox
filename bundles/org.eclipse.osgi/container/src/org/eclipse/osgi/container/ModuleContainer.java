@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,9 +16,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import org.eclipse.osgi.container.Module.StartOptions;
-import org.eclipse.osgi.container.Module.State;
-import org.eclipse.osgi.container.Module.StopOptions;
+import org.eclipse.osgi.container.Module.*;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.ModuleDatabase.Sort;
@@ -746,6 +744,15 @@ public final class ModuleContainer implements DebugOptionsListener {
 			}
 		}
 
+		if (!result.isEmpty()) {
+			// must check that the wiring does not export the package
+			for (ModuleCapability capability : wiring.getModuleCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
+				if (dynamicPkgName.equals(capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
+					// the package is exported, must not allow dynamic import
+					return Collections.emptyList();
+				}
+			}
+		}
 		return result;
 	}
 

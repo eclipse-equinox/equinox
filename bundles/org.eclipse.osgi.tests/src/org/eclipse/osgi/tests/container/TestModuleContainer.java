@@ -2151,6 +2151,37 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
+	public void testDynamicWithExport() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install the system.bundle
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
+		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+
+		// install an importer
+		Map<String, String> optionalImporterManifest = new HashMap<String, String>();
+		optionalImporterManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		optionalImporterManifest.put(Constants.BUNDLE_SYMBOLICNAME, "importer");
+		optionalImporterManifest.put(Constants.EXPORT_PACKAGE, "exporter");
+		optionalImporterManifest.put(Constants.DYNAMICIMPORT_PACKAGE, "exporter");
+		Module optionalImporterModule = installDummyModule(optionalImporterManifest, "optionalImporter", container);
+
+		// unsatisfied optional and dynamic imports do not fail a resolve. 
+		report = container.resolve(Arrays.asList(optionalImporterModule), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+
+		//dynamic and optional imports are same. Optional import is not satisfied we should only see the dynamic import
+		List<BundleRequirement> importReqsList = optionalImporterModule.getCurrentRevision().getWiring().getRequirements(PackageNamespace.PACKAGE_NAMESPACE);
+		assertEquals("Wrong number of imports.", 1, importReqsList.size());
+		assertEquals("Import was not dynamic", PackageNamespace.RESOLUTION_DYNAMIC, importReqsList.get(0).getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE));
+
+		ModuleWire dynamicWire = container.resolveDynamic("exporter", optionalImporterModule.getCurrentRevision());
+		Assert.assertNull("Expected no dynamic wire.", dynamicWire);
+	}
+
+	@Test
 	public void testSubstitutableExport() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
