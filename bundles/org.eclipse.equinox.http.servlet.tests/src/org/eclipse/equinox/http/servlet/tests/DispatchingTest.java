@@ -12,17 +12,10 @@
 package org.eclipse.equinox.http.servlet.tests;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.servlet.DispatcherType;
@@ -37,70 +30,18 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.eclipse.equinox.http.servlet.context.ContextPathCustomizer;
-import org.eclipse.equinox.http.servlet.tests.ServletTest.TestFilter;
-import org.eclipse.equinox.http.servlet.tests.bundle.Activator;
-import org.eclipse.equinox.http.servlet.tests.bundle.BundleAdvisor;
-import org.eclipse.equinox.http.servlet.tests.bundle.BundleInstaller;
+import org.eclipse.equinox.http.servlet.testbase.BaseTest;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServlet;
-import org.eclipse.equinox.http.servlet.tests.util.ServletRequestAdvisor;
-
 import org.junit.Assert;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceFactory;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
-import junit.framework.TestCase;
-
-public class DispatchingTest extends TestCase {
-
-	@Override
-	public void setUp() throws Exception {
-		// Quiet logging for tests
-		System.setProperty("/.LEVEL", "OFF");
-		System.setProperty("org.eclipse.jetty.server.LEVEL", "OFF");
-		System.setProperty("org.eclipse.jetty.servlet.LEVEL", "OFF");
-
-		System.setProperty("org.osgi.service.http.port", "8090");
-		BundleContext bundleContext = getBundleContext();
-		installer = new BundleInstaller(ServletTest.TEST_BUNDLES_BINARY_DIRECTORY, bundleContext);
-		advisor = new BundleAdvisor(bundleContext);
-		String port = getPort();
-		String contextPath = getContextPath();
-		requestAdvisor = new ServletRequestAdvisor(port, contextPath);
-		startBundles();
-		stopJetty();
-		startJetty();
-	}
-
-	@Override
-	public void tearDown() throws Exception {
-		for (ServiceRegistration<? extends Object> serviceRegistration : registrations) {
-			serviceRegistration.unregister();
-		}
-		stopJetty();
-		stopBundles();
-		requestAdvisor = null;
-		advisor = null;
-		registrations.clear();
-		try {
-			installer.shutdown();
-		} finally {
-			installer = null;
-		}
-	}
+public class DispatchingTest extends BaseTest {
 
 	public void test_forwardDepth1() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
@@ -114,6 +55,7 @@ public class DispatchingTest extends TestCase {
 		};
 
 		Servlet servlet2 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -177,6 +119,7 @@ public class DispatchingTest extends TestCase {
 		};
 
 		Servlet servlet2 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -264,6 +207,7 @@ public class DispatchingTest extends TestCase {
 		};
 
 		Servlet servlet2 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -361,6 +305,7 @@ public class DispatchingTest extends TestCase {
 		};
 
 		Servlet servlet3 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -449,6 +394,7 @@ public class DispatchingTest extends TestCase {
 		};
 
 		Servlet servlet4 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -697,6 +643,7 @@ public class DispatchingTest extends TestCase {
 		};
 
 		Servlet servlet2 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -760,6 +707,7 @@ public class DispatchingTest extends TestCase {
 		};
 
 		Servlet servlet2 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -847,6 +795,7 @@ public class DispatchingTest extends TestCase {
 		};
 
 		Servlet servlet2 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -924,6 +873,7 @@ public class DispatchingTest extends TestCase {
 
 	public void test_includeBasic() throws Exception {
 		Servlet servlet8 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
@@ -938,6 +888,7 @@ public class DispatchingTest extends TestCase {
 		};
 
 		Servlet servlet8Target = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
@@ -970,6 +921,7 @@ public class DispatchingTest extends TestCase {
 		};
 
 		Servlet servlet2 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -1033,6 +985,7 @@ public class DispatchingTest extends TestCase {
 		};
 
 		Servlet servlet2 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -1120,6 +1073,7 @@ public class DispatchingTest extends TestCase {
 		};
 
 		Servlet servlet2 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -1217,6 +1171,7 @@ public class DispatchingTest extends TestCase {
 		};
 
 		Servlet servlet3 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -1305,6 +1260,7 @@ public class DispatchingTest extends TestCase {
 		};
 
 		Servlet servlet4 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -1553,6 +1509,7 @@ public class DispatchingTest extends TestCase {
 		};
 
 		Servlet servlet2 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -1616,6 +1573,7 @@ public class DispatchingTest extends TestCase {
 		};
 
 		Servlet servlet2 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -1703,6 +1661,7 @@ public class DispatchingTest extends TestCase {
 		};
 
 		Servlet servlet2 = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -1831,195 +1790,4 @@ public class DispatchingTest extends TestCase {
 		Assert.assertEquals("|/Bug479115/a", result);
 	}
 
-	private String doRequest(String action, Map<String, String> params) throws IOException {
-		return doRequestGetResponse(action, params).get("responseBody").get(0);
-	}
-
-	private Map<String, List<String>> doRequestGetResponse(String action, Map<String, String> params) throws IOException {
-		StringBuilder requestInfo = new StringBuilder(ServletTest.PROTOTYPE);
-		requestInfo.append(action);
-		if (!params.isEmpty()) {
-			boolean firstParam = true;
-			for (Map.Entry<String, String> param : params.entrySet()) {
-				if (firstParam) {
-					requestInfo.append('?');
-					firstParam = false;
-				} else {
-					requestInfo.append('&');
-				}
-				requestInfo.append(param.getKey());
-				requestInfo.append('=');
-				requestInfo.append(param.getValue());
-			}
-		}
-		return requestAdvisor.request(requestInfo.toString(), null);
-	}
-
-	private BundleContext getBundleContext() {
-		return Activator.getBundleContext();
-	}
-
-	private String getContextPath() {
-		return getJettyProperty("context.path", "");
-	}
-
-	private HttpService getHttpService() {
-		ServiceReference<HttpService> serviceReference = getBundleContext().getServiceReference(HttpService.class);
-		return getBundleContext().getService(serviceReference);
-	}
-
-	private String getJettyProperty(String key, String defaultValue) {
-		String qualifiedKey = ServletTest.JETTY_PROPERTY_PREFIX + key;
-		String value = getProperty(qualifiedKey);
-		if (value == null) {
-			value = defaultValue;
-		}
-		return value;
-	}
-
-	private String getPort() {
-		String defaultPort = getProperty(ServletTest.OSGI_HTTP_PORT_PROPERTY);
-		if (defaultPort == null) {
-			defaultPort = "80";
-		}
-		return getJettyProperty("port", defaultPort);
-	}
-
-	private String getProperty(String key) {
-		BundleContext bundleContext = getBundleContext();
-		String value = bundleContext.getProperty(key);
-		return value;
-	}
-
-	private Bundle installBundle(String bundle) throws BundleException {
-		return installer.installBundle(bundle);
-	}
-
-	private void startBundles() throws BundleException {
-		for (String bundle : ServletTest.BUNDLES) {
-			advisor.startBundle(bundle);
-		}
-	}
-
-	private void startJetty() throws BundleException {
-		advisor.startBundle(ServletTest.EQUINOX_JETTY_BUNDLE);
-	}
-
-	private void stopBundles() throws BundleException {
-		for (int i = ServletTest.BUNDLES.length - 1; i >= 0; i--) {
-			String bundle = ServletTest.BUNDLES[i];
-			advisor.stopBundle(bundle);
-		}
-	}
-
-	private void stopJetty() throws BundleException {
-		advisor.stopBundle(ServletTest.EQUINOX_JETTY_BUNDLE);
-	}
-
-	private void uninstallBundle(Bundle bundle) throws BundleException {
-		installer.uninstallBundle(bundle);
-	}
-
-	private void write(OutputStream outputStream, String string) throws IOException {
-		outputStream.write(string.getBytes(StandardCharsets.UTF_8));
-	}
-
-	private static final String EQUINOX_DS_BUNDLE = "org.eclipse.equinox.ds";
-	private static final String EQUINOX_JETTY_BUNDLE = "org.eclipse.equinox.http.jetty";
-	private static final String JETTY_PROPERTY_PREFIX = "org.eclipse.equinox.http.jetty.";
-	private static final String OSGI_HTTP_PORT_PROPERTY = "org.osgi.service.http.port";
-	private static final String STATUS_OK = "OK";
-	private static final String TEST_BUNDLES_BINARY_DIRECTORY = "/bundles_bin/";
-	private static final String TEST_BUNDLE_1 = "tb1";
-
-	private static final String[] BUNDLES = new String[] {
-		ServletTest.EQUINOX_DS_BUNDLE
-	};
-
-	private BundleInstaller installer;
-	private BundleAdvisor advisor;
-	private ServletRequestAdvisor requestAdvisor;
-	private final Collection<ServiceRegistration<? extends Object>> registrations = new ArrayList<ServiceRegistration<? extends Object>>();
-
-	static class TestServletContextHelperFactory implements ServiceFactory<ServletContextHelper> {
-		static class TestServletContextHelper extends ServletContextHelper {
-			public TestServletContextHelper(Bundle bundle) {
-				super(bundle);
-			}};
-		@Override
-		public ServletContextHelper getService(Bundle bundle, ServiceRegistration<ServletContextHelper> registration) {
-			return new TestServletContextHelper(bundle);
-		}
-
-		@Override
-		public void ungetService(Bundle bundle, ServiceRegistration<ServletContextHelper> registration,
-				ServletContextHelper service) {
-			// nothing
-		}
-
-	}
-
-	static class TestContextPathAdaptor extends ContextPathCustomizer {
-		private final String defaultFilter;
-		private final String contextPrefix;
-		private final String testName;
-
-		/**
-		 * @param defaultFilter
-		 * @param contextPrefix
-		 */
-		public TestContextPathAdaptor(String defaultFilter, String contextPrefix, String testName) {
-			super();
-			this.defaultFilter = defaultFilter;
-			this.contextPrefix = contextPrefix;
-			this.testName = testName;
-		}
-
-		@Override
-		public String getDefaultContextSelectFilter(ServiceReference<?> httpWhiteBoardService) {
-			if (testName.equals(httpWhiteBoardService.getProperty("servlet.init." + ServletTest.TEST_PATH_CUSTOMIZER_NAME))) {
-				return defaultFilter;
-			}
-			return null;
-		}
-
-		@Override
-		public String getContextPathPrefix(ServiceReference<ServletContextHelper> helper) {
-			if (testName.equals(helper.getProperty(ServletTest.TEST_PATH_CUSTOMIZER_NAME))) {
-				return contextPrefix;
-			}
-			return null;
-		}
-
-	}
-
-	static class ErrorServlet extends HttpServlet{
-		private static final long serialVersionUID = 1L;
-		private final String errorCode;
-
-		public ErrorServlet(String errorCode) {
-			super();
-			this.errorCode = errorCode;
-		}
-
-		@Override
-		protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-			throws ServletException ,IOException {
-
-			if (response.isCommitted()) {
-				System.out.println("Problem?");
-
-				return;
-			}
-
-			PrintWriter writer = response.getWriter();
-
-			String requestURI = (String)request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
-			Integer status = (Integer)request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
-
-			writer.print(errorCode + " : " + status + " : ERROR : " + requestURI);
-		}
-
-	};
 }

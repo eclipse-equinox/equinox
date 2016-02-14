@@ -25,6 +25,14 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-surefire-plugin</artifactId>
+        <configuration>
+          <testClass>org.eclipse.equinox.http.servlet.tests.*</testClass>
+        </configuration>
+      </plugin>
+
+      <plugin>
        <groupId>org.eclipse.tycho</groupId>
        <artifactId>target-platform-configuration</artifactId>
        <configuration>

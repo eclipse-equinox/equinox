@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.net.HttpRetryException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.servlet.Filter;
@@ -67,13 +65,9 @@ import javax.servlet.http.HttpSessionIdListener;
 import javax.servlet.http.HttpSessionListener;
 import javax.servlet.http.Part;
 
-import junit.framework.TestCase;
-
 import org.eclipse.equinox.http.servlet.ExtendedHttpService;
 import org.eclipse.equinox.http.servlet.context.ContextPathCustomizer;
-import org.eclipse.equinox.http.servlet.tests.bundle.Activator;
-import org.eclipse.equinox.http.servlet.tests.bundle.BundleAdvisor;
-import org.eclipse.equinox.http.servlet.tests.bundle.BundleInstaller;
+import org.eclipse.equinox.http.servlet.testbase.BaseTest;
 import org.eclipse.equinox.http.servlet.tests.util.BaseAsyncServlet;
 import org.eclipse.equinox.http.servlet.tests.util.BaseChangeSessionIdServlet;
 import org.eclipse.equinox.http.servlet.tests.util.BaseHttpContext;
@@ -85,15 +79,11 @@ import org.eclipse.equinox.http.servlet.tests.util.BaseServletContextListener;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServletRequestAttributeListener;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServletRequestListener;
 import org.eclipse.equinox.http.servlet.tests.util.BufferedServlet;
-import org.eclipse.equinox.http.servlet.tests.util.ServletRequestAdvisor;
-
 import org.junit.Assert;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.hooks.service.FindHook;
@@ -108,49 +98,14 @@ import org.osgi.service.http.runtime.dto.ServletContextDTO;
 import org.osgi.service.http.runtime.dto.ServletDTO;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
-public class ServletTest extends TestCase {
-
-	@Override
-	public void setUp() throws Exception {
-		// Quiet logging for tests
-		System.setProperty("/.LEVEL", "OFF");
-		System.setProperty("org.eclipse.jetty.server.LEVEL", "OFF");
-		System.setProperty("org.eclipse.jetty.servlet.LEVEL", "OFF");
-
-		System.setProperty("org.osgi.service.http.port", "8090");
-		BundleContext bundleContext = getBundleContext();
-		installer = new BundleInstaller(ServletTest.TEST_BUNDLES_BINARY_DIRECTORY, bundleContext);
-		advisor = new BundleAdvisor(bundleContext);
-		String port = getPort();
-		String contextPath = getContextPath();
-		requestAdvisor = new ServletRequestAdvisor(port, contextPath);
-		startBundles();
-		stopJetty();
-		startJetty();
-	}
-
-	@Override
-	public void tearDown() throws Exception {
-		for (ServiceRegistration<? extends Object> serviceRegistration : registrations) {
-			serviceRegistration.unregister();
-		}
-		stopJetty();
-		stopBundles();
-		requestAdvisor = null;
-		advisor = null;
-		registrations.clear();
-		try {
-			installer.shutdown();
-		} finally {
-			installer = null;
-		}
-	}
+@SuppressWarnings("restriction")
+public class ServletTest extends BaseTest {
 
 	public void test_ErrorPage1() throws Exception {
 		String expected = "403 ERROR :";
 		String actual = null;
 		Map<String, List<String>> response = Collections.emptyMap();
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			response = requestAdvisor.request("TestErrorPage1/a", null);
@@ -170,7 +125,7 @@ public class ServletTest extends TestCase {
 		String expected = "org.eclipse.equinox.http.servlet.tests.tb1.TestErrorPage2$MyException ERROR :";
 		String actual = null;
 		Map<String, List<String>> response = Collections.emptyMap();
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			response = requestAdvisor.request("TestErrorPage2/a", null);
@@ -190,7 +145,7 @@ public class ServletTest extends TestCase {
 		String expected = "400 ERROR :";
 		String actual = null;
 		Map<String, List<String>> response = Collections.emptyMap();
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			response = requestAdvisor.request("TestErrorPage3/a", null);
@@ -213,7 +168,7 @@ public class ServletTest extends TestCase {
 	public void test_ErrorPage4() throws Exception {
 		String actual = null;
 		Map<String, List<String>> response = Collections.emptyMap();
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			response = requestAdvisor.request("TestErrorPage4/a", null);
@@ -458,7 +413,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter1() throws Exception {
 		String expected = "bab";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestFilter1/bab");
@@ -471,7 +426,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter2() throws Exception {
 		String expected = "cbabc";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestFilter2/cbabc");
@@ -484,7 +439,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter3() throws Exception {
 		String expected = "cbdadbc";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestFilter3/cbdadbc");
@@ -497,7 +452,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter4() throws Exception {
 		String expected = "dcbabcd";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestFilter4/dcbabcd");
@@ -510,7 +465,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter5() throws Exception {
 		String expected = "bab";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("something/bab.TestFilter5");
@@ -523,7 +478,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter6() throws Exception {
 		String expected = "cbabc";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("something/cbabc.TestFilter6");
@@ -536,7 +491,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter7() throws Exception {
 		String expected = "cbdadbc";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("something/cbdadbc.TestFilter7");
@@ -549,7 +504,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter8() throws Exception {
 		String expected = "dcbabcd";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("something/dcbabcd.TestFilter8");
@@ -562,7 +517,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter9() throws Exception {
 		String expected = "bab";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestFilter9/bab");
@@ -575,7 +530,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter10() throws Exception {
 		String expected = "cbabc";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestFilter10/cbabc");
@@ -588,7 +543,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter11() throws Exception {
 		String expected = "cbdadbc";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestFilter11/cbdadbc");
@@ -601,7 +556,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter12() throws Exception {
 		String expected = "dcbabcd";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestFilter12/dcbabcd");
@@ -614,7 +569,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter13() throws Exception {
 		String expected = "bab";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("something/a.TestFilter13");
@@ -627,7 +582,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter14() throws Exception {
 		String expected = "cbabc";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("something/a.TestFilter14");
@@ -640,7 +595,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter15() throws Exception {
 		String expected = "cbdadbc";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("something/a.TestFilter15");
@@ -653,7 +608,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter16() throws Exception {
 		String expected = "dcbabcd";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("something/a.TestFilter16");
@@ -666,7 +621,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter17() throws Exception {
 		String expected = "ebcdadcbe";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestFilter17/foo/bar/baz");
@@ -679,7 +634,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter18() throws Exception {
 		String expected = "dbcacbd";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestFilter18/foo/bar/baz");
@@ -692,7 +647,7 @@ public class ServletTest extends TestCase {
 	public void test_Filter19() throws Exception {
 		String expected = "dfbcacbfd";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestFilter18/foo/bar/baz/with/path/info");
@@ -702,36 +657,6 @@ public class ServletTest extends TestCase {
 		Assert.assertEquals(expected, actual);
 	}
 
-	static class TestFilter implements Filter {
-		AtomicInteger called = new AtomicInteger(0);
-		@Override
-		public void init(FilterConfig filterConfig) throws ServletException {
-			// nothing
-		}
-
-		@Override
-		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-				throws IOException, ServletException {
-			called.incrementAndGet();
-			chain.doFilter(request, response);
-		}
-
-		@Override
-		public void destroy() {
-			// nothing
-		}
-		void clear() {
-			called.set(0);
-		}
-
-		public boolean getCalled() {
-			return called.get() >= 1;
-		}
-
-		public int getCount() {
-			return called.get();
-		}
-	}
 	public void test_Filter20() throws Exception {
 		// Make sure legacy filter registrations match against all controllers that are for legacy HttpContext
 		// Make sure legacy filter registrations match as if they are prefix matching with wildcards
@@ -806,6 +731,7 @@ public class ServletTest extends TestCase {
 		};
 
 		Servlet servlet2 = new BaseServlet("a") {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(
@@ -1158,7 +1084,7 @@ public class ServletTest extends TestCase {
 	}
 
 	public void test_Registration12() throws Exception {
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			BundleContext bundleContext = getBundleContext();
@@ -1489,7 +1415,7 @@ public class ServletTest extends TestCase {
 	public void test_Resource1() throws Exception {
 		String expected = "a";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestResource1/resource1.txt");
@@ -1502,7 +1428,7 @@ public class ServletTest extends TestCase {
 	public void test_Resource2() throws Exception {
 		String expected = "cbdadbc";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestResource2/resource1.txt");
@@ -1515,7 +1441,7 @@ public class ServletTest extends TestCase {
 	public void test_Resource3() throws Exception {
 		String expected = "a";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestResource3/resource1.txt");
@@ -1528,7 +1454,7 @@ public class ServletTest extends TestCase {
 	public void test_Resource4() throws Exception {
 		String expected = "dcbabcd";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestResource4/resource1.txt");
@@ -1541,7 +1467,7 @@ public class ServletTest extends TestCase {
 	public void test_Resource5() throws Exception {
 		String expected = "dcbabcd";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestResource5/resource1.txt");
@@ -1552,7 +1478,7 @@ public class ServletTest extends TestCase {
 	}
 
 	public void test_Runtime() throws Exception {
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 
@@ -1574,9 +1500,9 @@ public class ServletTest extends TestCase {
 	}
 
 	public void test_Servlet1() throws Exception {
-		String expected = ServletTest.STATUS_OK;
+		String expected = STATUS_OK;
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestServlet1");
@@ -1589,7 +1515,7 @@ public class ServletTest extends TestCase {
 	public void test_Servlet2() throws Exception {
 		String expected = "3";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestServlet2");
@@ -1601,9 +1527,9 @@ public class ServletTest extends TestCase {
 	}
 
 	public void test_Servlet3() throws Exception {
-		String expected = ServletTest.STATUS_OK;
+		String expected = STATUS_OK;
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestServlet3");
@@ -1614,9 +1540,9 @@ public class ServletTest extends TestCase {
 	}
 
 	public void test_Servlet4() throws Exception {
-		String expected = System.getProperty(ServletTest.JETTY_PROPERTY_PREFIX + "context.path", "");
+		String expected = System.getProperty(JETTY_PROPERTY_PREFIX + "context.path", "");
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestServlet4");
@@ -1629,7 +1555,7 @@ public class ServletTest extends TestCase {
 	public void test_Servlet5() throws Exception {
 		String expected = "Equinox Jetty-based Http Service";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestServlet5");
@@ -1642,7 +1568,7 @@ public class ServletTest extends TestCase {
 	public void test_Servlet6() throws Exception {
 		String expected = "a";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("something/a.TestServlet6");
@@ -1655,7 +1581,7 @@ public class ServletTest extends TestCase {
 	public void test_Servlet7() throws Exception {
 		String expected = "a";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestServlet7/a");
@@ -1668,7 +1594,7 @@ public class ServletTest extends TestCase {
 	public void test_Servlet9() throws Exception {
 		String expected = "Equinox Jetty-based Http Service";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestServlet9");
@@ -1681,7 +1607,7 @@ public class ServletTest extends TestCase {
 	public void test_Servlet10() throws Exception {
 		String expected = "a";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestServlet10");
@@ -1694,7 +1620,7 @@ public class ServletTest extends TestCase {
 	public void test_Servlet11() throws Exception {
 		String expected = "a";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestServlet11");
@@ -1706,6 +1632,7 @@ public class ServletTest extends TestCase {
 
 	public void test_Servlet12() throws Exception {
 		Servlet sA = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
@@ -1717,6 +1644,7 @@ public class ServletTest extends TestCase {
 		};
 
 		Servlet sB = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
@@ -1767,6 +1695,7 @@ public class ServletTest extends TestCase {
 
 	public void test_ServletExactMatchPrecidence() throws Exception {
 		Servlet sA = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
@@ -1778,6 +1707,7 @@ public class ServletTest extends TestCase {
 		};
 
 		Servlet sB = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
@@ -1905,7 +1835,7 @@ public class ServletTest extends TestCase {
 	public void test_ServletContext1() throws Exception {
 		String expected = "/org/eclipse/equinox/http/servlet/tests/tb1/resource1.txt";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestServletContext1");
@@ -1919,7 +1849,7 @@ public class ServletTest extends TestCase {
 	public void test_ServletContext1_2() throws Exception {
 		String expected = "/org/eclipse/equinox/http/servlet/tests/tb1/resource1.txt";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestServletContext1");
@@ -2225,7 +2155,7 @@ public class ServletTest extends TestCase {
 	public void test_ServletContextHelper10() throws Exception {
 		String expected = "cac";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("a/TestServletContextHelper10/a");
@@ -2774,7 +2704,7 @@ public class ServletTest extends TestCase {
 	public void test_WBServlet1() throws Exception {
 		String expected = "a";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("WBServlet1/a");
@@ -2787,7 +2717,7 @@ public class ServletTest extends TestCase {
 	public void test_WBServlet2() throws Exception {
 		String expected = "bab";
 		String actual;
-		Bundle bundle = installBundle(ServletTest.TEST_BUNDLE_1);
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("WBServlet2/a");
@@ -2818,14 +2748,6 @@ public class ServletTest extends TestCase {
 		}
 	}
 
-	protected static final String PROTOTYPE = "prototype/";
-	protected static final String CONFIGURE = "configure";
-	protected static final String UNREGISTER = "unregister";
-	protected static final String ERROR = "error";
-	protected static final String STATUS_PARAM = "servlet.init.status";
-	protected static final String TEST_PROTOTYPE_NAME = "test.prototype.name";
-	protected static final String TEST_PATH_CUSTOMIZER_NAME = "test.path.customizer.name";
-	protected static final String TEST_ERROR_CODE = "test.error.code";
 	public void testWBServletChangeInitParams() throws Exception{
 			String actual;
 
@@ -3046,6 +2968,8 @@ public class ServletTest extends TestCase {
 			}
 		};
 		HttpServlet testServlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
@@ -3062,191 +2986,5 @@ public class ServletTest extends TestCase {
 		Assert.assertEquals(expected, actual);
 	}
 
-	private String doRequest(String action, Map<String, String> params) throws IOException {
-		return doRequestGetResponse(action, params).get("responseBody").get(0);
-	}
 
-	private Map<String, List<String>> doRequestGetResponse(String action, Map<String, String> params) throws IOException {
-		StringBuilder requestInfo = new StringBuilder(PROTOTYPE);
-		requestInfo.append(action);
-		if (!params.isEmpty()) {
-			boolean firstParam = true;
-			for (Map.Entry<String, String> param : params.entrySet()) {
-				if (firstParam) {
-					requestInfo.append('?');
-					firstParam = false;
-				} else {
-					requestInfo.append('&');
-				}
-				requestInfo.append(param.getKey());
-				requestInfo.append('=');
-				requestInfo.append(param.getValue());
-			}
-		}
-		return requestAdvisor.request(requestInfo.toString(), null);
-	}
-
-	private BundleContext getBundleContext() {
-		return Activator.getBundleContext();
-	}
-
-	private String getContextPath() {
-		return getJettyProperty("context.path", "");
-	}
-
-	private HttpService getHttpService() {
-		ServiceReference<HttpService> serviceReference = getBundleContext().getServiceReference(HttpService.class);
-		return getBundleContext().getService(serviceReference);
-	}
-
-	private String getJettyProperty(String key, String defaultValue) {
-		String qualifiedKey = ServletTest.JETTY_PROPERTY_PREFIX + key;
-		String value = getProperty(qualifiedKey);
-		if (value == null) {
-			value = defaultValue;
-		}
-		return value;
-	}
-
-	private String getPort() {
-		String defaultPort = getProperty(ServletTest.OSGI_HTTP_PORT_PROPERTY);
-		if (defaultPort == null) {
-			defaultPort = "80";
-		}
-		return getJettyProperty("port", defaultPort);
-	}
-
-	private String getProperty(String key) {
-		BundleContext bundleContext = getBundleContext();
-		String value = bundleContext.getProperty(key);
-		return value;
-	}
-
-	private Bundle installBundle(String bundle) throws BundleException {
-		return installer.installBundle(bundle);
-	}
-
-	private void startBundles() throws BundleException {
-		for (String bundle : ServletTest.BUNDLES) {
-			advisor.startBundle(bundle);
-		}
-	}
-
-	private void startJetty() throws BundleException {
-		advisor.startBundle(ServletTest.EQUINOX_JETTY_BUNDLE);
-	}
-
-	private void stopBundles() throws BundleException {
-		for (int i = ServletTest.BUNDLES.length - 1; i >= 0; i--) {
-			String bundle = ServletTest.BUNDLES[i];
-			advisor.stopBundle(bundle);
-		}
-	}
-
-	private void stopJetty() throws BundleException {
-		advisor.stopBundle(ServletTest.EQUINOX_JETTY_BUNDLE);
-	}
-
-	private void uninstallBundle(Bundle bundle) throws BundleException {
-		installer.uninstallBundle(bundle);
-	}
-
-	protected static final String EQUINOX_DS_BUNDLE = "org.eclipse.equinox.ds";
-	protected static final String EQUINOX_JETTY_BUNDLE = "org.eclipse.equinox.http.jetty";
-	protected static final String JETTY_PROPERTY_PREFIX = "org.eclipse.equinox.http.jetty.";
-	protected static final String OSGI_HTTP_PORT_PROPERTY = "org.osgi.service.http.port";
-	protected static final String STATUS_OK = "OK";
-	protected static final String TEST_BUNDLES_BINARY_DIRECTORY = "/bundles_bin/";
-	protected static final String TEST_BUNDLE_1 = "tb1";
-
-	protected static final String[] BUNDLES = new String[] {
-		ServletTest.EQUINOX_DS_BUNDLE
-	};
-
-	private BundleInstaller installer;
-	private BundleAdvisor advisor;
-	private ServletRequestAdvisor requestAdvisor;
-	private final Collection<ServiceRegistration<? extends Object>> registrations = new ArrayList<ServiceRegistration<? extends Object>>();
-
-	static class TestServletContextHelperFactory implements ServiceFactory<ServletContextHelper> {
-		static class TestServletContextHelper extends ServletContextHelper {
-			public TestServletContextHelper(Bundle bundle) {
-				super(bundle);
-			}};
-		@Override
-		public ServletContextHelper getService(Bundle bundle, ServiceRegistration<ServletContextHelper> registration) {
-			return new TestServletContextHelper(bundle);
-		}
-
-		@Override
-		public void ungetService(Bundle bundle, ServiceRegistration<ServletContextHelper> registration,
-				ServletContextHelper service) {
-			// nothing
-		}
-
-	}
-
-	static class TestContextPathAdaptor extends ContextPathCustomizer {
-		private final String defaultFilter;
-		private final String contextPrefix;
-		private final String testName;
-
-		/**
-		 * @param defaultFilter
-		 * @param contextPrefix
-		 */
-		public TestContextPathAdaptor(String defaultFilter, String contextPrefix, String testName) {
-			super();
-			this.defaultFilter = defaultFilter;
-			this.contextPrefix = contextPrefix;
-			this.testName = testName;
-		}
-
-		@Override
-		public String getDefaultContextSelectFilter(ServiceReference<?> httpWhiteBoardService) {
-			if (testName.equals(httpWhiteBoardService.getProperty("servlet.init." + TEST_PATH_CUSTOMIZER_NAME))) {
-				return defaultFilter;
-			}
-			return null;
-		}
-
-		@Override
-		public String getContextPathPrefix(ServiceReference<ServletContextHelper> helper) {
-			if (testName.equals(helper.getProperty(TEST_PATH_CUSTOMIZER_NAME))) {
-				return contextPrefix;
-			}
-			return null;
-		}
-
-	}
-
-	static class ErrorServlet extends HttpServlet{
-		private static final long serialVersionUID = 1L;
-		private final String errorCode;
-
-		public ErrorServlet(String errorCode) {
-			super();
-			this.errorCode = errorCode;
-		}
-
-		@Override
-		protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-			throws ServletException ,IOException {
-
-			if (response.isCommitted()) {
-				System.out.println("Problem?");
-
-				return;
-			}
-
-			PrintWriter writer = response.getWriter();
-
-			String requestURI = (String)request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
-			Integer status = (Integer)request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
-
-			writer.print(errorCode + " : " + status + " : ERROR : " + requestURI);
-		}
-
-	};
 }
