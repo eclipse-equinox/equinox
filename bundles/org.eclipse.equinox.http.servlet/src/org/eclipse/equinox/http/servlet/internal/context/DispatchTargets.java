@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2015 Raymond Augé and others.
+ * Copyright (c) 2014, 2016 Raymond Augé and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,41 +65,31 @@ public class DispatchTargets {
 			String path, DispatcherType dispatcherType)
 		throws ServletException, IOException {
 
-		HttpServletRequestWrapperImpl httpRuntimeRequest = HttpServletRequestWrapperImpl.findHttpRuntimeRequest(request);
-		boolean pushedState = false;
+		HttpServletRequestWrapperImpl requestWrapper = HttpServletRequestWrapperImpl.findHttpRuntimeRequest(request);
+		HttpServletResponse responseWrapper = HttpServletResponseWrapperImpl.findHttpRuntimeResponse(response);
 
 		try {
-			if (httpRuntimeRequest == null) {
-				httpRuntimeRequest = new HttpServletRequestWrapperImpl(request, this, dispatcherType);
-				request = httpRuntimeRequest;
-				response = new HttpServletResponseWrapperImpl(response);
+			if (requestWrapper == null) {
+				requestWrapper = new HttpServletRequestWrapperImpl(request);
+				request = requestWrapper;
 			}
-			else {
-				httpRuntimeRequest.push(this, dispatcherType);
-				pushedState = true;
+
+			if (responseWrapper == null) {
+				responseWrapper = new HttpServletResponseWrapperImpl(response);
+				response = responseWrapper;
 			}
+
+			requestWrapper.push(this, dispatcherType);
 
 			ResponseStateHandler responseStateHandler = new ResponseStateHandler(
 				request, response, this, dispatcherType);
 
 			responseStateHandler.processRequest();
 
-			if ((dispatcherType == DispatcherType.FORWARD) &&
-				!response.isCommitted()) {
-
-				response.flushBuffer();
-				response.getWriter().close();
-			}
-
 			return true;
 		}
 		finally {
-			if (pushedState) {
-				httpRuntimeRequest.pop();
-			}
-			else {
-				httpRuntimeRequest.destroy();
-			}
+			requestWrapper.pop();
 		}
 	}
 

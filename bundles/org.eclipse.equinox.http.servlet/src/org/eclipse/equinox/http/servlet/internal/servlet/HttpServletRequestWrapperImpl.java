@@ -132,6 +132,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	private final Deque<State> state = new ArrayDeque<State>();
 
 	private final HttpServletRequest request;
+	private final Map<String, Object> attributes;
 
 	public static HttpServletRequestWrapperImpl findHttpRuntimeRequest(
 		HttpServletRequest request) {
@@ -147,7 +148,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		return null;
 	}
 
-	public HttpServletRequestWrapperImpl(HttpServletRequest request, DispatchTargets dispatchTargets, DispatcherType dispatcherType) {
+	public HttpServletRequestWrapperImpl(HttpServletRequest request) {
 		super(request);
 		this.request = request;
 
@@ -158,7 +159,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 			attributes.put(name, request.getAttribute(name));
 		}
 
-		this.getState().push(new State(dispatchTargets, dispatcherType, attributes, request.getParameterMap(), request.getQueryString()));
+		this.attributes = attributes;
 	}
 
 	public void destroy() {
@@ -368,8 +369,13 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	}
 
 	public synchronized void push(DispatchTargets dispatchTargets, DispatcherType dispatcherType) {
-		State previous = getState().peek();
-		getState().push(new State(dispatchTargets, dispatcherType, previous.getAttributes(), previous.getParameterMap(), previous.getQueryString()));
+		Deque<State> curState = getState();
+		State previous = curState.peek();
+		if (previous == null) {
+			curState.push(new State(dispatchTargets, dispatcherType, attributes, request.getParameterMap(), request.getQueryString()));
+			return;
+		}
+		curState.push(new State(dispatchTargets, dispatcherType, previous.getAttributes(), previous.getParameterMap(), previous.getQueryString()));
 	}
 
 	public void removeAttribute(String name) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2016 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,8 +36,6 @@ public class RequestDispatcherAdaptor implements RequestDispatcher {
 
 	public void forward(ServletRequest request, ServletResponse response)
 		throws IOException, ServletException {
-
-		response.resetBuffer();
 
 		dispatchTargets.doDispatch(
 			(HttpServletRequest)request, (HttpServletResponse)response,
