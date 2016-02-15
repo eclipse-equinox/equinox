@@ -12,6 +12,7 @@ package org.eclipse.osgi.tests.container;
 
 import static java.util.jar.Attributes.Name.MANIFEST_VERSION;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.*;
 import java.util.*;
@@ -2363,6 +2364,101 @@ public class TestModuleContainer extends AbstractTest {
 			if (!fragmentRevisions.remove(hostWire.getRequirer())) {
 				Assert.fail("Unexpected fragment revision: " + hostWire.getRequirer());
 			}
+		}
+	}
+
+	@Test
+	public void testStartOnResolve() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install the system.bundle
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
+		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+		systemBundle.start();
+
+		// install a bunch of modules
+		Map<String, String> manifest = new HashMap<String, String>();
+		List<Module> modules = new ArrayList<Module>();
+		for (int i = 0; i < 5; i++) {
+			manifest.clear();
+			manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+			manifest.put(Constants.BUNDLE_SYMBOLICNAME, "module." + i);
+			manifest.put(Constants.IMPORT_PACKAGE, "export");
+			Module module = installDummyModule(manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), container);
+			try {
+				module.start();
+				fail("expected a bundle exception.");
+			} catch (BundleException e) {
+				// do nothing
+			}
+			modules.add(module);
+		}
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "exporter");
+		manifest.put(Constants.EXPORT_PACKAGE, "export");
+		installDummyModule(manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), container);
+
+		report = container.resolve(Collections.<Module> emptySet(), false);
+		Assert.assertNull("Found a error.", report.getResolutionException());
+
+		for (Module module : modules) {
+			Assert.assertEquals("Wrong state.", State.ACTIVE, module.getState());
+		}
+	}
+
+	@Test
+	public void testResolveDeadlock() throws BundleException, IOException, InterruptedException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install the system.bundle
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
+		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+		systemBundle.start();
+
+		// install a bunch of modules
+		Map<String, String> manifest = new HashMap<String, String>();
+		List<Module> modules = new ArrayList<Module>();
+		for (int i = 0; i < 5; i++) {
+			manifest.clear();
+			manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+			manifest.put(Constants.BUNDLE_SYMBOLICNAME, "module." + i);
+			modules.add(installDummyModule(manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), container));
+		}
+		adaptor.setSlowdownEvents(true);
+		final ConcurrentLinkedQueue<BundleException> startErrors = new ConcurrentLinkedQueue<BundleException>();
+		final ExecutorService executor = Executors.newFixedThreadPool(10);
+		try {
+			for (final Module module : modules) {
+
+				executor.execute(new Runnable() {
+
+					@Override
+					public void run() {
+						try {
+							module.start();
+						} catch (BundleException e) {
+							startErrors.offer(e);
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		} finally {
+			executor.shutdown();
+			executor.awaitTermination(5, TimeUnit.MINUTES);
+			systemBundle.stop();
+		}
+
+		Assert.assertNull("Found a error.", startErrors.poll());
+		List<DummyContainerEvent> events = adaptor.getDatabase().getContainerEvents();
+		for (DummyContainerEvent event : events) {
+			Assert.assertNotEquals("Found an error.", ContainerEvent.ERROR, event.type);
 		}
 	}
 

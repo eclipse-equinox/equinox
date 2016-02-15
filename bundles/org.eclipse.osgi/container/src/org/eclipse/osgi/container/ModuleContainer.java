@@ -623,9 +623,17 @@ public final class ModuleContainer implements DebugOptionsListener {
 				// lock.
 				for (Module module : modulesResolved) {
 					try {
+						// avoid grabbing the lock if the timestamp has changed
+						if (timestamp != moduleDatabase.getRevisionsTimestamp()) {
+							return false; // need to try again
+						}
 						module.lockStateChange(ModuleEvent.RESOLVED);
 						modulesLocked.add(module);
 					} catch (BundleException e) {
+						// before throwing an exception here, see if the timestamp has changed
+						if (timestamp != moduleDatabase.getRevisionsTimestamp()) {
+							return false; // need to try again
+						}
 						// TODO throw some appropriate exception
 						throw new IllegalStateException(Msg.ModuleContainer_StateLockError, e);
 					}
@@ -693,34 +701,37 @@ public final class ModuleContainer implements DebugOptionsListener {
 		Set<Module> triggerSet = restartTriggers ? new HashSet<Module>(triggers) : Collections.<Module> emptySet();
 		if (restartTriggers) {
 			for (Module module : triggers) {
-				try {
-					if (module.getId() != 0 && Module.RESOLVED_SET.contains(module.getState())) {
-						secureAction.start(module, StartOptions.TRANSIENT);
-					}
-				} catch (BundleException e) {
-					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
-				} catch (IllegalStateException e) {
-					// been uninstalled
-					continue;
+				if (module.getId() != 0 && Module.RESOLVED_SET.contains(module.getState())) {
+					start(module, StartOptions.TRANSIENT);
 				}
 			}
 		}
 		// This is questionable behavior according to the spec but this was the way equinox previously behaved
 		// Need to auto-start any persistently started bundles that got resolved
 		for (Module module : modulesLocked) {
-			if (module.inStartResolve() || module.getId() == 0 || triggerSet.contains(module)) {
-				continue;
-			}
-			try {
-				secureAction.start(module, StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
-			} catch (BundleException e) {
-				adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
-			} catch (IllegalStateException e) {
-				// been uninstalled
-				continue;
+			if (!module.inStartResolve() && module.getId() != 0 && !triggerSet.contains(module)) {
+				start(module, StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
 			}
 		}
 		return true;
+	}
+
+	private void start(Module module, StartOptions... options) {
+		try {
+			secureAction.start(module, options);
+		} catch (BundleException e) {
+			if (e.getType() == BundleException.STATECHANGE_ERROR) {
+				if (Module.ACTIVE_SET.contains(module.getState())) {
+					// There is still a timing issue here;
+					// but at least try to detect that another thread is starting the module
+					return;
+				}
+			}
+			adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
+		} catch (IllegalStateException e) {
+			// been uninstalled
+			return;
+		}
 	}
 
 	private List<DynamicModuleRequirement> getDynamicRequirements(String dynamicPkgName, ModuleRevision revision) {

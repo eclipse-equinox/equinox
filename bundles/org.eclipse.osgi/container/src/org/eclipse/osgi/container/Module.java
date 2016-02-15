@@ -13,6 +13,7 @@ package org.eclipse.osgi.container;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.internal.container.EquinoxReentrantLock;
 import org.eclipse.osgi.internal.debug.Debug;
@@ -159,7 +160,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	final EquinoxReentrantLock stateChangeLock = new EquinoxReentrantLock();
 	private final EnumSet<ModuleEvent> stateTransitionEvents = EnumSet.noneOf(ModuleEvent.class);
 	private final EnumSet<Settings> settings;
-	private final ThreadLocal<Boolean> inStartResolve = new ThreadLocal<Boolean>();
+	private final AtomicInteger inStartResolve = new AtomicInteger(0);
 	private volatile State state = State.INSTALLED;
 	private volatile int startlevel;
 	private volatile long lastModified;
@@ -401,18 +402,22 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			if (State.ACTIVE.equals(getState()))
 				return;
 			if (getState().equals(State.INSTALLED)) {
-				// must unlock to avoid out of order locks when multiple unresolved
-				// bundles are started at the same time from different threads
-				unlockStateChange(ModuleEvent.STARTED);
-				lockedStarted = false;
 				ResolutionReport report;
+				inStartResolve.incrementAndGet();
 				try {
-					inStartResolve.set(Boolean.TRUE);
-					report = getRevisions().getContainer().resolve(Arrays.asList(this), true);
+					// must unlock to avoid out of order locks when multiple unresolved
+					// bundles are started at the same time from different threads
+					unlockStateChange(ModuleEvent.STARTED);
+					lockedStarted = false;
+					try {
+
+						report = getRevisions().getContainer().resolve(Arrays.asList(this), true);
+					} finally {
+						lockStateChange(ModuleEvent.STARTED);
+						lockedStarted = true;
+					}
 				} finally {
-					inStartResolve.set(Boolean.FALSE);
-					lockStateChange(ModuleEvent.STARTED);
-					lockedStarted = true;
+					inStartResolve.decrementAndGet();
 				}
 				// need to check valid again in case someone uninstalled the bundle
 				checkValid();
@@ -440,7 +445,6 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				event = ModuleEvent.STOPPED;
 			}
 		} finally {
-			inStartResolve.set(Boolean.FALSE);
 			if (lockedStarted) {
 				unlockStateChange(ModuleEvent.STARTED);
 			}
@@ -689,10 +693,6 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	final boolean inStartResolve() {
-		Boolean value = inStartResolve.get();
-		if (value == null) {
-			return false;
-		}
-		return value.booleanValue();
+		return inStartResolve.get() > 0;
 	}
 }

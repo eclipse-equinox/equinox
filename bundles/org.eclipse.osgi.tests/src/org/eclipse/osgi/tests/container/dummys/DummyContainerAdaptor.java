@@ -13,6 +13,7 @@ package org.eclipse.osgi.tests.container.dummys;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.service.debug.DebugOptions;
@@ -22,6 +23,7 @@ import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 
 public class DummyContainerAdaptor extends ModuleContainerAdaptor {
+	private AtomicBoolean slowdownEvents = new AtomicBoolean(false);
 	private final ModuleCollisionHook collisionHook;
 	private final Map<String, String> configuration;
 	private final DummyModuleDatabase moduleDatabase;
@@ -86,8 +88,20 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 		return moduleDatabase;
 	}
 
+	public void setSlowdownEvents(boolean slowdown) {
+		slowdownEvents.set(slowdown);
+	}
+
 	@Override
 	public void publishModuleEvent(ModuleEvent type, Module module, Module origin) {
+		if (type == ModuleEvent.STARTING && slowdownEvents.get()) {
+			try {
+				Thread.sleep(6000);
+			} catch (InterruptedException e) {
+				// ignore
+				Thread.currentThread().interrupt();
+			}
+		}
 		moduleDatabase.addEvent(new DummyModuleEvent(module, type, module.getState()));
 	}
 
