@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2016 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
- *     Raymond Augé <raymond.auge@liferay.com> - Bug 436698
+ *     Raymond Augé - bug fixes and enhancements
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal.servlet;
 
@@ -17,6 +17,9 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import org.eclipse.equinox.http.servlet.internal.Activator;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
+import org.eclipse.equinox.http.servlet.internal.context.DispatchTargets;
+import org.eclipse.equinox.http.servlet.internal.registration.EndpointRegistration;
+import org.eclipse.equinox.http.servlet.internal.registration.ServletRegistration;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
 
 /**
@@ -28,10 +31,14 @@ import org.eclipse.equinox.http.servlet.internal.util.Const;
 public class ProxyServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 4117456123807468871L;
+	protected static final String MULTIPART_SERVLET_NAME_KEY = "multipart.servlet.name"; //$NON-NLS-1$
 	private HttpServiceRuntimeImpl httpServiceRuntimeImpl;
+	private String multipartServletName;
 
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
+
+		multipartServletName = getInitParameter(MULTIPART_SERVLET_NAME_KEY);
 
 		Activator.addProxyServlet(this);
 	}
@@ -67,19 +74,43 @@ public class ProxyServlet extends HttpServlet {
 			alias = Const.SLASH;
 		}
 
-		if (httpServiceRuntimeImpl.doDispatch(request, response, alias)) {
+		DispatchTargets dispatchTargets = httpServiceRuntimeImpl.getDispatchTargets(alias, null);
+
+		if ((dispatchTargets != null) && (multipartServletName != null)) {
+			EndpointRegistration<?> endpointRegistration = dispatchTargets.getServletRegistration();
+
+			if (endpointRegistration instanceof ServletRegistration) {
+				ServletRegistration servletRegistration = (ServletRegistration)endpointRegistration;
+
+				if (servletRegistration.getD().multipartSupported) {
+					RequestDispatcher multipartDispatcher = getServletContext().getNamedDispatcher(multipartServletName);
+
+					if (multipartDispatcher != null) {
+						request.setAttribute(DispatchTargets.class.getName(), dispatchTargets);
+
+						multipartDispatcher.forward(request, response);
+
+						return;
+					}
+				}
+			}
+		}
+
+		if (dispatchTargets != null) {
+			dispatchTargets.doDispatch(
+				request, response, alias, request.getDispatcherType());
+
 			return;
 		}
 
 		response.sendError(
-			HttpServletResponse.SC_NOT_FOUND, "ProxyServlet: " + alias);
+			HttpServletResponse.SC_NOT_FOUND, "ProxyServlet: " + alias); //$NON-NLS-1$
 	}
 
 	private void checkRuntime() {
 		if (httpServiceRuntimeImpl == null) {
 			throw new IllegalStateException(
-				"Proxy servlet not properly initialized. " +
-					"httpServiceRuntimeImpl is null");
+				"Proxy servlet not properly initialized. httpServiceRuntimeImpl is null"); //$NON-NLS-1$
 		}
 	}
 

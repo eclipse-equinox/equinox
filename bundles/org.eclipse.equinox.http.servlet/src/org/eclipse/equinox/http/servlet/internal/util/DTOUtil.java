@@ -1,18 +1,19 @@
 /*******************************************************************************
- * Copyright (c) Feb 23, 2015 Raymond Augé and others.
+ * Copyright (c) 2015, 2016 Raymond Augé and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Raymond Augé <raymond.auge@liferay.com> - Bug 460639
+ *     Raymond Augé - bug fixes and enhancements
  ******************************************************************************/
 
 package org.eclipse.equinox.http.servlet.internal.util;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import org.eclipse.equinox.http.servlet.internal.dto.ExtendedServletDTO;
 import org.osgi.dto.DTO;
 import org.osgi.service.http.runtime.dto.*;
 
@@ -146,11 +147,12 @@ public class DTOUtil {
 		return clone;
 	}
 
-	public static ServletDTO clone(ServletDTO original) {
-		ServletDTO clone = new ServletDTO();
+	public static ExtendedServletDTO clone(ExtendedServletDTO original) {
+		ExtendedServletDTO clone = new ExtendedServletDTO();
 
 		clone.asyncSupported = copy(original.asyncSupported);
 		clone.initParams = copyStringMap(original.initParams);
+		clone.multipartSupported = copy(original.multipartSupported);
 		clone.name = copy(original.name);
 		clone.patterns = copy(original.patterns);
 		clone.serviceId = copy(original.serviceId);

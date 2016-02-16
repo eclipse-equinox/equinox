@@ -4,15 +4,50 @@
         <filter comment="Use package version" id="1209008130">
             <message_arguments>
                 <message_argument value="1.2"/>
-                <message_argument value="3.2"/>
+                <message_argument value="3.3"/>
                 <message_argument value="HTTP_MAXTHREADS"/>
             </message_arguments>
         </filter>
         <filter comment="Use package version" id="1209008130">
             <message_arguments>
                 <message_argument value="1.2"/>
-                <message_argument value="3.2"/>
+                <message_argument value="3.3"/>
                 <message_argument value="HTTP_MINTHREADS"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.3"/>
+                <message_argument value="MULTIPART_FILESIZETHRESHOLD"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.3"/>
+                <message_argument value="MULTIPART_LOCATION"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.3"/>
+                <message_argument value="MULTIPART_MAXFILESIZE"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.3"/>
+                <message_argument value="MULTIPART_MAXREQUESTSIZE"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.3"/>
+                <message_argument value="PROPERTY_PREFIX"/>
             </message_arguments>
         </filter>
     </resource>

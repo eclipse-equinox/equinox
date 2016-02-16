@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2015 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Raymond Augé - bug fixes and enhancements
  *******************************************************************************/
 package org.eclipse.equinox.http.jetty;
 
@@ -67,6 +68,30 @@ public interface JettyConstants {
 	 * @since 1.2
 	 */
 	public static final String HTTP_MINTHREADS = "http.minThreads"; //$NON-NLS-1$
+
+	/**
+	 * name="multipart.fileSizeThreshold" type="Integer" (default: 8 -- size threshold after which the file will be written to disk)
+	 * @since 1.3
+	 */
+	public static final String MULTIPART_FILESIZETHRESHOLD = "multipart.fileSizeThreshold"; //$NON-NLS-1$
+
+	/**
+	 * name="multipart.location" type="String" (default: "" -- directory location where files will be stored)
+	 * @since 1.3
+	 */
+	public static final String MULTIPART_LOCATION = "multipart.location"; //$NON-NLS-1$
+
+	/**
+	 * name="multipart.maxFileSize" type="Long" (default: -1L -- maximum size allowed for uploaded files)
+	 * @since 1.3
+	 */
+	public static final String MULTIPART_MAXFILESIZE = "multipart.maxFileSize"; //$NON-NLS-1$
+
+	/**
+	 * name="multipart.maxRequestSize" type="Long" (default: -1L -- maximum size allowed for multipart/form-data requests)
+	 * @since 1.3
+	 */
+	public static final String MULTIPART_MAXREQUESTSIZE = "multipart.maxRequestSize"; //$NON-NLS-1$
 
 	/**
 	 * name="ssl.keystore" type="String"
@@ -131,5 +156,10 @@ public interface JettyConstants {
 	 * name="other.info" type="String"
 	 */
 	public static final String OTHER_INFO = "other.info"; //$NON-NLS-1$
+
+	/**
+	 * @since 1.3
+	 */
+	public static final String PROPERTY_PREFIX = "org.eclipse.equinox.http.jetty."; //$NON-NLS-1$
 
 }

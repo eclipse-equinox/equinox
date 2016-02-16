@@ -23,6 +23,7 @@ import javax.servlet.Filter;
 import javax.servlet.http.*;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.customizer.*;
+import org.eclipse.equinox.http.servlet.internal.dto.ExtendedServletDTO;
 import org.eclipse.equinox.http.servlet.internal.error.*;
 import org.eclipse.equinox.http.servlet.internal.registration.*;
 import org.eclipse.equinox.http.servlet.internal.registration.FilterRegistration;
@@ -480,11 +481,13 @@ public class ContextController {
 		String servletName = ServiceProperties.parseName(
 			servletRef.getProperty(
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME), servletHolder.get());
+		boolean multipartSupported = ServiceProperties.parseBoolean(
+			servletRef,	Const.EQUINOX_HTTP_MULTIPARTSUPPORTED);
 
 		if (((patterns == null) || (patterns.length == 0)) &&
 			((errorPages == null) || errorPages.length == 0)) {
 			throw new IllegalArgumentException(
-				"Either patterns or errorPages must contain a value.");
+				"Either patterns or errorPages must contain a value."); //$NON-NLS-1$
 		}
 
 		if (patterns != null) {
@@ -493,10 +496,11 @@ public class ContextController {
 			}
 		}
 
-		ServletDTO servletDTO = new ServletDTO();
+		ExtendedServletDTO servletDTO = new ExtendedServletDTO();
 
 		servletDTO.asyncSupported = asyncSupported;
 		servletDTO.initParams = servletInitParams;
+		servletDTO.multipartSupported = multipartSupported;
 		servletDTO.name = servletName;
 		servletDTO.patterns = sort(patterns);
 		servletDTO.serviceId = serviceId;

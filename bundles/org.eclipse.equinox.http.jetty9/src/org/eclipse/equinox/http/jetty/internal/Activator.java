@@ -8,7 +8,7 @@
  * Contributors:
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
- *     Raymond Augé - bug fixes
+ *     Raymond Augé - bug fixes and enhancements
  *******************************************************************************/
 
 package org.eclipse.equinox.http.jetty.internal;
@@ -43,9 +43,6 @@ public class Activator implements BundleActivator {
 	// (default threshold is "warn")
 	private static final String LOG_STDERR_THRESHOLD = "org.eclipse.equinox.http.jetty.log.stderr.threshold"; //$NON-NLS-1$
 
-	// Jetty will not have Servlet 3 multipart
-	private static final String SERVLET3_MULTIPART = "org.eclipse.equinox.http.jetty.servlet3.multipart"; //$NON-NLS-1$
-
 	// The staticServerManager is use by the start and stopServer methods and must be accessed in a static synchronized block
 	// to ensure it is correctly handled in terms of the bundle life-cycle.
 	private static HttpServerManager staticServerManager;
@@ -60,13 +57,8 @@ public class Activator implements BundleActivator {
 		EquinoxStdErrLog.setThresholdLogger(context.getProperty(LOG_STDERR_THRESHOLD));
 		httpServerManager = new HttpServerManager(jettyWorkDir);
 
-		String servlet3multipart = context.getProperty(SERVLET3_MULTIPART);
-		if ((servlet3multipart != null) && Boolean.valueOf(servlet3multipart).booleanValue()) {
-			httpServerManager.setServlet3multipart(Boolean.valueOf(servlet3multipart).booleanValue());
-		}
-
-		String autostart = context.getProperty(AUTOSTART);
-		if ((autostart == null || Boolean.valueOf(autostart).booleanValue()) && !isBundleActivationPolicyUsed(context)) {
+		boolean autostart = Details.getBoolean(context, AUTOSTART, true);
+		if (autostart && !isBundleActivationPolicyUsed(context)) {
 			Dictionary<String, Object> defaultSettings = createDefaultSettings(context);
 			httpServerManager.updated(DEFAULT_PID, defaultSettings);
 		}
@@ -109,125 +101,96 @@ public class Activator implements BundleActivator {
 	}
 
 	private Dictionary<String, Object> createDefaultSettings(BundleContext context) {
-		final String PROPERTY_PREFIX = "org.eclipse.equinox.http.jetty."; //$NON-NLS-1$
 		Dictionary<String, Object> defaultSettings = new Hashtable<String, Object>();
 
 		// PID
 		defaultSettings.put(Constants.SERVICE_PID, DEFAULT_PID);
 
 		// HTTP Enabled (default is true)
-		String httpEnabledProperty = context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTP_ENABLED);
-		Boolean httpEnabled = (httpEnabledProperty == null) ? Boolean.TRUE : Boolean.valueOf(httpEnabledProperty);
+		Boolean httpEnabled = Details.getBooleanProp(context, JettyConstants.HTTP_ENABLED, true);
 		defaultSettings.put(JettyConstants.HTTP_ENABLED, httpEnabled);
 
 		// HTTP Port
-		String httpPortProperty = context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTP_PORT);
-		if (httpPortProperty == null)
-			httpPortProperty = context.getProperty(ORG_OSGI_SERVICE_HTTP_PORT);
-
-		int httpPort = 80;
-		if (httpPortProperty != null) {
-			try {
-				httpPort = Integer.parseInt(httpPortProperty);
-			} catch (NumberFormatException e) {
-				//(log this) ignore and use default
-			}
-		}
+		int httpPort = Details.getIntProp(context, JettyConstants.HTTP_PORT, -1);
+		if (httpPort == -1)
+			httpPort = Details.getInt(context, ORG_OSGI_SERVICE_HTTP_PORT, 0);
 		defaultSettings.put(JettyConstants.HTTP_PORT, new Integer(httpPort));
 
 		// HTTP Host (default is 0.0.0.0)
-		String httpHost = context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTP_HOST);
+		String httpHost = Details.getStringProp(context, JettyConstants.HTTP_HOST, null);
 		if (httpHost != null)
 			defaultSettings.put(JettyConstants.HTTP_HOST, httpHost);
 
 		// HTTPS Enabled (default is false)
-		Boolean httpsEnabled = Boolean.valueOf(context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTPS_ENABLED));
+		Boolean httpsEnabled = Details.getBooleanProp(context, JettyConstants.HTTPS_ENABLED, false);
 		defaultSettings.put(JettyConstants.HTTPS_ENABLED, httpsEnabled);
 
 		// minimum number of threads
-		String minThreadsProperty = context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTP_MINTHREADS);
-		if (minThreadsProperty != null) {
-			try {
-				int minThreads = Integer.parseInt(minThreadsProperty);
-				defaultSettings.put(JettyConstants.HTTP_MINTHREADS, new Integer(minThreads));
-			} catch (NumberFormatException e) {
-				//(log this) ignore and use default
-			}
+		int minThreads = Details.getIntProp(context, JettyConstants.HTTP_MINTHREADS, 8);
+		if (minThreads != -1) {
+			defaultSettings.put(JettyConstants.HTTP_MINTHREADS, new Integer(minThreads));
 		}
 
 		// maximum number of threads
-		String maxThreadsProperty = context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTP_MAXTHREADS);
-		if (maxThreadsProperty != null) {
-			try {
-				int maxThreads = Integer.parseInt(maxThreadsProperty);
-				defaultSettings.put(JettyConstants.HTTP_MAXTHREADS, new Integer(maxThreads));
-			} catch (NumberFormatException e) {
-				//(log this) ignore and use default
-			}
+		int maxThreads = Details.getIntProp(context, JettyConstants.HTTP_MAXTHREADS, 200);
+		if (maxThreads != -1) {
+			defaultSettings.put(JettyConstants.HTTP_MAXTHREADS, new Integer(maxThreads));
 		}
 
 		if (httpsEnabled.booleanValue()) {
 			// HTTPS Port
-			String httpsPortProperty = context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTPS_PORT);
-			if (httpsPortProperty == null)
-				httpsPortProperty = context.getProperty(ORG_OSGI_SERVICE_HTTP_PORT_SECURE);
 
-			int httpsPort = 443;
-			if (httpsPortProperty != null) {
-				try {
-					httpsPort = Integer.parseInt(httpsPortProperty);
-				} catch (NumberFormatException e) {
-					//(log this) ignore and use default
-				}
-			}
+			int httpsPort = Details.getIntProp(context, JettyConstants.HTTP_PORT, -1);
+			if (httpsPort == -1)
+				httpsPort = Details.getInt(context, ORG_OSGI_SERVICE_HTTP_PORT_SECURE, 443);
 			defaultSettings.put(JettyConstants.HTTPS_PORT, new Integer(httpsPort));
 
 			// HTTPS Host (default is 0.0.0.0)
-			String httpsHost = context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTPS_HOST);
+			String httpsHost = Details.getStringProp(context, JettyConstants.HTTPS_HOST, null);
 			if (httpsHost != null)
 				defaultSettings.put(JettyConstants.HTTPS_HOST, httpsHost);
 
 			// SSL SETTINGS
-			String keystore = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_KEYSTORE);
+			String keystore = Details.getStringProp(context, JettyConstants.SSL_KEYSTORE, null);
 			if (keystore != null)
 				defaultSettings.put(JettyConstants.SSL_KEYSTORE, keystore);
 
-			String password = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_PASSWORD);
+			String password = Details.getStringProp(context, JettyConstants.SSL_PASSWORD, null);
 			if (password != null)
 				defaultSettings.put(JettyConstants.SSL_PASSWORD, password);
 
-			String keypassword = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_KEYPASSWORD);
+			String keypassword = Details.getStringProp(context, JettyConstants.SSL_KEYPASSWORD, null);
 			if (keypassword != null)
 				defaultSettings.put(JettyConstants.SSL_KEYPASSWORD, keypassword);
 
-			String needclientauth = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_NEEDCLIENTAUTH);
+			String needclientauth = Details.getStringProp(context, JettyConstants.SSL_NEEDCLIENTAUTH, null);
 			if (needclientauth != null)
 				defaultSettings.put(JettyConstants.SSL_NEEDCLIENTAUTH, Boolean.valueOf(needclientauth));
 
-			String wantclientauth = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_WANTCLIENTAUTH);
+			String wantclientauth = Details.getStringProp(context, JettyConstants.SSL_WANTCLIENTAUTH, null);
 			if (wantclientauth != null)
 				defaultSettings.put(JettyConstants.SSL_WANTCLIENTAUTH, Boolean.valueOf(wantclientauth));
 
-			String protocol = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_PROTOCOL);
+			String protocol = Details.getStringProp(context, JettyConstants.SSL_PROTOCOL, null);
 			if (protocol != null)
 				defaultSettings.put(JettyConstants.SSL_PROTOCOL, protocol);
 
-			String algorithm = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_ALGORITHM);
+			String algorithm = Details.getStringProp(context, JettyConstants.SSL_ALGORITHM, null);
 			if (algorithm != null)
 				defaultSettings.put(JettyConstants.SSL_ALGORITHM, algorithm);
 
-			String keystoretype = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_KEYSTORETYPE);
+			String keystoretype = Details.getStringProp(context, JettyConstants.SSL_KEYSTORETYPE, null);
 			if (keystoretype != null)
 				defaultSettings.put(JettyConstants.SSL_KEYSTORETYPE, keystoretype);
 		}
 
 		// Servlet Context Path
-		String contextpath = context.getProperty(PROPERTY_PREFIX + JettyConstants.CONTEXT_PATH);
+		String contextpath = Details.getStringProp(context, JettyConstants.CONTEXT_PATH, null);
 		if (contextpath != null)
 			defaultSettings.put(JettyConstants.CONTEXT_PATH, contextpath);
 
 		// Session Inactive Interval (timeout)
-		String sessionInactiveInterval = context.getProperty(PROPERTY_PREFIX + JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL);
+		String sessionInactiveInterval = Details.getStringProp(context, JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL, null);
 		if (sessionInactiveInterval != null) {
 			try {
 				defaultSettings.put(JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL, new Integer(sessionInactiveInterval));
@@ -237,12 +200,12 @@ public class Activator implements BundleActivator {
 		}
 
 		// Other Info
-		String otherInfo = context.getProperty(PROPERTY_PREFIX + JettyConstants.OTHER_INFO);
+		String otherInfo = Details.getStringProp(context, JettyConstants.OTHER_INFO, null);
 		if (otherInfo != null)
 			defaultSettings.put(JettyConstants.OTHER_INFO, otherInfo);
 
 		// customizer
-		String customizerClass = context.getProperty(PROPERTY_PREFIX + JettyConstants.CUSTOMIZER_CLASS);
+		String customizerClass = Details.getStringProp(context, JettyConstants.CUSTOMIZER_CLASS, null);
 		if (customizerClass != null)
 			defaultSettings.put(JettyConstants.CUSTOMIZER_CLASS, customizerClass);
 

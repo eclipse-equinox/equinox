@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Red Hat, Inc. - Jetty 9 adoption.
- *     Raymond Augé - bug fixes
+ *     Raymond Augé - bug fixes and enhancements
  *******************************************************************************/
 
 package org.eclipse.equinox.http.jetty.internal;
@@ -23,6 +23,7 @@ import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionIdListener;
 import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.jetty.JettyCustomizer;
+import org.eclipse.equinox.http.servlet.HttpServiceMultipartServlet;
 import org.eclipse.equinox.http.servlet.HttpServiceServlet;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.session.HashSessionManager;
@@ -44,7 +45,6 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 	private Map<String, Server> servers = new HashMap<String, Server>();
 	private File workDir;
-	private boolean servlet3multipart = false;
 
 	public HttpServerManager(File workDir) {
 		this.workDir = workDir;
@@ -71,7 +71,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 	@SuppressWarnings("unchecked")
 	public synchronized void updated(String pid, @SuppressWarnings("rawtypes") Dictionary dictionary) throws ConfigurationException {
 		deleted(pid);
-		Server server = new Server(new QueuedThreadPool(getMaxThreads(dictionary), getMinThreads(dictionary)));
+		Server server = new Server(new QueuedThreadPool(Details.getInt(dictionary, JettyConstants.HTTP_MAXTHREADS, 200), Details.getInt(dictionary, JettyConstants.HTTP_MINTHREADS, 8)));
 
 		JettyCustomizer customizer = createJettyCustomizer(dictionary);
 
@@ -112,6 +112,11 @@ public class HttpServerManager implements ManagedServiceFactory {
 		holder.setInitOrder(0);
 		holder.setInitParameter(Constants.SERVICE_VENDOR, "Eclipse.org"); //$NON-NLS-1$
 		holder.setInitParameter(Constants.SERVICE_DESCRIPTION, "Equinox Jetty-based Http Service"); //$NON-NLS-1$
+
+		String multipartServletName = "Equinox Jetty-based Http Service - Multipart Servlet"; //$NON-NLS-1$
+
+		holder.setInitParameter("multipart.servlet.name", multipartServletName); //$NON-NLS-1$
+
 		if (httpConnector != null) {
 			int port = httpConnector.getLocalPort();
 			if (port == -1)
@@ -124,17 +129,20 @@ public class HttpServerManager implements ManagedServiceFactory {
 				port = httpsConnector.getPort();
 			holder.setInitParameter(JettyConstants.HTTPS_PORT, Integer.toString(port));
 		}
-		String otherInfo = (String) dictionary.get(JettyConstants.OTHER_INFO);
+		String otherInfo = Details.getString(dictionary, JettyConstants.OTHER_INFO, null);
 		if (otherInfo != null)
 			holder.setInitParameter(JettyConstants.OTHER_INFO, otherInfo);
 
 		ServletContextHandler httpContext = createHttpContext(dictionary);
 		if (null != customizer)
 			httpContext = (ServletContextHandler) customizer.customizeContext(httpContext, dictionary);
-		setupMultiPartConfig(dictionary, holder);
 
 		httpContext.addServlet(holder, "/*"); //$NON-NLS-1$
 		server.setHandler(httpContext);
+
+		ServletHolder multiPartHolder = createMultipartNamedServlet(dictionary, multipartServletName);
+		// This servlet has no mapping as it's only used from named dispatcher
+		httpContext.getServletHandler().addServlet(multiPartHolder);
 
 		SessionManager sessionManager = httpContext.getSessionHandler().getSessionManager();
 		try {
@@ -151,47 +159,39 @@ public class HttpServerManager implements ManagedServiceFactory {
 		servers.put(pid, server);
 	}
 
-	public void setServlet3multipart(boolean servlet3multipart) {
-		this.servlet3multipart = servlet3multipart;
+	private ServletHolder createMultipartNamedServlet(@SuppressWarnings("rawtypes") Dictionary dictionary, String multipartServletName) {
+		int multipartFileSizeThreshold = Details.getInt(dictionary, JettyConstants.MULTIPART_FILESIZETHRESHOLD, 0);
+		String multipartLocation = Details.getString(dictionary, JettyConstants.MULTIPART_LOCATION, ""); //$NON-NLS-1$
+		long multipartMaxFileSize = Details.getLong(dictionary, JettyConstants.MULTIPART_MAXFILESIZE, -1L);
+		long multipartMaxRequestSize = Details.getLong(dictionary, JettyConstants.MULTIPART_MAXREQUESTSIZE, -1L);
+
+		ServletHolder holder = new ServletHolder(new InternalHttpServiceMultipartServlet());
+		holder.setInitOrder(1);
+		holder.setName(multipartServletName);
+		holder.setInitParameter(Constants.SERVICE_VENDOR, "Eclipse.org"); //$NON-NLS-1$
+		holder.setInitParameter(Constants.SERVICE_DESCRIPTION, multipartServletName); //$NON-NLS-1$
+
+		MultipartConfigElement multipartConfigElement = new MultipartConfigElement(multipartLocation, multipartMaxFileSize, multipartMaxRequestSize, multipartFileSizeThreshold);
+		holder.getRegistration().setMultipartConfig(multipartConfigElement);
+
+		return holder;
 	}
 
 	private ServerConnector createHttpsConnector(@SuppressWarnings("rawtypes") Dictionary dictionary, Server server, HttpConfiguration http_config) {
 		ServerConnector httpsConnector = null;
-		if (isHttpsEnabled(dictionary)) {
+		if (Details.getBoolean(dictionary, JettyConstants.HTTPS_ENABLED, false)) {
 			// SSL Context Factory for HTTPS and SPDY
 			SslContextFactory sslContextFactory = new SslContextFactory();
 			//sslContextFactory.setKeyStore(KeyS)
 
 			//Not sure if the next tree are properly migrated from jetty 8...
-			sslContextFactory.setKeyStorePath((String) dictionary.get(JettyConstants.SSL_KEYSTORE));
-			sslContextFactory.setKeyStorePassword((String) dictionary.get(JettyConstants.SSL_PASSWORD));
-			sslContextFactory.setKeyManagerPassword((String) dictionary.get(JettyConstants.SSL_KEYPASSWORD));
-
-			String keystoreType = (String) dictionary.get(JettyConstants.SSL_KEYSTORETYPE);
-			if (keystoreType != null) {
-				sslContextFactory.setKeyStoreType(keystoreType);
-			}
-
-			String protocol = (String) dictionary.get(JettyConstants.SSL_PROTOCOL);
-			if (protocol != null) {
-				sslContextFactory.setProtocol(protocol);
-			}
-
-			Object wantClientAuth = dictionary.get(JettyConstants.SSL_WANTCLIENTAUTH);
-			if (wantClientAuth != null) {
-				if (wantClientAuth instanceof String)
-					wantClientAuth = Boolean.valueOf((String) wantClientAuth);
-
-				sslContextFactory.setWantClientAuth((Boolean) wantClientAuth);
-			}
-
-			Object needClientAuth = dictionary.get(JettyConstants.SSL_NEEDCLIENTAUTH);
-			if (needClientAuth != null) {
-				if (needClientAuth instanceof String)
-					needClientAuth = Boolean.valueOf((String) needClientAuth);
-
-				sslContextFactory.setNeedClientAuth(((Boolean) needClientAuth));
-			}
+			sslContextFactory.setKeyStorePath(Details.getString(dictionary, JettyConstants.SSL_KEYSTORE, null));
+			sslContextFactory.setKeyStorePassword(Details.getString(dictionary, JettyConstants.SSL_PASSWORD, null));
+			sslContextFactory.setKeyManagerPassword(Details.getString(dictionary, JettyConstants.SSL_KEYPASSWORD, null));
+			sslContextFactory.setKeyStoreType(Details.getString(dictionary, JettyConstants.SSL_KEYSTORETYPE, "JKS")); //$NON-NLS-1$
+			sslContextFactory.setProtocol(Details.getString(dictionary, JettyConstants.SSL_PROTOCOL, "TLS")); //$NON-NLS-1$
+			sslContextFactory.setWantClientAuth(Details.getBoolean(dictionary, JettyConstants.SSL_WANTCLIENTAUTH, false));
+			sslContextFactory.setNeedClientAuth(Details.getBoolean(dictionary, JettyConstants.SSL_NEEDCLIENTAUTH, false));
 
 			// HTTPS Configuration
 			HttpConfiguration https_config = new HttpConfiguration(http_config);
@@ -199,23 +199,23 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 			// HTTPS connector
 			httpsConnector = new ServerConnector(server, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https_config)); //$NON-NLS-1$
-			httpsConnector.setPort(getIntProperty(dictionary, JettyConstants.HTTPS_PORT));
+			httpsConnector.setPort(Details.getInt(dictionary, JettyConstants.HTTPS_PORT, 443));
 		}
 		return httpsConnector;
 	}
 
 	private ServerConnector createHttpConnector(@SuppressWarnings("rawtypes") Dictionary dictionary, Server server, HttpConfiguration http_config) {
 		ServerConnector httpConnector = null;
-		if (isHttpEnabled(dictionary)) {
+		if (Details.getBoolean(dictionary, JettyConstants.HTTP_ENABLED, true)) {
 			// HTTP Configuration
-			if (isHttpsEnabled(dictionary)) {
+			if (Details.getBoolean(dictionary, JettyConstants.HTTPS_ENABLED, false)) {
 				http_config.setSecureScheme("https"); //$NON-NLS-1$
-				http_config.setSecurePort(getIntProperty(dictionary, JettyConstants.HTTPS_PORT));
+				http_config.setSecurePort(Details.getInt(dictionary, JettyConstants.HTTPS_PORT, 443));
 			}
 			// HTTP connector
 			httpConnector = new ServerConnector(server, new HttpConnectionFactory(http_config));
-			httpConnector.setPort(getIntProperty(dictionary, JettyConstants.HTTP_PORT));
-			httpConnector.setHost((String) dictionary.get(JettyConstants.HTTP_HOST));
+			httpConnector.setPort(Details.getInt(dictionary, JettyConstants.HTTP_PORT, 80));
+			httpConnector.setHost(Details.getString(dictionary, JettyConstants.HTTP_HOST, null));
 			httpConnector.setIdleTimeout(DEFAULT_IDLE_TIMEOUT);
 		}
 		return httpConnector;
@@ -229,96 +229,20 @@ public class HttpServerManager implements ManagedServiceFactory {
 		servers.clear();
 	}
 
-	private Integer getIntProperty(@SuppressWarnings("rawtypes") Dictionary dictionary, String property) {
-		Integer httpPort = null;
-		Object httpPortObj = dictionary.get(property);
-		if (httpPortObj instanceof Integer) {
-			httpPort = (Integer) httpPortObj;
-		} else if (httpPortObj instanceof String) {
-			httpPort = Integer.valueOf(httpPortObj.toString());
-		}
-		if (httpPort == null) {
-			throw new IllegalArgumentException("Expected " + property + "property, but it is not set."); //$NON-NLS-1$//$NON-NLS-2$
-		}
-		return httpPort;
-	}
-
-	/**
-	 * If not configured -> enable
-	 */
-	private boolean isHttpEnabled(@SuppressWarnings("rawtypes") Dictionary dictionary) {
-		Boolean httpEnabled = true;
-		Object httpEnabledObj = dictionary.get(JettyConstants.HTTP_ENABLED);
-		if (httpEnabledObj instanceof Boolean) {
-			httpEnabled = (Boolean) httpEnabledObj;
-		} else if (httpEnabledObj instanceof String) {
-			httpEnabled = Boolean.parseBoolean(httpEnabledObj.toString());
-		}
-		return httpEnabled;
-	}
-
-	/**
-	 * If not configured -> disable.
-	 */
-	private boolean isHttpsEnabled(@SuppressWarnings("rawtypes") Dictionary dictionary) {
-		Boolean httpsEnabled = false;
-		Object httpsEnabledObj = dictionary.get(JettyConstants.HTTPS_ENABLED);
-		if (httpsEnabledObj instanceof Boolean) {
-			httpsEnabled = (Boolean) httpsEnabledObj;
-		} else if (httpsEnabledObj instanceof String) {
-			httpsEnabled = Boolean.parseBoolean(httpsEnabledObj.toString());
-		}
-		return httpsEnabled;
-	}
-
-	private int getMaxThreads(@SuppressWarnings("rawtypes") Dictionary dictionary) {
-		Integer maxThreads = 200;
-		Object maxThreadsObj = dictionary.get(JettyConstants.HTTP_MAXTHREADS);
-		if (maxThreadsObj instanceof Integer) {
-			maxThreads = (Integer) maxThreadsObj;
-		} else if (maxThreadsObj instanceof String) {
-			maxThreads = Integer.parseInt(maxThreadsObj.toString());
-		}
-		return maxThreads;
-	}
-
-	private int getMinThreads(@SuppressWarnings("rawtypes") Dictionary dictionary) {
-		Integer minThreads = 8;
-		Object minThreadsObj = dictionary.get(JettyConstants.HTTP_MINTHREADS);
-		if (minThreadsObj instanceof Integer) {
-			minThreads = (Integer) minThreadsObj;
-		} else if (minThreadsObj instanceof String) {
-			minThreads = Integer.parseInt(minThreadsObj.toString());
-		}
-		return minThreads;
-	}
-
 	private ServletContextHandler createHttpContext(@SuppressWarnings("rawtypes") Dictionary dictionary) {
 		ServletContextHandler httpContext = new ServletContextHandler();
 		// hack in the mime type for xsd until jetty fixes it (bug 393218)
 		httpContext.getMimeTypes().addMimeMapping("xsd", "application/xml"); //$NON-NLS-1$ //$NON-NLS-2$
 		httpContext.setAttribute(INTERNAL_CONTEXT_CLASSLOADER, Thread.currentThread().getContextClassLoader());
 		httpContext.setClassLoader(this.getClass().getClassLoader());
-
-		String contextPathProperty = (String) dictionary.get(JettyConstants.CONTEXT_PATH);
-		if (contextPathProperty == null)
-			contextPathProperty = "/"; //$NON-NLS-1$
-		httpContext.setContextPath(contextPathProperty);
+		httpContext.setContextPath(Details.getString(dictionary, JettyConstants.CONTEXT_PATH, "/")); //$NON-NLS-1$
 
 		File contextWorkDir = new File(workDir, DIR_PREFIX + dictionary.get(Constants.SERVICE_PID).hashCode());
 		contextWorkDir.mkdir();
 		httpContext.setAttribute(CONTEXT_TEMPDIR, contextWorkDir);
 
 		HashSessionManager sessionManager = new HashSessionManager();
-		Integer sessionInactiveInterval = null;
-		Object sessionInactiveIntervalObj = dictionary.get(JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL);
-		if (sessionInactiveIntervalObj instanceof Integer) {
-			sessionInactiveInterval = (Integer) sessionInactiveIntervalObj;
-		} else if (sessionInactiveIntervalObj instanceof String) {
-			sessionInactiveInterval = Integer.valueOf(sessionInactiveIntervalObj.toString());
-		}
-		if (sessionInactiveInterval != null)
-			sessionManager.setMaxInactiveInterval(sessionInactiveInterval.intValue());
+		sessionManager.setMaxInactiveInterval(Details.getInt(dictionary, JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL, -1));
 
 		httpContext.setSessionHandler(new SessionHandler(sessionManager));
 
@@ -351,7 +275,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 			Class<?> clazz = httpServiceServlet.getClass();
 			try {
-				method = clazz.getMethod("sessionIdChanged", new Class<?>[] {String.class});
+				method = clazz.getMethod("sessionIdChanged", new Class<?>[] {String.class}); //$NON-NLS-1$
 			} catch (Exception e) {
 				throw new ServletException(e);
 			}
@@ -415,6 +339,39 @@ public class HttpServerManager implements ManagedServiceFactory {
 		}
 	}
 
+	public static class InternalHttpServiceMultipartServlet implements Servlet {
+		private Servlet httpServiceServlet = new HttpServiceMultipartServlet();
+		private ClassLoader contextLoader;
+
+		public void init(ServletConfig config) {
+			ServletContext context = config.getServletContext();
+			contextLoader = (ClassLoader) context.getAttribute(INTERNAL_CONTEXT_CLASSLOADER);
+		}
+
+		public void destroy() {
+			contextLoader = null;
+		}
+
+		public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+			Thread thread = Thread.currentThread();
+			ClassLoader current = thread.getContextClassLoader();
+			thread.setContextClassLoader(contextLoader);
+			try {
+				httpServiceServlet.service(req, res);
+			} finally {
+				thread.setContextClassLoader(current);
+			}
+		}
+
+		public ServletConfig getServletConfig() {
+			return httpServiceServlet.getServletConfig();
+		}
+
+		public String getServletInfo() {
+			return httpServiceServlet.getServletInfo();
+		}
+	}
+
 	// deleteDirectory is a convenience method to recursively delete a directory
 	private static boolean deleteDirectory(File directory) {
 		if (directory.exists() && directory.isDirectory()) {
@@ -428,15 +385,6 @@ public class HttpServerManager implements ManagedServiceFactory {
 			}
 		}
 		return directory.delete();
-	}
-
-	private void setupMultiPartConfig(@SuppressWarnings("rawtypes") Dictionary dictionary, ServletHolder holder) {
-		if (!servlet3multipart) {
-			return;
-		}
-
-		MultipartConfigElement multipartConfigElement = new MultipartConfigElement(System.getProperty("java.io.tmpdir")); //$NON-NLS-1$
-		holder.getRegistration().setMultipartConfig(multipartConfigElement);
 	}
 
 }

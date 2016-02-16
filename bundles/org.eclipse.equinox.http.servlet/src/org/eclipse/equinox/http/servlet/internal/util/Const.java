@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2015 Raymond Augé and others.
+ * Copyright (c) 2014, 2016 Raymond Augé and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Raymond Augé <raymond.auge@liferay.com> - Bug 436698
+ *     Raymond Augé - bug fixes and enhancements
  ******************************************************************************/
 
 package org.eclipse.equinox.http.servlet.internal.util;
@@ -32,6 +32,7 @@ public class Const {
 	public static final String SLASH_STAR = "/*"; //$NON-NLS-1$
 	public static final String SLASH_STAR_DOT = "/*."; //$NON-NLS-1$
 	public static final String STAR_DOT = "*."; //$NON-NLS-1$
+	public static final String EQUINOX_HTTP_MULTIPARTSUPPORTED = "equinox.http.multipartSupported"; //$NON-NLS-1$
 	public static final String EQUINOX_LEGACY_TCCL_PROP = "equinox.legacy.tccl"; //$NON-NLS-1$
 	public static final String EQUINOX_LEGACY_CONTEXT_SELECT = "equinox.context.select"; //$NON-NLS-1$
 	public static final String EQUINOX_LEGACY_CONTEXT_HELPER = "equinox.legacy.context.helper"; //$NON-NLS-1$

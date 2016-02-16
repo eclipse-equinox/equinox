@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2005, 2016 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,23 +8,23 @@
  * Contributors:
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
- *     Raymond Augé <raymond.auge@liferay.com> - Bug 436698
+ *     Raymond Augé - bug fixes and enhancements
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal.registration;
 
 import javax.servlet.Servlet;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
+import org.eclipse.equinox.http.servlet.internal.dto.ExtendedServletDTO;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.dto.ErrorPageDTO;
-import org.osgi.service.http.runtime.dto.ServletDTO;
 
 //This class wraps the servlet object registered in the HttpService.registerServlet call, to manage the context classloader when handleRequests are being asked.
-public class ServletRegistration extends EndpointRegistration<ServletDTO> {
+public class ServletRegistration extends EndpointRegistration<ExtendedServletDTO> {
 
 	public ServletRegistration(
-		ServiceHolder<Servlet> servletHolder, ServletDTO servletDTO, ErrorPageDTO errorPageDTO,
+		ServiceHolder<Servlet> servletHolder, ExtendedServletDTO servletDTO, ErrorPageDTO errorPageDTO,
 		ServletContextHelper servletContextHelper,
 		ContextController contextController, ClassLoader legacyTCCL) {
 

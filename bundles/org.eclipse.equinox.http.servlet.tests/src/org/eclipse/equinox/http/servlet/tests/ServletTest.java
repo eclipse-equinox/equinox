@@ -7,11 +7,12 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Raymond Augé <raymond.auge@liferay.com> - Bug 436698
+ *     Raymond Augé - bug fixes and enhancements
  *     Juan Gonzalez <juan.gonzalez@liferay.com> - Bug 486412
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.tests;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -65,6 +66,10 @@ import javax.servlet.http.HttpSessionIdListener;
 import javax.servlet.http.HttpSessionListener;
 import javax.servlet.http.Part;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.eclipse.equinox.http.servlet.ExtendedHttpService;
 import org.eclipse.equinox.http.servlet.context.ContextPathCustomizer;
 import org.eclipse.equinox.http.servlet.testbase.BaseTest;
@@ -1742,11 +1747,6 @@ public class ServletTest extends BaseTest {
 	 * 3.1 file uploads
 	 */
 	public void test_Servlet16() throws Exception {
-		String servlet3multipart = getProperty("org.eclipse.equinox.http.jetty.servlet3.multipart");
-		if ((servlet3multipart == null) || !Boolean.valueOf(servlet3multipart).booleanValue()) {
-			return;
-		}
-
 		Servlet servlet = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
 
@@ -1773,6 +1773,7 @@ public class ServletTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
+		props.put("equinox.http.multipartSupported", Boolean.TRUE);
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
 
 		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
@@ -1789,11 +1790,6 @@ public class ServletTest extends BaseTest {
 	 * 3.0 file uploads
 	 */
 	public void test_Servlet17() throws Exception {
-		String servlet3multipart = getProperty("org.eclipse.equinox.http.jetty.servlet3.multipart");
-		if ((servlet3multipart == null) || !Boolean.valueOf(servlet3multipart).booleanValue()) {
-			return;
-		}
-
 		Servlet servlet = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
 
@@ -1807,6 +1803,65 @@ public class ServletTest extends BaseTest {
 				String submittedFileName = getSubmittedFileName(part);
 				String contentType = part.getContentType();
 				long size = part.getSize();
+
+				PrintWriter writer = resp.getWriter();
+
+				writer.write(submittedFileName);
+				writer.write("|");
+				writer.write(contentType);
+				writer.write("|" + size);
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
+		props.put("equinox.http.multipartSupported", Boolean.TRUE);
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+
+		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
+
+		map.put("file", Arrays.<Object>asList(getClass().getResource("blue.png")));
+
+		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
+
+		Assert.assertEquals("200", result.get("responseCode").get(0));
+		Assert.assertEquals("blue.png|image/png|292", result.get("responseBody").get(0));
+	}
+
+	public void test_commonsFileUpload() throws Exception {
+		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+				throws IOException, ServletException {
+
+				boolean isMultipart = ServletFileUpload.isMultipartContent(req);
+				Assert.assertTrue(isMultipart);
+
+				DiskFileItemFactory factory = new DiskFileItemFactory();
+
+				ServletContext servletContext = this.getServletConfig().getServletContext();
+				File repository = (File) servletContext.getAttribute("javax.servlet.context.tempdir");
+				factory.setRepository(repository);
+				ServletFileUpload upload = new ServletFileUpload(factory);
+
+				List<FileItem> items = null;
+				try {
+					items = upload.parseRequest(req);
+				} catch (FileUploadException e) {
+					e.printStackTrace();
+				}
+
+				Assert.assertNotNull(items);
+				Assert.assertFalse(items.isEmpty());
+
+				FileItem fileItem = items.get(0);
+
+				String submittedFileName = fileItem.getName();
+				String contentType = fileItem.getContentType();
+				long size = fileItem.getSize();
 
 				PrintWriter writer = resp.getWriter();
 

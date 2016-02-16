@@ -60,7 +60,7 @@ public class DispatchTargets {
 		this.string = getClass().getSimpleName() + '[' + contextController.getFullContextPath() + requestURI + ", " + endpointRegistration.toString() + ']'; //$NON-NLS-1$
 	}
 
-	public boolean doDispatch(
+	public void doDispatch(
 			HttpServletRequest request, HttpServletResponse response,
 			String path, DispatcherType dispatcherType)
 		throws ServletException, IOException {
@@ -85,8 +85,6 @@ public class DispatchTargets {
 				request, response, this, dispatcherType);
 
 			responseStateHandler.processRequest();
-
-			return true;
 		}
 		finally {
 			requestWrapper.pop();
