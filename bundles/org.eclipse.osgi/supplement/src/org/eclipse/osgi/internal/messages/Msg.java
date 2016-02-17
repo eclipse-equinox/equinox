@@ -121,6 +121,8 @@ public class Msg extends NLS {
 
 	public static String Module_Fragment_InvalidOperation;
 	public static String Module_LockError;
+	public static String Module_LockStateError;
+	public static String Module_LockTimeout;
 	public static String Module_ResolveError;
 
 	public static String Module_StartError;

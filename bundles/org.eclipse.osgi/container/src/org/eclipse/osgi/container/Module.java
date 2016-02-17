@@ -10,15 +10,16 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.util.Arrays;
-import java.util.EnumSet;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.internal.container.EquinoxReentrantLock;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
@@ -293,6 +294,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		boolean invalid = false;
 		try {
 			boolean acquired = stateChangeLock.tryLock(revisions.getContainer().getModuleLockTimeout(), TimeUnit.SECONDS);
+			Set<ModuleEvent> currentTransition = Collections.emptySet();
 			if (acquired) {
 				boolean isValidTransition = true;
 				switch (transitionEvent) {
@@ -315,14 +317,24 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 						break;
 				}
 				if (!isValidTransition) {
+					currentTransition = EnumSet.copyOf(stateTransitionEvents);
 					invalid = true;
 					stateChangeLock.unlock();
 				} else {
 					stateTransitionEvents.add(transitionEvent);
 					return;
 				}
+			} else {
+				currentTransition = EnumSet.copyOf(stateTransitionEvents);
 			}
-			throw new BundleException(Msg.Module_LockError + toString() + " " + transitionEvent + " " + stateTransitionEvents + (invalid ? " invalid" : ""), BundleException.STATECHANGE_ERROR); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+			Throwable cause;
+			if (invalid) {
+				cause = new IllegalStateException(NLS.bind(Msg.Module_LockStateError, transitionEvent, currentTransition));
+			} else {
+				cause = new TimeoutException(NLS.bind(Msg.Module_LockTimeout, revisions.getContainer().getModuleLockTimeout()));
+			}
+			String exceptonInfo = toString() + ' ' + transitionEvent + ' ' + currentTransition;
+			throw new BundleException(Msg.Module_LockError + exceptonInfo, BundleException.STATECHANGE_ERROR, cause);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new BundleException(Msg.Module_LockError + toString() + " " + transitionEvent, BundleException.STATECHANGE_ERROR, e); //$NON-NLS-1$
