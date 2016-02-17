@@ -1235,6 +1235,34 @@ public class ServletTest extends BaseTest {
 		}
 	}
 
+	public void test_Registration18_WhiteboardServletByNameOnly() throws Exception {
+		String expected = "a";
+		final String servletName = "hello_servlet";
+		Servlet namedServlet = new BaseServlet(expected);
+		Servlet targetServlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+
+				request.getServletContext().getNamedDispatcher(servletName).forward(request, response);
+			}
+
+		};
+
+		Hashtable<String, String> props = new Hashtable<String, String>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, servletName);
+		registrations.add(getBundleContext().registerService(Servlet.class, namedServlet, props));
+
+		props = new Hashtable<String, String>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
+		registrations.add(getBundleContext().registerService(Servlet.class, targetServlet, props));
+
+		String actual = requestAdvisor.request("s");
+		Assert.assertEquals(expected, actual);
+	}
+
 	public void test_RegistrationTCCL1() {
 		final Set<String> filterTCCL = Collections.synchronizedSet(new HashSet<String>());
 		final Set<String> servletTCCL = Collections.synchronizedSet(new HashSet<String>());

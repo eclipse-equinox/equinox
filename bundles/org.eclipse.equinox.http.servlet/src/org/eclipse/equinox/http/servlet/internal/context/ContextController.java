@@ -478,16 +478,28 @@ public class ContextController {
 			// this is a legacy registration; use a negative id for the DTO
 			serviceId = -serviceId;
 		}
-		String servletName = ServiceProperties.parseName(
+		String servletNameFromProperties = (String)servletRef.getProperty(
+			HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
+		String generatedServletName = ServiceProperties.parseName(
 			servletRef.getProperty(
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME), servletHolder.get());
 		boolean multipartSupported = ServiceProperties.parseBoolean(
 			servletRef,	Const.EQUINOX_HTTP_MULTIPARTSUPPORTED);
 
 		if (((patterns == null) || (patterns.length == 0)) &&
-			((errorPages == null) || errorPages.length == 0)) {
-			throw new IllegalArgumentException(
-				"Either patterns or errorPages must contain a value."); //$NON-NLS-1$
+			((errorPages == null) || errorPages.length == 0) &&
+			(servletNameFromProperties == null)) {
+
+			StringBuilder sb = new StringBuilder();
+			sb.append("One of the service properties "); //$NON-NLS-1$
+			sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE);
+			sb.append(", "); //$NON-NLS-1$
+			sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
+			sb.append(", "); //$NON-NLS-1$
+			sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN);
+			sb.append(" must contain a value."); //$NON-NLS-1$
+
+			throw new IllegalArgumentException(sb.toString());
 		}
 
 		if (patterns != null) {
@@ -501,7 +513,7 @@ public class ContextController {
 		servletDTO.asyncSupported = asyncSupported;
 		servletDTO.initParams = servletInitParams;
 		servletDTO.multipartSupported = multipartSupported;
-		servletDTO.name = servletName;
+		servletDTO.name = generatedServletName;
 		servletDTO.patterns = sort(patterns);
 		servletDTO.serviceId = serviceId;
 		servletDTO.servletContextId = contextServiceId;
@@ -547,7 +559,7 @@ public class ContextController {
 			errorPageDTO.errorCodes = errorCodes;
 			errorPageDTO.exceptions = exceptions.toArray(new String[exceptions.size()]);
 			errorPageDTO.initParams = servletInitParams;
-			errorPageDTO.name = servletName;
+			errorPageDTO.name = generatedServletName;
 			errorPageDTO.serviceId = serviceId;
 			errorPageDTO.servletContextId = contextServiceId;
 			errorPageDTO.servletInfo = servletHolder.get().getServletInfo();
@@ -562,7 +574,7 @@ public class ContextController {
 			servletHolder, servletDTO, errorPageDTO, curServletContextHelper, this,
 			legacyTCCL);
 		ServletConfig servletConfig = new ServletConfigImpl(
-			servletName, servletInitParams, servletContext);
+			generatedServletName, servletInitParams, servletContext);
 
 		servletRegistration.init(servletConfig);
 

@@ -885,6 +885,8 @@ public class HttpServiceRuntimeImpl
 		sb.append(")(|("); //$NON-NLS-1$
 		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE);
 		sb.append("=*)("); //$NON-NLS-1$
+		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
+		sb.append("=*)("); //$NON-NLS-1$
 		sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN);
 		sb.append("=*)))"); //$NON-NLS-1$
 
