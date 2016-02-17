@@ -39,6 +39,8 @@ public class ProxyMultipartServlet extends HttpServlet {
 		DispatchTargets dispatchTargets = (DispatchTargets)request.getAttribute(DispatchTargets.class.getName());
 
 		if (dispatchTargets != null) {
+			request.removeAttribute(DispatchTargets.class.getName());
+
 			dispatchTargets.doDispatch(
 				request, response, alias, request.getDispatcherType());
 
