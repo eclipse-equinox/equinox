@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others
+ * Copyright (c) 2007, 2016 IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.cm.test;
 
-import java.util.Dictionary;
-import java.util.Properties;
+import java.util.*;
 import junit.framework.TestCase;
 import org.osgi.framework.*;
 import org.osgi.service.cm.*;
@@ -225,4 +224,66 @@ public class ConfigurationPluginTest extends TestCase {
 		config.delete();
 	}
 
+	public void testSameRankedPlugin() throws Exception {
+
+		Configuration config = cm.getConfiguration("test");
+		Properties props = new Properties();
+		props.put("testkey", "testvalue");
+		config.update(props);
+		final List pluginsCalled = new ArrayList();
+
+		Hashtable pluginProps = new Hashtable();
+		pluginProps.put(Constants.SERVICE_RANKING, new Integer(1));
+		ConfigurationPlugin plugin1 = new ConfigurationPlugin() {
+			public void modifyConfiguration(ServiceReference reference, Dictionary properties) {
+				pluginsCalled.add("plugin1");
+			}
+		};
+		ServiceRegistration pluginReg1 = Activator.getBundleContext().registerService(ConfigurationPlugin.class.getName(), plugin1, pluginProps);
+
+		ConfigurationPlugin plugin2 = new ConfigurationPlugin() {
+			public void modifyConfiguration(ServiceReference reference, Dictionary properties) {
+				pluginsCalled.add("plugin2");
+			}
+		};
+
+		pluginProps.put(Constants.SERVICE_RANKING, new Integer(2));
+		ServiceRegistration pluginReg2 = Activator.getBundleContext().registerService(ConfigurationPlugin.class.getName(), plugin2, pluginProps);
+
+		ConfigurationPlugin plugin3 = new ConfigurationPlugin() {
+			public void modifyConfiguration(ServiceReference reference, Dictionary properties) {
+				pluginsCalled.add("plugin3");
+			}
+		};
+
+		pluginProps.put(Constants.SERVICE_RANKING, new Integer(1));
+		ServiceRegistration pluginReg3 = Activator.getBundleContext().registerService(ConfigurationPlugin.class.getName(), plugin3, pluginProps);
+
+		ManagedService ms = new ManagedService() {
+			public void updated(Dictionary properties) throws ConfigurationException {
+				synchronized (lock) {
+					locked = false;
+					lock.notify();
+				}
+			}
+		};
+
+		Dictionary dict = new Properties();
+		dict.put(Constants.SERVICE_PID, "test");
+		ServiceRegistration reg = null;
+		synchronized (lock) {
+			reg = Activator.getBundleContext().registerService(ManagedService.class.getName(), ms, dict);
+			locked = true;
+			lock.wait(5000);
+			if (locked)
+				fail("should have updated");
+			assertEquals("Wrong order called for plugins.", Arrays.asList(new String[] {"plugin2", "plugin1", "plugin3"}), pluginsCalled);
+		}
+
+		reg.unregister();
+		pluginReg1.unregister();
+		pluginReg2.unregister();
+		pluginReg3.unregister();
+		config.delete();
+	}
 }

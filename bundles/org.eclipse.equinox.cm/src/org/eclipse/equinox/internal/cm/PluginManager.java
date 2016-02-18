@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2016 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,7 +57,12 @@ public class PluginManager {
 		private TreeSet<ServiceReference<ConfigurationPlugin>> serviceReferences = new TreeSet<ServiceReference<ConfigurationPlugin>>(new Comparator<ServiceReference<ConfigurationPlugin>>() {
 			public int compare(ServiceReference<ConfigurationPlugin> s1, ServiceReference<ConfigurationPlugin> s2) {
 
-				return getRank(s1).compareTo(getRank(s2));
+				int rankCompare = getRank(s1).compareTo(getRank(s2));
+				if (rankCompare != 0) {
+					return rankCompare;
+				}
+				// we reverse the order which means services with higher service.ranking properties are called first
+				return -(s1.compareTo(s2));
 			}
 
 			private Integer getRank(ServiceReference<ConfigurationPlugin> ref) {
