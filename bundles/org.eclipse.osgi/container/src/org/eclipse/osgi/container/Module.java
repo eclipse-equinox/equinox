@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -396,6 +396,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		boolean lockedStarted = false;
 		lockStateChange(ModuleEvent.STARTED);
 		try {
+			inStartResolve.incrementAndGet();
 			lockedStarted = true;
 			checkValid();
 			if (StartOptions.TRANSIENT_IF_AUTO_START.isContained(options) && !settings.contains(Settings.AUTO_START)) {
@@ -415,21 +416,16 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				return;
 			if (getState().equals(State.INSTALLED)) {
 				ResolutionReport report;
-				inStartResolve.incrementAndGet();
+				// must unlock to avoid out of order locks when multiple unresolved
+				// bundles are started at the same time from different threads
+				unlockStateChange(ModuleEvent.STARTED);
+				lockedStarted = false;
 				try {
-					// must unlock to avoid out of order locks when multiple unresolved
-					// bundles are started at the same time from different threads
-					unlockStateChange(ModuleEvent.STARTED);
-					lockedStarted = false;
-					try {
 
-						report = getRevisions().getContainer().resolve(Arrays.asList(this), true);
-					} finally {
-						lockStateChange(ModuleEvent.STARTED);
-						lockedStarted = true;
-					}
+					report = getRevisions().getContainer().resolve(Arrays.asList(this), true);
 				} finally {
-					inStartResolve.decrementAndGet();
+					lockStateChange(ModuleEvent.STARTED);
+					lockedStarted = true;
 				}
 				// need to check valid again in case someone uninstalled the bundle
 				checkValid();
@@ -460,6 +456,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			if (lockedStarted) {
 				unlockStateChange(ModuleEvent.STARTED);
 			}
+			inStartResolve.decrementAndGet();
 		}
 
 		if (event != null) {
