@@ -40,8 +40,7 @@ import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.startlevel.dto.BundleStartLevelDTO;
 import org.osgi.framework.startlevel.dto.FrameworkStartLevelDTO;
 import org.osgi.framework.wiring.*;
-import org.osgi.framework.wiring.dto.BundleRevisionDTO;
-import org.osgi.framework.wiring.dto.BundleWiringDTO;
+import org.osgi.framework.wiring.dto.*;
 
 public class EquinoxBundle implements Bundle, BundleReference {
 
@@ -854,11 +853,11 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			}
 
 			if (FrameworkStartLevel.class.equals(adapterType)) {
-				return (A) equinoxContainer.getStorage().getModuleContainer().getFrameworkStartLevel();
+				return (A) module.getContainer().getFrameworkStartLevel();
 			}
 
 			if (FrameworkWiring.class.equals(adapterType)) {
-				return (A) equinoxContainer.getStorage().getModuleContainer().getFrameworkWiring();
+				return (A) module.getContainer().getFrameworkWiring();
 			}
 
 			if (FrameworkDTO.class.equals(adapterType)) {
@@ -873,7 +872,31 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			}
 
 			if (FrameworkStartLevelDTO.class.equals(adapterType)) {
-				return (A) DTOBuilder.newFrameworkStartLevelDTO(equinoxContainer.getStorage().getModuleContainer().getFrameworkStartLevel());
+				return (A) DTOBuilder.newFrameworkStartLevelDTO(module.getContainer().getFrameworkStartLevel());
+			}
+
+			if (FrameworkWiringDTO.class.equals(adapterType)) {
+				readLock();
+				try {
+					Set<BundleWiring> allWirings = new HashSet<BundleWiring>();
+					for (Module m : module.getContainer().getModules()) {
+						for (BundleRevision revision : m.getRevisions().getRevisions()) {
+							BundleWiring wiring = revision.getWiring();
+							if (wiring != null) {
+								allWirings.add(wiring);
+							}
+						}
+					}
+					for (ModuleRevision revision : module.getContainer().getRemovalPending()) {
+						BundleWiring wiring = revision.getWiring();
+						if (wiring != null) {
+							allWirings.add(wiring);
+						}
+					}
+					return (A) DTOBuilder.newFrameworkWiringDTO(allWirings);
+				} finally {
+					readUnlock();
+				}
 			}
 		}
 

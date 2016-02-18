@@ -107,6 +107,17 @@ public class InternalUtils {
 		return (Collection<Resource>) c;
 	}
 
+	/**
+	 * Coerce the generic type of a collection from Collection<? extends BundleWiring>
+	 * to Collection<BundleWiring>
+	 * @param c List to be coerced.
+	 * @return c coerced to Collection<BundleWiring>
+	 */
+	@SuppressWarnings("unchecked")
+	public static Collection<BundleWiring> asCollectionBundleWiring(Collection<? extends BundleWiring> c) {
+		return (Collection<BundleWiring>) c;
+	}
+
 	public static void filterCapabilityPermissions(Collection<? extends BundleCapability> capabilities) {
 		if (System.getSecurityManager() == null) {
 			return;

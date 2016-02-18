@@ -202,6 +202,17 @@ public class DTOBuilder {
 		return dto;
 	}
 
+	public static FrameworkWiringDTO newFrameworkWiringDTO(Collection<BundleWiring> allWirings) {
+		DTOBuilder builder = new DTOBuilder();
+		for (BundleWiring wiring : allWirings) {
+			builder.getBundleWiringNodeDTO(wiring);
+		}
+		FrameworkWiringDTO dto = new FrameworkWiringDTO();
+		dto.wirings = new HashSet<BundleWiringDTO.NodeDTO>(builder.wiringnodes.values());
+		dto.resources = new HashSet<BundleRevisionDTO>(builder.resources.values());
+		return dto;
+	}
+
 	private BundleWiringDTO getBundleWiringDTO(BundleWiring wiring) {
 		if (wiring == null) {
 			return null;
