@@ -988,7 +988,7 @@ public class TestModuleContainer extends AbstractTest {
 		container.refresh(Arrays.asList(lazy1));
 
 		actual = database.getModuleEvents();
-		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(lazy1, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(lazy1, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(lazy1, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(lazy1, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(lazy1, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(lazy1, ModuleEvent.STARTED, State.ACTIVE)));
+		expected = new ArrayList<DummyModuleEvent>(Arrays.asList(new DummyModuleEvent(lazy1, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(lazy1, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(lazy1, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(lazy1, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(lazy1, ModuleEvent.LAZY_ACTIVATION, State.LAZY_STARTING)));
 		assertEvents(expected, actual, true);
 
 		container.update(lazy1, OSGiManifestBuilderFactory.createBuilder(getManifest("lazy1_v1.MF")), null);
@@ -2369,7 +2369,20 @@ public class TestModuleContainer extends AbstractTest {
 
 	@Test
 	public void testStartOnResolve() throws BundleException, IOException {
-		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		doTestStartOnResolve(true);
+	}
+
+	@Test
+	public void testDisableStartOnResolve() throws BundleException, IOException {
+		doTestStartOnResolve(false);
+	}
+
+	private void doTestStartOnResolve(boolean enabled) throws BundleException, IOException {
+		Map<String, String> configuration = new HashMap<String, String>();
+		if (!enabled) {
+			configuration.put(EquinoxConfiguration.PROP_MODULE_AUTO_START_ON_RESOLVE, Boolean.toString(false));
+		}
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), configuration);
 		ModuleContainer container = adaptor.getContainer();
 
 		// install the system.bundle
@@ -2405,8 +2418,9 @@ public class TestModuleContainer extends AbstractTest {
 		report = container.resolve(Collections.<Module> emptySet(), false);
 		Assert.assertNull("Found a error.", report.getResolutionException());
 
+		State expectedState = enabled ? State.ACTIVE : State.RESOLVED;
 		for (Module module : modules) {
-			Assert.assertEquals("Wrong state.", State.ACTIVE, module.getState());
+			Assert.assertEquals("Wrong state.", expectedState, module.getState());
 		}
 	}
 

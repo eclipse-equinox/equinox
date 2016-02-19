@@ -8,3 +8,4 @@ eclipseAdaptor.jar
 resolver.jar
 /generated/
 .DS_Store
+/configuration/

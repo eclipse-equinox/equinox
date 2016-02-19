@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2015 IBM Corporation and others.
+ * Copyright (c) 2006, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,7 +98,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Bundle chainTestD = installer.installBundle("chain.test.d"); //$NON-NLS-1$
 		chainTest.loadClass("chain.test.TestMultiChain").newInstance(); //$NON-NLS-1$
 
-		Object[] expectedEvents = new Object[12];
+		Object[] expectedEvents = new Object[8];
 		expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, chainTestD);
 		expectedEvents[1] = new BundleEvent(BundleEvent.STARTED, chainTestB);
 		expectedEvents[2] = new BundleEvent(BundleEvent.STARTED, chainTestC);
@@ -107,14 +107,20 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		expectedEvents[5] = new BundleEvent(BundleEvent.STOPPED, chainTestB);
 		expectedEvents[6] = new BundleEvent(BundleEvent.STOPPED, chainTestC);
 		expectedEvents[7] = new BundleEvent(BundleEvent.STOPPED, chainTestD);
-		expectedEvents[8] = new BundleEvent(BundleEvent.STARTED, chainTestD);
-		expectedEvents[9] = new BundleEvent(BundleEvent.STARTED, chainTestC);
-		expectedEvents[10] = new BundleEvent(BundleEvent.STARTED, chainTestB);
-		expectedEvents[11] = new BundleEvent(BundleEvent.STARTED, chainTestA);
 
 		installer.refreshPackages(new Bundle[] {chainTestC, chainTestD});
 
-		Object[] actualEvents = simpleResults.getResults(12);
+		Object[] actualEvents = simpleResults.getResults(8);
+		compareResults(expectedEvents, actualEvents);
+
+		chainTest.loadClass("chain.test.TestMultiChain").newInstance(); //$NON-NLS-1$
+		expectedEvents = new Object[4];
+		expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, chainTestD);
+		expectedEvents[1] = new BundleEvent(BundleEvent.STARTED, chainTestB);
+		expectedEvents[2] = new BundleEvent(BundleEvent.STARTED, chainTestC);
+		expectedEvents[3] = new BundleEvent(BundleEvent.STARTED, chainTestA);
+
+		actualEvents = simpleResults.getResults(4);
 		compareResults(expectedEvents, actualEvents);
 	}
 

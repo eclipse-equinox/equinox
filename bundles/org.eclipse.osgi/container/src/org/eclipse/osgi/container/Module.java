@@ -161,7 +161,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	final EquinoxReentrantLock stateChangeLock = new EquinoxReentrantLock();
 	private final EnumSet<ModuleEvent> stateTransitionEvents = EnumSet.noneOf(ModuleEvent.class);
 	private final EnumSet<Settings> settings;
-	private final AtomicInteger inStartResolve = new AtomicInteger(0);
+	final AtomicInteger inStart = new AtomicInteger(0);
 	private volatile State state = State.INSTALLED;
 	private volatile int startlevel;
 	private volatile long lastModified;
@@ -394,22 +394,25 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		}
 		BundleException startError = null;
 		boolean lockedStarted = false;
-		lockStateChange(ModuleEvent.STARTED);
+		// Indicate we are in the middle of a start.
+		// This must be incremented before we acquire the STARTED lock the first time.
+		inStart.incrementAndGet();
 		try {
-			inStartResolve.incrementAndGet();
+			lockStateChange(ModuleEvent.STARTED);
 			lockedStarted = true;
 			checkValid();
 			if (StartOptions.TRANSIENT_IF_AUTO_START.isContained(options) && !settings.contains(Settings.AUTO_START)) {
-				// Do nothing
+				// Do nothing; this is a request to start only if the module is set for auto start
 				return;
 			}
 			checkFragment();
 			persistStartOptions(options);
 			if (getStartLevel() > getRevisions().getContainer().getStartLevel()) {
 				if (StartOptions.TRANSIENT.isContained(options)) {
+					// it is an error to attempt to transient start a bundle without its start level met
 					throw new BundleException(Msg.Module_Transient_StartError, BundleException.START_TRANSIENT_ERROR);
 				}
-				// DO nothing
+				// Do nothing; start level is not met
 				return;
 			}
 			if (State.ACTIVE.equals(getState()))
@@ -421,7 +424,6 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				unlockStateChange(ModuleEvent.STARTED);
 				lockedStarted = false;
 				try {
-
 					report = getRevisions().getContainer().resolve(Arrays.asList(this), true);
 				} finally {
 					lockStateChange(ModuleEvent.STARTED);
@@ -456,7 +458,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			if (lockedStarted) {
 				unlockStateChange(ModuleEvent.STARTED);
 			}
-			inStartResolve.decrementAndGet();
+			inStart.decrementAndGet();
 		}
 
 		if (event != null) {
@@ -701,7 +703,12 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		return current == null ? false : current.hasLazyActivatePolicy();
 	}
 
-	final boolean inStartResolve() {
-		return inStartResolve.get() > 0;
+	/**
+	 * Used internally by the container to determine if any thread is in the middle
+	 * of a start operation on this module.
+	 * @return
+	 */
+	final boolean inStart() {
+		return inStart.get() > 0;
 	}
 }

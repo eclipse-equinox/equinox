@@ -90,6 +90,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	private final long moduleLockTimeout;
 
+	private final boolean autoStartOnResolve;
+
 	boolean DEBUG_MONITOR_LAZY = false;
 
 	/**
@@ -121,6 +123,12 @@ public final class ModuleContainer implements DebugOptionsListener {
 		if (debugOptions != null) {
 			this.DEBUG_MONITOR_LAZY = debugOptions.getBooleanOption(Debug.OPTION_MONITOR_LAZY, false);
 		}
+
+		String autoStartOnResolveProp = adaptor.getProperty(EquinoxConfiguration.PROP_MODULE_AUTO_START_ON_RESOLVE);
+		if (autoStartOnResolveProp == null) {
+			autoStartOnResolveProp = Boolean.toString(true);
+		}
+		this.autoStartOnResolve = Boolean.parseBoolean(autoStartOnResolveProp);
 	}
 
 	/**
@@ -702,15 +710,22 @@ public final class ModuleContainer implements DebugOptionsListener {
 		if (restartTriggers) {
 			for (Module module : triggers) {
 				if (module.getId() != 0 && Module.RESOLVED_SET.contains(module.getState())) {
-					start(module, StartOptions.TRANSIENT);
+					start(module, StartOptions.TRANSIENT_RESUME);
 				}
 			}
 		}
-		// This is questionable behavior according to the spec but this was the way equinox previously behaved
-		// Need to auto-start any persistently started bundles that got resolved
-		for (Module module : modulesLocked) {
-			if (!module.inStartResolve() && module.getId() != 0 && !triggerSet.contains(module)) {
-				start(module, StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
+		if (autoStartOnResolve) {
+			// This is questionable behavior according to the spec but this was the way equinox previously behaved
+			// Need to auto-start any persistently started bundles that got resolved
+			for (Module module : modulesLocked) {
+				// Note that we check inStart here.  There is still a timing issue that is impossible to avoid.
+				// Another thread could attempt to start the module but we could check inStart() before that thread
+				// increments inStart.  One thread will win the race to grab the module STARTED lock.  That thread
+				// will end up actually starting the module and the other thread will block.  If a timeout occurs
+				// the blocking thread will get an exception.
+				if (!module.inStart() && module.getId() != 0 && !triggerSet.contains(module)) {
+					start(module, StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
+				}
 			}
 		}
 		return true;
@@ -860,8 +875,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 					} catch (BundleException e) {
 						adaptor.publishContainerEvent(ContainerEvent.ERROR, refreshModule, e);
 					}
-				}
-				if (!State.ACTIVE.equals(previousState)) {
+				} else {
 					iTriggers.remove();
 				}
 			}
