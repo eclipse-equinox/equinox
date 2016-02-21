@@ -22,14 +22,6 @@
   <version>1.0.100-SNAPSHOT</version>
   <packaging>eclipse-test-plugin</packaging>
 
-  <repositories>
-    <repository>
-       <id>orbit-R20100519200754</id>
-       <url>http://download.eclipse.org/tools/orbit/downloads/drops/R20151221205849/repository/</url>
-       <layout>p2</layout>
-    </repository>
-  </repositories>
-
   <build>
     <plugins>
       <plugin>

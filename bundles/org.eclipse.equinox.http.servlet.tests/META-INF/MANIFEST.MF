@@ -3,7 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.equinox.http.servlet.tests
 Bundle-SymbolicName: org.eclipse.equinox.http.servlet.tests
 Bundle-Version: 1.0.100.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Eclipse-BundleShape: dir
 Bundle-Activator: org.eclipse.equinox.http.servlet.tests.bundle.Activator
 Import-Package: javax.servlet;version="2.6.0",
  javax.servlet.http;version="2.6.0",
