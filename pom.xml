@@ -108,6 +108,7 @@
     <module>bundles/org.eclipse.equinox.http.jetty9</module>
     <module>bundles/org.eclipse.equinox.http.registry</module>
     <module>bundles/org.eclipse.equinox.http.servlet</module>
+    <module>bundles/org.eclipse.equinox.http.servlet.tests</module>
     <module>bundles/org.eclipse.equinox.http.servletbridge</module>
     <module>bundles/org.eclipse.equinox.io</module>
     <module>bundles/org.eclipse.equinox.ip</module>
