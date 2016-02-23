@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2013 IBM Corporation and others.
+ * Copyright (c) 2008, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,12 +11,14 @@
 package org.eclipse.osgi.tests.bundles;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
+import org.osgi.framework.launch.Framework;
 import org.osgi.framework.wiring.FrameworkWiring;
 
 public class CascadeConfigTests extends AbstractBundleTests {
@@ -142,4 +144,41 @@ public class CascadeConfigTests extends AbstractBundleTests {
 		equinox.waitForStop(10000);
 	}
 
+	public void testCascadeConfigIni() throws Exception {
+		// First create a framework with the 'parent' configuration
+		File configParent = OSGiTestsActivator.getContext().getDataFile(getName() + "_parent");
+		configParent.mkdirs();
+		File parentConfigIni = new File(configParent, "config.ini");
+
+		Properties parentProps = new Properties();
+		parentProps.put("parent.key", "parent");
+		parentProps.put("parent.child.key", "parent");
+
+		parentProps.store(new FileOutputStream(parentConfigIni), "Parent config.ini");
+
+		// Now create a child framework and make sure bundle is there
+		File configChild = OSGiTestsActivator.getContext().getDataFile(getName() + "_child");
+		configChild.mkdirs();
+		File childConfigIni = new File(configChild, "config.ini");
+
+		Properties childProps = new Properties();
+		childProps.put("parent.child.key", "child");
+		childProps.put("child.key", "child");
+		childProps.store(new FileOutputStream(childConfigIni), "Parent config.ini");
+		Map<String, Object> childMap = new HashMap<String, Object>();
+		childMap.put(Constants.FRAMEWORK_STORAGE, configChild.getAbsolutePath());
+		childMap.put("osgi.sharedConfiguration.area", configParent.getCanonicalPath());
+
+		Framework equinox = new Equinox(childMap);
+		equinox.init();
+
+		BundleContext systemContext = equinox.getBundleContext();
+
+		assertEquals("Wrong value for parent.key", "parent", systemContext.getProperty("parent.key"));
+		assertEquals("Wrong value for parent.child.key", "child", systemContext.getProperty("parent.child.key"));
+		assertEquals("Wrong value for child.key", "child", systemContext.getProperty("child.key"));
+
+		equinox.stop();
+		equinox.waitForStop(10000);
+	}
 }

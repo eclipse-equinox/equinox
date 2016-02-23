@@ -477,7 +477,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		// We use an AttomicBoolean to hold the setting so we can set it after the config.ini has been loaded
 		AtomicBoolean debugLocations = new AtomicBoolean();
 		this.equinoxLocations = new EquinoxLocations(this.configValues, this.hookRegistry.getContainer(), debugLocations);
-		this.configValues.loadConfigIni(getConfigIni(equinoxLocations));
+		this.configValues.loadConfigIni(getConfigIni(equinoxLocations, false));
+		this.configValues.loadConfigIni(getConfigIni(equinoxLocations, true));
 		this.configValues.finalizeValues();
 
 		this.debugOptions = new FrameworkDebugOptions(this);
@@ -553,12 +554,16 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		}
 	}
 
-	private URL getConfigIni(EquinoxLocations equinoxLocations2) {
+	private URL getConfigIni(EquinoxLocations locations, boolean parent) {
 		if (Boolean.TRUE.toString().equals(getConfiguration(EquinoxConfiguration.PROP_IGNORE_USER_CONFIGURATION)))
 			return null;
-		Location configArea = equinoxLocations.getConfigurationLocation();
-		if (configArea == null)
+		Location configArea = locations.getConfigurationLocation();
+		if (configArea != null && parent) {
+			configArea = configArea.getParentLocation();
+		}
+		if (configArea == null) {
 			return null;
+		}
 		try {
 			return new URL(configArea.getURL().toExternalForm() + CONFIG_FILE);
 		} catch (MalformedURLException e) {
