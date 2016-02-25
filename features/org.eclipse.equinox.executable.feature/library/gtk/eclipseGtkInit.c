@@ -118,6 +118,9 @@ int loadGtk() {
 	if (oxygenGtkHack == NULL) {
 		setenv("OXYGEN_DISABLE_INNER_SHADOWS_HACK", "1", 0);
 	}
+	
+	/* Disable GTK scaling*/
+	setenv("GDK_SCALE", "1", 1);
 
 	void *gdkLib = NULL, *gtkLib = NULL, *objLib = NULL, *pixLib = NULL, *x11Lib = NULL;
 	
