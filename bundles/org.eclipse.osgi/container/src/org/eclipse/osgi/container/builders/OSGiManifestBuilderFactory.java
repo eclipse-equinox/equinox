@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.container.builders;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 import org.eclipse.osgi.container.ModuleRevisionBuilder;
 import org.eclipse.osgi.container.namespaces.*;
@@ -668,26 +666,24 @@ public final class OSGiManifestBuilderFactory {
 	}
 
 	private static Object convertValue(String type, String value) {
-
-		if (ATTR_TYPE_STRING.equalsIgnoreCase(type))
+		if (ATTR_TYPE_STRING.equalsIgnoreCase(type)) {
 			return value;
+		}
 
 		String trimmed = value.trim();
-		if (ATTR_TYPE_DOUBLE.equalsIgnoreCase(type))
+		if (ATTR_TYPE_DOUBLE.equalsIgnoreCase(type)) {
 			return new Double(trimmed);
-		else if (ATTR_TYPE_LONG.equalsIgnoreCase(type))
+		} else if (ATTR_TYPE_LONG.equalsIgnoreCase(type)) {
 			return new Long(trimmed);
-		else if (ATTR_TYPE_URI.equalsIgnoreCase(type))
-			try {
-				return new URI(trimmed);
-			} catch (URISyntaxException e) {
-				throw new RuntimeException(e);
-			}
-		else if (ATTR_TYPE_VERSION.equalsIgnoreCase(type))
+		} else if (ATTR_TYPE_URI.equalsIgnoreCase(type)) {
+			// we no longer actually create URIs here; just use the string
+			return trimmed;
+		} else if (ATTR_TYPE_VERSION.equalsIgnoreCase(type)) {
 			return new Version(trimmed);
-		else if (ATTR_TYPE_SET.equalsIgnoreCase(type))
-			return ManifestElement.getArrayFromList(trimmed, ","); //$NON-NLS-1$
-
+		} else if (ATTR_TYPE_SET.equalsIgnoreCase(type)) {
+			// just use List<String> here so we don't have to deal with String[] in other places
+			return Collections.unmodifiableList(Arrays.asList(ManifestElement.getArrayFromList(trimmed, ","))); //$NON-NLS-1$
+		}
 		// assume list type, anything else will throw an exception
 		Tokenizer listTokenizer = new Tokenizer(type);
 		String listType = listTokenizer.getToken("<"); //$NON-NLS-1$

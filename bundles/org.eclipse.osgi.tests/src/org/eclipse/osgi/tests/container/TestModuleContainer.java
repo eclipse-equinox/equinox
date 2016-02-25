@@ -12,6 +12,8 @@ package org.eclipse.osgi.tests.container;
 
 import static java.util.jar.Attributes.Name.MANIFEST_VERSION;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import java.io.*;
@@ -175,6 +177,21 @@ public class TestModuleContainer extends AbstractTest {
 		bytes.close();
 		adaptor.getDatabase().load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
 		adaptor.getContainer().refresh(Arrays.asList(adaptor.getContainer().getModule(0)));
+	}
+
+	// disabled @Test
+	public void testLoadPerformance() throws BundleException, IOException {
+		setupModuleDatabase();
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		resolvedModuleDatabase.store(new DataOutputStream(bytes), true);
+		bytes.close();
+		System.out.println("SIZE: " + bytes.size());
+		long start = System.currentTimeMillis();
+		for (int i = 0; i < 1000; i++) {
+			DummyContainerAdaptor adaptor = createDummyAdaptor();
+			adaptor.getDatabase().load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
+		}
+		System.out.println("END: " + (System.currentTimeMillis() - start));
 	}
 
 	@Test
@@ -2291,6 +2308,107 @@ public class TestModuleContainer extends AbstractTest {
 			m.write(out);
 		}
 		return ManifestElement.parseBundleManifest(new ByteArrayInputStream(out.toByteArray()), null);
+	}
+
+	@Test
+	public void testPersistence() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install the system.bundle
+		installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
+
+		Map<String, Object> attrs = new HashMap<String, Object>();
+		attrs.put("string", "sValue");
+		attrs.put("string.list1", Arrays.asList("v1", "v2", "v3"));
+		attrs.put("string.list2", Arrays.asList("v4", "v5", "v6"));
+		attrs.put("version", Version.valueOf("1.1"));
+		attrs.put("version.list", Arrays.asList(Version.valueOf("1.0"), Version.valueOf("2.0"), Version.valueOf("3.0")));
+		attrs.put("long", Long.valueOf(12345));
+		attrs.put("long.list", Arrays.asList(Long.valueOf(1), Long.valueOf(2), Long.valueOf(3)));
+		attrs.put("double", Double.valueOf(1.2345));
+		attrs.put("double.list", Arrays.asList(Double.valueOf(1.1), Double.valueOf(1.2), Double.valueOf(1.3)));
+		attrs.put("uri", "some.uri");
+		attrs.put("set", Arrays.asList("s1", "s2", "s3"));
+
+		// provider with all supported types
+		Map<String, String> providerManifest = new HashMap<String, String>();
+		providerManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		providerManifest.put(Constants.BUNDLE_SYMBOLICNAME, "provider");
+		providerManifest.put(Constants.EXPORT_PACKAGE, "provider; version=1.1; attr1=attr1; attr2=attr2; dir1:=dir1; dir2:=dir2");
+		providerManifest.put(Constants.PROVIDE_CAPABILITY,
+				"provider.cap;"//
+						+ " string=sValue;"//
+						+ " string.list1:List=\"v1,v2,v3\";"//
+						+ " string.list2:List<String>=\"v4,v5,v6\";"//
+						+ " version:Version=1.1;"//
+						+ " version.list:List<Version>=\"1.0,2.0,3.0\";"//
+						+ " long:Long=12345;"//
+						+ " long.list:List<Long>=\"1,2,3\";"//
+						+ " double:Double=1.2345;"//
+						+ " double.list:List<Double>=\"1.1,1.2,1.3\";"//
+						+ " uri:uri=some.uri;" //
+						+ " set:set=\"s1,s2,s3\"");
+		Module providerModule = installDummyModule(providerManifest, "provider", container);
+		Map<String, Object> providerAttrs = providerModule.getCurrentRevision().getCapabilities("provider.cap").get(0).getAttributes();
+		assertEquals("Wrong provider attrs", attrs, providerAttrs);
+
+		Map<String, String> requirerManifest = new HashMap<String, String>();
+		requirerManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		requirerManifest.put(Constants.BUNDLE_SYMBOLICNAME, "requirer");
+		requirerManifest.put(Constants.IMPORT_PACKAGE, "provider; version=1.1; attr1=attr1; attr2=attr2; dir1:=dir1; dir2:=dir2");
+		requirerManifest.put(Constants.REQUIRE_CAPABILITY,
+				"optional;"//
+						+ " resolution:=optional; " //
+						+ " string=sValue;"//
+						+ " string.list1:List=\"v1,v2,v3\";"//
+						+ " string.list2:List<String>=\"v4,v5,v6\";"//
+						+ " version:Version=1.1;"//
+						+ " version.list:List<Version>=\"1.0,2.0,3.0\";"//
+						+ " long:Long=12345;"//
+						+ " long.list:List<Long>=\"1,2,3\";"//
+						+ " double:Double=1.2345;"//
+						+ " double.list:List<Double>=\"1.1,1.2,1.3\";"//
+						+ " uri:uri=some.uri;" //
+						+ " set:set=\"s1,s2,s3\"," //
+						+ "provider.cap; filter:=\"(string=sValue)\"," //
+						+ "provider.cap; filter:=\"(string.list1=v2)\"," //
+						+ "provider.cap; filter:=\"(string.list2=v5)\"," //
+						+ "provider.cap; filter:=\"(string.list2=v5)\"," //
+						+ "provider.cap; filter:=\"(&(version>=1.1)(version<=1.1.1))\"," //
+						+ "provider.cap; filter:=\"(&(version.list=1)(version.list=2))\"," //
+						+ "provider.cap; filter:=\"(long>=12344)\"," //
+						+ "provider.cap; filter:=\"(long.list=2)\"," //
+						+ "provider.cap; filter:=\"(double>=1.2)\"," //
+						+ "provider.cap; filter:=\"(double.list=1.2)\"," //
+						+ "provider.cap; filter:=\"(uri=some.uri)\"," //
+						+ "provider.cap; filter:=\"(set=s2)\"" //
+						+ "");
+		Module requirerModule = installDummyModule(requirerManifest, "requirer", container);
+		Map<String, Object> requirerAttrs = requirerModule.getCurrentRevision().getRequirements("optional").get(0).getAttributes();
+		assertEquals("Wrong requirer attrs", attrs, requirerAttrs);
+		ResolutionReport report = container.resolve(Collections.singleton(requirerModule), true);
+		assertNull("Error resolving.", report.getResolutionException());
+
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		DataOutputStream data = new DataOutputStream(bytes);
+		adaptor.getDatabase().store(data, true);
+
+		// reload into a new container
+		adaptor = createDummyAdaptor();
+		container = adaptor.getContainer();
+		adaptor.getDatabase().load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
+
+		providerModule = container.getModule("provider");
+		providerAttrs = providerModule.getCurrentRevision().getCapabilities("provider.cap").get(0).getAttributes();
+		assertEquals("Wrong provider attrs", attrs, providerAttrs);
+		assertNotNull("No provider found.", providerModule);
+
+		requirerModule = container.getModule("requirer");
+		assertNotNull("No requirer found.", requirerModule);
+		requirerAttrs = requirerModule.getCurrentRevision().getRequirements("optional").get(0).getAttributes();
+		assertEquals("Wrong requirer attrs", attrs, requirerAttrs);
+
 	}
 
 	@Test
