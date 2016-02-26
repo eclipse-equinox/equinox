@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ import java.util.NoSuchElementException;
  * This class is a thread safe list that is designed for storing lists of listeners.
  * The implementation is optimized for minimal memory footprint, frequent reads 
  * and infrequent writes.  Modification of the list is synchronized and relatively
- * expensive, while accessing the listeners is very fast.  Readers are given access 
+ * expensive, while accessing the listeners is very fast.  For legacy code, readers are given access 
  * to the underlying array data structure for reading, with the trust that they will 
  * not modify the underlying array.
  * <p>
@@ -27,19 +27,19 @@ import java.util.NoSuchElementException;
  * using either equality or identity, as specified in the list constructor.
  * </p>
  * <p>
- * Use the <code>getListeners</code> method when notifying listeners. The recommended
+ * Use an enhanced 'for' loop to notify listeners. The recommended
  * code sequence for notifying all registered listeners of say,
- * <code>FooListener.eventHappened</code>, is:
+ * <code>FooListener#eventHappened(Event)</code>, is:
  * </p>
  * <pre>
- * ListenerList&lt;FooListener&gt; fooListeners = new ListenerList<>();
- * //...
- * for (FooListener listener : fooListeners) {
- * 	listener.eventHappened(event);
- * }
+ListenerList&lt;FooListener&gt; fooListeners = new ListenerList<>();
+//...
+for (FooListener listener : fooListeners) {
+	listener.eventHappened(event);
+}
  * </pre>
  * <p>
- * Alternatively, you can call {@link #getListeners()} and then use a for-loop
+ * Legacy code may still call {@link #getListeners()} and then use a 'for' loop
  * to iterate the {@code Object[]}. This might be insignificantly faster, but
  * it lacks type-safety and risks inadvertent modifications to the array.
  * </p>
