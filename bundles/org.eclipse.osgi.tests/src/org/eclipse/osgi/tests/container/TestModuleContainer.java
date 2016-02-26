@@ -14,6 +14,7 @@ import static java.util.jar.Attributes.Name.MANIFEST_VERSION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.*;
@@ -2408,7 +2409,94 @@ public class TestModuleContainer extends AbstractTest {
 		assertNotNull("No requirer found.", requirerModule);
 		requirerAttrs = requirerModule.getCurrentRevision().getRequirements("optional").get(0).getAttributes();
 		assertEquals("Wrong requirer attrs", attrs, requirerAttrs);
+	}
 
+	@Test
+	public void testInvalidAttributes() throws IOException, BundleException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install the system.bundle
+		installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
+
+		// provider with all supported types
+		Map<String, String> invalidAttrManifest = new HashMap<String, String>();
+		invalidAttrManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		invalidAttrManifest.put(Constants.BUNDLE_SYMBOLICNAME, "invalid");
+
+		invalidAttrManifest.put(Constants.PROVIDE_CAPABILITY, "provider.cap; invalid:Boolean=true");
+		checkInvalidManifest(invalidAttrManifest, container);
+
+		invalidAttrManifest.put(Constants.PROVIDE_CAPABILITY, "provider.cap; invalid:Integer=1");
+		checkInvalidManifest(invalidAttrManifest, container);
+
+		invalidAttrManifest.put(Constants.PROVIDE_CAPABILITY, "provider.cap; invalid:List<Boolean>=true");
+		checkInvalidManifest(invalidAttrManifest, container);
+
+		invalidAttrManifest.put(Constants.PROVIDE_CAPABILITY, "provider.cap; invalid:List<Integer>=1");
+		checkInvalidManifest(invalidAttrManifest, container);
+	}
+
+	private void checkInvalidManifest(Map<String, String> invalidAttrManifest, ModuleContainer container) {
+		try {
+			installDummyModule(invalidAttrManifest, "invalid", container);
+			fail("Expected to get a BundleException with MANIFEST_ERROR");
+		} catch (BundleException e) {
+			// find expected type
+			assertEquals("Wrong type.", BundleException.MANIFEST_ERROR, e.getType());
+		}
+	}
+
+	@Test
+	public void testStoreInvalidAttributes() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install the system.bundle
+		installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
+
+		Integer testInt = Integer.valueOf(1);
+		List<Integer> testIntList = Collections.singletonList(testInt);
+		ModuleRevisionBuilder builder = new ModuleRevisionBuilder();
+		builder.setSymbolicName("invalid.attr");
+		builder.setVersion(Version.valueOf("1.0.0"));
+		builder.addCapability("test", Collections.<String, String> emptyMap(), Collections.singletonMap("test", (Object) testInt));
+		builder.addCapability("test.list", Collections.<String, String> emptyMap(), Collections.singletonMap("test.list", (Object) testIntList));
+		Module invalid = container.install(null, builder.getSymbolicName(), builder, null);
+
+		Object testAttr = invalid.getCurrentRevision().getCapabilities("test").get(0).getAttributes().get("test");
+		assertEquals("Wrong test attr", testInt, testAttr);
+
+		Object testAttrList = invalid.getCurrentRevision().getCapabilities("test.list").get(0).getAttributes().get("test.list");
+		assertEquals("Wrong test list attr", testIntList, testAttrList);
+
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		DataOutputStream data = new DataOutputStream(bytes);
+		adaptor.getDatabase().store(data, true);
+
+		List<DummyContainerEvent> events = adaptor.getDatabase().getContainerEvents();
+		// make sure we see the errors
+		assertEquals("Wrong number of events.", 2, events.size());
+		for (DummyContainerEvent event : events) {
+			assertEquals("Wrong type of event.", ContainerEvent.ERROR, event.type);
+			assertTrue("Wrong type of exception.", event.error instanceof BundleException);
+		}
+
+		// reload into a new container
+		adaptor = createDummyAdaptor();
+		container = adaptor.getContainer();
+		adaptor.getDatabase().load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
+
+		invalid = container.getModule("invalid.attr");
+		assertNotNull("Could not find module.", invalid);
+
+		String testIntString = String.valueOf(testInt);
+		List<String> testIntStringList = Collections.singletonList(testIntString);
+		testAttr = invalid.getCurrentRevision().getCapabilities("test").get(0).getAttributes().get("test");
+		assertEquals("Wrong test attr", testIntString, testAttr);
+
+		testAttrList = invalid.getCurrentRevision().getCapabilities("test.list").get(0).getAttributes().get("test.list");
+		assertEquals("Wrong test list attr", testIntStringList, testAttrList);
 	}
 
 	@Test

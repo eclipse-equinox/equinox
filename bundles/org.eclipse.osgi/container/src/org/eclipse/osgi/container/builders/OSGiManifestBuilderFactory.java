@@ -306,7 +306,7 @@ public final class OSGiManifestBuilderFactory {
 		return symbolicName == null ? symbolicNameAlias : symbolicName;
 	}
 
-	private static void getPackageExports(ModuleRevisionBuilder builder, ManifestElement[] exportElements, Object symbolicName, Collection<Map<String, Object>> exportedPackages) {
+	private static void getPackageExports(ModuleRevisionBuilder builder, ManifestElement[] exportElements, Object symbolicName, Collection<Map<String, Object>> exportedPackages) throws BundleException {
 		if (exportElements == null)
 			return;
 		for (ManifestElement exportElement : exportElements) {
@@ -342,7 +342,7 @@ public final class OSGiManifestBuilderFactory {
 			addImplicitImports(builder, exportedPackages, importPackageNames);
 	}
 
-	private static void addPackageImports(ModuleRevisionBuilder builder, ManifestElement[] importElements, Collection<String> importPackageNames, boolean dynamic) {
+	private static void addPackageImports(ModuleRevisionBuilder builder, ManifestElement[] importElements, Collection<String> importPackageNames, boolean dynamic) throws BundleException {
 		if (importElements == null)
 			return;
 		for (ManifestElement importElement : importElements) {
@@ -424,7 +424,7 @@ public final class OSGiManifestBuilderFactory {
 		return directives;
 	}
 
-	private static void getRequireBundle(ModuleRevisionBuilder builder, ManifestElement[] requireBundles) {
+	private static void getRequireBundle(ModuleRevisionBuilder builder, ManifestElement[] requireBundles) throws BundleException {
 		if (requireBundles == null)
 			return;
 		for (ManifestElement requireElement : requireBundles) {
@@ -469,7 +469,7 @@ public final class OSGiManifestBuilderFactory {
 		}
 	}
 
-	private static void getFragmentHost(ModuleRevisionBuilder builder, ManifestElement[] fragmentHosts) {
+	private static void getFragmentHost(ModuleRevisionBuilder builder, ManifestElement[] fragmentHosts) throws BundleException {
 		if (fragmentHosts == null || fragmentHosts.length == 0)
 			return;
 
@@ -518,7 +518,7 @@ public final class OSGiManifestBuilderFactory {
 		}
 	}
 
-	private static void getRequireCapabilities(ModuleRevisionBuilder builder, ManifestElement[] requireElements) {
+	private static void getRequireCapabilities(ModuleRevisionBuilder builder, ManifestElement[] requireElements) throws BundleException {
 		if (requireElements == null)
 			return;
 		for (ManifestElement requireElement : requireElements) {
@@ -641,7 +641,7 @@ public final class OSGiManifestBuilderFactory {
 		}
 	}
 
-	private static Map<String, Object> getAttributes(ManifestElement element) {
+	private static Map<String, Object> getAttributes(ManifestElement element) throws BundleException {
 		Enumeration<String> keys = element.getKeys();
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		if (keys == null)
@@ -660,12 +660,12 @@ public final class OSGiManifestBuilderFactory {
 		return attributes;
 	}
 
-	private static Object convertValueWithNoWhitespace(String type, String value) {
+	private static Object convertValueWithNoWhitespace(String type, String value) throws BundleException {
 		value = value.replaceAll("\\s", ""); //$NON-NLS-1$//$NON-NLS-2$
 		return convertValue(type, value);
 	}
 
-	private static Object convertValue(String type, String value) {
+	private static Object convertValue(String type, String value) throws BundleException {
 		if (ATTR_TYPE_STRING.equalsIgnoreCase(type)) {
 			return value;
 		}
@@ -688,13 +688,13 @@ public final class OSGiManifestBuilderFactory {
 		Tokenizer listTokenizer = new Tokenizer(type);
 		String listType = listTokenizer.getToken("<"); //$NON-NLS-1$
 		if (!ATTR_TYPE_LIST.equalsIgnoreCase(listType))
-			throw new RuntimeException("Unsupported type: " + type); //$NON-NLS-1$
+			throw new BundleException("Unsupported type: " + type, BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 		char c = listTokenizer.getChar();
 		String componentType = ATTR_TYPE_STRING;
 		if (c == '<') {
 			componentType = listTokenizer.getToken(">"); //$NON-NLS-1$
 			if (listTokenizer.getChar() != '>')
-				throw new RuntimeException("Invalid type, missing ending '>' : " + type); //$NON-NLS-1$
+				throw new BundleException("Invalid type, missing ending '>' : " + type, BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 		}
 		List<String> tokens = new Tokenizer(value).getEscapedTokens(","); //$NON-NLS-1$
 		List<Object> components = new ArrayList<Object>();

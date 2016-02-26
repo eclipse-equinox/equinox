@@ -18,14 +18,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.container.Module.State;
+import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.container.ComputeNodeOrder;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Version;
+import org.osgi.framework.*;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.*;
@@ -999,7 +999,7 @@ public class ModuleDatabase {
 			// Followed by maps which may reference the strings and versions
 			out.writeInt(allMaps.size());
 			for (Map<String, ?> map : allMaps) {
-				writeMap(map, out, objectTable);
+				writeMap(map, out, objectTable, moduleDatabase);
 				out.writeInt(addToWriteTable(map, objectTable));
 			}
 
@@ -1404,7 +1404,7 @@ public class ModuleDatabase {
 
 		}
 
-		private static void writeMap(Map<String, ?> source, DataOutputStream out, Map<Object, Integer> objectTable) throws IOException {
+		private static void writeMap(Map<String, ?> source, DataOutputStream out, Map<Object, Integer> objectTable, ModuleDatabase moduleDatabase) throws IOException {
 			if (source == null) {
 				out.writeInt(0);
 			} else {
@@ -1428,12 +1428,13 @@ public class ModuleDatabase {
 						writeVersion((Version) value, out, objectTable);
 					} else if (value instanceof List) {
 						out.writeByte(VALUE_LIST);
-						writeList(out, (List<?>) value, objectTable);
+						writeList(out, key, (List<?>) value, objectTable, moduleDatabase);
 					} else {
-						// better do our best and write a string
-						// probably should warn here
+						// do our best and write a string; post an error.
+						// This will be difficult to debug because we don't know which module it is coming from, but it is better than being silent
+						moduleDatabase.adaptor.publishContainerEvent(ContainerEvent.ERROR, moduleDatabase.getModule(0), new BundleException("Invalid map value: " + key + " = " + value.getClass().getName() + '[' + value + ']')); //$NON-NLS-1$ //$NON-NLS-2$
 						out.writeByte(VALUE_STRING);
-						writeString((String) value, out, objectTable);
+						writeString(String.valueOf(value), out, objectTable);
 					}
 				}
 			}
@@ -1484,18 +1485,18 @@ public class ModuleDatabase {
 			}
 		}
 
-		private static void writeList(DataOutputStream out, List<?> list, Map<Object, Integer> objectTable) throws IOException {
+		private static void writeList(DataOutputStream out, String key, List<?> list, Map<Object, Integer> objectTable, ModuleDatabase moduleDatabase) throws IOException {
 			if (list.isEmpty()) {
 				out.writeInt(0);
 				return;
 			}
 			byte type = getListType(list);
-			if (type < 0) {
+			if (type == -1) {
 				out.writeInt(0);
 				return; // don't understand the list type
 			}
 			out.writeInt(list.size());
-			out.writeByte(type);
+			out.writeByte(type == -2 ? VALUE_STRING : type);
 			for (Object value : list) {
 				switch (type) {
 					case VALUE_STRING :
@@ -1511,6 +1512,10 @@ public class ModuleDatabase {
 						writeVersion((Version) value, out, objectTable);
 						break;
 					default :
+						// do our best and write a string; post an error.
+						// This will be difficult to debug because we don't know which module it is coming from, but it is better than being silent
+						moduleDatabase.adaptor.publishContainerEvent(ContainerEvent.ERROR, moduleDatabase.getModule(0), new BundleException("Invalid list element in map: " + key + " = " + value.getClass().getName() + '[' + value + ']')); //$NON-NLS-1$ //$NON-NLS-2$
+						writeString(String.valueOf(value), out, objectTable);
 						break;
 				}
 			}
