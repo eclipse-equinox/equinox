@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2014 IBM Corporation and others.
+ * Copyright (c) 2011, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,6 @@ import org.osgi.service.http.NamespaceException;
  * for registering the servlet with the HttpService, and handles the HTTP GET
  * requests by providing a template method that is implemented by subclasses.
  */
-@SuppressWarnings("deprecation")
 public abstract class AbstractTestServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	protected static final String STATUS_OK = "OK"; //$NON-NLS-1$

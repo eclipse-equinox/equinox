@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Raymond Augé and others.
+ * Copyright (c) 2014, 2016 Raymond Augé and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,6 @@ import org.osgi.service.http.NamespaceException;
  * for registering the servlet with the HttpService, and handles the HTTP GET
  * requests by providing a template method that is implemented by subclasses.
  */
-@SuppressWarnings("deprecation")
 public abstract class AbstractTestResource {
 	protected static final String STATUS_OK = "OK"; //$NON-NLS-1$
 	protected static final String STATUS_ERROR = "ERROR"; //$NON-NLS-1$

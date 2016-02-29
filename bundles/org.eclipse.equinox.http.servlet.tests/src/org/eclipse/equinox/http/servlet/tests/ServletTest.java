@@ -103,7 +103,6 @@ import org.osgi.service.http.runtime.dto.ServletContextDTO;
 import org.osgi.service.http.runtime.dto.ServletDTO;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
-@SuppressWarnings("restriction")
 public class ServletTest extends BaseTest {
 
 	public void test_ErrorPage1() throws Exception {
@@ -1877,7 +1876,9 @@ public class ServletTest extends BaseTest {
 
 				List<FileItem> items = null;
 				try {
-					items = upload.parseRequest(req);
+					@SuppressWarnings("unchecked")
+					List<FileItem> parseRequest = upload.parseRequest(req);
+					items = parseRequest;
 				} catch (FileUploadException e) {
 					e.printStackTrace();
 				}
