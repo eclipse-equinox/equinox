@@ -46,13 +46,13 @@
             <configuration>
               <property name="feature.base" value="."/>
               <target>
-                <copy todir="." overwrite="true">
+                <copy todir="${project.build.directory}" overwrite="true">
                   <fileset dir="../../../rt.equinox.binaries/${project.artifactId}/">
                     <include name="*.so"/>
                     <include name="*.dll"/>
                   </fileset>
                 </copy>
-                <chmod file="./*.so" perm="755" verbose="true"/>
+                <chmod file="${project.build.directory}/*.so" perm="755" verbose="true"/>
               </target>
             </configuration>
             <goals>
@@ -60,6 +60,22 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-packaging-plugin</artifactId>
+        <version>${tycho.version}</version>
+        <configuration>
+          <additionalFileSets>
+            <fileSet>
+              <directory>${project.build.directory}</directory>
+              <includes>
+                <include>*.so</include>
+                <include>*.dll</include>
+              </includes>
+            </fileSet>
+          </additionalFileSets>
+        </configuration>
       </plugin>
     </plugins>
   </build>
