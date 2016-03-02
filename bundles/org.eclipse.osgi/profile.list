@@ -9,7 +9,7 @@
 #     IBM Corporation - initial API and implementation
 ###############################################################################
 java.profiles = \
- JavaSE-1.9.profile,\
+ JavaSE-9.profile,\
  JavaSE-1.8.profile,\
  JavaSE-1.7.profile,\
  JavaSE-1.6.profile,\
