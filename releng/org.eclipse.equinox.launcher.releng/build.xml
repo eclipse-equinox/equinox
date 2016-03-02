@@ -49,7 +49,6 @@
 			<or>
 				<equals arg1="s390" arg2="${arch}" />
 				<equals arg1="s390x" arg2="${arch}" />
-				<equals arg1="motif.sparc" arg2="${ws}.${arch}" />
 				<equals arg1="win32.ia64" arg2="${ws}.${arch}" />
 			</or>
 		</condition>
@@ -68,13 +67,6 @@
 		</condition>
 	</target>
 
-	<target name="copyMotifLib" if="copyMotifLib" >
-		<scp file="${userName}@${machine}:${lib_dir}/libeclipse-motif.so"
-			todir="${localGit}/rt.equinox.binaries/${fragmentFolder}"
-			keyfile="${keyfile}"
-			trust="true"/>
-	</target>
-	
 	<target name="copyMacPPC" if="copyMacPPC" >
 		<scp file="${userName}@${machine}:${lib_dir}/eclipse"
 			todir="${localGit}/rt.equinox.binaries/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/ppc${mac_suffix}"
@@ -220,10 +212,6 @@
 			</and>
 		</condition>
 		<antcall target="copyMacPPC" />
-		<condition property="copyMotifLib" >
-			<equals arg1="aix.motif" arg2="${os}.${ws}" />
-		</condition>
-		<antcall target="copyMotifLib" />
 		<sshexec host="${machine}" 
 			username="${userName}" 
 			keyfile="${keyfile}" 
