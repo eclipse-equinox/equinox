@@ -53,6 +53,8 @@ static FN_TABLE gdkFunctions[] = {
 	FN_TABLE_ENTRY(gdk_set_program_class, 1),
 	FN_TABLE_ENTRY(gdk_display_get_default, 1),
 	FN_TABLE_ENTRY(gdk_x11_display_get_xdisplay, 1),
+	FN_TABLE_ENTRY(gdk_screen_get_default, 1),
+	FN_TABLE_ENTRY(gdk_screen_get_resolution, 1),
 	{ NULL, NULL }
 };
 /* functions from libgdk_pixbuf-2.0 */
@@ -60,6 +62,7 @@ static FN_TABLE pixFunctions[] = {
 	FN_TABLE_ENTRY(gdk_pixbuf_new_from_file, 1),
 	FN_TABLE_ENTRY(gdk_pixbuf_get_width, 1),
 	FN_TABLE_ENTRY(gdk_pixbuf_get_height, 1),
+	FN_TABLE_ENTRY(gdk_pixbuf_scale_simple, 1),
 	{ NULL, NULL }
 };
 /* functions from libgobject-2.0 */

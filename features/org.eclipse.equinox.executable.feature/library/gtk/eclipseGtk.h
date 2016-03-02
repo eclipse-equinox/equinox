@@ -48,9 +48,12 @@ struct GTK_PTRS {
 	GdkDisplay* (*gdk_display_get_default)  		();
 	Display*	(*gdk_x11_display_get_xdisplay)  	(GdkDisplay*);
 	GdkPixbuf*	(*gdk_pixbuf_new_from_file)			(const char*, GError **);
+	GdkPixbuf*	(*gdk_pixbuf_scale_simple)			(const GdkPixbuf*, int, int, GdkInterpType);
 	int			(*gdk_pixbuf_get_width)				(const GdkPixbuf*);
 	int			(*gdk_pixbuf_get_height)			(const GdkPixbuf*);
 	void		(*gdk_set_program_class)			(const char*);
+	GdkScreen *	(*gdk_screen_get_default)			();
+	double		(*gdk_screen_get_resolution)		(GdkScreen *);
 	
 	Window 		(*XGetSelectionOwner)		(Display*, Atom);
 	void		(*XSetSelectionOwner)		(Display*, Atom, Window, Time);

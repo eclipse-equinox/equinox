@@ -226,11 +226,26 @@ int reuseWorkbench(_TCHAR** filePath, int timeout) {
 	return result;
 }
 
+/* Get current scaling-factor */
+float scaleFactor ()
+{
+	float scaleFactor = 1;
+	GdkScreen * screen;
+	double resolution;
+	screen = gtk.gdk_screen_get_default();
+	resolution = gtk.gdk_screen_get_resolution (screen);
+	if (resolution <= 0) resolution = 96; // in unix and windows 100% corresponds to dpi of 96
+	resolution = ((int)(resolution/24 + 0.5)) * 24; //rounding the resolution to 25% multiples, 25% of 96 is 24.
+	scaleFactor = (float)(resolution/96);
+	return scaleFactor;
+}
 /* Create and Display the Splash Window */
 int showSplash( const char* featureImage )
 {
 	GtkWidget *image;
-	GdkPixbuf *pixbuf;
+	GdkPixbuf *pixbuf, *scaledPixbuf;
+	int width, height;
+	float scalingFactor;
 
 	if (splashHandle != 0)
 		return 0; /* already showing splash */
@@ -249,7 +264,17 @@ int showSplash( const char* featureImage )
 	gtk.g_signal_connect_data((gpointer)shellHandle, "destroy", (GtkSignalFunc)(gtk.gtk_widget_destroyed), &shellHandle, NULL, 0);
 		
 	pixbuf = gtk.gdk_pixbuf_new_from_file(featureImage, NULL);
-	image = gtk.gtk_image_new_from_pixbuf(pixbuf);
+	width = gtk.gdk_pixbuf_get_width(pixbuf);
+	height = gtk.gdk_pixbuf_get_height(pixbuf);
+	scalingFactor = scaleFactor();
+
+	if (scalingFactor > 1) {
+		scaledPixbuf = gtk.gdk_pixbuf_scale_simple(pixbuf, width * scalingFactor, height * scalingFactor, GDK_INTERP_BILINEAR);
+	} else {
+		scaledPixbuf = pixbuf;
+	}
+	
+	image = gtk.gtk_image_new_from_pixbuf(scaledPixbuf);
 	if (pixbuf) {
 		gtk.g_object_unref(pixbuf);
 	}
@@ -258,7 +283,7 @@ int showSplash( const char* featureImage )
 	if (getOfficialName() != NULL)
 		gtk.gtk_window_set_title((GtkWindow*)(shellHandle), getOfficialName());
 	gtk.gtk_window_set_position((GtkWindow*)(shellHandle), GTK_WIN_POS_CENTER);
-	gtk.gtk_window_resize((GtkWindow*)(shellHandle), gtk.gdk_pixbuf_get_width(pixbuf), gtk.gdk_pixbuf_get_height(pixbuf));
+	gtk.gtk_window_resize((GtkWindow*)(shellHandle), gtk.gdk_pixbuf_get_width(scaledPixbuf), gtk.gdk_pixbuf_get_height(scaledPixbuf));
 	gtk.gtk_widget_show_all((GtkWidget*)(shellHandle));
 	splashHandle = (long)shellHandle;
 	dispatchMessages();
