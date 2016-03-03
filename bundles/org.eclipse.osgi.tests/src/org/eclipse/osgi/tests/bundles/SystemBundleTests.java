@@ -34,7 +34,10 @@ import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.hooks.weaving.WeavingHook;
 import org.osgi.framework.hooks.weaving.WovenClass;
+import org.osgi.framework.namespace.NativeNamespace;
 import org.osgi.framework.wiring.*;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Requirement;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -2682,5 +2685,64 @@ public class SystemBundleTests extends AbstractBundleTests {
 		jos.flush();
 		jos.close();
 		return file;
+	}
+
+	public void testBug405919() throws Exception {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		config.mkdirs();
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put("osgi.framework", "boo");
+		// Initialize and start a framework specifying an invalid osgi.framework configuration value.
+		Equinox equinox = null;
+		try {
+			equinox = new Equinox(configuration);
+			equinox.start();
+		} catch (NullPointerException e) {
+			fail("failed to accept an invalid value for osgi.framework", e);
+		}
+		try {
+			// Make sure the framework can install and start a bundle.
+			BundleContext systemContext = equinox.getBundleContext();
+			try {
+				Bundle tb1 = systemContext.installBundle(installer.getBundleLocation("test.bug375784"));
+				tb1.start();
+			} catch (BundleException e) {
+				fail("failed to install and start test bundle", e);
+			}
+			// Check the capabilities and requirements of the system bundle.
+			BundleRevision inner = systemContext.getBundle().adapt(BundleRevision.class);
+			BundleRevision outer = getContext().getBundle(0).adapt(BundleRevision.class);
+			// Capabilities.
+			List<Capability> innerCaps = inner.getCapabilities(null);
+			List<Capability> outerCaps = outer.getCapabilities(null);
+			assertEquals("Number of capabilities differ", outerCaps.size(), innerCaps.size());
+			for (int i = 0; i < innerCaps.size(); i++) {
+				Capability innerCap = innerCaps.get(i);
+				Capability outerCap = innerCaps.get(i);
+				assertEquals("Capability namespaces differ: " + outerCap.getNamespace(), outerCap.getNamespace(), innerCap.getNamespace());
+				String namespace = outerCap.getNamespace();
+				if (NativeNamespace.NATIVE_NAMESPACE.equals(namespace) || "eclipse.platform".equals(namespace)) {
+					// Ignore these because they are known to differ.
+					continue;
+				}
+				assertEquals("Capability attributes differ: " + outerCap.getNamespace(), outerCap.getAttributes(), innerCap.getAttributes());
+				assertEquals("Capability directives differ: " + outerCap.getNamespace(), outerCap.getDirectives(), innerCap.getDirectives());
+			}
+			// Requirements.
+			List<Requirement> innerReqs = inner.getRequirements(null);
+			List<Requirement> outerReqs = outer.getRequirements(null);
+			assertEquals("Number of requirements differ", outerReqs.size(), innerReqs.size());
+			for (int i = 0; i < innerReqs.size(); i++) {
+				Requirement innerReq = innerReqs.get(i);
+				Requirement outerReq = innerReqs.get(i);
+				assertEquals("Requirement namespaces differ: " + outerReq.getNamespace(), outerReq.getNamespace(), innerReq.getNamespace());
+				assertEquals("Requirement attributes differ: " + outerReq.getNamespace(), outerReq.getAttributes(), innerReq.getAttributes());
+				assertEquals("Requirement directives differ: " + outerReq.getNamespace(), outerReq.getDirectives(), innerReq.getDirectives());
+			}
+		} finally {
+			equinox.stop();
+			equinox.waitForStop(5000);
+		}
 	}
 }

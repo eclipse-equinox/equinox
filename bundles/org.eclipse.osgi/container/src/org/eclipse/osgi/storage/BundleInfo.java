@@ -192,6 +192,11 @@ public final class BundleInfo {
 		}
 
 		private void setLastModified(File content) {
+			if (content == null) {
+				// Bug 477787: content will be null when the osgi.framework configuration property contains an invalid value.
+				lastModified = 0;
+				return;
+			}
 			if (isDirectory)
 				content = new File(content, "META-INF/MANIFEST.MF"); //$NON-NLS-1$
 			lastModified = Storage.secureAction.lastModified(content);

@@ -11,6 +11,7 @@
 
 package org.eclipse.osgi.internal.loader;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -357,7 +358,9 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 				if (signers.length > 0)
 					certs = signers[0].getCertificateChain();
 			}
-			return new GenerationProtectionDomain(new CodeSource(bundlefile.getBaseFile().toURL(), certs), permissions, getGeneration());
+			File file = bundlefile.getBaseFile();
+			// Bug 477787: file will be null when the osgi.framework configuration property contains an invalid value.
+			return new GenerationProtectionDomain(file == null ? null : new CodeSource(file.toURL(), certs), permissions, getGeneration());
 			//return new ProtectionDomain(new CodeSource(bundlefile.getBaseFile().toURL(), certs), permissions);
 		} catch (MalformedURLException e) {
 			// Failed to create our own domain; just return the baseDomain
