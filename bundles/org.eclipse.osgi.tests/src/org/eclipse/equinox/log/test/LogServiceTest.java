@@ -8,10 +8,14 @@
  *******************************************************************************/
 package org.eclipse.equinox.log.test;
 
+import java.util.HashMap;
+import java.util.Map;
 import junit.framework.TestCase;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.*;
+import org.osgi.service.log.admin.LoggerAdmin;
+import org.osgi.service.log.admin.LoggerContext;
 
 public class LogServiceTest extends TestCase {
 
@@ -20,6 +24,10 @@ public class LogServiceTest extends TestCase {
 	private LogReaderService reader;
 	private ServiceReference readerReference;
 	private TestListener listener;
+	private ServiceReference<LoggerAdmin> loggerAdminReference;
+	private LoggerAdmin loggerAdmin;
+	LoggerContext rootLoggerContext;
+	Map<String, LogLevel> rootLogLevels;
 
 	public LogServiceTest(String name) {
 		super(name);
@@ -28,16 +36,27 @@ public class LogServiceTest extends TestCase {
 	protected void setUp() throws Exception {
 		logReference = OSGiTestsActivator.getContext().getServiceReference(LogService.class.getName());
 		readerReference = OSGiTestsActivator.getContext().getServiceReference(LogReaderService.class.getName());
+		loggerAdminReference = OSGiTestsActivator.getContext().getServiceReference(LoggerAdmin.class);
 
 		log = (LogService) OSGiTestsActivator.getContext().getService(logReference);
 		reader = (LogReaderService) OSGiTestsActivator.getContext().getService(readerReference);
+		loggerAdmin = OSGiTestsActivator.getContext().getService(loggerAdminReference);
 
 		listener = new TestListener();
 		reader.addLogListener(listener);
+
+		rootLoggerContext = loggerAdmin.getLoggerContext(null);
+		rootLogLevels = rootLoggerContext.getLogLevels();
+
+		Map<String, LogLevel> copyLogLevels = new HashMap<String, LogLevel>(rootLogLevels);
+		copyLogLevels.put(Logger.ROOT_LOGGER_NAME, LogLevel.TRACE);
+		rootLoggerContext.setLogLevels(copyLogLevels);
 	}
 
 	protected void tearDown() throws Exception {
+		rootLoggerContext.setLogLevels(rootLogLevels);
 		reader.removeLogListener(listener);
+		OSGiTestsActivator.getContext().ungetService(loggerAdminReference);
 		OSGiTestsActivator.getContext().ungetService(logReference);
 		OSGiTestsActivator.getContext().ungetService(readerReference);
 	}

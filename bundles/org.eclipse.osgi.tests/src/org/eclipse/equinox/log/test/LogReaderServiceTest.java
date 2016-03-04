@@ -16,6 +16,8 @@ import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
 import org.osgi.framework.*;
 import org.osgi.service.log.*;
+import org.osgi.service.log.admin.LoggerAdmin;
+import org.osgi.service.log.admin.LoggerContext;
 
 public class LogReaderServiceTest extends AbstractBundleTests {
 
@@ -23,6 +25,10 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 	private ServiceReference logReference;
 	private LogReaderService reader;
 	private ServiceReference readerReference;
+	private ServiceReference<LoggerAdmin> loggerAdminReference;
+	private LoggerAdmin loggerAdmin;
+	LoggerContext rootLoggerContext;
+	Map<String, LogLevel> rootLogLevels;
 
 	public LogReaderServiceTest(String name) {
 		setName(name);
@@ -32,12 +38,23 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		super.setUp();
 		logReference = OSGiTestsActivator.getContext().getServiceReference(LogService.class.getName());
 		readerReference = OSGiTestsActivator.getContext().getServiceReference(LogReaderService.class.getName());
+		loggerAdminReference = OSGiTestsActivator.getContext().getServiceReference(LoggerAdmin.class);
 
 		log = (LogService) OSGiTestsActivator.getContext().getService(logReference);
 		reader = (LogReaderService) OSGiTestsActivator.getContext().getService(readerReference);
+		loggerAdmin = OSGiTestsActivator.getContext().getService(loggerAdminReference);
+
+		rootLoggerContext = loggerAdmin.getLoggerContext(null);
+		rootLogLevels = rootLoggerContext.getLogLevels();
+
+		Map<String, LogLevel> copyLogLevels = new HashMap<String, LogLevel>(rootLogLevels);
+		copyLogLevels.put(Logger.ROOT_LOGGER_NAME, LogLevel.TRACE);
+		rootLoggerContext.setLogLevels(copyLogLevels);
 	}
 
 	protected void tearDown() throws Exception {
+		rootLoggerContext.setLogLevels(rootLogLevels);
+		OSGiTestsActivator.getContext().ungetService(loggerAdminReference);
 		OSGiTestsActivator.getContext().ungetService(logReference);
 		OSGiTestsActivator.getContext().ungetService(readerReference);
 		super.tearDown();
@@ -106,7 +123,6 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 	}
 
 	public void testLogBundleEventInfo() throws Exception {
-
 		// this is just a bundle that is harmless to start/stop
 		Bundle testBundle = installer.installBundle("test.logging.a"); //$NON-NLS-1$
 		TestListener listener = new TestListener(testBundle);

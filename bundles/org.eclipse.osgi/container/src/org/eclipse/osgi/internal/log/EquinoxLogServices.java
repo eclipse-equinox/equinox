@@ -84,6 +84,9 @@ public class EquinoxLogServices {
 		logServiceManager = new LogServiceManager(logHistoryMax, logWriter, perfWriter);
 		eclipseLogFactory = new EquinoxLogFactory(logWriter, logServiceManager);
 		rootFrameworkLog = eclipseLogFactory.createFrameworkLog(null, logWriter);
+
+		logWriter.setLoggerAdmin(logServiceManager.getLoggerAdmin());
+		perfWriter.setLoggerAdmin(logServiceManager.getLoggerAdmin());
 	}
 
 	private ServiceRegistration<?> frameworkLogReg;

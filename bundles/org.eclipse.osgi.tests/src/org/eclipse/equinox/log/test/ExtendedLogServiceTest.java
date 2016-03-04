@@ -8,12 +8,18 @@
  *******************************************************************************/
 package org.eclipse.equinox.log.test;
 
+import java.util.HashMap;
+import java.util.Map;
 import junit.framework.TestCase;
 import org.eclipse.equinox.log.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.log.LogLevel;
 import org.osgi.service.log.LogService;
+import org.osgi.service.log.Logger;
+import org.osgi.service.log.admin.LoggerAdmin;
+import org.osgi.service.log.admin.LoggerContext;
 
 public class ExtendedLogServiceTest extends TestCase {
 
@@ -22,6 +28,11 @@ public class ExtendedLogServiceTest extends TestCase {
 	private ServiceReference logReference;
 	private ExtendedLogReaderService reader;
 	private ServiceReference readerReference;
+	private ServiceReference<LoggerAdmin> loggerAdminReference;
+	private LoggerAdmin loggerAdmin;
+	LoggerContext rootLoggerContext;
+	Map<String, LogLevel> rootLogLevels;
+
 	private TestListener listener;
 
 	public ExtendedLogServiceTest(String name) {
@@ -32,16 +43,27 @@ public class ExtendedLogServiceTest extends TestCase {
 		bundle = OSGiTestsActivator.getContext().getBundle();
 		logReference = OSGiTestsActivator.getContext().getServiceReference(ExtendedLogService.class.getName());
 		readerReference = OSGiTestsActivator.getContext().getServiceReference(ExtendedLogReaderService.class.getName());
+		loggerAdminReference = OSGiTestsActivator.getContext().getServiceReference(LoggerAdmin.class);
 
 		log = (ExtendedLogService) OSGiTestsActivator.getContext().getService(logReference);
 		reader = (ExtendedLogReaderService) OSGiTestsActivator.getContext().getService(readerReference);
+		loggerAdmin = OSGiTestsActivator.getContext().getService(loggerAdminReference);
 
 		listener = new TestListener();
 		reader.addLogListener(listener);
+
+		rootLoggerContext = loggerAdmin.getLoggerContext(null);
+		rootLogLevels = rootLoggerContext.getLogLevels();
+
+		Map<String, LogLevel> copyLogLevels = new HashMap<String, LogLevel>(rootLogLevels);
+		copyLogLevels.put(Logger.ROOT_LOGGER_NAME, LogLevel.TRACE);
+		rootLoggerContext.setLogLevels(copyLogLevels);
 	}
 
 	protected void tearDown() throws Exception {
+		rootLoggerContext.setLogLevels(rootLogLevels);
 		reader.removeLogListener(listener);
+		OSGiTestsActivator.getContext().ungetService(loggerAdminReference);
 		OSGiTestsActivator.getContext().ungetService(logReference);
 		OSGiTestsActivator.getContext().ungetService(readerReference);
 	}
@@ -111,7 +133,7 @@ public class ExtendedLogServiceTest extends TestCase {
 			listener.waitForLogEntry();
 		}
 		ExtendedLogEntry entry = listener.getEntryX();
-		assertTrue(entry.getLoggerName() == null);
+		assertEquals("Wrong logger name.", "LogService", entry.getLoggerName());
 		assertTrue(entry.getLevel() == 0);
 		assertTrue(entry.getMessage() == null);
 		assertTrue(entry.getException() == null);

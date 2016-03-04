@@ -24,6 +24,7 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 	private final String loggerName;
 	private final Bundle bundle;
 	private final int level;
+	private final LogLevel logLevelEnum;
 	private final String message;
 	private final Throwable throwable;
 	private final Object contextObject;
@@ -54,11 +55,12 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 		return threadId.longValue();
 	}
 
-	public ExtendedLogEntryImpl(Bundle bundle, String loggerName, Object contextObject, int level, String message, Throwable throwable) {
+	public ExtendedLogEntryImpl(Bundle bundle, String loggerName, Object contextObject, LogLevel logLevelEnum, int level, String message, Throwable throwable) {
 		this.time = System.currentTimeMillis();
 		this.loggerName = loggerName;
 		this.bundle = bundle;
 		this.level = level;
+		this.logLevelEnum = logLevelEnum;
 		this.message = message;
 		this.throwable = throwable;
 		this.contextObject = contextObject;
@@ -71,6 +73,7 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 			this.sequenceNumber = nextSequenceNumber++;
 		}
 
+		// TODO need to find the calling stack here not just 2 up.
 		stackTraceElement = currentThread.getStackTrace()[2];
 	}
 
@@ -98,6 +101,7 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 		return throwable;
 	}
 
+	@SuppressWarnings("deprecation")
 	public int getLevel() {
 		return level;
 	}
@@ -106,10 +110,9 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 		return message;
 	}
 
-	@SuppressWarnings("rawtypes")
-	public ServiceReference getServiceReference() {
+	public ServiceReference<?> getServiceReference() {
 		if (contextObject != null && contextObject instanceof ServiceReference)
-			return (ServiceReference) contextObject;
+			return (ServiceReference<?>) contextObject;
 
 		return null;
 	}
@@ -124,7 +127,7 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 
 	@Override
 	public LogLevel getLogLevel() {
-		return LogLevel.values()[getLevel()];
+		return logLevelEnum;
 	}
 
 	@Override

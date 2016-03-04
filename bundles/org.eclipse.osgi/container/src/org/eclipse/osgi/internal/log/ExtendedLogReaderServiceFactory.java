@@ -15,8 +15,7 @@ import org.eclipse.equinox.log.LogFilter;
 import org.eclipse.equinox.log.SynchronousLogListener;
 import org.eclipse.osgi.framework.util.ArrayMap;
 import org.osgi.framework.*;
-import org.osgi.service.log.LogEntry;
-import org.osgi.service.log.LogListener;
+import org.osgi.service.log.*;
 
 public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedLogReaderServiceImpl> {
 
@@ -177,21 +176,21 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 		return count;
 	}
 
-	void log(final Bundle bundle, final String name, final Object context, final int level, final String message, final Throwable exception) {
+	void log(final Bundle bundle, final String name, final Object context, final LogLevel logLevelEnum, final int level, final String message, final Throwable exception) {
 		if (System.getSecurityManager() != null) {
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
 				public Void run() {
-					logPrivileged(bundle, name, context, level, message, exception);
+					logPrivileged(bundle, name, context, logLevelEnum, level, message, exception);
 					return null;
 				}
 			});
 		} else {
-			logPrivileged(bundle, name, context, level, message, exception);
+			logPrivileged(bundle, name, context, logLevelEnum, level, message, exception);
 		}
 	}
 
-	void logPrivileged(Bundle bundle, String name, Object context, int level, String message, Throwable exception) {
-		LogEntry logEntry = new ExtendedLogEntryImpl(bundle, name, context, level, message, exception);
+	void logPrivileged(Bundle bundle, String name, Object context, LogLevel logLevelEnum, int level, String message, Throwable exception) {
+		LogEntry logEntry = new ExtendedLogEntryImpl(bundle, name, context, logLevelEnum, level, message, exception);
 		storeEntry(logEntry);
 		ArrayMap<LogListener, Object[]> listenersCopy;
 		listenersLock.readLock();

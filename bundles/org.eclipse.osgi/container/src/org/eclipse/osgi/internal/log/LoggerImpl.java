@@ -10,17 +10,23 @@ package org.eclipse.osgi.internal.log;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.equinox.log.Logger;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogLevel;
+import org.osgi.service.log.LogService;
+import org.osgi.service.log.admin.LoggerContext;
 
 public class LoggerImpl implements Logger {
 
 	protected final ExtendedLogServiceImpl logServiceImpl;
 	protected final String name;
 
-	public LoggerImpl(ExtendedLogServiceImpl logServiceImpl, String name) {
+	private LogLevel enabledLevel = LogLevel.TRACE;
+
+	public LoggerImpl(ExtendedLogServiceImpl logServiceImpl, String name, LoggerContext loggerContext) {
 		this.logServiceImpl = logServiceImpl;
 		this.name = name;
+		applyLoggerContext(loggerContext);
 	}
 
 	public String getName() {
@@ -46,7 +52,7 @@ public class LoggerImpl implements Logger {
 
 	@SuppressWarnings("rawtypes")
 	public void log(ServiceReference sr, int level, String message, Throwable exception) {
-		logServiceImpl.log(name, sr, level, message, exception);
+		log(sr, null, level, message, exception);
 	}
 
 	public void log(Object context, int level, String message) {
@@ -54,12 +60,41 @@ public class LoggerImpl implements Logger {
 	}
 
 	public void log(Object context, int level, String message, Throwable exception) {
-		logServiceImpl.log(name, context, level, message, exception);
+		log(context, null, level, message, exception);
+	}
+
+	private void log(Object context, LogLevel logLevelEnum, int level, String message, Throwable exception) {
+		log(logServiceImpl.getBundle(), context, logLevelEnum, level, message, exception);
+	}
+
+	void log(Bundle entryBundle, Object context, LogLevel logLevelEnum, int level, String message, Throwable exception) {
+		if (logLevelEnum == null) {
+			logLevelEnum = getLogLevel(level);
+		}
+		if (enabledLevel.implies(logLevelEnum)) {
+			logServiceImpl.getFactory().log(entryBundle, name, context, logLevelEnum, level, message, exception);
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	private LogLevel getLogLevel(int level) {
+		switch (level) {
+			case LogService.LOG_DEBUG :
+				return LogLevel.DEBUG;
+			case LogService.LOG_ERROR :
+				return LogLevel.ERROR;
+			case LogService.LOG_INFO :
+				return LogLevel.INFO;
+			case LogService.LOG_WARNING :
+				return LogLevel.WARN;
+			default :
+				return LogLevel.TRACE;
+		}
 	}
 
 	@Override
 	public boolean isTraceEnabled() {
-		return isLoggable(LogLevel.TRACE.ordinal());
+		return enabledLevel.implies(LogLevel.TRACE);
 	}
 
 	@Override
@@ -84,7 +119,7 @@ public class LoggerImpl implements Logger {
 
 	@Override
 	public boolean isDebugEnabled() {
-		return isLoggable(LogLevel.DEBUG.ordinal());
+		return enabledLevel.implies(LogLevel.DEBUG);
 	}
 
 	@Override
@@ -109,7 +144,7 @@ public class LoggerImpl implements Logger {
 
 	@Override
 	public boolean isInfoEnabled() {
-		return isLoggable(LogLevel.INFO.ordinal());
+		return enabledLevel.implies(LogLevel.INFO);
 	}
 
 	@Override
@@ -134,7 +169,7 @@ public class LoggerImpl implements Logger {
 
 	@Override
 	public boolean isWarnEnabled() {
-		return isLoggable(LogLevel.WARN.ordinal());
+		return enabledLevel.implies(LogLevel.WARN);
 	}
 
 	@Override
@@ -159,7 +194,7 @@ public class LoggerImpl implements Logger {
 
 	@Override
 	public boolean isErrorEnabled() {
-		return isLoggable(LogLevel.ERROR.ordinal());
+		return enabledLevel.implies(LogLevel.ERROR);
 	}
 
 	@Override
@@ -204,12 +239,16 @@ public class LoggerImpl implements Logger {
 
 	private static final Pattern pattern = Pattern.compile("(\\\\?)(\\\\?)(\\{\\})"); //$NON-NLS-1$
 
-	protected void log(LogLevel level, String format, Object... arguments) {
-		Arguments processedArguments = new Arguments(arguments);
-		if (processedArguments.isEmpty()) {
-			logServiceImpl.log(name, processedArguments.serviceReference(), level.ordinal(), format, processedArguments.throwable());
+	private void log(LogLevel level, String format, Object... arguments) {
+		if (!enabledLevel.implies(level)) {
 			return;
 		}
+		Arguments processedArguments = new Arguments(arguments);
+		String message = processedArguments.isEmpty() ? format : formatMessage(format, processedArguments);
+		logServiceImpl.getFactory().log(logServiceImpl.getBundle(), name, processedArguments.serviceReference(), level, level.ordinal(), message.toString(), processedArguments.throwable());
+	}
+
+	String formatMessage(String format, Arguments processedArguments) {
 		Matcher matcher = pattern.matcher(format);
 		char[] chars = format.toCharArray();
 		int offset = 0;
@@ -235,12 +274,16 @@ public class LoggerImpl implements Logger {
 			}
 		}
 		message.append(chars, offset, chars.length - offset);
-		logServiceImpl.log(name, processedArguments.serviceReference(), level.ordinal(), message.toString(), processedArguments.throwable());
+		return message.toString();
 	}
 
 	private static int append(StringBuilder builder, Matcher matcher, char[] chars, int offset, int length, Object argument) {
 		builder.append(chars, offset, length);
 		builder.append(argument);
 		return matcher.end(3);
+	}
+
+	void applyLoggerContext(LoggerContext loggerContext) {
+		enabledLevel = loggerContext == null ? LogLevel.WARN : loggerContext.getEffectiveLogLevel(name);
 	}
 }

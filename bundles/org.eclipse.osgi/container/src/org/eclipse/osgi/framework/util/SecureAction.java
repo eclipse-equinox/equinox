@@ -493,4 +493,15 @@ public class SecureAction {
 			}
 		}, controlContext);
 	}
+
+	public String getLocation(final Bundle bundle) {
+		if (System.getSecurityManager() == null) {
+			return bundle.getLocation();
+		}
+		return AccessController.doPrivileged(new PrivilegedAction<String>() {
+			public String run() {
+				return bundle.getLocation();
+			}
+		}, controlContext);
+	}
 }

@@ -12,18 +12,16 @@ package org.eclipse.osgi.internal.log;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
-import java.security.AccessController;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.equinox.log.*;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.service.log.LogEntry;
-import org.osgi.service.log.LogService;
+import org.osgi.service.log.*;
+import org.osgi.service.log.admin.LoggerAdmin;
+import org.osgi.service.log.admin.LoggerContext;
 
 class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	private static final String PASSWORD = "-password"; //$NON-NLS-1$	
@@ -67,8 +65,6 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	/** The system property used to specify command line args should be omitted from the log */
 	private static final String PROP_LOG_INCLUDE_COMMAND_LINE = "eclipse.log.include.commandline"; //$NON-NLS-1$
-	private static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
-
 	/** Indicates if the console messages should be printed to the console (System.out) */
 	private boolean consoleLog = false;
 	/** Indicates if the next log message is part of a new session */
@@ -93,6 +89,8 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	private int logLevel = FrameworkLogEntry.OK;
 	private boolean includeCommandLine = true;
+
+	private LoggerAdmin loggerAdmin = null;
 
 	/**
 	 * Constructs an EclipseLog which uses the specified File to log messages to
@@ -244,7 +242,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 		if (writer == null) {
 			if (outFile != null) {
 				try {
-					writer = logForStream(secureAction.getFileOutputStream(outFile, true));
+					writer = logForStream(ExtendedLogServiceFactory.secureAction.getFileOutputStream(outFile, true));
 				} catch (IOException e) {
 					writer = logForErrorStream();
 				}
@@ -321,6 +319,11 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 		environmentInfo.setConfiguration(EclipseStarter.PROP_LOGFILE, newFile == null ? "" : newFile.getAbsolutePath()); //$NON-NLS-1$
 	}
 
+	synchronized void setLoggerAdmin(LoggerAdmin loggerAdmin) {
+		this.loggerAdmin = loggerAdmin;
+		applyLogLevel();
+	}
+
 	public synchronized File getFile() {
 		return outFile;
 	}
@@ -350,7 +353,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 				Reader fileIn = null;
 				try {
 					openFile();
-					fileIn = new InputStreamReader(secureAction.getFileInputStream(oldOutFile), "UTF-8"); //$NON-NLS-1$
+					fileIn = new InputStreamReader(ExtendedLogServiceFactory.secureAction.getFileInputStream(oldOutFile), "UTF-8"); //$NON-NLS-1$
 					copyReader(fileIn, this.writer);
 				} catch (IOException e) {
 					copyFailed = true;
@@ -583,7 +586,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 		boolean isBackupOK = true;
 		if (outFile != null) {
-			if ((secureAction.length(outFile) >> 10) > maxLogSize) { // Use KB as file size unit.
+			if ((ExtendedLogServiceFactory.secureAction.length(outFile) >> 10) > maxLogSize) { // Use KB as file size unit.
 				String logFilename = outFile.getAbsolutePath();
 
 				// Delete old backup file that will be replaced.
@@ -669,6 +672,34 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 		}
 
 		includeCommandLine = "true".equals(environmentInfo.getConfiguration(PROP_LOG_INCLUDE_COMMAND_LINE, "true")); //$NON-NLS-1$//$NON-NLS-2$
+		applyLogLevel();
+	}
+
+	void applyLogLevel() {
+		if (loggerAdmin == null) {
+			return;
+		}
+		LoggerContext rootContext = loggerAdmin.getLoggerContext(null);
+		Map<String, LogLevel> rootLevels = rootContext.getLogLevels();
+		rootLevels.put(loggerName, getLogLevel());
+		rootContext.setLogLevels(rootLevels);
+	}
+
+	private LogLevel getLogLevel() {
+		if (logLevel == 0) {
+			return LogLevel.TRACE;
+		}
+		if ((logLevel & FrameworkLogEntry.INFO) != 0) {
+			return LogLevel.INFO;
+		}
+		if ((logLevel & FrameworkLogEntry.WARNING) != 0) {
+			return LogLevel.WARN;
+		}
+		if ((logLevel & FrameworkLogEntry.ERROR) != 0) {
+			return LogLevel.ERROR;
+		}
+		// not sure what to do here; it seems it would be an error
+		return LogLevel.AUDIT;
 	}
 
 	/**

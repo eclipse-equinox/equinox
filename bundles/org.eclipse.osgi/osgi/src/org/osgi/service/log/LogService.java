@@ -74,6 +74,19 @@ public interface LogService extends LoggerFactory {
 	 * <p>
 	 * The {@code ServiceReference} field and the {@code Throwable} field of the
 	 * {@code LogEntry} object will be set to {@code null}.
+	 * <p>
+	 * This method will log to the {@link Logger} named {@code "LogService"} for
+	 * the bundle. The specified level is mapped to a {@link LogLevel} as
+	 * follows:
+	 * <ul>
+	 * <li>{@link #LOG_ERROR} - {@link LogLevel#ERROR}</li>
+	 * <li>{@link #LOG_WARNING} - {@link LogLevel#WARN}</li>
+	 * <li>{@link #LOG_INFO} - {@link LogLevel#INFO}</li>
+	 * <li>{@link #LOG_DEBUG} - {@link LogLevel#DEBUG}</li>
+	 * <li>Any other value - {@link LogLevel#TRACE}</li>
+	 * </ul>
+	 * In the generated log entry, {@link LogEntry#getLevel()} must return the
+	 * specified level.
 	 * 
 	 * @param level The severity of the message. This should be one of the
 	 *            defined log levels but may be any integer that is interpreted
@@ -91,6 +104,19 @@ public interface LogService extends LoggerFactory {
 	 * <p>
 	 * The {@code ServiceReference} field of the {@code LogEntry} object will be
 	 * set to {@code null}.
+	 * <p>
+	 * This method will log to the {@link Logger} named {@code "LogService"} for
+	 * the bundle. The specified level is mapped to a {@link LogLevel} as
+	 * follows:
+	 * <ul>
+	 * <li>{@link #LOG_ERROR} - {@link LogLevel#ERROR}</li>
+	 * <li>{@link #LOG_WARNING} - {@link LogLevel#WARN}</li>
+	 * <li>{@link #LOG_INFO} - {@link LogLevel#INFO}</li>
+	 * <li>{@link #LOG_DEBUG} - {@link LogLevel#DEBUG}</li>
+	 * <li>Any other value - {@link LogLevel#TRACE}</li>
+	 * </ul>
+	 * In the generated log entry, {@link LogEntry#getLevel()} must return the
+	 * specified level.
 	 * 
 	 * @param level The severity of the message. This should be one of the
 	 *            defined log levels but may be any integer that is interpreted
@@ -111,6 +137,19 @@ public interface LogService extends LoggerFactory {
 	 * <p>
 	 * The {@code Throwable} field of the {@code LogEntry} will be set to
 	 * {@code null}.
+	 * <p>
+	 * This method will log to the {@link Logger} named {@code "LogService"} for
+	 * the bundle. The specified level is mapped to a {@link LogLevel} as
+	 * follows:
+	 * <ul>
+	 * <li>{@link #LOG_ERROR} - {@link LogLevel#ERROR}</li>
+	 * <li>{@link #LOG_WARNING} - {@link LogLevel#WARN}</li>
+	 * <li>{@link #LOG_INFO} - {@link LogLevel#INFO}</li>
+	 * <li>{@link #LOG_DEBUG} - {@link LogLevel#DEBUG}</li>
+	 * <li>Any other value - {@link LogLevel#TRACE}</li>
+	 * </ul>
+	 * In the generated log entry, {@link LogEntry#getLevel()} must return the
+	 * specified level.
 	 * 
 	 * @param sr The {@code ServiceReference} object of the service that this
 	 *            message is associated with or {@code null}.
@@ -128,6 +167,19 @@ public interface LogService extends LoggerFactory {
 	/**
 	 * Logs a message with an exception associated and a
 	 * {@code ServiceReference} object.
+	 * <p>
+	 * This method will log to the {@link Logger} named {@code "LogService"} for
+	 * the bundle. The specified level is mapped to a {@link LogLevel} as
+	 * follows:
+	 * <ul>
+	 * <li>{@link #LOG_ERROR} - {@link LogLevel#ERROR}</li>
+	 * <li>{@link #LOG_WARNING} - {@link LogLevel#WARN}</li>
+	 * <li>{@link #LOG_INFO} - {@link LogLevel#INFO}</li>
+	 * <li>{@link #LOG_DEBUG} - {@link LogLevel#DEBUG}</li>
+	 * <li>Any other value - {@link LogLevel#TRACE}</li>
+	 * </ul>
+	 * In the generated log entry, {@link LogEntry#getLevel()} must return the
+	 * specified level.
 	 * 
 	 * @param sr The {@code ServiceReference} object of the service that this
 	 *            message is associated with.

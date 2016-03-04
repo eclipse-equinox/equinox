@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2016 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -11,37 +11,42 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.equinox.log.ExtendedLogService;
 import org.eclipse.equinox.log.Logger;
+import org.eclipse.osgi.internal.log.ExtendedLogServiceFactory.EquinoxLoggerContext;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.log.FormatterLogger;
+import org.osgi.service.log.admin.LoggerContext;
 
 public class ExtendedLogServiceImpl implements ExtendedLogService {
 
 	private final ExtendedLogServiceFactory factory;
 	private volatile Bundle bundle;
-	private final Map<Class<? extends org.osgi.service.log.Logger>, Map<String, Logger>> loggerCache = new HashMap<>();
+	private final Map<Class<? extends org.osgi.service.log.Logger>, Map<String, LoggerImpl>> loggerCache = new HashMap<>();
 
 	public ExtendedLogServiceImpl(ExtendedLogServiceFactory factory, Bundle bundle) {
 		this.factory = factory;
 		this.bundle = bundle;
-		loggerCache.put(org.osgi.service.log.Logger.class, new HashMap<String, Logger>());
-		loggerCache.put(org.osgi.service.log.FormatterLogger.class, new HashMap<String, Logger>());
+		loggerCache.put(org.osgi.service.log.Logger.class, new HashMap<String, LoggerImpl>());
+		loggerCache.put(org.osgi.service.log.FormatterLogger.class, new HashMap<String, LoggerImpl>());
 	}
 
+	@SuppressWarnings("deprecation")
 	public void log(int level, String message) {
 		log(null, level, message, null);
 	}
 
+	@SuppressWarnings("deprecation")
 	public void log(int level, String message, Throwable exception) {
 		log(null, level, message, exception);
 	}
 
-	@SuppressWarnings("rawtypes")
-	public void log(ServiceReference sr, int level, String message) {
+	@SuppressWarnings("deprecation")
+	public void log(ServiceReference<?> sr, int level, String message) {
 		log(sr, level, message, null);
 	}
 
-	@SuppressWarnings("rawtypes")
-	public void log(ServiceReference sr, int level, String message, Throwable exception) {
+	@SuppressWarnings("deprecation")
+	public void log(ServiceReference<?> sr, int level, String message, Throwable exception) {
 		getLogger((String) null).log(sr, level, message, exception);
 	}
 
@@ -79,13 +84,23 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 		return factory.isLoggable(bundle, name, level);
 	}
 
-	// package private methods called from Logger
-	void log(String name, Object context, int level, String message, Throwable exception) {
-		factory.log(bundle, name, context, level, message, exception);
+	void setBundle(Bundle bundle) {
+		factory.contextsLock.writeLock().lock();
+		try {
+			Bundle previous = this.bundle;
+			this.bundle = bundle;
+			factory.loggerContextTargetMap.replaceSystemBundleLogService(previous, bundle);
+		} finally {
+			factory.contextsLock.writeLock().unlock();
+		}
 	}
 
-	void setBundle(Bundle bundle) {
-		this.bundle = bundle;
+	Bundle getBundle() {
+		return bundle;
+	}
+
+	ExtendedLogServiceFactory getFactory() {
+		return factory;
 	}
 
 	@Override
@@ -94,15 +109,42 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 	}
 
 	@Override
-	public synchronized <L extends org.osgi.service.log.Logger> L getLogger(String name, Class<L> loggerType) {
-		Map<String, Logger> loggers = loggerCache.get(loggerType);
-		if (loggers == null) {
-			throw new IllegalArgumentException(loggerType.getName());
+	public <L extends org.osgi.service.log.Logger> L getLogger(String name, Class<L> loggerType) {
+		if (name == null) {
+			name = "LogService"; //$NON-NLS-1$
 		}
-		Logger logger = loggers.get(name);
+		LoggerImpl logger = null;
+		Map<String, LoggerImpl> loggers = null;
+		factory.contextsLock.readLock().lock();
+		try {
+			loggers = loggerCache.get(loggerType);
+			if (loggers == null) {
+				throw new IllegalArgumentException(loggerType.getName());
+			}
+			logger = loggers.get(name);
+		} finally {
+			factory.contextsLock.readLock().unlock();
+		}
 		if (logger == null) {
-			logger = new FormatterLoggerImpl(this, name);
-			loggers.put(name, logger);
+			LoggerContext loggerContext = factory.loggerContextTargetMap.getEffectiveLoggerContext(bundle);
+			if (loggerType == FormatterLogger.class) {
+				logger = new FormatterLoggerImpl(this, name, loggerContext);
+			} else if (loggerType == org.osgi.service.log.Logger.class) {
+				logger = new LoggerImpl(this, name, loggerContext);
+			} else {
+				throw new IllegalArgumentException(loggerType.getName());
+			}
+			factory.contextsLock.writeLock().lock();
+			try {
+				LoggerImpl existing = loggers.get(name);
+				if (existing == null) {
+					loggers.put(name, logger);
+				} else {
+					logger = existing;
+				}
+			} finally {
+				factory.contextsLock.writeLock().unlock();
+			}
 		}
 		return loggerType.cast(logger);
 	}
@@ -255,5 +297,13 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 	@Override
 	public void audit(String format, Object... arguments) {
 		getLogger((String) null).audit(format, arguments);
+	}
+
+	void applyLogLevels(EquinoxLoggerContext effectiveLoggerContext) {
+		for (Map<String, LoggerImpl> loggers : loggerCache.values()) {
+			for (LoggerImpl logger : loggers.values()) {
+				logger.applyLoggerContext(effectiveLoggerContext);
+			}
+		}
 	}
 }

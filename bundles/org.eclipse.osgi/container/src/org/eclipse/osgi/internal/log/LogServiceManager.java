@@ -16,14 +16,19 @@ import org.eclipse.equinox.log.*;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.osgi.framework.*;
 import org.osgi.service.log.*;
+import org.osgi.service.log.admin.LoggerAdmin;
 
 public class LogServiceManager implements BundleListener, FrameworkListener, ServiceListener {
+	private static final String LOGGER_FRAMEWORK_EVENT = "Events.Framework"; //$NON-NLS-1$
+	private static final String LOGGER_BUNDLE_EVENT = "Events.Bundle"; //$NON-NLS-1$
+	private static final String LOGGER_SERVICE_EVENT = "Events.Service"; //$NON-NLS-1$
 
-	private static final String[] LOGSERVICE_CLASSES = {LogService.class.getName(), ExtendedLogService.class.getName()};
+	private static final String[] LOGSERVICE_CLASSES = {LogService.class.getName(), LoggerFactory.class.getName(), ExtendedLogService.class.getName()};
 	private static final String[] LOGREADERSERVICE_CLASSES = {LogReaderService.class.getName(), ExtendedLogReaderService.class.getName()};
 
 	private ServiceRegistration<?> logReaderServiceRegistration;
 	private ServiceRegistration<?> logServiceRegistration;
+	private ServiceRegistration<LoggerAdmin> loggerAdminRegistration;
 	private final ExtendedLogReaderServiceFactory logReaderServiceFactory;
 	private final ExtendedLogServiceFactory logServiceFactory;
 	private final ExtendedLogServiceImpl systemBundleLog;
@@ -51,6 +56,10 @@ public class LogServiceManager implements BundleListener, FrameworkListener, Ser
 		context.addBundleListener(logServiceFactory);
 		logReaderServiceRegistration = context.registerService(LOGREADERSERVICE_CLASSES, logReaderServiceFactory, null);
 		logServiceRegistration = context.registerService(LOGSERVICE_CLASSES, logServiceFactory, null);
+		Hashtable<String, Object> loggerAdminProps = new Hashtable<String, Object>();
+		// TODO the constant for log service id will like be defined
+		loggerAdminProps.put("osgi.log.service.id", logServiceRegistration.getReference().getProperty(Constants.SERVICE_ID)); //$NON-NLS-1$
+		loggerAdminRegistration = context.registerService(LoggerAdmin.class, logServiceFactory.getLoggerAdmin(), loggerAdminProps);
 
 		eventAdminAdapter = new EventAdminAdapter(context, logReaderServiceFactory);
 		eventAdminAdapter.start();
@@ -59,6 +68,8 @@ public class LogServiceManager implements BundleListener, FrameworkListener, Ser
 	public void stop(BundleContext context) {
 		eventAdminAdapter.stop();
 		eventAdminAdapter = null;
+		loggerAdminRegistration.unregister();
+		loggerAdminRegistration = null;
 		logServiceRegistration.unregister();
 		logServiceRegistration = null;
 		logReaderServiceRegistration.unregister();
@@ -73,14 +84,21 @@ public class LogServiceManager implements BundleListener, FrameworkListener, Ser
 		return systemBundleLog;
 	}
 
+	LoggerAdmin getLoggerAdmin() {
+		return logServiceFactory.getLoggerAdmin();
+	}
+
 	/**
 	 * BundleListener.bundleChanged method.
 	 *
 	 */
+	@SuppressWarnings("deprecation")
 	public void bundleChanged(BundleEvent event) {
 		Bundle bundle = event.getBundle();
-		if (logReaderServiceFactory.isLoggable(bundle, null, LogService.LOG_INFO))
-			logReaderServiceFactory.log(bundle, null, null, LogService.LOG_INFO, getBundleEventTypeName(event.getType()), null);
+		if (logReaderServiceFactory.isLoggable(bundle, LOGGER_BUNDLE_EVENT, LogService.LOG_INFO)) {
+			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(LOGGER_BUNDLE_EVENT);
+			logger.log(bundle, null, null, LogService.LOG_INFO, getBundleEventTypeName(event.getType()), null);
+		}
 	}
 
 	/**
@@ -91,9 +109,12 @@ public class LogServiceManager implements BundleListener, FrameworkListener, Ser
 		ServiceReference<?> reference = event.getServiceReference();
 		Bundle bundle = reference.getBundle();
 		int eventType = event.getType();
+		@SuppressWarnings("deprecation")
 		int logType = (eventType == ServiceEvent.MODIFIED) ? LogService.LOG_DEBUG : LogService.LOG_INFO;
-		if (logReaderServiceFactory.isLoggable(bundle, null, logType))
-			logReaderServiceFactory.log(bundle, null, reference, logType, getServiceEventTypeName(eventType), null);
+		if (logReaderServiceFactory.isLoggable(bundle, LOGGER_SERVICE_EVENT, logType)) {
+			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(LOGGER_SERVICE_EVENT);
+			logger.log(bundle, null, null, logType, getServiceEventTypeName(eventType), null);
+		}
 	}
 
 	/**
@@ -103,10 +124,12 @@ public class LogServiceManager implements BundleListener, FrameworkListener, Ser
 	public void frameworkEvent(FrameworkEvent event) {
 		Bundle bundle = event.getBundle();
 		int eventType = event.getType();
+		@SuppressWarnings("deprecation")
 		int logType = (eventType == FrameworkEvent.ERROR) ? LogService.LOG_ERROR : LogService.LOG_INFO;
-		Throwable throwable = (eventType == FrameworkEvent.ERROR) ? event.getThrowable() : null;
-		if (logReaderServiceFactory.isLoggable(bundle, null, logType))
-			logReaderServiceFactory.log(bundle, null, null, logType, getFrameworkEventTypeName(eventType), throwable);
+		if (logReaderServiceFactory.isLoggable(bundle, LOGGER_FRAMEWORK_EVENT, logType)) {
+			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(LOGGER_FRAMEWORK_EVENT);
+			logger.log(bundle, null, null, logType, getFrameworkEventTypeName(eventType), event.getThrowable());
+		}
 	}
 
 	/**
