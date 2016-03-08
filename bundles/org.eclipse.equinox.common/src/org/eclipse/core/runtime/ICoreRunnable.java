@@ -32,8 +32,8 @@ public interface ICoreRunnable {
 	 *     calling {@link IProgressMonitor#done()} on the given monitor, and
 	 *     the caller must not rely on {@link IProgressMonitor#done()} having been
 	 *     called by the receiver.
-	 * @exception CoreException if this operation fails.
-	 * @exception OperationCanceledException if the operation is canceled.
+	 * @exception CoreException if this operation fails
+	 * @exception OperationCanceledException if this operation is canceled
 	 */
 	public void run(IProgressMonitor monitor) throws CoreException;
 }
