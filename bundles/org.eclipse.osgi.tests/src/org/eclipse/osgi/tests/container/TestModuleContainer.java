@@ -2539,6 +2539,33 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
+	public void testStartLevelDeadlock() throws BundleException, IOException, InterruptedException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+		container.getFrameworkStartLevel().setInitialBundleStartLevel(2);
+
+		// install the system.bundle
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
+		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+		systemBundle.start();
+
+		// install a module
+		Map<String, String> manifest = new HashMap<String, String>();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "module.test");
+		Module module = installDummyModule(manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), container);
+		adaptor.setSlowdownEvents(true);
+		module.setStartLevel(1);
+		module.start();
+
+		List<DummyContainerEvent> events = adaptor.getDatabase().getContainerEvents();
+		for (DummyContainerEvent event : events) {
+			Assert.assertNotEquals("Found an error: " + event.error, ContainerEvent.ERROR, event.type);
+		}
+	}
+
+	@Test
 	public void testSystemBundleOnDemandFragments() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();

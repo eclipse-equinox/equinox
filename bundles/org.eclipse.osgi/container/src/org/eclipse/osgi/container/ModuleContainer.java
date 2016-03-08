@@ -1448,19 +1448,25 @@ public final class ModuleContainer implements DebugOptionsListener {
 			if (startlevel < 1) {
 				throw new IllegalArgumentException(Msg.ModuleContainer_NegativeStartLevelError + startlevel);
 			}
-			if (module.getStartLevel() == startlevel) {
+			int currentLevel = module.getStartLevel();
+			if (currentLevel == startlevel) {
 				return; // do nothing
 			}
 			moduleDatabase.setStartLevel(module, startlevel);
-			// queue start level operation in the background
-			// notice that we only do one start level operation at a time
-			CopyOnWriteIdentityMap<Module, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<Module, FrameworkListener[]>();
-			dispatchListeners.put(module, new FrameworkListener[0]);
-			ListenerQueue<Module, FrameworkListener[], Integer> queue = new ListenerQueue<Module, FrameworkListener[], Integer>(getManager());
-			queue.queueListeners(dispatchListeners.entrySet(), this);
+			// only queue the start level if
+			// 1) the current level is less than the new startlevel, may need to stop or
+			// 2) the module is marked for persistent activation, may need to start
+			if (currentLevel < startlevel || module.isPersistentlyStarted()) {
+				// queue start level operation in the background
+				// notice that we only do one start level operation at a time
+				CopyOnWriteIdentityMap<Module, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<Module, FrameworkListener[]>();
+				dispatchListeners.put(module, new FrameworkListener[0]);
+				ListenerQueue<Module, FrameworkListener[], Integer> queue = new ListenerQueue<Module, FrameworkListener[], Integer>(getManager());
+				queue.queueListeners(dispatchListeners.entrySet(), this);
 
-			// dispatch the start level job
-			queue.dispatchEventAsynchronous(MODULE_STARTLEVEL, startlevel);
+				// dispatch the start level job
+				queue.dispatchEventAsynchronous(MODULE_STARTLEVEL, startlevel);
+			}
 		}
 
 		@Override
