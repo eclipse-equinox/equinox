@@ -22,6 +22,6 @@
   <version>1.3.400-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
   <properties>
-    <code.ignoredWarnings>-warn:-unusedPrivate</code.ignoredWarnings>
+    <code.ignoredWarnings>-warn:-unusedPrivate,deprecation</code.ignoredWarnings>
   </properties>
 </project>
