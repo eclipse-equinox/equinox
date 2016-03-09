@@ -220,7 +220,7 @@ public class SystemBundleActivator implements BundleActivator {
 		Dictionary<String, String> headers = context.getBundle().getHeaders();
 		properties.put(Constants.SERVICE_VENDOR, headers.get(Constants.BUNDLE_VENDOR));
 		if (setRanking) {
-			properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
+			properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		}
 		properties.put(Constants.SERVICE_PID, context.getBundle().getBundleId() + "." + service.getClass().getName()); //$NON-NLS-1$
 		registrations.add(context.registerService(serviceClass, service, properties));

@@ -118,7 +118,7 @@ public class EquinoxLogServices {
 		Dictionary<String, String> headers = context.getBundle().getHeaders();
 
 		serviceProperties.put(Constants.SERVICE_VENDOR, headers.get(Constants.BUNDLE_VENDOR));
-		serviceProperties.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
+		serviceProperties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
 		serviceProperties.put(Constants.SERVICE_PID, context.getBundle().getBundleId() + '.' + service.getClass().getName());
 		serviceProperties.put(FrameworkLog.SERVICE_PERFORMANCE, Boolean.TRUE.toString());
 

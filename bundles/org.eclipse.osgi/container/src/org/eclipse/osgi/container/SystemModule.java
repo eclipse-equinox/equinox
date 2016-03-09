@@ -31,7 +31,7 @@ public abstract class SystemModule extends Module {
 	private final Map<Thread, ContainerEvent> forStop = new HashMap<Thread, ContainerEvent>(2);
 
 	public SystemModule(ModuleContainer container) {
-		super(new Long(0), Constants.SYSTEM_BUNDLE_LOCATION, container, EnumSet.of(Settings.AUTO_START, Settings.USE_ACTIVATION_POLICY), new Integer(0));
+		super(new Long(0), Constants.SYSTEM_BUNDLE_LOCATION, container, EnumSet.of(Settings.AUTO_START, Settings.USE_ACTIVATION_POLICY), Integer.valueOf(0));
 	}
 
 	/**

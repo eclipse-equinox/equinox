@@ -1734,7 +1734,7 @@ public class Storage {
 		// in cases where the temp dir may already exist.
 		Long bundleID = new Long(generation.getBundleInfo().getBundleId());
 		for (int i = 0; i < Integer.MAX_VALUE; i++) {
-			bundleTempDir = new File(libTempDir, bundleID.toString() + "_" + new Integer(i).toString()); //$NON-NLS-1$
+			bundleTempDir = new File(libTempDir, bundleID.toString() + "_" + Integer.valueOf(i).toString()); //$NON-NLS-1$
 			libTempFile = new File(bundleTempDir, libName);
 			if (bundleTempDir.exists()) {
 				if (libTempFile.exists())

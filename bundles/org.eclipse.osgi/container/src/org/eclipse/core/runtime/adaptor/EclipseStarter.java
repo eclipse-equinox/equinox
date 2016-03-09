@@ -375,7 +375,7 @@ public class EclipseStarter {
 			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_NOT_RUNNING);
 		// if we are just initializing, do not run the application just return.
 		if (initialize)
-			return new Integer(0);
+			return Integer.valueOf(0);
 		try {
 			if (appLauncher == null) {
 				boolean launchDefault = Boolean.valueOf(getProperty(PROP_APPLICATION_LAUNCHDEFAULT, "true")).booleanValue(); //$NON-NLS-1$
@@ -486,7 +486,7 @@ public class EclipseStarter {
 		// keep this splash handler as the default startup monitor
 		try {
 			Dictionary<String, Object> monitorProps = new Hashtable<String, Object>();
-			monitorProps.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
+			monitorProps.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
 			defaultMonitorRegistration = context.registerService(StartupMonitor.class.getName(), new DefaultStartupMonitor(endSplashHandler, equinoxConfig), monitorProps);
 		} catch (IllegalStateException e) {
 			//splash handler did not provide the necessary methods, ignore it
@@ -1262,7 +1262,7 @@ public class EclipseStarter {
 	 * returning anything else will cause exceptions in the caller.
 	 */
 	private static Object[] getVersionElements(String version) {
-		Object[] result = {new Integer(-1), new Integer(-1), new Integer(-1), ""}; //$NON-NLS-1$
+		Object[] result = {Integer.valueOf(-1), Integer.valueOf(-1), Integer.valueOf(-1), ""}; //$NON-NLS-1$
 		StringTokenizer t = new StringTokenizer(version, "."); //$NON-NLS-1$
 		String token;
 		for (int i = 0; t.hasMoreTokens() && i < 4; i++) {
@@ -1270,7 +1270,7 @@ public class EclipseStarter {
 			if (i < 3) {
 				// major, minor or service ... numeric values
 				try {
-					result[i] = new Integer(token);
+					result[i] = Integer.valueOf(token);
 				} catch (Exception e) {
 					if (i == 0)
 						return null; // return null if no valid numbers are present

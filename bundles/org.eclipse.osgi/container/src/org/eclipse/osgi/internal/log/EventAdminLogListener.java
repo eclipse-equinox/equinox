@@ -113,7 +113,7 @@ public class EventAdminLogListener implements SynchronousLogListener {
 			putServiceReferenceProperties(properties, ref);
 		}
 		properties.put(LOG_ENTRY, entry);
-		properties.put(LOG_LEVEL, new Integer(entry.getLevel()));
+		properties.put(LOG_LEVEL, Integer.valueOf(entry.getLevel()));
 		if (entry.getMessage() != null)
 			properties.put(MESSAGE, entry.getMessage());
 		properties.put(TIMESTAMP, new Long(entry.getTime()));

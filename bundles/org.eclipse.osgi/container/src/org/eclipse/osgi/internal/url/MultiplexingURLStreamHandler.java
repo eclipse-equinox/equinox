@@ -185,7 +185,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			try {
 				// set the real handler for the URL
 				handlerField.set(arg0, handler);
-				parseURLMethod.invoke(handler, new Object[] {arg0, arg1, new Integer(arg2), new Integer(arg3)});
+				parseURLMethod.invoke(handler, new Object[] {arg0, arg1, Integer.valueOf(arg2), Integer.valueOf(arg3)});
 				return;
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
@@ -218,7 +218,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			try {
 				// set the real handler for the URL
 				handlerField.set(arg0, handler);
-				setURLMethod.invoke(handler, new Object[] {arg0, arg1, arg2, new Integer(arg3), arg4, arg5, arg6, arg7, arg8});
+				setURLMethod.invoke(handler, new Object[] {arg0, arg1, arg2, Integer.valueOf(arg3), arg4, arg5, arg6, arg7, arg8});
 				return;
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();

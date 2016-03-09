@@ -362,8 +362,8 @@ public class ComputeNodeOrder {
 			final int NEXT_ADJACENT = 3;
 			final int AFTER_NEXTED_DFS_VISIT = 4;
 			// use precomputed objects to avoid garbage
-			final Integer NEXT_VERTEX_OBJECT = new Integer(NEXT_VERTEX);
-			final Integer AFTER_NEXTED_DFS_VISIT_OBJECT = new Integer(AFTER_NEXTED_DFS_VISIT);
+			final Integer NEXT_VERTEX_OBJECT = Integer.valueOf(NEXT_VERTEX);
+			final Integer AFTER_NEXTED_DFS_VISIT_OBJECT = Integer.valueOf(AFTER_NEXTED_DFS_VISIT);
 			// initialize 
 			// all vertex.color initially Vertex.WHITE;
 			// all vertex.predecessor initially null;

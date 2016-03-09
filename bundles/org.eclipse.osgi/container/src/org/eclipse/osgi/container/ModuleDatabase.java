@@ -947,13 +947,13 @@ public class ModuleDatabase {
 			Integer cur = objectTable.get(object);
 			if (cur != null)
 				throw new IllegalStateException("Object is already in the write table: " + object); //$NON-NLS-1$
-			objectTable.put(object, new Integer(objectTable.size()));
+			objectTable.put(object, Integer.valueOf(objectTable.size()));
 			// return the index of the object just added (i.e. size - 1)
 			return (objectTable.size() - 1);
 		}
 
 		private static void addToReadTable(Object object, int index, Map<Integer, Object> objectTable) {
-			objectTable.put(new Integer(index), object);
+			objectTable.put(Integer.valueOf(index), object);
 		}
 
 		public static void store(ModuleDatabase moduleDatabase, DataOutputStream out, boolean persistWirings) throws IOException {

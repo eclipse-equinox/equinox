@@ -154,7 +154,7 @@ public class StorageUtil {
 		Dictionary<String, Object> properties = new Hashtable<String, Object>(7);
 		Dictionary<String, String> headers = context.getBundle().getHeaders();
 		properties.put(Constants.SERVICE_VENDOR, headers.get(Constants.BUNDLE_VENDOR));
-		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
+		properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		properties.put(Constants.SERVICE_PID, context.getBundle().getBundleId() + "." + service.getClass().getName()); //$NON-NLS-1$
 		return context.registerService(name, service, properties);
 	}

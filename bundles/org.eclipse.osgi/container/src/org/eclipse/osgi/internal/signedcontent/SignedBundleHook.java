@@ -95,7 +95,7 @@ public class SignedBundleHook implements ActivatorHookFactory, BundleFileWrapper
 			trustEngineListener = new TrustEngineListener(context, this);
 		// always register the trust engine
 		Dictionary<String, Object> trustEngineProps = new Hashtable<String, Object>(7);
-		trustEngineProps.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
+		trustEngineProps.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
 		trustEngineProps.put(SignedContentConstants.TRUST_ENGINE, SignedContentConstants.DEFAULT_TRUST_ENGINE);
 		KeyStoreTrustEngine systemTrustEngine = new KeyStoreTrustEngine(CACERTS_PATH, CACERTS_TYPE, null, "System", this); //$NON-NLS-1$
 		systemTrustEngineReg = context.registerService(TrustEngine.class.getName(), systemTrustEngine, trustEngineProps);

@@ -194,12 +194,12 @@ public class ReliableFile {
 				return null;
 			List<Integer> list = new ArrayList<Integer>(defaultMaxGenerations);
 			if (file.exists())
-				list.add(new Integer(0)); //base file exists
+				list.add(Integer.valueOf(0)); //base file exists
 			for (int i = 0; i < files.length; i++) {
 				if (files[i].startsWith(prefix)) {
 					try {
 						int id = Integer.parseInt(files[i].substring(prefixLen));
-						list.add(new Integer(id));
+						list.add(Integer.valueOf(id));
 					} catch (NumberFormatException e) {/*ignore*/
 					}
 				}
