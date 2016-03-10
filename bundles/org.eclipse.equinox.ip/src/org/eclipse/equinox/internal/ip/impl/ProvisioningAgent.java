@@ -265,7 +265,7 @@ public class ProvisioningAgent implements BundleActivator, ProvisioningService, 
 		// Gets inner storage activator class name (if inner storage exists).
 		String storageName = (String) thisBundle.getHeaders().get(STORAGE);
 		if (storageName != null) {
-			storageName.trim();
+			storageName = storageName.trim();
 		}
 
 		// Registers configuration providers packed into the bundle
