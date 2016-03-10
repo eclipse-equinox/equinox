@@ -646,7 +646,7 @@ public class DSTest extends TestCase {
     props.put("test.property.value", "setFromCM");
     props.put("test.property.list", "setFromCM");
     props.put("component.name", "setFromCM");
-    props.put("component.id", new Long(-1));
+    props.put("component.id", Long.valueOf(-1));
     // the line below will create the configuration if it doesn't exists!
     // see CM api for details
 
@@ -696,7 +696,7 @@ public class DSTest extends TestCase {
     newProps.put("override.property.2", "setFromMethod");
     newProps.put("override.property.3", "setFromMethod");
     newProps.put(ComponentConstants.COMPONENT_NAME, "setFromMethod");
-    newProps.put(ComponentConstants.COMPONENT_ID, new Long(-1));
+    newProps.put(ComponentConstants.COMPONENT_ID, Long.valueOf(-1));
     newProps.put("name", "test");
 
     ComponentInstance ci = factory.newInstance(newProps);
@@ -1596,7 +1596,7 @@ public class DSTest extends TestCase {
     waitBundleStart();
 
     Hashtable props = new Hashtable(10);
-    props.put("config.base.data", new Integer(1));
+    props.put("config.base.data", Integer.valueOf(1));
 
     // component notsetNS100 - property not set by Configuration Admin; XML NS
     // 1.0.0
@@ -1697,7 +1697,7 @@ public class DSTest extends TestCase {
     waitBundleStart();
 
     Hashtable props = new Hashtable(10);
-    props.put("config.base.data", new Integer(1));
+    props.put("config.base.data", Integer.valueOf(1));
 
     // component notsetNS100 - property not set by Configuration Admin; XML NS
     // 1.0.0
@@ -2123,7 +2123,7 @@ public class DSTest extends TestCase {
           if (properties == null) {
             properties = new Hashtable();
           }
-          properties.put("component.index", new Integer(i));
+          properties.put("component.index", Integer.valueOf(i));
           config.update(properties);
 
           sleep0(100);
@@ -2214,7 +2214,7 @@ public class DSTest extends TestCase {
     Bundle tb21 = installBundle("tb21");
 
     Hashtable props = new Hashtable(10);
-    props.put("config.dummy.data", new Integer(1));
+    props.put("config.dummy.data", Integer.valueOf(1));
     cm.getConfiguration(MOD_NOTSET_NS100).update(props);
     cm.getConfiguration(MOD_NOARGS_NS100).update(props);
     cm.getConfiguration(MOD_CC_NS100).update(props);
@@ -2227,7 +2227,7 @@ public class DSTest extends TestCase {
     tb21.start();
     waitBundleStart();
 
-    props.put("config.dummy.data", new Integer(2));
+    props.put("config.dummy.data", Integer.valueOf(2));
     Hashtable unsatisfyingProps = new Hashtable(10);
     unsatisfyingProps.put("ref.target", "(component.name=org.eclipse.equinox.ds.tests.tb21.unexisting.provider)");
 
@@ -2271,7 +2271,7 @@ public class DSTest extends TestCase {
     Bundle tb21a = installBundle("tb21a");
 
     Hashtable props = new Hashtable(10);
-    props.put("config.dummy.data", new Integer(1));
+    props.put("config.dummy.data", Integer.valueOf(1));
     cm.getConfiguration(MOD_NOTSET_NS110).update(props);
     cm.getConfiguration(MOD_NOARGS_NS110).update(props);
     cm.getConfiguration(MOD_CC_NS110).update(props);
@@ -2284,7 +2284,7 @@ public class DSTest extends TestCase {
     tb21a.start();
     waitBundleStart();
 
-    props.put("config.dummy.data", new Integer(2));
+    props.put("config.dummy.data", Integer.valueOf(2));
     Hashtable unsatisfyingProps = new Hashtable(10);
     unsatisfyingProps.put("ref.target", "(component.name=org.eclipse.equinox.ds.tests.tb21.unexisting.provider)");
 
@@ -2388,7 +2388,7 @@ public class DSTest extends TestCase {
     Bundle tb21a = installBundle("tb21a");
 
     Hashtable props = new Hashtable(10);
-    props.put("config.dummy.data", new Integer(1));
+    props.put("config.dummy.data", Integer.valueOf(1));
     cm.getConfiguration(MOD_CC_NS110).update(props);
     cm.getConfiguration(MOD_NOT_EXIST_NS110).update(props);
     cm.getConfiguration(MOD_THROW_EX_NS110).update(props);
@@ -2400,12 +2400,12 @@ public class DSTest extends TestCase {
 
     // Verifying correctness of updated component properties
     PropertiesProvider bs = getBaseService(MOD_CC_NS110);
-    props.put("config.dummy.data", new Integer(2));
+    props.put("config.dummy.data", Integer.valueOf(2));
     cm.getConfiguration(MOD_CC_NS110).update(props);
     Thread.sleep(timeout * 2);
     Object val = ((ComponentContextProvider) bs).getComponentContext().getProperties().get("config.dummy.data");
     assertEquals("Modified method of " + MOD_CC_NS110 + " should be called", 1 << 2, (1 << 2) & getBaseConfigData(bs));
-    assertTrue("Component properties should be updated properly for " + MOD_CC_NS110, (new Integer(2)).equals(val));
+    assertTrue("Component properties should be updated properly for " + MOD_CC_NS110, (Integer.valueOf(2)).equals(val));
 
     // Specified modified method doesn't exist, deactivate() should be called
     // instead of modified
@@ -2481,7 +2481,7 @@ public class DSTest extends TestCase {
     	return;
     
     Hashtable props = new Hashtable(11);
-    props.put("config.base.data", new Integer(1));
+    props.put("config.base.data", Integer.valueOf(1));
     //create the configurations for the test DS components
     Configuration config = cm.getConfiguration(COMP_OPTIONAL);
     config.update(props);
@@ -2594,9 +2594,9 @@ public class DSTest extends TestCase {
       final String PROP_BIND_11 = "bind11";
       final String PROP_BIND_0n = "bind0n";
       final String PROP_BIND_1n = "bind1n";
-      final Integer RANK_1 = new Integer(1);
-      final Integer RANK_2 = new Integer(2);
-      final Integer RANK_3 = new Integer(3);
+      final Integer RANK_1 = Integer.valueOf(1);
+      final Integer RANK_2 = Integer.valueOf(2);
+      final Integer RANK_3 = Integer.valueOf(3);
       tb25.start();
       waitBundleStart();
 
@@ -2704,9 +2704,9 @@ public class DSTest extends TestCase {
       final String PROP_BIND_11 = "bind11";
       final String PROP_BIND_0n = "bind0n";
       final String PROP_BIND_1n = "bind1n";
-      final Integer RANK_1 = new Integer(1);
-      final Integer RANK_2 = new Integer(2);
-      final Integer RANK_3 = new Integer(3);
+      final Integer RANK_1 = 1;
+      final Integer RANK_2 = 2;
+      final Integer RANK_3 = 3;
       tb25.start();
       waitBundleStart();
 

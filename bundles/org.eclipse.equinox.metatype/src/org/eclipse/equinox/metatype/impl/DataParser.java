@@ -126,19 +126,19 @@ public class DataParser {
 			case AttributeDefinition.STRING :
 				return value;
 			case AttributeDefinition.LONG :
-				return new Long(value);
+				return Long.valueOf(value);
 			case AttributeDefinition.INTEGER :
-				return new Integer(value);
+				return Integer.valueOf(value);
 			case AttributeDefinition.SHORT :
-				return new Short(value);
+				return Short.valueOf(value);
 			case AttributeDefinition.CHARACTER :
-				return new Character(value.charAt(0));
+				return Character.valueOf(value.charAt(0));
 			case AttributeDefinition.BYTE :
-				return new Byte(value);
+				return Byte.valueOf(value);
 			case AttributeDefinition.DOUBLE :
-				return new Double(value);
+				return Double.valueOf(value);
 			case AttributeDefinition.FLOAT :
-				return new Float(value);
+				return Float.valueOf(value);
 			case AttributeDefinition.BIGINTEGER :
 				return new BigInteger(value);
 			case AttributeDefinition.BIGDECIMAL :

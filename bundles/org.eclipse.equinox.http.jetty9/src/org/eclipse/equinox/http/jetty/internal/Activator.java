@@ -114,7 +114,7 @@ public class Activator implements BundleActivator {
 		int httpPort = Details.getIntProp(context, JettyConstants.HTTP_PORT, -1);
 		if (httpPort == -1)
 			httpPort = Details.getInt(context, ORG_OSGI_SERVICE_HTTP_PORT, 0);
-		defaultSettings.put(JettyConstants.HTTP_PORT, new Integer(httpPort));
+		defaultSettings.put(JettyConstants.HTTP_PORT, Integer.valueOf(httpPort));
 
 		// HTTP Host (default is 0.0.0.0)
 		String httpHost = Details.getStringProp(context, JettyConstants.HTTP_HOST, null);
@@ -128,13 +128,13 @@ public class Activator implements BundleActivator {
 		// minimum number of threads
 		int minThreads = Details.getIntProp(context, JettyConstants.HTTP_MINTHREADS, 8);
 		if (minThreads != -1) {
-			defaultSettings.put(JettyConstants.HTTP_MINTHREADS, new Integer(minThreads));
+			defaultSettings.put(JettyConstants.HTTP_MINTHREADS, Integer.valueOf(minThreads));
 		}
 
 		// maximum number of threads
 		int maxThreads = Details.getIntProp(context, JettyConstants.HTTP_MAXTHREADS, 200);
 		if (maxThreads != -1) {
-			defaultSettings.put(JettyConstants.HTTP_MAXTHREADS, new Integer(maxThreads));
+			defaultSettings.put(JettyConstants.HTTP_MAXTHREADS, Integer.valueOf(maxThreads));
 		}
 
 		if (httpsEnabled.booleanValue()) {
@@ -143,7 +143,7 @@ public class Activator implements BundleActivator {
 			int httpsPort = Details.getIntProp(context, JettyConstants.HTTP_PORT, -1);
 			if (httpsPort == -1)
 				httpsPort = Details.getInt(context, ORG_OSGI_SERVICE_HTTP_PORT_SECURE, 443);
-			defaultSettings.put(JettyConstants.HTTPS_PORT, new Integer(httpsPort));
+			defaultSettings.put(JettyConstants.HTTPS_PORT, Integer.valueOf(httpsPort));
 
 			// HTTPS Host (default is 0.0.0.0)
 			String httpsHost = Details.getStringProp(context, JettyConstants.HTTPS_HOST, null);
@@ -193,7 +193,7 @@ public class Activator implements BundleActivator {
 		String sessionInactiveInterval = Details.getStringProp(context, JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL, null);
 		if (sessionInactiveInterval != null) {
 			try {
-				defaultSettings.put(JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL, new Integer(sessionInactiveInterval));
+				defaultSettings.put(JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL, Integer.valueOf(sessionInactiveInterval));
 			} catch (NumberFormatException e) {
 				//(log this) ignore
 			}

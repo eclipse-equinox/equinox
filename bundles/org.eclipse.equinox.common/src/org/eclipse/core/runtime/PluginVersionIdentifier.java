@@ -202,9 +202,9 @@ public final class PluginVersionIdentifier {
 
 		// "result" is a 4-element array with the major, minor, service, and qualifier
 		Object[] result = new Object[4];
-		result[0] = new Integer(numbers[0]);
-		result[1] = new Integer(numbers[1]);
-		result[2] = new Integer(numbers[2]);
+		result[0] = Integer.valueOf(numbers[0]);
+		result[1] = Integer.valueOf(numbers[1]);
+		result[2] = Integer.valueOf(numbers[2]);
 		if (elementSize >= 4)
 			result[3] = elements.elementAt(3);
 		else

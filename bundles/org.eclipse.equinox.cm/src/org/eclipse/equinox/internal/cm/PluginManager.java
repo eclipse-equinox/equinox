@@ -53,7 +53,7 @@ public class PluginManager {
 	}
 
 	private static class PluginTracker extends ServiceTracker<ConfigurationPlugin, ConfigurationPlugin> {
-		final Integer ZERO = new Integer(0);
+		final Integer ZERO = Integer.valueOf(0);
 		private TreeSet<ServiceReference<ConfigurationPlugin>> serviceReferences = new TreeSet<ServiceReference<ConfigurationPlugin>>(new Comparator<ServiceReference<ConfigurationPlugin>>() {
 			public int compare(ServiceReference<ConfigurationPlugin> s1, ServiceReference<ConfigurationPlugin> s2) {
 

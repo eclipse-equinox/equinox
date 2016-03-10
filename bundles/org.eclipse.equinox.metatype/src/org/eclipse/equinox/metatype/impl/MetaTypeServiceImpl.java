@@ -58,7 +58,7 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 		// Avoid synthetic accessor method warnings.
 		final LogService loggerTemp = this.logger;
 		final ServiceTracker<Object, Object> tracker = this.metaTypeProviderTracker;
-		Long bID = new Long(b.getBundleId());
+		Long bID = Long.valueOf(b.getBundleId());
 		synchronized (_mtps) {
 			if (_mtps.containsKey(bID))
 				return _mtps.get(bID);
@@ -116,7 +116,7 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 	public void bundleChanged(BundleEvent event) {
 
 		int type = event.getType();
-		Long bID = new Long(event.getBundle().getBundleId());
+		Long bID = Long.valueOf(event.getBundle().getBundleId());
 
 		switch (type) {
 			case BundleEvent.UPDATED :

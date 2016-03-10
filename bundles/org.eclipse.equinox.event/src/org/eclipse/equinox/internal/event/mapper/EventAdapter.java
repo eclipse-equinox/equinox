@@ -52,7 +52,7 @@ public abstract class EventAdapter {
 
 	public void putBundleProperties(Map<String, Object> properties, Bundle bundle) {
 		// assertion bundle != null
-		properties.put(Constants.BUNDLE_ID, new Long(bundle.getBundleId()));
+		properties.put(Constants.BUNDLE_ID, Long.valueOf(bundle.getBundleId()));
 		String symbolicName = bundle.getSymbolicName();
 		if (symbolicName != null) {
 			properties.put(Constants.BUNDLE_SYMBOLICNAME, symbolicName);

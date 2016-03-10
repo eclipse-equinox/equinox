@@ -148,7 +148,7 @@ public class CoordinatorImpl implements Coordinator {
 				throw new IllegalStateException(NLS.bind(Messages.CoordinatorShutdown, name, timeout));
 			synchronized (CoordinatorImpl.class) {
 				coordinations.add(coordination);
-				idToCoordination.put(new Long(coordination.getId()), coordination);
+				idToCoordination.put(Long.valueOf(coordination.getId()), coordination);
 			}
 		}
 		if (timeout > 0) {
@@ -171,7 +171,7 @@ public class CoordinatorImpl implements Coordinator {
 		CoordinationWeakReference.processOrphanedCoordinations();
 		CoordinationReferent result = null;
 		synchronized (CoordinatorImpl.class) {
-			CoordinationImpl c = idToCoordination.get(new Long(id));
+			CoordinationImpl c = idToCoordination.get(Long.valueOf(id));
 			if (c != null)
 				result = c.getReferent();
 		}
@@ -297,7 +297,7 @@ public class CoordinatorImpl implements Coordinator {
 		synchronized (this) {
 			synchronized (CoordinatorImpl.class) {
 				this.coordinations.remove(coordination);
-				idToCoordination.remove(new Long(coordination.getId()));
+				idToCoordination.remove(Long.valueOf(coordination.getId()));
 				participantToCoordination.keySet().removeAll(participants);
 			}
 		}

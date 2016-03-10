@@ -195,7 +195,7 @@ public class ValueTokenizer {
 						rangeError = validateString(ad, s);
 						break;
 					case AttributeDefinition.INTEGER :
-						Integer intVal = new Integer(s);
+						Integer intVal = Integer.valueOf(s);
 						if (ad._minValue != null && intVal.compareTo((Integer) ad._minValue) < 0) {
 							rangeError = true;
 						} else if (ad._maxValue != null && intVal.compareTo((Integer) ad._maxValue) > 0) {
@@ -203,7 +203,7 @@ public class ValueTokenizer {
 						}
 						break;
 					case AttributeDefinition.LONG :
-						Long longVal = new Long(s);
+						Long longVal = Long.valueOf(s);
 						if (ad._minValue != null && longVal.compareTo((Long) ad._minValue) < 0) {
 							rangeError = true;
 						} else if (ad._maxValue != null && longVal.compareTo((Long) ad._maxValue) > 0) {
@@ -211,7 +211,7 @@ public class ValueTokenizer {
 						}
 						break;
 					case AttributeDefinition.DOUBLE :
-						Double doubleVal = new Double(s);
+						Double doubleVal = Double.valueOf(s);
 						if (ad._minValue != null && doubleVal.compareTo((Double) ad._minValue) < 0) {
 							rangeError = true;
 						} else if (ad._maxValue != null && doubleVal.compareTo((Double) ad._maxValue) > 0) {
@@ -223,7 +223,7 @@ public class ValueTokenizer {
 						// Seems unnecessary to impose any further restrictions.
 						break;
 					case AttributeDefinition.CHARACTER :
-						Character charVal = new Character(s.charAt(0));
+						Character charVal = Character.valueOf(s.charAt(0));
 						if (ad._minValue != null && charVal.compareTo((Character) ad._minValue) < 0) {
 							rangeError = true;
 						} else if (ad._maxValue != null && charVal.compareTo((Character) ad._maxValue) > 0) {
@@ -231,7 +231,7 @@ public class ValueTokenizer {
 						}
 						break;
 					case AttributeDefinition.FLOAT :
-						Float floatVal = new Float(s);
+						Float floatVal = Float.valueOf(s);
 						if (ad._minValue != null && floatVal.compareTo((Float) ad._minValue) < 0) {
 							rangeError = true;
 						} else if (ad._maxValue != null && floatVal.compareTo((Float) ad._maxValue) > 0) {
@@ -239,7 +239,7 @@ public class ValueTokenizer {
 						}
 						break;
 					case AttributeDefinition.SHORT :
-						Short shortVal = new Short(s);
+						Short shortVal = Short.valueOf(s);
 						if (ad._minValue != null && shortVal.compareTo((Short) ad._minValue) < 0) {
 							rangeError = true;
 						} else if (ad._maxValue != null && shortVal.compareTo((Short) ad._maxValue) > 0) {
@@ -247,7 +247,7 @@ public class ValueTokenizer {
 						}
 						break;
 					case AttributeDefinition.BYTE :
-						Byte byteVal = new Byte(s);
+						Byte byteVal = Byte.valueOf(s);
 						if (ad._minValue != null && byteVal.compareTo((Byte) ad._minValue) < 0) {
 							rangeError = true;
 						} else if (ad._maxValue != null && byteVal.compareTo((Byte) ad._maxValue) > 0) {
