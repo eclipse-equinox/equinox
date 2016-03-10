@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 IBM Corporation and others.
+ * Copyright (c) 2008, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.io.*;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.Map.Entry;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.spec.PBEKeySpec;
@@ -138,9 +139,10 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			properties.remove(KEY_FACTORY_KEY);
 		}
 
-		for (Iterator i = properties.keySet().iterator(); i.hasNext();) {
-			Object externalKey = i.next();
-			Object value = properties.get(externalKey);
+		for (Iterator it = properties.entrySet().iterator(); it.hasNext();) {
+			Entry entry = (Entry) it.next();
+			Object externalKey = entry.getKey();
+			Object value = entry.getValue();
 			if (!(externalKey instanceof String))
 				continue;
 			if (!(value instanceof String))

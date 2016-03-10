@@ -310,9 +310,7 @@ public class Activator implements BundleActivator {
 	private static void closeURLTrackerServices() {
 		synchronized (urlTrackers) {
 			if (!urlTrackers.isEmpty()) {
-				for (Iterator<String> iter = urlTrackers.keySet().iterator(); iter.hasNext();) {
-					String key = iter.next();
-					ServiceTracker<Object, URLConverter> tracker = urlTrackers.get(key);
+				for (ServiceTracker<Object, URLConverter> tracker : urlTrackers.values()) {
 					tracker.close();
 				}
 				urlTrackers = new HashMap<>();

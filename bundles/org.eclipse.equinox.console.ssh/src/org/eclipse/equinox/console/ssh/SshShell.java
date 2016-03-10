@@ -129,8 +129,9 @@ public class SshShell implements Command {
 	
 	public void removeSession(SshSession session) {
 		CommandProcessor processorToRemove = null;
-		for (CommandProcessor processor : commandProcessorToConsoleThreadMap.keySet()) {
-			if (session.equals(commandProcessorToConsoleThreadMap.get(processor))) {
+		for (java.util.Map.Entry<CommandProcessor, SshSession> entry : commandProcessorToConsoleThreadMap.entrySet()) {
+			CommandProcessor processor = entry.getKey(); 
+			if (session.equals(entry.getValue())) {
 				processorToRemove = processor;
 				break;
 			}

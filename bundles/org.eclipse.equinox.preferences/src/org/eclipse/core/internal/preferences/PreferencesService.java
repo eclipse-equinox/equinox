@@ -15,6 +15,7 @@ package org.eclipse.core.internal.preferences;
 import java.io.*;
 import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.Map.Entry;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.preferences.*;
@@ -236,9 +237,9 @@ public class PreferencesService implements IPreferencesService {
 	private Properties convertFromLegacy(Properties properties) {
 		Properties result = new Properties();
 		String prefix = IPath.SEPARATOR + InstanceScope.SCOPE + IPath.SEPARATOR;
-		for (Iterator<?> i = properties.keySet().iterator(); i.hasNext();) {
-			String key = (String) i.next();
-			String value = properties.getProperty(key);
+		for (Entry<?, ?> entry : properties.entrySet()) {
+			String key = (String) entry.getKey();
+			String value = (String) entry.getValue();
 			if (value != null) {
 				int index = key.indexOf(IPath.SEPARATOR);
 				if (index == -1) {
@@ -260,9 +261,9 @@ public class PreferencesService implements IPreferencesService {
 	 */
 	private IExportedPreferences convertFromProperties(Properties properties) {
 		IExportedPreferences result = ExportedPreferences.newRoot();
-		for (Iterator<?> i = properties.keySet().iterator(); i.hasNext();) {
-			String path = (String) i.next();
-			String value = properties.getProperty(path);
+		for (Entry<?, ?> entry : properties.entrySet()) {
+			String path = (String) entry.getKey();
+			String value = (String) entry.getValue();
 			if (path.charAt(0) == EXPORT_ROOT_PREFIX) {
 				ExportedPreferences current = (ExportedPreferences) result.node(path.substring(1));
 				current.setExportRoot();

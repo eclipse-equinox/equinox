@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.io.PrintWriter;
 import java.security.Provider;
 import java.security.Security;
 import java.util.*;
+import java.util.Map.Entry;
 import org.eclipse.ui.about.ISystemSummarySection;
 
 public class SecurityConfigurationSection implements ISystemSummarySection {
@@ -59,23 +60,23 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 		Map attributes = service.getAttributes();
 		if ((null != attributes) && (0 < attributes.size())) {
 			writer.println("    Attributes:"); //$NON-NLS-1$
-			Set keys = attributes.keySet();
-			for (Iterator it = keys.iterator(); it.hasNext();) {
-				String key = (String) it.next();
+			for (Iterator it = attributes.entrySet().iterator(); it.hasNext();) {
+				Entry entry = (Entry) it.next();
+				String key = (String) entry.getKey();
 				writer.print("      " + key + ": "); //$NON-NLS-1$//$NON-NLS-2$
-				writer.println((String) attributes.get(key));
+				writer.println((String) entry.getValue());
 			}
 		}
 	}
 
 	private static ProviderService[] getServices(Provider provider) {
 
-		Set providerKeys = provider.keySet();
 		Hashtable serviceList = new Hashtable();
 		Hashtable attributeMap = new Hashtable(); // "type" => "Hashtable of (attribute,value) pairs"
 		Hashtable aliasMap = new Hashtable(); // "type" => "Arraylist of aliases"
-		for (Iterator it = providerKeys.iterator(); it.hasNext();) {
-			String key = (String) it.next();
+		for (Iterator it = provider.entrySet().iterator(); it.hasNext();) {
+			Entry entry = (Entry) it.next();
+			String key = (String) entry.getKey();
 
 			// this is provider info, available off the Provider API
 			if (key.startsWith(PROVIDER)) {
@@ -85,7 +86,7 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 			// this is an alias
 			if (key.startsWith(ALG_ALIAS)) {
 				String value = key.substring(key.indexOf(ALG_ALIAS) + ALG_ALIAS.length(), key.length());
-				String type = (String) provider.get(key);
+				String type = (String) entry.getValue();
 				String algo = value.substring(0, value.indexOf('.'));
 				String alias = value.substring(value.indexOf('.') + 1, value.length());
 				ArrayList aliasList = (ArrayList) aliasMap.get(type + '.' + algo);
@@ -121,13 +122,13 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 		}
 
 		ProviderService[] serviceArray = new ProviderService[serviceList.size()];
-		Set serviceKeys = serviceList.keySet();
 		int serviceCount = 0;
-		for (Iterator it = serviceKeys.iterator(); it.hasNext();) {
-			String key = (String) it.next();
+		for (Iterator it = serviceList.entrySet().iterator(); it.hasNext();) {
+			Entry entry = (Entry) it.next();
+			String key = (String) entry.getKey();
 			String type = key.substring(0, key.indexOf('.'));
 			String algo = key.substring(key.indexOf('.') + 1, key.length());
-			String className = (String) serviceList.get(key);
+			String className = (String) entry.getValue();
 			List aliases = (List) aliasMap.get(algo);
 			Map attributes = (Map) attributeMap.get(key);
 

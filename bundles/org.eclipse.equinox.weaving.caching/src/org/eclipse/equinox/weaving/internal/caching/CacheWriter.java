@@ -1,10 +1,10 @@
 /*******************************************************************************
  * Copyright (c) 2009 Martin Lippert and others.
- * All rights reserved. This program and the accompanying materials 
+ * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html.
- * 
+ *
  * Contributors:
  *     Martin Lippert - initial implementation
  *     Martin Lippert - caching of generated classes
@@ -18,14 +18,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 
 /**
  * The CacheWriter is responsible to store cache items to disk. The cache items
  * are read from the given queue.
- * 
+ *
  * @author Martin Lippert
  */
 public class CacheWriter {
@@ -34,7 +34,7 @@ public class CacheWriter {
 
     /**
      * Create a new cache writer for the given queue of cache items
-     * 
+     *
      * @param cacheQueue The blocking queue that delivers the cache items to
      *            store to this cache writer
      */
@@ -74,10 +74,10 @@ public class CacheWriter {
 
     /**
      * store the cache item to disk
-     * 
+     *
      * This operation creates the appropriate directory for the cache item if it
      * does not exist
-     * 
+     *
      * @param item the cache item to store to disc
      * @throws IOException if an error occurs while writing to the cache
      */
@@ -86,18 +86,17 @@ public class CacheWriter {
         // write out generated classes first
         final Map<String, byte[]> generatedClasses = item.getGeneratedClasses();
         if (generatedClasses != null) {
-            final Iterator<String> generatedClassNames = generatedClasses
-                    .keySet().iterator();
-            while (generatedClassNames.hasNext()) {
-                final String className = generatedClassNames.next();
-                final byte[] classBytes = generatedClasses.get(className);
+            for (final Entry<String, byte[]> entry : generatedClasses
+                    .entrySet()) {
+                final String className = entry.getKey();
+                final byte[] classBytes = entry.getValue();
                 storeSingleClass(className, classBytes, item.getDirectory());
             }
         }
 
         // write out the woven class
-        storeSingleClass(item.getName(), item.getCachedBytes(), item
-                .getDirectory());
+        storeSingleClass(item.getName(), item.getCachedBytes(),
+                item.getDirectory());
     }
 
     private void storeSingleClass(final String className,

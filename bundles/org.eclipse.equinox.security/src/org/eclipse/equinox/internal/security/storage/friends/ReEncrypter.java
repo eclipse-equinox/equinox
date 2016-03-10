@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.equinox.internal.security.storage.friends;
 
 import java.util.*;
+import java.util.Map.Entry;
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
 import org.eclipse.equinox.internal.security.storage.SecurePreferencesContainer;
@@ -124,10 +125,11 @@ public class ReEncrypter {
 			TmpElement element = (TmpElement) i.next();
 			ISecurePreferences node = root.node(element.getPath());
 			Map values = element.getValues();
-			for (Iterator j = values.keySet().iterator(); j.hasNext();) {
-				String key = (String) j.next();
+			for (Iterator it = values.entrySet().iterator(); it.hasNext();) {
+				Entry entry = (Entry) it.next();
+				String key = (String) entry.getKey();
 				try {
-					node.put(key, (String) values.get(key), true);
+					node.put(key, (String) entry.getValue(), true);
 				} catch (StorageException e) {
 					// this value will not be re-coded
 					String msg = NLS.bind(SecAuthMessages.encryptingError, key, node.absolutePath());

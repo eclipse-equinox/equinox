@@ -12,6 +12,7 @@
 package org.eclipse.equinox.internal.region;
 
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
 import org.eclipse.equinox.internal.region.hook.*;
 import org.eclipse.equinox.region.*;
@@ -285,8 +286,9 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 			}
 			this.regions.remove(region.getName());
 			this.edges.remove(region);
-			for (Region r : this.edges.keySet()) {
-				Set<FilteredRegion> edgeSet = this.edges.get(r);
+			for (Entry<Region, Set<FilteredRegion>> entry : edges.entrySet()) {
+				Region r = entry.getKey();
+				Set<FilteredRegion> edgeSet = entry.getValue();
 				for (FilteredRegion edge : edgeSet) {
 					if (region.equals(edge.getRegion())) {
 						Set<FilteredRegion> mutableEdgeSet = new HashSet<FilteredRegion>(edgeSet);

@@ -13,6 +13,7 @@ package org.eclipse.equinox.metatype.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.Map.Entry;
 import org.eclipse.equinox.metatype.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -98,11 +99,11 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 		Map<ServiceReference<Object>, Object> services = _tracker.getTracked();
 		if (services.isEmpty())
 			return new MetaTypeProviderWrapper[0];
-		Set<ServiceReference<Object>> serviceReferences = services.keySet();
 		Set<MetaTypeProviderWrapper> result = new HashSet<MetaTypeProviderWrapper>();
-		for (ServiceReference<Object> serviceReference : serviceReferences) {
+		for (Entry<ServiceReference<Object>, Object> entry : services.entrySet()) {
+			ServiceReference<Object> serviceReference = entry.getKey();
 			if (serviceReference.getBundle() == _bundle) {
-				Object service = services.get(serviceReference);
+				Object service = entry.getValue();
 				// If the service is not a MetaTypeProvider, we're not interested in it.
 				if (service instanceof MetaTypeProvider) {
 					// Include the METATYPE_PID, if present, to return as part of getPids(). Also, include the 

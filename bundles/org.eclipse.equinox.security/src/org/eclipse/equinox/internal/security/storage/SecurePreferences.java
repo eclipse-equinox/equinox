@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.equinox.internal.security.storage;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.Map.Entry;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import org.eclipse.core.runtime.IPath;
@@ -190,10 +191,11 @@ public class SecurePreferences {
 			thisNodePath = parentsPath + PATH_SEPARATOR + name;
 
 		if (values != null) {
-			for (Iterator i = values.keySet().iterator(); i.hasNext();) {
-				String key = (String) i.next();
+			for (Iterator it = values.entrySet().iterator(); it.hasNext();) {
+				Entry entry = (Entry) it.next();
+				String key = (String) entry.getKey();
 				PersistedPath extenalTag = new PersistedPath(thisNodePath, key);
-				properties.setProperty(extenalTag.toString(), (String) values.get(key));
+				properties.setProperty(extenalTag.toString(), (String) entry.getValue());
 			}
 		}
 
