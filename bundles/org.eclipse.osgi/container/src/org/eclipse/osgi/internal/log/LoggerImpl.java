@@ -17,7 +17,8 @@ import org.osgi.service.log.LogService;
 import org.osgi.service.log.admin.LoggerContext;
 
 public class LoggerImpl implements Logger {
-
+	static final String THIS_PACKAGE_NAME = LoggerImpl.class.getName().substring(0, LoggerImpl.class.getName().length() - LoggerImpl.class.getSimpleName().length());
+	static final Object[] EMPTY = new Object[0];
 	protected final ExtendedLogServiceImpl logServiceImpl;
 	protected final String name;
 
@@ -72,7 +73,7 @@ public class LoggerImpl implements Logger {
 			logLevelEnum = getLogLevel(level);
 		}
 		if (enabledLevel.implies(logLevelEnum)) {
-			logServiceImpl.getFactory().log(entryBundle, name, context, logLevelEnum, level, message, exception);
+			logServiceImpl.getFactory().log(entryBundle, name, getLocation(), context, logLevelEnum, level, message, exception);
 		}
 	}
 
@@ -99,12 +100,12 @@ public class LoggerImpl implements Logger {
 
 	@Override
 	public void trace(String message) {
-		trace(message, (Object) null);
+		trace(message, EMPTY);
 	}
 
 	@Override
 	public void trace(String format, Object arg) {
-		trace(format, arg, null);
+		trace(format, new Object[] {arg});
 	}
 
 	@Override
@@ -124,12 +125,12 @@ public class LoggerImpl implements Logger {
 
 	@Override
 	public void debug(String message) {
-		debug(message, (Object) null);
+		debug(message, EMPTY);
 	}
 
 	@Override
 	public void debug(String format, Object arg) {
-		debug(format, arg, null);
+		debug(format, new Object[] {arg});
 	}
 
 	@Override
@@ -149,12 +150,12 @@ public class LoggerImpl implements Logger {
 
 	@Override
 	public void info(String message) {
-		info(message, (Object) null);
+		info(message, EMPTY);
 	}
 
 	@Override
 	public void info(String format, Object arg) {
-		info(format, arg, null);
+		info(format, new Object[] {arg});
 	}
 
 	@Override
@@ -174,12 +175,12 @@ public class LoggerImpl implements Logger {
 
 	@Override
 	public void warn(String message) {
-		warn(message, (Object) null);
+		warn(message, EMPTY);
 	}
 
 	@Override
 	public void warn(String format, Object arg) {
-		warn(format, arg, null);
+		warn(format, new Object[] {arg});
 	}
 
 	@Override
@@ -199,12 +200,12 @@ public class LoggerImpl implements Logger {
 
 	@Override
 	public void error(String message) {
-		error(message, (Object) null);
+		error(message, EMPTY);
 	}
 
 	@Override
 	public void error(String format, Object arg) {
-		error(format, arg, null);
+		error(format, new Object[] {arg});
 	}
 
 	@Override
@@ -219,12 +220,12 @@ public class LoggerImpl implements Logger {
 
 	@Override
 	public void audit(String message) {
-		audit(message, (Object) null);
+		audit(message, EMPTY);
 	}
 
 	@Override
 	public void audit(String format, Object arg) {
-		audit(format, arg, null);
+		audit(format, new Object[] {arg});
 	}
 
 	@Override
@@ -243,9 +244,23 @@ public class LoggerImpl implements Logger {
 		if (!enabledLevel.implies(level)) {
 			return;
 		}
+		StackTraceElement location = getLocation();
 		Arguments processedArguments = new Arguments(arguments);
 		String message = processedArguments.isEmpty() ? format : formatMessage(format, processedArguments);
-		logServiceImpl.getFactory().log(logServiceImpl.getBundle(), name, processedArguments.serviceReference(), level, level.ordinal(), message.toString(), processedArguments.throwable());
+		logServiceImpl.getFactory().log(logServiceImpl.getBundle(), name, location, processedArguments.serviceReference(), level, level.ordinal(), message.toString(), processedArguments.throwable());
+	}
+
+	private StackTraceElement getLocation() {
+		StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+		if (elements.length == 0) {
+			return null;
+		}
+		for (int i = 1; i < elements.length; i++) {
+			if (!elements[i].getClassName().startsWith(THIS_PACKAGE_NAME)) {
+				return elements[i];
+			}
+		}
+		return elements[1];
 	}
 
 	String formatMessage(String format, Arguments processedArguments) {

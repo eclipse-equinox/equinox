@@ -25,19 +25,24 @@ public class Arguments {
 		ServiceReference<?> context = null;
 		Throwable exception = null;
 		Object object = arguments[arguments.length - 1];
-		if (object instanceof Throwable) {
+		if (object instanceof Throwable || object instanceof ServiceReference) {
 			length--;
-			exception = (Throwable) object;
+			if (object instanceof Throwable) {
+				exception = (Throwable) object;
+			} else {
+				context = (ServiceReference<?>) object;
+			}
 			if (arguments.length > 1) {
 				object = arguments[arguments.length - 2];
-				if (object instanceof ServiceReference) {
+				if ((object instanceof ServiceReference && context == null) || (object instanceof Throwable && exception == null)) {
 					length--;
-					context = (ServiceReference<?>) object;
+					if (object instanceof Throwable) {
+						exception = (Throwable) object;
+					} else {
+						context = (ServiceReference<?>) object;
+					}
 				}
 			}
-		} else if (object instanceof ServiceReference) {
-			length--;
-			context = (ServiceReference<?>) object;
 		}
 		serviceReference = context;
 		throwable = exception;

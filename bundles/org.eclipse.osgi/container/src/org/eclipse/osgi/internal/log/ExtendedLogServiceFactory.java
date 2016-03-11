@@ -80,8 +80,8 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 		return logReaderServiceFactory.isLoggable(bundle, name, level);
 	}
 
-	void log(Bundle bundle, String name, Object context, LogLevel logLevelEnum, int level, String message, Throwable exception) {
-		logReaderServiceFactory.log(bundle, name, context, logLevelEnum, level, message, exception);
+	void log(Bundle bundle, String name, StackTraceElement stackTraceElement, Object context, LogLevel logLevelEnum, int level, String message, Throwable exception) {
+		logReaderServiceFactory.log(bundle, name, stackTraceElement, context, logLevelEnum, level, message, exception);
 	}
 
 	void checkLogPermission() throws SecurityException {

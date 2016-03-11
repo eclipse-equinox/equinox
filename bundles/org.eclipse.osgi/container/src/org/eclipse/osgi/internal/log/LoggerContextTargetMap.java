@@ -110,7 +110,7 @@ public class LoggerContextTargetMap {
 		EquinoxLoggerContext loggerContext = loggerContexts.get(name);
 		if (loggerContext == null) {
 			loggerContext = factory.createEquinoxLoggerContext(name);
-			loggerContexts.put(null, loggerContext);
+			loggerContexts.put(name, loggerContext);
 		}
 		return loggerContext;
 	}

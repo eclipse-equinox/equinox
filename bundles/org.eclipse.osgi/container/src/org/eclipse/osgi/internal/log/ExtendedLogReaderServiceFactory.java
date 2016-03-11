@@ -176,21 +176,21 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 		return count;
 	}
 
-	void log(final Bundle bundle, final String name, final Object context, final LogLevel logLevelEnum, final int level, final String message, final Throwable exception) {
+	void log(final Bundle bundle, final String name, final StackTraceElement stackTraceElement, final Object context, final LogLevel logLevelEnum, final int level, final String message, final Throwable exception) {
 		if (System.getSecurityManager() != null) {
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
 				public Void run() {
-					logPrivileged(bundle, name, context, logLevelEnum, level, message, exception);
+					logPrivileged(bundle, name, stackTraceElement, context, logLevelEnum, level, message, exception);
 					return null;
 				}
 			});
 		} else {
-			logPrivileged(bundle, name, context, logLevelEnum, level, message, exception);
+			logPrivileged(bundle, name, stackTraceElement, context, logLevelEnum, level, message, exception);
 		}
 	}
 
-	void logPrivileged(Bundle bundle, String name, Object context, LogLevel logLevelEnum, int level, String message, Throwable exception) {
-		LogEntry logEntry = new ExtendedLogEntryImpl(bundle, name, context, logLevelEnum, level, message, exception);
+	void logPrivileged(Bundle bundle, String name, StackTraceElement stackTraceElement, Object context, LogLevel logLevelEnum, int level, String message, Throwable exception) {
+		LogEntry logEntry = new ExtendedLogEntryImpl(bundle, name, stackTraceElement, context, logLevelEnum, level, message, exception);
 		storeEntry(logEntry);
 		ArrayMap<LogListener, Object[]> listenersCopy;
 		listenersLock.readLock();

@@ -55,7 +55,7 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 		return threadId.longValue();
 	}
 
-	public ExtendedLogEntryImpl(Bundle bundle, String loggerName, Object contextObject, LogLevel logLevelEnum, int level, String message, Throwable throwable) {
+	public ExtendedLogEntryImpl(Bundle bundle, String loggerName, StackTraceElement stackTraceElement, Object contextObject, LogLevel logLevelEnum, int level, String message, Throwable throwable) {
 		this.time = System.currentTimeMillis();
 		this.loggerName = loggerName;
 		this.bundle = bundle;
@@ -73,8 +73,7 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 			this.sequenceNumber = nextSequenceNumber++;
 		}
 
-		// TODO need to find the calling stack here not just 2 up.
-		stackTraceElement = currentThread.getStackTrace()[2];
+		this.stackTraceElement = stackTraceElement;
 	}
 
 	public String getLoggerName() {
