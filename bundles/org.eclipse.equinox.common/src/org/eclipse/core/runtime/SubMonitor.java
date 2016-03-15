@@ -508,6 +508,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * {@link #done()} on a possibly-null monitor.
 	 * 
 	 * @param monitor a progress monitor or null
+	 * @since 3.8
 	 */
 	public static void done(IProgressMonitor monitor) {
 		if (monitor != null) {
