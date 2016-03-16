@@ -233,6 +233,9 @@ elif [ "$defaultOSArch" = "s390x" ];  then
 elif [ "$defaultOSArch" = "ia64" ];  then
 	M_ARCH=-mlp64
 	export M_ARCH
+elif [ "$defaultOSArch" = "x86" ];  then
+	M_ARCH=-m32
+	export M_ARCH
 fi
 
 LIBRARY_DIR="$EXEC_DIR/../org.eclipse.equinox.launcher.$defaultWS.$defaultOS.$defaultOSArch"
