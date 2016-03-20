@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,9 @@ package org.eclipse.osgi.internal.loader.classpath;
 
 import java.io.*;
 import java.security.ProtectionDomain;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
@@ -41,7 +44,8 @@ public class ClasspathEntry {
 
 	private final BundleFile bundlefile;
 	private final ProtectionDomain domain;
-	private final Manifest manifest;
+	private final ManifestPackageAttributes mainManifestPackageAttributes;
+	private final Map<String, ManifestPackageAttributes> perPackageManifestAttributes;
 	private KeyedHashSet userObjects = null;
 
 	// TODO Note that PDE has internal dependency on this field type/name (bug 267238)
@@ -57,7 +61,40 @@ public class ClasspathEntry {
 		this.bundlefile = bundlefile;
 		this.domain = domain;
 		this.data = new PDEData(generation.getBundleFile().getBaseFile(), generation.getRevision().getSymbolicName());
-		this.manifest = getManifest(bundlefile, generation);
+		final Manifest manifest = loadManifest(bundlefile, generation);
+		if (manifest != null && generation.getBundleInfo().getStorage().getConfiguration().DEFINE_PACKAGE_ATTRIBUTES) {
+			mainManifestPackageAttributes = manifestPackageAttributesFor(manifest.getMainAttributes(), null);
+			perPackageManifestAttributes = manifestPackageAttributesMapFor(manifest.getEntries().entrySet(), mainManifestPackageAttributes);
+		} else {
+			mainManifestPackageAttributes = ManifestPackageAttributes.NONE;
+			perPackageManifestAttributes = null;
+		}
+	}
+
+	private static ManifestPackageAttributes manifestPackageAttributesFor(Attributes attributes, ManifestPackageAttributes defaultAttributes) {
+		return ManifestPackageAttributes.of(attributes.getValue(Attributes.Name.SPECIFICATION_TITLE), //
+				attributes.getValue(Attributes.Name.SPECIFICATION_VERSION), //
+				attributes.getValue(Attributes.Name.SPECIFICATION_VENDOR), //
+				attributes.getValue(Attributes.Name.IMPLEMENTATION_TITLE), //
+				attributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION), //
+				attributes.getValue(Attributes.Name.IMPLEMENTATION_VENDOR), //
+				defaultAttributes);
+	}
+
+	private static Map<String, ManifestPackageAttributes> manifestPackageAttributesMapFor(Set<Entry<String, Attributes>> entries, ManifestPackageAttributes defaultAttributes) {
+		Map<String, ManifestPackageAttributes> result = null;
+		for (Entry<String, Attributes> entry : entries) {
+			String name = entry.getKey();
+			Attributes attributes = entry.getValue();
+			if (name != null && name.endsWith("/")) { //$NON-NLS-1$
+				String packageName = name.substring(0, name.length() - 1).replace('/', '.');
+				if (result == null) {
+					result = new HashMap<String, ManifestPackageAttributes>(4);
+				}
+				result.put(packageName, manifestPackageAttributesFor(attributes, defaultAttributes));
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -98,7 +135,7 @@ public class ClasspathEntry {
 		userObjects.add(userObject);
 	}
 
-	private static Manifest getManifest(BundleFile cpBundleFile, Generation generation) {
+	private static Manifest loadManifest(BundleFile cpBundleFile, Generation generation) {
 		if (!generation.hasPackageInfo() && generation.getBundleFile() == cpBundleFile) {
 			return null;
 		}
@@ -120,8 +157,12 @@ public class ClasspathEntry {
 		return null;
 	}
 
-	public Manifest getManifest() {
-		return this.manifest;
+	ManifestPackageAttributes manifestPackageAttributesFor(String packageName) {
+		ManifestPackageAttributes perPackage = perPackageManifestAttributes == null ? null : perPackageManifestAttributes.get(packageName);
+		if (perPackage != null) {
+			return perPackage;
+		}
+		return mainManifestPackageAttributes;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,6 @@ package org.eclipse.osgi.internal.loader.classpath;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
@@ -657,35 +655,15 @@ public class ClasspathManager {
 		String specTitle = null, specVersion = null, specVendor = null, implTitle = null, implVersion = null, implVendor = null;
 
 		if (generation.getBundleInfo().getStorage().getConfiguration().DEFINE_PACKAGE_ATTRIBUTES) {
-			Manifest mf = classpathEntry.getManifest();
-			if (mf != null) {
-				Attributes mainAttributes = mf.getMainAttributes();
-				String dirName = packageName.replace('.', '/') + '/';
-				Attributes packageAttributes = mf.getAttributes(dirName);
-				boolean noEntry = false;
-				if (packageAttributes == null) {
-					noEntry = true;
-					packageAttributes = mainAttributes;
-				}
-				specTitle = packageAttributes.getValue(Attributes.Name.SPECIFICATION_TITLE);
-				if (specTitle == null && !noEntry)
-					specTitle = mainAttributes.getValue(Attributes.Name.SPECIFICATION_TITLE);
-				specVersion = packageAttributes.getValue(Attributes.Name.SPECIFICATION_VERSION);
-				if (specVersion == null && !noEntry)
-					specVersion = mainAttributes.getValue(Attributes.Name.SPECIFICATION_VERSION);
-				specVendor = packageAttributes.getValue(Attributes.Name.SPECIFICATION_VENDOR);
-				if (specVendor == null && !noEntry)
-					specVendor = mainAttributes.getValue(Attributes.Name.SPECIFICATION_VENDOR);
-				implTitle = packageAttributes.getValue(Attributes.Name.IMPLEMENTATION_TITLE);
-				if (implTitle == null && !noEntry)
-					implTitle = mainAttributes.getValue(Attributes.Name.IMPLEMENTATION_TITLE);
-				implVersion = packageAttributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
-				if (implVersion == null && !noEntry)
-					implVersion = mainAttributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
-				implVendor = packageAttributes.getValue(Attributes.Name.IMPLEMENTATION_VENDOR);
-				if (implVendor == null && !noEntry)
-					implVendor = mainAttributes.getValue(Attributes.Name.IMPLEMENTATION_VENDOR);
-			}
+			ManifestPackageAttributes manifestPackageAttributes = classpathEntry.manifestPackageAttributesFor(packageName);
+			TitleVersionVendor specification = manifestPackageAttributes.getSpecification();
+			TitleVersionVendor implementation = manifestPackageAttributes.getImplementation();
+			specTitle = specification.getTitle();
+			specVersion = specification.getVersion();
+			specVendor = specification.getVendor();
+			implTitle = implementation.getTitle();
+			implVersion = implementation.getVersion();
+			implVendor = implementation.getVendor();
 		}
 
 		// The package is not defined yet define it before we define the class.
