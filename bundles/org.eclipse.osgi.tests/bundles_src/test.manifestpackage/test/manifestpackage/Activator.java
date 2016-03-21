@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,15 +19,18 @@ import test.manifestpackage.c.C;
 public class Activator implements BundleActivator {
 
 	public void start(BundleContext context) throws Exception {
+		Package thisPkg = getClass().getPackage();
+		assertNotNull("thisPkg", thisPkg);
+		checkPackage(thisPkg, "main", "1.0", "equinox.main", "MAIN", "10.0", "equinox.main");
 		Package aPkg = A.class.getPackage();
 		assertNotNull("aPkg", aPkg);
-		checkPackage(aPkg, "a", "1.1", "equinox", "A", "11.0", "equinox");
+		checkPackage(aPkg, "a", "1.1", "equinox.a", "A", "11.0", "equinox.a");
 		Package bPkg = B.class.getPackage();
 		assertNotNull("bPkg", bPkg);
-		checkPackage(bPkg, "b", "1.2", "equinox", "B", "12.0", "equinox");
+		checkPackage(bPkg, "b", "1.2", "equinox.b", "B", "12.0", "equinox.b");
 		Package cPkg = C.class.getPackage();
 		assertNotNull("cPkg", cPkg);
-		checkPackage(cPkg, "c", "1.3", "equinox", "C", "13.0", "equinox");
+		checkPackage(cPkg, "c", "1.3", "equinox.c", "C", "13.0", "equinox.c");
 	}
 
 	private void checkPackage(Package pkg, String specTitle, String specVersion, String specVendor, String implTitle, String implVersion, String implVendor) {
