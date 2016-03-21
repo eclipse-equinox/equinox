@@ -35,3 +35,15 @@ Specification-Vendor: equinox.c
 Implementation-Title: C
 Implementation-Version: 13.0
 Implementation-Vendor: equinox.c
+
+Name: test/manifestpackage/d/
+Specification-Title: d
+Implementation-Title: D
+
+Name: test/manifestpackage/e/
+Specification-Version: 1.5
+Implementation-Version: 15.0
+
+Name: test/manifestpackage/f/
+Specification-Vendor: equinox.f
+Implementation-Vendor: equinox.f

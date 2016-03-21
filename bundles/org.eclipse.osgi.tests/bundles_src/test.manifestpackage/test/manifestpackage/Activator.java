@@ -15,6 +15,9 @@ import org.osgi.framework.BundleContext;
 import test.manifestpackage.a.A;
 import test.manifestpackage.b.B;
 import test.manifestpackage.c.C;
+import test.manifestpackage.d.D;
+import test.manifestpackage.e.E;
+import test.manifestpackage.f.F;
 
 public class Activator implements BundleActivator {
 
@@ -22,15 +25,30 @@ public class Activator implements BundleActivator {
 		Package thisPkg = getClass().getPackage();
 		assertNotNull("thisPkg", thisPkg);
 		checkPackage(thisPkg, "main", "1.0", "equinox.main", "MAIN", "10.0", "equinox.main");
+
 		Package aPkg = A.class.getPackage();
 		assertNotNull("aPkg", aPkg);
 		checkPackage(aPkg, "a", "1.1", "equinox.a", "A", "11.0", "equinox.a");
+
 		Package bPkg = B.class.getPackage();
 		assertNotNull("bPkg", bPkg);
 		checkPackage(bPkg, "b", "1.2", "equinox.b", "B", "12.0", "equinox.b");
+
 		Package cPkg = C.class.getPackage();
 		assertNotNull("cPkg", cPkg);
 		checkPackage(cPkg, "c", "1.3", "equinox.c", "C", "13.0", "equinox.c");
+
+		Package dPkg = D.class.getPackage();
+		assertNotNull("dPkg", dPkg);
+		checkPackage(dPkg, "d", "1.0", "equinox.main", "D", "10.0", "equinox.main");
+
+		Package ePkg = E.class.getPackage();
+		assertNotNull("ePkg", ePkg);
+		checkPackage(ePkg, "main", "1.5", "equinox.main", "MAIN", "15.0", "equinox.main");
+
+		Package fPkg = F.class.getPackage();
+		assertNotNull("fPkg", fPkg);
+		checkPackage(fPkg, "main", "1.0", "equinox.f", "MAIN", "10.0", "equinox.f");
 	}
 
 	private void checkPackage(Package pkg, String specTitle, String specVersion, String specVendor, String implTitle, String implVersion, String implVendor) {
