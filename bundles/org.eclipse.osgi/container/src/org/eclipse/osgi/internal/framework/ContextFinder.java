@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
+import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 
 public class ContextFinder extends ClassLoader implements PrivilegedAction<List<ClassLoader>> {
@@ -152,22 +153,23 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 		}
 	}
 
-	protected Enumeration<URL> findResources(String arg0) throws IOException {
+	public Enumeration<URL> getResources(String arg0) throws IOException {
 		//Shortcut cycle
 		if (startLoading(arg0) == false) {
-			@SuppressWarnings("unchecked")
-			Enumeration<URL> result = Collections.enumeration(Collections.EMPTY_LIST);
-			return result;
+			return Collections.enumeration(Collections.<URL> emptyList());
 		}
 		try {
 			List<ClassLoader> toConsult = findClassLoaders();
+			Enumeration<URL> result = null;
 			for (Iterator<ClassLoader> loaders = toConsult.iterator(); loaders.hasNext();) {
-				Enumeration<URL> result = loaders.next().getResources(arg0);
-				if (result != null && result.hasMoreElements())
-					return result;
-				// go to the next class loader
+				result = loaders.next().getResources(arg0);
+				if (result != null && result.hasMoreElements()) {
+					// For context finder we do not compound results after this first loader that has resources
+					break;
+				}
+				// no results yet, go to the next class loader
 			}
-			return super.findResources(arg0);
+			return BundleLoader.compoundEnumerations(result, super.getResources(arg0));
 		} finally {
 			stopLoading(arg0);
 		}

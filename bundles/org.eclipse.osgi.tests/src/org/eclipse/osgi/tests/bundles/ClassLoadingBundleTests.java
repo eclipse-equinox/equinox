@@ -1666,6 +1666,23 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		global.loadClass("test.bug438904.frag.Test2");
 	}
 
+	public void testContextFinderGetResource() throws IOException, InvalidSyntaxException {
+		// get the context finder explicitly to test incase the thread context class loader has changed
+		ClassLoader contextFinder = getContext().getService(getContext().getServiceReferences(ClassLoader.class, "(equinox.classloader.type=contextClassLoader)").iterator().next());
+		// Using a resource we know is in java 8.
+		String resource = "META-INF/services/javax.print.PrintServiceLookup";
+		URL systemURL = ClassLoader.getSystemClassLoader().getResource("META-INF/services/javax.print.PrintServiceLookup");
+		assertNotNull("Did not find a parent resource: " + resource, systemURL);
+		//should return the file defined in test bundle.
+		URL url = contextFinder.getResource(resource);
+		//the first element should be the file define in this bundle.
+		List<URL> urls = Collections.list(contextFinder.getResources(resource));
+		// make sure we have a resource located in the parent
+		assertTrue("Did not find a parent resource: " + urls, urls.size() > 1);
+		//assert failed as it return the one defined in parent class.
+		assertEquals(url.toExternalForm(), urls.get(0).toExternalForm());
+	}
+
 	public void testBundleReference01() throws Exception {
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
 		Class clazz = test.loadClass("test1.Activator"); //$NON-NLS-1$
