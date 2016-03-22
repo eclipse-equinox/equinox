@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2014 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,12 +49,12 @@ public class SignedBundleTest extends BaseSecurityTest {
 	n/a		n/a		n/a		= positive, unsigned				('unsigned.jar')
 	yes		n/a		yes		= positive, 1 signer				('signed.jar','ca1_leafa')
 	yes		yes		yes		= positive, 2 signers				('multiply_signed.jar','ca1_leafa,'ca1_leafb')
-
+	
 	//negative = untrusted tests
 	no		n/a		yes		= negative, 1 signer, 1 untrusted	('signed.jar')		
 	no		no		yes		= negative, 2 signers, 2 untrusted  ('multiply_signed.jar')
 	yes		no		yes		= negative, 2 signers, 1 untrusted	('multiply_signed.jar', 'ca1_leafa')
-
+	
 	//negative = validity tests
 	yes		n/a		no		= negative, 1 signer, 1 corrupt		('signed_with_corrupt.jar','ca1_leafa')
 	yes		yes		no		= negative, 2 signers, 2 corrupt
@@ -91,11 +91,11 @@ public class SignedBundleTest extends BaseSecurityTest {
 		registerEclipseTrustEngine();
 		/*
 				TrustEngine engine = getTrustEngine();
-
+		
 				if (supportStore == null) {
 					fail("Could not open keystore with test certificates!");
 				}
-
+		
 				// get the certs from the support store and add
 				for (int i = 0; i < aliases.length; i++) {
 					Certificate cert = supportStore.getCertificate(aliases[i]);
@@ -923,6 +923,47 @@ public class SignedBundleTest extends BaseSecurityTest {
 			}
 		} catch (Exception e) {
 			fail("Unexpected exception", e);
+		}
+	}
+
+	public void test489686() {
+		Bundle testBundle = null;
+		try {
+			testBundle = installBundle(getTestJarPath("signed_with_missing_digest"));
+
+			// get the signed content for the bundle
+			SignedContent signedContent = getSignedContentFactory().getSignedContent(testBundle);
+			assertNotNull("SignedContent is null", signedContent);
+			// check if it is signed
+			assertTrue("Should be signed", signedContent.isSigned());
+			// get the signer infos
+			SignerInfo[] infos = signedContent.getSignerInfos();
+			assertNotNull("SignerInfo is null", infos);
+			assertEquals("wrong number of signers", 1, infos.length);
+
+			SignedContentEntry[] entries = signedContent.getSignedEntries();
+			assertNotNull("Entries is null", entries);
+			for (int i = 0; i < entries.length; i++) {
+				try {
+					entries[i].verify();
+					fail("Expected a corruption for: " + entries[i].getName());
+				} catch (InvalidContentException e) {
+					// expected
+				}
+				SignerInfo[] entryInfos = entries[i].getSignerInfos();
+				assertNotNull("SignerInfo is null", entryInfos);
+				assertEquals("wrong number of entry signers", 1, entryInfos.length);
+				assertEquals("Entry signer does not equal content signer", infos[0], entryInfos[0]);
+			}
+
+		} catch (Exception e) {
+			fail("Unexpected exception", e);
+		} finally {
+			try {
+				testBundle.uninstall();
+			} catch (Exception e) {
+				fail("Failed to uninstall bundle", e);
+			}
 		}
 	}
 }

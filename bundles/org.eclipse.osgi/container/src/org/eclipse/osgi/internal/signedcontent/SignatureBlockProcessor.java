@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2015 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2007, 2016 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -182,11 +182,14 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 			}
 
 			// get the string for this entry only, since the entryStartOffset
-			// points to the '\n' befor the 'Name: ' we increase it by 1
+			// points to the '\n' before the 'Name: ' we increase it by 1
 			// this is guaranteed to not go past end-of-string and be less
 			// then entryEndOffset.
 			String entryStr = mfStr.substring(entryStartOffset + 1, entryEndOffset);
 			entryStr = stripContinuations(entryStr);
+
+			// increment the offset to the ending entry for the next iteration of the loop ...
+			entryStartOffset = entryEndOffset;
 
 			// entry points to the start of the next 'entry'
 			String entryName = getEntryFileName(entryStr);
@@ -194,7 +197,6 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 			// if we could retrieve an entry name, then we will extract
 			// digest type list, and the digest value list
 			if (entryName != null) {
-
 				String aDigestLine = getDigestLine(entryStr, signerInfo.getMessageDigestAlgorithm());
 
 				if (aDigestLine != null) {
@@ -231,8 +233,6 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 					mdResult[1].add(digestResult);
 				} // could get lines of digest entries in this MF file entry
 			} // could retrieve entry name
-				// increment the offset to the ending entry...
-			entryStartOffset = entryEndOffset;
 		}
 	}
 
@@ -335,7 +335,7 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 		int entryStartOffset = mfStr.indexOf(MF_ENTRY_NEWLN_NAME);
 		int length = mfStr.length();
 
-		while ((entryStartOffset != -1) && (entryStartOffset < length)) {
+		if ((entryStartOffset != -1) && (entryStartOffset < length)) {
 
 			// get the start of the next 'entry', i.e. the end of this entry
 			int entryEndOffset = mfStr.indexOf(MF_ENTRY_NEWLN_NAME, entryStartOffset + 1);
@@ -346,12 +346,11 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 			}
 
 			// get the string for this entry only, since the entryStartOffset
-			// points to the '\n' befor the 'Name: ' we increase it by 1
+			// points to the '\n' before the 'Name: ' we increase it by 1
 			// this is guaranteed to not go past end-of-string and be less
 			// then entryEndOffset.
 			entryStr = mfStr.substring(entryStartOffset + 1, entryEndOffset);
 			entryStr = stripContinuations(entryStr);
-			break;
 		}
 
 		if (entryStr != null) {
