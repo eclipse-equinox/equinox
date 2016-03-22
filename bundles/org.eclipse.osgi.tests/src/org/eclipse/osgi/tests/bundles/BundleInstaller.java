@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,9 +73,9 @@ public class BundleInstaller {
 
 	String getBundleLocation0(String name) throws BundleException {
 		String bundleFileName = rootLocation + "/" + name;
-		URL bundleURL = context.getBundle().getEntry(bundleFileName);
+		URL bundleURL = context.getBundle().getEntry(bundleFileName + ".jar");
 		if (bundleURL == null)
-			bundleURL = context.getBundle().getEntry(bundleFileName + ".jar");
+			bundleURL = context.getBundle().getEntry(bundleFileName);
 		if (bundleURL == null)
 			throw new BundleException("Could not find bundle to install at: " + name);
 		try {
@@ -96,9 +96,9 @@ public class BundleInstaller {
 		if (fromBundle == null)
 			throw new BundleException("The bundle to update does not exist!! " + fromName);
 		String bundleFileName = rootLocation + "/" + toName;
-		URL bundleURL = context.getBundle().getEntry(bundleFileName);
+		URL bundleURL = context.getBundle().getEntry(bundleFileName + ".jar");
 		if (bundleURL == null)
-			bundleURL = context.getBundle().getEntry(bundleFileName + ".jar");
+			bundleURL = context.getBundle().getEntry(bundleFileName);
 		try {
 			bundleURL = ((URLConverter) converter.getService()).resolve(bundleURL);
 		} catch (IOException e) {

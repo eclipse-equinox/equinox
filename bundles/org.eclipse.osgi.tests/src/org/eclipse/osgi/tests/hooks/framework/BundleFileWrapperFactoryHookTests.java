@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,7 @@ import org.osgi.framework.launch.Framework;
 public class BundleFileWrapperFactoryHookTests extends AbstractFrameworkHookTests {
 	private static final String TEST_BUNDLE = "substitutes.a";
 	private static final String HOOK_CONFIGURATOR_BUNDLE = "wrapper.hooks.a";
-	private static final String HOOK_CONFIGURATOR_CLASS = "wrapper.hooks.a.TestHookConfigurator";
+	private static final String HOOK_CONFIGURATOR_CLASS = "org.eclipse.osgi.tests.wrapper.hooks.a.TestHookConfigurator";
 
 	private Map<String, String> configuration;
 	private Framework framework;
