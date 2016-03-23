@@ -11,6 +11,14 @@
  *******************************************************************************/
 package org.eclipse.equinox.ds.tests.tbc;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,10 +32,10 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import junit.framework.TestCase;
-
 import org.eclipse.equinox.ds.tests.BundleInstaller;
 import org.eclipse.equinox.ds.tests.DSTestsActivator;
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -48,7 +56,7 @@ import org.osgi.service.permissionadmin.PermissionAdmin;
 import org.osgi.service.permissionadmin.PermissionInfo;
 import org.osgi.util.tracker.ServiceTracker;
 
-public class DSTest extends TestCase {
+public class DSTest {
 
   private static final String NAMED_CLASS = "org.eclipse.equinox.ds.tests.tb4.NamedService";
 
@@ -179,6 +187,7 @@ public class DSTest extends TestCase {
 
   private BundleInstaller installer;
 
+  @Before
   public void setUp() throws Exception {
     DSTestsActivator.activateSCR();
 
@@ -386,6 +395,7 @@ public class DSTest extends TestCase {
     clearConfigurations();
   }
 
+  @Test
   public void testBindUnbind() throws Exception {
 
     assertEquals("TestBundle1 must be running.", Bundle.ACTIVE, tb1.getState());
@@ -421,6 +431,7 @@ public class DSTest extends TestCase {
     assertNotNull("The SAC component should be available", trackerSAC.getServiceReference());
   }
 
+  @Test
   public void testUniqueComponentContext() throws Exception {
     Bundle bundle = installBundle("tb4");
     bundle.start();
@@ -450,6 +461,7 @@ public class DSTest extends TestCase {
     uninstallBundle(bundle);
   }
 
+  @Test
   public void testComponentContextMethods() throws Exception {
 
     Object extendedClass = trackerExtendedClass.getService();
@@ -635,6 +647,7 @@ public class DSTest extends TestCase {
     uninstallBundle(bundle);
   }
 
+  @Test
   public void testPropertiesHandling() throws Exception {
     ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
     if (cm == null)
@@ -769,6 +782,7 @@ public class DSTest extends TestCase {
     uninstallBundle(bundle);
   }
 
+  @Test
   public void testBoundServiceReplacement() throws Exception {
     int beforeCount, afterCount;
     Hashtable mandatoryProperty = new Hashtable();
@@ -889,6 +903,7 @@ public class DSTest extends TestCase {
     return refs != null ? refs.length : 0;
   }
 
+  @Test
   public void testBoundServiceReplacementOnModification() throws Exception {
     BundleContext bc = getContext();
     Hashtable initialProps = new Hashtable();
@@ -1031,6 +1046,7 @@ public class DSTest extends TestCase {
     unregisterService(staticRegistration2);
   }
 
+  @Test
   public void testSecurity() throws Exception {
     // the method below sets the permissions of a bundle before installing it
     // to simplify the test case
@@ -1123,6 +1139,7 @@ public class DSTest extends TestCase {
     padm = null;
   }
 
+  @Test
   public void testImmediateComponents() throws Exception {
     Bundle tb4 = installBundle("tb4");
     tb4.start();
@@ -1140,6 +1157,7 @@ public class DSTest extends TestCase {
     uninstallBundle(tb4);
   }
 
+  @Test
   public void testRowReference() throws Exception {
     final String TAIL_CLASS = "org.eclipse.equinox.ds.tests.tb4.Component3";
     final String MIDDLE_CLASS = "org.eclipse.equinox.ds.tests.tb4.Component2";
@@ -1204,6 +1222,7 @@ public class DSTest extends TestCase {
     return refs != null && refs.length > 0;
   }
 
+  @Test
   public void testBlockingComponents() throws Exception {
     final Bundle tb2 = installBundle("tb2");
     final Bundle tb3 = installBundle("tb3");
@@ -1275,6 +1294,7 @@ public class DSTest extends TestCase {
     uninstallBundle(tb4);
   }
 
+  @Test
   public void testStaticPolicyBinding() throws Exception {
     Bundle tb6 = installBundle("tb6");
     tb6.start();
@@ -1326,6 +1346,7 @@ public class DSTest extends TestCase {
     uninstallBundle(tb6);
   }
 
+  @Test
   public void testCircularityHandling() throws Exception {
     Bundle tb7 = installBundle("tb7");
     tb7.start();
@@ -1398,6 +1419,7 @@ public class DSTest extends TestCase {
   }
 
   // tests namespace handling in xml component description parser
+  @Test
   public void testNamespaceHandling() throws Exception {
     Bundle tb8 = installBundle("tb8");
     tb8.start();
@@ -1449,6 +1471,7 @@ public class DSTest extends TestCase {
   }
 
   // tests wildcard handling in mf (e.g. Service-Component: OSGI-INF/*.xml)
+  @Test
   public void testWildcardHandling() throws Exception {
     Bundle tb9 = installBundle("tb9");
     tb9.start();
@@ -1463,6 +1486,7 @@ public class DSTest extends TestCase {
     uninstallBundle(tb9);
   }
 
+  @Test
   public void testDynamicComponentFactoryServiceBinding() throws Exception {
     Bundle tb10 = installBundle("tb10");
     assertNotNull("Failed to install test bundle tb10.jar", tb10);
@@ -1517,6 +1541,7 @@ public class DSTest extends TestCase {
     uninstallBundle(tb10);
   }
 
+  @Test
   public void testStaticComponentFactoryServiceBinding() throws Exception {
     Bundle tb10 = installBundle("tb10");
     assertNotNull("Failed to install test bundle tb10.jar", tb10);
@@ -1586,6 +1611,7 @@ public class DSTest extends TestCase {
     uninstallBundle(tb10);
   }
 
+  @Test
   public void testConfigurationPolicy() throws Exception {
     ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
     if (cm == null)
@@ -1687,6 +1713,7 @@ public class DSTest extends TestCase {
   }
 
   // tests configuration-policy for factory configuration objects
+  @Test
   public void testConfigurationPolicyFactoryConf() throws Exception {
     ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
     if (cm == null)
@@ -1787,6 +1814,7 @@ public class DSTest extends TestCase {
     uninstallBundle(tb11);
   }
 
+  @Test
   public void testActivateDeactivate() throws Exception {
     Bundle tb12 = installBundle("tb12");
     tb12.start();
@@ -1955,6 +1983,7 @@ public class DSTest extends TestCase {
     uninstallBundle(tb12);
   }
 
+  @Test
   public void testBindUnbindParams() throws Exception {
     Bundle tb13 = installBundle("tb13");
     tb13.start();
@@ -2014,6 +2043,7 @@ public class DSTest extends TestCase {
     uninstallBundle(tb13);
   }
 
+  @Test
   public void testOptionalNames() throws Exception {
     Bundle tb14 = installBundle("tb14");
     tb14.start();
@@ -2040,6 +2070,7 @@ public class DSTest extends TestCase {
     uninstallBundle(tb14);
   }
 
+  @Test
   public void testDisposingMultipleDependencies() throws Exception {
     Bundle tb15 = installBundle("tb15");
     tb15.start();
@@ -2070,6 +2101,7 @@ public class DSTest extends TestCase {
     uninstallBundle(tb15);
   }
 
+  @Test
   public void testReferenceTargetProperty() throws Exception {
     Bundle tb16 = installBundle("tb16");
     tb16.start();
@@ -2143,6 +2175,7 @@ public class DSTest extends TestCase {
     }
   }
 
+  @Test
   public void testOverload() throws Exception {
     Bundle tb17 = installBundle("tb17");
     Bundle tb18 = installBundle("tb18");
@@ -2194,6 +2227,7 @@ public class DSTest extends TestCase {
     uninstallBundle(tb19);
   }
 
+  @Test
   public void testLazyBundles() throws Exception {
     Bundle tb20 = installBundle("tb20");
     // lazy bundle
@@ -2206,6 +2240,7 @@ public class DSTest extends TestCase {
   }
 
   // Testing modified attribute for XML NS 1.0.0
+  @Test
   public void testModified100() throws Exception {
     ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
     if (cm == null)
@@ -2263,6 +2298,7 @@ public class DSTest extends TestCase {
   }
 
   // Testing modified attribute for XML NS 1.1.0
+  @Test
   public void testModified110() throws Exception {
     ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
     if (cm == null)
@@ -2380,6 +2416,7 @@ public class DSTest extends TestCase {
   }
 
   // Testing modified attribute - special cases
+  @Test
   public void testModifiedSpecialCases() throws Exception {
     ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
     if (cm == null)
@@ -2440,6 +2477,7 @@ public class DSTest extends TestCase {
     uninstallBundle(tb21a);
   }
 
+  @Test
   public void testPrivateProperties() throws Exception {
     Bundle tb22 = installBundle("tb22");
     tb22.start();
@@ -2458,6 +2496,7 @@ public class DSTest extends TestCase {
   }
 
   // Testing situation when bind method throws exception
+  @Test
   public void testBindException() throws Exception {
     Bundle tb23 = installBundle("tb23");
 
@@ -2475,6 +2514,7 @@ public class DSTest extends TestCase {
   }
   
   // Testing config admin appear/disappear situations
+  @Test
   public void testConfigAdminOnOff() throws Exception {
     ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
     if (cm == null)
@@ -2538,6 +2578,7 @@ public class DSTest extends TestCase {
   }
 
   // Tests update of service properties
+  @Test
   public void testServicePropertiesUpdate() throws Exception {
     Bundle tb25 = installBundle("tb25");
     ServiceRegistration sr = null;
@@ -2582,6 +2623,7 @@ public class DSTest extends TestCase {
   }
 
   // Tests Reluctant policy option of service references
+  @Test
   public void testPolicyOptionReluctant() throws Exception {
     Bundle tb25 = installBundle("tb25");
     ServiceRegistration sr = null;
@@ -2692,6 +2734,7 @@ public class DSTest extends TestCase {
   }
 
   // Tests Greedy policy option of service references
+  @Test
   public void testPolicyOptionGreedy() throws Exception {
     Bundle tb25 = installBundle("tb25");
     ServiceRegistration sr = null;
@@ -2802,6 +2845,7 @@ public class DSTest extends TestCase {
   }
 
   // Tests PID of Component configuration
+  @Test
   public void testComponentConfigurationPID() throws Exception {
     ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
     if (cm == null) {
