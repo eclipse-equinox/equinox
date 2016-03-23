@@ -11,7 +11,10 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
+import static org.junit.Assert.assertEquals;
+
 import org.eclipse.equinox.bidi.advanced.*;
+import org.junit.Test;
 
 /**
  * Tests RTL arithmetic
@@ -33,6 +36,7 @@ public class StructuredTextMathTest extends StructuredTextTestBase {
 		assertEquals(msg + " RTL - ", resRTL, toPseudo(fullRTL));
 	}
 
+	@Test
 	public void testRTLarithmetic() {
 		verifyOneLine("Math #0", "", "", "");
 		verifyOneLine("Math #1", "1+ABC", "1+ABC", ">@1+ABC@^");

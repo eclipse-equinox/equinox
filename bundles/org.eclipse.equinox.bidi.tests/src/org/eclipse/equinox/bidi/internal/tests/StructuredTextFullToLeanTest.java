@@ -11,8 +11,11 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
+import static org.junit.Assert.assertEquals;
+
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 import org.eclipse.equinox.bidi.advanced.*;
+import org.junit.Test;
 
 /**
  * Tests fullToLean method
@@ -109,6 +112,7 @@ public class StructuredTextFullToLeanTest extends StructuredTextTestBase {
 		assertEquals(msg + "state from leanToFullText3", state3, expertLTR.getState());
 	}
 
+	@Test
 	public void testFullToLean() {
 		type = StructuredTextTypeHandlerFactory.COMMA_DELIMITED;
 		doTest1("testFullToLean #1 - ", "", "", "", new int[0], new int[0], "", "", new int[0], new int[0]);

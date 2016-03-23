@@ -11,16 +11,21 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 import org.eclipse.equinox.bidi.advanced.IStructuredTextExpert;
 import org.eclipse.equinox.bidi.advanced.StructuredTextExpertFactory;
 import org.eclipse.equinox.bidi.custom.StructuredTextTypeHandler;
+import org.junit.Test;
 
 /**
  * Tests contribution of BiDi handlers.
  */
 public class StructuredTextExtensibilityTest extends StructuredTextTestBase {
-
+	@Test
 	public void testOtherContributions() {
 		StructuredTextTypeHandler handler = StructuredTextTypeHandlerFactory.getHandler("test.ID");
 		assertNotNull(handler);

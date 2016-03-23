@@ -11,11 +11,14 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Locale;
 import org.eclipse.equinox.bidi.StructuredTextProcessor;
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 import org.eclipse.equinox.bidi.advanced.IStructuredTextExpert;
 import org.eclipse.equinox.bidi.advanced.StructuredTextExpertFactory;
+import org.junit.*;
 
 /**
  * Tests methods in BidiComplexUtil
@@ -35,12 +38,13 @@ public class StructuredTextProcessorTest extends StructuredTextTestBase {
 
 	private Locale locale;
 
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 		locale = Locale.getDefault();
 	}
 
-	protected void tearDown() {
+	@After
+	public void tearDown() {
 		Locale.setDefault(locale);
 	}
 
@@ -100,6 +104,7 @@ public class StructuredTextProcessorTest extends StructuredTextTestBase {
 		assertEquals(txt, result, toPseudo(full));
 	}
 
+	@Test
 	public void testStructuredTextProcessor() {
 		// Test process() and deprocess() with default delimiters
 		doTest1("ABC/DEF/G", ">@ABC@/DEF@/G@^");

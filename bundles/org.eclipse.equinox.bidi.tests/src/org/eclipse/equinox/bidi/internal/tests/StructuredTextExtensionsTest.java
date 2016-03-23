@@ -13,6 +13,8 @@ package org.eclipse.equinox.bidi.internal.tests;
 
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 import org.eclipse.equinox.bidi.advanced.*;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * Tests all plug-in extensions
@@ -30,19 +32,20 @@ public class StructuredTextExtensionsTest extends StructuredTextTestBase {
 
 	private void doTest1(String label, String data, String result) {
 		String full = expert.leanToFullText(toUT16(data));
-		assertEquals(label + " data = " + data, result, toPseudo(full));
+		Assert.assertEquals(label + " data = " + data, result, toPseudo(full));
 	}
 
 	private void doTest2(String label, String data, String result) {
 		String full = expert.leanToFullText(data);
-		assertEquals(label + " data = " + data, result, toPseudo(full));
+		Assert.assertEquals(label + " data = " + data, result, toPseudo(full));
 	}
 
 	private void doTest3(String label, String data, String result) {
 		String full = expert.leanToFullText(toUT16(data));
-		assertEquals(label + " data = " + data, result, toPseudo(full));
+		Assert.assertEquals(label + " data = " + data, result, toPseudo(full));
 	}
 
+	@Test
 	public void testDefaultExtensions() {
 		String data;
 
@@ -205,6 +208,7 @@ public class StructuredTextExtensionsTest extends StructuredTextTestBase {
 		doTest3("DelimsEsc #7", "DEF.GHI (A\\):C ;JK ", "DEF@.GHI @(A\\):C ;JK ");
 	}
 
+	@Test
 	public void testTestExtensions() {
 		expert = StructuredTextExpertFactory.getExpert(PROPERTY, env);
 		doTest1("Property #0", "NAME,VAL1,VAL2", "NAME,VAL1,VAL2");

@@ -11,8 +11,13 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.equinox.bidi.advanced.*;
 import org.eclipse.equinox.bidi.custom.*;
+import org.junit.Test;
 
 /**
  * Test edge conditions.
@@ -72,6 +77,7 @@ public class StructuredTextSomeMoreTest extends StructuredTextTestBase {
 	final static StructuredTextEnvironment env1 = new StructuredTextEnvironment("en_US", false, StructuredTextEnvironment.ORIENT_LTR);
 	final static StructuredTextEnvironment env2 = new StructuredTextEnvironment("he", false, StructuredTextEnvironment.ORIENT_LTR);
 
+	@Test
 	public void testSomeMore() {
 		assertFalse(env1.isProcessingNeeded());
 		assertTrue(env2.isProcessingNeeded());

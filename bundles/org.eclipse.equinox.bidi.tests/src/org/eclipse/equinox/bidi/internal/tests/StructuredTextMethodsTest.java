@@ -11,10 +11,15 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 import org.eclipse.equinox.bidi.advanced.*;
 import org.eclipse.equinox.bidi.custom.StructuredTextCharTypes;
 import org.eclipse.equinox.bidi.custom.StructuredTextTypeHandler;
+import org.junit.Test;
 
 /**
  * Tests most public methods of BidiComplexEngine
@@ -276,6 +281,7 @@ public class StructuredTextMethodsTest extends StructuredTextTestBase {
 		assertEquals("Test curDirection", RTL, dir);
 	}
 
+	@Test
 	public void testMethods() {
 
 		doTestTools();

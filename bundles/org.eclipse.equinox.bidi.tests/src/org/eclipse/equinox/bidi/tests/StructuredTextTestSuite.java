@@ -11,23 +11,12 @@
 
 package org.eclipse.equinox.bidi.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.equinox.bidi.internal.tests.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-public class StructuredTextTestSuite extends TestSuite {
-	public static Test suite() {
-		return new StructuredTextTestSuite();
-	}
-
-	public StructuredTextTestSuite() {
-		addTestSuite(StructuredTextExtensibilityTest.class);
-		addTestSuite(StructuredTextMethodsTest.class);
-		addTestSuite(StructuredTextFullToLeanTest.class);
-		addTestSuite(StructuredTextExtensionsTest.class);
-		addTestSuite(StructuredTextMathTest.class);
-		addTestSuite(StructuredTextSomeMoreTest.class);
-		addTestSuite(StructuredTextProcessorTest.class);
-		addTestSuite(StructuredTextStringRecordTest.class);
-	}
+@RunWith(Suite.class)
+@Suite.SuiteClasses({StructuredTextExtensibilityTest.class, StructuredTextMethodsTest.class, StructuredTextFullToLeanTest.class, StructuredTextExtensionsTest.class, StructuredTextMathTest.class, StructuredTextSomeMoreTest.class, StructuredTextProcessorTest.class, StructuredTextStringRecordTest.class})
+public class StructuredTextTestSuite {
+	//intentionally left blank
 }

@@ -11,14 +11,19 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.internal.StructuredTextStringRecord;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
+import org.eclipse.equinox.bidi.internal.StructuredTextStringRecord;
+import org.junit.Test;
 
 /**
  *	Tests the StringRecord class	
  */
 public class StructuredTextStringRecordTest extends StructuredTextTestBase {
+	@Test
 	public void testStringRecord() {
 		StructuredTextStringRecord sr;
 		boolean catchFlag;

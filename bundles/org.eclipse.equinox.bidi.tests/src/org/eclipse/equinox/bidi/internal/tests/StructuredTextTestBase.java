@@ -11,12 +11,10 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import junit.framework.TestCase;
-
 /**
  * Base functionality for the handler tests.
  */
-public class StructuredTextTestBase extends TestCase {
+public class StructuredTextTestBase {
 
 	static final private char LRM = 0x200E;
 
