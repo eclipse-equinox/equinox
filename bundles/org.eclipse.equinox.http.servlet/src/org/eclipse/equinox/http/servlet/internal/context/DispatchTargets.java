@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Raymond Augé <raymond.auge@liferay.com> - Bug 436698
+ *     Istvan Sajtos <istvan.sajtos@liferay.com> - Bug 490608
  ******************************************************************************/
 
 package org.eclipse.equinox.http.servlet.internal.context;
@@ -15,8 +16,7 @@ import java.io.*;
 import java.net.URLDecoder;
 import java.util.*;
 import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 import org.eclipse.equinox.http.servlet.internal.registration.EndpointRegistration;
 import org.eclipse.equinox.http.servlet.internal.registration.FilterRegistration;
 import org.eclipse.equinox.http.servlet.internal.servlet.*;
@@ -118,6 +118,20 @@ public class DispatchTargets {
 			}
 
 			requestWrapper.push(this);
+
+			if (dispatcherType == DispatcherType.INCLUDE) {
+				HttpServletResponse previous = null;
+				HttpServletResponse next = response;
+
+				while (next instanceof HttpServletResponseWrapper) {
+					previous = next;
+					next = (HttpServletResponse) ((HttpServletResponseWrapper) next).getResponse();
+				}
+
+				IncludeDispatchResponseWrapper includeResponse = new IncludeDispatchResponseWrapper(next);
+
+				((HttpServletResponseWrapper) previous).setResponse(includeResponse);
+			}
 
 			ResponseStateHandler responseStateHandler = new ResponseStateHandler(request, response, this);
 
