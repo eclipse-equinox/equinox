@@ -176,8 +176,13 @@ case $defaultOS in
 		fi
 		case ${PROC} in
 			"i386" | "x86")
-				defaultOSArch="x86"
-				[ -d /bluebird/teamswt/swt-builddir/build/JRE/Solaris_x86/jdk1.6.0_14 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/build/JRE/Solaris_x86/jdk1.6.0_14"
+				if [ "`isainfo -k`" = "amd64" ]; then
+					defaultOSArch="x86_64"
+					[ -d /bluebird/teamswt/swt-builddir/build/JRE/Solaris_x64/jdk1.8.0_71 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/build/JRE/Solaris_x64/jdk1.8.0_71"
+				else
+					defaultOSArch="x86"
+					[ -d /bluebird/teamswt/swt-builddir/build/JRE/Solaris_x86/jdk1.6.0_14 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/build/JRE/Solaris_x86/jdk1.6.0_14"
+				fi
 				CC=cc
 				;;
 			"sparc")
@@ -235,6 +240,9 @@ elif [ "$defaultOSArch" = "ia64" ];  then
 	export M_ARCH
 elif [ "$defaultOSArch" = "x86" ];  then
 	M_ARCH=-m32
+	export M_ARCH
+elif [ "$defaultOS" = "solaris" -a "$defaultOSArch" = "x86_64" ];  then
+	M_ARCH=-m64
 	export M_ARCH
 fi
 
