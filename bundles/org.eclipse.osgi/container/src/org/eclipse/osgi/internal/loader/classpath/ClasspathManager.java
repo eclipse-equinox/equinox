@@ -36,11 +36,11 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.namespace.HostNamespace;
 
 /**
- * A helper class for <code>BaseClassLoader</code> implementations.  This class will keep track of 
- * <code>ClasspathEntry</code> objects for the host bundle and any attached fragment bundles.  This 
- * class takes care of searching the <code>ClasspathEntry</code> objects for a base class loader
- * implementation.  Additional behavior may be added to a classpath manager by configuring 
- * <code>ClassLoadingHook</code> and <code>ClassLoadingStatsHook</code>.
+ * A helper class for {@link ModuleClassLoader} implementations.  This class will keep track of 
+ * {@link ClasspathEntry} objects for the host bundle and any attached fragment bundles.  This 
+ * class takes care of searching the {@link ClasspathEntry} objects for a module class loader
+ * implementation.  Additional behavior may be added to a classpath manager by configuring a 
+ * {@link ClassLoaderHook}.
  * @see ModuleClassLoader
  * @see ClassLoaderHook
  * @since 3.2
@@ -66,9 +66,9 @@ public class ClasspathManager {
 	private ThreadLocal<Collection<String>> currentlyDefining = new ThreadLocal<Collection<String>>();
 
 	/**
-	 * Constructs a classpath manager for the given host base data, classpath and base class loader
+	 * Constructs a classpath manager for the given generation and module class loader
 	 * @param generation the host generation for this classpath manager
-	 * @param classloader the BaseClassLoader for this classpath manager
+	 * @param classloader the ModuleClassLoader for this classpath manager
 	 */
 	public ClasspathManager(Generation generation, ModuleClassLoader classloader) {
 		EquinoxConfiguration configuration = generation.getBundleInfo().getStorage().getConfiguration();
@@ -334,9 +334,9 @@ public class ClasspathManager {
 
 	/**
 	 * Finds a local resource by searching the ClasspathEntry objects of the classpath manager.
-	 * This method will first call all the configured class loading stats hooks 
+	 * This method will first call all the configured class loading hooks 
 	 * {@link ClassLoaderHook#preFindLocalResource(String, ClasspathManager)} methods.  Then it 
-	 * will search for the resource.  Finally it will call all the configured class loading stats hooks
+	 * will search for the resource.  Finally it will call all the configured class loading hooks
 	 * {@link ClassLoaderHook#postFindLocalResource(String, URL, ClasspathManager)} methods.
 	 * @param resource the requested resource name.
 	 * @return the requested resource URL or null if the resource does not exist
@@ -506,7 +506,7 @@ public class ClasspathManager {
 	 *       stats hooks {@link ClassLoaderHook#recordClassDefine(String, Class, byte[], ClasspathEntry, BundleEntry, ClasspathManager)}
 	 *       methods are called.</li>
 	 * </ol>
-	 * Finally all the configured class loading stats hooks
+	 * Finally all the configured class loading hooks
 	 * {@link ClassLoaderHook#postFindLocalClass(String, Class, ClasspathManager)} methods are called.
 	 * @param classname the requested class name.
 	 * @return the requested class
@@ -596,9 +596,11 @@ public class ClasspathManager {
 	/**
 	 * Defines the specified class.  This method will first call all the configured class loader hooks 
 	 * {@link ClassLoadingHook#processClass(String, byte[], ClasspathEntry, BundleEntry, ClasspathManager)} 
-	 * methods.  Then it will call the {@link ModuleClassLoader#defineClass(String, byte[], ClasspathEntry, BundleEntry)}
+	 * methods.  If any hook modifies the bytes the all configured hook 
+	 * {@link ClassLoaderHook#rejectTransformation(String, byte[], ClasspathEntry, BundleEntry, ClasspathManager)} 
+	 * methods are called.  Then it will call the {@link ModuleClassLoader#defineClass(String, byte[], ClasspathEntry, BundleEntry)}
 	 * method to define the class. After that, the class loader hooks are called to announce the class
-	 * definition.
+	 * definition by calling {@link ClassLoaderHook#recordClassDefine(String, Class, byte[], ClasspathEntry, BundleEntry, ClasspathManager)}.
 	 * @param name the name of the class to define
 	 * @param classbytes the class bytes
 	 * @param classpathEntry the classpath entry used to load the class bytes
@@ -688,7 +690,7 @@ public class ClasspathManager {
 	}
 
 	/**
-	 * Finds a library for the bundle represented by this class path managert
+	 * Finds a library for the bundle represented by this class path manager
 	 * @param libname the library name
 	 * @return The absolution path to the library or null if not found
 	 */
