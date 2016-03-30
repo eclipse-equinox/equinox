@@ -47,9 +47,8 @@ GTK_LIBS = \
  -DGTK_LIB="\"libgtk-x11-2.0.so.0\"" -DGDK_LIB="\"libgdk-x11-2.0.so.0\"" \
  -DGTK3_LIB="\"libgtk-3.so.0\"" -DGDK3_LIB="\"libgdk-3.so.0\"" \
  -DPIXBUF_LIB="\"libgdk_pixbuf-2.0.so.0\"" -DGOBJ_LIB="\"libgobject-2.0.so.0\"" -DX11_LIB="\"libX11.so.4\""
-LFLAGS = ${M_ARCH} -G
-CFLAGS = ${M_ARCH} \
-	$(OPTFLAG) \
+LFLAGS = -G
+CFLAGS = $(OPTFLAG) \
 	-DSOLARIS \
 	$(PICFLAG) \
 	-DMOZILLA_FIX \
@@ -98,7 +97,7 @@ eclipseNix.o: ../eclipseNix.c
 	$(CC) $(CFLAGS) -c ../eclipseNix.c -o eclipseNix.o
 	
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
-	$(CC) ${M_ARCH} -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
+	$(CC) -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
 	$(CC) $(LFLAGS) -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
