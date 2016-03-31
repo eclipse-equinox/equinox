@@ -71,6 +71,15 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 		return bundleLogService.getLogger(name);
 	}
 
+	@Override
+	public <L extends org.osgi.service.log.Logger> L getLogger(Bundle logBundle, String name, Class<L> loggerType) {
+		if (logBundle == null || (logBundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) != 0) {
+			throw new IllegalArgumentException("The bundle is not resolved: " + logBundle); //$NON-NLS-1$
+		}
+		ExtendedLogService bundleLogService = factory.getLogService(logBundle);
+		return bundleLogService.getLogger(name, loggerType);
+	}
+
 	public String getName() {
 		return getLogger((String) null).getName();
 	}
