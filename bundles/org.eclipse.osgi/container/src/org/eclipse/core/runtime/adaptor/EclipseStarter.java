@@ -127,7 +127,7 @@ public class EclipseStarter {
 	public static final String PROP_CONSOLE_LOG = "eclipse.consoleLog"; //$NON-NLS-1$
 	public static final String PROP_IGNOREAPP = "eclipse.ignoreApp"; //$NON-NLS-1$
 	public static final String PROP_REFRESH_BUNDLES = "eclipse.refreshBundles"; //$NON-NLS-1$
-	private static final String PROP_ALLOW_APPRELAUNCH = "eclipse.allowAppRelaunch"; //$NON-NLS-1$
+	public static final String PROP_ALLOW_APPRELAUNCH = "eclipse.allowAppRelaunch"; //$NON-NLS-1$
 	private static final String PROP_APPLICATION_LAUNCHDEFAULT = "eclipse.application.launchDefault"; //$NON-NLS-1$
 
 	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$

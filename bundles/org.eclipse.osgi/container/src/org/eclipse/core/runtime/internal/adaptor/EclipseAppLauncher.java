@@ -102,6 +102,8 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 
 				}
 				result = runApplication(defaultContext);
+				// refresh the allowAppRelaunch setting in case the application changed it
+				relaunch = Boolean.valueOf(equinoxConfig.getConfiguration(EclipseStarter.PROP_ALLOW_APPRELAUNCH));
 			} catch (Exception e) {
 				if (!relaunch || (b.getState() & Bundle.ACTIVE) == 0)
 					throw e;
