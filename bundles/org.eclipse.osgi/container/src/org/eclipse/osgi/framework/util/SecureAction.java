@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ package org.eclipse.osgi.framework.util;
 import java.io.*;
 import java.net.*;
 import java.security.*;
+import java.util.Properties;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import org.eclipse.osgi.container.Module;
@@ -73,6 +74,21 @@ public class SecureAction {
 		return AccessController.doPrivileged(new PrivilegedAction<String>() {
 			public String run() {
 				return System.getProperty(property);
+			}
+		}, controlContext);
+	}
+
+	/**
+	 * Returns a system properties.  Same as calling
+	 * System.getProperties().
+	 * @return the system properties.
+	 */
+	public Properties getProperties() {
+		if (System.getSecurityManager() == null)
+			return System.getProperties();
+		return AccessController.doPrivileged(new PrivilegedAction<Properties>() {
+			public Properties run() {
+				return System.getProperties();
 			}
 		}, controlContext);
 	}

@@ -2324,6 +2324,78 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.stop();
 	}
 
+	public void testBackedBySystemReplaceSystemProperties() throws BundleException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put("osgi.framework.useSystemProperties", "true");
+		Equinox equinox = new Equinox(configuration);
+		equinox.start();
+		ServiceReference<EnvironmentInfo> envRef = equinox.getBundleContext().getServiceReference(EnvironmentInfo.class);
+		EnvironmentInfo envInfo = equinox.getBundleContext().getService(envRef);
+
+		// replace the system properties with a copy
+		Properties copy = new Properties();
+		copy.putAll(System.getProperties());
+		System.setProperties(copy);
+
+		// set a system prop for this test after replacement of the properties object
+		String systemKey = getName() + ".system";
+		System.setProperty(systemKey, getName());
+
+		// make sure context properties reflect the new test prop
+		assertEquals("Wrong context value", getName(), equinox.getBundleContext().getProperty(systemKey));
+
+		// also test EnvironmentInfo properties
+		assertEquals("Wrong context value", getName(), envInfo.getProperty(systemKey));
+		assertEquals("Wrong EquinoxConfiguration config value", getName(), ((EquinoxConfiguration) envInfo).getConfiguration(systemKey));
+
+		// set environment info prop
+		String envKey = getName() + ".env";
+		envInfo.setProperty(envKey, getName());
+
+		// make sure the system properties reflect the new test prop
+		assertEquals("Wrong system value", getName(), System.getProperty(envKey));
+		equinox.stop();
+	}
+
+	public void testLocalConfigReplaceSystemProperties() throws BundleException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+		equinox.start();
+		ServiceReference<EnvironmentInfo> envRef = equinox.getBundleContext().getServiceReference(EnvironmentInfo.class);
+		EnvironmentInfo envInfo = equinox.getBundleContext().getService(envRef);
+
+		// replace the system properties with a copy
+		Properties copy = new Properties();
+		copy.putAll(System.getProperties());
+		System.setProperties(copy);
+
+		// set a system prop for this test after replacement of the properties object
+		String systemKey = getName() + ".system";
+		System.setProperty(systemKey, getName());
+
+		// make sure context properties reflect the new system test prop.
+		// remember context properties are backed by system properties
+		assertEquals("Wrong context value", getName(), equinox.getBundleContext().getProperty(systemKey));
+
+		// also test EnvironmentInfo properties.
+		// remember the getProperty method is backed by system properties
+		assertEquals("Wrong context value", getName(), envInfo.getProperty(systemKey));
+		// config options are not backed by system properties when framework is not using system properties for configuration
+		assertNull("Wrong EquinoxConfiguration config value", ((EquinoxConfiguration) envInfo).getConfiguration(systemKey));
+
+		// set environment info prop
+		String envKey = getName() + ".env";
+		envInfo.setProperty(envKey, getName());
+
+		// make sure the system properties does NOT reflect the new test prop
+		assertNull("Wrong system value", System.getProperty(envKey));
+		equinox.stop();
+	}
+
 	public void testSystemNLFragment() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<String, Object>();
