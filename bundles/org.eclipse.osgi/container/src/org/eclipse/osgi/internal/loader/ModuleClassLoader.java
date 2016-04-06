@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -414,8 +414,10 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 					lockingThread = classNameLocks.get(classname);
 				}
 			} catch (InterruptedException e) {
-				current.interrupt();
-				throw (LinkageError) new LinkageError(classname).initCause(e);
+				previousInterruption = true;
+				// must not throw LinkageError or ClassNotFoundException here because that will cause all threads
+				// to fail to load the class (see bug 490902)
+				throw new Error("Interrupted while waiting for classname lock: " + classname, e); //$NON-NLS-1$
 			} finally {
 				if (previousInterruption) {
 					current.interrupt();

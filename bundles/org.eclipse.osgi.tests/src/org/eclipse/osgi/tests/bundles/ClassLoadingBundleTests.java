@@ -14,6 +14,7 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
@@ -2053,5 +2054,70 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Dictionary<String, String> headers = test.getHeaders();
 		String bundleName = headers.get(Constants.BUNDLE_NAME);
 		assertEquals("Wrong bundle name header.", "default", bundleName);
+	}
+
+	public void testBug490902() throws BundleException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+		final Bundle a1 = installer.installBundle("test.bug490902.a");
+		final Bundle b1 = installer.installBundle("test.bug490902.b");
+		installer.resolveBundles(new Bundle[] {a1, b1});
+
+		final CountDownLatch startingB = new CountDownLatch(1);
+		final CountDownLatch endedSecondThread = new CountDownLatch(1);
+		BundleListener delayB1 = new SynchronousBundleListener() {
+			@Override
+			public void bundleChanged(BundleEvent event) {
+				if (event.getBundle() == b1 && BundleEvent.STARTING == event.getType()) {
+					try {
+						startingB.countDown();
+						System.out.println(getName() + ": Delaying now ...");
+						Thread.sleep(15000);
+						System.out.println(getName() + ": Done delaying.");
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				}
+			}
+		};
+		getContext().addBundleListener(delayB1);
+		try {
+			new Thread(new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+						System.out.println(getName() + ": Initial load test.");
+						a1.loadClass("test.bug490902.a.TestLoadA1").newInstance();
+					} catch (Throwable e) {
+						e.printStackTrace();
+					}
+				}
+			}, "Initial load test thread.").start();
+
+			startingB.await();
+			Thread secondThread = new Thread(new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+						System.out.println(getName() + ": Second load test.");
+						a1.loadClass("test.bug490902.a.TestLoadA1").newInstance();
+					} catch (Throwable e) {
+						e.printStackTrace();
+					} finally {
+						endedSecondThread.countDown();
+					}
+				}
+			}, "Second load test thread.");
+			secondThread.start();
+			// hack to make sure secondThread is in the middle of Class.forName
+			Thread.sleep(10000);
+
+			System.out.println(getName() + ": About to interrupt:" + secondThread.getName());
+			secondThread.interrupt();
+			endedSecondThread.await();
+			a1.loadClass("test.bug490902.a.TestLoadA1").newInstance();
+		} finally {
+			getContext().removeBundleListener(delayB1);
+		}
 	}
 }

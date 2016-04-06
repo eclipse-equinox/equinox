@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: test.bug490902.b
+Bundle-SymbolicName: test.bug490902.b
+Bundle-Version: 1.0.0
+Export-Package: test.bug490902.b
+Bundle-ActivationPolicy: lazy
