@@ -10,27 +10,56 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests.system;
 
+import junit.framework.TestCase;
 import org.eclipse.core.tests.harness.PerformanceTestRunner;
 import org.eclipse.equinox.region.*;
+import org.eclipse.equinox.region.tests.BundleInstaller;
 import org.osgi.framework.*;
 
-public class RegionPerformanceTests extends AbstractRegionSystemTest {
+public class RegionPerformanceTests extends TestCase {
 	Bundle testBundle;
+	private ServiceReference<RegionDigraph> digraphReference;
+	private RegionDigraph digraph;
+	private BundleInstaller bundleInstaller;
+	private Bundle testsBundle;
+	private BundleContext context;
 
 	@Override
 	protected void setUp() throws Exception {
-		super.setUp();
-		testBundle = bundleInstaller.installBundle(PP1);
+		testsBundle = FrameworkUtil.getBundle(this.getClass());
+
+		context = testsBundle.getBundleContext();
+
+		digraphReference = context.getServiceReference(RegionDigraph.class);
+		assertNotNull("No digraph found", digraphReference);
+		digraph = context.getService(digraphReference);
+		assertNotNull("No digraph found", digraph);
+
+		bundleInstaller = new BundleInstaller("bundle_tests", testsBundle); //$NON-NLS-1$
+		testBundle = bundleInstaller.installBundle(AbstractRegionSystemTest.PP1);
 		testBundle.start();
+
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		for (Region region : digraph) {
+			if (!region.contains(0)) {
+				digraph.removeRegion(region);
+			}
+		}
+		bundleInstaller.shutdown();
+		if (digraphReference != null)
+			context.ungetService(digraphReference);
 	}
 
 	private void doTestGetBundles(String fingerPrintName, String degradation) {
-		final BundleContext context = testBundle.getBundleContext();
+		final BundleContext bundleContext = testBundle.getBundleContext();
 		PerformanceTestRunner runner = new PerformanceTestRunner() {
 			protected void test() {
-				Bundle[] bundles = context.getBundles();
+				Bundle[] bundles = bundleContext.getBundles();
 				for (Bundle bundle : bundles) {
-					context.getBundle(bundle.getBundleId());
+					bundleContext.getBundle(bundle.getBundleId());
 				}
 			}
 		};
@@ -96,11 +125,11 @@ public class RegionPerformanceTests extends AbstractRegionSystemTest {
 	}
 
 	private void doTestGetServices(String fingerPrintName, String degradation) {
-		final BundleContext context = testBundle.getBundleContext();
+		final BundleContext bundleContext = testBundle.getBundleContext();
 		PerformanceTestRunner runner = new PerformanceTestRunner() {
 			protected void test() {
 				try {
-					context.getServiceReferences(RegionDigraph.class, null);
+					bundleContext.getServiceReferences(RegionDigraph.class, null);
 				} catch (InvalidSyntaxException e) {
 					fail(e.getMessage());
 				}
