@@ -10,38 +10,40 @@
  *******************************************************************************/
 package org.eclipse.equinox.cm.test;
 
-import java.util.Properties;
-import junit.framework.TestCase;
+import static org.junit.Assert.assertFalse;
+
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.junit.*;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.*;
 
-public class ConfigurationListenerTest extends TestCase {
+public class ConfigurationListenerTest {
 
 	private ConfigurationAdmin cm;
 	private ServiceReference reference;
 	boolean locked = false;
 	Object lock = new Object();
 
-	public ConfigurationListenerTest(String name) {
-		super(name);
-	}
-
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Activator.getBundle("org.eclipse.equinox.cm").start();
 		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class.getName());
 		cm = (ConfigurationAdmin) Activator.getBundleContext().getService(reference);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		Activator.getBundleContext().ungetService(reference);
 		Activator.getBundle("org.eclipse.equinox.cm").stop();
 	}
 
+	@Test
 	public void testListener() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Properties props = new Properties();
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 

@@ -10,38 +10,41 @@
  *******************************************************************************/
 package org.eclipse.equinox.cm.test;
 
-import java.util.Properties;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.junit.*;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-public class ConfigurationAdminTest extends TestCase {
+public class ConfigurationAdminTest {
 
 	private ConfigurationAdmin cm;
 	private ServiceReference reference;
 
-	public ConfigurationAdminTest(String name) {
-		super(name);
-	}
-
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Activator.getBundle("org.eclipse.equinox.cm").start();
 		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class.getName());
 		cm = (ConfigurationAdmin) Activator.getBundleContext().getService(reference);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		Activator.getBundleContext().ungetService(reference);
 		Activator.getBundle("org.eclipse.equinox.cm").stop();
 	}
 
+	@Test
 	public void testCreateConfig() throws Exception {
 		Configuration config = cm.getConfiguration("test");
 		assertEquals("test", config.getPid());
 	}
 
+	@Test
 	public void testCreateConfigNullPid() throws Exception {
 		try {
 			cm.getConfiguration(null);
@@ -51,11 +54,13 @@ public class ConfigurationAdminTest extends TestCase {
 		fail();
 	}
 
+	@Test
 	public void testCreateConfigWithLocation() throws Exception {
 		Configuration config = cm.getConfiguration("test", null);
 		assertEquals("test", config.getPid());
 	}
 
+	@Test
 	public void testCreateConfigNullPidWithLocation() throws Exception {
 		try {
 			cm.getConfiguration(null, null);
@@ -65,6 +70,7 @@ public class ConfigurationAdminTest extends TestCase {
 		fail();
 	}
 
+	@Test
 	public void testCreateConfigWithAndWithoutLocation() throws Exception {
 		Configuration config = cm.getConfiguration("test", "x");
 		config.update();
@@ -76,6 +82,7 @@ public class ConfigurationAdminTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testCreateConfigWithAndWithoutNullLocation() throws Exception {
 		Configuration config = cm.getConfiguration("test", null);
 		config.update();
@@ -89,11 +96,13 @@ public class ConfigurationAdminTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testCreateFactoryConfig() throws Exception {
 		Configuration config = cm.createFactoryConfiguration("test");
 		assertEquals("test", config.getFactoryPid());
 	}
 
+	@Test
 	public void testCreateFactoryConfigNullPid() throws Exception {
 		try {
 			cm.createFactoryConfiguration(null);
@@ -103,11 +112,13 @@ public class ConfigurationAdminTest extends TestCase {
 		fail();
 	}
 
+	@Test
 	public void testCreateFactoryConfigWithLocation() throws Exception {
 		Configuration config = cm.createFactoryConfiguration("test", null);
 		assertEquals("test", config.getFactoryPid());
 	}
 
+	@Test
 	public void testCreateFactoryConfigNullPidWithLocation() throws Exception {
 		try {
 			cm.createFactoryConfiguration(null, null);
@@ -117,6 +128,7 @@ public class ConfigurationAdminTest extends TestCase {
 		fail();
 	}
 
+	@Test
 	public void testCreateFactoryConfigWithAndWithoutLocation() throws Exception {
 		Configuration config = cm.createFactoryConfiguration("test", "x");
 		config.update();
@@ -128,6 +140,7 @@ public class ConfigurationAdminTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testCreateFactoryConfigWithAndWithoutNullLocation() throws Exception {
 		Configuration config = cm.createFactoryConfiguration("test", null);
 		config.update();
@@ -141,6 +154,7 @@ public class ConfigurationAdminTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testListConfiguration() throws Exception {
 		Configuration config = cm.getConfiguration("test", null);
 		config.update();
@@ -152,6 +166,7 @@ public class ConfigurationAdminTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testListConfigurationWithBoundLocation() throws Exception {
 		Configuration config = cm.getConfiguration("test", null);
 		config.update();
@@ -168,6 +183,7 @@ public class ConfigurationAdminTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testListFactoryConfiguration() throws Exception {
 		Configuration config = cm.createFactoryConfiguration("test", null);
 		config.update();
@@ -179,6 +195,7 @@ public class ConfigurationAdminTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testListFactoryConfigurationWithBoundLocation() throws Exception {
 		Configuration config = cm.createFactoryConfiguration("test", null);
 		config.update();
@@ -195,6 +212,7 @@ public class ConfigurationAdminTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testListConfigurationNull() throws Exception {
 		Configuration config = cm.createFactoryConfiguration("test", null);
 		config.update();
@@ -206,10 +224,11 @@ public class ConfigurationAdminTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testPersistentConfig() throws Exception {
 		Configuration config = cm.getConfiguration("test");
 		assertNull(config.getProperties());
-		Properties props = new Properties();
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 		assertTrue(config.getPid().equals("test"));
@@ -225,10 +244,11 @@ public class ConfigurationAdminTest extends TestCase {
 		assertNull(config.getProperties());
 	}
 
+	@Test
 	public void testPersistentFactoryConfig() throws Exception {
 		Configuration config = cm.createFactoryConfiguration("test");
 		assertNull(config.getProperties());
-		Properties props = new Properties();
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 		assertTrue(config.getFactoryPid().equals("test"));

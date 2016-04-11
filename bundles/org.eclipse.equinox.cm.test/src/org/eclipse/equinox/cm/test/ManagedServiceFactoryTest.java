@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.eclipse.equinox.cm.test;
 
-import java.util.Dictionary;
-import java.util.Properties;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import java.util.*;
+import org.junit.*;
 import org.osgi.framework.*;
 import org.osgi.service.cm.*;
 
-public class ManagedServiceFactoryTest extends TestCase {
+public class ManagedServiceFactoryTest {
 
 	private ConfigurationAdmin cm;
 	private ServiceReference reference;
@@ -24,26 +25,25 @@ public class ManagedServiceFactoryTest extends TestCase {
 	boolean locked = false;
 	Object lock = new Object();
 
-	public ManagedServiceFactoryTest(String name) {
-		super(name);
-	}
-
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Activator.getBundle("org.eclipse.equinox.cm").start();
 		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class.getName());
 		cm = (ConfigurationAdmin) Activator.getBundleContext().getService(reference);
 
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		Activator.getBundleContext().ungetService(reference);
 		Activator.getBundle("org.eclipse.equinox.cm").stop();
 	}
 
+	@Test
 	public void testSamePidManagedServiceFactory() throws Exception {
 
 		Configuration config = cm.createFactoryConfiguration("test");
-		Properties props = new Properties();
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 
@@ -97,6 +97,7 @@ public class ManagedServiceFactoryTest extends TestCase {
 		config.delete();
 	}
 
+	@Test
 	public void testGeneralManagedServiceFactory() throws Exception {
 		updateCount = 0;
 		ManagedServiceFactory msf = new ManagedServiceFactory() {
@@ -137,7 +138,7 @@ public class ManagedServiceFactoryTest extends TestCase {
 
 		Configuration config = cm.createFactoryConfiguration("test");
 		assertNull(config.getProperties());
-		Properties props = new Properties();
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("testkey", "testvalue");
 
 		synchronized (lock) {

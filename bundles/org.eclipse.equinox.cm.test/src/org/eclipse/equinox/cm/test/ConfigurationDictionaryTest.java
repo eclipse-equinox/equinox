@@ -10,35 +10,36 @@
  *******************************************************************************/
 package org.eclipse.equinox.cm.test;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.*;
-import junit.framework.TestCase;
+import org.junit.*;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-public class ConfigurationDictionaryTest extends TestCase {
+public class ConfigurationDictionaryTest {
 
 	private ConfigurationAdmin cm;
 	private ServiceReference reference;
 
-	public ConfigurationDictionaryTest(String name) {
-		super(name);
-	}
-
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Activator.getBundle("org.eclipse.equinox.cm").start();
 		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class.getName());
 		cm = (ConfigurationAdmin) Activator.getBundleContext().getService(reference);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		Activator.getBundleContext().ungetService(reference);
 		Activator.getBundle("org.eclipse.equinox.cm").stop();
 	}
 
+	@Test
 	public void testGoodConfigProperties() throws Exception {
 		Configuration config = cm.getConfiguration("test");
 		config.update();
@@ -127,6 +128,7 @@ public class ConfigurationDictionaryTest extends TestCase {
 		config.delete();
 	}
 
+	@Test
 	public void testNullKey() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
@@ -141,6 +143,7 @@ public class ConfigurationDictionaryTest extends TestCase {
 		fail();
 	}
 
+	@Test
 	public void testNullValue() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
@@ -155,6 +158,7 @@ public class ConfigurationDictionaryTest extends TestCase {
 		fail();
 	}
 
+	@Test
 	public void testObjectValue() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
@@ -169,6 +173,7 @@ public class ConfigurationDictionaryTest extends TestCase {
 		fail();
 	}
 
+	@Test
 	public void testObjectArray() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
@@ -183,6 +188,7 @@ public class ConfigurationDictionaryTest extends TestCase {
 		fail();
 	}
 
+	@Test
 	public void testObjectVector() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
@@ -199,6 +205,7 @@ public class ConfigurationDictionaryTest extends TestCase {
 		fail();
 	}
 
+	@Test
 	public void testObjectCollection() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
@@ -215,6 +222,7 @@ public class ConfigurationDictionaryTest extends TestCase {
 		fail();
 	}
 
+	@Test
 	public void testPutGetCustomCollection() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
@@ -232,6 +240,7 @@ public class ConfigurationDictionaryTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testGet() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
@@ -243,6 +252,7 @@ public class ConfigurationDictionaryTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testGetNull() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
@@ -257,6 +267,7 @@ public class ConfigurationDictionaryTest extends TestCase {
 		fail();
 	}
 
+	@Test
 	public void testRemove() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
@@ -270,6 +281,7 @@ public class ConfigurationDictionaryTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testRemoveNull() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();

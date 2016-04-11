@@ -10,15 +10,18 @@
  *******************************************************************************/
 package org.eclipse.equinox.cm.test;
 
-import java.util.*;
-import junit.framework.TestCase;
+import static org.junit.Assert.assertFalse;
+
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.junit.*;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.event.*;
 
-public class ConfigurationEventAdapterTest extends TestCase {
+public class ConfigurationEventAdapterTest {
 
 	private ConfigurationAdmin cm;
 	private ServiceReference cmReference;
@@ -26,27 +29,26 @@ public class ConfigurationEventAdapterTest extends TestCase {
 	boolean locked = false;
 	Object lock = new Object();
 
-	public ConfigurationEventAdapterTest(String name) {
-		super(name);
-	}
-
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Activator.getBundle("org.eclipse.equinox.event").start();
 		Activator.getBundle("org.eclipse.equinox.cm").start();
 		cmReference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class.getName());
 		cm = (ConfigurationAdmin) Activator.getBundleContext().getService(cmReference);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		Activator.getBundleContext().ungetService(cmReference);
 		Activator.getBundle("org.eclipse.equinox.cm").stop();
 		Activator.getBundle("org.eclipse.equinox.event").stop();
 	}
 
+	@Test
 	public void testConfigurationEvent() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Properties props = new Properties();
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 
@@ -82,10 +84,11 @@ public class ConfigurationEventAdapterTest extends TestCase {
 		reg.unregister();
 	}
 
+	@Test
 	public void testConfigurationFactoryEvent() throws Exception {
 
 		Configuration config = cm.createFactoryConfiguration("test");
-		Properties props = new Properties();
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 

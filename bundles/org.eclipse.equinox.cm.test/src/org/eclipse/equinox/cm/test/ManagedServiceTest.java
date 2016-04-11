@@ -10,16 +10,17 @@
  *******************************************************************************/
 package org.eclipse.equinox.cm.test;
 
-import java.util.Dictionary;
-import java.util.Properties;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import java.util.*;
 import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.LogFilter;
+import org.junit.*;
 import org.osgi.framework.*;
 import org.osgi.service.cm.*;
 import org.osgi.service.log.*;
 
-public class ManagedServiceTest extends TestCase {
+public class ManagedServiceTest {
 
 	private ConfigurationAdmin cm;
 	private ServiceReference reference;
@@ -27,25 +28,24 @@ public class ManagedServiceTest extends TestCase {
 	boolean locked = false;
 	Object lock = new Object();
 
-	public ManagedServiceTest(String name) {
-		super(name);
-	}
-
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Activator.getBundle("org.eclipse.equinox.cm").start();
 		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class.getName());
 		cm = (ConfigurationAdmin) Activator.getBundleContext().getService(reference);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		Activator.getBundleContext().ungetService(reference);
 		Activator.getBundle("org.eclipse.equinox.cm").stop();
 	}
 
+	@Test
 	public void testSamePidManagedService() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Properties props = new Properties();
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 
@@ -88,6 +88,7 @@ public class ManagedServiceTest extends TestCase {
 		config.delete();
 	}
 
+	@Test
 	public void testBug374637() throws Exception {
 
 		ManagedService ms = new ManagedService() {
@@ -129,6 +130,7 @@ public class ManagedServiceTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testGeneralManagedService() throws Exception {
 		updateCount = 0;
 		ManagedService ms = new ManagedService() {
@@ -158,7 +160,7 @@ public class ManagedServiceTest extends TestCase {
 
 		Configuration config = cm.getConfiguration("test");
 		assertNull(config.getProperties());
-		Properties props = new Properties();
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("testkey", "testvalue");
 
 		synchronized (lock) {

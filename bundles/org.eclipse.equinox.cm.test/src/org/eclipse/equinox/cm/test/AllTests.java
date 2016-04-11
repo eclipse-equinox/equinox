@@ -10,21 +10,12 @@
  *******************************************************************************/
 package org.eclipse.equinox.cm.test;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
+@RunWith(Suite.class)
+@SuiteClasses({ConfigurationAdminTest.class, ManagedServiceFactoryTest.class, ManagedServiceTest.class, ConfigurationDictionaryTest.class, ConfigurationPluginTest.class, ConfigurationListenerTest.class, ConfigurationEventAdapterTest.class})
 public class AllTests {
-
-	public static Test suite() {
-		TestSuite suite = new TestSuite("Test for org.eclipse.equinox.cm.test");
-		suite.addTestSuite(ConfigurationAdminTest.class);
-		suite.addTestSuite(ManagedServiceFactoryTest.class);
-		suite.addTestSuite(ManagedServiceTest.class);
-		suite.addTestSuite(ConfigurationDictionaryTest.class);
-		suite.addTestSuite(ConfigurationPluginTest.class);
-		suite.addTestSuite(ConfigurationListenerTest.class);
-		suite.addTestSuite(ConfigurationEventAdapterTest.class);
-		return suite;
-	}
-
+	// see @SuitClasses
 }

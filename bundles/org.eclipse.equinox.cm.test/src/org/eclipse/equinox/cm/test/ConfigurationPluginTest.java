@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.equinox.cm.test;
 
+import static org.junit.Assert.*;
+
 import java.util.*;
-import junit.framework.TestCase;
+import org.junit.*;
 import org.osgi.framework.*;
 import org.osgi.service.cm.*;
 
-public class ConfigurationPluginTest extends TestCase {
+public class ConfigurationPluginTest {
 
 	private ConfigurationAdmin cm;
 	private ServiceReference reference;
@@ -23,25 +25,24 @@ public class ConfigurationPluginTest extends TestCase {
 	Object lock = new Object();
 	boolean success;
 
-	public ConfigurationPluginTest(String name) {
-		super(name);
-	}
-
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Activator.getBundle("org.eclipse.equinox.cm").start();
 		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class.getName());
 		cm = (ConfigurationAdmin) Activator.getBundleContext().getService(reference);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		Activator.getBundleContext().ungetService(reference);
 		Activator.getBundle("org.eclipse.equinox.cm").stop();
 	}
 
+	@Test
 	public void testPlugin() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Properties props = new Properties();
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 
@@ -81,10 +82,11 @@ public class ConfigurationPluginTest extends TestCase {
 		config.delete();
 	}
 
+	@Test
 	public void testPidSpecificPlugin() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Properties props = new Properties();
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 
@@ -126,10 +128,11 @@ public class ConfigurationPluginTest extends TestCase {
 		config.delete();
 	}
 
+	@Test
 	public void testPidSpecificMissPlugin() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Properties props = new Properties();
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 
@@ -169,10 +172,11 @@ public class ConfigurationPluginTest extends TestCase {
 		config.delete();
 	}
 
+	@Test
 	public void testRankedPlugin() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Properties props = new Properties();
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 
@@ -224,10 +228,11 @@ public class ConfigurationPluginTest extends TestCase {
 		config.delete();
 	}
 
+	@Test
 	public void testSameRankedPlugin() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Properties props = new Properties();
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 		final List pluginsCalled = new ArrayList();
