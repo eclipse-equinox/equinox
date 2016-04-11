@@ -10,12 +10,17 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests.system;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Hashtable;
 import org.eclipse.equinox.region.Region;
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.service.url.*;
@@ -28,6 +33,8 @@ import org.osgi.service.url.*;
  * which there is a compatible URL Handler.
  */
 public class Bug346127Test extends AbstractRegionSystemTest {
+
+	@Test
 	public void testBug346127() throws Exception {
 		String location = bundleInstaller.getBundleLocation(PP1);
 		location = "regiondigraphtest:" + location;
@@ -41,8 +48,8 @@ public class Bug346127Test extends AbstractRegionSystemTest {
 		}
 	}
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		super.setUp();
 		Hashtable<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[] {"regiondigraphtest"});

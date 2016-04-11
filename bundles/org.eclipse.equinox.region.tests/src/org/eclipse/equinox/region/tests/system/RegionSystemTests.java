@@ -10,6 +10,13 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests.system;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.MalformedURLException;
@@ -19,6 +26,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.management.*;
 import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.bundle.EventHook;
@@ -29,13 +39,17 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class RegionSystemTests extends AbstractRegionSystemTest {
 
+	@Rule
+	public TestName testName = new TestName();
+
 	private static final long TEST_BUNDLE_ID = 452345245L;
 
+	@Test
 	public void testBasic() throws BundleException, InvalidSyntaxException, InterruptedException {
 		// get the system region
 		Region systemRegion = digraph.getRegion(0);
 		// create a disconnected test region
-		Region testRegion = digraph.createRegion(getName());
+		Region testRegion = digraph.createRegion(testName.getMethodName());
 		List<Bundle> bundles = new ArrayList<Bundle>();
 		// Install all test bundles
 		Bundle pp1, cp2, sc1;
@@ -80,6 +94,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		sc1Tracker.close();
 	}
 
+	@Test
 	public void testSingleBundleRegions() throws BundleException, InvalidSyntaxException, InterruptedException {
 		// get the system region
 		Region systemRegion = digraph.getRegion(0);
@@ -234,21 +249,24 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 	//		assertEquals("Wrong number of test ids.", 0, testIds.size());
 	//	}
 
+	@Test
 	public void testCyclicRegions0() throws BundleException, InvalidSyntaxException, InterruptedException {
 		doCyclicRegions(0);
 	}
 
+	@Test
 	public void testCyclicRegions10() throws BundleException, InvalidSyntaxException, InterruptedException {
 		doCyclicRegions(10);
 	}
 
+	@Test
 	public void testCyclicRegions100() throws BundleException, InvalidSyntaxException, InterruptedException {
 		doCyclicRegions(100);
 	}
 
 	private void doCyclicRegions(int numLevels) throws BundleException, InvalidSyntaxException, InterruptedException {
-		String regionName1 = getName() + "_1";
-		String regionName2 = getName() + "_2";
+		String regionName1 = testName.getMethodName() + "_1";
+		String regionName2 = testName.getMethodName() + "_2";
 		// get the system region
 		Region systemRegion = digraph.getRegion(0);
 		// create two regions to hold the bundles
@@ -298,7 +316,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		Region r1, r2 = null;
 		for (int i = 0; i <= numLevels; i++) {
 			r1 = (i > 0) ? r2 : testRegion1;
-			r2 = (i < numLevels) ? digraph.createRegion(getName() + "_level_" + i) : testRegion2;
+			r2 = (i < numLevels) ? digraph.createRegion(testName.getMethodName() + "_level_" + i) : testRegion2;
 			r1.connectRegion(r2, testRegionFilter1.build());
 			r2.connectRegion(r1, testRegionFilter2.build());
 		}
@@ -354,9 +372,10 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		}, null);
 	}
 
+	@Test
 	public void testSingletons() throws BundleException {
-		Region region1 = digraph.createRegion(getName() + "_1");
-		Region region2 = digraph.createRegion(getName() + "_2");
+		Region region1 = digraph.createRegion(testName.getMethodName() + "_1");
+		Region region2 = digraph.createRegion(testName.getMethodName() + "_2");
 
 		// first install into the same region; higher version 2 should resolve
 		Bundle singleton1 = bundleInstaller.installBundle(SINGLETON1, region1);
@@ -422,6 +441,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 	private static final String REGION_DOMAIN_PROP = "org.eclipse.equinox.region.domain";
 
+	@Test
 	public void testMbeans() throws MalformedObjectNameException, BundleException, InstanceNotFoundException, ReflectionException, MBeanException, AttributeNotFoundException {
 		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
 		ObjectName digraphName = new ObjectName(REGION_DOMAIN_PROP + ":type=RegionDigraph,*");
@@ -465,6 +485,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertEquals("Wrong name", SP1, name);
 	}
 
+	@Test
 	public void testBundleCollisionDisconnectedRegions() throws BundleException, InvalidSyntaxException {
 		// get the system region
 		Region systemRegion = digraph.getRegion(0);
@@ -493,7 +514,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			for (String name : ALL) {
 				String location = bundleInstaller.getBundleLocation(name);
 				try {
-					Bundle b = region.installBundle(getName() + "_expectToFail", new URL(location).openStream());
+					Bundle b = region.installBundle(testName.getMethodName() + "_expectToFail", new URL(location).openStream());
 					b.uninstall();
 					fail("Expected a bundle exception on duplicate bundle installation: " + name);
 				} catch (BundleException e) {
@@ -534,10 +555,11 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		}
 	}
 
+	@Test
 	public void testBundleCollisionUninstalledBundle() throws BundleException {
-		Region region1 = digraph.createRegion(getName() + 1);
-		Region region2 = digraph.createRegion(getName() + 2);
-		Region region3 = digraph.createRegion(getName() + 3);
+		Region region1 = digraph.createRegion(testName.getMethodName() + 1);
+		Region region2 = digraph.createRegion(testName.getMethodName() + 2);
+		Region region3 = digraph.createRegion(testName.getMethodName() + 3);
 		// install the same bundle into the first two regions.  Should be no collision
 		bundleInstaller.installBundle(PP1, region1);
 		bundleInstaller.installBundle(PP1, region2);
@@ -561,6 +583,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		}
 	}
 
+	@Test
 	public void testBundleCollisionConnectedRegions() throws BundleException, InvalidSyntaxException {
 		// get the system region
 		Region systemRegion = digraph.getRegion(0);
@@ -613,6 +636,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		}
 	}
 
+	@Test
 	public void testDefaultRegion() throws BundleException {
 		digraph.setDefaultRegion(null);
 
@@ -633,6 +657,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		digraph.setDefaultRegion(null);
 	}
 
+	@Test
 	public void testRemoveDefaultRegion() throws BundleException {
 		digraph.setDefaultRegion(null);
 
@@ -642,6 +667,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertEquals("DefaultRegion is not null", null, digraph.getDefaultRegion());
 	}
 
+	@Test
 	public void testSetNotExistingDefaultRegion() throws BundleException {
 		Region pp1Region = digraph.createRegion(PP1);
 		digraph.removeRegion(pp1Region);
@@ -653,6 +679,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		}
 	}
 
+	@Test
 	public void testRemoveRegion() throws BundleException {
 		Region pp1Region = digraph.createRegion(PP1);
 		pp1Region.addBundle(TEST_BUNDLE_ID);
@@ -682,10 +709,11 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertEquals("Wrong region found for the bundle id", pp2Region, digraph.getRegion(TEST_BUNDLE_ID));
 	}
 
+	@Test
 	public void testInstallAtLocation() throws BundleException, MalformedURLException, IOException {
 		// create disconnected test regions
-		Region r1 = digraph.createRegion(getName() + ".1");
-		Region r2 = digraph.createRegion(getName() + ".2");
+		Region r1 = digraph.createRegion(testName.getMethodName() + ".1");
+		Region r2 = digraph.createRegion(testName.getMethodName() + ".2");
 
 		String location = bundleInstaller.getBundleLocation(PP1);
 		Bundle b1 = null;
@@ -718,6 +746,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertEquals("Wrong location found.", location + ".2", l2);
 	}
 
+	@Test
 	public void testInvalidRegionName() {
 		Collection<String> invalidNames = new ArrayList<String>();
 		invalidNames.addAll(Arrays.asList(":", "bad:Name", ":bad::name:", ":badname", "badname:"));
@@ -742,6 +771,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 	}
 
+	@Test
 	public void testHigherRankedEventHookResolve() throws BundleException {
 		final List<BundleEvent> events = new CopyOnWriteArrayList<BundleEvent>();
 		SynchronousBundleListener listener = new SynchronousBundleListener() {
@@ -782,6 +812,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		}
 	}
 
+	@Test
 	public void testHigherRankedEventHookUninstall() throws BundleException {
 		// register a higher ranked bundle EventHook that causes a bundle to resolve while processing INSTALLED events
 		ServiceRegistration<EventHook> bundleEventHook = getContext().registerService(EventHook.class, new EventHook() {
@@ -808,6 +839,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertNull("Found region for uninstalled bundle.", digraph.getRegion(b));
 	}
 
+	@Test
 	public void testReplaceConnection() throws BundleException, InvalidSyntaxException {
 		// get the system region
 		Region systemRegion = digraph.getRegion(0);

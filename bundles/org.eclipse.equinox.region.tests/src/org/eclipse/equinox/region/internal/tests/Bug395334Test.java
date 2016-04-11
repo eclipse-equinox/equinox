@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.internal.tests;
 
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.equinox.region.RegionFilter;
 import org.eclipse.equinox.region.RegionFilterBuilder;
 import org.eclipse.equinox.region.tests.system.AbstractRegionSystemTest;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleRevision;
@@ -22,6 +25,7 @@ import org.osgi.framework.wiring.BundleRevision;
  * the bundle-symbolic-name attribute as per the RegionFilter API.
  */
 public class Bug395334Test extends AbstractRegionSystemTest {
+	@Test
 	public void testBug395334() throws Exception {
 		RegionFilterBuilder filterBuilder = digraph.createRegionFilterBuilder();
 		filterBuilder.allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(bundle-symbolic-name=org.eclipse.osgi)");

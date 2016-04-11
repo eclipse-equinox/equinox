@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests.system;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.util.Arrays;
 import java.util.List;
-import junit.framework.TestCase;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.tests.BundleInstaller;
+import org.junit.After;
+import org.junit.Before;
 import org.osgi.framework.*;
 
 /*
@@ -33,7 +36,7 @@ import org.osgi.framework.*;
  * SC1 -- package pkg2.* --> PP2
  * CC1 -- capability CP2 --> CP2
  */
-public class AbstractRegionSystemTest extends TestCase {
+public class AbstractRegionSystemTest {
 	public static final String PP1 = "PackageProvider1";
 	public static final String SP1 = "ServiceProvider1";
 	public static final String CP1 = "CapabilityProvider1";
@@ -54,21 +57,21 @@ public class AbstractRegionSystemTest extends TestCase {
 	protected Bundle testsBundle;
 	ServiceReference<RegionDigraph> digraphReference;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		testsBundle = FrameworkUtil.getBundle(this.getClass());;
 		BundleContext context = getContext();
 
 		digraphReference = context.getServiceReference(RegionDigraph.class);
-		assertNotNull("No digraph found", digraphReference);
+		assertNotNull("No digraph reference found", digraphReference);
 		digraph = context.getService(digraphReference);
-		assertNotNull("No digraph found");
+		assertNotNull("No digraph found", digraph);
 
 		bundleInstaller = new BundleInstaller("bundle_tests", testsBundle); //$NON-NLS-1$
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		for (Region region : digraph) {
 			if (!region.contains(0)) {
 				digraph.removeRegion(region);

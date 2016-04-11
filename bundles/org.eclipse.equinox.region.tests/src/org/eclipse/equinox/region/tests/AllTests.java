@@ -10,27 +10,18 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests;
 
-import junit.framework.*;
 import org.eclipse.equinox.region.internal.tests.*;
 import org.eclipse.equinox.region.internal.tests.hook.*;
 import org.eclipse.equinox.region.tests.system.Bug346127Test;
 import org.eclipse.equinox.region.tests.system.RegionSystemTests;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
+@RunWith(Suite.class)
+@SuiteClasses({RegionBundleCollisionHookTests.class, RegionBundleEventHookTests.class, RegionBundleFindHookTests.class, RegionResolverHookTests.class, RegionServiceEventHookTests.class, RegionServiceFindHookTests.class, BundleIdBasedRegionTests.class, StandardRegionDigraphPeristenceTests.class, StandardRegionDigraphTests.class, StandardRegionFilterTests.class, RegionSystemTests.class, Bug346127Test.class
+
+})
 public class AllTests {
-	public static Test suite() {
-		TestSuite suite = new TestSuite("Equinox Region Tests");
-		suite.addTest(new JUnit4TestAdapter(RegionBundleCollisionHookTests.class));
-		suite.addTest(new JUnit4TestAdapter(RegionBundleEventHookTests.class));
-		suite.addTest(new JUnit4TestAdapter(RegionBundleFindHookTests.class));
-		suite.addTest(new JUnit4TestAdapter(RegionResolverHookTests.class));
-		suite.addTest(new JUnit4TestAdapter(RegionServiceEventHookTests.class));
-		suite.addTest(new JUnit4TestAdapter(RegionServiceFindHookTests.class));
-		suite.addTest(new JUnit4TestAdapter(BundleIdBasedRegionTests.class));
-		suite.addTest(new JUnit4TestAdapter(StandardRegionDigraphPeristenceTests.class));
-		suite.addTest(new JUnit4TestAdapter(StandardRegionDigraphTests.class));
-		suite.addTest(new JUnit4TestAdapter(StandardRegionFilterTests.class));
-		suite.addTest(new TestSuite(RegionSystemTests.class));
-		suite.addTest(new TestSuite(Bug346127Test.class));
-		return suite;
-	}
+	// see @SuiteClasses
 }
