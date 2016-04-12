@@ -12,7 +12,8 @@ package org.eclipse.equinox.cm.test;
 
 import static org.junit.Assert.*;
 
-import java.util.*;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.junit.*;
 import org.osgi.framework.*;
 import org.osgi.service.cm.*;
@@ -20,7 +21,7 @@ import org.osgi.service.cm.*;
 public class ManagedServiceFactoryTest {
 
 	private ConfigurationAdmin cm;
-	private ServiceReference reference;
+	private ServiceReference<ConfigurationAdmin> reference;
 	int updateCount = 0;
 	boolean locked = false;
 	Object lock = new Object();
@@ -28,8 +29,8 @@ public class ManagedServiceFactoryTest {
 	@Before
 	public void setUp() throws Exception {
 		Activator.getBundle("org.eclipse.equinox.cm").start();
-		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class.getName());
-		cm = (ConfigurationAdmin) Activator.getBundleContext().getService(reference);
+		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class);
+		cm = Activator.getBundleContext().getService(reference);
 
 	}
 
@@ -62,7 +63,7 @@ public class ManagedServiceFactoryTest {
 				return null;
 			}
 
-			public void updated(String pid, Dictionary properties) throws ConfigurationException {
+			public void updated(String pid, Dictionary<String, ?> properties) {
 				synchronized (lock) {
 					locked = false;
 					lock.notify();
@@ -71,11 +72,11 @@ public class ManagedServiceFactoryTest {
 			}
 		};
 
-		Dictionary dict = new Properties();
+		Dictionary<String, Object> dict = new Hashtable<String, Object>();
 		dict.put(Constants.SERVICE_PID, "test");
-		ServiceRegistration reg = null;
+		ServiceRegistration<ManagedServiceFactory> reg = null;
 		synchronized (lock) {
-			reg = Activator.getBundleContext().registerService(ManagedServiceFactory.class.getName(), msf, dict);
+			reg = Activator.getBundleContext().registerService(ManagedServiceFactory.class, msf, dict);
 			locked = true;
 			lock.wait(5000);
 			if (locked)
@@ -83,9 +84,9 @@ public class ManagedServiceFactoryTest {
 			assertEquals(1, updateCount);
 		}
 
-		ServiceRegistration reg2 = null;
+		ServiceRegistration<ManagedServiceFactory> reg2 = null;
 		synchronized (lock) {
-			reg2 = Activator.getBundleContext().registerService(ManagedServiceFactory.class.getName(), msf, dict);
+			reg2 = Activator.getBundleContext().registerService(ManagedServiceFactory.class, msf, dict);
 			locked = true;
 			lock.wait(5000);
 			if (locked)
@@ -114,7 +115,7 @@ public class ManagedServiceFactoryTest {
 				return null;
 			}
 
-			public void updated(String pid, Dictionary properties) throws ConfigurationException {
+			public void updated(String pid, Dictionary<String, ?> properties) {
 				synchronized (lock) {
 					locked = false;
 					lock.notify();
@@ -123,12 +124,12 @@ public class ManagedServiceFactoryTest {
 			}
 		};
 
-		Dictionary dict = new Properties();
+		Dictionary<String, Object> dict = new Hashtable<String, Object>();
 		dict.put(Constants.SERVICE_PID, "test");
 
-		ServiceRegistration reg = null;
+		ServiceRegistration<ManagedServiceFactory> reg = null;
 		synchronized (lock) {
-			reg = Activator.getBundleContext().registerService(ManagedServiceFactory.class.getName(), msf, dict);
+			reg = Activator.getBundleContext().registerService(ManagedServiceFactory.class, msf, dict);
 			locked = true;
 			lock.wait(100);
 			assertTrue(locked);

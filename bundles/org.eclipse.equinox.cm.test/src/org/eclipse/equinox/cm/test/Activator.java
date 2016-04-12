@@ -17,11 +17,11 @@ public class Activator implements BundleActivator {
 
 	private static PackageAdmin packageAdmin;
 	private static BundleContext bundleContext;
-	private ServiceReference packageAdminRef;
+	private ServiceReference<PackageAdmin> packageAdminRef;
 
 	public void start(BundleContext context) throws Exception {
-		packageAdminRef = context.getServiceReference(PackageAdmin.class.getName());
-		setPackageAdmin((PackageAdmin) context.getService(packageAdminRef));
+		packageAdminRef = context.getServiceReference(PackageAdmin.class);
+		setPackageAdmin(context.getService(packageAdminRef));
 		setBundleContext(context);
 	}
 

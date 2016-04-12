@@ -24,7 +24,7 @@ import org.osgi.service.event.*;
 public class ConfigurationEventAdapterTest {
 
 	private ConfigurationAdmin cm;
-	private ServiceReference cmReference;
+	private ServiceReference<ConfigurationAdmin> cmReference;
 
 	boolean locked = false;
 	Object lock = new Object();
@@ -33,8 +33,8 @@ public class ConfigurationEventAdapterTest {
 	public void setUp() throws Exception {
 		Activator.getBundle("org.eclipse.equinox.event").start();
 		Activator.getBundle("org.eclipse.equinox.cm").start();
-		cmReference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class.getName());
-		cm = (ConfigurationAdmin) Activator.getBundleContext().getService(cmReference);
+		cmReference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class);
+		cm = Activator.getBundleContext().getService(cmReference);
 	}
 
 	@After
@@ -62,10 +62,10 @@ public class ConfigurationEventAdapterTest {
 
 		};
 		String[] topics = new String[] {"org/osgi/service/cm/ConfigurationEvent/*"};
-		Dictionary handlerProps = new Hashtable();
+		Dictionary<String, Object> handlerProps = new Hashtable<String, Object>();
 
 		handlerProps.put(EventConstants.EVENT_TOPIC, topics);
-		ServiceRegistration reg = Activator.getBundleContext().registerService(EventHandler.class.getName(), handler, handlerProps);
+		ServiceRegistration<EventHandler> reg = Activator.getBundleContext().registerService(EventHandler.class, handler, handlerProps);
 
 		synchronized (lock) {
 			config.update(props);
@@ -102,10 +102,9 @@ public class ConfigurationEventAdapterTest {
 
 		};
 		String[] topics = new String[] {"org/osgi/service/cm/ConfigurationEvent/*"};
-		Dictionary handlerProps = new Hashtable();
-
+		Dictionary<String, Object> handlerProps = new Hashtable<String, Object>();
 		handlerProps.put(EventConstants.EVENT_TOPIC, topics);
-		ServiceRegistration reg = Activator.getBundleContext().registerService(EventHandler.class.getName(), handler, handlerProps);
+		ServiceRegistration<EventHandler> reg = Activator.getBundleContext().registerService(EventHandler.class, handler, handlerProps);
 
 		synchronized (lock) {
 			config.update(props);

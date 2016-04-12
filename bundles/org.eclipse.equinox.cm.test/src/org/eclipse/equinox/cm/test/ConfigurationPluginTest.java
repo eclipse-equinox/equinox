@@ -20,7 +20,7 @@ import org.osgi.service.cm.*;
 public class ConfigurationPluginTest {
 
 	private ConfigurationAdmin cm;
-	private ServiceReference reference;
+	private ServiceReference<ConfigurationAdmin> reference;
 	boolean locked = false;
 	Object lock = new Object();
 	boolean success;
@@ -28,8 +28,8 @@ public class ConfigurationPluginTest {
 	@Before
 	public void setUp() throws Exception {
 		Activator.getBundle("org.eclipse.equinox.cm").start();
-		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class.getName());
-		cm = (ConfigurationAdmin) Activator.getBundleContext().getService(reference);
+		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class);
+		cm = Activator.getBundleContext().getService(reference);
 	}
 
 	@After
@@ -48,14 +48,14 @@ public class ConfigurationPluginTest {
 
 		ConfigurationPlugin plugin = new ConfigurationPlugin() {
 
-			public void modifyConfiguration(ServiceReference reference, Dictionary properties) {
+			public void modifyConfiguration(ServiceReference<?> serviceReference, Dictionary<String, Object> properties) {
 				properties.put("plugin", "plugin1");
 			}
 		};
-		ServiceRegistration pluginReg = Activator.getBundleContext().registerService(ConfigurationPlugin.class.getName(), plugin, null);
+		ServiceRegistration<ConfigurationPlugin> pluginReg = Activator.getBundleContext().registerService(ConfigurationPlugin.class, plugin, null);
 
 		ManagedService ms = new ManagedService() {
-			public void updated(Dictionary properties) throws ConfigurationException {
+			public void updated(Dictionary<String, ?> properties) {
 				synchronized (lock) {
 					locked = false;
 					lock.notify();
@@ -64,12 +64,12 @@ public class ConfigurationPluginTest {
 			}
 		};
 
-		Dictionary dict = new Properties();
+		Dictionary<String, Object> dict = new Hashtable<String, Object>();
 		dict.put(Constants.SERVICE_PID, "test");
-		ServiceRegistration reg = null;
+		ServiceRegistration<ManagedService> reg = null;
 		synchronized (lock) {
 			success = false;
-			reg = Activator.getBundleContext().registerService(ManagedService.class.getName(), ms, dict);
+			reg = Activator.getBundleContext().registerService(ManagedService.class, ms, dict);
 			locked = true;
 			lock.wait(5000);
 			if (locked)
@@ -92,16 +92,16 @@ public class ConfigurationPluginTest {
 
 		ConfigurationPlugin plugin = new ConfigurationPlugin() {
 
-			public void modifyConfiguration(ServiceReference reference, Dictionary properties) {
+			public void modifyConfiguration(ServiceReference<?> serviceReference, Dictionary<String, Object> properties) {
 				properties.put("plugin", "plugin1");
 			}
 		};
-		Dictionary pluginDict = new Properties();
+		Dictionary<String, Object> pluginDict = new Hashtable<String, Object>();
 		pluginDict.put(ConfigurationPlugin.CM_TARGET, new String[] {"test"});
-		ServiceRegistration pluginReg = Activator.getBundleContext().registerService(ConfigurationPlugin.class.getName(), plugin, pluginDict);
+		ServiceRegistration<ConfigurationPlugin> pluginReg = Activator.getBundleContext().registerService(ConfigurationPlugin.class, plugin, pluginDict);
 
 		ManagedService ms = new ManagedService() {
-			public void updated(Dictionary properties) throws ConfigurationException {
+			public void updated(Dictionary<String, ?> properties) {
 				synchronized (lock) {
 					locked = false;
 					lock.notify();
@@ -110,12 +110,12 @@ public class ConfigurationPluginTest {
 			}
 		};
 
-		Dictionary dict = new Properties();
+		Dictionary<String, Object> dict = new Hashtable<String, Object>();
 		dict.put(Constants.SERVICE_PID, "test");
-		ServiceRegistration reg = null;
+		ServiceRegistration<ManagedService> reg = null;
 		synchronized (lock) {
 			success = false;
-			reg = Activator.getBundleContext().registerService(ManagedService.class.getName(), ms, dict);
+			reg = Activator.getBundleContext().registerService(ManagedService.class, ms, dict);
 			locked = true;
 			lock.wait(5000);
 			if (locked)
@@ -138,16 +138,16 @@ public class ConfigurationPluginTest {
 
 		ConfigurationPlugin plugin = new ConfigurationPlugin() {
 
-			public void modifyConfiguration(ServiceReference reference, Dictionary properties) {
+			public void modifyConfiguration(ServiceReference<?> serviceReference, Dictionary<String, Object> properties) {
 				properties.put("plugin", "plugin1");
 			}
 		};
-		Dictionary pluginDict = new Properties();
+		Dictionary<String, Object> pluginDict = new Hashtable<String, Object>();
 		pluginDict.put(ConfigurationPlugin.CM_TARGET, new String[] {"testXXX"});
-		ServiceRegistration pluginReg = Activator.getBundleContext().registerService(ConfigurationPlugin.class.getName(), plugin, pluginDict);
+		ServiceRegistration<ConfigurationPlugin> pluginReg = Activator.getBundleContext().registerService(ConfigurationPlugin.class, plugin, pluginDict);
 
 		ManagedService ms = new ManagedService() {
-			public void updated(Dictionary properties) throws ConfigurationException {
+			public void updated(Dictionary<String, ?> properties) {
 				synchronized (lock) {
 					locked = false;
 					lock.notify();
@@ -156,12 +156,12 @@ public class ConfigurationPluginTest {
 			}
 		};
 
-		Dictionary dict = new Properties();
+		Dictionary<String, Object> dict = new Hashtable<String, Object>();
 		dict.put(Constants.SERVICE_PID, "test");
-		ServiceRegistration reg = null;
+		ServiceRegistration<ManagedService> reg = null;
 		synchronized (lock) {
 			success = false;
-			reg = Activator.getBundleContext().registerService(ManagedService.class.getName(), ms, dict);
+			reg = Activator.getBundleContext().registerService(ManagedService.class, ms, dict);
 			locked = true;
 			lock.wait(5000);
 			assertFalse(success);
@@ -182,25 +182,25 @@ public class ConfigurationPluginTest {
 
 		ConfigurationPlugin plugin = new ConfigurationPlugin() {
 
-			public void modifyConfiguration(ServiceReference reference, Dictionary properties) {
+			public void modifyConfiguration(ServiceReference<?> serviceReference, Dictionary<String, Object> properties) {
 				properties.put("plugin", "plugin1");
 			}
 		};
-		Dictionary pluginDict = new Properties();
+		Dictionary<String, Object> pluginDict = new Hashtable<String, Object>();
 		pluginDict.put(ConfigurationPlugin.CM_RANKING, new Integer(1));
-		ServiceRegistration pluginReg1 = Activator.getBundleContext().registerService(ConfigurationPlugin.class.getName(), plugin, pluginDict);
+		ServiceRegistration<ConfigurationPlugin> pluginReg1 = Activator.getBundleContext().registerService(ConfigurationPlugin.class, plugin, pluginDict);
 
 		ConfigurationPlugin plugin2 = new ConfigurationPlugin() {
 
-			public void modifyConfiguration(ServiceReference reference, Dictionary properties) {
+			public void modifyConfiguration(ServiceReference<?> serviceReference, Dictionary<String, Object> properties) {
 				properties.put("plugin", "plugin2");
 			}
 		};
 
-		ServiceRegistration pluginReg2 = Activator.getBundleContext().registerService(ConfigurationPlugin.class.getName(), plugin2, null);
+		ServiceRegistration<ConfigurationPlugin> pluginReg2 = Activator.getBundleContext().registerService(ConfigurationPlugin.class, plugin2, null);
 
 		ManagedService ms = new ManagedService() {
-			public void updated(Dictionary properties) throws ConfigurationException {
+			public void updated(Dictionary<String, ?> properties) {
 				synchronized (lock) {
 					locked = false;
 					lock.notify();
@@ -209,12 +209,12 @@ public class ConfigurationPluginTest {
 			}
 		};
 
-		Dictionary dict = new Properties();
+		Dictionary<String, Object> dict = new Hashtable<String, Object>();
 		dict.put(Constants.SERVICE_PID, "test");
-		ServiceRegistration reg = null;
+		ServiceRegistration<ManagedService> reg = null;
 		synchronized (lock) {
 			success = false;
-			reg = Activator.getBundleContext().registerService(ManagedService.class.getName(), ms, dict);
+			reg = Activator.getBundleContext().registerService(ManagedService.class, ms, dict);
 			locked = true;
 			lock.wait(5000);
 			if (locked)
@@ -235,37 +235,37 @@ public class ConfigurationPluginTest {
 		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("testkey", "testvalue");
 		config.update(props);
-		final List pluginsCalled = new ArrayList();
+		final List<String> pluginsCalled = new ArrayList<String>();
 
-		Hashtable pluginProps = new Hashtable();
+		Hashtable<String, Object> pluginProps = new Hashtable<String, Object>();
 		pluginProps.put(Constants.SERVICE_RANKING, new Integer(1));
 		ConfigurationPlugin plugin1 = new ConfigurationPlugin() {
-			public void modifyConfiguration(ServiceReference reference, Dictionary properties) {
+			public void modifyConfiguration(ServiceReference<?> serviceReference, Dictionary<String, Object> properties) {
 				pluginsCalled.add("plugin1");
 			}
 		};
-		ServiceRegistration pluginReg1 = Activator.getBundleContext().registerService(ConfigurationPlugin.class.getName(), plugin1, pluginProps);
+		ServiceRegistration<ConfigurationPlugin> pluginReg1 = Activator.getBundleContext().registerService(ConfigurationPlugin.class, plugin1, pluginProps);
 
 		ConfigurationPlugin plugin2 = new ConfigurationPlugin() {
-			public void modifyConfiguration(ServiceReference reference, Dictionary properties) {
+			public void modifyConfiguration(ServiceReference<?> serviceReference, Dictionary<String, Object> properties) {
 				pluginsCalled.add("plugin2");
 			}
 		};
 
 		pluginProps.put(Constants.SERVICE_RANKING, new Integer(2));
-		ServiceRegistration pluginReg2 = Activator.getBundleContext().registerService(ConfigurationPlugin.class.getName(), plugin2, pluginProps);
+		ServiceRegistration<ConfigurationPlugin> pluginReg2 = Activator.getBundleContext().registerService(ConfigurationPlugin.class, plugin2, pluginProps);
 
 		ConfigurationPlugin plugin3 = new ConfigurationPlugin() {
-			public void modifyConfiguration(ServiceReference reference, Dictionary properties) {
+			public void modifyConfiguration(ServiceReference<?> serviceReference, Dictionary<String, Object> properties) {
 				pluginsCalled.add("plugin3");
 			}
 		};
 
 		pluginProps.put(Constants.SERVICE_RANKING, new Integer(1));
-		ServiceRegistration pluginReg3 = Activator.getBundleContext().registerService(ConfigurationPlugin.class.getName(), plugin3, pluginProps);
+		ServiceRegistration<ConfigurationPlugin> pluginReg3 = Activator.getBundleContext().registerService(ConfigurationPlugin.class, plugin3, pluginProps);
 
 		ManagedService ms = new ManagedService() {
-			public void updated(Dictionary properties) throws ConfigurationException {
+			public void updated(Dictionary<String, ?> properties) {
 				synchronized (lock) {
 					locked = false;
 					lock.notify();
@@ -273,11 +273,11 @@ public class ConfigurationPluginTest {
 			}
 		};
 
-		Dictionary dict = new Properties();
+		Dictionary<String, Object> dict = new Hashtable<String, Object>();
 		dict.put(Constants.SERVICE_PID, "test");
-		ServiceRegistration reg = null;
+		ServiceRegistration<ManagedService> reg = null;
 		synchronized (lock) {
-			reg = Activator.getBundleContext().registerService(ManagedService.class.getName(), ms, dict);
+			reg = Activator.getBundleContext().registerService(ManagedService.class, ms, dict);
 			locked = true;
 			lock.wait(5000);
 			if (locked)

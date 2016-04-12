@@ -22,15 +22,15 @@ import org.osgi.service.cm.*;
 public class ConfigurationListenerTest {
 
 	private ConfigurationAdmin cm;
-	private ServiceReference reference;
+	private ServiceReference<ConfigurationAdmin> reference;
 	boolean locked = false;
 	Object lock = new Object();
 
 	@Before
 	public void setUp() throws Exception {
 		Activator.getBundle("org.eclipse.equinox.cm").start();
-		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class.getName());
-		cm = (ConfigurationAdmin) Activator.getBundleContext().getService(reference);
+		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class);
+		cm = Activator.getBundleContext().getService(reference);
 	}
 
 	@After
@@ -55,7 +55,7 @@ public class ConfigurationListenerTest {
 				}
 			}
 		};
-		ServiceRegistration reg = Activator.getBundleContext().registerService(ConfigurationListener.class.getName(), listener, null);
+		ServiceRegistration<ConfigurationListener> reg = Activator.getBundleContext().registerService(ConfigurationListener.class, listener, null);
 
 		synchronized (lock) {
 			config.update(props);

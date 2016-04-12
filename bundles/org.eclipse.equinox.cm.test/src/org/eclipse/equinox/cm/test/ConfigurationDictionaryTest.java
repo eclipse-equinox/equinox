@@ -24,13 +24,13 @@ import org.osgi.service.cm.ConfigurationAdmin;
 public class ConfigurationDictionaryTest {
 
 	private ConfigurationAdmin cm;
-	private ServiceReference reference;
+	private ServiceReference<ConfigurationAdmin> reference;
 
 	@Before
 	public void setUp() throws Exception {
 		Activator.getBundle("org.eclipse.equinox.cm").start();
-		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class.getName());
-		cm = (ConfigurationAdmin) Activator.getBundleContext().getService(reference);
+		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class);
+		cm = Activator.getBundleContext().getService(reference);
 	}
 
 	@After
@@ -43,7 +43,7 @@ public class ConfigurationDictionaryTest {
 	public void testGoodConfigProperties() throws Exception {
 		Configuration config = cm.getConfiguration("test");
 		config.update();
-		Dictionary dict = config.getProperties();
+		Dictionary<String, Object> dict = config.getProperties();
 		try {
 			dict.put("1", new String("x"));
 			dict.put("2", new Integer(1));
@@ -71,8 +71,8 @@ public class ConfigurationDictionaryTest {
 			dict.put("24", new short[] {1});
 			dict.put("25", new char[] {'a'});
 			dict.put("26", new boolean[] {true});
-			dict.put("27", new Vector());
-			Vector v = new Vector();
+			dict.put("27", new Vector<Object>());
+			Vector<Object> v = new Vector<Object>();
 			v.add(new String("x"));
 			v.add(new Integer(1));
 			v.add(new Long(1));
@@ -83,7 +83,7 @@ public class ConfigurationDictionaryTest {
 			v.add(new Character('a'));
 			v.add(Boolean.TRUE);
 			dict.put("28", v);
-			Collection c = new ArrayList();
+			Collection<Object> c = new ArrayList<Object>();
 			c.add(new String("x"));
 			c.add(new Integer(1));
 			c.add(new Long(1));
@@ -99,16 +99,16 @@ public class ConfigurationDictionaryTest {
 		}
 
 		config.update(dict);
-		Dictionary dict2 = config.getProperties();
+		Dictionary<String, Object> dict2 = config.getProperties();
 
 		assertTrue(dict.size() == dict2.size());
-		Enumeration keys = dict.keys();
+		Enumeration<String> keys = dict.keys();
 		while (keys.hasMoreElements()) {
-			String key = (String) keys.nextElement();
+			String key = keys.nextElement();
 			Object value1 = dict.get(key);
-			Class class1 = value1.getClass();
+			Class<?> class1 = value1.getClass();
 			Object value2 = dict2.get(key);
-			Class class2 = value2.getClass();
+			Class<?> class2 = value2.getClass();
 			if (value1.getClass().isArray()) {
 				assertTrue(class1 == class2);
 				assertTrue(class1.getComponentType() == class2.getComponentType());
@@ -118,8 +118,8 @@ public class ConfigurationDictionaryTest {
 				if (value1 instanceof Object[])
 					assertTrue(Arrays.asList((Object[]) value1).containsAll(Arrays.asList((Object[]) value2)));
 			} else if (value1 instanceof Collection) {
-				Collection c1 = (Collection) value1;
-				Collection c2 = (Collection) value2;
+				Collection<?> c1 = (Collection<?>) value1;
+				Collection<?> c2 = (Collection<?>) value2;
 				assertTrue(c1.size() == c2.size());
 				assertTrue(c1.containsAll(c2));
 			} else
@@ -132,7 +132,7 @@ public class ConfigurationDictionaryTest {
 	public void testNullKey() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
-		Dictionary dict = config.getProperties();
+		Dictionary<String, Object> dict = config.getProperties();
 		try {
 			dict.put(null, "x");
 		} catch (NullPointerException e) {
@@ -147,7 +147,7 @@ public class ConfigurationDictionaryTest {
 	public void testNullValue() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
-		Dictionary dict = config.getProperties();
+		Dictionary<String, Object> dict = config.getProperties();
 		try {
 			dict.put("x", null);
 		} catch (NullPointerException e) {
@@ -162,7 +162,7 @@ public class ConfigurationDictionaryTest {
 	public void testObjectValue() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
-		Dictionary dict = config.getProperties();
+		Dictionary<String, Object> dict = config.getProperties();
 		try {
 			dict.put("x", new Object());
 		} catch (IllegalArgumentException e) {
@@ -177,7 +177,7 @@ public class ConfigurationDictionaryTest {
 	public void testObjectArray() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
-		Dictionary dict = config.getProperties();
+		Dictionary<String, Object> dict = config.getProperties();
 		try {
 			dict.put("x", new Object[] {new Object()});
 		} catch (IllegalArgumentException e) {
@@ -192,9 +192,9 @@ public class ConfigurationDictionaryTest {
 	public void testObjectVector() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
-		Dictionary dict = config.getProperties();
+		Dictionary<String, Object> dict = config.getProperties();
 		try {
-			Vector v = new Vector();
+			Vector<Object> v = new Vector<Object>();
 			v.add(new Object());
 			dict.put("x", v);
 		} catch (IllegalArgumentException e) {
@@ -209,9 +209,9 @@ public class ConfigurationDictionaryTest {
 	public void testObjectCollection() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
-		Dictionary dict = config.getProperties();
+		Dictionary<String, Object> dict = config.getProperties();
 		try {
-			Collection c = new ArrayList();
+			Collection<Object> c = new ArrayList<Object>();
 			c.add(new Object());
 			dict.put("x", c);
 		} catch (IllegalArgumentException e) {
@@ -226,9 +226,9 @@ public class ConfigurationDictionaryTest {
 	public void testPutGetCustomCollection() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
-		Dictionary dict = config.getProperties();
+		Dictionary<String, Object> dict = config.getProperties();
 		try {
-			Collection c = new ArrayList() {
+			Collection<Object> c = new ArrayList<Object>() {
 				private static final long serialVersionUID = 1L;
 			};
 			dict.put("x", c);
@@ -244,7 +244,7 @@ public class ConfigurationDictionaryTest {
 	public void testGet() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
-		Dictionary dict = config.getProperties();
+		Dictionary<String, Object> dict = config.getProperties();
 		try {
 			assertTrue(null != dict.get(Constants.SERVICE_PID));
 		} finally {
@@ -256,7 +256,7 @@ public class ConfigurationDictionaryTest {
 	public void testGetNull() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
-		Dictionary dict = config.getProperties();
+		Dictionary<String, Object> dict = config.getProperties();
 		try {
 			dict.get(null);
 		} catch (NullPointerException e) {
@@ -271,7 +271,7 @@ public class ConfigurationDictionaryTest {
 	public void testRemove() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
-		Dictionary dict = config.getProperties();
+		Dictionary<String, Object> dict = config.getProperties();
 		try {
 			assertFalse(dict.isEmpty());
 			assertTrue(null != dict.remove(Constants.SERVICE_PID));
@@ -285,7 +285,7 @@ public class ConfigurationDictionaryTest {
 	public void testRemoveNull() throws Exception {
 		Configuration config = cm.getConfiguration("test2");
 		config.update();
-		Dictionary dict = config.getProperties();
+		Dictionary<String, Object> dict = config.getProperties();
 		try {
 			dict.remove(null);
 		} catch (NullPointerException e) {

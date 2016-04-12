@@ -23,13 +23,13 @@ import org.osgi.service.cm.ConfigurationAdmin;
 public class ConfigurationAdminTest {
 
 	private ConfigurationAdmin cm;
-	private ServiceReference reference;
+	private ServiceReference<ConfigurationAdmin> reference;
 
 	@Before
 	public void setUp() throws Exception {
 		Activator.getBundle("org.eclipse.equinox.cm").start();
-		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class.getName());
-		cm = (ConfigurationAdmin) Activator.getBundleContext().getService(reference);
+		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class);
+		cm = Activator.getBundleContext().getService(reference);
 	}
 
 	@After
