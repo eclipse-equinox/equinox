@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.equinox.http.servlet.testbase.BaseTest;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServlet;
+import org.eclipse.equinox.http.servlet.tests.util.DispatchResultServlet;
 import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.service.http.HttpContext;
@@ -55,39 +56,6 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Servlet servlet2 = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				PrintWriter writer = response.getWriter();
-
-				writer.write(request.getContextPath());
-				writer.write("|");
-				writer.write(request.getPathInfo());
-				writer.write("|");
-				writer.write(request.getQueryString());
-				writer.write("|");
-				writer.write(request.getRequestURI());
-				writer.write("|");
-				writer.write(request.getServletPath());
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_CONTEXT_PATH)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_PATH_INFO)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_QUERY_STRING)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_SERVLET_PATH)));
-			}
-
-		};
-
 		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
@@ -101,11 +69,11 @@ public class DispatchingTest extends BaseTest {
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
-		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String response = requestAdvisor.request("a/s1/d?p=1");
 
-		Assert.assertEquals("/a|/b|u=5&p=1|/a/s2/b|/s2|/a|/d|p=1|/a/s1/d|/s1", response);
+		Assert.assertEquals("/a|/b|u=5|/a/s2/b|/s2|/a|/d|p=1|/a/s1/d|/s1", response);
 	}
 
 	@Test
@@ -120,39 +88,6 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Servlet servlet2 = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				PrintWriter writer = response.getWriter();
-
-				writer.write(request.getContextPath());
-				writer.write("|");
-				writer.write(request.getPathInfo());
-				writer.write("|");
-				writer.write(request.getQueryString());
-				writer.write("|");
-				writer.write(request.getRequestURI());
-				writer.write("|");
-				writer.write(request.getServletPath());
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_CONTEXT_PATH)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_PATH_INFO)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_QUERY_STRING)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_SERVLET_PATH)));
-			}
-
-		};
-
 		TestFilter filter = new TestFilter() {
 
 			@Override
@@ -182,7 +117,7 @@ public class DispatchingTest extends BaseTest {
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
-		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
@@ -193,7 +128,7 @@ public class DispatchingTest extends BaseTest {
 
 		String response = requestAdvisor.request("a/s1/d?p=1");
 
-		Assert.assertEquals("/a|/b|u=5&p=1|/a/s2/b|/s2|/a|/d|p=1|/a/s1/d|/s1", response);
+		Assert.assertEquals("/a|/b|u=5|/a/s2/b|/s2|/a|/d|p=1|/a/s1/d|/s1", response);
 		Assert.assertTrue(filter.getCalled());
 	}
 
@@ -205,41 +140,8 @@ public class DispatchingTest extends BaseTest {
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
 					throws ServletException, IOException {
-				request.getRequestDispatcher("/s2/b?u=5").forward(request, response);
+				request.getRequestDispatcher("/s2/i4?u=5").forward(request, response);
 			}
-		};
-
-		Servlet servlet2 = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				PrintWriter writer = response.getWriter();
-
-				writer.write(request.getContextPath());
-				writer.write("|");
-				writer.write(request.getPathInfo());
-				writer.write("|");
-				writer.write(request.getQueryString());
-				writer.write("|");
-				writer.write(request.getRequestURI());
-				writer.write("|");
-				writer.write(request.getServletPath());
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_CONTEXT_PATH)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_PATH_INFO)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_QUERY_STRING)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_SERVLET_PATH)));
-			}
-
 		};
 
 		TestFilter filter = new TestFilter() {
@@ -271,7 +173,7 @@ public class DispatchingTest extends BaseTest {
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
-		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
@@ -282,7 +184,7 @@ public class DispatchingTest extends BaseTest {
 
 		String response = requestAdvisor.request("a/s1/d?p=1");
 
-		Assert.assertEquals("b/a|/b|u=5&p=1|/a/s2/b|/s2|/a|/d|p=1|/a/s1/d|/s1b", response);
+		Assert.assertEquals("b/a|/i4|u=5|/a/s2/i4|/s2|/a|/d|p=1|/a/s1/d|/s1b", response);
 		Assert.assertEquals(2, filter.getCount());
 	}
 
@@ -308,39 +210,6 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Servlet servlet3 = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				PrintWriter writer = response.getWriter();
-
-				writer.write(request.getContextPath());
-				writer.write("|");
-				writer.write(request.getPathInfo());
-				writer.write("|");
-				writer.write(request.getQueryString());
-				writer.write("|");
-				writer.write(request.getRequestURI());
-				writer.write("|");
-				writer.write(request.getServletPath());
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_CONTEXT_PATH)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_PATH_INFO)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_QUERY_STRING)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_SERVLET_PATH)));
-			}
-
-		};
-
 		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
@@ -359,11 +228,11 @@ public class DispatchingTest extends BaseTest {
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s3/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
-		registrations.add(getBundleContext().registerService(Servlet.class, servlet3, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String response = requestAdvisor.request("c1/s1/i1?p1=1");
 
-		Assert.assertEquals("/c1|/i3|p3=3&p2=2&p1=1|/c1/s3/i3|/s3|/c1|/i1|p1=1|/c1/s1/i1|/s1", response);
+		Assert.assertEquals("/c1|/i3|p3=3|/c1/s3/i3|/s3|/c1|/i1|p1=1|/c1/s1/i1|/s1", response);
 	}
 
 	@Test
@@ -398,39 +267,6 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Servlet servlet4 = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				PrintWriter writer = response.getWriter();
-
-				writer.write(request.getContextPath());
-				writer.write("|");
-				writer.write(request.getPathInfo());
-				writer.write("|");
-				writer.write(request.getQueryString());
-				writer.write("|");
-				writer.write(request.getRequestURI());
-				writer.write("|");
-				writer.write(request.getServletPath());
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_CONTEXT_PATH)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_PATH_INFO)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_QUERY_STRING)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_SERVLET_PATH)));
-			}
-
-		};
-
 		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
@@ -454,11 +290,11 @@ public class DispatchingTest extends BaseTest {
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s4/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
-		registrations.add(getBundleContext().registerService(Servlet.class, servlet4, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String response = requestAdvisor.request("c1/s1/i1?p1=1");
 
-		Assert.assertEquals("/c1|/i4|p4=4&p3=3&p2=2&p1=1|/c1/s4/i4|/s4|/c1|/i1|p1=1|/c1/s1/i1|/s1", response);
+		Assert.assertEquals("/c1|/i4|p4=4|/c1/s4/i4|/s4|/c1|/i1|p1=1|/c1/s1/i1|/s1", response);
 	}
 
 	@Test
@@ -487,7 +323,7 @@ public class DispatchingTest extends BaseTest {
 				throws ServletException, IOException {
 
 				PrintWriter writer = resp.getWriter();
-				writer.write(req.getQueryString());
+				writer.write(String.valueOf(req.getQueryString()));
 				writer.write("|");
 				writer.write(String.valueOf(req.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING)));
 				writer.write("|");
@@ -536,37 +372,6 @@ public class DispatchingTest extends BaseTest {
 				requestDispatcher.forward(req, resp);
 			}
 		};
-		Servlet sB = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void doGet(
-				HttpServletRequest request, HttpServletResponse resp)
-				throws ServletException, IOException {
-
-				PrintWriter writer = resp.getWriter();
-
-				writer.write(request.getContextPath());
-				writer.write("|");
-				writer.write(String.valueOf(request.getPathInfo()));
-				writer.write("|");
-				writer.write(request.getQueryString());
-				writer.write("|");
-				writer.write(String.valueOf(request.getRequestURI()));
-				writer.write("|");
-				writer.write(String.valueOf(request.getServletPath()));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH)));
-			}
-		};
 
 		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
@@ -583,11 +388,11 @@ public class DispatchingTest extends BaseTest {
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s2");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		registrations.add(getBundleContext().registerService(Servlet.class, sB, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String result = requestAdvisor.request("c1/s1/a?p=1&p=2");
 
-		Assert.assertEquals("/c1|/c1/s1/a|p=1&p=2|/c1/s1/a||null|null|null|null|null", result);
+		Assert.assertEquals("/c1|/a|p=1&p=2|/c1/s1/a|/s1|null|null|null|null|null", result);
 	}
 
 	@Test
@@ -636,7 +441,7 @@ public class DispatchingTest extends BaseTest {
 
 		String result = requestAdvisor.request("Servlet13A/a?p=1&p=2");
 
-		Assert.assertEquals("p=3&p=4&p=1&p=2|p=1&p=2|3|[3, 4, 1, 2]", result);
+		Assert.assertEquals("p=3&p=4|p=1&p=2|3|[3, 4, 1, 2]", result);
 	}
 
 	@Test
@@ -649,39 +454,6 @@ public class DispatchingTest extends BaseTest {
 					throws ServletException, IOException {
 				request.getRequestDispatcher("/s2/b?u=5").forward(request, response);
 			}
-		};
-
-		Servlet servlet2 = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				ServletOutputStream outputStream = response.getOutputStream();
-
-				write(outputStream, request.getContextPath());
-				write(outputStream, "|");
-				write(outputStream, request.getPathInfo());
-				write(outputStream, "|");
-				write(outputStream, request.getQueryString());
-				write(outputStream, "|");
-				write(outputStream, request.getRequestURI());
-				write(outputStream, "|");
-				write(outputStream, request.getServletPath());
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_CONTEXT_PATH)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_PATH_INFO)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_QUERY_STRING)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_SERVLET_PATH)));
-			}
-
 		};
 
 		Dictionary<String, Object> props = new Hashtable<String, Object>();
@@ -697,11 +469,11 @@ public class DispatchingTest extends BaseTest {
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
-		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String response = requestAdvisor.request("a/s1/d?p=1");
 
-		Assert.assertEquals("/a|/b|u=5&p=1|/a/s2/b|/s2|/a|/d|p=1|/a/s1/d|/s1", response);
+		Assert.assertEquals("/a|/b|u=5|/a/s2/b|/s2|/a|/d|p=1|/a/s1/d|/s1", response);
 	}
 
 	@Test
@@ -714,39 +486,6 @@ public class DispatchingTest extends BaseTest {
 					throws ServletException, IOException {
 				request.getRequestDispatcher("/s2/b?u=5").forward(request, response);
 			}
-		};
-
-		Servlet servlet2 = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				ServletOutputStream outputStream = response.getOutputStream();
-
-				write(outputStream, request.getContextPath());
-				write(outputStream, "|");
-				write(outputStream, request.getPathInfo());
-				write(outputStream, "|");
-				write(outputStream, request.getQueryString());
-				write(outputStream, "|");
-				write(outputStream, request.getRequestURI());
-				write(outputStream, "|");
-				write(outputStream, request.getServletPath());
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_CONTEXT_PATH)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_PATH_INFO)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_QUERY_STRING)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_SERVLET_PATH)));
-			}
-
 		};
 
 		TestFilter filter = new TestFilter() {
@@ -778,7 +517,7 @@ public class DispatchingTest extends BaseTest {
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
-		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
@@ -789,7 +528,7 @@ public class DispatchingTest extends BaseTest {
 
 		String response = requestAdvisor.request("a/s1/d?p=1");
 
-		Assert.assertEquals("/a|/b|u=5&p=1|/a/s2/b|/s2|/a|/d|p=1|/a/s1/d|/s1", response);
+		Assert.assertEquals("/a|/b|u=5|/a/s2/b|/s2|/a|/d|p=1|/a/s1/d|/s1", response);
 		Assert.assertTrue(filter.getCalled());
 	}
 
@@ -805,39 +544,6 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Servlet servlet2 = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				ServletOutputStream outputStream = response.getOutputStream();
-
-				write(outputStream, request.getContextPath());
-				write(outputStream, "|");
-				write(outputStream, request.getPathInfo());
-				write(outputStream, "|");
-				write(outputStream, request.getQueryString());
-				write(outputStream, "|");
-				write(outputStream, request.getRequestURI());
-				write(outputStream, "|");
-				write(outputStream, request.getServletPath());
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_CONTEXT_PATH)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_PATH_INFO)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_QUERY_STRING)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_SERVLET_PATH)));
-			}
-
-		};
-
 		TestFilter filter = new TestFilter() {
 
 			@Override
@@ -867,7 +573,7 @@ public class DispatchingTest extends BaseTest {
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
-		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
@@ -878,7 +584,7 @@ public class DispatchingTest extends BaseTest {
 
 		String response = requestAdvisor.request("a/s1/d?p=1");
 
-		Assert.assertEquals("b/a|/b|u=5&p=1|/a/s2/b|/s2|/a|/d|p=1|/a/s1/d|/s1b", response);
+		Assert.assertEquals("b/a|/b|u=5|/a/s2/b|/s2|/a|/d|p=1|/a/s1/d|/s1b", response);
 		Assert.assertEquals(2, filter.getCount());
 	}
 
@@ -933,39 +639,6 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Servlet servlet2 = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				PrintWriter writer = response.getWriter();
-
-				writer.write(request.getContextPath());
-				writer.write("|");
-				writer.write(request.getPathInfo());
-				writer.write("|");
-				writer.write(request.getQueryString());
-				writer.write("|");
-				writer.write(request.getRequestURI());
-				writer.write("|");
-				writer.write(request.getServletPath());
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH)));
-			}
-
-		};
-
 		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
@@ -979,11 +652,11 @@ public class DispatchingTest extends BaseTest {
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
-		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String response = requestAdvisor.request("a/s1/d?p=1");
 
-		Assert.assertEquals("/a|/d|u=5&p=1|/a/s1/d|/s1|/a|/b|u=5|/a/s2/b|/s2", response);
+		Assert.assertEquals("/a|/d|p=1|/a/s1/d|/s1|/a|/b|u=5|/a/s2/b|/s2", response);
 	}
 
 	@Test
@@ -996,39 +669,6 @@ public class DispatchingTest extends BaseTest {
 					throws ServletException, IOException {
 				request.getRequestDispatcher("/s2/b?u=5").include(request, response);
 			}
-		};
-
-		Servlet servlet2 = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				PrintWriter writer = response.getWriter();
-
-				writer.write(request.getContextPath());
-				writer.write("|");
-				writer.write(request.getPathInfo());
-				writer.write("|");
-				writer.write(request.getQueryString());
-				writer.write("|");
-				writer.write(request.getRequestURI());
-				writer.write("|");
-				writer.write(request.getServletPath());
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH)));
-			}
-
 		};
 
 		TestFilter filter = new TestFilter() {
@@ -1060,7 +700,7 @@ public class DispatchingTest extends BaseTest {
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
-		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
@@ -1071,7 +711,7 @@ public class DispatchingTest extends BaseTest {
 
 		String response = requestAdvisor.request("a/s1/d?p=1");
 
-		Assert.assertEquals("b/a|/d|u=5&p=1|/a/s1/d|/s1|/a|/b|u=5|/a/s2/b|/s2b", response);
+		Assert.assertEquals("b/a|/d|p=1|/a/s1/d|/s1|/a|/b|u=5|/a/s2/b|/s2b", response);
 		Assert.assertTrue(filter.getCalled());
 	}
 
@@ -1087,39 +727,6 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Servlet servlet2 = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				PrintWriter writer = response.getWriter();
-
-				writer.write(request.getContextPath());
-				writer.write("|");
-				writer.write(request.getPathInfo());
-				writer.write("|");
-				writer.write(request.getQueryString());
-				writer.write("|");
-				writer.write(request.getRequestURI());
-				writer.write("|");
-				writer.write(request.getServletPath());
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH)));
-			}
-
-		};
-
 		TestFilter filter = new TestFilter() {
 
 			@Override
@@ -1149,7 +756,7 @@ public class DispatchingTest extends BaseTest {
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
-		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
@@ -1160,7 +767,7 @@ public class DispatchingTest extends BaseTest {
 
 		String response = requestAdvisor.request("a/s1/d?p=1");
 
-		Assert.assertEquals("bb/a|/d|u=5&p=1|/a/s1/d|/s1|/a|/b|u=5|/a/s2/b|/s2bb", response);
+		Assert.assertEquals("bb/a|/d|p=1|/a/s1/d|/s1|/a|/b|u=5|/a/s2/b|/s2bb", response);
 		Assert.assertEquals(2, filter.getCount());
 	}
 
@@ -1186,39 +793,6 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Servlet servlet3 = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				PrintWriter writer = response.getWriter();
-
-				writer.write(request.getContextPath());
-				writer.write("|");
-				writer.write(request.getPathInfo());
-				writer.write("|");
-				writer.write(request.getQueryString());
-				writer.write("|");
-				writer.write(request.getRequestURI());
-				writer.write("|");
-				writer.write(request.getServletPath());
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH)));
-			}
-
-		};
-
 		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
@@ -1237,11 +811,11 @@ public class DispatchingTest extends BaseTest {
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s3/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
-		registrations.add(getBundleContext().registerService(Servlet.class, servlet3, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String response = requestAdvisor.request("c1/s1/i1?p1=1");
 
-		Assert.assertEquals("/c1|/i1|p3=3&p2=2&p1=1|/c1/s1/i1|/s1|/c1|/i3|p3=3|/c1/s3/i3|/s3", response);
+		Assert.assertEquals("/c1|/i1|p1=1|/c1/s1/i1|/s1|/c1|/i3|p3=3|/c1/s3/i3|/s3", response);
 	}
 
 	@Test
@@ -1276,39 +850,6 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Servlet servlet4 = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				PrintWriter writer = response.getWriter();
-
-				writer.write(request.getContextPath());
-				writer.write("|");
-				writer.write(request.getPathInfo());
-				writer.write("|");
-				writer.write(request.getQueryString());
-				writer.write("|");
-				writer.write(request.getRequestURI());
-				writer.write("|");
-				writer.write(request.getServletPath());
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH)));
-			}
-
-		};
-
 		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
@@ -1332,11 +873,11 @@ public class DispatchingTest extends BaseTest {
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s4/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
-		registrations.add(getBundleContext().registerService(Servlet.class, servlet4, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String response = requestAdvisor.request("c1/s1/i1?p1=1");
 
-		Assert.assertEquals("/c1|/i1|p4=4&p3=3&p2=2&p1=1|/c1/s1/i1|/s1|/c1|/i4|p4=4|/c1/s4/i4|/s4", response);
+		Assert.assertEquals("/c1|/i1|p1=1|/c1/s1/i1|/s1|/c1|/i4|p4=4|/c1/s4/i4|/s4", response);
 	}
 
 	@Test
@@ -1414,37 +955,6 @@ public class DispatchingTest extends BaseTest {
 				requestDispatcher.include(req, resp);
 			}
 		};
-		Servlet sB = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void doGet(
-				HttpServletRequest request, HttpServletResponse resp)
-				throws ServletException, IOException {
-
-				PrintWriter writer = resp.getWriter();
-
-				writer.write(request.getContextPath());
-				writer.write("|");
-				writer.write(request.getPathInfo());
-				writer.write("|");
-				writer.write(request.getQueryString());
-				writer.write("|");
-				writer.write(request.getRequestURI());
-				writer.write("|");
-				writer.write(request.getServletPath());
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI)));
-				writer.write("|");
-				writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH)));
-			}
-		};
 
 		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
@@ -1461,11 +971,11 @@ public class DispatchingTest extends BaseTest {
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s2");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		registrations.add(getBundleContext().registerService(Servlet.class, sB, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String result = requestAdvisor.request("c1/s1/a?p=1&p=2");
 
-		Assert.assertEquals("/c1|/c1/s1/a|p=1&p=2|/c1/s1/a||null|null|null|null|null", result);
+		Assert.assertEquals("/c1|/a|p=1&p=2|/c1/s1/a|/s1|null|null|null|null|null", result);
 	}
 
 	@Test
@@ -1514,7 +1024,7 @@ public class DispatchingTest extends BaseTest {
 
 		String result = requestAdvisor.request("Servlet13A/a?p=1&p=2");
 
-		Assert.assertEquals("p=3&p=4&p=1&p=2|p=3&p=4|3|[3, 4, 1, 2]", result);
+		Assert.assertEquals("p=1&p=2|p=3&p=4|3|[3, 4, 1, 2]", result);
 	}
 
 	@Test
@@ -1527,39 +1037,6 @@ public class DispatchingTest extends BaseTest {
 					throws ServletException, IOException {
 				request.getRequestDispatcher("/s2/b?u=5").include(request, response);
 			}
-		};
-
-		Servlet servlet2 = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				ServletOutputStream outputStream = response.getOutputStream();
-
-				write(outputStream, request.getContextPath());
-				write(outputStream, "|");
-				write(outputStream, request.getPathInfo());
-				write(outputStream, "|");
-				write(outputStream, request.getQueryString());
-				write(outputStream, "|");
-				write(outputStream, request.getRequestURI());
-				write(outputStream, "|");
-				write(outputStream, request.getServletPath());
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH)));
-			}
-
 		};
 
 		Dictionary<String, Object> props = new Hashtable<String, Object>();
@@ -1575,11 +1052,11 @@ public class DispatchingTest extends BaseTest {
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
-		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String response = requestAdvisor.request("a/s1/d?p=1");
 
-		Assert.assertEquals("/a|/d|u=5&p=1|/a/s1/d|/s1|/a|/b|u=5|/a/s2/b|/s2", response);
+		Assert.assertEquals("/a|/d|p=1|/a/s1/d|/s1|/a|/b|u=5|/a/s2/b|/s2", response);
 	}
 
 	@Test
@@ -1592,39 +1069,6 @@ public class DispatchingTest extends BaseTest {
 					throws ServletException, IOException {
 				request.getRequestDispatcher("/s2/b?u=5").include(request, response);
 			}
-		};
-
-		Servlet servlet2 = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				ServletOutputStream outputStream = response.getOutputStream();
-
-				write(outputStream, request.getContextPath());
-				write(outputStream, "|");
-				write(outputStream, request.getPathInfo());
-				write(outputStream, "|");
-				write(outputStream, request.getQueryString());
-				write(outputStream, "|");
-				write(outputStream, request.getRequestURI());
-				write(outputStream, "|");
-				write(outputStream, request.getServletPath());
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH)));
-			}
-
 		};
 
 		TestFilter filter = new TestFilter() {
@@ -1656,7 +1100,7 @@ public class DispatchingTest extends BaseTest {
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
-		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
@@ -1667,7 +1111,7 @@ public class DispatchingTest extends BaseTest {
 
 		String response = requestAdvisor.request("a/s1/d?p=1");
 
-		Assert.assertEquals("b/a|/d|u=5&p=1|/a/s1/d|/s1|/a|/b|u=5|/a/s2/b|/s2b", response);
+		Assert.assertEquals("b/a|/d|p=1|/a/s1/d|/s1|/a|/b|u=5|/a/s2/b|/s2b", response);
 		Assert.assertTrue(filter.getCalled());
 	}
 
@@ -1683,39 +1127,6 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Servlet servlet2 = new HttpServlet() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-
-				ServletOutputStream outputStream = response.getOutputStream();
-
-				write(outputStream, request.getContextPath());
-				write(outputStream, "|");
-				write(outputStream, request.getPathInfo());
-				write(outputStream, "|");
-				write(outputStream, request.getQueryString());
-				write(outputStream, "|");
-				write(outputStream, request.getRequestURI());
-				write(outputStream, "|");
-				write(outputStream, request.getServletPath());
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI)));
-				write(outputStream, "|");
-				write(outputStream, String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH)));
-			}
-
-		};
-
 		TestFilter filter = new TestFilter() {
 
 			@Override
@@ -1745,7 +1156,7 @@ public class DispatchingTest extends BaseTest {
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
-		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
+		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		props = new Hashtable<String, Object>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
@@ -1756,7 +1167,7 @@ public class DispatchingTest extends BaseTest {
 
 		String response = requestAdvisor.request("a/s1/d?p=1");
 
-		Assert.assertEquals("bb/a|/d|u=5&p=1|/a/s1/d|/s1|/a|/b|u=5|/a/s2/b|/s2bb", response);
+		Assert.assertEquals("bb/a|/d|p=1|/a/s1/d|/s1|/a|/b|u=5|/a/s2/b|/s2bb", response);
 		Assert.assertEquals(2, filter.getCount());
 	}
 
