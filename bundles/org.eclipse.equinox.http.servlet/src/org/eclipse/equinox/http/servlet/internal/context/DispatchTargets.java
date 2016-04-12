@@ -57,7 +57,7 @@ public class DispatchTargets {
 		this.parameterMap = queryStringToParameterMap(queryString);
 		this.queryString = queryString;
 
-		this.string = getClass().getSimpleName() + '[' + contextController.getFullContextPath() + requestURI + ", " + endpointRegistration.toString() + ']'; //$NON-NLS-1$
+		this.string = SIMPLE_NAME + '[' + contextController.getFullContextPath() + requestURI + (queryString != null ? '?' + queryString : "") + ", " + endpointRegistration.toString() + ']'; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public void doDispatch(
@@ -160,6 +160,8 @@ public class DispatchTargets {
 			throw new RuntimeException(unsupportedEncodingException);
 		}
 	}
+
+	private static final String SIMPLE_NAME = DispatchTargets.class.getSimpleName();
 
 	private final ContextController contextController;
 	private final EndpointRegistration<?> endpointRegistration;
