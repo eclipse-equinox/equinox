@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -1507,6 +1508,68 @@ public class ServletTest extends BaseTest {
 			}
 			if (sessionListenerReg != null) {
 				sessionListenerReg.unregister();
+			}
+			CookieHandler.setDefault(previous);
+		}
+	}
+
+	@Test
+	public void test_Sessions02() {
+		final AtomicReference<HttpSession> sessionReference = new AtomicReference<HttpSession>();
+
+		HttpServlet sessionServlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
+					IOException {
+				HttpSession session = request.getSession();
+				sessionReference.set(session);
+				if (session.getAttribute("test.attribute") == null) {
+					session.setAttribute("test.attribute", "foo");
+					response.getWriter().print("created");
+				} else {
+					session.setAttribute("test.attribute", null);
+					response.getWriter().print("attribute set to null");
+				}
+			}
+		};
+		ServiceRegistration<Servlet> servletReg = null;
+		Dictionary<String, Object> servletProps = new Hashtable<String, Object>();
+		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/sessions");
+		String actual = null;
+		CookieHandler previous = CookieHandler.getDefault();
+		CookieHandler.setDefault(new CookieManager( null, CookiePolicy.ACCEPT_ALL ) );
+		try {
+			servletReg = getBundleContext().registerService(Servlet.class, sessionServlet, servletProps);
+
+			// first call will create the session
+			actual = requestAdvisor.request("sessions");
+			assertEquals("Wrong result", "created", actual);
+
+			// second call will set parameter to null
+			actual = requestAdvisor.request("sessions");
+			assertEquals("Wrong result", "attribute set to null", actual);
+
+			HttpSession httpSession = sessionReference.get();
+
+			Enumeration<String> names = httpSession.getAttributeNames();
+
+			boolean exist = false;
+
+			while (names.hasMoreElements()) {
+				String name = names.nextElement();
+				if (name.equals("test.attribute")) {
+					exist = true;
+				}
+			}
+
+			assertFalse("Session atribute was not removed", exist);
+		} catch (Exception e) {
+			fail("Unexpected exception: " + e);
+		} finally {
+			if (servletReg != null) {
+				servletReg.unregister();
 			}
 			CookieHandler.setDefault(previous);
 		}

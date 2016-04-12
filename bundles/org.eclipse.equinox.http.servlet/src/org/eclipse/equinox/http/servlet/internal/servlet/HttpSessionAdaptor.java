@@ -249,9 +249,13 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 	}
 
 	public void setAttribute(String name, Object value) {
-		boolean added = (session.getAttribute(attributePrefix + name) == null);
+		Object actualValue = null;
 
-		session.setAttribute(attributePrefix + name, new HttpSessionAttributeWrapper(this, name, value, added));
+		if (value != null) {
+			boolean added = (session.getAttribute(attributePrefix + name) == null);
+			actualValue = new HttpSessionAttributeWrapper(this, name, value, added);
+		}
+		session.setAttribute(attributePrefix + name, actualValue);
 	}
 
 	public void setMaxInactiveInterval(int arg0) {
