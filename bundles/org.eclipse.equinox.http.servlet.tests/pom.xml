@@ -48,11 +48,6 @@
                    <id>org.eclipse.equinox.http.jetty</id>
                    <versionRange>3.3.0</versionRange>
                 </requirement>
-                <requirement>
-                   <type>eclipse-plugin</type>
-                   <id>org.apache.commons.fileupload</id>
-                   <versionRange>1.2.2</versionRange>
-                </requirement>
              </extraRequirements>
           </dependency-resolution>
        </configuration>
