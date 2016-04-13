@@ -114,7 +114,6 @@
     <module>bundles/org.eclipse.equinox.ip</module>
     <module>bundles/org.eclipse.equinox.jsp.jasper</module>
     <module>bundles/org.eclipse.equinox.jsp.jasper.registry</module>
-    <module>bundles/org.eclipse.equinox.log</module>
     <module>bundles/org.eclipse.equinox.metatype</module>
     <module>bundles/org.eclipse.equinox.region</module>
     <module>bundles/org.eclipse.equinox.servletbridge</module>
