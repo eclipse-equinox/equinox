@@ -21,8 +21,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServlet;
 import org.eclipse.equinox.http.servlet.ExtendedHttpService;
 import org.eclipse.equinox.http.servlet.internal.servlet.ProxyServlet;
-import org.eclipse.equinox.http.servlet.internal.util.HttpTuple;
-import org.eclipse.equinox.http.servlet.internal.util.UMDictionaryMap;
+import org.eclipse.equinox.http.servlet.internal.util.*;
 import org.osgi.framework.*;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.runtime.HttpServiceRuntime;
@@ -106,9 +105,6 @@ public class Activator
 		ServletConfig servletConfig = proxyServlet.getServletConfig();
 		ServletContext servletContext = servletConfig.getServletContext();
 
-		String[] httpServiceEndpoints = getHttpServiceEndpoints(
-			servletContext, servletConfig.getServletName());
-
 		Dictionary<String, Object> serviceProperties =
 			new Hashtable<String, Object>(3);
 
@@ -132,8 +128,28 @@ public class Activator
 				Constants.SERVICE_DESCRIPTION, DEFAULT_SERVICE_DESCRIPTION);
 		}
 
-		if (serviceProperties.get(
-				HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT) == null) {
+		Object httpServiceEndpointObj = serviceProperties.get(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT);
+
+		if (httpServiceEndpointObj == null) {
+			String[] httpServiceEndpoints = getHttpServiceEndpoints(
+				servletContext, servletConfig.getServletName());
+
+			serviceProperties.put(
+				HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT,
+				httpServiceEndpoints);
+		}
+		else {
+			List<String> httpServiceEndpoints = new ArrayList<String>();
+
+			String contextPath = servletContext.getContextPath();
+
+			for (String httpServiceEndpoint : StringPlus.from(httpServiceEndpointObj)) {
+				if (!httpServiceEndpoint.startsWith(Const.HTTP.concat(":")) && !httpServiceEndpoint.startsWith(contextPath)) { //$NON-NLS-1$
+					httpServiceEndpoint = contextPath + httpServiceEndpoint;
+				}
+
+				httpServiceEndpoints.add(httpServiceEndpoint);
+			}
 
 			serviceProperties.put(
 				HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT,
@@ -219,7 +235,7 @@ public class Activator
 		for (String mapping : mappings) {
 			if (mapping.indexOf('/') == 0) {
 				if (mapping.charAt(mapping.length() - 1) == '*') {
-					mapping = mapping.substring(0, mapping.length() - 2);
+					mapping = mapping.substring(0, mapping.length() - 1);
 
 					if ((mapping.length() > 1) &&
 						(mapping.charAt(mapping.length() - 1) != '/')) {

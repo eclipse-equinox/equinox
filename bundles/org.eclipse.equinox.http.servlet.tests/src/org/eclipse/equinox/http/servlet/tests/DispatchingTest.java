@@ -13,6 +13,7 @@ package org.eclipse.equinox.http.servlet.tests;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -43,6 +44,43 @@ import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 public class DispatchingTest extends BaseTest {
+
+	@Test
+	public void test_crossContextDispatch1() throws Exception {
+		Servlet servlet1 = new BaseServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response)
+					throws ServletException, IOException {
+
+				StringWriter writer = new StringWriter();
+
+				writer.write(request.getContextPath());
+				writer.write("|");
+
+				ServletContext servletContext = getServletContext().getContext("/");
+
+				writer.write(servletContext.getContextPath());
+
+				response.getWriter().write(writer.toString());
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+
+		props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
+
+		String response = requestAdvisor.request("a/s1/d");
+
+		Assert.assertEquals("/a|", response);
+	}
 
 	@Test
 	public void test_forwardDepth1() throws Exception {
