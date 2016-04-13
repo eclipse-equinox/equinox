@@ -221,7 +221,13 @@ public class Activator
 		try {
 			servletRegistration = servletContext.getServletRegistration(servletName);
 		} catch (UnsupportedOperationException e) {
-			servletContext.log("Could not find the servlet registration for the servlet: " + servletName, e); //$NON-NLS-1$
+			StringBuilder sb = new StringBuilder();
+			sb.append("Could not find the servlet registration for the servlet: "); //$NON-NLS-1$
+			sb.append(servletName);
+			sb.append(" The Http Service will not be able to locate it's root path."); //$NON-NLS-1$
+			sb.append(" This can be overcome by specifying an init-param with name 'osgi.http.endpoint'"); //$NON-NLS-1$
+			sb.append(" and value equal to the servlet mapping minus the glob character '*'."); //$NON-NLS-1$
+			servletContext.log(sb.toString());
 		}
 
 		if (servletRegistration == null) {
