@@ -54,10 +54,28 @@ public class AbstractBundleTests extends CoreTest {
 	}
 
 	static public void compareResults(Object[] expectedEvents, Object[] actualEvents) {
-		assertEquals("compareResults length", expectedEvents.length, actualEvents.length);
+		String expectedActual = " -- EXPECTED:" + toStringEventArray(expectedEvents) + " ACTUAL:" + toStringEventArray(actualEvents);
+		assertEquals("compareResults length" + expectedActual, expectedEvents.length, actualEvents.length);
 		for (int i = 0; i < expectedEvents.length; i++) {
-			assertEquals("compareResults " + i, expectedEvents[i], actualEvents[i]);
+			String assertMsg = "compareResults: " + i + expectedActual;
+			assertEquals(assertMsg, expectedEvents[i], actualEvents[i]);
 		}
+	}
+
+	static public String toStringEventArray(Object[] events) {
+		StringBuilder sb = new StringBuilder();
+		boolean first = true;
+		sb.append('[');
+		for (Object event : events) {
+			if (first) {
+				first = false;
+			} else {
+				sb.append(", ");
+			}
+			sb.append(toString(event));
+		}
+		sb.append(']');
+		return sb.toString();
 	}
 
 	static public void assertEquals(String message, Object expected, Object actual) {

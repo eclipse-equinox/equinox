@@ -30,8 +30,10 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 	private static final EnumSet<State> alreadyActive = EnumSet.of(State.ACTIVE, State.STOPPING, State.UNINSTALLED);
 	private static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
-	// holds the current activation trigger class and the ClasspathManagers that need to be activated
-	private final ThreadLocal<List<Object>> activationStack = new ThreadLocal<List<Object>>();
+	// holds the initiating class name
+	private final ThreadLocal<String> initiatingClassName = new ThreadLocal<String>();
+	// holds the ClasspathManagers that need to be activated
+	private final ThreadLocal<Deque<ClasspathManager>> activationStack = new ThreadLocal<Deque<ClasspathManager>>();
 	// used to store exceptions that occurred while activating a bundle
 	// keyed by ClasspathManager->Exception
 	// WeakHashMap is used to prevent pinning the ClasspathManager objects.
@@ -45,6 +47,9 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 
 	@Override
 	public void preFindLocalClass(String name, ClasspathManager manager) throws ClassNotFoundException {
+		if (initiatingClassName.get() == null) {
+			initiatingClassName.set(name);
+		}
 		ModuleRevision revision = manager.getGeneration().getRevision();
 		Module module = revision.getRevisions().getModule();
 		// If the bundle is active, uninstalled or stopping then the bundle has already
@@ -54,46 +59,37 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 		// The bundle is not active and does not require activation, just return the class
 		if (!shouldActivateFor(name, module, revision, manager))
 			return;
-		List<Object> stack = activationStack.get();
+		Deque<ClasspathManager> stack = activationStack.get();
 		if (stack == null) {
-			stack = new ArrayList<Object>(6);
+			stack = new ArrayDeque<ClasspathManager>(6);
 			activationStack.set(stack);
 		}
-		// the first element in the stack is the name of the trigger class, 
-		// each element after the trigger class is a classpath manager 
-		// that must be activated after the trigger class has been defined (see postFindLocalClass)
-		int size = stack.size();
-		if (size > 1) {
-			for (int i = size - 1; i >= 1; i--)
-				if (manager == stack.get(i))
-					// the manager is already on the stack in which case we are already in the process of loading the trigger class
-					return;
+		// each element is a classpath manager that must be activated after
+		// the initiating class has been defined (see postFindLocalClass)
+		if (!stack.contains(manager)) {
+			// only add the manager if it has not been added already
+			stack.addFirst(manager);
 		}
-		if (size == 0)
-			stack.add(name);
-		stack.add(manager);
 	}
 
 	@Override
 	public void postFindLocalClass(String name, Class<?> clazz, ClasspathManager manager) throws ClassNotFoundException {
-		List<Object> stack = activationStack.get();
-		if (stack == null)
+		if (initiatingClassName.get() != name)
 			return;
-		int size = stack.size();
-		if (size <= 1 || stack.get(0) != name)
+		initiatingClassName.set(null);
+		Deque<ClasspathManager> stack = activationStack.get();
+		if (stack == null || stack.isEmpty())
 			return;
+
 		// if we have a stack we must clear it even if (clazz == null)
-		ClasspathManager[] managers = null;
-		managers = new ClasspathManager[size - 1];
-		for (int i = 1; i < size; i++)
-			managers[i - 1] = (ClasspathManager) stack.get(i);
+		List<ClasspathManager> managers = new ArrayList<ClasspathManager>(stack);
 		stack.clear();
 		if (clazz == null)
 			return;
-		for (int i = managers.length - 1; i >= 0; i--) {
-			if (errors.get(managers[i]) != null) {
+		for (ClasspathManager managerElement : managers) {
+			if (errors.get(managerElement) != null) {
 				if (container.getConfiguration().throwErrorOnFailedStart)
-					throw errors.get(managers[i]);
+					throw errors.get(managerElement);
 				continue;
 			}
 
@@ -101,12 +97,12 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 			// Note that another thread may already be starting this bundle;
 			// In this case we will timeout after a default of 5 seconds and record the BundleException
 			long startTime = System.currentTimeMillis();
-			Module m = managers[i].getGeneration().getRevision().getRevisions().getModule();
+			Module m = managerElement.getGeneration().getRevision().getRevisions().getModule();
 			try {
 				// do not persist the start of this bundle
 				secureAction.start(m, StartOptions.LAZY_TRIGGER);
 			} catch (BundleException e) {
-				Bundle bundle = managers[i].getGeneration().getRevision().getBundle();
+				Bundle bundle = managerElement.getGeneration().getRevision().getBundle();
 				if (e.getType() == BundleException.STATECHANGE_ERROR) {
 					String message = NLS.bind(Msg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread(), name, m.getStateChangeOwner(), bundle, new Long(System.currentTimeMillis() - startTime)});
 					container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, message, e);
@@ -114,7 +110,7 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 				}
 				String message = NLS.bind(Msg.ECLIPSE_CLASSLOADER_ACTIVATION, bundle.getSymbolicName(), Long.toString(bundle.getBundleId()));
 				ClassNotFoundException error = new ClassNotFoundException(message, e);
-				errors.put(managers[i], error);
+				errors.put(managerElement, error);
 				if (container.getConfiguration().throwErrorOnFailedStart) {
 					container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, message, e, null);
 					throw error;

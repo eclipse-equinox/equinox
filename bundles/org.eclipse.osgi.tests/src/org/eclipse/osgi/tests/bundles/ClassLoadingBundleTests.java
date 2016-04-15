@@ -19,8 +19,7 @@ import javax.jws.WebService;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Endpoint;
 import javax.xml.ws.Service;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import junit.framework.*;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
@@ -222,14 +221,14 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestC);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestD);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTest);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestD);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestD);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestB);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestB);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestC);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestC);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestA);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestA);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestD);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestD);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTest);
 
 			actualFrameworkEvents = syncListenerResults.getResults(14);
@@ -289,14 +288,14 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestC);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestD);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTest);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestD);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestD);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestB);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestB);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestC);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestC);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestA);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestA);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestD);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestD);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTest);
 
 			actualFrameworkEvents = syncListenerResults.getResults(14);
@@ -312,7 +311,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		}
 	}
 
-	public void testBug405918() throws BundleException {
+	public void testBug408629() throws BundleException {
 		Bundle chainTest = installer.installBundle("chain.test"); //$NON-NLS-1$
 		Bundle chainTestA = installer.installBundle("chain.test.a"); //$NON-NLS-1$
 		Bundle chainTestB = installer.installBundle("chain.test.b"); //$NON-NLS-1$
@@ -333,15 +332,15 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		// eager start chainTestD
 		chainTestD.start();
 
-		Object[] expectedEvents = new Object[5];
-		expectedEvents[0] = new BundleEvent(BundleEvent.RESOLVED, chainTestD);
-		expectedEvents[1] = new BundleEvent(BundleEvent.RESOLVED, chainTestC);
-		expectedEvents[2] = new BundleEvent(BundleEvent.RESOLVED, chainTestB);
-		expectedEvents[3] = new BundleEvent(BundleEvent.RESOLVED, chainTestA);
-		expectedEvents[4] = new BundleEvent(BundleEvent.RESOLVED, chainTest);
+		Object[] expectedEvents1 = new Object[5];
+		expectedEvents1[0] = new BundleEvent(BundleEvent.RESOLVED, chainTestD);
+		expectedEvents1[1] = new BundleEvent(BundleEvent.RESOLVED, chainTestC);
+		expectedEvents1[2] = new BundleEvent(BundleEvent.RESOLVED, chainTestB);
+		expectedEvents1[3] = new BundleEvent(BundleEvent.RESOLVED, chainTestA);
+		expectedEvents1[4] = new BundleEvent(BundleEvent.RESOLVED, chainTest);
 
 		Object[] actualEvents = syncListenerResults.getResults(5);
-		compareResults(expectedEvents, actualEvents);
+		compareResults(expectedEvents1, actualEvents);
 		try {
 			System.setProperty("test.bug300692", "true");
 			System.setProperty("test.bug300692.listener", "true");
@@ -352,26 +351,47 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			Object[] actualFrameworkEvents = frameworkListenerResults.getResults(1);
 			compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
-			expectedEvents = new Object[14];
-			int i = 0;
+			expectedEvents1 = new Object[14];
+			Object[] expectedEvents2 = new Object[14];
+			int i1 = 0;
+			int i2 = 0;
 
-			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestA);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestB);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestC);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTest);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestB);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestB);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestC);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestC);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestA);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestA);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestD);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestD);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestD);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTest);
+			expectedEvents1[i1++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestA);
+			expectedEvents2[i2++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestA);
+			expectedEvents1[i1++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestB);
+			expectedEvents2[i2++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestB);
+			expectedEvents1[i1++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestC);
+			expectedEvents2[i2++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestC);
+			expectedEvents1[i1++] = new BundleEvent(BundleEvent.STARTING, chainTest);
+			expectedEvents2[i2++] = new BundleEvent(BundleEvent.STARTING, chainTest);
+			expectedEvents1[i1++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestD);
+			expectedEvents1[i1++] = new BundleEvent(BundleEvent.STARTING, chainTestB);
+			expectedEvents2[i2++] = new BundleEvent(BundleEvent.STARTING, chainTestB);
+			expectedEvents1[i1++] = new BundleEvent(BundleEvent.STARTED, chainTestB);
+			expectedEvents2[i2++] = new BundleEvent(BundleEvent.STARTED, chainTestB);
+			expectedEvents2[i2++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestD);
+			expectedEvents1[i1++] = new BundleEvent(BundleEvent.STARTING, chainTestD);
+			expectedEvents2[i2++] = new BundleEvent(BundleEvent.STARTING, chainTestD);
+			expectedEvents1[i1++] = new BundleEvent(BundleEvent.STARTED, chainTestD);
+			expectedEvents2[i2++] = new BundleEvent(BundleEvent.STARTED, chainTestD);
+			expectedEvents1[i1++] = new BundleEvent(BundleEvent.STARTING, chainTestC);
+			expectedEvents2[i2++] = new BundleEvent(BundleEvent.STARTING, chainTestC);
+			expectedEvents1[i1++] = new BundleEvent(BundleEvent.STARTED, chainTestC);
+			expectedEvents2[i2++] = new BundleEvent(BundleEvent.STARTED, chainTestC);
+			expectedEvents1[i1++] = new BundleEvent(BundleEvent.STARTING, chainTestA);
+			expectedEvents2[i2++] = new BundleEvent(BundleEvent.STARTING, chainTestA);
+			expectedEvents1[i1++] = new BundleEvent(BundleEvent.STARTED, chainTestA);
+			expectedEvents2[i2++] = new BundleEvent(BundleEvent.STARTED, chainTestA);
+			expectedEvents1[i1++] = new BundleEvent(BundleEvent.STARTED, chainTest);
+			expectedEvents2[i2++] = new BundleEvent(BundleEvent.STARTED, chainTest);
 
 			actualFrameworkEvents = syncListenerResults.getResults(14);
-			compareResults(expectedEvents, actualFrameworkEvents);
+			try {
+				compareResults(expectedEvents1, actualFrameworkEvents);
+			} catch (AssertionFailedError e) {
+				// try the second alternative
+				compareResults(expectedEvents2, actualFrameworkEvents);
+			}
 		} finally {
 			System.getProperties().remove("test.bug300692");
 			System.getProperties().remove("test.bug300692.listener");
