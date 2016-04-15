@@ -37,8 +37,7 @@ import org.eclipse.equinox.http.servlet.tests.bundle.Activator;
 import org.eclipse.equinox.http.servlet.tests.bundle.BundleAdvisor;
 import org.eclipse.equinox.http.servlet.tests.bundle.BundleInstaller;
 import org.eclipse.equinox.http.servlet.tests.util.ServletRequestAdvisor;
-import org.junit.After;
-import org.junit.Before;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -48,9 +47,11 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.context.ServletContextHelper;
 
-public class BaseTest {
+import junit.framework.TestCase;
 
-	@Before
+public class BaseTest extends TestCase {
+
+	@Override
 	public void setUp() throws Exception {
 		// Quiet logging for tests
 		System.setProperty("/.LEVEL", "OFF");
@@ -69,7 +70,7 @@ public class BaseTest {
 		startJetty();
 	}
 
-	@After
+	@Override
 	public void tearDown() throws Exception {
 		for (ServiceRegistration<? extends Object> serviceRegistration : registrations) {
 			serviceRegistration.unregister();

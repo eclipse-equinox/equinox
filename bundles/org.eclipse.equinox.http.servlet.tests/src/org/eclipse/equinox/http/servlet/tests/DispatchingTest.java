@@ -36,7 +36,7 @@ import org.eclipse.equinox.http.servlet.testbase.BaseTest;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServlet;
 import org.eclipse.equinox.http.servlet.tests.util.DispatchResultServlet;
 import org.junit.Assert;
-import org.junit.Test;
+
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.context.ServletContextHelper;
@@ -44,7 +44,6 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 public class DispatchingTest extends BaseTest {
 
-	@Test
 	public void test_crossContextDispatch1() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -81,7 +80,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("/a|", response);
 	}
 
-	@Test
 	public void test_forwardDepth1() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -113,7 +111,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("/a|/b|u=5|/a/s2/b|/s2|/a|/d|p=1|/a/s1/d|/s1", response);
 	}
 
-	@Test
 	public void test_forwardDepth1_WithRequestFilter() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -169,7 +166,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertTrue(filter.getCalled());
 	}
 
-	@Test
 	public void test_forwardDepth1_WithRequestAndForwardFilter() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -225,7 +221,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals(2, filter.getCount());
 	}
 
-	@Test
 	public void test_forwardDepth2() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -272,7 +267,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("/c1|/i3|p3=3|/c1/s3/i3|/s3|/c1|/i1|p1=1|/c1/s1/i1|/s1", response);
 	}
 
-	@Test
 	public void test_forwardDepth3() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -334,7 +328,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("/c1|/i4|p4=4|/c1/s4/i4|/s4|/c1|/i1|p1=1|/c1/s1/i1|/s1", response);
 	}
 
-	@Test
 	public void test_forwardNamedParameterAggregationAndPrecedence() throws Exception {
 		Servlet sA = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
@@ -392,7 +385,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("p=1&p=2|null|1|[1, 2]", result);
 	}
 
-	@Test
 	public void test_forwardNamed() throws Exception {
 		Servlet sA = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
@@ -432,7 +424,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("/c1|/a|p=1&p=2|/c1/s1/a|/s1|null|null|null|null|null", result);
 	}
 
-	@Test
 	public void test_forwardParameterAggregationAndPrecedence() throws Exception {
 		Servlet sA = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
@@ -481,7 +472,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("p=3&p=4|p=1&p=2|3|[3, 4, 1, 2]", result);
 	}
 
-	@Test
 	public void test_forwardStreamed() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -513,7 +503,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("/a|/b|u=5|/a/s2/b|/s2|/a|/d|p=1|/a/s1/d|/s1", response);
 	}
 
-	@Test
 	public void test_forwardStreamed_WithRequestFilter() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -569,7 +558,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertTrue(filter.getCalled());
 	}
 
-	@Test
 	public void test_forwardStreamed_WithRequestAndForwardFilter() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -625,7 +613,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals(2, filter.getCount());
 	}
 
-	@Test
 	public void test_includeBasic() throws Exception {
 		Servlet servlet8 = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
@@ -664,7 +651,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("s8target", requestAdvisor.request("S8"));
 	}
 
-	@Test
 	public void test_includeDepth1() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -696,7 +682,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("/a|/d|p=1|/a/s1/d|/s1|/a|/b|u=5|/a/s2/b|/s2", response);
 	}
 
-	@Test
 	public void test_includeDepth1_WithRequestFilter() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -752,7 +737,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertTrue(filter.getCalled());
 	}
 
-	@Test
 	public void test_includeDepth1_WithRequestAndIncludeFilter() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -808,7 +792,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals(2, filter.getCount());
 	}
 
-	@Test
 	public void test_includeDepth2() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -855,7 +838,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("/c1|/i1|p1=1|/c1/s1/i1|/s1|/c1|/i3|p3=3|/c1/s3/i3|/s3", response);
 	}
 
-	@Test
 	public void test_includeDepth3() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -917,7 +899,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("/c1|/i1|p1=1|/c1/s1/i1|/s1|/c1|/i4|p4=4|/c1/s4/i4|/s4", response);
 	}
 
-	@Test
 	public void test_includeNamedParameterAggregationAndPrecedence() throws Exception {
 		Servlet sA = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
@@ -975,7 +956,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("p=1&p=2|null|1|[1, 2]", result);
 	}
 
-	@Test
 	public void test_includeNamed() throws Exception {
 		Servlet sA = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
@@ -1015,7 +995,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("/c1|/a|p=1&p=2|/c1/s1/a|/s1|null|null|null|null|null", result);
 	}
 
-	@Test
 	public void test_includeParameterAggregationAndPrecedence() throws Exception {
 		Servlet sA = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
@@ -1064,7 +1043,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("p=1&p=2|p=3&p=4|3|[3, 4, 1, 2]", result);
 	}
 
-	@Test
 	public void test_includeStreamed() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -1096,7 +1074,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("/a|/d|p=1|/a/s1/d|/s1|/a|/b|u=5|/a/s2/b|/s2", response);
 	}
 
-	@Test
 	public void test_includeStreamed_WithRequestFilter() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -1152,7 +1129,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertTrue(filter.getCalled());
 	}
 
-	@Test
 	public void test_includeStreamed_WithRequestAndIncludeFilter() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -1208,7 +1184,6 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals(2, filter.getCount());
 	}
 
-	@Test
 	public void test_Bug479115() throws Exception {
 		Servlet servlet = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
