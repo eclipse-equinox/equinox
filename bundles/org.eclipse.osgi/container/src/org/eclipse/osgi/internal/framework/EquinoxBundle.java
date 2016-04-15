@@ -135,7 +135,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 				String initUUID = getEquinoxContainer().getConfiguration().setConfiguration(EquinoxConfiguration.PROP_INIT_UUID, Boolean.TRUE.toString());
 				if (initUUID != null) {
 					// this is not the first framework init, need to generate a new UUID
-					getEquinoxContainer().getConfiguration().setConfiguration(Constants.FRAMEWORK_UUID, new UniversalUniqueIdentifier().toString());
+					getEquinoxContainer().getConfiguration().setConfiguration(Constants.FRAMEWORK_UUID, UUID.randomUUID().toString());
 				}
 				getEquinoxContainer().init();
 				addInitFrameworkListeners();
