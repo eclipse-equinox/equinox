@@ -10,34 +10,29 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.tests.storage;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.security.Provider;
 import java.security.Security;
 import java.util.*;
-import junit.framework.*;
 import org.eclipse.equinox.security.storage.*;
 import org.eclipse.equinox.security.storage.provider.IProviderHints;
+import org.junit.Test;
 
 /**
  * This is a semi-manual test; expected to be run with modules requiring
  * UI interactions. Set configuration before executing this so that desired
  * storage module is selected.
  */
-public class ManualTest extends TestCase {
+public class ManualTest {
 
 	static private final String JAVA_MODULE_ID = "org.eclipse.equinox.security.javaCrypt"; //$NON-NLS-1$
-
-	public ManualTest() {
-		super();
-	}
-
-	public ManualTest(String name) {
-		super(name);
-	}
 
 	final private String passwordSample = "uYTIU689_~@@/";
 	final private String loginSample = "cheburashka";
 
+	@Test
 	public void testBasic() {
 
 		// Note that this skips Alg.Alias.Cipher.ABC
@@ -45,8 +40,8 @@ public class ManualTest extends TestCase {
 		// aliases from internal ones
 		Provider[] providers = Security.getProviders();
 		for (int i = 0; i < providers.length; i++) {
-			for (Iterator j = providers[i].entrySet().iterator(); j.hasNext();) {
-				Map.Entry entry = (Map.Entry) j.next();
+			for (Iterator<Map.Entry<Object, Object>> j = providers[i].entrySet().iterator(); j.hasNext();) {
+				Map.Entry<Object, Object> entry = j.next();
 				String key = (String) entry.getKey();
 				if (key == null)
 					continue;
@@ -75,8 +70,8 @@ public class ManualTest extends TestCase {
 			[keyFactory] PBEWithSHA1AndDESede
 			[keyFactory] PBEWithMD5AndTripleDES
 			[keyFactory] PBEWithMD5AndDES
-
-
+			
+			
 			[cypher] DES
 			[cypher] Blowfish
 			[cypher] RC2
@@ -90,7 +85,7 @@ public class ManualTest extends TestCase {
 			[cypher] PBEWithSHA1AndRC2_40
 			[cypher] PBEWithSHA1AndDESede
 			[cypher] DESedeWrap
-
+			
 			http://java.sun.com/javase/6/docs/technotes/guides/security/StandardNames.html#SecretKeyFactory
 			http://java.sun.com/j2se/1.4.2/docs/guide/security/jce/JCERefGuide.html#AppA
 			 */
@@ -100,9 +95,10 @@ public class ManualTest extends TestCase {
 	/**
 	 * Manual test for Java module to see password prompt functionality
 	 */
+	@Test
 	public void testJavaModule() throws IOException, StorageException {
 		// manual test for the Java module
-		Map options = new HashMap(1);
+		Map<String, Object> options = new HashMap<String, Object>(1);
 		options.put(IProviderHints.REQUIRED_MODULE_ID, JAVA_MODULE_ID);
 		ISecurePreferences storage = SecurePreferencesFactory.open(null, options);
 		ISecurePreferences node = storage.node("/cvs/account1");
@@ -110,10 +106,6 @@ public class ManualTest extends TestCase {
 		node.put("password", passwordSample, true);
 		assertEquals(loginSample, node.get("login", null));
 		assertEquals(passwordSample, node.get("password", null));
-	}
-
-	public static Test suite() {
-		return new TestSuite(ManualTest.class);
 	}
 
 }

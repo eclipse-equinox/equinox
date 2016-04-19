@@ -10,17 +10,20 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.tests.storage;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.eclipse.equinox.internal.security.storage.StorageUtils;
 import org.eclipse.equinox.internal.security.tests.SecurityTestsActivator;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.StorageException;
+import org.junit.Test;
 import org.osgi.framework.*;
 
 /**
@@ -43,14 +46,6 @@ public class DynamicPreferencesTest extends StorageAbstractTest {
 	final private static String clearTextKey = "data";
 	final private static String clearTextValue = "-> this should not be encrypted <-";
 
-	public DynamicPreferencesTest() {
-		super();
-	}
-
-	public DynamicPreferencesTest(String name) {
-		super(name);
-	}
-
 	private void check(ISecurePreferences prefs) throws StorageException {
 		ISecurePreferences node1 = prefs.node("/abc");
 		assertEquals(value, node1.get(key, defaultValue));
@@ -60,6 +55,7 @@ public class DynamicPreferencesTest extends StorageAbstractTest {
 	/**
 	 * Test dynamic behavior while secure preferences remain in memory
 	 */
+	@Test
 	public void testDynamicMemory() throws Exception {
 
 		Bundle bundle01 = null;
@@ -110,6 +106,7 @@ public class DynamicPreferencesTest extends StorageAbstractTest {
 	/**
 	 * Test dynamic behavior with persisted secure preferences
 	 */
+	@Test
 	public void testDynamicPersisted() throws Exception {
 		URL location = getStorageLocation();
 		assertNotNull(location);
@@ -176,7 +173,7 @@ public class DynamicPreferencesTest extends StorageAbstractTest {
 		assertTrue(exception);
 	}
 
-	protected Map getOptions() {
+	protected Map<String, Object> getOptions() {
 		// Don't specify default password for those tests; they need to have 
 		// password providers 
 		return getOptions(null);
@@ -226,7 +223,4 @@ public class DynamicPreferencesTest extends StorageAbstractTest {
 		}
 	}
 
-	public static Test suite() {
-		return new TestSuite(DynamicPreferencesTest.class);
-	}
 }

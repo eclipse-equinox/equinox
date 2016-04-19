@@ -12,7 +12,6 @@ package org.eclipse.equinox.internal.security.tests.storage;
 
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.Assert;
 import org.eclipse.core.runtime.*;
 
 /**
@@ -21,12 +20,12 @@ import org.eclipse.core.runtime.*;
  * @since 3.4
  * Copied from runtime tests
  */
-public class WaitingRegistryListener extends Assert implements IRegistryEventListener {
+public class WaitingRegistryListener extends org.junit.Assert implements IRegistryEventListener {
 
 	final static long MIN_WAIT_TIME = 100; // minimum wait time in milliseconds
 
-	private List extensionIDs; // String[]
-	private List extPointIDs; // String[]
+	private List<String> extensionIDs; // String[]
+	private List<String> extPointIDs; // String[]
 
 	private volatile boolean added;
 	private volatile boolean removed;
@@ -68,7 +67,7 @@ public class WaitingRegistryListener extends Assert implements IRegistryEventLis
 
 	public synchronized String[] extensionsReceived(long timeout) {
 		if (extensionIDs != null)
-			return (String[]) extensionIDs.toArray(new String[extensionIDs.size()]);
+			return extensionIDs.toArray(new String[0]);
 		try {
 			wait(timeout);
 		} catch (InterruptedException e) {
@@ -76,12 +75,12 @@ public class WaitingRegistryListener extends Assert implements IRegistryEventLis
 		}
 		if (extensionIDs == null)
 			return null;
-		return (String[]) extensionIDs.toArray(new String[extensionIDs.size()]);
+		return extensionIDs.toArray(new String[0]);
 	}
 
 	public synchronized String[] extPointsReceived(long timeout) {
 		if (extPointIDs != null)
-			return (String[]) extPointIDs.toArray(new String[extPointIDs.size()]);
+			return extPointIDs.toArray(new String[0]);
 		try {
 			wait(timeout);
 		} catch (InterruptedException e) {
@@ -89,7 +88,7 @@ public class WaitingRegistryListener extends Assert implements IRegistryEventLis
 		}
 		if (extPointIDs == null)
 			return null;
-		return (String[]) extPointIDs.toArray(new String[extPointIDs.size()]);
+		return extPointIDs.toArray(new String[0]);
 	}
 
 	public synchronized int waitFor(int events, long maxTimeout) {
@@ -154,7 +153,7 @@ public class WaitingRegistryListener extends Assert implements IRegistryEventLis
 	}
 
 	private void extensionsToString(IExtension[] extensions) {
-		extensionIDs = new ArrayList(extensions.length);
+		extensionIDs = new ArrayList<String>(extensions.length);
 		for (int i = 0; i < extensions.length; i++) {
 			IExtension extension = extensions[i];
 			extensionIDs.add(extension.getUniqueIdentifier());
@@ -181,7 +180,7 @@ public class WaitingRegistryListener extends Assert implements IRegistryEventLis
 	}
 
 	private void extPointsToString(IExtensionPoint[] extensionPoints) {
-		extPointIDs = new ArrayList(extensionPoints.length);
+		extPointIDs = new ArrayList<String>(extensionPoints.length);
 		for (int i = 0; i < extensionPoints.length; i++)
 			extPointIDs.add(extensionPoints[i].getUniqueIdentifier());
 	}

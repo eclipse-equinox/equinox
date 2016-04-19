@@ -10,17 +10,22 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.tests.storage;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.equinox.internal.security.storage.friends.InternalExchangeUtils;
 import org.eclipse.equinox.internal.security.tests.SecurityTestsActivator;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.StorageException;
+import org.junit.Test;
 import org.osgi.framework.BundleContext;
 
 abstract public class SecurePreferencesTest extends StorageAbstractTest {
@@ -45,15 +50,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	final private static String unicodeKey = "unicodeKey";
 	final private static String unicodeValue = "va\u0432lue\u0433";
 
-	public SecurePreferencesTest() {
-		super();
-	}
-
-	public SecurePreferencesTest(String name) {
-		super(name);
-	}
-
-	protected Map getOptions() {
+	protected Map<String, Object> getOptions() {
 		// Note that if the default password value below is modified, 
 		// the sample storage file needs to be regenerated.
 		return getOptions("password1");
@@ -125,6 +122,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	 * Basic test to fill / read Preferences implementation. Also tests removal of a value
 	 * and Preferences#keys().
 	 */
+	@Test
 	public void testPreferences() throws IOException, StorageException {
 		URL location = getStorageLocation();
 		assertNotNull(location);
@@ -144,6 +142,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	 * Test relative names, absolute names, and children names
 	 * @throws StorageException 
 	 */
+	@Test
 	public void testNames() throws IOException, StorageException {
 		ISecurePreferences preferences = newPreferences(getStorageLocation(), getOptions());
 		fill(preferences);
@@ -194,6 +193,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	 * Test node existence, resolution: parent -> child; child -> parent, 
 	 * compare absolute and relative paths.
 	 */
+	@Test
 	public void testNodeResolution() throws IOException, StorageException {
 		ISecurePreferences preferences = newPreferences(getStorageLocation(), getOptions());
 		fill(preferences);
@@ -253,6 +253,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	 * Tests node removal.
 	 * @throws StorageException 
 	 */
+	@Test
 	public void testNodeRemoval() throws IOException, StorageException {
 		URL location = getStorageLocation();
 		assertNotNull(location);
@@ -312,6 +313,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	 * Tests validation of node paths.
 	 * @throws Throwable 
 	 */
+	@Test
 	public void testPathValidation() throws Throwable {
 		ISecurePreferences preferences = newPreferences(getStorageLocation(), getOptions());
 		boolean exception = false;
@@ -342,6 +344,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	/**
 	 * Tests URL validation.
 	 */
+	@Test
 	public void testLocation() throws MalformedURLException {
 		URL invalidURL = new URL("http", "eclipse.org", "testEquinoxFile");
 		boolean exception = false;
@@ -359,6 +362,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
+	@Test
 	public void testDataTypes() throws StorageException, MalformedURLException, IOException {
 		ISecurePreferences preferences = newPreferences(getStorageLocation(), getOptions());
 
@@ -400,6 +404,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	/**
 	 * Tests corrupted encrypted data.
 	 */
+	@Test
 	public void testIncorrectData() throws IOException {
 		URL location = getFilePath(sampleLocation);
 		// Same default password as in the SecurePreferencesTest.getOptions() - same note
@@ -433,9 +438,10 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	/**
 	 * Tests incorrect passwords
 	 */
+	@Test
 	public void testIncorrectPassword() throws IOException {
 		URL location = getFilePath(sampleLocation);
-		Map options = getOptions("wrong");
+		Map<String, Object> options = getOptions("wrong");
 		ISecurePreferences preferences = newPreferences(location, options);
 		try {
 			ISecurePreferences node = preferences.node("/cvs/eclipse.org");
@@ -456,6 +462,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	/**
 	 * Tests incorrect or unexpected module specifications
 	 */
+	@Test
 	public void testModules() throws IOException {
 		URL location = getFilePath(sampleLocation);
 		ISecurePreferences preferences = newPreferences(location, getOptions(null));
@@ -490,6 +497,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	/**
 	 * Tests edge cases for data (nulls, empty strings, and so on).
 	 */
+	@Test
 	public void testEdgeCases() throws StorageException, MalformedURLException, IOException {
 		byte[] expectedEmptyArray = new byte[0];
 		byte[] wrongArray = new byte[] {1, 2, 3};
@@ -568,7 +576,4 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 		return FileLocator.toFileURL(url);
 	}
 
-	public static Test suite() {
-		return new TestSuite(SecurePreferencesTest.class);
-	}
 }

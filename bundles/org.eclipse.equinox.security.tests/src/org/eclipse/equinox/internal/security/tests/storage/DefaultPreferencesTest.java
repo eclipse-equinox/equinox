@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.tests.storage;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 /**
  * Uses whatever default module is provided for the current installation.
  */
@@ -20,9 +17,5 @@ public class DefaultPreferencesTest extends SecurePreferencesTest {
 
 	protected String getModuleID() {
 		return null;
-	}
-
-	public static Test suite() {
-		return new TestSuite(DefaultPreferencesTest.class);
 	}
 }

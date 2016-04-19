@@ -10,24 +10,20 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.tests.storage;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.equinox.internal.security.storage.StorageUtils;
 import org.eclipse.equinox.security.storage.*;
-import org.osgi.service.prefs.BackingStoreException;
+import org.junit.Test;
 
 public class SlashEncodeTest extends StorageAbstractTest {
-
-	public SlashEncodeTest() {
-		super();
-	}
-
-	public SlashEncodeTest(String name) {
-		super(name);
-	}
 
 	final private static String[] decodedSlash = {"root", "ro/ot", "/root", "root/", "ro/ot/me", "ro//ot"};
 	final private static String[] encodedSlash = {"root", "ro\\2fot", "\\2froot", "root\\2f", "ro\\2fot\\2fme", "ro\\2f\\2fot"};
@@ -41,6 +37,7 @@ public class SlashEncodeTest extends StorageAbstractTest {
 	/**
 	 * Tests forward slash
 	 */
+	@Test
 	public void testForwardSlash() {
 		for (int i = 0; i < decodedSlash.length; i++) {
 			String tmp = EncodingUtils.encodeSlashes(decodedSlash[i]);
@@ -52,6 +49,7 @@ public class SlashEncodeTest extends StorageAbstractTest {
 	/**
 	 * Tests backward slash
 	 */
+	@Test
 	public void testBackwardSlash() {
 		for (int i = 0; i < decodedBackSlash.length; i++) {
 			String tmp = EncodingUtils.encodeSlashes(decodedBackSlash[i]);
@@ -63,6 +61,7 @@ public class SlashEncodeTest extends StorageAbstractTest {
 	/**
 	 * Tests mixed slashes
 	 */
+	@Test
 	public void testMixSlash() {
 		for (int i = 0; i < decodedMixSlash.length; i++) {
 			String tmp = EncodingUtils.encodeSlashes(decodedMixSlash[i]);
@@ -74,6 +73,7 @@ public class SlashEncodeTest extends StorageAbstractTest {
 	/**
 	 * Tests edge conditions: null or empty arguments 
 	 */
+	@Test
 	public void testEdge() {
 		assertNull(EncodingUtils.encodeSlashes(null));
 		assertNull(EncodingUtils.decodeSlashes(null));
@@ -83,7 +83,7 @@ public class SlashEncodeTest extends StorageAbstractTest {
 		assertEquals("", encoded);
 	}
 
-	protected Map getOptions() {
+	protected Map<String, Object> getOptions() {
 		// Password value really doesn't matter here; we specify it to avoid
 		// triggering UI elements in case default password provider has the 
 		// highest priority in the tested configuration
@@ -96,6 +96,7 @@ public class SlashEncodeTest extends StorageAbstractTest {
 	 * @throws BackingStoreException 
 	 * @throws  
 	 */
+	@Test
 	public void testPreferencesWithSlashes() throws IOException, StorageException {
 		URL location = getStorageLocation();
 		assertNotNull(location);
@@ -124,9 +125,5 @@ public class SlashEncodeTest extends StorageAbstractTest {
 			assertEquals("test", nodeRet.get("password", null));
 		}
 		StorageUtils.delete(location);
-	}
-
-	public static Test suite() {
-		return new TestSuite(SlashEncodeTest.class);
 	}
 }

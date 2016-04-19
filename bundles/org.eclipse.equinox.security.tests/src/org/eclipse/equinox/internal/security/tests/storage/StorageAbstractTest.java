@@ -15,48 +15,40 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import javax.crypto.spec.PBEKeySpec;
-import junit.framework.TestCase;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.tests.harness.FileSystemHelper;
 import org.eclipse.equinox.internal.security.storage.*;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.provider.IProviderHints;
+import org.junit.After;
 
 /**
  * Temp directory is used for storage.
  */
-public class StorageAbstractTest extends TestCase {
+public class StorageAbstractTest {
 
 	final protected String defaultFileName = "secure_storage_test.equinox";
 
-	private List openPreferences = new ArrayList(5); // <ISecurePreferences>
-
-	public StorageAbstractTest() {
-		super();
-	}
-
-	public StorageAbstractTest(String name) {
-		super(name);
-	}
+	private List<ISecurePreferences> openPreferences = new ArrayList<ISecurePreferences>(5); // <ISecurePreferences>
 
 	protected String getModuleID() {
 		return null;
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		synchronized (openPreferences) {
-			for (Iterator i = openPreferences.iterator(); i.hasNext();) {
-				ISecurePreferences root = (ISecurePreferences) i.next();
+			for (Iterator<ISecurePreferences> i = openPreferences.iterator(); i.hasNext();) {
+				ISecurePreferences root = i.next();
 				SecurePreferencesMapper.close((((SecurePreferencesWrapper) root).getContainer().getRootData()));
 				URL location = ((SecurePreferencesWrapper) root).getContainer().getLocation();
 				StorageUtils.delete(location);
 			}
 		}
-		super.tearDown();
 	}
 
-	protected ISecurePreferences newPreferences(URL location, Map options) throws IOException {
+	protected ISecurePreferences newPreferences(URL location, Map<String, Object> options) throws IOException {
 		synchronized (openPreferences) {
 			ISecurePreferences result = SecurePreferencesFactory.open(location, options);
 			openPreferences.add(result);
@@ -66,8 +58,8 @@ public class StorageAbstractTest extends TestCase {
 
 	protected void closePreferences(ISecurePreferences root) {
 		synchronized (openPreferences) {
-			for (Iterator i = openPreferences.iterator(); i.hasNext();) {
-				ISecurePreferences element = (ISecurePreferences) i.next();
+			for (Iterator<ISecurePreferences> i = openPreferences.iterator(); i.hasNext();) {
+				ISecurePreferences element = i.next();
 				if (element.equals(root)) {
 					SecurePreferencesMapper.close((((SecurePreferencesWrapper) root).getContainer().getRootData()));
 					i.remove();
@@ -76,8 +68,8 @@ public class StorageAbstractTest extends TestCase {
 		}
 	}
 
-	protected Map getOptions(String defaultPassword) {
-		Map options = new HashMap();
+	protected Map<String, Object> getOptions(String defaultPassword) {
+		Map<String, Object> options = new HashMap<String, Object>();
 
 		if (defaultPassword != null) {
 			PBEKeySpec password = new PBEKeySpec(defaultPassword.toCharArray());
@@ -96,6 +88,7 @@ public class StorageAbstractTest extends TestCase {
 	 * Might consider switching to configuration location.
 	 * @throws MalformedURLException 
 	 */
+	@SuppressWarnings("deprecation")
 	protected URL getStorageLocation() throws MalformedURLException {
 		IPath tempDir = FileSystemHelper.getTempDir();
 		tempDir = tempDir.append(defaultFileName);

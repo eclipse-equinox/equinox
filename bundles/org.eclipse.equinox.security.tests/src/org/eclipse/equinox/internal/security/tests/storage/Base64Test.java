@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.tests.storage;
 
-import java.util.Random;
-import junit.framework.*;
-import org.eclipse.equinox.security.storage.EncodingUtils;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
-public class Base64Test extends TestCase {
+import java.util.Random;
+import org.eclipse.equinox.security.storage.EncodingUtils;
+import org.junit.Test;
+
+public class Base64Test {
 
 	/**
 	 * Number of random-generated round trip tests to run
@@ -39,17 +43,10 @@ public class Base64Test extends TestCase {
 	final private static String decoded6 = "a";
 	final private static String encoded6 = "YQ=="; // tests array bounds
 
-	public Base64Test() {
-		super();
-	}
-
-	public Base64Test(String name) {
-		super(name);
-	}
-
 	/**
 	 * Tests encoding using hand-calculated examples.
 	 */
+	@Test
 	public void testHandCoded() {
 		String encoded = EncodingUtils.encodeBase64(decoded1.getBytes());
 		assertEquals(encoded1, encoded);
@@ -75,6 +72,7 @@ public class Base64Test extends TestCase {
 	/**
 	 * Tests edge conditions: null or empty arguments 
 	 */
+	@Test
 	public void testEdge() {
 		assertNull(EncodingUtils.encodeBase64(null));
 		assertNull(EncodingUtils.decodeBase64(null));
@@ -90,6 +88,7 @@ public class Base64Test extends TestCase {
 	/**
 	 * Tests round trip using large random sequences 
 	 */
+	@Test
 	public void testRandom() {
 		Random generator = new Random(System.currentTimeMillis());
 
@@ -114,7 +113,4 @@ public class Base64Test extends TestCase {
 			assertEquals(array1[i], array2[i]);
 	}
 
-	public static Test suite() {
-		return new TestSuite(Base64Test.class);
-	}
 }
