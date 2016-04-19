@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2013). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2015). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public final class PackagePermission extends BasicPermission {
 	 * The action string {@code export}. The {@code export} action implies the
 	 * {@code import} action.
 	 * 
-	 * @deprecated Since 1.5. Use {@code exportonly} instead.
+	 * @deprecated As of 1.5. Use {@code exportonly} instead.
 	 */
 	public final static String						EXPORT				= "export";
 
@@ -429,7 +429,7 @@ public final class PackagePermission extends BasicPermission {
 	public String getActions() {
 		String result = actions;
 		if (result == null) {
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			boolean comma = false;
 
 			int mask = action_mask;
@@ -544,6 +544,7 @@ public final class PackagePermission extends BasicPermission {
 		map.put("package.name", getName());
 		if (bundle != null) {
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				@Override
 				public Void run() {
 					map.put("id", new Long(bundle.getBundleId()));
 					map.put("location", bundle.getLocation());

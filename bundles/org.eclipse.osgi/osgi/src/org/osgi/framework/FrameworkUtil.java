@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2005, 2013). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2015). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,6 +207,7 @@ public class FrameworkUtil {
 		// We use doPriv since the caller may not have permission
 		// to call getClassLoader.
 		Object cl = AccessController.doPrivileged(new PrivilegedAction<Object>() {
+			@Override
 			public Object run() {
 				return classFromBundle.getClassLoader();
 			}
@@ -652,7 +653,7 @@ public class FrameworkUtil {
 			if (dnChain == null) {
 				return null;
 			}
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			for (Iterator<?> iChain = dnChain.iterator(); iChain.hasNext();) {
 				sb.append(iChain.next());
 				if (iChain.hasNext()) {
