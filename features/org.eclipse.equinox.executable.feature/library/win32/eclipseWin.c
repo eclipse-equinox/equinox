@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -203,6 +203,7 @@ int showSplash( const _TCHAR* featureImage )
     int     depth;
     int     x, y;
     int     width, height;
+    int     dpiX, scaledWidth, scaledHeight;
 
 	if(splashing) {
 		/*splash screen is already showing, do nothing */
@@ -219,6 +220,11 @@ int showSplash( const _TCHAR* featureImage )
     /* Load the bitmap for the feature. */
     hDC = GetDC( NULL);
     depth = GetDeviceCaps( hDC, BITSPIXEL ) * GetDeviceCaps( hDC, PLANES);
+
+    /* fetch screen DPI and round it to closest 25% interval(25% of 96 is 24) */
+	dpiX = GetDeviceCaps ( hDC, LOGPIXELSX );
+	dpiX = ((int)(dpiX / 24.f + 0.5)) * 24;
+
     ReleaseDC(NULL, hDC);
     if (featureImage != NULL)
     	hBitmap = LoadImage(NULL, featureImage, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -228,6 +234,21 @@ int showSplash( const _TCHAR* featureImage )
     	return ERROR_FILE_NOT_FOUND;
     
 	GetObject(hBitmap, sizeof(BITMAP), &bmp);
+
+	/* reload scaled up image when zoom > 100% */
+    if (dpiX > 96.f) {
+    	/* calculate scaled-up bounds */
+    	scaledWidth = dpiX * bmp.bmWidth / 96.f;
+        scaledHeight = dpiX * bmp.bmHeight / 96.f;
+
+		hBitmap = LoadImage(NULL, featureImage, IMAGE_BITMAP, scaledWidth, scaledHeight, LR_LOADFROMFILE);
+
+		/* If the bitmap could not be found, return an error. */
+		if (hBitmap == 0)
+			return ERROR_FILE_NOT_FOUND;
+
+		GetObject(hBitmap, sizeof(BITMAP), &bmp);
+    }
 
     /* figure out position */
     width = GetSystemMetrics (SM_CXSCREEN);
