@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,13 +28,23 @@ public class OldStylePluginTests extends CoreTest {
 	public static int SIMPLE_RESULTS = 0x04;
 	public static final String BUNDLES_ROOT = "bundle_tests";
 	private BundleInstaller installer;
+	private boolean compatPluginInstalled = false;
 
 	public static Test suite() {
 		return new TestSuite(OldStylePluginTests.class);
 	}
 
 	protected void setUp() throws Exception {
-		assertTrue("Plugin compatibility fragment not configured.", getContext().getServiceReference(PluginConverter.class) != null);
+		compatPluginInstalled = false;
+		for (BundleWire hostWire : getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION).adapt(BundleWiring.class).getProvidedWires(HostNamespace.HOST_NAMESPACE)) {
+			if ("org.eclipse.osgi.compatibility.plugins".equals(hostWire.getRequirer().getSymbolicName())) {
+				compatPluginInstalled = true;
+				break;
+			}
+		}
+		if (compatPluginInstalled) {
+			assertTrue("Plugin compatibility fragment not configured.", getContext().getServiceReference(PluginConverter.class) != null);
+		}
 		installer = new BundleInstaller(BUNDLES_ROOT, OSGiTestsActivator.getContext());
 		installer.refreshPackages(null);
 	}
@@ -49,6 +59,9 @@ public class OldStylePluginTests extends CoreTest {
 	}
 
 	public void testSimplePlugin() {
+		if (!compatPluginInstalled) {
+			return;
+		}
 		String pluginName = "test.plugins.a";
 		Version pluginVersion = Version.parseVersion("1.0.0");
 		Bundle bundle = installPlugin(pluginName, false);
@@ -58,6 +71,9 @@ public class OldStylePluginTests extends CoreTest {
 	}
 
 	public void testImportPlugin() {
+		if (!compatPluginInstalled) {
+			return;
+		}
 		String pluginName = "test.plugins.b";
 		Version pluginVersion = Version.parseVersion("1.0.0");
 		Bundle bundle = installPlugin(pluginName, false);
@@ -130,6 +146,9 @@ public class OldStylePluginTests extends CoreTest {
 	}
 
 	public void testExportSinglePackage() {
+		if (!compatPluginInstalled) {
+			return;
+		}
 		String pluginName = "test.plugins.c";
 		Version pluginVersion = Version.parseVersion("1.0.0");
 		Bundle bundle = installPlugin(pluginName, false);
@@ -143,6 +162,9 @@ public class OldStylePluginTests extends CoreTest {
 	}
 
 	public void testExportAllPackage() {
+		if (!compatPluginInstalled) {
+			return;
+		}
 		String pluginName = "test.plugins.d";
 		Version pluginVersion = Version.parseVersion("1.0.0");
 		Bundle bundle = installPlugin(pluginName, false);
@@ -161,6 +183,9 @@ public class OldStylePluginTests extends CoreTest {
 	}
 
 	public void testActivator() {
+		if (!compatPluginInstalled) {
+			return;
+		}
 		String pluginName = "test.plugins.e";
 		Version pluginVersion = Version.parseVersion("1.0.0");
 		Bundle bundle = installPlugin(pluginName, false);
@@ -179,6 +204,9 @@ public class OldStylePluginTests extends CoreTest {
 	}
 
 	public void testExtensionSingleton() {
+		if (!compatPluginInstalled) {
+			return;
+		}
 		String pluginName = "test.plugins.f";
 		Version pluginVersion = Version.parseVersion("1.0.0");
 		Bundle bundle = installPlugin(pluginName, false);
@@ -187,6 +215,9 @@ public class OldStylePluginTests extends CoreTest {
 	}
 
 	public void testFragment() {
+		if (!compatPluginInstalled) {
+			return;
+		}
 		String pluginName = "test.plugins.g";
 		Version pluginVersion = Version.parseVersion("1.0.0");
 		Bundle bundle = installPlugin(pluginName, false);
