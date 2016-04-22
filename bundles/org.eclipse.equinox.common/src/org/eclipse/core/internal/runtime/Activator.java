@@ -21,6 +21,7 @@ import org.eclipse.equinox.log.ExtendedLogService;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
+import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.eclipse.osgi.service.localization.BundleLocalization;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.util.NLS;
@@ -36,6 +37,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * This class can only be used if OSGi plugin is available.
  */
 public class Activator implements BundleActivator {
+	public static final String PLUGIN_ID = "org.eclipse.equinox.common"; //$NON-NLS-1$ 
 
 	/**
 	 * Table to keep track of all the URL converter services.
@@ -52,6 +54,7 @@ public class Activator implements BundleActivator {
 	private ServiceTracker<Object, DebugOptions> debugTracker = null;
 	private ServiceTracker<Object, FrameworkLog> logTracker = null;
 	private ServiceTracker<Object, BundleLocalization> localizationTracker = null;
+	private ServiceRegistration<DebugOptionsListener> debugRegistration;
 
 	/*
 	 * Returns the singleton for this Activator. Callers should be aware that
@@ -71,6 +74,9 @@ public class Activator implements BundleActivator {
 		platformURLConverterService = context.registerService(URLConverter.class, new PlatformURLConverter(), urlProperties);
 		adapterManagerService = context.registerService(IAdapterManager.class, AdapterManager.getDefault(), null);
 		installPlatformURLSupport();
+		Hashtable<String, String> properties = new Hashtable<>(2);
+		properties.put(DebugOptions.LISTENER_SYMBOLICNAME, PLUGIN_ID);
+		debugRegistration = context.registerService(DebugOptionsListener.class, TracingOptions.DEBUG_OPTIONS_LISTENER, properties);
 	}
 
 	private PlatformLogWriter getPlatformWriter(BundleContext context) {
@@ -281,6 +287,10 @@ public class Activator implements BundleActivator {
 		if (localizationTracker != null) {
 			localizationTracker.close();
 			localizationTracker = null;
+		}
+		if (debugRegistration != null) {
+			debugRegistration.unregister();
+			debugRegistration = null;
 		}
 		RuntimeLog.setLogWriter(null);
 		bundleContext = null;
