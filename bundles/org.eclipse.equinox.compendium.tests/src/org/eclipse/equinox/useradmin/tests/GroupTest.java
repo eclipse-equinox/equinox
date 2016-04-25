@@ -10,30 +10,38 @@
  *******************************************************************************/
 package org.eclipse.equinox.useradmin.tests;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.equinox.compendium.tests.Activator;
+import org.junit.*;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.useradmin.*;
 
-public class GroupTest extends TestCase {
+public class GroupTest {
 
 	private UserAdmin userAdmin;
-	private ServiceReference userAdminReference;
+	private ServiceReference<UserAdmin> userAdminReference;
 
 	boolean locked = false;
 	Object lock = new Object();
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Activator.getBundle(Activator.BUNDLE_USERADMIN).start();
-		userAdminReference = Activator.getBundleContext().getServiceReference(UserAdmin.class.getName());
-		userAdmin = (UserAdmin) Activator.getBundleContext().getService(userAdminReference);
+		userAdminReference = Activator.getBundleContext().getServiceReference(UserAdmin.class);
+		userAdmin = Activator.getBundleContext().getService(userAdminReference);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		Activator.getBundleContext().ungetService(userAdminReference);
 		Activator.getBundle(Activator.BUNDLE_USERADMIN).stop();
 	}
 
+	@Test
 	public void testGroupCreateAndRemove() throws Exception {
 		Group group = (Group) userAdmin.createRole("testGroupCreateAndRemove", Role.GROUP); //$NON-NLS-1$
 		assertNotNull(group);
@@ -43,6 +51,7 @@ public class GroupTest extends TestCase {
 		assertNull(userAdmin.getRole("testGroupCreateAndRemove")); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testGroupAddingAndRemovingMembers() throws Exception {
 		Group group = (Group) userAdmin.createRole("testGroupAddingAndRemovingMembers", Role.GROUP); //$NON-NLS-1$
 		assertNotNull(group);

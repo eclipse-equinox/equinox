@@ -10,24 +10,12 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
+@RunWith(Suite.class)
+@SuiteClasses({AttributeTypePasswordTest.class, Bug332161Test.class, Bug340899Test.class, BugTests.class, SameOcdPidFactoryPidTest.class, ExtendableTest.class, Bug358969Test.class, UnresolvedBundleTest.class, GetDefaultValueTest.class, IconTest.class, Bug395196Test.class, NoADTest.class})
 public class AllTests {
-	public static Test suite() {
-		TestSuite suite = new TestSuite("Tests for Equinox MetaType"); //$NON-NLS-1$
-		suite.addTestSuite(AttributeTypePasswordTest.class);
-		suite.addTestSuite(Bug332161Test.class);
-		suite.addTestSuite(Bug340899Test.class);
-		suite.addTestSuite(BugTests.class);
-		suite.addTestSuite(SameOcdPidFactoryPidTest.class);
-		suite.addTestSuite(ExtendableTest.class);
-		suite.addTestSuite(Bug358969Test.class);
-		suite.addTestSuite(UnresolvedBundleTest.class);
-		suite.addTestSuite(GetDefaultValueTest.class);
-		suite.addTestSuite(IconTest.class);
-		suite.addTestSuite(Bug395196Test.class);
-		suite.addTestSuite(NoADTest.class);
-		return suite;
-	}
+	//see @SuiteClasses
 }

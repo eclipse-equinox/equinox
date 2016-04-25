@@ -10,7 +10,12 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.tests;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.Arrays;
+import org.junit.*;
 import org.osgi.framework.Bundle;
 import org.osgi.service.metatype.*;
 
@@ -99,12 +104,13 @@ public class Bug332161Test extends AbstractTest {
 	 * Tests an enumerated Char type consisting of a mixture of whitespace and
 	 * non-whitespace characters. A whitespace default value is used.
 	 */
+	@Test
 	public void test1() {
 		AttributeDefinition ad = findAttributeDefinitionById("char1", ads); //$NON-NLS-1$
-		assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
+		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		String defaultValue = getFirstDefaultValue(ad.getDefaultValue());
-		assertNotNull("Default value not found", defaultValue); //$NON-NLS-1$
-		assertEquals("Wrong default value", "\r", defaultValue); //$NON-NLS-1$  //$NON-NLS-2$
+		Assert.assertNotNull("Default value not found", defaultValue); //$NON-NLS-1$
+		Assert.assertEquals("Wrong default value", "\r", defaultValue); //$NON-NLS-1$  //$NON-NLS-2$
 		validateChar1Options(ad.getOptionLabels(), ad.getOptionValues());
 		assertValidationPass("\\ ", ad); //$NON-NLS-1$
 		assertValidationPass("\\\u0020", ad); //$NON-NLS-1$
@@ -122,12 +128,13 @@ public class Bug332161Test extends AbstractTest {
 	/*
 	 * Tests a String type with a default value of CRLF.
 	 */
+	@Test
 	public void test2() {
 		AttributeDefinition ad = findAttributeDefinitionById("string1", ads); //$NON-NLS-1$
-		assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
+		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		String defaultValue = getFirstDefaultValue(ad.getDefaultValue());
-		assertNotNull("Default value not found", defaultValue); //$NON-NLS-1$
-		assertEquals("Wrong default value", "\r\n", defaultValue); //$NON-NLS-1$  //$NON-NLS-2$
+		Assert.assertNotNull("Default value not found", defaultValue); //$NON-NLS-1$
+		Assert.assertEquals("Wrong default value", "\r\n", defaultValue); //$NON-NLS-1$  //$NON-NLS-2$
 		assertValidationPass("\\\r\\\n", ad); //$NON-NLS-1$
 	}
 
@@ -136,11 +143,12 @@ public class Bug332161Test extends AbstractTest {
 	 * with a mixture of whitespace (significant and not significant), escapes,
 	 * and non-whitespace characters.
 	 */
+	@Test
 	public void test3() {
 		AttributeDefinition ad = findAttributeDefinitionById("string2", ads); //$NON-NLS-1$
-		assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
+		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		String[] defaultValue = ad.getDefaultValue();
-		assertNotNull("Default value not found", defaultValue); //$NON-NLS-1$
+		Assert.assertNotNull("Default value not found", defaultValue); //$NON-NLS-1$
 		String[] expectedValue = new String[] {"\\ Hello, world!", //$NON-NLS-1$
 				"\"Goodbye, cruel world ...\" \r\n", //$NON-NLS-1$
 				"To Be,\r\nOr not to be\u0009\u0009" //$NON-NLS-1$
@@ -173,18 +181,20 @@ public class Bug332161Test extends AbstractTest {
 	 * Make sure these changes still return null for the default value when
 	 * unspecified.
 	 */
+	@Test
 	public void test4() {
 		AttributeDefinition ad = findAttributeDefinitionById("string3", ads); //$NON-NLS-1$
-		assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
+		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		assertNull("Default value was not null", ad.getDefaultValue()); //$NON-NLS-1$
 	}
 
 	/*
 	 * Invalid default and option values should be logged and ignored.
 	 */
+	@Test
 	public void test5() {
 		AttributeDefinition ad = findAttributeDefinitionById("char2", ads); //$NON-NLS-1$
-		assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
+		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		assertNull("Default value was not null", ad.getDefaultValue()); //$NON-NLS-1$
 		validateChar2Options(ad.getOptionLabels(), ad.getOptionValues());
 	}
@@ -193,9 +203,10 @@ public class Bug332161Test extends AbstractTest {
 	 * Null validation parameters are always invalid. Empty string validation
 	 * parameters are valid for type String.
 	 */
+	@Test
 	public void test6() {
 		AttributeDefinition ad = findAttributeDefinitionById("string3", ads); //$NON-NLS-1$
-		assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
+		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		assertValidationFail(null, ad);
 		assertValidationPass("", ad); //$NON-NLS-1$
 		ad = findAttributeDefinitionById("string2", ads); //$NON-NLS-1$
@@ -206,9 +217,10 @@ public class Bug332161Test extends AbstractTest {
 	/*
 	 * Test whitespace characters using min and max. No escapes on min or max.
 	 */
+	@Test
 	public void test7() {
 		AttributeDefinition ad = findAttributeDefinitionById("char3", ads); //$NON-NLS-1$
-		assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
+		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		assertValidationPass("\\\u0009", ad); //$NON-NLS-1$
 		assertValidationPass("\\\u0020", ad); //$NON-NLS-1$
 		assertValidationPass("\\ ", ad); //$NON-NLS-1$
@@ -225,17 +237,18 @@ public class Bug332161Test extends AbstractTest {
 	 * Test that empty string is a valid default and option value when
 	 * cardinality is zero.
 	 */
+	@Test
 	public void test8() {
 		AttributeDefinition ad = findAttributeDefinitionById("string4", ads); //$NON-NLS-1$
-		assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
+		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		String[] defaultValue = ad.getDefaultValue();
-		assertNotNull("Default value was null", defaultValue); //$NON-NLS-1$
-		assertEquals("Wrong number of default values", 1, defaultValue.length); //$NON-NLS-1$
-		assertEquals("Wrong default value", "", defaultValue[0]); //$NON-NLS-1$ //$NON-NLS-2$
+		Assert.assertNotNull("Default value was null", defaultValue); //$NON-NLS-1$
+		Assert.assertEquals("Wrong number of default values", 1, defaultValue.length); //$NON-NLS-1$
+		Assert.assertEquals("Wrong default value", "", defaultValue[0]); //$NON-NLS-1$ //$NON-NLS-2$
 		String[] optionValues = ad.getOptionValues();
-		assertNotNull("Option values was null", optionValues); //$NON-NLS-1$
-		assertEquals("Wrong number of option values", 1, optionValues.length); //$NON-NLS-1$
-		assertEquals("Wrong option value", "", optionValues[0]); //$NON-NLS-1$ //$NON-NLS-2$
+		Assert.assertNotNull("Option values was null", optionValues); //$NON-NLS-1$
+		Assert.assertEquals("Wrong number of option values", 1, optionValues.length); //$NON-NLS-1$
+		Assert.assertEquals("Wrong option value", "", optionValues[0]); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/*
@@ -244,9 +257,10 @@ public class Bug332161Test extends AbstractTest {
 	 * getOptionValues() returns null if options were specified but all were
 	 * invalid and removed.
 	 */
+	@Test
 	public void test9() {
 		AttributeDefinition ad = findAttributeDefinitionById("integer1", ads); //$NON-NLS-1$
-		assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
+		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		String[] defaultValue = ad.getDefaultValue();
 		assertNull("Default value was not null", defaultValue); //$NON-NLS-1$
 		assertNull("Option labels was not null", ad.getOptionLabels()); //$NON-NLS-1$
@@ -257,60 +271,63 @@ public class Bug332161Test extends AbstractTest {
 	 * Test that empty string is a valid default and option value when
 	 * cardinality is other than zero.
 	 */
+	@Test
 	public void test10() {
 		AttributeDefinition ad = findAttributeDefinitionById("string5", ads); //$NON-NLS-1$
-		assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
+		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		String[] defaultValue = ad.getDefaultValue();
-		assertNotNull("Default value was null", defaultValue); //$NON-NLS-1$
-		assertEquals("Wrong number of default values", 2, defaultValue.length); //$NON-NLS-1$
-		assertEquals("Wrong default value", "", defaultValue[0]); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("Wrong default value", "", defaultValue[1]); //$NON-NLS-1$ //$NON-NLS-2$
+		Assert.assertNotNull("Default value was null", defaultValue); //$NON-NLS-1$
+		Assert.assertEquals("Wrong number of default values", 2, defaultValue.length); //$NON-NLS-1$
+		Assert.assertEquals("Wrong default value", "", defaultValue[0]); //$NON-NLS-1$ //$NON-NLS-2$
+		Assert.assertEquals("Wrong default value", "", defaultValue[1]); //$NON-NLS-1$ //$NON-NLS-2$
 		String[] optionValues = ad.getOptionValues();
-		assertNotNull("Option values was null", optionValues); //$NON-NLS-1$
-		assertEquals("Wrong number of option values", 5, optionValues.length); //$NON-NLS-1$
-		assertEquals("Wrong option value", "", optionValues[0]); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("Wrong option value", ",", optionValues[1]); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("Wrong option value", ",,", optionValues[2]); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("Wrong option value", ",,,", optionValues[3]); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("Wrong option value", ",,,,", optionValues[4]); //$NON-NLS-1$ //$NON-NLS-2$
+		Assert.assertNotNull("Option values was null", optionValues); //$NON-NLS-1$
+		Assert.assertEquals("Wrong number of option values", 5, optionValues.length); //$NON-NLS-1$
+		Assert.assertEquals("Wrong option value", "", optionValues[0]); //$NON-NLS-1$ //$NON-NLS-2$
+		Assert.assertEquals("Wrong option value", ",", optionValues[1]); //$NON-NLS-1$ //$NON-NLS-2$
+		Assert.assertEquals("Wrong option value", ",,", optionValues[2]); //$NON-NLS-1$ //$NON-NLS-2$
+		Assert.assertEquals("Wrong option value", ",,,", optionValues[3]); //$NON-NLS-1$ //$NON-NLS-2$
+		Assert.assertEquals("Wrong option value", ",,,,", optionValues[4]); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb4"); //$NON-NLS-1$
 		bundle.start();
 		mti = metatype.getMetaTypeInformation(bundle);
-		assertNotNull("Metatype information not found", mti); //$NON-NLS-1$
+		Assert.assertNotNull("Metatype information not found", mti); //$NON-NLS-1$
 		ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb4", null); //$NON-NLS-1$
-		assertNotNull("Object class definition not found", ocd); //$NON-NLS-1$
+		Assert.assertNotNull("Object class definition not found", ocd); //$NON-NLS-1$
 		ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
-		assertNotNull("Attribute definitions not found", ads); //$NON-NLS-1$
-		assertEquals("Wrong number of attribute definitions", 9, ads.length); //$NON-NLS-1$
+		Assert.assertNotNull("Attribute definitions not found", ads); //$NON-NLS-1$
+		Assert.assertEquals("Wrong number of attribute definitions", 9, ads.length); //$NON-NLS-1$
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		bundle.stop();
 		super.tearDown();
 	}
 
 	private void validateChar1Options(String[] optionLabels, String[] optionValues) {
-		assertNotNull("Option labels not found", optionLabels); //$NON-NLS-1$
-		assertEquals("Wrong number of option labels", 6, optionLabels.length); //$NON-NLS-1$
-		assertNotNull("Option values not found", optionValues); //$NON-NLS-1$
-		assertEquals("Wrong number of option values", 6, optionValues.length); //$NON-NLS-1$
+		Assert.assertNotNull("Option labels not found", optionLabels); //$NON-NLS-1$
+		Assert.assertEquals("Wrong number of option labels", 6, optionLabels.length); //$NON-NLS-1$
+		Assert.assertNotNull("Option values not found", optionValues); //$NON-NLS-1$
+		Assert.assertEquals("Wrong number of option values", 6, optionValues.length); //$NON-NLS-1$
 		for (int i = 0; i < optionLabels.length; i++) {
 			if ("Space".equals(optionLabels[i])) { //$NON-NLS-1$
-				assertEquals("\u0020", optionValues[i]); //$NON-NLS-1$
+				Assert.assertEquals("\u0020", optionValues[i]); //$NON-NLS-1$
 			} else if ("Tab".equals(optionLabels[i])) { //$NON-NLS-1$
-				assertEquals("\u0009", optionValues[i]); //$NON-NLS-1$
+				Assert.assertEquals("\u0009", optionValues[i]); //$NON-NLS-1$
 			} else if ("Line Feed".equals(optionLabels[i])) { //$NON-NLS-1$
-				assertEquals("\n", optionValues[i]); //$NON-NLS-1$
+				Assert.assertEquals("\n", optionValues[i]); //$NON-NLS-1$
 			} else if ("Carriage Return".equals(optionLabels[i])) { //$NON-NLS-1$
-				assertEquals("\r", optionValues[i]); //$NON-NLS-1$
+				Assert.assertEquals("\r", optionValues[i]); //$NON-NLS-1$
 			} else if ("Capital A".equals(optionLabels[i])) { //$NON-NLS-1$
-				assertEquals("A", optionValues[i]); //$NON-NLS-1$
+				Assert.assertEquals("A", optionValues[i]); //$NON-NLS-1$
 			} else if ("Lowercase Z".equals(optionLabels[i])) { //$NON-NLS-1$
-				assertEquals("z", optionValues[i]); //$NON-NLS-1$
+				Assert.assertEquals("z", optionValues[i]); //$NON-NLS-1$
 			} else {
 				fail("Wrong number of option labels"); //$NON-NLS-1$
 			}
@@ -318,17 +335,17 @@ public class Bug332161Test extends AbstractTest {
 	}
 
 	private void validateChar2Options(String[] optionLabels, String[] optionValues) {
-		assertNotNull("Option labels not found", optionLabels); //$NON-NLS-1$
-		assertEquals("Wrong number of option labels", 3, optionLabels.length); //$NON-NLS-1$
-		assertNotNull("Option values not found", optionValues); //$NON-NLS-1$
-		assertEquals("Wrong number of option values", 3, optionValues.length); //$NON-NLS-1$
+		Assert.assertNotNull("Option labels not found", optionLabels); //$NON-NLS-1$
+		Assert.assertEquals("Wrong number of option labels", 3, optionLabels.length); //$NON-NLS-1$
+		Assert.assertNotNull("Option values not found", optionValues); //$NON-NLS-1$
+		Assert.assertEquals("Wrong number of option values", 3, optionValues.length); //$NON-NLS-1$
 		for (int i = 0; i < optionLabels.length; i++) {
 			if ("Capital A".equals(optionLabels[i])) { //$NON-NLS-1$
-				assertEquals("A", optionValues[i]); //$NON-NLS-1$
+				Assert.assertEquals("A", optionValues[i]); //$NON-NLS-1$
 			} else if ("Capital B".equals(optionLabels[i])) { //$NON-NLS-1$
-				assertEquals("B", optionValues[i]); //$NON-NLS-1$
+				Assert.assertEquals("B", optionValues[i]); //$NON-NLS-1$
 			} else if ("Capital E".equals(optionLabels[i])) { //$NON-NLS-1$
-				assertEquals("E", optionValues[i]); //$NON-NLS-1$
+				Assert.assertEquals("E", optionValues[i]); //$NON-NLS-1$
 			} else {
 				fail("Wrong number of option labels"); //$NON-NLS-1$
 			}

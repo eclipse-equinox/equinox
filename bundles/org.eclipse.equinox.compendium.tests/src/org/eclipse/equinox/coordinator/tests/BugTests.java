@@ -10,11 +10,18 @@
  *******************************************************************************/
 package org.eclipse.equinox.coordinator.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
 import java.lang.ref.WeakReference;
+import org.junit.Test;
 import org.osgi.service.coordinator.Coordination;
 import org.osgi.service.coordinator.CoordinationException;
 
 public class BugTests extends CoordinatorTest {
+
+	@Test
 	public void testBug421487() throws Exception {
 		// Begin a thread coordination on this thread.
 		Coordination c1 = coordinator.begin("c1", 0); //$NON-NLS-1$
@@ -22,7 +29,7 @@ public class BugTests extends CoordinatorTest {
 		Coordination c2 = coordinator.begin("c2", 0); //$NON-NLS-1$
 		// c2's enclosing coordination will be c1.
 		assertEquals("Wrong enclosing coordination", c1, c2.getEnclosingCoordination()); //$NON-NLS-1$
-		WeakReference reference = new WeakReference(c1);
+		WeakReference<Coordination> reference = new WeakReference<Coordination>(c1);
 		// Set c1 to null so it will become weakly reachable and enqueued.
 		c1 = null;
 		// Ensure c1 becomes weakly reachable.

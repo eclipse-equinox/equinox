@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.equinox.coordinator.tests;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.*;
+import org.junit.Test;
 import org.osgi.service.coordinator.Coordination;
 import org.osgi.service.coordinator.Participant;
 
@@ -22,9 +25,9 @@ import org.osgi.service.coordinator.Participant;
  */
 public class ReverseParticipantOrderNotifyTest extends CoordinatorTest {
 	private static class TestParticipant implements Participant {
-		private final List participants;
+		private final List<TestParticipant> participants;
 
-		public TestParticipant(List participants) {
+		public TestParticipant(List<TestParticipant> participants) {
 			this.participants = participants;
 		}
 
@@ -37,9 +40,10 @@ public class ReverseParticipantOrderNotifyTest extends CoordinatorTest {
 		}
 	}
 
+	@Test
 	public void testReverseParticipateOrderNotifyEnded() {
-		List before = new ArrayList();
-		List after = Collections.synchronizedList(new ArrayList());
+		List<Participant> before = new ArrayList<Participant>();
+		List<TestParticipant> after = Collections.synchronizedList(new ArrayList<TestParticipant>());
 		Coordination c = coordinator.create("c", 0); //$NON-NLS-1$
 		for (int i = 0; i < 10; i++) {
 			Participant p = new TestParticipant(after);
@@ -51,9 +55,10 @@ public class ReverseParticipantOrderNotifyTest extends CoordinatorTest {
 		assertEquals("Not notified in reverse participation order", before, after); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testReverseParticipateOrderNotifyFailed() {
-		List before = new ArrayList();
-		List after = Collections.synchronizedList(new ArrayList());
+		List<Participant> before = new ArrayList<Participant>();
+		List<TestParticipant> after = Collections.synchronizedList(new ArrayList<TestParticipant>());
 		Coordination c = coordinator.begin("c", 0); //$NON-NLS-1$
 		for (int i = 0; i < 10; i++) {
 			Participant p = new TestParticipant(after);

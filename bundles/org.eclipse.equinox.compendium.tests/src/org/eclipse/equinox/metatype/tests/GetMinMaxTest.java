@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.tests;
 
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.equinox.metatype.*;
+import org.junit.*;
 import org.osgi.framework.Bundle;
 import org.osgi.service.metatype.ObjectClassDefinition;
 
@@ -18,7 +21,8 @@ public class GetMinMaxTest extends AbstractTest {
 	private Bundle bundle;
 	private EquinoxObjectClassDefinition ocd;
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("getMinMax.tb1"); //$NON-NLS-1$
 		bundle.start();
@@ -26,30 +30,37 @@ public class GetMinMaxTest extends AbstractTest {
 		ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.getMinMax.tb1", null); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetMax() throws Exception {
 		assertMaxValue("getMax", "0"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Test
 	public void testGetMaxAsNotANumber() {
 		assertMaxValue("getMaxAsNotANumber", "1.0.0"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Test
 	public void testGetMaxNull() {
 		assertMaxValue("getMaxNull", null); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetMin() {
 		assertMinValue("getMin", "5"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Test
 	public void testGetMinAsNotANumber() {
 		assertMinValue("getMinAsNotANumber", "foo"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Test
 	public void testGetMinNull() {
 		assertMinValue("getMinNull", null); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testMinMaxStringValidationUsingInteger() {
 		String name = "minMaxValidUsingInt"; //$NON-NLS-1$
 		assertValid(name, "12345678"); //$NON-NLS-1$
@@ -58,6 +69,7 @@ public class GetMinMaxTest extends AbstractTest {
 		assertInvalid(name, "12345678123456789"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testMinMaxStringValidationUsingString() {
 		String name = "minMaxValidUsingString"; //$NON-NLS-1$
 		assertValid(name, "1"); //$NON-NLS-1$
@@ -76,7 +88,7 @@ public class GetMinMaxTest extends AbstractTest {
 
 	private void assertMinMaxValue(boolean max, String name, String value) {
 		EquinoxAttributeDefinition ad = getAttributeDefinition(name);
-		assertEquals("Wrong " + (max ? "max" : "min") + " value", value, max ? ad.getMax() : ad.getMin()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		Assert.assertEquals("Wrong " + (max ? "max" : "min") + " value", value, max ? ad.getMax() : ad.getMin()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
 	private void assertValid(String name, String value) {
@@ -90,10 +102,11 @@ public class GetMinMaxTest extends AbstractTest {
 
 	private void assertValidation(String name, String value, boolean valid) {
 		EquinoxAttributeDefinition ad = getAttributeDefinition(name);
-		if (valid)
-			assertEquals("Should be valid", "", ad.validate(value)); //$NON-NLS-1$ //$NON-NLS-2$
-		else
+		if (valid) {
+			Assert.assertEquals("Should be valid", "", ad.validate(value)); //$NON-NLS-1$ //$NON-NLS-2$
+		} else {
 			assertTrue("Should be invalid", ad.validate(value).length() > 0); //$NON-NLS-1$
+		}
 	}
 
 	private EquinoxAttributeDefinition getAttributeDefinition(String name) {

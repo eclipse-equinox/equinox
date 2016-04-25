@@ -10,22 +10,25 @@
  *******************************************************************************/
 package org.eclipse.equinox.coordinator.tests;
 
-import junit.framework.TestCase;
 import org.eclipse.equinox.compendium.tests.Activator;
+import org.junit.After;
+import org.junit.Before;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.coordinator.Coordinator;
 
-public abstract class CoordinatorTest extends TestCase {
+public abstract class CoordinatorTest {
 	protected Coordinator coordinator;
-	protected ServiceReference coordinatorRef;
+	protected ServiceReference<Coordinator> coordinatorRef;
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Activator.getBundle(Activator.BUNDLE_COORDINATOR).start();
-		coordinatorRef = Activator.getBundleContext().getServiceReference(Coordinator.class.getName());
-		coordinator = (Coordinator) Activator.getBundleContext().getService(coordinatorRef);
+		coordinatorRef = Activator.getBundleContext().getServiceReference(Coordinator.class);
+		coordinator = Activator.getBundleContext().getService(coordinatorRef);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		Activator.getBundleContext().ungetService(coordinatorRef);
 		Activator.getBundle(Activator.BUNDLE_COORDINATOR).stop();
 	}

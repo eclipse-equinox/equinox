@@ -10,7 +10,12 @@
  *******************************************************************************/
 package org.eclipse.equinox.coordinator.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.equinox.compendium.tests.Activator;
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.service.coordinator.*;
 
 /*
@@ -24,6 +29,7 @@ public class CoordinationMaxTimeoutTest extends CoordinatorTest {
 	private static final String PROPERTY_NAME = "org.eclipse.equinox.coordinator.timeout"; //$NON-NLS-1$
 	private static final long TIMEOUT = 5000;
 
+	@Test
 	public void testMaxTimeoutWithNoTimeout() throws Exception {
 		long start = System.currentTimeMillis();
 		Coordination c = coordinator.create("c", 0); //$NON-NLS-1$
@@ -41,6 +47,7 @@ public class CoordinationMaxTimeoutTest extends CoordinatorTest {
 		}
 	}
 
+	@Test
 	public void testMaxTimeoutWithGreaterTimeout() throws Exception {
 		long start = System.currentTimeMillis();
 		Coordination c = coordinator.create("c", 10000); //$NON-NLS-1$
@@ -58,6 +65,7 @@ public class CoordinationMaxTimeoutTest extends CoordinatorTest {
 		}
 	}
 
+	@Test
 	public void testMaxTimeoutWithLesserTimeout() throws Exception {
 		long start = System.currentTimeMillis();
 		long timeout = 2000;
@@ -76,6 +84,7 @@ public class CoordinationMaxTimeoutTest extends CoordinatorTest {
 		}
 	}
 
+	@Test
 	public void testExtendTimeoutWhenMaxTimeoutAlreadyReached() throws Exception {
 		long start = System.currentTimeMillis();
 		Coordination c = coordinator.create("c", 0); //$NON-NLS-1$
@@ -92,6 +101,7 @@ public class CoordinationMaxTimeoutTest extends CoordinatorTest {
 		}
 	}
 
+	@Test
 	public void testExtendTimeoutWhenMaxTimeoutNotAlreadyReached() throws Exception {
 		long start = System.currentTimeMillis();
 		long timeout = 1500;
@@ -113,11 +123,12 @@ public class CoordinationMaxTimeoutTest extends CoordinatorTest {
 		}
 	}
 
+	@Test
 	public void testNoMaxTimeoutWithTimeout() throws Exception {
 		Activator.getBundleContext().ungetService(coordinatorRef);
 		System.setProperty(PROPERTY_NAME, String.valueOf(0));
-		coordinatorRef = Activator.getBundleContext().getServiceReference(Coordinator.class.getName());
-		coordinator = (Coordinator) Activator.getBundleContext().getService(coordinatorRef);
+		coordinatorRef = Activator.getBundleContext().getServiceReference(Coordinator.class);
+		coordinator = Activator.getBundleContext().getService(coordinatorRef);
 		long start = System.currentTimeMillis();
 		long timeout = 2000;
 		Coordination c = coordinator.create("c", timeout); //$NON-NLS-1$
@@ -135,7 +146,8 @@ public class CoordinationMaxTimeoutTest extends CoordinatorTest {
 		}
 	}
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		System.setProperty(PROPERTY_NAME, String.valueOf(TIMEOUT));
 		assertSystemProperty(PROPERTY_NAME, String.valueOf(TIMEOUT));
 		assertFrameworkProperty(PROPERTY_NAME, String.valueOf(TIMEOUT));

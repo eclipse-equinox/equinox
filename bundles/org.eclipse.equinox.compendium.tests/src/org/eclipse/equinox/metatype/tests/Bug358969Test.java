@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.tests;
 
+import static org.junit.Assert.assertFalse;
+
 import org.eclipse.equinox.metatype.impl.LogTrackerMsg;
 import org.eclipse.equinox.metatype.impl.MetaTypeMsg;
+import org.junit.Test;
 
 public class Bug358969Test extends AbstractTest {
+	@Test
 	public void test1() {
 		String message = "NLS properties file not configured correctly"; //$NON-NLS-1$
 		String prefix = "NLS missing message:"; //$NON-NLS-1$

@@ -10,19 +10,22 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.tests;
 
+import org.junit.*;
 import org.osgi.framework.Bundle;
 import org.osgi.service.metatype.*;
 
 public class AttributeTypePasswordTest extends AbstractTest {
 	private Bundle bundle;
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb1"); //$NON-NLS-1$
 		bundle.start();
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		bundle.stop();
 		super.tearDown();
 	}
@@ -30,13 +33,14 @@ public class AttributeTypePasswordTest extends AbstractTest {
 	/*
 	 * Ensures the PASSWORD type is recognized.
 	 */
+	@Test
 	public void testAttributeTypePassword1() {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
 		for (int i = 0; i < ads.length; i++) {
 			if (ads[i].getID().equals("password1")) { //$NON-NLS-1$
-				assertEquals("Attribute type is not PASSWORD", AttributeDefinition.PASSWORD, ads[i].getType()); //$NON-NLS-1$
+				Assert.assertEquals("Attribute type is not PASSWORD", AttributeDefinition.PASSWORD, ads[i].getType()); //$NON-NLS-1$
 			}
 		}
 	}
@@ -44,18 +48,20 @@ public class AttributeTypePasswordTest extends AbstractTest {
 	/*
 	 * Ensures the PASSWORD type is treated the same as the STRING type.
 	 */
+	@Test
 	public void testAttributeTypePassword2() {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
 		AttributeDefinition ad = findAttributeDefinitionById("password1", ads); //$NON-NLS-1$
-		assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
+		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		assertValidationPass("1234abcd", ad); //$NON-NLS-1$
 	}
 
 	/*
 	 * Ensures the PASSWORD type is treated the same as the STRING type.
 	 */
+	@Test
 	public void testAttributeTypePassword3() {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
@@ -69,6 +75,7 @@ public class AttributeTypePasswordTest extends AbstractTest {
 	 * Ensures the PASSWORD type is treated the same as the STRING type.
 	 * PASSWORD length should be no less than min.
 	 */
+	@Test
 	public void testAttributeTypePassword4() {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
@@ -83,6 +90,7 @@ public class AttributeTypePasswordTest extends AbstractTest {
 	 * Ensures the PASSWORD type is treated the same as the STRING type.
 	 * PASSWORD length should be no greater than max.
 	 */
+	@Test
 	public void testAttributeTypePassword5() {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
@@ -97,6 +105,7 @@ public class AttributeTypePasswordTest extends AbstractTest {
 	 * Ensures the PASSWORD type is treated the same as the STRING type.
 	 * PASSWORD length should be no less than min and no greater than max.
 	 */
+	@Test
 	public void testAttributeTypePassword6() {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$

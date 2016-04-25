@@ -10,15 +10,12 @@
  *******************************************************************************/
 package org.eclipse.equinox.coordinator.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
+@RunWith(Suite.class)
+@SuiteClasses({CoordinationMaxTimeoutTest.class, ReverseParticipantOrderNotifyTest.class, BugTests.class})
 public class AllTests {
-	public static Test suite() {
-		TestSuite suite = new TestSuite("Tests for Equinox Coordinator"); //$NON-NLS-1$
-		suite.addTestSuite(CoordinationMaxTimeoutTest.class);
-		suite.addTestSuite(ReverseParticipantOrderNotifyTest.class);
-		suite.addTestSuite(BugTests.class);
-		return suite;
-	}
+	//see @SuiteClasses
 }

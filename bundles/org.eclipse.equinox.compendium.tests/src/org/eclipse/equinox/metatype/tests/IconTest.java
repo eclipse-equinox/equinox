@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.tests;
 
+import static org.junit.Assert.assertNull;
+
+import org.junit.*;
 import org.osgi.framework.Bundle;
 import org.osgi.service.metatype.*;
 
@@ -30,6 +33,7 @@ import org.osgi.service.metatype.*;
 public class IconTest extends AbstractTest {
 	private Bundle bundle;
 
+	@Test
 	public void testIcon() throws Exception {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		assertNotNull(mti);
@@ -49,6 +53,7 @@ public class IconTest extends AbstractTest {
 		assertIcon(ocd.getIcon(31251), 40000);
 	}
 
+	@Test
 	public void testNullIcon() throws Exception {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		assertNotNull(mti);
@@ -60,12 +65,14 @@ public class IconTest extends AbstractTest {
 		assertNull("Icon was not null", ocd.getIcon(10000)); //$NON-NLS-1$
 	}
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb9"); //$NON-NLS-1$
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		bundle.uninstall();
 		super.tearDown();
 	}

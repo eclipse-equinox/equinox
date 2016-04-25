@@ -10,20 +10,12 @@
  *******************************************************************************/
 package org.eclipse.equinox.compendium.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
+@RunWith(Suite.class)
+@SuiteClasses({org.eclipse.equinox.coordinator.tests.AllTests.class, org.eclipse.equinox.event.tests.AllTests.class, org.eclipse.equinox.metatype.tests.AllTests.class, org.eclipse.equinox.useradmin.tests.AllTests.class})
 public class AllTests {
-
-	public static Test suite() {
-		TestSuite suite = new TestSuite("Tests for Equinox Compendium"); //$NON-NLS-1$
-		suite.addTest(org.eclipse.equinox.metatype.tests.AllTests.suite());
-		// Second run for EquinoxMetaTypeService.
-		suite.addTest(org.eclipse.equinox.metatype.tests.AllTests.suite());
-		suite.addTest(org.eclipse.equinox.useradmin.tests.AllTests.suite());
-		suite.addTest(org.eclipse.equinox.event.tests.AllTests.suite());
-		suite.addTest(org.eclipse.equinox.coordinator.tests.AllTests.suite());
-		return suite;
-	}
-
+	//see @SuiteClasses
 }

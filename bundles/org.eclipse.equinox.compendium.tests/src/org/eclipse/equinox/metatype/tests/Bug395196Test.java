@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.tests;
 
+import static org.junit.Assert.assertNull;
+
+import org.junit.*;
 import org.osgi.framework.Bundle;
 import org.osgi.service.metatype.*;
 
@@ -27,26 +30,29 @@ public class Bug395196Test extends AbstractTest {
 	private MetaTypeInformation mti;
 	private ObjectClassDefinition ocd;
 
+	@Test
 	public void testRejectDefaultValueWhenNotAnOption() {
 		AttributeDefinition ad = findAttributeDefinitionById("ocd3-ad1", ads); //$NON-NLS-1$
-		assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
+		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		assertNull("Default value not matching one of the options was not rejected", ad.getDefaultValue()); //$NON-NLS-1$
 	}
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb1"); //$NON-NLS-1$
 		bundle.start();
 		mti = metatype.getMetaTypeInformation(bundle);
-		assertNotNull("Metatype information not found", mti); //$NON-NLS-1$
+		Assert.assertNotNull("Metatype information not found", mti); //$NON-NLS-1$
 		ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1.testRejectDefaultValueWhenNotAnOption", null); //$NON-NLS-1$
-		assertNotNull("Object class definition not found", ocd); //$NON-NLS-1$
+		Assert.assertNotNull("Object class definition not found", ocd); //$NON-NLS-1$
 		ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
-		assertNotNull("Attribute definitions not found", ads); //$NON-NLS-1$
-		assertEquals("Wrong number of attribute definitions", 1, ads.length); //$NON-NLS-1$
+		Assert.assertNotNull("Attribute definitions not found", ads); //$NON-NLS-1$
+		Assert.assertEquals("Wrong number of attribute definitions", 1, ads.length); //$NON-NLS-1$
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		bundle.stop();
 		super.tearDown();
 	}

@@ -10,18 +10,24 @@
  *******************************************************************************/
 package org.eclipse.equinox.useradmin.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.Dictionary;
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
 import org.eclipse.equinox.compendium.tests.Activator;
+import org.junit.*;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.useradmin.*;
 
-public class UserTest extends TestCase {
+public class UserTest {
 	private UserAdmin userAdmin;
-	private ServiceReference userAdminReference;
+	private ServiceReference<UserAdmin> userAdminReference;
 
+	@Test
 	public void testUser1() {
 		try {
 			createUser1();
@@ -42,6 +48,7 @@ public class UserTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testUser2() {
 		try {
 			createUser2();
@@ -62,7 +69,7 @@ public class UserTest extends TestCase {
 			assertEquals("2", 2, bytes[1]); //$NON-NLS-1$
 			assertEquals("3", 3, bytes[2]); //$NON-NLS-1$
 
-			Dictionary creds = ((User) user).getCredentials();
+			Dictionary<String, Object> creds = (((User) user).getCredentials());
 			test1 = creds.get("test1"); //$NON-NLS-1$
 			assertEquals("test1", "valu", test1); //$NON-NLS-1$ //$NON-NLS-2$
 			test2 = creds.get("test2"); //$NON-NLS-1$
@@ -88,6 +95,7 @@ public class UserTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testUserCreateAndRemove() throws Exception {
 		User user = (User) userAdmin.createRole("testUserCreateAndRemove", Role.USER); //$NON-NLS-1$
 		assertNotNull(user);
@@ -97,17 +105,20 @@ public class UserTest extends TestCase {
 		assertNull(userAdmin.getRole("testUserCreateAndRemove")); //$NON-NLS-1$
 	}
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Activator.getBundle(Activator.BUNDLE_USERADMIN).start();
-		userAdminReference = Activator.getBundleContext().getServiceReference(UserAdmin.class.getName());
-		userAdmin = (UserAdmin) Activator.getBundleContext().getService(userAdminReference);
+		userAdminReference = Activator.getBundleContext().getServiceReference(UserAdmin.class);
+		userAdmin = Activator.getBundleContext().getService(userAdminReference);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		Activator.getBundleContext().ungetService(userAdminReference);
 		Activator.getBundle(Activator.BUNDLE_USERADMIN).stop();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void createUser1() {
 		User user = (User) userAdmin.createRole("testUserCreate1", Role.USER); //$NON-NLS-1$
 		assertNotNull(user);
@@ -125,11 +136,12 @@ public class UserTest extends TestCase {
 			removeUser1();
 		} catch (Exception e) {
 			// Ignore.
-		} catch (AssertionFailedError e) {
+		} catch (AssertionError error) {
 			// Ignore.
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void createUser2() {
 		User user = (User) userAdmin.createRole("testUserCreate2", Role.USER); //$NON-NLS-1$
 		assertNotNull(user);
@@ -153,7 +165,7 @@ public class UserTest extends TestCase {
 			removeUser2();
 		} catch (Exception e) {
 			// Ignore.
-		} catch (AssertionFailedError e) {
+		} catch (AssertionError error) {
 			// Ignore.
 		}
 	}

@@ -10,30 +10,35 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.tests;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import org.eclipse.equinox.compendium.tests.Activator;
 import org.eclipse.osgi.tests.bundles.BundleInstaller;
+import org.junit.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.metatype.*;
 
-public class NoADTest extends TestCase {
+public class NoADTest {
 	private Bundle bundle;
 	private BundleInstaller bundleInstaller;
 	private MetaTypeService metaType;
-	private ServiceReference metaTypeReference;
+	private ServiceReference<MetaTypeService> metaTypeReference;
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Activator.getBundle(Activator.BUNDLE_METATYPE).start();
-		metaTypeReference = Activator.getBundleContext().getServiceReference(MetaTypeService.class.getName());
-		metaType = (MetaTypeService) Activator.getBundleContext().getService(metaTypeReference);
+		metaTypeReference = Activator.getBundleContext().getServiceReference(MetaTypeService.class);
+		metaType = Activator.getBundleContext().getService(metaTypeReference);
 		bundleInstaller = new BundleInstaller("bundle_tests/metatype", Activator.getBundleContext()); //$NON-NLS-1$
 		bundleInstaller.refreshPackages(null);
 		bundle = bundleInstaller.installBundle("tb10"); //$NON-NLS-1$
 		bundle.start();
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		bundleInstaller.shutdown();
 		Activator.getBundleContext().ungetService(metaTypeReference);
 		Activator.getBundle(Activator.BUNDLE_METATYPE).stop();
@@ -42,6 +47,7 @@ public class NoADTest extends TestCase {
 	/*
 	 * Ensures an OCD can exist with no ADs
 	 */
+	@Test
 	public void testNoADs() {
 		MetaTypeInformation mti = metaType.getMetaTypeInformation(bundle);
 		String[] pids = mti.getPids();

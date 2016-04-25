@@ -10,24 +10,29 @@
  *******************************************************************************/
 package org.eclipse.equinox.event.tests;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
-import junit.framework.TestCase;
 import org.eclipse.equinox.compendium.tests.Activator;
+import org.junit.*;
 import org.osgi.framework.*;
 import org.osgi.service.event.*;
 
-public class EventAdminTest extends TestCase {
+public class EventAdminTest {
 	private EventAdmin eventAdmin;
-	private ServiceReference eventAdminReference;
+	private ServiceReference<EventAdmin> eventAdminReference;
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Activator.getBundle(Activator.BUNDLE_EVENT).start();
-		eventAdminReference = Activator.getBundleContext().getServiceReference(EventAdmin.class.getName());
-		eventAdmin = (EventAdmin) Activator.getBundleContext().getService(eventAdminReference);
+		eventAdminReference = Activator.getBundleContext().getServiceReference(EventAdmin.class);
+		eventAdmin = Activator.getBundleContext().getService(eventAdminReference);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		Activator.getBundleContext().ungetService(eventAdminReference);
 		Activator.getBundle(Activator.BUNDLE_EVENT).stop();
 	}
@@ -38,13 +43,14 @@ public class EventAdminTest extends TestCase {
 	 * 
 	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=325064.
 	 */
+	@Test
 	public void testEventDeliveryForWildcardTopic1() {
-		Dictionary properties = new Hashtable();
+		Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(EventConstants.EVENT_TOPIC, "a/b/c/*"); //$NON-NLS-1$
 		BundleContext bundleContext = Activator.getBundleContext();
 		EventHandlerHelper handler = new EventHandlerHelper();
-		ServiceRegistration handlerRegistration = bundleContext.registerService(EventHandler.class, handler, properties);
-		Event event = new Event("a/b/c", (Dictionary) null); //$NON-NLS-1$
+		ServiceRegistration<EventHandler> handlerRegistration = bundleContext.registerService(EventHandler.class, handler, properties);
+		Event event = new Event("a/b/c", (Dictionary<String, Object>) null); //$NON-NLS-1$
 		eventAdmin.sendEvent(event);
 		assertNull("Received event published to topic 'a/b/c' while listening to 'a/b/c/*'", handler.lastEvent()); //$NON-NLS-1$
 		handlerRegistration.unregister();
@@ -54,13 +60,14 @@ public class EventAdminTest extends TestCase {
 	 * Ensures EventAdmin does not deliver an event published on topic "a/b" to 
 	 * an EventHandler listening to topic a/b/c/*.
 	 */
+	@Test
 	public void testEventDeliveryForWildcardTopic2() {
-		Dictionary properties = new Hashtable();
+		Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(EventConstants.EVENT_TOPIC, "a/b/c/*"); //$NON-NLS-1$
 		BundleContext bundleContext = Activator.getBundleContext();
 		EventHandlerHelper handler = new EventHandlerHelper();
-		ServiceRegistration handlerRegistration = bundleContext.registerService(EventHandler.class, handler, properties);
-		Event event = new Event("a/b", (Dictionary) null); //$NON-NLS-1$
+		ServiceRegistration<EventHandler> handlerRegistration = bundleContext.registerService(EventHandler.class, handler, properties);
+		Event event = new Event("a/b", (Dictionary<String, Object>) null); //$NON-NLS-1$
 		eventAdmin.sendEvent(event);
 		assertNull("Received event published to topic 'a/b' while listening to 'a/b/c/*'", handler.lastEvent()); //$NON-NLS-1$
 		handlerRegistration.unregister();
@@ -70,13 +77,14 @@ public class EventAdminTest extends TestCase {
 	 * Ensures EventAdmin does not deliver an event published on topic "a" to 
 	 * an EventHandler listening to topic a/b/c/*.
 	 */
+	@Test
 	public void testEventDeliveryForWildcardTopic3() {
-		Dictionary properties = new Hashtable();
+		Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(EventConstants.EVENT_TOPIC, "a/b/c/*"); //$NON-NLS-1$
 		BundleContext bundleContext = Activator.getBundleContext();
 		EventHandlerHelper handler = new EventHandlerHelper();
-		ServiceRegistration handlerRegistration = bundleContext.registerService(EventHandler.class, handler, properties);
-		Event event = new Event("a", (Dictionary) null); //$NON-NLS-1$
+		ServiceRegistration<EventHandler> handlerRegistration = bundleContext.registerService(EventHandler.class, handler, properties);
+		Event event = new Event("a", (Dictionary<String, Object>) null); //$NON-NLS-1$
 		eventAdmin.sendEvent(event);
 		assertNull("Received event published to topic 'a' while listening to 'a/b/c/*'", handler.lastEvent()); //$NON-NLS-1$
 		handlerRegistration.unregister();
@@ -86,13 +94,14 @@ public class EventAdminTest extends TestCase {
 	 * Ensures EventAdmin delivers an event published on topic "a/b/c/d" to an 
 	 * EventHandler listening to topic "a/b/c/*".
 	 */
+	@Test
 	public void testEventDeliveryForWildcardTopic4() {
-		Dictionary properties = new Hashtable();
+		Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(EventConstants.EVENT_TOPIC, "a/b/c/*"); //$NON-NLS-1$
 		BundleContext bundleContext = Activator.getBundleContext();
 		EventHandlerHelper handler = new EventHandlerHelper();
-		ServiceRegistration handlerRegistration = bundleContext.registerService(EventHandler.class, handler, properties);
-		Event event = new Event("a/b/c/d", (Dictionary) null); //$NON-NLS-1$
+		ServiceRegistration<EventHandler> handlerRegistration = bundleContext.registerService(EventHandler.class, handler, properties);
+		Event event = new Event("a/b/c/d", (Dictionary<String, Object>) null); //$NON-NLS-1$
 		eventAdmin.sendEvent(event);
 		assertNotNull("Did not receive event published to topic 'a/b/c/d' while listening to 'a/b/c/*'", handler.lastEvent()); //$NON-NLS-1$
 		handlerRegistration.unregister();
@@ -102,13 +111,14 @@ public class EventAdminTest extends TestCase {
 	 * Ensures EventAdmin delivers an event published on topic "a/b/c/d/e" to 
 	 * an EventHandler listening to topic "a/b/c/*".
 	 */
+	@Test
 	public void testEventDeliveryForWildcardTopic5() {
-		Dictionary properties = new Hashtable();
+		Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(EventConstants.EVENT_TOPIC, "a/b/c/*"); //$NON-NLS-1$
 		BundleContext bundleContext = Activator.getBundleContext();
 		EventHandlerHelper handler = new EventHandlerHelper();
-		ServiceRegistration handlerRegistration = bundleContext.registerService(EventHandler.class, handler, properties);
-		Event event = new Event("a/b/c/d/e", (Dictionary) null); //$NON-NLS-1$
+		ServiceRegistration<EventHandler> handlerRegistration = bundleContext.registerService(EventHandler.class, handler, properties);
+		Event event = new Event("a/b/c/d/e", (Dictionary<String, Object>) null); //$NON-NLS-1$
 		eventAdmin.sendEvent(event);
 		assertNotNull("Did not receive event published to topic 'a/b/c/d/e' while listening to 'a/b/c/*'", handler.lastEvent()); //$NON-NLS-1$
 		handlerRegistration.unregister();
@@ -118,13 +128,14 @@ public class EventAdminTest extends TestCase {
 	 * Ensures EventAdmin delivers an event published on topic "a/b/c/d/e/f" to 
 	 * an EventHandler listening to topic "a/b/c/*".
 	 */
+	@Test
 	public void testEventDeliveryForWildcardTopic6() {
-		Dictionary properties = new Hashtable();
+		Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(EventConstants.EVENT_TOPIC, "a/b/c/*"); //$NON-NLS-1$
 		BundleContext bundleContext = Activator.getBundleContext();
 		EventHandlerHelper handler = new EventHandlerHelper();
-		ServiceRegistration handlerRegistration = bundleContext.registerService(EventHandler.class, handler, properties);
-		Event event = new Event("a/b/c/d/e/f", (Dictionary) null); //$NON-NLS-1$
+		ServiceRegistration<EventHandler> handlerRegistration = bundleContext.registerService(EventHandler.class, handler, properties);
+		Event event = new Event("a/b/c/d/e/f", (Dictionary<String, Object>) null); //$NON-NLS-1$
 		eventAdmin.sendEvent(event);
 		assertNotNull("Did not receive event published to topic 'a/b/c/d/e/f' while listening to 'a/b/c/*'", handler.lastEvent()); //$NON-NLS-1$
 		handlerRegistration.unregister();
@@ -136,16 +147,17 @@ public class EventAdminTest extends TestCase {
 	 * 
 	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=325064.
 	 */
+	@Test
 	public void testEventDeliveryForWildcardTopic7() {
-		Dictionary properties = new Hashtable();
+		Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		properties.put(EventConstants.EVENT_TOPIC, new String[] {"a/b/c", "a/b/c/*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		BundleContext bundleContext = Activator.getBundleContext();
 		EventHandlerHelper handler = new EventHandlerHelper();
-		ServiceRegistration handlerRegistration = bundleContext.registerService(EventHandler.class, handler, properties);
-		Event event = new Event("a/b/c", (Dictionary) null); //$NON-NLS-1$
+		ServiceRegistration<EventHandler> handlerRegistration = bundleContext.registerService(EventHandler.class, handler, properties);
+		Event event = new Event("a/b/c", (Dictionary<String, Object>) null); //$NON-NLS-1$
 		eventAdmin.sendEvent(event);
 		assertNotNull("Did not receive event published to topic 'a/b/c' while listening to 'a/b/c'", handler.clearLastEvent()); //$NON-NLS-1$
-		event = new Event("a/b/c/d", (Dictionary) null); //$NON-NLS-1$
+		event = new Event("a/b/c/d", (Dictionary<String, Object>) null); //$NON-NLS-1$
 		eventAdmin.sendEvent(event);
 		assertNotNull("Did not receive event published to topic 'a/b/c/d' while listening to 'a/b/c/*'", handler.lastEvent()); //$NON-NLS-1$
 		handlerRegistration.unregister();

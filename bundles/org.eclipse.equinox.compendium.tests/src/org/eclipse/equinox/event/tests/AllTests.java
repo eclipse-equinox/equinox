@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.equinox.event.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
+@RunWith(Suite.class)
+@SuiteClasses(EventAdminTest.class)
 public class AllTests {
-	public static Test suite() {
-		TestSuite suite = new TestSuite("Tests for Equinox EventAdmin"); //$NON-NLS-1$
-		suite.addTestSuite(EventAdminTest.class);
-		return suite;
-	}
+	//see @SuiteClasses
 }

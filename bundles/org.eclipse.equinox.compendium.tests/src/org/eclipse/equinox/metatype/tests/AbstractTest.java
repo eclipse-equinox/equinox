@@ -10,35 +10,38 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.tests;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.*;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import junit.framework.TestCase;
 import org.eclipse.equinox.compendium.tests.Activator;
 import org.eclipse.equinox.metatype.EquinoxMetaTypeService;
 import org.eclipse.osgi.tests.bundles.BundleInstaller;
+import org.junit.*;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.metatype.*;
 
-public abstract class AbstractTest extends TestCase {
+public abstract class AbstractTest {
 	protected BundleInstaller bundleInstaller;
 	protected EquinoxMetaTypeService metatype;
-	protected ServiceReference metaTypeReference;
+	protected ServiceReference<EquinoxMetaTypeService> metaTypeReference;
 
 	protected void assertAttributeDefinition(AttributeDefinition ad, int cardinality, String[] defaultValue, String description, String id, String name, String[] optionLabels, String[] optionValues, int type) {
-		assertEquals("Wrong cardinality", cardinality, ad.getCardinality()); //$NON-NLS-1$
+		Assert.assertEquals("Wrong cardinality", cardinality, ad.getCardinality()); //$NON-NLS-1$
 		assertEquals("Wrong default value", defaultValue, ad.getDefaultValue()); //$NON-NLS-1$
-		assertEquals("Wrong description", description, ad.getDescription()); //$NON-NLS-1$
-		assertEquals("Wrong id", id, ad.getID()); //$NON-NLS-1$
-		assertEquals("Wrong name", name, ad.getName()); //$NON-NLS-1$
+		Assert.assertEquals("Wrong description", description, ad.getDescription()); //$NON-NLS-1$
+		Assert.assertEquals("Wrong id", id, ad.getID()); //$NON-NLS-1$
+		Assert.assertEquals("Wrong name", name, ad.getName()); //$NON-NLS-1$
 		assertEquals("Wrong option labels", optionLabels, ad.getOptionLabels()); //$NON-NLS-1$
 		assertEquals("Wrong option values", optionValues, ad.getOptionValues()); //$NON-NLS-1$
-		assertEquals("Wrong type", type, ad.getType()); //$NON-NLS-1$
+		Assert.assertEquals("Wrong type", type, ad.getType()); //$NON-NLS-1$
 	}
 
 	protected void assertAttributeDefinitions(AttributeDefinition[] ads, int size) {
-		assertNotNull("Null attribute definitions", ads); //$NON-NLS-1$
-		assertEquals("Wrong attribute definitions size", size, ads.length); //$NON-NLS-1$
+		Assert.assertNotNull("Null attribute definitions", ads); //$NON-NLS-1$
+		Assert.assertEquals("Wrong attribute definitions size", size, ads.length); //$NON-NLS-1$
 	}
 
 	protected void assertEquals(String message, String[] s1, String[] s2) {
@@ -50,11 +53,11 @@ public abstract class AbstractTest extends TestCase {
 		if (s1.length != s2.length)
 			fail(message + " (array lengths weren't equal)"); //$NON-NLS-1$
 		for (int i = 0; i < s1.length; i++)
-			assertEquals(message, s1[i], s2[i]);
+			Assert.assertEquals(message, s1[i], s2[i]);
 	}
 
 	protected void assertIcon(InputStream icon, int size) throws IOException {
-		assertNotNull("Icon was null", icon); //$NON-NLS-1$
+		Assert.assertNotNull("Icon was null", icon); //$NON-NLS-1$
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
 			byte[] bytes = new byte[2048];
@@ -67,25 +70,25 @@ public abstract class AbstractTest extends TestCase {
 				icon.close();
 			}
 			Icon i = new ImageIcon(baos.toByteArray());
-			assertEquals("Wrong icon size", size, i.getIconHeight() * i.getIconWidth()); //$NON-NLS-1$
+			Assert.assertEquals("Wrong icon size", size, i.getIconHeight() * i.getIconWidth()); //$NON-NLS-1$
 		} finally {
 			baos.close();
 		}
 	}
 
 	protected void assertNotNull(MetaTypeInformation mti) {
-		assertNotNull("Metatype information was null", mti); //$NON-NLS-1$
+		Assert.assertNotNull("Metatype information was null", mti); //$NON-NLS-1$
 	}
 
 	protected void assertNotNull(ObjectClassDefinition ocd) {
-		assertNotNull("Object class definition was null", ocd); //$NON-NLS-1$
+		Assert.assertNotNull("Object class definition was null", ocd); //$NON-NLS-1$
 	}
 
 	protected void assertObjectClassDefinition(ObjectClassDefinition ocd, String id, String name, String description) {
 		assertNotNull(ocd);
-		assertEquals("Wrong object class definition ID", id, ocd.getID()); //$NON-NLS-1$
-		assertEquals("Wrong object class definition name", name, ocd.getName()); //$NON-NLS-1$
-		assertEquals("Wrong object class definition description", description, ocd.getDescription()); //$NON-NLS-1$
+		Assert.assertEquals("Wrong object class definition ID", id, ocd.getID()); //$NON-NLS-1$
+		Assert.assertEquals("Wrong object class definition name", name, ocd.getName()); //$NON-NLS-1$
+		Assert.assertEquals("Wrong object class definition description", description, ocd.getDescription()); //$NON-NLS-1$
 	}
 
 	protected void assertValidationFail(String value, AttributeDefinition ad) {
@@ -95,12 +98,12 @@ public abstract class AbstractTest extends TestCase {
 
 	protected void assertValidationPass(String value, AttributeDefinition ad) {
 		String result = assertValidationPresent(value, ad);
-		assertEquals("Validation failed", 0, result.length()); //$NON-NLS-1$
+		Assert.assertEquals("Validation failed", 0, result.length()); //$NON-NLS-1$
 	}
 
 	protected String assertValidationPresent(String value, AttributeDefinition ad) {
 		String result = ad.validate(value);
-		assertNotNull("No validation was present", result); //$NON-NLS-1$
+		Assert.assertNotNull("No validation was present", result); //$NON-NLS-1$
 		return result;
 	}
 
@@ -138,16 +141,18 @@ public abstract class AbstractTest extends TestCase {
 		return defaultValue[0];
 	}
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Activator.getBundle(Activator.BUNDLE_METATYPE).start();
-		metaTypeReference = Activator.getBundleContext().getServiceReference(EquinoxMetaTypeService.class.getName());
-		assertNotNull("Metatype service reference not found", metaTypeReference); //$NON-NLS-1$
-		metatype = (EquinoxMetaTypeService) Activator.getBundleContext().getService(metaTypeReference);
-		assertNotNull("Metatype service not found", metatype); //$NON-NLS-1$
+		metaTypeReference = Activator.getBundleContext().getServiceReference(EquinoxMetaTypeService.class);
+		Assert.assertNotNull("Metatype service reference not found", metaTypeReference); //$NON-NLS-1$
+		metatype = Activator.getBundleContext().getService(metaTypeReference);
+		Assert.assertNotNull("Metatype service not found", metatype); //$NON-NLS-1$
 		bundleInstaller = new BundleInstaller("bundle_tests/metatype", Activator.getBundleContext()); //$NON-NLS-1$
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		bundleInstaller.shutdown();
 		Activator.getBundleContext().ungetService(metaTypeReference);
 		Activator.getBundle(Activator.BUNDLE_METATYPE).stop();

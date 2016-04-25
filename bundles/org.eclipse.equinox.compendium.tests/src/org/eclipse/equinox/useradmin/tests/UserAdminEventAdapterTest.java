@@ -10,37 +10,42 @@
  *******************************************************************************/
 package org.eclipse.equinox.useradmin.tests;
 
+import static org.junit.Assert.assertFalse;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
-import junit.framework.TestCase;
 import org.eclipse.equinox.compendium.tests.Activator;
+import org.junit.*;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.*;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 
-public class UserAdminEventAdapterTest extends TestCase {
+public class UserAdminEventAdapterTest {
 
 	private UserAdmin userAdmin;
-	private ServiceReference userAdminReference;
+	private ServiceReference<UserAdmin> userAdminReference;
 
 	boolean locked = false;
 	Object lock = new Object();
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Activator.getBundle(Activator.BUNDLE_EVENT).start();
 		Activator.getBundle(Activator.BUNDLE_USERADMIN).start();
-		userAdminReference = Activator.getBundleContext().getServiceReference(UserAdmin.class.getName());
-		userAdmin = (UserAdmin) Activator.getBundleContext().getService(userAdminReference);
+		userAdminReference = Activator.getBundleContext().getServiceReference(UserAdmin.class);
+		userAdmin = Activator.getBundleContext().getService(userAdminReference);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		Activator.getBundleContext().ungetService(userAdminReference);
 		Activator.getBundle(Activator.BUNDLE_USERADMIN).stop();
 		Activator.getBundle(Activator.BUNDLE_EVENT).stop();
 	}
 
+	@Test
 	public void testUserAdminEvent() throws Exception {
 
 		EventHandler handler = new EventHandler() {
@@ -53,10 +58,10 @@ public class UserAdminEventAdapterTest extends TestCase {
 
 		};
 		String[] topics = new String[] {"org/osgi/service/useradmin/UserAdmin/*"}; //$NON-NLS-1$
-		Dictionary handlerProps = new Hashtable();
+		Dictionary<String, Object> handlerProps = new Hashtable<String, Object>();
 
 		handlerProps.put(EventConstants.EVENT_TOPIC, topics);
-		ServiceRegistration reg = Activator.getBundleContext().registerService(EventHandler.class.getName(), handler, handlerProps);
+		ServiceRegistration<EventHandler> reg = Activator.getBundleContext().registerService(EventHandler.class, handler, handlerProps);
 
 		synchronized (lock) {
 			userAdmin.createRole("testRole", Role.USER); //$NON-NLS-1$

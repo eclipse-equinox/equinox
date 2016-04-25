@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.tests;
 
+import static org.junit.Assert.fail;
+
+import org.junit.*;
 import org.osgi.framework.Bundle;
 import org.osgi.service.metatype.*;
 
@@ -23,15 +26,16 @@ import org.osgi.service.metatype.*;
 public class GetDefaultValueTest extends AbstractTest {
 	private Bundle bundle;
 
+	@Test
 	public void testGetDefaultValue() {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
-		assertNotNull("Metatype information was null", mti); //$NON-NLS-1$
+		Assert.assertNotNull("Metatype information was null", mti); //$NON-NLS-1$
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1.getDefaultValues", null); //$NON-NLS-1$
-		assertNotNull("Object class definition was null", ocd); //$NON-NLS-1$
-		assertEquals("Wrong object class definition ID", "ocd2", ocd.getID()); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("Wrong object class definition name", "getDefaultValues", ocd.getName()); //$NON-NLS-1$ //$NON-NLS-2$
+		Assert.assertNotNull("Object class definition was null", ocd); //$NON-NLS-1$
+		Assert.assertEquals("Wrong object class definition ID", "ocd2", ocd.getID()); //$NON-NLS-1$ //$NON-NLS-2$
+		Assert.assertEquals("Wrong object class definition name", "getDefaultValues", ocd.getName()); //$NON-NLS-1$ //$NON-NLS-2$
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
-		assertEquals("Wrong number of attribute definitions", 24, ads.length); //$NON-NLS-1$
+		Assert.assertEquals("Wrong number of attribute definitions", 24, ads.length); //$NON-NLS-1$
 		for (int i = 0; i < ads.length; i++) {
 			switch (Integer.parseInt(ads[i].getID())) {
 				case 1 :
@@ -112,12 +116,9 @@ public class GetDefaultValueTest extends AbstractTest {
 		}
 	}
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb1"); //$NON-NLS-1$
-	}
-
-	protected void tearDown() throws Exception {
-		super.tearDown();
 	}
 }
