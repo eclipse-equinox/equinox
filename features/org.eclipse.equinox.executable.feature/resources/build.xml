@@ -212,20 +212,6 @@
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.gtk.s390/${collectingFolder}" includes="launcher" />
 	</target>
-	<target name="rootFilessolaris_gtk_sparc">
-		<mkdir dir="${feature.base}/solaris.gtk.sparc/${collectingFolder}"/>
-		<copy todir="${feature.base}/solaris.gtk.sparc/${collectingFolder}" failonerror="true" overwrite="true">
-			<fileset dir="${basedir}/bin/gtk/solaris/sparc" includes="**"			/>
-		</copy>
-		<chmod perm="755" dir="${feature.base}/solaris.gtk.sparc/${collectingFolder}" includes="launcher" />
-	</target>
-	<target name="rootFilessolaris_gtk_x86">
-		<mkdir dir="${feature.base}/solaris.gtk.x86/${collectingFolder}"/>
-		<copy todir="${feature.base}/solaris.gtk.x86/${collectingFolder}" failonerror="true" overwrite="true">
-			<fileset dir="${basedir}/bin/gtk/solaris/x86" includes="**"			/>
-		</copy>
-		<chmod perm="755" dir="${feature.base}/solaris.gtk.x86/${collectingFolder}" includes="launcher" />
-	</target>
 	<target name="rootFilessolaris_gtk_x86_64">
 		<mkdir dir="${feature.base}/solaris.gtk.x86_64/${collectingFolder}"/>
 		<copy todir="${feature.base}/solaris.gtk.x86_64/${collectingFolder}" failonerror="true" overwrite="true">
@@ -264,8 +250,6 @@
 		<antcall target="rootFileslinux_gtk_x86_64"/>
 		<antcall target="rootFileslinux_gtk_ia64"/>
 		<antcall target="rootFileslinux_gtk_s390x"/>
-		<antcall target="rootFilessolaris_gtk_sparc"/>
-		<antcall target="rootFilessolaris_gtk_x86"/>
 		<antcall target="rootFilessolaris_gtk_x86_64"/>
 		<antcall target="rootFilesaix_gtk_ppc64"/>
 		<antcall target="rootFilesaix_gtk_ppc"/>
