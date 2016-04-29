@@ -244,7 +244,7 @@ public class StorageUtil {
 			}
 
 			if (DEBUG) {
-				Debug.println("move: failed to rename " + from + " to " + to + " (" + (maxTries - tryCount) + " attempts remaining)");
+				Debug.println("move: failed to rename " + from + " to " + to + " (" + (maxTries - tryCount) + " attempts remaining)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 
 			if (tryCount >= maxTries) {
@@ -267,13 +267,13 @@ public class StorageUtil {
 			}
 
 			if (!rm(from, DEBUG)) {
-				Debug.println("move: failed to delete " + from + " after copy to " + to + ". Scheduling for delete on JVM exit.");
+				Debug.println("move: failed to delete " + from + " after copy to " + to + ". Scheduling for delete on JVM exit."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				from.deleteOnExit();
 			}
 			return true;
 		} catch (IOException e) {
 			if (DEBUG) {
-				Debug.println("move: failed to copy " + from + " to " + to);
+				Debug.println("move: failed to copy " + from + " to " + to); //$NON-NLS-1$ //$NON-NLS-2$
 				Debug.printStackTrace(e);
 			}
 
