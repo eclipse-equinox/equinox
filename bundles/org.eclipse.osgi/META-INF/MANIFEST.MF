@@ -80,7 +80,7 @@ Export-Service: org.osgi.service.packageadmin.PackageAdmin,
  org.osgi.service.startlevel.StartLevel,
  org.eclipse.osgi.service.debug.DebugOptions
 Provide-Capability: osgi.service; objectClass:List<String>="org.osgi.service.log.LogReaderService, org.eclipse.equinox.log.ExtendedLogReaderService",
- osgi.service; objectClass:List<String>="org.osgi.service.log.LogService, org.eclipse.equinox.log.ExtendedLogService",
+ osgi.service; objectClass:List<String>="org.osgi.service.log.LoggerFactory, org.osgi.service.log.LogService, org.eclipse.equinox.log.ExtendedLogService",
  osgi.service; objectClass:List<String>="org.osgi.service.log.admin.LoggerAdmin",
  osgi.service; objectClass:List<String>="org.eclipse.osgi.framework.log.FrameworkLog",
  osgi.service; objectClass:List<String>="org.eclipse.osgi.service.datalocation.Location"; type="osgi.user.area",
