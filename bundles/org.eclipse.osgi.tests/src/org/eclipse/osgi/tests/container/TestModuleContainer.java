@@ -2101,6 +2101,32 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
+	public void testNativeWithFitlerChars() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install the system.bundle
+		String extraCapabilities = "osgi.native; osgi.native.osname=\"Windows NT (unknown)\"";
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, extraCapabilities, container);
+		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+
+		// install bundle with Bundle-NativeCode
+		Map<String, String> nativeCodeManifest = new HashMap<String, String>();
+		nativeCodeManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		nativeCodeManifest.put(Constants.BUNDLE_SYMBOLICNAME, "importer");
+		nativeCodeManifest.put(Constants.BUNDLE_NATIVECODE, // 
+				"/lib/mylib.dll; osname=\"win32\"; osname=\"Windows NT (unknown)\"," + //
+						"/lib/mylib.lib; osname=\"Linux\"");
+
+		Module nativeCodeModule = installDummyModule(nativeCodeManifest, "nativeCodeBundle", container);
+
+		// unsatisfied optional and dynamic imports do not fail a resolve. 
+		report = container.resolve(Arrays.asList(nativeCodeModule), true);
+		Assert.assertNull("Failed to resolve nativeCodeBundle.", report.getResolutionException());
+	}
+
+	@Test
 	public void testUTF8LineContinuation() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
