@@ -772,6 +772,10 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * </pre></code>
 	 * 
 	 * @param totalWork number of ticks to consume from the receiver
+	 * @param suppressFlags a bitwise combination of SUPPRESS_* flags. They can be used to suppress
+	 * various behaviors on the newly-created monitor. Callers should generally include
+	 * the {@link #SUPPRESS_BEGINTASK} flag unless they are invoking a method whose JavaDoc specifically
+	 * states that the string argument to {@link #beginTask(String, int)} must be preserved.
 	 * @return new sub progress monitor that may be used in place of a new SubMonitor
 	 */
 	public SubMonitor newChild(int totalWork, int suppressFlags) {
@@ -943,7 +947,10 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * </pre></code>
 	 * 
 	 * @param totalWork number of ticks to consume from the receiver
-	 * @param suppressFlags TODO
+	 * @param suppressFlags a bitwise combination of SUPPRESS_* flags. They can be used to suppress
+	 * various behaviors on the newly-created monitor. Callers should generally include
+	 * the {@link #SUPPRESS_BEGINTASK} flag unless they are invoking a method whose JavaDoc specifically
+	 * states that the string argument to {@link #beginTask(String, int)} must be preserved.
 	 * @return new sub progress monitor that may be used in place of a new SubMonitor
 	 * @throws OperationCanceledException if the monitor has been cancelled
 	 * @since 3.8
