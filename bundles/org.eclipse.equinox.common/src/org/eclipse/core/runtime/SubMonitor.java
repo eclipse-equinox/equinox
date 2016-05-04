@@ -873,9 +873,10 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * 
 	 * @param totalWork number of ticks to consume from the receiver
 	 * @return a new SubMonitor instance
+	 * @throws OperationCanceledException if the monitor has been cancelled
 	 * @since 3.8
 	 */
-	public SubMonitor split(int totalWork) {
+	public SubMonitor split(int totalWork) throws OperationCanceledException {
 		return split(totalWork, SUPPRESS_BEGINTASK);
 	}
 
@@ -887,7 +888,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * or {@link #setWorkRemaining}</p>
 	 * 
 	 * <p>This method is much like {@link #newChild}, but will additionally check for cancellation and
-	 * will throw an OperationCanceledException if the monitor has been cancelled. Not every call to
+	 * will throw an {@link OperationCanceledException} if the monitor has been cancelled. Not every call to
 	 * this method will trigger a cancellation check. The checks will be performed as often as possible
 	 * without degrading the performance of the caller.
 	 * 
@@ -942,10 +943,12 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * </pre></code>
 	 * 
 	 * @param totalWork number of ticks to consume from the receiver
+	 * @param suppressFlags TODO
 	 * @return new sub progress monitor that may be used in place of a new SubMonitor
+	 * @throws OperationCanceledException if the monitor has been cancelled
 	 * @since 3.8
 	 */
-	public SubMonitor split(int totalWork, int suppressFlags) {
+	public SubMonitor split(int totalWork, int suppressFlags) throws OperationCanceledException {
 		int oldUsedForParent = this.usedForParent;
 		SubMonitor result = newChild(totalWork, suppressFlags);
 
