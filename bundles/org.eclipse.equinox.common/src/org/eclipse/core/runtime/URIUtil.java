@@ -299,7 +299,7 @@ public final class URIUtil {
 	/**
 	 * Returns a URI as a URL.
 	 * 
-	 * @throws MalformedURLException 
+	 * <p>Better use {@link URI#toURL()} instead.</p>
 	 */
 	public static URL toURL(URI uri) throws MalformedURLException {
 		return new URL(uri.toString());

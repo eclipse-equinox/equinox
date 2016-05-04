@@ -222,13 +222,6 @@ public abstract class PlatformURLConnection extends URLConnection {
 		System.out.println("URL " + s); //$NON-NLS-1$
 	}
 
-	/**
-	 * @throws IOException
-	 */
-	public URL[] getAuxillaryURLs() throws IOException {
-		return null;
-	}
-
 	@Override
 	public synchronized InputStream getInputStream() throws IOException {
 		if (!connected)

@@ -23,7 +23,6 @@ import org.osgi.framework.Bundle;
  */
 public class PlatformURLPluginConnection extends PlatformURLConnection {
 
-	private Bundle target = null;
 	private static boolean isRegistered = false;
 	public static final String PLUGIN = "plugin"; //$NON-NLS-1$
 
@@ -88,33 +87,5 @@ public class PlatformURLPluginConnection extends PlatformURLConnection {
 			return;
 		PlatformURLHandler.register(PLUGIN, PlatformURLPluginConnection.class);
 		isRegistered = true;
-	}
-
-	@Override
-	public URL[] getAuxillaryURLs() throws IOException {
-		if (target == null) {
-			String spec = url.getFile().trim();
-			if (spec.startsWith("/")) //$NON-NLS-1$
-				spec = spec.substring(1);
-			if (!spec.startsWith(PLUGIN))
-				throw new IOException(NLS.bind(CommonMessages.url_badVariant, url));
-			int ix = spec.indexOf("/", PLUGIN.length() + 1); //$NON-NLS-1$
-			String ref = ix == -1 ? spec.substring(PLUGIN.length() + 1) : spec.substring(PLUGIN.length() + 1, ix);
-			String id = getId(ref);
-			Activator activator = Activator.getDefault();
-			if (activator == null)
-				throw new IOException(CommonMessages.activator_not_available);
-			target = activator.getBundle(id);
-			if (target == null)
-				throw new IOException(NLS.bind(CommonMessages.url_resolvePlugin, url));
-		}
-		Bundle[] fragments = Activator.getDefault().getFragments(target);
-		int fragmentLength = (fragments == null) ? 0 : fragments.length;
-		if (fragmentLength == 0)
-			return null;
-		URL[] result = new URL[fragmentLength];
-		for (int i = 0; i < fragmentLength; i++)
-			result[i] = fragments[i].getEntry("/"); //$NON-NLS-1$
-		return result;
 	}
 }

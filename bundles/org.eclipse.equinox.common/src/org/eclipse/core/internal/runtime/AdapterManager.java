@@ -194,7 +194,6 @@ public final class AdapterManager implements IAdapterManager {
 	 * Computes the adapters that the provided class can adapt to, along
 	 * with the factory object that can perform that transformation. Returns 
 	 * a table of adapter class name to factory object.
-	 * @param adaptable
 	 */
 	private Map<String, IAdapterFactory> getFactories(Class<? extends Object> adaptable) {
 		//cache reference to lookup to protect against concurrent flush
