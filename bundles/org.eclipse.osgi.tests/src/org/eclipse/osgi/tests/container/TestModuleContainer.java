@@ -1803,7 +1803,7 @@ public class TestModuleContainer extends AbstractTest {
 
 		Map<String, String> configuration = new HashMap<String, String>();
 		configuration.put(EquinoxConfiguration.PROP_RESOLVER_BATCH_TIMEOUT, "5000");
-		Map<String, String> debugOpts = Collections.singletonMap("org.eclipse.osgi/resolver/uses", "true");
+		Map<String, String> debugOpts = Collections.emptyMap();
 		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), configuration, new DummyResolverHookFactory(), new DummyDebugOptions(debugOpts));
 		adaptor.setResolverExecutor(executor);
 		ModuleContainer container = adaptor.getContainer();

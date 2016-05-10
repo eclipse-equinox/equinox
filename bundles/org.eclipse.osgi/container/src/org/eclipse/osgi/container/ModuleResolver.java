@@ -482,7 +482,7 @@ final class ModuleResolver {
 			private Map<Resource, ResolutionException> errors = null;
 
 			public ResolveLogger() {
-				super(0);
+				super(DEBUG_USES ? Logger.LOG_DEBUG : 0);
 			}
 
 			@Override
@@ -508,6 +508,18 @@ final class ModuleResolver {
 			Map<Resource, ResolutionException> getUsesConstraintViolations() {
 				return errors == null ? Collections.<Resource, ResolutionException> emptyMap() : errors;
 			}
+
+			@Override
+			public boolean isDebugEnabled() {
+				checkTimeout();
+				return DEBUG_USES;
+			}
+
+			@Override
+			protected void doLog(int level, String msg, Throwable throwable) {
+				Debug.println("RESOLVER: " + msg + SEPARATOR + (throwable != null ? (TAB + TAB + throwable.getMessage()) : "")); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+
 		}
 
 		private final ModuleResolutionReport.Builder reportBuilder = new ModuleResolutionReport.Builder();
@@ -1496,11 +1508,15 @@ final class ModuleResolver {
 
 		@Override
 		public void execute(Runnable command) {
+			checkTimeout();
+			adaptor.getResolverExecutor().execute(command);
+		}
+
+		void checkTimeout() {
 			if (checkTimeout && resolveTimeout < System.currentTimeMillis()) {
 				checkTimeout = false;
 				throw new ResolutionTimeout();
 			}
-			adaptor.getResolverExecutor().execute(command);
 		}
 	}
 
