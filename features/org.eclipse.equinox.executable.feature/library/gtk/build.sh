@@ -186,8 +186,13 @@ case $defaultOS in
 				CC=cc
 				;;
 			"sparc")
-				defaultOSArch="sparc"
-				[ -d /bluebird/teamswt/swt-builddir/build/JRE/SPARC/jdk1.6.0_14 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/build/JRE/SPARC/jdk1.6.0_14"
+				if [ "`isainfo -k`" = "sparcv9" ]; then
+					defaultOSArch="sparcv9"
+					[ -d /bluebird/teamswt/swt-builddir/JDKs/SOLARIS/SPARC64/jdk1.5.0_22 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/SOLARIS/SPARC64/jdk1.5.0_22"
+				else
+					defaultOSArch="sparc"
+					[ -d /bluebird/teamswt/swt-builddir/build/JRE/SPARC/jdk1.6.0_14 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/build/JRE/SPARC/jdk1.6.0_14"
+				fi
 				CC=cc
 				;;
 			*)
@@ -241,9 +246,11 @@ elif [ "$defaultOSArch" = "ia64" ];  then
 elif [ "$defaultOSArch" = "x86" ];  then
 	M_ARCH=-m32
 	export M_ARCH
-elif [ "$defaultOS" = "solaris" -a "$defaultOSArch" = "x86_64" ];  then
-	M_ARCH=-m64
-	export M_ARCH
+elif [ "$defaultOS" = "solaris" ];  then
+	if [ "$defaultOSArch" = "x86_64" -o "$defaultOSArch" = "sparcv9" ]; then
+		M_ARCH=-m64
+		export M_ARCH
+	fi
 fi
 
 LIBRARY_DIR="$EXEC_DIR/../org.eclipse.equinox.launcher.$defaultWS.$defaultOS.$defaultOSArch"
