@@ -235,8 +235,8 @@ float scaleFactor ()
 	screen = gtk.gdk_screen_get_default();
 	resolution = gtk.gdk_screen_get_resolution (screen);
 	if (resolution <= 0) resolution = 96; // in unix and windows 100% corresponds to dpi of 96
-	resolution = ((int)(resolution/24 + 0.5)) * 24; //rounding the resolution to 25% multiples, 25% of 96 is 24.
-	scaleFactor = (float)(resolution/96);
+	resolution = ((int)((resolution + 24) / 96)) * 96; //rounding the resolution to 100% multiples,this implementation needs to be kept in sync with org.eclipse.swt.internal.DPIUtil#setDeviceZoom(int)
+	scaleFactor = (float)(resolution / 96);
 	return scaleFactor;
 }
 /* Create and Display the Splash Window */

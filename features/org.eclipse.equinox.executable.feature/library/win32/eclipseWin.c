@@ -221,9 +221,10 @@ int showSplash( const _TCHAR* featureImage )
     hDC = GetDC( NULL);
     depth = GetDeviceCaps( hDC, BITSPIXEL ) * GetDeviceCaps( hDC, PLANES);
 
-    /* fetch screen DPI and round it to closest 25% interval(25% of 96 is 24) */
+    /* fetch screen DPI and round it to 100% multiples, 
+    this implementation needs to be kept in sync with org.eclipse.swt.internal.DPIUtil#setDeviceZoom(int) */
 	dpiX = GetDeviceCaps ( hDC, LOGPIXELSX );
-	dpiX = ((int)(dpiX / 24.f + 0.5)) * 24;
+	dpiX = ((int)((dpiX + 24) / 96 )) * 96;
 
     ReleaseDC(NULL, hDC);
     if (featureImage != NULL)
@@ -236,10 +237,10 @@ int showSplash( const _TCHAR* featureImage )
 	GetObject(hBitmap, sizeof(BITMAP), &bmp);
 
 	/* reload scaled up image when zoom > 100% */
-    if (dpiX > 96.f) {
+    if (dpiX > 96) {
     	/* calculate scaled-up bounds */
-    	scaledWidth = dpiX * bmp.bmWidth / 96.f;
-        scaledHeight = dpiX * bmp.bmHeight / 96.f;
+    	scaledWidth = dpiX * bmp.bmWidth / 96;
+        scaledHeight = dpiX * bmp.bmHeight / 96;
 
 		hBitmap = LoadImage(NULL, featureImage, IMAGE_BITMAP, scaledWidth, scaledHeight, LR_LOADFROMFILE);
 
