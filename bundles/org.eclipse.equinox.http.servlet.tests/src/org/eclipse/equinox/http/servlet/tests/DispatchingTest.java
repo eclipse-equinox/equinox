@@ -14,9 +14,15 @@ package org.eclipse.equinox.http.servlet.tests;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.servlet.DispatcherType;
@@ -28,6 +34,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -1260,6 +1267,156 @@ public class DispatchingTest extends BaseTest {
 		String result = requestAdvisor.request("Bug479115/a");
 
 		Assert.assertEquals("|/Bug479115/a", result);
+	}
+
+	@Test
+	public void test_headers_include() throws Exception {
+		SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+		format.setTimeZone(TimeZone.getTimeZone("GMT"));
+		final long date1 = System.currentTimeMillis() - (1000*60*60*24*365*30);
+		final long date2 = System.currentTimeMillis() - (1000*60*60*24*365*40);
+
+		Servlet servlet1 = new BaseServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response)
+					throws ServletException, IOException {
+
+				response.addCookie(new Cookie("foo","bar"));
+				response.addDateHeader("X-date", date1);
+				response.addHeader("X-colour", "blue");
+				response.addIntHeader("X-size", 20);
+				response.setCharacterEncoding("UTF-8");
+				response.setContentType("text/plain");
+				response.setHeader("X-animal", "cat");
+				response.setLocale(Locale.CANADA);
+				response.setBufferSize(1024);
+
+				request.getRequestDispatcher("/s2").include(request, response);
+			}
+		};
+
+		Servlet servlet2 = new BaseServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response)
+					throws ServletException, IOException {
+
+				response.addCookie(new Cookie("foo","baz"));
+				response.addDateHeader("X-date", date2);
+				response.addHeader("X-colour", "green");
+				response.addIntHeader("X-size", 30);
+				response.setCharacterEncoding("UTF-16");
+				response.setContentType("text/json");
+				response.setHeader("X-animal", "bog");
+				response.setLocale(Locale.US);
+				response.setBufferSize(0);
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
+
+		props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
+
+		Map<String, List<String>> response = requestAdvisor.request("s1", null);
+
+		Assert.assertNotNull(response.get("Set-Cookie"));
+		Assert.assertEquals("foo=bar", response.get("Set-Cookie").get(0));
+		Assert.assertNotNull(response.get("X-date"));
+		Assert.assertEquals(format.format(new Date(date1)), response.get("X-date").get(0));
+		Assert.assertNotNull(response.get("X-colour"));
+		Assert.assertEquals("blue", response.get("X-colour").get(0));
+		Assert.assertNotNull(response.get("X-size"));
+		Assert.assertEquals("20", response.get("X-size").get(0));
+
+		String contentType = response.get("Content-Type").get(0);
+
+		Assert.assertTrue(contentType.contains("text/plain;"));
+		Assert.assertTrue(contentType.toLowerCase().contains("charset=utf-8"));
+		Assert.assertEquals("en-CA", response.get("Content-Language").get(0));
+		Assert.assertNotNull(response.get("X-animal"));
+		Assert.assertEquals("cat", response.get("X-animal").get(0));
+	}
+
+	@Test
+	public void test_headers_forward() throws Exception {
+		SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+		format.setTimeZone(TimeZone.getTimeZone("GMT"));
+		final long date1 = System.currentTimeMillis() - (1000*60*60*24*365*30);
+		final long date2 = System.currentTimeMillis() - (1000*60*60*24*365*40);
+
+		Servlet servlet1 = new BaseServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response)
+					throws ServletException, IOException {
+
+				response.addCookie(new Cookie("foo","bar"));
+				response.addDateHeader("X-date", date1);
+				response.addHeader("X-colour", "blue");
+				response.addIntHeader("X-size", 20);
+				response.setCharacterEncoding("UTF-8");
+				response.setContentType("text/plain");
+				response.setHeader("X-animal", "cat");
+				response.setLocale(Locale.CANADA);
+				response.setBufferSize(1024);
+
+				request.getRequestDispatcher("/s2").forward(request, response);
+			}
+		};
+
+		Servlet servlet2 = new BaseServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response)
+					throws ServletException, IOException {
+
+				response.addCookie(new Cookie("foo","baz"));
+				response.addDateHeader("X-date", date2);
+				response.addHeader("X-colour", "green");
+				response.addIntHeader("X-size", 30);
+				response.setCharacterEncoding("UTF-16");
+				response.setContentType("text/json");
+				response.setHeader("X-animal", "dog");
+				response.setLocale(Locale.US);
+				response.setBufferSize(0);
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
+
+		props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
+
+		Map<String, List<String>> response = requestAdvisor.request("s1", null);
+
+		Assert.assertNotNull(response.get("Set-Cookie"));
+		Assert.assertEquals("foo=baz", response.get("Set-Cookie").get(0));
+		Assert.assertNotNull(response.get("X-date"));
+		Assert.assertEquals(format.format(new Date(date2)), response.get("X-date").get(0));
+		Assert.assertNotNull(response.get("X-colour"));
+		Assert.assertEquals("green", response.get("X-colour").get(0));
+		Assert.assertNotNull(response.get("X-size"));
+		Assert.assertEquals("30", response.get("X-size").get(0));
+
+		String contentType = response.get("Content-Type").get(0);
+
+		Assert.assertTrue(contentType.contains("text/json;"));
+		Assert.assertTrue(contentType.toLowerCase().contains("charset=utf-16"));
+		Assert.assertEquals("en-US", response.get("Content-Language").get(0));
+		Assert.assertNotNull(response.get("X-animal"));
+		Assert.assertEquals("dog", response.get("X-animal").get(0));
 	}
 
 }

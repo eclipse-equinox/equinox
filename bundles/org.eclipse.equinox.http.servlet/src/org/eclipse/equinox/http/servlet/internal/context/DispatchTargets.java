@@ -104,7 +104,9 @@ public class DispatchTargets {
 
 		HttpServletRequest request = originalRequest;
 		HttpServletRequestWrapperImpl requestWrapper = HttpServletRequestWrapperImpl.findHttpRuntimeRequest(originalRequest);
-		HttpServletResponse responseWrapper = HttpServletResponseWrapperImpl.findHttpRuntimeResponse(response);
+		HttpServletResponseWrapper responseWrapper = HttpServletResponseWrapperImpl.findHttpRuntimeResponse(response);
+
+		boolean includeWrapperAdded = false;
 
 		try {
 			if (requestWrapper == null) {
@@ -119,18 +121,10 @@ public class DispatchTargets {
 
 			requestWrapper.push(this);
 
-			if (dispatcherType == DispatcherType.INCLUDE) {
-				HttpServletResponse previous = null;
-				HttpServletResponse next = response;
-
-				while (next instanceof HttpServletResponseWrapper) {
-					previous = next;
-					next = (HttpServletResponse) ((HttpServletResponseWrapper) next).getResponse();
-				}
-
-				IncludeDispatchResponseWrapper includeResponse = new IncludeDispatchResponseWrapper(next);
-
-				((HttpServletResponseWrapper) previous).setResponse(includeResponse);
+			if ((dispatcherType == DispatcherType.INCLUDE) && !(responseWrapper.getResponse() instanceof IncludeDispatchResponseWrapper)) {
+				// add the include wrapper to avoid header and status writes
+				responseWrapper.setResponse(new IncludeDispatchResponseWrapper((HttpServletResponse)responseWrapper.getResponse()));
+				includeWrapperAdded = true;
 			}
 
 			ResponseStateHandler responseStateHandler = new ResponseStateHandler(request, response, this);
@@ -138,6 +132,11 @@ public class DispatchTargets {
 			responseStateHandler.processRequest();
 		}
 		finally {
+			if ((dispatcherType == DispatcherType.INCLUDE) && (responseWrapper.getResponse() instanceof IncludeDispatchResponseWrapper) && includeWrapperAdded) {
+				// remove the include wrapper we added
+				responseWrapper.setResponse(((IncludeDispatchResponseWrapper)responseWrapper.getResponse()).getResponse());
+			}
+
 			requestWrapper.pop();
 
 			setter.close();
