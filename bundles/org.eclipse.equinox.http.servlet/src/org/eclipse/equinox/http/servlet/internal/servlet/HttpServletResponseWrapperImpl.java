@@ -99,6 +99,16 @@ public class HttpServletResponseWrapperImpl extends HttpServletResponseWrapper {
 		}
 
 		@Override
+		public void close() throws IOException {
+			originalOutputStream.close();
+		}
+
+		@Override
+		public void flush() throws IOException {
+			originalOutputStream.flush();
+		}
+
+		@Override
 		public boolean isReady() {
 			return originalOutputStream.isReady();
 		}

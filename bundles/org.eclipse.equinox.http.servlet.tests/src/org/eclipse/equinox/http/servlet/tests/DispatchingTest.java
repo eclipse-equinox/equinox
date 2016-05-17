@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.servlet.DispatcherType;
@@ -31,6 +34,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -42,6 +46,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.equinox.http.servlet.testbase.BaseTest;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServlet;
 import org.eclipse.equinox.http.servlet.tests.util.DispatchResultServlet;
+import org.eclipse.equinox.http.servlet.tests.util.EventHandler;
+import org.eclipse.equinox.http.servlet.tests.util.ServletRequestAdvisor;
 import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.service.http.HttpContext;
@@ -1417,6 +1423,158 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("en-US", response.get("Content-Language").get(0));
 		Assert.assertNotNull(response.get("X-animal"));
 		Assert.assertEquals("dog", response.get("X-animal").get(0));
+	}
+
+	// Bug 493583
+	@Test
+	public void test_streamed_response_outputstream() throws Exception {
+		final long interval = 100L;
+
+		Servlet servlet1 = new BaseServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+
+		        response.setContentType("text/event-stream");
+		        response.setCharacterEncoding("UTF-8");
+
+				try (ServletOutputStream out = response.getOutputStream()) {
+					for (int i = 1; i <= 10; ++i) {
+						try {
+							Thread.sleep(interval);
+						}
+						catch (InterruptedException e) {
+							throw new ServletException(e);
+						}
+
+						out.print("data: ");
+						out.print(System.currentTimeMillis());
+						out.print("\n\n");
+						out.flush();
+					}
+				}
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
+
+		final AtomicLong previousTime = new AtomicLong(System.currentTimeMillis());
+		final AtomicInteger counter = new AtomicInteger();
+		final AtomicBoolean result = new AtomicBoolean(true);
+
+		EventHandler handler = new EventHandler() {
+
+			@Override
+			public void handle(Map<String, String> eventMap) {
+				super.handle(eventMap);
+
+				long currentTime = System.currentTimeMillis();
+
+				long diff = (currentTime - previousTime.get());
+
+				System.out.println("Differential: " + diff);
+
+				// check that there is at least a differential of half the interval
+				// because we can't really guarantee that machine time will accurately
+				// reflect the timeouts we've set
+				if (diff < (interval / 2)) {
+					result.set(false);
+				}
+
+				previousTime.set(currentTime);
+				counter.incrementAndGet();
+			}
+
+		};
+
+		requestAdvisor.eventSource("s1", null, handler);
+
+		handler.close();
+
+		Assert.assertTrue(
+			"The interval between events was too short. It means that the response was not properly streamed.",
+			result.get());
+		Assert.assertEquals(10, counter.get());
+	}
+
+	// Bug 493583
+	@Test
+	public void test_streamed_response_writer() throws Exception {
+		final long interval = 100L;
+
+		Servlet servlet1 = new BaseServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+
+		        response.setContentType("text/event-stream");
+		        response.setCharacterEncoding("UTF-8");
+
+				try (PrintWriter writer = response.getWriter()) {
+					for (int i = 1; i <= 10; ++i) {
+						try {
+							Thread.sleep(interval);
+						}
+						catch (InterruptedException e) {
+							throw new ServletException(e);
+						}
+
+						writer.print("data: ");
+						writer.print(System.currentTimeMillis());
+						writer.print("\n\n");
+						writer.flush();
+					}
+				}
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
+
+		final AtomicLong previousTime = new AtomicLong(System.currentTimeMillis());
+		final AtomicInteger counter = new AtomicInteger();
+		final AtomicBoolean result = new AtomicBoolean(true);
+
+		EventHandler handler = new EventHandler() {
+
+			@Override
+			public void handle(Map<String, String> eventMap) {
+				super.handle(eventMap);
+
+				long currentTime = System.currentTimeMillis();
+
+				long diff = (currentTime - previousTime.get());
+
+				System.out.println("Differential: " + diff);
+
+				// check that there is at least a differential of half the interval
+				// because we can't really guarantee that machine time will accurately
+				// reflect the timeouts we've set
+				if (diff < (interval / 2)) {
+					result.set(false);
+				}
+
+				previousTime.set(currentTime);
+				counter.incrementAndGet();
+			}
+
+		};
+
+		requestAdvisor.eventSource("s1", null, handler);
+
+		handler.close();
+
+		Assert.assertTrue(
+			"The interval between events was too short. It means that the response was not properly streamed.",
+			result.get());
+		Assert.assertEquals(10, counter.get());
 	}
 
 }

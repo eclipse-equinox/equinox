@@ -137,6 +137,46 @@ public class ServletRequestAdvisor extends Object {
 		}
 	}
 
+	public Map<String, List<String>> eventSource(String value, Map<String, List<String>> headers, final EventHandler handler) throws IOException {
+		String spec = createUrlSpec(value);
+		log("Requesting " + spec); //$NON-NLS-1$
+		URL url = new URL(spec);
+		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+
+		connection.setChunkedStreamingMode(0);
+		connection.setDoOutput(true);
+		//connection.setRequestProperty("Connection", "Close");
+		connection.setInstanceFollowRedirects(false);
+		connection.setConnectTimeout(150 * 1000);
+		connection.setReadTimeout(150 * 1000);
+
+		if (headers != null) {
+			for(Map.Entry<String, List<String>> entry : headers.entrySet()) {
+				for(String entryValue : entry.getValue()) {
+					connection.setRequestProperty(entry.getKey(), entryValue);
+				}
+			}
+		}
+
+		int responseCode = connection.getResponseCode();
+
+		Map<String, List<String>> map = new HashMap<String, List<String>>(connection.getHeaderFields());
+		map.put("responseCode", Collections.singletonList(String.valueOf(responseCode)));
+
+		InputStream stream;
+
+		if (responseCode >= 400) {
+			stream = connection.getErrorStream();
+		}
+		else {
+			stream = connection.getInputStream();
+		}
+
+		handler.open(stream);
+
+		return map;
+	}
+
 	public Map<String, List<String>> upload(String value, Map<String, List<Object>> headers) throws IOException {
 		String spec = createUrlSpec(value);
 		log("Requesting " + spec); //$NON-NLS-1$
