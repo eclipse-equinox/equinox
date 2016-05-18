@@ -47,7 +47,6 @@ import org.eclipse.equinox.http.servlet.testbase.BaseTest;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServlet;
 import org.eclipse.equinox.http.servlet.tests.util.DispatchResultServlet;
 import org.eclipse.equinox.http.servlet.tests.util.EventHandler;
-import org.eclipse.equinox.http.servlet.tests.util.ServletRequestAdvisor;
 import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.service.http.HttpContext;
