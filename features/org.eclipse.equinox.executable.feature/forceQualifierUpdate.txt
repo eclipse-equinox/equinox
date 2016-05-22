@@ -6,3 +6,4 @@ Bug 442290 - Add ppc64le support into 4.5 build
 Bug 444051 - Comparator error in I20140914-2000 build
 Bug 458346 - Unusual, hard to decipher error in I-build
 Bug 492013 - comparator error in I20160419-0800 related to launcher feature
+Bug 494151 - Eclipse crashes after displaying splash screen with java.lang.NoClassDefFoundError
