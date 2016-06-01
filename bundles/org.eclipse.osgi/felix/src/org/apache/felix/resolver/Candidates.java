@@ -184,9 +184,9 @@ class Candidates
                 addCandidates(result.candidates);
                 result.candidates = null;
                 result.remaining = null;
-                if ((rc instanceof FelixResolveContext) && !Util.isFragment(resource))
+                if (!Util.isFragment(resource))
                 {
-                    Collection<Resource> ondemandFragments = ((FelixResolveContext) rc).getOndemandResources(resource);
+                    Collection<Resource> ondemandFragments = rc.findRelatedResources(resource);
                     for (Resource fragment : ondemandFragments)
                     {
                         if (m_session.isValidOnDemandResource(fragment))

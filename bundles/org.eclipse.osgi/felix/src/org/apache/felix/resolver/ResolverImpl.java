@@ -600,43 +600,18 @@ public class ResolverImpl implements Resolver
         return error;
     }
 
-    /**
-     * Resolves a dynamic requirement for the specified host resource using the
-     * specified {@link ResolveContext}. The dynamic requirement may contain
-     * wild cards in its filter for the package name. The matching candidates
-     * are used to resolve the requirement and the resolve context is not asked
-     * to find providers for the dynamic requirement. The host resource is
-     * expected to not be a fragment, to already be resolved and have an
-     * existing wiring provided by the resolve context.
-     * <p>
-     * This operation may resolve additional resources in order to resolve the
-     * dynamic requirement. The returned map will contain entries for each
-     * resource that got resolved in addition to the specified host resource.
-     * The wire list for the host resource will only contain a single wire which
-     * is for the dynamic requirement.
-     *
-     * @param rc the resolve context
-     * @param host the hosting resource
-     * @param dynamicReq the dynamic requirement
-     * @param matches a list of matching capabilities
-     * @return The new resources and wires required to satisfy the specified
-     * dynamic requirement. The returned map is the property of the caller and
-     * can be modified by the caller.
-     * @throws ResolutionException
-     */
-    public Map<Resource, List<Wire>> resolve(
-        ResolveContext rc, Resource host, Requirement dynamicReq,
-        List<Capability> matches)
-        throws ResolutionException
+    public Map<Resource,List<Wire>> resolveDynamic(ResolveContext context,
+            Wiring hostWiring, Requirement dynamicRequirement)
+            throws ResolutionException
     {
+        Resource host = hostWiring.getResource();
+        List<Capability> matches = context.findProviders(dynamicRequirement);
         // We can only create a dynamic import if the following
         // conditions are met:
-        // 1. The specified resource is resolved.
-        // 2. The package in question is not already imported.
-        // 3. The package in question is not accessible via require-bundle.
-        // 4. The package in question is not exported by the resource.
-        // 5. The package in question matches a dynamic import of the resource.
-        if (!matches.isEmpty() && rc.getWirings().containsKey(host))
+        // 1. The package in question is not already imported.
+        // 2. The package in question is not accessible via require-bundle.
+        // 3. The package in question is not exported by the resource.
+        if (!matches.isEmpty())
         {
             // Make sure all matching candidates are packages.
             for (Capability cap : matches)
@@ -647,11 +622,11 @@ public class ResolverImpl implements Resolver
                         "Matching candidate does not provide a package name.");
                 }
             }
-            ResolveSession session = new ResolveSession(rc,  new DumbExecutor(), host, dynamicReq, matches);
+            ResolveSession session = new ResolveSession(context,  new DumbExecutor(), host, dynamicRequirement, matches);
             return doResolve(session);
         }
 
-        return Collections.emptyMap();
+        throw new Candidates.MissingRequirementError(dynamicRequirement).toException();
     }
 
     private static List<WireCandidate> getWireCandidates(ResolveSession session, Candidates allCandidates, Resource resource)
