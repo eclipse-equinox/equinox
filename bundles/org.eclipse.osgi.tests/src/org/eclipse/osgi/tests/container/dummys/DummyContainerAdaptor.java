@@ -13,6 +13,7 @@ package org.eclipse.osgi.tests.container.dummys;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.Module.Settings;
@@ -31,6 +32,7 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	private final ResolverHookFactory resolverHookFactory;
 	private final DebugOptions debugOptions;
 	private volatile Executor resolverExecutor;
+	private volatile ScheduledExecutorService timeoutExecutor;
 
 	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, Map<String, String> configuration) {
 		this(collisionHook, configuration, new DummyResolverHookFactory());
@@ -121,6 +123,15 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 			return current;
 		}
 		return super.getResolverExecutor();
+	}
+
+	public void setTimeoutExecutor(ScheduledExecutorService timeoutExecutor) {
+		this.timeoutExecutor = timeoutExecutor;
+	}
+
+	@Override
+	public ScheduledExecutorService getScheduledExecutor() {
+		return this.timeoutExecutor;
 	}
 
 }

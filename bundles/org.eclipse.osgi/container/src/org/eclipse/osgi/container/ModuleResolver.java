@@ -12,8 +12,8 @@ package org.eclipse.osgi.container;
 
 import java.security.Permission;
 import java.util.*;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.felix.resolver.*;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.container.namespaces.EquinoxFragmentNamespace;
@@ -472,11 +472,6 @@ final class ModuleResolver {
 		return version instanceof Version ? (Version) version : Version.emptyVersion;
 	}
 
-	static class ResolutionTimeout extends RuntimeException {
-		private static final long serialVersionUID = 1L;
-		// Just a marker exception to break out of extra long resolution
-	}
-
 	class ResolveProcess extends ResolveContext implements Comparator<Capability>, FelixResolveContext, Executor {
 
 		class ResolveLogger extends Logger {
@@ -512,7 +507,6 @@ final class ModuleResolver {
 
 			@Override
 			public boolean isDebugEnabled() {
-				checkTimeout();
 				return DEBUG_USES;
 			}
 
@@ -553,8 +547,7 @@ final class ModuleResolver {
 		private volatile boolean currentlyResolvingMandatory = false;
 		private final Set<Resource> transitivelyResolveFailures = new LinkedHashSet<>();
 		private final Set<Resource> failedToResolve = new HashSet<>();
-		private final long resolveTimeout = System.currentTimeMillis() + resolverBatchTimeout;
-		private volatile boolean checkTimeout = true;
+		private AtomicBoolean scheduleTimeout = new AtomicBoolean(true);
 		/*
 		 * Used to generate the UNRESOLVED_PROVIDER resolution report entries.
 		 * 
@@ -849,12 +842,13 @@ final class ModuleResolver {
 
 		@Override
 		public Collection<Resource> findRelatedResources(Resource host) {
+			// for the container we only care about fragments for related resources
 			List<ModuleCapability> hostCaps = ((ModuleRevision) host).getModuleCapabilities(HostNamespace.HOST_NAMESPACE);
 			if (hostCaps.isEmpty()) {
 				return Collections.emptyList();
 			}
 
-			Collection<Resource> ondemandFragments = new ArrayList<>();
+			Collection<Resource> relatedFragments = new ArrayList<>();
 			for (String hostBSN : getHostBSNs(hostCaps)) {
 				String matchFilter = "(" + EquinoxFragmentNamespace.FRAGMENT_NAMESPACE + "=" + hostBSN + ")"; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 				Requirement fragmentRequirement = ModuleContainer.createRequirement(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, Collections.<String, String> singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, matchFilter), Collections.<String, Object> emptyMap());
@@ -866,14 +860,14 @@ final class ModuleResolver {
 					ModuleRequirement hostReq = candidate.getRevision().getModuleRequirements(HostNamespace.HOST_NAMESPACE).get(0);
 					for (ModuleCapability hostCap : hostCaps) {
 						if (hostReq.matches(hostCap)) {
-							ondemandFragments.add(candidate.getResource());
+							relatedFragments.add(candidate.getResource());
 							break;
 						}
 					}
 				}
 			}
 
-			return ondemandFragments;
+			return relatedFragments;
 		}
 
 		private Collection<String> getHostBSNs(List<ModuleCapability> hostCaps) {
@@ -1037,9 +1031,13 @@ final class ModuleResolver {
 					}
 					maxUsedMemory = Math.max(maxUsedMemory, Runtime.getRuntime().freeMemory() - initialFreeMemory);
 				}
-			} catch (ResolutionTimeout timeoutException) {
+			} catch (ResolutionException resolutionException) {
+				if (resolutionException.getCause() instanceof CancellationException) {
 				// revert back to single bundle resolves
 				resolveRevisionsIndividually(isMandatory, logger, result, toResolve, revisions);
+				} else {
+					throw resolutionException;
+				}
 			} catch (OutOfMemoryError memoryError) {
 				// revert back to single bundle resolves
 				resolveRevisionsIndividually(isMandatory, logger, result, toResolve, revisions);
@@ -1053,7 +1051,7 @@ final class ModuleResolver {
 		}
 
 		private void resolveRevisionsIndividually(boolean isMandatory, ResolveLogger logger, Map<Resource, List<Wire>> result, Collection<Resource> toResolve, Collection<ModuleRevision> revisions) throws ResolutionException {
-			checkTimeout = false;
+			scheduleTimeout.set(false);
 			for (Resource resource : toResolve) {
 				if (!wirings.containsKey(resource) && !failedToResolve.contains(resource)) {
 					resolveRevisions(Collections.singletonList(resource), isMandatory, logger, result);
@@ -1091,9 +1089,11 @@ final class ModuleResolver {
 						result.put(interimResultEntry.getKey(), interimResultEntry.getValue());
 					}
 				}
-			} catch (ResolutionTimeout timeoutException) {
+			} catch (ResolutionException resolutionException) {
+				if (resolutionException.getCause() instanceof CancellationException) {
 				applyTransitiveFailures = false;
-				throw timeoutException;
+				}
+				throw resolutionException;
 			} catch (OutOfMemoryError memoryError) {
 				applyTransitiveFailures = false;
 				throw memoryError;
@@ -1588,14 +1588,21 @@ final class ModuleResolver {
 
 		@Override
 		public void execute(Runnable command) {
-			checkTimeout();
 			adaptor.getResolverExecutor().execute(command);
 		}
 
-		void checkTimeout() {
-			if (checkTimeout && resolveTimeout < System.currentTimeMillis()) {
-				checkTimeout = false;
-				throw new ResolutionTimeout();
+		@Override
+		public void onCancel(Runnable callback) {
+			// Note that for each resolve Process we only want timeout the initial batch resolve
+			if (scheduleTimeout.compareAndSet(true, false)) {
+				ScheduledExecutorService scheduledExecutor = adaptor.getScheduledExecutor();
+				if (scheduledExecutor != null) {
+					try {
+						scheduledExecutor.schedule(callback, resolverBatchTimeout, TimeUnit.MILLISECONDS);
+					} catch (RejectedExecutionException e) {
+						// ignore may have been shutdown, it is ok we will not be able to timeout
+					}
+				}
 			}
 		}
 

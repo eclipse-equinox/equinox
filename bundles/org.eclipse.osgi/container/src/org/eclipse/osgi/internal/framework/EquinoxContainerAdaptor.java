@@ -339,6 +339,11 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		return executor.getInitialized(lazyExecutorCreator);
 	}
 
+	@Override
+	public ScheduledExecutorService getScheduledExecutor() {
+		return container.getScheduledExecutor();
+	}
+
 	public void shutdownResolverExecutor() {
 		Executor current = executor.getAndClear();
 		if (current instanceof ExecutorService) {
