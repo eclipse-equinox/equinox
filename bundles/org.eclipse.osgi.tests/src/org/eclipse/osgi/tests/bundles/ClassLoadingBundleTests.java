@@ -14,7 +14,11 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.*;
+import javax.jws.WebService;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Endpoint;
+import javax.xml.ws.Service;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
@@ -1672,7 +1676,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		ClassLoader contextFinder = getContext().getService(getContext().getServiceReferences(ClassLoader.class, "(equinox.classloader.type=contextClassLoader)").iterator().next());
 		// Using a resource we know is in java 8.
 		String resource = "META-INF/services/javax.print.PrintServiceLookup";
-		URL systemURL = ClassLoader.getSystemClassLoader().getResource("META-INF/services/javax.print.PrintServiceLookup");
+		URL systemURL = ClassLoader.getSystemClassLoader().getResource(resource);
 		assertNotNull("Did not find a parent resource: " + resource, systemURL);
 		//should return the file defined in test bundle.
 		URL url = contextFinder.getResource(resource);
@@ -1682,6 +1686,80 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertTrue("Did not find a parent resource: " + urls, urls.size() > 1);
 		//assert failed as it return the one defined in parent class.
 		assertEquals(url.toExternalForm(), urls.get(0).toExternalForm());
+	}
+
+	@WebService(endpointInterface = "org.eclipse.osgi.tests.bundles.TestService")
+	public static class TestServiceImpl implements TestService {
+
+		@Override
+		public String hello(final String name) {
+			return "Hello " + name;
+		}
+
+	}
+
+	/*
+	 * This test depends on the behavior of the JVM Endpoint implementation to use
+	 * the context class loader to try and find resources using an executor.
+	 * This is important because it causes the thread stack to have NO classes
+	 * loaded by a bundle class loader.  This causes a condition that would
+	 * make ContextFinder.getResources to return null
+	 */
+	public void testContextFinderEmptyGetResources() throws Exception {
+		// get the context finder explicitly to test incase the thread context class loader has changed
+		ClassLoader contextFinder = getContext().getService(getContext().getServiceReferences(ClassLoader.class, "(equinox.classloader.type=contextClassLoader)").iterator().next());
+		ClassLoader previousTCCL = Thread.currentThread().getContextClassLoader();
+		Thread.currentThread().setContextClassLoader(contextFinder);
+		ExecutorService pool = null;
+		try {
+			pool = Executors.newFixedThreadPool(3);
+
+			final String address = "http://localhost:8888/service";
+
+			final WebService annotation = TestService.class.getAnnotation(WebService.class);
+			final String namespaceURI = annotation.serviceName();
+			final String localPart = annotation.targetNamespace();
+			final QName serviceName = new QName(namespaceURI, localPart);
+
+			final TestServiceImpl tsi = new TestServiceImpl();
+			final Endpoint endpoint = Endpoint.create(tsi);
+			final HashMap<String, Object> props = new HashMap<String, Object>();
+			props.put(Endpoint.WSDL_SERVICE, serviceName);
+
+			endpoint.setProperties(props);
+			endpoint.setExecutor(pool);
+			endpoint.publish(address);
+			final URL wsdlURL = new URL(address + "?wsdl");
+			final Service s = Service.create(wsdlURL, serviceName);
+			assertNotNull("Service is null.", s);
+			final TestService port = s.getPort(TestService.class);
+
+			assertEquals("Wrong result.", "Hello World", port.hello("World"));
+		} finally {
+			Thread.currentThread().setContextClassLoader(previousTCCL);
+			if (pool != null) {
+				pool.shutdown();
+			}
+		}
+	}
+
+	public void testBundleClassLoaderEmptyGetResources() throws Exception {
+		final ClassLoader bundleClassLoader = getClass().getClassLoader();
+		// Using a resource we know does not exist
+		final String resource = "META-INF/services/test.does.note.ExistService";
+		doTestEmptyGetResources(bundleClassLoader, resource);
+	}
+
+	private void doTestEmptyGetResources(ClassLoader testClassLoader, String resource) throws Exception {
+		URL systemURL = ClassLoader.getSystemClassLoader().getResource(resource);
+		assertNull("Found a parent resource: " + resource, systemURL);
+		// Should return null resource
+		URL testurl = testClassLoader.getResource(resource);
+		assertNull("Found a resource: " + resource, testurl);
+
+		Enumeration<URL> testResources = testClassLoader.getResources(resource);
+		assertNotNull("null resources from testClassLoader: " + resource, testResources);
+		assertFalse("Resources has elements.", testResources.hasMoreElements());
 	}
 
 	public void testBundleReference01() throws Exception {
