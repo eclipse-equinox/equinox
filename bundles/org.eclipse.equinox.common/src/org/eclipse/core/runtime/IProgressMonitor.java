@@ -38,7 +38,36 @@ package org.eclipse.core.runtime;
  * involve blocking operations, or operations which might throw uncaught exceptions, 
  * the notifications should be queued, and the actual processing deferred (or perhaps
  * delegated to a separate thread).
- * </p><p>
+ * </p>
+ * <p><b>CALLER/CALLEE RESPONSIBILITIES:</b></p>
+ * <p>
+ * Methods that receive an {@link IProgressMonitor} must either obey the following
+ * conventions or include JavaDoc explaining how it differs from these rules.
+ * The called method:
+ * <ul>
+ * <li>Will call {@link #beginTask} on the argument 0 or 1 times, at its option.</li>
+ * <li>Will not promise to invoke {@link #done()} on the monitor.</li>
+ * <li>Will not call {@link #setCanceled} on the monitor.</li>
+ * <li>May rely on the monitor not being null.</li>
+ * <li>May rely on the monitor ignoring the string passed to {@link #beginTask}.</li>
+ * </ul>
+ * <p>
+ * The caller:
+ * <ul>
+ * <li>Will either pass in a fresh instance of {@link IProgressMonitor} that has
+ *     not had {@link #beginTask} invoked on it yet, or will select an
+ *     implementation of {@link IProgressMonitor} that explicitly permits multiple calls
+ *     to {@link #beginTask}.</li>
+ * <li>Will not rely on the callee to invoke {@link #done()} on the monitor.
+ *     It must either select an implementation of {@link IProgressMonitor} that
+ *     does not require {@link #done()} to be called, for example {@link SubMonitor},
+ *     or it must invoke {@link #done()} itself after the method returns.</li>
+ * <li>Will not pass in a null monitor unless the JavaDoc of the callee says that it
+ *     accepts null.</li>
+ * <li>Will pass in a monitor that ignores the name argument to {@link #beginTask}
+ *     unless the JavaDoc for the callee states otherwise.
+ * </ul>
+ * 
  * This interface can be used without OSGi running.
  * </p><p>
  * Clients may implement this interface.

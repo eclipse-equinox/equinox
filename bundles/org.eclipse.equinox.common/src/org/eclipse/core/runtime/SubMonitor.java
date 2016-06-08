@@ -45,31 +45,7 @@ import org.eclipse.core.internal.runtime.TracingOptions;
  * <li>Use <code>SubMonitor.split(...)</code> whenever you need to call another method that 
  * accepts an IProgressMonitor.</li>
  * </ul>
- * <p></p>
- * <p><b>DEFAULT BEHAVIOR:</b></p>
  * 
- * <p>When writing JavaDoc for a method that accepts an IProgressMonitor, you should assume the 
- * following default behavior unless the method's JavaDoc says otherwise:</p>
- * <ul>
- * <li>It WILL call beginTask on the IProgressMonitor.</li>
- * <li>It WILL NOT accept a null argument.</li>
- * <li>It WILL call done on the IProgressMonitor.</li>
- * </ul>
- * <p></p>
- * <p><b>BEST PRACTISES:</b></p>
- * 
- * <p>We recommend that newly-written methods follow the given contract:</p>
- * <ul>
- * <li>It WILL call beginTask on the IProgressMonitor.</li>
- * <li>It WILL accept a null argument, indicating that no progress should be reported and the operation cannot be cancelled.</li>
- * <li>It WILL NOT call done on the IProgressMonitor, leaving this responsibility up to the caller.</li>
- * </ul>
- * <p>If you wish to follow these conventions, you may copy and paste the following text into your method's JavaDoc:</p>
- * 
- * <pre>@param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility
- *        to call done() on the given monitor. Accepts <code>null</code>, indicating that no progress should be
- *        reported and that the operation cannot be cancelled.</pre>
- *
  * <p></p>
  * <p><b>Example: Recommended usage</b></p>
  *
@@ -97,36 +73,6 @@ import org.eclipse.core.internal.runtime.TracingOptions;
  *          
  *          // Use the remaining 40% of the progress to do some more work
  *          doSomeWork(progress.split(40)); 
- *      }
- * </pre>
- *
- *
- * <p></p>
- * <p><b>Example: Default usage</b></p>
- * 
- * <p>You will often need to implement a method that does not explicitly stipulate that calling done() is the responsibility
- * of the caller. In this case, you should use the following pattern:</p>
- * 
- * <pre>
- *      // param monitor the progress monitor to use for reporting progress to the user, or <code>null</code> indicating
- *      //        that no progress should be reported and the operation cannot be cancelled.
- *      //
- *      void doSomething(IProgressMonitor monitor) {
- *          // Convert the given monitor into a progress instance 
- *          SubMonitor progress = SubMonitor.convert(monitor, 100);
- *          try {
- *              // Use 30% of the progress to do some work
- *              doSomeWork(progress.split(30));
- *          
- *              // Advance the monitor by another 30%
- *              progress.worked(30);
- *          
- *              // Use the remaining 40% of the progress to do some more work
- *              doSomeWork(progress.split(40));
- *                            
- *          } finally {
- *              SubMonitor.done(monitor);
- *          } 
  *      }
  * </pre>
  * 
