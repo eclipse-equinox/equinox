@@ -204,9 +204,9 @@ org.osgi.framework.system.capabilities = \
  osgi.ee; osgi.ee="JavaSE/compact2"; version:List<Version>="1.8, 9.0",\
  osgi.ee; osgi.ee="JavaSE/compact3"; version:List<Version>="1.8, 9.0"
 osgi.java.profile.name = JavaSE-9
-org.eclipse.jdt.core.compiler.compliance=1.9
-org.eclipse.jdt.core.compiler.source=1.8
+org.eclipse.jdt.core.compiler.compliance=9
+org.eclipse.jdt.core.compiler.source=9
 org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode=enabled
-org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.8
+org.eclipse.jdt.core.compiler.codegen.targetPlatform=9
 org.eclipse.jdt.core.compiler.problem.assertIdentifier=error
 org.eclipse.jdt.core.compiler.problem.enumIdentifier=error
