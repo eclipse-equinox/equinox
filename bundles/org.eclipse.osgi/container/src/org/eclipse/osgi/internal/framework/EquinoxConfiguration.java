@@ -1026,7 +1026,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		}
 
 		// set the initial UUID so that it is set as soon as possible
-		String uuid = new UniversalUniqueIdentifier().toString();
+		String uuid = UUID.randomUUID().toString();
 		setConfiguration(FRAMEWORK_UUID, uuid);
 	}
 
