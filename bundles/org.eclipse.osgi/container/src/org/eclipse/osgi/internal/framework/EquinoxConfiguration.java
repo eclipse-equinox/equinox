@@ -208,6 +208,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String PROP_DEFAULT_SUFFIX = ".default"; //$NON-NLS-1$
 	public static final Collection<String> PROP_WITH_ECLIPSE_STARTER_DEFAULTS = Collections.singletonList(PROP_COMPATIBILITY_BOOTDELEGATION);
 	public static final String PROP_INIT_UUID = "equinox.init.uuid"; //$NON-NLS-1$
+
 	public static final class ConfigValues {
 		/**
 		 * Value of {@link #localConfig} properties that should be considered
@@ -1025,7 +1026,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		}
 
 		// set the initial UUID so that it is set as soon as possible
-		String uuid = UUID.randomUUID().toString();
+		String uuid = new UniversalUniqueIdentifier().toString();
 		setConfiguration(FRAMEWORK_UUID, uuid);
 	}
 

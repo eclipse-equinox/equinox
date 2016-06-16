@@ -20,7 +20,6 @@ import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
-import org.eclipse.osgi.container.namespaces.EquinoxPersistentUUIDNamespace;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.*;
 import org.eclipse.osgi.internal.container.LockSet;
@@ -301,8 +300,6 @@ public class Storage {
 					}
 				}
 			}
-			// set the persistent UUID property
-			this.equinoxContainer.getConfiguration().setConfiguration(EquinoxPersistentUUIDNamespace.PERSISTENT_UUID_NAMESPACE, getPersistentUUID());
 		} catch (Exception e) {
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
@@ -616,7 +613,6 @@ public class Storage {
 			}
 			return builder;
 		}
-
 		// First we must make sure the VM profile has been loaded
 		loadVMProfile(generation);
 		// dealing with system bundle find the extra capabilities and exports
@@ -638,11 +634,6 @@ public class Storage {
 		if (extraSystemCapabilities != null && extraSystemCapabilities.trim().length() > 0) {
 			result.append(extraSystemCapabilities).append(", "); //$NON-NLS-1$
 		}
-
-		// if there is an existing system module check if it has a persistent UUID
-		String persistentUUID = getPersistentUUID();
-		result.append(EquinoxPersistentUUIDNamespace.PERSISTENT_UUID_NAMESPACE).append("; "); //$NON-NLS-1$
-		result.append(EquinoxPersistentUUIDNamespace.PERSISTENT_UUID_NAMESPACE).append("=\"").append(persistentUUID).append("\", "); //$NON-NLS-1$//$NON-NLS-2$
 
 		result.append(EclipsePlatformNamespace.ECLIPSE_PLATFORM_NAMESPACE).append("; "); //$NON-NLS-1$
 		result.append(EquinoxConfiguration.PROP_OSGI_OS).append("=").append(equinoxConfig.getOS()).append("; "); //$NON-NLS-1$ //$NON-NLS-2$
@@ -672,18 +663,6 @@ public class Storage {
 		result.append(NativeNamespace.CAPABILITY_OSVERSION_ATTRIBUTE).append(":Version").append("=\"").append(osVersion).append("\"; "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		result.append(NativeNamespace.CAPABILITY_LANGUAGE_ATTRIBUTE).append("=\"").append(language).append('\"'); //$NON-NLS-1$
 		return result.toString();
-	}
-
-	String getPersistentUUID() {
-		Requirement persistentUUIDReq = ModuleContainer.createRequirement(EquinoxPersistentUUIDNamespace.PERSISTENT_UUID_NAMESPACE, Collections.<String, String> emptyMap(), Collections.<String, String> emptyMap());
-		Collection<BundleCapability> persistentUUIDs = moduleContainer.getFrameworkWiring().findProviders(persistentUUIDReq);
-		for (BundleCapability persistentUUIDCap : persistentUUIDs) {
-			if (persistentUUIDCap.getRevision().getBundle().getBundleId() == 0) {
-				return (String) persistentUUIDCap.getAttributes().get(EquinoxPersistentUUIDNamespace.PERSISTENT_UUID_NAMESPACE);
-			}
-		}
-		// not available; generate a new persistent UUID
-		return UUID.randomUUID().toString();
 	}
 
 	String getAliasList(Collection<String> aliases) {
