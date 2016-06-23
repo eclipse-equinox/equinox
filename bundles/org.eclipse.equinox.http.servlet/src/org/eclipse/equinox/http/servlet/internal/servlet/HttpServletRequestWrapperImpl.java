@@ -152,6 +152,8 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	public Object getAttribute(String attributeName) {
 		DispatchTargets current = dispatchTargets.peek();
 
+		Map<String, Object> specialOverides = current.getSpecialOverides();
+
 		if (current.getDispatcherType() == DispatcherType.ERROR) {
 			if ((Arrays.binarySearch(dispatcherAttributes, attributeName) > -1) &&
 				!attributeName.startsWith("javax.servlet.error.")) { //$NON-NLS-1$
@@ -164,8 +166,8 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 				if (current.getServletName() != null) {
 					return null;
 				}
-				if (super.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH) != null) {
-					return super.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH);
+				if (specialOverides.containsKey(RequestDispatcher.INCLUDE_CONTEXT_PATH)) {
+					return specialOverides.get(RequestDispatcher.INCLUDE_CONTEXT_PATH);
 				}
 				return current.getContextController().getContextPath();
 			}
@@ -173,8 +175,8 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 				if (current.getServletName() != null) {
 					return null;
 				}
-				if (super.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO) != null) {
-					return super.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
+				if (specialOverides.containsKey(RequestDispatcher.INCLUDE_PATH_INFO)) {
+					return specialOverides.get(RequestDispatcher.INCLUDE_PATH_INFO);
 				}
 				return current.getPathInfo();
 			}
@@ -182,8 +184,8 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 				if (current.getServletName() != null) {
 					return null;
 				}
-				if (super.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING) != null) {
-					return super.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING);
+				if (specialOverides.containsKey(RequestDispatcher.INCLUDE_QUERY_STRING)) {
+					return specialOverides.get(RequestDispatcher.INCLUDE_QUERY_STRING);
 				}
 				return current.getQueryString();
 			}
@@ -191,8 +193,8 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 				if (current.getServletName() != null) {
 					return null;
 				}
-				if (super.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null) {
-					return super.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
+				if (specialOverides.containsKey(RequestDispatcher.INCLUDE_REQUEST_URI)) {
+					return specialOverides.get(RequestDispatcher.INCLUDE_REQUEST_URI);
 				}
 				return current.getRequestURI();
 			}
@@ -200,8 +202,8 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 				if (current.getServletName() != null) {
 					return null;
 				}
-				if (super.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH) != null) {
-					return super.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
+				if (specialOverides.containsKey(RequestDispatcher.INCLUDE_SERVLET_PATH)) {
+					return specialOverides.get(RequestDispatcher.INCLUDE_SERVLET_PATH);
 				}
 				return current.getServletPath();
 			}
@@ -217,11 +219,17 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 				if (current.getServletName() != null) {
 					return null;
 				}
+				if (specialOverides.containsKey(RequestDispatcher.FORWARD_CONTEXT_PATH)) {
+					return specialOverides.get(RequestDispatcher.FORWARD_CONTEXT_PATH);
+				}
 				return original.getContextController().getContextPath();
 			}
 			else if (attributeName.equals(RequestDispatcher.FORWARD_PATH_INFO)) {
 				if (current.getServletName() != null) {
 					return null;
+				}
+				if (specialOverides.containsKey(RequestDispatcher.FORWARD_PATH_INFO)) {
+					return specialOverides.get(RequestDispatcher.FORWARD_PATH_INFO);
 				}
 				return original.getPathInfo();
 			}
@@ -229,17 +237,26 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 				if (current.getServletName() != null) {
 					return null;
 				}
+				if (specialOverides.containsKey(RequestDispatcher.FORWARD_QUERY_STRING)) {
+					return specialOverides.get(RequestDispatcher.FORWARD_QUERY_STRING);
+				}
 				return original.getQueryString();
 			}
 			else if (attributeName.equals(RequestDispatcher.FORWARD_REQUEST_URI)) {
 				if (current.getServletName() != null) {
 					return null;
 				}
+				if (specialOverides.containsKey(RequestDispatcher.FORWARD_REQUEST_URI)) {
+					return specialOverides.get(RequestDispatcher.FORWARD_REQUEST_URI);
+				}
 				return original.getRequestURI();
 			}
 			else if (attributeName.equals(RequestDispatcher.FORWARD_SERVLET_PATH)) {
 				if (current.getServletName() != null) {
 					return null;
+				}
+				if (specialOverides.containsKey(RequestDispatcher.FORWARD_SERVLET_PATH)) {
+					return specialOverides.get(RequestDispatcher.FORWARD_SERVLET_PATH);
 				}
 				return original.getServletPath();
 			}
@@ -313,7 +330,14 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	}
 
 	public void removeAttribute(String name) {
-		request.removeAttribute(name);
+		if (Arrays.binarySearch(dispatcherAttributes, name) > -1) {
+			DispatchTargets current = dispatchTargets.peek();
+
+			current.getSpecialOverides().remove(name);
+		}
+		else {
+			request.removeAttribute(name);
+		}
 
 		EventListeners eventListeners = dispatchTargets.peek().getContextController().getEventListeners();
 
@@ -336,7 +360,20 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 	public void setAttribute(String name, Object value) {
 		boolean added = (request.getAttribute(name) == null);
-		request.setAttribute(name, value);
+
+		if (Arrays.binarySearch(dispatcherAttributes, name) > -1) {
+			DispatchTargets current = dispatchTargets.peek();
+
+			if (value == null) {
+				current.getSpecialOverides().remove(name);
+			}
+			else {
+				current.getSpecialOverides().put(name, value);
+			}
+		}
+		else {
+			request.setAttribute(name, value);
+		}
 
 		EventListeners eventListeners = dispatchTargets.peek().getContextController().getEventListeners();
 
