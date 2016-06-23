@@ -134,11 +134,11 @@ public class HttpServerManager implements ManagedServiceFactory {
 			holder.setInitParameter(JettyConstants.OTHER_INFO, otherInfo);
 
 		ServletContextHandler httpContext = createHttpContext(dictionary);
-		if (null != customizer)
-			httpContext = (ServletContextHandler) customizer.customizeContext(httpContext, dictionary);
-
 		httpContext.addServlet(holder, "/*"); //$NON-NLS-1$
 		server.setHandler(httpContext);
+
+		if (null != customizer)
+			httpContext = (ServletContextHandler) customizer.customizeContext(httpContext, dictionary);
 
 		ServletHolder multiPartHolder = createMultipartNamedServlet(dictionary, multipartServletName);
 		// This servlet has no mapping as it's only used from named dispatcher
