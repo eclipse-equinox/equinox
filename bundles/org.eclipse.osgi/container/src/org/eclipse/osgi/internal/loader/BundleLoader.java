@@ -18,6 +18,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.osgi.container.*;
@@ -94,9 +95,7 @@ public class BundleLoader extends ModuleLoader {
 	/* If not null, list of package names to import dynamically. */
 	private String[] dynamicImportPackages;
 
-	private Object classLoaderMonitor = new Object();
-	/* @GuardedBy("classLoaderMonitor") */
-	private ModuleClassLoader classloader;
+	private final AtomicReference<ModuleClassLoader> classloader = new AtomicReference<ModuleClassLoader>();
 	private final ClassLoader parent;
 	private final AtomicBoolean triggerClassLoaded = new AtomicBoolean(false);
 
@@ -220,51 +219,64 @@ public class BundleLoader extends ModuleLoader {
 	}
 
 	public ModuleClassLoader getModuleClassLoader() {
-		synchronized (classLoaderMonitor) {
-			if (classloader == null) {
-				final List<ClassLoaderHook> hooks = container.getConfiguration().getHookRegistry().getClassLoaderHooks();
-				final Generation generation = (Generation) wiring.getRevision().getRevisionInfo();
-				if (System.getSecurityManager() == null) {
-					classloader = createClassLoaderPrivledged(parent, generation.getBundleInfo().getStorage().getConfiguration(), this, generation, hooks);
-				} else {
-					final ClassLoader cl = parent;
-					classloader = AccessController.doPrivileged(new PrivilegedAction<ModuleClassLoader>() {
-						@Override
-						public ModuleClassLoader run() {
-							return createClassLoaderPrivledged(cl, generation.getBundleInfo().getStorage().getConfiguration(), BundleLoader.this, generation, hooks);
-						}
-					});
-				}
-				for (ClassLoaderHook hook : hooks) {
-					hook.classLoaderCreated(classloader);
-				}
-			}
-			return classloader;
+		ModuleClassLoader result = classloader.get();
+		if (result != null) {
+			return result;
 		}
+		// doing optimistic class loader creating here to avoid holding any locks,
+		// this may result in multiple classloaders being constructed but only one will be used.
+		final List<ClassLoaderHook> hooks = container.getConfiguration().getHookRegistry().getClassLoaderHooks();
+		final Generation generation = (Generation) wiring.getRevision().getRevisionInfo();
+		if (System.getSecurityManager() == null) {
+			result = createClassLoaderPrivledged(parent, generation.getBundleInfo().getStorage().getConfiguration(), this, generation, hooks);
+		} else {
+			final ClassLoader cl = parent;
+			result = AccessController.doPrivileged(new PrivilegedAction<ModuleClassLoader>() {
+				@Override
+				public ModuleClassLoader run() {
+					return createClassLoaderPrivledged(cl, generation.getBundleInfo().getStorage().getConfiguration(), BundleLoader.this, generation, hooks);
+				}
+			});
+		}
+
+		if (classloader.compareAndSet(null, result)) {
+			// only send to hooks if this thread wins in creating the class loader.
+			for (ClassLoaderHook hook : hooks) {
+				hook.classLoaderCreated(result);
+			}
+		} else {
+			result = classloader.get();
+			if (debug.DEBUG_LOADER) {
+				Debug.println("BundleLoader[" + this + "].getModuleClassLoader() - created duplicate classloader"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
+		return result;
 	}
 
 	@Override
 	protected void loadFragments(Collection<ModuleRevision> fragments) {
-		synchronized (classLoaderMonitor) {
-			addFragmentExports(wiring.getModuleCapabilities(PackageNamespace.PACKAGE_NAMESPACE));
-			loadClassLoaderFragments(fragments);
-			clearManifestLocalizationCache();
-		}
+		addFragmentExports(wiring.getModuleCapabilities(PackageNamespace.PACKAGE_NAMESPACE));
+		loadClassLoaderFragments(fragments);
+		clearManifestLocalizationCache();
 	}
 
 	protected void clearManifestLocalizationCache() {
 		Generation hostGen = (Generation) wiring.getRevision().getRevisionInfo();
 		hostGen.clearManifestCache();
-		for (ModuleWire fragmentWire : wiring.getProvidedModuleWires(HostNamespace.HOST_NAMESPACE)) {
-			Generation fragGen = (Generation) fragmentWire.getRequirer().getRevisionInfo();
-			fragGen.clearManifestCache();
+		List<ModuleWire> hostWires = wiring.getProvidedModuleWires(HostNamespace.HOST_NAMESPACE);
+		// doing a null check because there is no lock on the module database here
+		if (hostWires != null) {
+			for (ModuleWire fragmentWire : hostWires) {
+				Generation fragGen = (Generation) fragmentWire.getRequirer().getRevisionInfo();
+				fragGen.clearManifestCache();
+			}
 		}
 	}
 
-	/* @GuardedBy("classLoaderMonitor") */
 	void loadClassLoaderFragments(Collection<ModuleRevision> fragments) {
-		if (classloader != null) {
-			classloader.loadFragments(fragments);
+		ModuleClassLoader current = classloader.get();
+		if (current != null) {
+			current.loadFragments(fragments);
 		}
 	}
 
@@ -289,10 +301,9 @@ public class BundleLoader extends ModuleLoader {
 				policy.close(context);
 			}
 		}
-		synchronized (classLoaderMonitor) {
-			if (classloader != null) {
-				classloader.close();
-			}
+		ModuleClassLoader current = classloader.get();
+		if (current != null) {
+			current.close();
 		}
 	}
 
@@ -367,7 +378,7 @@ public class BundleLoader extends ModuleLoader {
 		String pkgName = getPackageName(name);
 		boolean bootDelegation = false;
 		// follow the OSGi delegation model
-		if (checkParent && parent != null && container.isBootDelegationPackage(pkgName))
+		if (checkParent && parent != null && container.isBootDelegationPackage(pkgName)) {
 			// 2) if part of the bootdelegation list then delegate to parent and continue of failure
 			try {
 				return parent.loadClass(name);
@@ -375,6 +386,7 @@ public class BundleLoader extends ModuleLoader {
 				// we want to continue
 				bootDelegation = true;
 			}
+		}
 		Class<?> result = null;
 		try {
 			result = (Class<?>) searchHooks(name, PRE_CLASS);
@@ -438,13 +450,14 @@ public class BundleLoader extends ModuleLoader {
 			return result;
 		// hack to support backwards compatibility for bootdelegation
 		// or last resort; do class context trick to work around VM bugs
-		if (parent != null && !bootDelegation && ((checkParent && container.getConfiguration().compatibilityBootDelegation) || isRequestFromVM()))
+		if (parent != null && !bootDelegation && ((checkParent && container.getConfiguration().compatibilityBootDelegation) || isRequestFromVM())) {
 			// we don't need to continue if a CNFE is thrown here.
 			try {
 				return parent.loadClass(name);
 			} catch (ClassNotFoundException e) {
 				// we want to generate our own exception below
 			}
+		}
 		throw new ClassNotFoundException(name + " cannot be found by " + this); //$NON-NLS-1$
 	}
 
@@ -903,13 +916,14 @@ public class BundleLoader extends ModuleLoader {
 		if (visited.contains(this))
 			return;
 		visited.add(this);
-		for (String exported : exportedPackages) {
-			if (exported.equals(packageName) || (subPackages && isSubPackage(packageName, exported))) {
-				if (!result.contains(exported))
-					result.add(exported);
+		synchronized (exportedPackages) {
+			for (String exported : exportedPackages) {
+				if (exported.equals(packageName) || (subPackages && isSubPackage(packageName, exported))) {
+					if (!result.contains(exported))
+						result.add(exported);
+				}
 			}
 		}
-
 		for (String substituted : wiring.getSubstitutedNames()) {
 			if (substituted.equals(packageName) || (subPackages && isSubPackage(packageName, substituted))) {
 				if (!result.contains(substituted))
