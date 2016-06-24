@@ -96,7 +96,7 @@ public class BundleLoader extends ModuleLoader {
 
 	private Object classLoaderMonitor = new Object();
 	/* @GuardedBy("classLoaderMonitor") */
-	private volatile ModuleClassLoader classloader;
+	private ModuleClassLoader classloader;
 	private final ClassLoader parent;
 	private final AtomicBoolean triggerClassLoaded = new AtomicBoolean(false);
 
@@ -220,14 +220,8 @@ public class BundleLoader extends ModuleLoader {
 	}
 
 	public ModuleClassLoader getModuleClassLoader() {
-		if (classloader != null) {
-			return classloader;
-		}
-		// Need to obtain readlock on module database to prevent out of order locks that can happen
-		// when a refresh operation (requiring write lock) closes a BundleLoader
-		container.getStorage().getModuleDatabase().readLock();
-		try {
-			synchronized (classLoaderMonitor) {
+		synchronized (classLoaderMonitor) {
+			if (classloader == null) {
 				final List<ClassLoaderHook> hooks = container.getConfiguration().getHookRegistry().getClassLoaderHooks();
 				final Generation generation = (Generation) wiring.getRevision().getRevisionInfo();
 				if (System.getSecurityManager() == null) {
@@ -244,26 +238,17 @@ public class BundleLoader extends ModuleLoader {
 				for (ClassLoaderHook hook : hooks) {
 					hook.classLoaderCreated(classloader);
 				}
-				return classloader;
 			}
-		} finally {
-			container.getStorage().getModuleDatabase().readUnlock();
+			return classloader;
 		}
 	}
 
 	@Override
 	protected void loadFragments(Collection<ModuleRevision> fragments) {
-		// Need to obtain readlock on module database to prevent out of order locks that can happen
-		// when a refresh operation (requiring write lock) closes a BundleLoader
-		container.getStorage().getModuleDatabase().readLock();
-		try {
-			synchronized (classLoaderMonitor) {
-				addFragmentExports(wiring.getModuleCapabilities(PackageNamespace.PACKAGE_NAMESPACE));
-				loadClassLoaderFragments(fragments);
-				clearManifestLocalizationCache();
-			}
-		} finally {
-			container.getStorage().getModuleDatabase().readUnlock();
+		synchronized (classLoaderMonitor) {
+			addFragmentExports(wiring.getModuleCapabilities(PackageNamespace.PACKAGE_NAMESPACE));
+			loadClassLoaderFragments(fragments);
+			clearManifestLocalizationCache();
 		}
 	}
 
@@ -304,17 +289,10 @@ public class BundleLoader extends ModuleLoader {
 				policy.close(context);
 			}
 		}
-		// Need to obtain readlock on module database to prevent out of order locks that can happen
-		// when a refresh operation (requiring write lock) closes a BundleLoader
-		container.getStorage().getModuleDatabase().readLock();
-		try {
-			synchronized (classLoaderMonitor) {
-				if (classloader != null) {
-					classloader.close();
-				}
+		synchronized (classLoaderMonitor) {
+			if (classloader != null) {
+				classloader.close();
 			}
-		} finally {
-			container.getStorage().getModuleDatabase().readUnlock();
 		}
 	}
 
@@ -389,7 +367,7 @@ public class BundleLoader extends ModuleLoader {
 		String pkgName = getPackageName(name);
 		boolean bootDelegation = false;
 		// follow the OSGi delegation model
-		if (checkParent && parent != null && container.isBootDelegationPackage(pkgName)) {
+		if (checkParent && parent != null && container.isBootDelegationPackage(pkgName))
 			// 2) if part of the bootdelegation list then delegate to parent and continue of failure
 			try {
 				return parent.loadClass(name);
@@ -397,7 +375,6 @@ public class BundleLoader extends ModuleLoader {
 				// we want to continue
 				bootDelegation = true;
 			}
-		}
 		Class<?> result = null;
 		try {
 			result = (Class<?>) searchHooks(name, PRE_CLASS);
@@ -461,14 +438,13 @@ public class BundleLoader extends ModuleLoader {
 			return result;
 		// hack to support backwards compatibility for bootdelegation
 		// or last resort; do class context trick to work around VM bugs
-		if (parent != null && !bootDelegation && ((checkParent && container.getConfiguration().compatibilityBootDelegation) || isRequestFromVM())) {
+		if (parent != null && !bootDelegation && ((checkParent && container.getConfiguration().compatibilityBootDelegation) || isRequestFromVM()))
 			// we don't need to continue if a CNFE is thrown here.
 			try {
 				return parent.loadClass(name);
 			} catch (ClassNotFoundException e) {
 				// we want to generate our own exception below
 			}
-		}
 		throw new ClassNotFoundException(name + " cannot be found by " + this); //$NON-NLS-1$
 	}
 
