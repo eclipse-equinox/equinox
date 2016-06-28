@@ -1,0 +1,2 @@
+provides.0.namespace = osgi.service
+provides.0.name = org.osgi.service.cm.ConfigurationAdmin
