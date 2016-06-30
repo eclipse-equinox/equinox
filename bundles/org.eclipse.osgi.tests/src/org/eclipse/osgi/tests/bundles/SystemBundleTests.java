@@ -2745,7 +2745,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		return manifest;
 	}
 
-	private static File createBundle(File outputDir, String bundleName, Map<String, String> headers) throws IOException {
+	static File createBundle(File outputDir, String bundleName, Map<String, String> headers, Map<String, String>... entries) throws IOException {
 		Manifest m = new Manifest();
 		Attributes attributes = m.getMainAttributes();
 		attributes.putValue("Manifest-Version", "1.0");
@@ -2754,6 +2754,15 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 		File file = new File(outputDir, "bundle" + bundleName + ".jar"); //$NON-NLS-1$ //$NON-NLS-2$
 		JarOutputStream jos = new JarOutputStream(new FileOutputStream(file), m);
+		if (entries != null) {
+			for (Map<String, String> entryMap : entries) {
+				for (Map.Entry<String, String> entry : entryMap.entrySet()) {
+					jos.putNextEntry(new JarEntry(entry.getKey()));
+					jos.write(entry.getValue().getBytes());
+					jos.closeEntry();
+				}
+			}
+		}
 		jos.flush();
 		jos.close();
 		return file;

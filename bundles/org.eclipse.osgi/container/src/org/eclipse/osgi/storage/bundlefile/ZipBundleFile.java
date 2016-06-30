@@ -67,7 +67,15 @@ public class ZipBundleFile extends BundleFile {
 			if (generation != null) {
 				ModuleRevision r = generation.getRevision();
 				if (r != null) {
-					generation.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, r.getRevisions().getModule(), e);
+					ContainerEvent eventType = ContainerEvent.ERROR;
+					// If the revision has been removed from the list of revisions then it has been deleted
+					// because the bundle has been uninstalled or updated
+					if (!r.getRevisions().getModuleRevisions().contains(r)) {
+						// instead of filling the log with errors about missing files from 
+						// uninstalled/updated bundles just give it an info level
+						eventType = ContainerEvent.INFO;
+					}
+					generation.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(eventType, r.getRevisions().getModule(), e);
 				}
 			}
 			// TODO not sure if throwing a runtime exception is better

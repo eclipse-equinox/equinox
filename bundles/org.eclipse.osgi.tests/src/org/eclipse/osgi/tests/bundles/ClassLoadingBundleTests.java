@@ -21,6 +21,7 @@ import javax.xml.ws.Endpoint;
 import javax.xml.ws.Service;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
@@ -2197,5 +2198,44 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		} finally {
 			getContext().removeBundleListener(delayB1);
 		}
+	}
+
+	public void testLoaderUninstalledBundle() throws BundleException, IOException {
+		String testResourcePath = "testResource";
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, String> testHeaders = new HashMap<String, String>();
+		testHeaders.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		testHeaders.put(Constants.BUNDLE_SYMBOLICNAME, getName());
+		config.mkdirs();
+		File testBundleFile = SystemBundleTests.createBundle(config, getName(), testHeaders, Collections.singletonMap(testResourcePath, "testValue"));
+		Bundle test = getContext().installBundle(getName(), new FileInputStream(testBundleFile));
+		test.start();
+		BundleWiring wiring = test.adapt(BundleWiring.class);
+		assertNotNull("No wiring found.", wiring);
+		ModuleClassLoader bundleClassLoader = (ModuleClassLoader) wiring.getClassLoader();
+		URL testResource = bundleClassLoader.findLocalResource(testResourcePath);
+		assertNotNull("No test resource found.", testResource);
+
+		test.update(new FileInputStream(testBundleFile));
+		testResource = bundleClassLoader.findLocalResource(testResourcePath);
+		assertNull("Found resource.", testResource);
+
+		Object[] expectedFrameworkEvents = new Object[] {new FrameworkEvent(FrameworkEvent.INFO, test, null)};
+		Object[] actualFrameworkEvents = frameworkListenerResults.getResults(1);
+		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
+
+		wiring = test.adapt(BundleWiring.class);
+		assertNotNull("No wiring found.", wiring);
+		bundleClassLoader = (ModuleClassLoader) wiring.getClassLoader();
+		testResource = bundleClassLoader.findLocalResource(testResourcePath);
+		assertNotNull("No test resource found.", testResource);
+
+		test.uninstall();
+
+		testResource = bundleClassLoader.findLocalResource(testResourcePath);
+		assertNull("Found resource.", testResource);
+
+		actualFrameworkEvents = frameworkListenerResults.getResults(1);
+		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 	}
 }
