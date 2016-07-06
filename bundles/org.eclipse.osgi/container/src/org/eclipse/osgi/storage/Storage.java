@@ -62,6 +62,7 @@ public class Storage {
 	private static final String JAVASE = "JavaSE"; //$NON-NLS-1$
 	private static final String PROFILE_EXT = ".profile"; //$NON-NLS-1$
 	private static final String NUL = new String(new byte[] {0});
+	private static final String INITIAL_LOCATION = "initial@"; //$NON-NLS-1$
 
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
@@ -448,7 +449,13 @@ public class Storage {
 		ModuleRevision current = module.getCurrentRevision();
 		Generation generation = (Generation) current.getRevisionInfo();
 		String updateLocation = generation.getHeaders().get(Constants.BUNDLE_UPDATELOCATION);
-		return updateLocation == null ? module.getLocation() : updateLocation;
+		if (updateLocation == null) {
+			updateLocation = module.getLocation();
+		}
+		if (updateLocation.startsWith(INITIAL_LOCATION)) {
+			updateLocation = updateLocation.substring(INITIAL_LOCATION.length());
+		}
+		return updateLocation;
 	}
 
 	private URLConnection getContentConnection(final String spec) throws IOException {
