@@ -54,8 +54,6 @@ public class DispatchTargets {
 		this.servletPath = (servletPath == null) ? Const.BLANK : servletPath;
 		this.pathInfo = pathInfo;
 		this.queryString = queryString;
-
-		this.string = SIMPLE_NAME + '[' + contextController.getFullContextPath() + requestURI + (queryString != null ? '?' + queryString : "") + ", " + endpointRegistration.toString() + ']'; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public void addRequestParameters(HttpServletRequest request) {
@@ -197,7 +195,15 @@ public class DispatchTargets {
 
 	@Override
 	public String toString() {
-		return string;
+		String value = string;
+
+		if (value == null) {
+			value = SIMPLE_NAME + '[' + contextController.getFullContextPath() + requestURI + (queryString != null ? '?' + queryString : "") + ", " + endpointRegistration.toString() + ']'; //$NON-NLS-1$
+
+			string = value;
+		}
+
+		return value;
 	}
 
 	private static Map<String, String[]> queryStringToParameterMap(String queryString) {
@@ -266,6 +272,6 @@ public class DispatchTargets {
 	private final String servletPath;
 	private final String servletName;
 	private final Map<String, Object> specialOverides = new ConcurrentHashMap<String, Object>();
-	private final String string;
+	private String string;
 
 }

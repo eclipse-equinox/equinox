@@ -88,7 +88,7 @@ public class ServletContextAdaptor {
 
 		this.classLoader = bundleWiring.getClassLoader();
 
-		this.string = getClass().getSimpleName() + '[' + contextController + ']';
+		this.string = SIMPLE_NAME + '[' + contextController + ']';
 	}
 
 	public ServletContext createServletContext() {
@@ -385,7 +385,13 @@ public class ServletContextAdaptor {
 	}
 
 	Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		servletContextTL.set((ServletContext)proxy);
+		boolean useThreadLocal =
+			"removeAttribute".equals(method.getName()) ||
+			"setAttribute".equals(method.getName());
+
+		if (useThreadLocal) {
+			servletContextTL.set((ServletContext)proxy);
+		}
 
 		try {
 			Method m = contextToHandlerMethods.get(method);
@@ -399,7 +405,9 @@ public class ServletContextAdaptor {
 			}
 		}
 		finally {
-			servletContextTL.remove();
+			if (useThreadLocal) {
+				servletContextTL.remove();
+			}
 		}
 	}
 
@@ -422,6 +430,11 @@ public class ServletContextAdaptor {
 
 	}
 
+	private final static String SIMPLE_NAME =
+		ServletContextAdaptor.class.getSimpleName();
+
+	private final static ThreadLocal<ServletContext> servletContextTL = new ThreadLocal<ServletContext>();
+
 	private final AccessControlContext acc;
 	private final Bundle bundle;
 	private final ClassLoader classLoader;
@@ -430,7 +443,6 @@ public class ServletContextAdaptor {
 	private final ProxyContext proxyContext;
 	private final ServletContext servletContext;
 	final ServletContextHelper servletContextHelper;
-	private final ThreadLocal<ServletContext> servletContextTL = new ThreadLocal<ServletContext>();
 	private final String string;
 
 }
