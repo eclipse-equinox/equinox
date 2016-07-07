@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.osgi.container.ModuleContainer.ContainerStartLevel;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
@@ -22,13 +24,13 @@ import org.osgi.framework.launch.Framework;
 import org.osgi.service.resolver.ResolutionException;
 
 /**
- * A special kind of module that represents the system module for the container.  Additinal
+ * A special kind of module that represents the system module for the container.  Additional
  * methods are available on the system module for operations that effect the whole container.
  * For example, initializing the container, restarting and waiting for the container to stop.
  * @since 3.10
  */
 public abstract class SystemModule extends Module {
-	private final Map<Thread, ContainerEvent> forStop = new HashMap<Thread, ContainerEvent>(2);
+	private volatile AtomicReference<ContainerEvent> forStop = new AtomicReference<ContainerEvent>();
 
 	public SystemModule(ModuleContainer container) {
 		super(new Long(0), Constants.SYSTEM_BUNDLE_LOCATION, container, EnumSet.of(Settings.AUTO_START, Settings.USE_ACTIVATION_POLICY), Integer.valueOf(0));
@@ -82,6 +84,11 @@ public abstract class SystemModule extends Module {
 			}
 
 			setState(State.STARTING);
+			AtomicReference<ContainerEvent> existingForStop = forStop;
+			if (existingForStop.get() != null) {
+				// There was a previous launch, reset the reference forStop
+				forStop = new AtomicReference<ContainerEvent>();
+			}
 			publishEvent(ModuleEvent.STARTING);
 			try {
 				initWorker();
@@ -116,49 +123,53 @@ public abstract class SystemModule extends Module {
 	public ContainerEvent waitForStop(long timeout) throws InterruptedException {
 		final boolean waitForever = timeout == 0;
 		final long start = System.currentTimeMillis();
-		final Thread current = Thread.currentThread();
 		long timeLeft = timeout;
-		ContainerEvent event = null;
-		boolean stateLocked;
-		if (timeout == 0) {
-			stateChangeLock.lockInterruptibly();
-			stateLocked = true;
-		} else {
-			stateLocked = stateChangeLock.tryLock(timeLeft, TimeUnit.MILLISECONDS);
+		AtomicReference<ContainerEvent> stopEvent = null;
+		State currentState = null;
+		boolean stateLocked = false;
+		try {
+			if (timeout == 0) {
+				stateChangeLock.lockInterruptibly();
+				stateLocked = true;
+			} else {
+				stateLocked = stateChangeLock.tryLock(timeLeft, TimeUnit.MILLISECONDS);
+			}
+			if (stateLocked) {
+				stopEvent = forStop;
+				currentState = getState();
+			}
+		} finally {
+			if (stateLocked) {
+				stateChangeLock.unlock();
+			}
 		}
-		if (stateLocked) {
-			synchronized (forStop) {
-				try {
-					if (!Module.ACTIVE_SET.contains(getState())) {
-						return ContainerEvent.STOPPED;
-					}
-					event = forStop.remove(current);
-					if (event == null) {
-						forStop.put(current, null);
-					}
-				} finally {
-					stateChangeLock.unlock();
+
+		if (stopEvent == null || currentState == null) {
+			// Could not lock system module stateChangeLock; timeout
+			return ContainerEvent.STOPPED_TIMEOUT;
+		}
+		if (!ACTIVE_SET.contains(currentState)) {
+			// check if a past event is waiting for us
+			ContainerEvent result = stopEvent.get();
+			if (result != null) {
+				return result;
+			}
+			// framework must not have even been started yet
+			return ContainerEvent.STOPPED;
+		}
+		synchronized (stopEvent) {
+			do {
+				ContainerEvent result = stopEvent.get();
+				if (result != null) {
+					return result;
 				}
 				timeLeft = waitForever ? 0 : start + timeout - System.currentTimeMillis();
-				while (event == null && (waitForever || timeLeft > 0)) {
-					forStop.wait(timeLeft);
-					event = forStop.remove(current);
-					if (!waitForever) {
-						timeLeft = start + timeout - System.currentTimeMillis();
-					}
+				if (waitForever || timeLeft > 0) {
+					stopEvent.wait(timeLeft);
+				} else {
+					return ContainerEvent.STOPPED_TIMEOUT;
 				}
-			}
-		}
-		return event == null ? ContainerEvent.STOPPED_TIMEOUT : event;
-	}
-
-	private void notifyWaitForStop(ContainerEvent event) {
-		synchronized (forStop) {
-			Collection<Thread> waiting = new ArrayList<Thread>(forStop.keySet());
-			for (Thread t : waiting) {
-				forStop.put(t, event);
-			}
-			forStop.notifyAll();
+			} while (true);
 		}
 	}
 
@@ -203,15 +214,21 @@ public abstract class SystemModule extends Module {
 					getRevisions().getContainer().adaptor.publishContainerEvent(containerEvent, this, null);
 					getRevisions().getContainer().close();
 				} finally {
+					AtomicReference<ContainerEvent> eventReference = forStop;
+					eventReference.compareAndSet(null, containerEvent);
 					stateChangeLock.unlock();
+					synchronized (eventReference) {
+						eventReference.notifyAll();
+					}
 				}
 			} else {
 				throw new BundleException(Msg.SystemModule_LockError);
 			}
 		} catch (InterruptedException e) {
 			getRevisions().getContainer().adaptor.publishContainerEvent(ContainerEvent.ERROR, this, e);
+			throw new BundleException(Msg.Module_LockError + toString(), BundleException.STATECHANGE_ERROR, e);
 		}
-		notifyWaitForStop(containerEvent);
+
 	}
 
 	/**
