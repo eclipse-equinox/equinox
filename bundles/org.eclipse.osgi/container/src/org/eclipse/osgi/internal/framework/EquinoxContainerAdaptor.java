@@ -333,4 +333,10 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 			((ExecutorService) current).shutdown();
 		}
 	}
+
+	@Override
+	public ModuleRevisionBuilder adaptModuleRevisionBuilder(ModuleEvent operation, Module origin, ModuleRevisionBuilder builder, Object revisionInfo) {
+		Generation generation = (Generation) revisionInfo;
+		return generation.adaptModuleRevisionBuilder(operation, origin, builder);
+	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,14 +10,18 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.hooks.framework;
 
+import static org.junit.Assert.assertNotEquals;
+
 import java.io.File;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
 import org.osgi.framework.launch.Framework;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.resource.Capability;
 
 public class StorageHookTests extends AbstractFrameworkHookTests {
 	private static final String TEST_BUNDLE = "test";
@@ -28,6 +32,8 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	private static final String HOOK_CONFIGURATOR_FIELD_INVALID_FACTORY_CLASS = "invalidFactoryClass";
 	private static final String HOOK_CONFIGURATOR_FIELD_VALIDATE_CALLED = "validateCalled";
 	private static final String HOOK_CONFIGURATOR_FIELD_DELETING_CALLED = "deletingGenerationCalled";
+	private static final String HOOK_CONFIGURATOR_FIELD_ADAPT_MANIFEST = "adaptManifest";
+	private static final String HOOK_CONFIGURATOR_FIELD_REPLACE_BUILDER = "replaceModuleBuilder";
 
 	private Map<String, String> configuration;
 	private Framework framework;
@@ -135,6 +141,61 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertStorageHookDeletingGenerationCalled();
 	}
 
+	public void testAdaptModuleRevisionBuilder() throws Exception {
+		setFactoryClassAdaptManifest(true);
+		initAndStartFramework();
+
+		installBundle();
+		Bundle b = framework.getBundleContext().getBundle(location);
+		assertNotNull("Missing test bundle.", b);
+		List<Capability> testCaps = b.adapt(BundleRevision.class).getCapabilities("test.file.path");
+		assertEquals("Wrong number of test caps.", 1, testCaps.size());
+		String path1 = (String) testCaps.get(0).getAttributes().get("test.file.path");
+		assertNotNull("No path", path1);
+		String operation1 = (String) testCaps.get(0).getAttributes().get("test.operation");
+		assertEquals("Wrong operation", ModuleEvent.INSTALLED.toString(), operation1);
+		String location1 = (String) testCaps.get(0).getAttributes().get("test.origin");
+		assertEquals("Wrong origin", framework.getBundleContext().getBundle().getLocation(), location1);
+
+		b.update();
+		testCaps = b.adapt(BundleRevision.class).getCapabilities("test.file.path");
+		assertEquals("Wrong number of test caps.", 1, testCaps.size());
+		String path2 = (String) testCaps.get(0).getAttributes().get("test.file.path");
+		assertNotNull("No path", path2);
+		String operation2 = (String) testCaps.get(0).getAttributes().get("test.operation");
+		assertEquals("Wrong operation", ModuleEvent.UPDATED.toString(), operation2);
+		String location2 = (String) testCaps.get(0).getAttributes().get("test.origin");
+		assertEquals("Wrong origin", location, location2);
+
+		assertNotEquals("Path of updated bundle is the same.", path1, path2);
+
+		framework.stop();
+		framework.waitForStop(5000);
+
+		// create new framework object to test loading of persistent capability.
+		framework = createFramework(configuration);
+		framework.start();
+		b = framework.getBundleContext().getBundle(location);
+		testCaps = b.adapt(BundleRevision.class).getCapabilities("test.file.path");
+		assertEquals("Wrong number of test caps.", 1, testCaps.size());
+		path2 = (String) testCaps.get(0).getAttributes().get("test.file.path");
+		assertNotNull("No path", path2);
+		operation2 = (String) testCaps.get(0).getAttributes().get("test.operation");
+		assertEquals("Wrong operation", ModuleEvent.UPDATED.toString(), operation2);
+		location2 = (String) testCaps.get(0).getAttributes().get("test.origin");
+		assertEquals("Wrong origin", location, location2);
+
+		setFactoryClassAdaptManifest(false);
+		setFactoryClassReplaceBuilder(true);
+		b.uninstall();
+		installBundle();
+		b = framework.getBundleContext().getBundle(location);
+		assertNotNull("Missing test bundle.", b);
+		assertEquals("Wrong BSN.", "replace", b.getSymbolicName());
+		testCaps = b.adapt(BundleRevision.class).getCapabilities("replace");
+		assertEquals("Wrong number of capabilities.", 1, testCaps.size());
+	}
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		String loc = bundleInstaller.getBundleLocation(HOOK_CONFIGURATOR_BUNDLE);
@@ -200,6 +261,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_VALIDATE_CALLED).set(null, false);
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_INVALID_FACTORY_CLASS).set(null, false);
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_DELETING_CALLED).set(null, false);
+		clazz.getField(HOOK_CONFIGURATOR_FIELD_ADAPT_MANIFEST).set(null, false);
 	}
 
 	private void restartFramework() throws Exception {
@@ -214,6 +276,16 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	private void setStorageHookInvalid(boolean value) throws Exception {
 		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_INVALID).set(null, value);
+	}
+
+	private void setFactoryClassAdaptManifest(boolean value) throws Exception {
+		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
+		clazz.getField(HOOK_CONFIGURATOR_FIELD_ADAPT_MANIFEST).set(null, value);
+	}
+
+	private void setFactoryClassReplaceBuilder(boolean value) throws Exception {
+		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
+		clazz.getField(HOOK_CONFIGURATOR_FIELD_REPLACE_BUILDER).set(null, value);
 	}
 
 	private void updateBundle() throws Exception {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,8 @@ import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import org.eclipse.osgi.container.ModuleRevision;
+import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.internal.container.LockSet;
@@ -351,6 +352,19 @@ public final class BundleInfo {
 			synchronized (this.genMonitor) {
 				return this.storageHooks;
 			}
+		}
+
+		public ModuleRevisionBuilder adaptModuleRevisionBuilder(ModuleEvent operation, Module origin, ModuleRevisionBuilder builder) {
+			List<StorageHook<?, ?>> hooks = getStorageHooks();
+			if (hooks != null) {
+				for (StorageHook<?, ?> hook : hooks) {
+					ModuleRevisionBuilder hookResult = hook.adaptModuleRevisionBuilder(operation, origin, builder);
+					if (hookResult != null) {
+						builder = hookResult;
+					}
+				}
+			}
+			return builder;
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,20 +12,29 @@ package org.eclipse.osgi.tests.hooks.framework.storage.a;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.util.Dictionary;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
+import org.eclipse.osgi.container.ModuleRevisionBuilder;
 import org.eclipse.osgi.internal.hookregistry.*;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
+import org.osgi.framework.Version;
+import org.osgi.framework.namespace.BundleNamespace;
+import org.osgi.framework.namespace.IdentityNamespace;
 
 public class TestHookConfigurator implements HookConfigurator {
 	private static class TestStorageHookFactory extends StorageHookFactory<Object, Object, TestStorageHookFactory.TestStorageHook> {
 		private static class TestStorageHook extends StorageHookFactory.StorageHook<Object, Object> {
+			private static AtomicInteger adaptCount = new AtomicInteger(1);
+
 			public TestStorageHook(Generation generation, Class clazz) {
 				super(generation, clazz);
 			}
 
 			@Override
 			public void initialize(Dictionary manifest) {
-				// Nothing.
+				// Nothing
 			}
 
 			@Override
@@ -48,6 +57,28 @@ public class TestHookConfigurator implements HookConfigurator {
 			@Override
 			public void deletingGeneration() {
 				TestHookConfigurator.deletingGenerationCalled = true;
+			}
+
+			@Override
+			public ModuleRevisionBuilder adaptModuleRevisionBuilder(ModuleEvent operation, Module origin, ModuleRevisionBuilder builder) {
+				if (TestHookConfigurator.replaceModuleBuilder) {
+					ModuleRevisionBuilder replace = new ModuleRevisionBuilder();
+					replace.setSymbolicName("replace");
+					replace.setVersion(Version.parseVersion("1.1.1"));
+					replace.addCapability("replace", Collections.<String, String> emptyMap(), Collections.<String, Object> emptyMap());
+					replace.addCapability(IdentityNamespace.IDENTITY_NAMESPACE, Collections.<String, String> emptyMap(), Collections.<String, Object> singletonMap(IdentityNamespace.IDENTITY_NAMESPACE, "replace"));
+					replace.addCapability(BundleNamespace.BUNDLE_NAMESPACE, Collections.<String, String> emptyMap(), Collections.<String, Object> singletonMap(BundleNamespace.BUNDLE_NAMESPACE, "replace"));
+					return replace;
+				}
+				if (TestHookConfigurator.adaptManifest) {
+					Map<String, String> dirs = Collections.emptyMap();
+					Map<String, Object> attrs = new HashMap<String, Object>();
+					attrs.put("test.file.path", getGeneration().getContent().getPath() + " - " + adaptCount.getAndIncrement());
+					attrs.put("test.operation", operation.toString());
+					attrs.put("test.origin", origin.getLocation());
+					builder.addCapability("test.file.path", dirs, attrs);
+				}
+				return builder;
 			}
 		}
 
@@ -74,6 +105,8 @@ public class TestHookConfigurator implements HookConfigurator {
 	public static volatile boolean invalidFactoryClass;
 	public static volatile boolean validateCalled;
 	public static volatile boolean deletingGenerationCalled;
+	public static volatile boolean adaptManifest;
+	public static volatile boolean replaceModuleBuilder;
 
 	public void addHooks(HookRegistry hookRegistry) {
 		hookRegistry.addStorageHookFactory(new TestStorageHookFactory());

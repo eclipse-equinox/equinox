@@ -196,6 +196,10 @@ public final class ModuleContainer implements DebugOptionsListener {
 	 * @throws BundleException if some error occurs installing the module
 	 */
 	public Module install(Module origin, String location, ModuleRevisionBuilder builder, Object revisionInfo) throws BundleException {
+		ModuleRevisionBuilder adaptBuilder = getAdaptor().adaptModuleRevisionBuilder(ModuleEvent.INSTALLED, origin, builder, revisionInfo);
+		if (adaptBuilder != null) {
+			builder = adaptBuilder;
+		}
 		String name = builder.getSymbolicName();
 		boolean locationLocked = false;
 		boolean nameLocked = false;
@@ -284,6 +288,10 @@ public final class ModuleContainer implements DebugOptionsListener {
 	 * @throws BundleException if some error occurs updating the module
 	 */
 	public void update(Module module, ModuleRevisionBuilder builder, Object revisionInfo) throws BundleException {
+		ModuleRevisionBuilder adaptBuilder = getAdaptor().adaptModuleRevisionBuilder(ModuleEvent.UPDATED, module, builder, revisionInfo);
+		if (adaptBuilder != null) {
+			builder = adaptBuilder;
+		}
 		checkAdminPermission(module.getBundle(), AdminPermission.LIFECYCLE);
 		String name = builder.getSymbolicName();
 		boolean nameLocked = false;

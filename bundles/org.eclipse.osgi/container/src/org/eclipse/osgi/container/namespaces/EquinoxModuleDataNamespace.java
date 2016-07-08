@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ import org.osgi.resource.Namespace;
  * Equinox module data capability namespace.  This namespace is used
  * to store immutable data about a module revision.  This includes the following
  * <ul>
- *   <li>The activation policy as specified by the {@link Constants#BUNDLE_ACTIVATIONPOLICY}
+ *   <li>The activation policy as specified by the {@link Constants#BUNDLE_ACTIVATIONPOLICY
  *       Bundle-ActivationPolicy} header.</li>
  *   <li>The activator as specified by the {@link Constants#BUNDLE_ACTIVATOR Bundle-Activator}
  *       header.</li>
@@ -25,15 +25,9 @@ import org.osgi.resource.Namespace;
  *       header.</li>
  *   <li>The bundle class loading policy.
  * </ul>
- * Activation 
- * policy capability is provided for informational purposes and 
- * should not be considered as effective by the resolver.
- * <p>
- * For bundles, the attributes of this capability are extracted 
- * from the Bundle-ActivationPolicy header.  The directives
- * {@link Constants#EXCLUDE_DIRECTIVE} and {@link Constants#INCLUDE_DIRECTIVE}
- * are converted to attributes of type {@code List<String>}.
  * 
+ * This capability is provided for informational purposes and 
+ * should not be considered as effective by the resolver.
  * <p>
  * This class defines the names for the attributes and directives for this
  * namespace.  Capabilities in this namespace are not intended to be used to
@@ -84,7 +78,7 @@ public class EquinoxModuleDataNamespace extends Namespace {
 	public final static String EFFECTIVE_INFORMATION = "information"; //$NON-NLS-1$
 
 	/**
-	 * The capability attribute contains the {@link Constants#BUNDLE_ACTIVATIONPOLICY 
+	 * The capability attribute contains the {@link Constants#BUNDLE_ACTIVATIONPOLICY
 	 * activation policy} for the providing module revision. The value of this
 	 * attribute must be of type {@code String}.  When not specified then
 	 * the module revision uses an eager activation policy.
@@ -92,8 +86,8 @@ public class EquinoxModuleDataNamespace extends Namespace {
 	public final static String CAPABILITY_ACTIVATION_POLICY = "activation.policy"; //$NON-NLS-1$
 
 	/**
-	 * An activation policy name indicating the lazy activation policy
-	 * is used.
+	 * An {@link #CAPABILITY_ACTIVATION_POLICY activation policy} attribute value
+	 * indicating the lazy activation policy is used.
 	 */
 	public final static String CAPABILITY_ACTIVATION_POLICY_LAZY = "lazy"; //$NON-NLS-1$
 

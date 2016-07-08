@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,8 @@ package org.eclipse.osgi.internal.hookregistry;
 
 import java.io.*;
 import java.util.Dictionary;
+import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.osgi.framework.BundleException;
 
@@ -124,6 +126,10 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 			this.factoryClass = factoryClass;
 		}
 
+		/**
+		 * The generation associated with this hook.
+		 * @return the generation associated with this hook.
+		 */
 		public Generation getGeneration() {
 			return generation;
 		}
@@ -135,6 +141,26 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		 * @throws BundleException if any error occurs
 		 */
 		public abstract void initialize(Dictionary<String, String> manifest) throws BundleException;
+
+		/**
+		 * Allows a builder to be modified before it is used by the framework to create a {@link ModuleRevision revision}
+		 * associated with the bundle {@link #getGeneration() generation} being installed or updated.
+		 * @param operation The lifecycle operation event that is in progress using the supplied builder.
+		 * This will be either {@link ModuleEvent#INSTALLED installed} or {@link ModuleEvent#UPDATED updated}.
+		 * @param origin The module which originated the lifecycle operation. The origin may be {@code null} for
+		 * {@link ModuleEvent#INSTALLED installed} operations.  This is the module
+		 * passed to the {@link ModuleContainer#install(Module, String, ModuleRevisionBuilder, Object) install} or 
+		 * {@link ModuleContainer#update(Module, ModuleRevisionBuilder, Object) update} method.
+		 * @param builder the builder that will be used to create a new {@link ModuleRevision}.
+		 * @return The modified builder or a completely new builder to be used by the bundle.  A {@code null} value
+		 * indicates the original builder should be used, which may have been modified by adding requirements or
+		 * capabilities.
+		 * @see ModuleContainerAdaptor#adaptModuleRevisionBuilder(ModuleEvent, Module, ModuleRevisionBuilder, Object)
+		 */
+		public ModuleRevisionBuilder adaptModuleRevisionBuilder(ModuleEvent operation, Module origin, ModuleRevisionBuilder builder) {
+			// do nothing
+			return null;
+		}
 
 		/**
 		 * Loads the data from the specified 
