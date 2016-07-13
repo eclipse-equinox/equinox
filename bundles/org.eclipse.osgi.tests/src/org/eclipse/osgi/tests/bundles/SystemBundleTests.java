@@ -2417,6 +2417,19 @@ public class SystemBundleTests extends AbstractBundleTests {
 		new Equinox(null);
 	}
 
+	public void testNullStorageArea() throws BundleException {
+		File install = getContext().getDataFile(getName());
+		install.mkdirs();
+		Equinox equinox = new Equinox(Collections.singletonMap("osgi.install.area", install.getAbsolutePath()));
+		try {
+			equinox.init();
+			String storageArea = equinox.getBundleContext().getProperty(Constants.FRAMEWORK_STORAGE);
+			assertNotNull("No storage area set.", storageArea);
+		} finally {
+			equinox.stop();
+		}
+	}
+
 	public void testOSGiDevSetsCheckConfiguration() throws BundleException {
 		String originalCheckConfiguration = System.clearProperty(EquinoxConfiguration.PROP_CHECK_CONFIGURATION);
 		try {

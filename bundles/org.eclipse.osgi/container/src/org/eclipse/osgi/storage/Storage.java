@@ -126,6 +126,12 @@ public class Storage {
 		Location parent = this.osgiLocation.getParentLocation();
 		parentRoot = parent == null ? null : new File(parent.getURL().getFile());
 
+		if (container.getConfiguration().getConfiguration(Constants.FRAMEWORK_STORAGE) == null) {
+			// Set the derived value if not already set as part of configuration.
+			// Note this is the parent directory of where the framework stores data (org.eclipse.osgi/)
+			container.getConfiguration().setConfiguration(Constants.FRAMEWORK_STORAGE, childRoot.getParentFile().getAbsolutePath());
+		}
+
 		InputStream info = getInfoInputStream();
 		DataInputStream data = info == null ? null : new DataInputStream(new BufferedInputStream(info));
 		try {
