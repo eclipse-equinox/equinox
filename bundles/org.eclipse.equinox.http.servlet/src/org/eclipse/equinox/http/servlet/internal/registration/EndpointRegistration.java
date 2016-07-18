@@ -47,6 +47,7 @@ public abstract class EndpointRegistration<D extends DTO>
 		} else {
 			classLoader = servletHolder.getBundle().adapt(BundleWiring.class).getClassLoader();
 		}
+		createContextAttributes();
 	}
 
 	public void destroy() {
@@ -86,19 +87,13 @@ public abstract class EndpointRegistration<D extends DTO>
 
 	//Delegate the init call to the actual servlet
 	public void init(ServletConfig servletConfig) throws ServletException {
-		boolean initialized = false;
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(classLoader);
 
-			createContextAttributes();
 			getT().init(servletConfig);
-			initialized = true;
 		}
 		finally {
-			if (!initialized) {
-				destroyContextAttributes();
-			}
 			Thread.currentThread().setContextClassLoader(original);
 		}
 	}

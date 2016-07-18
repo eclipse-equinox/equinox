@@ -23,7 +23,6 @@ import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionIdListener;
 import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.jetty.JettyCustomizer;
-import org.eclipse.equinox.http.servlet.HttpServiceMultipartServlet;
 import org.eclipse.equinox.http.servlet.HttpServiceServlet;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.session.HashSessionManager;
@@ -140,10 +139,6 @@ public class HttpServerManager implements ManagedServiceFactory {
 		if (null != customizer)
 			httpContext = (ServletContextHandler) customizer.customizeContext(httpContext, dictionary);
 
-		ServletHolder multiPartHolder = createMultipartNamedServlet(dictionary, multipartServletName);
-		// This servlet has no mapping as it's only used from named dispatcher
-		httpContext.getServletHandler().addServlet(multiPartHolder);
-
 		SessionManager sessionManager = httpContext.getSessionHandler().getSessionManager();
 		try {
 			sessionManager.addEventListener((HttpSessionIdListener) holder.getServlet());
@@ -157,24 +152,6 @@ public class HttpServerManager implements ManagedServiceFactory {
 			throw new ConfigurationException(pid, e.getMessage(), e);
 		}
 		servers.put(pid, server);
-	}
-
-	private ServletHolder createMultipartNamedServlet(@SuppressWarnings("rawtypes") Dictionary dictionary, String multipartServletName) {
-		int multipartFileSizeThreshold = Details.getInt(dictionary, JettyConstants.MULTIPART_FILESIZETHRESHOLD, 0);
-		String multipartLocation = Details.getString(dictionary, JettyConstants.MULTIPART_LOCATION, ""); //$NON-NLS-1$
-		long multipartMaxFileSize = Details.getLong(dictionary, JettyConstants.MULTIPART_MAXFILESIZE, -1L);
-		long multipartMaxRequestSize = Details.getLong(dictionary, JettyConstants.MULTIPART_MAXREQUESTSIZE, -1L);
-
-		ServletHolder holder = new ServletHolder(new InternalHttpServiceMultipartServlet());
-		holder.setInitOrder(1);
-		holder.setName(multipartServletName);
-		holder.setInitParameter(Constants.SERVICE_VENDOR, "Eclipse.org"); //$NON-NLS-1$
-		holder.setInitParameter(Constants.SERVICE_DESCRIPTION, multipartServletName); //$NON-NLS-1$
-
-		MultipartConfigElement multipartConfigElement = new MultipartConfigElement(multipartLocation, multipartMaxFileSize, multipartMaxRequestSize, multipartFileSizeThreshold);
-		holder.getRegistration().setMultipartConfig(multipartConfigElement);
-
-		return holder;
 	}
 
 	private ServerConnector createHttpsConnector(@SuppressWarnings("rawtypes") Dictionary dictionary, Server server, HttpConfiguration http_config) {
@@ -336,39 +313,6 @@ public class HttpServerManager implements ManagedServiceFactory {
 			} finally {
 				thread.setContextClassLoader(current);
 			}
-		}
-	}
-
-	public static class InternalHttpServiceMultipartServlet implements Servlet {
-		private Servlet httpServiceServlet = new HttpServiceMultipartServlet();
-		private ClassLoader contextLoader;
-
-		public void init(ServletConfig config) {
-			ServletContext context = config.getServletContext();
-			contextLoader = (ClassLoader) context.getAttribute(INTERNAL_CONTEXT_CLASSLOADER);
-		}
-
-		public void destroy() {
-			contextLoader = null;
-		}
-
-		public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-			Thread thread = Thread.currentThread();
-			ClassLoader current = thread.getContextClassLoader();
-			thread.setContextClassLoader(contextLoader);
-			try {
-				httpServiceServlet.service(req, res);
-			} finally {
-				thread.setContextClassLoader(current);
-			}
-		}
-
-		public ServletConfig getServletConfig() {
-			return httpServiceServlet.getServletConfig();
-		}
-
-		public String getServletInfo() {
-			return httpServiceServlet.getServletInfo();
 		}
 	}
 

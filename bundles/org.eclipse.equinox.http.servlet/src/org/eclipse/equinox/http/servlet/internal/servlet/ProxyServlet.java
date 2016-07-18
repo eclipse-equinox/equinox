@@ -18,8 +18,6 @@ import javax.servlet.http.*;
 import org.eclipse.equinox.http.servlet.internal.Activator;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.context.DispatchTargets;
-import org.eclipse.equinox.http.servlet.internal.registration.EndpointRegistration;
-import org.eclipse.equinox.http.servlet.internal.registration.ServletRegistration;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
 
 /**
@@ -31,14 +29,10 @@ import org.eclipse.equinox.http.servlet.internal.util.Const;
 public class ProxyServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 4117456123807468871L;
-	protected static final String MULTIPART_SERVLET_NAME_KEY = "multipart.servlet.name"; //$NON-NLS-1$
 	private HttpServiceRuntimeImpl httpServiceRuntimeImpl;
-	private String multipartServletName;
 
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-
-		multipartServletName = getInitParameter(MULTIPART_SERVLET_NAME_KEY);
 
 		Activator.addProxyServlet(this);
 	}
@@ -75,26 +69,6 @@ public class ProxyServlet extends HttpServlet {
 		}
 
 		DispatchTargets dispatchTargets = httpServiceRuntimeImpl.getDispatchTargets(alias, null);
-
-		if ((dispatchTargets != null) && (multipartServletName != null)) {
-			EndpointRegistration<?> endpointRegistration = dispatchTargets.getServletRegistration();
-
-			if (endpointRegistration instanceof ServletRegistration) {
-				ServletRegistration servletRegistration = (ServletRegistration)endpointRegistration;
-
-				if (servletRegistration.getD().multipartSupported) {
-					RequestDispatcher multipartDispatcher = getServletContext().getNamedDispatcher(multipartServletName);
-
-					if (multipartDispatcher != null) {
-						request.setAttribute(DispatchTargets.class.getName(), dispatchTargets);
-
-						multipartDispatcher.forward(request, response);
-
-						return;
-					}
-				}
-			}
-		}
 
 		if (dispatchTargets != null) {
 			dispatchTargets.doDispatch(

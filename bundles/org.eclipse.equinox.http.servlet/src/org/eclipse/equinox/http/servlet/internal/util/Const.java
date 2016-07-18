@@ -32,7 +32,11 @@ public class Const {
 	public static final String SLASH_STAR = "/*"; //$NON-NLS-1$
 	public static final String SLASH_STAR_DOT = "/*."; //$NON-NLS-1$
 	public static final String STAR_DOT = "*."; //$NON-NLS-1$
-	public static final String EQUINOX_HTTP_MULTIPARTSUPPORTED = "equinox.http.multipartSupported"; //$NON-NLS-1$
+	public static final String EQUINOX_HTTP_MULTIPART_ENABLED = "equinox.http.multipartSupported"; //$NON-NLS-1$
+	public static final String EQUINOX_HTTP_MULTIPART_FILESIZETHRESHOLD = "equinox.http.whiteboard.servlet.multipart.fileSizeThreshold"; //$NON-NLS-1$
+	public static final String EQUINOX_HTTP_MULTIPART_LOCATION = "equinox.http.whiteboard.servlet.multipart.location"; //$NON-NLS-1$
+	public static final String EQUINOX_HTTP_MULTIPART_MAXFILESIZE = "equinox.http.whiteboard.servlet.multipart.maxFileSize"; //$NON-NLS-1$
+	public static final String EQUINOX_HTTP_MULTIPART_MAXREQUESTSIZE = "equinox.http.whiteboard.servlet.multipart.maxRequestSize"; //$NON-NLS-1$
 	public static final String EQUINOX_LEGACY_TCCL_PROP = "equinox.legacy.tccl"; //$NON-NLS-1$
 	public static final String EQUINOX_LEGACY_CONTEXT_SELECT = "equinox.context.select"; //$NON-NLS-1$
 	public static final String EQUINOX_LEGACY_CONTEXT_HELPER = "equinox.legacy.context.helper"; //$NON-NLS-1$

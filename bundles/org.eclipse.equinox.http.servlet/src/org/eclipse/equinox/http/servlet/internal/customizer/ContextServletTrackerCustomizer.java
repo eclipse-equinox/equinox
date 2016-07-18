@@ -13,6 +13,7 @@ package org.eclipse.equinox.http.servlet.internal.customizer;
 
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.Servlet;
+import org.eclipse.equinox.http.servlet.dto.ExtendedFailedServletDTO;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.error.HttpWhiteboardFailureException;
@@ -20,7 +21,6 @@ import org.eclipse.equinox.http.servlet.internal.registration.ServletRegistratio
 import org.eclipse.equinox.http.servlet.internal.util.*;
 import org.osgi.framework.*;
 import org.osgi.service.http.runtime.dto.DTOConstants;
-import org.osgi.service.http.runtime.dto.FailedServletDTO;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /**
@@ -59,8 +59,8 @@ public class ContextServletTrackerCustomizer
 
 			recordFailedServletDTO(serviceReference, hwfe.getFailureReason());
 		}
-		catch (Exception e) {
-			httpServiceRuntime.log(e.getMessage(), e);
+		catch (Throwable t) {
+			httpServiceRuntime.log(t.getMessage(), t);
 
 			recordFailedServletDTO(serviceReference, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
 		}
@@ -94,13 +94,32 @@ public class ContextServletTrackerCustomizer
 	private void recordFailedServletDTO(
 		ServiceReference<Servlet> serviceReference, int failureReason) {
 
-		FailedServletDTO failedServletDTO = new FailedServletDTO();
+		ExtendedFailedServletDTO failedServletDTO = new ExtendedFailedServletDTO();
 
 		failedServletDTO.asyncSupported = BooleanPlus.from(
 			serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED), false);
 		failedServletDTO.failureReason = failureReason;
 		failedServletDTO.initParams = ServiceProperties.parseInitParams(
 			serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX);
+		failedServletDTO.multipartEnabled = ServiceProperties.parseBoolean(
+			serviceReference, Const.EQUINOX_HTTP_MULTIPART_ENABLED);
+		Integer multipartFileSizeThreshold = (Integer)serviceReference.getProperty(
+			Const.EQUINOX_HTTP_MULTIPART_FILESIZETHRESHOLD);
+		if (multipartFileSizeThreshold != null) {
+			failedServletDTO.multipartFileSizeThreshold = multipartFileSizeThreshold;
+		}
+		failedServletDTO.multipartLocation = (String)serviceReference.getProperty(
+			Const.EQUINOX_HTTP_MULTIPART_LOCATION);
+		Long multipartMaxFileSize = (Long)serviceReference.getProperty(
+			Const.EQUINOX_HTTP_MULTIPART_MAXFILESIZE);
+		if (multipartMaxFileSize != null) {
+			failedServletDTO.multipartMaxFileSize = multipartMaxFileSize;
+		}
+		Long multipartMaxRequestSize = (Long)serviceReference.getProperty(
+			Const.EQUINOX_HTTP_MULTIPART_MAXREQUESTSIZE);
+		if (multipartMaxRequestSize != null) {
+			failedServletDTO.multipartMaxRequestSize = multipartMaxRequestSize;
+		}
 		failedServletDTO.name = (String)serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
 		failedServletDTO.patterns = StringPlus.from(
 			serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN)).toArray(new String[0]);

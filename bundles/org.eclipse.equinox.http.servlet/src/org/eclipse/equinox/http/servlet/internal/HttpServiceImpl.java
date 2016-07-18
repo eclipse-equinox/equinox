@@ -21,6 +21,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eclipse.equinox.http.servlet.ExtendedHttpService;
+import org.eclipse.equinox.http.servlet.internal.util.Throw;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.*;
 
@@ -99,7 +100,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 			});
 		}
 		catch (PrivilegedActionException e) {
-			unchecked(e.getException());
+			Throw.unchecked(e.getException());
 		}
 
 	}
@@ -123,7 +124,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 				}
 			});
 		} catch (PrivilegedActionException e) {
-			unchecked(e.getException());
+			Throw.unchecked(e.getException());
 		}
 
 	}
@@ -149,7 +150,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 				}
 			});
 		} catch (PrivilegedActionException e) {
-			unchecked(e.getException());
+			Throw.unchecked(e.getException());
 		}
 	}
 
@@ -183,14 +184,5 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 			throw new IllegalStateException(
 				"Service instance is already shutdown"); //$NON-NLS-1$
 		}
-	}
-
-	static <T> T unchecked(Exception exception) {
-		return HttpServiceImpl.<T, RuntimeException> unchecked0(exception);
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T, E extends Exception> T unchecked0(Exception exception) throws E {
-		throw (E) exception;
 	}
 }

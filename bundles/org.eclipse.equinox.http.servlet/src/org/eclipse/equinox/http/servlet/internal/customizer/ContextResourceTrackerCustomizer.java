@@ -57,8 +57,8 @@ public class ContextResourceTrackerCustomizer
 
 			recordFailedResourceDTO(serviceReference, hwfe.getFailureReason());
 		}
-		catch (Exception e) {
-			httpServiceRuntime.log(e.getMessage(), e);
+		catch (Throwable t) {
+			httpServiceRuntime.log(t.getMessage(), t);
 
 			recordFailedResourceDTO(serviceReference, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
 		}

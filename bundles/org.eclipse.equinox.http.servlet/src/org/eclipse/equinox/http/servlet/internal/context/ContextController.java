@@ -21,9 +21,9 @@ import java.util.regex.Pattern;
 import javax.servlet.*;
 import javax.servlet.Filter;
 import javax.servlet.http.*;
+import org.eclipse.equinox.http.servlet.dto.ExtendedServletDTO;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.customizer.*;
-import org.eclipse.equinox.http.servlet.internal.dto.ExtendedServletDTO;
 import org.eclipse.equinox.http.servlet.internal.error.*;
 import org.eclipse.equinox.http.servlet.internal.registration.*;
 import org.eclipse.equinox.http.servlet.internal.registration.FilterRegistration;
@@ -424,8 +424,10 @@ public class ContextController {
 		try {
 			resourceRegistration.init(servletConfig);
 		}
-		catch (ServletException e) {
-			return null;
+		catch (Throwable t) {
+			resourceRegistration.destroy();
+
+			return Throw.unchecked(t);
 		}
 
 		endpointRegistrations.add(resourceRegistration);
@@ -451,6 +453,10 @@ public class ContextController {
 			}
 		} finally {
 			if (registration == null) {
+				// Always attempt to release here; even though destroy() may have been called
+				// on the registration while failing to add.  There are cases where no 
+				// ServletRegistration may have even been created at all to call destory() on.
+				// Also, addedRegisteredObject may be false which means we never call doAddServletRegistration
 				servletHolder.release();
 				if (addedRegisteredObject) {
 					httpServiceRuntime.getRegisteredObjects().remove(servlet);
@@ -483,8 +489,16 @@ public class ContextController {
 		String generatedServletName = ServiceProperties.parseName(
 			servletRef.getProperty(
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME), servletHolder.get());
-		boolean multipartSupported = ServiceProperties.parseBoolean(
-			servletRef,	Const.EQUINOX_HTTP_MULTIPARTSUPPORTED);
+		boolean multipartEnabled = ServiceProperties.parseBoolean(
+			servletRef, Const.EQUINOX_HTTP_MULTIPART_ENABLED);
+		Integer multipartFileSizeThreshold = (Integer)servletRef.getProperty(
+			Const.EQUINOX_HTTP_MULTIPART_FILESIZETHRESHOLD);
+		String multipartLocation = (String)servletRef.getProperty(
+			Const.EQUINOX_HTTP_MULTIPART_LOCATION);
+		Long multipartMaxFileSize = (Long)servletRef.getProperty(
+			Const.EQUINOX_HTTP_MULTIPART_MAXFILESIZE);
+		Long multipartMaxRequestSize = (Long)servletRef.getProperty(
+			Const.EQUINOX_HTTP_MULTIPART_MAXREQUESTSIZE);
 
 		if (((patterns == null) || (patterns.length == 0)) &&
 			((errorPages == null) || errorPages.length == 0) &&
@@ -512,7 +526,11 @@ public class ContextController {
 
 		servletDTO.asyncSupported = asyncSupported;
 		servletDTO.initParams = servletInitParams;
-		servletDTO.multipartSupported = multipartSupported;
+		servletDTO.multipartEnabled = multipartEnabled;
+		servletDTO.multipartFileSizeThreshold = (multipartFileSizeThreshold != null ? multipartFileSizeThreshold : 0);
+		servletDTO.multipartLocation = (multipartLocation != null ? multipartLocation : Const.BLANK);
+		servletDTO.multipartMaxFileSize = (multipartMaxFileSize != null ? multipartMaxFileSize : -1L);
+		servletDTO.multipartMaxRequestSize = (multipartMaxRequestSize != null ? multipartMaxRequestSize : -1L);
 		servletDTO.name = generatedServletName;
 		servletDTO.patterns = sort(patterns);
 		servletDTO.serviceId = serviceId;
@@ -572,11 +590,18 @@ public class ContextController {
 			servletHolder.getBundle(), curServletContextHelper);
 		ServletRegistration servletRegistration = new ServletRegistration(
 			servletHolder, servletDTO, errorPageDTO, curServletContextHelper, this,
-			legacyTCCL);
+			servletContext, legacyTCCL);
 		ServletConfig servletConfig = new ServletConfigImpl(
 			generatedServletName, servletInitParams, servletContext);
 
-		servletRegistration.init(servletConfig);
+		try {
+			servletRegistration.init(servletConfig);
+		}
+		catch (Throwable t) {
+			servletRegistration.destroy();
+
+			return Throw.unchecked(t);
+		}
 
 		endpointRegistrations.add(servletRegistration);
 

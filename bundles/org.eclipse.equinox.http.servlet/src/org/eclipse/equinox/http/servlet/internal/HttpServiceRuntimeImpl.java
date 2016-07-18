@@ -22,6 +22,7 @@ import javax.servlet.Filter;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
 import org.eclipse.equinox.http.servlet.context.ContextPathCustomizer;
+import org.eclipse.equinox.http.servlet.dto.ExtendedFailedServletDTO;
 import org.eclipse.equinox.http.servlet.internal.context.*;
 import org.eclipse.equinox.http.servlet.internal.error.*;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
@@ -467,11 +468,11 @@ public class HttpServiceRuntimeImpl
 	}
 
 	private FailedServletDTO[] getFailedServletDTOs() {
-		Collection<FailedServletDTO> fsDTOs = failedServletDTOs.values();
+		Collection<ExtendedFailedServletDTO> fsDTOs = failedServletDTOs.values();
 
 		List<FailedServletDTO> copies = new ArrayList<FailedServletDTO>();
 
-		for (FailedServletDTO failedServletDTO : fsDTOs) {
+		for (ExtendedFailedServletDTO failedServletDTO : fsDTOs) {
 			copies.add(DTOUtil.clone(failedServletDTO));
 		}
 
@@ -1019,7 +1020,7 @@ public class HttpServiceRuntimeImpl
 
 	public void recordFailedServletDTO(
 		ServiceReference<Servlet> serviceReference,
-		FailedServletDTO failedServletDTO) {
+		ExtendedFailedServletDTO failedServletDTO) {
 
 		if (failedServletDTOs.containsKey(serviceReference)) {
 			return;
@@ -1092,8 +1093,8 @@ public class HttpServiceRuntimeImpl
 		new ConcurrentHashMap<ServiceReference<Object>, FailedResourceDTO>();
 	private final ConcurrentMap<ServiceReference<ServletContextHelper>, FailedServletContextDTO> failedServletContextDTOs =
 		new ConcurrentHashMap<ServiceReference<ServletContextHelper>, FailedServletContextDTO>();
-	private final ConcurrentMap<ServiceReference<Servlet>, FailedServletDTO> failedServletDTOs =
-		new ConcurrentHashMap<ServiceReference<Servlet>, FailedServletDTO>();
+	private final ConcurrentMap<ServiceReference<Servlet>, ExtendedFailedServletDTO> failedServletDTOs =
+		new ConcurrentHashMap<ServiceReference<Servlet>, ExtendedFailedServletDTO>();
 
 	private AtomicLong legacyIdGenerator = new AtomicLong(0);
 
@@ -1131,7 +1132,7 @@ public class HttpServiceRuntimeImpl
 		public void checkForError() {
 			Exception result = error.get();
 			if (result != null) {
-				HttpServiceImpl.unchecked(result);
+				Throw.unchecked(result);
 			}
 		}
 	}
@@ -1169,7 +1170,7 @@ public class HttpServiceRuntimeImpl
 					error.set(null);
 				} catch (Exception e){
 					error.set(e);
-					HttpServiceImpl.unchecked(e);
+					Throw.unchecked(e);
 				}
 			}
 
@@ -1205,7 +1206,7 @@ public class HttpServiceRuntimeImpl
 				error.set(null);
 			} catch (Exception e){
 				error.set(e);
-				HttpServiceImpl.unchecked(e);
+				Throw.unchecked(e);
 			}
 		}
 

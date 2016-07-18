@@ -12,10 +12,16 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal.registration;
 
-import javax.servlet.Servlet;
+import java.io.IOException;
+import java.util.*;
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
+import org.eclipse.equinox.http.servlet.dto.ExtendedServletDTO;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
-import org.eclipse.equinox.http.servlet.internal.dto.ExtendedServletDTO;
+import org.eclipse.equinox.http.servlet.internal.multipart.MultipartSupport;
+import org.eclipse.equinox.http.servlet.internal.multipart.MultipartSupportFactory;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.dto.ErrorPageDTO;
@@ -23,14 +29,43 @@ import org.osgi.service.http.runtime.dto.ErrorPageDTO;
 //This class wraps the servlet object registered in the HttpService.registerServlet call, to manage the context classloader when handleRequests are being asked.
 public class ServletRegistration extends EndpointRegistration<ExtendedServletDTO> {
 
+	private static MultipartSupportFactory factory;
+
+	static {
+		ServiceLoader<MultipartSupportFactory> loader = ServiceLoader.load(MultipartSupportFactory.class);
+
+		Iterator<MultipartSupportFactory> iterator = loader.iterator();
+
+		while (iterator.hasNext()) {
+			try {
+				factory = iterator.next();
+				break;
+			}
+			catch (Throwable t) {
+				// ignore, it means our optional imports are missing.
+			}
+		}
+	}
+
 	public ServletRegistration(
 		ServiceHolder<Servlet> servletHolder, ExtendedServletDTO servletDTO, ErrorPageDTO errorPageDTO,
 		ServletContextHelper servletContextHelper,
-		ContextController contextController, ClassLoader legacyTCCL) {
+		ContextController contextController, ServletContext servletContext, ClassLoader legacyTCCL) {
 
 		super(servletHolder, servletDTO, servletContextHelper, contextController, legacyTCCL);
 
 		this.errorPageDTO = errorPageDTO;
+
+		if (servletDTO.multipartEnabled) {
+			if (factory == null) {
+				throw new IllegalStateException(
+					"Multipart support not enabled due to missing, optional commons-fileupload dependency!"); //$NON-NLS-1$
+			}
+			multipartSupport = factory.newInstance(servletDTO, servletContext);
+		}
+		else {
+			multipartSupport = null;
+		}
 	}
 
 	public ErrorPageDTO getErrorPageDTO() {
@@ -74,6 +109,15 @@ public class ServletRegistration extends EndpointRegistration<ExtendedServletDTO
 		return super.match(name, servletPath, pathInfo, extension, match);
 	}
 
-	private ErrorPageDTO errorPageDTO;
+	public Map<String, Part> parseRequest(HttpServletRequest request) throws IOException, ServletException {
+		if (multipartSupport == null) {
+			throw new IOException("Servlet not configured for multipart!"); //$NON-NLS-1$
+		}
+
+		return multipartSupport.parseRequest(request);
+	}
+
+	private final ErrorPageDTO errorPageDTO;
+	private final MultipartSupport multipartSupport;
 
 }

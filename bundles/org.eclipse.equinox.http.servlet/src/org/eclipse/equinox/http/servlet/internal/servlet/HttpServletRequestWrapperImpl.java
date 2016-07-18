@@ -12,11 +12,15 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal.servlet;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.context.DispatchTargets;
+import org.eclipse.equinox.http.servlet.internal.registration.EndpointRegistration;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
 import org.eclipse.equinox.http.servlet.internal.util.EventListeners;
 import org.osgi.service.http.HttpContext;
@@ -25,6 +29,8 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 	private final Stack<DispatchTargets> dispatchTargets = new Stack<DispatchTargets>();
 	private final HttpServletRequest request;
+	private Map<String, Part> parts;
+	private final Lock lock = new ReentrantLock();
 
 	private static final String[] dispatcherAttributes = new String[] {
 		RequestDispatcher.ERROR_EXCEPTION,
@@ -398,6 +404,47 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 					servletRequestAttributeEvent);
 			}
 		}
+	}
+
+	@Override
+	public Part getPart(String name) throws IOException, ServletException {
+		return getParts0().get(name);
+	}
+
+	@Override
+	public Collection<Part> getParts() throws IOException, ServletException {
+		return new ArrayList<Part>(getParts0().values());
+	}
+
+	private Map<String, Part> getParts0() throws IOException, ServletException {
+		org.eclipse.equinox.http.servlet.internal.registration.ServletRegistration servletRegistration = getServletRegistration();
+
+		if (servletRegistration == null) {
+			throw new ServletException("Not a servlet request!"); //$NON-NLS-1$
+		}
+
+		lock.lock();
+
+		try {
+			if (parts != null) {
+				return parts;
+			}
+
+			return parts = servletRegistration.parseRequest(this);
+		}
+		finally {
+			lock.unlock();
+		}
+	}
+
+	private org.eclipse.equinox.http.servlet.internal.registration.ServletRegistration getServletRegistration() {
+		EndpointRegistration<?> servletRegistration = dispatchTargets.peek().getServletRegistration();
+
+		if (servletRegistration instanceof org.eclipse.equinox.http.servlet.internal.registration.ServletRegistration) {
+			return (org.eclipse.equinox.http.servlet.internal.registration.ServletRegistration)servletRegistration;
+		}
+
+		return null;
 	}
 
 }

@@ -6,17 +6,19 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Raymond Augé - initial implementation
+ *     Raymond Augé <raymond.auge@liferay.com> - Bug 497271
  *******************************************************************************/
-package org.eclipse.equinox.http.servlet;
+package org.eclipse.equinox.http.servlet.internal.util;
 
-import javax.servlet.http.HttpServlet;
+public class Throw {
 
-/**
- * @noextend This class is not intended to be subclassed by clients.
- * @deprecated No longer required.
- * @since 1.3
- */
-public class HttpServiceMultipartServlet extends HttpServlet {
-	private static final long serialVersionUID = 2281118780429323631L;
+	public static <T> T unchecked(Throwable throwable) {
+		return Throw.<T, RuntimeException>unchecked0(throwable);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T, E extends Throwable> T unchecked0(Throwable throwable) throws E {
+		throw (E) throwable;
+	}
+
 }

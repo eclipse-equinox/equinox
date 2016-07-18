@@ -6,17 +6,15 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Raymond Augé - initial implementation
+ *     Raymond Augé <raymond.auge@liferay.com> - Bug 497271
  *******************************************************************************/
-package org.eclipse.equinox.http.servlet;
+package org.eclipse.equinox.http.servlet.internal.multipart;
 
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletContext;
+import org.eclipse.equinox.http.servlet.dto.ExtendedServletDTO;
 
-/**
- * @noextend This class is not intended to be subclassed by clients.
- * @deprecated No longer required.
- * @since 1.3
- */
-public class HttpServiceMultipartServlet extends HttpServlet {
-	private static final long serialVersionUID = 2281118780429323631L;
+public interface MultipartSupportFactory {
+
+	MultipartSupport newInstance(ExtendedServletDTO servletDTO, ServletContext servletContext);
+
 }

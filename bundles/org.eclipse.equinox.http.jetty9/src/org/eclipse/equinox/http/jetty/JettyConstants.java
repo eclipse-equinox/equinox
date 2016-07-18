@@ -70,25 +70,25 @@ public interface JettyConstants {
 	public static final String HTTP_MINTHREADS = "http.minThreads"; //$NON-NLS-1$
 
 	/**
-	 * name="multipart.fileSizeThreshold" type="Integer" (default: 8 -- size threshold after which the file will be written to disk)
+	 * @deprecated
 	 * @since 1.3
 	 */
 	public static final String MULTIPART_FILESIZETHRESHOLD = "multipart.fileSizeThreshold"; //$NON-NLS-1$
 
 	/**
-	 * name="multipart.location" type="String" (default: "" -- directory location where files will be stored)
+	 * @deprecated
 	 * @since 1.3
 	 */
 	public static final String MULTIPART_LOCATION = "multipart.location"; //$NON-NLS-1$
 
 	/**
-	 * name="multipart.maxFileSize" type="Long" (default: -1L -- maximum size allowed for uploaded files)
+	 * @deprecated
 	 * @since 1.3
 	 */
 	public static final String MULTIPART_MAXFILESIZE = "multipart.maxFileSize"; //$NON-NLS-1$
 
 	/**
-	 * name="multipart.maxRequestSize" type="Long" (default: -1L -- maximum size allowed for multipart/form-data requests)
+	 * @deprecated
 	 * @since 1.3
 	 */
 	public static final String MULTIPART_MAXREQUESTSIZE = "multipart.maxRequestSize"; //$NON-NLS-1$

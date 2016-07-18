@@ -13,7 +13,8 @@ package org.eclipse.equinox.http.servlet.internal.util;
 
 import java.lang.reflect.Array;
 import java.util.*;
-import org.eclipse.equinox.http.servlet.internal.dto.ExtendedServletDTO;
+import org.eclipse.equinox.http.servlet.dto.ExtendedFailedServletDTO;
+import org.eclipse.equinox.http.servlet.dto.ExtendedServletDTO;
 import org.osgi.dto.DTO;
 import org.osgi.service.http.runtime.dto.*;
 
@@ -95,12 +96,17 @@ public class DTOUtil {
 		return clone;
 	}
 
-	public static FailedServletDTO clone(FailedServletDTO original) {
-		FailedServletDTO clone = new FailedServletDTO();
+	public static ExtendedFailedServletDTO clone(ExtendedFailedServletDTO original) {
+		ExtendedFailedServletDTO clone = new ExtendedFailedServletDTO();
 
 		clone.asyncSupported = copy(original.asyncSupported);
 		clone.failureReason = copy(original.failureReason);
 		clone.initParams = copyStringMap(clone.initParams);
+		clone.multipartEnabled = copy(original.multipartEnabled);
+		clone.multipartFileSizeThreshold = copy(original.multipartFileSizeThreshold);
+		clone.multipartLocation = copy(original.multipartLocation);
+		clone.multipartMaxFileSize = copy(original.multipartMaxFileSize);
+		clone.multipartMaxRequestSize = copy(original.multipartMaxRequestSize);
 		clone.name = copy(original.name);
 		clone.patterns = copy(original.patterns);
 		clone.serviceId = copy(original.serviceId);
@@ -152,7 +158,11 @@ public class DTOUtil {
 
 		clone.asyncSupported = copy(original.asyncSupported);
 		clone.initParams = copyStringMap(original.initParams);
-		clone.multipartSupported = copy(original.multipartSupported);
+		clone.multipartEnabled = copy(original.multipartEnabled);
+		clone.multipartFileSizeThreshold = copy(original.multipartFileSizeThreshold);
+		clone.multipartLocation = copy(original.multipartLocation);
+		clone.multipartMaxFileSize = copy(original.multipartMaxFileSize);
+		clone.multipartMaxRequestSize = copy(original.multipartMaxRequestSize);
 		clone.name = copy(original.name);
 		clone.patterns = copy(original.patterns);
 		clone.serviceId = copy(original.serviceId);

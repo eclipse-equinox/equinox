@@ -17,6 +17,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 
 import java.lang.reflect.InvocationTargetException;
@@ -111,8 +112,8 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public class ServletTest extends BaseTest {
 	@Rule
 	public TestName testName = new TestName();
-	
-	
+
+
 	@Test
 	public void test_ErrorPage1() throws Exception {
 		String expected = "403 ERROR :";
@@ -1910,15 +1911,15 @@ public class ServletTest extends BaseTest {
 		Assert.assertEquals("b", requestAdvisor.request("files/help.txt"));
 	}
 
-	private static String getSubmittedFileName(Part part) {
-		for (String cd : part.getHeader("content-disposition").split(";")) {
-			if (cd.trim().startsWith("filename")) {
-				String fileName = cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
-				return fileName.substring(fileName.lastIndexOf('/') + 1).substring(fileName.lastIndexOf('\\') + 1); // MSIE fix.
-			}
-		}
-		return null;
-	}
+//	private static String getSubmittedFileName(Part part) {
+//		for (String cd : part.getHeader("content-disposition").split(";")) {
+//			if (cd.trim().startsWith("filename")) {
+//				String fileName = cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
+//				return fileName.substring(fileName.lastIndexOf('/') + 1).substring(fileName.lastIndexOf('\\') + 1); // MSIE fix.
+//			}
+//		}
+//		return null;
+//	}
 
 	/*
 	 * 3.1 file uploads
@@ -1961,14 +1962,38 @@ public class ServletTest extends BaseTest {
 		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
 
 		Assert.assertEquals("200", result.get("responseCode").get(0));
-		Assert.assertEquals("resource1.txt|text/plain|1", result.get("responseBody").get(0));
+		Assert.assertEquals("resource1.txt|text/plain|25", result.get("responseBody").get(0));
 	}
 
-	/*
-	 * 3.0 file uploads
-	 */
 	@Test
-	public void test_Servlet17() throws Exception {
+	public void test_Servlet16_notEnabled() throws Exception {
+		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+				throws IOException, ServletException {
+
+				req.getPart("file");
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+
+		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
+
+		map.put("file", Arrays.<Object>asList(getClass().getResource("resource1.txt")));
+
+		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
+
+		Assert.assertEquals("500", result.get("responseCode").get(0));
+	}
+
+	@Test
+	public void test_Servlet16_fileuploadWithLocation() throws Exception {
 		Servlet servlet = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
 
@@ -1979,9 +2004,14 @@ public class ServletTest extends BaseTest {
 				Part part = req.getPart("file");
 				Assert.assertNotNull(part);
 
-				String submittedFileName = getSubmittedFileName(part);
+				String submittedFileName = part.getSubmittedFileName();
 				String contentType = part.getContentType();
 				long size = part.getSize();
+
+				File tempDir = (File)getServletContext().getAttribute(ServletContext.TEMPDIR);
+				File location = new File(tempDir, "file-upload-test");
+
+				File[] listFiles = location.listFiles();
 
 				PrintWriter writer = resp.getWriter();
 
@@ -1989,6 +2019,7 @@ public class ServletTest extends BaseTest {
 				writer.write("|");
 				writer.write(contentType);
 				writer.write("|" + size);
+				writer.write("|" + listFiles.length);
 			}
 		};
 
@@ -1996,17 +2027,174 @@ public class ServletTest extends BaseTest {
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
 		props.put("equinox.http.multipartSupported", Boolean.TRUE);
+		props.put("equinox.http.whiteboard.servlet.multipart.location", "file-upload-test");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
 
 		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
 
-		map.put("file", Arrays.<Object>asList(getClass().getResource("blue.png")));
+		map.put("file", Arrays.<Object>asList(getClass().getResource("resource1.txt")));
 
 		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
 
 		Assert.assertEquals("200", result.get("responseCode").get(0));
-		Assert.assertEquals("blue.png|image/png|292", result.get("responseBody").get(0));
+		Assert.assertEquals("resource1.txt|text/plain|25|0", result.get("responseBody").get(0));
 	}
+
+	@Test
+	public void test_Servlet16_fileuploadWithLocationAndThreshold() throws Exception {
+		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+				throws IOException, ServletException {
+
+				Part part = req.getPart("file");
+				Assert.assertNotNull(part);
+
+				String submittedFileName = part.getSubmittedFileName();
+				String contentType = part.getContentType();
+				long size = part.getSize();
+
+				File tempDir = (File)getServletContext().getAttribute(ServletContext.TEMPDIR);
+				File location = new File(tempDir, "file-upload-test");
+
+				File[] listFiles = location.listFiles();
+
+				PrintWriter writer = resp.getWriter();
+
+				writer.write(submittedFileName);
+				writer.write("|");
+				writer.write(contentType);
+				writer.write("|" + size);
+				writer.write("|" + listFiles.length);
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
+		props.put("equinox.http.multipartSupported", Boolean.TRUE);
+		props.put("equinox.http.whiteboard.servlet.multipart.location", "file-upload-test");
+		props.put("equinox.http.whiteboard.servlet.multipart.fileSizeThreshold", 10);
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+
+		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
+
+		map.put("file", Arrays.<Object>asList(getClass().getResource("resource1.txt")));
+
+		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
+
+		Assert.assertEquals("200", result.get("responseCode").get(0));
+		Assert.assertEquals("resource1.txt|text/plain|25|1", result.get("responseBody").get(0));
+	}
+
+	@Test
+	public void test_Servlet16_fileuploadWithLocationMaxFileSize() throws Exception {
+		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+				throws IOException, ServletException {
+
+				req.getPart("file");
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
+		props.put("equinox.http.multipartSupported", Boolean.TRUE);
+		props.put("equinox.http.whiteboard.servlet.multipart.location", "file-upload-test");
+		// Note the actual uploaded file size is 25bytes
+		props.put("equinox.http.whiteboard.servlet.multipart.maxFileSize", 24L);
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+
+		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
+
+		map.put("file", Arrays.<Object>asList(getClass().getResource("resource1.txt")));
+
+		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
+
+		Assert.assertEquals("500", result.get("responseCode").get(0));
+	}
+
+	@Test
+	public void test_Servlet16_fileuploadWithLocationMaxRequestSize() throws Exception {
+		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+				throws IOException, ServletException {
+
+				req.getPart("file");
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
+		props.put("equinox.http.multipartSupported", Boolean.TRUE);
+		props.put("equinox.http.whiteboard.servlet.multipart.location", "file-upload-test");
+		// Note the actual uploaded file size is 25bytes, but you also need room for the rest of the headers
+		props.put("equinox.http.whiteboard.servlet.multipart.maxRequestSize", 26L);
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+
+		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
+
+		map.put("file", Arrays.<Object>asList(getClass().getResource("resource1.txt")));
+
+		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
+
+		Assert.assertEquals("500", result.get("responseCode").get(0));
+	}
+
+	/*
+	 * 3.0 file uploads
+	 */
+// This is commented due to a bug in commons-fileupload which was subsequently fixed in later versions.
+//	@Test
+//	public void test_Servlet17() throws Exception {
+//		Servlet servlet = new HttpServlet() {
+//			private static final long serialVersionUID = 1L;
+//
+//			@Override
+//			protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+//				throws IOException, ServletException {
+//
+//				Part part = req.getPart("file");
+//				Assert.assertNotNull(part);
+//
+//				String submittedFileName = getSubmittedFileName(part);
+//				String contentType = part.getContentType();
+//				long size = part.getSize();
+//
+//				PrintWriter writer = resp.getWriter();
+//
+//				writer.write(submittedFileName);
+//				writer.write("|");
+//				writer.write(contentType);
+//				writer.write("|" + size);
+//			}
+//		};
+//
+//		Dictionary<String, Object> props = new Hashtable<String, Object>();
+//		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
+//		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
+//		props.put("equinox.http.multipartSupported", Boolean.TRUE);
+//		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+//
+//		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
+//
+//		map.put("file", Arrays.<Object>asList(getClass().getResource("blue.png")));
+//
+//		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
+//
+//		Assert.assertEquals("200", result.get("responseCode").get(0));
+//		Assert.assertEquals("blue.png|image/png|292", result.get("responseBody").get(0));
+//	}
 
 	@Test
 	public void test_commonsFileUpload() throws Exception {
