@@ -19,24 +19,6 @@
   </parent>
   <groupId>org.eclipse.equinox</groupId>
   <artifactId>org.eclipse.equinox.bidi</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>target-platform-configuration</artifactId>
-        <configuration>
-          <!--
-             Build java profile J2SE-1.3 set in build.properties does not provide
-             OSGi/Minimum-1.2 defined in bundle manifest. Probably need to report
-             this to the equinox team to reconsile the two, but for now just
-             override build profile in pom.xml.
-           -->
-          <executionEnvironment>OSGi/Minimum-1.2</executionEnvironment>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
