@@ -68,6 +68,20 @@ package org.eclipse.core.runtime;
  *     unless the JavaDoc for the callee states otherwise.
  * </ul>
  * 
+ * <p>
+ * The responsibilities described above were introduced in Eclipse 4.7. Prior to
+ * Eclipse 4.7 it was common practice for the callee to invoke {@link #done()} on
+ * its monitor and for the caller to rely upon this fact. As of Eclipse 4.6, all
+ * the important top-level entry points have been updated to call {@link #done()},
+ * meaning they work with both methods that invoke {@link #done()} and methods
+ * that don't.
+ * </p>
+ * <p>
+ * Since this convention was introduced in Eclipse 4.7, some plugin code may need to
+ * change. In particular, callers are no longer allowed to rely upon the callee
+ * invoking {@link #done()} on a monitor and must do so themselves if necessary.
+ * </p>
+ * <p>
  * This interface can be used without OSGi running.
  * </p><p>
  * Clients may implement this interface.
