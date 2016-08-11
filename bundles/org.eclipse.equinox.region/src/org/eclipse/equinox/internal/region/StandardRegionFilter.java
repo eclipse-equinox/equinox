@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2013 VMware Inc and others.
+ * Copyright (c) 2011, 2016 VMware Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,9 @@ public final class StandardRegionFilter implements RegionFilter {
 	}
 
 	public boolean isAllowed(Bundle bundle) {
+		if (bundle == null) {
+			return false;
+		}
 		HashMap<String, Object> attrs = new HashMap<String, Object>(4);
 		String bsn = bundle.getSymbolicName();
 		if (bsn != null) {

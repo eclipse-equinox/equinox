@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2013 VMware Inc.
+ * Copyright (c) 2011, 2015 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -102,6 +102,49 @@ public class RegionServiceFindHookTests {
 		this.candidates.add(serviceReference(BUNDLE_A));
 		this.bundleFindHook.find(bundleContext(BUNDLE_A), "", "", false, this.candidates);
 		assertTrue(this.candidates.contains(serviceReference(BUNDLE_A)));
+	}
+
+	@Test
+	public void testFindUnregisteredService() throws InvalidSyntaxException, BundleException {
+		ServiceReference<Object> ref = new ServiceReference<Object>() {
+
+			@Override
+			public Object getProperty(String key) {
+				return null;
+			}
+
+			@Override
+			public String[] getPropertyKeys() {
+				return new String[0];
+			}
+
+			@Override
+			public Bundle getBundle() {
+				return null;
+			}
+
+			@Override
+			public Bundle[] getUsingBundles() {
+				return null;
+			}
+
+			@Override
+			public boolean isAssignableTo(Bundle bundle, String className) {
+				return false;
+			}
+
+			@Override
+			public int compareTo(Object reference) {
+				return 1;
+			}
+		};
+		this.candidates.add(ref);
+
+		RegionFilter filter = createFilter(BUNDLE_B);
+		region(REGION_A).connectRegion(region(REGION_B), filter);
+
+		this.bundleFindHook.find(bundleContext(BUNDLE_A), "", "", false, this.candidates);
+		assertFalse(this.candidates.contains(ref));
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 VMware Inc.
+ * Copyright (c) 2015, 2016 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,7 +74,8 @@ public final class RegionServiceFindHook implements FindHook {
 		 */
 		@Override
 		protected boolean contains(Region region, ServiceReference<?> candidate) {
-			return region.contains(candidate.getBundle());
+			Bundle b = candidate.getBundle();
+			return b == null ? false : region.contains(b);
 		}
 
 		/**
