@@ -41,7 +41,7 @@ package org.eclipse.core.runtime;
  * </p>
  * <p><b>CALLER/CALLEE RESPONSIBILITIES:</b></p>
  * <p>
- * Methods that receive an {@link IProgressMonitor} must either obey the following
+ * Methods that receive an {@link IProgressMonitor} ("callees") must either obey the following
  * conventions or include JavaDoc explaining how it differs from these rules.
  * The called method:
  * <ul>
@@ -69,8 +69,8 @@ package org.eclipse.core.runtime;
  * </ul>
  * 
  * <p>
- * The responsibilities described above were introduced in Eclipse 4.7. Prior to
- * Eclipse 4.7 it was common practice for the callee to invoke {@link #done()} on
+ * The responsibilities described above were introduced in Eclipse 4.7 (Oxygen). Prior to
+ * Eclipse 4.7, it was common practice for the callee to invoke {@link #done()} on
  * its monitor and for the caller to rely upon this fact. As of Eclipse 4.6, all
  * the important top-level entry points have been updated to call {@link #done()},
  * meaning they work with both methods that invoke {@link #done()} and methods
@@ -78,8 +78,8 @@ package org.eclipse.core.runtime;
  * </p>
  * <p>
  * Since this convention was introduced in Eclipse 4.7, some plugin code may need to
- * change. In particular, callers are no longer allowed to rely upon the callee
- * invoking {@link #done()} on a monitor and must do so themselves if necessary.
+ * change. In particular, callers that pass a monitor are no longer allowed to rely upon
+ * the callee invoking {@link #done()} and must do so themselves if necessary.
  * </p>
  * <p>
  * This interface can be used without OSGi running.
