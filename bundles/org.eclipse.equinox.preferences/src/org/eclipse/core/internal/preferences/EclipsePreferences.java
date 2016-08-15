@@ -282,7 +282,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		} catch (IOException e) {
 			String message = NLS.bind(PrefsMessages.preferences_saveException, location);
 			log(new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, message, e));
-			throw new BackingStoreException(message);
+			throw new BackingStoreException(message, e);
 		} finally {
 			if (output != null)
 				try {
@@ -700,11 +700,11 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		} catch (IOException e) {
 			String message = NLS.bind(PrefsMessages.preferences_loadException, location);
 			log(new Status(IStatus.INFO, PrefsMessages.OWNER_NAME, IStatus.INFO, message, e));
-			throw new BackingStoreException(message);
+			throw new BackingStoreException(message, e);
 		} catch (IllegalArgumentException e) {
 			String message = NLS.bind(PrefsMessages.preferences_loadException, location);
 			log(new Status(IStatus.INFO, PrefsMessages.OWNER_NAME, IStatus.INFO, message, e));
-			throw new BackingStoreException(message);
+			throw new BackingStoreException(message, e);
 		} finally {
 			if (input != null)
 				try {
