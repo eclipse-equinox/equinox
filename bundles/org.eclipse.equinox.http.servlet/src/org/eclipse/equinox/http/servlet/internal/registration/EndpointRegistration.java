@@ -168,7 +168,19 @@ public abstract class EndpointRegistration<D extends DTO>
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + '[' + getD().toString() + ']';
+		String toString = _toString;
+
+		if (toString == null) {
+			toString = SIMPLE_NAME + '[' + getD().toString() + ']';
+
+			_toString = toString;
+		}
+
+		return toString;
 	}
 
+	private static final String SIMPLE_NAME =
+		EndpointRegistration.class.getSimpleName();
+
+	private String _toString;
 }

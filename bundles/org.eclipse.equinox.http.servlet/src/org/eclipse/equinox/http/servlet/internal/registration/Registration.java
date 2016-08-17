@@ -12,6 +12,11 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal.registration;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.osgi.dto.DTO;
 
 public abstract class Registration<T, D extends DTO> {
@@ -19,41 +24,81 @@ public abstract class Registration<T, D extends DTO> {
 	private final D d;
 	private final T t;
 
-	protected int referenceCount;
+	protected final AtomicInteger referenceCount = new AtomicInteger();
 
 	public Registration(T t, D d) {
 		this.t = t;
 		this.d = d;
 	}
 
-	public synchronized void addReference() {
-		++referenceCount;
-	}
+	public void addReference() {
+		readLock.lock();
 
-	public synchronized void removeReference() {
-		--referenceCount;
-		if (referenceCount == 0) {
-			notifyAll();
+		try {
+			referenceCount.incrementAndGet();
+		}
+		finally {
+			readLock.unlock();
 		}
 	}
 
-	public synchronized void destroy() {
-		boolean interrupted = false;
+	public void removeReference() {
+		readLock.lock();
+
 		try {
-			while (referenceCount != 0) {
+			if (referenceCount.decrementAndGet() == 0 && destroyed) {
+				readLock.unlock();
+
+				writeLock.lock();
+
 				try {
-					(new Exception()).printStackTrace();
-					wait();
-				} catch (InterruptedException e) {
-					// wait until the servlet is inactive but save the interrupted status
+					condition.signalAll();
+				}
+				finally {
+					writeLock.unlock();
+
+					readLock.lock();
+				}
+			}
+		}
+		finally {
+			readLock.unlock();
+		}
+	}
+
+	public void destroy() {
+		boolean interrupted = false;
+
+		writeLock.lock();
+
+		destroyed = true;
+
+		try {
+			while (referenceCount.get() != 0) {
+				try {
+					condition.await();
+				}
+				catch (InterruptedException ie) {
 					interrupted = true;
 				}
 			}
-		} finally {
-			if (interrupted)
-				Thread.currentThread().interrupt(); //restore the interrupted state
+		}
+		finally {
+			writeLock.unlock();
+
+			if (interrupted) {
+				Thread.currentThread().interrupt();
+			}
 		}
 	}
+
+	private volatile boolean destroyed;
+
+	private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+
+	private final Lock readLock = readWriteLock.readLock();
+	private final Lock writeLock = readWriteLock.writeLock();
+	private final Condition condition = writeLock.newCondition();
 
 	public D getD() {
 		return d;

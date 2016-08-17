@@ -14,6 +14,7 @@ package org.eclipse.equinox.http.servlet.internal.servlet;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.ServletContext;
 import javax.servlet.http.*;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
@@ -27,7 +28,7 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 		private static final long serialVersionUID = 4626167646903550760L;
 
 		private static final String PARENT_SESSION_LISTENER_KEY = "org.eclipse.equinox.http.parent.session.listener"; //$NON-NLS-1$
-		transient final Set<HttpSessionAdaptor> innerSessions = new HashSet<HttpSessionAdaptor>();
+		transient final Set<HttpSessionAdaptor> innerSessions = Collections.newSetFromMap(new ConcurrentHashMap<HttpSessionAdaptor, Boolean>());
 		@Override
 		public void valueBound(HttpSessionBindingEvent event) {
 			// do nothing
@@ -37,42 +38,64 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 		public void valueUnbound(HttpSessionBindingEvent event) {
 			// Here we assume the unbound event is signifying the session is being invalidated.
 			// Must invalidate the inner sessions
-			Set<HttpSessionAdaptor> innerSessionsToInvalidate;
-			synchronized (innerSessions) {
-				// copy the sessions to invalidate and clear the set
-				innerSessionsToInvalidate = new HashSet<HttpSessionAdaptor>(innerSessions);
-				innerSessions.clear();
-			}
-			for (HttpSessionAdaptor innerSession : innerSessionsToInvalidate) {
-				innerSession.invalidate();
+			Iterator<HttpSessionAdaptor> iterator = innerSessions.iterator();
+
+			while (iterator.hasNext()) {
+				HttpSessionAdaptor innerSession = iterator.next();
+
+				iterator.remove();
+
+				ContextController contextController =
+					innerSession.getController();
+
+				EventListeners eventListeners =
+					contextController.getEventListeners();
+
+				List<HttpSessionListener> httpSessionListeners =
+					eventListeners.get(HttpSessionListener.class);
+
+				if (!httpSessionListeners.isEmpty()) {
+					HttpSessionEvent httpSessionEvent = new HttpSessionEvent(
+						innerSession);
+
+					for (HttpSessionListener listener : httpSessionListeners) {
+						try {
+							listener.sessionDestroyed(httpSessionEvent);
+						}
+						catch (IllegalStateException ise) {
+							// outer session is already invalidated
+						}
+					}
+				}
+
+				contextController.removeActiveSession(
+					innerSession.getSession());
 			}
 		}
 
 		static void addHttpSessionAdaptor(HttpSessionAdaptor innerSession) {
+			HttpSession httpSession = innerSession.getSession();
+
 			ParentSessionListener parentListener;
 			// need to have a global lock here because we must ensure that this is added only once
-			synchronized (ParentSessionListener.class) {
-				parentListener = (ParentSessionListener) innerSession.getSession().getAttribute(PARENT_SESSION_LISTENER_KEY);
+			synchronized (httpSession) {
+				parentListener = (ParentSessionListener) httpSession.getAttribute(PARENT_SESSION_LISTENER_KEY);
 				if (parentListener == null) {
 					parentListener = new ParentSessionListener();
-					innerSession.getSession().setAttribute(PARENT_SESSION_LISTENER_KEY, parentListener);
+					httpSession.setAttribute(PARENT_SESSION_LISTENER_KEY, parentListener);
 				}
 			}
-			synchronized (parentListener.innerSessions) {
-				parentListener.innerSessions.add(innerSession);
-			}
+
+			parentListener.innerSessions.add(innerSession);
 		}
 
 		static void removeHttpSessionAdaptor(HttpSessionAdaptor innerSession) {
-			ParentSessionListener parentListener;
-			// need to have a global lock here because we must ensure that this is added only once
-			synchronized (ParentSessionListener.class) {
-				parentListener = (ParentSessionListener) innerSession.getSession().getAttribute(PARENT_SESSION_LISTENER_KEY);
-			}
+			HttpSession httpSession = innerSession.getSession();
+
+			ParentSessionListener parentListener = (ParentSessionListener) httpSession.getAttribute(PARENT_SESSION_LISTENER_KEY);
+
 			if (parentListener != null) {
-				synchronized (parentListener.innerSessions) {
-					parentListener.innerSessions.remove(innerSession);
-				}
+				parentListener.innerSessions.remove(innerSession);
 			}
 		}
 	}
@@ -172,7 +195,7 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 		this.controller = controller;
 		this.attributePrefix = "equinox.http." + controller.getContextName(); //$NON-NLS-1$
 
-		this.string = getClass().getSimpleName() + '[' + session.getId() + ", " + attributePrefix + ']'; //$NON-NLS-1$
+		this.string = SIMPLE_NAME + '[' + session.getId() + ", " + attributePrefix + ']'; //$NON-NLS-1$
 	}
 
 	public ContextController getController() {
@@ -317,4 +340,8 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 	public String toString() {
 		return string;
 	}
+
+	private static final String SIMPLE_NAME =
+		HttpSessionAdaptor.class.getSimpleName();
+
 }
