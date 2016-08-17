@@ -14,15 +14,14 @@
 package org.eclipse.equinox.http.jetty.internal;
 
 import java.io.File;
-import java.lang.reflect.Method;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.*;
 import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.osgi.framework.*;
+import org.osgi.framework.startlevel.BundleStartLevel;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.service.cm.ManagedServiceFactory;
-import org.osgi.service.startlevel.StartLevel;
 
-@SuppressWarnings("deprecation")
 public class Activator implements BundleActivator {
 
 	private static final String JETTY_WORK_DIR = "jettywork"; //$NON-NLS-1$
@@ -58,7 +57,7 @@ public class Activator implements BundleActivator {
 		httpServerManager = new HttpServerManager(jettyWorkDir);
 
 		boolean autostart = Details.getBoolean(context, AUTOSTART, true);
-		if (autostart && !isBundleActivationPolicyUsed(context)) {
+		if (autostart && !isBundleLazyActivationPolicyUsed(context)) {
 			Dictionary<String, Object> defaultSettings = createDefaultSettings(context);
 			httpServerManager.updated(DEFAULT_PID, defaultSettings);
 		}
@@ -70,23 +69,18 @@ public class Activator implements BundleActivator {
 		setStaticServerManager(httpServerManager);
 	}
 
-	@SuppressWarnings("unchecked")
-	private boolean isBundleActivationPolicyUsed(BundleContext context) {
-		@SuppressWarnings("rawtypes")
-		ServiceReference reference = context.getServiceReference(StartLevel.class.getName());
-		StartLevel sl = ((reference != null) ? (StartLevel) context.getService(reference) : null);
-		if (sl != null) {
-			try {
-				Bundle bundle = context.getBundle();
-				Method isBundleActivationPolicyUsed = StartLevel.class.getMethod("isBundleActivationPolicyUsed", new Class[] {Bundle.class}); //$NON-NLS-1$
-				Boolean result = (Boolean) isBundleActivationPolicyUsed.invoke(sl, new Object[] {bundle});
-				return result.booleanValue();
-			} catch (Exception e) {
-				// ignore
-				// Bundle Activation Policy only available in StartLevel Service 1.1
-			} finally {
-				context.ungetService(reference);
+	private boolean isBundleLazyActivationPolicyUsed(BundleContext context) {
+		if (context.getBundle().adapt(BundleStartLevel.class).isActivationPolicyUsed()) {
+			// checking for lazy capability; NOTE this is equinox specific
+			// but we fall back to header lookup for other frameworks
+			List<BundleCapability> moduleData = context.getBundle().adapt(BundleRevision.class).getDeclaredCapabilities("equinox.module.data"); //$NON-NLS-1$
+			String activationPolicy = null;
+			if (moduleData.isEmpty()) {
+				activationPolicy = context.getBundle().getHeaders("").get(Constants.BUNDLE_ACTIVATIONPOLICY); //$NON-NLS-1$
+			} else {
+				activationPolicy = (String) moduleData.get(0).getAttributes().get("activation.policy"); //$NON-NLS-1$
 			}
+			return activationPolicy == null ? false : activationPolicy.startsWith(Constants.ACTIVATION_LAZY);
 		}
 		return false;
 	}
