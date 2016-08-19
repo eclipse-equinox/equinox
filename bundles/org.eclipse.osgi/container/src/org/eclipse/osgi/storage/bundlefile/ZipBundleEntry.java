@@ -115,21 +115,27 @@ public class ZipBundleEntry extends BundleEntry {
 		return null;
 	}
 
-	private class ZipBundleEntryInputStream extends InputStream {
-		private final InputStream stream;
+	private class ZipBundleEntryInputStream extends FilterInputStream {
+
 		private boolean closed = false;
 
 		public ZipBundleEntryInputStream(InputStream stream) {
-			this.stream = stream;
+			super(stream);
 		}
 
 		public int available() throws IOException {
-			return stream.available();
+			try {
+				return super.available();
+			} catch (IOException e) {
+				throw enrichExceptionWithBaseFile(e);
+			}
 		}
 
 		public void close() throws IOException {
 			try {
-				stream.close();
+				super.close();
+			} catch (IOException e) {
+				throw enrichExceptionWithBaseFile(e);
 			} finally {
 				synchronized (this) {
 					if (closed)
@@ -140,32 +146,48 @@ public class ZipBundleEntry extends BundleEntry {
 			}
 		}
 
-		public void mark(int var0) {
-			stream.mark(var0);
-		}
-
-		public boolean markSupported() {
-			return stream.markSupported();
-		}
-
 		public int read() throws IOException {
-			return stream.read();
+			try {
+				return super.read();
+			} catch (IOException e) {
+				throw enrichExceptionWithBaseFile(e);
+			}
 		}
 
 		public int read(byte[] var0, int var1, int var2) throws IOException {
-			return stream.read(var0, var1, var2);
+			try {
+				return super.read(var0, var1, var2);
+			} catch (IOException e) {
+				throw enrichExceptionWithBaseFile(e);
+			}
 		}
 
 		public int read(byte[] var0) throws IOException {
-			return stream.read(var0);
+			try {
+				return super.read(var0);
+			} catch (IOException e) {
+				throw enrichExceptionWithBaseFile(e);
+			}
 		}
 
 		public void reset() throws IOException {
-			stream.reset();
+			try {
+				super.reset();
+			} catch (IOException e) {
+				throw enrichExceptionWithBaseFile(e);
+			}
 		}
 
 		public long skip(long var0) throws IOException {
-			return stream.skip(var0);
+			try {
+				return super.skip(var0);
+			} catch (IOException e) {
+				throw enrichExceptionWithBaseFile(e);
+			}
+		}
+
+		private IOException enrichExceptionWithBaseFile(IOException e) {
+			return new IOException(bundleFile.getBaseFile().toString(), e);
 		}
 	}
 }
