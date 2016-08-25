@@ -178,7 +178,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * affects operations which are too small to report any progress. Operations which are large
 	 * enough to consume at least one tick will always be checked for cancellation.
 	 */
-	private static final int TRIVIAL_OPERATIONS_BEFORE_CANCELLATION_CHECK = 1000;
+	private static final int TRIVIAL_OPERATIONS_BEFORE_CANCELLATION_CHECK = 10;
 
 	/**
 	 * Minimum number of ticks to allocate when calling beginTask on an unknown IProgressMonitor.
