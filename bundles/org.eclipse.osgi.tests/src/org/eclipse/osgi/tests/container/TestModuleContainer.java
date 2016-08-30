@@ -2101,7 +2101,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testNativeWithFitlerChars() throws BundleException, IOException {
+	public void testNativeWithFilterChars() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 

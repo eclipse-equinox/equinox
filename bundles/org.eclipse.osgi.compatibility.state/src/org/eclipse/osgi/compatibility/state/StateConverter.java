@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2013, 2016 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -144,12 +144,44 @@ class StateConverter {
 	}
 
 	private List<GenericSpecification> createRequireCapability(Requirement requirement) {
-		String declaration = requirement.getNamespace() + toString(requirement.getAttributes(), "=", false) + toString(requirement.getDirectives(), ":=", true); //$NON-NLS-1$ //$NON-NLS-2$
+		Map<String, String> directives = new HashMap<String, String>(requirement.getDirectives());
+		String filter = directives.get(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
+		if (filter != null) {
+			directives.put(Namespace.REQUIREMENT_FILTER_DIRECTIVE, escapeFilterInput(filter));
+		}
+		String declaration = requirement.getNamespace() + toString(requirement.getAttributes(), "=", false) + toString(directives, ":=", true); //$NON-NLS-1$ //$NON-NLS-2$
 		List<GenericSpecification> result = state.getFactory().createGenericSpecifications(declaration);
 		for (GenericSpecification genericSpecification : result) {
 			genericSpecification.setUserObject(requirement);
 		}
 		return result;
+	}
+
+	// We have to re-escape the escape characters in the filter string
+	private static String escapeFilterInput(final String filter) {
+		boolean escaped = false;
+		int inlen = filter.length();
+		int outlen = inlen << 1; /* inlen * 2 */
+
+		char[] output = new char[outlen];
+		filter.getChars(0, inlen, output, inlen);
+
+		int cursor = 0;
+		for (int i = inlen; i < outlen; i++) {
+			char c = output[i];
+			switch (c) {
+				case '\\' :
+					output[cursor] = '\\';
+					cursor++;
+					escaped = true;
+					break;
+			}
+
+			output[cursor] = c;
+			cursor++;
+		}
+
+		return escaped ? new String(output, 0, cursor) : filter;
 	}
 
 	private String createOSGiRequirement(Requirement requirement, String namespace, String... versions) {
