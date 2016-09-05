@@ -438,12 +438,15 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 						sc.setState(Component.STATE_UNSATISFIED);
 						resolver.enableComponents(components);
 					} else {
-						// we can just dispose this SCP
-						sc.componentProps.removeElement(scp);
-						Vector components = new Vector();
-						components.addElement(scp);
-						resolver.disposeComponentConfigs(components, ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED);
-						scp.setState(Component.STATE_DISPOSED);
+						// in case it has ever been constructed
+						if (scp != null) {
+							// we can just dispose this SCP
+							sc.componentProps.removeElement(scp);
+							Vector components = new Vector();
+							components.addElement(scp);
+							resolver.disposeComponentConfigs(components, ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED);
+							scp.setState(Component.STATE_DISPOSED);
+						}
 					}
 				}
 				break;
