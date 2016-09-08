@@ -148,7 +148,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				}
 			}
 		} catch (KeyStoreException e) {
-			throw (IOException) new IOException(e.getMessage()).initCause(e);
+			throw new IOException(e.getMessage(), e);
 		} catch (GeneralSecurityException e) {
 			if (signedBundleHook != null) {
 				signedBundleHook.log(e.getMessage(), FrameworkLogEntry.WARNING, e);

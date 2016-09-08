@@ -99,7 +99,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 				bundle.setArbitraryDirectives(StateBuilder.getDirectives(bsnElement, StateBuilder.DEFINED_BSN_DIRECTIVES));
 			}
 		} catch (BundleException e) {
-			throw (IllegalArgumentException) new IllegalArgumentException("Illegal symbolic name: " + symbolicName).initCause(e); //$NON-NLS-1$
+			throw new IllegalArgumentException("Illegal symbolic name: " + symbolicName, e); //$NON-NLS-1$
 		}
 
 		bundle.setVersion(version);
@@ -514,7 +514,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 				result.add(StateBuilder.createRequiredBundle(element));
 			return result;
 		} catch (BundleException e) {
-			throw (IllegalArgumentException) new IllegalArgumentException("Declaration is invalid: " + declaration).initCause(e); //$NON-NLS-1$
+			throw new IllegalArgumentException("Declaration is invalid: " + declaration, e); //$NON-NLS-1$
 		}
 	}
 
@@ -528,7 +528,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 				result.add(StateBuilder.createHostSpecification(element, null));
 			return result;
 		} catch (BundleException e) {
-			throw (IllegalArgumentException) new IllegalArgumentException("Declaration is invalid: " + declaration).initCause(e); //$NON-NLS-1$
+			throw new IllegalArgumentException("Declaration is invalid: " + declaration, e); //$NON-NLS-1$
 		}
 	}
 
@@ -542,7 +542,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 				StateBuilder.addImportPackages(element, result, 2, false);
 			return result;
 		} catch (BundleException e) {
-			throw (IllegalArgumentException) new IllegalArgumentException("Declaration is invalid: " + declaration).initCause(e); //$NON-NLS-1$
+			throw new IllegalArgumentException("Declaration is invalid: " + declaration, e); //$NON-NLS-1$
 		}
 	}
 
@@ -553,7 +553,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 				return Collections.<GenericDescription> emptyList();
 			return StateBuilder.createOSGiCapabilities(elements, new ArrayList<GenericDescription>(elements.length), (Integer) null);
 		} catch (BundleException e) {
-			throw (IllegalArgumentException) new IllegalArgumentException("Declaration is invalid: " + declaration).initCause(e); //$NON-NLS-1$
+			throw new IllegalArgumentException("Declaration is invalid: " + declaration, e); //$NON-NLS-1$
 		}
 	}
 
@@ -564,7 +564,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 				return Collections.<GenericSpecification> emptyList();
 			return StateBuilder.createOSGiRequires(elements, new ArrayList<GenericSpecification>(elements.length));
 		} catch (BundleException e) {
-			throw (IllegalArgumentException) new IllegalArgumentException("Declaration is invalid: " + declaration).initCause(e); //$NON-NLS-1$
+			throw new IllegalArgumentException("Declaration is invalid: " + declaration, e); //$NON-NLS-1$
 		}
 	}
 
@@ -578,7 +578,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 				StateBuilder.addExportPackages(element, result, false);
 			return result;
 		} catch (BundleException e) {
-			throw (IllegalArgumentException) new IllegalArgumentException("Declaration is invalid: " + declaration).initCause(e); //$NON-NLS-1$
+			throw new IllegalArgumentException("Declaration is invalid: " + declaration, e); //$NON-NLS-1$
 		}
 	}
 }

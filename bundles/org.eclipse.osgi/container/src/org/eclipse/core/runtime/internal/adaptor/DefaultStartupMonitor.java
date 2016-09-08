@@ -36,10 +36,10 @@ public class DefaultStartupMonitor implements StartupMonitor {
 		try {
 			updateMethod = splashHandler.getClass().getMethod("updateSplash", (Class[]) null); //$NON-NLS-1$
 		} catch (SecurityException e) {
-			throw (IllegalStateException) new IllegalStateException(e.getMessage()).initCause(e);
+			throw new IllegalStateException(e.getMessage(), e);
 		} catch (NoSuchMethodException e) {
 			//TODO maybe we could do something else in the update method in this case, like print something to the console?
-			throw (IllegalStateException) new IllegalStateException(e.getMessage()).initCause(e);
+			throw new IllegalStateException(e.getMessage(), e);
 		}
 	}
 

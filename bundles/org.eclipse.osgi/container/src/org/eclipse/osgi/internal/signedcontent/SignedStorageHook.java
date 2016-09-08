@@ -104,7 +104,7 @@ public class SignedStorageHook extends StorageHookFactory<List<SignerInfo>, List
 				try {
 					certs[i] = PKCS7Processor.certFact.generateCertificate(new ByteArrayInputStream(certBytes));
 				} catch (CertificateException e) {
-					throw (IOException) new IOException(e.getMessage()).initCause(e);
+					throw new IOException(e.getMessage(), e);
 				}
 			}
 			int anchorIdx = is.readInt();
@@ -168,7 +168,7 @@ public class SignedStorageHook extends StorageHookFactory<List<SignerInfo>, List
 					try {
 						certBytes = certs[i].getEncoded();
 					} catch (CertificateEncodingException e) {
-						throw (IOException) new IOException(e.getMessage()).initCause(e);
+						throw new IOException(e.getMessage(), e);
 					}
 					os.writeInt(certBytes.length);
 					os.write(certBytes);

@@ -189,7 +189,7 @@ public abstract class NLS {
 					try {
 						number = Integer.parseInt(message.substring(i, index));
 					} catch (NumberFormatException e) {
-						throw (IllegalArgumentException) new IllegalArgumentException().initCause(e);
+						throw new IllegalArgumentException(e);
 					}
 					if (number == 0 && argZero != null)
 						buffer.append(argZero);

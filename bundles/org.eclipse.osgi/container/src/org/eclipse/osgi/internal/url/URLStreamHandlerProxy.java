@@ -231,7 +231,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 			throw (RuntimeException) e.getTargetException();
 		} catch (Exception e) {
 			// expected on JRE < 1.5
-			throw (UnsupportedOperationException) new UnsupportedOperationException().initCause(e);
+			throw new UnsupportedOperationException(e);
 		}
 	}
 }

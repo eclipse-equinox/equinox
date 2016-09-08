@@ -223,7 +223,7 @@ public class PKCS7Processor implements SignedContentConstants {
 				dateFormt.setTimeZone(TimeZone.getTimeZone("GMT")); //$NON-NLS-1$
 				signingTime = dateFormt.parse(dateString);
 			} catch (ParseException e) {
-				throw (SignatureException) new SignatureException(SignedContentMessages.PKCS7_Parse_Signing_Time).initCause(e);
+				throw new SignatureException(SignedContentMessages.PKCS7_Parse_Signing_Time, e);
 			}
 		}
 	}

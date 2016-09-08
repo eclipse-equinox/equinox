@@ -1460,7 +1460,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 			try {
 				filter = parse_filter();
 			} catch (ArrayIndexOutOfBoundsException e) {
-				throw new InvalidSyntaxException(Msg.FILTER_TERMINATED_ABRUBTLY, filterstring);
+				throw new InvalidSyntaxException(Msg.FILTER_TERMINATED_ABRUBTLY, filterstring, e);
 			}
 
 			if (pos != filterChars.length) {

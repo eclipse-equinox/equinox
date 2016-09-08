@@ -65,7 +65,7 @@ public final class PermissionInfoCollection extends PermissionCollection {
 			try {
 				addPermissions(collection, permClass);
 			} catch (Exception e) {
-				throw (SecurityException) new SecurityException("Exception creating permissions: " + permClass + ": " + e.getMessage()).initCause(e); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new SecurityException("Exception creating permissions: " + permClass + ": " + e.getMessage(), e); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			synchronized (cachedPermissionCollections) {
 				// check to see if another thread beat this thread at adding the collection

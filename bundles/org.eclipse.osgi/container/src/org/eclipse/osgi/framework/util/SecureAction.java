@@ -318,9 +318,7 @@ public class SecureAction {
 			zipNameException.initCause(e);
 			throw zipNameException;
 		} catch (IOException e) {
-			IOException fileNameException = new IOException("Exception in opening zip file: " + file.getPath()); //$NON-NLS-1$
-			fileNameException.initCause(e);
-			throw fileNameException;
+			throw new IOException("Exception in opening zip file: " + file.getPath(), e); //$NON-NLS-1$
 		}
 	}
 

@@ -217,13 +217,13 @@ public class SignedBundleHook implements ActivatorHookFactory, BundleFileWrapper
 		try {
 			result.initializeSignedContent();
 		} catch (InvalidKeyException e) {
-			throw (InvalidKeyException) new InvalidKeyException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content)).initCause(e);
+			throw new InvalidKeyException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content), e);
 		} catch (SignatureException e) {
-			throw (SignatureException) new SignatureException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content)).initCause(e);
+			throw new SignatureException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content), e);
 		} catch (CertificateException e) {
-			throw (CertificateException) new CertificateException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content)).initCause(e);
+			throw new CertificateException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content), e);
 		} catch (NoSuchAlgorithmException e) {
-			throw (NoSuchAlgorithmException) new NoSuchAlgorithmException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content)).initCause(e);
+			throw new NoSuchAlgorithmException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content), e);
 		} catch (NoSuchProviderException e) {
 			throw (NoSuchProviderException) new NoSuchProviderException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content)).initCause(e);
 		}
