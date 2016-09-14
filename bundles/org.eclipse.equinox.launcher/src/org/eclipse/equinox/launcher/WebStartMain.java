@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,8 +39,8 @@ public class WebStartMain extends Main {
 	private static final String PROP_OSGI_BUNDLES = "osgi.bundles"; //$NON-NLS-1$
 	private static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
 
-	private Map<String, List<BundleInfo>> allBundles = null; // Map of all the bundles found on the classpath. Id -> ArrayList of BundleInfo
-	private List<BundleInfo> bundleList = null; //The list of bundles found on the osgi.bundle list 
+	private Map allBundles = null; // Map of all the bundles found on the classpath. Id -> ArrayList of BundleInfo
+	private List bundleList = null; //The list of bundles found on the osgi.bundle list 
 
 	protected class BundleInfo {
 		String bsn;
@@ -100,12 +100,12 @@ public class WebStartMain extends Main {
 	 * The start parameter is not used in this context
 	 */
 	protected String searchFor(final String target, String start) {
-		List<BundleInfo> matches = allBundles.get(target);
+		ArrayList matches = (ArrayList) allBundles.get(target);
 		if (matches == null)
 			return null;
 		int numberOfMatches = matches.size();
 		if (numberOfMatches == 1) {
-			return matches.get(0).location;
+			return ((BundleInfo) matches.get(0)).location;
 		}
 		if (numberOfMatches == 0)
 			return null;
@@ -113,25 +113,25 @@ public class WebStartMain extends Main {
 		String[] versions = new String[numberOfMatches];
 		int highest = 0;
 		for (int i = 0; i < versions.length; i++) {
-			versions[i] = matches.get(i).version;
+			versions[i] = ((BundleInfo) matches.get(i)).version;
 		}
 		highest = findMax(null, versions);
-		return matches.get(highest).location;
+		return ((BundleInfo) matches.get(highest)).location;
 	}
 
 	private BundleInfo findBundle(final String target, String version, boolean removeMatch) {
-		List<BundleInfo> matches = allBundles.get(target);
+		ArrayList matches = (ArrayList) allBundles.get(target);
 		int numberOfMatches = matches != null ? matches.size() : 0;
 		if (numberOfMatches == 1) {
 			//TODO Need to check the version
-			return removeMatch ? matches.remove(0) : matches.get(0);
+			return (BundleInfo) (removeMatch ? matches.remove(0) : matches.get(0));
 		}
 		if (numberOfMatches == 0)
 			return null;
 
 		if (version != null) {
-			for (Iterator<BundleInfo> iterator = matches.iterator(); iterator.hasNext();) {
-				BundleInfo bi = iterator.next();
+			for (Iterator iterator = matches.iterator(); iterator.hasNext();) {
+				BundleInfo bi = (BundleInfo) iterator.next();
 				if (bi.version.equals(version)) {
 					if (removeMatch)
 						iterator.remove();
@@ -144,26 +144,26 @@ public class WebStartMain extends Main {
 		String[] versions = new String[numberOfMatches];
 		int highest = 0;
 		for (int i = 0; i < versions.length; i++) {
-			versions[i] = matches.get(i).version;
+			versions[i] = ((BundleInfo) matches.get(i)).version;
 		}
 		highest = findMax(null, versions);
-		return removeMatch ? matches.remove(highest) : matches.get(highest);
+		return (BundleInfo) (removeMatch ? matches.remove(highest) : matches.get(highest));
 	}
 
 	/* 
 	 * Get all the bundles available on the webstart classpath
 	 */
 	private void discoverBundles() {
-		allBundles = new HashMap<String, List<BundleInfo>>();
+		allBundles = new HashMap();
 		try {
-			Enumeration<URL> resources = WebStartMain.class.getClassLoader().getResources(JarFile.MANIFEST_NAME);
+			Enumeration resources = WebStartMain.class.getClassLoader().getResources(JarFile.MANIFEST_NAME);
 			while (resources.hasMoreElements()) {
-				BundleInfo found = getBundleInfo(resources.nextElement());
+				BundleInfo found = getBundleInfo((URL) resources.nextElement());
 				if (found == null)
 					continue;
-				List<BundleInfo> matching = allBundles.get(found.bsn);
+				ArrayList matching = (ArrayList) allBundles.get(found.bsn);
 				if (matching == null) {
-					matching = new ArrayList<BundleInfo>(1);
+					matching = new ArrayList(1);
 					allBundles.put(found.bsn, matching);
 				}
 				matching.add(found);
@@ -243,11 +243,11 @@ public class WebStartMain extends Main {
 		//In webstart the bundles list can only contain bundle names with or without a version.
 		String prop = System.getProperty(PROP_OSGI_BUNDLES);
 		if (prop == null || prop.trim().equals("")) { //$NON-NLS-1$
-			bundleList = new ArrayList<BundleInfo>(0);
+			bundleList = new ArrayList(0);
 			return;
 		}
 
-		bundleList = new ArrayList<BundleInfo>(10);
+		bundleList = new ArrayList(10);
 		StringTokenizer tokens = new StringTokenizer(prop, ","); //$NON-NLS-1$
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();
@@ -300,18 +300,18 @@ public class WebStartMain extends Main {
 	private void buildOSGiBundleList() {
 		StringBuffer finalBundleList = new StringBuffer(allBundles.size() * 30);
 		//First go through all the bundles of the bundle
-		for (Iterator<BundleInfo> iterator = bundleList.iterator(); iterator.hasNext();) {
-			BundleInfo searched = iterator.next();
+		for (Iterator iterator = bundleList.iterator(); iterator.hasNext();) {
+			BundleInfo searched = (BundleInfo) iterator.next();
 			BundleInfo found = findBundle(searched.bsn, searched.version, true);
 			if (found != null)
 				finalBundleList.append(REFERENCE_SCHEME).append(found.location).append(searched.startData).append(',');
 		}
 
 		if (!Boolean.FALSE.toString().equalsIgnoreCase(System.getProperties().getProperty(PROP_WEBSTART_AUTOMATIC_INSTALLATION))) {
-			for (Iterator<List<BundleInfo>> iterator = allBundles.values().iterator(); iterator.hasNext();) {
-				List<BundleInfo> toAdd = iterator.next();
-				for (Iterator<BundleInfo> iterator2 = toAdd.iterator(); iterator2.hasNext();) {
-					BundleInfo bi = iterator2.next();
+			for (Iterator iterator = allBundles.values().iterator(); iterator.hasNext();) {
+				ArrayList toAdd = (ArrayList) iterator.next();
+				for (Iterator iterator2 = toAdd.iterator(); iterator2.hasNext();) {
+					BundleInfo bi = (BundleInfo) iterator2.next();
 					finalBundleList.append(REFERENCE_SCHEME).append(bi.location).append(',');
 				}
 			}
