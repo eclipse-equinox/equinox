@@ -508,17 +508,18 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Object[] actualEvents = simpleResults.getResults(0);
 		compareResults(expectedEvents, actualEvents);
 
-		// test that calling loadClass from a lazy start bundle activates a bundle
+		// test that calling loadClass from a lazy start bundle does not activates a bundle
+		// This is not disabled by default (bug 503742)
 		Bundle legacyA = installer.installBundle("legacy.lazystart.a"); //$NON-NLS-1$
 		try {
 			legacyA.loadClass("does.not.exist.Test"); //$NON-NLS-1$
 		} catch (ClassNotFoundException e) {
 			// expected
 		}
-		expectedEvents = new Object[1];
-		expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, legacyA);
-		actualEvents = simpleResults.getResults(1);
+		expectedEvents = new Object[0];
+		actualEvents = simpleResults.getResults(0);
 		compareResults(expectedEvents, actualEvents);
+		assertEquals("Wrong state for lazy bundle.", Bundle.STARTING, legacyA.getState());
 	}
 
 	public void testOSGiLazyStart() throws Exception {

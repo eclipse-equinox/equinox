@@ -564,9 +564,10 @@ public class EquinoxBundle implements Bundle, BundleReference {
 				return classLoader.loadClass(name);
 			}
 		} catch (ClassNotFoundException e) {
-			// This is an equinox-ism.  Not sure it is worth it to offer an option to disable ...
+			// This is an equinox-ism, check compatibility flag
+			boolean compatibilityLazyTrigger = equinoxContainer.getConfiguration().compatibilityLazyTriggerOnFailLoad;
 			// On failure attempt to activate lazy activating bundles.
-			if (State.LAZY_STARTING.equals(module.getState())) {
+			if (compatibilityLazyTrigger && State.LAZY_STARTING.equals(module.getState())) {
 				try {
 					module.start(StartOptions.LAZY_TRIGGER);
 				} catch (BundleException e1) {

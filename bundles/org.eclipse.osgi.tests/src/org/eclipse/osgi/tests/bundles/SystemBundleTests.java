@@ -2933,6 +2933,55 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.stop();
 	}
 
+	public void testLazyTriggerOnLoadError() throws InterruptedException, BundleException {
+		// create/start/stop/start/stop test
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(EquinoxConfiguration.PROP_COMPATIBILITY_START_LAZY_ON_FAIL_CLASSLOAD, "true");
+		Equinox equinox = new Equinox(configuration);
+
+		equinox.start();
+
+		BundleContext systemContext = equinox.getBundleContext();
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+		// install a lazy activated bundle
+		Bundle b = systemContext.installBundle(installer.getBundleLocation("chain.test.d")); //$NON-NLS-1$
+		b.start(Bundle.START_ACTIVATION_POLICY);
+		assertEquals("Wrong state of bundle.", Bundle.STARTING, b.getState());
+		try {
+			// trigger the start by loading non existing class
+			b.loadClass("does.not.exist.Clazz");
+			fail("Expected class load error");
+		} catch (ClassNotFoundException e) {
+			// expected
+		}
+		// should be active now
+		assertEquals("Wrong state of bundle.", Bundle.ACTIVE, b.getState());
+		// put the framework back to the RESOLVED state
+		equinox.stop();
+		equinox.waitForStop(10000);
+
+		// revert back to default behavior
+		configuration.remove(EquinoxConfiguration.PROP_COMPATIBILITY_START_LAZY_ON_FAIL_CLASSLOAD);
+		equinox = new Equinox(configuration);
+		equinox.start();
+		b = equinox.getBundleContext().getBundle(b.getBundleId());
+		assertEquals("Wrong state of bundle.", Bundle.STARTING, b.getState());
+
+		try {
+			// loading non-existing class should NOT trigger lazy activation now
+			b.loadClass("does.not.exist.Clazz");
+			fail("Expected class load error");
+		} catch (ClassNotFoundException e) {
+			// expected
+		}
+		// should still be in STARTING state.
+		assertEquals("Wrong state of bundle.", Bundle.STARTING, b.getState());
+
+		equinox.stop();
+	}
+
 	void checkActiveThreadType(Equinox equinox, boolean expectIsDeamon) {
 		String uuid = equinox.getBundleContext().getProperty(Constants.FRAMEWORK_UUID);
 		ThreadGroup topGroup = Thread.currentThread().getThreadGroup();

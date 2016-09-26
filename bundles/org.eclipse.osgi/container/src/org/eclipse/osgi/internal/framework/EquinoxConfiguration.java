@@ -92,6 +92,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public final boolean contextBootDelegation;
 	public final boolean compatibilityBootDelegation;
+	public final boolean compatibilityLazyTriggerOnFailLoad;
 
 	public final List<String> LIB_EXTENSIONS;
 	public final List<String> ECLIPSE_LIB_VARIANTS;
@@ -149,6 +150,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String PROP_COMPATIBILITY_BOOTDELEGATION = "osgi.compatibility.bootdelegation"; //$NON-NLS-1$
 	public static final String PROP_COMPATIBILITY_ERROR_FAILED_START = "osgi.compatibility.errorOnFailedStart"; //$NON-NLS-1$
 	public static final String PROP_COMPATIBILITY_START_LAZY = "osgi.compatibility.eagerStart.LazyActivation"; //$NON-NLS-1$
+	public static final String PROP_COMPATIBILITY_START_LAZY_ON_FAIL_CLASSLOAD = "osgi.compatibility.trigger.lazyActivation.onFailedClassLoad"; //$NON-NLS-1$
 
 	public static final String PROP_OSGI_OS = "osgi.os"; //$NON-NLS-1$
 	public static final String PROP_OSGI_WS = "osgi.ws"; //$NON-NLS-1$
@@ -544,6 +546,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 		contextBootDelegation = "true".equals(getConfiguration(PROP_CONTEXT_BOOTDELEGATION, "true")); //$NON-NLS-1$ //$NON-NLS-2$
 		compatibilityBootDelegation = "true".equals(getConfiguration(PROP_COMPATIBILITY_BOOTDELEGATION)); //$NON-NLS-1$
+		compatibilityLazyTriggerOnFailLoad = "true".equals(getConfiguration(PROP_COMPATIBILITY_START_LAZY_ON_FAIL_CLASSLOAD)); //$NON-NLS-1$
 
 		COPY_NATIVES = Boolean.valueOf(getConfiguration(PROP_COPY_NATIVES)).booleanValue();
 		String[] libExtensions = ManifestElement.getArrayFromList(getConfiguration(EquinoxConfiguration.PROP_FRAMEWORK_LIBRARY_EXTENSIONS, getConfiguration(org.osgi.framework.Constants.FRAMEWORK_LIBRARY_EXTENSIONS, getOSLibraryExtDefaults())), ","); //$NON-NLS-1$
