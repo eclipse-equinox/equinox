@@ -2825,7 +2825,7 @@ public class Main {
 		}
 	}
 
-	private class StartupClassLoader extends URLClassLoader {
+	public class StartupClassLoader extends URLClassLoader {
 
 		public StartupClassLoader(URL[] urls) {
 			super(urls);
@@ -2849,6 +2849,15 @@ public class Main {
 					return libFile.getAbsolutePath();
 			}
 			return super.findLibrary(name);
+		}
+
+		/**
+		 * Must override addURL to make it public so the framework can
+		 * do deep reflection to add URLs on Java 9.
+		 */
+		@Override
+		public void addURL(URL url) {
+			super.addURL(url);
 		}
 	}
 
