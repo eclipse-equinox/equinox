@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,27 +11,13 @@
 
 package org.eclipse.osgi.internal.loader;
 
-import java.lang.reflect.Method;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 
 public class EquinoxClassLoader extends ModuleClassLoader {
-	private static final boolean EQUINOX_REGISTERED_AS_PARALLEL;
-
-	static {
-		boolean registeredAsParallel;
-		try {
-			Method parallelCapableMetod = ClassLoader.class.getDeclaredMethod("registerAsParallelCapable", (Class[]) null); //$NON-NLS-1$
-			parallelCapableMetod.setAccessible(true);
-			registeredAsParallel = ((Boolean) parallelCapableMetod.invoke(null, (Object[]) null)).booleanValue();
-		} catch (Throwable e) {
-			// must do everything to avoid failing in clinit
-			registeredAsParallel = false;
-		}
-		EQUINOX_REGISTERED_AS_PARALLEL = registeredAsParallel;
-	}
+	private static final boolean EQUINOX_REGISTERED_AS_PARALLEL = ClassLoader.registerAsParallelCapable();
 
 	private final EquinoxConfiguration configuration;
 	private final Debug debug;
