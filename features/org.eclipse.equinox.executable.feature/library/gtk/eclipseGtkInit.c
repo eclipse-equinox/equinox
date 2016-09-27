@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2015 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -17,14 +17,14 @@
 
 struct GTK_PTRS gtk = { 1 }; /* initialize the first field "not_initialized" so we can tell when we've loaded the pointers */
 
-static _TCHAR* minVerMsg1 = _T_ECLIPSE("Starting from the Eclipse 4.5 (Mars) release, \nGTK+ versions below");
+static _TCHAR* minVerMsg1 = _T_ECLIPSE("Starting from the Eclipse 4.7 (Oxygen) release, \nGTK+ versions below");
 static _TCHAR* minVerMsg2 = _T_ECLIPSE("are not supported.\nGTK+ version found is");
 static _TCHAR* minVerTitle = _T_ECLIPSE("Unsupported GTK+ version");
 static _TCHAR* gtkInitFail = _T_ECLIPSE("Unable to initialize GTK+\n");
 static _TCHAR* upgradeWarning1 = _T_ECLIPSE("\nPlease upgrade GTK+ to minimum version");
 static _TCHAR* upgradeWarning2 = _T_ECLIPSE("\nor use an older version of Eclipse.\nClick OK to Exit.");
 static int minGtkMajorVersion = 2;
-static int minGtkMinorVersion = 18;
+static int minGtkMinorVersion = 24;
 static int minGtkMicroVersion = 0;
 
 /* tables to help initialize the function pointers */
