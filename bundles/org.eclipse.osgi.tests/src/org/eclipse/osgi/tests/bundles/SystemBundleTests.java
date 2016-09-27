@@ -2900,4 +2900,58 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	public void testDaemonActiveThread() throws BundleException, InterruptedException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		config.mkdirs();
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+
+		// test setting to anything other than 'normal'
+		// should result in a daemon thread
+		configuration.put(EquinoxConfiguration.PROP_ACTIVE_THREAD_TYPE, "daemon");
+		Equinox equinox = new Equinox(configuration);
+		equinox.start();
+		checkActiveThreadType(equinox, true);
+		equinox.stop();
+		equinox.waitForStop(10000);
+
+		// test setting to 'normal'
+		// should result in a non-daemon thread
+		configuration.put(EquinoxConfiguration.PROP_ACTIVE_THREAD_TYPE, EquinoxConfiguration.ACTIVE_THREAD_TYPE_NORMAL);
+		equinox = new Equinox(configuration);
+		equinox.start();
+		checkActiveThreadType(equinox, false);
+		equinox.stop();
+		equinox.waitForStop(10000);
+
+		// test setting to null (default)
+		// should result in a non-daemon thread
+		configuration.remove(EquinoxConfiguration.PROP_ACTIVE_THREAD_TYPE);
+		equinox = new Equinox(configuration);
+		equinox.start();
+		checkActiveThreadType(equinox, false);
+		equinox.stop();
+	}
+
+	void checkActiveThreadType(Equinox equinox, boolean expectIsDeamon) {
+		String uuid = equinox.getBundleContext().getProperty(Constants.FRAMEWORK_UUID);
+		ThreadGroup topGroup = Thread.currentThread().getThreadGroup();
+		if (topGroup != null) {
+			while (topGroup.getParent() != null) {
+				topGroup = topGroup.getParent();
+			}
+		}
+		Thread[] threads = new Thread[topGroup.activeCount()];
+		topGroup.enumerate(threads);
+		Thread found = null;
+		for (Thread t : threads) {
+			String name = t.getName();
+			if (("Active Thread: Equinox Container: " + uuid).equals(name)) {
+				found = t;
+				break;
+			}
+		}
+		assertNotNull("No framework active thread for \"" + uuid + "\" found in : " + Arrays.toString(threads), found);
+		assertEquals("Wrong daemon type.", expectIsDeamon, found.isDaemon());
+	}
 }
