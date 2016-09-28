@@ -410,7 +410,7 @@ static _TCHAR* findLib( _TCHAR* command ) {
         free(location);
 	}
 	
-	/* Not found yet, try the registry, we will use the first vm >= 1.4 */
+	/* Not found yet, try the registry, we will use the first vm >= 1.6 */
 	jreKeyName = _T("Software\\JavaSoft\\Java Runtime Environment");
 	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, jreKeyName, 0, KEY_READ, &jreKey) == ERROR_SUCCESS) {
 		if(RegQueryValueEx(jreKey, _T_ECLIPSE("CurrentVersion"), NULL, NULL, (void*)&keyName, &length) == ERROR_SUCCESS) {
@@ -423,8 +423,8 @@ static _TCHAR* findLib( _TCHAR* command ) {
 		j = 0;
 		length = MAX_PATH;
 		while (RegEnumKeyEx(jreKey, j++, keyName, &length, 0, 0, 0, 0) == ERROR_SUCCESS) {  
-			/*look for a 1.4 or 1.5 vm*/ 
-			if( _tcsncmp(_T("1.4"), keyName, 3) <= 0 ) {
+			/*look for a 1.6+ vm*/
+			if( _tcsncmp(_T("1.6"), keyName, 3) <= 0 ) {
 				path = checkVMRegistryKey(jreKey, keyName);
 				if (path != NULL) {
 					RegCloseKey(jreKey);
