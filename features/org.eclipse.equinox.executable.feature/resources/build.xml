@@ -233,13 +233,6 @@
 		</copy>
 		<chmod perm="755" dir="${feature.base}/hpux.gtk.ia64/${collectingFolder}" includes="launcher" />
 	</target>
-	<target name="rootFilesqnx_photon_x86">
-		<mkdir dir="${feature.base}/qnx.photon.x86/${collectingFolder}"/>
-		<copy todir="${feature.base}/qnx.photon.x86/${collectingFolder}" failonerror="true" overwrite="true">
-			<fileset dir="${basedir}/bin/photon/qnx/x86" includes="**"			/>
-		</copy>
-		<chmod perm="755" dir="${feature.base}/qnx.photon.x86/${collectingFolder}" includes="launcher" />
-	</target>
 	<target name="rootFilesgroup_group_group">
 		<antcall target="rootFileswin32_win32_x86"/>
 		<antcall target="rootFileswin32_win32_x86_64"/>
@@ -262,7 +255,6 @@
 		<antcall target="rootFilesaix_gtk_ppc64"/>
 		<antcall target="rootFilesaix_gtk_ppc"/>
 		<antcall target="rootFileshpux_gtk_ia64"/>
-		<antcall target="rootFilesqnx_photon_x86"/>
 	</target>
 
 	<target name="zip.distribution" depends="init" description="Create a zip containing all the plug-ins and features for the feature: org.eclipse.platform.launchers.">
