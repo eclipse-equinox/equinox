@@ -32,7 +32,10 @@ public class ServicePropertiesComp implements PropertiesProvider {
 
   }
 
-  public void bindRef(PropertiesProvider service, Map properties) {
+  public void bindDynamicRef(PropertiesProvider service, Map properties) {
+  }
+
+  public void bindStaticRef(PropertiesProvider service, Map properties) {
   }
 
   public synchronized void serviceUpdatedStatic(PropertiesProvider service, Map properties) {

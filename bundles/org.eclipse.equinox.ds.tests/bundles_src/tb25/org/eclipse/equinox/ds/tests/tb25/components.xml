@@ -11,13 +11,15 @@
 		<reference
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=service.properties.update.test)"
-			bind="bindRef"
+			name="bindStaticRef"
+			bind="bindStaticRef"
 			updated="serviceUpdatedStatic"/>
 		<reference
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=service.properties.update.test)"
 			policy="dynamic"
-			bind="bindRef"
+			name="bindDynamicRef"
+			bind="bindDynamicRef"
 			updated="serviceUpdatedDynamic"/>
 		<service>
 			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
@@ -35,24 +37,28 @@
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=reluctant.policy.option.test)"
 			cardinality="0..1"
+			name="bind01"
 			bind="bind01"
 			policy-option="reluctant"/>
 		<reference
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=reluctant.policy.option.test)"
 			cardinality="1..1"
+			name="bind11"
 			bind="bind11"
 			policy-option="reluctant"/>
 		<reference
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=reluctant.policy.option.test)"
 			cardinality="0..n"
+			name="bind0n"
 			bind="bind0n"
 			policy-option="reluctant"/>
 		<reference
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=reluctant.policy.option.test)"
 			cardinality="1..n"
+			name="bind1n"
 			bind="bind1n"
 			policy-option="reluctant"/>
 		<service>
@@ -71,6 +77,7 @@
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=reluctant.policy.option.test)"
 			cardinality="0..1"
+			name="bind01"
 			bind="bind01"
 			policy="dynamic"
 			policy-option="reluctant"/>
@@ -78,6 +85,7 @@
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=reluctant.policy.option.test)"
 			cardinality="1..1"
+			name="bind11"
 			bind="bind11"
 			policy="dynamic"
 			policy-option="reluctant"/>
@@ -85,6 +93,7 @@
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=reluctant.policy.option.test)"
 			cardinality="0..n"
+			name="bind0n"
 			bind="bind0n"
 			policy="dynamic"
 			policy-option="reluctant"/>
@@ -92,6 +101,7 @@
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=reluctant.policy.option.test)"
 			cardinality="1..n"
+			name="bind1n"
 			bind="bind1n"
 			policy="dynamic"
 			policy-option="reluctant"/>
@@ -111,24 +121,28 @@
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=greedy.policy.option.test)"
 			cardinality="0..1"
+			name="bind01"
 			bind="bind01"
 			policy-option="greedy"/>
 		<reference
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=greedy.policy.option.test)"
 			cardinality="1..1"
+			name="bind11"
 			bind="bind11"
 			policy-option="greedy"/>
 		<reference
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=greedy.policy.option.test)"
 			cardinality="0..n"
+			name="bind0n"
 			bind="bind0n"
 			policy-option="greedy"/>
 		<reference
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=greedy.policy.option.test)"
 			cardinality="1..n"
+			name="bind1n"
 			bind="bind1n"
 			policy-option="greedy"/>
 		<service>
@@ -147,6 +161,7 @@
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=greedy.policy.option.test)"
 			cardinality="0..1"
+			name="bind01"
 			bind="bind01"
 			policy="dynamic"
 			policy-option="greedy"/>
@@ -154,6 +169,7 @@
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=greedy.policy.option.test)"
 			cardinality="1..1"
+			name="bind11"
 			bind="bind11"
 			policy="dynamic"
 			policy-option="greedy"/>
@@ -161,6 +177,7 @@
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=greedy.policy.option.test)"
 			cardinality="0..n"
+			name="bind0n"
 			bind="bind0n"
 			policy="dynamic"
 			policy-option="greedy"/>
@@ -168,6 +185,7 @@
 			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
 			target="(service.provider=greedy.policy.option.test)"
 			cardinality="1..n"
+			name="bind1n"
 			bind="bind1n"
 			policy="dynamic"
 			policy-option="greedy"/>
