@@ -1465,8 +1465,8 @@ public class Storage {
 				profileIn = getNextBestProfile(systemGeneration, javaEdition, javaVersion, embeddedProfileName);
 		}
 		if (profileIn == null)
-			// the profile url is still null then use the osgi min profile in OSGi by default
-			profileIn = findInSystemBundle(systemGeneration, "JavaSE-1.6.profile"); //$NON-NLS-1$
+			// the profile url is still null then use the min profile the framework can use
+			profileIn = findInSystemBundle(systemGeneration, "JavaSE-1.7.profile"); //$NON-NLS-1$
 		if (profileIn != null) {
 			try {
 				result.load(new BufferedInputStream(profileIn));
@@ -1486,7 +1486,7 @@ public class Storage {
 				result.put(EquinoxConfiguration.PROP_OSGI_JAVA_PROFILE_NAME, vmProfile.replace('_', '/'));
 			else
 				// last resort; default to the absolute minimum profile name for the framework
-				result.put(EquinoxConfiguration.PROP_OSGI_JAVA_PROFILE_NAME, "JavaSE-1.6"); //$NON-NLS-1$
+				result.put(EquinoxConfiguration.PROP_OSGI_JAVA_PROFILE_NAME, "JavaSE-1.7"); //$NON-NLS-1$
 		return result;
 	}
 

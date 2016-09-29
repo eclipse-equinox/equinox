@@ -2608,7 +2608,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		config.mkdirs();
 		Map<String, Object> configuration = new HashMap<String, Object>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
-		configuration.put(Constants.FRAMEWORK_SYSTEMCAPABILITIES, "osgi.ee; osgi.ee=JavaSE; version:Version=1.6, something.system");
+		configuration.put(Constants.FRAMEWORK_SYSTEMCAPABILITIES, "osgi.ee; osgi.ee=JavaSE; version:Version=1.7, something.system");
 		configuration.put(Constants.FRAMEWORK_SYSTEMPACKAGES, "something.system");
 		configuration.put(Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA, "something.extra");
 		configuration.put(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, "something.extra");
