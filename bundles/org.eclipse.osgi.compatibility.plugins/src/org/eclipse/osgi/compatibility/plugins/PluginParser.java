@@ -70,7 +70,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 
 		public Map<String, List<String>> getLibraries() {
 			if (libraries == null)
-				return new HashMap<String, List<String>>(0);
+				return new HashMap<>(0);
 			return libraries;
 		}
 
@@ -78,7 +78,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 			if (!TARGET21.equals(target) && schemaVersion == null && !requiresExpanded) {
 				requiresExpanded = true;
 				if (requires == null) {
-					requires = new ArrayList<Prerequisite>(1);
+					requires = new ArrayList<>(1);
 					requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME, TARGET21_STRING, false, false, IModel.PLUGIN_REQUIRES_MATCH_GREATER_OR_EQUAL));
 					requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY, null, false, false, null));
 				} else {
@@ -108,7 +108,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 				}
 			}
 			if (requires == null)
-				return requires = new ArrayList<Prerequisite>(0);
+				return requires = new ArrayList<>(0);
 
 			return requires;
 		}
@@ -187,10 +187,10 @@ public class PluginParser extends DefaultHandler implements IModel {
 	}
 
 	// Current State Information
-	Stack<Integer> stateStack = new Stack<Integer>();
+	Stack<Integer> stateStack = new Stack<>();
 
 	// Current object stack (used to hold the current object we are populating in this plugin info
-	Stack<Object> objectStack = new Stack<Object>();
+	Stack<Object> objectStack = new Stack<>();
 	Locator locator = null;
 
 	// Valid States
@@ -273,8 +273,8 @@ public class PluginParser extends DefaultHandler implements IModel {
 						@SuppressWarnings("unchecked")
 						List<String> exports = (List<String>) objectStack.pop();
 						if (manifestInfo.libraries == null) {
-							manifestInfo.libraries = new HashMap<String, List<String>>(3);
-							manifestInfo.libraryPaths = new ArrayList<String>(3);
+							manifestInfo.libraries = new HashMap<>(3);
+							manifestInfo.libraryPaths = new ArrayList<>(3);
 						}
 						manifestInfo.libraries.put(curLibrary, exports);
 						manifestInfo.libraryPaths.add(curLibrary.replace('\\', '/'));
@@ -477,7 +477,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 
 	public static SAXParserFactory acquireXMLParsing(BundleContext context) {
 		if (xmlTracker == null) {
-			xmlTracker = new ServiceTracker<SAXParserFactory, SAXParserFactory>(context, "javax.xml.parsers.SAXParserFactory", null); //$NON-NLS-1$
+			xmlTracker = new ServiceTracker<>(context, "javax.xml.parsers.SAXParserFactory", null); //$NON-NLS-1$
 			xmlTracker.open();
 		}
 		SAXParserFactory result = xmlTracker.getService();
@@ -595,7 +595,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 
 	public void parsePluginRequiresImport(Attributes attributes) {
 		if (manifestInfo.requires == null) {
-			manifestInfo.requires = new ArrayList<Prerequisite>();
+			manifestInfo.requires = new ArrayList<>();
 			// to avoid cycles
 			//			if (!manifestInfo.pluginId.equals(PluginConverterImpl.PI_RUNTIME))  //$NON-NLS-1$
 			//				manifestInfo.requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME, null, false, false, null)); //$NON-NLS-1$

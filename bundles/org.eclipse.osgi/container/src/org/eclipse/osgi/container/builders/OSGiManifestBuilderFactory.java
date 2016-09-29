@@ -78,7 +78,7 @@ public final class OSGiManifestBuilderFactory {
 
 		Object symbolicName = getSymbolicNameAndVersion(builder, manifest, symbolicNameAlias, manifestVersion);
 
-		Collection<Map<String, Object>> exportedPackages = new ArrayList<Map<String, Object>>();
+		Collection<Map<String, Object>> exportedPackages = new ArrayList<>();
 		getPackageExports(builder, ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, manifest.get(Constants.EXPORT_PACKAGE)), symbolicName, exportedPackages);
 		getPackageExports(builder, ManifestElement.parseHeader(HEADER_OLD_PROVIDE_PACKAGE, manifest.get(HEADER_OLD_PROVIDE_PACKAGE)), symbolicName, exportedPackages);
 		if (extraExports != null && !extraExports.isEmpty()) {
@@ -131,7 +131,7 @@ public final class OSGiManifestBuilderFactory {
 		if (elements == null)
 			return;
 		int length = elements.length;
-		Set<String> packages = new HashSet<String>(length);
+		Set<String> packages = new HashSet<>(length);
 		for (int i = 0; i < length; i++) {
 			// check for duplicate imports
 			String[] packageNames = elements[i].getValueComponents();
@@ -259,7 +259,7 @@ public final class OSGiManifestBuilderFactory {
 				ManifestElement bsnElement = symbolicNameElements[0];
 				builder.setSymbolicName(bsnElement.getValue());
 				if (symbolicNameAlias != null) {
-					List<String> result = new ArrayList<String>();
+					List<String> result = new ArrayList<>();
 					result.add(builder.getSymbolicName());
 					result.add(symbolicNameAlias);
 					symbolicName = result;
@@ -279,7 +279,7 @@ public final class OSGiManifestBuilderFactory {
 				}
 				if (!isFragment) {
 					// create the bundle namespace
-					Map<String, Object> bundleAttributes = new HashMap<String, Object>(attributes);
+					Map<String, Object> bundleAttributes = new HashMap<>(attributes);
 					bundleAttributes.put(BundleNamespace.BUNDLE_NAMESPACE, symbolicName);
 					bundleAttributes.put(BundleNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE, builder.getVersion());
 					builder.addCapability(BundleNamespace.BUNDLE_NAMESPACE, directives, bundleAttributes);
@@ -287,7 +287,7 @@ public final class OSGiManifestBuilderFactory {
 					// create the host namespace
 					// only if the directive is not never
 					if (!HostNamespace.FRAGMENT_ATTACHMENT_NEVER.equals(directives.get(HostNamespace.CAPABILITY_FRAGMENT_ATTACHMENT_DIRECTIVE))) {
-						Map<String, Object> hostAttributes = new HashMap<String, Object>(attributes);
+						Map<String, Object> hostAttributes = new HashMap<>(attributes);
 						hostAttributes.put(HostNamespace.HOST_NAMESPACE, symbolicName);
 						hostAttributes.put(HostNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE, builder.getVersion());
 						builder.addCapability(HostNamespace.HOST_NAMESPACE, directives, hostAttributes);
@@ -295,7 +295,7 @@ public final class OSGiManifestBuilderFactory {
 				}
 				// every bundle that has a symbolic name gets an identity;
 				// never use the symbolic name alias for the identity namespace
-				Map<String, Object> identityAttributes = new HashMap<String, Object>(attributes);
+				Map<String, Object> identityAttributes = new HashMap<>(attributes);
 				identityAttributes.put(IdentityNamespace.IDENTITY_NAMESPACE, builder.getSymbolicName());
 				identityAttributes.put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, builder.getVersion());
 				identityAttributes.put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, isFragment ? IdentityNamespace.TYPE_FRAGMENT : IdentityNamespace.TYPE_BUNDLE);
@@ -324,7 +324,7 @@ public final class OSGiManifestBuilderFactory {
 			}
 			attributes.put(PackageNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE, builder.getVersion());
 			for (String packageName : packageNames) {
-				Map<String, Object> packageAttrs = new HashMap<String, Object>(attributes);
+				Map<String, Object> packageAttrs = new HashMap<>(attributes);
 				packageAttrs.put(PackageNamespace.PACKAGE_NAMESPACE, packageName);
 				builder.addCapability(PackageNamespace.PACKAGE_NAMESPACE, directives, packageAttrs);
 				exportedPackages.add(packageAttrs);
@@ -333,7 +333,7 @@ public final class OSGiManifestBuilderFactory {
 	}
 
 	private static void getPackageImports(ModuleRevisionBuilder builder, Map<String, String> manifest, Collection<Map<String, Object>> exportedPackages, int manifestVersion) throws BundleException {
-		Collection<String> importPackageNames = new ArrayList<String>();
+		Collection<String> importPackageNames = new ArrayList<>();
 		ManifestElement[] importElements = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, manifest.get(Constants.IMPORT_PACKAGE));
 		ManifestElement[] dynamicImportElements = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE, manifest.get(Constants.DYNAMICIMPORT_PACKAGE));
 		addPackageImports(builder, importElements, importPackageNames, false);
@@ -368,7 +368,7 @@ public final class OSGiManifestBuilderFactory {
 					importPackageNames.add(packageName);
 				}
 				// fill in the filter directive based on the attributes
-				Map<String, String> packageDirectives = new HashMap<String, String>(directives);
+				Map<String, String> packageDirectives = new HashMap<>(directives);
 				StringBuilder filter = new StringBuilder();
 				filter.append('(').append(PackageNamespace.PACKAGE_NAMESPACE).append('=').append(packageName).append(')');
 				int size = filter.length();
@@ -406,14 +406,14 @@ public final class OSGiManifestBuilderFactory {
 			StringBuilder filter = new StringBuilder();
 			filter.append("(&(").append(PackageNamespace.PACKAGE_NAMESPACE).append('=').append(packageName).append(')'); //$NON-NLS-1$
 			filter.append('(').append(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE).append(">=").append(packageVersion).append("))"); //$NON-NLS-1$//$NON-NLS-2$
-			Map<String, String> directives = new HashMap<String, String>(1);
+			Map<String, String> directives = new HashMap<>(1);
 			directives.put(PackageNamespace.REQUIREMENT_FILTER_DIRECTIVE, filter.toString());
 			builder.addRequirement(PackageNamespace.PACKAGE_NAMESPACE, directives, new HashMap<String, Object>(0));
 		}
 	}
 
 	private static Map<String, String> getDirectives(ManifestElement element) {
-		Map<String, String> directives = new HashMap<String, String>();
+		Map<String, String> directives = new HashMap<>();
 		Enumeration<String> keys = element.getDirectiveKeys();
 		if (keys == null)
 			return directives;
@@ -445,7 +445,7 @@ public final class OSGiManifestBuilderFactory {
 					continue;
 				}
 				// fill in the filter directive based on the attributes
-				Map<String, String> bundleDirectives = new HashMap<String, String>(directives);
+				Map<String, String> bundleDirectives = new HashMap<>(directives);
 				StringBuilder filter = new StringBuilder();
 				filter.append('(').append(BundleNamespace.BUNDLE_NAMESPACE).append('=').append(bundleName).append(')');
 				int size = filter.length();
@@ -537,14 +537,14 @@ public final class OSGiManifestBuilderFactory {
 			return;
 		}
 		// only support one
-		HashMap<String, String> directives = new HashMap<String, String>();
+		HashMap<String, String> directives = new HashMap<>();
 		directives.put(EclipsePlatformNamespace.REQUIREMENT_FILTER_DIRECTIVE, platformFilter);
 		builder.addRequirement(EclipsePlatformNamespace.ECLIPSE_PLATFORM_NAMESPACE, directives, Collections.<String, Object> emptyMap());
 	}
 
 	@SuppressWarnings("deprecation")
 	private static void getEquinoxDataCapability(ModuleRevisionBuilder builder, Map<String, String> manifest) throws BundleException {
-		Map<String, Object> attributes = new HashMap<String, Object>();
+		Map<String, Object> attributes = new HashMap<>();
 
 		// Get the activation policy attributes
 		ManifestElement[] policyElements = ManifestElement.parseHeader(Constants.BUNDLE_ACTIVATIONPOLICY, manifest.get(Constants.BUNDLE_ACTIVATIONPOLICY));
@@ -600,7 +600,7 @@ public final class OSGiManifestBuilderFactory {
 		// Get the class path
 		ManifestElement[] classpathElements = ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH, manifest.get(Constants.BUNDLE_CLASSPATH));
 		if (classpathElements != null) {
-			List<String> classpath = new ArrayList<String>();
+			List<String> classpath = new ArrayList<>();
 			for (ManifestElement element : classpathElements) {
 				String[] components = element.getValueComponents();
 				for (String component : components) {
@@ -613,7 +613,7 @@ public final class OSGiManifestBuilderFactory {
 		// Get the buddy policy list
 		ManifestElement[] buddyPolicies = ManifestElement.parseHeader(EquinoxModuleDataNamespace.BUDDY_POLICY_HEADER, manifest.get(EquinoxModuleDataNamespace.BUDDY_POLICY_HEADER));
 		if (buddyPolicies != null) {
-			List<String> policies = new ArrayList<String>();
+			List<String> policies = new ArrayList<>();
 			for (ManifestElement element : buddyPolicies) {
 				for (String component : element.getValueComponents()) {
 					policies.add(component);
@@ -625,7 +625,7 @@ public final class OSGiManifestBuilderFactory {
 		// Get the registered buddy list
 		ManifestElement[] registeredBuddies = ManifestElement.parseHeader(EquinoxModuleDataNamespace.REGISTERED_BUDDY_HEADER, manifest.get(EquinoxModuleDataNamespace.REGISTERED_BUDDY_HEADER));
 		if (registeredBuddies != null) {
-			List<String> buddies = new ArrayList<String>();
+			List<String> buddies = new ArrayList<>();
 			for (ManifestElement element : registeredBuddies) {
 				for (String component : element.getValueComponents()) {
 					buddies.add(component);
@@ -643,7 +643,7 @@ public final class OSGiManifestBuilderFactory {
 
 	private static Map<String, Object> getAttributes(ManifestElement element) throws BundleException {
 		Enumeration<String> keys = element.getKeys();
-		Map<String, Object> attributes = new HashMap<String, Object>();
+		Map<String, Object> attributes = new HashMap<>();
 		if (keys == null)
 			return attributes;
 		while (keys.hasMoreElements()) {
@@ -697,7 +697,7 @@ public final class OSGiManifestBuilderFactory {
 				throw new BundleException("Invalid type, missing ending '>' : " + type, BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 		}
 		List<String> tokens = new Tokenizer(value).getEscapedTokens(","); //$NON-NLS-1$
-		List<Object> components = new ArrayList<Object>();
+		List<Object> components = new ArrayList<>();
 		for (String component : tokens) {
 			components.add(convertValue(componentType, component));
 		}
@@ -709,7 +709,7 @@ public final class OSGiManifestBuilderFactory {
 		String[] brees = ManifestElement.getArrayFromList(manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT));
 		if (brees == null || brees.length == 0)
 			return;
-		List<String> breeFilters = new ArrayList<String>();
+		List<String> breeFilters = new ArrayList<>();
 		for (String bree : brees)
 			breeFilters.add(createOSGiEERequirementFilter(bree));
 		String filterSpec;
@@ -723,7 +723,7 @@ public final class OSGiManifestBuilderFactory {
 			filterSpec = filterBuf.append(")").toString(); //$NON-NLS-1$
 		}
 
-		Map<String, String> directives = new HashMap<String, String>(1);
+		Map<String, String> directives = new HashMap<>(1);
 		directives.put(ExecutionEnvironmentNamespace.REQUIREMENT_FILTER_DIRECTIVE, filterSpec);
 		builder.addRequirement(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE, directives, new HashMap<String, Object>(0));
 	}
@@ -847,7 +847,7 @@ public final class OSGiManifestBuilderFactory {
 
 		NativeClause(int manifestIndex, ManifestElement clause) throws BundleException {
 			this.manifestIndex = manifestIndex;
-			this.nativePaths = new ArrayList<String>(Arrays.asList(clause.getValueComponents()));
+			this.nativePaths = new ArrayList<>(Arrays.asList(clause.getValueComponents()));
 			StringBuilder sb = new StringBuilder();
 			sb.append("(&"); //$NON-NLS-1$
 			addToNativeCodeFilter(sb, clause, Constants.BUNDLE_NATIVECODE_OSNAME);
@@ -943,7 +943,7 @@ public final class OSGiManifestBuilderFactory {
 
 		boolean optional = false;
 
-		List<NativeClause> nativeClauses = new ArrayList<NativeClause>();
+		List<NativeClause> nativeClauses = new ArrayList<>();
 		for (int i = 0; i < elements.length; i++) {
 			if (i == elements.length - 1) {
 				optional = elements[i].getValue().equals("*"); //$NON-NLS-1$
@@ -963,7 +963,7 @@ public final class OSGiManifestBuilderFactory {
 		if (numNativePaths > 1) {
 			allNativeFilters.append("(|"); //$NON-NLS-1$
 		}
-		Map<String, Object> attributes = new HashMap<String, Object>(2);
+		Map<String, Object> attributes = new HashMap<>(2);
 		for (int i = 0; i < numNativePaths; i++) {
 			NativeClause nativeClause = nativeClauses.get(i);
 			if (numNativePaths == 1) {
@@ -977,7 +977,7 @@ public final class OSGiManifestBuilderFactory {
 			allNativeFilters.append(')');
 		}
 
-		Map<String, String> directives = new HashMap<String, String>(2);
+		Map<String, String> directives = new HashMap<>(2);
 		directives.put(NativeNamespace.REQUIREMENT_FILTER_DIRECTIVE, allNativeFilters.toString());
 		if (optional) {
 			directives.put(NativeNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE, NativeNamespace.RESOLUTION_OPTIONAL);

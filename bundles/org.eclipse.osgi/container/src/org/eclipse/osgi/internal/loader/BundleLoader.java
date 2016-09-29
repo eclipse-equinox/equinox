@@ -95,7 +95,7 @@ public class BundleLoader extends ModuleLoader {
 	/* If not null, list of package names to import dynamically. */
 	private String[] dynamicImportPackages;
 
-	private final AtomicReference<ModuleClassLoader> classloader = new AtomicReference<ModuleClassLoader>();
+	private final AtomicReference<ModuleClassLoader> classloader = new AtomicReference<>();
 	private final ClassLoader parent;
 	private final AtomicBoolean triggerClassLoaded = new AtomicBoolean(false);
 
@@ -208,7 +208,7 @@ public class BundleLoader extends ModuleLoader {
 	private static PackageSource createMultiSource(String packageName, PackageSource[] sources) {
 		if (sources.length == 1)
 			return sources[0];
-		List<SingleSourcePackage> sourceList = new ArrayList<SingleSourcePackage>(sources.length);
+		List<SingleSourcePackage> sourceList = new ArrayList<>(sources.length);
 		for (int i = 0; i < sources.length; i++) {
 			SingleSourcePackage[] innerSources = sources[i].getSuppliers();
 			for (int j = 0; j < innerSources.length; j++)
@@ -732,7 +732,7 @@ public class BundleLoader extends ModuleLoader {
 		if ((path.length() > 1) && (path.charAt(0) == '/')) /* if name has a leading slash */
 			path = path.substring(1); /* remove leading slash before search */
 		boolean subPackages = (options & BundleWiring.LISTRESOURCES_RECURSE) != 0;
-		List<String> packages = new ArrayList<String>();
+		List<String> packages = new ArrayList<>();
 		// search imported package names
 		KeyedHashSet importSources = getImportedSources(null);
 		KeyedElement[] imports;
@@ -746,7 +746,7 @@ public class BundleLoader extends ModuleLoader {
 		}
 
 		// now add package names from required bundles
-		Collection<BundleLoader> visited = new ArrayList<BundleLoader>();
+		Collection<BundleLoader> visited = new ArrayList<>();
 		visited.add(this); // always add ourselves so we do not recurse back to ourselves
 		for (ModuleWire bundleWire : requiredBundleWires) {
 			BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
@@ -758,8 +758,8 @@ public class BundleLoader extends ModuleLoader {
 		boolean localSearch = (options & BundleWiring.LISTRESOURCES_LOCAL) != 0;
 		// Use LinkedHashSet for optimized performance of contains() plus
 		// ordering guarantees.
-		LinkedHashSet<String> result = new LinkedHashSet<String>();
-		Set<String> importedPackages = new HashSet<String>(0);
+		LinkedHashSet<String> result = new LinkedHashSet<>();
+		Set<String> importedPackages = new HashSet<>(0);
 		for (String name : packages) {
 			// look for import source
 			PackageSource externalSource = findImportedSource(name, null);
@@ -801,7 +801,7 @@ public class BundleLoader extends ModuleLoader {
 			return list1 == null ? BundleLoader.<E> emptyEnumeration() : list1;
 		if (list1 == null || !list1.hasMoreElements())
 			return list2 == null ? BundleLoader.<E> emptyEnumeration() : list2;
-		List<E> compoundResults = new ArrayList<E>();
+		List<E> compoundResults = new ArrayList<>();
 		while (list1.hasMoreElements())
 			compoundResults.add(list1.nextElement());
 		while (list2.hasMoreElements()) {
@@ -952,7 +952,7 @@ public class BundleLoader extends ModuleLoader {
 		if (packageImports == null || packageImports.isEmpty()) {
 			return;
 		}
-		List<String> dynamicImports = new ArrayList<String>(packageImports.size());
+		List<String> dynamicImports = new ArrayList<>(packageImports.size());
 		for (ModuleRequirement packageImport : packageImports) {
 			if (PackageNamespace.RESOLUTION_DYNAMIC.equals(packageImport.getDirectives().get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
 				Matcher matcher = PACKAGENAME_FILTER.matcher(packageImport.getDirectives().get(PackageNamespace.REQUIREMENT_FILTER_DIRECTIVE));
@@ -983,9 +983,9 @@ public class BundleLoader extends ModuleLoader {
 			int size = packages.length;
 			List<String> stems;
 			if (dynamicImportPackageStems == null) {
-				stems = new ArrayList<String>(size);
+				stems = new ArrayList<>(size);
 			} else {
-				stems = new ArrayList<String>(size + dynamicImportPackageStems.length);
+				stems = new ArrayList<>(size + dynamicImportPackageStems.length);
 				for (int i = 0; i < dynamicImportPackageStems.length; i++) {
 					stems.add(dynamicImportPackageStems[i]);
 				}
@@ -993,9 +993,9 @@ public class BundleLoader extends ModuleLoader {
 
 			List<String> names;
 			if (dynamicImportPackages == null) {
-				names = new ArrayList<String>(size);
+				names = new ArrayList<>(size);
 			} else {
-				names = new ArrayList<String>(size + dynamicImportPackages.length);
+				names = new ArrayList<>(size + dynamicImportPackages.length);
 				for (int i = 0; i < dynamicImportPackages.length; i++) {
 					names.add(dynamicImportPackages[i]);
 				}
@@ -1036,7 +1036,7 @@ public class BundleLoader extends ModuleLoader {
 	public final void addDynamicImportPackage(ManifestElement[] packages) {
 		if (packages == null)
 			return;
-		List<String> dynamicImports = new ArrayList<String>(packages.length);
+		List<String> dynamicImports = new ArrayList<>(packages.length);
 		StringBuilder importSpec = new StringBuilder();
 		for (ManifestElement dynamicImportElement : packages) {
 			String[] names = dynamicImportElement.getValueComponents();
@@ -1051,7 +1051,7 @@ public class BundleLoader extends ModuleLoader {
 		if (dynamicImports.size() > 0) {
 			addDynamicImportPackage(dynamicImports.toArray(new String[dynamicImports.size()]));
 
-			Map<String, String> dynamicImportMap = new HashMap<String, String>();
+			Map<String, String> dynamicImportMap = new HashMap<>();
 			dynamicImportMap.put(Constants.DYNAMICIMPORT_PACKAGE, importSpec.toString());
 
 			try {
@@ -1132,10 +1132,10 @@ public class BundleLoader extends ModuleLoader {
 				return result.isNullSource() ? null : result;
 		}
 		if (visited == null)
-			visited = new ArrayList<BundleLoader>();
+			visited = new ArrayList<>();
 		if (!visited.contains(this))
 			visited.add(this); // always add ourselves so we do not recurse back to ourselves
-		List<PackageSource> result = new ArrayList<PackageSource>(3);
+		List<PackageSource> result = new ArrayList<>(3);
 		for (ModuleWire bundleWire : requiredBundleWires) {
 			BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
 			if (loader != null) {

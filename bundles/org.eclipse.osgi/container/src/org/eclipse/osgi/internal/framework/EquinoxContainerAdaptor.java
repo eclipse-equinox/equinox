@@ -38,7 +38,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	private final ClassLoader moduleClassLoaderParent;
 	private final AtomicLong lastSecurityAdminFlush;
 
-	final AtomicLazyInitializer<Executor> executor = new AtomicLazyInitializer<Executor>();
+	final AtomicLazyInitializer<Executor> executor = new AtomicLazyInitializer<>();
 	final Callable<Executor> lazyExecutorCreator;
 
 	public EquinoxContainerAdaptor(EquinoxContainer container, Storage storage, Map<Long, Generation> initial) {
@@ -77,7 +77,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 				// idle timeout; make it short to get rid of threads quickly after resolve
 				int idleTimeout = 10;
 				// use sync queue to force thread creation
-				BlockingQueue<Runnable> queue = new SynchronousQueue<Runnable>();
+				BlockingQueue<Runnable> queue = new SynchronousQueue<>();
 				// try to name the threads with useful name
 				ThreadFactory threadFactory = new ThreadFactory() {
 					@Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2015 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,7 +48,7 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 		// until a real ContentHandler for this mime-type is registered
 		setNewHandler(reference, getRank(reference));
 
-		contentHandlerServiceTracker = new ServiceTracker<ContentHandler, ServiceReference<ContentHandler>>(context, ContentHandler.class.getName(), this);
+		contentHandlerServiceTracker = new ServiceTracker<>(context, ContentHandler.class.getName(), this);
 		URLStreamHandlerFactoryImpl.secureAction.open(contentHandlerServiceTracker);
 	}
 

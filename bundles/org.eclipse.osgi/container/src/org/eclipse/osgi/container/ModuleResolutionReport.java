@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,12 +28,12 @@ import org.osgi.service.resolver.ResolutionException;
 class ModuleResolutionReport implements ResolutionReport {
 
 	static class Builder {
-		private final Map<Resource, List<Entry>> resourceToEntries = new HashMap<Resource, List<Entry>>();
+		private final Map<Resource, List<Entry>> resourceToEntries = new HashMap<>();
 
 		public void addEntry(Resource resource, Entry.Type type, Object data) {
 			List<Entry> entries = resourceToEntries.get(resource);
 			if (entries == null) {
-				entries = new ArrayList<Entry>();
+				entries = new ArrayList<>();
 				resourceToEntries.put(resource, entries);
 			}
 			entries.add(new EntryImpl(type, data));
@@ -69,7 +69,7 @@ class ModuleResolutionReport implements ResolutionReport {
 	private final Map<Resource, List<Wire>> resolutionResult;
 
 	ModuleResolutionReport(Map<Resource, List<Wire>> resolutionResult, Map<Resource, List<Entry>> entries, ResolutionException cause) {
-		this.entries = entries == null ? Collections.<Resource, List<Entry>> emptyMap() : Collections.unmodifiableMap(new HashMap<Resource, List<ResolutionReport.Entry>>(entries));
+		this.entries = entries == null ? Collections.<Resource, List<Entry>> emptyMap() : Collections.unmodifiableMap(new HashMap<>(entries));
 		this.resolutionResult = resolutionResult == null ? Collections.<Resource, List<Wire>> emptyMap() : Collections.unmodifiableMap(resolutionResult);
 		this.resolutionException = cause;
 	}
@@ -93,7 +93,7 @@ class ModuleResolutionReport implements ResolutionReport {
 			prepend = ""; //$NON-NLS-1$
 		}
 		if (visited == null) {
-			visited = new HashSet<BundleRevision>();
+			visited = new HashSet<>();
 		}
 		if (visited.contains(revision)) {
 			return ""; //$NON-NLS-1$
@@ -164,7 +164,7 @@ class ModuleResolutionReport implements ResolutionReport {
 	}
 
 	private static String createOSGiCapability(Capability cap) {
-		Map<String, Object> attributes = new HashMap<String, Object>(cap.getAttributes());
+		Map<String, Object> attributes = new HashMap<>(cap.getAttributes());
 		Map<String, String> directives = cap.getDirectives();
 		String name = (String) attributes.remove(cap.getNamespace());
 		return name + ModuleRevision.toString(attributes, false, true) + ModuleRevision.toString(directives, true, true);
@@ -186,7 +186,7 @@ class ModuleResolutionReport implements ResolutionReport {
 	}
 
 	private static String createOSGiRequirement(Requirement requirement, String... versions) {
-		Map<String, String> directives = new HashMap<String, String>(requirement.getDirectives());
+		Map<String, String> directives = new HashMap<>(requirement.getDirectives());
 		String filter = directives.remove(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
 		if (filter == null)
 			throw new IllegalArgumentException("No filter directive found:" + requirement); //$NON-NLS-1$

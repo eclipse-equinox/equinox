@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,9 +61,9 @@ public class ShrinkableValueCollectionMap<K, V> extends AbstractMap<K, Collectio
 			if (entrySet == null) {
 				return null;
 			}
-			value = new ShrinkableEntrySetValueCollection<V>(entrySet);
+			value = new ShrinkableEntrySetValueCollection<>(entrySet);
 			if (values == null) {
-				values = new HashMap<Object, Collection<V>>(map.size());
+				values = new HashMap<>(map.size());
 			}
 			values.put(key, value);
 		}
@@ -81,7 +81,7 @@ public class ShrinkableValueCollectionMap<K, V> extends AbstractMap<K, Collectio
 			value = values.remove(key);
 		}
 		if ((value == null) && (entrySet != null)) {
-			value = new ShrinkableEntrySetValueCollection<V>(entrySet);
+			value = new ShrinkableEntrySetValueCollection<>(entrySet);
 		}
 		return value;
 	}

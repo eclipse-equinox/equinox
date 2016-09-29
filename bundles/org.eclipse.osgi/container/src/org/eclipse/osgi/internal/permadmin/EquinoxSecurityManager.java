@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2013 IBM Corporation and others.
+ * Copyright (c) 2008, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,8 +36,8 @@ public class EquinoxSecurityManager extends SecurityManager {
 
 	static class CheckContext {
 		// A non zero depth indicates that we are doing a recursive permission check.
-		List<List<Decision[]>> depthCondSets = new ArrayList<List<Decision[]>>(2);
-		List<AccessControlContext> accs = new ArrayList<AccessControlContext>(2);
+		List<List<Decision[]>> depthCondSets = new ArrayList<>(2);
+		List<AccessControlContext> accs = new ArrayList<>(2);
 		List<Class<?>> CondClassSet;
 
 		public int getDepth() {
@@ -62,7 +62,7 @@ public class EquinoxSecurityManager extends SecurityManager {
 		}
 	}
 
-	private final ThreadLocal<CheckContext> localCheckContext = new ThreadLocal<CheckContext>();
+	private final ThreadLocal<CheckContext> localCheckContext = new ThreadLocal<>();
 
 	boolean addConditionsForDomain(Decision[] results) {
 		CheckContext cc = localCheckContext.get();
@@ -73,7 +73,7 @@ public class EquinoxSecurityManager extends SecurityManager {
 		}
 		List<Decision[]> condSets = cc.depthCondSets.get(cc.getDepth());
 		if (condSets == null) {
-			condSets = new ArrayList<Decision[]>(1);
+			condSets = new ArrayList<>(1);
 			cc.depthCondSets.set(cc.getDepth(), condSets);
 		}
 		condSets.add(results);
@@ -120,7 +120,7 @@ public class EquinoxSecurityManager extends SecurityManager {
 			if (conditionSets == null)
 				return;
 			// TODO the spec seems impossible to implement just doing the simple thing for now
-			Map<Class<? extends Condition>, Dictionary<Object, Object>> conditionDictionaries = new HashMap<Class<? extends Condition>, Dictionary<Object, Object>>();
+			Map<Class<? extends Condition>, Dictionary<Object, Object>> conditionDictionaries = new HashMap<>();
 			for (Decision[] domainDecisions : conditionSets) {
 				boolean grant = false;
 				for (int i = 0; i < domainDecisions.length; i++) {
@@ -158,12 +158,12 @@ public class EquinoxSecurityManager extends SecurityManager {
 		for (int i = 0; i < postponed.length; i++) {
 			Dictionary<Object, Object> condContext = conditionDictionaries.get(postponed[i].getClass());
 			if (condContext == null) {
-				condContext = new Hashtable<Object, Object>();
+				condContext = new Hashtable<>();
 				conditionDictionaries.put(postponed[i].getClass(), condContext);
 			}
 			// prevent recursion into Condition
 			if (cc.CondClassSet == null)
-				cc.CondClassSet = new ArrayList<Class<?>>(2);
+				cc.CondClassSet = new ArrayList<>(2);
 			if (cc.CondClassSet.contains(postponed[i].getClass()))
 				return SecurityTable.ABSTAIN;
 			cc.CondClassSet.add(postponed[i].getClass());

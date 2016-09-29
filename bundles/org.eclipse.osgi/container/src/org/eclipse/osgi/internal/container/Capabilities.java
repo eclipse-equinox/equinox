@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,9 +25,9 @@ import org.osgi.resource.*;
 public class Capabilities {
 	static class NamespaceSet {
 		private final String name;
-		private final Map<String, Set<ModuleCapability>> indexes = new HashMap<String, Set<ModuleCapability>>();
-		private final Set<ModuleCapability> all = new HashSet<ModuleCapability>();
-		private final Set<ModuleCapability> nonStringIndexes = new HashSet<ModuleCapability>(0);
+		private final Map<String, Set<ModuleCapability>> indexes = new HashMap<>();
+		private final Set<ModuleCapability> all = new HashSet<>();
+		private final Set<ModuleCapability> nonStringIndexes = new HashSet<>(0);
 		private final boolean matchMandatory;
 
 		NamespaceSet(String name) {
@@ -66,7 +66,7 @@ public class Capabilities {
 			} else {
 				Set<ModuleCapability> capabilities = indexes.get(indexKey);
 				if (capabilities == null) {
-					capabilities = new HashSet<ModuleCapability>(1);
+					capabilities = new HashSet<>(1);
 					indexes.put((String) indexKey, capabilities);
 				}
 				capabilities.add(capability);
@@ -135,7 +135,7 @@ public class Capabilities {
 				} else {
 					Set<ModuleCapability> indexed = indexes.get(indexKey);
 					if (indexed == null) {
-						result = new ArrayList<ModuleCapability>(0);
+						result = new ArrayList<>(0);
 					} else {
 						result = match(f, indexed, synthetic);
 					}
@@ -153,7 +153,7 @@ public class Capabilities {
 		}
 
 		private List<ModuleCapability> match(Filter f, Set<ModuleCapability> candidates, boolean synthetic) {
-			List<ModuleCapability> result = new ArrayList<ModuleCapability>(1);
+			List<ModuleCapability> result = new ArrayList<>(1);
 			for (ModuleCapability candidate : candidates) {
 				if (matches(f, candidate, !synthetic && matchMandatory)) {
 					result.add(candidate);
@@ -200,7 +200,7 @@ public class Capabilities {
 		return true;
 	}
 
-	Map<String, NamespaceSet> namespaceSets = new HashMap<String, NamespaceSet>();
+	Map<String, NamespaceSet> namespaceSets = new HashMap<>();
 
 	/**
 	 * Adds the {@link ModuleRevision#getModuleCapabilities(String) capabilities}
@@ -225,7 +225,7 @@ public class Capabilities {
 				Object packageName = capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
 				if (packageName instanceof String) {
 					if (packageNames == null) {
-						packageNames = new ArrayList<String>();
+						packageNames = new ArrayList<>();
 					}
 					packageNames.add((String) packageName);
 				}

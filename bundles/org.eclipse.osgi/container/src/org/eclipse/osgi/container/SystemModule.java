@@ -30,7 +30,7 @@ import org.osgi.service.resolver.ResolutionException;
  * @since 3.10
  */
 public abstract class SystemModule extends Module {
-	private volatile AtomicReference<ContainerEvent> forStop = new AtomicReference<ContainerEvent>();
+	private volatile AtomicReference<ContainerEvent> forStop = new AtomicReference<>();
 
 	public SystemModule(ModuleContainer container) {
 		super(new Long(0), Constants.SYSTEM_BUNDLE_LOCATION, container, EnumSet.of(Settings.AUTO_START, Settings.USE_ACTIVATION_POLICY), Integer.valueOf(0));
@@ -87,7 +87,7 @@ public abstract class SystemModule extends Module {
 			AtomicReference<ContainerEvent> existingForStop = forStop;
 			if (existingForStop.get() != null) {
 				// There was a previous launch, reset the reference forStop
-				forStop = new AtomicReference<ContainerEvent>();
+				forStop = new AtomicReference<>();
 			}
 			publishEvent(ModuleEvent.STARTING);
 			try {

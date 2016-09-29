@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,7 +67,7 @@ class OSGiFrameworkHooks {
 				}
 				case EquinoxConfiguration.BSN_VERSION_MANAGED : {
 					Bundle targetBundle = target.getBundle();
-					ArrayMap<Bundle, Module> candidateBundles = new ArrayMap<Bundle, Module>(collisionCandidates.size());
+					ArrayMap<Bundle, Module> candidateBundles = new ArrayMap<>(collisionCandidates.size());
 					for (Module module : collisionCandidates) {
 						candidateBundles.put(module.getBundle(), module);
 					}
@@ -82,7 +82,7 @@ class OSGiFrameworkHooks {
 
 		private void notifyCollisionHooks(final int operationType, final Bundle target, Collection<Bundle> collisionCandidates) {
 			// Note that collision hook results are honored for the system bundle.
-			final Collection<Bundle> shrinkable = new ShrinkableCollection<Bundle>(collisionCandidates);
+			final Collection<Bundle> shrinkable = new ShrinkableCollection<>(collisionCandidates);
 			if (System.getSecurityManager() == null) {
 				notifyCollisionHooksPriviledged(operationType, target, shrinkable);
 			} else {
@@ -250,7 +250,7 @@ class OSGiFrameworkHooks {
 				}
 				if (hooks.isEmpty())
 					return;
-				candidates = new ShrinkableCollection<BundleRevision>(candidates);
+				candidates = new ShrinkableCollection<>(candidates);
 				for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
 					HookReference hookRef = iHooks.next();
 					if (hookRef.reference.getBundle() == null) {
@@ -275,7 +275,7 @@ class OSGiFrameworkHooks {
 				}
 				if (hooks.isEmpty())
 					return;
-				collisionCandidates = new ShrinkableCollection<BundleCapability>(collisionCandidates);
+				collisionCandidates = new ShrinkableCollection<>(collisionCandidates);
 				for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
 					HookReference hookRef = iHooks.next();
 					if (hookRef.reference.getBundle() == null) {
@@ -296,7 +296,7 @@ class OSGiFrameworkHooks {
 				}
 				if (hooks.isEmpty())
 					return;
-				candidates = new ShrinkableCollection<BundleCapability>(candidates);
+				candidates = new ShrinkableCollection<>(candidates);
 				for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
 					HookReference hookRef = iHooks.next();
 					if (hookRef.reference.getBundle() == null) {

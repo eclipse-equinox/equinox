@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,7 @@ import org.eclipse.osgi.framework.eventmgr.*;
  */
 public class MRUBundleFileList implements EventDispatcher<Object, Object, BundleFile> {
 	private static final int MIN = 10;
-	private static final ThreadLocal<BundleFile> closingBundleFile = new ThreadLocal<BundleFile>();
+	private static final ThreadLocal<BundleFile> closingBundleFile = new ThreadLocal<>();
 
 	// list of open bundle files
 	final private BundleFile[] bundleFileList;
@@ -46,7 +46,7 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 		if (fileLimit >= MIN) {
 			this.bundleFileList = new BundleFile[fileLimit];
 			this.useStampList = new long[fileLimit];
-			this.bundleFileCloser = new CopyOnWriteIdentityMap<Object, Object>();
+			this.bundleFileCloser = new CopyOnWriteIdentityMap<>();
 			this.bundleFileCloser.put(this, this);
 		} else {
 			this.bundleFileList = null;
@@ -181,7 +181,7 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 			return;
 		try {
 			/* queue to hold set of listeners */
-			ListenerQueue<Object, Object, BundleFile> queue = new ListenerQueue<Object, Object, BundleFile>(manager);
+			ListenerQueue<Object, Object, BundleFile> queue = new ListenerQueue<>(manager);
 			/* add bundle file closer to the queue */
 			queue.queueListeners(bundleFileCloser.entrySet(), this);
 			/* dispatch event to set of listeners */

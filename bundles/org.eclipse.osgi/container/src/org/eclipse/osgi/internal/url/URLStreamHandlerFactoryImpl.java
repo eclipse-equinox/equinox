@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 IBM Corporation and others.
+ * Copyright (c) 2004, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,7 +42,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 	private static final List<Class<?>> ignoredClasses = Arrays.asList(new Class<?>[] {MultiplexingURLStreamHandler.class, URLStreamHandlerFactoryImpl.class, URL.class});
 	private Map<String, URLStreamHandler> proxies;
 	private URLStreamHandlerFactory parentFactory;
-	private ThreadLocal<List<String>> creatingProtocols = new ThreadLocal<List<String>>();
+	private ThreadLocal<List<String>> creatingProtocols = new ThreadLocal<>();
 
 	/**
 	 * Create the factory.
@@ -52,8 +52,8 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 	public URLStreamHandlerFactoryImpl(BundleContext context, EquinoxContainer container) {
 		super(context, container);
 
-		proxies = new Hashtable<String, URLStreamHandler>(15);
-		handlerTracker = new ServiceTracker<URLStreamHandlerService, URLStreamHandlerService>(context, URLSTREAMHANDLERCLASS, null);
+		proxies = new Hashtable<>(15);
+		handlerTracker = new ServiceTracker<>(context, URLSTREAMHANDLERCLASS, null);
 		handlerTracker.open();
 	}
 
@@ -119,7 +119,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 	private boolean isRecursive(String protocol) {
 		List<String> protocols = creatingProtocols.get();
 		if (protocols == null) {
-			protocols = new ArrayList<String>(1);
+			protocols = new ArrayList<>(1);
 			creatingProtocols.set(protocols);
 		}
 		if (protocols.contains(protocol))

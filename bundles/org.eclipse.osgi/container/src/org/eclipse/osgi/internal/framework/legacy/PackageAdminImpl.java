@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2014 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,7 +69,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		Module module = StartLevelImpl.getModule(bundle);
 		Collection<ModuleRevision> revisions = module == null ? Collections.<ModuleRevision> emptyList() : module.getRevisions().getModuleRevisions();
 
-		Collection<ExportedPackage> allExports = new ArrayList<ExportedPackage>();
+		Collection<ExportedPackage> allExports = new ArrayList<>();
 		for (ModuleRevision revision : revisions) {
 			ModuleWiring wiring = revision.getWiring();
 			if (wiring != null) {
@@ -111,7 +111,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		Requirement packageReq = ModuleContainer.createRequirement(PackageNamespace.PACKAGE_NAMESPACE, directives, attributes);
 		Collection<BundleCapability> packageCaps = container.getFrameworkWiring().findProviders(packageReq);
 		InternalUtils.filterCapabilityPermissions(packageCaps);
-		List<ExportedPackage> result = new ArrayList<ExportedPackage>();
+		List<ExportedPackage> result = new ArrayList<>();
 		for (BundleCapability capability : packageCaps) {
 			ModuleWiring wiring = (ModuleWiring) capability.getRevision().getWiring();
 			if (wiring != null) {
@@ -120,7 +120,7 @@ public class PackageAdminImpl implements PackageAdmin {
 					// This is a fragment, just get all the host wirings
 					List<ModuleWire> hostWires = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
 					if (hostWires != null && !hostWires.isEmpty()) {
-						wirings = new ArrayList<ModuleWiring>(hostWires.size());
+						wirings = new ArrayList<>(hostWires.size());
 						for (ModuleWire hostWire : hostWires) {
 							ModuleWiring hostWiring = hostWire.getProviderWiring();
 							if (hostWiring != null) {
@@ -157,7 +157,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		Requirement bundleReq = ModuleContainer.createRequirement(BundleNamespace.BUNDLE_NAMESPACE, directives, attributes);
 		Collection<BundleCapability> bundleCaps = container.getFrameworkWiring().findProviders(bundleReq);
 		InternalUtils.filterCapabilityPermissions(bundleCaps);
-		Collection<RequiredBundle> result = new ArrayList<RequiredBundle>();
+		Collection<RequiredBundle> result = new ArrayList<>();
 		for (BundleCapability capability : bundleCaps) {
 			BundleWiring wiring = capability.getRevision().getWiring();
 			if (wiring != null) {
@@ -183,7 +183,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		if (identityCaps.isEmpty()) {
 			return null;
 		}
-		List<Bundle> sorted = new ArrayList<Bundle>(identityCaps.size());
+		List<Bundle> sorted = new ArrayList<>(identityCaps.size());
 		for (BundleCapability capability : identityCaps) {
 			Bundle b = capability.getRevision().getBundle();
 			// a sanity check incase this is an old revision
@@ -215,7 +215,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			// we don't hold locks while checking the graph, just return if no longer valid
 			return null;
 		}
-		Collection<Bundle> fragments = new ArrayList<Bundle>(hostWires.size());
+		Collection<Bundle> fragments = new ArrayList<>(hostWires.size());
 		for (ModuleWire wire : hostWires) {
 			Bundle fragment = wire.getRequirer().getBundle();
 			if (fragment != null) {
@@ -235,7 +235,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			// we don't hold locks while checking the graph, just return if no longer valid
 			return null;
 		}
-		Collection<Bundle> hosts = new ArrayList<Bundle>(hostWires.size());
+		Collection<Bundle> hosts = new ArrayList<>(hostWires.size());
 		for (ModuleWire wire : hostWires) {
 			Bundle host = wire.getProvider().getBundle();
 			if (host != null) {
@@ -320,7 +320,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			if (!providerWiring.isInUse()) {
 				return null;
 			}
-			Set<Bundle> importing = new HashSet<Bundle>();
+			Set<Bundle> importing = new HashSet<>();
 
 			String packageName = getName();
 			addRequirers(importing, providerWiring, packageName);
@@ -424,7 +424,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			if (!providerWiring.isInUse()) {
 				return null;
 			}
-			Set<Bundle> requiring = new HashSet<Bundle>();
+			Set<Bundle> requiring = new HashSet<>();
 
 			addRequirers(requiring, providerWiring);
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2012 IBM Corporation and others.
+ * Copyright (c) 2008, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,7 +35,7 @@ class PermissionsHash extends PermissionCollection {
 	/**
 	 * A hashtable to store the elements of the collection.
 	 */
-	Hashtable<Permission, Permission> perms = new Hashtable<Permission, Permission>(8);
+	Hashtable<Permission, Permission> perms = new Hashtable<>(8);
 
 	/**
 	 * Constructs a new instance of this class.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,13 +69,13 @@ public final class HookRegistry {
 
 	private final EquinoxContainer container;
 	private volatile boolean initialized = false;
-	private final List<ClassLoaderHook> classLoaderHooks = new ArrayList<ClassLoaderHook>();
+	private final List<ClassLoaderHook> classLoaderHooks = new ArrayList<>();
 	private final List<ClassLoaderHook> classLoaderHooksRO = Collections.unmodifiableList(classLoaderHooks);
-	private final List<StorageHookFactory<?, ?, ?>> storageHookFactories = new ArrayList<StorageHookFactory<?, ?, ?>>();
+	private final List<StorageHookFactory<?, ?, ?>> storageHookFactories = new ArrayList<>();
 	private final List<StorageHookFactory<?, ?, ?>> storageHookFactoriesRO = Collections.unmodifiableList(storageHookFactories);
-	private final List<BundleFileWrapperFactoryHook> bundleFileWrapperFactoryHooks = new ArrayList<BundleFileWrapperFactoryHook>();
+	private final List<BundleFileWrapperFactoryHook> bundleFileWrapperFactoryHooks = new ArrayList<>();
 	private final List<BundleFileWrapperFactoryHook> bundleFileWrapperFactoryHooksRO = Collections.unmodifiableList(bundleFileWrapperFactoryHooks);
-	private final List<ActivatorHookFactory> activatorHookFactories = new ArrayList<ActivatorHookFactory>();
+	private final List<ActivatorHookFactory> activatorHookFactories = new ArrayList<>();
 	private final List<ActivatorHookFactory> activatorHookFactoriesRO = Collections.unmodifiableList(activatorHookFactories);
 
 	public HookRegistry(EquinoxContainer container) {
@@ -94,8 +94,8 @@ public final class HookRegistry {
 	 * 5. Set this HookRegistry object to read only to prevent any other hooks from being added. <p>
 	 */
 	public void initialize() {
-		List<String> configurators = new ArrayList<String>(5);
-		List<FrameworkLogEntry> errors = new ArrayList<FrameworkLogEntry>(0); // optimistic that no errors will occur
+		List<String> configurators = new ArrayList<>(5);
+		List<FrameworkLogEntry> errors = new ArrayList<>(0); // optimistic that no errors will occur
 		mergeFileHookConfigurators(configurators, errors);
 		mergePropertyHookConfigurators(configurators);
 		synchronized (this) {

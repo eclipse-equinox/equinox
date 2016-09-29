@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2012 IBM Corporation
+ * Copyright (c) 2007, 2016 IBM Corporation
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,7 +98,7 @@ public class EventAdminLogListener implements SynchronousLogListener {
 			default : // other log levels are represented by LOG_OTHER
 				topic += TOPIC_SEPARATOR + LOG_OTHER;
 		}
-		Hashtable<String, Object> properties = new Hashtable<String, Object>();
+		Hashtable<String, Object> properties = new Hashtable<>();
 		Bundle bundle = entry.getBundle();
 		if (bundle == null) {
 			throw new RuntimeException("LogEntry.getBundle() returns null"); //$NON-NLS-1$

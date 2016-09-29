@@ -310,7 +310,7 @@ public class ManifestElement {
 	@SuppressWarnings("unchecked")
 	private Hashtable<String, Object> addTableValue(Hashtable<String, Object> table, String key, String value) {
 		if (table == null) {
-			table = new Hashtable<String, Object>(7);
+			table = new Hashtable<>(7);
 		}
 		Object curValue = table.get(key);
 		if (curValue != null) {
@@ -319,7 +319,7 @@ public class ManifestElement {
 			if (curValue instanceof List) {
 				newList = (List<String>) curValue;
 			} else {
-				newList = new ArrayList<String>(5);
+				newList = new ArrayList<>(5);
 				newList.add((String) curValue);
 			}
 			newList.add(value);
@@ -345,13 +345,13 @@ public class ManifestElement {
 	public static ManifestElement[] parseHeader(String header, String value) throws BundleException {
 		if (value == null)
 			return (null);
-		List<ManifestElement> headerElements = new ArrayList<ManifestElement>(10);
+		List<ManifestElement> headerElements = new ArrayList<>(10);
 		Tokenizer tokenizer = new Tokenizer(value);
 		parseloop: while (true) {
 			String next = tokenizer.getString(";,"); //$NON-NLS-1$
 			if (next == null)
 				throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
-			List<String> headerValues = new ArrayList<String>();
+			List<String> headerValues = new ArrayList<>();
 			StringBuffer headerValue = new StringBuffer(next);
 			headerValues.add(next);
 
@@ -473,7 +473,7 @@ public class ManifestElement {
 	public static String[] getArrayFromList(String stringList, String separator) {
 		if (stringList == null || stringList.trim().length() == 0)
 			return new String[0];
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		StringTokenizer tokens = new StringTokenizer(stringList, separator);
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();
@@ -500,7 +500,7 @@ public class ManifestElement {
 	 */
 	public static Map<String, String> parseBundleManifest(InputStream manifest, Map<String, String> headers) throws IOException, BundleException {
 		if (headers == null)
-			headers = new HashMap<String, String>();
+			headers = new HashMap<>();
 
 		manifest = new BufferedInputStream(manifest);
 		try {

@@ -73,8 +73,8 @@ public final class ModuleRevisionBuilder {
 	private String symbolicName = null;
 	private Version version = Version.emptyVersion;
 	private int types = 0;
-	private final List<GenericInfo> capabilityInfos = new ArrayList<GenericInfo>();
-	private final List<GenericInfo> requirementInfos = new ArrayList<GenericInfo>();
+	private final List<GenericInfo> capabilityInfos = new ArrayList<>();
+	private final List<GenericInfo> requirementInfos = new ArrayList<>();
 
 	/**
 	 * Constructs a new module builder
@@ -122,7 +122,7 @@ public final class ModuleRevisionBuilder {
 	 * @return the capabilities
 	 */
 	public List<GenericInfo> getCapabilities() {
-		return new ArrayList<GenericInfo>(capabilityInfos);
+		return new ArrayList<>(capabilityInfos);
 	}
 
 	/**
@@ -140,7 +140,7 @@ public final class ModuleRevisionBuilder {
 	 * @return the requirements
 	 */
 	public List<GenericInfo> getRequirements() {
-		return new ArrayList<GenericInfo>(requirementInfos);
+		return new ArrayList<>(requirementInfos);
 	}
 
 	/**
@@ -232,7 +232,7 @@ public final class ModuleRevisionBuilder {
 
 	private static void addGenericInfo(List<GenericInfo> infos, String namespace, Map<String, String> directives, Map<String, Object> attributes) {
 		if (infos == null) {
-			infos = new ArrayList<GenericInfo>();
+			infos = new ArrayList<>();
 		}
 		infos.add(new GenericInfo(namespace, copyUnmodifiableMap(directives), copyUnmodifiableMap(attributes)));
 	}
@@ -246,7 +246,7 @@ public final class ModuleRevisionBuilder {
 			Map.Entry<K, V> entry = map.entrySet().iterator().next();
 			return Collections.singletonMap(entry.getKey(), entry.getValue());
 		}
-		return Collections.unmodifiableMap(new HashMap<K, V>(map));
+		return Collections.unmodifiableMap(new HashMap<>(map));
 	}
 
 	void basicAddCapability(String namespace, Map<String, String> directives, Map<String, Object> attributes) {
@@ -259,7 +259,7 @@ public final class ModuleRevisionBuilder {
 
 	private static void basicAddGenericInfo(List<GenericInfo> infos, String namespace, Map<String, String> directives, Map<String, Object> attributes) {
 		if (infos == null) {
-			infos = new ArrayList<GenericInfo>();
+			infos = new ArrayList<>();
 		}
 		infos.add(new GenericInfo(namespace, unmodifiableMap(directives), unmodifiableMap(attributes)));
 	}

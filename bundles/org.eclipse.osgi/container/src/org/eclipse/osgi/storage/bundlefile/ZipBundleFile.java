@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -268,7 +268,7 @@ public class ZipBundleFile extends BundleFile {
 		if (path.length() > 0 && path.charAt(path.length() - 1) != '/')
 			path = new StringBuilder(path).append("/").toString(); //$NON-NLS-1$
 
-		LinkedHashSet<String> result = new LinkedHashSet<String>();
+		LinkedHashSet<String> result = new LinkedHashSet<>();
 		// Get all zip file entries and add the ones of interest.
 		Enumeration<? extends ZipEntry> entries = zipFile.entries();
 		while (entries.hasMoreElements()) {

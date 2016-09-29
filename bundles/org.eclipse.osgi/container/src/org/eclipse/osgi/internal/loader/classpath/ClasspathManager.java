@@ -63,7 +63,7 @@ public class ClasspathManager {
 	// a Map<String,String> where "libname" is the key and libpath" is the value
 	private ArrayMap<String, String> loadedLibraries = null;
 	// used to detect recusive defineClass calls for the same class on the same class loader (bug 345500)
-	private ThreadLocal<Collection<String>> currentlyDefining = new ThreadLocal<Collection<String>>();
+	private ThreadLocal<Collection<String>> currentlyDefining = new ThreadLocal<>();
 
 	/**
 	 * Constructs a classpath manager for the given generation and module class loader
@@ -97,7 +97,7 @@ public class ClasspathManager {
 			// we don't hold locks while checking the graph, just return if no longer valid
 			return emptyFragments;
 		}
-		List<FragmentClasspath> result = new ArrayList<FragmentClasspath>(fragmentWires.size());
+		List<FragmentClasspath> result = new ArrayList<>(fragmentWires.size());
 		for (ModuleWire fragmentWire : fragmentWires) {
 			ModuleRevision revision = fragmentWire.getRequirer();
 			Generation fragGeneration = (Generation) revision.getRevisionInfo();
@@ -146,7 +146,7 @@ public class ClasspathManager {
 	}
 
 	private ClasspathEntry[] buildClasspath(String[] cp, ClasspathManager hostloader, Generation source) {
-		ArrayList<ClasspathEntry> result = new ArrayList<ClasspathEntry>(cp.length);
+		ArrayList<ClasspathEntry> result = new ArrayList<>(cp.length);
 		// add the regular classpath entries.
 		for (int i = 0; i < cp.length; i++)
 			findClassPathEntry(result, cp[i], hostloader, source);
@@ -299,7 +299,7 @@ public class ClasspathManager {
 	}
 
 	public synchronized void loadFragments(Collection<ModuleRevision> addedFragments) {
-		List<FragmentClasspath> result = new ArrayList<FragmentClasspath>(Arrays.asList(fragments));
+		List<FragmentClasspath> result = new ArrayList<>(Arrays.asList(fragments));
 
 		for (ModuleRevision addedFragment : addedFragments) {
 			Generation fragGeneration = (Generation) addedFragment.getRevisionInfo();
@@ -388,7 +388,7 @@ public class ClasspathManager {
 	 * @return an enumeration of the the requested resources
 	 */
 	public Enumeration<URL> findLocalResources(String resource) {
-		List<URL> resources = new ArrayList<URL>(6);
+		List<URL> resources = new ArrayList<>(6);
 		int classPathIndex = 0;
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i] != null) {
@@ -465,7 +465,7 @@ public class ClasspathManager {
 	 * @return an enumeration of the the requested entries or null if the entries do not exist
 	 */
 	public Enumeration<BundleEntry> findLocalEntries(String path) {
-		List<BundleEntry> objects = new ArrayList<BundleEntry>(6);
+		List<BundleEntry> objects = new ArrayList<>(6);
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i] != null) {
 				BundleEntry result = findEntryImpl(path, entries[i].getBundleFile());
@@ -576,7 +576,7 @@ public class ClasspathManager {
 
 		Collection<String> current = currentlyDefining.get();
 		if (current == null) {
-			current = new ArrayList<String>(5);
+			current = new ArrayList<>(5);
 			currentlyDefining.set(current);
 		}
 		if (current.contains(name))
@@ -697,7 +697,7 @@ public class ClasspathManager {
 	public String findLibrary(String libname) {
 		synchronized (this) {
 			if (loadedLibraries == null)
-				loadedLibraries = new ArrayMap<String, String>(1);
+				loadedLibraries = new ArrayMap<>(1);
 		}
 		synchronized (loadedLibraries) {
 			// we assume that each classloader will load a small number of of libraries
@@ -755,7 +755,7 @@ public class ClasspathManager {
 	 * @see ModuleClassLoader#findEntries(String, String, int)
 	 */
 	public List<URL> findEntries(String path, String filePattern, int options) {
-		List<Generation> generations = new ArrayList<Generation>();
+		List<Generation> generations = new ArrayList<>();
 		// first get the host bundle file
 		generations.add(generation);
 		// next get the attached fragments bundle files
@@ -768,7 +768,7 @@ public class ClasspathManager {
 		Enumeration<URL> eURLs = Storage.findEntries(generations, path, filePattern, options);
 		if (eURLs == null)
 			return result;
-		result = new ArrayList<URL>();
+		result = new ArrayList<>();
 		while (eURLs.hasMoreElements())
 			result.add(eURLs.nextElement());
 		return Collections.unmodifiableList(result);
@@ -778,7 +778,7 @@ public class ClasspathManager {
 	 * @see ModuleClassLoader#listLocalResources(String, String, int)
 	 */
 	public Collection<String> listLocalResources(String path, String filePattern, int options) {
-		List<BundleFile> bundleFiles = new ArrayList<BundleFile>();
+		List<BundleFile> bundleFiles = new ArrayList<>();
 
 		ClasspathEntry[] cpEntries = getHostClasspathEntries();
 		for (ClasspathEntry cpEntry : cpEntries)

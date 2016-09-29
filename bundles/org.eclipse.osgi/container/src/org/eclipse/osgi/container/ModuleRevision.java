@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,7 +49,7 @@ public final class ModuleRevision implements BundleRevision {
 	private List<ModuleCapability> createCapabilities(List<GenericInfo> capabilityInfos) {
 		if (capabilityInfos == null || capabilityInfos.isEmpty())
 			return Collections.emptyList();
-		List<ModuleCapability> result = new ArrayList<ModuleCapability>(capabilityInfos.size());
+		List<ModuleCapability> result = new ArrayList<>(capabilityInfos.size());
 		for (GenericInfo info : capabilityInfos) {
 			result.add(new ModuleCapability(info.namespace, info.directives, info.attributes, this));
 		}
@@ -59,7 +59,7 @@ public final class ModuleRevision implements BundleRevision {
 	private List<ModuleRequirement> createRequirements(List<GenericInfo> requirementInfos) {
 		if (requirementInfos == null || requirementInfos.isEmpty())
 			return Collections.emptyList();
-		List<ModuleRequirement> result = new ArrayList<ModuleRequirement>(requirementInfos.size());
+		List<ModuleRequirement> result = new ArrayList<>(requirementInfos.size());
 		for (GenericInfo info : requirementInfos) {
 			result.add(new ModuleRequirement(info.namespace, info.directives, info.attributes, this));
 		}
@@ -100,7 +100,7 @@ public final class ModuleRevision implements BundleRevision {
 	public List<ModuleCapability> getModuleCapabilities(String namespace) {
 		if (namespace == null)
 			return Collections.unmodifiableList(capabilities);
-		List<ModuleCapability> result = new ArrayList<ModuleCapability>();
+		List<ModuleCapability> result = new ArrayList<>();
 		for (ModuleCapability capability : capabilities) {
 			if (namespace.equals(capability.getNamespace())) {
 				result.add(capability);
@@ -118,7 +118,7 @@ public final class ModuleRevision implements BundleRevision {
 	public List<ModuleRequirement> getModuleRequirements(String namespace) {
 		if (namespace == null)
 			return Collections.unmodifiableList(requirements);
-		List<ModuleRequirement> result = new ArrayList<ModuleRequirement>();
+		List<ModuleRequirement> result = new ArrayList<>();
 		for (ModuleRequirement requirement : requirements) {
 			if (namespace.equals(requirement.getNamespace())) {
 				result.add(requirement);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 IBM Corporation and others.
+ * Copyright (c) 2004, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ public class ManifestLocalization {
 	private final Generation generation;
 	private final Dictionary<String, String> rawHeaders;
 	private volatile Dictionary<String, String> defaultLocaleHeaders = null;
-	private final Hashtable<String, BundleResourceBundle> cache = new Hashtable<String, BundleResourceBundle>(5);
+	private final Hashtable<String, BundleResourceBundle> cache = new Hashtable<>(5);
 
 	public ManifestLocalization(Generation generation, Dictionary<String, String> rawHeaders, String defaultRoot) {
 		this.generation = generation;
@@ -62,7 +62,7 @@ public class ManifestLocalization {
 		}
 		ResourceBundle localeProperties = getResourceBundle(localeString, isDefaultLocale);
 		Enumeration<String> eKeys = this.rawHeaders.keys();
-		Headers<String, String> localeHeaders = new Headers<String, String>(this.rawHeaders.size());
+		Headers<String, String> localeHeaders = new Headers<>(this.rawHeaders.size());
 		while (eKeys.hasMoreElements()) {
 			String key = eKeys.nextElement();
 			String value = this.rawHeaders.get(key);
@@ -84,7 +84,7 @@ public class ManifestLocalization {
 	}
 
 	private String[] buildNLVariants(String nl) {
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		while (nl.length() > 0) {
 			result.add(nl);
 			int i = nl.lastIndexOf('_');

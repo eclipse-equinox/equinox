@@ -140,16 +140,16 @@ public class ModuleDatabase {
 	 */
 	public ModuleDatabase(ModuleContainerAdaptor adaptor) {
 		this.adaptor = adaptor;
-		this.modulesByLocations = new HashMap<String, Module>();
-		this.modulesById = new HashMap<Long, Module>();
-		this.wirings = new HashMap<ModuleRevision, ModuleWiring>();
+		this.modulesByLocations = new HashMap<>();
+		this.modulesById = new HashMap<>();
+		this.wirings = new HashMap<>();
 		// Start at id 1 because 0 is reserved for the system bundle
 		this.nextId = new AtomicLong(1);
 		// seed with current time to avoid duplicate timestamps after using -clean
 		this.constructionTime = System.currentTimeMillis();
 		this.revisionsTimeStamp = new AtomicLong(constructionTime);
 		this.allTimeStamp = new AtomicLong(constructionTime);
-		this.moduleSettings = new HashMap<Long, EnumSet<Settings>>();
+		this.moduleSettings = new HashMap<>();
 		this.capabilities = new Capabilities();
 	}
 
@@ -355,8 +355,8 @@ public class ModuleDatabase {
 				}
 			}
 			if (allPendingRemoval) {
-				Collection<ModuleWiring> toRemoveWirings = new ArrayList<ModuleWiring>();
-				Map<ModuleWiring, Collection<ModuleWire>> toRemoveWireLists = new HashMap<ModuleWiring, Collection<ModuleWire>>();
+				Collection<ModuleWiring> toRemoveWirings = new ArrayList<>();
+				Map<ModuleWiring, Collection<ModuleWire>> toRemoveWireLists = new HashMap<>();
 				for (ModuleRevision pendingRemoval : dependencyClosure) {
 					ModuleWiring removedWiring = wirings.get(pendingRemoval);
 					if (removedWiring == null) {
@@ -367,7 +367,7 @@ public class ModuleDatabase {
 					for (ModuleWire wire : removedWires) {
 						Collection<ModuleWire> providerWires = toRemoveWireLists.get(wire.getProviderWiring());
 						if (providerWires == null) {
-							providerWires = new ArrayList<ModuleWire>();
+							providerWires = new ArrayList<>();
 							toRemoveWireLists.put(wire.getProviderWiring(), providerWires);
 						}
 						providerWires.add(wire);
@@ -404,7 +404,7 @@ public class ModuleDatabase {
 	 * @return all revisions with a removal pending wiring.
 	 */
 	final Collection<ModuleRevision> getRemovalPending() {
-		Collection<ModuleRevision> removalPending = new ArrayList<ModuleRevision>();
+		Collection<ModuleRevision> removalPending = new ArrayList<>();
 		readLock();
 		try {
 			for (ModuleWiring wiring : wirings.values()) {
@@ -444,7 +444,7 @@ public class ModuleDatabase {
 	final Map<ModuleRevision, ModuleWiring> getWiringsCopy() {
 		readLock();
 		try {
-			return new HashMap<ModuleRevision, ModuleWiring>(wirings);
+			return new HashMap<>(wirings);
 		} finally {
 			readUnlock();
 		}
@@ -472,7 +472,7 @@ public class ModuleDatabase {
 	final Map<ModuleRevision, ModuleWiring> getWiringsClone() {
 		readLock();
 		try {
-			Map<ModuleRevision, ModuleWiring> clonedWirings = new HashMap<ModuleRevision, ModuleWiring>();
+			Map<ModuleRevision, ModuleWiring> clonedWirings = new HashMap<>();
 			for (Map.Entry<ModuleRevision, ModuleWiring> entry : wirings.entrySet()) {
 				ModuleWiring wiring = new ModuleWiring(entry.getKey(), entry.getValue().getModuleCapabilities(null), entry.getValue().getModuleRequirements(null), entry.getValue().getProvidedModuleWires(null), entry.getValue().getRequiredModuleWires(null), entry.getValue().getSubstitutedNames());
 				clonedWirings.put(entry.getKey(), wiring);
@@ -537,7 +537,7 @@ public class ModuleDatabase {
 	final List<Module> getSortedModules(Sort... sortOptions) {
 		readLock();
 		try {
-			List<Module> modules = new ArrayList<Module>(modulesByLocations.values());
+			List<Module> modules = new ArrayList<>(modulesByLocations.values());
 			sortModules(modules, sortOptions);
 			return modules;
 		} finally {
@@ -590,7 +590,7 @@ public class ModuleDatabase {
 
 	private Collection<List<Module>> sortByDependencies(List<Module> toSort) {
 		// Build references so we can sort
-		List<Module[]> references = new ArrayList<Module[]>(toSort.size());
+		List<Module[]> references = new ArrayList<>(toSort.size());
 		for (Module module : toSort) {
 			ModuleRevision current = module.getCurrentRevision();
 			if (current == null) {
@@ -623,9 +623,9 @@ public class ModuleDatabase {
 		if (cycles.length == 0)
 			return Collections.emptyList();
 
-		Collection<List<Module>> moduleCycles = new ArrayList<List<Module>>(cycles.length);
+		Collection<List<Module>> moduleCycles = new ArrayList<>(cycles.length);
 		for (Object[] cycle : cycles) {
-			List<Module> moduleCycle = new ArrayList<Module>(cycle.length);
+			List<Module> moduleCycle = new ArrayList<>(cycle.length);
 			for (Object module : cycle) {
 				moduleCycle.add((Module) module);
 			}
@@ -964,9 +964,9 @@ public class ModuleDatabase {
 			out.writeInt(moduleDatabase.getInitialModuleStartLevel());
 
 			// prime the object table with all the strings, versions and maps
-			Set<String> allStrings = new HashSet<String>();
-			Set<Version> allVersions = new HashSet<Version>();
-			Set<Map<String, ?>> allMaps = new HashSet<Map<String, ?>>();
+			Set<String> allStrings = new HashSet<>();
+			Set<Version> allVersions = new HashSet<>();
+			Set<Map<String, ?>> allMaps = new HashSet<>();
 
 			// first gather all the strings, versions and maps from the modules
 			List<Module> modules = moduleDatabase.getModules();
@@ -983,7 +983,7 @@ public class ModuleDatabase {
 			}
 
 			// Now persist all the Strings
-			Map<Object, Integer> objectTable = new HashMap<Object, Integer>();
+			Map<Object, Integer> objectTable = new HashMap<>();
 			allStrings.remove(null);
 			out.writeInt(allStrings.size());
 			for (String string : allStrings) {
@@ -1106,7 +1106,7 @@ public class ModuleDatabase {
 			moduleDatabase.nextId.set(in.readLong());
 			moduleDatabase.setInitialModuleStartLevel(in.readInt());
 
-			Map<Integer, Object> objectTable = new HashMap<Integer, Object>();
+			Map<Integer, Object> objectTable = new HashMap<>();
 			if (version >= 2) {
 				int numStrings = in.readInt();
 				for (int i = 0; i < numStrings; i++) {
@@ -1141,7 +1141,7 @@ public class ModuleDatabase {
 			}
 
 			// now read all the info about each wiring using only indexes
-			Map<ModuleRevision, ModuleWiring> wirings = new HashMap<ModuleRevision, ModuleWiring>();
+			Map<ModuleRevision, ModuleWiring> wirings = new HashMap<>();
 			for (int i = 0; i < numWirings; i++) {
 				ModuleWiring wiring = readWiring(in, objectTable);
 				wirings.put(wiring.getRevision(), wiring);
@@ -1346,31 +1346,31 @@ public class ModuleDatabase {
 				throw new NullPointerException("Could not find revision for wiring."); //$NON-NLS-1$
 
 			int numCapabilities = in.readInt();
-			List<ModuleCapability> capabilities = new ArrayList<ModuleCapability>(numCapabilities);
+			List<ModuleCapability> capabilities = new ArrayList<>(numCapabilities);
 			for (int i = 0; i < numCapabilities; i++) {
 				capabilities.add((ModuleCapability) objectTable.get(in.readInt()));
 			}
 
 			int numRequirements = in.readInt();
-			List<ModuleRequirement> requirements = new ArrayList<ModuleRequirement>(numRequirements);
+			List<ModuleRequirement> requirements = new ArrayList<>(numRequirements);
 			for (int i = 0; i < numRequirements; i++) {
 				requirements.add((ModuleRequirement) objectTable.get(in.readInt()));
 			}
 
 			int numProvidedWires = in.readInt();
-			List<ModuleWire> providedWires = new ArrayList<ModuleWire>(numProvidedWires);
+			List<ModuleWire> providedWires = new ArrayList<>(numProvidedWires);
 			for (int i = 0; i < numProvidedWires; i++) {
 				providedWires.add((ModuleWire) objectTable.get(in.readInt()));
 			}
 
 			int numRequiredWires = in.readInt();
-			List<ModuleWire> requiredWires = new ArrayList<ModuleWire>(numRequiredWires);
+			List<ModuleWire> requiredWires = new ArrayList<>(numRequiredWires);
 			for (int i = 0; i < numRequiredWires; i++) {
 				requiredWires.add((ModuleWire) objectTable.get(in.readInt()));
 			}
 
 			int numSubstitutedNames = in.readInt();
-			Collection<String> substituted = new ArrayList<String>(numSubstitutedNames);
+			Collection<String> substituted = new ArrayList<>(numSubstitutedNames);
 			for (int i = 0; i < numSubstitutedNames; i++) {
 				substituted.add(readString(in, objectTable));
 			}
@@ -1456,7 +1456,7 @@ public class ModuleDatabase {
 				Object value = readMapValue(in, type, objectTable);
 				result = Collections.singletonMap(key, value);
 			} else {
-				result = new HashMap<String, Object>(count);
+				result = new HashMap<>(count);
 				for (int i = 0; i < count; i++) {
 					String key = readString(in, objectTable);
 					byte type = in.readByte();
@@ -1544,7 +1544,7 @@ public class ModuleDatabase {
 			if (size == 1) {
 				return Collections.singletonList(readListValue(listType, in, objectTable));
 			}
-			List<Object> list = new ArrayList<Object>(size);
+			List<Object> list = new ArrayList<>(size);
 			for (int i = 0; i < size; i++) {
 				list.add(readListValue(listType, in, objectTable));
 			}

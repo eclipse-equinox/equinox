@@ -45,12 +45,12 @@ public final class ModuleWiring implements BundleWiring {
 	private volatile List<ModuleCapability> capabilities;
 	private volatile List<ModuleRequirement> requirements;
 	private final Collection<String> substitutedPkgNames;
-	private final AtomicLazyInitializer<ModuleLoader> loader = new AtomicLazyInitializer<ModuleLoader>();
+	private final AtomicLazyInitializer<ModuleLoader> loader = new AtomicLazyInitializer<>();
 	private final LoaderInitializer loaderInitializer = new LoaderInitializer();
 	private volatile List<ModuleWire> providedWires;
 	private volatile List<ModuleWire> requiredWires;
 	volatile boolean isValid = true;
-	private final AtomicReference<Set<String>> dynamicMissRef = new AtomicReference<Set<String>>();
+	private final AtomicReference<Set<String>> dynamicMissRef = new AtomicReference<>();
 
 	ModuleWiring(ModuleRevision revision, List<ModuleCapability> capabilities, List<ModuleRequirement> requirements, List<ModuleWire> providedWires, List<ModuleWire> requiredWires, Collection<String> substitutedPkgNames) {
 		super();
@@ -102,8 +102,8 @@ public final class ModuleWiring implements BundleWiring {
 		if (!isValid)
 			return null;
 		if (namespace == null)
-			return new ArrayList<ModuleCapability>(allCapabilities);
-		List<ModuleCapability> result = new ArrayList<ModuleCapability>();
+			return new ArrayList<>(allCapabilities);
+		List<ModuleCapability> result = new ArrayList<>();
 		for (ModuleCapability capability : allCapabilities) {
 			if (namespace.equals(capability.getNamespace())) {
 				result.add(capability);
@@ -143,8 +143,8 @@ public final class ModuleWiring implements BundleWiring {
 		if (!isValid)
 			return null;
 		if (namespace == null)
-			return new ArrayList<ModuleRequirement>(allRequirements);
-		List<ModuleRequirement> result = new ArrayList<ModuleRequirement>();
+			return new ArrayList<>(allRequirements);
+		List<ModuleRequirement> result = new ArrayList<>();
 		for (ModuleRequirement requirement : allRequirements) {
 			if (namespace.equals(requirement.getNamespace())) {
 				result.add(requirement);
@@ -224,8 +224,8 @@ public final class ModuleWiring implements BundleWiring {
 		if (!isValid)
 			return null;
 		if (namespace == null)
-			return new ArrayList<ModuleWire>(allWires);
-		List<ModuleWire> result = new ArrayList<ModuleWire>();
+			return new ArrayList<>(allWires);
+		List<ModuleWire> result = new ArrayList<>();
 		for (ModuleWire moduleWire : allWires) {
 			if (namespace.equals(moduleWire.getCapability().getNamespace())) {
 				result.add(moduleWire);
@@ -410,13 +410,13 @@ public final class ModuleWiring implements BundleWiring {
 	 */
 	public void addDynamicImports(ModuleRevisionBuilder builder) {
 		List<GenericInfo> newImports = builder.getRequirements();
-		List<ModuleRequirement> newRequirements = new ArrayList<ModuleRequirement>();
+		List<ModuleRequirement> newRequirements = new ArrayList<>();
 		for (GenericInfo info : newImports) {
 			if (!PackageNamespace.PACKAGE_NAMESPACE.equals(info.getNamespace())) {
 				throw new IllegalArgumentException("Invalid namespace for package imports: " + info.getNamespace()); //$NON-NLS-1$
 			}
-			Map<String, Object> attributes = new HashMap<String, Object>(info.getAttributes());
-			Map<String, String> directives = new HashMap<String, String>(info.getDirectives());
+			Map<String, Object> attributes = new HashMap<>(info.getAttributes());
+			Map<String, String> directives = new HashMap<>(info.getDirectives());
 			directives.put(DYNAMICALLY_ADDED_IMPORT_DIRECTIVE, "true"); //$NON-NLS-1$
 			directives.put(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE, PackageNamespace.RESOLUTION_DYNAMIC);
 			newRequirements.add(new ModuleRequirement(info.getNamespace(), directives, attributes, revision));
@@ -424,7 +424,7 @@ public final class ModuleWiring implements BundleWiring {
 		ModuleDatabase moduleDatabase = revision.getRevisions().getContainer().moduleDatabase;
 		moduleDatabase.writeLock();
 		try {
-			List<ModuleRequirement> updatedRequirements = new ArrayList<ModuleRequirement>(requirements);
+			List<ModuleRequirement> updatedRequirements = new ArrayList<>(requirements);
 			updatedRequirements.addAll(newRequirements);
 			requirements = updatedRequirements;
 		} finally {

@@ -125,7 +125,7 @@ public class ReliableFile {
 	private File referenceFile;
 
 	/** List of checksum file objects: File => specific ReliableFile generation */
-	private static Hashtable<File, CacheInfo> cacheFiles = new Hashtable<File, CacheInfo>(20);
+	private static Hashtable<File, CacheInfo> cacheFiles = new Hashtable<>(20);
 
 	private File inputFile = null;
 	private File outputFile = null;
@@ -192,7 +192,7 @@ public class ReliableFile {
 			String[] files = parent.list();
 			if (files == null)
 				return null;
-			List<Integer> list = new ArrayList<Integer>(defaultMaxGenerations);
+			List<Integer> list = new ArrayList<>(defaultMaxGenerations);
 			if (file.exists())
 				list.add(Integer.valueOf(0)); //base file exists
 			for (int i = 0; i < files.length; i++) {
@@ -637,7 +637,7 @@ public class ReliableFile {
 		if (!directory.isDirectory())
 			throw new IOException("Not a valid directory"); //$NON-NLS-1$
 		String files[] = directory.list();
-		Set<String> list = new HashSet<String>(files.length / 2);
+		Set<String> list = new HashSet<>(files.length / 2);
 		for (int idx = 0; idx < files.length; idx++) {
 			String file = files[idx];
 			int pos = file.lastIndexOf('.');

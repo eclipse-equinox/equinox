@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 IBM Corporation and others.
+ * Copyright (c) 2004, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -93,7 +93,7 @@ public class ComputeNodeOrder {
 			 * 
 			 * Element type: <code>Vertex</code>
 			 */
-			public List<Vertex> adjacent = new ArrayList<Vertex>(3);
+			public List<Vertex> adjacent = new ArrayList<>(3);
 
 			/**
 			 * Creates a new vertex with the given id.
@@ -110,14 +110,14 @@ public class ComputeNodeOrder {
 		 * 
 		 * Element type: <code>Vertex</code>
 		 */
-		private List<Vertex> vertexList = new ArrayList<Vertex>(100);
+		private List<Vertex> vertexList = new ArrayList<>(100);
 
 		/**
 		 * Map from id to vertex.
 		 * 
 		 * Key type: <code>Object</code>; value type: <code>Vertex</code>
 		 */
-		private Map<Object, Vertex> vertexMap = new HashMap<Object, Vertex>(100);
+		private Map<Object, Vertex> vertexMap = new HashMap<>(100);
 
 		/**
 		 * DFS visit time. Non-negative.
@@ -270,7 +270,7 @@ public class ComputeNodeOrder {
 			}
 			// find the roots of each component
 			// Map<Vertex,List<Object>> components
-			Map<Vertex, List<Object>> components = new HashMap<Vertex, List<Object>>();
+			Map<Vertex, List<Object>> components = new HashMap<>();
 			for (Iterator<Vertex> it = vertexList.iterator(); it.hasNext();) {
 				Vertex vertex = it.next();
 				if (vertex.predecessor == null) {
@@ -284,14 +284,14 @@ public class ComputeNodeOrder {
 					}
 					List<Object> component = components.get(root);
 					if (component == null) {
-						component = new ArrayList<Object>(2);
+						component = new ArrayList<>(2);
 						component.add(root.id);
 						components.put(root, component);
 					}
 					component.add(vertex.id);
 				}
 			}
-			List<Object[]> result = new ArrayList<Object[]>(components.size());
+			List<Object[]> result = new ArrayList<>(components.size());
 			for (Iterator<List<Object>> it = components.values().iterator(); it.hasNext();) {
 				List<Object> component = it.next();
 				if (component.size() > 1) {
@@ -369,7 +369,7 @@ public class ComputeNodeOrder {
 			// all vertex.predecessor initially null;
 			time = 0;
 			// for a stack, append to the end of an array-based list
-			List<Object> stack = new ArrayList<Object>(Math.max(1, vertexList.size()));
+			List<Object> stack = new ArrayList<>(Math.max(1, vertexList.size()));
 			Iterator<Vertex> allAdjacent = null;
 			Vertex vertex = null;
 			Iterator<Vertex> allV = vertexList.iterator();

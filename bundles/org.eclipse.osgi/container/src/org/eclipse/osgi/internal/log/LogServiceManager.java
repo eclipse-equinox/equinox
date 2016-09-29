@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2014 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2016 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -236,7 +236,7 @@ public class LogServiceManager implements BundleListener, FrameworkListener, Ser
 		}
 
 		public Dictionary<String, String> getHeaders() {
-			return new Hashtable<String, String>();
+			return new Hashtable<>();
 		}
 
 		public long getBundleId() {
@@ -300,7 +300,7 @@ public class LogServiceManager implements BundleListener, FrameworkListener, Ser
 		}
 
 		public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType) {
-			return new HashMap<X509Certificate, List<X509Certificate>>();
+			return new HashMap<>();
 		}
 
 		public Version getVersion() {

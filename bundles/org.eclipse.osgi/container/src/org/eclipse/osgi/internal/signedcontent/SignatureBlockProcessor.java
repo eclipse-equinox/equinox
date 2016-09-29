@@ -22,8 +22,8 @@ import org.eclipse.osgi.util.NLS;
 
 public class SignatureBlockProcessor implements SignedContentConstants {
 	private final SignedBundleFile signedBundle;
-	private List<SignerInfo> signerInfos = new ArrayList<SignerInfo>();
-	private Map<String, Object> contentMDResults = new HashMap<String, Object>();
+	private List<SignerInfo> signerInfos = new ArrayList<>();
+	private Map<String, Object> contentMDResults = new HashMap<>();
 	// map of tsa singers keyed by SignerInfo -> {tsa_SignerInfo, signingTime}
 	private Map<SignerInfo, Object[]> tsaSignerInfos;
 	private final int supportFlags;
@@ -43,7 +43,7 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 
 		// read all the signature block file names into a list
 		Enumeration<String> en = wrappedBundleFile.getEntryPaths(META_INF);
-		List<String> signers = new ArrayList<String>(2);
+		List<String> signers = new ArrayList<>(2);
 		while (en.hasMoreElements()) {
 			String name = en.nextElement();
 			if ((name.endsWith(DOT_DSA) || name.endsWith(DOT_RSA)) && name.indexOf('/') == name.lastIndexOf('/'))
@@ -117,7 +117,7 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 		if (tsaCerts != null && signingTime != null) {
 			SignerInfoImpl tsaSignerInfo = new SignerInfoImpl(tsaCerts, null, digAlg);
 			if (tsaSignerInfos == null)
-				tsaSignerInfos = new HashMap<SignerInfo, Object[]>(2);
+				tsaSignerInfos = new HashMap<>(2);
 			tsaSignerInfos.put(signerInfo, new Object[] {tsaSignerInfo, signingTime});
 		}
 	}
@@ -225,8 +225,8 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 						@SuppressWarnings("unchecked")
 						List<Object>[] arrayLists = new ArrayList[2];
 						mdResult = arrayLists;
-						mdResult[0] = new ArrayList<Object>();
-						mdResult[1] = new ArrayList<Object>();
+						mdResult[0] = new ArrayList<>();
+						mdResult[1] = new ArrayList<>();
 						contentMDResults.put(entryName, mdResult);
 					}
 					mdResult[0].add(signerInfo);

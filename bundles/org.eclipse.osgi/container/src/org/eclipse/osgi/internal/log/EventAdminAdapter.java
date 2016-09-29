@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,7 @@ public class EventAdminAdapter implements ServiceTrackerCustomizer<Object, Objec
 	public static final String EVENT_TOPIC = "event.topics"; //$NON-NLS-1$
 	private static final String[] LOG_TOPICS_ARRAY = {"*", "org/*", "org/osgi/*", "org/osgi/service/*", "org/osgi/service/log/*", "org/osgi/service/log/LogEntry/*", "org/osgi/service/log/LogEntry/LOG_ERROR", "org/osgi/service/log/LogEntry/LOG_WARNING", "org/osgi/service/log/LogEntry/LOG_INFO", "org/osgi/service/log/LogEntry/LOG_DEBUG", "org/osgi/service/log/LogEntry/LOG_OTHER"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$//$NON-NLS-10$ //$NON-NLS-11$
 	private static final Object LOG_TOPIC_TOKEN = new Object();
-	private static Collection<String> logTopics = new HashSet<String>(Arrays.asList(LOG_TOPICS_ARRAY));
+	private static Collection<String> logTopics = new HashSet<>(Arrays.asList(LOG_TOPICS_ARRAY));
 	private static Collection<String> eventAdminObjectClass = Arrays.asList("org.osgi.service.event.EventAdmin"); //$NON-NLS-1$
 	private static Collection<String> eventHandlerObjectClass = Arrays.asList("org.osgi.service.event.EventHandler"); //$NON-NLS-1$
 
@@ -34,8 +34,8 @@ public class EventAdminAdapter implements ServiceTrackerCustomizer<Object, Objec
 	public EventAdminAdapter(BundleContext context, ExtendedLogReaderServiceFactory logReaderServiceFactory) {
 		this.context = context;
 		this.logReaderServiceFactory = logReaderServiceFactory;
-		eventAdminTracker = new ServiceTracker<Object, Object>(context, "org.osgi.service.event.EventAdmin", this); //$NON-NLS-1$
-		eventHandlerTracker = new ServiceTracker<Object, Object>(context, "org.osgi.service.event.EventHandler", this); //$NON-NLS-1$
+		eventAdminTracker = new ServiceTracker<>(context, "org.osgi.service.event.EventAdmin", this); //$NON-NLS-1$
+		eventHandlerTracker = new ServiceTracker<>(context, "org.osgi.service.event.EventHandler", this); //$NON-NLS-1$
 	}
 
 	public void start() {

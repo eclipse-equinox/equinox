@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2016 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -35,7 +35,7 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 		try {
 			Thread.class.getMethod("getId", (Class[]) null); //$NON-NLS-1$
 		} catch (NoSuchMethodException e) {
-			return new WeakHashMap<Thread, Long>();
+			return new WeakHashMap<>();
 		}
 		return null;
 	}

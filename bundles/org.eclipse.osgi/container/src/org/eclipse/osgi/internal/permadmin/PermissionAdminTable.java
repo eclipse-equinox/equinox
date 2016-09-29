@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2012 IBM Corporation and others.
+ * Copyright (c) 2008, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,7 @@ import java.util.Map;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
 public class PermissionAdminTable {
-	private final Map<String, PermissionInfoCollection> locations = new HashMap<String, PermissionInfoCollection>();
+	private final Map<String, PermissionInfoCollection> locations = new HashMap<>();
 
 	String[] getLocations() {
 		return locations.keySet().toArray(new String[locations.size()]);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -125,7 +125,7 @@ public class DirBundleFile extends BundleFile {
 			return null;
 		String dirPath = path.length() == 0 || path.charAt(path.length() - 1) == '/' ? path : path + '/';
 
-		LinkedHashSet<String> entries = new LinkedHashSet<String>();
+		LinkedHashSet<String> entries = new LinkedHashSet<>();
 		for (String s : fileList) {
 			java.io.File childFile = new java.io.File(pathFile, s);
 			StringBuilder sb = new StringBuilder(dirPath).append(s);

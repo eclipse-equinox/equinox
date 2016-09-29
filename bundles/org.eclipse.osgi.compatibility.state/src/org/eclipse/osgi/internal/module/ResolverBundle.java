@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 IBM Corporation and others.
+ * Copyright (c) 2004, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,7 +62,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 			imports = new ResolverImport[0];
 			requires = new BundleConstraint[0];
 			GenericSpecification[] requirements = getBundleDescription().getGenericRequires();
-			List<GenericConstraint> constraints = new ArrayList<GenericConstraint>();
+			List<GenericConstraint> constraints = new ArrayList<>();
 			for (GenericSpecification requirement : requirements) {
 				if (StateImpl.OSGI_EE_NAMESPACE.equals(requirement.getType()))
 					constraints.add(new GenericConstraint(this, requirement));
@@ -83,7 +83,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 
 		ImportPackageSpecification[] actualImports = getBundleDescription().getImportPackages();
 		// Reorder imports so that optionals are at the end so that we wire statics before optionals
-		List<ResolverImport> importList = new ArrayList<ResolverImport>(actualImports.length);
+		List<ResolverImport> importList = new ArrayList<>(actualImports.length);
 		for (int i = actualImports.length - 1; i >= 0; i--)
 			if (ImportPackageSpecification.RESOLUTION_OPTIONAL.equals(actualImports[i].getDirective(Constants.RESOLUTION_DIRECTIVE)))
 				importList.add(new ResolverImport(this, actualImports[i]));
@@ -125,7 +125,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 	}
 
 	ResolverExport[] getExports(String name) {
-		List<ResolverExport> results = new ArrayList<ResolverExport>(1); // rare to have more than one
+		List<ResolverExport> results = new ArrayList<>(1); // rare to have more than one
 		// it is faster to ask the VersionHashMap for this package name and then compare the exporter to this
 		List<ResolverExport> resolverExports = resolver.getResolverExports().get(name);
 		for (ResolverExport export : resolverExports)
@@ -172,7 +172,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 	}
 
 	private <T> List<T> getAll(T[] hostEntries, Map<Long, List<T>> fragmentMap) {
-		List<T> result = new ArrayList<T>(hostEntries.length);
+		List<T> result = new ArrayList<>(hostEntries.length);
 		for (T entry : hostEntries)
 			result.add(entry);
 		for (ResolverBundle fragment : fragments) {
@@ -281,17 +281,17 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 
 	private void initFragments() {
 		if (fragments == null)
-			fragments = new ArrayList<ResolverBundle>(1);
+			fragments = new ArrayList<>(1);
 		if (fragmentExports == null)
-			fragmentExports = new HashMap<Long, List<ResolverExport>>(1);
+			fragmentExports = new HashMap<>(1);
 		if (fragmentImports == null)
-			fragmentImports = new HashMap<Long, List<ResolverImport>>(1);
+			fragmentImports = new HashMap<>(1);
 		if (fragmentRequires == null)
-			fragmentRequires = new HashMap<Long, List<BundleConstraint>>(1);
+			fragmentRequires = new HashMap<>(1);
 		if (fragmentGenericCapabilities == null)
-			fragmentGenericCapabilities = new HashMap<Long, List<GenericCapability>>(1);
+			fragmentGenericCapabilities = new HashMap<>(1);
 		if (fragmentGenericRequires == null)
-			fragmentGenericRequires = new HashMap<Long, List<GenericConstraint>>(1);
+			fragmentGenericRequires = new HashMap<>(1);
 	}
 
 	private boolean isImported(String packageName) {
@@ -342,7 +342,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 		fragment.getHost().addPossibleSupplier(this);
 
 		if (newImports.length > 0) {
-			ArrayList<ResolverImport> hostImports = new ArrayList<ResolverImport>(newImports.length);
+			ArrayList<ResolverImport> hostImports = new ArrayList<>(newImports.length);
 			for (int i = 0; i < newImports.length; i++)
 				if (!isImported(newImports[i].getName()))
 					hostImports.add(new ResolverImport(this, newImports[i]));
@@ -350,7 +350,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 		}
 
 		if (newRequires.length > 0) {
-			ArrayList<BundleConstraint> hostRequires = new ArrayList<BundleConstraint>(newRequires.length);
+			ArrayList<BundleConstraint> hostRequires = new ArrayList<>(newRequires.length);
 			for (int i = 0; i < newRequires.length; i++)
 				if (!isRequired(newRequires[i].getName()))
 					hostRequires.add(new BundleConstraint(this, newRequires[i]));
@@ -358,7 +358,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 		}
 
 		if (newGenericRequires.length > 0) {
-			ArrayList<GenericConstraint> hostGenericRequires = new ArrayList<GenericConstraint>(newGenericRequires.length);
+			ArrayList<GenericConstraint> hostGenericRequires = new ArrayList<>(newGenericRequires.length);
 			for (int i = 0; i < newGenericRequires.length; i++) {
 				// only add namespaces that are not osgi.ee
 				if (!StateImpl.OSGI_EE_NAMESPACE.equals(newGenericRequires[i].getType()))
@@ -368,7 +368,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 				fragmentGenericRequires.put(fragment.bundleID, hostGenericRequires);
 		}
 
-		ArrayList<ResolverExport> hostExports = new ArrayList<ResolverExport>(newExports.length);
+		ArrayList<ResolverExport> hostExports = new ArrayList<>(newExports.length);
 		if (newExports.length > 0 && dynamicAttach) {
 			for (int i = 0; i < newExports.length; i++) {
 				ResolverExport currentExports[] = getExports(newExports[i].getName());
@@ -385,7 +385,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 			fragmentExports.put(fragment.bundleID, hostExports);
 		}
 
-		List<GenericCapability> hostCapabilities = new ArrayList<GenericCapability>(newGenericCapabilities.length);
+		List<GenericCapability> hostCapabilities = new ArrayList<>(newGenericCapabilities.length);
 		if (newGenericCapabilities.length > 0 && dynamicAttach) {
 			for (GenericDescription capability : newGenericCapabilities) {
 				if (!IdentityNamespace.IDENTITY_NAMESPACE.equals(capability.getType())) {
@@ -536,8 +536,8 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 			// bug 353103: must make a snapshot to avoid ConcurrentModificationException
 			ResolverBundle[] remainingFrags = fragments.toArray(new ResolverBundle[fragments.size()]);
 			for (ResolverBundle remainingFrag : remainingFrags) {
-				List<ResolverImport> additionalImports = new ArrayList<ResolverImport>(0);
-				List<BundleConstraint> additionalRequires = new ArrayList<BundleConstraint>(0);
+				List<ResolverImport> additionalImports = new ArrayList<>(0);
+				List<BundleConstraint> additionalRequires = new ArrayList<>(0);
 				if (hasUnresolvedConstraint(reason, fragment, remainingFrag, oldImports, oldRequires, additionalImports, additionalRequires))
 					continue;
 				// merge back the additional imports or requires which the detached fragment has in common with the remaining fragment

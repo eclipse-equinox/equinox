@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2014 IBM Corporation and others.
+ * Copyright (c) 2006, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,9 +31,9 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 	private static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
 	// holds the initiating class name
-	private final ThreadLocal<String> initiatingClassName = new ThreadLocal<String>();
+	private final ThreadLocal<String> initiatingClassName = new ThreadLocal<>();
 	// holds the ClasspathManagers that need to be activated
-	private final ThreadLocal<Deque<ClasspathManager>> activationStack = new ThreadLocal<Deque<ClasspathManager>>();
+	private final ThreadLocal<Deque<ClasspathManager>> activationStack = new ThreadLocal<>();
 	// used to store exceptions that occurred while activating a bundle
 	// keyed by ClasspathManager->Exception
 	// WeakHashMap is used to prevent pinning the ClasspathManager objects.
@@ -61,7 +61,7 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 			return;
 		Deque<ClasspathManager> stack = activationStack.get();
 		if (stack == null) {
-			stack = new ArrayDeque<ClasspathManager>(6);
+			stack = new ArrayDeque<>(6);
 			activationStack.set(stack);
 		}
 		// each element is a classpath manager that must be activated after
@@ -82,7 +82,7 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 			return;
 
 		// if we have a stack we must clear it even if (clazz == null)
-		List<ClasspathManager> managers = new ArrayList<ClasspathManager>(stack);
+		List<ClasspathManager> managers = new ArrayList<>(stack);
 		stack.clear();
 		if (clazz == null)
 			return;

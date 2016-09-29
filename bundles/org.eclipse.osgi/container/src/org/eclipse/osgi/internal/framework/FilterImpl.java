@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2014 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -180,7 +180,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	 */
 	public boolean match(Dictionary<String, ?> dictionary) {
 		if (dictionary != null) {
-			dictionary = new Headers<String, Object>(dictionary);
+			dictionary = new Headers<>(dictionary);
 		}
 
 		return matchCase(dictionary);
@@ -1406,7 +1406,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 
 	public List<FilterImpl> getChildren() {
 		if (value instanceof FilterImpl[]) {
-			return new ArrayList<FilterImpl>(Arrays.asList((FilterImpl[]) value));
+			return new ArrayList<>(Arrays.asList((FilterImpl[]) value));
 		}
 		return Collections.emptyList();
 	}
@@ -1416,7 +1416,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	 * @return all the attributes contained within this filter
 	 */
 	public String[] getAttributes() {
-		List<String> results = new ArrayList<String>();
+		List<String> results = new ArrayList<>();
 		getAttributesInternal(results);
 		return results.toArray(new String[results.size()]);
 	}
@@ -1525,7 +1525,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 				return parse_item();
 			}
 
-			List<FilterImpl> operands = new ArrayList<FilterImpl>(10);
+			List<FilterImpl> operands = new ArrayList<>(10);
 
 			while (filterChars[pos] == '(') {
 				FilterImpl child = parse_filter();
@@ -1544,7 +1544,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 				return parse_item();
 			}
 
-			List<FilterImpl> operands = new ArrayList<FilterImpl>(10);
+			List<FilterImpl> operands = new ArrayList<>(10);
 
 			while (filterChars[pos] == '(') {
 				FilterImpl child = parse_filter();
@@ -1685,7 +1685,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 		private Object parse_substring() throws InvalidSyntaxException {
 			StringBuffer sb = new StringBuffer(filterChars.length - pos);
 
-			List<String> operands = new ArrayList<String>(10);
+			List<String> operands = new ArrayList<>(10);
 
 			parseloop: while (true) {
 				char c = filterChars[pos];
@@ -1818,7 +1818,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 		private Version leftVersion;
 		private Version rightVersion;
 		private char rightRule = 0;
-		private Collection<Version> excludes = new ArrayList<Version>(0);
+		private Collection<Version> excludes = new ArrayList<>(0);
 
 		public String toString() {
 			if (rightVersion == null) {
@@ -1853,8 +1853,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	public Map<String, String> getStandardOSGiAttributes(String... versions) {
 		if (op != AND && op != EQUAL && op != SUBSTRING && op != PRESENT)
 			throw new IllegalArgumentException("Invalid filter for Starndard OSGi Attributes: " + op); //$NON-NLS-1$
-		Map<String, String> result = new HashMap<String, String>();
-		Map<String, Range> versionAttrs = new HashMap<String, Range>();
+		Map<String, String> result = new HashMap<>();
+		Map<String, Range> versionAttrs = new HashMap<>();
 		if (versions != null) {
 			for (String versionAttr : versions) {
 				versionAttrs.put(versionAttr, null);

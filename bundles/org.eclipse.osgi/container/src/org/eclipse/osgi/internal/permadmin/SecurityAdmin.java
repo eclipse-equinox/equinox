@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2014 IBM Corporation and others.
+ * Copyright (c) 2008, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -250,7 +250,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		// could implement our own Enumeration, but we don't care about performance here.  Just do something simple:
 		synchronized (lock) {
 			SecurityRow[] rows = condAdminTable.getRows();
-			List<ConditionalPermissionInfo> vRows = new ArrayList<ConditionalPermissionInfo>(rows.length);
+			List<ConditionalPermissionInfo> vRows = new ArrayList<>(rows.length);
 			for (int i = 0; i < rows.length; i++)
 				vRows.add(rows[i]);
 			return Collections.enumeration(vRows);
@@ -313,7 +313,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			if (updateStamp != timeStamp)
 				return false;
 			SecurityRow[] newRows = new SecurityRow[rows.size()];
-			Collection<String> names = new ArrayList<String>();
+			Collection<String> names = new ArrayList<>();
 			for (int i = 0; i < newRows.length; i++) {
 				Object rowObj = rows.get(i);
 				if (!(rowObj instanceof ConditionalPermissionInfo))
@@ -426,7 +426,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		DataInputStream in = null;
 		try {
 			in = new DataInputStream(resource.openStream());
-			List<PermissionInfo> permissions = new ArrayList<PermissionInfo>();
+			List<PermissionInfo> permissions = new ArrayList<>();
 			BufferedReader reader;
 			try {
 				reader = new BufferedReader(new InputStreamReader(in, "UTF8")); //$NON-NLS-1$
@@ -466,10 +466,10 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	}
 
 	private static Bundle createMockBundle(String[] signers) {
-		Map<X509Certificate, List<X509Certificate>> signersMap = new HashMap<X509Certificate, List<X509Certificate>>();
+		Map<X509Certificate, List<X509Certificate>> signersMap = new HashMap<>();
 		for (int i = 0; i < signers.length; i++) {
 			List<String> chain = parseDNchain(signers[i]);
-			List<X509Certificate> signersList = new ArrayList<X509Certificate>();
+			List<X509Certificate> signersList = new ArrayList<>();
 			Principal subject = null, issuer = null;
 			X509Certificate first = null;
 			for (Iterator<String> iChain = chain.iterator(); iChain.hasNext();) {
@@ -515,7 +515,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		}
 
 		public Dictionary<String, String> getHeaders() {
-			return new Hashtable<String, String>();
+			return new Hashtable<>();
 		}
 
 		public Dictionary<String, String> getHeaders(String locale) {
@@ -550,7 +550,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		}
 
 		public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType) {
-			return new HashMap<X509Certificate, List<X509Certificate>>(signers);
+			return new HashMap<>(signers);
 		}
 
 		public int getState() {
@@ -826,7 +826,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		if (dnChain == null) {
 			throw new IllegalArgumentException("The DN chain must not be null."); //$NON-NLS-1$
 		}
-		List<String> parsed = new ArrayList<String>();
+		List<String> parsed = new ArrayList<>();
 		int startIndex = 0;
 		startIndex = skipSpaces(dnChain, startIndex);
 		while (startIndex < dnChain.length()) {

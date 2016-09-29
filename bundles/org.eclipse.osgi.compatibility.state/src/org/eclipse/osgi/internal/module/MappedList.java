@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,13 +19,13 @@ import java.util.*;
  */
 public class MappedList<K, V> {
 	// the mapping with key -> Object[] mapping
-	protected final HashMap<K, List<V>> internal = new HashMap<K, List<V>>();
+	protected final HashMap<K, List<V>> internal = new HashMap<>();
 	protected final List<V> empty = Collections.<V> emptyList();
 
 	public void put(K key, V value) {
 		List<V> existing = internal.get(key);
 		if (existing == null) {
-			existing = new ArrayList<V>(1);
+			existing = new ArrayList<>(1);
 			existing.add(value);
 			internal.put(key, existing);
 			return;
@@ -66,7 +66,7 @@ public class MappedList<K, V> {
 	public List<V> getAllValues() {
 		if (getSize() == 0)
 			return empty;
-		ArrayList<V> results = new ArrayList<V>(getSize());
+		ArrayList<V> results = new ArrayList<>(getSize());
 		Iterator<List<V>> iter = internal.values().iterator();
 		while (iter.hasNext())
 			results.addAll(iter.next());

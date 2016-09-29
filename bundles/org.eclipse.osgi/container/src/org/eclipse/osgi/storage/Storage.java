@@ -78,7 +78,7 @@ public class Storage {
 	private final ModuleContainer moduleContainer;
 	private final Object saveMonitor = new Object();
 	private long lastSavedTimestamp = -1;
-	private final LockSet<Long> idLocks = new LockSet<Long>();
+	private final LockSet<Long> idLocks = new LockSet<>();
 	private final MRUBundleFileList mruList;
 	private final FrameworkExtensionInstaller extensionInstaller;
 	private final List<String> cachedHeaderKeys = Arrays.asList(Constants.BUNDLE_SYMBOLICNAME, Constants.BUNDLE_ACTIVATIONPOLICY, "Service-Component"); //$NON-NLS-1$
@@ -140,7 +140,7 @@ public class Storage {
 				generations = loadGenerations(data);
 			} catch (IllegalArgumentException e) {
 				equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, "The persistent format for the framework data has changed.  The framework will be reinitialized: " + e.getMessage(), null); //$NON-NLS-1$
-				generations = new HashMap<Long, Generation>(0);
+				generations = new HashMap<>(0);
 				data = null;
 				cleanOSGiStorage(osgiLocation, childRoot);
 			}
@@ -192,7 +192,7 @@ public class Storage {
 		if (systemWiring == null) {
 			return;
 		}
-		Collection<ModuleRevision> fragments = new ArrayList<ModuleRevision>();
+		Collection<ModuleRevision> fragments = new ArrayList<>();
 		for (ModuleWire hostWire : systemWiring.getProvidedModuleWires(HostNamespace.HOST_NAMESPACE)) {
 			fragments.add(hostWire.getRequirer());
 		}
@@ -212,7 +212,7 @@ public class Storage {
 	}
 
 	private void discardBundlesOnLoad() throws BundleException {
-		Collection<Module> discarded = new ArrayList<Module>(0);
+		Collection<Module> discarded = new ArrayList<>(0);
 		for (Module module : moduleContainer.getModules()) {
 			if (module.getId() == Constants.SYSTEM_BUNDLE_ID)
 				continue;
@@ -585,8 +585,8 @@ public class Storage {
 		if (generation.getBundleInfo().getBundleId() == 0) {
 			return; // ignore system bundle
 		}
-		List<StorageHookFactory<?, ?, ?>> factories = new ArrayList<StorageHookFactory<?, ?, ?>>(getConfiguration().getHookRegistry().getStorageHookFactories());
-		List<StorageHook<?, ?>> hooks = new ArrayList<StorageHook<?, ?>>(factories.size());
+		List<StorageHookFactory<?, ?, ?>> factories = new ArrayList<>(getConfiguration().getHookRegistry().getStorageHookFactories());
+		List<StorageHook<?, ?>> hooks = new ArrayList<>(factories.size());
 		for (Iterator<StorageHookFactory<?, ?, ?>> iFactories = factories.iterator(); iFactories.hasNext();) {
 			@SuppressWarnings("unchecked")
 			StorageHookFactory<Object, Object, StorageHook<Object, Object>> next = (StorageHookFactory<Object, Object, StorageHook<Object, Object>>) iFactories.next();
@@ -607,7 +607,7 @@ public class Storage {
 			Map<String, String> unchecked = (Map<String, String>) headers;
 			mapHeaders = unchecked;
 		} else {
-			mapHeaders = new HashMap<String, String>();
+			mapHeaders = new HashMap<>();
 			for (Enumeration<String> eKeys = headers.keys(); eKeys.hasMoreElements();) {
 				String key = eKeys.nextElement();
 				mapHeaders.put(key, headers.get(key));
@@ -912,7 +912,7 @@ public class Storage {
 		if (commandProp == null)
 			return;
 		String[] temp = ManifestElement.getArrayFromList(commandProp, " "); //$NON-NLS-1$
-		List<String> command = new ArrayList<String>(temp.length + 1);
+		List<String> command = new ArrayList<>(temp.length + 1);
 		boolean foundFullPath = false;
 		for (int i = 0; i < temp.length; i++) {
 			if ("[fullpath]".equals(temp[i]) || "${abspath}".equals(temp[i])) { //$NON-NLS-1$ //$NON-NLS-2$
@@ -1098,7 +1098,7 @@ public class Storage {
 
 	private void saveGenerations(DataOutputStream out) throws IOException {
 		List<Module> modules = moduleContainer.getModules();
-		List<Generation> generations = new ArrayList<Generation>();
+		List<Generation> generations = new ArrayList<>();
 		for (Module module : modules) {
 			ModuleRevision revision = module.getCurrentRevision();
 			if (revision != null) {
@@ -1183,21 +1183,21 @@ public class Storage {
 
 	private Map<Long, Generation> loadGenerations(DataInputStream in) throws IOException {
 		if (in == null) {
-			return new HashMap<Long, Generation>(0);
+			return new HashMap<>(0);
 		}
 		int version = in.readInt();
 		if (version != VERSION) {
 			throw new IllegalArgumentException("Found persistent version \"" + version + "\" expecting \"" + VERSION + "\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		int numCachedHeaders = in.readInt();
-		List<String> storedCachedHeaderKeys = new ArrayList<String>(numCachedHeaders);
+		List<String> storedCachedHeaderKeys = new ArrayList<>(numCachedHeaders);
 		for (int i = 0; i < numCachedHeaders; i++) {
 			storedCachedHeaderKeys.add(ObjectPool.intern(in.readUTF()));
 		}
 
 		int numInfos = in.readInt();
-		Map<Long, Generation> result = new HashMap<Long, Generation>(numInfos);
-		List<Generation> generations = new ArrayList<BundleInfo.Generation>(numInfos);
+		Map<Long, Generation> result = new HashMap<>(numInfos);
+		List<Generation> generations = new ArrayList<>(numInfos);
 		for (int i = 0; i < numInfos; i++) {
 			long infoId = in.readLong();
 			String infoLocation = ObjectPool.intern(in.readUTF());
@@ -1209,7 +1209,7 @@ public class Storage {
 			String contentPath = in.readUTF();
 			long lastModified = in.readLong();
 
-			Map<String, String> cachedHeaders = new HashMap<String, String>(storedCachedHeaderKeys.size());
+			Map<String, String> cachedHeaders = new HashMap<>(storedCachedHeaderKeys.size());
 			for (String headerKey : storedCachedHeaderKeys) {
 				String value = in.readUTF();
 				if (NUL.equals(value)) {
@@ -1250,8 +1250,8 @@ public class Storage {
 	}
 
 	private void loadStorageHookData(List<Generation> generations, DataInputStream in) throws IOException {
-		List<StorageHookFactory<?, ?, ?>> factories = new ArrayList<StorageHookFactory<?, ?, ?>>(getConfiguration().getHookRegistry().getStorageHookFactories());
-		Map<Generation, List<StorageHook<?, ?>>> hookMap = new HashMap<Generation, List<StorageHook<?, ?>>>();
+		List<StorageHookFactory<?, ?, ?>> factories = new ArrayList<>(getConfiguration().getHookRegistry().getStorageHookFactories());
+		Map<Generation, List<StorageHook<?, ?>>> hookMap = new HashMap<>();
 		int numFactories = in.readInt();
 		for (int i = 0; i < numFactories; i++) {
 			String factoryName = in.readUTF();
@@ -1327,7 +1327,7 @@ public class Storage {
 	private static List<StorageHook<?, ?>> getHooks(Map<Generation, List<StorageHook<?, ?>>> hookMap, Generation generation) {
 		List<StorageHook<?, ?>> result = hookMap.get(generation);
 		if (result == null) {
-			result = new ArrayList<StorageHook<?, ?>>();
+			result = new ArrayList<>();
 			hookMap.put(generation, result);
 		}
 		return result;
@@ -1544,7 +1544,7 @@ public class Storage {
 	}
 
 	public static Enumeration<URL> findEntries(List<Generation> generations, String path, String filePattern, int options) {
-		List<BundleFile> bundleFiles = new ArrayList<BundleFile>(generations.size());
+		List<BundleFile> bundleFiles = new ArrayList<>(generations.size());
 		for (Generation generation : generations)
 			bundleFiles.add(generation.getBundleFile());
 		// search all the bundle files
@@ -1611,7 +1611,7 @@ public class Storage {
 	public static List<String> listEntryPaths(List<BundleFile> bundleFiles, String path, String filePattern, int options) {
 		// Use LinkedHashSet for optimized performance of contains() plus
 		// ordering guarantees.
-		LinkedHashSet<String> pathList = new LinkedHashSet<String>();
+		LinkedHashSet<String> pathList = new LinkedHashSet<>();
 		Filter patternFilter = null;
 		Hashtable<String, String> patternProps = null;
 		if (filePattern != null) {
@@ -1626,26 +1626,26 @@ public class Storage {
 					if (bundleFile.getEntry(path) != null && !pathList.contains(path))
 						pathList.add(path);
 				}
-				return new ArrayList<String>(pathList);
+				return new ArrayList<>(pathList);
 			}
 			// For when the file pattern includes a wildcard.
 			try {
 				// create a file pattern filter with 'filename' as the key
 				patternFilter = FilterImpl.newInstance("(filename=" + sanitizeFilterInput(filePattern) + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				// create a single hashtable to be shared during the recursive search
-				patternProps = new Hashtable<String, String>(2);
+				patternProps = new Hashtable<>(2);
 			} catch (InvalidSyntaxException e) {
 				// TODO something unexpected happened; log error and return nothing
 				//				Bundle b = context == null ? null : context.getBundle();
 				//				eventPublisher.publishFrameworkEvent(FrameworkEvent.ERROR, b, e);
-				return new ArrayList<String>(pathList);
+				return new ArrayList<>(pathList);
 			}
 		}
 		// find the entry paths for the datas
 		for (BundleFile bundleFile : bundleFiles) {
 			listEntryPaths(bundleFile, path, patternFilter, patternProps, options, pathList);
 		}
-		return new ArrayList<String>(pathList);
+		return new ArrayList<>(pathList);
 	}
 
 	public static String sanitizeFilterInput(String filePattern) throws InvalidSyntaxException {
@@ -1692,7 +1692,7 @@ public class Storage {
 	// guarantees.
 	private static LinkedHashSet<String> listEntryPaths(BundleFile bundleFile, String path, Filter patternFilter, Hashtable<String, String> patternProps, int options, LinkedHashSet<String> pathList) {
 		if (pathList == null)
-			pathList = new LinkedHashSet<String>();
+			pathList = new LinkedHashSet<>();
 		Enumeration<String> entryPaths;
 		if ((options & BundleWiring.FINDENTRIES_RECURSE) != 0)
 			entryPaths = bundleFile.getEntryPaths(path, true);

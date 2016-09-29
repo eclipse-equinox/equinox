@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -112,7 +112,7 @@ public class StateBuilder {
 		ManifestElement[] exports = ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, manifest.get(Constants.EXPORT_PACKAGE));
 		ManifestElement[] provides = ManifestElement.parseHeader(StateImpl.PROVIDE_PACKAGE, manifest.get(StateImpl.PROVIDE_PACKAGE));
 		boolean strict = state != null && state.inStrictMode();
-		List<String> providedExports = new ArrayList<String>(provides == null ? 0 : provides.length);
+		List<String> providedExports = new ArrayList<>(provides == null ? 0 : provides.length);
 		result.setExportPackages(createExportPackages(exports, provides, providedExports, strict));
 		ManifestElement[] imports = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, manifest.get(Constants.IMPORT_PACKAGE));
 		ManifestElement[] dynamicImports = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE, manifest.get(Constants.DYNAMICIMPORT_PACKAGE));
@@ -135,7 +135,7 @@ public class StateBuilder {
 		ManifestElement[] genericRequires = ManifestElement.parseHeader(GENERIC_REQUIRE, manifest.get(GENERIC_REQUIRE));
 		List<ManifestElement> aliasList = null;
 		if (genericAliases.length > 0) {
-			aliasList = new ArrayList<ManifestElement>(genericRequires == null ? 0 : genericRequires.length);
+			aliasList = new ArrayList<>(genericRequires == null ? 0 : genericRequires.length);
 			for (int i = 0; i < genericAliases.length; i++) {
 				ManifestElement[] aliasReqs = ManifestElement.parseHeader(genericAliases[i][1], manifest.get(genericAliases[i][1]));
 				if (aliasReqs == null)
@@ -163,7 +163,7 @@ public class StateBuilder {
 		ManifestElement[] genericCapabilities = ManifestElement.parseHeader(GENERIC_CAPABILITY, manifest.get(GENERIC_CAPABILITY));
 		List<ManifestElement> aliasList = null;
 		if (genericAliases.length > 0) {
-			aliasList = new ArrayList<ManifestElement>(genericCapabilities == null ? 0 : genericCapabilities.length);
+			aliasList = new ArrayList<>(genericCapabilities == null ? 0 : genericCapabilities.length);
 			for (int i = 0; i < genericAliases.length; i++) {
 				ManifestElement[] aliasCapabilities = ManifestElement.parseHeader(genericAliases[i][0], manifest.get(genericAliases[i][0]));
 				if (aliasCapabilities == null)
@@ -250,7 +250,7 @@ public class StateBuilder {
 			// add implicit imports for each exported package if manifest verions is less than 2.
 			if (exported.length == 0 && imported == null && dynamicImported == null)
 				return null;
-			allImports = new ArrayList<ImportPackageSpecification>(exported.length + (imported == null ? 0 : imported.length));
+			allImports = new ArrayList<>(exported.length + (imported == null ? 0 : imported.length));
 			for (int i = 0; i < exported.length; i++) {
 				if (providedExports.contains(exported[i].getName()))
 					continue;
@@ -261,7 +261,7 @@ public class StateBuilder {
 				allImports.add(result);
 			}
 		} else {
-			allImports = new ArrayList<ImportPackageSpecification>(imported == null ? 0 : imported.length);
+			allImports = new ArrayList<>(imported == null ? 0 : imported.length);
 		}
 
 		// add dynamics first so they will get overriden by static imports if
@@ -320,7 +320,7 @@ public class StateBuilder {
 		int numExports = (exported == null ? 0 : exported.length) + (provides == null ? 0 : provides.length);
 		if (numExports == 0)
 			return null;
-		List<ExportPackageDescription> allExports = new ArrayList<ExportPackageDescription>(numExports);
+		List<ExportPackageDescription> allExports = new ArrayList<>(numExports);
 		if (exported != null)
 			for (int i = 0; i < exported.length; i++)
 				addExportPackages(exported[i], allExports, strict);
@@ -384,7 +384,7 @@ public class StateBuilder {
 					continue keyloop;
 			}
 			if (arbitraryDirectives == null)
-				arbitraryDirectives = new HashMap<String, String>();
+				arbitraryDirectives = new HashMap<>();
 			arbitraryDirectives.put(key, element.getDirective(key));
 		}
 		return arbitraryDirectives;
@@ -413,7 +413,7 @@ public class StateBuilder {
 			}
 			if (!definedAttr) {
 				if (arbitraryAttrs == null)
-					arbitraryAttrs = new HashMap<String, Object>();
+					arbitraryAttrs = new HashMap<>();
 				arbitraryAttrs.put(key, convertValue(type, value));
 			}
 		}
@@ -461,7 +461,7 @@ public class StateBuilder {
 				throw new RuntimeException("Invalid type, missing ending '>' : " + type); //$NON-NLS-1$
 		}
 		List<String> tokens = new Tokenizer(value).getEscapedTokens(","); //$NON-NLS-1$
-		List<Object> components = new ArrayList<Object>();
+		List<Object> components = new ArrayList<>();
 		for (String component : tokens) {
 			components.add(convertValue(componentType, component));
 		}
@@ -494,8 +494,8 @@ public class StateBuilder {
 		if (brees == null || brees.length == 0)
 			return result;
 		if (result == null)
-			result = new ArrayList<GenericSpecification>(brees.length);
-		List<String> breeFilters = new ArrayList<String>();
+			result = new ArrayList<>(brees.length);
+		List<String> breeFilters = new ArrayList<>();
 		for (String bree : brees)
 			breeFilters.add(createOSGiEERequirementFilter(bree));
 		String filterSpec;
@@ -609,7 +609,7 @@ public class StateBuilder {
 		if (osgiRequires == null)
 			return result;
 		if (result == null)
-			result = new ArrayList<GenericSpecification>();
+			result = new ArrayList<>();
 		for (ManifestElement element : osgiRequires) {
 			String[] namespaces = element.getValueComponents();
 			for (String namespace : namespaces) {
@@ -647,7 +647,7 @@ public class StateBuilder {
 	private static List<GenericSpecification> createEquinoxRequires(ManifestElement[] equinoxRequires) throws BundleException {
 		if (equinoxRequires == null)
 			return null;
-		ArrayList<GenericSpecification> results = new ArrayList<GenericSpecification>(equinoxRequires.length);
+		ArrayList<GenericSpecification> results = new ArrayList<>(equinoxRequires.length);
 		for (int i = 0; i < equinoxRequires.length; i++) {
 			String[] genericNames = equinoxRequires[i].getValueComponents();
 			for (int j = 0; j < genericNames.length; j++) {
@@ -686,7 +686,7 @@ public class StateBuilder {
 
 	static List<GenericDescription> createOSGiCapabilities(ManifestElement[] osgiCapabilities, List<GenericDescription> result, BundleDescription description) throws BundleException {
 		if (result == null)
-			result = new ArrayList<GenericDescription>(osgiCapabilities == null ? 1 : osgiCapabilities.length + 1);
+			result = new ArrayList<>(osgiCapabilities == null ? 1 : osgiCapabilities.length + 1);
 		// Always have an osgi.identity capability if there is a symbolic name.
 		GenericDescription osgiIdentity = createOsgiIdentityCapability(description);
 		if (osgiIdentity != null)
@@ -699,7 +699,7 @@ public class StateBuilder {
 		if (osgiCapabilities == null)
 			return result;
 		if (result == null)
-			result = new ArrayList<GenericDescription>(osgiCapabilities.length);
+			result = new ArrayList<>(osgiCapabilities.length);
 
 		for (ManifestElement element : osgiCapabilities) {
 			String[] namespaces = element.getValueComponents();
@@ -712,9 +712,9 @@ public class StateBuilder {
 				Map<String, Object> mapAttrs = getAttributes(element, new String[0]);
 				if (profileIndex != null)
 					mapAttrs.put(ExportPackageDescriptionImpl.EQUINOX_EE, profileIndex);
-				Dictionary<String, Object> attrs = mapAttrs == null ? new Hashtable<String, Object>() : new Hashtable<String, Object>(mapAttrs);
+				Dictionary<String, Object> attrs = mapAttrs == null ? new Hashtable<String, Object>() : new Hashtable<>(mapAttrs);
 				desc.setAttributes(attrs);
-				Map<String, String> directives = new HashMap<String, String>();
+				Map<String, String> directives = new HashMap<>();
 				Enumeration<String> keys = element.getDirectiveKeys();
 				if (keys != null)
 					for (keys = element.getDirectiveKeys(); keys.hasMoreElements();) {
@@ -731,7 +731,7 @@ public class StateBuilder {
 	private static List<GenericDescription> createEquinoxCapabilities(ManifestElement[] equinoxCapabilities) throws BundleException {
 		if (equinoxCapabilities == null)
 			return null;
-		ArrayList<GenericDescription> results = new ArrayList<GenericDescription>(equinoxCapabilities.length);
+		ArrayList<GenericDescription> results = new ArrayList<>(equinoxCapabilities.length);
 		for (int i = 0; i < equinoxCapabilities.length; i++) {
 			String[] genericNames = equinoxCapabilities[i].getValueComponents();
 			for (int j = 0; j < genericNames.length; j++) {
@@ -745,7 +745,7 @@ public class StateBuilder {
 						throw new BundleException("A bundle is not allowed to define a capability in the " + IdentityNamespace.IDENTITY_NAMESPACE + " name space."); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				Map<String, Object> mapAttrs = getAttributes(equinoxCapabilities[i], new String[] {Constants.VERSION_ATTRIBUTE});
-				Dictionary<String, Object> attrs = mapAttrs == null ? new Hashtable<String, Object>() : new Hashtable<String, Object>(mapAttrs);
+				Dictionary<String, Object> attrs = mapAttrs == null ? new Hashtable<String, Object>() : new Hashtable<>(mapAttrs);
 				attrs.put(desc.getType(), name);
 				String versionString = equinoxCapabilities[i].getAttribute(Constants.VERSION_ATTRIBUTE);
 				if (versionString != null)
@@ -811,7 +811,7 @@ public class StateBuilder {
 		if (elements == null)
 			return;
 		int length = elements.length;
-		Set<String> packages = new HashSet<String>(length);
+		Set<String> packages = new HashSet<>(length);
 		for (int i = 0; i < length; i++) {
 			// check for duplicate imports
 			String[] packageNames = elements[i].getValueComponents();
@@ -893,7 +893,7 @@ public class StateBuilder {
 			return null;
 		GenericDescriptionImpl result = new GenericDescriptionImpl();
 		result.setType(IdentityNamespace.IDENTITY_NAMESPACE);
-		Dictionary<String, Object> attributes = new Hashtable<String, Object>(description.getDeclaredAttributes());
+		Dictionary<String, Object> attributes = new Hashtable<>(description.getDeclaredAttributes());
 		// remove osgi.wiring.bundle and bundle-version attributes
 		attributes.remove(BundleNamespace.BUNDLE_NAMESPACE);
 		attributes.remove(Constants.BUNDLE_VERSION_ATTRIBUTE);
@@ -901,7 +901,7 @@ public class StateBuilder {
 		attributes.put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, description.getHost() == null ? IdentityNamespace.TYPE_BUNDLE : IdentityNamespace.TYPE_FRAGMENT);
 		attributes.put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, description.getVersion());
 		result.setAttributes(attributes);
-		Map<String, String> directives = new HashMap<String, String>(description.getDeclaredDirectives());
+		Map<String, String> directives = new HashMap<>(description.getDeclaredDirectives());
 		// remove defaults directive values
 		if (!description.isSingleton())
 			directives.remove(Constants.SINGLETON_DIRECTIVE);

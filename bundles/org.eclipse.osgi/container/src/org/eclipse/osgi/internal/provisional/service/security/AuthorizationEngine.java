@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,7 @@ public abstract class AuthorizationEngine {
 	private final ServiceTracker<AuthorizationListener, AuthorizationListener> listenerTracker;
 
 	public AuthorizationEngine(BundleContext context) {
-		listenerTracker = new ServiceTracker<AuthorizationListener, AuthorizationListener>(context, AuthorizationListener.class.getName(), null);
+		listenerTracker = new ServiceTracker<>(context, AuthorizationListener.class.getName(), null);
 		listenerTracker.open();
 	}
 
@@ -52,11 +52,11 @@ public abstract class AuthorizationEngine {
 		Object[] services = listenerTracker.getServices();
 		if (services == null)
 			return;
-		Map<AuthorizationListener, Object> listeners = new HashMap<AuthorizationListener, Object>();
+		Map<AuthorizationListener, Object> listeners = new HashMap<>();
 		for (Object service : services) {
 			listeners.put((AuthorizationListener) service, service);
 		}
-		ListenerQueue<AuthorizationListener, Object, AuthorizationEvent> queue = new ListenerQueue<AuthorizationListener, Object, AuthorizationEvent>(manager);
+		ListenerQueue<AuthorizationListener, Object, AuthorizationEvent> queue = new ListenerQueue<>(manager);
 		queue.queueListeners(listeners.entrySet(), dispatcher);
 		queue.dispatchEventSynchronous(0, event);
 	}

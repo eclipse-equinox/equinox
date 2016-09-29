@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2012 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 
 	public Map<String, Object> getDirectives() {
 		synchronized (this.monitor) {
-			Map<String, Object> result = new HashMap<String, Object>(5);
+			Map<String, Object> result = new HashMap<>(5);
 			if (resolution != null)
 				result.put(Constants.RESOLUTION_DIRECTIVE, resolution);
 			return result;
@@ -216,7 +216,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	@Override
 	protected Map<String, String> getInternalDirectives() {
 		synchronized (this.monitor) {
-			Map<String, String> result = new HashMap<String, String>(5);
+			Map<String, String> result = new HashMap<>(5);
 			if (arbitraryDirectives != null)
 				result.putAll(arbitraryDirectives);
 			if (resolution != null) {

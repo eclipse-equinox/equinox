@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2015 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,7 +50,7 @@ public class LockSet<T> {
 		}
 	}
 
-	private final Map<T, LockHolder> locks = new HashMap<T, LockHolder>();
+	private final Map<T, LockHolder> locks = new HashMap<>();
 
 	public boolean tryLock(T t, long time, TimeUnit unit) throws InterruptedException {
 		final boolean previousInterruption = Thread.interrupted();

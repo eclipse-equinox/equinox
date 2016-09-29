@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2014 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,7 +44,7 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	/** A map of all the disabled options with values set at the time debug was disabled */
 	private Properties disabledOptions = null;
 	/** A cache of all of the bundles <code>DebugTrace</code> in the format <key,value> --> <bundle name, DebugTrace> */
-	protected final Map<String, DebugTrace> debugTraceCache = new HashMap<String, DebugTrace>();
+	protected final Map<String, DebugTrace> debugTraceCache = new HashMap<>();
 	/** The File object to store messages.  This value may be null. */
 	protected File outFile = null;
 	/** Is verbose debugging enabled?  Changing this value causes a new tracing session to start. */
@@ -104,7 +104,7 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 
 	public void start(BundleContext bc) {
 		this.context = bc;
-		listenerTracker = new ServiceTracker<DebugOptionsListener, DebugOptionsListener>(bc, DebugOptionsListener.class.getName(), this);
+		listenerTracker = new ServiceTracker<>(bc, DebugOptionsListener.class.getName(), this);
 		listenerTracker.open();
 	}
 
@@ -185,7 +185,7 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public Map<String, String> getOptions() {
-		Map<String, String> snapShot = new HashMap<String, String>();
+		Map<String, String> snapShot = new HashMap<>();
 		synchronized (lock) {
 			if (options != null)
 				snapShot.putAll((Map) options);
@@ -301,7 +301,7 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 				// no events to fire
 				return;
 			}
-			fireChangesTo = new HashSet<String>();
+			fireChangesTo = new HashSet<>();
 			// first check for removals
 			for (Iterator<Object> keys = options.keySet().iterator(); keys.hasNext();) {
 				String key = (String) keys.next();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2004, 2016 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -20,7 +20,7 @@ public class GroupingChecker {
 	// a mapping of bundles to their package roots; keyed by
 	// ResolverBundle -> HashMap of packages; keyed by
 	// package name -> PackageRoots
-	private Map<ResolverBundle, Map<String, PackageRoots>> bundles = new HashMap<ResolverBundle, Map<String, PackageRoots>>();
+	private Map<ResolverBundle, Map<String, PackageRoots>> bundles = new HashMap<>();
 
 	/*
 	 * This method fully populates a bundles package roots for the purpose of resolving
@@ -108,7 +108,7 @@ public class GroupingChecker {
 		String[] uses = matchingCapability.getUsesDirective();
 		if (uses == null)
 			return null;
-		ArrayList<PackageRoots[]> results = new ArrayList<PackageRoots[]>(0);
+		ArrayList<PackageRoots[]> results = new ArrayList<>(0);
 		for (String usedPackage : uses) {
 			PackageRoots providingRoots = getPackageRoots(matchingCapability.getResolverBundle(), usedPackage, null);
 			providingRoots.addConflicts(requiringBundle, usedPackage, null, results);
@@ -167,7 +167,7 @@ public class GroupingChecker {
 	PackageRoots getPackageRoots(ResolverBundle bundle, String packageName, List<ResolverBundle> visited) {
 		Map<String, PackageRoots> packages = bundles.get(bundle);
 		if (packages == null) {
-			packages = new HashMap<String, PackageRoots>(5);
+			packages = new HashMap<>(5);
 			bundles.put(bundle, packages);
 		}
 		PackageRoots packageRoots = packages.get(packageName);
@@ -209,7 +209,7 @@ public class GroupingChecker {
 		}
 		// check if the bundle exports the package
 		ResolverExport[] exports = bundle.getExports(packageName);
-		List<PackageRoots> roots = new ArrayList<PackageRoots>(0);
+		List<PackageRoots> roots = new ArrayList<>(0);
 		// check roots from required bundles
 		BundleConstraint[] requires = bundle.getRequires();
 		for (int i = 0; i < requires.length; i++) {
@@ -326,7 +326,7 @@ public class GroupingChecker {
 			if (roots == null)
 				return results;
 			if (visited == null)
-				visited = new ArrayList<PackageRoots>(1);
+				visited = new ArrayList<>(1);
 			if (visited.contains(this))
 				return results;
 			visited.add(this);
@@ -346,7 +346,7 @@ public class GroupingChecker {
 					if (thisUsedRoots != nullPackageRoots && importingUsedRoots != nullPackageRoots)
 						if (!(subSet(thisUsedRoots.roots, importingUsedRoots.roots) || subSet(importingUsedRoots.roots, thisUsedRoots.roots))) {
 							if (results == null)
-								results = new ArrayList<PackageRoots[]>(1);
+								results = new ArrayList<>(1);
 							results.add(new PackageRoots[] {this, importingUsedRoots});
 						}
 					// need to check the usedRoots consistency for transitive closure
@@ -366,7 +366,7 @@ public class GroupingChecker {
 				if (uses == null)
 					continue;
 				if (visited == null)
-					visited = new ArrayList<PackageRoots>(1);
+					visited = new ArrayList<>(1);
 				if (visited.contains(this))
 					return results;
 				visited.add(this);
@@ -380,7 +380,7 @@ public class GroupingChecker {
 					if (thisUsedRoots != nullPackageRoots && exportingUsedRoots != nullPackageRoots)
 						if (!(subSet(thisUsedRoots.roots, exportingUsedRoots.roots) || subSet(exportingUsedRoots.roots, thisUsedRoots.roots))) {
 							if (results == null)
-								results = new ArrayList<PackageRoots[]>(1);
+								results = new ArrayList<>(1);
 							results.add(new PackageRoots[] {this, exportingUsedRoots});
 						}
 					// need to check the usedRoots consistency for transitive closure
@@ -397,7 +397,7 @@ public class GroupingChecker {
 			if (this != nullPackageRoots && bundleUsedRoots != nullPackageRoots)
 				if (!(subSet(this.roots, bundleUsedRoots.roots) || subSet(bundleUsedRoots.roots, this.roots))) {
 					if (results == null)
-						results = new ArrayList<PackageRoots[]>(1);
+						results = new ArrayList<>(1);
 					results.add(new PackageRoots[] {this, bundleUsedRoots});
 				}
 			// need to check the usedRoots consistency for transitive closure

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,7 @@ public class NativeCodeFinder {
 	private final Generation generation;
 	private final Debug debug;
 	// This is only used to keep track of when the same native library is loaded more than once
-	private final Collection<String> loadedNativeCode = new ArrayList<String>(1);
+	private final Collection<String> loadedNativeCode = new ArrayList<>(1);
 
 	public NativeCodeFinder(Generation generation) {
 		this.generation = generation;

@@ -42,7 +42,7 @@ import org.osgi.service.startlevel.StartLevel;
 
 public class SystemBundleActivator implements BundleActivator {
 	private EquinoxFactoryManager urlFactoryManager;
-	private List<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>(10);
+	private List<ServiceRegistration<?>> registrations = new ArrayList<>(10);
 	private SecurityManager setSecurityManagner;
 
 	@SuppressWarnings("deprecation")
@@ -73,7 +73,7 @@ public class SystemBundleActivator implements BundleActivator {
 		register(bc, PermissionAdmin.class, sa, null);
 		register(bc, ConditionalPermissionAdmin.class, sa, null);
 
-		Hashtable<String, Object> props = new Hashtable<String, Object>(7);
+		Hashtable<String, Object> props = new Hashtable<>(7);
 		props.clear();
 		props.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
 		register(bc, Resolver.class, new ResolverImpl(new Logger(0), null), false, props);
@@ -152,7 +152,7 @@ public class SystemBundleActivator implements BundleActivator {
 	}
 
 	private void registerLocations(BundleContext bc, EquinoxLocations equinoxLocations) {
-		Dictionary<String, Object> locationProperties = new Hashtable<String, Object>(1);
+		Dictionary<String, Object> locationProperties = new Hashtable<>(1);
 		Location location = equinoxLocations.getUserLocation();
 		if (location != null) {
 			locationProperties.put("type", EquinoxLocations.PROP_USER_AREA); //$NON-NLS-1$
@@ -216,7 +216,7 @@ public class SystemBundleActivator implements BundleActivator {
 
 	private void register(BundleContext context, String serviceClass, Object service, boolean setRanking, Dictionary<String, Object> properties) {
 		if (properties == null)
-			properties = new Hashtable<String, Object>(7);
+			properties = new Hashtable<>(7);
 		Dictionary<String, String> headers = context.getBundle().getHeaders();
 		properties.put(Constants.SERVICE_VENDOR, headers.get(Constants.BUNDLE_VENDOR));
 		if (setRanking) {

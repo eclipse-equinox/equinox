@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -151,7 +151,7 @@ public class StorageUtil {
 	 * @return the service registration object
 	 */
 	public static ServiceRegistration<?> register(String name, Object service, BundleContext context) {
-		Dictionary<String, Object> properties = new Hashtable<String, Object>(7);
+		Dictionary<String, Object> properties = new Hashtable<>(7);
 		Dictionary<String, String> headers = context.getBundle().getHeaders();
 		properties.put(Constants.SERVICE_VENDOR, headers.get(Constants.BUNDLE_VENDOR));
 		properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));

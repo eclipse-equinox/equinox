@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2014 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2016 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -50,9 +50,9 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	private static PrintStream errorStream;
 
 	private final BasicReadWriteLock listenersLock = new BasicReadWriteLock();
-	private ArrayMap<LogListener, Object[]> listeners = new ArrayMap<LogListener, Object[]>(5);
+	private ArrayMap<LogListener, Object[]> listeners = new ArrayMap<>(5);
 	private LogFilter[] filters = null;
-	private final ThreadLocal<int[]> nestedCallCount = new ThreadLocal<int[]>();
+	private final ThreadLocal<int[]> nestedCallCount = new ThreadLocal<>();
 	private final LinkedList<LogEntry> history;
 	private final int maxHistory;
 
@@ -101,7 +101,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	public ExtendedLogReaderServiceFactory(int maxHistory) {
 		this.maxHistory = maxHistory;
 		if (maxHistory > 0) {
-			history = new LinkedList<LogEntry>();
+			history = new LinkedList<>();
 		} else {
 			history = null;
 		}
@@ -237,7 +237,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	void addLogListener(LogListener listener, LogFilter filter) {
 		listenersLock.writeLock();
 		try {
-			ArrayMap<LogListener, Object[]> listenersCopy = new ArrayMap<LogListener, Object[]>(listeners.getKeys(), listeners.getValues());
+			ArrayMap<LogListener, Object[]> listenersCopy = new ArrayMap<>(listeners.getKeys(), listeners.getValues());
 			Object[] listenerObjects = listenersCopy.get(listener);
 			if (listenerObjects == null) {
 				// Only create a task queue for non-SynchronousLogListeners
@@ -256,7 +256,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	}
 
 	private void recalculateFilters(ArrayMap<LogListener, Object[]> listenersCopy) {
-		List<LogFilter> filtersList = new ArrayList<LogFilter>();
+		List<LogFilter> filtersList = new ArrayList<>();
 		int size = listenersCopy.size();
 		for (int i = 0; i < size; i++) {
 			Object[] listenerObjects = listenersCopy.getValue(i);
@@ -277,7 +277,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	void removeLogListener(LogListener listener) {
 		listenersLock.writeLock();
 		try {
-			ArrayMap<LogListener, Object[]> listenersCopy = new ArrayMap<LogListener, Object[]>(listeners.getKeys(), listeners.getValues());
+			ArrayMap<LogListener, Object[]> listenersCopy = new ArrayMap<>(listeners.getKeys(), listeners.getValues());
 			listenersCopy.remove(listener);
 			recalculateFilters(listenersCopy);
 			listeners = listenersCopy;
@@ -291,7 +291,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 			return EMPTY_ENUMERATION;
 		}
 		synchronized (history) {
-			return Collections.enumeration(new ArrayList<LogEntry>(history));
+			return Collections.enumeration(new ArrayList<>(history));
 		}
 	}
 }

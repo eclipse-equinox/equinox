@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,13 +45,13 @@ public class EquinoxEventPublisher {
 	 * installed in the Framework.
 	 */
 	// Map of BundleContexts for bundle's BundleListeners.
-	private final Map<BundleContextImpl, CopyOnWriteIdentityMap<BundleListener, BundleListener>> allBundleListeners = new HashMap<BundleContextImpl, CopyOnWriteIdentityMap<BundleListener, BundleListener>>();
+	private final Map<BundleContextImpl, CopyOnWriteIdentityMap<BundleListener, BundleListener>> allBundleListeners = new HashMap<>();
 
 	// Map of BundleContexts for bundle's SynchronousBundleListeners.
-	private final Map<BundleContextImpl, CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener>> allSyncBundleListeners = new HashMap<BundleContextImpl, CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener>>();
+	private final Map<BundleContextImpl, CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener>> allSyncBundleListeners = new HashMap<>();
 
 	// Map of BundleContexts for bundle's FrameworkListeners.
-	private final Map<BundleContextImpl, CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener>> allFrameworkListeners = new HashMap<BundleContextImpl, CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener>>();
+	private final Map<BundleContextImpl, CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener>> allFrameworkListeners = new HashMap<>();
 
 	public EquinoxEventPublisher(EquinoxContainer container) {
 		this.container = container;
@@ -86,7 +86,7 @@ public class EquinoxEventPublisher {
 
 	public <K, V, E> ListenerQueue<K, V, E> newListenerQueue() {
 		synchronized (this.monitor) {
-			return new ListenerQueue<K, V, E>(eventManager);
+			return new ListenerQueue<>(eventManager);
 		}
 	}
 
@@ -142,7 +142,7 @@ public class EquinoxEventPublisher {
 		BundleContextImpl systemContext = null;
 		Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>> systemBundleListenersSync = null;
 		synchronized (allSyncBundleListeners) {
-			listenersSync = new HashMap<BundleContextImpl, Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>>>(allSyncBundleListeners.size());
+			listenersSync = new HashMap<>(allSyncBundleListeners.size());
 			for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener>> entry : allSyncBundleListeners.entrySet()) {
 				CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener> listeners = entry.getValue();
 				if (!listeners.isEmpty()) {
@@ -162,7 +162,7 @@ public class EquinoxEventPublisher {
 		Set<Map.Entry<BundleListener, BundleListener>> systemBundleListenersAsync = null;
 		if ((event.getType() & (BundleEvent.STARTING | BundleEvent.STOPPING | BundleEvent.LAZY_ACTIVATION)) == 0) {
 			synchronized (allBundleListeners) {
-				listenersAsync = new HashMap<BundleContextImpl, Set<Map.Entry<BundleListener, BundleListener>>>(allBundleListeners.size());
+				listenersAsync = new HashMap<>(allBundleListeners.size());
 				for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<BundleListener, BundleListener>> entry : allBundleListeners.entrySet()) {
 					CopyOnWriteIdentityMap<BundleListener, BundleListener> listeners = entry.getValue();
 					if (!listeners.isEmpty()) {
@@ -188,7 +188,7 @@ public class EquinoxEventPublisher {
 		if (listenersAsync == null) {
 			shrinkable = asBundleContexts(listenersSync.keySet());
 		} else {
-			shrinkable = new ShrinkableCollection<BundleContext>(asBundleContexts(listenersSync.keySet()), asBundleContexts(listenersAsync.keySet()));
+			shrinkable = new ShrinkableCollection<>(asBundleContexts(listenersSync.keySet()), asBundleContexts(listenersAsync.keySet()));
 		}
 
 		notifyEventHooksPrivileged(event, shrinkable);
@@ -288,7 +288,7 @@ public class EquinoxEventPublisher {
 		// Build the listener snapshot
 		Map<BundleContextImpl, Set<Map.Entry<FrameworkListener, FrameworkListener>>> listenerSnapshot;
 		synchronized (allFrameworkListeners) {
-			listenerSnapshot = new HashMap<BundleContextImpl, Set<Map.Entry<FrameworkListener, FrameworkListener>>>(allFrameworkListeners.size());
+			listenerSnapshot = new HashMap<>(allFrameworkListeners.size());
 			for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener>> entry : allFrameworkListeners.entrySet()) {
 				CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener> listeners = entry.getValue();
 				if (!listeners.isEmpty()) {
@@ -303,7 +303,7 @@ public class EquinoxEventPublisher {
 
 		// add the listeners specified by the caller first
 		if (callerListeners != null && callerListeners.length > 0) {
-			Map<FrameworkListener, FrameworkListener> listeners = new HashMap<FrameworkListener, FrameworkListener>();
+			Map<FrameworkListener, FrameworkListener> listeners = new HashMap<>();
 			for (FrameworkListener listener : callerListeners) {
 				if (listener != null)
 					listeners.put(listener, listener);
@@ -348,7 +348,7 @@ public class EquinoxEventPublisher {
 			synchronized (allSyncBundleListeners) {
 				CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener> listeners = allSyncBundleListeners.get(context);
 				if (listeners == null) {
-					listeners = new CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener>();
+					listeners = new CopyOnWriteIdentityMap<>();
 					allSyncBundleListeners.put(context, listeners);
 				}
 				listeners.put((SynchronousBundleListener) listener, (SynchronousBundleListener) listener);
@@ -357,7 +357,7 @@ public class EquinoxEventPublisher {
 			synchronized (allBundleListeners) {
 				CopyOnWriteIdentityMap<BundleListener, BundleListener> listeners = allBundleListeners.get(context);
 				if (listeners == null) {
-					listeners = new CopyOnWriteIdentityMap<BundleListener, BundleListener>();
+					listeners = new CopyOnWriteIdentityMap<>();
 					allBundleListeners.put(context, listeners);
 				}
 				listeners.put(listener, listener);
@@ -386,7 +386,7 @@ public class EquinoxEventPublisher {
 		synchronized (allFrameworkListeners) {
 			CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener> listeners = allFrameworkListeners.get(context);
 			if (listeners == null) {
-				listeners = new CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener>();
+				listeners = new CopyOnWriteIdentityMap<>();
 				allFrameworkListeners.put(context, listeners);
 			}
 			listeners.put(listener, listener);

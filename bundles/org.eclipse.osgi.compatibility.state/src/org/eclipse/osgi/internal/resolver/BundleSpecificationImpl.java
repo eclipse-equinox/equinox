@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -118,7 +118,7 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 
 	@Override
 	protected Map<String, String> getInternalDirectives() {
-		Map<String, String> result = new HashMap<String, String>(2);
+		Map<String, String> result = new HashMap<>(2);
 		synchronized (this.monitor) {
 			if (arbitraryDirectives != null)
 				result.putAll(arbitraryDirectives);

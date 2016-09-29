@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,7 +50,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 
 	public Map<String, Object> getDirectives() {
 		synchronized (this.monitor) {
-			Map<String, Object> result = new HashMap<String, Object>(7);
+			Map<String, Object> result = new HashMap<>(7);
 			if (uses != null)
 				result.put(Constants.USES_DIRECTIVE, uses);
 			if (exclude != null)
@@ -68,7 +68,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	}
 
 	public Map<String, String> getDeclaredDirectives() {
-		Map<String, String> result = new HashMap<String, String>(6);
+		Map<String, String> result = new HashMap<>(6);
 		synchronized (this.monitor) {
 			Map<String, String> arbitrary = getArbitraryDirectives();
 			if (arbitrary != null)
@@ -90,7 +90,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	}
 
 	public Map<String, Object> getDeclaredAttributes() {
-		Map<String, Object> result = new HashMap<String, Object>(2);
+		Map<String, Object> result = new HashMap<>(2);
 		synchronized (this.monitor) {
 			if (attributes != null)
 				result.putAll(attributes);

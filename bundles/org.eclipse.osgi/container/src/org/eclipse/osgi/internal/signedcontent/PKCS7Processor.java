@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2014 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2006, 2016 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -229,7 +229,7 @@ public class PKCS7Processor implements SignedContentConstants {
 	}
 
 	private List<Certificate> constructCertPath(List<Certificate> certs, Certificate targetCert) {
-		List<Certificate> certsList = new ArrayList<Certificate>();
+		List<Certificate> certsList = new ArrayList<>();
 		certsList.add(targetCert);
 
 		X509Certificate currentCert = (X509Certificate) targetCert;
@@ -360,7 +360,7 @@ public class PKCS7Processor implements SignedContentConstants {
 		if (bp.classOfTag == BERProcessor.CONTEXTSPECIFIC_TAGCLASS && bp.tag == 1) {
 
 			// there are some unsignedAttrs are found!!
-			unsignedAttrs = new HashMap<int[], byte[]>();
+			unsignedAttrs = new HashMap<>();
 
 			// step into a set of unsigned attributes, I believe, when steps 
 			// into here, the 'poiter' is pointing to the first element
@@ -389,7 +389,7 @@ public class PKCS7Processor implements SignedContentConstants {
 		if (bp.classOfTag == BERProcessor.CONTEXTSPECIFIC_TAGCLASS) {
 
 			// process the signed attributes
-			signedAttrs = new HashMap<int[], byte[]>();
+			signedAttrs = new HashMap<>();
 
 			BERProcessor signedAttrsBERS = bp.stepInto();
 			do {
@@ -449,7 +449,7 @@ public class PKCS7Processor implements SignedContentConstants {
 	 * @throws SignatureException 
 	 */
 	private List<Certificate> processCertificates(BERProcessor bp) throws CertificateException, SignatureException {
-		List<Certificate> rtvList = new ArrayList<Certificate>(3);
+		List<Certificate> rtvList = new ArrayList<>(3);
 
 		// Step into the first certificate-element
 		BERProcessor certsBERS = bp.stepInto();

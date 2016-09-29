@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 IBM Corporation and others.
+ * Copyright (c) 2004, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,7 @@ public final class StateHelperImpl implements StateHelper {
 		if (bundles == null || bundles.length == 0)
 			return new BundleDescription[0];
 
-		Set<BundleDescription> reachable = new HashSet<BundleDescription>(bundles.length);
+		Set<BundleDescription> reachable = new HashSet<>(bundles.length);
 		for (int i = 0; i < bundles.length; i++) {
 			if (!bundles[i].isResolved())
 				continue;
@@ -58,7 +58,7 @@ public final class StateHelperImpl implements StateHelper {
 	public BundleDescription[] getPrerequisites(BundleDescription[] bundles) {
 		if (bundles == null || bundles.length == 0)
 			return new BundleDescription[0];
-		Set<BundleDescription> reachable = new HashSet<BundleDescription>(bundles.length);
+		Set<BundleDescription> reachable = new HashSet<>(bundles.length);
 		for (int i = 0; i < bundles.length; i++)
 			addPrerequisites(bundles[i], reachable);
 		return reachable.toArray(new BundleDescription[reachable.size()]);
@@ -75,7 +75,7 @@ public final class StateHelperImpl implements StateHelper {
 	}
 
 	private Map<String, List<ExportPackageDescription>> getExportedPackageMap(State state) {
-		Map<String, List<ExportPackageDescription>> result = new HashMap<String, List<ExportPackageDescription>>();
+		Map<String, List<ExportPackageDescription>> result = new HashMap<>();
 		BundleDescription[] bundles = state.getBundles();
 		for (int i = 0; i < bundles.length; i++) {
 			ExportPackageDescription[] packages = bundles[i].getExportPackages();
@@ -83,7 +83,7 @@ public final class StateHelperImpl implements StateHelper {
 				ExportPackageDescription description = packages[j];
 				List<ExportPackageDescription> exports = result.get(description.getName());
 				if (exports == null) {
-					exports = new ArrayList<ExportPackageDescription>();
+					exports = new ArrayList<>();
 					result.put(description.getName(), exports);
 				}
 				exports.add(description);
@@ -93,7 +93,7 @@ public final class StateHelperImpl implements StateHelper {
 	}
 
 	private Map<String, List<GenericDescription>> getGenericsMap(State state, boolean resolved) {
-		Map<String, List<GenericDescription>> result = new HashMap<String, List<GenericDescription>>();
+		Map<String, List<GenericDescription>> result = new HashMap<>();
 		BundleDescription[] bundles = state.getBundles();
 		for (int i = 0; i < bundles.length; i++) {
 			if (resolved && !bundles[i].isResolved())
@@ -103,7 +103,7 @@ public final class StateHelperImpl implements StateHelper {
 				GenericDescription description = generics[j];
 				List<GenericDescription> genericList = result.get(description.getName());
 				if (genericList == null) {
-					genericList = new ArrayList<GenericDescription>(1);
+					genericList = new ArrayList<>(1);
 					result.put(description.getName(), genericList);
 				}
 				genericList.add(description);
@@ -115,8 +115,8 @@ public final class StateHelperImpl implements StateHelper {
 	private VersionConstraint[] getUnsatisfiedLeaves(State state, BundleDescription[] bundles, ResolverHook hook) {
 		Map<String, List<ExportPackageDescription>> packages = getExportedPackageMap(state);
 		Map<String, List<GenericDescription>> generics = getGenericsMap(state, false);
-		Set<VersionConstraint> result = new HashSet<VersionConstraint>();
-		List<BundleDescription> bundleList = new ArrayList<BundleDescription>(bundles.length);
+		Set<VersionConstraint> result = new HashSet<>();
+		List<BundleDescription> bundleList = new ArrayList<>(bundles.length);
 		for (int i = 0; i < bundles.length; i++)
 			bundleList.add(bundles[i]);
 		for (int i = 0; i < bundleList.size(); i++) {
@@ -193,7 +193,7 @@ public final class StateHelperImpl implements StateHelper {
 		if (containingState == null)
 			// it is a bug in the client to call this method when not attached to a state
 			throw new IllegalStateException("Does not belong to a state"); //$NON-NLS-1$
-		List<VersionConstraint> unsatisfied = new ArrayList<VersionConstraint>();
+		List<VersionConstraint> unsatisfied = new ArrayList<>();
 		HostSpecification host = bundle.getHost();
 		if (host != null)
 			if (!host.isResolved() && !isBundleConstraintResolvable(host, BundleRevision.HOST_NAMESPACE, hook))
@@ -225,14 +225,14 @@ public final class StateHelperImpl implements StateHelper {
 	}
 
 	private ArrayMap<BundleCapability, BaseDescription> asArrayMap(List<BaseDescription> descriptions, String namespace) {
-		List<BundleCapability> capabilities = new ArrayList<BundleCapability>(descriptions.size());
+		List<BundleCapability> capabilities = new ArrayList<>(descriptions.size());
 		for (BaseDescription description : descriptions)
 			capabilities.add(((BaseDescriptionImpl) description).getCapability(namespace));
-		return new ArrayMap<BundleCapability, BaseDescription>(capabilities, descriptions);
+		return new ArrayMap<>(capabilities, descriptions);
 	}
 
 	private List<BaseDescription> getPossibleCandidates(VersionConstraint constraint, BaseDescription[] descriptions, String namespace, ResolverHook hook, boolean resolved) {
-		List<BaseDescription> candidates = new ArrayList<BaseDescription>();
+		List<BaseDescription> candidates = new ArrayList<>();
 		for (int i = 0; i < descriptions.length; i++)
 			if ((!resolved || descriptions[i].getSupplier().isResolved()) && constraint.isSatisfiedBy(descriptions[i]))
 				candidates.add(descriptions[i]);
@@ -300,7 +300,7 @@ public final class StateHelperImpl implements StateHelper {
 	}
 
 	public Object[][] sortBundles(BundleDescription[] toSort) {
-		List<Object[]> references = new ArrayList<Object[]>(toSort.length);
+		List<Object[]> references = new ArrayList<>(toSort.length);
 		for (int i = 0; i < toSort.length; i++)
 			if (toSort[i].isResolved())
 				buildReferences(toSort[i], references);
@@ -391,9 +391,9 @@ public final class StateHelperImpl implements StateHelper {
 		if (state != null)
 			strict = state.inStrictMode();
 		BundleDescription host = (BundleDescription) (bundle.getHost() == null ? bundle : bundle.getHost().getSupplier());
-		List<ExportPackageDescription> orderedPkgList = new ArrayList<ExportPackageDescription>(); // list of all ExportPackageDescriptions that are visible (ArrayList is used to keep order)
-		Set<ExportPackageDescription> pkgSet = new HashSet<ExportPackageDescription>();
-		Set<String> importList = new HashSet<String>(); // list of package names which are directly imported
+		List<ExportPackageDescription> orderedPkgList = new ArrayList<>(); // list of all ExportPackageDescriptions that are visible (ArrayList is used to keep order)
+		Set<ExportPackageDescription> pkgSet = new HashSet<>();
+		Set<String> importList = new HashSet<>(); // list of package names which are directly imported
 		// get the list of directly imported packages first.
 		ImportsHolder imports = new ImportsHolder(bundle, options);
 		for (int i = 0; i < imports.getSize(); i++) {
@@ -406,9 +406,9 @@ public final class StateHelperImpl implements StateHelper {
 			}
 			// get the sources of the required bundles of the exporter
 			BundleSpecification[] requires = pkgSupplier.getExporter().getRequiredBundles();
-			Set<BundleDescription> visited = new HashSet<BundleDescription>();
+			Set<BundleDescription> visited = new HashSet<>();
 			visited.add(bundle); // always add self to prevent recursing into self
-			Set<String> importNames = new HashSet<String>(1);
+			Set<String> importNames = new HashSet<>(1);
 			importNames.add(imports.getName(i));
 			for (int j = 0; j < requires.length; j++) {
 				BundleDescription bundleSupplier = (BundleDescription) requires[j].getSupplier();
@@ -420,7 +420,7 @@ public final class StateHelperImpl implements StateHelper {
 		}
 		// now find all the packages that are visible from required bundles
 		RequiresHolder requires = new RequiresHolder(bundle, options);
-		Set<BundleDescription> visited = new HashSet<BundleDescription>(requires.getSize());
+		Set<BundleDescription> visited = new HashSet<>(requires.getSize());
 		visited.add(bundle); // always add self to prevent recursing into self
 		for (int i = 0; i < requires.getSize(); i++) {
 			BundleDescription bundleSupplier = requires.getSupplier(i);
@@ -443,7 +443,7 @@ public final class StateHelperImpl implements StateHelper {
 				for (int j = 0; j < imports.length; j++) {
 					if (substitutedExports[i].getName().equals(imports[j].getName()) && !pkgSet.contains(imports[j])) {
 						if (substituteNames == null)
-							substituteNames = new HashSet<String>(1);
+							substituteNames = new HashSet<>(1);
 						else
 							substituteNames.clear();
 						// substituteNames is a set of one package containing the single substitute we are trying to get the source for
@@ -453,13 +453,13 @@ public final class StateHelperImpl implements StateHelper {
 				}
 			}
 		}
-		importList = substitutedExports.length == 0 ? importList : new HashSet<String>(importList);
+		importList = substitutedExports.length == 0 ? importList : new HashSet<>(importList);
 		for (int i = 0; i < substitutedExports.length; i++)
 			// we add the package name to the import list to prevent required bundles from adding more sources
 			importList.add(substitutedExports[i].getName());
 
 		ExportPackageDescription[] exports = requiredBundle.getSelectedExports();
-		HashSet<String> exportNames = new HashSet<String>(exports.length); // set is used to improve performance of duplicate check.
+		HashSet<String> exportNames = new HashSet<>(exports.length); // set is used to improve performance of duplicate check.
 		for (int i = 0; i < exports.length; i++)
 			if ((pkgNames == null || pkgNames.contains(exports[i].getName())) && !isSystemExport(exports[i], options) && isFriend(symbolicName, exports[i], strict) && !importList.contains(exports[i].getName()) && !pkgSet.contains(exports[i])) {
 				if (!exportNames.contains(exports[i].getName())) {
@@ -479,7 +479,7 @@ public final class StateHelperImpl implements StateHelper {
 				getPackages(requiredBundles.getSupplier(i), symbolicName, importList, orderedPkgList, pkgSet, visited, strict, pkgNames, options);
 			} else if (exportNames.size() > 0) {
 				// adding any exports from required bundles which we also export
-				Set<BundleDescription> tmpVisited = new HashSet<BundleDescription>();
+				Set<BundleDescription> tmpVisited = new HashSet<>();
 				getPackages(requiredBundles.getSupplier(i), symbolicName, importList, orderedPkgList, pkgSet, tmpVisited, strict, exportNames, options);
 			}
 		}
@@ -577,7 +577,7 @@ class RequiresHolder {
 		isUsingResolved = (options & StateHelper.VISIBLE_INCLUDE_ALL_HOST_WIRES) != 0;
 		if (isUsingResolved) {
 			requiredBundles = null;
-			resolvedBundlesExported = new HashMap<BundleDescription, Boolean>();
+			resolvedBundlesExported = new HashMap<>();
 			resolvedRequires = bundle.getResolvedRequires();
 			determineRequiresVisibility(bundle);
 		} else {
@@ -611,7 +611,7 @@ class RequiresHolder {
 	 */
 	private void determineRequiresVisibility(BundleDescription bundle) {
 		BundleSpecification[] required = bundle.getRequiredBundles();
-		Set<BundleDescription> resolved = new HashSet<BundleDescription>();
+		Set<BundleDescription> resolved = new HashSet<>();
 
 		for (int i = 0; i < resolvedRequires.length; i++) {
 			resolved.add(resolvedRequires[i]);

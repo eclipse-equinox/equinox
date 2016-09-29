@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2015 IBM Corporation and others.
+ * Copyright (c) 2006, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -114,7 +114,7 @@ public class EquinoxLogServices {
 	private ServiceRegistration<?> registerPerformanceLog(BundleContext context) {
 		Object service = createPerformanceLog(context.getBundle());
 		String serviceName = FrameworkLog.class.getName();
-		Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(7);
+		Dictionary<String, Object> serviceProperties = new Hashtable<>(7);
 		Dictionary<String, String> headers = context.getBundle().getHeaders();
 
 		serviceProperties.put(Constants.SERVICE_VENDOR, headers.get(Constants.BUNDLE_VENDOR));

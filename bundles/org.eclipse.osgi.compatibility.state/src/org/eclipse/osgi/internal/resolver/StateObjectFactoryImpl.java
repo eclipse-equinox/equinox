@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2014 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -112,7 +112,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setExecutionEnvironments(executionEnvironments);
 		bundle.setGenericRequires(genericRequires);
 
-		List<GenericDescription> includeIdentity = new ArrayList<GenericDescription>(genericCapabilities == null ? 1 : genericCapabilities.length + 1);
+		List<GenericDescription> includeIdentity = new ArrayList<>(genericCapabilities == null ? 1 : genericCapabilities.length + 1);
 		GenericDescription genericIdentity = StateBuilder.createOsgiIdentityCapability(bundle);
 		if (genericIdentity != null) {
 			includeIdentity.add(genericIdentity);
@@ -332,7 +332,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	private GenericDescription createGenericDescription(String name, String type, Version version, Map<String, ?> attributes, Map<String, String> directives, BundleDescription supplier) {
 		GenericDescriptionImpl result = new GenericDescriptionImpl();
 		result.setType(type);
-		Dictionary<String, Object> attrs = attributes == null ? new Hashtable<String, Object>() : new Hashtable<String, Object>(attributes);
+		Dictionary<String, Object> attrs = attributes == null ? new Hashtable<String, Object>() : new Hashtable<>(attributes);
 		if (version != null) {
 			Object versionObj = attrs.get(Constants.VERSION_ATTRIBUTE);
 			if (!(versionObj instanceof Version) && version != null)
@@ -509,7 +509,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, declaration);
 			if (elements == null)
 				return Collections.<BundleSpecification> emptyList();
-			List<BundleSpecification> result = new ArrayList<BundleSpecification>(elements.length);
+			List<BundleSpecification> result = new ArrayList<>(elements.length);
 			for (ManifestElement element : elements)
 				result.add(StateBuilder.createRequiredBundle(element));
 			return result;
@@ -523,7 +523,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.FRAGMENT_HOST, declaration);
 			if (elements == null)
 				return Collections.<HostSpecification> emptyList();
-			List<HostSpecification> result = new ArrayList<HostSpecification>(elements.length);
+			List<HostSpecification> result = new ArrayList<>(elements.length);
 			for (ManifestElement element : elements)
 				result.add(StateBuilder.createHostSpecification(element, null));
 			return result;
@@ -537,7 +537,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, declaration);
 			if (elements == null)
 				return Collections.<ImportPackageSpecification> emptyList();
-			List<ImportPackageSpecification> result = new ArrayList<ImportPackageSpecification>(elements.length);
+			List<ImportPackageSpecification> result = new ArrayList<>(elements.length);
 			for (ManifestElement element : elements)
 				StateBuilder.addImportPackages(element, result, 2, false);
 			return result;
@@ -573,7 +573,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, declaration);
 			if (elements == null)
 				return Collections.<ExportPackageDescription> emptyList();
-			List<ExportPackageDescription> result = new ArrayList<ExportPackageDescription>(elements.length);
+			List<ExportPackageDescription> result = new ArrayList<>(elements.length);
 			for (ManifestElement element : elements)
 				StateBuilder.addExportPackages(element, result, false);
 			return result;

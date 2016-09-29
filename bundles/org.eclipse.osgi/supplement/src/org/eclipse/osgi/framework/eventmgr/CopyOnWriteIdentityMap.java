@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -84,7 +84,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 				@SuppressWarnings("unchecked")
 				Entry<K, V>[] newEntries = new Entry[size];
 				System.arraycopy(entries, 0, newEntries, 0, size);
-				newEntries[i] = new Entry<K, V>(key, value);
+				newEntries[i] = new Entry<>(key, value);
 				entries = newEntries;
 				return v;
 			}
@@ -95,7 +95,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 		if (size > 0) {
 			System.arraycopy(entries, 0, newEntries, 0, size);
 		}
-		newEntries[size] = new Entry<K, V>(key, value);
+		newEntries[size] = new Entry<>(key, value);
 		entries = newEntries;
 		return null;
 	}
@@ -337,7 +337,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * The entries returned by the set cannot be modified.
 	 */
 	public Set<Map.Entry<K, V>> entrySet() {
-		return new Snapshot<K, V>(entries()).entrySet();
+		return new Snapshot<>(entries()).entrySet();
 	}
 
 	/**
@@ -347,7 +347,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * @return A Set of the key objects in this map
 	 */
 	public Set<K> keySet() {
-		return new Snapshot<K, V>(entries()).keySet();
+		return new Snapshot<>(entries()).keySet();
 	}
 
 	/**
@@ -357,7 +357,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * @return A Collection of the value objects in this map.
 	 */
 	public Collection<V> values() {
-		return new Snapshot<K, V>(entries()).values();
+		return new Snapshot<>(entries()).values();
 	}
 
 	/**

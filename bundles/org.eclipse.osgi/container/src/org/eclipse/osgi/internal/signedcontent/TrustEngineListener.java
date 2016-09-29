@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2012 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2007, 2016 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -54,8 +54,8 @@ public class TrustEngineListener {
 		// find any signed content that has signerinfos with the supplied anchor
 		// re-evaluate trust and check authorization again.
 		Bundle[] bundles = context.getBundles();
-		Set<Bundle> usingAnchor = new HashSet<Bundle>();
-		Set<SignerInfo> untrustedSigners = new HashSet<SignerInfo>();
+		Set<Bundle> usingAnchor = new HashSet<>();
+		Set<SignerInfo> untrustedSigners = new HashSet<>();
 		for (int i = 0; i < bundles.length; i++) {
 			SignedContentImpl signedContent = getSignedContent(bundles[i]);
 			if (signedContent != null && signedContent.isSigned()) {

@@ -89,7 +89,7 @@ public class ClasspathEntry {
 			if (name != null && name.endsWith("/")) { //$NON-NLS-1$
 				String packageName = name.substring(0, name.length() - 1).replace('/', '.');
 				if (result == null) {
-					result = new HashMap<String, ManifestPackageAttributes>(4);
+					result = new HashMap<>(4);
 				}
 				result.put(packageName, manifestPackageAttributesFor(attributes, defaultAttributes));
 			}

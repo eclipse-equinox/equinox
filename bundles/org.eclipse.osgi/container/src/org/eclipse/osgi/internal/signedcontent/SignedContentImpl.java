@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2012 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2007, 2016 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -38,7 +38,7 @@ public class SignedContentImpl implements SignedContent {
 	public SignedContentEntry[] getSignedEntries() {
 		if (contentMDResults == null)
 			return new SignedContentEntry[0];
-		List<SignedContentEntry> results = new ArrayList<SignedContentEntry>(contentMDResults.size());
+		List<SignedContentEntry> results = new ArrayList<>(contentMDResults.size());
 		for (Map.Entry<String, Object> entry : contentMDResults.entrySet()) {
 			String entryName = entry.getKey();
 			Object[] mdResult = (Object[]) entry.getValue();
@@ -105,7 +105,7 @@ public class SignedContentImpl implements SignedContent {
 		if (!containsInfo(baseInfo))
 			throw new IllegalArgumentException("The baseInfo is not found"); //$NON-NLS-1$
 		if (tsaSignerInfos == null)
-			tsaSignerInfos = new HashMap<SignerInfo, Object[]>(signerInfos.length);
+			tsaSignerInfos = new HashMap<>(signerInfos.length);
 		tsaSignerInfos.put(baseInfo, new Object[] {tsaSignerInfo, signingTime});
 	}
 

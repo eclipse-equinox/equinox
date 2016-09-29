@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,8 +12,9 @@ package org.eclipse.osgi.internal.service.security;
 
 import java.io.*;
 import java.security.*;
-import java.security.cert.*;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.signedcontent.SignedBundleHook;
@@ -262,7 +263,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 
 	public String[] getAliases() throws IOException, GeneralSecurityException {
 
-		List<String> returnList = new ArrayList<String>();
+		List<String> returnList = new ArrayList<>();
 		try {
 			KeyStore store = getKeyStore();
 			synchronized (store) {

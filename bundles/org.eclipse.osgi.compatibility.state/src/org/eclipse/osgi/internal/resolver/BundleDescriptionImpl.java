@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -258,7 +258,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
 			if (currentData.stateWires == null) {
-				currentData.stateWires = new HashMap<String, List<StateWire>>(0);
+				currentData.stateWires = new HashMap<>(0);
 			}
 			return currentData.stateWires;
 		}
@@ -535,7 +535,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			if (newDependencies == null)
 				return;
 			if (!checkDups && dependencies == null)
-				dependencies = new ArrayList<BundleDescription>(newDependencies.length);
+				dependencies = new ArrayList<>(newDependencies.length);
 			for (int i = 0; i < newDependencies.length; i++) {
 				addDependency((BaseDescriptionImpl) newDependencies[i], checkDups);
 			}
@@ -548,7 +548,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			if (bundle == this)
 				return;
 			if (dependencies == null)
-				dependencies = new ArrayList<BundleDescription>(10);
+				dependencies = new ArrayList<>(10);
 			if (!checkDups || !dependencies.contains(bundle)) {
 				bundle.addDependent(this);
 				dependencies.add(bundle);
@@ -563,8 +563,8 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	List<BundleDescription> getBundleDependencies() {
 		synchronized (this.monitor) {
 			if (dependencies == null)
-				return new ArrayList<BundleDescription>(0);
-			ArrayList<BundleDescription> required = new ArrayList<BundleDescription>(dependencies.size());
+				return new ArrayList<>(0);
+			ArrayList<BundleDescription> required = new ArrayList<>(dependencies.size());
 			for (Iterator<BundleDescription> iter = dependencies.iterator(); iter.hasNext();) {
 				BundleDescription dep = iter.next();
 				if (dep != this && dep.getHost() == null)
@@ -577,7 +577,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	protected void addDependent(BundleDescription dependent) {
 		synchronized (this.monitor) {
 			if (dependents == null)
-				dependents = new ArrayList<BundleDescription>(10);
+				dependents = new ArrayList<>(10);
 			// no need to check for duplicates here; this is only called in addDepenency which already checks for dups.
 			dependents.add(dependent);
 		}
@@ -684,7 +684,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
 			if (currentData.addedDynamicImports == null)
-				currentData.addedDynamicImports = new ArrayList<ImportPackageSpecification>();
+				currentData.addedDynamicImports = new ArrayList<>();
 			for (ImportPackageSpecification addImport : dynamicImport) {
 				if (!ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(addImport.getDirective(Constants.RESOLUTION_DIRECTIVE)))
 					throw new IllegalArgumentException("Import must be a dynamic import."); //$NON-NLS-1$
@@ -746,7 +746,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			if (lazyData.dynamicStamps == null) {
 				if (timestamp == null)
 					return;
-				lazyData.dynamicStamps = new HashMap<String, Long>();
+				lazyData.dynamicStamps = new HashMap<>();
 			}
 			if (timestamp == null)
 				lazyData.dynamicStamps.remove(requestedPackage);
@@ -858,7 +858,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	}
 
 	public Map<String, String> getDeclaredDirectives() {
-		Map<String, String> result = new HashMap<String, String>(2);
+		Map<String, String> result = new HashMap<>(2);
 		Map<String, String> arbitrary = getArbitraryDirectives();
 		if (arbitrary != null)
 			result.putAll(arbitrary);
@@ -879,7 +879,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	}
 
 	public Map<String, Object> getDeclaredAttributes() {
-		Map<String, Object> result = new HashMap<String, Object>(1);
+		Map<String, Object> result = new HashMap<>(1);
 		synchronized (this.monitor) {
 			if (attributes != null)
 				result.putAll(attributes);
@@ -890,7 +890,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	}
 
 	public List<BundleRequirement> getDeclaredRequirements(String namespace) {
-		List<BundleRequirement> result = new ArrayList<BundleRequirement>();
+		List<BundleRequirement> result = new ArrayList<>();
 		if (namespace == null || BundleRevision.BUNDLE_NAMESPACE.equals(namespace)) {
 			BundleSpecification[] requires = getRequiredBundles();
 			for (BundleSpecification require : requires) {
@@ -914,7 +914,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	}
 
 	public List<BundleCapability> getDeclaredCapabilities(String namespace) {
-		List<BundleCapability> result = new ArrayList<BundleCapability>();
+		List<BundleCapability> result = new ArrayList<>();
 		if (host == null) {
 			if (getSymbolicName() != null) {
 				if (namespace == null || BundleRevision.BUNDLE_NAMESPACE.equals(namespace)) {
@@ -1083,7 +1083,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		public List<BundleCapability> getCapabilities(String namespace) {
 			if (!isInUse())
 				return null;
-			List<BundleCapability> result = new ArrayList<BundleCapability>();
+			List<BundleCapability> result = new ArrayList<>();
 			GenericDescription[] genericCapabilities = getSelectedGenericCapabilities();
 			for (GenericDescription capabilitiy : genericCapabilities) {
 				if (namespace == null || namespace.equals(capabilitiy.getType()))
@@ -1116,7 +1116,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			if (requiredWires == null)
 				// happens if not in use
 				return null;
-			List<BundleRequirement> requirements = new ArrayList<BundleRequirement>(requiredWires.size());
+			List<BundleRequirement> requirements = new ArrayList<>(requiredWires.size());
 			for (BundleWire wire : requiredWires) {
 				if (!requirements.contains(wire.getRequirement()))
 					requirements.add(wire.getRequirement());
@@ -1152,7 +1152,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			if (!isInUse())
 				return null;
 			BundleDescription[] dependentBundles = getDependents();
-			List<BundleWire> unorderedResult = new ArrayList<BundleWire>();
+			List<BundleWire> unorderedResult = new ArrayList<>();
 			for (BundleDescription dependent : dependentBundles) {
 				List<BundleWire> dependentWires = dependent.getWiring().getRequiredWires(namespace);
 				if (dependentWires != null)
@@ -1161,7 +1161,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 							unorderedResult.add(bundleWire);
 					}
 			}
-			List<BundleWire> orderedResult = new ArrayList<BundleWire>(unorderedResult.size());
+			List<BundleWire> orderedResult = new ArrayList<>(unorderedResult.size());
 			List<BundleCapability> capabilities = getCapabilities(namespace);
 			for (BundleCapability capability : capabilities) {
 				for (Iterator<BundleWire> wires = unorderedResult.iterator(); wires.hasNext();) {
@@ -1185,7 +1185,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			List<BundleWire> result = Collections.<BundleWire> emptyList();
 			Map<String, List<StateWire>> wireMap = getWires();
 			if (namespace == null) {
-				result = new ArrayList<BundleWire>();
+				result = new ArrayList<>();
 				for (List<StateWire> wires : wireMap.values()) {
 					for (StateWire wire : wires) {
 						result.add(new BundleWireImpl(wire));
@@ -1196,7 +1196,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			List<StateWire> wires = wireMap.get(namespace);
 			if (wires == null)
 				return result;
-			result = new ArrayList<BundleWire>(wires.size());
+			result = new ArrayList<>(wires.size());
 			for (StateWire wire : wires) {
 				result.add(new BundleWireImpl(wire));
 			}

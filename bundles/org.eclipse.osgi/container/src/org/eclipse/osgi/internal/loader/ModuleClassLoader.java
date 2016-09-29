@@ -91,7 +91,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 		}
 	}
 
-	private final Map<String, Thread> classNameLocks = new HashMap<String, Thread>(5);
+	private final Map<String, Thread> classNameLocks = new HashMap<>(5);
 	private final Object pkgLock = new Object();
 
 	/**

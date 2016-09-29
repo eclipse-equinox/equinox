@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 IBM Corporation and others.
+ * Copyright (c) 2004, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -140,7 +140,7 @@ public abstract class BaseDescriptionImpl implements BaseDescription {
 			if (namespace.equals(internalName))
 				return attrs;
 			// we are doing an alias, must remove internal Name and add alias
-			attrs = new HashMap<String, Object>(attrs);
+			attrs = new HashMap<>(attrs);
 			Object nameValue = attrs.remove(internalName);
 			if (nameValue != null)
 				attrs.put(namespace, nameValue);

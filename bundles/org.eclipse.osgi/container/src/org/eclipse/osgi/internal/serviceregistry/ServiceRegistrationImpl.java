@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2014 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -93,7 +93,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		this.clazzes = clazzes; /* must be set before calling createProperties. */
 		this.service = service; /* must be set before calling createProperties. */
 		this.serviceid = registry.getNextServiceId(); /* must be set before calling createProperties. */
-		this.contextsUsing = new ArrayList<BundleContextImpl>(10);
+		this.contextsUsing = new ArrayList<>(10);
 
 		synchronized (registrationLock) {
 			this.state = REGISTERED;
@@ -102,7 +102,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 			 * stores the value in a final field without
 			 * otherwise using it.
 			 */
-			this.reference = new ServiceReferenceImpl<S>(this);
+			this.reference = new ServiceReferenceImpl<>(this);
 		}
 	}
 
@@ -524,7 +524,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 			Debug.println("getServiceObjects[" + user.getBundleImpl() + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
-		return new ServiceObjectsImpl<S>(user, this);
+		return new ServiceObjectsImpl<>(user, this);
 	}
 
 	/**
@@ -536,11 +536,11 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	private ServiceUse<S> newServiceUse(BundleContextImpl user) {
 		if (service instanceof ServiceFactory) {
 			if (service instanceof PrototypeServiceFactory) {
-				return new PrototypeServiceFactoryUse<S>(user, this);
+				return new PrototypeServiceFactoryUse<>(user, this);
 			}
-			return new ServiceFactoryUse<S>(user, this);
+			return new ServiceFactoryUse<>(user, this);
 		}
-		return new ServiceUse<S>(user, this);
+		return new ServiceUse<>(user, this);
 	}
 
 	/**

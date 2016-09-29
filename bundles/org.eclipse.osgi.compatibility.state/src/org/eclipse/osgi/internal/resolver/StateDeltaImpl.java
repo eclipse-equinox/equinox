@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,7 @@ final class StateDeltaImpl implements StateDelta {
 
 	private final State state;
 
-	private final Map<BundleDescription, BundleDelta> changes = new HashMap<BundleDescription, BundleDelta>();
+	private final Map<BundleDescription, BundleDelta> changes = new HashMap<>();
 	private ResolverHookException error;
 
 	public StateDeltaImpl(State state) {
@@ -37,7 +37,7 @@ final class StateDeltaImpl implements StateDelta {
 
 	public BundleDelta[] getChanges(int mask, boolean exact) {
 		synchronized (this.changes) {
-			List<BundleDelta> result = new ArrayList<BundleDelta>();
+			List<BundleDelta> result = new ArrayList<>();
 			for (Iterator<BundleDelta> changesIter = changes.values().iterator(); changesIter.hasNext();) {
 				BundleDelta change = changesIter.next();
 				if (mask == change.getType() || (!exact && (change.getType() & mask) != 0))

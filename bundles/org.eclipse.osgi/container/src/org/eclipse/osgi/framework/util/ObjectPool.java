@@ -21,7 +21,7 @@ public class ObjectPool {
 	// TODO need to set these
 	private static final boolean DEBUG_OBJECTPOOL_ADDS = false;
 	private static final boolean DEBUG_OBJECTPOOL_DUPS = false;
-	private static Map<Object, WeakReference<Object>> objectCache = new WeakHashMap<Object, WeakReference<Object>>();
+	private static Map<Object, WeakReference<Object>> objectCache = new WeakHashMap<>();
 
 	@SuppressWarnings("unchecked")
 	public static <T> T intern(T obj) {

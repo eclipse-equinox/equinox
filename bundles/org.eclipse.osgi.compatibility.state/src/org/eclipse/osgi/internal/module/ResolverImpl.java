@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2004, 2016 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -53,7 +53,7 @@ public class ResolverImpl implements Resolver {
 	// Used to check permissions for import/export, provide/require, host/fragment
 	private final PermissionChecker permissionChecker;
 	// Set of bundles that are pending removal
-	private MappedList<Long, BundleDescription> removalPending = new MappedList<Long, BundleDescription>();
+	private MappedList<Long, BundleDescription> removalPending = new MappedList<>();
 	// Indicates whether this resolver has been initialized
 	private boolean initialized = false;
 
@@ -85,15 +85,15 @@ public class ResolverImpl implements Resolver {
 
 	// Initializes the resolver
 	private void initialize() {
-		resolverExports = new VersionHashMap<ResolverExport>(this);
-		resolverBundles = new VersionHashMap<ResolverBundle>(this);
-		resolverGenerics = new HashMap<String, VersionHashMap<GenericCapability>>();
-		unresolvedBundles = new HashSet<ResolverBundle>();
-		bundleMapping = new HashMap<BundleDescription, ResolverBundle>();
+		resolverExports = new VersionHashMap<>(this);
+		resolverBundles = new VersionHashMap<>(this);
+		resolverGenerics = new HashMap<>();
+		unresolvedBundles = new HashSet<>();
+		bundleMapping = new HashMap<>();
 		BundleDescription[] bundles = state.getBundles();
 		groupingChecker = new GroupingChecker();
 
-		ArrayList<ResolverBundle> fragmentBundles = new ArrayList<ResolverBundle>();
+		ArrayList<ResolverBundle> fragmentBundles = new ArrayList<>();
 		// Add each bundle to the resolver's internal state
 		for (int i = 0; i < bundles.length; i++)
 			initResolverBundle(bundles[i], fragmentBundles, false);
@@ -137,7 +137,7 @@ public class ResolverImpl implements Resolver {
 
 	// Re-wire previously resolved bundles
 	private void rewireBundles() {
-		List<ResolverBundle> visited = new ArrayList<ResolverBundle>(bundleMapping.size());
+		List<ResolverBundle> visited = new ArrayList<>(bundleMapping.size());
 		for (ResolverBundle rb : bundleMapping.values()) {
 			if (!rb.getBundleDescription().isResolved())
 				continue;
@@ -350,8 +350,8 @@ public class ResolverImpl implements Resolver {
 		do {
 			timestamp = state.getTimeStamp();
 			List<ResolverBundle> hosts = resolverBundles.get(hostConstraint.getVersionConstraint().getName());
-			candidates = new ArrayList<ResolverBundle>(hosts);
-			List<BundleCapability> hostCapabilities = new ArrayList<BundleCapability>(hosts.size());
+			candidates = new ArrayList<>(hosts);
+			List<BundleCapability> hostCapabilities = new ArrayList<>(hosts.size());
 			// Must remove candidates that do not match before calling hooks.
 			for (Iterator<ResolverBundle> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
 				ResolverBundle host = iCandidates.next();
@@ -365,7 +365,7 @@ public class ResolverImpl implements Resolver {
 			}
 
 			if (hook != null)
-				hook.filterMatches(hostConstraint.getRequirement(), asCapabilities(new ArrayMap<BundleCapability, ResolverBundle>(hostCapabilities, candidates)));
+				hook.filterMatches(hostConstraint.getRequirement(), asCapabilities(new ArrayMap<>(hostCapabilities, candidates)));
 		} while (timestamp != state.getTimeStamp());
 		// we are left with only candidates that satisfy the host constraint
 		for (ResolverBundle host : candidates) {
@@ -443,24 +443,24 @@ public class ResolverImpl implements Resolver {
 			// attempt to resolve all unresolved bundles
 			Collection<ResolverBundle> hookDisabled = Collections.EMPTY_LIST;
 			if (hook != null) {
-				List<ResolverBundle> resolvableBundles = new ArrayList<ResolverBundle>(unresolvedBundles);
-				List<BundleRevision> resolvableRevisions = new ArrayList<BundleRevision>(resolvableBundles.size());
+				List<ResolverBundle> resolvableBundles = new ArrayList<>(unresolvedBundles);
+				List<BundleRevision> resolvableRevisions = new ArrayList<>(resolvableBundles.size());
 				for (ResolverBundle bundle : resolvableBundles)
 					resolvableRevisions.add(bundle.getBundleDescription());
-				ArrayMap<BundleRevision, ResolverBundle> resolvable = new ArrayMap<BundleRevision, ResolverBundle>(resolvableRevisions, resolvableBundles);
+				ArrayMap<BundleRevision, ResolverBundle> resolvable = new ArrayMap<>(resolvableRevisions, resolvableBundles);
 				int size = resolvableBundles.size();
 				hook.filterResolvable(resolvable);
 				if (resolvable.size() < size) {
-					hookDisabled = new ArrayList<ResolverBundle>(unresolvedBundles);
+					hookDisabled = new ArrayList<>(unresolvedBundles);
 					hookDisabled.removeAll(resolvableBundles);
 				}
 			}
 
 			usesCalculationTimeout = false;
 
-			List<ResolverBundle> toResolve = new ArrayList<ResolverBundle>(unresolvedBundles);
+			List<ResolverBundle> toResolve = new ArrayList<>(unresolvedBundles);
 			// first resolve the system bundle to allow osgi.ee capabilities to be resolved
-			List<ResolverBundle> unresolvedSystemBundles = new ArrayList<ResolverBundle>(1);
+			List<ResolverBundle> unresolvedSystemBundles = new ArrayList<>(1);
 			String systemBSN = getSystemBundle();
 			for (Iterator<ResolverBundle> iToResolve = toResolve.iterator(); iToResolve.hasNext();) {
 				ResolverBundle rb = iToResolve.next();
@@ -549,7 +549,7 @@ public class ResolverImpl implements Resolver {
 			return reRefresh; // we don't care about this unless we are in development mode
 		// when in develoment mode we need to reRefresh hosts  of unresolved fragments that add new constraints 
 		// and reRefresh and unresolved bundles that have dependents
-		Set<BundleDescription> additionalRefresh = new HashSet<BundleDescription>();
+		Set<BundleDescription> additionalRefresh = new HashSet<>();
 		ResolverBundle[] unresolved = unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
 		for (int i = 0; i < unresolved.length; i++) {
 			addUnresolvedWithDependents(unresolved[i], additionalRefresh);
@@ -588,7 +588,7 @@ public class ResolverImpl implements Resolver {
 	}
 
 	private Collection<ResolverBundle> resolveOptionalConstraints(ResolverBundle[] bundles) {
-		Collection<ResolverBundle> result = new ArrayList<ResolverBundle>();
+		Collection<ResolverBundle> result = new ArrayList<>();
 		for (int i = 0; i < bundles.length; i++) {
 			if (bundles[i] != null && resolveOptionalConstraints(bundles[i])) {
 				result.add(bundles[i]);
@@ -600,7 +600,7 @@ public class ResolverImpl implements Resolver {
 	// TODO this does not do proper uses constraint verification.
 	private boolean resolveOptionalConstraints(ResolverBundle bundle) {
 		BundleConstraint[] requires = bundle.getRequires();
-		List<ResolverBundle> cycle = new ArrayList<ResolverBundle>();
+		List<ResolverBundle> cycle = new ArrayList<>();
 		boolean resolvedOptional = false;
 		for (int i = 0; i < requires.length; i++)
 			if (requires[i].isOptional() && requires[i].getSelectedSupplier() == null) {
@@ -647,7 +647,7 @@ public class ResolverImpl implements Resolver {
 	private void selectSingletons(ResolverBundle[] bundles) {
 		if (developmentMode)
 			return; // want all singletons to resolve in devmode
-		Map<String, Collection<ResolverBundle>> selectedSingletons = new HashMap<String, Collection<ResolverBundle>>(bundles.length);
+		Map<String, Collection<ResolverBundle>> selectedSingletons = new HashMap<>(bundles.length);
 		for (ResolverBundle bundle : bundles) {
 			if (!bundle.getBundleDescription().isSingleton() || !bundle.isResolvable())
 				continue;
@@ -655,7 +655,7 @@ public class ResolverImpl implements Resolver {
 			Collection<ResolverBundle> selected = selectedSingletons.get(bsn);
 			if (selected != null)
 				continue; // already processed the bsn
-			selected = new ArrayList<ResolverBundle>(1);
+			selected = new ArrayList<>(1);
 			selectedSingletons.put(bsn, selected);
 
 			List<ResolverBundle> sameBSN = resolverBundles.get(bsn);
@@ -677,7 +677,7 @@ public class ResolverImpl implements Resolver {
 				Collection<ResolverBundle> collisions = collisionMap.get(singleton);
 				if (collisions == null || !singleton.isResolvable())
 					continue; // not a singleton or not resolvable
-				Collection<ResolverBundle> pickOneToResolve = new ArrayList<ResolverBundle>();
+				Collection<ResolverBundle> pickOneToResolve = new ArrayList<>();
 				for (ResolverBundle collision : collisions) {
 					if (selected.contains(collision)) {
 						// Must fail since there is already a selected bundle which is a collision of the singleton bundle
@@ -729,12 +729,12 @@ public class ResolverImpl implements Resolver {
 	}
 
 	private Map<ResolverBundle, Collection<ResolverBundle>> getCollisionMap(List<ResolverBundle> sameBSN) {
-		Map<ResolverBundle, Collection<ResolverBundle>> result = new HashMap<ResolverBundle, Collection<ResolverBundle>>();
+		Map<ResolverBundle, Collection<ResolverBundle>> result = new HashMap<>();
 		for (ResolverBundle singleton : sameBSN) {
 			if (!singleton.getBundleDescription().isSingleton() || !singleton.isResolvable())
 				continue; // ignore non-singleton and non-resolvable
-			List<ResolverBundle> collisionCandidates = new ArrayList<ResolverBundle>(sameBSN.size() - 1);
-			List<BundleCapability> capabilities = new ArrayList<BundleCapability>(sameBSN.size() - 1);
+			List<ResolverBundle> collisionCandidates = new ArrayList<>(sameBSN.size() - 1);
+			List<BundleCapability> capabilities = new ArrayList<>(sameBSN.size() - 1);
 			for (ResolverBundle collision : sameBSN) {
 				if (collision == singleton || !collision.getBundleDescription().isSingleton() || !collision.isResolvable())
 					continue; // Ignore the bundle we are checking and non-singletons and non-resolvable
@@ -742,7 +742,7 @@ public class ResolverImpl implements Resolver {
 				capabilities.add(getIdentity(collision));
 			}
 			if (hook != null)
-				hook.filterSingletonCollisions(getIdentity(singleton), asCapabilities(new ArrayMap<BundleCapability, ResolverBundle>(capabilities, collisionCandidates)));
+				hook.filterSingletonCollisions(getIdentity(singleton), asCapabilities(new ArrayMap<>(capabilities, collisionCandidates)));
 			result.put(singleton, collisionCandidates);
 		}
 		return result;
@@ -758,12 +758,12 @@ public class ResolverImpl implements Resolver {
 			// need to sort bundles to keep consistent order for fragment attachment (bug 174930)
 			Arrays.sort(bundles);
 		// First attach all fragments to the matching hosts
-		Collection<String> processedFragments = new HashSet<String>(bundles.length);
+		Collection<String> processedFragments = new HashSet<>(bundles.length);
 		for (int i = 0; i < bundles.length; i++)
 			attachFragment(bundles[i], processedFragments);
 
 		// Lists of cyclic dependencies recording during resolving
-		List<ResolverBundle> cycle = new ArrayList<ResolverBundle>(1); // start small
+		List<ResolverBundle> cycle = new ArrayList<>(1); // start small
 		// Attempt to resolve all unresolved bundles
 		for (int i = 0; i < bundles.length; i++) {
 			if (DEBUG)
@@ -801,7 +801,7 @@ public class ResolverImpl implements Resolver {
 				// We pass false for keepFragmentsAttached because we need to redo the attachments (bug 272561)
 				setBundleUnresolved(bundles[i], false, false);
 				if (exclude == null)
-					exclude = new HashSet<ResolverBundle>(1);
+					exclude = new HashSet<>(1);
 				exclude.add(bundles[i]);
 			}
 		}
@@ -819,7 +819,7 @@ public class ResolverImpl implements Resolver {
 				continue;
 			}
 			if (conflictedBundles == null)
-				conflictedBundles = new HashSet<ResolverBundle>(conflictingConstraints.size());
+				conflictedBundles = new HashSet<>(conflictingConstraints.size());
 			ResolverBundle conflictedBundle;
 			if (conflict.isFromFragment())
 				conflictedBundle = bundleMapping.get(conflict.getVersionConstraint().getBundle());
@@ -842,7 +842,7 @@ public class ResolverImpl implements Resolver {
 	private void reResolveBundles(Set<ResolverBundle> exclude, ResolverBundle[] bundles, Dictionary<Object, Object>[] platformProperties) {
 		if (exclude == null || exclude.size() == 0)
 			return;
-		List<ResolverBundle> remainingUnresolved = new ArrayList<ResolverBundle>();
+		List<ResolverBundle> remainingUnresolved = new ArrayList<>();
 		for (int i = 0; i < bundles.length; i++) {
 			if (!exclude.contains(bundles[i])) {
 				// We pass false for keepFragmentsAttached because we need to redo the attachments (bug 272561)
@@ -859,9 +859,9 @@ public class ResolverImpl implements Resolver {
 			usesMode = secureAction.getProperty("osgi.resolver.usesMode"); //$NON-NLS-1$
 		if ("ignore".equals(usesMode) || developmentMode) //$NON-NLS-1$
 			return null;
-		Set<String> bundleConstraints = new HashSet<String>();
-		Set<String> packageConstraints = new HashSet<String>();
-		Collection<GenericConstraint> multiRequirementWithMultiSuppliers = new ArrayList<GenericConstraint>();
+		Set<String> bundleConstraints = new HashSet<>();
+		Set<String> packageConstraints = new HashSet<>();
+		Collection<GenericConstraint> multiRequirementWithMultiSuppliers = new ArrayList<>();
 		// first try out the initial selections
 		List<ResolverConstraint> initialConflicts = getConflicts(bundles, packageConstraints, bundleConstraints, multiRequirementWithMultiSuppliers);
 		if (initialConflicts == null || "tryFirst".equals(usesMode) || usesCalculationTimeout) { //$NON-NLS-1$
@@ -991,7 +991,7 @@ public class ResolverImpl implements Resolver {
 	private ResolverBundle[] getConflictedBundles(List<ResolverConstraint> bestConflicts) {
 		if (bestConflicts == null)
 			return new ResolverBundle[0];
-		List<ResolverBundle> conflictedBundles = new ArrayList<ResolverBundle>(bestConflicts.size());
+		List<ResolverBundle> conflictedBundles = new ArrayList<>(bestConflicts.size());
 		for (ResolverConstraint constraint : bestConflicts)
 			if (!conflictedBundles.contains(constraint.getBundle()))
 				conflictedBundles.add(constraint.getBundle());
@@ -1044,7 +1044,7 @@ public class ResolverImpl implements Resolver {
 					printConflict(conflict, requires[i], bundle);
 
 				if (conflicts == null)
-					conflicts = new ArrayList<ResolverConstraint>(1);
+					conflicts = new ArrayList<>(1);
 				conflicts.add(requires[i]);
 			}
 		}
@@ -1059,7 +1059,7 @@ public class ResolverImpl implements Resolver {
 					printConflict(conflict, imports[i], bundle);
 
 				if (conflicts == null)
-					conflicts = new ArrayList<ResolverConstraint>(1);
+					conflicts = new ArrayList<>(1);
 				conflicts.add(imports[i]);
 			}
 		}
@@ -1081,7 +1081,7 @@ public class ResolverImpl implements Resolver {
 				PackageRoots[][] conflict = groupingChecker.isConsistent(bundle, (GenericCapability) supplier);
 				if (conflict != null) {
 					if (capabilityConflicts == null)
-						capabilityConflicts = new ArrayList<PackageRoots[][]>(1);
+						capabilityConflicts = new ArrayList<>(1);
 					capabilityConflicts.add(conflict);
 				}
 			}
@@ -1092,7 +1092,7 @@ public class ResolverImpl implements Resolver {
 				if (capabilityConflicts.size() == suppliers.length) {
 					// every capability conflicted
 					if (conflicts == null)
-						conflicts = new ArrayList<ResolverConstraint>(1);
+						conflicts = new ArrayList<>(1);
 					conflicts.add(capabilityRequirement);
 				}
 			}
@@ -1136,9 +1136,9 @@ public class ResolverImpl implements Resolver {
 	// get a list of resolver constraints that have multiple suppliers
 	// a 2 demensional array is used each entry is a list of identical constraints that have identical suppliers.
 	private ResolverConstraint[][] getMultipleSuppliers(ResolverBundle[] bundles, Set<String> packageConstraints, Set<String> bundleConstraints) {
-		List<ResolverImport> multipleImportSupplierList = new ArrayList<ResolverImport>(1);
-		List<BundleConstraint> multipleRequireSupplierList = new ArrayList<BundleConstraint>(1);
-		List<GenericConstraint> multipleGenericSupplierList = new ArrayList<GenericConstraint>(1);
+		List<ResolverImport> multipleImportSupplierList = new ArrayList<>(1);
+		List<BundleConstraint> multipleRequireSupplierList = new ArrayList<>(1);
+		List<GenericConstraint> multipleGenericSupplierList = new ArrayList<>(1);
 		for (ResolverBundle bundle : bundles) {
 			BundleConstraint[] requires = bundle.getRequires();
 			for (BundleConstraint require : requires)
@@ -1176,17 +1176,17 @@ public class ResolverImpl implements Resolver {
 				if (genericRequire.getNumPossibleSuppliers() > 1 && !genericRequire.isMultiple())
 					multipleGenericSupplierList.add(genericRequire);
 		}
-		List<ResolverConstraint[]> results = new ArrayList<ResolverConstraint[]>();
+		List<ResolverConstraint[]> results = new ArrayList<>();
 		if (multipleImportSupplierList.size() + multipleRequireSupplierList.size() + multipleGenericSupplierList.size() > usesMultipleSuppliersLimit) {
 			// we have hit a max on the multiple suppliers in the lists without merging.
 			// first merge the identical constraints that have identical suppliers
-			Map<String, List<List<ResolverConstraint>>> multipleImportSupplierMaps = new HashMap<String, List<List<ResolverConstraint>>>();
+			Map<String, List<List<ResolverConstraint>>> multipleImportSupplierMaps = new HashMap<>();
 			for (ResolverImport importPkg : multipleImportSupplierList)
 				addMutipleSupplierConstraint(multipleImportSupplierMaps, importPkg, importPkg.getName());
-			Map<String, List<List<ResolverConstraint>>> multipleRequireSupplierMaps = new HashMap<String, List<List<ResolverConstraint>>>();
+			Map<String, List<List<ResolverConstraint>>> multipleRequireSupplierMaps = new HashMap<>();
 			for (BundleConstraint requireBundle : multipleRequireSupplierList)
 				addMutipleSupplierConstraint(multipleRequireSupplierMaps, requireBundle, requireBundle.getName());
-			Map<String, List<List<ResolverConstraint>>> multipleGenericSupplierMaps = new HashMap<String, List<List<ResolverConstraint>>>();
+			Map<String, List<List<ResolverConstraint>>> multipleGenericSupplierMaps = new HashMap<>();
 			for (GenericConstraint genericRequire : multipleGenericSupplierList)
 				addMutipleSupplierConstraint(multipleGenericSupplierMaps, genericRequire, genericRequire.getNameSpace());
 			addMergedSuppliers(results, multipleImportSupplierMaps);
@@ -1196,7 +1196,7 @@ public class ResolverImpl implements Resolver {
 			if (results.size() > usesMultipleSuppliersLimit && packageConstraints != null && bundleConstraints != null) {
 				// we still have too big of a list; filter out constraints that are not in conflict
 				List<ResolverConstraint[]> tooBig = results;
-				results = new ArrayList<ResolverConstraint[]>();
+				results = new ArrayList<>();
 				for (ResolverConstraint[] constraints : tooBig) {
 					ResolverConstraint constraint = constraints.length > 0 ? constraints[0] : null;
 					if (constraint instanceof ResolverImport) {
@@ -1240,8 +1240,8 @@ public class ResolverImpl implements Resolver {
 	private void addMutipleSupplierConstraint(Map<String, List<List<ResolverConstraint>>> constraints, ResolverConstraint constraint, String key) {
 		List<List<ResolverConstraint>> mergedConstraintLists = constraints.get(key);
 		if (mergedConstraintLists == null) {
-			mergedConstraintLists = new ArrayList<List<ResolverConstraint>>(0);
-			List<ResolverConstraint> constraintList = new ArrayList<ResolverConstraint>(1);
+			mergedConstraintLists = new ArrayList<>(0);
+			List<ResolverConstraint> constraintList = new ArrayList<>(1);
 			constraintList.add(constraint);
 			mergedConstraintLists.add(constraintList);
 			constraints.put(key, mergedConstraintLists);
@@ -1259,7 +1259,7 @@ public class ResolverImpl implements Resolver {
 			constraintList.add(constraint);
 			return;
 		}
-		List<ResolverConstraint> constraintList = new ArrayList<ResolverConstraint>(1);
+		List<ResolverConstraint> constraintList = new ArrayList<>(1);
 		constraintList.add(constraint);
 		mergedConstraintLists.add(constraintList);
 	}
@@ -1299,7 +1299,7 @@ public class ResolverImpl implements Resolver {
 				ResolverBundle cycleBundle = cycle.get(i);
 				cycleBundle.clearWires();
 			}
-			List<ResolverBundle> innerCycle = new ArrayList<ResolverBundle>(cycle.size());
+			List<ResolverBundle> innerCycle = new ArrayList<>(cycle.size());
 			for (int i = 0; i < cycle.size(); i++)
 				resolveBundle(cycle.get(i), innerCycle);
 			checkCycle(innerCycle);
@@ -1494,8 +1494,8 @@ public class ResolverImpl implements Resolver {
 				capabilities = Collections.EMPTY_LIST;
 			else
 				capabilities = name == null || name.indexOf('*') >= 0 ? namespace.getAllValues() : namespace.get(name);
-			candidates = new ArrayList<GenericCapability>(capabilities);
-			List<BundleCapability> genCapabilities = new ArrayList<BundleCapability>(candidates.size());
+			candidates = new ArrayList<>(capabilities);
+			List<BundleCapability> genCapabilities = new ArrayList<>(candidates.size());
 			// Must remove candidates that do not match before calling hooks.
 			for (Iterator<GenericCapability> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
 				GenericCapability capability = iCandidates.next();
@@ -1506,7 +1506,7 @@ public class ResolverImpl implements Resolver {
 				}
 			}
 			if (hook != null)
-				hook.filterMatches(constraint.getRequirement(), asCapabilities(new ArrayMap<BundleCapability, GenericCapability>(genCapabilities, candidates)));
+				hook.filterMatches(constraint.getRequirement(), asCapabilities(new ArrayMap<>(genCapabilities, candidates)));
 		} while (timestamp != state.getTimeStamp());
 		boolean result = false;
 		// We are left with only capabilities that satisfy the constraint.
@@ -1576,8 +1576,8 @@ public class ResolverImpl implements Resolver {
 		do {
 			timestamp = state.getTimeStamp();
 			List<ResolverBundle> bundles = resolverBundles.get(req.getVersionConstraint().getName());
-			candidates = new ArrayList<ResolverBundle>(bundles);
-			List<BundleCapability> capabilities = new ArrayList<BundleCapability>(candidates.size());
+			candidates = new ArrayList<>(bundles);
+			List<BundleCapability> capabilities = new ArrayList<>(candidates.size());
 			// Must remove candidates that do not match before calling hooks.
 			for (Iterator<ResolverBundle> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
 				ResolverBundle bundle = iCandidates.next();
@@ -1588,7 +1588,7 @@ public class ResolverImpl implements Resolver {
 				}
 			}
 			if (hook != null)
-				hook.filterMatches(req.getRequirement(), asCapabilities(new ArrayMap<BundleCapability, ResolverBundle>(capabilities, candidates)));
+				hook.filterMatches(req.getRequirement(), asCapabilities(new ArrayMap<>(capabilities, candidates)));
 		} while (timestamp != state.getTimeStamp());
 		// We are left with only capabilities that satisfy the require bundle.
 		boolean result = false;
@@ -1648,8 +1648,8 @@ public class ResolverImpl implements Resolver {
 		do {
 			timestamp = state.getTimeStamp();
 			List<ResolverExport> exports = resolverExports.get(imp.getName());
-			candidates = new ArrayList<ResolverExport>(exports);
-			List<BundleCapability> capabilities = new ArrayList<BundleCapability>(candidates.size());
+			candidates = new ArrayList<>(exports);
+			List<BundleCapability> capabilities = new ArrayList<>(candidates.size());
 			// Must remove candidates that do not match before calling hooks.
 			for (Iterator<ResolverExport> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
 				ResolverExport export = iCandidates.next();
@@ -1660,7 +1660,7 @@ public class ResolverImpl implements Resolver {
 				}
 			}
 			if (hook != null)
-				hook.filterMatches(imp.getRequirement(), asCapabilities(new ArrayMap<BundleCapability, ResolverExport>(capabilities, candidates)));
+				hook.filterMatches(imp.getRequirement(), asCapabilities(new ArrayMap<>(capabilities, candidates)));
 		} while (timestamp != state.getTimeStamp());
 		// We are left with only capabilities that satisfy the import.
 		for (ResolverExport export : candidates) {
@@ -1827,11 +1827,11 @@ public class ResolverImpl implements Resolver {
 			stateResolveConstraints(rb);
 
 		// Build up the state wires
-		Map<String, List<StateWire>> stateWires = new HashMap<String, List<StateWire>>();
+		Map<String, List<StateWire>> stateWires = new HashMap<>();
 
 		// Gather selected exports
 		ResolverExport[] exports = rb.getSelectedExports();
-		List<ExportPackageDescription> selectedExports = new ArrayList<ExportPackageDescription>(exports.length);
+		List<ExportPackageDescription> selectedExports = new ArrayList<>(exports.length);
 		for (int i = 0; i < exports.length; i++) {
 			if (permissionChecker.checkPackagePermission(exports[i].getExportPackageDescription()))
 				selectedExports.add(exports[i].getExportPackageDescription());
@@ -1840,7 +1840,7 @@ public class ResolverImpl implements Resolver {
 
 		// Gather substitute exports
 		ResolverExport[] substituted = rb.getSubstitutedExports();
-		List<ExportPackageDescription> substitutedExports = new ArrayList<ExportPackageDescription>(substituted.length);
+		List<ExportPackageDescription> substitutedExports = new ArrayList<>(substituted.length);
 		for (int i = 0; i < substituted.length; i++) {
 			substitutedExports.add(substituted[i].getExportPackageDescription());
 		}
@@ -1851,8 +1851,8 @@ public class ResolverImpl implements Resolver {
 
 		// Gather bundles that have been wired to
 		BundleConstraint[] requires = rb.getRequires();
-		List<BundleDescription> bundlesWiredTo = new ArrayList<BundleDescription>(requires.length);
-		List<StateWire> requireWires = new ArrayList<StateWire>(requires.length);
+		List<BundleDescription> bundlesWiredTo = new ArrayList<>(requires.length);
+		List<StateWire> requireWires = new ArrayList<>(requires.length);
 		for (int i = 0; i < requires.length; i++)
 			if (requires[i].getSelectedSupplier() != null) {
 				BundleDescription supplier = (BundleDescription) requires[i].getSelectedSupplier().getBaseDescription();
@@ -1865,14 +1865,14 @@ public class ResolverImpl implements Resolver {
 			stateWires.put(BundleRevision.BUNDLE_NAMESPACE, requireWires);
 
 		GenericCapability[] capabilities = rb.getGenericCapabilities();
-		List<GenericDescription> selectedCapabilities = new ArrayList<GenericDescription>(capabilities.length);
+		List<GenericDescription> selectedCapabilities = new ArrayList<>(capabilities.length);
 		for (GenericCapability capability : capabilities)
 			if (capability.isEffective() && permissionChecker.checkCapabilityPermission(capability.getGenericDescription()))
 				selectedCapabilities.add(capability.getGenericDescription());
 		GenericDescription[] selectedCapabilitiesArray = selectedCapabilities.toArray(new GenericDescription[selectedCapabilities.size()]);
 
 		GenericConstraint[] genericRequires = rb.getGenericRequires();
-		List<GenericDescription> resolvedGenericRequires = new ArrayList<GenericDescription>(genericRequires.length);
+		List<GenericDescription> resolvedGenericRequires = new ArrayList<>(genericRequires.length);
 		for (GenericConstraint genericConstraint : genericRequires) {
 			VersionSupplier[] matching = genericConstraint.getMatchingCapabilities();
 			if (matching != null)
@@ -1882,7 +1882,7 @@ public class ResolverImpl implements Resolver {
 					StateWire genericWire = newStateWire(rb.getBundleDescription(), genericConstraint.getVersionConstraint(), supplier.getSupplier(), supplier);
 					List<StateWire> genericWires = stateWires.get(genericConstraint.getNameSpace());
 					if (genericWires == null) {
-						genericWires = new ArrayList<StateWire>();
+						genericWires = new ArrayList<>();
 						stateWires.put(genericConstraint.getNameSpace(), genericWires);
 					}
 					genericWires.add(genericWire);
@@ -1895,7 +1895,7 @@ public class ResolverImpl implements Resolver {
 			VersionSupplier[] matchingBundles = rb.getHost().getPossibleSuppliers();
 			if (matchingBundles != null && matchingBundles.length > 0) {
 				hostBundles = new BundleDescription[matchingBundles.length];
-				List<StateWire> hostWires = new ArrayList<StateWire>(matchingBundles.length);
+				List<StateWire> hostWires = new ArrayList<>(matchingBundles.length);
 				stateWires.put(BundleRevision.HOST_NAMESPACE, hostWires);
 				for (int i = 0; i < matchingBundles.length; i++) {
 					hostBundles[i] = matchingBundles[i].getBundleDescription();
@@ -1937,8 +1937,8 @@ public class ResolverImpl implements Resolver {
 	private static ExportPackageDescription[] getExportsWiredTo(ResolverBundle rb, Map<String, List<StateWire>> stateWires) {
 		// Gather exports that have been wired to
 		ResolverImport[] imports = rb.getImportPackages();
-		List<ExportPackageDescription> exportsWiredTo = new ArrayList<ExportPackageDescription>(imports.length);
-		List<StateWire> importWires = new ArrayList<StateWire>(imports.length);
+		List<ExportPackageDescription> exportsWiredTo = new ArrayList<>(imports.length);
+		List<StateWire> importWires = new ArrayList<>(imports.length);
 		for (int i = 0; i < imports.length; i++)
 			if (imports[i].getSelectedSupplier() != null) {
 				ExportPackageDescription supplier = (ExportPackageDescription) imports[i].getSelectedSupplier().getBaseDescription();
@@ -2003,7 +2003,7 @@ public class ResolverImpl implements Resolver {
 		Map<String, List<StateWire>> wires = ((BundleDescriptionImpl) importingBundle).getWires();
 		List<StateWire> imports = wires.get(BundleRevision.PACKAGE_NAMESPACE);
 		if (imports == null) {
-			imports = new ArrayList<StateWire>();
+			imports = new ArrayList<>();
 			wires.put(BundleRevision.PACKAGE_NAMESPACE, imports);
 		}
 		imports.add(newStateWire(importingBundle, requirement, capabilityHost, capability));
@@ -2294,7 +2294,7 @@ public class ResolverImpl implements Resolver {
 			String type = capability.getGenericDescription().getType();
 			VersionHashMap<GenericCapability> namespace = resolverGenerics.get(type);
 			if (namespace == null) {
-				namespace = new VersionHashMap<GenericCapability>(this);
+				namespace = new VersionHashMap<>(this);
 				resolverGenerics.put(type, namespace);
 			}
 			namespace.put(capability.getName(), capability);

@@ -127,7 +127,7 @@ public class PluginConverterImpl implements PluginConverter {
 		pluginInfo = null;
 		pluginManifestLocation = null;
 		pluginZip = null;
-		generatedManifest = new Hashtable<String, String>(10);
+		generatedManifest = new Hashtable<>(10);
 		manifestType = MANIFEST_TYPE_UNKNOWN;
 		target = null;
 		devProperties = null;
@@ -165,7 +165,7 @@ public class PluginConverterImpl implements PluginConverter {
 	private Set<String> filterExport(Set<String> exportToFilter, Collection<String> filter) {
 		if (filter == null || filter.contains("*")) //$NON-NLS-1$
 			return exportToFilter;
-		Set<String> filteredExport = new HashSet<String>(exportToFilter.size());
+		Set<String> filteredExport = new HashSet<>(exportToFilter.size());
 		for (String anExport : exportToFilter) {
 			for (String aFilter : filter) {
 				int dotStar = aFilter.indexOf(".*"); //$NON-NLS-1$
@@ -182,7 +182,7 @@ public class PluginConverterImpl implements PluginConverter {
 
 	private List<String> findOSJars(File pluginRoot, String path, boolean filter) {
 		path = path.substring(4);
-		List<String> found = new ArrayList<String>(0);
+		List<String> found = new ArrayList<>(0);
 		for (int i = 0; i < OS_LIST.length; i++) {
 			//look for os/osname/path
 			String searchedPath = "os/" + OS_LIST[i] + "/" + path; //$NON-NLS-1$ //$NON-NLS-2$
@@ -246,7 +246,7 @@ public class PluginConverterImpl implements PluginConverter {
 
 	private List<String> findWSJars(File pluginRoot, String path, boolean filter) {
 		path = path.substring(4);
-		List<String> found = new ArrayList<String>(0);
+		List<String> found = new ArrayList<>(0);
 		for (int i = 0; i < WS_LIST.length; i++) {
 			String searchedPath = "ws/" + WS_LIST[i] + path; //$NON-NLS-1$
 			if (new File(pluginRoot, searchedPath).exists()) {
@@ -275,7 +275,7 @@ public class PluginConverterImpl implements PluginConverter {
 	private <K, V> Map<K, V> convertDictionaryToMap(Dictionary<K, V> dictionary) {
 		if (dictionary == null)
 			return Collections.emptyMap();
-		Map<K, V> result = new HashMap<K, V>(dictionary.size());
+		Map<K, V> result = new HashMap<>(dictionary.size());
 		Enumeration<K> keys = dictionary.keys();
 		while (keys.hasMoreElements()) {
 			K key = keys.nextElement();
@@ -295,7 +295,7 @@ public class PluginConverterImpl implements PluginConverter {
 				throw new PluginConversionException(message);
 			}
 			// replaces any eventual existing file
-			manifestToWrite = new Hashtable<String, String>(convertDictionaryToMap(manifestToWrite));
+			manifestToWrite = new Hashtable<>(convertDictionaryToMap(manifestToWrite));
 			// MANIFEST.MF files must be written using UTF-8
 			out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(generationLocation), UTF_8));
 			writeEntry(MANIFEST_VERSION, manifestToWrite.remove(MANIFEST_VERSION));
@@ -473,7 +473,7 @@ public class PluginConverterImpl implements PluginConverter {
 		if (devProperties != null || configuration.inDevelopmentMode()) {
 			String[] devClassPath = configuration.getDevClassPath(pluginInfo.getUniqueId(), devProperties);
 			// collect export clauses
-			List<String> allExportClauses = new ArrayList<String>(libs.size());
+			List<String> allExportClauses = new ArrayList<>(libs.size());
 			Set<Map.Entry<String, List<String>>> libEntries = libs.entrySet();
 			for (Iterator<Map.Entry<String, List<String>>> iter = libEntries.iterator(); iter.hasNext();) {
 				Map.Entry<String, List<String>> element = iter.next();
@@ -491,7 +491,7 @@ public class PluginConverterImpl implements PluginConverter {
 			}
 		}
 
-		Set<String> result = new TreeSet<String>();
+		Set<String> result = new TreeSet<>();
 		Set<Map.Entry<String, List<String>>> libEntries = libs.entrySet();
 		for (Iterator<Map.Entry<String, List<String>>> iter = libEntries.iterator(); iter.hasNext();) {
 			Map.Entry<String, List<String>> element = iter.next();
@@ -515,7 +515,7 @@ public class PluginConverterImpl implements PluginConverter {
 					exports = filterExport(getExportsFromDir(libraryLocation), filter);
 			} else {
 				List<String> expandedLibs = getLibrariesExpandingVariables(element.getKey(), false);
-				exports = new HashSet<String>();
+				exports = new HashSet<>();
 				for (Iterator<String> iterator = expandedLibs.iterator(); iterator.hasNext();) {
 					String libName = iterator.next();
 					File libFile = new File(pluginManifestLocation, libName);
@@ -537,7 +537,7 @@ public class PluginConverterImpl implements PluginConverter {
 	private Set<String> getExportsFromDir(File location, String packageName) {
 		String prefix = (packageName.length() > 0) ? (packageName + '.') : ""; //$NON-NLS-1$
 		String[] files = location.list();
-		Set<String> exportedPaths = new HashSet<String>();
+		Set<String> exportedPaths = new HashSet<>();
 		boolean containsFile = false;
 		if (files != null)
 			for (int i = 0; i < files.length; i++) {
@@ -560,7 +560,7 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 
 	private Set<String> getExportsFromJAR(File jarFile) {
-		Set<String> names = new HashSet<String>();
+		Set<String> names = new HashSet<>();
 		ZipFile file = null;
 		try {
 			file = new ZipFile(jarFile);
@@ -597,7 +597,7 @@ public class PluginConverterImpl implements PluginConverter {
 	private List<String> getLibrariesExpandingVariables(String libraryPath, boolean filter) {
 		String var = hasPrefix(libraryPath);
 		if (var == null) {
-			List<String> returnValue = new ArrayList<String>(1);
+			List<String> returnValue = new ArrayList<>(1);
 			returnValue.add(libraryPath);
 			return returnValue;
 		}
@@ -607,7 +607,7 @@ public class PluginConverterImpl implements PluginConverter {
 		if (var.equals("os")) { //$NON-NLS-1$
 			return findOSJars(pluginManifestLocation, libraryPath, filter);
 		}
-		return new ArrayList<String>(0);
+		return new ArrayList<>(0);
 	}
 
 	//return a String representing the string found between the $s

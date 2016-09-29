@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2013, 2016 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -82,7 +82,7 @@ class PlatformBundleListener implements SynchronousBundleListener, FrameworkList
 			if (lastResolveStamp != database.getRevisionsTimestamp()) {
 				Collection<ModuleRevision> containerRemovalPending = container.getRemovalPending();
 				BundleDescription[] stateRemovalPendingDescs = systemState.getRemovalPending();
-				Collection<BundleDescription> stateRemovalPending = new ArrayList<BundleDescription>(stateRemovalPendingDescs.length);
+				Collection<BundleDescription> stateRemovalPending = new ArrayList<>(stateRemovalPendingDescs.length);
 				for (BundleDescription description : stateRemovalPendingDescs) {
 					if (!containerRemovalPending.contains(description.getUserObject())) {
 						stateRemovalPending.add(description);
@@ -150,7 +150,7 @@ class PlatformBundleListener implements SynchronousBundleListener, FrameworkList
 					candidates.clear();
 					return;
 				}
-				Collection<ModuleWiring> wirings = new ArrayList<ModuleWiring>(1);
+				Collection<ModuleWiring> wirings = new ArrayList<>(1);
 				if ((reqRevision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 					if (ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE.equals(namespace) || HostNamespace.HOST_NAMESPACE.equals(namespace)) {
 						wirings.add(reqWiring);

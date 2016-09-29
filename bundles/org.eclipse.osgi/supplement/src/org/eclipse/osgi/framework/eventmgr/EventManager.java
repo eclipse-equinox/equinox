@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -194,7 +194,7 @@ public class EventManager {
 			/* if there is no thread, then create a new one */
 			thread = AccessController.doPrivileged(new PrivilegedAction<EventThread<K, V, E>>() {
 				public EventThread<K, V, E> run() {
-					EventThread<K, V, E> t = new EventThread<K, V, E>(threadGroup, threadName);
+					EventThread<K, V, E> t = new EventThread<>(threadGroup, threadName);
 					return t;
 				}
 			});
@@ -371,7 +371,7 @@ public class EventManager {
 				throw new IllegalStateException();
 			}
 
-			Queued<K, V, E> item = new Queued<K, V, E>(l, d, a, o);
+			Queued<K, V, E> item = new Queued<>(l, d, a, o);
 
 			if (head == null) /* if the queue was empty */
 			{

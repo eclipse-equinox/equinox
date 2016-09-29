@@ -103,7 +103,7 @@ public final class BundleInfo {
 				if (rawHeaders == null) {
 					BundleEntry manifest = getBundleFile().getEntry(OSGI_BUNDLE_MANIFEST);
 					if (manifest == null) {
-						rawHeaders = new Headers<String, String>(0);
+						rawHeaders = new Headers<>(0);
 						rawHeaders.setReadOnly();
 					} else {
 						try {
@@ -393,7 +393,7 @@ public final class BundleInfo {
 	Generation createGeneration() throws BundleException {
 		synchronized (this.infoMonitor) {
 			if (generationLocks == null) {
-				generationLocks = new LockSet<Long>();
+				generationLocks = new LockSet<>();
 			}
 			boolean lockedID;
 			try {

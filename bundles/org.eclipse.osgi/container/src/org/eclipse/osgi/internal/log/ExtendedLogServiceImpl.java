@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2016 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -18,7 +18,7 @@ public class ExtendedLogServiceImpl implements ExtendedLogService, LogService {
 
 	private final ExtendedLogServiceFactory factory;
 	private volatile Bundle bundle;
-	private final HashMap<String, Logger> loggerCache = new HashMap<String, Logger>();
+	private final HashMap<String, Logger> loggerCache = new HashMap<>();
 
 	public ExtendedLogServiceImpl(ExtendedLogServiceFactory factory, Bundle bundle) {
 		this.factory = factory;

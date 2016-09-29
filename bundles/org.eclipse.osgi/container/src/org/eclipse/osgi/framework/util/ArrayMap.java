@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,8 +24,8 @@ public class ArrayMap<K, V> implements Collection<K> {
 	final List<V> values;
 
 	public ArrayMap(int initialCapacity) {
-		keys = new ArrayList<K>(initialCapacity);
-		values = new ArrayList<V>(initialCapacity);
+		keys = new ArrayList<>(initialCapacity);
+		values = new ArrayList<>(initialCapacity);
 	}
 
 	/**
@@ -73,11 +73,11 @@ public class ArrayMap<K, V> implements Collection<K> {
 	}
 
 	public List<K> getKeys() {
-		return new ArrayList<K>(keys);
+		return new ArrayList<>(keys);
 	}
 
 	public List<V> getValues() {
-		return new ArrayList<V>(values);
+		return new ArrayList<>(values);
 	}
 
 	public int size() {
@@ -159,9 +159,9 @@ public class ArrayMap<K, V> implements Collection<K> {
 	}
 
 	public void sort(Comparator<K> comparator) {
-		List<K> sortedKeys = new ArrayList<K>(keys);
+		List<K> sortedKeys = new ArrayList<>(keys);
 		Collections.sort(sortedKeys, comparator);
-		List<V> sortedValues = new ArrayList<V>(sortedKeys.size());
+		List<V> sortedValues = new ArrayList<>(sortedKeys.size());
 		for (K key : sortedKeys) {
 			sortedValues.add(getByIdentity(key));
 		}

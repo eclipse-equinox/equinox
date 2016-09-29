@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2012 IBM Corporation and others.
+ * Copyright (c) 2008, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,7 +50,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		if (conditionInfos == null || conditionInfos.length == 0)
 			bundleConditions = null;
 		else
-			bundleConditions = new HashMap<BundlePermissions, Condition[]>();
+			bundleConditions = new HashMap<>();
 	}
 
 	static SecurityRowSnapShot createSecurityRowSnapShot(String encoded) {
@@ -103,8 +103,8 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		if (decision.length() == 0 || (!ConditionalPermissionInfo.DENY.equalsIgnoreCase(decision) && !ConditionalPermissionInfo.ALLOW.equalsIgnoreCase(decision)))
 			throw new IllegalArgumentException(encoded);
 
-		List<ConditionInfo> condList = new ArrayList<ConditionInfo>();
-		List<PermissionInfo> permList = new ArrayList<PermissionInfo>();
+		List<ConditionInfo> condList = new ArrayList<>();
+		List<PermissionInfo> permList = new ArrayList<>();
 		int pos = start + 1;
 		while (pos < end) {
 			while (pos < end && chars[pos] != '[' && chars[pos] != '(')
@@ -327,7 +327,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 					return postponedPermCheck; // no need to postpone the condition if the row abstains
 				// this row will deny or allow the permission; must queue the postponed condition
 				if (postponedConditions == null)
-					postponedConditions = new ArrayList<Condition>(1);
+					postponedConditions = new ArrayList<>(1);
 				postponedConditions.add(condition);
 			}
 			empty &= conditions[i] == null;

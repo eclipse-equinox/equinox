@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2012 IBM Corporation and others.
+ * Copyright (c) 2008, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,7 @@ public class SecurityTableUpdate implements ConditionalPermissionUpdate {
 		this.securityAdmin = securityAdmin;
 		this.timeStamp = timeStamp;
 		// must make a snap shot of the security rows.
-		this.rows = new ArrayList<ConditionalPermissionInfo>(rows.length);
+		this.rows = new ArrayList<>(rows.length);
 		for (int i = 0; i < rows.length; i++)
 			// Use SecurityRowSnapShot to prevent modification before commit 
 			// and to throw exceptions from delete

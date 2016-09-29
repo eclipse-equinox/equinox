@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,7 @@ public final class ModuleRevisions implements BundleRevisions {
 	private final Module module;
 	private final ModuleContainer container;
 	/* @GuardedBy("monitor") */
-	private final List<ModuleRevision> revisions = new ArrayList<ModuleRevision>(1);
+	private final List<ModuleRevision> revisions = new ArrayList<>(1);
 	/* @GuardedBy("monitor") */
 	private boolean uninstalled = false;
 	/* @GuardedBy("monitor") */
@@ -68,7 +68,7 @@ public final class ModuleRevisions implements BundleRevisions {
 	 */
 	public List<ModuleRevision> getModuleRevisions() {
 		synchronized (monitor) {
-			return new ArrayList<ModuleRevision>(revisions);
+			return new ArrayList<>(revisions);
 		}
 	}
 

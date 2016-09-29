@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,8 +29,8 @@ public class DTOBuilder {
 	private final Map<BundleWiring, BundleWiringDTO.NodeDTO> wiringnodes;
 
 	private DTOBuilder() {
-		resources = new IdentityHashMap<BundleRevision, BundleRevisionDTO>();
-		wiringnodes = new IdentityHashMap<BundleWiring, BundleWiringDTO.NodeDTO>();
+		resources = new IdentityHashMap<>();
+		wiringnodes = new IdentityHashMap<>();
 	}
 
 	public static BundleDTO newBundleDTO(Bundle bundle) {
@@ -209,8 +209,8 @@ public class DTOBuilder {
 		BundleWiringDTO dto = new BundleWiringDTO();
 		dto.bundle = wiring.getBundle().getBundleId();
 		dto.root = getWiringId(wiring);
-		dto.nodes = new HashSet<BundleWiringDTO.NodeDTO>(wiringnodes.values());
-		dto.resources = new HashSet<BundleRevisionDTO>(resources.values());
+		dto.nodes = new HashSet<>(wiringnodes.values());
+		dto.resources = new HashSet<>(resources.values());
 		return dto;
 	}
 
@@ -274,7 +274,7 @@ public class DTOBuilder {
 		}
 		List<BundleRevision> revs = revisions.getRevisions();
 		final int size = revs.size();
-		List<BundleWiringDTO> dtos = new ArrayList<BundleWiringDTO>(size);
+		List<BundleWiringDTO> dtos = new ArrayList<>(size);
 		for (int i = 0; i < size; i++) {
 			BundleWiring wiring = revs.get(i).getWiring();
 			if (wiring != null) {
@@ -367,7 +367,7 @@ public class DTOBuilder {
 			return null;
 		}
 		final int length = references.length;
-		List<ServiceReferenceDTO> refDTOs = new ArrayList<ServiceReferenceDTO>(length);
+		List<ServiceReferenceDTO> refDTOs = new ArrayList<>(length);
 		for (int i = 0; i < length; i++) {
 			ServiceReferenceDTO dto = getServiceReferenceDTO(references[i]);
 			if (dto != null) {
@@ -378,12 +378,7 @@ public class DTOBuilder {
 	}
 
 	private static Object mapValue(Object v) {
-		if ((v == null)
-				|| v instanceof Number
-				|| v instanceof Boolean
-				|| v instanceof Character
-				|| v instanceof String
-				|| v instanceof DTO) {
+		if ((v == null) || v instanceof Number || v instanceof Boolean || v instanceof Character || v instanceof String || v instanceof DTO) {
 			return v;
 		}
 		if (v instanceof Map) {
@@ -423,14 +418,7 @@ public class DTOBuilder {
 	}
 
 	private static Class<?> mapComponentType(Class<?> componentType) {
-		if (componentType.isPrimitive()
-				|| componentType.isArray()
-				|| Object.class.equals(componentType)
-				|| Number.class.isAssignableFrom(componentType)
-				|| Boolean.class.isAssignableFrom(componentType)
-				|| Character.class.isAssignableFrom(componentType)
-				|| String.class.isAssignableFrom(componentType)
-				|| DTO.class.isAssignableFrom(componentType)) {
+		if (componentType.isPrimitive() || componentType.isArray() || Object.class.equals(componentType) || Number.class.isAssignableFrom(componentType) || Boolean.class.isAssignableFrom(componentType) || Character.class.isAssignableFrom(componentType) || String.class.isAssignableFrom(componentType) || DTO.class.isAssignableFrom(componentType)) {
 			return componentType;
 		}
 		if (Map.class.isAssignableFrom(componentType)) {
@@ -446,22 +434,22 @@ public class DTOBuilder {
 	}
 
 	private static <E> List<E> newList(int size) {
-		return new ArrayList<E>(size);
+		return new ArrayList<>(size);
 	}
 
 	private static <E> Set<E> newSet(int size) {
-		return new HashSet<E>(size);
+		return new HashSet<>(size);
 	}
 
 	private static <K, V> Map<K, V> newMap(int size) {
-		return new HashMap<K, V>(size);
+		return new HashMap<>(size);
 	}
 
 	/**
 	 * Assumes the input map is always <String,String>.
 	 */
 	private static Map<String, String> newDirectivesMapDTO(Map<String, String> map) {
-		Map<String, String> dto = new HashMap<String, String>(map);
+		Map<String, String> dto = new HashMap<>(map);
 		return dto;
 	}
 
@@ -471,7 +459,7 @@ public class DTOBuilder {
 	 * and Version objects are converted to String objects.
 	 */
 	private static Map<String, Object> newAttributesMapDTO(Map<String, Object> map) {
-		Map<String, Object> dto = new HashMap<String, Object>(map);
+		Map<String, Object> dto = new HashMap<>(map);
 		/* Lists are copied and Version objects are converted to String objects. */
 		for (Map.Entry<String, Object> entry : dto.entrySet()) {
 			Object value = entry.getValue();
@@ -480,7 +468,7 @@ public class DTOBuilder {
 				continue;
 			}
 			if (value instanceof List) {
-				List<Object> newList = new ArrayList<Object>((List<?>) value);
+				List<Object> newList = new ArrayList<>((List<?>) value);
 				for (ListIterator<Object> iter = newList.listIterator(); iter.hasNext();) {
 					Object element = iter.next();
 					if (element instanceof Version) {

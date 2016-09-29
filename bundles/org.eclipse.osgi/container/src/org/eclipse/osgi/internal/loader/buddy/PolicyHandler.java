@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,14 +42,14 @@ public class PolicyHandler implements SynchronousBundleListener {
 		policedLoader = loader;
 		this.originalBuddyList = buddyList;
 		policies = buddyList.toArray();
-		beingLoaded = new ThreadLocal<Set<String>>();
+		beingLoaded = new ThreadLocal<>();
 		this.packageAdmin = packageAdmin;
 	}
 
 	static Object[] getArrayFromList(String stringList) {
 		if (stringList == null || stringList.trim().equals("")) //$NON-NLS-1$
 			return null;
-		List<Object> list = new ArrayList<Object>();
+		List<Object> list = new ArrayList<>();
 		StringTokenizer tokens = new StringTokenizer(stringList, ","); //$NON-NLS-1$
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();
@@ -174,7 +174,7 @@ public class PolicyHandler implements SynchronousBundleListener {
 			Enumeration<URL> result = policy.loadResources(name);
 			if (result != null) {
 				if (results == null)
-					results = new ArrayList<URL>(policyCount);
+					results = new ArrayList<>(policyCount);
 				while (result.hasMoreElements()) {
 					URL url = result.nextElement();
 					if (!results.contains(url)) //only add if not already added 
@@ -192,7 +192,7 @@ public class PolicyHandler implements SynchronousBundleListener {
 			return false;
 
 		if (classesAndResources == null) {
-			classesAndResources = new HashSet<String>(3);
+			classesAndResources = new HashSet<>(3);
 			beingLoaded.set(classesAndResources);
 		}
 		classesAndResources.add(name);

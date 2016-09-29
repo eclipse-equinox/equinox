@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2012 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,10 +46,10 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 	public ContentHandlerFactoryImpl(BundleContext context, EquinoxContainer container) {
 		super(context, container);
 
-		proxies = new Hashtable<String, ContentHandlerProxy>(5);
+		proxies = new Hashtable<>(5);
 
 		//We need to track content handler registrations
-		contentHandlerTracker = new ServiceTracker<ContentHandler, ContentHandler>(context, contentHandlerClazz, null);
+		contentHandlerTracker = new ServiceTracker<>(context, contentHandlerClazz, null);
 		contentHandlerTracker.open();
 	}
 

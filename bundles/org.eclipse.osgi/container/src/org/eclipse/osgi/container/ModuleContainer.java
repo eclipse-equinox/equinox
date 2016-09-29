@@ -50,12 +50,12 @@ public final class ModuleContainer implements DebugOptionsListener {
 	/**
 	 * Used by install operations to establish a write lock on an install location
 	 */
-	private final LockSet<String> locationLocks = new LockSet<String>();
+	private final LockSet<String> locationLocks = new LockSet<>();
 
 	/**
 	 * Used by install and update operations to establish a write lock for a name
 	 */
-	private final LockSet<String> nameLocks = new LockSet<String>();
+	private final LockSet<String> nameLocks = new LockSet<>();
 
 	/**
 	 * An implementation of FrameworkWiring for this container
@@ -86,7 +86,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	/**
 	 * Holds the system module while it is being refreshed
 	 */
-	private final AtomicReference<SystemModule> refreshingSystemModule = new AtomicReference<SystemModule>();
+	private final AtomicReference<SystemModule> refreshingSystemModule = new AtomicReference<>();
 
 	private final long moduleLockTimeout;
 
@@ -229,7 +229,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 					// This is to perform the collision check below
 					List<ModuleCapability> sameIdentity = moduleDatabase.findCapabilities(getIdentityRequirement(name, builder.getVersion()));
 					if (!sameIdentity.isEmpty()) {
-						collisionCandidates = new ArrayList<Module>(1);
+						collisionCandidates = new ArrayList<>(1);
 						for (ModuleCapability identity : sameIdentity) {
 							ModuleRevision equinoxRevision = identity.getRevision();
 							if (!equinoxRevision.isCurrent())
@@ -313,7 +313,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 				// This is to perform the collision check below
 				List<ModuleCapability> sameIdentity = moduleDatabase.findCapabilities(getIdentityRequirement(name, builder.getVersion()));
 				if (!sameIdentity.isEmpty()) {
-					collisionCandidates = new ArrayList<Module>(1);
+					collisionCandidates = new ArrayList<>(1);
 					for (ModuleCapability identity : sameIdentity) {
 						ModuleRevision equinoxRevision = identity.getRevision();
 						if (!equinoxRevision.isCurrent())
@@ -464,9 +464,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	private ResolutionReport resolveAndApply(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers) {
 		if (triggers == null)
-			triggers = new ArrayList<Module>(0);
-		Collection<ModuleRevision> triggerRevisions = new ArrayList<ModuleRevision>(triggers.size());
-		Collection<ModuleRevision> unresolved = new ArrayList<ModuleRevision>();
+			triggers = new ArrayList<>(0);
+		Collection<ModuleRevision> triggerRevisions = new ArrayList<>(triggers.size());
+		Collection<ModuleRevision> unresolved = new ArrayList<>();
 		Map<ModuleRevision, ModuleWiring> wiringClone;
 		long timestamp;
 		moduleDatabase.readLock();
@@ -496,7 +496,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 		if (deltaWiring.isEmpty())
 			return report; // nothing to do
 
-		Collection<Module> modulesResolved = new ArrayList<Module>();
+		Collection<Module> modulesResolved = new ArrayList<>();
 		for (ModuleRevision deltaRevision : deltaWiring.keySet()) {
 			if (!wiringClone.containsKey(deltaRevision))
 				modulesResolved.add(deltaRevision.getRevisions().getModule());
@@ -521,7 +521,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 			result = null;
 			Map<ModuleRevision, ModuleWiring> wiringClone = null;
 			List<DynamicModuleRequirement> dynamicReqs = null;
-			Collection<ModuleRevision> unresolved = new ArrayList<ModuleRevision>();
+			Collection<ModuleRevision> unresolved = new ArrayList<>();
 			moduleDatabase.readLock();
 			try {
 				ModuleWiring wiring = revision.getWiring();
@@ -591,7 +591,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 				return null; // nothing to do
 			}
 
-			modulesResolved = new ArrayList<Module>();
+			modulesResolved = new ArrayList<>();
 			for (ModuleRevision deltaRevision : deltaWiring.keySet()) {
 				if (!wiringClone.containsKey(deltaRevision))
 					modulesResolved.add(deltaRevision.getRevisions().getModule());
@@ -627,7 +627,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	private final Object stateLockMonitor = new Object();
 
 	private boolean applyDelta(Map<ModuleRevision, ModuleWiring> deltaWiring, Collection<Module> modulesResolved, Collection<Module> triggers, long timestamp, boolean restartTriggers) {
-		List<Module> modulesLocked = new ArrayList<Module>(modulesResolved.size());
+		List<Module> modulesLocked = new ArrayList<>(modulesResolved.size());
 		// now attempt to apply the delta
 		try {
 			synchronized (stateLockMonitor) {
@@ -655,7 +655,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 					}
 				}
 			}
-			Map<ModuleWiring, Collection<ModuleRevision>> hostsWithDynamicFrags = new HashMap<ModuleWiring, Collection<ModuleRevision>>(0);
+			Map<ModuleWiring, Collection<ModuleRevision>> hostsWithDynamicFrags = new HashMap<>(0);
 			moduleDatabase.writeLock();
 			try {
 				if (timestamp != moduleDatabase.getRevisionsTimestamp())
@@ -680,7 +680,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 								if (hostWiring != null) {
 									Collection<ModuleRevision> dynamicFragments = hostsWithDynamicFrags.get(hostWiring);
 									if (dynamicFragments == null) {
-										dynamicFragments = new ArrayList<ModuleRevision>();
+										dynamicFragments = new ArrayList<>();
 										hostsWithDynamicFrags.put(hostWiring, dynamicFragments);
 									}
 									dynamicFragments.add(hostWire.getRequirer());
@@ -714,7 +714,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 		}
 
 		// If there are any triggers re-start them now if requested
-		Set<Module> triggerSet = restartTriggers ? new HashSet<Module>(triggers) : Collections.<Module> emptySet();
+		Set<Module> triggerSet = restartTriggers ? new HashSet<>(triggers) : Collections.<Module> emptySet();
 		if (restartTriggers) {
 			for (Module module : triggers) {
 				if (module.getId() != 0 && Module.RESOLVED_SET.contains(module.getState())) {
@@ -768,7 +768,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 			// not resolved!
 			return Collections.emptyList();
 		}
-		List<DynamicModuleRequirement> result = new ArrayList<ModuleRequirement.DynamicModuleRequirement>(1);
+		List<DynamicModuleRequirement> result = new ArrayList<>(1);
 		// check the dynamic import packages
 		DynamicModuleRequirement dynamicRequirement;
 		for (ModuleRequirement requirement : wiring.getModuleRequirements(PackageNamespace.PACKAGE_NAMESPACE)) {
@@ -810,10 +810,10 @@ public final class ModuleContainer implements DebugOptionsListener {
 			checkSystemExtensionRefresh(initial);
 			timestamp = moduleDatabase.getRevisionsTimestamp();
 			wiringCopy = moduleDatabase.getWiringsCopy();
-			refreshTriggers = new ArrayList<Module>(getRefreshClosure(initial, wiringCopy));
-			toRemoveRevisions = new ArrayList<ModuleRevision>();
-			toRemoveWirings = new ArrayList<ModuleWiring>();
-			toRemoveWireLists = new HashMap<ModuleWiring, Collection<ModuleWire>>();
+			refreshTriggers = new ArrayList<>(getRefreshClosure(initial, wiringCopy));
+			toRemoveRevisions = new ArrayList<>();
+			toRemoveWirings = new ArrayList<>();
+			toRemoveWireLists = new HashMap<>();
 			for (Iterator<Module> iTriggers = refreshTriggers.iterator(); iTriggers.hasNext();) {
 				Module module = iTriggers.next();
 				boolean first = true;
@@ -825,7 +825,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 						for (ModuleWire wire : removedWires) {
 							Collection<ModuleWire> providerWires = toRemoveWireLists.get(wire.getProviderWiring());
 							if (providerWires == null) {
-								providerWires = new ArrayList<ModuleWire>();
+								providerWires = new ArrayList<>();
 								toRemoveWireLists.put(wire.getProviderWiring(), providerWires);
 							}
 							providerWires.add(wire);
@@ -850,8 +850,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 			refreshSystemModule();
 			return Collections.emptyList();
 		}
-		Collection<Module> modulesLocked = new ArrayList<Module>(refreshTriggers.size());
-		Collection<Module> modulesUnresolved = new ArrayList<Module>();
+		Collection<Module> modulesLocked = new ArrayList<>(refreshTriggers.size());
+		Collection<Module> modulesUnresolved = new ArrayList<>();
 		try {
 			// Acquire the module state change locks.
 			// Note this is done while holding a global lock to avoid multiple threads trying to compete over
@@ -989,7 +989,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	 * @see FrameworkWiring#refreshBundles(Collection, FrameworkListener...)
 	 */
 	public ResolutionReport refresh(Collection<Module> initial) {
-		initial = initial == null ? null : new ArrayList<Module>(initial);
+		initial = initial == null ? null : new ArrayList<>(initial);
 		Collection<Module> refreshTriggers = unresolve(initial);
 		if (!isRefreshingSystemModule()) {
 			return resolve(refreshTriggers, false, true);
@@ -1161,9 +1161,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 	}
 
 	Set<Module> getRefreshClosure(Collection<Module> initial, Map<ModuleRevision, ModuleWiring> wiringCopy) {
-		Set<Module> refreshClosure = new HashSet<Module>();
+		Set<Module> refreshClosure = new HashSet<>();
 		if (initial == null) {
-			initial = new HashSet<Module>();
+			initial = new HashSet<>();
 			Collection<ModuleRevision> removalPending = moduleDatabase.getRemovalPending();
 			for (ModuleRevision revision : removalPending) {
 				initial.add(revision.getRevisions().getModule());
@@ -1200,7 +1200,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	}
 
 	static Collection<ModuleRevision> getDependencyClosure(ModuleRevision initial, Map<ModuleRevision, ModuleWiring> wiringCopy) {
-		Set<ModuleRevision> dependencyClosure = new HashSet<ModuleRevision>();
+		Set<ModuleRevision> dependencyClosure = new HashSet<>();
 		addDependents(initial, wiringCopy, dependencyClosure);
 		return dependencyClosure;
 	}
@@ -1291,9 +1291,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 			// queue to refresh in the background
 			// notice that we only do one refresh operation at a time
-			CopyOnWriteIdentityMap<ContainerWiring, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<ModuleContainer.ContainerWiring, FrameworkListener[]>();
+			CopyOnWriteIdentityMap<ContainerWiring, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<>();
 			dispatchListeners.put(this, listeners);
-			ListenerQueue<ContainerWiring, FrameworkListener[], Collection<Module>> queue = new ListenerQueue<ModuleContainer.ContainerWiring, FrameworkListener[], Collection<Module>>(getManager());
+			ListenerQueue<ContainerWiring, FrameworkListener[], Collection<Module>> queue = new ListenerQueue<>(getManager());
 			queue.queueListeners(dispatchListeners.entrySet(), this);
 
 			// dispatch the refresh job
@@ -1320,7 +1320,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 		public Collection<Bundle> getRemovalPendingBundles() {
 			moduleDatabase.readLock();
 			try {
-				Collection<Bundle> removalPendingBundles = new HashSet<Bundle>();
+				Collection<Bundle> removalPendingBundles = new HashSet<>();
 				Collection<ModuleRevision> removalPending = moduleDatabase.getRemovalPending();
 				for (ModuleRevision moduleRevision : removalPending) {
 					removalPendingBundles.add(moduleRevision.getBundle());
@@ -1337,7 +1337,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 			moduleDatabase.readLock();
 			try {
 				Collection<Module> closure = getRefreshClosure(modules, moduleDatabase.getWiringsCopy());
-				Collection<Bundle> result = new ArrayList<Bundle>(closure.size());
+				Collection<Bundle> result = new ArrayList<>(closure.size());
 				for (Module module : closure) {
 					result.add(module.getBundle());
 				}
@@ -1358,7 +1358,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 			return AccessController.doPrivileged(new PrivilegedAction<Collection<Module>>() {
 				@Override
 				public Collection<Module> run() {
-					Collection<Module> result = new ArrayList<Module>(bundles.size());
+					Collection<Module> result = new ArrayList<>(bundles.size());
 					for (Bundle bundle : bundles) {
 						Module module = bundle.adapt(Module.class);
 						if (module == null)
@@ -1467,9 +1467,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 			if (currentLevel < startlevel || module.isPersistentlyStarted()) {
 				// queue start level operation in the background
 				// notice that we only do one start level operation at a time
-				CopyOnWriteIdentityMap<Module, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<Module, FrameworkListener[]>();
+				CopyOnWriteIdentityMap<Module, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<>();
 				dispatchListeners.put(module, new FrameworkListener[0]);
-				ListenerQueue<Module, FrameworkListener[], Integer> queue = new ListenerQueue<Module, FrameworkListener[], Integer>(getManager());
+				ListenerQueue<Module, FrameworkListener[], Integer> queue = new ListenerQueue<>(getManager());
 				queue.queueListeners(dispatchListeners.entrySet(), this);
 
 				// dispatch the start level job
@@ -1492,9 +1492,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 			}
 			// queue start level operation in the background
 			// notice that we only do one start level operation at a time
-			CopyOnWriteIdentityMap<Module, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<Module, FrameworkListener[]>();
+			CopyOnWriteIdentityMap<Module, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<>();
 			dispatchListeners.put(moduleDatabase.getModule(0), listeners);
-			ListenerQueue<Module, FrameworkListener[], Integer> queue = new ListenerQueue<Module, FrameworkListener[], Integer>(getManager());
+			ListenerQueue<Module, FrameworkListener[], Integer> queue = new ListenerQueue<>(getManager());
 			queue.queueListeners(dispatchListeners.entrySet(), this);
 
 			// dispatch the start level job

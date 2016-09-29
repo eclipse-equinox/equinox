@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,14 +72,14 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 * Case-preserved keys.
 	 */
 	public synchronized Enumeration<K> keys() {
-		return new ArrayEnumeration<K>(headers, size);
+		return new ArrayEnumeration<>(headers, size);
 	}
 
 	/**
 	 * Values.
 	 */
 	public synchronized Enumeration<V> elements() {
-		return new ArrayEnumeration<V>(values, size);
+		return new ArrayEnumeration<>(values, size);
 	}
 
 	private int getIndex(Object key) {
@@ -275,7 +275,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	}
 
 	public static Headers<String, String> parseManifest(InputStream in) throws BundleException {
-		Headers<String, String> headers = new Headers<String, String>(10);
+		Headers<String, String> headers = new Headers<>(10);
 		try {
 			ManifestElement.parseBundleManifest(in, headers);
 		} catch (IOException e) {

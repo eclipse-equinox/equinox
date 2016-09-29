@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2015 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,9 +27,9 @@ class StateWriter {
 	// like BundleDescription, ExportPackageDescription, Version etc.. The integer
 	// index value will be used in the cache to allow cross-references in the
 	// cached state.
-	private final Map<Object, Integer> objectTable = new HashMap<Object, Integer>();
+	private final Map<Object, Integer> objectTable = new HashMap<>();
 
-	private final List<Object> forcedWrite = new ArrayList<Object>();
+	private final List<Object> forcedWrite = new ArrayList<>();
 
 	private int addToObjectTable(Object object) {
 		Integer cur = objectTable.get(object);
@@ -383,7 +383,7 @@ class StateWriter {
 		writeBundleDescription(description.getSupplier(), out, false);
 		writeStringOrNull(description.getType() == GenericDescription.DEFAULT_TYPE ? null : description.getType(), out);
 		Dictionary<String, Object> attrs = description.getAttributes();
-		Map<String, Object> mapAttrs = new HashMap<String, Object>(attrs.size());
+		Map<String, Object> mapAttrs = new HashMap<>(attrs.size());
 		for (Enumeration<String> keys = attrs.keys(); keys.hasMoreElements();) {
 			String key = keys.nextElement();
 			mapAttrs.put(key, attrs.get(key));

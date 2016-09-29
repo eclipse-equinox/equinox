@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2013 IBM Corporation and others.
+ * Copyright (c) 2006, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 		setType(fragmentDeclaration.getType());
 		Dictionary<String, Object> origAttrs = fragmentDeclaration.getAttributes();
 		if (origAttrs != null) {
-			Hashtable<String, Object> copyAttrs = new Hashtable<String, Object>();
+			Hashtable<String, Object> copyAttrs = new Hashtable<>();
 			for (Enumeration<String> keys = origAttrs.keys(); keys.hasMoreElements();) {
 				String key = keys.nextElement();
 				copyAttrs.put(key, origAttrs.get(key));
@@ -39,7 +39,7 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 			setAttributes(copyAttrs);
 		}
 		Map<String, String> origDirectives = fragmentDeclaration.getDeclaredDirectives();
-		Map<String, String> copyDirectives = new HashMap<String, String>(origDirectives);
+		Map<String, String> copyDirectives = new HashMap<>(origDirectives);
 		setDirectives(copyDirectives);
 		setSupplier(host);
 		this.fragmentDeclaration = fragmentDeclaration;
@@ -118,7 +118,7 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 
 	public Map<String, Object> getDeclaredAttributes() {
 		synchronized (this.monitor) {
-			Map<String, Object> result = new HashMap<String, Object>(5);
+			Map<String, Object> result = new HashMap<>(5);
 			if (attributes != null)
 				for (Enumeration<String> keys = attributes.keys(); keys.hasMoreElements();) {
 					String key = keys.nextElement();

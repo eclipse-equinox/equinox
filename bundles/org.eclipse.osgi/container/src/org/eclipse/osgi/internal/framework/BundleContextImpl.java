@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -164,7 +164,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			return null;
 		}
 
-		List<Bundle> bundles = new ArrayList<Bundle>(1);
+		List<Bundle> bundles = new ArrayList<>(1);
 		bundles.add(m.getBundle());
 		notifyFindHooks(this, bundles);
 		if (bundles.isEmpty()) {
@@ -189,7 +189,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 */
 	public Bundle[] getBundles() {
 		List<Module> modules = container.getStorage().getModuleContainer().getModules();
-		List<Bundle> bundles = new ArrayList<Bundle>(modules.size());
+		List<Bundle> bundles = new ArrayList<>(modules.size());
 		for (Module module : modules) {
 			bundles.add(module.getBundle());
 		}
@@ -202,9 +202,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		if (context.getBundleImpl().getBundleId() == 0) {
 			// Make a copy for the purposes of calling the hooks;
 			// The the removals from the hooks are ignored
-			allBundles = new ArrayList<Bundle>(allBundles);
+			allBundles = new ArrayList<>(allBundles);
 		}
-		final Collection<Bundle> shrinkable = new ShrinkableCollection<Bundle>(allBundles);
+		final Collection<Bundle> shrinkable = new ShrinkableCollection<>(allBundles);
 		if (System.getSecurityManager() == null) {
 			notifyFindHooksPriviledged(context, shrinkable);
 		} else {
@@ -873,7 +873,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		synchronized (contextLock) {
 			if (servicesInUse == null)
 				// Cannot predict how many services a bundle will use, start with a small table.
-				servicesInUse = new HashMap<ServiceRegistrationImpl<?>, ServiceUse<?>>(10);
+				servicesInUse = new HashMap<>(10);
 		}
 	}
 
@@ -1019,7 +1019,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			Collection<ServiceReference<S>> empty = Collections.<ServiceReference<S>> emptyList();
 			return empty;
 		}
-		List<ServiceReference<S>> result = new ArrayList<ServiceReference<S>>(refs.length);
+		List<ServiceReference<S>> result = new ArrayList<>(refs.length);
 		for (ServiceReference<S> b : refs) {
 			result.add(b);
 		}

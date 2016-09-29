@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2006, 2016 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -151,19 +151,19 @@ public abstract class MultiplexingFactory {
 		if (factories == null)
 			return null;
 
-		List<Object> released = new LinkedList<Object>(factories);
+		List<Object> released = new LinkedList<>(factories);
 		factories = null;
 		return released;
 	}
 
 	private synchronized void addFactory(Object factory) {
-		List<Object> updated = (factories == null) ? new LinkedList<Object>() : new LinkedList<Object>(factories);
+		List<Object> updated = (factories == null) ? new LinkedList<>() : new LinkedList<>(factories);
 		updated.add(factory);
 		factories = updated;
 	}
 
 	private synchronized void removeFactory(Object factory) {
-		List<Object> updated = new LinkedList<Object>(factories);
+		List<Object> updated = new LinkedList<>(factories);
 		updated.remove(factory);
 		factories = updated.isEmpty() ? null : updated;
 	}

@@ -123,7 +123,7 @@ public class ModuleRequirement implements BundleRequirement {
 		}
 
 		if (specificPackageFilter != null) {
-			Map<String, String> dynamicDirectives = new HashMap<String, String>(directives);
+			Map<String, String> dynamicDirectives = new HashMap<>(directives);
 			dynamicDirectives.put(PackageNamespace.REQUIREMENT_FILTER_DIRECTIVE, specificPackageFilter);
 			return new DynamicModuleRequirement(host, dynamicDirectives);
 		}

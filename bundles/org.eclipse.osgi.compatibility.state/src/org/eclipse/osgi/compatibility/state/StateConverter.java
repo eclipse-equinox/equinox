@@ -35,18 +35,18 @@ class StateConverter {
 			throw new IllegalArgumentException("Bogus osgi.identity: " + idList); //$NON-NLS-1$
 		} else if (idList.size() == 1) {
 			Capability id = idList.iterator().next();
-			Map<String, Object> idAttrs = new HashMap<String, Object>(id.getAttributes());
+			Map<String, Object> idAttrs = new HashMap<>(id.getAttributes());
 			String symbolicName = (String) idAttrs.remove(IdentityNamespace.IDENTITY_NAMESPACE);
 			symbolicNameSpecification = symbolicName + toString(idAttrs, "=", true) + toString(id.getDirectives(), ":=", true); //$NON-NLS-1$ //$NON-NLS-2$
 			version = (Version) idAttrs.remove(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
 		}
 
-		List<ExportPackageDescription> exportPackages = new ArrayList<ExportPackageDescription>();
-		List<GenericDescription> provideCapabilities = new ArrayList<GenericDescription>();
-		List<ImportPackageSpecification> importPackages = new ArrayList<ImportPackageSpecification>();
-		List<GenericSpecification> requireCapabilities = new ArrayList<GenericSpecification>();
-		List<HostSpecification> fragmentHost = new ArrayList<HostSpecification>(0);
-		List<BundleSpecification> requireBundles = new ArrayList<BundleSpecification>();
+		List<ExportPackageDescription> exportPackages = new ArrayList<>();
+		List<GenericDescription> provideCapabilities = new ArrayList<>();
+		List<ImportPackageSpecification> importPackages = new ArrayList<>();
+		List<GenericSpecification> requireCapabilities = new ArrayList<>();
+		List<HostSpecification> fragmentHost = new ArrayList<>(0);
+		List<BundleSpecification> requireBundles = new ArrayList<>();
 
 		Collection<Capability> capabilities = resource.getCapabilities(null);
 
@@ -90,7 +90,7 @@ class StateConverter {
 	}
 
 	private List<ExportPackageDescription> creatExportPackage(Capability capability) {
-		Map<String, Object> attributes = new HashMap<String, Object>(capability.getAttributes());
+		Map<String, Object> attributes = new HashMap<>(capability.getAttributes());
 		Map<String, String> directives = capability.getDirectives();
 		String packageName = (String) attributes.remove(PackageNamespace.PACKAGE_NAMESPACE);
 		// remove invalid attributes
@@ -144,7 +144,7 @@ class StateConverter {
 	}
 
 	private List<GenericSpecification> createRequireCapability(Requirement requirement) {
-		Map<String, String> directives = new HashMap<String, String>(requirement.getDirectives());
+		Map<String, String> directives = new HashMap<>(requirement.getDirectives());
 		String filter = directives.get(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
 		if (filter != null) {
 			directives.put(Namespace.REQUIREMENT_FILTER_DIRECTIVE, escapeFilterInput(filter));
@@ -185,7 +185,7 @@ class StateConverter {
 	}
 
 	private String createOSGiRequirement(Requirement requirement, String namespace, String... versions) {
-		Map<String, String> directives = new HashMap<String, String>(requirement.getDirectives());
+		Map<String, String> directives = new HashMap<>(requirement.getDirectives());
 		String filter = directives.remove(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
 		if (filter == null)
 			throw new IllegalArgumentException("No filter directive found:" + requirement); //$NON-NLS-1$

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2013 IBM Corporation and others.
+ * Copyright (c) 2008, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,14 +43,14 @@ public class ShrinkableCollection<E> implements Collection<E> {
 	}
 
 	public ShrinkableCollection(Collection<? extends E> c1, Collection<? extends E> c2) {
-		list = new ArrayList<Collection<? extends E>>(2);
+		list = new ArrayList<>(2);
 		list.add(c1);
 		list.add(c2);
 		collection = initComposite(list);
 	}
 
 	public ShrinkableCollection(List<Collection<? extends E>> l) {
-		list = new ArrayList<Collection<? extends E>>(l);
+		list = new ArrayList<>(l);
 		collection = initComposite(list);
 	}
 
@@ -60,7 +60,7 @@ public class ShrinkableCollection<E> implements Collection<E> {
 			assert verifyNoDuplicates(c);
 			size += c.size();
 		}
-		Collection<E> result = new ArrayList<E>(size);
+		Collection<E> result = new ArrayList<>(size);
 		for (Collection<? extends E> c : collections) {
 			for (E e : c) {
 				if (!result.contains(e)) {

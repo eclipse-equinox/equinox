@@ -52,7 +52,7 @@ public final class ModuleCapability implements BundleCapability {
 	public Map<String, Object> getAttributes() {
 		if (transientAttrs == null)
 			return attributes;
-		Map<String, Object> result = new HashMap<String, Object>(transientAttrs);
+		Map<String, Object> result = new HashMap<>(transientAttrs);
 		result.putAll(attributes);
 		return Collections.unmodifiableMap(result);
 	}

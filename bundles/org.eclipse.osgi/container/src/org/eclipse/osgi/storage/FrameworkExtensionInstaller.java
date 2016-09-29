@@ -34,7 +34,7 @@ import org.osgi.resource.Capability;
 public class FrameworkExtensionInstaller {
 	private static final ClassLoader CL = FrameworkExtensionInstaller.class.getClassLoader();
 	private static final Method ADD_FWK_URL_METHOD = findAddURLMethod(CL, "addURL"); //$NON-NLS-1$
-	private final ArrayMap<BundleActivator, Bundle> hookActivators = new ArrayMap<BundleActivator, Bundle>(5);
+	private final ArrayMap<BundleActivator, Bundle> hookActivators = new ArrayMap<>(5);
 
 	private static Method findAddURLMethod(ClassLoader cl, String name) {
 		if (cl == null)
@@ -143,7 +143,7 @@ public class FrameworkExtensionInstaller {
 		@SuppressWarnings("unchecked")
 		List<String> paths = metaDatas.isEmpty() ? null : (List<String>) metaDatas.get(0).getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_CLASSPATH);
 		if (paths == null) {
-			paths = new ArrayList<String>(1);
+			paths = new ArrayList<>(1);
 			paths.add("."); //$NON-NLS-1$
 		}
 		if (configuration.inDevelopmentMode()) {
@@ -152,7 +152,7 @@ public class FrameworkExtensionInstaller {
 				paths.add(devPath);
 			}
 		}
-		List<File> results = new ArrayList<File>(paths.size());
+		List<File> results = new ArrayList<>(paths.size());
 		for (String path : paths) {
 			if (".".equals(path)) { //$NON-NLS-1$
 				results.add(((Generation) revision.getRevisionInfo()).getBundleFile().getBaseFile());
@@ -193,7 +193,7 @@ public class FrameworkExtensionInstaller {
 	public void stopExtensionActivators(BundleContext context) {
 		ArrayMap<BundleActivator, Bundle> current;
 		synchronized (hookActivators) {
-			current = new ArrayMap<BundleActivator, Bundle>(hookActivators.getKeys(), hookActivators.getValues());
+			current = new ArrayMap<>(hookActivators.getKeys(), hookActivators.getValues());
 			hookActivators.clear();
 		}
 		for (BundleActivator activator : current) {

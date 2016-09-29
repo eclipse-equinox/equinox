@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,7 @@ public class WeavingHookConfigurator extends ClassLoaderHook {
 	// holds the map of black listed hooks.  Use weak map to avoid pinning and simplify cleanup.
 	private final Map<ServiceRegistration<?>, Boolean> blackList = Collections.synchronizedMap(new WeakHashMap<ServiceRegistration<?>, Boolean>());
 	// holds the stack of WovenClass objects currently being used to define classes
-	private final ThreadLocal<List<WovenClassImpl>> wovenClassStack = new ThreadLocal<List<WovenClassImpl>>();
+	private final ThreadLocal<List<WovenClassImpl>> wovenClassStack = new ThreadLocal<>();
 
 	private final EquinoxContainer container;
 
@@ -47,7 +47,7 @@ public class WeavingHookConfigurator extends ClassLoaderHook {
 		WovenClassImpl wovenClass = new WovenClassImpl(name, classbytes, entry, classpathEntry, loader, container, blackList);
 		List<WovenClassImpl> wovenClasses = wovenClassStack.get();
 		if (wovenClasses == null) {
-			wovenClasses = new ArrayList<WovenClassImpl>(6);
+			wovenClasses = new ArrayList<>(6);
 			wovenClassStack.set(wovenClasses);
 		}
 		wovenClasses.add(wovenClass);

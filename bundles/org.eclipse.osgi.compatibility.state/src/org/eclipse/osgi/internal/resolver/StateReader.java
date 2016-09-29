@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -104,7 +104,7 @@ final class StateReader {
 			int numSets = in.readInt();
 			Dictionary<?, ?>[] platformProps = new Dictionary[numSets];
 			for (int i = 0; i < numSets; i++) {
-				Hashtable<Object, Object> props = new Hashtable<Object, Object>(platformPropKeys.length);
+				Hashtable<Object, Object> props = new Hashtable<>(platformPropKeys.length);
 				int numProps = in.readInt();
 				for (int j = 0; j < numProps; j++) {
 					Object value = readPlatformProp(in);
@@ -164,7 +164,7 @@ final class StateReader {
 		int numSets = in.readInt();
 		Dictionary<?, ?>[] platformProps = new Dictionary[numSets];
 		for (int i = 0; i < numSets; i++) {
-			Hashtable<Object, Object> props = new Hashtable<Object, Object>(platformPropKeys.length);
+			Hashtable<Object, Object> props = new Hashtable<>(platformPropKeys.length);
 			int numProps = in.readInt();
 			for (int j = 0; j < numProps; j++) {
 				Object value = readPlatformProp(in);
@@ -335,7 +335,7 @@ final class StateReader {
 
 		int dynamicPkgCnt = in.readInt();
 		if (dynamicPkgCnt > 0) {
-			HashMap<String, Long> dynamicStamps = new HashMap<String, Long>(dynamicPkgCnt);
+			HashMap<String, Long> dynamicStamps = new HashMap<>(dynamicPkgCnt);
 			for (int i = 0; i < dynamicPkgCnt; i++) {
 				String pkg = readString(in, false);
 				Long stamp = new Long(in.readLong());
@@ -432,7 +432,7 @@ final class StateReader {
 		int count = in.readInt();
 		if (count == 0)
 			return null;
-		HashMap<String, Object> result = new HashMap<String, Object>(count);
+		HashMap<String, Object> result = new HashMap<>(count);
 		for (int i = 0; i < count; i++) {
 			String key = readString(in, false);
 			Object value = null;
@@ -467,7 +467,7 @@ final class StateReader {
 			} else if (type == 8) {
 				int listType = in.readByte();
 				int size = in.readInt();
-				List<Object> list = new ArrayList<Object>(size);
+				List<Object> list = new ArrayList<>(size);
 				for (int j = 0; j < size; j++) {
 					switch (listType) {
 						case 0 :
@@ -607,7 +607,7 @@ final class StateReader {
 		result.setSupplier(readBundleDescription(in));
 		result.setType(readString(in, false));
 		Map<String, Object> mapAttrs = readMap(in);
-		Dictionary<String, Object> attrs = new Hashtable<String, Object>();
+		Dictionary<String, Object> attrs = new Hashtable<>();
 		if (mapAttrs != null) {
 			for (Iterator<String> keys = mapAttrs.keySet().iterator(); keys.hasNext();) {
 				String key = keys.next();
@@ -718,8 +718,7 @@ final class StateReader {
 		int minorComponent = in.readInt();
 		int serviceComponent = in.readInt();
 		String qualifierComponent = readString(in, false);
-		Version result = (Version) ObjectPool.intern(new Version(majorComponent, minorComponent, serviceComponent, qualifierComponent));
-		//Version result = new Version(majorComponent, minorComponent, serviceComponent, qualifierComponent);
+		Version result = ObjectPool.intern(new Version(majorComponent, minorComponent, serviceComponent, qualifierComponent));
 		return result;
 	}
 
@@ -763,12 +762,12 @@ final class StateReader {
 
 			if (intern)
 				return string.intern();
-			return (String) ObjectPool.intern(string);
+			return ObjectPool.intern(string);
 		}
 
 		if (intern)
 			return in.readUTF().intern();
-		return (String) ObjectPool.intern(in.readUTF());
+		return ObjectPool.intern(in.readUTF());
 	}
 
 	private byte readTag(DataInputStream in) throws IOException {
@@ -818,7 +817,7 @@ final class StateReader {
 		try {
 			in = openLazyFile();
 			// get the set of bundles that must be loaded according to dependencies
-			List<BundleDescriptionImpl> toLoad = new ArrayList<BundleDescriptionImpl>();
+			List<BundleDescriptionImpl> toLoad = new ArrayList<>();
 			addDependencies(target, toLoad);
 			int skipBytes[] = getSkipBytes(toLoad);
 			// look for the lazy data of the toLoad list

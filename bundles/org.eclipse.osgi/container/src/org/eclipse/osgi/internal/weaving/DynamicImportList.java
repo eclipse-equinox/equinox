@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2013 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,7 @@ import org.osgi.framework.PackagePermission;
  */
 public class DynamicImportList extends AbstractList<String> implements RandomAccess {
 	// the collection of valid DynamicImport-Package statments.
-	private final List<String> imports = new ArrayList<String>(0);
+	private final List<String> imports = new ArrayList<>(0);
 	private final WovenClassImpl wovenClass;
 
 	public DynamicImportList(WovenClassImpl wovenClass) {

@@ -228,7 +228,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		private final Properties localConfig;
 
 		public ConfigValues(Map<String, ?> initialConfiguration) {
-			this.initialConfig = initialConfiguration == null ? new HashMap<String, Object>(0) : new HashMap<String, Object>(initialConfiguration);
+			this.initialConfig = initialConfiguration == null ? new HashMap<String, Object>(0) : new HashMap<>(initialConfiguration);
 			Object useSystemPropsValue = initialConfig.get(PROP_USE_SYSTEM_PROPERTIES);
 			this.useSystemProperties = useSystemPropsValue == null ? false : Boolean.parseBoolean(useSystemPropsValue.toString());
 			Properties tempConfiguration = useSystemProperties ? EquinoxContainer.secureAction.getProperties() : new Properties();
@@ -470,7 +470,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			Properties props = useSystemProperties ? EquinoxContainer.secureAction.getProperties() : localConfig;
 			// must sync on props to avoid concurrent modification exception
 			synchronized (props) {
-				Map<String, String> result = new HashMap<String, String>(props.size());
+				Map<String, String> result = new HashMap<>(props.size());
 				for (Object key : props.keySet()) {
 					if (key instanceof String) {
 						String skey = (String) key;
@@ -603,7 +603,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	}
 
 	private static List<String> buildEclipseLibraryVariants(String ws, String os, String arch, String nl) {
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		result.add("ws/" + ws + "/"); //$NON-NLS-1$ //$NON-NLS-2$
 		result.add("os/" + os + "/" + arch + "/"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		result.add("os/" + os + "/"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -618,7 +618,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	}
 
 	private static List<String> buildNLJarVariants(String nl) {
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		nl = nl.replace('_', '/');
 		while (nl.length() > 0) {
 			result.add("nl/" + nl + "/"); //$NON-NLS-1$ //$NON-NLS-2$

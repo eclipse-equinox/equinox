@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @param <V> the type of object to lazy initialize
  */
 public class AtomicLazyInitializer<V> {
-	private final AtomicReference<V> holder = new AtomicReference<V>();
+	private final AtomicReference<V> holder = new AtomicReference<>();
 
 	/**
 	 * Gets the current value.  If the value has not been initialized then

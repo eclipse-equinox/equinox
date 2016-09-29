@@ -78,8 +78,8 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		// TODO ideally this should be in equinox configuration or perhaps in storage
 		String bootDelegationProp = equinoxConfig.getConfiguration(Constants.FRAMEWORK_BOOTDELEGATION);
 		String[] bootPackages = ManifestElement.getArrayFromList(bootDelegationProp, ","); //$NON-NLS-1$
-		HashSet<String> exactMatch = new HashSet<String>(bootPackages.length);
-		List<String> stemMatch = new ArrayList<String>(bootPackages.length);
+		HashSet<String> exactMatch = new HashSet<>(bootPackages.length);
+		List<String> stemMatch = new ArrayList<>(bootPackages.length);
 		boolean delegateAllValue = false;
 		for (int i = 0; i < bootPackages.length; i++) {
 			if (bootPackages[i].equals("*")) { //$NON-NLS-1$
@@ -243,7 +243,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 
 	void systemStart(BundleContext bc) {
 		synchronized (this.monitor) {
-			signedContentFactory = new ServiceTracker<SignedContentFactory, SignedContentFactory>(bc, SignedContentFactory.class, null);
+			signedContentFactory = new ServiceTracker<>(bc, SignedContentFactory.class, null);
 		}
 		signedContentFactory.open();
 	}

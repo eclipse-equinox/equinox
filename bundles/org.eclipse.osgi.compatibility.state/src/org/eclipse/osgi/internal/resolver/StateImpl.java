@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -112,15 +112,15 @@ public abstract class StateImpl implements State {
 	transient private Resolver resolver;
 	transient private StateDeltaImpl changes;
 	transient private boolean resolving = false;
-	transient private LinkedList<BundleDescription> removalPendings = new LinkedList<BundleDescription>();
+	transient private LinkedList<BundleDescription> removalPendings = new LinkedList<>();
 
 	private boolean resolved = true;
 	private long timeStamp = System.currentTimeMillis();
 	private final KeyedHashSet bundleDescriptions = new KeyedHashSet(false);
-	private final Map<BundleDescription, List<ResolverError>> resolverErrors = new HashMap<BundleDescription, List<ResolverError>>();
+	private final Map<BundleDescription, List<ResolverError>> resolverErrors = new HashMap<>();
 	private StateObjectFactory factory;
 	private final KeyedHashSet resolvedBundles = new KeyedHashSet();
-	private final Map<BundleDescription, List<DisabledInfo>> disabledBundles = new HashMap<BundleDescription, List<DisabledInfo>>();
+	private final Map<BundleDescription, List<DisabledInfo>> disabledBundles = new HashMap<>();
 	private boolean fullyLoaded = false;
 	private boolean dynamicCacheChanged = false;
 	// only used for lazy loading of BundleDescriptions
@@ -128,7 +128,7 @@ public abstract class StateImpl implements State {
 	@SuppressWarnings("unchecked")
 	private Dictionary<Object, Object>[] platformProperties = new Dictionary[] {new Hashtable<String, String>(PROPS.length)}; // Dictionary here because of Filter API
 	private long highestBundleId = -1;
-	private final Set<String> platformPropertyKeys = new HashSet<String>(PROPS.length);
+	private final Set<String> platformPropertyKeys = new HashSet<>(PROPS.length);
 	private ResolverHookFactory hookFactory;
 	private ResolverHook hook;
 	private boolean developmentMode = false;
@@ -185,7 +185,7 @@ public abstract class StateImpl implements State {
 			resolvedBundles.remove(existing);
 			List<DisabledInfo> infos = disabledBundles.remove(existing);
 			if (infos != null) {
-				List<DisabledInfo> newInfos = new ArrayList<DisabledInfo>(infos.size());
+				List<DisabledInfo> newInfos = new ArrayList<>(infos.size());
 				for (Iterator<DisabledInfo> iInfos = infos.iterator(); iInfos.hasNext();) {
 					DisabledInfo info = iInfos.next();
 					newInfos.add(new DisabledInfo(info.getPolicyName(), info.getMessage(), newDescription));
@@ -282,7 +282,7 @@ public abstract class StateImpl implements State {
 		synchronized (this.monitor) {
 			if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(symbolicName))
 				symbolicName = getSystemBundle();
-			final List<BundleDescription> bundles = new ArrayList<BundleDescription>();
+			final List<BundleDescription> bundles = new ArrayList<>();
 			for (Iterator<KeyedElement> iter = bundleDescriptions.iterator(); iter.hasNext();) {
 				BundleDescription bundle = (BundleDescription) iter.next();
 				if (symbolicName.equals(bundle.getSymbolicName()))
@@ -513,7 +513,7 @@ public abstract class StateImpl implements State {
 					if (reResolve == null)
 						reResolve = internalGetRemovalPending();
 					if (triggers == null) {
-						Set<BundleDescription> triggerSet = new HashSet<BundleDescription>();
+						Set<BundleDescription> triggerSet = new HashSet<>();
 						Collection<BundleDescription> closure = getDependencyClosure(Arrays.asList(reResolve));
 						for (BundleDescription toRefresh : closure) {
 							Bundle bundle = toRefresh.getBundle();
@@ -527,7 +527,7 @@ public abstract class StateImpl implements State {
 				@SuppressWarnings("unchecked")
 				Headers<Object, Object>[] tmpPlatformProperties = new Headers[platformProperties.length];
 				for (int i = 0; i < platformProperties.length; i++) {
-					tmpPlatformProperties[i] = new Headers<Object, Object>(platformProperties[i].size());
+					tmpPlatformProperties[i] = new Headers<>(platformProperties[i].size());
 					for (Enumeration<Object> keys = platformProperties[i].keys(); keys.hasMoreElements();) {
 						Object key = keys.nextElement();
 						tmpPlatformProperties[i].put(key, platformProperties[i].get(key));
@@ -568,7 +568,7 @@ public abstract class StateImpl implements State {
 		if (reResolve.length == 0)
 			return reResolve; // if reResolve length==0 then we want to prevent pending removal
 		// merge in all removal pending bundles that are not already in the list
-		List<BundleDescription> result = new ArrayList<BundleDescription>(reResolve.length + removed.length);
+		List<BundleDescription> result = new ArrayList<>(reResolve.length + removed.length);
 		for (int i = 0; i < reResolve.length; i++)
 			result.add(reResolve[i]);
 		for (int i = 0; i < removed.length; i++) {
@@ -699,7 +699,7 @@ public abstract class StateImpl implements State {
 	public ExportPackageDescription[] getExportedPackages() {
 		fullyLoad();
 		synchronized (this.monitor) {
-			List<ExportPackageDescription> allExportedPackages = new ArrayList<ExportPackageDescription>();
+			List<ExportPackageDescription> allExportedPackages = new ArrayList<>();
 			for (Iterator<KeyedElement> iter = resolvedBundles.iterator(); iter.hasNext();) {
 				BundleDescription bundle = (BundleDescription) iter.next();
 				ExportPackageDescription[] bundlePackages = bundle.getSelectedExports();
@@ -721,7 +721,7 @@ public abstract class StateImpl implements State {
 	}
 
 	BundleDescription[] getFragments(final BundleDescription host) {
-		final List<BundleDescription> fragments = new ArrayList<BundleDescription>();
+		final List<BundleDescription> fragments = new ArrayList<>();
 		synchronized (this.monitor) {
 			for (Iterator<KeyedElement> iter = bundleDescriptions.iterator(); iter.hasNext();) {
 				BundleDescription bundle = (BundleDescription) iter.next();
@@ -812,7 +812,7 @@ public abstract class StateImpl implements State {
 		@SuppressWarnings("unchecked")
 		Dictionary<Object, Object>[] newPlatformProperties = new Dictionary[platformProperties.length];
 		for (int i = 0; i < platformProperties.length; i++) {
-			newPlatformProperties[i] = new Hashtable<Object, Object>(platformProperties[i].size());
+			newPlatformProperties[i] = new Hashtable<>(platformProperties[i].size());
 			synchronized (platformProperties[i]) {
 				for (Enumeration<?> keys = platformProperties[i].keys(); keys.hasMoreElements();) {
 					Object key = keys.nextElement();
@@ -876,7 +876,7 @@ public abstract class StateImpl implements State {
 		for (int idx = 0; idx < systemBundles.length; idx++) {
 			BundleDescriptionImpl systemBundle = (BundleDescriptionImpl) systemBundles[idx];
 			ExportPackageDescription[] exports = systemBundle.getExportPackages();
-			List<ExportPackageDescription> newExports = new ArrayList<ExportPackageDescription>(exports.length);
+			List<ExportPackageDescription> newExports = new ArrayList<>(exports.length);
 			for (int i = 0; i < exports.length; i++)
 				if (((Integer) exports[i].getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue() < 0)
 					newExports.add(exports[i]);
@@ -910,7 +910,7 @@ public abstract class StateImpl implements State {
 		BundleDescription[] systemBundles = getBundles(Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
 		for (BundleDescription systemBundle : systemBundles) {
 			GenericDescription[] capabilities = systemBundle.getGenericCapabilities();
-			List<GenericDescription> newCapabilities = new ArrayList<GenericDescription>(capabilities.length);
+			List<GenericDescription> newCapabilities = new ArrayList<>(capabilities.length);
 			for (GenericDescription capability : capabilities) {
 				Object equinoxEEIndex = capability.getDeclaredAttributes().get(ExportPackageDescriptionImpl.EQUINOX_EE);
 				if (equinoxEEIndex == null)
@@ -940,14 +940,14 @@ public abstract class StateImpl implements State {
 			if (OSGI_EE_NAMESPACE.equals(capability.getType()) && profileIndex.equals(capability.getAttributes().get(ExportPackageDescriptionImpl.EQUINOX_EE)))
 				return; // profile already specifies osgi.ee capabilities
 		}
-		Map<String, List<String>> eeVersions = new HashMap<String, List<String>>();
+		Map<String, List<String>> eeVersions = new HashMap<>();
 		String[] ees = ManifestElement.getArrayFromList(profileEE);
 		for (String ee : ees) {
 			String[] eeNameVersion = StateBuilder.getOSGiEENameVersion(ee);
 
 			List<String> versions = eeVersions.get(eeNameVersion[0]);
 			if (versions == null) {
-				versions = new ArrayList<String>();
+				versions = new ArrayList<>();
 				eeVersions.put(eeNameVersion[0], versions);
 			}
 			if (eeNameVersion[1] != null && !versions.contains(eeNameVersion[1]))
@@ -956,10 +956,10 @@ public abstract class StateImpl implements State {
 		for (Map.Entry<String, List<String>> eeVersion : eeVersions.entrySet()) {
 			GenericDescriptionImpl capability = new GenericDescriptionImpl();
 			capability.setType(OSGI_EE_NAMESPACE);
-			Dictionary<String, Object> attributes = new Hashtable<String, Object>();
+			Dictionary<String, Object> attributes = new Hashtable<>();
 			attributes.put(capability.getType(), eeVersion.getKey());
 			if (eeVersion.getValue().size() > 0) {
-				List<Version> versions = new ArrayList<Version>(eeVersion.getValue().size());
+				List<Version> versions = new ArrayList<>(eeVersion.getValue().size());
 				for (String version : eeVersion.getValue()) {
 					versions.add(new Version(version));
 				}
@@ -1036,7 +1036,7 @@ public abstract class StateImpl implements State {
 
 	public Collection<BundleDescription> getDependencyClosure(Collection<BundleDescription> bundles) {
 		BundleDescription[] removals = getRemovalPending();
-		Set<BundleDescription> result = new HashSet<BundleDescription>();
+		Set<BundleDescription> result = new HashSet<>();
 		for (BundleDescription bundle : bundles) {
 			addDependents(bundle, result, removals);
 		}
@@ -1086,7 +1086,7 @@ public abstract class StateImpl implements State {
 				resolving = true;
 				ResolverHookFactory currentFactory = hookFactory;
 				if (currentFactory != null) {
-					Collection<BundleRevision> triggers = new ArrayList<BundleRevision>(1);
+					Collection<BundleRevision> triggers = new ArrayList<>(1);
 					triggers.add(importingBundle);
 					triggers = Collections.unmodifiableCollection(triggers);
 					currentHook = begin(triggers);
@@ -1165,7 +1165,7 @@ public abstract class StateImpl implements State {
 
 	public ExportPackageDescription[] getSystemPackages() {
 		synchronized (this.monitor) {
-			List<ExportPackageDescription> result = new ArrayList<ExportPackageDescription>();
+			List<ExportPackageDescription> result = new ArrayList<>();
 			BundleDescription[] systemBundles = getBundles(Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
 			if (systemBundles.length > 0) {
 				BundleDescriptionImpl systemBundle = (BundleDescriptionImpl) systemBundles[0];
@@ -1199,7 +1199,7 @@ public abstract class StateImpl implements State {
 				throw new IllegalStateException(); // TODO need error message here!
 			List<ResolverError> errors = resolverErrors.get(bundle);
 			if (errors == null) {
-				errors = new ArrayList<ResolverError>(1);
+				errors = new ArrayList<>(1);
 				resolverErrors.put(bundle, errors);
 			}
 			errors.add(new ResolverErrorImpl((BundleDescriptionImpl) bundle, type, data, unsatisfied));
@@ -1266,7 +1266,7 @@ public abstract class StateImpl implements State {
 				throw new IllegalArgumentException(NLS.bind(StateMsg.BUNDLE_NOT_IN_STATE, disabledInfo.getBundle()));
 			List<DisabledInfo> currentInfos = disabledBundles.get(disabledInfo.getBundle());
 			if (currentInfos == null) {
-				currentInfos = new ArrayList<DisabledInfo>(1);
+				currentInfos = new ArrayList<>(1);
 				currentInfos.add(disabledInfo);
 				disabledBundles.put(disabledInfo.getBundle(), currentInfos);
 			} else {
@@ -1324,7 +1324,7 @@ public abstract class StateImpl implements State {
 	 * Used by StateWriter to get all the DisabledInfo objects to persist
 	 */
 	DisabledInfo[] getDisabledInfos() {
-		List<DisabledInfo> results = new ArrayList<DisabledInfo>();
+		List<DisabledInfo> results = new ArrayList<>();
 		synchronized (this.monitor) {
 			for (Iterator<List<DisabledInfo>> allDisabledInfos = disabledBundles.values().iterator(); allDisabledInfos.hasNext();)
 				results.addAll(allDisabledInfos.next());
