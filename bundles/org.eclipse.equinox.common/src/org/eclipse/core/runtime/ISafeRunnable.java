@@ -22,6 +22,7 @@ package org.eclipse.core.runtime;
  * </p>
  * @see SafeRunner#run(ISafeRunnable)
  */
+@FunctionalInterface
 public interface ISafeRunnable {
 	/**
 	 * Runs this runnable.  Any exceptions thrown from this method will
