@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="stubs/org.eclipse.virgo.teststubs.osgi.jar" sourcepath="stubs/org.eclipse.virgo.teststubs.osgi-sources.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" output="bundle_tests/PackageProvider1" path="bundles_src/PackageProvider1"/>
@@ -16,5 +15,6 @@
 	<classpathentry kind="src" output="bundle_tests/CapabilityClient1" path="bundles_src/CapabilityClient1"/>
 	<classpathentry kind="src" output="bundle_tests/Singleton1" path="bundles_src/Singleton1"/>
 	<classpathentry kind="src" output="bundle_tests/Singleton2" path="bundles_src/Singleton2"/>
+	<classpathentry exported="true" kind="lib" path="stubs/org.eclipse.virgo.teststubs.osgi.jar" sourcepath="stubs/org.eclipse.virgo.teststubs.osgi-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
