@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.equinox.http.servlet" version="2">
-    <resource path="src/org/eclipse/equinox/http/servlet/ExtendedHttpService.java" type="org.eclipse.equinox.http.servlet.ExtendedHttpService">
-        <filter comment="Add restriction for the provider type" id="403853384">
+    <resource path="META-INF/MANIFEST.MF">
+        <filter comment="Increased minor version because provisional internal package was added." id="926941240">
             <message_arguments>
-                <message_argument value="org.eclipse.equinox.http.servlet.ExtendedHttpService"/>
+                <message_argument value="1.4.0"/>
+                <message_argument value="1.3.0"/>
             </message_arguments>
         </filter>
     </resource>
