@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Rapicorp, Inc - Support for Mac Layout (bug 431116)
+ *     Mickael Istria (Red Hat Inc.) - [502220] Default ws ${launcher}-workspace
  *******************************************************************************/
 package org.eclipse.osgi.internal.location;
 
@@ -92,8 +93,20 @@ public class EquinoxLocations {
 
 		temp = buildLocation(PROP_INSTANCE_AREA_DEFAULT, null, "", false, false, INSTANCE_DATA_AREA_PREFIX); //$NON-NLS-1$
 		defaultLocation = temp == null ? null : temp.getURL();
-		if (defaultLocation == null)
-			defaultLocation = buildURL(new File(System.getProperty(PROP_USER_DIR), "workspace").getAbsolutePath(), true); //$NON-NLS-1$
+		if (defaultLocation == null) {
+			StringBuilder instanceAreaDefault = new StringBuilder();
+			String launcherPath = equinoxConfig.getConfiguration(PROP_LAUNCHER);
+			if (launcherPath != null) {
+				String launcherName = new File(launcherPath).getName();
+				if (launcherName.endsWith(".exe")) { //$NON-NLS-1$
+					launcherName = launcherName.substring(0, launcherName.length() - ".exe".length()); //$NON-NLS-1$
+				}
+				instanceAreaDefault.append(launcherName);
+				instanceAreaDefault.append('-');
+			}
+			instanceAreaDefault.append("workspace"); //$NON-NLS-1$
+			defaultLocation = buildURL(new File(System.getProperty(PROP_USER_DIR), instanceAreaDefault.toString()).getAbsolutePath(), true);
+		}
 		instanceLocation = buildLocation(PROP_INSTANCE_AREA, defaultLocation, "", false, false, INSTANCE_DATA_AREA_PREFIX); //$NON-NLS-1$
 
 		mungeConfigurationLocation();
