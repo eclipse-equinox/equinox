@@ -29,7 +29,6 @@ PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).so
 MAIN_OBJS = eclipseMain.o eclipseCocoaMain.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseCocoaCommon.o
 DLL_OBJS	= eclipse.o eclipseCocoa.o eclipseUtil.o eclipseJNI.o eclipseShm.o
-#NgImageData.o NgWinBMPFileFormat.o NgCommon.o
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
@@ -43,7 +42,7 @@ CFLAGS = -O -s \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
-	-I.. -I../motif $(JAVA_HEADERS)
+	-I.. $(JAVA_HEADERS)
 
 all: $(EXEC) $(DLL)
 
@@ -70,15 +69,6 @@ eclipseCommon.o: ../eclipseCommon.h ../eclipseUnicode.h ../eclipseCommon.c
 
 eclipseShm.o: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
 	$(CC) $(CFLAGS) -c ../eclipseShm.c -o $@
-
-NgCommon.o: ../motif/NgCommon.c
-	$(CC) $(CFLAGS) -c ../motif/NgCommon.c -o $@
-
-NgWinBMPFileFormat.o: ../motif/NgWinBMPFileFormat.c
-	$(CC) $(CFLAGS) -c ../motif/NgWinBMPFileFormat.c -o $@
-
-NgImageData.o: ../motif/NgImageData.c
-	$(CC) $(CFLAGS) -c ../motif/NgImageData.c -o $@
 
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
 	$(CC) -o $(EXEC) $(ARCHS) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)

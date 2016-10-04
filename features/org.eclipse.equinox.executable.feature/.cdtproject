@@ -86,20 +86,6 @@
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
 </target>
-<target name="linux-all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="library/motif">
-<buildCommand>make</buildCommand>
-<buildArguments>-f make_linux.mak JAVA_HOME=/usr/java/1.5 DEFAULT_WS=motif</buildArguments>
-<buildTarget>all</buildTarget>
-<stopOnError>false</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="library/motif">
-<buildCommand>make</buildCommand>
-<buildArguments>-f make_linux.mak</buildArguments>
-<buildTarget>clean</buildTarget>
-<stopOnError>false</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
 <target name="linux-all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="library/gtk">
 <buildCommand>make</buildCommand>
 <buildArguments>-f make_linux.mak JAVA_HOME=/usr/java/1.5</buildArguments>

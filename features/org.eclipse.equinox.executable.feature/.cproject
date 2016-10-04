@@ -62,22 +62,6 @@
 						<useDefaultCommand>false</useDefaultCommand>
 						<runAllBuilders>true</runAllBuilders>
 					</target>
-					<target name="linux-all" path="library/motif" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-						<buildCommand>make</buildCommand>
-						<buildArguments>-f make_linux.mak JAVA_HOME=/usr/java/1.5 DEFAULT_WS=motif MOTIF_HOME=/eclipse/motif21</buildArguments>
-						<buildTarget>all</buildTarget>
-						<stopOnError>false</stopOnError>
-						<useDefaultCommand>false</useDefaultCommand>
-						<runAllBuilders>true</runAllBuilders>
-					</target>
-					<target name="clean" path="library/motif" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-						<buildCommand>make</buildCommand>
-						<buildArguments>-f make_linux.mak</buildArguments>
-						<buildTarget>clean</buildTarget>
-						<stopOnError>false</stopOnError>
-						<useDefaultCommand>false</useDefaultCommand>
-						<runAllBuilders>true</runAllBuilders>
-					</target>
 				</buildTargets>
 			</storageModule>
 		</cconfiguration>

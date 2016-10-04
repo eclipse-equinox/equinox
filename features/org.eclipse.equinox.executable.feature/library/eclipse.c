@@ -64,7 +64,7 @@
  *  -vm <javaVM>               the Java VM to be used
  *  -os <opSys>                the operating system being run on
  *  -arch <osArch>             the hardware architecture of the OS: x86, sparc, hp9000
- *  -ws <gui>                  the window system to be used: win32, motif, gtk, ...
+ *  -ws <gui>                  the window system to be used: win32, gtk, cocoa, ...
  *  -nosplash                  do not display the splash screen. The java application will
  *                             not receive the -showsplash command.
  *  -showsplash <bitmap>	   show the given bitmap in the splash screen.

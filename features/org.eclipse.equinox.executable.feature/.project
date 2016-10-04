@@ -59,7 +59,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.environment</key>
-					<value>DEFAULT_OS=${system_property:osgi.os}|DEFAULT_OS_ARCH=${system_property:osgi.arch}|X11_HOME=/usr/X11R6|DEFAULT_WS=${system_property:osgi.ws}|JAVA_HOME=${system_property:java.home}/..|MOTIF_HOME=/usr/X11|PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/share/pkgconfig:/usr/lib64/pkgconfig:/usr/share/pkgconfig:/opt/kde3/lib64/pkgconfig:/opt/gnome/lib64/pkgconfig:/opt/gnome/lib64/pkgconfig:/opt/gnome/share/pkgconfig|</value>
+					<value>DEFAULT_OS=${system_property:osgi.os}|DEFAULT_OS_ARCH=${system_property:osgi.arch}|X11_HOME=/usr/X11R6|DEFAULT_WS=${system_property:osgi.ws}|JAVA_HOME=${system_property:java.home}/..|PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/share/pkgconfig:/usr/lib64/pkgconfig:/usr/share/pkgconfig:/opt/kde3/lib64/pkgconfig:/opt/gnome/lib64/pkgconfig:/opt/gnome/lib64/pkgconfig:/opt/gnome/share/pkgconfig|</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.stopOnError</key>
