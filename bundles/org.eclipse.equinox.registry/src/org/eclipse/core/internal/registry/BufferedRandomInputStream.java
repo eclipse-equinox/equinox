@@ -100,7 +100,7 @@ public class BufferedRandomInputStream extends InputStream {
 		return available + skipped;
 	}
 
-	public int available() throws IOException {
+	public int available() {
 		return (buffer_size - buffer_pos);
 	}
 

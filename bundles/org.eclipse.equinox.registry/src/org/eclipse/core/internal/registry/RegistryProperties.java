@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.Status;
  * to BundleContext properties (if available) or System properties otherwise.
  */
 public class RegistryProperties {
-	
+
 	public static final String empty = ""; //$NON-NLS-1$
 
 	private static Properties registryProperties = new Properties();
@@ -68,7 +68,7 @@ public class RegistryProperties {
 			// is not present or non-standard. This should not happen, but let's give
 			// the program a chance to continue - properties should have reasonable 
 			// default values.
-			IStatus status = new Status(Status.ERROR, IRegistryConstants.RUNTIME_NAME, 0, e.getMessage(), e);
+			IStatus status = new Status(IStatus.ERROR, IRegistryConstants.RUNTIME_NAME, 0, e.getMessage(), e);
 			RuntimeLog.log(status);
 			return null;
 		}

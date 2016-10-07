@@ -24,7 +24,7 @@ public class RegistryIndexElement implements KeyedElement {
 	public RegistryIndexElement(String key) {
 		this.key = key;
 	}
-	
+
 	public RegistryIndexElement(String key, int[] extensionPoints, int[] extensions) {
 		this.key = key;
 		this.extensionPoints = new RegistryIndexChildren(extensionPoints);
@@ -49,8 +49,7 @@ public class RegistryIndexElement implements KeyedElement {
 
 		if (add)
 			return extensions.linkChild(id);
-		else
-			return extensions.unlinkChild(id);
+		return extensions.unlinkChild(id);
 	}
 
 	public boolean updateExtensions(int[] IDs, boolean add) {
@@ -59,8 +58,7 @@ public class RegistryIndexElement implements KeyedElement {
 
 		if (add)
 			return extensions.linkChildren(IDs);
-		else
-			return extensions.unlinkChildren(IDs);
+		return extensions.unlinkChildren(IDs);
 	}
 
 	public boolean updateExtensionPoint(int id, boolean add) {
@@ -69,8 +67,7 @@ public class RegistryIndexElement implements KeyedElement {
 
 		if (add)
 			return extensionPoints.linkChild(id);
-		else
-			return extensionPoints.unlinkChild(id);
+		return extensionPoints.unlinkChild(id);
 	}
 
 	public boolean updateExtensionPoints(int[] IDs, boolean add) {
@@ -79,8 +76,7 @@ public class RegistryIndexElement implements KeyedElement {
 
 		if (add)
 			return extensionPoints.linkChildren(IDs);
-		else
-			return extensionPoints.unlinkChildren(IDs);
+		return extensionPoints.unlinkChildren(IDs);
 	}
 
 	//Implements the KeyedElement interface

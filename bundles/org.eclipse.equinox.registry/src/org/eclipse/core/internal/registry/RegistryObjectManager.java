@@ -476,7 +476,7 @@ public class RegistryObjectManager implements IObjectManager {
 		if (orphanExtensions == null && !fromCache) {
 			result = new HashMap();
 			orphanExtensions = result;
-		} else if (orphanExtensions == null || (result = ((HashMap) ((orphanExtensions instanceof SoftReference) ? ((SoftReference) orphanExtensions).get() : orphanExtensions))) == null) {
+		} else if (orphanExtensions == null || (result = ((orphanExtensions instanceof SoftReference) ? ((SoftReference) orphanExtensions).get() : orphanExtensions)) == null) {
 			result = registry.getTableReader().loadOrphans();
 			orphanExtensions = new SoftReference(result);
 		}
