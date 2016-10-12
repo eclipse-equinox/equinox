@@ -17,7 +17,6 @@
 #include <locale.h>
 #include <dlfcn.h>
 #include <stdio.h>
-#include <string.h>
 
 #define ECLIPSE_ICON  401
 
@@ -49,12 +48,8 @@ void displayMessage(char* title, char* message)
 	
     /* If GTK has not been initialized yet, do it now. */
     if (initWindowSystem( &saveArgc, saveArgv, 1 ) != 0) {
-    	printf("%s:\n%s\n", title, message);
+		printf("%s:\n%s\n", title, message);
     	return;
-    }
-
-    if (strcmp( message, _T_ECLIPSE("GTK+ Version Check")) == 0) {
-        return;
     }
 
   	dialog = gtk.gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT,

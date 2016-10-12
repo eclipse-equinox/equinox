@@ -202,7 +202,6 @@ static _TCHAR* returnCodeMsg = _T_ECLIPSE("Java was started but returned exit co
 static _TCHAR* goVMMsg = _T_ECLIPSE("Start VM: %s\n");
 static _TCHAR* pathMsg = _T_ECLIPSE("%s in your current PATH");
 static _TCHAR* shareMsg = _T_ECLIPSE("No exit data available.");
-static _TCHAR* gtkCheck = _T_ECLIPSE("GTK+ Version Check");
 static _TCHAR* noVMMsg =
 _T_ECLIPSE("A Java Runtime Environment (JRE) or Java Development Kit (JDK)\n\
 must be available in order to run %s. No Java virtual machine\n\
@@ -618,7 +617,12 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 
 #ifndef _WIN32
 #ifndef MACOSX
-    displayMessage( officialName, gtkCheck );
+    if ((!suppressErrors) && (!noSplash)) {
+	char *display = getenv("DISPLAY");
+        if (display != NULL) {
+            initWindowSystem( &argc, argv, 1);
+        }
+    }
 #endif
 #endif
 	/* the startup jarFile goes on the classpath */
