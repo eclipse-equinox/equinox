@@ -208,8 +208,8 @@ public class DTOBuilder {
 			builder.getBundleWiringNodeDTO(wiring);
 		}
 		FrameworkWiringDTO dto = new FrameworkWiringDTO();
-		dto.wirings = new HashSet<BundleWiringDTO.NodeDTO>(builder.wiringnodes.values());
-		dto.resources = new HashSet<BundleRevisionDTO>(builder.resources.values());
+		dto.wirings = new HashSet<>(builder.wiringnodes.values());
+		dto.resources = new HashSet<>(builder.resources.values());
 		return dto;
 	}
 

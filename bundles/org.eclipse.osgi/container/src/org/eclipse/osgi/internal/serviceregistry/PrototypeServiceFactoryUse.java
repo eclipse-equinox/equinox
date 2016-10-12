@@ -41,7 +41,7 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	 */
 	PrototypeServiceFactoryUse(BundleContextImpl context, ServiceRegistrationImpl<S> registration) {
 		super(context, registration);
-		this.serviceObjects = new IdentityHashMap<S, AtomicInteger>();
+		this.serviceObjects = new IdentityHashMap<>();
 	}
 
 	/**

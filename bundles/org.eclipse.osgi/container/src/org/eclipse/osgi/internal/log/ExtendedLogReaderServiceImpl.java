@@ -10,6 +10,7 @@ package org.eclipse.osgi.internal.log;
 import java.util.*;
 import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.LogFilter;
+import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogListener;
 
 public class ExtendedLogReaderServiceImpl implements ExtendedLogReaderService {
@@ -37,7 +38,7 @@ public class ExtendedLogReaderServiceImpl implements ExtendedLogReaderService {
 		addLogListener(listener, ExtendedLogReaderServiceFactory.NULL_LOGGER_FILTER);
 	}
 
-	public Enumeration getLog() {
+	public Enumeration<LogEntry> getLog() {
 		checkShutdown();
 		return factory.getLog();
 	}

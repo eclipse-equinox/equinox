@@ -878,7 +878,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			if (FrameworkWiringDTO.class.equals(adapterType)) {
 				readLock();
 				try {
-					Set<BundleWiring> allWirings = new HashSet<BundleWiring>();
+					Set<BundleWiring> allWirings = new HashSet<>();
 					for (Module m : module.getContainer().getModules()) {
 						for (BundleRevision revision : m.getRevisions().getRevisions()) {
 							BundleWiring wiring = revision.getWiring();

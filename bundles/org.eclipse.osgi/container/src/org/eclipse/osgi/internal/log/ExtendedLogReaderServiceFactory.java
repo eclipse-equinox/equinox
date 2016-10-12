@@ -36,7 +36,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	}
 
 	@SuppressWarnings("unchecked")
-	private static final Enumeration<?> EMPTY_ENUMERATION = Collections.enumeration(Collections.EMPTY_LIST);
+	private static final Enumeration<LogEntry> EMPTY_ENUMERATION = Collections.enumeration(Collections.EMPTY_LIST);
 
 	static final LogFilter NULL_LOGGER_FILTER = new LogFilter() {
 		public boolean isLoggable(Bundle b, String loggerName, int logLevel) {
@@ -285,7 +285,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 		}
 	}
 
-	Enumeration<?> getLog() {
+	Enumeration<LogEntry> getLog() {
 		if (history == null) {
 			return EMPTY_ENUMERATION;
 		}

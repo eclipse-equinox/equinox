@@ -17,10 +17,10 @@ import org.osgi.framework.Version;
 import org.osgi.service.log.admin.LoggerContext;
 
 public class LoggerContextTargetMap {
-	private final Map<Bundle, ExtendedLogServiceImpl> logServices = new HashMap<Bundle, ExtendedLogServiceImpl>();
-	private final Map<String, EquinoxLoggerContext> loggerContexts = new HashMap<String, EquinoxLoggerContext>();
-	private final Map<Bundle, List<String>> targetToQualifiedNames = new HashMap<Bundle, List<String>>();
-	private final Map<String, Collection<Bundle>> qualifiedNameToTargets = new HashMap<String, Collection<Bundle>>();
+	private final Map<Bundle, ExtendedLogServiceImpl> logServices = new HashMap<>();
+	private final Map<String, EquinoxLoggerContext> loggerContexts = new HashMap<>();
+	private final Map<Bundle, List<String>> targetToQualifiedNames = new HashMap<>();
+	private final Map<String, Collection<Bundle>> qualifiedNameToTargets = new HashMap<>();
 
 	List<String> add(Bundle b) {
 		String bsn = b.getSymbolicName();
@@ -31,7 +31,7 @@ public class LoggerContextTargetMap {
 		String version = v == null ? "" : v.toString(); //$NON-NLS-1$
 		String location = ExtendedLogServiceFactory.secureAction.getLocation(b);
 
-		List<String> result = new ArrayList<String>(3);
+		List<String> result = new ArrayList<>(3);
 
 		StringBuilder sb = new StringBuilder(bsn);
 		getTargetsInternal(bsn).add(b);
@@ -72,7 +72,7 @@ public class LoggerContextTargetMap {
 	private Collection<Bundle> getTargetsInternal(String pid) {
 		Collection<Bundle> targets = qualifiedNameToTargets.get(pid);
 		if (targets == null) {
-			targets = new ArrayList<Bundle>(1);
+			targets = new ArrayList<>(1);
 			qualifiedNameToTargets.put(pid, targets);
 		}
 		return targets;

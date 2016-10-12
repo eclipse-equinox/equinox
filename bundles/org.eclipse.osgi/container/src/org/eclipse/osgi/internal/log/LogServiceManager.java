@@ -56,7 +56,7 @@ public class LogServiceManager implements BundleListener, FrameworkListener, Ser
 		context.addBundleListener(logServiceFactory);
 		logReaderServiceRegistration = context.registerService(LOGREADERSERVICE_CLASSES, logReaderServiceFactory, null);
 		logServiceRegistration = context.registerService(LOGSERVICE_CLASSES, logServiceFactory, null);
-		Hashtable<String, Object> loggerAdminProps = new Hashtable<String, Object>();
+		Hashtable<String, Object> loggerAdminProps = new Hashtable<>();
 		// TODO the constant for log service id will like be defined
 		loggerAdminProps.put("osgi.log.service.id", logServiceRegistration.getReference().getProperty(Constants.SERVICE_ID)); //$NON-NLS-1$
 		loggerAdminRegistration = context.registerService(LoggerAdmin.class, logServiceFactory.getLoggerAdmin(), loggerAdminProps);
