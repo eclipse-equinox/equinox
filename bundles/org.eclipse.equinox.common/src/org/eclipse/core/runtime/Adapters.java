@@ -59,7 +59,10 @@ public class Adapters {
 			Object result = adaptable.getAdapter(adapter);
 			if (result != null) {
 				// Sanity-check
-				Assert.isTrue(adapter.isInstance(result));
+				if (!adapter.isInstance(result)) {
+					throw new AssertionFailedException(adaptable.getClass().getName() + ".getAdapter(" + adapter.getName() + ".class) returned " //$NON-NLS-1$//$NON-NLS-2$
+							+ result.getClass().getName() + " that is not an instance the requested type"); //$NON-NLS-1$
+				}
 				return (T) result;
 			}
 		}
@@ -74,7 +77,11 @@ public class Adapters {
 		Object result = queryAdapterManager(sourceObject, adapterId, allowActivation);
 		if (result != null) {
 			// Sanity-check
-			Assert.isTrue(adapter.isInstance(result));
+			if (!adapter.isInstance(result)) {
+				throw new AssertionFailedException("An adapter factory for " //$NON-NLS-1$
+						+ sourceObject.getClass().getName() + " returned " + result.getClass().getName() //$NON-NLS-1$
+						+ " that is not an instance of " + adapter.getName()); //$NON-NLS-1$
+			}
 			return (T) result;
 		}
 
