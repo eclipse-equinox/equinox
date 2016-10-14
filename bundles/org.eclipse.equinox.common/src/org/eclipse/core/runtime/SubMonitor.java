@@ -178,7 +178,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * affects operations which are too small to report any progress. Operations which are large
 	 * enough to consume at least one tick will always be checked for cancellation.
 	 */
-	private static final int TRIVIAL_SPLITS_BEFORE_CANCELLATION_CHECK = 10;
+	private static final int TRIVIAL_SPLITS_BEFORE_CANCELLATION_CHECK = 20;
 
 	/**
 	 * Number of trivial tick operations (operations which do not report any progress) which can be
@@ -188,7 +188,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * affects operations which are too small to report any progress. Operations which are large
 	 * enough to consume at least one tick will always be checked for cancellation.
 	 */
-	private static final int TRIVIAL_TICKS_BEFORE_CANCELLATION_CHECK = 10;
+	private static final int TRIVIAL_TICKS_BEFORE_CANCELLATION_CHECK = 20;
 
 	/**
 	 * The limit for {@link RootInfo#cancellationCheckCounter} before performing a cancellation check.
@@ -330,7 +330,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * the parent progress monitor is touched. This points to the last incomplete child 
 	 * created with split.
 	 */
-	private IProgressMonitor lastSubMonitor = null;
+	private SubMonitor lastSubMonitor = null;
 
 	/**
 	 * Used to communicate with the root of this progress monitor tree
@@ -486,8 +486,10 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * @return a new SubMonitor instance that is a child of the given monitor
 	 */
 	public static SubMonitor convert(IProgressMonitor monitor, String taskName, int work) {
-		if (monitor == null)
+		if (monitor == null) {
 			monitor = new NullProgressMonitor();
+			return new SubMonitor(new RootInfo(monitor), 0, work, SUPPRESS_ALL_LABELS);
+		}
 
 		// Optimization: if the given monitor already a SubMonitor, no conversion is necessary
 		if (monitor instanceof SubMonitor) {
@@ -781,12 +783,9 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * @return new sub progress monitor that may be used in place of a new SubMonitor
 	 */
 	public SubMonitor newChild(int totalWork, int suppressFlags) {
-		if (TracingOptions.debugProgressMonitors && totalWork == 0) {
-			logProblem("Attempted to create a child without providing it with any ticks"); //$NON-NLS-1$
-		}
-
 		double totalWorkDouble = (totalWork > 0) ? totalWork : 0.0d;
 		totalWorkDouble = Math.min(totalWorkDouble, totalForChildren - usedForChildren);
+		SubMonitor oldActiveChild = lastSubMonitor;
 		cleanupActiveChild();
 
 		// Compute the flags for the child. We want the net effect to be as though the child is
@@ -807,7 +806,35 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 		// is no method on the child that would delegate to beginTask on the parent.
 		childFlags |= (suppressFlags & ALL_PUBLIC_FLAGS);
 
-		SubMonitor result = new SubMonitor(root, consume(totalWorkDouble), 0, childFlags);
+		int consumed = consume(totalWorkDouble);
+
+		if (TracingOptions.debugProgressMonitors) {
+			if (totalWork == 0) {
+				logProblem("Attempted to create a child without providing it with any ticks"); //$NON-NLS-1$
+			}
+		} else {
+			// Only perform optimizations which reuse monitors if we're not debugging progress monitors,
+			// since reusing the monitors prevents us from tracking the usage of an individual monitor
+			// in any meaningful way.
+
+			// If we're creating a new child that can't report any ticks and we just consumed a previous
+			// child, just reuse the previous child.
+			if (consumed == 0 && oldActiveChild != null && childFlags == oldActiveChild.flags) {
+				lastSubMonitor = oldActiveChild;
+				return oldActiveChild;
+			}
+
+			// If the new child is going to consume the entire parent, return the parent itself.
+			if (usedForParent >= totalParent && childFlags == flags) {
+				totalParent = consumed;
+				usedForParent = 0;
+				totalForChildren = 0;
+				usedForChildren = 0;
+				return this;
+			}
+		}
+
+		SubMonitor result = new SubMonitor(root, consumed, 0, childFlags);
 		lastSubMonitor = result;
 		return result;
 	}
@@ -958,20 +985,14 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * @since 3.8
 	 */
 	public SubMonitor split(int totalWork, int suppressFlags) throws OperationCanceledException {
-		int oldUsedForParent = this.usedForParent;
 		SubMonitor result = newChild(totalWork, suppressFlags);
 
-		if ((flags & SUPPRESS_ISCANCELED) == 0) {
+		if ((flags & SUPPRESS_ISCANCELED) == 0 && result != this) {
 			int ticksTheChildWillReportToParent = result.totalParent;
 
 			// If the new child reports a nonzero amount of progress.
 			if (ticksTheChildWillReportToParent > 0) {
-				// Don't check for cancellation if the child is consuming 100% of its parent since whatever code created
-				// the parent already performed this check.
-				if (oldUsedForParent > 0 || usedForParent < totalParent) {
-					// Treat this as a nontrivial operation and check for cancellation unconditionally.
-					root.checkForCancellation();
-				}
+				root.checkForCancellation();
 			} else {
 				root.reportTrivialOperation(TRIVIAL_SPLIT_DELTA);
 			}
