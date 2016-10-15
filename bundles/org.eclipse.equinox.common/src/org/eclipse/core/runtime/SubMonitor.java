@@ -205,7 +205,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * Amount to increment {@link RootInfo#cancellationCheckCounter} when performing
 	 * a trivial {@link #step(int)} operation.
 	 */
-	private static final int TRIVIAL_TICK_DELTA = TRIVIAL_OPERATION_COUNT_LIMIT / TRIVIAL_TICKS_BEFORE_CANCELLATION_CHECK;;
+	private static final int TRIVIAL_TICK_DELTA = TRIVIAL_OPERATION_COUNT_LIMIT / TRIVIAL_TICKS_BEFORE_CANCELLATION_CHECK;
 
 	/**
 	 * Minimum number of ticks to allocate when calling beginTask on an unknown IProgressMonitor.
@@ -216,7 +216,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 
 	/**
 	 * The RootInfo holds information about the root progress monitor. A SubMonitor and
-	 * its active descendents share the same RootInfo.
+	 * its active descendants share the same RootInfo.
 	 */
 	private static final class RootInfo {
 		final IProgressMonitor root;
@@ -225,13 +225,13 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 		 * Remembers the last task name. Prevents us from setting the same task name multiple
 		 * times in a row.
 		 */
-		String taskName = null;
+		String taskName;
 
 		/**
 		 * Remembers the last subtask name. Prevents the SubMonitor from setting the same
 		 * subtask string more than once in a row.
 		 */
-		String subTask = null;
+		String subTask;
 
 		/**
 		 * Counter that indicates when we should perform an cancellation check for a trivial
@@ -240,9 +240,8 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 		int cancellationCheckCounter;
 
 		/**
-		 * Creates a RootInfo struct that delegates to the given progress 
-		 * monitor. 
-		 * 
+		 * Creates a RootInfo structure that delegates to the given progress monitor.
+		 *
 		 * @param root progress monitor to delegate to
 		 */
 		public RootInfo(IProgressMonitor root) {
@@ -598,6 +597,27 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 			return root.isCanceled();
 		}
 		return false;
+	}
+
+	/**
+	 * Checks whether cancellation of current operation has been requested and throws
+	 * an {@link OperationCanceledException} if it was the case. This method is a shorthand
+	 * for:
+	 * <pre>
+	 * if (monitor.isCanceled())
+	 *     throw new OperationCanceledException();
+	 * </pre>
+	 *
+	 * @return this SubMonitor to allow for chained invocation
+	 * @throws OperationCanceledException if cancellation has been requested
+	 * @see #isCanceled()
+	 * @since 3.9
+	 */
+	public SubMonitor checkCanceled() throws OperationCanceledException {
+		if (isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		return this;
 	}
 
 	@Override
