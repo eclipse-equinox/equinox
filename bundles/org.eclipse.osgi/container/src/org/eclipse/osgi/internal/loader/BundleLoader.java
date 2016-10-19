@@ -18,7 +18,6 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.osgi.container.*;
@@ -95,7 +94,10 @@ public class BundleLoader extends ModuleLoader {
 	/* If not null, list of package names to import dynamically. */
 	private String[] dynamicImportPackages;
 
-	private final AtomicReference<ModuleClassLoader> classloader = new AtomicReference<>();
+	private final Object classLoaderCreatedMonitor = new Object();
+	/* @GuardedBy("classLoaderCreatedMonitor") */
+	private ModuleClassLoader classLoaderCreated;
+	private volatile ModuleClassLoader classloader;
 	private final ClassLoader parent;
 	private final AtomicBoolean triggerClassLoaded = new AtomicBoolean(false);
 
@@ -219,7 +221,7 @@ public class BundleLoader extends ModuleLoader {
 	}
 
 	public ModuleClassLoader getModuleClassLoader() {
-		ModuleClassLoader result = classloader.get();
+		ModuleClassLoader result = classloader;
 		if (result != null) {
 			return result;
 		}
@@ -239,15 +241,27 @@ public class BundleLoader extends ModuleLoader {
 			});
 		}
 
-		if (classloader.compareAndSet(null, result)) {
-			// only send to hooks if this thread wins in creating the class loader.
-			for (ClassLoaderHook hook : hooks) {
-				hook.classLoaderCreated(result);
-			}
-		} else {
-			result = classloader.get();
-			if (debug.DEBUG_LOADER) {
-				Debug.println("BundleLoader[" + this + "].getModuleClassLoader() - created duplicate classloader"); //$NON-NLS-1$ //$NON-NLS-2$
+		// Synchronize on classLoaderCreatedMonitor in order to ensure hooks are called before returning.
+		// Note that we do hold a lock here while calling hooks.
+		// Not ideal, but hooks really should do little work from classLoaderCreated method.
+		synchronized (classLoaderCreatedMonitor) {
+			if (classLoaderCreated == null) {
+				// must set createdClassloader before calling hooks; otherwise we could enter
+				// and endless loop if the hook causes re-entry (that would be a bad hook impl)
+				classLoaderCreated = result;
+				// only send to hooks if this thread wins in creating the class loader.
+				for (ClassLoaderHook hook : hooks) {
+					hook.classLoaderCreated(result);
+				}
+				// finally set the class loader for use after calling hooks
+				classloader = classLoaderCreated;
+			} else {
+				// return the classLoaderCreated here; not the final classloader
+				// this is necessary in case re-entry by a hook.classLoaderCreated method
+				result = classLoaderCreated;
+				if (debug.DEBUG_LOADER) {
+					Debug.println("BundleLoader[" + this + "].getModuleClassLoader() - created duplicate classloader"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
 			}
 		}
 		return result;
@@ -274,7 +288,7 @@ public class BundleLoader extends ModuleLoader {
 	}
 
 	void loadClassLoaderFragments(Collection<ModuleRevision> fragments) {
-		ModuleClassLoader current = classloader.get();
+		ModuleClassLoader current = classloader;
 		if (current != null) {
 			current.loadFragments(fragments);
 		}
@@ -301,7 +315,7 @@ public class BundleLoader extends ModuleLoader {
 				policy.close(context);
 			}
 		}
-		ModuleClassLoader current = classloader.get();
+		ModuleClassLoader current = classloader;
 		if (current != null) {
 			current.close();
 		}
