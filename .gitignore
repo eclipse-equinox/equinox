@@ -1,4 +1,5 @@
 /*/*/bin/
+/bundles/archived/*/bin/
 .DS_Store
 
 # maven
