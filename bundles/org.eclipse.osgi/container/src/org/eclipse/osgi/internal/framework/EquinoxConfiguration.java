@@ -34,6 +34,7 @@ import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
+import org.eclipse.osgi.internal.location.LocationHelper;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
@@ -322,7 +323,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			if (location == null)
 				return result;
 			try {
-				InputStream in = location.openStream();
+				InputStream in = LocationHelper.getStream(location);
 				try {
 					result.load(in);
 				} finally {
@@ -525,13 +526,13 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 				URL location = new URL(osgiDev);
 
 				if ("file".equals(location.getProtocol())) { //$NON-NLS-1$
-					f = new File(location.getFile());
+					f = LocationHelper.decodePath(new File(location.getPath()));
 					devLastModified = f.lastModified();
 				}
 
 				// Check the osgi.dev property to see if dev classpath entries have been defined.
 				try {
-					loadDevProperties(location.openStream());
+					loadDevProperties(LocationHelper.getStream(location));
 					devMode = true;
 				} catch (IOException e) {
 					// TODO consider logging
@@ -903,13 +904,13 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 				setConfiguration(PROP_FRAMEWORK, externalForm);
 			}
 			if (getConfiguration(EquinoxLocations.PROP_INSTALL_AREA) == null) {
-				String filePart = getFrameworkPath(url.getFile(), true);
+				String filePart = getFrameworkPath(url.getPath(), true);
 				setConfiguration(EquinoxLocations.PROP_INSTALL_AREA, filePart);
 			}
 		}
 		// always decode these properties
-		setConfiguration(PROP_FRAMEWORK, decode(getConfiguration(PROP_FRAMEWORK)));
-		setConfiguration(EquinoxLocations.PROP_INSTALL_AREA, decode(getConfiguration(EquinoxLocations.PROP_INSTALL_AREA)));
+		setConfiguration(PROP_FRAMEWORK, LocationHelper.decode(getConfiguration(PROP_FRAMEWORK), true));
+		setConfiguration(EquinoxLocations.PROP_INSTALL_AREA, LocationHelper.decode(getConfiguration(EquinoxLocations.PROP_INSTALL_AREA), true));
 
 		setConfiguration(FRAMEWORK_VENDOR, ECLIPSE_FRAMEWORK_VENDOR);
 		String value = getConfiguration(FRAMEWORK_PROCESSOR);
@@ -1069,30 +1070,6 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			if (sb.length() > 0)
 				return Integer.parseInt(sb.toString());
 			return 0;
-		}
-	}
-
-	public static String decode(String urlString) {
-		//first encode '+' characters, because URLDecoder incorrectly converts 
-		//them to spaces on certain class library implementations.
-		if (urlString.indexOf('+') >= 0) {
-			int len = urlString.length();
-			StringBuffer buf = new StringBuffer(len);
-			for (int i = 0; i < len; i++) {
-				char c = urlString.charAt(i);
-				if (c == '+')
-					buf.append("%2B"); //$NON-NLS-1$
-				else
-					buf.append(c);
-			}
-			urlString = buf.toString();
-		}
-		try {
-			return URLDecoder.decode(urlString, "UTF-8"); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
-			// Tried but failed
-			// TODO should we throw runtime exception here?
-			return urlString;
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2015 IBM Corporation and others.
+ * Copyright (c) 2009, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,9 +11,8 @@
 package org.eclipse.osgi.tests.bundles;
 
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collection;
+import java.net.*;
+import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
@@ -289,5 +288,83 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 				// nothing
 			}
 		}
+	}
+
+	public void testPercentLocation() throws BundleException, IOException {
+		doTestSpecialChars('%', false);
+		doTestSpecialChars('%', true);
+	}
+
+	public void testSpaceLocation() throws BundleException, IOException {
+		doTestSpecialChars(' ', false);
+		doTestSpecialChars(' ', true);
+	}
+
+	private void doTestSpecialChars(char c, boolean encode) throws BundleException, IOException {
+		File bundlesDirectory = OSGiTestsActivator.getContext().getDataFile("file_with_" + c + "_char");
+		bundlesDirectory.mkdirs();
+
+		File testBundleJarFile = SystemBundleTests.createBundle(bundlesDirectory, getName() + 1, false, false);
+		@SuppressWarnings("deprecation")
+		String testBundleJarFileURL = encode ? testBundleJarFile.toURI().toString() : testBundleJarFile.toURL().toString();
+		File testBundleDirFile = SystemBundleTests.createBundle(bundlesDirectory, getName() + 2, false, true);
+		@SuppressWarnings("deprecation")
+		String testBundleDirFileURL = encode ? testBundleDirFile.toURI().toString() : testBundleDirFile.toURL().toString();
+
+		// Test with reference URL to jar bundle
+		Bundle testBundleJarRef = getContext().installBundle("reference:" + testBundleJarFileURL);
+		testBundleJarRef.start();
+		testBundleJarRef.uninstall();
+
+		// Test with reference URL to dir bundle
+		Bundle testBundleDirRef = getContext().installBundle("reference:" + testBundleDirFileURL);
+		testBundleDirRef.start();
+		testBundleDirRef.uninstall();
+
+		// Test with jar bundle
+		Bundle testBundleJar = getContext().installBundle(testBundleJarFileURL);
+		testBundleJar.start();
+		testBundleJar.uninstall();
+
+		// Test with dir bundle
+		Bundle testBundleDir = getContext().installBundle(testBundleDirFileURL);
+		testBundleDir.start();
+		testBundleDir.uninstall();
+	}
+
+	public void testPercentCharBundleEntry() throws IOException, BundleException {
+		doTestSpaceCharsBundleEntry('%');
+	}
+
+	public void testSpaceCharBundleEntry() throws IOException, BundleException {
+		doTestSpaceCharsBundleEntry(' ');
+	}
+
+	public void testPlusCharBundleEntry() throws IOException, BundleException {
+		doTestSpaceCharsBundleEntry('+');
+	}
+
+	public void doTestSpaceCharsBundleEntry(char c) throws IOException, BundleException {
+		String entryName = "file_with_" + c + "_char";
+		File bundlesDirectory = OSGiTestsActivator.getContext().getDataFile(getName());
+		bundlesDirectory.mkdirs();
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		headers.put(Constants.BUNDLE_SYMBOLICNAME, getName());
+		Map<String, String> entry = Collections.singletonMap(entryName, "value");
+
+		File testBundleJarFile = SystemBundleTests.createBundle(bundlesDirectory, getName(), headers, entry);
+		Bundle testBundle = getContext().installBundle(getName(), new FileInputStream(testBundleJarFile));
+		URL entryURL = testBundle.getEntry(entryName);
+		assertNotNull("Entry not found.", entryURL);
+		InputStream is = entryURL.openStream();
+		is.close();
+
+		String encodeEntry = URLEncoder.encode(entryName, "UTF-8");
+		String urlString = entryURL.toExternalForm();
+		urlString = urlString.substring(0, urlString.indexOf(entryName)) + encodeEntry;
+		URL encodedURL = new URL(urlString);
+		is = encodedURL.openStream();
+		is.close();
 	}
 }

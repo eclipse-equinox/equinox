@@ -517,7 +517,7 @@ public class EclipseStarter {
 			// if it is a reference URL then strip off the reference: and set base to the file:...
 			if (url.getProtocol().equals(REFERENCE_PROTOCOL)) {
 				reference = true;
-				String baseSpec = url.getFile();
+				String baseSpec = url.getPath();
 				if (baseSpec.startsWith(FILE_SCHEME)) {
 					File child = new File(baseSpec.substring(5));
 					baseURL = child.isAbsolute() ? child.toURL() : new File(parent, child.getPath()).toURL();
@@ -525,7 +525,7 @@ public class EclipseStarter {
 					baseURL = createURL(baseSpec);
 			}
 
-			fileLocation = new File(baseURL.getFile());
+			fileLocation = new File(baseURL.getPath());
 			// if the location is relative, prefix it with the parent
 			if (!fileLocation.isAbsolute())
 				fileLocation = new File(parent, fileLocation.toString());
@@ -542,7 +542,7 @@ public class EclipseStarter {
 
 		// finally we have something worth trying	
 		try {
-			URLConnection result = url.openConnection();
+			URLConnection result = LocationHelper.getConnection(url);
 			result.connect();
 			return url;
 		} catch (IOException e) {
@@ -886,7 +886,7 @@ public class EclipseStarter {
 		URL url = LocationHelper.buildURL(urlSpec, false);
 		if (url == null)
 			return null;
-		File fwkFile = new File(url.getFile());
+		File fwkFile = LocationHelper.decodePath(new File(url.getPath()));
 		fwkFile = new File(fwkFile.getAbsolutePath());
 		fwkFile = new File(fwkFile.getParent());
 		return fwkFile.getAbsolutePath();
@@ -902,7 +902,7 @@ public class EclipseStarter {
 		URL url = cs.getLocation();
 		if (url == null)
 			return null;
-		String result = url.getFile();
+		String result = url.getPath();
 		if (File.separatorChar == '\\') {
 			// in case on windows the \ is used
 			result = result.replace('\\', '/');
@@ -969,7 +969,7 @@ public class EclipseStarter {
 			try {
 				// don't need to install if it is already installed
 				if (osgiBundle == null) {
-					InputStream in = initialBundles[i].location.openStream();
+					InputStream in = LocationHelper.getStream(initialBundles[i].location);
 					try {
 						osgiBundle = context.installBundle(initialBundles[i].locationString, in);
 					} catch (BundleException e) {
@@ -1202,14 +1202,7 @@ public class EclipseStarter {
 		String[] candidates = searchCandidates.get(start);
 		if (candidates == null) {
 			File startFile = new File(start);
-			// Pre-check if file exists, if not, and it contains escape characters,
-			// try decoding the path
-			if (!startFile.exists() && start.indexOf('%') >= 0) {
-				String decodePath = EquinoxConfiguration.decode(start);
-				File f = new File(decodePath);
-				if (f.exists())
-					startFile = f;
-			}
+			startFile = LocationHelper.decodePath(startFile);
 			candidates = startFile.list();
 			if (candidates != null)
 				searchCandidates.put(start, candidates);

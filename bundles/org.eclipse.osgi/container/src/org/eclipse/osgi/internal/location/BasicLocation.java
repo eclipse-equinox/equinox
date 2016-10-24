@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 IBM Corporation and others.
+ * Copyright (c) 2004, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -114,7 +114,8 @@ public class BasicLocation implements Location {
 		File file = null;
 		if (value.getProtocol().equalsIgnoreCase("file")) { //$NON-NLS-1$
 			try {
-				String basePath = new File(value.getFile()).getCanonicalPath();
+				File f = LocationHelper.decodePath(new File(value.getPath()));
+				String basePath = f.getCanonicalPath();
 				value = LocationHelper.buildURL("file:" + basePath, true); //$NON-NLS-1$
 			} catch (IOException e) {
 				// do nothing just use the original value
@@ -124,10 +125,10 @@ public class BasicLocation implements Location {
 				if (givenLockFile.isAbsolute()) {
 					file = givenLockFile;
 				} else {
-					file = new File(value.getFile(), lockFilePath);
+					file = new File(value.getPath(), lockFilePath);
 				}
 			} else {
-				file = new File(value.getFile(), DEFAULT_LOCK_FILENAME);
+				file = new File(value.getPath(), DEFAULT_LOCK_FILENAME);
 			}
 		}
 		lock = lock && !isReadOnly;

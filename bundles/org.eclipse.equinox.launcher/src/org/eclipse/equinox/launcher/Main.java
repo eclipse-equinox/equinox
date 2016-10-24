@@ -2137,7 +2137,7 @@ public class Main {
 		Properties props = new Properties();
 		InputStream is = null;
 		try {
-			is = url.openStream();
+			is = getStream(url);
 			props.load(is);
 		} finally {
 			if (is != null)
@@ -2148,6 +2148,17 @@ public class Main {
 				}
 		}
 		return props;
+	}
+
+	private InputStream getStream(URL location) throws IOException {
+		if ("file".equalsIgnoreCase(location.getProtocol())) { //$NON-NLS-1$
+			// this is done to handle URLs with invalid syntax in the path
+			File f = new File(location.getPath());
+			if (f.exists()) {
+				return new FileInputStream(f);
+			}
+		}
+		return location.openStream();
 	}
 
 	/*

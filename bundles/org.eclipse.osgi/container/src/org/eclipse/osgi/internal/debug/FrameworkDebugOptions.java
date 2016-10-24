@@ -11,10 +11,10 @@
 package org.eclipse.osgi.internal.debug;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+import org.eclipse.osgi.internal.location.LocationHelper;
 import org.eclipse.osgi.service.debug.*;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
@@ -76,14 +76,14 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 				userDir += "/"; //$NON-NLS-1$
 			debugOptionsFilename = new File(userDir, OPTIONS).toString();
 		}
-		optionsFile = buildURL(debugOptionsFilename, false);
+		optionsFile = LocationHelper.buildURL(debugOptionsFilename, false);
 		if (optionsFile == null) {
 			System.out.println("Unable to construct URL for options file: " + debugOptionsFilename); //$NON-NLS-1$
 			return;
 		}
 		System.out.print("Debug options:\n    " + optionsFile.toExternalForm()); //$NON-NLS-1$
 		try {
-			InputStream input = optionsFile.openStream();
+			InputStream input = LocationHelper.getStream(optionsFile);
 			try {
 				options.load(input);
 				System.out.println(" loaded"); //$NON-NLS-1$
@@ -112,36 +112,6 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 		listenerTracker.close();
 		listenerTracker = null;
 		this.context = null;
-	}
-
-	@SuppressWarnings("deprecation")
-	private static URL buildURL(String spec, boolean trailingSlash) {
-		if (spec == null)
-			return null;
-		boolean isFile = spec.startsWith("file:"); //$NON-NLS-1$
-		try {
-			if (isFile)
-				return adjustTrailingSlash(new File(spec.substring(5)).toURL(), trailingSlash);
-			return new URL(spec);
-		} catch (MalformedURLException e) {
-			// if we failed and it is a file spec, there is nothing more we can do
-			// otherwise, try to make the spec into a file URL.
-			if (isFile)
-				return null;
-			try {
-				return adjustTrailingSlash(new File(spec).toURL(), trailingSlash);
-			} catch (MalformedURLException e1) {
-				return null;
-			}
-		}
-	}
-
-	private static URL adjustTrailingSlash(URL url, boolean trailingSlash) throws MalformedURLException {
-		String file = url.getFile();
-		if (trailingSlash == (file.endsWith("/"))) //$NON-NLS-1$
-			return url;
-		file = trailingSlash ? file + "/" : file.substring(0, file.length() - 1); //$NON-NLS-1$
-		return new URL(url.getProtocol(), url.getHost(), file);
 	}
 
 	/**

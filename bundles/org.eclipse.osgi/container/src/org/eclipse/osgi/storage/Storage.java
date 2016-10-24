@@ -115,7 +115,7 @@ public class Storage {
 			osgiParentLocation = parentConfigLocation.createLocation(null, parentConfigLocation.getDataArea(EquinoxContainer.NAME), true);
 		}
 		this.osgiLocation = configLocation.createLocation(osgiParentLocation, configLocation.getDataArea(EquinoxContainer.NAME), configLocation.isReadOnly());
-		this.childRoot = new File(osgiLocation.getURL().getFile());
+		this.childRoot = new File(osgiLocation.getURL().getPath());
 
 		if (Boolean.valueOf(container.getConfiguration().getConfiguration(EquinoxConfiguration.PROP_CLEAN)).booleanValue()) {
 			cleanOSGiStorage(osgiLocation, childRoot);
@@ -124,7 +124,7 @@ public class Storage {
 			this.childRoot.mkdirs();
 		}
 		Location parent = this.osgiLocation.getParentLocation();
-		parentRoot = parent == null ? null : new File(parent.getURL().getFile());
+		parentRoot = parent == null ? null : new File(parent.getURL().getPath());
 
 		if (container.getConfiguration().getConfiguration(Constants.FRAMEWORK_STORAGE) == null) {
 			// Set the derived value if not already set as part of configuration.
@@ -466,13 +466,13 @@ public class Storage {
 
 	private URLConnection getContentConnection(final String spec) throws IOException {
 		if (System.getSecurityManager() == null) {
-			return createURL(spec).openConnection();
+			return LocationHelper.getConnection(createURL(spec));
 		}
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<URLConnection>() {
 				@Override
 				public URLConnection run() throws IOException {
-					return createURL(spec).openConnection();
+					return LocationHelper.getConnection(createURL(spec));
 				}
 			});
 		} catch (PrivilegedActionException e) {
@@ -855,6 +855,7 @@ public class Storage {
 
 			if ("file".equals(protocol)) { //$NON-NLS-1$
 				File inFile = new File(sourceURL.getPath());
+				inFile = LocationHelper.decodePath(inFile);
 				if (inFile.isDirectory()) {
 					// need to delete the outFile because it is not a directory
 					outFile.delete();

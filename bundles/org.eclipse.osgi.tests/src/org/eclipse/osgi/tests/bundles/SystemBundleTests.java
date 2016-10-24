@@ -2737,7 +2737,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		return bundles;
 	}
 
-	private static File createBundle(File outputDir, String id, boolean emptyManifest, boolean dirBundle) throws IOException {
+	static File createBundle(File outputDir, String id, boolean emptyManifest, boolean dirBundle) throws IOException {
 		File file = new File(outputDir, "bundle" + id + (dirBundle ? "" : ".jar")); //$NON-NLS-1$ //$NON-NLS-2$
 		if (!dirBundle) {
 			JarOutputStream jos = new JarOutputStream(new FileOutputStream(file), createManifest(id, emptyManifest));
@@ -2985,6 +2985,45 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state of bundle.", Bundle.STARTING, b.getState());
 
 		equinox.stop();
+	}
+
+	public void testConfigPercentChar() throws BundleException, IOException {
+		doTestConfigSpecialChar('%');
+	}
+
+	public void testConfigSpaceChar() throws BundleException, IOException {
+		doTestConfigSpecialChar(' ');
+	}
+
+	public void testConfigPlusChar() throws BundleException, IOException {
+		doTestConfigSpecialChar('+');
+	}
+
+	private void doTestConfigSpecialChar(char c) throws BundleException, IOException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName() + c + "config");
+		config.mkdirs();
+		// create a config.ini with some system property substitutes
+		Properties configIni = new Properties();
+		configIni.setProperty("test.config", getName());
+		configIni.store(new FileOutputStream(new File(config, "config.ini")), "Test config.ini");
+
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+		equinox.init();
+
+		BundleContext systemContext = equinox.getBundleContext();
+		// check for substitution
+		assertEquals("Wrong value for test.config", getName(), systemContext.getProperty("test.config"));
+
+		equinox.stop();
+		try {
+			equinox.waitForStop(5000);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			fail("Unexpected interruption.", e);
+		}
+
 	}
 
 	void checkActiveThreadType(Equinox equinox, boolean expectIsDeamon) {

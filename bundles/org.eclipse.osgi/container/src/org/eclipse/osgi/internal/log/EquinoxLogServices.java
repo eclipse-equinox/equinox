@@ -48,7 +48,7 @@ public class EquinoxLogServices {
 			File configAreaDirectory = null;
 			if (configuration != null)
 				// TODO assumes the URL is a file: url
-				configAreaDirectory = new File(configuration.getURL().getFile());
+				configAreaDirectory = new File(configuration.getURL().getPath());
 
 			if (configAreaDirectory != null) {
 				logFile = new File(configAreaDirectory, logFilePath);

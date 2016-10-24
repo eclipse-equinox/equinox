@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 IBM Corporation and others.
+ * Copyright (c) 2004, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -251,7 +251,7 @@ public class EquinoxLocations {
 
 		URL installURL = computeInstallConfigurationLocation();
 		if (installURL != null && "file".equals(installURL.getProtocol())) { //$NON-NLS-1$
-			File installDir = new File(installURL.getFile());
+			File installDir = new File(installURL.getPath());
 			File defaultConfigDir = new File(installDir, CONFIG_DIR);
 			if (!defaultConfigDir.exists())
 				defaultConfigDir.mkdirs();
@@ -264,7 +264,7 @@ public class EquinoxLocations {
 
 	private static boolean canWrite(URL location) {
 		if (location != null && "file".equals(location.getProtocol())) { //$NON-NLS-1$
-			File locationDir = new File(location.getFile());
+			File locationDir = new File(location.getPath());
 			if (!locationDir.exists())
 				locationDir.mkdirs();
 			if (locationDir.exists() && StorageUtil.canWrite(locationDir))
@@ -282,7 +282,7 @@ public class EquinoxLocations {
 		URL installURL = buildURL(installProperty, true);
 		if (installURL == null)
 			return null;
-		File installDir = new File(installURL.getFile());
+		File installDir = new File(installURL.getPath());
 		String installDirHash = getInstallDirHash();
 
 		String appName = "." + ECLIPSE; //$NON-NLS-1$
@@ -322,7 +322,7 @@ public class EquinoxLocations {
 		URL installURL = buildURL(installProperty, true);
 		if (installURL == null)
 			return ""; //$NON-NLS-1$
-		File installDir = new File(installURL.getFile());
+		File installDir = new File(installURL.getPath());
 		int hashCode;
 		try {
 			hashCode = installDir.getCanonicalPath().hashCode();

@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.internal.location.LocationHelper;
 import org.eclipse.osgi.storage.BundleInfo;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.url.BundleResourceHandler;
@@ -33,8 +34,20 @@ public class Handler extends BundleResourceHandler {
 		ModuleRevision revision = module.getCurrentRevision();
 		BundleInfo.Generation revisionInfo = (BundleInfo.Generation) revision.getRevisionInfo();
 		BundleEntry entry = revisionInfo == null ? null : revisionInfo.getBundleFile().getEntry(url.getPath());
-		if (entry == null)
+		if (entry == null) {
+			String path = url.getPath();
+			if (revisionInfo != null && (path.indexOf('%') >= 0 || path.indexOf('+') >= 0)) {
+				entry = revisionInfo.getBundleFile().getEntry(LocationHelper.decode(path, true));
+				if (entry != null) {
+					return entry;
+				}
+				entry = revisionInfo.getBundleFile().getEntry(LocationHelper.decode(path, false));
+				if (entry != null) {
+					return entry;
+				}
+			}
 			throw new FileNotFoundException(url.getPath());
+		}
 		return entry;
 	}
 }
