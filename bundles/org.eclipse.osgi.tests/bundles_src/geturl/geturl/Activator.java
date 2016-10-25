@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,8 @@
  *******************************************************************************/
 package geturl;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.IOException;
+import java.net.*;
 import java.security.PrivilegedAction;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -40,8 +40,13 @@ public class Activator implements BundleActivator {
 					throw new RuntimeException("Could not create URL from parts: " + url);
 				}
 				url.toExternalForm();
-				return Boolean.TRUE;
 
+				try {
+					url.openConnection(Proxy.NO_PROXY);
+				} catch (IOException e) {
+					// expected since our impl throws this
+				}
+				return Boolean.TRUE;
 			}
 		}, props);
 	}

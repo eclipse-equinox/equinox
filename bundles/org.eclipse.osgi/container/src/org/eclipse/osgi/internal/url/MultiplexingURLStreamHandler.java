@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2006, 2016 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,10 +11,12 @@ package org.eclipse.osgi.internal.url;
 import java.io.IOException;
 import java.lang.reflect.*;
 import java.net.*;
+import java.net.Proxy;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 
 public class MultiplexingURLStreamHandler extends URLStreamHandler {
 	private static Method openConnectionMethod;
+	private static Method openConnectionProxyMethod;
 	private static Method equalsMethod;
 	private static Method getDefaultPortMethod;
 	private static Method getHostAddressMethod;
@@ -37,6 +39,9 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		try {
 			openConnectionMethod = URLStreamHandler.class.getDeclaredMethod("openConnection", new Class[] {URL.class}); //$NON-NLS-1$
 			openConnectionMethod.setAccessible(true);
+
+			openConnectionProxyMethod = URLStreamHandler.class.getDeclaredMethod("openConnection", new Class[] {URL.class, Proxy.class}); //$NON-NLS-1$
+			openConnectionProxyMethod.setAccessible(true);
 
 			equalsMethod = URLStreamHandler.class.getDeclaredMethod("equals", new Class[] {URL.class, URL.class}); //$NON-NLS-1$
 			equalsMethod.setAccessible(true);
@@ -92,6 +97,24 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		if (handler != null) {
 			try {
 				return (URLConnection) openConnectionMethod.invoke(handler, new Object[] {url});
+			} catch (InvocationTargetException e) {
+				if (e.getTargetException() instanceof IOException)
+					throw (IOException) e.getTargetException();
+				throw (RuntimeException) e.getTargetException();
+			} catch (Exception e) {
+				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, "openConnection", e); //$NON-NLS-1$
+				throw new RuntimeException(e.getMessage(), e);
+			}
+		}
+		throw new MalformedURLException();
+	}
+
+	@Override
+	protected URLConnection openConnection(URL url, Proxy proxy) throws IOException {
+		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
+		if (handler != null) {
+			try {
+				return (URLConnection) openConnectionProxyMethod.invoke(handler, new Object[] {url, proxy});
 			} catch (InvocationTargetException e) {
 				if (e.getTargetException() instanceof IOException)
 					throw (IOException) e.getTargetException();
