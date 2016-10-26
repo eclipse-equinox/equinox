@@ -38,37 +38,37 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			return;
 		try {
 			openConnectionMethod = URLStreamHandler.class.getDeclaredMethod("openConnection", new Class[] {URL.class}); //$NON-NLS-1$
-			openConnectionMethod.setAccessible(true);
+			MultiplexingFactory.setAccessible(openConnectionMethod);
 
 			openConnectionProxyMethod = URLStreamHandler.class.getDeclaredMethod("openConnection", new Class[] {URL.class, Proxy.class}); //$NON-NLS-1$
-			openConnectionProxyMethod.setAccessible(true);
+			MultiplexingFactory.setAccessible(openConnectionProxyMethod);
 
 			equalsMethod = URLStreamHandler.class.getDeclaredMethod("equals", new Class[] {URL.class, URL.class}); //$NON-NLS-1$
-			equalsMethod.setAccessible(true);
+			MultiplexingFactory.setAccessible(equalsMethod);
 
 			getDefaultPortMethod = URLStreamHandler.class.getDeclaredMethod("getDefaultPort", (Class[]) null); //$NON-NLS-1$
-			getDefaultPortMethod.setAccessible(true);
+			MultiplexingFactory.setAccessible(getDefaultPortMethod);
 
 			getHostAddressMethod = URLStreamHandler.class.getDeclaredMethod("getHostAddress", new Class[] {URL.class}); //$NON-NLS-1$
-			getHostAddressMethod.setAccessible(true);
+			MultiplexingFactory.setAccessible(getHostAddressMethod);
 
 			hashCodeMethod = URLStreamHandler.class.getDeclaredMethod("hashCode", new Class[] {URL.class}); //$NON-NLS-1$
-			hashCodeMethod.setAccessible(true);
+			MultiplexingFactory.setAccessible(hashCodeMethod);
 
 			hostsEqualMethod = URLStreamHandler.class.getDeclaredMethod("hostsEqual", new Class[] {URL.class, URL.class}); //$NON-NLS-1$
-			hostsEqualMethod.setAccessible(true);
+			MultiplexingFactory.setAccessible(hostsEqualMethod);
 
 			parseURLMethod = URLStreamHandler.class.getDeclaredMethod("parseURL", new Class[] {URL.class, String.class, Integer.TYPE, Integer.TYPE}); //$NON-NLS-1$
-			parseURLMethod.setAccessible(true);
+			MultiplexingFactory.setAccessible(parseURLMethod);
 
 			sameFileMethod = URLStreamHandler.class.getDeclaredMethod("sameFile", new Class[] {URL.class, URL.class}); //$NON-NLS-1$
-			sameFileMethod.setAccessible(true);
+			MultiplexingFactory.setAccessible(sameFileMethod);
 
 			setURLMethod = URLStreamHandler.class.getDeclaredMethod("setURL", new Class[] {URL.class, String.class, String.class, Integer.TYPE, String.class, String.class, String.class, String.class, String.class}); //$NON-NLS-1$
-			setURLMethod.setAccessible(true);
+			MultiplexingFactory.setAccessible(setURLMethod);
 
 			toExternalFormMethod = URLStreamHandler.class.getDeclaredMethod("toExternalForm", new Class[] {URL.class}); //$NON-NLS-1$
-			toExternalFormMethod.setAccessible(true);
+			MultiplexingFactory.setAccessible(toExternalFormMethod);
 
 			try {
 				handlerField = URL.class.getDeclaredField("handler"); //$NON-NLS-1$
@@ -77,7 +77,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 				if (handlerField == null)
 					throw e;
 			}
-			handlerField.setAccessible(true);
+			MultiplexingFactory.setAccessible(handlerField);
 		} catch (Exception e) {
 			factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, "initializeMethods", e); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage(), e);

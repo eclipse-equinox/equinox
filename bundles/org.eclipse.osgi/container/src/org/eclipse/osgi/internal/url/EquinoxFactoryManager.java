@@ -92,7 +92,7 @@ public class EquinoxFactoryManager {
 		Object lock;
 		try {
 			Field streamHandlerLockField = URL.class.getDeclaredField("streamHandlerLock"); //$NON-NLS-1$
-			streamHandlerLockField.setAccessible(true);
+			MultiplexingFactory.setAccessible(streamHandlerLockField);
 			lock = streamHandlerLockField.get(null);
 		} catch (NoSuchFieldException noField) {
 			// could not find the lock, lets sync on the class object
@@ -229,7 +229,7 @@ public class EquinoxFactoryManager {
 		for (int i = 0; i < fields.length; i++) {
 			boolean isStatic = Modifier.isStatic(fields[i].getModifiers());
 			if (instance != isStatic && fields[i].getType().equals(type)) {
-				fields[i].setAccessible(true);
+				MultiplexingFactory.setAccessible(fields[i]);
 				return fields[i];
 			}
 		}
