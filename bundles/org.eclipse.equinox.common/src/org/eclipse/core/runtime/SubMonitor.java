@@ -985,14 +985,20 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * @since 3.8
 	 */
 	public SubMonitor split(int totalWork, int suppressFlags) throws OperationCanceledException {
+		int oldUsedForParent = this.usedForParent;
 		SubMonitor result = newChild(totalWork, suppressFlags);
 
-		if ((flags & SUPPRESS_ISCANCELED) == 0 && result != this) {
+		if ((flags & SUPPRESS_ISCANCELED) == 0) {
 			int ticksTheChildWillReportToParent = result.totalParent;
 
 			// If the new child reports a nonzero amount of progress.
 			if (ticksTheChildWillReportToParent > 0) {
-				root.checkForCancellation();
+				// Don't check for cancellation if the child is consuming 100% of its parent since whatever code created
+				// the parent already performed this check.
+				if (oldUsedForParent > 0 || usedForParent < totalParent) {
+					// Treat this as a nontrivial operation and check for cancellation unconditionally.
+					root.checkForCancellation();
+				}
 			} else {
 				root.reportTrivialOperation(TRIVIAL_SPLIT_DELTA);
 			}
