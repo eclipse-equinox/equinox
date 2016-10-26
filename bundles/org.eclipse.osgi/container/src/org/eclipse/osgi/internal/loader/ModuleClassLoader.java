@@ -169,6 +169,15 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 		}
 	}
 
+	// preparing for Java 9
+	protected Class<?> findClass(String moduleName, String name) {
+		try {
+			return findLocalClass(name);
+		} catch (ClassNotFoundException e) {
+			return null;
+		}
+	}
+
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
 		return findLocalClass(name);
@@ -197,6 +206,11 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 		}
 
 		return (null);
+	}
+
+	// preparing for Java 9
+	protected URL findResource(String moduleName, String name) {
+		return findLocalResource(name);
 	}
 
 	@Override

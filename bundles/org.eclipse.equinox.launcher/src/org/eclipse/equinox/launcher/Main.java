@@ -2859,6 +2859,20 @@ public class Main {
 		public void addURL(URL url) {
 			super.addURL(url);
 		}
+
+		// preparing for Java 9
+		protected URL findResource(String moduleName, String name) {
+			return findResource(name);
+		}
+
+		// preparing for Java 9
+		protected Class<?> findClass(String moduleName, String name) {
+			try {
+				return findClass(name);
+			} catch (ClassNotFoundException e) {
+				return null;
+			}
+		}
 	}
 
 	private Properties substituteVars(Properties result) {
