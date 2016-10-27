@@ -9,3 +9,4 @@ Bug 458346 - Unusual, hard to decipher error in I-build
 Bug 462266 - Comparator errors in I20150316-0800
 Bug 470227 - Upgrade to Jetty 9.3 for Neon M3
 Bug 495069 - Try to move up to Jetty 9.3.9
+Bug 506597 - Build failure on I20161026-2000

@@ -12,3 +12,4 @@ Bug 458346 - Unusual, hard to decipher error in I-build
 Bug 462096 - Latest X-build fails on "equinox-sdk" product due to dependencies missing
 Bug 481453 - May need to 'touch' some features for I-build
 Bug 495069 - Try to move up to Jetty 9.3.9
+Bug 506597 - Build failure on I20161026-2000
