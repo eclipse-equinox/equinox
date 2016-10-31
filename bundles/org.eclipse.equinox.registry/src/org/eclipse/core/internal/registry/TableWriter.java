@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -417,8 +417,15 @@ public class TableWriter {
 		if (string == null)
 			out.writeByte(TableReader.NULL);
 		else {
-			out.writeByte(TableReader.OBJECT);
-			out.writeUTF(string);
+			byte[] data = string.getBytes(TableReader.UTF_8);
+			if (data.length > 65535) {
+				out.writeByte(TableReader.LOBJECT);
+				out.writeInt(data.length);
+				out.write(data);
+			} else {
+				out.writeByte(TableReader.OBJECT);
+				out.writeUTF(string);
+			}
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,15 +23,17 @@ public class TableReader {
 	//Markers in the cache 
 	static final int NULL = 0;
 	static final int OBJECT = 1;
+	static final int LOBJECT = 2;
 
 	//The version of the cache
-	static final int CACHE_VERSION = 7;
+	static final int CACHE_VERSION = 8;
 	// Version 1 -> 2: the contributor Ids changed from "long" to "String"
 	// Version 2 -> 3: added namespace index and the table of contributors
 	// Version 3 -> 4: offset table saved in a binary form (performance)
 	// Version 4 -> 5: remove support added in version 4 to save offset table in a binary form (performance)
 	// Version 5 -> 6: replace HashtableOfInt with OffsetTable (memory usage optimization)
 	// Version 6 -> 7: added option for multi-language support
+	// Version 7 -> 8: added support for large UTF-8 strings
 
 	//Informations representing the MAIN file
 	static final String MAIN = ".mainData"; //$NON-NLS-1$
@@ -62,6 +64,8 @@ public class TableReader {
 	//The orphan file
 	static final String ORPHANS = ".orphans"; //$NON-NLS-1$
 	File orphansFile;
+
+	static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 
 	//Status code
 	private static final byte fileError = 0;
@@ -152,9 +156,9 @@ public class TableReader {
 			long contributorsFileSize = in.readLong();
 			long namespacesFileSize = in.readLong();
 			long orphansFileSize = in.readLong();
-			String osStamp = readUTF(in);
-			String windowsStamp = readUTF(in);
-			String localeStamp = readUTF(in);
+			String osStamp = readUTF(in, OBJECT);
+			String windowsStamp = readUTF(in, OBJECT);
+			String localeStamp = readUTF(in, OBJECT);
 			boolean multiLanguage = in.readBoolean();
 
 			boolean validTime = (expectedTimestamp == 0 || expectedTimestamp == registryStamp);
@@ -380,7 +384,7 @@ public class TableReader {
 		byte type = in.readByte();
 		if (type == NULL)
 			return null;
-		return readUTF(in);
+		return readUTF(in, type);
 	}
 
 	public String[] loadExtensionExtraData(int dataPosition) {
@@ -599,7 +603,7 @@ public class TableReader {
 				int size = orphanInput.readInt();
 				HashMap result = new HashMap(size);
 				for (int i = 0; i < size; i++) {
-					String key = readUTF(orphanInput);
+					String key = readUTF(orphanInput, OBJECT);
 					int[] value = readArray(orphanInput);
 					result.put(key, value);
 				}
@@ -646,8 +650,17 @@ public class TableReader {
 		}
 	}
 
-	private String readUTF(DataInputStream in) throws IOException {
-		String value = in.readUTF();
+	private String readUTF(DataInputStream in, int type) throws IOException {
+		String value;
+		if (type == LOBJECT) {
+			int length = in.readInt();
+			byte[] data = new byte[length];
+			in.readFully(data);
+			value = new String(data, UTF_8);
+		} else {
+			value = in.readUTF();
+		}
+
 		Map map = null;
 		if (stringPool != null) {
 			map = (Map) stringPool.get();
