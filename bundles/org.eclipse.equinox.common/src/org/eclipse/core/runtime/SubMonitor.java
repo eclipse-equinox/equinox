@@ -1020,6 +1020,8 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * @param work a non-negative number of work units just completed
 	 * @throws OperationCanceledException if the monitor has been cancelled
 	 * @since 3.9
+	 * @noreference This method is not intended to be referenced by clients.
+	 * @deprecated Scheduled for deletion. Use {@link #split(int)} instead.
 	 */
 	public void step(int work) throws OperationCanceledException {
 		if (TracingOptions.debugProgressMonitors) {
