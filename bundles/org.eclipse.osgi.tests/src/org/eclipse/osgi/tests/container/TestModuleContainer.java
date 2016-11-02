@@ -2363,19 +2363,18 @@ public class TestModuleContainer extends AbstractTest {
 		providerManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		providerManifest.put(Constants.BUNDLE_SYMBOLICNAME, "provider");
 		providerManifest.put(Constants.EXPORT_PACKAGE, "provider; version=1.1; attr1=attr1; attr2=attr2; dir1:=dir1; dir2:=dir2");
-		providerManifest.put(Constants.PROVIDE_CAPABILITY,
-				"provider.cap;"//
-						+ " string=sValue;"//
-						+ " string.list1:List=\"v1,v2,v3\";"//
-						+ " string.list2:List<String>=\"v4,v5,v6\";"//
-						+ " version:Version=1.1;"//
-						+ " version.list:List<Version>=\"1.0,2.0,3.0\";"//
-						+ " long:Long=12345;"//
-						+ " long.list:List<Long>=\"1,2,3\";"//
-						+ " double:Double=1.2345;"//
-						+ " double.list:List<Double>=\"1.1,1.2,1.3\";"//
-						+ " uri:uri=some.uri;" //
-						+ " set:set=\"s1,s2,s3\"");
+		providerManifest.put(Constants.PROVIDE_CAPABILITY, "provider.cap;"//
+				+ " string=sValue;"//
+				+ " string.list1:List=\"v1,v2,v3\";"//
+				+ " string.list2:List<String>=\"v4,v5,v6\";"//
+				+ " version:Version=1.1;"//
+				+ " version.list:List<Version>=\"1.0,2.0,3.0\";"//
+				+ " long:Long=12345;"//
+				+ " long.list:List<Long>=\"1,2,3\";"//
+				+ " double:Double=1.2345;"//
+				+ " double.list:List<Double>=\"1.1,1.2,1.3\";"//
+				+ " uri:uri=some.uri;" //
+				+ " set:set=\"s1,s2,s3\"");
 		Module providerModule = installDummyModule(providerManifest, "provider", container);
 		Map<String, Object> providerAttrs = providerModule.getCurrentRevision().getCapabilities("provider.cap").get(0).getAttributes();
 		assertEquals("Wrong provider attrs", attrs, providerAttrs);
@@ -2384,33 +2383,32 @@ public class TestModuleContainer extends AbstractTest {
 		requirerManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		requirerManifest.put(Constants.BUNDLE_SYMBOLICNAME, "requirer");
 		requirerManifest.put(Constants.IMPORT_PACKAGE, "provider; version=1.1; attr1=attr1; attr2=attr2; dir1:=dir1; dir2:=dir2");
-		requirerManifest.put(Constants.REQUIRE_CAPABILITY,
-				"optional;"//
-						+ " resolution:=optional; " //
-						+ " string=sValue;"//
-						+ " string.list1:List=\"v1,v2,v3\";"//
-						+ " string.list2:List<String>=\"v4,v5,v6\";"//
-						+ " version:Version=1.1;"//
-						+ " version.list:List<Version>=\"1.0,2.0,3.0\";"//
-						+ " long:Long=12345;"//
-						+ " long.list:List<Long>=\"1,2,3\";"//
-						+ " double:Double=1.2345;"//
-						+ " double.list:List<Double>=\"1.1,1.2,1.3\";"//
-						+ " uri:uri=some.uri;" //
-						+ " set:set=\"s1,s2,s3\"," //
-						+ "provider.cap; filter:=\"(string=sValue)\"," //
-						+ "provider.cap; filter:=\"(string.list1=v2)\"," //
-						+ "provider.cap; filter:=\"(string.list2=v5)\"," //
-						+ "provider.cap; filter:=\"(string.list2=v5)\"," //
-						+ "provider.cap; filter:=\"(&(version>=1.1)(version<=1.1.1))\"," //
-						+ "provider.cap; filter:=\"(&(version.list=1)(version.list=2))\"," //
-						+ "provider.cap; filter:=\"(long>=12344)\"," //
-						+ "provider.cap; filter:=\"(long.list=2)\"," //
-						+ "provider.cap; filter:=\"(double>=1.2)\"," //
-						+ "provider.cap; filter:=\"(double.list=1.2)\"," //
-						+ "provider.cap; filter:=\"(uri=some.uri)\"," //
-						+ "provider.cap; filter:=\"(set=s2)\"" //
-						+ "");
+		requirerManifest.put(Constants.REQUIRE_CAPABILITY, "optional;"//
+				+ " resolution:=optional; " //
+				+ " string=sValue;"//
+				+ " string.list1:List=\"v1,v2,v3\";"//
+				+ " string.list2:List<String>=\"v4,v5,v6\";"//
+				+ " version:Version=1.1;"//
+				+ " version.list:List<Version>=\"1.0,2.0,3.0\";"//
+				+ " long:Long=12345;"//
+				+ " long.list:List<Long>=\"1,2,3\";"//
+				+ " double:Double=1.2345;"//
+				+ " double.list:List<Double>=\"1.1,1.2,1.3\";"//
+				+ " uri:uri=some.uri;" //
+				+ " set:set=\"s1,s2,s3\"," //
+				+ "provider.cap; filter:=\"(string=sValue)\"," //
+				+ "provider.cap; filter:=\"(string.list1=v2)\"," //
+				+ "provider.cap; filter:=\"(string.list2=v5)\"," //
+				+ "provider.cap; filter:=\"(string.list2=v5)\"," //
+				+ "provider.cap; filter:=\"(&(version>=1.1)(version<=1.1.1))\"," //
+				+ "provider.cap; filter:=\"(&(version.list=1)(version.list=2))\"," //
+				+ "provider.cap; filter:=\"(long>=12344)\"," //
+				+ "provider.cap; filter:=\"(long.list=2)\"," //
+				+ "provider.cap; filter:=\"(double>=1.2)\"," //
+				+ "provider.cap; filter:=\"(double.list=1.2)\"," //
+				+ "provider.cap; filter:=\"(uri=some.uri)\"," //
+				+ "provider.cap; filter:=\"(set=s2)\"" //
+				+ "");
 		Module requirerModule = installDummyModule(requirerManifest, "requirer", container);
 		Map<String, Object> requirerAttrs = requirerModule.getCurrentRevision().getRequirements("optional").get(0).getAttributes();
 		assertEquals("Wrong requirer attrs", attrs, requirerAttrs);
@@ -2624,6 +2622,47 @@ public class TestModuleContainer extends AbstractTest {
 				Assert.fail("Unexpected fragment revision: " + hostWire.getRequirer());
 			}
 		}
+	}
+
+	@Test
+	public void testUnresolvedHostWithFragmentCycle() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install a host
+		Map<String, String> hostManifest = new HashMap<String, String>();
+		hostManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		hostManifest.put(Constants.BUNDLE_SYMBOLICNAME, "host");
+		hostManifest.put(Constants.BUNDLE_VERSION, "1.0");
+		hostManifest.put(Constants.EXPORT_PACKAGE, "host");
+		hostManifest.put(Constants.IMPORT_PACKAGE, "host.impl");
+		installDummyModule(hostManifest, "host10", container);
+		hostManifest.put(Constants.BUNDLE_VERSION, "1.1");
+		installDummyModule(hostManifest, "host11", container);
+		hostManifest.put(Constants.BUNDLE_VERSION, "1.2");
+		installDummyModule(hostManifest, "host12", container);
+		//hostManifest.put(Constants.BUNDLE_VERSION, "1.3");
+		//installDummyModule(hostManifest, "host13", container);
+
+		// install a host.impl fragment
+		Map<String, String> hostImplManifest = new HashMap<String, String>();
+		hostImplManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		hostImplManifest.put(Constants.BUNDLE_SYMBOLICNAME, "host.impl");
+		hostImplManifest.put(Constants.EXPORT_PACKAGE, "host.impl");
+		hostImplManifest.put(Constants.IMPORT_PACKAGE, "host");
+		hostImplManifest.put(Constants.FRAGMENT_HOST, "host");
+		installDummyModule(hostImplManifest, "hostImpl", container);
+
+		// install an importer of host package
+		Map<String, String> hostImporterManifest = new HashMap<String, String>();
+		hostImporterManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		hostImporterManifest.put(Constants.BUNDLE_SYMBOLICNAME, "host.importer");
+		hostImporterManifest.put(Constants.IMPORT_PACKAGE, "host");
+		Module hostImporter = installDummyModule(hostImporterManifest, "hostImporter", container);
+
+		ResolutionReport report = container.resolve(Arrays.asList(hostImporter), true);
+		Assert.assertNull("Failed to resolve test.", report.getResolutionException());
+
 	}
 
 	@Test
