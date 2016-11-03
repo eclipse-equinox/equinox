@@ -69,7 +69,7 @@ import org.eclipse.core.internal.runtime.TracingOptions;
  *          doSomeWork(progress.split(30));
  *          
  *          // Advance the monitor by another 30%
- *          progress.step(30);
+ *          progress.split(30);
  *          
  *          // Use the remaining 40% of the progress to do some more work
  *          doSomeWork(progress.split(40)); 
@@ -110,7 +110,7 @@ import org.eclipse.core.internal.runtime.TracingOptions;
  *          } else {
  *              // Bad: Causes the progress monitor to appear to start at 50%, wasting half of the
  *              // space in the monitor.
- *              progress.step(50);
+ *              progress.worked(50);
  *          }
  * </pre>
  * 
@@ -181,31 +181,15 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	private static final int TRIVIAL_SPLITS_BEFORE_CANCELLATION_CHECK = 20;
 
 	/**
-	 * Number of trivial tick operations (operations which do not report any progress) which can be
-	 * performed before the monitor performs a cancellation check. This ensures that cancellation
-	 * checks do not create a performance problem in tight loops that report a lot of work
-	 * while still ensuring that cancellation is checked occasionally in such loops. This only
-	 * affects operations which are too small to report any progress. Operations which are large
-	 * enough to consume at least one tick will always be checked for cancellation.
-	 */
-	private static final int TRIVIAL_TICKS_BEFORE_CANCELLATION_CHECK = 20;
-
-	/**
 	 * The limit for {@link RootInfo#cancellationCheckCounter} before performing a cancellation check.
 	 */
-	private static final int TRIVIAL_OPERATION_COUNT_LIMIT = TRIVIAL_SPLITS_BEFORE_CANCELLATION_CHECK * TRIVIAL_TICKS_BEFORE_CANCELLATION_CHECK;
+	private static final int TRIVIAL_OPERATION_COUNT_LIMIT = TRIVIAL_SPLITS_BEFORE_CANCELLATION_CHECK;
 
 	/**
 	 * Amount to increment {@link RootInfo#cancellationCheckCounter} when performing
 	 * a trivial {@link #split(int)} operation.
 	 */
-	private static final int TRIVIAL_SPLIT_DELTA = TRIVIAL_OPERATION_COUNT_LIMIT / TRIVIAL_SPLITS_BEFORE_CANCELLATION_CHECK;
-
-	/**
-	 * Amount to increment {@link RootInfo#cancellationCheckCounter} when performing
-	 * a trivial {@link #step(int)} operation.
-	 */
-	private static final int TRIVIAL_TICK_DELTA = TRIVIAL_OPERATION_COUNT_LIMIT / TRIVIAL_TICKS_BEFORE_CANCELLATION_CHECK;
+	private static final int TRIVIAL_SPLIT_DELTA = 1;
 
 	/**
 	 * Minimum number of ticks to allocate when calling beginTask on an unknown IProgressMonitor.
@@ -743,7 +727,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 *      
 	 *      ////////////////////////////////////////////////////////////////////////////
 	 *      // Example 2: Demonstrates the function of active children. Creating children
-	 *      // is sufficient to smoothly report progress, even if step(...) and done()
+	 *      // is sufficient to smoothly report progress, even if worked(...) and done()
 	 *      // are never called.
 	 *      void myMethod(IProgressMonitor parent) {
 	 *          SubMonitor progress = SubMonitor.convert(parent, 100);
@@ -872,7 +856,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 *      
 	 *      ////////////////////////////////////////////////////////////////////////////
 	 *      // Example 2: Demonstrates the function of active children. Creating children
-	 *      // is sufficient to smoothly report progress, even if step(...) and done()
+	 *      // is sufficient to smoothly report progress, even if worked(...) and done()
 	 *      // are never called.
 	 *      void myMethod(IProgressMonitor parent) {
 	 *          SubMonitor progress = SubMonitor.convert(parent, 100);
@@ -943,7 +927,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 *      
 	 *      ////////////////////////////////////////////////////////////////////////////
 	 *      // Example 2: Demonstrates the function of active children. Creating children
-	 *      // is sufficient to smoothly report progress, even if step(...) and done()
+	 *      // is sufficient to smoothly report progress, even if worked(...) and done()
 	 *      // are never called.
 	 *      void myMethod(IProgressMonitor parent) {
 	 *          SubMonitor progress = SubMonitor.convert(parent, 100);
@@ -1004,43 +988,6 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 			}
 		}
 		return result;
-	}
-
-	/**
-	 * Notifies that a given number of work units of the main task
-	 * has been completed. Note that this amount represents an
-	 * installment, as opposed to a cumulative amount of work done
-	 * to date.
-	 * <p>
-	 * This method is much like {@link #worked}, but will additionally check for cancellation and
-	 * will throw an {@link OperationCanceledException} if the monitor has been cancelled. Not
-	 * every call to this method will trigger a cancellation check. The checks will be performed
-	 * as often as possible without degrading the performance of the caller.
-	 *
-	 * @param work a non-negative number of work units just completed
-	 * @throws OperationCanceledException if the monitor has been cancelled
-	 * @since 3.9
-	 * @noreference This method is not intended to be referenced by clients.
-	 * @deprecated Scheduled for deletion. Use {@link #split(int)} instead.
-	 */
-	public void step(int work) throws OperationCanceledException {
-		if (TracingOptions.debugProgressMonitors) {
-			if (work == 0) {
-				logProblem("Attempted to report 0 ticks of work"); //$NON-NLS-1$
-			} else if (work < 0) {
-				logProblem("Attempted to report negative ticks of work"); //$NON-NLS-1$
-			}
-		}
-
-		cleanupActiveChild();
-
-		int delta = consume(Math.max(work, 0));
-		if (delta != 0) {
-			root.checkForCancellation();
-			root.worked(delta);
-		} else {
-			root.reportTrivialOperation(TRIVIAL_TICK_DELTA);
-		}
 	}
 
 	private void cleanupActiveChild() {
