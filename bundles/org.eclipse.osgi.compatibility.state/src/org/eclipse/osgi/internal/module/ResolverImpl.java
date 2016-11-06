@@ -2102,12 +2102,13 @@ public class ResolverImpl implements Resolver {
 	}
 
 	private void unresolveBundle(ResolverBundle bundle, boolean removed) {
-		if (bundle == null)
-			return;
 		// check the removed list if unresolving then remove from the removed list
 		List<BundleDescription> removedBundles = removalPending.remove(new Long(bundle.getBundleDescription().getBundleId()));
 		for (BundleDescription removedDesc : removedBundles) {
 			ResolverBundle re = bundleMapping.get(removedDesc);
+			if (re == null) {
+				continue;
+			}
 			unresolveBundle(re, true);
 			state.removeBundleComplete(removedDesc);
 			resolverExports.remove(re.getExportPackages());
@@ -2135,8 +2136,13 @@ public class ResolverImpl implements Resolver {
 		BundleDescription[] dependents = bundle.getBundleDescription().getDependents();
 		state.resolveBundle(bundle.getBundleDescription(), false, null, null, null, null, null, null, null, null);
 		// Unresolve dependents of 'bundle'
-		for (int i = 0; i < dependents.length; i++)
-			unresolveBundle(bundleMapping.get(dependents[i]), false);
+		for (int i = 0; i < dependents.length; i++) {
+			ResolverBundle db = bundleMapping.get(dependents[i]);
+			if (db == null) {
+				continue;
+			}
+			unresolveBundle(db, false);
+		}
 	}
 
 	public void bundleUpdated(BundleDescription newDescription, BundleDescription existingDescription, boolean pending) {
