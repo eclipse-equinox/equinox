@@ -58,7 +58,6 @@ public abstract class MultiplexingFactory {
 			Class<Collection<AccessibleObject>> clazz = (Class<Collection<AccessibleObject>>) defineAnonymousClass.invoke(unsafe, URL.class, bytes, (Object[]) null);
 			result = clazz.getConstructor().newInstance();
 		} catch (Throwable t) {
-			t.printStackTrace();
 			// ingore as if there is no Unsafe
 		}
 		setAccessible = result;
