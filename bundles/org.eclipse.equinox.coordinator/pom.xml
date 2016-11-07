@@ -29,7 +29,7 @@
         <version>${tycho.version}</version>
         <configuration>
           <compilerArgs>
-            <arg>-warn:-unchecked</arg>
+            <arg>-nowarn:[${project.basedir}/osgi]</arg>
           </compilerArgs>
         </configuration>
       </plugin>
