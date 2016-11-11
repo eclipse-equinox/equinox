@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.framework;
 
+import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
 import java.util.*;
 import java.util.concurrent.*;
@@ -29,7 +30,18 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.wiring.BundleRevision;
 
 public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
-	private static final ClassLoader BOOT_CLASSLOADER = new ClassLoader(Object.class.getClassLoader()) { /* boot class loader */};
+	public static final ClassLoader BOOT_CLASSLOADER;
+	static {
+		ClassLoader platformClassLoader = null;
+		try {
+			Method getPlatformClassLoader = ClassLoader.class.getMethod("getPlatformClassLoader"); //$NON-NLS-1$
+			platformClassLoader = (ClassLoader) getPlatformClassLoader.invoke(null);
+		} catch (Throwable t) {
+			// try everything possible to not fail <clinit>
+			platformClassLoader = new ClassLoader(Object.class.getClassLoader()) { /* boot class loader */};
+		}
+		BOOT_CLASSLOADER = platformClassLoader;
+	}
 	private final EquinoxContainer container;
 	private final Storage storage;
 	private final OSGiFrameworkHooks hooks;

@@ -46,7 +46,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 
 	public ContextFinder(ClassLoader contextClassLoader) {
 		super(contextClassLoader);
-		this.parentContextClassLoader = contextClassLoader != null ? contextClassLoader : new ClassLoader(Object.class.getClassLoader()) {/*boot classloader*/};
+		this.parentContextClassLoader = contextClassLoader != null ? contextClassLoader : EquinoxContainerAdaptor.BOOT_CLASSLOADER;
 	}
 
 	// Return a list of all classloaders on the stack that are neither the 

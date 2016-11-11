@@ -182,7 +182,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 			if (EquinoxConfiguration.CONTEXTCLASSLOADER_PARENT_APP.equals(type))
 				parent = ClassLoader.getSystemClassLoader();
 			else if (EquinoxConfiguration.CONTEXTCLASSLOADER_PARENT_BOOT.equals(type))
-				parent = null;
+				parent = EquinoxContainerAdaptor.BOOT_CLASSLOADER;
 			else if (EquinoxConfiguration.CONTEXTCLASSLOADER_PARENT_FWK.equals(type))
 				parent = EquinoxContainer.class.getClassLoader();
 			else if (EquinoxConfiguration.CONTEXTCLASSLOADER_PARENT_EXT.equals(type)) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,14 +15,9 @@ import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Enumeration;
+import org.eclipse.osgi.internal.framework.EquinoxContainerAdaptor;
 
 public class SystemPolicy implements IBuddyPolicy {
-
-	private static class ParentClassLoader extends ClassLoader {
-		protected ParentClassLoader() {
-			super(Object.class.getClassLoader());
-		}
-	}
 
 	public static final byte BOOT = 0;
 	public static final byte EXT = 1;
@@ -57,15 +52,15 @@ public class SystemPolicy implements IBuddyPolicy {
 			case APP :
 				if (ClassLoader.getSystemClassLoader() != null)
 					return ClassLoader.getSystemClassLoader();
-				return new ParentClassLoader();
+				return EquinoxContainerAdaptor.BOOT_CLASSLOADER;
 
 			case BOOT :
-				return new ParentClassLoader();
+				return EquinoxContainerAdaptor.BOOT_CLASSLOADER;
 
 			case EXT :
 				if (ClassLoader.getSystemClassLoader() != null)
 					return ClassLoader.getSystemClassLoader().getParent();
-				return new ParentClassLoader();
+				return EquinoxContainerAdaptor.BOOT_CLASSLOADER;
 		}
 		return null;
 	}
