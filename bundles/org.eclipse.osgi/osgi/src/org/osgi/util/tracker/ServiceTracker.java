@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2014). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2016). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
 import org.osgi.framework.AllServiceListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -387,15 +388,14 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 	/**
 	 * Default implementation of the
 	 * {@code ServiceTrackerCustomizer.addingService} method.
-	 * 
 	 * <p>
 	 * This method is only called when this {@code ServiceTracker} has been
 	 * constructed with a {@code null ServiceTrackerCustomizer} argument.
-	 * 
 	 * <p>
-	 * This implementation returns the result of calling {@code getService} on
-	 * the {@code BundleContext} with which this {@code ServiceTracker} was
-	 * created passing the specified {@code ServiceReference}.
+	 * This implementation returns the result of calling
+	 * {@code getServiceObjects(reference).getService()} on the
+	 * {@code BundleContext} with which this {@code ServiceTracker} was created
+	 * passing the specified {@code ServiceReference}.
 	 * <p>
 	 * This method can be overridden in a subclass to customize the service
 	 * object to be tracked for the service being added. In that case, take care
@@ -404,14 +404,15 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 	 * the service.
 	 * 
 	 * @param reference The reference to the service being added to this
-	 *        {@code ServiceTracker}.
+	 *            {@code ServiceTracker}.
 	 * @return The service object to be tracked for the service added to this
 	 *         {@code ServiceTracker}.
 	 * @see ServiceTrackerCustomizer#addingService(ServiceReference)
 	 */
+	@Override
 	public T addingService(ServiceReference<S> reference) {
 		@SuppressWarnings("unchecked")
-		T result = (T) context.getService(reference);
+		T result = (T) context.getServiceObjects(reference).getService();
 		return result;
 	}
 
@@ -430,6 +431,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 	 * @param service The service object for the modified service.
 	 * @see ServiceTrackerCustomizer#modifiedService(ServiceReference, Object)
 	 */
+	@Override
 	public void modifiedService(ServiceReference<S> reference, T service) {
 		/* do nothing */
 	}
@@ -437,15 +439,14 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 	/**
 	 * Default implementation of the
 	 * {@code ServiceTrackerCustomizer.removedService} method.
-	 * 
 	 * <p>
 	 * This method is only called when this {@code ServiceTracker} has been
 	 * constructed with a {@code null ServiceTrackerCustomizer} argument.
-	 * 
 	 * <p>
-	 * This implementation calls {@code ungetService}, on the
+	 * This implementation calls
+	 * {@code getServiceObjects(reference).ungetService(service)}, on the
 	 * {@code BundleContext} with which this {@code ServiceTracker} was created,
-	 * passing the specified {@code ServiceReference}.
+	 * passing the specified {@code ServiceReference} and service.
 	 * <p>
 	 * This method can be overridden in a subclass. If the default
 	 * implementation of {@link #addingService(ServiceReference) addingService}
@@ -455,8 +456,11 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 	 * @param service The service object for the removed service.
 	 * @see ServiceTrackerCustomizer#removedService(ServiceReference, Object)
 	 */
+	@Override
 	public void removedService(ServiceReference<S> reference, T service) {
-		context.ungetService(reference);
+		@SuppressWarnings("unchecked")
+		S s = (S) service;
+		context.getServiceObjects(reference).ungetService(s);
 	}
 
 	/**
@@ -526,12 +530,11 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 			return null;
 		}
 		synchronized (t) {
-			int length = t.size();
-			if (length == 0) {
+			if (t.isEmpty()) {
 				return null;
 			}
 			@SuppressWarnings("unchecked")
-			ServiceReference<S>[] result = new ServiceReference[length];
+			ServiceReference<S>[] result = new ServiceReference[0];
 			return t.copyKeys(result);
 		}
 	}
@@ -881,6 +884,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 		 * 
 		 * @param event {@code ServiceEvent} object from the framework.
 		 */
+		@Override
 		final public void serviceChanged(final ServiceEvent event) {
 			/*
 			 * Check if we had a delayed call (which could happen when we
