@@ -2563,7 +2563,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testStartLevelDeadlock() throws BundleException, IOException, InterruptedException {
+	public void testStartLevelDeadlock() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		container.getFrameworkStartLevel().setInitialBundleStartLevel(2);
@@ -2625,7 +2625,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testUnresolvedHostWithFragmentCycle() throws BundleException, IOException {
+	public void testUnresolvedHostWithFragmentCycle() throws BundleException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
@@ -2662,7 +2662,26 @@ public class TestModuleContainer extends AbstractTest {
 
 		ResolutionReport report = container.resolve(Arrays.asList(hostImporter), true);
 		Assert.assertNull("Failed to resolve test.", report.getResolutionException());
+	}
 
+	@Test
+	public void testModuleWiringToString() throws BundleException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install a test module
+		Map<String, String> testManifest = new HashMap<String, String>();
+		testManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		testManifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.name");
+		testManifest.put(Constants.BUNDLE_VERSION, "1.0");
+		Module testModule = installDummyModule(testManifest, "host10", container);
+
+		ResolutionReport report = container.resolve(Arrays.asList(testModule), true);
+		Assert.assertNull("Failed to resolve test.", report.getResolutionException());
+
+		ModuleRevision revision = testModule.getCurrentRevision();
+		ModuleWiring wiring = revision.getWiring();
+		Assert.assertEquals("Unexpected wiring.toString()", revision.toString(), wiring.toString());
 	}
 
 	@Test

@@ -453,4 +453,9 @@ public final class ModuleWiring implements BundleWiring {
 			misses.removeAll(packageNames);
 		}
 	}
+
+	@Override
+	public String toString() {
+		return revision.toString();
+	}
 }
