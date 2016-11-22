@@ -972,7 +972,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 		int oldUsedForParent = this.usedForParent;
 		SubMonitor result = newChild(totalWork, suppressFlags);
 
-		if ((flags & SUPPRESS_ISCANCELED) == 0) {
+		if ((result.flags & SUPPRESS_ISCANCELED) == 0) {
 			int ticksTheChildWillReportToParent = result.totalParent;
 
 			// If the new child reports a nonzero amount of progress.
