@@ -145,9 +145,9 @@ int main( int argc, _TCHAR* argv[] )
     /* Parse configuration file arguments */
     iniFile = checkForIni(argc, argv);
     if (iniFile != NULL)
-    	ret = readConfigFile(iniFile, &configArgc, &configArgv);
+		ret = readConfigFile(iniFile, &configArgc, &configArgv);
     else
-    	ret = readIniFile(program, &configArgc, &configArgv);
+		ret = readIniFile(program, &configArgc, &configArgv);
 	if (ret == 0)
 	{
 		parseArgs (&configArgc, configArgv, 0);

@@ -74,7 +74,7 @@ int initWindowSystem(int* pArgc, char* argv[], int showSplash)
     	return -1;
     
     if (getOfficialName() != NULL) 
-    	defaultArgv[0] = getOfficialName();
+		defaultArgv[0] = getOfficialName();
     
 	if (argv == NULL) {
 		/* gtk_init_check on Solaris 9 doesn't like NULL or empty argv */

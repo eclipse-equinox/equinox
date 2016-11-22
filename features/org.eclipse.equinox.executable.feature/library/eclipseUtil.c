@@ -315,7 +315,7 @@ int versionCmp(char *ver1, char *ver2)
     num2 = atoi(ver2);
 
     if (num1 > num2)
-    	return 1;
+		return 1;
     	
 	if (num1 < num2)
 		return -1;
