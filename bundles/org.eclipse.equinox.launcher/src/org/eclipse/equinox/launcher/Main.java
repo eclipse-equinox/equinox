@@ -340,25 +340,13 @@ public class Main {
 		if (osName.equals(Constants.OS_MACOSX))
 			return Constants.WS_COCOA;
 		if (osName.equals(Constants.OS_HPUX))
-			return Constants.WS_MOTIF;
+			return Constants.WS_GTK;
 		if (osName.equals(Constants.OS_AIX))
-			return Constants.WS_MOTIF;
+			return Constants.WS_GTK;
 		if (osName.equals(Constants.OS_SOLARIS))
 			return Constants.WS_GTK;
 		if (osName.equals(Constants.OS_QNX))
 			return Constants.WS_PHOTON;
-		return Constants.WS_UNKNOWN;
-	}
-
-	private String getAlternateWS(String defaultWS) {
-		// We'll have already tried the default, so we only need to map
-		// in one direction. (default -> alternate)
-		if (Constants.WS_COCOA.equals(defaultWS))
-			return Constants.WS_CARBON;
-		if (Constants.WS_GTK.equals(defaultWS))
-			return Constants.WS_MOTIF;
-		if (Constants.WS_WIN32.equals(defaultWS))
-			return Constants.WS_WPF;
 		return Constants.WS_UNKNOWN;
 	}
 
@@ -452,14 +440,6 @@ public class Main {
 			String fragmentArch = getArch();
 
 			libPath = getLibraryPath(getFragmentString(fragmentOS, fragmentWS, fragmentArch), defaultPath);
-			if (libPath == null && ws == null) {
-				// no ws was specified and we didn't find the default fragment, try an alternate ws
-				String alternateWS = getAlternateWS(fragmentWS);
-				libPath = getLibraryPath(getFragmentString(fragmentOS, alternateWS, fragmentArch), defaultPath);
-				if (libPath != null) {
-					System.getProperties().put(PROP_WS, alternateWS);
-				}
-			}
 		}
 		library = libPath;
 		if (library != null)
