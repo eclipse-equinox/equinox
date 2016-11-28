@@ -36,7 +36,6 @@ static FN_TABLE gtkFunctions[] = {
 	FN_TABLE_ENTRY(gtk_init_check, 1),
 	FN_TABLE_ENTRY(gtk_init_with_args, 0),
 	FN_TABLE_ENTRY(gtk_message_dialog_new, 1),
-	FN_TABLE_ENTRY(gtk_set_locale, 0),
 	FN_TABLE_ENTRY(gtk_widget_destroy, 1),
 	FN_TABLE_ENTRY(gtk_widget_destroyed, 1),
 	FN_TABLE_ENTRY(gtk_widget_show_all, 1),
@@ -50,7 +49,6 @@ static FN_TABLE gtkFunctions[] = {
 };
 /* functions from libgdk-x11-2.0 or libgdk-3.so.0*/
 static FN_TABLE gdkFunctions[] = {
-	FN_TABLE_ENTRY(gdk_set_program_class, 1),
 	FN_TABLE_ENTRY(gdk_display_get_default, 1),
 	FN_TABLE_ENTRY(gdk_x11_display_get_xdisplay, 1),
 	FN_TABLE_ENTRY(gdk_screen_get_default, 1),
@@ -181,7 +179,6 @@ int loadGtk() {
 				if ( x11Lib == NULL || loadGtkSymbols(x11Lib, x11Functions)  != 0) return -1;
 
 				/* Initialize GTK. */
-				if (gtk.gtk_set_locale) gtk.gtk_set_locale();
 				if (gtk.gtk_init_with_args) {
 					GError *error = NULL;
 					if (!gtk.gtk_init_with_args(0, NULL, NULL, NULL, NULL, &error)) {

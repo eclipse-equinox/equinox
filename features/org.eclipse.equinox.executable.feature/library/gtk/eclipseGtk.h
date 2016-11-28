@@ -23,7 +23,6 @@ struct GTK_PTRS {
 	gboolean	(*gtk_init_check)			(int*, char***);
 	gboolean	(*gtk_init_with_args)		(int*, char***, const char *, void *, const char *, GError **);
 	GtkWidget*	(*gtk_message_dialog_new)	(GtkWindow*, GtkDialogFlags, GtkMessageType, GtkButtonsType, const gchar*, ...);
-	gchar*		(*gtk_set_locale)			();
 	void		(*gtk_widget_destroy)		(GtkWidget*);
 	void		(*gtk_widget_destroyed)		(GtkWidget*, GtkWidget**);
 	void		(*gtk_widget_show_all)		(GtkWidget*);
@@ -37,7 +36,6 @@ struct GTK_PTRS {
 	gulong 		(*g_signal_connect_data)	(gpointer, const gchar*, GCallback, gpointer, GClosureNotify, GConnectFlags);
 	gboolean	(*g_main_context_iteration)	(GMainContext*, gboolean);
 	void		(*g_object_unref)			(gpointer);
-	GObject*	(*g_object_new)				(GType, const gchar*, ...);
 	guint       (*g_timeout_add)			(guint, GSourceFunc, gpointer);
 	void		(*g_error_free)				(GError *);
 
@@ -51,7 +49,6 @@ struct GTK_PTRS {
 	GdkPixbuf*	(*gdk_pixbuf_scale_simple)			(const GdkPixbuf*, int, int, GdkInterpType);
 	int			(*gdk_pixbuf_get_width)				(const GdkPixbuf*);
 	int			(*gdk_pixbuf_get_height)			(const GdkPixbuf*);
-	void		(*gdk_set_program_class)			(const char*);
 	GdkScreen *	(*gdk_screen_get_default)			();
 	double		(*gdk_screen_get_resolution)		(GdkScreen *);
 	
