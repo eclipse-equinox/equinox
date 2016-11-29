@@ -68,6 +68,15 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		bundleContext = context;
 		singleton = this;
+
+		installLocationTracker = openServiceTracker(Location.INSTALL_FILTER);
+		instanceLocationTracker = openServiceTracker(Location.INSTANCE_FILTER);
+		configLocationTracker = openServiceTracker(Location.CONFIGURATION_FILTER);
+		bundleTracker = openServiceTracker(PackageAdmin.class);
+		debugTracker = openServiceTracker(DebugOptions.class);
+		logTracker = openServiceTracker(FrameworkLog.class);
+		localizationTracker = openServiceTracker(BundleLocalization.class);
+
 		RuntimeLog.setLogWriter(getPlatformWriter(context));
 		Dictionary<String, Object> urlProperties = new Hashtable<>();
 		urlProperties.put("protocol", "platform"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -99,16 +108,6 @@ public class Activator implements BundleActivator {
 	 * Return the configuration location service, if available.
 	 */
 	public Location getConfigurationLocation() {
-		if (configLocationTracker == null) {
-			Filter filter = null;
-			try {
-				filter = bundleContext.createFilter(Location.CONFIGURATION_FILTER);
-			} catch (InvalidSyntaxException e) {
-				// should not happen
-			}
-			configLocationTracker = new ServiceTracker<>(bundleContext, filter, null);
-			configLocationTracker.open();
-		}
 		return configLocationTracker.getService();
 	}
 
@@ -116,10 +115,6 @@ public class Activator implements BundleActivator {
 	 * Return the debug options service, if available.
 	 */
 	public DebugOptions getDebugOptions() {
-		if (debugTracker == null) {
-			debugTracker = new ServiceTracker<>(bundleContext, DebugOptions.class.getName(), null);
-			debugTracker.open();
-		}
 		return debugTracker.getService();
 	}
 
@@ -127,10 +122,6 @@ public class Activator implements BundleActivator {
 	 * Return the framework log service, if available.
 	 */
 	public FrameworkLog getFrameworkLog() {
-		if (logTracker == null) {
-			logTracker = new ServiceTracker<>(bundleContext, FrameworkLog.class.getName(), null);
-			logTracker.open();
-		}
 		return logTracker.getService();
 	}
 
@@ -138,16 +129,6 @@ public class Activator implements BundleActivator {
 	 * Return the instance location service, if available.
 	 */
 	public Location getInstanceLocation() {
-		if (instanceLocationTracker == null) {
-			Filter filter = null;
-			try {
-				filter = bundleContext.createFilter(Location.INSTANCE_FILTER);
-			} catch (InvalidSyntaxException e) {
-				// ignore this.  It should never happen as we have tested the above format.
-			}
-			instanceLocationTracker = new ServiceTracker<>(bundleContext, filter, null);
-			instanceLocationTracker.open();
-		}
 		return instanceLocationTracker.getService();
 	}
 
@@ -176,10 +157,6 @@ public class Activator implements BundleActivator {
 	 * Return the package admin service, if available.
 	 */
 	private PackageAdmin getBundleAdmin() {
-		if (bundleTracker == null) {
-			bundleTracker = new ServiceTracker<>(getContext(), PackageAdmin.class.getName(), null);
-			bundleTracker.open();
-		}
 		return bundleTracker.getService();
 	}
 
@@ -197,17 +174,20 @@ public class Activator implements BundleActivator {
 	 * Return the install location service if available.
 	 */
 	public Location getInstallLocation() {
-		if (installLocationTracker == null) {
-			Filter filter = null;
-			try {
-				filter = bundleContext.createFilter(Location.INSTALL_FILTER);
-			} catch (InvalidSyntaxException e) {
-				// should not happen
-			}
-			installLocationTracker = new ServiceTracker<>(bundleContext, filter, null);
-			installLocationTracker.open();
-		}
 		return installLocationTracker.getService();
+	}
+
+	private <T> ServiceTracker<Object, T> openServiceTracker(String filterString) throws InvalidSyntaxException {
+		Filter filter = bundleContext.createFilter(filterString);
+		ServiceTracker<Object, T> tracker = new ServiceTracker<>(bundleContext, filter, null);
+		tracker.open();
+		return tracker;
+	}
+
+	private <T> ServiceTracker<Object, T> openServiceTracker(Class<?> clazz) {
+		ServiceTracker<Object, T> tracker = new ServiceTracker<>(bundleContext, clazz.getName(), null);
+		tracker.open();
+		return tracker;
 	}
 
 	/**
@@ -233,12 +213,7 @@ public class Activator implements BundleActivator {
 	 */
 	public ResourceBundle getLocalization(Bundle bundle, String locale) throws MissingResourceException {
 		if (localizationTracker == null) {
-			BundleContext context = Activator.getContext();
-			if (context == null) {
-				throw new MissingResourceException(CommonMessages.activator_resourceBundleNotStarted, bundle.getSymbolicName(), ""); //$NON-NLS-1$
-			}
-			localizationTracker = new ServiceTracker<>(context, BundleLocalization.class.getName(), null);
-			localizationTracker.open();
+			throw new MissingResourceException(CommonMessages.activator_resourceBundleNotStarted, bundle.getSymbolicName(), ""); //$NON-NLS-1$
 		}
 		BundleLocalization location = localizationTracker.getService();
 		ResourceBundle result = null;
@@ -262,31 +237,24 @@ public class Activator implements BundleActivator {
 		}
 		if (installLocationTracker != null) {
 			installLocationTracker.close();
-			installLocationTracker = null;
 		}
 		if (configLocationTracker != null) {
 			configLocationTracker.close();
-			configLocationTracker = null;
 		}
 		if (bundleTracker != null) {
 			bundleTracker.close();
-			bundleTracker = null;
 		}
 		if (debugTracker != null) {
 			debugTracker.close();
-			debugTracker = null;
 		}
 		if (logTracker != null) {
 			logTracker.close();
-			logTracker = null;
 		}
 		if (instanceLocationTracker != null) {
 			instanceLocationTracker.close();
-			instanceLocationTracker = null;
 		}
 		if (localizationTracker != null) {
 			localizationTracker.close();
-			localizationTracker = null;
 		}
 		if (debugRegistration != null) {
 			debugRegistration.unregister();

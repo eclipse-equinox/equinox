@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.core.internal.runtime;
 
-import org.eclipse.core.internal.runtime.DataArea;
-
 /**
  * The class contains a set of utilities working platform metadata area.
  * This class can only be used if OSGi plugin is available.
@@ -26,8 +24,9 @@ public class MetaDataKeeper {
 	/**
 	 * Returns the object which defines the location and organization
 	 * of the platform's meta area.
+	 * @return non null
 	 */
-	public static DataArea getMetaArea() {
+	public static synchronized DataArea getMetaArea() {
 		if (metaArea != null)
 			return metaArea;
 

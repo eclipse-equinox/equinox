@@ -39,7 +39,7 @@ public class DataArea {
 	private IPath location; //The location of the instance data
 	private boolean initialized = false;
 
-	protected void assertLocationInitialized() throws IllegalStateException {
+	protected synchronized void assertLocationInitialized() throws IllegalStateException {
 		if (location != null && initialized)
 			return;
 		Activator activator = Activator.getDefault();
