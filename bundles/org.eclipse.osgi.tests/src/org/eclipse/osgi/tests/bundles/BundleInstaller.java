@@ -127,7 +127,7 @@ public class BundleInstaller {
 		return bundle;
 	}
 
-	synchronized public Bundle[] uninstallAllBundles() throws BundleException {
+	synchronized public Bundle[] uninstallAllBundles() {
 		if (bundles == null)
 			return null;
 		ArrayList result = new ArrayList(bundles.size());
@@ -137,6 +137,9 @@ public class BundleInstaller {
 				bundle.uninstall();
 			} catch (IllegalStateException e) {
 				// ignore; bundle probably already uninstalled
+			} catch (BundleException e) {
+				// ignore and move on, but print stacktrace for logs
+				e.printStackTrace();
 			}
 			result.add(bundle);
 		}
@@ -144,7 +147,7 @@ public class BundleInstaller {
 		return (Bundle[]) result.toArray(new Bundle[result.size()]);
 	}
 
-	synchronized public Bundle[] shutdown() throws BundleException {
+	synchronized public Bundle[] shutdown() {
 		if (bundles == null)
 			return null;
 		Bundle[] result = uninstallAllBundles();

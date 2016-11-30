@@ -1567,11 +1567,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			}
 			assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 		} finally {
-			try {
-				testBundleInstaller.shutdown();
-			} catch (BundleException e) {
-				fail("Could not shutdown installer", e);
-			}
+			testBundleInstaller.shutdown();
 		}
 	}
 
