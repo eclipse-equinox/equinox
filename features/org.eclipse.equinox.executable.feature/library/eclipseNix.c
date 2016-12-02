@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -56,9 +56,6 @@ static const char* jvmLocations [] = { "j9vm", "../jre/bin/j9vm",
 
 static void adjustLibraryPath( char * vmLibrary );
 static char * findLib(char * command);
-#ifdef NETSCAPE_FIX
-extern void   fixEnvForNetscape();
-#endif /* NETSCAPE_FIX */
 
 char * findVMLibrary( char* command ) {
 	char * lib = findLib(command);
@@ -121,9 +118,6 @@ static void adjustLibraryPath( char * vmLibrary ) {
 #ifdef MOZILLA_FIX
 	fixEnvForMozilla();
 #endif /* MOZILLA_FIX */
-#ifdef NETSCAPE_FIX
-	fixEnvForNetscape();
-#endif /* NETSCAPE_FIX */
 	
 	paths = getVMLibrarySearchPath(vmLibrary);
  

@@ -1,5 +1,5 @@
 #*******************************************************************************
-# Copyright (c) 2000, 2010 IBM Corporation and others.
+# Copyright (c) 2000, 2016 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at 
@@ -46,7 +46,6 @@ GTK_LIBS = \
 LFLAGS = ${M_ARCH} -shared -static-libgcc
 # -Wl,--export-dynamic
 CFLAGS = ${M_ARCH} -O -s \
-	-DNETSCAPE_FIX \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
