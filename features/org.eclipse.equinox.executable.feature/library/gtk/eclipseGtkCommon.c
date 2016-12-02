@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -90,19 +90,13 @@ int initWindowSystem(int* pArgc, char* argv[], int showSplash)
     }  
 
 	/* Initialize GTK. */
-    if (gtk.gtk_init_with_args) {
-        GError *error = NULL;
-        if (!gtk.gtk_init_with_args(0, NULL, NULL, NULL, NULL, &error)) {
-            if (error) {
-                fprintf(stderr, "%s: %s\n", getOfficialName(), error->message);
-                if (gtk.g_error_free) gtk.g_error_free(error);
-            }
-            return -1;
+    GError *error = NULL;
+    if (!gtk.gtk_init_with_args(0, NULL, NULL, NULL, NULL, &error)) {
+        if (error) {
+            fprintf(stderr, "%s: %s\n", getOfficialName(), error->message);
+            gtk.g_error_free(error);
         }
-    } else {
-        if (!gtk.gtk_init_check(pArgc, &argv)) {
-        	return -1;
-        }
+        return -1;
     }
 
 	/*_gdk_set_program_class(getOfficialName());*/

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -20,7 +20,6 @@ struct GTK_PTRS {
 	void		(*gtk_container_add)		(GtkContainer*, GtkWidget*);
 	gint		(*gtk_dialog_run)			(GtkDialog *);
 	GtkWidget*	(*gtk_image_new_from_pixbuf)(GdkPixbuf*);
-	gboolean	(*gtk_init_check)			(int*, char***);
 	gboolean	(*gtk_init_with_args)		(int*, char***, const char *, void *, const char *, GError **);
 	GtkWidget*	(*gtk_message_dialog_new)	(GtkWindow*, GtkDialogFlags, GtkMessageType, GtkButtonsType, const gchar*, ...);
 	void		(*gtk_widget_destroy)		(GtkWidget*);
