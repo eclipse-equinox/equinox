@@ -1,6 +1,6 @@
 /*
- * Copyright (c) OSGi Alliance (2010, 2013). All Rights Reserved.
- *
+ * Copyright (c) OSGi Alliance (2014). All Rights Reserved.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,28 +15,26 @@
  */
 
 /**
- * Service Component Package Version 1.3.
- *
+ * Function Package Version 1.0.
+ * 
  * <p>
  * Bundles wishing to use this package must list the package in the
- * Import-Package header of the bundle's manifest. This package has two types of
- * users: the consumers that use the API in this package and the providers that
- * implement the API in this package.
- *
+ * Import-Package header of the bundle's manifest.
+ * 
  * <p>
  * Example import for consumers using the API in this package:
  * <p>
- * {@code  Import-Package: org.osgi.service.component; version="[1.3,2.0)"}
+ * {@code  Import-Package: org.osgi.util.function; version="[1.0,2.0)"}
  * <p>
  * Example import for providers implementing the API in this package:
  * <p>
- * {@code  Import-Package: org.osgi.service.component; version="[1.3,1.4)"}
- *
+ * {@code  Import-Package: org.osgi.util.function; version="[1.0,1.1)"}
+ * 
  * @author $Id$
  */
 
-@Version("1.3")
-package org.osgi.service.component;
+@Version("1.0")
+package org.osgi.util.function;
 
 import org.osgi.annotation.versioning.Version;
 
