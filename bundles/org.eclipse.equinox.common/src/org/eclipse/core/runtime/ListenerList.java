@@ -7,11 +7,13 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Mikael Barbero (Eclipse Foundation) - Bug 509234
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * This class is a thread safe list that is designed for storing lists of listeners.
@@ -246,5 +248,38 @@ public class ListenerList<E> implements Iterable<E> {
 	 */
 	public synchronized void clear() {
 		listeners = EmptyArray;
+	}
+
+	/**
+	 * Returns a Spliterator covering the registered listeners.
+	 * <p>
+	 * The spliterator reports Spliterator.SIZED, Spliterator.SUBSIZED, Spliterator.ORDERED, and Spliterator.IMMUTABLE
+	 * 
+	 * @return a spliterator for listeners
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public Spliterator<E> spliterator() {
+		return (Spliterator<E>) Arrays.spliterator(listeners);
+	}
+
+	/**
+	 * Returns a sequential {@code Stream} over the registered listeners.
+	 * 
+	 * @return a sequential {@code Stream} over the registered listeners.
+	 * @since org.eclipse.equinox.common 3.9
+	 */
+	public Stream<E> stream() {
+		return StreamSupport.stream(spliterator(), false);
+	}
+
+	/**
+	 * Returns a parallel {@code Stream} over the registered listeners.
+	 * 
+	 * @return a parallel {@code Stream} over the registered listeners.
+	 * @since org.eclipse.equinox.common 3.9
+	 */
+	public Stream<E> parallelStream() {
+		return StreamSupport.stream(spliterator(), true);
 	}
 }
