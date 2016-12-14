@@ -25,7 +25,6 @@ import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.jetty.JettyCustomizer;
 import org.eclipse.equinox.http.servlet.HttpServiceServlet;
 import org.eclipse.jetty.server.*;
-import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -139,7 +138,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 		if (null != customizer)
 			httpContext = (ServletContextHandler) customizer.customizeContext(httpContext, dictionary);
 
-		SessionManager sessionManager = httpContext.getSessionHandler().getSessionManager();
+		SessionHandler sessionManager = httpContext.getSessionHandler();
 		try {
 			sessionManager.addEventListener((HttpSessionIdListener) holder.getServlet());
 		} catch (ServletException e) {
@@ -217,11 +216,9 @@ public class HttpServerManager implements ManagedServiceFactory {
 		File contextWorkDir = new File(workDir, DIR_PREFIX + dictionary.get(Constants.SERVICE_PID).hashCode());
 		contextWorkDir.mkdir();
 		httpContext.setAttribute(CONTEXT_TEMPDIR, contextWorkDir);
-
-		HashSessionManager sessionManager = new HashSessionManager();
-		sessionManager.setMaxInactiveInterval(Details.getInt(dictionary, JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL, -1));
-
-		httpContext.setSessionHandler(new SessionHandler(sessionManager));
+		SessionHandler handler = new SessionHandler();
+		handler.setMaxInactiveInterval(Details.getInt(dictionary, JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL, -1));
+		httpContext.setSessionHandler(handler);
 
 		return httpContext;
 	}
