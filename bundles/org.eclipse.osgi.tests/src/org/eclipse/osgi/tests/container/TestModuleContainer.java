@@ -2665,6 +2665,51 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
+	public void testMultiHostFragmentWithOverlapImport() throws BundleException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install an exporter
+		Map<String, String> exporterManifest = new HashMap<String, String>();
+		exporterManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		exporterManifest.put(Constants.BUNDLE_SYMBOLICNAME, "exporter");
+		exporterManifest.put(Constants.BUNDLE_VERSION, "1.0");
+		exporterManifest.put(Constants.EXPORT_PACKAGE, "exporter");
+		installDummyModule(exporterManifest, "exporter", container);
+
+		// install a fragment to the exporter
+		Map<String, String> exporterFragManifest = new HashMap<String, String>();
+		exporterFragManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		exporterFragManifest.put(Constants.BUNDLE_SYMBOLICNAME, "exporter.frag");
+		exporterFragManifest.put(Constants.EXPORT_PACKAGE, "exporter.frag");
+		exporterFragManifest.put(Constants.FRAGMENT_HOST, "exporter");
+		installDummyModule(exporterFragManifest, "exporter.frag", container);
+
+		// install a host that imports the exporter
+		Map<String, String> hostManifest = new HashMap<String, String>();
+		hostManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		hostManifest.put(Constants.BUNDLE_SYMBOLICNAME, "host");
+		hostManifest.put(Constants.BUNDLE_VERSION, "1.0");
+		hostManifest.put(Constants.IMPORT_PACKAGE, "exporter");
+		installDummyModule(hostManifest, "host10", container);
+		hostManifest.put(Constants.BUNDLE_VERSION, "1.1");
+		installDummyModule(hostManifest, "host11", container);
+		hostManifest.put(Constants.BUNDLE_VERSION, "1.2");
+		installDummyModule(hostManifest, "host12", container);
+
+		// install a fragment that also imports the exporter
+		Map<String, String> hostFragManifest = new HashMap<String, String>();
+		hostFragManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		hostFragManifest.put(Constants.BUNDLE_SYMBOLICNAME, "host.frag");
+		hostFragManifest.put(Constants.FRAGMENT_HOST, "host");
+		hostFragManifest.put(Constants.IMPORT_PACKAGE, "exporter; version=0.0");
+		Module hostFrag = installDummyModule(hostFragManifest, "host.frag", container);
+
+		ResolutionReport report = container.resolve(Arrays.asList(hostFrag), true);
+		Assert.assertNull("Failed to resolve test.", report.getResolutionException());
+	}
+
+	@Test
 	public void testModuleWiringToString() throws BundleException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
