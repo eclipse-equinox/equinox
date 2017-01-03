@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import junit.framework.TestSuite;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
+import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.FrameworkWiring;
 
 public class PlatformAdminBundleTests extends AbstractBundleTests {
@@ -162,5 +163,25 @@ public class PlatformAdminBundleTests extends AbstractBundleTests {
 		} finally {
 			getContext().removeFrameworkListener(errorListener);
 		}
+	}
+
+	public void testTimestamp() throws BundleException {
+		PlatformAdmin pa = installer.getPlatformAdmin();
+		// get system state first to ensure it does not have the test bundle
+		State systemState = pa.getState(false);
+
+		long initialTimeStamp = systemState.getTimeStamp();
+		Bundle test = installer.installBundle("test");
+
+		assertTrue("Timestamp has not changed.", initialTimeStamp != systemState.getTimeStamp());
+
+		initialTimeStamp = systemState.getTimeStamp();
+		test.adapt(BundleStartLevel.class).setStartLevel(1000);
+
+		assertTrue("Timestamp has not changed.", initialTimeStamp == systemState.getTimeStamp());
+
+		initialTimeStamp = systemState.getTimeStamp();
+		test.uninstall();
+		assertTrue("Timestamp has not changed.", initialTimeStamp != systemState.getTimeStamp());
 	}
 }
