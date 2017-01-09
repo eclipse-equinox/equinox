@@ -134,7 +134,7 @@ public class Activator implements BundleActivator {
 		if (httpsEnabled.booleanValue()) {
 			// HTTPS Port
 
-			int httpsPort = Details.getIntProp(context, JettyConstants.HTTP_PORT, -1);
+			int httpsPort = Details.getIntProp(context, JettyConstants.HTTPS_PORT, -1);
 			if (httpsPort == -1)
 				httpsPort = Details.getInt(context, ORG_OSGI_SERVICE_HTTP_PORT_SECURE, 443);
 			defaultSettings.put(JettyConstants.HTTPS_PORT, Integer.valueOf(httpsPort));
