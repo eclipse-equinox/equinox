@@ -144,8 +144,6 @@ public class ContextController {
 		this.trackingContext = trackingContextParam;
 		this.consumingContext = consumingContext;
 
-		this.string = SIMPLE_NAME + '[' + serviceId + "][" + contextName + ", " + trackingContextParam.getBundle() + ']'; //$NON-NLS-1$
-
 		listenerServiceTracker = new ServiceTracker<EventListener, AtomicReference<ListenerRegistration>>(
 			trackingContext, httpServiceRuntime.getListenerFilter(),
 			new ContextListenerTrackerCustomizer(
@@ -639,10 +637,12 @@ public class ContextController {
 	}
 
 	public DispatchTargets getDispatchTargets(
-		String path, RequestInfoDTO requestInfoDTO) {
+		String pathString, RequestInfoDTO requestInfoDTO) {
 
-		String queryString = Path.findQueryString(path);
-		String requestURI = Path.stripQueryString(path);
+		Path path = new Path(pathString);
+
+		String queryString = path.getQueryString();
+		String requestURI = path.getRequestURI();
 
 		// perfect match
 		DispatchTargets dispatchTargets = getDispatchTargets(
@@ -650,10 +650,9 @@ public class ContextController {
 
 		if (dispatchTargets == null) {
 			// extension match
-			String extension = Path.findExtension(requestURI);
 
 			dispatchTargets = getDispatchTargets(
-				requestURI, extension, queryString, Match.EXTENSION,
+				requestURI, path.getExtension(), queryString, Match.EXTENSION,
 				requestInfoDTO);
 		}
 
@@ -926,7 +925,15 @@ public class ContextController {
 
 	@Override
 	public String toString() {
-		return string;
+		String value = string;
+
+		if (value == null) {
+			value = SIMPLE_NAME + '[' + contextName + ", " + trackingContext.getBundle() + ']'; //$NON-NLS-1$
+
+			string = value;
+		}
+
+		return value;
 	}
 
 	private void addEnpointRegistrationsToRequestInfo(
@@ -1241,12 +1248,16 @@ public class ContextController {
 			return previousHttpSessionAdaptor;
 		}
 
+		List<HttpSessionListener> listeners = eventListeners.get(HttpSessionListener.class);
+
+		if (listeners.isEmpty()) {
+			return httpSessionAdaptor;
+		}
+
 		HttpSessionEvent httpSessionEvent = new HttpSessionEvent(
 			httpSessionAdaptor);
 
-		for (HttpSessionListener listener : eventListeners.get(
-				HttpSessionListener.class)) {
-
+		for (HttpSessionListener listener : listeners) {
 			listener.sessionCreated(httpSessionEvent);
 		}
 
@@ -1295,7 +1306,7 @@ public class ContextController {
 	private final ServiceReference<ServletContextHelper> servletContextHelperRef;
 	private final String servletContextHelperRefFilter;
 	private boolean shutdown;
-	private final String string;
+	private String string;
 
 	private final ServiceTracker<Filter, AtomicReference<FilterRegistration>> filterServiceTracker;
 	private final ServiceTracker<EventListener, AtomicReference<ListenerRegistration>> listenerServiceTracker;

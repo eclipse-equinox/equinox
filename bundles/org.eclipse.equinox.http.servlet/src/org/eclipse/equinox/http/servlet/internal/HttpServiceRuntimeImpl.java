@@ -60,7 +60,7 @@ public class HttpServiceRuntimeImpl
 		this.listenerServiceFilter = createListenerFilter(consumingContext, parentServletContext);
 
 		this.parentServletContext = parentServletContext;
-		this.attributes = Collections.unmodifiableMap(attributes);
+		this.attributes = attributes;
 		this.targetFilter = "(" + Activator.UNIQUE_SERVICE_ID + "=" + attributes.get(Activator.UNIQUE_SERVICE_ID) + ")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		contextServiceTracker =
@@ -199,10 +199,12 @@ public class HttpServiceRuntimeImpl
 	}
 
 	public DispatchTargets getDispatchTargets(
-		String path, RequestInfoDTO requestInfoDTO) {
+		String pathString, RequestInfoDTO requestInfoDTO) {
 
-		String queryString = Path.findQueryString(path);
-		String requestURI = Path.stripQueryString(path);
+		Path path = new Path(pathString);
+
+		String queryString = path.getQueryString();
+		String requestURI = path.getRequestURI();
 
 		// perfect match
 		DispatchTargets dispatchTargets = getDispatchTargets(
@@ -210,10 +212,9 @@ public class HttpServiceRuntimeImpl
 
 		if (dispatchTargets == null) {
 			// extension match
-			String extension = Path.findExtension(requestURI);
 
 			dispatchTargets = getDispatchTargets(
-				requestURI, extension, queryString, Match.EXTENSION,
+				requestURI, path.getExtension(), queryString, Match.EXTENSION,
 				requestInfoDTO);
 		}
 

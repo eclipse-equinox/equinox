@@ -16,40 +16,42 @@ package org.eclipse.equinox.http.servlet.internal.util;
  */
 public class Path {
 
-	public static String findExtension(String path) {
-		path = stripQueryString(path);
-
-		String lastSegment = path.substring(path.lastIndexOf('/') + 1);
-
-		int dot = lastSegment.lastIndexOf('.');
-
-		if (dot == -1) {
-			return null;
-		}
-
-		return lastSegment.substring(dot + 1);
-	}
-
-	public static String findQueryString(String path) {
-		String queryString = null;
-
+	public Path(String path) {
 		int index = path.indexOf('?');
 
-		if (index != -1) {
-			queryString = path.substring(index + 1);
+		if (index == -1) {
+			_requestURI = path;
+			_queryString = null;
+		}
+		else {
+			_requestURI = path.substring(0, index);
+			_queryString = path.substring(index + 1);
 		}
 
-		return queryString;
-	}
+		index = _requestURI.lastIndexOf('.');
 
-	public static String stripQueryString(String path) {
-		int index = path.indexOf('?');
-
-		if (index != -1) {
-			path = path.substring(0, index);
+		if ((index == -1) || (index < _requestURI.lastIndexOf('/'))) {
+			_extension = null;
 		}
-
-		return path;
+		else {
+			_extension = _requestURI.substring(index + 1);
+		}
 	}
+
+	public String getRequestURI() {
+		return _requestURI;
+	}
+
+	public String getQueryString() {
+		return _queryString;
+	}
+
+	public String getExtension() {
+		return _extension;
+	}
+
+	private final String _requestURI;
+	private final String _queryString;
+	private final String _extension;
 
 }

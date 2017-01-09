@@ -13,7 +13,11 @@
 package org.eclipse.equinox.http.servlet.internal.context;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.servlet.ServletContext;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
 
@@ -28,9 +32,8 @@ import org.eclipse.equinox.http.servlet.internal.util.Const;
 public class ProxyContext {
 	private static final String JAVAX_SERVLET_CONTEXT_TEMPDIR = "javax.servlet.context.tempdir"; //$NON-NLS-1$
 
-	private String servletPath;
-	private HashMap<ContextController, ContextAttributes> attributesMap =
-		new HashMap<ContextController, ContextAttributes>();
+	private final ConcurrentMap<ContextController, ContextAttributes> attributesMap =
+		new ConcurrentHashMap<ContextController, ContextAttributes>();
 	File proxyContextTempDir;
 	private ServletContext servletContext;
 
@@ -49,36 +52,44 @@ public class ProxyContext {
 			deleteDirectory(proxyContextTempDir);
 	}
 
-	public synchronized String getServletPath() {
-		return (servletPath == null ? Const.BLANK : servletPath);
+	public String getServletPath() {
+		return Const.BLANK;
 	}
 
-	public synchronized void createContextAttributes(
+	public void createContextAttributes(
 		ContextController controller) {
 
-		ContextAttributes attributes = attributesMap.get(controller);
-		if (attributes == null) {
-			attributes = new ContextAttributes(controller);
-			attributesMap.put(controller, attributes);
+		synchronized (attributesMap) {
+			ContextAttributes contextAttributes = attributesMap.get(controller);
+
+			if (contextAttributes == null) {
+				contextAttributes = new ContextAttributes(controller);
+
+				attributesMap.put(controller, contextAttributes);
+			}
+
+			contextAttributes.addReference();
 		}
-		attributes.addReference();
 	}
 
-	public synchronized void destroyContextAttributes(
+	public void destroyContextAttributes(
 		ContextController controller) {
 
-		ContextAttributes attributes = attributesMap.get(controller);
-		if (attributes == null) {
-			throw new IllegalStateException("too many calls");
-		}
-		attributes.removeReference();
-		if (attributes.referenceCount() == 0) {
-			attributesMap.remove(controller);
-			attributes.destroy();
+		synchronized (attributesMap) {
+			ContextAttributes contextAttributes = attributesMap.get(controller);
+
+			if (contextAttributes == null) {
+				throw new IllegalStateException("too many calls");
+			}
+
+			if (contextAttributes.removeReference() == 0) {
+				attributesMap.remove(controller);
+				contextAttributes.destroy();
+			}
 		}
 	}
 
-	public synchronized Dictionary<String, Object> getContextAttributes(
+	public Dictionary<String, Object> getContextAttributes(
 		ContextController controller) {
 
 		return attributesMap.get(controller);
@@ -107,9 +118,11 @@ public class ProxyContext {
 		return directory.delete();
 	}
 
-	public class ContextAttributes extends Hashtable<String, Object> {
+	public class ContextAttributes
+		extends Dictionary<String, Object> implements Serializable {
+
 		private static final long serialVersionUID = 1916670423277243587L;
-		private int referenceCount;
+		private final AtomicInteger referenceCount = new AtomicInteger();
 
 		public ContextAttributes(ContextController controller) {
 			if (proxyContextTempDir != null) {
@@ -129,17 +142,55 @@ public class ProxyContext {
 				deleteDirectory(contextTempDir);
 		}
 
-		public void addReference() {
-			referenceCount++;
+		public int addReference() {
+			return referenceCount.incrementAndGet();
 		}
 
-		public void removeReference() {
-			referenceCount--;
+		public int removeReference() {
+			return referenceCount.decrementAndGet();
 		}
 
 		public int referenceCount() {
-			return referenceCount;
+			return referenceCount.get();
 		}
+
+		@Override
+		public Enumeration<Object> elements() {
+			return Collections.enumeration(_map.values());
+		}
+
+		@Override
+		public Object get(Object key) {
+			return _map.get(key);
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return _map.isEmpty();
+		}
+
+		@Override
+		public Enumeration<String> keys() {
+			return Collections.enumeration(_map.keySet());
+		}
+
+		@Override
+		public Object put(String key, Object value) {
+			return _map.put(key, value);
+		}
+
+		@Override
+		public Object remove(Object key) {
+			return _map.remove(key);
+		}
+
+		@Override
+		public int size() {
+			return _map.size();
+		}
+
+		private final Map<String, Object> _map =
+			new ConcurrentHashMap<String, Object>();
 	}
 
 }

@@ -87,8 +87,6 @@ public class ServletContextAdaptor {
 		BundleWiring bundleWiring = this.bundle.adapt(BundleWiring.class);
 
 		this.classLoader = bundleWiring.getClassLoader();
-
-		this.string = SIMPLE_NAME + '[' + contextController + ']';
 	}
 
 	public ServletContext createServletContext() {
@@ -381,7 +379,15 @@ public class ServletContextAdaptor {
 	}
 
 	public String toString() {
-		return string;
+		String value = string;
+
+		if (value == null) {
+			value = SIMPLE_NAME + '[' + contextController + ']';
+
+			string = value;
+		}
+
+		return value;
 	}
 
 	Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -443,6 +449,6 @@ public class ServletContextAdaptor {
 	private final ProxyContext proxyContext;
 	private final ServletContext servletContext;
 	final ServletContextHelper servletContextHelper;
-	private final String string;
+	private String string;
 
 }

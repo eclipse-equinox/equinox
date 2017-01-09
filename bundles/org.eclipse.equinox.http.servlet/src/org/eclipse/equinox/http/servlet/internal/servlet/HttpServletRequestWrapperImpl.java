@@ -27,7 +27,7 @@ import org.osgi.service.http.HttpContext;
 
 public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
-	private final Stack<DispatchTargets> dispatchTargets = new Stack<DispatchTargets>();
+	private final Deque<DispatchTargets> dispatchTargets = new LinkedList<DispatchTargets>();
 	private final HttpServletRequest request;
 	private Map<String, Part> parts;
 	private final Lock lock = new ReentrantLock();
@@ -93,7 +93,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 		if ((currentDispatchTargets.getServletName() != null) ||
 			(currentDispatchTargets.getDispatcherType() == DispatcherType.INCLUDE)) {
-			return this.dispatchTargets.get(0).getPathInfo();
+			return this.dispatchTargets.getLast().getPathInfo();
 		}
 		return currentDispatchTargets.getPathInfo();
 	}
@@ -153,7 +153,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 		if ((currentDispatchTargets.getServletName() != null) ||
 			(currentDispatchTargets.getDispatcherType() == DispatcherType.INCLUDE)) {
-			return this.dispatchTargets.get(0).getServletPath();
+			return this.dispatchTargets.getLast().getServletPath();
 		}
 		if (currentDispatchTargets.getServletPath().equals(Const.SLASH)) {
 			return Const.BLANK;
@@ -168,6 +168,14 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	public Object getAttribute(String attributeName) {
 		DispatchTargets current = dispatchTargets.peek();
 		DispatcherType dispatcherType = current.getDispatcherType();
+
+		if ((dispatcherType == DispatcherType.ASYNC) ||
+			(dispatcherType == DispatcherType.REQUEST) ||
+			!attributeName.startsWith("javax.servlet.")) {
+
+			return request.getAttribute(attributeName);
+		}
+
 		boolean hasServletName = (current.getServletName() != null);
 		Map<String, Object> specialOverides = current.getSpecialOverides();
 
@@ -234,7 +242,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 				return null;
 			}
 
-			DispatchTargets original = dispatchTargets.get(0);
+			DispatchTargets original = dispatchTargets.getLast();
 
 			if (attributeName.equals(RequestDispatcher.FORWARD_CONTEXT_PATH)) {
 				if (specialOverides.containsKey(RequestDispatcher.FORWARD_CONTEXT_PATH)) {

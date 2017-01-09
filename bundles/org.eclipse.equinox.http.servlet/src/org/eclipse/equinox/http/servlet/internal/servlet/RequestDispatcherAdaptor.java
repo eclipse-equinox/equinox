@@ -25,15 +25,13 @@ public class RequestDispatcherAdaptor implements RequestDispatcher {
 
 	private final DispatchTargets dispatchTargets;
 	private final String path;
-	private final String string;
+	private String string;
 
 	public RequestDispatcherAdaptor(
 		DispatchTargets dispatchTargets, String path) {
 
 		this.dispatchTargets = dispatchTargets;
 		this.path = path;
-
-		this.string = SIMPLE_NAME + '[' + path + ", " + dispatchTargets + ']'; //$NON-NLS-1$
 	}
 
 	public void forward(ServletRequest request, ServletResponse response)
@@ -54,7 +52,15 @@ public class RequestDispatcherAdaptor implements RequestDispatcher {
 
 	@Override
 	public String toString() {
-		return string;
+		String value = string;
+
+		if (value == null) {
+			value = SIMPLE_NAME + '[' + path + ", " + dispatchTargets + ']'; //$NON-NLS-1$
+
+			string = value;
+		}
+
+		return value;
 	}
 
 }
