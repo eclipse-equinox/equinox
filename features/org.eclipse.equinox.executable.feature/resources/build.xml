@@ -236,25 +236,12 @@
 	<target name="rootFilesgroup_group_group">
 		<antcall target="rootFileswin32_win32_x86"/>
 		<antcall target="rootFileswin32_win32_x86_64"/>
-		<antcall target="rootFileswin32_win32_ia64"/>
-		<antcall target="rootFilesmacosx_carbon_ppc"/>
-		<antcall target="rootFilesmacosx_carbon_x86"/>
-		<antcall target="rootFilesmacosx_cocoa_ppc"/>
-		<antcall target="rootFilesmacosx_cocoa_x86"/>
+		<antcall target="rootFilesmacosx_cocoa_x86_64"/>
 		<antcall target="rootFileslinux_gtk_x86"/>
 		<antcall target="rootFileslinux_gtk_ppc"/>
 		<antcall target="rootFileslinux_gtk_ppc64"/>
 		<antcall target="rootFileslinux_gtk_ppc64le"/>
-		<antcall target="rootFileslinux_gtk_arm"/>
-		<antcall target="rootFileslinux_gtk_aarch64"/>
 		<antcall target="rootFileslinux_gtk_x86_64"/>
-		<antcall target="rootFileslinux_gtk_ia64"/>
-		<antcall target="rootFileslinux_gtk_s390x"/>
-		<antcall target="rootFilessolaris_gtk_x86_64"/>
-		<antcall target="rootFilessolaris_gtk_sparcv9"/>
-		<antcall target="rootFilesaix_gtk_ppc64"/>
-		<antcall target="rootFilesaix_gtk_ppc"/>
-		<antcall target="rootFileshpux_gtk_ia64"/>
 	</target>
 
 	<target name="zip.distribution" depends="init" description="Create a zip containing all the plug-ins and features for the feature: org.eclipse.platform.launchers.">

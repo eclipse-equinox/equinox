@@ -501,24 +501,13 @@
                     <copy todir="bin" verbose="true" includeEmptyDirs="false" failonerror="true">
                       <fileset dir="../../../rt.equinox.binaries/org.eclipse.equinox.executable/bin/">
                         <include name="cocoa/macosx/x86_64/**/*"/>
-                        <include name="gtk/aix/ppc/**/*"/>
-                        <include name="gtk/aix/ppc64/**/*"/>
-                        <include name="gtk/hpux/ia64/**/*"/>
-                        <include name="gtk/linux/arm/**/*"/>
-                        <include name="gtk/linux/aarch64/**/*"/>
                         <include name="gtk/linux/ppc/**/*"/>
                         <include name="gtk/linux/ppc64/**/*"/>
                         <include name="gtk/linux/ppc64le/**/*"/>
                         <include name="gtk/linux/x86/**/*"/>
                         <include name="gtk/linux/x86_64/**/*"/>
-                        <include name="gtk/solaris/x86_64/**/*"/>
-                        <include name="gtk/solaris/sparcv9/**/*"/>
                         <include name="win32/win32/x86/**/*"/>
                         <include name="win32/win32/x86_64/**/*"/>
-                      </fileset>
-                      <fileset dir="../../../rt.equinox.binaries/org.eclipse.equinox.executable/contributed/">
-                        <include name="gtk/linux/s390/**/*"/>
-                        <include name="gtk/linux/s390x/**/*"/>
                       </fileset>
                     </copy>
                     <!-- rename eclipse launchers to "launcher" -->
