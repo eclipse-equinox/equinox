@@ -8,20 +8,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="META-INF/MANIFEST.MF" type="org.osgi.service.component.annotations.Component">
-        <filter id="286375965">
-            <message_arguments>
-                <message_argument value="org.osgi.service.component.annotations.Component"/>
-                <message_argument value="reference()"/>
-            </message_arguments>
-        </filter>
-        <filter id="288469092">
-            <message_arguments>
-                <message_argument value="org.osgi.service.component.annotations.Component"/>
-                <message_argument value="configurationPid()"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="src/org/osgi/service/component/ComponentConstants.java" type="org.osgi.service.component.ComponentConstants">
         <filter id="403767336">
             <message_arguments>
@@ -43,6 +29,159 @@
                 <message_argument value="1.3"/>
                 <message_argument value="3.6"/>
                 <message_argument value="org.osgi.service.component.ComponentServiceObjects"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/component/annotations/Component.java" type="org.osgi.service.component.annotations.Component">
+        <filter id="286375965">
+            <message_arguments>
+                <message_argument value="org.osgi.service.component.annotations.Component"/>
+                <message_argument value="reference()"/>
+            </message_arguments>
+        </filter>
+        <filter id="288469092">
+            <message_arguments>
+                <message_argument value="org.osgi.service.component.annotations.Component"/>
+                <message_argument value="configurationPid()"/>
+            </message_arguments>
+        </filter>
+        <filter id="1091567618">
+            <message_arguments>
+                <message_argument value="1.2"/>
+                <message_argument value="3.6"/>
+                <message_argument value="configurationPid()"/>
+            </message_arguments>
+        </filter>
+        <filter id="1091567618">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.6"/>
+                <message_argument value="NAME"/>
+            </message_arguments>
+        </filter>
+        <filter id="1091567618">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.6"/>
+                <message_argument value="reference()"/>
+            </message_arguments>
+        </filter>
+        <filter id="1091567618">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.6"/>
+                <message_argument value="scope()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/component/annotations/FieldOption.java" type="org.osgi.service.component.annotations.FieldOption">
+        <filter id="1108344834">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.6"/>
+                <message_argument value="org.osgi.service.component.annotations.FieldOption"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/component/annotations/Reference.java" type="org.osgi.service.component.annotations.Reference">
+        <filter id="1091567618">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.6"/>
+                <message_argument value="bind()"/>
+            </message_arguments>
+        </filter>
+        <filter id="1091567618">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.6"/>
+                <message_argument value="field()"/>
+            </message_arguments>
+        </filter>
+        <filter id="1091567618">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.6"/>
+                <message_argument value="fieldOption()"/>
+            </message_arguments>
+        </filter>
+        <filter id="1091567618">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.6"/>
+                <message_argument value="scope()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/component/annotations/ReferenceScope.java" type="org.osgi.service.component.annotations.ReferenceScope">
+        <filter id="1108344834">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.6"/>
+                <message_argument value="org.osgi.service.component.annotations.ReferenceScope"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/component/annotations/ServiceScope.java" type="org.osgi.service.component.annotations.ServiceScope">
+        <filter id="1108344834">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.6"/>
+                <message_argument value="org.osgi.service.component.annotations.ServiceScope"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/component/runtime/ServiceComponentRuntime.java" type="org.osgi.service.component.runtime.ServiceComponentRuntime">
+        <filter id="1108344834">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.6"/>
+                <message_argument value="org.osgi.service.component.runtime.ServiceComponentRuntime"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/component/runtime/dto/ComponentConfigurationDTO.java" type="org.osgi.service.component.runtime.dto.ComponentConfigurationDTO">
+        <filter id="1108344834">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.6"/>
+                <message_argument value="org.osgi.service.component.runtime.dto.ComponentConfigurationDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/component/runtime/dto/ComponentDescriptionDTO.java" type="org.osgi.service.component.runtime.dto.ComponentDescriptionDTO">
+        <filter id="1108344834">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.6"/>
+                <message_argument value="org.osgi.service.component.runtime.dto.ComponentDescriptionDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/component/runtime/dto/ReferenceDTO.java" type="org.osgi.service.component.runtime.dto.ReferenceDTO">
+        <filter id="1108344834">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.6"/>
+                <message_argument value="org.osgi.service.component.runtime.dto.ReferenceDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/component/runtime/dto/SatisfiedReferenceDTO.java" type="org.osgi.service.component.runtime.dto.SatisfiedReferenceDTO">
+        <filter id="1108344834">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.6"/>
+                <message_argument value="org.osgi.service.component.runtime.dto.SatisfiedReferenceDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/component/runtime/dto/UnsatisfiedReferenceDTO.java" type="org.osgi.service.component.runtime.dto.UnsatisfiedReferenceDTO">
+        <filter id="1108344834">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.6"/>
+                <message_argument value="org.osgi.service.component.runtime.dto.UnsatisfiedReferenceDTO"/>
             </message_arguments>
         </filter>
     </resource>
