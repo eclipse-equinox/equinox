@@ -161,9 +161,9 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	 */
 	public boolean match(ServiceReference<?> reference) {
 		if (reference instanceof ServiceReferenceImpl) {
-			return matchCase(((ServiceReferenceImpl<?>) reference).getRegistration().getProperties());
+			return matches(((ServiceReferenceImpl<?>) reference).getRegistration().getProperties());
 		}
-		return matchCase(new ServiceReferenceDictionary(reference));
+		return matches(new ServiceReferenceMap(reference));
 	}
 
 	/**
@@ -1754,19 +1754,20 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	}
 
 	/**
-	 * This Dictionary is used for key lookup from a ServiceReference during
-	 * filter evaluation. This Dictionary implementation only supports the get
+	 * This Map is used for key lookup from a ServiceReference during
+	 * filter evaluation. This Map implementation only supports the get
 	 * operation using a String key as no other operations are used by the
 	 * Filter implementation.
 	 * 
 	 */
-	private static class ServiceReferenceDictionary extends Dictionary<String, Object> {
+	static private final class ServiceReferenceMap extends AbstractMap<String, Object> implements Map<String, Object> {
 		private final ServiceReference<?> reference;
 
-		ServiceReferenceDictionary(ServiceReference<?> reference) {
+		ServiceReferenceMap(ServiceReference<?> reference) {
 			this.reference = reference;
 		}
 
+		@Override
 		public Object get(Object key) {
 			if (reference == null) {
 				return null;
@@ -1774,27 +1775,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 			return reference.getProperty((String) key);
 		}
 
-		public boolean isEmpty() {
-			throw new UnsupportedOperationException();
-		}
-
-		public Enumeration<String> keys() {
-			throw new UnsupportedOperationException();
-		}
-
-		public Enumeration<Object> elements() {
-			throw new UnsupportedOperationException();
-		}
-
-		public Object put(String key, Object value) {
-			throw new UnsupportedOperationException();
-		}
-
-		public Object remove(Object key) {
-			throw new UnsupportedOperationException();
-		}
-
-		public int size() {
+		@Override
+		public Set<Entry<String, Object>> entrySet() {
 			throw new UnsupportedOperationException();
 		}
 	}

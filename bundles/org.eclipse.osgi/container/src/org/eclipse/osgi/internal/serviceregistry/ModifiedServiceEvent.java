@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2012 IBM Corporation and others.
+ * Copyright (c) 2009, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
+import java.util.Map;
 import org.osgi.framework.*;
 
 /**
@@ -21,7 +22,7 @@ class ModifiedServiceEvent extends ServiceEvent {
 	private static final long serialVersionUID = -5373850978543026102L;
 	private final ServiceEvent modified;
 	private final ServiceEvent modifiedEndMatch;
-	private final ServiceProperties previousProperties;
+	private final Map<String, Object> previousProperties;
 
 	/**
 	 * Create a ServiceEvent containing the service properties prior to modification.
@@ -29,7 +30,7 @@ class ModifiedServiceEvent extends ServiceEvent {
 	 * @param reference Reference to service with modified properties.
 	 * @param previousProperties Service properties prior to modification.
 	 */
-	ModifiedServiceEvent(ServiceReference<?> reference, ServiceProperties previousProperties) {
+	ModifiedServiceEvent(ServiceReference<?> reference, Map<String, Object> previousProperties) {
 		super(ServiceEvent.MODIFIED, reference);
 		this.modified = new ServiceEvent(ServiceEvent.MODIFIED, reference);
 		this.modifiedEndMatch = new ServiceEvent(ServiceEvent.MODIFIED_ENDMATCH, reference);
@@ -63,9 +64,9 @@ class ModifiedServiceEvent extends ServiceEvent {
 	 * @return True is the filter matches the previous service properties.
 	 */
 	boolean matchPreviousProperties(Filter filter) {
-		/* We use matchCase here since ServiceProperties already 
+		/* We use matches here since ServiceProperties already 
 		 * does case insensitive lookup.
 		 */
-		return filter.matchCase(previousProperties);
+		return filter.matches(previousProperties);
 	}
 }

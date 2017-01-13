@@ -62,7 +62,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 
 	/** properties for this registration. */
 	/* @GuardedBy("registrationLock") */
-	private ServiceProperties properties;
+	private Map<String, Object> properties;
 
 	/** service id. */
 	private final long serviceid;
@@ -151,7 +151,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	 */
 	public void setProperties(Dictionary<String, ?> props) {
 		final ServiceReferenceImpl<S> ref;
-		final ServiceProperties previousProperties;
+		final Map<String, Object> previousProperties;
 		synchronized (registry) {
 			synchronized (registrationLock) {
 				if (state != REGISTERED) { /* in the process of unregisterING */
@@ -290,6 +290,19 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	}
 
 	/**
+	 * Count of service properties set by framework for each
+	 * service registration.
+	 * <ul>
+	 * <li>Constants.OBJECTCLASS</li>
+	 * <li>Constants.SERVICE_ID</li>
+	 * <li>Constants.SERVICE_BUNDLEID</li>
+	 * <li>Constants.SERVICE_SCOPE</li>
+	 * </ul>
+	 * @see #createProperties(Dictionary)
+	 */
+	private static final int FRAMEWORK_SET_SERVICE_PROPERTIES_COUNT = 4;
+
+	/**
 	 * Construct a properties object from the dictionary for this
 	 * ServiceRegistration.
 	 *
@@ -297,13 +310,13 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	 * @return A Properties object for this ServiceRegistration.
 	 */
 	/* @GuardedBy("registrationLock") */
-	private ServiceProperties createProperties(Dictionary<String, ?> p) {
+	private Map<String, Object> createProperties(Dictionary<String, ?> p) {
 		assert Thread.holdsLock(registrationLock);
-		ServiceProperties props = new ServiceProperties(p);
+		ServiceProperties props = new ServiceProperties(p, FRAMEWORK_SET_SERVICE_PROPERTIES_COUNT);
 
-		props.set(Constants.OBJECTCLASS, clazzes, true);
-		props.set(Constants.SERVICE_ID, Long.valueOf(serviceid), true);
-		props.set(Constants.SERVICE_BUNDLEID, Long.valueOf(bundle.getBundleId()), true);
+		props.put(Constants.OBJECTCLASS, clazzes);
+		props.put(Constants.SERVICE_ID, Long.valueOf(serviceid));
+		props.put(Constants.SERVICE_BUNDLEID, Long.valueOf(bundle.getBundleId()));
 		final String scope;
 		if (service instanceof ServiceFactory) {
 			if (service instanceof PrototypeServiceFactory) {
@@ -314,10 +327,9 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		} else {
 			scope = Constants.SCOPE_SINGLETON;
 		}
-		props.set(Constants.SERVICE_SCOPE, scope, true);
-		props.setReadOnly();
+		props.put(Constants.SERVICE_SCOPE, scope);
 
-		Object ranking = props.getProperty(Constants.SERVICE_RANKING);
+		Object ranking = props.get(Constants.SERVICE_RANKING);
 		if (ranking instanceof Integer) {
 			serviceranking = ((Integer) ranking).intValue();
 		} else {
@@ -327,14 +339,14 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 			}
 		}
 
-		return props;
+		return props.asUnmodifiableMap();
 	}
 
 	/**
 	 * Return the properties object. This is for framework internal use only.
 	 * @return The service registration's properties.
 	 */
-	public ServiceProperties getProperties() {
+	public Map<String, Object> getProperties() {
 		synchronized (registrationLock) {
 			return properties;
 		}
@@ -354,7 +366,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	 */
 	Object getProperty(String key) {
 		synchronized (registrationLock) {
-			return properties.getProperty(key);
+			return ServiceProperties.cloneValue(properties.get(key));
 		}
 	}
 
@@ -370,7 +382,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	 */
 	String[] getPropertyKeys() {
 		synchronized (registrationLock) {
-			return properties.getPropertyKeys();
+			return properties.keySet().toArray(new String[0]);
 		}
 	}
 

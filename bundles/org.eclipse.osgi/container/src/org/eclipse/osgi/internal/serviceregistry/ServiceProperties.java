@@ -13,102 +13,91 @@ package org.eclipse.osgi.internal.serviceregistry;
 
 import java.lang.reflect.Array;
 import java.util.*;
-import org.eclipse.osgi.framework.util.Headers;
+import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
+import org.eclipse.osgi.internal.messages.Msg;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Constants;
 
 /**
- * Hashtable for service properties.
+ * Service properties.
  * 
  * Supports case-insensitive key lookup.
  */
-class ServiceProperties extends Headers<String, Object> {
+class ServiceProperties extends CaseInsensitiveDictionaryMap<String, Object> {
 	/**
-	 * Create a properties object for the service.
+	 * Create a properties object from a Dictionary.
 	 *
 	 * @param props The properties for this service.
+	 * @throws IllegalArgumentException If a case-variants of a key are
+	 * in the props parameter.
 	 */
-	private ServiceProperties(int size, Dictionary<String, ?> props) {
-		super(size);
+	ServiceProperties(Dictionary<String, ?> props) {
+		this(props, 0);
+	}
 
+	/**
+	 * Create a properties object from a Dictionary.
+	 *
+	 * @param props The properties for this service.
+	 * @param extra Extra capacity in the map.
+	 * @throws IllegalArgumentException If a case-variants of a key are
+	 * in the props parameter.
+	 */
+	ServiceProperties(Dictionary<String, ?> props, int extra) {
+		super(initialCapacity((props == null) ? extra : props.size() + extra));
 		if (props == null) {
 			return;
 		}
 		synchronized (props) {
 			Enumeration<?> keysEnum = props.keys();
-
 			while (keysEnum.hasMoreElements()) {
 				Object key = keysEnum.nextElement();
-
 				if (key instanceof String) {
 					String header = (String) key;
-
-					setProperty(header, props.get(header));
+					if (putIfAbsent(header, cloneValue(props.get(header))) != null) {
+						throw new IllegalArgumentException(NLS.bind(Msg.HEADER_DUPLICATE_KEY_EXCEPTION, key));
+					}
 				}
 			}
 		}
 	}
 
 	/**
-	 * Create a properties object for the service.
+	 * Create a properties object from a Map.
 	 *
 	 * @param props The properties for this service.
+	 * @throws IllegalArgumentException If a case-variants of a key are
+	 * in the props parameter.
 	 */
-	ServiceProperties(Dictionary<String, ?> props) {
-		this((props == null) ? 2 : props.size() + 2, props);
-	}
-
-	/**
-	 * Get a clone of the value of a service's property.
-	 *
-	 * @param key header name.
-	 * @return Clone of the value of the property or <code>null</code> if there is
-	 * no property by that name.
-	 */
-	Object getProperty(String key) {
-		return cloneValue(get(key));
-	}
-
-	/**
-	 * Get the list of key names for the service's properties.
-	 *
-	 * @return The list of property key names.
-	 */
-	synchronized String[] getPropertyKeys() {
-		int size = size();
-
-		String[] keynames = new String[size];
-
-		Enumeration<String> keysEnum = keys();
-
-		for (int i = 0; i < size; i++) {
-			keynames[i] = keysEnum.nextElement();
+	ServiceProperties(Map<String, ?> props) {
+		super(initialCapacity((props == null) ? 0 : props.size()));
+		if (props == null) {
+			return;
 		}
-
-		return keynames;
-	}
-
-	/**
-	 * Put a clone of the property value into this property object.
-	 *
-	 * @param key Name of property.
-	 * @param value Value of property.
-	 * @return previous property value.
-	 */
-	synchronized Object setProperty(String key, Object value) {
-		return set(key, cloneValue(value));
+		synchronized (props) {
+			for (Entry<?, ?> e : props.entrySet()) {
+				Object key = e.getKey();
+				if (key instanceof String) {
+					String header = (String) key;
+					if (putIfAbsent(header, cloneValue(e.getValue())) != null) {
+						throw new IllegalArgumentException(NLS.bind(Msg.HEADER_DUPLICATE_KEY_EXCEPTION, key));
+					}
+				}
+			}
+		}
 	}
 
 	/**
 	 * Attempt to clone the value if necessary and possible.
 	 *
-	 * For some strange reason, you can test to see of an Object is
+	 * For some strange reason, you can test to see if an Object is
 	 * Cloneable but you can't call the clone method since it is
 	 * protected on Object!
 	 *
 	 * @param value object to be cloned.
 	 * @return cloned object or original object if we didn't clone it.
 	 */
-	private static Object cloneValue(Object value) {
+	static Object cloneValue(Object value) {
 		if (value == null)
 			return null;
 		if (value instanceof String) /* shortcut String */
@@ -129,33 +118,28 @@ class ServiceProperties extends Headers<String, Object> {
 			System.arraycopy(value, 0, clonedArray, 0, len);
 			return clonedArray;
 		}
-		// must use reflection because Object clone method is protected!!
-		try {
-			return clazz.getMethod("clone", (Class<?>[]) null).invoke(value, (Object[]) null); //$NON-NLS-1$
-		} catch (Exception e) {
-			/* clone is not a public method on value's class */
-		} catch (Error e) {
-			/* JCL does not support reflection; try some well known types */
-			if (value instanceof Vector<?>)
-				return ((Vector<?>) value).clone();
-			if (value instanceof Hashtable<?, ?>)
-				return ((Hashtable<?, ?>) value).clone();
+
+		if (value instanceof Cloneable) {
+			// must use reflection because Object clone method is protected!!
+			try {
+				return clazz.getMethod("clone", (Class<?>[]) null).invoke(value, (Object[]) null); //$NON-NLS-1$
+			} catch (Exception e) {
+				/* clone is not a public method on value's class */
+			}
 		}
 		return value;
 	}
 
-	public synchronized String toString() {
-		String keys[] = getPropertyKeys();
+	@Override
+	public String toString() {
+		Set<String> keys = keySet();
 
-		int size = keys.length;
-
-		StringBuilder sb = new StringBuilder(20 * size);
+		StringBuilder sb = new StringBuilder(20 * keys.size());
 
 		sb.append('{');
 
 		int n = 0;
-		for (int i = 0; i < size; i++) {
-			String key = keys[i];
+		for (String key : keys) {
 			if (!key.equals(Constants.OBJECTCLASS)) {
 				if (n > 0)
 					sb.append(", "); //$NON-NLS-1$
