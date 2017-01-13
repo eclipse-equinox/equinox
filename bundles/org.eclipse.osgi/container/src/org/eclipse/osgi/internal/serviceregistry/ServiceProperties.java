@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2012 IBM Corporation and others.
+ * Copyright (c) 2003, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -149,7 +149,7 @@ class ServiceProperties extends Headers<String, Object> {
 
 		int size = keys.length;
 
-		StringBuffer sb = new StringBuffer(20 * size);
+		StringBuilder sb = new StringBuilder(20 * size);
 
 		sb.append('{');
 
