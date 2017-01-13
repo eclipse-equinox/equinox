@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2016 IBM Corporation and others.
+ * Copyright (c) 2003, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,9 @@ import org.osgi.framework.BundleException;
  * but the get operation is case-insensitive.
  * </ul>
  * @since 3.1
+ * @deprecated As of 3.13. Replaced by {@link CaseInsensitiveDictionaryMap}.
  */
+@Deprecated
 public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	private boolean readOnly = false;
 	private K[] headers;
