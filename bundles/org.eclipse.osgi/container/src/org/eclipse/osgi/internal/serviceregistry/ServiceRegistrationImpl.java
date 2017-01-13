@@ -387,6 +387,22 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	}
 
 	/**
+	 * Get a copy of the service's properties.
+	 *
+	 * <p>This method will continue to return the properties after the
+	 * service has been unregistered. This is so that references to
+	 * unregistered service can be interrogated.
+	 * (For example: ServiceReference objects stored in the log.)
+	 *
+	 * @return A copy of the properties.
+	 */
+	Dictionary<String, Object> getPropertiesCopy() {
+		synchronized (registrationLock) {
+			return new ServiceProperties(properties);
+		}
+	}
+
+	/**
 	 * Return the service id for this service.
 	 * @return The service id for this service.
 	 */

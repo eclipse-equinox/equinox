@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2015 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 import junit.framework.*;
+import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
 import org.osgi.framework.*;
 
 public abstract class FilterTests extends TestCase {
@@ -433,6 +434,14 @@ public abstract class FilterTests extends TestCase {
 
 		public boolean isAssignableTo(Bundle bundle, String className) {
 			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Dictionary getProperties() {
+			if (dictionary == null) {
+				return new CaseInsensitiveDictionaryMap();
+			}
+			return new CaseInsensitiveDictionaryMap(dictionary);
 		}
 	}
 }

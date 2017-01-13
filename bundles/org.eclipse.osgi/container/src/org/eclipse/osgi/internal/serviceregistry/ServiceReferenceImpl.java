@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2012 IBM Corporation and others.
+ * Copyright (c) 2003, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
+import java.util.Dictionary;
 import org.osgi.framework.*;
 
 /**
@@ -271,5 +272,38 @@ public class ServiceReferenceImpl<S> implements ServiceReference<S> {
 	 */
 	String[] getClasses() {
 		return registration.getClasses();
+	}
+
+	/**
+	 * Returns a copy of the properties of the service referenced by this
+	 * {@code ServiceReference} object.
+	 * <p>
+	 * This method will continue to return the properties after the service has
+	 * been unregistered. This is so references to unregistered services (for
+	 * example, {@code ServiceReference} objects stored in the log) can still be
+	 * interrogated.
+	 * <p>
+	 * The returned {@code Dictionary} object:
+	 * <ul>
+	 * <li>Must map property values by using property keys in a
+	 * <i>case-insensitive manner</i>.</li>
+	 * <li>Must return property keys is a <i>case-preserving</i> manner. This
+	 * means that the keys must have the same case as the corresponding key in
+	 * the properties {@code Dictionary} that was passed to the
+	 * {@link BundleContext#registerService(String[],Object,Dictionary)} or
+	 * {@link ServiceRegistration#setProperties(Dictionary)} methods.</li>
+	 * <li>Is the property of the caller and can be modified by the caller but
+	 * any changes are not reflected in the properties of the service.
+	 * {@link ServiceRegistration#setProperties(Dictionary)} must be called to
+	 * modify the properties of the service.</li>
+	 * </ul>
+	 * 
+	 * @return A copy of the properties of the service referenced by this
+	 *         {@code ServiceReference} object
+	 * @since 1.9
+	 */
+	@Override
+	public Dictionary<String, Object> getProperties() {
+		return registration.getPropertiesCopy();
 	}
 }
