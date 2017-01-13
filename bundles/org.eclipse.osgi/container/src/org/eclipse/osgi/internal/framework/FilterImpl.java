@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2016 IBM Corporation and others.
+ * Copyright (c) 2003, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,7 @@ import java.lang.reflect.*;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import org.eclipse.osgi.framework.util.Headers;
+import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.internal.serviceregistry.ServiceReferenceImpl;
@@ -179,11 +179,10 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	 *         variants of the same key name.
 	 */
 	public boolean match(Dictionary<String, ?> dictionary) {
-		if (dictionary != null) {
-			dictionary = new Headers<>(dictionary);
+		if (dictionary == null) {
+			return matches(null);
 		}
-
-		return matchCase(dictionary);
+		return matches(new CaseInsensitiveDictionaryMap<>(dictionary));
 	}
 
 	/**

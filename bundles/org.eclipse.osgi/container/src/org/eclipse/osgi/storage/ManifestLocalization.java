@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2016 IBM Corporation and others.
+ * Copyright (c) 2004, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
+import java.util.Map.Entry;
 import org.eclipse.osgi.container.*;
-import org.eclipse.osgi.framework.util.Headers;
+import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.osgi.framework.Constants;
 import org.osgi.framework.namespace.HostNamespace;
@@ -61,11 +62,9 @@ public class ManifestLocalization {
 			return rawHeaders;
 		}
 		ResourceBundle localeProperties = getResourceBundle(localeString, isDefaultLocale);
-		Enumeration<String> eKeys = this.rawHeaders.keys();
-		Headers<String, String> localeHeaders = new Headers<>(this.rawHeaders.size());
-		while (eKeys.hasMoreElements()) {
-			String key = eKeys.nextElement();
-			String value = this.rawHeaders.get(key);
+		CaseInsensitiveDictionaryMap<String, String> localeHeaders = new CaseInsensitiveDictionaryMap<>(this.rawHeaders);
+		for (Entry<String, String> entry : localeHeaders.entrySet()) {
+			String value = entry.getValue();
 			if (value.startsWith("%") && (value.length() > 1)) { //$NON-NLS-1$
 				String propertiesKey = value.substring(1);
 				try {
@@ -73,14 +72,14 @@ public class ManifestLocalization {
 				} catch (MissingResourceException ex) {
 					value = propertiesKey;
 				}
+				entry.setValue(value);
 			}
-			localeHeaders.set(key, value);
 		}
-		localeHeaders.setReadOnly();
+		Dictionary<String, String> result = localeHeaders.asUnmodifiableDictionary();
 		if (isDefaultLocale) {
-			defaultLocaleHeaders = localeHeaders;
+			defaultLocaleHeaders = result;
 		}
-		return (localeHeaders);
+		return result;
 	}
 
 	private String[] buildNLVariants(String nl) {

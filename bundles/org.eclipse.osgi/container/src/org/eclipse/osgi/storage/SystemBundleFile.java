@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,11 @@ package org.eclipse.osgi.storage;
 import java.io.*;
 import java.net.URL;
 import java.util.Enumeration;
-import org.eclipse.osgi.framework.util.Headers;
+import java.util.Map;
+import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
 
 public class SystemBundleFile extends BundleFile {
@@ -91,7 +93,7 @@ public class SystemBundleFile extends BundleFile {
 				URL url = manifests.nextElement();
 				try {
 					// check each manifest until we find one with the Eclipse-SystemBundle: true header
-					Headers<String, String> headers = Headers.parseManifest(url.openStream());
+					Map<String, String> headers = ManifestElement.parseBundleManifest(url.openStream(), new CaseInsensitiveDictionaryMap<String, String>());
 					if ("true".equals(headers.get(Storage.ECLIPSE_SYSTEMBUNDLE))) //$NON-NLS-1$
 						return url;
 				} catch (BundleException e) {

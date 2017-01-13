@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,8 +16,9 @@ import java.net.URL;
 import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.eclipse.osgi.framework.util.Headers;
+import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.namespace.IdentityNamespace;
@@ -40,7 +41,9 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 	private Dictionary loadManifest(String manifest) {
 		URL url = getContext().getBundle().getEntry(MANIFEST_ROOT + manifest);
 		try {
-			return Headers.parseManifest(url.openStream());
+			CaseInsensitiveDictionaryMap<String, String> headers = new CaseInsensitiveDictionaryMap<String, String>();
+			ManifestElement.parseBundleManifest(url.openStream(), headers);
+			return headers.asUnmodifiableDictionary();
 		} catch (IOException e) {
 			fail("Unexpected error loading manifest: " + manifest, e);
 		} catch (BundleException e) {

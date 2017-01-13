@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.framework.util.Headers;
+import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
 import org.eclipse.osgi.internal.container.LockSet;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
@@ -31,6 +31,7 @@ import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.eclipse.osgi.storage.url.BundleResourceHandler;
 import org.eclipse.osgi.storage.url.bundleentry.Handler;
+import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleException;
 
@@ -46,7 +47,7 @@ public final class BundleInfo {
 		private boolean isReference;
 		private boolean hasPackageInfo;
 		private BundleFile bundleFile;
-		private Headers<String, String> rawHeaders;
+		private Map<String, String> rawHeaders;
 		private ModuleRevision revision;
 		private ManifestLocalization headerLocalization;
 		private ProtectionDomain domain;
@@ -98,16 +99,15 @@ public final class BundleInfo {
 			return cachedHeaders;
 		}
 
-		Headers<String, String> getRawHeaders() {
+		Map<String, String> getRawHeaders() {
 			synchronized (genMonitor) {
 				if (rawHeaders == null) {
 					BundleEntry manifest = getBundleFile().getEntry(OSGI_BUNDLE_MANIFEST);
 					if (manifest == null) {
-						rawHeaders = new Headers<>(0);
-						rawHeaders.setReadOnly();
+						rawHeaders = Collections.emptyMap();
 					} else {
 						try {
-							rawHeaders = Headers.parseManifest(manifest.getInputStream());
+							rawHeaders = Collections.unmodifiableMap(ManifestElement.parseBundleManifest(manifest.getInputStream(), new CaseInsensitiveDictionaryMap<String, String>()));
 						} catch (Exception e) {
 							if (e instanceof RuntimeException) {
 								throw (RuntimeException) e;
@@ -516,7 +516,7 @@ public final class BundleInfo {
 
 		@Override
 		public Enumeration<String> elements() {
-			return generation.getRawHeaders().elements();
+			return Collections.enumeration(generation.getRawHeaders().values());
 		}
 
 		@Override
@@ -537,7 +537,7 @@ public final class BundleInfo {
 
 		@Override
 		public Enumeration<String> keys() {
-			return generation.getRawHeaders().keys();
+			return Collections.enumeration(generation.getRawHeaders().keySet());
 		}
 
 		@Override
