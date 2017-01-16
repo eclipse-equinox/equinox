@@ -1,27 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.osgi.services" version="2">
-    <resource path="META-INF/MANIFEST.MF">
-        <filter id="923795461">
-            <message_arguments>
-                <message_argument value="3.6.0"/>
-                <message_argument value="3.5.100"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="META-INF/MANIFEST.MF" type="org.osgi.service.component.annotations.Component">
-        <filter id="286375965">
-            <message_arguments>
-                <message_argument value="org.osgi.service.component.annotations.Component"/>
-                <message_argument value="reference()"/>
-            </message_arguments>
-        </filter>
-        <filter id="288469092">
-            <message_arguments>
-                <message_argument value="org.osgi.service.component.annotations.Component"/>
-                <message_argument value="configurationPid()"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="src/org/osgi/service/component/ComponentConstants.java" type="org.osgi.service.component.ComponentConstants">
         <filter id="403767336">
             <message_arguments>
