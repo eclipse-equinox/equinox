@@ -19,6 +19,18 @@ import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
 
 public final class StandardRegionFilter implements RegionFilter {
+	final static Filter ALL;
+
+	static {
+		try {
+			ALL = FrameworkUtil.createFilter("(|(!(all=*))(all=*))"); //$NON-NLS-1$
+		} catch (InvalidSyntaxException e) {
+			// should never happen!
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+	}
+
 	private static final String BUNDLE_ID_ATTR = "id"; //$NON-NLS-1$
 	private final Map<String, Collection<Filter>> filters;
 
@@ -75,7 +87,7 @@ public final class StandardRegionFilter implements RegionFilter {
 		if (filters == null)
 			return false;
 		for (Filter filter : filters) {
-			if (filter.matches(attrs))
+			if (filter == ALL || filter.matches(attrs))
 				return true;
 		}
 		return false;
@@ -85,7 +97,7 @@ public final class StandardRegionFilter implements RegionFilter {
 		if (filters == null)
 			return false;
 		for (Filter filter : filters) {
-			if (filter.match(service))
+			if (filter == ALL || filter.match(service))
 				return true;
 		}
 		return false;

@@ -21,20 +21,6 @@ import org.osgi.framework.*;
 
 public final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 
-	private final static String ALL_SPEC = "(|(!(all=*))(all=*))"; //$NON-NLS-1$
-
-	private final static Filter ALL;
-
-	static {
-		try {
-			ALL = FrameworkUtil.createFilter(ALL_SPEC);
-		} catch (InvalidSyntaxException e) {
-			// should never happen!
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
-	}
-
 	private final Object monitor = new Object();
 
 	private final Map<String, Collection<Filter>> policy = new HashMap<String, Collection<Filter>>();
@@ -52,14 +38,20 @@ public final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 				namespaceFilters = new LinkedHashSet<Filter>();
 				policy.put(namespace, namespaceFilters);
 			}
-			// TODO need to use BundleContext.createFilter here
-			namespaceFilters.add(FrameworkUtil.createFilter(filter));
+
+			namespaceFilters.add(createFilter(filter));
 		}
 		if (VISIBLE_SERVICE_NAMESPACE.equals(namespace)) {
 			// alias the deprecated namespace to osgi.service
 			allow(VISIBLE_OSGI_SERVICE_NAMESPACE, filter);
 		}
 		return this;
+	}
+
+	public Filter createFilter(String spec) throws InvalidSyntaxException {
+		// TODO need to use BundleContext.createFilter here
+		Filter filter = FrameworkUtil.createFilter(spec);
+		return (StandardRegionFilter.ALL.equals(filter)) ? StandardRegionFilter.ALL : filter;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -75,7 +67,7 @@ public final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 			}
 			// remove any other filters since this will override them all.
 			namespaceFilters.clear();
-			namespaceFilters.add(ALL);
+			namespaceFilters.add(StandardRegionFilter.ALL);
 		}
 		if (VISIBLE_SERVICE_NAMESPACE.equals(namespace)) {
 			// alias the deprecated namespace to osgi.service
