@@ -26,7 +26,7 @@ import org.eclipse.osgi.util.NLS;
  * @since 3.13
  */
 public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> implements Map<K, V> {
-	private final Map<K, V> map;
+	final Map<Object, V> map;
 
 	/**
 	 * Create an empty CaseInsensitiveDictionaryMap.
@@ -117,7 +117,7 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 	@Override
 	public V get(Object key) {
 		Objects.requireNonNull(key);
-		return get0(mappedKey(key));
+		return get0(keyWrap(key));
 	}
 
 	private V get0(Object key) {
@@ -125,21 +125,15 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 	}
 
 	/**
-	 * Returns the specified key or, if the key is a String and the map
-	 * contains a case-variant of the key, returns the case-variant of
-	 * the key in the map.
+	 * Returns the specified key or, if the key is a String, returns 
+	 * a case-insensitive wrapping of the key.
 	 *
 	 * @param key
-	 * @return The specified key or the case-variant of the key in the map.
+	 * @return The specified key or a case-insensitive wrapping of the key.
 	 */
-	private Object mappedKey(Object key) {
-		if ((key instanceof String) && !map.containsKey(key)) {
-			String stringKey = (String) key;
-			for (K k : map.keySet()) {
-				if ((k instanceof String) && stringKey.equalsIgnoreCase((String) k)) {
-					return k;
-				}
-			}
+	private Object keyWrap(Object key) {
+		if (key instanceof String) {
+			return new CaseInsensitiveKey((String) key);
 		}
 		return key;
 	}
@@ -171,18 +165,17 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 	public V put(K key, V value) {
 		Objects.requireNonNull(key);
 		Objects.requireNonNull(value);
-		return put0(key, value, mappedKey(key));
+		return put0(key, value, keyWrap(key));
 	}
 
-	private V put0(K key, V value, Object mappedKey) {
-		if (key instanceof String) {
-			@SuppressWarnings("unchecked")
-			K k = (K) ((String) key).intern();
-			key = k;
+	private V put0(K key, V value, Object wrappedKey) {
+		if (key != wrappedKey) {
+			CaseInsensitiveKey interned = ((CaseInsensitiveKey) wrappedKey).intern();
+			V previous = map.remove(interned); // remove so we put key into map
+			map.put(interned, value);
+			return previous;
 		}
-		V removeResult = (mappedKey != key) ? map.remove(mappedKey) : null;
-		V putResult = map.put(key, value);
-		return (putResult != null) ? putResult : removeResult;
+		return map.put(wrappedKey, value);
 	}
 
 	/**
@@ -198,10 +191,10 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 	public V putIfAbsent(K key, V value) {
 		Objects.requireNonNull(key);
 		Objects.requireNonNull(value);
-		Object mappedKey = mappedKey(key);
-		V v = get0(mappedKey);
+		Object wrappedKey = keyWrap(key);
+		V v = get0(wrappedKey);
 		if (v == null) {
-			v = put0(key, value, mappedKey);
+			v = put0(key, value, wrappedKey);
 		}
 		return v;
 	}
@@ -216,7 +209,7 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 	@Override
 	public V remove(Object key) {
 		Objects.requireNonNull(key);
-		return map.remove(mappedKey(key));
+		return map.remove(keyWrap(key));
 	}
 
 	/**
@@ -245,10 +238,7 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 	@Override
 	public boolean containsKey(Object key) {
 		Objects.requireNonNull(key);
-		if (map.containsKey(key)) {
-			return true;
-		}
-		return map.containsKey(mappedKey(key));
+		return map.containsKey(keyWrap(key));
 	}
 
 	/**
@@ -262,20 +252,32 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 		return map.containsValue(value);
 	}
 
+	private transient Set<Entry<K, V>> entrySet = null;
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public Set<Entry<K, V>> entrySet() {
-		return map.entrySet();
+		Set<Entry<K, V>> es = entrySet;
+		if (es == null) {
+			return entrySet = new EntrySet();
+		}
+		return es;
 	}
+
+	private transient Set<K> keySet = null;
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public Set<K> keySet() {
-		return map.keySet();
+		Set<K> ks = keySet;
+		if (ks == null) {
+			return keySet = new KeySet();
+		}
+		return ks;
 	}
 
 	/**
@@ -345,7 +347,7 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 		return new UnmodifiableDictionary<>(d);
 	}
 
-	private static class UnmodifiableDictionary<K, V> extends Dictionary<K, V> {
+	private static final class UnmodifiableDictionary<K, V> extends Dictionary<K, V> {
 		private final Dictionary<? extends K, ? extends V> d;
 
 		UnmodifiableDictionary(Dictionary<? extends K, ? extends V> d) {
@@ -405,6 +407,225 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 				return true;
 			}
 			return d.equals(obj);
+		}
+	}
+
+	private static final class CaseInsensitiveKey {
+		final String key;
+		private transient int hashCode;
+
+		CaseInsensitiveKey(String key) {
+			this.key = key;
+		}
+
+		private CaseInsensitiveKey(String key, int hashCode) {
+			this.key = key;
+			this.hashCode = hashCode;
+		}
+
+		CaseInsensitiveKey intern() {
+			String interned = key.intern();
+			if (interned == key) {
+				return this;
+			}
+			return new CaseInsensitiveKey(interned, hashCode);
+		}
+
+		@Override
+		public int hashCode() {
+			int h = hashCode;
+			if (h != 0) {
+				return h;
+			}
+			h = 1;
+			for (char c : key.toCharArray()) {
+				h = 31 * h + Character.toLowerCase(Character.toUpperCase(c));
+			}
+			return hashCode = h;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj instanceof CaseInsensitiveKey) {
+				return key.equalsIgnoreCase(((CaseInsensitiveKey) obj).key);
+			}
+			return false;
+		}
+
+		@Override
+		public String toString() {
+			return key;
+		}
+	}
+
+	private final class KeySet extends AbstractSet<K> {
+		KeySet() {
+		}
+
+		@Override
+		public int size() {
+			return CaseInsensitiveDictionaryMap.this.size();
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return CaseInsensitiveDictionaryMap.this.isEmpty();
+		}
+
+		@Override
+		public boolean contains(Object o) {
+			return CaseInsensitiveDictionaryMap.this.containsKey(o);
+		}
+
+		@Override
+		public Iterator<K> iterator() {
+			return new KeyIterator<>(map.keySet());
+		}
+
+		@Override
+		public boolean remove(Object o) {
+			return CaseInsensitiveDictionaryMap.this.remove(o) != null;
+		}
+
+		@Override
+		public void clear() {
+			CaseInsensitiveDictionaryMap.this.clear();
+		}
+	}
+
+	private static final class KeyIterator<K> implements Iterator<K> {
+		private final Iterator<Object> i;
+
+		KeyIterator(Collection<Object> c) {
+			this.i = c.iterator();
+		}
+
+		@Override
+		public boolean hasNext() {
+			return i.hasNext();
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public K next() {
+			Object k = i.next();
+			if (k instanceof CaseInsensitiveKey) {
+				k = ((CaseInsensitiveKey) k).key;
+			}
+			return (K) k;
+		}
+
+		@Override
+		public void remove() {
+			i.remove();
+		}
+	}
+
+	private final class EntrySet extends AbstractSet<Entry<K, V>> {
+		EntrySet() {
+		}
+
+		@Override
+		public int size() {
+			return CaseInsensitiveDictionaryMap.this.size();
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return CaseInsensitiveDictionaryMap.this.isEmpty();
+		}
+
+		@Override
+		public Iterator<Entry<K, V>> iterator() {
+			return new EntryIterator<>(map.entrySet());
+		}
+
+		@Override
+		public void clear() {
+			CaseInsensitiveDictionaryMap.this.clear();
+		}
+	}
+
+	private static final class EntryIterator<K, V> implements Iterator<Entry<K, V>> {
+		private final Iterator<Entry<Object, V>> i;
+
+		EntryIterator(Collection<Entry<Object, V>> c) {
+			this.i = c.iterator();
+		}
+
+		@Override
+		public boolean hasNext() {
+			return i.hasNext();
+		}
+
+		@Override
+		public Entry<K, V> next() {
+			return new CaseInsentiveEntry<>(i.next());
+		}
+
+		@Override
+		public void remove() {
+			i.remove();
+		}
+	}
+
+	private static final class CaseInsentiveEntry<K, V> implements Entry<K, V> {
+		private final Entry<Object, V> entry;
+
+		CaseInsentiveEntry(Entry<Object, V> entry) {
+			this.entry = entry;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public K getKey() {
+			Object k = entry.getKey();
+			if (k instanceof CaseInsensitiveKey) {
+				k = ((CaseInsensitiveKey) k).key;
+			}
+			return (K) k;
+		}
+
+		@Override
+		public V getValue() {
+			return entry.getValue();
+		}
+
+		@Override
+		public V setValue(V value) {
+			Objects.requireNonNull(value);
+			return entry.setValue(value);
+		}
+
+		@Override
+		public int hashCode() {
+			return entry.getKey().hashCode() ^ entry.getValue().hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof Entry) {
+				Entry<?, ?> other = (Entry<?, ?>) obj;
+				Object k1 = entry.getKey();
+				@SuppressWarnings("unchecked")
+				Object k2 = (other instanceof CaseInsentiveEntry) ? ((CaseInsentiveEntry<K, V>) other).entry.getKey() : other.getKey();
+				if ((k1 == k2) || k1.equals(k2)) {
+					Object v1 = entry.getValue();
+					Object v2 = other.getValue();
+					if ((v1 == v2) || v1.equals(v2)) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public String toString() {
+			return entry.toString();
 		}
 	}
 }
