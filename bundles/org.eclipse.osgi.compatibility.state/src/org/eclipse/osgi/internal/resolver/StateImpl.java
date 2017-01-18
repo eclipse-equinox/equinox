@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2016 IBM Corporation and others.
+ * Copyright (c) 2003, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -525,9 +525,9 @@ public abstract class StateImpl implements State {
 				}
 				// use the Headers class to handle ignoring case while matching keys (bug 180817)
 				@SuppressWarnings("unchecked")
-				Headers<Object, Object>[] tmpPlatformProperties = new Headers[platformProperties.length];
+				CaseInsensitiveDictionaryMap<Object, Object>[] tmpPlatformProperties = new CaseInsensitiveDictionaryMap[platformProperties.length];
 				for (int i = 0; i < platformProperties.length; i++) {
-					tmpPlatformProperties[i] = new Headers<>(platformProperties[i].size());
+					tmpPlatformProperties[i] = new CaseInsensitiveDictionaryMap<>(platformProperties[i].size());
 					for (Enumeration<Object> keys = platformProperties[i].keys(); keys.hasMoreElements();) {
 						Object key = keys.nextElement();
 						tmpPlatformProperties[i].put(key, platformProperties[i].get(key));

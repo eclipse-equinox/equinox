@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,8 +12,9 @@ package org.eclipse.osgi.compatibility.plugins;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
-import org.eclipse.osgi.framework.util.Headers;
+import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
 import org.eclipse.osgi.internal.hookregistry.ActivatorHookFactory;
 import org.eclipse.osgi.internal.hookregistry.BundleFileWrapperFactoryHook;
 import org.eclipse.osgi.internal.hookregistry.HookConfigurator;
@@ -25,6 +26,7 @@ import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.eclipse.osgi.storage.bundlefile.BundleFileWrapper;
 import org.eclipse.osgi.storage.bundlefile.FileBundleEntry;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -55,10 +57,10 @@ public class PluginConverterHook implements HookConfigurator {
 						if (!PluginConverterImpl.OSGI_BUNDLE_MANIFEST.equals(path)) {
 							return entry;
 						}
-						Headers<String, String> headers = null;
+						Map<String, String> headers = null;
 						if (entry != null) {
 							try {
-								headers = Headers.parseManifest(entry.getInputStream());
+								headers = ManifestElement.parseBundleManifest(entry.getInputStream(), new CaseInsensitiveDictionaryMap<String, String>());
 							} catch (Exception e) {
 								throw new RuntimeException(e);
 							}
