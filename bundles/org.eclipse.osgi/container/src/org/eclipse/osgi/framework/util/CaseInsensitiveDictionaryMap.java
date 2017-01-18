@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.framework.util;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.*;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.util.NLS;
@@ -57,7 +59,7 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 		Enumeration<? extends K> keys = dictionary.keys();
 		while (keys.hasMoreElements()) {
 			K key = keys.nextElement();
-			if (putIfAbsent(key, dictionary.get(key)) != null) {
+			if (put(key, dictionary.get(key)) != null) {
 				throw new IllegalArgumentException(NLS.bind(Msg.HEADER_DUPLICATE_KEY_EXCEPTION, key));
 			}
 		}
@@ -74,7 +76,7 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 		this(initialCapacity(map.size()));
 		/* initialize the keys and values */
 		for (Entry<? extends K, ? extends V> e : map.entrySet()) {
-			if (putIfAbsent(e.getKey(), e.getValue()) != null) {
+			if (put(e.getKey(), e.getValue()) != null) {
 				throw new IllegalArgumentException(NLS.bind(Msg.HEADER_DUPLICATE_KEY_EXCEPTION, e.getKey()));
 			}
 		}
@@ -116,12 +118,7 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 	 */
 	@Override
 	public V get(Object key) {
-		Objects.requireNonNull(key);
-		return get0(keyWrap(key));
-	}
-
-	private V get0(Object key) {
-		return map.get(key);
+		return map.get(keyWrap(requireNonNull(key)));
 	}
 
 	/**
@@ -163,40 +160,14 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 	 */
 	@Override
 	public V put(K key, V value) {
-		Objects.requireNonNull(key);
-		Objects.requireNonNull(value);
-		return put0(key, value, keyWrap(key));
-	}
-
-	private V put0(K key, V value, Object wrappedKey) {
-		if (key != wrappedKey) {
-			CaseInsensitiveKey interned = ((CaseInsensitiveKey) wrappedKey).intern();
-			V previous = map.remove(interned); // remove so we put key into map
-			map.put(interned, value);
+		requireNonNull(value);
+		if (key instanceof String) {
+			Object wrappedKey = keyWrap(((String) key).intern());
+			V previous = map.remove(wrappedKey); // remove so we put key into map
+			map.put(wrappedKey, value);
 			return previous;
 		}
-		return map.put(wrappedKey, value);
-	}
-
-	/**
-	 * If the specified key is not already associated with a value,
-	 * associates it with the specified value and return
-	 * {@code null}. Otherwise returns the current value of the
-	 * specified key.
-	 * <p>
-	 * The key and value must be non-null.
-	 * <p>
-	 * If the key is a String, any case-variant will be replaced.
-	 */
-	public V putIfAbsent(K key, V value) {
-		Objects.requireNonNull(key);
-		Objects.requireNonNull(value);
-		Object wrappedKey = keyWrap(key);
-		V v = get0(wrappedKey);
-		if (v == null) {
-			v = put0(key, value, wrappedKey);
-		}
-		return v;
+		return map.put(requireNonNull(key), value);
 	}
 
 	/**
@@ -208,8 +179,7 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 	 */
 	@Override
 	public V remove(Object key) {
-		Objects.requireNonNull(key);
-		return map.remove(keyWrap(key));
+		return map.remove(keyWrap(requireNonNull(key)));
 	}
 
 	/**
@@ -237,8 +207,7 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 	 */
 	@Override
 	public boolean containsKey(Object key) {
-		Objects.requireNonNull(key);
-		return map.containsKey(keyWrap(key));
+		return map.containsKey(keyWrap(requireNonNull(key)));
 	}
 
 	/**
@@ -248,8 +217,7 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 	 */
 	@Override
 	public boolean containsValue(Object value) {
-		Objects.requireNonNull(value);
-		return map.containsValue(value);
+		return map.containsValue(requireNonNull(value));
 	}
 
 	private transient Set<Entry<K, V>> entrySet = null;
@@ -351,7 +319,7 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 		private final Dictionary<? extends K, ? extends V> d;
 
 		UnmodifiableDictionary(Dictionary<? extends K, ? extends V> d) {
-			this.d = Objects.requireNonNull(d);
+			this.d = requireNonNull(d);
 		}
 
 		@Override
@@ -416,19 +384,6 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 
 		CaseInsensitiveKey(String key) {
 			this.key = key;
-		}
-
-		private CaseInsensitiveKey(String key, int hashCode) {
-			this.key = key;
-			this.hashCode = hashCode;
-		}
-
-		CaseInsensitiveKey intern() {
-			String interned = key.intern();
-			if (interned == key) {
-				return this;
-			}
-			return new CaseInsensitiveKey(interned, hashCode);
 		}
 
 		@Override
@@ -596,8 +551,7 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 
 		@Override
 		public V setValue(V value) {
-			Objects.requireNonNull(value);
-			return entry.setValue(value);
+			return entry.setValue(requireNonNull(value));
 		}
 
 		@Override
