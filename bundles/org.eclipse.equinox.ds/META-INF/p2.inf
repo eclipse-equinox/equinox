@@ -1,7 +1,9 @@
 instructions.configure=\
-  setProgramProperty(propName:equinox.use.ds, propValue:true);
+  setProgramProperty(propName:equinox.use.ds, propValue:true);\
+  setProgramProperty(propName:ds.delayed.keepInstances, propValue:true);
 instructions.unconfigure=\
-  setProgramProperty(propName:equinox.use.ds, propValue:);
+  setProgramProperty(propName:equinox.use.ds, propValue:);\
+  setProgramProperty(propName:ds.delayed.keepInstances, propValue:);
 provides.0.namespace = osgi.extender
 provides.0.name = osgi.component
 provides.0.version = 1.2

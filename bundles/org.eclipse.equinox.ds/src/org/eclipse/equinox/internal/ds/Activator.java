@@ -20,6 +20,8 @@ import org.osgi.framework.wiring.BundleWiring;
 
 public class Activator implements BundleActivator {
 
+	private Bundle scr;
+
 	public void start(BundleContext context) throws Exception {
 		ServiceReference<EnvironmentInfo> envInfoRef = context.getServiceReference(EnvironmentInfo.class);
 		EnvironmentInfo envInfo = null;
@@ -27,9 +29,11 @@ public class Activator implements BundleActivator {
 			envInfo = context.getService(envInfoRef);
 		}
 		if (envInfo != null) {
+			envInfo.setProperty("ds.delayed.keepInstances", "true"); //$NON-NLS-1$//$NON-NLS-2$
 			envInfo.setProperty("equinox.use.ds", "true"); //$NON-NLS-1$//$NON-NLS-2$
 			context.ungetService(envInfoRef);
 		} else {
+			System.setProperty("ds.delayed.keepInstances", "true"); //$NON-NLS-1$//$NON-NLS-2$
 			System.setProperty("equinox.use.ds", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
@@ -38,18 +42,18 @@ public class Activator implements BundleActivator {
 		if (required.isEmpty()) {
 			throw new IllegalStateException("No org.apache.felix.scr bundle found!"); //$NON-NLS-1$
 		}
-		Bundle scr = required.get(0).getProvider().getBundle();
+		scr = required.get(0).getProvider().getBundle();
 		if (!"org.apache.felix.scr".equals(scr.getSymbolicName())) { //$NON-NLS-1$
 			throw new IllegalStateException("Required wrong bundle: " + scr); //$NON-NLS-1$
 		}
 		BundleStartLevel equinoxSDstartLevel = context.getBundle().adapt(BundleStartLevel.class);
 		BundleStartLevel scrStartLevel = scr.adapt(BundleStartLevel.class);
 		scrStartLevel.setStartLevel(equinoxSDstartLevel.getStartLevel());
-		scr.start();
+		scr.start(Bundle.START_TRANSIENT);
 	}
 
 	public void stop(BundleContext context) throws Exception {
-		// do nothing; just keep scr persistently started
+		scr.stop(Bundle.STOP_TRANSIENT);
 	}
 
 }
