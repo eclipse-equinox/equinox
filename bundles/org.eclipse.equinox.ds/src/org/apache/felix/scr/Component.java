@@ -26,7 +26,7 @@ import org.osgi.service.component.ComponentInstance;
  * The <code>Component</code> interface represents a single component managed
  * by the Service Component Runtime. Management agents may access the Component
  * instances through the {@link ScrService}.
- * @deprecated  * @deprecated clients should use {@link org.osgi.service.component.runtime.dto.ComponentDescriptionDTO} instead.
+ * @deprecated clients should use {@link org.osgi.service.component.runtime.dto.ComponentDescriptionDTO} instead.
  */
 @Deprecated
 public interface Component {
@@ -207,6 +207,7 @@ public interface Component {
 	 * are used to register the Component as a service and are returned by
 	 * the <code>ComponentContext.getProperties()</code> method.
 	 */
+	@SuppressWarnings("rawtypes")
 	Dictionary getProperties();
 
 	/**

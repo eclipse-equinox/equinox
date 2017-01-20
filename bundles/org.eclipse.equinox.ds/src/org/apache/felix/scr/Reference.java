@@ -45,6 +45,7 @@ public interface Reference {
 	 * Returns an array of references to the services bound to this Reference
 	 * or <code>null</code> if no services are currently bound.
 	 */
+	@SuppressWarnings("rawtypes")
 	ServiceReference[] getServiceReferences();
 
 	/**
