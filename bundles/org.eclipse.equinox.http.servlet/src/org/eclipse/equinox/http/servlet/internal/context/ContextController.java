@@ -15,9 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.AccessController;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import javax.servlet.*;
@@ -784,6 +782,12 @@ public class ContextController {
 				matchingFilterRegistrations.add(filterRegistration);
 			}
 		}
+	}
+
+	public Map<String, HttpSessionAdaptor> getActiveSessions() {
+		checkShutdown();
+
+		return activeSessions;
 	}
 
 	public Set<EndpointRegistration<?>> getEndpointRegistrations() {

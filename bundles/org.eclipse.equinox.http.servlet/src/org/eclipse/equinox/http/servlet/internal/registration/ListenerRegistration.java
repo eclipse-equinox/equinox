@@ -12,11 +12,12 @@
 package org.eclipse.equinox.http.servlet.internal.registration;
 
 import java.lang.reflect.*;
-import java.util.EventListener;
-import java.util.List;
+import java.util.*;
 import javax.servlet.*;
+import javax.servlet.http.*;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
+import org.eclipse.equinox.http.servlet.internal.servlet.HttpSessionAdaptor;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.runtime.dto.ListenerDTO;
 
@@ -65,6 +66,18 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 
 			super.destroy();
 
+			if (classes.contains(HttpSessionBindingListener.class) ||
+				classes.contains(HttpSessionAttributeListener.class) ||
+				classes.contains(HttpSessionListener.class)) {
+
+				Map<String, HttpSessionAdaptor> activeSessions =
+					contextController.getActiveSessions();
+
+				for (HttpSessionAdaptor adaptor : activeSessions.values()) {
+					adaptor.invokeSessionListeners(classes, super.getT());
+				}
+			}
+
 			if (classes.contains(ServletContextListener.class)) {
 				ServletContextListener servletContextListener =
 					(ServletContextListener)super.getT();
@@ -88,7 +101,7 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 
 		ListenerRegistration listenerRegistration = (ListenerRegistration)obj;
 
-		return super.getT().equals(listenerRegistration.getT());
+		return listenerRegistration.getT().equals(super.getT());
 	}
 
 	@Override

@@ -274,6 +274,38 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 		controller.removeActiveSession(session);
 	}
 
+	public void invokeSessionListeners (List<Class<? extends EventListener>> classes, EventListener listener) {
+		if (classes == null) {
+			return;
+		}
+
+		for (Class<? extends EventListener> clazz : classes) {
+			if (clazz.equals(HttpSessionListener.class)){
+				HttpSessionEvent sessionEvent = new HttpSessionEvent(this);
+				HttpSessionListener httpSessionListener = (HttpSessionListener) listener;
+				httpSessionListener.sessionDestroyed(sessionEvent);
+			}
+
+			if (clazz.equals(HttpSessionBindingListener.class) || clazz.equals(HttpSessionAttributeListener.class)) {
+				Enumeration<String> attributeNames = getAttributeNames();
+				while (attributeNames.hasMoreElements()) {
+					String attributeName = attributeNames.nextElement();
+					HttpSessionBindingEvent sessionBindingEvent = new HttpSessionBindingEvent(this, attributeName);
+
+					if (clazz.equals(HttpSessionBindingListener.class)) {
+						HttpSessionBindingListener httpSessionBindingListener = (HttpSessionBindingListener) listener;
+						httpSessionBindingListener.valueUnbound(sessionBindingEvent);
+					}
+
+					if (clazz.equals(HttpSessionAttributeListener.class)) {
+						HttpSessionAttributeListener httpSessionAttributeListener = (HttpSessionAttributeListener) listener;
+						httpSessionAttributeListener.attributeRemoved(sessionBindingEvent);
+					}
+				}
+			}
+		}
+	}
+
 	/**@deprecated*/
 	public void putValue(String arg0, Object arg1) {
 		setAttribute(arg0, arg1);
