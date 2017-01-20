@@ -4,6 +4,6 @@
    <service>
       <provide interface="javax.servlet.Filter"/>
    </service>
-   <property name="char" type="Character" value="b"/>
+   <property name="char" type="String" value="b"/>
    <property name="osgi.http.whiteboard.filter.pattern" type="String" value="/WBServlet2/*"/>
 </scr:component>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Raymond Augé and others.
+ * Copyright (c) 2014, 2017 Raymond Augé and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,8 @@ public class WBFilter2 extends AbstractWhiteboardTestFilter {
 	char c;
 
 	protected void activate(ComponentContext componentContext) {
-		c = (Character)componentContext.getProperties().get("char");
+		String s = (String) componentContext.getProperties().get("char");
+		c = s.charAt(0);
 	}
 
 	@Override
