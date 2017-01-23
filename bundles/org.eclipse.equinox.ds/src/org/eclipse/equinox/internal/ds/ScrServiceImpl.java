@@ -36,8 +36,14 @@ public class ScrServiceImpl implements ScrService {
 	}
 
 	private Component[] toComponents(Collection<ComponentDescriptionDTO> componentDescriptionDTOs) {
-		// TODO Auto-generated method stub
-		return null;
+		Collection<Component> components = new ArrayList<Component>();
+		for (ComponentDescriptionDTO dto : componentDescriptionDTOs) {
+			Component component = toComponent(dto);
+			if (component != null) {
+				components.add(component);
+			}
+		}
+		return components.isEmpty() ? null : components.toArray(new Component[0]);
 	}
 
 	@Override
@@ -52,8 +58,12 @@ public class ScrServiceImpl implements ScrService {
 	}
 
 	private Component toComponent(ComponentDescriptionDTO dto) {
-		// TODO Auto-generated method stub
-		return null;
+		Collection<ComponentConfigurationDTO> configs = scr.getComponentConfigurationDTOs(dto);
+		if (configs.isEmpty()) {
+			return null;
+		}
+
+		return new ComponentImpl(configs.iterator().next());
 	}
 
 	@Override
@@ -324,8 +334,8 @@ public class ScrServiceImpl implements ScrService {
 			this.unsatisfied = unsatisifed;
 		}
 
-		@SuppressWarnings("rawtypes")
 		@Override
+		@SuppressWarnings("rawtypes")
 		public ServiceReference[] getServiceReferences() {
 			Collection<ServiceReference<?>> serviceReferences = new ArrayList<ServiceReference<?>>();
 			for (ServiceReferenceDTO serviceRefDTO : unsatisfied.targetServices) {

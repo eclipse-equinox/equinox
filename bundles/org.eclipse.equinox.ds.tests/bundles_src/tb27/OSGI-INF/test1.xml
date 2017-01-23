@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<scr:component 
+			name="test1"
+			enabled="true"
+			immediate="true"
+			xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0">
+		<implementation class="org.eclipse.equinox.ds.tests.tb27.impl.TestService"/>
+		<service>
+			<provide interface="java.util.List"/>
+		</service>
+		<reference name="log" interface="org.osgi.service.log.LogService" />
+	</scr:component>
+</root>

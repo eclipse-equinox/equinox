@@ -31,5 +31,6 @@
 	<classpathentry kind="src" output="scr_test/tb23" path="bundles_src/tb23"/>
 	<classpathentry kind="src" output="scr_test/tb25" path="bundles_src/tb25"/>
 	<classpathentry kind="src" output="scr_test/tb26" path="bundles_src/tb26"/>
+	<classpathentry kind="src" output="scr_test/tb27" path="bundles_src/tb27"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

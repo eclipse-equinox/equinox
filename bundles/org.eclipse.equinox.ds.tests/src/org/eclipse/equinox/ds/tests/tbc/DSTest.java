@@ -32,6 +32,9 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.felix.scr.Component;
+import org.apache.felix.scr.Reference;
+import org.apache.felix.scr.ScrService;
 import org.eclipse.equinox.ds.tests.BundleInstaller;
 import org.eclipse.equinox.ds.tests.DSTestsActivator;
 import org.junit.Before;
@@ -2894,6 +2897,33 @@ public class DSTest {
       if (config != null) {
         config.delete();
       }
+    }
+  }
+
+  @SuppressWarnings("deprecation")
+@Test
+  public void testScrService() throws BundleException {
+    Bundle tb27 = installBundle("tb27");
+    ServiceReference<ScrService> ref = getContext().getServiceReference(ScrService.class);
+    ScrService scrService = ref == null ? null : getContext().getService(ref);
+    assertNotNull("No ScrService.", scrService);
+    try {
+      tb27.start();
+      waitBundleStart();
+      Component[] tb27Comps = scrService.getComponents(tb27);
+      assertNotNull("No tb26 components.", tb27Comps);
+      assertEquals("Wrong number of components.", 1, tb27Comps.length);
+      Component test1 = tb27Comps[0];
+      assertEquals("Wrong name.", "test1", test1.getName());
+      Reference[] refs = test1.getReferences();
+      assertNotNull("No references.", refs);
+      assertEquals("Wrong number of references.", 1, refs.length);
+      assertEquals("Wrong ref name.", "log", refs[0].getName());
+      ServiceReference<?>[] services = refs[0].getServiceReferences();
+      assertNotNull("No service references.", services);
+      assertEquals("Wrong number of service refs.", 1, services.length);
+    } finally {
+      uninstallBundle(tb27);
     }
   }
 
