@@ -170,23 +170,7 @@ public class DefaultPreferences extends EclipsePreferences {
 		// if the node already exists, nothing more to do
 		if (super.nodeExists(path))
 			return true;
-
-		// try to apply runtime defaults in case the node is created programmatically inside initializer
-		PreferencesService.getDefault().applyRuntimeDefaults(path, pluginReference);
-		// check if the node was created inside initializer's code
-		if (super.nodeExists(path))
-			return true;
-
-		// try to look for preferences.ini file inside bundle
-		Bundle bundle = PreferencesOSGiUtils.getDefault().getBundle(path);
-		if (bundle != null) {
-			URL url = FileLocator.find(bundle, new Path(IPreferencesConstants.PREFERENCES_DEFAULT_OVERRIDE_FILE_NAME), null);
-			// node exists only if file exists and if it contains some preferences
-			if (!loadProperties(url).isEmpty())
-				return true;
-		}
-
-		// check product and command line customizations
+		// if the node does not exist, maybe it has not been loaded yet
 		initializeCustomizations();
 		// scope based path is a path relative to the "/default" node; this is the path that appears in customizations
 		IPath scopeBasedPath = new Path(absolutePath() + PATH_SEPARATOR + path).removeFirstSegments(1);

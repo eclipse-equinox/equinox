@@ -605,21 +605,19 @@ public class PreferencesService implements IPreferencesService {
 							Preferences node = context.getNode(qualifier);
 							if (node != null) {
 								found = true;
-								if (childPath != null && node.nodeExists(childPath))
+								if (childPath != null)
 									node = node.node(childPath);
 								result.add(node);
 							}
 						}
 					}
 					if (!found) {
-						Preferences node = getRootNode().node(scopeString);
-						if (node.nodeExists(qualifier)) {
-							node = node.node(qualifier);
-							if (childPath != null && node.nodeExists(childPath))
-								node = node.node(childPath);
-							result.add(node);
-						}
+						Preferences node = getRootNode().node(scopeString).node(qualifier);
+						if (childPath != null)
+							node = node.node(childPath);
+						result.add(node);
 					}
+					found = false;
 				}
 
 				@Override
