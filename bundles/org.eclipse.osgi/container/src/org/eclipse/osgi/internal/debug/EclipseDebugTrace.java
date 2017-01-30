@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corporation and others.
+ * Copyright (c) 2009, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.security.AccessController;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.debug.DebugTrace;
 
@@ -93,17 +94,7 @@ class EclipseDebugTrace implements DebugTrace {
 	/** DebugOptions are used to determine if the specified bundle symbolic name + option-path has debugging enabled */
 	private FrameworkDebugOptions debugOptions = null;
 
-	/**
-	 * Construct a new EclipseDebugTrace for the specified bundle symbolic name and write messages to the specified
-	 * trace file.  The DebugOptions object will be used to determine if tracing should occur.  
-	 * 
-	 * @param bundleSymbolicName The symbolic name of the bundle being traced
-	 * @param debugOptions Used to determine if the specified bundle symbolic name + option-path has tracing enabled
-	 */
-	EclipseDebugTrace(final String bundleSymbolicName, final FrameworkDebugOptions debugOptions) {
-
-		this(bundleSymbolicName, debugOptions, null);
-	}
+	private final boolean consoleLog;
 
 	/**
 	 * Construct a new EclipseDebugTrace for the specified bundle symbolic name and write messages to the specified
@@ -114,7 +105,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 * @param traceClass The class that the client is using to perform trace API calls
 	 */
 	EclipseDebugTrace(final String bundleSymbolicName, final FrameworkDebugOptions debugOptions, final Class<?> traceClass) {
-
+		this.consoleLog = "true".equals(debugOptions.getConfiguration().getConfiguration(EclipseStarter.PROP_CONSOLE_LOG)); //$NON-NLS-1$
 		this.traceClass = traceClass != null ? traceClass.getName() : null;
 		this.debugOptions = debugOptions;
 		this.bundleSymbolicName = bundleSymbolicName;
@@ -643,12 +634,34 @@ class EclipseDebugTrace implements DebugTrace {
 				/**
 				 * @throws IOException  
 				 */
+				@Override
 				public void close() throws IOException {
 					// We don't want to close System.out
 				}
 
+				@Override
 				public void write(byte[] var0, int var1, int var2) throws IOException {
 					this.out.write(var0, var1, var2);
+				}
+			};
+		} else if (consoleLog) {
+			out = new FilterOutputStream(out) {
+				@Override
+				public void write(int b) throws IOException {
+					System.out.write(b);
+					out.write(b);
+				}
+
+				@Override
+				public void write(byte[] b) throws IOException {
+					System.out.write(b);
+					out.write(b);
+				}
+
+				@Override
+				public void write(byte[] b, int off, int len) throws IOException {
+					System.out.write(b, off, len);
+					out.write(b, off, len);
 				}
 			};
 		}
