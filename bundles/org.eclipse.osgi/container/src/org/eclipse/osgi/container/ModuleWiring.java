@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.felix.resolver.FelixWiring;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
 import org.eclipse.osgi.internal.container.AtomicLazyInitializer;
 import org.eclipse.osgi.internal.container.InternalUtils;
@@ -28,7 +29,7 @@ import org.osgi.resource.*;
  * An implementation of {@link BundleWiring}.
  * @since 3.10
  */
-public final class ModuleWiring implements BundleWiring {
+public final class ModuleWiring implements BundleWiring, FelixWiring {
 	class LoaderInitializer implements Callable<ModuleLoader> {
 		@Override
 		public ModuleLoader call() throws Exception {
@@ -457,5 +458,27 @@ public final class ModuleWiring implements BundleWiring {
 	@Override
 	public String toString() {
 		return revision.toString();
+	}
+
+	/**
+	 * @since 3.12
+	 */
+	@Override
+	public Collection<Wire> getSubstitutionWires() {
+		if (substitutedPkgNames.isEmpty()) {
+			return Collections.emptyList();
+		}
+		// Could cache this, but seems unnecessary since it will only be used by the resolver
+		Collection<Wire> substitutionWires = new ArrayList<>(substitutedPkgNames.size());
+		List<ModuleWire> current = requiredWires;
+		for (ModuleWire wire : current) {
+			Capability cap = wire.getCapability();
+			if (PackageNamespace.PACKAGE_NAMESPACE.equals(cap.getNamespace())) {
+				if (substitutedPkgNames.contains(cap.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
+					substitutionWires.add(wire);
+				}
+			}
+		}
+		return substitutionWires;
 	}
 }
