@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -2836,6 +2836,100 @@ public class TestModuleContainer extends AbstractTest {
 		for (DummyContainerEvent event : events) {
 			Assert.assertNotEquals("Found an error.", ContainerEvent.ERROR, event.type);
 		}
+	}
+
+	@Test
+	public void testSplitPackageUses01() throws BundleException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install a split exporter core that substitutes
+		Map<String, String> coreManifest = new HashMap<String, String>();
+		coreManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		coreManifest.put(Constants.BUNDLE_SYMBOLICNAME, "core");
+		coreManifest.put(Constants.EXPORT_PACKAGE, "pkg1; core=split; mandatory:=core");
+		coreManifest.put(Constants.IMPORT_PACKAGE, "pkg1; core=split");
+
+		// install a split exporter misc that requires core and substitutes
+		Map<String, String> miscManifest = new HashMap<String, String>();
+		miscManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		miscManifest.put(Constants.BUNDLE_SYMBOLICNAME, "misc");
+		miscManifest.put(Constants.EXPORT_PACKAGE, "pkg1; misc=split; mandatory:=misc");
+		miscManifest.put(Constants.REQUIRE_BUNDLE, "core");
+
+		// install a bundle that imports core and exports pkg2 that uses pkg1 from core
+		Map<String, String> importsCoreManifest = new HashMap<String, String>();
+		importsCoreManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		importsCoreManifest.put(Constants.BUNDLE_SYMBOLICNAME, "importsCore");
+		importsCoreManifest.put(Constants.EXPORT_PACKAGE, "pkg2; uses:=pkg1");
+		importsCoreManifest.put(Constants.IMPORT_PACKAGE, "pkg1; core=split");
+
+		// install a bundle that imports pkg2, but requires misc
+		Map<String, String> requiresMiscManifest = new HashMap<String, String>();
+		requiresMiscManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		requiresMiscManifest.put(Constants.BUNDLE_SYMBOLICNAME, "requiresMisc");
+		requiresMiscManifest.put(Constants.IMPORT_PACKAGE, "pkg2");
+		requiresMiscManifest.put(Constants.REQUIRE_BUNDLE, "misc");
+
+		installDummyModule(coreManifest, "core", container);
+		installDummyModule(miscManifest, "misc", container);
+		installDummyModule(importsCoreManifest, "importsCore", container);
+		Module requireMisc = installDummyModule(requiresMiscManifest, "requireMisc", container);
+
+		ResolutionReport report = container.resolve(Arrays.asList(requireMisc), true);
+		Assert.assertNull("Failed to resolve test.", report.getResolutionException());
+
+		// now test by resolving the split exporters first
+		adaptor = createDummyAdaptor();
+		container = adaptor.getContainer();
+
+		installDummyModule(coreManifest, "core", container);
+		Module misc = installDummyModule(miscManifest, "misc", container);
+		report = container.resolve(Arrays.asList(misc), true);
+		Assert.assertNull("Failed to resolve test.", report.getResolutionException());
+
+		installDummyModule(importsCoreManifest, "importsCore", container);
+		requireMisc = installDummyModule(requiresMiscManifest, "requireMisc", container);
+		report = container.resolve(Arrays.asList(requireMisc), true);
+		Assert.assertNull("Failed to resolve test.", report.getResolutionException());
+
+		// now test by resolving the split exporters first with a real substitution
+		adaptor = createDummyAdaptor();
+		container = adaptor.getContainer();
+
+		// install a exporter that substitutes core's export
+		Map<String, String> substitutesCoreManifest = new HashMap<String, String>();
+		substitutesCoreManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		substitutesCoreManifest.put(Constants.BUNDLE_SYMBOLICNAME, "substitutesCore");
+		substitutesCoreManifest.put(Constants.EXPORT_PACKAGE, "pkg1; substitutesCore=true; mandatory:=substitutesCore");
+
+		// change core's import to force it to the substitute
+		coreManifest.put(Constants.IMPORT_PACKAGE, "pkg1; substitutesCore=true");
+		importsCoreManifest.put(Constants.IMPORT_PACKAGE, "pkg1; substitutesCore=true");
+
+		installDummyModule(substitutesCoreManifest, "substitutesCore", container);
+		installDummyModule(coreManifest, "core", container);
+		misc = installDummyModule(miscManifest, "misc", container);
+		report = container.resolve(Arrays.asList(misc), true);
+		Assert.assertNull("Failed to resolve test.", report.getResolutionException());
+
+		installDummyModule(importsCoreManifest, "importsCore", container);
+		requireMisc = installDummyModule(requiresMiscManifest, "requireMisc", container);
+		report = container.resolve(Arrays.asList(requireMisc), true);
+		Assert.assertNull("Failed to resolve test.", report.getResolutionException());
+
+		// not test by doing a full resolve with real substitution
+		adaptor = createDummyAdaptor();
+		container = adaptor.getContainer();
+
+		installDummyModule(substitutesCoreManifest, "substitutesCore", container);
+		installDummyModule(coreManifest, "core", container);
+		installDummyModule(miscManifest, "misc", container);
+		installDummyModule(importsCoreManifest, "importsCore", container);
+		requireMisc = installDummyModule(requiresMiscManifest, "requireMisc", container);
+
+		report = container.resolve(Arrays.asList(requireMisc), true);
+		Assert.assertNull("Failed to resolve test.", report.getResolutionException());
 	}
 
 	private static void assertWires(List<ModuleWire> required, List<ModuleWire>... provided) {
