@@ -151,4 +151,18 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 		String msg = NLS.bind(RegistryMessages.adapters_badAdapterFactory, element.getContributor().getName());
 		RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, msg, null));
 	}
+
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("AdapterFactoryProxy [contributor: "); //$NON-NLS-1$
+		sb.append(element.getContributor());
+		sb.append(", adaptableType: "); //$NON-NLS-1$
+		sb.append(getAdaptableType());
+		if (factory != null) {
+			sb.append(", factory: "); //$NON-NLS-1$
+			sb.append(factory);
+		}
+		sb.append("]"); //$NON-NLS-1$
+		return sb.toString();
+	}
 }

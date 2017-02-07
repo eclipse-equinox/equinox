@@ -288,13 +288,25 @@ public final class AdapterManager implements IAdapterManager {
 	public <T> T getAdapter(Object adaptable, Class<T> adapterType) {
 		Assert.isNotNull(adaptable);
 		Assert.isNotNull(adapterType);
-		IAdapterFactory factory = getFactories(adaptable.getClass()).get(adapterType.getName());
+		String adapterTypeName = adapterType.getName();
+		IAdapterFactory factory = getFactories(adaptable.getClass()).get(adapterTypeName);
 		T result = null;
-		if (factory != null)
+		if (factory != null) {
 			result = factory.getAdapter(adaptable, adapterType);
-		if (result == null && adapterType.isInstance(adaptable))
+		}
+		if (result == null && adapterType.isInstance(adaptable)) {
 			return (T) adaptable;
-		return result;
+		}
+		if (result == null || adapterType.isInstance(result)) {
+			return result;
+		}
+		// Here we have a result which does not match the expected type.
+		// Throwing an exception here allows us to identify the violating factory.
+		// If we don't do this, clients will just see CCE without any idea who
+		// supplied the wrong adapter
+		throw new AssertionFailedException("Adapter factory " //$NON-NLS-1$
+				+ factory + " returned " + result.getClass().getName() //$NON-NLS-1$
+				+ " that is not an instance of " + adapterTypeName); //$NON-NLS-1$
 	}
 
 	@Override
