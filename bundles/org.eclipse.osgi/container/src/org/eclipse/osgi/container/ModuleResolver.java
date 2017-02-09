@@ -1518,6 +1518,11 @@ final class ModuleResolver {
 				throw new ResolutionTimeout();
 			}
 		}
+
+		@Override
+		public Collection<Wire> getSubstitutionWires(Wiring wiring) {
+			return ((ModuleWiring) wiring).getSubstitutionWires();
+		}
 	}
 
 	protected boolean threadResolving() {

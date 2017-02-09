@@ -14,7 +14,6 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.felix.resolver.FelixWiring;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
 import org.eclipse.osgi.internal.container.AtomicLazyInitializer;
 import org.eclipse.osgi.internal.container.InternalUtils;
@@ -29,7 +28,7 @@ import org.osgi.resource.*;
  * An implementation of {@link BundleWiring}.
  * @since 3.10
  */
-public final class ModuleWiring implements BundleWiring, FelixWiring {
+public final class ModuleWiring implements BundleWiring {
 	class LoaderInitializer implements Callable<ModuleLoader> {
 		@Override
 		public ModuleLoader call() throws Exception {
@@ -460,22 +459,7 @@ public final class ModuleWiring implements BundleWiring, FelixWiring {
 		return revision.toString();
 	}
 
-	/**
-	 * Returns the subset of {@link Wiring#getRequiredResourceWires(String) require wires}
-	 * that provide wires to {@link Capability capabilities} which substitute capabilities
-	 * of this wiring. For example, when a {@link PackageNamespace package} name is both
-	 * provided and required by the same resource. If the package requirement is resolved
-	 * to a capability hosted by a different wiring then the package capability is
-	 * considered to be substituted.
-	 *
-	 * @see #getSubstitutedNames()
-	 * @return A collection containing a snapshot of the substitution {@link Wire}s
-	 * for the {@link Requirement requirements} of this wiring, or an empty list
-	 * if this wiring has no substitution wires.
-	 * @since 3.12
-	 */
-	@Override
-	public Collection<Wire> getSubstitutionWires() {
+	Collection<Wire> getSubstitutionWires() {
 		if (substitutedPkgNames.isEmpty()) {
 			return Collections.emptyList();
 		}
