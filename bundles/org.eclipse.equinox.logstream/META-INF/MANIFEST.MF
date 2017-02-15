@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Logstream
+Bundle-SymbolicName: org.eclipse.equinox.log.stream
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.eclipse.equinox.internal.log.stream.LogStreamFactoryImpl
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: org.osgi.framework;version="1.3.0",
+ org.osgi.service.log;version="1.4.0",
+ org.osgi.util.promise;version="1.0.0",
+ org.osgi.util.pushstream;version="1.0.0",
+ org.osgi.util.tracker;version="1.5.0"
+Bundle-ActivationPolicy: lazy
