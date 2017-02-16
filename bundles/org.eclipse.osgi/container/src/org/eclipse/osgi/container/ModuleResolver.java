@@ -472,7 +472,7 @@ final class ModuleResolver {
 		return version instanceof Version ? (Version) version : Version.emptyVersion;
 	}
 
-	class ResolveProcess extends ResolveContext implements Comparator<Capability>, FelixResolveContext, Executor {
+	class ResolveProcess extends ResolveContext implements Comparator<Capability>, Executor {
 
 		class ResolveLogger extends Logger {
 			private Map<Resource, ResolutionException> errors = null;
@@ -1033,8 +1033,8 @@ final class ModuleResolver {
 				}
 			} catch (ResolutionException resolutionException) {
 				if (resolutionException.getCause() instanceof CancellationException) {
-				// revert back to single bundle resolves
-				resolveRevisionsIndividually(isMandatory, logger, result, toResolve, revisions);
+					// revert back to single bundle resolves
+					resolveRevisionsIndividually(isMandatory, logger, result, toResolve, revisions);
 				} else {
 					throw resolutionException;
 				}
@@ -1091,7 +1091,7 @@ final class ModuleResolver {
 				}
 			} catch (ResolutionException resolutionException) {
 				if (resolutionException.getCause() instanceof CancellationException) {
-				applyTransitiveFailures = false;
+					applyTransitiveFailures = false;
 				}
 				throw resolutionException;
 			} catch (OutOfMemoryError memoryError) {
@@ -1607,7 +1607,7 @@ final class ModuleResolver {
 		}
 
 		@Override
-		public Collection<Wire> getSubstitutionWires(Wiring wiring) {
+		public List<Wire> getSubstitutionWires(Wiring wiring) {
 			return ((ModuleWiring) wiring).getSubstitutionWires();
 		}
 	}

@@ -459,12 +459,12 @@ public final class ModuleWiring implements BundleWiring {
 		return revision.toString();
 	}
 
-	Collection<Wire> getSubstitutionWires() {
+	List<Wire> getSubstitutionWires() {
 		if (substitutedPkgNames.isEmpty()) {
 			return Collections.emptyList();
 		}
 		// Could cache this, but seems unnecessary since it will only be used by the resolver
-		Collection<Wire> substitutionWires = new ArrayList<>(substitutedPkgNames.size());
+		List<Wire> substitutionWires = new ArrayList<>(substitutedPkgNames.size());
 		List<ModuleWire> current = requiredWires;
 		for (ModuleWire wire : current) {
 			Capability cap = wire.getCapability();
