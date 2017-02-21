@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.equinox.registry;singleton:=true
-Bundle-Version: 3.6.200.qualifier
+Bundle-Version: 3.7.0.qualifier
 Bundle-Localization: plugin
 Export-Package: org.eclipse.core.internal.adapter;x-internal:=true,
  org.eclipse.core.internal.registry;x-friends:="org.eclipse.core.runtime",
@@ -33,5 +33,4 @@ Eclipse-ExtensibleAPI: true
 Comment-Header: Both Eclipse-LazyStart and Bundle-ActivationPolicy are specified for compatibility with 3.2
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: CDC-1.1/Foundation-1.1,
- J2SE-1.4
+Bundle-RequiredExecutionEnvironment: J2SE-1.4
