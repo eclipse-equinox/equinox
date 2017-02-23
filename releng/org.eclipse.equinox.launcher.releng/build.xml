@@ -12,7 +12,7 @@
 	<property name="gitTag" value="master" />
 	
 	<target name="init_keyfile">
-		<condition property="keyfile" value="C:\BUILD\ssh\swtbuild_dsa_private" else="/var/lib/hudson/swt/swtbuild_dsa_private">
+		<condition property="keyfile" value="C:\BUILD\ssh\swtbuild_dsa_private" else="/var/lib/hudson/.ssh/id_rsa">
 			<os family="windows"/>
 		</condition>
 	</target>
@@ -71,6 +71,7 @@
 		<scp file="${userName}@${machine}:${lib_dir}/eclipse"
 			todir="${localGit}/rt.equinox.binaries/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/ppc${mac_suffix}"
 			keyfile="${keyfile}"
+			port="${port}"
 			trust="true"/>
 	</target>
 	
@@ -84,6 +85,17 @@
 		<property name="arch" value="${env.arch}" />
 		
 		<resolveProperty name="machine" value="m_${os}.${arch}" />
+		<script language="javascript">
+			a = project.getProperty('machine').split(':');
+
+			project.setProperty('machine', a[0]);
+			if ( a[1] == null ) {
+				project.setProperty('port', '22');
+			} else {
+				project.setProperty('port', a[1]);
+			}
+		</script>
+
 		<resolveProperty name="javaArg" value="j_${os}.${arch}" />
 		<resolveProperty name="userName" value="u_${os}.${arch}" />
 		<property name="userName" value="swtbuild" />
@@ -153,6 +165,7 @@
 		<scp file="${basedir}/${zip_file}"
 			todir="${userName}@${machine}:${remotebuilddir}" 
 			keyfile="${keyfile}"
+			port="${port}"
 			trust="true"/>
 		<condition property="lib_dir" value="${remotetmpdir}/cocoa" else="${remotetmpdir}/${ws}" >
 			<equals arg1="cocoa" arg2="${ws}" />
@@ -180,7 +193,8 @@
                 </condition>
 		<sshexec host="${machine}" 
 			username="${userName}" 
-			keyfile="${keyfile}" 
+			keyfile="${keyfile}"
+			port="${port}"
 			trust="true"
 	 		command="rm -rf ${remotetmpdir}; mkdir ${remotetmpdir}; cd ${remotetmpdir}; unzip ${unzip_options} ${remotebuilddir}/${zip_file}; cd ${lib_dir}; ${build_cmd}; then ${exit_cmd} cd; ${exit_cmd} else cd; rm -rf ${remotetmpdir}; rm ${remotebuilddir}/${zip_file}; exit 1; fi"/>
 		<condition property="mac_suffix" value="/Eclipse.app/Contents/MacOS" else="">
@@ -194,6 +208,7 @@
 		<scp file="${userName}@${machine}:${lib_dir}/${exe}"
 			todir="${localGit}/rt.equinox.binaries/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}${mac_suffix}"
 			keyfile="${keyfile}"
+			port="${port}"
 			trust="true"/>
 		<condition property="lib" value="eclipse_${maj_ver}${min_ver}.dll" else="eclipse_${maj_ver}${min_ver}.*">
 			<or>
@@ -203,6 +218,7 @@
 		<scp file="${userName}@${machine}:${lib_dir}/${lib}"
 			todir="${localGit}/rt.equinox.binaries/${fragmentFolder}"
 			keyfile="${keyfile}"
+			port="${port}"
 			trust="true"/>
 		<!-- x86 and ppc are the same universal binary, copy to both under the executable feature -->
 		<condition property="copyMacPPC">
@@ -214,7 +230,8 @@
 		<antcall target="copyMacPPC" />
 		<sshexec host="${machine}" 
 			username="${userName}" 
-			keyfile="${keyfile}" 
+			keyfile="${keyfile}"
+			port="${port}"
 			trust="true"
 	 		command="rm -rf ${remotetmpdir}; rm ${remotebuilddir}/${zip_file}"/>
 		<delete file="${basedir}/${zip_file}"/>
