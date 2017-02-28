@@ -25,6 +25,12 @@
         </filter>
     </resource>
     <resource path="src/org/osgi/service/component/annotations/Component.java" type="org.osgi.service.component.annotations.Component">
+        <filter comment="Bug 501950 - [ds] replace Equinox DS implementation with Felix SCR (DS)" id="286326823">
+            <message_arguments>
+                <message_argument value="org.osgi.service.component.annotations.Component"/>
+                <message_argument value="NAME"/>
+            </message_arguments>
+        </filter>
         <filter id="286375965">
             <message_arguments>
                 <message_argument value="org.osgi.service.component.annotations.Component"/>
