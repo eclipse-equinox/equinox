@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,8 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 	private static final String HOOK_CONFIGURATOR_CLASS = "org.eclipse.osgi.tests.classloader.hooks.a.TestHookConfigurator";
 	private static final String REJECT_PROP = "classloader.hooks.a.reject";
 	private static final String BAD_TRANSFORM_PROP = "classloader.hooks.a.bad.transform";
+	private static final String RECURSION_LOAD = "classloader.hooks.a.recursion.load";
+	private static final String RECURSION_LOAD_SUPPORTED = "classloader.hooks.a.recursion.load.supported";
 
 	private Map<String, String> configuration;
 	private Framework framework;
@@ -41,6 +43,8 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 		super.setUp();
 		setRejectTransformation(false);
 		setBadTransform(false);
+		setRecursionLoad(false);
+		setRecursionLoadSupported(false);
 		String loc = bundleInstaller.getBundleLocation(HOOK_CONFIGURATOR_BUNDLE);
 		loc = loc.substring(loc.indexOf("file:"));
 		classLoader.addURL(new URL(loc));
@@ -65,12 +69,20 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 		return framework.getBundleContext().installBundle(location);
 	}
 
-	private void setRejectTransformation(boolean value) throws Exception {
+	private void setRejectTransformation(boolean value) {
 		System.setProperty(REJECT_PROP, Boolean.toString(value));
 	}
 
 	private void setBadTransform(boolean value) {
 		System.setProperty(BAD_TRANSFORM_PROP, Boolean.toString(value));
+	}
+
+	private void setRecursionLoad(boolean value) {
+		System.setProperty(RECURSION_LOAD, Boolean.toString(value));
+	}
+
+	private void setRecursionLoadSupported(boolean value) {
+		System.setProperty(RECURSION_LOAD_SUPPORTED, Boolean.toString(value));
 	}
 
 	public void testRejectTransformationFromWeavingHook() throws Exception {
@@ -95,6 +107,7 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 		refreshBundles(Collections.singleton(b));
 		try {
 			b.loadClass(TEST_CLASSNAME);
+			fail("Expected a ClassFormatError.");
 		} catch (ClassFormatError e) {
 			// expected
 		}
@@ -115,9 +128,25 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 		refreshBundles(Collections.singleton(b));
 		try {
 			b.loadClass(TEST_CLASSNAME);
+			fail("Expected a ClassFormatError.");
 		} catch (ClassFormatError e) {
 			// expected
 		}
+	}
+
+	public void testRecursionFromClassLoadingHookNotSupported() throws Exception {
+		setRecursionLoad(true);
+		initAndStartFramework();
+		Bundle b = installBundle();
+		b.loadClass(TEST_CLASSNAME);
+	}
+
+	public void testRecursionFromClassLoadingHookIsSupported() throws Exception {
+		setRecursionLoad(true);
+		setRecursionLoadSupported(true);
+		initAndStartFramework();
+		Bundle b = installBundle();
+		b.loadClass(TEST_CLASSNAME);
 	}
 
 	private void refreshBundles(Collection<Bundle> bundles) throws InterruptedException {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2016 IBM Corporation and others.
+ * Copyright (c) 2004, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1187,6 +1187,11 @@ public class ServiceRegistry {
 			public String getHookMethodName() {
 				return "find"; //$NON-NLS-1$
 			}
+
+			@Override
+			public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
+				return false;
+			}
 		});
 	}
 
@@ -1217,6 +1222,11 @@ public class ServiceRegistry {
 			public String getHookMethodName() {
 				return "event"; //$NON-NLS-1$
 			}
+
+			@Override
+			public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
+				return false;
+			}
 		});
 	}
 
@@ -1246,6 +1256,11 @@ public class ServiceRegistry {
 			public String getHookMethodName() {
 				return "event"; //$NON-NLS-1$
 			}
+
+			@Override
+			public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
+				return false;
+			}
 		});
 	}
 
@@ -1272,6 +1287,9 @@ public class ServiceRegistry {
 	 * @param hookContext Context to use when calling the hook service.
 	 */
 	private void notifyHookPrivileged(BundleContextImpl context, ServiceRegistrationImpl<?> registration, HookContext hookContext) {
+		if (hookContext.skipRegistration(registration)) {
+			return;
+		}
 		Object hook = registration.getSafeService(context, ServiceConsumer.singletonConsumer);
 		if (hook == null) { // if the hook is null
 			return;
@@ -1342,6 +1360,11 @@ public class ServiceRegistry {
 			public String getHookMethodName() {
 				return "added"; //$NON-NLS-1$
 			}
+
+			@Override
+			public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
+				return false;
+			}
 		});
 	}
 
@@ -1392,6 +1415,11 @@ public class ServiceRegistry {
 
 			public String getHookMethodName() {
 				return added ? "added" : "removed"; //$NON-NLS-1$ //$NON-NLS-2$
+			}
+
+			@Override
+			public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
+				return false;
 			}
 		});
 	}

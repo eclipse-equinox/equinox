@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2016 IBM Corporation and others.
+ * Copyright (c) 2010, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,10 +22,15 @@ import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.osgi.framework.*;
 
 public class WeavingHookConfigurator extends ClassLoaderHook {
+	static class WovenClassContext {
+		List<WovenClassImpl> wovenClassStack = new ArrayList<>(6);
+		List<String> processClassNameStack = new ArrayList<>(6);
+	}
+
 	// holds the map of black listed hooks.  Use weak map to avoid pinning and simplify cleanup.
 	private final Map<ServiceRegistration<?>, Boolean> blackList = Collections.synchronizedMap(new WeakHashMap<ServiceRegistration<?>, Boolean>());
 	// holds the stack of WovenClass objects currently being used to define classes
-	private final ThreadLocal<List<WovenClassImpl>> wovenClassStack = new ThreadLocal<>();
+	private final ThreadLocal<WovenClassContext> wovenClassContext = new ThreadLocal<>();
 
 	private final EquinoxContainer container;
 
@@ -45,34 +50,48 @@ public class WeavingHookConfigurator extends ClassLoaderHook {
 		BundleLoader loader = classLoader.getBundleLoader();
 		// create a woven class object and add it to the thread local stack
 		WovenClassImpl wovenClass = new WovenClassImpl(name, classbytes, entry, classpathEntry, loader, container, blackList);
-		List<WovenClassImpl> wovenClasses = wovenClassStack.get();
-		if (wovenClasses == null) {
-			wovenClasses = new ArrayList<>(6);
-			wovenClassStack.set(wovenClasses);
+		WovenClassContext context = wovenClassContext.get();
+		if (context == null) {
+			context = new WovenClassContext();
+			wovenClassContext.set(context);
 		}
-		wovenClasses.add(wovenClass);
-		// call the weaving hooks
-		try {
-			return wovenClass.callHooks();
-		} catch (Throwable t) {
-			ServiceRegistration<?> errorHook = wovenClass.getErrorHook();
-			Bundle errorBundle = errorHook != null ? errorHook.getReference().getBundle() : manager.getGeneration().getRevision().getBundle();
-			container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, errorBundle, t);
-			// fail hard with a class loading error
-			ClassFormatError error = new ClassFormatError("Unexpected error from weaving hook."); //$NON-NLS-1$
-			error.initCause(t);
-			throw error;
+		context.wovenClassStack.add(wovenClass);
+		// If we detect recursion for the same class name then we will not call the
+		// weaving hooks for the second request to load.
+		// Note that this means the actual bytes that get used to define the class
+		// will not have been woven at all.
+		if (!context.processClassNameStack.contains(name)) {
+			context.processClassNameStack.add(name);
+			// call the weaving hooks
+			try {
+				return wovenClass.callHooks();
+			} catch (Throwable t) {
+				ServiceRegistration<?> errorHook = wovenClass.getErrorHook();
+				Bundle errorBundle = errorHook != null ? errorHook.getReference().getBundle() : manager.getGeneration().getRevision().getBundle();
+				container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, errorBundle, t);
+				// fail hard with a class loading error
+				ClassFormatError error = new ClassFormatError("Unexpected error from weaving hook."); //$NON-NLS-1$
+				error.initCause(t);
+				throw error;
+			} finally {
+				context.processClassNameStack.remove(name);
+			}
 		}
+		return null;
 	}
 
 	public void recordClassDefine(String name, Class<?> clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
 		// here we assume the stack contans a woven class with the same name as the class we are defining.
-		List<WovenClassImpl> wovenClasses = wovenClassStack.get();
-		if (wovenClasses == null || wovenClasses.size() == 0)
+		WovenClassContext context = wovenClassContext.get();
+		if (context == null || context.wovenClassStack.size() == 0)
 			return;
-		WovenClassImpl wovenClass = wovenClasses.remove(wovenClasses.size() - 1);
+		WovenClassImpl wovenClass = context.wovenClassStack.remove(context.wovenClassStack.size() - 1);
 		// inform the woven class about the class that was defined.
 		wovenClass.setWeavingCompleted(clazz);
 	}
 
+	@Override
+	public boolean isProcessClassRecursionSupported() {
+		return true;
+	}
 }

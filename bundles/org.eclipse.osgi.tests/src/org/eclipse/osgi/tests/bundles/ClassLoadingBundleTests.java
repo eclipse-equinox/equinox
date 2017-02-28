@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.jws.WebService;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Endpoint;
@@ -25,6 +26,8 @@ import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.framework.hooks.weaving.WeavingHook;
+import org.osgi.framework.hooks.weaving.WovenClass;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.*;
 import org.osgi.service.packageadmin.ExportedPackage;
@@ -2218,6 +2221,84 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			a1.loadClass("test.bug490902.a.TestLoadA1").newInstance();
 		} finally {
 			getContext().removeBundleListener(delayB1);
+		}
+	}
+
+	public void testRecursiveWeavingHookFactory() {
+		final ThreadLocal<Boolean> testThread = new ThreadLocal<Boolean>() {
+			@Override
+			protected Boolean initialValue() {
+				return Boolean.FALSE;
+			}
+		};
+
+		testThread.set(Boolean.TRUE);
+		final Set<String> weavingHookClasses = new HashSet<String>();
+		final List<WovenClass> called = new ArrayList<WovenClass>();
+		final AtomicBoolean loadNewClassInWeave = new AtomicBoolean(false);
+
+		ServiceFactory<WeavingHook> topFactory = new ServiceFactory<WeavingHook>() {
+			@Override
+			public WeavingHook getService(Bundle bundle, ServiceRegistration<WeavingHook> registration) {
+				if (!testThread.get()) {
+					return null;
+				}
+				WeavingHook hook = new WeavingHook() {
+
+					@Override
+					public void weave(WovenClass wovenClass) {
+						if (loadNewClassInWeave.get()) {
+							// Force a load of inner class
+							Runnable run = new Runnable() {
+								@Override
+								public void run() {
+									// nothing
+								}
+							};
+							run.run();
+							weavingHookClasses.add(run.getClass().getName());
+						}
+						called.add(wovenClass);
+					}
+				};
+				weavingHookClasses.add(hook.getClass().getName());
+				return hook;
+			}
+
+			@Override
+			public void ungetService(Bundle bundle, ServiceRegistration<WeavingHook> registration, WeavingHook service) {
+				// nothing
+			}
+		};
+		ServiceRegistration<WeavingHook> reg = getContext().registerService(WeavingHook.class, topFactory, null);
+
+		Runnable run = null;
+		try {
+			// force call to factory without protection of the framework recursion checks
+			topFactory.getService(null, null);
+
+			// set flag to load inner class while weaving
+			loadNewClassInWeave.set(true);
+
+			// Force a load of inner class
+			run = new Runnable() {
+				@Override
+				public void run() {
+					// nothing
+				}
+			};
+			run.run();
+		} finally {
+			reg.unregister();
+		}
+
+		assertEquals("Unexpected number of woven classes.", 3, called.size());
+		for (WovenClass wovenClass : called) {
+			if (weavingHookClasses.contains(wovenClass.getClassName())) {
+				assertNull("Did not expect to find class: " + wovenClass.getDefinedClass(), wovenClass.getDefinedClass());
+			} else {
+				assertEquals("Expected the inner runnable class.", run.getClass(), wovenClass.getDefinedClass());
+			}
 		}
 	}
 

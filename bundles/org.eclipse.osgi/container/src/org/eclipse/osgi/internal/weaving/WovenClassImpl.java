@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2013 IBM Corporation and others.
+ * Copyright (c) 2010, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -147,8 +147,11 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		if (error != null)
 			return; // do not call any other hooks once an error has occurred.
 		if (hook instanceof WeavingHook) {
-			if (blackList.containsKey(hookRegistration))
-				return; // black listed hook
+			if (skipRegistration(hookRegistration)) {
+				// Note we double check blacklist here just
+				// in case another thread blacklisted since the first check
+				return;
+			}
 			if ((hookFlags & FLAG_HOOKCALLED) == 0) {
 				hookFlags |= FLAG_HOOKCALLED;
 				// only do this check on the first weaving hook call
@@ -169,6 +172,11 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 				blackList.put(hookRegistration, Boolean.TRUE);
 			}
 		}
+	}
+
+	@Override
+	public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
+		return blackList.containsKey(hookRegistration);
 	}
 
 	private boolean validBytes(byte[] checkBytes) {
@@ -214,6 +222,11 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 			@Override
 			public String getHookMethodName() {
 				return "modified"; //$NON-NLS-1$
+			}
+
+			@Override
+			public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
+				return false;
 			}
 		};
 		if (System.getSecurityManager() == null)

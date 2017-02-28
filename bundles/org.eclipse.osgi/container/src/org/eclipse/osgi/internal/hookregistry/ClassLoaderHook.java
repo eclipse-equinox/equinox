@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -290,6 +290,19 @@ public abstract class ClassLoaderHook {
 	public ClassLoader getModuleClassLoaderParent(EquinoxConfiguration configuration) {
 		// do nothing by default
 		return null;
+	}
+
+	/**
+	 * Returns true if this hook can support invoking 
+	 * {@link ClassLoaderHook#processClass(String, byte[], ClasspathEntry, BundleEntry, ClasspathManager) processClass}
+	 * recursively for the same class name.  If false is returned then a class
+	 * loading error will occur if recursive class processing is detected.
+	 * <p>
+	 * This method must return a constant boolean value.
+	 * @return true if recursing class processing is supported
+	 */
+	public boolean isProcessClassRecursionSupported() {
+		return false;
 	}
 
 }

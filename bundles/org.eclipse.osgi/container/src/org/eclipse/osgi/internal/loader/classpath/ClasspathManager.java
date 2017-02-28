@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,7 +63,7 @@ public class ClasspathManager {
 	// a Map<String,String> where "libname" is the key and libpath" is the value
 	private ArrayMap<String, String> loadedLibraries = null;
 	// used to detect recusive defineClass calls for the same class on the same class loader (bug 345500)
-	private ThreadLocal<Collection<String>> currentlyDefining = new ThreadLocal<>();
+	private ThreadLocal<DefineContext> currentDefineContext = new ThreadLocal<>();
 
 	/**
 	 * Constructs a classpath manager for the given generation and module class loader
@@ -574,23 +574,18 @@ public class ClasspathManager {
 			Debug.println("  defining class " + name); //$NON-NLS-1$
 		}
 
-		Collection<String> current = currentlyDefining.get();
-		if (current == null) {
-			current = new ArrayList<>(5);
-			currentlyDefining.set(current);
-		}
-		if (current.contains(name))
-			return null; // avoid recursive defines (bug 345500)
 		try {
-			current.add(name);
 			return defineClass(name, classbytes, classpathEntry, entry, hooks);
 		} catch (Error e) {
 			if (debug.DEBUG_LOADER)
 				Debug.println("  error defining class " + name); //$NON-NLS-1$
 			throw e;
-		} finally {
-			current.remove(name);
 		}
+	}
+
+	static class DefineContext {
+		Collection<String> currentlyProcessing = new ArrayList<>(5);
+		Collection<String> currentlyDefining = new ArrayList<>(5);
 	}
 
 	/**
@@ -610,35 +605,88 @@ public class ClasspathManager {
 	 */
 	private Class<?> defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, List<ClassLoaderHook> hooks) {
 		DefineClassResult result = null;
+		boolean recursionDetected = false;
 		try {
 			definePackage(name, classpathEntry);
-			for (ClassLoaderHook hook : hooks) {
-				byte[] modifiedBytes = hook.processClass(name, classbytes, classpathEntry, entry, this);
-				if (modifiedBytes != null) {
-					// the WeavingHookConfigurator already calls the rejectTransformation method; avoid calling it again.
-					if (!(hook instanceof WeavingHookConfigurator)) {
-						for (ClassLoaderHook rejectHook : hooks) {
-							if (rejectHook.rejectTransformation(name, modifiedBytes, classpathEntry, entry, this)) {
-								modifiedBytes = null;
-								break;
-							}
+			DefineContext context = currentDefineContext.get();
+			if (context == null) {
+				context = new DefineContext();
+				currentDefineContext.set(context);
+			}
+
+			// First call the hooks that do not handle recursion themselves
+			if (!hookRegistry.getContainer().isProcessClassRecursionSupportedByAll()) {
+				// One or more hooks do not support recursive class processing.
+				// We need to detect recursions for this set of hooks. 
+				if (context.currentlyProcessing.contains(name)) {
+					// Avoid recursion for the same class name for these hooks
+					recursionDetected = true;
+					// TODO consider thrown a ClassCircularityError here
+					return null;
+				}
+				context.currentlyProcessing.add(name);
+				try {
+
+					for (ClassLoaderHook hook : hooks) {
+						if (!hook.isProcessClassRecursionSupported()) {
+							classbytes = processClass(hook, name, classbytes, classpathEntry, entry, this, hooks);
 						}
 					}
-					if (modifiedBytes != null) {
-						classbytes = modifiedBytes;
-					}
+				} finally {
+					context.currentlyProcessing.remove(name);
 				}
 			}
-			result = classloader.defineClass(name, classbytes, classpathEntry);
-		} finally {
-			// only pass the newly defined class to the hook
-			Class<?> defined = result != null && result.defined ? result.clazz : null;
+
+			// Now call the hooks that do support recursion without the check.
 			for (ClassLoaderHook hook : hooks) {
-				hook.recordClassDefine(name, defined, classbytes, classpathEntry, entry, this);
+				if (hook.isProcessClassRecursionSupported()) {
+					// Note if the hooks don't take protective measures for a recursive class load here
+					// it will result in a stack overflow.
+					classbytes = processClass(hook, name, classbytes, classpathEntry, entry, this, hooks);
+				}
+			}
+
+			if (context.currentlyDefining.contains(name)) {
+				// TODO consider thrown a ClassCircularityError here
+				return null; // avoid recursive defines (bug 345500)
+			}
+			context.currentlyDefining.add(name);
+			try {
+				result = classloader.defineClass(name, classbytes, classpathEntry);
+			} finally {
+				context.currentlyDefining.remove(name);
+			}
+		} finally {
+			// only call hooks if we properly called processClass above
+			if (!recursionDetected) {
+				// only pass the newly defined class to the hook
+				Class<?> defined = result != null && result.defined ? result.clazz : null;
+				for (ClassLoaderHook hook : hooks) {
+					hook.recordClassDefine(name, defined, classbytes, classpathEntry, entry, this);
+				}
 			}
 		}
 		// return either the pre-loaded class or the newly defined class
 		return result == null ? null : result.clazz;
+	}
+
+	private byte[] processClass(ClassLoaderHook hook, String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager classpathManager, List<ClassLoaderHook> hooks) {
+		byte[] modifiedBytes = hook.processClass(name, classbytes, classpathEntry, entry, this);
+		if (modifiedBytes != null) {
+			// the WeavingHookConfigurator already calls the rejectTransformation method; avoid calling it again.
+			if (!(hook instanceof WeavingHookConfigurator)) {
+				for (ClassLoaderHook rejectHook : hooks) {
+					if (rejectHook.rejectTransformation(name, modifiedBytes, classpathEntry, entry, this)) {
+						modifiedBytes = null;
+						break;
+					}
+				}
+			}
+			if (modifiedBytes != null) {
+				classbytes = modifiedBytes;
+			}
+		}
+		return classbytes;
 	}
 
 	private void definePackage(String name, ClasspathEntry classpathEntry) {

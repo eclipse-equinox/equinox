@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.framework.legacy.PackageAdminImpl;
 import org.eclipse.osgi.internal.framework.legacy.StartLevelImpl;
+import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.internal.log.EquinoxLogServices;
@@ -46,6 +47,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	private final Set<String> bootDelegation;
 	private final String[] bootDelegationStems;
 	private final boolean bootDelegateAll;
+	private final boolean isProcessClassRecursionSupportedByAll;
 	private final EquinoxEventPublisher eventPublisher;
 
 	private final Object monitor = new Object();
@@ -97,6 +99,13 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		bootDelegateAll = delegateAllValue;
 		bootDelegation = exactMatch;
 		bootDelegationStems = stemMatch.isEmpty() ? null : stemMatch.toArray(new String[stemMatch.size()]);
+
+		// Detect if all hooks can support recursive class processing
+		boolean supportRecursion = true;
+		for (ClassLoaderHook hook : equinoxConfig.getHookRegistry().getClassLoaderHooks()) {
+			supportRecursion &= hook.isProcessClassRecursionSupported();
+		}
+		isProcessClassRecursionSupportedByAll = supportRecursion;
 	}
 
 	public Storage getStorage() {
@@ -141,6 +150,10 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 				if (name.startsWith(bootDelegationStems[i]))
 					return true;
 		return false;
+	}
+
+	public boolean isProcessClassRecursionSupportedByAll() {
+		return isProcessClassRecursionSupportedByAll;
 	}
 
 	void init() {
