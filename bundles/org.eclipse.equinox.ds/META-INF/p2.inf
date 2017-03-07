@@ -6,4 +6,4 @@ instructions.unconfigure=\
   setProgramProperty(propName:ds.delayed.keepInstances, propValue:);
 provides.0.namespace = osgi.extender
 provides.0.name = osgi.component
-provides.0.version = 1.2
+provides.0.version = 1.3
