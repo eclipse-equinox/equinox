@@ -104,6 +104,7 @@ public class LoggerContextTargetMap {
 		logServices.clear();
 		qualifiedNameToTargets.clear();
 		targetToQualifiedNames.clear();
+		loggerContexts.clear();
 	}
 
 	LoggerContext createLoggerContext(String name, ExtendedLogServiceFactory factory) {

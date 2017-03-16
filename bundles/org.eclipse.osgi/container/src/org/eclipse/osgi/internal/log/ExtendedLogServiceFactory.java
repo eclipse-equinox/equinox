@@ -143,7 +143,7 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 				}
 				if (level == null && contextName != null) {
 					// non-null context name is a non-root context;
-					// must not check the root context
+					// must check the root context for non-root contexts
 					EquinoxLoggerContext rootContext = loggerContextTargetMap.getRootLoggerContext();
 					if (rootContext != null) {
 						level = rootContext.getEffectiveLogLevel(name);
@@ -170,17 +170,6 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 
 		@Override
 		public void setLogLevels(Map<String, LogLevel> logLevels) {
-			if (!setWithConfigAdmin(logLevels)) {
-				doSetLogLevels(logLevels);
-			}
-		}
-
-		private boolean setWithConfigAdmin(Map<String, LogLevel> logLevels) {
-			// TODO Auto-generated method stub
-			return false;
-		}
-
-		private void doSetLogLevels(Map<String, LogLevel> logLevels) {
 			boolean readLocked = false;
 			try {
 				contextsLock.writeLock().lock();
@@ -203,7 +192,7 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 
 		@Override
 		public void clear() {
-			doSetLogLevels(Collections.<String, LogLevel> emptyMap());
+			setLogLevels(Collections.<String, LogLevel> emptyMap());
 		}
 
 		@Override

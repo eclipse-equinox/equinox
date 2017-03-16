@@ -33,6 +33,7 @@ public class LogServiceManager implements BundleListener, FrameworkListener, Ser
 	private final ExtendedLogServiceFactory logServiceFactory;
 	private final ExtendedLogServiceImpl systemBundleLog;
 	private EventAdminAdapter eventAdminAdapter;
+	private ConfigAdminListener configAdminListener;
 
 	public LogServiceManager(int maxHistory, LogListener... systemListeners) {
 		logReaderServiceFactory = new ExtendedLogReaderServiceFactory(maxHistory);
@@ -63,9 +64,13 @@ public class LogServiceManager implements BundleListener, FrameworkListener, Ser
 
 		eventAdminAdapter = new EventAdminAdapter(context, logReaderServiceFactory);
 		eventAdminAdapter.start();
+		configAdminListener = new ConfigAdminListener(context, logServiceFactory);
+		configAdminListener.start();
 	}
 
 	public void stop(BundleContext context) {
+		configAdminListener.stop();
+		configAdminListener = null;
 		eventAdminAdapter.stop();
 		eventAdminAdapter = null;
 		loggerAdminRegistration.unregister();
