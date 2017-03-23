@@ -1,0 +1,37 @@
+Manifest-Version: 1.0
+Bundle-DocURL: http://www.eclipse.org/aether/aether-spi/
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Built-By: Benjamin
+Bundle-SymbolicName: org.eclipse.aether.spi
+Export-Package: org.eclipse.aether.spi.connector;uses:="org.eclipse.ae
+ ther,org.eclipse.aether.artifact,org.eclipse.aether.metadata,org.ecli
+ pse.aether.repository,org.eclipse.aether.transfer";version="1.0.1.v20
+ 141111",org.eclipse.aether.spi.connector.checksum;uses:="org.eclipse.
+ aether,org.eclipse.aether.repository,org.eclipse.aether.transfer";ver
+ sion="1.0.1.v20141111",org.eclipse.aether.spi.connector.layout;uses:=
+ "org.eclipse.aether,org.eclipse.aether.artifact,org.eclipse.aether.me
+ tadata,org.eclipse.aether.repository,org.eclipse.aether.transfer";ver
+ sion="1.0.1.v20141111",org.eclipse.aether.spi.connector.transport;use
+ s:="org.eclipse.aether,org.eclipse.aether.repository,org.eclipse.aeth
+ er.transfer";version="1.0.1.v20141111",org.eclipse.aether.spi.io;vers
+ ion="1.0.1.v20141111",org.eclipse.aether.spi.localrepo;uses:="org.ecl
+ ipse.aether,org.eclipse.aether.repository";version="1.0.1.v20141111",
+ org.eclipse.aether.spi.locator;version="1.0.1.v20141111",org.eclipse.
+ aether.spi.log;version="1.0.1.v20141111"
+Bundle-Version: 1.0.1.v20141111
+Bundle-Description: The service provider interface for repository syst
+ em implementations and repository connectors.
+Build-Jdk: 1.7.0_71
+Bundle-Vendor: Eclipse Aether
+Bnd-LastModified: 1415716536281
+Bundle-License: http://www.eclipse.org/legal/epl-v10.html
+Bundle-Name: Aether SPI
+Tool: Bnd-2.1.0.20130426-122213
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven Bundle Plugin
+Import-Package: org.eclipse.aether;version="[1.0,2)",org.eclipse.aethe
+ r.artifact;version="[1.0,2)",org.eclipse.aether.metadata;version="[1.
+ 0,2)",org.eclipse.aether.repository;version="[1.0,2)",org.eclipse.aet
+ her.transfer;version="[1.0,2)"
+Bundle-ManifestVersion: 2
+

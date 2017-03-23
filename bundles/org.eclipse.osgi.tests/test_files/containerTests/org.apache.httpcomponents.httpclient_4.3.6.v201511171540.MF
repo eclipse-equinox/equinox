@@ -1,0 +1,121 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.apache.httpcomponents.httpclient
+Archiver-Version: Plexus Archiver
+Built-By: oleg
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Specification-Title: HttpComponents Apache HttpClient
+Implementation-Vendor-Id: org.apache
+Import-Package: javax.crypto,javax.crypto.spec,javax.net,javax.net.ssl
+ ,javax.security.auth.x500,net.sf.ehcache;resolution:=optional,net.spy
+ .memcached;resolution:=optional,org.apache.commons.codec.binary;versi
+ on="1.6.0",org.apache.commons.logging;version="1.1.1",org.apache.http
+ ;version="4.3.3",org.apache.http.concurrent;version="4.3.3",org.apach
+ e.http.config;version="4.3.3",org.apache.http.entity;version="4.3.3",
+ org.apache.http.impl;version="4.3.3",org.apache.http.impl.io;version=
+ "4.3.3",org.apache.http.io;version="4.3.3",org.apache.http.message;ve
+ rsion="4.3.3",org.apache.http.params;version="4.3.3",org.apache.http.
+ pool;version="4.3.3",org.apache.http.protocol;version="4.3.3",org.apa
+ che.http.util;version="4.3.3",org.ietf.jgss
+Export-Package: org.apache.http.auth;version="4.3.6"; uses:="org.apach
+ e.http.protocol,  org.apache.http.params,  org.apache.http.config,  o
+ rg.apache.http",org.apache.http.auth.params;version="4.3.6";uses:="or
+ g.apache.http.params",org.apache.http.client;version="4.3.6"; uses:="
+ org.apache.http.protocol,  org.apache.http.params,  org.apache.http.c
+ onn.routing,  org.apache.http.conn,  org.apache.http.cookie,  org.apa
+ che.http.client.methods,  org.apache.http,  org.apache.http.auth",org
+ .apache.http.client.cache;version="4.3.6";uses:="org.apache.http.prot
+ ocol,org.apache.http.client.protocol,org.apache.http",org.apache.http
+ .client.config;version="4.3.6";uses:="org.apache.http",org.apache.htt
+ p.client.entity;version="4.3.6";uses:="org.apache.http.entity,org.apa
+ che.http",org.apache.http.client.fluent;version="4.3.6"; uses:="org.a
+ pache.http.message,  org.apache.http.conn.scheme,  org.apache.http.en
+ tity,  org.apache.http.impl.conn,  org.apache.http.client,  org.apach
+ e.http.client.config,  org.apache.http.client.methods,  org.apache.ht
+ tp.auth,  org.apache.http.concurrent,  org.apache.http",org.apache.ht
+ tp.client.methods;version="4.3.6"; uses:="org.apache.http.conn,  org.
+ apache.http.message,  org.apache.http.params,  org.apache.http.client
+ .config,  new org.apache.http.client.methods,  org.apache.http.concur
+ rent,  org.apache.http",org.apache.http.client.params;version="4.3.6"
+ ; uses:="org.apache.http.auth.params,  org.apache.http.conn.params,  
+ org.apache.http.params,  org.apache.http.cookie.params,  org.apache.h
+ ttp.client.config,  org.apache.http",org.apache.http.client.protocol;
+ version="4.3.6"; uses:="org.apache.commons.logging,  org.apache.http.
+ cookie,  org.apache.http.protocol,  org.apache.http.config,  org.apac
+ he.http.client.config,  org.apache.http.client,  org.apache.http.conn
+ .routing,  org.apache.http.auth,  org.apache.http",org.apache.http.cl
+ ient.utils;version="4.3.6";uses:="org.apache.http.client,org.apache.h
+ ttp.client.methods,org.apache.http",org.apache.http.conn;version="4.3
+ .4"; uses:="org.apache.http.protocol,  org.apache.http.conn.scheme,  
+ org.apache.http.params,  org.apache.http.entity,  org.apache.http.con
+ fig,  javax.net.ssl,  org.apache.http.conn.routing,  org.apache.http.
+ concurrent,  org.apache.http",org.apache.http.conn.params;version="4.
+ 3.4";uses:="org.apache.http.params,org.apache.http.conn.routing,org.a
+ pache.http",org.apache.http.conn.routing;version="4.3.6";uses:="org.a
+ pache.http.protocol,org.apache.http",org.apache.http.conn.scheme;vers
+ ion="4.3.6";uses:="org.apache.http.params,org.apache.http",org.apache
+ .http.conn.socket;version="4.3.6";uses:="org.apache.http.protocol,org
+ .apache.http",org.apache.http.conn.ssl;version="4.3.6"; uses:="org.ap
+ ache.http.conn.socket,  org.apache.http.protocol,  org.apache.http.co
+ nn.scheme,  org.apache.http.params,  javax.net.ssl,  org.apache.http"
+ ,org.apache.http.conn.util;version="4.3.6",org.apache.http.cookie;ver
+ sion="4.3.6"; uses:="org.apache.http.protocol,  org.apache.http.param
+ s,  org.apache.http.config,  org.apache.http",org.apache.http.cookie.
+ params;version="4.3.6";uses:="org.apache.http.params",org.apache.http
+ .entity.mime;version="4.3.6";uses:="org.apache.http.entity.mime.conte
+ nt,org.apache.http.entity,org.apache.http",org.apache.http.entity.mim
+ e.content;version="4.3.6";uses:="org.apache.http.entity",org.apache.h
+ ttp.impl.auth;version="4.3.6"; uses:="org.apache.http.protocol,  org.
+ apache.commons.logging,  org.apache.http.params,  org.apache.http.cli
+ ent,  org.ietf.jgss,  org.apache.http.util,  org.apache.http.auth,  o
+ rg.apache.http",org.apache.http.impl.client;version="4.3.6"; uses:="o
+ rg.apache.http.conn.socket,  org.apache.http.protocol,  org.apache.co
+ mmons.logging,  org.apache.http.entity,  org.apache.http.client,  org
+ .apache.http.conn.routing,  org.apache.http.conn,  org.apache.http.co
+ okie,  org.apache.http.impl.execchain,  org.apache.http.impl.auth,  o
+ rg.apache.http.client.config,  javax.net.ssl,  org.apache.http.messag
+ e,  org.apache.http.conn.scheme,  org.apache.http.pool,  org.apache.h
+ ttp.params,  org.apache.http.conn.ssl,  org.apache.http.config,  org.
+ apache.http.client.methods,  org.apache.http,  org.apache.http.auth, 
+  org.apache.http.concurrent",org.apache.http.impl.client.cache;versio
+ n="4.3.6";x-internal:=true,org.apache.http.impl.client.cache.ehcache;
+ version="4.3.6";x-internal:=true,org.apache.http.impl.client.cache.me
+ mcached;version="4.3.6";x-internal:=true,org.apache.http.impl.conn;ve
+ rsion="4.3.6"; uses:="org.apache.http.message,  org.apache.http.io,  
+ org.apache.http.protocol,  org.apache.http.impl.io,  org.apache.commo
+ ns.logging,  org.apache.http.conn.scheme,  org.apache.http.pool,  org
+ .apache.http.impl,  org.apache.http.params,  org.apache.http.entity, 
+  org.apache.http.conn.routing,  org.apache.http.conn,  org.apache.htt
+ p.config,  javax.net.ssl,  org.apache.http.util,  org.apache.http",or
+ g.apache.http.impl.conn.tsccm;version="4.3.6"; uses:="org.apache.comm
+ ons.logging,  org.apache.http.conn.scheme,  org.apache.http.conn.para
+ ms,  org.apache.http.params,  org.apache.http.impl.conn,  org.apache.
+ http.conn.routing,  org.apache.http.conn",org.apache.http.impl.cookie
+ ;version="4.3.6"; uses:="org.apache.http.message,  org.apache.http.pr
+ otocol,  org.apache.http.cookie,  org.apache.http.params,  org.apache
+ .http.util,  org.apache.http",org.apache.http.impl.execchain;version=
+ "4.3.6"; uses:="org.apache.http.protocol,  org.apache.commons.logging
+ ,  org.apache.http.params,  org.apache.http.entity,  org.apache.http.
+ client,  org.apache.http.conn.routing,  org.apache.http.client.protoc
+ ol,  org.apache.http.conn,  org.apache.http.client.methods,  org.apac
+ he.http.auth,  org.apache.http.concurrent,  org.apache.http"
+Bundle-Name: %Bundle-Name
+Implementation-Title: HttpComponents Apache HttpClient
+Implementation-Version: 4.3.6
+Specification-Vendor: The Apache Software Foundation
+Bundle-ManifestVersion: 2
+Eclipse-SourceReferences: scm:cvs:pserver:dev.eclipse.org:/cvsroot/too
+ ls:org.eclipse.orbit/org.apache.httpcomponents.httpclient;tag=v201511
+ 171540
+Bundle-Vendor: %Bundle-Vendor
+url: http://hc.apache.org/httpcomponents-client
+Implementation-Vendor: The Apache Software Foundation
+Bundle-Version: 4.3.6.v201511171540
+Bundle-ClassPath: .
+X-Compile-Target-JDK: 1.5
+Implementation-Build: tags/4.3.6-RC1/httpclient@r1598881; 2014-05-31 1
+ 7:18:30+0200
+X-Compile-Source-JDK: 1.5
+Specification-Version: 4.3.6
+Build-Jdk: 1.7.0_21
+Created-By: Apache Maven 3.0.5
+

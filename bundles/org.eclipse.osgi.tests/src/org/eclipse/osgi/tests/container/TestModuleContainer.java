@@ -2932,6 +2932,43 @@ public class TestModuleContainer extends AbstractTest {
 		Assert.assertNull("Failed to resolve test.", report.getResolutionException());
 	}
 
+	List<String> HTTPCOMPS_AND_EATHER = Arrays.asList( //
+			"org.apache.commons.codec_1.9.0.v20170208-1614.MF", //
+			"org.apache.commons.logging_1.1.1.v201101211721.MF", //
+			"org.apache.httpcomponents.httpclient_4.3.6.v201511171540.MF", //
+			"org.apache.httpcomponents.httpclient_4.5.2.v20170208-1614.MF", //
+			"org.apache.httpcomponents.httpclient_4.5.2.v20170210-0925.MF", //
+			"org.apache.httpcomponents.httpcore_4.3.3.v201411290715.MF", //
+			"org.apache.httpcomponents.httpcore_4.4.4.v20161115-1643.MF", //
+			"org.apache.httpcomponents.httpcore_4.4.6.v20170210-0925.MF", //
+			"org.eclipse.aether.api_1.0.1.v20141111.MF", //
+			"org.eclipse.aether.spi_1.0.1.v20141111.MF", //
+			"org.eclipse.aether.transport.http_1.0.1.v20141111.MF", //
+			"org.eclipse.aether.util_1.0.1.v20141111.MF");
+
+	@Test
+	public void testSubstitutionWithMoreThan2Providers() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		Module systemBundle = installDummyModule( //
+				"system.bundle.MF", //
+				Constants.SYSTEM_BUNDLE_LOCATION, //
+				Constants.SYSTEM_BUNDLE_SYMBOLICNAME, //
+				"javax.crypto, javax.crypto.spec, javax.net, javax.net.ssl, javax.security.auth.x500, org.ietf.jgss", //
+				"osgi.ee; osgi.ee=JavaSE; version:List<Version>=\"1.3, 1.4, 1.5, 1.6, 1.7\"", //
+				container);
+		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
+		Assert.assertNull("Failed to resolve test.", report.getResolutionException());
+
+		List<Module> modules = new ArrayList<Module>();
+		for (String manifest : HTTPCOMPS_AND_EATHER) {
+			modules.add(installDummyModule(manifest, manifest, container));
+		}
+		report = container.resolve(modules, true);
+		Assert.assertNull("Failed to resolve test.", report.getResolutionException());
+	}
+
 	private static void assertWires(List<ModuleWire> required, List<ModuleWire>... provided) {
 		for (ModuleWire requiredWire : required) {
 			for (List<ModuleWire> providedList : provided) {

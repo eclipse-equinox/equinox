@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-Vendor: %bundleProvider
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-Name: %bundleName
+Bundle-SymbolicName: javax.inject
+Bundle-Version: 1.0.0.v20091030
+Export-Package: javax.inject;version="1.0.0"
+Bundle-ManifestVersion: 2

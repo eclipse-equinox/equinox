@@ -1,0 +1,42 @@
+Manifest-Version: 1.0
+Bundle-DocURL: http://www.eclipse.org/aether/aether-api/
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Built-By: Benjamin
+Bundle-SymbolicName: org.eclipse.aether.api
+Export-Package: org.eclipse.aether;uses:="org.eclipse.aether.artifact,
+ org.eclipse.aether.collection,org.eclipse.aether.deployment,org.eclip
+ se.aether.installation,org.eclipse.aether.metadata,org.eclipse.aether
+ .repository,org.eclipse.aether.resolution,org.eclipse.aether.transfer
+ ";version="1.0.1.v20141111",org.eclipse.aether.artifact;version="1.0.
+ 1.v20141111",org.eclipse.aether.collection;uses:="org.eclipse.aether,
+ org.eclipse.aether.artifact,org.eclipse.aether.graph,org.eclipse.aeth
+ er.repository,org.eclipse.aether.version";version="1.0.1.v20141111",o
+ rg.eclipse.aether.deployment;uses:="org.eclipse.aether,org.eclipse.ae
+ ther.artifact,org.eclipse.aether.metadata,org.eclipse.aether.reposito
+ ry";version="1.0.1.v20141111",org.eclipse.aether.graph;uses:="org.ecl
+ ipse.aether.artifact,org.eclipse.aether.repository,org.eclipse.aether
+ .version";version="1.0.1.v20141111",org.eclipse.aether.installation;u
+ ses:="org.eclipse.aether,org.eclipse.aether.artifact,org.eclipse.aeth
+ er.metadata";version="1.0.1.v20141111",org.eclipse.aether.metadata;us
+ es:="org.eclipse.aether";version="1.0.1.v20141111",org.eclipse.aether
+ .repository;uses:="org.eclipse.aether,org.eclipse.aether.artifact,org
+ .eclipse.aether.metadata";version="1.0.1.v20141111",org.eclipse.aethe
+ r.resolution;uses:="org.eclipse.aether,org.eclipse.aether.artifact,or
+ g.eclipse.aether.collection,org.eclipse.aether.graph,org.eclipse.aeth
+ er.metadata,org.eclipse.aether.repository,org.eclipse.aether.version"
+ ;version="1.0.1.v20141111",org.eclipse.aether.transfer;uses:="org.ecl
+ ipse.aether,org.eclipse.aether.artifact,org.eclipse.aether.metadata,o
+ rg.eclipse.aether.repository";version="1.0.1.v20141111",org.eclipse.a
+ ether.version;uses:="org.eclipse.aether";version="1.0.1.v20141111"
+Bundle-Version: 1.0.1.v20141111
+Bundle-Description: The application programming interface for the repo
+ sitory system.
+Build-Jdk: 1.7.0_71
+Bundle-Vendor: Eclipse Aether
+Bnd-LastModified: 1415716475533
+Bundle-License: http://www.eclipse.org/legal/epl-v10.html
+Bundle-Name: Aether API
+Tool: Bnd-2.1.0.20130426-122213
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven Bundle Plugin
+Bundle-ManifestVersion: 2

@@ -1,0 +1,48 @@
+Manifest-Version: 1.0
+Bundle-DocURL: http://www.eclipse.org/aether/aether-util/
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Built-By: Benjamin
+Bundle-SymbolicName: org.eclipse.aether.util
+Export-Package: org.eclipse.aether.util;uses:="org.eclipse.aether";ver
+ sion="1.0.1.v20141111",org.eclipse.aether.util.artifact;uses:="org.ec
+ lipse.aether.artifact";version="1.0.1.v20141111",org.eclipse.aether.u
+ til.concurrency;version="1.0.1.v20141111",org.eclipse.aether.util.fil
+ ter;uses:="org.eclipse.aether.artifact,org.eclipse.aether.graph,org.e
+ clipse.aether.version";version="1.0.1.v20141111",org.eclipse.aether.u
+ til.graph.manager;uses:="org.eclipse.aether.collection,org.eclipse.ae
+ ther.graph";version="1.0.1.v20141111",org.eclipse.aether.util.graph.s
+ elector;uses:="org.eclipse.aether.collection,org.eclipse.aether.graph
+ ";version="1.0.1.v20141111",org.eclipse.aether.util.graph.transformer
+ ;uses:="org.eclipse.aether,org.eclipse.aether.collection,org.eclipse.
+ aether.graph";version="1.0.1.v20141111",org.eclipse.aether.util.graph
+ .traverser;uses:="org.eclipse.aether.collection,org.eclipse.aether.gr
+ aph";version="1.0.1.v20141111",org.eclipse.aether.util.graph.version;
+ uses:="org.eclipse.aether,org.eclipse.aether.collection";version="1.0
+ .1.v20141111",org.eclipse.aether.util.graph.visitor;uses:="org.eclips
+ e.aether.graph";version="1.0.1.v20141111",org.eclipse.aether.util.lis
+ tener;uses:="org.eclipse.aether,org.eclipse.aether.transfer";version=
+ "1.0.1.v20141111",org.eclipse.aether.util.repository;uses:="javax.net
+ .ssl,org.eclipse.aether,org.eclipse.aether.artifact,org.eclipse.aethe
+ r.metadata,org.eclipse.aether.repository,org.eclipse.aether.resolutio
+ n";version="1.0.1.v20141111",org.eclipse.aether.util.version;uses:="o
+ rg.eclipse.aether.version";version="1.0.1.v20141111"
+Bundle-Version: 1.0.1.v20141111
+Bundle-Description: A collection of utility classes to ease usage of t
+ he repository system.
+Build-Jdk: 1.7.0_71
+Bundle-Vendor: Eclipse Aether
+Bnd-LastModified: 1415716627937
+Bundle-License: http://www.eclipse.org/legal/epl-v10.html
+Bundle-Name: Aether Utilities
+Tool: Bnd-2.1.0.20130426-122213
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven Bundle Plugin
+Import-Package: javax.net.ssl,org.eclipse.aether;version="[1.0,2)",org
+ .eclipse.aether.artifact;version="[1.0,2)",org.eclipse.aether.collect
+ ion;version="[1.0,2)",org.eclipse.aether.graph;version="[1.0,2)",org.
+ eclipse.aether.metadata;version="[1.0,2)",org.eclipse.aether.reposito
+ ry;version="[1.0,2)",org.eclipse.aether.resolution;version="[1.0,2)",
+ org.eclipse.aether.transfer;version="[1.0,2)",org.eclipse.aether.vers
+ ion;version="[1.0,2)"
+Bundle-ManifestVersion: 2
+
