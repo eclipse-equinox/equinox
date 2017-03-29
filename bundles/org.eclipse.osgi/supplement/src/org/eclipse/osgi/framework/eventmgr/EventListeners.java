@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2016 IBM Corporation and others.
+ * Copyright (c) 2003, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,7 +67,7 @@ public class EventListeners<K, V> {
 	 * @param listener This is the listener object to be removed from the list.
 	 * @throws IllegalArgumentException If listener is null.
 	 */
-	public void removeListener(V listener) {
+	public void removeListener(K listener) {
 		list.remove(listener);
 	}
 
