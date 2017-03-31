@@ -13,6 +13,7 @@ import org.eclipse.equinox.log.ExtendedLogEntry;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogEntry;
+import org.osgi.service.log.LogLevel;
 
 public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 
@@ -30,6 +31,7 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 	private final long threadId;
 	private final String threadName;
 	private final long sequenceNumber;
+	private final StackTraceElement stackTraceElement;
 
 	private static Map<Thread, Long> createThreadIdMap() {
 		try {
@@ -68,6 +70,8 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 			this.threadId = getId(currentThread);
 			this.sequenceNumber = nextSequenceNumber++;
 		}
+
+		stackTraceElement = currentThread.getStackTrace()[2];
 	}
 
 	public String getLoggerName() {
@@ -116,5 +120,25 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 
 	public Object getContext() {
 		return contextObject;
+	}
+
+	@Override
+	public LogLevel getLogLevel() {
+		return LogLevel.values()[getLevel()];
+	}
+
+	@Override
+	public long getSequence() {
+		return getSequenceNumber();
+	}
+
+	@Override
+	public String getThreadInfo() {
+		return getThreadName();
+	}
+
+	@Override
+	public StackTraceElement getLocation() {
+		return stackTraceElement;
 	}
 }

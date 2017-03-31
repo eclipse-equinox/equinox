@@ -107,7 +107,7 @@ public class ExtendedLogServiceTest extends TestCase {
 
 	public void testNullLoggerLogNull() throws Exception {
 		synchronized (listener) {
-			log.getLogger(null).log(null, 0, null, null);
+			log.getLogger((String) null).log(null, 0, null, null);
 			listener.waitForLogEntry();
 		}
 		ExtendedLogEntry entry = listener.getEntryX();

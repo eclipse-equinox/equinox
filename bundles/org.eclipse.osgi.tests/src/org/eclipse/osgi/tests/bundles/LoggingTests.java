@@ -15,6 +15,7 @@ import junit.framework.*;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.log.*;
+import org.eclipse.equinox.log.Logger;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.osgi.framework.*;

@@ -16,7 +16,7 @@ import org.osgi.service.log.LogService;
   * @see LogService
  * @since 3.7
  */
-public interface Logger {
+public interface Logger extends org.osgi.service.log.Logger {
 	/**
 	 * @see LogService#log(int, String)
 	 */
