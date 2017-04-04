@@ -28,8 +28,8 @@ Netware                                  # Novell
 OpenBSD                                  # Open source
 OS2 OS/2                                 # IBM
 QNX procnto                              # QNX Neutrino 2.1
-Solaris                                  # Sun
-SunOS                                    # Sun
+Solaris SunOS                            # Sun
+SunOS Solaris                            # Sun
 VxWorks                                  # WindRiver Systems
 Windows95 "Windows 95" Win95 Win32       # Microsoft
 Windows98 "Windows 98" Win98 Win32       # Microsoft
