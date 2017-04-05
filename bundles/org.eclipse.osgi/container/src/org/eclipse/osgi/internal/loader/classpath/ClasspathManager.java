@@ -93,7 +93,7 @@ public class ClasspathManager {
 			return emptyFragments;
 		}
 		List<ModuleWire> fragmentWires = hostloader.getBundleLoader().getWiring().getProvidedModuleWires(HostNamespace.HOST_NAMESPACE);
-		if (fragmentWires == null) {
+		if (fragmentWires == null || fragmentWires.isEmpty()) {
 			// we don't hold locks while checking the graph, just return if no longer valid
 			return emptyFragments;
 		}
