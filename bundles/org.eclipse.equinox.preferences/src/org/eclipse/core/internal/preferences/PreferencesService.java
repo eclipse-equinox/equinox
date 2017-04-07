@@ -16,6 +16,7 @@ import java.io.*;
 import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.preferences.*;
@@ -595,12 +596,16 @@ public class PreferencesService implements IPreferencesService {
 		final ArrayList<Preferences> result = new ArrayList<>();
 		for (int i = 0; i < order.length; i++) {
 			final String scopeString = order[i];
+			AtomicReference<IllegalStateException> error = new AtomicReference<>();
 			SafeRunner.run(new ISafeRunnable() {
+
+				private IScopeContext context;
+
 				@Override
 				public void run() throws Exception {
 					boolean found = false;
 					for (int j = 0; contexts != null && j < contexts.length; j++) {
-						IScopeContext context = contexts[j];
+						context = contexts[j];
 						if (context != null && context.getName().equals(scopeString)) {
 							Preferences node = context.getNode(qualifier);
 							if (node != null) {
@@ -622,9 +627,21 @@ public class PreferencesService implements IPreferencesService {
 
 				@Override
 				public void handleException(Throwable exception) {
-					log(new Status(IStatus.ERROR, Activator.PI_PREFERENCES, PrefsMessages.preferences_contextError, exception));
+					// See bug 514333 and org.eclipse.core.internal.runtime.DataArea.assertLocationInitialized()
+					// If we see an IllegalStateException flying and the explicit init is required, we should not continue
+					if (context instanceof InstanceScope && exception instanceof IllegalStateException && Boolean.getBoolean("osgi.dataAreaRequiresExplicitInit")) { //$NON-NLS-1$
+						error.set((IllegalStateException) exception);
+					} else {
+						log(new Status(IStatus.ERROR, Activator.PI_PREFERENCES, PrefsMessages.preferences_contextError, exception));
+					}
 				}
 			});
+
+			IllegalStateException illegalState = error.get();
+			if (illegalState != null) {
+				// See bug 514333: don't allow clients to read (empty) instance prefs if the instance area is not initialized yet
+				throw illegalState;
+			}
 		}
 		return result.toArray(new Preferences[result.size()]);
 	}

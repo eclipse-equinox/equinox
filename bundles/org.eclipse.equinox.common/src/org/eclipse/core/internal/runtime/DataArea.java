@@ -25,6 +25,7 @@ import org.osgi.framework.Bundle;
  */
 public class DataArea {
 	private static final String OPTION_DEBUG = "org.eclipse.equinox.common/debug"; //$NON-NLS-1$;
+	private static final String REQUIRES_EXPLICIT_INIT = "osgi.dataAreaRequiresExplicitInit"; //$NON-NLS-1$;
 
 	/* package */static final String F_META_AREA = ".metadata"; //$NON-NLS-1$
 	/* package */static final String F_PLUGIN_DATA = ".plugins"; //$NON-NLS-1$
@@ -48,7 +49,15 @@ public class DataArea {
 		Location service = activator.getInstanceLocation();
 		if (service == null)
 			throw new IllegalStateException(CommonMessages.meta_noDataModeSpecified);
+
+		boolean explicitInitRequired = Boolean.valueOf(Activator.getContext().getProperty(REQUIRES_EXPLICIT_INIT));
+		if (explicitInitRequired && !service.isSet()) {
+			// See bug 514333: don't allow clients to initialize instance location if the instance area is not explicitly defined yet
+			throw new IllegalStateException(CommonMessages.meta_instanceDataUnspecified);
+		}
+
 		try {
+			// This will try to init url either from the specified location value or from service default
 			URL url = service.getURL();
 			if (url == null)
 				throw new IllegalStateException(CommonMessages.meta_instanceDataUnspecified);
