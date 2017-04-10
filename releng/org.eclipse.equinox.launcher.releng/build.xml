@@ -86,13 +86,15 @@
 		
 		<resolveProperty name="machine" value="m_${os}.${arch}" />
 		<script language="javascript">
-			a = project.getProperty('machine').split(':');
-
-			project.setProperty('machine', a[0]);
-			if ( a[1] == null ) {
-				project.setProperty('port', '22');
-			} else {
-				project.setProperty('port', a[1]);
+			a = project.getProperty('machine');
+			if (a != null) {
+				a = a.split(':');
+				project.setProperty('machine', a[0]);
+				if ( a[1] == null ) {
+					project.setProperty('port', '22');
+				} else {
+					project.setProperty('port', a[1]);
+				}
 			}
 		</script>
 
