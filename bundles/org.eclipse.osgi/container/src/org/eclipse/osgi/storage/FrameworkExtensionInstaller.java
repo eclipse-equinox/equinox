@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -93,9 +93,14 @@ public class FrameworkExtensionInstaller {
 	}
 
 	void addExtensionContent0(Collection<ModuleRevision> revisions, Module systemModule) throws BundleException {
+		if (revisions.isEmpty()) {
+			// NOTE: revisions could be empty when initializing the framework with no
+			// framework extensions
+			return;
+		}
 		if (CL == null || ADD_FWK_URL_METHOD == null) {
 			// use the first revision as the blame
-			ModuleRevision revision = revisions.isEmpty() ? null : revisions.iterator().next();
+			ModuleRevision revision = revisions.iterator().next();
 			throw new BundleException("Cannot support framework extension bundles without a public addURL(URL) method on the framework class loader: " + revision.getBundle()); //$NON-NLS-1$
 		}
 
