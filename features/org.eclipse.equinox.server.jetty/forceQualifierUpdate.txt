@@ -11,3 +11,4 @@ Bug 470227 - Upgrade to Jetty 9.3 for Neon M3
 Bug 495069 - Try to move up to Jetty 9.3.9
 Bug 506597 - Build failure on I20161026-2000
 Bug 510929 - Update Jetty to 9.4.1 (or newer)
+Bug 512807 - Update Jetty to 9.4.4
