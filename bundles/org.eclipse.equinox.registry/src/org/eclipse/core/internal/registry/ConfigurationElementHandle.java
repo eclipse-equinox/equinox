@@ -160,4 +160,9 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 		}
 		return true;
 	}
+
+	@Override
+	public int getHandleId() {
+		return getId();
+	}
 }

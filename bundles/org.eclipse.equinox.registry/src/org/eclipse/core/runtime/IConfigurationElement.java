@@ -150,6 +150,7 @@ public interface IConfigurationElement {
 	 * @deprecated The method is equivalent to the {@link #getAttribute(String)}. Contrary to its description,
 	 * this method returns a translated value. Use the {@link #getAttribute(String)} method instead.
 	 */
+	@Deprecated
 	public String getAttributeAsIs(String name) throws InvalidRegistryObjectException;
 
 	/**
@@ -311,6 +312,7 @@ public interface IConfigurationElement {
 	 * @deprecated The method is equivalent to the {@link #getValue()}. Contrary to its description,
 	 * this method returns a translated value. Use the {@link #getValue()} method instead.
 	 */
+	@Deprecated
 	public String getValueAsIs() throws InvalidRegistryObjectException;
 
 	/**
@@ -353,6 +355,7 @@ public interface IConfigurationElement {
 	 * elements belonging to the <code>org.abc</code> namespace would fall into this category.
 	 * </p>
 	 */
+	@Deprecated
 	public String getNamespace() throws InvalidRegistryObjectException;
 
 	/**
@@ -373,8 +376,10 @@ public interface IConfigurationElement {
 	 */
 	public IContributor getContributor() throws InvalidRegistryObjectException;
 
-	/* (non-javadoc)
-	 * @see Object#equals(java.lang.Object)
+	/**
+	 * {@inheritDoc}
+	 * @return true if the given element has same handle id
+	 * @see #getHandleId()
 	 */
 	@Override
 	public boolean equals(Object o);
@@ -387,4 +392,13 @@ public interface IConfigurationElement {
 	 * @since 3.1
 	 */
 	public boolean isValid();
+
+	/**
+	 * Returns unique identifier of the registry object from which this element was created.
+	 * Two configuration element instances are considered to be equal if their handle id's are same.
+	 * @return The handle id of the registry object from which this configuration element was created.
+	 * @see #equals(Object)
+	 * @since 3.8
+	 */
+	public int getHandleId();
 }
