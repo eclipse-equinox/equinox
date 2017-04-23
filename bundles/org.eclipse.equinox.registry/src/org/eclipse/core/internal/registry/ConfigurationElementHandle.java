@@ -160,4 +160,26 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 		}
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("ConfigurationElementHandle ["); //$NON-NLS-1$
+		sb.append("name: "); //$NON-NLS-1$
+		sb.append(getName());
+		String id = getAttribute("id"); //$NON-NLS-1$
+		if (id != null && id.length() > 0) {
+			sb.append(", id: ").append(id); //$NON-NLS-1$
+		}
+		String value = getValue();
+		if (value != null) {
+			sb.append(", value: ").append(value); //$NON-NLS-1$
+		}
+		sb.append(", handle id: ").append(hashCode()); //$NON-NLS-1$
+		sb.append(", namespace: "); //$NON-NLS-1$
+		sb.append(getNamespaceIdentifier());
+		sb.append("]"); //$NON-NLS-1$
+		return sb.toString();
+	}
+
 }
