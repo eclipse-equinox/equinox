@@ -41,4 +41,37 @@
       </plugin>
     </plugins>
   </build>
+    <profiles>
+    <profile>
+      <id>build-natives</id>
+      <activation>
+        <property>
+          <!-- This has to be hardcoded. Profiles are not allowed to use pom defined properties :-( -->
+          <name>native</name>
+          <value>gtk.linux.x86_64</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>natives</id>
+                <phase>process-resources</phase>
+                <configuration>
+                  <target>
+                    <exec executable="make" newenvironment="false" dir="keystorelinuxnative/"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
