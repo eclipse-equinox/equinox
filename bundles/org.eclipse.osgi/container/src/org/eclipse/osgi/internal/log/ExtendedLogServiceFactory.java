@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2017 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -129,29 +129,36 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 			contextsLock.readLock().lock();
 			try {
 				LogLevel level = null;
-				String lookupName = name;
-				while ((level = contextLogLevels.get(lookupName)) == null) {
-					int lastDot = lookupName.lastIndexOf('.');
-					if (lastDot >= 0) {
-						lookupName = lookupName.substring(0, lastDot);
-					} else {
-						break;
+				String loggerName = name;
+				loggerName = isLoggerNamePresent(loggerName);
+
+				if (loggerName != null) {
+					level = contextLogLevels.get(loggerName);
+					if (level == null && contextName != null) {
+						// non-null context name is a non-root context;
+						// must check the root context for non-root contexts
+						EquinoxLoggerContext rootContext = loggerContextTargetMap.getRootLoggerContext();
+						if (rootContext != null) {
+							level = rootContext.getEffectiveLogLevel(loggerName);
+						}
+					}
+
+				}
+
+				else {
+					if (contextName != null) {
+						EquinoxLoggerContext rootContext = loggerContextTargetMap.getRootLoggerContext();
+						if (rootContext != null) {
+							level = rootContext.getEffectiveLogLevel(name);
+						}
+
 					}
 				}
-				if (level == null) {
-					level = contextLogLevels.get(Logger.ROOT_LOGGER_NAME);
-				}
-				if (level == null && contextName != null) {
-					// non-null context name is a non-root context;
-					// must check the root context for non-root contexts
-					EquinoxLoggerContext rootContext = loggerContextTargetMap.getRootLoggerContext();
-					if (rootContext != null) {
-						level = rootContext.getEffectiveLogLevel(name);
-					}
-				}
+
 				if (level == null) {
 					level = LogLevel.WARN;
 				}
+
 				return level;
 			} finally {
 				contextsLock.readLock().unlock();
@@ -204,6 +211,35 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 				contextsLock.readLock().unlock();
 			}
 		}
-	}
 
+		/*     
+		*    Purpose        : To check whether lookupName is present in the contextLogLevels map or not
+		*    				  and return the lookupName accordingly.
+		* 
+		*/
+		public String isLoggerNamePresent(String lookupName) {
+
+			String loggerName = lookupName;
+			while (!contextLogLevels.containsKey(loggerName)) {
+				int lastDot = loggerName.lastIndexOf('.');
+				if (lastDot >= 0) {
+					loggerName = loggerName.substring(0, lastDot);
+				} else {
+					break;
+				}
+			}
+
+			if (!contextLogLevels.containsKey(loggerName)) {
+
+				if (contextLogLevels.containsKey(Logger.ROOT_LOGGER_NAME)) {
+					loggerName = Logger.ROOT_LOGGER_NAME;
+				} else {
+					loggerName = null;
+				}
+			}
+
+			return loggerName;
+		}
+
+	}
 }
