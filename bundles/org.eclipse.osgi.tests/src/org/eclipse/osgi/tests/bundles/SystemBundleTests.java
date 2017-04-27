@@ -3043,4 +3043,32 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertNotNull("No framework active thread for \"" + uuid + "\" found in : " + Arrays.toString(threads), found);
 		assertEquals("Wrong daemon type.", expectIsDeamon, found.isDaemon());
 	}
+
+	public void testWindowsAlias() {
+		String origOS = System.getProperty("os.name");
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map configuration = new HashMap();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		System.setProperty("os.name", "Windows 5000");
+		Equinox equinox = null;
+		try {
+			equinox = new Equinox(configuration);
+			equinox.init();
+			Assert.assertEquals("Wrong framework os name value", "win32", equinox.getBundleContext().getProperty(Constants.FRAMEWORK_OS_NAME));
+		} catch (BundleException e) {
+			fail("Failed init", e);
+		} finally {
+			System.setProperty("os.name", origOS);
+			try {
+				if (equinox != null) {
+					equinox.stop();
+					equinox.waitForStop(1000);
+				}
+			} catch (BundleException e) {
+				fail("Failed to stop framework.", e);
+			} catch (InterruptedException e) {
+				fail("Failed to stop framework.", e);
+			}
+		}
+	}
 }
