@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<component id="org.eclipse.equinox.http.jetty9" version="2">
+<component id="org.eclipse.equinox.http.jetty" version="2">
     <resource path="META-INF/MANIFEST.MF">
         <filter comment="Increased minor version since API has been deprecated" id="926941240">
             <message_arguments>
