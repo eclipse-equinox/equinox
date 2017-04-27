@@ -126,6 +126,22 @@ public class HttpServletResponseWrapperImpl extends HttpServletResponseWrapper {
 			originalOutputStream.write(b);
 		}
 
+		@Override
+		public void write(byte[] b) throws IOException {
+			if (isCompleted()) {
+				return;
+			}
+			originalOutputStream.write(b);
+		}
+
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException {
+			if (isCompleted()) {
+				return;
+			}
+			originalOutputStream.write(b, off, len);
+		}
+
 		private final ServletOutputStream originalOutputStream;
 
 	}

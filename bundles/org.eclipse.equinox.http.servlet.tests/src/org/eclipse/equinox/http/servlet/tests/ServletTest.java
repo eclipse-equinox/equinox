@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Raymond Augé - bug fixes and enhancements
  *     Juan Gonzalez <juan.gonzalez@liferay.com> - Bug 486412
+ *     Peter Nehrer <pnehrer@eclipticalsoftware.com> - Bug 515912
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.tests;
 
@@ -21,7 +22,6 @@ import java.io.PrintWriter;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -79,6 +79,7 @@ import org.eclipse.equinox.http.servlet.ExtendedHttpService;
 import org.eclipse.equinox.http.servlet.context.ContextPathCustomizer;
 import org.eclipse.equinox.http.servlet.session.HttpSessionInvalidator;
 import org.eclipse.equinox.http.servlet.testbase.BaseTest;
+import org.eclipse.equinox.http.servlet.tests.util.AsyncOutputServlet;
 import org.eclipse.equinox.http.servlet.tests.util.BaseAsyncServlet;
 import org.eclipse.equinox.http.servlet.tests.util.BaseChangeSessionIdServlet;
 import org.eclipse.equinox.http.servlet.tests.util.BaseHttpContext;
@@ -3550,6 +3551,7 @@ public class ServletTest extends BaseTest {
 		Assert.assertEquals(0, listenerBalance.get());
 	}
 
+	@Test
 	public void test_Async1() throws Exception {
 
 		Servlet s1 = new BaseAsyncServlet("test_Listener8");
@@ -3566,6 +3568,31 @@ public class ServletTest extends BaseTest {
 			Assert.assertTrue(output1, output1.endsWith("test_Listener8"));
 		}
 		finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+		}
+	}
+
+	@Test
+	public void test_AsyncOutput1() throws Exception {
+		Servlet s1 = new AsyncOutputServlet();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			Dictionary<String, Object> servletProps1 = new Hashtable<String, Object>();
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "AsyncOutputServlet");
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/asyncOutput");
+			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, true);
+			registrations.add(getBundleContext().registerService(Servlet.class, s1, servletProps1));
+
+			String output1 = requestAdvisor.request("asyncOutput");
+
+			Assert.assertTrue("write(int)", output1.startsWith("0123456789"));
+
+			String output2 = requestAdvisor.request("asyncOutput?bytes=true");
+
+			Assert.assertTrue("write(byte[], int, int)", output2.startsWith("0123456789"));
+		} finally {
 			for (ServiceRegistration<?> registration : registrations) {
 				registration.unregister();
 			}
