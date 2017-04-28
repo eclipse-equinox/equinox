@@ -501,7 +501,6 @@
                     <copy todir="bin" verbose="true" includeEmptyDirs="false" failonerror="true">
                       <fileset dir="../../../rt.equinox.binaries/org.eclipse.equinox.executable/bin/">
                         <include name="cocoa/macosx/x86_64/**/*"/>
-                        <include name="gtk/linux/ppc/**/*"/>
                         <include name="gtk/linux/ppc64/**/*"/>
                         <include name="gtk/linux/ppc64le/**/*"/>
                         <include name="gtk/linux/x86/**/*"/>
