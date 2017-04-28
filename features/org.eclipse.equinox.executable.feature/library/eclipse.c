@@ -1042,7 +1042,7 @@ static void adjustVMArgs(_TCHAR *javaVM, _TCHAR *jniLib, _TCHAR **vmArgv[]) {
 	if (!isModularVM(javaVM, jniLib)) {
 		while ((*vmArgv)[i] != NULL) {
 			if (_tcsncmp((*vmArgv)[i], ADDMODULES, _tcslen(ADDMODULES)) == 0) {
-				int j = 0;
+				int j = 0, k = 0;
 
 				if ((_tcschr((*vmArgv)[i], '=') != NULL) && ((*vmArgv)[i][13] == '=')) {
 					/* --add-modules=<value> */
@@ -1057,7 +1057,7 @@ static void adjustVMArgs(_TCHAR *javaVM, _TCHAR *jniLib, _TCHAR **vmArgv[]) {
 				}
 
 				/* shift all remaining arguments, but keep i, so that we can find repeated occurrences of --add-modules */
-				int k = i;
+				k = i;
 				(*vmArgv)[k] = (*vmArgv)[j];
 				while ((*vmArgv)[j] != NULL) {
 					(*vmArgv)[++k] = (*vmArgv)[++j];
