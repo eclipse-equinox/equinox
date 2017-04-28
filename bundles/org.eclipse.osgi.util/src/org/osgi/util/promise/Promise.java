@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2014). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2014, 2016). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,14 @@
 package org.osgi.util.promise;
 
 import java.lang.reflect.InvocationTargetException;
+
 import org.osgi.annotation.versioning.ProviderType;
+import org.osgi.util.function.Callback;
 import org.osgi.util.function.Function;
 import org.osgi.util.function.Predicate;
 
 /**
  * A Promise of a value.
- * 
  * <p>
  * A Promise represents a future value. It handles the interactions for
  * asynchronous processing. A {@link Deferred} object can be used to create a
@@ -33,7 +34,6 @@ import org.osgi.util.function.Predicate;
  * or the Promise can be used in chaining. In chaining, callbacks are provided
  * that receive the resolved Promise, and a new Promise is generated that
  * resolves based upon the result of a callback.
- * 
  * <p>
  * Both {@link #onResolve(Runnable) callbacks} and
  * {@link #then(Success, Failure) chaining} can be repeated any number of times,
@@ -42,32 +42,19 @@ import org.osgi.util.function.Predicate;
  * Example callback usage:
  * 
  * <pre>
- * final Promise&lt;String&gt; foo = foo();
- * foo.onResolve(new Runnable() {
- *   public void run() {
- *     System.out.println(foo.getValue());
- *   }
- * });
+ * Promise&lt;String&gt; foo = foo();
+ * foo.onResolve(() -&gt; System.out.println("resolved"));
  * </pre>
  * 
  * Example chaining usage;
  * 
  * <pre>
- * Success&lt;String,String&gt; doubler = new Success&lt;String,String&gt;() {
- *   public Promise&lt;String&gt; call(Promise&lt;String&gt; p) throws Exception {
- *     return Promises.resolved(p.getValue()+p.getValue());
- *   }
- * };
- * final Promise&lt;String&gt; foo = foo().then(doubler).then(doubler);
- * foo.onResolve(new Runnable() {
- *   public void run() {
- *     System.out.println(foo.getValue());
- *   }
- * });
+ * Success&lt;String,String&gt; doubler = p -&gt; Promises
+ * 		.resolved(p.getValue() + p.getValue());
+ * Promise&lt;String&gt; foo = foo().then(doubler).then(doubler);
  * </pre>
  * 
  * @param <T> The value type associated with this Promise.
- * 
  * @ThreadSafe
  * @author $Id$
  */
@@ -229,6 +216,40 @@ public interface Promise<T> {
 	 * @see #then(Success, Failure)
 	 */
 	<R> Promise<R> then(Success<? super T, ? extends R> success);
+
+	/**
+	 * Chain a new Promise to this Promise with a callback.
+	 * <p>
+	 * The specified {@link Callback} is called when this Promise is resolved
+	 * either successfully or with a failure.
+	 * <p>
+	 * This method returns a new Promise which is chained to this Promise. The
+	 * returned Promise must be resolved when this Promise is resolved after the
+	 * specified callback is executed. If the callback throws an exception, the
+	 * returned Promise is failed with that exception. Otherwise the returned
+	 * Promise is resolved with this Promise.
+	 * <p>
+	 * This method may be called at any time including before and after this
+	 * Promise has been resolved.
+	 * <p>
+	 * Resolving this Promise <i>happens-before</i> any registered callback is
+	 * called. That is, in a registered callback, {@link #isDone()} must return
+	 * {@code true} and {@link #getValue()} and {@link #getFailure()} must not
+	 * block.
+	 * <p>
+	 * A callback may be called on a different thread than the thread which
+	 * registered the callback. So the callback must be thread safe but can rely
+	 * upon that the registration of the callback <i>happens-before</i> the
+	 * registered callback is called.
+	 * 
+	 * @param callback A callback to be called when this Promise is resolved.
+	 *            Must not be {@code null}.
+	 * @return A new Promise which is chained to this Promise. The returned
+	 *         Promise must be resolved when this Promise is resolved after the
+	 *         specified callback is executed.
+	 * @since 1.1
+	 */
+	Promise<T> then(Callback callback);
 
 	/**
 	 * Filter the value of this Promise.
@@ -400,4 +421,36 @@ public interface Promise<T> {
 	 *         the value of the specified Promise.
 	 */
 	Promise<T> fallbackTo(Promise<? extends T> fallback);
+
+	/**
+	 * Time out the resolution of this Promise.
+	 * <p>
+	 * If this Promise is successfully resolved before the timeout, the returned
+	 * Promise is resolved with the value of this Promise. If this Promise is
+	 * resolved with a failure before the timeout, the returned Promise is
+	 * resolved with the failure of this Promise. If the timeout is reached
+	 * before this Promise is resolved, the returned Promise is failed with a
+	 * {@link TimeoutException}.
+	 * 
+	 * @param milliseconds The time to wait in milliseconds. Zero and negative
+	 *            time is treated as an immediate timeout.
+	 * @return A Promise that is resolved when either this Promise is resolved
+	 *         or the specified timeout is reached.
+	 * @since 1.1
+	 */
+	Promise<T> timeout(long milliseconds);
+
+	/**
+	 * Delay after the resolution of this Promise.
+	 * <p>
+	 * Once this Promise is resolved, resolve the returned Promise with this
+	 * Promise after the specified delay.
+	 * 
+	 * @param milliseconds The time to delay in milliseconds. Zero and negative
+	 *            time is treated as no delay.
+	 * @return A Promise that is resolved with this Promise after this Promise
+	 *         is resolved and the specified delay has elapsed.
+	 * @since 1.1
+	 */
+	Promise<T> delay(long milliseconds);
 }
