@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2017 IBM Corporation and others.
+ * Copyright (c) 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ equinox_get_schema (void)
     static const SecretSchema the_schema = {
         "org.eclipse.equinox", SECRET_SCHEMA_NONE,
         {
-            {  "NULL", 0 },
+            {  NULL, 0 },
         }
     };
     return &the_schema;
