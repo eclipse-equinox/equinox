@@ -217,7 +217,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 			GenericSpecificationImpl req = new GenericSpecificationImpl();
 			req.setName(genericRequires[i].getName());
 			req.setType(genericRequires[i].getType());
-			req.setResolution(req.getResolution());
+			req.setResolution(genericRequires[i].getResolution());
 			try {
 				req.setMatchingFilter(genericRequires[i].getMatchingFilter(), false);
 			} catch (InvalidSyntaxException e) {
