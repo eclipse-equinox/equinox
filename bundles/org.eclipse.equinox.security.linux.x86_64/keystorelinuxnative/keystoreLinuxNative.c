@@ -35,7 +35,16 @@ static void unlock_secret_service(JNIEnv *env)
 	GList *l, *ul;
 	gchar* lbl;
 	gint nu;
-	
+	//check that there is session dbus bus
+	GDBusConnection* dbusconnection = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, &error);
+	if (error != NULL) {
+		(*env)->ExceptionClear(env);
+	 	char buffer [60];
+		sprintf(buffer, "Unable to get secret service: %s", error->message);
+	 	(*env)->ThrowNew(env, (* env)->FindClass(env, "java/lang/SecurityException"), buffer);
+	 	g_error_free (error);
+	 	return;
+	}
 	SecretService*	secretservice = secret_service_get_sync(SECRET_SERVICE_LOAD_COLLECTIONS, NULL, &error);
  	if (error != NULL) {
 	  (*env)->ExceptionClear(env);
