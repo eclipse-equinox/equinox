@@ -106,7 +106,7 @@
     <module>bundles/org.eclipse.equinox.http</module>
     -->
     
-    <module>bundles/org.eclipse.equinox.http.jetty9</module>
+    <module>bundles/org.eclipse.equinox.http.jetty</module>
     <module>bundles/org.eclipse.equinox.http.registry</module>
     <module>bundles/org.eclipse.equinox.http.servlet</module>
     <module>bundles/org.eclipse.equinox.http.servlet.tests</module>
