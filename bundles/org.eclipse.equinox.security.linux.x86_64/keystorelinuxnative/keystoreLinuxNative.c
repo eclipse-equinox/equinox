@@ -39,28 +39,25 @@ static void unlock_secret_service(JNIEnv *env)
 	GDBusConnection* dbusconnection = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, &error);
 	if (error != NULL) {
 		(*env)->ExceptionClear(env);
-	 	char buffer [60];
-		sprintf(buffer, "Unable to get secret service: %s", error->message);
-	 	(*env)->ThrowNew(env, (* env)->FindClass(env, "java/lang/SecurityException"), buffer);
+		g_prefix_error(&error, "Unable to get DBus session bus: ");
+	 	(*env)->ThrowNew(env, (* env)->FindClass(env, "java/lang/SecurityException"), error->message);
 	 	g_error_free (error);
 	 	return;
 	}
 	SecretService*	secretservice = secret_service_get_sync(SECRET_SERVICE_LOAD_COLLECTIONS, NULL, &error);
  	if (error != NULL) {
 	  (*env)->ExceptionClear(env);
- 	  char buffer [60];
-		sprintf(buffer, "Unable to get secret service: %s", error->message);
- 		(*env)->ThrowNew(env, (* env)->FindClass(env, "java/lang/SecurityException"), buffer);
+ 	  	g_prefix_error(&error, "Unable to get secret service: ");
+ 		(*env)->ThrowNew(env, (* env)->FindClass(env, "java/lang/SecurityException"), error->message);
  		g_error_free (error);
  		return;
  	}
- 
+
 	SecretCollection*	defaultcollection = secret_collection_for_alias_sync(secretservice, SECRET_COLLECTION_DEFAULT, SECRET_COLLECTION_NONE, NULL, &error);
  	if (error != NULL) {
 	  (*env)->ExceptionClear(env);
- 	  char buffer [60];
-		sprintf(buffer, "Unable to get secret service: %s", error->message);
- 		(*env)->ThrowNew(env, (* env)->FindClass(env, "java/lang/SecurityException"), buffer);
+ 	  	g_prefix_error(&error, "Unable to get secret collection: ");
+ 		(*env)->ThrowNew(env, (* env)->FindClass(env, "java/lang/SecurityException"), error->message);
  		g_error_free (error);
  		return;
  	}
@@ -75,13 +72,12 @@ static void unlock_secret_service(JNIEnv *env)
 		g_list_free(ul);
 		if (error != NULL) {
 		  (*env)->ExceptionClear(env);
-	 	  char buffer [60];
-			sprintf(buffer, "Unable to unlock: %s", error->message);
-	 		(*env)->ThrowNew(env, (* env)->FindClass(env, "java/lang/SecurityException"), buffer);
+	 	  	g_prefix_error(&error, "Unable to unlock: ");
+	 		(*env)->ThrowNew(env, (* env)->FindClass(env, "java/lang/SecurityException"), error->message);
 	 		g_error_free (error);
 	 		return;
 	 	}
-	 	
+
 	}
 	return;
 }
@@ -89,53 +85,49 @@ static void unlock_secret_service(JNIEnv *env)
 JNIEXPORT jstring JNICALL Java_org_eclipse_equinox_internal_security_linux_LinuxPasswordProvider_getMasterPassword(JNIEnv *env, jobject this) {
   GError *error = NULL;
   jstring result;
-  
+
   unlock_secret_service(env);
   if ((*env)->ExceptionOccurred(env)) {
     return NULL;
-  }	
-  
+  }
+
 	gchar *password = secret_password_lookup_sync(EQUINOX_SCHEMA, NULL, &error, NULL);
-	
+
 	if (error != NULL) {
 	    (*env)->ExceptionClear(env);
-			char buffer [60];
-			sprintf(buffer, "%s.  Result: %d", error->message, error->code);
-			(*env)->ThrowNew(env, (* env)->FindClass(env, "java/lang/SecurityException"), buffer);
+		(*env)->ThrowNew(env, (* env)->FindClass(env, "java/lang/SecurityException"), error->message);
 	    g_error_free (error);
 	    return NULL;
 	} else if (password == NULL) {
 	    (*env)->ExceptionClear(env);
-			(*env)->ThrowNew(env, (* env)->FindClass(env, "java/lang/SecurityException"), "Unable to find password");
-			return NULL;
+		(*env)->ThrowNew(env, (* env)->FindClass(env, "java/lang/SecurityException"), "Unable to find password");
+		return NULL;
 	} else {
 	    result = (*env)->NewStringUTF(env, password);
-			free(password);
+		free(password);
 	    return result;
 	}
 }
 
 JNIEXPORT void JNICALL Java_org_eclipse_equinox_internal_security_linux_LinuxPasswordProvider_saveMasterPassword(JNIEnv *env, jobject this, jstring password) {
 	GError *error = NULL;
-	
+
 	unlock_secret_service(env);
 	if ((*env)->ExceptionOccurred(env)) {
-    return;
-  }
-  
+		return;
+	}
+
 	const char *passwordUTF = (*env)->GetStringUTFChars(env, password, NULL);
 	secret_password_store_sync (EQUINOX_SCHEMA, SECRET_COLLECTION_DEFAULT,
-	                            "Equinox master password", passwordUTF, NULL, &error,
-	                            NULL);
-	
+			"Equinox master password", passwordUTF, NULL, &error,
+			NULL);
+
 	// free the UTF strings
 	(*env)->ReleaseStringUTFChars( env, password, passwordUTF );
 
 	if (error != NULL) {
-    (*env)->ExceptionClear(env);
-		char buffer [60];
-		sprintf(buffer, "%s.  Result: %d", error->message, error->code);
-		(*env)->ThrowNew(env, (* env)->FindClass(env, "java/lang/SecurityException"), buffer);
+		(*env)->ExceptionClear(env);
+		(*env)->ThrowNew(env, (* env)->FindClass(env, "java/lang/SecurityException"), error->message);
 		g_error_free (error);
 	}
 }
