@@ -251,6 +251,7 @@ home directory.");
 
 #define XXPERMGEN	  _T_ECLIPSE("-XX:MaxPermSize=")
 #define ADDMODULES	  _T_ECLIPSE("--add-modules")
+#define PERMIT_ILLEGAL_ACCESS _T_ECLIPSE("--permit-illegal-access")
 #define ACTION_OPENFILE _T_ECLIPSE("openFile")
 #define GTK_VERSION   _T_ECLIPSE("--launcher.GTK_version")
 
@@ -1041,7 +1042,7 @@ static void adjustVMArgs(_TCHAR *javaVM, _TCHAR *jniLib, _TCHAR **vmArgv[]) {
 
 	if (!isModularVM(javaVM, jniLib)) {
 		while ((*vmArgv)[i] != NULL) {
-			if (_tcsncmp((*vmArgv)[i], ADDMODULES, _tcslen(ADDMODULES)) == 0) {
+			if (_tcsncmp((*vmArgv)[i], ADDMODULES, _tcslen(ADDMODULES)) == 0 || _tcsncmp((*vmArgv)[i], PERMIT_ILLEGAL_ACCESS, _tcslen(PERMIT_ILLEGAL_ACCESS)) == 0) {
 				int j = 0, k = 0;
 
 				if ((_tcschr((*vmArgv)[i], '=') != NULL) && ((*vmArgv)[i][13] == '=')) {
@@ -1050,6 +1051,9 @@ static void adjustVMArgs(_TCHAR *javaVM, _TCHAR *jniLib, _TCHAR **vmArgv[]) {
 				} else if (_tcslen(ADDMODULES) == _tcslen((*vmArgv)[i])) {
 					/* --add-modules <value> OR --add-modules <end-of-vmArgv> */
 					((*vmArgv)[i + 1] != NULL) ? (j = i + 2) : (j = i + 1);
+				} else if (_tcslen(PERMIT_ILLEGAL_ACCESS) == _tcslen((*vmArgv)[i])) {
+					/* --permit-illegal-access */
+					j = i + 1;
 				} else {
 					/* Probable new argument e.g. --add-modules-if-required or misspelled argument e.g. --add-modulesq */
 					i++;
