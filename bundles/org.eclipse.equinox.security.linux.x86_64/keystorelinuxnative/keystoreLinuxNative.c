@@ -61,6 +61,11 @@ static void unlock_secret_service(JNIEnv *env)
  		g_error_free (error);
  		return;
  	}
+ 	if (defaultcollection == NULL) {
+ 		(*env)->ExceptionClear(env);
+ 		(*env)->ThrowNew(env, (* env)->FindClass(env, "java/lang/SecurityException"), "Unable to find default secret collection");
+ 		return;
+ 	}
 
 	if (secret_collection_get_locked(defaultcollection))
 	{
