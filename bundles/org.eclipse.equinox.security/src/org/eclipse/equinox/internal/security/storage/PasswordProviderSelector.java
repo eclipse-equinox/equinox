@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2012 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -235,7 +235,7 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 	}
 
 	protected HashSet getDisabledModules() {
-		IEclipsePreferences node = new ConfigurationScope().getNode(AuthPlugin.PI_AUTH);
+		IEclipsePreferences node = ConfigurationScope.INSTANCE.getNode(AuthPlugin.PI_AUTH);
 		String tmp = node.get(IStorageConstants.DISABLED_PROVIDERS_KEY, null);
 		if (tmp == null || tmp.length() == 0)
 			return null;

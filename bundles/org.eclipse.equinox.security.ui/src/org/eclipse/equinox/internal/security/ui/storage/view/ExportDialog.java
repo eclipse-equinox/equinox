@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,7 @@ public class ExportDialog extends TitleAreaDialog {
 
 	protected static final String EXPORT_FILE = "org.eclipse.equinox.security.ui.exportfile"; //$NON-NLS-1$
 
-	protected IEclipsePreferences eclipseNode = new ConfigurationScope().getNode(Activator.PLUGIN_ID);
+	protected IEclipsePreferences eclipseNode = ConfigurationScope.INSTANCE.getNode(Activator.PLUGIN_ID);
 
 	protected Text fileText;
 	protected Button okButton;

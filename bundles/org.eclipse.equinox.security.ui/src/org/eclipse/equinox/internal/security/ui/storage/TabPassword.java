@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.ui.storage;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -245,7 +246,7 @@ public class TabPassword {
 	}
 
 	protected HashSet getDisabledModules() {
-		IEclipsePreferences node = new ConfigurationScope().getNode(PREFERENCES_PLUGIN);
+		IEclipsePreferences node = ConfigurationScope.INSTANCE.getNode(PREFERENCES_PLUGIN);
 		String tmp = node.get(IStorageConstants.DISABLED_PROVIDERS_KEY, null);
 		if (tmp == null || tmp.length() == 0)
 			return null;
@@ -286,7 +287,7 @@ public class TabPassword {
 			tmp.append(((PasswordProviderDescription) items[i].getData()).getId());
 		}
 
-		IEclipsePreferences node = new ConfigurationScope().getNode(PREFERENCES_PLUGIN);
+		IEclipsePreferences node = ConfigurationScope.INSTANCE.getNode(PREFERENCES_PLUGIN);
 		if (first)
 			node.remove(IStorageConstants.DISABLED_PROVIDERS_KEY);
 		else
