@@ -230,7 +230,6 @@ home directory.");
 #define EXITDATA     _T_ECLIPSE("-exitdata")
 #define STARTUP      _T_ECLIPSE("-startup")
 #define VM           _T_ECLIPSE("-vm")
-#define MODULARVM    _T_ECLIPSE("-modularVM")
 #define WS           _T_ECLIPSE("-ws")
 #define NAME         _T_ECLIPSE("-name")
 #define VMARGS       _T_ECLIPSE("-vmargs")					/* special option processing required */
@@ -272,7 +271,6 @@ static int     noSplash      = 0;				/* True: do not show splash win	*/
 static int	   suppressErrors = 0;				/* True: do not display errors dialogs */
        int     secondThread  = 0;				/* True: start the VM on a second thread */
 static int     appendVmargs = 0;                /* True: append cmdline vmargs to launcher.ini vmargs */
-static int     modularVM  = 0;				   /* True: is known to be Java 9 or later */
 
 static _TCHAR*  showSplashArg = NULL;			/* showsplash data (main launcher window) */
 static _TCHAR*  splashBitmap  = NULL;			/* the actual splash bitmap */
@@ -317,7 +315,6 @@ static Option options[] = {
     { CONSOLE,		&needConsole,	VALUE_IS_FLAG,	0 },
     { CONSOLELOG,	&needConsole,	VALUE_IS_FLAG,	0 },
     { DEBUG,		&debug,			VALUE_IS_FLAG,	0 },
-    { MODULARVM,   &modularVM,	VALUE_IS_FLAG,	1},
     { NOSPLASH,     &noSplash,      VALUE_IS_FLAG,	1 },
     { SUPRESSERRORS, &suppressErrors, VALUE_IS_FLAG, 1},
     { SECOND_THREAD, &secondThread, VALUE_IS_FLAG,  1 },
@@ -1043,10 +1040,7 @@ static void adjustVMArgs(_TCHAR *javaVM, _TCHAR *jniLib, _TCHAR **vmArgv[]) {
 
 	int i = 0;
 
-	if(!modularVM) {
-		modularVM = isModularVM(javaVM, jniLib);
-	}
-	if (!modularVM) {
+	if (!isModularVM(javaVM, jniLib)) {
 		while ((*vmArgv)[i] != NULL) {
 			if (_tcsncmp((*vmArgv)[i], ADDMODULES, _tcslen(ADDMODULES)) == 0 || _tcsncmp((*vmArgv)[i], PERMIT_ILLEGAL_ACCESS, _tcslen(PERMIT_ILLEGAL_ACCESS)) == 0) {
 				int j = 0, k = 0;
@@ -1146,7 +1140,7 @@ static void getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmA
      * VMARGS + vmArg + requiredVMargs
      *  + NULL)
      */
-    totalProgArgs  = 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 1 + argc + 2 + 1 + nVMarg + nEEargs + nReqVMarg + 1 + (modularVM ? 1 : 0);
+    totalProgArgs  = 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 1 + argc + 2 + 1 + nVMarg + nEEargs + nReqVMarg + 1;
 	*progArgv = malloc( totalProgArgs * sizeof( _TCHAR* ) );
     dst = 0;
 
@@ -1213,9 +1207,6 @@ static void getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmA
 		(*progArgv)[ dst++ ] = jniLib;
 	else
 		(*progArgv)[ dst++ ] = javaVM;
-	if(modularVM) {
-		(*progArgv)[ dst++ ] = MODULARVM;
-	}
     (*progArgv)[ dst++ ] = VMARGS;
 
 	for (src = 0; src < nVMarg; src++)
