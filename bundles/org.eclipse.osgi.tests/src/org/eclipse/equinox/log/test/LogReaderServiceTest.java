@@ -167,15 +167,15 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 			for (int i = 0; i < 9; i++) {
 				testLog.log(LogService.LOG_WARNING, String.valueOf(i));
 			}
-			assertEquals("Wrong number of logs.", 9, countLogEntries(testReader.getLog(), 0));
+			assertEquals("Wrong number of logs.", 9, countLogEntries(testReader.getLog(), 8));
 
 			// log 9 more things
 			for (int i = 9; i < 18; i++) {
 				testLog.log(LogService.LOG_WARNING, String.valueOf(i));
 			}
 
-			// should only be the last 10 logs (8 - 17)
-			assertEquals("Wrong number of logs.", 10, countLogEntries(testReader.getLog(), 8));
+			// should only be the last 10 logs (17-8)
+			assertEquals("Wrong number of logs.", 10, countLogEntries(testReader.getLog(), 17));
 		} finally {
 			try {
 				equinox.stop();
@@ -215,7 +215,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		while (logEntries.hasMoreElements()) {
 			LogEntry entry = (LogEntry) logEntries.nextElement();
 			assertEquals("Wrong log message.", String.valueOf(startingMessage), entry.getMessage());
-			startingMessage++;
+			startingMessage--;
 			count++;
 		}
 		return count;

@@ -227,9 +227,9 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 		if (history != null) {
 			synchronized (history) {
 				if (history.size() == maxHistory) {
-					history.removeFirst();
+					history.removeLast();
 				}
-				history.addLast(logEntry);
+				history.addFirst(logEntry);
 			}
 		}
 	}
