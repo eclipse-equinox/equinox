@@ -11,6 +11,9 @@
 
 package org.eclipse.equinox.http.servlet.internal.registration;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
 import org.osgi.dto.DTO;
@@ -25,12 +28,14 @@ public abstract class MatchableRegistration<T, D extends DTO>
 		super(t, d);
 	}
 
+	public abstract boolean needDecode();
+
 	public abstract String match(
 		String name, String servletPath, String pathInfo, String extension,
 		Match match);
 
-	protected boolean isPathWildcardMatch(
-		String pattern, String servletPath, String pathInfo) {
+	private boolean isPathWildcardMatch(
+		String pattern, String servletPath) {
 
 		int cpl = pattern.length() - 2;
 
@@ -47,11 +52,18 @@ public abstract class MatchableRegistration<T, D extends DTO>
 		return false;
 	}
 
-	protected boolean doMatch(
+	final protected boolean doMatch(
 			String pattern, String servletPath, String pathInfo,
 			String extension, Match match)
 		throws IllegalArgumentException {
-
+		if (needDecode()) {
+			try {
+				servletPath = URLDecoder.decode(servletPath, "UTF-8"); //$NON-NLS-1$
+			}
+			catch (UnsupportedEncodingException e) {
+				// do nothing
+			}
+		}
 		if (match == Match.EXACT) {
 			return pattern.equals(servletPath);
 		}
@@ -66,7 +78,7 @@ public abstract class MatchableRegistration<T, D extends DTO>
 			}
 
 			if ((match == Match.REGEX) && isPathWildcardMatch(
-					pattern, servletPath, pathInfo)) {
+					pattern, servletPath)) {
 
 				return true;
 			}
@@ -88,4 +100,18 @@ public abstract class MatchableRegistration<T, D extends DTO>
 		return false;
 	}
 
+	static boolean patternsRequireDecode(String[] patterns) {
+		for (String pattern : patterns) {
+			try {
+				String encode = URLEncoder.encode(pattern, "UTF-8"); //$NON-NLS-1$
+				if (!encode.equals(pattern)) {
+					return true;
+				}
+			}
+			catch (UnsupportedEncodingException e) {
+				// do nothing
+			}
+		}
+		return false;
+	}
 }
