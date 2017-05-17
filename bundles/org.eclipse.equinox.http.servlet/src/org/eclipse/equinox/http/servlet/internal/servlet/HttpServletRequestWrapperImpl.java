@@ -9,6 +9,7 @@
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
  *     Raymond Augé <raymond.auge@liferay.com> - Bug 436698
+ *     Arnaud Mergey <a_mergey@yahoo.fr> - Bug 497510
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal.servlet;
 
@@ -312,6 +313,13 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 			return (String) req.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
 
 		return req.getPathInfo();
+	}
+	
+	public static String getDispatchRequestURI(HttpServletRequest req) {
+		if (req.getDispatcherType() == DispatcherType.INCLUDE)
+			return (String) req.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
+
+		return req.getRequestURI();
 	}
 
 	public HttpSession getSession() {

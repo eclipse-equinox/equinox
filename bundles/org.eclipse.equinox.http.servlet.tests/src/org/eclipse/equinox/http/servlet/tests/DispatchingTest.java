@@ -1576,4 +1576,61 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals(10, counter.get());
 	}
 
+	@Test
+	public void test_Bug497510_1() throws Exception {
+		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void doGet(
+				final HttpServletRequest req, final HttpServletResponse resp)
+				throws ServletException, IOException {
+
+				String requestURI = req.getRequestURI();
+
+				Assert.assertNotNull(requestURI);
+
+				PrintWriter writer = resp.getWriter();
+				writer.write(requestURI);
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "Bug497510");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Bug497510/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+
+		String result = requestAdvisor.request("Bug497510/a%20b%20c");
+
+		Assert.assertEquals("/Bug497510/a%20b%20c", result);
+	}
+
+	@Test
+	public void test_Bug497510_2() throws Exception {
+		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void doGet(
+				final HttpServletRequest req, final HttpServletResponse resp)
+				throws ServletException, IOException {
+
+				String requestURI = req.getRequestURI();
+
+				Assert.assertNotNull(requestURI);
+
+				PrintWriter writer = resp.getWriter();
+				writer.write(requestURI);
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "Bug 497510");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Bug 497510/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+
+		String result = requestAdvisor.request("Bug%20497510/a%20b%20c");
+
+		Assert.assertEquals("/Bug%20497510/a%20b%20c", result);
+	}
 }

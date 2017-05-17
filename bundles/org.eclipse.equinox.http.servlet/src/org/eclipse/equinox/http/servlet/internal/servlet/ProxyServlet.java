@@ -9,6 +9,7 @@
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
  *     Raymond Augé - bug fixes and enhancements
+ *     Arnaud Mergey <a_mergey@yahoo.fr> - Bug 497510
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal.servlet;
 
@@ -52,6 +53,30 @@ public class ProxyServlet extends HttpServlet {
 	public void sessionIdChanged(String oldSessionId) {
 		httpServiceRuntimeImpl.fireSessionIdChanged(oldSessionId);
 	}
+	
+	/**
+	 * get the value of path info, not decoded by the server 
+	 */
+	private String getNotDecodedAlias(HttpServletRequest request) {
+		String pathInfo = HttpServletRequestWrapperImpl.getDispatchPathInfo(request);
+		if(pathInfo == null) {
+			return null;
+		}
+		String requestUri = HttpServletRequestWrapperImpl.getDispatchRequestURI(request);
+		
+		String[] pathInfoSegments = pathInfo.split(Const.SLASH);
+		String[] requestUriSegments = requestUri.split(Const.SLASH);
+		
+		if(pathInfoSegments.length == requestUriSegments.length) {
+			return requestUri;
+		}
+		
+		StringBuilder aliasBuilder = new StringBuilder();
+		for(int i=(requestUriSegments.length - pathInfoSegments.length + 1);i<requestUriSegments.length;i++) {
+			aliasBuilder.append(Const.SLASH).append(requestUriSegments[i]);
+		}
+		return aliasBuilder.toString();
+	}
 
 	/**
 	 * @see HttpServlet#service(ServletRequest, ServletResponse)
@@ -62,7 +87,7 @@ public class ProxyServlet extends HttpServlet {
 
 		checkRuntime();
 
-		String alias = HttpServletRequestWrapperImpl.getDispatchPathInfo(request);
+		String alias = getNotDecodedAlias(request);
 
 		if (alias == null) {
 			alias = Const.SLASH;
