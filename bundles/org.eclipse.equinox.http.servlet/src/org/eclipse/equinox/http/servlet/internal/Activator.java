@@ -163,8 +163,7 @@ public class Activator
 		boolean useSystemContext = Boolean.valueOf(context.getProperty(PROP_GLOBAL_WHITEBOARD));
 		BundleContext trackingContext = useSystemContext ? context.getBundle(Constants.SYSTEM_BUNDLE_LOCATION).getBundleContext() : context;
 		HttpServiceRuntimeImpl httpServiceRuntime = new HttpServiceRuntimeImpl(
-			trackingContext, context, servletContext,
-			new UMDictionaryMap<String, Object>(serviceProperties));
+			trackingContext, context, servletContext, serviceProperties);
 
 		proxyServlet.setHttpServiceRuntimeImpl(httpServiceRuntime);
 

@@ -110,7 +110,7 @@ public class ContextController {
 		BundleContext trackingContextParam, BundleContext consumingContext,
 		ServiceReference<ServletContextHelper> servletContextHelperRef,
 		ProxyContext proxyContext, HttpServiceRuntimeImpl httpServiceRuntime,
-		String contextName, String contextPath) {
+		String contextName, String contextPath, HttpSessionTracker httpSessionTracker) {
 
 		validate(contextName, contextPath);
 
@@ -141,6 +141,7 @@ public class ContextController {
 
 		this.trackingContext = trackingContextParam;
 		this.consumingContext = consumingContext;
+		this.httpSessionTracker = httpSessionTracker;
 
 		listenerServiceTracker = new ServiceTracker<EventListener, AtomicReference<ListenerRegistration>>(
 			trackingContext, httpServiceRuntime.getListenerFilter(),
@@ -452,7 +453,7 @@ public class ContextController {
 		} finally {
 			if (registration == null) {
 				// Always attempt to release here; even though destroy() may have been called
-				// on the registration while failing to add.  There are cases where no 
+				// on the registration while failing to add.  There are cases where no
 				// ServletRegistration may have even been created at all to call destory() on.
 				// Also, addedRegisteredObject may be false which means we never call doAddServletRegistration
 				servletHolder.release();
@@ -1208,7 +1209,15 @@ public class ContextController {
 	}
 
 	public void removeActiveSession(HttpSession session) {
-		activeSessions.remove(session.getId());
+		removeActiveSession(session.getId());
+	}
+
+	public void removeActiveSession(String sessionId) {
+		HttpSessionAdaptor httpSessionAdaptor = activeSessions.remove(sessionId);
+
+		if (httpSessionAdaptor != null) {
+			httpSessionTracker.removeHttpSessionAdaptor(sessionId, httpSessionAdaptor);
+		}
 	}
 
 	public void fireSessionIdChanged(String oldSessionId) {
@@ -1246,7 +1255,7 @@ public class ContextController {
 			session, servletContext, this);
 
 		HttpSessionAdaptor previousHttpSessionAdaptor =
-			activeSessions.putIfAbsent(sessionId, httpSessionAdaptor);
+			addSessionAdaptor(sessionId, httpSessionAdaptor);
 
 		if (previousHttpSessionAdaptor != null) {
 			return previousHttpSessionAdaptor;
@@ -1266,6 +1275,21 @@ public class ContextController {
 		}
 
 		return httpSessionAdaptor;
+	}
+
+	public HttpSessionAdaptor addSessionAdaptor(
+		String sessionId, HttpSessionAdaptor httpSessionAdaptor) {
+
+		HttpSessionAdaptor previousHttpSessionAdaptor =
+			activeSessions.putIfAbsent(sessionId, httpSessionAdaptor);
+
+		if (previousHttpSessionAdaptor != null) {
+			return previousHttpSessionAdaptor;
+		}
+
+		httpSessionTracker.addHttpSessionAdaptor(sessionId, httpSessionAdaptor);
+
+		return null;
 	}
 
 	private void validate(String preValidationContextName, String preValidationContextPath) {
@@ -1305,6 +1329,7 @@ public class ContextController {
 	private final ConcurrentMap<String, HttpSessionAdaptor> activeSessions = new ConcurrentHashMap<String, HttpSessionAdaptor>();
 
 	private final HttpServiceRuntimeImpl httpServiceRuntime;
+	private final HttpSessionTracker httpSessionTracker;
 	private final Set<ListenerRegistration> listenerRegistrations = new HashSet<ListenerRegistration>();
 	private final ProxyContext proxyContext;
 	private final ServiceReference<ServletContextHelper> servletContextHelperRef;

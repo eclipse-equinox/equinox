@@ -25,8 +25,10 @@ import org.eclipse.equinox.http.servlet.context.ContextPathCustomizer;
 import org.eclipse.equinox.http.servlet.dto.ExtendedFailedServletDTO;
 import org.eclipse.equinox.http.servlet.internal.context.*;
 import org.eclipse.equinox.http.servlet.internal.error.*;
+import org.eclipse.equinox.http.servlet.internal.servlet.HttpSessionTracker;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
 import org.eclipse.equinox.http.servlet.internal.util.*;
+import org.eclipse.equinox.http.servlet.session.HttpSessionInvalidator;
 import org.osgi.framework.*;
 import org.osgi.framework.dto.ServiceReferenceDTO;
 import org.osgi.service.http.HttpContext;
@@ -49,7 +51,7 @@ public class HttpServiceRuntimeImpl
 
 	public HttpServiceRuntimeImpl(
 		BundleContext trackingContext, BundleContext consumingContext,
-		ServletContext parentServletContext, Map<String, Object> attributes) {
+		ServletContext parentServletContext, Dictionary<String, Object> attributes) {
 
 		this.trackingContext = trackingContext;
 		this.consumingContext = consumingContext;
@@ -60,8 +62,10 @@ public class HttpServiceRuntimeImpl
 		this.listenerServiceFilter = createListenerFilter(consumingContext, parentServletContext);
 
 		this.parentServletContext = parentServletContext;
-		this.attributes = attributes;
-		this.targetFilter = "(" + Activator.UNIQUE_SERVICE_ID + "=" + attributes.get(Activator.UNIQUE_SERVICE_ID) + ")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		this.attributes = new UMDictionaryMap<String, Object>(attributes);
+		this.targetFilter = "(" + Activator.UNIQUE_SERVICE_ID + "=" + this.attributes.get(Activator.UNIQUE_SERVICE_ID) + ")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		this.httpSessionTracker = new HttpSessionTracker(this);
+		this.invalidatorReg = trackingContext.registerService(HttpSessionInvalidator.class, this.httpSessionTracker, attributes);
 
 		contextServiceTracker =
 			new ServiceTracker<ServletContextHelper, AtomicReference<ContextController>>(
@@ -111,7 +115,7 @@ public class HttpServiceRuntimeImpl
 
 			ContextController contextController = new ContextController(
 				trackingContext, consumingContext, serviceReference, new ProxyContext(parentServletContext),
-				this, contextName, contextPath);
+				this, contextName, contextPath, httpSessionTracker);
 
 			controllerMap.put(serviceReference, contextController);
 
@@ -174,6 +178,7 @@ public class HttpServiceRuntimeImpl
 	}
 
 	public void destroy() {
+		invalidatorReg.unregister();
 		defaultContextReg.unregister();
 
 		contextServiceTracker.close();
@@ -188,6 +193,9 @@ public class HttpServiceRuntimeImpl
 		failedServletContextDTOs.clear();
 		failedServletDTOs.clear();
 
+		httpSessionTracker.clear();
+
+		httpSessionTracker = null;
 		attributes = null;
 		trackingContext = null;
 		consumingContext = null;
@@ -274,6 +282,10 @@ public class HttpServiceRuntimeImpl
 			}
 		}
 		return null;
+	}
+
+	public void log(String message) {
+		parentServletContext.log(message);
 	}
 
 	public void log(String message, Throwable t) {
@@ -1104,6 +1116,8 @@ public class HttpServiceRuntimeImpl
 	private ServiceTracker<ServletContextHelper, AtomicReference<ContextController>> contextServiceTracker;
 	private ServiceTracker<ContextPathCustomizer, ContextPathCustomizer> contextPathAdaptorTracker;
 	private ContextPathCustomizerHolder contextPathCustomizerHolder;
+	private HttpSessionTracker httpSessionTracker;
+	private final ServiceRegistration<HttpSessionInvalidator> invalidatorReg;
 
 	static class DefaultServletContextHelperFactory implements ServiceFactory<ServletContextHelper> {
 		@Override

@@ -73,6 +73,25 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		this.request = request;
 	}
 
+	@Override
+	public String changeSessionId() {
+		HttpSessionAdaptor httpSessionAdaptor = (HttpSessionAdaptor)getSession(false);
+
+		if (httpSessionAdaptor == null) {
+			throw new IllegalStateException("No session"); //$NON-NLS-1$
+		}
+
+		DispatchTargets currentDispatchTarget = dispatchTargets.peek();
+
+		String oldSessionId = httpSessionAdaptor.getId();
+		String newSessionId = super.changeSessionId();
+
+		currentDispatchTarget.getContextController().removeActiveSession(oldSessionId);
+		currentDispatchTarget.getContextController().addSessionAdaptor(newSessionId, httpSessionAdaptor);
+
+		return newSessionId;
+	}
+
 	public String getAuthType() {
 		String authType = (String) this.getAttribute(HttpContext.AUTHENTICATION_TYPE);
 		if (authType != null)
@@ -172,7 +191,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 		if ((dispatcherType == DispatcherType.ASYNC) ||
 			(dispatcherType == DispatcherType.REQUEST) ||
-			!attributeName.startsWith("javax.servlet.")) {
+			!attributeName.startsWith("javax.servlet.")) { //$NON-NLS-1$
 
 			return request.getAttribute(attributeName);
 		}
@@ -239,7 +258,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 			}
 		}
 		else if (dispatcherType == DispatcherType.FORWARD) {
-			if (hasServletName && attributeName.startsWith("javax.servlet.forward")) {
+			if (hasServletName && attributeName.startsWith("javax.servlet.forward")) { //$NON-NLS-1$
 				return null;
 			}
 

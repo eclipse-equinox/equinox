@@ -77,6 +77,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.eclipse.equinox.http.servlet.ExtendedHttpService;
 import org.eclipse.equinox.http.servlet.context.ContextPathCustomizer;
+import org.eclipse.equinox.http.servlet.session.HttpSessionInvalidator;
 import org.eclipse.equinox.http.servlet.testbase.BaseTest;
 import org.eclipse.equinox.http.servlet.tests.util.BaseAsyncServlet;
 import org.eclipse.equinox.http.servlet.tests.util.BaseChangeSessionIdServlet;
@@ -109,6 +110,7 @@ import org.osgi.service.http.runtime.dto.RuntimeDTO;
 import org.osgi.service.http.runtime.dto.ServletContextDTO;
 import org.osgi.service.http.runtime.dto.ServletDTO;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.util.tracker.ServiceTracker;
 
 public class ServletTest extends BaseTest {
 	@Rule
@@ -1574,6 +1576,130 @@ public class ServletTest extends BaseTest {
 				servletReg.unregister();
 			}
 			CookieHandler.setDefault(previous);
+		}
+	}
+
+	@Test
+	public void test_Sessions03_HttpSessionInvalidator() throws Exception {
+		ServiceTracker<HttpSessionInvalidator, HttpSessionInvalidator> sessionInvalidatorTracker =
+			new ServiceTracker<>(getBundleContext(), HttpSessionInvalidator.class, null);
+		sessionInvalidatorTracker.open();
+		HttpSessionInvalidator invalidator = sessionInvalidatorTracker.waitForService(100);
+
+		final AtomicBoolean valueBound = new AtomicBoolean(false);
+		final AtomicBoolean valueUnbound = new AtomicBoolean(false);
+		final HttpSessionBindingListener bindingListener = new HttpSessionBindingListener() {
+
+			@Override
+			public void valueUnbound(HttpSessionBindingEvent event) {
+				valueUnbound.set(true);
+			}
+
+			@Override
+			public void valueBound(HttpSessionBindingEvent event) {
+				valueBound.set(true);
+			}
+		};
+		final AtomicBoolean sessionCreated = new AtomicBoolean(false);
+		final AtomicBoolean sessionDestroyed = new AtomicBoolean(false);
+		final AtomicReference<String> sessionId = new AtomicReference<String>();
+		HttpSessionListener sessionListener = new HttpSessionListener() {
+
+			@Override
+			public void sessionDestroyed(HttpSessionEvent se) {
+				sessionDestroyed.set(true);
+			}
+
+			@Override
+			public void sessionCreated(HttpSessionEvent se) {
+				sessionCreated.set(true);
+			}
+		};
+		HttpServlet sessionServlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
+					IOException {
+				HttpSession session = request.getSession();
+				if (session.getAttribute("test.attribute") == null) {
+					session.setAttribute("test.attribute", bindingListener);
+					sessionId.set(session.getId());
+					response.getWriter().print("created");
+				} else {
+					session.invalidate();
+					response.getWriter().print("invalidated");
+				}
+			}
+
+		};
+		ServiceRegistration<Servlet> servletReg = null;
+		ServiceRegistration<HttpSessionListener> sessionListenerReg = null;
+		Dictionary<String, Object> servletProps = new Hashtable<String, Object>();
+		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/sessions");
+		String actual = null;
+		CookieHandler previous = CookieHandler.getDefault();
+		CookieHandler.setDefault(new CookieManager( null, CookiePolicy.ACCEPT_ALL ) );
+		try {
+			servletReg = getBundleContext().registerService(Servlet.class, sessionServlet, servletProps);
+			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
+			sessionListenerReg = getBundleContext().registerService(HttpSessionListener.class, sessionListener, listenerProps);
+
+			sessionCreated.set(false);
+			valueBound.set(false);
+			sessionDestroyed.set(false);
+			valueUnbound.set(false);
+
+			// first call will create the session
+			actual = requestAdvisor.request("sessions");
+			assertEquals("Wrong result", "created", actual);
+			assertTrue("No sessionCreated called", sessionCreated.get());
+			assertTrue("No valueBound called", valueBound.get());
+			assertFalse("sessionDestroyed was called", sessionDestroyed.get());
+			assertFalse("valueUnbound was called", valueUnbound.get());
+
+			sessionCreated.set(false);
+			valueBound.set(false);
+			sessionDestroyed.set(false);
+			valueUnbound.set(false);
+
+			assertNotNull(sessionId.get());
+
+			// invalidate using the invalidator
+			invalidator.invalidate(sessionId.get(), true);
+
+			// second call should find the session invalidated, and create a new one
+			actual = requestAdvisor.request("sessions");
+			assertEquals("Wrong result", "created", actual);
+			assertTrue("No sessionCreated was called", sessionCreated.get());
+			assertTrue("No valueBound was called", valueBound.get());
+			assertTrue("No sessionDestroyed called", sessionDestroyed.get());
+			assertTrue("No valueUnbound called", valueUnbound.get());
+
+			sessionCreated.set(false);
+			sessionDestroyed.set(false);
+			valueBound.set(false);
+			valueUnbound.set(false);
+
+			// calling again should invalidate the session again
+			actual = requestAdvisor.request("sessions");
+			assertEquals("Wrong result", "invalidated", actual);
+			assertFalse("sessionCreated called", sessionCreated.get());
+			assertFalse("valueBound called", valueBound.get());
+			assertTrue("No sessionDestroyed called", sessionDestroyed.get());
+			assertTrue("No valueUnbound called", valueUnbound.get());
+		} catch (Exception e) {
+			fail("Unexpected exception: " + e);
+		} finally {
+			if (servletReg != null) {
+				servletReg.unregister();
+			}
+			if (sessionListenerReg != null) {
+				sessionListenerReg.unregister();
+			}
+			CookieHandler.setDefault(previous);
+			sessionInvalidatorTracker.close();
 		}
 	}
 
@@ -3160,11 +3286,11 @@ public class ServletTest extends BaseTest {
 		final AtomicReference<HttpSession> sessionReference = new AtomicReference<HttpSession>();
 
 		ServletContextListener scl = new ServletContextListener() {
-			
+
 			@Override
 			public void contextInitialized(ServletContextEvent arg0) {
 			}
-			
+
 			@Override
 			public void contextDestroyed(ServletContextEvent arg0) {
 				listenerBalance.decrementAndGet();
