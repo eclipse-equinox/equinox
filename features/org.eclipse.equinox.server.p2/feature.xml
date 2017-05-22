@@ -16,12 +16,12 @@
    </license>
 
    <requires>
-      <import feature="org.eclipse.ecf.core.feature" version="1.1.0" match="compatible"/>
-      <import feature="org.eclipse.ecf.core.ssl.feature" version="1.0.0" match="compatible"/>
-      <import feature="org.eclipse.ecf.filetransfer.feature" version="3.9.0" match="compatible"/>
-      <import feature="org.eclipse.ecf.filetransfer.httpclient4.feature" version="3.8.0" match="compatible"/>
-      <import feature="org.eclipse.ecf.filetransfer.httpclient4.ssl.feature" version="1.0.0" match="compatible"/>
-      <import feature="org.eclipse.ecf.filetransfer.ssl.feature" version="1.0.0" match="compatible"/>
+      <import feature="org.eclipse.ecf.core.feature" version="1.4.0" match="compatible"/>
+      <import feature="org.eclipse.ecf.core.ssl.feature" version="1.1.0" match="compatible"/>
+      <import feature="org.eclipse.ecf.filetransfer.feature" version="3.13.7" match="compatible"/>
+      <import feature="org.eclipse.ecf.filetransfer.httpclient4.feature" version="3.13.7" match="compatible"/>
+      <import feature="org.eclipse.ecf.filetransfer.httpclient4.ssl.feature" version="1.1.0" match="compatible"/>
+      <import feature="org.eclipse.ecf.filetransfer.ssl.feature" version="1.1.0" match="compatible"/>
    </requires>
 
    <plugin
