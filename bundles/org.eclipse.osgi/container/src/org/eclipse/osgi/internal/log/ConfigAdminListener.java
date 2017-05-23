@@ -39,7 +39,6 @@ class ConfigAdminListener implements ServiceTrackerCustomizer<Object, ServiceReg
 	private static final String METHOD_CONFIG_GET_FACTORY_PID = "getFactoryPid"; //$NON-NLS-1$
 
 	private static final String PID_PREFIX_LOG_ADMIN = "org.osgi.service.log.admin"; //$NON-NLS-1$
-	private static final String NULL_LEVEL = "NULL"; //$NON-NLS-1$
 	// using String constructor here to avoid interning
 	private static final String PID_FILTER = '(' + Constants.SERVICE_PID + '=' + PID_PREFIX_LOG_ADMIN + '*' + ')';
 
@@ -225,14 +224,10 @@ class ConfigAdminListener implements ServiceTrackerCustomizer<Object, ServiceReg
 				String key = keys.nextElement();
 				Object v = configDictionary.get(key);
 				if (v instanceof String) {
-					if (NULL_LEVEL.equals(v)) {
-						result.put(key, null);
-					} else {
-						try {
-							result.put(key, LogLevel.valueOf((String) v));
-						} catch (IllegalArgumentException e) {
-							// ignore invalid values
-						}
+					try {
+						result.put(key, LogLevel.valueOf((String) v));
+					} catch (IllegalArgumentException e) {
+						// ignore invalid values
 					}
 				}
 			}

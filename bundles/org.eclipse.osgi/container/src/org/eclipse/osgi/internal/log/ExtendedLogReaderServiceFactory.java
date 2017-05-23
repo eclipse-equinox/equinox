@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2017 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -54,6 +54,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	private final ThreadLocal<int[]> nestedCallCount = new ThreadLocal<>();
 	private final LinkedList<LogEntry> history;
 	private final int maxHistory;
+	private final LogLevel defaultLevel;
 
 	static boolean safeIsLoggable(LogFilter filter, Bundle bundle, String name, int level) {
 		try {
@@ -97,13 +98,18 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 		}
 	}
 
-	public ExtendedLogReaderServiceFactory(int maxHistory) {
+	public ExtendedLogReaderServiceFactory(int maxHistory, LogLevel defaultLevel) {
+		this.defaultLevel = defaultLevel;
 		this.maxHistory = maxHistory;
 		if (maxHistory > 0) {
 			history = new LinkedList<>();
 		} else {
 			history = null;
 		}
+	}
+
+	public LogLevel getDefaultLogLevel() {
+		return defaultLevel;
 	}
 
 	public ExtendedLogReaderServiceImpl getService(Bundle bundle, ServiceRegistration<ExtendedLogReaderServiceImpl> registration) {
@@ -293,4 +299,5 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 			return Collections.enumeration(new ArrayList<>(history));
 		}
 	}
+
 }

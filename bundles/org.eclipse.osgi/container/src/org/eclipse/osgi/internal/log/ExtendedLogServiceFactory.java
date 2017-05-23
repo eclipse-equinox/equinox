@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2017 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -25,7 +25,7 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 	final ReentrantReadWriteLock contextsLock = new ReentrantReadWriteLock();
 	final LoggerContextTargetMap loggerContextTargetMap = new LoggerContextTargetMap();
 	private final Permission logPermission = new LogPermission("*", LogPermission.LOG); //$NON-NLS-1$
-	private final ExtendedLogReaderServiceFactory logReaderServiceFactory;
+	final ExtendedLogReaderServiceFactory logReaderServiceFactory;
 	private final LoggerAdmin loggerAdmin = new EquinoxLoggerAdmin();
 
 	public ExtendedLogServiceFactory(ExtendedLogReaderServiceFactory logReaderServiceFactory) {
@@ -150,7 +150,7 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 					}
 				}
 				if (level == null) {
-					level = LogLevel.WARN;
+					level = logReaderServiceFactory.getDefaultLogLevel();
 				}
 				return level;
 			} finally {
