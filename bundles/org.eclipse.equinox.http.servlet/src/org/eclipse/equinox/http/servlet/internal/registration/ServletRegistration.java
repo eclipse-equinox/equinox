@@ -66,7 +66,6 @@ public class ServletRegistration extends EndpointRegistration<ExtendedServletDTO
 		else {
 			multipartSupport = null;
 		}
-		needDecode = MatchableRegistration.patternsRequireDecode(servletDTO.patterns);
 	}
 
 	public ErrorPageDTO getErrorPageDTO() {
@@ -117,12 +116,8 @@ public class ServletRegistration extends EndpointRegistration<ExtendedServletDTO
 
 		return multipartSupport.parseRequest(request);
 	}
-	@Override
-	public boolean needDecode() {
-		return needDecode;
-	}
 
-	private final boolean needDecode;
 	private final ErrorPageDTO errorPageDTO;
 	private final MultipartSupport multipartSupport;
+
 }

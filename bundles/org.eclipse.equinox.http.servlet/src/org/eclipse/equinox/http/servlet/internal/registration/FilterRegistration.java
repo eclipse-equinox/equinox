@@ -38,7 +38,6 @@ public class FilterRegistration
 	private final ContextController contextController;
 	private final boolean initDestoyWithContextController;
 	private final Pattern[] compiledRegexs;
-	private final boolean needDecode;
 
 	public FilterRegistration(
 		ServiceHolder<Filter> filterHolder, FilterDTO filterDTO, int priority,
@@ -71,7 +70,6 @@ public class FilterRegistration
 		} else {
 			initDestoyWithContextController = true;
 		}
-		needDecode = MatchableRegistration.patternsRequireDecode(filterDTO.patterns);
 	}
 
 	public int compareTo(FilterRegistration otherFilterRegistration) {
@@ -272,11 +270,6 @@ public class FilterRegistration
 		}
 
 		return patterns;
-	}
-
-	@Override
-	public boolean needDecode() {
-		return needDecode;
 	}
 
 }
