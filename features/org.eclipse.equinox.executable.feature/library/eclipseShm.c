@@ -137,6 +137,8 @@ int setSharedData(const _TCHAR* id, const _TCHAR* data) {
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "eclipse-memcpy.h"
+
 int createSharedData(char** id, int size) {
 	int shmid;
 	key_t key = getpid();

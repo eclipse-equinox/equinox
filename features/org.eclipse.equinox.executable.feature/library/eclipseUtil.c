@@ -28,6 +28,8 @@
 #include <strings.h>
 #endif
 
+#include "eclipse-memcpy.h"
+
 #define MAX_LINE_LENGTH 256
 
 /* Is the given VM J9 */

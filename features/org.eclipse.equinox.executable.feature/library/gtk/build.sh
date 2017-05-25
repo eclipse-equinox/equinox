@@ -10,6 +10,7 @@
 #     IBM Corporation - initial API and implementation
 #     Kevin Cornell (Rational Software Corporation)
 # Martin Oberhuber (Wind River) - [176805] Support building with gcc and debug
+# Martin Oberhuber (Wind River) - [517013] Avoid memcpy@GLIBC_2.14 dependency
 #*******************************************************************************
 #
 # Usage: sh build.sh [<optional switches>] [clean]
@@ -252,6 +253,12 @@ elif [ "$defaultOS" = "solaris" ];  then
 	if [ "$defaultOSArch" = "x86_64" -o "$defaultOSArch" = "sparcv9" ]; then
 		M_ARCH=-m64
 		export M_ARCH
+	fi
+elif [ "$defaultOS" = "linux" ]; then
+	if [ "$defaultOSArch" = "x86_64" ]; then
+		# Bug 517013: Avoid using memcpy() to remain compatible with older glibc
+		M_CFLAGS="-fno-builtin-memcpy -fno-builtin-memmove"
+		export M_CFLAGS
 	fi
 fi
 

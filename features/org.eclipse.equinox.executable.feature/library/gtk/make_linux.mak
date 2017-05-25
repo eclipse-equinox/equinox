@@ -48,7 +48,7 @@ GTK_LIBS = \
  -DGTK3_LIB="\"libgtk-3.so.0\"" -DGDK3_LIB="\"libgdk-3.so.0\"" \
  -DPIXBUF_LIB="\"libgdk_pixbuf-2.0.so.0\"" -DGOBJ_LIB="\"libgobject-2.0.so.0\"" -DX11_LIB="\"libX11.so.6\""
 LFLAGS = ${M_ARCH} -shared -fpic -Wl,--export-dynamic 
-CFLAGS = ${M_ARCH} -g -s -Wall\
+CFLAGS = ${M_CFLAGS} ${M_ARCH} -g -s -Wall\
 	-fpic \
 	-DLINUX \
 	-DMOZILLA_FIX \

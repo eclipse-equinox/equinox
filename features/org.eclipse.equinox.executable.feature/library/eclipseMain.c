@@ -28,6 +28,8 @@
 #include <locale.h>
 #include <sys/stat.h>
 
+#include "eclipse-memcpy.h"
+
 static _TCHAR* libraryMsg =
 _T_ECLIPSE("The %s executable launcher was unable to locate its \n\
 companion shared library.");

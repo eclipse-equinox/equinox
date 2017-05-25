@@ -168,6 +168,8 @@
 #include <errno.h>
 #include <ctype.h>
 
+#include "eclipse-memcpy.h"
+
 #define MAX_PATH_LENGTH   2000
 #define MAX_SHARED_LENGTH   (16 * 1024)
 
