@@ -44,7 +44,7 @@ char *findCommand(char *command);
 char*  defaultVM     = "java";
 char*  vmLibrary	 = "JavaVM";
 char*  shippedVMDir  = "../../jre/Contents/Home/bin/"; // relative to launcher
-int isModularJVM = 0;
+int isSunMaxPermSizeVM = 0;
 
 static void adjustLibraryPath(char * vmLibrary);
 static char * findLib(char * command);
@@ -330,8 +330,7 @@ char** getArgVM( char* vm )
 	return result;
 }
 
-/* set isModularJVM to 1 if the JVM version is >= 9, 0 otherwise */
-void checkJavaVersion(char* command) {
+char * getJavaVersion(char* command) {
 	FILE *fp;
 	char buffer[4096];
 	char *version = NULL, *firstChar;
@@ -339,7 +338,7 @@ void checkJavaVersion(char* command) {
 	sprintf(buffer,"%s -version 2>&1", command);
 	fp = popen(buffer, "r");
 	if (fp == NULL) {
-		return;
+		return NULL;
 	}
 	while (fgets(buffer, sizeof(buffer)-1, fp) != NULL) {
 		if (!version) {
@@ -355,20 +354,25 @@ void checkJavaVersion(char* command) {
 				version[numChars] = '\0';
 			}
 		}
-		if (version != NULL) {
-			char *str = version;
-			/* According to the new Java version-string scheme, the first element is
-			 * the major version number, details at http://openjdk.java.net/jeps/223 */
-			char *majorVersion = strtok(str, ".-");
-			if (majorVersion != NULL && (strtol(majorVersion, NULL, 10) >= 9)) {
-				isModularJVM = 1;
+		if (strstr(buffer, "Java HotSpot(TM)") || strstr(buffer, "OpenJDK")) {
+			if (version != NULL) {
+				_TCHAR *value = strtok(version, ".");
+				if (value != NULL && (strtol(value, NULL, 10) == 1)) {
+					value = strtok(NULL, ".");
+					if (strtol(value, NULL, 10) < 8) {
+						isSunMaxPermSizeVM = 1;
+					}
+				}
 			}
-			free(version);
+			break;
 		}
-		break;
+		if (strstr(buffer, "IBM") != NULL) {
+			isSunMaxPermSizeVM = 0;
+			break;
+		}
 	}
 	pclose(fp);
-	return;
+	return version;
 }
 
 char * getJavaHome() {
@@ -425,8 +429,8 @@ char * findVMLibrary( char* command ) {
 	if (strstr(cmd, "/JavaVM.framework/") != NULL && (strstr(cmd, "/Current/") != NULL || strstr(cmd, "/A/") != NULL)) {
 		cmd = getJavaHome();
 	}
-	// This is necessary to initialize isModularJVM
-	checkJavaVersion(cmd);
+	// This is necessary to initialize isSunMaxPermSizeVM
+	getJavaVersion(cmd);
 	result = JAVA_FRAMEWORK;
 	if (strstr(cmd, "/JavaVM.framework/") == NULL) {
 		char * lib = findLib(cmd);
@@ -621,8 +625,8 @@ void processVMArgs(char **vmargs[] )
 	}
 }
 
-int isModularVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
-	return isModularJVM;
+int isMaxPermSizeVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
+	return isSunMaxPermSizeVM;
 }
 
 NSString* getApplicationSupport() {

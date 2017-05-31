@@ -168,8 +168,7 @@ JavaResults* startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[],
 	return startJavaJNI(libPath, vmArgs, progArgs, jarFile);
 }
 
-/* returns 1 if the JVM version is >= 9, 0 otherwise */
-int isModularVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
+int isMaxPermSizeVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
 	if (javaVM == NULL) {
 		return 0;
 	}
@@ -195,17 +194,22 @@ int isModularVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
 				version[numChars] = '\0';
 			}
 		}
-		if (version != NULL) {
-			_TCHAR *str = version;
-			/* According to the new Java version-string scheme, the first element is
-			 * the major version number, details at http://openjdk.java.net/jeps/223 */
-			_TCHAR *majorVersion = _tcstok(str, ".-");
-			if (majorVersion != NULL && (_tcstol(majorVersion, NULL, 10) >= 9)) {
-				result = 1;
+		if (_tcsstr(buffer, "Java HotSpot(TM)") || _tcsstr(buffer, "OpenJDK")) {
+			if (version != NULL) {
+				_TCHAR *value = _tcstok(version, ".");
+				if (value != NULL && (_tcstol(value, NULL, 10) == 1)) {
+					value = _tcstok(NULL, ".");
+					if (_tcstol(value, NULL, 10) < 8) {
+						result = 1;
+					}
+				}
 			}
-			free(version);
+			break;
 		}
-		break;
+		if (_tcsstr(buffer, "IBM") != NULL) {
+			result = 0;
+			break;
+		}
 	}
 	pclose(fp);
 	return result;
