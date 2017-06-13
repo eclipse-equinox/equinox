@@ -256,6 +256,7 @@ public class ListenerList<E> implements Iterable<E> {
 	 * The spliterator reports Spliterator.SIZED, Spliterator.SUBSIZED, Spliterator.ORDERED, and Spliterator.IMMUTABLE
 	 * 
 	 * @return a spliterator for listeners
+	 * @since org.eclipse.equinox.common 3.9
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
