@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2013 IBM Corporation and others.
+ * Copyright (c) 2010, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -90,15 +90,15 @@ public class CoordinatorImpl implements Coordinator {
 
 	private final Bundle bundle;
 	private final List<CoordinationImpl> coordinations;
-	private final LogService logService;
+	private final LogTracker logTracker;
 	private final long maxTimeout;
 	private final Timer timer;
 
 	private boolean shutdown;
 
-	public CoordinatorImpl(Bundle bundle, LogService logService, Timer timer, long maxTimeout) {
+	public CoordinatorImpl(Bundle bundle, LogTracker logService, Timer timer, long maxTimeout) {
 		this.bundle = bundle;
-		this.logService = logService;
+		this.logTracker = logService;
 		this.timer = timer;
 		coordinations = new ArrayList<CoordinationImpl>();
 		if (maxTimeout < 0)
@@ -128,7 +128,7 @@ public class CoordinatorImpl implements Coordinator {
 		// Override the requested timeout with the max timeout, if necessary.
 		if (maxTimeout != 0) {
 			if (timeout == 0 || maxTimeout < timeout) {
-				logService.log(LogService.LOG_WARNING, NLS.bind(Messages.MaximumTimeout, new Object[]{timeout, maxTimeout, name}));
+				logTracker.log(LogService.LOG_WARNING, NLS.bind(Messages.MaximumTimeout, new Object[]{timeout, maxTimeout, name}));
 				timeout = maxTimeout;
 			}
 		}
@@ -179,7 +179,7 @@ public class CoordinatorImpl implements Coordinator {
 			try {
 				checkPermission(CoordinationPermission.ADMIN, result.getName());
 			} catch (SecurityException e) {
-				logService.log(LogService.LOG_DEBUG, NLS.bind(Messages.GetCoordinationNotPermitted, new Object[]{Thread.currentThread(), result.getName(), result.getId()}), e);
+				logTracker.log(LogService.LOG_DEBUG, NLS.bind(Messages.GetCoordinationNotPermitted, new Object[]{Thread.currentThread(), result.getName(), result.getId()}), e);
 				result = null;
 			}
 		}
@@ -200,7 +200,7 @@ public class CoordinatorImpl implements Coordinator {
 					checkPermission(CoordinationPermission.ADMIN, coordination.getName());
 					result.add(coordination.getReferent());
 				} catch (SecurityException e) {
-					logService.log(LogService.LOG_DEBUG, NLS.bind(Messages.GetCoordinationNotPermitted, new Object[]{Thread.currentThread(), coordination.getName(), coordination.getId()}), e);
+					logTracker.log(LogService.LOG_DEBUG, NLS.bind(Messages.GetCoordinationNotPermitted, new Object[]{Thread.currentThread(), coordination.getName(), coordination.getId()}), e);
 				}
 			}
 		}
@@ -250,8 +250,8 @@ public class CoordinatorImpl implements Coordinator {
 		return bundle;
 	}
 
-	LogService getLogService() {
-		return logService;
+	LogTracker getLogService() {
+		return logTracker;
 	}
 	
 	long getMaxTimeout() {
@@ -263,7 +263,7 @@ public class CoordinatorImpl implements Coordinator {
 		try {
 			Timer.class.getMethod("purge", (Class<?>[]) null).invoke(timer, (Object[]) null); //$NON-NLS-1$
 		} catch (Exception e) {
-			logService.log(LogService.LOG_DEBUG, Messages.CanceledTaskNotPurged, e);
+			logTracker.log(LogService.LOG_DEBUG, Messages.CanceledTaskNotPurged, e);
 		}
 	}
 

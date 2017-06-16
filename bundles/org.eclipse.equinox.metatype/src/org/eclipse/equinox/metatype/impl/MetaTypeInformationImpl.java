@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,13 +10,11 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.impl;
 
-import org.eclipse.equinox.metatype.EquinoxMetaTypeInformation;
-
 import java.util.Enumeration;
 import java.util.Vector;
 import javax.xml.parsers.SAXParser;
+import org.eclipse.equinox.metatype.EquinoxMetaTypeInformation;
 import org.osgi.framework.Bundle;
-import org.osgi.service.log.LogService;
 
 /**
  * Implementation of MetaTypeProvider
@@ -33,7 +31,7 @@ public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements Equ
 	/**
 	 * Constructor of class MetaTypeInformationImpl.
 	 */
-	MetaTypeInformationImpl(Bundle bundle, SAXParser parser, LogService logger) {
+	MetaTypeInformationImpl(Bundle bundle, SAXParser parser, LogTracker logger) {
 		super(bundle, parser, logger);
 	}
 

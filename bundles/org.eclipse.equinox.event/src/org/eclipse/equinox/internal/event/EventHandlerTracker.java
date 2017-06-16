@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,12 +18,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandlerWrapper> implements EventDispatcher<EventHandlerWrapper, Permission, Event> {
 
-	private final LogService log;
+	private final LogTracker log;
 	//* List<EventHandlerWrapper> of all handlers with topic of "*"
 	private final List<EventHandlerWrapper> globalWildcard;
 	// Map<String,List<EventHandlerWrapper>> key is topic prefix of partial wildcard
@@ -31,7 +30,7 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 	// Map<String,List<EventHandlerWrapper>> key is topic name
 	private final Map<String, List<EventHandlerWrapper>> topicName;
 
-	public EventHandlerTracker(BundleContext context, LogService log) {
+	public EventHandlerTracker(BundleContext context, LogTracker log) {
 		super(context, EventHandler.class.getName(), null);
 		this.log = log;
 		globalWildcard = new ArrayList<EventHandlerWrapper>();

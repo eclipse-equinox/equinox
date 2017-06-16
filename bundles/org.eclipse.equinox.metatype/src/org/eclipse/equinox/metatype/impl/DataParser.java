@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 IBM Corporation and others.
+ * Copyright (c) 2005, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,13 +83,13 @@ public class DataParser {
 	String _dp_localization;
 
 	// Default visibility to avoid a plethora of synthetic accessor method warnings.
-	final LogService logger;
+	final LogTracker logger;
 	final Collection<Designate> designates = new ArrayList<Designate>(7);
 
 	/*
 	 * Constructor of class DataParser.
 	 */
-	public DataParser(Bundle bundle, URL url, SAXParser parser, LogService logger) {
+	public DataParser(Bundle bundle, URL url, SAXParser parser, LogTracker logger) {
 
 		this._dp_bundle = bundle;
 		this._dp_url = url;

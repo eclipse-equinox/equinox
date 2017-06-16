@@ -36,11 +36,11 @@ public class UserAdminStore {
 	protected ServiceReference prefsRef;
 	protected ServiceRegistration userAdminListenerReg;
 	protected UserAdmin useradmin;
-	protected LogService log;
+	protected LogTracker log;
 	protected Preferences rootNode;
 	protected PreferencesService preferencesService;
 
-	protected UserAdminStore(PreferencesService preferencesService, UserAdmin useradmin, LogService log) {
+	protected UserAdminStore(PreferencesService preferencesService, UserAdmin useradmin, LogTracker log) {
 		this.preferencesService = preferencesService;
 		this.useradmin = useradmin;
 		this.log = log;

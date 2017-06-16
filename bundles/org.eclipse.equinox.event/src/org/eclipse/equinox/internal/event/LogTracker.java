@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1998, 2013 IBM Corporation and others.
+ * Copyright (c) 1998, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * and handles all issues such as the service coming and going.
  */
 
-public class LogTracker extends ServiceTracker<LogService, LogService> implements LogService {
+public class LogTracker extends ServiceTracker<LogService, LogService> {
 	/** LogService interface class name */
 	protected final static String clazz = "org.osgi.service.log.LogService"; //$NON-NLS-1$
 
@@ -55,11 +55,12 @@ public class LogTracker extends ServiceTracker<LogService, LogService> implement
 		log(null, level, message, exception);
 	}
 
-	public void log(ServiceReference reference, int level, String message) {
+	public void log(ServiceReference<?> reference, int level, String message) {
 		log(reference, level, message, null);
 	}
 
-	public synchronized void log(ServiceReference reference, int level, String message, Throwable exception) {
+	@SuppressWarnings("deprecation")
+	public synchronized void log(ServiceReference<?> reference, int level, String message, Throwable exception) {
 		ServiceReference<LogService>[] references = getServiceReferences();
 
 		if (references != null) {
@@ -90,6 +91,7 @@ public class LogTracker extends ServiceTracker<LogService, LogService> implement
 	 * @param throwable Log exception or null if none.
 	 * @param reference ServiceReference associated with message or null if none.
 	 */
+	@SuppressWarnings("deprecation")
 	protected void noLogService(int level, String message, Throwable throwable, ServiceReference<?> reference) {
 		if (out != null) {
 			synchronized (out) {
@@ -99,22 +101,22 @@ public class LogTracker extends ServiceTracker<LogService, LogService> implement
 				out.print(timestamp + " "); //$NON-NLS-1$
 
 				switch (level) {
-					case LOG_DEBUG : {
+					case LogService.LOG_DEBUG : {
 						out.print(LogTrackerMsg.Debug);
 
 						break;
 					}
-					case LOG_INFO : {
+					case LogService.LOG_INFO : {
 						out.print(LogTrackerMsg.Info);
 
 						break;
 					}
-					case LOG_WARNING : {
+					case LogService.LOG_WARNING : {
 						out.print(LogTrackerMsg.Warning);
 
 						break;
 					}
-					case LOG_ERROR : {
+					case LogService.LOG_ERROR : {
 						out.print(LogTrackerMsg.Error);
 
 						break;

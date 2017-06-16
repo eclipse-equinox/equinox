@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2015 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,7 @@ import org.osgi.service.log.LogService;
  */
 public class EventHandlerWrapper {
 	final ServiceReference<EventHandler> reference;
-	private final LogService log;
+	private final LogTracker log;
 	final BundleContext context;
 	private EventHandler handler;
 	private String[] topics;
@@ -38,7 +38,7 @@ public class EventHandlerWrapper {
 	 * @param context Bundle Context of the Event Admin bundle
 	 * @param log LogService object for logging
 	 */
-	public EventHandlerWrapper(ServiceReference<EventHandler> reference, BundleContext context, LogService log) {
+	public EventHandlerWrapper(ServiceReference<EventHandler> reference, BundleContext context, LogTracker log) {
 		this.reference = reference;
 		this.context = context;
 		this.log = log;

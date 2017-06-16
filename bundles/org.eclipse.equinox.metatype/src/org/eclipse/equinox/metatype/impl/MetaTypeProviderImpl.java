@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,12 +45,12 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	boolean _isThereMeta = false;
 
 	// Give access to subclasses.
-	protected final LogService logger;
+	protected final LogTracker logger;
 
 	/**
 	 * Constructor of class MetaTypeProviderImpl.
 	 */
-	MetaTypeProviderImpl(Bundle bundle, SAXParser parser, LogService logger) {
+	MetaTypeProviderImpl(Bundle bundle, SAXParser parser, LogTracker logger) {
 
 		this._bundle = bundle;
 		this.logger = logger;

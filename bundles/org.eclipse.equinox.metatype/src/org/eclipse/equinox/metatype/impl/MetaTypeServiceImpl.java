@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,13 +30,13 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 	SAXParserFactory _parserFactory;
 	private Hashtable<Long, EquinoxMetaTypeInformation> _mtps = new Hashtable<Long, EquinoxMetaTypeInformation>(7);
 
-	private final LogService logger;
+	private final LogTracker logger;
 	private final ServiceTracker<Object, Object> metaTypeProviderTracker;
 
 	/**
 	 * Constructor of class MetaTypeServiceImpl.
 	 */
-	public MetaTypeServiceImpl(SAXParserFactory parserFactory, LogService logger, ServiceTracker<Object, Object> metaTypeProviderTracker) {
+	public MetaTypeServiceImpl(SAXParserFactory parserFactory, LogTracker logger, ServiceTracker<Object, Object> metaTypeProviderTracker) {
 		this._parserFactory = parserFactory;
 		this.logger = logger;
 		this.metaTypeProviderTracker = metaTypeProviderTracker;
@@ -56,7 +56,7 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 	 */
 	private EquinoxMetaTypeInformation getMetaTypeProvider(final Bundle b) {
 		// Avoid synthetic accessor method warnings.
-		final LogService loggerTemp = this.logger;
+		final LogTracker loggerTemp = this.logger;
 		final ServiceTracker<Object, Object> tracker = this.metaTypeProviderTracker;
 		Long bID = Long.valueOf(b.getBundleId());
 		synchronized (_mtps) {

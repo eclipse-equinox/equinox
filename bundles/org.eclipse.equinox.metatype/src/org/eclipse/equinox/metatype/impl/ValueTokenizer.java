@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,13 +21,13 @@ public class ValueTokenizer {
 	private static final char DELIMITER = ',';
 	private static final char ESCAPE = '\\';
 
-	private final LogService logger;
+	private final LogTracker logger;
 	private final List<String> values = new ArrayList<String>();
 
 	/*
 	 * Constructor of class ValueTokenizer
 	 */
-	public ValueTokenizer(String values_str, LogService logger) {
+	public ValueTokenizer(String values_str, LogTracker logger) {
 		this.logger = logger;
 		if (values_str == null)
 			return;

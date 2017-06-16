@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2001, 2008 IBM Corporation and others.
+ * Copyright (c) 2001, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,13 +27,13 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 
 	protected ServiceReference userAdmin;
 	static protected final String userAdminListenerClass = "org.osgi.service.useradmin.UserAdminListener"; //$NON-NLS-1$
-	protected LogService log;
+	protected LogTracker log;
 	/** List of UserAdminListeners */
 	protected EventListeners listeners;
 	/** EventManager for event delivery. */
 	protected EventManager eventManager;
 
-	protected UserAdminEventProducer(ServiceReference userAdmin, BundleContext context, LogService log) {
+	protected UserAdminEventProducer(ServiceReference userAdmin, BundleContext context, LogTracker log) {
 		super(context, userAdminListenerClass, null);
 		this.userAdmin = userAdmin;
 		this.log = log;
