@@ -82,6 +82,7 @@
     <module>bundles/org.eclipse.osgi.services</module>
     <module>bundles/org.eclipse.osgi.util</module>
     <module>bundles/org.eclipse.osgi/supplement</module>
+    <module>bundles/org.eclipse.equinox.log.stream</module>
     
     <module>bundles/org.eclipse.equinox.launcher</module>
     <module>bundles/org.eclipse.equinox.launcher.cocoa.macosx.x86_64</module>

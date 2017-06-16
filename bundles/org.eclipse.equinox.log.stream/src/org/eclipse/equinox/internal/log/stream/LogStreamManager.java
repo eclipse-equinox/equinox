@@ -12,7 +12,6 @@ package org.eclipse.equinox.internal.log.stream;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -24,7 +23,6 @@ import org.osgi.service.log.stream.LogStreamProvider;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-
 /* LogStreamManager is used to start and stop the bundle and keeps the track of the logs using the 
  * ServiceTrackerCustomizer<LogReaderService, AtomicReference<LogReaderService>> which listens to 
  * the incoming logs using the LogListener. It is also responsible to provide service tracker 
@@ -32,50 +30,51 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * 
  */
 public class LogStreamManager implements BundleActivator, ServiceTrackerCustomizer<LogReaderService, AtomicReference<LogReaderService>>, LogListener {
-	private ServiceRegistration<LogStreamProvider> logStreamServiceRegistration;    
+	private ServiceRegistration<LogStreamProvider> logStreamServiceRegistration;
 	private LogStreamProviderFactory logStreamProviderFactory;
 	private ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService;
 	BundleContext context;
 	ReentrantLock eventProducerLock = new ReentrantLock();
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
-	public void start(BundleContext context) throws Exception {
-		
-		this.context = context;
+	@Override
+	public void start(BundleContext bc) throws Exception {
+
+		this.context = bc;
 		logReaderService = new ServiceTracker<>(context, LogReaderService.class, this);
 		logReaderService.open();
-		
-		logStreamProviderFactory = new LogStreamProviderFactory(logReaderService);   
-		logStreamServiceRegistration = context.registerService(LogStreamProvider.class, logStreamProviderFactory, null); 
-		
+
+		logStreamProviderFactory = new LogStreamProviderFactory(logReaderService);
+		logStreamServiceRegistration = context.registerService(LogStreamProvider.class, logStreamProviderFactory, null);
+
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
+	@Override
 	public void stop(BundleContext bundleContext) throws Exception {
 		logReaderService.close();
-		logStreamServiceRegistration.unregister();   
-		logStreamServiceRegistration = null;		 
+		logStreamServiceRegistration.unregister();
+		logStreamServiceRegistration = null;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
 	 */
-	
+
 	@Override
 	public AtomicReference<LogReaderService> addingService(ServiceReference<LogReaderService> reference) {
 		AtomicReference<LogReaderService> tracked = new AtomicReference<>();
 		modifiedService(reference, tracked);
 		return tracked;
 	}
-	
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
@@ -110,7 +109,7 @@ public class LogStreamManager implements BundleActivator, ServiceTrackerCustomiz
 							}
 						}
 					}
-					
+
 					readerService.addLogListener(this);
 				}
 			}
@@ -118,18 +117,15 @@ public class LogStreamManager implements BundleActivator, ServiceTrackerCustomiz
 			eventProducerLock.unlock();
 		}
 	}
-	
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
 	 */
 	@Override
 	public void removedService(ServiceReference<LogReaderService> removedRef, AtomicReference<LogReaderService> removedTracked) {
-		
 		eventProducerLock.lock();
 		try {
-		} finally {
 			LogReaderService removedLogReader = removedTracked.get();
 			if (removedLogReader != null) {
 				// remove the listener
@@ -151,12 +147,11 @@ public class LogStreamManager implements BundleActivator, ServiceTrackerCustomiz
 					}
 				}
 			}
+		} finally {
 			eventProducerLock.unlock();
 		}
 	}
 
-
-	
 	/* It is used to post each log entry to the LogStreamProviderFactory
 	 * (non-Javadoc)
 	 * @see org.osgi.service.log.LogListener#logged(org.osgi.service.log.LogEntry)
@@ -164,7 +159,7 @@ public class LogStreamManager implements BundleActivator, ServiceTrackerCustomiz
 
 	@Override
 	public void logged(LogEntry entry) {
-		
+
 		logStreamProviderFactory.postLogEntry(entry);
 	}
 

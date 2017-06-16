@@ -16,7 +16,6 @@ import java.util.WeakHashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogReaderService;
 import org.osgi.service.log.stream.LogStreamProvider;
@@ -29,19 +28,15 @@ import org.osgi.util.tracker.ServiceTracker;
 public class LogStreamProviderImpl implements LogStreamProvider {
 	private final PushStreamProvider pushStreamProvider = new PushStreamProvider();
 	private final ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService;
-	private final WeakHashMap<LogEntrySource,Boolean> weakMap = new WeakHashMap<>();
+	private final WeakHashMap<LogEntrySource, Boolean> weakMap = new WeakHashMap<>();
 	private final Set<LogEntrySource> logEntrySources = Collections.newSetFromMap(weakMap);
 
 	private final ReentrantReadWriteLock historyLock = new ReentrantReadWriteLock();
-	
-	
-	
-	public LogStreamProviderImpl(
-			ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService) {
+
+	public LogStreamProviderImpl(ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService) {
 		this.logReaderService = logReaderService;
 	}
-	
-	
+
 	/* Create a PushStream of {@link LogEntry} objects.
 	 * The returned PushStream is an unbuffered stream with a parallelism of one.
 	 * (non-Javadoc)
@@ -58,23 +53,21 @@ public class LogStreamProviderImpl implements LogStreamProvider {
 				}
 			}
 		}
-		
-		
+
 		// A write lock is acquired in order to add logEntrySource into the Set of logEntrySources.
 		historyLock.writeLock().lock();
-			try{
-				LogEntrySource logEntrySource = new LogEntrySource(withHistory);
-				PushStreamBuilder<LogEntry, BlockingQueue<PushEvent<? extends LogEntry>>> streamBuilder = pushStreamProvider.buildStream(logEntrySource);
-				//creating an unbuffered stream
-				PushStream<LogEntry> logStream = streamBuilder.unbuffered().create();
-				logEntrySource.setLogStream(logStream);
-				// Adding to sources makes the source start listening for new entries
-				logEntrySources.add(logEntrySource);
-				return logStream;
-			}
-			finally{
-				historyLock.writeLock().unlock();
-			}
+		try {
+			LogEntrySource logEntrySource = new LogEntrySource(withHistory);
+			PushStreamBuilder<LogEntry, BlockingQueue<PushEvent<? extends LogEntry>>> streamBuilder = pushStreamProvider.buildStream(logEntrySource);
+			//creating an unbuffered stream
+			PushStream<LogEntry> logStream = streamBuilder.unbuffered().create();
+			logEntrySource.setLogStream(logStream);
+			// Adding to sources makes the source start listening for new entries
+			logEntrySources.add(logEntrySource);
+			return logStream;
+		} finally {
+			historyLock.writeLock().unlock();
+		}
 	}
 
 	/*
@@ -82,36 +75,34 @@ public class LogStreamProviderImpl implements LogStreamProvider {
 	 */
 	public void logged(LogEntry entry) {
 		historyLock.readLock().lock();
-		try{
+		try {
 			for (LogEntrySource logEntrySource : logEntrySources) {
 				logEntrySource.logged(entry);
 			}
-		}
-		finally{
+		} finally {
 			historyLock.readLock().unlock();
 		}
 	}
-	
-	
+
 	/*
 	 * Closing the stream for each source.
 	 */
 	public void close() {
 		PushStream<LogEntry> logStream;
 		historyLock.readLock().lock();
-		try{
-			for(LogEntrySource logEntrySource : logEntrySources) {
-			    logStream = logEntrySource.getLogStream();
+		try {
+			for (LogEntrySource logEntrySource : logEntrySources) {
+				logStream = logEntrySource.getLogStream();
 				try {
 					logStream.close();
-					
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-		}finally{
+		} finally {
 			historyLock.readLock().unlock();
 		}
-	}	
+	}
 
 }
