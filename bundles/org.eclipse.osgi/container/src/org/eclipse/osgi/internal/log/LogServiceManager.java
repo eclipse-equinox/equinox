@@ -130,7 +130,19 @@ public class LogServiceManager implements BundleListener, FrameworkListener, Ser
 		Bundle bundle = event.getBundle();
 		int eventType = event.getType();
 		@SuppressWarnings("deprecation")
-		int logType = (eventType == FrameworkEvent.ERROR) ? LogService.LOG_ERROR : LogService.LOG_INFO;
+		int logType;
+		switch (eventType) {
+			case FrameworkEvent.ERROR :
+				logType = LogService.LOG_ERROR;
+				break;
+			case FrameworkEvent.WARNING :
+				logType = LogService.LOG_WARNING;
+				break;
+			default :
+				logType = LogService.LOG_INFO;
+				break;
+		}
+
 		if (logReaderServiceFactory.isLoggable(bundle, LOGGER_FRAMEWORK_EVENT, logType)) {
 			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(LOGGER_FRAMEWORK_EVENT);
 			logger.log(bundle, null, null, logType, getFrameworkEventTypeName(eventType), event.getThrowable());

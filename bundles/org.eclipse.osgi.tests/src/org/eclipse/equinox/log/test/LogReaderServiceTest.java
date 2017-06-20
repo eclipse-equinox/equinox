@@ -10,6 +10,9 @@ package org.eclipse.equinox.log.test;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.*;
+import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
@@ -165,6 +168,32 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 			listener.waitForLogEntry();
 		}
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
+	}
+
+	public void testLogFrameworkEventType() throws Exception {
+		final List<LogEntry> events = new CopyOnWriteArrayList<LogEntry>();
+		final CountDownLatch countDown = new CountDownLatch(2);
+		final Bundle b = getContext().getBundle();
+		LogListener listener = new LogListener() {
+			@Override
+			public void logged(LogEntry entry) {
+				if (b.equals(entry.getBundle())) {
+					events.add(entry);
+					countDown.countDown();
+				}
+			}
+		};
+		reader.addLogListener(listener);
+
+		//publishing an event with ERROR
+		b.adapt(Module.class).getContainer().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, b.adapt(Module.class), new Exception());
+		//publishing an event with WARNING
+		b.adapt(Module.class).getContainer().getAdaptor().publishContainerEvent(ContainerEvent.WARNING, b.adapt(Module.class), new Exception());
+		countDown.await(2, TimeUnit.SECONDS);
+		assertEquals("Wrong number of events", 2, events.size());
+		assertEquals("Wrong type.", LogService.LOG_ERROR, events.get(0).getLevel());
+		assertEquals("Wrong type.", LogService.LOG_WARNING, events.get(1).getLevel());
+
 	}
 
 	public void testLogHistory1() throws BundleException {
