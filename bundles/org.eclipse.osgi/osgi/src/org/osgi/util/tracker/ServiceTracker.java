@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2016). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2017). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -394,9 +394,9 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 	 * This method is only called when this {@code ServiceTracker} has been
 	 * constructed with a {@code null ServiceTrackerCustomizer} argument.
 	 * <p>
-	 * This implementation returns the result of calling {@code getService} on
+	 * This implementation returns the result of calling {@code getService}, on
 	 * the {@code BundleContext} with which this {@code ServiceTracker} was
-	 * created passing the specified {@code ServiceReference}.
+	 * created, passing the specified {@code ServiceReference}.
 	 * <p>
 	 * This method can be overridden in a subclass to customize the service
 	 * object to be tracked for the service being added. In that case, take care
