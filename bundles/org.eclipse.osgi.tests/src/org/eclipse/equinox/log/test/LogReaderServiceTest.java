@@ -172,7 +172,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 
 	public void testLogFrameworkEventType() throws Exception {
 		final List<LogEntry> events = new CopyOnWriteArrayList<LogEntry>();
-		final CountDownLatch countDown = new CountDownLatch(2);
+		final CountDownLatch countDown = new CountDownLatch(3);
 		final Bundle b = getContext().getBundle();
 		LogListener listener = new LogListener() {
 			@Override
@@ -189,10 +189,14 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		b.adapt(Module.class).getContainer().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, b.adapt(Module.class), new Exception());
 		//publishing an event with WARNING
 		b.adapt(Module.class).getContainer().getAdaptor().publishContainerEvent(ContainerEvent.WARNING, b.adapt(Module.class), new Exception());
+		//publishing an event with INFO
+		b.adapt(Module.class).getContainer().getAdaptor().publishContainerEvent(ContainerEvent.INFO, b.adapt(Module.class), new Exception());
+
 		countDown.await(2, TimeUnit.SECONDS);
-		assertEquals("Wrong number of events", 2, events.size());
-		assertEquals("Wrong type.", LogService.LOG_ERROR, events.get(0).getLevel());
-		assertEquals("Wrong type.", LogService.LOG_WARNING, events.get(1).getLevel());
+		assertEquals("Wrong number of events", 3, events.size());
+		assertEquals("Wrong type.", LogLevel.ERROR, events.get(0).getLogLevel());
+		assertEquals("Wrong type.", LogLevel.WARN, events.get(1).getLogLevel());
+		assertEquals("Wrong type.", LogLevel.INFO, events.get(2).getLogLevel());
 
 	}
 
