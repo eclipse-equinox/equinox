@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2016 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -2677,22 +2677,38 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertNotNull("No system bundle class loader.", cl);
 	}
 
-	public void testJavaProfile() {
-		String original = System.getProperty("java.specification.version");
+	public void testJavaProfile() throws IOException {
+		String originalSpecVersion = System.getProperty("java.specification.version");
+		String originalJavaHome = System.getProperty("java.home");
 		try {
-			doTestJavaProfile("9.3.1", "JavaSE-9");
-			doTestJavaProfile("9", "JavaSE-9");
-			doTestJavaProfile("8.4", "JavaSE-1.8");
-			doTestJavaProfile("1.10.1", "JavaSE-1.8");
-			doTestJavaProfile("1.9", "JavaSE-1.8");
-			doTestJavaProfile("1.8", "JavaSE-1.8");
-			doTestJavaProfile("1.7", "JavaSE-1.7");
+			doTestJavaProfile("9.3.1", "JavaSE-9", null);
+			doTestJavaProfile("9", "JavaSE-9", null);
+			doTestJavaProfile("8.4", "JavaSE-1.8", null);
+			doTestJavaProfile("1.10.1", "JavaSE-1.8", null);
+			doTestJavaProfile("1.9", "JavaSE-1.8", null);
+			doTestJavaProfile("1.8", "JavaSE-1.8", null);
+			doTestJavaProfile("1.7", "JavaSE-1.7", null);
+			doTestJavaProfile("1.8", "JavaSE/compact3-1.8", "compact3");
+			doTestJavaProfile("1.8", "JavaSE/compact3-1.8", "\"compact3\"");
+			doTestJavaProfile("1.8", "JavaSE-1.8", "\"compact4\"");
+			doTestJavaProfile("9", "JavaSE/compact3-1.8", "compact3");
+			doTestJavaProfile("9", "JavaSE/compact3-1.8", "\"compact3\"");
+			doTestJavaProfile("9", "JavaSE-9", "\"compact4\"");
 		} finally {
-			System.setProperty("java.specification.version", original);
+			System.setProperty("java.specification.version", originalSpecVersion);
+			System.setProperty("java.home", originalJavaHome);
 		}
 	}
 
-	private void doTestJavaProfile(String javaSpecVersion, String expectedEEName) {
+	private void doTestJavaProfile(String javaSpecVersion, String expectedEEName, String releaseName) throws FileNotFoundException, IOException {
+		if (releaseName != null) {
+			File release = getContext().getDataFile("jre/release");
+			release.getParentFile().mkdirs();
+			Properties props = new Properties();
+			props.put("JAVA_PROFILE", releaseName);
+			props.store(new FileOutputStream(release), null);
+			System.setProperty("java.home", release.getParentFile().getAbsolutePath());
+		}
 		System.setProperty("java.specification.version", javaSpecVersion);
 		// create/stop/ test
 		File config = OSGiTestsActivator.getContext().getDataFile(getName() + javaSpecVersion);
@@ -2719,7 +2735,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 
-		assertTrue("Wrong osgi EE: " + osgiEE, osgiEE.endsWith(expectedEEName));
+		assertTrue("Wrong osgi EE: expected: " + expectedEEName + " but was: " + osgiEE, osgiEE.endsWith(expectedEEName));
 	}
 
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {

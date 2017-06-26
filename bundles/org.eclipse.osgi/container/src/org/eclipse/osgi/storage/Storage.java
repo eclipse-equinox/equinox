@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1434,8 +1434,12 @@ public class Storage {
 								Properties releaseProps = new Properties();
 								try {
 									releaseProps.load(new FileInputStream(release));
-									if (releaseProps.containsKey("JAVA_PROFILE")) { //$NON-NLS-1$
-										embeddedProfileName = "_" + releaseProps.getProperty("JAVA_PROFILE") + "-"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+									String releaseName = releaseProps.getProperty("JAVA_PROFILE"); //$NON-NLS-1$
+									if (releaseName != null) {
+										// make sure to remove extra quotes
+										releaseName = releaseName.trim();
+										releaseName = releaseName.replaceAll("^\"|\"$", ""); //$NON-NLS-1$ //$NON-NLS-2$
+										embeddedProfileName = "_" + releaseName + "-"; //$NON-NLS-1$ //$NON-NLS-2$
 									}
 								} catch (IOException e) {
 									// ignore
@@ -1520,6 +1524,9 @@ public class Storage {
 			} else if (major <= 9 && major > 1) {
 				minor = 8;
 				major = 1;
+			} else {
+				// we have reached the end of our search; return the existing result;
+				return result;
 			}
 		} while (result == null && minor >= 0);
 		return result;
