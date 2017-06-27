@@ -12,7 +12,6 @@
 /* This file contains code common between GTK & Motif */
 #include "eclipseOS.h"
 #include "eclipseCommon.h"
-#include "eclipseMozilla.h"
 #include "eclipseUtil.h"
 #include "eclipseJNI.h"
 
@@ -115,9 +114,6 @@ static void adjustLibraryPath( char * vmLibrary ) {
 	int needAdjust = 0;
 	
 	char ** paths = NULL;
-#ifdef MOZILLA_FIX
-	fixEnvForMozilla();
-#endif /* MOZILLA_FIX */
 	
 	paths = getVMLibrarySearchPath(vmLibrary);
  

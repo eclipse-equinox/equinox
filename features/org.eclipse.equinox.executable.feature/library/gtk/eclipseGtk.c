@@ -11,7 +11,6 @@
  *     Tom Tromey (Red Hat, Inc.)
  *******************************************************************************/
 
-#include "eclipseMozilla.h"
 #include "eclipseCommon.h"
 #include "eclipseOS.h"
 #include "eclipseUtil.h"
@@ -327,10 +326,6 @@ JavaResults* launchJavaVM( char* args[] )
   	pid_t   jvmProcess, finishedProcess = 0;
   	int     exitCode;
   	
-#ifdef MOZILLA_FIX
-	fixEnvForMozilla();
-#endif /* MOZILLA_FIX */
-	
 	jvmProcess = fork();
   	if (jvmProcess == 0) 
     {

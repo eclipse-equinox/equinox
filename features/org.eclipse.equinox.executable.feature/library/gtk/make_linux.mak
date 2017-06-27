@@ -37,7 +37,7 @@ endif
 CC?=gcc
 MAIN_OBJS = eclipseMain.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseGtkCommon.o eclipseGtkInit.o
-DLL_OBJS	= eclipse.o eclipseGtk.o eclipseUtil.o eclipseJNI.o eclipseMozilla.o eclipseShm.o eclipseNix.o
+DLL_OBJS	= eclipse.o eclipseGtk.o eclipseUtil.o eclipseJNI.o eclipseShm.o eclipseNix.o
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
@@ -51,7 +51,6 @@ LFLAGS = ${M_ARCH} -shared -fpic -Wl,--export-dynamic
 CFLAGS = ${M_CFLAGS} ${M_ARCH} -g -s -Wall\
 	-fpic \
 	-DLINUX \
-	-DMOZILLA_FIX \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
@@ -88,9 +87,6 @@ eclipseJNI.o: ../eclipseJNI.c ../eclipseCommon.h ../eclipseOS.h ../eclipseJNI.h
 eclipseConfig.o: ../eclipseConfig.c ../eclipseConfig.h ../eclipseOS.h
 	$(CC) $(CFLAGS) -c ../eclipseConfig.c -o eclipseConfig.o
 	
-eclipseMozilla.o: ../eclipseMozilla.c ../eclipseMozilla.h ../eclipseOS.h
-	$(CC) $(CFLAGS) -c ../eclipseMozilla.c -o eclipseMozilla.o
-
 eclipseShm.o: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
 	$(CC) $(CFLAGS) -c ../eclipseShm.c -o eclipseShm.o
 
