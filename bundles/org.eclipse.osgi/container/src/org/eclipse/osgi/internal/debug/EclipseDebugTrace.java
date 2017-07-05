@@ -11,6 +11,7 @@
 package org.eclipse.osgi.internal.debug;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -604,12 +605,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 * @return A Writer for the given OutputStream
 	 */
 	private Writer logForStream(OutputStream output) {
-
-		try {
-			return new BufferedWriter(new OutputStreamWriter(output, "UTF-8")); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
-			return new BufferedWriter(new OutputStreamWriter(output));
-		}
+		return new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8));
 	}
 
 	/**

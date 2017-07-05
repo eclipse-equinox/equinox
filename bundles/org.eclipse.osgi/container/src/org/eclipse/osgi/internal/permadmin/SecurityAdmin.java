@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2016 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.osgi.internal.permadmin;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.*;
 import java.util.*;
@@ -427,12 +428,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		try {
 			in = new DataInputStream(resource.openStream());
 			List<PermissionInfo> permissions = new ArrayList<>();
-			BufferedReader reader;
-			try {
-				reader = new BufferedReader(new InputStreamReader(in, "UTF8")); //$NON-NLS-1$
-			} catch (UnsupportedEncodingException e) {
-				reader = new BufferedReader(new InputStreamReader(in));
-			}
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
 
 			while (true) {
 				String line = reader.readLine();

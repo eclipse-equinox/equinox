@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2016 IBM Corporation and others.
+ * Copyright (c) 2003, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 package org.eclipse.osgi.framework.internal.reliablefile;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
@@ -822,12 +823,7 @@ public class ReliableFile {
 					crc.update(data, 0, 16); // update crc w/ sig bytes
 					return FILETYPE_NOSIGNATURE;
 				}
-			long crccmp;
-			try {
-				crccmp = Long.valueOf(new String(data, 4, 8, "UTF-8"), 16).longValue(); //$NON-NLS-1$
-			} catch (UnsupportedEncodingException e) {
-				crccmp = Long.valueOf(new String(data, 4, 8), 16).longValue();
-			}
+			long crccmp = Long.valueOf(new String(data, 4, 8, StandardCharsets.UTF_8), 16).longValue();
 			if (crccmp == crc.getValue()) {
 				return FILETYPE_VALID;
 			}

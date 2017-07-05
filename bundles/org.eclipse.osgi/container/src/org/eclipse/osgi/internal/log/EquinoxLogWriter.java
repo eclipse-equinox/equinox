@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 IBM Corporation and others.
+ * Copyright (c) 2004, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.osgi.internal.log;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.equinox.log.*;
@@ -445,11 +446,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	 * @return a Writer for the given OutputStream
 	 */
 	private Writer logForStream(OutputStream output) {
-		try {
-			return new BufferedWriter(new OutputStreamWriter(output, "UTF-8")); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
-			return new BufferedWriter(new OutputStreamWriter(output));
-		}
+		return new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8));
 	}
 
 	/**
