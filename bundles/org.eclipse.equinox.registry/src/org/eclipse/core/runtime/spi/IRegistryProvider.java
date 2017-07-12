@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -26,10 +26,10 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 public interface IRegistryProvider {
 
 	/**
-	 * Returns the extension registry contributed by this provider; must not 
+	 * Returns the extension registry contributed by this provider; must not
 	 * be <code>null</code>.
-	 * 
-	 * @return an extension registry 
+	 *
+	 * @return an extension registry
 	 */
 	public IExtensionRegistry getRegistry();
 }

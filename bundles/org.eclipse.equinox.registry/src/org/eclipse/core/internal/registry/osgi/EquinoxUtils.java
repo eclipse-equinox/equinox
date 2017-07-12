@@ -18,9 +18,9 @@ import org.osgi.framework.*;
  * The class contains a set of Equinox-specific helper methods. The methods were isolated
  * into separate class to prevent an attempt to load Equinox classes in a generic OSGi
  * environment.
- * 
+ *
  * This class uses OSGi services.
- * 
+ *
  * @since org.eclipse.equinox.registry 3.2.100
  */
 public class EquinoxUtils {

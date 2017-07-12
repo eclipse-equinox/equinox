@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -23,7 +23,7 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 /**
- * A listener for bundle events.  When a bundles come and go we look to see 
+ * A listener for bundle events.  When a bundles come and go we look to see
  * if there are any extensions or extension points and update the registry accordingly.
  * Using a Synchronous listener here is important. If the
  * bundle activator code tries to access the registry to get its extension
@@ -33,7 +33,7 @@ import org.osgi.framework.*;
  */
 public class EclipseBundleListener implements SynchronousBundleListener {
 	private static final String PLUGIN_MANIFEST = "plugin.xml"; //$NON-NLS-1$
-	private static final String FRAGMENT_MANIFEST = "fragment.xml"; //$NON-NLS-1$	
+	private static final String FRAGMENT_MANIFEST = "fragment.xml"; //$NON-NLS-1$
 
 	private ExtensionRegistry registry;
 	private RegistryStrategyOSGI strategy;
@@ -49,19 +49,19 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 
 	@Override
 	public void bundleChanged(BundleEvent event) {
-		/* Only should listen for RESOLVED and UNRESOLVED events.  
-		 * 
-		 * When a bundle is updated the Framework will publish an UNRESOLVED and 
-		 * then a RESOLVED event which should cause the bundle to be removed 
-		 * and then added back into the registry.  
-		 * 
-		 * When a bundle is uninstalled the Framework should publish an UNRESOLVED 
-		 * event and then an UNINSTALLED event so the bundle will have been removed 
+		/* Only should listen for RESOLVED and UNRESOLVED events.
+		 *
+		 * When a bundle is updated the Framework will publish an UNRESOLVED and
+		 * then a RESOLVED event which should cause the bundle to be removed
+		 * and then added back into the registry.
+		 *
+		 * When a bundle is uninstalled the Framework should publish an UNRESOLVED
+		 * event and then an UNINSTALLED event so the bundle will have been removed
 		 * by the UNRESOLVED event before the UNINSTALLED event is published.
-		 * 
+		 *
 		 * When a bundle is refreshed from PackageAdmin an UNRESOLVED event will be
 		 * published which will remove the bundle from the registry.  If the bundle
-		 * can be RESOLVED after a refresh then a RESOLVED event will be published 
+		 * can be RESOLVED after a refresh then a RESOLVED event will be published
 		 * which will add the bundle back.  This is required because the classloader
 		 * will have been refreshed for the bundle so all extensions and extension
 		 * points for the bundle must be refreshed.
@@ -249,7 +249,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		if (localization == null)
 			// localization may be empty in which case we should check the default
 			localization = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
-		// we do a simple check to make sure the default nls path exists in the target; 
+		// we do a simple check to make sure the default nls path exists in the target;
 		// this is for performance reasons, but I'm not sure it is valid because a target could ship without the default nls properties file but this seems very unlikely
 		URL baseNLS = target.getEntry(localization + ".properties"); //$NON-NLS-1$
 		if (baseNLS == null)

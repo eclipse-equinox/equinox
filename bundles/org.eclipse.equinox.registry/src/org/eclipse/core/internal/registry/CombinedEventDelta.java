@@ -16,11 +16,11 @@ import org.eclipse.core.runtime.IExtensionPoint;
 
 /**
  * The class stores extensions and extensions points that have been actually
- * modified by a registry operation. 
- * 
+ * modified by a registry operation.
+ *
  * For performance, modified extensions and extension points are stored in two forms:
  * - organized in buckets by IDs of extension points (for listeners on specific ext.point)
- * - aggregated in one list (for global listeners) 
+ * - aggregated in one list (for global listeners)
  */
 public class CombinedEventDelta {
 
@@ -130,7 +130,7 @@ public class CombinedEventDelta {
 			extensionPoints = (List) extPointsByID.get(id);
 		else if (id == null)
 			extensionPoints = allExtensionPoints;
-		if (extensionPoints == null) // no changes that fit the filter 
+		if (extensionPoints == null) // no changes that fit the filter
 			return null;
 		int size = extensionPoints.size();
 		ArrayList result = new ArrayList(size);
@@ -150,7 +150,7 @@ public class CombinedEventDelta {
 			extensions = (List) extensionsByID.get(id);
 		else if (id == null)
 			extensions = allExtensions;
-		if (extensions == null) // no changes that fit the filter 
+		if (extensions == null) // no changes that fit the filter
 			return null;
 		int size = extensions.size();
 		ArrayList result = new ArrayList(size);

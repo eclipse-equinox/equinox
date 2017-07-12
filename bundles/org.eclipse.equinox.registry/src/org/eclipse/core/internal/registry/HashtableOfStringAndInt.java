@@ -164,7 +164,7 @@ public final class HashtableOfStringAndInt implements Cloneable {
 			out.writeInt(valueTable[i]);
 		}
 	}
-	
+
 	/**
 	 * Filtered save: outputs only elements with values not in the excluded list.
 	 */

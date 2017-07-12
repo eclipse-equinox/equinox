@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.IExtensionDelta;
 import org.eclipse.core.runtime.IRegistryChangeEvent;
 
 /**
- * A registry change event implementation. A filter can be specified. In that case, only 
+ * A registry change event implementation. A filter can be specified. In that case, only
  * deltas for the selected host will be available to clients.
  */
 public final class RegistryChangeEvent implements IRegistryChangeEvent {

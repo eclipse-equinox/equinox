@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -56,7 +56,7 @@ public class RegistryObjectManager implements IObjectManager {
 	private HashMap removedContributors; // key: contributor ID; value: contributor name
 	private KeyedHashSet namespacesIndex; // registry elements (extension & extensionpoints) indexed by namespaces
 
-	// Map key: extensionPointFullyQualifiedName, value int[] of orphan extensions. 
+	// Map key: extensionPointFullyQualifiedName, value int[] of orphan extensions.
 	// The orphan access does not need to be synchronized because the it is protected by the lock in extension registry.
 	private Object orphanExtensions;
 
@@ -276,8 +276,8 @@ public class RegistryObjectManager implements IObjectManager {
 		return result;
 	}
 
-	// The current impementation of this method assumes that we don't cache dynamic 
-	// extension. In this case all extensions not yet loaded (i.e. not in the memory cache) 
+	// The current impementation of this method assumes that we don't cache dynamic
+	// extension. In this case all extensions not yet loaded (i.e. not in the memory cache)
 	// are "not dynamic" and we actually check memory objects to see if they are dynamic.
 	//
 	// If we decide to allow caching of dynamic objects, the implementation
@@ -600,7 +600,7 @@ public class RegistryObjectManager implements IObjectManager {
 			return contributor;
 		// check if we have it among removed contributors - potentially
 		// notification of removals might be processed after the contributor
-		// marked as removed: 
+		// marked as removed:
 		if (removedContributors != null)
 			return (RegistryContributor) removedContributors.get(id);
 		return null;
@@ -679,7 +679,7 @@ public class RegistryObjectManager implements IObjectManager {
 
 	/**
 	 * Add to the set of the objects all extensions and extension points that
-	 * could be navigated to from the objects in the set. 
+	 * could be navigated to from the objects in the set.
 	 */
 	synchronized void addNavigableObjects(Map associatedObjects) {
 		Map result = new HashMap();

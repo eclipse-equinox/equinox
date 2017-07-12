@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -27,9 +27,9 @@ import org.eclipse.core.runtime.spi.RegistryContributor;
 public final class ContributorFactorySimple {
 
 	/**
-	 * Creates registry contributor object based on a determining object.The determining 
+	 * Creates registry contributor object based on a determining object.The determining
 	 * object must not be <code>null</code>.
-	 * 
+	 *
 	 * @param determiningObject object associated with the contribution
 	 * @return new registry contributor based on the determining object
 	 */

@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -15,8 +15,8 @@ import java.lang.ref.SoftReference;
 import org.eclipse.core.runtime.IContributor;
 
 /**
- * An object which represents the user-defined extension point in a 
- * plug-in manifest. 
+ * An object which represents the user-defined extension point in a
+ * plug-in manifest.
  */
 public class ExtensionPoint extends RegistryObject {
 	public static final ExtensionPoint[] EMPTY_ARRAY = new ExtensionPoint[0];
@@ -49,14 +49,14 @@ public class ExtensionPoint extends RegistryObject {
 	}
 
 	private String[] getExtraData() {
-		//The extension point has been created by parsing, or does not have any extra data 
-		if (noExtraData()) { //When this is true, the extraInformation is always a String[]. This happens when the object is created by the parser.  
+		//The extension point has been created by parsing, or does not have any extra data
+		if (noExtraData()) { //When this is true, the extraInformation is always a String[]. This happens when the object is created by the parser.
 			if (extraInformation != null)
 				return (String[]) extraInformation;
 			return new String[EXTRA_SIZE];
 		}
 
-		//The extension point has been loaded from the cache. 
+		//The extension point has been loaded from the cache.
 		String[] result = null;
 		if (extraInformation == null || (result = ((extraInformation instanceof SoftReference) ? (String[]) ((SoftReference) extraInformation).get() : (String[]) extraInformation)) == null) {
 			result = registry.getTableReader().loadExtensionPointExtraData(getExtraDataOffset());
@@ -79,7 +79,7 @@ public class ExtensionPoint extends RegistryObject {
 
 	protected String getSchemaReference() {
 		String[] result = getExtraData();
-		return result[1] == null ? "" : result[SCHEMA].replace(File.separatorChar, '/'); //$NON-NLS-1$		
+		return result[1] == null ? "" : result[SCHEMA].replace(File.separatorChar, '/'); //$NON-NLS-1$
 	}
 
 	protected String getLabel() {

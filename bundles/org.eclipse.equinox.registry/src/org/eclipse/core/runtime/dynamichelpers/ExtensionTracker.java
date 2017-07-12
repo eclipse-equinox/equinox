@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids - fix for the bug 178028 (removals not propagated to handlers)
@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.*;
  * <p>
  * This class can be used without OSGi running.
  * </p>
- * @see org.eclipse.core.runtime.dynamichelpers.IExtensionTracker 
+ * @see org.eclipse.core.runtime.dynamichelpers.IExtensionTracker
  * @since 3.1
  */
 public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListener {
@@ -46,8 +46,8 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	/**
 	 * Construct a new instance of the extension tracker using the given registry
 	 * containing tracked extensions and extension points.
-	 * 
-	 * @param theRegistry the extension registry to track 
+	 *
+	 * @param theRegistry the extension registry to track
 	 * @since org.eclipse.equinox.registry 3.2
 	 */
 	public ExtensionTracker(IExtensionRegistry theRegistry) {
@@ -129,10 +129,10 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 
 	/**
 	 * Notify all handlers whose filter matches that the given delta occurred.
-	 * If the list of objects is not <code>null</code> then this is a removal and 
+	 * If the list of objects is not <code>null</code> then this is a removal and
 	 * the handlers will be given a chance to process the list.  If it is <code>null</code>
 	 * then the notification is an addition.
-	 * 
+	 *
 	 * @param delta the change to broadcast
 	 * @param objects the objects to pass to the handlers on removals
 	 */
@@ -251,8 +251,8 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 
 	/**
 	 * Return an instance of filter matching all changes for the given extension point.
-	 * 
-	 * @param xpt the extension point 
+	 *
+	 * @param xpt the extension point
 	 * @return a filter
 	 */
 	public static IFilter createExtensionPointFilter(final IExtensionPoint xpt) {
@@ -266,7 +266,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 
 	/**
 	 * Return an instance of filter matching all changes for the given extension points.
-	 * 
+	 *
 	 * @param xpts the extension points used to filter
 	 * @return a filter
 	 */
@@ -284,8 +284,8 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 
 	/**
 	 * Return an instance of filter matching all changes from a given plugin.
-	 * 
-	 * @param id the plugin id 
+	 *
+	 * @param id the plugin id
 	 * @return a filter
 	 */
 	public static IFilter createNamespaceFilter(final String id) {

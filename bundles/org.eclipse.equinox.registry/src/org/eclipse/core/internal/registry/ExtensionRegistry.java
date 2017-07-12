@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Danail Nachev - exception handling for registry listeners (bug 188369)
@@ -72,7 +72,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	// Table reader associated with this extension registry
 	protected TableReader theTableReader = new TableReader(this);
 
-	private Object masterToken; // use to get full control of the registry; objects created as "static" 
+	private Object masterToken; // use to get full control of the registry; objects created as "static"
 	private Object userToken; // use to modify non-persisted registry elements
 
 	protected RegistryStrategy strategy; // overridable portions of the registry functionality
@@ -97,7 +97,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	/**
 	 * Sets new cache file manager. If existing file manager was owned by the registry,
 	 * closes it.
-	 *  
+	 *
 	 * @param cacheBase the base location for the registry cache
 	 * @param isCacheReadOnly whether the file cache is read only
 	 */
@@ -217,7 +217,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	@Override
 	public void addRegistryChangeListener(IRegistryChangeListener listener) {
-		// this is just a convenience API - no need to do any sync'ing here		
+		// this is just a convenience API - no need to do any sync'ing here
 		addListenerInternal(listener, null);
 	}
 
@@ -259,7 +259,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		access.enterRead();
 	}
 
-	// allow other objects in the registry to use the same lock	
+	// allow other objects in the registry to use the same lock
 	void exitRead() {
 		access.exitRead();
 	}
@@ -290,7 +290,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 */
 	@Override
 	public IConfigurationElement[] getConfigurationElementsFor(String extensionPointId) {
-		// this is just a convenience API - no need to do any sync'ing here		
+		// this is just a convenience API - no need to do any sync'ing here
 		int lastdot = extensionPointId.lastIndexOf('.');
 		if (lastdot == -1)
 			return new IConfigurationElement[0];
@@ -316,7 +316,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 */
 	@Override
 	public IConfigurationElement[] getConfigurationElementsFor(String pluginId, String extensionPointName, String extensionId) {
-		// this is just a convenience API - no need to do any sync'ing here		
+		// this is just a convenience API - no need to do any sync'ing here
 		IExtension extension = this.getExtension(pluginId, extensionPointName, extensionId);
 		if (extension == null)
 			return new IConfigurationElement[0];
@@ -369,7 +369,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 */
 	@Override
 	public IExtension getExtension(String extensionPointId, String extensionId) {
-		// this is just a convenience API - no need to do any sync'ing here		
+		// this is just a convenience API - no need to do any sync'ing here
 		int lastdot = extensionPointId.lastIndexOf('.');
 		if (lastdot == -1)
 			return null;
@@ -382,7 +382,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 */
 	@Override
 	public IExtension getExtension(String pluginId, String extensionPointName, String extensionId) {
-		// this is just a convenience API - no need to do any sync'ing here		
+		// this is just a convenience API - no need to do any sync'ing here
 		IExtensionPoint extPoint = getExtensionPoint(pluginId, extensionPointName);
 		if (extPoint != null)
 			return extPoint.getExtension(extensionId);
@@ -685,7 +685,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		this.userToken = userToken;
 		registryObjects = new RegistryObjectManager(this);
 
-		boolean isRegistryFilledFromCache = false; // indicates if registry was able to use cache to populate it's content 
+		boolean isRegistryFilledFromCache = false; // indicates if registry was able to use cache to populate it's content
 
 		if (strategy.cacheUse()) {
 			// Try to read the registry from the cache first. If that fails, create a new registry
@@ -757,10 +757,10 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 */
 	@Override
 	public void stop(Object key) {
-		// If the registry creator specified a key token, check that the key mathches it 
+		// If the registry creator specified a key token, check that the key mathches it
 		// (it is assumed that registry owner keeps the key to prevent unautorized accesss).
 		if (masterToken != null && masterToken != key) {
-			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.stop() method. Check if proper access token is supplied."); //$NON-NLS-1$  
+			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.stop() method. Check if proper access token is supplied."); //$NON-NLS-1$
 		}
 
 		// Do extra stop processing if specified in the registry strategy
@@ -818,10 +818,10 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 			// A bit of backward compatibility: if registry was modified, but timestamp was not,
 			// it means that the new timestamp tracking mechanism was not used. In this case
 			// explicitly obtain timestamps for all contributions. Note that this logic
-			// maintains a problem described in the bug 104267 for contributions that 
+			// maintains a problem described in the bug 104267 for contributions that
 			// don't use the timestamp tracking mechanism.
 			if (aggregatedTimestamp.isModifed())
-				timestamp = aggregatedTimestamp.getContentsTimestamp(); // use timestamp tracking  
+				timestamp = aggregatedTimestamp.getContentsTimestamp(); // use timestamp tracking
 			else
 				timestamp = strategy.getContributionsTimestamp(); // use legacy approach
 
@@ -850,7 +850,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 	// Registry Object Factory
-	// The factory produces contributions, extension points, extensions, and configuration elements 
+	// The factory produces contributions, extension points, extensions, and configuration elements
 	// to be stored in the extension registry.
 	protected RegistryObjectFactory theRegistryObjectFactory = null;
 
@@ -1050,11 +1050,11 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	/**
 	 * Access check for add/remove operations:
-	 * - Master key allows all operations 
+	 * - Master key allows all operations
 	 * - User key allows modifications of non-persisted elements
-	 * 
+	 *
 	 * @param key key to the registry supplied by the user
-	 * @param persist true if operation affects persisted elements 
+	 * @param persist true if operation affects persisted elements
 	 * @return true is the key grants read/write access to the registry
 	 */
 	private boolean checkReadWriteAccess(Object key, boolean persist) {
@@ -1124,7 +1124,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	/**
 	 * Adds an extension point to the extension registry.
 	 * <p>
-	 * If the registry is not modifiable, this method is an access controlled method. 
+	 * If the registry is not modifiable, this method is an access controlled method.
 	 * Proper token should be passed as an argument for non-modifiable registries.
 	 * </p>
 	 * @param identifier Id of the extension point. If non-qualified names is supplied,
@@ -1133,13 +1133,13 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 * @param persist indicates if contribution should be stored in the registry cache. If false,
 	 * contribution is not persisted in the registry cache and is lost on Eclipse restart
 	 * @param label display string for the extension point
-	 * @param schemaReference reference to the extension point schema. The schema reference 
+	 * @param schemaReference reference to the extension point schema. The schema reference
 	 * is a URL path relative to the plug-in installation URL. May be null
 	 * @param token the key used to check permissions. Two registry keys are set in the registry
-	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
-	 * master token and a user token. Master token allows all operations; user token 
+	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}:
+	 * master token and a user token. Master token allows all operations; user token
 	 * allows non-persisted registry elements to be modified.
-	 * @return <code>true</code> if successful, <code>false</code> if a problem was encountered 
+	 * @return <code>true</code> if successful, <code>false</code> if a problem was encountered
 	 * @throws IllegalArgumentException if incorrect token is passed in
 	 */
 	public boolean addExtensionPoint(String identifier, IContributor contributor, boolean persist, String label, String schemaReference, Object token) throws IllegalArgumentException {
@@ -1204,11 +1204,11 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	/**
 	 * Adds an extension to the extension registry.
 	 * <p>
-	 * If the registry is not modifiable, this method is an access controlled method. 
+	 * If the registry is not modifiable, this method is an access controlled method.
 	 * Proper token should be passed as an argument for non-modifiable registries.
 	 * </p>
 	 * @see org.eclipse.core.internal.registry.spi.ConfigurationElementDescription
-	 * 
+	 *
 	 * @param identifier Id of the extension. If non-qualified name is supplied,
 	 * it will be converted internally into a fully qualified name
 	 * @param contributor the contributor of this extension
@@ -1219,10 +1219,10 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 * name is supplied, it is assumed to have the same contributorId as this extension
 	 * @param configurationElements contents of the extension
 	 * @param token the key used to check permissions. Two registry keys are set in the registry
-	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
-	 * master token and a user token. Master token allows all operations; user token 
+	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}:
+	 * master token and a user token. Master token allows all operations; user token
 	 * allows non-persisted registry elements to be modified.
-	 * @return <code>true</code> if successful, <code>false</code> if a problem was encountered 
+	 * @return <code>true</code> if successful, <code>false</code> if a problem was encountered
 	 * @throws IllegalArgumentException if incorrect token is passed in
 	 */
 	public boolean addExtension(String identifier, IContributor contributor, boolean persist, String label, String extensionPointId, ConfigurationElementDescription configurationElements, Object token) throws IllegalArgumentException {
@@ -1365,7 +1365,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 				namespace = removeExtension(id);
 			Map removed = new HashMap(1);
 			removed.put(new Integer(id), registryObject);
-			// There is some asymmetry between extension and extension point removal. Removing extension point makes 
+			// There is some asymmetry between extension and extension point removal. Removing extension point makes
 			// extensions "orphans" but does not remove them. As a result, only extensions needs to be processed.
 			if (!isExtensionPoint)
 				registryObjects.addAssociatedObjects(removed, registryObject);
@@ -1395,8 +1395,8 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	}
 
 	/**
-	 * <strong>EXPERIMENTAL</strong>. This method has been added as part of a work in progress. 
-	 * There is a guarantee neither that this API will work nor that it will remain the same. 
+	 * <strong>EXPERIMENTAL</strong>. This method has been added as part of a work in progress.
+	 * There is a guarantee neither that this API will work nor that it will remain the same.
 	 * Please do not use this method without consulting with the Equinox team.
 	 */
 	public Object getTemporaryUserToken() {

@@ -4,20 +4,20 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.core.internal.registry;
 
 /**
- * The code (minus the getDeclaringPluginDescriptor() was moved into 
- * the  BaseExtensionPointHandle to avoid duplicating code in the 
+ * The code (minus the getDeclaringPluginDescriptor() was moved into
+ * the  BaseExtensionPointHandle to avoid duplicating code in the
  * compatibility fragment.
- * 
+ *
  * Modifications to the code should be done in the BaseExtensionHandle.
- * 
- * @since 3.1 
+ *
+ * @since 3.1
  */
 public class ExtensionHandle extends BaseExtensionHandle {
 

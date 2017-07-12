@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -15,8 +15,8 @@ import org.eclipse.core.runtime.spi.RegistryContributor;
 import org.osgi.framework.Bundle;
 
 /**
- * The contributor factory creates new registry contributors for use in OSGi-based 
- * registries. 
+ * The contributor factory creates new registry contributors for use in OSGi-based
+ * registries.
  * <p>
  * This class can not be extended or instantiated by clients.
  * </p>
@@ -27,9 +27,9 @@ import org.osgi.framework.Bundle;
 public final class ContributorFactoryOSGi {
 
 	/**
-	 * Creates registry contributor object based on a Bundle. The bundle must not 
+	 * Creates registry contributor object based on a Bundle. The bundle must not
 	 * be <code>null</code>.
-	 * 
+	 *
 	 * @param contributor bundle associated with the contribution
 	 * @return new registry contributor based on the Bundle
 	 */
@@ -54,12 +54,12 @@ public final class ContributorFactoryOSGi {
 
 	/**
 	 * Returns the OSGi bundle used to define this contributor. If a fragment
-	 * was used to create the contributor, the fragment is returned. 
-	 * 
-	 * <p>The method may return null if the contributor is not based on a bundle, 
-	 * if the bundle can't be found, or if the bundle is presently unresolved or 
+	 * was used to create the contributor, the fragment is returned.
+	 *
+	 * <p>The method may return null if the contributor is not based on a bundle,
+	 * if the bundle can't be found, or if the bundle is presently unresolved or
 	 * uninstalled.</p>
-	 * 
+	 *
 	 * @param contributor bundle-based registry contributor
 	 * @return the actual OSGi bundle associated with this contributor
 	 * @since org.eclipse.equinox.registry 3.3

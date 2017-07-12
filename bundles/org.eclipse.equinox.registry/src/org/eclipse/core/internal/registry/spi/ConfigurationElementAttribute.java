@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -13,7 +13,7 @@ package org.eclipse.core.internal.registry.spi;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 /**
- * Describes properties of configuration elements to be added to the registry. 
+ * Describes properties of configuration elements to be added to the registry.
  * Properties are represented as pairs of strings: {attribute name; attribute value}.
  * <p>
  * It is expected that both attribute name and attribute value are not null.
@@ -43,7 +43,7 @@ public final class ConfigurationElementAttribute {
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param name attribute name
 	 * @param value attribute value
 	 */

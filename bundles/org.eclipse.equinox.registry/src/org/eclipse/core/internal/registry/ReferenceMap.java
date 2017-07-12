@@ -18,31 +18,31 @@
  *    Apache Software Foundation - Initial implementation
  *    Pascal Rapicault, IBM -  Pascal remove the entrySet() implementation because it relied on another class.
  *    IBM - change to int keys, remove support for weak references, and remove unused methods
- *    Rafik Jaouani - fix for the timing problem in case an item with the same key is added (bug 205117) 
+ *    Rafik Jaouani - fix for the timing problem in case an item with the same key is added (bug 205117)
  */
 package org.eclipse.core.internal.registry;
 
 import java.lang.ref.*;
 
 /**
- *  Hashtable-based map with integer keys that allows values to be removed 
+ *  Hashtable-based map with integer keys that allows values to be removed
  *  by the garbage  collector.<P>
  *
- *  When you construct a <Code>ReferenceMap</Code>, you can 
+ *  When you construct a <Code>ReferenceMap</Code>, you can
  *  specify what kind of references are used to store the
- *  map's values.  If non-hard references are 
+ *  map's values.  If non-hard references are
  *  used, then the garbage collector can remove mappings
- *  if a value becomes unreachable, or if the 
+ *  if a value becomes unreachable, or if the
  *  JVM's memory is running low.  For information on how
  *  the different reference types behave, see
  *  {@link Reference}.<P>
  *
  *  The algorithms used are basically the same as those
- *  in {@link java.util.HashMap}.  In particular, you 
+ *  in {@link java.util.HashMap}.  In particular, you
  *  can specify a load factor and capacity to suit your
  *  needs.
  *
- *  This map does <I>not</I> allow null values.  Attempting to add a null 
+ *  This map does <I>not</I> allow null values.  Attempting to add a null
  *  value to the map will raise a <Code>NullPointerException</Code>.<P>
  *
  *  This data structure is not synchronized.
@@ -125,7 +125,7 @@ public class ReferenceMap {
 		/**
 		 * Sets the next entry in the linked list of map entries
 		 * with the same hash value.
-		 * 
+		 *
 		 * @param next The next entry, or <code>null</code>.
 		 */
 		public void setNext(IEntry next);
@@ -181,7 +181,7 @@ public class ReferenceMap {
 
 	/**
 	 *  The threshold variable is calculated by multiplying
-	 *  table.length and loadFactor.  
+	 *  table.length and loadFactor.
 	 *  Note: I originally marked this field as final, but then this class
 	 *   didn't compile under JDK1.2.2.
 	 *  @serial
@@ -199,12 +199,12 @@ public class ReferenceMap {
 	private transient int size;
 
 	/**
-	 *  The hash table.  Its length is always a power of two.  
+	 *  The hash table.  Its length is always a power of two.
 	 */
 	private transient IEntry[] table;
 
 	/**
-	 *  When size reaches threshold, the map is resized.  
+	 *  When size reaches threshold, the map is resized.
 	 *  @see #resize()
 	 */
 	private transient int threshold;
@@ -259,7 +259,7 @@ public class ReferenceMap {
 		while (entry != null) {
 			if (key == entry.getKey()) {
 				// See bug 205117 - in case an item with the same key value was added
-				// items with NULL value always removed; 
+				// items with NULL value always removed;
 				// items with non-NULL values are removed only on user request
 				if (!cleanup || (entry.getValue() == null)) {
 					if (previous == null)
@@ -311,7 +311,7 @@ public class ReferenceMap {
 
 	/**
 	 * Constructs a new table entry for the given data
-	 * 
+	 *
 	 * @param key The entry key
 	 * @param value The entry value
 	 * @param next The next value in the entry's collision chain
@@ -332,7 +332,7 @@ public class ReferenceMap {
 	 *  Purges stale mappings from this map.<P>
 	 *
 	 *  Ordinarily, stale mappings are only removed during
-	 *  a write operation; typically a write operation will    
+	 *  a write operation; typically a write operation will
 	 *  occur often enough that you'll never need to manually
 	 *  invoke this method.<P>
 	 *
@@ -399,7 +399,7 @@ public class ReferenceMap {
 	/**
 	 *  Resizes this hash table by doubling its capacity.
 	 *  This is an expensive operation, as entries must
-	 *  be copied from the old smaller table to the new 
+	 *  be copied from the old smaller table to the new
 	 *  bigger table.
 	 */
 	private void resize() {

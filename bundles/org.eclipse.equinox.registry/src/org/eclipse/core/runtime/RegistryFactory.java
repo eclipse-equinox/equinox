@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -36,17 +36,17 @@ public final class RegistryFactory {
 	/**
 	 * Creates a new extension registry based on the given set of parameters.
 	 * <p>
-	 * The strategy is an optional collection of methods that supply additional registry 
-	 * functionality. Users may pass in <code>null</code> for the strategy if default 
+	 * The strategy is an optional collection of methods that supply additional registry
+	 * functionality. Users may pass in <code>null</code> for the strategy if default
 	 * behavior is sufficient.
 	 * </p><p>
-	 * The master token is stored by the registry and later used as an identifier of callers 
-	 * who are allowed full control over the registry functionality. Users may pass in 
+	 * The master token is stored by the registry and later used as an identifier of callers
+	 * who are allowed full control over the registry functionality. Users may pass in
 	 * <code>null</code> as a master token.
 	 * </p><p>
 	 * The user token is stored by the registry and later used as an identifier of callers
-	 * who are allowed to control registry at the user level. For instance, users attempting to 
-	 * modify dynamic contributions to the registry have to use the user token. Users may pass 
+	 * who are allowed to control registry at the user level. For instance, users attempting to
+	 * modify dynamic contributions to the registry have to use the user token. Users may pass
 	 * in <code>null</code> as a user token.
 	 * </p>
 	 * @param strategy registry strategy or <code>null</code>
@@ -60,9 +60,9 @@ public final class RegistryFactory {
 
 	/**
 	 * Returns the default extension registry specified by the registry provider.
-	 * May return <code>null</code> if the provider has not been set or if the 
+	 * May return <code>null</code> if the provider has not been set or if the
 	 * registry has not been created.
-	 * 
+	 *
 	 * @return existing extension registry or <code>null</code>
 	 */
 	public static IExtensionRegistry getRegistry() {
@@ -73,23 +73,23 @@ public final class RegistryFactory {
 	}
 
 	/**
-	 * Creates a registry strategy that can be used in an OSGi container. The strategy uses 
-	 * OSGi contributions and contributors for the registry processing and takes advantage of 
+	 * Creates a registry strategy that can be used in an OSGi container. The strategy uses
+	 * OSGi contributions and contributors for the registry processing and takes advantage of
 	 * additional mechanisms available through the OSGi library.
 	 * <p>
-	 * The OSGi registry strategy sequentially checks the array of storage directories to 
+	 * The OSGi registry strategy sequentially checks the array of storage directories to
 	 * discover the location of the registry cache formed by previous invocations of the extension
-	 * registry. Once found, the location is used to store registry cache. If this value 
+	 * registry. Once found, the location is used to store registry cache. If this value
 	 * is <code>null</code> then caching of the registry content is disabled.
 	 * </p><p>
-	 * The cache read-only array is an array the same length as the storage directory array. 
-	 * It contains boolean values indicating whether or not each storage directory is read-only. 
-	 * If the value at an index is <code>true</code> then the location at the corresponding index 
-	 * in the storage directories array is read-only; if <code>false</code> then the cache location 
-	 * is read-write. The array can be <code>null</code> if the <code>storageDirs</code> parameter 
+	 * The cache read-only array is an array the same length as the storage directory array.
+	 * It contains boolean values indicating whether or not each storage directory is read-only.
+	 * If the value at an index is <code>true</code> then the location at the corresponding index
+	 * in the storage directories array is read-only; if <code>false</code> then the cache location
+	 * is read-write. The array can be <code>null</code> if the <code>storageDirs</code> parameter
 	 * is <code>null</code>.
 	 * </p><p>
-	 * The master token should be passed to the OSGi registry strategy to permit it to perform 
+	 * The master token should be passed to the OSGi registry strategy to permit it to perform
 	 * contributions to the registry.
 	 * </p>
 	 * @param storageDirs array of file system directories or <code>null</code>

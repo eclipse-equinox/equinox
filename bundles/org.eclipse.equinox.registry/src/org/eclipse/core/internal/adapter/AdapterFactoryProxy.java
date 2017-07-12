@@ -3,8 +3,8 @@
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- * 
- * Contributors: 
+ *
+ * Contributors:
  * 	IBM - Initial API and implementation
  * 	Oracle - Fix for bug 408506
  ******************************************************************************/
@@ -32,7 +32,7 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 	private IAdapterFactory factory;
 	private boolean factoryLoaded = false;
 	/**
-	 * Store Id of the declaring extension. We might need it in case 
+	 * Store Id of the declaring extension. We might need it in case
 	 * the owner goes away (in this case element becomes invalid).
 	 */
 	private String ownerId;
@@ -114,7 +114,7 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 	/**
 	 * Loads the real adapter factory, but only if its associated plug-in is
 	 * already loaded. Returns the real factory if it was successfully loaded.
-	 * @param force if <code>true</code> the plugin providing the 
+	 * @param force if <code>true</code> the plugin providing the
 	 * factory will be loaded if necessary, otherwise no plugin activations
 	 * will occur.
 	 */
@@ -125,13 +125,13 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 		String contributorName = element.getContributor().getName();
 		boolean isActive;
 		// Different VMs have different degrees of "laziness" for the class loading.
-		// To make sure that VM won't try to load EquinoxUtils before getting into 
-		// this try-catch block, the fully qualified name is used (removing entry for 
+		// To make sure that VM won't try to load EquinoxUtils before getting into
+		// this try-catch block, the fully qualified name is used (removing entry for
 		// the EquinoxUtils from the import list).
 		try {
 			isActive = org.eclipse.core.internal.registry.osgi.EquinoxUtils.isActive(contributorName);
 		} catch (NoClassDefFoundError noClass) {
-			// This block will only be triggered if VM loads classes in a very "eager" way. 
+			// This block will only be triggered if VM loads classes in a very "eager" way.
 			isActive = true;
 		}
 		if (!force && !isActive)

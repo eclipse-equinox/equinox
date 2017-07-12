@@ -22,8 +22,8 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * The class contains a set of helper methods for the runtime content plugin.
- * The closeServices() method should be called before the plugin is stopped. 
- * 
+ * The closeServices() method should be called before the plugin is stopped.
+ *
  * @since org.eclipse.equinox.registry 3.2
  */
 public class OSGIUtils {

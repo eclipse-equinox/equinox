@@ -84,10 +84,10 @@ public class ExtensionsParser extends DefaultHandler {
 
 	private Contribution contribution;
 
-	//This keeps tracks of the value of the configuration element in case the value comes in several pieces (see characters()). See as well bug 75592. 
+	//This keeps tracks of the value of the configuration element in case the value comes in several pieces (see characters()). See as well bug 75592.
 	private String configurationElementValue;
 
-	/** 
+	/**
 	 * Status code constant (value 1) indicating a problem in a bundle extensions
 	 * manifest (<code>extensions.xml</code>) file.
 	 */
@@ -96,7 +96,7 @@ public class ExtensionsParser extends DefaultHandler {
 	public static final String PLUGIN = "plugin"; //$NON-NLS-1$
 	public static final String PLUGIN_ID = "id"; //$NON-NLS-1$
 	public static final String PLUGIN_NAME = "name"; //$NON-NLS-1$
-	public static final String FRAGMENT = "fragment"; //$NON-NLS-1$	
+	public static final String FRAGMENT = "fragment"; //$NON-NLS-1$
 	public static final String BUNDLE_UID = "id"; //$NON-NLS-1$
 
 	public static final String EXTENSION_POINT = "extension-point"; //$NON-NLS-1$
@@ -141,7 +141,7 @@ public class ExtensionsParser extends DefaultHandler {
 
 	private ArrayList processedExtensionIds = null;
 
-	// Keep track of elements added into the registry manager in case we encounter a error 
+	// Keep track of elements added into the registry manager in case we encounter a error
 	// and need to rollback
 	private ArrayList addedRegistryObjects = new ArrayList(5);
 
@@ -490,7 +490,7 @@ public class ExtensionsParser extends DefaultHandler {
 				String existingSupplier = existingExtension.getContributor().getName();
 				String msg = NLS.bind(RegistryMessages.parse_duplicateExtension, new String[] {currentSupplier, existingSupplier, uniqueId});
 				registry.log(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, 0, msg, null));
-			} else if (processedExtensionIds != null) { // check elements in this contribution 
+			} else if (processedExtensionIds != null) { // check elements in this contribution
 				for (Iterator i = processedExtensionIds.iterator(); i.hasNext();) {
 					if (uniqueId.equals(i.next())) {
 						String currentSupplier = contribution.getDefaultNamespace();
@@ -570,8 +570,8 @@ public class ExtensionsParser extends DefaultHandler {
 			return;
 		}
 		if (!objectManager.addExtensionPoint(currentExtPoint, true)) {
-			// avoid adding extension point second time as it might cause 
-			// extensions associated with the existing extension point to 
+			// avoid adding extension point second time as it might cause
+			// extensions associated with the existing extension point to
 			// become inaccessible.
 			if (registry.debug()) {
 				String msg = NLS.bind(RegistryMessages.parse_duplicateExtensionPoint, currentExtPoint.getUniqueIdentifier(), contribution.getDefaultNamespace());
@@ -702,7 +702,7 @@ public class ExtensionsParser extends DefaultHandler {
 	}
 
 	/**
-	 * To preserve backward compatibility, we will only attempt to extract namespace form the name 
+	 * To preserve backward compatibility, we will only attempt to extract namespace form the name
 	 * if Eclipse version specified in the plugin.xml (<?eclipse version="3.2"?>) is at least 3.2.
 	 */
 	private void initializeExtractNamespace() {

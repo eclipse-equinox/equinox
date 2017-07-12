@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.spi.RegistryStrategy;
  * Use Eclipse job scheduling mechanism.
  */
 final public class ExtensionEventDispatcherJob extends Job {
-	// an "identy rule" that forces extension events to be queued		
+	// an "identy rule" that forces extension events to be queued
 	private final static ISchedulingRule EXTENSION_EVENT_RULE = new ISchedulingRule() {
 		@Override
 		public boolean contains(ISchedulingRule rule) {

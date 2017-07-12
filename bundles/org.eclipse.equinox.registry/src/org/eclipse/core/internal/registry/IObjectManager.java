@@ -11,7 +11,7 @@
 package org.eclipse.core.internal.registry;
 
 /**
- * @since 3.1 
+ * @since 3.1
  */
 public interface IObjectManager {
 	Handle getHandle(int id, byte type);

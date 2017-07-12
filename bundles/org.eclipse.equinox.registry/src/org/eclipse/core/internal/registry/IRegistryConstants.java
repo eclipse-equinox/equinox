@@ -19,9 +19,9 @@ public interface IRegistryConstants {
 	public static final String RUNTIME_NAME = "org.eclipse.core.runtime"; //$NON-NLS-1$
 
 	// command line options
-	public static final String NO_REGISTRY_CACHE = "-noregistrycache"; //$NON-NLS-1$	
-	public static final String NO_LAZY_REGISTRY_CACHE_LOADING = "-noLazyRegistryCacheLoading"; //$NON-NLS-1$		
-	public static final String MULTI_LANGUAGE = "-registryMultiLanguage"; //$NON-NLS-1$		
+	public static final String NO_REGISTRY_CACHE = "-noregistrycache"; //$NON-NLS-1$
+	public static final String NO_LAZY_REGISTRY_CACHE_LOADING = "-noLazyRegistryCacheLoading"; //$NON-NLS-1$
+	public static final String MULTI_LANGUAGE = "-registryMultiLanguage"; //$NON-NLS-1$
 
 	// System options
 	public static final String PROP_NO_LAZY_CACHE_LOADING = "eclipse.noLazyRegistryCacheLoading"; //$NON-NLS-1$
@@ -37,7 +37,7 @@ public interface IRegistryConstants {
 	public static final String PROP_WS = "osgi.ws"; //$NON-NLS-1$
 
 	/**
-	 * Specific error code supplied to the Status objects 
+	 * Specific error code supplied to the Status objects
 	 */
 	static final int PLUGIN_ERROR = 1;
 }

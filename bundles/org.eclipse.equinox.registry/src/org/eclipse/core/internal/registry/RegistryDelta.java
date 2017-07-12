@@ -69,7 +69,7 @@ public class RegistryDelta {
 
 	void setObjectManager(IObjectManager objectManager) {
 		this.objectManager = objectManager;
-		//TODO May want to add into the existing one here... if it is possible to have batching 
+		//TODO May want to add into the existing one here... if it is possible to have batching
 	}
 
 	public IObjectManager getObjectManager() {

@@ -44,7 +44,7 @@ public abstract class RegistryObject implements KeyedElement {
 		children = values;
 	}
 
-	//This can not return null. It returns the singleton empty array or an array 
+	//This can not return null. It returns the singleton empty array or an array
 	protected int[] getRawChildren() {
 		return children;
 	}

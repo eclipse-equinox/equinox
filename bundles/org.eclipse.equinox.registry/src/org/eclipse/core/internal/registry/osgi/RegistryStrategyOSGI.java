@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -74,16 +74,16 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 
 	/**
 	 * @param theStorageDir - array of file system directories to store cache files; might be null
-	 * @param cacheReadOnly - array of read only attributes. True: cache at this location is read 
+	 * @param cacheReadOnly - array of read only attributes. True: cache at this location is read
 	 * only; false: cache is read/write
-	 * @param key - control key for the registry (should be the same key as used in 
+	 * @param key - control key for the registry (should be the same key as used in
 	 * the RegistryManager#createExtensionRegistry() of this registry
 	 */
 	public RegistryStrategyOSGI(File[] theStorageDir, boolean[] cacheReadOnly, Object key) {
 		super(theStorageDir, cacheReadOnly);
 		token = key;
 
-		// Only do timestamp calculations if osgi.checkConfiguration is set to "true" (typically, 
+		// Only do timestamp calculations if osgi.checkConfiguration is set to "true" (typically,
 		// this implies -dev mode)
 		BundleContext context = Activator.getContext();
 		if (context != null)
@@ -112,20 +112,20 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	// Use OSGi bundles for namespace resolution (contributors: plugins and fragments)
 
 	/**
-	 * The default load factor for the bundle cache. 
+	 * The default load factor for the bundle cache.
 	 */
 	private static float DEFAULT_BUNDLECACHE_LOADFACTOR = 0.75f;
 
 	/**
-	 * The expected bundle cache size (calculated as a number of bundles divided 
-	 * by the DEFAULT_BUNDLECACHE_LOADFACTOR). The bundle cache will be resized 
-	 * automatically is this number is exceeded. 
+	 * The expected bundle cache size (calculated as a number of bundles divided
+	 * by the DEFAULT_BUNDLECACHE_LOADFACTOR). The bundle cache will be resized
+	 * automatically is this number is exceeded.
 	 */
 	private static int DEFAULT_BUNDLECACHE_SIZE = 200;
 
 	/**
 	 * For performance, we cache mapping of IDs to Bundles.
-	 * 
+	 *
 	 * We don't expect mapping to change during the runtime. (Or, in the OSGI terms,
 	 * we don't expect bundle IDs to be reused during the Eclipse run.)
 	 * The Bundle object is stored as a weak reference to facilitate GC
@@ -143,7 +143,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		} catch (NumberFormatException e) {
 			return null;
 		}
-		// We assume here that OSGI Id will fit into "int". As the number of 
+		// We assume here that OSGI Id will fit into "int". As the number of
 		// registry elements themselves are expected to fit into "int", this
 		// is a valid assumption for the time being.
 		Bundle bundle = (Bundle) bundleMap.get((int) OSGiId);
@@ -169,7 +169,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 			contributingBundle = getBundle(contributor.getId());
 
 		if (contributingBundle == null)
-			throwException(NLS.bind(RegistryMessages.plugin_loadClassError, "UNKNOWN BUNDLE", className), new InvalidRegistryObjectException()); //$NON-NLS-1$ 
+			throwException(NLS.bind(RegistryMessages.plugin_loadClassError, "UNKNOWN BUNDLE", className), new InvalidRegistryObjectException()); //$NON-NLS-1$
 
 		// load the requested class from this bundle
 		Class classInstance = null;
@@ -220,7 +220,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 
 		// populate the registry with all the currently installed bundles.
 		// There is a small window here while processBundles is being
-		// called where the pluginBundleListener may receive a BundleEvent 
+		// called where the pluginBundleListener may receive a BundleEvent
 		// to add/remove a bundle from the registry.  This is ok since
 		// the registry is a synchronized object and will not add the
 		// same bundle twice.

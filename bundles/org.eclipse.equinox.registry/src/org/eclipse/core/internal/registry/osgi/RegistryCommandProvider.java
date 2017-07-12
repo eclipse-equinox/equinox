@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Benjamin Muskalla - fix for the console help text (bug 240607) 
+ *     Benjamin Muskalla - fix for the console help text (bug 240607)
  *******************************************************************************/
 
 package org.eclipse.core.internal.registry.osgi;
@@ -30,7 +30,7 @@ public class RegistryCommandProvider implements CommandProvider {
 	}
 
 	/*
-	 * This method either returns the help message for a particular command, 
+	 * This method either returns the help message for a particular command,
 	 * or returns the help messages for all commands (if commandName is null)
 	 */
 	private String getHelp(String commandName) {
@@ -103,7 +103,7 @@ public class RegistryCommandProvider implements CommandProvider {
 
 	/**
 	 * Handles the help command
-	 * 
+	 *
 	 * @param intp
 	 * @return description for a particular command or false if there is no command with the specified name
 	 */

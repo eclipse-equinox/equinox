@@ -59,7 +59,7 @@ public class ExtensionDelta implements IExtensionDelta {
 
 	@Override
 	public String toString() {
-		return "\n\t\t" + getExtensionPoint().getUniqueIdentifier() + " - " + getExtension().getNamespaceIdentifier() + '.' + getExtension().getSimpleIdentifier() + " (" + getKindString(this.getKind()) + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$		
+		return "\n\t\t" + getExtensionPoint().getUniqueIdentifier() + " - " + getExtension().getNamespaceIdentifier() + '.' + getExtension().getSimpleIdentifier() + " (" + getKindString(this.getKind()) + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
 	public static String getKindString(int kind) {

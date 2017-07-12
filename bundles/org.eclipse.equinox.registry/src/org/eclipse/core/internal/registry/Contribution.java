@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.InvalidRegistryObjectException;
 
 // This object is used to keep track on a contributor basis of the extension and extension points being contributed.
 // It is mainly used on removal so we can quickly  find objects to remove.
-// Each contribution is made in the context of a namespace.  
+// Each contribution is made in the context of a namespace.
 public class Contribution implements KeyedElement {
 	static final int[] EMPTY_CHILDREN = new int[] {0, 0};
 
@@ -33,7 +33,7 @@ public class Contribution implements KeyedElement {
 
 	// This array stores the identifiers of both the extension points and the extensions.
 	// The array has always a minimum size of 2.
-	// The first element of the array is the number of extension points and the second the number of extensions. 
+	// The first element of the array is the number of extension points and the second the number of extensions.
 	// [numberOfExtensionPoints, numberOfExtensions, extensionPoint#1, extensionPoint#2, extensionPoint..., ext#1, ext#2, ext#3, ... ].
 	// The size of the array is 2 + (numberOfExtensionPoints +  numberOfExtensions).
 	private int[] children = EMPTY_CHILDREN;
@@ -54,7 +54,7 @@ public class Contribution implements KeyedElement {
 		// Old New Result
 		//  F   F   F
 		//  F   T   T	=> needs to be adjusted
-		//  T   F   T 
+		//  T   F   T
 		//  T   T   T
 		if (shouldPersist() != addContribution.shouldPersist())
 			persist = true;

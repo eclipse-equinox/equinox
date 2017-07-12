@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -17,10 +17,10 @@ import org.eclipse.core.runtime.*;
 /**
  * This is the copy of the ExtensionPointHandle minus the getDeclaringPluginDescriptor()
  * method that was moved into compatibility plugin.
- * 
+ *
  * This class should not be used directly. Use ExtensionPointHandle instead.
- * 
- * @since org.eclipse.equinox.registry 3.2 
+ *
+ * @since org.eclipse.equinox.registry 3.2
  */
 public class BaseExtensionPointHandle extends Handle implements IExtensionPoint {
 

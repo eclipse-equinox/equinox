@@ -11,17 +11,17 @@
 package org.eclipse.core.runtime;
 
 /**
- * This interface allows extension providers to control how the instances provided to extension-points are being created 
- * by referring to the factory instead of referring to a class. For example, the following extension to the preference page 
- * extension-point uses a factory called <code>PreferencePageFactory</code>.   
+ * This interface allows extension providers to control how the instances provided to extension-points are being created
+ * by referring to the factory instead of referring to a class. For example, the following extension to the preference page
+ * extension-point uses a factory called <code>PreferencePageFactory</code>.
  * <code><pre>
  *  &lt;extension point="org.eclipse.ui.preferencePages"&gt;
- *    &lt;page  name="..."  class="org.eclipse.update.ui.PreferencePageFactory:org.eclipse.update.ui.preferences.MainPreferencePage"&gt; 
+ *    &lt;page  name="..."  class="org.eclipse.update.ui.PreferencePageFactory:org.eclipse.update.ui.preferences.MainPreferencePage"&gt;
  *    &lt;/page&gt;
  *  &lt;/extension&gt;
  * </pre>
  *  </code>
- * 
+ *
  * <p>
  * Effectively, factories give full control over the create executable extension process.
  *  </p><p>
@@ -37,7 +37,7 @@ package org.eclipse.core.runtime;
 public interface IExecutableExtensionFactory {
 	/**
 	 * Creates and returns a new instance.
-	 * 
+	 *
 	 * @exception CoreException if an instance of the executable extension
 	 *   could not be created for any reason
 	 */

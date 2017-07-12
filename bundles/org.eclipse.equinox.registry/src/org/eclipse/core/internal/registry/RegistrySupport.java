@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -15,14 +15,14 @@ import org.eclipse.core.runtime.IStatus;
 
 /**
  * Simple implementation if the registry support functionality.
- * The logging output is done onto System.out (for both specific and generic logs) 
+ * The logging output is done onto System.out (for both specific and generic logs)
  * in the following format:
- * 
+ *
  * [Error|Warning|Log]: Main error message
  * [Error|Warning|Log]: Child error message 1
  * 	...
  * [Error|Warning|Log]: Child error message N
- * 
+ *
  * The translation routine assumes that keys are prefixed with '%'. If no resource
  * bundle is present, the key itself (without leading '%') is returned. There is
  * no decoding for the leading '%%'.

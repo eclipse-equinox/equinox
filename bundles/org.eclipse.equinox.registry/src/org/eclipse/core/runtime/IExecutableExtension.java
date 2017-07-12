@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -13,7 +13,7 @@ package org.eclipse.core.runtime;
 import org.eclipse.core.runtime.CoreException;
 
 /**
- * Interface for executable extension classes that require access to 
+ * Interface for executable extension classes that require access to
  * their configuration element, or implement an extension adapter.
  * <p>
  * Extension adapters are typically required in cases where the extension
@@ -28,19 +28,19 @@ import org.eclipse.core.runtime.CoreException;
  * </p><p>
  * Clients may implement this interface.
  * </p>
- * 
+ *
  * @see IConfigurationElement#createExecutableExtension(String)
  */
 public interface IExecutableExtension {
 	/**
 	 * This method is called by the implementation of the method
 	 * <code>IConfigurationElement.createExecutableExtension</code>
-	 * on a newly constructed extension, passing it its relevant configuration 
-	 * information. Most executable extensions only make use of the first 
+	 * on a newly constructed extension, passing it its relevant configuration
+	 * information. Most executable extensions only make use of the first
 	 * two call arguments.
 	 * <p>
-	 * Regular executable extensions specify their Java implementation 
-	 * class name as an attribute of the configuration element for the 
+	 * Regular executable extensions specify their Java implementation
+	 * class name as an attribute of the configuration element for the
 	 * extension. For example
 	 * <pre>
 	 *     &lt;action run="com.example.BaseAction"/&gt;
@@ -105,14 +105,14 @@ public interface IExecutableExtension {
 	 * </ul>
 	 * </p>
 	 *
-	 * @param config the configuration element used to trigger this execution. 
+	 * @param config the configuration element used to trigger this execution.
 	 *		It can be queried by the executable extension for specific
 	 *		configuration properties
 	 * @param propertyName the name of an attribute of the configuration element
 	 *		used on the <code>createExecutableExtension(String)</code> call. This
 	 *		argument can be used in the cases where a single configuration element
 	 *		is used to define multiple executable extensions.
-	 * @param data adapter data in the form of a <code>String</code>, 
+	 * @param data adapter data in the form of a <code>String</code>,
 	 *		a <code>Hashtable</code>, or <code>null</code>.
 	 * @exception CoreException if error(s) detected during initialization processing
 	 * @see IConfigurationElement#createExecutableExtension(String)

@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.spi.RegistryContributor;
 import org.eclipse.osgi.util.NLS;
 
 public class TableReader {
-	//Markers in the cache 
+	//Markers in the cache
 	static final int NULL = 0;
 	static final int OBJECT = 1;
 	static final int LOBJECT = 2;
@@ -140,7 +140,7 @@ public class TableReader {
 
 	}
 
-	//	Check various aspect of the cache to see if it's valid 
+	//	Check various aspect of the cache to see if it's valid
 	private boolean checkCacheValidity(DataInputStream in, long expectedTimestamp) {
 		int version;
 		try {
@@ -325,7 +325,7 @@ public class TableReader {
 				for (int i = 0; i < nbrOfExtension; i++) {
 					int nbrOfCe = mainInput.readInt();
 					for (int j = 0; j < nbrOfCe; j++) {
-						// note that max depth is set to 2 and extra input is never going to 
+						// note that max depth is set to 2 and extra input is never going to
 						// be used in this call to the loadConfigurationElementAndChildren().
 						objects.add(loadConfigurationElementAndChildren(mainInput, null, 1, 2, objects, null), holdObjects);
 					}
@@ -427,7 +427,7 @@ public class TableReader {
 		result[1] = readStringOrNull(extraInput); //the schema
 		result[2] = readStringOrNull(extraInput); //the fully qualified name
 		result[3] = readStringOrNull(extraInput); //the namespace
-		result[4] = readStringOrNull(extraInput); //the contributor Id 
+		result[4] = readStringOrNull(extraInput); //the contributor Id
 		return result;
 	}
 
@@ -573,7 +573,7 @@ public class TableReader {
 		return xpt;
 	}
 
-	private ExtensionPoint loadFullExtensionPoint() throws IOException { //TODO I don't like this. 
+	private ExtensionPoint loadFullExtensionPoint() throws IOException { //TODO I don't like this.
 		ExtensionPoint xpt = basicLoadExtensionPoint();
 		String[] tmp = basicLoadExtensionPointExtraData();
 		xpt.setLabel(tmp[0]);

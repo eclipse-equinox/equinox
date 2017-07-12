@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -27,16 +27,16 @@ public class ConfigurationElement extends RegistryObject {
 	byte parentType; //This value is only interesting when running from cache.
 
 	//Store the properties and the value of the configuration element.
-	//The format is the following: 
+	//The format is the following:
 	//	[p1, v1, p2, v2, configurationElementValue]
 	//If the array size is even, there is no "configurationElementValue (ie getValue returns null)".
-	//The properties and their values are alternated (v1 is the value of p1). 
+	//The properties and their values are alternated (v1 is the value of p1).
 	protected String[] propertiesAndValue;
 
 	//The name of the configuration element
 	private String name;
 
-	//ID of the actual contributor of this element 
+	//ID of the actual contributor of this element
 	//This value can be null when the element is loaded from disk and the owner has been uninstalled.
 	//This happens when the configuration is obtained from a delta containing removed extension.
 	private String contributorId;
@@ -245,7 +245,7 @@ public class ConfigurationElement extends RegistryObject {
 		// Check if we have extension adapter and initialize;
 		// Make the call even if the initialization string is null
 		try {
-			// We need to take into account both "old" and "new" style executable extensions 
+			// We need to take into account both "old" and "new" style executable extensions
 			ConfigurationElementHandle confElementHandle = new ConfigurationElementHandle(registry.getObjectManager(), getObjectId());
 			if (result instanceof IExecutableExtension)
 				((IExecutableExtension) result).setInitializationData(confElementHandle, attributeName, initData);

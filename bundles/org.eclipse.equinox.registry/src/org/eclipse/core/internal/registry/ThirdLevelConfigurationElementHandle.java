@@ -13,7 +13,7 @@ package org.eclipse.core.internal.registry;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 /**
- * @since 3.1 
+ * @since 3.1
  */
 public class ThirdLevelConfigurationElementHandle extends ConfigurationElementHandle {
 

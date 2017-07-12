@@ -13,8 +13,8 @@ package org.eclipse.core.internal.registry;
 /**
  * Monitor ensuring no more than one writer working concurrently.
  * Multiple readers are allowed to perform simultaneously.
- * 
- * This class was borrowed from org.eclipse.jdt.internal.core.search.indexing. 
+ *
+ * This class was borrowed from org.eclipse.jdt.internal.core.search.indexing.
  */
 public class ReadWriteMonitor {
 

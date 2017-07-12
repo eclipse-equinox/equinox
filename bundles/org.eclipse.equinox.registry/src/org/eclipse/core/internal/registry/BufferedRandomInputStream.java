@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -19,7 +19,7 @@ public class BufferedRandomInputStream extends InputStream {
 
 	private RandomAccessFile inputFile;
 	private String filePath; // Canonical path to the underlying file used for logging
-	private int buffer_size; // Current size of the buffer 
+	private int buffer_size; // Current size of the buffer
 	private int buffer_pos; // Current read position in the buffer
 	/**
 	 * The absolute position in the file where the buffered region starts.
@@ -123,7 +123,7 @@ public class BufferedRandomInputStream extends InputStream {
 	/**
 	 * Supplies functionality of the {@link java.io.RandomAccessFile#seek(long)} in
 	 * a buffer-friendly manner.
-	 * 
+	 *
 	 * @param pos offset
 	 * @throws IOException
 	 */

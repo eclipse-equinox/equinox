@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -44,7 +44,7 @@ public final class RegistryTimestamp {
 
 	/**
 	 * Set value of the aggregated timestamp.
-	 * @param timestamp the aggregated timestamp of the current registry contents 
+	 * @param timestamp the aggregated timestamp of the current registry contents
 	 */
 	public void set(long timestamp) {
 		aggregateTimestamp = timestamp;
@@ -62,14 +62,14 @@ public final class RegistryTimestamp {
 	/**
 	 * Determines if the aggregate timestamp was modified using add() or remove()
 	 * methods.
-	 * @return true: the timestamp was modified after the last set/reset 
+	 * @return true: the timestamp was modified after the last set/reset
 	 */
 	public boolean isModifed() {
 		return modified;
 	}
 
 	/**
-	 * Add individual contribution timestamp to the aggregated timestamp. 
+	 * Add individual contribution timestamp to the aggregated timestamp.
 	 * @param timestamp the time stamp of the contribution being added to the registry
 	 */
 	public void add(long timestamp) {

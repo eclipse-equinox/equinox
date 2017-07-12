@@ -11,7 +11,7 @@
 package org.eclipse.core.internal.registry;
 
 /**
- * A factory method for the creation of the registry objects for 
+ * A factory method for the creation of the registry objects for
  * registries supporting multiple languages.
  */
 public class RegistryObjectFactoryMulti extends RegistryObjectFactory {

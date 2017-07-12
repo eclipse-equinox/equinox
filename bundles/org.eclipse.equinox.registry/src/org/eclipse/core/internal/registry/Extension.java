@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Andrey Loskutov <loskutov@gmx.de> - bug 484014
@@ -15,14 +15,14 @@ import java.lang.ref.SoftReference;
 import org.eclipse.core.runtime.IContributor;
 
 /**
- * An object which represents the user-defined extension in a plug-in manifest.  
+ * An object which represents the user-defined extension in a plug-in manifest.
  */
 public class Extension extends RegistryObject {
 	public static final Extension[] EMPTY_ARRAY = new Extension[0];
 
 	//Extension simple identifier
 	private String simpleId;
-	//The namespace for the extension. 
+	//The namespace for the extension.
 	private String namespaceIdentifier;
 
 	//	Place holder for the label and  the extension point. It contains either a String[] or a SoftReference to a String[].
@@ -73,14 +73,14 @@ public class Extension extends RegistryObject {
 	}
 
 	private String[] getExtraData() {
-		//The extension has been created by parsing, or does not have any extra data 
+		//The extension has been created by parsing, or does not have any extra data
 		if (noExtraData()) {
 			if (extraInformation != null)
 				return (String[]) extraInformation;
 			return null;
 		}
 
-		//The extension has been loaded from the cache. 
+		//The extension has been loaded from the cache.
 		String[] result = null;
 		if (extraInformation == null || (result = ((extraInformation instanceof SoftReference) ? (String[]) ((SoftReference) extraInformation).get() : (String[]) extraInformation)) == null) {
 			result = registry.getTableReader().loadExtensionExtraData(getExtraDataOffset());

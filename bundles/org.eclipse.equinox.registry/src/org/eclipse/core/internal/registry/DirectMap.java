@@ -4,16 +4,16 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.core.internal.registry;
 
 /**
- * Essentially a map String -> String[] for small number of keys. 
- * 
- * For Maps containing a small number of objects hashing often reduces performance. 
+ * Essentially a map String -> String[] for small number of keys.
+ *
+ * For Maps containing a small number of objects hashing often reduces performance.
  * This implementation uses two parallel arrays, one for keys, one for
  * values, and grows them as necessary.
  */

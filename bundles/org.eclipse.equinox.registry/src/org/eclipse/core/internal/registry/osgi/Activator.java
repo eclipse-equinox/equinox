@@ -20,12 +20,12 @@ import org.eclipse.osgi.service.datalocation.Location;
 import org.osgi.framework.*;
 
 /**
- * The extension registry bundle. This activator will create the default OSGi registry 
+ * The extension registry bundle. This activator will create the default OSGi registry
  * unless told otherwise by setting the following system property to false:
  * <code>eclipse.createRegistry=false</code>
- * 
+ *
  * The default registry will be stopped on the bundle shutdown.
- * 
+ *
  * @see IRegistryConstants#PROP_DEFAULT_REGISTRY
  */
 public class Activator implements BundleActivator {
@@ -75,7 +75,7 @@ public class Activator implements BundleActivator {
 	}
 
 	/**
-	 * Look for the no registry cache flag and check to see if we should NOT be lazily loading plug-in 
+	 * Look for the no registry cache flag and check to see if we should NOT be lazily loading plug-in
 	 * definitions from the registry cache file.
 	 * NOTE: this command line processing is only performed in the presence of OSGi
 	 */
@@ -107,10 +107,10 @@ public class Activator implements BundleActivator {
 		if ("true".equals(bundleContext.getProperty(IRegistryConstants.PROP_REGISTRY_NULL_USER_TOKEN))) //$NON-NLS-1$
 			userRegistryKey = null;
 
-		// Determine primary and alternative registry locations. Eclipse extension registry cache 
+		// Determine primary and alternative registry locations. Eclipse extension registry cache
 		// can be found in one of the two locations:
 		// a) in the local configuration area (standard location passed in by the platform) -> priority
-		// b) in the shared configuration area (typically, shared install is used) 
+		// b) in the shared configuration area (typically, shared install is used)
 		File[] registryLocations;
 		boolean[] readOnlyLocations;
 

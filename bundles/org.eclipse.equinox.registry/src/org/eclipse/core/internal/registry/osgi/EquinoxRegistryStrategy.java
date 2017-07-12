@@ -4,10 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Danail Nachev - bug 203599 - events if jobs bundle has been stopped     
+ *     Danail Nachev - bug 203599 - events if jobs bundle has been stopped
  *******************************************************************************/
 package org.eclipse.core.internal.registry.osgi;
 
@@ -24,11 +24,11 @@ import org.osgi.framework.ServiceReference;
  * The registry strategy used by the Equinox extension registry. Adds to the
  * OSGi registry:
  * <p><ul>
- * <li>Use debug information supplied via .options files</li> 
+ * <li>Use debug information supplied via .options files</li>
  * <li>Use Eclipse logging - Use Eclipse platform state for cache validation</li>
  * <li>Event scheduling is done using Eclipse job scheduling mechanism</li>
- * </ul></p> 
- * 
+ * </ul></p>
+ *
  * @since org.eclipse.equinox.registry 3.2
  */
 public class EquinoxRegistryStrategy extends RegistryStrategyOSGI {
@@ -76,13 +76,13 @@ public class EquinoxRegistryStrategy extends RegistryStrategyOSGI {
 	}
 
 	/**
-	 * This method will attempt to use Eclipse Jobs mechanism to schedule registry events. If, at any time, 
+	 * This method will attempt to use Eclipse Jobs mechanism to schedule registry events. If, at any time,
 	 * Eclipse Jobs mechanism is missing, this method will fallback on the "internal" event scheduling
 	 * provided by the registry strategy.
-	 * 
+	 *
 	 * Once the switch to the fallback mechanism occurred, no further attempt to use scheduling from the Jobs bundle
-	 * will be made (until registry bundle is restarted). Avoiding repeated checks in this scenario will ensure that 
-	 * most users see no performance degradation and that order of registry events remains consistent. 
+	 * will be made (until registry bundle is restarted). Avoiding repeated checks in this scenario will ensure that
+	 * most users see no performance degradation and that order of registry events remains consistent.
 	 */
 	@Override
 	public final void scheduleChangeEvent(Object[] listeners, Map deltas, Object registry) {
