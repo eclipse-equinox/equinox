@@ -35,11 +35,11 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 	private static final String PLUGIN_MANIFEST = "plugin.xml"; //$NON-NLS-1$
 	private static final String FRAGMENT_MANIFEST = "fragment.xml"; //$NON-NLS-1$
 
-	private ExtensionRegistry registry;
-	private RegistryStrategyOSGI strategy;
-	private Object token;
-	private HashMap dynamicAddStateStamps = new HashMap();
-	private long currentStateStamp[] = new long[] {0};
+	private final ExtensionRegistry registry;
+	private final RegistryStrategyOSGI strategy;
+	private final Object token;
+	private final HashMap<String, Long> dynamicAddStateStamps = new HashMap<>();
+	private final long currentStateStamp[] = new long[] {0};
 
 	public EclipseBundleListener(ExtensionRegistry registry, Object key, RegistryStrategyOSGI strategy) {
 		this.registry = registry;
@@ -203,7 +203,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		String hostID = Long.toString(host.getBundleId());
 
 		synchronized (currentStateStamp) {
-			Long hostStateStamp = (Long) dynamicAddStateStamps.get(hostID);
+			Long hostStateStamp = dynamicAddStateStamps.get(hostID);
 			if (hostStateStamp != null && currentStateStamp[0] == hostStateStamp.longValue())
 				return; // already processed this host
 		}
@@ -244,7 +244,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		if (!registry.hasContributor(Long.toString(target.getBundleId())))
 			return false;
 		// get the base localization path from the target
-		Dictionary targetHeaders = target.getHeaders(""); //$NON-NLS-1$
+		Dictionary<?, ?> targetHeaders = target.getHeaders(""); //$NON-NLS-1$
 		String localization = (String) targetHeaders.get(Constants.BUNDLE_LOCALIZATION);
 		if (localization == null)
 			// localization may be empty in which case we should check the default
@@ -259,12 +259,12 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			return false; // just to be safe
 		String baseDir = lastSlash < 0 ? "" : localization.substring(0, lastSlash); //$NON-NLS-1$
 		String filePattern = (lastSlash < 0 ? localization : localization.substring(lastSlash + 1)) + "_*.properties"; //$NON-NLS-1$
-		Enumeration nlsFiles = fragment.findEntries(baseDir, filePattern, false);
+		Enumeration<?> nlsFiles = fragment.findEntries(baseDir, filePattern, false);
 		return nlsFiles != null;
 	}
 
 	private static boolean isSingleton(Bundle bundle) {
-		Dictionary allHeaders = bundle.getHeaders(""); //$NON-NLS-1$
+		Dictionary<?, ?> allHeaders = bundle.getHeaders(""); //$NON-NLS-1$
 		String symbolicNameHeader = (String) allHeaders.get(Constants.BUNDLE_SYMBOLICNAME);
 		try {
 			if (symbolicNameHeader != null) {

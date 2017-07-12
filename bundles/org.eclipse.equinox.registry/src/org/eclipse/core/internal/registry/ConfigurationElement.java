@@ -198,7 +198,7 @@ public class ConfigurationElement extends RegistryObject {
 			ConfigurationElement[] exec;
 			ConfigurationElement[] parms;
 			ConfigurationElement element;
-			Hashtable initParms;
+			Hashtable<String, String> initParms;
 			String pname;
 
 			exec = getChildren(attributeName);
@@ -208,7 +208,7 @@ public class ConfigurationElement extends RegistryObject {
 				className = element.getAttribute("class"); //$NON-NLS-1$
 				parms = element.getChildren("parameter"); //$NON-NLS-1$
 				if (parms.length != 0) {
-					initParms = new Hashtable(parms.length + 1);
+					initParms = new Hashtable<>(parms.length + 1);
 					for (i = 0; i < parms.length; i++) {
 						pname = parms[i].getAttribute("name"); //$NON-NLS-1$
 						if (pname != null)

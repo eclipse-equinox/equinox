@@ -49,25 +49,25 @@ public class RegistryObjectManager implements IObjectManager {
 
 	//Those two data structures are only used when the addition or the removal of a plugin occurs.
 	//They are used to keep track on a contributor basis of the extension being added or removed
-	private KeyedHashSet newContributions; //represents the contributers added during this session.
+	private final KeyedHashSet newContributions; //represents the contributers added during this session.
 	private Object formerContributions; //represents the contributers encountered in previous sessions. This is loaded lazily.
 
-	private HashMap contributors; // key: contributor ID; value: contributor name
-	private HashMap removedContributors; // key: contributor ID; value: contributor name
+	private HashMap<String, RegistryContributor> contributors; // key: contributor ID; value: contributor name
+	private HashMap<String, RegistryContributor> removedContributors; // key: contributor ID; value: contributor name
 	private KeyedHashSet namespacesIndex; // registry elements (extension & extensionpoints) indexed by namespaces
 
 	// Map key: extensionPointFullyQualifiedName, value int[] of orphan extensions.
 	// The orphan access does not need to be synchronized because the it is protected by the lock in extension registry.
 	private Object orphanExtensions;
 
-	private KeyedHashSet heldObjects = new KeyedHashSet(); //strong reference to the objects that must be hold on to
+	private final KeyedHashSet heldObjects = new KeyedHashSet(); //strong reference to the objects that must be hold on to
 
 	//Indicate if objects have been removed or added from the table. This only needs to be set in a couple of places (addNamespace and removeNamespace)
 	private boolean isDirty = false;
 
 	private boolean fromCache = false;
 
-	private ExtensionRegistry registry;
+	private final ExtensionRegistry registry;
 
 	// TODO this option is not used
 	// OSGI system properties.  Copied from EclipseStarter
@@ -220,9 +220,9 @@ public class RegistryObjectManager implements IObjectManager {
 		if (fromCache == false)
 			return new KeyedHashSet(0);
 
-		if (formerContributions == null || (result = ((KeyedHashSet) ((formerContributions instanceof SoftReference) ? ((SoftReference) formerContributions).get() : formerContributions))) == null) {
+		if (formerContributions == null || (result = ((KeyedHashSet) ((formerContributions instanceof SoftReference) ? ((SoftReference<?>) formerContributions).get() : formerContributions))) == null) {
 			result = registry.getTableReader().loadContributions();
-			formerContributions = new SoftReference(result);
+			formerContributions = new SoftReference<>(result);
 		}
 		return result;
 	}
@@ -475,21 +475,21 @@ public class RegistryObjectManager implements IObjectManager {
 
 	}
 
-	private Map getOrphans() {
-		Object result = orphanExtensions;
+	private Map<String, int[]> getOrphans() {
+		Object result;
 		if (orphanExtensions == null && !fromCache) {
-			result = new HashMap();
+			result = new HashMap<>();
 			orphanExtensions = result;
-		} else if (orphanExtensions == null || (result = ((orphanExtensions instanceof SoftReference) ? ((SoftReference) orphanExtensions).get() : orphanExtensions)) == null) {
+		} else if (orphanExtensions == null || (result = ((orphanExtensions instanceof SoftReference) ? ((SoftReference<?>) orphanExtensions).get() : orphanExtensions)) == null) {
 			result = registry.getTableReader().loadOrphans();
-			orphanExtensions = new SoftReference(result);
+			orphanExtensions = new SoftReference<>(result);
 		}
-		return (HashMap) result;
+		return (HashMap<String, int[]>) result;
 	}
 
 	void addOrphans(String extensionPoint, int[] extensions) {
-		Map orphans = getOrphans();
-		int[] existingOrphanExtensions = (int[]) orphans.get(extensionPoint);
+		Map<String, int[]> orphans = getOrphans();
+		int[] existingOrphanExtensions = orphans.get(extensionPoint);
 
 		if (existingOrphanExtensions != null) {
 			// just add
@@ -504,13 +504,13 @@ public class RegistryObjectManager implements IObjectManager {
 		markOrphansHasDirty(orphans);
 	}
 
-	void markOrphansHasDirty(Map orphans) {
+	void markOrphansHasDirty(Map<String, int[]> orphans) {
 		orphanExtensions = orphans;
 	}
 
 	void addOrphan(String extensionPoint, int extension) {
-		Map orphans = getOrphans();
-		int[] existingOrphanExtensions = (int[]) orphans.get(extensionPoint);
+		Map<String, int[]> orphans = getOrphans();
+		int[] existingOrphanExtensions = orphans.get(extensionPoint);
 
 		if (existingOrphanExtensions != null) {
 			// just add
@@ -526,8 +526,8 @@ public class RegistryObjectManager implements IObjectManager {
 	}
 
 	int[] removeOrphans(String extensionPoint) {
-		Map orphans = getOrphans();
-		int[] existingOrphanExtensions = (int[]) orphans.remove(extensionPoint);
+		Map<String, int[]> orphans = getOrphans();
+		int[] existingOrphanExtensions = orphans.remove(extensionPoint);
 		if (existingOrphanExtensions != null) {
 			markOrphansHasDirty(orphans);
 		}
@@ -535,8 +535,8 @@ public class RegistryObjectManager implements IObjectManager {
 	}
 
 	void removeOrphan(String extensionPoint, int extension) {
-		Map orphans = getOrphans();
-		int[] existingOrphanExtensions = (int[]) orphans.get(extensionPoint);
+		Map<String, int[]> orphans = getOrphans();
+		int[] existingOrphanExtensions = orphans.get(extensionPoint);
 
 		if (existingOrphanExtensions == null)
 			return;
@@ -558,7 +558,7 @@ public class RegistryObjectManager implements IObjectManager {
 	}
 
 	//This method is only used by the writer to reach in
-	Map getOrphanExtensions() {
+	Map<String, int[]> getOrphanExtensions() {
 		return getOrphans();
 	}
 
@@ -579,10 +579,10 @@ public class RegistryObjectManager implements IObjectManager {
 
 	// This method is used internally and by the writer to reach in. Notice that it doesn't
 	// return contributors marked as removed.
-	HashMap getContributors() {
+	HashMap<String, RegistryContributor> getContributors() {
 		if (contributors == null) {
 			if (fromCache == false)
-				contributors = new HashMap();
+				contributors = new HashMap<>();
 			else
 				contributors = registry.getTableReader().loadContributors();
 		}
@@ -590,19 +590,19 @@ public class RegistryObjectManager implements IObjectManager {
 	}
 
 	synchronized IContributor[] getContributorsSync() {
-		Collection contributorValues = getContributors().values();
-		return (IContributor[]) contributorValues.toArray(new IContributor[contributorValues.size()]);
+		Collection<RegistryContributor> contributorValues = getContributors().values();
+		return contributorValues.toArray(new IContributor[contributorValues.size()]);
 	}
 
 	synchronized RegistryContributor getContributor(String id) {
-		RegistryContributor contributor = (RegistryContributor) getContributors().get(id);
+		RegistryContributor contributor = getContributors().get(id);
 		if (contributor != null)
 			return contributor;
 		// check if we have it among removed contributors - potentially
 		// notification of removals might be processed after the contributor
 		// marked as removed:
 		if (removedContributors != null)
-			return (RegistryContributor) removedContributors.get(id);
+			return removedContributors.get(id);
 		return null;
 	}
 
@@ -619,10 +619,10 @@ public class RegistryObjectManager implements IObjectManager {
 
 	synchronized void removeContributor(String id) {
 		isDirty = true;
-		RegistryContributor removed = (RegistryContributor) getContributors().remove(id);
+		RegistryContributor removed = getContributors().remove(id);
 		if (removed != null) {
 			if (removedContributors == null)
-				removedContributors = new HashMap();
+				removedContributors = new HashMap<>();
 			removedContributors.put(id, removed);
 		}
 	}
@@ -652,11 +652,11 @@ public class RegistryObjectManager implements IObjectManager {
 	 * them in a IObjectManager so that they can be accessed from the appropriate
 	 * deltas but not from the registry.
 	 */
-	synchronized Map getAssociatedObjects(String contributionId) {
+	synchronized Map<Integer, RegistryObject> getAssociatedObjects(String contributionId) {
 		//Collect all the objects associated with this contribution
 		int[] xpts = getExtensionPointsFrom(contributionId);
 		int[] exts = getExtensionsFrom(contributionId);
-		Map actualObjects = new HashMap(xpts.length + exts.length);
+		Map<Integer, RegistryObject> actualObjects = new HashMap<>(xpts.length + exts.length);
 		for (int i = 0; i < exts.length; i++) {
 			Extension tmp = (Extension) basicGetObject(exts[i], RegistryObjectManager.EXTENSION);
 			actualObjects.put(new Integer(exts[i]), tmp);
@@ -673,7 +673,7 @@ public class RegistryObjectManager implements IObjectManager {
 	/**
 	 * Adds elements to be removed along with the registry object.
 	 */
-	synchronized void addAssociatedObjects(Map map, RegistryObject registryObject) {
+	synchronized void addAssociatedObjects(Map<Integer, RegistryObject> map, RegistryObject registryObject) {
 		collectChildren(registryObject, 0, map);
 	}
 
@@ -681,10 +681,10 @@ public class RegistryObjectManager implements IObjectManager {
 	 * Add to the set of the objects all extensions and extension points that
 	 * could be navigated to from the objects in the set.
 	 */
-	synchronized void addNavigableObjects(Map associatedObjects) {
-		Map result = new HashMap();
-		for (Iterator iter = associatedObjects.values().iterator(); iter.hasNext();) {
-			RegistryObject object = (RegistryObject) iter.next();
+	synchronized void addNavigableObjects(Map<Integer, RegistryObject> associatedObjects) {
+		Map<Integer, RegistryObject> result = new HashMap<>();
+		for (Iterator<RegistryObject> iter = associatedObjects.values().iterator(); iter.hasNext();) {
+			RegistryObject object = iter.next();
 			if (object instanceof Extension) {
 				// add extension point
 				ExtensionPoint extPoint = getExtensionPointObject(((Extension) object).getExtensionPointIdentifier());
@@ -709,9 +709,9 @@ public class RegistryObjectManager implements IObjectManager {
 				}
 			} else if (object instanceof ExtensionPoint) {
 				// by now extensions of this extension point have been marked as orphans
-				Map orphans = getOrphans();
+				Map<String, int[]> orphans = getOrphans();
 				String name = ((ExtensionPoint) object).getUniqueIdentifier();
-				int[] extensions = (int[]) orphans.get(name);
+				int[] extensions = orphans.get(name);
 				if (extensions != null) {
 					for (int j = 0; j < extensions.length; j++) {
 						Extension tmp = (Extension) basicGetObject(extensions[j], RegistryObjectManager.EXTENSION);
@@ -729,10 +729,10 @@ public class RegistryObjectManager implements IObjectManager {
 		associatedObjects.putAll(result);
 	}
 
-	synchronized void removeObjects(Map associatedObjects) {
+	synchronized void removeObjects(Map<?, ?> associatedObjects) {
 		//Remove the objects from the main object manager so they can no longer be accessed.
-		Collection allValues = associatedObjects.values();
-		for (Iterator iter = allValues.iterator(); iter.hasNext();) {
+		Collection<?> allValues = associatedObjects.values();
+		for (Iterator<?> iter = allValues.iterator(); iter.hasNext();) {
 			RegistryObject toRemove = (RegistryObject) iter.next();
 			remove((toRemove).getObjectId(), true);
 			if (toRemove instanceof ExtensionPoint)
@@ -740,11 +740,11 @@ public class RegistryObjectManager implements IObjectManager {
 		}
 	}
 
-	IObjectManager createDelegatingObjectManager(Map object) {
+	IObjectManager createDelegatingObjectManager(Map<?, ?> object) {
 		return new TemporaryObjectManager(object, this);
 	}
 
-	private void collectChildren(RegistryObject ce, int level, Map collector) {
+	private void collectChildren(RegistryObject ce, int level, Map<Integer, RegistryObject> collector) {
 		ConfigurationElement[] children = (ConfigurationElement[]) getObjects(ce.getRawChildren(), level == 0 || ce.noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
 		for (int j = 0; j < children.length; j++) {
 			collector.put(new Integer(children[j].getObjectId()), children[j]);
@@ -795,7 +795,7 @@ public class RegistryObjectManager implements IObjectManager {
 		int[] namespaceExtensions = indexElement.getExtensions();
 
 		// filter extensions with no extension point (orphan extensions)
-		List tmp = new ArrayList();
+		List<Handle> tmp = new ArrayList<>();
 		Extension[] exts = (Extension[]) getObjects(namespaceExtensions, EXTENSION);
 		for (int i = 0; i < exts.length; i++) {
 			if (getExtensionPointObject(exts[i].getExtensionPointIdentifier()) != null)
@@ -804,7 +804,7 @@ public class RegistryObjectManager implements IObjectManager {
 		if (tmp.size() == 0)
 			return EMPTY_EXTENSIONS_ARRAY;
 		ExtensionHandle[] result = new ExtensionHandle[tmp.size()];
-		return (ExtensionHandle[]) tmp.toArray(result);
+		return tmp.toArray(result);
 	}
 
 	public ExtensionHandle[] getExtensionsFromContributor(String contributorId) {

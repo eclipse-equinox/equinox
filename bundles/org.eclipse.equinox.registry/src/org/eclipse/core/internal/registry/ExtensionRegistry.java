@@ -56,28 +56,28 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	}
 
 	// used to enforce concurrent access policy for readers/writers
-	private ReadWriteMonitor access = new ReadWriteMonitor();
+	private final ReadWriteMonitor access = new ReadWriteMonitor();
 
 	// deltas not broadcasted yet. Deltas are kept organized by the namespace name (objects with the same namespace are grouped together)
-	private transient Map deltas = new HashMap(11);
+	private transient Map<String, Object> deltas = new HashMap<>(11);
 
 	//storage manager associated with the registry cache
 	protected StorageManager cacheStorageManager;
 
 	// all registry change listeners
-	private transient ListenerList listeners = new ListenerList();
+	private transient ListenerList<ListenerInfo> listeners = new ListenerList<>();
 
 	private RegistryObjectManager registryObjects = null;
 
 	// Table reader associated with this extension registry
 	protected TableReader theTableReader = new TableReader(this);
 
-	private Object masterToken; // use to get full control of the registry; objects created as "static"
-	private Object userToken; // use to modify non-persisted registry elements
+	private final Object masterToken; // use to get full control of the registry; objects created as "static"
+	private final Object userToken; // use to modify non-persisted registry elements
 
 	protected RegistryStrategy strategy; // overridable portions of the registry functionality
 
-	private RegistryTimestamp aggregatedTimestamp = new RegistryTimestamp(); // tracks current contents of the registry
+	private final RegistryTimestamp aggregatedTimestamp = new RegistryTimestamp(); // tracks current contents of the registry
 
 	// encapsulates processing of new registry deltas
 	private CombinedEventDelta eventDelta = null;
@@ -181,9 +181,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		return recordChange(extensionPoint, orphans, IExtensionDelta.ADDED);
 	}
 
-	private Set addExtensionsAndExtensionPoints(Contribution element) {
+	private Set<String> addExtensionsAndExtensionPoints(Contribution element) {
 		// now add and resolve extensions and extension points
-		Set affectedNamespaces = new HashSet();
+		Set<String> affectedNamespaces = new HashSet<>();
 		int[] extPoints = element.getExtensionPoints();
 		for (int i = 0; i < extPoints.length; i++) {
 			String namespace = this.addExtensionPoint(extPoints[i]);
@@ -230,13 +230,13 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		registryObjects.addContribution(element);
 		if (!link)
 			return;
-		Set affectedNamespaces = addExtensionsAndExtensionPoints(element);
+		Set<String> affectedNamespaces = addExtensionsAndExtensionPoints(element);
 		setObjectManagers(affectedNamespaces, registryObjects.createDelegatingObjectManager(registryObjects.getAssociatedObjects(element.getContributorId())));
 	}
 
-	private void setObjectManagers(Set affectedNamespaces, IObjectManager manager) {
-		for (Iterator iter = affectedNamespaces.iterator(); iter.hasNext();) {
-			getDelta((String) iter.next()).setObjectManager(manager);
+	private void setObjectManagers(Set<String> affectedNamespaces, IObjectManager manager) {
+		for (Iterator<String> iter = affectedNamespaces.iterator(); iter.hasNext();) {
+			getDelta(iter.next()).setObjectManager(manager);
 		}
 		if (eventDelta != null)
 			eventDelta.setObjectManager(manager);
@@ -244,8 +244,8 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	private void basicRemove(String contributorId) {
 		// ignore anonymous namespaces
-		Set affectedNamespaces = removeExtensionsAndExtensionPoints(contributorId);
-		Map associatedObjects = registryObjects.getAssociatedObjects(contributorId);
+		Set<String> affectedNamespaces = removeExtensionsAndExtensionPoints(contributorId);
+		Map<Integer, RegistryObject> associatedObjects = registryObjects.getAssociatedObjects(contributorId);
 		registryObjects.removeObjects(associatedObjects);
 		registryObjects.addNavigableObjects(associatedObjects); // put the complete set of navigable objects
 		setObjectManagers(affectedNamespaces, registryObjects.createDelegatingObjectManager(associatedObjects));
@@ -277,7 +277,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		}
 		// for thread safety, create tmp collections
 		Object[] tmpListeners = listeners.getListeners();
-		Map tmpDeltas = new HashMap(this.deltas);
+		Map<String, Object> tmpDeltas = new HashMap<>(this.deltas);
 		// the deltas have been saved for notification - we can clear them now
 		deltas.clear();
 		// do the notification asynchronously
@@ -640,8 +640,8 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		return recordChange(extensionPoint, existingExtensions, IExtensionDelta.REMOVED);
 	}
 
-	private Set removeExtensionsAndExtensionPoints(String contributorId) {
-		Set affectedNamespaces = new HashSet();
+	private Set<String> removeExtensionsAndExtensionPoints(String contributorId) {
+		Set<String> affectedNamespaces = new HashSet<>();
 		int[] extensions = registryObjects.getExtensionsFrom(contributorId);
 		for (int i = 0; i < extensions.length; i++) {
 			String namespace = this.removeExtension(extensions[i]);
@@ -934,7 +934,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Registry change events processing
 
-	public IStatus processChangeEvent(Object[] listenerInfos, final Map scheduledDeltas) {
+	public IStatus processChangeEvent(Object[] listenerInfos, final Map<String, ?> scheduledDeltas) {
 		// Separate new event delta from the pack
 		final CombinedEventDelta extendedDelta = (CombinedEventDelta) scheduledDeltas.remove(notNamespace);
 
@@ -975,7 +975,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 				}
 			}
 		}
-		for (Iterator iter = scheduledDeltas.values().iterator(); iter.hasNext();) {
+		for (Iterator<?> iter = scheduledDeltas.values().iterator(); iter.hasNext();) {
 			((RegistryDelta) iter.next()).getObjectManager().close();
 		}
 		IObjectManager manager = extendedDelta.getObjectManager();
@@ -985,11 +985,11 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	}
 
 	private RegistryEventThread eventThread = null; // registry event loop
-	protected final List queue = new LinkedList(); // stores registry events info
+	protected final List<QueueElement> queue = new LinkedList<>(); // stores registry events info
 
 	// Registry events notifications are done on a separate thread in a sequential manner
 	// (first in - first processed)
-	public void scheduleChangeEvent(Object[] listenerInfos, Map scheduledDeltas) {
+	public void scheduleChangeEvent(Object[] listenerInfos, Map<String, ?> scheduledDeltas) {
 		QueueElement newElement = new QueueElement(listenerInfos, scheduledDeltas);
 		if (eventThread == null) {
 			eventThread = new RegistryEventThread(this);
@@ -1004,16 +1004,16 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	// The pair of values we store in the event queue
 	private class QueueElement {
 		Object[] listenerInfos;
-		Map scheduledDeltas;
+		Map<String, ?> scheduledDeltas;
 
-		QueueElement(Object[] infos, Map deltas) {
+		QueueElement(Object[] infos, Map<String, ?> deltas) {
 			this.scheduledDeltas = deltas;
 			listenerInfos = infos;
 		}
 	}
 
 	private class RegistryEventThread extends Thread {
-		private ExtensionRegistry registry;
+		private final ExtensionRegistry registry;
 
 		public RegistryEventThread(ExtensionRegistry registry) {
 			super("Extension Registry Event Dispatcher"); //$NON-NLS-1$
@@ -1032,7 +1032,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 					} catch (InterruptedException e) {
 						return;
 					}
-					element = (QueueElement) queue.remove(0);
+					element = queue.remove(0);
 				}
 				registry.processChangeEvent(element.listenerInfos, element.scheduledDeltas);
 			}
@@ -1363,7 +1363,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 				namespace = removeExtensionPoint(id);
 			else
 				namespace = removeExtension(id);
-			Map removed = new HashMap(1);
+			Map<Integer, RegistryObject> removed = new HashMap<>(1);
 			removed.put(new Integer(id), registryObject);
 			// There is some asymmetry between extension and extension point removal. Removing extension point makes
 			// extensions "orphans" but does not remove them. As a result, only extensions needs to be processed.

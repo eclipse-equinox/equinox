@@ -32,11 +32,11 @@ public class CombinedEventDelta {
 	// an empty array trail used to reduce re-allocations
 	final static private int arrayGrowthSpace = 5;
 
-	private Map extensionsByID = null; // extension point ID -> List of Integer extensions IDs
-	private Map extPointsByID = null; // extension point ID -> List of Integer extension point IDs
+	private Map<String, List<Integer>> extensionsByID; // extension point ID -> List of Integer extensions IDs
+	private Map<String, List<Integer>> extPointsByID; // extension point ID -> List of Integer extension point IDs
 
-	private ArrayList allExtensions = null; // List of Integer IDs
-	private ArrayList allExtensionPoints = null; // List if Integer IDs
+	private List<Integer> allExtensions; // List of Integer IDs
+	private List<Integer> allExtensionPoints; // List if Integer IDs
 
 	private CombinedEventDelta(boolean addition) {
 		this.addition = addition;
@@ -66,50 +66,54 @@ public class CombinedEventDelta {
 		return objectManager;
 	}
 
-	private List getExtensionsBucket(String id) {
-		if (extensionsByID == null)
-			extensionsByID = new HashMap();
-		List extensions = (List) extensionsByID.get(id);
+	private List<Integer> getExtensionsBucket(String id) {
+		if (extensionsByID == null) {
+			extensionsByID = new HashMap<>();
+		}
+		List<Integer> extensions = extensionsByID.get(id);
 		if (extensions == null) {
-			extensions = new ArrayList(arrayGrowthSpace);
+			extensions = new ArrayList<>(arrayGrowthSpace);
 			extensionsByID.put(id, extensions);
 		}
 		return extensions;
 	}
 
-	private List getExtPointsBucket(String id) {
-		if (extPointsByID == null)
-			extPointsByID = new HashMap();
-		List extensionPoints = (List) extPointsByID.get(id);
+	private List<Integer> getExtPointsBucket(String id) {
+		if (extPointsByID == null) {
+			extPointsByID = new HashMap<>();
+		}
+		List<Integer> extensionPoints = extPointsByID.get(id);
 		if (extensionPoints == null) {
-			extensionPoints = new ArrayList(arrayGrowthSpace);
+			extensionPoints = new ArrayList<>(arrayGrowthSpace);
 			extPointsByID.put(id, extensionPoints);
 		}
 		return extensionPoints;
 	}
 
-	private List getExtPointsGlobal() {
-		if (allExtensionPoints == null)
-			allExtensionPoints = new ArrayList();
+	private List<Integer> getExtPointsGlobal() {
+		if (allExtensionPoints == null) {
+			allExtensionPoints = new ArrayList<>();
+		}
 		return allExtensionPoints;
 	}
 
-	private List getExtensionsGlobal() {
-		if (allExtensions == null)
-			allExtensions = new ArrayList();
+	private List<Integer> getExtensionsGlobal() {
+		if (allExtensions == null) {
+			allExtensions = new ArrayList<>();
+		}
 		return allExtensions;
 	}
 
 	public void rememberExtensionPoint(ExtensionPoint extensionPoint) {
 		String bucketId = extensionPoint.getUniqueIdentifier();
-		Object extPt = new Integer(extensionPoint.getObjectId());
+		Integer extPt = new Integer(extensionPoint.getObjectId());
 		getExtPointsBucket(bucketId).add(extPt);
 		getExtPointsGlobal().add(extPt);
 	}
 
 	public void rememberExtension(ExtensionPoint extensionPoint, int ext) {
 		String bucketId = extensionPoint.getUniqueIdentifier();
-		Object extension = new Integer(ext);
+		Integer extension = new Integer(ext);
 
 		getExtensionsBucket(bucketId).add(extension);
 		getExtensionsGlobal().add(extension);
@@ -125,40 +129,41 @@ public class CombinedEventDelta {
 	}
 
 	public IExtensionPoint[] getExtensionPoints(String id) {
-		List extensionPoints = null;
+		List<Integer> extensionPoints = null;
 		if (id != null && extPointsByID != null)
-			extensionPoints = (List) extPointsByID.get(id);
+			extensionPoints = extPointsByID.get(id);
 		else if (id == null)
 			extensionPoints = allExtensionPoints;
 		if (extensionPoints == null) // no changes that fit the filter
 			return null;
 		int size = extensionPoints.size();
-		ArrayList result = new ArrayList(size);
+		ArrayList<IExtensionPoint> result = new ArrayList<>(size);
 		for (int i = 0; i < size; i++) {
-			Integer extPt = (Integer) extensionPoints.get(i);
+			Integer extPt = extensionPoints.get(i);
 			IExtensionPoint extensionPoint = new ExtensionPointHandle(objectManager, extPt.intValue());
 			result.add(extensionPoint);
 		}
 		if (result.size() == 0)
 			return null;
-		return (IExtensionPoint[]) result.toArray(new IExtensionPoint[result.size()]);
+		return result.toArray(new IExtensionPoint[result.size()]);
 	}
 
 	public IExtension[] getExtensions(String id) {
-		List extensions = null;
-		if (id != null && extensionsByID != null)
-			extensions = (List) extensionsByID.get(id);
-		else if (id == null)
+		List<Integer> extensions = null;
+		if (id != null && extensionsByID != null) {
+			extensions = extensionsByID.get(id);
+		} else if (id == null) {
 			extensions = allExtensions;
+		}
 		if (extensions == null) // no changes that fit the filter
 			return null;
 		int size = extensions.size();
-		ArrayList result = new ArrayList(size);
+		ArrayList<IExtension> result = new ArrayList<>(size);
 		for (int i = 0; i < size; i++) {
-			Integer ext = (Integer) extensions.get(i);
+			Integer ext = extensions.get(i);
 			IExtension extension = new ExtensionHandle(objectManager, ext.intValue());
 			result.add(extension);
 		}
-		return (IExtension[]) result.toArray(new IExtension[result.size()]);
+		return result.toArray(new IExtension[result.size()]);
 	}
 }

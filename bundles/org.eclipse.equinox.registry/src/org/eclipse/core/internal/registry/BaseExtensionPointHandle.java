@@ -73,11 +73,11 @@ public class BaseExtensionPointHandle extends Handle implements IExtensionPoint 
 		if (tmpExtensions.length == 0)
 			return ConfigurationElementHandle.EMPTY_ARRAY;
 
-		ArrayList result = new ArrayList();
+		ArrayList<Handle> result = new ArrayList<>();
 		for (int i = 0; i < tmpExtensions.length; i++) {
 			result.addAll(Arrays.asList(objectManager.getHandles(tmpExtensions[i].getRawChildren(), RegistryObjectManager.CONFIGURATION_ELEMENT)));
 		}
-		return (IConfigurationElement[]) result.toArray(new IConfigurationElement[result.size()]);
+		return result.toArray(new IConfigurationElement[result.size()]);
 	}
 
 	public String getLabelAsIs() {

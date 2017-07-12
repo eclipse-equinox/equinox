@@ -27,9 +27,9 @@ import org.osgi.util.tracker.ServiceTracker;
  * @since org.eclipse.equinox.registry 3.2
  */
 public class OSGIUtils {
-	private ServiceTracker debugTracker = null;
-	private ServiceTracker bundleTracker = null;
-	private ServiceTracker configurationLocationTracker = null;
+	private ServiceTracker<?, ?> debugTracker = null;
+	private ServiceTracker<?, ?> bundleTracker = null;
+	private ServiceTracker<?, ?> configurationLocationTracker = null;
 
 	// OSGI system properties.  Copied from EclipseStarter
 	public static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
@@ -56,10 +56,10 @@ public class OSGIUtils {
 			return;
 		}
 
-		debugTracker = new ServiceTracker(context, DebugOptions.class.getName(), null);
+		debugTracker = new ServiceTracker<>(context, DebugOptions.class.getName(), null);
 		debugTracker.open();
 
-		bundleTracker = new ServiceTracker(context, PackageAdmin.class.getName(), null);
+		bundleTracker = new ServiceTracker<>(context, PackageAdmin.class.getName(), null);
 		bundleTracker.open();
 
 		// locations
@@ -70,7 +70,7 @@ public class OSGIUtils {
 		} catch (InvalidSyntaxException e) {
 			// ignore this.  It should never happen as we have tested the above format.
 		}
-		configurationLocationTracker = new ServiceTracker(context, filter, null);
+		configurationLocationTracker = new ServiceTracker<>(context, filter, null);
 		configurationLocationTracker.open();
 
 	}

@@ -82,9 +82,9 @@ public class Extension extends RegistryObject {
 
 		//The extension has been loaded from the cache.
 		String[] result = null;
-		if (extraInformation == null || (result = ((extraInformation instanceof SoftReference) ? (String[]) ((SoftReference) extraInformation).get() : (String[]) extraInformation)) == null) {
+		if (extraInformation == null || (result = ((extraInformation instanceof SoftReference) ? (String[]) ((SoftReference<?>) extraInformation).get() : (String[]) extraInformation)) == null) {
 			result = registry.getTableReader().loadExtensionExtraData(getExtraDataOffset());
-			extraInformation = new SoftReference(result);
+			extraInformation = new SoftReference<>(result);
 		}
 		return result;
 	}
@@ -135,7 +135,7 @@ public class Extension extends RegistryObject {
 	 */
 	private void ensureExtraInformationType() {
 		if (extraInformation instanceof SoftReference) {
-			extraInformation = ((SoftReference) extraInformation).get();
+			extraInformation = ((SoftReference<?>) extraInformation).get();
 		}
 		if (extraInformation == null) {
 			extraInformation = new String[EXTRA_SIZE];

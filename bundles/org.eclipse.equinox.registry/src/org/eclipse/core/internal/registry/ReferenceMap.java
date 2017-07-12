@@ -58,12 +58,12 @@ public class ReferenceMap {
 	 */
 	private static class HardRef implements IEntry {
 
-		private int key;
+		private final int key;
 		private IEntry next;
 		/**
 		 * Reference value.  Note this can never be null.
 		 */
-		private Object value;
+		private final Object value;
 
 		public HardRef(int key, Object value, IEntry next) {
 			this.key = key;
@@ -135,14 +135,14 @@ public class ReferenceMap {
 	 * Augments a normal soft reference with additional information
 	 * required to implement the IEntry interface.
 	 */
-	private static class SoftRef extends SoftReference implements IEntry {
-		private int key;
+	private static class SoftRef extends SoftReference<Object> implements IEntry {
+		private final int key;
 		/**
 		 * For chained collisions
 		 */
 		private IEntry next;
 
-		public SoftRef(int key, Object value, IEntry next, ReferenceQueue q) {
+		public SoftRef(int key, Object value, IEntry next, ReferenceQueue<Object> q) {
 			super(value, q);
 			this.key = key;
 			this.next = next;
@@ -186,12 +186,12 @@ public class ReferenceMap {
 	 *   didn't compile under JDK1.2.2.
 	 *  @serial
 	 */
-	private float loadFactor;
+	private final float loadFactor;
 
 	/**
 	 *  ReferenceQueue used to eliminate stale mappings.
 	 */
-	private transient ReferenceQueue queue = new ReferenceQueue();
+	private transient ReferenceQueue<Object> queue = new ReferenceQueue<>();
 
 	/**
 	 *  Number of mappings in this map.
@@ -342,7 +342,7 @@ public class ReferenceMap {
 	 *  background thread.
 	 */
 	private void purge() {
-		Reference ref = queue.poll();
+		Reference<?> ref = queue.poll();
 		while (ref != null) {
 			doRemove(((IEntry) ref).getKey(), true);
 			ref.clear();

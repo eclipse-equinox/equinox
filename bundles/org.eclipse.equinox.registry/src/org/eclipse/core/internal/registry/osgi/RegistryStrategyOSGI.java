@@ -44,7 +44,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	/**
 	 * Registry access key
 	 */
-	private Object token;
+	private final Object token;
 
 	/**
 	 * Debug extension registry
@@ -59,12 +59,12 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	/**
 	 * Tracker for the XML parser service
 	 */
-	private ServiceTracker xmlTracker = null;
+	private ServiceTracker<?, ?> xmlTracker = null;
 
 	/**
 	 * Tracker for the LocaleProvider service
 	 */
-	private ServiceTracker localeTracker = null;
+	private ServiceTracker<?, ?> localeTracker = null;
 
 	/**
 	 * Value of the query "should we track contributions timestamps" is cached
@@ -131,7 +131,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	 * The Bundle object is stored as a weak reference to facilitate GC
 	 * in case the bundle was uninstalled during the Eclipse run.
 	 */
-	private ReferenceMap bundleMap = new ReferenceMap(ReferenceMap.SOFT, DEFAULT_BUNDLECACHE_SIZE, DEFAULT_BUNDLECACHE_LOADFACTOR);
+	private final ReferenceMap bundleMap = new ReferenceMap(ReferenceMap.SOFT, DEFAULT_BUNDLECACHE_SIZE, DEFAULT_BUNDLECACHE_LOADFACTOR);
 
 	// String Id to OSGi Bundle conversion
 	private Bundle getBundle(String id) {
@@ -172,7 +172,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 			throwException(NLS.bind(RegistryMessages.plugin_loadClassError, "UNKNOWN BUNDLE", className), new InvalidRegistryObjectException()); //$NON-NLS-1$
 
 		// load the requested class from this bundle
-		Class classInstance = null;
+		Class<?> classInstance = null;
 		try {
 			classInstance = contributingBundle.loadClass(className);
 		} catch (Exception e1) {
@@ -309,7 +309,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	@Override
 	public SAXParserFactory getXMLParser() {
 		if (xmlTracker == null) {
-			xmlTracker = new ServiceTracker(Activator.getContext(), SAXParserFactory.class.getName(), null);
+			xmlTracker = new ServiceTracker<>(Activator.getContext(), SAXParserFactory.class.getName(), null);
 			xmlTracker.open();
 		}
 		return (SAXParserFactory) xmlTracker.getService();
@@ -321,7 +321,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	@Override
 	public String getLocale() {
 		if (localeTracker == null) {
-			localeTracker = new ServiceTracker(Activator.getContext(), LocaleProvider.class.getName(), null);
+			localeTracker = new ServiceTracker<>(Activator.getContext(), LocaleProvider.class.getName(), null);
 			localeTracker.open();
 		}
 		LocaleProvider localeProvider = (LocaleProvider) localeTracker.getService();

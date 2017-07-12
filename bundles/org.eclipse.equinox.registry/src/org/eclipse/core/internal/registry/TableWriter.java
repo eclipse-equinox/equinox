@@ -12,6 +12,7 @@ package org.eclipse.core.internal.registry;
 
 import java.io.*;
 import java.util.*;
+import java.util.Map.Entry;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.spi.RegistryContributor;
 
@@ -61,7 +62,7 @@ public class TableWriter {
 
 	private OffsetTable offsets;
 
-	private ExtensionRegistry registry;
+	private final ExtensionRegistry registry;
 	private RegistryObjectManager objectManager;
 
 	public TableWriter(ExtensionRegistry registry) {
@@ -230,14 +231,14 @@ public class TableWriter {
 		outputNamespace.close();
 	}
 
-	private void saveContributors(HashMap contributors) throws IOException {
+	private void saveContributors(HashMap<?, ?> contributors) throws IOException {
 		FileOutputStream fosContributors = new FileOutputStream(contributorsFile);
 		DataOutputStream outputContributors = new DataOutputStream(new BufferedOutputStream(fosContributors));
 
-		Collection entries = contributors.values();
+		Collection<?> entries = contributors.values();
 		outputContributors.writeInt(entries.size());
 
-		for (Iterator i = entries.iterator(); i.hasNext();) {
+		for (Iterator<?> i = entries.iterator(); i.hasNext();) {
 			RegistryContributor contributor = (RegistryContributor) i.next();
 			writeStringOrNull(contributor.getActualId(), outputContributors);
 			writeStringOrNull(contributor.getActualName(), outputContributors);
@@ -430,27 +431,27 @@ public class TableWriter {
 	}
 
 	private void saveOrphans() throws IOException {
-		Map orphans = objectManager.getOrphanExtensions();
-		Map filteredOrphans = new HashMap();
-		for (Iterator iter = orphans.entrySet().iterator(); iter.hasNext();) {
-			Map.Entry entry = (Map.Entry) iter.next();
-			int[] filteredValue = filter((int[]) entry.getValue());
+		Map<String, int[]> orphans = objectManager.getOrphanExtensions();
+		Map<String, int[]> filteredOrphans = new HashMap<>();
+		for (Iterator<Entry<String, int[]>> iter = orphans.entrySet().iterator(); iter.hasNext();) {
+			Entry<String, int[]> entry = iter.next();
+			int[] filteredValue = filter(entry.getValue());
 			if (filteredValue.length != 0)
 				filteredOrphans.put(entry.getKey(), filteredValue);
 		}
 		FileOutputStream fosOrphan = new FileOutputStream(orphansFile);
 		DataOutputStream outputOrphan = new DataOutputStream(new BufferedOutputStream(fosOrphan));
 		outputOrphan.writeInt(filteredOrphans.size());
-		Set elements = filteredOrphans.entrySet();
-		for (Iterator iter = elements.iterator(); iter.hasNext();) {
-			Map.Entry entry = (Map.Entry) iter.next();
-			outputOrphan.writeUTF((String) entry.getKey());
-			saveArray((int[]) entry.getValue(), outputOrphan);
+		Set<Entry<String, int[]>> elements = filteredOrphans.entrySet();
+		for (Iterator<Entry<String, int[]>> iter = elements.iterator(); iter.hasNext();) {
+			Entry<String, int[]> entry = iter.next();
+			outputOrphan.writeUTF(entry.getKey());
+			saveArray(entry.getValue(), outputOrphan);
 		}
-		for (Iterator iter = elements.iterator(); iter.hasNext();) {
-			Map.Entry entry = (Map.Entry) iter.next();
-			mainOutput.writeInt(((int[]) entry.getValue()).length);
-			saveExtensions((IExtension[]) objectManager.getHandles((int[]) entry.getValue(), RegistryObjectManager.EXTENSION), mainOutput);
+		for (Iterator<Entry<String, int[]>> iter = elements.iterator(); iter.hasNext();) {
+			Entry<String, int[]> entry = iter.next();
+			mainOutput.writeInt(entry.getValue().length);
+			saveExtensions((IExtension[]) objectManager.getHandles(entry.getValue(), RegistryObjectManager.EXTENSION), mainOutput);
 		}
 		outputOrphan.flush();
 		fosOrphan.getFD().sync();

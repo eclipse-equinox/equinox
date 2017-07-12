@@ -41,8 +41,8 @@ public class Activator implements BundleActivator {
 	private Object userRegistryKey = new Object();
 
 	private IExtensionRegistry defaultRegistry = null;
-	private ServiceRegistration registryRegistration;
-	private ServiceRegistration commandRegistration;
+	private ServiceRegistration<?> registryRegistration;
+	private ServiceRegistration<?> commandRegistration;
 	private RegistryProviderOSGI defaultProvider;
 	private AdapterManagerListener adapterManagerListener = null;
 
@@ -81,7 +81,7 @@ public class Activator implements BundleActivator {
 	 */
 	private void processCommandLine() {
 		// use a string here instead of the class to prevent class loading.
-		ServiceReference ref = getContext().getServiceReference("org.eclipse.osgi.service.environment.EnvironmentInfo"); //$NON-NLS-1$
+		ServiceReference<?> ref = getContext().getServiceReference("org.eclipse.osgi.service.environment.EnvironmentInfo"); //$NON-NLS-1$
 		if (ref == null)
 			return;
 		String[] args = EquinoxUtils.getCommandLine(bundleContext, ref);
@@ -138,7 +138,7 @@ public class Activator implements BundleActivator {
 
 		defaultRegistry = RegistryFactory.createRegistry(strategy, masterRegistryKey, userRegistryKey);
 
-		registryRegistration = Activator.getContext().registerService(IExtensionRegistry.class.getName(), defaultRegistry, new Hashtable());
+		registryRegistration = Activator.getContext().registerService(IExtensionRegistry.class.getName(), defaultRegistry, new Hashtable<String, Object>());
 		defaultProvider = new RegistryProviderOSGI(defaultRegistry);
 		// Set the registry provider and specify this as a default registry:
 		RegistryProviderFactory.setDefault(defaultProvider);

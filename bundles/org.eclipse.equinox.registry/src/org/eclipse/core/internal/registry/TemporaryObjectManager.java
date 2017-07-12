@@ -17,10 +17,10 @@ import org.eclipse.core.runtime.InvalidRegistryObjectException;
  * @since 3.1
  */
 public class TemporaryObjectManager implements IObjectManager {
-	private Map actualObjects; //id --> registry objects
+	private Map<?, ?> actualObjects; //id --> registry objects
 	private RegistryObjectManager parent; //the main object manager (should be equals to extensionRegistry.getObjectManager)
 
-	public TemporaryObjectManager(Map actualObjects, RegistryObjectManager parent) {
+	public TemporaryObjectManager(Map<?, ?> actualObjects, RegistryObjectManager parent) {
 		this.actualObjects = actualObjects;
 		this.parent = parent;
 	}

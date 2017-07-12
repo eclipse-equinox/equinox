@@ -20,10 +20,10 @@ import org.eclipse.core.runtime.IRegistryChangeEvent;
  * deltas for the selected host will be available to clients.
  */
 public final class RegistryChangeEvent implements IRegistryChangeEvent {
-	private String filter;
-	private Map deltas;
+	private final String filter;
+	private final Map<String, ?> deltas;
 
-	public RegistryChangeEvent(Map deltas, String filter) {
+	public RegistryChangeEvent(Map<String, ?> deltas, String filter) {
 		this.deltas = deltas;
 		this.filter = filter;
 	}
@@ -35,7 +35,7 @@ public final class RegistryChangeEvent implements IRegistryChangeEvent {
 			return singleDelta == null ? new RegistryDelta[0] : new RegistryDelta[] {singleDelta};
 		}
 		// there is no filter - return all deltas
-		return (RegistryDelta[]) deltas.values().toArray(new RegistryDelta[deltas.size()]);
+		return deltas.values().toArray(new RegistryDelta[deltas.size()]);
 	}
 
 	private RegistryDelta getHostDelta(String pluginId) {

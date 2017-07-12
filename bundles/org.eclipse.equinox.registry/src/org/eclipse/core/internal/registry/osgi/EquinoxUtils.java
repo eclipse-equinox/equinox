@@ -28,7 +28,7 @@ public class EquinoxUtils {
 	/**
 	 * Get the command line arguments from the EnvironmentInfo service
 	 */
-	public static String[] getCommandLine(BundleContext context, ServiceReference ref) {
+	public static String[] getCommandLine(BundleContext context, ServiceReference<?> ref) {
 		if (ref == null)
 			return null;
 		try {
@@ -42,7 +42,7 @@ public class EquinoxUtils {
 	/**
 	 * Get the time stamp from the PlatformAdmin service.
 	 */
-	public static long getContainerTimestamp(BundleContext context, ServiceReference ref) {
+	public static long getContainerTimestamp(BundleContext context, ServiceReference<?> ref) {
 		if (ref == null)
 			return -1;
 		try {
@@ -53,7 +53,7 @@ public class EquinoxUtils {
 		}
 	}
 
-	public static ServiceRegistration registerCommandProvider(BundleContext context) {
+	public static ServiceRegistration<?> registerCommandProvider(BundleContext context) {
 		// try to register the registry command provider
 		try {
 			// refer to the CommandProvider by name here so that even if VM

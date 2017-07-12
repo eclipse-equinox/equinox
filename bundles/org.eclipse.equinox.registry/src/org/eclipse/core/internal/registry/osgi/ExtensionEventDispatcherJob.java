@@ -33,11 +33,11 @@ final public class ExtensionEventDispatcherJob extends Job {
 			return rule == this;
 		}
 	};
-	private Map deltas;
+	private Map<?, ?> deltas;
 	private Object[] listenerInfos;
 	private Object registry;
 
-	public ExtensionEventDispatcherJob(Object[] listenerInfos, Map deltas, Object registry) {
+	public ExtensionEventDispatcherJob(Object[] listenerInfos, Map<?, ?> deltas, Object registry) {
 		// name not NL'd since it is a system job
 		super("Registry event dispatcher"); //$NON-NLS-1$
 		setSystem(true);

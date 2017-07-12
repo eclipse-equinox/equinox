@@ -77,14 +77,14 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 	}
 
 	@Override
-	public Object getAdapter(Object adaptableObject, Class adapterType) {
+	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
 		if (!factoryLoaded)
 			loadFactory(false);
 		return factory == null ? null : factory.getAdapter(adaptableObject, adapterType);
 	}
 
 	@Override
-	public Class[] getAdapterList() {
+	public Class<?>[] getAdapterList() {
 		if (!factoryLoaded)
 			loadFactory(false);
 		return factory == null ? null : factory.getAdapterList();
@@ -93,7 +93,7 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 	@Override
 	public String[] getAdapterNames() {
 		IConfigurationElement[] children = element.getChildren();
-		ArrayList adapters = new ArrayList(children.length);
+		ArrayList<String> adapters = new ArrayList<>(children.length);
 		for (int i = 0; i < children.length; i++) {
 			//ignore unknown children for forward compatibility
 			if ("adapter".equals(children[i].getName())) { //$NON-NLS-1$
@@ -104,7 +104,7 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 		}
 		if (adapters.isEmpty())
 			logError();
-		return (String[]) adapters.toArray(new String[adapters.size()]);
+		return adapters.toArray(new String[adapters.size()]);
 	}
 
 	IExtension getExtension() {

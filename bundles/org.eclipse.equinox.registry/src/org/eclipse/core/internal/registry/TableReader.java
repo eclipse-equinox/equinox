@@ -73,9 +73,9 @@ public class TableReader {
 
 	private boolean holdObjects = false;
 
-	private ExtensionRegistry registry;
+	private final ExtensionRegistry registry;
 
-	private SoftReference stringPool;
+	private SoftReference<Map<String, String>> stringPool;
 
 	void setMainDataFile(File main) throws IOException {
 		mainDataFile = new BufferedRandomInputStream(main);
@@ -462,14 +462,14 @@ public class TableReader {
 
 	final static float contributorsLoadFactor = 1.2f; // allocate more memory to avoid resizing
 
-	public HashMap loadContributors() {
-		HashMap result = null;
+	public HashMap<String, RegistryContributor> loadContributors() {
+		HashMap<String, RegistryContributor> result = null;
 		DataInputStream contributorsInput = null;
 		try {
 			synchronized (contributorsFile) {
 				contributorsInput = new DataInputStream(new BufferedInputStream(new FileInputStream(contributorsFile)));
 				int size = contributorsInput.readInt();
-				result = new HashMap((int) (size * contributorsLoadFactor));
+				result = new HashMap<>((int) (size * contributorsLoadFactor));
 				for (int i = 0; i < size; i++) {
 					String id = readStringOrNull(contributorsInput);
 					String name = readStringOrNull(contributorsInput);
@@ -595,13 +595,13 @@ public class TableReader {
 		return loaded;
 	}
 
-	public HashMap loadOrphans() {
+	public HashMap<String, int[]> loadOrphans() {
 		DataInputStream orphanInput = null;
 		try {
 			synchronized (orphansFile) {
 				orphanInput = new DataInputStream(new BufferedInputStream(new FileInputStream(orphansFile)));
 				int size = orphanInput.readInt();
-				HashMap result = new HashMap(size);
+				HashMap<String, int[]> result = new HashMap<>(size);
 				for (int i = 0; i < size; i++) {
 					String key = readUTF(orphanInput, OBJECT);
 					int[] value = readArray(orphanInput);
@@ -661,16 +661,16 @@ public class TableReader {
 			value = in.readUTF();
 		}
 
-		Map map = null;
+		Map<String, String> map = null;
 		if (stringPool != null) {
-			map = (Map) stringPool.get();
+			map = stringPool.get();
 		}
 		if (map == null) {
-			map = new HashMap();
-			stringPool = new SoftReference(map);
+			map = new HashMap<>();
+			stringPool = new SoftReference<>(map);
 		}
 
-		String pooledString = (String) map.get(value);
+		String pooledString = map.get(value);
 		if (pooledString == null) {
 			map.put(value, value);
 			return value;

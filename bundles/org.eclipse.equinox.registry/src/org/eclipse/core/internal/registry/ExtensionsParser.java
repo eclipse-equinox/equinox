@@ -25,7 +25,7 @@ public class ExtensionsParser extends DefaultHandler {
 	private final static String NO_EXTENSION_MUNGING = "eclipse.noExtensionMunging"; //$NON-NLS-1$ //System property
 	private static final String VERSION_3_0 = "3.0"; //$NON-NLS-1$
 	private static final String VERSION_3_2 = "3.2"; //$NON-NLS-1$
-	private static Map extensionPointMap;
+	private static Map<String, String> extensionPointMap;
 
 	static {
 		initializeExtensionPointMap();
@@ -35,7 +35,7 @@ public class ExtensionsParser extends DefaultHandler {
 	 * Initialize the list of renamed extension point ids
 	 */
 	private static void initializeExtensionPointMap() {
-		Map map = new HashMap(13);
+		Map<String, String> map = new HashMap<>(13);
 		map.put("org.eclipse.ui.markerImageProvider", "org.eclipse.ui.ide.markerImageProvider"); //$NON-NLS-1$ //$NON-NLS-2$
 		map.put("org.eclipse.ui.markerHelp", "org.eclipse.ui.ide.markerHelp"); //$NON-NLS-1$ //$NON-NLS-2$
 		map.put("org.eclipse.ui.markerImageProviders", "org.eclipse.ui.ide.markerImageProviders"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -62,19 +62,19 @@ public class ExtensionsParser extends DefaultHandler {
 	private String locationName = null;
 
 	// Current State Information
-	private Stack stateStack = new Stack();
+	private final Stack<Integer> stateStack = new Stack<>();
 
 	// Current object stack (used to hold the current object we are
 	// populating in this plugin descriptor
-	private Stack objectStack = new Stack();
+	private final Stack<KeyedElement> objectStack = new Stack<>();
 
 	private String schemaVersion = null;
 
 	// A status for holding results.
-	private MultiStatus status;
+	private final MultiStatus status;
 
 	// Owning extension registry
-	private ExtensionRegistry registry;
+	private final ExtensionRegistry registry;
 
 	// Resource bundle used to translate the content of the plugin.xml
 	protected ResourceBundle resources;
@@ -132,18 +132,18 @@ public class ExtensionsParser extends DefaultHandler {
 	private static final int EXTENSION_INDEX = 1;
 	private static final int LAST_INDEX = 1;
 
-	private ArrayList scratchVectors[] = new ArrayList[LAST_INDEX + 1];
+	private final ArrayList<RegistryObject> scratchVectors[] = new ArrayList[LAST_INDEX + 1];
 
 	private Locator locator = null;
 
 	// Cache the behavior toggle (true: attempt to extract namespace from qualified IDs)
 	private boolean extractNamespaces = false;
 
-	private ArrayList processedExtensionIds = null;
+	private ArrayList<String> processedExtensionIds = null;
 
 	// Keep track of elements added into the registry manager in case we encounter a error
 	// and need to rollback
-	private ArrayList addedRegistryObjects = new ArrayList(5);
+	private final ArrayList<RegistryObject> addedRegistryObjects = new ArrayList<>(5);
 
 	public ExtensionsParser(MultiStatus status, ExtensionRegistry registry) {
 		super();
@@ -164,7 +164,7 @@ public class ExtensionsParser extends DefaultHandler {
 	 */
 	@Override
 	public void characters(char[] ch, int start, int length) {
-		int state = ((Integer) stateStack.peek()).intValue();
+		int state = stateStack.peek().intValue();
 		if (state != CONFIGURATION_ELEMENT_STATE)
 			return;
 		if (state == CONFIGURATION_ELEMENT_STATE) {
@@ -197,7 +197,7 @@ public class ExtensionsParser extends DefaultHandler {
 	 */
 	@Override
 	public void endElement(String uri, String elementName, String qName) {
-		switch (((Integer) stateStack.peek()).intValue()) {
+		switch (stateStack.peek().intValue()) {
 			case IGNORED_ELEMENT_STATE :
 				stateStack.pop();
 				break;
@@ -208,14 +208,14 @@ public class ExtensionsParser extends DefaultHandler {
 			case BUNDLE_STATE :
 				stateStack.pop();
 
-				ArrayList extensionPoints = scratchVectors[EXTENSION_POINT_INDEX];
-				ArrayList extensions = scratchVectors[EXTENSION_INDEX];
+				ArrayList<?> extensionPoints = scratchVectors[EXTENSION_POINT_INDEX];
+				ArrayList<?> extensions = scratchVectors[EXTENSION_INDEX];
 				int[] namespaceChildren = new int[2 + extensionPoints.size() + extensions.size()];
 				int position = 2;
 				// Put the extension points into this namespace
 				if (extensionPoints.size() > 0) {
 					namespaceChildren[Contribution.EXTENSION_POINT] = extensionPoints.size();
-					for (Iterator iter = extensionPoints.iterator(); iter.hasNext();) {
+					for (Iterator<?> iter = extensionPoints.iterator(); iter.hasNext();) {
 						namespaceChildren[position++] = ((RegistryObject) iter.next()).getObjectId();
 					}
 					extensionPoints.clear();
@@ -223,7 +223,7 @@ public class ExtensionsParser extends DefaultHandler {
 
 				// Put the extensions into this namespace too
 				if (extensions.size() > 0) {
-					Extension[] renamedExtensions = fixRenamedExtensionPoints((Extension[]) extensions.toArray(new Extension[extensions.size()]));
+					Extension[] renamedExtensions = fixRenamedExtensionPoints(extensions.toArray(new Extension[extensions.size()]));
 					namespaceChildren[Contribution.EXTENSION] = renamedExtensions.length;
 					for (int i = 0; i < renamedExtensions.length; i++) {
 						namespaceChildren[position++] = renamedExtensions[i].getObjectId();
@@ -298,8 +298,8 @@ public class ExtensionsParser extends DefaultHandler {
 	 * Remove all elements that we have added so far into registry manager
 	 */
 	private void cleanup() {
-		for (Iterator i = addedRegistryObjects.iterator(); i.hasNext();) {
-			RegistryObject object = (RegistryObject) i.next();
+		for (Iterator<RegistryObject> i = addedRegistryObjects.iterator(); i.hasNext();) {
+			RegistryObject object = i.next();
 			if (object instanceof ExtensionPoint) {
 				String id = ((ExtensionPoint) object).getUniqueIdentifier();
 				objectManager.removeExtensionPoint(id);
@@ -491,7 +491,7 @@ public class ExtensionsParser extends DefaultHandler {
 				String msg = NLS.bind(RegistryMessages.parse_duplicateExtension, new String[] {currentSupplier, existingSupplier, uniqueId});
 				registry.log(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, 0, msg, null));
 			} else if (processedExtensionIds != null) { // check elements in this contribution
-				for (Iterator i = processedExtensionIds.iterator(); i.hasNext();) {
+				for (Iterator<String> i = processedExtensionIds.iterator(); i.hasNext();) {
 					if (uniqueId.equals(i.next())) {
 						String currentSupplier = contribution.getDefaultNamespace();
 						String existingSupplier = currentSupplier;
@@ -502,7 +502,7 @@ public class ExtensionsParser extends DefaultHandler {
 				}
 			}
 			if (processedExtensionIds == null)
-				processedExtensionIds = new ArrayList(10);
+				processedExtensionIds = new ArrayList<>(10);
 			processedExtensionIds.add(uniqueId);
 		}
 
@@ -597,7 +597,7 @@ public class ExtensionsParser extends DefaultHandler {
 	public void startDocument() {
 		stateStack.push(new Integer(INITIAL_STATE));
 		for (int i = 0; i <= LAST_INDEX; i++) {
-			scratchVectors[i] = new ArrayList();
+			scratchVectors[i] = new ArrayList<>();
 		}
 	}
 
@@ -606,7 +606,7 @@ public class ExtensionsParser extends DefaultHandler {
 	 */
 	@Override
 	public void startElement(String uri, String elementName, String qName, Attributes attributes) {
-		switch (((Integer) stateStack.peek()).intValue()) {
+		switch (stateStack.peek().intValue()) {
 			case INITIAL_STATE :
 				handleInitialState(elementName, attributes);
 				break;
@@ -693,7 +693,7 @@ public class ExtensionsParser extends DefaultHandler {
 		for (int i = 0; i < extensions.length; i++) {
 			Extension extension = extensions[i];
 			String oldPointId = extension.getExtensionPointIdentifier();
-			String newPointId = (String) extensionPointMap.get(oldPointId);
+			String newPointId = extensionPointMap.get(oldPointId);
 			if (newPointId != null) {
 				extension.setExtensionPointIdentifier(newPointId);
 			}

@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.*;
 public final class AdapterManagerListener implements IRegistryEventListener, IAdapterManagerProvider {
 	public static final String ADAPTER_POINT_ID = "org.eclipse.core.runtime.adapters"; //$NON-NLS-1$
 
-	private AdapterManager theAdapterManager;
+	private final AdapterManager theAdapterManager;
 
 	/**
 	 * Constructs a new adapter manager.
@@ -80,9 +80,9 @@ public final class AdapterManagerListener implements IRegistryEventListener, IAd
 	public synchronized void removed(IExtension[] extensions) {
 		theAdapterManager.flushLookup();
 		for (int i = 0; i < extensions.length; i++) {
-			for (Iterator it = theAdapterManager.getFactories().values().iterator(); it.hasNext();) {
-				for (Iterator it2 = ((List) it.next()).iterator(); it2.hasNext();) {
-					IAdapterFactory factory = (IAdapterFactory) it2.next();
+			for (Iterator<List<IAdapterFactory>> it = theAdapterManager.getFactories().values().iterator(); it.hasNext();) {
+				for (Iterator<IAdapterFactory> it2 = (it.next()).iterator(); it2.hasNext();) {
+					IAdapterFactory factory = it2.next();
 					if (!(factory instanceof AdapterFactoryProxy))
 						continue;
 					if (((AdapterFactoryProxy) factory).originatesFrom(extensions[i]))

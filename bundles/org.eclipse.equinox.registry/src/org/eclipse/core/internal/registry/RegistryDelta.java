@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.IExtensionDelta;
  * The extension deltas are grouped by namespace. There is one registry delta by namespace.
  */
 public class RegistryDelta {
-	private Set extensionDeltas = new HashSet(); //the extension deltas (each element indicate the type of the delta)
+	private final Set<IExtensionDelta> extensionDeltas = new HashSet<>(); //the extension deltas (each element indicate the type of the delta)
 	private IObjectManager objectManager; //The object manager from which all the objects contained in the deltas will be found.
 
 	RegistryDelta() {
@@ -30,17 +30,17 @@ public class RegistryDelta {
 	}
 
 	public IExtensionDelta[] getExtensionDeltas() {
-		return (IExtensionDelta[]) extensionDeltas.toArray(new ExtensionDelta[extensionDeltas.size()]);
+		return extensionDeltas.toArray(new ExtensionDelta[extensionDeltas.size()]);
 	}
 
 	public IExtensionDelta[] getExtensionDeltas(String extensionPoint) {
-		Collection selectedExtDeltas = new LinkedList();
-		for (Iterator extDeltasIter = extensionDeltas.iterator(); extDeltasIter.hasNext();) {
-			IExtensionDelta extensionDelta = (IExtensionDelta) extDeltasIter.next();
+		Collection<IExtensionDelta> selectedExtDeltas = new LinkedList<>();
+		for (Iterator<IExtensionDelta> extDeltasIter = extensionDeltas.iterator(); extDeltasIter.hasNext();) {
+			IExtensionDelta extensionDelta = extDeltasIter.next();
 			if (extensionDelta.getExtension().getExtensionPointUniqueIdentifier().equals(extensionPoint))
 				selectedExtDeltas.add(extensionDelta);
 		}
-		return (IExtensionDelta[]) selectedExtDeltas.toArray(new IExtensionDelta[selectedExtDeltas.size()]);
+		return selectedExtDeltas.toArray(new IExtensionDelta[selectedExtDeltas.size()]);
 	}
 
 	/**
@@ -48,8 +48,8 @@ public class RegistryDelta {
 	 * @param extensionId must not be null
 	 */
 	public IExtensionDelta getExtensionDelta(String extensionPointId, String extensionId) {
-		for (Iterator extDeltasIter = extensionDeltas.iterator(); extDeltasIter.hasNext();) {
-			IExtensionDelta extensionDelta = (IExtensionDelta) extDeltasIter.next();
+		for (Iterator<IExtensionDelta> extDeltasIter = extensionDeltas.iterator(); extDeltasIter.hasNext();) {
+			IExtensionDelta extensionDelta = extDeltasIter.next();
 			IExtension extension = extensionDelta.getExtension();
 			if (extension.getExtensionPointUniqueIdentifier().equals(extensionPointId) && extension.getUniqueIdentifier() != null && extension.getUniqueIdentifier().equals(extensionId))
 				return extensionDelta;
