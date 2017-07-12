@@ -41,6 +41,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		/**
 		 * Used by ListenerList to ensure uniqueness.
 		 */
+		@Override
 		public boolean equals(Object another) {
 			return another instanceof ListenerInfo && ((ListenerInfo) another).listener == this.listener;
 		}
@@ -48,6 +49,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		/* (non-Javadoc)
 		 * @see java.lang.Object#hashCode()
 		 */
+		@Override
 		public int hashCode() {
 			return listener == null ? 0 : listener.hashCode();
 		}
@@ -197,10 +199,12 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		return affectedNamespaces;
 	}
 
+	@Override
 	public void addListener(IRegistryEventListener listener) {
 		addListenerInternal(listener, null);
 	}
 
+	@Override
 	public void addListener(IRegistryEventListener listener, String extensionPointId) {
 		addListenerInternal(listener, extensionPointId);
 	}
@@ -211,11 +215,13 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		}
 	}
 
+	@Override
 	public void addRegistryChangeListener(IRegistryChangeListener listener) {
 		// this is just a convenience API - no need to do any sync'ing here		
 		addListenerInternal(listener, null);
 	}
 
+	@Override
 	public void addRegistryChangeListener(IRegistryChangeListener listener, String filter) {
 		addListenerInternal(listener, filter);
 	}
@@ -282,6 +288,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 *  (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getConfigurationElementsFor(java.lang.String)
 	 */
+	@Override
 	public IConfigurationElement[] getConfigurationElementsFor(String extensionPointId) {
 		// this is just a convenience API - no need to do any sync'ing here		
 		int lastdot = extensionPointId.lastIndexOf('.');
@@ -294,6 +301,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 *  (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getConfigurationElementsFor(java.lang.String, java.lang.String)
 	 */
+	@Override
 	public IConfigurationElement[] getConfigurationElementsFor(String pluginId, String extensionPointSimpleId) {
 		// this is just a convenience API - no need to do any sync'ing here
 		IExtensionPoint extPoint = this.getExtensionPoint(pluginId, extensionPointSimpleId);
@@ -306,6 +314,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 *  (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getConfigurationElementsFor(java.lang.String, java.lang.String, java.lang.String)
 	 */
+	@Override
 	public IConfigurationElement[] getConfigurationElementsFor(String pluginId, String extensionPointName, String extensionId) {
 		// this is just a convenience API - no need to do any sync'ing here		
 		IExtension extension = this.getExtension(pluginId, extensionPointName, extensionId);
@@ -330,6 +339,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 *  (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getExtension(java.lang.String)
 	 */
+	@Override
 	public IExtension getExtension(String extensionId) {
 		if (extensionId == null)
 			return null;
@@ -357,6 +367,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 *  (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getExtension(java.lang.String, java.lang.String)
 	 */
+	@Override
 	public IExtension getExtension(String extensionPointId, String extensionId) {
 		// this is just a convenience API - no need to do any sync'ing here		
 		int lastdot = extensionPointId.lastIndexOf('.');
@@ -369,6 +380,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 *  (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getExtension(java.lang.String, java.lang.String, java.lang.String)
 	 */
+	@Override
 	public IExtension getExtension(String pluginId, String extensionPointName, String extensionId) {
 		// this is just a convenience API - no need to do any sync'ing here		
 		IExtensionPoint extPoint = getExtensionPoint(pluginId, extensionPointName);
@@ -381,6 +393,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 *  (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getExtensionPoint(java.lang.String)
 	 */
+	@Override
 	public IExtensionPoint getExtensionPoint(String xptUniqueId) {
 		access.enterRead();
 		try {
@@ -394,6 +407,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 *  (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getExtensionPoint(java.lang.String, java.lang.String)
 	 */
+	@Override
 	public IExtensionPoint getExtensionPoint(String elementName, String xpt) {
 		access.enterRead();
 		try {
@@ -407,6 +421,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 *  (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getExtensionPoints()
 	 */
+	@Override
 	public IExtensionPoint[] getExtensionPoints() {
 		access.enterRead();
 		try {
@@ -420,6 +435,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 *  (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getExtensionPoints(java.lang.String)
 	 */
+	@Override
 	public IExtensionPoint[] getExtensionPoints(String namespaceName) {
 		access.enterRead();
 		try {
@@ -433,6 +449,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 *  (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getExtensions(java.lang.String)
 	 */
+	@Override
 	public IExtension[] getExtensions(String namespaceName) {
 		access.enterRead();
 		try {
@@ -442,6 +459,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		}
 	}
 
+	@Override
 	public IExtension[] getExtensions(IContributor contributor) {
 		if (!(contributor instanceof RegistryContributor))
 			throw new IllegalArgumentException(); // should never happen
@@ -454,6 +472,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		}
 	}
 
+	@Override
 	public IExtensionPoint[] getExtensionPoints(IContributor contributor) {
 		if (!(contributor instanceof RegistryContributor))
 			throw new IllegalArgumentException(); // should never happen
@@ -470,6 +489,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 *  (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getNamespaces()
 	 */
+	@Override
 	public String[] getNamespaces() {
 		access.enterRead();
 		try {
@@ -484,6 +504,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		}
 	}
 
+	@Override
 	public boolean hasContributor(IContributor contributor) {
 		if (!(contributor instanceof RegistryContributor))
 			throw new IllegalArgumentException(); // should never happen
@@ -546,6 +567,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 			aggregatedTimestamp.remove(timestamp);
 	}
 
+	@Override
 	public void removeContributor(IContributor contributor, Object key) {
 		if (!(contributor instanceof RegistryContributor))
 			throw new IllegalArgumentException(); // should never happen
@@ -637,12 +659,14 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		return affectedNamespaces;
 	}
 
+	@Override
 	public void removeRegistryChangeListener(IRegistryChangeListener listener) {
 		synchronized (listeners) {
 			listeners.remove(new ListenerInfo(listener, null));
 		}
 	}
 
+	@Override
 	public void removeListener(IRegistryEventListener listener) {
 		synchronized (listeners) {
 			listeners.remove(new ListenerInfo(listener, null));
@@ -715,6 +739,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 		if (debugEvents())
 			addRegistryChangeListener(new IRegistryChangeListener() {
+				@Override
 				public void registryChanged(IRegistryChangeEvent event) {
 					System.out.println(event);
 				}
@@ -730,6 +755,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 * close cache and dispose of listeners.
 	 * @param key - key token for this registry
 	 */
+	@Override
 	public void stop(Object key) {
 		// If the registry creator specified a key token, check that the key mathches it 
 		// (it is assumed that registry owner keeps the key to prevent unautorized accesss).
@@ -918,10 +944,12 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 			if ((listenerInfo.listener instanceof IRegistryChangeListener) && scheduledDeltas.size() != 0) {
 				if (listenerInfo.filter == null || scheduledDeltas.containsKey(listenerInfo.filter)) {
 					SafeRunner.run(new ISafeRunnable() {
+						@Override
 						public void run() throws Exception {
 							((IRegistryChangeListener) listenerInfo.listener).registryChanged(new RegistryChangeEvent(scheduledDeltas, listenerInfo.filter));
 						}
 
+						@Override
 						public void handleException(Throwable exception) {
 							result.add(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, RegistryMessages.plugin_eventListenerError, exception));
 						}
@@ -993,6 +1021,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 			this.registry = registry;
 		}
 
+		@Override
 		public void run() {
 			while (true) {
 				QueueElement element;
@@ -1043,6 +1072,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		return result;
 	}
 
+	@Override
 	public boolean addContribution(InputStream is, IContributor contributor, boolean persist, String contributionName, ResourceBundle translationBundle, Object key) {
 		if (!checkReadWriteAccess(key, persist))
 			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.addContribution() method. Check if proper access token is supplied."); //$NON-NLS-1$
@@ -1306,12 +1336,14 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		currentConfigurationElement.setParentType(parent instanceof ConfigurationElement ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.EXTENSION);
 	}
 
+	@Override
 	public boolean removeExtension(IExtension extension, Object token) throws IllegalArgumentException {
 		if (!(extension instanceof ExtensionHandle))
 			return false;
 		return removeObject(((ExtensionHandle) extension).getObject(), false, token);
 	}
 
+	@Override
 	public boolean removeExtensionPoint(IExtensionPoint extensionPoint, Object token) throws IllegalArgumentException {
 		if (!(extensionPoint instanceof ExtensionPointHandle))
 			return false;
@@ -1352,6 +1384,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		return true;
 	}
 
+	@Override
 	public IContributor[] getAllContributors() {
 		access.enterRead();
 		try {
@@ -1370,6 +1403,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		return userToken;
 	}
 
+	@Override
 	public boolean isMultiLanguage() {
 		return isMultiLanguage;
 	}

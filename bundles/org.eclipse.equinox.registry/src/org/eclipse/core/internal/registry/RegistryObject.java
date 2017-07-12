@@ -58,14 +58,17 @@ public abstract class RegistryObject implements KeyedElement {
 	}
 
 	//Implementation of the KeyedElement interface
+	@Override
 	public int getKeyHashCode() {
 		return objectId;
 	}
 
+	@Override
 	public Object getKey() {
 		return new Integer(objectId);
 	}
 
+	@Override
 	public boolean compare(KeyedElement other) {
 		return objectId == ((RegistryObject) other).objectId;
 	}

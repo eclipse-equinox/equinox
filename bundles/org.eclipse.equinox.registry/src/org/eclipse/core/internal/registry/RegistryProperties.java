@@ -57,6 +57,7 @@ public class RegistryProperties {
 			// Wrap BundleContext into an inner class to make sure it will only get loaded 
 			// if OSGi layer is present.
 			Runnable innerClass = new Runnable() {
+				@Override
 				public void run() {
 					org.osgi.framework.BundleContext bundleContext = (org.osgi.framework.BundleContext) context;
 					result[0] = bundleContext.getProperty(propertyName);

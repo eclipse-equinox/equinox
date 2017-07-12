@@ -71,22 +71,27 @@ public class ReferenceMap {
 			this.next = next;
 		}
 
+		@Override
 		public int getKey() {
 			return key;
 		}
 
+		@Override
 		public IEntry getNext() {
 			return next;
 		}
 
+		@Override
 		public Object getValue() {
 			return value;
 		}
 
+		@Override
 		public void setNext(IEntry next) {
 			this.next = next;
 		}
 
+		@Override
 		public String toString() {
 			return "HardRef(" + key + ',' + value + ')'; //$NON-NLS-1$
 		}
@@ -143,18 +148,22 @@ public class ReferenceMap {
 			this.next = next;
 		}
 
+		@Override
 		public int getKey() {
 			return key;
 		}
 
+		@Override
 		public IEntry getNext() {
 			return next;
 		}
 
+		@Override
 		public Object getValue() {
 			return super.get();
 		}
 
+		@Override
 		public void setNext(IEntry next) {
 			this.next = next;
 		}

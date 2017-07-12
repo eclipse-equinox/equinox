@@ -38,6 +38,7 @@ public final class AdapterManagerListener implements IRegistryEventListener, IAd
 	 * the plug-in registry.  Note that the actual factory implementations
 	 * are loaded lazily as they are needed.
 	 */
+	@Override
 	public boolean addFactories(AdapterManager adapterManager) {
 		IExtensionPoint point = RegistryFactory.getRegistry().getExtensionPoint(ADAPTER_POINT_ID);
 		if (point == null)
@@ -68,12 +69,14 @@ public final class AdapterManagerListener implements IRegistryEventListener, IAd
 		}
 	}
 
+	@Override
 	public synchronized void added(IExtension[] extensions) {
 		for (int i = 0; i < extensions.length; i++)
 			registerExtension(extensions[i]);
 		theAdapterManager.flushLookup();
 	}
 
+	@Override
 	public synchronized void removed(IExtension[] extensions) {
 		theAdapterManager.flushLookup();
 		for (int i = 0; i < extensions.length; i++) {
@@ -89,10 +92,12 @@ public final class AdapterManagerListener implements IRegistryEventListener, IAd
 		}
 	}
 
+	@Override
 	public synchronized void added(IExtensionPoint[] extensionPoints) {
 		// nothing to do
 	}
 
+	@Override
 	public synchronized void removed(IExtensionPoint[] extensionPoints) {
 		// all extensions should have been removed by this point by #removed(IExtension[] extensions)
 		// nothing to do

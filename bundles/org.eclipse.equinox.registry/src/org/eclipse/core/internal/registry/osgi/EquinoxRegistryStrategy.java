@@ -46,18 +46,22 @@ public class EquinoxRegistryStrategy extends RegistryStrategyOSGI {
 		super(theStorageDir, cacheReadOnly, key);
 	}
 
+	@Override
 	public boolean debug() {
 		return DEBUG_ECLIPSE_REGISTRY;
 	}
 
+	@Override
 	public boolean debugRegistryEvents() {
 		return DEBUG_ECLIPSE_EVENTS;
 	}
 
+	@Override
 	public final void log(IStatus status) {
 		RuntimeLog.log(status);
 	}
 
+	@Override
 	public long getContainerTimestamp() {
 		BundleContext context = Activator.getContext();
 		if (context == null) {
@@ -80,6 +84,7 @@ public class EquinoxRegistryStrategy extends RegistryStrategyOSGI {
 	 * will be made (until registry bundle is restarted). Avoiding repeated checks in this scenario will ensure that 
 	 * most users see no performance degradation and that order of registry events remains consistent. 
 	 */
+	@Override
 	public final void scheduleChangeEvent(Object[] listeners, Map deltas, Object registry) {
 		if (useJobs) {
 			try {

@@ -44,6 +44,7 @@ public final class RegistryChangeEvent implements IRegistryChangeEvent {
 		return (RegistryDelta) deltas.get(pluginId);
 	}
 
+	@Override
 	public IExtensionDelta[] getExtensionDeltas() {
 		RegistryDelta[] hostDeltas = getHostDeltas();
 		if (hostDeltas.length == 0)
@@ -60,6 +61,7 @@ public final class RegistryChangeEvent implements IRegistryChangeEvent {
 		return extensionDeltas;
 	}
 
+	@Override
 	public IExtensionDelta[] getExtensionDeltas(String hostName) {
 		RegistryDelta hostDelta = getHostDelta(hostName);
 		if (hostDelta == null)
@@ -67,6 +69,7 @@ public final class RegistryChangeEvent implements IRegistryChangeEvent {
 		return hostDelta.getExtensionDeltas();
 	}
 
+	@Override
 	public IExtensionDelta[] getExtensionDeltas(String hostName, String extensionPoint) {
 		RegistryDelta hostDelta = getHostDelta(hostName);
 		if (hostDelta == null)
@@ -74,6 +77,7 @@ public final class RegistryChangeEvent implements IRegistryChangeEvent {
 		return hostDelta.getExtensionDeltas(hostName + '.' + extensionPoint);
 	}
 
+	@Override
 	public IExtensionDelta getExtensionDelta(String hostName, String extensionPoint, String extension) {
 		RegistryDelta hostDelta = getHostDelta(hostName);
 		if (hostDelta == null)
@@ -81,6 +85,7 @@ public final class RegistryChangeEvent implements IRegistryChangeEvent {
 		return hostDelta.getExtensionDelta(hostName + '.' + extensionPoint, extension);
 	}
 
+	@Override
 	public String toString() {
 		return "RegistryChangeEvent:  " + Arrays.asList(getHostDeltas()); //$NON-NLS-1$
 	}

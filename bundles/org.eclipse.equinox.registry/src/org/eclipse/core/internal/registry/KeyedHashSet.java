@@ -297,6 +297,7 @@ public class KeyedHashSet {
 		return elementCount;
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer result = new StringBuffer(100);
 		result.append("{"); //$NON-NLS-1$

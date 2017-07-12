@@ -128,6 +128,7 @@ public class ExtensionPoint extends RegistryObject {
 		((String[]) extraInformation)[CONTRIBUTOR_ID] = id;
 	}
 
+	@Override
 	public String toString() {
 		return getUniqueIdentifier();
 	}

@@ -80,14 +80,17 @@ public class RegistryIndexElement implements KeyedElement {
 	}
 
 	//Implements the KeyedElement interface
+	@Override
 	public int getKeyHashCode() {
 		return getKey().hashCode();
 	}
 
+	@Override
 	public Object getKey() {
 		return key;
 	}
 
+	@Override
 	public boolean compare(KeyedElement other) {
 		return key.equals(((RegistryIndexElement) other).key);
 	}

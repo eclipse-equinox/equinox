@@ -95,6 +95,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#translate(java.lang.String, java.util.ResourceBundle)
 	 */
+	@Override
 	public final String translate(String key, ResourceBundle resources) {
 		return ResourceTranslator.getResourceString(null, key, resources);
 	}
@@ -102,6 +103,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#translate(java.lang.String[], org.eclipse.core.runtime.IContributor, java.lang.String)
 	 */
+	@Override
 	public String[] translate(String[] nonTranslated, IContributor contributor, String locale) {
 		return ResourceTranslator.getResourceString(ContributorFactoryOSGi.resolve(contributor), nonTranslated, locale);
 	}
@@ -158,6 +160,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#createExecutableExtension(org.eclipse.core.runtime.spi.RegistryContributor, java.lang.String, java.lang.String)
 	 */
+	@Override
 	public Object createExecutableExtension(RegistryContributor contributor, String className, String overridenContributorName) throws CoreException {
 		Bundle contributingBundle;
 		if (overridenContributorName != null && !overridenContributorName.equals("")) //$NON-NLS-1$
@@ -205,6 +208,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#onStart(org.eclipse.core.runtime.IExtensionRegistry, boolean)
 	 */
+	@Override
 	public void onStart(IExtensionRegistry registry, boolean loadedFromCache) {
 		super.onStart(registry, loadedFromCache);
 
@@ -227,6 +231,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#onStop(org.eclipse.core.runtime.IExtensionRegistry)
 	 */
+	@Override
 	public void onStop(IExtensionRegistry registry) {
 		if (pluginBundleListener != null)
 			Activator.getContext().removeBundleListener(pluginBundleListener);
@@ -247,6 +252,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#cacheUse()
 	 */
+	@Override
 	public boolean cacheUse() {
 		return !"true".equals(RegistryProperties.getProperty(IRegistryConstants.PROP_NO_REGISTRY_CACHE)); //$NON-NLS-1$
 	}
@@ -254,6 +260,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#cacheLazyLoading()
 	 */
+	@Override
 	public boolean cacheLazyLoading() {
 		return !("true".equalsIgnoreCase(RegistryProperties.getProperty(IRegistryConstants.PROP_NO_LAZY_CACHE_LOADING))); //$NON-NLS-1$
 	}
@@ -261,6 +268,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#getContributionsTimestamp()
 	 */
+	@Override
 	public long getContributionsTimestamp() {
 		if (!checkContributionsTimestamp())
 			return 0;
@@ -298,6 +306,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#getXMLParser()
 	 */
+	@Override
 	public SAXParserFactory getXMLParser() {
 		if (xmlTracker == null) {
 			xmlTracker = new ServiceTracker(Activator.getContext(), SAXParserFactory.class.getName(), null);
@@ -309,6 +318,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#getLocale()
 	 */
+	@Override
 	public String getLocale() {
 		if (localeTracker == null) {
 			localeTracker = new ServiceTracker(Activator.getContext(), LocaleProvider.class.getName(), null);

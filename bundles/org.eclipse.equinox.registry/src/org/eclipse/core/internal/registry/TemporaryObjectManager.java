@@ -25,6 +25,7 @@ public class TemporaryObjectManager implements IObjectManager {
 		this.parent = parent;
 	}
 
+	@Override
 	public Handle getHandle(int id, byte type) {
 		switch (type) {
 			case RegistryObjectManager.EXTENSION_POINT :
@@ -42,6 +43,7 @@ public class TemporaryObjectManager implements IObjectManager {
 		}
 	}
 
+	@Override
 	public Handle[] getHandles(int[] ids, byte type) {
 		Handle[] results = null;
 		int nbrId = ids.length;
@@ -85,6 +87,7 @@ public class TemporaryObjectManager implements IObjectManager {
 		return results;
 	}
 
+	@Override
 	synchronized public Object getObject(int id, byte type) {
 		Object result = null;
 		try {
@@ -99,6 +102,7 @@ public class TemporaryObjectManager implements IObjectManager {
 		return result;
 	}
 
+	@Override
 	synchronized public RegistryObject[] getObjects(int[] values, byte type) {
 		if (values.length == 0) {
 			switch (type) {
@@ -131,6 +135,7 @@ public class TemporaryObjectManager implements IObjectManager {
 		return results;
 	}
 
+	@Override
 	public synchronized void close() {
 		actualObjects = null;
 	}

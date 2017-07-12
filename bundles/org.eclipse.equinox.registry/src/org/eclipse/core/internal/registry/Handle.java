@@ -38,6 +38,7 @@ public abstract class Handle {
 	 */
 	abstract RegistryObject getObject();
 
+	@Override
 	public boolean equals(Object object) {
 		if (object instanceof Handle) {
 			return objectId == ((Handle) object).objectId;
@@ -45,6 +46,7 @@ public abstract class Handle {
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		return objectId;
 	}

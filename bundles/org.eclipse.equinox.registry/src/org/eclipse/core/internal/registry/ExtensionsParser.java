@@ -154,6 +154,7 @@ public class ExtensionsParser extends DefaultHandler {
 	/* (non-Javadoc)
 	 * @see org.xml.sax.helpers.DefaultHandler#setDocumentLocator(org.xml.sax.Locator)
 	 */
+	@Override
 	public void setDocumentLocator(Locator locator) {
 		this.locator = locator;
 	}
@@ -161,6 +162,7 @@ public class ExtensionsParser extends DefaultHandler {
 	/* (non-Javadoc)
 	 * @see org.xml.sax.helpers.DefaultHandler#characters(char[], int, int)
 	 */
+	@Override
 	public void characters(char[] ch, int start, int length) {
 		int state = ((Integer) stateStack.peek()).intValue();
 		if (state != CONFIGURATION_ELEMENT_STATE)
@@ -185,6 +187,7 @@ public class ExtensionsParser extends DefaultHandler {
 	/* (non-Javadoc)
 	 * @see org.xml.sax.helpers.DefaultHandler#endDocument()
 	 */
+	@Override
 	public void endDocument() {
 		// do nothing
 	}
@@ -192,6 +195,7 @@ public class ExtensionsParser extends DefaultHandler {
 	/* (non-Javadoc)
 	 * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
 	 */
+	@Override
 	public void endElement(String uri, String elementName, String qName) {
 		switch (((Integer) stateStack.peek()).intValue()) {
 			case IGNORED_ELEMENT_STATE :
@@ -275,6 +279,7 @@ public class ExtensionsParser extends DefaultHandler {
 	/* (non-Javadoc)
 	 * @see org.xml.sax.helpers.DefaultHandler#error(org.xml.sax.SAXParseException)
 	 */
+	@Override
 	public void error(SAXParseException ex) {
 		logStatus(ex);
 	}
@@ -282,6 +287,7 @@ public class ExtensionsParser extends DefaultHandler {
 	/* (non-Javadoc)
 	 * @see org.xml.sax.helpers.DefaultHandler#fatalError(org.xml.sax.SAXParseException)
 	 */
+	@Override
 	public void fatalError(SAXParseException ex) throws SAXException {
 		cleanup();
 		logStatus(ex);
@@ -587,6 +593,7 @@ public class ExtensionsParser extends DefaultHandler {
 	/* (non-Javadoc)
 	 * @see org.xml.sax.helpers.DefaultHandler#startDocument()
 	 */
+	@Override
 	public void startDocument() {
 		stateStack.push(new Integer(INITIAL_STATE));
 		for (int i = 0; i <= LAST_INDEX; i++) {
@@ -597,6 +604,7 @@ public class ExtensionsParser extends DefaultHandler {
 	/* (non-Javadoc)
 	 * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
 	 */
+	@Override
 	public void startElement(String uri, String elementName, String qName, Attributes attributes) {
 		switch (((Integer) stateStack.peek()).intValue()) {
 			case INITIAL_STATE :
@@ -622,6 +630,7 @@ public class ExtensionsParser extends DefaultHandler {
 	/* (non-Javadoc)
 	 * @see org.xml.sax.helpers.DefaultHandler#warning(org.xml.sax.SAXParseException)
 	 */
+	@Override
 	public void warning(SAXParseException ex) {
 		logStatus(ex);
 	}
@@ -634,6 +643,7 @@ public class ExtensionsParser extends DefaultHandler {
 	 * @see org.xml.sax.ContentHandler#processingInstruction
 	 * @since 3.0
 	 */
+	@Override
 	public void processingInstruction(String target, String data) {
 		// Since 3.0, a processing instruction of the form <?eclipse version="3.0"?> at
 		// the start of the manifest file is used to indicate the plug-in manifest

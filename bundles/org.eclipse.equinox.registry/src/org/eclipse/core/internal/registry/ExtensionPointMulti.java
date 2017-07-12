@@ -23,12 +23,14 @@ public class ExtensionPointMulti extends ExtensionPoint {
 		super(self, children, dataOffset, registry, persist);
 	}
 
+	@Override
 	protected String getLabel(String locale) {
 		// this method call should be fairly rare, so no caching to save on memory
 		String[] translated = registry.translate(new String[] {getLabelAsIs()}, getContributor(), locale);
 		return translated[0];
 	}
 
+	@Override
 	protected String getLabel() {
 		return getLabel(getLocale());
 	}

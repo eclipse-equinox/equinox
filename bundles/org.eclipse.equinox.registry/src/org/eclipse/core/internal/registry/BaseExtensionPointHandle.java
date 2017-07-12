@@ -28,19 +28,23 @@ public class BaseExtensionPointHandle extends Handle implements IExtensionPoint 
 		super(objectManager, id);
 	}
 
+	@Override
 	public IExtension[] getExtensions() {
 		return (IExtension[]) objectManager.getHandles(getExtensionPoint().getRawChildren(), RegistryObjectManager.EXTENSION);
 	}
 
 	// This method is left for backward compatibility only
+	@Override
 	public String getNamespace() {
 		return getContributor().getName();
 	}
 
+	@Override
 	public String getNamespaceIdentifier() {
 		return getExtensionPoint().getNamespace();
 	}
 
+	@Override
 	public IContributor getContributor() {
 		return getExtensionPoint().getContributor();
 	}
@@ -49,6 +53,7 @@ public class BaseExtensionPointHandle extends Handle implements IExtensionPoint 
 		return getExtensionPoint().shouldPersist();
 	}
 
+	@Override
 	public IExtension getExtension(String extensionId) {
 		if (extensionId == null)
 			return null;
@@ -61,6 +66,7 @@ public class BaseExtensionPointHandle extends Handle implements IExtensionPoint 
 		return null;
 	}
 
+	@Override
 	public IConfigurationElement[] getConfigurationElements() {
 		//get the actual extension objects since we'll need to get the configuration elements information.
 		Extension[] tmpExtensions = (Extension[]) objectManager.getObjects(getExtensionPoint().getRawChildren(), RegistryObjectManager.EXTENSION);
@@ -78,26 +84,32 @@ public class BaseExtensionPointHandle extends Handle implements IExtensionPoint 
 		return getExtensionPoint().getLabelAsIs();
 	}
 
+	@Override
 	public String getLabel() {
 		return getExtensionPoint().getLabel();
 	}
 
+	@Override
 	public String getLabel(String locale) {
 		return getExtensionPoint().getLabel(locale);
 	}
 
+	@Override
 	public String getSchemaReference() {
 		return getExtensionPoint().getSchemaReference();
 	}
 
+	@Override
 	public String getSimpleIdentifier() {
 		return getExtensionPoint().getSimpleIdentifier();
 	}
 
+	@Override
 	public String getUniqueIdentifier() {
 		return getExtensionPoint().getUniqueIdentifier();
 	}
 
+	@Override
 	RegistryObject getObject() {
 		return getExtensionPoint();
 	}
@@ -106,6 +118,7 @@ public class BaseExtensionPointHandle extends Handle implements IExtensionPoint 
 		return (ExtensionPoint) objectManager.getObject(getId(), RegistryObjectManager.EXTENSION_POINT);
 	}
 
+	@Override
 	public boolean isValid() {
 		try {
 			getExtensionPoint();

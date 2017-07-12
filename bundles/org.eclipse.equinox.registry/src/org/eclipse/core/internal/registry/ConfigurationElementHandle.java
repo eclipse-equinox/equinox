@@ -30,18 +30,22 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 		return getConfigurationElement().shouldPersist();
 	}
 
+	@Override
 	public String getAttribute(String propertyName) {
 		return getConfigurationElement().getAttribute(propertyName);
 	}
 
+	@Override
 	public String getAttribute(String attrName, String locale) {
 		return getConfigurationElement().getAttribute(attrName, locale);
 	}
 
+	@Override
 	public String[] getAttributeNames() {
 		return getConfigurationElement().getAttributeNames();
 	}
 
+	@Override
 	public IConfigurationElement[] getChildren() {
 		ConfigurationElement actualCe = getConfigurationElement();
 		if (actualCe.noExtraData()) {
@@ -50,6 +54,7 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 		return (IConfigurationElement[]) objectManager.getHandles(actualCe.getRawChildren(), RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
 	}
 
+	@Override
 	public Object createExecutableExtension(String propertyName) throws CoreException {
 		try {
 			return getConfigurationElement().createExecutableExtension(propertyName);
@@ -61,10 +66,12 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 		}
 	}
 
+	@Override
 	public String getAttributeAsIs(String name) {
 		return getConfigurationElement().getAttributeAsIs(name);
 	}
 
+	@Override
 	public IConfigurationElement[] getChildren(String name) {
 		ConfigurationElement actualCE = getConfigurationElement();
 		ConfigurationElement[] children = (ConfigurationElement[]) objectManager.getObjects(actualCE.getRawChildren(), actualCE.noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
@@ -88,6 +95,7 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 		return result;
 	}
 
+	@Override
 	public IExtension getDeclaringExtension() {
 		Object result = this;
 		while (!((result = ((ConfigurationElementHandle) result).getParent()) instanceof ExtensionHandle)) { /*do nothing*/
@@ -95,45 +103,55 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 		return (IExtension) result;
 	}
 
+	@Override
 	public String getName() {
 		return getConfigurationElement().getName();
 	}
 
+	@Override
 	public Object getParent() {
 		ConfigurationElement actualCe = getConfigurationElement();
 		return objectManager.getHandle(actualCe.parentId, actualCe.parentType);
 	}
 
+	@Override
 	public String getValue() {
 		return getConfigurationElement().getValue();
 	}
 
+	@Override
 	public String getValue(String locale) {
 		return getConfigurationElement().getValue(locale);
 	}
 
+	@Override
 	public String getValueAsIs() {
 		return getConfigurationElement().getValueAsIs();
 	}
 
+	@Override
 	RegistryObject getObject() {
 		return getConfigurationElement();
 	}
 
 	// Method left for backward compatibility only
+	@Override
 	public String getNamespace() {
 		return getContributor().getName();
 	}
 
+	@Override
 	public String getNamespaceIdentifier() {
 		// namespace name is determined by the contributing extension
 		return getDeclaringExtension().getNamespaceIdentifier();
 	}
 
+	@Override
 	public IContributor getContributor() {
 		return getConfigurationElement().getContributor();
 	}
 
+	@Override
 	public boolean isValid() {
 		try {
 			getConfigurationElement();

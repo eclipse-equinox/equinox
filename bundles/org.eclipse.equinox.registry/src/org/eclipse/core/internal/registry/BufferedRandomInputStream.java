@@ -59,6 +59,7 @@ public class BufferedRandomInputStream extends InputStream {
 		return buffer_size;
 	}
 
+	@Override
 	public int read() throws IOException {
 		if (buffer_pos >= buffer_size) {
 			if (fillBuffer() <= 0)
@@ -67,6 +68,7 @@ public class BufferedRandomInputStream extends InputStream {
 		return buffer[buffer_pos++] & 0xFF;
 	}
 
+	@Override
 	public int read(byte b[], int off, int len) throws IOException {
 		int available = buffer_size - buffer_pos;
 		if (available < 0)
@@ -85,6 +87,7 @@ public class BufferedRandomInputStream extends InputStream {
 		return available + read(b, off + available, len - available);
 	}
 
+	@Override
 	public long skip(long n) throws IOException {
 		if (n <= 0)
 			return 0;
@@ -100,16 +103,19 @@ public class BufferedRandomInputStream extends InputStream {
 		return available + skipped;
 	}
 
+	@Override
 	public int available() {
 		return (buffer_size - buffer_pos);
 	}
 
+	@Override
 	public void close() throws IOException {
 		inputFile.close();
 		inputFile = null;
 		buffer = null;
 	}
 
+	@Override
 	public String toString() {
 		return filePath;
 	}

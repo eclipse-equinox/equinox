@@ -259,6 +259,7 @@ public class RegistryObjectManager implements IObjectManager {
 		heldObjects.remove(toRelease);
 	}
 
+	@Override
 	public synchronized Object getObject(int id, byte type) {
 		return basicGetObject(id, type);
 	}
@@ -290,6 +291,7 @@ public class RegistryObjectManager implements IObjectManager {
 		return true;
 	}
 
+	@Override
 	public synchronized RegistryObject[] getObjects(int[] values, byte type) {
 		if (values.length == 0) {
 			switch (type) {
@@ -329,6 +331,7 @@ public class RegistryObjectManager implements IObjectManager {
 		return (ExtensionPoint) getObject(id, EXTENSION_POINT);
 	}
 
+	@Override
 	public Handle getHandle(int id, byte type) {
 		switch (type) {
 			case EXTENSION_POINT :
@@ -346,6 +349,7 @@ public class RegistryObjectManager implements IObjectManager {
 		}
 	}
 
+	@Override
 	public Handle[] getHandles(int[] ids, byte type) {
 		Handle[] results = null;
 		int nbrId = ids.length;
@@ -748,6 +752,7 @@ public class RegistryObjectManager implements IObjectManager {
 		}
 	}
 
+	@Override
 	public void close() {
 		//do nothing.
 	}

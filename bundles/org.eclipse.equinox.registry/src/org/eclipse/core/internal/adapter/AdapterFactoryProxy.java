@@ -76,18 +76,21 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 		return ""; //$NON-NLS-1$
 	}
 
+	@Override
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (!factoryLoaded)
 			loadFactory(false);
 		return factory == null ? null : factory.getAdapter(adaptableObject, adapterType);
 	}
 
+	@Override
 	public Class[] getAdapterList() {
 		if (!factoryLoaded)
 			loadFactory(false);
 		return factory == null ? null : factory.getAdapterList();
 	}
 
+	@Override
 	public String[] getAdapterNames() {
 		IConfigurationElement[] children = element.getChildren();
 		ArrayList adapters = new ArrayList(children.length);
@@ -115,6 +118,7 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 	 * factory will be loaded if necessary, otherwise no plugin activations
 	 * will occur.
 	 */
+	@Override
 	public synchronized IAdapterFactory loadFactory(boolean force) {
 		if (factory != null || factoryLoaded)
 			return factory;
@@ -152,6 +156,7 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 		RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, msg, null));
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("AdapterFactoryProxy [contributor: "); //$NON-NLS-1$

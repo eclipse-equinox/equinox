@@ -30,6 +30,7 @@ public class ExtensionDelta implements IExtensionDelta {
 		return extensionPoint;
 	}
 
+	@Override
 	public IExtensionPoint getExtensionPoint() {
 		return new ExtensionPointHandle(containingDelta.getObjectManager(), extensionPoint);
 	}
@@ -38,10 +39,12 @@ public class ExtensionDelta implements IExtensionDelta {
 		this.extensionPoint = extensionPoint;
 	}
 
+	@Override
 	public int getKind() {
 		return kind;
 	}
 
+	@Override
 	public IExtension getExtension() {
 		return new ExtensionHandle(containingDelta.getObjectManager(), extension);
 	}
@@ -54,6 +57,7 @@ public class ExtensionDelta implements IExtensionDelta {
 		this.kind = kind;
 	}
 
+	@Override
 	public String toString() {
 		return "\n\t\t" + getExtensionPoint().getUniqueIdentifier() + " - " + getExtension().getNamespaceIdentifier() + '.' + getExtension().getSimpleIdentifier() + " (" + getKindString(this.getKind()) + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$		
 	}

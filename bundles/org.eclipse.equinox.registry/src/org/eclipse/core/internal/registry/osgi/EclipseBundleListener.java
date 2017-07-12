@@ -47,6 +47,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		this.strategy = strategy;
 	}
 
+	@Override
 	public void bundleChanged(BundleEvent event) {
 		/* Only should listen for RESOLVED and UNRESOLVED events.  
 		 * 

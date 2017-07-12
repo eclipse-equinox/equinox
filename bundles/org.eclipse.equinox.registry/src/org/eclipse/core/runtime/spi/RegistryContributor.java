@@ -130,6 +130,7 @@ public final class RegistryContributor implements IContributor {
 	 * 
 	 * @return name of the registry contributor 
 	 */
+	@Override
 	public String getName() {
 		return hostName;
 	}
@@ -137,6 +138,7 @@ public final class RegistryContributor implements IContributor {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return actualContributorName + "[" + actualContributorId + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}

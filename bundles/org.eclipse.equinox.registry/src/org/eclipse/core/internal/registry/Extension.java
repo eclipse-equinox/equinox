@@ -125,6 +125,7 @@ public class Extension extends RegistryObject {
 		namespaceIdentifier = value;
 	}
 
+	@Override
 	public String toString() {
 		return getUniqueIdentifier() + " -> " + getExtensionPointIdentifier(); //$NON-NLS-1$
 	}

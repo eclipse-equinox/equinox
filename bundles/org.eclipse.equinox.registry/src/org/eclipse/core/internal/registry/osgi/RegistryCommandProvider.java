@@ -24,6 +24,7 @@ public class RegistryCommandProvider implements CommandProvider {
 
 	private boolean verbose = false; // is command run in a "verbose" mode?
 
+	@Override
 	public String getHelp() {
 		return getHelp(null);
 	}

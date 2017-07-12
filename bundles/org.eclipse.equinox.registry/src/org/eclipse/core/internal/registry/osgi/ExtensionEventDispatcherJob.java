@@ -23,10 +23,12 @@ import org.eclipse.core.runtime.spi.RegistryStrategy;
 final public class ExtensionEventDispatcherJob extends Job {
 	// an "identy rule" that forces extension events to be queued		
 	private final static ISchedulingRule EXTENSION_EVENT_RULE = new ISchedulingRule() {
+		@Override
 		public boolean contains(ISchedulingRule rule) {
 			return rule == this;
 		}
 
+		@Override
 		public boolean isConflicting(ISchedulingRule rule) {
 			return rule == this;
 		}
@@ -46,6 +48,7 @@ final public class ExtensionEventDispatcherJob extends Job {
 		setRule(EXTENSION_EVENT_RULE);
 	}
 
+	@Override
 	public IStatus run(IProgressMonitor monitor) {
 		return RegistryStrategy.processChangeEvent(listenerInfos, deltas, registry);
 	}

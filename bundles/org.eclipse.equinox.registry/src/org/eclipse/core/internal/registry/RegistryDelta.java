@@ -62,6 +62,7 @@ public class RegistryDelta {
 		((ExtensionDelta) extensionDelta).setContainingDelta(this);
 	}
 
+	@Override
 	public String toString() {
 		return "\n\tHost " + ": " + extensionDeltas; //$NON-NLS-1$//$NON-NLS-2$
 	}

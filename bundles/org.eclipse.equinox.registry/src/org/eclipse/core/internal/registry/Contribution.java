@@ -106,19 +106,23 @@ public class Contribution implements KeyedElement {
 		return defaultNamespace;
 	}
 
+	@Override
 	public String toString() {
 		return "Contribution: " + contributorId + " in namespace" + getDefaultNamespace(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	//Implements the KeyedElement interface
+	@Override
 	public int getKeyHashCode() {
 		return getKey().hashCode();
 	}
 
+	@Override
 	public Object getKey() {
 		return contributorId;
 	}
 
+	@Override
 	public boolean compare(KeyedElement other) {
 		return contributorId.equals(((Contribution) other).contributorId);
 	}

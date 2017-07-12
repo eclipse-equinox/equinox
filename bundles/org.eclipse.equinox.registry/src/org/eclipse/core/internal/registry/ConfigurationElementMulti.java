@@ -29,6 +29,7 @@ public class ConfigurationElementMulti extends ConfigurationElement {
 		super(self, contributorId, name, propertiesAndValue, children, extraDataOffset, parent, parentType, registry, persist);
 	}
 
+	@Override
 	String getAttribute(String attrName, String locale) {
 		if (propertiesAndValue.length <= 1)
 			return null;
@@ -50,6 +51,7 @@ public class ConfigurationElementMulti extends ConfigurationElement {
 		return propertiesAndValue[index * 2 + 1]; // return non-translated value
 	}
 
+	@Override
 	String getValue(String locale) {
 		if (propertiesAndValue.length == 0 || propertiesAndValue.length % 2 == 0)
 			return null;
@@ -107,10 +109,12 @@ public class ConfigurationElementMulti extends ConfigurationElement {
 	///////////////////////////////////////////////////////////////////////////////////
 	// "Default" locale
 
+	@Override
 	public String getAttribute(String attrName) {
 		return getAttribute(attrName, getLocale());
 	}
 
+	@Override
 	public String getValue() {
 		return getValue(getLocale());
 	}

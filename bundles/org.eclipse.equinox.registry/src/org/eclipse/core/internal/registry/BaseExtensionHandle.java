@@ -35,14 +35,17 @@ public class BaseExtensionHandle extends Handle implements IExtension {
 	}
 
 	// Method left for backward compatiblity only
+	@Override
 	public String getNamespace() {
 		return getContributor().getName();
 	}
 
+	@Override
 	public String getNamespaceIdentifier() {
 		return getExtension().getNamespaceIdentifier();
 	}
 
+	@Override
 	public IContributor getContributor() {
 		return getExtension().getContributor();
 	}
@@ -51,10 +54,12 @@ public class BaseExtensionHandle extends Handle implements IExtension {
 		return getExtension().getContributorId();
 	}
 
+	@Override
 	public String getExtensionPointUniqueIdentifier() {
 		return getExtension().getExtensionPointIdentifier();
 	}
 
+	@Override
 	public String getLabel() {
 		return getExtension().getLabel();
 	}
@@ -63,26 +68,32 @@ public class BaseExtensionHandle extends Handle implements IExtension {
 		return getExtension().getLabelAsIs();
 	}
 
+	@Override
 	public String getLabel(String locale) {
 		return getExtension().getLabel(locale);
 	}
 
+	@Override
 	public String getSimpleIdentifier() {
 		return getExtension().getSimpleIdentifier();
 	}
 
+	@Override
 	public String getUniqueIdentifier() {
 		return getExtension().getUniqueIdentifier();
 	}
 
+	@Override
 	public IConfigurationElement[] getConfigurationElements() {
 		return (IConfigurationElement[]) objectManager.getHandles(getExtension().getRawChildren(), RegistryObjectManager.CONFIGURATION_ELEMENT);
 	}
 
+	@Override
 	RegistryObject getObject() {
 		return getExtension();
 	}
 
+	@Override
 	public boolean isValid() {
 		try {
 			getExtension();

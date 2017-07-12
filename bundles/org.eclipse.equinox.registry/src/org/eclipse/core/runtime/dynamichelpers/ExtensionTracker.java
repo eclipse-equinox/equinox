@@ -61,6 +61,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.dynamichelpers.IExtensionTracker#registerHandler(org.eclipse.core.runtime.dynamichelpers.IExtensionChangeHandler, org.eclipse.core.runtime.dynamichelpers.IFilter)
 	 */
+	@Override
 	public void registerHandler(IExtensionChangeHandler handler, IFilter filter) {
 		synchronized (lock) {
 			if (closed)
@@ -73,6 +74,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	/* (non-Javadoc)
 	 * @see IExtensionTracker@unregisterHandler(IExtensionChangeHandler)
 	 */
+	@Override
 	public void unregisterHandler(IExtensionChangeHandler handler) {
 		synchronized (lock) {
 			if (closed)
@@ -84,6 +86,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	/* (non-Javadoc)
 	 * @see IExtensionTracker@registerObject(IExtension, Object, int)
 	 */
+	@Override
 	public void registerObject(IExtension element, Object object, int referenceType) {
 		if (element == null || object == null)
 			return;
@@ -107,6 +110,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	 * <em>This method must not be called by clients.</em>
 	 * </p>
 	 */
+	@Override
 	public void registryChanged(IRegistryChangeEvent event) {
 		IExtensionDelta delta[] = event.getExtensionDeltas();
 		int len = delta.length;
@@ -186,6 +190,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	/* (non-Javadoc)
 	 * @see IExtensionTracker@getObjects(IExtension)
 	 */
+	@Override
 	public Object[] getObjects(IExtension element) {
 		synchronized (lock) {
 			if (closed)
@@ -201,6 +206,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	/* (non-Javadoc)
 	 * @see IExtensionTracker@close()
 	 */
+	@Override
 	public void close() {
 		synchronized (lock) {
 			if (closed)
@@ -217,6 +223,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	/* (non-Javadoc)
 	 * @see IExtensionTracker@unregisterObject(IExtension, Object)
 	 */
+	@Override
 	public void unregisterObject(IExtension extension, Object object) {
 		synchronized (lock) {
 			if (closed)
@@ -230,6 +237,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	/* (non-Javadoc)
 	 * @see IExtensionTracker@unregisterObject(IExtension)
 	 */
+	@Override
 	public Object[] unregisterObject(IExtension extension) {
 		synchronized (lock) {
 			if (closed)
@@ -249,6 +257,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	 */
 	public static IFilter createExtensionPointFilter(final IExtensionPoint xpt) {
 		return new IFilter() {
+			@Override
 			public boolean matches(IExtensionPoint target) {
 				return xpt.equals(target);
 			}
@@ -263,6 +272,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	 */
 	public static IFilter createExtensionPointFilter(final IExtensionPoint[] xpts) {
 		return new IFilter() {
+			@Override
 			public boolean matches(IExtensionPoint target) {
 				for (int i = 0; i < xpts.length; i++)
 					if (xpts[i].equals(target))
@@ -280,6 +290,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	 */
 	public static IFilter createNamespaceFilter(final String id) {
 		return new IFilter() {
+			@Override
 			public boolean matches(IExtensionPoint target) {
 				return id.equals(target.getNamespaceIdentifier());
 			}
@@ -295,10 +306,12 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 			this.filter = filter;
 		}
 
+		@Override
 		public boolean equals(Object target) {
 			return handler.equals(((HandlerWrapper) target).handler);
 		}
 
+		@Override
 		public int hashCode() {
 			return handler.hashCode();
 		}

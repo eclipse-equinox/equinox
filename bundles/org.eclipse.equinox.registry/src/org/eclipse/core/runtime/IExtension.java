@@ -188,6 +188,7 @@ public interface IExtension {
 	/* (non-javadoc) 
 	 * @see Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object o);
 
 	/**
