@@ -158,6 +158,7 @@ public class RegistryStrategy {
 	 *
 	 * @deprecated use {@link #onStart(IExtensionRegistry, boolean)}.
 	 */
+	@Deprecated
 	public void onStart(IExtensionRegistry registry) {
 		// The default implementation
 	}
@@ -210,7 +211,7 @@ public class RegistryStrategy {
 	 */
 	public Object createExecutableExtension(RegistryContributor contributor, String className, String overridenContributorName) throws CoreException {
 		Object result = null;
-		Class classInstance = null;
+		Class<?> classInstance = null;
 		try {
 			classInstance = Class.forName(className);
 		} catch (ClassNotFoundException e1) {
@@ -241,7 +242,7 @@ public class RegistryStrategy {
 	 * @param deltas the registry deltas (thread safe); may not be <code>null</code>
 	 * @param registry the extension registry (NOT thread safe); may not be <code>null</code>
 	 */
-	public void scheduleChangeEvent(Object[] listeners, Map deltas, Object registry) {
+	public void scheduleChangeEvent(Object[] listeners, Map<String, ?> deltas, Object registry) {
 		((ExtensionRegistry) registry).scheduleChangeEvent(listeners, deltas);
 	}
 
@@ -255,7 +256,7 @@ public class RegistryStrategy {
 	 * @param registry the extension registry; may not be <code>null</code>
 	 * @return status of the operation or <code>null</code>
 	 */
-	public final static IStatus processChangeEvent(Object[] listeners, Map deltas, Object registry) {
+	public final static IStatus processChangeEvent(Object[] listeners, Map<String, ?> deltas, Object registry) {
 		if (registry instanceof ExtensionRegistry)
 			return ((ExtensionRegistry) registry).processChangeEvent(listeners, deltas);
 		return null;

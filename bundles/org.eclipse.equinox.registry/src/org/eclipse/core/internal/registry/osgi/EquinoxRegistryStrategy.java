@@ -85,7 +85,7 @@ public class EquinoxRegistryStrategy extends RegistryStrategyOSGI {
 	 * most users see no performance degradation and that order of registry events remains consistent.
 	 */
 	@Override
-	public final void scheduleChangeEvent(Object[] listeners, Map deltas, Object registry) {
+	public final void scheduleChangeEvent(Object[] listeners, Map<String, ?> deltas, Object registry) {
 		if (useJobs) {
 			try {
 				new ExtensionEventDispatcherJob(listeners, deltas, registry).schedule();

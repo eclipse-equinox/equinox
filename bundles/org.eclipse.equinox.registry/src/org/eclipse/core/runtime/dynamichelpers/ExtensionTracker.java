@@ -28,11 +28,11 @@ import org.eclipse.core.runtime.*;
  */
 public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListener {
 	//Map keeping the association between extensions and a set of objects. Key: IExtension, value: ReferenceHashSet.
-	private Map extensionToObjects = new HashMap();
-	private ListenerList handlers = new ListenerList();
+	private Map<IExtension, ReferenceHashSet<Object>> extensionToObjects = new HashMap<>();
+	private ListenerList<HandlerWrapper> handlers = new ListenerList<>();
 	private final Object lock = new Object();
 	private boolean closed = false;
-	private IExtensionRegistry registry; // the registry that this tacker works with
+	private final IExtensionRegistry registry; // the registry that this tacker works with
 
 	private static final Object[] EMPTY_ARRAY = new Object[0];
 
@@ -95,9 +95,9 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 			if (closed)
 				return;
 
-			ReferenceHashSet associatedObjects = (ReferenceHashSet) extensionToObjects.get(element);
+			ReferenceHashSet<Object> associatedObjects = extensionToObjects.get(element);
 			if (associatedObjects == null) {
-				associatedObjects = new ReferenceHashSet();
+				associatedObjects = new ReferenceHashSet<>();
 				extensionToObjects.put(element, associatedObjects);
 			}
 			associatedObjects.add(object, referenceType);
@@ -173,7 +173,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 			if (closed)
 				return;
 
-			ReferenceHashSet associatedObjects = (ReferenceHashSet) extensionToObjects.remove(delta.getExtension());
+			ReferenceHashSet<?> associatedObjects = extensionToObjects.remove(delta.getExtension());
 			if (associatedObjects == null)
 				removedObjects = EMPTY_ARRAY;
 			else
@@ -195,7 +195,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 		synchronized (lock) {
 			if (closed)
 				return EMPTY_ARRAY;
-			ReferenceHashSet objectSet = (ReferenceHashSet) extensionToObjects.get(element);
+			ReferenceHashSet<?> objectSet = extensionToObjects.get(element);
 			if (objectSet == null)
 				return EMPTY_ARRAY;
 
@@ -228,7 +228,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 		synchronized (lock) {
 			if (closed)
 				return;
-			ReferenceHashSet associatedObjects = (ReferenceHashSet) extensionToObjects.get(extension);
+			ReferenceHashSet<Object> associatedObjects = extensionToObjects.get(extension);
 			if (associatedObjects != null)
 				associatedObjects.remove(object);
 		}
@@ -242,7 +242,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 		synchronized (lock) {
 			if (closed)
 				return EMPTY_ARRAY;
-			ReferenceHashSet associatedObjects = (ReferenceHashSet) extensionToObjects.remove(extension);
+			ReferenceHashSet<?> associatedObjects = extensionToObjects.remove(extension);
 			if (associatedObjects == null)
 				return EMPTY_ARRAY;
 			return associatedObjects.toArray();
