@@ -18,7 +18,7 @@ DigitalUnix                              # Compaq
 embos                                    # Segger Embedded Software Solutions
 Epoc32 SymbianOS                         # Symbian OS
 FreeBSD                                  # Free BSD
-HPUX                                     # Hewlett Packard
+HPUX hp-ux                               # Hewlett Packard
 IRIX                                     # Sillicon Graphics
 Linux                                    # Open source
 MacOS "Mac OS"                   # Apple
