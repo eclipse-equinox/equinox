@@ -112,13 +112,6 @@
 	<classpathentry kind="src" output="bundle_tests/geturl" path="bundles_src/geturl"/>
 	<classpathentry kind="src" output="bundle_tests/test.bug375784" path="bundles_src/test.bug375784"/>
 	<classpathentry kind="src" output="bundle_tests/storage.hooks.a" path="bundles_src/storage.hooks.a"/>
-	<classpathentry kind="src" output="bundle_tests/test.plugins.a" path="bundles_src/test.plugins.a"/>
-	<classpathentry kind="src" output="bundle_tests/test.plugins.b" path="bundles_src/test.plugins.b"/>
-	<classpathentry kind="src" output="bundle_tests/test.plugins.c" path="bundles_src/test.plugins.c"/>
-	<classpathentry kind="src" output="bundle_tests/test.plugins.d" path="bundles_src/test.plugins.d"/>
-	<classpathentry kind="src" output="bundle_tests/test.plugins.e" path="bundles_src/test.plugins.e"/>
-	<classpathentry kind="src" output="bundle_tests/test.plugins.f" path="bundles_src/test.plugins.f"/>
-	<classpathentry kind="src" output="bundle_tests/test.plugins.g" path="bundles_src/test.plugins.g"/>
 	<classpathentry kind="src" output="bundle_tests/test.bug412228" path="bundles_src/test.bug412228"/>
 	<classpathentry kind="src" output="bundle_tests/test.uninstall.start1" path="bundles_src/test.uninstall.start1"/>
 	<classpathentry kind="src" output="bundle_tests/test.uninstall.start2" path="bundles_src/test.uninstall.start2"/>
