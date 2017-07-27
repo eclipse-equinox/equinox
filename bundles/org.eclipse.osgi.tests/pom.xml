@@ -36,7 +36,7 @@
         <artifactId>tycho-surefire-plugin</artifactId>
         <version>${tycho.version}</version>
         <configuration>
-          <argLine>-Xmx128m -Dosgi.framework.extensions=reference:file:${basedir}/../org.eclipse.osgi.compatibility.plugins/target/org.eclipse.osgi.compatibility.plugins-1.1.0-SNAPSHOT.jar</argLine>
+          <argLine>-Xmx128m</argLine>
           <dependencies>
             <dependency>
               <type>p2-installable-unit</type>
