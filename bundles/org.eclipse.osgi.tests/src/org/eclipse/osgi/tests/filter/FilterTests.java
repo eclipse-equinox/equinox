@@ -15,6 +15,7 @@ import java.math.BigInteger;
 import java.util.*;
 import junit.framework.*;
 import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
+import org.eclipse.osgi.tests.util.MapDictionary;
 import org.osgi.framework.*;
 
 public abstract class FilterTests extends TestCase {
@@ -342,6 +343,21 @@ public abstract class FilterTests extends TestCase {
 		hash.put("object", obj42);
 		assertFalse("does match filter", f1.match(hash));
 		assertFalse("does match filter", f1.match(new DictionaryServiceReference(hash)));
+	}
+
+	public void testNullValueMatch() throws InvalidSyntaxException {
+		Dictionary<String, Object> nullProps = new MapDictionary<String, Object>();
+		nullProps.put("test.null", null);
+		nullProps.put("test.non.null", "v1");
+		assertFalse(createFilter("(test.null=*)").match(nullProps));
+		assertTrue(createFilter("(&(!(test.null=*))(test.non.null=v1))").match(nullProps));
+	}
+
+	public void testNullKeyMatch() throws InvalidSyntaxException {
+		Dictionary<String, Object> nullProps = new MapDictionary<String, Object>();
+		nullProps.put(null, "null.v1");
+		nullProps.put("test.non.null", "v1");
+		assertTrue(createFilter("(test.non.null=v1)").match(nullProps));
 	}
 
 	public static class SampleComparable implements Comparable {

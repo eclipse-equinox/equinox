@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2014 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.serviceregistry;
 
+import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -17,6 +18,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
+import org.eclipse.osgi.tests.util.MapDictionary;
 import org.osgi.framework.*;
 
 public class ServiceRegistryTests extends AbstractBundleTests {
@@ -521,6 +523,38 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			fail("Interrupted.", e);
 		}
 
+	}
+
+	public void testNullValue() throws InvalidSyntaxException {
+		ServiceRegistration reg = null;
+		try {
+			Dictionary<String, Object> nullProps = new MapDictionary<String, Object>();
+			nullProps.put("test.null", null);
+			nullProps.put("test.non.null", "v1");
+			reg = OSGiTestsActivator.getContext().registerService(Object.class, new Object(), nullProps);
+			assertFalse(OSGiTestsActivator.getContext().createFilter("(test.null=*)").match(reg.getReference()));
+			assertFalse(OSGiTestsActivator.getContext().createFilter("(test.null=*)").match(reg.getReference().getProperties()));
+			assertTrue(OSGiTestsActivator.getContext().createFilter("(&(!(test.null=*))(test.non.null=v1))").match(reg.getReference()));
+			assertTrue(OSGiTestsActivator.getContext().createFilter("(&(!(test.null=*))(test.non.null=v1))").match(reg.getReference().getProperties()));
+		} finally {
+			if (reg != null)
+				reg.unregister();
+		}
+	}
+
+	public void testNullKey() throws InvalidSyntaxException {
+		ServiceRegistration reg = null;
+		try {
+			Dictionary<String, Object> nullProps = new MapDictionary<String, Object>();
+			nullProps.put(null, "null.v1");
+			nullProps.put("test.non.null", "v1");
+			reg = OSGiTestsActivator.getContext().registerService(Object.class, new Object(), nullProps);
+			assertTrue(OSGiTestsActivator.getContext().createFilter("(test.non.null=v1)").match(reg.getReference()));
+			assertTrue(OSGiTestsActivator.getContext().createFilter("(test.non.null=v1)").match(reg.getReference().getProperties()));
+		} finally {
+			if (reg != null)
+				reg.unregister();
+		}
 	}
 
 	private void clearResults(boolean[] results) {

@@ -54,7 +54,8 @@ class ServiceProperties extends CaseInsensitiveDictionaryMap<String, Object> {
 				Object key = keysEnum.nextElement();
 				if (key instanceof String) {
 					String header = (String) key;
-					if (put(header, cloneValue(props.get(header))) != null) {
+					Object value = cloneValue(props.get(header));
+					if (value != null && put(header, value) != null) {
 						throw new IllegalArgumentException(NLS.bind(Msg.HEADER_DUPLICATE_KEY_EXCEPTION, key));
 					}
 				}
@@ -79,7 +80,8 @@ class ServiceProperties extends CaseInsensitiveDictionaryMap<String, Object> {
 				Object key = e.getKey();
 				if (key instanceof String) {
 					String header = (String) key;
-					if (put(header, cloneValue(e.getValue())) != null) {
+					Object value = cloneValue(props.get(header));
+					if (value != null && put(header, value) != null) {
 						throw new IllegalArgumentException(NLS.bind(Msg.HEADER_DUPLICATE_KEY_EXCEPTION, key));
 					}
 				}

@@ -59,8 +59,15 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 		Enumeration<? extends K> keys = dictionary.keys();
 		while (keys.hasMoreElements()) {
 			K key = keys.nextElement();
-			if (put(key, dictionary.get(key)) != null) {
-				throw new IllegalArgumentException(NLS.bind(Msg.HEADER_DUPLICATE_KEY_EXCEPTION, key));
+			// ignore null keys
+			if (key != null) {
+				V value = dictionary.get(key);
+				// ignore null values
+				if (value != null) {
+					if (put(key, value) != null) {
+						throw new IllegalArgumentException(NLS.bind(Msg.HEADER_DUPLICATE_KEY_EXCEPTION, key));
+					}
+				}
 			}
 		}
 	}
@@ -76,8 +83,16 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 		this(initialCapacity(map.size()));
 		/* initialize the keys and values */
 		for (Entry<? extends K, ? extends V> e : map.entrySet()) {
-			if (put(e.getKey(), e.getValue()) != null) {
-				throw new IllegalArgumentException(NLS.bind(Msg.HEADER_DUPLICATE_KEY_EXCEPTION, e.getKey()));
+			K key = e.getKey();
+			// ignore null keys
+			if (key != null) {
+				V value = e.getValue();
+				// ignore null values
+				if (value != null) {
+					if (put(key, value) != null) {
+						throw new IllegalArgumentException(NLS.bind(Msg.HEADER_DUPLICATE_KEY_EXCEPTION, key));
+					}
+				}
 			}
 		}
 	}
@@ -112,13 +127,11 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * The key must be non-null.
-	 * <p>
 	 * If the key is a String, the key is located in a case-insensitive manner.
 	 */
 	@Override
 	public V get(Object key) {
-		return map.get(keyWrap(requireNonNull(key)));
+		return map.get(keyWrap(key));
 	}
 
 	/**
@@ -173,13 +186,11 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * The key must be non-null.
-	 * <p>
 	 * If the key is a String, the key is removed in a case-insensitive manner.
 	 */
 	@Override
 	public V remove(Object key) {
-		return map.remove(keyWrap(requireNonNull(key)));
+		return map.remove(keyWrap(key));
 	}
 
 	/**
@@ -201,23 +212,19 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * The key must be non-null.
-	 * <p>
 	 * If the key is a String, the key is located in a case-insensitive manner.
 	 */
 	@Override
 	public boolean containsKey(Object key) {
-		return map.containsKey(keyWrap(requireNonNull(key)));
+		return map.containsKey(keyWrap(key));
 	}
 
 	/**
 	 * {@inheritDoc}
-	 * <p>
-	 * The value must be non-null.
 	 */
 	@Override
 	public boolean containsValue(Object value) {
-		return map.containsValue(requireNonNull(value));
+		return map.containsValue(value);
 	}
 
 	private transient Set<Entry<K, V>> entrySet = null;
@@ -556,7 +563,7 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 
 		@Override
 		public int hashCode() {
-			return entry.getKey().hashCode() ^ entry.getValue().hashCode();
+			return Objects.hashCode(entry.getKey()) ^ Objects.hashCode(entry.getValue());
 		}
 
 		@Override
@@ -566,13 +573,7 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 				Object k1 = entry.getKey();
 				@SuppressWarnings("unchecked")
 				Object k2 = (other instanceof CaseInsentiveEntry) ? ((CaseInsentiveEntry<K, V>) other).entry.getKey() : other.getKey();
-				if ((k1 == k2) || k1.equals(k2)) {
-					Object v1 = entry.getValue();
-					Object v2 = other.getValue();
-					if ((v1 == v2) || v1.equals(v2)) {
-						return true;
-					}
-				}
+				return Objects.equals(k1, k2) && Objects.equals(entry.getValue(), other.getValue());
 			}
 			return false;
 		}
