@@ -1,4 +1,0 @@
-# To force a version qualifier update add the bug here
-Bug 403352 - Update all parent versions to match our build stream
-Bug 458346 - Unusual, hard to decipher error in I-build
-Bug 506597 - Build failure on I20161026-2000
