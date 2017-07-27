@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,7 @@ public class ObjectPoolTestCase extends CoreTest {
 		// new objects are added to the object pool; interning should add the object to the pool and return the same object
 		for (int i = 0; i < num; i++) {
 			String test1 = getName() + "_" + i; //$NON-NLS-1$
-			String test2 = (String) ObjectPool.intern(test1);
+			String test2 = ObjectPool.intern(test1);
 			assertTrue("Strings are not the same: " + test1, test1 == test2); //$NON-NLS-1$
 			objects.add(test2);
 		}
@@ -33,7 +33,7 @@ public class ObjectPoolTestCase extends CoreTest {
 		// after doing a GC the interned objects should still be in the pool; interning a duplicate should return the objects that were added above
 		for (int i = 0; i < num; i++) {
 			String test1 = getName() + "_" + i; //$NON-NLS-1$
-			String test2 = (String) ObjectPool.intern(test1);
+			String test2 = ObjectPool.intern(test1);
 			assertFalse("Strings are the same: " + test1, test1 == test2); //$NON-NLS-1$
 			assertTrue("Strings are not the same: " + test1, test2 == objects.get(i)); //$NON-NLS-1$
 		}
@@ -43,7 +43,7 @@ public class ObjectPoolTestCase extends CoreTest {
 		// after doing a GC the interned objects should have been removed from the object pool
 		for (int i = 0; i < num; i++) {
 			String test1 = getName() + "_" + i; //$NON-NLS-1$
-			String test2 = (String) ObjectPool.intern(test1);
+			String test2 = ObjectPool.intern(test1);
 			assertTrue("Strings are not the same: " + test1, test1 == test2); //$NON-NLS-1$
 			objects.add(test2);
 		}
@@ -60,11 +60,11 @@ public class ObjectPoolTestCase extends CoreTest {
 		// new objects are added to the object pool; interning should add the object to the pool and return the same object
 		for (int i = 0; i < num; i++) {
 			String testString1 = getName() + "_" + i; //$NON-NLS-1$
-			String testString2 = (String) ObjectPool.intern(testString1);
+			String testString2 = ObjectPool.intern(testString1);
 			assertTrue("Strings are not the same: " + testString1, testString1 == testString2); //$NON-NLS-1$
 			strings.add(testString2);
 			Version testVersion1 = new Version(i, i, i, getName() + "_" + i); //$NON-NLS-1$
-			Version testVersion2 = (Version) ObjectPool.intern(testVersion1);
+			Version testVersion2 = ObjectPool.intern(testVersion1);
 			assertTrue("Versions are not the same: " + testVersion1, testVersion1 == testVersion2); //$NON-NLS-1$
 			versions.add(testVersion2);
 		}
@@ -72,11 +72,11 @@ public class ObjectPoolTestCase extends CoreTest {
 		// after doing a GC the interned objects should still be in the pool; interning a duplicate should return the objects that were added above
 		for (int i = 0; i < num; i++) {
 			String testString1 = getName() + "_" + i; //$NON-NLS-1$
-			String testString2 = (String) ObjectPool.intern(testString1);
+			String testString2 = ObjectPool.intern(testString1);
 			assertFalse("Strings are the same: " + testString1, testString1 == testString2); //$NON-NLS-1$
 			assertTrue("Strings are not the same: " + testString1, testString2 == strings.get(i)); //$NON-NLS-1$
 			Version testVersion1 = new Version(i, i, i, getName() + "_" + i); //$NON-NLS-1$
-			Version testVersion2 = (Version) ObjectPool.intern(testVersion1);
+			Version testVersion2 = ObjectPool.intern(testVersion1);
 			assertFalse("Versions are the same: " + testVersion1, testVersion1 == testVersion2); //$NON-NLS-1$
 			assertTrue("Versions are not the same: " + testVersion1, testVersion2 == versions.get(i)); //$NON-NLS-1$
 		}
@@ -87,11 +87,11 @@ public class ObjectPoolTestCase extends CoreTest {
 		doGC();
 		for (int i = 0; i < num; i++) {
 			String testString1 = getName() + "_" + i; //$NON-NLS-1$
-			String testString2 = (String) ObjectPool.intern(testString1);
+			String testString2 = ObjectPool.intern(testString1);
 			assertTrue("Strings are not the same: " + testString1, testString1 == testString2); //$NON-NLS-1$
 			strings.add(testString2);
 			Version testVersion1 = new Version(i, i, i, getName() + "_" + i); //$NON-NLS-1$
-			Version testVersion2 = (Version) ObjectPool.intern(testVersion1);
+			Version testVersion2 = ObjectPool.intern(testVersion1);
 			assertTrue("Versions are not the same: " + testVersion1, testVersion1 == testVersion2); //$NON-NLS-1$
 			versions.add(testVersion2);
 		}
