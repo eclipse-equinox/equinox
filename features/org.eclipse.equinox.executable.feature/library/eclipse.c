@@ -1378,7 +1378,7 @@ static _TCHAR* findSplash(_TCHAR* splashArg) {
 			/*directory, look for splash.bmp*/
 			ch = malloc( (length + 12) * sizeof(_TCHAR));
 			_stprintf( ch, _T_ECLIPSE("%s%c%s"), splashArg, dirSeparator, _T_ECLIPSE("splash.bmp") );
-			if (_tstat(ch, &stats) == 0 && stats.st_mode & S_IFREG) {
+			if (_tstat(ch, &stats) == 0 && (stats.st_mode & S_IFREG)) {
 				free(splashArg);
 				return ch;
 			}
@@ -1834,7 +1834,7 @@ static int processEEProps(_TCHAR* eeFile)
         	else {
         		c1 = malloc( (_tcslen(argv[index]) - _tcslen(option->name) + 1) *sizeof(_TCHAR));
             	_tcscpy(c1, argv[index] + _tcslen(option->name));
-        		if (option->flag & ADJUST_PATH && option->flag & VALUE_IS_LIST) {
+        		if ((option->flag & ADJUST_PATH) && (option->flag & VALUE_IS_LIST)) {
         			c2 = checkPathList(c1, eeDir, 1);
        				free(c1);
     				c1 = c2;
