@@ -1432,13 +1432,12 @@ public class Storage {
 							File release = new File(javaHome, "release"); //$NON-NLS-1$
 							if (release.exists()) {
 								Properties releaseProps = new Properties();
-								try {
-									releaseProps.load(new FileInputStream(release));
+								try (InputStream releaseStream = new FileInputStream(release)) {
+									releaseProps.load(releaseStream);
 									String releaseName = releaseProps.getProperty("JAVA_PROFILE"); //$NON-NLS-1$
 									if (releaseName != null) {
 										// make sure to remove extra quotes
-										releaseName = releaseName.trim();
-										releaseName = releaseName.replaceAll("^\"|\"$", ""); //$NON-NLS-1$ //$NON-NLS-2$
+										releaseName = releaseName.replaceAll("^\\s*\"?|\"?\\s*$", ""); //$NON-NLS-1$ //$NON-NLS-2$
 										embeddedProfileName = "_" + releaseName + "-"; //$NON-NLS-1$ //$NON-NLS-2$
 									}
 								} catch (IOException e) {

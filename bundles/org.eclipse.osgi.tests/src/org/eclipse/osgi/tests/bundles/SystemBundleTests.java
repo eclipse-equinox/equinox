@@ -2690,6 +2690,8 @@ public class SystemBundleTests extends AbstractBundleTests {
 			doTestJavaProfile("1.7", "JavaSE-1.7", null);
 			doTestJavaProfile("1.8", "JavaSE/compact3-1.8", "compact3");
 			doTestJavaProfile("1.8", "JavaSE/compact3-1.8", "\"compact3\"");
+			doTestJavaProfile("1.8", "JavaSE/compact3-1.8", " \"compact3\" ");
+			doTestJavaProfile("1.8", "JavaSE/compact3-1.8", " compact3 ");
 			doTestJavaProfile("1.8", "JavaSE-1.8", "\"compact4\"");
 			doTestJavaProfile("9", "JavaSE/compact3-1.8", "compact3");
 			doTestJavaProfile("9", "JavaSE/compact3-1.8", "\"compact3\"");
@@ -2706,7 +2708,12 @@ public class SystemBundleTests extends AbstractBundleTests {
 			release.getParentFile().mkdirs();
 			Properties props = new Properties();
 			props.put("JAVA_PROFILE", releaseName);
-			props.store(new FileOutputStream(release), null);
+			FileOutputStream propStream = new FileOutputStream(release);
+			try {
+				props.store(propStream, null);
+			} finally {
+				propStream.close();
+			}
 			System.setProperty("java.home", release.getParentFile().getAbsolutePath());
 		}
 		System.setProperty("java.specification.version", javaSpecVersion);
