@@ -60,7 +60,7 @@ public class LogStreamProviderImpl implements LogStreamProvider {
 			LogEntrySource logEntrySource = new LogEntrySource(withHistory);
 			PushStreamBuilder<LogEntry, BlockingQueue<PushEvent<? extends LogEntry>>> streamBuilder = pushStreamProvider.buildStream(logEntrySource);
 			//creating an unbuffered stream
-			PushStream<LogEntry> logStream = streamBuilder.unbuffered().create();
+			PushStream<LogEntry> logStream = streamBuilder.unbuffered().build();
 			logEntrySource.setLogStream(logStream);
 			// Adding to sources makes the source start listening for new entries
 			logEntrySources.add(logEntrySource);
