@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2005, 2015). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2016). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -289,7 +289,7 @@ public final class TopicPermission extends Permission {
 	public String getActions() {
 		String result = actions;
 		if (result == null) {
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			boolean comma = false;
 			int mask = getActionsMask();
 			if ((mask & ACTION_PUBLISH) == ACTION_PUBLISH) {

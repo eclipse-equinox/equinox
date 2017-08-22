@@ -36,4 +36,19 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="src/org/osgi/service/metatype/MetaTypeService.java" type="org.osgi.service.metatype.MetaTypeService">
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.service.metatype.MetaTypeService"/>
+                <message_argument value="METATYPE_SPECIFICATION_VERSION"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.4"/>
+                <message_argument value="3.7"/>
+                <message_argument value="METATYPE_SPECIFICATION_VERSION"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>
