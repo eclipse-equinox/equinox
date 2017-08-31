@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2016 IBM Corporation and others.
+ * Copyright (c) 2004, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,10 @@ package org.eclipse.osgi.internal.location;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration.ConfigValues;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
@@ -69,7 +71,7 @@ public class EquinoxLocations {
 	private final Location instanceLocation;
 	private final Location eclipseHomeLocation;
 
-	public EquinoxLocations(ConfigValues equinoxConfig, EquinoxContainer container, AtomicBoolean debugLocations) {
+	public EquinoxLocations(ConfigValues equinoxConfig, EquinoxContainer container, AtomicBoolean debugLocations, Map<Throwable, Integer> exceptions) {
 		this.equinoxConfig = equinoxConfig;
 		this.container = container;
 		this.debugLocations = debugLocations;
@@ -77,8 +79,14 @@ public class EquinoxLocations {
 		// Initializes the Location objects for the LocationManager.
 		// set the osgi storage area if it exists
 		String osgiStorage = equinoxConfig.getConfiguration(Constants.FRAMEWORK_STORAGE);
-		if (osgiStorage != null)
+		if (osgiStorage != null) {
+			if (equinoxConfig.getConfiguration(PROP_CONFIG_AREA) != null) {
+				exceptions.put(new IllegalArgumentException(String.format( //
+						"The property '%s' with the value '%s' is being overriden by the OSGi standard configuration property '%s' with the value '%s'.", //$NON-NLS-1$
+						PROP_CONFIG_AREA, equinoxConfig.getConfiguration(PROP_CONFIG_AREA), Constants.FRAMEWORK_STORAGE, osgiStorage)), FrameworkLogEntry.WARNING);
+			}
 			equinoxConfig.setConfiguration(PROP_CONFIG_AREA, osgiStorage);
+		}
 		// do install location initialization first since others may depend on it
 		// assumes that the property is already set
 		installLocation = buildLocation(PROP_INSTALL_AREA, null, "", true, false, null); //$NON-NLS-1$

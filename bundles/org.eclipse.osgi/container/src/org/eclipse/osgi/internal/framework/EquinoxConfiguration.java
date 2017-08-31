@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2016 IBM Corporation and others.
+ * Copyright (c) 2003, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,11 +30,13 @@ import java.security.ProtectionDomain;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.core.runtime.internal.adaptor.ConsoleManager;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.internal.location.LocationHelper;
+import org.eclipse.osgi.internal.log.EquinoxLogServices;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
@@ -111,6 +113,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public final boolean CLASS_CERTIFICATE;
 	public final boolean PARALLEL_CAPABLE;
+
+	private final Map<Throwable, Integer> exceptions = new LinkedHashMap<>(0);
 
 	// JVM os.arch property name
 	public static final String PROP_JVM_OS_ARCH = "os.arch"; //$NON-NLS-1$
@@ -230,7 +234,10 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		private final Map<String, Object> initialConfig;
 		private final Properties localConfig;
 
-		public ConfigValues(Map<String, ?> initialConfiguration) {
+		private final Map<Throwable, Integer> exceptions;
+
+		public ConfigValues(Map<String, ?> initialConfiguration, Map<Throwable, Integer> exceptions) {
+			this.exceptions = exceptions;
 			this.initialConfig = initialConfiguration == null ? new HashMap<String, Object>(0) : new HashMap<>(initialConfiguration);
 			Object useSystemPropsValue = initialConfig.get(PROP_USE_SYSTEM_PROPERTIES);
 			this.useSystemProperties = useSystemPropsValue == null ? false : Boolean.parseBoolean(useSystemPropsValue.toString());
@@ -288,7 +295,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 				// Verify type compatibility.
 				Long.parseLong(getConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL));
 			} catch (NumberFormatException e) {
-				// TODO Consider logging here.
+				exceptions.put(e, FrameworkLogEntry.ERROR);
 				// The specified value is not type compatible. Use the default.
 				setConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL, DEFAULT_STATE_SAVE_DELAY_INTERVAL);
 			}
@@ -329,9 +336,12 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 				} finally {
 					in.close();
 				}
+			} catch (FileNotFoundException e) {
+				// TODO probably should log, but the common case for non-eclipse
+				// environments would be to not have a config.ini ...
 			} catch (IOException e) {
-				// its ok if there is no file.  We'll just use the defaults for everything
-				// TODO but it might be nice to log something with gentle wording (i.e., it is not an error)
+				// We'll just use the defaults for everything but log the exception on reading
+				exceptions.put(e, FrameworkLogEntry.WARNING);
 			}
 			return substituteVars(result);
 		}
@@ -497,15 +507,15 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		// Care must be taken to bootstrap of the config values properly
 		// A separate class is used to hold the configuration maps so that we can pass them
 		// to the EquionxLocations before the EquinoxConfiguration has been fully constructed
-		this.configValues = new ConfigValues(initialConfiguration);
+		this.configValues = new ConfigValues(initialConfiguration, exceptions);
 
 		// We need to initialize some properties always before constructing the EquinoxLocations
 		initializeProperties();
 
-		// At this point we do not know if we want to debug locations because we have not detemined if osgi.debug is set yet
+		// At this point we do not know if we want to debug locations because we have not determined if osgi.debug is set yet
 		// We use an AttomicBoolean to hold the setting so we can set it after the config.ini has been loaded
 		AtomicBoolean debugLocations = new AtomicBoolean();
-		this.equinoxLocations = new EquinoxLocations(this.configValues, this.hookRegistry.getContainer(), debugLocations);
+		this.equinoxLocations = new EquinoxLocations(this.configValues, this.hookRegistry.getContainer(), debugLocations, exceptions);
 		this.configValues.loadConfigIni(getConfigIni(equinoxLocations, false));
 		this.configValues.loadConfigIni(getConfigIni(equinoxLocations, true));
 		this.configValues.finalizeValues();
@@ -535,7 +545,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 					loadDevProperties(LocationHelper.getStream(location));
 					devMode = true;
 				} catch (IOException e) {
-					// TODO consider logging
+					exceptions.put(e, FrameworkLogEntry.ERROR);
 				}
 
 			} catch (MalformedURLException e) {
@@ -858,7 +868,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		try {
 			props.load(input);
 		} catch (IOException e) {
-			// TODO consider logging here
+			exceptions.put(e, FrameworkLogEntry.ERROR);
 		} finally {
 			if (input != null)
 				try {
@@ -1158,5 +1168,12 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public EquinoxLocations getEquinoxLocations() {
 		return equinoxLocations;
+	}
+
+	void logMessages(EquinoxLogServices logServices) {
+		for (Map.Entry<Throwable, Integer> exception : exceptions.entrySet()) {
+			logServices.log(EquinoxContainer.NAME, exception.getValue(), exception.getKey().getMessage(), exception.getKey());
+		}
+		exceptions.clear();
 	}
 }

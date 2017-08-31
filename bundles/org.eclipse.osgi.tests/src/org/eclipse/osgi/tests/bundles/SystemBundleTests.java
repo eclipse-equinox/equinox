@@ -39,6 +39,7 @@ import org.osgi.framework.namespace.NativeNamespace;
 import org.osgi.framework.wiring.*;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
+import org.osgi.service.log.*;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -3082,6 +3083,39 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("Failed init", e);
 		} finally {
 			System.setProperty("os.name", origOS);
+			try {
+				if (equinox != null) {
+					equinox.stop();
+					equinox.waitForStop(1000);
+				}
+			} catch (BundleException e) {
+				fail("Failed to stop framework.", e);
+			} catch (InterruptedException e) {
+				fail("Failed to stop framework.", e);
+			}
+		}
+	}
+
+	public void testOverrideEquinoxConfigAreaProp() {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map configuration = new HashMap();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(EquinoxLocations.PROP_CONFIG_AREA, config.getAbsolutePath() + "-override");
+		configuration.put(EquinoxConfiguration.PROP_LOG_HISTORY_MAX, "10");
+		Equinox equinox = null;
+		try {
+			equinox = new Equinox(configuration);
+			equinox.init();
+			BundleContext bc = equinox.getBundleContext();
+			LogReaderService logReader = bc.getService(bc.getServiceReference(LogReaderService.class));
+			Enumeration<LogEntry> logs = logReader.getLog();
+			assertTrue("No logs found.", logs.hasMoreElements());
+			LogEntry entry = logs.nextElement();
+			assertEquals("Wrong log level.", LogLevel.WARN, entry.getLogLevel());
+			assertTrue("Wrong message found: " + entry.getMessage(), entry.getMessage().contains(EquinoxLocations.PROP_CONFIG_AREA));
+		} catch (BundleException e) {
+			fail("Failed init", e);
+		} finally {
 			try {
 				if (equinox != null) {
 					equinox.stop();

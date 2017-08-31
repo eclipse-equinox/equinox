@@ -63,6 +63,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	public EquinoxContainer(Map<String, ?> configuration) {
 		this.equinoxConfig = new EquinoxConfiguration(configuration, new HookRegistry(this));
 		this.logServices = new EquinoxLogServices(this.equinoxConfig);
+		this.equinoxConfig.logMessages(this.logServices);
 		this.equinoxConfig.getHookRegistry().initialize();
 		try {
 			this.storage = Storage.createStorage(this);
