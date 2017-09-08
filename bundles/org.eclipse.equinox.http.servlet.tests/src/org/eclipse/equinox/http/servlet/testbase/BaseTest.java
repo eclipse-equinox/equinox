@@ -195,6 +195,7 @@ public class BaseTest {
 	protected static final String STATUS_OK = "OK";
 	protected static final String TEST_BUNDLES_BINARY_DIRECTORY = "/bundles_bin/";
 	protected static final String TEST_BUNDLE_1 = "tb1";
+	protected static final String TEST_BUNDLE_2 = "tb2";
 
 	protected static final String[] BUNDLES = new String[] {
 		EQUINOX_DS_BUNDLE

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true">
+	<implementation class="org.eclipse.equinox.http.servlet.tests.tb2.TestResource1"/>
+	<service>
+		<provide interface="org.eclipse.equinox.http.servlet.tests.tb2.TestResource1"/>
+	</service>
+	<property name="osgi.http.whiteboard.context.select" type="String" value="(osgi.http.whiteboard.context.name=foo)"/>
+	<property name="osgi.http.whiteboard.resource.pattern" type="String" value="/TestResource1/*"/>
+	<property name="osgi.http.whiteboard.resource.prefix" type="String" value="/org/eclipse/equinox/http/servlet/tests/tb2"/>
+</scr:component>
