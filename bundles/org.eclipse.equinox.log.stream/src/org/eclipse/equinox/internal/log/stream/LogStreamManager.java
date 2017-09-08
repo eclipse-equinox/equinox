@@ -33,8 +33,8 @@ public class LogStreamManager implements BundleActivator, ServiceTrackerCustomiz
 	private ServiceRegistration<LogStreamProvider> logStreamServiceRegistration;
 	private LogStreamProviderFactory logStreamProviderFactory;
 	private ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService;
-	BundleContext context;
-	ReentrantLock eventProducerLock = new ReentrantLock();
+	private BundleContext context;
+	private final ReentrantLock eventProducerLock = new ReentrantLock();
 
 	/*
 	 * (non-Javadoc)
@@ -42,14 +42,11 @@ public class LogStreamManager implements BundleActivator, ServiceTrackerCustomiz
 	 */
 	@Override
 	public void start(BundleContext bc) throws Exception {
-
 		this.context = bc;
 		logReaderService = new ServiceTracker<>(context, LogReaderService.class, this);
 		logReaderService.open();
-
 		logStreamProviderFactory = new LogStreamProviderFactory(logReaderService);
 		logStreamServiceRegistration = context.registerService(LogStreamProvider.class, logStreamProviderFactory, null);
-
 	}
 
 	/*
@@ -61,6 +58,7 @@ public class LogStreamManager implements BundleActivator, ServiceTrackerCustomiz
 		logReaderService.close();
 		logStreamServiceRegistration.unregister();
 		logStreamServiceRegistration = null;
+		logStreamProviderFactory.shutdownExecutor();
 	}
 
 	/*
@@ -159,7 +157,6 @@ public class LogStreamManager implements BundleActivator, ServiceTrackerCustomiz
 
 	@Override
 	public void logged(LogEntry entry) {
-
 		logStreamProviderFactory.postLogEntry(entry);
 	}
 

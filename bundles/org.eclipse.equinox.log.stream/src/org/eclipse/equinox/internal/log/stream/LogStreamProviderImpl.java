@@ -14,6 +14,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.osgi.service.log.LogEntry;
@@ -23,6 +25,7 @@ import org.osgi.util.pushstream.PushEvent;
 import org.osgi.util.pushstream.PushStream;
 import org.osgi.util.pushstream.PushStreamBuilder;
 import org.osgi.util.pushstream.PushStreamProvider;
+import org.osgi.util.pushstream.QueuePolicyOption;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class LogStreamProviderImpl implements LogStreamProvider {
@@ -32,17 +35,22 @@ public class LogStreamProviderImpl implements LogStreamProvider {
 	private final Set<LogEntrySource> logEntrySources = Collections.newSetFromMap(weakMap);
 
 	private final ReentrantReadWriteLock historyLock = new ReentrantReadWriteLock();
+	private final ExecutorService executor;
 
-	public LogStreamProviderImpl(ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService) {
+	public LogStreamProviderImpl(ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService, ExecutorService executor) {
 		this.logReaderService = logReaderService;
+		this.executor = executor;
 	}
 
 	/* Create a PushStream of {@link LogEntry} objects.
-	 * The returned PushStream is an unbuffered stream with a parallelism of one.
+	 * The returned PushStream is 
+	 * Buffered with a buffer large enough to contain the history, if included.
+	 * Have the QueuePolicyOption.DISCARD_OLDEST queue policy option.
+	 * Use a shared executor.
+	 * Have a parallelism of one.
 	 * (non-Javadoc)
 	 * @see org.osgi.service.log.stream.LogStreamProvider#createStream(org.osgi.service.log.stream.LogStreamProvider.Options[])
 	 */
-
 	@Override
 	public PushStream<LogEntry> createStream(Options... options) {
 		ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> withHistory = null;
@@ -59,8 +67,9 @@ public class LogStreamProviderImpl implements LogStreamProvider {
 		try {
 			LogEntrySource logEntrySource = new LogEntrySource(withHistory);
 			PushStreamBuilder<LogEntry, BlockingQueue<PushEvent<? extends LogEntry>>> streamBuilder = pushStreamProvider.buildStream(logEntrySource);
-			//creating an unbuffered stream
-			PushStream<LogEntry> logStream = streamBuilder.unbuffered().build();
+			//creating a buffered push stream
+			LinkedBlockingQueue<PushEvent<? extends LogEntry>> historyQueue = new LinkedBlockingQueue<>();
+			PushStream<LogEntry> logStream = streamBuilder.withBuffer(historyQueue).withExecutor(executor).withQueuePolicy(QueuePolicyOption.DISCARD_OLDEST).build();
 			logEntrySource.setLogStream(logStream);
 			// Adding to sources makes the source start listening for new entries
 			logEntrySources.add(logEntrySource);

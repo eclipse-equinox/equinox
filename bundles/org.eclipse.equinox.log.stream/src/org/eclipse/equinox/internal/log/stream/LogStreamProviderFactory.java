@@ -12,6 +12,9 @@ package org.eclipse.equinox.internal.log.stream;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.osgi.framework.Bundle;
@@ -27,6 +30,16 @@ public class LogStreamProviderFactory implements ServiceFactory<LogStreamProvide
 	Map<Bundle, LogStreamProviderImpl> providers = new HashMap<>();
 	ReentrantReadWriteLock eventProducerLock = new ReentrantReadWriteLock();
 	ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService;
+
+	/* 
+	 * ExecutorService is used to provide parallelism of one by making sure only one thread is used for the executor
+	 */
+	private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+		@Override
+		public Thread newThread(Runnable r) {
+			return new Thread(r, "LogStream thread");
+		}
+	});
 
 	public LogStreamProviderFactory(ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService) {
 		this.logReaderService = logReaderService;
@@ -58,7 +71,7 @@ public class LogStreamProviderFactory implements ServiceFactory<LogStreamProvide
 
 	@Override
 	public LogStreamProviderImpl getService(Bundle bundle, ServiceRegistration<LogStreamProvider> registration) {
-		LogStreamProviderImpl logStreamProviderImpl = new LogStreamProviderImpl(logReaderService);
+		LogStreamProviderImpl logStreamProviderImpl = new LogStreamProviderImpl(logReaderService, executor);
 		eventProducerLock.writeLock().lock();
 		try {
 			providers.put(bundle, logStreamProviderImpl);
@@ -85,9 +98,15 @@ public class LogStreamProviderFactory implements ServiceFactory<LogStreamProvide
 		} finally {
 			eventProducerLock.writeLock().unlock();
 		}
-
 		logStreamProviderImpl.close();
 
+	}
+
+	/*
+	 * Shutdown the executor
+	 */
+	public void shutdownExecutor() {
+		executor.shutdown();
 	}
 
 }
