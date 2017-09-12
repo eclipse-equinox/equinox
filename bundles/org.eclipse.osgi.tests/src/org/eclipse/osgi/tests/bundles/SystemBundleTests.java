@@ -22,6 +22,7 @@ import javax.net.SocketFactory;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
+import org.eclipse.osgi.framework.util.FilePath;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.launch.Equinox;
@@ -29,12 +30,15 @@ import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.storage.url.reference.Handler;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.eclipse.osgi.tests.security.BaseSecurityTest;
 import org.junit.Assert;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.hooks.weaving.WeavingHook;
 import org.osgi.framework.hooks.weaving.WovenClass;
+import org.osgi.framework.launch.Framework;
+import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.framework.namespace.NativeNamespace;
 import org.osgi.framework.wiring.*;
 import org.osgi.resource.Capability;
@@ -3127,5 +3131,60 @@ public class SystemBundleTests extends AbstractBundleTests {
 				fail("Failed to stop framework.", e);
 			}
 		}
+	}
+
+	public void testSystemCapabilitiesBug522125() throws URISyntaxException, FileNotFoundException, IOException, BundleException, InterruptedException {
+		String frameworkLocation = OSGiTestsActivator.getContext().getProperty(EquinoxConfiguration.PROP_FRAMEWORK);
+		URI uri = new URI(frameworkLocation);
+		File f = new File(uri);
+		if (!f.isFile()) {
+			Assert.fail("Cannot test when framework location is a directory: " + f.getAbsolutePath());
+		}
+		File testDestination = OSGiTestsActivator.getContext().getDataFile(getName() + ".framework.jar");
+		BaseSecurityTest.copy(new FileInputStream(f), testDestination);
+		FilePath userDir = new FilePath(System.getProperty("user.dir"));
+		FilePath testPath = new FilePath(testDestination);
+		String relative = userDir.makeRelative(testPath);
+		System.out.println(relative);
+		URL relativeURL = new URL("file:" + relative);
+		relativeURL.openStream().close();
+		final ClassLoader osgiClassLoader = getClass().getClassLoader();
+		URLClassLoader cl = new URLClassLoader(new URL[] {relativeURL}) {
+
+			@Override
+			protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+				if (name.startsWith("org.osgi.")) {
+					return osgiClassLoader.loadClass(name);
+				}
+				return super.loadClass(name, resolve);
+			}
+
+		};
+
+		ServiceLoader<FrameworkFactory> sLoader = ServiceLoader.load(FrameworkFactory.class, cl);
+		FrameworkFactory factory = sLoader.iterator().next();
+
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, String> configuration = new HashMap<String, String>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(EquinoxConfiguration.PROP_FRAMEWORK, relativeURL.toExternalForm());
+
+		Framework framework = factory.newFramework(configuration);
+		framework.init();
+		framework.stop();
+		framework.waitForStop(5000);
+
+		BundleRevision systemRevision1 = framework.adapt(BundleRevision.class);
+		int capCount1 = systemRevision1.getCapabilities(null).size();
+
+		framework = factory.newFramework(configuration);
+		framework.init();
+		framework.stop();
+		framework.waitForStop(5000);
+
+		BundleRevision systemRevision2 = framework.adapt(BundleRevision.class);
+		int capCount2 = systemRevision2.getCapabilities(null).size();
+
+		Assert.assertEquals("Wrong number of capabilities", capCount1, capCount2);
 	}
 }

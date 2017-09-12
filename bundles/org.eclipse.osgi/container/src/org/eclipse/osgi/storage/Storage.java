@@ -1225,18 +1225,20 @@ public class Storage {
 			if (infoId == 0) {
 				content = getSystemContent();
 				isDirectory = content != null ? content.isDirectory() : false;
+				// Note that we do not do any checking for absolute paths with
+				// the system bundle.  We always take the content as discovered
+				// by getSystemContent()
 			} else {
 				content = new File(contentPath);
-			}
-
-			if (content != null && !content.isAbsolute()) {
-				// make sure it has the absolute location instead
-				if (isReference) {
-					// reference installs are relative to the installPath
-					content = new File(installPath, contentPath);
-				} else {
-					// normal installs are relative to the storage area
-					content = getFile(contentPath, true);
+				if (!content.isAbsolute()) {
+					// make sure it has the absolute location instead
+					if (isReference) {
+						// reference installs are relative to the installPath
+						content = new File(installPath, contentPath);
+					} else {
+						// normal installs are relative to the storage area
+						content = getFile(contentPath, true);
+					}
 				}
 			}
 
