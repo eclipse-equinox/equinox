@@ -31,13 +31,11 @@ public class LogStreamProviderFactory implements ServiceFactory<LogStreamProvide
 	ReentrantReadWriteLock eventProducerLock = new ReentrantReadWriteLock();
 	ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService;
 
-	/* 
-	 * ExecutorService is used to provide parallelism of one by making sure only one thread is used for the executor
-	 */
-	private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+	private final int cores = Runtime.getRuntime().availableProcessors();
+	private final ExecutorService executor = Executors.newFixedThreadPool(cores - 1, new ThreadFactory() {
 		@Override
 		public Thread newThread(Runnable r) {
-			return new Thread(r, "LogStream thread");
+			return new Thread(r, "LogStream thread"); //$NON-NLS-1$
 		}
 	});
 
