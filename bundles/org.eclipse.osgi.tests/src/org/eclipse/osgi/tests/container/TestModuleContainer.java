@@ -38,8 +38,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -49,6 +51,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.jar.Attributes;
@@ -67,6 +70,7 @@ import org.eclipse.osgi.container.ModuleWire;
 import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
+import org.eclipse.osgi.framework.util.ThreadInfoReport;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
@@ -2188,7 +2192,7 @@ public class TestModuleContainer extends AbstractTest {
 	public void testUTF8LineContinuation() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
-		String utfString = "a.with.é.multibyte";
+		String utfString = "a.with.ï¿½.multibyte";
 		while (utfString.getBytes("UTF8").length < 500) {
 			Map<String, String> manifest = getUTFManifest(utfString);
 			Module testModule = installDummyModule(manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), container);
@@ -3510,6 +3514,76 @@ public class TestModuleContainer extends AbstractTest {
 		Assert.assertEquals("Wrong number of host packages.", 2, packages.size());
 		//system.bundle alias shouldn't be added to the bundle-symbolic-name attribute of the osgi.wiring.package capabilities of SYSTEM BUNDLE.
 		Assert.assertEquals("Wrong bundle-symbolic-name attribute", "org.eclipse.osgi", packages.get(0).getAttributes().get(PackageNamespace.CAPABILITY_BUNDLE_SYMBOLICNAME_ATTRIBUTE));
+	}
+
+	@Test
+	public void testStartDeadLock() throws BundleException, InterruptedException, IOException {
+		CountDownLatch startLatch = new CountDownLatch(1);
+		CountDownLatch stopLatch = new CountDownLatch(1);
+
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.singletonMap(EquinoxConfiguration.PROP_MODULE_LOCK_TIMEOUT, "1"));
+		adaptor.setStartLatch(startLatch);
+		adaptor.setStopLatch(stopLatch);
+
+		ModuleContainer container = adaptor.getContainer();
+
+		// install the system.bundle
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
+		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+		systemBundle.start();
+
+		// install a module
+		Map<String, String> manifest = new HashMap<String, String>();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "lock.test");
+		final Module module = installDummyModule(manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), container);
+
+		final ArrayBlockingQueue<BundleException> startExceptions = new ArrayBlockingQueue<BundleException>(2);
+		Runnable start = new Runnable() {
+			@Override
+			public void run() {
+				try {
+					module.start();
+				} catch (BundleException e) {
+					startExceptions.offer(e);
+				}
+			}
+		};
+		Thread t1 = new Thread(start);
+		Thread t2 = new Thread(start);
+		t1.start();
+		t2.start();
+
+		BundleException startError = startExceptions.poll(10, TimeUnit.SECONDS);
+		startLatch.countDown();
+
+		Assert.assertEquals("Wrong cause.", TimeoutException.class, startError.getCause().getClass());
+		Assert.assertEquals("Wrong cause.", ThreadInfoReport.class, startError.getCause().getCause().getClass());
+		startError.printStackTrace();
+
+		final ArrayBlockingQueue<BundleException> stopExceptions = new ArrayBlockingQueue<BundleException>(2);
+		Runnable stop = new Runnable() {
+			@Override
+			public void run() {
+				try {
+					module.stop();
+				} catch (BundleException e) {
+					stopExceptions.offer(e);
+				}
+			}
+		};
+		Thread tStop1 = new Thread(stop);
+		Thread tStop2 = new Thread(stop);
+		tStop1.start();
+		tStop2.start();
+
+		BundleException stopError = stopExceptions.poll(10, TimeUnit.SECONDS);
+		startLatch.countDown();
+
+		Assert.assertEquals("Wrong cause.", TimeoutException.class, stopError.getCause().getClass());
+		Assert.assertEquals("Wrong cause.", ThreadInfoReport.class, stopError.getCause().getCause().getClass());
+		stopError.printStackTrace();
 	}
 
 	private static void assertWires(List<ModuleWire> required, List<ModuleWire>... provided) {

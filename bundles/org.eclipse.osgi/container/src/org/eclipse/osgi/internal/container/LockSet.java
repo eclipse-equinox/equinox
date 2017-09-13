@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -51,6 +51,10 @@ public class LockSet<T> {
 		void unlock() {
 			lock.unlock();
 		}
+
+		public String toString() {
+			return lock.toString();
+		}
 	}
 
 	private final Map<T, LockHolder> locks = new HashMap<>();
@@ -99,6 +103,12 @@ public class LockSet<T> {
 			if (lock.decremementUseCount() == 0) {
 				locks.remove(t);
 			}
+		}
+	}
+
+	public String getLockInfo(T t) {
+		synchronized (locks) {
+			return String.valueOf(locks.get(t));
 		}
 	}
 }

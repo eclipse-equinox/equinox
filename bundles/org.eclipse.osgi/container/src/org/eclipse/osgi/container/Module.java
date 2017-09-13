@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
+import org.eclipse.osgi.framework.util.ThreadInfoReport;
 import org.eclipse.osgi.internal.container.EquinoxReentrantLock;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.messages.Msg;
@@ -338,7 +339,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			if (invalid) {
 				cause = new IllegalStateException(NLS.bind(Msg.Module_LockStateError, transitionEvent, currentTransition));
 			} else {
-				cause = new TimeoutException(NLS.bind(Msg.Module_LockTimeout, revisions.getContainer().getModuleLockTimeout()));
+				cause = new TimeoutException(NLS.bind(Msg.Module_LockTimeout, revisions.getContainer().getModuleLockTimeout())).initCause(new ThreadInfoReport(stateChangeLock.toString()));
 			}
 			String exceptonInfo = toString() + ' ' + transitionEvent + ' ' + currentTransition;
 			throw new BundleException(Msg.Module_LockError + exceptonInfo, BundleException.STATECHANGE_ERROR, cause);

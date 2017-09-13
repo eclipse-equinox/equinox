@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,9 +15,11 @@ package org.eclipse.osgi.tests.container.dummys;
 
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.container.ModuleCollisionHook;
@@ -31,7 +33,7 @@ import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 
 public class DummyContainerAdaptor extends ModuleContainerAdaptor {
-	private AtomicBoolean slowdownEvents = new AtomicBoolean(false);
+	private final AtomicBoolean slowdownEvents = new AtomicBoolean(false);
 	private Runnable runForEvents = null;
 	private final ModuleCollisionHook collisionHook;
 	private final Map<String, String> configuration;
@@ -39,6 +41,8 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	private final ModuleContainer container;
 	private final ResolverHookFactory resolverHookFactory;
 	private final DebugOptions debugOptions;
+	private final AtomicReference<CountDownLatch> startLatch = new AtomicReference<CountDownLatch>();
+	private final AtomicReference<CountDownLatch> stopLatch = new AtomicReference<CountDownLatch>();
 	private volatile Executor resolverExecutor;
 	private volatile ScheduledExecutorService timeoutExecutor;
 
@@ -57,6 +61,10 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 		this.moduleDatabase = new DummyModuleDatabase(this);
 		this.debugOptions = debugOptions;
 		this.container = new ModuleContainer(this, moduleDatabase);
+	}
+
+	public void setConfiguration(String key, String value) {
+		this.configuration.put(key, value);
 	}
 
 	@Override
@@ -82,7 +90,7 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 
 	@Override
 	public Module createModule(String location, long id, EnumSet<Settings> settings, int startlevel) {
-		return new DummyModule(id, location, container, settings, startlevel);
+		return new DummyModule(id, location, container, settings, startlevel, startLatch.get(), stopLatch.get());
 	}
 
 	@Override
@@ -148,6 +156,14 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	@Override
 	public ScheduledExecutorService getScheduledExecutor() {
 		return this.timeoutExecutor;
+	}
+
+	public void setStartLatch(CountDownLatch startLatch) {
+		this.startLatch.set(startLatch);
+	}
+
+	public void setStopLatch(CountDownLatch stopLatch) {
+		this.stopLatch.set(stopLatch);
 	}
 
 }

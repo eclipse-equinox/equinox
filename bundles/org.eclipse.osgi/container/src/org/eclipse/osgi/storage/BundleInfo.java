@@ -37,6 +37,7 @@ import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.container.ModuleRevisionBuilder;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
+import org.eclipse.osgi.framework.util.ThreadInfoReport;
 import org.eclipse.osgi.internal.container.LockSet;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
@@ -471,7 +472,7 @@ public final class BundleInfo {
 				throw new BundleException("Failed to obtain id locks for generation.", BundleException.STATECHANGE_ERROR, e); //$NON-NLS-1$
 			}
 			if (!lockedID) {
-				throw new BundleException("Failed to obtain id locks for generation.", BundleException.STATECHANGE_ERROR); //$NON-NLS-1$
+				throw new BundleException("Failed to obtain id locks for generation.", BundleException.STATECHANGE_ERROR, new ThreadInfoReport(generationLocks.getLockInfo(nextGenerationId))); //$NON-NLS-1$
 			}
 			Generation newGeneration = new Generation(nextGenerationId++);
 			return newGeneration;

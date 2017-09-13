@@ -46,6 +46,7 @@ import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
 import org.eclipse.osgi.framework.eventmgr.EventManager;
 import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 import org.eclipse.osgi.framework.util.SecureAction;
+import org.eclipse.osgi.framework.util.ThreadInfoReport;
 import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.internal.container.LockSet;
 import org.eclipse.osgi.internal.debug.Debug;
@@ -248,10 +249,10 @@ public final class ModuleContainer implements DebugOptionsListener {
 				locationLocked = locationLocks.tryLock(location, 5, TimeUnit.SECONDS);
 				nameLocked = name != null && nameLocks.tryLock(name, 5, TimeUnit.SECONDS);
 				if (!locationLocked) {
-					throw new BundleException("Failed to obtain location lock for installation: " + location, BundleException.STATECHANGE_ERROR); //$NON-NLS-1$
+					throw new BundleException("Failed to obtain location lock for installation: " + location, BundleException.STATECHANGE_ERROR, new ThreadInfoReport(locationLocks.getLockInfo(location))); //$NON-NLS-1$
 				}
 				if (name != null && !nameLocked) {
-					throw new BundleException("Failed to obtain symbolic name lock for installation: " + name, BundleException.STATECHANGE_ERROR); //$NON-NLS-1$
+					throw new BundleException("Failed to obtain symbolic name lock for installation: " + name, BundleException.STATECHANGE_ERROR, new ThreadInfoReport(nameLocks.getLockInfo(name))); //$NON-NLS-1$
 				}
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
@@ -341,7 +342,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 			// Attempt to lock the name
 			try {
 				if (name != null && !(nameLocked = nameLocks.tryLock(name, 5, TimeUnit.SECONDS))) {
-					throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR); //$NON-NLS-1$
+					throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR, new ThreadInfoReport(nameLocks.getLockInfo(name))); //$NON-NLS-1$
 				}
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
