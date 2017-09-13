@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -200,7 +200,14 @@ public class ModuleDatabase {
 		writeLock();
 		try {
 			int startlevel = Constants.SYSTEM_BUNDLE_LOCATION.equals(location) ? 0 : getInitialModuleStartLevel();
-			long id = Constants.SYSTEM_BUNDLE_LOCATION.equals(location) ? 0 : getNextIdAndIncrement();
+			long id = Constants.SYSTEM_BUNDLE_LOCATION.equals(location) ? 0 : builder.getId();
+			if (id == -1) {
+				// the id is not set by the builder; get and increment the next ID
+				id = getAndIncrementNextId();
+			}
+			if (getModule(id) != null) {
+				throw new IllegalStateException("Duplicate module id: " + id + " used by module: " + getModule(id)); //$NON-NLS-1$//$NON-NLS-2$
+			}
 			EnumSet<Settings> settings = getActivationPolicySettings(builder);
 			Module module = load(location, builder, revisionInfo, id, settings, startlevel);
 			long currentTime = System.currentTimeMillis();
@@ -634,23 +641,13 @@ public class ModuleDatabase {
 		return moduleCycles;
 	}
 
-	/**
-	 * Increments by one the next module ID
-	 */
-	private long getNextIdAndIncrement() {
-		// sanity check
-		checkWrite();
-		return nextId.getAndIncrement();
-
-	}
-
 	private void checkWrite() {
 		if (monitor.getWriteHoldCount() == 0)
 			throw new IllegalMonitorStateException("Must hold the write lock."); //$NON-NLS-1$
 	}
 
 	/**
-	 * returns the next module ID
+	 * returns the next module ID.
 	 * <p>
 	 * A read operation protected by the {@link #readLock() read} lock.
 	 * @return the next module ID
@@ -661,6 +658,22 @@ public class ModuleDatabase {
 			return nextId.get();
 		} finally {
 			readUnlock();
+		}
+	}
+
+	/**
+	 * Atomically increments by one the next module ID.
+	 * <p>
+	 * A write operation protected by the {@link #writeLock()} lock.
+	 * @return the previous module ID
+	 * @since 3.13
+	 */
+	public final long getAndIncrementNextId() {
+		writeLock();
+		try {
+			return nextId.getAndIncrement();
+		} finally {
+			writeUnlock();
 		}
 	}
 

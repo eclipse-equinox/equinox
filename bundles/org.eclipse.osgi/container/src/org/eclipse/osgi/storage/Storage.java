@@ -14,7 +14,6 @@ import java.io.*;
 import java.net.*;
 import java.security.*;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.osgi.container.*;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
@@ -530,20 +529,22 @@ public class Storage {
 		boolean isReference = in instanceof ReferenceInputStream;
 		File staged = stageContent(in, sourceURL);
 		Generation generation = null;
-		Long lockedID = getNextRootID();
 		try {
-			BundleInfo info = new BundleInfo(this, lockedID, bundleLocation, 0);
+			Long nextID = moduleDatabase.getAndIncrementNextId();
+			BundleInfo info = new BundleInfo(this, nextID, bundleLocation, 0);
 			generation = info.createGeneration();
 
-			File contentFile = getContentFile(staged, isReference, lockedID, generation.getGenerationId());
+			File contentFile = getContentFile(staged, isReference, nextID, generation.getGenerationId());
 			generation.setContent(contentFile, isReference);
 			// Check that we can open the bundle file
 			generation.getBundleFile().open();
 			setStorageHooks(generation);
 
 			ModuleRevisionBuilder builder = getBuilder(generation);
+			builder.setId(nextID);
+
 			Module m = moduleContainer.install(origin, bundleLocation, builder, generation);
-			if (!lockedID.equals(m.getId())) {
+			if (!nextID.equals(m.getId())) {
 				// this revision is already installed. delete the generation
 				generation.delete();
 				return (Generation) m.getCurrentRevision().getRevisionInfo();
@@ -577,7 +578,6 @@ public class Storage {
 			if (generation != null) {
 				generation.getBundleInfo().unlockGeneration(generation);
 			}
-			idLocks.unlock(lockedID);
 		}
 	}
 
@@ -873,33 +873,6 @@ public class Storage {
 			}
 			throw new BundleException(Msg.BUNDLE_READ_EXCEPTION, BundleException.READ_ERROR, e);
 		}
-	}
-
-	private Long getNextRootID() throws BundleException {
-		// Try up to 500 times
-		for (int i = 0; i < 500; i++) {
-			moduleDatabase.readLock();
-			try {
-				Long nextID = moduleDatabase.getNextId();
-				try {
-					if (idLocks.tryLock(nextID, 0, TimeUnit.SECONDS)) {
-						return nextID;
-					}
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR, e); //$NON-NLS-1$
-				}
-			} finally {
-				moduleDatabase.readUnlock();
-			}
-			// sleep to allow another thread to get the database lock
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			}
-		}
-		throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR); //$NON-NLS-1$
 	}
 
 	/**

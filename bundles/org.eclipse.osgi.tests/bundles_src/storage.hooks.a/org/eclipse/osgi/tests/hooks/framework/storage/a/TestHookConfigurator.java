@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,6 +63,8 @@ public class TestHookConfigurator implements HookConfigurator {
 			public ModuleRevisionBuilder adaptModuleRevisionBuilder(ModuleEvent operation, Module origin, ModuleRevisionBuilder builder) {
 				if (TestHookConfigurator.replaceModuleBuilder) {
 					ModuleRevisionBuilder replace = new ModuleRevisionBuilder();
+					// try setting the ID to something which is checked during the test
+					replace.setId(5678);
 					replace.setSymbolicName("replace");
 					replace.setVersion(Version.parseVersion("1.1.1"));
 					replace.addCapability("replace", Collections.<String, String> emptyMap(), Collections.<String, Object> emptyMap());
@@ -71,6 +73,8 @@ public class TestHookConfigurator implements HookConfigurator {
 					return replace;
 				}
 				if (TestHookConfigurator.adaptManifest) {
+					// try setting the ID to something which is checked during the test
+					builder.setId(5678);
 					Map<String, String> dirs = Collections.emptyMap();
 					Map<String, Object> attrs = new HashMap<String, Object>();
 					attrs.put("test.file.path", getGeneration().getContent().getPath() + " - " + adaptCount.getAndIncrement());

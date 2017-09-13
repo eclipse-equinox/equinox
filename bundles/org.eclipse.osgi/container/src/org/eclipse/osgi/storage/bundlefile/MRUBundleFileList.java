@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,9 @@
 package org.eclipse.osgi.storage.bundlefile;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.osgi.framework.eventmgr.*;
 
 /**
@@ -40,14 +42,15 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	// used to work around bug 275166
 	private boolean firstDispatch = true;
 
+	private AtomicInteger pending = new AtomicInteger();
+
 	public MRUBundleFileList(int fileLimit) {
 		// only enable the MRU if the initFileLimit is > MIN
 		this.fileLimit = fileLimit;
 		if (fileLimit >= MIN) {
 			this.bundleFileList = new BundleFile[fileLimit];
 			this.useStampList = new long[fileLimit];
-			this.bundleFileCloser = new CopyOnWriteIdentityMap<>();
-			this.bundleFileCloser.put(this, this);
+			this.bundleFileCloser = Collections.<Object, Object> singletonMap(this, this);
 		} else {
 			this.bundleFileList = null;
 			this.useStampList = null;
@@ -173,12 +176,22 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 			// TODO should log ??
 		} finally {
 			closingBundleFile.set(null);
+			pending.decrementAndGet();
 		}
 	}
 
 	private void closeBundleFile(BundleFile toRemove, EventManager manager) {
 		if (toRemove == null)
 			return;
+		int pendingNum = pending.incrementAndGet();
+		if (pendingNum > fileLimit) {
+			// delay to allow the closer to catchup
+			try {
+				Thread.sleep(Math.min(500, pendingNum));
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+		}
 		try {
 			/* queue to hold set of listeners */
 			ListenerQueue<Object, Object, BundleFile> queue = new ListenerQueue<>(manager);

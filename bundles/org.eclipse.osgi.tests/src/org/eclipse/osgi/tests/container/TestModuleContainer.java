@@ -3274,6 +3274,45 @@ public class TestModuleContainer extends AbstractTest {
 		Assert.assertNull("Failed to resolve test.", report.getResolutionException());
 	}
 
+	@Test
+	public void testModuleIDSetting() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install the system.bundle
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
+		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+
+		Map<String, String> manifest = new HashMap<String, String>();
+
+		// test by installing bundles with decreasing IDs
+		List<Module> modules = new ArrayList<Module>();
+		for (int i = 5; i > 0; i--) {
+			manifest.clear();
+			manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+			manifest.put(Constants.BUNDLE_SYMBOLICNAME, String.valueOf(i));
+			modules.add(installDummyModule(manifest, i, manifest.get(Constants.BUNDLE_SYMBOLICNAME), container));
+		}
+
+		// test that the modules have decreasing ID starting at 5
+		long id = 5;
+		for (Module module : modules) {
+			Assert.assertEquals("Wrong ID found.", id--, module.getId().longValue());
+		}
+
+		// test that error occurs when trying to use an existing ID
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, String.valueOf("test.dup.id"));
+		try {
+			installDummyModule(manifest, 5, manifest.get(Constants.BUNDLE_SYMBOLICNAME), container);
+			fail("Expected to fail installation with duplicate ID.");
+		} catch (IllegalStateException e) {
+			// expected
+		}
+	}
+
 	private static void assertWires(List<ModuleWire> required, List<ModuleWire>... provided) {
 		for (ModuleWire requiredWire : required) {
 			for (List<ModuleWire> providedList : provided) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -196,8 +196,11 @@ public final class ModuleContainer implements DebugOptionsListener {
 	 * @throws BundleException if some error occurs installing the module
 	 */
 	public Module install(Module origin, String location, ModuleRevisionBuilder builder, Object revisionInfo) throws BundleException {
+		long id = builder.getId();
 		ModuleRevisionBuilder adaptBuilder = getAdaptor().adaptModuleRevisionBuilder(ModuleEvent.INSTALLED, origin, builder, revisionInfo);
 		if (adaptBuilder != null) {
+			// be sure to restore the id from the original builder
+			adaptBuilder.setInternalId(id);
 			builder = adaptBuilder;
 		}
 		String name = builder.getSymbolicName();
@@ -288,8 +291,11 @@ public final class ModuleContainer implements DebugOptionsListener {
 	 * @throws BundleException if some error occurs updating the module
 	 */
 	public void update(Module module, ModuleRevisionBuilder builder, Object revisionInfo) throws BundleException {
+		long id = builder.getId();
 		ModuleRevisionBuilder adaptBuilder = getAdaptor().adaptModuleRevisionBuilder(ModuleEvent.UPDATED, module, builder, revisionInfo);
 		if (adaptBuilder != null) {
+			// be sure to restore the id from the original builder
+			adaptBuilder.setInternalId(id);
 			builder = adaptBuilder;
 		}
 		checkAdminPermission(module.getBundle(), AdminPermission.LIFECYCLE);

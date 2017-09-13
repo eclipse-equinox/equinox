@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -147,6 +147,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 
 		installBundle();
 		Bundle b = framework.getBundleContext().getBundle(location);
+		assertNotEquals("Wrong ID.", 5678, b.getBundleId());
 		assertNotNull("Missing test bundle.", b);
 		List<Capability> testCaps = b.adapt(BundleRevision.class).getCapabilities("test.file.path");
 		assertEquals("Wrong number of test caps.", 1, testCaps.size());
@@ -158,6 +159,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertEquals("Wrong origin", framework.getBundleContext().getBundle().getLocation(), location1);
 
 		b.update();
+		assertNotEquals("Wrong ID.", 5678, b.getBundleId());
 		testCaps = b.adapt(BundleRevision.class).getCapabilities("test.file.path");
 		assertEquals("Wrong number of test caps.", 1, testCaps.size());
 		String path2 = (String) testCaps.get(0).getAttributes().get("test.file.path");
@@ -176,6 +178,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		framework = createFramework(configuration);
 		framework.start();
 		b = framework.getBundleContext().getBundle(location);
+		assertNotEquals("Wrong ID.", 5678, b.getBundleId());
 		testCaps = b.adapt(BundleRevision.class).getCapabilities("test.file.path");
 		assertEquals("Wrong number of test caps.", 1, testCaps.size());
 		path2 = (String) testCaps.get(0).getAttributes().get("test.file.path");
@@ -190,6 +193,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		b.uninstall();
 		installBundle();
 		b = framework.getBundleContext().getBundle(location);
+		assertNotEquals("Wrong ID.", 5678, b.getBundleId());
 		assertNotNull("Missing test bundle.", b);
 		assertEquals("Wrong BSN.", "replace", b.getSymbolicName());
 		testCaps = b.adapt(BundleRevision.class).getCapabilities("replace");
