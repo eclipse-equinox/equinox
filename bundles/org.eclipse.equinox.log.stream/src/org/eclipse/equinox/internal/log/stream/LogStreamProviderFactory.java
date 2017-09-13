@@ -32,10 +32,12 @@ public class LogStreamProviderFactory implements ServiceFactory<LogStreamProvide
 	ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService;
 
 	private final int cores = Runtime.getRuntime().availableProcessors();
-	private final ExecutorService executor = Executors.newFixedThreadPool(cores - 1, new ThreadFactory() {
+	private final ExecutorService executor = Executors.newFixedThreadPool(cores, new ThreadFactory() {
 		@Override
 		public Thread newThread(Runnable r) {
-			return new Thread(r, "LogStream thread"); //$NON-NLS-1$
+			Thread t = new Thread(r, "LogStream thread"); //$NON-NLS-1$
+			t.setDaemon(true);
+			return t;
 		}
 	});
 
