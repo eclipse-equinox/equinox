@@ -15,7 +15,7 @@ import java.net.*;
 import java.security.Permission;
 import java.security.PrivilegedAction;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.*;
 import javax.net.SocketFactory;
@@ -3187,4 +3187,80 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		Assert.assertEquals("Wrong number of capabilities", capCount1, capCount2);
 	}
+
+	// Disabled because the test is too much for the build machines
+	public void disable_testBundleIDLock() {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+
+		final Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
+		// should be in the STARTING state
+		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
+		final BundleContext systemContext = equinox.getBundleContext();
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+
+		final int numBundles = 40000;
+		final File[] testBundles;
+		try {
+			testBundles = createBundles(new File(config, "bundles"), numBundles); //$NON-NLS-1$
+		} catch (IOException e) {
+			fail("Unexpected error creating budnles", e); //$NON-NLS-1$
+			throw new RuntimeException();
+		}
+
+		ExecutorService executor = Executors.newFixedThreadPool(500);
+		final List<Throwable> errors = new CopyOnWriteArrayList<Throwable>();
+		try {
+			for (int i = 0; i < testBundles.length; i++) {
+				final File testBundleFile = testBundles[i];
+				executor.execute(new Runnable() {
+
+					@Override
+					public void run() {
+						try {
+							systemContext.installBundle("file:///" + testBundleFile.getAbsolutePath());
+						} catch (BundleException e) {
+							e.printStackTrace();
+							errors.add(e);
+						}
+					}
+				});
+
+			}
+		} finally {
+			executor.shutdown();
+			try {
+				executor.awaitTermination(600, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				fail("Interrupted.", e);
+			}
+		}
+
+		Assert.assertEquals("Errors found.", Collections.emptyList(), errors);
+		Assert.assertEquals("Wrong number of bundles.", numBundles + 1, systemContext.getBundles().length);
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+	}
+
 }
