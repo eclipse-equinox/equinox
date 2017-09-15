@@ -252,6 +252,7 @@ home directory.");
 #define PERM_GEN	  _T_ECLIPSE("--launcher.XXMaxPermSize")
 
 #define XXPERMGEN	  _T_ECLIPSE("-XX:MaxPermSize=")
+#define ADDMODULES	  _T_ECLIPSE("--add-modules")
 #define ACTION_OPENFILE _T_ECLIPSE("openFile")
 #define GTK_VERSION   _T_ECLIPSE("--launcher.GTK_version")
 
@@ -1035,28 +1036,37 @@ static _TCHAR** mergeConfigurationFilesVMArgs() {
 }
 
 static void adjustVMArgs(_TCHAR *javaVM, _TCHAR *jniLib, _TCHAR **vmArgv[]) {
-	/* Sun/Oracle VMs below version 8 need some extra perm gen space */
-	/* Detecting Sun VM is expensive - only do so if necessary */
-	if (permGen != NULL) {
-		int specified = 0, i = -1;
+	/* JVMs whose version is >= 9 need an extra VM argument (--add-modules) to start eclipse but earlier versions
+	 * do not recognize this argument, remove it from the list of VM arguments when the JVM version is below 9 */
 
-		/* first check to see if it is already specified */
-		while ((*vmArgv)[++i] != NULL) {
-			/* we are also counting the number of args here */
-			if (!specified && _tcsncmp((*vmArgv)[i], XXPERMGEN, _tcslen(XXPERMGEN)) == 0) {
-				specified = 1;
+	int i = 0;
+
+	if (!isModularVM(javaVM, jniLib)) {
+		while ((*vmArgv)[i] != NULL) {
+			if (_tcsncmp((*vmArgv)[i], ADDMODULES, _tcslen(ADDMODULES)) == 0) {
+				int j = 0, k = 0;
+
+				if ((_tcschr((*vmArgv)[i], '=') != NULL) && ((*vmArgv)[i][13] == '=')) {
+					/* --add-modules=<value> */
+					j = i + 1;
+				} else if (_tcslen(ADDMODULES) == _tcslen((*vmArgv)[i])) {
+					/* --add-modules <value> OR --add-modules <end-of-vmArgv> */
+					((*vmArgv)[i + 1] != NULL) ? (j = i + 2) : (j = i + 1);
+				} else {
+					/* Probable new argument e.g. --add-modules-if-required or misspelled argument e.g. --add-modulesq */
+					i++;
+					continue;
+				}
+
+				/* shift all remaining arguments, but keep i, so that we can find repeated occurrences of --add-modules */
+				k = i;
+				(*vmArgv)[k] = (*vmArgv)[j];
+				while ((*vmArgv)[j] != NULL) {
+					(*vmArgv)[++k] = (*vmArgv)[++j];
+				}
+			} else {
+				i++;
 			}
-		}
-
-		if (!specified && isMaxPermSizeVM(javaVM, jniLib)) {
-			_TCHAR ** oldArgs = *vmArgv;
-			_TCHAR *newArg = malloc((_tcslen(XXPERMGEN) + _tcslen(permGen) + 1) * sizeof(_TCHAR));
-			_stprintf(newArg, _T_ECLIPSE("%s%s"), XXPERMGEN, permGen);
-
-			*vmArgv = malloc((i + 2) * sizeof(_TCHAR *));
-			memcpy(*vmArgv, oldArgs, i * sizeof(_TCHAR *));
-			(*vmArgv)[i] = newArg;
-			(*vmArgv)[i + 1] = 0;
 		}
 	}
 }

@@ -77,10 +77,7 @@ typedef struct {
 	WORD codepage;
 } TRANSLATIONS;
 
-#define COMPANY_NAME_KEY _T_ECLIPSE("\\StringFileInfo\\%04x%04x\\CompanyName")
 #define PRODUCT_VERSION_KEY _T_ECLIPSE("\\StringFileInfo\\%04x%04x\\ProductVersion")
-#define SUN_MICROSYSTEMS _T_ECLIPSE("Sun Microsystems")
-#define ORACLE 			 _T_ECLIPSE("Oracle")
 
 static void sendOpenFileMessage(HWND window) {
 	_TCHAR* id;
@@ -600,16 +597,16 @@ JavaResults* startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[],
 	return startJavaJNI(libPath, vmArgs, progArgs, jarFile);
 }
 
-int isMaxPermSizeVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
+/* returns 1 if the JVM version is >= 9, 0 otherwise */
+int isModularVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
 	_TCHAR *vm = (jniLib != NULL) ? jniLib : javaVM;
 	int result = 0;
 	DWORD infoSize;
 	DWORD handle;
 	void * info;
 	
-	_TCHAR *key, *value, *versionKey, *version, *majorVersion = NULL;
-	size_t i;
-	int valueSize, versionSize;
+	_TCHAR *versionKey, *version, *majorVersion = NULL;
+	int versionSize;
 	
 	if (vm == NULL)
 		return 0;
@@ -623,25 +620,15 @@ int isMaxPermSizeVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
 			VerQueryValue(info,  _T_ECLIPSE("\\VarFileInfo\\Translation"), (void *) &translations, &translationsSize);
 
 			/* this size is only right because %04x is 4 characters */
-			key = malloc((_tcslen(COMPANY_NAME_KEY) + 1) * sizeof(_TCHAR));
 			versionKey = malloc((_tcslen(PRODUCT_VERSION_KEY) + 1) * sizeof(_TCHAR));
-			for (i = 0; i < (translationsSize / sizeof(TRANSLATIONS)); i++) {
-				_stprintf(key, COMPANY_NAME_KEY, translations[i].language, translations[i].codepage);
-				VerQueryValue(info, key, (void *)&value, &valueSize);
-
-				if ((_tcsncmp(value, SUN_MICROSYSTEMS, _tcslen(SUN_MICROSYSTEMS)) == 0) || (_tcsncmp(value, ORACLE, _tcslen(ORACLE)) == 0)) {
-					_stprintf(versionKey, PRODUCT_VERSION_KEY, translations[i].language, translations[i].codepage);
-					VerQueryValue(info, versionKey, (void *)&version, &versionSize);
-					if (versionSize > 1) {
-						majorVersion = _tcstok(version, ".");
-					}
-					if ((majorVersion != NULL) && (_tcstol(majorVersion, NULL, 10) < 8)) {
+				_stprintf(versionKey, PRODUCT_VERSION_KEY, translations[0].language, translations[0].codepage);
+				VerQueryValue(info, versionKey, (void *)&version, &versionSize);
+				if (versionSize >= 1) {
+					majorVersion = _tcstok(version, ".-");
+					if ((majorVersion != NULL) && (_tcstol(majorVersion, NULL, 10) >= 9)) {
 						result = 1;
 					}
-					break;
 				}
-			}
-			free(key);
 			free(versionKey);
 		}
 		free(info);
