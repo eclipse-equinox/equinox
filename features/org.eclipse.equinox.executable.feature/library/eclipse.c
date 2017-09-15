@@ -272,6 +272,7 @@ static int     noSplash      = 0;				/* True: do not show splash win	*/
 static int	   suppressErrors = 0;				/* True: do not display errors dialogs */
        int     secondThread  = 0;				/* True: start the VM on a second thread */
 static int     appendVmargs = 0;                /* True: append cmdline vmargs to launcher.ini vmargs */
+static int     skipJava9ParamRemoval		 = 0;		/* Set to true only on macOS, if -vm was present on commandline or in eclipse.ini and points to a shared lib */
 
 static _TCHAR*  showSplashArg = NULL;			/* showsplash data (main launcher window) */
 static _TCHAR*  splashBitmap  = NULL;			/* the actual splash bitmap */
@@ -1041,7 +1042,7 @@ static void adjustVMArgs(_TCHAR *javaVM, _TCHAR *jniLib, _TCHAR **vmArgv[]) {
 
 	int i = 0;
 
-	if (!isModularVM(javaVM, jniLib)) {
+	if (!skipJava9ParamRemoval && !isModularVM(javaVM, jniLib)) {
 		while ((*vmArgv)[i] != NULL) {
 			if (_tcsncmp((*vmArgv)[i], ADDMODULES, _tcslen(ADDMODULES)) == 0) {
 				int j = 0, k = 0;
@@ -1692,6 +1693,9 @@ static int determineVM(_TCHAR** msg) {
     		return vmEEProps(vmName, msg);
 
     	case VM_LIBRARY:
+#ifdef MACOSX
+    		skipJava9ParamRemoval = 1;
+#endif
     		ch = findCommand(vmName);
     		if(ch != NULL) {
     			jniLib = findVMLibrary(ch);
