@@ -30,12 +30,8 @@ int initialized = 0;
 
 static void init() {
 	if (!initialized) {
-		ProcessSerialNumber psn;
-		if (GetCurrentProcess(&psn) == noErr) {
-			TransformProcessType(&psn, kProcessTransformToForegroundApplication);
-			SetFrontProcess(&psn);
-		}
-		[NSApplication sharedApplication];
+		[[NSApplication sharedApplication] setActivationPolicy: NSApplicationActivationPolicyRegular];
+		[[NSRunningApplication currentApplication] activateWithOptions: NSApplicationActivateIgnoringOtherApps];
 		initialized= true;
 	}
 }

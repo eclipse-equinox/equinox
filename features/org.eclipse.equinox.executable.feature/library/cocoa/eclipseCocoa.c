@@ -97,11 +97,8 @@ static NSWindow* window = nil;
 }
 
 + (int)show: (NSString *) featureImage {
-	ProcessSerialNumber psn;
-	if (GetCurrentProcess(&psn) == noErr) {
-		TransformProcessType(&psn, kProcessTransformToForegroundApplication);
-		SetFrontProcess(&psn);
-	}
+	[[NSApplication sharedApplication] setActivationPolicy: NSApplicationActivationPolicyRegular];
+	[[NSRunningApplication currentApplication] activateWithOptions: NSApplicationActivateIgnoringOtherApps];
 	if (window != NULL)
 		return 0; /*already showing */
 	if (featureImage == NULL)
