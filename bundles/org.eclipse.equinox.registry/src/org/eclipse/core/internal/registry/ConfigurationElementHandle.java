@@ -165,4 +165,33 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 	public int getHandleId() {
 		return getId();
 	}
+
+	/**
+	 * <b>WARNING</b>: this method <b>must</b> return string containing {@link #getHandleId()} identifier, because some clients might have
+	 * misused previously returned {@link Object#toString()} value which was in fact just {@link #hashCode()} value which
+	 * in turn was alwas the value of {@link #getHandleId()}.
+	 * <p>
+	 * Please read <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=515587#c0">bug 515587</a> for details.
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("ConfigurationElementHandle ["); //$NON-NLS-1$
+		sb.append("name: "); //$NON-NLS-1$
+		sb.append(getName());
+		String id = getAttribute("id"); //$NON-NLS-1$
+		if (id != null && id.length() > 0) {
+			sb.append(", id: ").append(id); //$NON-NLS-1$
+		}
+		String value = getValue();
+		if (value != null) {
+			sb.append(", value: ").append(value); //$NON-NLS-1$
+		}
+		sb.append(", handle id: ").append(getHandleId()); //$NON-NLS-1$
+		sb.append(", namespace: "); //$NON-NLS-1$
+		sb.append(getNamespaceIdentifier());
+		sb.append("]"); //$NON-NLS-1$
+		return sb.toString();
+	}
+
 }
