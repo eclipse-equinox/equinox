@@ -21,7 +21,6 @@ import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.*;
-import org.eclipse.osgi.internal.container.LockSet;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.*;
 import org.eclipse.osgi.internal.hookregistry.BundleFileWrapperFactoryHook;
@@ -77,7 +76,6 @@ public class Storage {
 	private final ModuleContainer moduleContainer;
 	private final Object saveMonitor = new Object();
 	private long lastSavedTimestamp = -1;
-	private final LockSet<Long> idLocks = new LockSet<>();
 	private final MRUBundleFileList mruList;
 	private final FrameworkExtensionInstaller extensionInstaller;
 	private final List<String> cachedHeaderKeys = Arrays.asList(Constants.BUNDLE_SYMBOLICNAME, Constants.BUNDLE_ACTIVATIONPOLICY, "Service-Component"); //$NON-NLS-1$
