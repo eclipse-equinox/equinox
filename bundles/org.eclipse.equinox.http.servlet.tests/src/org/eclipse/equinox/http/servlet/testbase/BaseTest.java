@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 Raymond Augé.
+ * Copyright (c) 2014, 2016 Raymond AugÃ©.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Raymond Augé <raymond.auge@liferay.com> - initial implementation
+ *     Raymond AugÃ© <raymond.auge@liferay.com> - initial implementation
  ******************************************************************************/
 
 package org.eclipse.equinox.http.servlet.testbase;
