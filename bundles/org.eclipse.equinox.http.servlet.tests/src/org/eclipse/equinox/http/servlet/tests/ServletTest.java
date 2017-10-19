@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 IBM Corporation and others.
+ * Copyright (c) 2011, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -2196,6 +2196,31 @@ public class ServletTest extends BaseTest {
 //		Assert.assertEquals("200", result.get("responseCode").get(0));
 //		Assert.assertEquals("blue.png|image/png|292", result.get("responseBody").get(0));
 //	}
+
+	@Test
+	public void test_Servlet18() throws Exception {
+		Servlet sA = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+				// get a resource that is imported
+				URL url = request.getServletContext().getResource("org/osgi/service/http/HttpService.class");
+				response.getWriter().write(url == null ? "null" : url.getProtocol());
+			}
+
+		};
+
+		HttpService httpService = getHttpService();
+
+		HttpContext httpContext = httpService.createDefaultHttpContext();
+
+		httpService.registerServlet("/testDefaultHttpContextResource", sA, null, httpContext);
+
+		// just making sure bundleresource protocol is used as proof that Bundle.getResource was called
+		Assert.assertEquals("bundleresource", requestAdvisor.request("testDefaultHttpContextResource"));
+	}
 
 	@Test
 	public void test_commonsFileUpload() throws Exception {
