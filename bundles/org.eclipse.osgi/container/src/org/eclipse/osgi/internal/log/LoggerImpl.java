@@ -12,8 +12,7 @@ import java.util.regex.Pattern;
 import org.eclipse.equinox.log.Logger;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.log.LogLevel;
-import org.osgi.service.log.LogService;
+import org.osgi.service.log.*;
 import org.osgi.service.log.admin.LoggerContext;
 
 public class LoggerImpl implements Logger {
@@ -236,6 +235,41 @@ public class LoggerImpl implements Logger {
 	@Override
 	public void audit(String format, Object... arguments) {
 		log(LogLevel.AUDIT, format, arguments);
+	}
+
+	@Override
+	public <E extends Exception> void trace(LoggerConsumer<E> consumer) throws E {
+		if (isTraceEnabled()) {
+			consumer.accept(this);
+		}
+	}
+
+	@Override
+	public <E extends Exception> void debug(LoggerConsumer<E> consumer) throws E {
+		if (isDebugEnabled()) {
+			consumer.accept(this);
+		}
+	}
+
+	@Override
+	public <E extends Exception> void info(LoggerConsumer<E> consumer) throws E {
+		if (isInfoEnabled()) {
+			consumer.accept(this);
+		}
+	}
+
+	@Override
+	public <E extends Exception> void warn(LoggerConsumer<E> consumer) throws E {
+		if (isWarnEnabled()) {
+			consumer.accept(this);
+		}
+	}
+
+	@Override
+	public <E extends Exception> void error(LoggerConsumer<E> consumer) throws E {
+		if (isErrorEnabled()) {
+			consumer.accept(this);
+		}
 	}
 
 	private static final Pattern pattern = Pattern.compile("(\\\\?)(\\\\?)(\\{\\})"); //$NON-NLS-1$

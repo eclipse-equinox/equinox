@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2016). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2017). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -507,7 +507,7 @@ public final class CapabilityPermission extends BasicPermission {
 		AccessController.doPrivileged(new PrivilegedAction<Void>() {
 			@Override
 			public Void run() {
-				props.put("id", new Long(bundle.getBundleId()));
+				props.put("id", Long.valueOf(bundle.getBundleId()));
 				props.put("location", bundle.getLocation());
 				String name = bundle.getSymbolicName();
 				if (name != null) {

@@ -15,6 +15,7 @@ import org.eclipse.osgi.internal.log.ExtendedLogServiceFactory.EquinoxLoggerCont
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.FormatterLogger;
+import org.osgi.service.log.LoggerConsumer;
 import org.osgi.service.log.admin.LoggerContext;
 
 public class ExtendedLogServiceImpl implements ExtendedLogService {
@@ -306,6 +307,31 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 	@Override
 	public void audit(String format, Object... arguments) {
 		getLogger((String) null).audit(format, arguments);
+	}
+
+	@Override
+	public <E extends Exception> void trace(LoggerConsumer<E> consumer) throws E {
+		getLogger((String) null).trace(consumer);
+	}
+
+	@Override
+	public <E extends Exception> void debug(LoggerConsumer<E> consumer) throws E {
+		getLogger((String) null).debug(consumer);
+	}
+
+	@Override
+	public <E extends Exception> void info(LoggerConsumer<E> consumer) throws E {
+		getLogger((String) null).info(consumer);
+	}
+
+	@Override
+	public <E extends Exception> void warn(LoggerConsumer<E> consumer) throws E {
+		getLogger((String) null).warn(consumer);
+	}
+
+	@Override
+	public <E extends Exception> void error(LoggerConsumer<E> consumer) throws E {
+		getLogger((String) null).error(consumer);
 	}
 
 	void applyLogLevels(EquinoxLoggerContext effectiveLoggerContext) {

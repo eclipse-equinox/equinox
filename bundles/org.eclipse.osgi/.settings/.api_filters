@@ -16,6 +16,30 @@
         <filter id="403767336">
             <message_arguments>
                 <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="INTENT_ASYNC"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="INTENT_BASIC"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="INTENT_CONFIDENTIAL"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="INTENT_PRIVATE"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
                 <message_argument value="SERVICE_CHANGECOUNT"/>
             </message_arguments>
         </filter>
@@ -31,6 +55,34 @@
                 <message_argument value="1.9"/>
                 <message_argument value="3.13"/>
                 <message_argument value="BUNDLE_SCM"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.9"/>
+                <message_argument value="3.13"/>
+                <message_argument value="INTENT_ASYNC"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.9"/>
+                <message_argument value="3.13"/>
+                <message_argument value="INTENT_BASIC"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.9"/>
+                <message_argument value="3.13"/>
+                <message_argument value="INTENT_CONFIDENTIAL"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.9"/>
+                <message_argument value="3.13"/>
+                <message_argument value="INTENT_PRIVATE"/>
             </message_arguments>
         </filter>
         <filter id="1209008130">
@@ -141,6 +193,15 @@
                 <message_argument value="1.4"/>
                 <message_argument value="3.13"/>
                 <message_argument value="org.osgi.service.log.Logger"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/log/LoggerConsumer.java" type="org.osgi.service.log.LoggerConsumer">
+        <filter id="1108344834">
+            <message_arguments>
+                <message_argument value="1.4"/>
+                <message_argument value="3.13"/>
+                <message_argument value="org.osgi.service.log.LoggerConsumer"/>
             </message_arguments>
         </filter>
     </resource>

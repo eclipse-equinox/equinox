@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2010, 2016). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2010, 2017). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -443,7 +443,7 @@ public final class AdaptPermission extends BasicPermission {
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
 				@Override
 				public Void run() {
-					map.put("id", new Long(bundle.getBundleId()));
+					map.put("id", Long.valueOf(bundle.getBundleId()));
 					map.put("location", bundle.getLocation());
 					String name = bundle.getSymbolicName();
 					if (name != null) {
