@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2013 SAP AG and others.
+ * Copyright (c) 2010, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,7 +33,7 @@ public class TelnetCommand {
 	
 	private String defaultHost = null;
     private int defaultPort;
-    private List<CommandProcessor> processors = new ArrayList<CommandProcessor>();
+    private List<CommandProcessor> processors = new ArrayList<>();
     private final BundleContext context;
     private String host = null;
     private int port;
@@ -54,7 +54,7 @@ public class TelnetCommand {
         processors.add(processor);
         this.context = context;
         if ("true".equals(context.getProperty(USE_CONFIG_ADMIN_PROP))) {
-        	Dictionary<String, String> telnetProperties = new Hashtable<String, String>();
+        	Dictionary<String, String> telnetProperties = new Hashtable<>();
         	telnetProperties.put(Constants.SERVICE_PID, TELNET_PID);
         	try {
         		synchronized (lock) {
@@ -90,7 +90,7 @@ public class TelnetCommand {
     }
     
     public synchronized void startService() {
-    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
+    	Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put("osgi.command.scope", "equinox");
 		properties.put("osgi.command.function", new String[] {"telnet"});
 		if ((port > 0 || defaultPort > 0) && isEnabled == true) {
@@ -215,6 +215,7 @@ public class TelnetCommand {
     
     class TelnetConfigurator implements ManagedService {
 		private Dictionary<String, Object> properties;
+		@Override
 		public synchronized void updated(Dictionary<String, ?> props) throws ConfigurationException {
 			if (props != null) {
 				@SuppressWarnings("unchecked")

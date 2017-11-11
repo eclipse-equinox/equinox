@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 SAP AG
+ * Copyright (c) 2011, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,15 +11,15 @@
 
 package org.eclipse.equinox.console.telnet;
 
+import static org.easymock.EasyMock.createMock;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
 import org.eclipse.equinox.console.common.ConsoleInputStream;
 import org.eclipse.equinox.console.common.ConsoleOutputStream;
 import org.junit.Assert;
 import org.junit.Test;
-
-import static org.easymock.EasyMock.*;
-
-import java.io.ByteArrayOutputStream;
-import java.io.StringBufferInputStream;
 
 public class TelnetInputHandlerTests {
 
@@ -27,7 +27,7 @@ public class TelnetInputHandlerTests {
 
     @Test
     public void testHandler() throws Exception {
-        StringBufferInputStream input = new StringBufferInputStream("abcde");
+        ByteArrayInputStream input = new ByteArrayInputStream("abcde".getBytes());
         ConsoleInputStream in = new ConsoleInputStream();
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         ConsoleOutputStream out = new ConsoleOutputStream(byteOut);

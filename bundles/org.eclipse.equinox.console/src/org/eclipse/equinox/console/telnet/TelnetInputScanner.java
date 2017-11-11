@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 SAP AG and others
+ * Copyright (c) 2010, 2017 SAP AG and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,9 +39,9 @@ public class TelnetInputScanner extends Scanner {
     private boolean shouldFinish = false;
     private boolean tTypeNegotiationStarted = false;
     private int lastRead = -1;
-    private ArrayList<Integer> currentTerminalType = new ArrayList<Integer>();
+    private ArrayList<Integer> currentTerminalType = new ArrayList<>();
     private ArrayList<Integer> lastTerminalType = null;
-    private Set<String> supportedTerminalTypes = new HashSet<String>();
+    private Set<String> supportedTerminalTypes = new HashSet<>();
     private Callback callback;
 
     public TelnetInputScanner(ConsoleInputStream toShell, ConsoleOutputStream toTelnet, Callback callback) {
@@ -64,7 +64,8 @@ public class TelnetInputScanner extends Scanner {
         supportedTerminalTypes.add("SCO");     
     }
 
-    public void scan(int b) throws IOException {
+    @Override
+	public void scan(int b) throws IOException {
         b &= 0xFF;
 
         if (isEsc) {
@@ -174,7 +175,7 @@ public class TelnetInputScanner extends Scanner {
 					return;
 				}
 				lastTerminalType = currentTerminalType;
-				currentTerminalType = new ArrayList<Integer>();
+				currentTerminalType = new ArrayList<>();
 				if (isLast == true && isMatch == false) {
 					shouldFinish = true;
 					sendRequest();
@@ -263,7 +264,8 @@ public class TelnetInputScanner extends Scanner {
         toShell.add(new byte[]{BS});
     }
 
-    protected void scanEsc(int b) throws IOException {
+    @Override
+	protected void scanEsc(int b) throws IOException {
         esc += (char) b;
         toShell.add(new byte[]{(byte) b});
         KEYS key = checkEscape(esc);

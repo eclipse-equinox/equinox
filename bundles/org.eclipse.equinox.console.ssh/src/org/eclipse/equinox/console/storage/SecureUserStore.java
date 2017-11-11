@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 SAP AG
+ * Copyright (c) 2011, 2017 SAP AG
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,11 +45,10 @@ public class SecureUserStore {
 	 * @return String array containing the usernames
 	 */
 	public static String[] getUserNames() {
-		String userFileLoc = null;
+		String userFileLoc = getFileLocation();
 		InputStream in = null;
 		
 		try {
-			userFileLoc = getFileLocation();
 			in = new FileInputStream(userFileLoc);
 			Properties users = null;
 			try {
@@ -57,7 +56,7 @@ public class SecureUserStore {
 			} catch (IOException e) {
 				throw new IllegalArgumentException("Cannot load properties from file " + userFileLoc);
 			}
-			Set<String> userNames = new HashSet<String>();
+			Set<String> userNames = new HashSet<>();
 			for (Object key : users.keySet()) {
 				if (!(key instanceof String)) {
 					continue;
@@ -102,12 +101,11 @@ public class SecureUserStore {
 	 * @param roles comma-separated list of the roles of the user
 	 */
 	public static void putUser(String username, String password, String roles) {
-		String userFileLoc = null;
+		String userFileLoc = getFileLocation();
 		InputStream in = null;
 		OutputStream out = null;
 		
 		try {
-			userFileLoc = getFileLocation();
 			in = new FileInputStream(userFileLoc);
 			Properties users = null; 
 			
@@ -164,16 +162,15 @@ public class SecureUserStore {
 	 * @param roles comma-separated list of new roles for the user 
 	 */
 	public static void addRoles(String username, String roles) {
-		String userFileLoc = null;
+		if (roles == null || roles.length() == 0) {
+			return;
+		}
+		
+		String userFileLoc = getFileLocation();
 		InputStream in = null;
 		OutputStream out = null;
 		
 		try {
-			if (roles == null || roles.length() == 0) {
-				return;
-			}
-			
-			userFileLoc = getFileLocation();
 			in = new FileInputStream(userFileLoc);
 			Properties users = null; 
 			
@@ -185,7 +182,7 @@ public class SecureUserStore {
 			
 			String userRolesKey = constructPropertyName(username, ROLES_KEY);
 			String currentRoles = (String)users.remove(userRolesKey);
-			Set<String> rolesSet = new HashSet<String>();
+			Set<String> rolesSet = new HashSet<>();
 			
 			if (currentRoles.length() > 0) {
 				for (String role : currentRoles.split(",")) {
@@ -240,16 +237,14 @@ public class SecureUserStore {
 	 * @param rolesToRemove comma-separated list of roles to be removed
 	 */
 	public static void removeRoles(String username, String rolesToRemove) {
-		String userFileLoc = null;
+		if(rolesToRemove == null || rolesToRemove.length() == 0) {
+			return;
+		}
+		String userFileLoc = getFileLocation();
 		InputStream in = null;
 		OutputStream out = null;
 		
 		try {
-			if(rolesToRemove == null || rolesToRemove.length() == 0) {
-				return;
-			}
-			
-			userFileLoc = getFileLocation();
 			in = new FileInputStream(userFileLoc);
 			Properties users = null; 
 			
@@ -261,7 +256,7 @@ public class SecureUserStore {
 			
 			String userRolesKey = constructPropertyName(username, ROLES_KEY);
 			String currentRoles = (String)users.remove(userRolesKey);
-			Set<String> rolesSet = new HashSet<String>();
+			Set<String> rolesSet = new HashSet<>();
 			
 			for (String role : currentRoles.split(",")) {
 				rolesSet.add(role);
@@ -313,12 +308,11 @@ public class SecureUserStore {
 	 * @param username user to be removed
 	 */
 	public static void deleteUser(String username) {
-		String userFileLoc = null;
+		String userFileLoc = getFileLocation();
 		InputStream in = null;
 		OutputStream out = null;
 		
 		try {
-			userFileLoc = getFileLocation();
 			in = new FileInputStream(userFileLoc);
 			Properties users = null; 
 			
@@ -377,12 +371,11 @@ public class SecureUserStore {
 	 * @param username user to reset the password
 	 */
 	public static void resetPassword(String username) {
-		String userFileLoc = null;
+		String userFileLoc = getFileLocation();
 		InputStream in = null;
 		OutputStream out = null;
 		
 		try {
-			userFileLoc = getFileLocation();
 			in = new FileInputStream(userFileLoc);
 			Properties users = null; 
 			
@@ -437,12 +430,11 @@ public class SecureUserStore {
 	 * @param password the new password
 	 */
 	public static void setPassword(String username, String password) {
-		String userFileLoc = null;
+		String userFileLoc = getFileLocation();
 		InputStream in = null;
 		OutputStream out = null;
 		
 		try {
-			userFileLoc = getFileLocation();
 			in = new FileInputStream(userFileLoc);
 			Properties users = null; 
 			
@@ -500,10 +492,9 @@ public class SecureUserStore {
 	 * @return true if there is an entry for this user in the store, false otherwise
 	 */
 	public static boolean existsUser(String username) {
-		String userFileLoc = null;
+		String userFileLoc = getFileLocation();
 		InputStream in = null;
 		try {
-			userFileLoc = getFileLocation();
 			in = new FileInputStream(userFileLoc);
 			Properties users = null; 
 			
@@ -536,24 +527,17 @@ public class SecureUserStore {
 		String userFileLoc = getFileLocation();
 		File file = new File(userFileLoc);
 		if (!file.exists()) {
-			OutputStream out = null;
-			try {
-				Properties props = new Properties();
-				out = new FileOutputStream(file);
+			Properties props = new Properties();
+			try (OutputStream out = new FileOutputStream(file);) {
 				props.store(out, null);
-			} finally {
-				if (out != null) {
-					out.close();
-				}
 			}
 		}
 	}
 	
 	private static String getProperty(String username, String propertyName) {
-		String userFileLoc = null;
+		String userFileLoc = getFileLocation();
 		InputStream in = null;
 		try {
-			userFileLoc = getFileLocation();
 			in = new FileInputStream(userFileLoc);
 			Properties users = null; 
 			

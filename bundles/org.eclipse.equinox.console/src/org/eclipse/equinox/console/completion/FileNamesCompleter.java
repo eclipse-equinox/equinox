@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 SAP AG
+ * Copyright (c) 2011, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,11 +27,12 @@ import org.eclipse.equinox.console.completion.common.Completer;
 public class FileNamesCompleter implements Completer {
 	private static final String FILE = "file:";
 	
+	@Override
 	public Map<String, Integer> getCandidates(String buffer, int cursor) {
-		Map<String, Integer> result = new HashMap<String, Integer>();
+		Map<String, Integer> result = new HashMap<>();
 		String currentToken = CommandLineParser.getCurrentToken(buffer, cursor);
 		if(currentToken == null || currentToken.equals("")) {
-			return new HashMap<String, Integer>();
+			return new HashMap<>();
 		}
 		
 		// if current token contains file:, then use URL class to parse the filename
@@ -90,7 +91,7 @@ public class FileNamesCompleter implements Completer {
 	}
 
 	private Map<String, Integer> checkChildren(File parent, String nameToComplete, int cursor, boolean absolute) {
-		Map<String, Integer> result = new HashMap<String, Integer>();
+		Map<String, Integer> result = new HashMap<>();
 		if(parent.exists()) {
 			File[] children = parent.listFiles();
 			for(File child : children) {

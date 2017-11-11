@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 SAP AG
+ * Copyright (c) 2011, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -89,9 +89,9 @@ public class FileNamesCompleterTests {
 	
 	private void createFile(File parentDir, String filename) throws IOException {
 		File file = new File(parentDir.getAbsolutePath() + File.separator + filename);
-		PrintWriter out = new PrintWriter(new FileOutputStream(file));
-		out.write(filename);
-		out.flush();
-		out.close();
+		try (PrintWriter out = new PrintWriter(new FileOutputStream(file))) {
+			out.write(filename);
+			out.flush();
+		}
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 SAP AG
+ * Copyright (c) 2010, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,7 +51,7 @@ public abstract class Scanner {
     public Scanner(ConsoleInputStream toShell, OutputStream toTelnet) {
         this.toShell = toShell;
         this.toTelnet = toTelnet;
-        supportedEscapeSequences = new HashMap<String, TerminalTypeMappings> ();
+        supportedEscapeSequences = new HashMap<> ();
         supportedEscapeSequences.put("ANSI", new ANSITerminalTypeMappings());
         supportedEscapeSequences.put("VT100", new VT100TerminalTypeMappings());
         VT220TerminalTypeMappings vtMappings = new VT220TerminalTypeMappings();

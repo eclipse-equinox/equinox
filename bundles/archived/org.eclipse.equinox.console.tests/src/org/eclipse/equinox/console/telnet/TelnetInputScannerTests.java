@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 SAP AG
+ * Copyright (c) 2011, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -96,7 +96,7 @@ public class TelnetInputScannerTests {
 
         try {
             scanner.scan((byte) 'a');
-            scanner.scan((byte) ESC);
+            scanner.scan(ESC);
             scanner.scan((byte) 'b');
         } catch (IOException e) {
             System.out.println("Error while scanning: " + e.getMessage());
@@ -110,7 +110,7 @@ public class TelnetInputScannerTests {
 
     @Test
     public void testTTNegotiations() throws Exception {
-        Map<byte[], TerminalTypeMappings> ttMappings = new HashMap<byte[], TerminalTypeMappings>();
+        Map<byte[], TerminalTypeMappings> ttMappings = new HashMap<>();
         ttMappings.put(new byte[] { 'A', 'N', 'S', 'I' }, new ANSITerminalTypeMappings());
         ttMappings.put(new byte[] { 'V', 'T', '1', '0', '0' }, new VT100TerminalTypeMappings());
         ttMappings.put(new byte[] { 'V', 'T', '2', '2', '0' }, new VT220TerminalTypeMappings());
@@ -211,7 +211,8 @@ public class TelnetInputScannerTests {
 
         private boolean isCalled = false;
 
-        public void finished() {
+        @Override
+		public void finished() {
             isCalled = true;
         }
 

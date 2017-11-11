@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 SAP AG
+ * Copyright (c) 2011, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,7 @@ public class ActivatorTests {
 
 	@Test
 	public void testGetCommandMethods() {
-		Set<String> commandNames = new HashSet<String>();
+		Set<String> commandNames = new HashSet<>();
 		commandNames.add("_testMethod1");
 		commandNames.add("_testMethod2");
 		commandNames.add("_testMethod3");
@@ -67,10 +67,7 @@ public class ActivatorTests {
 			
 		}
 		
-		private void _method(CommandInterpreter i) {
-			
-		}
-		
+		@Override
 		public String getHelp() {
 			// TODO Auto-generated method stub
 			return null;

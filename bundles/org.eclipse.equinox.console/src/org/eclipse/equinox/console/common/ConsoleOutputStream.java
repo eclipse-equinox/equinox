@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 SAP AG
+ * Copyright (c) 2010, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,7 +51,8 @@ public class ConsoleOutputStream extends OutputStream {
     /**
      * An implementation of the corresponding abstract method in OutputStream.
      */
-    public synchronized void write(int i) throws IOException {
+    @Override
+	public synchronized void write(int i) throws IOException {
 
         if (!queueing) {
             if (isEcho) {
@@ -90,7 +91,8 @@ public class ConsoleOutputStream extends OutputStream {
      *
      * @throws IOException
      */
-    public synchronized void flush() throws IOException {
+    @Override
+	public synchronized void flush() throws IOException {
         if (pos > 0) {
             try {
 				out.write(buffer, 0, pos);
@@ -122,7 +124,8 @@ public class ConsoleOutputStream extends OutputStream {
      *
      * @throws IOException
      */
-    public void close() throws IOException {
+    @Override
+	public void close() throws IOException {
         out.close();
     }
 

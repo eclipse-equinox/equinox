@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011 Gunnar Wagenknecht and others.
+ * Copyright (c) 2011, 2017 Gunnar Wagenknecht and others.
  * All rights reserved.
  *
  * This program and the accompanying materials are made available under the terms of the
@@ -98,12 +98,11 @@ public class AuthorizedKeys {
 	public AuthorizedKeys(final String authorizedKeysFile) throws FileNotFoundException, IOException {
 		// read file line-by-line
 		final File file = new File(authorizedKeysFile);
-		final Scanner scanner = new Scanner(file);
-		scanner.useDelimiter(NEWLINE);
-		int lineNumber = 0;
-		final List<PublicKey> keys = new ArrayList<PublicKey>();
+		try (Scanner scanner = new Scanner(file)) {
+			scanner.useDelimiter(NEWLINE);
+			int lineNumber = 0;
+			final List<PublicKey> keys = new ArrayList<>();
 
-		try {
 			while (scanner.hasNext()) {
 				lineNumber++;
 
@@ -122,11 +121,9 @@ public class AuthorizedKeys {
 					throw new ParseKeyException("Line " + lineNumber + ": " + e.getMessage(), e);
 				}
 			}
-		} finally {
-			scanner.close();
+			this.keys = Collections.unmodifiableList(keys);
 		}
 
-		this.keys = Collections.unmodifiableList(keys);
 	}
 
 	/**

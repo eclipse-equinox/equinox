@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2012 SAP AG
+ * Copyright (c) 2011, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ public class Activator implements BundleActivator {
 			this.context = context;
 		}
 
+		@Override
 		public SshCommand addingService(ServiceReference<CommandProcessor> reference) {
 			CommandProcessor processor = context.getService(reference);
 			if (processor == null)
@@ -49,12 +50,14 @@ public class Activator implements BundleActivator {
 			return sshConnection;
 		}
 
+		@Override
 		public void modifiedService(
 				ServiceReference<CommandProcessor> reference,
 				SshCommand service) {
 			// nothing
 		}
 
+		@Override
 		public void removedService(ServiceReference<CommandProcessor> reference, SshCommand service) {
 			CommandProcessor processor = context.getService(reference);
 			service.removeCommandProcessor(processor);
@@ -65,20 +68,14 @@ public class Activator implements BundleActivator {
 		return context;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
+	@Override
 	public void start(BundleContext bundleContext) throws Exception {
 		context = bundleContext;
-		commandProcessorTracker = new ServiceTracker<CommandProcessor, SshCommand>(context, CommandProcessor.class, new ProcessorCustomizer(context));
+		commandProcessorTracker = new ServiceTracker<>(context, CommandProcessor.class, new ProcessorCustomizer(context));
 		commandProcessorTracker.open();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
+	@Override
 	public void stop(BundleContext bundleContext) throws Exception {
 		Activator.context = null;
 		commandProcessorTracker.close();

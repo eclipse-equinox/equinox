@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 SAP AG
+ * Copyright (c) 2010, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,7 @@ public abstract class TerminalTypeMappings {
 	protected byte DEL;
 	
 	public TerminalTypeMappings() {
-		escapesToKey = new HashMap<String, KEYS>();
+		escapesToKey = new HashMap<>();
         escapesToKey.put("[A", KEYS.UP); //$NON-NLS-1$
         escapesToKey.put("[B", KEYS.DOWN); //$NON-NLS-1$
         escapesToKey.put("[C", KEYS.RIGHT); //$NON-NLS-1$

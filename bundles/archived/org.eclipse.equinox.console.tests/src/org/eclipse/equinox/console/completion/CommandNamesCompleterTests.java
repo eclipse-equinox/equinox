@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 SAP AG
+ * Copyright (c) 2011, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ public class CommandNamesCompleterTests {
 
 	@Test
 	public void testGetCandidates() throws Exception {
-		Set<String> commands = new HashSet<String>();
+		Set<String> commands = new HashSet<>();
 		commands.add("equinox:bundles");
 		commands.add("equinox:diag");
 		commands.add("equinox:setprop");

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2012 SAP AG
+ * Copyright (c) 2011, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,7 @@ public class HelpCommand {
     		this.context = context;
     	}
     	
+		@Override
 		public Set<CommandProvider> addingService(
 				ServiceReference<CommandProvider> reference) {
 			if (reference.getProperty("osgi.command.function") != null) {
@@ -58,12 +59,14 @@ public class HelpCommand {
 			return legacyCommandProviders;
 		}
 
+		@Override
 		public void modifiedService(
 				ServiceReference<CommandProvider> reference,
 				Set<CommandProvider> service) {
 			// nothing to do
 		}
 
+		@Override
 		public void removedService(ServiceReference<CommandProvider> reference,
 				Set<CommandProvider> providers) {
 			CommandProvider provider = context.getService(reference);
@@ -74,15 +77,15 @@ public class HelpCommand {
 	
 	public HelpCommand(BundleContext context) {
 		this.context = context;
-		legacyCommandProviders = new HashSet<CommandProvider>();
-		commandProvidersTracker = new ServiceTracker<CommandProvider, Set<CommandProvider>>(context, CommandProvider.class.getName(), new CommandProviderCustomizer(context));
+		legacyCommandProviders = new HashSet<>();
+		commandProvidersTracker = new ServiceTracker<>(context, CommandProvider.class, new CommandProviderCustomizer(context));
 		commandProvidersTracker.open();
-		commandsTrackerTracker = new ServiceTracker<CommandsTracker, CommandsTracker>(context, CommandsTracker.class.getName(), null);
+		commandsTrackerTracker = new ServiceTracker<>(context, CommandsTracker.class, null);
 		commandsTrackerTracker.open();
 	}
 	
 	public void startService() {
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 		props.put(CommandProcessor.COMMAND_SCOPE, "equinox");
 		props.put(CommandProcessor.COMMAND_FUNCTION, new String[] {"help"});
@@ -177,7 +180,7 @@ public class HelpCommand {
 				if (method.getName().equals("_" + command)) {
 					try {
 						Method helpMethod = provider.getClass().getMethod("_help", CommandInterpreter.class);
-						ArrayList<Object> argsList = new ArrayList<Object>();
+						ArrayList<Object> argsList = new ArrayList<>();
 						argsList.add(command);
 						retval = helpMethod.invoke(provider, new CustomCommandInterpreter(session, argsList));
 					} catch (Exception e) {

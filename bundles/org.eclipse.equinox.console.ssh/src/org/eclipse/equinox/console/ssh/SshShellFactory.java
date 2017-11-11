@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 SAP AG
+ * Copyright (c) 2011, 2017 SAP AG
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,13 +28,14 @@ public class SshShellFactory implements Factory<Command> {
 	
 	private List<CommandProcessor> processors;
 	private BundleContext context;
-	private Set<SshShell> shells = new HashSet<SshShell>();
+	private Set<SshShell> shells = new HashSet<>();
 	
 	public SshShellFactory(List<CommandProcessor> processors, BundleContext context) {
 		this.processors = processors;
 		this.context = context;
 	}
 	
+	@Override
 	public synchronized Command create() {
 		SshShell shell = new SshShell(processors, context);
 		shells.add(shell);

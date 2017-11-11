@@ -37,7 +37,7 @@ public class TelnetCommandTests {
 	
 	@Test
 	public void testTelnetCommand() throws Exception {
-		CommandSession session = EasyMock.createMock(CommandSession.class);
+		try (CommandSession session = EasyMock.createMock(CommandSession.class)) {
     	session.put((String)EasyMock.anyObject(), EasyMock.anyObject());
         EasyMock.expectLastCall().times(3);
         EasyMock.expect(session.execute((String)EasyMock.anyObject())).andReturn(new Object());
@@ -58,9 +58,7 @@ public class TelnetCommandTests {
         TelnetCommand command = new TelnetCommand(processor, context);
         command.startService();
         
-        Socket socketClient = null;
-        try {
-            socketClient = new Socket(HOST, TELNET_PORT);
+        try (Socket socketClient = new Socket(HOST, TELNET_PORT);){
             OutputStream outClient = socketClient.getOutputStream();
             outClient.write(TEST_CONTENT);
             outClient.write('\n');
@@ -73,11 +71,9 @@ public class TelnetCommandTests {
                 // do nothing
             }
         } finally {
-            if (socketClient != null) {
-                socketClient.close();
-            }
             command.telnet(new String[] {STOP_COMMAND});
         }
         EasyMock.verify(context);
+		}
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2014 IBM Corporation and others.
+ * Copyright (c) 2003, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,6 +65,7 @@ import org.osgi.framework.wiring.BundleRevisions;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.framework.wiring.FrameworkWiring;
+import org.osgi.resource.Namespace;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
@@ -133,7 +134,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	private final static String newline = "\r\n"; //$NON-NLS-1$
 
 	/** this list contains the bundles known to be lazily awaiting activation */
-	private final List<Bundle> lazyActivation = new ArrayList<Bundle>();
+	private final List<Bundle> lazyActivation = new ArrayList<>();
 	
 	private Activator activator;
 	
@@ -168,7 +169,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		EquinoxCommandsConverter converter = new EquinoxCommandsConverter(context);
 		converterReg = context.registerService(Converter.class.getName(), converter, null);
 		
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 		props.put(CommandProcessor.COMMAND_SCOPE, "equinox");
 		props.put(CommandProcessor.COMMAND_FUNCTION, functions);
@@ -995,7 +996,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			System.out.print("unwired"); //$NON-NLS-1$
 			System.out.print(">"); //$NON-NLS-1$
 			System.out.print("<"); //$NON-NLS-1$
-			System.out.print(importReq.getDirectives().get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE));
+			System.out.print(importReq.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE));
 			System.out.println(">"); //$NON-NLS-1$
 		}
 		return title;
@@ -1185,7 +1186,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_HEADERS_COMMAND_DESCRIPTION)
 	public List<Dictionary<String, String>> headers(@Descriptor(ConsoleMsg.CONSOLE_HELP_HEADERS_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundles) throws Exception {
-		ArrayList<Dictionary<String, String>> headers = new ArrayList<Dictionary<String,String>>();
+		ArrayList<Dictionary<String, String>> headers = new ArrayList<>();
 		
 		if (bundles == null || bundles.length == 0) {
 			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
@@ -1602,7 +1603,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		} else {
 			names = symbolicName;
 		}
-		List<Bundle> bundles = new ArrayList<Bundle>();
+		List<Bundle> bundles = new ArrayList<>();
 		if (names == null) {
 			bundles.addAll(Arrays.asList(packageAdmin.getBundles(null, null)));
 		} else {
@@ -1706,14 +1707,14 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		}
 	}
 	private Map<String, List<PackageSource>> getPackagesInternal(BundleWiring wiring) {
-		Map<String, List<PackageSource>> packages = new TreeMap<String, List<PackageSource>>();
+		Map<String, List<PackageSource>> packages = new TreeMap<>();
 		// first get the imported packages
 		List<BundleWire> packageWires = wiring.getRequiredWires(PackageNamespace.PACKAGE_NAMESPACE);
-		Set<String> importedPackageNames = new HashSet<String>();
+		Set<String> importedPackageNames = new HashSet<>();
 		for (BundleWire packageWire : packageWires) {
 			String packageName = (String) packageWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
 			importedPackageNames.add(packageName);
-			List<PackageSource> packageSources = new ArrayList<PackageSource>();
+			List<PackageSource> packageSources = new ArrayList<>();
 			packageSources.add(new PackageSource(packageWire.getCapability(), packageWire));
 			packages.put(packageName, packageSources);
 		}
@@ -1733,7 +1734,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 				if (!importedPackageNames.contains(packageName)) {
 					List<PackageSource> packageSources = packages.get(packageName);
 					if (packageSources == null) {
-						packageSources = new ArrayList<PackageSource>();
+						packageSources = new ArrayList<>();
 						packages.put(packageName, packageSources);
 					}
 					boolean sourceFound = false;
@@ -1750,7 +1751,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			}
 
 			// get substituted packages
-			Set<String> declaredPackageNames = new HashSet<String>();
+			Set<String> declaredPackageNames = new HashSet<>();
 			for (BundleCapability declaredPackage : providerWiring.getRevision().getDeclaredCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
 				declaredPackageNames.add((String) declaredPackage.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
 			}
@@ -1766,7 +1767,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 				if (declaredPackageNames.contains(packageName)) {
 					List<PackageSource> packageSources = packages.get(packageName);
 					if (packageSources == null) {
-						packageSources = new ArrayList<PackageSource>();
+						packageSources = new ArrayList<>();
 						packages.put(packageName, packageSources);
 					}
 					packageSources.add(new PackageSource(packageWire.getCapability(), packageWire));
@@ -1893,7 +1894,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_GETPROP_COMMAND_DESCRIPTION)
 	public void getprop(@Descriptor(ConsoleMsg.CONSOLE_HELP_GETPROP_COMMAND_ARGUMENT_DESCRIPTION) String... propName) throws Exception {
 		Properties allProperties = System.getProperties();
-		Iterator<?> propertyNames = new TreeSet<Object>(allProperties.keySet()).iterator();
+		Iterator<?> propertyNames = new TreeSet<>(allProperties.keySet()).iterator();
 		while (propertyNames.hasNext()) {
 			String prop = (String) propertyNames.next();
 			if (propName == null || propName.length == 0 || prop.startsWith(propName[0])) {
@@ -1905,7 +1906,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION)
 	public void diag(@Descriptor(ConsoleMsg.CONSOLE_HELP_DIAG_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles) throws Exception {
 		if (bundles.length == 0) {
-			List<Bundle> unresolved = new ArrayList<Bundle>();
+			List<Bundle> unresolved = new ArrayList<>();
 			Bundle[] allBundles = context.getBundles();
 			for (Bundle bundle : allBundles) {
 				BundleRevision revision = bundle.adapt(BundleRevision.class);
@@ -1942,7 +1943,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	private static class DiagReportListener implements ResolverHookFactory {
-		private final Collection<BundleRevision> targetTriggers = new ArrayList<BundleRevision>();
+		private final Collection<BundleRevision> targetTriggers = new ArrayList<>();
 		public DiagReportListener(Bundle[] bundles) {
 			for (Bundle bundle : bundles) {
 				BundleRevision revision = bundle.adapt(BundleRevision.class);
@@ -1955,29 +1956,35 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		volatile ResolutionReport report = null;
 		class DiagResolverHook implements ResolverHook, ResolutionReport.Listener {
 
+			@Override
 			public void handleResolutionReport(ResolutionReport report) {
 				DiagReportListener.this.report = report;
 			}
 
+			@Override
 			public void filterResolvable(Collection<BundleRevision> candidates) {
 				// nothing
 			}
 
+			@Override
 			public void filterSingletonCollisions(BundleCapability singleton,
 					Collection<BundleCapability> collisionCandidates) {
 				// nothing
 			}
 
+			@Override
 			public void filterMatches(BundleRequirement requirement,
 					Collection<BundleCapability> candidates) {
 				// nothing
 			}
 
+			@Override
 			public void end() {
 				// nothing
 			}
 			
 		}
+		@Override
 		public ResolverHook begin(Collection<BundleRevision> triggers) {
 			if (triggers.containsAll(targetTriggers)) {
 				return new DiagResolverHook();
@@ -1992,6 +1999,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	/**
 	 * This is used to track lazily activated bundles.
 	 */
+	@Override
 	public void bundleChanged(BundleEvent event) {
 		int type = event.getType();
 		Bundle bundle = event.getBundle();

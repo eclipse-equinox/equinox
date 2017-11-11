@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 SAP AG
+ * Copyright (c) 2011, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,14 +41,14 @@ public class CompletionHandler {
 	public CompletionHandler(BundleContext context, CommandSession session) {
 		this.context = context;
 		this.session = session;
-		completers = new HashSet<Completer>();
+		completers = new HashSet<>();
 	}
 	
 	public Map<String, Integer> getCandidates(byte[] buf, int cursor) {
         String currentInput = new String(buf);
         String currentToken = CommandLineParser.getCurrentToken(currentInput, cursor);
         if (currentToken ==  null){
-        	return new HashMap<String, Integer>();
+        	return new HashMap<>();
         }
         if (currentToken.contains(FILE) == true) {
         	completers.add(new FileNamesCompleter());
@@ -61,7 +61,7 @@ public class CompletionHandler {
         	}
         }
         lookupCustomCompleters();
-		Map<String, Integer> candidates = new TreeMap<String, Integer>();
+		Map<String, Integer> candidates = new TreeMap<>();
 		for (Completer completer : completers) {
 			candidates.putAll(completer.getCandidates(currentInput, cursor));
 		}

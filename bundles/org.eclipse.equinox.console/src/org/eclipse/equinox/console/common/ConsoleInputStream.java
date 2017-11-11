@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 SAP AG
+ * Copyright (c) 2010, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,12 +19,13 @@ import java.util.ArrayList;
  */
 public class ConsoleInputStream extends InputStream {
 
-    private final ArrayList<byte[]> buffer = new ArrayList<byte[]>();
+    private final ArrayList<byte[]> buffer = new ArrayList<>();
     private byte[] current;
     private int pos;
     private boolean isClosed;
 
-    public synchronized int read() {
+    @Override
+	public synchronized int read() {
         while (current == null && buffer.isEmpty() && !isClosed) {
             try {
                 wait();
@@ -108,7 +109,8 @@ public class ConsoleInputStream extends InputStream {
         return readCnt;
     }*/
     
-    public synchronized int read(byte b[], int off, int len) throws IOException {
+    @Override
+	public synchronized int read(byte b[], int off, int len) throws IOException {
         if (len == 0) {
             return len;
         }
@@ -140,7 +142,8 @@ public class ConsoleInputStream extends InputStream {
         return readCnt;
     }
 
-    public synchronized void close() throws IOException {
+    @Override
+	public synchronized void close() throws IOException {
         isClosed = true;
         notifyAll();
     }

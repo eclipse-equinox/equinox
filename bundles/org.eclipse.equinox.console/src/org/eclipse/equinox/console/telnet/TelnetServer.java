@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 SAP AG and others
+ * Copyright (c) 2010, 2017 SAP AG and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,8 +35,8 @@ public class TelnetServer extends Thread {
     private boolean isRunning = true;
     private List<CommandProcessor> processors = null;
     private BundleContext context;
-    private List<Socket> sockets = new ArrayList<Socket>();
-    private Map<CommandProcessor, List<TelnetConnection>> processorToConnectionsMapping = new HashMap<CommandProcessor, List<TelnetConnection>>();
+    private List<Socket> sockets = new ArrayList<>();
+    private Map<CommandProcessor, List<TelnetConnection>> processorToConnectionsMapping = new HashMap<>();
     
     public TelnetServer(BundleContext context, List<CommandProcessor> processors, String host, int port) throws IOException {
     	this.context = context;
@@ -48,6 +48,7 @@ public class TelnetServer extends Thread {
     	}
     }
     
+	@Override
 	public void run()
     {
         try
@@ -60,7 +61,7 @@ public class TelnetServer extends Thread {
                 	TelnetConnection telnetConnection = new TelnetConnection(socket, processor, context);
                 	List<TelnetConnection> telnetConnections = processorToConnectionsMapping.get(processor);
                 	if (telnetConnections == null) {
-                		telnetConnections = new ArrayList<TelnetConnection>();
+                		telnetConnections = new ArrayList<>();
                 		processorToConnectionsMapping.put(processor, telnetConnections);
                 	}
                 	telnetConnections.add(telnetConnection);
@@ -86,7 +87,7 @@ public class TelnetServer extends Thread {
 	public synchronized void addCommandProcessor(CommandProcessor processor) {
 		processors.add(processor);
 		if (!sockets.isEmpty()) {
-			List<TelnetConnection> telnetConnections = new ArrayList<TelnetConnection>();
+			List<TelnetConnection> telnetConnections = new ArrayList<>();
 			for (Socket socket : sockets) {
 				TelnetConnection telnetConnection = new TelnetConnection(socket, processor, context);
 				telnetConnections.add(telnetConnection);

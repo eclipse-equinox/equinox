@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 SAP AG
+ * Copyright (c) 2010, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,7 +60,8 @@ public class ConsoleInputScanner extends Scanner {
     	this.context = context;
     }
     
-    public void scan(int b) throws IOException {
+    @Override
+	public void scan(int b) throws IOException {
         b &= 0xFF;
         if (isCR) {
             isCR = false;
@@ -261,7 +262,7 @@ public class ConsoleInputScanner extends Scanner {
     }
     
     protected String[] removeCommonPrefix(String [] names, String commonPrefix){
-    	ArrayList<String> result = new ArrayList<String>();
+    	ArrayList<String> result = new ArrayList<>();
     	for (String name : names) {
     		String nameWithoutPrefix = name.substring(commonPrefix.length());
     		if (nameWithoutPrefix.length() > 0) {
@@ -333,7 +334,8 @@ public class ConsoleInputScanner extends Scanner {
         history.reset();
     }
 
-    protected void scanEsc(final int b) throws IOException {
+    @Override
+	protected void scanEsc(final int b) throws IOException {
         esc += (char) b;
         KEYS key = checkEscape(esc);
         if (key == KEYS.UNFINISHED) {

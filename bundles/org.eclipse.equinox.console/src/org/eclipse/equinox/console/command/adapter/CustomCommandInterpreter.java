@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,7 +54,8 @@ public class CustomCommandInterpreter implements CommandInterpreter {
 	  arguments = args.iterator();
   }
   
-  public Object execute(String cmd) {
+  @Override
+public Object execute(String cmd) {
 	  try {
 		  return commandSession.execute(cmd);
 	  } catch (RuntimeException e) {
@@ -64,7 +65,8 @@ public class CustomCommandInterpreter implements CommandInterpreter {
 	  } 
   }
 
-  public String nextArgument() {
+  @Override
+public String nextArgument() {
     if (arguments.hasNext()) {
     	Object next = arguments.next();
     	return next == null ? null : next.toString();
@@ -77,7 +79,8 @@ public class CustomCommandInterpreter implements CommandInterpreter {
    *
    * @param o the object to be printed
    */
-  public void print(Object o) {
+  @Override
+public void print(Object o) {
       check4More();
       out.print(o);
       out.flush();    
@@ -86,7 +89,8 @@ public class CustomCommandInterpreter implements CommandInterpreter {
   /**
    * Prints a empty line to the outputstream
    */
-  public void println() {
+  @Override
+public void println() {
     println(""); //$NON-NLS-1$
   }
 
@@ -94,7 +98,8 @@ public class CustomCommandInterpreter implements CommandInterpreter {
    * Print a stack trace including nested exceptions.
    * @param t The offending exception
    */
-  public void printStackTrace(Throwable t) {
+  @Override
+public void printStackTrace(Throwable t) {
     t.printStackTrace(out);
 
     Method[] methods = t.getClass().getMethods();
@@ -131,7 +136,8 @@ public class CustomCommandInterpreter implements CommandInterpreter {
    *
    * @param o the object to be printed
    */
-  public void println(Object o) {
+  @Override
+public void println(Object o) {
     if (o == null) {
       return;
     }
@@ -160,7 +166,8 @@ public class CustomCommandInterpreter implements CommandInterpreter {
    * @param dic the dictionary to print
    * @param title the header to print above the key/value pairs
    */
-  public void printDictionary(Dictionary<?,?> dic, String title) {
+  @Override
+public void printDictionary(Dictionary<?,?> dic, String title) {
     if (dic == null)
       return;
 
@@ -188,25 +195,18 @@ public class CustomCommandInterpreter implements CommandInterpreter {
    * @param bundle  the bundle containing the resource
    * @param resource  the resource to print
    */
-  public void printBundleResource(Bundle bundle, String resource) {
+  @Override
+public void printBundleResource(Bundle bundle, String resource) {
     URL entry = null;
     entry = bundle.getEntry(resource);
     if (entry != null) {
       try {
         println(resource);
-        InputStream in = entry.openStream();
         byte[] buffer = new byte[1024];
         int read = 0;
-        try {
+        try (InputStream in = entry.openStream()) {
           while ((read = in.read(buffer)) != -1)
             print(new String(buffer, 0, read));
-        } finally {
-          if (in != null) {
-            try {
-              in.close();
-            } catch (IOException e) {
-            }
-          }
         }
       } catch (Exception e) {
         System.err.println(e);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 SAP AG
+ * Copyright (c) 2011, 2017 SAP AG
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,7 +44,7 @@ public class SshShell implements Command {
 	private InputStream in;
 	private OutputStream out;
 	private ExitCallback callback;
-	private Map<CommandProcessor, SshSession> commandProcessorToConsoleThreadMap = new HashMap<CommandProcessor, SshSession>();
+	private Map<CommandProcessor, SshSession> commandProcessorToConsoleThreadMap = new HashMap<>();
 	
 	private final Map<String, TerminalTypeMappings> supportedEscapeSequences;
 	private static final String DEFAULT_TTYPE = File.separatorChar == '/' ? "XTERM" : "ANSI";
@@ -55,7 +55,7 @@ public class SshShell implements Command {
 	public SshShell(List<CommandProcessor> processors, BundleContext context) {
 		this.processors = processors;
 		this.context = context;
-		supportedEscapeSequences = new HashMap<String, TerminalTypeMappings> ();
+		supportedEscapeSequences = new HashMap<> ();
         supportedEscapeSequences.put("ANSI", new ANSITerminalTypeMappings());
         supportedEscapeSequences.put("WINDOWS", new ANSITerminalTypeMappings());
         supportedEscapeSequences.put("VT100", new VT100TerminalTypeMappings());
@@ -69,22 +69,27 @@ public class SshShell implements Command {
         currentEscapesToKey = currentMappings.getEscapesToKey();
 	}
 
+	@Override
 	public void setInputStream(InputStream in) {
 		this.in = in;
 	}
 
+	@Override
 	public void setOutputStream(OutputStream out) {
 		this.out = out;
 	}
 
+	@Override
 	public void setErrorStream(OutputStream err) {
 		// do nothing
 	}
 
+	@Override
 	public void setExitCallback(ExitCallback callback) {
 		this.callback = callback;
 	}
 
+	@Override
 	public synchronized void start(Environment env) throws IOException {
 		String term = env.getEnv().get(TERMINAL_PROPERTY);
 		TerminalTypeMappings mapping = supportedEscapeSequences.get(term.toUpperCase());
@@ -114,6 +119,7 @@ public class SshShell implements Command {
 		commandProcessorToConsoleThreadMap.put(processor, consoleSession);
 	}
 
+	@Override
 	public void destroy() {
 		return;
 	}

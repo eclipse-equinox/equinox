@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2013 SAP AG and others.
+ * Copyright (c) 2011, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,7 @@ import org.osgi.service.cm.ManagedService;
 public class SshCommand {
 	private String defaultHost = null;
 	private int defaultPort;
-    private List<CommandProcessor> processors = new ArrayList<CommandProcessor>();
+    private List<CommandProcessor> processors = new ArrayList<>();
     private String host = null;
     private int port;
     private SshServ sshServ;
@@ -59,7 +59,7 @@ public class SshCommand {
         this.context = context;
         
         if ("true".equals(context.getProperty(USE_CONFIG_ADMIN_PROP))) {
-        	Dictionary<String, String> sshProperties = new Hashtable<String, String>();
+        	Dictionary<String, String> sshProperties = new Hashtable<>();
         	sshProperties.put(Constants.SERVICE_PID, SSH_PID);
         	try {
         		synchronized (lock) {
@@ -95,7 +95,7 @@ public class SshCommand {
     }
     
     public synchronized void startService() {
-    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
+    	Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put("osgi.command.scope", "equinox");
 		properties.put("osgi.command.function", new String[] {"ssh"});
 		if ((port > 0 || defaultPort > 0) && isEnabled == true) {
@@ -211,15 +211,9 @@ public class SshCommand {
     }
     
     private void checkPortAvailable(int port) throws Exception {
-    	ServerSocket socket = null;
-    	try {
-    		socket = new ServerSocket(port);
+    	try (ServerSocket socket = new ServerSocket(port)){
     	} catch (BindException e) {
     		throw new Exception ("Port " + port + " already in use");
-    	} finally {
-    		if (socket != null) {
-    			socket.close();
-    		}
     	}
     }
     
@@ -227,7 +221,7 @@ public class SshCommand {
      * Register user administration commands
      */
     private void registerUserAdmin() {
-    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
+    	Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put("osgi.command.scope", "equinox");
 		properties.put("osgi.command.function", new String[] {"addUser", "addUser", "deleteUser", "resetPassword", "setPassword", "addRoles", "removeRoles", "listUsers"});
 		context.registerService(UserAdminCommand.class.getName(), new UserAdminCommand(), properties);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 SAP AG
+ * Copyright (c) 2011, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,17 +32,18 @@ public class EquinoxCommandsConverter implements Converter {
 		this.context = context;
 	}
 	
+	@Override
 	public Object convert(Class<?> desiredType, Object in) throws Exception {
 		if(desiredType == Bundle[].class) {
 			if (in instanceof String) {
-				if("*".equals((String) in)) {
+				if("*".equals(in)) {
 					return context.getBundles();
 				}
 			} else if (in instanceof List<?>) {
 				List<?> args = (List<?>) in;
 				if (checkStringElements(args)) {
 					try {
-						ArrayList<Bundle> bundles = new ArrayList<Bundle>();
+						ArrayList<Bundle> bundles = new ArrayList<>();
 						for (Object arg : args) {
 							long id = Long.parseLong((String)arg);
 							bundles.add(context.getBundle(id));
@@ -124,6 +125,7 @@ public class EquinoxCommandsConverter implements Converter {
 		return true;
 	}
 
+	@Override
 	public CharSequence format(Object target, int level, Converter escape) throws Exception {
 		if (target instanceof Dictionary<?, ?>) {
 			Dictionary<?, ?> dic = (Dictionary<?, ?>) target;

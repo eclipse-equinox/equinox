@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012 Gunnar Wagenknecht and others.
+ * Copyright (c) 2012, 2017 Gunnar Wagenknecht and others.
  * All rights reserved.
  *
  * This program and the accompanying materials are made available under the terms of the
@@ -35,6 +35,7 @@ public class AuthorizedKeysFileAuthenticator implements PublickeyAuthenticator {
 		this.authorizedKeysFile = authorizedKeysFile;
 	}
 
+	@Override
 	public boolean authenticate(String username, PublicKey key, ServerSession session) {
 		String authorizedKeysFile = getAuthorizedKeysFile();
 		if(null == authorizedKeysFile) {

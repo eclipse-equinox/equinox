@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 SAP AG.
+ * Copyright (c) 2013, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ public class CommandsTracker {
     	commandNames = Collections.synchronizedSet(new HashSet<String>());
     	try {
 			Filter filter = bundleContext.createFilter(String.format("(&(%s=*)(%s=*))", CommandProcessor.COMMAND_SCOPE, CommandProcessor.COMMAND_FUNCTION));
-			commandsTracker = new ServiceTracker<Object, Set<String>>(bundleContext, filter, new CommandsTrackerCustomizer());
+			commandsTracker = new ServiceTracker<>(bundleContext, filter, new CommandsTrackerCustomizer());
 			commandsTracker.open();
 		} catch (InvalidSyntaxException e) {
 			//do nothing;
@@ -40,12 +40,13 @@ public class CommandsTracker {
     
     public Set<String> getCommands() {
     	synchronized (lock) {
-    		return new HashSet<String>(commandNames);
+    		return new HashSet<>(commandNames);
     	}
     }
     
     class CommandsTrackerCustomizer implements ServiceTrackerCustomizer<Object, Set<String>> {
-    	public Set<String> addingService(ServiceReference<Object> reference) {
+    	@Override
+		public Set<String> addingService(ServiceReference<Object> reference) {
 			Object scope = reference.getProperty(CommandProcessor.COMMAND_SCOPE);
         	Object function = reference.getProperty(CommandProcessor.COMMAND_FUNCTION);
 
@@ -64,10 +65,12 @@ public class CommandsTracker {
             return null;
 		}
 
+		@Override
 		public void modifiedService(ServiceReference<Object> reference, Set<String> commandNames) {
 			// nothing to do
 		}
 
+		@Override
 		public void removedService(ServiceReference<Object> reference, Set<String> commandNames) {
 			Object scope = reference.getProperty(CommandProcessor.COMMAND_SCOPE);
             Object function = reference.getProperty(CommandProcessor.COMMAND_FUNCTION);

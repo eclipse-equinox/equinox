@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 SAP AG
+ * Copyright (c) 2011, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,10 +34,11 @@ public class CommandNamesCompleter implements Completer {
 	
 	public CommandNamesCompleter(BundleContext context, CommandSession session) {
 		this.session = session;
-		commandsTrackerTracker = new ServiceTracker<CommandsTracker, CommandsTracker>(context, CommandsTracker.class.getName(), null);
+		commandsTrackerTracker = new ServiceTracker<>(context, CommandsTracker.class.getName(), null);
 		commandsTrackerTracker.open();
 	}
 	
+	@Override
 	@SuppressWarnings("unchecked")
 	public Map<String, Integer> getCandidates(String buffer, int cursor) {
 		CommandsTracker commandsTracker = commandsTrackerTracker.getService();
@@ -54,7 +55,7 @@ public class CommandNamesCompleter implements Completer {
 		// command names are stored in the session in lower case
 		String currentToken = CommandLineParser.getCurrentToken(buffer, cursor).toLowerCase();
 		if(currentToken == null || currentToken.equals("")) {
-			return new HashMap<String, Integer>();
+			return new HashMap<>();
 		}
 		
 		if (!currentToken.contains(":")) {
@@ -66,7 +67,7 @@ public class CommandNamesCompleter implements Completer {
 	}
 	
 	private Set<String> clearScopes(Set<String> commandNames) {
-		Set<String> clearedCommandNames = new HashSet<String>();
+		Set<String> clearedCommandNames = new HashSet<>();
 		
 		for(String commandName : commandNames) {
 			clearedCommandNames.add(commandName.substring(commandName.indexOf(":") + 1));

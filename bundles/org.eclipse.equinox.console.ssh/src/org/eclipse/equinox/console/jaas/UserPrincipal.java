@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 SAP AG
+ * Copyright (c) 2011, 2017 SAP AG
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,7 @@ import java.util.Set;
 public class UserPrincipal implements Principal {
 	private String username;
 	private char[] password;
-	private Set<RolePrincipal> rolePrincipals = new HashSet<RolePrincipal>();
+	private Set<RolePrincipal> rolePrincipals = new HashSet<>();
 	
 	public UserPrincipal(String username, String password) {
 		this.username = username;
@@ -30,6 +30,7 @@ public class UserPrincipal implements Principal {
 		System.arraycopy(password.toCharArray(), 0, this.password, 0, this.password.length);
 	}
 	
+	@Override
 	public String getName() {
 		return username;
 	}
@@ -64,6 +65,7 @@ public class UserPrincipal implements Principal {
 		rolePrincipals.add(rolePrincipal);
 	}
 	
+	@Override
 	public boolean equals(Object userPrincipal) {
 		if (userPrincipal == null) {
 			return false;

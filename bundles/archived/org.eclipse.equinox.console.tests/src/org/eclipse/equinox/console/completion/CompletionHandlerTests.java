@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 SAP AG
+ * Copyright (c) 2011, 2017 SAP AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,13 +72,13 @@ public class CompletionHandlerTests {
 		expect(context.getServiceReferences("org.eclipse.equinox.console.commands.CommandsTracker", null)).andReturn(new ServiceReference[]{}).anyTimes();
 		replay(context);
 		
-		Set<String> variables = new HashSet<String>();
+		Set<String> variables = new HashSet<>();
 		variables.add("SCOPE");
 		variables.add("PROMPT");
 		variables.add("ECHO_ON");
 		variables.add("ECHO");
 		
-		Set<String> commands = new HashSet<String>();
+		Set<String> commands = new HashSet<>();
 		commands.add("equinox:bundles");
 		commands.add("equinox:diag");
 		commands.add("equinox:setprop");
@@ -166,10 +166,10 @@ public class CompletionHandlerTests {
 	
 	private void createFile(File parentDir, String filename) throws IOException {
 		File file = new File(parentDir.getAbsolutePath() + File.separator + filename);
-		PrintWriter out = new PrintWriter(new FileOutputStream(file));
-		out.write(filename);
-		out.flush();
-		out.close();
+		try (PrintWriter out = new PrintWriter(new FileOutputStream(file))) {
+			out.write(filename);
+			out.flush();
+		}
 	}
 
 }
