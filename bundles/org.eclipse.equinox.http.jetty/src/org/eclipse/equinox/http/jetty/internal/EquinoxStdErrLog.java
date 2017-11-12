@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others
+ * Copyright (c) 2011, 2017 IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,6 +75,7 @@ public class EquinoxStdErrLog implements Logger {
 			this.realLogger.setDebugEnabled(true);
 	}
 
+	@Override
 	public org.eclipse.jetty.util.log.Logger getLogger(String name) {
 		if ((name == null && this.localName == null) || (name != null && name.equals(this.localName)))
 			return this;
@@ -82,6 +83,7 @@ public class EquinoxStdErrLog implements Logger {
 	}
 
 	// debugSOO = slf4j.getMethod("debug", new Class[]{String.class,Object.class,Object.class});
+	@Override
 	public void debug(String msg, Object... arg0) {
 		if (threshold > DEBUG)
 			return;
@@ -90,6 +92,7 @@ public class EquinoxStdErrLog implements Logger {
 	}
 
 	// debugST = slf4j.getMethod("debug", new Class[]{String.class,Throwable.class});
+	@Override
 	public void debug(String msg, Throwable th) {
 		if (threshold > DEBUG)
 			return;
@@ -98,6 +101,7 @@ public class EquinoxStdErrLog implements Logger {
 	}
 
 	// infoSOO = slf4j.getMethod("info", new Class[]{String.class,Object.class,Object.class});
+	@Override
 	public void info(String msg, Object... arg0) {
 		if (threshold > INFO)
 			return;
@@ -106,6 +110,7 @@ public class EquinoxStdErrLog implements Logger {
 	}
 
 	// warnSOO = slf4j.getMethod("warn", new Class[]{String.class,Object.class,Object.class});
+	@Override
 	public void warn(String msg, Object... arg0) {
 		if (threshold > WARN)
 			return;
@@ -114,6 +119,7 @@ public class EquinoxStdErrLog implements Logger {
 	}
 
 	// warnST = slf4j.getMethod("warn", new Class[]{String.class,Throwable.class});
+	@Override
 	public void warn(String msg, Throwable th) {
 		if (threshold > WARN)
 			return;
@@ -133,47 +139,56 @@ public class EquinoxStdErrLog implements Logger {
 		realLogger.warn("ERROR:  " + msg, th); //$NON-NLS-1$
 	}
 
+	@Override
 	public String getName() {
 		return realLogger.getName();
 	}
 
+	@Override
 	public void warn(Throwable thrown) {
 		if (threshold > WARN)
 			return;
 		realLogger.warn(thrown);
 	}
 
+	@Override
 	public void info(Throwable thrown) {
 		if (threshold > INFO)
 			return;
 		realLogger.info(thrown);
 	}
 
+	@Override
 	public void info(String msg, Throwable thrown) {
 		if (threshold > INFO)
 			return;
 		realLogger.info(msg, thrown);
 	}
 
+	@Override
 	public boolean isDebugEnabled() {
 		return threshold == DEBUG;
 	}
 
+	@Override
 	public void setDebugEnabled(boolean enabled) {
 		threshold = DEBUG;
 	}
 
+	@Override
 	public void debug(Throwable thrown) {
 		if (threshold > DEBUG)
 			return;
 		realLogger.debug(thrown);
 	}
 
+	@Override
 	public void ignore(Throwable ignored) {
 		// Just post this to debug
 		debug(ignored);
 	}
 
+	@Override
 	public void debug(String msg, long value) {
 		if (threshold > DEBUG)
 			return;

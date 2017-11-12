@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,13 +41,14 @@ public class HttpServerManager implements ManagedServiceFactory {
 	private static final String DIR_PREFIX = "pid_"; //$NON-NLS-1$
 	private static final String INTERNAL_CONTEXT_CLASSLOADER = "org.eclipse.equinox.http.jetty.internal.ContextClassLoader"; //$NON-NLS-1$
 
-	private Map<String, Server> servers = new HashMap<String, Server>();
+	private Map<String, Server> servers = new HashMap<>();
 	private File workDir;
 
 	public HttpServerManager(File workDir) {
 		this.workDir = workDir;
 	}
 
+	@Override
 	public synchronized void deleted(String pid) {
 		Server server = servers.remove(pid);
 		if (server != null) {
@@ -62,12 +63,13 @@ public class HttpServerManager implements ManagedServiceFactory {
 		}
 	}
 
+	@Override
 	public String getName() {
 		return this.getClass().getName();
 	}
 
-	@SuppressWarnings("unchecked")
-	public synchronized void updated(String pid, @SuppressWarnings("rawtypes") Dictionary dictionary) throws ConfigurationException {
+	@Override
+	public synchronized void updated(String pid, Dictionary<String, ?> dictionary) throws ConfigurationException {
 		deleted(pid);
 		Server server = new Server(new QueuedThreadPool(Details.getInt(dictionary, JettyConstants.HTTP_MAXTHREADS, 200), Details.getInt(dictionary, JettyConstants.HTTP_MINTHREADS, 8)));
 
@@ -243,6 +245,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 		private ClassLoader contextLoader;
 		private Method method;
 
+		@Override
 		public void init(ServletConfig config) throws ServletException {
 			ServletContext context = config.getServletContext();
 			contextLoader = (ClassLoader) context.getAttribute(INTERNAL_CONTEXT_CLASSLOADER);
@@ -264,6 +267,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 			}
 		}
 
+		@Override
 		public void destroy() {
 			Thread thread = Thread.currentThread();
 			ClassLoader current = thread.getContextClassLoader();
@@ -276,6 +280,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 			contextLoader = null;
 		}
 
+		@Override
 		public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
 			Thread thread = Thread.currentThread();
 			ClassLoader current = thread.getContextClassLoader();
@@ -287,14 +292,17 @@ public class HttpServerManager implements ManagedServiceFactory {
 			}
 		}
 
+		@Override
 		public ServletConfig getServletConfig() {
 			return httpServiceServlet.getServletConfig();
 		}
 
+		@Override
 		public String getServletInfo() {
 			return httpServiceServlet.getServletInfo();
 		}
 
+		@Override
 		public void sessionIdChanged(HttpSessionEvent event, String oldSessionId) {
 			Thread thread = Thread.currentThread();
 			ClassLoader current = thread.getContextClassLoader();

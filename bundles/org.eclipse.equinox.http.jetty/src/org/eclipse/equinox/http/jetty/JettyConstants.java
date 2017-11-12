@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,24 +73,28 @@ public interface JettyConstants {
 	 * @deprecated
 	 * @since 1.3
 	 */
+	@Deprecated
 	public static final String MULTIPART_FILESIZETHRESHOLD = "multipart.fileSizeThreshold"; //$NON-NLS-1$
 
 	/**
 	 * @deprecated
 	 * @since 1.3
 	 */
+	@Deprecated
 	public static final String MULTIPART_LOCATION = "multipart.location"; //$NON-NLS-1$
 
 	/**
 	 * @deprecated
 	 * @since 1.3
 	 */
+	@Deprecated
 	public static final String MULTIPART_MAXFILESIZE = "multipart.maxFileSize"; //$NON-NLS-1$
 
 	/**
 	 * @deprecated
 	 * @since 1.3
 	 */
+	@Deprecated
 	public static final String MULTIPART_MAXREQUESTSIZE = "multipart.maxRequestSize"; //$NON-NLS-1$
 
 	/**

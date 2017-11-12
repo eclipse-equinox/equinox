@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2017 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,9 +47,9 @@ public class Activator implements BundleActivator {
 	private static HttpServerManager staticServerManager;
 
 	private HttpServerManager httpServerManager;
-	@SuppressWarnings("rawtypes")
-	private ServiceRegistration registration;
+	private ServiceRegistration<ManagedServiceFactory> registration;
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		File jettyWorkDir = new File(context.getDataFile(""), JETTY_WORK_DIR); //$NON-NLS-1$
 		jettyWorkDir.mkdir();
@@ -62,10 +62,10 @@ public class Activator implements BundleActivator {
 			httpServerManager.updated(DEFAULT_PID, defaultSettings);
 		}
 
-		Dictionary<String, Object> dictionary = new Hashtable<String, Object>();
+		Dictionary<String, Object> dictionary = new Hashtable<>();
 		dictionary.put(Constants.SERVICE_PID, MANAGED_SERVICE_FACTORY_PID);
 
-		registration = context.registerService(ManagedServiceFactory.class.getName(), httpServerManager, dictionary);
+		registration = context.registerService(ManagedServiceFactory.class, httpServerManager, dictionary);
 		setStaticServerManager(httpServerManager);
 	}
 
@@ -85,6 +85,7 @@ public class Activator implements BundleActivator {
 		return false;
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		setStaticServerManager(null);
 		registration.unregister();
@@ -95,7 +96,7 @@ public class Activator implements BundleActivator {
 	}
 
 	private Dictionary<String, Object> createDefaultSettings(BundleContext context) {
-		Dictionary<String, Object> defaultSettings = new Hashtable<String, Object>();
+		Dictionary<String, Object> defaultSettings = new Hashtable<>();
 
 		// PID
 		defaultSettings.put(Constants.SERVICE_PID, DEFAULT_PID);
