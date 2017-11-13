@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) OSGi Alliance (2015, 2017). All Rights Reserved.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.osgi.util.pushstream;
 
 import static java.util.Collections.emptyList;
@@ -7,9 +23,7 @@ import static java.util.stream.Collectors.toList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 
 import org.osgi.util.promise.Deferred;
@@ -18,12 +32,11 @@ import org.osgi.util.promise.Promises;
 
 class SimplePushEventSourceImpl<T, U extends BlockingQueue<PushEvent< ? extends T>>>
 		implements SimplePushEventSource<T> {
-
+	
 	private final Object								lock		= new Object();
 
-	private final Executor								worker;
-
-	private final ScheduledExecutorService				scheduler;
+	private final PushStreamExecutors					executors;
+	private final PushStreamExecutors					sameThread;
 
 	private final QueuePolicy<T,U>						queuePolicy;
 
@@ -44,11 +57,13 @@ class SimplePushEventSourceImpl<T, U extends BlockingQueue<PushEvent< ? extends 
 	private boolean										waitForFinishes;
 
 
-	public SimplePushEventSourceImpl(Executor worker,
-			ScheduledExecutorService scheduler, QueuePolicy<T,U> queuePolicy,
+	public SimplePushEventSourceImpl(PushStreamExecutors executors,
+			QueuePolicy<T,U> queuePolicy,
 			U queue, int parallelism, Runnable onClose) {
-		this.worker = worker;
-		this.scheduler = scheduler;
+		this.executors = executors;
+		this.sameThread = new PushStreamExecutors(
+				PushStreamExecutors.inlineExecutor(),
+				executors.scheduledExecutor());
 		this.queuePolicy = queuePolicy;
 		this.queue = queue;
 		this.parallelism = parallelism;
@@ -96,7 +111,7 @@ class SimplePushEventSourceImpl<T, U extends BlockingQueue<PushEvent< ? extends 
 
 	private void doSend(PushEventConsumer< ? super T> pec, PushEvent<T> event) {
 		try {
-			worker.execute(() -> safePush(pec, event));
+			executors.execute(() -> safePush(pec, event));
 		} catch (RejectedExecutionException ree) {
 			// TODO log?
 			if (!event.isTerminal()) {
@@ -107,21 +122,22 @@ class SimplePushEventSourceImpl<T, U extends BlockingQueue<PushEvent< ? extends 
 		}
 	}
 
-	@SuppressWarnings("boxing")
 	private Promise<Long> doSendWithBackPressure(
 			PushEventConsumer< ? super T> pec, PushEvent<T> event) {
-		Deferred<Long> d = new Deferred<>();
+		Deferred<Long> d = sameThread.deferred();
 		try {
-			worker.execute(
-					() -> d.resolve(System.nanoTime() + safePush(pec, event)));
+			executors.execute(
+					() -> d.resolve(Long.valueOf(
+							System.nanoTime() + safePush(pec, event))));
 		} catch (RejectedExecutionException ree) {
 			// TODO log?
+
 			if (!event.isTerminal()) {
 				close(PushEvent.error(ree));
-				return Promises.resolved(System.nanoTime());
+				d.resolve(Long.valueOf(System.nanoTime()));
 			} else {
-				return Promises
-						.resolved(System.nanoTime() + safePush(pec, event));
+				d.resolve(
+						Long.valueOf(System.nanoTime() + safePush(pec, event)));
 			}
 		}
 		return d.getPromise();
@@ -135,7 +151,7 @@ class SimplePushEventSourceImpl<T, U extends BlockingQueue<PushEvent< ? extends 
 				closeConsumer(pec, PushEvent.close());
 				return -1;
 			}
-			return backpressure;
+			return event.isTerminal() ? -1 : backpressure;
 		} catch (Exception e) {
 			// TODO log?
 			if (!event.isTerminal()) {
@@ -221,13 +237,13 @@ class SimplePushEventSourceImpl<T, U extends BlockingQueue<PushEvent< ? extends 
 			"unchecked", "boxing"
 	})
 	private void startWorker() {
-		worker.execute(() -> {
+		executors.execute(() -> {
 			try {
 				
 				for(;;) {
 					PushEvent<T> event;
 					List<PushEventConsumer< ? super T>> toCall;
-					boolean resetWait = false;
+					boolean resetWait;
 					synchronized (lock) {
 						if(waitForFinishes) {
 							semaphore.release();
@@ -244,6 +260,11 @@ class SimplePushEventSourceImpl<T, U extends BlockingQueue<PushEvent< ? extends 
 							break;
 						}
 
+						if (connected.isEmpty()) {
+							queue.clear();
+							break;
+						}
+
 						toCall = new ArrayList<>(connected);
 						if (event.isTerminal()) {
 							waitForFinishes = true;
@@ -252,40 +273,39 @@ class SimplePushEventSourceImpl<T, U extends BlockingQueue<PushEvent< ? extends 
 							while (!semaphore.tryAcquire(parallelism - 1)) {
 								lock.wait();
 							}
-						}
-					}
-					
-					List<Promise<Long>> calls = toCall.stream().map(pec -> {
-						if (semaphore.tryAcquire()) {
-							try {
-								return doSendWithBackPressure(pec, event);
-							} finally {
-								semaphore.release();
-							}
 						} else {
-							return Promises.resolved(
-									System.nanoTime() + safePush(pec, event));
+							resetWait = false;
 						}
-					}).collect(toList());
-
-					long toWait = Promises.all(calls)
-							.map(l -> l.stream()
-									.max(Long::compareTo)
-										.orElseGet(() -> System.nanoTime()))
-							.getValue() - System.nanoTime();
-					
-					
-					if (toWait > 0) {
-						scheduler.schedule(this::startWorker, toWait,
-								NANOSECONDS);
-						return;
 					}
+					
+					Promise<Long> backPressure = deliver(toCall, event);
+					
+					if (backPressure.isDone()) {
+						handleReset(resetWait);
 
-					if (resetWait == true) {
-						synchronized (lock) {
-							waitForFinishes = false;
-							lock.notifyAll();
+						long toWait = backPressure.getValue()
+								- System.nanoTime();
+
+						if (toWait > 0) {
+							executors.schedule(this::startWorker, toWait,
+									NANOSECONDS);
+							return;
 						}
+					} else {
+						backPressure.then(p -> {
+							handleReset(resetWait);
+							long toWait = p.getValue() - System.nanoTime();
+
+							if (toWait > 0) {
+								executors.schedule(this::startWorker, toWait,
+										NANOSECONDS);
+							} else {
+								startWorker();
+							}
+							return p;
+						}, p -> close(
+								PushEvent.error((Exception) p.getFailure())));
+						return;
 					}
 				}
 
@@ -304,6 +324,41 @@ class SimplePushEventSourceImpl<T, U extends BlockingQueue<PushEvent< ? extends 
 
 	}
 
+	private void handleReset(boolean resetWait) {
+		if (resetWait == true) {
+			synchronized (lock) {
+				waitForFinishes = false;
+				lock.notifyAll();
+			}
+		}
+	}
+
+	private Promise<Long> deliver(List<PushEventConsumer< ? super T>> toCall,
+			PushEvent<T> event) {
+		if (toCall.size() == 1) {
+			return doCall(event, toCall.get(0));
+		} else {
+			List<Promise<Long>> calls = toCall.stream().map(pec -> {
+				if (semaphore.tryAcquire()) {
+					return doSendWithBackPressure(pec, event)
+							.onResolve(() -> semaphore.release());
+				} else {
+					return doCall(event, pec);
+				}
+			}).collect(toList());
+			return Promises
+					.all(sameThread.deferred(), calls)
+					.map(l -> l.stream().max(Long::compareTo).orElseGet(
+							() -> Long.valueOf(System.nanoTime())));
+		}
+	}
+
+	private Promise<Long> doCall(PushEvent<T> event,
+			PushEventConsumer< ? super T> pec) {
+		return sameThread.resolved(
+				Long.valueOf(System.nanoTime() + safePush(pec, event)));
+	}
+
 	@Override
 	public boolean isConnected() {
 		synchronized (lock) {
@@ -320,17 +375,17 @@ class SimplePushEventSourceImpl<T, U extends BlockingQueue<PushEvent< ? extends 
 
 			if (connected.isEmpty()) {
 				if (connectPromise == null) {
-					connectPromise = new Deferred<>();
+					connectPromise = executors.deferred();
 				}
 				return connectPromise.getPromise();
 			} else {
-				return Promises.resolved(null);
+				return executors.resolved(null);
 			}
 		}
 	}
 
 	private Promise<Void> closedConnectPromise() {
-		return Promises.failed(new IllegalStateException(
+		return executors.failed(new IllegalStateException(
 				"This SimplePushEventSource is closed"));
 	}
 

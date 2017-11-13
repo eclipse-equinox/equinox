@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) OSGi Alliance (2015, 2017). All Rights Reserved.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.osgi.util.pushstream;
 
 import static java.util.Collections.emptyList;
@@ -23,7 +39,6 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,7 +54,9 @@ import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
+import java.util.function.LongUnaryOperator;
 import java.util.function.Supplier;
+import java.util.function.ToLongBiFunction;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -60,8 +77,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 	
 	protected final PushStreamProvider								psp;
 	
-	protected final Executor										defaultExecutor;
-	protected final ScheduledExecutorService						scheduler;
+	protected final PushStreamExecutors								executors;
 
 	protected final AtomicReference<State> closed = new AtomicReference<>(BUILDING);
 	
@@ -75,10 +91,9 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 	protected abstract void upstreamClose(PushEvent< ? > close);
 
 	AbstractPushStreamImpl(PushStreamProvider psp,
-			Executor executor, ScheduledExecutorService scheduler) {
+			PushStreamExecutors executors) {
 		this.psp = psp;
-		this.defaultExecutor = executor;
-		this.scheduler = scheduler;
+		this.executors = executors;
 	}
 
 	protected long handleEvent(PushEvent< ? extends T> event) {
@@ -201,7 +216,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 	@Override
 	public PushStream<T> filter(Predicate< ? super T> predicate) {
 		AbstractPushStreamImpl<T> eventStream = new IntermediatePushStreamImpl<>(
-				psp, defaultExecutor, scheduler, this);
+				psp, executors, this);
 		updateNext((event) -> {
 			try {
 				if (!event.isTerminal()) {
@@ -224,7 +239,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 	public <R> PushStream<R> map(Function< ? super T, ? extends R> mapper) {
 		
 		AbstractPushStreamImpl<R> eventStream = new IntermediatePushStreamImpl<>(
-				psp, defaultExecutor, scheduler, this);
+				psp, executors, this);
 		updateNext(event -> {
 			try {
 				if (!event.isTerminal()) {
@@ -245,7 +260,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 	public <R> PushStream<R> flatMap(
 			Function< ? super T, ? extends PushStream< ? extends R>> mapper) {
 		AbstractPushStreamImpl<R> eventStream = new IntermediatePushStreamImpl<>(
-				psp, defaultExecutor, scheduler, this);
+				psp, executors, this);
 
 		PushEventConsumer<R> consumer = e -> {
 			switch (e.getType()) {
@@ -305,7 +320,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 	public PushStream<T> sorted(Comparator< ? super T> comparator) {
 		List<T> list = Collections.synchronizedList(new ArrayList<>());
 		AbstractPushStreamImpl<T> eventStream = new IntermediatePushStreamImpl<>(
-				psp, defaultExecutor, scheduler, this);
+				psp, executors, this);
 		updateNext(event -> {
 			try {
 				switch(event.getType()) {
@@ -340,7 +355,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 			throw new IllegalArgumentException("The limit must be greater than zero");
 		}
 		AbstractPushStreamImpl<T> eventStream = new IntermediatePushStreamImpl<>(
-				psp, defaultExecutor, scheduler, this);
+				psp, executors, this);
 		AtomicLong counter = new AtomicLong(maxSize);
 		updateNext(event -> {
 			try {
@@ -366,11 +381,11 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 	@Override
 	public PushStream<T> limit(Duration maxTime) {
 		
-		Runnable start = () -> scheduler.schedule(() -> close(),
+		Runnable start = () -> executors.schedule(() -> close(),
 				maxTime.toNanos(), NANOSECONDS);
 
 		AbstractPushStreamImpl<T> eventStream = new IntermediatePushStreamImpl<T>(
-				psp, defaultExecutor, scheduler, this) {
+				psp, executors, this) {
 			@Override
 			protected void beginning() {
 				start.run();
@@ -394,11 +409,11 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 		long timeout = maxTime.toNanos();
 
 		AbstractPushStreamImpl<T> eventStream = new IntermediatePushStreamImpl<T>(
-				psp, defaultExecutor, scheduler, this) {
+				psp, executors, this) {
 			@Override
 			protected void beginning() {
 				lastTime.set(System.nanoTime());
-				scheduler.schedule(() -> check(lastTime, timeout), timeout,
+				executors.schedule(() -> check(lastTime, timeout), timeout,
 						NANOSECONDS);
 			}
 		};
@@ -419,7 +434,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 		long elapsed = now - lastTime.get();
 
 		if (elapsed < timeout) {
-			scheduler.schedule(() -> check(lastTime, timeout),
+			executors.schedule(() -> check(lastTime, timeout),
 					timeout - elapsed, NANOSECONDS);
 		} else {
 			PushEvent<T> error = PushEvent.error(new TimeoutException());
@@ -436,7 +451,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 					"The number to skip must be greater than or equal to zero");
 		}
 		AbstractPushStreamImpl<T> eventStream = new IntermediatePushStreamImpl<>(
-				psp, defaultExecutor, scheduler, this);
+				psp, executors, this);
 		AtomicLong counter = new AtomicLong(n);
 		updateNext(event -> {
 			try {
@@ -460,7 +475,8 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 	@Override
 	public PushStream<T> fork(int n, int delay, Executor ex) {
 		AbstractPushStreamImpl<T> eventStream = new IntermediatePushStreamImpl<>(
-				psp, ex, scheduler, this);
+				psp, new PushStreamExecutors(ex, executors.scheduledExecutor()),
+				this);
 		Semaphore s = new Semaphore(n);
 		updateNext(event -> {
 			try {
@@ -522,7 +538,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 	public PushStream<T> merge(
 			PushEventSource< ? extends T> source) {
 		AbstractPushStreamImpl<T> eventStream = new IntermediatePushStreamImpl<>(
-				psp, defaultExecutor, scheduler, this);
+				psp, executors, this);
 		AtomicInteger count = new AtomicInteger(2);
 		PushEventConsumer<T> consumer = event -> {
 			try {
@@ -604,7 +620,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 
 		@SuppressWarnings("resource")
 		AbstractPushStreamImpl<T> eventStream = new AbstractPushStreamImpl<T>(
-				psp, defaultExecutor, scheduler) {
+				psp, executors) {
 			@Override
 			protected boolean begin() {
 				if (closed.compareAndSet(BUILDING, STARTED)) {
@@ -644,8 +660,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 		Predicate<? super T>[] tests = Arrays.copyOf(predicates, predicates.length);
 		AbstractPushStreamImpl<T>[] rsult = new AbstractPushStreamImpl[tests.length];
 		for(int i = 0; i < tests.length; i++) {
-			rsult[i] = new IntermediatePushStreamImpl<>(psp, defaultExecutor,
-					scheduler, this);
+			rsult[i] = new IntermediatePushStreamImpl<>(psp, executors, this);
 		}
 
 		Boolean[] array = new Boolean[tests.length];
@@ -701,7 +716,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 	@Override
 	public PushStream<T> sequential() {
 		AbstractPushStreamImpl<T> eventStream = new IntermediatePushStreamImpl<>(
-				psp, defaultExecutor, scheduler, this);
+				psp, executors, this);
 		Lock lock = new ReentrantLock();
 		updateNext((event) -> {
 			try {
@@ -723,7 +738,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 	public <R> PushStream<R> coalesce(
 			Function< ? super T,Optional<R>> accumulator) {
 		AbstractPushStreamImpl<R> eventStream = new IntermediatePushStreamImpl<>(
-				psp, defaultExecutor, scheduler, this);
+				psp, executors, this);
 		updateNext((event) -> {
 			try {
 				if (!event.isTerminal()) {
@@ -770,7 +785,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 
 		@SuppressWarnings("resource")
 		AbstractPushStreamImpl<R> eventStream = new IntermediatePushStreamImpl<R>(
-				psp, defaultExecutor, scheduler, this) {
+				psp, executors, this) {
 			@Override
 			protected void beginning() {
 				init.run();
@@ -842,7 +857,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 	@Override
 	public <R> PushStream<R> window(Duration time,
 			Function<Collection<T>,R> f) {
-		return window(time, defaultExecutor, f);
+		return window(time, executors.executor(), f);
 	}
 
 	@Override
@@ -861,7 +876,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 	public <R> PushStream<R> window(Supplier<Duration> time,
 			IntSupplier maxEvents,
 			BiFunction<Long,Collection<T>,R> f) {
-		return window(time, maxEvents, defaultExecutor, f);
+		return window(time, maxEvents, executors.executor(), f);
 	}
 
 	@Override
@@ -887,7 +902,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 
 				long windowSize = time.get().toNanos();
 				previousWindowSize.set(windowSize);
-				scheduler.schedule(
+				executors.schedule(
 						getWindowTask(p, f, time, maxEvents, lock, count,
 								queueRef, timestamp, counter,
 								previousWindowSize, ex),
@@ -899,7 +914,8 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 
 		@SuppressWarnings("resource")
 		AbstractPushStreamImpl<R> eventStream = new IntermediatePushStreamImpl<R>(
-				psp, ex, scheduler, this) {
+				psp, new PushStreamExecutors(ex, executors.scheduledExecutor()),
+				this) {
 			@Override
 			protected void beginning() {
 				begin.accept(this);
@@ -952,7 +968,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 					long nextWindow = time.get().toNanos();
 					long backpressure = previousWindowSize.getAndSet(nextWindow)
 							- elapsed;
-					scheduler.schedule(
+					executors.schedule(
 							getWindowTask(eventStream, f, time, maxEvents, lock,
 									newCount, queueRef, timestamp, counter,
 									previousWindowSize, ex),
@@ -1178,7 +1194,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 			long nextWindow = time.get().toNanos();
 			previousWindowSize.set(nextWindow);
 			queueRef.set(getQueueForInternalBuffering(maxEvents.getAsInt()));
-			scheduler.schedule(
+			executors.schedule(
 					getWindowTask(eventStream, f, time, maxEvents, lock,
 							expectedCounter + 1, queueRef, timestamp, counter,
 							previousWindowSize, executor),
@@ -1208,8 +1224,51 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 	}
 
 	@Override
+	public PushStream<T> adjustBackPressure(LongUnaryOperator adjustment) {
+		AbstractPushStreamImpl<T> eventStream = new IntermediatePushStreamImpl<>(
+				psp, executors, this);
+		updateNext(event -> {
+			try {
+				long bp = eventStream.handleEvent(event);
+				if (event.isTerminal()) {
+					return ABORT;
+				} else {
+					return bp < 0 ? bp : adjustment.applyAsLong(bp);
+				}
+			} catch (Exception e) {
+				close(PushEvent.error(e));
+				return ABORT;
+			}
+		});
+		return eventStream;
+	}
+
+	@Override
+	public PushStream<T> adjustBackPressure(
+			ToLongBiFunction<T,Long> adjustment) {
+		AbstractPushStreamImpl<T> eventStream = new IntermediatePushStreamImpl<>(
+				psp, executors, this);
+		updateNext(event -> {
+			try {
+				long bp = eventStream.handleEvent(event);
+				if (event.isTerminal()) {
+					return ABORT;
+				} else {
+					return bp < 0 ? bp
+							: adjustment.applyAsLong(event.getData(),
+									Long.valueOf(bp));
+				}
+			} catch (Exception e) {
+				close(PushEvent.error(e));
+				return ABORT;
+			}
+		});
+		return eventStream;
+	}
+
+	@Override
 	public Promise<Void> forEach(Consumer< ? super T> action) {
-		Deferred<Void> d = new Deferred<>();
+		Deferred<Void> d = executors.deferred();
 		updateNext((event) -> {
 				try {
 					switch(event.getType()) {
@@ -1223,10 +1282,10 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 							d.fail(event.getFailure());
 							break;
 					}
-					close(event.nodata());
+				close(event.nodata());
 					return ABORT;
 				} catch (Exception e) {
-					d.fail(e);
+				close(PushEvent.error(e));
 					return ABORT;
 				}
 			});
@@ -1248,7 +1307,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 
 	@Override
 	public Promise<T> reduce(T identity, BinaryOperator<T> accumulator) {
-		Deferred<T> d = new Deferred<>();
+		Deferred<T> d = executors.deferred();
 		AtomicReference<T> iden = new AtomicReference<T>(identity);
 
 		updateNext(event -> {
@@ -1277,7 +1336,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 
 	@Override
 	public Promise<Optional<T>> reduce(BinaryOperator<T> accumulator) {
-		Deferred<Optional<T>> d = new Deferred<>();
+		Deferred<Optional<T>> d = executors.deferred();
 		AtomicReference<T> iden = new AtomicReference<T>(null);
 
 		updateNext(event -> {
@@ -1307,7 +1366,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 
 	@Override
 	public <U> Promise<U> reduce(U identity, BiFunction<U, ? super T, U> accumulator, BinaryOperator<U> combiner) {
-		Deferred<U> d = new Deferred<>();
+		Deferred<U> d = executors.deferred();
 		AtomicReference<U> iden = new AtomicReference<>(identity);
 
 		updateNext(event -> {
@@ -1338,7 +1397,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 	public <R, A> Promise<R> collect(Collector<? super T, A, R> collector) {
 		A result = collector.supplier().get();
 		BiConsumer<A, ? super T> accumulator = collector.accumulator();
-		Deferred<R> d = new Deferred<>();
+		Deferred<R> d = executors.deferred();
 		PushEventConsumer<T> consumer;
 
 		if (collector.characteristics()
@@ -1405,7 +1464,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 
 	@Override
 	public Promise<Long> count() {
-		Deferred<Long> d = new Deferred<>();
+		Deferred<Long> d = executors.deferred();
 		LongAdder counter = new LongAdder();
 		updateNext((event) -> {
 				try {
@@ -1451,7 +1510,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 
 	@Override
 	public Promise<Optional<T>> findFirst() {
-		Deferred<Optional<T>> d = new Deferred<>();
+		Deferred<Optional<T>> d = executors.deferred();
 		updateNext((event) -> {
 				try {
 					Optional<T> o = null;
@@ -1485,7 +1544,7 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 
 	@Override
 	public Promise<Long> forEachEvent(PushEventConsumer< ? super T> action) {
-		Deferred<Long> d = new Deferred<>();
+		Deferred<Long> d = executors.deferred();
 		LongAdder la = new LongAdder();
 		updateNext((event) -> {
 			try {
@@ -1497,15 +1556,17 @@ abstract class AbstractPushStreamImpl<T> implements PushStream<T> {
 					case CLOSE:
 						try {
 							action.accept(event);
-						} finally {
 							d.resolve(Long.valueOf(la.sum()));
+						} catch (Exception e) {
+							d.fail(e);
 						}
 						break;
 					case ERROR:
 						try {
 							action.accept(event);
-						} finally {
 							d.fail(event.getFailure());
+						} catch (Exception e) {
+							d.fail(e);
 						}
 						break;
 				}

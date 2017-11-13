@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2015, 2016). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2015, 2017). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@ import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
+import java.util.function.LongUnaryOperator;
 import java.util.function.Supplier;
+import java.util.function.ToLongBiFunction;
 import java.util.stream.Collector;
 
 import org.osgi.annotation.versioning.ProviderType;
@@ -187,8 +189,8 @@ public interface PushStream<T> extends AutoCloseable {
 	 * @param delay Nr of ms/thread that is queued back pressure
 	 * @param e an executor to use for the background threads.
 	 * @return Builder style (can be a new or the same object)
-	 * @throws IllegalArgumentException if the number of threads is < 1 or the
-	 *             delay is < 0
+	 * @throws IllegalArgumentException if the number of threads is &lt; 1 or
+	 *             the delay is &lt; 0
 	 * @throws NullPointerException if the Executor is null
 	 */
 	PushStream<T> fork(int n, int delay, Executor e)
@@ -428,6 +430,33 @@ public interface PushStream<T> extends AutoCloseable {
 	<R> PushStream<R> window(Supplier<Duration> timeSupplier,
 			IntSupplier maxEvents, Executor executor,
 			BiFunction<Long,Collection<T>,R> f);
+
+	/**
+	 * Changes the back-pressure propagated by this pipeline stage.
+	 * <p>
+	 * The supplied function receives the back pressure returned by the next
+	 * pipeline stage and returns the back pressure that should be returned by
+	 * this stage. This function will not be called if the previous pipeline
+	 * stage returns negative back pressure.
+	 * 
+	 * @param adjustment
+	 * @return Builder style (can be a new or the same object)
+	 */
+	PushStream<T> adjustBackPressure(LongUnaryOperator adjustment);
+
+	/**
+	 * Changes the back-pressure propagated by this pipeline stage.
+	 * <p>
+	 * The supplied function receives the data object passed to the next
+	 * pipeline stage and the back pressure that was returned by that stage when
+	 * accepting it. The function returns the back pressure that should be
+	 * returned by this stage. This function will not be called if the previous
+	 * pipeline stage returns negative back pressure.
+	 * 
+	 * @param adjustment
+	 * @return Builder style (can be a new or the same object)
+	 */
+	PushStream<T> adjustBackPressure(ToLongBiFunction<T,Long> adjustment);
 
 	/**
 	 * Execute the action for each event received until the channel is closed.
