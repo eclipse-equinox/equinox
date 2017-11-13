@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,7 @@ import java.security.cert.Certificate;
 import org.eclipse.equinox.internal.security.ui.wizard.CertificateViewer;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.*;
 
@@ -50,19 +49,15 @@ public class ConfirmationDialog extends TitleAreaDialog {
 
 	protected void createButtonsForButtonBar(Composite parent) {
 		Button yesBtn = createButton(parent, YES, SecurityUIMsg.CONFIRMATION_DIALGO_YES, true);
-		yesBtn.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				setReturnCode(YES);
-				close();
-			}
-		});
+		yesBtn.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
+			setReturnCode(YES);
+			close();
+		}));
 
 		Button noBtn = createButton(parent, NO, SecurityUIMsg.CONFIRMATION_DIALGO_NO, false);
-		noBtn.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				setReturnCode(NO);
-				close();
-			}
-		});
+		noBtn.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
+			setReturnCode(NO);
+			close();
+		}));
 	}
 }

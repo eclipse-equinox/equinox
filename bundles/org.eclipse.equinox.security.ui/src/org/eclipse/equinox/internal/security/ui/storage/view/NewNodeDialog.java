@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,8 +16,6 @@ import org.eclipse.equinox.internal.security.ui.storage.IStorageConst;
 import org.eclipse.jface.dialogs.*;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.PlatformUI;
@@ -52,11 +50,7 @@ public class NewNodeDialog extends TitleAreaDialog {
 
 		new Label(composite, SWT.LEFT).setText(SecUIMessages.newNodeLabel);
 		nodeName = new Text(composite, SWT.LEFT | SWT.BORDER);
-		nodeName.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent event) {
-				okButton.setEnabled(validName());
-			}
-		});
+		nodeName.addModifyListener(event -> okButton.setEnabled(validName()));
 
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		GridLayoutFactory.swtDefaults().generateLayout(composite);

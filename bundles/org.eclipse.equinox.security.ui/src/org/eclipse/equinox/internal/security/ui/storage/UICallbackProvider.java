@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,22 +87,20 @@ public class UICallbackProvider implements IUICallbacks {
 		Display display = PlatformUI.getWorkbench().getDisplay();
 		if (!display.isDisposed() && (display.getThread() == Thread.currentThread())) { // we are running in a UI thread
 
-			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() { // syncExec not really necessary but kept for safety
-						public void run() {
-							IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
-							InitWithProgress task = new InitWithProgress(callback);
-							try {
-								progressService.busyCursorWhile(task);
-							} catch (InvocationTargetException e) {
-								exception[0] = new StorageException(StorageException.INTERNAL_ERROR, e);
-								return;
-							} catch (InterruptedException e) {
-								exception[0] = new StorageException(StorageException.INTERNAL_ERROR, SecUIMessages.initCancelled);
-								return;
-							}
-							exception[0] = task.getException();
-						}
-					});
+			PlatformUI.getWorkbench().getDisplay().syncExec(() -> {
+				IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
+				InitWithProgress task = new InitWithProgress(callback);
+				try {
+					progressService.busyCursorWhile(task);
+				} catch (InvocationTargetException e1) {
+					exception[0] = new StorageException(StorageException.INTERNAL_ERROR, e1);
+					return;
+				} catch (InterruptedException e2) {
+					exception[0] = new StorageException(StorageException.INTERNAL_ERROR, SecUIMessages.initCancelled);
+					return;
+				}
+				exception[0] = task.getException();
+			});
 		} else { // we are running in non-UI thread, use Job to show small progress indicator on the status bar
 			Job job = new Job(SecUIMessages.secureStorageInitialization) {
 				protected IStatus run(IProgressMonitor monitor) {
@@ -130,11 +128,9 @@ public class UICallbackProvider implements IUICallbacks {
 			return null;
 
 		final Boolean[] result = new Boolean[1];
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-			public void run() {
-				boolean reply = MessageDialog.openConfirm(StorageUtils.getShell(), SecUIMessages.generalDialogTitle, msg);
-				result[0] = Boolean.valueOf(reply);
-			}
+		PlatformUI.getWorkbench().getDisplay().syncExec(() -> {
+			boolean reply = MessageDialog.openConfirm(StorageUtils.getShell(), SecUIMessages.generalDialogTitle, msg);
+			result[0] = Boolean.valueOf(reply);
 		});
 		return result[0];
 	}

@@ -118,16 +118,13 @@ public class NodesView {
 		nodeTreeViewer.setLabelProvider(new ViewLabelProvider());
 		nodeTreeViewer.setInput(defaultPrefs);
 
-		nodeTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-
-			public void selectionChanged(SelectionChangedEvent event) {
-				TreeSelection selection = (TreeSelection) event.getSelection();
-				Object selected = selection.getFirstElement();
-				if (selected instanceof ISecurePreferences)
-					parentView.setSelection((ISecurePreferences) selected);
-				else
-					parentView.setSelection(null);
-			}
+		nodeTreeViewer.addSelectionChangedListener(event -> {
+			TreeSelection selection = (TreeSelection) event.getSelection();
+			Object selected = selection.getFirstElement();
+			if (selected instanceof ISecurePreferences)
+				parentView.setSelection((ISecurePreferences) selected);
+			else
+				parentView.setSelection(null);
 		});
 
 		if (Activator.getDefault().debugStorageContents()) {
@@ -139,22 +136,20 @@ public class NodesView {
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager(SecUIMessages.nodesContextMenu);
 
-		menuMgr.addMenuListener(new IMenuListener() {
-			public void menuAboutToShow(IMenuManager manager) {
-				boolean canRemove = false;
-				boolean canAdd = false;
-				TreeSelection selection = (TreeSelection) nodeTreeViewer.getSelection();
-				Object selected = selection.getFirstElement();
-				if (selected instanceof ISecurePreferences) {
-					ISecurePreferences node = (ISecurePreferences) selected;
-					boolean isRoot = (node.parent() == null);
-					boolean isInternal = node.absolutePath().startsWith(IStorageConst.PROVIDER_NODE);
-					canRemove = (!isRoot && !isInternal);
-					canAdd = !isInternal;
-				}
-				removeNodeAction.setEnabled(canRemove);
-				addNodeAction.setEnabled(canAdd);
+		menuMgr.addMenuListener(manager -> {
+			boolean canRemove = false;
+			boolean canAdd = false;
+			TreeSelection selection = (TreeSelection) nodeTreeViewer.getSelection();
+			Object selected = selection.getFirstElement();
+			if (selected instanceof ISecurePreferences) {
+				ISecurePreferences node = (ISecurePreferences) selected;
+				boolean isRoot = (node.parent() == null);
+				boolean isInternal = node.absolutePath().startsWith(IStorageConst.PROVIDER_NODE);
+				canRemove = (!isRoot && !isInternal);
+				canAdd = !isInternal;
 			}
+			removeNodeAction.setEnabled(canRemove);
+			addNodeAction.setEnabled(canAdd);
 		});
 		Menu menu = menuMgr.createContextMenu(nodeTreeViewer.getControl());
 		nodeTreeViewer.getControl().setMenu(menu);

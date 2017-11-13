@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,7 @@ public class CertificateImportCertSelectPage extends WizardPage implements Liste
 
 	private Composite certPreview;
 	private Combo certDropDown;
-	private List certList;
+	private List<Certificate> certList;
 
 	static CertificateFactory certFact;
 
@@ -75,10 +75,10 @@ public class CertificateImportCertSelectPage extends WizardPage implements Liste
 			certDropDown.removeAll();
 
 		try {
-			certList = new ArrayList();
-			Collection collection = certFact.generateCertificates(new FileInputStream(certImportWizard.selectedImportFile));
+			certList = new ArrayList<>();
+			Collection<? extends Certificate> collection = certFact.generateCertificates(new FileInputStream(certImportWizard.selectedImportFile));
 			// For a set or list
-			for (Iterator it = collection.iterator(); it.hasNext();) {
+			for (Iterator<? extends Certificate> it = collection.iterator(); it.hasNext();) {
 				certList.add(it.next());
 			}
 

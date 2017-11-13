@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.ui;
 
-import java.util.Arrays;
 import java.util.Hashtable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -39,18 +38,18 @@ public class Activator extends AbstractUIPlugin {
 	private static final String PROP_DEFAULT_SERVICE = "org.eclipse.osgi"; //$NON-NLS-1$
 
 	//service trackers
-	private static ServiceTracker trustEngineTracker;
-	private static ServiceTracker authzEngineTracker;
-	private static ServiceTracker authzManagerTracker;
-	private static ServiceTracker platformAdminTracker;
-	private static ServiceTracker debugTracker;
+	private static ServiceTracker<?, TrustEngine> trustEngineTracker;
+	private static ServiceTracker<?, AuthorizationEngine> authzEngineTracker;
+	private static ServiceTracker<?, AuthorizationManager> authzManagerTracker;
+	private static ServiceTracker<?, PlatformAdmin> platformAdminTracker;
+	private static ServiceTracker<?, DebugOptions> debugTracker;
 
 	// The shared plug-in instance
 	private static Activator plugin;
 
 	// The bundle context
 	private static BundleContext bundleContext;
-	private ServiceRegistration defaultAuthzManagerReg;
+	private ServiceRegistration<AuthorizationManager> defaultAuthzManagerReg;
 
 	// debug tracing
 	private static final String OPTION_DEBUG = "org.eclipse.equinox.security.ui/debug"; //$NON-NLS-1$;
@@ -84,10 +83,10 @@ public class Activator extends AbstractUIPlugin {
 		plugin = this;
 
 		// Register the default authorization manager
-		Hashtable properties = new Hashtable(7);
+		Hashtable<String, Object> properties = new Hashtable<>(7);
 		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
 		properties.put(PROP_AUTHZ_MANAGER, PROP_DEFAULT_SERVICE);
-		defaultAuthzManagerReg = bundleContext.registerService(AuthorizationManager.class.getName(), new DefaultAuthorizationManager(), properties);
+		defaultAuthzManagerReg = bundleContext.registerService(AuthorizationManager.class, new DefaultAuthorizationManager(), properties);
 	}
 
 	public void stop(BundleContext context) throws Exception {
@@ -132,16 +131,12 @@ public class Activator extends AbstractUIPlugin {
 					// do nothing just use no filter TODO we may want to log something
 				}
 			if (filter != null) {
-				trustEngineTracker = new ServiceTracker(bundleContext, filter, null);
+				trustEngineTracker = new ServiceTracker<>(bundleContext, filter, null);
 			} else
-				trustEngineTracker = new ServiceTracker(bundleContext, TrustEngine.class.getName(), null);
+				trustEngineTracker = new ServiceTracker<>(bundleContext, TrustEngine.class, null);
 			trustEngineTracker.open();
 		}
-		Object[] services = trustEngineTracker.getServices();
-		if (services != null) {
-			return (TrustEngine[]) Arrays.asList(services).toArray(new TrustEngine[] {});
-		}
-		return new TrustEngine[0];
+		return trustEngineTracker.getServices(new TrustEngine[] {});
 	}
 
 	public static AuthorizationEngine getAuthorizationEngine() {
@@ -155,13 +150,13 @@ public class Activator extends AbstractUIPlugin {
 					//TODO:log the error
 				}
 			if (filter != null) {
-				authzEngineTracker = new ServiceTracker(Activator.getBundleContext(), filter, null);
+				authzEngineTracker = new ServiceTracker<>(Activator.getBundleContext(), filter, null);
 			} else {
-				authzEngineTracker = new ServiceTracker(Activator.getBundleContext(), AuthorizationEngine.class.getName(), null);
+				authzEngineTracker = new ServiceTracker<>(Activator.getBundleContext(), AuthorizationEngine.class, null);
 			}
 			authzEngineTracker.open();
 		}
-		return (AuthorizationEngine) authzEngineTracker.getService();
+		return authzEngineTracker.getService();
 	}
 
 	public static AuthorizationManager getAuthorizationManager() {
@@ -175,21 +170,21 @@ public class Activator extends AbstractUIPlugin {
 					//TODO:log the error
 				}
 			if (filter != null) {
-				authzManagerTracker = new ServiceTracker(Activator.getBundleContext(), filter, null);
+				authzManagerTracker = new ServiceTracker<>(Activator.getBundleContext(), filter, null);
 			} else {
-				authzManagerTracker = new ServiceTracker(Activator.getBundleContext(), AuthorizationManager.class.getName(), null);
+				authzManagerTracker = new ServiceTracker<>(Activator.getBundleContext(), AuthorizationManager.class, null);
 			}
 			authzManagerTracker.open();
 		}
-		return (AuthorizationManager) authzManagerTracker.getService();
+		return authzManagerTracker.getService();
 	}
 
 	public static PlatformAdmin getPlatformAdmin() {
 		if (platformAdminTracker == null) {
-			platformAdminTracker = new ServiceTracker(Activator.getBundleContext(), PlatformAdmin.class.getName(), null);
+			platformAdminTracker = new ServiceTracker<>(Activator.getBundleContext(), PlatformAdmin.class, null);
 			platformAdminTracker.open();
 		}
-		return (PlatformAdmin) platformAdminTracker.getService();
+		return platformAdminTracker.getService();
 	}
 
 	/**
@@ -215,10 +210,10 @@ public class Activator extends AbstractUIPlugin {
 
 	public DebugOptions getDebugOptions() {
 		if (debugTracker == null) {
-			debugTracker = new ServiceTracker(bundleContext, DebugOptions.class.getName(), null);
+			debugTracker = new ServiceTracker<>(bundleContext, DebugOptions.class, null);
 			debugTracker.open();
 		}
-		return (DebugOptions) debugTracker.getService();
+		return debugTracker.getService();
 	}
 
 	public boolean debugStorageContents() {

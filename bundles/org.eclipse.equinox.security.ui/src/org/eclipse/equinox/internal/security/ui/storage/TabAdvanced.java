@@ -28,7 +28,7 @@ public class TabAdvanced {
 
 	private static final String PREFERENCES_PLUGIN = "org.eclipse.equinox.security"; //$NON-NLS-1$
 
-	private Map availableCiphers = null;
+	private Map<String, ?> availableCiphers = null;
 	private Combo cipherSelector = null;
 
 	private IEclipsePreferences eclipseNode = null;
@@ -55,8 +55,8 @@ public class TabAdvanced {
 
 		// fill cipher selector
 		int position = 0;
-		for (Iterator i = availableCiphers.keySet().iterator(); i.hasNext();) {
-			String cipherAlgorithm = (String) i.next();
+		for (Iterator<String> i = availableCiphers.keySet().iterator(); i.hasNext();) {
+			String cipherAlgorithm = i.next();
 			cipherSelector.add(cipherAlgorithm, position);
 			if (defaultCipherAlgorithm.equals(cipherAlgorithm))
 				cipherSelector.select(position);

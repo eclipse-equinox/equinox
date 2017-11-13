@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,8 @@ import org.eclipse.jface.dialogs.*;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.*;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -113,20 +114,12 @@ public class StorageLoginDialog extends TitleAreaDialog {
 
 		new Label(composite, SWT.LEFT).setText(SecUIMessages.labelPassword);
 		password = new Text(composite, SWT.LEFT | SWT.BORDER);
-		password.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent event) {
-				okButton.setEnabled(validatePassword());
-			}
-		});
+		password.addModifyListener(event -> okButton.setEnabled(validatePassword()));
 
 		if (confirmPassword) {
 			new Label(composite, SWT.LEFT).setText(SecUIMessages.labelConfirm);
 			confirm = new Text(composite, SWT.LEFT | SWT.BORDER);
-			confirm.addModifyListener(new ModifyListener() {
-				public void modifyText(ModifyEvent event) {
-					okButton.setEnabled(validatePassword());
-				}
-			});
+			confirm.addModifyListener(event -> okButton.setEnabled(validatePassword()));
 		} else
 			confirm = null;
 

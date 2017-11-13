@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -148,10 +148,6 @@ public class ValuesView {
 		}
 	}
 
-	class TableNameSorter extends ViewerSorter {
-		// using default implementation for now
-	}
-
 	public ValuesView(Table table, final ISecurePreferencesSelection parentView, Shell shell) {
 		this.parentView = parentView;
 		this.shell = shell;
@@ -170,7 +166,7 @@ public class ValuesView {
 
 		tableViewer.setContentProvider(new TableContentProvider());
 		tableViewer.setLabelProvider(new TableLabelProvider());
-		tableViewer.setSorter(new TableNameSorter());
+		tableViewer.setComparator(new ViewerComparator());
 
 		if (Activator.getDefault().debugStorageContents()) {
 			makeActions();
@@ -181,39 +177,37 @@ public class ValuesView {
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager(SecUIMessages.nodesContextMenu);
 
-		menuMgr.addMenuListener(new IMenuListener() {
-			public void menuAboutToShow(IMenuManager manager) {
-				if (selectedNode == null) {
-					addValueAction.setEnabled(false);
-					removeValueAction.setEnabled(false);
-					return;
-				}
-				boolean isInternal = selectedNode.absolutePath().startsWith(IStorageConst.PROVIDER_NODE);
-				addValueAction.setEnabled(!isInternal);
-				removeValueAction.setEnabled(!isInternal);
-				if (encryptValueAction != null)
-					encryptValueAction.setEnabled(!isInternal);
-				if (decryptValueAction != null)
-					decryptValueAction.setEnabled(!isInternal);
-				if (showValueAction != null)
-					showValueAction.setEnabled(false);
+		menuMgr.addMenuListener(manager -> {
+			if (selectedNode == null) {
+				addValueAction.setEnabled(false);
+				removeValueAction.setEnabled(false);
+				return;
+			}
+			boolean isInternal = selectedNode.absolutePath().startsWith(IStorageConst.PROVIDER_NODE);
+			addValueAction.setEnabled(!isInternal);
+			removeValueAction.setEnabled(!isInternal);
+			if (encryptValueAction != null)
+				encryptValueAction.setEnabled(!isInternal);
+			if (decryptValueAction != null)
+				decryptValueAction.setEnabled(!isInternal);
+			if (showValueAction != null)
+				showValueAction.setEnabled(false);
 
-				// enablement of encrypted/decrypted
-				StructuredSelection selection = (StructuredSelection) tableViewer.getSelection();
-				Object selected = selection.getFirstElement();
-				if (selected instanceof TableValuesElement) {
-					String key = ((TableValuesElement) selected).getKey();
-					try {
-						boolean encrypted = selectedNode.isEncrypted(key);
-						if (encryptValueAction != null)
-							encryptValueAction.setEnabled(!isInternal && !encrypted);
-						if (decryptValueAction != null)
-							decryptValueAction.setEnabled(!isInternal && encrypted);
-						if (showValueAction != null)
-							showValueAction.setEnabled(encrypted);
-					} catch (StorageException e) {
-						Activator.log(IStatus.ERROR, SecUIMessages.failedDecrypt, null, e);
-					}
+			// enablement of encrypted/decrypted
+			StructuredSelection selection = (StructuredSelection) tableViewer.getSelection();
+			Object selected = selection.getFirstElement();
+			if (selected instanceof TableValuesElement) {
+				String key = ((TableValuesElement) selected).getKey();
+				try {
+					boolean encrypted = selectedNode.isEncrypted(key);
+					if (encryptValueAction != null)
+						encryptValueAction.setEnabled(!isInternal && !encrypted);
+					if (decryptValueAction != null)
+						decryptValueAction.setEnabled(!isInternal && encrypted);
+					if (showValueAction != null)
+						showValueAction.setEnabled(encrypted);
+				} catch (StorageException e) {
+					Activator.log(IStatus.ERROR, SecUIMessages.failedDecrypt, null, e);
 				}
 			}
 		});

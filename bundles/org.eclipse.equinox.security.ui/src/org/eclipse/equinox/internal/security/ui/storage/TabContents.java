@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,7 @@ import org.eclipse.equinox.security.storage.*;
 import org.eclipse.jface.layout.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -79,20 +78,17 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		buttonSave = new Button(buttonBar, SWT.PUSH);
 		buttonSave.setText(SecUIMessages.saveButton);
 		setButtonSize(buttonSave);
-		buttonSave.addSelectionListener(new SelectionAdapter() {
-
-			public void widgetSelected(SelectionEvent e) {
-				ISecurePreferences root = SecurePreferencesFactory.getDefault();
-				if (root == null)
-					return;
-				try {
-					root.flush();
-				} catch (IOException exception) {
-					Activator.log(IStatus.ERROR, exception.getMessage(), null, exception);
-				}
-				validateSave(); // save could fail so re-check
+		buttonSave.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
+			ISecurePreferences root = SecurePreferencesFactory.getDefault();
+			if (root == null)
+				return;
+			try {
+				root.flush();
+			} catch (IOException exception) {
+				Activator.log(IStatus.ERROR, exception.getMessage(), null, exception);
 			}
-		});
+			validateSave(); // save could fail so re-check
+		}));
 
 		/* Removed for the time being. In future modify/show/export operations could be 
 		 * re-introduced with some special access token required to be entered by the user 
@@ -109,11 +105,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		Button buttonDelete = new Button(buttonBar, SWT.PUSH);
 		buttonDelete.setText(SecUIMessages.deleteButton);
 		setButtonSize(buttonDelete);
-		buttonDelete.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				deteleDefaultStorage();
-			}
-		});
+		buttonDelete.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> deteleDefaultStorage()));
 
 		URL location = InternalExchangeUtils.defaultStorageLocation();
 		if (location != null) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,8 +17,6 @@ import org.eclipse.jface.action.ControlContribution;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -81,19 +79,6 @@ public class SecurityStatusControl extends ControlContribution {
 
 		label = new CLabel(parent, SWT.NONE);
 		label.setImage(getIcon(currentState));
-		label.addMouseListener(new MouseListener() {
-			public void mouseDoubleClick(MouseEvent e) {
-				//TODO: handleActionInvoked();
-			}
-
-			public void mouseDown(MouseEvent e) {
-				//nothing yet
-			}
-
-			public void mouseUp(MouseEvent e) {
-				//nothing yet
-			}
-		});
 
 		Job updateJob = new Job(ID) {
 			public IStatus run(IProgressMonitor monitor) {
@@ -102,13 +87,11 @@ public class SecurityStatusControl extends ControlContribution {
 					if (!currentState.equals(newState)) {
 						final Display display = getDisplay(window);
 						if (null != display)
-							display.asyncExec(new Runnable() {
-								public void run() {
-									if (!label.isDisposed()) {
-										Image oldIcon = label.getImage();
-										label.setImage(getIcon(currentState));
-										oldIcon.dispose();
-									}
+							display.asyncExec(() -> {
+								if (!label.isDisposed()) {
+									Image oldIcon = label.getImage();
+									label.setImage(getIcon(currentState));
+									oldIcon.dispose();
 								}
 							});
 						currentState = newState;

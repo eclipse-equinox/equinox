@@ -19,7 +19,8 @@ import org.eclipse.jface.dialogs.*;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.*;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.*;
@@ -87,11 +88,7 @@ public class ExportDialog extends TitleAreaDialog {
 			fileText.setText(lastFileName);
 
 		// add listener after the setText() above
-		fileText.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent event) {
-				okButton.setEnabled(validFile());
-			}
-		});
+		fileText.addModifyListener(event -> okButton.setEnabled(validFile()));
 
 		Button browse = new Button(composite, SWT.NONE);
 		browse.setText(SecUIMessages.exportDialogBrowse);

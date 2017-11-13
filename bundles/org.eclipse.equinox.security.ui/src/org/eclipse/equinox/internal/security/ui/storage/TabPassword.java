@@ -191,10 +191,10 @@ public class TabPassword {
 		TableColumn priorityColumn = new TableColumn(providerTable, SWT.CENTER);
 		priorityColumn.setText(SecUIMessages.priorityColumn);
 
-		List availableModules = InternalExchangeUtils.passwordProvidersFind();
-		HashSet disabledModules = getDisabledModules();
-		for (Iterator i = availableModules.iterator(); i.hasNext();) {
-			PasswordProviderDescription module = (PasswordProviderDescription) i.next();
+		List<PasswordProviderDescription> availableModules = InternalExchangeUtils.passwordProvidersFind();
+		HashSet<String> disabledModules = getDisabledModules();
+		for (Iterator<PasswordProviderDescription> i = availableModules.iterator(); i.hasNext();) {
+			PasswordProviderDescription module = i.next();
 			TableItem item = new TableItem(providerTable, SWT.NONE);
 			item.setText(new String[] {module.getName(), Integer.toString(module.getPriority())});
 			item.setData(module);
@@ -245,12 +245,12 @@ public class TabPassword {
 		enableLogout();
 	}
 
-	protected HashSet getDisabledModules() {
+	protected HashSet<String> getDisabledModules() {
 		IEclipsePreferences node = ConfigurationScope.INSTANCE.getNode(PREFERENCES_PLUGIN);
 		String tmp = node.get(IStorageConstants.DISABLED_PROVIDERS_KEY, null);
 		if (tmp == null || tmp.length() == 0)
 			return null;
-		HashSet modules = new HashSet();
+		HashSet<String> modules = new HashSet<>();
 		String[] disabledProviders = tmp.split(","); //$NON-NLS-1$
 		for (int i = 0; i < disabledProviders.length; i++) {
 			modules.add(disabledProviders[i]);

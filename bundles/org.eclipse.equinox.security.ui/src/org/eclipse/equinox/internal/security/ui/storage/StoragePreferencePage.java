@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package org.eclipse.equinox.internal.security.ui.storage;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.*;
@@ -48,18 +47,11 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 		advancedTab = new TabAdvanced(folder, 2, getShell());
 		folder.setSelection(0);
 
-		folder.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// nothing to do
-			}
-
-			public void widgetSelected(SelectionEvent e) {
-				int i = folder.getSelectionIndex();
-				if (i == 0 && passwordTab != null) // password page
-					passwordTab.onActivated();
-			}
-		});
+		folder.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
+			int i = folder.getSelectionIndex();
+			if (i == 0 && passwordTab != null) // password page
+				passwordTab.onActivated();
+		}));
 		Dialog.applyDialogFont(folder);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), HELP_ID);
 		return folder;

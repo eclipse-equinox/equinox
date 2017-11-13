@@ -44,13 +44,11 @@ public class DefaultPasswordProvider extends PasswordProvider {
 		final StorageLoginDialog loginDialog = new StorageLoginDialog(newPassword, passwordChange, location);
 
 		final PBEKeySpec[] result = new PBEKeySpec[1];
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-			public void run() {
-				if (loginDialog.open() == Window.OK)
-					result[0] = loginDialog.getGeneratedPassword();
-				else
-					result[0] = null;
-			}
+		PlatformUI.getWorkbench().getDisplay().syncExec(() -> {
+			if (loginDialog.open() == Window.OK)
+				result[0] = loginDialog.getGeneratedPassword();
+			else
+				result[0] = null;
 		});
 		return result[0];
 	}
@@ -60,11 +58,9 @@ public class DefaultPasswordProvider extends PasswordProvider {
 			return false;
 
 		final Boolean[] result = new Boolean[1];
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-			public void run() {
-				boolean reply = MessageDialog.openConfirm(StorageUtils.getShell(), SecUIMessages.exceptionTitle, SecUIMessages.exceptionDecode);
-				result[0] = Boolean.valueOf(reply);
-			}
+		PlatformUI.getWorkbench().getDisplay().syncExec(() -> {
+			boolean reply = MessageDialog.openConfirm(StorageUtils.getShell(), SecUIMessages.exceptionTitle, SecUIMessages.exceptionDecode);
+			result[0] = Boolean.valueOf(reply);
 		});
 		return result[0].booleanValue();
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008,  Jay Rosenthal
+ * Copyright (c) 2008, 2017  Jay Rosenthal and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -43,7 +43,7 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 	private static String LABEL_KEYUSAGE_ENCIPHERONLY = "encipherOnly"; //$NON-NLS-1$
 	private static String LABEL_KEYUSAGE_DECIPHERONLY = "decipherOnly"; //$NON-NLS-1$
 
-	private ArrayList elements = new ArrayList();
+	private ArrayList<X509CertificateAttribute> elements = new ArrayList<>();
 	private Viewer viewer = null;
 	private static String listDelim = ", "; //$NON-NLS-1$
 
@@ -138,9 +138,8 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 			X509CertificateAttribute pubKeyInfoItem = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_THMBPRINTX509_PUBKEY_INFO, getHex(pubKey.getEncoded()));
 			elements.add(pubKeyInfoItem);
 
-			Collection subAltNamesVctr;
 			try {
-				subAltNamesVctr = theCert.getSubjectAlternativeNames();
+				Collection<List<?>> subAltNamesVctr = theCert.getSubjectAlternativeNames();
 
 				//				StringBuffer bfrSubAltNames = new StringBuffer();
 				if (subAltNamesVctr != null && subAltNamesVctr.size() > 0) {
@@ -173,13 +172,13 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 			X509CertificateAttribute basicConstraints = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_BASIC_CNSTRNTS, (basicCnstrntsBfr.toString()).substring(0, basicCnstrntsBfr.length() - 2), basicConstraint);
 			elements.add(basicConstraints);
 
-			List exKeyUsg;
+			List<String> exKeyUsg;
 			try {
 				exKeyUsg = theCert.getExtendedKeyUsage();
 				StringBuffer exKeyUsgBfr = new StringBuffer();
 				if (exKeyUsg != null && exKeyUsg.size() > 0) {
-					for (Iterator exKeyUsgIter = exKeyUsg.iterator(); exKeyUsgIter.hasNext();) {
-						exKeyUsgBfr.append(((String) exKeyUsgIter.next()) + listDelim);
+					for (Iterator<String> exKeyUsgIter = exKeyUsg.iterator(); exKeyUsgIter.hasNext();) {
+						exKeyUsgBfr.append((exKeyUsgIter.next()) + listDelim);
 					}
 
 					X509CertificateAttribute exKeyUsgProp = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_EXKEY_USAGE, (exKeyUsgBfr.toString()).substring(0, exKeyUsgBfr.length() - 2), theCert.getExtendedKeyUsage());

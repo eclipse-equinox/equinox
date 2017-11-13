@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.equinox.security.ui;singleton:=true
-Bundle-Version: 1.1.400.qualifier
+Bundle-Version: 1.2.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Import-Package: javax.crypto.spec,
@@ -27,5 +27,5 @@ Export-Package: org.eclipse.equinox.internal.provisional.security.ui;version="1.
  org.eclipse.equinox.internal.security.ui.storage;x-internal:=true,
  org.eclipse.equinox.internal.security.ui.storage.view;x-internal:=true,
  org.eclipse.equinox.internal.security.ui.wizard;x-internal:=true
-Bundle-RequiredExecutionEnvironment: J2SE-1.4
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy

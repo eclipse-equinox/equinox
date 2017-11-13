@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2016 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,36 +46,36 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 
 	private void appendService(PrintWriter writer, ProviderService service, int index) {
 		writer.println("   Service: " + service.getType() + ", Algorithm: " + service.getAlgorithm() + ", Class: " + service.getClassName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		List aliases = service.getAliases();
+		List<String> aliases = service.getAliases();
 		if (null != aliases && (0 < aliases.size())) {
 			writer.print("    Aliases: "); //$NON-NLS-1$
-			for (Iterator it = aliases.iterator(); it.hasNext();) {
-				writer.print((String) it.next());
+			for (Iterator<String> it = aliases.iterator(); it.hasNext();) {
+				writer.print(it.next());
 				if (it.hasNext()) {
 					writer.print(", "); //$NON-NLS-1$
 				}
 			}
 			writer.println();
 		}
-		Map attributes = service.getAttributes();
+		Map<String, String> attributes = service.getAttributes();
 		if ((null != attributes) && (0 < attributes.size())) {
 			writer.println("    Attributes:"); //$NON-NLS-1$
-			for (Iterator it = attributes.entrySet().iterator(); it.hasNext();) {
-				Entry entry = (Entry) it.next();
-				String key = (String) entry.getKey();
+			for (Iterator<Entry<String, String>> it = attributes.entrySet().iterator(); it.hasNext();) {
+				Entry<String, String> entry = it.next();
+				String key = entry.getKey();
 				writer.print("      " + key + ": "); //$NON-NLS-1$//$NON-NLS-2$
-				writer.println((String) entry.getValue());
+				writer.println(entry.getValue());
 			}
 		}
 	}
 
 	private static ProviderService[] getServices(Provider provider) {
 
-		Hashtable serviceList = new Hashtable();
-		Hashtable attributeMap = new Hashtable(); // "type" => "Hashtable of (attribute,value) pairs"
-		Hashtable aliasMap = new Hashtable(); // "type" => "Arraylist of aliases"
-		for (Iterator it = provider.entrySet().iterator(); it.hasNext();) {
-			Entry entry = (Entry) it.next();
+		Hashtable<String, String> serviceList = new Hashtable<>();
+		Hashtable<String, Hashtable<String, String>> attributeMap = new Hashtable<>(); // "type" => "Hashtable of (attribute,value) pairs"
+		Hashtable<String, List<String>> aliasMap = new Hashtable<>(); // "type" => "Arraylist of aliases"
+		for (Iterator<Entry<Object, Object>> it = provider.entrySet().iterator(); it.hasNext();) {
+			Entry<Object, Object> entry = it.next();
 			String key = (String) entry.getKey();
 
 			// this is provider info, available off the Provider API
@@ -89,9 +89,9 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 				String type = (String) entry.getValue();
 				String algo = value.substring(0, value.indexOf('.'));
 				String alias = value.substring(value.indexOf('.') + 1, value.length());
-				ArrayList aliasList = (ArrayList) aliasMap.get(type + '.' + algo);
+				List<String> aliasList = aliasMap.get(type + '.' + algo);
 				if (aliasList == null) {
-					aliasList = new ArrayList();
+					aliasList = new ArrayList<>();
 					aliasList.add(alias);
 					aliasMap.put(type, aliasList);
 				} else {
@@ -105,9 +105,9 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 				String algorithm = key.substring(key.indexOf('.') + 1, key.indexOf(' '));
 				String attribute = key.substring(key.indexOf(' ') + 1, key.length());
 				String value = (String) provider.get(key);
-				Hashtable attributeTable = (Hashtable) attributeMap.get(type + '.' + algorithm);
+				Hashtable<String, String> attributeTable = attributeMap.get(type + '.' + algorithm);
 				if (attributeTable == null) {
-					attributeTable = new Hashtable();
+					attributeTable = new Hashtable<>();
 					attributeTable.put(attribute, value);
 					attributeMap.put(type + '.' + algorithm, attributeTable);
 				} else {
@@ -117,20 +117,20 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 
 			// else this is a service
 			else {
-				serviceList.put(key, provider.get(key));
+				serviceList.put(key, (String) provider.get(key));
 			}
 		}
 
 		ProviderService[] serviceArray = new ProviderService[serviceList.size()];
 		int serviceCount = 0;
-		for (Iterator it = serviceList.entrySet().iterator(); it.hasNext();) {
-			Entry entry = (Entry) it.next();
-			String key = (String) entry.getKey();
+		for (Iterator<Entry<String, String>> it = serviceList.entrySet().iterator(); it.hasNext();) {
+			Entry<String, String> entry = it.next();
+			String key = entry.getKey();
 			String type = key.substring(0, key.indexOf('.'));
 			String algo = key.substring(key.indexOf('.') + 1, key.length());
-			String className = (String) entry.getValue();
-			List aliases = (List) aliasMap.get(algo);
-			Map attributes = (Map) attributeMap.get(key);
+			String className = entry.getValue();
+			List<String> aliases = aliasMap.get(algo);
+			Hashtable<String, String> attributes = attributeMap.get(key);
 
 			serviceArray[serviceCount] = new ProviderService(type, algo, className, aliases, attributes);
 			serviceCount++;
@@ -143,10 +143,10 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 		private final String type;
 		private final String algorithm;
 		private final String className;
-		private final List aliases;
-		private final Map attributes;
+		private final List<String> aliases;
+		private final Map<String, String> attributes;
 
-		public ProviderService(String type, String algorithm, String className, List aliases, Map attributes) {
+		public ProviderService(String type, String algorithm, String className, List<String> aliases, Map<String, String> attributes) {
 			this.type = type;
 			this.algorithm = algorithm;
 			this.className = className;
@@ -166,11 +166,11 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 			return className;
 		}
 
-		public List getAliases() {
+		public List<String> getAliases() {
 			return aliases;
 		}
 
-		public Map getAttributes() {
+		public Map<String, String> getAttributes() {
 			return attributes;
 		}
 	}

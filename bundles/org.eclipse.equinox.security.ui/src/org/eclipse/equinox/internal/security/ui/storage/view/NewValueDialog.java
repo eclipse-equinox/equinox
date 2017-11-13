@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,8 +16,6 @@ import org.eclipse.jface.dialogs.*;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.*;
@@ -73,11 +71,7 @@ public class NewValueDialog extends TitleAreaDialog {
 
 		new Label(composite, SWT.LEFT).setText(SecUIMessages.addValueKeyLabel);
 		keyText = new Text(composite, SWT.LEFT | SWT.BORDER);
-		keyText.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent event) {
-				okButton.setEnabled(validName());
-			}
-		});
+		keyText.addModifyListener(event -> okButton.setEnabled(validName()));
 
 		new Label(composite, SWT.LEFT).setText(SecUIMessages.addValueValueLabel);
 		valueText = new Text(composite, SWT.LEFT | SWT.BORDER);

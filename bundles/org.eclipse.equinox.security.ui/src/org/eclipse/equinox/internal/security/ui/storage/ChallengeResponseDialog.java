@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,6 @@ import org.eclipse.jface.dialogs.*;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -81,20 +79,12 @@ public class ChallengeResponseDialog extends TitleAreaDialog {
 			new Label(group, SWT.LEFT).setText(SecUIMessages.passwordQuestion);
 			questions[i] = new Text(group, SWT.LEFT | SWT.BORDER);
 			questions[i].setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false));
-			questions[i].addModifyListener(new ModifyListener() {
-				public void modifyText(ModifyEvent event) {
-					validateOK();
-				}
-			});
+			questions[i].addModifyListener(event -> validateOK());
 
 			new Label(group, SWT.LEFT).setText(SecUIMessages.passwordAnswer);
 			answers[i] = new Text(group, SWT.LEFT | SWT.BORDER);
 			answers[i].setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false));
-			answers[i].addModifyListener(new ModifyListener() {
-				public void modifyText(ModifyEvent event) {
-					validateOK();
-				}
-			});
+			answers[i].addModifyListener(event -> validateOK());
 		}
 
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

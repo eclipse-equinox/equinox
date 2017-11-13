@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008,  Jay Rosenthal and others.
+ * Copyright (c) 2008, 2017  Jay Rosenthal and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,8 +12,7 @@
 
 package org.eclipse.equinox.internal.provisional.security.ui;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 import javax.security.auth.x500.X500Principal;
 
 /**
@@ -44,7 +43,7 @@ public class X500PrincipalHelper {
 	public final static String attrEMAIL = "EMAILADDRESS"; //$NON-NLS-1$
 	public final static String attrUID = "UID"; //$NON-NLS-1$
 
-	ArrayList rdnNameArray = new ArrayList();
+	ArrayList<List<String>> rdnNameArray = new ArrayList<>();
 
 	private final static String attrTerminator = "="; //$NON-NLS-1$
 
@@ -187,7 +186,7 @@ public class X500PrincipalHelper {
 	private void parseDN(String dn) throws IllegalArgumentException {
 		int startIndex = 0;
 		char c = '\0';
-		ArrayList nameValues = new ArrayList();
+		ArrayList<String> nameValues = new ArrayList<>();
 
 		// Clear the existing array, in case this instance is being re-used
 		rdnNameArray.clear();
@@ -211,7 +210,7 @@ public class X500PrincipalHelper {
 			if (c != '+') {
 				rdnNameArray.add(nameValues);
 				if (endIndex != dn.length())
-					nameValues = new ArrayList();
+					nameValues = new ArrayList<>();
 				else
 					nameValues = null;
 			}
@@ -231,13 +230,13 @@ public class X500PrincipalHelper {
 	 *      the order they occur.  May be empty.
 	 * 
 	 */
-	public ArrayList getAllValues(String attributeID) {
-		ArrayList retList = new ArrayList();
+	public ArrayList<String> getAllValues(String attributeID) {
+		ArrayList<String> retList = new ArrayList<>();
 		String searchPart = attributeID + attrTerminator;
 
-		for (Iterator iter = rdnNameArray.iterator(); iter.hasNext();) {
-			ArrayList nameList = (ArrayList) iter.next();
-			String namePart = (String) nameList.get(0);
+		for (Iterator<List<String>> iter = rdnNameArray.iterator(); iter.hasNext();) {
+			List<String> nameList = iter.next();
+			String namePart = nameList.get(0);
 
 			if (namePart.startsWith(searchPart)) {
 				// Return the string starting after the ID string and the = sign that follows it.
@@ -257,9 +256,9 @@ public class X500PrincipalHelper {
 		String retNamePart = null;
 		String searchPart = attributeID + attrTerminator;
 
-		for (Iterator iter = rdnNameArray.iterator(); iter.hasNext();) {
-			ArrayList nameList = (ArrayList) iter.next();
-			String namePart = (String) nameList.get(0);
+		for (Iterator<List<String>> iter = rdnNameArray.iterator(); iter.hasNext();) {
+			List<String> nameList = iter.next();
+			String namePart = nameList.get(0);
 
 			if (namePart.startsWith(searchPart)) {
 				// Return the string starting after the ID string and the = sign that follows it.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,8 +16,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -55,11 +54,7 @@ public class CertificateImportFileSelectPage extends WizardPage implements Liste
 		// browse button
 		browseDirectoriesButton = new Button(certSelectComposite, SWT.PUSH);
 		browseDirectoriesButton.setText(SecurityUIMsg.WIZARD_BROWSE);
-		browseDirectoriesButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				handleLocationFileButtonPressed();
-			}
-		});
+		browseDirectoriesButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> handleLocationFileButtonPressed()));
 
 		addListeners();
 	}
