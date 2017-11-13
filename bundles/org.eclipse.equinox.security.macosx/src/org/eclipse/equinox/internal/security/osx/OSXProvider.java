@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ public class OSXProvider extends PasswordProvider {
 
 	private native String setPassword(String serviceName, String accountName, String password) throws SecurityException;
 
+	@Override
 	public PBEKeySpec getPassword(IPreferencesContainer container, int passwordType) {
 		if (accountName == null)
 			return null;

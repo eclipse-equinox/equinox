@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,7 @@ public class WinCrypto extends PasswordProvider {
 	 */
 	private final static int PASSWORD_LENGTH = 250;
 
+	@Override
 	public PBEKeySpec getPassword(IPreferencesContainer container, int passwordType) {
 		byte[] encryptedPassword;
 		if ((passwordType & CREATE_NEW_PASSWORD) == 0)
@@ -117,6 +118,7 @@ public class WinCrypto extends PasswordProvider {
 		return true;
 	}
 
+	@Override
 	public boolean retryOnError(Exception e, IPreferencesContainer container) {
 		// It would be rather dangerous to allow this password to be changed
 		// as it would permanently trash all entries in the secure storage.
