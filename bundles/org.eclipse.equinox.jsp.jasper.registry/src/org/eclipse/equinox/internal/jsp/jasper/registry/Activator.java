@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others
+ * Copyright (c) 2007, 2017 IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,30 +10,29 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.jsp.jasper.registry;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-public class Activator implements BundleActivator, ServiceTrackerCustomizer {
+public class Activator implements BundleActivator, ServiceTrackerCustomizer<PackageAdmin, PackageAdmin> {
 
-	private ServiceTracker packageAdminTracker;
+	private ServiceTracker<?, PackageAdmin> packageAdminTracker;
 	private static PackageAdmin packageAdmin;
-	private BundleContext context;
+	private BundleContext bundleContext;
 
+	@Override
 	public void start(BundleContext context) throws Exception {
-		this.context = context;
-		packageAdminTracker = new ServiceTracker(context, PackageAdmin.class.getName(), this);
+		this.bundleContext = context;
+		packageAdminTracker = new ServiceTracker<>(context, PackageAdmin.class, this);
 		packageAdminTracker.open();
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		packageAdminTracker.close();
 		packageAdminTracker = null;
-		this.context = null;
+		this.bundleContext = null;
 	}
 
 	public static synchronized Bundle getBundle(String symbolicName) {
@@ -52,19 +51,22 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		return null;
 	}
 
-	public Object addingService(ServiceReference reference) {
+	@Override
+	public PackageAdmin addingService(ServiceReference<PackageAdmin> reference) {
 		synchronized (Activator.class) {
-			packageAdmin = (PackageAdmin) context.getService(reference);
+			packageAdmin = bundleContext.getService(reference);
 		}
 		return packageAdmin;
 	}
 
-	public void modifiedService(ServiceReference reference, Object service) {
+	@Override
+	public void modifiedService(ServiceReference<PackageAdmin> reference, PackageAdmin service) {
 	}
 
-	public void removedService(ServiceReference reference, Object service) {
+	@Override
+	public void removedService(ServiceReference<PackageAdmin> reference, PackageAdmin service) {
 		synchronized (Activator.class) {
-			context.ungetService(reference);
+			bundleContext.ungetService(reference);
 			packageAdmin = null;
 		}
 	}

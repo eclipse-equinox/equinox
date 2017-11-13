@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005-2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,28 +14,31 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 // This class is a slightly augmented copy of org.eclipse.core.runtime.internal.adaptor.ContextFinder
 // in particular basicFindClassLoaders has been altered to use PackageAdmin to determine if a class originated from
 // a bundle and to skip over the various JspClassloader classes.
-public class JSPContextFinder extends ClassLoader implements PrivilegedAction {
+public class JSPContextFinder extends ClassLoader implements PrivilegedAction<ArrayList<ClassLoader>> {
 	static final class Finder extends SecurityManager {
-		public Class[] getClassContext() {
+		@Override
+		public Class<?>[] getClassContext() {
 			return super.getClassContext();
 		}
 	}
+
 	//This is used to detect cycle that could be caused while delegating the loading to other classloaders
 	//It keeps track on a thread basis of the set of requested classes and resources
-	private static ThreadLocal cycleDetector = new ThreadLocal();
+	private static ThreadLocal<Set<String>> cycleDetector = new ThreadLocal<>();
 	static Finder contextFinder;
 	static {
-		AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				contextFinder = new Finder();
-				return null;
-			}
+		AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+			contextFinder = new Finder();
+			return null;
 		});
 	}
 
@@ -47,9 +50,9 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction {
 	// JSPContextFinder classloader nor the boot classloader.  The last classloader
 	// in the list is either a bundle classloader or the framework's classloader
 	// We assume that the bootclassloader never uses the context classloader to find classes in itself.
-	ArrayList basicFindClassLoaders() {
-		Class[] stack = contextFinder.getClassContext();
-		ArrayList result = new ArrayList(1);
+	ArrayList<ClassLoader> basicFindClassLoaders() {
+		Class<?>[] stack = contextFinder.getClassContext();
+		ArrayList<ClassLoader> result = new ArrayList<>(1);
 		ClassLoader previousLoader = null;
 		for (int i = 1; i < stack.length; i++) {
 			ClassLoader tmp = stack[i].getClassLoader();
@@ -68,10 +71,8 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction {
 		return result;
 	}
 
-	private boolean checkClass(Class clazz) {
-		return clazz != JSPContextFinder.class &&
-			clazz != BundleProxyClassLoader.class &&
-			clazz != JspClassLoader.class;
+	private boolean checkClass(Class<?> clazz) {
+		return clazz != JSPContextFinder.class && clazz != BundleProxyClassLoader.class && clazz != JspClassLoader.class;
 	}
 
 	// ensures that a classloader does not have the JSPContextFinder as part of the 
@@ -86,25 +87,26 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction {
 		return true;
 	}
 
-	private ArrayList findClassLoaders() {
+	private ArrayList<ClassLoader> findClassLoaders() {
 		if (System.getSecurityManager() == null)
 			return basicFindClassLoaders();
-		return (ArrayList) AccessController.doPrivileged(this);
+		return AccessController.doPrivileged(this);
 	}
 
-	public Object run() {
+	@Override
+	public ArrayList<ClassLoader> run() {
 		return basicFindClassLoaders();
 	}
 
 	//Return whether the request for loading "name" should proceed.
 	//False is returned when a cycle is being detected 
 	private boolean startLoading(String name) {
-		Set classesAndResources = (Set) cycleDetector.get();
+		Set<String> classesAndResources = cycleDetector.get();
 		if (classesAndResources != null && classesAndResources.contains(name))
 			return false;
 
 		if (classesAndResources == null) {
-			classesAndResources = new HashSet(3);
+			classesAndResources = new HashSet<>(3);
 			cycleDetector.set(classesAndResources);
 		}
 		classesAndResources.add(name);
@@ -112,19 +114,20 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction {
 	}
 
 	private void stopLoading(String name) {
-		((Set) cycleDetector.get()).remove(name);
+		cycleDetector.get().remove(name);
 	}
 
-	protected Class loadClass(String arg0, boolean arg1) throws ClassNotFoundException {
+	@Override
+	protected Class<?> loadClass(String arg0, boolean arg1) throws ClassNotFoundException {
 		//Shortcut cycle
 		if (startLoading(arg0) == false)
 			throw new ClassNotFoundException(arg0);
 
 		try {
-			ArrayList toConsult = findClassLoaders();
-			for (Iterator loaders = toConsult.iterator(); loaders.hasNext();)
+			ArrayList<ClassLoader> toConsult = findClassLoaders();
+			for (Iterator<ClassLoader> loaders = toConsult.iterator(); loaders.hasNext();)
 				try {
-					return ((ClassLoader) loaders.next()).loadClass(arg0);
+					return loaders.next().loadClass(arg0);
 				} catch (ClassNotFoundException e) {
 					// go to the next class loader
 				}
@@ -134,14 +137,15 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction {
 		}
 	}
 
+	@Override
 	public URL getResource(String arg0) {
 		//Shortcut cycle
 		if (startLoading(arg0) == false)
 			return null;
 		try {
-			ArrayList toConsult = findClassLoaders();
-			for (Iterator loaders = toConsult.iterator(); loaders.hasNext();) {
-				URL result = ((ClassLoader) loaders.next()).getResource(arg0);
+			ArrayList<ClassLoader> toConsult = findClassLoaders();
+			for (Iterator<ClassLoader> loaders = toConsult.iterator(); loaders.hasNext();) {
+				URL result = loaders.next().getResource(arg0);
 				if (result != null)
 					return result;
 				// go to the next class loader
@@ -152,14 +156,15 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction {
 		}
 	}
 
-	protected Enumeration findResources(String arg0) throws IOException {
+	@Override
+	protected Enumeration<URL> findResources(String arg0) throws IOException {
 		//Shortcut cycle
 		if (startLoading(arg0) == false)
 			return null;
 		try {
-			ArrayList toConsult = findClassLoaders();
-			for (Iterator loaders = toConsult.iterator(); loaders.hasNext();) {
-				Enumeration result = ((ClassLoader) loaders.next()).getResources(arg0);
+			ArrayList<ClassLoader> toConsult = findClassLoaders();
+			for (Iterator<ClassLoader> loaders = toConsult.iterator(); loaders.hasNext();) {
+				Enumeration<URL> result = loaders.next().getResources(arg0);
 				if (result != null && result.hasMoreElements())
 					return result;
 				// go to the next class loader

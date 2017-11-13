@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2017 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.jsp.jasper;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -40,23 +39,28 @@ public class JspClassLoader extends URLClassLoader {
 	private static final ClassLoader PARENT = JspClassLoader.class.getClassLoader().getParent();
 	private static final String JAVA_PACKAGE = "java."; //$NON-NLS-1$
 	private static final ClassLoader EMPTY_CLASSLOADER = new ClassLoader() {
+		@Override
 		public URL getResource(String name) {
 			return null;
 		}
 
-		public Enumeration findResources(String name) throws IOException {
-			return new Enumeration() {
+		@Override
+		public Enumeration<URL> findResources(String name) {
+			return new Enumeration<URL>() {
+				@Override
 				public boolean hasMoreElements() {
 					return false;
 				}
 
-				public Object nextElement() {
+				@Override
+				public URL nextElement() {
 					return null;
 				}
 			};
 		}
 
-		public Class loadClass(String name) throws ClassNotFoundException {
+		@Override
+		public Class<?> loadClass(String name) throws ClassNotFoundException {
 			throw new ClassNotFoundException(name);
 		}
 	};
@@ -73,8 +77,8 @@ public class JspClassLoader extends URLClassLoader {
 	}
 
 	private void addBundleClassPathJars(Bundle bundle) {
-		Dictionary headers = bundle.getHeaders();
-		String classPath = (String) headers.get(Constants.BUNDLE_CLASSPATH);
+		Dictionary<String, String> headers = bundle.getHeaders();
+		String classPath = headers.get(Constants.BUNDLE_CLASSPATH);
 		if (classPath != null) {
 			StringTokenizer tokenizer = new StringTokenizer(classPath, ","); //$NON-NLS-1$
 			while (tokenizer.hasMoreTokens()) {
@@ -95,14 +99,16 @@ public class JspClassLoader extends URLClassLoader {
 		}
 	}
 
-	protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
+	@Override
+	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 		if (PARENT != null && name.startsWith(JAVA_PACKAGE))
 			return PARENT.loadClass(name);
 		return super.loadClass(name, resolve);
 	}
 
 	// Classes should "not" be loaded by this classloader from the URLs - it is just used for TLD resource discovery.
-	protected Class findClass(String name) throws ClassNotFoundException {
+	@Override
+	protected Class<?> findClass(String name) throws ClassNotFoundException {
 		throw new ClassNotFoundException(name);
 	}
 }

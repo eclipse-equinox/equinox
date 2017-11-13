@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,17 +34,19 @@ public class JSPFactory implements IExecutableExtensionFactory, IExecutableExten
 	private IConfigurationElement config;
 	private String bundleResourcePath;
 
+	@Override
 	public void setInitializationData(IConfigurationElement config, String propertyName, Object data) throws CoreException {
 		this.config = config;
 		if (data != null) {
 			if (data instanceof String)
 				bundleResourcePath = (String) data;
 			else if (data instanceof Hashtable) {
-				bundleResourcePath = (String) ((Hashtable) data).get("path"); //$NON-NLS-1$
+				bundleResourcePath = ((Hashtable<String, String>) data).get("path"); //$NON-NLS-1$
 			}
 		}
 	}
 
+	@Override
 	public Object create() throws CoreException {
 		Bundle b = Activator.getBundle(config.getContributor().getName()); //check for null and illegal state exception
 		String alias = config.getAttribute("alias"); //$NON-NLS-1$

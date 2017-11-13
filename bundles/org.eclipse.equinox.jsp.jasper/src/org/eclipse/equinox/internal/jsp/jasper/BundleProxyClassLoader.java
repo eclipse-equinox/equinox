@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2017 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,6 @@ import java.net.URL;
 import java.util.Enumeration;
 
 import org.osgi.framework.Bundle;
-
 
 /**
  * A BundleProxyClassLoader wraps a bundle and uses the various Bundle methods to produce a ClassLoader. 
@@ -35,24 +34,29 @@ public class BundleProxyClassLoader extends ClassLoader {
 		this.bundle = bundle;
 	}
 
-	public Enumeration findResources(String name) throws IOException {
+	@Override
+	public Enumeration<URL> findResources(String name) throws IOException {
 		return bundle.getResources(name);
 	}
 
+	@Override
 	public URL findResource(String name) {
 		return bundle.getResource(name);
 	}
 
-	public Class findClass(String name) throws ClassNotFoundException {
+	@Override
+	public Class<?> findClass(String name) throws ClassNotFoundException {
 		return bundle.loadClass(name);
 	}
 
+	@Override
 	public URL getResource(String name) {
 		return (parent == null) ? findResource(name) : super.getResource(name);
 	}
 
-	protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
-		Class clazz = (parent == null) ? findClass(name) : super.loadClass(name, false);
+	@Override
+	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+		Class<?> clazz = (parent == null) ? findClass(name) : super.loadClass(name, false);
 		if (resolve)
 			super.resolveClass(clazz);
 

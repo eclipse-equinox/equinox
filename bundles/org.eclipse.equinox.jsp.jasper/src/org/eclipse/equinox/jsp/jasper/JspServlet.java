@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2017 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,16 +77,19 @@ public class JspServlet extends HttpServlet {
 			super.setReadOnly();
 		}
 
+		@Override
 		public void add(Permission permission) {
 			throw new SecurityException();
 		}
 
+		@Override
 		public boolean implies(Permission permission) {
 			return bundle.hasPermission(permission);
 		}
 
-		public Enumeration elements() {
-			return Collections.enumeration(Collections.EMPTY_LIST);
+		@Override
+		public Enumeration<Permission> elements() {
+			return Collections.enumeration(Collections.emptyList());
 		}
 	}
 
@@ -108,6 +111,7 @@ public class JspServlet extends HttpServlet {
 		this(bundle, bundleResourcePath, null);
 	}
 
+	@Override
 	public void init(ServletConfig config) throws ServletException {
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
@@ -132,6 +136,7 @@ public class JspServlet extends HttpServlet {
 		}
 	}
 
+	@Override
 	public void destroy() {
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
@@ -142,6 +147,7 @@ public class JspServlet extends HttpServlet {
 		}
 	}
 
+	@Override
 	public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String pathInfo = request.getPathInfo();
 		if (pathInfo != null && pathInfo.startsWith("/WEB-INF/")) { //$NON-NLS-1$
@@ -158,10 +164,12 @@ public class JspServlet extends HttpServlet {
 		}
 	}
 
+	@Override
 	public ServletConfig getServletConfig() {
 		return jspServlet.getServletConfig();
 	}
 
+	@Override
 	public String getServletInfo() {
 		return jspServlet.getServletInfo();
 	}
@@ -181,35 +189,39 @@ public class JspServlet extends HttpServlet {
 			return adaptor.createServletContext();
 		}
 
+		@Override
 		public String getInitParameter(String arg0) {
 			return config.getInitParameter(arg0);
 		}
 
-		public Enumeration getInitParameterNames() {
+		@Override
+		public Enumeration<String> getInitParameterNames() {
 			return config.getInitParameterNames();
 		}
 
+		@Override
 		public ServletContext getServletContext() {
 			return context;
 		}
 
+		@Override
 		public String getServletName() {
 			return config.getServletName();
 		}
 	}
 
-	final static Map contextToHandlerMethods;
+	final static Map<Method, Method> contextToHandlerMethods;
 	static {
 		contextToHandlerMethods = createContextToHandlerMethods();
 	}
 
-	private static Map createContextToHandlerMethods() {
-		Map methods = new HashMap();
+	private static Map<Method, Method> createContextToHandlerMethods() {
+		Map<Method, Method> methods = new HashMap<>();
 		Method[] handlerMethods = ServletContextAdaptor.class.getDeclaredMethods();
 		for (int i = 0; i < handlerMethods.length; i++) {
 			Method handlerMethod = handlerMethods[i];
 			String name = handlerMethod.getName();
-			Class[] parameterTypes = handlerMethod.getParameterTypes();
+			Class<?>[] parameterTypes = handlerMethod.getParameterTypes();
 			try {
 				Method m = ServletContext.class.getMethod(name, parameterTypes);
 				methods.put(m, handlerMethod);
@@ -228,23 +240,19 @@ public class JspServlet extends HttpServlet {
 		}
 
 		public ServletContext createServletContext() {
-			Class clazz = getClass();
+			Class<?> clazz = getClass();
 			ClassLoader classLoader = clazz.getClassLoader();
-			Class[] interfaces = new Class[] {ServletContext.class};
+			Class<?>[] interfaces = new Class[] {ServletContext.class};
 			InvocationHandler handler = createInvocationHandler();
 			return (ServletContext) Proxy.newProxyInstance(classLoader, interfaces, handler);
 		}
 
 		private InvocationHandler createInvocationHandler() {
-			return new InvocationHandler() {
-				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-					return ServletContextAdaptor.this.invoke(proxy, method, args);
-				}
-			};
+			return (proxy, method, args) -> ServletContextAdaptor.this.invoke(proxy, method, args);
 		}
 
 		Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			Method m = (Method) JspServlet.contextToHandlerMethods.get(method);
+			Method m = JspServlet.contextToHandlerMethods.get(method);
 			if (m != null) {
 				return m.invoke(this, args);
 			}
@@ -264,9 +272,9 @@ public class JspServlet extends HttpServlet {
 			if (path.length() == 0)
 				path = "/"; //$NON-NLS-1$
 			String file = sanitizeEntryName(resourceName.substring(lastSlash + 1));
-			Enumeration entryPaths = bundle.findEntries(path, file, false);
+			Enumeration<URL> entryPaths = bundle.findEntries(path, file, false);
 			if (entryPaths != null && entryPaths.hasMoreElements())
-				return (URL) entryPaths.nextElement();
+				return entryPaths.nextElement();
 
 			return delegate.getResource(name);
 		}
@@ -305,14 +313,14 @@ public class JspServlet extends HttpServlet {
 			return null;
 		}
 
-		public Set getResourcePaths(String name) {
-			Set result = delegate.getResourcePaths(name);
-			Enumeration e = bundle.findEntries(bundleResourcePath + name, null, false);
+		public Set<String> getResourcePaths(String name) {
+			Set<String> result = delegate.getResourcePaths(name);
+			Enumeration<URL> e = bundle.findEntries(bundleResourcePath + name, null, false);
 			if (e != null) {
 				if (result == null)
-					result = new HashSet();
+					result = new HashSet<>();
 				while (e.hasMoreElements()) {
-					URL entryURL = (URL) e.nextElement();
+					URL entryURL = e.nextElement();
 					result.add(entryURL.getFile().substring(bundleResourcePath.length()));
 				}
 			}
