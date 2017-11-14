@@ -29,7 +29,7 @@ Export-Package: org.eclipse.core.runtime.adaptor;x-friends:="org.eclipse.core.ru
  org.eclipse.osgi.internal.location;x-internal:=true,
  org.eclipse.osgi.internal.messages;x-internal:=true,
  org.eclipse.osgi.internal.provisional.service.security;version="1.0.0";x-friends:="org.eclipse.equinox.security.ui",
- org.eclipse.osgi.internal.provisional.verifier;x-friends:="org.eclipse.update.core,org.eclipse.ui.workbench,org.eclipse.equinox.p2.artifact.repository",
+ org.eclipse.osgi.internal.provisional.verifier;x-friends:="org.eclipse.ui.workbench,org.eclipse.equinox.p2.artifact.repository",
  org.eclipse.osgi.internal.service.security;x-friends:="org.eclipse.equinox.security.ui",
  org.eclipse.osgi.internal.serviceregistry;x-internal:=true,
  org.eclipse.osgi.internal.signedcontent;x-internal:=true,
