@@ -34,6 +34,7 @@ public class JSPFactory implements IExecutableExtensionFactory, IExecutableExten
 	private IConfigurationElement config;
 	private String bundleResourcePath;
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void setInitializationData(IConfigurationElement config, String propertyName, Object data) throws CoreException {
 		this.config = config;
