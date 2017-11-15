@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 IBM Corporation and others.
+ * Copyright (c) 2004, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,9 @@ package org.eclipse.osgi.storage.url.bundleentry;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.container.ModuleContainer;
+import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.internal.location.LocationHelper;
 import org.eclipse.osgi.storage.BundleInfo;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;

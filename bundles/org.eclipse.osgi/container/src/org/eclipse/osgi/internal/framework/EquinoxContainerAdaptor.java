@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,20 +12,43 @@ package org.eclipse.osgi.internal.framework;
 
 import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import org.eclipse.osgi.container.*;
+import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.container.Module.State;
+import org.eclipse.osgi.container.ModuleCollisionHook;
+import org.eclipse.osgi.container.ModuleContainerAdaptor;
+import org.eclipse.osgi.container.ModuleLoader;
+import org.eclipse.osgi.container.ModuleRevision;
+import org.eclipse.osgi.container.ModuleRevisionBuilder;
+import org.eclipse.osgi.container.ModuleWiring;
+import org.eclipse.osgi.container.SystemModule;
 import org.eclipse.osgi.internal.container.AtomicLazyInitializer;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
-import org.eclipse.osgi.internal.loader.*;
+import org.eclipse.osgi.internal.loader.BundleLoader;
+import org.eclipse.osgi.internal.loader.FragmentLoader;
+import org.eclipse.osgi.internal.loader.SystemBundleLoader;
 import org.eclipse.osgi.internal.permadmin.BundlePermissions;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.Storage;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.wiring.BundleRevision;
 

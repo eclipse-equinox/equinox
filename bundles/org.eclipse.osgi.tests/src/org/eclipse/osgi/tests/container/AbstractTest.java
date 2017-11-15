@@ -12,14 +12,27 @@ package org.eclipse.osgi.tests.container;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
-import org.eclipse.osgi.container.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.container.ModuleContainer;
+import org.eclipse.osgi.container.ModuleRevisionBuilder;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.service.debug.DebugOptions;
-import org.eclipse.osgi.tests.container.dummys.*;
+import org.eclipse.osgi.tests.container.dummys.DummyCollisionHook;
+import org.eclipse.osgi.tests.container.dummys.DummyContainerAdaptor;
+import org.eclipse.osgi.tests.container.dummys.DummyResolverHookFactory;
 import org.eclipse.osgi.util.ManifestElement;
-import org.junit.*;
-import org.osgi.framework.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 
 public abstract class AbstractTest {
