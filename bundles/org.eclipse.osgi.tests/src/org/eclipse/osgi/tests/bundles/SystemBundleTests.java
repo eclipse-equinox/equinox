@@ -2761,7 +2761,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		return bundles;
 	}
 
-	static File createBundle(File outputDir, String id, boolean emptyManifest, boolean dirBundle) throws IOException {
+	public static File createBundle(File outputDir, String id, boolean emptyManifest, boolean dirBundle) throws IOException {
 		File file = new File(outputDir, "bundle" + id + (dirBundle ? "" : ".jar")); //$NON-NLS-1$ //$NON-NLS-2$
 		if (!dirBundle) {
 			JarOutputStream jos = new JarOutputStream(new FileOutputStream(file), createManifest(id, emptyManifest));

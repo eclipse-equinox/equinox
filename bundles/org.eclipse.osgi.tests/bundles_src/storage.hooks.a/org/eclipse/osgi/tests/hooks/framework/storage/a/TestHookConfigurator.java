@@ -39,7 +39,10 @@ public class TestHookConfigurator implements HookConfigurator {
 
 			@Override
 			public void load(Object loadContext, DataInputStream is) {
-				// Nothing.
+				if (TestHookConfigurator.failLoad) {
+					// will force a clean
+					throw new IllegalArgumentException();
+				}
 			}
 
 			@Override
@@ -106,6 +109,7 @@ public class TestHookConfigurator implements HookConfigurator {
 
 	public static volatile boolean createStorageHookCalled;
 	public static volatile boolean invalid;
+	public static volatile boolean failLoad;
 	public static volatile boolean invalidFactoryClass;
 	public static volatile boolean validateCalled;
 	public static volatile boolean deletingGenerationCalled;

@@ -18,6 +18,7 @@ import java.util.*;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.eclipse.osgi.tests.bundles.SystemBundleTests;
 import org.osgi.framework.*;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.wiring.BundleRevision;
@@ -28,6 +29,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	private static final String HOOK_CONFIGURATOR_BUNDLE = "storage.hooks.a";
 	private static final String HOOK_CONFIGURATOR_CLASS = "org.eclipse.osgi.tests.hooks.framework.storage.a.TestHookConfigurator";
 	private static final String HOOK_CONFIGURATOR_FIELD_CREATE_STORAGE_HOOK_CALLED = "createStorageHookCalled";
+	private static final String HOOK_CONFIGURATOR_FIELD_FAIL_LOAD = "failLoad";
 	private static final String HOOK_CONFIGURATOR_FIELD_INVALID = "invalid";
 	private static final String HOOK_CONFIGURATOR_FIELD_INVALID_FACTORY_CLASS = "invalidFactoryClass";
 	private static final String HOOK_CONFIGURATOR_FIELD_VALIDATE_CALLED = "validateCalled";
@@ -112,6 +114,18 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 			assertThrowable(e);
 		}
 		assertCreateStorageHookCalled();
+	}
+
+	public void testCleanOnFailLoad() throws Exception {
+		initAndStartFramework();
+		installBundle();
+		setFactoryHookFailLoad(true);
+		restartFramework();
+		assertBundleDiscarded();
+		// install a bundle without reference to test that the staging area is created correctly after clean
+		File bundlesBase = new File(OSGiTestsActivator.getContext().getDataFile(getName()), "bundles");
+		bundlesBase.mkdirs();
+		framework.getBundleContext().installBundle(SystemBundleTests.createBundle(bundlesBase, getName(), false, false).toURI().toString());
 	}
 
 	public void testDeletingGenerationCalledOnDiscard() throws Exception {
@@ -266,6 +280,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_INVALID_FACTORY_CLASS).set(null, false);
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_DELETING_CALLED).set(null, false);
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_ADAPT_MANIFEST).set(null, false);
+		clazz.getField(HOOK_CONFIGURATOR_FIELD_FAIL_LOAD).set(null, false);
 	}
 
 	private void restartFramework() throws Exception {
@@ -290,6 +305,11 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	private void setFactoryClassReplaceBuilder(boolean value) throws Exception {
 		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_REPLACE_BUILDER).set(null, value);
+	}
+
+	private void setFactoryHookFailLoad(boolean value) throws Exception {
+		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
+		clazz.getField(HOOK_CONFIGURATOR_FIELD_FAIL_LOAD).set(null, value);
 	}
 
 	private void updateBundle() throws Exception {

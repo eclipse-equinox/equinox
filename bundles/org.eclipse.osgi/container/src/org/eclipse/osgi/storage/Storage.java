@@ -381,6 +381,10 @@ public class Storage {
 		if (location.isReadOnly() || !StorageUtil.rm(root, getConfiguration().getDebug().DEBUG_STORAGE)) {
 			equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "The -clean (osgi.clean) option was not successful. Unable to clean the storage area: " + root.getAbsolutePath(), null); //$NON-NLS-1$
 		}
+		if (!location.isReadOnly()) {
+			// make sure to recreate to root folder
+			root.mkdirs();
+		}
 	}
 
 	public ModuleDatabase getModuleDatabase() {
