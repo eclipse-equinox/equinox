@@ -22,12 +22,32 @@ import static org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_EXTENSION;
 import static org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_FRAGMENT;
 import static org.osgi.framework.Constants.SUPPORTS_FRAMEWORK_REQUIREBUNDLE;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.net.*;
+import java.net.JarURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.core.runtime.internal.adaptor.ConsoleManager;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -124,10 +144,6 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String PROP_JVM_OS_VERSION = "os.version"; //$NON-NLS-1$
 	public static final String PROP_JVM_SPEC_VERSION = "java.specification.version"; //$NON-NLS-1$
 	public static final String PROP_JVM_SPEC_NAME = "java.specification.name"; //$NON-NLS-1$
-	// J2ME configuration property name
-	public static final String PROP_J2ME_MICROEDITION_CONFIGURATION = "microedition.configuration"; //$NON-NLS-1$
-	// J2ME profile property name
-	public static final String PROP_J2ME_MICROEDITION_PROFILES = "microedition.profiles"; //$NON-NLS-1$
 
 	public static final String PROP_SETPERMS_CMD = "osgi.filepermissions.command"; //$NON-NLS-1$
 	public static final String PROP_DEBUG = "osgi.debug"; //$NON-NLS-1$

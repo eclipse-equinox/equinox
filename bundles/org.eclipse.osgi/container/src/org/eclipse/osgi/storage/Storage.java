@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -42,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.osgi.container.Module;
@@ -115,7 +117,6 @@ public class Storage {
 	public static final String DELETE_FLAG = ".delete"; //$NON-NLS-1$
 	public static final String LIB_TEMP = "libtemp"; //$NON-NLS-1$
 
-	private static final String J2SE = "J2SE"; //$NON-NLS-1$
 	private static final String JAVASE = "JavaSE"; //$NON-NLS-1$
 	private static final String PROFILE_EXT = ".profile"; //$NON-NLS-1$
 	private static final String NUL = new String(new byte[] {0});
@@ -1420,76 +1421,101 @@ public class Storage {
 	}
 
 	private Properties findVMProfile(Generation systemGeneration) {
-		Properties result = new Properties();
-		// Find the VM profile name using J2ME properties
-		String j2meConfig = System.getProperty(EquinoxConfiguration.PROP_J2ME_MICROEDITION_CONFIGURATION);
-		String j2meProfiles = System.getProperty(EquinoxConfiguration.PROP_J2ME_MICROEDITION_PROFILES);
+		Properties result = readConfiguredJavaProfile(systemGeneration);
 		String vmProfile = null;
-		String javaEdition = null;
-		Version javaVersion = null;
-		String embeddedProfileName = "-"; //$NON-NLS-1$
-		if (j2meConfig != null && j2meConfig.length() > 0 && j2meProfiles != null && j2meProfiles.length() > 0) {
-			// save the vmProfile based off of the config and profile
-			// use the last profile; assuming that is the highest one
-			String[] j2meProfileList = ManifestElement.getArrayFromList(j2meProfiles, " "); //$NON-NLS-1$
-			if (j2meProfileList != null && j2meProfileList.length > 0)
-				vmProfile = j2meConfig + '_' + j2meProfileList[j2meProfileList.length - 1];
-		} else {
-			// No J2ME properties; use J2SE properties
-			// Note that the CDC spec appears not to require VM implementations to set the
-			// javax.microedition properties!!  So we will try to fall back to the 
-			// java.specification.name property, but this is pretty ridiculous!!
-			String javaSpecVersion = System.getProperty(EquinoxConfiguration.PROP_JVM_SPEC_VERSION);
+		try {
+			if (result != null) {
+				return result;
+			}
+
+			// default to Java 7 since that is our min
+			Version javaVersion = Version.valueOf("1.7"); //$NON-NLS-1$
 			// set the profile and EE based off of the java.specification.version
-			// TODO We assume J2ME Foundation and J2SE here.  need to support other profiles J2EE ...
-			if (javaSpecVersion != null) {
-				StringTokenizer st = new StringTokenizer(javaSpecVersion, " _-"); //$NON-NLS-1$
-				javaSpecVersion = st.nextToken();
-				String javaSpecName = System.getProperty(EquinoxConfiguration.PROP_JVM_SPEC_NAME);
-				// See bug 291269 we check for Foundation Specification and Foundation Profile Specification
-				if (javaSpecName != null && (javaSpecName.indexOf("Foundation Specification") >= 0 || javaSpecName.indexOf("Foundation Profile Specification") >= 0)) //$NON-NLS-1$ //$NON-NLS-2$
-					vmProfile = "CDC-" + javaSpecVersion + "_Foundation-" + javaSpecVersion; //$NON-NLS-1$ //$NON-NLS-2$
-				else {
-					// look for JavaSE if 1.6 or greater; otherwise look for J2SE
-					Version v16 = new Version("1.6"); //$NON-NLS-1$
-					javaEdition = J2SE;
-					try {
-						javaVersion = new Version(javaSpecVersion);
-						if (v16.compareTo(javaVersion) <= 0)
-							javaEdition = JAVASE;
-					} catch (IllegalArgumentException e) {
-						// do nothing
-					}
-					// If javaSE 1.8 then check for release file for profile name.
-					Version v18 = new Version("1.8"); //$NON-NLS-1$
-					if (javaVersion != null && v18.compareTo(javaVersion) <= 0) {
-						String javaHome = System.getProperty("java.home"); //$NON-NLS-1$
-						if (javaHome != null) {
-							File release = new File(javaHome, "release"); //$NON-NLS-1$
-							if (release.exists()) {
-								Properties releaseProps = new Properties();
-								try (InputStream releaseStream = new FileInputStream(release)) {
-									releaseProps.load(releaseStream);
-									String releaseName = releaseProps.getProperty("JAVA_PROFILE"); //$NON-NLS-1$
-									if (releaseName != null) {
-										// make sure to remove extra quotes
-										releaseName = releaseName.replaceAll("^\\s*\"?|\"?\\s*$", ""); //$NON-NLS-1$ //$NON-NLS-2$
-										embeddedProfileName = "_" + releaseName + "-"; //$NON-NLS-1$ //$NON-NLS-2$
-									}
-								} catch (IOException e) {
-									// ignore
-								}
+			String javaSpecVersion = System.getProperty(EquinoxConfiguration.PROP_JVM_SPEC_VERSION);
+			StringTokenizer st = new StringTokenizer(javaSpecVersion, " _-"); //$NON-NLS-1$
+			javaSpecVersion = st.nextToken();
+			try {
+				javaVersion = new Version(javaSpecVersion);
+			} catch (IllegalArgumentException e) {
+				// do nothing
+			}
+
+			if (Version.valueOf("9").compareTo(javaVersion) <= 0) { //$NON-NLS-1$
+				result = calculateVMProfile(javaVersion);
+				if (result != null) {
+					return result;
+				}
+				// could not calculate; fall back to reading profile files
+			}
+
+			String embeddedProfileName = "-"; //$NON-NLS-1$
+			// If javaSE 1.8 then check for release file for profile name.
+			if (javaVersion != null && Version.valueOf("1.8").compareTo(javaVersion) <= 0) { //$NON-NLS-1$
+				String javaHome = System.getProperty("java.home"); //$NON-NLS-1$
+				if (javaHome != null) {
+					File release = new File(javaHome, "release"); //$NON-NLS-1$
+					if (release.exists()) {
+						Properties releaseProps = new Properties();
+						try (InputStream releaseStream = new FileInputStream(release)) {
+							releaseProps.load(releaseStream);
+							String releaseName = releaseProps.getProperty("JAVA_PROFILE"); //$NON-NLS-1$
+							if (releaseName != null) {
+								// make sure to remove extra quotes
+								releaseName = releaseName.replaceAll("^\\s*\"?|\"?\\s*$", ""); //$NON-NLS-1$ //$NON-NLS-2$
+								embeddedProfileName = "_" + releaseName + "-"; //$NON-NLS-1$ //$NON-NLS-2$
 							}
+						} catch (IOException e) {
+							// ignore
 						}
 					}
-					vmProfile = javaEdition + embeddedProfileName + javaSpecVersion;
+				}
+			}
+
+			result = new Properties();
+			vmProfile = JAVASE + embeddedProfileName + javaSpecVersion;
+			InputStream profileIn = null;
+			if (vmProfile != null) {
+				// look for a profile in the system bundle based on the vm profile
+				String javaProfile = vmProfile + PROFILE_EXT;
+				profileIn = findInSystemBundle(systemGeneration, javaProfile);
+				if (profileIn == null)
+					profileIn = getNextBestProfile(systemGeneration, JAVASE, javaVersion, embeddedProfileName);
+			}
+			if (profileIn == null)
+				// the profile url is still null then use the min profile the framework can use
+				profileIn = findInSystemBundle(systemGeneration, "JavaSE-1.7.profile"); //$NON-NLS-1$
+			if (profileIn != null) {
+				try {
+					result.load(new BufferedInputStream(profileIn));
+				} catch (IOException e) {
+					// TODO consider logging ...
+				} finally {
+					try {
+						profileIn.close();
+					} catch (IOException ee) {
+						// do nothing
+					}
+				}
+			}
+		} finally {
+			// set the profile name if it does not provide one
+			if (result != null && result.getProperty(EquinoxConfiguration.PROP_OSGI_JAVA_PROFILE_NAME) == null) {
+				if (vmProfile != null) {
+					result.put(EquinoxConfiguration.PROP_OSGI_JAVA_PROFILE_NAME, vmProfile.replace('_', '/'));
+				} else {
+					// last resort; default to the absolute minimum profile name for the framework
+					result.put(EquinoxConfiguration.PROP_OSGI_JAVA_PROFILE_NAME, "JavaSE-1.7"); //$NON-NLS-1$
 				}
 			}
 		}
-		InputStream profileIn = null;
+		return result;
+	}
+
+	private Properties readConfiguredJavaProfile(Generation systemGeneration) {
 		// check for the java profile property for a url
 		String propJavaProfile = equinoxContainer.getConfiguration().getConfiguration(EquinoxConfiguration.PROP_OSGI_JAVA_PROFILE);
-		if (propJavaProfile != null)
+		if (propJavaProfile != null) {
+			InputStream profileIn = null;
 			try {
 				// we assume a URL
 				profileIn = new URL(propJavaProfile).openStream();
@@ -1497,46 +1523,126 @@ public class Storage {
 				// try using a relative path in the system bundle
 				profileIn = findInSystemBundle(systemGeneration, propJavaProfile);
 			}
-		if (profileIn == null && vmProfile != null) {
-			// look for a profile in the system bundle based on the vm profile
-			String javaProfile = vmProfile + PROFILE_EXT;
-			profileIn = findInSystemBundle(systemGeneration, javaProfile);
-			if (profileIn == null)
-				profileIn = getNextBestProfile(systemGeneration, javaEdition, javaVersion, embeddedProfileName);
-		}
-		if (profileIn == null)
-			// the profile url is still null then use the min profile the framework can use
-			profileIn = findInSystemBundle(systemGeneration, "JavaSE-1.7.profile"); //$NON-NLS-1$
-		if (profileIn != null) {
-			try {
-				result.load(new BufferedInputStream(profileIn));
-			} catch (IOException e) {
-				// TODO consider logging ...
-			} finally {
+			if (profileIn != null) {
+				Properties result = new Properties();
 				try {
-					profileIn.close();
-				} catch (IOException ee) {
-					// do nothing
+					result.load(new BufferedInputStream(profileIn));
+				} catch (IOException e) {
+					// consider logging
+				} finally {
+					try {
+						profileIn.close();
+					} catch (IOException e) {
+						// nothing to do
+					}
 				}
+				return result;
 			}
 		}
-		// set the profile name if it does not provide one
-		if (result.getProperty(EquinoxConfiguration.PROP_OSGI_JAVA_PROFILE_NAME) == null)
-			if (vmProfile != null)
-				result.put(EquinoxConfiguration.PROP_OSGI_JAVA_PROFILE_NAME, vmProfile.replace('_', '/'));
-			else
-				// last resort; default to the absolute minimum profile name for the framework
-				result.put(EquinoxConfiguration.PROP_OSGI_JAVA_PROFILE_NAME, "JavaSE-1.7"); //$NON-NLS-1$
+		return null;
+	}
+
+	private Properties calculateVMProfile(Version javaVersion) {
+		String systemPackages = calculateVMPackages();
+		if (systemPackages == null) {
+			return null;
+		}
+		String executionEnvs = calculateVMExecutionEnvs(javaVersion);
+		String eeCapabilities = calculateEECapabilities(javaVersion);
+
+		Properties result = new Properties();
+		result.put(Constants.FRAMEWORK_SYSTEMPACKAGES, systemPackages);
+		result.put(Constants.FRAMEWORK_EXECUTIONENVIRONMENT, executionEnvs);
+		result.put(Constants.FRAMEWORK_SYSTEMCAPABILITIES, eeCapabilities);
 		return result;
 	}
 
+	private String calculateVMExecutionEnvs(Version javaVersion) {
+		StringBuilder result = new StringBuilder("OSGi/Minimum-1.0, OSGi/Minimum-1.1, OSGi/Minimum-1.2, JavaSE/compact1-1.8, JavaSE/compact2-1.8, JavaSE/compact3-1.8, JRE-1.1, J2SE-1.2, J2SE-1.3, J2SE-1.4, J2SE-1.5, JavaSE-1.6, JavaSE-1.7, JavaSE-1.8"); //$NON-NLS-1$
+		Version v = new Version(9, 0, 0);
+		while (v.compareTo(javaVersion) <= 0) {
+			result.append(',').append(' ').append(JAVASE).append('-').append(v.getMajor());
+			if (v.getMinor() > 0) {
+				result.append('.').append(v.getMinor());
+			}
+			if (v.getMajor() == javaVersion.getMajor()) {
+				v = new Version(v.getMajor(), v.getMinor() + 1, 0);
+			} else {
+				v = new Version(v.getMajor() + 1, 0, 0);
+			}
+		}
+		return result.toString();
+	}
+
+	private String calculateEECapabilities(Version javaVersion) {
+		Version v = new Version(9, 0, 0);
+		StringBuilder versionsBulder = new StringBuilder();
+		while (v.compareTo(javaVersion) <= 0) {
+			versionsBulder.append(',').append(' ').append(v.getMajor()).append('.').append(v.getMinor());
+			if (v.getMajor() == javaVersion.getMajor()) {
+				v = new Version(v.getMajor(), v.getMinor() + 1, 0);
+			} else {
+				v = new Version(v.getMajor() + 1, 0, 0);
+			}
+		}
+		String versionsList = versionsBulder.toString();
+
+		StringBuilder result = new StringBuilder("osgi.ee; osgi.ee=\"OSGi/Minimum\"; version:List<Version>=\"1.0, 1.1, 1.2\", osgi.ee; osgi.ee=\"JRE\"; version:List<Version>=\"1.0, 1.1\", osgi.ee; osgi.ee=\"JavaSE\"; version:List<Version>=\"1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8"); //$NON-NLS-1$
+		result.append(versionsList).append("\""); //$NON-NLS-1$
+		result.append(",osgi.ee; osgi.ee=\"JavaSE/compact1\"; version:List<Version>=\"1.8"); //$NON-NLS-1$
+		result.append(versionsList).append("\""); //$NON-NLS-1$
+		result.append(",osgi.ee; osgi.ee=\"JavaSE/compact2\"; version:List<Version>=\"1.8"); //$NON-NLS-1$
+		result.append(versionsList).append("\""); //$NON-NLS-1$
+		result.append(",osgi.ee; osgi.ee=\"JavaSE/compact3\"; version:List<Version>=\"1.8"); //$NON-NLS-1$
+		result.append(versionsList).append("\""); //$NON-NLS-1$
+
+		return result.toString();
+	}
+
+	private String calculateVMPackages() {
+		try {
+			List<String> packages = new ArrayList<>();
+			Class<?> moduleLayerClass = Class.forName("java.lang.ModuleLayer"); //$NON-NLS-1$
+			Method boot = moduleLayerClass.getMethod("boot"); //$NON-NLS-1$
+			Method modules = moduleLayerClass.getMethod("modules"); //$NON-NLS-1$
+			Class<?> moduleClass = Class.forName("java.lang.Module"); //$NON-NLS-1$
+			Method getDescriptor = moduleClass.getMethod("getDescriptor"); //$NON-NLS-1$
+			Class<?> moduleDescriptorClass = Class.forName("java.lang.module.ModuleDescriptor"); //$NON-NLS-1$
+			Method exports = moduleDescriptorClass.getMethod("exports"); //$NON-NLS-1$
+			Class<?> exportsClass = Class.forName("java.lang.module.ModuleDescriptor$Exports"); //$NON-NLS-1$
+			Method targets = exportsClass.getMethod("targets"); //$NON-NLS-1$
+			Method source = exportsClass.getMethod("source"); //$NON-NLS-1$
+
+			Object bootLayer = boot.invoke(null);
+			Set<?> bootModules = (Set<?>) modules.invoke(bootLayer);
+			for (Object m : bootModules) {
+				Object descriptor = getDescriptor.invoke(m);
+				for (Object export : (Set<?>) exports.invoke(descriptor)) {
+					String pkg = (String) source.invoke(export);
+					if (((Set<?>) targets.invoke(export)).isEmpty() && !pkg.startsWith("java.")) { //$NON-NLS-1$
+						packages.add(pkg);
+					}
+				}
+			}
+			Collections.sort(packages);
+			StringBuilder result = new StringBuilder();
+			for (String pkg : packages) {
+				if (result.length() != 0) {
+					result.append(',').append(' ');
+				}
+				result.append(pkg);
+			}
+			return result.toString();
+		} catch (Exception e) {
+			equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error determining system packages.", e); //$NON-NLS-1$
+			return null;
+		}
+	}
+
 	private InputStream getNextBestProfile(Generation systemGeneration, String javaEdition, Version javaVersion, String embeddedProfileName) {
-		if (javaVersion == null || (javaEdition != J2SE && javaEdition != JAVASE))
-			return null; // we cannot automatically choose the next best profile unless this is a J2SE or JavaSE vm
+		if (javaVersion == null || javaEdition != JAVASE)
+			return null; // we cannot automatically choose the next best profile unless this is a JavaSE vm
 		InputStream bestProfile = findNextBestProfile(systemGeneration, javaEdition, javaVersion, embeddedProfileName);
-		if (bestProfile == null && javaEdition == JAVASE)
-			// if this is a JavaSE VM then search for a lower J2SE profile
-			bestProfile = findNextBestProfile(systemGeneration, J2SE, javaVersion, embeddedProfileName);
 		if (bestProfile == null && !"-".equals(embeddedProfileName)) { //$NON-NLS-1$
 			// Just use the base javaEdition name without the profile name as backup
 			return getNextBestProfile(systemGeneration, javaEdition, javaVersion, "-"); //$NON-NLS-1$
