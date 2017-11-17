@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2013 Martin Lippert and others.
+ * Copyright (c) 2008, 2017 Martin Lippert and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -100,7 +100,6 @@ public class SupplementerRegistry implements ISupplementerRegistry {
         this.dontWeaveTheseBundles = new HashSet<String>();
 
         this.dontWeaveTheseBundles.add("org.eclipse.osgi");
-        this.dontWeaveTheseBundles.add("org.eclipse.update.configurator");
         this.dontWeaveTheseBundles.add("org.eclipse.core.runtime");
         this.dontWeaveTheseBundles.add("org.eclipse.equinox.common");
         this.dontWeaveTheseBundles.add("org.eclipse.equinox.weaving.hook");

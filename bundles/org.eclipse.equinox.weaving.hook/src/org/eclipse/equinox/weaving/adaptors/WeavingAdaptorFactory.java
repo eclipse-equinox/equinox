@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2013 IBM Corporation and others.
+ * Copyright (c) 2006, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
- *   David Knibb               initial implementation      
+ *   David Knibb               initial implementation
  *   Matthew Webster           Eclipse 3.2 changes
- *   Heiko Seeberger           Enhancements for service dynamics     
+ *   Heiko Seeberger           Enhancements for service dynamics
  *   Martin Lippert            extracted weaving and caching service factories
  *******************************************************************************/
 
@@ -46,7 +46,6 @@ public class WeavingAdaptorFactory {
             .asList(new String[] { "org.eclipse.equinox.weaving.aspectj", //$NON-NLS-1$
                     "org.eclipse.equinox.weaving.caching", //$NON-NLS-1$
                     "org.eclipse.equinox.weaving.caching.j9", //$NON-NLS-1$
-                    "org.eclipse.update.configurator", //$NON-NLS-1$
                     "org.eclipse.equinox.simpleconfigurator", //$NON-NLS-1$
                     "org.eclipse.equinox.common" }); //$NON-NLS-1$
 
@@ -96,8 +95,8 @@ public class WeavingAdaptorFactory {
         final ICachingServiceFactory cachingServiceFactory = cachingServiceFactoryTracker
                 .getService();
         if (cachingServiceFactory != null) {
-            service = cachingServiceFactory.createCachingService(loader,
-                    bundle, key);
+            service = cachingServiceFactory.createCachingService(loader, bundle,
+                    key);
         }
         if (Debug.DEBUG_CACHE)
             Debug.println("< WeavingAdaptorFactory.getCachingService() service=" //$NON-NLS-1$
@@ -106,8 +105,8 @@ public class WeavingAdaptorFactory {
     }
 
     public Bundle getHost(final Bundle fragment) {
-        if (Debug.DEBUG_GENERAL)
-            Debug.println("> WeavingAdaptorFactory.getHost() fragment=" + fragment); //$NON-NLS-1$
+        if (Debug.DEBUG_GENERAL) Debug.println(
+                "> WeavingAdaptorFactory.getHost() fragment=" + fragment); //$NON-NLS-1$
 
         Bundle host = null;
         if (packageAdminService != null)
@@ -118,17 +117,19 @@ public class WeavingAdaptorFactory {
         return host;
     }
 
-    protected IWeavingService getWeavingService(final ModuleClassLoader loader) {
-        if (Debug.DEBUG_WEAVE)
-            Debug.println("> WeavingAdaptorFactory.getWeavingService() baseClassLoader=" //$NON-NLS-1$
-                    + loader);
+    protected IWeavingService getWeavingService(
+            final ModuleClassLoader loader) {
+        if (Debug.DEBUG_WEAVE) Debug.println(
+                "> WeavingAdaptorFactory.getWeavingService() baseClassLoader=" //$NON-NLS-1$
+                        + loader);
 
         final Generation generation = loader.getClasspathManager()
                 .getGeneration();
         final Bundle bundle = loader.getBundle();
 
         IWeavingService weavingService = null;
-        if (!IGNORE_WEAVING_SERVICE_BUNDLES.contains(bundle.getSymbolicName())) {
+        if (!IGNORE_WEAVING_SERVICE_BUNDLES
+                .contains(bundle.getSymbolicName())) {
             final IWeavingServiceFactory weavingServiceFactory = weavingServiceFactoryTracker
                     .getService();
             if (weavingServiceFactory != null) {
@@ -233,9 +234,9 @@ public class WeavingAdaptorFactory {
     }
 
     private void initializePackageAdminService(final BundleContext context) {
-        if (Debug.DEBUG_GENERAL)
-            Debug.println("> AdaptorFactory.initializePackageAdminService() context=" //$NON-NLS-1$
-                    + context);
+        if (Debug.DEBUG_GENERAL) Debug.println(
+                "> AdaptorFactory.initializePackageAdminService() context=" //$NON-NLS-1$
+                        + context);
 
         final ServiceReference<PackageAdmin> ref = context
                 .getServiceReference(PackageAdmin.class);
@@ -249,9 +250,9 @@ public class WeavingAdaptorFactory {
     }
 
     private void initializeStartLevelService(final BundleContext context) {
-        if (Debug.DEBUG_GENERAL)
-            Debug.println("> AdaptorFactory.initializeStartLevelService() context=" //$NON-NLS-1$
-                    + context);
+        if (Debug.DEBUG_GENERAL) Debug.println(
+                "> AdaptorFactory.initializeStartLevelService() context=" //$NON-NLS-1$
+                        + context);
 
         final ServiceReference<StartLevel> ref = context
                 .getServiceReference(StartLevel.class);
