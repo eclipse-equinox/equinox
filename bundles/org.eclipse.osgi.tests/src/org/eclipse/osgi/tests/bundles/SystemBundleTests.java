@@ -10,18 +10,54 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
-import java.io.*;
-import java.net.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.Proxy;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.net.URLConnection;
 import java.security.Permission;
 import java.security.PrivilegedAction;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Properties;
+import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.jar.*;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 import javax.net.SocketFactory;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
+import org.eclipse.equinox.log.ExtendedLogReaderService;
+import org.eclipse.equinox.log.ExtendedLogService;
+import org.eclipse.equinox.log.test.TestListener2;
 import org.eclipse.osgi.framework.util.FilePath;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
@@ -32,7 +68,17 @@ import org.eclipse.osgi.storage.url.reference.Handler;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.security.BaseSecurityTest;
 import org.junit.Assert;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.hooks.weaving.WeavingHook;
@@ -40,14 +86,22 @@ import org.osgi.framework.hooks.weaving.WovenClass;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.framework.namespace.NativeNamespace;
-import org.osgi.framework.wiring.*;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
-import org.osgi.service.log.*;
+import org.osgi.service.log.LogEntry;
+import org.osgi.service.log.LogLevel;
+import org.osgi.service.log.LogReaderService;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
-import org.osgi.service.url.*;
+import org.osgi.service.url.AbstractURLStreamHandlerService;
+import org.osgi.service.url.URLConstants;
+import org.osgi.service.url.URLStreamHandlerService;
 
 public class SystemBundleTests extends AbstractBundleTests {
 	public static Test suite() {
@@ -3130,6 +3184,70 @@ public class SystemBundleTests extends AbstractBundleTests {
 			} catch (InterruptedException e) {
 				fail("Failed to stop framework.", e);
 			}
+		}
+	}
+
+	public void testLogOrderMultipleListeners() throws InterruptedException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map configuration = new HashMap();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = null;
+
+		try {
+			equinox = new Equinox(configuration);
+			equinox.start();
+			doLoggingOnMultipleListeners(equinox);
+			equinox.stop();
+			equinox.waitForStop(1000);
+			equinox.start();
+			doLoggingOnMultipleListeners(equinox);
+
+		} catch (BundleException e) {
+			fail("Failed init", e);
+		} finally {
+			try {
+				if (equinox != null) {
+					equinox.stop();
+					equinox.waitForStop(1000);
+				}
+			} catch (BundleException e) {
+				fail("Failed to stop framework.", e);
+			} catch (InterruptedException e) {
+				fail("Failed to stop framework.", e);
+			}
+		}
+	}
+
+	public static void doLoggingOnMultipleListeners(Equinox equinox) throws InterruptedException {
+		int listenersSize = 100;
+		int logSize = 10000;
+		BundleContext bc = equinox.getBundleContext();
+		ExtendedLogReaderService logReader = bc.getService(bc.getServiceReference(ExtendedLogReaderService.class));
+		ExtendedLogService log = bc.getService(bc.getServiceReference(ExtendedLogService.class));
+		ArrayList<TestListener2> listeners = new ArrayList<TestListener2>();
+		CountDownLatch latch = new CountDownLatch(logSize * listenersSize);
+
+		for (int i = 0; i < listenersSize; i++) {
+			TestListener2 listener = new TestListener2(latch);
+			listeners.add(listener);
+			logReader.addLogListener(listener);
+		}
+
+		for (int i = 0; i < logSize; i++) {
+			log.warn(String.valueOf(i));
+		}
+
+		latch.await(10, TimeUnit.SECONDS);
+		assertEquals("Failed to log all entries", 0, latch.getCount());
+
+		int expected = 0;
+		for (String msg : listeners.get(0).getLogs()) {
+			assertEquals("Unexpected log found.", expected, Integer.parseInt(msg));
+			expected++;
+		}
+
+		for (int i = 1; i < listenersSize; i++) {
+			assertTrue(listeners.get(i).getLogs().equals(listeners.get(0).getLogs()));
 		}
 	}
 
