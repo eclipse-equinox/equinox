@@ -16,9 +16,11 @@
 
 package org.osgi.util.promise;
 
-import static java.util.Objects.requireNonNull;
 import static org.osgi.util.promise.PromiseImpl.uncaughtException;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -35,27 +37,29 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.osgi.annotation.versioning.ConsumerType;
+import org.osgi.util.promise.PromiseImpl.Result;
 
 /**
- * The executors for Promise callbacks and scheduled operations.
+ * Promise factory to create Deferred and Promise objects.
  * <p>
- * Instances of this class can be used to create a Deferred that can be resolved
- * in the future as well as resolved Promises. The returned Deferred and Promise
- * objects all use the executors used to construct this object for any callback
- * or scheduled operation execution.
+ * Instances of this class can be used to create Deferred and Promise objects
+ * which use the executors used to construct this object for any callback or
+ * scheduled operation execution.
  * 
  * @Immutable
  * @author $Id$
  * @since 1.1
  */
 @ConsumerType
-public class PromiseExecutors {
+public class PromiseFactory {
 	/**
-	 * The default executors.
+	 * The default factory which uses the default callback executor and default
+	 * scheduled executor.
 	 */
-	final static PromiseExecutors			defaultExecutors	= new PromiseExecutors(
+	final static PromiseFactory				defaultFactory	= new PromiseFactory(
 			null, null);
 
 	/**
@@ -71,19 +75,19 @@ public class PromiseExecutors {
 
 
 	/**
-	 * Create a new PromiseExecutors with the specified callback executor.
+	 * Create a new PromiseFactory with the specified callback executor.
 	 * <p>
 	 * The default scheduled executor will be used.
 	 * 
 	 * @param callbackExecutor The executor to use for callbacks. {@code null}
 	 *            can be specified for the default callback executor.
 	 */
-	public PromiseExecutors(Executor callbackExecutor) {
+	public PromiseFactory(Executor callbackExecutor) {
 		this(callbackExecutor, null);
 	}
 
 	/**
-	 * Create a new PromiseExecutors with the specified callback executor and
+	 * Create a new PromiseFactory with the specified callback executor and
 	 * specified scheduled executor.
 	 * 
 	 * @param callbackExecutor The executor to use for callbacks. {@code null}
@@ -92,7 +96,7 @@ public class PromiseExecutors {
 	 *            operations. {@code null} can be specified for the default
 	 *            scheduled executor.
 	 */
-	public PromiseExecutors(Executor callbackExecutor,
+	public PromiseFactory(Executor callbackExecutor,
 			ScheduledExecutorService scheduledExecutor) {
 		this.callbackExecutor = callbackExecutor;
 		this.scheduledExecutor = scheduledExecutor;
@@ -103,9 +107,9 @@ public class PromiseExecutors {
 	 * 
 	 * @return The executor to use for callbacks. This will be the default
 	 *         callback executor if {@code null} was specified for the callback
-	 *         executor when this PromiseExecutors was created.
+	 *         executor when this PromiseFactory was created.
 	 */
-	protected Executor executor() {
+	public Executor executor() {
 		if (callbackExecutor == null) {
 			return DefaultExecutors.callbackExecutor();
 		}
@@ -113,13 +117,13 @@ public class PromiseExecutors {
 	}
 
 	/**
-	 * Returns the executor to use for scheduled operations.
+	 * Returns the scheduled executor to use for scheduled operations.
 	 * 
-	 * @return The executor to use for scheduled operations. This will be the
-	 *         default scheduled executor if {@code null} was specified for the
-	 *         scheduled executor when this PromiseExecutors was created.
+	 * @return The scheduled executor to use for scheduled operations. This will
+	 *         be the default scheduled executor if {@code null} was specified
+	 *         for the scheduled executor when this PromiseFactory was created.
 	 */
-	protected ScheduledExecutorService scheduledExecutor() {
+	public ScheduledExecutorService scheduledExecutor() {
 		if (scheduledExecutor == null) {
 			return DefaultExecutors.scheduledExecutor();
 		}
@@ -128,14 +132,15 @@ public class PromiseExecutors {
 
 	/**
 	 * Create a new Deferred with the callback executor and scheduled executor
-	 * of this PromiseExecutors object.
+	 * of this PromiseFactory object.
 	 * <p>
 	 * Use this method instead of {@link Deferred#Deferred()} to create a new
 	 * {@link Deferred} whose associated Promise uses executors other than the
 	 * default executors.
 	 * 
+	 * @param <T> The value type associated with the returned Deferred.
 	 * @return A new {@link Deferred} with the callback and scheduled executors
-	 *         of this PromiseExecutors object
+	 *         of this PromiseFactory object
 	 */
 	public <T> Deferred<T> deferred() {
 		return new Deferred<>(this);
@@ -145,7 +150,7 @@ public class PromiseExecutors {
 	 * Returns a new Promise that has been resolved with the specified value.
 	 * <p>
 	 * The returned Promise uses the callback executor and scheduled executor of
-	 * this PromiseExecutors object
+	 * this PromiseFactory object
 	 * <p>
 	 * Use this method instead of {@link Promises#resolved(Object)} to create a
 	 * Promise which uses executors other than the default executors.
@@ -155,14 +160,14 @@ public class PromiseExecutors {
 	 * @return A new Promise that has been resolved with the specified value.
 	 */
 	public <T> Promise<T> resolved(T value) {
-		return new PromiseImpl<>(value, null, this);
+		return new ResolvedPromiseImpl<>(value, this);
 	}
 
 	/**
 	 * Returns a new Promise that has been resolved with the specified failure.
 	 * <p>
 	 * The returned Promise uses the callback executor and scheduled executor of
-	 * this PromiseExecutors object
+	 * this PromiseFactory object
 	 * <p>
 	 * Use this method instead of {@link Promises#failed(Throwable)} to create a
 	 * Promise which uses executors other than the default executors.
@@ -173,37 +178,123 @@ public class PromiseExecutors {
 	 * @return A new Promise that has been resolved with the specified failure.
 	 */
 	public <T> Promise<T> failed(Throwable failure) {
-		return new PromiseImpl<>(null, requireNonNull(failure), this);
+		return new FailedPromiseImpl<>(failure, this);
 	}
 
 	/**
 	 * Returns a new Promise that will hold the result of the specified task.
 	 * <p>
+	 * The returned Promise uses the callback executor and scheduled executor of
+	 * this PromiseFactory object
+	 * <p>
 	 * The specified task will be executed on the {@link #executor() callback
 	 * executor}.
 	 * 
+	 * @param <T> The value type associated with the returned Promise.
 	 * @param task The task whose result will be available from the returned
 	 *            Promise.
 	 * @return A new Promise that will hold the result of the specified task.
 	 */
-	public <V> Promise<V> submit(final Callable< ? extends V> task) {
-		requireNonNull(task);
-		final Deferred<V> deferred = deferred();
+	public <T> Promise<T> submit(Callable< ? extends T> task) {
+		DeferredPromiseImpl<T> promise = new DeferredPromiseImpl<>(this);
+		Runnable submit = promise.new Submit(task);
 		try {
-			executor().execute(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						deferred.resolve(task.call());
-					} catch (Throwable t) {
-						deferred.fail(t);
-					}
-				}
-			});
+			executor().execute(submit);
 		} catch (Exception t) {
-			deferred.fail(t);
+			promise.tryResolve(null, t);
 		}
-		return deferred.getPromise();
+		return promise;
+	}
+
+	/**
+	 * Returns a new Promise that is a latch on the resolution of the specified
+	 * Promises.
+	 * <p>
+	 * The returned Promise uses the callback executor and scheduled executor of
+	 * this PromiseFactory object
+	 * <p>
+	 * The returned Promise acts as a gate and must be resolved after all of the
+	 * specified Promises are resolved.
+	 * 
+	 * @param <T> The value type of the List value associated with the returned
+	 *            Promise.
+	 * @param <S> A subtype of the value type of the List value associated with
+	 *            the returned Promise.
+	 * @param promises The Promises which must be resolved before the returned
+	 *            Promise must be resolved. Must not be {@code null} and all of
+	 *            the elements in the collection must not be {@code null}.
+	 * @return A Promise that must be successfully resolved with a List of the
+	 *         values in the order of the specified Promises if all the
+	 *         specified Promises are successfully resolved. The List in the
+	 *         returned Promise is the property of the caller and is modifiable.
+	 *         The returned Promise must be resolved with a failure of
+	 *         {@link FailedPromisesException} if any of the specified Promises
+	 *         are resolved with a failure. The failure
+	 *         {@link FailedPromisesException} must contain all of the specified
+	 *         Promises which resolved with a failure.
+	 */
+	public <T, S extends T> Promise<List<T>> all(
+			Collection<Promise<S>> promises) {
+		if (promises.isEmpty()) {
+			List<T> result = new ArrayList<>();
+			return resolved(result);
+		}
+
+		DeferredPromiseImpl<List<T>> promise = new DeferredPromiseImpl<>(this);
+		/* make a copy and capture the ordering */
+		List<Promise<S>> list = new ArrayList<>(promises);
+		All<T,S> all = new All<>(promise, list);
+		for (Promise<S> p : list) {
+			p.onResolve(all);
+		}
+		return promise;
+	}
+
+	/**
+	 * A callback used to resolve the specified Promise when the specified list
+	 * of Promises are resolved for the {@link PromiseFactory#all(Collection)}
+	 * method.
+	 * 
+	 * @ThreadSafe
+	 */
+	private static final class All<T, S extends T> implements Runnable {
+		private final DeferredPromiseImpl<List<T>>	promise;
+		private final List<Promise<S>>		promises;
+		private final AtomicInteger			promiseCount;
+
+		All(DeferredPromiseImpl<List<T>> promise,
+				List<Promise<S>> promises) {
+			this.promise = promise;
+			this.promises = promises;
+			this.promiseCount = new AtomicInteger(promises.size());
+		}
+
+		@Override
+		public void run() {
+			if (promiseCount.decrementAndGet() != 0) {
+				return;
+			}
+			List<T> value = new ArrayList<>(promises.size());
+			List<Promise< ? >> failed = new ArrayList<>(promises.size());
+			Throwable cause = null;
+			for (Promise<S> p : promises) {
+				Result<S> result = PromiseImpl.collect(p);
+				if (result.fail != null) {
+					failed.add(p);
+					if (cause == null) {
+						cause = result.fail;
+					}
+				} else {
+					value.add(result.value);
+				}
+			}
+			if (failed.isEmpty()) {
+				promise.tryResolve(value, null);
+			} else {
+				promise.tryResolve(null,
+						new FailedPromisesException(failed, cause));
+			}
+		}
 	}
 
 	/**
@@ -284,7 +375,7 @@ public class PromiseExecutors {
 				}
 			}
 			Thread t = delegateThreadFactory.newThread(r);
-			t.setName("PromiseImpl," + t.getName());
+			t.setName("PromiseFactory," + t.getName());
 			t.setDaemon(true);
 			return t;
 		}
