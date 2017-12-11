@@ -9,6 +9,43 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="src/org/osgi/service/log/LogEntry.java" type="org.osgi.service.log.LogEntry">
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.4"/>
+                <message_argument value="3.7"/>
+                <message_argument value="getLocation()"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.4"/>
+                <message_argument value="3.7"/>
+                <message_argument value="getLogLevel()"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.4"/>
+                <message_argument value="3.7"/>
+                <message_argument value="getLoggerName()"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.4"/>
+                <message_argument value="3.7"/>
+                <message_argument value="getSequence()"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.4"/>
+                <message_argument value="3.7"/>
+                <message_argument value="getThreadInfo()"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="src/org/osgi/service/log/LogLevel.java" type="org.osgi.service.log.LogLevel">
         <filter id="1108344834">
             <message_arguments>
