@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,16 +11,26 @@
 
 package org.eclipse.osgi.internal.loader.classpath;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.security.ProtectionDomain;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
 import org.eclipse.osgi.storage.BundleInfo;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
+import org.eclipse.osgi.storage.Storage;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 
@@ -46,6 +56,7 @@ public class ClasspathEntry {
 	private final ProtectionDomain domain;
 	private final ManifestPackageAttributes mainManifestPackageAttributes;
 	private final Map<String, ManifestPackageAttributes> perPackageManifestAttributes;
+	private final List<BundleFile> mrBundleFiles;
 	private KeyedHashSet userObjects = null;
 
 	// TODO Note that PDE has internal dependency on this field type/name (bug 267238)
@@ -69,6 +80,35 @@ public class ClasspathEntry {
 			mainManifestPackageAttributes = ManifestPackageAttributes.NONE;
 			perPackageManifestAttributes = null;
 		}
+
+		boolean isMRJar;
+		if (bundlefile == generation.getBundleFile()) {
+			// this is the root bundle file
+			isMRJar = generation.isMRJar();
+		} else {
+			isMRJar = manifest != null ? Boolean.parseBoolean(manifest.getMainAttributes().getValue(BundleInfo.MULTI_RELEASE_HEADER)) : false;
+		}
+		if (isMRJar) {
+			mrBundleFiles = getMRBundleFiles(bundlefile, generation);
+		} else {
+			mrBundleFiles = Collections.emptyList();
+		}
+	}
+
+	private static List<BundleFile> getMRBundleFiles(BundleFile bundlefile, Generation generation) {
+		Storage storage = generation.getBundleInfo().getStorage();
+		if (storage.getRuntimeVersion().getMajor() < 9) {
+			return Collections.emptyList();
+		}
+		List<BundleFile> mrBundleFiles = new ArrayList<>();
+		for (int i = storage.getRuntimeVersion().getMajor(); i > 8; i--) {
+			String versionPath = "META-INF/versions/" + i + '/'; //$NON-NLS-1$
+			BundleEntry versionEntry = bundlefile.getEntry(versionPath);
+			if (versionEntry != null) {
+				mrBundleFiles.add(storage.createNestedBundleFile(versionPath, bundlefile, generation));
+			}
+		}
+		return Collections.unmodifiableList(mrBundleFiles);
 	}
 
 	private static ManifestPackageAttributes manifestPackageAttributesFor(Attributes attributes, ManifestPackageAttributes defaultAttributes) {
@@ -135,6 +175,50 @@ public class ClasspathEntry {
 		userObjects.add(userObject);
 	}
 
+	/**
+	 * Finds the entry with the specified path.
+	 * This handles Multi-Release searching also.
+	 * @param path the path to find
+	 * @return the entry with the specified path.
+	 */
+	public BundleEntry findEntry(String path) {
+		for (BundleFile mrFile : mrBundleFiles) {
+			BundleEntry mrEntry = mrFile.getEntry(path);
+			if (mrEntry != null) {
+				return mrEntry;
+			}
+		}
+		return bundlefile.getEntry(path);
+	}
+
+	/**
+	 * Finds the resource wiht the specified name.
+	 * This handles Multi-Release searching also.
+	 * @param name the resource name
+	 * @param m the module this classpath entry is for
+	 * @param index the index this classpath entry.
+	 * @return the resource URL or {@code null} if the resource does not exist.
+	 */
+	public URL findResource(String name, Module m, int index) {
+		for (BundleFile mrFile : mrBundleFiles) {
+			URL mrURL = mrFile.getResourceURL(name, m, index);
+			if (mrURL != null) {
+				return mrURL;
+			}
+		}
+		return bundlefile.getResourceURL(name, m, index);
+	}
+
+	/**
+	 * Adds the BundleFile objects for this classpath in the proper order
+	 * for searching for resources. This handles Multi-Release ordering also.
+	 * @param bundlefiles
+	 */
+	public void addBundleFiles(List<BundleFile> bundlefiles) {
+		bundlefiles.addAll(mrBundleFiles);
+		bundlefiles.add(bundlefile);
+	}
+
 	private static Manifest loadManifest(BundleFile cpBundleFile, Generation generation) {
 		if (!generation.hasPackageInfo() && generation.getBundleFile() == cpBundleFile) {
 			return null;
@@ -165,4 +249,10 @@ public class ClasspathEntry {
 		return mainManifestPackageAttributes;
 	}
 
+	public void close() throws IOException {
+		bundlefile.close();
+		for (BundleFile bf : mrBundleFiles) {
+			bf.close();
+		}
+	}
 }

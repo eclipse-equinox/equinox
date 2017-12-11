@@ -11,11 +11,22 @@
 
 package org.eclipse.osgi.internal.loader.classpath;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
-import java.util.*;
-import org.eclipse.osgi.container.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.ListIterator;
+import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.container.ModuleCapability;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
+import org.eclipse.osgi.container.ModuleRevision;
+import org.eclipse.osgi.container.ModuleWire;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.util.ArrayMap;
 import org.eclipse.osgi.internal.debug.Debug;
@@ -134,7 +145,7 @@ public class ClasspathManager {
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i] != null) {
 				try {
-					entries[i].getBundleFile().close();
+					entries[i].close();
 				} catch (IOException e) {
 					generation.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, generation.getRevision().getRevisions().getModule(), e);
 				}
@@ -358,24 +369,25 @@ public class ClasspathManager {
 	}
 
 	private URL findLocalResourceImpl(String resource, int classPathIndex) {
+		Module m = generation.getRevision().getRevisions().getModule();
 		URL result = null;
 		int curIndex = 0;
-		for (int i = 0; i < entries.length; i++) {
-			if (entries[i] != null) {
-				result = findResourceImpl(resource, entries[i].getBundleFile(), curIndex);
-				if (result != null && (classPathIndex == -1 || classPathIndex == curIndex))
+		for (ClasspathEntry cpEntry : entries) {
+			if (cpEntry != null) {
+				result = cpEntry.findResource(resource, m, curIndex);
+				if (result != null && (classPathIndex == -1 || classPathIndex == curIndex)) {
 					return result;
+				}
 			}
 			curIndex++;
 		}
 		// look in fragments
-		FragmentClasspath[] currentFragments = getFragmentClasspaths();
-		for (int i = 0; i < currentFragments.length; i++) {
-			ClasspathEntry[] fragEntries = currentFragments[i].getEntries();
-			for (int j = 0; j < fragEntries.length; j++) {
-				result = findResourceImpl(resource, fragEntries[j].getBundleFile(), curIndex);
-				if (result != null && (classPathIndex == -1 || classPathIndex == curIndex))
+		for (FragmentClasspath fragCP : getFragmentClasspaths()) {
+			for (ClasspathEntry cpEntry : fragCP.getEntries()) {
+				result = cpEntry.findResource(resource, m, curIndex);
+				if (result != null && (classPathIndex == -1 || classPathIndex == curIndex)) {
 					return result;
+				}
 				curIndex++;
 			}
 		}
@@ -388,34 +400,31 @@ public class ClasspathManager {
 	 * @return an enumeration of the the requested resources
 	 */
 	public Enumeration<URL> findLocalResources(String resource) {
+		Module m = generation.getRevision().getRevisions().getModule();
 		List<URL> resources = new ArrayList<>(6);
 		int classPathIndex = 0;
-		for (int i = 0; i < entries.length; i++) {
-			if (entries[i] != null) {
-				URL url = findResourceImpl(resource, entries[i].getBundleFile(), classPathIndex);
-				if (url != null)
+		for (ClasspathEntry cpEntry : entries) {
+			if (cpEntry != null) {
+				URL url = cpEntry.findResource(resource, m, classPathIndex);
+				if (url != null) {
 					resources.add(url);
+				}
 			}
 			classPathIndex++;
 		}
 		// look in fragments
-		FragmentClasspath[] currentFragments = getFragmentClasspaths();
-		for (int i = 0; i < currentFragments.length; i++) {
-			ClasspathEntry[] fragEntries = currentFragments[i].getEntries();
-			for (int j = 0; j < fragEntries.length; j++) {
-				URL url = findResourceImpl(resource, fragEntries[j].getBundleFile(), classPathIndex);
-				if (url != null)
+		for (FragmentClasspath fragCP : getFragmentClasspaths()) {
+			for (ClasspathEntry cpEntry : fragCP.getEntries()) {
+				URL url = cpEntry.findResource(resource, m, classPathIndex);
+				if (url != null) {
 					resources.add(url);
+				}
 				classPathIndex++;
 			}
 		}
 		if (resources.size() > 0)
 			return Collections.enumeration(resources);
 		return EMPTY_ENUMERATION;
-	}
-
-	private URL findResourceImpl(String name, BundleFile bundlefile, int index) {
-		return bundlefile.getResourceURL(name, generation.getRevision().getRevisions().getModule(), index);
 	}
 
 	/**
@@ -439,7 +448,7 @@ public class ClasspathManager {
 		int curIndex = 0;
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i] != null) {
-				result = findEntryImpl(path, entries[i].getBundleFile());
+				result = entries[i].findEntry(path);
 				if (result != null && (classPathIndex == -1 || classPathIndex == curIndex))
 					return result;
 			}
@@ -450,46 +459,13 @@ public class ClasspathManager {
 		for (int i = 0; i < currentFragments.length; i++) {
 			ClasspathEntry[] fragEntries = currentFragments[i].getEntries();
 			for (int j = 0; j < fragEntries.length; j++) {
-				result = findEntryImpl(path, fragEntries[j].getBundleFile());
+				result = fragEntries[j].findEntry(path);
 				if (result != null && (classPathIndex == -1 || classPathIndex == curIndex))
 					return result;
 				curIndex++;
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Finds the local entries by searching the ClasspathEntry objects of the classpath manager.
-	 * @param path the requested entry path.
-	 * @return an enumeration of the the requested entries or null if the entries do not exist
-	 */
-	public Enumeration<BundleEntry> findLocalEntries(String path) {
-		List<BundleEntry> objects = new ArrayList<>(6);
-		for (int i = 0; i < entries.length; i++) {
-			if (entries[i] != null) {
-				BundleEntry result = findEntryImpl(path, entries[i].getBundleFile());
-				if (result != null)
-					objects.add(result);
-			}
-		}
-		// look in fragments
-		FragmentClasspath[] currentFragments = getFragmentClasspaths();
-		for (int i = 0; i < currentFragments.length; i++) {
-			ClasspathEntry[] fragEntries = currentFragments[i].getEntries();
-			for (int j = 0; j < fragEntries.length; j++) {
-				BundleEntry result = findEntryImpl(path, fragEntries[j].getBundleFile());
-				if (result != null)
-					objects.add(result);
-			}
-		}
-		if (objects.size() > 0)
-			return Collections.enumeration(objects);
-		return null;
-	}
-
-	private BundleEntry findEntryImpl(String path, BundleFile bundleFile) {
-		return bundleFile.getEntry(path);
 	}
 
 	/**
@@ -557,7 +533,8 @@ public class ClasspathManager {
 		if (debug.DEBUG_LOADER)
 			Debug.println("ModuleClassLoader[" + classloader.getBundleLoader() + " - " + classpathEntry.getBundleFile() + "].findClassImpl(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
 		String filename = name.replace('.', '/').concat(".class"); //$NON-NLS-1$
-		BundleEntry entry = classpathEntry.getBundleFile().getEntry(filename);
+
+		BundleEntry entry = classpathEntry.findEntry(filename);
 		if (entry == null)
 			return null;
 
@@ -829,14 +806,14 @@ public class ClasspathManager {
 		List<BundleFile> bundleFiles = new ArrayList<>();
 
 		ClasspathEntry[] cpEntries = getHostClasspathEntries();
-		for (ClasspathEntry cpEntry : cpEntries)
-			bundleFiles.add(cpEntry.getBundleFile());
+		for (ClasspathEntry cpEntry : cpEntries) {
+			cpEntry.addBundleFiles(bundleFiles);
+		}
 
-		FragmentClasspath[] currentFragments = getFragmentClasspaths();
-		for (FragmentClasspath fragmentClasspath : currentFragments) {
-			ClasspathEntry[] fragEntries = fragmentClasspath.getEntries();
-			for (ClasspathEntry cpEntry : fragEntries)
-				bundleFiles.add(cpEntry.getBundleFile());
+		for (FragmentClasspath fragmentClasspath : getFragmentClasspaths()) {
+			for (ClasspathEntry cpEntry : fragmentClasspath.getEntries()) {
+				cpEntry.addBundleFiles(bundleFiles);
+			}
 		}
 
 		return Storage.listEntryPaths(bundleFiles, path, filePattern, options);

@@ -128,5 +128,6 @@
 	<classpathentry kind="src" output="bundle_tests/test.dynamicimport" path="bundles_src/test.dynamicimport"/>
 	<classpathentry kind="src" output="bundle_tests/test.bug490902.a" path="bundles_src/test.bug490902.a"/>
 	<classpathentry kind="src" output="bundle_tests/test.bug490902.b" path="bundles_src/test.bug490902.b"/>
+	<classpathentry kind="src" output="bundle_tests/mrBundleInputBase" path="bundles_src/mrBundleInputBase"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

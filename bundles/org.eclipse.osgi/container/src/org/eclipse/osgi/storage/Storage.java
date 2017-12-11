@@ -45,6 +45,7 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleCapability;
@@ -109,7 +110,9 @@ import org.osgi.resource.Namespace;
 import org.osgi.resource.Requirement;
 
 public class Storage {
-	public static final int VERSION = 3;
+	public static final int VERSION = 4;
+	private static final int MR_JAR_VERSION = 4;
+	private static final int LOWEST_VERSION_SUPPORTED = 3;
 	public static final String BUNDLE_DATA_DIR = "data"; //$NON-NLS-1$
 	public static final String BUNDLE_FILE_NAME = "bundleFile"; //$NON-NLS-1$
 	public static final String FRAMEWORK_INFO = "framework.info"; //$NON-NLS-1$
@@ -140,6 +143,9 @@ public class Storage {
 	private final FrameworkExtensionInstaller extensionInstaller;
 	private final List<String> cachedHeaderKeys = Arrays.asList(Constants.BUNDLE_SYMBOLICNAME, Constants.BUNDLE_ACTIVATIONPOLICY, "Service-Component"); //$NON-NLS-1$
 	private final boolean allowRestrictedProvides;
+	private final AtomicBoolean refreshMRBundles = new AtomicBoolean(false);
+	private final Version runtimeVersion;
+	private final String javaSpecVersion;
 
 	public static Storage createStorage(EquinoxContainer container) throws IOException, BundleException {
 		Storage storage = new Storage(container);
@@ -153,6 +159,24 @@ public class Storage {
 	}
 
 	private Storage(EquinoxContainer container) throws IOException {
+		// default to Java 7 since that is our min
+		Version javaVersion = Version.valueOf("1.7"); //$NON-NLS-1$
+		// set the profile and EE based off of the java.specification.version
+		String javaSpecVersionProp = System.getProperty(EquinoxConfiguration.PROP_JVM_SPEC_VERSION);
+		StringTokenizer st = new StringTokenizer(javaSpecVersionProp, " _-"); //$NON-NLS-1$
+		javaSpecVersionProp = st.nextToken();
+		try {
+			String[] vComps = javaSpecVersionProp.split("\\."); //$NON-NLS-1$
+			// only pay attention to the first three components of the version
+			int major = vComps.length > 0 ? Integer.parseInt(vComps[0]) : 0;
+			int minor = vComps.length > 1 ? Integer.parseInt(vComps[1]) : 0;
+			int micro = vComps.length > 2 ? Integer.parseInt(vComps[2]) : 0;
+			javaVersion = new Version(major, minor, micro);
+		} catch (IllegalArgumentException e) {
+			// do nothing
+		}
+		runtimeVersion = javaVersion;
+		javaSpecVersion = javaSpecVersionProp;
 		mruList = new MRUBundleFileList(getBundleFileLimit(container.getConfiguration()));
 		equinoxContainer = container;
 		extensionInstaller = new FrameworkExtensionInstaller(container.getConfiguration());
@@ -228,6 +252,10 @@ public class Storage {
 				}
 			}
 		}
+	}
+
+	public Version getRuntimeVersion() {
+		return runtimeVersion;
 	}
 
 	private int getBundleFileLimit(EquinoxConfiguration configuration) {
@@ -343,6 +371,10 @@ public class Storage {
 							moduleContainer.resolve(Collections.singleton(systemModule), true);
 						}
 					}
+					if (refreshMRBundles.get()) {
+						Collection<Module> toRefresh = refreshMRJarBundles();
+						moduleContainer.refresh(toRefresh);
+					}
 				} catch (BundleException e) {
 					throw new IllegalStateException("Could not create a builder for the system bundle.", e); //$NON-NLS-1$
 				}
@@ -374,6 +406,19 @@ public class Storage {
 				newGeneration.getBundleInfo().unlockGeneration(newGeneration);
 			}
 		}
+	}
+
+	private Collection<Module> refreshMRJarBundles() throws BundleException {
+		Collection<Module> mrJarBundles = new ArrayList<>();
+		for (Module m : moduleContainer.getModules()) {
+			Generation generation = (Generation) m.getCurrentRevision().getRevisionInfo();
+			// Note that we check the raw headers here incase we are working off an old version of the persistent storage
+			if (Boolean.parseBoolean(generation.getRawHeaders().get(BundleInfo.MULTI_RELEASE_HEADER))) {
+				refresh(m);
+				mrJarBundles.add(m);
+			}
+		}
+		return mrJarBundles;
 	}
 
 	public void close() {
@@ -774,6 +819,20 @@ public class Storage {
 		return result.toString();
 	}
 
+	private void refresh(Module module) throws BundleException {
+		ModuleRevision current = module.getCurrentRevision();
+		Generation currentGen = (Generation) current.getRevisionInfo();
+		File content = currentGen.getContent();
+		String spec = (currentGen.isReference() ? "reference:" : "") + content.toURI().toString(); //$NON-NLS-1$ //$NON-NLS-2$
+		URLConnection contentConn;
+		try {
+			contentConn = getContentConnection(spec);
+		} catch (IOException e) {
+			throw new BundleException("Error reading bundle content.", e); //$NON-NLS-1$
+		}
+		update(module, contentConn);
+	}
+
 	public Generation update(Module module, URLConnection content) throws BundleException {
 		if (osgiLocation.isReadOnly()) {
 			throw new BundleException("The framework storage area is read only.", BundleException.INVALID_OPERATION); //$NON-NLS-1$
@@ -787,7 +846,6 @@ public class Storage {
 		}
 		boolean isReference = in instanceof ReferenceInputStream;
 		File staged = stageContent(in, sourceURL);
-
 		ModuleRevision current = module.getCurrentRevision();
 		Generation currentGen = (Generation) current.getRevisionInfo();
 
@@ -1146,6 +1204,8 @@ public class Storage {
 		}
 		out.writeInt(VERSION);
 
+		out.writeUTF(runtimeVersion.toString());
+
 		out.writeInt(cachedHeaderKeys.size());
 		for (String headerKey : cachedHeaderKeys) {
 			out.writeUTF(headerKey);
@@ -1184,6 +1244,8 @@ public class Storage {
 					out.writeUTF(NUL);
 				}
 			}
+
+			out.writeBoolean(generation.isMRJar());
 		}
 
 		saveStorageHookData(out, generations);
@@ -1222,8 +1284,12 @@ public class Storage {
 			return new HashMap<>(0);
 		}
 		int version = in.readInt();
-		if (version != VERSION) {
+		if (version > VERSION || version < LOWEST_VERSION_SUPPORTED) {
 			throw new IllegalArgumentException("Found persistent version \"" + version + "\" expecting \"" + VERSION + "\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+		Version savedRuntimeVersion = (version >= MR_JAR_VERSION) ? Version.parseVersion(in.readUTF()) : null;
+		if (savedRuntimeVersion == null || !savedRuntimeVersion.equals(runtimeVersion)) {
+			refreshMRBundles.set(true);
 		}
 		int numCachedHeaders = in.readInt();
 		List<String> storedCachedHeaderKeys = new ArrayList<>(numCachedHeaders);
@@ -1255,6 +1321,7 @@ public class Storage {
 				}
 				cachedHeaders.put(headerKey, value);
 			}
+			boolean isMRJar = (version >= MR_JAR_VERSION) ? in.readBoolean() : false;
 
 			File content;
 			if (infoId == 0) {
@@ -1278,7 +1345,7 @@ public class Storage {
 			}
 
 			BundleInfo info = new BundleInfo(this, infoId, infoLocation, nextGenId);
-			Generation generation = info.restoreGeneration(generationId, content, isDirectory, isReference, hasPackageInfo, cachedHeaders, lastModified);
+			Generation generation = info.restoreGeneration(generationId, content, isDirectory, isReference, hasPackageInfo, cachedHeaders, lastModified, isMRJar);
 			result.put(infoId, generation);
 			generations.add(generation);
 		}
@@ -1428,20 +1495,8 @@ public class Storage {
 				return result;
 			}
 
-			// default to Java 7 since that is our min
-			Version javaVersion = Version.valueOf("1.7"); //$NON-NLS-1$
-			// set the profile and EE based off of the java.specification.version
-			String javaSpecVersion = System.getProperty(EquinoxConfiguration.PROP_JVM_SPEC_VERSION);
-			StringTokenizer st = new StringTokenizer(javaSpecVersion, " _-"); //$NON-NLS-1$
-			javaSpecVersion = st.nextToken();
-			try {
-				javaVersion = new Version(javaSpecVersion);
-			} catch (IllegalArgumentException e) {
-				// do nothing
-			}
-
-			if (Version.valueOf("9").compareTo(javaVersion) <= 0) { //$NON-NLS-1$
-				result = calculateVMProfile(javaVersion);
+			if (Version.valueOf("9").compareTo(runtimeVersion) <= 0) { //$NON-NLS-1$
+				result = calculateVMProfile(runtimeVersion);
 				if (result != null) {
 					return result;
 				}
@@ -1450,7 +1505,7 @@ public class Storage {
 
 			String embeddedProfileName = "-"; //$NON-NLS-1$
 			// If javaSE 1.8 then check for release file for profile name.
-			if (javaVersion != null && Version.valueOf("1.8").compareTo(javaVersion) <= 0) { //$NON-NLS-1$
+			if (runtimeVersion != null && Version.valueOf("1.8").compareTo(runtimeVersion) <= 0) { //$NON-NLS-1$
 				String javaHome = System.getProperty("java.home"); //$NON-NLS-1$
 				if (javaHome != null) {
 					File release = new File(javaHome, "release"); //$NON-NLS-1$
@@ -1479,7 +1534,7 @@ public class Storage {
 				String javaProfile = vmProfile + PROFILE_EXT;
 				profileIn = findInSystemBundle(systemGeneration, javaProfile);
 				if (profileIn == null)
-					profileIn = getNextBestProfile(systemGeneration, JAVASE, javaVersion, embeddedProfileName);
+					profileIn = getNextBestProfile(systemGeneration, JAVASE, runtimeVersion, embeddedProfileName);
 			}
 			if (profileIn == null)
 				// the profile url is still null then use the min profile the framework can use

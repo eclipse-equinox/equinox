@@ -48,9 +48,11 @@ import org.eclipse.osgi.storage.url.bundleentry.Handler;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 
 public final class BundleInfo {
 	public static final String OSGI_BUNDLE_MANIFEST = "META-INF/MANIFEST.MF"; //$NON-NLS-1$
+	public static final String MULTI_RELEASE_HEADER = "Multi-Release"; //$NON-NLS-1$
 
 	public final class Generation {
 		private final long generationId;
@@ -68,13 +70,14 @@ public final class BundleInfo {
 		private NativeCodeFinder nativeCodeFinder;
 		private List<StorageHook<?, ?>> storageHooks;
 		private long lastModified;
+		private boolean isMRJar;
 
 		Generation(long generationId) {
 			this.generationId = generationId;
 			this.cachedHeaders = new CachedManifest(this, Collections.<String, String> emptyMap());
 		}
 
-		Generation(long generationId, File content, boolean isDirectory, boolean isReference, boolean hasPackageInfo, Map<String, String> cached, long lastModified) {
+		Generation(long generationId, File content, boolean isDirectory, boolean isReference, boolean hasPackageInfo, Map<String, String> cached, long lastModified, boolean isMRJar) {
 			this.generationId = generationId;
 			this.content = content;
 			this.isDirectory = isDirectory;
@@ -82,6 +85,7 @@ public final class BundleInfo {
 			this.hasPackageInfo = hasPackageInfo;
 			this.cachedHeaders = new CachedManifest(this, cached);
 			this.lastModified = lastModified;
+			this.isMRJar = isMRJar;
 		}
 
 		public BundleFile getBundleFile() {
@@ -121,7 +125,28 @@ public final class BundleInfo {
 						rawHeaders = Collections.emptyMap();
 					} else {
 						try {
-							rawHeaders = Collections.unmodifiableMap(ManifestElement.parseBundleManifest(manifest.getInputStream(), new CaseInsensitiveDictionaryMap<String, String>()));
+							Map<String, String> merged = ManifestElement.parseBundleManifest(manifest.getInputStream(), new CaseInsensitiveDictionaryMap<String, String>());
+							// For MRJARs only replace Import-Package and Require-Capability if the versioned values are non-null
+							if (Boolean.parseBoolean(merged.get(MULTI_RELEASE_HEADER))) {
+								for (int i = getStorage().getRuntimeVersion().getMajor(); i > 8; i--) {
+									String versionManifest = "META-INF/versions/" + i + "/OSGI-INF/MANIFEST.MF"; //$NON-NLS-1$ //$NON-NLS-2$
+									BundleEntry versionEntry = getBundleFile().getEntry(versionManifest);
+									if (versionEntry != null) {
+										Map<String, String> versioned = ManifestElement.parseBundleManifest(versionEntry.getInputStream(), new CaseInsensitiveDictionaryMap<String, String>());
+										String versionedImport = versioned.get(Constants.IMPORT_PACKAGE);
+										String versionedRequireCap = versioned.get(Constants.REQUIRE_CAPABILITY);
+										if (versionedImport != null) {
+											merged.put(Constants.IMPORT_PACKAGE, versionedImport);
+										}
+										if (versionedRequireCap != null) {
+											merged.put(Constants.REQUIRE_CAPABILITY, versionedRequireCap);
+										}
+										// found a versioned entry; stop searching for more versions
+										break;
+									}
+								}
+							}
+							rawHeaders = Collections.unmodifiableMap(merged);
 						} catch (Exception e) {
 							if (e instanceof RuntimeException) {
 								throw (RuntimeException) e;
@@ -191,6 +216,12 @@ public final class BundleInfo {
 			}
 		}
 
+		public boolean isMRJar() {
+			synchronized (this.genMonitor) {
+				return this.isMRJar;
+			}
+		}
+
 		public File getContent() {
 			synchronized (this.genMonitor) {
 				return this.content;
@@ -222,6 +253,7 @@ public final class BundleInfo {
 				this.storageHooks = storageHooks;
 				if (install) {
 					this.hasPackageInfo = BundleInfo.hasPackageInfo(getBundleFile());
+					this.isMRJar = Boolean.parseBoolean(getRawHeaders().get(MULTI_RELEASE_HEADER));
 				}
 			}
 		}
@@ -433,9 +465,9 @@ public final class BundleInfo {
 		}
 	}
 
-	Generation restoreGeneration(long generationId, File content, boolean isDirectory, boolean isReference, boolean hasPackageInfo, Map<String, String> cached, long lastModified) {
+	Generation restoreGeneration(long generationId, File content, boolean isDirectory, boolean isReference, boolean hasPackageInfo, Map<String, String> cached, long lastModified, boolean isMRJar) {
 		synchronized (this.infoMonitor) {
-			Generation restoredGeneration = new Generation(generationId, content, isDirectory, isReference, hasPackageInfo, cached, lastModified);
+			Generation restoredGeneration = new Generation(generationId, content, isDirectory, isReference, hasPackageInfo, cached, lastModified, isMRJar);
 			return restoredGeneration;
 		}
 	}
