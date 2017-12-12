@@ -12,13 +12,30 @@ package org.eclipse.osgi.internal.framework;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import org.eclipse.osgi.framework.eventmgr.*;
+import org.eclipse.osgi.framework.eventmgr.CopyOnWriteIdentityMap;
+import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
+import org.eclipse.osgi.framework.eventmgr.EventManager;
+import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 import org.eclipse.osgi.internal.debug.Debug;
-import org.eclipse.osgi.internal.serviceregistry.*;
-import org.osgi.framework.*;
+import org.eclipse.osgi.internal.serviceregistry.HookContext;
+import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
+import org.eclipse.osgi.internal.serviceregistry.ShrinkableCollection;
+import org.osgi.framework.AdminPermission;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.bundle.EventHook;
 
@@ -59,7 +76,7 @@ public class EquinoxEventPublisher {
 
 	void init() {
 		// create our event manager on init()
-		resetEventManager(new EventManager("Framework Event Dispatcher: " + toString())); //$NON-NLS-1$
+		resetEventManager(new EventManager("Framework Event Dispatcher: " + container.toString())); //$NON-NLS-1$
 	}
 
 	void close() {

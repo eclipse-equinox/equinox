@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,10 +11,31 @@
 package org.eclipse.osgi.container;
 
 import java.security.Permission;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.felix.resolver.*;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.felix.resolver.Logger;
+import org.apache.felix.resolver.ResolutionError;
+import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.container.namespaces.EquinoxFragmentNamespace;
 import org.eclipse.osgi.internal.container.InternalUtils;
@@ -29,10 +50,24 @@ import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 import org.osgi.framework.hooks.resolver.ResolverHook;
-import org.osgi.framework.namespace.*;
-import org.osgi.framework.wiring.*;
-import org.osgi.resource.*;
-import org.osgi.service.resolver.*;
+import org.osgi.framework.namespace.BundleNamespace;
+import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.IdentityNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Namespace;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
+import org.osgi.resource.Wire;
+import org.osgi.resource.Wiring;
+import org.osgi.service.resolver.HostedCapability;
+import org.osgi.service.resolver.ResolutionException;
+import org.osgi.service.resolver.ResolveContext;
+import org.osgi.service.resolver.Resolver;
 
 /**
  * The module resolver handles calls to the {@link Resolver} service for resolving modules
@@ -548,6 +583,7 @@ final class ModuleResolver {
 		private final Set<Resource> transitivelyResolveFailures = new LinkedHashSet<>();
 		private final Set<Resource> failedToResolve = new HashSet<>();
 		private AtomicBoolean scheduleTimeout = new AtomicBoolean(true);
+		private AtomicReference<ScheduledFuture<?>> timoutFuture = new AtomicReference<>();
 		/*
 		 * Used to generate the UNRESOLVED_PROVIDER resolution report entries.
 		 * 
@@ -952,6 +988,10 @@ final class ModuleResolver {
 				} catch (ResolutionException e) {
 					re = e;
 				} finally {
+					ScheduledFuture<?> f = timoutFuture.getAndSet(null);
+					if (f != null) {
+						f.cancel(true);
+					}
 					computeUnresolvedProviderResolutionReportEntries(result);
 					computeUsesConstraintViolations(logger.getUsesConstraintViolations());
 					if (DEBUG_WIRING) {
@@ -1598,7 +1638,7 @@ final class ModuleResolver {
 				ScheduledExecutorService scheduledExecutor = adaptor.getScheduledExecutor();
 				if (scheduledExecutor != null) {
 					try {
-						scheduledExecutor.schedule(callback, resolverBatchTimeout, TimeUnit.MILLISECONDS);
+						timoutFuture.set(scheduledExecutor.schedule(callback, resolverBatchTimeout, TimeUnit.MILLISECONDS));
 					} catch (RejectedExecutionException e) {
 						// ignore may have been shutdown, it is ok we will not be able to timeout
 					}
