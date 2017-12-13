@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,6 +65,7 @@ public class WebStartMain extends Main {
 		System.getProperties().put(PROP_OSGI_BUNDLES, DEFAULT_OSGI_BUNDLES);
 	}
 
+	@Override
 	protected void basicRun(String[] args) throws Exception {
 		setDefaultBundles();
 		initializeBundleListStructure();
@@ -79,6 +80,7 @@ public class WebStartMain extends Main {
 		super.basicRun(args);
 	}
 
+	@Override
 	protected void beforeFwkInvocation() {
 		// set the check config option so we pick up modified bundle jars (bug 152825)
 		if (System.getProperty(PROP_CHECK_CONFIG) == null)
@@ -99,6 +101,7 @@ public class WebStartMain extends Main {
 	 * Find the target bundle among all the bundles that are on the classpath.
 	 * The start parameter is not used in this context
 	 */
+	@Override
 	protected String searchFor(final String target, String start) {
 		List<BundleInfo> matches = allBundles.get(target);
 		if (matches == null)
@@ -154,7 +157,7 @@ public class WebStartMain extends Main {
 	 * Get all the bundles available on the webstart classpath
 	 */
 	private void discoverBundles() {
-		allBundles = new HashMap<String, List<BundleInfo>>();
+		allBundles = new HashMap<>();
 		try {
 			Enumeration<URL> resources = WebStartMain.class.getClassLoader().getResources(JarFile.MANIFEST_NAME);
 			while (resources.hasMoreElements()) {
@@ -163,7 +166,7 @@ public class WebStartMain extends Main {
 					continue;
 				List<BundleInfo> matching = allBundles.get(found.bsn);
 				if (matching == null) {
-					matching = new ArrayList<BundleInfo>(1);
+					matching = new ArrayList<>(1);
 					allBundles.put(found.bsn, matching);
 				}
 				matching.add(found);
@@ -243,11 +246,11 @@ public class WebStartMain extends Main {
 		//In webstart the bundles list can only contain bundle names with or without a version.
 		String prop = System.getProperty(PROP_OSGI_BUNDLES);
 		if (prop == null || prop.trim().equals("")) { //$NON-NLS-1$
-			bundleList = new ArrayList<BundleInfo>(0);
+			bundleList = new ArrayList<>(0);
 			return;
 		}
 
-		bundleList = new ArrayList<BundleInfo>(10);
+		bundleList = new ArrayList<>(10);
 		StringTokenizer tokens = new StringTokenizer(prop, ","); //$NON-NLS-1$
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();

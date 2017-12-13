@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -111,6 +111,7 @@ public class Main {
 	protected boolean splashDown = false;
 
 	public final class SplashHandler extends Thread {
+		@Override
 		public void run() {
 			takeDownSplash();
 		}
@@ -796,7 +797,7 @@ public class Main {
 	protected String[] getArrayFromList(String prop) {
 		if (prop == null || prop.trim().equals("")) //$NON-NLS-1$
 			return new String[0];
-		Vector<String> list = new Vector<String>();
+		Vector<String> list = new Vector<>();
 		StringTokenizer tokens = new StringTokenizer(prop, ","); //$NON-NLS-1$
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();
@@ -815,7 +816,7 @@ public class Main {
 	 * @exception MalformedURLException if a problem occurs computing the class path
 	 */
 	private URL[] getDevPath(URL base) throws IOException {
-		ArrayList<URL> result = new ArrayList<URL>(5);
+		ArrayList<URL> result = new ArrayList<>(5);
 		if (inDevelopmentMode)
 			addDevEntries(base, result, OSGI);
 		//The jars from the base always need to be added, even when running in dev mode (bug 46772)
@@ -848,7 +849,7 @@ public class Main {
 	private void readFrameworkExtensions(URL base, ArrayList<URL> result) throws IOException {
 		String[] extensions = getArrayFromList(System.getProperties().getProperty(PROP_EXTENSIONS));
 		String parent = new File(base.getFile()).getParent().toString();
-		ArrayList<String> extensionResults = new ArrayList<String>(extensions.length);
+		ArrayList<String> extensionResults = new ArrayList<>(extensions.length);
 		for (int i = 0; i < extensions.length; i++) {
 			//Search the extension relatively to the osgi plugin 
 			String path = searchForBundle(extensions[i], parent);
@@ -1046,7 +1047,7 @@ public class Main {
 		if (candidates == null)
 			return null;
 
-		ArrayList<String> matches = new ArrayList<String>(2);
+		ArrayList<String> matches = new ArrayList<>(2);
 		for (int i = 0; i < candidates.length; i++) {
 			if (isMatchingCandidate(target, candidates[i], root))
 				matches.add(candidates[i]);
@@ -1445,7 +1446,7 @@ public class Main {
 	 * @param argString the arguments string
 	 */
 	public static void main(String argString) {
-		Vector<String> list = new Vector<String>(5);
+		Vector<String> list = new Vector<>(5);
 		for (StringTokenizer tokens = new StringTokenizer(argString, " "); tokens.hasMoreElements();) //$NON-NLS-1$
 			list.addElement(tokens.nextToken());
 		main(list.toArray(new String[list.size()]));
@@ -2242,7 +2243,7 @@ public class Main {
 		String splashPath = System.getProperty(PROP_SPLASHPATH);
 		if (splashPath != null) {
 			String[] entries = getArrayFromList(splashPath);
-			ArrayList<String> path = new ArrayList<String>(entries.length);
+			ArrayList<String> path = new ArrayList<>(entries.length);
 			for (int i = 0; i < entries.length; i++) {
 				String entry = resolve(entries[i]);
 				if (entry != null && entry.startsWith(FILE_SCHEME)) {
@@ -2429,7 +2430,7 @@ public class Main {
 	private static String[] buildNLVariants(String locale) {
 		//build list of suffixes for loading resource bundles
 		String nl = locale;
-		ArrayList<String> result = new ArrayList<String>(4);
+		ArrayList<String> result = new ArrayList<>(4);
 		int lastSeparator;
 		while (true) {
 			result.add("nl" + File.separatorChar + nl.replace('_', File.separatorChar) + File.separatorChar + SPLASH_IMAGE); //$NON-NLS-1$
@@ -2749,22 +2750,27 @@ public class Main {
 				private static final long serialVersionUID = 3258131349494708277L;
 
 				// A simple PermissionCollection that only has AllPermission
+				@Override
 				public void add(Permission permission) {
 					//no adding to this policy
 				}
 
+				@Override
 				public boolean implies(Permission permission) {
 					return true;
 				}
 
+				@Override
 				public Enumeration<Permission> elements() {
 					return new Enumeration<Permission>() {
 						int cur = 0;
 
+						@Override
 						public boolean hasMoreElements() {
 							return cur < 1;
 						}
 
+						@Override
 						public Permission nextElement() {
 							if (cur == 0) {
 								cur = 1;
@@ -2777,24 +2783,28 @@ public class Main {
 			};
 		}
 
+		@Override
 		public PermissionCollection getPermissions(CodeSource codesource) {
 			if (contains(codesource))
 				return allPermissions;
 			return policy == null ? allPermissions : policy.getPermissions(codesource);
 		}
 
+		@Override
 		public PermissionCollection getPermissions(ProtectionDomain domain) {
 			if (contains(domain.getCodeSource()))
 				return allPermissions;
 			return policy == null ? allPermissions : policy.getPermissions(domain);
 		}
 
+		@Override
 		public boolean implies(ProtectionDomain domain, Permission permission) {
 			if (contains(domain.getCodeSource()))
 				return true;
 			return policy == null ? true : policy.implies(domain, permission);
 		}
 
+		@Override
 		public void refresh() {
 			if (policy != null)
 				policy.refresh();
@@ -2830,6 +2840,7 @@ public class Main {
 			super(urls, parent, factory);
 		}
 
+		@Override
 		protected String findLibrary(String name) {
 			if (extensionPaths == null)
 				return super.findLibrary(name);
