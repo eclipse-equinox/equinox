@@ -18,3 +18,4 @@ Export-Package: org.eclipse.osgi.tests.bundles,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 DynamicImport-Package: ext.framework.b
 Eclipse-BundleShape: dir
+Automatic-Module-Name: org.eclipse.osgi.tests

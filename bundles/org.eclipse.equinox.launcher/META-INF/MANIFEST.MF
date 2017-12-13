@@ -11,3 +11,4 @@ Bundle-Localization: launcher
 Export-Package: org.eclipse.core.launcher;x-internal:=true,
  org.eclipse.equinox.internal.launcher;x-internal:=true,
  org.eclipse.equinox.launcher;x-internal:=true
+Automatic-Module-Name: org.eclipse.equinox.launcher

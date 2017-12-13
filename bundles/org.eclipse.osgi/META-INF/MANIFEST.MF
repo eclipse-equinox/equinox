@@ -113,3 +113,4 @@ Eclipse-SystemBundle: true
 Main-Class: org.eclipse.core.runtime.adaptor.EclipseStarter
 Require-Capability: osgi.ee; filter:="(| (&(osgi.ee=JavaSE)(version=1.7)) (&(osgi.ee=JavaSE/compact1)(version=1.8)) )"
 Eclipse-BundleShape: jar
+Automatic-Module-Name: org.eclipse.osgi

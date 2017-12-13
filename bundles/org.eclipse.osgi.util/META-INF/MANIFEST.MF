@@ -21,3 +21,4 @@ Import-Package: org.osgi.framework; version=1.1,
  org.osgi.util.promise; version="[1.1, 1.2)",
  org.osgi.util.xml; version="[1.0.1, 1.1)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Automatic-Module-Name: org.eclipse.osgi.util

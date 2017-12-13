@@ -38,3 +38,4 @@ Import-Package: org.osgi.framework,
  org.eclipse.osgi.service.urlconversion,
  org.eclipse.osgi.storagemanager,
  org.eclipse.osgi.util
+Automatic-Module-Name: org.eclipse.equinox.supplement
