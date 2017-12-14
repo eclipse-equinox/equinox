@@ -647,6 +647,7 @@ public class Main {
 				parent = appCL.getParent();
 		} else if (PARENT_CLASSLOADER_CURRENT.equalsIgnoreCase(type))
 			parent = this.getClass().getClassLoader();
+		@SuppressWarnings("resource")
 		URLClassLoader loader = new StartupClassLoader(bootPath, parent);
 		Class<?> clazz = loader.loadClass(STARTER);
 		Method method = clazz.getDeclaredMethod("run", String[].class, Runnable.class); //$NON-NLS-1$
@@ -2377,39 +2378,43 @@ public class Main {
 			if (!clean)
 				return splash.getAbsolutePath();
 		}
-		ZipFile file;
-		try {
-			file = new ZipFile(jarPath);
+
+		try (ZipFile file = new ZipFile(jarPath)) {
+			ZipEntry entry = file.getEntry(jarEntry.replace(File.separatorChar, '/'));
+			if (entry == null)
+				return null;
+			InputStream input = null;
+			try {
+				input = file.getInputStream(entry);
+			} catch (IOException e) {
+				log("Exception opening splash: " + entry.getName() + " in JAR file: " + jarPath); //$NON-NLS-1$ //$NON-NLS-2$
+				log(e);
+				return null;
+			}
+			new File(splash.getParent()).mkdirs();
+			OutputStream output;
+			try {
+				output = new BufferedOutputStream(new FileOutputStream(splash));
+			} catch (FileNotFoundException e) {
+				try {
+					input.close();
+				} catch (IOException e1) {
+					// ignore
+				}
+				return null;
+			}
+			transferStreams(input, output);
+			try {
+				file.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return splash.exists() ? splash.getAbsolutePath() : null;
 		} catch (IOException e) {
 			log("Exception looking for " + jarEntry + " in JAR file: " + jarPath); //$NON-NLS-1$ //$NON-NLS-2$
 			log(e);
 			return null;
 		}
-		ZipEntry entry = file.getEntry(jarEntry.replace(File.separatorChar, '/'));
-		if (entry == null)
-			return null;
-		InputStream input = null;
-		try {
-			input = file.getInputStream(entry);
-		} catch (IOException e) {
-			log("Exception opening splash: " + entry.getName() + " in JAR file: " + jarPath); //$NON-NLS-1$ //$NON-NLS-2$
-			log(e);
-			return null;
-		}
-		new File(splash.getParent()).mkdirs();
-		OutputStream output;
-		try {
-			output = new BufferedOutputStream(new FileOutputStream(splash));
-		} catch (FileNotFoundException e) {
-			try {
-				input.close();
-			} catch (IOException e1) {
-				// ignore
-			}
-			return null;
-		}
-		transferStreams(input, output);
-		return splash.exists() ? splash.getAbsolutePath() : null;
 	}
 
 	/*
