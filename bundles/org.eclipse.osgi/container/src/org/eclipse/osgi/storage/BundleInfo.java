@@ -53,6 +53,8 @@ import org.osgi.framework.Constants;
 public final class BundleInfo {
 	public static final String OSGI_BUNDLE_MANIFEST = "META-INF/MANIFEST.MF"; //$NON-NLS-1$
 	public static final String MULTI_RELEASE_HEADER = "Multi-Release"; //$NON-NLS-1$
+	public static final String MULTI_RELEASE_VERSIONS = "META-INF/versions/"; //$NON-NLS-1$
+	public static final Collection<String> MULTI_RELEASE_FILTER_PREFIXES = Collections.singleton("META-INF/"); //$NON-NLS-1$
 
 	public final class Generation {
 		private final long generationId;

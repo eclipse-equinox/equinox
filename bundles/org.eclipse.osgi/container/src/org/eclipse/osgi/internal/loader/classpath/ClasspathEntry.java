@@ -102,10 +102,10 @@ public class ClasspathEntry {
 		}
 		List<BundleFile> mrBundleFiles = new ArrayList<>();
 		for (int i = storage.getRuntimeVersion().getMajor(); i > 8; i--) {
-			String versionPath = "META-INF/versions/" + i + '/'; //$NON-NLS-1$
+			String versionPath = BundleInfo.MULTI_RELEASE_VERSIONS + i + '/';
 			BundleEntry versionEntry = bundlefile.getEntry(versionPath);
 			if (versionEntry != null) {
-				mrBundleFiles.add(storage.createNestedBundleFile(versionPath, bundlefile, generation));
+				mrBundleFiles.add(storage.createNestedBundleFile(versionPath, bundlefile, generation, BundleInfo.MULTI_RELEASE_FILTER_PREFIXES));
 			}
 		}
 		return Collections.unmodifiableList(mrBundleFiles);

@@ -1045,8 +1045,12 @@ public class Storage {
 	}
 
 	public BundleFile createNestedBundleFile(String nestedDir, BundleFile bundleFile, Generation generation) {
+		return createNestedBundleFile(nestedDir, bundleFile, generation, Collections.<String> emptyList());
+	}
+
+	public BundleFile createNestedBundleFile(String nestedDir, BundleFile bundleFile, Generation generation, Collection<String> filterPrefixes) {
 		// here we assume the content is a path offset into the base bundle file;  create a NestedDirBundleFile
-		return wrapBundleFile(new NestedDirBundleFile(bundleFile, nestedDir), generation, false);
+		return wrapBundleFile(new NestedDirBundleFile(bundleFile, nestedDir, filterPrefixes), generation, false);
 	}
 
 	public BundleFile wrapBundleFile(BundleFile bundleFile, Generation generation, boolean isBase) {

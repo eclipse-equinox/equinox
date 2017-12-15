@@ -13,6 +13,8 @@ package org.eclipse.osgi.storage.bundlefile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 
 /**
@@ -28,46 +30,87 @@ import java.util.Enumeration;
  */
 public class NestedDirBundleFile extends BundleFile {
 	private final BundleFile baseBundleFile;
-	private final String cp;
+	private final String nestedDirName;
+	private final Collection<String> filterPrefixes;
 
 	/**
 	 * Constructs a NestedDirBundleFile
 	 * @param baseBundlefile the base bundle file
-	 * @param cp
+	 * @param nestedDirName
 	 */
-	public NestedDirBundleFile(BundleFile baseBundlefile, String cp) {
+	public NestedDirBundleFile(BundleFile baseBundlefile, String nestedDirName) {
+		this(baseBundlefile, nestedDirName, Collections.<String> emptyList());
+	}
+
+	/**
+	 * Constructs a NestedDirBundleFile
+	 * @param baseBundlefile the base bundle file
+	 * @param nestedDirName
+	 * @param filterPrefixes the prefixes to filter out for the bundle file
+	 */
+	public NestedDirBundleFile(BundleFile baseBundlefile, String nestedDirName, Collection<String> filterPrefixes) {
 		super(baseBundlefile.getBaseFile());
 		this.baseBundleFile = baseBundlefile;
-		if (cp.charAt(cp.length() - 1) != '/') {
-			cp = cp + '/';
+		if (nestedDirName.charAt(nestedDirName.length() - 1) != '/') {
+			nestedDirName = nestedDirName + '/';
 		}
-		this.cp = cp;
+		this.nestedDirName = nestedDirName;
+		this.filterPrefixes = filterPrefixes;
 	}
 
 	public void close() {
 		// do nothing.
 	}
 
+	private boolean filterPath(String path) {
+		if (path.length() > 0 && path.charAt(0) == '/')
+			path = path.substring(1);
+		for (String prefix : filterPrefixes) {
+			if (path.startsWith(prefix)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean filterDir(String path) {
+		if (filterPrefixes.isEmpty()) {
+			return false;
+		}
+		if (path.length() > 0 && path.charAt(path.length() - 1) != '/') {
+			path = path + '/';
+		}
+		return filterPath(path);
+	}
+
 	public BundleEntry getEntry(String path) {
+		if (filterPath(path)) {
+			return null;
+		}
 		return baseBundleFile.getEntry(prependNestedDir(path));
 	}
 
 	public boolean containsDir(String dir) {
 		if (dir == null)
 			return false;
-
+		if (filterPath(dir)) {
+			return false;
+		}
 		return baseBundleFile.containsDir(prependNestedDir(dir));
 	}
 
 	private String prependNestedDir(String path) {
 		if (path.length() > 0 && path.charAt(0) == '/')
 			path = path.substring(1);
-		return new StringBuffer(cp).append(path).toString();
+		return new StringBuffer(nestedDirName).append(path).toString();
 	}
 
 	public Enumeration<String> getEntryPaths(String path, boolean recurse) {
+		if (filterDir(path)) {
+			return null;
+		}
 		final Enumeration<String> basePaths = baseBundleFile.getEntryPaths(prependNestedDir(path), recurse);
-		final int cpLength = cp.length();
+		final int cpLength = nestedDirName.length();
 		if (basePaths == null)
 			return null;
 		return new Enumeration<String>() {

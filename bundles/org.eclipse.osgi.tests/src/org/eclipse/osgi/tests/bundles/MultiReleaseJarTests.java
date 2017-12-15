@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -99,12 +100,18 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		bundleEntries.put("multi/release/test/TestClass9.class", getBytes("multi/release/test/TestClass9.class", base));
 		bundleEntries.put("multi/release/test/TestClass10.class", getBytes("multi/release/test/TestClass10.class", base));
 		bundleEntries.put("multi/release/test/TestClass11.class", getBytes("multi/release/test/TestClass11.class", base));
+		bundleEntries.put("multi/release/test/TestService.class", getBytes("multi/release/test/TestService.class", base));
+		bundleEntries.put("multi/release/test/TestService9.class", getBytes("multi/release/test/TestService9.class", base));
+		bundleEntries.put("multi/release/test/TestServiceBase.class", getBytes("multi/release/test/TestServiceBase.class", base));
+
 		bundleEntries.put("multi/release/test/testResourceBase.txt", getBytes("multi/release/test/testResourceBase.txt", base));
 		bundleEntries.put("multi/release/test/testResource8.txt", getBytes("multi/release/test/testResource8.txt", base));
 		bundleEntries.put("multi/release/test/testResource9.txt", getBytes("multi/release/test/testResource9.txt", base));
 		bundleEntries.put("multi/release/test/testResource10.txt", getBytes("multi/release/test/testResource10.txt", base));
 		bundleEntries.put("multi/release/test/testResource11.txt", getBytes("multi/release/test/testResource11.txt", base));
 
+		bundleEntries.put("META-INF/services/", null);
+		bundleEntries.put("META-INF/services/multi.release.test.TestService", "multi.release.test.TestServiceBase".getBytes("UTF-8"));
 		bundleEntries.put("META-INF/versions/", null);
 		bundleEntries.put("META-INF/versions/8/", null);
 		bundleEntries.put("META-INF/versions/8/multi/", null);
@@ -115,6 +122,12 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		bundleEntries.put("META-INF/versions/8/multi/release/test/testResource8.txt", getBytes("multi/release/test/testResource8.txt", base, new byte[] {'0', '8'}));
 		bundleEntries.put("META-INF/versions/8/multi/release/test/testResourceAdd8.txt", getBytes("multi/release/test/testResourceAdd8.txt", base));
 		bundleEntries.put("META-INF/versions/9/", null);
+		bundleEntries.put("META-INF/versions/9/META-INF/", null);
+		bundleEntries.put("META-INF/versions/9/META-INF/addedFor9.txt", "added for 9".getBytes("UTF-8"));
+		bundleEntries.put("META-INF/versions/9/META-INF/addedDirFor9/", null);
+		bundleEntries.put("META-INF/versions/9/META-INF/addedDirFor9/addedFor9.txt", "added for 9".getBytes("UTF-8"));
+		bundleEntries.put("META-INF/versions/9/META-INF/services/", null);
+		bundleEntries.put("META-INF/versions/9/META-INF/services/multi.release.test.TestService", "multi.release.test.TestService9".getBytes("UTF-8"));
 		bundleEntries.put("META-INF/versions/9/multi/", null);
 		bundleEntries.put("META-INF/versions/9/multi/release/", null);
 		bundleEntries.put("META-INF/versions/9/multi/release/test/", null);
@@ -862,4 +875,76 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		}
 	}
 
+	public void testMultiReleasePreventMetaInfServiceVersions() throws Exception {
+		System.setProperty("java.specification.version", "9");
+
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, String> configMap = Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configMap);
+
+		try {
+			equinox.start();
+			BundleContext systemContext = equinox.getBundleContext();
+			Bundle mrBundle = systemContext.installBundle("reference:" + mrJarBundle.toURI().toString());
+			mrBundle.start();
+
+			Class<?> testServiceClass = mrBundle.loadClass("multi.release.test.TestService");
+			ServiceLoader<?> loader = ServiceLoader.load(testServiceClass, mrBundle.adapt(BundleWiring.class).getClassLoader());
+			Object testService = loader.iterator().next();
+			assertEquals("Wrong service found.", "SERVICE_BASE", testService.toString());
+		} finally {
+			equinox.stop();
+			equinox.waitForStop(1000);
+		}
+	}
+
+	public void testMultiReleasePreventMetaInfResourceURLs() throws Exception {
+		System.setProperty("java.specification.version", "9");
+
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, String> configMap = Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configMap);
+
+		try {
+			equinox.start();
+			BundleContext systemContext = equinox.getBundleContext();
+			Bundle mrBundle = systemContext.installBundle("reference:" + mrJarBundle.toURI().toString());
+			mrBundle.start();
+
+			URL existingResource = mrBundle.getResource("multi/release/test/testResourceAdd9.txt");
+			assertNotNull("Did not find Java 9 added resource.", existingResource);
+			URL metaInfResource = new URL(existingResource, "/META-INF/addedFor9.txt");
+			try {
+				metaInfResource.openStream().close();
+				fail("Expected error opening versioned META-INF resource.");
+			} catch (IOException e) {
+				// expected
+			}
+
+		} finally {
+			equinox.stop();
+			equinox.waitForStop(1000);
+		}
+	}
+
+	public void testMultiReleasePreventMetaInfVersionListing() throws Exception {
+		System.setProperty("java.specification.version", "9");
+
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, String> configMap = Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configMap);
+
+		try {
+			equinox.start();
+			BundleContext systemContext = equinox.getBundleContext();
+			Bundle mrBundle = systemContext.installBundle("reference:" + mrJarBundle.toURI().toString());
+			mrBundle.start();
+
+			Collection<String> list = mrBundle.adapt(BundleWiring.class).listResources("/META-INF/", "*.txt", 0);
+			assertTrue("Found versioned META-INF resources: " + list, list.isEmpty());
+		} finally {
+			equinox.stop();
+			equinox.waitForStop(1000);
+		}
+	}
 }
