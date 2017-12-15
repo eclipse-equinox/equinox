@@ -14,3 +14,4 @@ Bug 481453 - May need to 'touch' some features for I-build
 Bug 495069 - Try to move up to Jetty 9.3.9
 Bug 506597 - Build failure on I20161026-2000
 Bug 521792 - I-builds are failing from September 1 2017 
+Bug 528810 - Compilation failure in I20171214-2000

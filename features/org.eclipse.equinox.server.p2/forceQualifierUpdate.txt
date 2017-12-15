@@ -19,3 +19,4 @@ Bug 453675 - touch org.eclipse.equinox.server.p2 for new httpcomponents
 Bug 458346 - Unusual, hard to decipher error in I-build
 Bug 462096 - Latest X-build fails on "equinox-sdk" product due to dependencies missing
 Bug 506597 - Build failure on I20161026-2000
+Bug 528810 - Compilation failure in I20171214-2000
