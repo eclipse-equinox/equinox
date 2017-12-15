@@ -151,7 +151,7 @@ public class Storage {
 		Storage storage = new Storage(container);
 		// Do some operations that need to happen on the fully constructed Storage before returning it
 		storage.checkSystemBundle();
-		storage.discardBundlesOnLoad();
+		storage.refreshStaleBundles();
 		storage.installExtensions();
 		// TODO hack to make sure all bundles are in UNINSTALLED state before system bundle init is called
 		storage.getModuleContainer().setInitialModuleStates();
@@ -296,21 +296,30 @@ public class Storage {
 		return permData;
 	}
 
-	private void discardBundlesOnLoad() throws BundleException {
-		Collection<Module> discarded = new ArrayList<>(0);
+	private void refreshStaleBundles() throws BundleException {
+		Collection<Module> needsRefresh = new ArrayList<>(0);
+
+		// First uninstall any modules that had their content changed or deleted
 		for (Module module : moduleContainer.getModules()) {
 			if (module.getId() == Constants.SYSTEM_BUNDLE_ID)
 				continue;
 			ModuleRevision revision = module.getCurrentRevision();
 			Generation generation = (Generation) revision.getRevisionInfo();
 			if (needsDiscarding(generation)) {
-				discarded.add(module);
+				needsRefresh.add(module);
 				moduleContainer.uninstall(module);
 				generation.delete();
 			}
 		}
-		if (!discarded.isEmpty()) {
-			moduleContainer.refresh(discarded);
+		// Next check if we need to refresh Multi-Release Jar bundles
+		// because the runtime version changed.
+		if (refreshMRBundles.get()) {
+			needsRefresh.addAll(refreshMRJarBundles());
+		}
+
+		// refresh the modules that got deleted or are Multi-Release bundles
+		if (!needsRefresh.isEmpty()) {
+			moduleContainer.refresh(needsRefresh);
 		}
 	}
 
@@ -370,10 +379,6 @@ public class Storage {
 							// must resolve before continuing to ensure extensions get attached
 							moduleContainer.resolve(Collections.singleton(systemModule), true);
 						}
-					}
-					if (refreshMRBundles.get()) {
-						Collection<Module> toRefresh = refreshMRJarBundles();
-						moduleContainer.refresh(toRefresh);
 					}
 				} catch (BundleException e) {
 					throw new IllegalStateException("Could not create a builder for the system bundle.", e); //$NON-NLS-1$

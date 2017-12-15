@@ -767,8 +767,8 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			doTestMultiReleaseBundleManifestChangeRuntime(rv, configMap, location);
 		}
 
-		equinox.start();
 		try {
+			equinox.start();
 			BundleContext systemContext = equinox.getBundleContext();
 			Bundle toUninstall = systemContext.getBundle(location);
 			toUninstall.uninstall();
@@ -826,6 +826,39 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			} catch (Exception e) {
 				// ignore;
 			}
+		}
+	}
+
+	public void testMultiReleaseBundleDeletedRestart() throws Exception {
+		File copyMrJarBundle = OSGiTestsActivator.getContext().getDataFile("copy-" + mrJarBundle.getName());
+		StorageUtil.readFile(new FileInputStream(mrJarBundle), copyMrJarBundle);
+
+		System.setProperty("java.specification.version", "9");
+
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, String> configMap = Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configMap);
+
+		try {
+			equinox.start();
+			BundleContext systemContext = equinox.getBundleContext();
+			Bundle mrBundle = systemContext.installBundle("reference:" + copyMrJarBundle.toURI().toString());
+			mrBundle.start();
+		} finally {
+			equinox.stop();
+			equinox.waitForStop(1000);
+		}
+
+		copyMrJarBundle.delete();
+
+		System.setProperty("java.specification.version", "10");
+
+		equinox = new Equinox(configMap);
+		try {
+			equinox.start();
+		} finally {
+			equinox.stop();
+			equinox.waitForStop(1000);
 		}
 	}
 
