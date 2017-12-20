@@ -64,6 +64,15 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="src/org/osgi/service/log/LoggerConsumer.java" type="org.osgi.service.log.LoggerConsumer">
+        <filter id="1108344834">
+            <message_arguments>
+                <message_argument value="1.4"/>
+                <message_argument value="3.7"/>
+                <message_argument value="org.osgi.service.log.LoggerConsumer"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="src/org/osgi/service/log/LoggerFactory.java" type="org.osgi.service.log.LoggerFactory">
         <filter id="1108344834">
             <message_arguments>
