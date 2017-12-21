@@ -19,3 +19,4 @@ Import-Package:
 Export-Package: org.eclipse.equinox.ds.tests.tbc
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Eclipse-BundleShape: dir
+Automatic-Module-Name: org.eclipse.equinox.ds.tests

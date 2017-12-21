@@ -1,6 +1,6 @@
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
-Bundle-Version: 1.4.100.qualifier
+Bundle-Version: 1.4.200.qualifier
 Bundle-SymbolicName: org.eclipse.equinox.event
 Bundle-Activator: org.eclipse.equinox.internal.event.Activator
 Import-Package: org.eclipse.osgi.framework.eventmgr;version="1.1.0",
@@ -20,3 +20,4 @@ Provide-Capability:
  osgi.service;
   objectClass:List<String>="org.osgi.service.event.EventAdmin";
   uses:="org.osgi.service.event"
+Automatic-Module-Name: org.eclipse.equinox.event

@@ -29,3 +29,4 @@ Export-Package: org.eclipse.equinox.http.jetty;version="1.4.0"
 Comment-Header: Both Eclipse-LazyStart and Bundle-ActivationPolicy are specified for compatibility with 3.2
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.eclipse.equinox.http.jetty

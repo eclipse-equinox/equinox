@@ -24,3 +24,4 @@ Export-Package:
 Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.0
 Provided-Services: class=org.osgi.service.io.ConnectorService
 Bundle-Localization: plugin
+Automatic-Module-Name: org.eclipse.equinox.io

@@ -40,4 +40,5 @@ Provide-Capability: osgi.implementation;
  osgi.service;
   objectClass:List<String>="org.osgi.service.http.runtime.HttpServiceRuntime";
   uses:="org.osgi.service.http.runtime"
+Automatic-Module-Name: org.eclipse.equinox.http.servlet
 

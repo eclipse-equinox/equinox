@@ -25,4 +25,5 @@ Import-Package: javax.servlet;version="2.6.0",
  org.osgi.service.http.whiteboard;version="1.0.0",
  org.osgi.util.tracker;version="1.5.0"
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.eclipse.equinox.http.servlet.tests
 

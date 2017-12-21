@@ -10,3 +10,4 @@ X-Deploy-Export-Package: javax.servlet;version="2.6.0";uses:="javax.servlet.anno
  javax.servlet.http;version="2.6.0";uses:="javax.servlet",
  javax.servlet.resources;version="2.6.0",
  org.eclipse.equinox.servletbridge;version="1.1"
+Automatic-Module-Name: org.eclipse.equinox.servletbridge.extensionbundle

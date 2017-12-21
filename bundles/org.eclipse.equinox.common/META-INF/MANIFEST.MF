@@ -34,3 +34,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Comment-Header: Both Eclipse-LazyStart and Bundle-ActivationPolicy are specified for compatibility with 3.2
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.eclipse.equinox.common

@@ -28,3 +28,4 @@ Export-Package: org.eclipse.equinox.console.common,
  org.apache.felix.service.command;status=provisional;mandatory:=status;version="0.10.0"
 Require-Bundle: org.apache.felix.gogo.runtime;bundle-version="0.10.0",
  org.apache.felix.gogo.shell;bundle-version="0.10.0"
+Automatic-Module-Name: org.eclipse.equinox.console

@@ -30,3 +30,4 @@ Export-Package: org.eclipse.equinox.console.internal.ssh;x-internal:=true,
  org.eclipse.equinox.console.jaas,
  org.eclipse.equinox.console.ssh;x-internal:=true,
  org.eclipse.equinox.console.storage;x-internal:=true
+Automatic-Module-Name: org.eclipse.equinox.console.ssh

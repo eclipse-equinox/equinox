@@ -29,3 +29,4 @@ Provide-Capability: osgi.implementation;
  osgi.service;
   objectClass:List<String>="org.osgi.service.metatype.MetaTypeService";
   uses:="org.osgi.service.metatype"
+Automatic-Module-Name: org.eclipse.equinox.metatype

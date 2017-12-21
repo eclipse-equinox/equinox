@@ -9,3 +9,4 @@ Export-Package: org.eclipse.equinox.service.weaving,
  org.eclipse.equinox.weaving.adaptors;x-friends:="org.eclipse.equinox.weaving.tests",
  org.eclipse.equinox.weaving.hooks;x-friends:="org.eclipse.equinox.weaving.tests"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Automatic-Module-Name: org.eclipse.equinox.weaving.hook

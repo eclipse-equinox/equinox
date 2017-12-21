@@ -29,3 +29,4 @@ Export-Package: org.eclipse.equinox.internal.provisional.security.ui;version="1.
  org.eclipse.equinox.internal.security.ui.wizard;x-internal:=true
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.eclipse.equinox.security.ui

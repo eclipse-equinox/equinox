@@ -19,6 +19,6 @@
   </parent>
   <groupId>org.eclipse.equinox</groupId>
   <artifactId>org.eclipse.equinox.compendium.tests</artifactId>
-  <version>1.2.0</version>
+  <version>1.2.100-SNAPSHOT</version>
   <packaging>eclipse-test-plugin</packaging>
 </project>

@@ -10,3 +10,4 @@ Eclipse-PlatformFilter: (& (osgi.os=macosx) (|(osgi.arch=x86)(osgi.arch=x86_64)(
 Bundle-Localization: fragment
 Export-Package: org.eclipse.equinox.internal.security.osx;x-internal:=true,
  org.eclipse.equinox.internal.security.osx.nls;x-internal:=true
+Automatic-Module-Name: org.eclipse.equinox.security.macosx

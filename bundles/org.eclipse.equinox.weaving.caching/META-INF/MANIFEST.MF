@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.equinox.weaving.caching
-Bundle-Version: 1.1.0.qualifier
+Bundle-Version: 1.1.100.qualifier
 Bundle-Name: Standard Caching Service for Equinox Aspects
 Bundle-Vendor: Eclipse.org - Equinox
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -12,3 +12,4 @@ Import-Package: com.ibm.oti.shared;resolution:=optional,
  org.eclipse.osgi.service.debug;version="1.0.0",
  org.osgi.framework;version="1.4.0"
 Export-Package: org.eclipse.equinox.weaving.internal.caching;x-friends:="org.aspectj.osgi.service.caching.test"
+Automatic-Module-Name: org.eclipse.equinox.weaving.caching

@@ -16,3 +16,4 @@ Import-Package: org.eclipse.equinox.internal.util.hash;version="1.0.0",
 Export-Package: org.eclipse.equinox.internal.wireadmin; x-internal:=true
 Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.0
 Bundle-Localization: plugin
+Automatic-Module-Name: org.eclipse.equinox.wireadmin

@@ -18,3 +18,4 @@ Import-Package: org.eclipse.osgi.framework.eventmgr;version="1.1",
 Export-Package: org.eclipse.equinox.internal.useradmin;x-internal:=true
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.1
+Automatic-Module-Name: org.eclipse.equinox.useradmin

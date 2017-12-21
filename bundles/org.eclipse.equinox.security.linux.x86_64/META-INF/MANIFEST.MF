@@ -9,3 +9,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Localization: fragment
 Eclipse-PlatformFilter: (& (osgi.os=linux) (osgi.arch=x86_64))
 Export-Package: org.eclipse.equinox.internal.security.linux;x-internal:=true
+Automatic-Module-Name: org.eclipse.equinox.security.linux.x86_64
