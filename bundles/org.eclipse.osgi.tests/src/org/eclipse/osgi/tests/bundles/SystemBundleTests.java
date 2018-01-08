@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2017 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -75,6 +76,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -86,6 +88,8 @@ import org.osgi.framework.hooks.weaving.WovenClass;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.framework.namespace.NativeNamespace;
+import org.osgi.framework.startlevel.BundleStartLevel;
+import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
@@ -3304,6 +3308,160 @@ public class SystemBundleTests extends AbstractBundleTests {
 		int capCount2 = systemRevision2.getCapabilities(null).size();
 
 		Assert.assertEquals("Wrong number of capabilities", capCount1, capCount2);
+	}
+
+	public void testStartLevelSorting() throws IOException, InterruptedException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map configuration = new HashMap();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = null;
+		final int numBundles = 200;
+		final File[] testBundleFiles = createBundles(new File(config, "testBundles"), numBundles);
+		try {
+			equinox = new Equinox(configuration);
+			equinox.start();
+			final List<Bundle> testBundles = Collections.synchronizedList(new ArrayList<Bundle>());
+			final List<Bundle> startedBundles = Collections.synchronizedList(new ArrayList<Bundle>());
+			for (int i = 0; i < numBundles / 2; i++) {
+				Bundle b = equinox.getBundleContext().installBundle("reference:file:///" + testBundleFiles[i].getAbsolutePath());
+				b.adapt(BundleStartLevel.class).setStartLevel(i + 2);
+				testBundles.add(b);
+				b.start();
+			}
+			final Equinox finalEquinox = equinox;
+
+			BundleListener initialListener = new SynchronousBundleListener() {
+				AtomicBoolean reverseStartLevel = new AtomicBoolean();
+				AtomicBoolean installBundles = new AtomicBoolean();
+
+				@Override
+				public void bundleChanged(BundleEvent event) {
+					Bundle eBundle = event.getBundle();
+					String bsn = eBundle.getSymbolicName();
+					if (!bsn.startsWith("bundle-b") || event.getType() != BundleEvent.STARTED) {
+						return;
+					}
+					startedBundles.add(eBundle);
+					if (reverseStartLevel.compareAndSet(false, true)) {
+						for (int i = numBundles / 4, j = numBundles; i < numBundles / 2; i++, j--) {
+							BundleStartLevel tbsl = testBundles.get(i).adapt(BundleStartLevel.class);
+							tbsl.setStartLevel(j + 2 + numBundles);
+						}
+					} else if (installBundles.compareAndSet(false, true)) {
+						for (int i = numBundles / 2; i < numBundles; i++) {
+							try {
+								Bundle b = finalEquinox.getBundleContext().installBundle("reference:file:///" + testBundleFiles[i].getAbsolutePath());
+								b.adapt(BundleStartLevel.class).setStartLevel(i + 2);
+								testBundles.add(b);
+								b.start();
+							} catch (BundleException e) {
+								// do nothing
+							}
+						}
+					}
+				}
+			};
+
+			equinox.getBundleContext().addBundleListener(initialListener);
+			long startTime = System.currentTimeMillis();
+			final CountDownLatch waitForStartLevel = new CountDownLatch(1);
+			equinox.adapt(FrameworkStartLevel.class).setStartLevel(numBundles * 3, new FrameworkListener() {
+
+				@Override
+				public void frameworkEvent(FrameworkEvent event) {
+					waitForStartLevel.countDown();
+				}
+			});
+			waitForStartLevel.await(20, TimeUnit.SECONDS);
+			System.out.println("Start time: " + (System.currentTimeMillis() - startTime));
+
+			assertEquals("Did not finish start level setting.", 0, waitForStartLevel.getCount());
+			assertEquals("Did not install all the expected bundles.", numBundles, testBundles.size());
+
+			List<Bundle> expectedStartOrder = new ArrayList<Bundle>();
+			for (int i = 0; i < numBundles / 4; i++) {
+				expectedStartOrder.add(testBundles.get(i));
+			}
+			for (int i = numBundles / 2; i < numBundles; i++) {
+				expectedStartOrder.add(testBundles.get(i));
+			}
+			for (int i = (numBundles / 2) - 1; i >= numBundles / 4; i--) {
+				expectedStartOrder.add(testBundles.get(i));
+			}
+
+			assertEquals("Size on expected order is wrong.", numBundles, expectedStartOrder.size());
+			for (int i = 0; i < numBundles; i++) {
+				assertEquals("Wrong bundle at: " + i, expectedStartOrder.get(i), startedBundles.get(i));
+			}
+
+			equinox.getBundleContext().removeBundleListener(initialListener);
+
+			final List<Bundle> stoppedBundles = Collections.synchronizedList(new ArrayList<Bundle>());
+			BundleListener shutdownListener = new SynchronousBundleListener() {
+				AtomicBoolean reverseStartLevel = new AtomicBoolean();
+				AtomicBoolean uninstallBundles = new AtomicBoolean();
+				AtomicBoolean inUninstall = new AtomicBoolean();
+
+				@Override
+				public void bundleChanged(BundleEvent event) {
+					if (inUninstall.get()) {
+						return;
+					}
+					Bundle eBundle = event.getBundle();
+					String bsn = eBundle.getSymbolicName();
+					if (!bsn.startsWith("bundle-b") || event.getType() != BundleEvent.STOPPED) {
+						return;
+					}
+					stoppedBundles.add(eBundle);
+					if (reverseStartLevel.compareAndSet(false, true)) {
+						for (int i = numBundles / 2, j = numBundles - 1; i < numBundles; i++, j--) {
+							BundleStartLevel tbsl = testBundles.get(i).adapt(BundleStartLevel.class);
+							tbsl.setStartLevel(j + 2);
+						}
+					} else if (uninstallBundles.compareAndSet(false, true)) {
+						for (int i = 0; i < numBundles / 4; i++) {
+							try {
+								inUninstall.set(true);
+								testBundles.get(i).uninstall();
+							} catch (BundleException e) {
+								// do nothing
+							} finally {
+								inUninstall.set(false);
+							}
+						}
+					}
+				}
+			};
+			equinox.getBundleContext().addBundleListener(shutdownListener);
+
+			List<Bundle> expectedStopOrder = new ArrayList<Bundle>(expectedStartOrder);
+			Collections.reverse(expectedStopOrder);
+			Collections.reverse(expectedStopOrder.subList(numBundles / 4, 3 * (numBundles / 4)));
+			expectedStopOrder = new ArrayList(expectedStopOrder.subList(0, 3 * (numBundles / 4)));
+
+			long stopTime = System.currentTimeMillis();
+			equinox.stop();
+			equinox.waitForStop(20000);
+			System.out.println("Stop time: " + (System.currentTimeMillis() - stopTime));
+
+			assertEquals("Size on expected order is wrong.", expectedStopOrder.size(), stoppedBundles.size());
+			for (int i = 0; i < expectedStopOrder.size(); i++) {
+				assertEquals("Wrong bundle at: " + i, expectedStopOrder.get(i), stoppedBundles.get(i));
+			}
+		} catch (BundleException e) {
+			fail("Failed init", e);
+		} finally {
+			try {
+				if (equinox != null) {
+					equinox.stop();
+					equinox.waitForStop(1000);
+				}
+			} catch (BundleException e) {
+				fail("Failed to stop framework.", e);
+			} catch (InterruptedException e) {
+				fail("Failed to stop framework.", e);
+			}
+		}
 	}
 
 	// Disabled because the test is too much for the build machines

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,16 +12,30 @@ package org.eclipse.osgi.container;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import org.eclipse.osgi.container.Module.*;
+import org.eclipse.osgi.container.Module.StartOptions;
+import org.eclipse.osgi.container.Module.State;
+import org.eclipse.osgi.container.Module.StopOptions;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.ModuleDatabase.Sort;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
-import org.eclipse.osgi.framework.eventmgr.*;
+import org.eclipse.osgi.framework.eventmgr.CopyOnWriteIdentityMap;
+import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
+import org.eclipse.osgi.framework.eventmgr.EventManager;
+import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.internal.container.LockSet;
@@ -33,11 +47,24 @@ import org.eclipse.osgi.report.resolution.ResolutionReport.Entry;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.*;
-import org.osgi.framework.namespace.*;
+import org.osgi.framework.AdminPermission;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.Version;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.IdentityNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
-import org.osgi.framework.wiring.*;
-import org.osgi.resource.*;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.FrameworkWiring;
+import org.osgi.resource.Namespace;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
+import org.osgi.resource.Wire;
 import org.osgi.service.resolver.ResolutionException;
 
 /**
@@ -1575,6 +1602,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 					}
 					// Note that we must get a new list of modules each time;
 					// this is because additional modules could have been installed from the previous start-level
+					// but only do this if the module database has changed!!
+					List<Module> sorted = null;
+					long currentTimestamp = Long.MIN_VALUE;
 					if (newStartLevel > currentSL) {
 						for (int i = currentSL; i < newStartLevel; i++) {
 							int toStartLevel = i + 1;
@@ -1582,7 +1612,16 @@ public final class ModuleContainer implements DebugOptionsListener {
 							if (debugStartLevel) {
 								Debug.println("StartLevel: incremented active start level to; " + toStartLevel); //$NON-NLS-1$
 							}
-							incStartLevel(toStartLevel, moduleDatabase.getSortedModules(Sort.BY_START_LEVEL));
+							if (sorted == null || currentTimestamp != moduleDatabase.getTimestamp()) {
+								moduleDatabase.readLock();
+								try {
+									sorted = moduleDatabase.getSortedModules(Sort.BY_START_LEVEL);
+									currentTimestamp = moduleDatabase.getTimestamp();
+								} finally {
+									moduleDatabase.readUnlock();
+								}
+							}
+							incStartLevel(toStartLevel, sorted);
 						}
 					} else {
 						for (int i = currentSL; i > newStartLevel; i--) {
@@ -1591,7 +1630,16 @@ public final class ModuleContainer implements DebugOptionsListener {
 							if (debugStartLevel) {
 								Debug.println("StartLevel: decremented active start level to " + toStartLevel); //$NON-NLS-1$
 							}
-							decStartLevel(toStartLevel, moduleDatabase.getSortedModules(Sort.BY_START_LEVEL, Sort.BY_DEPENDENCY));
+							if (sorted == null || currentTimestamp != moduleDatabase.getTimestamp()) {
+								moduleDatabase.readLock();
+								try {
+									sorted = moduleDatabase.getSortedModules(Sort.BY_START_LEVEL, Sort.BY_DEPENDENCY);
+									currentTimestamp = moduleDatabase.getTimestamp();
+								} finally {
+									moduleDatabase.readUnlock();
+								}
+							}
+							decStartLevel(toStartLevel, sorted);
 						}
 					}
 					if (currentSL > 0 && newStartLevel > 0) {
