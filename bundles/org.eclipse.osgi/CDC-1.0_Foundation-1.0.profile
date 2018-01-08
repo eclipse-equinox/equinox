@@ -1,5 +1,5 @@
 ###############################################################################
-# Copyright (c) 2005 IBM Corporation and others.
+# Copyright (c) 2005, 2018 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -9,6 +9,22 @@
 #     IBM Corporation - initial API and implementation
 ###############################################################################
 org.osgi.framework.system.packages = \
+ java.io,\
+ java.lang,\
+ java.lang.ref,\
+ java.lang.reflect,\
+ java.math,\
+ java.net,\
+ java.security,\
+ java.security.acl,\
+ java.security.cert,\
+ java.security.interfaces,\
+ java.security.spec,\
+ java.text,\
+ java.text.resources,\
+ java.util,\
+ java.util.jar,\
+ java.util.zip,\
  javax.microedition.io
 org.osgi.framework.bootdelegation = \
  javax.microedition.io

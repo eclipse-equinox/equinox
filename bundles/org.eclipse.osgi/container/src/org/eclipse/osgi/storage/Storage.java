@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1683,7 +1683,7 @@ public class Storage {
 				Object descriptor = getDescriptor.invoke(m);
 				for (Object export : (Set<?>) exports.invoke(descriptor)) {
 					String pkg = (String) source.invoke(export);
-					if (((Set<?>) targets.invoke(export)).isEmpty() && !pkg.startsWith("java.")) { //$NON-NLS-1$
+					if (((Set<?>) targets.invoke(export)).isEmpty()) {
 						packages.add(pkg);
 					}
 				}

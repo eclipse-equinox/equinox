@@ -1,5 +1,5 @@
 ###############################################################################
-# Copyright (c) 2014 IBM Corporation and others.
+# Copyright (c) 2014, 2018 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -9,7 +9,56 @@
 #     IBM Corporation - initial API and implementation
 ###############################################################################
 org.osgi.framework.system.packages = \
+ java.io,\
+ java.lang,\
+ java.lang.annotation,\
+ java.lang.instrument,\
+ java.lang.invoke,\
+ java.lang.management,\
+ java.lang.ref,\
+ java.lang.reflect,\
+ java.math,\
+ java.net,\
+ java.nio,\
+ java.nio.channels,\
+ java.nio.channels.spi,\
+ java.nio.charset,\
+ java.nio.charset.spi,\
+ java.nio.file,\
+ java.nio.file.attribute,\
+ java.nio.file.spi,\
+ java.rmi,\
+ java.rmi.activation,\
+ java.rmi.dgc,\
+ java.rmi.registry,\
+ java.rmi.server,\
+ java.security,\
+ java.security.acl,\
+ java.security.cert,\
+ java.security.interfaces,\
+ java.security.spec,\
+ java.sql,\
+ java.text,\
+ java.text.spi,\
+ java.time,\
+ java.time.chrono,\
+ java.time.format,\
+ java.time.temporal,\
+ java.time.zone,\
+ java.util,\
+ java.util.concurrent,\
+ java.util.concurrent.atomic,\
+ java.util.concurrent.locks,\
+ java.util.function,\
+ java.util.jar,\
+ java.util.logging,\
+ java.util.prefs,\
+ java.util.regex,\
+ java.util.spi,\
+ java.util.stream,\
+ java.util.zip,\
  javax.annotation.processing,\
+ javax.crypto,\
  javax.crypto.interfaces,\
  javax.crypto.spec,\
  javax.lang.model,\

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2017 IBM Corporation and others.
+ * Copyright (c) 2003, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,16 +13,41 @@ package org.eclipse.osgi.tests.services.resolver;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BaseDescription;
+import org.eclipse.osgi.service.resolver.BundleDelta;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.Resolver;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.service.resolver.StateDelta;
+import org.eclipse.osgi.service.resolver.StateHelper;
+import org.eclipse.osgi.service.resolver.StateObjectFactory;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.Version;
 import org.osgi.framework.namespace.IdentityNamespace;
-import org.osgi.framework.wiring.*;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.resource.Capability;
 
 public class StateResolverTest extends AbstractStateTest {
@@ -3693,6 +3718,57 @@ public class StateResolverTest extends AbstractStateTest {
 
 		assertTrue("host not resolved", a.isResolved());
 		assertTrue("fragment not resolved", aFrag.isResolved());
+	}
+
+	public void testImportJavaPackages() throws Exception {
+		State state = buildEmptyState();
+		int bundleID = 0;
+		Hashtable manifest = new Hashtable();
+		Dictionary[] props = new Dictionary[] {new Hashtable()};
+		props[0].put("org.osgi.framework.executionenvironment", "J2SE-1.5, JavaSE-1.6");
+		props[0].put(Constants.FRAMEWORK_SYSTEMPACKAGES, "java.lang,java.util");
+		state.setPlatformProperties(props);
+
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "org.eclipse.osgi");
+		BundleDescription systemBundle = state.getFactory().createBundleDescription(state, manifest, "org.eclipse.osgi", bundleID++);
+		state.addBundle(systemBundle);
+
+		List bundles = new ArrayList();
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
+		manifest.put(Constants.IMPORT_PACKAGE, "java.lang");
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "JavaSE-1.6");
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, "A", bundleID++);
+		bundles.add(a);
+		state.addBundle(a);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A.FRAG");
+		manifest.put(Constants.FRAGMENT_HOST, "A");
+		manifest.put(Constants.IMPORT_PACKAGE, "java.lang,java.util");
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.5");
+		BundleDescription aFrag = state.getFactory().createBundleDescription(state, manifest, "A.FRAG", bundleID++);
+		bundles.add(aFrag);
+		state.addBundle(aFrag);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
+		manifest.put(Constants.IMPORT_PACKAGE, "java.xyz");
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "JavaSE-1.6");
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, "B", bundleID++);
+		bundles.add(b);
+		state.addBundle(b);
+
+		state.resolve();
+
+		assertTrue("host A not resolved", a.isResolved());
+		assertTrue("fragment A.FRAG not resolved", aFrag.isResolved());
+		assertFalse("host B is wrongly resolved", b.isResolved());
+
 	}
 
 	private ExportPackageDescription[] isConsistent(ExportPackageDescription[] pkgs1, ExportPackageDescription[] pkgs2) {
