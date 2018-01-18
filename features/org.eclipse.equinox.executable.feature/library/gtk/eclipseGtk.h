@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -15,7 +15,7 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdkx.h>
 
-struct GTK_PTRS { 
+struct GTK_PTRS {
 	short 		not_initialized;
 	void		(*gtk_container_add)		(GtkContainer*, GtkWidget*);
 	gint		(*gtk_dialog_run)			(GtkDialog *);
@@ -37,13 +37,19 @@ struct GTK_PTRS {
 	void		(*g_object_unref)			(gpointer);
 	guint       (*g_timeout_add)			(guint, GSourceFunc, gpointer);
 	void		(*g_error_free)				(GError *);
-
+	void		(*g_type_init)            	();
+	GDBusProxy*	(*g_dbus_proxy_new_for_bus_sync) (GBusType, GDBusProxyFlags, GDBusInterfaceInfo *, const gchar *,const gchar *, const gchar *, GCancellable *, GError **);
+	GVariant *  (*g_dbus_proxy_call_sync) (GDBusProxy *, const gchar *, GVariant *, GDBusCallFlags, gint, GCancellable *, GError **);
+	GVariantBuilder * (*g_variant_builder_new) (const GVariantType *);
+	void 		(*g_variant_builder_add) 	(GVariantBuilder *, const gchar *, const gchar *);
+	GVariant * 	(*g_variant_new) 			(const gchar *, GVariantBuilder *);
+	void 		(*g_variant_builder_unref) 	(GVariantBuilder *);
+	void		(*g_variant_unref) 			(GVariant *);
 #ifdef SOLARIS
 	GString* 	(*g_string_insert_c) 		(GString *, gssize, gchar);
 #endif	
 		
 	GdkDisplay* (*gdk_display_get_default)  		();
-	Display*	(*gdk_x11_display_get_xdisplay)  	(GdkDisplay*);
 	GdkPixbuf*	(*gdk_pixbuf_new_from_file)			(const char*, GError **);
 	GdkPixbuf*	(*gdk_pixbuf_scale_simple)			(const GdkPixbuf*, int, int, GdkInterpType);
 	int			(*gdk_pixbuf_get_width)				(const GdkPixbuf*);
@@ -51,17 +57,8 @@ struct GTK_PTRS {
 	GdkScreen *	(*gdk_screen_get_default)			();
 	double		(*gdk_screen_get_resolution)		(GdkScreen *);
 	
-	Window 		(*XGetSelectionOwner)		(Display*, Atom);
-	void		(*XSetSelectionOwner)		(Display*, Atom, Window, Time);
-	void 		(*XChangeProperty)			(Display*, Window, Atom, Atom, int, int, unsigned char *, int);
-	Window 		(*XCreateWindow)			(Display*, Window, int, int, unsigned int, unsigned int, unsigned int, int, unsigned int, Visual*, unsigned long, XSetWindowAttributes*);
-	void		(*XSync)					(Display*, Bool);
-	int			(*XDefaultScreen)			(Display*);
-	Window		(*XRootWindow)				(Display*, int);
-	Atom 		(*XInternAtom)				(Display*, _Xconst char*, Bool	);
 };
 
-#define gtk_GDK_DISPLAY gtk.gdk_x11_display_get_xdisplay(gtk.gdk_display_get_default())
 extern struct GTK_PTRS gtk;
 
 #define FN_TABLE_ENTRY(fn, required) { (void**)& gtk.fn, #fn, required }

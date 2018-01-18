@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -23,9 +23,7 @@
 #include <sys/wait.h>
 #include <sys/ioctl.h>
 #include <dlfcn.h>
-#ifdef SOLARIS
-#include <sys/filio.h>
-#endif
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,10 +31,6 @@
 #include <locale.h>
 #include <semaphore.h>
 #include <fcntl.h>
-
-#ifdef HPUX
-#define SEM_FAILED (void *)-1
-#endif
 
 /* Global Variables */
 char*  defaultVM     = "java";
@@ -46,188 +40,186 @@ char*  shippedVMDir  = "jre/bin/";
 /* Define the special arguments for the various Java VMs. */
 static char*  argVM_JAVA[]        = { NULL };
 
+/*
+ * Define arguments that are required/used by platform (e.g SWT) to function properly on gtk. (via Java's System.getProperty(..)).
+ * These should not affect JVM itself (e.g flags shouldn't set things like memory usage of the JVM).
+ *
+ * Note, these may re-occur in *.product (i.e eclipse.ini) such that "java -jar launcher" would work (e.g a child eclipse).
+ * See bug 528414.
+ *
+ * For swt.dbus.init, see bottom of method (SWT/Gtk) Display.java:createDisplay().
+ */
+char* gtkPlatformJavaSystemProperties [] = { "-Dswt.dbus.init", NULL};
+
 /* Define local variables . */
-static long			splashHandle = 0;
+static GtkWidget*	splashHandle = 0;
 static GtkWidget*   shellHandle = 0;
 
-static sem_t* mutex;
-static Atom appWindowAtom, launcherWindowAtom;
 static _TCHAR** openFilePath = NULL; /* the files we want to open */
 static int openFileTimeout = 60; 	 /* number of seconds to wait before timeout */
-static int windowPropertySet = 0;	 /* set to 1 on success */
+static int filesPassedToSWT = 0;	 /* set to 1 on success */
+static const int FILEOPEN_RETRY_TIMEOUT_MS = 1000;
 
-static struct sigaction quitAction;
-static struct sigaction intAction;
+/** GDBus related */
+static const gchar GDBUS_SERVICE[] = "org.eclipse.swt";
+static const gchar GDBUS_OBJECT[] = "/org/eclipse/swt";
+static const gchar GDBUS_INTERFACE[] = "org.eclipse.swt";
+GDBusProxy *gdbus_proxy = NULL;
 
-/* Local functions */
-static void catch_signal(int sig) {
-	//catch signals, free the lock, reinstall the original
-	//signal handlers and reraise the signal.
-	sem_post(mutex);
-	sem_close(mutex);
-	sigaction(SIGINT, &intAction, NULL);
-	sigaction(SIGQUIT, &intAction, NULL);
-	raise(sig);
-}
+gboolean gdbus_initProxy ();
+gboolean gdbus_testConnection();
+gboolean gdbus_FileOpen_TimerProc(gpointer data);
+gboolean gdbus_call_FileOpen ();
 
-typedef int (*LockFunc)();
-int executeWithLock(char *name, LockFunc func) {
-	int result = -1;
-	int lock = -1;
-	struct sigaction action;
-
-	mutex = sem_open(name, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG | S_IRWXO, 1);
-	if (mutex == SEM_FAILED) {
-		//create failed. Probably lock is already created so try opening the existing lock.
-		mutex = sem_open(name, 0);
-	}
-	if (mutex == SEM_FAILED)
-		return -1; //this is an error.
-
-	// install signal handler to free the lock if something bad happens.
-	// sem_t is not freed automatically when a process ends.
-	action.sa_handler = catch_signal;
-	sigaction(SIGINT, &action, &intAction);
-	sigaction(SIGQUIT, &action, &quitAction);
-
-	while ((lock = sem_trywait(mutex)) != 0) {
-		if (errno == EAGAIN) {
-			//couldn't acquire lock, sleep a bit and try again
-			sleep(1);
-			if (--openFileTimeout > 0)
-				continue;
-		}
-		break;
-	}
-
-	if (lock == 0)
-		result = func();
-
-	sem_post(mutex);
-	sem_close(mutex);
-
-	//reinstall the original signal handlers
-	sigaction(SIGINT, &intAction, NULL);
-	sigaction(SIGQUIT, &quitAction, NULL);
-	return result;
-}
-
-/* Create a "SWT_Window_" + APP_NAME string with optional suffix.
- * Caller should free the memory when finished */
-static char * createSWTWindowString(char * suffix, int semaphore) {
-#ifdef SOLARIS
-	/* solaris requires semaphore names to start with '/' */
-	char * prefix = semaphore != 0 ? _T_ECLIPSE("/SWT_Window_") : _T_ECLIPSE("SWT_Window_");
-#else
-	char * prefix = _T_ECLIPSE("SWT_Window_");
-#endif
-	
-	char * result = malloc((_tcslen(prefix) + _tcslen(getOfficialName()) + (suffix != NULL ? _tcslen(suffix) : 0) + 1) * sizeof(char));
-	if (suffix != NULL)
-		_stprintf(result, _T_ECLIPSE("%s%s%s"), prefix, getOfficialName(), suffix);
-	else
-		_stprintf(result, _T_ECLIPSE("%s%s"), prefix, getOfficialName());
-	return result;
-}
-
-static int setAppWindowPropertyFn() {
-	Window appWindow;
-	Atom propAtom;
-	_TCHAR *propVal;
-
-	//Look for the SWT window. If it's there, set a property on it.
-	appWindow = gtk.XGetSelectionOwner(gtk_GDK_DISPLAY, appWindowAtom);
-	if (appWindow) {
-		propAtom = gtk.XInternAtom(gtk_GDK_DISPLAY, "org.eclipse.swt.filePath.message", FALSE);
-		//append a colon delimiter in case more than one file gets appended to the app windows property.
-		propVal = concatPaths(openFilePath, _T_ECLIPSE(':'));
-		gtk.XChangeProperty(gtk_GDK_DISPLAY, appWindow, propAtom, propAtom, 8, PropModeAppend, (unsigned char *)propVal, _tcslen(propVal));
-		free(propVal);
-		windowPropertySet = 1;
-		return 1;
-	}
-	return 0;
-}
-
-/* set the Application window property by executing _setWindowPropertyFn within a semaphore */
-int setAppWindowProperty() {
-	int result;
-	char * mutexName = createSWTWindowString(NULL, 1);
-	result = executeWithLock(mutexName, setAppWindowPropertyFn);
-	gtk.XSync(gtk_GDK_DISPLAY, False);
-	free(mutexName);
-	return result;
-}
-
-/* timer callback function to call setAppWindowProperty */
-static gboolean setAppWindowTimerProc(gpointer data) {
-	//try to set the app window property. If unsuccessful return true to reschedule the timer.
-	openFileTimeout--;
-	return !setAppWindowProperty() && openFileTimeout > 0;
-}
-
-int createLauncherWindow() {
-	Window window, launcherWindow;
-	//check if a launcher window exists. If none exists, we know we are the first and we should be launching the app.
-	window = gtk.XGetSelectionOwner(gtk_GDK_DISPLAY, launcherWindowAtom);
-	if (window == 0) {
-		//create a launcher window that other processes can find.
-		launcherWindow = gtk.XCreateWindow(gtk_GDK_DISPLAY, gtk.XRootWindow(gtk_GDK_DISPLAY, gtk.XDefaultScreen(gtk_GDK_DISPLAY)), -10, -10, 1,
-				1, 0, 0, InputOnly, CopyFromParent, (unsigned long) 0, (XSetWindowAttributes *) NULL);
-		//for some reason Set and Get are both necessary. Set alone does nothing.
-		gtk.XSetSelectionOwner(gtk_GDK_DISPLAY, launcherWindowAtom, launcherWindow, CurrentTime);
-		gtk.XGetSelectionOwner(gtk_GDK_DISPLAY, launcherWindowAtom);
-		//add a timeout to set the property on the apps window once the app is launched.
-		gtk.g_timeout_add(1000, setAppWindowTimerProc, 0);
-		return 0;
-	}
-	return 1;
-}
-
-int reuseWorkbench(_TCHAR** filePath, int timeout) {
-	char *appName, *launcherName;
-	int result = 0;
+/*
+ * Deals with opening files passed to eclipse.  e.g: ./eclipse /myfile
+ *
+ * return 1 = Files passed to eclipse. Don't spawn another instance.
+ *        0 = Launch a new eclipse instance, will try to pass files to eclipse once instance is launched.
+ */
+gboolean reuseWorkbench(_TCHAR** filePath, int timeout) {
+	openFileTimeout = timeout;
+	openFilePath = filePath;
 
 	if (initWindowSystem(&initialArgc, initialArgv, 1) != 0)
 		return -1;
 
-	openFileTimeout = timeout;
-	openFilePath = filePath;
-	
-	//App name is defined in SWT as well. Values must be consistent.
-	appName = createSWTWindowString(NULL, 0);
-	appWindowAtom = gtk.XInternAtom(gtk_GDK_DISPLAY, appName, FALSE);
-	free(appName);
-
-	//check if app is already running. Just set property if it is.
-	if (setAppWindowProperty() > 0)
-		return 1;
-
-	/* app is not running, create a launcher window to act as a mutex so we don't need to keep the semaphore locked */
-	launcherName = createSWTWindowString(_T_ECLIPSE("_Launcher"), 1);
-	launcherWindowAtom = gtk.XInternAtom(gtk_GDK_DISPLAY, launcherName, FALSE);
-	result = executeWithLock(launcherName, createLauncherWindow);
-	free(launcherName);
-
-	if (result == 1) {
-		//The app is already being launched in another process.  Set the property on that app window and exit
-		while (openFileTimeout > 0) {
-			if (setAppWindowProperty() > 0)
-				return 1; //success
-			else {
-				openFileTimeout--;
-				sleep(1);
-			}
-		}
-		//timed out trying to set the app property
-		result = 0;
+	if (!gdbus_initProxy()) {
+		_ftprintf(stderr, "Launcher Error. Could not init gdbus proxy. Bug? Launching eclipse without opening files passed in.\n");
+		return  0;
 	}
-	return result;
+
+	// If eclipse already open, just pass files.
+	if (gdbus_testConnection()) {
+		return gdbus_call_FileOpen();
+	} else {
+		// Otherwise add a timer that will keep trying to pass files to eclipse for a few minutes until it succeeds or times out.
+		// Note, the while loop in launchJavaVM() ensures the launcher doesn't quit before the timer expired.
+		gtk.g_timeout_add(FILEOPEN_RETRY_TIMEOUT_MS, gdbus_FileOpen_TimerProc, 0);
+		return 0;
+	}
+}
+
+/**
+ * Initializes variables/structures for dbus connectivity to org.eclipse.swt.
+ * Can be called multiple times, only first time initializes, other times just return early (1).
+ *
+ * DO NOT USE TO TEST CONNECTION. Use dbus_testConnection() instead.
+ *
+ * return: 0 (false) bug, something that shouldn't fail failed. This can happen if dynamic function calls failed or gdbus is not available etc..
+ *         1 (true) proxy configured.
+ */
+gboolean gdbus_initProxy () {
+	if (gdbus_proxy != NULL)
+		return 1; // already initialized.
+
+	// Function 'g_type_init()' is not needed anymore as of glib 2.36 as gtype system is initialized earlier. It is marked as deprecated.
+	// It is here because at the time of writing, eclipse supports glib 2.28.
+	// It is dynamic to prevent compile warning. But should be removed once min glib eclipse version >= 2.36
+	gtk.g_type_init();
+
+	GError *error = NULL; // Some functions return errors through params
+	gdbus_proxy = gtk.g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION, G_DBUS_PROXY_FLAGS_NONE, NULL, GDBUS_SERVICE, GDBUS_OBJECT, GDBUS_INTERFACE, NULL, &error);
+	if ((gdbus_proxy == NULL) || (error != NULL)) {
+		fprintf(stderr, "Launcher error: GDBus proxy init failed to connect %s:%s on %s.\n", GDBUS_SERVICE, GDBUS_OBJECT, GDBUS_INTERFACE);
+		if (error != NULL) {
+			_ftprintf(stderr, "Launcher error: GDBus gdbus_proxy init failed for reason: %s\n", error->message);
+			gtk.g_error_free (error);
+		}
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+/*
+ * Test if we can reach org.eclipse.swt dbus session.
+ *
+ * return 0 (false) No connection.
+ *        1 (true)  org.eclipse.swt listens to calls.
+ */
+gboolean gdbus_testConnection() {
+	if (!gdbus_initProxy())
+		return 0;
+	GError *error = NULL; // Some functions return errors through params
+	GVariant *result;     // The value result from a call
+	result = gtk.g_dbus_proxy_call_sync(gdbus_proxy, "org.freedesktop.DBus.Peer.Ping", 0, G_DBUS_CALL_FLAGS_NONE, /* Proxy default timeout */ -1, NULL, &error);
+	if (error != NULL) {
+			gtk.g_error_free(error);
+			return 0;
+	}
+	if (result != NULL) {
+		gtk.g_variant_unref (result);
+		return 1;
+	}
+	_ftprintf(stderr, "ERROR: testConnection failed due to unknown reason. Bug in eclipseGtk.c? Potential cause could be dynamic function not initialized properly\n");
+	return 0;
+}
+
+/*
+ * Timer callback function.
+ *
+ * Try to pass files to eclipse. If eclipse not up yet, try again later.
+ *
+ * Timer ends when it returns false. (Files passed to eclipse or timeout).
+ */
+gboolean gdbus_FileOpen_TimerProc(gpointer data) {
+	if (openFileTimeout == 0)
+		return 0; // stop timer.
+	openFileTimeout--;
+	if (gdbus_testConnection()) {
+		gdbus_call_FileOpen();
+		filesPassedToSWT = 1;
+		return 0; // stop timer.
+	}
+	return 1; // run timer again.
+}
+
+/*
+ * Call fileOpen method in SWT.  Note, in SWT, see GDBus.java. fileOpen GDBusMethod is defined in Display.java.
+ * This call can be called multiple times if Eclipse hasn't launched yet.
+ *
+ * Return: FALSE (0) Call did not work. Probably eclipse not fired up yet. (try again later)
+ *         TRUE (1) GDBus call completed successfully.
+ */
+gboolean gdbus_call_FileOpen () {
+	if (!gdbus_initProxy())
+		return 0;
+
+	// Construct GDBus arguments based on files passed into launcher.
+	GVariantBuilder *builder;
+	GVariant *paramaters;
+	builder = gtk.g_variant_builder_new ((const GVariantType *) "as");  // as = G_VARIANT_TYPE_STRING_ARRAY
+
+	int i = -1;
+	while (openFilePath[++i] != NULL) {
+			gtk.g_variant_builder_add (builder, (const gchar *) (const GVariantType *) "s", (const gchar *) openFilePath[i]);  // s = G_VARIANT_TYPE_STRING
+	}
+
+	paramaters = gtk.g_variant_new ("(as)", builder);
+	gtk.g_variant_builder_unref (builder);
+
+	// Send a message
+	GError *error = NULL;
+	GVariant *result;
+	result = gtk.g_dbus_proxy_call_sync(gdbus_proxy, "FileOpen", paramaters, G_DBUS_CALL_FLAGS_NONE, /* Proxy default timeout */ -1, NULL, &error);
+	if (error != NULL) {
+		gtk.g_error_free (error);
+		return 0; // did not work. Eclipse probably not up yet. Try again later.
+	} else {
+		 if (result != NULL) {
+			// Because this not straight forward, below is an example of how to retrieve string return value if needed in the future.
+			// Note, arguments are packaged into a tuple because we deal with gdbus in dynamic way.
+			// gchar *str;
+			// g_variant_get(result, "(&s)", &str);
+			 gtk.g_variant_unref(result);
+		}
+		return 1; // worked.
+	}
 }
 
 /* Get current scaling-factor */
-float scaleFactor ()
-{
+float scaleFactor () {
 	float scaleFactor = 1;
 	GdkScreen * screen;
 	double resolution;
@@ -238,9 +230,9 @@ float scaleFactor ()
 	scaleFactor = (float)(resolution / 96);
 	return scaleFactor;
 }
+
 /* Create and Display the Splash Window */
-int showSplash( const char* featureImage )
-{
+int showSplash( const char* featureImage ) {
 	GtkWidget *image;
 	GdkPixbuf *pixbuf, *scaledPixbuf;
 	int width, height;
@@ -284,7 +276,7 @@ int showSplash( const char* featureImage )
 	gtk.gtk_window_set_position((GtkWindow*)(shellHandle), GTK_WIN_POS_CENTER);
 	gtk.gtk_window_resize((GtkWindow*)(shellHandle), gtk.gdk_pixbuf_get_width(scaledPixbuf), gtk.gdk_pixbuf_get_height(scaledPixbuf));
 	gtk.gtk_widget_show_all((GtkWidget*)(shellHandle));
-	splashHandle = (long)shellHandle;
+	splashHandle = shellHandle;
 	dispatchMessages();
 	return 0;
 }
@@ -295,7 +287,7 @@ void dispatchMessages() {
 }
 
 jlong getSplashHandle() {
-	return splashHandle;
+	return (jlong) splashHandle;
 }
 
 void takeDownSplash() {
@@ -308,8 +300,7 @@ void takeDownSplash() {
 }
 
 /* Get the window system specific VM arguments */
-char** getArgVM( char* vm ) 
-{
+char** getArgVM( char* vm ) {
     char** result;
 
 /*    if (isJ9VM( vm )) 
@@ -320,8 +311,7 @@ char** getArgVM( char* vm )
     return result;
 }
 
-JavaResults* launchJavaVM( char* args[] )
-{
+JavaResults* launchJavaVM( char* args[] ) {
 	JavaResults* jvmResults = NULL;
   	pid_t   jvmProcess, finishedProcess = 0;
   	int     exitCode;
@@ -352,7 +342,9 @@ JavaResults* launchJavaVM( char* args[] )
 			sleepTime.tv_sec = 0;
 			sleepTime.tv_nsec = 5e+8; // 500 milliseconds
 			
-			while(openFileTimeout > 0 && !windowPropertySet && (finishedProcess = waitpid(jvmProcess, &exitCode, WNOHANG)) == 0) {
+			// Ensure we don't quit the launcher until gdbus_FileOpen_TimerProc() finished or timed out.
+			// If making any changes to this loop, ensure "./eclipse /myFile" still works.
+			while(openFileTimeout > 0 && !filesPassedToSWT && (finishedProcess = waitpid(jvmProcess, &exitCode, WNOHANG)) == 0) {
 				dispatchMessages();
 				nanosleep(&sleepTime, NULL);
 			}
@@ -363,6 +355,5 @@ JavaResults* launchJavaVM( char* args[] )
       		/* TODO, this should really be a runResult if we could distinguish the launch problem above */
 			jvmResults->launchResult = WEXITSTATUS(exitCode);
     }
-
 	return jvmResults;
 }

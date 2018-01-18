@@ -38,6 +38,10 @@ extern _TCHAR**	initialArgv;			/* argv originally used to start launcher */
 extern _TCHAR*  eeLibPath;				/* library path specified in a .ee file */
 extern int		secondThread;			/* whether or not to start the vm on a second thread */
 
+#ifdef LINUX
+extern char* gtkPlatformJavaSystemProperties [];
+#endif
+
 /* OS Specific Functions */
 
 /** Display a Message

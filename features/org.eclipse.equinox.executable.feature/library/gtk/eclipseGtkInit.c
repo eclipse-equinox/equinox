@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -49,9 +49,23 @@ static FN_TABLE gtkFunctions[] = {
 /* functions from libgdk-x11-2.0 or libgdk-3.so.0*/
 static FN_TABLE gdkFunctions[] = {
 	FN_TABLE_ENTRY(gdk_display_get_default, 1),
-	FN_TABLE_ENTRY(gdk_x11_display_get_xdisplay, 1),
 	FN_TABLE_ENTRY(gdk_screen_get_default, 1),
 	FN_TABLE_ENTRY(gdk_screen_get_resolution, 1),
+	{ NULL, NULL }
+};
+/* functions from libgio-2.0.so.0*/
+static FN_TABLE gioFunctions[] = {
+	FN_TABLE_ENTRY(g_dbus_proxy_new_for_bus_sync, 1),
+	FN_TABLE_ENTRY(g_dbus_proxy_call_sync, 1),
+	{ NULL, NULL }
+};
+/* functions from libglib-2.0.so.0*/
+static FN_TABLE glibFunctions[] = {
+	FN_TABLE_ENTRY(g_variant_builder_new, 1),
+	FN_TABLE_ENTRY(g_variant_builder_add, 1),
+	FN_TABLE_ENTRY(g_variant_new, 1),
+	FN_TABLE_ENTRY(g_variant_builder_unref, 1),
+	FN_TABLE_ENTRY(g_variant_unref, 1),
 	{ NULL, NULL }
 };
 /* functions from libgdk_pixbuf-2.0 */
@@ -69,22 +83,10 @@ static FN_TABLE gobjFunctions[] = {
 	FN_TABLE_ENTRY(g_object_unref, 1),
 	FN_TABLE_ENTRY(g_timeout_add, 1),
 	FN_TABLE_ENTRY(g_error_free, 1),
+	FN_TABLE_ENTRY(g_type_init, 1),
 #ifdef SOLARIS
 	FN_TABLE_ENTRY(g_string_insert_c, 1),
 #endif
-	{ NULL, NULL }
-};
-
-/* functions from libX11 */
-static FN_TABLE x11Functions[] = {
-	FN_TABLE_ENTRY(XGetSelectionOwner, 1),
-	FN_TABLE_ENTRY(XSetSelectionOwner, 1),
-	FN_TABLE_ENTRY(XCreateWindow, 1),
-	FN_TABLE_ENTRY(XChangeProperty, 1),
-	FN_TABLE_ENTRY(XSync, 1),
-	FN_TABLE_ENTRY(XRootWindow, 1),
-	FN_TABLE_ENTRY(XDefaultScreen, 1),
-	FN_TABLE_ENTRY(XInternAtom, 1),
 	{ NULL, NULL }
 };
 
@@ -122,7 +124,7 @@ int loadGtk() {
 	/* Disable GTK scaling*/
 	setenv("GDK_SCALE", "1", 1);
 
-	void *gdkLib = NULL, *gtkLib = NULL, *objLib = NULL, *pixLib = NULL, *x11Lib = NULL;
+	void *gioLib = NULL, *glibLib = NULL, *gdkLib = NULL, *gtkLib = NULL, *objLib = NULL, *pixLib = NULL;
 	
 	char *gtk3 = getenv("SWT_GTK3");
 	if (gtk3 == NULL || strcmp(gtk3,"1") == 0) {
@@ -167,15 +169,17 @@ int loadGtk() {
 
 				objLib = dlopen(GOBJ_LIB, DLFLAGS);
 				pixLib = dlopen(PIXBUF_LIB, DLFLAGS);
-				x11Lib = dlopen(X11_LIB, DLFLAGS);
+				gioLib = dlopen(GIO_LIB, DLFLAGS);
+				glibLib= dlopen(GLIB_LIB, DLFLAGS);
 
 				memset(&gtk, 0, sizeof(struct GTK_PTRS));
 
 				if ( gtkLib == NULL || loadGtkSymbols(gtkLib, gtkFunctions)  != 0) return -1;
 				if ( gdkLib == NULL || loadGtkSymbols(gdkLib, gdkFunctions)  != 0) return -1;
+				if ( gioLib == NULL || loadGtkSymbols(gdkLib, gioFunctions)  != 0) return -1;
+				if ( glibLib == NULL || loadGtkSymbols(gdkLib, glibFunctions)  != 0) return -1;
 				if ( pixLib == NULL || loadGtkSymbols(pixLib, pixFunctions)  != 0) return -1;
 				if ( objLib == NULL || loadGtkSymbols(objLib, gobjFunctions) != 0) return -1;
-				if ( x11Lib == NULL || loadGtkSymbols(x11Lib, x11Functions)  != 0) return -1;
 
 				/* Initialize GTK. */
 				if (gtk.gtk_init_with_args) {
@@ -205,16 +209,18 @@ int loadGtk() {
 
 	objLib = dlopen(GOBJ_LIB, DLFLAGS);
 	pixLib = dlopen(PIXBUF_LIB, DLFLAGS);
-	x11Lib = dlopen(X11_LIB, DLFLAGS);
+	gioLib = dlopen(GIO_LIB, DLFLAGS);
+	glibLib= dlopen(GLIB_LIB, DLFLAGS);
 
 	/* initialize ptr struct to 0's */
 	memset(&gtk, 0, sizeof(struct GTK_PTRS));
 
 	if ( gtkLib == NULL || loadGtkSymbols(gtkLib, gtkFunctions)  != 0) return -1;
 	if ( gdkLib == NULL || loadGtkSymbols(gdkLib, gdkFunctions)  != 0) return -1;
+	if ( gioLib == NULL || loadGtkSymbols(gdkLib, gioFunctions)  != 0) return -1;
+	if ( glibLib == NULL || loadGtkSymbols(gdkLib, glibFunctions)  != 0) return -1;
 	if ( pixLib == NULL || loadGtkSymbols(pixLib, pixFunctions)  != 0) return -1;
 	if ( objLib == NULL || loadGtkSymbols(objLib, gobjFunctions) != 0) return -1;
-	if ( x11Lib == NULL || loadGtkSymbols(x11Lib, x11Functions) != 0) return -1;
 
 	return 0;
 }

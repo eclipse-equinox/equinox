@@ -1103,6 +1103,12 @@ static void getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmA
 	/* If the user specified "-vmargs", add them instead of the default VM args. */
 	vmArg = (userVMarg != NULL) ? userVMarg : getArgVM( (launchMode == LAUNCH_JNI) ? jniLib : javaVM );
 
+#ifdef LINUX
+	// Append flags needed for SWT to understand it's started from launcher to provide things like dbus support.
+	vmArg = concatArgs(vmArg, gtkPlatformJavaSystemProperties);
+#endif
+
+
 	adjustVMArgs(javaVM, jniLib, &vmArg);
 
  	/* Calculate the number of VM arguments. */
