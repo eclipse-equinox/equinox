@@ -86,23 +86,10 @@ case $defaultOS in
 				defaultOSArch="x86_64"
 				defaultJava=DEFAULT_JAVA_EXEC
 				[ -d /bluebird/teamswt/swt-builddir/JDKs/x86_64/jdk1.5.0 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/x86_64/jdk1.5.0"
-
-				# Automatically figure out where java is installed on the system if it was not found/given otherwise.
-				if [ "$defaultJavaHome" = "" ]; then
-					DYNAMIC_JAVA_HOME=`readlink -f /usr/bin/java | sed "s:jre/::" | sed "s:bin/java::"`
-                                 	if [ -a "${DYNAMIC_JAVA_HOME}include/jni.h" ]; then
-        	                		echo "Info: Java automatically set to: $DYNAMIC_JAVA_HOME "
-						defaultJavaHome="$DYNAMIC_JAVA_HOME"
-					else
-						echo "Warning, java not found on system. Please specify JAVA_HOME manually"
-					fi
-				fi
-				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			i?86 | "x86")
 				defaultOSArch="x86"
 				[ -d /bluebird/teamswt/swt-builddir/JDKs/x86/ibm-java2-i386-50 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/x86/ibm-java2-i386-50"
-				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			"ppc")
 				defaultOSArch="ppc"
@@ -264,12 +251,6 @@ elif [ "$defaultOS" = "solaris" ];  then
 	if [ "$defaultOSArch" = "x86_64" -o "$defaultOSArch" = "sparcv9" ]; then
 		M_ARCH=-m64
 		export M_ARCH
-	fi
-elif [ "$defaultOS" = "linux" ]; then
-	if [ "$defaultOSArch" = "x86_64" ]; then
-		# Bug 517013: Avoid using memcpy() to remain compatible with older glibc
-		M_CFLAGS="-fno-builtin-memcpy -fno-builtin-memmove"
-		export M_CFLAGS
 	fi
 fi
 
