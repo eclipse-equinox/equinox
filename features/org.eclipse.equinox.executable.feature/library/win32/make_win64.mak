@@ -39,12 +39,12 @@ MAIN_OBJS = eclipseMain.obj
 COMMON_OBJS = eclipseConfig.obj eclipseCommon.obj   eclipseWinCommon.obj
 DLL_OBJS	= eclipse.obj  eclipseWin.obj  eclipseUtil.obj  eclipseJNI.obj eclipseShm.obj
 
-LIBS   = kernel32.lib user32.lib comctl32.lib msvcrt.lib bufferoverflowU.lib
-DLL_LIBS = kernel32.lib user32.lib comctl32.lib gdi32.lib Advapi32.lib msvcrt.lib version.lib bufferoverflowU.lib
-LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /MT /RELEASE /NOLOGO -subsystem:windows -entry:wmainCRTStartup
-CONSOLEFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /MT /NOLOGO -subsystem:console -entry:wmainCRTStartup
+LIBS   = kernel32.lib user32.lib comctl32.lib libcmt.lib bufferoverflowU.lib
+DLL_LIBS = kernel32.lib user32.lib comctl32.lib gdi32.lib Advapi32.lib libcmt.lib version.lib bufferoverflowU.lib
+LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:windows -entry:wmainCRTStartup
+CONSOLEFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:console -entry:wmainCRTStartup
 #DLL_LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /PDB:NONE /RELEASE /NOLOGO -entry:_DllMainCRTStartup@12 -dll /BASE:0x72000000 /DLL
-DLL_LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /PDB:NONE /MT /RELEASE /NOLOGO  -dll /BASE:0x72000000 /DLL
+DLL_LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /PDB:NONE /RELEASE /NOLOGO  -dll /BASE:0x72000000 /DLL
 RES	= $(PROGRAM_NAME).res
 EXEC	= $(PROGRAM_OUTPUT)
 CONSOLE = $(PROGRAM_NAME)c.exe
@@ -58,31 +58,31 @@ wcflags = -DUNICODE -I.. -DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 all: $(EXEC) $(DLL) $(CONSOLE)
 
 eclipseMain.obj: ../eclipseUnicode.h ../eclipseCommon.h ../eclipseMain.c 
-	$(cc) $(DEBUG) $(wcflags) $(cvarsdll) /Fo$*.obj ../eclipseMain.c
+	$(cc) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseMain.c
 
 eclipseCommon.obj: ../eclipseCommon.h ../eclipseUnicode.h ../eclipseCommon.c
-	$(cc) $(DEBUG) $(wcflags) $(cvarsdll) /Fo$*.obj ../eclipseCommon.c
+	$(cc) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseCommon.c
 
 eclipse.obj: ../eclipseOS.h ../eclipseUnicode.h ../eclipse.c
-    $(cc) $(DEBUG) $(wcflags) $(cvarsdll) /Fo$*.obj ../eclipse.c
+    $(cc) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipse.c
 
 eclipseUtil.obj: ../eclipseUtil.h ../eclipseUnicode.h ../eclipseUtil.c
-    $(cc) $(DEBUG) $(wcflags) $(cvarsdll) /Fo$*.obj ../eclipseUtil.c
+    $(cc) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseUtil.c
 
 eclipseConfig.obj: ../eclipseConfig.h ../eclipseUnicode.h ../eclipseConfig.c
-    $(cc) $(DEBUG) $(wcflags) $(cvarsdll) /Fo$*.obj ../eclipseConfig.c
+    $(cc) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseConfig.c
 
 eclipseWin.obj: ../eclipseOS.h ../eclipseUnicode.h eclipseWin.c
-    $(cc) $(DEBUG) $(wcflags) $(cvarsdll) /Fo$*.obj eclipseWin.c
+    $(cc) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj eclipseWin.c
 
 eclipseWinCommon.obj: ../eclipseCommon.h eclipseWinCommon.c
-    $(cc) $(DEBUG) $(wcflags) $(cvarsdll) /Fo$*.obj eclipseWinCommon.c
+    $(cc) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj eclipseWinCommon.c
 
 eclipseJNI.obj: ../eclipseCommon.h ../eclipseOS.h ../eclipseJNI.c
-	$(CC) $(DEBUG) $(wcflags) $(cvarsdll) /Fo$*.obj ../eclipseJNI.c
+	$(CC) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseJNI.c
 
 eclipseShm.obj: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
-	$(CC) $(DEBUG) $(wcflags) $(cvarsdll) /Fo$*.obj ../eclipseShm.c
+	$(CC) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseShm.c
 	
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
     $(link) $(LFLAGS) -out:$(PROGRAM_OUTPUT) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
@@ -90,7 +90,7 @@ $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
 #the console version needs a flag set, should look for a better way to do this
 $(CONSOLE): $(MAIN_OBJS) $(COMMON_OBJS)
 	del -f eclipseConfig.obj aeclipseConfig.obj
-	$(cc) $(DEBUG) $(wcflags) $(cvarsdll) -D_WIN32_CONSOLE /FoeclipseConfig.obj ../eclipseConfig.c
+	$(cc) $(DEBUG) $(wcflags) $(cvarsmt) -D_WIN32_CONSOLE /FoeclipseConfig.obj ../eclipseConfig.c
     $(link) $(CONSOLEFLAGS) -out:$(CONSOLE) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
