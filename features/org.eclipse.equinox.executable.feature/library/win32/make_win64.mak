@@ -41,10 +41,10 @@ DLL_OBJS	= eclipse.obj  eclipseWin.obj  eclipseUtil.obj  eclipseJNI.obj eclipseS
 
 LIBS   = kernel32.lib user32.lib comctl32.lib msvcrt.lib bufferoverflowU.lib
 DLL_LIBS = kernel32.lib user32.lib comctl32.lib gdi32.lib Advapi32.lib msvcrt.lib version.lib bufferoverflowU.lib
-LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:windows -entry:wmainCRTStartup
-CONSOLEFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:console -entry:wmainCRTStartup
+LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /MT /RELEASE /NOLOGO -subsystem:windows -entry:wmainCRTStartup
+CONSOLEFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /MT /NOLOGO -subsystem:console -entry:wmainCRTStartup
 #DLL_LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /PDB:NONE /RELEASE /NOLOGO -entry:_DllMainCRTStartup@12 -dll /BASE:0x72000000 /DLL
-DLL_LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /PDB:NONE /RELEASE /NOLOGO  -dll /BASE:0x72000000 /DLL
+DLL_LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /PDB:NONE /MT /RELEASE /NOLOGO  -dll /BASE:0x72000000 /DLL
 RES	= $(PROGRAM_NAME).res
 EXEC	= $(PROGRAM_OUTPUT)
 CONSOLE = $(PROGRAM_NAME)c.exe
