@@ -1,5 +1,5 @@
 #*******************************************************************************
-# Copyright (c) 2006, 2014 IBM Corporation and others.
+# Copyright (c) 2006, 2018 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -10,5 +10,5 @@
 #*******************************************************************************
 
 maj_ver=1
-min_ver=628
+min_ver=700
 LIB_VERSION = $(maj_ver)$(min_ver)
