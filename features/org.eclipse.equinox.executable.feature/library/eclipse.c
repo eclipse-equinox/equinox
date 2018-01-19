@@ -416,6 +416,9 @@ static void dummyCallback(void * info) {}
 /* vmArgs must be NULL terminated                                */
 JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 {
+	/* arg[0] should be the full pathname of this program. */
+    program = _tcsdup( argv[0] );
+
     /* Parse command line arguments (looking for the VM to use). */
     /* Override configuration file arguments */
     parseArgs( &argc, argv );
@@ -499,9 +502,6 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     JavaResults* javaResults = NULL;
     int 	  launchMode;
     int 	  running = 1;
-
-	/* arg[0] should be the full pathname of this program. */
-    program = _tcsdup( argv[0] );
 
 	/* Initialize official program name */
    	officialName = name != NULL ? _tcsdup( name ) : getDefaultOfficialName();
