@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2017 Gunnar Wagenknecht and others.
+ * Copyright (c) 2011, 2018 Gunnar Wagenknecht and others.
  * All rights reserved.
  *
  * This program and the accompanying materials are made available under the terms of the
@@ -14,9 +14,9 @@ package org.eclipse.equinox.console.internal.ssh;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -62,19 +62,11 @@ public class AuthorizedKeys {
 	private static final String NEWLINE = "\n";
 
 	private static byte[] asBytes(final String string) {
-		try {
-			return string.getBytes("UTF-8");
-		} catch (final UnsupportedEncodingException e) {
-			return string.getBytes();
-		}
+			return string.getBytes(StandardCharsets.UTF_8);
 	}
 
 	private static String asString(final byte[] bytes) {
-		try {
-			return new String(bytes, "UTF-8");
-		} catch (final UnsupportedEncodingException e) {
-			return new String(bytes);
-		}
+			return new String(bytes, StandardCharsets.UTF_8);
 	}
 
 	public static void main(final String[] args) {

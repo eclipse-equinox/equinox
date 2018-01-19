@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 SAP AG
+ * Copyright (c) 2010, 2018 SAP AG
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,7 @@
 
 package org.eclipse.equinox.console.common;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
@@ -37,11 +37,7 @@ public class HistoryHolder {
     }
 
     public synchronized void add(byte[] data) {
-        try {
-            data = new String(data, "US-ASCII").trim().getBytes("US-ASCII");
-        } catch (UnsupportedEncodingException e) {
-
-        }
+        data = new String(data, StandardCharsets.US_ASCII).trim().getBytes(StandardCharsets.US_ASCII);
         if (data.length == 0) {
             pos = size;
             return;
