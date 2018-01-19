@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -781,12 +782,8 @@ public class Main {
 		}
 		if (!replaced)
 			return urlString;
-		try {
-			return new String(decodedBytes, 0, decodedLength, "UTF-8"); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
-			//use default encoding
-			return new String(decodedBytes, 0, decodedLength);
-		}
+
+		return new String(decodedBytes, 0, decodedLength, StandardCharsets.UTF_8);
 	}
 
 	/**
@@ -2637,7 +2634,7 @@ public class Main {
 	private void openLogFile() throws IOException {
 		computeLogFileLocation();
 		try {
-			log = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(logFile.getAbsolutePath(), true), "UTF-8")); //$NON-NLS-1$
+			log = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(logFile.getAbsolutePath(), true), StandardCharsets.UTF_8));
 		} catch (IOException e) {
 			logFile = null;
 			throw e;
@@ -2645,11 +2642,7 @@ public class Main {
 	}
 
 	private BufferedWriter logForStream(OutputStream output) {
-		try {
-			return new BufferedWriter(new OutputStreamWriter(output, "UTF-8")); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
-			return new BufferedWriter(new OutputStreamWriter(output));
-		}
+		return new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8));
 	}
 
 	private void closeLogFile() throws IOException {
