@@ -61,6 +61,7 @@ DEFAULT_OS_ARCH="$defaultOSArch"
 DEFAULT_WS="$defaultWS"
 EXEC_DIR=../../../../../rt.equinox.binaries/org.eclipse.equinox.executable
 PROGRAM_OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch/Eclipse.app/Contents/MacOS"
+MACOSX_DEPLOYMENT_TARGET=10.10
 
 # /System/Library/Frameworks/JavaVM.framework/Headers does not exist anymore on Yosemite
 if [ -e /System/Library/Frameworks/JavaVM.framework/Headers ]; then
@@ -70,7 +71,7 @@ else
 fi
 
 ARCHS="-arch x86_64"
-export PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS ARCHS PROGRAM_OUTPUT_DIR JAVA_HEADERS
+export PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS ARCHS PROGRAM_OUTPUT_DIR JAVA_HEADERS MACOSX_DEPLOYMENT_TARGET
 
 if [ "$extraArgs" != "" ]; then
 	make -f $makefile $extraArgs
