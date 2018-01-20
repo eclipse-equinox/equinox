@@ -810,6 +810,14 @@ public class ContextController {
 	}
 
 	public String getFullContextPath() {
+		if (fullContextPath != null) {
+			return fullContextPath;
+		}
+
+		return fullContextPath = getFullContextPath0();
+	}
+
+	private  String getFullContextPath0() {
 		List<String> endpoints = httpServiceRuntime.getHttpServiceEndpoints();
 
 		if (endpoints.isEmpty()) {
@@ -818,7 +826,7 @@ public class ContextController {
 
 		String defaultEndpoint = endpoints.get(0);
 
-		if ((defaultEndpoint.length() > 0) && defaultEndpoint.endsWith("/")) {
+		if ((defaultEndpoint.length() > 0) && defaultEndpoint.endsWith(Const.SLASH)) {
 			defaultEndpoint = defaultEndpoint.substring(
 				0, defaultEndpoint.length() - 1);
 		}
@@ -1322,6 +1330,7 @@ public class ContextController {
 	private final BundleContext consumingContext;
 	private final String contextName;
 	private final String contextPath;
+	private volatile String fullContextPath;
 	private final long contextServiceId;
 	private final Set<EndpointRegistration<?>> endpointRegistrations = new ConcurrentSkipListSet<EndpointRegistration<?>>();
 	private final EventListeners eventListeners = new EventListeners();

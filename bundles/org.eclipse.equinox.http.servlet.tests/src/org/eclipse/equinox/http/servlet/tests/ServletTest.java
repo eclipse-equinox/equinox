@@ -2953,6 +2953,146 @@ public class ServletTest extends BaseTest {
 	}
 
 	@Test
+	public void test_ServletContextHelper15_fullContextPath_include() throws Exception {
+		try {
+			stopJetty();
+			System.setProperty("org.eclipse.equinox.http.jetty.context.path", "/foo");
+		}
+		finally {
+			startJetty();
+		}
+
+		BundleContext bundleContext = getBundleContext();
+		Bundle bundle = bundleContext.getBundle();
+
+		ServletContextHelper servletContextHelperA = new ServletContextHelper(bundle){};
+
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			final AtomicReference<String> path = new AtomicReference<String>();
+
+			Servlet servletA = new HttpServlet() {
+				private static final long serialVersionUID = 1L;
+				@Override
+				protected void service(HttpServletRequest req, HttpServletResponse resp)
+					throws IOException, ServletException {
+					RequestDispatcher rd = req.getRequestDispatcher("/foo/a/SB");
+					rd.include(req, resp);
+				}
+			};
+			Servlet servletB = new HttpServlet() {
+				private static final long serialVersionUID = 1L;
+				@Override
+				protected void service(HttpServletRequest req, HttpServletResponse resp)
+					throws IOException, ServletException {
+					path.set((String)req.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH));
+				}
+			};
+
+			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
+			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelperA, contextProps));
+			Dictionary<String, Object> props = new Hashtable<String, Object>();
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SA");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/SA");
+			registrations.add(getBundleContext().registerService(Servlet.class, servletA, props));
+			props = new Hashtable<String, Object>();
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SB");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/SB");
+			registrations.add(getBundleContext().registerService(Servlet.class, servletB, props));
+
+			requestAdvisor.request("foo/a/SA");
+
+			Assert.assertEquals("/foo/a", path.get());
+		}
+		finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+			try {
+				stopJetty();
+				System.setProperty("org.eclipse.equinox.http.jetty.context.path", "");
+			}
+			finally {
+				startJetty();
+			}
+		}
+	}
+
+	@Test
+	public void test_ServletContextHelper15_fullContextPath_forward() throws Exception {
+		try {
+			stopJetty();
+			System.setProperty("org.eclipse.equinox.http.jetty.context.path", "/foo");
+		}
+		finally {
+			startJetty();
+		}
+
+		BundleContext bundleContext = getBundleContext();
+		Bundle bundle = bundleContext.getBundle();
+
+		ServletContextHelper servletContextHelperA = new ServletContextHelper(bundle){};
+
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			final AtomicReference<String> path = new AtomicReference<String>();
+
+			Servlet servletA = new HttpServlet() {
+				private static final long serialVersionUID = 1L;
+				@Override
+				protected void service(HttpServletRequest req, HttpServletResponse resp)
+					throws IOException, ServletException {
+					RequestDispatcher rd = req.getRequestDispatcher("/foo/a/SB");
+					rd.forward(req, resp);
+				}
+			};
+			Servlet servletB = new HttpServlet() {
+				private static final long serialVersionUID = 1L;
+				@Override
+				protected void service(HttpServletRequest req, HttpServletResponse resp)
+					throws IOException, ServletException {
+					path.set((String)req.getAttribute(RequestDispatcher.FORWARD_CONTEXT_PATH));
+				}
+			};
+
+			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
+			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelperA, contextProps));
+			Dictionary<String, Object> props = new Hashtable<String, Object>();
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SA");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/SA");
+			registrations.add(getBundleContext().registerService(Servlet.class, servletA, props));
+			props = new Hashtable<String, Object>();
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SB");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/SB");
+			registrations.add(getBundleContext().registerService(Servlet.class, servletB, props));
+
+			requestAdvisor.request("foo/a/SA");
+
+			Assert.assertEquals("/foo/a", path.get());
+		}
+		finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+			try {
+				stopJetty();
+				System.setProperty("org.eclipse.equinox.http.jetty.context.path", "");
+			}
+			finally {
+				startJetty();
+			}
+		}
+	}
+
+	@Test
 	public void test_Listener1() throws Exception {
 		BaseServletContextListener scl1 =
 			new BaseServletContextListener();

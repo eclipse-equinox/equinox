@@ -214,7 +214,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 				if (specialOverides.containsKey(RequestDispatcher.INCLUDE_CONTEXT_PATH)) {
 					return specialOverides.get(RequestDispatcher.INCLUDE_CONTEXT_PATH);
 				}
-				return current.getContextController().getContextPath();
+				return current.getContextController().getFullContextPath();
 			}
 			else if (attributeName.equals(RequestDispatcher.INCLUDE_PATH_INFO)) {
 				if (hasServletName) {
@@ -268,7 +268,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 				if (specialOverides.containsKey(RequestDispatcher.FORWARD_CONTEXT_PATH)) {
 					return specialOverides.get(RequestDispatcher.FORWARD_CONTEXT_PATH);
 				}
-				return original.getContextController().getContextPath();
+				return original.getContextController().getFullContextPath();
 			}
 			else if (attributeName.equals(RequestDispatcher.FORWARD_PATH_INFO)) {
 				if (specialOverides.containsKey(RequestDispatcher.FORWARD_PATH_INFO)) {
@@ -333,7 +333,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 		return req.getPathInfo();
 	}
-	
+
 	public static String getDispatchRequestURI(HttpServletRequest req) {
 		if (req.getDispatcherType() == DispatcherType.INCLUDE)
 			return (String) req.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);

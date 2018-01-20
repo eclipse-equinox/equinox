@@ -85,7 +85,7 @@ public class DispatchTargets {
 		RequestAttributeSetter setter = new RequestAttributeSetter(originalRequest);
 
 		if (dispatcherType == DispatcherType.INCLUDE) {
-			setter.setAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH, contextController.getContextPath());
+			setter.setAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH, contextController.getFullContextPath());
 			setter.setAttribute(RequestDispatcher.INCLUDE_PATH_INFO, getPathInfo());
 			setter.setAttribute(RequestDispatcher.INCLUDE_QUERY_STRING, getQueryString());
 			setter.setAttribute(RequestDispatcher.INCLUDE_REQUEST_URI, getRequestURI());
@@ -198,7 +198,7 @@ public class DispatchTargets {
 		String value = string;
 
 		if (value == null) {
-			value = SIMPLE_NAME + '[' + contextController.getFullContextPath() + requestURI + (queryString != null ? '?' + queryString : "") + ", " + endpointRegistration.toString() + ']'; //$NON-NLS-1$
+			value = SIMPLE_NAME + '[' + contextController.getFullContextPath() + requestURI + (queryString != null ? '?' + queryString : "") + ", " + endpointRegistration.toString() + ']'; //$NON-NLS-1$ //$NON-NLS-2$
 
 			string = value;
 		}
