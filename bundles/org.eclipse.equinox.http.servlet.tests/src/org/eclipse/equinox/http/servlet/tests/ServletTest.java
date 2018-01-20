@@ -1706,6 +1706,112 @@ public class ServletTest extends BaseTest {
 	}
 
 	@Test
+	public void test_Sessions04_inlineSessionId() {
+		final AtomicBoolean valueBound = new AtomicBoolean(false);
+		final AtomicBoolean valueUnbound = new AtomicBoolean(false);
+		final HttpSessionBindingListener bindingListener = new HttpSessionBindingListener() {
+
+			@Override
+			public void valueUnbound(HttpSessionBindingEvent event) {
+				valueUnbound.set(true);
+			}
+
+			@Override
+			public void valueBound(HttpSessionBindingEvent event) {
+				valueBound.set(true);
+			}
+		};
+		final AtomicBoolean sessionCreated = new AtomicBoolean(false);
+		final AtomicBoolean sessionDestroyed = new AtomicBoolean(false);
+		HttpSessionListener sessionListener = new HttpSessionListener() {
+
+			@Override
+			public void sessionDestroyed(HttpSessionEvent se) {
+				sessionDestroyed.set(true);
+			}
+
+			@Override
+			public void sessionCreated(HttpSessionEvent se) {
+				sessionCreated.set(true);
+			}
+		};
+		HttpServlet sessionServlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
+					IOException {
+				HttpSession session = request.getSession();
+				if (session.getAttribute("test.attribute") == null) {
+					session.setAttribute("test.attribute", bindingListener);
+					response.getWriter().print(response.encodeURL(request.getRequestURI()));
+				} else {
+					session.invalidate();
+					response.getWriter().print("invalidated");
+				}
+			}
+
+		};
+		ServiceRegistration<Servlet> servletReg = null;
+		ServiceRegistration<HttpSessionListener> sessionListenerReg = null;
+		Dictionary<String, Object> servletProps = new Hashtable<String, Object>();
+		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/sessions");
+		String actual = null;
+
+		try {
+			servletReg = getBundleContext().registerService(Servlet.class, sessionServlet, servletProps);
+			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
+			sessionListenerReg = getBundleContext().registerService(HttpSessionListener.class, sessionListener, listenerProps);
+
+			sessionCreated.set(false);
+			valueBound.set(false);
+			sessionDestroyed.set(false);
+			valueUnbound.set(false);
+
+			// first call will create the session
+			String inlined = requestAdvisor.request("sessions");
+			assertTrue("Wrong result: " + inlined, inlined.startsWith("/sessions;jsessionid="));
+			assertTrue("No sessionCreated called", sessionCreated.get());
+			assertTrue("No valueBound called", valueBound.get());
+			assertFalse("sessionDestroyed was called", sessionDestroyed.get());
+			assertFalse("valueUnbound was called", valueUnbound.get());
+
+			sessionCreated.set(false);
+			valueBound.set(false);
+			sessionDestroyed.set(false);
+			valueUnbound.set(false);
+
+			// second call will invalidate the session
+			actual = requestAdvisor.request(inlined.substring(1));
+			assertEquals("Wrong result", "invalidated", actual);
+			assertFalse("sessionCreated was called", sessionCreated.get());
+			assertFalse("valueBound was called", valueBound.get());
+			assertTrue("No sessionDestroyed called", sessionDestroyed.get());
+			assertTrue("No valueUnbound called", valueUnbound.get());
+
+			sessionCreated.set(false);
+			sessionDestroyed.set(false);
+			valueBound.set(false);
+			valueUnbound.set(false);
+			// calling again should create the session again
+			actual = requestAdvisor.request(inlined.substring(1) + "?bar=2");
+			assertTrue("Wrong result: " + actual, actual.startsWith("/sessions;jsessionid="));
+			assertTrue("No sessionCreated called", sessionCreated.get());
+			assertTrue("No valueBound called", valueBound.get());
+		} catch (Exception e) {
+			fail("Unexpected exception: " + e);
+		} finally {
+			if (servletReg != null) {
+				servletReg.unregister();
+			}
+			if (sessionListenerReg != null) {
+				sessionListenerReg.unregister();
+			}
+		}
+	}
+
+	@Test
 	public void test_Resource1() throws Exception {
 		String expected = "a";
 		String actual;

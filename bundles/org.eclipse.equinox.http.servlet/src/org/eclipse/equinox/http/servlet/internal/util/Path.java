@@ -18,6 +18,16 @@ public class Path {
 
 	public Path(String path) {
 		int index = path.indexOf('?');
+		int semi = path.indexOf(';');
+
+		if (semi != -1) {
+			if (index > semi) {
+				path = path.substring(0, semi) + path.substring(index, path.length());
+			}
+			else if (index == -1) {
+				path = path.substring(0, semi);
+			}
+		}
 
 		if (index == -1) {
 			_requestURI = path;
