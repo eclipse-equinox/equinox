@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2017 IBM Corporation and others.
+ * Copyright (c) 2006, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,26 +10,63 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
-import java.net.*;
-import java.util.*;
-import java.util.concurrent.*;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.jws.WebService;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Endpoint;
 import javax.xml.ws.Service;
-import junit.framework.*;
+import junit.framework.AssertionFailedError;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.BundleReference;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.hooks.weaving.WeavingHook;
 import org.osgi.framework.hooks.weaving.WovenClass;
 import org.osgi.framework.namespace.PackageNamespace;
-import org.osgi.framework.wiring.*;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -1145,7 +1182,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		installer.resolveBundles(new Bundle[] {test});
 		BundleWiring wiring = test.adapt(BundleWiring.class);
 		ClassLoader bcl = wiring.getClassLoader();
-		ClassLoader cl = new URLClassLoader(new URL[0], bcl);
+		URLClassLoader cl = new URLClassLoader(new URL[0], bcl);
 		Enumeration manifests = cl.getResources("META-INF/MANIFEST.MF"); //$NON-NLS-1$
 		assertNotNull("manifests", manifests); //$NON-NLS-1$
 		ArrayList manifestURLs = new ArrayList();
@@ -1157,6 +1194,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		int dotIndex = manifest.getHost().indexOf('.');
 		long bundleId = dotIndex >= 0 && dotIndex < manifest.getHost().length() - 1 ? Long.parseLong(manifest.getHost().substring(0, dotIndex)) : Long.parseLong(manifest.getHost());
 		assertEquals("host id", test.getBundleId(), bundleId); //$NON-NLS-1$
+		cl.close();
 	}
 
 	public void testMultipleGetResources01() throws Exception {
@@ -1179,7 +1217,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		installer.resolveBundles(new Bundle[] {test});
 		BundleWiring wiring = test.adapt(BundleWiring.class);
 		ClassLoader bcl = wiring.getClassLoader();
-		ClassLoader cl = new URLClassLoader(new URL[0], bcl);
+		URLClassLoader cl = new URLClassLoader(new URL[0], bcl);
 		Enumeration resources = cl.getResources("data/resource1"); //$NON-NLS-1$
 		assertNotNull("resources", resources); //$NON-NLS-1$
 		ArrayList resourceURLs = new ArrayList();
@@ -1188,6 +1226,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertEquals("resource number", 2, resourceURLs.size()); //$NON-NLS-1$
 		assertEquals("root resource", "root classpath", readURL((URL) resourceURLs.get(0))); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("stuff resource", "stuff classpath", readURL((URL) resourceURLs.get(1))); //$NON-NLS-1$ //$NON-NLS-2$
+		cl.close();
 	}
 
 	public void testMultipleGetResources02() throws Exception {
