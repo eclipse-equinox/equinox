@@ -37,11 +37,12 @@ public class ProxyContext {
 	File proxyContextTempDir;
 	private ServletContext servletContext;
 
-	public ProxyContext(ServletContext servletContext) {
+	public ProxyContext(String contextName, ServletContext servletContext) {
 		this.servletContext = servletContext;
 		File tempDir = (File) servletContext.getAttribute(JAVAX_SERVLET_CONTEXT_TEMPDIR);
 		if (tempDir != null) {
-			proxyContextTempDir = new File(tempDir, "proxytemp"); //$NON-NLS-1$
+			tempDir = new File(tempDir, "proxytemp"); //$NON-NLS-1$
+			proxyContextTempDir = new File(tempDir, contextName);
 			deleteDirectory(proxyContextTempDir);
 			proxyContextTempDir.mkdirs();
 		}

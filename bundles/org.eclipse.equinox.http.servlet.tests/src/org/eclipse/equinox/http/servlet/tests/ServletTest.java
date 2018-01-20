@@ -2902,6 +2902,57 @@ public class ServletTest extends BaseTest {
 	}
 
 	@Test
+	public void test_ServletContextHelper14_uniqueTempDirs() throws Exception {
+		BundleContext bundleContext = getBundleContext();
+		Bundle bundle = bundleContext.getBundle();
+
+		ServletContextHelper servletContextHelperA = new ServletContextHelper(bundle){};
+		ServletContextHelper servletContextHelperB = new ServletContextHelper(bundle){};
+
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			final AtomicReference<File> fileA = new AtomicReference<File>();
+
+			Servlet servletA = new HttpServlet() {
+				private static final long serialVersionUID = 1L;
+				@Override
+				protected void service(HttpServletRequest req, HttpServletResponse resp)
+					throws IOException, ServletException {
+					fileA.set((File)getServletContext().getAttribute(ServletContext.TEMPDIR));
+					new File(fileA.get(), "test").createNewFile();
+				}
+			};
+
+			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
+			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelperA, contextProps));
+			Dictionary<String, Object> props = new Hashtable<String, Object>();
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SA");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/SA");
+			registrations.add(getBundleContext().registerService(Servlet.class, servletA, props));
+
+			requestAdvisor.request("a/SA");
+			Assert.assertNotNull(fileA.get());
+			Assert.assertTrue(new File(fileA.get(), "test").exists());
+
+			contextProps = new Hashtable<String, String>();
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "b");
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/b");
+			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelperB, contextProps));
+
+			Assert.assertNotNull(fileA.get());
+			Assert.assertTrue(new File(fileA.get(), "test").exists());
+		}
+		finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+		}
+	}
+
+	@Test
 	public void test_Listener1() throws Exception {
 		BaseServletContextListener scl1 =
 			new BaseServletContextListener();

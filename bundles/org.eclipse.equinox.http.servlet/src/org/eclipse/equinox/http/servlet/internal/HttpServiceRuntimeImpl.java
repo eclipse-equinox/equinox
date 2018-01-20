@@ -114,7 +114,7 @@ public class HttpServiceRuntimeImpl
 			contextPath = adaptContextPath(contextPath, serviceReference);
 
 			ContextController contextController = new ContextController(
-				trackingContext, consumingContext, serviceReference, new ProxyContext(parentServletContext),
+				trackingContext, consumingContext, serviceReference, new ProxyContext(contextName, parentServletContext),
 				this, contextName, contextPath, httpSessionTracker);
 
 			controllerMap.put(serviceReference, contextController);
