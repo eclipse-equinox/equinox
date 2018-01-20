@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,11 +20,13 @@ public class Activator implements BundleActivator {
 
 	private HttpServiceServlet httpServiceServlet;
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		httpServiceServlet = new HttpServiceServlet();
 		BridgeServlet.registerServletDelegate(httpServiceServlet);
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		BridgeServlet.unregisterServletDelegate(httpServiceServlet);
 		httpServiceServlet = null;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ public class BridgeServlet extends HttpServlet {
 	 * init() is called by the Servlet Container and used to instantiate the frameworkLauncher which MUST be an instance of FrameworkLauncher.
 	 * After instantiating the framework init, deploy, and start are called.
 	 */
+	@Override
 	public void init() throws ServletException {
 		super.init();
 
@@ -68,9 +69,9 @@ public class BridgeServlet extends HttpServlet {
 		String initSSLSocketFactory = getServletConfig().getInitParameter("_initSSLSocketFactory"); //$NON-NLS-1$
 		if (!"false".equals(initSSLSocketFactory)) { //$NON-NLS-1$
 			try {
-				Class clazz = this.getClass().getClassLoader().loadClass("javax.net.ssl.SSLSocketFactory"); //$NON-NLS-1$
-				Method getDefaultMethod = clazz.getMethod("getDefault", null); //$NON-NLS-1$
-				getDefaultMethod.invoke(null, null);
+				Class<?> clazz = this.getClass().getClassLoader().loadClass("javax.net.ssl.SSLSocketFactory"); //$NON-NLS-1$
+				Method getDefaultMethod = clazz.getMethod("getDefault"); //$NON-NLS-1$
+				getDefaultMethod.invoke(null);
 			} catch (Exception e) {
 				// best effort -- log problems
 				getServletContext().log("Bridge Servlet _initSSLSocketFactory - failed - " + e.getMessage()); //$NON-NLS-1$
@@ -80,7 +81,7 @@ public class BridgeServlet extends HttpServlet {
 		String frameworkLauncherClassParameter = getServletConfig().getInitParameter("frameworkLauncherClass"); //$NON-NLS-1$
 		if (frameworkLauncherClassParameter != null) {
 			try {
-				Class frameworkLauncherClass = this.getClass().getClassLoader().loadClass(frameworkLauncherClassParameter);
+				Class<?> frameworkLauncherClass = this.getClass().getClassLoader().loadClass(frameworkLauncherClassParameter);
 				framework = (FrameworkLauncher) frameworkLauncherClass.newInstance();
 			} catch (Exception e) {
 				throw new ServletException(e);
@@ -105,6 +106,7 @@ public class BridgeServlet extends HttpServlet {
 	/**
 	 * destroy() is called by the Servlet Container and used to first stop and then destroy the framework.
 	 */
+	@Override
 	public void destroy() {
 		framework.stop();
 		framework.destroy();
@@ -117,6 +119,7 @@ public class BridgeServlet extends HttpServlet {
 	 * framework control and will otherwise try to delegate to the registered servlet delegate
 	 *  
 	 */
+	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String pathInfo = req.getPathInfo();
 		// Check if this is being handled by an extension mapping
@@ -301,10 +304,12 @@ public class BridgeServlet extends HttpServlet {
 			super(req);
 		}
 
+		@Override
 		public String getPathInfo() {
 			return super.getServletPath();
 		}
 
+		@Override
 		public String getServletPath() {
 			return ""; //$NON-NLS-1$
 		}
@@ -316,6 +321,7 @@ public class BridgeServlet extends HttpServlet {
 			super(req);
 		}
 
+		@Override
 		public Object getAttribute(String attributeName) {
 			if (attributeName.equals(INCLUDE_SERVLET_PATH_ATTRIBUTE)) {
 				return ""; //$NON-NLS-1$

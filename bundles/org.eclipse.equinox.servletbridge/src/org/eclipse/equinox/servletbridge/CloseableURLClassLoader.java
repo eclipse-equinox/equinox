@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2015 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,9 +53,9 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	private static final String SCHEME_FILE = "file"; //$NON-NLS-1$
 
 	// @GuardedBy("loaders")
-	final ArrayList loaders = new ArrayList(); // package private to avoid synthetic access.
+	final ArrayList<CloseableJarFileLoader> loaders = new ArrayList<>(); // package private to avoid synthetic access.
 	// @GuardedBy("loaders")
-	private final ArrayList loaderURLs = new ArrayList(); // note: protected by loaders
+	private final ArrayList<URL> loaderURLs = new ArrayList<>(); // note: protected by loaders
 	// @GuardedBy("loaders")
 	boolean closed = false; // note: protected by loaders, package private to avoid synthetic access.
 
@@ -73,6 +73,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 			this.jarFile = jarFile;
 		}
 
+		@Override
 		public void connect() throws IOException {
 			internalGetEntry();
 		}
@@ -86,6 +87,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 			return entry;
 		}
 
+		@Override
 		public InputStream getInputStream() throws IOException {
 			return jarFile.getInputStream(internalGetEntry());
 		}
@@ -94,10 +96,12 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		 * @throws IOException
 		 * Documented to avoid warning
 		 */
+		@Override
 		public JarFile getJarFile() throws IOException {
 			return jarFile;
 		}
 
+		@Override
 		public JarEntry getJarEntry() throws IOException {
 			return internalGetEntry();
 		}
@@ -110,10 +114,12 @@ public class CloseableURLClassLoader extends URLClassLoader {
 			this.jarFile = jarFile;
 		}
 
+		@Override
 		protected URLConnection openConnection(URL u) throws IOException {
 			return new CloseableJarURLConnection(u, jarFile);
 		}
 
+		@Override
 		protected void parseURL(URL u, String spec, int start, int limit) {
 			setURL(u, JAR, null, 0, null, null, spec.substring(start, limit), null, null);
 		}
@@ -243,12 +249,12 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	}
 
 	private static URL[] excludeFileJarURLS(URL[] urls) {
-		ArrayList urlList = new ArrayList();
+		ArrayList<URL> urlList = new ArrayList<>();
 		for (int i = 0; i < urls.length; i++) {
 			if (!isFileJarURL(urls[i]))
 				urlList.add(urls[i]);
 		}
-		return (URL[]) urlList.toArray(new URL[urlList.size()]);
+		return urlList.toArray(new URL[urlList.size()]);
 	}
 
 	private static boolean isFileJarURL(URL url) {
@@ -262,12 +268,11 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.net.URLClassLoader#findClass(java.lang.String)
-	 */
-	protected Class findClass(final String name) throws ClassNotFoundException {
+	@Override
+	protected Class<?> findClass(final String name) throws ClassNotFoundException {
 		try {
-			Class clazz = (Class) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+			Class<?> clazz = (Class<?>) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+				@Override
 				public Object run() throws ClassNotFoundException {
 					String resourcePath = name.replace('.', '/') + DOT_CLASS;
 					CloseableJarFileLoader loader = null;
@@ -275,8 +280,8 @@ public class CloseableURLClassLoader extends URLClassLoader {
 					synchronized (loaders) {
 						if (closed)
 							return null;
-						for (Iterator iterator = loaders.iterator(); iterator.hasNext();) {
-							loader = (CloseableJarFileLoader) iterator.next();
+						for (Iterator<CloseableJarFileLoader> iterator = loaders.iterator(); iterator.hasNext();) {
+							loader = iterator.next();
 							resourceURL = loader.getURL(resourcePath);
 							if (resourceURL != null)
 								break;
@@ -301,7 +306,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	}
 
 	// package private to avoid synthetic access.
-	Class defineClass(String name, URL resourceURL, Manifest manifest) throws IOException {
+	Class<?> defineClass(String name, URL resourceURL, Manifest manifest) throws IOException {
 		JarURLConnection connection = (JarURLConnection) resourceURL.openConnection();
 		int lastDot = name.lastIndexOf('.');
 		if (lastDot != -1) {
@@ -326,7 +331,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 			if (isRegisteredAsParallel()) {
 				boolean initialLock = lockClassName(name);
 				try {
-					Class clazz = findLoadedClass(name);
+					Class<?> clazz = findLoadedClass(name);
 					if (clazz != null) {
 						return clazz;
 					}
@@ -375,17 +380,16 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see java.net.URLClassLoader#findResource(java.lang.String)
-	 */
+	@Override
 	public URL findResource(final String name) {
 		URL url = (URL) AccessController.doPrivileged(new PrivilegedAction() {
+			@Override
 			public Object run() {
 				synchronized (loaders) {
 					if (closed)
 						return null;
-					for (Iterator iterator = loaders.iterator(); iterator.hasNext();) {
-						CloseableJarFileLoader loader = (CloseableJarFileLoader) iterator.next();
+					for (Iterator<CloseableJarFileLoader> iterator = loaders.iterator(); iterator.hasNext();) {
+						CloseableJarFileLoader loader = iterator.next();
 						URL resourceURL = loader.getURL(name);
 						if (resourceURL != null)
 							return resourceURL;
@@ -399,18 +403,17 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		return super.findResource(name);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.net.URLClassLoader#findResources(java.lang.String)
-	 */
-	public Enumeration findResources(final String name) throws IOException {
-		final List resources = new ArrayList();
+	@Override
+	public Enumeration<URL> findResources(final String name) throws IOException {
+		final List<URL> resources = new ArrayList<>();
 		AccessController.doPrivileged(new PrivilegedAction() {
+			@Override
 			public Object run() {
 				synchronized (loaders) {
 					if (closed)
 						return null;
-					for (Iterator iterator = loaders.iterator(); iterator.hasNext();) {
-						CloseableJarFileLoader loader = (CloseableJarFileLoader) iterator.next();
+					for (Iterator<CloseableJarFileLoader> iterator = loaders.iterator(); iterator.hasNext();) {
+						CloseableJarFileLoader loader = iterator.next();
 						URL resourceURL = loader.getURL(name);
 						if (resourceURL != null)
 							resources.add(resourceURL);
@@ -419,7 +422,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 				return null;
 			}
 		}, context);
-		Enumeration e = super.findResources(name);
+		Enumeration<URL> e = super.findResources(name);
 		while (e.hasMoreElements())
 			resources.add(e.nextElement());
 
@@ -430,21 +433,20 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	 * The "close" method is called when the class loader is no longer needed and we should close any open resources.
 	 * In particular this method will close the jar files associated with this class loader.
 	 */
+	@Override
 	public void close() {
 		synchronized (loaders) {
 			if (closed)
 				return;
-			for (Iterator iterator = loaders.iterator(); iterator.hasNext();) {
-				CloseableJarFileLoader loader = (CloseableJarFileLoader) iterator.next();
+			for (Iterator<CloseableJarFileLoader> iterator = loaders.iterator(); iterator.hasNext();) {
+				CloseableJarFileLoader loader = iterator.next();
 				loader.close();
 			}
 			closed = true;
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see java.net.URLClassLoader#addURL(java.net.URL)
-	 */
+	@Override
 	protected void addURL(URL url) {
 		synchronized (loaders) {
 			if (isFileJarURL(url)) {
@@ -458,19 +460,17 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		super.addURL(url);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.net.URLClassLoader#getURLs()
-	 */
+	@Override
 	public URL[] getURLs() {
-		List result = new ArrayList();
+		List<URL> result = new ArrayList<>();
 		synchronized (loaders) {
 			result.addAll(loaderURLs);
 		}
 		result.addAll(Arrays.asList(super.getURLs()));
-		return (URL[]) result.toArray(new URL[result.size()]);
+		return result.toArray(new URL[result.size()]);
 	}
 
-	private final Map classNameLocks = new HashMap(5);
+	private final Map<String, Thread> classNameLocks = new HashMap<>(5);
 	private final Object pkgLock = new Object();
 
 	private boolean lockClassName(String classname) {

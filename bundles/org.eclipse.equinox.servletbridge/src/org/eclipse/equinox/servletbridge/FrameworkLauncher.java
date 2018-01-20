@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,23 +76,28 @@ public class FrameworkLauncher {
 		Permission allPermission = new AllPermission();
 
 		// A simple PermissionCollection that only has AllPermission
+		@Override
 		public void add(Permission permission) {
 			// do nothing
 		}
 
+		@Override
 		public boolean implies(Permission permission) {
 			return true;
 		}
 
-		public Enumeration elements() {
-			return new Enumeration() {
+		@Override
+		public Enumeration<Permission> elements() {
+			return new Enumeration<Permission>() {
 				int cur = 0;
 
+				@Override
 				public boolean hasMoreElements() {
 					return cur < 1;
 				}
 
-				public Object nextElement() {
+				@Override
+				public Permission nextElement() {
 					if (cur == 0) {
 						cur = 1;
 						return allPermission;
@@ -212,6 +217,7 @@ public class FrameworkLauncher {
 
 	private File findExtensionBundleFile(File plugins, final String extensionBundleBSN) {
 		FileFilter extensionBundleFilter = new FileFilter() {
+			@Override
 			public boolean accept(File candidate) {
 				return candidate.getName().startsWith(extensionBundleBSN + "_"); //$NON-NLS-1$
 			}
@@ -372,7 +378,7 @@ public class FrameworkLauncher {
 			return;
 		}
 
-		Map initialPropertyMap = buildInitialPropertyMap();
+		Map<String, String> initialPropertyMap = buildInitialPropertyMap();
 		String[] args = buildCommandLineArguments();
 
 		// Handle commandline -D properties
@@ -398,18 +404,20 @@ public class FrameworkLauncher {
 
 			URL[] frameworkURLs = findFrameworkURLs(initialPropertyMap);
 			frameworkClassLoader = new ChildFirstURLClassLoader(frameworkURLs, this.getClass().getClassLoader());
-			Class clazz = frameworkClassLoader.loadClass(STARTER);
+			Class<?> clazz = frameworkClassLoader.loadClass(STARTER);
 
-			Method setInitialProperties = clazz.getMethod("setInitialProperties", new Class[] {Map.class}); //$NON-NLS-1$
-			setInitialProperties.invoke(null, new Object[] {initialPropertyMap});
+			Method setInitialProperties = clazz.getMethod("setInitialProperties", Map.class); //$NON-NLS-1$
+			setInitialProperties.invoke(null, initialPropertyMap);
 
 			registerRestartHandler(clazz);
 
-			Method runMethod = clazz.getMethod("startup", new Class[] {String[].class, Runnable.class}); //$NON-NLS-1$
-			runMethod.invoke(null, new Object[] {args, null});
+			Method runMethod = clazz.getMethod("startup", String[].class, Runnable.class); //$NON-NLS-1$
+			runMethod.invoke(null, args, null);
 
 			frameworkContextClassLoader = Thread.currentThread().getContextClassLoader();
-		} catch (InvocationTargetException ite) {
+		} catch (
+
+		InvocationTargetException ite) {
 			Throwable t = ite.getTargetException();
 			if (t == null)
 				t = ite;
@@ -423,16 +431,16 @@ public class FrameworkLauncher {
 		}
 	}
 
-	private URL[] findFrameworkURLs(Map initialPropertyMap) {
-		List frameworkURLs = new ArrayList();
-		String installArea = (String) initialPropertyMap.get(OSGI_INSTALL_AREA);
+	private URL[] findFrameworkURLs(Map<String, String> initialPropertyMap) {
+		List<URL> frameworkURLs = new ArrayList<>();
+		String installArea = initialPropertyMap.get(OSGI_INSTALL_AREA);
 		if (installArea.startsWith(FILE_SCHEME)) {
 			installArea = installArea.substring(FILE_SCHEME.length());
 		}
 		File installBase = new File(installArea);
 
 		// OSGi framework
-		String osgiFramework = (String) initialPropertyMap.get(OSGI_FRAMEWORK);
+		String osgiFramework = initialPropertyMap.get(OSGI_FRAMEWORK);
 		File osgiFrameworkFile = null;
 		if (osgiFramework == null) {
 			// search for osgi.framework in osgi.install.area
@@ -461,9 +469,9 @@ public class FrameworkLauncher {
 		}
 
 		// OSGi framework extensions
-		String osgiFrameworkExtensions = (String) initialPropertyMap.get(OSGI_FRAMEWORK_EXTENSIONS);
+		String osgiFrameworkExtensions = initialPropertyMap.get(OSGI_FRAMEWORK_EXTENSIONS);
 		if (osgiFrameworkExtensions != null) {
-			StringTokenizer tokenizer = new StringTokenizer(osgiFrameworkExtensions, ",");
+			StringTokenizer tokenizer = new StringTokenizer(osgiFrameworkExtensions, ","); //$NON-NLS-1$
 			while (tokenizer.hasMoreTokens()) {
 				String extension = tokenizer.nextToken().trim();
 				if (extension.length() == 0)
@@ -475,7 +483,7 @@ public class FrameworkLauncher {
 				}
 			}
 		}
-		return (URL[]) frameworkURLs.toArray(new URL[frameworkURLs.size()]);
+		return frameworkURLs.toArray(new URL[frameworkURLs.size()]);
 	}
 
 	private URL findExtensionURL(String extension, File osgiFrameworkFile) {
@@ -502,15 +510,15 @@ public class FrameworkLauncher {
 		}
 	}
 
-	private void registerRestartHandler(Class starterClazz) throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException {
+	private void registerRestartHandler(Class<?> starterClazz) throws IllegalAccessException, InvocationTargetException {
 		Method registerFrameworkShutdownHandler = null;
 		try {
-			registerFrameworkShutdownHandler = starterClazz.getDeclaredMethod("internalAddFrameworkShutdownHandler", new Class[] {Runnable.class}); //$NON-NLS-1$
+			registerFrameworkShutdownHandler = starterClazz.getDeclaredMethod("internalAddFrameworkShutdownHandler", Runnable.class); //$NON-NLS-1$
 			if (!registerFrameworkShutdownHandler.isAccessible()) {
 				registerFrameworkShutdownHandler.setAccessible(true);
 			}
 			Runnable restartHandler = createRestartHandler(starterClazz);
-			registerFrameworkShutdownHandler.invoke(null, new Object[] {restartHandler});
+			registerFrameworkShutdownHandler.invoke(null, restartHandler);
 		} catch (NoSuchMethodException e) {
 			// Ok. However we will not support restart events. Log this as info
 			context.log(starterClazz.getName() + " does not support setting a shutdown handler. Restart handling is disabled."); //$NON-NLS-1$
@@ -519,15 +527,16 @@ public class FrameworkLauncher {
 
 	}
 
-	private Runnable createRestartHandler(Class starterClazz) throws ClassNotFoundException, NoSuchMethodException {
-		final Method getProperty = starterClazz.getDeclaredMethod("getProperty", new Class[] {String.class}); //$NON-NLS-1$
+	private Runnable createRestartHandler(Class<?> starterClazz) throws NoSuchMethodException {
+		final Method getProperty = starterClazz.getDeclaredMethod("getProperty", String.class); //$NON-NLS-1$
 		if (!getProperty.isAccessible()) {
 			getProperty.setAccessible(true);
 		}
 		Runnable restartHandler = new Runnable() {
+			@Override
 			public void run() {
 				try {
-					String forcedRestart = (String) getProperty.invoke(null, new Object[] {OSGI_FORCED_RESTART});
+					String forcedRestart = (String) getProperty.invoke(null, OSGI_FORCED_RESTART);
 					if (Boolean.valueOf(forcedRestart).booleanValue()) {
 						stop();
 						start();
@@ -550,8 +559,8 @@ public class FrameworkLauncher {
 	 * The value '@null' will set the map value to null.
 	 * @return a map containing the initial properties
 	 */
-	protected Map buildInitialPropertyMap() {
-		Map initialPropertyMap = new HashMap();
+	protected Map<String, String> buildInitialPropertyMap() {
+		Map<String, String> initialPropertyMap = new HashMap<>();
 		Properties launchProperties = loadProperties(resourceBase + LAUNCH_INI);
 		for (Iterator it = launchProperties.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
@@ -607,7 +616,7 @@ public class FrameworkLauncher {
 		return initialPropertyMap;
 	}
 
-	private void setInitialProperty(Map initialPropertyMap, String key, String value) {
+	private void setInitialProperty(Map<String, String> initialPropertyMap, String key, String value) {
 		if (key.endsWith("*")) { //$NON-NLS-1$
 			if (value.equals(NULL_IDENTIFIER)) {
 				clearPrefixedSystemProperties(key.substring(0, key.length() - 1), initialPropertyMap);
@@ -618,16 +627,16 @@ public class FrameworkLauncher {
 			initialPropertyMap.put(key, value);
 	}
 
-	private Properties loadConfigurationFile(Map initialPropertyMap) {
+	private Properties loadConfigurationFile(Map<String, String> initialPropertyMap) {
 		InputStream is = null;
 		try {
-			String installArea = (String) initialPropertyMap.get(OSGI_INSTALL_AREA);
+			String installArea = initialPropertyMap.get(OSGI_INSTALL_AREA);
 			if (installArea.startsWith(FILE_SCHEME)) {
 				installArea = installArea.substring(FILE_SCHEME.length());
 			}
 			File installBase = new File(installArea);
 
-			String configurationArea = (String) initialPropertyMap.get(OSGI_CONFIGURATION_AREA);
+			String configurationArea = initialPropertyMap.get(OSGI_CONFIGURATION_AREA);
 			if (configurationArea.startsWith(FILE_SCHEME)) {
 				configurationArea = configurationArea.substring(FILE_SCHEME.length());
 			}
@@ -660,7 +669,7 @@ public class FrameworkLauncher {
 	/**
 	 * clearPrefixedSystemProperties clears System Properties by writing null properties in the targetPropertyMap that match a prefix
 	 */
-	private static void clearPrefixedSystemProperties(String prefix, Map targetPropertyMap) {
+	private static void clearPrefixedSystemProperties(String prefix, Map<String, String> targetPropertyMap) {
 		for (Iterator it = System.getProperties().keySet().iterator(); it.hasNext();) {
 			String propertyName = (String) it.next();
 			if (propertyName.startsWith(prefix) && !targetPropertyMap.containsKey(propertyName)) {
@@ -674,7 +683,7 @@ public class FrameworkLauncher {
 	 * @return an array of String containing the commandline arguments
 	 */
 	protected String[] buildCommandLineArguments() {
-		List args = new ArrayList();
+		List<String> args = new ArrayList<>();
 
 		String commandLine = config.getInitParameter(CONFIG_COMMANDLINE);
 		if (commandLine != null) {
@@ -718,7 +727,7 @@ public class FrameworkLauncher {
 				args.add(arg);
 			}
 		}
-		return (String[]) args.toArray(new String[] {});
+		return args.toArray(new String[] {});
 	}
 
 	/**
@@ -739,17 +748,17 @@ public class FrameworkLauncher {
 
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
-			Class clazz = frameworkClassLoader.loadClass(STARTER);
-			Method method = clazz.getDeclaredMethod("shutdown", (Class[]) null); //$NON-NLS-1$
+			Class<?> clazz = frameworkClassLoader.loadClass(STARTER);
+			Method method = clazz.getDeclaredMethod("shutdown"); //$NON-NLS-1$
 			Thread.currentThread().setContextClassLoader(frameworkContextClassLoader);
-			method.invoke(clazz, (Object[]) null);
+			method.invoke(clazz);
 
 			// ACL keys its loggers off of the ContextClassLoader which prevents GC without calling release. 
 			// This section explicitly calls release if ACL is used.
 			try {
 				clazz = this.getClass().getClassLoader().loadClass("org.apache.commons.logging.LogFactory"); //$NON-NLS-1$
-				method = clazz.getDeclaredMethod("release", new Class[] {ClassLoader.class}); //$NON-NLS-1$
-				method.invoke(clazz, new Object[] {frameworkContextClassLoader});
+				method = clazz.getDeclaredMethod("release", ClassLoader.class); //$NON-NLS-1$
+				method.invoke(clazz, frameworkContextClassLoader);
 			} catch (ClassNotFoundException e) {
 				// ignore, ACL is not being used
 			}
@@ -775,11 +784,11 @@ public class FrameworkLauncher {
 	protected void copyResource(String resourcePath, File target) {
 		if (resourcePath.endsWith("/")) { //$NON-NLS-1$
 			target.mkdir();
-			Set paths = context.getResourcePaths(resourcePath);
+			Set<String> paths = context.getResourcePaths(resourcePath);
 			if (paths == null)
 				return;
-			for (Iterator it = paths.iterator(); it.hasNext();) {
-				String path = (String) it.next();
+			for (Iterator<String> it = paths.iterator(); it.hasNext();) {
+				String path = it.next();
 				File newFile = new File(target, path.substring(resourcePath.length()));
 				copyResource(path, newFile);
 			}
@@ -896,6 +905,7 @@ public class FrameworkLauncher {
 	 */
 	protected String searchFor(final String target, String start) {
 		FileFilter filter = new FileFilter() {
+			@Override
 			public boolean accept(File candidate) {
 				return candidate.getName().equals(target) || candidate.getName().startsWith(target + "_"); //$NON-NLS-1$
 			}
@@ -1021,6 +1031,7 @@ public class FrameworkLauncher {
 			super(urls, parent, false);
 		}
 
+		@Override
 		public URL getResource(String name) {
 			URL resource = findResource(name);
 			if (resource == null) {
@@ -1031,7 +1042,8 @@ public class FrameworkLauncher {
 			return resource;
 		}
 
-		protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
+		@Override
+		protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 			if (isRegisteredAsParallel()) {
 				return loadClass0(name, resolve);
 			}
@@ -1040,8 +1052,8 @@ public class FrameworkLauncher {
 			}
 		}
 
-		private Class loadClass0(String name, boolean resolve) throws ClassNotFoundException {
-			Class clazz = findLoadedClass(name);
+		private Class<?> loadClass0(String name, boolean resolve) throws ClassNotFoundException {
+			Class<?> clazz = findLoadedClass(name);
 			if (clazz == null) {
 				try {
 					clazz = findClass(name);
@@ -1061,10 +1073,12 @@ public class FrameworkLauncher {
 		}
 
 		// we want to ensure that the framework has AllPermissions
+		@Override
 		protected PermissionCollection getPermissions(CodeSource codesource) {
 			return allPermissions;
 		}
 
+		@Override
 		protected boolean isRegisteredAsParallel() {
 			return CHILDFIRST_REGISTERED_AS_PARALLEL;
 		}
