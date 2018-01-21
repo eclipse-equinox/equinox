@@ -271,9 +271,9 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	@Override
 	protected Class<?> findClass(final String name) throws ClassNotFoundException {
 		try {
-			Class<?> clazz = (Class<?>) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+			Class<?> clazz = AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>() {
 				@Override
-				public Object run() throws ClassNotFoundException {
+				public Class<?> run() throws ClassNotFoundException {
 					String resourcePath = name.replace('.', '/') + DOT_CLASS;
 					CloseableJarFileLoader loader = null;
 					URL resourceURL = null;
@@ -382,9 +382,9 @@ public class CloseableURLClassLoader extends URLClassLoader {
 
 	@Override
 	public URL findResource(final String name) {
-		URL url = (URL) AccessController.doPrivileged(new PrivilegedAction() {
+		URL url = AccessController.doPrivileged(new PrivilegedAction<URL>() {
 			@Override
-			public Object run() {
+			public URL run() {
 				synchronized (loaders) {
 					if (closed)
 						return null;
@@ -406,7 +406,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	@Override
 	public Enumeration<URL> findResources(final String name) throws IOException {
 		final List<URL> resources = new ArrayList<>();
-		AccessController.doPrivileged(new PrivilegedAction() {
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
 			@Override
 			public Object run() {
 				synchronized (loaders) {

@@ -559,6 +559,7 @@ public class FrameworkLauncher {
 	 * The value '@null' will set the map value to null.
 	 * @return a map containing the initial properties
 	 */
+	@SuppressWarnings("rawtypes")
 	protected Map<String, String> buildInitialPropertyMap() {
 		Map<String, String> initialPropertyMap = new HashMap<>();
 		Properties launchProperties = loadProperties(resourceBase + LAUNCH_INI);
@@ -670,7 +671,8 @@ public class FrameworkLauncher {
 	 * clearPrefixedSystemProperties clears System Properties by writing null properties in the targetPropertyMap that match a prefix
 	 */
 	private static void clearPrefixedSystemProperties(String prefix, Map<String, String> targetPropertyMap) {
-		for (Iterator it = System.getProperties().keySet().iterator(); it.hasNext();) {
+		for (@SuppressWarnings("rawtypes")
+		Iterator it = System.getProperties().keySet().iterator(); it.hasNext();) {
 			String propertyName = (String) it.next();
 			if (propertyName.startsWith(prefix) && !targetPropertyMap.containsKey(propertyName)) {
 				targetPropertyMap.put(propertyName, null);
