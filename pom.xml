@@ -77,6 +77,7 @@
 -->
 
     <module>bundles/org.eclipse.equinox.ds.tests</module>
+    <module>bundles/org.eclipse.equinox.preferences.tests</module>
 <!-- removed until the dependency on aspectj is removed. see bug 470000
     <module>bundles/org.eclipse.equinox.region.tests</module>
 -->

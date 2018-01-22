@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Julian Chen - fix for bug #92572, jclRM
  *     Jan-Ove Weichel (janove.weichel@vogella.com) - bug 474359
+ *     InterSystems Corporation - bug 444188
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
@@ -61,8 +62,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	// the parent of an EclipsePreference node is always an EclipsePreference node. (or null)
 	protected final EclipsePreferences parent;
 	protected boolean removed = false;
-	private ListenerList<INodeChangeListener> nodeChangeListeners;
-	private ListenerList<IPreferenceChangeListener> preferenceChangeListeners;
+	private final ListenerList<INodeChangeListener> nodeChangeListeners = new ListenerList<>();
+	private final ListenerList<IPreferenceChangeListener> preferenceChangeListeners = new ListenerList<>();
 	private ScopeDescriptor descriptor;
 
 	public static boolean DEBUG_PREFERENCE_GENERAL = false;
@@ -130,8 +131,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	@Override
 	public void addNodeChangeListener(INodeChangeListener listener) {
 		checkRemoved();
-		if (nodeChangeListeners == null)
-			nodeChangeListeners = new ListenerList<>();
 		nodeChangeListeners.add(listener);
 		if (DEBUG_PREFERENCE_GENERAL)
 			PrefsMessages.message("Added preference node change listener: " + listener + " to: " + absolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -141,8 +140,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	@Override
 	public void addPreferenceChangeListener(IPreferenceChangeListener listener) {
 		checkRemoved();
-		if (preferenceChangeListeners == null)
-			preferenceChangeListeners = new ListenerList<>();
 		preferenceChangeListeners.add(listener);
 		if (DEBUG_PREFERENCE_GENERAL)
 			PrefsMessages.message("Added preference property change listener: " + listener + " to: " + absolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1021,8 +1018,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		if (nodeChangeListeners == null)
 			return;
 		nodeChangeListeners.remove(listener);
-		if (nodeChangeListeners.size() == 0)
-			nodeChangeListeners = null;
 		if (DEBUG_PREFERENCE_GENERAL)
 			PrefsMessages.message("Removed preference node change listener: " + listener + " from: " + absolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
@@ -1034,8 +1029,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		if (preferenceChangeListeners == null)
 			return;
 		preferenceChangeListeners.remove(listener);
-		if (preferenceChangeListeners.size() == 0)
-			preferenceChangeListeners = null;
 		if (DEBUG_PREFERENCE_GENERAL)
 			PrefsMessages.message("Removed preference property change listener: " + listener + " from: " + absolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
