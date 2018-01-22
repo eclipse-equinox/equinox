@@ -23,7 +23,7 @@ package org.eclipse.equinox.http.servlet.session;
  * adopters on the understanding that any code that uses this SPI will almost certainly
  * be broken (repeatedly) as the SPI evolves.
  * </p>
- * @since 1.4
+ * @since 1.5
  */
 public interface HttpSessionInvalidator {
 

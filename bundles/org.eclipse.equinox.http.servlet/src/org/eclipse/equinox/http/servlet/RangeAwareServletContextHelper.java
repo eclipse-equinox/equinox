@@ -19,7 +19,7 @@ import org.osgi.service.http.context.ServletContextHelper;
  * A custom servlet context helper type providing support for predicting the need
  * for ranged content responses based on the content type and the user agent.
  *
- * @since 1.4
+ * @since 1.5
  */
 public abstract class RangeAwareServletContextHelper extends ServletContextHelper {
 

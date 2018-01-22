@@ -22,7 +22,7 @@ import org.eclipse.equinox.http.servlet.internal.util.EventListeners;
 import org.eclipse.equinox.http.servlet.session.HttpSessionInvalidator;
 
 /**
- * @since 1.4
+ * @since 1.5
  */
 public class HttpSessionTracker implements HttpSessionInvalidator {
 
