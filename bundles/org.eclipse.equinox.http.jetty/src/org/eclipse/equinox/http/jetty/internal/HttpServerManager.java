@@ -122,18 +122,25 @@ public class HttpServerManager implements ManagedServiceFactory {
 			if (port == -1)
 				port = httpConnector.getPort();
 			holder.setInitParameter(JettyConstants.HTTP_PORT, Integer.toString(port));
+			String host = httpConnector.getHost();
+			if (host != null)
+				holder.setInitParameter(JettyConstants.HTTP_HOST, host);
 		}
 		if (httpsConnector != null) {
 			int port = httpsConnector.getLocalPort();
 			if (port == -1)
 				port = httpsConnector.getPort();
 			holder.setInitParameter(JettyConstants.HTTPS_PORT, Integer.toString(port));
+			String host = httpConnector.getHost();
+			if (host != null)
+				holder.setInitParameter(JettyConstants.HTTPS_HOST, host);
 		}
 		String otherInfo = Details.getString(dictionary, JettyConstants.OTHER_INFO, null);
 		if (otherInfo != null)
 			holder.setInitParameter(JettyConstants.OTHER_INFO, otherInfo);
 
 		ServletContextHandler httpContext = createHttpContext(dictionary);
+		holder.setInitParameter(JettyConstants.CONTEXT_PATH, httpContext.getContextPath());
 		httpContext.addServlet(holder, "/*"); //$NON-NLS-1$
 		server.setHandler(httpContext);
 

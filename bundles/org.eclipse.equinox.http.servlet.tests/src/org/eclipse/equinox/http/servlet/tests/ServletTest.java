@@ -3214,7 +3214,7 @@ public class ServletTest extends BaseTest {
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/SB");
 			registrations.add(getBundleContext().registerService(Servlet.class, servletB, props));
 
-			requestAdvisor.request("foo/a/SA");
+			requestAdvisor.request("a/SA");
 
 			Assert.assertEquals("/foo/a", path.get());
 		}
@@ -3284,7 +3284,7 @@ public class ServletTest extends BaseTest {
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/SB");
 			registrations.add(getBundleContext().registerService(Servlet.class, servletB, props));
 
-			requestAdvisor.request("foo/a/SA");
+			requestAdvisor.request("a/SA");
 
 			Assert.assertEquals("/foo/a", path.get());
 		}

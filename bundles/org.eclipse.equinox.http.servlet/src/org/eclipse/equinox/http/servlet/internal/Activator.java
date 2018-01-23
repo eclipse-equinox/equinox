@@ -132,7 +132,7 @@ public class Activator
 
 		if (httpServiceEndpointObj == null) {
 			String[] httpServiceEndpoints = getHttpServiceEndpoints(
-				servletContext, servletConfig.getServletName());
+				serviceProperties, servletContext, servletConfig.getServletName());
 
 			serviceProperties.put(
 				HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT,
@@ -200,7 +200,45 @@ public class Activator
 	}
 
 	private String[] getHttpServiceEndpoints(
-		ServletContext servletContext, String servletName) {
+		Dictionary<String, Object> serviceProperties, ServletContext servletContext, String servletName) {
+
+		List<String> httpServiceEndpoints = new ArrayList<String>();
+
+		String contextPath = (String)serviceProperties.get(Const.CONTEXT_PATH);
+
+		if ((contextPath != null)) {
+			String httpHost = (String)serviceProperties.get(Const.HTTP_HOST);
+			String httpPort = (String)serviceProperties.get(Const.HTTP_PORT);
+
+			if (httpPort != null) {
+				if (httpHost == null) {
+					String endpoint = assembleEndpoint(Const.HTTP, Const.LOCALHOST, httpPort, contextPath);
+					httpServiceEndpoints.add(endpoint);
+				}
+				else {
+					String endpoint = assembleEndpoint(Const.HTTP, httpHost, httpPort, contextPath);
+					httpServiceEndpoints.add(endpoint);
+				}
+			}
+
+			String httpsHost = (String)serviceProperties.get(Const.HTTPS_HOST);
+			String httpsPort = (String)serviceProperties.get(Const.HTTPS_PORT);
+
+			if (httpsPort != null) {
+				if (httpsHost == null) {
+					String endpoint = assembleEndpoint(Const.HTTPS, Const.LOCALHOST, httpsPort, contextPath);
+					httpServiceEndpoints.add(endpoint);
+				}
+				else {
+					String endpoint = assembleEndpoint(Const.HTTPS, httpHost, httpsPort, contextPath);
+					httpServiceEndpoints.add(endpoint);
+				}
+			}
+
+			if (!httpServiceEndpoints.isEmpty()) {
+				return httpServiceEndpoints.toArray(new String[0]);
+			}
+		}
 
 		int majorVersion = servletContext.getMajorVersion();
 
@@ -214,7 +252,7 @@ public class Activator
 			return new String[0];
 		}
 
-		String contextPath = servletContext.getContextPath();
+		contextPath = servletContext.getContextPath();
 
 		ServletRegistration servletRegistration = null;
 		try {
@@ -235,8 +273,6 @@ public class Activator
 
 		Collection<String> mappings = servletRegistration.getMappings();
 
-		List<String> httpServiceEndpoints = new ArrayList<String>();
-
 		for (String mapping : mappings) {
 			if (mapping.indexOf('/') == 0) {
 				if (mapping.charAt(mapping.length() - 1) == '*') {
@@ -253,8 +289,21 @@ public class Activator
 			}
 		}
 
-		return httpServiceEndpoints.toArray(
-			new String[httpServiceEndpoints.size()]);
+		return httpServiceEndpoints.toArray(new String[0]);
+	}
+
+	private String assembleEndpoint(String protocol, String host, String port, String contextPath) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(protocol);
+		sb.append(Const.PROTOCOL);
+		sb.append(host);
+		sb.append(':');
+		sb.append(port);
+		sb.append(contextPath);
+		if (sb.charAt(sb.length() - 1) != '/') {
+			sb.append('/');
+		}
+		return sb.toString();
 	}
 
 	private void processRegistrations() {

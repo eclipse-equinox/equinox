@@ -46,7 +46,7 @@
                 <requirement>
                    <type>eclipse-plugin</type>
                    <id>org.eclipse.equinox.http.jetty</id>
-                   <versionRange>3.4.0</versionRange>
+                   <versionRange>3.6.0</versionRange>
                 </requirement>
              </extraRequirements>
           </dependency-resolution>

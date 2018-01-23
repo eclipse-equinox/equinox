@@ -826,9 +826,15 @@ public class ContextController {
 
 		String defaultEndpoint = endpoints.get(0);
 
-		if ((defaultEndpoint.length() > 0) && defaultEndpoint.endsWith(Const.SLASH)) {
-			defaultEndpoint = defaultEndpoint.substring(
-				0, defaultEndpoint.length() - 1);
+		if (defaultEndpoint.length() > 0) {
+			int protocol = defaultEndpoint.indexOf(Const.PROTOCOL);
+			if (protocol > -1) {
+				defaultEndpoint = defaultEndpoint.substring(protocol + 3);
+			}
+			int slash = defaultEndpoint.indexOf(Const.SLASH);
+			if (defaultEndpoint.endsWith(Const.SLASH)) {
+				defaultEndpoint = defaultEndpoint.substring(slash, defaultEndpoint.length() - 1);
+			}
 		}
 
 		return defaultEndpoint + contextPath;

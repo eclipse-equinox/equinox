@@ -19,14 +19,21 @@ public class Const {
 	public static final String AMP = "&"; //$NON-NLS-1$
 	public static final String BLANK = ""; //$NON-NLS-1$
 	public static final String CLOSE_PAREN = ")"; //$NON-NLS-1$
+	public static final String CONTEXT_PATH = "context.path"; //$NON-NLS-1$
 	public static final String DOT = "."; //$NON-NLS-1$
 	public static final String[] EMPTY_ARRAY = new String[0];
 	public static final String EQUAL = "="; //$NON-NLS-1$
 	public static final String FILTER_NAME = "filter-name"; //$NON-NLS-1$
 	public static final String FILTER_PRIORITY = "filter-priority"; //$NON-NLS-1$
 	public static final String HTTP = "http"; //$NON-NLS-1$
+	public static final String HTTP_HOST = "http.host"; //$NON-NLS-1$
+	public static final String HTTP_PORT = "http.port"; //$NON-NLS-1$
+	public static final String HTTPS = "https"; //$NON-NLS-1$
+	public static final String HTTPS_HOST = "https.host"; //$NON-NLS-1$
+	public static final String HTTPS_PORT = "https.port"; //$NON-NLS-1$
 	public static final String LOCALHOST = "localhost"; //$NON-NLS-1$
 	public static final String OPEN_PAREN = "("; //$NON-NLS-1$
+	public static final String PROTOCOL = "://"; //$NON-NLS-1$
 	public static final String SERVLET_NAME = "servlet-name"; //$NON-NLS-1$
 	public static final String SLASH = "/"; //$NON-NLS-1$
 	public static final String SLASH_STAR = "/*"; //$NON-NLS-1$

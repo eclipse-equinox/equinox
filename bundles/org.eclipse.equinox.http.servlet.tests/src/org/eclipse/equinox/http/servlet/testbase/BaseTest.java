@@ -14,9 +14,15 @@ package org.eclipse.equinox.http.servlet.testbase;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
+import java.lang.reflect.ParameterizedType;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,6 +53,10 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.context.ServletContextHelper;
+import org.osgi.service.http.runtime.HttpServiceRuntime;
+import org.osgi.service.http.runtime.HttpServiceRuntimeConstants;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.util.tracker.ServiceTracker;
 
 public class BaseTest {
 
@@ -57,15 +67,15 @@ public class BaseTest {
 		System.setProperty("org.eclipse.jetty.server.LEVEL", "OFF");
 		System.setProperty("org.eclipse.jetty.servlet.LEVEL", "OFF");
 
-		System.setProperty("org.osgi.service.http.port", "8090");
+		System.setProperty("org.osgi.service.http.port", "0");
 		BundleContext bundleContext = getBundleContext();
 		installer = new BundleInstaller(TEST_BUNDLES_BINARY_DIRECTORY, bundleContext);
 		advisor = new BundleAdvisor(bundleContext);
-		String port = getPort();
-		String contextPath = getContextPath();
-		requestAdvisor = new ServletRequestAdvisor(port, contextPath);
 		startBundles();
 		stopJetty();
+		runtimeTracker = new ServiceTracker<>(bundleContext, HttpServiceRuntime.class, null);
+		runtimeTracker.open();
+		runtimeTracker.waitForService(100);
 		startJetty();
 	}
 
@@ -74,6 +84,7 @@ public class BaseTest {
 		for (ServiceRegistration<? extends Object> serviceRegistration : registrations) {
 			serviceRegistration.unregister();
 		}
+		runtimeTracker.close();
 		stopJetty();
 		stopBundles();
 		requestAdvisor = null;
@@ -146,6 +157,29 @@ public class BaseTest {
 		return value;
 	}
 
+	protected List<String> getStringPlus(String key, ServiceReference<?> ref) {
+		Object property = ref.getProperty(key);
+		if (String.class.isInstance(property)) {
+			return Collections.singletonList((String)property);
+		}
+		else if (String[].class.isInstance(property)) {
+			return Arrays.asList((String[])property);
+		}
+		else if (Collection.class.isInstance(property)) {
+			List<String> list = new ArrayList<String>();
+			for (@SuppressWarnings("rawtypes")
+				 Iterator i = ((Collection)property).iterator(); i.hasNext();) {
+
+				Object o = i.next();
+				if (String.class.isInstance(o)) {
+					list.add((String)o);
+				}
+			}
+			return list;
+		}
+		return Collections.emptyList();
+	}
+
 	protected Bundle installBundle(String bundle) throws BundleException {
 		return installer.installBundle(bundle);
 	}
@@ -156,8 +190,24 @@ public class BaseTest {
 		}
 	}
 
-	protected void startJetty() throws BundleException {
+	protected void startJetty() throws Exception {
 		advisor.startBundle(EQUINOX_JETTY_BUNDLE);
+		ServiceReference<HttpServiceRuntime> runtimeReference = runtimeTracker.getServiceReference();
+		List<String> endpoints = getStringPlus(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT, runtimeReference);
+		String port = getPort();
+		if (port.equals("0") && !endpoints.isEmpty()) {
+			for (String endpoint : endpoints) {
+				if (endpoint.startsWith("http://")) {
+					port = String.valueOf(new URL(endpoint).getPort());
+					break;
+				}
+			}
+			if (port.equals("-1")) {
+				port = "80";
+			}
+		}
+		String contextPath = getContextPath();
+		requestAdvisor = new ServletRequestAdvisor(port, contextPath);
 	}
 
 	protected void stopBundles() throws BundleException {
@@ -205,6 +255,7 @@ public class BaseTest {
 	protected BundleAdvisor advisor;
 	protected ServletRequestAdvisor requestAdvisor;
 	protected final Collection<ServiceRegistration<? extends Object>> registrations = new ArrayList<ServiceRegistration<? extends Object>>();
+	protected ServiceTracker<HttpServiceRuntime, HttpServiceRuntime> runtimeTracker;
 
 	protected static class TestFilter implements Filter {
 		AtomicInteger called = new AtomicInteger(0);
