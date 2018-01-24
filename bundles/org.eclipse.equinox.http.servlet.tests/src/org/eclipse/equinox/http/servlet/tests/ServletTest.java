@@ -3783,7 +3783,8 @@ public class ServletTest extends BaseTest {
 		}
 	}
 
-	@Test
+	//Disable @Test
+	// TODO this test takes large amounts of memory and can fail with OOM on build machines see bug 530247
 	public void test_AsyncOutput1() throws Exception {
 		Servlet s1 = new AsyncOutputServlet();
 		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
