@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2016 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2004, 2018 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -8,21 +8,53 @@
  *     IBM Corporation - initial API and implementation
  *     Danail Nachev -  ProSyst - bug 218625
  *     Rob Harrop - SpringSource Inc. (bug 247522)
+ *     Karsten Thoms (itemis) - Expose developmentMode
  ******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
 import java.security.AccessController;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.eclipse.osgi.framework.util.ArrayMap;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.internal.module.GroupingChecker.PackageRoots;
-import org.eclipse.osgi.internal.resolver.*;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.internal.resolver.BaseDescriptionImpl;
+import org.eclipse.osgi.internal.resolver.BundleDescriptionImpl;
+import org.eclipse.osgi.internal.resolver.ExportPackageDescriptionImpl;
+import org.eclipse.osgi.internal.resolver.StateImpl;
+import org.eclipse.osgi.service.resolver.BaseDescription;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.BundleSpecification;
+import org.eclipse.osgi.service.resolver.DisabledInfo;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.GenericDescription;
+import org.eclipse.osgi.service.resolver.GenericSpecification;
+import org.eclipse.osgi.service.resolver.HostSpecification;
+import org.eclipse.osgi.service.resolver.ImportPackageSpecification;
+import org.eclipse.osgi.service.resolver.NativeCodeDescription;
+import org.eclipse.osgi.service.resolver.NativeCodeSpecification;
+import org.eclipse.osgi.service.resolver.Resolver;
+import org.eclipse.osgi.service.resolver.ResolverError;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.service.resolver.StateWire;
+import org.eclipse.osgi.service.resolver.VersionConstraint;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.*;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.wiring.BundleCapability;
@@ -408,16 +440,18 @@ public class ResolverImpl implements Resolver {
 		if (state == null)
 			throw new IllegalStateException("RESOLVER_NO_STATE"); //$NON-NLS-1$
 
-		if (!initialized)
-			initialize();
+		// set developmentMode each resolution
+		developmentMode = platformProperties.length == 0 ? false : StateImpl.DEVELOPMENT_MODE.equals(platformProperties[0].get(StateImpl.OSGI_RESOLVER_MODE));
+		// set uses timeout each resolution
+		usesTimeout = getUsesTimeout(platformProperties);
+		// set limit for constraints with multiple suppliers each resolution
+		usesMultipleSuppliersLimit = getMultipleSuppliersLimit(platformProperties);
 		hook = (state instanceof StateImpl) ? ((StateImpl) state).getResolverHook() : null;
+
+		if (!initialized) {
+			initialize();
+		}
 		try {
-			// set developmentMode each resolution
-			developmentMode = platformProperties.length == 0 ? false : StateImpl.DEVELOPMENT_MODE.equals(platformProperties[0].get(StateImpl.OSGI_RESOLVER_MODE));
-			// set uses timeout each resolution
-			usesTimeout = getUsesTimeout(platformProperties);
-			// set limit for constraints with multiple suppliers each resolution
-			usesMultipleSuppliersLimit = getMultipleSuppliersLimit(platformProperties);
 			reRefresh = addDevConstraints(reRefresh);
 			// Unresolve all the supplied bundles and their dependents
 			if (reRefresh != null)
@@ -2305,5 +2339,9 @@ public class ResolverImpl implements Resolver {
 			}
 			namespace.put(capability.getName(), capability);
 		}
+	}
+
+	boolean isDevelopmentMode() {
+		return developmentMode;
 	}
 }

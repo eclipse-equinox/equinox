@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 IBM Corporation and others.
+ * Copyright (c) 2006, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Karsten Thoms (itemis) - Consider devmode for effective status computation
  *******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
@@ -19,10 +20,10 @@ public class GenericConstraint extends ResolverConstraint {
 	private final boolean effective;
 	private final boolean multiple;
 
-	GenericConstraint(ResolverBundle bundle, GenericSpecification constraint) {
+	GenericConstraint(ResolverBundle bundle, GenericSpecification constraint, boolean developmentMode) {
 		super(bundle, constraint);
 		String effectiveDirective = constraint.getRequirement().getDirectives().get(Constants.EFFECTIVE_DIRECTIVE);
-		effective = effectiveDirective == null || Constants.EFFECTIVE_RESOLVE.equals(effectiveDirective);
+		effective = effectiveDirective == null || Constants.EFFECTIVE_RESOLVE.equals(effectiveDirective) || (Constants.EFFECTIVE_ACTIVE.equals(effectiveDirective) && developmentMode);
 		multiple = (constraint.getResolution() & GenericSpecification.RESOLUTION_MULTIPLE) != 0;
 	}
 

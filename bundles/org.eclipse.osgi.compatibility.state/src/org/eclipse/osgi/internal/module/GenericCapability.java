@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Karsten Thoms (itemis) - Consider devmode for effective status computation
  *******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
@@ -20,13 +21,13 @@ public class GenericCapability extends VersionSupplier {
 	final String[] uses;
 	final boolean effective;
 
-	GenericCapability(ResolverBundle resolverBundle, GenericDescription base) {
+	GenericCapability(ResolverBundle resolverBundle, GenericDescription base, boolean developmentMode) {
 		super(base);
 		this.resolverBundle = resolverBundle;
 		String usesDirective = base.getDeclaredDirectives().get(Constants.USES_DIRECTIVE);
 		uses = ManifestElement.getArrayFromList(usesDirective);
 		String effectiveDirective = base.getDeclaredDirectives().get(Constants.EFFECTIVE_DIRECTIVE);
-		effective = effectiveDirective == null || Constants.EFFECTIVE_RESOLVE.equals(effectiveDirective);
+		effective = effectiveDirective == null || Constants.EFFECTIVE_RESOLVE.equals(effectiveDirective) || (Constants.EFFECTIVE_ACTIVE.equals(effectiveDirective) && developmentMode);
 	}
 
 	public BundleDescription getBundleDescription() {

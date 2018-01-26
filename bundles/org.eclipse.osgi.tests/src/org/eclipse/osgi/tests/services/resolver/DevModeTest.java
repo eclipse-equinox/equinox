@@ -14,7 +14,9 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.State;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
@@ -334,4 +336,37 @@ public class DevModeTest extends AbstractStateTest {
 		assertTrue("2.1", cRequired.length == 1);
 		assertTrue("2.2", cRequired[0] == a1);
 	}
+
+	public void testDevModeGenericCapability() throws BundleException {
+		State state = buildDevModeState();
+
+		int bundleID = 0;
+		Hashtable manifest = new Hashtable();
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A; singleton:=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_CAPABILITY, "osgi.service; filter:=\"(objectClass=foo.Bar)\";\n" + "  effective:=\"active\"");
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		state.addBundle(a);
+		state.resolve();
+		// a can't be resolved since its required capability is not provided
+
+		assertFalse("0.1", a.isResolved());
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B; singleton:=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.PROVIDE_CAPABILITY, "osgi.service; objectClass:List<String>=\"foo.Bar\"");
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		state.addBundle(b);
+		state.resolve();
+		// with bundle B, A is resolvable now
+		assertTrue("0.2", a.isResolved());
+	}
+
 }
