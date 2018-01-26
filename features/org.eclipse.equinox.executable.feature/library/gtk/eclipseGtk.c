@@ -40,16 +40,6 @@ char*  shippedVMDir  = "jre/bin/";
 /* Define the special arguments for the various Java VMs. */
 static char*  argVM_JAVA[]        = { NULL };
 
-/*
- * Define arguments that are required/used by platform (e.g SWT) to function properly on gtk. (via Java's System.getProperty(..)).
- * These should not affect JVM itself (e.g flags shouldn't set things like memory usage of the JVM).
- *
- * Note, these may re-occur in *.product (i.e eclipse.ini) such that "java -jar launcher" would work (e.g a child eclipse).
- * See bug 528414.
- *
- * For swt.dbus.init, see bottom of method (SWT/Gtk) Display.java:createDisplay().
- */
-char* gtkPlatformJavaSystemProperties [] = { "-Dswt.dbus.init", NULL};
 
 /* Define local variables . */
 static GtkWidget*	splashHandle = 0;
