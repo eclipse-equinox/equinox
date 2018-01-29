@@ -1,0 +1,1 @@
+Bug 521182 - [compiler] method reference on null object should throw NPE at runtime (JLS compliance)
