@@ -170,7 +170,7 @@ public class StorageUtil {
 		try {
 			// we use the .dll suffix to properly test on Vista virtual directories
 			// on Vista you are not allowed to write executable files on virtual directories like "Program Files"
-			fileTest = File.createTempFile("writtableArea", ".dll", installDir); //$NON-NLS-1$ //$NON-NLS-2$
+			fileTest = File.createTempFile("writableArea", ".dll", installDir); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (IOException e) {
 			//If an exception occured while trying to create the file, it means that it is not writtable
 			return false;
