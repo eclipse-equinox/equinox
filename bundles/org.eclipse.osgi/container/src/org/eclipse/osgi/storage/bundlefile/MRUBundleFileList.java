@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2017 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.eclipse.osgi.framework.eventmgr.*;
+import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
+import org.eclipse.osgi.framework.eventmgr.EventManager;
+import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 
 /**
  * A simple/quick/small implementation of an MRU (Most Recently Used) list to keep
@@ -33,6 +35,7 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	final private long[] useStampList;
 	// the limit of open files to allow before least used bundle file is closed
 	final private int fileLimit; // value < MIN will disable MRU
+	final private int delayLimit;
 	private EventManager bundleFileCloserManager = null;
 	final private Map<Object, Object> bundleFileCloser;
 	// the current number of open bundle files
@@ -47,6 +50,9 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	public MRUBundleFileList(int fileLimit) {
 		// only enable the MRU if the initFileLimit is > MIN
 		this.fileLimit = fileLimit;
+		// If the filelimit is > 5000 then use it as the delayLimit also;
+		// Otherwise use the max between fileLimit * 2 and 500
+		this.delayLimit = Math.max(fileLimit > 5000 ? fileLimit : fileLimit * 2, 500);
 		if (fileLimit >= MIN) {
 			this.bundleFileList = new BundleFile[fileLimit];
 			this.useStampList = new long[fileLimit];
@@ -184,7 +190,7 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 		if (toRemove == null)
 			return;
 		int pendingNum = pending.incrementAndGet();
-		if (pendingNum > fileLimit) {
+		if (pendingNum > delayLimit) {
 			// delay to allow the closer to catchup
 			try {
 				Thread.sleep(Math.min(500, pendingNum));
