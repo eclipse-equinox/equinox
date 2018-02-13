@@ -14,7 +14,10 @@ package org.eclipse.osgi.storage.bundlefile;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
 import org.eclipse.osgi.framework.eventmgr.EventManager;
 import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
@@ -35,7 +38,6 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	final private long[] useStampList;
 	// the limit of open files to allow before least used bundle file is closed
 	final private int fileLimit; // value < MIN will disable MRU
-	final private int delayLimit;
 	private EventManager bundleFileCloserManager = null;
 	final private Map<Object, Object> bundleFileCloser;
 	// the current number of open bundle files
@@ -45,14 +47,13 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	// used to work around bug 275166
 	private boolean firstDispatch = true;
 
-	private AtomicInteger pending = new AtomicInteger();
+	private final ReentrantLock pendingLock = new ReentrantLock();
+	private final Condition pendingCond = pendingLock.newCondition();
+	private final AtomicInteger pending = new AtomicInteger();
 
 	public MRUBundleFileList(int fileLimit) {
 		// only enable the MRU if the initFileLimit is > MIN
 		this.fileLimit = fileLimit;
-		// If the filelimit is > 5000 then use it as the delayLimit also;
-		// Otherwise use the max between fileLimit * 2 and 500
-		this.delayLimit = Math.max(fileLimit > 5000 ? fileLimit : fileLimit * 2, 500);
 		if (fileLimit >= MIN) {
 			this.bundleFileList = new BundleFile[fileLimit];
 			this.useStampList = new long[fileLimit];
@@ -182,21 +183,38 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 			// TODO should log ??
 		} finally {
 			closingBundleFile.set(null);
-			pending.decrementAndGet();
+			pendingLock.lock();
+			try {
+				if (pending.decrementAndGet() < fileLimit) {
+					pendingCond.signalAll();
+				}
+			} finally {
+				pendingLock.unlock();
+			}
 		}
 	}
 
 	private void closeBundleFile(BundleFile toRemove, EventManager manager) {
 		if (toRemove == null)
 			return;
-		int pendingNum = pending.incrementAndGet();
-		if (pendingNum > delayLimit) {
-			// delay to allow the closer to catchup
-			try {
-				Thread.sleep(Math.min(500, pendingNum));
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
+		pendingLock.lock();
+		try {
+			int pendingNum = pending.incrementAndGet();
+			if (pendingNum > fileLimit) {
+				// decrement before waiting since we will not pend until the queue
+				// reduces a bit
+				pending.decrementAndGet();
+				// delay to allow the closer to catchup
+				try {
+					pendingCond.await(Math.min(500, pendingNum), TimeUnit.MILLISECONDS);
+					// add to the pending count again
+					pending.incrementAndGet();
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
 			}
+		} finally {
+			pendingLock.unlock();
 		}
 		try {
 			/* queue to hold set of listeners */

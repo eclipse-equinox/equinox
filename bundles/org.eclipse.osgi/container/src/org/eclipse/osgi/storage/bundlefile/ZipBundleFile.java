@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,8 +12,15 @@
 
 package org.eclipse.osgi.storage.bundlefile;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.LinkedHashSet;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
@@ -30,6 +37,12 @@ import org.eclipse.osgi.util.NLS;
  */
 public class ZipBundleFile extends BundleFile {
 
+	// A reentrant lock is used here (instead of intrinsic synchronization)
+	// to allow the lock conditional held
+	// see lockOpen() and getZipFile()
+	private final ReentrantLock openLock = new ReentrantLock();
+	private final Condition refCondition = openLock.newCondition();
+
 	private final MRUBundleFileList mruList;
 
 	private final BundleInfo.Generation generation;
@@ -38,11 +51,11 @@ public class ZipBundleFile extends BundleFile {
 	/**
 	 * The zip file
 	 */
-	protected volatile ZipFile zipFile;
+	private volatile ZipFile zipFile;
 	/**
 	 * The closed flag
 	 */
-	protected volatile boolean closed = true;
+	private volatile boolean closed = true;
 
 	private int referenceCount = 0;
 
@@ -60,9 +73,9 @@ public class ZipBundleFile extends BundleFile {
 	 * Checks if the zip file is open
 	 * @return true if the zip file is open
 	 */
-	protected boolean checkedOpen() {
+	private boolean lockOpen() {
 		try {
-			return getZipFile() != null;
+			return getZipFile(true) != null;
 		} catch (IOException e) {
 			if (generation != null) {
 				ModuleRevision r = generation.getRevision();
@@ -89,7 +102,7 @@ public class ZipBundleFile extends BundleFile {
 	 * @return an open ZipFile for this bundle file
 	 * @throws IOException
 	 */
-	protected ZipFile basicOpen() throws IOException {
+	private ZipFile basicOpen() throws IOException {
 		return BundleFile.secureAction.getZipFile(this.basefile);
 	}
 
@@ -97,27 +110,47 @@ public class ZipBundleFile extends BundleFile {
 	 * Returns an open ZipFile for this bundle file.  If an open
 	 * ZipFile does not exist then a new one is created and
 	 * returned.
+	 * @param keepLock true if the open zip lock should be retained
 	 * @return an open ZipFile for this bundle
 	 * @throws IOException
 	 */
-	protected synchronized ZipFile getZipFile() throws IOException {
+	ZipFile getZipFile(boolean keepLock) throws IOException {
+		if (openLock.getHoldCount() != 0) {
+			ModuleRevision r = generation.getRevision();
+			if (r != null) {
+				// post an error about reentrant lock here
+				RuntimeException error = new RuntimeException("Must not re-enter openLock in getZipFile."); //$NON-NLS-1$
+				generation.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, r.getRevisions().getModule(), error);
+			}
+		}
 		if (closed) {
+			// do this outside the lock
 			mruListAdd();
-			zipFile = basicOpen();
-			closed = false;
-		} else
-			mruListUse();
-		return zipFile;
+		}
+		openLock.lock();
+		try {
+			if (closed) {
+				zipFile = basicOpen();
+				closed = false;
+			} else {
+				mruListUse();
+			}
+			return zipFile;
+		} finally {
+			if (!keepLock || zipFile == null) {
+				openLock.unlock();
+			}
+		}
 	}
 
 	/**
-	* Returns a ZipEntry for the bundle file. Must be called while synchronizing on this object.
+	* Returns a ZipEntry for the bundle file. Must be called while holding the monitor lock.
 	* This method does not ensure that the ZipFile is opened. Callers may need to call getZipfile() prior to calling this 
 	* method.
 	* @param path the path to an entry
 	* @return a ZipEntry or null if the entry does not exist
 	*/
-	protected ZipEntry getZipEntry(String path) {
+	private ZipEntry getZipEntry(String path) {
 		if (path.length() > 0 && path.charAt(0) == '/')
 			path = path.substring(1);
 		ZipEntry entry = zipFile.getEntry(path);
@@ -137,19 +170,24 @@ public class ZipBundleFile extends BundleFile {
 	 * of <code>null</code> is returned if the directory to extract does 
 	 * not exist or if content extraction is not supported.
 	 */
-	protected synchronized File extractDirectory(String dirName) {
-		if (!checkedOpen())
+	File extractDirectory(String dirName) {
+		if (!lockOpen()) {
 			return null;
-		Enumeration<? extends ZipEntry> entries = zipFile.entries();
-		while (entries.hasMoreElements()) {
-			String entryPath = entries.nextElement().getName();
-			if (entryPath.startsWith(dirName) && !entryPath.endsWith("/")) //$NON-NLS-1$
-				getFile(entryPath, false);
 		}
-		return getExtractFile(dirName);
+		try {
+			Enumeration<? extends ZipEntry> entries = zipFile.entries();
+			while (entries.hasMoreElements()) {
+				String entryPath = entries.nextElement().getName();
+				if (entryPath.startsWith(dirName) && !entryPath.endsWith("/")) //$NON-NLS-1$
+					getFile(entryPath, false);
+			}
+			return getExtractFile(dirName);
+		} finally {
+			openLock.unlock();
+		}
 	}
 
-	protected File getExtractFile(String entryName) {
+	private File getExtractFile(String entryName) {
 		if (generation == null)
 			return null;
 		String path = ".cp"; /* put all these entries in this subdir *///$NON-NLS-1$
@@ -161,131 +199,149 @@ public class ZipBundleFile extends BundleFile {
 		return generation.getExtractFile(path);
 	}
 
-	public synchronized File getFile(String entry, boolean nativeCode) {
-		if (!checkedOpen())
+	public File getFile(String entry, boolean nativeCode) {
+		if (!lockOpen()) {
 			return null;
-		ZipEntry zipEntry = getZipEntry(entry);
-		if (zipEntry == null)
-			return null;
-
+		}
 		try {
-			File nested = getExtractFile(zipEntry.getName());
-			if (nested != null) {
-				if (nested.exists()) {
-					/* the entry is already cached */
-					if (debug.DEBUG_GENERAL)
-						Debug.println("File already present: " + nested.getPath()); //$NON-NLS-1$
-					if (nested.isDirectory())
-						// must ensure the complete directory is extracted (bug 182585)
-						extractDirectory(zipEntry.getName());
-				} else {
-					if (zipEntry.getName().endsWith("/")) { //$NON-NLS-1$
-						nested.mkdirs();
-						if (!nested.isDirectory()) {
-							if (debug.DEBUG_GENERAL)
-								Debug.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
-							throw new IOException(NLS.bind(Msg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
-						}
-						extractDirectory(zipEntry.getName());
-					} else {
-						InputStream in = zipFile.getInputStream(zipEntry);
-						if (in == null)
-							return null;
-						generation.storeContent(nested, in, nativeCode);
-					}
-				}
+			ZipEntry zipEntry = getZipEntry(entry);
+			if (zipEntry == null)
+				return null;
 
-				return nested;
+			try {
+				File nested = getExtractFile(zipEntry.getName());
+				if (nested != null) {
+					if (nested.exists()) {
+						/* the entry is already cached */
+						if (debug.DEBUG_GENERAL)
+							Debug.println("File already present: " + nested.getPath()); //$NON-NLS-1$
+						if (nested.isDirectory())
+							// must ensure the complete directory is extracted (bug 182585)
+							extractDirectory(zipEntry.getName());
+					} else {
+						if (zipEntry.getName().endsWith("/")) { //$NON-NLS-1$
+							nested.mkdirs();
+							if (!nested.isDirectory()) {
+								if (debug.DEBUG_GENERAL)
+									Debug.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
+								throw new IOException(NLS.bind(Msg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
+							}
+							extractDirectory(zipEntry.getName());
+						} else {
+							InputStream in = zipFile.getInputStream(zipEntry);
+							if (in == null)
+								return null;
+							generation.storeContent(nested, in, nativeCode);
+						}
+					}
+
+					return nested;
+				}
+			} catch (IOException e) {
+				if (debug.DEBUG_GENERAL)
+					Debug.printStackTrace(e);
+				generation.getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Unable to extract content: " + generation.getRevision() + ": " + entry, e); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-		} catch (IOException e) {
-			if (debug.DEBUG_GENERAL)
-				Debug.printStackTrace(e);
-			generation.getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Unable to extract content: " + generation.getRevision() + ": " + entry, e); //$NON-NLS-1$ //$NON-NLS-2$
+		} finally {
+			openLock.unlock();
 		}
 		return null;
 	}
 
-	public synchronized boolean containsDir(String dir) {
-		if (!checkedOpen())
+	public boolean containsDir(String dir) {
+		if (!lockOpen()) {
 			return false;
-		if (dir == null)
-			return false;
-
-		if (dir.length() == 0)
-			return true;
-
-		if (dir.charAt(0) == '/') {
-			if (dir.length() == 1)
-				return true;
-			dir = dir.substring(1);
 		}
+		try {
+			if (dir == null)
+				return false;
 
-		if (dir.length() > 0 && dir.charAt(dir.length() - 1) != '/')
-			dir = dir + '/';
-
-		Enumeration<? extends ZipEntry> entries = zipFile.entries();
-		ZipEntry zipEntry;
-		String entryPath;
-		while (entries.hasMoreElements()) {
-			zipEntry = entries.nextElement();
-			entryPath = zipEntry.getName();
-			if (entryPath.startsWith(dir)) {
+			if (dir.length() == 0)
 				return true;
+
+			if (dir.charAt(0) == '/') {
+				if (dir.length() == 1)
+					return true;
+				dir = dir.substring(1);
 			}
+
+			if (dir.length() > 0 && dir.charAt(dir.length() - 1) != '/')
+				dir = dir + '/';
+
+			Enumeration<? extends ZipEntry> entries = zipFile.entries();
+			ZipEntry zipEntry;
+			String entryPath;
+			while (entries.hasMoreElements()) {
+				zipEntry = entries.nextElement();
+				entryPath = zipEntry.getName();
+				if (entryPath.startsWith(dir)) {
+					return true;
+				}
+			}
+		} finally {
+			openLock.unlock();
 		}
 		return false;
 	}
 
-	public synchronized BundleEntry getEntry(String path) {
-		if (!checkedOpen())
-			return null;
-		ZipEntry zipEntry = getZipEntry(path);
-		if (zipEntry == null) {
-			if (path.length() == 0 || path.charAt(path.length() - 1) == '/') {
-				// this is a directory request lets see if any entries exist in this directory
-				if (containsDir(path))
-					return new DirZipBundleEntry(this, path);
-			}
+	public BundleEntry getEntry(String path) {
+		if (!lockOpen()) {
 			return null;
 		}
+		try {
+			ZipEntry zipEntry = getZipEntry(path);
+			if (zipEntry == null) {
+				if (path.length() == 0 || path.charAt(path.length() - 1) == '/') {
+					// this is a directory request lets see if any entries exist in this directory
+					if (containsDir(path))
+						return new DirZipBundleEntry(this, path);
+				}
+				return null;
+			}
 
-		return new ZipBundleEntry(zipEntry, this);
-
+			return new ZipBundleEntry(zipEntry, this);
+		} finally {
+			openLock.unlock();
+		}
 	}
 
 	@Override
-	public synchronized Enumeration<String> getEntryPaths(String path, boolean recurse) {
-		if (path == null)
-			throw new NullPointerException();
-		// Is the zip file already open or, if not, can it be opened?
-		if (!checkedOpen())
+	public Enumeration<String> getEntryPaths(String path, boolean recurse) {
+		if (!lockOpen()) {
 			return null;
+		}
+		try {
+			if (path == null)
+				throw new NullPointerException();
 
-		// Strip any leading '/' off of path.
-		if (path.length() > 0 && path.charAt(0) == '/')
-			path = path.substring(1);
-		// Append a '/', if not already there, to path if not an empty string.
-		if (path.length() > 0 && path.charAt(path.length() - 1) != '/')
-			path = new StringBuilder(path).append("/").toString(); //$NON-NLS-1$
+			// Strip any leading '/' off of path.
+			if (path.length() > 0 && path.charAt(0) == '/')
+				path = path.substring(1);
+			// Append a '/', if not already there, to path if not an empty string.
+			if (path.length() > 0 && path.charAt(path.length() - 1) != '/')
+				path = new StringBuilder(path).append("/").toString(); //$NON-NLS-1$
 
-		LinkedHashSet<String> result = new LinkedHashSet<>();
-		// Get all zip file entries and add the ones of interest.
-		Enumeration<? extends ZipEntry> entries = zipFile.entries();
-		while (entries.hasMoreElements()) {
-			ZipEntry zipEntry = entries.nextElement();
-			String entryPath = zipEntry.getName();
-			// Is the entry of possible interest? Note that 
-			// string.startsWith("") == true.
-			if (entryPath.startsWith(path)) {
-				// If we get here, we know that the entry is either (1) equal to
-				// path, (2) a file under path, or (3) a subdirectory of path.
-				if (path.length() < entryPath.length()) {
-					// If we get here, we know that entry is not equal to path.
-					getEntryPaths(path, entryPath.substring(path.length()), recurse, result);
+			LinkedHashSet<String> result = new LinkedHashSet<>();
+			// Get all zip file entries and add the ones of interest.
+			Enumeration<? extends ZipEntry> entries = zipFile.entries();
+			while (entries.hasMoreElements()) {
+				ZipEntry zipEntry = entries.nextElement();
+				String entryPath = zipEntry.getName();
+				// Is the entry of possible interest? Note that 
+				// string.startsWith("") == true.
+				if (entryPath.startsWith(path)) {
+					// If we get here, we know that the entry is either (1) equal to
+					// path, (2) a file under path, or (3) a subdirectory of path.
+					if (path.length() < entryPath.length()) {
+						// If we get here, we know that entry is not equal to path.
+						getEntryPaths(path, entryPath.substring(path.length()), recurse, result);
+					}
 				}
 			}
+			return result.size() == 0 ? null : Collections.enumeration(result);
+		} finally {
+			openLock.unlock();
 		}
-		return result.size() == 0 ? null : Collections.enumeration(result);
 	}
 
 	private void getEntryPaths(String path, String entry, boolean recurse, LinkedHashSet<String> entries) {
@@ -302,26 +358,31 @@ public class ZipBundleFile extends BundleFile {
 		}
 	}
 
-	public synchronized void close() throws IOException {
-		if (!closed) {
-			if (referenceCount > 0 && isMruListClosing()) {
-				// there are some opened streams to this BundleFile still;
-				// wait for them all to close because this is being closed by the MRUBundleFileList
-				try {
-					wait(1000); // timeout after 1 second
-				} catch (InterruptedException e) {
-					// do nothing for now ...
-				}
-				if (referenceCount != 0 || closed)
-					// either another thread closed the bundle file or we timed waiting for all the reference inputstreams to close
-					// If the referenceCount did not reach zero then this bundle file will remain open until the
-					// bundle file is closed explicitly (i.e. bundle is updated/uninstalled or framework is shutdown)
-					return;
+	public void close() throws IOException {
+		openLock.lock();
+		try {
+			if (!closed) {
+				if (referenceCount > 0 && isMruListClosing()) {
+					// there are some opened streams to this BundleFile still;
+					// wait for them all to close because this is being closed by the MRUBundleFileList
+					try {
+						refCondition.await(1000, TimeUnit.MICROSECONDS); // timeout after 1 second
+					} catch (InterruptedException e) {
+						// do nothing for now ...
+					}
+					if (referenceCount != 0 || closed)
+						// either another thread closed the bundle file or we timed waiting for all the reference inputstreams to close
+						// If the referenceCount did not reach zero then this bundle file will remain open until the
+						// bundle file is closed explicitly (i.e. bundle is updated/uninstalled or framework is shutdown)
+						return;
 
+				}
+				closed = true;
+				zipFile.close();
+				mruListRemove();
 			}
-			closed = true;
-			zipFile.close();
-			mruListRemove();
+		} finally {
+			openLock.unlock();
 		}
 	}
 
@@ -352,17 +413,27 @@ public class ZipBundleFile extends BundleFile {
 	}
 
 	public void open() throws IOException {
-		getZipFile();
+		getZipFile(false);
 	}
 
-	synchronized void incrementReference() {
-		referenceCount += 1;
+	void incrementReference() {
+		openLock.lock();
+		try {
+			referenceCount += 1;
+		} finally {
+			openLock.unlock();
+		}
 	}
 
-	synchronized void decrementReference() {
-		referenceCount = Math.max(0, referenceCount - 1);
-		// only notify if the referenceCount is zero.
-		if (referenceCount == 0)
-			notify();
+	void decrementReference() {
+		openLock.lock();
+		try {
+			referenceCount = Math.max(0, referenceCount - 1);
+			// only notify if the referenceCount is zero.
+			if (referenceCount == 0)
+				refCondition.signal();
+		} finally {
+			openLock.unlock();
+		}
 	}
 }

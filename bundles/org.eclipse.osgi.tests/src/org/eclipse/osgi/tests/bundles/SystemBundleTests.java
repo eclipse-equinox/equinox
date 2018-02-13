@@ -3464,10 +3464,10 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
-	// Disabled because the test is too much for the build machines
-	public void disable_testBundleIDLock() {
+	public void testBundleIDLock() {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(EquinoxConfiguration.PROP_FILE_LIMIT, "10");
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 
 		final Equinox equinox = new Equinox(configuration);
@@ -3487,7 +3487,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
 
-		final int numBundles = 40000;
+		final int numBundles = 5000;
 		final File[] testBundles;
 		try {
 			testBundles = createBundles(new File(config, "bundles"), numBundles); //$NON-NLS-1$
@@ -3496,7 +3496,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			throw new RuntimeException();
 		}
 
-		ExecutorService executor = Executors.newFixedThreadPool(500);
+		ExecutorService executor = Executors.newFixedThreadPool(50);
 		final List<Throwable> errors = new CopyOnWriteArrayList<Throwable>();
 		try {
 			for (int i = 0; i < testBundles.length; i++) {
@@ -3539,4 +3539,84 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	public void testMRUBundleFileListOverflow() throws BundleException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		final int numBundles = 5000;
+		final File[] testBundles;
+		try {
+			testBundles = createBundles(new File(config, "bundles"), numBundles); //$NON-NLS-1$
+		} catch (IOException e) {
+			fail("Unexpected error creating budnles", e); //$NON-NLS-1$
+			throw new RuntimeException();
+		}
+
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(EquinoxConfiguration.PROP_FILE_LIMIT, "10");
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+
+		final Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
+		// should be in the STARTING state
+		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
+		final BundleContext systemContext = equinox.getBundleContext();
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+
+		final List<Bundle> bundles = new ArrayList<>();
+		for (File testBundleFile : testBundles) {
+			bundles.add(systemContext.installBundle("file:///" + testBundleFile.getAbsolutePath()));
+		}
+
+		// Note that this test uses wall clock timing which is not always consistent
+		// across testing environments, but we use a limit that should be well within
+		// reason for the test data size
+		long startTime = System.nanoTime();
+		ExecutorService executor = Executors.newFixedThreadPool(10);
+		try {
+			for (int i = 0; i < 10; i++) {
+				executor.execute(new Runnable() {
+					@Override
+					public void run() {
+						List<Bundle> shuffled = new ArrayList<>(bundles);
+						Collections.shuffle(shuffled);
+						for (Bundle bundle : shuffled) {
+							bundle.getEntry("does/not/exist");
+						}
+					}
+				});
+			}
+		} finally {
+			executor.shutdown();
+			try {
+				executor.awaitTermination(600, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				fail("Interrupted.", e);
+			}
+		}
+
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+
+		long timeTaken = TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime);
+		System.out.println(getName() + " time taken: " + timeTaken);
+		assertTrue("Test took too long: " + timeTaken, timeTaken < 30);
+	}
 }

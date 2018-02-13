@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.storage.bundlefile;
 
-import java.io.*;
+import java.io.File;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.zip.ZipEntry;
@@ -51,12 +54,12 @@ public class ZipBundleEntry extends BundleEntry {
 		ZipBundleFile zipBundleFile = bundleFile;
 
 		if (!zipBundleFile.isMruEnabled())
-			return bundleFile.getZipFile().getInputStream(zipEntry);
+			return bundleFile.getZipFile(false).getInputStream(zipEntry);
 
 		zipBundleFile.incrementReference();
 		InputStream result = null;
 		try {
-			return result = new ZipBundleEntryInputStream(zipBundleFile.getZipFile().getInputStream(zipEntry));
+			return result = new ZipBundleEntryInputStream(zipBundleFile.getZipFile(false).getInputStream(zipEntry));
 		} finally {
 			if (result == null)
 				// an exception occurred; decrement the reference
