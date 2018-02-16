@@ -12,7 +12,6 @@
 package org.eclipse.osgi.storage.bundlefile;
 
 import java.io.File;
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -51,20 +50,7 @@ public class ZipBundleEntry extends BundleEntry {
 	 * @exception java.io.IOException
 	 */
 	public InputStream getInputStream() throws IOException {
-		ZipBundleFile zipBundleFile = bundleFile;
-
-		if (!zipBundleFile.isMruEnabled())
-			return bundleFile.getZipFile(false).getInputStream(zipEntry);
-
-		zipBundleFile.incrementReference();
-		InputStream result = null;
-		try {
-			return result = new ZipBundleEntryInputStream(zipBundleFile.getZipFile(false).getInputStream(zipEntry));
-		} finally {
-			if (result == null)
-				// an exception occurred; decrement the reference
-				zipBundleFile.decrementReference();
-		}
+		return bundleFile.getInputStream(zipEntry);
 	}
 
 	/**
@@ -116,81 +102,5 @@ public class ZipBundleEntry extends BundleEntry {
 			//This can not happen. 
 		}
 		return null;
-	}
-
-	private class ZipBundleEntryInputStream extends FilterInputStream {
-
-		private boolean closed = false;
-
-		public ZipBundleEntryInputStream(InputStream stream) {
-			super(stream);
-		}
-
-		public int available() throws IOException {
-			try {
-				return super.available();
-			} catch (IOException e) {
-				throw enrichExceptionWithBaseFile(e);
-			}
-		}
-
-		public void close() throws IOException {
-			try {
-				super.close();
-			} catch (IOException e) {
-				throw enrichExceptionWithBaseFile(e);
-			} finally {
-				synchronized (this) {
-					if (closed)
-						return;
-					closed = true;
-				}
-				bundleFile.decrementReference();
-			}
-		}
-
-		public int read() throws IOException {
-			try {
-				return super.read();
-			} catch (IOException e) {
-				throw enrichExceptionWithBaseFile(e);
-			}
-		}
-
-		public int read(byte[] var0, int var1, int var2) throws IOException {
-			try {
-				return super.read(var0, var1, var2);
-			} catch (IOException e) {
-				throw enrichExceptionWithBaseFile(e);
-			}
-		}
-
-		public int read(byte[] var0) throws IOException {
-			try {
-				return super.read(var0);
-			} catch (IOException e) {
-				throw enrichExceptionWithBaseFile(e);
-			}
-		}
-
-		public void reset() throws IOException {
-			try {
-				super.reset();
-			} catch (IOException e) {
-				throw enrichExceptionWithBaseFile(e);
-			}
-		}
-
-		public long skip(long var0) throws IOException {
-			try {
-				return super.skip(var0);
-			} catch (IOException e) {
-				throw enrichExceptionWithBaseFile(e);
-			}
-		}
-
-		private IOException enrichExceptionWithBaseFile(IOException e) {
-			return new IOException(bundleFile.getBaseFile().toString(), e);
-		}
 	}
 }

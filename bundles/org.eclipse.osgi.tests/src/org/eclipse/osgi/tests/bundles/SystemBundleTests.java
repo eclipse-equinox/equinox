@@ -16,6 +16,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URI;
@@ -33,6 +35,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -43,6 +46,7 @@ import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -53,6 +57,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import javax.net.SocketFactory;
+import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
@@ -60,11 +65,13 @@ import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.ExtendedLogService;
 import org.eclipse.equinox.log.test.TestListener2;
 import org.eclipse.osgi.framework.util.FilePath;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
+import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.storage.url.reference.Handler;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.security.BaseSecurityTest;
@@ -2859,7 +2866,9 @@ public class SystemBundleTests extends AbstractBundleTests {
 			for (Map<String, String> entryMap : entries) {
 				for (Map.Entry<String, String> entry : entryMap.entrySet()) {
 					jos.putNextEntry(new JarEntry(entry.getKey()));
-					jos.write(entry.getValue().getBytes());
+					if (entry.getValue() != null) {
+						jos.write(entry.getValue().getBytes());
+					}
 					jos.closeEntry();
 				}
 			}
@@ -3539,7 +3548,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
-	public void testMRUBundleFileListOverflow() throws BundleException {
+	public void testMRUBundleFileListOverflow() throws BundleException, FileNotFoundException, IOException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		final int numBundles = 5000;
 		final File[] testBundles;
@@ -3550,26 +3559,27 @@ public class SystemBundleTests extends AbstractBundleTests {
 			throw new RuntimeException();
 		}
 
+		File debugOptions = new File(config, "debugOptions");
+		Properties debugProps = new Properties();
+		debugProps.setProperty(Debug.OPTION_DEBUG_BUNDLE_FILE, "true");
+		FileOutputStream debugOut = new FileOutputStream(debugOptions);
+		debugProps.store(debugOut, "Equinox Debug Options");
+		debugOut.close();
+
 		Map<String, Object> configuration = new HashMap<String, Object>();
 		configuration.put(EquinoxConfiguration.PROP_FILE_LIMIT, "10");
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		//configuration.put(EquinoxConfiguration.PROP_DEBUG, debugOptions.getAbsolutePath());
 
 		final Equinox equinox = new Equinox(configuration);
-		try {
-			equinox.init();
-		} catch (BundleException e) {
-			fail("Unexpected exception in init()", e); //$NON-NLS-1$
-		}
-		// should be in the STARTING state
-		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
-		final BundleContext systemContext = equinox.getBundleContext();
-		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
 		try {
 			equinox.start();
 		} catch (BundleException e) {
 			fail("Failed to start the framework", e); //$NON-NLS-1$
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+		final BundleContext systemContext = equinox.getBundleContext();
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
 
 		final List<Bundle> bundles = new ArrayList<>();
 		for (File testBundleFile : testBundles) {
@@ -3619,4 +3629,114 @@ public class SystemBundleTests extends AbstractBundleTests {
 		System.out.println(getName() + " time taken: " + timeTaken);
 		assertTrue("Test took too long: " + timeTaken, timeTaken < 30);
 	}
+
+	public void testZipBundleFileOpenLock() throws IOException, BundleException, InvalidSyntaxException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		config.mkdirs();
+
+		Map<String, String> bundleHeaders = new HashMap<String, String>();
+		bundleHeaders.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		bundleHeaders.put(Constants.BUNDLE_SYMBOLICNAME, getName());
+		Map<String, String> bundleEntries = new LinkedHashMap<>();
+		bundleEntries.put("dirA/", null);
+		bundleEntries.put("dirA/fileA", "fileA");
+		bundleEntries.put("dirA/dirB/", null);
+		bundleEntries.put("dirA/dirB/fileB", "fileB");
+		// file in a directory with no directory entry
+		bundleEntries.put("dirA/dirC/fileC", "fileC");
+		File testBundleFile = SystemBundleTests.createBundle(config, getName(), bundleHeaders, bundleEntries);
+
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+
+		final Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+		final BundleContext systemContext = equinox.getBundleContext();
+
+		String converterFilter = "(&(objectClass=" + URLConverter.class.getName() + ")(protocol=bundleentry))";
+		final URLConverter converter = systemContext.getService(systemContext.getServiceReferences(URLConverter.class, converterFilter).iterator().next());
+
+		final Bundle testBundle = systemContext.installBundle("file:///" + testBundleFile.getAbsolutePath());
+		testBundle.start();
+
+		final List<FrameworkEvent> errorsAndWarnings = new CopyOnWriteArrayList<FrameworkEvent>();
+		FrameworkListener fwkListener = new FrameworkListener() {
+			@Override
+			public void frameworkEvent(FrameworkEvent event) {
+				int type = event.getType();
+				if (type == FrameworkEvent.ERROR || type == FrameworkEvent.WARNING) {
+					errorsAndWarnings.add(event);
+				}
+			}
+		};
+		systemContext.addFrameworkListener(fwkListener);
+
+		Runnable asyncTest = new Runnable() {
+			@Override
+			public void run() {
+				try {
+					assertNotNull("Entry not found.", testBundle.getEntry("dirA/fileA"));
+					assertNotNull("Entry not found.", testBundle.getEntry("dirA/dirB/fileB"));
+					assertNotNull("Entry not found.", testBundle.getEntry("dirA/dirC/fileC"));
+					assertNotNull("Entry not found.", testBundle.getEntry("dirA/dirC/"));
+					URL dirBURL = converter.toFileURL(testBundle.getEntry("dirA/dirB/"));
+					assertNotNull("Failed to convert to file URL", dirBURL);
+					URL dirAURL = converter.toFileURL(testBundle.getEntry("dirA/"));
+					assertNotNull("Failed to convert to file URL", dirAURL);
+					List<URL> allEntries = testBundle.adapt(BundleWiring.class).findEntries("/", "*", BundleWiring.FINDENTRIES_RECURSE);
+					assertEquals("Wrong number of entries: " + allEntries, 8, allEntries.size());
+				} catch (IOException e) {
+					throw new AssertionFailedError(e.getMessage());
+				}
+			}
+		};
+
+		// do test with two threads to make sure open lock is not held by a thread
+		ExecutorService executor1 = Executors.newFixedThreadPool(1);
+		ExecutorService executor2 = Executors.newFixedThreadPool(1);
+		try {
+			executor1.submit(asyncTest).get();
+			executor2.submit(asyncTest).get();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			fail("Interrupted.", e);
+		} catch (ExecutionException e) {
+			if (e.getCause() instanceof Error) {
+				throw (Error) e.getCause();
+			}
+			throw (RuntimeException) e.getCause();
+		} finally {
+			executor1.shutdown();
+			executor2.shutdown();
+		}
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+
+		if (!errorsAndWarnings.isEmpty()) {
+			StringWriter errorStackTraces = new StringWriter();
+			PrintWriter writer = new PrintWriter(errorStackTraces);
+			for (FrameworkEvent frameworkEvent : errorsAndWarnings) {
+				if (frameworkEvent.getThrowable() != null) {
+					frameworkEvent.getThrowable().printStackTrace(writer);
+				}
+			}
+			writer.close();
+			fail("Found errors or warnings: " + errorsAndWarnings.size() + " - " + errorStackTraces.toString());
+		}
+	}
+
 }

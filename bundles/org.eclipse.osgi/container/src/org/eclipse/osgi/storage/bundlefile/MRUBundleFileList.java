@@ -21,6 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
 import org.eclipse.osgi.framework.eventmgr.EventManager;
 import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
+import org.eclipse.osgi.internal.debug.Debug;
 
 /**
  * A simple/quick/small implementation of an MRU (Most Recently Used) list to keep
@@ -50,10 +51,12 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	private final ReentrantLock pendingLock = new ReentrantLock();
 	private final Condition pendingCond = pendingLock.newCondition();
 	private final AtomicInteger pending = new AtomicInteger();
+	private final Debug debug;
 
-	public MRUBundleFileList(int fileLimit) {
+	public MRUBundleFileList(int fileLimit, Debug debug) {
 		// only enable the MRU if the initFileLimit is > MIN
 		this.fileLimit = fileLimit;
+		this.debug = debug;
 		if (fileLimit >= MIN) {
 			this.bundleFileList = new BundleFile[fileLimit];
 			this.useStampList = new long[fileLimit];
@@ -70,15 +73,17 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	 * the number of open BundleFiles == the fileLimit then the least 
 	 * recently used BundleFile is closed.
 	 * @param bundleFile the bundle file about to be opened.
+	 * @return true if back pressure is needed
 	 */
-	public void add(BundleFile bundleFile) {
+	public boolean add(BundleFile bundleFile) {
 		if (fileLimit < MIN)
-			return; // MRU is disabled
+			return false; // MRU is disabled
 		BundleFile toRemove = null;
 		EventManager manager = null;
+		boolean backpressureNeeded = false;
 		synchronized (this) {
 			if (bundleFile.getMruIndex() >= 0)
-				return; // do nothing; someone is trying add a bundleFile that is already in an MRU list
+				return false; // do nothing; someone is trying add a bundleFile that is already in an MRU list
 			int index = 0; // default to the first slot
 			if (numOpen < fileLimit) {
 				// numOpen does not exceed the fileLimit
@@ -91,7 +96,7 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 			} else {
 				// numOpen has reached the fileLimit
 				// find the least recently used bundleFile and close it 
-				// and use it slot for the new bundleFile to be opened.
+				// and use its slot for the new bundleFile to be opened.
 				index = 0;
 				for (int i = 1; i < fileLimit; i++)
 					if (useStampList[i] < useStampList[index])
@@ -100,6 +105,7 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 				if (toRemove.getMruIndex() != index)
 					throw new IllegalStateException("The BundleFile has the incorrect mru index: " + index + " != " + toRemove.getMruIndex()); //$NON-NLS-1$//$NON-NLS-2$
 				removeInternal(toRemove);
+				backpressureNeeded = isBackPressureNeeded();
 			}
 			// found an index to place to bundleFile to be opened
 			bundleFileList[index] = bundleFile;
@@ -116,6 +122,8 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 		// must not close the toRemove bundle file while holding the lock of another bundle file (bug 161976)
 		// This queues the bundle file for close asynchronously.
 		closeBundleFile(toRemove, manager);
+
+		return backpressureNeeded;
 	}
 
 	/**
@@ -194,27 +202,40 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 		}
 	}
 
-	private void closeBundleFile(BundleFile toRemove, EventManager manager) {
-		if (toRemove == null)
-			return;
+	private boolean isBackPressureNeeded() {
 		pendingLock.lock();
 		try {
-			int pendingNum = pending.incrementAndGet();
+			return pending.incrementAndGet() > fileLimit;
+		} finally {
+			pendingLock.unlock();
+		}
+	}
+
+	public void applyBackpressure() {
+		pendingLock.lock();
+		try {
+			int pendingNum = pending.get();
 			if (pendingNum > fileLimit) {
-				// decrement before waiting since we will not pend until the queue
-				// reduces a bit
-				pending.decrementAndGet();
+				if (debug.DEBUG_BUNDLE_FILE) {
+					Debug.println("MRUBundleFileList: Applying back pressure before opening: " + toString()); //$NON-NLS-1$
+				}
 				// delay to allow the closer to catchup
 				try {
 					pendingCond.await(Math.min(500, pendingNum), TimeUnit.MILLISECONDS);
-					// add to the pending count again
-					pending.incrementAndGet();
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
 			}
 		} finally {
 			pendingLock.unlock();
+		}
+	}
+
+	private void closeBundleFile(BundleFile toRemove, EventManager manager) {
+		if (toRemove == null)
+			return;
+		if (debug.DEBUG_BUNDLE_FILE) {
+			Debug.println("MRUBundleFileList: about to close bundle file: " + toRemove); //$NON-NLS-1$
 		}
 		try {
 			/* queue to hold set of listeners */
@@ -227,6 +248,9 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 			// we cannot propagate exceptions out of this method
 			// failing to queue a bundle close should not cause an error (bug 283797)
 			// TODO should consider logging
+			if (debug.DEBUG_BUNDLE_FILE) {
+				Debug.printStackTrace(t);
+			}
 		}
 	}
 

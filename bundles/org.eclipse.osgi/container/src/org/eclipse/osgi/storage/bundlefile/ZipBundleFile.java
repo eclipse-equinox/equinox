@@ -13,6 +13,7 @@
 package org.eclipse.osgi.storage.bundlefile;
 
 import java.io.File;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -98,15 +99,6 @@ public class ZipBundleFile extends BundleFile {
 	}
 
 	/**
-	 * Opens the ZipFile for this bundle file
-	 * @return an open ZipFile for this bundle file
-	 * @throws IOException
-	 */
-	private ZipFile basicOpen() throws IOException {
-		return BundleFile.secureAction.getZipFile(this.basefile);
-	}
-
-	/**
 	 * Returns an open ZipFile for this bundle file.  If an open
 	 * ZipFile does not exist then a new one is created and
 	 * returned.
@@ -114,37 +106,45 @@ public class ZipBundleFile extends BundleFile {
 	 * @return an open ZipFile for this bundle
 	 * @throws IOException
 	 */
-	ZipFile getZipFile(boolean keepLock) throws IOException {
-		if (openLock.getHoldCount() != 0) {
-			ModuleRevision r = generation.getRevision();
-			if (r != null) {
-				// post an error about reentrant lock here
-				RuntimeException error = new RuntimeException("Must not re-enter openLock in getZipFile."); //$NON-NLS-1$
-				generation.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, r.getRevisions().getModule(), error);
-			}
-		}
-		if (closed) {
-			// do this outside the lock
-			mruListAdd();
-		}
+	private ZipFile getZipFile(boolean keepLock) throws IOException {
 		openLock.lock();
 		try {
 			if (closed) {
-				zipFile = basicOpen();
-				closed = false;
+				boolean needBackPressure = mruListAdd();
+				if (needBackPressure) {
+					// release lock before applying back pressure
+					openLock.unlock();
+					try {
+						mruListApplyBackPressure();
+					} finally {
+						// get lock back after back pressure
+						openLock.lock();
+					}
+				}
+				// check close again after getting open lock again
+				if (closed) {
+					// always add again if back pressure was applied in case
+					// the bundle file got removed while releasing the open lock
+					if (needBackPressure) {
+						mruListAdd();
+					}
+					// This can throw an IO exception resulting in closed remaining true on exit
+					zipFile = BundleFile.secureAction.getZipFile(this.basefile);
+					closed = false;
+				}
 			} else {
 				mruListUse();
 			}
 			return zipFile;
 		} finally {
-			if (!keepLock || zipFile == null) {
+			if (!keepLock || closed) {
 				openLock.unlock();
 			}
 		}
 	}
 
 	/**
-	* Returns a ZipEntry for the bundle file. Must be called while holding the monitor lock.
+	* Returns a ZipEntry for the bundle file. Must be called while holding the open lock.
 	* This method does not ensure that the ZipFile is opened. Callers may need to call getZipfile() prior to calling this 
 	* method.
 	* @param path the path to an entry
@@ -213,7 +213,7 @@ public class ZipBundleFile extends BundleFile {
 				if (nested != null) {
 					if (nested.exists()) {
 						/* the entry is already cached */
-						if (debug.DEBUG_GENERAL)
+						if (debug.DEBUG_BUNDLE_FILE)
 							Debug.println("File already present: " + nested.getPath()); //$NON-NLS-1$
 						if (nested.isDirectory())
 							// must ensure the complete directory is extracted (bug 182585)
@@ -222,7 +222,7 @@ public class ZipBundleFile extends BundleFile {
 						if (zipEntry.getName().endsWith("/")) { //$NON-NLS-1$
 							nested.mkdirs();
 							if (!nested.isDirectory()) {
-								if (debug.DEBUG_GENERAL)
+								if (debug.DEBUG_BUNDLE_FILE)
 									Debug.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
 								throw new IOException(NLS.bind(Msg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
 							}
@@ -238,7 +238,7 @@ public class ZipBundleFile extends BundleFile {
 					return nested;
 				}
 			} catch (IOException e) {
-				if (debug.DEBUG_GENERAL)
+				if (debug.DEBUG_BUNDLE_FILE)
 					Debug.printStackTrace(e);
 				generation.getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Unable to extract content: " + generation.getRevision() + ": " + entry, e); //$NON-NLS-1$ //$NON-NLS-2$
 			}
@@ -380,6 +380,7 @@ public class ZipBundleFile extends BundleFile {
 				closed = true;
 				zipFile.close();
 				mruListRemove();
+				zipFile = null;
 			}
 		} finally {
 			openLock.unlock();
@@ -390,7 +391,7 @@ public class ZipBundleFile extends BundleFile {
 		return this.mruList != null && this.mruList.isClosing(this);
 	}
 
-	boolean isMruEnabled() {
+	private boolean isMruEnabled() {
 		return this.mruList != null && this.mruList.isEnabled();
 	}
 
@@ -406,10 +407,17 @@ public class ZipBundleFile extends BundleFile {
 		}
 	}
 
-	private void mruListAdd() {
+	private void mruListApplyBackPressure() {
 		if (this.mruList != null) {
-			mruList.add(this);
+			this.mruList.applyBackpressure();
 		}
+	}
+
+	private boolean mruListAdd() {
+		if (this.mruList != null) {
+			return mruList.add(this);
+		}
+		return false;
 	}
 
 	public void open() throws IOException {
@@ -434,6 +442,98 @@ public class ZipBundleFile extends BundleFile {
 				refCondition.signal();
 		} finally {
 			openLock.unlock();
+		}
+	}
+
+	InputStream getInputStream(ZipEntry entry) throws IOException {
+		if (!lockOpen()) {
+			throw new IOException("Failed to open zip file."); //$NON-NLS-1$
+		}
+		try {
+			InputStream zipStream = zipFile.getInputStream(entry);
+			if (isMruEnabled()) {
+				zipStream = new ZipBundleEntryInputStream(zipStream);
+			}
+			return zipStream;
+		} finally {
+			openLock.unlock();
+		}
+	}
+
+	private class ZipBundleEntryInputStream extends FilterInputStream {
+
+		private boolean streamClosed = false;
+
+		public ZipBundleEntryInputStream(InputStream stream) {
+			super(stream);
+			incrementReference();
+		}
+
+		public int available() throws IOException {
+			try {
+				return super.available();
+			} catch (IOException e) {
+				throw enrichExceptionWithBaseFile(e);
+			}
+		}
+
+		public void close() throws IOException {
+			try {
+				super.close();
+			} catch (IOException e) {
+				throw enrichExceptionWithBaseFile(e);
+			} finally {
+				synchronized (this) {
+					if (streamClosed)
+						return;
+					streamClosed = true;
+				}
+				decrementReference();
+			}
+		}
+
+		public int read() throws IOException {
+			try {
+				return super.read();
+			} catch (IOException e) {
+				throw enrichExceptionWithBaseFile(e);
+			}
+		}
+
+		public int read(byte[] var0, int var1, int var2) throws IOException {
+			try {
+				return super.read(var0, var1, var2);
+			} catch (IOException e) {
+				throw enrichExceptionWithBaseFile(e);
+			}
+		}
+
+		public int read(byte[] var0) throws IOException {
+			try {
+				return super.read(var0);
+			} catch (IOException e) {
+				throw enrichExceptionWithBaseFile(e);
+			}
+		}
+
+		public void reset() throws IOException {
+			try {
+				super.reset();
+			} catch (IOException e) {
+				throw enrichExceptionWithBaseFile(e);
+			}
+		}
+
+		public long skip(long var0) throws IOException {
+			try {
+				return super.skip(var0);
+			} catch (IOException e) {
+				throw enrichExceptionWithBaseFile(e);
+			}
+		}
+
+		private IOException enrichExceptionWithBaseFile(IOException e) {
+			return new IOException(getBaseFile().toString(), e);
 		}
 	}
 }

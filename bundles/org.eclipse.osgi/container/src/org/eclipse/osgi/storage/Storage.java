@@ -177,7 +177,7 @@ public class Storage {
 		}
 		runtimeVersion = javaVersion;
 		javaSpecVersion = javaSpecVersionProp;
-		mruList = new MRUBundleFileList(getBundleFileLimit(container.getConfiguration()));
+		mruList = new MRUBundleFileList(getBundleFileLimit(container.getConfiguration()), container.getConfiguration().getDebug());
 		equinoxContainer = container;
 		extensionInstaller = new FrameworkExtensionInstaller(container.getConfiguration());
 		allowRestrictedProvides = Boolean.parseBoolean(container.getConfiguration().getConfiguration(EquinoxConfiguration.PROP_ALLOW_RESTRICTED_PROVIDES));
