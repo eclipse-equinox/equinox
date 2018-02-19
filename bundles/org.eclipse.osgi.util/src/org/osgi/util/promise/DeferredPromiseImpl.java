@@ -22,6 +22,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.osgi.util.function.Consumer;
 import org.osgi.util.function.Function;
@@ -91,10 +93,30 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 	}
 
 	/**
+	 * Return a resolved PromiseImpl if this DeferredPromiseImpl is resolved.
+	 * 
+	 * @return A ResolvedPromiseImpl holding the value of this
+	 *         DeferredPromiseImpl or a FailedPromiseImpl holding the failure of
+	 *         this DeferredPromiseImpl or this DeferredPromiseImpl if this
+	 *         DeferredPromiseImpl is not resolved.
+	 */
+	PromiseImpl<T> orDone() {
+		// ensure latch open before reading state
+		if (!isDone()) {
+			return this;
+		}
+		if (fail == null) {
+			return resolved(value);
+		}
+		return failed(fail);
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public T getValue() throws InvocationTargetException, InterruptedException {
+		// ensure latch open before reading state
 		resolved.await();
 		if (fail == null) {
 			return value;
@@ -107,12 +129,13 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 	 */
 	@Override
 	public Throwable getFailure() throws InterruptedException {
+		// ensure latch open before reading state
 		resolved.await();
 		return fail;
 	}
 
 	/**
-	 * Return a holder of the result of this PromiseImpl.
+	 * {@inheritDoc}
 	 */
 	@Override
 	Result<T> collect() {
@@ -207,8 +230,8 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 	 */
 	Promise<Void> resolveWith(Promise< ? extends T> with) {
 		DeferredPromiseImpl<Void> chained = deferred();
-		with.onResolve(chained.new ResolveWith<>(this, with));
-		return chained;
+		chain(with, chained.new ResolveWith<>(with, this));
+		return chained.orDone();
 	}
 
 	/**
@@ -218,21 +241,21 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 	 * @Immutable
 	 */
 	private final class ResolveWith<P> implements Runnable {
-		private final DeferredPromiseImpl<P>	promise;
-		private final Promise< ? extends P>		with;
+		private final Promise< ? extends P>		promise;
+		private final DeferredPromiseImpl<P>	target;
 
-		ResolveWith(DeferredPromiseImpl<P> promise,
-				Promise< ? extends P> with) {
-			this.promise = promise;
-			this.with = requireNonNull(with);
+		ResolveWith(Promise< ? extends P> promise,
+				DeferredPromiseImpl<P> target) {
+			this.promise = requireNonNull(promise);
+			this.target = requireNonNull(target);
 		}
 
 		@Override
 		public void run() {
 			Throwable f = null;
-			Result<P> result = collect(with);
+			Result<P> result = collect(promise);
 			try {
-				promise.resolve(result.value, result.fail);
+				target.resolve(result.value, result.fail);
 			} catch (Throwable e) {
 				f = e; // propagate new exception
 			}
@@ -254,7 +277,7 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 		@SuppressWarnings("unchecked")
 		Then(PromiseImpl<P> promise, Success< ? super P, ? extends T> success,
 				Failure failure) {
-			this.promise = promise;
+			this.promise = requireNonNull(promise);
 			this.success = (Success<P, ? extends T>) success;
 			this.failure = failure;
 		}
@@ -278,8 +301,7 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 					result.fail = e; // propagate new exception
 				}
 				if (returned != null) {
-					// resolve chained when returned promise is resolved
-					returned.onResolve(new Chain(returned));
+					chain(returned, new Chain(returned));
 					return;
 				}
 			}
@@ -297,7 +319,7 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 		private final Promise< ? extends T> promise;
 
 		Chain(Promise< ? extends T> promise) {
-			this.promise = promise;
+			this.promise = requireNonNull(promise);
 		}
 
 		@Override
@@ -313,11 +335,11 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 	 * 
 	 * @Immutable
 	 */
-	final class ChainImpl implements Runnable {
+	private final class ChainImpl implements Runnable {
 		private final PromiseImpl<T> promise;
 
 		ChainImpl(PromiseImpl<T> promise) {
-			this.promise = promise;
+			this.promise = requireNonNull(promise);
 		}
 
 		@Override
@@ -337,7 +359,7 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 		private final Consumer< ? super T>	consumer;
 
 		ThenAccept(PromiseImpl<T> promise, Consumer< ? super T> consumer) {
-			this.promise = promise;
+			this.promise = requireNonNull(promise);
 			this.consumer = requireNonNull(consumer);
 		}
 
@@ -365,7 +387,7 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 		private final Predicate< ? super T>	predicate;
 
 		Filter(PromiseImpl<T> promise, Predicate< ? super T> predicate) {
-			this.promise = promise;
+			this.promise = requireNonNull(promise);
 			this.predicate = requireNonNull(predicate);
 		}
 
@@ -395,7 +417,7 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 		private final Function< ? super P, ? extends T>	mapper;
 
 		Map(PromiseImpl<P> promise, Function< ? super P, ? extends T> mapper) {
-			this.promise = promise;
+			this.promise = requireNonNull(promise);
 			this.mapper = requireNonNull(mapper);
 		}
 
@@ -425,7 +447,7 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 
 		FlatMap(PromiseImpl<P> promise,
 				Function< ? super P,Promise< ? extends T>> mapper) {
-			this.promise = promise;
+			this.promise = requireNonNull(promise);
 			this.mapper = requireNonNull(mapper);
 		}
 
@@ -440,7 +462,7 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 					result.fail = e;
 				}
 				if (flatmap != null) {
-					flatmap.onResolve(new Chain(flatmap));
+					chain(flatmap, new Chain(flatmap));
 					return;
 				}
 			}
@@ -459,7 +481,7 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 
 		Recover(PromiseImpl<T> promise,
 				Function<Promise< ? >, ? extends T> recovery) {
-			this.promise = promise;
+			this.promise = requireNonNull(promise);
 			this.recovery = requireNonNull(recovery);
 		}
 
@@ -492,7 +514,7 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 
 		RecoverWith(PromiseImpl<T> promise,
 				Function<Promise< ? >,Promise< ? extends T>> recovery) {
-			this.promise = promise;
+			this.promise = requireNonNull(promise);
 			this.recovery = requireNonNull(recovery);
 		}
 
@@ -507,7 +529,7 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 					result.fail = e;
 				}
 				if (recovered != null) {
-					recovered.onResolve(new Chain(recovered));
+					chain(recovered, new Chain(recovered));
 					return;
 				}
 			}
@@ -525,7 +547,7 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 		private final Promise< ? extends T>	fallback;
 
 		FallbackTo(PromiseImpl<T> promise, Promise< ? extends T> fallback) {
-			this.promise = promise;
+			this.promise = requireNonNull(promise);
 			this.fallback = requireNonNull(fallback);
 		}
 
@@ -533,7 +555,7 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 		public void run() {
 			Result<T> result = promise.collect();
 			if (result.fail != null) {
-				fallback.onResolve(new FallbackChain(fallback, result.fail));
+				chain(fallback, new FallbackChain(fallback, result.fail));
 				return;
 			}
 			tryResolve(result.value, null);
@@ -551,8 +573,8 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 		private final Throwable				failure;
 
 		FallbackChain(Promise< ? extends T> fallback, Throwable failure) {
-			this.fallback = fallback;
-			this.failure = failure;
+			this.fallback = requireNonNull(fallback);
+			this.failure = requireNonNull(failure);
 		}
 
 		@Override
@@ -562,6 +584,59 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 				result.fail = failure;
 			}
 			tryResolve(result.value, result.fail);
+		}
+	}
+
+	/**
+	 * A callback used by the {@link PromiseImpl#timeout(long)} method to
+	 * schedule the timeout and to resolve the chained Promise and cancel the
+	 * timeout.
+	 * 
+	 * @Immutable
+	 */
+	final class Timeout implements Runnable {
+		private final PromiseImpl<T>		promise;
+		private final ScheduledFuture< ? > future;
+
+		Timeout(PromiseImpl<T> promise, long millis) {
+			this.promise = requireNonNull(promise);
+			if (promise.isDone()) {
+				this.future = null;
+			} else {
+				FailedPromiseImpl<T> timedout = failed(new TimeoutException());
+				Runnable operation = new ChainImpl(timedout);
+				this.future = schedule(operation, millis, TimeUnit.MILLISECONDS);
+			}
+		}
+
+		@Override
+		public void run() {
+			Result<T> result = promise.collect();
+			tryResolve(result.value, result.fail);
+			if (future != null) {
+				future.cancel(false);
+			}
+		}
+	}
+
+	/**
+	 * A callback used by the {@link PromiseImpl#delay(long)} method to delay
+	 * chaining a promise.
+	 * 
+	 * @Immutable
+	 */
+	final class Delay implements Runnable {
+		private final Runnable	operation;
+		private final long		millis;
+
+		Delay(PromiseImpl<T> promise, long millis) {
+			this.operation = new ChainImpl(promise);
+			this.millis = millis;
+		}
+
+		@Override
+		public void run() {
+			schedule(operation, millis, TimeUnit.MILLISECONDS);
 		}
 	}
 
