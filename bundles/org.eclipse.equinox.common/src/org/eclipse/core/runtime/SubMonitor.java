@@ -62,7 +62,7 @@ import org.eclipse.core.internal.runtime.TracingOptions;
  *      //        reported and that the operation cannot be cancelled.
  *      //
  *      void doSomething(IProgressMonitor monitor) {
- *      	// Convert the given monitor into a progress instance 
+ *          // Convert the given monitor into a progress instance 
  *          SubMonitor progress = SubMonitor.convert(monitor, 100);
  *              
  *          // Use 30% of the progress to do some work
@@ -87,7 +87,7 @@ import org.eclipse.core.internal.runtime.TracingOptions;
  *           
  *          if (condition) {
  *              // Use 50% of the progress to do some work
- *          	doSomeWork(progress.split(50));
+ *              doSomeWork(progress.split(50));
  *          }
  *          
  *          // Don't report any work, but ensure that we have 50 ticks remaining on the progress monitor.
@@ -106,7 +106,7 @@ import org.eclipse.core.internal.runtime.TracingOptions;
  * <pre>
  *          if (condition) {
  *              // Use 50% of the progress to do some work
- *          	doSomeWork(progress.split(50));
+ *              doSomeWork(progress.split(50));
  *          } else {
  *              // Bad: Causes the progress monitor to appear to start at 50%, wasting half of the
  *              // space in the monitor.
@@ -129,7 +129,7 @@ import org.eclipse.core.internal.runtime.TracingOptions;
  *          SubMonitor loopProgress = progress.split(70).setWorkRemaining(someCollection.size());
  *          
  *          for (Iterator iter = someCollection.iterator(); iter.hasNext();) {
- *          	Object next = iter.next();
+ *              Object next = iter.next();
  *              
  *              doWorkOnElement(next, loopProgress.split(1));
  *          }
@@ -149,18 +149,18 @@ import org.eclipse.core.internal.runtime.TracingOptions;
  * <pre>
  *      void doSomething(IProgressMonitor monitor, LinkedListNode node) {
  *          SubMonitor progress = SubMonitor.convert(monitor);
- *
- *			while (node != null) {
+ *          
+ *          while (node != null) {
  *              // Regardless of the amount of progress reported so far,
  *              // use 0.01% of the space remaining in the monitor to process the next node.
  *              progress.setWorkRemaining(10000);
  *              
- *				doWorkOnElement(node, progress.split(1));
- *
+ *              doWorkOnElement(node, progress.split(1));
+ *              
  *              node = node.next;
  *          }
  *      }
- * </pre>  
+ * </pre>
  * 
  * <p>
  * This class can be used without OSGi running.
