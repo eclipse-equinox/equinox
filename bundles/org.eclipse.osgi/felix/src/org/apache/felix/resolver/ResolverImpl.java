@@ -1351,7 +1351,6 @@ public class ResolverImpl implements Resolver
                 }
             }
         }
-
         // IMPLEMENTATION NOTE:
         // Below we track the mutated reqs that have been permuted
         // in a single candidates permutation.  This permutation may contain a
@@ -1378,10 +1377,10 @@ public class ResolverImpl implements Resolver
                 if (!isCompatible(exportBlame, usedBlames.m_cap, resourcePkgMap))
                 {
                     mutated = (mutated != null)
-                        ? mutated
-                        : new HashSet<Requirement>();
+                            ? mutated
+                            : new HashSet<Requirement>();
                     rethrow = permuteUsedBlames(session, rethrow, allCandidates, resource,
-                        pkgName, null, usedBlames, permRef1, permRef2, mutated);
+                            pkgName, null, usedBlames, permRef1, permRef2, mutated);
                 }
             }
 
@@ -1433,9 +1432,8 @@ public class ResolverImpl implements Resolver
                 if (!isCompatible(requirementBlames, usedBlames.m_cap, resourcePkgMap))
                 {
                     mutated = (mutated != null)
-                        ? mutated
-                        : new HashSet<Requirement>();
-                    // Split packages, need to think how to get a good message for split packages (sigh)
+                            ? mutated
+                            : new HashSet<Requirement>();// Split packages, need to think how to get a good message for split packages (sigh)
                     // For now we just use the first requirement that brings in the package that conflicts
                     Blame requirementBlame = requirementBlames.get(0);
                     rethrow = permuteUsedBlames(session, rethrow, allCandidates, resource, pkgName, requirementBlame, usedBlames, permRef1, permRef2, mutated);
@@ -1521,12 +1519,12 @@ public class ResolverImpl implements Resolver
         }
         return null;
     }
-
+    
     private ResolutionError permuteUsedBlames(ResolveSession session,
-        ResolutionError rethrow, Candidates allCandidates, Resource resource,
-        String pkgName, Blame requirementBlame, UsedBlames usedBlames,
-        AtomicReference<Candidates> permRef1, AtomicReference<Candidates> permRef2,
-        Set<Requirement> mutated)
+          ResolutionError rethrow, Candidates allCandidates, Resource resource,
+          String pkgName, Blame requirementBlame, UsedBlames usedBlames,
+          AtomicReference<Candidates> permRef1, AtomicReference<Candidates> permRef2,
+          Set<Requirement> mutated)
     {
         for (Blame usedBlame : usedBlames.m_blames)
         {
@@ -1542,12 +1540,12 @@ public class ResolverImpl implements Resolver
                 if (requirementBlame == null)
                 {
                     rethrow = new UseConstraintError(session.getContext(), allCandidates,
-                        resource, pkgName, usedBlame);
+                            resource, pkgName, usedBlame);
                 }
                 else
                 {
                     rethrow = new UseConstraintError(session.getContext(), allCandidates,
-                        resource, pkgName, requirementBlame, usedBlame);
+                            resource, pkgName, requirementBlame, usedBlame);
                 }
             }
 
@@ -1587,8 +1585,7 @@ public class ResolverImpl implements Resolver
         return rethrow;
     }
 
-    private boolean permuteUsedBlameRequirement(Requirement req, Set<Requirement> mutated,
-        Candidates permutation)
+    private boolean permuteUsedBlameRequirement(Requirement req, Set<Requirement> mutated, Candidates permutation)
     {
         // Sanity check for multiple.
         if (Util.isMultiple(req))
@@ -1614,7 +1611,7 @@ public class ResolverImpl implements Resolver
         }
         return false;
     }
-
+    
     private static OpenHashMap<String, Blame> calculateExportedPackages(
             ResolveSession session,
             Candidates allCandidates,

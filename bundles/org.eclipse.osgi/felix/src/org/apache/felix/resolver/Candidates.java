@@ -1235,14 +1235,14 @@ class Candidates
                         for (Requirement dependent : dependents)
                         {
                             CandidateSelector dependentSelector = m_candidateMap.get(
-                                dependent);
+                                    dependent);
                             // If the dependent selector only has one capability left then check if
                             // the current candidate is the selector's current candidate.
                             if (dependentSelector != null
-                                && dependentSelector.getRemainingCandidateCount() <= 1)
+                                    && dependentSelector.getRemainingCandidateCount() <= 1)
                             {
                                 if (current.equals(
-                                    dependentSelector.getCurrentCandidate()))
+                                        dependentSelector.getCurrentCandidate()))
                                 {
                                     // return false since we do not want to allow this requirement
                                     // to substitute the capability
