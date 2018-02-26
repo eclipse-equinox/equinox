@@ -127,7 +127,7 @@ public final class FileLocator {
 	 * @return a URL for the given path or <code>null</code>.  The actual form
 	 * 	of the returned URL is not specified.
 	 *
-	 * @since 3.9
+	 * @since 3.10
 	 */
 	public static URL find(Bundle bundle, IPath path) {
 		return FindSupport.find(bundle, path, null);
