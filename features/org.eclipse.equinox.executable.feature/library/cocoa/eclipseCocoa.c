@@ -140,7 +140,7 @@ static NSWindow* window = nil;
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	NSEvent* event;
 	NSApplication* application = [NSApplication sharedApplication];
-	while ((event = [application nextEventMatchingMask: 0 untilDate: nil inMode: NSDefaultRunLoopMode dequeue: TRUE]) != nil) {
+	while ((event = [application nextEventMatchingMask: NSAnyEventMask untilDate: nil inMode: NSDefaultRunLoopMode dequeue: TRUE]) != nil) {
 		[application sendEvent: event];
 	}
 	[pool release];
