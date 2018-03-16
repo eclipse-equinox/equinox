@@ -39,12 +39,12 @@ MAIN_OBJS = eclipseMain.obj
 COMMON_OBJS = eclipseConfig.obj eclipseCommon.obj   eclipseWinCommon.obj
 DLL_OBJS	= eclipse.obj  eclipseWin.obj  eclipseUtil.obj  eclipseJNI.obj eclipseShm.obj
 
-LIBS   = kernel32.lib user32.lib comctl32.lib libcmt.lib bufferoverflowU.lib
-DLL_LIBS = kernel32.lib user32.lib comctl32.lib gdi32.lib Advapi32.lib libcmt.lib version.lib bufferoverflowU.lib
-LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:windows -entry:wmainCRTStartup
-CONSOLEFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:console -entry:wmainCRTStartup
+LIBS   = kernel32.lib user32.lib comctl32.lib libcmt.lib
+DLL_LIBS = kernel32.lib user32.lib comctl32.lib gdi32.lib Advapi32.lib libcmt.lib version.lib
+LFLAGS = /DYNAMICBASE /NXCOMPAT /HIGHENTROPYVA /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:windows -entry:wmainCRTStartup
+CONSOLEFLAGS = /DYNAMICBASE /NXCOMPAT /HIGHENTROPYVA /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:console -entry:wmainCRTStartup
 #DLL_LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /PDB:NONE /RELEASE /NOLOGO -entry:_DllMainCRTStartup@12 -dll /BASE:0x72000000 /DLL
-DLL_LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /PDB:NONE /RELEASE /NOLOGO  -dll /BASE:0x72000000 /DLL
+DLL_LFLAGS = /DYNAMICBASE /NXCOMPAT /HIGHENTROPYVA /NODEFAULTLIB /INCREMENTAL:NO /PDB:NONE /RELEASE /NOLOGO  -dll /BASE:0x72000000 /DLL
 RES	= $(PROGRAM_NAME).res
 EXEC	= $(PROGRAM_OUTPUT)
 CONSOLE = $(PROGRAM_NAME)c.exe
