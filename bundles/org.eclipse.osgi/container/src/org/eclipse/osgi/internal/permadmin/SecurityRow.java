@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Connexta, LLC - performance improvements
  *******************************************************************************/
 package org.eclipse.osgi.internal.permadmin;
 
@@ -33,6 +34,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	private final boolean deny;
 	/* GuardedBy(bundleConditions) */
 	final Map<BundlePermissions, Condition[]> bundleConditions;
+	final Object bundleConditionsLock = new Object();
 
 	public SecurityRow(SecurityAdmin securityAdmin, String name, ConditionInfo[] conditionInfos, PermissionInfo[] permissionInfos, String decision) {
 		if (permissionInfos == null || permissionInfos.length == 0)
@@ -237,62 +239,92 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		securityAdmin.delete(this, true);
 	}
 
-	Condition[] getConditions(Bundle bundle) {
-		Condition[] conditions = new Condition[conditionInfos.length];
-		for (int i = 0; i < conditionInfos.length; i++) {
-			/*
-			 * TODO: Can we pre-get the Constructors in our own constructor
-			 */
-			Class<?> clazz;
-			try {
-				clazz = Class.forName(conditionInfos[i].getType());
-			} catch (ClassNotFoundException e) {
-				/* If the class isn't there, we fail */
-				return null;
+	Condition[] getConditions(BundlePermissions bundlePermissions) {
+		synchronized (bundleConditionsLock) {
+			Condition[] conditions = null;
+			if (bundleConditions != null) {
+				conditions = bundleConditions.get(bundlePermissions);
 			}
-			Constructor<?> constructor = null;
-			Method method = null;
-			try {
-				method = clazz.getMethod("getCondition", conditionMethodArgs); //$NON-NLS-1$
-				if ((method.getModifiers() & Modifier.STATIC) == 0)
-					method = null;
-			} catch (NoSuchMethodException e) {
-				// This is a normal case
-			}
-			if (method == null)
-				try {
-					constructor = clazz.getConstructor(conditionMethodArgs);
-				} catch (NoSuchMethodException e) {
-					// TODO should post a FrameworkEvent of type error here
-					conditions[i] = Condition.FALSE;
-					continue;
-				}
+			if (conditions == null) {
+				conditions = new Condition[conditionInfos.length];
+				for (int i = 0; i < conditionInfos.length; i++) {
+					/*
+					 * TODO: Can we pre-get the Constructors in our own constructor
+					 */
+					Class<?> clazz;
+					try {
+						clazz = Class.forName(conditionInfos[i].getType());
+					} catch (ClassNotFoundException e) {
+						/* If the class isn't there, we fail */
+						return null;
+					}
+					Constructor<?> constructor = null;
+					Method method = getConditionMethod(clazz);
+					if (method == null) {
+						constructor = getConditionConstructor(clazz);
+						if (constructor == null) {
+							// TODO should post a FrameworkEvent of type error here
+							conditions[i] = Condition.FALSE;
+							continue;
+						}
+					}
 
-			Object args[] = {bundle, conditionInfos[i]};
-			try {
-				if (method != null)
-					conditions[i] = (Condition) method.invoke(null, args);
-				else
-					conditions[i] = (Condition) constructor.newInstance(args);
-			} catch (Throwable t) {
-				// TODO should post a FrameworkEvent of type error here
-				conditions[i] = Condition.FALSE;
+					Object[] args = {bundlePermissions.getBundle(), conditionInfos[i]};
+					try {
+						if (method != null)
+							conditions[i] = (Condition) method.invoke(null, args);
+						else
+							conditions[i] = (Condition) constructor.newInstance(args);
+					} catch (Exception e) {
+						// TODO should post a FrameworkEvent of type error here
+						conditions[i] = Condition.FALSE;
+					}
+				}
+				if (bundleConditions != null) {
+					bundleConditions.put(bundlePermissions, conditions);
+				}
+			}
+			return conditions;
+		}
+	}
+
+	private Method getConditionMethod(Class<?> clazz) {
+		for (Method checkMethod : clazz.getMethods()) {
+			if (checkMethod.getName().equals("getCondition")
+					&& (checkMethod.getModifiers() & Modifier.STATIC) == Modifier.STATIC
+					&& checkParameterTypes(checkMethod.getParameterTypes())) {
+				return checkMethod;
 			}
 		}
-		return conditions;
+		return null;
+	}
+
+	private Constructor<?> getConditionConstructor(Class<?> clazz) {
+		for (Constructor<?> checkConstructor : clazz.getConstructors()) {
+			if (checkParameterTypes(checkConstructor.getParameterTypes())) {
+				return checkConstructor;
+			}
+		}
+		return null;
+	}
+
+	private boolean checkParameterTypes(Class<?>[] foundTypes) {
+		if (foundTypes.length != conditionMethodArgs.length) {
+			return false;
+		}
+
+		for (int i = 0; i < foundTypes.length; i++) {
+			if (!foundTypes[i].isAssignableFrom(conditionMethodArgs[i])) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	Decision evaluate(BundlePermissions bundlePermissions, Permission permission) {
 		if (bundleConditions == null || bundlePermissions == null)
 			return evaluatePermission(permission);
-		Condition[] conditions;
-		synchronized (bundleConditions) {
-			conditions = bundleConditions.get(bundlePermissions);
-			if (conditions == null) {
-				conditions = getConditions(bundlePermissions.getBundle());
-				bundleConditions.put(bundlePermissions, conditions);
-			}
-		}
+		Condition[] conditions = getConditions(bundlePermissions);
 		if (conditions == ABSTAIN_LIST)
 			return DECISION_ABSTAIN;
 		if (conditions == SATISFIED_LIST)
@@ -314,7 +346,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 				} else {
 					if (!mutable)
 						// this will cause the row to always abstain; mark this to be ignored in future checks
-						synchronized (bundleConditions) {
+						synchronized (bundleConditionsLock) {
 							bundleConditions.put(bundlePermissions, ABSTAIN_LIST);
 						}
 					return DECISION_ABSTAIN;
@@ -333,7 +365,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			empty &= conditions[i] == null;
 		}
 		if (empty) {
-			synchronized (bundleConditions) {
+			synchronized (bundleConditionsLock) {
 				bundleConditions.put(bundlePermissions, SATISFIED_LIST);
 			}
 		}
@@ -413,7 +445,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	void clearCaches() {
 		permissionInfoCollection.clearPermissionCache();
 		if (bundleConditions != null)
-			synchronized (bundleConditions) {
+			synchronized (bundleConditionsLock) {
 				bundleConditions.clear();
 			}
 	}
@@ -435,7 +467,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			if (mutable || !condition.isPostponed())
 				return; // do nothing
 			if (isSatisfied) {
-				synchronized (row.bundleConditions) {
+				synchronized (row.bundleConditionsLock) {
 					Condition[] rowConditions = row.bundleConditions.get(bundlePermissions);
 					boolean isEmpty = true;
 					for (int i = 0; i < rowConditions.length; i++) {
@@ -448,7 +480,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 						row.bundleConditions.put(bundlePermissions, SATISFIED_LIST);
 				}
 			} else {
-				synchronized (row.bundleConditions) {
+				synchronized (row.bundleConditionsLock) {
 					row.bundleConditions.put(bundlePermissions, ABSTAIN_LIST);
 				}
 			}

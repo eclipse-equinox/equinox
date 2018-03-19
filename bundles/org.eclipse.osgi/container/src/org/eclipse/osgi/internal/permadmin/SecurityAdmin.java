@@ -405,6 +405,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			permAdminCollections[i].clearPermissionCache();
 		for (int i = 0; i < condAdminRows.length; i++)
 			condAdminRows[i].clearCaches();
+		condAdminTable.clearEvaluationCache();
 	}
 
 	EquinoxSecurityManager getSupportedSecurityManager() {

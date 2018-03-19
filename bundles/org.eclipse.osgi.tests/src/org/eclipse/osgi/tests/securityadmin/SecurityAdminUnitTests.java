@@ -39,6 +39,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	private static final PermissionInfo[] RUNTIME_INFOS = new PermissionInfo[] {new PermissionInfo("java.lang.RuntimePermission", "exitVM", null)}; //$NON-NLS-1$ //$NON-NLS-2$
 
 	private static final ConditionInfo[] ALLLOCATION_CONDS = new ConditionInfo[] {new ConditionInfo("org.osgi.service.condpermadmin.BundleLocationCondition", new String[] {"*"})}; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final ConditionInfo MUT_SAT = new ConditionInfo("ext.framework.b.TestCondition", new String[] {"MUT_SAT", "true", "false", "true"}); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	private static final ConditionInfo POST_MUT_SAT = new ConditionInfo("ext.framework.b.TestCondition", new String[] {"POST_MUT_SAT", "true", "true", "true"}); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	private static final ConditionInfo POST_MUT_UNSAT = new ConditionInfo("ext.framework.b.TestCondition", new String[] {"POST_MUT_UNSAT", "true", "true", "false"}); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
@@ -644,6 +645,30 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 		tc1sat.setSatisfied(false);
 		tc2sat.setSatisfied(false);
+		testSMPermission(pds, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public void testMutableConditions() {
+		installConditionBundle();
+		TestCondition.clearConditions();
+
+		Bundle test1 = installTestBundle(TEST_BUNDLE);
+		ProtectionDomain pd1 = test1.adapt(ProtectionDomain.class);
+		ProtectionDomain[] pds = new ProtectionDomain[] {pd1};
+
+		ConditionalPermissionUpdate update = cpa.newConditionalPermissionUpdate();
+		List<ConditionalPermissionInfo> rows = update.getConditionalPermissionInfos();
+		rows.add(cpa.newConditionalPermissionInfo(null, new ConditionInfo[] {MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfo.DENY));
+		rows.add(cpa.newConditionalPermissionInfo(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
+		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$);
+
+		testSMPermission(pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
+
+		TestCondition tc1sat = TestCondition.getTestCondition("MUT_SAT_" + test1.getBundleId()); //$NON-NLS-1$
+
+		assertNotNull("tc1sat", tc1sat); //$NON-NLS-1$
+
+		tc1sat.setSatisfied(false);
 		testSMPermission(pds, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
