@@ -16,3 +16,4 @@ Bug 516120 - Update Jetty to 9.4.5
 Bug 518514 - Update Jetty to 9.4.6
 Bug 522072 - Update platform to latest Jetty 9.4.7
 Bug 527620 - Update platform to latest Jetty 9.4.8
+Bug 532294 - Update platform to latest Jetty 9.4.9
