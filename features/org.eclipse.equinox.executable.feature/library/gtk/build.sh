@@ -1,6 +1,6 @@
 #!/bin/sh
 #*******************************************************************************
-# Copyright (c) 2000, 2014 IBM Corporation and others.
+# Copyright (c) 2000, 2018 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at 
@@ -121,17 +121,12 @@ case $defaultOS in
 				defaultJava=DEFAULT_JAVA_EXEC
 				OUTPUT_DIR="$EXEC_DIR/contributed/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
-			"ia64")
-				defaultOSArch="ia64"
-				defaultJava=DEFAULT_JAVA_EXEC
-				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
-				;;
-                        "arm*")
+			"arm*")
 				defaultOSArch="arm"
 				defaultJava=DEFAULT_JAVA_EXEC
 				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
-                        "aarch64")
+            "aarch64")
 				defaultOSArch="aarch64"
 				defaultJava=DEFAULT_JAVA_EXEC
 				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
@@ -149,58 +144,6 @@ case $defaultOS in
 		fi
 		[ -d /bluebird/teamswt/swt-builddir/JDKs/AIX/PPC64/j564/sdk ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/AIX/PPC64/j564/sdk"
 	;;
-	"HP-UX" | "hpux")
-		makefile="make_hpux.mak"
-		defaultOS="hpux"
-		case $defaultOSArch in
-			"ia64_32")
-				PATH=$PATH:/opt/hp-gcc/bin:/opt/gtk2.6/bin
-				PKG_CONFIG_PATH="/opt/gtk2.6/lib/pkgconfig"
-				;;
-			"ia64")
-				PATH=$PATH:/opt/hp-gcc/bin:/opt/gtk_64bit/bin
-				PKG_CONFIG_PATH="/opt/gtk_64bit/lib/hpux64/pkgconfig"
-				;;
-		esac
-		export PATH PKG_CONFIG_PATH
-		[ -d /opt/java1.5 ] && defaultJavaHome="/opt/java1.5"
-	;;
-	"SunOS" | "solaris")
-		makefile="make_solaris.mak"
-		defaultOS="solaris"
-		OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
-		#PATH=/usr/ccs/bin:/opt/SUNWspro/bin:$PATH
-		PATH=/usr/ccs/bin:/export/home/SUNWspro/bin:$PATH
-		export PATH
-		if [ "$PROC" = "" ];  then
-		    PROC=`uname -p`
-		fi
-		case ${PROC} in
-			"i386" | "x86")
-				if [ "`isainfo -k`" = "amd64" ]; then
-					defaultOSArch="x86_64"
-					[ -d /bluebird/teamswt/swt-builddir/build/JRE/Solaris_x64/jdk1.8.0_71 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/build/JRE/Solaris_x64/jdk1.8.0_71"
-				else
-					defaultOSArch="x86"
-					[ -d /bluebird/teamswt/swt-builddir/build/JRE/Solaris_x86/jdk1.6.0_14 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/build/JRE/Solaris_x86/jdk1.6.0_14"
-				fi
-				CC=cc
-				;;
-			"sparc")
-				if [ "`isainfo -k`" = "sparcv9" ]; then
-					defaultOSArch="sparcv9"
-					[ -d /bluebird/teamswt/swt-builddir/JDKs/SOLARIS/SPARC64/jdk1.5.0_22 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/SOLARIS/SPARC64/jdk1.5.0_22"
-				else
-					defaultOSArch="sparc"
-					[ -d /bluebird/teamswt/swt-builddir/build/JRE/SPARC/jdk1.6.0_14 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/build/JRE/SPARC/jdk1.6.0_14"
-				fi
-				CC=cc
-				;;
-			*)
-				echo "*** Unknown processor type <${PROC}>"
-				;;
-		esac
-		;;
 	*)
 	echo "Unknown OS -- build aborted"
 	;;
@@ -241,17 +184,9 @@ elif [ "$defaultOSArch" = "s390x" ];  then
 	if [ "${JAVA_HOME}" = "" ]; then
 		export JAVA_HOME="/home/swtbuild/java5/s390x/ibm-java2-s390x-50"
 	fi
-elif [ "$defaultOSArch" = "ia64" ];  then
-	M_ARCH=-mlp64
-	export M_ARCH
 elif [ "$defaultOSArch" = "x86" ];  then
 	M_ARCH=-m32
 	export M_ARCH
-elif [ "$defaultOS" = "solaris" ];  then
-	if [ "$defaultOSArch" = "x86_64" -o "$defaultOSArch" = "sparcv9" ]; then
-		M_ARCH=-m64
-		export M_ARCH
-	fi
 fi
 
 LIBRARY_DIR="$EXEC_DIR/../org.eclipse.equinox.launcher.$defaultWS.$defaultOS.$defaultOSArch"
