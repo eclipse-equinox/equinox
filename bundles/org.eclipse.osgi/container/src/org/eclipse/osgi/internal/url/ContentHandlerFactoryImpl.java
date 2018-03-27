@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2016 IBM Corporation and others.
+ * Copyright (c) 2003, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,11 @@ package org.eclipse.osgi.internal.url;
 import java.lang.reflect.Method;
 import java.net.ContentHandler;
 import java.net.URLConnection;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.messages.Msg;
@@ -36,7 +40,7 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 
 	private static final String contentHandlerClazz = "java.net.ContentHandler"; //$NON-NLS-1$
 	private static final String CONTENT_HANDLER_PKGS = "java.content.handler.pkgs"; //$NON-NLS-1$
-	private static final String DEFAULT_VM_CONTENT_HANDLERS = "sun.net.www.content"; //$NON-NLS-1$
+	private static final String DEFAULT_VM_CONTENT_HANDLERS = "sun.net.www.content|sun.awt.www.content"; //$NON-NLS-1$
 
 	private static final List<Class<?>> ignoredClasses = Arrays.asList(new Class<?>[] {MultiplexingContentHandler.class, ContentHandlerFactoryImpl.class, URLConnection.class});
 
