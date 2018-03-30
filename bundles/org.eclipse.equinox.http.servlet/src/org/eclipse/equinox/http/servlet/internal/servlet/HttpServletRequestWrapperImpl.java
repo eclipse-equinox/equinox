@@ -54,6 +54,8 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		dispatcherAttributes.add(RequestDispatcher.INCLUDE_SERVLET_PATH);
 	}
 
+	private static final Object NULL_PLACEHOLDER = new Object();
+
 	public static HttpServletRequestWrapperImpl findHttpRuntimeRequest(
 		HttpServletRequest request) {
 
@@ -207,49 +209,40 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 			}
 		}
 		else if (dispatcherType == DispatcherType.INCLUDE) {
-			if (attributeName.equals(RequestDispatcher.INCLUDE_CONTEXT_PATH)) {
-				if (hasServletName) {
+			if (hasServletName && attributeName.startsWith("javax.servlet.include")) { //$NON-NLS-1$
+				return null;
+			}
+
+			if (dispatcherAttributes.contains(attributeName)) {
+				Object specialOveride = specialOverides.get(attributeName);
+
+				if (NULL_PLACEHOLDER.equals(specialOveride)) {
 					return null;
 				}
-				if (specialOverides.containsKey(RequestDispatcher.INCLUDE_CONTEXT_PATH)) {
-					return specialOverides.get(RequestDispatcher.INCLUDE_CONTEXT_PATH);
+				else if (specialOveride != null) {
+					return specialOveride;
 				}
+
+				Object attributeValue = super.getAttribute(attributeName);
+
+				if (attributeValue != null) {
+					return attributeValue;
+				}
+			}
+
+			if (attributeName.equals(RequestDispatcher.INCLUDE_CONTEXT_PATH)) {
 				return current.getContextController().getFullContextPath();
 			}
 			else if (attributeName.equals(RequestDispatcher.INCLUDE_PATH_INFO)) {
-				if (hasServletName) {
-					return null;
-				}
-				if (specialOverides.containsKey(RequestDispatcher.INCLUDE_PATH_INFO)) {
-					return specialOverides.get(RequestDispatcher.INCLUDE_PATH_INFO);
-				}
 				return current.getPathInfo();
 			}
 			else if (attributeName.equals(RequestDispatcher.INCLUDE_QUERY_STRING)) {
-				if (hasServletName) {
-					return null;
-				}
-				if (specialOverides.containsKey(RequestDispatcher.INCLUDE_QUERY_STRING)) {
-					return specialOverides.get(RequestDispatcher.INCLUDE_QUERY_STRING);
-				}
 				return current.getQueryString();
 			}
 			else if (attributeName.equals(RequestDispatcher.INCLUDE_REQUEST_URI)) {
-				if (hasServletName) {
-					return null;
-				}
-				if (specialOverides.containsKey(RequestDispatcher.INCLUDE_REQUEST_URI)) {
-					return specialOverides.get(RequestDispatcher.INCLUDE_REQUEST_URI);
-				}
 				return current.getRequestURI();
 			}
 			else if (attributeName.equals(RequestDispatcher.INCLUDE_SERVLET_PATH)) {
-				if (hasServletName) {
-					return null;
-				}
-				if (specialOverides.containsKey(RequestDispatcher.INCLUDE_SERVLET_PATH)) {
-					return specialOverides.get(RequestDispatcher.INCLUDE_SERVLET_PATH);
-				}
 				return current.getServletPath();
 			}
 
@@ -262,36 +255,32 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 				return null;
 			}
 
+			if (dispatcherAttributes.contains(attributeName)) {
+				Object specialOveride = specialOverides.get(attributeName);
+
+				if (NULL_PLACEHOLDER.equals(specialOveride)) {
+					return null;
+				}
+				else if (specialOveride != null) {
+					return specialOveride;
+				}
+			}
+
 			DispatchTargets original = dispatchTargets.getLast();
 
 			if (attributeName.equals(RequestDispatcher.FORWARD_CONTEXT_PATH)) {
-				if (specialOverides.containsKey(RequestDispatcher.FORWARD_CONTEXT_PATH)) {
-					return specialOverides.get(RequestDispatcher.FORWARD_CONTEXT_PATH);
-				}
 				return original.getContextController().getFullContextPath();
 			}
 			else if (attributeName.equals(RequestDispatcher.FORWARD_PATH_INFO)) {
-				if (specialOverides.containsKey(RequestDispatcher.FORWARD_PATH_INFO)) {
-					return specialOverides.get(RequestDispatcher.FORWARD_PATH_INFO);
-				}
 				return original.getPathInfo();
 			}
 			else if (attributeName.equals(RequestDispatcher.FORWARD_QUERY_STRING)) {
-				if (specialOverides.containsKey(RequestDispatcher.FORWARD_QUERY_STRING)) {
-					return specialOverides.get(RequestDispatcher.FORWARD_QUERY_STRING);
-				}
 				return original.getQueryString();
 			}
 			else if (attributeName.equals(RequestDispatcher.FORWARD_REQUEST_URI)) {
-				if (specialOverides.containsKey(RequestDispatcher.FORWARD_REQUEST_URI)) {
-					return specialOverides.get(RequestDispatcher.FORWARD_REQUEST_URI);
-				}
 				return original.getRequestURI();
 			}
 			else if (attributeName.equals(RequestDispatcher.FORWARD_SERVLET_PATH)) {
-				if (specialOverides.containsKey(RequestDispatcher.FORWARD_SERVLET_PATH)) {
-					return specialOverides.get(RequestDispatcher.FORWARD_SERVLET_PATH);
-				}
 				return original.getServletPath();
 			}
 
@@ -374,9 +363,8 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 			current.getSpecialOverides().remove(name);
 		}
-		else {
-			request.removeAttribute(name);
-		}
+
+		request.removeAttribute(name);
 
 		DispatchTargets currentDispatchTarget = dispatchTargets.peek();
 
@@ -406,15 +394,14 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 			DispatchTargets current = dispatchTargets.peek();
 
 			if (value == null) {
-				current.getSpecialOverides().remove(name);
+				current.getSpecialOverides().put(name, NULL_PLACEHOLDER);
 			}
 			else {
 				current.getSpecialOverides().put(name, value);
 			}
 		}
-		else {
-			request.setAttribute(name, value);
-		}
+
+		request.setAttribute(name, value);
 
 		DispatchTargets currentDispatchTarget = dispatchTargets.peek();
 
