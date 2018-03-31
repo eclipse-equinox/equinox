@@ -37,7 +37,7 @@ public final class StateHelperImpl implements StateHelper {
 		if (bundles == null || bundles.length == 0)
 			return new BundleDescription[0];
 
-		Set<BundleDescription> reachable = new HashSet<>(bundles.length);
+		Set<BundleDescription> reachable = new LinkedHashSet<>(bundles.length);
 		for (int i = 0; i < bundles.length; i++) {
 			if (!bundles[i].isResolved())
 				continue;
@@ -58,7 +58,7 @@ public final class StateHelperImpl implements StateHelper {
 	public BundleDescription[] getPrerequisites(BundleDescription[] bundles) {
 		if (bundles == null || bundles.length == 0)
 			return new BundleDescription[0];
-		Set<BundleDescription> reachable = new HashSet<>(bundles.length);
+		Set<BundleDescription> reachable = new LinkedHashSet<>(bundles.length);
 		for (int i = 0; i < bundles.length; i++)
 			addPrerequisites(bundles[i], reachable);
 		return reachable.toArray(new BundleDescription[reachable.size()]);
