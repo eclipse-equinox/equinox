@@ -29,7 +29,7 @@ import org.eclipse.core.internal.runtime.TracingOptions;
  * <li>It is not necessary to call beginTask() or done() on an instance of SubMonitor.</li>
  * <li>SubMonitor has a simpler syntax for creating nested monitors.</li>
  * <li>SubMonitor is more efficient for deep recursion chains.</li>      
- * <li>SubMonitor has a setWorkRemining method that allows the remaining space on the monitor to be 
+ * <li>SubMonitor has a setWorkRemaining method that allows the remaining space on the monitor to be 
  * redistributed without reporting any work.</li>
  * <li>SubMonitor protects the caller from common progress reporting bugs in a called method. For example, 
  * if a called method fails to call done() on the given monitor or fails to consume all the ticks on 
@@ -57,7 +57,7 @@ import org.eclipse.core.internal.runtime.TracingOptions;
  * necessary to call <code>monitor.done()</code>. The JavaDoc contract makes this the responsibility of the caller.</p> 
  * 
  * <pre>
- *      // param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility
+ *      // {@literal @}param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility
  *      //        to call done() on the given monitor. Accepts <code>null</code>, indicating that no progress should be
  *      //        reported and that the operation cannot be cancelled.
  *      //
