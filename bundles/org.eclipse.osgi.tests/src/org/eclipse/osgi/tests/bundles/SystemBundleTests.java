@@ -88,6 +88,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.SynchronousBundleListener;
+import org.osgi.framework.Version;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.hooks.weaving.WeavingHook;
@@ -2748,10 +2749,11 @@ public class SystemBundleTests extends AbstractBundleTests {
 	}
 
 	public void testJavaProfile() throws IOException {
+		boolean isRunningJava9OrGreater = isJavaVersionGreaterThanOrEqualTo9();
 		String originalSpecVersion = System.getProperty("java.specification.version");
 		String originalJavaHome = System.getProperty("java.home");
 		try {
-			doTestJavaProfile("9.3.1", "JavaSE-9", null);
+			doTestJavaProfile("9.3.1", isRunningJava9OrGreater ? "JavaSE-9.3" : "JavaSE-9", null);
 			doTestJavaProfile("9", "JavaSE-9", null);
 			doTestJavaProfile("8.4", "JavaSE-1.8", null);
 			doTestJavaProfile("1.10.1", "JavaSE-1.8", null);
@@ -2763,13 +2765,35 @@ public class SystemBundleTests extends AbstractBundleTests {
 			doTestJavaProfile("1.8", "JavaSE/compact3-1.8", " \"compact3\" ");
 			doTestJavaProfile("1.8", "JavaSE/compact3-1.8", " compact3 ");
 			doTestJavaProfile("1.8", "JavaSE-1.8", "\"compact4\"");
-			doTestJavaProfile("9", "JavaSE/compact3-1.8", "compact3");
-			doTestJavaProfile("9", "JavaSE/compact3-1.8", "\"compact3\"");
-			doTestJavaProfile("9", "JavaSE-9", "\"compact4\"");
+			if (!isRunningJava9OrGreater) {
+				doTestJavaProfile("9", "JavaSE/compact3-1.8", "compact3");
+				doTestJavaProfile("9", "JavaSE/compact3-1.8", "\"compact3\"");
+				doTestJavaProfile("9", "JavaSE-9", "\"compact4\"");
+			}
 		} finally {
 			System.setProperty("java.specification.version", originalSpecVersion);
 			System.setProperty("java.home", originalJavaHome);
 		}
+	}
+
+	private Boolean isJavaVersionGreaterThanOrEqualTo9() {
+		// default to Java 7 since that is our min
+		Version javaVersion = Version.valueOf("1.7"); //$NON-NLS-1$
+		// set the profile and EE based off of the java.specification.version
+		String javaSpecVersionProp = System.getProperty(EquinoxConfiguration.PROP_JVM_SPEC_VERSION);
+		StringTokenizer st = new StringTokenizer(javaSpecVersionProp, " _-"); //$NON-NLS-1$
+		javaSpecVersionProp = st.nextToken();
+		try {
+			String[] vComps = javaSpecVersionProp.split("\\."); //$NON-NLS-1$
+			// only pay attention to the first three components of the version
+			int major = vComps.length > 0 ? Integer.parseInt(vComps[0]) : 0;
+			int minor = vComps.length > 1 ? Integer.parseInt(vComps[1]) : 0;
+			int micro = vComps.length > 2 ? Integer.parseInt(vComps[2]) : 0;
+			javaVersion = new Version(major, minor, micro);
+		} catch (IllegalArgumentException e) {
+			// do nothing
+		}
+		return javaVersion.compareTo(new Version(9, 0, 0)) >= 0;
 	}
 
 	private void doTestJavaProfile(String javaSpecVersion, String expectedEEName, String releaseName) throws FileNotFoundException, IOException {
