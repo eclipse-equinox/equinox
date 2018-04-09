@@ -143,7 +143,7 @@ public class LogServiceManager implements BundleListener, FrameworkListener, Ser
 		int logType = (eventType == ServiceEvent.MODIFIED) ? LogService.LOG_DEBUG : LogService.LOG_INFO;
 		if (logReaderServiceFactory.isLoggable(bundle, LOGGER_SERVICE_EVENT, logType)) {
 			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(LOGGER_SERVICE_EVENT);
-			logger.log(bundle, null, null, logType, getServiceEventTypeName(eventType), null);
+			logger.log(bundle, reference, null, logType, getServiceEventTypeName(eventType), null);
 		}
 	}
 

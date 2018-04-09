@@ -8,15 +8,24 @@
  *******************************************************************************/
 package org.eclipse.equinox.log.test;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 import junit.framework.TestCase;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.log.*;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.log.LogEntry;
+import org.osgi.service.log.LogLevel;
+import org.osgi.service.log.LogReaderService;
+import org.osgi.service.log.LogService;
+import org.osgi.service.log.Logger;
 import org.osgi.service.log.admin.LoggerAdmin;
 import org.osgi.service.log.admin.LoggerContext;
 
+@SuppressWarnings("deprecation")
 public class LogServiceTest extends TestCase {
 
 	private LogService log;
@@ -266,5 +275,42 @@ public class LogServiceTest extends TestCase {
 		assertTrue(entry.getMessage().equals(message));
 		assertTrue(entry.getException().getMessage().equals(t.getMessage()));
 		assertTrue(entry.getServiceReference() == logReference);
+	}
+
+	public void testServiceEventLog() throws InterruptedException {
+		BundleContext context = OSGiTestsActivator.getContext();
+		ServiceRegistration<Object> reg = context.registerService(Object.class, new Object(), null);
+		ServiceReference<Object> ref = reg.getReference();
+		listener.waitForLogEntry();
+
+		listener.waitForLogEntry();
+		LogEntry entry = listener.getEntryX();
+		assertEquals("Wrong logger name.", "Events.Service", entry.getLoggerName());
+		assertEquals("Wrong event log level.", LogLevel.INFO, entry.getLogLevel());
+		assertEquals("Wrong bundle.", context.getBundle(), entry.getBundle());
+		assertNull("Wrong exception.", entry.getException());
+		assertEquals("Wrong service reference.", ref, entry.getServiceReference());
+		assertEquals("Wrong message.", "ServiceEvent REGISTERED", entry.getMessage());
+
+		reg.setProperties(new Hashtable(Collections.singletonMap("key1", "value1")));
+
+		listener.waitForLogEntry();
+		entry = listener.getEntryX();
+		assertEquals("Wrong logger name.", "Events.Service", entry.getLoggerName());
+		assertEquals("Wrong event log level.", LogLevel.DEBUG, entry.getLogLevel());
+		assertEquals("Wrong bundle.", context.getBundle(), entry.getBundle());
+		assertNull("Wrong exception.", entry.getException());
+		assertEquals("Wrong service reference.", ref, entry.getServiceReference());
+		assertEquals("Wrong message.", "ServiceEvent MODIFIED", entry.getMessage());
+
+		reg.unregister();
+		listener.waitForLogEntry();
+		entry = listener.getEntryX();
+		assertEquals("Wrong logger name.", "Events.Service", entry.getLoggerName());
+		assertEquals("Wrong event log level.", LogLevel.INFO, entry.getLogLevel());
+		assertEquals("Wrong bundle.", context.getBundle(), entry.getBundle());
+		assertNull("Wrong exception.", entry.getException());
+		assertEquals("Wrong service reference.", ref, entry.getServiceReference());
+		assertEquals("Wrong message.", "ServiceEvent UNREGISTERING", entry.getMessage());
 	}
 }
