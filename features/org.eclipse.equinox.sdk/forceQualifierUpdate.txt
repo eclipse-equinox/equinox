@@ -7,3 +7,4 @@ Bug 458346 - Unusual, hard to decipher error in I-build
 Bug 483585 - I20151203-0800 build failed due to resolution problems
 Bug 506597 - Build failure on I20161026-2000
 Bug 528810 - Compilation failure in I20171214-2000
+Bug 533464 - Build failure in I20180411-0530
