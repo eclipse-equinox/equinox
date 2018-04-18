@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2008 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2018 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -31,7 +31,7 @@ public class ThreadPoolFactoryImpl extends ServiceFactoryImpl implements ThreadP
 	private int limit;
 	private int used = 0;
 	private Job queue;
-	private static int defaultPercent;;
+	private static int defaultPercent;
 
 	public ThreadPoolFactoryImpl(String bundleName, Log log) {
 

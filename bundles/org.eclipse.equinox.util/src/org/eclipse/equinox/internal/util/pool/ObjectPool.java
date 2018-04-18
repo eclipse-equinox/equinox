@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2008 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2018 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -73,7 +73,7 @@ public class ObjectPool {
 		this.oc = oc;
 		if (template != null) {
 			try {
-				template.getConstructor(new Class[0]);
+				template.getConstructor();
 				this.template = template;
 			} catch (NoSuchMethodException nsm) {
 				throw new IllegalArgumentException(template + " don't have default constructor!");

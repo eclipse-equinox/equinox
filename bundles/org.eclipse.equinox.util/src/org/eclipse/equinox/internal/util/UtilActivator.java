@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2008 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2018 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.util;
 
+import org.eclipse.equinox.internal.util.impl.tpt.ServiceFactoryImpl;
 import org.eclipse.equinox.internal.util.impl.tpt.threadpool.ThreadPoolFactoryImpl;
 import org.eclipse.equinox.internal.util.impl.tpt.timer.TimerFactory;
 import org.eclipse.equinox.internal.util.ref.Log;
@@ -103,7 +104,7 @@ public class UtilActivator implements BundleActivator {
 				log.debug(0, 2001, String.valueOf(time[0] - time[1]), null, false, true);
 			}
 
-			String bundleName = ThreadPoolFactoryImpl.getName(bc.getBundle());
+			String bundleName = ServiceFactoryImpl.getName(bc.getBundle());
 			thMan = new ThreadPoolFactoryImpl(bundleName, log);
 			if (startup)
 				timeLog(3); /* 3 = "Creating Thread Pool service took " */

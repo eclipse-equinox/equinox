@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2008 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2018 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -42,18 +42,22 @@ public class TimerFactory extends ServiceFactoryImpl implements Timer {
 		return new TimerFactory(bundleName);
 	}
 
+	@Deprecated
 	public void notifyAfterMillis(TimerListener listener, long timePeriod, int event) throws IllegalArgumentException {
 		addNotifyListener(listener, Thread.NORM_PRIORITY, Timer.ONE_SHOT_TIMER, timePeriod, event);
 	}
 
+	@Deprecated
 	public void notifyAfterMillis(TimerListener listener, int priority, long timePeriod, int event) throws IllegalArgumentException {
 		addNotifyListener(listener, priority, Timer.ONE_SHOT_TIMER, timePeriod, event);
 	}
 
+	@Deprecated
 	public void notifyAfter(TimerListener listener, int timePeriod, int event) throws IllegalArgumentException {
 		addNotifyListener(listener, Thread.NORM_PRIORITY, Timer.ONE_SHOT_TIMER, timePeriod * 1000, event);
 	}
 
+	@Deprecated
 	public void notifyAfter(TimerListener listener, int priority, int timePeriod, int event) throws IllegalArgumentException {
 		addNotifyListener(listener, priority, Timer.ONE_SHOT_TIMER, timePeriod * 1000, event);
 	}
