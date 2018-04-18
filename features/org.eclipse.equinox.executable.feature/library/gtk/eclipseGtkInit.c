@@ -121,9 +121,6 @@ int loadGtk() {
 		setenv("OXYGEN_DISABLE_INNER_SHADOWS_HACK", "1", 0);
 	}
 	
-	/* Disable GTK scaling*/
-	setenv("GDK_SCALE", "1", 1);
-
 	void *gioLib = NULL, *glibLib = NULL, *gdkLib = NULL, *gtkLib = NULL, *objLib = NULL, *pixLib = NULL;
 	
 	char *gtk3 = getenv("SWT_GTK3");
