@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -155,6 +155,7 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 		return false;
 	}
 
+	@Override
 	public ManagedService addingService(ServiceReference<ManagedService> reference) {
 		ManagedService service = context.getService(reference);
 		if (service == null)
@@ -164,6 +165,7 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 		return service;
 	}
 
+	@Override
 	public void modifiedService(ServiceReference<ManagedService> reference, ManagedService service) {
 		List<String> newPids = TargetMap.getPids(reference.getProperty(Constants.SERVICE_PID));
 		synchronized (targets) {
@@ -187,14 +189,15 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 				}
 			}
 		}
-		
+
 		untrackManagedService(reference);
 		addingService(reference);
 	}
 
+	@Override
 	public void removedService(ServiceReference<ManagedService> reference, ManagedService service) {
 		untrackManagedService(reference);
-		
+
 		context.ungetService(reference);
 	}
 
@@ -267,6 +270,7 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 
 	private void asynchUpdated(final ManagedService service, final Dictionary<String, ?> properties) {
 		queue.put(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					service.updated(properties);

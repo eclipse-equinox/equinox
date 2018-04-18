@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -137,6 +137,7 @@ class ConfigurationImpl implements Configuration {
 		}
 	}
 
+	@Override
 	public void delete() {
 		Object deleteToken;
 		try {
@@ -167,6 +168,7 @@ class ConfigurationImpl implements Configuration {
 		}
 	}
 
+	@Override
 	public String getBundleLocation() {
 		try {
 			lock();
@@ -191,6 +193,7 @@ class ConfigurationImpl implements Configuration {
 		}
 	}
 
+	@Override
 	public String getFactoryPid() {
 		return getFactoryPid(true);
 	}
@@ -206,10 +209,12 @@ class ConfigurationImpl implements Configuration {
 		}
 	}
 
+	@Override
 	public String getPid() {
 		return getPid(true);
 	}
 
+	@Override
 	public Dictionary<String, Object> getProperties() {
 		try {
 			lock();
@@ -267,6 +272,7 @@ class ConfigurationImpl implements Configuration {
 		}
 	}
 
+	@Override
 	public void setBundleLocation(String bundleLocation) {
 		try {
 			lock();
@@ -289,6 +295,7 @@ class ConfigurationImpl implements Configuration {
 		}
 	}
 
+	@Override
 	public void update() throws IOException {
 		try {
 			lock();
@@ -303,6 +310,7 @@ class ConfigurationImpl implements Configuration {
 		}
 	}
 
+	@Override
 	public void update(Dictionary<String, ?> properties) throws IOException {
 		try {
 			lock();
@@ -335,7 +343,7 @@ class ConfigurationImpl implements Configuration {
 					System.arraycopy(value, 0, copyOfArray, 0, arrayLength);
 					newDictionary.put(key, copyOfArray);
 				} else if (value instanceof Collection)
-					newDictionary.put(key, new Vector<Object>((Collection<?>) value));
+					newDictionary.put(key, new Vector<>((Collection<?>) value));
 				else
 					newDictionary.put(key, properties.get(key));
 			} else
@@ -348,10 +356,12 @@ class ConfigurationImpl implements Configuration {
 		dictionary = newDictionary;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		return (obj instanceof ConfigurationImpl) && pid.equals(((ConfigurationImpl) obj).getPid());
 	}
 
+	@Override
 	public int hashCode() {
 		return pid.hashCode();
 	}
@@ -365,6 +375,7 @@ class ConfigurationImpl implements Configuration {
 		}
 	}
 
+	@Override
 	public long getChangeCount() {
 		try {
 			lock();

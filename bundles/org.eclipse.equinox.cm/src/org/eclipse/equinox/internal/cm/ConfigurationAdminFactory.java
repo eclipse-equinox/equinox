@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,16 +55,19 @@ public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAd
 		pluginManager.stop();
 	}
 
+	@Override
 	public ConfigurationAdmin getService(Bundle bundle, ServiceRegistration<ConfigurationAdmin> registration) {
 		ServiceReference<ConfigurationAdmin> reference = registration.getReference();
 		eventDispatcher.setServiceReference(reference);
 		return new ConfigurationAdminImpl(this, configurationStore, bundle);
 	}
 
+	@Override
 	public void ungetService(Bundle bundle, ServiceRegistration<ConfigurationAdmin> registration, ConfigurationAdmin service) {
 		// do nothing
 	}
 
+	@Override
 	public void bundleChanged(BundleEvent event) {
 		if (event.getType() == BundleEvent.UNINSTALLED)
 			configurationStore.unbindConfigurations(event.getBundle());

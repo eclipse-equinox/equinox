@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others..
+ * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,19 +34,23 @@ class ConfigurationAdminImpl implements ConfigurationAdmin {
 		this.bundleLocation = ConfigurationAdminImpl.getLocation(bundle);
 	}
 
+	@Override
 	public Configuration createFactoryConfiguration(String factoryPid) {
 		return internalGetConfiguration(factoryPid, bundleLocation, true, true);
 
 	}
 
+	@Override
 	public Configuration createFactoryConfiguration(String factoryPid, String location) {
 		return internalGetConfiguration(factoryPid, location, true, false);
 	}
 
+	@Override
 	public Configuration getConfiguration(String pid) {
 		return internalGetConfiguration(pid, bundleLocation, false, true);
 	}
 
+	@Override
 	public Configuration getConfiguration(String pid, String location) {
 		return internalGetConfiguration(pid, location, false, false);
 	}
@@ -75,6 +79,7 @@ class ConfigurationAdminImpl implements ConfigurationAdmin {
 		return config;
 	}
 
+	@Override
 	public Configuration[] listConfigurations(String filterString) throws InvalidSyntaxException {
 		if (filterString == null)
 			filterString = "(" + Constants.SERVICE_PID + "=*)"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -84,7 +89,7 @@ class ConfigurationAdminImpl implements ConfigurationAdmin {
 			return null;
 		}
 
-		List<Configuration> result = new ArrayList<Configuration>(configs.length);
+		List<Configuration> result = new ArrayList<>(configs.length);
 		SecurityManager sm = System.getSecurityManager();
 		for (int i = 0; i < configs.length; i++) {
 			try {
@@ -106,6 +111,7 @@ class ConfigurationAdminImpl implements ConfigurationAdmin {
 
 	static String getLocation(final Bundle bundle) {
 		return AccessController.doPrivileged(new PrivilegedAction<String>() {
+			@Override
 			public String run() {
 				return bundle.getLocation();
 			}

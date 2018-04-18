@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -146,6 +146,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 		return false;
 	}
 
+	@Override
 	public ManagedServiceFactory addingService(ServiceReference<ManagedServiceFactory> reference) {
 		ManagedServiceFactory service = context.getService(reference);
 		if (service == null)
@@ -155,6 +156,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 		return service;
 	}
 
+	@Override
 	public void modifiedService(ServiceReference<ManagedServiceFactory> reference, ManagedServiceFactory service) {
 		List<String> newPids = TargetMap.getPids(reference.getProperty(Constants.SERVICE_PID));
 		synchronized (targets) {
@@ -178,14 +180,15 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 				}
 			}
 		}
-		
+
 		untrackManagedServiceFactory(reference);
 		addingService(reference);
 	}
 
+	@Override
 	public void removedService(ServiceReference<ManagedServiceFactory> reference, ManagedServiceFactory service) {
 		untrackManagedServiceFactory(reference);
-		
+
 		context.ungetService(reference);
 	}
 
@@ -259,6 +262,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 
 	private void asynchDeleted(final ManagedServiceFactory service, final String pid) {
 		queue.put(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					service.deleted(pid);
@@ -274,6 +278,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 			return;
 		}
 		queue.put(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					service.updated(pid, properties);

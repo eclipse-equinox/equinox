@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation.
+ * Copyright (c) 2007, 2018 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,7 +39,7 @@ public class ConfigurationEventAdapter implements ConfigurationListener {
 
 	public ConfigurationEventAdapter(BundleContext context) {
 		this.context = context;
-		eventAdminTracker = new ServiceTracker<EventAdmin, EventAdmin>(context, EventAdmin.class, null);
+		eventAdminTracker = new ServiceTracker<>(context, EventAdmin.class, null);
 	}
 
 	public void start() throws Exception {
@@ -53,6 +53,7 @@ public class ConfigurationEventAdapter implements ConfigurationListener {
 		eventAdminTracker.close();
 	}
 
+	@Override
 	public void configurationEvent(ConfigurationEvent event) {
 		EventAdmin eventAdmin = eventAdminTracker.getService();
 		if (eventAdmin == null) {
@@ -74,7 +75,7 @@ public class ConfigurationEventAdapter implements ConfigurationListener {
 		if (ref == null) {
 			throw new RuntimeException("ServiceEvent.getServiceReference() is null"); //$NON-NLS-1$
 		}
-		Hashtable<String, Object> properties = new Hashtable<String, Object>();
+		Hashtable<String, Object> properties = new Hashtable<>();
 		properties.put(CM_PID, event.getPid());
 		if (event.getFactoryPid() != null) {
 			properties.put(CM_FACTORY_PID, event.getFactoryPid());

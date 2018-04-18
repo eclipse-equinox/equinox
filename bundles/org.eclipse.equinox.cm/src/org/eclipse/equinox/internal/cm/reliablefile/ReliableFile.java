@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 package org.eclipse.equinox.internal.cm.reliablefile;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
@@ -128,7 +129,7 @@ public class ReliableFile {
 	private File referenceFile;
 
 	/** List of checksum file objects: File => specific ReliableFile generation */
-	private static Hashtable<File, CacheInfo> cacheFiles = new Hashtable<File, CacheInfo>(20);
+	private static Hashtable<File, CacheInfo> cacheFiles = new Hashtable<>(20);
 
 	private File inputFile = null;
 	private File outputFile = null;
@@ -195,7 +196,7 @@ public class ReliableFile {
 			String[] files = parent.list();
 			if (files == null)
 				return null;
-			List<Integer> list = new ArrayList<Integer>(defaultMaxGenerations);
+			List<Integer> list = new ArrayList<>(defaultMaxGenerations);
 			if (file.exists())
 				list.add(Integer.valueOf(0)); //base file exists
 			for (int i = 0; i < files.length; i++) {
@@ -625,7 +626,7 @@ public class ReliableFile {
 		if (!directory.isDirectory())
 			throw new IOException("Not a valid directory"); //$NON-NLS-1$
 		String files[] = directory.list();
-		Set<String> list = new HashSet<String>(files.length / 2);
+		Set<String> list = new HashSet<>(files.length / 2);
 		for (int idx = 0; idx < files.length; idx++) {
 			String file = files[idx];
 			int pos = file.lastIndexOf('.');
@@ -793,12 +794,7 @@ public class ReliableFile {
 					crc.update(data, 0, 16); // update crc w/ sig bytes
 					return FILETYPE_NOSIGNATURE;
 				}
-			long crccmp;
-			try {
-				crccmp = Long.valueOf(new String(data, 4, 8, "UTF-8"), 16).longValue(); //$NON-NLS-1$
-			} catch (UnsupportedEncodingException e) {
-				crccmp = Long.valueOf(new String(data, 4, 8), 16).longValue();
-			}
+			long crccmp = Long.valueOf(new String(data, 4, 8, StandardCharsets.UTF_8), 16).longValue();
 			if (crccmp == crc.getValue()) {
 				return FILETYPE_VALID;
 			}

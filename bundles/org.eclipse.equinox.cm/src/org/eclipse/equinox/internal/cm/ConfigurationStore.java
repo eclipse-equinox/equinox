@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ class ConfigurationStore {
 	private static final String STORE_DIR = "store"; //$NON-NLS-1$
 	private static final String DATA_PRE = "data"; //$NON-NLS-1$
 	private static final String CFG_EXT = ".cfg"; //$NON-NLS-1$
-	private final Map<String, ConfigurationImpl> configurations = new HashMap<String, ConfigurationImpl>();
+	private final Map<String, ConfigurationImpl> configurations = new HashMap<>();
 	private int createdPidCount = 0;
 	private final File store;
 
@@ -109,6 +109,7 @@ class ConfigurationStore {
 		try {
 			final File storeCopy = store;
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<File>() {
+				@Override
 				public File run() throws Exception {
 					File toFile = token == null ? File.createTempFile(DATA_PRE, CFG_EXT, storeCopy) : (File) token;
 					writeConfigurationFile(toFile, configProperties);
@@ -151,6 +152,7 @@ class ConfigurationStore {
 		if (store == null || token == null)
 			return; // no persistent store
 		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+			@Override
 			public Object run() {
 				deleteConfigurationFile((File) token);
 				return null;
@@ -184,7 +186,7 @@ class ConfigurationStore {
 	}
 
 	public ConfigurationImpl[] getFactoryConfigurations(String factoryPid) {
-		List<ConfigurationImpl> resultList = new ArrayList<ConfigurationImpl>();
+		List<ConfigurationImpl> resultList = new ArrayList<>();
 		synchronized (this) {
 			resultList.addAll(configurations.values());
 		}
@@ -198,7 +200,7 @@ class ConfigurationStore {
 	}
 
 	public ConfigurationImpl[] listConfigurations(Filter filter) {
-		List<ConfigurationImpl> resultList = new ArrayList<ConfigurationImpl>();
+		List<ConfigurationImpl> resultList = new ArrayList<>();
 		synchronized (this) {
 			resultList.addAll(configurations.values());
 		}

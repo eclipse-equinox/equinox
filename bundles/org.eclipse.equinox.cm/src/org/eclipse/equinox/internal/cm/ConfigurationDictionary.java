@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,12 +31,13 @@ public class ConfigurationDictionary extends Dictionary<String, Object> implemen
 	static class CaseInsensitiveStringComparator implements Comparator<String>, Serializable {
 		private static final long serialVersionUID = 6501536810492374044L;
 
+		@Override
 		public int compare(String s1, String s2) {
 			return (s1).compareToIgnoreCase(s2);
 		}
 	}
 
-	protected final Map<String, Object> configurationProperties = Collections.synchronizedMap(new TreeMap<String, Object>(new CaseInsensitiveStringComparator()));
+	protected final Map<String, Object> configurationProperties = Collections.synchronizedMap(new TreeMap<>(new CaseInsensitiveStringComparator()));
 
 	private static void validateValue(Object value) {
 		Class<?> clazz = value.getClass();
@@ -63,44 +64,53 @@ public class ConfigurationDictionary extends Dictionary<String, Object> implemen
 		throw new IllegalArgumentException(clazz.getName());
 	}
 
+	@Override
 	public Enumeration<Object> elements() {
 		return new Enumeration<Object>() {
 			final Iterator<Object> valuesIterator = configurationProperties.values().iterator();
 
+			@Override
 			public boolean hasMoreElements() {
 				return valuesIterator.hasNext();
 			}
 
+			@Override
 			public Object nextElement() {
 				return valuesIterator.next();
 			}
 		};
 	}
 
+	@Override
 	public Object get(Object key) {
 		if (key == null)
 			throw new NullPointerException();
 		return configurationProperties.get(key);
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return configurationProperties.isEmpty();
 	}
 
+	@Override
 	public Enumeration<String> keys() {
 		return new Enumeration<String>() {
 			Iterator<String> keysIterator = configurationProperties.keySet().iterator();
 
+			@Override
 			public boolean hasMoreElements() {
 				return keysIterator.hasNext();
 			}
 
+			@Override
 			public String nextElement() {
 				return keysIterator.next();
 			}
 		};
 	}
 
+	@Override
 	public Object put(String key, Object value) {
 		if (key == null || value == null)
 			throw new NullPointerException();
@@ -111,12 +121,14 @@ public class ConfigurationDictionary extends Dictionary<String, Object> implemen
 		return configurationProperties.put(key, value);
 	}
 
+	@Override
 	public Object remove(Object key) {
 		if (key == null)
 			throw new NullPointerException();
 		return configurationProperties.remove(key);
 	}
 
+	@Override
 	public int size() {
 		return configurationProperties.size();
 	}

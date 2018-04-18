@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2014 Cognos Incorporated, IBM Corporation
+ * Copyright (c) 2006, 2018 Cognos Incorporated, IBM Corporation
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,7 @@ public class Activator implements BundleActivator {
 		return null;
 	}
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		setBundleContext(context);
 		logTracker = new LogTracker(context, System.err);
@@ -53,6 +54,7 @@ public class Activator implements BundleActivator {
 		registration = context.registerService(ConfigurationAdmin.class.getName(), factory, null);
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		registration.unregister();
 		registration = null;

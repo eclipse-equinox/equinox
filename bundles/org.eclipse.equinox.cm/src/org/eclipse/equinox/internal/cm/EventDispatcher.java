@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,8 +33,8 @@ public class EventDispatcher {
 
 	public EventDispatcher(BundleContext context, LogTracker log) {
 		this.log = log;
-		tracker = new ServiceTracker<ConfigurationListener, ConfigurationListener>(context, ConfigurationListener.class, null);
-		syncTracker = new ServiceTracker<SynchronousConfigurationListener, SynchronousConfigurationListener>(context, SynchronousConfigurationListener.class, null);
+		tracker = new ServiceTracker<>(context, ConfigurationListener.class, null);
+		syncTracker = new ServiceTracker<>(context, SynchronousConfigurationListener.class, null);
 	}
 
 	public void start() {
@@ -80,6 +80,7 @@ public class EventDispatcher {
 		for (int i = 0; i < refs.length; ++i) {
 			final ServiceReference<ConfigurationListener> ref = refs[i];
 			queue.put(new Runnable() {
+				@Override
 				public void run() {
 					ConfigurationListener listener = tracker.getService(ref);
 					if (listener == null) {

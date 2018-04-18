@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,7 +54,8 @@ public class PluginManager {
 
 	private static class PluginTracker extends ServiceTracker<ConfigurationPlugin, ConfigurationPlugin> {
 		final Integer ZERO = Integer.valueOf(0);
-		private TreeSet<ServiceReference<ConfigurationPlugin>> serviceReferences = new TreeSet<ServiceReference<ConfigurationPlugin>>(new Comparator<ServiceReference<ConfigurationPlugin>>() {
+		private TreeSet<ServiceReference<ConfigurationPlugin>> serviceReferences = new TreeSet<>(new Comparator<ServiceReference<ConfigurationPlugin>>() {
+			@Override
 			public int compare(ServiceReference<ConfigurationPlugin> s1, ServiceReference<ConfigurationPlugin> s2) {
 
 				int rankCompare = getRank(s1).compareTo(getRank(s2));
@@ -81,12 +82,14 @@ public class PluginManager {
 		 * Rather than returning null if no references are present, it
 		 * returns an empty array.
 		 */
+		@Override
 		public ServiceReference<ConfigurationPlugin>[] getServiceReferences() {
 			synchronized (serviceReferences) {
 				return serviceReferences.toArray(new ServiceReference[serviceReferences.size()]);
 			}
 		}
 
+		@Override
 		public ConfigurationPlugin addingService(ServiceReference<ConfigurationPlugin> reference) {
 			synchronized (serviceReferences) {
 				serviceReferences.add(reference);
@@ -94,10 +97,12 @@ public class PluginManager {
 			return context.getService(reference);
 		}
 
+		@Override
 		public void modifiedService(ServiceReference<ConfigurationPlugin> reference, ConfigurationPlugin service) {
 			// nothing to do
 		}
 
+		@Override
 		public void removedService(ServiceReference<ConfigurationPlugin> reference, ConfigurationPlugin service) {
 			synchronized (serviceReferences) {
 				serviceReferences.remove(reference);

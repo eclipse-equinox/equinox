@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -109,6 +109,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 *
 	 * @exception 	java.io.IOException If an error occurs closing the file.
 	 */
+	@Override
 	public synchronized void close() throws IOException {
 		if (reliable != null) {
 			try {
@@ -124,6 +125,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 * Override default FilterInputStream method.
 	 * @see FilterInputStream#read(byte[], int, int)
 	 */
+	@Override
 	public synchronized int read(byte b[], int off, int len) throws IOException {
 		if (readPos >= length) {
 			return -1;
@@ -143,6 +145,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 * Override default FilterInputStream method.
 	 * @see FilterInputStream#read(byte[])
 	 */
+	@Override
 	public synchronized int read(byte b[]) throws IOException {
 		return read(b, 0, b.length);
 	}
@@ -151,6 +154,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 * Override default FilterInputStream method.
 	 * @see FilterInputStream#read()
 	 */
+	@Override
 	public synchronized int read() throws IOException {
 		if (readPos >= length) {
 			return -1;
@@ -167,6 +171,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 * Override default available method.
 	 * @see FilterInputStream#available()
 	 */
+	@Override
 	public synchronized int available() {
 		if (readPos < length) // just in case
 			return (length - readPos);
@@ -177,6 +182,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 * Override default skip method.
 	 * @see FilterInputStream#skip(long)
 	 */
+	@Override
 	public synchronized long skip(long n) throws IOException {
 		long len = super.skip(n);
 		if (readPos + len > length)
@@ -189,6 +195,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 * Override default markSupported method.
 	 * @see FilterInputStream#markSupported()
 	 */
+	@Override
 	public boolean markSupported() {
 		return false;
 	}
@@ -197,6 +204,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 * Override default mark method.
 	 * @see FilterInputStream#mark(int)
 	 */
+	@Override
 	public void mark(int readlimit) {
 		//ignore
 	}
@@ -205,6 +213,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 * Override default reset method.
 	 * @see FilterInputStream#reset()
 	 */
+	@Override
 	public void reset() throws IOException {
 		throw new IOException("reset not supported."); //$NON-NLS-1$
 	}

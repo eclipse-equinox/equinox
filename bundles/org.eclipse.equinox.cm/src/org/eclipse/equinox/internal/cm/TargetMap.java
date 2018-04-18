@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,8 @@ import org.osgi.framework.*;
 
 public class TargetMap {
 
-	private final Map<ServiceReference<?>, List<List<String>>> targetToQualifiedPids = new HashMap<ServiceReference<?>, List<List<String>>>();
-	private final Map<String, Collection<ServiceReference<?>>> qualifiedPidToTargets = new HashMap<String, Collection<ServiceReference<?>>>();
+	private final Map<ServiceReference<?>, List<List<String>>> targetToQualifiedPids = new HashMap<>();
+	private final Map<String, Collection<ServiceReference<?>>> qualifiedPidToTargets = new HashMap<>();
 
 	public List<List<String>> add(ServiceReference<?> ref) {
 		List<String> specifiedPids = getPids(ref.getProperty(Constants.SERVICE_PID));
@@ -32,7 +32,7 @@ public class TargetMap {
 		String version = v == null ? "" : v.toString(); //$NON-NLS-1$
 		String location = ConfigurationAdminImpl.getLocation(b);
 
-		List<List<String>> result = new ArrayList<List<String>>(specifiedPids.size());
+		List<List<String>> result = new ArrayList<>(specifiedPids.size());
 		for (String specifiedPid : specifiedPids) {
 			getTargetsInternal(specifiedPid).add(ref);
 
@@ -49,7 +49,7 @@ public class TargetMap {
 			String pidBsnVersionLocation = sb.toString();
 			getTargetsInternal(pidBsnVersionLocation).add(ref);
 
-			List<String> qualifiedPIDs = new ArrayList<String>(4);
+			List<String> qualifiedPIDs = new ArrayList<>(4);
 			qualifiedPIDs.add(pidBsnVersionLocation);
 			qualifiedPIDs.add(pidBsnVersion);
 			qualifiedPIDs.add(pidBsn);
@@ -72,9 +72,9 @@ public class TargetMap {
 		} else if (pid instanceof Collection) {
 			@SuppressWarnings("unchecked")
 			Collection<String> pidList = (Collection<String>) pid;
-			specifiedPids = new ArrayList<String>(pidList);
+			specifiedPids = new ArrayList<>(pidList);
 		} else if (pid.getClass().isArray()) {
-			specifiedPids = new ArrayList<String>(Arrays.asList((String[]) pid));
+			specifiedPids = new ArrayList<>(Arrays.asList((String[]) pid));
 		}
 		return specifiedPids;
 	}
@@ -96,7 +96,7 @@ public class TargetMap {
 	private Collection<ServiceReference<?>> getTargetsInternal(String pid) {
 		Collection<ServiceReference<?>> targets = qualifiedPidToTargets.get(pid);
 		if (targets == null) {
-			targets = new ArrayList<ServiceReference<?>>(1);
+			targets = new ArrayList<>(1);
 			qualifiedPidToTargets.put(pid, targets);
 		}
 		return targets;
@@ -104,7 +104,7 @@ public class TargetMap {
 
 	List<ServiceReference<?>> getTargets(String qualifiedPid) {
 		Collection<ServiceReference<?>> targets = qualifiedPidToTargets.get(qualifiedPid);
-		return targets == null ? Collections.EMPTY_LIST : new ArrayList<ServiceReference<?>>(targets);
+		return targets == null ? Collections.EMPTY_LIST : new ArrayList<>(targets);
 	}
 
 	List<List<String>> getQualifiedPids(ServiceReference<?> ref) {

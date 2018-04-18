@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2013 Cognos Incorporated
+ * Copyright (c) 2006, 2018 Cognos Incorporated
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,7 @@ import java.util.LinkedList;
 public class SerializedTaskQueue {
 
 	private static final int MAX_WAIT = 5000;
-	private final LinkedList<Runnable> tasks = new LinkedList<Runnable>();
+	private final LinkedList<Runnable> tasks = new LinkedList<>();
 	private Thread thread;
 	private final String queueName;
 
@@ -30,6 +30,7 @@ public class SerializedTaskQueue {
 		tasks.add(newTask);
 		if (thread == null) {
 			thread = new Thread(queueName) {
+				@Override
 				public void run() {
 					Runnable task = nextTask(MAX_WAIT);
 					while (task != null) {
