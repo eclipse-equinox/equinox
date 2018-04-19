@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2008 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2018 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,22 +32,27 @@ public final class HashObjIntS extends HashObjIntNS {
 		super(capacity, lf);
 	}
 
+	@Override
 	public synchronized void put(Object key, int value) {
 		super.put(key, value);
 	}
 
+	@Override
 	public synchronized int get(Object key) {
 		return super.get(key);
 	}
 
+	@Override
 	public synchronized int remove(Object key) {
 		return super.remove(key);
 	}
 
+	@Override
 	public synchronized int size() {
 		return super.size();
 	}
 
+	@Override
 	public synchronized void removeAll() {
 		super.removeAll();
 	}

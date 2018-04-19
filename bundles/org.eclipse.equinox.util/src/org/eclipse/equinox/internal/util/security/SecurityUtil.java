@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2008 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2018 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -98,9 +98,9 @@ public final class SecurityUtil implements PrivilegedRunner.PrivilegedDispatcher
 	 * @return a Class
 	 * @throws ClassNotFoundException
 	 */
-	public Class forName(final String name) throws ClassNotFoundException {
+	public Class<?> forName(final String name) throws ClassNotFoundException {
 		try {
-			return (Class) PrivilegedRunner.doPrivileged(controlContext, this, CLASS_FOR_NAME, name, null, null, null);
+			return (Class<?>) PrivilegedRunner.doPrivileged(controlContext, this, CLASS_FOR_NAME, name, null, null, null);
 		} catch (ClassNotFoundException t) {
 			throw t;
 		} catch (Exception t) {
@@ -364,7 +364,7 @@ public final class SecurityUtil implements PrivilegedRunner.PrivilegedDispatcher
 	 *            the BundleContext
 	 * @return a service object
 	 */
-	public Object getService(final ServiceReference reference, final BundleContext context) {
+	public Object getService(final ServiceReference<?> reference, final BundleContext context) {
 		if (context == null) {
 			throw new NullPointerException("Context is null");
 		}
@@ -392,7 +392,7 @@ public final class SecurityUtil implements PrivilegedRunner.PrivilegedDispatcher
 	 * @throws InvalidSyntaxException
 	 *             if filter is not correct
 	 */
-	public ServiceReference[] getServiceReferences(String clazz, String filter, BundleContext context) throws InvalidSyntaxException {
+	public ServiceReference<?>[] getServiceReferences(String clazz, String filter, BundleContext context) throws InvalidSyntaxException {
 		if (context == null) {
 			throw new NullPointerException("Context is null");
 		}
@@ -422,7 +422,7 @@ public final class SecurityUtil implements PrivilegedRunner.PrivilegedDispatcher
 	 *            the bundle context
 	 * @return a service registration
 	 */
-	public ServiceRegistration registerService(String clazz, Object service, Dictionary properties, BundleContext context) {
+	public ServiceRegistration<?> registerService(String clazz, Object service, Dictionary<?, ?> properties, BundleContext context) {
 		if (context == null) {
 			throw new NullPointerException("Context is null");
 		}
@@ -433,7 +433,7 @@ public final class SecurityUtil implements PrivilegedRunner.PrivilegedDispatcher
 			throw new NullPointerException("Class name is null");
 		}
 		try {
-			return (ServiceRegistration) PrivilegedRunner.doPrivileged(controlContext, this, SERVICE_REG_CLASS, context, clazz, service, properties);
+			return (ServiceRegistration<?>) PrivilegedRunner.doPrivileged(controlContext, this, SERVICE_REG_CLASS, context, clazz, service, properties);
 		} catch (Exception t) {
 			throw new RuntimeException(t.getMessage());
 		}
@@ -453,7 +453,7 @@ public final class SecurityUtil implements PrivilegedRunner.PrivilegedDispatcher
 	 *            the bundle context
 	 * @return a service registration
 	 */
-	public ServiceRegistration registerService(String[] classes, Object service, Dictionary properties, BundleContext context) {
+	public ServiceRegistration<?> registerService(String[] classes, Object service, Dictionary<?, ?> properties, BundleContext context) {
 		if (context == null) {
 			throw new NullPointerException("Context is null");
 		}
@@ -464,7 +464,7 @@ public final class SecurityUtil implements PrivilegedRunner.PrivilegedDispatcher
 			throw new NullPointerException("Class names are null");
 		}
 		try {
-			return (ServiceRegistration) PrivilegedRunner.doPrivileged(controlContext, this, SERVICE_REG_CLASSES, context, classes, service, properties);
+			return (ServiceRegistration<?>) PrivilegedRunner.doPrivileged(controlContext, this, SERVICE_REG_CLASSES, context, classes, service, properties);
 		} catch (Exception t) {
 			throw new RuntimeException(t.getMessage());
 		}
@@ -492,9 +492,9 @@ public final class SecurityUtil implements PrivilegedRunner.PrivilegedDispatcher
 	 *            the bundle
 	 * @return the bundle location
 	 */
-	public Dictionary getHeaders(Bundle bundle) {
+	public Dictionary<?, ?> getHeaders(Bundle bundle) {
 		try {
-			return (Dictionary) PrivilegedRunner.doPrivileged(controlContext, this, BUNDLE_GET_HEADERS, bundle, null, null, null);
+			return (Dictionary<?, ?>) PrivilegedRunner.doPrivileged(controlContext, this, BUNDLE_GET_HEADERS, bundle, null, null, null);
 		} catch (Exception t) {
 			throw new RuntimeException(t.getMessage());
 		}
@@ -687,11 +687,8 @@ public final class SecurityUtil implements PrivilegedRunner.PrivilegedDispatcher
 		return PrivilegedRunner.doPrivileged(controlContext, dispatcher, type, arg1, null, null, null);
 	}
 
-	/**
-	 * @see org.eclipse.equinox.internal.util.security.PrivilegedRunner.PrivilegedDispatcher#dispatchPrivileged(int,
-	 *      java.lang.Object, java.lang.Object, java.lang.Object,
-	 *      java.lang.Object)
-	 */
+	@SuppressWarnings("unchecked")
+	@Override
 	public Object dispatchPrivileged(int type, Object arg1, Object arg2, Object arg3, Object arg4) throws Exception {
 		switch (type) {
 			case SYSTEM_GET_PROPERTY :
@@ -725,11 +722,11 @@ public final class SecurityUtil implements PrivilegedRunner.PrivilegedDispatcher
 			case SERVICE_GET_REFERENCE :
 				return ((BundleContext) arg1).getServiceReferences((String) arg2, (String) arg3);
 			case SERVICE_GET_SERVICE :
-				return ((BundleContext) arg1).getService((ServiceReference) arg2);
+				return ((BundleContext) arg1).getService((ServiceReference<?>) arg2);
 			case SERVICE_REG_CLASS :
-				return ((BundleContext) arg1).registerService((String) arg2, arg3, (Dictionary) arg4);
+				return ((BundleContext) arg1).registerService((String) arg2, arg3, (Dictionary<String, ?>) arg4);
 			case SERVICE_REG_CLASSES :
-				return ((BundleContext) arg1).registerService((String[]) arg2, arg3, (Dictionary) arg4);
+				return ((BundleContext) arg1).registerService((String[]) arg2, arg3, (Dictionary<String, ?>) arg4);
 			case BUNDLE_GET_LOCATION :
 				return ((Bundle) arg1).getLocation();
 			case BUNDLE_GET_HEADERS :

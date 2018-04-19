@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2008 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2018 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -30,7 +30,7 @@ import org.eclipse.equinox.internal.util.timer.TimerListener;
 
 public class TimerImpl implements Runnable {
 
-	static Hashtable nodes;
+	static Hashtable<TimerQueueNode, TimerQueueNode> nodes;
 	static ObjectPool nodePool;
 
 	static ThreadPoolFactoryImpl threadPool;
@@ -43,7 +43,7 @@ public class TimerImpl implements Runnable {
 	public TimerImpl(ThreadPoolFactoryImpl threadPool) {
 		nodePool = new ObjectPool(new TimerQueueNode(), 2, 4, 2);
 		TimerImpl.threadPool = threadPool;
-		nodes = new Hashtable(10);
+		nodes = new Hashtable<>(10);
 		queue = new TimerQueue();
 		try {
 			th = ((ServiceFactoryImpl.privileged()) ? getOne() : new Thread(this, "[Timer] - Main Queue Handler"));
@@ -59,6 +59,7 @@ public class TimerImpl implements Runnable {
 		}
 	}
 
+	@Override
 	public void run() {
 		TimerQueueNode n = null;
 		while (!terminated) {
@@ -153,7 +154,7 @@ public class TimerImpl implements Runnable {
 					continue;
 				}
 			}
-		}// while (!terminated)
+		} // while (!terminated)
 		nodePool.clear();
 		nodePool = null;
 		nodes.clear();
@@ -179,7 +180,7 @@ public class TimerImpl implements Runnable {
 
 		TimerQueueNode n = (TimerQueueNode) nodePool.getObject();
 		n.setEvent(listener, priority, timerType, System.currentTimeMillis() + periodMilis, periodMilis, event, name, acc);
-		TimerQueueNode tmp = (TimerQueueNode) nodes.remove(n);
+		TimerQueueNode tmp = nodes.remove(n);
 		if (tmp != null) {
 			synchronized (queue) {
 				queue.removeTimerNode(tmp);
@@ -222,7 +223,7 @@ public class TimerImpl implements Runnable {
 	public void removeListener(TimerListener listener, int event) {
 		TimerQueueNode rmTmp = (TimerQueueNode) nodePool.getObject();
 		rmTmp.setEvent(listener, 0, 0, 0, 0, event, null, null);
-		TimerQueueNode old = (TimerQueueNode) nodes.remove(rmTmp);
+		TimerQueueNode old = nodes.remove(rmTmp);
 		if (old != null) {
 			synchronized (queue) {
 				queue.removeTimerNode(old);
@@ -232,7 +233,7 @@ public class TimerImpl implements Runnable {
 		rmTmp.returnInPool();
 	}
 
-	private class PrivilegedActionImpl implements PrivilegedAction {
+	private class PrivilegedActionImpl implements PrivilegedAction<Thread> {
 		private Runnable runnable = null;
 		private boolean locked = false;
 		private boolean waiting = false;
@@ -253,7 +254,8 @@ public class TimerImpl implements Runnable {
 			this.runnable = runnable;
 		}
 
-		public Object run() {
+		@Override
+		public Thread run() {
 			Runnable runnableLocal = null;
 			synchronized (this) {
 				runnableLocal = this.runnable;
@@ -270,7 +272,7 @@ public class TimerImpl implements Runnable {
 		if (action == null)
 			action = new PrivilegedActionImpl();
 		action.set(this);
-		return (Thread) AccessController.doPrivileged(action);
+		return AccessController.doPrivileged(action);
 	}
 
 	PrivilegedActionImpl action = null;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2009 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2018 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,7 +23,7 @@ import org.eclipse.equinox.internal.util.timer.TimerListener;
  * @version 1.0
  */
 
-public class ThreadPoolManagerImpl extends ObjectPool implements TimerListener, PrivilegedAction {
+public class ThreadPoolManagerImpl extends ObjectPool implements TimerListener, PrivilegedAction<Executor> {
 
 	static ThreadPoolManagerImpl threadPool = null;
 
@@ -54,7 +54,7 @@ public class ThreadPoolManagerImpl extends ObjectPool implements TimerListener, 
 	private static boolean autoMax;
 
 	private ThreadPoolManagerImpl(int i, int j, int m) {
-		super((Class) null, i, j, m);
+		super((Class<?>) null, i, j, m);
 		tMaximum = i * j;
 		ignoreMax = UtilActivator.getBoolean(pIgnoreMax);
 		autoMax = UtilActivator.getBoolean(pAutoMaximum);
@@ -75,11 +75,13 @@ public class ThreadPoolManagerImpl extends ObjectPool implements TimerListener, 
 		return threadPool;
 	}
 
+	@Override
 	public void clear() {
 		shrink(-1);
 		threadPool = null;
 	}
 
+	@Override
 	public Object getInstance() throws Exception {
 		if (ServiceFactoryImpl.privileged()) {
 			return AccessController.doPrivileged(this);
@@ -88,10 +90,12 @@ public class ThreadPoolManagerImpl extends ObjectPool implements TimerListener, 
 		return new Executor();
 	}
 
-	public Object run() {
+	@Override
+	public Executor run() {
 		return new Executor();
 	}
 
+	@Override
 	public Object getObject() {
 		try {
 			return super.getObject();
@@ -116,6 +120,7 @@ public class ThreadPoolManagerImpl extends ObjectPool implements TimerListener, 
 		return null;
 	}
 
+	@Override
 	protected void shrink(int count) {
 		synchronized (getSyncMonitor()) {
 			dontExtend = true;
@@ -130,11 +135,13 @@ public class ThreadPoolManagerImpl extends ObjectPool implements TimerListener, 
 		}
 	}
 
+	@Override
 	public void shrink() {
 		shrink(minimumFill - 1);
 		dontExtend = false;
 	}
 
+	@Override
 	public boolean releaseObject(Object obj) {
 		Job tmp = null;
 		Executor x = (Executor) obj;
@@ -164,6 +171,7 @@ public class ThreadPoolManagerImpl extends ObjectPool implements TimerListener, 
 		return true;
 	}
 
+	@Override
 	public void timer(int event) {
 		int count = 0;
 		int all = 0;

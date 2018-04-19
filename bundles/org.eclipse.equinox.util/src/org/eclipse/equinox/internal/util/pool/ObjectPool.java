@@ -19,7 +19,7 @@ package org.eclipse.equinox.internal.util.pool;
 
 public class ObjectPool {
 
-	private Class template;
+	private Class<?> template;
 
 	protected Object[][] buff;
 
@@ -51,11 +51,11 @@ public class ObjectPool {
 		this(null, oc, size, factor, size * factor);
 	}
 
-	public ObjectPool(Class template, int size, int factor) {
+	public ObjectPool(Class<?> template, int size, int factor) {
 		this(template, null, size, factor, size * factor);
 	}
 
-	public ObjectPool(Class template, int size, int factor, int minimumFill) {
+	public ObjectPool(Class<?> template, int size, int factor, int minimumFill) {
 		this(template, null, size, factor, (minimumFill = (minimumFill > (size * factor)) ? (size * factor) : minimumFill));
 	}
 
@@ -63,7 +63,7 @@ public class ObjectPool {
 		this(null, oc, size, factor, (minimumFill = minimumFill > (size * factor) ? (size * factor) : minimumFill));
 	}
 
-	protected ObjectPool(Class template, ObjectCreator oc, int size, int factor, int minimumFill) {
+	protected ObjectPool(Class<?> template, ObjectCreator oc, int size, int factor, int minimumFill) {
 
 		if (size <= 1 || factor < 1) {
 			throw new IllegalArgumentException(size + " is less or equal to 1");

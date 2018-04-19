@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2008 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2018 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -162,6 +162,7 @@ public abstract class EventThread implements Runnable {
 	 * Processes the event queue. Sets the event to be dispathed in the
 	 * <code> element </code> field and calls <cope> processEvent </code>
 	 */
+	@Override
 	public void run() {
 		synchronized (queue) {
 			queue.notifyAll();
@@ -193,13 +194,13 @@ public abstract class EventThread implements Runnable {
 		}
 	}
 
-	private void makeThread(ThreadGroup group, String name) {
+	private void makeThread(ThreadGroup threadGroup, String threadName) {
 		try {
 			if (privilegedAction == null) {
 				privilegedAction = new PrivilegedActionImpl();
 			}
-			privilegedAction.set(group, this, name);
-			thread = (Thread) AccessController.doPrivileged(privilegedAction);
+			privilegedAction.set(threadGroup, this, threadName);
+			thread = AccessController.doPrivileged(privilegedAction);
 			// thread = new Thread(group, this, name);
 			// thread.setDaemon(false);
 			// if (!disableContextClassLoader)
@@ -223,7 +224,7 @@ public abstract class EventThread implements Runnable {
 	 * Returns the desired thread priority. Called in the constructors of the
 	 * class in order to set the returned value to the thread.
 	 * 
-	 * @return
+	 * @return priority of the thread
 	 */
 	public abstract int getThreadPriority();
 
@@ -261,7 +262,7 @@ public abstract class EventThread implements Runnable {
 	public abstract void print(Throwable t);
 }
 
-class PrivilegedActionImpl implements PrivilegedAction {
+class PrivilegedActionImpl implements PrivilegedAction<Thread> {
 	private ThreadGroup group;
 	private Runnable runnable;
 	private String name;
@@ -276,13 +277,14 @@ class PrivilegedActionImpl implements PrivilegedAction {
 		this.name = name;
 	}
 
-	public Object run() {
-		ThreadGroup group = this.group;
-		Runnable runnable = this.runnable;
-		String name = this.name;
+	@Override
+	public Thread run() {
+		ThreadGroup group1 = this.group;
+		Runnable runnable1 = this.runnable;
+		String name1 = this.name;
 		unlock();
-		Thread th = new Thread(group, runnable, name);
-		if (!UtilActivator.getBoolean("equinox.disableContextClassLoader"))
+		Thread th = new Thread(group1, runnable1, name1);
+		if (!UtilActivator.getBoolean("equinox.disableContextClassLoader")) //$NON-NLS-1$
 			th.setContextClassLoader(null);
 		th.setDaemon(false);
 		return th;

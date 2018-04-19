@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2008 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2018 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -53,6 +53,7 @@ public class Executor extends Thread implements ThreadContext {
 		notify();
 	}
 
+	@Override
 	public void run() {
 		while (!terminated) {
 			if (job != null) {
@@ -129,6 +130,7 @@ public class Executor extends Thread implements ThreadContext {
 		start();
 	}
 
+	@Override
 	public Runnable getRunnable() {
 		return job;
 	}
@@ -140,10 +142,11 @@ public class Executor extends Thread implements ThreadContext {
 	}
 }
 
-class PEA implements PrivilegedAction {
+class PEA implements PrivilegedAction<Object> {
 
 	Runnable job;
 
+	@Override
 	public Object run() {
 		job.run();
 		return null;

@@ -115,6 +115,7 @@ class TimerQueueNode implements Runnable, ObjectCreator {
 		}
 	}
 
+	@Override
 	public void run() {
 		synchronized (this) {
 			running = true;
@@ -135,6 +136,7 @@ class TimerQueueNode implements Runnable, ObjectCreator {
 		running = false;
 	}
 
+	@Override
 	public Object getInstance() {
 		return new TimerQueueNode();
 	}
@@ -151,15 +153,18 @@ class TimerQueueNode implements Runnable, ObjectCreator {
 
 	}
 
+	@Override
 	public int hashCode() {
 		TimerListener lis = listener;
 		return (lis != null) ? (theHash = (lis.hashCode() + event)) : theHash;
 	}
 
+	@Override
 	public String toString() {
 		return "QueueNode: " + super.toString() + "\r\n" + "\t\tListener: " + listener + "\r\n" + "\t\tEvent: " + event + "\r\n" + "\t\tType: " + type + "\r\n" + "\t\trunafter: " + (runOn - System.currentTimeMillis()) + "\r\n" + "\t\tEnabled: " + enabled;
 	}
 
+	@Override
 	public boolean equals(Object a) {
 		if (a instanceof TimerQueueNode) {
 			TimerQueueNode b = (TimerQueueNode) a;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2008 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2018 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -114,9 +114,7 @@ public final class PrivilegedRunner implements ObjectCreator {
 		}
 	}
 
-	/**
-	 * @see org.eclipse.equinox.internal.util.pool.ObjectCreator#getInstance()
-	 */
+	@Override
 	public Object getInstance() throws Exception {
 		return new PA();
 	}
@@ -150,7 +148,7 @@ public final class PrivilegedRunner implements ObjectCreator {
 		Object dispatchPrivileged(int type, Object arg1, Object arg2, Object arg3, Object arg4) throws Exception;
 	}
 
-	static class PA implements PrivilegedExceptionAction {
+	static class PA implements PrivilegedExceptionAction<Object> {
 
 		int type;
 		Object arg1, arg2, arg3, arg4;
@@ -162,9 +160,7 @@ public final class PrivilegedRunner implements ObjectCreator {
 			arg1 = arg2 = arg3 = arg4 = null;
 		}
 
-		/**
-		 * @see java.security.PrivilegedExceptionAction#run()
-		 */
+		@Override
 		public Object run() throws Exception {
 			return dispatcher.dispatchPrivileged(type, arg1, arg2, arg3, arg4);
 		}

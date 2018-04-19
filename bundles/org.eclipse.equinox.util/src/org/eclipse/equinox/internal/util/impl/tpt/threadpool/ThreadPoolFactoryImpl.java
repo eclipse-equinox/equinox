@@ -25,7 +25,7 @@ import org.eclipse.equinox.internal.util.threadpool.ThreadPoolManager;
  * @version 1.0
  */
 
-public class ThreadPoolFactoryImpl extends ServiceFactoryImpl implements ThreadPoolManager, ThreadPoolFactory {
+public class ThreadPoolFactoryImpl extends ServiceFactoryImpl<ThreadPoolFactory> implements ThreadPoolManager, ThreadPoolFactory {
 
 	public static ThreadPoolManagerImpl threadPool;
 	private int limit;
@@ -56,7 +56,8 @@ public class ThreadPoolFactoryImpl extends ServiceFactoryImpl implements ThreadP
 		this(bundleName, (ThreadPoolManagerImpl.tMaximum * defaultPercent) / 100);
 	}
 
-	public Object getInstance(String bundleName) {
+	@Override
+	public ThreadPoolFactory getInstance(String bundleName) {
 		if (threadPool == null)
 			throw new RuntimeException("ServiceFactory is currently off!");
 		return new ThreadPoolFactoryImpl(bundleName);
@@ -68,6 +69,7 @@ public class ThreadPoolFactoryImpl extends ServiceFactoryImpl implements ThreadP
 		tmp.clear();
 	}
 
+	@Override
 	public ThreadPoolManager getThreadPool(int size, boolean sizeIsInPercents) {
 		if (threadPool == null)
 			throw new RuntimeException("[ThreadPool] ThreadPool is inaccessible");
@@ -81,6 +83,7 @@ public class ThreadPoolFactoryImpl extends ServiceFactoryImpl implements ThreadP
 		return new ThreadPoolFactoryImpl(bundleName, size);
 	}
 
+	@Override
 	public void execute(Runnable job, String name) {
 		execute(job, Thread.NORM_PRIORITY, name);
 	}
@@ -117,11 +120,10 @@ public class ThreadPoolFactoryImpl extends ServiceFactoryImpl implements ThreadP
 	}
 
 	public void execute(Runnable job, int priority, String name, AccessControlContext acc) {
-		execute0(job, priority, name, acc
-
-		);
+		execute0(job, priority, name, acc);
 	}
 
+	@Override
 	public void execute(Runnable job, int priority, String name) {
 		execute0(job, priority, name, (Log.security() ? AccessController.getContext() : null));
 	}
@@ -154,6 +156,7 @@ public class ThreadPoolFactoryImpl extends ServiceFactoryImpl implements ThreadP
 		}
 	}
 
+	@Override
 	public void reset() {
 		if (threadPool != null) {
 			threadPool.reset();

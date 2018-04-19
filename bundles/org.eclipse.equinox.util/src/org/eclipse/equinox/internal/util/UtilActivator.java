@@ -35,10 +35,10 @@ import org.osgi.framework.*;
 public class UtilActivator implements BundleActivator {
 
 	public static ThreadPoolFactoryImpl thMan;
-	private ServiceRegistration thManReg;
+	private ServiceRegistration<?> thManReg;
 
 	public static TimerFactory timer;
-	private ServiceRegistration timerReg;
+	private ServiceRegistration<Timer> timerReg;
 	public static Log log;
 	public static int debugLevel = 1;
 	public static BundleContext bc;
@@ -60,7 +60,7 @@ public class UtilActivator implements BundleActivator {
 	 * timer services. Also adds the framework and system pluggable commands to
 	 * the parser service pluggable commands.
 	 * 
-	 * @param bc
+	 * @param context
 	 *            The execution context of the bundle being started.
 	 * @exception BundleException
 	 *                If this method throws an exception, the bundle is marked
@@ -68,8 +68,9 @@ public class UtilActivator implements BundleActivator {
 	 *                listeners, unregister all service's registered by the
 	 *                bundle, release all services used by the bundle.
 	 */
-	public void start(BundleContext bc) throws BundleException {
-		UtilActivator.bc = bc;
+	@Override
+	public void start(BundleContext context) throws BundleException {
+		UtilActivator.bc = context;
 		startup = getBoolean("equinox.measurements.bundles");
 		if (startup) {
 			long tmp = System.currentTimeMillis();
@@ -77,9 +78,9 @@ public class UtilActivator implements BundleActivator {
 			points = new long[3];
 		}
 
-		UtilActivator.bc = bc;
+		UtilActivator.bc = context;
 		try {
-			log = new Log(bc, false);
+			log = new Log(context, false);
 			LOG_DEBUG = getBoolean("equinox.putil.debug");
 			log.setDebug(LOG_DEBUG);
 			log.setPrintOnConsole(getBoolean("equinox.putil.console"));
@@ -104,12 +105,12 @@ public class UtilActivator implements BundleActivator {
 				log.debug(0, 2001, String.valueOf(time[0] - time[1]), null, false, true);
 			}
 
-			String bundleName = ServiceFactoryImpl.getName(bc.getBundle());
+			String bundleName = ServiceFactoryImpl.getName(context.getBundle());
 			thMan = new ThreadPoolFactoryImpl(bundleName, log);
 			if (startup)
 				timeLog(3); /* 3 = "Creating Thread Pool service took " */
 
-			thManReg = bc.registerService(new String[] {ThreadPoolManager.class.getName(), ThreadPoolFactory.class.getName()}, thMan, null);
+			thManReg = context.registerService(new String[] {ThreadPoolManager.class.getName(), ThreadPoolFactory.class.getName()}, thMan, null);
 			if (startup)
 				timeLog(4); /* 4 = "Registering Thread Pool service took " */
 
@@ -118,7 +119,7 @@ public class UtilActivator implements BundleActivator {
 				timeLog(33); /* 33 = "Creating Timer service took " */
 
 			int i = getInteger("equinox.util.threadpool.inactiveTime", 30);
-			timerReg = bc.registerService(Timer.class.getName(), timer, null);
+			timerReg = context.registerService(Timer.class, timer, null);
 			timer.addNotifyListener(ThreadPoolFactoryImpl.threadPool, Thread.NORM_PRIORITY, Timer.PERIODICAL_TIMER, (i * 1000L), 0);
 
 			TimerRef.timer = timer;
@@ -156,6 +157,7 @@ public class UtilActivator implements BundleActivator {
 	 *                bundle's listeners, unregister all service's registered by
 	 *                the bundle, release all service's used by the bundle.
 	 */
+	@Override
 	public void stop(BundleContext bc) throws BundleException {
 		try {
 			thManReg.unregister();

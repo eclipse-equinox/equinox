@@ -73,6 +73,7 @@ public interface Timer {
 	 *                if time period is not positive
 	 * @deprecated
 	 */
+	@Deprecated
 	public void notifyAfterMillis(TimerListener listener, long timePeriod, int event) throws IllegalArgumentException;
 
 	/**
@@ -98,6 +99,7 @@ public interface Timer {
 	 *                Thread.MIN_PRIORITY and Thread.MAX_PRIORITY
 	 * @deprecated
 	 */
+	@Deprecated
 	public void notifyAfterMillis(TimerListener listener, int priority, long timePeriod, int event) throws IllegalArgumentException;
 
 	/**
@@ -120,6 +122,7 @@ public interface Timer {
 	 *                if time period is not positive
 	 * @deprecated
 	 */
+	@Deprecated
 	public void notifyAfter(TimerListener listener, int timePeriod, int event) throws IllegalArgumentException;
 
 	/**
@@ -145,6 +148,7 @@ public interface Timer {
 	 *                Thread.MIN_PRIORITY and Thread.MAX_PRIORITY
 	 * @deprecated
 	 */
+	@Deprecated
 	public void notifyAfter(TimerListener listener, int priority, int timePeriod, int event) throws IllegalArgumentException;
 
 	/**

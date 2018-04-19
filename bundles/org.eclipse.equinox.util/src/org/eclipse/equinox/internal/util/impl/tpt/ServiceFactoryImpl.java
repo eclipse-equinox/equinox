@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2008 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2018 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,7 +21,7 @@ import org.osgi.framework.*;
  * @version 1.0
  */
 
-public abstract class ServiceFactoryImpl implements ServiceFactory {
+public abstract class ServiceFactoryImpl<T> implements ServiceFactory<T> {
 
 	public String bundleName;
 	public static Log log;
@@ -58,12 +58,13 @@ public abstract class ServiceFactoryImpl implements ServiceFactory {
 		this.bundleName = bundleName;
 	}
 
-	public Object getService(Bundle caller, ServiceRegistration sReg) {
+	@Override
+	public T getService(Bundle caller, ServiceRegistration<T> sReg) {
 		return getInstance(useNames ? getName(caller) : null);
 	}
 
 	public static String getName(Bundle caller) {
-		StringBuffer bf = new StringBuffer(13);
+		StringBuilder bf = new StringBuilder(13);
 		bf.append(" (Bundle ");
 		bf.append(caller.getBundleId());
 		bf.append(')');
@@ -79,8 +80,9 @@ public abstract class ServiceFactoryImpl implements ServiceFactory {
 	 * @param service
 	 *            object that is released
 	 */
-	public void ungetService(Bundle caller, ServiceRegistration sReg, Object service) {
+	@Override
+	public void ungetService(Bundle caller, ServiceRegistration<T> sReg, T service) {
 	}
 
-	public abstract Object getInstance(String bundleName);
+	public abstract T getInstance(String bundleName);
 }

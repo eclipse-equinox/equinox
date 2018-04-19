@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2008 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2018 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,13 +32,14 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * @version 1.0
  */
 
-public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRunner.PrivilegedDispatcher {
+public class Log implements LogInterface, ServiceTrackerCustomizer<LogService, LogService>, PrivilegedRunner.PrivilegedDispatcher {
 
 	/**
 	 * Flag, pointing if printingOnConsole is allowed
 	 * 
 	 * @deprecated since osgilib verion 1.3.9 use set/get PrintOnConsole
 	 */
+	@Deprecated
 	public boolean printOnConsole = false;
 
 	/**
@@ -52,6 +53,7 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 	 * 
 	 * @deprecated since osgilib verion 1.3.9 use set/get Debug
 	 */
+	@Deprecated
 	public boolean debug = false;
 
 	/**
@@ -60,8 +62,7 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 	 */
 	private boolean logErrorLevel = false;
 
-	private ServiceTracker logTracker;
-	private ServiceReference traceRef;
+	private ServiceTracker<LogService, LogService> logTracker;
 
 	protected static final SecurityUtil securityUtil = new SecurityUtil();
 
@@ -70,7 +71,7 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 	private long bundleId;
 	/** BundleContext to get LogService and service owner of Log object BundleId */
 	protected BundleContext bc;
-	private static Vector logs = new Vector();
+	private static Vector<Log> logs = new Vector<>();
 	private static Log listener;
 
 	public Log(BundleContext bc) {
@@ -134,7 +135,7 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 	}
 
 	void initListenerNS() {
-		logTracker = new ServiceTracker(bc, "org.osgi.service.log.LogService", this);
+		logTracker = new ServiceTracker<>(bc, org.osgi.service.log.LogService.class, this);
 		logTracker.open();
 		listener = this;
 	}
@@ -148,6 +149,7 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 	 * @param ex
 	 *            Throwable object, containing the stack trace; may be null.
 	 */
+	@Override
 	public void error(String str, Throwable ex) {
 		if (isClosed)
 			return;
@@ -194,6 +196,7 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 	 * @param ex
 	 *            Throwable object, containing the stack trace; may be null.
 	 */
+	@Override
 	public void warning(String str, Throwable ex) {
 		if (isClosed)
 			return;
@@ -238,6 +241,7 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 	 * @param str
 	 *            Message to be logged.
 	 */
+	@Override
 	public void info(String str) {
 		if (isClosed)
 			return;
@@ -282,6 +286,7 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 	 * @param ex
 	 *            Throwable object, containing the stack trace; may be null.
 	 */
+	@Override
 	public void debug(String str, Throwable ex) {
 		if (!debug || isClosed)
 			return;
@@ -408,10 +413,10 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 
 	LogService getService0() throws IllegalArgumentException {
 		synchronized (logs) {
-			ServiceReference logRef = (ServiceReference) listener.logTracker.getService();
+			ServiceReference<LogService> logRef = listener.logTracker.getServiceReference();
 			LogService ls = null;
 			if (logRef != null) {
-				ls = (LogService) bc.getService(logRef);
+				ls = bc.getService(logRef);
 			}
 			return ls;
 		}
@@ -498,12 +503,9 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 	 * ServiceListener from the framework and nulls references. After invocation
 	 * of this method, this Log object can be used no longer.
 	 */
+	@Override
 	public void close() {
 		if (bc != null) {
-			if (traceRef != null) {
-				bc.ungetService(traceRef);
-				traceRef = null;
-			}
 			synchronized (logs) {
 				close0();
 			}
@@ -521,7 +523,7 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 			}
 			Log ls = null;
 			while (logs.size() > 0) {
-				ls = (Log) logs.elementAt(0);
+				ls = logs.elementAt(0);
 				try {
 					ls.initListener();
 					break;
@@ -541,6 +543,7 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 	 * @param value
 	 *            boolean if true enables print on console else disables it
 	 */
+	@Override
 	public void setPrintOnConsole(boolean value) {
 		printOnConsole = value;
 	}
@@ -551,6 +554,7 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 	 * @param value
 	 *            boolean if true enables loging of debug info else disables it
 	 */
+	@Override
 	public void setDebug(boolean value) {
 		debug = value;
 	}
@@ -560,6 +564,7 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 	 * 
 	 * @return true if debugging is enabled
 	 */
+	@Override
 	public boolean getDebug() {
 		return debug;
 	}
@@ -569,18 +574,22 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 	 * 
 	 * @return true if printingon console is enabled
 	 */
+	@Override
 	public boolean getPrintOnConsole() {
 		return printOnConsole;
 	}
 
-	public Object addingService(ServiceReference reference) {
-		return reference;
+	@Override
+	public LogService addingService(ServiceReference<LogService> reference) {
+		return bc.getService(reference);
 	}
 
-	public void modifiedService(ServiceReference reference, Object service) {
+	@Override
+	public void modifiedService(ServiceReference<LogService> reference, LogService service) {
 	}
 
-	public void removedService(ServiceReference reference, Object service) {
+	@Override
+	public void removedService(ServiceReference<LogService> reference, LogService service) {
 	}
 
 	private HashIntObjNS map = null;
@@ -734,6 +743,7 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 		}
 	}
 
+	@Override
 	public void finalize() {
 		if (fos != null)
 			try {
@@ -783,6 +793,7 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 	 *      java.lang.Object, java.lang.Object, java.lang.Object,
 	 *      java.lang.Object)
 	 */
+	@Override
 	public Object dispatchPrivileged(int type, Object arg1, Object arg2, Object arg3, Object arg4) throws Exception {
 		switch (type) {
 			case OPEN_TYPE :
@@ -800,6 +811,7 @@ public class Log implements LogInterface, ServiceTrackerCustomizer, PrivilegedRu
 
 class Saver implements Runnable {
 
+	@Override
 	public void run() {
 		byte[] bytes = null;
 		Log log = null;
