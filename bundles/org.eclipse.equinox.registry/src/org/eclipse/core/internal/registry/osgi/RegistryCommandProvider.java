@@ -35,7 +35,7 @@ public class RegistryCommandProvider implements CommandProvider {
 	 */
 	private String getHelp(String commandName) {
 		boolean all = commandName == null;
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		if (all) {
 			sb.append("---Extension Registry Commands---"); //$NON-NLS-1$
 			sb.append(NEW_LINE);
@@ -167,7 +167,7 @@ public class RegistryCommandProvider implements CommandProvider {
 	}
 
 	private String spacing(CommandInterpreter ci, int level) {
-		StringBuffer b = new StringBuffer();
+		StringBuilder b = new StringBuilder();
 		for (int i = 0; i < level; i++)
 			b.append(indent);
 		return b.toString();

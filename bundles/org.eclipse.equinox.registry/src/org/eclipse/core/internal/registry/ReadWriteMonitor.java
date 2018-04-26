@@ -89,7 +89,7 @@ public class ReadWriteMonitor {
 
 	@Override
 	public String toString() {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		buffer.append(this.hashCode());
 		if (status == 0) {
 			buffer.append("Monitor idle "); //$NON-NLS-1$
