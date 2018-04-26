@@ -95,6 +95,7 @@ public interface IExtension {
 	 * elements belonging to the <code>org.abc</code> namespace would fall into this category.
 	 * </p>
 	 */
+	@Deprecated
 	public String getNamespace() throws InvalidRegistryObjectException;
 
 	/**
@@ -185,9 +186,6 @@ public interface IExtension {
 	 */
 	public String getUniqueIdentifier() throws InvalidRegistryObjectException;
 
-	/* (non-javadoc)
-	 * @see Object#equals(java.lang.Object)
-	 */
 	@Override
 	public boolean equals(Object o);
 
