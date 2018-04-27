@@ -121,7 +121,7 @@ case $defaultOS in
 				defaultJava=DEFAULT_JAVA_EXEC
 				OUTPUT_DIR="$EXEC_DIR/contributed/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
-			"arm*")
+			arm*)
 				defaultOSArch="arm"
 				defaultJava=DEFAULT_JAVA_EXEC
 				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
