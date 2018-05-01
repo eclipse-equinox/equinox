@@ -13,13 +13,16 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.CookieHandler;
@@ -75,8 +78,8 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.eclipse.equinox.http.servlet.RangeAwareServletContextHelper;
 import org.eclipse.equinox.http.servlet.ExtendedHttpService;
+import org.eclipse.equinox.http.servlet.RangeAwareServletContextHelper;
 import org.eclipse.equinox.http.servlet.context.ContextPathCustomizer;
 import org.eclipse.equinox.http.servlet.session.HttpSessionInvalidator;
 import org.eclipse.equinox.http.servlet.testbase.BaseTest;
@@ -3783,8 +3786,7 @@ public class ServletTest extends BaseTest {
 		}
 	}
 
-	//Disable @Test
-	// TODO this test takes large amounts of memory and can fail with OOM on build machines see bug 530247
+	@Test
 	public void test_AsyncOutput1() throws Exception {
 		Servlet s1 = new AsyncOutputServlet();
 		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
@@ -3795,13 +3797,13 @@ public class ServletTest extends BaseTest {
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, true);
 			registrations.add(getBundleContext().registerService(Servlet.class, s1, servletProps1));
 
-			String output1 = requestAdvisor.request("asyncOutput");
+			String output1 = requestAdvisor.request("asyncOutput?iterations=2");
 
-			Assert.assertTrue("write(int)", output1.startsWith("0123456789"));
+			Assert.assertEquals("write(int)", "01234567890123456789", output1);
 
-			String output2 = requestAdvisor.request("asyncOutput?bytes=true");
+			String output2 = requestAdvisor.request("asyncOutput?bytes=true&iterations=4");
 
-			Assert.assertTrue("write(byte[], int, int)", output2.startsWith("0123456789"));
+			Assert.assertEquals("write(byte[], int, int)", "0123456789012345678901234567890123456789", output2);
 		} finally {
 			for (ServiceRegistration<?> registration : registrations) {
 				registration.unregister();

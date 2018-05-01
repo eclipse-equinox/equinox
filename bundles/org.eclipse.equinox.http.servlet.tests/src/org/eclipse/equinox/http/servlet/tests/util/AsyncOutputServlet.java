@@ -32,19 +32,23 @@ public class AsyncOutputServlet extends HttpServlet {
 		resp.flushBuffer();
 		AsyncContext async = req.startAsync(req, resp);
 		ServletOutputStream out = resp.getOutputStream();
-		out.setWriteListener(new AsyncWriter(async, Boolean.parseBoolean(req.getParameter("bytes"))));
+		out.setWriteListener(new AsyncWriter(
+			async,
+			Integer.parseInt(req.getParameter("iterations") == null ? "1" : req.getParameter("iterations")),
+			Boolean.parseBoolean(req.getParameter("bytes"))));
 	}
 
 	private class AsyncWriter implements WriteListener {
 
 		private final AsyncContext async;
-
 		private final boolean writeBytes;
+		private final int iterations;
 
 		private boolean eof;
 
-		public AsyncWriter(AsyncContext async, boolean writeBytes) {
+		public AsyncWriter(AsyncContext async, int iterations, boolean writeBytes) {
 			this.async = async;
+			this.iterations = iterations;
 			this.writeBytes = writeBytes;
 		}
 
@@ -58,6 +62,8 @@ public class AsyncOutputServlet extends HttpServlet {
 				return;
 			}
 
+			int count = 0;
+
 			if (writeBytes) {
 				byte[] buf = new byte[10];
 				for (int i = 0; i < buf.length; ++i) {
@@ -66,13 +72,17 @@ public class AsyncOutputServlet extends HttpServlet {
 
 				do {
 					out.write(buf);
-				} while (out.isReady());
+				} while (out.isReady() && (++count < iterations));
 			} else {
 				int i = -1;
 				do {
-					out.write('0' + (++i % 10));
-				} while (out.isReady());
+					int b = '0' + (++i % 10);
+					out.write(b);
+				} while (out.isReady() && (++count < (iterations * 10)));
 			}
+
+			out.close();
+			async.complete();
 
 			eof = true;
 		}
