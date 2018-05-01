@@ -106,7 +106,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 					}
 				}
 			} catch (Exception e) {
-				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.METADATA_FILE_PARSE_ERROR, new Object[] {entry, bundle.getBundleId(), bundle.getSymbolicName()}), e);
+				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.METADATA_FILE_PARSE_ERROR, new Object[] {entry, bundle.getBundleId(), bundle.getSymbolicName()}), e);
 			}
 		}
 		return result;
