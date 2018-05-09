@@ -111,7 +111,7 @@ public class SecurityTable extends PermissionCollection {
 		Condition[] conditions = row.getConditions(bundlePermissions);
 		if (conditions != null) {
 			for (Condition condition : conditions) {
-				if (condition.isMutable()) {
+				if (condition != null && condition.isMutable()) {
 					evaluationCache.put(evaluationCacheKey, MUTABLE);
 					return true;
 				}

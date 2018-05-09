@@ -57,6 +57,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 	private static final ConditionInfo[] ALLLOCATION_CONDS = new ConditionInfo[] {new ConditionInfo("org.osgi.service.condpermadmin.BundleLocationCondition", new String[] {"*"})}; //$NON-NLS-1$ //$NON-NLS-2$
 	private static final ConditionInfo MUT_SAT = new ConditionInfo("ext.framework.b.TestCondition", new String[] {"MUT_SAT", "true", "false", "true"}); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+	private static final ConditionInfo NOT_MUT_SAT = new ConditionInfo("ext.framework.b.TestCondition", new String[] {"NOT_MUT_SAT", "false", "false", "true"}); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	private static final ConditionInfo POST_MUT_SAT = new ConditionInfo("ext.framework.b.TestCondition", new String[] {"POST_MUT_SAT", "true", "true", "true"}); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	private static final ConditionInfo POST_MUT_UNSAT = new ConditionInfo("ext.framework.b.TestCondition", new String[] {"POST_MUT_UNSAT", "true", "true", "false"}); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
@@ -687,6 +688,24 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 		tc1sat.setSatisfied(false);
 		testSMPermission(pds, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
+
+		tc1sat.setSatisfied(true);
+		update = cpa.newConditionalPermissionUpdate();
+		rows = update.getConditionalPermissionInfos();
+		rows.clear();
+		rows.add(cpa.newConditionalPermissionInfo(null, new ConditionInfo[] {NOT_MUT_SAT, MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfo.DENY));
+		rows.add(cpa.newConditionalPermissionInfo(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
+		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$);
+
+		testSMPermission(pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
+		// test again to make sure we get the same result
+		testSMPermission(pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
+		// test with different file name
+		testSMPermission(pds, new FilePermission("test2", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
+
+		TestCondition tc2sat = TestCondition.getTestCondition("NOT_MUT_SAT_" + test1.getBundleId()); //$NON-NLS-1$
+		assertNotNull("tc2sat", tc2sat); //$NON-NLS-1$
+
 	}
 
 	public void testAccessControlContext01() {

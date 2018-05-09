@@ -17,11 +17,11 @@ class EvaluationCacheKey {
 
 	private final Permission permission;
 
-	private final Long bundleId;
+	private final BundlePermissions bundlePermissions;
 
 	EvaluationCacheKey(BundlePermissions bundlePermissions, Permission permission) {
 		this.permission = permission;
-		this.bundleId = bundlePermissions.getBundle().getBundleId();
+		this.bundlePermissions = bundlePermissions;
 	}
 
 	@Override
@@ -33,11 +33,11 @@ class EvaluationCacheKey {
 			return false;
 		}
 		EvaluationCacheKey that = (EvaluationCacheKey) o;
-		return Objects.equals(bundleId, that.bundleId) && Objects.equals(permission, that.permission);
+		return bundlePermissions == that.bundlePermissions && Objects.equals(permission, that.permission);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(bundleId, permission);
+		return Objects.hash(bundlePermissions, permission);
 	}
 }
