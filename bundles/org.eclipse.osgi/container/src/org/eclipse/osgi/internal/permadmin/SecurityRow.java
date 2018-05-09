@@ -11,11 +11,19 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.permadmin;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.security.Permission;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.osgi.framework.Bundle;
-import org.osgi.service.condpermadmin.*;
+import org.osgi.service.condpermadmin.Condition;
+import org.osgi.service.condpermadmin.ConditionInfo;
+import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
 public final class SecurityRow implements ConditionalPermissionInfo {
@@ -290,8 +298,8 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 
 	private Method getConditionMethod(Class<?> clazz) {
 		for (Method checkMethod : clazz.getMethods()) {
-			if (checkMethod.getName().equals("getCondition")
-					&& (checkMethod.getModifiers() & Modifier.STATIC) == Modifier.STATIC
+			if (checkMethod.getName().equals("getCondition") //$NON-NLS-1$
+					&& (checkMethod.getModifiers() & Modifier.STATIC) == Modifier.STATIC //
 					&& checkParameterTypes(checkMethod.getParameterTypes())) {
 				return checkMethod;
 			}
