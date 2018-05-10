@@ -92,6 +92,7 @@ public class SecurityUIMsg extends NLS {
 	public static String ADVPAGE_LABEL_ALIASES;
 	public static String ADVPAGE_LABEL_ATTRIBUTES;
 
+	public static String CERTVIEW_SHELL_TITLE;
 	public static String CERTVIEW_LABEL_BASIC;
 	public static String CERTVIEW_LABEL_DETAILS;
 	public static String CERTVIEW_LABEL_VALIDITY_DATES;

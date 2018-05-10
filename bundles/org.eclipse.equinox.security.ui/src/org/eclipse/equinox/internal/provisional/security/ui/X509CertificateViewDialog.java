@@ -44,6 +44,12 @@ public class X509CertificateViewDialog extends TitleAreaDialog {
 		this.theCert = cert;
 	}
 
+	@Override
+	protected void configureShell(Shell newShell) {
+		super.configureShell(newShell);
+		newShell.setText(SecurityUIMsg.CERTVIEW_SHELL_TITLE);
+	}
+
 	protected Control createContents(Composite parent) {
 		return super.createContents(parent);
 	}
