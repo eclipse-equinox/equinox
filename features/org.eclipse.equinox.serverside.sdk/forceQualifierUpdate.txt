@@ -16,3 +16,4 @@ Bug 506597 - Build failure on I20161026-2000
 Bug 521792 - I-builds are failing from September 1 2017 
 Bug 528810 - Compilation failure in I20171214-2000
 Bug 533464 - Build failure in I20180411-0530
+Bug 444188 - EclipsePreferences is not thread safe
