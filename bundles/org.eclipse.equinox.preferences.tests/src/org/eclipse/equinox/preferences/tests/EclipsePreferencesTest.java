@@ -30,23 +30,25 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChange
 import org.junit.After;
 import org.junit.Test;
 import org.osgi.service.prefs.BackingStoreException;
-import org.osgi.service.prefs.Preferences;
 
 /**
  * Test suite for class org.eclipse.core.internal.preferences.EclipsePreferences
- * WARNING: many tests are still located in org.eclipse.core.tests.internal.preferences.EclipsePreferencesTest from eclipse.platform.runtime
+ * WARNING: many tests are still located in
+ * org.eclipse.core.tests.internal.preferences.EclipsePreferencesTest from
+ * eclipse.platform.runtime
  */
 public class EclipsePreferencesTest {
 
-	/** 
+	/**
 	 * Concurrent access to listener collection should not lead to exceptions
+	 * 
 	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=444188
 	 */
 	@Test
 	public void testConcurrentPreferenceChangeListener() throws InterruptedException, CoreException {
 		final IEclipsePreferences node = createTestNode();
 		final int runSize = 100000;
-		
+
 		executeInTwoThreads(new ICoreRunnable() {
 			@Override
 			public void run(IProgressMonitor monitor) throws CoreException {
@@ -65,8 +67,9 @@ public class EclipsePreferencesTest {
 		});
 	}
 
-	/** 
+	/**
 	 * Concurrent access to listener collection should not lead to exceptions
+	 * 
 	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=444188
 	 */
 	@Test
@@ -91,7 +94,8 @@ public class EclipsePreferencesTest {
 					try {
 						node.node(Thread.currentThread().getName()).removeNode(); // Should not throw
 					} catch (BackingStoreException e) {
-						throw new CoreException(new Status(IStatus.ERROR, "org.eclipse.core.tests.runtime", 0, "", null));
+						throw new CoreException(
+								new Status(IStatus.ERROR, "org.eclipse.core.tests.runtime", 0, "", null));
 					}
 					node.removeNodeChangeListener(listener); // Should not throw
 				}
@@ -111,7 +115,7 @@ public class EclipsePreferencesTest {
 		job.schedule();
 		try {
 			latch.await();
-				runnable.run(new NullProgressMonitor());
+			runnable.run(new NullProgressMonitor());
 		} finally {
 			job.cancel();
 			job.join();
@@ -122,12 +126,12 @@ public class EclipsePreferencesTest {
 			}
 		}
 	}
-	
+
 	@After
 	public void after() throws BackingStoreException {
 		getScopeRoot().removeNode();
 	}
-	
+
 	private static String getUniqueString() {
 		return System.currentTimeMillis() + "-" + Math.random();
 	}
@@ -135,7 +139,7 @@ public class EclipsePreferencesTest {
 	private static IEclipsePreferences createTestNode() {
 		return (IEclipsePreferences) getScopeRoot().node(getUniqueString());
 	}
-	
+
 	private static IEclipsePreferences getScopeRoot() {
 		return (IEclipsePreferences) Platform.getPreferencesService().getRootNode().node("EclipsePreferencesTest");
 	}
