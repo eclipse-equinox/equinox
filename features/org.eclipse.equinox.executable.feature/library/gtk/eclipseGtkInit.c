@@ -111,28 +111,12 @@ int loadGtk() {
 #define DLFLAGS RTLD_LAZY
 #endif
 
-	char *overlayScrollbar = getenv("LIBOVERLAY_SCROLLBAR");
-	if (overlayScrollbar == NULL) {
-		setenv("LIBOVERLAY_SCROLLBAR", "0", 0);
-	}
-
-	char *oxygenGtkHack = getenv("OXYGEN_DISABLE_INNER_SHADOWS_HACK");
-	if (oxygenGtkHack == NULL) {
-		setenv("OXYGEN_DISABLE_INNER_SHADOWS_HACK", "1", 0);
-	}
-	
 	void *gioLib = NULL, *glibLib = NULL, *gdkLib = NULL, *gtkLib = NULL, *objLib = NULL, *pixLib = NULL;
 	
 	char *gtk3 = getenv("SWT_GTK3");
 	if (gtk3 == NULL || strcmp(gtk3,"1") == 0) {
 		gdkLib = dlopen(GDK3_LIB, DLFLAGS);
 		gtkLib = dlopen(GTK3_LIB, DLFLAGS);
-
-		/* Work around for https://bugzilla.gnome.org/show_bug.cgi?id=677329, see Eclipse bug 435742 */
-		char *gdkCoreDeviceEvents = getenv("GDK_CORE_DEVICE_EVENTS");
-		if (gdkCoreDeviceEvents == NULL) {
-			setenv("GDK_CORE_DEVICE_EVENTS", "1", 0);
-		}
 	}
 	if (!gtkLib || !gdkLib) { //if GTK+ 2
 		gdkLib = dlopen(GDK_LIB, DLFLAGS);
