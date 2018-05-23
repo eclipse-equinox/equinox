@@ -1,23 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <project default="build_eclipse" basedir=".">
 
-<target name="build_eclipse">
+<condition property="build-natives">
+	<matches pattern="^${ws}.${os}.${arch}$" string="${native}"/>
+</condition>
+
+<target name="build_eclipse" if="build-natives">
 	<exec dir="." executable="sh">
 		<arg line="${basedir}/build.sh"/>
 		<arg line="install"/>
+		<arg line="-ws ${ws}"/>
+		<arg line="-os ${os}"/>
+		<arg line="-arch ${arch}"/>
 	</exec>
 </target>
 
-<target name="build_eclipse_ppc">
-	<exec dir="." executable="sh">
-		<env key="MODEL" value="ppc"/>
-		<arg line="${basedir}/build.sh"/>
-		<arg line="install"/>
-	</exec>
-</target>
-	
-<target name="clean">
+<target name="clean" if="build-natives">
 	<tstamp/>
 	<exec dir="." executable="sh">
 		<arg line="${basedir}/build.sh"/>
