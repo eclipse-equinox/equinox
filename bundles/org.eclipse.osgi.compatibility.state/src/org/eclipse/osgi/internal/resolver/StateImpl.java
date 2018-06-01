@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2017 IBM Corporation and others.
+ * Copyright (c) 2003, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Danail Nachev -  ProSyst - bug 218625
  *     Rob Harrop - SpringSource Inc. (bug 247522)
+ *     Karsten Thoms (itemis) - bug 535341
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
@@ -121,6 +122,7 @@ public abstract class StateImpl implements State {
 	private StateObjectFactory factory;
 	private final KeyedHashSet resolvedBundles = new KeyedHashSet();
 	private final Map<BundleDescription, List<DisabledInfo>> disabledBundles = new HashMap<>();
+	private final Map<String, Set<BundleDescription>> bundleNameCache = new HashMap<>();
 	private boolean fullyLoaded = false;
 	private boolean dynamicCacheChanged = false;
 	// only used for lazy loading of BundleDescriptions
@@ -182,6 +184,7 @@ public abstract class StateImpl implements State {
 				return false;
 			if (!bundleDescriptions.remove(existing))
 				return false;
+			removeBundleNameCacheEntry(existing);
 			resolvedBundles.remove(existing);
 			List<DisabledInfo> infos = disabledBundles.remove(existing);
 			if (infos != null) {
@@ -237,6 +240,7 @@ public abstract class StateImpl implements State {
 				return false;
 			resolvedBundles.remove((KeyedElement) toRemove);
 			disabledBundles.remove(toRemove);
+			removeBundleNameCacheEntry(toRemove);
 			resolved = false;
 			getDelta().recordBundleRemoved((BundleDescriptionImpl) toRemove);
 			((BundleDescriptionImpl) toRemove).setStateBit(BundleDescriptionImpl.REMOVAL_PENDING, true);
@@ -282,11 +286,9 @@ public abstract class StateImpl implements State {
 		synchronized (this.monitor) {
 			if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(symbolicName))
 				symbolicName = getSystemBundle();
-			final List<BundleDescription> bundles = new ArrayList<>();
-			for (Iterator<KeyedElement> iter = bundleDescriptions.iterator(); iter.hasNext();) {
-				BundleDescription bundle = (BundleDescription) iter.next();
-				if (symbolicName.equals(bundle.getSymbolicName()))
-					bundles.add(bundle);
+			final Set<BundleDescription> bundles = bundleNameCache.get(symbolicName);
+			if (bundles == null) {
+				return new BundleDescription[0];
 			}
 			return bundles.toArray(new BundleDescription[bundles.size()]);
 		}
@@ -684,6 +686,7 @@ public abstract class StateImpl implements State {
 			if (bundleDescriptions.add((BundleDescriptionImpl) description)) {
 				if (description.getBundleId() > getHighestBundleId())
 					highestBundleId = description.getBundleId();
+				addBundleNameCacheEntry(description);
 				return true;
 			}
 			return false;
@@ -1330,5 +1333,24 @@ public abstract class StateImpl implements State {
 				results.addAll(allDisabledInfos.next());
 		}
 		return results.toArray(new DisabledInfo[results.size()]);
+	}
+
+	private void addBundleNameCacheEntry(BundleDescription description) {
+		Set<BundleDescription> descriptions = bundleNameCache.get(description.getSymbolicName());
+		if (descriptions == null) {
+			descriptions = new LinkedHashSet<>();
+			bundleNameCache.put(description.getSymbolicName(), descriptions);
+		}
+		descriptions.add(description);
+	}
+
+	private void removeBundleNameCacheEntry(BundleDescription description) {
+		Set<BundleDescription> descriptions = bundleNameCache.get(description.getSymbolicName());
+		if (descriptions != null) {
+			descriptions.remove(description);
+			if (descriptions.isEmpty()) {
+				bundleNameCache.remove(description.getSymbolicName());
+			}
+		}
 	}
 }
