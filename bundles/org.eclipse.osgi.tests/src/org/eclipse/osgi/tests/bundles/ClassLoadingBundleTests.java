@@ -32,16 +32,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.jws.WebService;
-import javax.xml.namespace.QName;
-import javax.xml.ws.Endpoint;
-import javax.xml.ws.Service;
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
@@ -52,7 +47,6 @@ import org.osgi.framework.BundleReference;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -1735,76 +1729,22 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		global.loadClass("test.bug438904.frag.Test2");
 	}
 
-	public void testContextFinderGetResource() throws IOException, InvalidSyntaxException {
-		// get the context finder explicitly to test incase the thread context class loader has changed
-		ClassLoader contextFinder = getContext().getService(getContext().getServiceReferences(ClassLoader.class, "(equinox.classloader.type=contextClassLoader)").iterator().next());
-		// Using a resource we know is in java 8.
-		String resource = "META-INF/services/javax.print.PrintServiceLookup";
-		URL systemURL = ClassLoader.getSystemClassLoader().getResource(resource);
-		assertNotNull("Did not find a parent resource: " + resource, systemURL);
-		//should return the file defined in test bundle.
-		URL url = contextFinder.getResource(resource);
-		//the first element should be the file define in this bundle.
-		List<URL> urls = Collections.list(contextFinder.getResources(resource));
-		// make sure we have a resource located in the parent
-		assertTrue("Did not find a parent resource: " + urls, urls.size() > 1);
-		//assert failed as it return the one defined in parent class.
-		assertEquals(url.toExternalForm(), urls.get(0).toExternalForm());
-	}
+	public void testUnitTestForcompoundEnumerations() {
+		Enumeration<Object> result = BundleLoader.compoundEnumerations(null, Collections.emptyEnumeration());
+		assertNotNull("Null result.", result);
+		assertFalse("Found elements.", result.hasMoreElements());
 
-	@WebService(endpointInterface = "org.eclipse.osgi.tests.bundles.TestService")
-	public static class TestServiceImpl implements TestService {
+		result = BundleLoader.compoundEnumerations(Collections.emptyEnumeration(), null);
+		assertNotNull("Null result.", result);
+		assertFalse("Found elements.", result.hasMoreElements());
 
-		@Override
-		public String hello(final String name) {
-			return "Hello " + name;
-		}
+		result = BundleLoader.compoundEnumerations(null, null);
+		assertNotNull("Null result.", result);
+		assertFalse("Found elements.", result.hasMoreElements());
 
-	}
-
-	/*
-	 * This test depends on the behavior of the JVM Endpoint implementation to use
-	 * the context class loader to try and find resources using an executor.
-	 * This is important because it causes the thread stack to have NO classes
-	 * loaded by a bundle class loader.  This causes a condition that would
-	 * make ContextFinder.getResources to return null
-	 */
-	public void testContextFinderEmptyGetResources() throws Exception {
-		// get the context finder explicitly to test incase the thread context class loader has changed
-		ClassLoader contextFinder = getContext().getService(getContext().getServiceReferences(ClassLoader.class, "(equinox.classloader.type=contextClassLoader)").iterator().next());
-		ClassLoader previousTCCL = Thread.currentThread().getContextClassLoader();
-		Thread.currentThread().setContextClassLoader(contextFinder);
-		ExecutorService pool = null;
-		try {
-			pool = Executors.newFixedThreadPool(3);
-
-			final String address = "http://localhost:23512/service";
-
-			final WebService annotation = TestService.class.getAnnotation(WebService.class);
-			final String namespaceURI = annotation.serviceName();
-			final String localPart = annotation.targetNamespace();
-			final QName serviceName = new QName(namespaceURI, localPart);
-
-			final TestServiceImpl tsi = new TestServiceImpl();
-			final Endpoint endpoint = Endpoint.create(tsi);
-			final HashMap<String, Object> props = new HashMap<String, Object>();
-			props.put(Endpoint.WSDL_SERVICE, serviceName);
-
-			endpoint.setProperties(props);
-			endpoint.setExecutor(pool);
-			endpoint.publish(address);
-			final URL wsdlURL = new URL(address + "?wsdl");
-			final Service s = Service.create(wsdlURL, serviceName);
-			assertNotNull("Service is null.", s);
-			final TestService port = s.getPort(TestService.class);
-
-			assertEquals("Wrong result.", "Hello World", port.hello("World"));
-		} finally {
-			Thread.currentThread().setContextClassLoader(previousTCCL);
-			if (pool != null) {
-				pool.shutdown();
-			}
-		}
+		result = BundleLoader.compoundEnumerations(Collections.emptyEnumeration(), Collections.emptyEnumeration());
+		assertNotNull("Null result.", result);
+		assertFalse("Found elements.", result.hasMoreElements());
 	}
 
 	public void testBundleClassLoaderEmptyGetResources() throws Exception {

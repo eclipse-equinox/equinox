@@ -3763,4 +3763,43 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	public void testContextFinderGetResource() throws IOException, InvalidSyntaxException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map configuration = new HashMap();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(EquinoxConfiguration.PROP_CONTEXTCLASSLOADER_PARENT, EquinoxConfiguration.CONTEXTCLASSLOADER_PARENT_FWK);
+		Equinox equinox = null;
+		try {
+			equinox = new Equinox(configuration);
+			equinox.init();
+			BundleContext bc = equinox.getBundleContext();
+			// get the context finder explicitly to test
+			ClassLoader contextFinder = bc.getService(bc.getServiceReferences(ClassLoader.class, "(equinox.classloader.type=contextClassLoader)").iterator().next());
+			// Using a resource we know is in the framework
+			String resource = "profile.list";
+			URL fwkURL = Bundle.class.getClassLoader().getResource(resource);
+			assertNotNull("Did not find a parent resource: " + resource, fwkURL);
+			// should return the file defined in test bundle.
+			URL url = contextFinder.getResource(resource);
+			// the first element should be the file define in this bundle.
+			List<URL> urls = Collections.list(contextFinder.getResources(resource));
+			// make sure we have a resource located in the parent
+			assertTrue("Did not find a parent resource: " + urls, urls.size() > 1);
+			// assert failed as it return the one defined in parent class.
+			assertEquals(url.toExternalForm(), urls.get(0).toExternalForm());
+		} catch (BundleException e) {
+			fail("Failed init", e);
+		} finally {
+			try {
+				if (equinox != null) {
+					equinox.stop();
+					equinox.waitForStop(1000);
+				}
+			} catch (BundleException e) {
+				fail("Failed to stop framework.", e);
+			} catch (InterruptedException e) {
+				fail("Failed to stop framework.", e);
+			}
+		}
+	}
 }
