@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Preferences Tests
 Bundle-Category: test
 Bundle-SymbolicName: org.eclipse.equinox.preferences.tests
-Bundle-Version: 3.7.100.qualifier
+Bundle-Version: 3.7.200.qualifier
 Require-Bundle: org.junit
 Import-Package: 
  org.apache.felix.scr;version="1.6.0",

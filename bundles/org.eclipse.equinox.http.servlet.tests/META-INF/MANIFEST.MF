@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.equinox.http.servlet.tests
 Bundle-SymbolicName: org.eclipse.equinox.http.servlet.tests
-Bundle-Version: 1.5.0.qualifier
+Bundle-Version: 1.5.100.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-BundleShape: dir
 Bundle-Activator: org.eclipse.equinox.http.servlet.tests.bundle.Activator
