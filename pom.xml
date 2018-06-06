@@ -84,7 +84,6 @@
     
     <module>bundles/org.eclipse.equinox.launcher</module>
     <module>bundles/org.eclipse.equinox.launcher.cocoa.macosx.x86_64</module>
-    <module>bundles/org.eclipse.equinox.launcher.gtk.linux.ppc64</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.linux.ppc64le</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.linux.x86</module>
     <module>bundles/org.eclipse.equinox.launcher.gtk.linux.x86_64</module>

@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.equinox.executable"
       label="%featureName"
-      version="3.8.0.qualifier"
+      version="3.8.100.qualifier"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
 
@@ -26,16 +26,6 @@
          os="macosx"
          ws="cocoa"
          arch="x86_64"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-   <plugin
-         id="org.eclipse.equinox.launcher.gtk.linux.ppc64"
-         os="linux"
-         ws="gtk"
-         arch="ppc64"
          download-size="0"
          install-size="0"
          version="0.0.0"

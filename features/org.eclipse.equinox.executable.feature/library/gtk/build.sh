@@ -91,19 +91,6 @@ case $defaultOS in
 				defaultOSArch="x86"
 				[ -d /bluebird/teamswt/swt-builddir/JDKs/x86/ibm-java2-i386-50 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/x86/ibm-java2-i386-50"
 				;;
-			"ppc")
-				defaultOSArch="ppc"
-				defaultJava=DEFAULT_JAVA_EXEC
-				#[ -d /bluebird/teamswt/swt-builddir/JDKs/PPC/ibm-java2-ppc-50 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/PPC/ibm-java2-ppc-50"
-				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
-				;;
-			"ppc64")
-				defaultOSArch="ppc64"
-				defaultJava=DEFAULT_JAVA_EXEC
-				#[ -d /bluebird/teamswt/swt-builddir/JDKs/PPC64/ibm-java2-ppc64-50 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/PPC64/ibm-java2-ppc64-50"
-				defaultJavaHome=`readlink -f /usr/bin/java | sed "s:jre/bin/java::"`
-				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
-				;;
 			"ppc64le")
 				defaultOSArch="ppc64le"
 				defaultJava=DEFAULT_JAVA_EXEC
@@ -136,14 +123,6 @@ case $defaultOS in
 				;;
 		esac
 		;;
-	"AIX" | "aix")
-		makefile="make_aix.mak"
-		defaultOS="aix"
-		if [ -z "$defaultOSArch" ]; then
-			defaultOSArch="ppc64"
-		fi
-		[ -d /bluebird/teamswt/swt-builddir/JDKs/AIX/PPC64/j564/sdk ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/AIX/PPC64/j564/sdk"
-	;;
 	*)
 	echo "Unknown OS -- build aborted"
 	;;
@@ -167,12 +146,8 @@ elif [ -z "$JAVA_HOME" -a -n  "$defaultJavaHome" ]; then
 	export JAVA_HOME
 fi
 
-if [ "$defaultOSArch" = "ppc64" -o $defaultOSArch = "ppc64le" ];  then
-	if [ "$defaultOS" = "aix" ];  then
-		M_ARCH=-maix64
-	else
-		M_ARCH=-m64
-	fi
+if [ $defaultOSArch = "ppc64le" ];  then
+	M_ARCH=-m64
 	export M_ARCH
 elif [ "$defaultOSArch" = "s390" ];  then
 	if [ "${JAVA_HOME}" = "" ]; then

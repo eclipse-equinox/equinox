@@ -134,14 +134,6 @@
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.gtk.ppc/${collectingFolder}" includes="launcher" />
 	</target>
-	<target name="rootFileslinux_gtk_ppc64">
-		<mkdir dir="${feature.base}/linux.gtk.ppc64/${collectingFolder}"/>
-		<copy todir="${feature.base}/linux.gtk.ppc64/${collectingFolder}" failonerror="true" overwrite="true">
-			<fileset dir="${basedir}/bin/gtk/linux/ppc64" includes="**"			/>
-			<fileset dir="${basedir}/gtk_root" includes="**"			/>
-		</copy>
-		<chmod perm="755" dir="${feature.base}/linux.gtk.ppc64/${collectingFolder}" includes="launcher" />
-	</target>
 	<target name="rootFileslinux_gtk_ppc64le">
 		<mkdir dir="${feature.base}/linux.gtk.ppc64le/${collectingFolder}"/>
 		<copy todir="${feature.base}/linux.gtk.ppc64le/${collectingFolder}" failonerror="true" overwrite="true">
@@ -165,22 +157,6 @@
 			<fileset dir="${basedir}/gtk_root" includes="**"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.gtk.aarch64/${collectingFolder}" includes="launcher" />
-	</target>
-	<target name="rootFilesaix_gtk_ppc64">
-		<mkdir dir="${feature.base}/aix.gtk.ppc64/${collectingFolder}"/>
-		<copy todir="${feature.base}/aix.gtk.ppc64/${collectingFolder}" failonerror="true" overwrite="true">
-			<fileset dir="${basedir}/bin/gtk/aix/ppc64" includes="**"			/>
-			<fileset dir="${basedir}/gtk_root" includes="**"			/>
-		</copy>
-		<chmod perm="755" dir="${feature.base}/aix.gtk.ppc64/${collectingFolder}" includes="launcher" />
-	</target>
-	<target name="rootFilesaix_gtk_ppc">
-		<mkdir dir="${feature.base}/aix.gtk.ppc/${collectingFolder}"/>
-		<copy todir="${feature.base}/aix.gtk.ppc/${collectingFolder}" failonerror="true" overwrite="true">
-			<fileset dir="${basedir}/bin/gtk/aix/ppc" includes="**"			/>
-			<fileset dir="${basedir}/gtk_root" includes="**"			/>
-		</copy>
-		<chmod perm="755" dir="${feature.base}/aix.gtk.ppc/${collectingFolder}" includes="launcher" />
 	</target>
 	<target name="rootFileslinux_gtk_x86_64">
 		<mkdir dir="${feature.base}/linux.gtk.x86_64/${collectingFolder}"/>
@@ -238,7 +214,6 @@
 		<antcall target="rootFileswin32_win32_x86_64"/>
 		<antcall target="rootFilesmacosx_cocoa_x86_64"/>
 		<antcall target="rootFileslinux_gtk_x86"/>
-		<antcall target="rootFileslinux_gtk_ppc64"/>
 		<antcall target="rootFileslinux_gtk_ppc64le"/>
 		<antcall target="rootFileslinux_gtk_x86_64"/>
 	</target>
