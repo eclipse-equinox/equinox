@@ -14,8 +14,14 @@ package org.eclipse.osgi.internal.hookregistry;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.internal.cds.CDSHookConfigurator;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.hooks.DevClassLoadingHook;
@@ -103,6 +109,7 @@ public final class HookRegistry {
 			addClassLoaderHook(new EclipseLazyStarter(container));
 			addClassLoaderHook(new WeavingHookConfigurator(container));
 			configurators.add(SignedBundleHook.class.getName());
+			configurators.add(CDSHookConfigurator.class.getName());
 			loadConfigurators(configurators, errors);
 			// set to read-only
 			initialized = true;
