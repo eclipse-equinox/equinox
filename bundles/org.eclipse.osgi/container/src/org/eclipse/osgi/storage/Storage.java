@@ -1013,10 +1013,7 @@ public class Storage {
 		File outFile = null;
 		try {
 			if (in instanceof ReferenceInputStream) {
-				URL reference = ((ReferenceInputStream) in).getReference();
-				if (!"file".equals(reference.getProtocol())) //$NON-NLS-1$
-					throw new BundleException(NLS.bind(Msg.ADAPTOR_URL_CREATE_EXCEPTION, reference));
-				return new File(reference.getPath());
+				return ((ReferenceInputStream) in).getReference();
 			}
 
 			outFile = File.createTempFile(BUNDLE_FILE_NAME, ".tmp", childRoot); //$NON-NLS-1$

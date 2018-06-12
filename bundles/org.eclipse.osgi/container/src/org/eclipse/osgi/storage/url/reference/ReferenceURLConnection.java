@@ -11,11 +11,17 @@
 
 package org.eclipse.osgi.storage.url.reference;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import org.eclipse.osgi.framework.util.FilePath;
 import org.eclipse.osgi.internal.location.LocationHelper;
+import org.eclipse.osgi.internal.messages.Msg;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * URLConnection for the reference protocol.
@@ -23,23 +29,25 @@ import org.eclipse.osgi.internal.location.LocationHelper;
 
 public class ReferenceURLConnection extends URLConnection {
 	private final String installPath;
-	private URL reference;
+	private volatile File reference;
 
 	protected ReferenceURLConnection(URL url, String installPath) {
 		super(url);
 		this.installPath = installPath;
 	}
 
-	@SuppressWarnings("deprecation")
 	public synchronized void connect() throws IOException {
 		if (!connected) {
 			// TODO assumes that reference URLs are always based on file: URLs.
 			// There are not solid usecases to the contrary. Yet.
-			// Construct the ref URL carefully so as to preserve UNC paths etc.
-			String path = url.getPath().substring(5);
+			// Construct the ref File carefully so as to preserve UNC paths etc.
+			String path = url.getPath();
+			if (!path.startsWith("file:")) { //$NON-NLS-1$
+				throw new IOException(NLS.bind(Msg.ADAPTOR_URL_CREATE_EXCEPTION, path));
+			}
+			path = url.getPath().substring(5);
 			File file = new File(path);
 
-			URL ref;
 			if (!file.isAbsolute()) {
 				if (installPath != null)
 					file = makeAbsolute(installPath, file);
@@ -47,10 +55,10 @@ public class ReferenceURLConnection extends URLConnection {
 
 			file = LocationHelper.decodePath(file);
 
-			ref = file.toURL();
 			checkRead(file);
 
-			reference = ref;
+			reference = file;
+			connected = true;
 		}
 	}
 

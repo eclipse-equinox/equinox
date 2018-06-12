@@ -305,46 +305,90 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		}
 	}
 
-	public void testPercentLocation() throws BundleException, IOException {
+	public void testPercentLocation() {
 		doTestSpecialChars('%', false);
 		doTestSpecialChars('%', true);
 	}
 
-	public void testSpaceLocation() throws BundleException, IOException {
+	public void testSpaceLocation() {
 		doTestSpecialChars(' ', false);
 		doTestSpecialChars(' ', true);
 	}
 
-	private void doTestSpecialChars(char c, boolean encode) throws BundleException, IOException {
+	public void testPlusLocation() {
+		doTestSpecialChars('+', true);
+		doTestSpecialChars('+', false);
+	}
+
+	public void testOctothorpLocation() {
+		doTestSpecialChars('#', true);
+		// # must be encoded for anything to pass
+		doTestSpecialChars('#', false, false, false);
+	}
+
+	public void testQuestionMarkLocation() {
+		doTestSpecialChars('?', true);
+		// ? must only be encoded for non-reference installs
+		doTestSpecialChars('?', false, true, false);
+
+	}
+
+	private void doTestSpecialChars(char c, boolean encode) {
+		doTestSpecialChars(c, encode, true, true);
+	}
+
+	private void doTestSpecialChars(char c, boolean encode, boolean refPass, boolean filePass) {
 		File bundlesDirectory = OSGiTestsActivator.getContext().getDataFile("file_with_" + c + "_char");
 		bundlesDirectory.mkdirs();
 
-		File testBundleJarFile = SystemBundleTests.createBundle(bundlesDirectory, getName() + 1, false, false);
-		@SuppressWarnings("deprecation")
-		String testBundleJarFileURL = encode ? testBundleJarFile.toURI().toString() : testBundleJarFile.toURL().toString();
-		File testBundleDirFile = SystemBundleTests.createBundle(bundlesDirectory, getName() + 2, false, true);
-		@SuppressWarnings("deprecation")
-		String testBundleDirFileURL = encode ? testBundleDirFile.toURI().toString() : testBundleDirFile.toURL().toString();
+		File testBundleJarFile = null;
+		String testBundleJarFileURL = null;
+		File testBundleDirFile = null;
+		String testBundleDirFileURL = null;
+		try {
+			testBundleJarFile = SystemBundleTests.createBundle(bundlesDirectory, getName() + 1, false, false);
+			testBundleJarFileURL = encode ? testBundleJarFile.toURI().toString() : testBundleJarFile.toURL().toString();
+			testBundleDirFile = SystemBundleTests.createBundle(bundlesDirectory, getName() + 2, false, true);
+			testBundleDirFileURL = encode ? testBundleDirFile.toURI().toString() : testBundleDirFile.toURL().toString();
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
+
+		String refToJarURL = "reference:" + testBundleJarFileURL;
+		// Test with reference stream to jar bundle
+		testInstallSpecialCharBundle(refToJarURL, true, refPass);
 
 		// Test with reference URL to jar bundle
-		Bundle testBundleJarRef = getContext().installBundle("reference:" + testBundleJarFileURL);
-		testBundleJarRef.start();
-		testBundleJarRef.uninstall();
+		testInstallSpecialCharBundle(refToJarURL, false, refPass);
 
 		// Test with reference URL to dir bundle
-		Bundle testBundleDirRef = getContext().installBundle("reference:" + testBundleDirFileURL);
-		testBundleDirRef.start();
-		testBundleDirRef.uninstall();
+		testInstallSpecialCharBundle("reference:" + testBundleDirFileURL, false, refPass);
 
 		// Test with jar bundle
-		Bundle testBundleJar = getContext().installBundle(testBundleJarFileURL);
-		testBundleJar.start();
-		testBundleJar.uninstall();
+		testInstallSpecialCharBundle(testBundleJarFileURL, false, filePass);
 
 		// Test with dir bundle
-		Bundle testBundleDir = getContext().installBundle(testBundleDirFileURL);
-		testBundleDir.start();
-		testBundleDir.uninstall();
+		testInstallSpecialCharBundle(testBundleDirFileURL, false, filePass);
+	}
+
+	void testInstallSpecialCharBundle(String location, boolean openStream, boolean expectSuccess) {
+		try {
+			Bundle b;
+			if (openStream) {
+				b = getContext().installBundle(location, new URL(location).openStream());
+			} else {
+				b = getContext().installBundle(location);
+			}
+			b.start();
+			b.uninstall();
+			if (!expectSuccess) {
+				fail("Should have failed for location: " + location);
+			}
+		} catch (Exception e) {
+			if (expectSuccess) {
+				fail("Should not have failed for location: " + location + " " + e.getMessage());
+			}
+		}
 	}
 
 	public void testPercentCharBundleEntry() throws IOException, BundleException {

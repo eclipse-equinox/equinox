@@ -11,18 +11,18 @@
 
 package org.eclipse.osgi.storage.url.reference;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 
 /**
- * InputStream subclass which provides a reference (via URL) to the data
+ * InputStream subclass which provides a reference (via File) to the data
  * rather than allowing the input stream to be directly read.
  */
 public class ReferenceInputStream extends InputStream {
-	protected URL reference;
+	private final File reference;
 
-	public ReferenceInputStream(URL reference) {
+	public ReferenceInputStream(File reference) {
 		this.reference = reference;
 	}
 
@@ -32,7 +32,7 @@ public class ReferenceInputStream extends InputStream {
 		throw new IOException();
 	}
 
-	public URL getReference() {
+	public File getReference() {
 		return reference;
 	}
 }
