@@ -599,6 +599,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * @see #isCanceled()
 	 * @since 3.9
 	 */
+	@Override
 	public SubMonitor checkCanceled() throws OperationCanceledException {
 		if (isCanceled()) {
 			throw new OperationCanceledException();
