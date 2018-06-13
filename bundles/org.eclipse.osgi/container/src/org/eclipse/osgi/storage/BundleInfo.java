@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.hookregistry.StorageHookFactory;
 import org.eclipse.osgi.internal.hookregistry.StorageHookFactory.StorageHook;
 import org.eclipse.osgi.internal.messages.Msg;
+import org.eclipse.osgi.storage.Storage.StorageException;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.eclipse.osgi.storage.url.BundleResourceHandler;
@@ -308,15 +309,31 @@ public final class BundleInfo {
 		 * not exist if the content has not previously been stored.
 		 * @param path the path to the content to extract from the generation
 		 * @return a file object where content of the specified path may be stored.
+		 * @throws StorageException if the path will escape the persistent storage of the generation
 		 */
 		public File getExtractFile(String path) {
-			StringBuilder builder = new StringBuilder();
-			builder.append(getBundleId()).append('/').append(getGenerationId());
-			if (path.length() > 0 && path.charAt(0) != '/') {
-				builder.append('/');
+			return getExtractFile(null, path);
+		}
+
+		/**
+		 * Gets called by BundleFile during {@link BundleFile#getFile(String, boolean)}.  This method 
+		 * will allocate a File object where content of the specified path may be 
+		 * stored for this generation.  The returned File object may 
+		 * not exist if the content has not previously been stored.
+		 * @param path the path to the content to extract from the generation
+		 * @param base the base path that is prepended to the path, may be null
+		 * @return a file object where content of the specified path may be stored.
+		 * @throws StorageException if the path will escape the persistent storage of 
+		 * the generation starting at the specified base
+		 */
+		public File getExtractFile(String base, String path) {
+			StringBuilder baseBuilder = new StringBuilder();
+			baseBuilder.append(getBundleId()).append('/').append(getGenerationId());
+			if (base != null) {
+				baseBuilder.append('/').append(base);
 			}
-			builder.append(path);
-			return getStorage().getFile(builder.toString(), true);
+
+			return getStorage().getFile(baseBuilder.toString(), path, true);
 		}
 
 		public void storeContent(File destination, InputStream in, boolean nativeCode) throws IOException {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2016 IBM Corporation and others.
+ * Copyright (c) 2009, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,13 +10,28 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 
 public class BundleInstallUpdateTests extends AbstractBundleTests {
@@ -366,5 +381,50 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		URL encodedURL = new URL(urlString);
 		is = encodedURL.openStream();
 		is.close();
+	}
+
+	public void testEscapeZipRoot() throws IOException, BundleException, InvalidSyntaxException, URISyntaxException {
+		String entry1 = "../../escapedZipRoot1.txt";
+		String entry2 = "dir1/../../../escapedZipRoot2.txt";
+		String cp1 = "../../cp.jar";
+		File bundlesDirectory = OSGiTestsActivator.getContext().getDataFile(getName());
+		bundlesDirectory.mkdirs();
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		headers.put(Constants.BUNDLE_SYMBOLICNAME, getName());
+		headers.put(Constants.BUNDLE_CLASSPATH, "., ../../cp.jar");
+		Map<String, String> entries = new HashMap<>();
+		entries.put(entry1, "value");
+		entries.put(entry2, "value");
+		entries.put(cp1, "value");
+
+		File testBundleJarFile = SystemBundleTests.createBundle(bundlesDirectory, getName(), headers, entries);
+		Bundle testBundle = getContext().installBundle(getName(), new FileInputStream(testBundleJarFile));
+		testBundle.start();
+		try {
+			testBundle.loadClass("does.not.exist.Test");
+		} catch (ClassNotFoundException e) {
+			// expected
+		}
+		URLConverter bundleURLConverter = getContext().getService(getContext().getServiceReferences(URLConverter.class, "(protocol=bundleentry)").iterator().next());
+
+		URL dir1 = bundleURLConverter.toFileURL(testBundle.getEntry("dir1/"));
+		File dir1File = new File(dir1.toExternalForm().substring(5));
+
+		File dir1EscapedFile2 = new File(dir1File, entry2.substring("dir1".length()));
+		assertFalse("File escaped zip root: " + dir1EscapedFile2.getCanonicalPath(), dir1EscapedFile2.exists());
+
+		URL root = bundleURLConverter.toFileURL(testBundle.getEntry("/"));
+		File rootFile = new File(root.toExternalForm().substring(5));
+
+		File rootEscapedFile1 = new File(rootFile, entry1);
+		assertFalse("File escaped zip root: " + rootEscapedFile1.getCanonicalPath(), rootEscapedFile1.exists());
+
+		File rootEscapedFile2 = new File(rootFile, entry2);
+		assertFalse("File escaped zip root: " + rootEscapedFile2.getCanonicalPath(), rootEscapedFile2.exists());
+
+		File rootEscapedFile3 = new File(rootFile, cp1);
+		assertFalse("File escaped zip root: " + rootEscapedFile3.getCanonicalPath(), rootEscapedFile3.exists());
+
 	}
 }

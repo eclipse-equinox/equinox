@@ -31,6 +31,7 @@ import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.storage.BundleInfo;
+import org.eclipse.osgi.storage.Storage.StorageException;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -190,13 +191,7 @@ public class ZipBundleFile extends BundleFile {
 	private File getExtractFile(String entryName) {
 		if (generation == null)
 			return null;
-		String path = ".cp"; /* put all these entries in this subdir *///$NON-NLS-1$
-		String name = entryName.replace('/', File.separatorChar);
-		if ((name.length() > 1) && (name.charAt(0) == File.separatorChar)) /* if name has a leading slash */
-			path = path.concat(name);
-		else
-			path = path + File.separator + name;
-		return generation.getExtractFile(path);
+		return generation.getExtractFile(".cp", entryName); //$NON-NLS-1$
 	}
 
 	public File getFile(String entry, boolean nativeCode) {
@@ -238,6 +233,10 @@ public class ZipBundleFile extends BundleFile {
 					return nested;
 				}
 			} catch (IOException e) {
+				if (debug.DEBUG_BUNDLE_FILE)
+					Debug.printStackTrace(e);
+				generation.getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Unable to extract content: " + generation.getRevision() + ": " + entry, e); //$NON-NLS-1$ //$NON-NLS-2$
+			} catch (StorageException e) {
 				if (debug.DEBUG_BUNDLE_FILE)
 					Debug.printStackTrace(e);
 				generation.getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Unable to extract content: " + generation.getRevision() + ": " + entry, e); //$NON-NLS-1$ //$NON-NLS-2$

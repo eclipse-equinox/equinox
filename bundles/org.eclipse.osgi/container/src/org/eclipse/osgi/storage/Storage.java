@@ -110,6 +110,27 @@ import org.osgi.resource.Namespace;
 import org.osgi.resource.Requirement;
 
 public class Storage {
+	public static class StorageException extends RuntimeException {
+		private static final long serialVersionUID = 1L;
+
+		public StorageException() {
+			super();
+		}
+
+		public StorageException(String message, Throwable cause) {
+			super(message, cause);
+		}
+
+		public StorageException(String message) {
+			super(message);
+		}
+
+		public StorageException(Throwable cause) {
+			super(cause);
+		}
+
+	}
+
 	public static final int VERSION = 4;
 	private static final int MR_JAR_VERSION = 4;
 	private static final int LOWEST_VERSION_SUPPORTED = 3;
@@ -931,15 +952,19 @@ public class Storage {
 		return bundleID + "/" + generationID + "/" + BUNDLE_FILE_NAME; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	public File getFile(String path, boolean checkParent) {
+	public File getFile(String path, boolean checkParent) throws StorageException {
+		return getFile(null, path, checkParent);
+	}
+
+	public File getFile(String base, String path, boolean checkParent) throws StorageException {
 		// first check the child location
-		File childPath = new File(childRoot, path);
+		File childPath = getFile(childRoot, base, path);
 		// now check the parent
 		if (checkParent && parentRoot != null) {
 			if (childPath.exists()) {
 				return childPath;
 			}
-			File parentPath = new File(parentRoot, path);
+			File parentPath = getFile(parentRoot, base, path);
 			if (parentPath.exists()) {
 				// only use the parent file only if it exists;
 				return parentPath;
@@ -947,6 +972,25 @@ public class Storage {
 		}
 		// did not exist in both locations; use the child path
 		return childPath;
+	}
+
+	private static File getFile(File root, String base, String path) {
+		if (base != null) {
+			// if base is not null then move root to include the base
+			root = new File(root, base);
+		}
+		File result = new File(root, path);
+
+		try {
+			String resultCanonical = result.getCanonicalPath();
+			String rootCanonical = root.getCanonicalPath();
+			if (!resultCanonical.startsWith(rootCanonical + File.separator) && !resultCanonical.equals(rootCanonical)) {
+				throw new StorageException("Invalid path: " + path); //$NON-NLS-1$
+			}
+		} catch (IOException e) {
+			throw new StorageException("Invalid path: " + path, e); //$NON-NLS-1$
+		}
+		return result;
 	}
 
 	private File stageContent(final InputStream in, final URL sourceURL) throws BundleException {
