@@ -9,16 +9,33 @@
 package org.eclipse.equinox.log.test;
 
 import java.io.File;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import org.eclipse.equinox.log.SynchronousLogListener;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
-import org.osgi.framework.*;
-import org.osgi.service.log.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.log.LogEntry;
+import org.osgi.service.log.LogLevel;
+import org.osgi.service.log.LogListener;
+import org.osgi.service.log.LogReaderService;
+import org.osgi.service.log.LogService;
+import org.osgi.service.log.Logger;
 import org.osgi.service.log.admin.LoggerAdmin;
 import org.osgi.service.log.admin.LoggerContext;
 
@@ -135,6 +152,24 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 			listener.waitForLogEntry();
 		}
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
+	}
+
+	public void testLogBundleEventSynchronous() throws Exception {
+		// this is just a bundle that is harmless to start/stop
+		final Bundle testBundle = installer.installBundle("test.logging.a"); //$NON-NLS-1$
+		final AtomicReference<Thread> logThread = new AtomicReference<>();
+		LogListener listener = new SynchronousLogListener() {
+			@Override
+			public void logged(LogEntry entry) {
+				if (entry.getBundle() == testBundle) {
+					logThread.compareAndSet(null, Thread.currentThread());
+				}
+			}
+		};
+		reader.addLogListener(listener);
+		testBundle.start();
+
+		assertEquals("Wrong thread for synchronous bundle event logs.", Thread.currentThread(), logThread.get());
 	}
 
 	public void testLogServiceEventInfo() throws Exception {

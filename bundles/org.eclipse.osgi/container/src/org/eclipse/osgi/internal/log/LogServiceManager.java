@@ -25,7 +25,6 @@ import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
@@ -33,6 +32,7 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.Version;
 import org.osgi.service.log.LogLevel;
 import org.osgi.service.log.LogListener;
@@ -41,7 +41,7 @@ import org.osgi.service.log.LogService;
 import org.osgi.service.log.LoggerFactory;
 import org.osgi.service.log.admin.LoggerAdmin;
 
-public class LogServiceManager implements BundleListener, FrameworkListener, ServiceListener {
+public class LogServiceManager implements SynchronousBundleListener, FrameworkListener, ServiceListener {
 	private static final String LOGGER_FRAMEWORK_EVENT = "Events.Framework"; //$NON-NLS-1$
 	private static final String LOGGER_BUNDLE_EVENT = "Events.Bundle"; //$NON-NLS-1$
 	private static final String LOGGER_SERVICE_EVENT = "Events.Service"; //$NON-NLS-1$

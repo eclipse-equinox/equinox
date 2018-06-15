@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation All rights reserved. This program
+ * Copyright (c) 2007, 2018 IBM Corporation All rights reserved. This program
  * and the accompanying materials are made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -25,10 +25,10 @@ class TestListener implements LogListener {
 		this.testBundle = testBundle == null ? OSGiTestsActivator.getContext().getBundle() : testBundle;
 	}
 
-	public synchronized void logged(LogEntry entry) {
-		if (!testBundle.equals(entry.getBundle()))
+	public synchronized void logged(LogEntry e) {
+		if (!testBundle.equals(e.getBundle()))
 			return; // discard logs from all other bundles
-		this.entry = entry;
+		this.entry = e;
 		notifyAll();
 	}
 
