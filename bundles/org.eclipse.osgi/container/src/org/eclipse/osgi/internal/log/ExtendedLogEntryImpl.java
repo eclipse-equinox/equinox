@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2018 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 	private final int level;
 	private final LogLevel logLevelEnum;
 	private final String message;
+	private final ServiceReference<?> ref;
 	private final Throwable throwable;
 	private final Object contextObject;
 	private final long time;
@@ -55,7 +56,7 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 		return threadId.longValue();
 	}
 
-	public ExtendedLogEntryImpl(Bundle bundle, String loggerName, StackTraceElement stackTraceElement, Object contextObject, LogLevel logLevelEnum, int level, String message, Throwable throwable) {
+	public ExtendedLogEntryImpl(Bundle bundle, String loggerName, StackTraceElement stackTraceElement, Object contextObject, LogLevel logLevelEnum, int level, String message, ServiceReference<?> ref, Throwable throwable) {
 		this.time = System.currentTimeMillis();
 		this.loggerName = loggerName;
 		this.bundle = bundle;
@@ -63,6 +64,7 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 		this.logLevelEnum = logLevelEnum;
 		this.message = message;
 		this.throwable = throwable;
+		this.ref = ref;
 		this.contextObject = contextObject;
 
 		Thread currentThread = Thread.currentThread();
@@ -110,10 +112,7 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 	}
 
 	public ServiceReference<?> getServiceReference() {
-		if (contextObject != null && contextObject instanceof ServiceReference)
-			return (ServiceReference<?>) contextObject;
-
-		return null;
+		return ref;
 	}
 
 	public long getTime() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2017 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2018 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -127,7 +127,7 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 		Bundle bundle = event.getBundle();
 		if (logReaderServiceFactory.isLoggable(bundle, LOGGER_BUNDLE_EVENT, LogService.LOG_INFO)) {
 			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(LOGGER_BUNDLE_EVENT);
-			logger.log(bundle, null, null, LogService.LOG_INFO, getBundleEventTypeName(event.getType()), null);
+			logger.log(bundle, event, null, LogService.LOG_INFO, getBundleEventTypeName(event.getType()), null, null);
 		}
 	}
 
@@ -143,7 +143,7 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 		int logType = (eventType == ServiceEvent.MODIFIED) ? LogService.LOG_DEBUG : LogService.LOG_INFO;
 		if (logReaderServiceFactory.isLoggable(bundle, LOGGER_SERVICE_EVENT, logType)) {
 			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(LOGGER_SERVICE_EVENT);
-			logger.log(bundle, reference, null, logType, getServiceEventTypeName(eventType), null);
+			logger.log(bundle, event, null, logType, getServiceEventTypeName(eventType), reference, null);
 		}
 	}
 
@@ -151,10 +151,10 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 	 * FrameworkListener.frameworkEvent method.
 	 *
 	 */
+	@SuppressWarnings("deprecation")
 	public void frameworkEvent(FrameworkEvent event) {
 		Bundle bundle = event.getBundle();
 		int eventType = event.getType();
-		@SuppressWarnings("deprecation")
 		int logType;
 		switch (eventType) {
 			case FrameworkEvent.ERROR :
@@ -170,7 +170,7 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 
 		if (logReaderServiceFactory.isLoggable(bundle, LOGGER_FRAMEWORK_EVENT, logType)) {
 			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(LOGGER_FRAMEWORK_EVENT);
-			logger.log(bundle, null, null, logType, getFrameworkEventTypeName(eventType), event.getThrowable());
+			logger.log(bundle, event, null, logType, getFrameworkEventTypeName(eventType), null, event.getThrowable());
 		}
 	}
 

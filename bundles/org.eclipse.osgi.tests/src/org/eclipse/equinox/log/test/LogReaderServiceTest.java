@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2014 IBM Corporation and others All rights reserved. This
+ * Copyright (c) 2007, 2018 IBM Corporation and others All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -18,6 +18,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.eclipse.equinox.log.ExtendedLogEntry;
 import org.eclipse.equinox.log.SynchronousLogListener;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
@@ -26,8 +27,11 @@ import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.log.LogEntry;
@@ -151,7 +155,11 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 			testBundle.start();
 			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
+
+		ExtendedLogEntry entry = listener.getEntryX();
+		assertTrue(entry.getLevel() == LogService.LOG_INFO);
+		assertEquals("Wrong level.", LogLevel.INFO, entry.getLogLevel());
+		assertTrue("Wrong context: " + entry.getContext(), entry.getContext() instanceof BundleEvent);
 	}
 
 	public void testLogBundleEventSynchronous() throws Exception {
@@ -179,7 +187,10 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 			OSGiTestsActivator.getContext().registerService(Object.class.getName(), new Object(), null);
 			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
+		ExtendedLogEntry entry = listener.getEntryX();
+		assertTrue(entry.getLevel() == LogService.LOG_INFO);
+		assertEquals("Wrong level.", LogLevel.INFO, entry.getLogLevel());
+		assertTrue("Wrong context: " + entry.getContext(), entry.getContext() instanceof ServiceEvent);
 	}
 
 	public void testLogServiceEventDebug() throws Exception {
@@ -191,18 +202,34 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 			registration.setProperties(new Hashtable());
 			listener.waitForLogEntry();
 		}
-		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_DEBUG);
+		ExtendedLogEntry entry = listener.getEntryX();
+		assertTrue(entry.getLevel() == LogService.LOG_DEBUG);
+		assertEquals("Wrong level.", LogLevel.DEBUG, entry.getLogLevel());
+		assertTrue("Wrong context: " + entry.getContext(), entry.getContext() instanceof ServiceEvent);
 	}
 
 	public void testLogFrameworkEvent() throws Exception {
 		Bundle testBundle = installer.installBundle("test.logging.a"); //$NON-NLS-1$
-		TestListener listener = new TestListener(testBundle);
+		final AtomicReference<LogEntry> logEntry = new AtomicReference<>();
+		final CountDownLatch countDown = new CountDownLatch(1);
+		LogListener listener = new LogListener() {
+			@Override
+			public void logged(LogEntry entry) {
+				if ("Events.Framework".equals(entry.getLoggerName())) {
+					logEntry.set(entry);
+					countDown.countDown();
+				}
+			}
+		};
 		reader.addLogListener(listener);
-		synchronized (listener) {
-			installer.refreshPackages(new Bundle[] {testBundle});
-			listener.waitForLogEntry();
-		}
-		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
+		installer.refreshPackages(new Bundle[] {testBundle});
+
+		countDown.await(5, TimeUnit.SECONDS);
+
+		ExtendedLogEntry entry = (ExtendedLogEntry) logEntry.get();
+		assertTrue(entry.getLevel() == LogService.LOG_INFO);
+		assertEquals("Wrong level.", LogLevel.INFO, entry.getLogLevel());
+		assertTrue("Wrong context: " + entry.getContext(), entry.getContext() instanceof FrameworkEvent);
 	}
 
 	public void testLogFrameworkEventType() throws Exception {

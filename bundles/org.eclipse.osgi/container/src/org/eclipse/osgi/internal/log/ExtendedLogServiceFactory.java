@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2017 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2018 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -9,12 +9,19 @@ package org.eclipse.osgi.internal.log;
 
 import java.security.AccessController;
 import java.security.Permission;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.equinox.log.ExtendedLogService;
 import org.eclipse.equinox.log.LogPermission;
 import org.eclipse.osgi.framework.util.SecureAction;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.log.LogLevel;
 import org.osgi.service.log.Logger;
 import org.osgi.service.log.admin.LoggerAdmin;
@@ -80,8 +87,8 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 		return logReaderServiceFactory.isLoggable(bundle, name, level);
 	}
 
-	void log(Bundle bundle, String name, StackTraceElement stackTraceElement, Object context, LogLevel logLevelEnum, int level, String message, Throwable exception) {
-		logReaderServiceFactory.log(bundle, name, stackTraceElement, context, logLevelEnum, level, message, exception);
+	void log(Bundle bundle, String name, StackTraceElement stackTraceElement, Object context, LogLevel logLevelEnum, int level, String message, ServiceReference<?> ref, Throwable exception) {
+		logReaderServiceFactory.log(bundle, name, stackTraceElement, context, logLevelEnum, level, message, ref, exception);
 	}
 
 	void checkLogPermission() throws SecurityException {

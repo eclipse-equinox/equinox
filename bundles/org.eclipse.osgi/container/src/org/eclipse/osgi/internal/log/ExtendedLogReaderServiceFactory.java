@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2017 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2018 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.log.OrderedExecutor.OrderedTaskQueue;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogLevel;
@@ -209,21 +210,21 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 		return count;
 	}
 
-	void log(final Bundle bundle, final String name, final StackTraceElement stackTraceElement, final Object context, final LogLevel logLevelEnum, final int level, final String message, final Throwable exception) {
+	void log(final Bundle bundle, final String name, final StackTraceElement stackTraceElement, final Object context, final LogLevel logLevelEnum, final int level, final String message, final ServiceReference<?> ref, final Throwable exception) {
 		if (System.getSecurityManager() != null) {
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
 				public Void run() {
-					logPrivileged(bundle, name, stackTraceElement, context, logLevelEnum, level, message, exception);
+					logPrivileged(bundle, name, stackTraceElement, context, logLevelEnum, level, message, ref, exception);
 					return null;
 				}
 			});
 		} else {
-			logPrivileged(bundle, name, stackTraceElement, context, logLevelEnum, level, message, exception);
+			logPrivileged(bundle, name, stackTraceElement, context, logLevelEnum, level, message, ref, exception);
 		}
 	}
 
-	void logPrivileged(Bundle bundle, String name, StackTraceElement stackTraceElement, Object context, LogLevel logLevelEnum, int level, String message, Throwable exception) {
-		LogEntry logEntry = new ExtendedLogEntryImpl(bundle, name, stackTraceElement, context, logLevelEnum, level, message, exception);
+	void logPrivileged(Bundle bundle, String name, StackTraceElement stackTraceElement, Object context, LogLevel logLevelEnum, int level, String message, ServiceReference<?> ref, Throwable exception) {
+		LogEntry logEntry = new ExtendedLogEntryImpl(bundle, name, stackTraceElement, context, logLevelEnum, level, message, ref, exception);
 		storeEntry(logEntry);
 		ArrayMap<LogListener, Object[]> listenersCopy;
 		listenersLock.readLock().lock();

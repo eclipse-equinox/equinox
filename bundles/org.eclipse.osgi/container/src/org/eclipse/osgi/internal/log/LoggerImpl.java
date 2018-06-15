@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2018 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -12,7 +12,9 @@ import java.util.regex.Pattern;
 import org.eclipse.equinox.log.Logger;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.log.*;
+import org.osgi.service.log.LogLevel;
+import org.osgi.service.log.LogService;
+import org.osgi.service.log.LoggerConsumer;
 import org.osgi.service.log.admin.LoggerContext;
 
 public class LoggerImpl implements Logger {
@@ -47,12 +49,12 @@ public class LoggerImpl implements Logger {
 
 	@SuppressWarnings("rawtypes")
 	public void log(ServiceReference sr, int level, String message) {
-		log(sr, level, message, null);
+		log(sr, null, level, message, sr, null);
 	}
 
 	@SuppressWarnings("rawtypes")
 	public void log(ServiceReference sr, int level, String message, Throwable exception) {
-		log(sr, null, level, message, exception);
+		log(sr, null, level, message, sr, exception);
 	}
 
 	public void log(Object context, int level, String message) {
@@ -60,19 +62,19 @@ public class LoggerImpl implements Logger {
 	}
 
 	public void log(Object context, int level, String message, Throwable exception) {
-		log(context, null, level, message, exception);
+		log(context, null, level, message, null, exception);
 	}
 
-	private void log(Object context, LogLevel logLevelEnum, int level, String message, Throwable exception) {
-		log(logServiceImpl.getBundle(), context, logLevelEnum, level, message, exception);
+	private void log(Object context, LogLevel logLevelEnum, int level, String message, ServiceReference<?> ref, Throwable exception) {
+		log(logServiceImpl.getBundle(), context, logLevelEnum, level, message, ref, exception);
 	}
 
-	void log(Bundle entryBundle, Object context, LogLevel logLevelEnum, int level, String message, Throwable exception) {
+	void log(Bundle entryBundle, Object context, LogLevel logLevelEnum, int level, String message, ServiceReference<?> ref, Throwable exception) {
 		if (logLevelEnum == null) {
 			logLevelEnum = getLogLevel(level);
 		}
 		if (enabledLevel.implies(logLevelEnum)) {
-			logServiceImpl.getFactory().log(entryBundle, name, getLocation(), context, logLevelEnum, level, message, exception);
+			logServiceImpl.getFactory().log(entryBundle, name, getLocation(), context, logLevelEnum, level, message, ref, exception);
 		}
 	}
 
@@ -281,7 +283,7 @@ public class LoggerImpl implements Logger {
 		StackTraceElement location = getLocation();
 		Arguments processedArguments = new Arguments(arguments);
 		String message = processedArguments.isEmpty() ? format : formatMessage(format, processedArguments);
-		logServiceImpl.getFactory().log(logServiceImpl.getBundle(), name, location, processedArguments.serviceReference(), level, level.ordinal(), message.toString(), processedArguments.throwable());
+		logServiceImpl.getFactory().log(logServiceImpl.getBundle(), name, location, processedArguments.serviceReference(), level, level.ordinal(), message.toString(), processedArguments.serviceReference(), processedArguments.throwable());
 	}
 
 	private StackTraceElement getLocation() {
