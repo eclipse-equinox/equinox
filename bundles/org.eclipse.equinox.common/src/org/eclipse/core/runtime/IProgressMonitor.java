@@ -133,27 +133,6 @@ public interface IProgressMonitor {
 	public boolean isCanceled();
 
 	/**
-	 * Checks whether cancellation of this monitor has been requested and throws
-	 * an {@link OperationCanceledException} if it was the case.
-	 * <p>
-	 * This method is a shorthand for:
-	 * <pre>
-	 * if (monitor.isCanceled())
-	 *     throw new OperationCanceledException();
-	 * </pre>
-	 * </p>
-	 *
-	 * @return this monitor instance for convenience (eg., chaining)
-	 * @throws OperationCanceledException if {@link #isCanceled()} returns <code>true</code>
-	 * @since 3.11
-	 */
-	default IProgressMonitor checkCanceled() throws OperationCanceledException {
-		if (isCanceled())
-			throw new OperationCanceledException();
-		return this;
-	}
-
-	/**
 	 * Sets the cancel state to the given value.
 	 * 
 	 * @param value <code>true</code> indicates that cancelation has
