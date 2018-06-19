@@ -96,11 +96,13 @@ import org.osgi.framework.hooks.weaving.WovenClass;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.framework.namespace.NativeNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.resource.Capability;
@@ -3789,6 +3791,55 @@ public class SystemBundleTests extends AbstractBundleTests {
 			assertEquals(url.toExternalForm(), urls.get(0).toExternalForm());
 		} catch (BundleException e) {
 			fail("Failed init", e);
+		} finally {
+			try {
+				if (equinox != null) {
+					equinox.stop();
+					equinox.waitForStop(1000);
+				}
+			} catch (BundleException e) {
+				fail("Failed to stop framework.", e);
+			} catch (InterruptedException e) {
+				fail("Failed to stop framework.", e);
+			}
+		}
+	}
+
+	public void testDynamicImportFromSystemBundle() throws IOException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map configuration = new HashMap();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, "some.system.pkg");
+		Equinox equinox = null;
+		try {
+			equinox = new Equinox(configuration);
+			equinox.init();
+			BundleContext bc = equinox.getBundleContext();
+
+			Map<String, String> h2 = new HashMap<String, String>();
+			h2.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+			h2.put(Constants.BUNDLE_SYMBOLICNAME, getName() + ".dynamicimporter");
+			h2.put(Constants.DYNAMICIMPORT_PACKAGE, "some.system.*; version=1.0");
+			File f2 = SystemBundleTests.createBundle(config, getName() + ".importer", h2);
+			Bundle b2 = bc.installBundle("reference:file:///" + f2.getAbsolutePath()); //$NON-NLS-1$
+			b2.getResource("does/not/exist.txt");
+
+			Map<String, String> h1 = new HashMap<String, String>();
+			h1.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+			h1.put(Constants.BUNDLE_SYMBOLICNAME, getName() + ".exporter");
+			h1.put(Constants.EXPORT_PACKAGE, "some.system.pkg; version=1.0");
+			File f1 = SystemBundleTests.createBundle(config, getName() + ".exporter", h1);
+			Bundle b1 = bc.installBundle("reference:file:///" + f1.getAbsolutePath()); //$NON-NLS-1$
+
+			b2.getResource("some/system/pkg/Test");
+
+			BundleWiring w = b2.adapt(BundleWiring.class);
+			assertNotNull("Null wiring.", w);
+			List<BundleWire> pkgWires = w.getRequiredWires(PackageNamespace.PACKAGE_NAMESPACE);
+			assertFalse("Empty wires.", pkgWires.isEmpty());
+			assertEquals("Wrong provider", b1.adapt(BundleRevision.class), pkgWires.iterator().next().getProvider());
+		} catch (BundleException e) {
+			fail("Unexpected BundleException", e);
 		} finally {
 			try {
 				if (equinox != null) {
