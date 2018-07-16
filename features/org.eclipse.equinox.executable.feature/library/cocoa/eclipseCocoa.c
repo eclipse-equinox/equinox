@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -377,7 +377,11 @@ char * getJavaHome() {
 	if (fp == NULL) {
 		return NULL;
 	}
+	path[0] = 0;
 	while (fgets(path, sizeof(path)-1, fp) != NULL) {
+	}
+	if(path[0]==0) {
+		return NULL;
 	}
 	result = path;
 	start = strchr(result, '\n');
@@ -421,6 +425,9 @@ char * findVMLibrary( char* command ) {
 	cmd = command;
 	if (strstr(cmd, "/JavaVM.framework/") != NULL && (strstr(cmd, "/Current/") != NULL || strstr(cmd, "/A/") != NULL)) {
 		cmd = getJavaHome();
+		if (cmd == NULL) {
+			return NULL;
+		}
 	}
 	// This is necessary to initialize isModularJVM
 	checkJavaVersion(cmd);
@@ -554,7 +561,15 @@ void restartLauncher(char* program, char* args[]) {
 
 JavaResults* launchJavaVM( _TCHAR* args[] )
 {
-	/*for now always do JNI on Mac, should not come in here */
+	/*
+	 * On macOS, JNI is always used, so this point is only reached, if no usable JVM was found.
+	 * Request a JDK install: The 'script' command makes stdin and stdout look like a tty,
+	 * so it looks for /usr/libexec/java_home that this is for a command line tool and a dialog
+	 * with a link to the JDK download page is shown.
+	 */
+	execl("/usr/bin/script", "/usr/bin/script", "/dev/null", "/usr/libexec/java_home", "--request", NULL);
+
+	/* not reached. */
 	JavaResults * results = malloc(sizeof(JavaResults));
 	results->launchResult = -1;
 	results->runResult = 0;
