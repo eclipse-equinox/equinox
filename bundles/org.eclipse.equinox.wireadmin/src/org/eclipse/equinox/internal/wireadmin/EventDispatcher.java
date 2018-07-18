@@ -8,6 +8,7 @@
  *
  * Contributors:
  *    ProSyst Software GmbH - initial API and implementation
+ *    Eurotech
  *******************************************************************************/
 package org.eclipse.equinox.internal.wireadmin;
 
@@ -71,6 +72,10 @@ public class EventDispatcher implements Runnable {
 	}
 
 	void addEvent(WireAdminEvent evt) {
+		if (refToList.isEmpty()) {
+			return;
+		}
+
 		if (dispatcher == null) {
 			// synchronous
 			notifyListeners(new EventData(evt, refToList));

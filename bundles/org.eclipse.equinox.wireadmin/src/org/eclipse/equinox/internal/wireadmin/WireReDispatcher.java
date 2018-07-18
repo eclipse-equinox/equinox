@@ -8,6 +8,7 @@
  *
  * Contributors:
  *    ProSyst Software GmbH - initial API and implementation
+ *    Eurotech
  *******************************************************************************/
 package org.eclipse.equinox.internal.wireadmin;
 
@@ -20,6 +21,7 @@ import org.osgi.framework.*;
 import org.osgi.service.event.*;
 import org.osgi.service.wireadmin.*;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * This is an implementation of log events redispatching.
@@ -53,6 +55,9 @@ public class WireReDispatcher implements WireAdminListener {
 	static final String WIRE_DELETED = "WIRE_DELETED";
 	static final String PRODUCER_EXCEPTION = "PRODUCER_EXCEPTION";
 	static final String CONSUMER_EXCEPTION = "CONSUMER_EXCEPTION";
+
+	static final String[] EVENT_TOPICS;
+
 	static final String WIRE_ENTRY = "wire.entry";
 	static final String WA_WIRE = "wire";
 	static final String WA_WIRE_FLAVORS = "wire.flavors";
@@ -60,10 +65,24 @@ public class WireReDispatcher implements WireAdminListener {
 	static final String WA_WIRE_CONNECTED = "wire.connected";
 	static final String WA_WIRE_VALID = "wire.valid";
 
+	static {
+		EVENT_TOPICS = new String[8];
+		EVENT_TOPICS[0] = WIRE_HEADER + TOPIC_SEPARATOR + WIRE_CREATED;
+		EVENT_TOPICS[1] = WIRE_HEADER + TOPIC_SEPARATOR + WIRE_CONNECTED;
+		EVENT_TOPICS[2] = WIRE_HEADER + TOPIC_SEPARATOR + WIRE_UPDATED;
+		EVENT_TOPICS[3] = WIRE_HEADER + TOPIC_SEPARATOR + WIRE_TRACE;
+		EVENT_TOPICS[4] = WIRE_HEADER + TOPIC_SEPARATOR + WIRE_DISCONNECTED;
+		EVENT_TOPICS[5] = WIRE_HEADER + TOPIC_SEPARATOR + WIRE_DELETED;
+		EVENT_TOPICS[6] = WIRE_HEADER + TOPIC_SEPARATOR + PRODUCER_EXCEPTION;
+		EVENT_TOPICS[7] = WIRE_HEADER + TOPIC_SEPARATOR + CONSUMER_EXCEPTION;
+	}
+
 	BundleContext bc;
 	ServiceRegistration waReg;
 	Log log;
 	ServiceTracker eventAdminTracker;
+	ServiceTracker eventHandlerTracker;
+	EventHandlerIndex eventHandlerIndex;
 
 	/*
 	 * (non-Javadoc)
@@ -73,12 +92,12 @@ public class WireReDispatcher implements WireAdminListener {
 	public void start(BundleContext bc) throws Exception {
 		this.bc = bc;
 		log = new Log(bc, false);
+		eventHandlerIndex = new EventHandlerIndex();
 		log.setDebug(Activator.getBoolean("equinox.wireadmin.redispatcher.debug"));
 		log.setPrintOnConsole(Activator.getBoolean("equinox.wireadmin.redispatcher.console"));
 
-		Hashtable props = new Hashtable(3);
-		props.put(WireConstants.WIREADMIN_EVENTS, new Integer(Integer.MAX_VALUE));
-		waReg = bc.registerService(WireAdminListener.class.getName(), this, props);
+		eventHandlerTracker = new ServiceTracker(bc, EventHandler.class.getName(), eventHandlerIndex);
+		eventHandlerTracker.open();
 
 		eventAdminTracker = new ServiceTracker(bc, EventAdmin.class.getName(), null);
 		eventAdminTracker.open();
@@ -94,9 +113,9 @@ public class WireReDispatcher implements WireAdminListener {
 			eventAdminTracker.close();
 			eventAdminTracker = null;
 		}
-		if (waReg != null) {
-			waReg.unregister();
-			waReg = null;
+		if (eventHandlerTracker != null) {
+			eventHandlerTracker.close();
+			eventHandlerTracker = null;
 		}
 		log.close();
 		this.bc = null;
@@ -147,37 +166,36 @@ public class WireReDispatcher implements WireAdminListener {
 			if (ref == null) {
 				throw new RuntimeException("Wire Admin ServiceReference is null");
 			}
-			String topicSuffix = null;
+			final int topicIndex;
 			switch (event.getType()) {
 				case WireAdminEvent.WIRE_CREATED :
-					topicSuffix = WIRE_CREATED;
+					topicIndex = 0;
 					break;
 				case WireAdminEvent.WIRE_CONNECTED :
-					topicSuffix = WIRE_CONNECTED;
+					topicIndex = 1;
 					break;
 				case WireAdminEvent.WIRE_UPDATED :
-					topicSuffix = WIRE_UPDATED;
+					topicIndex = 2;
 					break;
 				case WireAdminEvent.WIRE_TRACE :
-					topicSuffix = WIRE_TRACE;
+					topicIndex = 3;
 					break;
 				case WireAdminEvent.WIRE_DISCONNECTED :
-					topicSuffix = WIRE_DISCONNECTED;
+					topicIndex = 4;
 					break;
 				case WireAdminEvent.WIRE_DELETED :
-					topicSuffix = WIRE_DELETED;
+					topicIndex = 5;
 					break;
 				case WireAdminEvent.PRODUCER_EXCEPTION :
-					topicSuffix = PRODUCER_EXCEPTION;
+					topicIndex = 6;
 					break;
 				case WireAdminEvent.CONSUMER_EXCEPTION :
-					topicSuffix = CONSUMER_EXCEPTION;
+					topicIndex = 7;
 					break;
 				default : /* ignore: unknown/new events */
 					return;
 			}
-			String topic = WIRE_HEADER + TOPIC_SEPARATOR + topicSuffix;
-			if (!hasServiceReferences(topic)) {
+			if (!eventHandlerIndex.hasEventHandlers(topicIndex)) {
 				if (Activator.LOG_DEBUG)
 					log.debug(0, 10017, event.toString(), null, false);
 				return; /*
@@ -204,7 +222,7 @@ public class WireReDispatcher implements WireAdminListener {
 				addExceptionProps(props, throwable);
 			}
 			props.put(EVENT, event);
-			final Event eaEvent = new Event(topic, (Dictionary) props);
+			final Event eaEvent = new Event(EVENT_TOPICS[topicIndex], (Dictionary) props);
 			AccessController.doPrivileged(new PrivilegedAction() {
 				public Object run() {
 					eventAdmin.postEvent(eaEvent);
@@ -214,59 +232,6 @@ public class WireReDispatcher implements WireAdminListener {
 			if (Activator.LOG_DEBUG)
 				log.debug(0, 10018, event.toString(), null, false);
 		}
-	}
-
-	/**
-	 * This will return true if has at least one ServiceReference which match
-	 * given topic.
-	 * 
-	 * @param topic
-	 * @return
-	 */
-	protected boolean hasServiceReferences(String topic) {
-		BundleContext l_bc = bc;
-		if (l_bc == null) {
-			return false;
-		}
-		ServiceReference[] sr = null;
-		try {/* get all handlers */
-			sr = l_bc.getServiceReferences(EventHandler.class.getName(), null);
-		} catch (InvalidSyntaxException e) {
-			return false;
-		}
-		if (sr != null && sr.length > 0) {
-			TopicPermission perm = new TopicPermission(topic, TopicPermission.SUBSCRIBE);
-			for (int i = 0; i < sr.length; i++) {
-				try {
-					ServiceReference sRef = sr[i];
-					Bundle bundle = sRef.getBundle();
-					if (bundle != null && (bundle.getState() != Bundle.UNINSTALLED) && bundle.hasPermission(perm)) {
-						Object reftopic = sRef.getProperty(EventConstants.EVENT_TOPIC);
-						if (reftopic != null) { /*
-																											 * otherwise means will receive
-																											 * no events
-																											 */
-							if (reftopic instanceof String[]) { /*
-																																		 * even with one
-																																		 * element it
-																																		 * must be
-																																		 * String[]
-																																		 */
-								String topics[] = (String[]) reftopic;
-								for (int j = 0; j < topics.length; j++) {
-									if (matchTopic(topics[j], topic)) {
-										return true;
-									}
-								}
-							}
-						}
-					}/* check permission */
-				} catch (Throwable t) {
-					log.error("Error while checking bundle permissions", t);
-				}
-			}/* for */
-		}/* sr != null && sr.length > 0 */
-		return false;
 	}
 
 	/**
@@ -312,6 +277,113 @@ public class WireReDispatcher implements WireAdminListener {
 		if (pattern.charAt(index - 1) == TOPIC_SEPARATOR)
 			return false;
 		return true;
+	}
+
+	synchronized void register() {
+		unregister();
+
+		Hashtable props = new Hashtable(3);
+		props.put(WireConstants.WIREADMIN_EVENTS, new Integer(Integer.MAX_VALUE));
+		waReg = bc.registerService(WireAdminListener.class.getName(), this, props);
+	}
+
+	synchronized void unregister() {
+		if (waReg != null) {
+			waReg.unregister();
+			waReg = null;
+		}
+	}
+
+	static class EventHandlerTopics {
+		int topics;
+
+		public EventHandlerTopics(final int topics) {
+			this.topics = topics;
+		}
+	}
+
+	class EventHandlerIndex implements ServiceTrackerCustomizer {
+
+		final int[] eventHandlerCount = new int[EVENT_TOPICS.length];
+		int totalEventHandlerCount = 0;
+
+		public synchronized Object addingService(final ServiceReference reference) {
+
+			final int topics = process(reference);
+
+			if (topics != 0 && totalEventHandlerCount++ == 0) {
+				register();
+			}
+
+			return new EventHandlerTopics(topics);
+		}
+
+		public void modifiedService(ServiceReference reference, Object service) {
+
+			removedService(reference, service);
+
+			final EventHandlerTopics newTopics = (EventHandlerTopics) addingService(reference);
+
+			((EventHandlerTopics) service).topics = newTopics.topics;
+		}
+
+		public synchronized void removedService(ServiceReference reference, Object service) {
+
+			final int topics = ((EventHandlerTopics) service).topics;
+
+			if (topics == 0) {
+				return;
+			}
+
+			remove(topics);
+
+			if (--totalEventHandlerCount == 0) {
+				unregister();
+			}
+		}
+
+		int process(final ServiceReference ref) {
+
+			final Object topic = ref.getProperty(EventConstants.EVENT_TOPIC);
+
+			if (!(topic instanceof String[])) {
+				return 0;
+			}
+
+			final String[] topics = (String[]) topic;
+
+			int matchingTopics = 0;
+
+			for (int i = 0; i < topics.length; i++) {
+				matchingTopics |= processTopicPattern(topics[i]);
+			}
+
+			return matchingTopics;
+		}
+
+		int processTopicPattern(final String pattern) {
+			int matchingTopics = 0;
+			for (int i = 0; i < EVENT_TOPICS.length; i++) {
+				if (matchTopic(pattern, EVENT_TOPICS[i])) {
+					eventHandlerCount[i]++;
+					matchingTopics |= 1 << i;
+				}
+			}
+			return matchingTopics;
+		}
+
+		void remove(final int topics) {
+			for (int i = 0; i < EVENT_TOPICS.length; i++) {
+				if ((topics & (1 << i)) != 0) {
+					eventHandlerCount[i]--;
+				}
+			}
+		}
+
+		boolean hasEventHandlers(final int topicIndex) {
+			return eventHandlerCount[topicIndex] != 0;
+		}
+
 	}
 
 }
