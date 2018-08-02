@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
@@ -327,6 +328,10 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 	}
 
 	public void testQuestionMarkLocation() {
+		if (Platform.getOS().equals(Platform.OS_WIN32)) {
+			// Skip this test on windows
+			return;
+		}
 		doTestSpecialChars('?', true);
 		// ? must only be encoded for non-reference installs
 		doTestSpecialChars('?', false, true, false);
