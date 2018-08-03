@@ -1714,6 +1714,8 @@ public class Storage {
 			Method getDescriptor = moduleClass.getMethod("getDescriptor"); //$NON-NLS-1$
 			Class<?> moduleDescriptorClass = Class.forName("java.lang.module.ModuleDescriptor"); //$NON-NLS-1$
 			Method exports = moduleDescriptorClass.getMethod("exports"); //$NON-NLS-1$
+			Method isAutomatic = moduleDescriptorClass.getMethod("isAutomatic");
+			Method packagesMethod = moduleDescriptorClass.getMethod("packages");
 			Class<?> exportsClass = Class.forName("java.lang.module.ModuleDescriptor$Exports"); //$NON-NLS-1$
 			Method targets = exportsClass.getMethod("targets"); //$NON-NLS-1$
 			Method source = exportsClass.getMethod("source"); //$NON-NLS-1$
@@ -1722,10 +1724,20 @@ public class Storage {
 			Set<?> bootModules = (Set<?>) modules.invoke(bootLayer);
 			for (Object m : bootModules) {
 				Object descriptor = getDescriptor.invoke(m);
-				for (Object export : (Set<?>) exports.invoke(descriptor)) {
-					String pkg = (String) source.invoke(export);
-					if (((Set<?>) targets.invoke(export)).isEmpty()) {
-						packages.add(pkg);
+				if ((Boolean) isAutomatic.invoke(descriptor)) {
+					/*
+					 * Automatic modules are supposed to export all their packages.
+					 * However, java.lang.module.ModuleDescriptor::exports returns an empty set for them.
+					 * Add all their packages (as returned by java.lang.module.ModuleDescriptor::packages)
+					 * to the list of VM supplied packages.
+					 */
+					packages.addAll((Set<String>) packagesMethod.invoke(descriptor));
+				} else {
+					for (Object export : (Set<?>) exports.invoke(descriptor)) {
+						String pkg = (String) source.invoke(export);
+						if (((Set<?>) targets.invoke(export)).isEmpty()) {
+							packages.add(pkg);
+						}
 					}
 				}
 			}
