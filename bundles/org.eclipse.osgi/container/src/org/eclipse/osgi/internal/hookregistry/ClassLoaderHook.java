@@ -305,4 +305,21 @@ public abstract class ClassLoaderHook {
 		return false;
 	}
 
+	/**
+	 * Returns the filtered list of ClasspathEntry instances for the given class, resource or entry.
+	 * A {@code null} value may be returned in which case the find process will go over all the host and
+	 * fragment entries in order to find the given entity which is the default behavior.
+	 * Any non-null return value including an empty list will only look at the entries in the returned list.
+	 *
+	 * This method is used within {@link ClasspathManager#findLocalResource(String)}, {@link ClasspathManager#findLocalResources(String)},
+	 *  {@link ClasspathManager#findLocalClass(String) } and  {@link ClasspathManager#findLocalEntry(String) }
+	 *
+	 * @param name the name of the requested class, resource or entry
+	 * @param manager the classpath manager used to find the requested class, resource or entry
+	 * @return the array of ClassPathEntry objects to use to load this given entity
+	 */
+	public ClasspathEntry[] getClassPathEntries(String name, ClasspathManager manager) {
+		// do nothing by default
+		return null;
+	}
 }
