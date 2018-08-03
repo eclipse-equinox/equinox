@@ -1704,6 +1704,7 @@ public class Storage {
 		return result.toString();
 	}
 
+	@SuppressWarnings("unchecked")
 	private String calculateVMPackages() {
 		try {
 			List<String> packages = new ArrayList<>();
@@ -1714,10 +1715,10 @@ public class Storage {
 			Method getDescriptor = moduleClass.getMethod("getDescriptor"); //$NON-NLS-1$
 			Class<?> moduleDescriptorClass = Class.forName("java.lang.module.ModuleDescriptor"); //$NON-NLS-1$
 			Method exports = moduleDescriptorClass.getMethod("exports"); //$NON-NLS-1$
-			Method isAutomatic = moduleDescriptorClass.getMethod("isAutomatic");
-			Method packagesMethod = moduleDescriptorClass.getMethod("packages");
+			Method isAutomatic = moduleDescriptorClass.getMethod("isAutomatic"); //$NON-NLS-1$
+			Method packagesMethod = moduleDescriptorClass.getMethod("packages"); //$NON-NLS-1$
 			Class<?> exportsClass = Class.forName("java.lang.module.ModuleDescriptor$Exports"); //$NON-NLS-1$
-			Method targets = exportsClass.getMethod("targets"); //$NON-NLS-1$
+			Method isQualified = exportsClass.getMethod("isQualified"); //$NON-NLS-1$
 			Method source = exportsClass.getMethod("source"); //$NON-NLS-1$
 
 			Object bootLayer = boot.invoke(null);
@@ -1735,7 +1736,7 @@ public class Storage {
 				} else {
 					for (Object export : (Set<?>) exports.invoke(descriptor)) {
 						String pkg = (String) source.invoke(export);
-						if (((Set<?>) targets.invoke(export)).isEmpty()) {
+						if (!((Boolean) isQualified.invoke(export))) {
 							packages.add(pkg);
 						}
 					}
