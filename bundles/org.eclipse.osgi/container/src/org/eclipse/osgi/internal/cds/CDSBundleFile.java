@@ -128,4 +128,12 @@ public class CDSBundleFile extends BundleFileWrapper {
 			return null;
 		return urlHelper.findSharedClass(null, url, name);
 	}
+
+	/**
+	 * Returns the primed flag for this bundle file.
+	 * @return the primed flag
+	 */
+	public boolean getPrimed() {
+		return this.primed;
+	}
 }

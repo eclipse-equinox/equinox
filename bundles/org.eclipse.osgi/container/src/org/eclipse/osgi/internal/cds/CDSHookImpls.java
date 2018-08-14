@@ -35,6 +35,7 @@ import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
+import org.eclipse.osgi.internal.loader.classpath.FragmentClasspath;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
@@ -143,16 +144,39 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 		if (factory == null) {
 			return;
 		}
-		CDSBundleFile hostFile = null;
 		try {
 			SharedClassURLHelper urlHelper = factory.getURLHelper(classLoader);
+			boolean minimizeUpdateChecks = urlHelper.setMinimizeUpdateChecks();
 			// set the url helper for the host base CDSBundleFile
-			hostFile = getCDSBundleFile(classLoader.getClasspathManager().getGeneration().getBundleFile());
+			CDSBundleFile hostFile = getCDSBundleFile(classLoader.getClasspathManager().getGeneration().getBundleFile());
 			if (hostFile != null) {
 				hostFile.setURLHelper(urlHelper);
-				if (urlHelper.setMinimizeUpdateChecks()) {
-					// no need to prime if we were able to setsetMinimizeUpdateChecks
+				if (minimizeUpdateChecks) {
+					// no need to prime if we were able to setMinimizeUpdateChecks
 					hostFile.setPrimed(true);
+				}
+			}
+			// No need to prime if we were able to setMinimizeUpdateChecks.
+			// Mark all the BundleFiles on the classpath as primed.
+			ClasspathManager cpManager = classLoader.getClasspathManager();
+			for (ClasspathEntry entry : cpManager.getHostClasspathEntries()) {
+				CDSBundleFile cdsBundleFile = getCDSBundleFile(entry.getBundleFile());
+				if (cdsBundleFile != null) {
+					cdsBundleFile.setURLHelper(urlHelper);
+					if (minimizeUpdateChecks) {
+						cdsBundleFile.setPrimed(true);
+					}
+				}
+			}
+			for (FragmentClasspath fragCP : cpManager.getFragmentClasspaths()) {
+				for (ClasspathEntry entry : fragCP.getEntries()) {
+					CDSBundleFile cdsBundleFile = getCDSBundleFile(entry.getBundleFile());
+					if (cdsBundleFile != null) {
+						cdsBundleFile.setURLHelper(urlHelper);
+						if (minimizeUpdateChecks) {
+							cdsBundleFile.setPrimed(true);
+						}
+					}
 				}
 			}
 		} catch (HelperAlreadyDefinedException e) {
@@ -165,9 +189,11 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 		CDSBundleFile hostFile = getCDSBundleFile(hostmanager.getGeneration().getBundleFile());
 		CDSBundleFile sourceFile = getCDSBundleFile(sourceGeneration.getBundleFile());
 		if ((hostFile != sourceFile) && (null != hostFile) && (null != sourceFile)) {
-			// set the helper that got set on the host base bundle file in initializedClassLoader
+			// Set the helper that got set on the host base bundle file in classLoaderCreated.
+			// This is to handle the case where fragments are dynamically attached
 			SharedClassURLHelper urlHelper = hostFile.getURLHelper();
 			sourceFile.setURLHelper(urlHelper);
+			sourceFile.setPrimed(hostFile.getPrimed());
 		}
 
 		return false;
