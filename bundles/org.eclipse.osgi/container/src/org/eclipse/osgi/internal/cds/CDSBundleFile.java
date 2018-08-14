@@ -34,6 +34,7 @@ import org.eclipse.osgi.storage.bundlefile.BundleFileWrapper;
  * shared classes cache. 
  */
 public class CDSBundleFile extends BundleFileWrapper {
+	private final static String classFileExt = ".class"; //$NON-NLS-1$
 	private URL url; // the URL to the content of the real bundle file
 	private SharedClassURLHelper urlHelper; // the url helper set by the classloader
 	private boolean primed = false;
@@ -67,12 +68,11 @@ public class CDSBundleFile extends BundleFileWrapper {
 	 * shared classes cache. If found, the bytes representing the magic cookie are stored in CDSBundleEntry object.
 	 */
 	public BundleEntry getEntry(String path) {
-		String classFileExt = ".class"; //$NON-NLS-1$
 		BundleEntry wrappedEntry = super.getEntry(path);
 		if (wrappedEntry == null) {
 			return null;
 		}
-		if ((false == primed) || (false == path.endsWith(classFileExt))) {
+		if (!primed || !path.endsWith(classFileExt)) {
 			return wrappedEntry;
 		}
 

@@ -43,8 +43,6 @@ import org.eclipse.osgi.storage.bundlefile.BundleFileWrapperChain;
 
 public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFactoryHook {
 	private static SharedClassHelperFactory factory = Shared.getSharedClassHelperFactory();
-	private static java.lang.reflect.Method minimizeMethod = null;
-	private static boolean hasMinimizeMethod = true; /* Assume true to begin with */
 
 	// With Equinox bug 226038 (v3.4), the framework will now pass an instance
 	// of BundleFileWrapperChain rather than the wrapped BundleFile.  This is
@@ -133,55 +131,6 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 		}
 	}
 
-	/* Calling setMinimizeUpdateChecks() on the urlHelper tells it to only check the plugin jar for updates
-	 * once on startup. This removes the need to "prime" plugins by always cacheing the first class from the jar.
-	 * 
-	 * Java5 does not have a runMinimizeUpdateChecks method, but Java6 does. The text below explains why.
-	 * 
-	 * Java6 has an improved jar update detection mechanism which is event-driven and listens for
-	 * real jar open and close events. It will check jar timestamps on every class-load for closed jars (when
-	 * loading cached classes from those jars) and not check them if it knows the jars are open.
-	 *  
-	 * Java5 didn't know about jar open/close events so simply assumed that the first class to be stored by
-	 * a plugin implied that its jar was opened indefinitely. This is why it helps to "prime" a plugin when 
-	 * running under Java5 - by storing a class, the jar is opened and the JVM stops checking its timestamp 
-	 * which results in faster startup.
-	 * 
-	 * While the Java6 behaviour is more correct (it will pick up changes if a jar is closed after having been opened),
-	 * if the jars are not opened or "primed", then it will perform constant checks on their timestamps which hurts startup times.
-	 * This is why setMinimizeUpdateChecks was introduced - it's a means of saying to the urlHelper - regardless of
-	 * whether my container(s) is open or closed, I only want you to check it once for updates.
-	 * 
-	 * The consequence of this is that less file handles are open on startup in Java6.
-	 * 
-	 * This has been written in such a way that this adaptor will continue to work exactly the same with Java5, but
-	 * will adapt its behaviour when used with Java6 to do the right thing.
-	 */
-	private boolean runMinimizeMethod(SharedClassURLHelper urlHelper) {
-		if (hasMinimizeMethod && (urlHelper != null)) {
-			if (minimizeMethod == null) {
-				hasMinimizeMethod = false; /* Assume failure - prove success below */
-				try {
-					Class<?> c = urlHelper.getClass();
-					minimizeMethod = c.getMethod("setMinimizeUpdateChecks"); //$NON-NLS-1$
-					minimizeMethod.setAccessible(true);
-					hasMinimizeMethod = true;
-				} catch (Exception e) {
-					/* hasMinimizeMethod will be false and we won't try this again */
-				}
-			}
-			if (minimizeMethod != null) {
-				try {
-					minimizeMethod.invoke(urlHelper);
-					return true;
-				} catch (Exception e) {
-					hasMinimizeMethod = false;
-				}
-			}
-		}
-		return false;
-	}
-
 	private boolean hasMagicClassNumber(byte[] classbytes) {
 		if (classbytes == null || classbytes.length < 4)
 			return false;
@@ -197,13 +146,12 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 		CDSBundleFile hostFile = null;
 		try {
 			SharedClassURLHelper urlHelper = factory.getURLHelper(classLoader);
-			boolean minimizeSucceeded = runMinimizeMethod(urlHelper);
 			// set the url helper for the host base CDSBundleFile
 			hostFile = getCDSBundleFile(classLoader.getClasspathManager().getGeneration().getBundleFile());
 			if (hostFile != null) {
 				hostFile.setURLHelper(urlHelper);
-				if (minimizeSucceeded) {
-					/* In Java6, there is no longer a requirement to "prime" plugins */
+				if (urlHelper.setMinimizeUpdateChecks()) {
+					// no need to prime if we were able to setsetMinimizeUpdateChecks
 					hostFile.setPrimed(true);
 				}
 			}

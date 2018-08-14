@@ -22,18 +22,21 @@
 
 package org.eclipse.osgi.internal.cds;
 
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.hookregistry.HookConfigurator;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
+import org.eclipse.osgi.internal.log.EquinoxLogServices;
 
 public class CDSHookConfigurator implements HookConfigurator {
 
-	private static final String SUPPRESS_ERRORS = "j9.cds.suppresserrors"; //$NON-NLS-1$
+	private static final String REPORT_ERRORS = "j9.cds.reporterrors"; //$NON-NLS-1$
 	private static final String DISABLE_CDS = "j9.cds.disable"; //$NON-NLS-1$
 	private static final String OLD_CDS_CONFIGURATOR = "com.ibm.cds.CDSHookConfigurator"; //$NON-NLS-1$
 	private static final String J9_SHARED_CLASS_HELPER_CLASS = "com.ibm.oti.shared.SharedClassHelperFactory"; //$NON-NLS-1$
 
 	public void addHooks(HookRegistry hookRegistry) {
-		boolean disableCDS = "true".equals(hookRegistry.getConfiguration().getProperty(DISABLE_CDS)); //$NON-NLS-1$
+		boolean disableCDS = Boolean.valueOf(hookRegistry.getConfiguration().getProperty(DISABLE_CDS));
 		if (disableCDS) {
 			return;
 		}
@@ -48,11 +51,12 @@ public class CDSHookConfigurator implements HookConfigurator {
 		try {
 			Class.forName(J9_SHARED_CLASS_HELPER_CLASS);
 		} catch (ClassNotFoundException e) {
-			boolean reportErrors = "false".equals(hookRegistry.getConfiguration().getProperty(SUPPRESS_ERRORS)); //$NON-NLS-1$
+			boolean reportErrors = Boolean.valueOf(hookRegistry.getConfiguration().getProperty(REPORT_ERRORS));
 			// not running on J9
 			if (reportErrors) {
-				System.err.println("The J9 Class Sharing Adaptor will not work in this configuration."); //$NON-NLS-1$
-				System.err.println("You are not running on a J9 Java VM."); //$NON-NLS-1$
+				EquinoxContainer container = hookRegistry.getContainer();
+				EquinoxLogServices logServices = container.getLogServices();
+				logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, "The J9 Class Sharing Adaptor will not work in this configuration. You are not running on a J9 Java VM.", null); //$NON-NLS-1$
 			}
 			return;
 		}
