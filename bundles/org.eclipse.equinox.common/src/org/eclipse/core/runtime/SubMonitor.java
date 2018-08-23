@@ -314,7 +314,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * the parent progress monitor is touched. This points to the last incomplete child 
 	 * created with split.
 	 */
-	private SubMonitor lastSubMonitor = null;
+	private SubMonitor lastSubMonitor;
 
 	/**
 	 * Used to communicate with the root of this progress monitor tree
@@ -991,10 +991,11 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	}
 
 	private void cleanupActiveChild() {
-		if (lastSubMonitor == null)
-			return;
-
 		IProgressMonitor child = lastSubMonitor;
+		if (child == null) {
+			return;
+		}
+
 		lastSubMonitor = null;
 		child.done();
 	}
