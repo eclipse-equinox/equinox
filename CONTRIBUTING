@@ -1,46 +1,55 @@
-Contributing to Equinox
-=======================
+# Contributing to Eclipse Equinox
 
 Thanks for your interest in this project.
 
-Project description:
---------------------
+## Project description
 
-Equinox is an implementation of the OSGi R5 core framework specification, a set of bundles that implement various optional OSGi services and other infrastructure for running OSGi-based systems.
+Eclipse Equinox is an implementation of the OSGi R6 core framework
+specification, a set of bundles that implement various optional OSGi services
+and other infrastructure for running OSGi-based systems.
 
-- https://projects.eclipse.org/projects/rt.equinox
+* https://projects.eclipse.org/projects/eclipse.equinox
 
-Developer resources:
---------------------
+## Developer resources
 
-Information regarding source code management, builds, coding standards, and more.
+Information regarding source code management, builds, coding standards, and
+more.
 
-- https://projects.eclipse.org/projects/rt.equinox/developer
+* https://projects.eclipse.org/projects/eclipse.equinox/developer
 
-Contributor License Agreement:
-------------------------------
+The project maintains the following source code repositories
 
-Before your contribution can be accepted by the project, you need to create and electronically sign the Eclipse Foundation Contributor License Agreement (ECA).
-
-- http://www.eclipse.org/legal/ECA.php
-
-Contact:
---------
-
-Contact the project developers via the project's "dev" list.
-
-- https://dev.eclipse.org/mailman/listinfo/equinox-dev
-
-Search for bugs:
-----------------
+* http://git.eclipse.org/c/equinox/rt.equinox.binaries.git
+* http://git.eclipse.org/c/equinox/rt.equinox.bundles.git
+* http://git.eclipse.org/c/equinox/rt.equinox.framework.git
+* http://git.eclipse.org/c/equinox/rt.equinox.p2.git
 
 This project uses Bugzilla to track ongoing development and issues.
 
-- https://bugs.eclipse.org/bugs/buglist.cgi?product=Equinox
+* Search for issues: https://eclipse.org/bugs/buglist.cgi?product=Equinox
+* Create a new report: https://eclipse.org/bugs/enter_bug.cgi?product=Equinox
 
-Create a new bug:
------------------
+Be sure to search for existing bugs before you create another one. Remember that
+contributions are always welcome!
 
-Be sure to search for existing bugs before you create another one. Remember that contributions are always welcome!
+## Eclipse Contributor Agreement
 
-- https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Equinox
+Before your contribution can be accepted by the project team contributors must
+electronically sign the Eclipse Contributor Agreement (ECA).
+
+* http://www.eclipse.org/legal/ECA.php
+
+Commits that are provided by non-committers must have a Signed-off-by field in
+the footer indicating that the author is aware of the terms by which the
+contribution has been provided to the project. The non-committer must
+additionally have an Eclipse Foundation account and must have a signed Eclipse
+Contributor Agreement (ECA) on file.
+
+For more information, please see the Eclipse Committer Handbook:
+https://www.eclipse.org/projects/handbook/#resources-commit
+
+## Contact
+
+Contact the project developers via the project's "dev" list.
+
+* https://dev.eclipse.org/mailman/listinfo/equinox-dev
