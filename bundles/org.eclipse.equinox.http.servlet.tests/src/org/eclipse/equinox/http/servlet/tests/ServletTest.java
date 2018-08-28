@@ -3309,6 +3309,98 @@ public class ServletTest extends BaseTest {
 	}
 
 	@Test
+	public void test_getRequestURI_trailingSlash1() throws Exception {
+		try {
+			stopJetty();
+			System.setProperty("org.eclipse.equinox.http.jetty.context.path", "/foo");
+		}
+		finally {
+			startJetty();
+		}
+
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			final AtomicReference<String> getRequestURI = new AtomicReference<String>();
+
+			Servlet servletA = new HttpServlet() {
+				private static final long serialVersionUID = 1L;
+				@Override
+				protected void service(HttpServletRequest req, HttpServletResponse resp)
+					throws IOException, ServletException {
+					getRequestURI.set(req.getRequestURI());
+				}
+			};
+
+			Dictionary<String, Object> props = new Hashtable<String, Object>();
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SA");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/*");
+			registrations.add(getBundleContext().registerService(Servlet.class, servletA, props));
+			props = new Hashtable<String, Object>();
+
+			requestAdvisor.request("a/b/c/");
+			Assert.assertEquals("/foo/a/b/c/", getRequestURI.get());
+			requestAdvisor.request("a/b/");
+			Assert.assertEquals("/foo/a/b/", getRequestURI.get());
+			requestAdvisor.request("a/");
+			Assert.assertEquals("/foo/a/", getRequestURI.get());
+			requestAdvisor.request("/");
+			Assert.assertEquals("/foo/", getRequestURI.get());
+		}
+		finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+			try {
+				stopJetty();
+				System.setProperty("org.eclipse.equinox.http.jetty.context.path", "");
+			}
+			finally {
+				startJetty();
+			}
+		}
+	}
+
+	@Test
+	public void test_getRequestURI_trailingSlash2() throws Exception {
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			final AtomicReference<String> getRequestURI = new AtomicReference<String>();
+
+			Servlet servletA = new HttpServlet() {
+				private static final long serialVersionUID = 1L;
+				@Override
+				protected void service(HttpServletRequest req, HttpServletResponse resp)
+					throws IOException, ServletException {
+					getRequestURI.set(req.getRequestURI());
+				}
+			};
+
+			Dictionary<String, Object> props = new Hashtable<String, Object>();
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SA");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/*");
+			registrations.add(getBundleContext().registerService(Servlet.class, servletA, props));
+			props = new Hashtable<String, Object>();
+
+			requestAdvisor.request("a/b/c/");
+			Assert.assertEquals("/a/b/c/", getRequestURI.get());
+			requestAdvisor.request("a/b/");
+			Assert.assertEquals("/a/b/", getRequestURI.get());
+			requestAdvisor.request("a/");
+			Assert.assertEquals("/a/", getRequestURI.get());
+			// Note using empty string here because of the way requestAdvisor works
+			// by appending a slash first.
+			requestAdvisor.request("");
+			Assert.assertEquals("/", getRequestURI.get());
+		}
+		finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+		}
+	}
+
+
+	@Test
 	public void test_Listener1() throws Exception {
 		BaseServletContextListener scl1 =
 			new BaseServletContextListener();
