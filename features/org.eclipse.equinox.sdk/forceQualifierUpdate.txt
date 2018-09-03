@@ -3,3 +3,4 @@ Bug 528810 - Compilation failure in I20171214-2000
 Bug 533464 - Build failure in I20180411-0530
 Bug 444188 - EclipsePreferences is not thread safe
 Bug 537705 - I-Build: I20180805-2000 build failed 
+Needs a touch for felix.scr qualifier update
