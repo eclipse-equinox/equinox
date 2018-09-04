@@ -3338,12 +3338,15 @@ public class ServletTest extends BaseTest {
 			props = new Hashtable<String, Object>();
 
 			requestAdvisor.request("a/b/c/");
+
 			Assert.assertEquals("/foo/a/b/c/", getRequestURI.get());
 			requestAdvisor.request("a/b/");
 			Assert.assertEquals("/foo/a/b/", getRequestURI.get());
 			requestAdvisor.request("a/");
 			Assert.assertEquals("/foo/a/", getRequestURI.get());
-			requestAdvisor.request("/");
+			// Note using empty string here because of the way requestAdvisor works
+			// by appending a slash first.
+			requestAdvisor.request("");
 			Assert.assertEquals("/foo/", getRequestURI.get());
 		}
 		finally {
@@ -3362,6 +3365,67 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void test_getRequestURI_trailingSlash2() throws Exception {
+		try {
+			stopJetty();
+			System.setProperty("org.eclipse.equinox.http.jetty.context.path", "/foo");
+		}
+		finally {
+			startJetty();
+		}
+
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			final AtomicReference<String> getRequestURI = new AtomicReference<String>();
+
+			Servlet servletA = new HttpServlet() {
+				private static final long serialVersionUID = 1L;
+				@Override
+				protected void service(HttpServletRequest req, HttpServletResponse resp)
+					throws IOException, ServletException {
+					HttpSession session = req.getSession();
+					session.setAttribute("test", req.getParameter("p1"));
+					getRequestURI.set(resp.encodeURL(req.getRequestURI()));
+				}
+			};
+
+			Dictionary<String, Object> props = new Hashtable<String, Object>();
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SA");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/*");
+			registrations.add(getBundleContext().registerService(Servlet.class, servletA, props));
+			props = new Hashtable<String, Object>();
+
+			requestAdvisor.request("a/b/c/?p1=v1");
+			// get the session
+			String initialURI = getRequestURI.get();
+			int sessionIdx = initialURI.indexOf(";jsessionid=");
+			Assert.assertTrue("No session: " + initialURI, sessionIdx > -1);
+			String sessionPostfix = initialURI.substring(sessionIdx);
+			Assert.assertEquals("/foo/a/b/c/" + sessionPostfix, getRequestURI.get());
+			requestAdvisor.request("a/b/" + sessionPostfix);
+			Assert.assertEquals("/foo/a/b/" + sessionPostfix, getRequestURI.get());
+			requestAdvisor.request("a/" + sessionPostfix);
+			Assert.assertEquals("/foo/a/" + sessionPostfix, getRequestURI.get());
+			// Note using empty string here because of the way requestAdvisor works
+			// by appending a slash first.
+			requestAdvisor.request("" + sessionPostfix);
+			Assert.assertEquals("/foo/" + sessionPostfix, getRequestURI.get());
+		}
+		finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+			try {
+				stopJetty();
+				System.setProperty("org.eclipse.equinox.http.jetty.context.path", "");
+			}
+			finally {
+				startJetty();
+			}
+		}
+	}
+
+	@Test
+	public void test_getRequestURI_trailingSlash3() throws Exception {
 		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 		try {
 			final AtomicReference<String> getRequestURI = new AtomicReference<String>();
@@ -3399,6 +3463,51 @@ public class ServletTest extends BaseTest {
 		}
 	}
 
+	@Test
+	public void test_getRequestURI_trailingSlash4() throws Exception {
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		try {
+			final AtomicReference<String> getRequestURI = new AtomicReference<String>();
+
+			Servlet servletA = new HttpServlet() {
+				private static final long serialVersionUID = 1L;
+				@Override
+				protected void service(HttpServletRequest req, HttpServletResponse resp)
+					throws IOException, ServletException {
+					HttpSession session = req.getSession();
+					session.setAttribute("test", req.getParameter("p1"));
+					getRequestURI.set(resp.encodeURL(req.getRequestURI()));
+				}
+			};
+
+			Dictionary<String, Object> props = new Hashtable<String, Object>();
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SA");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/*");
+			registrations.add(getBundleContext().registerService(Servlet.class, servletA, props));
+			props = new Hashtable<String, Object>();
+
+			requestAdvisor.request("a/b/c/?p1=v1");
+			// get the session
+			String initialURI = getRequestURI.get();
+			int sessionIdx = initialURI.indexOf(";jsessionid=");
+			Assert.assertTrue("No session: " + initialURI, sessionIdx > -1);
+			String sessionPostfix = initialURI.substring(sessionIdx);
+			Assert.assertEquals("/a/b/c/" + sessionPostfix, getRequestURI.get());
+			requestAdvisor.request("a/b/" + sessionPostfix);
+			Assert.assertEquals("/a/b/" + sessionPostfix, getRequestURI.get());
+			requestAdvisor.request("a/" + sessionPostfix);
+			Assert.assertEquals("/a/" + sessionPostfix, getRequestURI.get());
+			// Note using empty string here because of the way requestAdvisor works
+			// by appending a slash first.
+			requestAdvisor.request("" + sessionPostfix);
+			Assert.assertEquals("/" + sessionPostfix, getRequestURI.get());
+		}
+		finally {
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+		}
+	}
 
 	@Test
 	public void test_Listener1() throws Exception {

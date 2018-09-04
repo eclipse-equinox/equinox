@@ -67,9 +67,9 @@ public class ProxyServlet extends HttpServlet {
 		}
 		String requestUri = HttpServletRequestWrapperImpl.getDispatchRequestURI(request);
 		
-		// NOTE split does not include trailing empty strings for paths that end in SLASH
-		String[] pathInfoSegments = pathInfo.split(Const.SLASH);
-		String[] requestUriSegments = requestUri.split(Const.SLASH);
+		// NOTE use split that takes a max to preserve ending SLASH
+		String[] pathInfoSegments = pathInfo.split(Const.SLASH, Integer.MAX_VALUE - 1);
+		String[] requestUriSegments = requestUri.split(Const.SLASH, Integer.MAX_VALUE - 1);
 		
 		if(pathInfoSegments.length == requestUriSegments.length) {
 			return requestUri;
@@ -78,10 +78,6 @@ public class ProxyServlet extends HttpServlet {
 		StringBuilder aliasBuilder = new StringBuilder();
 		for(int i=(requestUriSegments.length - pathInfoSegments.length + 1);i<requestUriSegments.length;i++) {
 			aliasBuilder.append(Const.SLASH).append(requestUriSegments[i]);
-		}
-		// if the original request ends in '/' then be sure to append a '/'
-		if (requestUri.endsWith(Const.SLASH)) {
-			aliasBuilder.append(Const.SLASH);
 		}
 		return aliasBuilder.toString();
 	}
