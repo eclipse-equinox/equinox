@@ -210,10 +210,8 @@
 		<chmod perm="755" dir="${feature.base}/hpux.gtk.ia64/${collectingFolder}" includes="launcher" />
 	</target>
 	<target name="rootFilesgroup_group_group">
-		<antcall target="rootFileswin32_win32_x86"/>
 		<antcall target="rootFileswin32_win32_x86_64"/>
 		<antcall target="rootFilesmacosx_cocoa_x86_64"/>
-		<antcall target="rootFileslinux_gtk_x86"/>
 		<antcall target="rootFileslinux_gtk_ppc64le"/>
 		<antcall target="rootFileslinux_gtk_x86_64"/>
 	</target>
