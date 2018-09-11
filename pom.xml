@@ -88,7 +88,6 @@
     <module>bundles/org.eclipse.equinox.concurrent</module>
     <module>bundles/org.eclipse.equinox.security</module>
     <module>bundles/org.eclipse.equinox.security.macosx</module>
-    <module>bundles/org.eclipse.equinox.security.win32.x86</module>
     <module>bundles/org.eclipse.equinox.security.win32.x86_64</module>
     <module>bundles/org.eclipse.equinox.security.linux.x86_64</module>
     <module>bundles/org.eclipse.equinox.bidi</module>
