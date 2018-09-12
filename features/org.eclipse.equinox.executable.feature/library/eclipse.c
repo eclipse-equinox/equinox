@@ -216,6 +216,9 @@ static _TCHAR* startupMsg =
 _T_ECLIPSE("The %s executable launcher was unable to locate its \n\
 companion launcher jar.");
 
+static _TCHAR* gtk2Msg =
+_T_ECLIPSE("The %s executable launcher no longer supports running with GTK + 2.x. Continuing using GTK+ 3.x.");
+
 static _TCHAR* homeMsg =
 _T_ECLIPSE("The %s executable launcher was unable to locate its \n\
 home directory.");
@@ -521,12 +524,12 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 		_stscanf(gtkVersionString, _T_ECLIPSE("%d"), &gtkVersion);
 
 		if (gtkVersion == 2) {
-			setenv("SWT_GTK3","0",1);
-		} else {
-			setenv("SWT_GTK3","1",1);
+			errorMsg = malloc( (_tcslen(gtk2Msg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
+			_stprintf( errorMsg, gtk2Msg, officialName );
+			_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), officialName, errorMsg);
 		}
 	}
-	
+
 	char *overlayScrollbar = getenv("LIBOVERLAY_SCROLLBAR");
 	if (overlayScrollbar == NULL) {
 		setenv("LIBOVERLAY_SCROLLBAR", "0", 0);
@@ -535,13 +538,10 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	if (oxygenGtkHack == NULL) {
 		setenv("OXYGEN_DISABLE_INNER_SHADOWS_HACK", "1", 0);
 	}
-	char *gtk3 = getenv("SWT_GTK3");
-	if (gtk3 == NULL || strcmp(gtk3,"1") == 0) {
-		/* Work around for https://bugzilla.gnome.org/show_bug.cgi?id=677329, see Eclipse bug 435742 */
-		char *gdkCoreDeviceEvents = getenv("GDK_CORE_DEVICE_EVENTS");
-		if (gdkCoreDeviceEvents == NULL) {
-			setenv("GDK_CORE_DEVICE_EVENTS", "1", 0);
-		}
+	/* Work around for https://bugzilla.gnome.org/show_bug.cgi?id=677329, see Eclipse bug 435742 */
+	char *gdkCoreDeviceEvents = getenv("GDK_CORE_DEVICE_EVENTS");
+	if (gdkCoreDeviceEvents == NULL) {
+		setenv("GDK_CORE_DEVICE_EVENTS", "1", 0);
 	}
 #endif
 #endif

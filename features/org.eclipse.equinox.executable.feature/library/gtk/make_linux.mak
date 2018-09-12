@@ -86,11 +86,9 @@ EXEC = $(PROGRAM_OUTPUT)
 # DLL == 'eclipse_XXXX.so'
 DLL = $(PROGRAM_LIBRARY)
 
-#LIBS = `pkg-config --libs-only-L gtk+-2.0` -lgtk-x11-2.0 -lgdk_pixbuf-2.0 -lgobject-2.0 -lgdk-x11-2.0 -lpthread -ldl
 LIBS = -lpthread -ldl
 GTK_LIBS = \
- -DGTK_LIB="\"libgtk-x11-2.0.so.0\"" -DGDK_LIB="\"libgdk-x11-2.0.so.0\"" \
- -DGTK3_LIB="\"libgtk-3.so.0\"" -DGDK3_LIB="\"libgdk-3.so.0\"" \
+ -DGTK3_LIB="\"libgtk-4.so.0\"" -DGDK3_LIB="\"libgdk-4.so.0\"" \
  -DPIXBUF_LIB="\"libgdk_pixbuf-2.0.so.0\"" -DGOBJ_LIB="\"libgobject-2.0.so.0\"" \
  -DGIO_LIB="\"libgio-2.0.so.0\"" -DGLIB_LIB="\"libglib-2.0.so.0\""
 LFLAGS = ${M_ARCH} -shared -fpic -Wl,--export-dynamic 
@@ -105,7 +103,7 @@ CFLAGS = ${M_CFLAGS} ${M_ARCH} -g -s -Wall\
 	-I. \
 	-I.. \
 	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux \
-	`pkg-config --cflags gtk+-2.0`
+	`pkg-config --cflags gtk+-3.0`
 
 all: $(EXEC) $(DLL)
 

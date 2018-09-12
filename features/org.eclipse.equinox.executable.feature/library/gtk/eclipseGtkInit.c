@@ -26,12 +26,12 @@ static _TCHAR* minVerTitle = _T_ECLIPSE("Unsupported GTK+ version");
 static _TCHAR* gtkInitFail = _T_ECLIPSE("Unable to initialize GTK+\n");
 static _TCHAR* upgradeWarning1 = _T_ECLIPSE("\nPlease upgrade GTK+ to minimum version");
 static _TCHAR* upgradeWarning2 = _T_ECLIPSE("\nor use an older version of Eclipse.\nClick OK to Exit.");
-static int minGtkMajorVersion = 2;
-static int minGtkMinorVersion = 24;
+static int minGtkMajorVersion = 3;
+static int minGtkMinorVersion = 0;
 static int minGtkMicroVersion = 0;
 
 /* tables to help initialize the function pointers */
-/* functions from libgtk-x11-2.0 or libgtk-3.so.0*/
+/* functions from libgtk-3.so.0*/
 static FN_TABLE gtkFunctions[] = {
 	FN_TABLE_ENTRY(gtk_container_add, 1),
 	FN_TABLE_ENTRY(gtk_dialog_run, 1),
@@ -49,7 +49,7 @@ static FN_TABLE gtkFunctions[] = {
 	FN_TABLE_ENTRY(gtk_window_set_position, 1),
 	{ NULL, NULL }
 };
-/* functions from libgdk-x11-2.0 or libgdk-3.so.0*/
+/* functions from libgdk-3.so.0*/
 static FN_TABLE gdkFunctions[] = {
 	FN_TABLE_ENTRY(gdk_display_get_default, 1),
 	FN_TABLE_ENTRY(gdk_screen_get_default, 1),
@@ -116,16 +116,10 @@ int loadGtk() {
 
 	void *gioLib = NULL, *glibLib = NULL, *gdkLib = NULL, *gtkLib = NULL, *objLib = NULL, *pixLib = NULL;
 	
-	char *gtk3 = getenv("SWT_GTK3");
-	if (gtk3 == NULL || strcmp(gtk3,"1") == 0) {
-		gdkLib = dlopen(GDK3_LIB, DLFLAGS);
-		gtkLib = dlopen(GTK3_LIB, DLFLAGS);
-	}
-	if (!gtkLib || !gdkLib) { //if GTK+ 2
-		gdkLib = dlopen(GDK_LIB, DLFLAGS);
-		gtkLib = dlopen(GTK_LIB, DLFLAGS);
-		setenv("SWT_GTK3","0",1);
+	gdkLib = dlopen(GDK3_LIB, DLFLAGS);
+	gtkLib = dlopen(GTK3_LIB, DLFLAGS);
 
+	if (!gtkLib || !gdkLib) {
 		const char * (*func)(int, int, int);
 		dlerror();
 
