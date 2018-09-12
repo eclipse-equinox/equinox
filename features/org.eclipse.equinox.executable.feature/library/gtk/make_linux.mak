@@ -88,7 +88,7 @@ DLL = $(PROGRAM_LIBRARY)
 
 LIBS = -lpthread -ldl
 GTK_LIBS = \
- -DGTK3_LIB="\"libgtk-4.so.0\"" -DGDK3_LIB="\"libgdk-4.so.0\"" \
+ -DGTK3_LIB="\"libgtk-3.so.0\"" -DGDK3_LIB="\"libgdk-3.so.0\"" \
  -DPIXBUF_LIB="\"libgdk_pixbuf-2.0.so.0\"" -DGOBJ_LIB="\"libgobject-2.0.so.0\"" \
  -DGIO_LIB="\"libgio-2.0.so.0\"" -DGLIB_LIB="\"libglib-2.0.so.0\""
 LFLAGS = ${M_ARCH} -shared -fpic -Wl,--export-dynamic 
