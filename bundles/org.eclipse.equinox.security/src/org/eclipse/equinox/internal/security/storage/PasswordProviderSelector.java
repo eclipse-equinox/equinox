@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.preferences.*;
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
 import org.eclipse.equinox.internal.security.storage.friends.IStorageConstants;
+import org.eclipse.equinox.internal.security.storage.provider.IValidatingPasswordProvider;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.equinox.security.storage.provider.PasswordProvider;
 import org.eclipse.osgi.util.NLS;
@@ -130,6 +131,17 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 					if (hint != null)
 						suppliedHints.add(hint);
 				}
+			}
+
+			Object clazz;
+			try {
+				clazz = element.createExecutableExtension(CLASS_NAME);
+				// Bug 537833 - on some systems, the password provider does not work (e.g. Linux with KDE desktop) so these
+				// providers will request validation
+				if (clazz instanceof IValidatingPasswordProvider && !((IValidatingPasswordProvider) clazz).isValid())
+					continue;
+			} catch (CoreException e) {
+				continue;
 			}
 
 			allAvailableModules.add(new ExtStorageModule(moduleID, element, priority, name, description, suppliedHints));

@@ -90,6 +90,15 @@ static void unlock_secret_service(JNIEnv *env)
 	return;
 }
 
+JNIEXPORT jboolean JNICALL Java_org_eclipse_equinox_internal_security_linux_LinuxPasswordProvider_canUnlock(JNIEnv *env, jobject this) {  
+
+  unlock_secret_service(env);
+  if ((*env)->ExceptionOccurred(env)) {
+    return JNI_FALSE;
+  }
+  return JNI_TRUE;
+}
+
 JNIEXPORT jstring JNICALL Java_org_eclipse_equinox_internal_security_linux_LinuxPasswordProvider_getMasterPassword(JNIEnv *env, jobject this) {
   GError *error = NULL;
   jstring result;

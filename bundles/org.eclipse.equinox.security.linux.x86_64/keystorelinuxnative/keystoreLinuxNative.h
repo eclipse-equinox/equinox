@@ -31,6 +31,14 @@ JNIEXPORT jstring JNICALL Java_org_eclipse_equinox_internal_security_linux_Linux
 
 /*
  * Class:     LinuxPasswordProvider
+ * Method:    canUnlock
+ * Signature: ()Ljava/lang/boolean;
+ */
+JNIEXPORT jboolean JNICALL Java_org_eclipse_equinox_internal_security_linux_LinuxPasswordProvider_canUnlock
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     LinuxPasswordProvider
  * Method:    saveMasterPassword
  * Signature: (Ljava/lang/String;)V
  */
