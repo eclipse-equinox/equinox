@@ -20,3 +20,4 @@ Bug 444188 - EclipsePreferences is not thread safe
 Bug 537705 - I-Build: I20180805-2000 build failed
 Bug 538962 - I-Build I20180911-1400 build failed 
 Needs a touch for felix.scr qualifier update
+Build I20180920-0430 failed
