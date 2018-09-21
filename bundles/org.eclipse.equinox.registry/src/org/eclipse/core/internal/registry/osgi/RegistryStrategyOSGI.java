@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.core.internal.registry.*;
 import org.eclipse.core.internal.runtime.ResourceTranslator;
@@ -136,6 +138,8 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	 */
 	private final ReferenceMap bundleMap = new ReferenceMap(ReferenceMap.SOFT, DEFAULT_BUNDLECACHE_SIZE, DEFAULT_BUNDLECACHE_LOADFACTOR);
 
+	private ReadWriteLock bundleMapLock = new ReentrantReadWriteLock();
+
 	// String Id to OSGi Bundle conversion
 	private Bundle getBundle(String id) {
 		if (id == null)
@@ -149,11 +153,23 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		// We assume here that OSGI Id will fit into "int". As the number of
 		// registry elements themselves are expected to fit into "int", this
 		// is a valid assumption for the time being.
-		Bundle bundle = (Bundle) bundleMap.get((int) OSGiId);
+		Bundle bundle;
+		bundleMapLock.readLock().lock();
+		try {
+			bundle = (Bundle) bundleMap.get((int) OSGiId);
+		} finally {
+			bundleMapLock.readLock().unlock();
+		}
 		if (bundle != null)
 			return bundle;
+		// note: we accept that two concurrent threads end up here for the same id, because they will anyway resolve the same mapping
 		bundle = Activator.getContext().getBundle(OSGiId);
-		bundleMap.put((int) OSGiId, bundle);
+		bundleMapLock.writeLock().lock();
+		try {
+			bundleMap.put((int) OSGiId, bundle);
+		} finally {
+			bundleMapLock.writeLock().unlock();
+		}
 		return bundle;
 	}
 
