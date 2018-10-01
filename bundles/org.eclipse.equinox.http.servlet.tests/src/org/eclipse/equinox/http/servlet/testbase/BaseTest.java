@@ -238,7 +238,7 @@ public class BaseTest {
 	protected static final String TEST_PATH_CUSTOMIZER_NAME = "test.path.customizer.name";
 	protected static final String TEST_ERROR_CODE = "test.error.code";
 
-	protected static final String EQUINOX_DS_BUNDLE = "org.eclipse.equinox.ds";
+	protected static final String EQUINOX_DS_BUNDLE = "org.apache.felix.scr";
 	protected static final String EQUINOX_JETTY_BUNDLE = "org.eclipse.equinox.http.jetty";
 	protected static final String JETTY_PROPERTY_PREFIX = "org.eclipse.equinox.http.jetty.";
 	protected static final String OSGI_HTTP_PORT_PROPERTY = "org.osgi.service.http.port";
