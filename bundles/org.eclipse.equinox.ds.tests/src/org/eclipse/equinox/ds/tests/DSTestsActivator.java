@@ -40,7 +40,7 @@ public class DSTestsActivator implements BundleActivator {
 	}
 	
 	public static void activateSCR() {
-		activateBundle("org.eclipse.equinox.ds");
+		activateBundle("org.apache.felix.scr");
 		activateBundle("org.eclipse.equinox.cm");
 		activateBundle("org.eclipse.equinox.log");
 		activateBundle("org.eclipse.equinox.util");
