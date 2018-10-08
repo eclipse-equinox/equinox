@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.equinox.http.servlet" version="2">
-    <resource path="META-INF/MANIFEST.MF">
-        <filter comment="See bug 507244" id="926941240">
-            <message_arguments>
-                <message_argument value="1.4.0"/>
-                <message_argument value="1.3.1"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="src/org/eclipse/equinox/http/servlet/HttpServiceServlet.java" type="org.eclipse.equinox.http.servlet.HttpServiceServlet">
         <filter id="576720909">
             <message_arguments>
