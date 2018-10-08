@@ -47,7 +47,7 @@ public class ObjectPool {
 	protected ObjectCreator oc;
 
 	public Object getInstance() throws Exception {
-		return oc != null ? oc.getInstance() : template.newInstance();
+		return oc != null ? oc.getInstance() : template.getDeclaredConstructor().newInstance();
 	}
 
 	public ObjectPool(ObjectCreator oc, int size, int factor) {

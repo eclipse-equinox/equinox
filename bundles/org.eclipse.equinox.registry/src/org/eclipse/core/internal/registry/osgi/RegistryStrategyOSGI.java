@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -138,7 +138,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	 */
 	private final ReferenceMap bundleMap = new ReferenceMap(ReferenceMap.SOFT, DEFAULT_BUNDLECACHE_SIZE, DEFAULT_BUNDLECACHE_LOADFACTOR);
 
-	private ReadWriteLock bundleMapLock = new ReentrantReadWriteLock();
+	private final ReadWriteLock bundleMapLock = new ReentrantReadWriteLock();
 
 	// String Id to OSGi Bundle conversion
 	private Bundle getBundle(String id) {
@@ -203,7 +203,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		// create a new instance
 		Object result = null;
 		try {
-			result = classInstance.newInstance();
+			result = classInstance.getDeclaredConstructor().newInstance();
 		} catch (Exception e) {
 			throwException(NLS.bind(RegistryMessages.plugin_instantiateClassError, contributingBundle.getSymbolicName(), className), e);
 		} catch (LinkageError e1) {

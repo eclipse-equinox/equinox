@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -223,7 +223,7 @@ public class RegistryStrategy {
 		}
 
 		try {
-			result = classInstance.newInstance();
+			result = classInstance.getDeclaredConstructor().newInstance();
 		} catch (Exception e) {
 			String message = NLS.bind(RegistryMessages.exExt_instantiateClassError, contributor.getActualName(), className);
 			throw new CoreException(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IRegistryConstants.PLUGIN_ERROR, message, e));

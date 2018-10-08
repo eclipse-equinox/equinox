@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2017 IBM Corporation and others.
+ * Copyright (c) 2007, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -241,7 +241,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 			return null;
 
 		try {
-			return (JettyCustomizer) Class.forName(customizerClass).newInstance();
+			return (JettyCustomizer) Class.forName(customizerClass).getDeclaredConstructor().newInstance();
 		} catch (Exception e) {
 			// TODO: consider logging this, but we should still continue
 			e.printStackTrace();

@@ -85,7 +85,7 @@ public class BridgeServlet extends HttpServlet {
 		if (frameworkLauncherClassParameter != null) {
 			try {
 				Class<?> frameworkLauncherClass = this.getClass().getClassLoader().loadClass(frameworkLauncherClassParameter);
-				framework = (FrameworkLauncher) frameworkLauncherClass.newInstance();
+				framework = (FrameworkLauncher) frameworkLauncherClass.getDeclaredConstructor().newInstance();
 			} catch (Exception e) {
 				throw new ServletException(e);
 			}

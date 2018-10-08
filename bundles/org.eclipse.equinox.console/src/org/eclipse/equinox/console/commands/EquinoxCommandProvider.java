@@ -1437,7 +1437,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 						toThrow = throwable.getConstructor(String.class).newInstance(message);
 					}
 					catch (Exception e) {
-						toThrow = throwable.newInstance();
+						toThrow = throwable.getDeclaredConstructor().newInstance();
 					}
 				}
 				// Initialize the cause. Its stack trace will be that of the current thread.
