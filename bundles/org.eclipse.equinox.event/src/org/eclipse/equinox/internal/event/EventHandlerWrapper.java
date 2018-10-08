@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2017 IBM Corporation and others.
+ * Copyright (c) 2007, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -132,6 +132,7 @@ public class EventHandlerWrapper {
 		EventHandler tempHandler = null;
 		try {
 			tempHandler = AccessController.doPrivileged(new PrivilegedAction<EventHandler>() {
+				@Override
 				public EventHandler run() {
 					return context.getService(reference);
 				}

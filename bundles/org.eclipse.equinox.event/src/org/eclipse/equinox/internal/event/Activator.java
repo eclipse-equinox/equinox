@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,7 @@ public class Activator implements BundleActivator {
 	private ServiceRegistration<EventAdmin> eventAdminService;
 	private EventComponent eventAdmin;
 
+	@Override
 	public void start(BundleContext bundleContext) throws InvalidSyntaxException {
 		if (Boolean.valueOf(bundleContext.getProperty(PROP_USE_DS)).booleanValue())
 			return; // If this property is set we assume DS is being used.
@@ -40,6 +41,7 @@ public class Activator implements BundleActivator {
 		eventAdminService = bundleContext.registerService(EventAdmin.class, eventAdmin, null);
 	}
 
+	@Override
 	public void stop(BundleContext bundleContext) {
 		if (eventAdmin != null) {
 			eventAdminService.unregister();

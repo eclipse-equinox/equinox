@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -65,18 +65,12 @@ public class EventAdminImpl implements EventAdmin {
 		log.close();
 	}
 
-	/**
-	 * @param event
-	 * @see org.osgi.service.event.EventAdmin#postEvent(org.osgi.service.event.Event)
-	 */
+	@Override
 	public void postEvent(Event event) {
 		dispatchEvent(event, true);
 	}
 
-	/**
-	 * @param event
-	 * @see org.osgi.service.event.EventAdmin#sendEvent(org.osgi.service.event.Event)
-	 */
+	@Override
 	public void sendEvent(Event event) {
 		dispatchEvent(event, false);
 	}
@@ -122,12 +116,12 @@ public class EventAdminImpl implements EventAdmin {
 		SecurityManager sm = System.getSecurityManager();
 		Permission perm = (sm == null) ? null : new TopicPermission(topic, TopicPermission.SUBSCRIBE);
 
-		Map<EventHandlerWrapper, Permission> listeners = new CopyOnWriteIdentityMap<EventHandlerWrapper, Permission>();
+		Map<EventHandlerWrapper, Permission> listeners = new CopyOnWriteIdentityMap<>();
 		for (EventHandlerWrapper wrapper : eventHandlers)
 			listeners.put(wrapper, perm);
 
 		// Create the listener queue for this event delivery
-		ListenerQueue<EventHandlerWrapper, Permission, Event> listenerQueue = new ListenerQueue<EventHandlerWrapper, Permission, Event>(currentManager);
+		ListenerQueue<EventHandlerWrapper, Permission, Event> listenerQueue = new ListenerQueue<>(currentManager);
 		// Add the listeners to the queue and associate them with the event
 		// dispatcher
 		listenerQueue.queueListeners(listeners.entrySet(), handlers);

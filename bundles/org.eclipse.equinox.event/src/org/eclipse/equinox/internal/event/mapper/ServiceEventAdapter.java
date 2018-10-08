@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation.
+ * Copyright (c) 2005, 2018 IBM Corporation.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,9 +37,7 @@ public class ServiceEventAdapter extends EventAdapter {
 		this.event = event;
 	}
 
-	/**
-	 * @see org.eclipse.equinox.internal.event.mapper.EventAdapter#convert()
-	 */
+	@Override
 	public Event convert() {
 		String typename = null;
 		switch (event.getType()) {
@@ -56,7 +54,7 @@ public class ServiceEventAdapter extends EventAdapter {
 				return null;
 		}
 		String topic = HEADER + Constants.TOPIC_SEPARATOR + typename;
-		Map<String, Object> properties = new HashMap<String, Object>();
+		Map<String, Object> properties = new HashMap<>();
 		ServiceReference<?> ref = event.getServiceReference();
 		if (ref != null) {
 			putServiceReferenceProperties(properties, ref);

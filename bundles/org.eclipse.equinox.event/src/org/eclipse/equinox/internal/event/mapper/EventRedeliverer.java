@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -48,26 +48,17 @@ public class EventRedeliverer implements FrameworkListener, BundleListener, Serv
 		bc.addServiceListener(this);
 	}
 
-	/**
-	 * @param event
-	 * @see org.osgi.framework.FrameworkListener#frameworkEvent(org.osgi.framework.FrameworkEvent)
-	 */
+	@Override
 	public void frameworkEvent(FrameworkEvent event) {
 		new FrameworkEventAdapter(event, eventAdmin).redeliver();
 	}
 
-	/**
-	 * @param event
-	 * @see org.osgi.framework.BundleListener#bundleChanged(org.osgi.framework.BundleEvent)
-	 */
+	@Override
 	public void bundleChanged(BundleEvent event) {
 		new BundleEventAdapter(event, eventAdmin).redeliver();
 	}
 
-	/**
-	 * @param event
-	 * @see org.osgi.framework.ServiceListener#serviceChanged(org.osgi.framework.ServiceEvent)
-	 */
+	@Override
 	public void serviceChanged(ServiceEvent event) {
 		new ServiceEventAdapter(event, eventAdmin).redeliver();
 	}

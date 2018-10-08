@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2017 IBM Corporation and others.
+ * Copyright (c) 2007, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -36,11 +36,12 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 	public EventHandlerTracker(BundleContext context, LogTracker log) {
 		super(context, EventHandler.class.getName(), null);
 		this.log = log;
-		globalWildcard = new ArrayList<EventHandlerWrapper>();
-		partialWildcard = new HashMap<String, List<EventHandlerWrapper>>();
-		topicName = new HashMap<String, List<EventHandlerWrapper>>();
+		globalWildcard = new ArrayList<>();
+		partialWildcard = new HashMap<>();
+		topicName = new HashMap<>();
 	}
 
+	@Override
 	public EventHandlerWrapper addingService(ServiceReference<EventHandler> reference) {
 		EventHandlerWrapper wrapper = new EventHandlerWrapper(reference, context, log);
 		synchronized (this) {
@@ -51,6 +52,7 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 		return wrapper;
 	}
 
+	@Override
 	public void modifiedService(ServiceReference<EventHandler> reference, EventHandlerWrapper service) {
 		synchronized (this) {
 			unbucket(service);
@@ -63,6 +65,7 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 		service.flush(); // needs to be called outside sync region
 	}
 
+	@Override
 	public void removedService(ServiceReference<EventHandler> reference, EventHandlerWrapper service) {
 		synchronized (this) {
 			unbucket(service);
@@ -91,7 +94,7 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 				String key = topic.substring(0, topic.length() - 2); // Strip off "/*" from the end
 				List<EventHandlerWrapper> wrappers = partialWildcard.get(key);
 				if (wrappers == null) {
-					wrappers = new ArrayList<EventHandlerWrapper>();
+					wrappers = new ArrayList<>();
 					partialWildcard.put(key, wrappers);
 				}
 				wrappers.add(wrapper);
@@ -100,7 +103,7 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 			else {
 				List<EventHandlerWrapper> wrappers = topicName.get(topic);
 				if (wrappers == null) {
-					wrappers = new ArrayList<EventHandlerWrapper>();
+					wrappers = new ArrayList<>();
 					topicName.put(topic, wrappers);
 				}
 				wrappers.add(wrapper);
@@ -156,7 +159,7 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 	 */
 	public synchronized Set<EventHandlerWrapper> getHandlers(final String topic) {
 		// Use a set to remove duplicates
-		Set<EventHandlerWrapper> handlers = new HashSet<EventHandlerWrapper>();
+		Set<EventHandlerWrapper> handlers = new HashSet<>();
 
 		// Add the "*" handlers
 		handlers.addAll(globalWildcard);
@@ -195,6 +198,7 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 	 * @see org.eclipse.osgi.framework.eventmgr.EventDispatcher#dispatchEvent(java.lang.Object,
 	 *      java.lang.Object, int, java.lang.Object)
 	 */
+	@Override
 	public void dispatchEvent(EventHandlerWrapper eventListener, Permission listenerObject, int eventAction, Event eventObject) {
 		eventListener.handleEvent(eventObject, listenerObject);
 	}

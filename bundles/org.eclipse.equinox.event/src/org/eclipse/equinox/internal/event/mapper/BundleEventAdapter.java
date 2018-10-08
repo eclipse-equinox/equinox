@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation.
+ * Copyright (c) 2005, 2018 IBM Corporation.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -40,10 +40,7 @@ public class BundleEventAdapter extends EventAdapter {
 		this.event = event;
 	}
 
-	/**
-	 * @return event
-	 * @see org.eclipse.equinox.internal.event.mapper.EventAdapter#convert()
-	 */
+	@Override
 	public Event convert() {
 		String typename = null;
 		switch (event.getType()) {
@@ -73,7 +70,7 @@ public class BundleEventAdapter extends EventAdapter {
 				typename = Integer.toString(event.getType());
 		}
 		String topic = HEADER + Constants.TOPIC_SEPARATOR + typename;
-		Map<String, Object> properties = new HashMap<String, Object>();
+		Map<String, Object> properties = new HashMap<>();
 		Bundle bundle = event.getBundle();
 		if (bundle == null) {
 			throw new RuntimeException("BundleEvent.getBundle() returns null"); //$NON-NLS-1$
