@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 SAP AG and others.
+ * Copyright (c) 2011, 2018 SAP AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -89,7 +89,7 @@ public class HelpCommand {
 	
 	public void startService() {
 		Dictionary<String, Object> props = new Hashtable<>();
-		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
+		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		props.put(CommandProcessor.COMMAND_SCOPE, "equinox");
 		props.put(CommandProcessor.COMMAND_FUNCTION, new String[] {"help"});
 		context.registerService(HelpCommand.class.getName(), this, props);

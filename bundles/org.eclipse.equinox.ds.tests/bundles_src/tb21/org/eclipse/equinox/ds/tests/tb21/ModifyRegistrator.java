@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -93,7 +93,7 @@ public class ModifyRegistrator implements ComponentContextProvider {
 		}
 		Object prop = properties.get("config.base.data");
 		int data = (prop instanceof Integer) ? ((Integer) prop).intValue() : 0;
-		properties.put("config.base.data", new Integer(data | value));
+		properties.put("config.base.data", Integer.valueOf(data | value));
 	}
 
 	public ComponentContext getComponentContext() {

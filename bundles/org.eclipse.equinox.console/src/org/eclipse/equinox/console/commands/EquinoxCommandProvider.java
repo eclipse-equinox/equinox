@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2017 IBM Corporation and others.
+ * Copyright (c) 2003, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -173,7 +173,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		converterReg = context.registerService(Converter.class.getName(), converter, null);
 		
 		Dictionary<String, Object> props = new Hashtable<>();
-		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
+		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		props.put(CommandProcessor.COMMAND_SCOPE, "equinox");
 		props.put(CommandProcessor.COMMAND_FUNCTION, functions);
 		providerReg = context.registerService(EquinoxCommandProvider.class.getName(), this, props);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -109,14 +109,14 @@ public class CombinedEventDelta {
 
 	public void rememberExtensionPoint(ExtensionPoint extensionPoint) {
 		String bucketId = extensionPoint.getUniqueIdentifier();
-		Integer extPt = new Integer(extensionPoint.getObjectId());
+		Integer extPt = Integer.valueOf(extensionPoint.getObjectId());
 		getExtPointsBucket(bucketId).add(extPt);
 		getExtPointsGlobal().add(extPt);
 	}
 
 	public void rememberExtension(ExtensionPoint extensionPoint, int ext) {
 		String bucketId = extensionPoint.getUniqueIdentifier();
-		Integer extension = new Integer(ext);
+		Integer extension = Integer.valueOf(ext);
 
 		getExtensionsBucket(bucketId).add(extension);
 		getExtensionsGlobal().add(extension);

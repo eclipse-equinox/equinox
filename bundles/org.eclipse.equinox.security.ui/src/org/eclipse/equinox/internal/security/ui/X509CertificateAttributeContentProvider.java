@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2017  Jay Rosenthal and others.
+ * Copyright (c) 2008, 2018  Jay Rosenthal and others.
  * 
  *
  * This program and the accompanying materials
@@ -96,7 +96,7 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 
 			X509Certificate theCert = (X509Certificate) newInput;
 
-			X509CertificateAttribute ver = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_VERSION, new Integer(theCert.getVersion()).toString());
+			X509CertificateAttribute ver = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_VERSION, Integer.valueOf(theCert.getVersion()).toString());
 			elements.add(ver);
 
 			X509CertificateAttribute serialNum = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_SERIAL_NUM, theCert.getSerialNumber().toString());
@@ -157,7 +157,7 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 				e1.printStackTrace();
 			}
 			int basicCnstrnts = theCert.getBasicConstraints();
-			Integer basicConstraint = new Integer(basicCnstrnts);
+			Integer basicConstraint = Integer.valueOf(basicCnstrnts);
 			StringBuffer basicCnstrntsBfr = new StringBuffer();
 			if (basicCnstrnts == -1) {
 				// Not a CA

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2017 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -87,7 +87,7 @@ public class Activator extends AbstractUIPlugin {
 
 		// Register the default authorization manager
 		Hashtable<String, Object> properties = new Hashtable<>(7);
-		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
+		properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
 		properties.put(PROP_AUTHZ_MANAGER, PROP_DEFAULT_SERVICE);
 		defaultAuthzManagerReg = bundleContext.registerService(AuthorizationManager.class, new DefaultAuthorizationManager(), properties);
 	}

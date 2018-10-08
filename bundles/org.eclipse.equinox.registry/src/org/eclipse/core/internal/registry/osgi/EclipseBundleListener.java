@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2014 IBM Corporation and others.
+ * Copyright (c) 2003, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -190,7 +190,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			// only need to worry about fragments
 			synchronized (currentStateStamp) {
 				// mark this host as processed for the current state stamp.
-				dynamicAddStateStamps.put(Long.toString(bundle.getBundleId()), new Long(currentStateStamp[0]));
+				dynamicAddStateStamps.put(Long.toString(bundle.getBundleId()), Long.valueOf(currentStateStamp[0]));
 			}
 			return;
 		}
@@ -238,7 +238,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			}
 			synchronized (currentStateStamp) {
 				// mark this host as processed for the current state stamp.
-				dynamicAddStateStamps.put(hostID, new Long(currentStateStamp[0]));
+				dynamicAddStateStamps.put(hostID, Long.valueOf(currentStateStamp[0]));
 			}
 		}
 	}

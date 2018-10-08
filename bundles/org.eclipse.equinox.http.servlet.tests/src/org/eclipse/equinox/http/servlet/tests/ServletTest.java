@@ -3024,7 +3024,7 @@ public class ServletTest extends BaseTest {
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX + "a", "a");
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX + "b", "b");
-			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX + "c", new Integer(1));
+			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX + "c", Integer.valueOf(1));
 			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
 			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();

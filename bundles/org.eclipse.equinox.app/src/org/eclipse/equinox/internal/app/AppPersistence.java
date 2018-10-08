@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -187,9 +187,9 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 		}
 		if (nextScheduledID == Integer.MAX_VALUE)
 			nextScheduledID = 0;
-		String result = new Integer(nextScheduledID++).toString();
+		String result = Integer.valueOf(nextScheduledID++).toString();
 		while (scheduledApps.get(result) != null && nextScheduledID < Integer.MAX_VALUE)
-			result = new Integer(nextScheduledID++).toString();
+			result = Integer.valueOf(nextScheduledID++).toString();
 		if (nextScheduledID == Integer.MAX_VALUE)
 			throw new ApplicationException(ApplicationException.APPLICATION_DUPLICATE_SCHEDULE_ID, "Maximum number of scheduled applications reached"); //$NON-NLS-1$
 		return result;
@@ -365,12 +365,12 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 						continue;
 					lastMin = minute;
 					Hashtable props = new Hashtable();
-					props.put(ScheduledApplication.YEAR, new Integer(cal.get(Calendar.YEAR)));
-					props.put(ScheduledApplication.MONTH, new Integer(cal.get(Calendar.MONTH)));
-					props.put(ScheduledApplication.DAY_OF_MONTH, new Integer(cal.get(Calendar.DAY_OF_MONTH)));
-					props.put(ScheduledApplication.DAY_OF_WEEK, new Integer(cal.get(Calendar.DAY_OF_WEEK)));
-					props.put(ScheduledApplication.HOUR_OF_DAY, new Integer(cal.get(Calendar.HOUR_OF_DAY)));
-					props.put(ScheduledApplication.MINUTE, new Integer(minute));
+					props.put(ScheduledApplication.YEAR, Integer.valueOf(cal.get(Calendar.YEAR)));
+					props.put(ScheduledApplication.MONTH, Integer.valueOf(cal.get(Calendar.MONTH)));
+					props.put(ScheduledApplication.DAY_OF_MONTH, Integer.valueOf(cal.get(Calendar.DAY_OF_MONTH)));
+					props.put(ScheduledApplication.DAY_OF_WEEK, Integer.valueOf(cal.get(Calendar.DAY_OF_WEEK)));
+					props.put(ScheduledApplication.HOUR_OF_DAY, Integer.valueOf(cal.get(Calendar.HOUR_OF_DAY)));
+					props.put(ScheduledApplication.MINUTE, Integer.valueOf(minute));
 					Event timerEvent = new Event(ScheduledApplication.TIMER_TOPIC, (Dictionary) props);
 					EclipseScheduledApplication[] apps = null;
 					// poor mans implementation of dispatching events; the spec will not allow us to use event admin to dispatch the virtual timer events; boo!!

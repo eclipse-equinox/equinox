@@ -707,13 +707,13 @@ public final class SecurityUtil implements PrivilegedRunner.PrivilegedDispatcher
 			case FILE_GET_OUTPUT_STREAM :
 				return new FileOutputStream(((File) arg1).getAbsolutePath(), ((Boolean) arg2).booleanValue());
 			case FILE_LENGTH :
-				return new Long(((File) arg1).length());
+				return Long.valueOf(((File) arg1).length());
 			case FILE_EXISTS :
 				return ((File) arg1).exists() ? Boolean.TRUE : Boolean.FALSE;
 			case FILE_ISDIR :
 				return ((File) arg1).isDirectory() ? Boolean.TRUE : Boolean.FALSE;
 			case FILE_LAST_MODIFIED :
-				return new Long(((File) arg1).lastModified());
+				return Long.valueOf(((File) arg1).lastModified());
 			case FILE_LIST :
 				return ((File) arg1).list();
 			case FILE_DELETE :

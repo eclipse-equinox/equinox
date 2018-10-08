@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1367,7 +1367,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 			else
 				namespace = removeExtension(id);
 			Map<Integer, RegistryObject> removed = new HashMap<>(1);
-			removed.put(new Integer(id), registryObject);
+			removed.put(Integer.valueOf(id), registryObject);
 			// There is some asymmetry between extension and extension point removal. Removing extension point makes
 			// extensions "orphans" but does not remove them. As a result, only extensions needs to be processed.
 			if (!isExtensionPoint)

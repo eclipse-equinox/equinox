@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2010 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2018 by ProSyst Software GmbH
  * http://www.prosyst.com
  *
  * This program and the accompanying materials
@@ -48,7 +48,7 @@ public class Component1 implements PropertiesProvider, ComponentContextProvider 
   protected void deactivate(ComponentContext ctxt) {
     deactPos = deactCount++;
     
-    properties.put("config.base.data", new Integer(deactPos));
+    properties.put("config.base.data", Integer.valueOf(deactPos));
   }
 
   public Dictionary getProperties() {

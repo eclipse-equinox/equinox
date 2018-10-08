@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  *  This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License 2.0
@@ -30,12 +30,12 @@ public interface IApplication {
 	/**
 	 * Exit object indicating normal termination
 	 */
-	public static final Integer EXIT_OK = new Integer(0);
+	public static final Integer EXIT_OK = Integer.valueOf(0);
 
 	/**
 	 * Exit object requesting platform restart
 	 */
-	public static final Integer EXIT_RESTART = new Integer(23);
+	public static final Integer EXIT_RESTART = Integer.valueOf(23);
 
 	/**
 	 * Exit object requesting that the command passed back be executed.  Typically
@@ -43,7 +43,7 @@ public interface IApplication {
 	 * relaunched the command line will be retrieved from the 
 	 * {@link IApplicationContext#EXIT_DATA_PROPERTY eclipse.exitdata} system property.  
 	 */
-	public static final Integer EXIT_RELAUNCH = new Integer(24);
+	public static final Integer EXIT_RELAUNCH = Integer.valueOf(24);
 
 	/**
 	 * Starts this application with the given context and returns a result.  The content of 

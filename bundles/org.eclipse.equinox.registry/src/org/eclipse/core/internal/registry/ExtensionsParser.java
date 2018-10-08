@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -314,7 +314,7 @@ public class ExtensionsParser extends DefaultHandler {
 
 	private void handleExtensionPointState(String elementName) {
 		// We ignore all elements under extension points (if there are any)
-		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
+		stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
 		unknownElement(EXTENSION_POINT, elementName);
 	}
 
@@ -326,7 +326,7 @@ public class ExtensionsParser extends DefaultHandler {
 		// its parent configuration element object.  However, the first configuration
 		// element object we created (the last one we pop off the stack) will need to
 		// be added to a vector in the extension object called _configuration.
-		stateStack.push(new Integer(CONFIGURATION_ELEMENT_STATE));
+		stateStack.push(Integer.valueOf(CONFIGURATION_ELEMENT_STATE));
 
 		configurationElementValue = null;
 
@@ -349,25 +349,25 @@ public class ExtensionsParser extends DefaultHandler {
 		// new manifests should have the plugin (or fragment) element empty
 		// in compatibility mode, any extraneous elements will be silently ignored
 		compatibilityMode = attributes.getLength() > 0;
-		stateStack.push(new Integer(BUNDLE_STATE));
+		stateStack.push(Integer.valueOf(BUNDLE_STATE));
 		objectStack.push(contribution);
 	}
 
 	private void handleBundleState(String elementName, Attributes attributes) {
 		if (elementName.equals(EXTENSION_POINT)) {
-			stateStack.push(new Integer(BUNDLE_EXTENSION_POINT_STATE));
+			stateStack.push(Integer.valueOf(BUNDLE_EXTENSION_POINT_STATE));
 			parseExtensionPointAttributes(attributes);
 			return;
 		}
 		if (elementName.equals(EXTENSION)) {
-			stateStack.push(new Integer(BUNDLE_EXTENSION_STATE));
+			stateStack.push(Integer.valueOf(BUNDLE_EXTENSION_STATE));
 			parseExtensionAttributes(attributes);
 			return;
 		}
 
 		// If we get to this point, the element name is one we don't currently accept.
 		// Set the state to indicate that this element will be ignored
-		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
+		stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
 		if (!compatibilityMode)
 			unknownElement(PLUGIN, elementName);
 	}
@@ -480,7 +480,7 @@ public class ExtensionsParser extends DefaultHandler {
 		if (currentExtension.getExtensionPointIdentifier() == null) {
 			missingAttribute(EXTENSION_TARGET, EXTENSION);
 			stateStack.pop();
-			stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
+			stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
 			objectStack.pop();
 			return;
 		}
@@ -570,7 +570,7 @@ public class ExtensionsParser extends DefaultHandler {
 			String attribute = currentExtPoint.getSimpleIdentifier() == null ? EXTENSION_POINT_ID : EXTENSION_POINT_NAME;
 			missingAttribute(attribute, EXTENSION_POINT);
 			stateStack.pop();
-			stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
+			stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
 			return;
 		}
 		if (!objectManager.addExtensionPoint(currentExtPoint, true)) {
@@ -582,7 +582,7 @@ public class ExtensionsParser extends DefaultHandler {
 				registry.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, msg, null));
 			}
 			stateStack.pop();
-			stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
+			stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
 			return;
 		}
 		if (currentExtPoint.getNamespace() == null)
@@ -599,7 +599,7 @@ public class ExtensionsParser extends DefaultHandler {
 	 */
 	@Override
 	public void startDocument() {
-		stateStack.push(new Integer(INITIAL_STATE));
+		stateStack.push(Integer.valueOf(INITIAL_STATE));
 		for (int i = 0; i <= LAST_INDEX; i++) {
 			scratchVectors[i] = new ArrayList<>();
 		}
@@ -625,7 +625,7 @@ public class ExtensionsParser extends DefaultHandler {
 				handleExtensionState(elementName, attributes);
 				break;
 			default :
-				stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
+				stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
 				if (!compatibilityMode)
 					internalError(NLS.bind(RegistryMessages.parse_unknownTopElement, elementName));
 		}

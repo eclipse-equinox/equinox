@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2016 IBM Corporation and others.
+ * Copyright (c) 2004, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -124,7 +124,7 @@ public class TableReader {
 			if (!checkCacheValidity(tableInput, expectedTimestamp))
 				return null;
 
-			Integer nextId = new Integer(tableInput.readInt());
+			Integer nextId = Integer.valueOf(tableInput.readInt());
 			OffsetTable offsets = OffsetTable.load(tableInput);
 			extensionPoints = new HashtableOfStringAndInt();
 			extensionPoints.load(tableInput);

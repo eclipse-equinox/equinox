@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2010 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2018 by ProSyst Software GmbH
  * http://www.prosyst.com
  *
  * This program and the accompanying materials
@@ -137,7 +137,7 @@ public class CallRegistrator implements ComponentContextProvider {
     }
     Object prop = properties.get("config.base.data");
     int data = (prop instanceof Integer) ? ((Integer) prop).intValue() : 0;
-    properties.put("config.base.data", new Integer(data | value));
+    properties.put("config.base.data", Integer.valueOf(data | value));
   }
 
   // Successors should override

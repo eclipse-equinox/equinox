@@ -129,7 +129,7 @@ public class TestServletPrototype extends HttpServlet {
 		// Update ranking
 		String serviceRanking = request.getParameter(Constants.SERVICE_RANKING);
 		if (serviceRanking != null) {
-			serviceProps.put(Constants.SERVICE_RANKING, new Integer(serviceRanking));
+			serviceProps.put(Constants.SERVICE_RANKING, Integer.valueOf(serviceRanking));
 		}
 		// Update context selection
 		String contextSelect = request.getParameter(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);

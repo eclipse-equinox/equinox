@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.InvalidRegistryObjectException;
  */
 public class TemporaryObjectManager implements IObjectManager {
 	private Map<?, ?> actualObjects; //id --> registry objects
-	private RegistryObjectManager parent; //the main object manager (should be equals to extensionRegistry.getObjectManager)
+	private final RegistryObjectManager parent; //the main object manager (should be equals to extensionRegistry.getObjectManager)
 
 	public TemporaryObjectManager(Map<?, ?> actualObjects, RegistryObjectManager parent) {
 		this.actualObjects = actualObjects;
@@ -97,7 +97,7 @@ public class TemporaryObjectManager implements IObjectManager {
 			result = parent.getObject(id, type);
 		} catch (InvalidRegistryObjectException e) {
 			if (actualObjects != null) {
-				result = actualObjects.get(new Integer(id));
+				result = actualObjects.get(Integer.valueOf(id));
 			}
 		}
 		if (result == null)

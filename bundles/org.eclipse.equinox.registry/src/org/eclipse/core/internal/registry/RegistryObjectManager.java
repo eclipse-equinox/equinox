@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2017 IBM Corporation and others.
+ * Copyright (c) 2004, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -663,12 +663,12 @@ public class RegistryObjectManager implements IObjectManager {
 		Map<Integer, RegistryObject> actualObjects = new HashMap<>(xpts.length + exts.length);
 		for (int i = 0; i < exts.length; i++) {
 			Extension tmp = (Extension) basicGetObject(exts[i], RegistryObjectManager.EXTENSION);
-			actualObjects.put(new Integer(exts[i]), tmp);
+			actualObjects.put(Integer.valueOf(exts[i]), tmp);
 			collectChildren(tmp, 0, actualObjects);
 		}
 		for (int i = 0; i < xpts.length; i++) {
 			ExtensionPoint xpt = (ExtensionPoint) basicGetObject(xpts[i], RegistryObjectManager.EXTENSION_POINT);
-			actualObjects.put(new Integer(xpts[i]), xpt);
+			actualObjects.put(Integer.valueOf(xpts[i]), xpt);
 		}
 
 		return actualObjects;
@@ -695,9 +695,9 @@ public class RegistryObjectManager implements IObjectManager {
 				if (extPoint == null) // already removed?
 					continue;
 
-				Integer extPointIndex = new Integer(extPoint.getKeyHashCode());
+				Integer extPointIndex = Integer.valueOf(extPoint.getKeyHashCode());
 				if (!associatedObjects.containsKey(extPointIndex))
-					result.put(new Integer(extPoint.getKeyHashCode()), extPoint);
+					result.put(Integer.valueOf(extPoint.getKeyHashCode()), extPoint);
 
 				// add all extensions for the extension point
 				int[] extensions = extPoint.getRawChildren();
@@ -705,7 +705,7 @@ public class RegistryObjectManager implements IObjectManager {
 					Extension tmp = (Extension) basicGetObject(extensions[j], RegistryObjectManager.EXTENSION);
 					if (tmp == null) // already removed
 						continue;
-					Integer extensionIndex = new Integer(extensions[j]);
+					Integer extensionIndex = Integer.valueOf(extensions[j]);
 					if (!associatedObjects.containsKey(extensionIndex)) {
 						result.put(extensionIndex, tmp);
 						collectChildren(tmp, 0, result);
@@ -721,7 +721,7 @@ public class RegistryObjectManager implements IObjectManager {
 						Extension tmp = (Extension) basicGetObject(extensions[j], RegistryObjectManager.EXTENSION);
 						if (tmp == null) // already removed
 							continue;
-						Integer extensionIndex = new Integer(extensions[j]);
+						Integer extensionIndex = Integer.valueOf(extensions[j]);
 						if (!associatedObjects.containsKey(extensionIndex)) {
 							result.put(extensionIndex, tmp);
 							collectChildren(tmp, 0, result);
@@ -751,7 +751,7 @@ public class RegistryObjectManager implements IObjectManager {
 	private void collectChildren(RegistryObject ce, int level, Map<Integer, RegistryObject> collector) {
 		ConfigurationElement[] children = (ConfigurationElement[]) getObjects(ce.getRawChildren(), level == 0 || ce.noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
 		for (int j = 0; j < children.length; j++) {
-			collector.put(new Integer(children[j].getObjectId()), children[j]);
+			collector.put(Integer.valueOf(children[j].getObjectId()), children[j]);
 			collectChildren(children[j], level + 1, collector);
 		}
 	}
