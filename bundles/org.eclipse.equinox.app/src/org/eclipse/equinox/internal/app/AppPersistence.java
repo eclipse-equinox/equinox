@@ -242,9 +242,8 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	}
 
 	private static void loadLocks(File locksData) throws IOException {
-		ObjectInputStream in = null;
-		try {
-			in = new ObjectInputStream(new FileInputStream(locksData));
+		try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(locksData));) {
+
 			int dataVersion = in.readInt();
 			if (dataVersion != DATA_VERSION)
 				return;
@@ -253,16 +252,11 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 				for (int i = 0; i < numLocks; i++)
 					locks.add(in.readUTF());
 			}
-		} finally {
-			if (in != null)
-				in.close();
 		}
 	}
 
 	private static void loadSchedules(File schedulesData) throws IOException {
-		ObjectInputStream in = null;
-		try {
-			in = new ObjectInputStream(new FileInputStream(schedulesData));
+		try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(schedulesData))) {
 			int dataVersion = in.readInt();
 			if (dataVersion != DATA_VERSION)
 				return;
@@ -283,9 +277,6 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 			throw new IOException(e.getMessage());
 		} catch (ClassNotFoundException e) {
 			throw new IOException(e.getMessage());
-		} finally {
-			if (in != null)
-				in.close();
 		}
 	}
 
@@ -307,24 +298,16 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 
 	// must call this while holding the locks lock
 	private static void saveLocks(File locksData) throws IOException {
-		ObjectOutputStream out = null;
-		try {
-			out = new ObjectOutputStream(new FileOutputStream(locksData));
-			out.writeInt(DATA_VERSION);
+		try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(locksData))) {
 			out.writeInt(locks.size());
 			for (Iterator iterLocks = locks.iterator(); iterLocks.hasNext();)
 				out.writeUTF((String) iterLocks.next());
-		} finally {
-			if (out != null)
-				out.close();
 		}
 	}
 
 	// must call this while holding the scheduledApps lock
 	private static void saveSchedules(File schedulesData) throws IOException {
-		ObjectOutputStream out = null;
-		try {
-			out = new ObjectOutputStream(new FileOutputStream(schedulesData));
+		try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(schedulesData))) {
 			out.writeInt(DATA_VERSION);
 			out.writeInt(scheduledApps.size());
 			for (Iterator apps = scheduledApps.values().iterator(); apps.hasNext();) {
@@ -336,9 +319,6 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 				out.writeBoolean(app.isRecurring());
 				out.writeObject(app.getArguments());
 			}
-		} finally {
-			if (out != null)
-				out.close();
 		}
 	}
 
