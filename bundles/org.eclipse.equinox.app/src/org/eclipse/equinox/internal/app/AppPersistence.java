@@ -299,6 +299,7 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	// must call this while holding the locks lock
 	private static void saveLocks(File locksData) throws IOException {
 		try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(locksData))) {
+			out.writeInt(DATA_VERSION);
 			out.writeInt(locks.size());
 			for (Iterator iterLocks = locks.iterator(); iterLocks.hasNext();)
 				out.writeUTF((String) iterLocks.next());
