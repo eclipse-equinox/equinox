@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -65,6 +65,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 			this.arguments = new HashMap(arguments);
 	}
 
+	@Override
 	synchronized public String getState() {
 		switch (status) {
 			case FLAG_STARTING :
@@ -82,6 +83,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		}
 	}
 
+	@Override
 	protected void destroySpecific() {
 		// when this method is called we must force the application to exit.
 		// first set the status to stopping
@@ -168,10 +170,12 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		}
 	}
 
+	@Override
 	public Map getArguments() {
 		return arguments;
 	}
 
+	@Override
 	public Object run(Object context) throws Exception {
 		if (context != null) {
 			// always force the use of the context if it is not null
@@ -241,6 +245,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		return result;
 	}
 
+	@Override
 	public void stop() {
 		try {
 			destroy();
@@ -251,6 +256,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 
 	}
 
+	@Override
 	public void applicationRunning() {
 		// first set the application handle status to running
 		setAppStatus(EclipseAppHandle.FLAG_ACTIVE);
@@ -259,11 +265,13 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		if (monitors == null)
 			return;
 		SafeRunner.run(new ISafeRunnable() {
+			@Override
 			public void handleException(Throwable e) {
 				// just continue ... the exception has already been logged by
 				// handleException(ISafeRunnable)
 			}
 
+			@Override
 			public void run() throws Exception {
 				for (int i = 0; i < monitors.length; i++) {
 					StartupMonitor monitor = (StartupMonitor) Activator.getContext().getService(monitors[i]);
@@ -289,6 +297,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 			return null;
 		// Implement our own Comparator to sort services
 		Arrays.sort(refs, new Comparator() {
+			@Override
 			public int compare(Object o1, Object o2) {
 				// sort in descending order
 				// sort based on service ranking first; highest rank wins
@@ -331,34 +340,40 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		return configs[0];
 	}
 
+	@Override
 	public String getBrandingApplication() {
 		IBranding branding = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getBranding();
 		return branding == null ? null : branding.getApplication();
 	}
 
+	@Override
 	public Bundle getBrandingBundle() {
 		IBranding branding = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getBranding();
 		return branding == null ? null : branding.getDefiningBundle();
 
 	}
 
+	@Override
 	public String getBrandingDescription() {
 		IBranding branding = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getBranding();
 		return branding == null ? null : branding.getDescription();
 
 	}
 
+	@Override
 	public String getBrandingId() {
 		IBranding branding = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getBranding();
 		return branding == null ? null : branding.getId();
 	}
 
+	@Override
 	public String getBrandingName() {
 		IBranding branding = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getBranding();
 		return branding == null ? null : branding.getName();
 
 	}
 
+	@Override
 	public String getBrandingProperty(String key) {
 		IBranding branding = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getBranding();
 		return branding == null ? null : branding.getProperty(key);
@@ -379,6 +394,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		return null;
 	}
 
+	@Override
 	public synchronized Object getExitValue(long timeout) throws ApplicationException, InterruptedException {
 		if (handleRegistration == null && application == null)
 			return result;
@@ -396,6 +412,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		return result;
 	}
 
+	@Override
 	public void setResult(Object result, IApplication application) {
 		setInternalResult(result == null ? NULL_RESULT : result, true, application);
 	}

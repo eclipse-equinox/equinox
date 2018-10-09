@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  *  This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License 2.0
@@ -24,6 +24,7 @@ import org.eclipse.equinox.app.IApplicationContext;
 public class ErrorApplication implements IApplication {
 	static final String ERROR_EXCEPTION = "error.exception"; //$NON-NLS-1$
 
+	@Override
 	public Object start(IApplicationContext context) throws Exception {
 		Exception error = (Exception) context.getArguments().get(ERROR_EXCEPTION);
 		if (error != null)
@@ -31,6 +32,7 @@ public class ErrorApplication implements IApplication {
 		throw new IllegalStateException();
 	}
 
+	@Override
 	public void stop() {
 		// do nothing
 	}

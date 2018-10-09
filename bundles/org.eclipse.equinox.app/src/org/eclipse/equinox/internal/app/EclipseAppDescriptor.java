@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -80,11 +80,13 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		this.iconURL = iconResult;
 	}
 
+	@Override
 	protected Map getPropertiesSpecific(String locale) {
 		// just use the service properties; for now we do not localize any properties
 		return getServiceProperties();
 	}
 
+	@Override
 	protected ApplicationHandle launchSpecific(Map arguments) throws Exception {
 		// if this application is locked throw an exception.
 		if (getLocked().booleanValue())
@@ -108,12 +110,14 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		return appHandle;
 	}
 
+	@Override
 	protected synchronized void lockSpecific() {
 		locked = Boolean.TRUE;
 		// make sure the service properties are updated with the latest lock info
 		refreshProperties();
 	}
 
+	@Override
 	protected synchronized void unlockSpecific() {
 		locked = Boolean.FALSE;
 		// make sure the service properties are updated with the latest lock info
@@ -200,12 +204,14 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		return appContainer;
 	}
 
+	@Override
 	public boolean matchDNChain(String pattern) {
 		if (contributor == null)
 			return false;
 		return BundleSignerCondition.getCondition(contributor, new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {pattern})).isSatisfied();
 	}
 
+	@Override
 	protected boolean isLaunchableSpecific() {
 		return true;
 	}

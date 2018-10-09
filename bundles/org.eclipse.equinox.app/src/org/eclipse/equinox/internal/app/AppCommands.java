@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -89,6 +89,7 @@ public class AppCommands implements CommandProvider {
 			scheduledApplications.close();
 	}
 
+	@Override
 	public String getHelp() {
 		return getHelp(null);
 	}

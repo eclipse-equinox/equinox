@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -51,6 +51,7 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 		Activator.openTracker(appTracker, false);
 	}
 
+	@Override
 	public String getScheduleId() {
 		return id;
 	}
@@ -59,30 +60,35 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 		return appPid;
 	}
 
+	@Override
 	public synchronized String getTopic() {
 		if (removed)
 			throw new IllegalStateException(Messages.scheduled_app_removed);
 		return topic;
 	}
 
+	@Override
 	public synchronized String getEventFilter() {
 		if (removed)
 			throw new IllegalStateException(Messages.scheduled_app_removed);
 		return eventFilter;
 	}
 
+	@Override
 	public synchronized boolean isRecurring() {
 		if (removed)
 			throw new IllegalStateException(Messages.scheduled_app_removed);
 		return recurring;
 	}
 
+	@Override
 	public synchronized ApplicationDescriptor getApplicationDescriptor() {
 		if (removed)
 			throw new IllegalStateException(Messages.scheduled_app_removed);
 		return (ApplicationDescriptor) Activator.getService(appTracker);
 	}
 
+	@Override
 	public synchronized Map getArguments() {
 		if (removed)
 			throw new IllegalStateException(Messages.scheduled_app_removed);
@@ -95,6 +101,7 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 		return result;
 	}
 
+	@Override
 	public synchronized void remove() {
 		if (removed)
 			return;
@@ -106,6 +113,7 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 		appTracker.close();
 	}
 
+	@Override
 	public synchronized void handleEvent(Event event) {
 		try {
 			if (removed)
@@ -145,6 +153,7 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 		/*
 		 * does the proper TopicPermission check for the event topic
 		 */
+		@Override
 		public void checkGuard(Object object) throws SecurityException {
 			SecurityManager sm = System.getSecurityManager();
 			if (sm != null)

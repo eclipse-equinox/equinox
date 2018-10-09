@@ -354,6 +354,7 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	}
 
 	static class AppTimer implements Runnable {
+		@Override
 		public void run() {
 			int lastMin = -1;
 			while (!shutdown) {
@@ -413,6 +414,7 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 		}
 	}
 
+	@Override
 	public Object addingService(ServiceReference reference) {
 		if (configLocation != null)
 			return null; // only care about one configuration
@@ -422,10 +424,12 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 		return configLocation;
 	}
 
+	@Override
 	public void modifiedService(ServiceReference reference, Object service) {
 		// don't care
 	}
 
+	@Override
 	public void removedService(ServiceReference reference, Object service) {
 		if (service == configLocation)
 			configLocation = null;

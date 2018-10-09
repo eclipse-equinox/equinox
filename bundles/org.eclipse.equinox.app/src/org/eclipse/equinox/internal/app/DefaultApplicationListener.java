@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others.
+ * Copyright (c) 2007, 2018 IBM Corporation and others.
  *
  *  This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License 2.0
@@ -58,6 +58,7 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 		}
 	}
 
+	@Override
 	public Object run(Object context) {
 		if (handleTracker == null)
 			return getResult(); // app has ended, return the result
@@ -106,6 +107,7 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 		return running;
 	}
 
+	@Override
 	public void stop() {
 		if (handleTracker == null)
 			return;
@@ -121,14 +123,17 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 		}
 	}
 
+	@Override
 	public Object addingService(ServiceReference reference) {
 		return Activator.getContext().getService(reference);
 	}
 
+	@Override
 	public void modifiedService(ServiceReference reference, Object service) {
 		// do nothing
 	}
 
+	@Override
 	synchronized public void removedService(ServiceReference reference, Object service) {
 		running = false;
 		// only wait for 5 seconds; this may timeout if forcing an application to quit takes too long

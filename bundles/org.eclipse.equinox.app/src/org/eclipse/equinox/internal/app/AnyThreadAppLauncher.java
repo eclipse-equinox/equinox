@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,13 +16,14 @@ package org.eclipse.equinox.internal.app;
 
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 
-public class AnyThreadAppLauncher implements Runnable{
+public class AnyThreadAppLauncher implements Runnable {
 	private EclipseAppHandle appHandle;
 
 	private AnyThreadAppLauncher(EclipseAppHandle appHandle) {
 		this.appHandle = appHandle;
 	}
 
+	@Override
 	public void run() {
 		try {
 			// pasing null will cause EclipseAppHandle to get the correct arguments

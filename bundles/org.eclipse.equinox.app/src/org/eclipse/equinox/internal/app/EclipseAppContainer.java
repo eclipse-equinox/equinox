@@ -80,7 +80,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 	/* @GuardedBy(lock) */
 	private EclipseAppHandle activeScopedSingleton; // the current scoped singleton handle
 	/* @GuardedBy(lock) */
-	private HashMap/*<<String> <ArrayList <EclipseAppHandle>> */activeLimited; // Map of handles that have cardinality limits
+	private HashMap/*<<String> <ArrayList <EclipseAppHandle>> */ activeLimited; // Map of handles that have cardinality limits
 	private String defaultAppId;
 	private DefaultApplicationListener defaultAppListener;
 	private ParameterizedRunnable defaultMainThreadAppHandle; // holds the default app handle to be run on the main thread
@@ -229,6 +229,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 			this.serviceProps = serviceProps;
 		}
 
+		@Override
 		public Object run() {
 			return context.registerService(serviceClasses, serviceObject, serviceProps);
 		}
@@ -367,6 +368,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 		}
 	}
 
+	@Override
 	public void bundleChanged(BundleEvent event) {
 		// if this is not the system bundle stopping then ignore the event
 		if ((BundleEvent.STOPPING & event.getType()) == 0 || event.getBundle().getBundleId() != 0)
@@ -597,6 +599,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 		}
 	}
 
+	@Override
 	public Object addingService(ServiceReference reference) {
 		ApplicationLauncher appLauncher;
 		ParameterizedRunnable appRunnable;
@@ -618,28 +621,34 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 		return appLauncher;
 	}
 
+	@Override
 	public void modifiedService(ServiceReference reference, Object service) {
 		// Do nothing
 	}
 
+	@Override
 	public void removedService(ServiceReference reference, Object service) {
 		// Do nothing
 	}
 
+	@Override
 	public void added(IExtension[] extensions) {
 		for (int i = 0; i < extensions.length; i++)
 			createAppDescriptor(extensions[i]);
 	}
 
+	@Override
 	public void added(IExtensionPoint[] extensionPoints) {
 		// nothing
 	}
 
+	@Override
 	public void removed(IExtension[] extensions) {
 		for (int i = 0; i < extensions.length; i++)
 			removeAppDescriptor(extensions[i].getUniqueIdentifier());
 	}
 
+	@Override
 	public void removed(IExtensionPoint[] extensionPoints) {
 		// nothing
 	}

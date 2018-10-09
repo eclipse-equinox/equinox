@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,10 +14,10 @@
 package org.eclipse.equinox.internal.app;
 
 import java.util.HashMap;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.osgi.framework.Bundle;
 
-public class ProductExtensionBranding implements IBranding{
+public class ProductExtensionBranding implements IBranding {
 	private static final String ATTR_DESCRIPTION = "description"; //$NON-NLS-1$
 	private static final String ATTR_NAME = "name"; //$NON-NLS-1$
 	private static final String ATTR_APPLICATION = "application"; //$NON-NLS-1$
@@ -53,30 +53,37 @@ public class ProductExtensionBranding implements IBranding{
 		definingBundle = Activator.getBundle(element.getContributor());
 	}
 
+	@Override
 	public Bundle getDefiningBundle() {
 		return definingBundle;
 	}
 
+	@Override
 	public String getApplication() {
 		return application;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public String getDescription() {
 		return description;
 	}
 
+	@Override
 	public String getId() {
 		return id;
 	}
 
+	@Override
 	public String getProperty(String key) {
 		return (String) properties.get(key);
 	}
 
+	@Override
 	public Object getProduct() {
 		return null;
 	}

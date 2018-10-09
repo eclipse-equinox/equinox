@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,7 @@ public class MainApplicationLauncher implements ApplicationRunnable {
 		this.appContainer = appContainer;
 	}
 
+	@Override
 	public Object run(Object context) throws Exception {
 		appContainer.startDefaultApp(false);
 		ApplicationRunnable mainHandle = getMainHandle();
@@ -40,6 +41,7 @@ public class MainApplicationLauncher implements ApplicationRunnable {
 		return launchMainApp;
 	}
 
+	@Override
 	public void stop() {
 		// force the application to quit
 		ApplicationRunnable handle = getMainHandle();

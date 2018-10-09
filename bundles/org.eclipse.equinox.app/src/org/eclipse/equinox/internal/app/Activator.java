@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -42,6 +42,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	private ServiceTracker registryTracker;
 	private IExtensionRegistry registry;
 
+	@Override
 	public void start(BundleContext bc) {
 		_context = bc;
 		// doing simple get service here because we expect the PackageAdmin service to always be available
@@ -65,6 +66,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		}
 	}
 
+	@Override
 	public void stop(BundleContext bc) {
 		// stop the app commands for the console
 		try {
@@ -114,6 +116,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			CommandLineArgs.processCommandLine(envInfo);
 	}
 
+	@Override
 	public Object addingService(ServiceReference reference) {
 		BundleContext context = _context;
 		if (context == null)
@@ -143,10 +146,12 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		return null;
 	}
 
+	@Override
 	public void modifiedService(ServiceReference reference, Object service) {
 		// do nothing
 	}
 
+	@Override
 	public void removedService(ServiceReference reference, Object service) {
 		EclipseAppContainer currentContainer = null;
 		synchronized (this) {
@@ -169,6 +174,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			tracker.open(allServices);
 		else
 			AccessController.doPrivileged(new PrivilegedAction() {
+				@Override
 				public Object run() {
 					tracker.open(allServices);
 					return null;
@@ -181,6 +187,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		if (System.getSecurityManager() == null)
 			return tracker.getService();
 		return AccessController.doPrivileged(new PrivilegedAction() {
+			@Override
 			public Object run() {
 				return tracker.getService();
 			}
@@ -192,6 +199,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		if (System.getSecurityManager() == null)
 			return bundle.getLocation();
 		return (String) AccessController.doPrivileged(new PrivilegedAction() {
+			@Override
 			public Object run() {
 				return bundle.getLocation();
 			}
