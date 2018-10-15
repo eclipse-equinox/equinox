@@ -15,14 +15,15 @@ package org.eclipse.equinox.internal.security.storage;
 
 import java.util.*;
 import org.eclipse.core.runtime.*;
-import org.eclipse.core.runtime.preferences.ConfigurationScope;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.*;
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
 import org.eclipse.equinox.internal.security.storage.friends.IStorageConstants;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.equinox.security.storage.provider.PasswordProvider;
 import org.eclipse.osgi.util.NLS;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 //XXX add validation on module IDs - AZaz09 and dots, absolutely no tabs 
 // XXX reserved name DEFAULT_PASSWORD_ID
@@ -238,8 +239,10 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 	}
 
 	protected HashSet getDisabledModules() {
-		IEclipsePreferences node = ConfigurationScope.INSTANCE.getNode(AuthPlugin.PI_AUTH);
-		String tmp = node.get(IStorageConstants.DISABLED_PROVIDERS_KEY, null);
+		IScopeContext[] scopes = {ConfigurationScope.INSTANCE, DefaultScope.INSTANCE};
+		String defaultPreferenceValue = ""; //$NON-NLS-1$
+		IPreferencesService preferencesService = getPreferencesService();
+		String tmp = preferencesService.getString(AuthPlugin.PI_AUTH, IStorageConstants.DISABLED_PROVIDERS_KEY, defaultPreferenceValue, scopes);
 		if (tmp == null || tmp.length() == 0)
 			return null;
 		HashSet disabledModules = new HashSet();
@@ -248,5 +251,18 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 			disabledModules.add(disabledProviders[i]);
 		}
 		return disabledModules;
+	}
+
+	private IPreferencesService getPreferencesService() {
+		BundleContext context = AuthPlugin.getDefault().getBundleContext();
+		ServiceReference reference = context.getServiceReference(IPreferencesService.class);
+		if (reference == null) {
+			throw new IllegalStateException("Failed to find service: " + IPreferencesService.class); //$NON-NLS-1$
+		}
+		try {
+			return (IPreferencesService) context.getService(reference);
+		} finally {
+			context.ungetService(reference);
+		}
 	}
 }

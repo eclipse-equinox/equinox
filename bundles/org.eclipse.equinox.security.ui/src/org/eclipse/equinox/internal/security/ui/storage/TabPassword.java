@@ -13,11 +13,10 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.ui.storage;
 
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
-import org.eclipse.core.runtime.preferences.ConfigurationScope;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.*;
 import org.eclipse.equinox.internal.security.storage.friends.*;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
@@ -33,6 +32,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import org.osgi.service.prefs.BackingStoreException;
+import org.osgi.service.prefs.Preferences;
 
 public class TabPassword {
 
@@ -249,25 +249,26 @@ public class TabPassword {
 	}
 
 	protected HashSet<String> getDisabledModules() {
-		IEclipsePreferences node = ConfigurationScope.INSTANCE.getNode(PREFERENCES_PLUGIN);
-		String tmp = node.get(IStorageConstants.DISABLED_PROVIDERS_KEY, null);
-		if (tmp == null || tmp.length() == 0)
-			return null;
-		HashSet<String> modules = new HashSet<>();
-		String[] disabledProviders = tmp.split(","); //$NON-NLS-1$
-		for (int i = 0; i < disabledProviders.length; i++) {
-			modules.add(disabledProviders[i]);
-		}
-		return modules;
+		IScopeContext[] scopes = {ConfigurationScope.INSTANCE, DefaultScope.INSTANCE};
+		IPreferencesService preferencesService = Platform.getPreferencesService();
+		String defaultPreferenceValue = ""; //$NON-NLS-1$
+		String tmp = preferencesService.getString(PREFERENCES_PLUGIN, IStorageConstants.DISABLED_PROVIDERS_KEY, defaultPreferenceValue, scopes);
+		HashSet<String> disabledModules = splitModuleIds(tmp);
+		return disabledModules;
 	}
 
 	public void performDefaults() {
 		if (providerTable == null)
 			return;
+		Set<String> defaultDisabledModules = getDefaultDisabledModules();
+
 		TableItem[] items = providerTable.getItems();
 		for (int i = 0; i < items.length; i++) {
-			if (!items[i].getChecked()) {
-				items[i].setChecked(true);
+			TableItem item = items[i];
+			String moduleId = getModuleId(item);
+			boolean enabled = defaultDisabledModules == null || moduleId == null || !defaultDisabledModules.contains(moduleId);
+			if (item.getChecked() != enabled) {
+				item.setChecked(enabled);
 				providerModified = true;
 			}
 		}
@@ -291,10 +292,8 @@ public class TabPassword {
 		}
 
 		IEclipsePreferences node = ConfigurationScope.INSTANCE.getNode(PREFERENCES_PLUGIN);
-		if (first)
-			node.remove(IStorageConstants.DISABLED_PROVIDERS_KEY);
-		else
-			node.put(IStorageConstants.DISABLED_PROVIDERS_KEY, tmp.toString());
+		node.put(IStorageConstants.DISABLED_PROVIDERS_KEY, tmp.toString());
+
 		try {
 			node.flush();
 		} catch (BackingStoreException e) {
@@ -348,4 +347,32 @@ public class TabPassword {
 			detailsText.setText(selectedModule.getDescription());
 	}
 
+	private HashSet<String> getDefaultDisabledModules() {
+		String defaultPreferenceValue = ""; //$NON-NLS-1$
+		Preferences pluginNode = DefaultScope.INSTANCE.getNode(PREFERENCES_PLUGIN);
+		String tmp = pluginNode.get(IStorageConstants.DISABLED_PROVIDERS_KEY, defaultPreferenceValue);
+		HashSet<String> defaultDisabledModules = splitModuleIds(tmp);
+		return defaultDisabledModules;
+	}
+
+	private String getModuleId(TableItem item) {
+		String moduleId = null;
+		Object itemData = item.getData();
+		if (itemData instanceof PasswordProviderDescription) {
+			PasswordProviderDescription module = (PasswordProviderDescription) itemData;
+			moduleId = module.getId();
+		}
+		return moduleId;
+	}
+
+	private static HashSet<String> splitModuleIds(String joinedModuleIds) {
+		if (joinedModuleIds == null || joinedModuleIds.isEmpty())
+			return null;
+		HashSet<String> modules = new HashSet<>();
+		String[] disabledProviders = joinedModuleIds.split(","); //$NON-NLS-1$
+		for (int i = 0; i < disabledProviders.length; i++) {
+			modules.add(disabledProviders[i]);
+		}
+		return modules;
+	}
 }
