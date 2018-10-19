@@ -17,12 +17,17 @@ import static org.junit.Assert.assertNotEquals;
 
 import java.io.File;
 import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.SystemBundleTests;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Capability;
@@ -215,6 +220,13 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertEquals("Wrong BSN.", "replace", b.getSymbolicName());
 		testCaps = b.adapt(BundleRevision.class).getCapabilities("replace");
 		assertEquals("Wrong number of capabilities.", 1, testCaps.size());
+	}
+
+	public void testFrameworkUtilHelper() throws Exception {
+		initAndStartFramework();
+		Class<?> frameworkUtilClass = classLoader.loadClass("org.osgi.framework.FrameworkUtil");
+		Bundle b = (Bundle) frameworkUtilClass.getMethod("getBundle", Class.class).invoke(null, BundleContext.class);
+		assertEquals("Wrong bundle found.", framework.getBundleContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION), b);
 	}
 
 	protected void setUp() throws Exception {

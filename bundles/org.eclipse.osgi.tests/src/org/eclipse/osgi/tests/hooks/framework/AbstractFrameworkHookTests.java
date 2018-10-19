@@ -56,7 +56,7 @@ public abstract class AbstractFrameworkHookTests extends CoreTest {
 
 		@Override
 		protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-			if (name.startsWith("org.eclipse")) {
+			if (name.startsWith("org.eclipse") || name.startsWith("org.osgi.framework.FrameworkUtil")) {
 				Class<?> result = findLoadedClass(name);
 				if (result == null)
 					result = findClass(name);

@@ -15,13 +15,22 @@ package org.eclipse.osgi.tests.hooks.framework.storage.a;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.util.*;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.ModuleRevisionBuilder;
-import org.eclipse.osgi.internal.hookregistry.*;
+import org.eclipse.osgi.internal.hookregistry.ActivatorHookFactory;
+import org.eclipse.osgi.internal.hookregistry.HookConfigurator;
+import org.eclipse.osgi.internal.hookregistry.HookRegistry;
+import org.eclipse.osgi.internal.hookregistry.StorageHookFactory;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.BundleNamespace;
 import org.osgi.framework.namespace.IdentityNamespace;
@@ -121,5 +130,23 @@ public class TestHookConfigurator implements HookConfigurator {
 
 	public void addHooks(HookRegistry hookRegistry) {
 		hookRegistry.addStorageHookFactory(new TestStorageHookFactory());
+		hookRegistry.addActivatorHookFactory(new ActivatorHookFactory() {
+
+			@Override
+			public BundleActivator createActivator() {
+				return new BundleActivator() {
+
+					@Override
+					public void start(BundleContext context) throws Exception {
+						TestHelper.testBundle = context.getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
+					}
+
+					@Override
+					public void stop(BundleContext context) throws Exception {
+						// nothing
+					}
+				};
+			}
+		});
 	}
 }

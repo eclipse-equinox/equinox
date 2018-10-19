@@ -16,25 +16,16 @@
 
 package org.osgi.framework;
 
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Enumeration;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import java.util.ServiceLoader;
 import javax.security.auth.x500.X500Principal;
 import org.eclipse.osgi.internal.framework.FilterImpl;
+import org.eclipse.osgi.internal.hookregistry.FrameworkUtilHelper;
 
 /**
  * Framework Utility class.
@@ -194,6 +185,26 @@ public class FrameworkUtil {
 		return DNChainMatching.match(matchPattern, dnChain);
 	}
 
+	private final static List<FrameworkUtilHelper> helpers;
+	static {
+		List<FrameworkUtilHelper> l = new ArrayList<>();
+		try {
+			ServiceLoader<FrameworkUtilHelper> helperLoader = AccessController.doPrivileged(new PrivilegedAction<ServiceLoader<FrameworkUtilHelper>>() {
+				@Override
+				public ServiceLoader<FrameworkUtilHelper> run() {
+					return ServiceLoader.load(FrameworkUtilHelper.class, FrameworkUtilHelper.class.getClassLoader());
+				}
+			});
+			for (Iterator<FrameworkUtilHelper> iHelpers = helperLoader.iterator(); iHelpers.hasNext();) {
+				l.add(iHelpers.next());
+			}
+		} catch (Exception e) {
+			// should not fail out of static initializers
+			e.printStackTrace();
+		}
+		helpers = Collections.unmodifiableList(l);
+	}
+
 	/**
 	 * Return a {@code Bundle} for the specified bundle class. The returned
 	 * {@code Bundle} is the bundle associated with the bundle class loader
@@ -216,6 +227,13 @@ public class FrameworkUtil {
 
 		if (cl instanceof BundleReference) {
 			return ((BundleReference) cl).getBundle();
+		}
+
+		for (FrameworkUtilHelper helper : helpers) {
+			Bundle b = helper.getBundle(classFromBundle);
+			if (b != null) {
+				return b;
+			}
 		}
 		return null;
 	}
