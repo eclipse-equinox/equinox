@@ -286,4 +286,9 @@ public class ListenerList<E> implements Iterable<E> {
 	public Stream<E> parallelStream() {
 		return StreamSupport.stream(spliterator(), true);
 	}
+
+	@Override
+	public String toString() {
+		return Arrays.toString(listeners);
+	}
 }
