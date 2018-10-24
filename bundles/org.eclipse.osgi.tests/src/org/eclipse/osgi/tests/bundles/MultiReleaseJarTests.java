@@ -765,7 +765,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 
 	public void testMultiReleaseBundleManifestChangeRuntime() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
-		Map<String, String> configMap = Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath() + " with space");
+		Map<String, String> configMap = Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		Equinox equinox = new Equinox(configMap);
 		String location;
 		try {
