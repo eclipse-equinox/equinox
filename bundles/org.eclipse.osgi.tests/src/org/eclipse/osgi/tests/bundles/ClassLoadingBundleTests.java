@@ -2372,7 +2372,6 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Bundle requirer = getContext().installBundle(getName() + "-requirer", new FileInputStream(requirerBundleFile));
 		requirer.start();
 
-		BundleWiring exporterWiring = exporter.adapt(BundleWiring.class);
 		BundleWiring importerWiring = importer.adapt(BundleWiring.class);
 		BundleWiring requirerWiring = requirer.adapt(BundleWiring.class);
 
