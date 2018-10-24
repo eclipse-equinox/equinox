@@ -223,7 +223,7 @@ public class BundleLoader extends ModuleLoader {
 
 	final PackageSource createExportPackageSource(ModuleWire importWire, Collection<BundleLoader> visited) {
 		String name = (String) importWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
-		BundleLoader providerLoader = (BundleLoader) importWire.getProviderWiring().getModuleLoader();
+		BundleLoader providerLoader = getProviderLoader(importWire);
 		if (providerLoader == null) {
 			return createMultiSource(name, new PackageSource[0]);
 		}
@@ -799,7 +799,7 @@ public class BundleLoader extends ModuleLoader {
 		Collection<BundleLoader> visited = new ArrayList<>();
 		visited.add(this); // always add ourselves so we do not recurse back to ourselves
 		for (ModuleWire bundleWire : requiredBundleWires) {
-			BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
+			BundleLoader loader = getProviderLoader(bundleWire);
 			if (loader != null) {
 				loader.addProvidedPackageNames(pkgName, packages, subPackages, visited);
 			}
@@ -951,7 +951,7 @@ public class BundleLoader extends ModuleLoader {
 				// always add required bundles first if we locally provide the package
 				// This allows a bundle to provide a package from a required bundle without 
 				// re-exporting the whole required bundle.
-				BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
+				BundleLoader loader = getProviderLoader(bundleWire);
 				if (loader != null) {
 					loader.addExportedProvidersFor(packageName, result, visited);
 				}
@@ -960,6 +960,11 @@ public class BundleLoader extends ModuleLoader {
 		// now add the locally provided package.
 		if (local != null)
 			result.add(local);
+	}
+
+	private BundleLoader getProviderLoader(ModuleWire wire) {
+		ModuleWiring provider = wire.getProviderWiring();
+		return provider == null ? null : (BundleLoader) provider.getModuleLoader();
 	}
 
 	final void addProvidedPackageNames(String packageName, List<String> result, boolean subPackages, Collection<BundleLoader> visited) {
@@ -982,7 +987,7 @@ public class BundleLoader extends ModuleLoader {
 		}
 		for (ModuleWire bundleWire : requiredBundleWires) {
 			if (BundleNamespace.VISIBILITY_REEXPORT.equals(bundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE))) {
-				BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
+				BundleLoader loader = getProviderLoader(bundleWire);
 				if (loader != null) {
 					loader.addProvidedPackageNames(packageName, result, subPackages, visited);
 				}
@@ -1187,7 +1192,7 @@ public class BundleLoader extends ModuleLoader {
 			visited.add(this); // always add ourselves so we do not recurse back to ourselves
 		List<PackageSource> result = new ArrayList<>(3);
 		for (ModuleWire bundleWire : requiredBundleWires) {
-			BundleLoader loader = (BundleLoader) bundleWire.getProviderWiring().getModuleLoader();
+			BundleLoader loader = getProviderLoader(bundleWire);
 			if (loader != null) {
 				loader.addExportedProvidersFor(pkgName, result, visited);
 			}

@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
@@ -49,6 +50,7 @@ import org.osgi.framework.BundleListener;
 import org.osgi.framework.BundleReference;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
@@ -64,6 +66,7 @@ import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -2321,5 +2324,120 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
+	}
+
+	public void testStaleLoaderNPE() throws BundleException, IOException, ClassNotFoundException, InterruptedException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		config.mkdirs();
+
+		Map<String, String> exporterHeaders = new HashMap<>();
+		exporterHeaders.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		exporterHeaders.put(Constants.BUNDLE_SYMBOLICNAME, "exporter");
+		exporterHeaders.put(Constants.EXPORT_PACKAGE, "export1, export2, export3, export4");
+		Map<String, String> exporterContent = new HashMap<>();
+		exporterContent.put("export1/", null);
+		exporterContent.put("export1/SomeClass.class", "SomeClass.class");
+		exporterContent.put("export2/", null);
+		exporterContent.put("export2/SomeClass.class", "SomeClass.class");
+		exporterContent.put("export3/", null);
+		exporterContent.put("export3/resource.txt", "resource.txt");
+		exporterContent.put("export4/", null);
+		exporterContent.put("export4/resource.txt", "resource.txt");
+		File exporterBundleFile = SystemBundleTests.createBundle(config, getName() + "-exporter", exporterHeaders, exporterContent);
+
+		Map<String, String> importerHeaders = new HashMap<>();
+		importerHeaders.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		importerHeaders.put(Constants.BUNDLE_SYMBOLICNAME, "importer");
+		importerHeaders.put(Constants.IMPORT_PACKAGE, "export1, export2, export3, export4");
+		Map<String, String> importerContent = new HashMap<>();
+		importerContent.put("importer/", null);
+		importerContent.put("importer/resource.txt", "resource.txt");
+		importerContent.put("importer/SomeClass.class", "SomeClass.class");
+		File importerBundleFile = SystemBundleTests.createBundle(config, getName() + "-importer", importerHeaders, importerContent);
+
+		Map<String, String> requirerHeaders = new HashMap<>();
+		requirerHeaders.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		requirerHeaders.put(Constants.BUNDLE_SYMBOLICNAME, "requirer");
+		requirerHeaders.put(Constants.REQUIRE_BUNDLE, "exporter");
+		Map<String, String> requirerContent = new HashMap<>();
+		requirerContent.put("requirer/", null);
+		requirerContent.put("requirer/resource.txt", "resource.txt");
+		requirerContent.put("requirer/SomeClass.class", "SomeClass.class");
+		File requirerBundleFile = SystemBundleTests.createBundle(config, getName() + "-requirer", requirerHeaders, requirerContent);
+
+		Bundle exporter = getContext().installBundle(getName() + "-exporter", new FileInputStream(exporterBundleFile));
+		exporter.start();
+		Bundle importer = getContext().installBundle(getName() + "-importer", new FileInputStream(importerBundleFile));
+		importer.start();
+		Bundle requirer = getContext().installBundle(getName() + "-requirer", new FileInputStream(requirerBundleFile));
+		requirer.start();
+
+		BundleWiring exporterWiring = exporter.adapt(BundleWiring.class);
+		BundleWiring importerWiring = importer.adapt(BundleWiring.class);
+		BundleWiring requirerWiring = requirer.adapt(BundleWiring.class);
+
+		// get class loaders so we can use them after invalidating the wires
+		ClassLoader importerCL = importerWiring.getClassLoader();
+		ClassLoader requirerCL = requirerWiring.getClassLoader();
+
+		try {
+			importerCL.loadClass("export1.SomeClass");
+			fail("Expecting LinkageError.");
+		} catch (LinkageError e) {
+			// expected; the class is invalid
+		}
+		URL export3Resource = importerCL.getResource("export3/resource.txt");
+		assertNotNull("Missing resource.", export3Resource);
+
+		try {
+			requirerCL.loadClass("export1.SomeClass");
+			fail("Expecting LinkageError.");
+		} catch (LinkageError e) {
+			// expected; the class is invalid
+		}
+		export3Resource = requirerCL.getResource("export3/resource.txt");
+		assertNotNull("Missing resource.", export3Resource);
+
+		// invalid wires by refreshing the exporter
+		refreshBundles(Collections.singleton(exporter));
+
+		try {
+			importerCL.loadClass("export2.SomeClass");
+			fail("Expecting LinkageError.");
+		} catch (LinkageError e) {
+			// expected; the class is invalid
+			// NOTE the import sources are calculated at loader creating time
+			// which happened before the refresh
+		}
+		URL export4Resource = importerCL.getResource("export4/resource.txt");
+		// Note that import sources are calculated at loader creating time
+		// which happened before the refresh
+		assertNotNull("Missing resource.", export4Resource);
+
+		try {
+			requirerCL.loadClass("export2.SomeClass");
+			fail("Expecting ClassNotFoundException.");
+		} catch (ClassNotFoundException e) {
+			// expected; the wire is invalid
+			// NOTE the require sources are calculated lazily but now
+			// the wire is invalid after the refresh
+		}
+
+		export4Resource = requirerCL.getResource("export4/resource.txt");
+		assertNull("Found resource from invalid wire.", export4Resource);
+	}
+
+	void refreshBundles(Collection<Bundle> bundles) throws InterruptedException {
+		final CountDownLatch refreshSignal = new CountDownLatch(1);
+		getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION).adapt(FrameworkWiring.class).refreshBundles(bundles, new FrameworkListener() {
+
+			@Override
+			public void frameworkEvent(FrameworkEvent event) {
+				if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED) {
+					refreshSignal.countDown();
+				}
+			}
+		});
+		refreshSignal.await(30, TimeUnit.SECONDS);
 	}
 }
