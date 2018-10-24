@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -776,9 +777,9 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			mrBundle.start();
 		} finally {
 			equinox.stop();
-			equinox.waitForStop(1000);
+			equinox.waitForStop(10000);
 		}
-
+		System.out.println("Equinox state: " + equinox.getState());
 		for (int rv = 8; rv <= 11; rv++) {
 			doTestMultiReleaseBundleManifestChangeRuntime(rv, configMap, location);
 		}
@@ -793,7 +794,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			mrBundle.start();
 		} finally {
 			equinox.stop();
-			equinox.waitForStop(1000);
+			equinox.waitForStop(10000);
 		}
 
 		for (int rv = 8; rv <= 11; rv++) {
@@ -823,6 +824,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		try {
 			equinox.start();
 			BundleContext systemContext = equinox.getBundleContext();
+			System.out.println("Bundles: " + Arrays.toString(systemContext.getBundles()));
 			Bundle mrBundle = systemContext.getBundle(location);
 			assertNotNull("No mrBundle found: " + rv, mrBundle);
 			assertEquals("Wrong state of mrBundle: " + rv, Bundle.ACTIVE, mrBundle.getState());
