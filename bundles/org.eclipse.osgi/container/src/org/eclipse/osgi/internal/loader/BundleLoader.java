@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2017 IBM Corporation and others.
+ * Copyright (c) 2004, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -59,6 +59,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.namespace.BundleNamespace;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
@@ -127,6 +128,7 @@ public class BundleLoader extends ModuleLoader {
 	private volatile ModuleClassLoader classloader;
 	private final ClassLoader parent;
 	private final AtomicBoolean triggerClassLoaded = new AtomicBoolean(false);
+	private final AtomicBoolean firstUseOfInvalidLoader = new AtomicBoolean(false);
 
 	/**
 	 * Returns the package name from the specified class name.
@@ -964,7 +966,15 @@ public class BundleLoader extends ModuleLoader {
 
 	private BundleLoader getProviderLoader(ModuleWire wire) {
 		ModuleWiring provider = wire.getProviderWiring();
-		return provider == null ? null : (BundleLoader) provider.getModuleLoader();
+		if (provider == null) {
+			if (firstUseOfInvalidLoader.getAndSet(true)) {
+				// publish a framework event once per loader, include an exception to show the stack
+				String message = "Invalid class loader from a refreshed bundle is being used: " + toString(); //$NON-NLS-1$
+				container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, wiring.getBundle(), new IllegalStateException(message));
+			}
+			return null;
+		}
+		return (BundleLoader) provider.getModuleLoader();
 	}
 
 	final void addProvidedPackageNames(String packageName, List<String> result, boolean subPackages, Collection<BundleLoader> visited) {

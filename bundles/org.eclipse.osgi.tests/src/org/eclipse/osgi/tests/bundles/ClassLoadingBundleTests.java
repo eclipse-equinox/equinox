@@ -34,7 +34,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import junit.framework.AssertionFailedError;
@@ -2369,7 +2371,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		exporter.start();
 		Bundle importer = getContext().installBundle(getName() + "-importer", new FileInputStream(importerBundleFile));
 		importer.start();
-		Bundle requirer = getContext().installBundle(getName() + "-requirer", new FileInputStream(requirerBundleFile));
+		final Bundle requirer = getContext().installBundle(getName() + "-requirer", new FileInputStream(requirerBundleFile));
 		requirer.start();
 
 		BundleWiring importerWiring = importer.adapt(BundleWiring.class);
@@ -2400,6 +2402,17 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		// invalid wires by refreshing the exporter
 		refreshBundles(Collections.singleton(exporter));
 
+		// add a framework event listener to find error message about invalud class loaders
+		final BlockingQueue<FrameworkEvent> events = new LinkedBlockingQueue<>();
+		getContext().addFrameworkListener(new FrameworkListener() {
+			@Override
+			public void frameworkEvent(FrameworkEvent event) {
+				if (event.getBundle() == requirer) {
+					events.add(event);
+				}
+			}
+		});
+
 		try {
 			importerCL.loadClass("export2.SomeClass");
 			fail("Expecting LinkageError.");
@@ -2424,6 +2437,17 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 		export4Resource = requirerCL.getResource("export4/resource.txt");
 		assertNull("Found resource from invalid wire.", export4Resource);
+
+		// find the expected event
+		FrameworkEvent event = events.poll(5, TimeUnit.SECONDS);
+		assertNotNull("No FrameworkEvent found.", event);
+		assertEquals("Wrong bundle for event.", requirer, event.getBundle());
+		assertEquals("Wrong event type.", FrameworkEvent.ERROR, event.getType());
+		assertTrue("Wrong exception: " + event.getThrowable(), event.getThrowable() instanceof RuntimeException);
+		assertTrue("Wrong message: " + event.getThrowable().getMessage(), event.getThrowable().getMessage().startsWith("Invalid class loader"));
+
+		// make sure there are no others
+		assertNull("Found more events.", events.poll(1, TimeUnit.SECONDS));
 	}
 
 	void refreshBundles(Collection<Bundle> bundles) throws InterruptedException {
