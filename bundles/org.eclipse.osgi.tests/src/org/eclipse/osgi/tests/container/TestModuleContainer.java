@@ -1673,7 +1673,7 @@ public class TestModuleContainer extends AbstractTest {
 			testOut.close();
 		}
 		String traceOutput = bytesOut.toString();
-		Assert.assertTrue("Wrong traceOutput: " + traceOutput, traceOutput.startsWith("org.osgi.service.resolver.ResolutionException"));
+		Assert.assertTrue("Wrong traceOutput: " + traceOutput, traceOutput.startsWith("org.apache.felix.resolver.reason.ReasonException"));
 	}
 
 	/*
