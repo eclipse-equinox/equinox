@@ -172,6 +172,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public static final String PROP_CONTEXT_BOOTDELEGATION = "osgi.context.bootdelegation"; //$NON-NLS-1$
 	public static final String PROP_COMPATIBILITY_BOOTDELEGATION = "osgi.compatibility.bootdelegation"; //$NON-NLS-1$
+	public static final String PROP_DS_DELAYED_KEEPINSTANCES = "ds.delayed.keepInstances"; //$NON-NLS-1$
 	public static final String PROP_COMPATIBILITY_ERROR_FAILED_START = "osgi.compatibility.errorOnFailedStart"; //$NON-NLS-1$
 	public static final String PROP_COMPATIBILITY_START_LAZY = "osgi.compatibility.eagerStart.LazyActivation"; //$NON-NLS-1$
 	public static final String PROP_COMPATIBILITY_START_LAZY_ON_FAIL_CLASSLOAD = "osgi.compatibility.trigger.lazyActivation.onFailedClassLoad"; //$NON-NLS-1$
@@ -232,7 +233,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String SYSTEM_PROVIDE_HEADER_SYSTEM_EXTRA = "system.extra"; //$NON-NLS-1$
 
 	public static final String PROP_DEFAULT_SUFFIX = ".default"; //$NON-NLS-1$
-	public static final Collection<String> PROP_WITH_ECLIPSE_STARTER_DEFAULTS = Collections.singletonList(PROP_COMPATIBILITY_BOOTDELEGATION);
+	public static final Collection<String> PROP_WITH_ECLIPSE_STARTER_DEFAULTS = Collections.unmodifiableList(Arrays.asList(PROP_COMPATIBILITY_BOOTDELEGATION, PROP_DS_DELAYED_KEEPINSTANCES));
 	public static final String PROP_INIT_UUID = "equinox.init.uuid"; //$NON-NLS-1$
 
 	public static final String PROP_ACTIVE_THREAD_TYPE = "osgi.framework.activeThreadType"; //$NON-NLS-1$

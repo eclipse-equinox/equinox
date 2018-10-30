@@ -200,6 +200,15 @@ public class EclipseStarter {
 				// set a default value; but this value can be overriden by the config.ini
 				configuration.put(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION + EquinoxConfiguration.PROP_DEFAULT_SUFFIX, "true"); //$NON-NLS-1$
 			}
+
+			String dsDelayedKeepInstances = System.getProperty(EquinoxConfiguration.PROP_DS_DELAYED_KEEPINSTANCES);
+			if (dsDelayedKeepInstances != null) {
+				// The system properties have a specific setting; use it
+				configuration.put(EquinoxConfiguration.PROP_DS_DELAYED_KEEPINSTANCES, dsDelayedKeepInstances);
+			} else {
+				// set a default value; but this value can be overriden by the config.ini
+				configuration.put(EquinoxConfiguration.PROP_DS_DELAYED_KEEPINSTANCES + EquinoxConfiguration.PROP_DEFAULT_SUFFIX, "true"); //$NON-NLS-1$
+			}
 		}
 		return configuration;
 	}
