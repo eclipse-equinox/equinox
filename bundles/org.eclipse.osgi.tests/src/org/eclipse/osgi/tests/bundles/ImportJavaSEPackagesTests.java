@@ -14,12 +14,14 @@
 package org.eclipse.osgi.tests.bundles;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.launch.Equinox;
@@ -121,12 +123,59 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 		Map<Integer, Integer> packagesPerVersion = new HashMap<Integer, Integer>();
 		packagesPerVersion.put(7, 56);
 		packagesPerVersion.put(8, 63);
-		packagesPerVersion.put(9, 66);
+		if (!originalSpecVersion.startsWith("1.")) {
+			packagesPerVersion.put(9, calculateJavaPackageCount());
+		} else {
+			packagesPerVersion.put(9, 66);
+		}
 
 		for (Entry<Integer, Integer> entry : packagesPerVersion.entrySet()) {
 			doSystemPackages(entry.getKey(), entry.getValue());
 		}
 
+	}
+
+	private int calculateJavaPackageCount() throws Exception {
+		int javaPackages = 0;
+		Class<?> moduleLayerClass = Class.forName("java.lang.ModuleLayer"); //$NON-NLS-1$
+		Method boot = moduleLayerClass.getMethod("boot"); //$NON-NLS-1$
+		Method modules = moduleLayerClass.getMethod("modules"); //$NON-NLS-1$
+		Class<?> moduleClass = Class.forName("java.lang.Module"); //$NON-NLS-1$
+		Method getDescriptor = moduleClass.getMethod("getDescriptor"); //$NON-NLS-1$
+		Class<?> moduleDescriptorClass = Class.forName("java.lang.module.ModuleDescriptor"); //$NON-NLS-1$
+		Method exports = moduleDescriptorClass.getMethod("exports"); //$NON-NLS-1$
+		Method isAutomatic = moduleDescriptorClass.getMethod("isAutomatic"); //$NON-NLS-1$
+		Method packagesMethod = moduleDescriptorClass.getMethod("packages"); //$NON-NLS-1$
+		Class<?> exportsClass = Class.forName("java.lang.module.ModuleDescriptor$Exports"); //$NON-NLS-1$
+		Method isQualified = exportsClass.getMethod("isQualified"); //$NON-NLS-1$
+		Method source = exportsClass.getMethod("source"); //$NON-NLS-1$
+
+		Object bootLayer = boot.invoke(null);
+		Set<?> bootModules = (Set<?>) modules.invoke(bootLayer);
+		for (Object m : bootModules) {
+			Object descriptor = getDescriptor.invoke(m);
+			if ((Boolean) isAutomatic.invoke(descriptor)) {
+				/*
+				 * Automatic modules are supposed to export all their packages.
+				 * However, java.lang.module.ModuleDescriptor::exports returns an empty set for them.
+				 * Add all their packages (as returned by java.lang.module.ModuleDescriptor::packages)
+				 * to the list of VM supplied packages.
+				 */
+				for (String packageName : ((Set<String>) packagesMethod.invoke(descriptor))) {
+					if (packageName.startsWith("java.")) {
+						javaPackages++;
+					}
+				}
+			} else {
+				for (Object export : (Set<?>) exports.invoke(descriptor)) {
+					String pkg = (String) source.invoke(export);
+					if (!((Boolean) isQualified.invoke(export)) && pkg.startsWith("java.")) {
+						javaPackages++;
+					}
+				}
+			}
+		}
+		return javaPackages;
 	}
 
 	public void doSystemPackages(int rv, int expectedPackages) throws Exception {
@@ -148,8 +197,8 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 			equinox.start();
 			BundleContext systemContext = equinox.getBundleContext();
 			Dictionary<String, String> testHeaders = equinox.getHeaders();
-			assertTrue(Constants.EXPORT_PACKAGE + " does not contain the java.* package", testHeaders.get(Constants.EXPORT_PACKAGE).contains(JAVA_LANG));
-			assertTrue(Constants.EXPORT_PACKAGE + " does not contain the java.* package", testHeaders.get(Constants.EXPORT_PACKAGE).contains(JAVA_UTIL));
+			assertTrue(Constants.EXPORT_PACKAGE + " does not contain the java.lang package", testHeaders.get(Constants.EXPORT_PACKAGE).contains(JAVA_LANG));
+			assertTrue(Constants.EXPORT_PACKAGE + " does not contain the java.util package", testHeaders.get(Constants.EXPORT_PACKAGE).contains(JAVA_UTIL));
 			List<BundleCapability> capabilities = equinox.adapt(BundleWiring.class).getCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
 
 			int count = 0;
@@ -163,8 +212,8 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 			Bundle testBundle = systemContext.installBundle(bundle.toURI().toString());
 			testBundle.start();
 			String systemPackages = testBundle.getBundleContext().getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
-			assertTrue("System packages should include java.* packages", systemPackages.contains(JAVA_LANG));
-			assertTrue("System packages should include java.* packages", systemPackages.contains(JAVA_UTIL));
+			assertTrue("System packages should include java.lang packages", systemPackages.contains(JAVA_LANG));
+			assertTrue("System packages should include java.util packages", systemPackages.contains(JAVA_UTIL));
 		} catch (BundleException e) {
 			fail("Failed to test System packages");
 		} finally {
