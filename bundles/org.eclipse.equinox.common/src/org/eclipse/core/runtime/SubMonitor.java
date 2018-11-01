@@ -1041,4 +1041,10 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 		}
 		RuntimeLog.log(new Status(IStatus.WARNING, "org.eclipse.core.runtime", message, new Throwable())); //$NON-NLS-1$
 	}
+
+	@Override
+	public String toString() {
+		return "SubMonitor [totalParent=" + totalParent + ", usedForParent=" + usedForParent + ", usedForChildren=" + usedForChildren + ", totalForChildren=" + totalForChildren + ", beginTaskCalled=" + beginTaskCalled + "]";
+	}
+
 }
