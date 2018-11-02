@@ -198,9 +198,9 @@ public class FrameworkUtil {
 			for (Iterator<FrameworkUtilHelper> iHelpers = helperLoader.iterator(); iHelpers.hasNext();) {
 				l.add(iHelpers.next());
 			}
-		} catch (Exception e) {
+		} catch (Throwable t) {
 			// should not fail out of static initializers
-			e.printStackTrace();
+			t.printStackTrace();
 		}
 		helpers = Collections.unmodifiableList(l);
 	}
