@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.service.command.CommandProcessor;
-import org.apache.sshd.server.Command;
+import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 import org.eclipse.equinox.console.common.KEYS;

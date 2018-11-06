@@ -27,9 +27,9 @@ import java.util.Map;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.sshd.ClientChannel;
-import org.apache.sshd.ClientSession;
-import org.apache.sshd.SshClient;
+import org.apache.sshd.client.channel.ClientChannel;
+import org.apache.sshd.client.session.ClientSession;
+import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.future.DefaultConnectFuture;
 import org.apache.sshd.common.RuntimeSshException;
@@ -89,8 +89,7 @@ public class SshCommandWithConfigAdminTests {
 		
 		CommandSession session = EasyMock.createMock(CommandSession.class);
 		EasyMock.makeThreadSafe(session, true);
-		session.put((String)EasyMock.anyObject(), EasyMock.anyObject());
-		EasyMock.expectLastCall().times(5);
+		EasyMock.expect(session.put((String)EasyMock.anyObject(), EasyMock.anyObject())).andReturn(EasyMock.anyObject()).times(5);
 		EasyMock.expect(session.execute(GOGO_SHELL_COMMAND)).andReturn(null);
 		session.close();
 		EasyMock.expectLastCall();
@@ -143,7 +142,7 @@ public class SshCommandWithConfigAdminTests {
 		SshClient client = SshClient.setUpDefaultClient();
 		client.start();
 		try {
-			ConnectFuture connectFuture = client.connect(HOST, Integer.valueOf(SSH_PORT));
+			ConnectFuture connectFuture = client.connect(USERNAME, HOST, Integer.valueOf(SSH_PORT));
 			DefaultConnectFuture defaultConnectFuture = (DefaultConnectFuture) connectFuture;
 
 			try {
@@ -153,14 +152,7 @@ public class SshCommandWithConfigAdminTests {
 			}
 			ClientSession sshSession = defaultConnectFuture.getSession();
 
-			int ret = ClientSession.WAIT_AUTH;                
-			sshSession.authPassword(USERNAME, PASSWORD);
-			ret = sshSession.waitFor(ClientSession.WAIT_AUTH | ClientSession.CLOSED | ClientSession.AUTHED, 0);
-
-			if ((ret & ClientSession.CLOSED) != 0) {
-				System.err.println("error");
-				System.exit(-1);
-			}
+			sshSession.addPasswordIdentity(PASSWORD);
 			ClientChannel channel = sshSession.createChannel("shell");
 			channel.setIn(new StringBufferInputStream(TEST_CONTENT + "\n"));
 			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
@@ -195,8 +187,7 @@ public class SshCommandWithConfigAdminTests {
 	
 	private void testDisabled(boolean isDefault) throws Exception {
 		CommandSession session = EasyMock.createMock(CommandSession.class);
-		session.put((String)EasyMock.anyObject(), EasyMock.anyObject());
-		EasyMock.expectLastCall().times(4);
+		EasyMock.expect(session.put((String)EasyMock.anyObject(), EasyMock.anyObject())).andReturn(EasyMock.anyObject()).times(4);
 		EasyMock.expect(session.execute(GOGO_SHELL_COMMAND)).andReturn(null);
 		session.close();
 		EasyMock.expectLastCall();
@@ -250,7 +241,7 @@ public class SshCommandWithConfigAdminTests {
 		SshClient client = SshClient.setUpDefaultClient();
 		client.start();
 		try {
-			ConnectFuture connectFuture = client.connect(HOST, Integer.valueOf(SSH_PORT));
+			ConnectFuture connectFuture = client.connect("", HOST, Integer.valueOf(SSH_PORT));
 			DefaultConnectFuture defaultConnectFuture = (DefaultConnectFuture) connectFuture;
 
 			try {

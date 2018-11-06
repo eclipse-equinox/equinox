@@ -25,9 +25,9 @@ import java.util.Map;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.sshd.ClientChannel;
-import org.apache.sshd.ClientSession;
-import org.apache.sshd.SshClient;
+import org.apache.sshd.client.channel.ClientChannel;
+import org.apache.sshd.client.session.ClientSession;
+import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.future.DefaultConnectFuture;
 import org.apache.sshd.server.Environment;
@@ -75,8 +75,7 @@ public class SshCommandTests {
 	public void testSshCommand() throws Exception {
 		CommandSession session = EasyMock.createMock(CommandSession.class);
 		EasyMock.makeThreadSafe(session, true);
-		session.put((String)EasyMock.anyObject(), EasyMock.anyObject());
-		EasyMock.expectLastCall().times(5);
+		EasyMock.expect(session.put((String)EasyMock.anyObject(), EasyMock.anyObject())).andReturn(new Object());
 		EasyMock.expect(session.execute(GOGO_SHELL_COMMAND)).andReturn(null);
 		session.close();
 		EasyMock.expectLastCall();
@@ -106,7 +105,7 @@ public class SshCommandTests {
 		SshClient client = SshClient.setUpDefaultClient();
 		client.start();
 		try {
-			ConnectFuture connectFuture = client.connect(HOST, SSH_PORT);
+			ConnectFuture connectFuture = client.connect(USERNAME, HOST, SSH_PORT);
 			DefaultConnectFuture defaultConnectFuture = (DefaultConnectFuture) connectFuture;
 
 			try {
@@ -116,14 +115,7 @@ public class SshCommandTests {
 			}
 			ClientSession sshSession = defaultConnectFuture.getSession();
 
-			int ret = ClientSession.WAIT_AUTH;                
-			sshSession.authPassword(USERNAME, PASSWORD);
-			ret = sshSession.waitFor(ClientSession.WAIT_AUTH | ClientSession.CLOSED | ClientSession.AUTHED, 0);
-
-			if ((ret & ClientSession.CLOSED) != 0) {
-				System.err.println("error");
-				System.exit(-1);
-			}
+			sshSession.addPasswordIdentity(PASSWORD);
 			ClientChannel channel = sshSession.createChannel("shell");
 			channel.setIn(new StringBufferInputStream(TEST_CONTENT + "\n"));
 			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();

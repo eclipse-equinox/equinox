@@ -20,7 +20,7 @@ import java.util.Set;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.sshd.common.Factory;
-import org.apache.sshd.server.Command;
+import org.apache.sshd.server.command.Command;
 import org.osgi.framework.BundleContext;
 
 /**

@@ -7,6 +7,9 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: junit.framework;version="4.8.1",
  org.apache.sshd.client.future,
+ org.apache.sshd.client,
+ org.apache.sshd.client.session,
+ org.apache.sshd.client.channel,
  org.easymock;version="2.4.0",
  org.junit;version="4.8.1"
 Fragment-Host: org.eclipse.equinox.console.ssh, org.eclipse.equinox.console

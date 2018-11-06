@@ -55,8 +55,7 @@ public class UserAdminCommandTests {
 		SecureUserStore.initStorage();
 		
 		CommandSession session = EasyMock.createMock(CommandSession.class);
-        session.put((String)EasyMock.anyObject(), EasyMock.anyObject());
-        EasyMock.expectLastCall().times(3);
+        EasyMock.expect(session.put((String)EasyMock.anyObject(), EasyMock.anyObject())).andReturn(new Object()).times(3);
         EasyMock.replay(session);
         
         UserAdminCommand command = new UserAdminCommand();

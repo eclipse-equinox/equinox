@@ -15,6 +15,8 @@
 package org.eclipse.equinox.console.ssh;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.PublicKey;
 import java.util.List;
 
@@ -25,9 +27,9 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 import org.apache.felix.service.command.CommandProcessor;
-import org.apache.sshd.SshServer;
-import org.apache.sshd.server.PasswordAuthenticator;
-import org.apache.sshd.server.PublickeyAuthenticator;
+import org.apache.sshd.server.SshServer;
+import org.apache.sshd.server.auth.password.PasswordAuthenticator;
+import org.apache.sshd.server.auth.pubkey.PublickeyAuthenticator;
 import org.apache.sshd.server.jaas.JaasPasswordAuthenticator;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.session.ServerSession;
@@ -64,7 +66,7 @@ public class SshServ extends Thread {
 			sshServer.setHost(host);
 		}
     	sshServer.setPort(port);
-    	sshServer.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(System.getProperty(SSH_KEYSTORE_PROP, SSH_KEYSTORE_PROP_DEFAULT)));
+    	sshServer.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(Paths.get(System.getProperty(SSH_KEYSTORE_PROP, SSH_KEYSTORE_PROP_DEFAULT))));
     	sshServer.setShellFactory(shellFactory);
     	sshServer.setPasswordAuthenticator(createJaasPasswordAuthenticator());
     	sshServer.setPublickeyAuthenticator(createSimpleAuthorizedKeysAuthenticator());
@@ -79,7 +81,7 @@ public class SshServ extends Thread {
 	public synchronized void stopSshServer() {
     	try {
 			sshServer.stop(true);
-		} catch (InterruptedException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
     }
