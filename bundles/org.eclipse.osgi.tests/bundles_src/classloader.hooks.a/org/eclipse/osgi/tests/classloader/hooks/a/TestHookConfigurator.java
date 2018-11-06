@@ -14,7 +14,9 @@
 package org.eclipse.osgi.tests.classloader.hooks.a;
 
 import org.eclipse.osgi.container.Module;
-import org.eclipse.osgi.internal.hookregistry.*;
+import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
+import org.eclipse.osgi.internal.hookregistry.HookConfigurator;
+import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
@@ -27,7 +29,7 @@ public class TestHookConfigurator implements HookConfigurator {
 	final ThreadLocal<Boolean> doingRecursionLoad = new ThreadLocal<Boolean>() {
 		protected Boolean initialValue() {
 			return false;
-		};
+		}
 	};
 
 	public void addHooks(HookRegistry hookRegistry) {
