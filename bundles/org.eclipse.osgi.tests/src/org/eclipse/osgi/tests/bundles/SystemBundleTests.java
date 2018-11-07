@@ -2855,6 +2855,20 @@ public class SystemBundleTests extends AbstractBundleTests {
 		return bundles;
 	}
 
+	private static File[] createBundles(File outputDir, int bundleCount, Map<String, String> extraHeaders) throws IOException {
+		outputDir.mkdirs();
+
+		File[] bundles = new File[bundleCount];
+
+		for (int i = 0; i < bundleCount; i++) {
+			Map<String, String> headers = new HashMap<>(extraHeaders);
+			headers.put(Constants.BUNDLE_SYMBOLICNAME, "-b" + i);
+			bundles[i] = createBundle(outputDir, "-b" + i, headers);
+		}
+
+		return bundles;
+	}
+
 	public static File createBundle(File outputDir, String id, boolean emptyManifest, boolean dirBundle) throws IOException {
 		File file = new File(outputDir, "bundle" + id + (dirBundle ? "" : ".jar")); //$NON-NLS-1$ //$NON-NLS-2$
 		if (!dirBundle) {
@@ -3854,6 +3868,90 @@ public class SystemBundleTests extends AbstractBundleTests {
 			} catch (InterruptedException e) {
 				fail("Failed to stop framework.", e);
 			}
+		}
+	}
+
+	// Note this is more of a performance test.  It has a timeout that will cause it to
+	// fail if it takes too long.
+	public void testMassiveParallelInstallStart() {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, Object> configuration = new HashMap<String, Object>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+
+		final Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
+		// should be in the STARTING state
+		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
+		final BundleContext systemContext = equinox.getBundleContext();
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+
+		long startCreateBundle = System.nanoTime();
+		final int numBundles = 2000;
+		final File[] testBundles;
+		try {
+			testBundles = createBundles(new File(config, "bundles"), numBundles, Collections.singletonMap(Constants.DYNAMICIMPORT_PACKAGE, "*")); //$NON-NLS-1$
+		} catch (IOException e) {
+			fail("Unexpected error creating budnles", e); //$NON-NLS-1$
+			throw new RuntimeException();
+		}
+		System.out.println("Time to create: " + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startCreateBundle));
+
+		long startReslveTime = System.nanoTime();
+		ExecutorService executor = Executors.newFixedThreadPool(50);
+		final List<Exception> errors = new CopyOnWriteArrayList<>();
+		try {
+			for (final File f : testBundles) {
+				executor.execute(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							String location = f.toURI().toURL().toExternalForm();
+							System.out.println("Installing: " + f.getName());
+							Bundle b = systemContext.installBundle(location);
+							b.start();
+							BundleWiring wiring = b.adapt(BundleWiring.class);
+							wiring.getClassLoader().loadClass(BundleContext.class.getName());
+						} catch (Exception e) {
+							errors.add(e);
+						}
+					}
+				});
+			}
+		} finally {
+			executor.shutdown();
+			try {
+				assertTrue("Operation took too long", executor.awaitTermination(5, TimeUnit.MINUTES));
+			} catch (InterruptedException e) {
+				fail("Interrupted.", e);
+			}
+		}
+		System.out.println("Time to resolve: " + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startReslveTime));
+
+		Assert.assertEquals("Errors found.", Collections.emptyList(), errors);
+		Assert.assertEquals("Wrong number of bundles.", numBundles + 1, systemContext.getBundles().length);
+
+		List<BundleWire> providedWires = equinox.adapt(BundleWiring.class).getProvidedWires(PackageNamespace.PACKAGE_NAMESPACE);
+		Assert.assertEquals("Wrong number of provided wires.", numBundles, providedWires.size());
+
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
 		}
 	}
 }

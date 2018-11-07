@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
+import java.io.Closeable;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -25,9 +26,11 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.osgi.container.Module.StartOptions;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.Module.StopOptions;
@@ -482,19 +485,23 @@ public final class ModuleContainer implements DebugOptionsListener {
 			return new ModuleResolutionReport(null, Collections.<Resource, List<Entry>> emptyMap(), new ResolutionException("Unable to resolve while shutting down the framework.")); //$NON-NLS-1$
 		}
 		ResolutionReport report = null;
-		do {
-			try {
-				report = resolveAndApply(triggers, triggersMandatory, restartTriggers);
-			} catch (RuntimeException e) {
-				if (e.getCause() instanceof BundleException) {
-					BundleException be = (BundleException) e.getCause();
-					if (be.getType() == BundleException.REJECTED_BY_HOOK || be.getType() == BundleException.STATECHANGE_ERROR) {
-						return new ModuleResolutionReport(null, Collections.<Resource, List<Entry>> emptyMap(), new ResolutionException(be));
+		try (ResolutionLock resolutionLock = new ResolutionLock(1)) {
+			do {
+				try {
+					report = resolveAndApply(triggers, triggersMandatory, restartTriggers);
+				} catch (RuntimeException e) {
+					if (e.getCause() instanceof BundleException) {
+						BundleException be = (BundleException) e.getCause();
+						if (be.getType() == BundleException.REJECTED_BY_HOOK || be.getType() == BundleException.STATECHANGE_ERROR) {
+							return new ModuleResolutionReport(null, Collections.<Resource, List<Entry>> emptyMap(), new ResolutionException(be));
+						}
 					}
+					throw e;
 				}
-				throw e;
-			}
-		} while (report == null);
+			} while (report == null);
+		} catch (ResolutionLockException e) {
+			return new ModuleResolutionReport(null, Collections.<Resource, List<Entry>> emptyMap(), new ResolutionException("Timeout acquiring lock for resolution", e, Collections.<Requirement> emptyList())); //$NON-NLS-1$
+		}
 		return report;
 	}
 
@@ -553,90 +560,94 @@ public final class ModuleContainer implements DebugOptionsListener {
 		Map<ModuleRevision, ModuleWiring> deltaWiring;
 		Collection<Module> modulesResolved;
 		long timestamp;
-		do {
-			result = null;
-			Map<ModuleRevision, ModuleWiring> wiringClone = null;
-			List<DynamicModuleRequirement> dynamicReqs = null;
-			Collection<ModuleRevision> unresolved = new ArrayList<>();
-			moduleDatabase.readLock();
-			try {
-				ModuleWiring wiring = revision.getWiring();
-				if (wiring == null) {
-					// not resolved!!
-					return null;
-				}
-				if (wiring.isDynamicPackageMiss(dynamicPkgName)) {
-					// cached a miss for this package
-					return null;
-				}
-				// need to check that another thread has not done the work already
-				result = findExistingDynamicWire(revision.getWiring(), dynamicPkgName);
-				if (result != null) {
-					return result;
-				}
-				dynamicReqs = getDynamicRequirements(dynamicPkgName, revision);
-				if (dynamicReqs.isEmpty()) {
-					// save the miss for the package name
-					wiring.addDynamicPackageMiss(dynamicPkgName);
-					return null;
-				}
-				timestamp = moduleDatabase.getRevisionsTimestamp();
-				wiringClone = moduleDatabase.getWiringsClone();
-				Collection<Module> allModules = moduleDatabase.getModules();
-				for (Module module : allModules) {
-					ModuleRevision current = module.getCurrentRevision();
-					if (current != null && !wiringClone.containsKey(current))
-						unresolved.add(current);
-				}
-			} finally {
-				moduleDatabase.readUnlock();
-			}
-
-			deltaWiring = null;
-			boolean foundCandidates = false;
-			for (DynamicModuleRequirement dynamicReq : dynamicReqs) {
-				ModuleResolutionReport report = moduleResolver.resolveDynamicDelta(dynamicReq, unresolved, wiringClone, moduleDatabase);
-				Map<Resource, List<Wire>> resolutionResult = report.getResolutionResult();
-				deltaWiring = resolutionResult == null ? Collections.<ModuleRevision, ModuleWiring> emptyMap() : moduleResolver.generateDelta(resolutionResult, wiringClone);
-				if (deltaWiring.get(revision) != null) {
-					break;
-				}
-				// Did not establish a valid wire.
-				// Check to see if any candidates were available.
-				// this is used for caching purposes below
-				List<Entry> revisionEntries = report.getEntries().get(revision);
-				if (revisionEntries == null || revisionEntries.isEmpty()) {
-					foundCandidates = true;
-				} else {
-					// must make sure there is no MISSING_CAPABILITY type entry
-					boolean isMissingCapability = false;
-					for (Entry entry : revisionEntries) {
-						isMissingCapability |= Entry.Type.MISSING_CAPABILITY.equals(entry.getType());
-					}
-					foundCandidates |= !isMissingCapability;
-				}
-			}
-			if (deltaWiring == null || deltaWiring.get(revision) == null) {
-				if (!foundCandidates) {
+		try (ResolutionLock resolutionLock = new ResolutionLock(MAX_RESOLUTION_PERMITS)) {
+			do {
+				result = null;
+				Map<ModuleRevision, ModuleWiring> wiringClone = null;
+				List<DynamicModuleRequirement> dynamicReqs = null;
+				Collection<ModuleRevision> unresolved = new ArrayList<>();
+				moduleDatabase.readLock();
+				try {
 					ModuleWiring wiring = revision.getWiring();
-					if (wiring != null) {
+					if (wiring == null) {
+						// not resolved!!
+						return null;
+					}
+					if (wiring.isDynamicPackageMiss(dynamicPkgName)) {
+						// cached a miss for this package
+						return null;
+					}
+					// need to check that another thread has not done the work already
+					result = findExistingDynamicWire(revision.getWiring(), dynamicPkgName);
+					if (result != null) {
+						return result;
+					}
+					dynamicReqs = getDynamicRequirements(dynamicPkgName, revision);
+					if (dynamicReqs.isEmpty()) {
 						// save the miss for the package name
 						wiring.addDynamicPackageMiss(dynamicPkgName);
+						return null;
+					}
+					timestamp = moduleDatabase.getRevisionsTimestamp();
+					wiringClone = moduleDatabase.getWiringsClone();
+					Collection<Module> allModules = moduleDatabase.getModules();
+					for (Module module : allModules) {
+						ModuleRevision current = module.getCurrentRevision();
+						if (current != null && !wiringClone.containsKey(current))
+							unresolved.add(current);
+					}
+				} finally {
+					moduleDatabase.readUnlock();
+				}
+
+				deltaWiring = null;
+				boolean foundCandidates = false;
+				for (DynamicModuleRequirement dynamicReq : dynamicReqs) {
+					ModuleResolutionReport report = moduleResolver.resolveDynamicDelta(dynamicReq, unresolved, wiringClone, moduleDatabase);
+					Map<Resource, List<Wire>> resolutionResult = report.getResolutionResult();
+					deltaWiring = resolutionResult == null ? Collections.<ModuleRevision, ModuleWiring> emptyMap() : moduleResolver.generateDelta(resolutionResult, wiringClone);
+					if (deltaWiring.get(revision) != null) {
+						break;
+					}
+					// Did not establish a valid wire.
+					// Check to see if any candidates were available.
+					// this is used for caching purposes below
+					List<Entry> revisionEntries = report.getEntries().get(revision);
+					if (revisionEntries == null || revisionEntries.isEmpty()) {
+						foundCandidates = true;
+					} else {
+						// must make sure there is no MISSING_CAPABILITY type entry
+						boolean isMissingCapability = false;
+						for (Entry entry : revisionEntries) {
+							isMissingCapability |= Entry.Type.MISSING_CAPABILITY.equals(entry.getType());
+						}
+						foundCandidates |= !isMissingCapability;
 					}
 				}
-				return null; // nothing to do
-			}
+				if (deltaWiring == null || deltaWiring.get(revision) == null) {
+					if (!foundCandidates) {
+						ModuleWiring wiring = revision.getWiring();
+						if (wiring != null) {
+							// save the miss for the package name
+							wiring.addDynamicPackageMiss(dynamicPkgName);
+						}
+					}
+					return null; // nothing to do
+				}
 
-			modulesResolved = new ArrayList<>();
-			for (ModuleRevision deltaRevision : deltaWiring.keySet()) {
-				if (!wiringClone.containsKey(deltaRevision))
-					modulesResolved.add(deltaRevision.getRevisions().getModule());
-			}
+				modulesResolved = new ArrayList<>();
+				for (ModuleRevision deltaRevision : deltaWiring.keySet()) {
+					if (!wiringClone.containsKey(deltaRevision))
+						modulesResolved.add(deltaRevision.getRevisions().getModule());
+				}
 
-			// Save the result
-			ModuleWiring wiring = deltaWiring.get(revision);
-			result = findExistingDynamicWire(wiring, dynamicPkgName);
-		} while (!applyDelta(deltaWiring, modulesResolved, Collections.<Module> emptyList(), timestamp, false));
+				// Save the result
+				ModuleWiring wiring = deltaWiring.get(revision);
+				result = findExistingDynamicWire(wiring, dynamicPkgName);
+			} while (!applyDelta(deltaWiring, modulesResolved, Collections.<Module> emptyList(), timestamp, false));
+		} catch (ResolutionLockException e) {
+			return null;
+		}
 
 		return result;
 	}
@@ -660,19 +671,69 @@ public final class ModuleContainer implements DebugOptionsListener {
 		return null;
 	}
 
-	private final Object stateLockMonitor = new Object();
+	// The resolution algorithm uses optimistic locking approach;
+	// This involves taking a snapshot of the state and performing an
+	// operation on the snapshot while holding no locks and then
+	// obtaining the write lock to apply the results.  If we
+	// detect the state has changed since the snapshot taken then
+	// the process is started over.  If we allow too many threads
+	// to try to do this at the same time it causes thrashing
+	// between taking the snapshot and successfully applying the
+	// results.  Instead of resorting to single threaded operations
+	// we choose to limit the number of concurrent resolves
+	final static int MAX_RESOLUTION_PERMITS = 10;
+	final Semaphore _resolutionLock = new Semaphore(MAX_RESOLUTION_PERMITS);
+	final ReentrantLock _bundleStateLock = new ReentrantLock();
+
+	static class ResolutionLockException extends Exception {
+		private static final long serialVersionUID = 1L;
+
+		public ResolutionLockException() {
+			super();
+		}
+
+		public ResolutionLockException(Throwable cause) {
+			super(cause);
+		}
+	}
+
+	class ResolutionLock implements Closeable {
+		private final int permits;
+
+		ResolutionLock(int permits) throws ResolutionLockException {
+			this.permits = permits;
+			boolean previousInterruption = Thread.interrupted();
+			try {
+				if (!_resolutionLock.tryAcquire(permits, 30, TimeUnit.SECONDS)) {
+					throw new ResolutionLockException();
+				}
+			} catch (InterruptedException e) {
+				throw new ResolutionLockException(e);
+			} finally {
+				if (previousInterruption) {
+					Thread.currentThread().interrupt();
+				}
+			}
+		}
+
+		@Override
+		public void close() {
+			_resolutionLock.release(permits);
+		}
+	}
 
 	private boolean applyDelta(Map<ModuleRevision, ModuleWiring> deltaWiring, Collection<Module> modulesResolved, Collection<Module> triggers, long timestamp, boolean restartTriggers) {
 		List<Module> modulesLocked = new ArrayList<>(modulesResolved.size());
 		// now attempt to apply the delta
 		try {
-			synchronized (stateLockMonitor) {
-				// Acquire the necessary RESOLVED state change lock.
-				// Note this is done while holding a global lock to avoid multiple threads trying to compete over
-				// locking multiple modules; otherwise out of order locks between modules can happen
-				// NOTE this MUST be done outside of holding the moduleDatabase lock also to avoid
-				// introducing out of order locks between the bundle state change lock and the moduleDatabase
-				// lock.
+			// Acquire the necessary RESOLVED state change lock.
+			// Note this is done while holding a global lock to avoid multiple threads trying to compete over
+			// locking multiple modules; otherwise out of order locks between modules can happen
+			// NOTE this MUST be done outside of holding the moduleDatabase lock also to avoid
+			// introducing out of order locks between the bundle state change lock and the moduleDatabase
+			// lock.
+			_bundleStateLock.lock();
+			try {
 				for (Module module : modulesResolved) {
 					try {
 						// avoid grabbing the lock if the timestamp has changed
@@ -690,7 +751,10 @@ public final class ModuleContainer implements DebugOptionsListener {
 						throw new IllegalStateException(Msg.ModuleContainer_StateLockError, e);
 					}
 				}
+			} finally {
+				_bundleStateLock.unlock();
 			}
+
 			Map<ModuleWiring, Collection<ModuleRevision>> hostsWithDynamicFrags = new HashMap<>(0);
 			moduleDatabase.writeLock();
 			try {
@@ -895,18 +959,19 @@ public final class ModuleContainer implements DebugOptionsListener {
 			// NOTE this MUST be done outside of holding the moduleDatabase lock also to avoid
 			// introducing out of order locks between the bundle state change lock and the moduleDatabase
 			// lock.
-			synchronized (stateLockMonitor) {
-				try {
-					// go in reverse order
-					for (ListIterator<Module> iTriggers = refreshTriggers.listIterator(refreshTriggers.size()); iTriggers.hasPrevious();) {
-						Module refreshModule = iTriggers.previous();
-						refreshModule.lockStateChange(ModuleEvent.UNRESOLVED);
-						modulesLocked.add(refreshModule);
-					}
-				} catch (BundleException e) {
-					// TODO throw some appropriate exception
-					throw new IllegalStateException(Msg.ModuleContainer_StateLockError, e);
+			_bundleStateLock.lock();
+			try {
+				// go in reverse order
+				for (ListIterator<Module> iTriggers = refreshTriggers.listIterator(refreshTriggers.size()); iTriggers.hasPrevious();) {
+					Module refreshModule = iTriggers.previous();
+					refreshModule.lockStateChange(ModuleEvent.UNRESOLVED);
+					modulesLocked.add(refreshModule);
 				}
+			} catch (BundleException e) {
+				// TODO throw some appropriate exception
+				throw new IllegalStateException(Msg.ModuleContainer_StateLockError, e);
+			} finally {
+				_bundleStateLock.unlock();
 			}
 			// Must not hold the module database lock while stopping bundles
 			// Stop any active bundles and remove non-active modules from the refreshTriggers
@@ -974,7 +1039,6 @@ public final class ModuleContainer implements DebugOptionsListener {
 				module.unlockStateChange(ModuleEvent.UNRESOLVED);
 			}
 		}
-
 		// publish unresolved events after giving up all locks
 		for (Module module : modulesUnresolved) {
 			adaptor.publishModuleEvent(ModuleEvent.UNRESOLVED, module, module);
