@@ -1028,7 +1028,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 	ResolutionReport resolve() {
 		if (!Module.RESOLVED_SET.contains(module.getState())) {
-			return module.getContainer().resolve(Arrays.asList(module), true);
+			return module.getContainer().resolve(Collections.singletonList(module), true);
 		}
 		return null;
 	}

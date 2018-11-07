@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -22,7 +22,9 @@ import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
-import org.osgi.framework.*;
+import org.osgi.framework.AdminPermission;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.service.resolver.ResolutionException;
 
@@ -65,7 +67,7 @@ public abstract class SystemModule extends Module {
 				lockedStarted = false;
 				ResolutionReport report;
 				try {
-					report = getRevisions().getContainer().resolve(Arrays.asList((Module) this), true);
+					report = getRevisions().getContainer().resolve(Collections.singletonList((Module) this), true);
 				} finally {
 					lockStateChange(ModuleEvent.STARTED);
 					lockedStarted = true;

@@ -13,7 +13,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,7 +25,9 @@ import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.*;
+import org.osgi.framework.AdminPermission;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleReference;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.service.resolver.ResolutionException;
@@ -427,7 +431,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				unlockStateChange(ModuleEvent.STARTED);
 				lockedStarted = false;
 				try {
-					report = getRevisions().getContainer().resolve(Arrays.asList(this), true);
+					report = getRevisions().getContainer().resolve(Collections.singletonList(this), true);
 				} finally {
 					lockStateChange(ModuleEvent.STARTED);
 					lockedStarted = true;

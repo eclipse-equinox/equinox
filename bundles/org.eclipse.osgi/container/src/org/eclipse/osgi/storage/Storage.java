@@ -383,7 +383,7 @@ public class Storage {
 
 				ModuleRevisionBuilder builder = getBuilder(newGeneration);
 				systemModule = moduleContainer.install(null, Constants.SYSTEM_BUNDLE_LOCATION, builder, newGeneration);
-				moduleContainer.resolve(Arrays.asList(systemModule), false);
+				moduleContainer.resolve(Collections.singletonList(systemModule), false);
 			} else {
 				ModuleRevision currentRevision = systemModule.getCurrentRevision();
 				Generation currentGeneration = currentRevision == null ? null : (Generation) currentRevision.getRevisionInfo();
