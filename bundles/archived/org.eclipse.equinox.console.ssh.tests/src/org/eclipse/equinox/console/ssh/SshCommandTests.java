@@ -71,6 +71,7 @@ public class SshCommandTests {
         initJaasConfigFile();
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testSshCommand() throws Exception {
 		CommandSession session = EasyMock.createMock(CommandSession.class);
@@ -93,7 +94,7 @@ public class SshCommandTests {
 		EasyMock.expect(context.registerService((String)EasyMock.anyObject(), EasyMock.anyObject(), (Dictionary<String, ?>)EasyMock.anyObject())).andReturn(null);
 		EasyMock.replay(context);
 
-		Map<String, String> environment = new HashMap<String, String>();
+		Map<String, String> environment = new HashMap<>();
 		environment.put(TERM_PROPERTY, XTERM);
 		Environment env = EasyMock.createMock(Environment.class);
 		EasyMock.expect(env.getEnv()).andReturn(environment);

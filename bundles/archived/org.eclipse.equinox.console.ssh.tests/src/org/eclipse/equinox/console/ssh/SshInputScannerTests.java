@@ -56,7 +56,7 @@ public class SshInputScannerTests {
 
         try {
             scanner.scan((byte) 'a');
-            scanner.scan((byte) ESC);
+            scanner.scan(ESC);
             scanner.scan((byte) 'b');
         } catch (IOException e) {
             System.out.println("Error while scanning: " + e.getMessage());

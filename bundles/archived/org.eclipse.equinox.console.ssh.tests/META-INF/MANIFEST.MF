@@ -4,7 +4,7 @@ Bundle-Name: Ssh Tests
 Bundle-SymbolicName: org.eclipse.equinox.console.ssh.tests
 Bundle-Version: 1.1.0.qualifier
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: junit.framework;version="4.8.1",
  org.apache.sshd.client.future,
  org.apache.sshd.client,

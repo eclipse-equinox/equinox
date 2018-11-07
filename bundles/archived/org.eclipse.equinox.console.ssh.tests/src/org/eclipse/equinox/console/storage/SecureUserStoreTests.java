@@ -98,12 +98,12 @@ public class SecureUserStoreTests {
 	}
 	
 	private boolean compareRoles(String expectedRoles, String actualRoles) {
-		Set<String> expectedRolesSet = new HashSet<String>();
+		Set<String> expectedRolesSet = new HashSet<>();
 		for(String role : expectedRoles.split(",")) {
 			expectedRolesSet.add(role);
 		}
 		
-		Set<String> actualRolesSet = new HashSet<String>();
+		Set<String> actualRolesSet = new HashSet<>();
 		for(String role : actualRoles.split(",")) {
 			actualRolesSet.add(role);
 		}

@@ -74,6 +74,7 @@ public class SshCommandWithConfigAdminTests {
         initJaasConfigFile();
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testSshCommandWithConfigAdmin() throws Exception {
 		
@@ -90,7 +91,7 @@ public class SshCommandWithConfigAdminTests {
 		EasyMock.replay(processor);
 
 		final ServiceRegistration<?> registration = EasyMock.createMock(ServiceRegistration.class);
-        registration.setProperties((Dictionary)EasyMock.anyObject());
+        registration.setProperties((Dictionary<String, ?>)EasyMock.anyObject());
         EasyMock.expectLastCall();
         EasyMock.replay(registration);
 
@@ -103,11 +104,9 @@ public class SshCommandWithConfigAdminTests {
         				(String)EasyMock.anyObject(), 
         				(ManagedService)EasyMock.anyObject(), 
         				(Dictionary<String, ?>)EasyMock.anyObject())
-        	).andAnswer((IAnswer<ServiceRegistration<?>>) new IAnswer<ServiceRegistration<?>>() {
-        		public ServiceRegistration<?> answer() {
-        			configurator = (ManagedService) EasyMock.getCurrentArguments()[1];
-        			return registration;
-        		}
+        	).andAnswer((IAnswer<ServiceRegistration<?>>) () -> {
+				configurator = (ManagedService) EasyMock.getCurrentArguments()[1];
+				return registration;
 			});
         EasyMock.expect(
         		context.registerService(
@@ -116,14 +115,14 @@ public class SshCommandWithConfigAdminTests {
         				(Dictionary<String, ?>)EasyMock.anyObject())).andReturn(null);
 		EasyMock.replay(context);
 
-		Map<String, String> environment = new HashMap<String, String>();
+		Map<String, String> environment = new HashMap<>();
 		environment.put(TERM_PROPERTY, XTERM);
 		Environment env = EasyMock.createMock(Environment.class);
 		EasyMock.expect(env.getEnv()).andReturn(environment);
 		EasyMock.replay(env);
 
 		SshCommand command = new SshCommand(processor, context);
-		Dictionary props = new Hashtable();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put("port", SSH_PORT);
 		props.put("host", HOST);
 		props.put("enabled", TRUE);
@@ -175,6 +174,7 @@ public class SshCommandWithConfigAdminTests {
 		testDisabled(true);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void testDisabled(boolean isDefault) throws Exception {
 		CommandSession session = EasyMock.createMock(CommandSession.class);
 		EasyMock.expect(session.put((String)EasyMock.anyObject(), EasyMock.anyObject())).andReturn(EasyMock.anyObject()).times(4);
@@ -188,7 +188,7 @@ public class SshCommandWithConfigAdminTests {
 		EasyMock.replay(processor);
 
 		final ServiceRegistration<?> registration = EasyMock.createMock(ServiceRegistration.class);
-        registration.setProperties((Dictionary)EasyMock.anyObject());
+        registration.setProperties((Dictionary<String, ?>)EasyMock.anyObject());
         EasyMock.expectLastCall();
         EasyMock.replay(registration);
 
@@ -200,11 +200,9 @@ public class SshCommandWithConfigAdminTests {
         				(String)EasyMock.anyObject(), 
         				(ManagedService)EasyMock.anyObject(), 
         				(Dictionary<String, ?>)EasyMock.anyObject())
-        	).andAnswer((IAnswer<ServiceRegistration<?>>) new IAnswer<ServiceRegistration<?>>() {
-        		public ServiceRegistration<?> answer() {
-        			configurator = (ManagedService) EasyMock.getCurrentArguments()[1];
-        			return registration;
-        		}
+        	).andAnswer((IAnswer<ServiceRegistration<?>>) () -> {
+				configurator = (ManagedService) EasyMock.getCurrentArguments()[1];
+				return registration;
 			});
         EasyMock.expect(
         		context.registerService(
@@ -213,14 +211,14 @@ public class SshCommandWithConfigAdminTests {
         				(Dictionary<String, ?>)EasyMock.anyObject())).andReturn(null);
 		EasyMock.replay(context);
 
-		Map<String, String> environment = new HashMap<String, String>();
+		Map<String, String> environment = new HashMap<>();
 		environment.put(TERM_PROPERTY, XTERM);
 		Environment env = EasyMock.createMock(Environment.class);
 		EasyMock.expect(env.getEnv()).andReturn(environment);
 		EasyMock.replay(env);
 
 		SshCommand command = new SshCommand(processor, context);
-		Dictionary props = new Hashtable();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put("port", SSH_PORT);
 		props.put("host", HOST);
 		if (isDefault == false) {
@@ -239,9 +237,8 @@ public class SshCommandWithConfigAdminTests {
 			} catch (InterruptedException ie) {
 				// do nothing
 			}
-			ClientSession sshSession;
 			try {
-				sshSession = defaultConnectFuture.getSession();
+				defaultConnectFuture.getSession();
 				Assert.fail("It should not be possible to connect to " + HOST + ":" + SSH_PORT);
 			} catch (RuntimeSshException e) {
 				//this is expected

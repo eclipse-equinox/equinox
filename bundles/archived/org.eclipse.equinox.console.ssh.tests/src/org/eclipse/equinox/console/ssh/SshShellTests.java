@@ -91,13 +91,13 @@ public class SshShellTests {
             EasyMock.expect(context.getProperty(DEFAULT_USER_STORAGE)).andReturn(TRUE);
             EasyMock.replay(context);
             
-            Map<String, String> environment = new HashMap<String, String>();
+            Map<String, String> environment = new HashMap<>();
             environment.put(TERM_PROPERTY, XTERM);
             Environment env = EasyMock.createMock(Environment.class);
             EasyMock.expect(env.getEnv()).andReturn(environment);
             EasyMock.replay(env);
             
-            List<CommandProcessor> processors = new ArrayList<CommandProcessor>();
+            List<CommandProcessor> processors = new ArrayList<>();
             processors.add(processor);
             shell = new SshShell(processors, context);
             shell.setInputStream(socketServer.getInputStream());
