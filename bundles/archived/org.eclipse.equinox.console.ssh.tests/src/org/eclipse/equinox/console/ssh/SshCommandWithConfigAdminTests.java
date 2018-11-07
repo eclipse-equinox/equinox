@@ -46,7 +46,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ManagedService;
 
-
 public class SshCommandWithConfigAdminTests {
 	private static final int TEST_CONTENT = 100;
 	private static final String USER_STORE_FILE_NAME = "org.eclipse.equinox.console.jaas.file";
@@ -72,97 +71,93 @@ public class SshCommandWithConfigAdminTests {
 	public void init() throws Exception {
 		clean();
 		initStore();
-        initJaasConfigFile();
+		initJaasConfigFile();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testSshCommandWithConfigAdmin() throws Exception {
 
-		CommandSession session = EasyMock.createMock(CommandSession.class);
-		EasyMock.makeThreadSafe(session, true);
-		EasyMock.expect(session.put((String)EasyMock.anyObject(), EasyMock.anyObject())).andReturn(EasyMock.anyObject()).times(5);
-		EasyMock.expect(session.execute(GOGO_SHELL_COMMAND)).andReturn(null);
-		session.close();
-		EasyMock.expectLastCall();
-		EasyMock.replay(session);
+		try (CommandSession session = EasyMock.createMock(CommandSession.class)) {
+			EasyMock.makeThreadSafe(session, true);
+			EasyMock.expect(session.put((String) EasyMock.anyObject(), EasyMock.anyObject()))
+					.andReturn(EasyMock.anyObject()).times(5);
+			EasyMock.expect(session.execute(GOGO_SHELL_COMMAND)).andReturn(null);
+			session.close();
+			EasyMock.expectLastCall();
+			EasyMock.replay(session);
 
-		CommandProcessor processor = EasyMock.createMock(CommandProcessor.class);
-		EasyMock.expect(processor.createSession((ConsoleInputStream)EasyMock.anyObject(), (PrintStream)EasyMock.anyObject(), (PrintStream)EasyMock.anyObject())).andReturn(session);
-		EasyMock.replay(processor);
+			CommandProcessor processor = EasyMock.createMock(CommandProcessor.class);
+			EasyMock.expect(processor.createSession((ConsoleInputStream) EasyMock.anyObject(),
+					(PrintStream) EasyMock.anyObject(), (PrintStream) EasyMock.anyObject())).andReturn(session);
+			EasyMock.replay(processor);
 
-		final ServiceRegistration<?> registration = EasyMock.createMock(ServiceRegistration.class);
-        registration.setProperties((Dictionary<String, ?>)EasyMock.anyObject());
-        EasyMock.expectLastCall();
-        EasyMock.replay(registration);
+			final ServiceRegistration<?> registration = EasyMock.createMock(ServiceRegistration.class);
+			registration.setProperties((Dictionary<String, ?>) EasyMock.anyObject());
+			EasyMock.expectLastCall();
+			EasyMock.replay(registration);
 
-        BundleContext context = EasyMock.createMock(BundleContext.class);
-        EasyMock.makeThreadSafe(context, true);
-        EasyMock.expect(context.getProperty(USE_CONFIG_ADMIN_PROP)).andReturn(TRUE);
-		EasyMock.expect(context.getProperty(DEFAULT_USER_STORAGE)).andReturn(TRUE).anyTimes();
-        EasyMock.expect(
-        		(ServiceRegistration) context.registerService(
-        				(String)EasyMock.anyObject(),
-        				(ManagedService)EasyMock.anyObject(),
-        				(Dictionary<String, ?>)EasyMock.anyObject())
-        	).andAnswer((IAnswer<ServiceRegistration<?>>) () -> {
-				configurator = (ManagedService) EasyMock.getCurrentArguments()[1];
-				return registration;
-			});
-        EasyMock.expect(
-        		context.registerService(
-        				(String)EasyMock.anyObject(),
-        				(SshCommand)EasyMock.anyObject(),
-        				(Dictionary<String, ?>)EasyMock.anyObject())).andReturn(null);
-		EasyMock.replay(context);
+			BundleContext context = EasyMock.createMock(BundleContext.class);
+			EasyMock.makeThreadSafe(context, true);
+			EasyMock.expect(context.getProperty(USE_CONFIG_ADMIN_PROP)).andReturn(TRUE);
+			EasyMock.expect(context.getProperty(DEFAULT_USER_STORAGE)).andReturn(TRUE).anyTimes();
+			EasyMock.expect((ServiceRegistration) context.registerService((String) EasyMock.anyObject(),
+					(ManagedService) EasyMock.anyObject(), (Dictionary<String, ?>) EasyMock.anyObject()))
+					.andAnswer((IAnswer<ServiceRegistration<?>>) () -> {
+						configurator = (ManagedService) EasyMock.getCurrentArguments()[1];
+						return registration;
+					});
+			EasyMock.expect(context.registerService((String) EasyMock.anyObject(), (SshCommand) EasyMock.anyObject(),
+					(Dictionary<String, ?>) EasyMock.anyObject())).andReturn(null);
+			EasyMock.replay(context);
+			Map<String, String> environment = new HashMap<>();
+			environment.put(TERM_PROPERTY, XTERM);
+			Environment env = EasyMock.createMock(Environment.class);
+			EasyMock.expect(env.getEnv()).andReturn(environment);
+			EasyMock.replay(env);
 
-		Map<String, String> environment = new HashMap<>();
-		environment.put(TERM_PROPERTY, XTERM);
-		Environment env = EasyMock.createMock(Environment.class);
-		EasyMock.expect(env.getEnv()).andReturn(environment);
-		EasyMock.replay(env);
+			SshCommand command = new SshCommand(processor, context);
+			Dictionary<String, Object> props = new Hashtable<>();
+			props.put("port", SSH_PORT);
+			props.put("host", HOST);
+			props.put("enabled", TRUE);
+			configurator.updated(props);
 
-		SshCommand command = new SshCommand(processor, context);
-		Dictionary<String, Object> props = new Hashtable<>();
-		props.put("port", SSH_PORT);
-		props.put("host", HOST);
-		props.put("enabled", TRUE);
-		configurator.updated(props);
-
-		SshClient client = SshClient.setUpDefaultClient();
-		client.start();
-		try {
-			ConnectFuture connectFuture = client.connect(USERNAME, HOST, Integer.valueOf(SSH_PORT));
-			DefaultConnectFuture defaultConnectFuture = (DefaultConnectFuture) connectFuture;
-
+			SshClient client = SshClient.setUpDefaultClient();
+			client.start();
 			try {
-				Thread.sleep(WAIT_TIME);
-			} catch (InterruptedException ie) {
-				// do nothing
-			}
-			ClientSession sshSession = defaultConnectFuture.getSession();
+				ConnectFuture connectFuture = client.connect(USERNAME, HOST, Integer.valueOf(SSH_PORT));
+				DefaultConnectFuture defaultConnectFuture = (DefaultConnectFuture) connectFuture;
 
-			sshSession.addPasswordIdentity(PASSWORD);
-			ClientChannel channel = sshSession.createChannel("shell");
-			channel.setIn(new ByteArrayInputStream((TEST_CONTENT + "\n").getBytes(StandardCharsets.UTF_8)));
-			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-			channel.setOut(byteOut);
-			channel.setErr(byteOut);
-			channel.open();
-			try {
-				Thread.sleep(WAIT_TIME);
-			} catch (InterruptedException ie) {
-				// do nothing
+				try {
+					Thread.sleep(WAIT_TIME);
+				} catch (InterruptedException ie) {
+					// do nothing
+				}
+				try (ClientSession sshSession = defaultConnectFuture.getSession()) {
+
+					sshSession.addPasswordIdentity(PASSWORD);
+					ClientChannel channel = sshSession.createChannel("shell");
+					channel.setIn(new ByteArrayInputStream((TEST_CONTENT + "\n").getBytes(StandardCharsets.UTF_8)));
+					ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+					channel.setOut(byteOut);
+					channel.setErr(byteOut);
+					channel.open();
+					try {
+						Thread.sleep(WAIT_TIME);
+					} catch (InterruptedException ie) {
+						// do nothing
+					}
+					byte[] output = byteOut.toByteArray();
+					Assert.assertEquals("Output not as expected", Integer.toString(TEST_CONTENT),
+							new String(output).trim());
+				}
+			} finally {
+				client.stop();
 			}
-			byte[] output = byteOut.toByteArray();
-			Assert.assertEquals("Output not as expected",Integer.toString(TEST_CONTENT), new String(output).trim());
-			sshSession.close(true);
-		} finally {
-			client.stop();
+
+			command.ssh(new String[] { STOP_COMMAND });
 		}
-
-		command.ssh(new String[] {STOP_COMMAND});
-		return;
 	}
 
 	@Test
@@ -177,83 +172,78 @@ public class SshCommandWithConfigAdminTests {
 
 	@SuppressWarnings("unchecked")
 	private void testDisabled(boolean isDefault) throws Exception {
-		CommandSession session = EasyMock.createMock(CommandSession.class);
-		EasyMock.expect(session.put((String)EasyMock.anyObject(), EasyMock.anyObject())).andReturn(EasyMock.anyObject()).times(4);
-		EasyMock.expect(session.execute(GOGO_SHELL_COMMAND)).andReturn(null);
-		session.close();
-		EasyMock.expectLastCall();
-		EasyMock.replay(session);
+		try (CommandSession session = EasyMock.createMock(CommandSession.class)) {
+			EasyMock.expect(session.put((String) EasyMock.anyObject(), EasyMock.anyObject()))
+					.andReturn(EasyMock.anyObject()).times(4);
+			EasyMock.expect(session.execute(GOGO_SHELL_COMMAND)).andReturn(null);
+			session.close();
+			EasyMock.expectLastCall();
+			EasyMock.replay(session);
+			CommandProcessor processor = EasyMock.createMock(CommandProcessor.class);
+			EasyMock.expect(processor.createSession((ConsoleInputStream) EasyMock.anyObject(),
+					(PrintStream) EasyMock.anyObject(), (PrintStream) EasyMock.anyObject())).andReturn(session);
+			EasyMock.replay(processor);
 
-		CommandProcessor processor = EasyMock.createMock(CommandProcessor.class);
-		EasyMock.expect(processor.createSession((ConsoleInputStream)EasyMock.anyObject(), (PrintStream)EasyMock.anyObject(), (PrintStream)EasyMock.anyObject())).andReturn(session);
-		EasyMock.replay(processor);
+			final ServiceRegistration<?> registration = EasyMock.createMock(ServiceRegistration.class);
+			registration.setProperties((Dictionary<String, ?>) EasyMock.anyObject());
+			EasyMock.expectLastCall();
+			EasyMock.replay(registration);
 
-		final ServiceRegistration<?> registration = EasyMock.createMock(ServiceRegistration.class);
-        registration.setProperties((Dictionary<String, ?>)EasyMock.anyObject());
-        EasyMock.expectLastCall();
-        EasyMock.replay(registration);
+			BundleContext context = EasyMock.createMock(BundleContext.class);
+			EasyMock.expect(context.getProperty(USE_CONFIG_ADMIN_PROP)).andReturn(TRUE);
+			EasyMock.expect(context.getProperty(DEFAULT_USER_STORAGE)).andReturn(TRUE).anyTimes();
+			EasyMock.expect((ServiceRegistration) context.registerService((String) EasyMock.anyObject(),
+					(ManagedService) EasyMock.anyObject(), (Dictionary<String, ?>) EasyMock.anyObject()))
+					.andAnswer((IAnswer<ServiceRegistration<?>>) () -> {
+						configurator = (ManagedService) EasyMock.getCurrentArguments()[1];
+						return registration;
+					});
+			EasyMock.expect(context.registerService((String) EasyMock.anyObject(), (SshCommand) EasyMock.anyObject(),
+					(Dictionary<String, ?>) EasyMock.anyObject())).andReturn(null);
+			EasyMock.replay(context);
 
-        BundleContext context = EasyMock.createMock(BundleContext.class);
-        EasyMock.expect(context.getProperty(USE_CONFIG_ADMIN_PROP)).andReturn(TRUE);
-		EasyMock.expect(context.getProperty(DEFAULT_USER_STORAGE)).andReturn(TRUE).anyTimes();
-        EasyMock.expect(
-        		(ServiceRegistration) context.registerService(
-        				(String)EasyMock.anyObject(),
-        				(ManagedService)EasyMock.anyObject(),
-        				(Dictionary<String, ?>)EasyMock.anyObject())
-        	).andAnswer((IAnswer<ServiceRegistration<?>>) () -> {
-				configurator = (ManagedService) EasyMock.getCurrentArguments()[1];
-				return registration;
-			});
-        EasyMock.expect(
-        		context.registerService(
-        				(String)EasyMock.anyObject(),
-        				(SshCommand)EasyMock.anyObject(),
-        				(Dictionary<String, ?>)EasyMock.anyObject())).andReturn(null);
-		EasyMock.replay(context);
+			Map<String, String> environment = new HashMap<>();
+			environment.put(TERM_PROPERTY, XTERM);
+			Environment env = EasyMock.createMock(Environment.class);
+			EasyMock.expect(env.getEnv()).andReturn(environment);
+			EasyMock.replay(env);
 
-		Map<String, String> environment = new HashMap<>();
-		environment.put(TERM_PROPERTY, XTERM);
-		Environment env = EasyMock.createMock(Environment.class);
-		EasyMock.expect(env.getEnv()).andReturn(environment);
-		EasyMock.replay(env);
+			SshCommand command = new SshCommand(processor, context);
+			Dictionary<String, Object> props = new Hashtable<>();
+			props.put("port", SSH_PORT);
+			props.put("host", HOST);
+			if (isDefault == false) {
+				props.put("enabled", FALSE);
+			}
+			configurator.updated(props);
 
-		SshCommand command = new SshCommand(processor, context);
-		Dictionary<String, Object> props = new Hashtable<>();
-		props.put("port", SSH_PORT);
-		props.put("host", HOST);
-		if (isDefault == false) {
-			props.put("enabled", FALSE);
-		}
-		configurator.updated(props);
+			SshClient client = SshClient.setUpDefaultClient();
+			client.start();
+			try {
+				ConnectFuture connectFuture = client.connect("", HOST, Integer.valueOf(SSH_PORT));
+				DefaultConnectFuture defaultConnectFuture = (DefaultConnectFuture) connectFuture;
 
-		SshClient client = SshClient.setUpDefaultClient();
-		client.start();
-		try {
-			ConnectFuture connectFuture = client.connect("", HOST, Integer.valueOf(SSH_PORT));
-			DefaultConnectFuture defaultConnectFuture = (DefaultConnectFuture) connectFuture;
+				try {
+					Thread.sleep(WAIT_TIME);
+				} catch (InterruptedException ie) {
+					// do nothing
+				}
+				try {
+					defaultConnectFuture.getSession();
+					Assert.fail("It should not be possible to connect to " + HOST + ":" + SSH_PORT);
+				} catch (RuntimeSshException e) {
+					// this is expected
+				}
+			} finally {
+				client.stop();
+			}
 
 			try {
-				Thread.sleep(WAIT_TIME);
-			} catch (InterruptedException ie) {
-				// do nothing
+				command.ssh(new String[] { STOP_COMMAND });
+			} catch (IllegalStateException e) {
+				// this is expected
 			}
-			try {
-				defaultConnectFuture.getSession();
-				Assert.fail("It should not be possible to connect to " + HOST + ":" + SSH_PORT);
-			} catch (RuntimeSshException e) {
-				//this is expected
-			}
-		} finally {
-			client.stop();
 		}
-
-		try {
-			command.ssh(new String[] {STOP_COMMAND});
-		} catch (IllegalStateException e) {
-			// this is expected
-		}
-		return;
 	}
 
 	@After
@@ -263,40 +253,35 @@ public class SshCommandWithConfigAdminTests {
 
 	private void clean() {
 		System.setProperty(USER_STORE_FILE_NAME, "");
-    	File file = new File(STORE_FILE_NAME);
-    	if (file.exists()) {
-    		file.delete();
-    	}
+		File file = new File(STORE_FILE_NAME);
+		if (file.exists()) {
+			file.delete();
+		}
 
-    	System.setProperty(JAAS_CONFIG_PROPERTY_NAME, "");
-    	File jaasConfFile = new File(JAAS_CONFIG_FILE_NAME);
-    	if (jaasConfFile.exists()) {
-    		jaasConfFile.delete();
-    	}
+		System.setProperty(JAAS_CONFIG_PROPERTY_NAME, "");
+		File jaasConfFile = new File(JAAS_CONFIG_FILE_NAME);
+		if (jaasConfFile.exists()) {
+			jaasConfFile.delete();
+		}
 	}
 
 	private void initStore() throws Exception {
 		System.setProperty(USER_STORE_FILE_NAME, STORE_FILE_NAME);
-        SecureUserStore.initStorage();
-        SecureUserStore.putUser(USERNAME, DigestUtil.encrypt(PASSWORD), null);
+		SecureUserStore.initStorage();
+		SecureUserStore.putUser(USERNAME, DigestUtil.encrypt(PASSWORD), null);
 	}
 
 	private void initJaasConfigFile() throws Exception {
 		System.setProperty(JAAS_CONFIG_PROPERTY_NAME, JAAS_CONFIG_FILE_NAME);
 		File jaasConfFile = new File(JAAS_CONFIG_FILE_NAME);
-    	if (!jaasConfFile.exists()) {
-    		PrintWriter out = null;
-    		try {
-				out = new PrintWriter(jaasConfFile);
+		if (!jaasConfFile.exists()) {
+			try (PrintWriter out = new PrintWriter(jaasConfFile);) {
+
 				out.println("equinox_console {");
 				out.println("	org.eclipse.equinox.console.jaas.SecureStorageLoginModule REQUIRED;");
 				out.println("};");
-			} finally {
-				if (out != null) {
-					out.close();
-				}
 			}
-    	}
+		}
 	}
 
 }

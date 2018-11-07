@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Lazar Kirchev, SAP AG - initial API and implementation
  *******************************************************************************/
@@ -42,7 +42,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 
-
 public class SshCommandTests {
 	private static final int TEST_CONTENT = 100;
 	private static final String USER_STORE_FILE_NAME = "org.eclipse.equinox.console.jaas.file";
@@ -69,117 +68,113 @@ public class SshCommandTests {
 	public void init() throws Exception {
 		clean();
 		initStore();
-        initJaasConfigFile();
+		initJaasConfigFile();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testSshCommand() throws Exception {
-		CommandSession session = EasyMock.createMock(CommandSession.class);
-		EasyMock.makeThreadSafe(session, true);
-		EasyMock.expect(session.put((String)EasyMock.anyObject(), EasyMock.anyObject())).andReturn(new Object());
-		EasyMock.expect(session.execute(GOGO_SHELL_COMMAND)).andReturn(null);
-		session.close();
-		EasyMock.expectLastCall();
-		EasyMock.replay(session);
+		try (CommandSession session = EasyMock.createMock(CommandSession.class)) {
+			EasyMock.makeThreadSafe(session, true);
+			EasyMock.expect(session.put((String) EasyMock.anyObject(), EasyMock.anyObject())).andReturn(new Object());
+			EasyMock.expect(session.execute(GOGO_SHELL_COMMAND)).andReturn(null);
+			session.close();
+			EasyMock.expectLastCall();
+			EasyMock.replay(session);
 
-		CommandProcessor processor = EasyMock.createMock(CommandProcessor.class);
-		EasyMock.expect(processor.createSession((ConsoleInputStream)EasyMock.anyObject(), (PrintStream)EasyMock.anyObject(), (PrintStream)EasyMock.anyObject())).andReturn(session);
-		EasyMock.replay(processor);
+			CommandProcessor processor = EasyMock.createMock(CommandProcessor.class);
+			EasyMock.expect(processor.createSession((ConsoleInputStream) EasyMock.anyObject(),
+					(PrintStream) EasyMock.anyObject(), (PrintStream) EasyMock.anyObject())).andReturn(session);
+			EasyMock.replay(processor);
+			BundleContext context = EasyMock.createMock(BundleContext.class);
+			EasyMock.makeThreadSafe(context, true);
+			EasyMock.expect(context.getProperty(USE_CONFIG_ADMIN_PROP)).andReturn(FALSE);
+			EasyMock.expect(context.getProperty(DEFAULT_USER_STORAGE)).andReturn(TRUE).anyTimes();
+			EasyMock.expect(context.getProperty(SSH_PORT_PROP_NAME)).andReturn(Integer.toString(SSH_PORT));
+			EasyMock.expect(context.registerService((String) EasyMock.anyObject(), EasyMock.anyObject(),
+					(Dictionary<String, ?>) EasyMock.anyObject())).andReturn(null);
+			EasyMock.replay(context);
 
-		BundleContext context = EasyMock.createMock(BundleContext.class);
-		EasyMock.makeThreadSafe(context, true);
-		EasyMock.expect(context.getProperty(USE_CONFIG_ADMIN_PROP)).andReturn(FALSE);
-		EasyMock.expect(context.getProperty(DEFAULT_USER_STORAGE)).andReturn(TRUE).anyTimes();
-		EasyMock.expect(context.getProperty(SSH_PORT_PROP_NAME)).andReturn(Integer.toString(SSH_PORT));
-		EasyMock.expect(context.registerService((String)EasyMock.anyObject(), EasyMock.anyObject(), (Dictionary<String, ?>)EasyMock.anyObject())).andReturn(null);
-		EasyMock.replay(context);
+			Map<String, String> environment = new HashMap<>();
+			environment.put(TERM_PROPERTY, XTERM);
+			Environment env = EasyMock.createMock(Environment.class);
+			EasyMock.expect(env.getEnv()).andReturn(environment);
+			EasyMock.replay(env);
 
-		Map<String, String> environment = new HashMap<>();
-		environment.put(TERM_PROPERTY, XTERM);
-		Environment env = EasyMock.createMock(Environment.class);
-		EasyMock.expect(env.getEnv()).andReturn(environment);
-		EasyMock.replay(env);
+			SshCommand command = new SshCommand(processor, context);
+			command.ssh(new String[] { START_COMMAND });
 
-		SshCommand command = new SshCommand(processor, context);
-		command.ssh(new String[] {START_COMMAND});
-
-		SshClient client = SshClient.setUpDefaultClient();
-		client.start();
-		try {
-			ConnectFuture connectFuture = client.connect(USERNAME, HOST, SSH_PORT);
-			DefaultConnectFuture defaultConnectFuture = (DefaultConnectFuture) connectFuture;
-
+			SshClient client = SshClient.setUpDefaultClient();
+			client.start();
 			try {
-				Thread.sleep(WAIT_TIME);
-			} catch (InterruptedException ie) {
-				// do nothing
-			}
-			ClientSession sshSession = defaultConnectFuture.getSession();
+				ConnectFuture connectFuture = client.connect(USERNAME, HOST, SSH_PORT);
+				DefaultConnectFuture defaultConnectFuture = (DefaultConnectFuture) connectFuture;
 
-			sshSession.addPasswordIdentity(PASSWORD);
-			ClientChannel channel = sshSession.createChannel("shell");
-			channel.setIn(new ByteArrayInputStream((TEST_CONTENT + "\n").getBytes(StandardCharsets.UTF_8)));
-			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-			channel.setOut(byteOut);
-			channel.setErr(byteOut);
-			channel.open();
-			try {
-				Thread.sleep(WAIT_TIME);
-			} catch (InterruptedException ie) {
-				// do nothing
+				try {
+					Thread.sleep(WAIT_TIME);
+				} catch (InterruptedException ie) {
+					// do nothing
+				}
+				try (ClientSession sshSession = defaultConnectFuture.getSession()) {
+					sshSession.addPasswordIdentity(PASSWORD);
+					ClientChannel channel = sshSession.createChannel("shell");
+					channel.setIn(new ByteArrayInputStream((TEST_CONTENT + "\n").getBytes(StandardCharsets.UTF_8)));
+					ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+					channel.setOut(byteOut);
+					channel.setErr(byteOut);
+					channel.open();
+					try {
+						Thread.sleep(WAIT_TIME);
+					} catch (InterruptedException ie) {
+						// do nothing
+					}
+					byte[] output = byteOut.toByteArray();
+					Assert.assertEquals("Output not as expected", Integer.toString(TEST_CONTENT),
+							new String(output).trim());
+				}
+			} finally {
+				client.stop();
 			}
-			byte[] output = byteOut.toByteArray();
-			Assert.assertEquals("Output not as expected",Integer.toString(TEST_CONTENT), new String(output).trim());
-			sshSession.close(true);
-		} finally {
-			client.stop();
+
+			command.ssh(new String[] { STOP_COMMAND });
+			return;
 		}
-
-		command.ssh(new String[] {STOP_COMMAND});
-		return;
 	}
-	
+
 	@After
 	public void cleanUp() {
 		clean();
 	}
-	
+
 	private void clean() {
 		System.setProperty(USER_STORE_FILE_NAME, "");
-    	File file = new File(STORE_FILE_NAME);
-    	if (file.exists()) {
-    		file.delete();
-    	}
-    	
-    	System.setProperty(JAAS_CONFIG_PROPERTY_NAME, "");
-    	File jaasConfFile = new File(JAAS_CONFIG_FILE_NAME);
-    	if (jaasConfFile.exists()) {
-    		jaasConfFile.delete();
-    	}
+		File file = new File(STORE_FILE_NAME);
+		if (file.exists()) {
+			file.delete();
+		}
+
+		System.setProperty(JAAS_CONFIG_PROPERTY_NAME, "");
+		File jaasConfFile = new File(JAAS_CONFIG_FILE_NAME);
+		if (jaasConfFile.exists()) {
+			jaasConfFile.delete();
+		}
 	}
-	
+
 	private void initStore() throws Exception {
 		System.setProperty(USER_STORE_FILE_NAME, STORE_FILE_NAME);
-        SecureUserStore.initStorage();
-        SecureUserStore.putUser(USERNAME, DigestUtil.encrypt(PASSWORD), null);
+		SecureUserStore.initStorage();
+		SecureUserStore.putUser(USERNAME, DigestUtil.encrypt(PASSWORD), null);
 	}
-	
+
 	private void initJaasConfigFile() throws Exception {
 		System.setProperty(JAAS_CONFIG_PROPERTY_NAME, JAAS_CONFIG_FILE_NAME);
 		File jaasConfFile = new File(JAAS_CONFIG_FILE_NAME);
-    	if (!jaasConfFile.exists()) {
-    		PrintWriter out = null;
-    		try {
-				out = new PrintWriter(jaasConfFile);
+		if (!jaasConfFile.exists()) {
+			try (PrintWriter out = new PrintWriter(jaasConfFile);) {
 				out.println("equinox_console {");
 				out.println("	org.eclipse.equinox.console.jaas.SecureStorageLoginModule REQUIRED;");
 				out.println("};");
-			} finally {
-				if (out != null) {
-					out.close();
-				}
 			}
-    	}
+		}
 	}
 }
