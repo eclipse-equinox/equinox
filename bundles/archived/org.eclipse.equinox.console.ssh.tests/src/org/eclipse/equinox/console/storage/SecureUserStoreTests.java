@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 SAP AG
+ * Copyright (c) 2011, 2018 SAP AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,15 +14,16 @@
 
 package org.eclipse.equinox.console.storage;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.equinox.console.jaas.SecureStorageLoginModule;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 public class SecureUserStoreTests {
