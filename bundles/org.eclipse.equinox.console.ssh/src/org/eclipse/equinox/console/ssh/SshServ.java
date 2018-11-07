@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 SAP AG and others.
+ * Copyright (c) 2011, 2018 SAP AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,16 +15,8 @@
 package org.eclipse.equinox.console.ssh;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.PublicKey;
 import java.util.List;
-
-import org.eclipse.equinox.console.internal.ssh.AuthorizedKeysFileAuthenticator;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.sshd.server.SshServer;
@@ -32,7 +24,10 @@ import org.apache.sshd.server.auth.password.PasswordAuthenticator;
 import org.apache.sshd.server.auth.pubkey.PublickeyAuthenticator;
 import org.apache.sshd.server.jaas.JaasPasswordAuthenticator;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
-import org.apache.sshd.server.session.ServerSession;
+import org.eclipse.equinox.console.internal.ssh.AuthorizedKeysFileAuthenticator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 
 /**
  *  This class configures and start an ssh server
@@ -107,38 +102,34 @@ public class SshServ extends Thread {
 			AuthorizedKeysFileAuthenticator authenticator = new AuthorizedKeysFileAuthenticator();
 			authenticator.setAuthorizedKeysFile(authorizedKeysFile);
 			return authenticator;
-		} 
-		
+		}
+
 		final String customPublicKeysAuthentication = System.getProperty(SSH_CUSTOM_PUBLIC_KEY_AUTHENTICATION);
-		
+
 		// fall back to dynamic provider based on available OSGi services only if explicitly specified
 		if ("true".equals(customPublicKeysAuthentication)) {
-			return new PublickeyAuthenticator() {
-
-				@Override
-				public boolean authenticate(String username, PublicKey key, ServerSession session) {
-					// find available services
-					try {
-						for (ServiceReference<PublickeyAuthenticator> reference : context.getServiceReferences(PublickeyAuthenticator.class, null)) {
-							PublickeyAuthenticator authenticator = null;
-							try {
-								authenticator = context.getService(reference);
-								// first positive match wins; continue looking otherwise
-								if(authenticator.authenticate(username, key, session))
-									return true;
-							} finally {
-								if(null != authenticator)
-									context.ungetService(reference);
-							}
+			return (username, key, session) -> {
+				// find available services
+				try {
+					for (ServiceReference<PublickeyAuthenticator> reference : context.getServiceReferences(PublickeyAuthenticator.class, null)) {
+						PublickeyAuthenticator authenticator = null;
+						try {
+							authenticator = context.getService(reference);
+							// first positive match wins; continue looking otherwise
+							if(authenticator.authenticate(username, key, session))
+								return true;
+						} finally {
+							if(null != authenticator)
+								context.ungetService(reference);
 						}
-					} catch (InvalidSyntaxException e) {
-						// no filter is used
 					}
-					return false;
+				} catch (InvalidSyntaxException e) {
+					// no filter is used
 				}
+				return false;
 			};
 		}
-		
+
 		return null;
     }
 }
