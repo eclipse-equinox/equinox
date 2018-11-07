@@ -95,6 +95,8 @@
     <module>bundles/org.eclipse.equinox.console</module>
     <module>bundles/org.eclipse.equinox.console.jaas.fragment</module>
     <module>bundles/org.eclipse.equinox.console.ssh</module>
+    <module>bundles/org.eclipse.equinox.console.ssh.tests</module>
+    <module>bundles/org.eclipse.equinox.console.tests</module>
     <module>bundles/org.eclipse.equinox.coordinator</module>
     <module>bundles/org.eclipse.equinox.device</module>
     <module>bundles/org.eclipse.equinox.ds</module>
