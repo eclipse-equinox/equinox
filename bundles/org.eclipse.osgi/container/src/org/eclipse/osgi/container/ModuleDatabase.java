@@ -13,8 +13,21 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.io.*;
-import java.util.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
@@ -28,10 +41,14 @@ import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.container.ComputeNodeOrder;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.resource.*;
+import org.osgi.resource.Namespace;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Wire;
 import org.osgi.service.resolver.Resolver;
 
 /**
@@ -120,7 +137,7 @@ public class ModuleDatabase {
 	/**
 	 * Monitors read and write access to this database
 	 */
-	private final ReentrantReadWriteLock monitor = new ReentrantReadWriteLock(true);
+	private final ReentrantReadWriteLock monitor = new ReentrantReadWriteLock(false);
 
 	static enum Sort {
 		BY_DEPENDENCY, BY_START_LEVEL, BY_ID;
