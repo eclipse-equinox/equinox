@@ -7,17 +7,18 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Lazar Kirchev, SAP AG - initial API and implementation
  *******************************************************************************/
 package org.eclipse.equinox.console.ssh;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.io.StringBufferInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -73,11 +74,11 @@ public class SshCommandWithConfigAdminTests {
 		initStore();
         initJaasConfigFile();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testSshCommandWithConfigAdmin() throws Exception {
-		
+
 		CommandSession session = EasyMock.createMock(CommandSession.class);
 		EasyMock.makeThreadSafe(session, true);
 		EasyMock.expect(session.put((String)EasyMock.anyObject(), EasyMock.anyObject())).andReturn(EasyMock.anyObject()).times(5);
@@ -101,8 +102,8 @@ public class SshCommandWithConfigAdminTests {
 		EasyMock.expect(context.getProperty(DEFAULT_USER_STORAGE)).andReturn(TRUE).anyTimes();
         EasyMock.expect(
         		(ServiceRegistration) context.registerService(
-        				(String)EasyMock.anyObject(), 
-        				(ManagedService)EasyMock.anyObject(), 
+        				(String)EasyMock.anyObject(),
+        				(ManagedService)EasyMock.anyObject(),
         				(Dictionary<String, ?>)EasyMock.anyObject())
         	).andAnswer((IAnswer<ServiceRegistration<?>>) () -> {
 				configurator = (ManagedService) EasyMock.getCurrentArguments()[1];
@@ -110,8 +111,8 @@ public class SshCommandWithConfigAdminTests {
 			});
         EasyMock.expect(
         		context.registerService(
-        				(String)EasyMock.anyObject(), 
-        				(SshCommand)EasyMock.anyObject(), 
+        				(String)EasyMock.anyObject(),
+        				(SshCommand)EasyMock.anyObject(),
         				(Dictionary<String, ?>)EasyMock.anyObject())).andReturn(null);
 		EasyMock.replay(context);
 
@@ -143,7 +144,7 @@ public class SshCommandWithConfigAdminTests {
 
 			sshSession.addPasswordIdentity(PASSWORD);
 			ClientChannel channel = sshSession.createChannel("shell");
-			channel.setIn(new StringBufferInputStream(TEST_CONTENT + "\n"));
+			channel.setIn(new ByteArrayInputStream((TEST_CONTENT + "\n").getBytes(StandardCharsets.UTF_8)));
 			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 			channel.setOut(byteOut);
 			channel.setErr(byteOut);
@@ -163,17 +164,17 @@ public class SshCommandWithConfigAdminTests {
 		command.ssh(new String[] {STOP_COMMAND});
 		return;
 	}
-	
+
 	@Test
 	public void testSshCommandWithConfigAdminDisabledSsh() throws Exception {
 		testDisabled(false);
 	}
-	
+
 	@Test
 	public void testSshCommandWithConfigAdminDisabledSshByDefault() throws Exception {
 		testDisabled(true);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void testDisabled(boolean isDefault) throws Exception {
 		CommandSession session = EasyMock.createMock(CommandSession.class);
@@ -197,8 +198,8 @@ public class SshCommandWithConfigAdminTests {
 		EasyMock.expect(context.getProperty(DEFAULT_USER_STORAGE)).andReturn(TRUE).anyTimes();
         EasyMock.expect(
         		(ServiceRegistration) context.registerService(
-        				(String)EasyMock.anyObject(), 
-        				(ManagedService)EasyMock.anyObject(), 
+        				(String)EasyMock.anyObject(),
+        				(ManagedService)EasyMock.anyObject(),
         				(Dictionary<String, ?>)EasyMock.anyObject())
         	).andAnswer((IAnswer<ServiceRegistration<?>>) () -> {
 				configurator = (ManagedService) EasyMock.getCurrentArguments()[1];
@@ -206,8 +207,8 @@ public class SshCommandWithConfigAdminTests {
 			});
         EasyMock.expect(
         		context.registerService(
-        				(String)EasyMock.anyObject(), 
-        				(SshCommand)EasyMock.anyObject(), 
+        				(String)EasyMock.anyObject(),
+        				(SshCommand)EasyMock.anyObject(),
         				(Dictionary<String, ?>)EasyMock.anyObject())).andReturn(null);
 		EasyMock.replay(context);
 
@@ -254,32 +255,32 @@ public class SshCommandWithConfigAdminTests {
 		}
 		return;
 	}
-	
+
 	@After
 	public void cleanUp() {
 		clean();
 	}
-	
+
 	private void clean() {
 		System.setProperty(USER_STORE_FILE_NAME, "");
     	File file = new File(STORE_FILE_NAME);
     	if (file.exists()) {
     		file.delete();
     	}
-    	
+
     	System.setProperty(JAAS_CONFIG_PROPERTY_NAME, "");
     	File jaasConfFile = new File(JAAS_CONFIG_FILE_NAME);
     	if (jaasConfFile.exists()) {
     		jaasConfFile.delete();
     	}
 	}
-	
+
 	private void initStore() throws Exception {
 		System.setProperty(USER_STORE_FILE_NAME, STORE_FILE_NAME);
         SecureUserStore.initStorage();
         SecureUserStore.putUser(USERNAME, DigestUtil.encrypt(PASSWORD), null);
 	}
-	
+
 	private void initJaasConfigFile() throws Exception {
 		System.setProperty(JAAS_CONFIG_PROPERTY_NAME, JAAS_CONFIG_FILE_NAME);
 		File jaasConfFile = new File(JAAS_CONFIG_FILE_NAME);
@@ -297,5 +298,5 @@ public class SshCommandWithConfigAdminTests {
 			}
     	}
 	}
-	
+
 }

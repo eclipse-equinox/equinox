@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 SAP AG
+ * Copyright (c) 2011, 2018 SAP AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,22 +14,23 @@
 
 package org.eclipse.equinox.console.ssh;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.io.StringBufferInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.sshd.client.channel.ClientChannel;
-import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.client.SshClient;
+import org.apache.sshd.client.channel.ClientChannel;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.future.DefaultConnectFuture;
+import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.server.Environment;
 import org.easymock.EasyMock;
 import org.eclipse.equinox.console.common.ConsoleInputStream;
@@ -118,7 +119,7 @@ public class SshCommandTests {
 
 			sshSession.addPasswordIdentity(PASSWORD);
 			ClientChannel channel = sshSession.createChannel("shell");
-			channel.setIn(new StringBufferInputStream(TEST_CONTENT + "\n"));
+			channel.setIn(new ByteArrayInputStream((TEST_CONTENT + "\n").getBytes(StandardCharsets.UTF_8)));
 			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 			channel.setOut(byteOut);
 			channel.setErr(byteOut);
