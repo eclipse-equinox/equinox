@@ -134,7 +134,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 			if (port == -1)
 				port = httpsConnector.getPort();
 			holder.setInitParameter(JettyConstants.HTTPS_PORT, Integer.toString(port));
-			String host = httpConnector.getHost();
+			String host = httpsConnector.getHost();
 			if (host != null)
 				holder.setInitParameter(JettyConstants.HTTPS_HOST, host);
 		}
