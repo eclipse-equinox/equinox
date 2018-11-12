@@ -7,9 +7,11 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Inno-Tec Innovative Technologies GmbH - Fix for Bug 388055
+ *
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.storage;
 
@@ -24,15 +26,18 @@ public class CryptoData {
 	 * Separates salt from the data; this must not be a valid Base64 character.
 	 */
 	static private final char SALT_SEPARATOR = ',';
+	static private final char IV_SEPARATOR = ';';
 
 	final private String moduleID;
 	final private byte[] salt;
+	final private byte[] iv;
 	final private byte[] encryptedData;
 
-	public CryptoData(String moduleID, byte[] salt, byte[] data) {
+	public CryptoData(String moduleID, byte[] salt, byte[] data, byte[] iv) {
 		this.moduleID = moduleID;
 		this.salt = salt;
 		this.encryptedData = data;
+		this.iv = iv;
 	}
 
 	public String getModuleID() {
@@ -45,6 +50,10 @@ public class CryptoData {
 
 	public byte[] getData() {
 		return encryptedData;
+	}
+
+	public byte[] getIV() {
+		return iv;
 	}
 
 	public CryptoData(String data) throws StorageException {
@@ -61,10 +70,18 @@ public class CryptoData {
 			encrypted = data.substring(pos + 1);
 		}
 
+		// separate IV
+		int ivPos = encrypted.indexOf(IV_SEPARATOR);
+		if (ivPos != -1) {
+			iv = Base64.decode(encrypted.substring(0, ivPos));
+		} else { // this data does not provide an IV
+			iv = null;
+		}
+
 		// separate salt and data
 		int saltPos = encrypted.indexOf(SALT_SEPARATOR);
 		if (saltPos != -1) {
-			salt = Base64.decode(encrypted.substring(0, saltPos));
+			salt = Base64.decode(encrypted.substring(ivPos + 1, saltPos));
 			encryptedData = Base64.decode(encrypted.substring(saltPos + 1));
 		} else { // this is a "null" value
 			if (encrypted.length() != 0) // double check that this is not a broken entry
@@ -78,8 +95,13 @@ public class CryptoData {
 	public String toString() {
 		StringBuffer encryptedText = (moduleID == null) ? new StringBuffer() : new StringBuffer(moduleID);
 		encryptedText.append(MODULE_ID_SEPARATOR);
-		if (salt != null)
+		if (iv != null) {
+			encryptedText.append(Base64.encode(iv));
+		}
+		if (salt != null) {
+			encryptedText.append(IV_SEPARATOR);
 			encryptedText.append(Base64.encode(salt));
+		}
 		if (encryptedData != null) {
 			encryptedText.append(SALT_SEPARATOR);
 			encryptedText.append(Base64.encode(encryptedData));

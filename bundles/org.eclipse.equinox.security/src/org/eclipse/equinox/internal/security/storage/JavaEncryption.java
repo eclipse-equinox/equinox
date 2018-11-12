@@ -7,9 +7,11 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Inno-Tec Innovative Technologies GmbH - Fix for Bug 388055
+ *
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.storage;
 
@@ -18,8 +20,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 import java.util.Map.Entry;
 import javax.crypto.*;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.PBEParameterSpec;
+import javax.crypto.spec.*;
 import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
@@ -144,9 +145,10 @@ public class JavaEncryption {
 
 			Cipher c = Cipher.getInstance(cipherAlgorithm);
 			c.init(Cipher.ENCRYPT_MODE, key, entropy);
+			byte[] iv = c.getIV();
 
 			byte[] result = c.doFinal(clearText);
-			return new CryptoData(passwordExt.getModuleID(), salt, result);
+			return new CryptoData(passwordExt.getModuleID(), salt, result, iv);
 		} catch (InvalidKeyException e) {
 			handle(e, StorageException.ENCRYPTION_ERROR);
 			return null;
@@ -181,7 +183,17 @@ public class JavaEncryption {
 			SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(keyFactoryAlgorithm);
 			SecretKey key = keyFactory.generateSecret(passwordExt.getPassword());
 
-			PBEParameterSpec entropy = new PBEParameterSpec(encryptedData.getSalt(), SALT_ITERATIONS);
+			IvParameterSpec ivParamSpec = null;
+			if (encryptedData.getIV() != null) {
+				ivParamSpec = new IvParameterSpec(encryptedData.getIV());
+			}
+
+			PBEParameterSpec entropy = null;
+			if (ivParamSpec != null) {
+				entropy = new PBEParameterSpec(encryptedData.getSalt(), SALT_ITERATIONS, ivParamSpec);
+			} else {
+				entropy = new PBEParameterSpec(encryptedData.getSalt(), SALT_ITERATIONS);
+			}
 
 			Cipher c = Cipher.getInstance(cipherAlgorithm);
 			c.init(Cipher.DECRYPT_MODE, key, entropy);

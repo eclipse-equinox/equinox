@@ -7,9 +7,11 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Inno-Tec Innovative Technologies GmbH - Fix for Bug 388055
+ *
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.storage;
 
@@ -218,7 +220,7 @@ public class SecurePreferences {
 		checkRemoved();
 
 		if (!encrypt || value == null) {
-			CryptoData clearValue = new CryptoData(null, null, StorageUtils.getBytes(value));
+			CryptoData clearValue = new CryptoData(null, null, StorageUtils.getBytes(value), null);
 			internalPut(key, clearValue.toString()); // uses Base64 to encode byte sequences
 			markModified();
 			return;
@@ -228,7 +230,7 @@ public class SecurePreferences {
 		if (passwordExt == null) {
 			boolean storeDecrypted = !CallbacksProvider.getDefault().runningUI() || InternalExchangeUtils.isJUnitApp();
 			if (storeDecrypted) { // for JUnits and headless runs we store value as clear text and log a error
-				CryptoData clearValue = new CryptoData(null, null, StorageUtils.getBytes(value));
+				CryptoData clearValue = new CryptoData(null, null, StorageUtils.getBytes(value), null);
 				internalPut(key, clearValue.toString());
 				markModified();
 				// Make this as visible as possible. Both print out the output and log a error
