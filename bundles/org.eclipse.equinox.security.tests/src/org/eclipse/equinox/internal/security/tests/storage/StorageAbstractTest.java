@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,7 +33,7 @@ public class StorageAbstractTest {
 
 	final protected String defaultFileName = "secure_storage_test.equinox";
 
-	private List<ISecurePreferences> openPreferences = new ArrayList<ISecurePreferences>(5); // <ISecurePreferences>
+	private List<ISecurePreferences> openPreferences = new ArrayList<>(5); // <ISecurePreferences>
 
 	protected String getModuleID() {
 		return null;
@@ -72,7 +72,7 @@ public class StorageAbstractTest {
 	}
 
 	protected Map<String, Object> getOptions(String defaultPassword) {
-		Map<String, Object> options = new HashMap<String, Object>();
+		Map<String, Object> options = new HashMap<>();
 
 		if (defaultPassword != null) {
 			PBEKeySpec password = new PBEKeySpec(defaultPassword.toCharArray());

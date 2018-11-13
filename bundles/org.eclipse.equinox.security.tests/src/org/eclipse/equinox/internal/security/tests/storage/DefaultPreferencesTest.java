@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,7 @@ package org.eclipse.equinox.internal.security.tests.storage;
  */
 public class DefaultPreferencesTest extends SecurePreferencesTest {
 
+	@Override
 	protected String getModuleID() {
 		return null;
 	}

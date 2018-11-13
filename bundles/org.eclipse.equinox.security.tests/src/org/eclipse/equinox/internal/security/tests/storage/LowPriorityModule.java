@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -24,10 +24,12 @@ public class LowPriorityModule extends PasswordProvider {
 
 	public final static PBEKeySpec PASSWORD = new PBEKeySpec("LowPriorityPassword".toCharArray());
 
+	@Override
 	public PBEKeySpec getPassword(IPreferencesContainer container, int passwordType) {
 		return PASSWORD;
 	}
 
+	@Override
 	public boolean retryOnError(Exception e, IPreferencesContainer container) {
 		return false;
 	}

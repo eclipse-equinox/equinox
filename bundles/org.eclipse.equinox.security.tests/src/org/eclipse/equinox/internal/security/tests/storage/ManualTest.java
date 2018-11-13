@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -101,7 +101,7 @@ public class ManualTest {
 	@Test
 	public void testJavaModule() throws IOException, StorageException {
 		// manual test for the Java module
-		Map<String, Object> options = new HashMap<String, Object>(1);
+		Map<String, Object> options = new HashMap<>(1);
 		options.put(IProviderHints.REQUIRED_MODULE_ID, JAVA_MODULE_ID);
 		ISecurePreferences storage = SecurePreferencesFactory.open(null, options);
 		ISecurePreferences node = storage.node("/cvs/account1");

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,10 +39,12 @@ public class WinPreferencesTest extends SecurePreferencesTest {
 	static private final String WIN_MODULE_ID = "org.eclipse.equinox.security.WindowsPasswordProvider"; //$NON-NLS-1$
 	static private final String WIN_64BIT_MODULE_ID = "org.eclipse.equinox.security.WindowsPasswordProvider64bit"; //$NON-NLS-1$
 
+	@Override
 	protected String getModuleID() {
 		return is64Bit ? WIN_64BIT_MODULE_ID : WIN_MODULE_ID;
 	}
 
+	@Override
 	protected Map<String, Object> getOptions() {
 		// Don't specify default password when testing specific password provider
 		return getOptions(null);
