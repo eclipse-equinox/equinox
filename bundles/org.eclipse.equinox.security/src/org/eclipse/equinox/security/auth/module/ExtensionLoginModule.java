@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -48,38 +48,28 @@ final public class ExtensionLoginModule implements LoginModule {
 		// place holder
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.security.auth.spi.LoginModule#initialize(javax.security.auth.Subject, javax.security.auth.callback.CallbackHandler, java.util.Map, java.util.Map)
-	 */
-	public void initialize(Subject subject, CallbackHandler callbackHandler, Map sharedState, Map options) {
+	@Override
+	public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
 		target = ExtLoginModuleLoader.load(options);
 		target.initialize(subject, callbackHandler, sharedState, options);
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.security.auth.spi.LoginModule#login()
-	 */
+	@Override
 	public boolean login() throws LoginException {
 		return target.login();
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.security.auth.spi.LoginModule#commit()
-	 */
+	@Override
 	public boolean commit() throws LoginException {
 		return target.commit();
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.security.auth.spi.LoginModule#abort()
-	 */
+	@Override
 	public boolean abort() throws LoginException {
 		return target.abort();
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.security.auth.spi.LoginModule#logout()
-	 */
+	@Override
 	public boolean logout() throws LoginException {
 		return target.logout();
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2017 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@ package org.eclipse.equinox.internal.security.storage;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.util.*;
+import java.util.Map.Entry;
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
@@ -53,7 +54,7 @@ public class JavaEncryption {
 
 	private boolean initialized = false;
 
-	private HashMap availableCiphers;
+	private HashMap<String, String> availableCiphers;
 
 	public JavaEncryption() {
 		// placeholder
@@ -88,11 +89,7 @@ public class JavaEncryption {
 			if (callback == null)
 				internalInitialize();
 			else {
-				callback.execute(new IStorageTask() {
-					public void execute() throws StorageException {
-						internalInitialize();
-					}
-				});
+				callback.execute(() -> internalInitialize());
 			}
 		} finally {
 			lock.release();
@@ -123,8 +120,8 @@ public class JavaEncryption {
 			throw new StorageException(StorageException.INTERNAL_ERROR, SecAuthMessages.noAlgorithms);
 
 		// use first available
-		cipherAlgorithm = (String) availableCiphers.keySet().iterator().next();
-		keyFactoryAlgorithm = (String) availableCiphers.get(cipherAlgorithm);
+		cipherAlgorithm = availableCiphers.keySet().iterator().next();
+		keyFactoryAlgorithm = availableCiphers.get(cipherAlgorithm);
 
 		String msg = NLS.bind(SecAuthMessages.usingAlgorithm, unavailableCipher, cipherAlgorithm);
 		AuthPlugin.getDefault().logMessage(msg);
@@ -223,16 +220,12 @@ public class JavaEncryption {
 	 * Result: Map:
 	 *    <String>cipher -> <String>keyFactory
 	 */
-	public HashMap detect() {
+	public HashMap<String, String> detect() {
 		IUICallbacks callback = CallbacksProvider.getDefault().getCallback();
 		if (callback == null)
 			return internalDetect();
 
-		IStorageTask task = new IStorageTask() {
-			public void execute() {
-				internalDetect();
-			}
-		};
+		IStorageTask task = () -> internalDetect();
 		try {
 			callback.execute(task);
 		} catch (StorageException e) { // should not happen in this path
@@ -241,13 +234,12 @@ public class JavaEncryption {
 		return availableCiphers;
 	}
 
-	public HashMap internalDetect() {
-		Set ciphers = findProviders(CIPHER);
-		Set keyFactories = findProviders(SECRET_KEY_FACTORY);
-		availableCiphers = new HashMap(ciphers.size());
+	public HashMap<String, String> internalDetect() {
+		Set<String> ciphers = findProviders(CIPHER);
+		Set<String> keyFactories = findProviders(SECRET_KEY_FACTORY);
+		availableCiphers = new HashMap<>(ciphers.size());
 
-		for (Iterator i = ciphers.iterator(); i.hasNext();) {
-			String cipher = (String) i.next();
+		for (String cipher : ciphers) {
 			// check if there is a key factory with the same name
 			if (keyFactories.contains(cipher)) {
 				if (roundtrip(cipher, cipher)) {
@@ -255,8 +247,7 @@ public class JavaEncryption {
 					continue;
 				}
 			}
-			for (Iterator j = keyFactories.iterator(); j.hasNext();) {
-				String keyFactory = (String) j.next();
+			for (String keyFactory : keyFactories) {
 				if (roundtrip(cipher, keyFactory)) {
 					availableCiphers.put(cipher, keyFactory);
 					continue;
@@ -266,13 +257,13 @@ public class JavaEncryption {
 		return availableCiphers;
 	}
 
-	private Set findProviders(String prefix) {
+	private Set<String> findProviders(String prefix) {
 		Provider[] providers = Security.getProviders();
-		Set algorithms = new HashSet();
+		Set<String> algorithms = new HashSet<>();
 		int prefixLength = prefix.length();
 		for (int i = 0; i < providers.length; i++) {
-			for (Iterator j = providers[i].entrySet().iterator(); j.hasNext();) {
-				Map.Entry entry = (Map.Entry) j.next();
+			for (Iterator<Entry<Object, Object>> j = providers[i].entrySet().iterator(); j.hasNext();) {
+				Entry<Object, Object> entry = j.next();
 				Object key = entry.getKey();
 				if (key == null)
 					continue;

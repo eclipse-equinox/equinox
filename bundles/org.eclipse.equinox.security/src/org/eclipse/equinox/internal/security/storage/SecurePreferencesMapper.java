@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2015 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -45,7 +45,7 @@ public class SecurePreferencesMapper {
 
 	static private ISecurePreferences defaultPreferences = null;
 
-	static private Map preferences = new HashMap(); // URL.toString() -> SecurePreferencesRoot
+	static private Map<String, SecurePreferencesRoot> preferences = new HashMap<>(); // URL.toString() -> SecurePreferencesRoot
 
 	final public static String USER_HOME = "user.home"; //$NON-NLS-1$
 
@@ -110,7 +110,7 @@ public class SecurePreferencesMapper {
 		String key = location.toString();
 		SecurePreferencesRoot root;
 		if (preferences.containsKey(key))
-			root = (SecurePreferencesRoot) preferences.get(key);
+			root = preferences.get(key);
 		else {
 			root = new SecurePreferencesRoot(location);
 			preferences.put(key, root);
@@ -123,8 +123,7 @@ public class SecurePreferencesMapper {
 
 	static public void stop() {
 		synchronized (preferences) {
-			for (Iterator i = preferences.values().iterator(); i.hasNext();) {
-				SecurePreferencesRoot provider = (SecurePreferencesRoot) i.next();
+			for (SecurePreferencesRoot provider : preferences.values()) {
 				try {
 					provider.flush();
 				} catch (IOException e) {
@@ -139,8 +138,7 @@ public class SecurePreferencesMapper {
 
 	static public void clearPasswordCache() {
 		synchronized (preferences) {
-			for (Iterator i = preferences.values().iterator(); i.hasNext();) {
-				SecurePreferencesRoot provider = (SecurePreferencesRoot) i.next();
+			for (SecurePreferencesRoot provider : preferences.values()) {
 				provider.clearPasswordCache();
 			}
 		}
@@ -151,8 +149,8 @@ public class SecurePreferencesMapper {
 		if (root == null)
 			return;
 		synchronized (preferences) {
-			for (Iterator i = preferences.values().iterator(); i.hasNext();) {
-				SecurePreferencesRoot provider = (SecurePreferencesRoot) i.next();
+			for (Iterator<SecurePreferencesRoot> i = preferences.values().iterator(); i.hasNext();) {
+				SecurePreferencesRoot provider = i.next();
 				if (!root.equals(provider))
 					continue;
 				i.remove();
@@ -191,7 +189,7 @@ public class SecurePreferencesMapper {
 			if (buffer.length() == 0)
 				return options;
 			if (options == null)
-				options = new HashMap(1);
+				options = new HashMap<>(1);
 			if (!options.containsKey(IProviderHints.DEFAULT_PASSWORD))
 				options.put(IProviderHints.DEFAULT_PASSWORD, new PBEKeySpec(buffer.toString().toCharArray()));
 		} catch (IOException e) {

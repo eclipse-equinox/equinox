@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -27,8 +27,8 @@ public class ConfigurationFederator extends Configuration {
 	// events
 	private Configuration[] federatedConfigs = null;
 
-	private Hashtable configCache = new Hashtable(5);
-	private Hashtable configToProviderMap = new Hashtable(5);
+	private Hashtable<String, AppConfigurationEntry[]> configCache = new Hashtable<>(5);
+	private Hashtable<String, String> configToProviderMap = new Hashtable<>(5);
 
 	final private Configuration defaultConfiguration;
 
@@ -36,8 +36,9 @@ public class ConfigurationFederator extends Configuration {
 		this.defaultConfiguration = defaultConfiguration;
 	}
 
+	@Override
 	public synchronized AppConfigurationEntry[] getAppConfigurationEntry(String name) {
-		AppConfigurationEntry[] returnValue = (AppConfigurationEntry[]) configCache.get(name);
+		AppConfigurationEntry[] returnValue = configCache.get(name);
 		if (returnValue != null)
 			return returnValue;
 
@@ -54,7 +55,7 @@ public class ConfigurationFederator extends Configuration {
 			AppConfigurationEntry[] config = allConfigs[i].getAppConfigurationEntry(name);
 			if (config == null)
 				continue;
-			String cachedProviderName = (String) configToProviderMap.get(name);
+			String cachedProviderName = configToProviderMap.get(name);
 			if (cachedProviderName != null && !cachedProviderName.equals(allConfigs[i].getClass().getName())) {
 				String message = NLS.bind(SecAuthMessages.duplicateJaasConfig1, name, cachedProviderName);
 				AuthPlugin.getDefault().logError(message, null);
@@ -78,6 +79,7 @@ public class ConfigurationFederator extends Configuration {
 		return returnValue;
 	}
 
+	@Override
 	public synchronized void refresh() {
 		for (int i = 0; i < federatedConfigs.length; i++)
 			federatedConfigs[i].refresh();

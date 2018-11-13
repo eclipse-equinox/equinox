@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -64,24 +64,24 @@ import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
  */
 public class SecurePreferencesContainer implements IPreferencesContainer {
 
-	private Map wrappers = new HashMap(); // node -> SecurePreferencesWrapper
+	private Map<SecurePreferences, SecurePreferencesWrapper> wrappers = new HashMap<>(); // node -> SecurePreferencesWrapper
 
-	final private Map options;
+	final private Map<Object, Object> options;
 	final private SecurePreferencesRoot root;
 
-	public SecurePreferencesContainer(SecurePreferencesRoot root, Map options) {
+	public SecurePreferencesContainer(SecurePreferencesRoot root, Map<Object, Object> options) {
 		this.root = root;
 		if (options != null) { // make a copy to avoid problems if original is modified later
-			this.options = new HashMap(options.size());
+			this.options = new HashMap<>(options.size());
 			this.options.putAll(options);
 		} else
-			this.options = new HashMap(2);
+			this.options = new HashMap<>(2);
 	}
 
 	public ISecurePreferences wrapper(SecurePreferences node) {
 		synchronized (wrappers) {
 			if (wrappers.containsKey(node))
-				return (ISecurePreferences) wrappers.get(node);
+				return wrappers.get(node);
 			SecurePreferencesWrapper newWrapper = new SecurePreferencesWrapper(node, this);
 			wrappers.put(node, newWrapper);
 			return newWrapper;
@@ -95,10 +95,12 @@ public class SecurePreferencesContainer implements IPreferencesContainer {
 		}
 	}
 
+	@Override
 	public URL getLocation() {
 		return root.getLocation();
 	}
 
+	@Override
 	public ISecurePreferences getPreferences() {
 		return wrapper(root);
 	}
@@ -110,12 +112,14 @@ public class SecurePreferencesContainer implements IPreferencesContainer {
 	//////////////////////////////////////////////////////////////////////////////////
 	// Handling of options 
 
+	@Override
 	public boolean hasOption(Object key) {
 		synchronized (options) {
 			return options.containsKey(key);
 		}
 	}
 
+	@Override
 	public Object getOption(Object key) {
 		synchronized (options) {
 			return options.get(key);

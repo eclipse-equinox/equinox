@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2016 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -32,9 +32,9 @@ public class ReEncrypter {
 
 	private class TmpElement {
 		private String path; // absolute node path
-		private Map values; // <String>key -> <String>value
+		private Map<String, String> values; // <String>key -> <String>value
 
-		public TmpElement(String path, Map values) {
+		public TmpElement(String path, Map<String, String> values) {
 			this.path = path;
 			this.values = values;
 		}
@@ -43,7 +43,7 @@ public class ReEncrypter {
 			return path;
 		}
 
-		public Map getValues() {
+		public Map<String, String> getValues() {
 			return values;
 		}
 	}
@@ -52,7 +52,7 @@ public class ReEncrypter {
 	final private String moduleID;
 	private boolean processedOK = true;
 
-	private ArrayList elements = new ArrayList(); // List<TmpElement> 
+	private ArrayList<TmpElement> elements = new ArrayList<>(); // List<TmpElement> 
 
 	public ReEncrypter(ISecurePreferences prefs, String moduleID) {
 		this.moduleID = moduleID;
@@ -71,7 +71,7 @@ public class ReEncrypter {
 	private void decrypt(ISecurePreferences node) {
 		String[] keys = node.keys();
 		if (keys.length > 0) {
-			Map map = new HashMap(keys.length); // could be less than that
+			Map<String, String> map = new HashMap<>(keys.length); // could be less than that
 			for (int i = 0; i < keys.length; i++) {
 				try {
 					if (!node.isEncrypted(keys[i]))
@@ -124,15 +124,14 @@ public class ReEncrypter {
 		SecurePreferencesContainer container = ((SecurePreferencesWrapper) root).getContainer();
 		Object originalProperty = container.getOption(IProviderHints.REQUIRED_MODULE_ID);
 		container.setOption(IProviderHints.REQUIRED_MODULE_ID, moduleID);
-		for (Iterator i = elements.iterator(); i.hasNext();) {
-			TmpElement element = (TmpElement) i.next();
+		for (TmpElement element : elements) {
 			ISecurePreferences node = root.node(element.getPath());
-			Map values = element.getValues();
-			for (Iterator it = values.entrySet().iterator(); it.hasNext();) {
-				Entry entry = (Entry) it.next();
-				String key = (String) entry.getKey();
+			Map<String, String> values = element.getValues();
+			for (Iterator<Entry<String, String>> it = values.entrySet().iterator(); it.hasNext();) {
+				Entry<String, String> entry = it.next();
+				String key = entry.getKey();
 				try {
-					node.put(key, (String) entry.getValue(), true);
+					node.put(key, entry.getValue(), true);
 				} catch (StorageException e) {
 					// this value will not be re-coded
 					String msg = NLS.bind(SecAuthMessages.encryptingError, key, node.absolutePath());

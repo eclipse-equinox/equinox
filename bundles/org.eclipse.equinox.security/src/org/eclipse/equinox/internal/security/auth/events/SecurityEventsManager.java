@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.auth.events;
 
-import java.util.Iterator;
 import java.util.Vector;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
@@ -21,7 +20,7 @@ import org.eclipse.equinox.security.auth.ILoginContextListener;
 
 public class SecurityEventsManager {
 
-	private Vector listeners = new Vector(5);
+	private Vector<ILoginContextListener> listeners = new Vector<>(5);
 
 	synchronized public void addListener(ILoginContextListener listener) {
 		listeners.add(listener);
@@ -32,34 +31,26 @@ public class SecurityEventsManager {
 	}
 
 	public void notifyLoginBegin(Subject subject) {
-		for (Iterator i = listeners.iterator(); i.hasNext();) {
-			Object listener = i.next();
-			if (listener instanceof ILoginContextListener)
-				((ILoginContextListener) listener).onLoginStart(subject);
+		for (ILoginContextListener listener : listeners) {
+			listener.onLoginStart(subject);
 		}
 	}
 
 	public void notifyLoginEnd(Subject subject, LoginException loginException) {
-		for (Iterator i = listeners.iterator(); i.hasNext();) {
-			Object listener = i.next();
-			if (listener instanceof ILoginContextListener)
-				((ILoginContextListener) listener).onLoginFinish(subject, loginException);
+		for (ILoginContextListener listener : listeners) {
+			listener.onLoginFinish(subject, loginException);
 		}
 	}
 
 	public void notifyLogoutBegin(Subject subject) {
-		for (Iterator i = listeners.iterator(); i.hasNext();) {
-			Object listener = i.next();
-			if (listener instanceof ILoginContextListener)
-				((ILoginContextListener) listener).onLogoutStart(subject);
+		for (ILoginContextListener listener : listeners) {
+			listener.onLogoutStart(subject);
 		}
 	}
 
 	public void notifyLogoutEnd(Subject subject, LoginException loginException) {
-		for (Iterator i = listeners.iterator(); i.hasNext();) {
-			Object listener = i.next();
-			if (listener instanceof ILoginContextListener)
-				((ILoginContextListener) listener).onLogoutFinish(subject, loginException);
+		for (ILoginContextListener listener : listeners) {
+			listener.onLogoutFinish(subject, loginException);
 		}
 	}
 }

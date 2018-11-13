@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,14 +26,17 @@ public class EquinoxPrivateCredential implements IPrivateCredential {
 		this.loginModuleID = loginModuleID;
 	}
 
+	@Override
 	public PBEKeySpec getPrivateKey() {
 		return key;
 	}
 
+	@Override
 	public String getProviderID() {
 		return loginModuleID;
 	}
 
+	@Override
 	public void clear() {
 		if (key != null)
 			key.clearPassword();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.storage.friends;
 
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -27,9 +26,9 @@ public class PasswordProviderDescription {
 	private String id;
 	private String name;
 	private String description;
-	private List hints;
+	private List<String> hints;
 
-	public PasswordProviderDescription(String name, String id, int priority, String description, List hints) {
+	public PasswordProviderDescription(String name, String id, int priority, String description, List<String> hints) {
 		this.id = id;
 		this.name = name;
 		this.priority = priority;
@@ -52,8 +51,7 @@ public class PasswordProviderDescription {
 	public boolean hasHint(String hint) {
 		if (hints == null)
 			return false;
-		for (Iterator i = hints.iterator(); i.hasNext();) {
-			String candidate = (String) i.next();
+		for (String candidate : hints) {
 			if (hint.equalsIgnoreCase(candidate))
 				return true;
 		}

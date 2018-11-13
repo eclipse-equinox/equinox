@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -32,7 +32,7 @@ public class ExtLoginModuleLoader {
 	final private static String ELEM_MODULE = "loginModule"; //$NON-NLS-1$
 	final private static String ATTR_MODULE_CLASS = "class"; //$NON-NLS-1$
 
-	public static LoginModule load(Map options) {
+	public static LoginModule load(Map<String, ?> options) {
 		IExtensionRegistry registry = RegistryFactory.getRegistry();
 		IExtensionPoint point = registry.getExtensionPoint(POINT_MODULE);
 		IExtension[] extensions = point.getExtensions();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2016 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -80,7 +80,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 
 	private JavaEncryption cipher = new JavaEncryption();
 
-	private Map passwordCache = new HashMap(5); // cached passwords: module ID -> PasswordExt 
+	private Map<String, PasswordExt> passwordCache = new HashMap<>(5); // cached passwords: module ID -> PasswordExt 
 
 	public SecurePreferencesRoot(URL location) throws IOException {
 		super(null, null);
@@ -96,6 +96,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		return cipher;
 	}
 
+	@Override
 	public boolean isModified() {
 		return modified;
 	}
@@ -142,8 +143,8 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			properties.remove(KEY_FACTORY_KEY);
 		}
 
-		for (Iterator it = properties.entrySet().iterator(); it.hasNext();) {
-			Entry entry = (Entry) it.next();
+		for (Iterator<Entry<Object, Object>> it = properties.entrySet().iterator(); it.hasNext();) {
+			Entry<Object, Object> entry = it.next();
 			Object externalKey = entry.getKey();
 			Object value = entry.getValue();
 			if (!(externalKey instanceof String))
@@ -160,6 +161,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		}
 	}
 
+	@Override
 	synchronized public void flush() throws IOException {
 		if (location == null)
 			return;
@@ -245,7 +247,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			// Quick check first: it is cached?
 			synchronized (passwordCache) {
 				if (passwordCache.containsKey(key))
-					return (PasswordExt) passwordCache.get(key);
+					return passwordCache.get(key);
 			}
 
 			// if this is (a headless run or JUnit) and prompt hint is not set up, set it to "false"

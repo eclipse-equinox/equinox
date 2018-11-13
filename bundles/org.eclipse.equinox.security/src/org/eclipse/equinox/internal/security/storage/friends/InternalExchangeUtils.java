@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -40,7 +40,7 @@ public class InternalExchangeUtils {
 	 * the secure storage. Returns Map of pairs: supported cipher algorithm to 
 	 * a supported key factory algorithm.
 	 */
-	static public Map ciphersDetectAvailable() {
+	static public Map<String, String> ciphersDetectAvailable() {
 		return new JavaEncryption().detect();
 	}
 
@@ -50,11 +50,10 @@ public class InternalExchangeUtils {
 	 * might fail on instantiation and not be available for the actual use.
 	 * @return available password providers as described in extensions
 	 */
-	static public List passwordProvidersFind() {
-		List availableModules = PasswordProviderSelector.getInstance().findAvailableModules(null);
-		List result = new ArrayList(availableModules.size());
-		for (Iterator i = availableModules.iterator(); i.hasNext();) {
-			ExtStorageModule module = (ExtStorageModule) i.next();
+	static public List<PasswordProviderDescription> passwordProvidersFind() {
+		List<ExtStorageModule> availableModules = PasswordProviderSelector.getInstance().findAvailableModules(null);
+		List<PasswordProviderDescription> result = new ArrayList<>(availableModules.size());
+		for (ExtStorageModule module : availableModules) {
 			result.add(new PasswordProviderDescription(module.name, module.moduleID, module.priority, module.description, module.hints));
 		}
 		return result;

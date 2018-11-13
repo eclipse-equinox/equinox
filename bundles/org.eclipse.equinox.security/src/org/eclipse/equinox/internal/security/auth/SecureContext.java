@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,8 +20,8 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import org.eclipse.equinox.internal.security.auth.events.SecurityEventsManager;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
-import org.eclipse.equinox.security.auth.ILoginContextListener;
 import org.eclipse.equinox.security.auth.ILoginContext;
+import org.eclipse.equinox.security.auth.ILoginContextListener;
 
 public class SecureContext implements ILoginContext {
 
@@ -45,6 +45,7 @@ public class SecureContext implements ILoginContext {
 		this.handler = handler;
 	}
 
+	@Override
 	public void login() throws LoginException {
 		LoginContext context = getLoginContext();
 		LoginException loginException = null;
@@ -64,6 +65,7 @@ public class SecureContext implements ILoginContext {
 		loggedIn = true;
 	}
 
+	@Override
 	public void logout() throws LoginException {
 		LoginContext context = getLoginContext();
 		Subject subject = getLoginContext().getSubject();
@@ -79,12 +81,14 @@ public class SecureContext implements ILoginContext {
 		loggedIn = false;
 	}
 
+	@Override
 	public Subject getSubject() throws LoginException {
 		if (!loggedIn)
 			login();
 		return getLoginContext().getSubject();
 	}
 
+	@Override
 	public LoginContext getLoginContext() throws LoginException {
 		if (loginContext != null)
 			return loginContext;
@@ -102,10 +106,12 @@ public class SecureContext implements ILoginContext {
 		return loginContext;
 	}
 
+	@Override
 	public void registerListener(ILoginContextListener listener) {
 		eventsManager.addListener(listener);
 	}
 
+	@Override
 	public void unregisterListener(ILoginContextListener listener) {
 		eventsManager.removeListener(listener);
 	}

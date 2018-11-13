@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,10 +37,12 @@ public class EquinoxPublicCredential implements IPublicCredential {
 		this.loginModuleID = loginModuleID;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public Principal getPrimaryRole() {
 		if (primaryRole != null)
 			return primaryRole;
@@ -49,10 +51,12 @@ public class EquinoxPublicCredential implements IPublicCredential {
 		return null;
 	}
 
+	@Override
 	public Principal[] getRoles() {
 		return roles;
 	}
 
+	@Override
 	public String getProviderID() {
 		return loginModuleID;
 	}

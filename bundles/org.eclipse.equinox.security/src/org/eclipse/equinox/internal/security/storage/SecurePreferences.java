@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2016 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -54,12 +54,12 @@ public class SecurePreferences {
 	/**
 	 * Child nodes; created lazily; might be null
 	 */
-	protected Map children;
+	protected Map<String, SecurePreferences> children;
 
 	/**
 	 * Values associated with this node; created lazily; might be null
 	 */
-	private Map values;
+	private Map<String, String> values;
 
 	/**
 	 * Cache root node to improve performance a bit
@@ -110,12 +110,12 @@ public class SecurePreferences {
 		checkRemoved();
 		if (values == null)
 			return EMPTY_STRING_ARRAY;
-		Set keys = values.keySet();
+		Set<String> keys = values.keySet();
 		int size = keys.size();
 		String[] result = new String[size];
 		int pos = 0;
-		for (Iterator i = keys.iterator(); i.hasNext();) {
-			result[pos++] = (String) i.next();
+		for (String string : keys) {
+			result[pos++] = string;
 		}
 		return result;
 	}
@@ -124,12 +124,12 @@ public class SecurePreferences {
 		checkRemoved();
 		if (children == null)
 			return EMPTY_STRING_ARRAY;
-		Set keys = children.keySet();
+		Set<String> keys = children.keySet();
 		int size = keys.size();
 		String[] result = new String[size];
 		int pos = 0;
-		for (Iterator i = keys.iterator(); i.hasNext();) {
-			result[pos++] = (String) i.next();
+		for (String string : keys) {
+			result[pos++] = string;
 		}
 		return result;
 	}
@@ -165,11 +165,11 @@ public class SecurePreferences {
 	synchronized private SecurePreferences getChild(String segment, boolean create) {
 		if (children == null) {
 			if (create)
-				children = new HashMap(5);
+				children = new HashMap<>(5);
 			else
 				return null;
 		}
-		SecurePreferences child = (SecurePreferences) children.get(segment);
+		SecurePreferences child = children.get(segment);
 		if (!create || (child != null))
 			return child;
 		child = new SecurePreferences(this, segment);
@@ -194,18 +194,16 @@ public class SecurePreferences {
 			thisNodePath = parentsPath + PATH_SEPARATOR + name;
 
 		if (values != null) {
-			for (Iterator it = values.entrySet().iterator(); it.hasNext();) {
-				Entry entry = (Entry) it.next();
-				String key = (String) entry.getKey();
+			for (Entry<String, String> entry : values.entrySet()) {
+				String key = entry.getKey();
 				PersistedPath extenalTag = new PersistedPath(thisNodePath, key);
-				properties.setProperty(extenalTag.toString(), (String) entry.getValue());
+				properties.setProperty(extenalTag.toString(), entry.getValue());
 			}
 		}
 
 		if (children != null) {
-			for (Iterator i = children.entrySet().iterator(); i.hasNext();) {
-				Map.Entry entry = (Map.Entry) i.next();
-				SecurePreferences child = (SecurePreferences) entry.getValue();
+			for (Entry<String, SecurePreferences> entry : children.entrySet()) {
+				SecurePreferences child = entry.getValue();
 				child.flush(properties, thisNodePath);
 			}
 		}
@@ -300,14 +298,14 @@ public class SecurePreferences {
 
 	synchronized protected void internalPut(String key, String value) {
 		if (values == null)
-			values = new HashMap(5);
+			values = new HashMap<>(5);
 		values.put(key, value);
 	}
 
 	protected String internalGet(String key) {
 		if (values == null)
 			return null;
-		return (String) values.get(key);
+		return values.get(key);
 	}
 
 	protected void markModified() {
@@ -340,9 +338,8 @@ public class SecurePreferences {
 		removed = true;
 		if (children == null)
 			return;
-		for (Iterator i = children.entrySet().iterator(); i.hasNext();) {
-			Map.Entry entry = (Map.Entry) i.next();
-			SecurePreferences child = (SecurePreferences) entry.getValue();
+		for (Entry<String, SecurePreferences> entry : children.entrySet()) {
+			SecurePreferences child = entry.getValue();
 			child.markRemoved();
 		}
 	}
@@ -379,10 +376,10 @@ public class SecurePreferences {
 			return true;
 		char[] chars = path.toCharArray();
 		boolean lastSlash = false;
-		for (int i = 0; i < chars.length; i++) {
-			if ((chars[i] <= 31) || (chars[i] >= 127))
+		for (char c : chars) {
+			if ((c <= 31) || (c >= 127))
 				return false;
-			boolean isSlash = (chars[i] == IPath.SEPARATOR);
+			boolean isSlash = (c == IPath.SEPARATOR);
 			if (lastSlash && isSlash)
 				return false;
 			lastSlash = isSlash;

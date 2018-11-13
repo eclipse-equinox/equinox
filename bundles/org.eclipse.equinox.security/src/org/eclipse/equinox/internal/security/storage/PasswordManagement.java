@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -103,7 +103,7 @@ public class PasswordManagement {
 
 	static public String[] getPasswordRecoveryQuestions(SecurePreferencesRoot root, String moduleID) {
 		// retrieve stored questions
-		List questions = new ArrayList();
+		List<String> questions = new ArrayList<>();
 		SecurePreferences node = recoveryNode(root, moduleID);
 		for (int i = 0;; i++) {
 			String key = PASSWORD_RECOVERY_QUESTION + Integer.toString(i + 1);
@@ -119,7 +119,7 @@ public class PasswordManagement {
 			}
 		}
 		String[] result = new String[questions.size()];
-		return (String[]) questions.toArray(result);
+		return questions.toArray(result);
 	}
 
 	static public String recoverPassword(String[] answers, SecurePreferencesRoot root, String moduleID) {

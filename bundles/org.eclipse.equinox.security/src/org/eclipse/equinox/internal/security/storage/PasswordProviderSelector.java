@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2017 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -42,7 +42,7 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 	final private static String HINTS_NAME = "hint";//$NON-NLS-1$
 	final private static String HINT_VALUE = "value";//$NON-NLS-1$
 
-	private Map modules = new HashMap(5); // cache of modules found
+	private Map<String, PasswordProviderModuleExt> modules = new HashMap<>(5); // cache of modules found
 
 	public class ExtStorageModule {
 		public String moduleID;
@@ -50,9 +50,9 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 		public int priority;
 		public String name;
 		public String description;
-		public List hints;
+		public List<String> hints;
 
-		public ExtStorageModule(String id, IConfigurationElement element, int priority, String name, String description, List hints) {
+		public ExtStorageModule(String id, IConfigurationElement element, int priority, String name, String description, List<String> hints) {
 			super();
 			this.element = element;
 			this.moduleID = id;
@@ -86,13 +86,13 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 		// hides default constructor; use getInstance()
 	}
 
-	public List findAvailableModules(String expectedID) {
+	public List<ExtStorageModule> findAvailableModules(String expectedID) {
 
 		IExtensionRegistry registry = RegistryFactory.getRegistry();
 		IExtensionPoint point = registry.getExtensionPoint(EXTENSION_POINT);
 		IExtension[] extensions = point.getExtensions();
 
-		ArrayList allAvailableModules = new ArrayList(extensions.length);
+		ArrayList<ExtStorageModule> allAvailableModules = new ArrayList<>(extensions.length);
 
 		for (int i = 0; i < extensions.length; i++) {
 			String moduleID = extensions[i].getUniqueIdentifier();
@@ -122,10 +122,10 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 
 			String description = element.getAttribute(MODULE_DESCRIPTION);
 
-			List suppliedHints = null;
+			List<String> suppliedHints = null;
 			IConfigurationElement[] hints = element.getChildren(HINTS_NAME);
 			if (hints.length != 0) {
-				suppliedHints = new ArrayList(hints.length);
+				suppliedHints = new ArrayList<>(hints.length);
 				for (int j = 0; j < hints.length; j++) {
 					String hint = hints[j].getAttribute(HINT_VALUE);
 					if (hint != null)
@@ -147,12 +147,10 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 			allAvailableModules.add(new ExtStorageModule(moduleID, element, priority, name, description, suppliedHints));
 		}
 
-		Collections.sort(allAvailableModules, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				int p1 = ((ExtStorageModule) o1).priority;
-				int p2 = ((ExtStorageModule) o2).priority;
-				return p2 - p1;
-			}
+		Collections.sort(allAvailableModules, (o1, o2) -> {
+			int p1 = o1.priority;
+			int p2 = o2.priority;
+			return p2 - p1;
 		});
 
 		return allAvailableModules;
@@ -163,14 +161,13 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 			expectedID = expectedID.toLowerCase(); // ID is case-insensitive
 		synchronized (modules) {
 			if (modules.containsKey(expectedID))
-				return (PasswordProviderModuleExt) modules.get(expectedID);
+				return modules.get(expectedID);
 		}
 
-		List allAvailableModules = findAvailableModules(expectedID);
-		HashSet disabledModules = getDisabledModules();
+		List<ExtStorageModule> allAvailableModules = findAvailableModules(expectedID);
+		HashSet<String> disabledModules = getDisabledModules();
 
-		for (Iterator i = allAvailableModules.iterator(); i.hasNext();) {
-			ExtStorageModule module = (ExtStorageModule) i.next();
+		for (ExtStorageModule module : allAvailableModules) {
 
 			if (expectedID == null && disabledModules != null && disabledModules.contains(module.moduleID))
 				continue;
@@ -214,18 +211,22 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	// Synch local cache with the registry 
+	@Override
 	public void added(IExtension[] extensions) {
 		clearCaches();
 	}
 
+	@Override
 	public void added(IExtensionPoint[] extensionPoints) {
 		clearCaches();
 	}
 
+	@Override
 	public void removed(IExtension[] extensions) {
 		clearCaches();
 	}
 
+	@Override
 	public void removed(IExtensionPoint[] extensionPoints) {
 		clearCaches();
 	}
@@ -250,14 +251,14 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 		}
 	}
 
-	protected HashSet getDisabledModules() {
+	protected HashSet<String> getDisabledModules() {
 		IScopeContext[] scopes = {ConfigurationScope.INSTANCE, DefaultScope.INSTANCE};
 		String defaultPreferenceValue = ""; //$NON-NLS-1$
 		IPreferencesService preferencesService = getPreferencesService();
 		String tmp = preferencesService.getString(AuthPlugin.PI_AUTH, IStorageConstants.DISABLED_PROVIDERS_KEY, defaultPreferenceValue, scopes);
 		if (tmp == null || tmp.length() == 0)
 			return null;
-		HashSet disabledModules = new HashSet();
+		HashSet<String> disabledModules = new HashSet<>();
 		String[] disabledProviders = tmp.split(","); //$NON-NLS-1$
 		for (int i = 0; i < disabledProviders.length; i++) {
 			disabledModules.add(disabledProviders[i]);
@@ -267,12 +268,12 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 
 	private IPreferencesService getPreferencesService() {
 		BundleContext context = AuthPlugin.getDefault().getBundleContext();
-		ServiceReference reference = context.getServiceReference(IPreferencesService.class);
+		ServiceReference<IPreferencesService> reference = context.getServiceReference(IPreferencesService.class);
 		if (reference == null) {
 			throw new IllegalStateException("Failed to find service: " + IPreferencesService.class); //$NON-NLS-1$
 		}
 		try {
-			return (IPreferencesService) context.getService(reference);
+			return context.getService(reference);
 		} finally {
 			context.ungetService(reference);
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,10 +39,10 @@ public class AuthPlugin implements BundleActivator {
 	private static AuthPlugin singleton;
 
 	private BundleContext bundleContext;
-	private ServiceTracker debugTracker = null;
-	private ServiceTracker configTracker = null;
-	private ServiceTracker environmentTracker = null;
-	private volatile ServiceTracker logTracker = null;
+	private ServiceTracker<?, DebugOptions> debugTracker = null;
+	private ServiceTracker<?, Location> configTracker = null;
+	private ServiceTracker<?, EnvironmentInfo> environmentTracker = null;
+	private volatile ServiceTracker<?, FrameworkLog> logTracker = null;
 
 	public static boolean DEBUG = false;
 	public static boolean DEBUG_LOGIN_FRAMEWORK = false;
@@ -59,6 +59,7 @@ public class AuthPlugin implements BundleActivator {
 		super();
 	}
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		bundleContext = context;
 		singleton = this;
@@ -71,6 +72,7 @@ public class AuthPlugin implements BundleActivator {
 		// time spend in the bundle activator).
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 
 		PasswordProviderSelector.stop();
@@ -113,10 +115,10 @@ public class AuthPlugin implements BundleActivator {
 		if (debugTracker == null) {
 			if (bundleContext == null)
 				return defaultValue;
-			debugTracker = new ServiceTracker(bundleContext, DebugOptions.class.getName(), null);
+			debugTracker = new ServiceTracker<>(bundleContext, DebugOptions.class, null);
 			debugTracker.open();
 		}
-		DebugOptions options = (DebugOptions) debugTracker.getService();
+		DebugOptions options = debugTracker.getService();
 		if (options == null)
 			return defaultValue;
 		String value = options.getOption(option);
@@ -133,10 +135,10 @@ public class AuthPlugin implements BundleActivator {
 			} catch (InvalidSyntaxException e) {
 				// should never happen
 			}
-			configTracker = new ServiceTracker(bundleContext, filter, null);
+			configTracker = new ServiceTracker<>(bundleContext, filter, null);
 			configTracker.open();
 		}
-		Location location = (Location) configTracker.getService();
+		Location location = configTracker.getService();
 		if (location == null)
 			return null;
 		return location.getURL();
@@ -146,10 +148,10 @@ public class AuthPlugin implements BundleActivator {
 		if (environmentTracker == null) {
 			if (bundleContext == null)
 				return null;
-			environmentTracker = new ServiceTracker(bundleContext, EnvironmentInfo.class.getName(), null);
+			environmentTracker = new ServiceTracker<>(bundleContext, EnvironmentInfo.class, null);
 			environmentTracker.open();
 		}
-		return (EnvironmentInfo) environmentTracker.getService();
+		return environmentTracker.getService();
 	}
 
 	/**
@@ -165,7 +167,7 @@ public class AuthPlugin implements BundleActivator {
 	 */
 	public void frameworkLogError(String msg, int severity, Throwable e) {
 		if ((logTracker == null) && (bundleContext != null)) {
-			logTracker = new ServiceTracker(bundleContext, FrameworkLog.class.getName(), null);
+			logTracker = new ServiceTracker<>(bundleContext, FrameworkLog.class, null);
 			logTracker.open();
 		}
 		FrameworkLog log = (logTracker == null) ? null : (FrameworkLog) logTracker.getService();

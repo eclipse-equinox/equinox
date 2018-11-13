@@ -43,7 +43,7 @@ public class ConfigurationFactory {
 		IExtensionPoint point = registry.getExtensionPoint(POINT_PROVIDER);
 		IExtension[] extensions = point.getExtensions();
 
-		ArrayList returnValue = new ArrayList(extensions.length);
+		ArrayList<Configuration> returnValue = new ArrayList<>(extensions.length);
 		for (int i = 0; i < extensions.length; i++) {
 			IConfigurationElement[] elements = extensions[i].getConfigurationElements();
 			for (int j = 0; j < elements.length; j++) {
@@ -52,7 +52,7 @@ public class ConfigurationFactory {
 					returnValue.add(provider);
 			}
 		}
-		return (Configuration[]) returnValue.toArray(new Configuration[] {});
+		return returnValue.toArray(new Configuration[] {});
 	}
 
 	private Configuration readProvider(IConfigurationElement element) {
