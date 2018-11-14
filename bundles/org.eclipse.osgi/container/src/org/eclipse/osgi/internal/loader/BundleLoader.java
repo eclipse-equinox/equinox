@@ -1191,6 +1191,9 @@ public class BundleLoader extends ModuleLoader {
 	}
 
 	private PackageSource findRequiredSource(String pkgName, Collection<BundleLoader> visited) {
+		if (requiredBundleWires.isEmpty()) {
+			return null;
+		}
 		synchronized (requiredSources) {
 			PackageSource result = (PackageSource) requiredSources.getByKey(pkgName);
 			if (result != null)

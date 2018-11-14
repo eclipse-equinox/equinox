@@ -183,8 +183,16 @@ public class KeyedHashSet {
 	 * all its current values.
 	 */
 	protected void expand() {
+		if (elements.length == Integer.MAX_VALUE) {
+			throw new OutOfMemoryError();
+		}
 		KeyedElement[] oldElements = elements;
-		elements = new KeyedElement[elements.length * 2];
+		int newSize = elements.length * 2;
+		if (newSize < 0) {
+			// overflowed; set to max
+			newSize = Integer.MAX_VALUE;
+		}
+		elements = new KeyedElement[newSize];
 
 		int maxArrayIndex = elements.length - 1;
 		for (int i = 0; i < oldElements.length; i++) {
