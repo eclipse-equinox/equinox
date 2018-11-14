@@ -22,8 +22,10 @@ import java.util.NoSuchElementException;
  * reduce the overhead of storing the keys of each individual element<p>
  * This class in not thread safe, clients must ensure synchronization when modifying an object of this type.
  * @since 3.2 
+ * @deprecated This class will be removed in a future release
  */
 // This class was moved from  /org.eclipse.osgi/core/framework/org/eclipse/osgi/framework/internal/core/KeyedHashSet.java
+@Deprecated
 public class KeyedHashSet {
 	public static final int MINIMUM_SIZE = 7;
 	int elementCount = 0;

@@ -16,14 +16,51 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.*;
-import org.eclipse.osgi.framework.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.framework.FilterImpl;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BaseDescription;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.BundleSpecification;
+import org.eclipse.osgi.service.resolver.DisabledInfo;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.GenericDescription;
+import org.eclipse.osgi.service.resolver.GenericSpecification;
+import org.eclipse.osgi.service.resolver.HostSpecification;
+import org.eclipse.osgi.service.resolver.ImportPackageSpecification;
+import org.eclipse.osgi.service.resolver.NativeCodeDescription;
+import org.eclipse.osgi.service.resolver.NativeCodeSpecification;
+import org.eclipse.osgi.service.resolver.Resolver;
+import org.eclipse.osgi.service.resolver.ResolverError;
+import org.eclipse.osgi.service.resolver.ResolverHookException;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.service.resolver.StateDelta;
+import org.eclipse.osgi.service.resolver.StateHelper;
+import org.eclipse.osgi.service.resolver.StateObjectFactory;
+import org.eclipse.osgi.service.resolver.StateWire;
+import org.eclipse.osgi.service.resolver.VersionConstraint;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.Version;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.wiring.BundleRevision;
@@ -120,10 +157,10 @@ public abstract class StateImpl implements State {
 
 	private boolean resolved = true;
 	private long timeStamp = System.currentTimeMillis();
-	private final KeyedHashSet bundleDescriptions = new KeyedHashSet(false);
+	private final Map<Long, BundleDescription> bundleDescriptions = new HashMap<>();
 	private final Map<BundleDescription, List<ResolverError>> resolverErrors = new HashMap<>();
 	private StateObjectFactory factory;
-	private final KeyedHashSet resolvedBundles = new KeyedHashSet();
+	private final Map<Long, BundleDescription> resolvedBundles = new HashMap<>();
 	private final Map<BundleDescription, List<DisabledInfo>> disabledBundles = new HashMap<>();
 	private final Map<String, Set<BundleDescription>> bundleNameCache = new HashMap<>();
 	private boolean fullyLoaded = false;
@@ -144,6 +181,14 @@ public abstract class StateImpl implements State {
 	protected StateImpl() {
 		// always add the default platform property keys.
 		addPlatformPropertyKeys(PROPS);
+	}
+
+	private static boolean add(BundleDescription bundle, Map<Long, BundleDescription> map, boolean replace) {
+		if (!replace && map.containsKey(bundle.getBundleId())) {
+			return false;
+		}
+		map.put(bundle.getBundleId(), bundle);
+		return true;
 	}
 
 	public boolean addBundle(BundleDescription description) {
@@ -182,13 +227,13 @@ public abstract class StateImpl implements State {
 
 	public boolean updateBundle(BundleDescription newDescription) {
 		synchronized (this.monitor) {
-			BundleDescriptionImpl existing = (BundleDescriptionImpl) bundleDescriptions.get((BundleDescriptionImpl) newDescription);
+			BundleDescriptionImpl existing = (BundleDescriptionImpl) bundleDescriptions.get(newDescription.getBundleId());
 			if (existing == null)
 				return false;
-			if (!bundleDescriptions.remove(existing))
+			if (bundleDescriptions.remove(existing.getBundleId()) == null)
 				return false;
 			removeBundleNameCacheEntry(existing);
-			resolvedBundles.remove(existing);
+			resolvedBundles.remove(existing.getBundleId());
 			List<DisabledInfo> infos = disabledBundles.remove(existing);
 			if (infos != null) {
 				List<DisabledInfo> newInfos = new ArrayList<>(infos.size());
@@ -238,10 +283,10 @@ public abstract class StateImpl implements State {
 
 	public boolean removeBundle(BundleDescription toRemove) {
 		synchronized (this.monitor) {
-			toRemove = (BundleDescription) bundleDescriptions.get((KeyedElement) toRemove);
-			if (toRemove == null || !bundleDescriptions.remove((KeyedElement) toRemove))
+			toRemove = bundleDescriptions.get(toRemove.getBundleId());
+			if (toRemove == null || bundleDescriptions.remove(toRemove.getBundleId()) == null)
 				return false;
-			resolvedBundles.remove((KeyedElement) toRemove);
+			resolvedBundles.remove(toRemove.getBundleId());
 			disabledBundles.remove(toRemove);
 			removeBundleNameCacheEntry(toRemove);
 			resolved = false;
@@ -299,13 +344,13 @@ public abstract class StateImpl implements State {
 
 	public BundleDescription[] getBundles() {
 		synchronized (this.monitor) {
-			return (BundleDescription[]) bundleDescriptions.elements(new BundleDescription[bundleDescriptions.size()]);
+			return bundleDescriptions.values().toArray(new BundleDescription[0]);
 		}
 	}
 
 	public BundleDescription getBundle(long id) {
 		synchronized (this.monitor) {
-			BundleDescription result = (BundleDescription) bundleDescriptions.getByKey(new Long(id));
+			BundleDescription result = bundleDescriptions.get(id);
 			if (result != null)
 				return result;
 			// need to look in removal pending bundles;
@@ -400,10 +445,10 @@ public abstract class StateImpl implements State {
 			modifiable.setStateBit(BundleDescriptionImpl.RESOLVED, status);
 			if (status) {
 				resolverErrors.remove(modifiable);
-				resolvedBundles.add(modifiable);
+				add(modifiable, resolvedBundles, true);
 			} else {
 				// remove the bundle from the resolved pool
-				resolvedBundles.remove(modifiable);
+				resolvedBundles.remove(modifiable.getBundleId());
 				modifiable.removeDependencies();
 			}
 			// to support development mode we will resolveConstraints even if the resolve status == false
@@ -659,7 +704,7 @@ public abstract class StateImpl implements State {
 
 	public BundleDescription[] getResolvedBundles() {
 		synchronized (this.monitor) {
-			return (BundleDescription[]) resolvedBundles.elements(new BundleDescription[resolvedBundles.size()]);
+			return resolvedBundles.values().toArray(new BundleDescription[0]);
 		}
 	}
 
@@ -686,7 +731,7 @@ public abstract class StateImpl implements State {
 			}
 			((BundleDescriptionImpl) description).setContainingState(this);
 			((BundleDescriptionImpl) description).setStateBit(BundleDescriptionImpl.REMOVAL_PENDING, false);
-			if (bundleDescriptions.add((BundleDescriptionImpl) description)) {
+			if (add(description, bundleDescriptions, false)) {
 				if (description.getBundleId() > getHighestBundleId())
 					highestBundleId = description.getBundleId();
 				addBundleNameCacheEntry(description);
@@ -698,7 +743,7 @@ public abstract class StateImpl implements State {
 
 	void addResolvedBundle(BundleDescriptionImpl resolvedBundle) {
 		synchronized (this.monitor) {
-			resolvedBundles.add(resolvedBundle);
+			add(resolvedBundle, resolvedBundles, true);
 		}
 	}
 
@@ -706,8 +751,8 @@ public abstract class StateImpl implements State {
 		fullyLoad();
 		synchronized (this.monitor) {
 			List<ExportPackageDescription> allExportedPackages = new ArrayList<>();
-			for (Iterator<KeyedElement> iter = resolvedBundles.iterator(); iter.hasNext();) {
-				BundleDescription bundle = (BundleDescription) iter.next();
+			for (Iterator<BundleDescription> iter = resolvedBundles.values().iterator(); iter.hasNext();) {
+				BundleDescription bundle = iter.next();
 				ExportPackageDescription[] bundlePackages = bundle.getSelectedExports();
 				if (bundlePackages == null)
 					continue;
@@ -729,8 +774,8 @@ public abstract class StateImpl implements State {
 	BundleDescription[] getFragments(final BundleDescription host) {
 		final List<BundleDescription> fragments = new ArrayList<>();
 		synchronized (this.monitor) {
-			for (Iterator<KeyedElement> iter = bundleDescriptions.iterator(); iter.hasNext();) {
-				BundleDescription bundle = (BundleDescription) iter.next();
+			for (Iterator<BundleDescription> iter = bundleDescriptions.values().iterator(); iter.hasNext();) {
+				BundleDescription bundle = iter.next();
 				HostSpecification hostSpec = bundle.getHost();
 
 				if (hostSpec != null) {
@@ -771,8 +816,8 @@ public abstract class StateImpl implements State {
 
 	public BundleDescription getBundleByLocation(String location) {
 		synchronized (this.monitor) {
-			for (Iterator<KeyedElement> i = bundleDescriptions.iterator(); i.hasNext();) {
-				BundleDescription current = (BundleDescription) i.next();
+			for (Iterator<BundleDescription> i = bundleDescriptions.values().iterator(); i.hasNext();) {
+				BundleDescription current = i.next();
 				if (location.equals(current.getLocation()))
 					return current;
 			}

@@ -42,8 +42,6 @@ import org.eclipse.osgi.container.ModuleWire;
 import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
-import org.eclipse.osgi.framework.util.KeyedElement;
-import org.eclipse.osgi.framework.util.KeyedHashSet;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
@@ -106,9 +104,9 @@ public class BundleLoader extends ModuleLoader {
 	private final BundleLoaderSources exportSources;
 
 	/* cache of required package sources. Key is packagename, value is PackageSource */
-	private final KeyedHashSet requiredSources = new KeyedHashSet(false);
+	private final Map<String, PackageSource> requiredSources = new HashMap<>();
 	/* cache of imported packages. Key is packagename, Value is PackageSource */
-	private final KeyedHashSet importedSources = new KeyedHashSet(false);
+	private final Map<String, PackageSource> importedSources = new HashMap<>();
 	private final List<ModuleWire> requiredBundleWires;
 
 	/* @GuardedBy("importedSources") */
@@ -786,13 +784,13 @@ public class BundleLoader extends ModuleLoader {
 		boolean subPackages = (options & BundleWiring.LISTRESOURCES_RECURSE) != 0;
 		List<String> packages = new ArrayList<>();
 		// search imported package names
-		KeyedHashSet importSources = getImportedSources(null);
-		KeyedElement[] imports;
+		Map<String, PackageSource> importSources = getImportedSources(null);
+		Collection<PackageSource> imports;
 		synchronized (importSources) {
-			imports = importSources.elements();
+			imports = new ArrayList<>(importSources.values());
 		}
-		for (KeyedElement keyedElement : imports) {
-			String id = ((PackageSource) keyedElement).getId();
+		for (PackageSource source : imports) {
+			String id = source.getId();
 			if (id.equals(pkgName) || (subPackages && isSubPackage(pkgName, id)))
 				packages.add(id);
 		}
@@ -1144,13 +1142,13 @@ public class BundleLoader extends ModuleLoader {
 	}
 
 	private PackageSource findImportedSource(String pkgName, Collection<BundleLoader> visited) {
-		KeyedHashSet imports = getImportedSources(visited);
+		Map<String, PackageSource> imports = getImportedSources(visited);
 		synchronized (imports) {
-			return (PackageSource) imports.getByKey(pkgName);
+			return imports.get(pkgName);
 		}
 	}
 
-	private KeyedHashSet getImportedSources(Collection<BundleLoader> visited) {
+	private Map<String, PackageSource> getImportedSources(Collection<BundleLoader> visited) {
 		synchronized (importedSources) {
 			if (importsInitialized) {
 				return importedSources;
@@ -1160,7 +1158,7 @@ public class BundleLoader extends ModuleLoader {
 				for (ModuleWire importWire : importWires) {
 					PackageSource source = createExportPackageSource(importWire, visited);
 					if (source != null) {
-						importedSources.add(source);
+						importedSources.put(source.getId(), source);
 					}
 				}
 			}
@@ -1182,7 +1180,7 @@ public class BundleLoader extends ModuleLoader {
 					Debug.println("BundleLoader[" + this + "] using dynamic import source: " + source); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				synchronized (importedSources) {
-					importedSources.add(source);
+					importedSources.put(source.getId(), source);
 				}
 				return source;
 			}
@@ -1195,7 +1193,7 @@ public class BundleLoader extends ModuleLoader {
 			return null;
 		}
 		synchronized (requiredSources) {
-			PackageSource result = (PackageSource) requiredSources.getByKey(pkgName);
+			PackageSource result = requiredSources.get(pkgName);
 			if (result != null)
 				return result.isNullSource() ? null : result;
 		}
@@ -1225,7 +1223,7 @@ public class BundleLoader extends ModuleLoader {
 			source = createMultiSource(pkgName, srcs);
 		}
 		synchronized (requiredSources) {
-			requiredSources.add(source);
+			requiredSources.put(source.getId(), source);
 		}
 		return source.isNullSource() ? null : source;
 	}

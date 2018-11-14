@@ -14,29 +14,31 @@
 package org.eclipse.osgi.internal.loader;
 
 import java.security.AccessController;
+import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.osgi.container.ModuleCapability;
-import org.eclipse.osgi.framework.util.KeyedHashSet;
 import org.eclipse.osgi.framework.util.SecureAction;
-import org.eclipse.osgi.internal.loader.sources.*;
+import org.eclipse.osgi.internal.loader.sources.FilteredSourcePackage;
+import org.eclipse.osgi.internal.loader.sources.PackageSource;
+import org.eclipse.osgi.internal.loader.sources.SingleSourcePackage;
 import org.osgi.framework.namespace.PackageNamespace;
 
 public class BundleLoaderSources {
 	static SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
-	private final KeyedHashSet pkgSources;
+	private final Map<String, PackageSource> pkgSources;
 	private final BundleLoader loader;
 
 	public BundleLoaderSources(BundleLoader loader) {
-		this.pkgSources = new KeyedHashSet(false);
+		this.pkgSources = new HashMap<>();
 		this.loader = loader;
 	}
 
 	PackageSource getPackageSource(String pkgName) {
 		synchronized (pkgSources) {
-			PackageSource pkgSource = (PackageSource) pkgSources.getByKey(pkgName);
+			PackageSource pkgSource = pkgSources.get(pkgName);
 			if (pkgSource == null) {
 				pkgSource = new SingleSourcePackage(pkgName, loader);
-				pkgSources.add(pkgSource);
+				pkgSources.put(pkgSource.getId(), pkgSource);
 			}
 			return pkgSource;
 		}
@@ -67,8 +69,8 @@ public class BundleLoaderSources {
 		if (storeSource) {
 			if (pkgSource != null) {
 				synchronized (pkgSources) {
-					if (pkgSources.getByKey(name) == null) {
-						pkgSources.add(pkgSource);
+					if (pkgSources.get(name) == null) {
+						pkgSources.put(pkgSource.getId(), pkgSource);
 					}
 				}
 			}

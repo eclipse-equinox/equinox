@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Enumeration;
 import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.container.ModuleWiring;
-import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.internal.framework.EquinoxBundle;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.loader.BundleLoader;
@@ -28,7 +27,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.service.packageadmin.PackageAdmin;
 
-public abstract class PackageSource implements KeyedElement {
+public abstract class PackageSource {
 	protected final String id;
 
 	public PackageSource(String id) {
@@ -42,16 +41,13 @@ public abstract class PackageSource implements KeyedElement {
 
 	public abstract SingleSourcePackage[] getSuppliers();
 
-	public boolean compare(KeyedElement other) {
-		return id.equals(((PackageSource) other).getId());
+	public boolean compare(PackageSource other) {
+		return id.equals(other.getId());
 	}
 
-	public int getKeyHashCode() {
+	@Override
+	public int hashCode() {
 		return id.hashCode();
-	}
-
-	public Object getKey() {
-		return id;
 	}
 
 	public boolean isNullSource() {

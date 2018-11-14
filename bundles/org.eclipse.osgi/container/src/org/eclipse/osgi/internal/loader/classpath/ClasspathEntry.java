@@ -30,7 +30,6 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.framework.util.KeyedElement;
-import org.eclipse.osgi.framework.util.KeyedHashSet;
 import org.eclipse.osgi.storage.BundleInfo;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.Storage;
@@ -60,7 +59,7 @@ public class ClasspathEntry {
 	private final ManifestPackageAttributes mainManifestPackageAttributes;
 	private final Map<String, ManifestPackageAttributes> perPackageManifestAttributes;
 	private final List<BundleFile> mrBundleFiles;
-	private KeyedHashSet userObjects = null;
+	private HashMap<Object, KeyedElement> userObjects = null;
 
 	// TODO Note that PDE has internal dependency on this field type/name (bug 267238)
 	@SuppressWarnings("unused")
@@ -164,7 +163,7 @@ public class ClasspathEntry {
 	public synchronized Object getUserObject(Object key) {
 		if (userObjects == null)
 			return null;
-		return userObjects.getByKey(key);
+		return userObjects.get(key);
 
 	}
 
@@ -174,8 +173,10 @@ public class ClasspathEntry {
 	 */
 	public synchronized void addUserObject(KeyedElement userObject) {
 		if (userObjects == null)
-			userObjects = new KeyedHashSet(5, false);
-		userObjects.add(userObject);
+			userObjects = new HashMap<>(5);
+		if (!userObjects.containsKey(userObject.getKey())) {
+			userObjects.put(userObject.getKey(), userObject);
+		}
 	}
 
 	/**
