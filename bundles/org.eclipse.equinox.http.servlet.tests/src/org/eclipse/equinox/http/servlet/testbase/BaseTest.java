@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.servlet.context.ContextPathCustomizer;
 import org.eclipse.equinox.http.servlet.tests.bundle.Activator;
 import org.eclipse.equinox.http.servlet.tests.bundle.BundleAdvisor;
@@ -142,6 +143,11 @@ public class BaseTest {
 		}
 		return value;
 	}
+	
+	protected void setJettyProperty(String key, String value) {
+		String qualifiedKey = JETTY_PROPERTY_PREFIX + key;
+		System.setProperty(qualifiedKey, value);
+	}
 
 	protected String getPort() {
 		String defaultPort = getProperty(OSGI_HTTP_PORT_PROPERTY);
@@ -209,6 +215,33 @@ public class BaseTest {
 		String contextPath = getContextPath();
 		requestAdvisor = new ServletRequestAdvisor(port, contextPath);
 	}
+	
+	protected void startJettyWithSSL(String port, String ksPath, String ksPassword, String keyPassword) throws Exception {
+		if(port == null) {
+			throw new IllegalArgumentException("Port cannot be null");		
+		}
+		if (ksPath == null) {
+			throw new IllegalArgumentException("Keystore path  cannot be null");			
+		}
+		setJettyProperty(JettyConstants.HTTP_ENABLED, "false");
+		setJettyProperty(JettyConstants.HTTPS_ENABLED, "true");
+		
+		setJettyProperty(JettyConstants.HTTPS_PORT, port);
+		
+		setJettyProperty(JettyConstants.SSL_KEYSTORE, ksPath);
+		
+		if(ksPassword != null) {
+			setJettyProperty(JettyConstants.SSL_PASSWORD, ksPassword);
+		}
+		if(keyPassword != null) {
+			setJettyProperty(JettyConstants.SSL_KEYPASSWORD, keyPassword);
+		}
+		
+		advisor.startBundle(EQUINOX_JETTY_BUNDLE);
+		String contextPath = getContextPath();
+		requestAdvisor = new ServletRequestAdvisor(port, contextPath, ksPath, ksPassword);	
+	}
+
 
 	protected void stopBundles() throws BundleException {
 		for (int i = BUNDLES.length - 1; i >= 0; i--) {
@@ -219,6 +252,12 @@ public class BaseTest {
 
 	protected void stopJetty() throws BundleException {
 		advisor.stopBundle(EQUINOX_JETTY_BUNDLE);
+	}
+	
+	protected void stopJettyWithSSL() throws BundleException {
+		advisor.stopBundle(EQUINOX_JETTY_BUNDLE);
+		setJettyProperty(JettyConstants.HTTP_ENABLED, "true");
+		setJettyProperty(JettyConstants.HTTPS_ENABLED, "false");			
 	}
 
 	protected void uninstallBundle(Bundle bundle) throws BundleException {

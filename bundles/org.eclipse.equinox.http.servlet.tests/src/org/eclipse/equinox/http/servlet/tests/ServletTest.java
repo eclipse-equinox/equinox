@@ -32,6 +32,7 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -4309,6 +4310,27 @@ public class ServletTest extends BaseTest {
 		String actual = requestAdvisor.request(testName.getMethodName());
 		Assert.assertEquals(expected, actual);
 	}
-
-
+	
+	@Test
+	public void testHTTPSEndpoint() throws Exception {
+		stopJetty();
+		File keyStoreFile = getBundleContext().getDataFile("server-keystore.jks");
+		URL keyStoreURL = getClass().getResource("server-keystore.jks");
+		if (!keyStoreFile.exists()) {
+			Files.copy(keyStoreURL.openStream(), keyStoreFile.toPath());
+		}
+		
+		startJettyWithSSL("8443", keyStoreFile.getAbsolutePath(), "secret", "secret");
+		
+		Bundle bundle = installBundle(TEST_BUNDLE_1);
+		try {
+			bundle.start();
+			
+			String actual = requestAdvisor.requestHttps("TestServlet10");
+			assertEquals("Expected output not found", "a", actual);
+		} finally {
+			uninstallBundle(bundle);
+			stopJettyWithSSL();
+		}
+	}
 }

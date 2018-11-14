@@ -188,6 +188,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 			// HTTPS connector
 			httpsConnector = new ServerConnector(server, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https_config)); //$NON-NLS-1$
 			httpsConnector.setPort(Details.getInt(dictionary, JettyConstants.HTTPS_PORT, 443));
+			httpsConnector.setHost(Details.getString(dictionary, JettyConstants.HTTPS_HOST, null));
 		}
 		return httpsConnector;
 	}

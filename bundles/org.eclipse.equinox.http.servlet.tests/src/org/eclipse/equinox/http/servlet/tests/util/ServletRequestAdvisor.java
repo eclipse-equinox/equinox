@@ -14,21 +14,31 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.tests.util;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-
+import java.security.KeyStore;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 /*
  * The ServletRequestAdvisor is responsible for composing URLs and using them
@@ -37,8 +47,14 @@ import java.util.Map;
 public class ServletRequestAdvisor extends Object {
 	private final String contextPath;
 	private final String port;
+	private final String ksPath;
+	private final String ksPassword;
 
 	public ServletRequestAdvisor(String port, String contextPath) {
+		this(port, contextPath, null, null);
+	}
+	
+	public ServletRequestAdvisor(String port, String contextPath, String ksPath, String ksPassword) {
 		super();
 		if (port == null)
 		 {
@@ -46,11 +62,16 @@ public class ServletRequestAdvisor extends Object {
 		}
 		this.port = port;
 		this.contextPath = contextPath;
+		this.ksPath = ksPath;
+		this.ksPassword = ksPassword;
 	}
 
-	private String createUrlSpec(String value) {
+	private String createUrlSpec(String value, boolean isHttps) {
 		StringBuffer buffer = new StringBuffer(100);
 		String protocol = "http://"; //$NON-NLS-1$
+		if (isHttps) {
+			protocol = "https://";
+		}
 		String host = "localhost"; //$NON-NLS-1$
 		buffer.append(protocol);
 		buffer.append(host);
@@ -62,8 +83,13 @@ public class ServletRequestAdvisor extends Object {
 			buffer.append(value);
 		}
 		return buffer.toString();
+		
 	}
 
+	private String createUrlSpec(String value) {
+		return createUrlSpec(value, false);
+	}
+	
 	private String drain(InputStream stream) throws IOException {
 		byte[] bytes = new byte[100];
 		StringBuffer buffer = new StringBuffer(500);
@@ -98,6 +124,70 @@ public class ServletRequestAdvisor extends Object {
 		} finally {
 			stream.close();
 		}
+	}
+	
+	public String requestHttps(String value) throws Exception {
+		String spec = createUrlSpec(value, true);
+		log("Requesting " + spec); //$NON-NLS-1$
+		URL url = new URL(spec);
+		SSLContext sslContext = SSLContext.getInstance("SSL");
+		initializeSSLContext(sslContext, ksPath, ksPassword);
+		
+		HttpsURLConnection httpsConn = (HttpsURLConnection)url.openConnection();
+		httpsConn.setSSLSocketFactory(sslContext.getSocketFactory());
+	    httpsConn.setRequestMethod("GET");
+	    httpsConn.setDoOutput(false);
+	    httpsConn.setDoInput(true);
+	    httpsConn.setConnectTimeout(150 * 1000);
+	    httpsConn.setReadTimeout(150 * 1000);
+	    httpsConn.connect();
+	    
+	    assertEquals("Request to the url " + spec + " was not successful", 200 , httpsConn.getResponseCode());
+	    InputStream stream = httpsConn.getInputStream();
+		try {
+			return drain(stream);
+		} finally {
+			stream.close();
+		}	
+	}
+
+	private void initializeSSLContext(SSLContext sslContext, String ksPath, String ksPassword) throws Exception {
+		KeyManager keyManagers[] = null;
+        if (ksPath != null) {
+       	 	KeyManagerFactory kmFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            File ksFile = new File(ksPath);
+            KeyStore keyStore = KeyStore.getInstance("JKS");
+
+            try(InputStream ksStream = new FileInputStream(ksFile)){
+            	keyStore.load(ksStream, ksPassword.toCharArray());
+            	kmFactory.init(keyStore, ksPassword.toCharArray());
+	            keyManagers = kmFactory.getKeyManagers();
+            }          
+        }
+        
+       TrustManager[] trustManagers = getTrustManager();
+       
+       sslContext.init(keyManagers, trustManagers, null);  
+		
+	}
+	
+	private TrustManager[] getTrustManager() {
+		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+            @Override
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+
+            @Override
+            public void checkClientTrusted(
+                                           java.security.cert.X509Certificate[] certs, String authType) {}
+
+            @Override
+            public void checkServerTrusted(
+                                           java.security.cert.X509Certificate[] certs, String authType) {}
+        } };
+
+        return trustAllCerts;
 	}
 
 	public Map<String, List<String>> request(String value, Map<String, List<String>> headers) throws IOException {
