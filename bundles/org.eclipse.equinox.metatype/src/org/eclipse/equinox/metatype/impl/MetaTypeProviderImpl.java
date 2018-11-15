@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.impl;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import javax.xml.parsers.SAXParser;
@@ -85,7 +84,6 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	 * @param parserFactory The bundle object for which the metadata should be
 	 *        read
 	 * @return void
-	 * @throws IOException If there are errors accessing the metadata.xml file
 	 */
 	private boolean readMetaFiles(Bundle bundle, SAXParser saxParser) {
 		Enumeration<URL> entries = bundle.findEntries(MetaTypeService.METATYPE_DOCUMENTS_LOCATION, "*", false); //$NON-NLS-1$

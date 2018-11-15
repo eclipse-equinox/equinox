@@ -103,7 +103,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	/**
 	 * Start the Device Manager.
 	 *
-	 * @param context The device manager's bundle context
+	 * @param contxt The device manager's bundle context
 	 */
 
 	public void start(BundleContext contxt) throws Exception {
@@ -195,7 +195,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	/**
 	 * Stop the Device Manager bundle.
 	 *
-	 * @param context The device manager's bundle context
+	 * @param contxt The device manager's bundle context
 	 */
 
 	public void stop(BundleContext contxt) throws Exception {
@@ -296,7 +296,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 * by the ServiceTracker.
 	 *
 	 * @param reference Reference to service that has been removed.
-	 * @param service The service object for the removed service.
+	 * @param object The service object for the removed service.
 	 */
 	public void removedService(ServiceReference reference, Object object) {
 		if (Activator.DEBUG) {
@@ -391,7 +391,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 			/* This should be included per Section 8.7.7 of the OSGi SP R2
 			 * spec, but it causes the OSGi SP R2 Test Suite to fail.
 			 * We should turn this on for R3.
-
+			
 			 if (driverServiceRegistered)
 			 */
 			//			if (false) {

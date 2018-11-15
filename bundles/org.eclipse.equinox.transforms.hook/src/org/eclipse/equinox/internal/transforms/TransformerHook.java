@@ -14,7 +14,6 @@
 
 package org.eclipse.equinox.internal.transforms;
 
-import java.io.IOException;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.hookregistry.*;
 import org.eclipse.osgi.internal.log.EquinoxLogServices;
@@ -31,9 +30,6 @@ public class TransformerHook implements BundleFileWrapperFactoryHook, HookConfig
 	private volatile TransformInstanceListData templates;
 	private EquinoxLogServices logServices;
 
-	/**
-	 * @throws IOException  
-	 */
 	public BundleFileWrapper wrapBundleFile(BundleFile bundleFile, Generation generation, boolean base) {
 		if (transformers == null || templates == null)
 			return null;

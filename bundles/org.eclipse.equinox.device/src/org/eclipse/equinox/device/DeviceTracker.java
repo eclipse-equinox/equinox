@@ -49,7 +49,6 @@ public class DeviceTracker extends ServiceTracker {
 	 *
 	 * @param manager DeviceManager object
 	 * @param device ServiceReference to the Device service.
-	 * @param id ID of DeviceTracker object
 	 */
 	public DeviceTracker(Activator manager, ServiceReference device) {
 		super(manager.context, device, null);

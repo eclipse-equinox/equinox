@@ -267,7 +267,6 @@ public interface RegionDigraph extends Iterable<Region> {
 	 * Gets the default {@link Region}, where all bundles installed via {@link BundleContext} are assigned.
 	 * If the default {@link Region} isn't set newly installed bundles are assigned to their installer's region.
 	 * 
-	 * @param defaultRegion the region where all bundles installed via {@link BundleContext} will be assigned to
 	 * @return The default region to assign to or <b>null</b> if it isn't set
 	 */
 	Region getDefaultRegion();

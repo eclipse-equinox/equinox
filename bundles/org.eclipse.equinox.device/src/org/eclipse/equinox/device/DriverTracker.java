@@ -158,7 +158,7 @@ public class DriverTracker extends ServiceTracker {
 	 * @param reference Reference to service that has been removed.
 	 * @param service The service object for the removed service.
 	 */
-	public void removedService(ServiceReference reference, Object object) {
+	public void removedService(ServiceReference reference, Object service) {
 		if (Activator.DEBUG) {
 			log.log(reference, LogService.LOG_DEBUG, this + " removing service"); //$NON-NLS-1$
 		}
@@ -203,7 +203,6 @@ public class DriverTracker extends ServiceTracker {
 	 * is set, it will use the Bundle's location instead.
 	 *
 	 * @param reference Reference to driver service.
-	 * @param log LogService object.
 	 * @return DRIVER_ID string.
 	 */
 	public String getDriverID(final ServiceReference reference) {

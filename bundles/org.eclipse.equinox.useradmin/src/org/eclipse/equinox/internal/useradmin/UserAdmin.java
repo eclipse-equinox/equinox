@@ -221,7 +221,7 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	 * description of the filter syntax. If a <code>null</code> filter is
 	 * specified, all roles managed by this UserAdmin are returned.
 	 *
-	 * @param filter The filter criteria to match.
+	 * @param filterString The filter criteria to match.
 	 *
 	 * @return The roles managed by this UserAdmin whose properties
 	 * match the specified filter criteria, or all roles if a

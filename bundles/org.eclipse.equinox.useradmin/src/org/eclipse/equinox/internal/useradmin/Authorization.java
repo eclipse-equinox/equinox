@@ -91,13 +91,13 @@ public class Authorization implements org.osgi.service.useradmin.Authorization {
 	 * Checks if the role with the specified name is implied by this 
 	 * Authorization context.
 	 * <p>
-
+	
 	 * Bundles must define globally unique role names that are associated with
 	 * the privilege of accessing restricted resources or operations.
 	 * System administrators will grant users access to these resources, by
 	 * creating a {@link Group} for each role and adding {@link User}s to it.
 	 *
-	 * @param name The name of the role to check for.
+	 * @param name_ The name of the role to check for.
 	 *
 	 * @return <code>true</code> if this Authorization context implies the
 	 * specified role, otherwise <code>false</code>.

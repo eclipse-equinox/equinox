@@ -89,7 +89,7 @@ public class DriverSelectorTracker extends ServiceTracker {
 	/**
 	 * Default match selection algorithm from OSGi SPR2 spec.
 	 *
-	 * @param matchArray An array of the successful matches.
+	 * @param matches An array of the successful matches.
 	 * @return ServiceReference to the selected Driver service
 	 */
 	public ServiceReference defaultSelection(Match[] matches) {

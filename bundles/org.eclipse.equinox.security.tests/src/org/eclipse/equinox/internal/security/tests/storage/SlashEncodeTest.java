@@ -97,7 +97,6 @@ public class SlashEncodeTest extends StorageAbstractTest {
 	 * Tests preferences node name using slash encoding
 	 * @throws IOException 
 	 * @throws BackingStoreException 
-	 * @throws  
 	 */
 	@Test
 	public void testPreferencesWithSlashes() throws IOException, StorageException {
