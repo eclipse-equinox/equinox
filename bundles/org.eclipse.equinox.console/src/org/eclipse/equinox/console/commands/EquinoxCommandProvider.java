@@ -1445,14 +1445,10 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 				// Set the stack trace to that of the target thread.
 				toThrow.setStackTrace(t.getStackTrace());
 				// Stop the thread using the specified throwable.
-				try {
-					t.stop(toThrow);
-				} catch (UnsupportedOperationException e) {
-					// Thread#stop(Throwable) doesn't work any more in JDK 8. Try stop0:
-					Method stop0 = Thread.class.getDeclaredMethod("stop0", Object.class);
-					stop0.setAccessible(true);
-					stop0.invoke(t, toThrow);
-				}
+				// Thread#stop(Throwable) doesn't work any more in JDK 8 and is removed in Java 11. Try stop0:
+				Method stop0 = Thread.class.getDeclaredMethod("stop0", Object.class);
+				stop0.setAccessible(true);
+				stop0.invoke(t, toThrow);
 				return;
 			}
 			// An unrecognized action was specified.
