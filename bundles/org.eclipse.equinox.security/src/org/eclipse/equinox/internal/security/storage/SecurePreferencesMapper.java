@@ -26,6 +26,7 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.util.NLS;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class SecurePreferencesMapper {
 
 	/**

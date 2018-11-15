@@ -70,7 +70,7 @@ final public class SecurePreferencesFactory {
 	 * @return a secure preferences
 	 * @throws IOException if unsupported URLs types are passed in, or if location is not accessible
 	 */
-	static public ISecurePreferences open(URL location, Map options) throws IOException {
+	static public ISecurePreferences open(URL location, @SuppressWarnings("rawtypes") Map options) throws IOException {
 		return SecurePreferencesMapper.open(location, options);
 	}
 }
