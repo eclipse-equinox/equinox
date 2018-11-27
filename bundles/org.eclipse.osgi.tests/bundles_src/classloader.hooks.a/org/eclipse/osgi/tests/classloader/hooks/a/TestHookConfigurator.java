@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2017 IBM Corporation and others.
+ * Copyright (c) 2013, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,7 @@ public class TestHookConfigurator implements HookConfigurator {
 	private static final String BAD_TRANSFORM_PROP = "classloader.hooks.a.bad.transform";
 	private static final String RECURSION_LOAD = "classloader.hooks.a.recursion.load";
 	private static final String RECURSION_LOAD_SUPPORTED = "classloader.hooks.a.recursion.load.supported";
+	private static final String FILTER_CLASS_PATHS = "classloader.hooks.a.filter.class.paths";
 	final ThreadLocal<Boolean> doingRecursionLoad = new ThreadLocal<Boolean>() {
 		protected Boolean initialValue() {
 			return false;
@@ -73,6 +74,13 @@ public class TestHookConfigurator implements HookConfigurator {
 				return Boolean.getBoolean(RECURSION_LOAD_SUPPORTED);
 			}
 
+			@Override
+			public ClasspathEntry[] getClassPathEntries(String name, ClasspathManager manager) {
+				if (Boolean.getBoolean(FILTER_CLASS_PATHS)) {
+					return new ClasspathEntry[0];
+				}
+				return super.getClassPathEntries(name, manager);
+			}
 		});
 	}
 }

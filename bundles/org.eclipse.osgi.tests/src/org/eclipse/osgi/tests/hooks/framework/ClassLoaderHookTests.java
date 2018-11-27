@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2017 IBM Corporation and others.
+ * Copyright (c) 2013, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,12 +15,18 @@ package org.eclipse.osgi.tests.hooks.framework;
 
 import java.io.File;
 import java.net.URL;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.hooks.weaving.WeavingHook;
 import org.osgi.framework.hooks.weaving.WovenClass;
 import org.osgi.framework.launch.Framework;
@@ -37,6 +43,7 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 	private static final String BAD_TRANSFORM_PROP = "classloader.hooks.a.bad.transform";
 	private static final String RECURSION_LOAD = "classloader.hooks.a.recursion.load";
 	private static final String RECURSION_LOAD_SUPPORTED = "classloader.hooks.a.recursion.load.supported";
+	private static final String FILTER_CLASS_PATHS = "classloader.hooks.a.filter.class.paths";
 
 	private Map<String, String> configuration;
 	private Framework framework;
@@ -48,6 +55,7 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 		setBadTransform(false);
 		setRecursionLoad(false);
 		setRecursionLoadSupported(false);
+		setFilterClassPaths(false);
 		String loc = bundleInstaller.getBundleLocation(HOOK_CONFIGURATOR_BUNDLE);
 		loc = loc.substring(loc.indexOf("file:"));
 		classLoader.addURL(new URL(loc));
@@ -86,6 +94,10 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 
 	private void setRecursionLoadSupported(boolean value) {
 		System.setProperty(RECURSION_LOAD_SUPPORTED, Boolean.toString(value));
+	}
+
+	private void setFilterClassPaths(boolean value) {
+		System.setProperty(FILTER_CLASS_PATHS, Boolean.toString(value));
 	}
 
 	public void testRejectTransformationFromWeavingHook() throws Exception {
@@ -164,5 +176,21 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 			}
 		});
 		refreshSignal.await(30, TimeUnit.SECONDS);
+	}
+
+	public void testFilterClassPaths() throws Exception {
+		setFilterClassPaths(false);
+		initAndStartFramework();
+		Bundle b = installBundle();
+		b.loadClass(TEST_CLASSNAME);
+
+		setFilterClassPaths(true);
+		refreshBundles(Collections.singleton(b));
+		try {
+			b.loadClass(TEST_CLASSNAME);
+			fail("Expected a ClassNotFoundException.");
+		} catch (ClassNotFoundException e) {
+			// expected
+		}
 	}
 }
