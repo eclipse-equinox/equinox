@@ -28,12 +28,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.osgi.container.Module.StartOptions;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.Module.StopOptions;
+import org.eclipse.osgi.container.ModuleContainer.ResolutionLock.Permits;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.ModuleDatabase.Sort;
@@ -485,10 +488,10 @@ public final class ModuleContainer implements DebugOptionsListener {
 			return new ModuleResolutionReport(null, Collections.<Resource, List<Entry>> emptyMap(), new ResolutionException("Unable to resolve while shutting down the framework.")); //$NON-NLS-1$
 		}
 		ResolutionReport report = null;
-		try (ResolutionLock resolutionLock = new ResolutionLock(1)) {
+		try (ResolutionLock.Permits resolutionPermits = _resolutionLock.acquire(1)) {
 			do {
 				try {
-					report = resolveAndApply(triggers, triggersMandatory, restartTriggers);
+					report = resolveAndApply(triggers, triggersMandatory, restartTriggers, resolutionPermits);
 				} catch (RuntimeException e) {
 					if (e.getCause() instanceof BundleException) {
 						BundleException be = (BundleException) e.getCause();
@@ -505,7 +508,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 		return report;
 	}
 
-	private ResolutionReport resolveAndApply(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers) {
+	private ResolutionReport resolveAndApply(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers, ResolutionLock.Permits resolutionPermits) {
 		if (triggers == null)
 			triggers = new ArrayList<>(0);
 		Collection<ModuleRevision> triggerRevisions = new ArrayList<>(triggers.size());
@@ -545,7 +548,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 				modulesResolved.add(deltaRevision.getRevisions().getModule());
 		}
 
-		return applyDelta(deltaWiring, modulesResolved, triggers, timestamp, restartTriggers) ? report : null;
+		return applyDelta(deltaWiring, modulesResolved, triggers, timestamp, restartTriggers, resolutionPermits) ? report : null;
 	}
 
 	/**
@@ -560,7 +563,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 		Map<ModuleRevision, ModuleWiring> deltaWiring;
 		Collection<Module> modulesResolved;
 		long timestamp;
-		try (ResolutionLock resolutionLock = new ResolutionLock(MAX_RESOLUTION_PERMITS)) {
+		try (Permits resolutionPermits = _resolutionLock.acquire(ResolutionLock.MAX_RESOLUTION_PERMITS)) {
 			do {
 				result = null;
 				Map<ModuleRevision, ModuleWiring> wiringClone = null;
@@ -644,7 +647,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 				// Save the result
 				ModuleWiring wiring = deltaWiring.get(revision);
 				result = findExistingDynamicWire(wiring, dynamicPkgName);
-			} while (!applyDelta(deltaWiring, modulesResolved, Collections.<Module> emptyList(), timestamp, false));
+			} while (!applyDelta(deltaWiring, modulesResolved, Collections.<Module> emptyList(), timestamp, false, resolutionPermits));
 		} catch (ResolutionLockException e) {
 			return null;
 		}
@@ -681,8 +684,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	// between taking the snapshot and successfully applying the
 	// results.  Instead of resorting to single threaded operations
 	// we choose to limit the number of concurrent resolves
-	final static int MAX_RESOLUTION_PERMITS = 10;
-	final Semaphore _resolutionLock = new Semaphore(MAX_RESOLUTION_PERMITS);
+	final ResolutionLock _resolutionLock = new ResolutionLock();
 	final ReentrantLock _bundleStateLock = new ReentrantLock();
 
 	static class ResolutionLockException extends Exception {
@@ -697,32 +699,61 @@ public final class ModuleContainer implements DebugOptionsListener {
 		}
 	}
 
-	class ResolutionLock implements Closeable {
-		private final int permits;
+	/**
+	 * A resolution hook allows for a max of 10 threads to do resolution operations
+	 * at the same time.  The implementation uses a semaphore to grant the max number
+	 * of permits (threads) but a reentrant read lock is also used to detect reentry.
+	 * If a thread reenters then no extra permits are required by the thread.
+	 * This lock returns a Permits object that implements closeable for use in
+	 * try->with.  If permits is closed multiple times then the additional close
+	 * operations are a no-op.
+	 */
+	static class ResolutionLock {
+		final static int MAX_RESOLUTION_PERMITS = 10;
+		final Semaphore permitPool = new Semaphore(MAX_RESOLUTION_PERMITS);
+		final ReentrantReadWriteLock reenterLock = new ReentrantReadWriteLock();
 
-		ResolutionLock(int permits) throws ResolutionLockException {
-			this.permits = permits;
-			boolean previousInterruption = Thread.interrupted();
-			try {
-				if (!_resolutionLock.tryAcquire(permits, 30, TimeUnit.SECONDS)) {
-					throw new ResolutionLockException();
+		class Permits implements Closeable {
+			private final int aquiredPermits;
+			private final AtomicBoolean closed = new AtomicBoolean();
+
+			Permits(int requestedPermits) throws ResolutionLockException {
+				if (reenterLock.getReadHoldCount() > 0) {
+					// thread is already holding permits; don't request more
+					requestedPermits = 0;
 				}
-			} catch (InterruptedException e) {
-				throw new ResolutionLockException(e);
-			} finally {
-				if (previousInterruption) {
-					Thread.currentThread().interrupt();
+				this.aquiredPermits = requestedPermits;
+				boolean previousInterruption = Thread.interrupted();
+				try {
+					if (!permitPool.tryAcquire(requestedPermits, 30, TimeUnit.SECONDS)) {
+						throw new ResolutionLockException();
+					}
+				} catch (InterruptedException e) {
+					throw new ResolutionLockException(e);
+				} finally {
+					if (previousInterruption) {
+						Thread.currentThread().interrupt();
+					}
+				}
+				// mark this thread as holding permits
+				reenterLock.readLock().lock();
+			}
+
+			@Override
+			public void close() {
+				if (closed.compareAndSet(false, true)) {
+					permitPool.release(aquiredPermits);
+					reenterLock.readLock().unlock();
 				}
 			}
 		}
 
-		@Override
-		public void close() {
-			_resolutionLock.release(permits);
+		Permits acquire(int requestedPermits) throws ResolutionLockException {
+			return new Permits(requestedPermits);
 		}
 	}
 
-	private boolean applyDelta(Map<ModuleRevision, ModuleWiring> deltaWiring, Collection<Module> modulesResolved, Collection<Module> triggers, long timestamp, boolean restartTriggers) {
+	private boolean applyDelta(Map<ModuleRevision, ModuleWiring> deltaWiring, Collection<Module> modulesResolved, Collection<Module> triggers, long timestamp, boolean restartTriggers, ResolutionLock.Permits resolutionPermits) {
 		List<Module> modulesLocked = new ArrayList<>(modulesResolved.size());
 		// now attempt to apply the delta
 		try {
@@ -808,6 +839,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 				module.unlockStateChange(ModuleEvent.RESOLVED);
 			}
 		}
+
+		// release resolution permits before firing events
+		resolutionPermits.close();
 
 		for (Module module : modulesLocked) {
 			adaptor.publishModuleEvent(ModuleEvent.RESOLVED, module, module);

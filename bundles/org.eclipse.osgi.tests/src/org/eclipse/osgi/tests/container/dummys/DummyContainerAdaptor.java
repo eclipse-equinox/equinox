@@ -32,6 +32,7 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 
 public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	private AtomicBoolean slowdownEvents = new AtomicBoolean(false);
+	private Runnable runForEvents = null;
 	private final ModuleCollisionHook collisionHook;
 	private final Map<String, String> configuration;
 	private final DummyModuleDatabase moduleDatabase;
@@ -111,7 +112,15 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 				Thread.currentThread().interrupt();
 			}
 		}
+		Runnable current = runForEvents;
+		if (current != null) {
+			current.run();
+		}
 		moduleDatabase.addEvent(new DummyModuleEvent(module, type, module.getState()));
+	}
+
+	public void setRunForEvents(Runnable runForEvents) {
+		this.runForEvents = runForEvents;
 	}
 
 	@Override

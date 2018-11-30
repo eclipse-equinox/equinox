@@ -49,6 +49,8 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import org.eclipse.osgi.container.Module;
@@ -2864,7 +2866,7 @@ public class TestModuleContainer extends AbstractTest {
 		}
 		adaptor.setSlowdownEvents(true);
 		final ConcurrentLinkedQueue<BundleException> startErrors = new ConcurrentLinkedQueue<BundleException>();
-		final ExecutorService executor = Executors.newFixedThreadPool(10);
+		final ExecutorService executor = Executors.newFixedThreadPool(5);
 		try {
 			for (final Module module : modules) {
 
@@ -2892,6 +2894,107 @@ public class TestModuleContainer extends AbstractTest {
 		for (DummyContainerEvent event : events) {
 			Assert.assertNotEquals("Found an error.", ContainerEvent.ERROR, event.type);
 		}
+	}
+
+	class RecurseResolverHook implements ResolverHook {
+		volatile ModuleContainer container;
+		volatile Module dynamicImport;
+		final AtomicInteger id = new AtomicInteger();
+		List<IllegalStateException> expectedErrors = Collections.synchronizedList(new ArrayList<IllegalStateException>());
+
+		@Override
+		public void filterResolvable(Collection<BundleRevision> candidates) {
+			ModuleContainer current = container;
+			if (current != null) {
+				int nextId = id.incrementAndGet();
+				if (nextId >= 2) {
+					// Don't do this again
+					return;
+				}
+				Map<String, String> manifest = new HashMap<String, String>();
+				manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+				manifest.put(Constants.BUNDLE_SYMBOLICNAME, "module.recurse." + nextId);
+				try {
+					Module m = installDummyModule(manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), current);
+					ResolutionReport report = current.resolve(Collections.singleton(m), false);
+					report.getResolutionException();
+				} catch (IllegalStateException e) {
+					expectedErrors.add(e);
+				} catch (BundleException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				Module curDynamicImport = dynamicImport;
+				if (curDynamicImport != null) {
+					try {
+						current.resolveDynamic("org.osgi.framework", curDynamicImport.getCurrentRevision());
+					} catch (IllegalStateException e) {
+						expectedErrors.add(e);
+					}
+				}
+			}
+		}
+
+		@Override
+		public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
+			// nothing
+		}
+
+		@Override
+		public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
+			// nothing
+		}
+
+		@Override
+		public void end() {
+			// nothing
+		}
+
+		List<IllegalStateException> getExpectedErrors() {
+			return new ArrayList<>(expectedErrors);
+		}
+	}
+
+	@Test
+	public void testRecurseResolutionPermits() throws BundleException, IOException {
+		RecurseResolverHook resolverHook = new RecurseResolverHook();
+		DummyContainerAdaptor adaptor = createDummyAdaptor(resolverHook);
+		final ModuleContainer container = adaptor.getContainer();
+
+		// install the system.bundle
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
+		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+		systemBundle.start();
+
+		// install a bundle to do dynamic resolution from
+		Map<String, String> manifest = new HashMap<String, String>();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "dynamicImport");
+		manifest.put(Constants.DYNAMICIMPORT_PACKAGE, "*");
+		final Module dynamicImport = installDummyModule(manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), container);
+		dynamicImport.start();
+		resolverHook.dynamicImport = dynamicImport;
+		resolverHook.container = container;
+
+		final AtomicReference<ModuleWire> dynamicWire = new AtomicReference<>();
+		Runnable runForEvents = new Runnable() {
+			@Override
+			public void run() {
+				dynamicWire.set(container.resolveDynamic("org.osgi.framework", dynamicImport.getCurrentRevision()));
+			}
+		};
+		adaptor.setRunForEvents(runForEvents);
+		// install a bundle to resolve
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "initial");
+		Module m = installDummyModule(manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), container);
+		m.start();
+
+		assertNotNull("No Dynamic Wire", dynamicWire.get());
+		assertEquals("Wrong number of exected errors.", 2, resolverHook.getExpectedErrors().size());
 	}
 
 	@Test
