@@ -3469,6 +3469,33 @@ public class TestModuleContainer extends AbstractTest {
 		}
 	}
 
+	@Test
+	public void testAliasBundleNameReport() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
+		container.resolve(Collections.singleton(systemBundle), true);
+
+		Map<String, String> b1Manifest = new HashMap<>();
+		b1Manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b1");
+		b1Manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		b1Manifest.put(Constants.IMPORT_PACKAGE, "doesnotexist");
+		ModuleRevisionBuilder b1Builder = OSGiManifestBuilderFactory.createBuilder(b1Manifest, "alias.name", "", "");
+		container.install(systemBundle, "b1", b1Builder, null);
+
+		Map<String, String> b2Manifest = new HashMap<>();
+		b2Manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b2");
+		b2Manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		b2Manifest.put(Constants.REQUIRE_BUNDLE, "b1");
+		ModuleRevisionBuilder b2Builder = OSGiManifestBuilderFactory.createBuilder(b2Manifest);
+		Module b2 = container.install(systemBundle, "b2", b2Builder, null);
+
+		ResolutionReport report = container.resolve(Collections.singleton(b2), true);
+		String message = report.getResolutionReportMessage(b2.getCurrentRevision());
+		assertTrue("Wrong error message: " + message, message.contains("b1") && message.contains("alias.name"));
+	}
+
 	private static void assertWires(List<ModuleWire> required, List<ModuleWire>... provided) {
 		for (ModuleWire requiredWire : required) {
 			for (List<ModuleWire> providedList : provided) {

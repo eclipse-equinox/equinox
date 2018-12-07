@@ -169,7 +169,7 @@ class ModuleResolutionReport implements ResolutionReport {
 	private static String createOSGiCapability(Capability cap) {
 		Map<String, Object> attributes = new HashMap<>(cap.getAttributes());
 		Map<String, String> directives = cap.getDirectives();
-		String name = (String) attributes.remove(cap.getNamespace());
+		String name = String.valueOf(attributes.remove(cap.getNamespace()));
 		return name + ModuleRevision.toString(attributes, false, true) + ModuleRevision.toString(directives, true, true);
 	}
 
