@@ -69,7 +69,7 @@ public class HttpSessionTracker implements HttpSessionInvalidator {
 			List<HttpSessionAttributeListener> httpSessionAttributeListeners =
 				eventListeners.get(HttpSessionAttributeListener.class);
 
-			if (!httpSessionListeners.isEmpty()) {
+			if (!httpSessionAttributeListeners.isEmpty()) {
 				Enumeration<String> enumeration =
 					httpSessionAdaptor.getAttributeNames();
 

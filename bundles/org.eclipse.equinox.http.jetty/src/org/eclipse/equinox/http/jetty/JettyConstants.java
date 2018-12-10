@@ -151,6 +151,11 @@ public interface JettyConstants {
 	public static final String CONTEXT_SESSIONINACTIVEINTERVAL = "context.sessioninactiveinterval"; //$NON-NLS-1$
 
 	/**
+	 * name="housekeeper.interval" type="Integer"
+	 */
+	public static final String HOUSEKEEPER_INTERVAL = "housekeeper.interval"; //$NON-NLS-1$
+
+	/**
 	 * name="customizer.class" type="String" <br />
 	 * (full qualified name of the class that implements
 	 * <code>org.eclipse.equinox.http.jetty.JettyCustomizer</code> and has a public no-arg constructor;

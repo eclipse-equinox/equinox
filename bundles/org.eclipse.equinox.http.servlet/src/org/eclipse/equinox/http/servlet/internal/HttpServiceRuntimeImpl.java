@@ -1075,6 +1075,10 @@ public class HttpServiceRuntimeImpl
 		}
 	}
 
+	public void sessionDestroyed(String sessionId) {
+		httpSessionTracker.invalidate(sessionId, false);
+	}
+
 	private Map<String, Object> attributes;
 	private final String targetFilter;
 	private final ServiceRegistration<ServletContextHelper> defaultContextReg;

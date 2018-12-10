@@ -45,6 +45,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -1806,6 +1807,63 @@ public class ServletTest extends BaseTest {
 			assertTrue("Wrong result: " + actual, actual.startsWith("/sessions;jsessionid="));
 			assertTrue("No sessionCreated called", sessionCreated.get());
 			assertTrue("No valueBound called", valueBound.get());
+		} catch (Exception e) {
+			fail("Unexpected exception: " + e);
+		} finally {
+			if (servletReg != null) {
+				servletReg.unregister();
+			}
+			if (sessionListenerReg != null) {
+				sessionListenerReg.unregister();
+			}
+		}
+	}
+
+	@Test
+	public void test_Sessions05_Bug541607_MemoryLeak() throws Exception {
+		final List<String> sessionIds = new CopyOnWriteArrayList<>();
+		HttpSessionListener sessionListener = new HttpSessionListener() {
+
+			@Override
+			public void sessionDestroyed(HttpSessionEvent se) {
+				sessionIds.remove(se.getSession().getId());
+			}
+
+			@Override
+			public void sessionCreated(HttpSessionEvent se) {
+				sessionIds.add(se.getSession().getId());
+			}
+		};
+		HttpServlet sessionServlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
+					IOException {
+				HttpSession session = request.getSession();
+				response.getWriter().print("created " + session.getId());
+			}
+
+		};
+		ServiceRegistration<Servlet> servletReg = null;
+		ServiceRegistration<HttpSessionListener> sessionListenerReg = null;
+		Dictionary<String, Object> servletProps = new Hashtable<String, Object>();
+		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/sessions");
+
+		try {
+			servletReg = getBundleContext().registerService(Servlet.class, sessionServlet, servletProps);
+			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
+			sessionListenerReg = getBundleContext().registerService(HttpSessionListener.class, sessionListener, listenerProps);
+
+			// call the servet 10 times, we should get 10 sessions
+			for (int i = 0; i < 10; i++) {
+				requestAdvisor.request("sessions");
+			}
+
+			assertEquals("Wrong result", 10, sessionIds.size());
+			Thread.sleep(12000); // 12 seconds
+			assertEquals("Wrong result", 0, sessionIds.size());
 		} catch (Exception e) {
 			fail("Unexpected exception: " + e);
 		} finally {

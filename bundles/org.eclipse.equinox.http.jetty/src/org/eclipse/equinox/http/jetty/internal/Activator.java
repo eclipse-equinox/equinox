@@ -197,6 +197,16 @@ public class Activator implements BundleActivator {
 			}
 		}
 
+		// House Keeper Interval
+		String houseKeeperInterval = Details.getStringProp(context, JettyConstants.HOUSEKEEPER_INTERVAL, null);
+		if (houseKeeperInterval != null) {
+			try {
+				defaultSettings.put(JettyConstants.HOUSEKEEPER_INTERVAL, Long.valueOf(houseKeeperInterval));
+			} catch (NumberFormatException e) {
+				//(log this) ignore
+			}
+		}
+
 		// Other Info
 		String otherInfo = Details.getStringProp(context, JettyConstants.OTHER_INFO, null);
 		if (otherInfo != null)

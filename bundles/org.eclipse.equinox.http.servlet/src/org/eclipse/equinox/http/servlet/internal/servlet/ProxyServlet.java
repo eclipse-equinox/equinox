@@ -53,6 +53,10 @@ public class ProxyServlet extends HttpServlet {
 		this.httpServiceRuntimeImpl = httpServiceRuntimeImpl;
 	}
 
+	public void sessionDestroyed(String sessionId) {
+		httpServiceRuntimeImpl.sessionDestroyed(sessionId);
+	}
+
 	public void sessionIdChanged(String oldSessionId) {
 		httpServiceRuntimeImpl.fireSessionIdChanged(oldSessionId);
 	}

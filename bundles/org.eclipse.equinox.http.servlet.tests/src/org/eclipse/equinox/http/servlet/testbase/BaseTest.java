@@ -69,6 +69,8 @@ public class BaseTest {
 		System.setProperty("org.eclipse.jetty.servlet.LEVEL", "OFF");
 
 		System.setProperty("org.osgi.service.http.port", "0");
+		System.setProperty("org.eclipse.equinox.http.jetty.context.sessioninactiveinterval", "1");
+		System.setProperty("org.eclipse.equinox.http.jetty.housekeeper.interval", "10");
 		BundleContext bundleContext = getBundleContext();
 		installer = new BundleInstaller(TEST_BUNDLES_BINARY_DIRECTORY, bundleContext);
 		advisor = new BundleAdvisor(bundleContext);

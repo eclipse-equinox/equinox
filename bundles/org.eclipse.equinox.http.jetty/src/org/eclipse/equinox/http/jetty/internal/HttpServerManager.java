@@ -22,12 +22,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import javax.servlet.*;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionIdListener;
+import javax.servlet.http.*;
 import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.jetty.JettyCustomizer;
 import org.eclipse.equinox.http.servlet.HttpServiceServlet;
 import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.server.session.HouseKeeper;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -159,6 +159,9 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 		try {
 			server.start();
+
+			HouseKeeper houseKeeper = server.getSessionIdManager().getSessionHouseKeeper();
+			houseKeeper.setIntervalSec(Details.getLong(dictionary, JettyConstants.HOUSEKEEPER_INTERVAL, houseKeeper.getIntervalSec()));
 		} catch (Exception e) {
 			throw new ConfigurationException(pid, e.getMessage(), e);
 		}
@@ -250,23 +253,32 @@ public class HttpServerManager implements ManagedServiceFactory {
 		}
 	}
 
-	public static class InternalHttpServiceServlet implements HttpSessionIdListener, Servlet {
+	public static class InternalHttpServiceServlet implements HttpSessionListener, HttpSessionIdListener, Servlet {
 		//		private static final long serialVersionUID = 7477982882399972088L;
-		private Servlet httpServiceServlet = new HttpServiceServlet();
+		private final Servlet httpServiceServlet = new HttpServiceServlet();
 		private ClassLoader contextLoader;
-		private Method method;
+		private final Method sessionDestroyed;
+		private final Method sessionIdChanged;
+
+		public InternalHttpServiceServlet() {
+			Class<?> clazz = httpServiceServlet.getClass();
+
+			try {
+				sessionDestroyed = clazz.getMethod("sessionDestroyed", new Class<?>[] {String.class}); //$NON-NLS-1$
+			} catch (Exception e) {
+				throw new IllegalStateException(e);
+			}
+			try {
+				sessionIdChanged = clazz.getMethod("sessionIdChanged", new Class<?>[] {String.class}); //$NON-NLS-1$
+			} catch (Exception e) {
+				throw new IllegalStateException(e);
+			}
+		}
 
 		@Override
 		public void init(ServletConfig config) throws ServletException {
 			ServletContext context = config.getServletContext();
 			contextLoader = (ClassLoader) context.getAttribute(INTERNAL_CONTEXT_CLASSLOADER);
-
-			Class<?> clazz = httpServiceServlet.getClass();
-			try {
-				method = clazz.getMethod("sessionIdChanged", new Class<?>[] {String.class}); //$NON-NLS-1$
-			} catch (Exception e) {
-				throw new ServletException(e);
-			}
 
 			Thread thread = Thread.currentThread();
 			ClassLoader current = thread.getContextClassLoader();
@@ -314,12 +326,35 @@ public class HttpServerManager implements ManagedServiceFactory {
 		}
 
 		@Override
+		public void sessionCreated(HttpSessionEvent event) {
+			// Nothing to do.
+		}
+
+		@Override
+		public void sessionDestroyed(HttpSessionEvent event) {
+			Thread thread = Thread.currentThread();
+			ClassLoader current = thread.getContextClassLoader();
+			thread.setContextClassLoader(contextLoader);
+			try {
+				sessionDestroyed.invoke(httpServiceServlet, event.getSession().getId());
+			} catch (IllegalAccessException e) {
+				// not likely
+			} catch (IllegalArgumentException e) {
+				// not likely
+			} catch (InvocationTargetException e) {
+				throw new RuntimeException(e.getCause());
+			} finally {
+				thread.setContextClassLoader(current);
+			}
+		}
+
+		@Override
 		public void sessionIdChanged(HttpSessionEvent event, String oldSessionId) {
 			Thread thread = Thread.currentThread();
 			ClassLoader current = thread.getContextClassLoader();
 			thread.setContextClassLoader(contextLoader);
 			try {
-				method.invoke(httpServiceServlet, oldSessionId);
+				sessionIdChanged.invoke(httpServiceServlet, oldSessionId);
 			} catch (IllegalAccessException e) {
 				// not likely
 			} catch (IllegalArgumentException e) {
