@@ -60,9 +60,9 @@ public class ProxyServlet extends HttpServlet {
 	public void sessionIdChanged(String oldSessionId) {
 		httpServiceRuntimeImpl.fireSessionIdChanged(oldSessionId);
 	}
-	
+
 	/**
-	 * get the value of path info, not decoded by the server 
+	 * get the value of path info, not decoded by the server
 	 */
 	private String getNotDecodedAlias(HttpServletRequest request) {
 		String pathInfo = HttpServletRequestWrapperImpl.getDispatchPathInfo(request);
@@ -70,20 +70,7 @@ public class ProxyServlet extends HttpServlet {
 			return null;
 		}
 		String requestUri = HttpServletRequestWrapperImpl.getDispatchRequestURI(request);
-		
-		// NOTE use split that takes a max to preserve ending SLASH
-		String[] pathInfoSegments = pathInfo.split(Const.SLASH, Integer.MAX_VALUE - 1);
-		String[] requestUriSegments = requestUri.split(Const.SLASH, Integer.MAX_VALUE - 1);
-		
-		if(pathInfoSegments.length == requestUriSegments.length) {
-			return requestUri;
-		}
-		
-		StringBuilder aliasBuilder = new StringBuilder();
-		for(int i=(requestUriSegments.length - pathInfoSegments.length + 1);i<requestUriSegments.length;i++) {
-			aliasBuilder.append(Const.SLASH).append(requestUriSegments[i]);
-		}
-		return aliasBuilder.toString();
+		return requestUri.substring(request.getContextPath().length() + request.getServletPath().length());
 	}
 
 	/**

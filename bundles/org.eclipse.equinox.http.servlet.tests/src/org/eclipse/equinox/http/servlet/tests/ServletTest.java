@@ -2685,6 +2685,34 @@ public class ServletTest extends BaseTest {
 	}
 
 	@Test
+	public void test_PathEncodings_Bug540970() throws Exception {
+		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void service(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+
+				PrintWriter writer = resp.getWriter();
+
+				writer.write(req.getRequestURI());
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+
+		Map<String, List<String>> map = new HashMap<String, List<String>>();
+
+		Map<String, List<String>> result = requestAdvisor.request("Servlet16/NEEO-a5056097%2Fdevice%2Fapt-neeo_io%3Avirtual%3A6jzOoAtL%2FTemperature_GF_Living%2Fnone%2F1%2Fdirectory%2Factor/default", map);
+
+		Assert.assertEquals("200", result.get("responseCode").get(0));
+		Assert.assertEquals("/Servlet16/NEEO-a5056097%2Fdevice%2Fapt-neeo_io%3Avirtual%3A6jzOoAtL%2FTemperature_GF_Living%2Fnone%2F1%2Fdirectory%2Factor/default", result.get("responseBody").get(0));
+	}
+
+	@Test
 	public void test_ServletContext1() throws Exception {
 		String expected = "/org/eclipse/equinox/http/servlet/tests/tb1/resource1.txt";
 		String actual;
