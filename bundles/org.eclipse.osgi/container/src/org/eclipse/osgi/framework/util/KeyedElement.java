@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,9 +14,14 @@
 package org.eclipse.osgi.framework.util;
 
 /**
+ * NOTE: This interface defines an element that could be inserted into an internal class called
+ * <code>KeyedHashSet</code>.  This internal class <code>KeyedHashSet</code> has been deleted.
+ * The KeyedElement interface has remained because of the use of it in <code>ClasspathEntry</code>.
+ * A keyed element can easily be put into a standard Map implementation by using the keyed element
+ * key for the mapping.
+ * <p>
  * An element of an <code>KeyedHashSet</code>.  A KeyedElement privides the key which is used to hash 
  * the elements in an <code>KeyedHashSet</code>.
- * @see KeyedHashSet
  * @since 3.2
  */
 // This class was moved from  /org.eclipse.osgi/core/framework/org/eclipse/osgi/framework/internal/core/KeyedElement.java
