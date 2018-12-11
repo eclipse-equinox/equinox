@@ -182,6 +182,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		testBundle.start();
 
 		assertEquals("Wrong thread for synchronous bundle event logs.", Thread.currentThread(), logThread.get());
+
 	}
 
 	public void testLogServiceEventInfo() throws Exception {
@@ -334,5 +335,124 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 			count++;
 		}
 		return count;
+	}
+
+	public void testLoggerContextSetLogLevelsWithBundleInstalledAndLogger() throws Exception {
+		Bundle bundle = null;
+		String loggerName = "test.logger";
+		try {
+			bundle = installer.installBundle("test.logging.a");
+			bundle.start();
+			Logger logger = log.getLogger(bundle, loggerName, Logger.class);
+			assertNotNull("Logger cannot be null", logger);
+			//Bundle is installed and a logger is associated with that bundle before setting the log level
+			setAndAssertLogLevel(bundle.getSymbolicName(), loggerName);
+
+			TestListener listener = new TestListener(bundle);
+			reader.addLogListener(listener);
+			for (LogLevel logLevel : LogLevel.values()) {
+				String message = logLevel.name() + " MESSAGE";
+				doLogging(bundle, logger, listener, logLevel, message);
+			}
+		} finally {
+			if (bundle != null) {
+				bundle.stop();
+				bundle.uninstall();
+			}
+		}
+	}
+
+	public void testLoggerContextSetLogLevelsWithBundleInstalledAndNoLogger() throws Exception {
+		Bundle bundle = null;
+		String loggerName = "test.logger";
+		try {
+			bundle = installer.installBundle("test.logging.a");
+			bundle.start();
+			//Bundle is installed but a logger is not associated with the bundle before setting the log level
+			setAndAssertLogLevel(bundle.getSymbolicName(), loggerName);
+			Logger logger = log.getLogger(bundle, loggerName, Logger.class);
+			assertNotNull("Logger cannot be null", logger);
+			TestListener listener = new TestListener(bundle);
+			reader.addLogListener(listener);
+			for (LogLevel logLevel : LogLevel.values()) {
+				String message = logLevel.name() + " MESSAGE";
+				doLogging(bundle, logger, listener, logLevel, message);
+			}
+		} finally {
+			if (bundle != null) {
+				bundle.stop();
+				bundle.uninstall();
+			}
+		}
+	}
+
+	public void testLoggerContextSetLogLevelsWithoutBundleAndLogger() throws Exception {
+		Bundle bundle = null;
+		String loggerName = "test.logger";
+		//Bundle is not installed and also the logger is not associated with the bundle before setting the log level
+		setAndAssertLogLevel("test.logging.a", loggerName);
+		try {
+			bundle = installer.installBundle("test.logging.a");
+			bundle.start();
+			Logger logger = log.getLogger(bundle, loggerName, Logger.class);
+			assertNotNull("Logger cannot be null", logger);
+			TestListener listener = new TestListener(bundle);
+			reader.addLogListener(listener);
+			for (LogLevel logLevel : LogLevel.values()) {
+				String message = logLevel.name() + " MESSAGE";
+				doLogging(bundle, logger, listener, logLevel, message);
+			}
+		} finally {
+			if (bundle != null) {
+				bundle.stop();
+				bundle.uninstall();
+			}
+		}
+	}
+
+	private void setAndAssertLogLevel(String loggerContextName, String loggerName) {
+		LoggerContext loggerContext = loggerAdmin.getLoggerContext(loggerContextName);
+		Map<String, LogLevel> logLevels = loggerContext.getLogLevels();
+		logLevels.put(loggerName, LogLevel.TRACE);
+		loggerContext.setLogLevels(logLevels);
+		assertEquals("Log levels not set for " + loggerContext.getName(), logLevels, loggerContext.getLogLevels());
+		assertEquals("Wrong effective level", LogLevel.TRACE, loggerContext.getEffectiveLogLevel(loggerName));
+	}
+
+	private void doLogging(Bundle bundle, Logger logger, TestListener listener, LogLevel logLevel, String message) throws Exception {
+		synchronized (listener) {
+			logToLogger(logger, message, logLevel);
+			listener.waitForLogEntry();
+		}
+		ExtendedLogEntry logEntry = listener.getEntryX();
+		assertEquals("Wrong message logged", message, logEntry.getMessage());
+		assertEquals("Wrong Log level", logLevel, logEntry.getLogLevel());
+		assertEquals("Wrong Logger name", logger.getName(), logEntry.getLoggerName());
+		assertEquals("Wrong bundle", bundle.getSymbolicName(), logEntry.getBundle().getSymbolicName());
+	}
+
+	private void logToLogger(Logger logger, String message, LogLevel logLevel) {
+		switch (logLevel) {
+			case AUDIT :
+				logger.audit(message);
+				break;
+			case ERROR :
+				logger.error(message);
+				break;
+			case WARN :
+				logger.warn(message);
+				break;
+			case INFO :
+				logger.info(message);
+				break;
+			case DEBUG :
+				logger.debug(message);
+				break;
+			case TRACE :
+				logger.trace(message);
+				break;
+			default :
+				fail("Unknown Log level");
+		}
 	}
 }

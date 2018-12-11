@@ -13,7 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.log;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.eclipse.osgi.internal.log.ExtendedLogServiceFactory.EquinoxLoggerContext;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
@@ -131,6 +136,9 @@ public class LoggerContextTargetMap {
 			matching = logServices.keySet();
 		} else {
 			matching = qualifiedNameToTargets.get(loggerContext.getName());
+		}
+		if (matching == null) {
+			return;
 		}
 		for (Bundle bundle : matching) {
 			ExtendedLogServiceImpl logService = logServices.get(bundle);
