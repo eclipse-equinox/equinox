@@ -15,13 +15,12 @@
 
 package org.eclipse.equinox.http.servlet.internal.servlet;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpSession;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
-import org.eclipse.equinox.http.servlet.internal.context.ContextController;
-import org.eclipse.equinox.http.servlet.internal.util.EventListeners;
 import org.eclipse.equinox.http.servlet.session.HttpSessionInvalidator;
 
 /**
@@ -42,63 +41,21 @@ public class HttpSessionTracker implements HttpSessionInvalidator {
 			return;
 		}
 
+		HttpSession parentSession = null;
+
 		for (HttpSessionAdaptor httpSessionAdaptor : httpSessionAdaptors) {
-			ContextController contextController =
-				httpSessionAdaptor.getController();
+			parentSession = httpSessionAdaptor.getSession();
 
-			EventListeners eventListeners =
-				contextController.getEventListeners();
+			httpSessionAdaptor.invalidate();
+		}
 
-			List<HttpSessionListener> httpSessionListeners = eventListeners.get(
-				HttpSessionListener.class);
-
-			if (!httpSessionListeners.isEmpty()) {
-				HttpSessionEvent httpSessionEvent = new HttpSessionEvent(
-					httpSessionAdaptor);
-
-				for (HttpSessionListener listener : httpSessionListeners) {
-					try {
-						listener.sessionDestroyed(httpSessionEvent);
-					}
-					catch (IllegalStateException ise) {
-						// outer session is already invalidated
-					}
-				}
+		if (invalidateParent && parentSession != null) {
+			try {
+				parentSession.invalidate();
 			}
-
-			List<HttpSessionAttributeListener> httpSessionAttributeListeners =
-				eventListeners.get(HttpSessionAttributeListener.class);
-
-			if (!httpSessionAttributeListeners.isEmpty()) {
-				Enumeration<String> enumeration =
-					httpSessionAdaptor.getAttributeNames();
-
-				while (enumeration.hasMoreElements()) {
-					HttpSessionBindingEvent httpSessionBindingEvent =
-						new HttpSessionBindingEvent(
-							httpSessionAdaptor, enumeration.nextElement());
-
-					for (HttpSessionAttributeListener
-							httpSessionAttributeListener :
-								httpSessionAttributeListeners) {
-
-						httpSessionAttributeListener.attributeRemoved(
-							httpSessionBindingEvent);
-					}
-				}
-			}
-
-			contextController.removeActiveSession(
-				httpSessionAdaptor.getSession());
-
-			if (invalidateParent) {
-				try {
-					httpSessionAdaptor.getSession().invalidate();
-				}
-				catch (IllegalStateException ise) {
-					httpServiceRuntime.log(
-						"Session was already invalidated!", ise); //$NON-NLS-1$
-				}
+			catch (IllegalStateException ise) {
+				httpServiceRuntime.log(
+					"Session was already invalidated!", ise); //$NON-NLS-1$
 			}
 		}
 	}

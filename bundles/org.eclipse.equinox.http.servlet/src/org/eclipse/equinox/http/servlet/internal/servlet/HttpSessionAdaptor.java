@@ -110,13 +110,6 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 		}
 
 		controller.removeActiveSession(session);
-
-		try {
-			this.getSession().invalidate();
-		}
-		catch (IllegalStateException ise) {
-			controller.getHttpServiceRuntime().log("Session already invalidated!", ise); //$NON-NLS-1$
-		}
 	}
 
 	public void invokeSessionListeners (List<Class<? extends EventListener>> classes, EventListener listener) {
