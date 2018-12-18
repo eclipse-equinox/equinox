@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Inno-Tec Innovative Technologies GmbH.
+ * Copyright (c) 2018 Inno-Tec Innovative Technologies GmbH. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,7 +37,6 @@ import org.junit.Test;
  */
 public class DetectPBECiphersTest {
 
-	@SuppressWarnings("rawtypes")
 	@Test
 	public void testPBEDetect() {
 		int cipherJVMCount = 0;
@@ -59,9 +58,9 @@ public class DetectPBECiphersTest {
 		}
 
 		JavaEncryption encryption = new JavaEncryption();
-		HashMap detectedCiphers = encryption.detect();
+		HashMap<String, String> detectedCiphers = encryption.detect();
 
-		assertTrue(detectedCiphers.size() > 0);
+		assertTrue(!detectedCiphers.isEmpty());
 		assertEquals(cipherJVMCount, detectedCiphers.size());
 	}
 }
