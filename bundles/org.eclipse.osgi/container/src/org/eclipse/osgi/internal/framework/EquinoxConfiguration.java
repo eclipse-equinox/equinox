@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2017 IBM Corporation and others.
+ * Copyright (c) 2003, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -239,6 +239,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String PROP_ACTIVE_THREAD_TYPE = "osgi.framework.activeThreadType"; //$NON-NLS-1$
 	public static final String ACTIVE_THREAD_TYPE_NORMAL = "normal"; //$NON-NLS-1$
 
+	public static final String PROP_GOSH_ARGS = "gosh.args"; //$NON-NLS-1$
+
 	public static final class ConfigValues {
 		/**
 		 * Value of {@link #localConfig} properties that should be considered
@@ -320,15 +322,17 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 				setConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL, DEFAULT_STATE_SAVE_DELAY_INTERVAL);
 			}
 
-			String consoleProp = getConfiguration(ConsoleManager.PROP_CONSOLE);
-			consoleProp = consoleProp == null ? null : consoleProp.trim();
-			if (consoleProp == null || consoleProp.length() > 0) {
-				// no -console was specified or it has specified none or a port for telnet;
-				// need to make sure the gogo shell does not create an interactive console on standard in/out
-				setConfiguration("gosh.args", "--nointeractive"); //$NON-NLS-1$//$NON-NLS-2$
-			} else {
-				// Need to make sure we don't shutdown the framework if no console is around (bug 362412)
-				setConfiguration("gosh.args", "--noshutdown"); //$NON-NLS-1$//$NON-NLS-2$
+			if (getConfiguration(PROP_GOSH_ARGS) == null) {
+				String consoleProp = getConfiguration(ConsoleManager.PROP_CONSOLE);
+				consoleProp = consoleProp == null ? null : consoleProp.trim();
+				if (consoleProp == null || consoleProp.length() > 0) {
+					// no -console was specified or it has specified none or a port for telnet;
+					// need to make sure the gogo shell does not create an interactive console on standard in/out
+					setConfiguration(PROP_GOSH_ARGS, "--nointeractive"); //$NON-NLS-1$
+				} else {
+					// Need to make sure we don't shutdown the framework if no console is around (bug 362412)
+					setConfiguration(PROP_GOSH_ARGS, "--noshutdown"); //$NON-NLS-1$
+				}
 			}
 		}
 
