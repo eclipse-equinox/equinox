@@ -152,6 +152,7 @@ public interface JettyConstants {
 
 	/**
 	 * name="housekeeper.interval" type="Integer"
+	 * @since 1.5
 	 */
 	public static final String HOUSEKEEPER_INTERVAL = "housekeeper.interval"; //$NON-NLS-1$
 
