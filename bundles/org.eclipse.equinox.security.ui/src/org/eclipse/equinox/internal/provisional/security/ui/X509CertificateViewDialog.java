@@ -17,7 +17,6 @@ package org.eclipse.equinox.internal.provisional.security.ui;
 
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
-import org.eclipse.equinox.internal.security.ui.Activator;
 import org.eclipse.equinox.internal.security.ui.SecurityUIMsg;
 import org.eclipse.equinox.internal.security.ui.wizard.CertificateViewer;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -25,19 +24,16 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 
 public class X509CertificateViewDialog extends TitleAreaDialog {
-	private final static String titleImageName = "/titleAreaCert.gif"; //$NON-NLS-1$
 	private X509Certificate theCert;
 	private static final DateFormat _df = DateFormat.getDateInstance(DateFormat.LONG);
 	private X500PrincipalHelper nameHelper = new X500PrincipalHelper();
 
 	// We use the "bannerFont" for our bold font
 	private static Font boldFont = JFaceResources.getBannerFont();
-	private Image titleImage;
 
 	public X509CertificateViewDialog(Shell parentShell, X509Certificate cert) {
 		super(parentShell);
@@ -58,11 +54,6 @@ public class X509CertificateViewDialog extends TitleAreaDialog {
 		nameHelper.setPrincipal(theCert.getSubjectX500Principal());
 
 		setTitle((nameHelper.getCN() != null ? nameHelper.getCN() : nameHelper.getOU()));
-
-		titleImage = Activator.getImageDescriptor(titleImageName).createImage();
-
-		if (titleImage != null)
-			setTitleImage(titleImage);
 
 		Composite composite = (Composite) super.createDialogArea(parent);
 
@@ -216,13 +207,6 @@ public class X509CertificateViewDialog extends TitleAreaDialog {
 		// The default has only a "Close" button, but it returns the CANCEL Id
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
 
-	}
-
-	public boolean close() {
-		if (titleImage != null) {
-			titleImage.dispose();
-		}
-		return super.close();
 	}
 
 }
