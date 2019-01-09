@@ -91,10 +91,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 	public void testaddListener() throws Exception {
 		TestListener listener = new TestListener();
 		reader.addLogListener(listener);
-		synchronized (listener) {
-			log.log(LogService.LOG_INFO, "info"); //$NON-NLS-1$
-			listener.waitForLogEntry();
-		}
+		log.log(LogService.LOG_INFO, "info"); //$NON-NLS-1$
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
 	}
 
@@ -102,10 +99,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		TestListener listener = new TestListener();
 		reader.addLogListener(listener);
 		reader.addLogListener(listener);
-		synchronized (listener) {
-			log.log(LogService.LOG_INFO, "info"); //$NON-NLS-1$
-			listener.waitForLogEntry();
-		}
+		log.log(LogService.LOG_INFO, "info"); //$NON-NLS-1$
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
 	}
 
@@ -137,10 +131,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		TestListener listener = new TestListener();
 		reader.addLogListener(listener);
 		long timeBeforeLog = System.currentTimeMillis();
-		synchronized (listener) {
-			log.log(logReference, LogService.LOG_INFO, "info", new Throwable("test")); //$NON-NLS-1$ //$NON-NLS-2$
-			listener.waitForLogEntry();
-		}
+		log.log(logReference, LogService.LOG_INFO, "info", new Throwable("test")); //$NON-NLS-1$ //$NON-NLS-2$
 		LogEntry entry = listener.getEntryX();
 		assertTrue(entry.getBundle() == OSGiTestsActivator.getContext().getBundle());
 		assertTrue(entry.getMessage().equals("info")); //$NON-NLS-1$
@@ -153,12 +144,10 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 	public void testLogBundleEventInfo() throws Exception {
 		// this is just a bundle that is harmless to start/stop
 		Bundle testBundle = installer.installBundle("test.logging.a"); //$NON-NLS-1$
-		TestListener listener = new TestListener(testBundle);
+		TestListener listener = new TestListener(testBundle.getLocation());
 		reader.addLogListener(listener);
-		synchronized (listener) {
-			testBundle.start();
-			listener.waitForLogEntry();
-		}
+
+		testBundle.start();
 
 		ExtendedLogEntry entry = listener.getEntryX();
 		assertTrue(entry.getLevel() == LogService.LOG_INFO);
@@ -188,10 +177,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 	public void testLogServiceEventInfo() throws Exception {
 		TestListener listener = new TestListener();
 		reader.addLogListener(listener);
-		synchronized (listener) {
-			OSGiTestsActivator.getContext().registerService(Object.class.getName(), new Object(), null);
-			listener.waitForLogEntry();
-		}
+		OSGiTestsActivator.getContext().registerService(Object.class.getName(), new Object(), null);
 		ExtendedLogEntry entry = listener.getEntryX();
 		assertTrue(entry.getLevel() == LogService.LOG_INFO);
 		assertEquals("Wrong level.", LogLevel.INFO, entry.getLogLevel());
@@ -203,10 +189,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 
 		TestListener listener = new TestListener();
 		reader.addLogListener(listener);
-		synchronized (listener) {
-			registration.setProperties(new Hashtable());
-			listener.waitForLogEntry();
-		}
+		registration.setProperties(new Hashtable());
 		ExtendedLogEntry entry = listener.getEntryX();
 		assertTrue(entry.getLevel() == LogService.LOG_DEBUG);
 		assertEquals("Wrong level.", LogLevel.DEBUG, entry.getLogLevel());
@@ -348,7 +331,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 			//Bundle is installed and a logger is associated with that bundle before setting the log level
 			setAndAssertLogLevel(bundle.getSymbolicName(), loggerName);
 
-			TestListener listener = new TestListener(bundle);
+			TestListener listener = new TestListener(bundle.getLocation());
 			reader.addLogListener(listener);
 			for (LogLevel logLevel : LogLevel.values()) {
 				String message = logLevel.name() + " MESSAGE";
@@ -372,7 +355,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 			setAndAssertLogLevel(bundle.getSymbolicName(), loggerName);
 			Logger logger = log.getLogger(bundle, loggerName, Logger.class);
 			assertNotNull("Logger cannot be null", logger);
-			TestListener listener = new TestListener(bundle);
+			TestListener listener = new TestListener(bundle.getLocation());
 			reader.addLogListener(listener);
 			for (LogLevel logLevel : LogLevel.values()) {
 				String message = logLevel.name() + " MESSAGE";
@@ -396,7 +379,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 			bundle.start();
 			Logger logger = log.getLogger(bundle, loggerName, Logger.class);
 			assertNotNull("Logger cannot be null", logger);
-			TestListener listener = new TestListener(bundle);
+			TestListener listener = new TestListener(bundle.getLocation());
 			reader.addLogListener(listener);
 			for (LogLevel logLevel : LogLevel.values()) {
 				String message = logLevel.name() + " MESSAGE";
@@ -420,10 +403,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 	}
 
 	private void doLogging(Bundle bundle, Logger logger, TestListener listener, LogLevel logLevel, String message) throws Exception {
-		synchronized (listener) {
-			logToLogger(logger, message, logLevel);
-			listener.waitForLogEntry();
-		}
+		logToLogger(logger, message, logLevel);
 		ExtendedLogEntry logEntry = listener.getEntryX();
 		assertEquals("Wrong message logged", message, logEntry.getMessage());
 		assertEquals("Wrong Log level", logLevel, logEntry.getLogLevel());
@@ -455,4 +435,39 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 				fail("Unknown Log level");
 		}
 	}
+
+	public void testBundleEventsLogged() throws Exception {
+		String testBundleLoc = installer.getBundleLocation("test.logging.a");
+		TestListener listener = new TestListener(testBundleLoc);
+		reader.addLogListener(listener);
+		Bundle bundle = installer.installBundle("test.logging.a");
+
+		bundle.start();
+		bundle.stop();
+		bundle.update();
+		bundle.start();
+		bundle.stop();
+		bundle.uninstall();
+
+		assertBundleEventLog("BundleEvent INSTALLED", bundle, listener);
+		assertBundleEventLog("BundleEvent RESOLVED", bundle, listener);
+		assertBundleEventLog("BundleEvent STARTED", bundle, listener);
+		assertBundleEventLog("BundleEvent STOPPED", bundle, listener);
+		assertBundleEventLog("BundleEvent UNRESOLVED", bundle, listener);
+		assertBundleEventLog("BundleEvent UPDATED", bundle, listener);
+		assertBundleEventLog("BundleEvent RESOLVED", bundle, listener);
+		assertBundleEventLog("BundleEvent STARTED", bundle, listener);
+		assertBundleEventLog("BundleEvent STOPPED", bundle, listener);
+		assertBundleEventLog("BundleEvent UNRESOLVED", bundle, listener);
+		assertBundleEventLog("BundleEvent UNINSTALLED", bundle, listener);
+
+	}
+
+	private void assertBundleEventLog(String message, Bundle bundle, TestListener listener) throws InterruptedException {
+		LogEntry logEntry = listener.getEntryX();
+		assertEquals("Wrong message.", message, logEntry.getMessage());
+		assertEquals("Wrong bundle.", bundle, logEntry.getBundle());
+
+	}
+
 }

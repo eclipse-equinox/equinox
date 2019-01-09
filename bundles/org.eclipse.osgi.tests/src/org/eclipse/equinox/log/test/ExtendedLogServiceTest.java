@@ -15,7 +15,10 @@ package org.eclipse.equinox.log.test;
 import java.util.HashMap;
 import java.util.Map;
 import junit.framework.TestCase;
-import org.eclipse.equinox.log.*;
+import org.eclipse.equinox.log.ExtendedLogEntry;
+import org.eclipse.equinox.log.ExtendedLogReaderService;
+import org.eclipse.equinox.log.ExtendedLogService;
+import org.eclipse.equinox.log.LogFilter;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -73,26 +76,17 @@ public class ExtendedLogServiceTest extends TestCase {
 	}
 
 	public void testLogContext() throws Exception {
-		synchronized (listener) {
-			log.log(this, LogService.LOG_INFO, null);
-			listener.waitForLogEntry();
-		}
+		log.log(this, LogService.LOG_INFO, null);
 		assertTrue(listener.getEntryX().getContext() == this);
 	}
 
 	public void testNullLogContext() throws Exception {
-		synchronized (listener) {
-			log.log(null, LogService.LOG_INFO, null);
-			listener.waitForLogEntry();
-		}
+		log.log(null, LogService.LOG_INFO, null);
 		assertTrue(listener.getEntryX().getContext() == null);
 	}
 
 	public void testLogContextWithNullThrowable() throws Exception {
-		synchronized (listener) {
-			log.log(this, LogService.LOG_INFO, null, null);
-			listener.waitForLogEntry();
-		}
+		log.log(this, LogService.LOG_INFO, null, null);
 		assertTrue(listener.getEntryX().getContext() == this);
 	}
 
@@ -119,10 +113,7 @@ public class ExtendedLogServiceTest extends TestCase {
 	}
 
 	public void testNamedLoggerLogNull() throws Exception {
-		synchronized (listener) {
-			log.getLogger("test").log(null, 0, null, null);
-			listener.waitForLogEntry();
-		}
+		log.getLogger("test").log(null, 0, null, null);
 		ExtendedLogEntry entry = listener.getEntryX();
 		assertTrue(entry.getLoggerName() == "test");
 		assertTrue(entry.getLevel() == 0);
@@ -132,10 +123,7 @@ public class ExtendedLogServiceTest extends TestCase {
 	}
 
 	public void testNullLoggerLogNull() throws Exception {
-		synchronized (listener) {
-			log.getLogger((String) null).log(null, 0, null, null);
-			listener.waitForLogEntry();
-		}
+		log.getLogger((String) null).log(null, 0, null, null);
 		ExtendedLogEntry entry = listener.getEntryX();
 		assertEquals("Wrong logger name.", "LogService", entry.getLoggerName());
 		assertTrue(entry.getLevel() == 0);
@@ -147,10 +135,7 @@ public class ExtendedLogServiceTest extends TestCase {
 	public void testNamedLoggerLogFull() throws Exception {
 		String message = "test";
 		Throwable t = new Throwable("test");
-		synchronized (listener) {
-			log.getLogger("test").log(logReference, LogService.LOG_INFO, message, t);
-			listener.waitForLogEntry();
-		}
+		log.getLogger("test").log(logReference, LogService.LOG_INFO, message, t);
 		ExtendedLogEntry entry = listener.getEntryX();
 		assertTrue(entry.getLoggerName() == "test");
 		assertTrue(entry.getBundle() == bundle);
@@ -163,10 +148,7 @@ public class ExtendedLogServiceTest extends TestCase {
 	public void testNamedLoggerLogFullWithNullBundle() throws Exception {
 		String message = "test";
 		Throwable t = new Throwable("test");
-		synchronized (listener) {
-			log.getLogger(null, "test").log(logReference, LogService.LOG_INFO, message, t);
-			listener.waitForLogEntry();
-		}
+		log.getLogger(null, "test").log(logReference, LogService.LOG_INFO, message, t);
 		ExtendedLogEntry entry = listener.getEntryX();
 		assertTrue(entry.getLoggerName() == "test");
 		assertTrue(entry.getBundle() == bundle);
@@ -179,10 +161,7 @@ public class ExtendedLogServiceTest extends TestCase {
 	public void testNamedLoggerLogFullWithBundle() throws Exception {
 		String message = "test";
 		Throwable t = new Throwable("test");
-		synchronized (listener) {
-			log.getLogger(bundle, "test").log(logReference, LogService.LOG_INFO, message, t);
-			listener.waitForLogEntry();
-		}
+		log.getLogger(bundle, "test").log(logReference, LogService.LOG_INFO, message, t);
 		ExtendedLogEntry entry = listener.getEntryX();
 		assertTrue(entry.getLoggerName() == "test");
 		assertTrue(entry.getBundle() == bundle);

@@ -75,115 +75,73 @@ public class LogServiceTest extends TestCase {
 	}
 
 	public void testLogDebug() throws Exception {
-		synchronized (listener) {
-			log.log(LogService.LOG_DEBUG, "debug"); //$NON-NLS-1$
-			listener.waitForLogEntry();
-		}
+		log.log(LogService.LOG_DEBUG, "debug"); //$NON-NLS-1$
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_DEBUG);
 	}
 
 	public void testLogError() throws Exception {
-		synchronized (listener) {
-			log.log(LogService.LOG_ERROR, "error"); //$NON-NLS-1$
-			listener.waitForLogEntry();
-		}
+		log.log(LogService.LOG_ERROR, "error"); //$NON-NLS-1$
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_ERROR);
 	}
 
 	public void testLogInfo() throws Exception {
-		synchronized (listener) {
-			log.log(LogService.LOG_INFO, "info"); //$NON-NLS-1$
-			listener.waitForLogEntry();
-		}
+		log.log(LogService.LOG_INFO, "info"); //$NON-NLS-1$
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
 	}
 
 	public void testLogWarning() throws Exception {
-		synchronized (listener) {
-			log.log(LogService.LOG_WARNING, "warning"); //$NON-NLS-1$
-			listener.waitForLogEntry();
-		}
+		log.log(LogService.LOG_WARNING, "warning"); //$NON-NLS-1$
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_WARNING);
 	}
 
 	public void testLogZeroLevel() throws Exception {
-		synchronized (listener) {
-			log.log(0, "zero"); //$NON-NLS-1$
-			listener.waitForLogEntry();
-		}
+		log.log(0, "zero"); //$NON-NLS-1$
 		assertTrue(listener.getEntryX().getLevel() == 0);
 	}
 
 	public void testLogNegativeLevel() throws Exception {
-		synchronized (listener) {
-			log.log(-1, "negative"); //$NON-NLS-1$
-			listener.waitForLogEntry();
-		}
+		log.log(-1, "negative"); //$NON-NLS-1$
 		assertTrue(listener.getEntryX().getLevel() == -1);
 	}
 
 	public void testLogMessage() throws Exception {
-		synchronized (listener) {
-			log.log(LogService.LOG_INFO, "message"); //$NON-NLS-1$
-			listener.waitForLogEntry();
-		}
+		log.log(LogService.LOG_INFO, "message"); //$NON-NLS-1$
 		assertTrue(listener.getEntryX().getMessage().equals("message")); //$NON-NLS-1$
 	}
 
 	public void testLogNullMessage() throws Exception {
-		synchronized (listener) {
-			log.log(LogService.LOG_INFO, null);
-			listener.waitForLogEntry();
-		}
+		log.log(LogService.LOG_INFO, null);
 		assertTrue(listener.getEntryX().getMessage() == null);
 	}
 
 	public void testLogThrowable() throws Exception {
 		Throwable t = new Throwable("throwable"); //$NON-NLS-1$
-		synchronized (listener) {
-			log.log(LogService.LOG_INFO, null, t);
-			listener.waitForLogEntry();
-		}
+		log.log(LogService.LOG_INFO, null, t);
 		assertTrue(listener.getEntryX().getException().getMessage().equals(t.getMessage()));
 	}
 
 	public void testLogNullThrowable() throws Exception {
-		synchronized (listener) {
-			log.log(LogService.LOG_INFO, null, null);
-			listener.waitForLogEntry();
-		}
+		log.log(LogService.LOG_INFO, null, null);
 		assertTrue(listener.getEntryX().getException() == null);
 	}
 
 	public void testLogServiceReference() throws Exception {
-		synchronized (listener) {
-			log.log(logReference, LogService.LOG_INFO, null);
-			listener.waitForLogEntry();
-		}
+		log.log(logReference, LogService.LOG_INFO, null);
 		assertTrue(listener.getEntryX().getServiceReference().equals(logReference));
 	}
 
 	public void testNullLogServiceReference() throws Exception {
-		synchronized (listener) {
-			log.log(null, LogService.LOG_INFO, null);
-			listener.waitForLogEntry();
-		}
+		log.log(null, LogService.LOG_INFO, null);
 		assertTrue(listener.getEntryX().getServiceReference() == null);
 	}
 
 	public void testLogServiceReferenceWithNullThrowable() throws Exception {
-		synchronized (listener) {
-			log.log(logReference, LogService.LOG_INFO, null, null);
-			listener.waitForLogEntry();
-		}
+		log.log(logReference, LogService.LOG_INFO, null, null);
 		assertTrue(listener.getEntryX().getServiceReference().equals(logReference));
 	}
 
 	public void testLogNull1() throws Exception {
-		synchronized (listener) {
-			log.log(0, null);
-			listener.waitForLogEntry();
-		}
+		log.log(0, null);
 		LogEntry entry = listener.getEntryX();
 		assertTrue(entry.getLevel() == 0);
 		assertTrue(entry.getMessage() == null);
@@ -192,10 +150,7 @@ public class LogServiceTest extends TestCase {
 	}
 
 	public void testLogNull2() throws Exception {
-		synchronized (listener) {
-			log.log(0, null, null);
-			listener.waitForLogEntry();
-		}
+		log.log(0, null, null);
 		LogEntry entry = listener.getEntryX();
 		assertTrue(entry.getLevel() == 0);
 		assertTrue(entry.getMessage() == null);
@@ -204,10 +159,7 @@ public class LogServiceTest extends TestCase {
 	}
 
 	public void testLogNull3() throws Exception {
-		synchronized (listener) {
-			log.log(null, 0, null);
-			listener.waitForLogEntry();
-		}
+		log.log(null, 0, null);
 		LogEntry entry = listener.getEntryX();
 		assertTrue(entry.getLevel() == 0);
 		assertTrue(entry.getMessage() == null);
@@ -216,10 +168,7 @@ public class LogServiceTest extends TestCase {
 	}
 
 	public void testLogNull4() throws Exception {
-		synchronized (listener) {
-			log.log(null, 0, null, null);
-			listener.waitForLogEntry();
-		}
+		log.log(null, 0, null, null);
 		LogEntry entry = listener.getEntryX();
 		assertTrue(entry.getLevel() == 0);
 		assertTrue(entry.getMessage() == null);
@@ -229,10 +178,7 @@ public class LogServiceTest extends TestCase {
 
 	public void testLogFull1() throws Exception {
 		String message = "test"; //$NON-NLS-1$
-		synchronized (listener) {
-			log.log(LogService.LOG_INFO, message);
-			listener.waitForLogEntry();
-		}
+		log.log(LogService.LOG_INFO, message);
 		LogEntry entry = listener.getEntryX();
 		assertTrue(entry.getLevel() == LogService.LOG_INFO);
 		assertTrue(entry.getMessage().equals(message));
@@ -243,10 +189,7 @@ public class LogServiceTest extends TestCase {
 	public void testLogFull2() throws Exception {
 		String message = "test"; //$NON-NLS-1$
 		Throwable t = new Throwable("test"); //$NON-NLS-1$
-		synchronized (listener) {
-			log.log(LogService.LOG_INFO, message, t);
-			listener.waitForLogEntry();
-		}
+		log.log(LogService.LOG_INFO, message, t);
 		LogEntry entry = listener.getEntryX();
 		assertTrue(entry.getLevel() == LogService.LOG_INFO);
 		assertTrue(entry.getMessage().equals(message));
@@ -256,10 +199,7 @@ public class LogServiceTest extends TestCase {
 
 	public void testLogFull3() throws Exception {
 		String message = "test"; //$NON-NLS-1$
-		synchronized (listener) {
-			log.log(logReference, LogService.LOG_INFO, message);
-			listener.waitForLogEntry();
-		}
+		log.log(logReference, LogService.LOG_INFO, message);
 		LogEntry entry = listener.getEntryX();
 		assertTrue(entry.getLevel() == LogService.LOG_INFO);
 		assertTrue(entry.getMessage().equals(message));
@@ -270,10 +210,7 @@ public class LogServiceTest extends TestCase {
 	public void testLogFull4() throws Exception {
 		String message = "test"; //$NON-NLS-1$
 		Throwable t = new Throwable("test"); //$NON-NLS-1$
-		synchronized (listener) {
-			log.log(logReference, LogService.LOG_INFO, message, t);
-			listener.waitForLogEntry();
-		}
+		log.log(logReference, LogService.LOG_INFO, message, t);
 		LogEntry entry = listener.getEntryX();
 		assertTrue(entry.getLevel() == LogService.LOG_INFO);
 		assertTrue(entry.getMessage().equals(message));
@@ -285,9 +222,7 @@ public class LogServiceTest extends TestCase {
 		BundleContext context = OSGiTestsActivator.getContext();
 		ServiceRegistration<Object> reg = context.registerService(Object.class, new Object(), null);
 		ServiceReference<Object> ref = reg.getReference();
-		listener.waitForLogEntry();
 
-		listener.waitForLogEntry();
 		LogEntry entry = listener.getEntryX();
 		assertEquals("Wrong logger name.", "Events.Service", entry.getLoggerName());
 		assertEquals("Wrong event log level.", LogLevel.INFO, entry.getLogLevel());
@@ -298,7 +233,6 @@ public class LogServiceTest extends TestCase {
 
 		reg.setProperties(new Hashtable(Collections.singletonMap("key1", "value1")));
 
-		listener.waitForLogEntry();
 		entry = listener.getEntryX();
 		assertEquals("Wrong logger name.", "Events.Service", entry.getLoggerName());
 		assertEquals("Wrong event log level.", LogLevel.DEBUG, entry.getLogLevel());
@@ -308,7 +242,6 @@ public class LogServiceTest extends TestCase {
 		assertEquals("Wrong message.", "ServiceEvent MODIFIED", entry.getMessage());
 
 		reg.unregister();
-		listener.waitForLogEntry();
 		entry = listener.getEntryX();
 		assertEquals("Wrong logger name.", "Events.Service", entry.getLoggerName());
 		assertEquals("Wrong event log level.", LogLevel.INFO, entry.getLogLevel());

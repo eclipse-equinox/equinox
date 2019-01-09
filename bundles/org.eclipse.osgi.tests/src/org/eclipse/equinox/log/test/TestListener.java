@@ -10,49 +10,49 @@ n This program
  *******************************************************************************/
 package org.eclipse.equinox.log.test;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.equinox.log.ExtendedLogEntry;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.junit.Assert;
-import org.osgi.framework.Bundle;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogListener;
 
 class TestListener implements LogListener {
-	private final Bundle testBundle;
-	LogEntry entry;
+	private final String testBundleLoc;
+	private List<LogEntry> logs = new ArrayList<>();
 
 	public TestListener() {
 		this(null);
 	}
 
-	public TestListener(Bundle testBundle) {
-		this.testBundle = testBundle == null ? OSGiTestsActivator.getContext().getBundle() : testBundle;
+	public TestListener(String testBundleLoc) {
+		this.testBundleLoc = testBundleLoc == null ? OSGiTestsActivator.getContext().getBundle().getLocation() : testBundleLoc;
 	}
 
 	public synchronized void logged(LogEntry e) {
-		if (!testBundle.equals(e.getBundle()))
+		if (!testBundleLoc.equals(e.getBundle().getLocation())) {
 			return; // discard logs from all other bundles
-		this.entry = e;
+		}
+		logs.add(e);
 		notifyAll();
 	}
 
-	public synchronized ExtendedLogEntry getEntryX() {
-		ExtendedLogEntry current = (ExtendedLogEntry) entry;
-		entry = null;
-		return current;
+	public synchronized ExtendedLogEntry getEntryX() throws InterruptedException {
+		return getEntryX(20000);
 	}
 
-	public void waitForLogEntry() throws InterruptedException {
-		synchronized (this) {
-			long timeToWait = 20000;
-			long startTime = System.currentTimeMillis();
-			while (this.entry == null && timeToWait > 0) {
-				this.wait(timeToWait);
-				timeToWait = timeToWait - (System.currentTimeMillis() - startTime);
-			}
-			if (this.entry == null) {
-				Assert.fail("No log entry logged.");
-			}
+	public synchronized ExtendedLogEntry getEntryX(long timeToWait) throws InterruptedException {
+		LogEntry logEntry;
+		long startTime = System.currentTimeMillis();
+		if (logs.size() == 0 && timeToWait > 0) {
+			this.wait(timeToWait);
+			timeToWait = timeToWait - (System.currentTimeMillis() - startTime);
 		}
+		logEntry = logs.size() == 0 ? null : logs.remove(0);
+		if (logEntry == null) {
+			Assert.fail("No log entry logged.");
+		}
+		return (ExtendedLogEntry) logEntry;
 	}
 }

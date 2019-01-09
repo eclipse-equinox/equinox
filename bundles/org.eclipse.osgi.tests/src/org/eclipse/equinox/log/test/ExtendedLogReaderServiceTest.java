@@ -77,10 +77,7 @@ public class ExtendedLogReaderServiceTest extends TestCase {
 				return true;
 			}
 		});
-		synchronized (listener) {
-			log.log(LogService.LOG_INFO, "info");
-			listener.waitForLogEntry();
-		}
+		log.log(LogService.LOG_INFO, "info");
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
 	}
 
@@ -111,10 +108,7 @@ public class ExtendedLogReaderServiceTest extends TestCase {
 				return true;
 			}
 		});
-		synchronized (listener) {
-			log.log(LogService.LOG_INFO, "info");
-			listener.waitForLogEntry();
-		}
+		log.log(LogService.LOG_INFO, "info");
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
 	}
 
@@ -159,17 +153,11 @@ public class ExtendedLogReaderServiceTest extends TestCase {
 		long timeBeforeLog = System.currentTimeMillis();
 		String threadName = Thread.currentThread().getName();
 		long threadId = getCurrentThreadId();
-		synchronized (listener) {
-			log.getLogger("test").log(logReference, LogService.LOG_INFO, "info", new Throwable("test"));
-			listener.waitForLogEntry();
-		}
+		log.getLogger("test").log(logReference, LogService.LOG_INFO, "info", new Throwable("test"));
 		ExtendedLogEntry entry = listener.getEntryX();
 		long sequenceNumberBefore = entry.getSequenceNumber();
 
-		synchronized (listener) {
-			log.getLogger("test").log(logReference, LogService.LOG_INFO, "info", new Throwable("test"));
-			listener.waitForLogEntry();
-		}
+		log.getLogger("test").log(logReference, LogService.LOG_INFO, "info", new Throwable("test"));
 		entry = listener.getEntryX();
 		assertTrue(entry.getBundle() == OSGiTestsActivator.getContext().getBundle());
 		assertTrue(entry.getMessage().equals("info"));
