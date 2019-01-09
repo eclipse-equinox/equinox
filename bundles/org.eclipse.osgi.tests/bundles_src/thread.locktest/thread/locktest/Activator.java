@@ -14,7 +14,9 @@
 package thread.locktest;
 
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
 
 public class Activator implements BundleActivator, Runnable {
 
@@ -23,7 +25,7 @@ public class Activator implements BundleActivator, Runnable {
 		System.out.println("about to start thread");
 		thread.start();
 		System.out.println("about to join the thread");
-		thread.join(10000);
+		thread.join(40000);
 		System.out.println("after joining thread");
 		AbstractBundleTests.simpleResults.addEvent(new BundleEvent(BundleEvent.STARTED, context.getBundle()));
 	}
@@ -38,7 +40,7 @@ public class Activator implements BundleActivator, Runnable {
 		new Class1();
 		long totalTime = System.currentTimeMillis() - startTime;
 		System.out.println("loaded Class1 " + totalTime);
-		if (totalTime < 10000)
+		if (totalTime < 40000)
 			AbstractBundleTests.simpleResults.addEvent(new Long(5000));
 	}
 
