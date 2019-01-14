@@ -1,127 +1,131 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.osgi.services" version="2">
-    <resource path="src/org/osgi/service/event/EventConstants.java" type="org.osgi.service.event.EventConstants">
-        <filter id="403767336">
+    <resource path="src/org/osgi/service/cm/Configuration.java" type="org.osgi.service.cm.Configuration">
+        <filter comment="Ignore OSGi API" id="403804204">
             <message_arguments>
-                <message_argument value="org.osgi.service.event.EventConstants"/>
-                <message_argument value="EVENT_ADMIN_IMPLEMENTATION"/>
+                <message_argument value="org.osgi.service.cm.Configuration"/>
+                <message_argument value="addAttributes(Configuration.ConfigurationAttribute[])"/>
             </message_arguments>
         </filter>
-        <filter id="403767336">
+        <filter comment="Ignore OSGi API" id="403804204">
             <message_arguments>
-                <message_argument value="org.osgi.service.event.EventConstants"/>
-                <message_argument value="EVENT_ADMIN_SPECIFICATION_VERSION"/>
+                <message_argument value="org.osgi.service.cm.Configuration"/>
+                <message_argument value="getAttributes()"/>
             </message_arguments>
         </filter>
-        <filter id="1209008130">
+        <filter comment="Ignore OSGi API" id="403804204">
             <message_arguments>
-                <message_argument value="1.4"/>
-                <message_argument value="3.7"/>
-                <message_argument value="EVENT_ADMIN_IMPLEMENTATION"/>
+                <message_argument value="org.osgi.service.cm.Configuration"/>
+                <message_argument value="getProcessedProperties(ServiceReference&lt;?&gt;)"/>
             </message_arguments>
         </filter>
-        <filter id="1209008130">
+        <filter comment="Ignore OSGi API" id="403804204">
             <message_arguments>
-                <message_argument value="1.4"/>
-                <message_argument value="3.7"/>
-                <message_argument value="EVENT_ADMIN_SPECIFICATION_VERSION"/>
+                <message_argument value="org.osgi.service.cm.Configuration"/>
+                <message_argument value="removeAttributes(Configuration.ConfigurationAttribute[])"/>
             </message_arguments>
         </filter>
-    </resource>
-    <resource path="src/org/osgi/service/log/FormatterLogger.java" type="org.osgi.service.log.FormatterLogger">
-        <filter id="1108344834">
+        <filter comment="Ignore OSGi API" id="403804204">
             <message_arguments>
-                <message_argument value="1.4"/>
-                <message_argument value="3.7"/>
-                <message_argument value="org.osgi.service.log.FormatterLogger"/>
+                <message_argument value="org.osgi.service.cm.Configuration"/>
+                <message_argument value="updateIfDifferent(Dictionary&lt;String,?&gt;)"/>
             </message_arguments>
         </filter>
-    </resource>
-    <resource path="src/org/osgi/service/log/LogEntry.java" type="org.osgi.service.log.LogEntry">
-        <filter id="1209008130">
+        <filter comment="Ignore OSGi API" id="1209008130">
             <message_arguments>
-                <message_argument value="1.4"/>
-                <message_argument value="3.7"/>
-                <message_argument value="getLocation()"/>
+                <message_argument value="1.6"/>
+                <message_argument value="3.8"/>
+                <message_argument value="addAttributes(Configuration.ConfigurationAttribute[])"/>
             </message_arguments>
         </filter>
-        <filter id="1209008130">
+        <filter comment="Ignore OSGi API" id="1209008130">
             <message_arguments>
-                <message_argument value="1.4"/>
-                <message_argument value="3.7"/>
-                <message_argument value="getLogLevel()"/>
+                <message_argument value="1.6"/>
+                <message_argument value="3.8"/>
+                <message_argument value="getAttributes()"/>
             </message_arguments>
         </filter>
-        <filter id="1209008130">
+        <filter comment="Ignore OSGi API" id="1209008130">
             <message_arguments>
-                <message_argument value="1.4"/>
-                <message_argument value="3.7"/>
-                <message_argument value="getLoggerName()"/>
+                <message_argument value="1.6"/>
+                <message_argument value="3.8"/>
+                <message_argument value="getProcessedProperties(ServiceReference&lt;?&gt;)"/>
             </message_arguments>
         </filter>
-        <filter id="1209008130">
+        <filter comment="Ignore OSGi API" id="1209008130">
             <message_arguments>
-                <message_argument value="1.4"/>
-                <message_argument value="3.7"/>
-                <message_argument value="getSequence()"/>
+                <message_argument value="1.6"/>
+                <message_argument value="3.8"/>
+                <message_argument value="removeAttributes(Configuration.ConfigurationAttribute[])"/>
             </message_arguments>
         </filter>
-        <filter id="1209008130">
+        <filter comment="Ignore OSGi API" id="1209008130">
             <message_arguments>
-                <message_argument value="1.4"/>
-                <message_argument value="3.7"/>
-                <message_argument value="getThreadInfo()"/>
+                <message_argument value="1.6"/>
+                <message_argument value="3.8"/>
+                <message_argument value="updateIfDifferent(Dictionary&lt;String,?&gt;)"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="src/org/osgi/service/log/LogLevel.java" type="org.osgi.service.log.LogLevel">
-        <filter id="1108344834">
+    <resource path="src/org/osgi/service/cm/Configuration.java" type="org.osgi.service.cm.Configuration$ConfigurationAttribute">
+        <filter comment="Ignore OSGi API" id="1209008130">
             <message_arguments>
-                <message_argument value="1.4"/>
-                <message_argument value="3.7"/>
-                <message_argument value="org.osgi.service.log.LogLevel"/>
+                <message_argument value="1.6"/>
+                <message_argument value="3.8"/>
+                <message_argument value="ConfigurationAttribute"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="src/org/osgi/service/log/Logger.java" type="org.osgi.service.log.Logger">
-        <filter id="1108344834">
+    <resource path="src/org/osgi/service/cm/ConfigurationAdmin.java" type="org.osgi.service.cm.ConfigurationAdmin">
+        <filter comment="Ignore OSGi API" id="403804204">
             <message_arguments>
-                <message_argument value="1.4"/>
-                <message_argument value="3.7"/>
-                <message_argument value="org.osgi.service.log.Logger"/>
+                <message_argument value="org.osgi.service.cm.ConfigurationAdmin"/>
+                <message_argument value="getFactoryConfiguration(String, String)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="403804204">
+            <message_arguments>
+                <message_argument value="org.osgi.service.cm.ConfigurationAdmin"/>
+                <message_argument value="getFactoryConfiguration(String, String, String)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.8"/>
+                <message_argument value="getFactoryConfiguration(String, String)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.8"/>
+                <message_argument value="getFactoryConfiguration(String, String, String)"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="src/org/osgi/service/log/LoggerConsumer.java" type="org.osgi.service.log.LoggerConsumer">
-        <filter id="1108344834">
+    <resource path="src/org/osgi/service/cm/ConfigurationConstants.java" type="org.osgi.service.cm.ConfigurationConstants">
+        <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="1.4"/>
-                <message_argument value="3.7"/>
-                <message_argument value="org.osgi.service.log.LoggerConsumer"/>
+                <message_argument value="org.osgi.service.cm.ConfigurationConstants"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="src/org/osgi/service/log/LoggerFactory.java" type="org.osgi.service.log.LoggerFactory">
-        <filter id="1108344834">
+    <resource path="src/org/osgi/service/cm/ConfigurationPermission.java" type="org.osgi.service.cm.ConfigurationPermission">
+        <filter comment="Ignore OSGi API" id="1141899266">
             <message_arguments>
-                <message_argument value="1.4"/>
-                <message_argument value="3.7"/>
-                <message_argument value="org.osgi.service.log.LoggerFactory"/>
+                <message_argument value="1.6"/>
+                <message_argument value="3.8"/>
+                <message_argument value="ATTRIBUTE"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="src/org/osgi/service/metatype/MetaTypeService.java" type="org.osgi.service.metatype.MetaTypeService">
-        <filter id="403767336">
+    <resource path="src/org/osgi/service/cm/ReadOnlyConfigurationException.java" type="org.osgi.service.cm.ReadOnlyConfigurationException">
+        <filter comment="Ignore OSGi API" id="1108344834">
             <message_arguments>
-                <message_argument value="org.osgi.service.metatype.MetaTypeService"/>
-                <message_argument value="METATYPE_SPECIFICATION_VERSION"/>
-            </message_arguments>
-        </filter>
-        <filter id="1209008130">
-            <message_arguments>
-                <message_argument value="1.4"/>
-                <message_argument value="3.7"/>
-                <message_argument value="METATYPE_SPECIFICATION_VERSION"/>
+                <message_argument value="1.6"/>
+                <message_argument value="3.8"/>
+                <message_argument value="org.osgi.service.cm.ReadOnlyConfigurationException"/>
             </message_arguments>
         </filter>
     </resource>
