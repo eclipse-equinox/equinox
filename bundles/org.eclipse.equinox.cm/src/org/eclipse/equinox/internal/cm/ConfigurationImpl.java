@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2019 Cognos Incorporated, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,8 +19,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
+import org.osgi.framework.*;
 import org.osgi.service.cm.*;
 
 /**
@@ -32,22 +31,26 @@ class ConfigurationImpl implements Configuration {
 	final static String LOCATION_BOUND = "org.eclipse.equinox.cm.location.bound"; //$NON-NLS-1$
 	final static String PROPERTIES_NULL = "org.eclipse.equinox.cm.properties.null"; //$NON-NLS-1$
 	final static String CHANGE_COUNT = "org.eclipse.equinox.cm.change.count"; //$NON-NLS-1$
+	final static String READ_ONLY = "org.eclipse.equinox.cm.readonly"; //$NON-NLS-1$
 
 	private final ConfigurationAdminFactory configurationAdminFactory;
 	private final ConfigurationStore configurationStore;
-	/** @GuardedBy this*/
-	private String bundleLocation;
 	private final String factoryPid;
 	private final String pid;
+	/** @GuardedBy lock*/
+	private String bundleLocation;
+	/** @GuardedBy lock*/
 	private ConfigurationDictionary dictionary;
-	/** @GuardedBy this*/
+	/** @GuardedBy lock*/
 	private boolean deleted = false;
-	/** @GuardedBy this*/
+	/** @GuardedBy lock*/
 	private boolean bound = false;
-	/** @GuardedBy this*/
+	/** @GuardedBy lock*/
 	private long changeCount;
-	/** @GuardedBy this*/
+	/** @GuardedBy lock*/
 	private Object storageToken;
+	/** @GuardedBy lock*/
+	private boolean readOnly = false;
 	private final ReentrantLock lock = new ReentrantLock();
 
 	public ConfigurationImpl(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, String factoryPid, String pid, String bundleLocation, boolean bind) {
@@ -70,6 +73,8 @@ class ConfigurationImpl implements Configuration {
 		this.bound = boundProp == null ? false : boundProp.booleanValue();
 		Long changeCountProp = (Long) dictionary.remove(CHANGE_COUNT);
 		this.changeCount = changeCountProp == null ? 0 : changeCountProp.longValue();
+		Boolean readOnlyProp = (Boolean) dictionary.remove(READ_ONLY);
+		this.readOnly = readOnlyProp == null ? false : readOnlyProp.booleanValue();
 		Boolean nullProps = (Boolean) dictionary.remove(PROPERTIES_NULL);
 		if (nullProps == null || !nullProps.booleanValue()) {
 			updateDictionary(dictionary);
@@ -91,8 +96,8 @@ class ConfigurationImpl implements Configuration {
 	}
 
 	boolean bind(String callerLocation) {
+		lock();
 		try {
-			lock();
 			if (bundleLocation == null) {
 				bundleLocation = callerLocation;
 				bound = true;
@@ -111,8 +116,8 @@ class ConfigurationImpl implements Configuration {
 	}
 
 	boolean isBound() {
+		lock();
 		try {
-			lock();
 			return bound;
 		} finally {
 			unlock();
@@ -120,8 +125,8 @@ class ConfigurationImpl implements Configuration {
 	}
 
 	void unbind(Bundle bundle) {
+		lock();
 		try {
-			lock();
 			String callerLocation = ConfigurationAdminImpl.getLocation(bundle);
 			if (bound && callerLocation.equals(bundleLocation)) {
 				bundleLocation = null;
@@ -143,9 +148,10 @@ class ConfigurationImpl implements Configuration {
 	@Override
 	public void delete() {
 		Object deleteToken;
+		lock();
 		try {
-			lock();
 			checkDeleted();
+			checkReadOnly();
 			deleted = true;
 			configurationAdminFactory.notifyConfigurationDeleted(this, factoryPid != null);
 			configurationAdminFactory.dispatchEvent(ConfigurationEvent.CM_DELETED, factoryPid, pid);
@@ -162,9 +168,15 @@ class ConfigurationImpl implements Configuration {
 			throw new IllegalStateException("deleted"); //$NON-NLS-1$
 	}
 
+	private void checkReadOnly() {
+		if (readOnly) {
+			throw new ReadOnlyConfigurationException("read only"); //$NON-NLS-1$
+		}
+	}
+
 	String getLocation() {
+		lock();
 		try {
-			lock();
 			return bundleLocation;
 		} finally {
 			unlock();
@@ -173,8 +185,8 @@ class ConfigurationImpl implements Configuration {
 
 	@Override
 	public String getBundleLocation() {
+		lock();
 		try {
-			lock();
 			checkDeleted();
 			configurationAdminFactory.checkConfigurePermission(bundleLocation, null);
 			if (bundleLocation != null)
@@ -186,8 +198,8 @@ class ConfigurationImpl implements Configuration {
 	}
 
 	String getFactoryPid(boolean checkDeleted) {
+		lock();
 		try {
-			lock();
 			if (checkDeleted)
 				checkDeleted();
 			return factoryPid;
@@ -202,8 +214,8 @@ class ConfigurationImpl implements Configuration {
 	}
 
 	String getPid(boolean checkDeleted) {
+		lock();
 		try {
-			lock();
 			if (checkDeleted)
 				checkDeleted();
 			return pid;
@@ -219,8 +231,8 @@ class ConfigurationImpl implements Configuration {
 
 	@Override
 	public Dictionary<String, Object> getProperties() {
+		lock();
 		try {
-			lock();
 			checkDeleted();
 			if (dictionary == null)
 				return null;
@@ -234,8 +246,8 @@ class ConfigurationImpl implements Configuration {
 	}
 
 	Dictionary<String, Object> getAllProperties(boolean includeStorageKeys) {
+		lock();
 		try {
-			lock();
 			if (deleted)
 				return null;
 			Dictionary<String, Object> copy = getProperties();
@@ -252,17 +264,21 @@ class ConfigurationImpl implements Configuration {
 		}
 	}
 
-	private static void fileAutoProperties(Dictionary<String, Object> dictionary, ConfigurationImpl config, boolean includeLoc, boolean includeStorageKey) {
+	static void fileAutoProperties(Dictionary<String, Object> dictionary, ConfigurationImpl config, boolean includeLoc, boolean includeStorageKey) {
 		dictionary.put(Constants.SERVICE_PID, config.getPid(false));
 		String factoryPid = config.getFactoryPid(false);
 		if (factoryPid != null) {
 			dictionary.put(ConfigurationAdmin.SERVICE_FACTORYPID, factoryPid);
+		} else {
+			dictionary.remove(ConfigurationAdmin.SERVICE_FACTORYPID);
 		}
 		if (includeLoc) {
 			String loc = config.getLocation();
 			if (loc != null) {
 				dictionary.put(ConfigurationAdmin.SERVICE_BUNDLELOCATION, loc);
 			}
+		} else {
+			dictionary.remove(ConfigurationAdmin.SERVICE_BUNDLELOCATION);
 		}
 		if (includeStorageKey) {
 			if (config.dictionary == null) {
@@ -272,13 +288,14 @@ class ConfigurationImpl implements Configuration {
 			if (config.isBound()) {
 				dictionary.put(LOCATION_BOUND, Boolean.TRUE);
 			}
+			dictionary.put(READ_ONLY, Boolean.valueOf(config.readOnly));
 		}
 	}
 
 	@Override
 	public void setBundleLocation(String bundleLocation) {
+		lock();
 		try {
-			lock();
 			checkDeleted();
 			configurationAdminFactory.checkConfigurePermission(this.bundleLocation, null);
 			configurationAdminFactory.checkConfigurePermission(bundleLocation, null);
@@ -300,9 +317,10 @@ class ConfigurationImpl implements Configuration {
 
 	@Override
 	public void update() throws IOException {
+		lock();
 		try {
-			lock();
 			checkDeleted();
+			checkReadOnly();
 			if (dictionary == null)
 				dictionary = new ConfigurationDictionary();
 			changeCount++;
@@ -315,17 +333,174 @@ class ConfigurationImpl implements Configuration {
 
 	@Override
 	public void update(Dictionary<String, ?> properties) throws IOException {
+		lock();
 		try {
-			lock();
-			checkDeleted();
-			updateDictionary(properties);
-			changeCount++;
-			save();
-			configurationAdminFactory.notifyConfigurationUpdated(this, factoryPid != null);
-			configurationAdminFactory.dispatchEvent(ConfigurationEvent.CM_UPDATED, factoryPid, pid);
+			doUpdate(properties, false);
 		} finally {
 			unlock();
 		}
+	}
+
+	@Override
+	public boolean updateIfDifferent(Dictionary<String, ?> properties) throws IOException {
+		lock();
+		try {
+			return doUpdate(properties, true);
+		} finally {
+			unlock();
+		}
+	}
+
+	private boolean same(Dictionary<String, ?> properties) {
+		if (dictionary == null) {
+			return false;
+		}
+		if (dictionary.size() != properties.size()) {
+			return false;
+		}
+
+		Enumeration<String> keys = properties.keys();
+		while (keys.hasMoreElements()) {
+			String key = keys.nextElement();
+			if (dictionary.get(key) == null) {
+				return false;
+			}
+			Object current = dictionary.get(key);
+			Object newValue = properties.get(key);
+			if (current.getClass().isArray()) {
+				if (!newValue.getClass().isArray()) {
+					return false;
+				}
+				if (!current.getClass().getComponentType().equals(newValue.getClass().getComponentType())) {
+					current = convertIfPossible(current);
+					newValue = convertIfPossible(newValue);
+					if (!current.getClass().getComponentType().equals(newValue.getClass().getComponentType())) {
+						return false;
+					}
+				}
+				Class<?> currentComponentType = current.getClass().getComponentType();
+				if (long.class.isAssignableFrom(currentComponentType)) {
+					if (!Arrays.equals((long[]) current, (long[]) newValue)) {
+						return false;
+					}
+				} else if (int.class.isAssignableFrom(currentComponentType)) {
+					if (!Arrays.equals((int[]) current, (int[]) newValue)) {
+						return false;
+					}
+				} else if (short.class.isAssignableFrom(currentComponentType)) {
+					if (!Arrays.equals((short[]) current, (short[]) newValue)) {
+						return false;
+					}
+				} else if (char.class.isAssignableFrom(currentComponentType)) {
+					if (!Arrays.equals((char[]) current, (char[]) newValue)) {
+						return false;
+					}
+				} else if (byte.class.isAssignableFrom(currentComponentType)) {
+					if (!Arrays.equals((byte[]) current, (byte[]) newValue)) {
+						return false;
+					}
+				} else if (double.class.isAssignableFrom(currentComponentType)) {
+					if (!Arrays.equals((double[]) current, (double[]) newValue)) {
+						return false;
+					}
+				} else if (float.class.isAssignableFrom(currentComponentType)) {
+					if (!Arrays.equals((float[]) current, (float[]) newValue)) {
+						return false;
+					}
+				} else if (boolean.class.isAssignableFrom(currentComponentType)) {
+					if (!Arrays.equals((boolean[]) current, (boolean[]) newValue)) {
+						return false;
+					}
+				} else {
+					if (!Arrays.equals((Object[]) current, (Object[]) newValue)) {
+						return false;
+					}
+				}
+
+			} else {
+				if (!current.equals(newValue)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	private Object convertIfPossible(Object array) {
+		Class<?> componentType = array.getClass().getComponentType();
+		if (Long.class.isAssignableFrom(componentType)) {
+			Long[] original = (Long[]) array;
+			long[] converted = new long[original.length];
+			for (int i = 0; i < original.length; i++) {
+				converted[i] = original[i];
+			}
+			return converted;
+		} else if (Integer.class.isAssignableFrom(componentType)) {
+			Integer[] original = (Integer[]) array;
+			int[] converted = new int[original.length];
+			for (int i = 0; i < original.length; i++) {
+				converted[i] = original[i];
+			}
+			return converted;
+		} else if (Short.class.isAssignableFrom(componentType)) {
+			Short[] original = (Short[]) array;
+			short[] converted = new short[original.length];
+			for (int i = 0; i < original.length; i++) {
+				converted[i] = original[i];
+			}
+			return converted;
+		} else if (Character.class.isAssignableFrom(componentType)) {
+			Character[] original = (Character[]) array;
+			char[] converted = new char[original.length];
+			for (int i = 0; i < original.length; i++) {
+				converted[i] = original[i];
+			}
+			return converted;
+		} else if (Byte.class.isAssignableFrom(componentType)) {
+			Byte[] original = (Byte[]) array;
+			byte[] converted = new byte[original.length];
+			for (int i = 0; i < original.length; i++) {
+				converted[i] = original[i];
+			}
+			return converted;
+		} else if (Double.class.isAssignableFrom(componentType)) {
+			Double[] original = (Double[]) array;
+			double[] converted = new double[original.length];
+			for (int i = 0; i < original.length; i++) {
+				converted[i] = original[i];
+			}
+			return converted;
+		} else if (Float.class.isAssignableFrom(componentType)) {
+			Float[] original = (Float[]) array;
+			float[] converted = new float[original.length];
+			for (int i = 0; i < original.length; i++) {
+				converted[i] = original[i];
+			}
+			return converted;
+		} else if (Boolean.class.isAssignableFrom(componentType)) {
+			Boolean[] original = (Boolean[]) array;
+			boolean[] converted = new boolean[original.length];
+			for (int i = 0; i < original.length; i++) {
+				converted[i] = original[i];
+			}
+			return converted;
+
+		}
+		return array;
+	}
+
+	private boolean doUpdate(Dictionary<String, ?> properties, boolean checkSame) throws IOException {
+		checkDeleted();
+		checkReadOnly();
+		if (checkSame && same(properties)) {
+			return false;
+		}
+		updateDictionary(properties);
+		changeCount++;
+		save();
+		configurationAdminFactory.notifyConfigurationUpdated(this, factoryPid != null);
+		configurationAdminFactory.dispatchEvent(ConfigurationEvent.CM_UPDATED, factoryPid, pid);
+		return true;
 	}
 
 	private void save() throws IOException {
@@ -370,8 +545,8 @@ class ConfigurationImpl implements Configuration {
 	}
 
 	boolean isDeleted() {
+		lock();
 		try {
-			lock();
 			return deleted;
 		} finally {
 			unlock();
@@ -380,10 +555,60 @@ class ConfigurationImpl implements Configuration {
 
 	@Override
 	public long getChangeCount() {
+		lock();
 		try {
-			lock();
 			checkDeleted();
 			return changeCount;
+		} finally {
+			unlock();
+		}
+	}
+
+	@Override
+	public Dictionary<String, Object> getProcessedProperties(ServiceReference<?> reference) {
+		return configurationAdminFactory.modifyConfiguration(reference, this);
+	}
+
+	@Override
+	public void addAttributes(ConfigurationAttribute... attrs) throws IOException {
+		lock();
+		try {
+			configurationAdminFactory.checkAttributePermission(bundleLocation);
+			for (ConfigurationAttribute attr : attrs) {
+				if (ConfigurationAttribute.READ_ONLY.equals(attr)) {
+					readOnly = true;
+				}
+			}
+			save();
+		} finally {
+			unlock();
+		}
+	}
+
+	@Override
+	public Set<ConfigurationAttribute> getAttributes() {
+		lock();
+		try {
+			if (readOnly) {
+				return EnumSet.of(ConfigurationAttribute.READ_ONLY);
+			}
+			return Collections.emptySet();
+		} finally {
+			unlock();
+		}
+	}
+
+	@Override
+	public void removeAttributes(ConfigurationAttribute... attrs) throws IOException {
+		lock();
+		try {
+			configurationAdminFactory.checkAttributePermission(bundleLocation);
+			for (ConfigurationAttribute attr : attrs) {
+				if (ConfigurationAttribute.READ_ONLY.equals(attr)) {
+					readOnly = false;
+				}
+			}
+			save();
 		} finally {
 			unlock();
 		}

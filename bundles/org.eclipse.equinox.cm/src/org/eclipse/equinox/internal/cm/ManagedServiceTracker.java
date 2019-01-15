@@ -78,8 +78,7 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 				ManagedService service = getService(ref);
 				if (hasLocPermission && service != null) {
 					if (isMultiple || config.bind(ConfigurationAdminImpl.getLocation(ref.getBundle()))) {
-						Dictionary<String, Object> properties = config.getProperties();
-						configurationAdminFactory.modifyConfiguration(ref, properties);
+						Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(ref, config);
 						asynchUpdated(service, properties);
 					}
 				}
@@ -129,8 +128,7 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 						}
 						updateManagedService(qualifiedPidLists, ref, service);
 					} else if (update) {
-						Dictionary<String, Object> properties = config.getProperties();
-						configurationAdminFactory.modifyConfiguration(ref, properties);
+						Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(ref, config);
 						asynchUpdated(service, properties);
 					}
 					// do not break on !isMultiple since we need to check if the other refs apply no matter what
@@ -226,8 +224,7 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 							boolean hasLocPermission = configurationAdminFactory.checkTargetPermission(location, reference);
 							if (hasLocPermission) {
 								if ((shouldBind && config.bind(ConfigurationAdminImpl.getLocation(reference.getBundle()))) || !shouldBind) {
-									Dictionary<String, Object> properties = config.getProperties();
-									configurationAdminFactory.modifyConfiguration(reference, properties);
+									Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(reference, config);
 									asynchUpdated(service, properties);
 									foundConfig = true;
 									break qualifiedPids;

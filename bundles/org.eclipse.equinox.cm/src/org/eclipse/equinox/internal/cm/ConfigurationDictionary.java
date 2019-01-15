@@ -146,8 +146,8 @@ public class ConfigurationDictionary extends Dictionary<String, Object> implemen
 				Object copyOfArray = Array.newInstance(value.getClass().getComponentType(), arrayLength);
 				System.arraycopy(value, 0, copyOfArray, 0, arrayLength);
 				result.configurationProperties.put(key, copyOfArray);
-			} else if (value instanceof Vector)
-				result.configurationProperties.put(key, ((Vector<?>) value).clone());
+			} else if (value instanceof Collection)
+				result.configurationProperties.put(key, new ArrayList<>((Collection<?>) value));
 			else
 				result.configurationProperties.put(key, value);
 		}

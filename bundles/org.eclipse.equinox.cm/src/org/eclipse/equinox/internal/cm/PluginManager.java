@@ -15,7 +15,8 @@
 package org.eclipse.equinox.internal.cm;
 
 import java.util.*;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationPlugin;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -37,26 +38,63 @@ public class PluginManager {
 		pluginTracker.close();
 	}
 
-	public void modifyConfiguration(ServiceReference<?> managedReference, Dictionary<String, Object> properties) {
+	public Dictionary<String, Object> modifyConfiguration(ServiceReference<?> managedReference, ConfigurationImpl config) {
+		Dictionary<String, Object> properties = config.getProperties();
 		if (properties == null)
-			return;
+			return null;
 
 		ServiceReference<ConfigurationPlugin>[] references = pluginTracker.getServiceReferences();
 		for (int i = 0; i < references.length; ++i) {
-			String[] pids = (String[]) references[i].getProperty(ConfigurationPlugin.CM_TARGET);
+			Collection<?> pids = getStringProperty(references[i].getProperty(ConfigurationPlugin.CM_TARGET));
 			if (pids != null) {
-				String pid = (String) properties.get(Constants.SERVICE_PID);
-				if (!Arrays.asList(pids).contains(pid))
+				String pid = config.getFactoryPid();
+				if (pid == null) {
+					pid = config.getPid();
+				}
+				if (!pids.contains(pid))
 					continue;
 			}
 			ConfigurationPlugin plugin = pluginTracker.getService(references[i]);
-			if (plugin != null)
-				plugin.modifyConfiguration(managedReference, properties);
+			if (plugin != null) {
+				int rank = getRank(references[i]);
+				if (rank < 0 || rank > 1000) {
+					plugin.modifyConfiguration(managedReference, ((ConfigurationDictionary) properties).copy());
+				} else {
+					plugin.modifyConfiguration(managedReference, properties);
+					ConfigurationImpl.fileAutoProperties(properties, config, false, false);
+				}
+			}
 		}
+		return properties;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Collection<Object> getStringProperty(Object value) {
+		if (value == null)
+			return null;
+		if (value instanceof String) {
+			return Collections.singleton(value);
+		}
+		if (value instanceof String[]) {
+			return Arrays.asList((Object[]) value);
+		}
+		if (value instanceof Collection) {
+			return (Collection<Object>) value;
+		}
+		return null;
+	}
+
+	static final Integer ZERO = Integer.valueOf(0);
+
+	static Integer getRank(ServiceReference<ConfigurationPlugin> ref) {
+		Object ranking = ref.getProperty(ConfigurationPlugin.CM_RANKING);
+		if (ranking == null || !(ranking instanceof Integer))
+			return ZERO;
+		return ((Integer) ranking);
 	}
 
 	private static class PluginTracker extends ServiceTracker<ConfigurationPlugin, ConfigurationPlugin> {
-		final Integer ZERO = Integer.valueOf(0);
+
 		private TreeSet<ServiceReference<ConfigurationPlugin>> serviceReferences = new TreeSet<>(new Comparator<ServiceReference<ConfigurationPlugin>>() {
 			@Override
 			public int compare(ServiceReference<ConfigurationPlugin> s1, ServiceReference<ConfigurationPlugin> s2) {
@@ -67,13 +105,6 @@ public class PluginManager {
 				}
 				// we reverse the order which means services with higher service.ranking properties are called first
 				return -(s1.compareTo(s2));
-			}
-
-			private Integer getRank(ServiceReference<ConfigurationPlugin> ref) {
-				Object ranking = ref.getProperty(ConfigurationPlugin.CM_RANKING);
-				if (ranking == null || !(ranking instanceof Integer))
-					return ZERO;
-				return ((Integer) ranking);
 			}
 		});
 

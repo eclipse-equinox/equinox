@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others..
+ * Copyright (c) 2005, 2019 Cognos Incorporated, IBM Corporation and others..
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,32 +39,41 @@ class ConfigurationAdminImpl implements ConfigurationAdmin {
 
 	@Override
 	public Configuration createFactoryConfiguration(String factoryPid) {
-		return internalGetConfiguration(factoryPid, bundleLocation, true, true);
-
+		return internalGetConfiguration(factoryPid, bundleLocation, true, true, null);
 	}
 
 	@Override
 	public Configuration createFactoryConfiguration(String factoryPid, String location) {
-		return internalGetConfiguration(factoryPid, location, true, false);
+		return internalGetConfiguration(factoryPid, location, true, false, null);
 	}
 
 	@Override
 	public Configuration getConfiguration(String pid) {
-		return internalGetConfiguration(pid, bundleLocation, false, true);
+		return internalGetConfiguration(pid, bundleLocation, false, true, null);
 	}
 
 	@Override
 	public Configuration getConfiguration(String pid, String location) {
-		return internalGetConfiguration(pid, location, false, false);
+		return internalGetConfiguration(pid, location, false, false, null);
 	}
 
-	private Configuration internalGetConfiguration(String pid, String location, boolean factory, boolean bind) {
+	@Override
+	public Configuration getFactoryConfiguration(String factoryPid, String name) {
+		return internalGetConfiguration(factoryPid, bundleLocation, true, true, name);
+	}
+
+	@Override
+	public Configuration getFactoryConfiguration(String factoryPid, String name, String location) {
+		return internalGetConfiguration(factoryPid, location, true, false, name);
+	}
+
+	private Configuration internalGetConfiguration(String pid, String location, boolean factory, boolean bind, String name) {
 		checkPID(pid);
 		this.configurationAdminFactory.checkConfigurePermission(location, bundleLocation);
 
 		ConfigurationImpl config;
 		if (factory) {
-			config = configurationStore.createFactoryConfiguration(pid, location, bind);
+			config = configurationStore.getFactoryConfiguration(pid, location, bind, name);
 		} else {
 			config = configurationStore.getConfiguration(pid, location, bind);
 		}

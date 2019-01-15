@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2019 Cognos Incorporated, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,7 @@ import org.osgi.service.cm.ConfigurationPermission;
 public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAdmin>, BundleListener {
 
 	static private final Permission allConfigurationPermission = new ConfigurationPermission("*", ConfigurationPermission.CONFIGURE); //$NON-NLS-1$
+	static private final Permission allAttributePermission = new ConfigurationPermission("*", ConfigurationPermission.ATTRIBUTE); //$NON-NLS-1$
 	private final EventDispatcher eventDispatcher;
 	private final PluginManager pluginManager;
 	private final LogTracker log;
@@ -105,6 +106,17 @@ public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAd
 		return true;
 	}
 
+	public void checkAttributePermission(String location) throws SecurityException {
+		SecurityManager sm = System.getSecurityManager();
+		if (sm != null) {
+			if (location == null) {
+				sm.checkPermission(allAttributePermission);
+			} else {
+				sm.checkPermission(new ConfigurationPermission(location, ConfigurationPermission.ATTRIBUTE));
+			}
+		}
+	}
+
 	void log(int level, String message) {
 		log.log(level, message);
 	}
@@ -139,7 +151,7 @@ public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAd
 		}
 	}
 
-	void modifyConfiguration(ServiceReference<?> reference, Dictionary<String, Object> properties) {
-		pluginManager.modifyConfiguration(reference, properties);
+	Dictionary<String, Object> modifyConfiguration(ServiceReference<?> reference, ConfigurationImpl config) {
+		return pluginManager.modifyConfiguration(reference, config);
 	}
 }

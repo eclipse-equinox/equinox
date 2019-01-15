@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2019 Cognos Incorporated, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -177,8 +177,18 @@ class ConfigurationStore {
 		return config;
 	}
 
-	public synchronized ConfigurationImpl createFactoryConfiguration(String factoryPid, String location, boolean bind) {
-		String pid = factoryPid + "-" + new Date().getTime() + "-" + createdPidCount++; //$NON-NLS-1$ //$NON-NLS-2$
+	public synchronized ConfigurationImpl getFactoryConfiguration(String factoryPid, String location, boolean bind, String name) {
+		String pid;
+		if (name == null) {
+			pid = factoryPid + "-" + new Date().getTime() + "-" + createdPidCount++; //$NON-NLS-1$ //$NON-NLS-2$
+		} else {
+			pid = factoryPid + "~" + name; //$NON-NLS-1$
+			ConfigurationImpl config = configurations.get(pid);
+			if (config != null) {
+				return config;
+			}
+		}
+
 		ConfigurationImpl config = new ConfigurationImpl(configurationAdminFactory, this, factoryPid, pid, location, bind);
 		configurations.put(pid, config);
 		return config;

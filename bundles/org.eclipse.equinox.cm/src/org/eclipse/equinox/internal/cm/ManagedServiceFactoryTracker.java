@@ -74,8 +74,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 				ManagedServiceFactory serviceFactory = getService(ref);
 				if (hasLocPermission && serviceFactory != null) {
 					if (isMultiple || config.bind(ConfigurationAdminImpl.getLocation(ref.getBundle()))) {
-						Dictionary<String, Object> properties = config.getProperties();
-						configurationAdminFactory.modifyConfiguration(ref, properties);
+						Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(ref, config);
 						asynchUpdated(serviceFactory, config.getPid(), properties);
 					}
 				}
@@ -120,8 +119,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 					if (delete) {
 						asynchDeleted(serviceFactory, config.getPid());
 					} else if (update) {
-						Dictionary<String, Object> properties = config.getProperties();
-						configurationAdminFactory.modifyConfiguration(ref, properties);
+						Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(ref, config);
 						asynchUpdated(serviceFactory, config.getPid(), properties);
 					}
 					// do not break on !isMultiple since we need to check if the other refs apply no matter what
@@ -218,8 +216,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 							boolean hasLocPermission = configurationAdminFactory.checkTargetPermission(location, reference);
 							if (hasLocPermission) {
 								if (shouldBind && configs[i].bind(ConfigurationAdminImpl.getLocation(reference.getBundle())) || !shouldBind) {
-									Dictionary<String, Object> properties = configs[i].getProperties();
-									configurationAdminFactory.modifyConfiguration(reference, properties);
+									Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(reference, configs[i]);
 									asynchUpdated(serviceFactory, configs[i].getPid(), properties);
 									foundConfig = true;
 								} else {
