@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.osgi.services" version="2">
+    <resource path="META-INF/MANIFEST.MF">
+        <filter comment="Ignore OSGI API" id="923795461">
+            <message_arguments>
+                <message_argument value="3.8.0"/>
+                <message_argument value="3.7.100"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="src/org/osgi/service/cm/Configuration.java" type="org.osgi.service.cm.Configuration">
         <filter comment="Ignore OSGi API" id="403804204">
             <message_arguments>
@@ -126,6 +134,131 @@
                 <message_argument value="1.6"/>
                 <message_argument value="3.8"/>
                 <message_argument value="org.osgi.service.cm.ReadOnlyConfigurationException"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/component/ComponentConstants.java" type="org.osgi.service.component.ComponentConstants">
+        <filter comment="Ignore OSGI API" id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.service.component.ComponentConstants"/>
+                <message_argument value="COMPONENT_SPECIFICATION_VERSION"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGI API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.4"/>
+                <message_argument value="3.8"/>
+                <message_argument value="COMPONENT_SPECIFICATION_VERSION"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/component/runtime/dto/ComponentConfigurationDTO.java" type="org.osgi.service.component.runtime.dto.ComponentConfigurationDTO">
+        <filter comment="Ignore OSGI API" id="336658481">
+            <message_arguments>
+                <message_argument value="org.osgi.service.component.runtime.dto.ComponentConfigurationDTO"/>
+                <message_argument value="FAILED_ACTIVATION"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGI API" id="336658481">
+            <message_arguments>
+                <message_argument value="org.osgi.service.component.runtime.dto.ComponentConfigurationDTO"/>
+                <message_argument value="failure"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGI API" id="336658481">
+            <message_arguments>
+                <message_argument value="org.osgi.service.component.runtime.dto.ComponentConfigurationDTO"/>
+                <message_argument value="service"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGI API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.4"/>
+                <message_argument value="3.8"/>
+                <message_argument value="FAILED_ACTIVATION"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGI API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.4"/>
+                <message_argument value="3.8"/>
+                <message_argument value="failure"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGI API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.4"/>
+                <message_argument value="3.8"/>
+                <message_argument value="service"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/component/runtime/dto/ComponentDescriptionDTO.java" type="org.osgi.service.component.runtime.dto.ComponentDescriptionDTO">
+        <filter comment="Ignore OSGI API" id="336658481">
+            <message_arguments>
+                <message_argument value="org.osgi.service.component.runtime.dto.ComponentDescriptionDTO"/>
+                <message_argument value="activationFields"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGI API" id="336658481">
+            <message_arguments>
+                <message_argument value="org.osgi.service.component.runtime.dto.ComponentDescriptionDTO"/>
+                <message_argument value="factoryProperties"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGI API" id="336658481">
+            <message_arguments>
+                <message_argument value="org.osgi.service.component.runtime.dto.ComponentDescriptionDTO"/>
+                <message_argument value="init"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGI API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.4"/>
+                <message_argument value="3.8"/>
+                <message_argument value="activationFields"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGI API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.4"/>
+                <message_argument value="3.8"/>
+                <message_argument value="factoryProperties"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGI API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.4"/>
+                <message_argument value="3.8"/>
+                <message_argument value="init"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/component/runtime/dto/ReferenceDTO.java" type="org.osgi.service.component.runtime.dto.ReferenceDTO">
+        <filter comment="Ignore OSGI API" id="336658481">
+            <message_arguments>
+                <message_argument value="org.osgi.service.component.runtime.dto.ReferenceDTO"/>
+                <message_argument value="collectionType"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGI API" id="336658481">
+            <message_arguments>
+                <message_argument value="org.osgi.service.component.runtime.dto.ReferenceDTO"/>
+                <message_argument value="parameter"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGI API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.4"/>
+                <message_argument value="3.8"/>
+                <message_argument value="collectionType"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGI API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.4"/>
+                <message_argument value="3.8"/>
+                <message_argument value="parameter"/>
             </message_arguments>
         </filter>
     </resource>

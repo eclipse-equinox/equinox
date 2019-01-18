@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2004, 2015). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2017). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,17 +126,28 @@ public interface ComponentConstants {
 
 	/**
 	 * Capability name for Service Component Runtime.
-	 * 
 	 * <p>
 	 * Used in {@code Provide-Capability} and {@code Require-Capability}
 	 * manifest headers with the {@code osgi.extender} namespace. For example:
 	 * 
 	 * <pre>
 	 * Require-Capability: osgi.extender;
-	 *  filter:="(&amp;(osgi.extender=osgi.component)(version&gt;=1.3)(!(version&gt;=2.0)))"
+	 *  filter:="(&amp;(osgi.extender=osgi.component)(version&gt;=1.4)(!(version&gt;=2.0)))"
 	 * </pre>
 	 * 
 	 * @since 1.3
 	 */
 	public static final String	COMPONENT_CAPABILITY_NAME					= "osgi.component";
+
+	/**
+	 * Compile time constant for the Specification Version of Declarative
+	 * Services.
+	 * <p>
+	 * Used in {@code Version} and {@code Requirement} annotations. The value of
+	 * this compile time constant will change when the specification version of
+	 * Declarative Services is updated.
+	 * 
+	 * @since 1.4
+	 */
+	public static final String	COMPONENT_SPECIFICATION_VERSION				= "1.4.0";
 }

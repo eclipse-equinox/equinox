@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2013, 2015). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2013, 2017). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,4 +145,27 @@ public class ReferenceDTO extends DTO {
 	 * not declare a scope for the reference.
 	 */
 	public String	scope;
+
+	/**
+	 * The zero-based parameter number of the constructor parameter for the
+	 * reference.
+	 * <p>
+	 * This is declared in the {@code parameter} attribute of the
+	 * {@code reference} element. This must be {@code null} if the component
+	 * description does not declare a parameter number for the reference.
+	 * 
+	 * @since 1.4
+	 */
+	public Integer	parameter;
+
+	/**
+	 * The collection type for the reference.
+	 * <p>
+	 * This is declared in the {@code field-collection-type} attribute of the
+	 * {@code reference} element. This must be {@code null} if the component
+	 * description does not declare a collection type for the reference.
+	 * 
+	 * @since 1.4
+	 */
+	public String	collectionType;
 }
