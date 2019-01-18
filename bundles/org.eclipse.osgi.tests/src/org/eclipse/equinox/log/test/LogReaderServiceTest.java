@@ -451,12 +451,16 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 
 		assertBundleEventLog("BundleEvent INSTALLED", bundle, listener);
 		assertBundleEventLog("BundleEvent RESOLVED", bundle, listener);
+		assertBundleEventLog("BundleEvent STARTING", bundle, listener);
 		assertBundleEventLog("BundleEvent STARTED", bundle, listener);
+		assertBundleEventLog("BundleEvent STOPPING", bundle, listener);
 		assertBundleEventLog("BundleEvent STOPPED", bundle, listener);
 		assertBundleEventLog("BundleEvent UNRESOLVED", bundle, listener);
 		assertBundleEventLog("BundleEvent UPDATED", bundle, listener);
 		assertBundleEventLog("BundleEvent RESOLVED", bundle, listener);
+		assertBundleEventLog("BundleEvent STARTING", bundle, listener);
 		assertBundleEventLog("BundleEvent STARTED", bundle, listener);
+		assertBundleEventLog("BundleEvent STOPPING", bundle, listener);
 		assertBundleEventLog("BundleEvent STOPPED", bundle, listener);
 		assertBundleEventLog("BundleEvent UNRESOLVED", bundle, listener);
 		assertBundleEventLog("BundleEvent UNINSTALLED", bundle, listener);

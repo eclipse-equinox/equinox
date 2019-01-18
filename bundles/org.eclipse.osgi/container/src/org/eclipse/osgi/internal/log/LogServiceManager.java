@@ -131,9 +131,6 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 		if (logReaderServiceFactory.isLoggable(bundle, LOGGER_BUNDLE_EVENT, LogService.LOG_INFO)) {
 			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(LOGGER_BUNDLE_EVENT);
 			int eventType = event.getType();
-			if (eventType == BundleEvent.STARTING || eventType == BundleEvent.STOPPING || eventType == BundleEvent.LAZY_ACTIVATION) {
-				return;
-			}
 			logger.log(bundle, event, null, LogService.LOG_INFO, getBundleEventTypeName(eventType), null, null);
 		}
 	}
