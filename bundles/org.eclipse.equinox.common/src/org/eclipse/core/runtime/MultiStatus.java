@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
+import java.util.*;
+
 /**
  * A concrete multi-status implementation, 
  * suitable either for instantiating or subclassing.
@@ -24,7 +26,7 @@ public class MultiStatus extends Status {
 
 	/** List of child statuses.
 	 */
-	private IStatus[] children;
+	private final List<IStatus> children = new ArrayList<>();
 
 	/**
 	 * Creates and returns a new multi-status object with the given children.
@@ -40,16 +42,7 @@ public class MultiStatus extends Status {
 	public MultiStatus(String pluginId, int code, IStatus[] newChildren, String message, Throwable exception) {
 		this(pluginId, code, message, exception);
 		Assert.isLegal(newChildren != null);
-		int maxSeverity = getSeverity();
-		for (int i = 0; i < newChildren.length; i++) {
-			Assert.isLegal(newChildren[i] != null);
-			int severity = newChildren[i].getSeverity();
-			if (severity > maxSeverity)
-				maxSeverity = severity;
-		}
-		this.children = new IStatus[newChildren.length];
-		setSeverity(maxSeverity);
-		System.arraycopy(newChildren, 0, this.children, 0, newChildren.length);
+		addAllInternal(newChildren);
 	}
 
 	/**
@@ -64,7 +57,6 @@ public class MultiStatus extends Status {
 	 */
 	public MultiStatus(String pluginId, int code, String message, Throwable exception) {
 		super(OK, pluginId, code, message, exception);
-		children = new IStatus[0];
 	}
 
 	/**
@@ -74,10 +66,7 @@ public class MultiStatus extends Status {
 	 */
 	public void add(IStatus status) {
 		Assert.isLegal(status != null);
-		IStatus[] result = new IStatus[children.length + 1];
-		System.arraycopy(children, 0, result, 0, children.length);
-		result[result.length - 1] = status;
-		children = result;
+		children.add(status);
 		int newSev = status.getSeverity();
 		if (newSev > getSeverity()) {
 			setSeverity(newSev);
@@ -93,15 +82,24 @@ public class MultiStatus extends Status {
 	 */
 	public void addAll(IStatus status) {
 		Assert.isLegal(status != null);
-		IStatus[] statuses = status.getChildren();
-		for (int i = 0; i < statuses.length; i++) {
-			add(statuses[i]);
+		addAllInternal(status.getChildren());
+	}
+
+	private void addAllInternal(IStatus[] newChildren) {
+		int maxSeverity = getSeverity();
+		for (IStatus child : newChildren) {
+			Assert.isLegal(child != null);
+			int severity = child.getSeverity();
+			if (severity > maxSeverity)
+				maxSeverity = severity;
 		}
+		this.children.addAll(Arrays.asList(newChildren));
+		setSeverity(maxSeverity);
 	}
 
 	@Override
 	public IStatus[] getChildren() {
-		return children;
+		return children.toArray(new IStatus[0]);
 	}
 
 	@Override
@@ -135,15 +133,10 @@ public class MultiStatus extends Status {
 	 */
 	@Override
 	public String toString() {
-		StringBuffer buf = new StringBuffer(super.toString());
-		buf.append(" children=["); //$NON-NLS-1$
-		for (int i = 0; i < children.length; i++) {
-			if (i != 0) {
-				buf.append(" "); //$NON-NLS-1$
-			}
-			buf.append(children[i].toString());
+		StringJoiner joiner = new StringJoiner(" ", super.toString() + " children=[", "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		for (IStatus child : children) {
+			joiner.add(child.toString());
 		}
-		buf.append("]"); //$NON-NLS-1$
-		return buf.toString();
+		return joiner.toString();
 	}
 }
