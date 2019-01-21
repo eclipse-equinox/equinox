@@ -224,7 +224,7 @@ public interface Component {
 	 *
 	 * @since 1.2
 	 */
-	ComponentInstance getComponentInstance();
+	<S> ComponentInstance<S> getComponentInstance();
 
 	/**
 	 * Returns the name of the method to be called when the component is being
