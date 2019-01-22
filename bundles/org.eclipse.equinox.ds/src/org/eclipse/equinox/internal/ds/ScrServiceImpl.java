@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -204,7 +204,7 @@ public class ScrServiceImpl implements ScrService {
 		}
 
 		@Override
-		public ComponentInstance getComponentInstance() {
+		public ComponentInstance<Object> getComponentInstance() {
 			throw new UnsupportedOperationException("Not supported."); //$NON-NLS-1$
 		}
 
