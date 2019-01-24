@@ -74,7 +74,7 @@ eclipseShm.o: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
 	$(CC) $(CFLAGS) -c ../eclipseShm.c -o $@
 
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
-	$(CC) -o $(EXEC) $(ARCHS) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
+	$(CC) -pagezero_size 0x1000 -o $(EXEC) $(ARCHS) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
 	$(CC) -bundle -o $(DLL) $(ARCHS) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
