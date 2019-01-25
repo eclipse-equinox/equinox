@@ -167,6 +167,8 @@ public class FrameworkExtensionInstaller {
 			paths.add("."); //$NON-NLS-1$
 		}
 		if (configuration.inDevelopmentMode()) {
+			// must create a copy because paths could be unmodifiable
+			paths = new ArrayList<>(paths);
 			String[] devPaths = configuration.getDevClassPath(revision.getSymbolicName());
 			for (String devPath : devPaths) {
 				paths.add(devPath);
