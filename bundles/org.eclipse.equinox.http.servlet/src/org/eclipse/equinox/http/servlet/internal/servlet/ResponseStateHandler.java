@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 Raymond Augé and others.
+ * Copyright (c) 2014, 2019 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -24,6 +24,7 @@ import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.context.DispatchTargets;
 import org.eclipse.equinox.http.servlet.internal.registration.EndpointRegistration;
 import org.eclipse.equinox.http.servlet.internal.registration.FilterRegistration;
+import org.eclipse.equinox.http.servlet.internal.util.HttpStatus;
 
 /**
  * @author Raymond Augé
@@ -84,7 +85,9 @@ public class ResponseStateHandler {
 
 			setException(e);
 
-			if (dispatchTargets.getDispatcherType() != DispatcherType.REQUEST) {
+			if (dispatchTargets.getDispatcherType() != DispatcherType.ERROR &&
+				dispatchTargets.getDispatcherType() != DispatcherType.REQUEST) {
+
 				throwException(e);
 			}
 		}
@@ -93,6 +96,43 @@ public class ResponseStateHandler {
 
 			for (FilterRegistration filterRegistration : filters) {
 				filterRegistration.removeReference();
+			}
+
+			if ((exception != null) && dispatchTargets.getDispatcherType() == DispatcherType.ERROR) {
+				// This was the error handler throwing an error.
+				// We have to handle this with a custom error page of our own.
+
+				PrintWriter writer = response.getWriter();
+
+				Integer status = (Integer)request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+				String message = (String)request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
+
+				if (message == null) {
+					message = exception.getMessage();
+				}
+
+				request.getServletContext().log(message, exception);
+
+				final HttpStatus httpStatus = HttpStatus.of(status);
+
+				writer.println("<!DOCTYPE html>"); //$NON-NLS-1$
+				writer.println("<html lang=\"en\"><head>"); //$NON-NLS-1$
+				writer.println("<meta charset=\"utf-8\" />"); //$NON-NLS-1$
+				writer.println("<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />"); //$NON-NLS-1$
+				writer.println("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />"); //$NON-NLS-1$
+				writer.print("<title>"); //$NON-NLS-1$
+				writer.print(httpStatus.value());
+				writer.print(" - "); //$NON-NLS-1$
+				writer.print(httpStatus.description());
+				writer.println("</title></head>"); //$NON-NLS-1$
+				writer.print("<body><div><h1>"); //$NON-NLS-1$
+				writer.print(httpStatus.value());
+				writer.print(" <small>"); //$NON-NLS-1$
+				writer.print(httpStatus.description());
+				writer.println("</small></h1>"); //$NON-NLS-1$
+				writer.print("<p>"); //$NON-NLS-1$
+				writer.print(message);
+				writer.println("</p></div></body></html>"); //$NON-NLS-1$
 			}
 
 			if (dispatchTargets.getDispatcherType() == DispatcherType.FORWARD) {
@@ -171,11 +211,24 @@ public class ResponseStateHandler {
 		}
 
 		ContextController contextController = dispatchTargets.getContextController();
-		Class<? extends Exception> clazz = exception.getClass();
-		final String className = clazz.getName();
+		Class<?> clazz = exception.getClass();
+		final String originalClassName = clazz.getName();
+		String className = originalClassName;
 
-		final DispatchTargets errorDispatchTargets = contextController.getDispatchTargets(
-			className, null, null, null, null, null, Match.EXACT, null);
+		DispatchTargets errorDispatchTargets;
+
+		do {
+			errorDispatchTargets = contextController.getDispatchTargets(
+				className, null, null, null, null, null, Match.EXACT, null);
+
+			if (errorDispatchTargets != null) {
+				break;
+			}
+
+			clazz = clazz.getSuperclass();
+			className = clazz.getName();
+		}
+		while (Exception.class.isAssignableFrom(clazz));
 
 		if (errorDispatchTargets == null) {
 			throwException(exception);
@@ -196,7 +249,7 @@ public class ResponseStateHandler {
 						if (attributeName.equals(RequestDispatcher.ERROR_EXCEPTION)) {
 							return exception;
 						} else if (attributeName.equals(RequestDispatcher.ERROR_EXCEPTION_TYPE)) {
-							return className;
+							return originalClassName;
 						} else if (attributeName.equals(RequestDispatcher.ERROR_MESSAGE)) {
 							return exception.getMessage();
 						} else if (attributeName.equals(RequestDispatcher.ERROR_REQUEST_URI)) {

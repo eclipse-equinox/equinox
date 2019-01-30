@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2015 Liferay, Inc.
+ * Copyright (c) 2014, 2019 Liferay, Inc.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -50,9 +50,11 @@ public class ServiceProperties {
 		}
 		for (String key : serviceReference.getPropertyKeys()) {
 			if (key.startsWith(prefix)) {
+				Object value = serviceReference.getProperty(key);
+				if (value instanceof String) {
 				initParams.put(
-					key.substring(prefix.length()),
-					String.valueOf(serviceReference.getProperty(key)));
+					key.substring(prefix.length()), (String)value);
+				}
 			}
 		}
 

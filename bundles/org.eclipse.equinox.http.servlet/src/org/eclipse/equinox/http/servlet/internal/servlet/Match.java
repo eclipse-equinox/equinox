@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Raymond Augé and others.
+ * Copyright (c) 2014, 2019 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,6 +19,6 @@ package org.eclipse.equinox.http.servlet.internal.servlet;
  */
 public enum Match {
 
-	EXACT, EXTENSION, REGEX, DEFAULT_SERVLET
+	EXACT, EXTENSION, REGEX, DEFAULT_SERVLET, CONTEXT_ROOT
 
 }

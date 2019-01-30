@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Raymond Augé and others.
+ * Copyright (c) 2014, 2019 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -48,11 +48,21 @@ public class ContextResourceTrackerCustomizer
 			return result;
 		}
 
-		if (!contextController.matches(serviceReference)) {
-			return result;
-		}
-
 		try {
+			if (!contextController.matches(serviceReference)) {
+				// Only the default context will perform the "does anyone match" checks.
+				if (httpServiceRuntime.isDefaultContext(contextController) &&
+					!httpServiceRuntime.matchesAnyContext(serviceReference)) {
+
+					throw new HttpWhiteboardFailureException(
+						"Doesn't match any contexts. " + serviceReference, DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING); //$NON-NLS-1$
+				}
+
+				return result;
+			}
+
+			httpServiceRuntime.removeFailedResourceDTO(serviceReference);
+
 			result.set(contextController.addResourceRegistration(serviceReference));
 		}
 		catch (HttpWhiteboardFailureException hwfe) {
@@ -100,7 +110,7 @@ public class ContextResourceTrackerCustomizer
 		failedResourceDTO.failureReason = failureReason;
 		failedResourceDTO.patterns = StringPlus.from(
 			serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN)).toArray(new String[0]);
-		failedResourceDTO.prefix = (String)serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
+		failedResourceDTO.prefix = String.valueOf(serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX));
 		failedResourceDTO.serviceId = (Long)serviceReference.getProperty(Constants.SERVICE_ID);
 		failedResourceDTO.servletContextId = contextController.getServiceId();
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,8 +25,6 @@ import org.eclipse.equinox.http.servlet.internal.context.ContextController.Servi
 import org.eclipse.equinox.http.servlet.internal.servlet.FilterChainImpl;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.runtime.dto.FilterDTO;
 
@@ -45,35 +43,20 @@ public class FilterRegistration
 
 	public FilterRegistration(
 		ServiceHolder<Filter> filterHolder, FilterDTO filterDTO, int priority,
-		ContextController contextController, ClassLoader legacyTCCL) {
+		ContextController contextController) {
 
 		super(filterHolder.get(), filterDTO);
 		this.filterHolder = filterHolder;
 		this.priority = priority;
 		this.contextController = contextController;
 		this.compiledRegexs = getCompiledRegex(filterDTO);
-		if (legacyTCCL != null) {
+		if (filterHolder.getLegacyTCCL() != null) {
 			// legacy filter registrations used the current TCCL at registration time
-			classLoader = legacyTCCL;
+			classLoader = filterHolder.getLegacyTCCL();
 		} else {
 			classLoader = filterHolder.getBundle().adapt(BundleWiring.class).getClassLoader();
 		}
-		String legacyContextFilter = (String) filterHolder.getServiceReference().getProperty(Const.EQUINOX_LEGACY_CONTEXT_SELECT);
-		if (legacyContextFilter != null) {
-			// This is a legacy Filter registration.
-			// This filter tells us the real context controller,
-			// backed by an HttpContext that should be used to init/destroy this Filter
-			org.osgi.framework.Filter f = null;
-			try {
-				 f = FrameworkUtil.createFilter(legacyContextFilter);
-			}
-			catch (InvalidSyntaxException e) {
-				// nothing
-			}
-			initDestoyWithContextController = f == null || contextController.matches(f);
-		} else {
-			initDestoyWithContextController = true;
-		}
+		initDestoyWithContextController = true;
 		needDecode = MatchableRegistration.patternsRequireDecode(filterDTO.patterns);
 	}
 
@@ -243,23 +226,31 @@ public class FilterRegistration
 			pattern = pattern.substring(0, extensionMatchIndex + 2);
 		}
 
-		// first try prefix path matching; taking into account wild cards if necessary
-		if ((pattern.charAt(0) == '/')) {
-			if (isPathWildcardMatch(pattern, path)) {
-				if (extensionWithPrefixMatch != null) {
-					return extensionWithPrefixMatch.equals(extension);
+		if (pattern.isEmpty() && Const.SLASH.equals(path)) {
+			return true;
+		}
+		else if (!pattern.isEmpty()) {
+			// first try prefix path matching; taking into account wild cards if necessary
+			if (pattern.charAt(0) == '/') {
+				if (isPathWildcardMatch(pattern, path)) {
+					if (extensionWithPrefixMatch != null) {
+						return extensionWithPrefixMatch.equals(extension);
+					}
+					// special case for context path
+					if (Const.SLASH.equals(path) && Const.SLASH_STAR.equals(pattern)) {
+						return false;
+					}
+					return true;
 				}
-				return true;
+				return false;
 			}
-			return false;
+
+			// next try extension matching if requested
+			if (pattern.charAt(0) == '*') {
+				return pattern.substring(2).equals(extension);
+			}
 		}
 
-		// next try extension matching if requested
-		if (pattern.charAt(0) == '*') {
-			return pattern.substring(2).equals(extension);
-		}
-
-		// this is really an invalid case that should have gotten caught at registration time
 		return false;
 	}
 

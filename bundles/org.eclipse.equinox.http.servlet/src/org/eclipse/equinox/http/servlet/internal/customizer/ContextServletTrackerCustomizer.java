@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Raymond Augé and others.
+ * Copyright (c) 2014, 2019 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,15 +16,13 @@ package org.eclipse.equinox.http.servlet.internal.customizer;
 
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.Servlet;
-import org.eclipse.equinox.http.servlet.dto.ExtendedFailedServletDTO;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.error.HttpWhiteboardFailureException;
 import org.eclipse.equinox.http.servlet.internal.registration.ServletRegistration;
-import org.eclipse.equinox.http.servlet.internal.util.*;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.runtime.dto.DTOConstants;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /**
  * @author Raymond Augé
@@ -50,22 +48,32 @@ public class ContextServletTrackerCustomizer
 			return result;
 		}
 
-		if (!contextController.matches(serviceReference)) {
-			return result;
-		}
-
 		try {
+			if (!contextController.matches(serviceReference)) {
+				// Only the default context will perform the "does anyone match" checks.
+				if (httpServiceRuntime.isDefaultContext(contextController) &&
+					!httpServiceRuntime.matchesAnyContext(serviceReference)) {
+
+					throw new HttpWhiteboardFailureException(
+						"Doesn't match any contexts. " + serviceReference, DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING); //$NON-NLS-1$
+				}
+
+				return result;
+			}
+
+			httpServiceRuntime.removeFailedServletDTO(serviceReference);
+
 			result.set(contextController.addServletRegistration(serviceReference));
 		}
 		catch (HttpWhiteboardFailureException hwfe) {
 			httpServiceRuntime.log(hwfe.getMessage(), hwfe);
 
-			recordFailedServletDTO(serviceReference, hwfe.getFailureReason());
+			contextController.recordFailedServletDTO(serviceReference, null, hwfe.getFailureReason());
 		}
 		catch (Throwable t) {
 			httpServiceRuntime.log(t.getMessage(), t);
 
-			recordFailedServletDTO(serviceReference, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
+			contextController.recordFailedServletDTO(serviceReference, null, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
 		}
 
 		return result;
@@ -91,46 +99,8 @@ public class ContextServletTrackerCustomizer
 			registration.destroy();
 		}
 
-		contextController.getHttpServiceRuntime().removeFailedServletDTOs(serviceReference);
-	}
-
-	private void recordFailedServletDTO(
-		ServiceReference<Servlet> serviceReference, int failureReason) {
-
-		ExtendedFailedServletDTO failedServletDTO = new ExtendedFailedServletDTO();
-
-		failedServletDTO.asyncSupported = BooleanPlus.from(
-			serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED), false);
-		failedServletDTO.failureReason = failureReason;
-		failedServletDTO.initParams = ServiceProperties.parseInitParams(
-			serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX);
-		failedServletDTO.multipartEnabled = ServiceProperties.parseBoolean(
-			serviceReference, Const.EQUINOX_HTTP_MULTIPART_ENABLED);
-		Integer multipartFileSizeThreshold = (Integer)serviceReference.getProperty(
-			Const.EQUINOX_HTTP_MULTIPART_FILESIZETHRESHOLD);
-		if (multipartFileSizeThreshold != null) {
-			failedServletDTO.multipartFileSizeThreshold = multipartFileSizeThreshold;
-		}
-		failedServletDTO.multipartLocation = (String)serviceReference.getProperty(
-			Const.EQUINOX_HTTP_MULTIPART_LOCATION);
-		Long multipartMaxFileSize = (Long)serviceReference.getProperty(
-			Const.EQUINOX_HTTP_MULTIPART_MAXFILESIZE);
-		if (multipartMaxFileSize != null) {
-			failedServletDTO.multipartMaxFileSize = multipartMaxFileSize;
-		}
-		Long multipartMaxRequestSize = (Long)serviceReference.getProperty(
-			Const.EQUINOX_HTTP_MULTIPART_MAXREQUESTSIZE);
-		if (multipartMaxRequestSize != null) {
-			failedServletDTO.multipartMaxRequestSize = multipartMaxRequestSize;
-		}
-		failedServletDTO.name = (String)serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
-		failedServletDTO.patterns = StringPlus.from(
-			serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN)).toArray(new String[0]);
-		failedServletDTO.serviceId = (Long)serviceReference.getProperty(Constants.SERVICE_ID);
-		failedServletDTO.servletContextId = contextController.getServiceId();
-		failedServletDTO.servletInfo = Const.BLANK;
-
-		contextController.getHttpServiceRuntime().recordFailedServletDTO(serviceReference, failedServletDTO);
+		contextController.getHttpServiceRuntime().removeFailedServletDTO(serviceReference);
+		contextController.getHttpServiceRuntime().removeFailedErrorPageDTO(serviceReference);
 	}
 
 	private ContextController contextController;

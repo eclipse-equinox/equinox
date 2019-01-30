@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Raymond Augé and others.
+ * Copyright (c) 2014, 2019 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,7 @@ package org.eclipse.equinox.http.servlet.internal.registration;
 import javax.servlet.Servlet;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.dto.ResourceDTO;
 /**
@@ -25,12 +26,13 @@ import org.osgi.service.http.runtime.dto.ResourceDTO;
 public class ResourceRegistration extends EndpointRegistration<ResourceDTO> {
 
 	public ResourceRegistration(
-		ServiceHolder<Servlet> servletHolder, ResourceDTO resourceDTO,
+		ServiceReference<?> serviceReference, ServiceHolder<Servlet> servletHolder, ResourceDTO resourceDTO,
 		ServletContextHelper servletContextHelper,
-		ContextController contextController, ClassLoader legacyTCCL) {
+		ContextController contextController) {
 
-		super(servletHolder, resourceDTO, servletContextHelper, contextController, legacyTCCL);
+		super(servletHolder, resourceDTO, servletContextHelper, contextController);
 
+		this.serviceReference = serviceReference;
 		name = servletHolder.get().getClass().getName().concat("#").concat(getD().prefix); //$NON-NLS-1$
 		needDecode = MatchableRegistration.patternsRequireDecode(resourceDTO.patterns);
 	}
@@ -51,11 +53,17 @@ public class ResourceRegistration extends EndpointRegistration<ResourceDTO> {
 	}
 
 	@Override
+	public ServiceReference<?> getServiceReference() {
+		return serviceReference;
+	}
+
+	@Override
 	public boolean needDecode() {
 		return needDecode;
 	}
 
 	private final boolean needDecode;
 	private final String name;
+	private final ServiceReference<?> serviceReference;
 
 }

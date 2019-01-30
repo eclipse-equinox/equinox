@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2018 Raymond Augé and others.
+ * Copyright (c) 2014, 2019 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,8 @@
  ******************************************************************************/
 
 package org.eclipse.equinox.http.servlet.testbase;
+
+import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -41,7 +43,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.servlet.context.ContextPathCustomizer;
-import org.eclipse.equinox.http.servlet.tests.bundle.Activator;
 import org.eclipse.equinox.http.servlet.tests.bundle.BundleAdvisor;
 import org.eclipse.equinox.http.servlet.tests.bundle.BundleInstaller;
 import org.eclipse.equinox.http.servlet.tests.util.ServletRequestAdvisor;
@@ -50,6 +51,8 @@ import org.junit.Before;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -57,9 +60,23 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.HttpServiceRuntime;
 import org.osgi.service.http.runtime.HttpServiceRuntimeConstants;
+import org.osgi.service.http.runtime.dto.ErrorPageDTO;
+import org.osgi.service.http.runtime.dto.FailedErrorPageDTO;
+import org.osgi.service.http.runtime.dto.FailedFilterDTO;
+import org.osgi.service.http.runtime.dto.FailedResourceDTO;
+import org.osgi.service.http.runtime.dto.FailedServletContextDTO;
+import org.osgi.service.http.runtime.dto.FailedServletDTO;
+import org.osgi.service.http.runtime.dto.FilterDTO;
+import org.osgi.service.http.runtime.dto.RequestInfoDTO;
+import org.osgi.service.http.runtime.dto.ResourceDTO;
+import org.osgi.service.http.runtime.dto.ServletContextDTO;
+import org.osgi.service.http.runtime.dto.ServletDTO;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class BaseTest {
+
+	public static final String	DEFAULT	= HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME;
 
 	@Before
 	public void setUp() throws Exception {
@@ -67,15 +84,14 @@ public class BaseTest {
 		System.setProperty("/.LEVEL", "OFF");
 		System.setProperty("org.eclipse.jetty.server.LEVEL", "OFF");
 		System.setProperty("org.eclipse.jetty.servlet.LEVEL", "OFF");
-
 		System.setProperty("org.osgi.service.http.port", "0");
 		System.setProperty("org.eclipse.equinox.http.jetty.context.sessioninactiveinterval", "1");
 		System.setProperty("org.eclipse.equinox.http.jetty.housekeeper.interval", "10");
 		BundleContext bundleContext = getBundleContext();
 		installer = new BundleInstaller(TEST_BUNDLES_BINARY_DIRECTORY, bundleContext);
 		advisor = new BundleAdvisor(bundleContext);
-		startBundles();
 		stopJetty();
+		startBundles();
 		runtimeTracker = new ServiceTracker<>(bundleContext, HttpServiceRuntime.class, null);
 		runtimeTracker.open();
 		runtimeTracker.waitForService(100);
@@ -84,20 +100,25 @@ public class BaseTest {
 
 	@After
 	public void tearDown() throws Exception {
-		for (ServiceRegistration<? extends Object> serviceRegistration : registrations) {
-			serviceRegistration.unregister();
-		}
 		runtimeTracker.close();
-		stopJetty();
 		stopBundles();
 		requestAdvisor = null;
 		advisor = null;
-		registrations.clear();
 		try {
 			installer.shutdown();
 		} finally {
 			installer = null;
 		}
+
+		for (ServiceRegistration<? extends Object> serviceRegistration : registrations) {
+			try {
+				serviceRegistration.unregister();
+			}
+			catch (Exception e) {
+				// ignore
+			}
+		}
+		registrations.clear();
 	}
 
 	protected String doRequest(String action, Map<String, String> params) throws IOException {
@@ -125,7 +146,7 @@ public class BaseTest {
 	}
 
 	protected BundleContext getBundleContext() {
-		return Activator.getBundleContext();
+		return FrameworkUtil.getBundle(BaseTest.class).getBundleContext();
 	}
 
 	protected String getContextPath() {
@@ -145,7 +166,7 @@ public class BaseTest {
 		}
 		return value;
 	}
-	
+
 	protected void setJettyProperty(String key, String value) {
 		String qualifiedKey = JETTY_PROPERTY_PREFIX + key;
 		System.setProperty(qualifiedKey, value);
@@ -176,7 +197,7 @@ public class BaseTest {
 		else if (Collection.class.isInstance(property)) {
 			List<String> list = new ArrayList<String>();
 			for (@SuppressWarnings("rawtypes")
-				 Iterator i = ((Collection)property).iterator(); i.hasNext();) {
+				Iterator i = ((Collection)property).iterator(); i.hasNext();) {
 
 				Object o = i.next();
 				if (String.class.isInstance(o)) {
@@ -193,9 +214,6 @@ public class BaseTest {
 	}
 
 	protected void startBundles() throws BundleException {
-		for (String bundle : BUNDLES) {
-			advisor.startBundle(bundle);
-		}
 	}
 
 	protected void startJetty() throws Exception {
@@ -217,49 +235,44 @@ public class BaseTest {
 		String contextPath = getContextPath();
 		requestAdvisor = new ServletRequestAdvisor(port, contextPath);
 	}
-	
+
 	protected void startJettyWithSSL(String port, String ksPath, String ksPassword, String keyPassword) throws Exception {
 		if(port == null) {
-			throw new IllegalArgumentException("Port cannot be null");		
+			throw new IllegalArgumentException("Port cannot be null");
 		}
 		if (ksPath == null) {
-			throw new IllegalArgumentException("Keystore path  cannot be null");			
+			throw new IllegalArgumentException("Keystore path  cannot be null");
 		}
 		setJettyProperty(JettyConstants.HTTP_ENABLED, "false");
 		setJettyProperty(JettyConstants.HTTPS_ENABLED, "true");
-		
+
 		setJettyProperty(JettyConstants.HTTPS_PORT, port);
-		
+
 		setJettyProperty(JettyConstants.SSL_KEYSTORE, ksPath);
-		
+
 		if(ksPassword != null) {
 			setJettyProperty(JettyConstants.SSL_PASSWORD, ksPassword);
 		}
 		if(keyPassword != null) {
 			setJettyProperty(JettyConstants.SSL_KEYPASSWORD, keyPassword);
 		}
-		
+
 		advisor.startBundle(EQUINOX_JETTY_BUNDLE);
 		String contextPath = getContextPath();
-		requestAdvisor = new ServletRequestAdvisor(port, contextPath, ksPath, ksPassword);	
+		requestAdvisor = new ServletRequestAdvisor(port, contextPath, ksPath, ksPassword);
 	}
 
-
 	protected void stopBundles() throws BundleException {
-		for (int i = BUNDLES.length - 1; i >= 0; i--) {
-			String bundle = BUNDLES[i];
-			advisor.stopBundle(bundle);
-		}
 	}
 
 	protected void stopJetty() throws BundleException {
 		advisor.stopBundle(EQUINOX_JETTY_BUNDLE);
 	}
-	
+
 	protected void stopJettyWithSSL() throws BundleException {
 		advisor.stopBundle(EQUINOX_JETTY_BUNDLE);
 		setJettyProperty(JettyConstants.HTTP_ENABLED, "true");
-		setJettyProperty(JettyConstants.HTTPS_ENABLED, "false");			
+		setJettyProperty(JettyConstants.HTTPS_ENABLED, "false");
 	}
 
 	protected void uninstallBundle(Bundle bundle) throws BundleException {
@@ -268,6 +281,177 @@ public class BaseTest {
 
 	protected void write(OutputStream outputStream, String string) throws IOException {
 		outputStream.write(string.getBytes(StandardCharsets.UTF_8));
+	}
+
+	protected FailedServletDTO getFailedServletDTOByName(String name) {
+		for (FailedServletDTO failedServletDTO : getFailedServletDTOs()) {
+			if (name.equals(failedServletDTO.name)) {
+				return failedServletDTO;
+			}
+		}
+
+		return null;
+	}
+
+	protected FailedServletDTO[] getFailedServletDTOs() {
+		HttpServiceRuntime httpServiceRuntime = getHttpServiceRuntime();
+
+		return httpServiceRuntime.getRuntimeDTO().failedServletDTOs;
+	}
+
+	protected HttpServiceRuntime getHttpServiceRuntime() {
+		ServiceReference<HttpServiceRuntime> serviceReference =
+				getBundleContext().getServiceReference(HttpServiceRuntime.class);
+
+		assertNotNull(serviceReference);
+
+		return getBundleContext().getService(serviceReference);
+	}
+
+	protected long getServiceId(ServiceRegistration<?> sr) {
+		return (Long) sr.getReference().getProperty(Constants.SERVICE_ID);
+	}
+
+	protected RequestInfoDTO calculateRequestInfoDTO(String string) {
+		HttpServiceRuntime httpServiceRuntime = getHttpServiceRuntime();
+
+		return httpServiceRuntime.calculateRequestInfoDTO(string);
+	}
+
+	protected ServletDTO getServletDTOByName(String context, String name) {
+		ServletContextDTO servletContextDTO = getServletContextDTOByName(context);
+
+		if (servletContextDTO == null) {
+			return null;
+		}
+
+		for (ServletDTO servletDTO : servletContextDTO.servletDTOs) {
+			if (name.equals(servletDTO.name)) {
+				return servletDTO;
+			}
+		}
+
+		return null;
+	}
+
+	protected ServletContextDTO getServletContextDTOByName(String name) {
+		for (ServletContextDTO servletContextDTO : getServletContextDTOs()) {
+			if (name.equals(servletContextDTO.name)) {
+				return servletContextDTO;
+			}
+		}
+
+		return null;
+	}
+
+	protected ServletContextDTO[] getServletContextDTOs() {
+		return getHttpServiceRuntime().getRuntimeDTO().servletContextDTOs;
+	}
+
+	protected ErrorPageDTO getErrorPageDTOByName(String context, String name) {
+		ServletContextDTO servletContextDTO = getServletContextDTOByName(context);
+
+		if (servletContextDTO == null) {
+			return null;
+		}
+
+		for (ErrorPageDTO errorPageDTO : servletContextDTO.errorPageDTOs) {
+			if (name.equals(errorPageDTO.name)) {
+				return errorPageDTO;
+			}
+		}
+
+		return null;
+	}
+
+	protected FailedErrorPageDTO getFailedErrorPageDTOByName(String name) {
+		for (FailedErrorPageDTO failedErrorPageDTO : getFailedErrorPageDTOs()) {
+			if (name.equals(failedErrorPageDTO.name)) {
+				return failedErrorPageDTO;
+			}
+		}
+
+		return null;
+	}
+
+	protected FailedErrorPageDTO[] getFailedErrorPageDTOs() {
+		HttpServiceRuntime httpServiceRuntime = getHttpServiceRuntime();
+
+		return httpServiceRuntime.getRuntimeDTO().failedErrorPageDTOs;
+	}
+
+	protected FilterDTO getFilterDTOByName(String contextName, String name) {
+		ServletContextDTO servletContextDTO = getServletContextDTOByName(contextName);
+
+		if (servletContextDTO == null) {
+			return null;
+		}
+
+		for (FilterDTO filterDTO : servletContextDTO.filterDTOs) {
+			if (name.equals(filterDTO.name)) {
+				return filterDTO;
+			}
+		}
+
+		return null;
+	}
+
+	protected FailedFilterDTO getFailedFilterDTOByName(String name) {
+		for (FailedFilterDTO failedFilterDTO : getFailedFilterDTOs()) {
+			if (name.equals(failedFilterDTO.name)) {
+				return failedFilterDTO;
+			}
+		}
+
+		return null;
+	}
+
+	protected FailedFilterDTO[] getFailedFilterDTOs() {
+		return getHttpServiceRuntime().getRuntimeDTO().failedFilterDTOs;
+	}
+
+	protected FailedServletContextDTO getFailedServletContextDTOByName(String name) {
+		for (FailedServletContextDTO failedServletContextDTO : getFailedServletContextDTOs()) {
+			if (name.equals(failedServletContextDTO.name)) {
+				return failedServletContextDTO;
+			}
+		}
+
+		return null;
+	}
+
+	protected FailedServletContextDTO[] getFailedServletContextDTOs() {
+		return getHttpServiceRuntime().getRuntimeDTO().failedServletContextDTOs;
+	}
+
+	protected ResourceDTO getResourceDTOByServiceId(String contextName, long serviceId) {
+		ServletContextDTO servletContextDTO = getServletContextDTOByName(contextName);
+
+		if (servletContextDTO == null) {
+			return null;
+		}
+
+		for (ResourceDTO resourceDTO : servletContextDTO.resourceDTOs) {
+			if (serviceId == resourceDTO.serviceId) {
+				return resourceDTO;
+			}
+		}
+
+		return null;
+	}
+
+	protected FailedResourceDTO getFailedResourceDTOByServiceId(long serviceId) {
+		for (FailedResourceDTO failedResourceDTO : getFailedResourceDTOs()) {
+			if (serviceId == failedResourceDTO.serviceId) {
+				return failedResourceDTO;
+			}
+		}
+
+		return null;
+	}
+
+	protected FailedResourceDTO[] getFailedResourceDTOs() {
+		return getHttpServiceRuntime().getRuntimeDTO().failedResourceDTOs;
 	}
 
 	protected static final String PROTOTYPE = "prototype/";

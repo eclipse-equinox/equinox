@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -100,12 +100,14 @@ import org.eclipse.equinox.http.servlet.tests.util.BaseServletContextListener;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServletRequestAttributeListener;
 import org.eclipse.equinox.http.servlet.tests.util.BaseServletRequestListener;
 import org.eclipse.equinox.http.servlet.tests.util.BufferedServlet;
+import org.eclipse.equinox.http.servlet.tests.util.TestServletPrototype;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -126,6 +128,20 @@ public class ServletTest extends BaseTest {
 	@Rule
 	public TestName testName = new TestName();
 
+	@Override
+	protected void startBundles() throws BundleException {
+		for (String bundle : BUNDLES) {
+			advisor.startBundle(bundle);
+		}
+	}
+
+	@Override
+	protected void stopBundles() throws BundleException {
+		for (int i = BUNDLES.length - 1; i >= 0; i--) {
+			String bundle = BUNDLES[i];
+			advisor.stopBundle(bundle);
+		}
+	}
 
 	@Test
 	public void test_ErrorPage1() throws Exception {
@@ -215,6 +231,12 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void test_ErrorPage5() throws Exception {
+		BundleContext bundleContext = getBundleContext();
+		Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+		serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/prototype/*");
+		TestServletPrototype testDriver = new TestServletPrototype(bundleContext);
+		registrations.add(bundleContext.registerService(Servlet.class, testDriver, serviceProps));
+
 		Dictionary<String, Object> errorProps = new Hashtable<String, Object>();
 		errorProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E5.4xx");
 		errorProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, "4xx");
@@ -3082,7 +3104,7 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void test_ServletContextHelper12() throws Exception {
-		String expected1 = "a,b,1";
+		String expected1 = "a,b,null";
 
 		BundleContext bundleContext = getBundleContext();
 		Bundle bundle = bundleContext.getBundle();
@@ -3420,7 +3442,7 @@ public class ServletTest extends BaseTest {
 
 			Dictionary<String, Object> props = new Hashtable<String, Object>();
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SA");
-			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/*");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, new String[] {"/*", "/"});
 			registrations.add(getBundleContext().registerService(Servlet.class, servletA, props));
 			props = new Hashtable<String, Object>();
 
@@ -3528,7 +3550,7 @@ public class ServletTest extends BaseTest {
 
 			Dictionary<String, Object> props = new Hashtable<String, Object>();
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SA");
-			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/*");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, new String[] {"/*", "/"});
 			registrations.add(getBundleContext().registerService(Servlet.class, servletA, props));
 			props = new Hashtable<String, Object>();
 
@@ -4154,6 +4176,12 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void testWBServletChangeInitParams() throws Exception{
+		BundleContext bundleContext = getBundleContext();
+		Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+		serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/prototype/*");
+		TestServletPrototype testDriver = new TestServletPrototype(bundleContext);
+		registrations.add(bundleContext.registerService(Servlet.class, testDriver, serviceProps));
+
 			String actual;
 
 			Map<String, String> params = new HashMap<String, String>();
@@ -4174,6 +4202,12 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void testWBServletChangePattern() throws Exception{
+		BundleContext bundleContext = getBundleContext();
+		Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+		serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/prototype/*");
+		TestServletPrototype testDriver = new TestServletPrototype(bundleContext);
+		registrations.add(bundleContext.registerService(Servlet.class, testDriver, serviceProps));
+
 		String actual;
 
 		Map<String, String> params = new HashMap<String, String>();
@@ -4194,6 +4228,12 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void testWBServletChangeRanking() throws Exception{
+		BundleContext bundleContext = getBundleContext();
+		Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+		serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/prototype/*");
+		TestServletPrototype testDriver = new TestServletPrototype(bundleContext);
+		registrations.add(bundleContext.registerService(Servlet.class, testDriver, serviceProps));
+
 		String actual;
 
 		// Configure two servlets with the second one registered ranking higher
@@ -4234,6 +4274,12 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void testWBServletDefaultContextAdaptor1() throws Exception{
+		BundleContext bundleContext = getBundleContext();
+		Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+		serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/prototype/*");
+		TestServletPrototype testDriver = new TestServletPrototype(bundleContext);
+		registrations.add(bundleContext.registerService(Servlet.class, testDriver, serviceProps));
+
 		Dictionary<String, String> helperProps = new Hashtable<String, String>();
 		helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "testContext" + testName.getMethodName());
 		helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/testContext");
@@ -4264,6 +4310,7 @@ public class ServletTest extends BaseTest {
 
 			actual = requestAdvisor.request(testName.getMethodName());
 			Assert.assertEquals(testName.getMethodName(), actual);
+			doRequest(UNREGISTER, params);
 		} finally {
 			helperReg.unregister();
 			if (pathAdaptorReg != null) {
@@ -4274,6 +4321,12 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void testWBServletDefaultContextAdaptor2() throws Exception{
+		BundleContext bundleContext = getBundleContext();
+		Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+		serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/prototype/*");
+		TestServletPrototype testDriver = new TestServletPrototype(bundleContext);
+		registrations.add(bundleContext.registerService(Servlet.class, testDriver, serviceProps));
+
 		Dictionary<String, String> helperProps = new Hashtable<String, String>();
 		helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "testContext" + testName.getMethodName());
 		helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/testContext");
@@ -4305,6 +4358,7 @@ public class ServletTest extends BaseTest {
 
 			actual = requestAdvisor.request("testContext/" + testName.getMethodName());
 			Assert.assertEquals(testName.getMethodName(), actual);
+			doRequest(UNREGISTER, params);
 		} finally {
 			helperReg.unregister();
 			if (pathAdaptorReg != null) {
@@ -4315,6 +4369,12 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void testWBServletDefaultContextAdaptor3() throws Exception{
+		BundleContext bundleContext = getBundleContext();
+		Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+		serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/prototype/*");
+		TestServletPrototype testDriver = new TestServletPrototype(bundleContext);
+		registrations.add(bundleContext.registerService(Servlet.class, testDriver, serviceProps));
+
 		// test the ContextPathCustomizer with a ServletContextHelper that has a '/' context path
 		Dictionary<String, String> helperProps = new Hashtable<String, String>();
 		helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "testContext" + testName.getMethodName());
@@ -4347,6 +4407,7 @@ public class ServletTest extends BaseTest {
 
 			actual = requestAdvisor.request(testName.getMethodName());
 			Assert.assertEquals(testName.getMethodName(), actual);
+			doRequest(UNREGISTER, params);
 		} finally {
 			helperReg.unregister();
 			if (pathAdaptorReg != null) {
@@ -4396,7 +4457,7 @@ public class ServletTest extends BaseTest {
 		String actual = requestAdvisor.request(testName.getMethodName());
 		Assert.assertEquals(expected, actual);
 	}
-	
+
 	@Test
 	public void testHTTPSEndpoint() throws Exception {
 		stopJetty();
@@ -4405,13 +4466,13 @@ public class ServletTest extends BaseTest {
 		if (!keyStoreFile.exists()) {
 			Files.copy(keyStoreURL.openStream(), keyStoreFile.toPath());
 		}
-		
+
 		startJettyWithSSL("8443", keyStoreFile.getAbsolutePath(), "secret", "secret");
-		
+
 		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
-			
+
 			String actual = requestAdvisor.requestHttps("TestServlet10");
 			assertEquals("Expected output not found", "a", actual);
 		} finally {

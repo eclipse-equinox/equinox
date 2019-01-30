@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2017 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2019 Cognos Incorporated, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -35,7 +35,7 @@ public class Activator implements BundleActivator {
 	private static final String ORG_OSGI_SERVICE_HTTP_PORT = "org.osgi.service.http.port"; //$NON-NLS-1$
 	private static final String ORG_OSGI_SERVICE_HTTP_PORT_SECURE = "org.osgi.service.http.port.secure"; //$NON-NLS-1$
 
-	// controls whether start() should automatically start an Http Service based on BundleContext properties (default is true)
+	// controls whether start() should automatically start an Http Service based on BundleContext properties (default is false)
 	// Note: only used if the bundle is explicitly started (e.g. not "lazy" activated)
 	private static final String AUTOSTART = "org.eclipse.equinox.http.jetty.autostart"; //$NON-NLS-1$
 
@@ -59,8 +59,8 @@ public class Activator implements BundleActivator {
 		EquinoxStdErrLog.setThresholdLogger(context.getProperty(LOG_STDERR_THRESHOLD));
 		httpServerManager = new HttpServerManager(jettyWorkDir);
 
-		boolean autostart = Details.getBoolean(context, AUTOSTART, true);
-		if (autostart && !isBundleLazyActivationPolicyUsed(context)) {
+		boolean autostart = Details.getBoolean(context, AUTOSTART, false);
+		if (autostart || !isBundleLazyActivationPolicyUsed(context)) {
 			Dictionary<String, Object> defaultSettings = createDefaultSettings(context);
 			httpServerManager.updated(DEFAULT_PID, defaultSettings);
 		}

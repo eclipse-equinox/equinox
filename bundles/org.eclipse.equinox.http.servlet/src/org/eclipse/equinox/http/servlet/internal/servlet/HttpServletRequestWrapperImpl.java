@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2019 Cognos Incorporated, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,7 @@ import javax.servlet.http.*;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.context.DispatchTargets;
 import org.eclipse.equinox.http.servlet.internal.registration.EndpointRegistration;
+import org.eclipse.equinox.http.servlet.internal.registration.ServletRegistration;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
 import org.eclipse.equinox.http.servlet.internal.util.EventListeners;
 import org.osgi.service.http.HttpContext;
@@ -441,6 +442,20 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	@Override
 	public Collection<Part> getParts() throws IOException, ServletException {
 		return new ArrayList<Part>(getParts0().values());
+	}
+
+	public AsyncContext startAsync() throws IllegalStateException {
+		EndpointRegistration<?> endpointRegistration = dispatchTargets.peek().getServletRegistration();
+
+		if (endpointRegistration instanceof ServletRegistration) {
+			ServletRegistration servletRegistration = (ServletRegistration)endpointRegistration;
+
+			if (servletRegistration.getD().asyncSupported) {
+				return request.startAsync();
+			}
+		}
+
+		throw new IllegalStateException("Async not supported by " + endpointRegistration); //$NON-NLS-1$
 	}
 
 	private Map<String, Part> getParts0() throws IOException, ServletException {

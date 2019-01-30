@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 Raymond Augé and others.
+ * Copyright (c) 2014, 2019 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,9 +16,8 @@ package org.eclipse.equinox.http.servlet.internal;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Map.Entry;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.*;
 import javax.servlet.Filter;
@@ -26,7 +25,10 @@ import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
 import org.eclipse.equinox.http.servlet.context.ContextPathCustomizer;
 import org.eclipse.equinox.http.servlet.dto.ExtendedFailedServletDTO;
-import org.eclipse.equinox.http.servlet.internal.context.*;
+import org.eclipse.equinox.http.servlet.internal.context.ContextController;
+import org.eclipse.equinox.http.servlet.internal.context.DispatchTargets;
+import org.eclipse.equinox.http.servlet.internal.dto.ExtendedErrorPageDTO;
+import org.eclipse.equinox.http.servlet.internal.dto.ExtendedFailedServletContextDTO;
 import org.eclipse.equinox.http.servlet.internal.error.*;
 import org.eclipse.equinox.http.servlet.internal.servlet.HttpSessionTracker;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
@@ -34,7 +36,6 @@ import org.eclipse.equinox.http.servlet.internal.util.*;
 import org.eclipse.equinox.http.servlet.session.HttpSessionInvalidator;
 import org.osgi.framework.*;
 import org.osgi.framework.dto.ServiceReferenceDTO;
-import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.HttpServiceRuntime;
@@ -86,7 +87,8 @@ public class HttpServiceRuntimeImpl
 		defaultContextProps.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
 		defaultContextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, Const.SLASH);
 		defaultContextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_TARGET, this.targetFilter);
-		defaultContextReg = consumingContext.registerService(ServletContextHelper.class, new DefaultServletContextHelperFactory(), defaultContextProps);
+		defaultContextReg = consumingContext.registerService(
+			new String [] {ServletContextHelper.class.getName(), DefaultServletContextHelper.class.getName()}, new DefaultServletContextHelperFactory(), defaultContextProps);
 	}
 
 	@Override
@@ -98,27 +100,9 @@ public class HttpServiceRuntimeImpl
 			return result;
 		}
 
-		String contextName = (String)serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
-		String contextPath = (String)serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH);
-
 		try {
-			if (contextName == null) {
-				throw new IllegalContextNameException(
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + " is null. Ignoring!", //$NON-NLS-1$
-					DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
-			}
-
-			if (contextPath == null) {
-				throw new IllegalContextPathException(
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH + " is null. Ignoring!", //$NON-NLS-1$
-					DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
-			}
-
-			contextPath = adaptContextPath(contextPath, serviceReference);
-
 			ContextController contextController = new ContextController(
-				trackingContext, consumingContext, serviceReference, new ProxyContext(contextName, parentServletContext),
-				this, contextName, contextPath, httpSessionTracker);
+				trackingContext, consumingContext, serviceReference, parentServletContext, this);
 
 			controllerMap.put(serviceReference, contextController);
 
@@ -127,18 +111,18 @@ public class HttpServiceRuntimeImpl
 		catch (HttpWhiteboardFailureException hwfe) {
 			parentServletContext.log(hwfe.getMessage(), hwfe);
 
-			recordFailedServletContextDTO(serviceReference, contextName, contextPath, hwfe.getFailureReason());
+			recordFailedServletContextDTO(serviceReference, 0, hwfe.getFailureReason());
 		}
 		catch (Exception e) {
 			parentServletContext.log(e.getMessage(), e);
 
-			recordFailedServletContextDTO(serviceReference, contextName, contextPath, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
+			recordFailedServletContextDTO(serviceReference, 0, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
 		}
 
 		return result;
 	}
 
-	private String adaptContextPath(String contextPath, ServiceReference<ServletContextHelper> helper) {
+	public String adaptContextPath(String contextPath, ServiceReference<ServletContextHelper> helper) {
 		ContextPathCustomizer pathAdaptor = contextPathCustomizerHolder.getHighestRanked();
 		if (pathAdaptor != null) {
 			String contextPrefix = pathAdaptor.getContextPathPrefix(helper);
@@ -164,8 +148,16 @@ public class HttpServiceRuntimeImpl
 		return null;
 	}
 
+	public boolean isDefaultContext(ContextController contextController) {
+		ServiceReference<?> thisReference = defaultContextReg.getReference();
+		ServiceReference<ServletContextHelper> contextReference = contextController.getServiceReference();
+		if (thisReference == null) throw new NullPointerException("Default Context Service reference is null. " + this); //$NON-NLS-1$
+		if (contextReference == null) throw new NullPointerException("Context Service reference is null. " + contextController); //$NON-NLS-1$
+		return thisReference.equals(contextReference);
+	}
+
 	@Override
-	public RequestInfoDTO calculateRequestInfoDTO(String path) {
+	public synchronized RequestInfoDTO calculateRequestInfoDTO(String path) {
 		RequestInfoDTO requestInfoDTO = new RequestInfoDTO();
 
 		requestInfoDTO.path = path;
@@ -180,7 +172,7 @@ public class HttpServiceRuntimeImpl
 		return requestInfoDTO;
 	}
 
-	public void destroy() {
+	public synchronized void destroy() {
 		invalidatorReg.unregister();
 		defaultContextReg.unregister();
 
@@ -197,14 +189,13 @@ public class HttpServiceRuntimeImpl
 		failedServletDTOs.clear();
 
 		httpSessionTracker.clear();
+		registeredObjects.clear();
 
 		httpSessionTracker = null;
 		attributes = null;
 		trackingContext = null;
 		consumingContext = null;
-		legacyIdGenerator = null;
 		parentServletContext = null;
-		registeredObjects = null;
 		contextServiceTracker = null;
 		contextPathCustomizerHolder = null;
 	}
@@ -229,24 +220,41 @@ public class HttpServiceRuntimeImpl
 				requestInfoDTO);
 		}
 
-		if (dispatchTargets == null) {
+		if (dispatchTargets == null && !Const.SLASH.equals(pathString)) {
 			// regex match
 			dispatchTargets = getDispatchTargets(
 				requestURI, null, queryString, Match.REGEX, requestInfoDTO);
 		}
 
 		if (dispatchTargets == null) {
-			// handle '/' aliases
+			// handle with servlet mapped to '/'
+			// the servletpath is the requestURI minus the contextpath and the pathinfo is null
 			dispatchTargets = getDispatchTargets(
 				requestURI, null, queryString, Match.DEFAULT_SERVLET,
+				requestInfoDTO);
+		}
+
+		if (dispatchTargets == null && Const.SLASH.equals(pathString)) {
+			// handle with servlet mapped to '' (empty string)
+			// the pathinfo is '/' and the servletpath and contextpath are the empty string ("")
+			dispatchTargets = getDispatchTargets(
+				requestURI, null, queryString, Match.CONTEXT_ROOT,
 				requestInfoDTO);
 		}
 
 		return dispatchTargets;
 	}
 
+	public HttpSessionTracker getHttpSessionTracker() {
+		return httpSessionTracker;
+	}
+
 	public Set<Object> getRegisteredObjects() {
 		return registeredObjects;
+	}
+
+	public String getTargetFilter() {
+		return targetFilter;
 	}
 
 	public List<String> getHttpServiceEndpoints() {
@@ -256,22 +264,31 @@ public class HttpServiceRuntimeImpl
 	}
 
 	@Override
-	public RuntimeDTO getRuntimeDTO() {
+	public synchronized RuntimeDTO getRuntimeDTO() {
 		RuntimeDTO runtimeDTO = new RuntimeDTO();
 
-		runtimeDTO.serviceDTO = getServiceDTO();
-
-		// TODO FailedErrorDTOs
-
-		runtimeDTO.failedErrorPageDTOs = null;
+		runtimeDTO.failedErrorPageDTOs = getFailedErrorPageDTOs();
 		runtimeDTO.failedFilterDTOs = getFailedFilterDTOs();
 		runtimeDTO.failedListenerDTOs = getFailedListenerDTOs();
 		runtimeDTO.failedResourceDTOs = getFailedResourceDTOs();
 		runtimeDTO.failedServletContextDTOs = getFailedServletContextDTO();
 		runtimeDTO.failedServletDTOs = getFailedServletDTOs();
+		runtimeDTO.serviceDTO = getServiceDTO();
 		runtimeDTO.servletContextDTOs = getServletContextDTOs();
 
 		return runtimeDTO;
+	}
+
+	private FailedErrorPageDTO[] getFailedErrorPageDTOs() {
+		Collection<FailedErrorPageDTO> fepDTOs = failedErrorPageDTOs.values();
+
+		List<FailedErrorPageDTO> copies = new ArrayList<FailedErrorPageDTO>();
+
+		for (FailedErrorPageDTO failedErrorPageDTO : fepDTOs) {
+			copies.add(DTOUtil.clone(failedErrorPageDTO));
+		}
+
+		return copies.toArray(new FailedErrorPageDTO[0]);
 	}
 
 	private ServiceReferenceDTO getServiceDTO() {
@@ -303,19 +320,28 @@ public class HttpServiceRuntimeImpl
 			return true;
 		}
 
-		org.osgi.framework.Filter targetFilter;
+		org.osgi.framework.Filter whiteboardTargetFilter;
 
 		try {
-			targetFilter = FrameworkUtil.createFilter(target);
+			whiteboardTargetFilter = FrameworkUtil.createFilter(target);
 		}
 		catch (InvalidSyntaxException ise) {
 			throw new IllegalArgumentException(ise);
 		}
 
-		if (targetFilter.matches(attributes)) {
+		if (whiteboardTargetFilter.matches(attributes)) {
 			return true;
 		}
 
+		return false;
+	}
+
+	public boolean matchesAnyContext(ServiceReference<?> serviceReference) {
+		for (ContextController contextController : controllerMap.values()) {
+			if (contextController.matches(serviceReference)) {
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -336,10 +362,16 @@ public class HttpServiceRuntimeImpl
 
 		ContextController contextController = contextControllerRef.get();
 		if (contextController != null) {
+			Iterator<Entry<ServiceReference<ServletContextHelper>, ExtendedFailedServletContextDTO>> iterator = failedServletContextDTOs.entrySet().iterator();
+			while (iterator.hasNext()) {
+				if (iterator.next().getValue().shadowingServiceId == contextController.getServiceId()) {
+					iterator.remove();
+				}
+			}
 			contextController.destroy();
 		}
-		controllerMap.remove(serviceReference);
 		failedServletContextDTOs.remove(serviceReference);
+		controllerMap.remove(serviceReference);
 		trackingContext.ungetService(serviceReference);
 	}
 
@@ -373,8 +405,8 @@ public class HttpServiceRuntimeImpl
 		return null;
 	}
 
-	long generateLegacyId() {
-		return legacyIdGenerator.getAndIncrement();
+	public Collection<ContextController> getContextControllers() {
+		return controllerMap.values();
 	}
 
 	public DispatchTargets getDispatchTargets(
@@ -398,9 +430,9 @@ public class HttpServiceRuntimeImpl
 		String servletPath = requestURI;
 		String pathInfo = null;
 
-		if (match == Match.DEFAULT_SERVLET) {
-			pathInfo = servletPath;
-			servletPath = Const.SLASH;
+		if (match == Match.CONTEXT_ROOT) {
+			pathInfo = Const.SLASH;
+			servletPath = Const.BLANK;
 		}
 
 		do {
@@ -415,7 +447,7 @@ public class HttpServiceRuntimeImpl
 				}
 			}
 
-			if (match == Match.EXACT) {
+			if ((match == Match.EXACT) || (match == Match.CONTEXT_ROOT) || (match == Match.DEFAULT_SERVLET)) {
 				break;
 			}
 
@@ -444,7 +476,7 @@ public class HttpServiceRuntimeImpl
 			copies.add(DTOUtil.clone(failedFilterDTO));
 		}
 
-		return copies.toArray(new FailedFilterDTO[copies.size()]);
+		return copies.toArray(new FailedFilterDTO[0]);
 	}
 
 	private FailedListenerDTO[] getFailedListenerDTOs() {
@@ -456,10 +488,10 @@ public class HttpServiceRuntimeImpl
 			copies.add(DTOUtil.clone(failedListenerDTO));
 		}
 
-		return copies.toArray(new FailedListenerDTO[copies.size()]);
+		return copies.toArray(new FailedListenerDTO[0]);
 	}
 
-	private FailedResourceDTO[] getFailedResourceDTOs() {
+	public FailedResourceDTO[] getFailedResourceDTOs() {
 		Collection<FailedResourceDTO> frDTOs = failedResourceDTOs.values();
 
 		List<FailedResourceDTO> copies = new ArrayList<FailedResourceDTO>();
@@ -468,11 +500,11 @@ public class HttpServiceRuntimeImpl
 			copies.add(DTOUtil.clone(failedResourceDTO));
 		}
 
-		return copies.toArray(new FailedResourceDTO[copies.size()]);
+		return copies.toArray(new FailedResourceDTO[0]);
 	}
 
 	private FailedServletContextDTO[] getFailedServletContextDTO() {
-		Collection<FailedServletContextDTO> fscDTOs = failedServletContextDTOs.values();
+		Collection<ExtendedFailedServletContextDTO> fscDTOs = failedServletContextDTOs.values();
 
 		List<FailedServletContextDTO> copies = new ArrayList<FailedServletContextDTO>();
 
@@ -480,7 +512,7 @@ public class HttpServiceRuntimeImpl
 			copies.add(DTOUtil.clone(failedServletContextDTO));
 		}
 
-		return copies.toArray(new FailedServletContextDTO[copies.size()]);
+		return copies.toArray(new FailedServletContextDTO[0]);
 	}
 
 	private FailedServletDTO[] getFailedServletDTOs() {
@@ -492,28 +524,27 @@ public class HttpServiceRuntimeImpl
 			copies.add(DTOUtil.clone(failedServletDTO));
 		}
 
-		return copies.toArray(new FailedServletDTO[copies.size()]);
+		return copies.toArray(new FailedServletDTO[0]);
 	}
 
-	private ServletContextDTO[] getServletContextDTOs() {
+	public ServletContextDTO[] getServletContextDTOs() {
 		List<ServletContextDTO> servletContextDTOs = new ArrayList<ServletContextDTO>();
 
 		for (ContextController contextController : controllerMap.values()) {
 			servletContextDTOs.add(contextController.getServletContextDTO());
 		}
 
-		return servletContextDTOs.toArray(
-			new ServletContextDTO[servletContextDTOs.size()]);
+		return servletContextDTOs.toArray(new ServletContextDTO[0]);
 	}
 
 	public void registerHttpServiceFilter(
-		Bundle bundle, String alias, Filter filter, Dictionary<String, String> initparams, HttpContext httpContext) throws ServletException {
+		Bundle bundle, String alias, Filter filter, Dictionary<String, String> initparams, ServiceReference<? extends ServletContextHelper> serviceReference) {
 
 		if (alias == null) {
-			throw new IllegalArgumentException("Alias cannot be null");
+			throw new IllegalArgumentException("Alias cannot be null"); //$NON-NLS-1$
 		}
 		if (filter == null) {
-			throw new IllegalArgumentException("Filter cannot be null");
+			throw new IllegalArgumentException("Filter cannot be null"); //$NON-NLS-1$
 		}
 
 		ContextController.checkPattern(alias);
@@ -539,7 +570,6 @@ public class HttpServiceRuntimeImpl
 			if ((initparams != null) && (initparams.get(Const.FILTER_NAME) != null)) {
 				filterName = initparams.get(Const.FILTER_NAME);
 			}
-			HttpContextHelperFactory factory = getOrRegisterHttpContextHelperFactory(bundle, httpContext);
 
 			HttpServiceObjectRegistration objectRegistration = null;
 			ServiceRegistration<Filter> registration = null;
@@ -548,8 +578,7 @@ public class HttpServiceRuntimeImpl
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_TARGET, targetFilter);
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, alias);
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, filterName);
-				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + Const.EQUINOX_LEGACY_CONTEXT_HELPER + "=true)"); //$NON-NLS-1$ //$NON-NLS-2$
-				props.put(Const.EQUINOX_LEGACY_CONTEXT_SELECT, factory.getFilter());
+				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, getFilter(serviceReference));
 				props.put(Const.EQUINOX_LEGACY_TCCL_PROP, Thread.currentThread().getContextClassLoader());
 				props.put(Constants.SERVICE_RANKING, findFilterPriority(initparams));
 				fillInitParams(props, initparams, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX);
@@ -560,7 +589,7 @@ public class HttpServiceRuntimeImpl
 				// check that init got called and did not throw an exception
 				filterFactory.checkForError();
 
-				objectRegistration = new HttpServiceObjectRegistration(filter, registration, factory, bundle);
+				objectRegistration = new HttpServiceObjectRegistration(filter, registration, bundle);
 				Set<HttpServiceObjectRegistration> objectRegistrations = bundleRegistrations.get(bundle);
 				if (objectRegistrations == null) {
 					objectRegistrations = new HashSet<HttpServiceObjectRegistration>();
@@ -571,8 +600,6 @@ public class HttpServiceRuntimeImpl
 			} finally {
 				if (objectRegistration == null || !legacyMappings.containsKey(objectRegistration.serviceKey)) {
 					// something bad happened above (likely going to throw a runtime exception)
-					// need to clean up the factory reference
-					decrementFactoryUseCount(factory);
 					if (registration != null) {
 						registration.unregister();
 					}
@@ -617,17 +644,17 @@ public class HttpServiceRuntimeImpl
 		}
 
 		throw new IllegalArgumentException(
-			"filter-priority must be an integer between -1000 and 1000 but " +
-				"was: " + filterPriority);
+			"filter-priority must be an integer between -1000 and 1000 but " + //$NON-NLS-1$
+				"was: " + filterPriority); //$NON-NLS-1$
 	}
 
 	public void registerHttpServiceResources(
-		Bundle bundle, String alias, String name, HttpContext httpContext) throws NamespaceException {
+		Bundle bundle, String alias, String name, ServiceReference<? extends ServletContextHelper> serviceReference) throws NamespaceException {
 		if (alias == null) {
-			throw new IllegalArgumentException("Alias cannot be null");
+			throw new IllegalArgumentException("Alias cannot be null"); //$NON-NLS-1$
 		}
 		if (name == null) {
-			throw new IllegalArgumentException("Name cannot be null");
+			throw new IllegalArgumentException("Name cannot be null"); //$NON-NLS-1$
 		}
 		String pattern = alias;
 		if (pattern.startsWith("/*.")) { //$NON-NLS-1$
@@ -643,9 +670,9 @@ public class HttpServiceRuntimeImpl
 
 		synchronized (legacyMappings) {
 			HttpServiceObjectRegistration objectRegistration = null;
-			HttpContextHelperFactory factory = getOrRegisterHttpContextHelperFactory(bundle, httpContext);
+			ServiceRegistration<?> registration = null;
 			try {
-				String fullAlias = getFullAlias(alias, factory);
+				String fullAlias = getFullAlias(alias, serviceReference);
 				HttpServiceObjectRegistration existing = legacyMappings.get(fullAlias);
 				if (existing != null) {
 					throw new PatternInUseException(alias);
@@ -654,11 +681,11 @@ public class HttpServiceRuntimeImpl
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_TARGET, targetFilter);
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN, pattern);
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX, name);
-				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, factory.getFilter());
+				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, getFilter(serviceReference));
 				props.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
 				props.put(Const.EQUINOX_LEGACY_TCCL_PROP, Thread.currentThread().getContextClassLoader());
-				ServiceRegistration<?> registration = bundle.getBundleContext().registerService(String.class, "resource", props); //$NON-NLS-1$
-				objectRegistration = new HttpServiceObjectRegistration(fullAlias, registration, factory, bundle);
+				registration = bundle.getBundleContext().registerService(String.class, "resource", props); //$NON-NLS-1$
+				objectRegistration = new HttpServiceObjectRegistration(fullAlias, registration, bundle);
 
 				Set<HttpServiceObjectRegistration> objectRegistrations = bundleRegistrations.get(bundle);
 				if (objectRegistrations == null) {
@@ -678,19 +705,26 @@ public class HttpServiceRuntimeImpl
 				if (objectRegistration == null || !legacyMappings.containsKey(objectRegistration.serviceKey)) {
 					// something bad happened above (likely going to throw a runtime exception)
 					// need to clean up the factory reference
-					decrementFactoryUseCount(factory);
+					if (registration != null) {
+						registration.unregister();
+					}
 				}
 			}
 		}
 	}
 
+	private Object getFilter(ServiceReference<? extends ServletContextHelper> serviceReference) {
+		String ctxName = (String)serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
+		return String.format("(%s=%s)", HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, ctxName); //$NON-NLS-1$
+	}
+
 	public void registerHttpServiceServlet(
-		Bundle bundle, String alias, Servlet servlet, Dictionary<String, String> initparams, HttpContext httpContext) throws NamespaceException, ServletException{
+		Bundle bundle, String alias, Servlet servlet, Dictionary<String, String> initparams, ServiceReference<? extends ServletContextHelper> serviceReference) throws NamespaceException, ServletException{
 		if (alias == null) {
-			throw new IllegalArgumentException("Alias cannot be null");
+			throw new IllegalArgumentException("Alias cannot be null"); //$NON-NLS-1$
 		}
 		if (servlet == null) {
-			throw new IllegalArgumentException("Servlet cannot be null");
+			throw new IllegalArgumentException("Servlet cannot be null"); //$NON-NLS-1$
 		}
 
 		// check the pattern against the original input
@@ -713,9 +747,8 @@ public class HttpServiceRuntimeImpl
 			}
 			HttpServiceObjectRegistration objectRegistration = null;
 			ServiceRegistration<Servlet> registration = null;
-			HttpContextHelperFactory factory = getOrRegisterHttpContextHelperFactory(bundle, httpContext);
 			try {
-				String fullAlias = getFullAlias(alias, factory);
+				String fullAlias = getFullAlias(alias, serviceReference);
 				HttpServiceObjectRegistration existing = legacyMappings.get(fullAlias);
 				if (existing != null) {
 					throw new PatternInUseException(alias);
@@ -729,7 +762,7 @@ public class HttpServiceRuntimeImpl
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_TARGET, targetFilter);
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, pattern);
 				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, servletName);
-				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, factory.getFilter());
+				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, getFilter(serviceReference));
 				props.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
 				props.put(Const.EQUINOX_LEGACY_TCCL_PROP, Thread.currentThread().getContextClassLoader());
 				fillInitParams(props, initparams, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX);
@@ -739,7 +772,7 @@ public class HttpServiceRuntimeImpl
 				// check that init got called and did not throw an exception
 				legacyServlet.checkForError();
 
-				objectRegistration = new HttpServiceObjectRegistration(fullAlias, registration, factory, bundle);
+				objectRegistration = new HttpServiceObjectRegistration(fullAlias, registration, bundle);
 
 				Set<HttpServiceObjectRegistration> objectRegistrations = bundleRegistrations.get(bundle);
 				if (objectRegistrations == null) {
@@ -760,7 +793,6 @@ public class HttpServiceRuntimeImpl
 				if (objectRegistration == null || !legacyMappings.containsKey(objectRegistration.serviceKey)) {
 					// something bad happened above (likely going to throw a runtime exception)
 					// need to clean up the factory reference
-					decrementFactoryUseCount(factory);
 					if (registration != null) {
 						registration.unregister();
 					}
@@ -769,8 +801,9 @@ public class HttpServiceRuntimeImpl
 		}
 	}
 
-	private String getFullAlias(String alias, HttpContextHelperFactory factory) {
-		AtomicReference<ContextController> controllerRef = contextServiceTracker.getService(factory.getServiceReference());
+	private String getFullAlias(String alias, ServiceReference<? extends ServletContextHelper> serviceReference) {
+		@SuppressWarnings("unchecked")
+		AtomicReference<ContextController> controllerRef = contextServiceTracker.getService((ServiceReference<ServletContextHelper>)serviceReference);
 		if (controllerRef != null) {
 			ContextController controller = controllerRef.get();
 			if (controller != null) {
@@ -802,7 +835,6 @@ public class HttpServiceRuntimeImpl
 			} catch (IllegalStateException e) {
 				// ignore; already unregistered
 			}
-			decrementFactoryUseCount(objectRegistration.factory);
 			legacyMappings.remove(aliasCustomization);
 
 		}
@@ -824,7 +856,6 @@ public class HttpServiceRuntimeImpl
 			} catch (IllegalStateException e) {
 				// ignore; already unregistered
 			}
-			decrementFactoryUseCount(objectRegistration.factory);
 			legacyMappings.remove(filter);
 		}
 	}
@@ -840,39 +871,8 @@ public class HttpServiceRuntimeImpl
 					} catch (IllegalStateException e) {
 						// ignore; already unregistered
 					}
-					decrementFactoryUseCount(objectRegistration.factory);
 					legacyMappings.remove(objectRegistration.serviceKey);
 				}
-			}
-		}
-	}
-
-	private HttpContextHelperFactory getOrRegisterHttpContextHelperFactory(Bundle initiatingBundle, HttpContext httpContext) {
-		if (httpContext == null) {
-			throw new NullPointerException("A null HttpContext is not allowed."); //$NON-NLS-1$
-		}
-		synchronized (httpContextHelperFactories) {
-			HttpContextHelperFactory factory = httpContextHelperFactories.get(httpContext);
-			if (factory == null) {
-				factory = new HttpContextHelperFactory(httpContext);
-				Dictionary<String, Object> props = new Hashtable<String, Object>();
-				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, httpContext.getClass().getName().replaceAll("[^a-zA-Z_0-9\\-]", "_") + "-" + generateLegacyId()); //$NON-NLS-1$
-				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/"); //$NON-NLS-1$
-				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_TARGET, targetFilter);
-				props.put(Const.EQUINOX_LEGACY_CONTEXT_HELPER, Boolean.TRUE);
-				props.put(Const.EQUINOX_LEGACY_HTTP_CONTEXT_INITIATING_ID, initiatingBundle.getBundleId());
-				factory.setRegistration(consumingContext.registerService(ServletContextHelper.class, factory, props));
-				httpContextHelperFactories.put(httpContext, factory);
-			}
-			factory.incrementUseCount();
-			return factory;
-		}
-	}
-
-	private void decrementFactoryUseCount(HttpContextHelperFactory factory) {
-		synchronized (httpContextHelperFactories) {
-			if (factory.decrementUseCount() == 0) {
-				httpContextHelperFactories.remove(factory.getHttpContext());
 			}
 		}
 	}
@@ -980,6 +980,17 @@ public class HttpServiceRuntimeImpl
 		return resourceServiceFilter;
 	}
 
+	public void recordFailedErrorPageDTO(
+		ServiceReference<?> serviceReference,
+		FailedErrorPageDTO failedErrorPageDTO) {
+
+		if (failedErrorPageDTOs.containsKey(serviceReference)) {
+			return;
+		}
+
+		failedErrorPageDTOs.put(serviceReference, failedErrorPageDTO);
+	}
+
 	public void recordFailedFilterDTO(
 		ServiceReference<Filter> serviceReference,
 		FailedFilterDTO failedFilterDTO) {
@@ -1003,7 +1014,7 @@ public class HttpServiceRuntimeImpl
 	}
 
 	public void recordFailedResourceDTO(
-		ServiceReference<Object> serviceReference, FailedResourceDTO failedResourceDTO) {
+		ServiceReference<?> serviceReference, FailedResourceDTO failedResourceDTO) {
 
 		if (failedResourceDTOs.containsKey(serviceReference)) {
 			return;
@@ -1012,30 +1023,30 @@ public class HttpServiceRuntimeImpl
 		failedResourceDTOs.put(serviceReference, failedResourceDTO);
 	}
 
-	private void recordFailedServletContextDTO(
-		ServiceReference<ServletContextHelper> serviceReference, String contextName,
-		String contextPath, int failureReason) {
+	public void recordFailedServletContextDTO(
+		ServiceReference<ServletContextHelper> serviceReference, long shadowingServiceId, int failureReason) {
 
-		FailedServletContextDTO failedServletContextDTO = new FailedServletContextDTO();
+		ExtendedFailedServletContextDTO failedServletContextDTO = new ExtendedFailedServletContextDTO();
 
 		failedServletContextDTO.attributes = Collections.emptyMap();
-		failedServletContextDTO.contextPath = contextPath;
-		failedServletContextDTO.errorPageDTOs = new ErrorPageDTO[0];
+		failedServletContextDTO.contextPath = String.valueOf(serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH));
+		failedServletContextDTO.errorPageDTOs = new ExtendedErrorPageDTO[0];
 		failedServletContextDTO.failureReason = failureReason;
 		failedServletContextDTO.filterDTOs = new FilterDTO[0];
 		failedServletContextDTO.initParams = ServiceProperties.parseInitParams(
 			serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX);
 		failedServletContextDTO.listenerDTOs = new ListenerDTO[0];
-		failedServletContextDTO.name = contextName;
+		failedServletContextDTO.name = String.valueOf(serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
 		failedServletContextDTO.resourceDTOs = new ResourceDTO[0];
 		failedServletContextDTO.serviceId = (Long)serviceReference.getProperty(Constants.SERVICE_ID);
 		failedServletContextDTO.servletDTOs = new ServletDTO[0];
+		failedServletContextDTO.shadowingServiceId = shadowingServiceId;
 
 		failedServletContextDTOs.put(serviceReference, failedServletContextDTO);
 	}
 
 	public void recordFailedServletDTO(
-		ServiceReference<Servlet> serviceReference,
+		ServiceReference<?> serviceReference,
 		ExtendedFailedServletDTO failedServletDTO) {
 
 		if (failedServletDTOs.containsKey(serviceReference)) {
@@ -1043,6 +1054,12 @@ public class HttpServiceRuntimeImpl
 		}
 
 		failedServletDTOs.put(serviceReference, failedServletDTO);
+	}
+
+	public void removeFailedErrorPageDTO(
+		ServiceReference<Servlet> serviceReference) {
+
+		failedErrorPageDTOs.remove(serviceReference);
 	}
 
 	public void removeFailedFilterDTO(
@@ -1063,13 +1080,13 @@ public class HttpServiceRuntimeImpl
 		failedResourceDTOs.remove(serviceReference);
 	}
 
-	public void removeFailedServletDTOs(
+	public void removeFailedServletDTO(
 		ServiceReference<Servlet> serviceReference) {
 
 		failedServletDTOs.remove(serviceReference);
 	}
 
-	public void fireSessionIdChanged(String oldSessionId) {
+	public synchronized void fireSessionIdChanged(String oldSessionId) {
 		for (ContextController contextController : controllerMap.values()) {
 			contextController.fireSessionIdChanged(oldSessionId);
 		}
@@ -1081,7 +1098,7 @@ public class HttpServiceRuntimeImpl
 
 	private Map<String, Object> attributes;
 	private final String targetFilter;
-	private final ServiceRegistration<ServletContextHelper> defaultContextReg;
+	private final ServiceRegistration<?> defaultContextReg;
 	private ServletContext parentServletContext;
 
 	private BundleContext trackingContext;
@@ -1093,61 +1110,36 @@ public class HttpServiceRuntimeImpl
 	private final org.osgi.framework.Filter listenerServiceFilter;
 
 	// BEGIN of old HttpService support
-	private Map<HttpContext, HttpContextHelperFactory> httpContextHelperFactories =
-		Collections.synchronizedMap(new HashMap<HttpContext, HttpContextHelperFactory>());
-	private Map<Object, HttpServiceObjectRegistration> legacyMappings =
+	private final Map<Object, HttpServiceObjectRegistration> legacyMappings =
 		Collections.synchronizedMap(new HashMap<Object, HttpServiceObjectRegistration>());
-	private Map<Bundle, Set<HttpServiceObjectRegistration>> bundleRegistrations =
+	private final Map<Bundle, Set<HttpServiceObjectRegistration>> bundleRegistrations =
 		new HashMap<Bundle, Set<HttpServiceObjectRegistration>>();
-	private Map<Bundle, Map<String, String>> bundleAliasCustomizations = new HashMap<Bundle, Map<String,String>>();
+	private final Map<Bundle, Map<String, String>> bundleAliasCustomizations = new HashMap<Bundle, Map<String,String>>();
 	// END of old HttpService support
 
-	private ConcurrentMap<ServiceReference<ServletContextHelper>, ContextController> controllerMap =
-		new ConcurrentHashMap<ServiceReference<ServletContextHelper>, ContextController>();
+	private final ConcurrentMap<ServiceReference<ServletContextHelper>, ContextController> controllerMap =
+		new ConcurrentSkipListMap<ServiceReference<ServletContextHelper>, ContextController>(Collections.reverseOrder());
 
+	private final ConcurrentMap<ServiceReference<?>, FailedErrorPageDTO> failedErrorPageDTOs =
+		new ConcurrentHashMap<ServiceReference<?>, FailedErrorPageDTO>();
 	private final ConcurrentMap<ServiceReference<Filter>, FailedFilterDTO> failedFilterDTOs =
 		new ConcurrentHashMap<ServiceReference<Filter>, FailedFilterDTO>();
 	private final ConcurrentMap<ServiceReference<EventListener>, FailedListenerDTO> failedListenerDTOs =
 		new ConcurrentHashMap<ServiceReference<EventListener>, FailedListenerDTO>();
-	private final ConcurrentMap<ServiceReference<Object>, FailedResourceDTO> failedResourceDTOs =
-		new ConcurrentHashMap<ServiceReference<Object>, FailedResourceDTO>();
-	private final ConcurrentMap<ServiceReference<ServletContextHelper>, FailedServletContextDTO> failedServletContextDTOs =
-		new ConcurrentHashMap<ServiceReference<ServletContextHelper>, FailedServletContextDTO>();
-	private final ConcurrentMap<ServiceReference<Servlet>, ExtendedFailedServletDTO> failedServletDTOs =
-		new ConcurrentHashMap<ServiceReference<Servlet>, ExtendedFailedServletDTO>();
+	private final ConcurrentMap<ServiceReference<?>, FailedResourceDTO> failedResourceDTOs =
+		new ConcurrentHashMap<ServiceReference<?>, FailedResourceDTO>();
+	private final ConcurrentMap<ServiceReference<ServletContextHelper>, ExtendedFailedServletContextDTO> failedServletContextDTOs =
+		new ConcurrentHashMap<ServiceReference<ServletContextHelper>, ExtendedFailedServletContextDTO>();
+	private final ConcurrentMap<ServiceReference<?>, ExtendedFailedServletDTO> failedServletDTOs =
+		new ConcurrentHashMap<ServiceReference<?>, ExtendedFailedServletDTO>();
 
-	private AtomicLong legacyIdGenerator = new AtomicLong(0);
-
-	private Set<Object> registeredObjects = Collections.newSetFromMap(new ConcurrentHashMap<Object, Boolean>());
+	private final Set<Object> registeredObjects = Collections.newSetFromMap(new ConcurrentHashMap<Object, Boolean>());
 
 	private ServiceTracker<ServletContextHelper, AtomicReference<ContextController>> contextServiceTracker;
 	private ServiceTracker<ContextPathCustomizer, ContextPathCustomizer> contextPathAdaptorTracker;
 	private ContextPathCustomizerHolder contextPathCustomizerHolder;
 	private HttpSessionTracker httpSessionTracker;
 	private final ServiceRegistration<HttpSessionInvalidator> invalidatorReg;
-
-	static class DefaultServletContextHelperFactory implements ServiceFactory<ServletContextHelper> {
-		@Override
-		public ServletContextHelper getService(
-			Bundle bundle,
-			ServiceRegistration<ServletContextHelper> registration) {
-			return new DefaultServletContextHelper(bundle);
-		}
-
-		@Override
-		public void ungetService(
-			Bundle bundle,
-			ServiceRegistration<ServletContextHelper> registration,
-			ServletContextHelper service) {
-			// do nothing
-		}
-	}
-
-	static class DefaultServletContextHelper extends ServletContextHelper {
-		public DefaultServletContextHelper(Bundle b) {
-			super(b);
-		}
-	}
 
 	static class LegacyServiceObject {
 		final AtomicReference<Exception> error = new AtomicReference<Exception>(new ServletException("The init() method was never called.")); //$NON-NLS-1$
@@ -1331,6 +1323,18 @@ public class HttpServiceRuntimeImpl
 				return firstEntry == null ? null : firstEntry.getValue();
 			}
 		}
+	}
+
+	public boolean failedResourceDTO(ServiceReference<?> serviceReference) {
+		return failedResourceDTOs.containsKey(serviceReference);
+	}
+
+	public boolean failedServletDTO(ServiceReference<?> serviceReference) {
+		return failedServletDTOs.containsKey(serviceReference);
+	}
+
+	public boolean failedErrorPageDTO(ServiceReference<?> serviceReference) {
+		return failedErrorPageDTOs.containsKey(serviceReference);
 	}
 
 }

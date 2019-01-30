@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Raymond Augé and others.
+ * Copyright (c) 2014, 2019 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -50,11 +50,21 @@ public class ContextFilterTrackerCustomizer
 			return result;
 		}
 
-		if (!contextController.matches(serviceReference)) {
-			return result;
-		}
-
 		try {
+			if (!contextController.matches(serviceReference)) {
+				// Only the default context will perform the "does anyone match" checks.
+				if (httpServiceRuntime.isDefaultContext(contextController) &&
+					!httpServiceRuntime.matchesAnyContext(serviceReference)) {
+
+					throw new HttpWhiteboardFailureException(
+						"Doesn't match any contexts. " + serviceReference, DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING); //$NON-NLS-1$
+				}
+
+				return result;
+			}
+
+			httpServiceRuntime.removeFailedFilterDTO(serviceReference);
+
 			result.set(contextController.addFilterRegistration(serviceReference));
 		}
 		catch (HttpWhiteboardFailureException hwfe) {

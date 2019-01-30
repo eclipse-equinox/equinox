@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2015 Raymond Augé and others.
+ * Copyright (c) 2014, 2019 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -70,12 +70,18 @@ public abstract class MatchableRegistration<T, D extends DTO>
 		if (match == Match.EXACT) {
 			return pattern.equals(servletPath);
 		}
+		if ((match == Match.CONTEXT_ROOT) && Const.BLANK.equals(pattern)) {
+			return  Const.BLANK.equals(servletPath) && Const.SLASH.equals(pathInfo);
+		}
+		if ((match == Match.DEFAULT_SERVLET) && Const.SLASH.equals(pattern)) {
+			return !servletPath.isEmpty() && pathInfo == null;
+		}
 
 		if (pattern.indexOf(Const.SLASH_STAR_DOT) == 0) {
 			pattern = pattern.substring(1);
 		}
 
-		if (pattern.charAt(0) == '/') {
+		if (!pattern.isEmpty() && pattern.charAt(0) == '/') {
 			if ((match == Match.DEFAULT_SERVLET) && (pattern.length() == 1)) {
 				return true;
 			}

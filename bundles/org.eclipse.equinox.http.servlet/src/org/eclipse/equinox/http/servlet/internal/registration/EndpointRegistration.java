@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2015 Raymond Augé and others.
+ * Copyright (c) 2014, 2019 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,7 @@ import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
 import org.osgi.dto.DTO;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.context.ServletContextHelper;
 
@@ -31,22 +32,22 @@ import org.osgi.service.http.context.ServletContextHelper;
 public abstract class EndpointRegistration<D extends DTO>
 	extends MatchableRegistration<Servlet, D> implements Comparable<EndpointRegistration<?>>{
 
-	private final ServiceHolder<Servlet> servletHolder;
+	protected final ServiceHolder<Servlet> servletHolder;
 	private final ServletContextHelper servletContextHelper; //The context used during the registration of the servlet
 	private final ContextController contextController;
 	private final ClassLoader classLoader;
 
 	public EndpointRegistration(
 		ServiceHolder<Servlet> servletHolder, D d, ServletContextHelper servletContextHelper,
-		ContextController contextController, ClassLoader legacyTCCL) {
+		ContextController contextController) {
 
 		super(servletHolder.get(), d);
 		this.servletHolder = servletHolder;
 		this.servletContextHelper = servletContextHelper;
 		this.contextController = contextController;
-		if (legacyTCCL != null) {
+		if (servletHolder.getLegacyTCCL() != null) {
 			// legacy registrations used the current TCCL at registration time
-			classLoader = legacyTCCL;
+			classLoader = servletHolder.getLegacyTCCL();
 		} else {
 			classLoader = servletHolder.getBundle().adapt(BundleWiring.class).getClassLoader();
 		}
@@ -114,6 +115,8 @@ public abstract class EndpointRegistration<D extends DTO>
 	public ServletContextHelper getServletContextHelper() {
 		return servletContextHelper;
 	}
+
+	public abstract ServiceReference<?> getServiceReference();
 
 	@Override
 	public String match(

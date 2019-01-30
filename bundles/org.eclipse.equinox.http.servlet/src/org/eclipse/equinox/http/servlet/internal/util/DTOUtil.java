@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Raymond Augé and others.
+ * Copyright (c) 2015, 2019 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -32,6 +32,22 @@ public class DTOUtil {
 		clone.asyncSupported = copy(original.asyncSupported);
 		clone.errorCodes = copy(original.errorCodes);
 		clone.exceptions = copy(original.exceptions);
+		clone.initParams = copyStringMap(original.initParams);
+		clone.name = copy(original.name);
+		clone.serviceId = copy(original.serviceId);
+		clone.servletContextId = copy(original.servletContextId);
+		clone.servletInfo = copy(original.servletInfo);
+
+		return clone;
+	}
+
+	public static FailedErrorPageDTO clone(FailedErrorPageDTO original) {
+		FailedErrorPageDTO clone = new FailedErrorPageDTO();
+
+		clone.asyncSupported = copy(original.asyncSupported);
+		clone.errorCodes = copy(original.errorCodes);
+		clone.exceptions = copy(original.exceptions);
+		clone.failureReason = copy(original.failureReason);
 		clone.initParams = copyStringMap(original.initParams);
 		clone.name = copy(original.name);
 		clone.serviceId = copy(original.serviceId);
@@ -177,7 +193,7 @@ public class DTOUtil {
 
 	private static long[] copy(long[] array) {
 		if (array == null) {
-			return null;
+			return new long[0];
 		}
 		if (array.length == 0) {
 			return array;
@@ -188,7 +204,7 @@ public class DTOUtil {
 
 	private static String[] copy(String[] array) {
 		if (array == null) {
-			return null;
+			return new String[0];
 		}
 		if (array.length == 0) {
 			return array;
@@ -223,14 +239,14 @@ public class DTOUtil {
 	}
 
 	private static Map<String, String> copyStringMap(Map<String, String> initParams) {
+		if (initParams == null) {
+			return Collections.emptyMap();
+		}
 		return new HashMap<String, String>(initParams);
 	}
 
 	public static <V> Map<String, Object> copyGenericMap(Map<String, V> value) {
-		if (value == null) {
-			return null;
-		}
-		if (value.isEmpty()) {
+		if ((value == null) || value.isEmpty()) {
 			return Collections.emptyMap();
 		}
 		HashMap<String, Object> result = new HashMap<String, Object>();

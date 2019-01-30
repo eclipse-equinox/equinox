@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2019 Cognos Incorporated, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -85,7 +85,7 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 	/**@deprecated*/
 	public String[] getValueNames() {
 		Collection<String> result = getAttributeNames0();
-		return result.toArray(new String[result.size()]);
+		return result.toArray(new String[0]);
 	}
 
 	public void invalidate() {

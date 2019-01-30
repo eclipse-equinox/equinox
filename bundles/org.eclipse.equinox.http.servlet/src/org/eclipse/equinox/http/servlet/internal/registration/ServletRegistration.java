@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2005, 2019 Cognos Incorporated, IBM Corporation and others
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,11 +23,12 @@ import javax.servlet.http.Part;
 import org.eclipse.equinox.http.servlet.dto.ExtendedServletDTO;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
+import org.eclipse.equinox.http.servlet.internal.dto.ExtendedErrorPageDTO;
 import org.eclipse.equinox.http.servlet.internal.multipart.MultipartSupport;
 import org.eclipse.equinox.http.servlet.internal.multipart.MultipartSupportFactory;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.runtime.dto.ErrorPageDTO;
 
 //This class wraps the servlet object registered in the HttpService.registerServlet call, to manage the context classloader when handleRequests are being asked.
 public class ServletRegistration extends EndpointRegistration<ExtendedServletDTO> {
@@ -51,11 +52,11 @@ public class ServletRegistration extends EndpointRegistration<ExtendedServletDTO
 	}
 
 	public ServletRegistration(
-		ServiceHolder<Servlet> servletHolder, ExtendedServletDTO servletDTO, ErrorPageDTO errorPageDTO,
+		ServiceHolder<Servlet> servletHolder, ExtendedServletDTO servletDTO, ExtendedErrorPageDTO errorPageDTO,
 		ServletContextHelper servletContextHelper,
-		ContextController contextController, ServletContext servletContext, ClassLoader legacyTCCL) {
+		ContextController contextController, ServletContext servletContext) {
 
-		super(servletHolder, servletDTO, servletContextHelper, contextController, legacyTCCL);
+		super(servletHolder, servletDTO, servletContextHelper, contextController);
 
 		this.errorPageDTO = errorPageDTO;
 
@@ -72,7 +73,7 @@ public class ServletRegistration extends EndpointRegistration<ExtendedServletDTO
 		needDecode = MatchableRegistration.patternsRequireDecode(servletDTO.patterns);
 	}
 
-	public ErrorPageDTO getErrorPageDTO() {
+	public ExtendedErrorPageDTO getErrorPageDTO() {
 		return errorPageDTO;
 	}
 
@@ -89,6 +90,11 @@ public class ServletRegistration extends EndpointRegistration<ExtendedServletDTO
 	@Override
 	public long getServiceId() {
 		return getD().serviceId;
+	}
+
+	@Override
+	public ServiceReference<?> getServiceReference() {
+		return servletHolder.getServiceReference();
 	}
 
 	@Override
@@ -126,6 +132,6 @@ public class ServletRegistration extends EndpointRegistration<ExtendedServletDTO
 	}
 
 	private final boolean needDecode;
-	private final ErrorPageDTO errorPageDTO;
+	private final ExtendedErrorPageDTO errorPageDTO;
 	private final MultipartSupport multipartSupport;
 }

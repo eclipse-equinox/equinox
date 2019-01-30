@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2014 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -114,8 +114,8 @@ public class ServletRequestAdvisor extends Object {
 		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
 
 		connection.setInstanceFollowRedirects(false);
-		connection.setConnectTimeout(150 * 1000);
-		connection.setReadTimeout(150 * 1000);
+		connection.setConnectTimeout(150 * 100000);
+		connection.setReadTimeout(150 * 100000);
 		connection.connect();
 
 		InputStream stream = connection.getInputStream();
