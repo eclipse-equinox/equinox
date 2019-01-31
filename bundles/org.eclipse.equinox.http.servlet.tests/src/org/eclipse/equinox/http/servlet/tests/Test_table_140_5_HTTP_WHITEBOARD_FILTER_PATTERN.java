@@ -68,7 +68,7 @@ public class Test_table_140_5_HTTP_WHITEBOARD_FILTER_PATTERN extends BaseTest {
 		assertEquals("bab", requestAdvisor.request("a"));
 		assertEquals("bab", requestAdvisor.request("a.html"));
 		assertEquals("bab", requestAdvisor.request("some/path/b.html"));
-		assertEquals("a", requestAdvisor.request(""));
+		assertEquals("bab", requestAdvisor.request(""));
 
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "");
 		sr.setProperties(properties);

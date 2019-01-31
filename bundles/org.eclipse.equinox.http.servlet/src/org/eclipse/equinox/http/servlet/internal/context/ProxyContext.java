@@ -83,7 +83,7 @@ public class ProxyContext {
 			ContextAttributes contextAttributes = attributesMap.get(controller);
 
 			if (contextAttributes == null) {
-				throw new IllegalStateException("too many calls");
+				throw new IllegalStateException("too many calls"); //$NON-NLS-1$
 			}
 
 			if (contextAttributes.removeReference() == 0) {

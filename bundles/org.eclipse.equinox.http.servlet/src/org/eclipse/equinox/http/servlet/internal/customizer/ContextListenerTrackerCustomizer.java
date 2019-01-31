@@ -30,15 +30,13 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  * @author Raymond Augé
  */
 public class ContextListenerTrackerCustomizer
-	extends RegistrationServiceTrackerCustomizer<EventListener,  AtomicReference<ListenerRegistration>> {
+	extends RegistrationServiceTrackerCustomizer<EventListener,  ListenerRegistration> {
 
 	public ContextListenerTrackerCustomizer(
 		BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime,
 		ContextController contextController) {
 
-		super(bundleContext, httpServiceRuntime);
-
-		this.contextController = contextController;
+		super(bundleContext, httpServiceRuntime, contextController);
 	}
 
 	@Override
@@ -51,6 +49,8 @@ public class ContextListenerTrackerCustomizer
 		}
 
 		try {
+			contextController.checkShutdown();
+
 			if (!contextController.matches(serviceReference)) {
 				// Only the default context will perform the "does anyone match" checks.
 				if (httpServiceRuntime.isDefaultContext(contextController) &&
@@ -82,41 +82,26 @@ public class ContextListenerTrackerCustomizer
 		catch (HttpWhiteboardFailureException hwfe) {
 			httpServiceRuntime.log(hwfe.getMessage(), hwfe);
 
-			recordFailedListenerDTO(serviceReference, hwfe.getFailureReason());
+			recordFailed(serviceReference, hwfe.getFailureReason());
 		}
 		catch (Exception e) {
 			httpServiceRuntime.log(e.getMessage(), e);
 
-			recordFailedListenerDTO(serviceReference, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
+			recordFailed(serviceReference, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
+		}
+		finally {
+			httpServiceRuntime.incrementServiceChangecount();
 		}
 
 		return result;
 	}
 
 	@Override
-	public void modifiedService(
-		ServiceReference<EventListener> serviceReference,
-		AtomicReference<ListenerRegistration> listenerRegistration) {
-
-		removedService(serviceReference, listenerRegistration);
-		addingService(serviceReference);
-	}
-
-	@Override
-	public void removedService(
-		ServiceReference<EventListener> serviceReference,
-		AtomicReference<ListenerRegistration> listenerReference) {
-
-		ListenerRegistration listenerRegistration = listenerReference.get();
-		if (listenerRegistration != null) {
-			// Destroy now ungets the object we are using
-			listenerRegistration.destroy();
-		}
-
+	void removeFailed(ServiceReference<EventListener> serviceReference) {
 		contextController.getHttpServiceRuntime().removeFailedListenerDTO(serviceReference);
 	}
 
-	private void recordFailedListenerDTO(
+	private void recordFailed(
 		ServiceReference<EventListener> serviceReference, int failureReason) {
 
 		FailedListenerDTO failedListenerDTO = new FailedListenerDTO();
@@ -129,7 +114,5 @@ public class ContextListenerTrackerCustomizer
 
 		contextController.getHttpServiceRuntime().recordFailedListenerDTO(serviceReference, failedListenerDTO);
 	}
-
-	private ContextController contextController;
 
 }

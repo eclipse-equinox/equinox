@@ -26,7 +26,7 @@ public class EventListeners {
 
 	public <E extends EventListener> List<E> get(Class<E> clazz) {
 		if (clazz == null) {
-			throw new NullPointerException("clazz can't be null");
+			throw new NullPointerException("clazz can't be null"); //$NON-NLS-1$
 		}
 
 		List<ListenerRegistration> list = map.get(clazz);
@@ -42,7 +42,7 @@ public class EventListeners {
 		Class<E> clazz, ListenerRegistration listenerRegistration) {
 
 		if (clazz == null) {
-			throw new NullPointerException("clazz can't be null");
+			throw new NullPointerException("clazz can't be null"); //$NON-NLS-1$
 		}
 
 		List<ListenerRegistration> list = map.get(clazz);
@@ -74,7 +74,7 @@ public class EventListeners {
 		Class<E> clazz, ListenerRegistration listenerRegistration) {
 
 		if (clazz == null) {
-			throw new NullPointerException("clazz can't be null");
+			throw new NullPointerException("clazz can't be null"); //$NON-NLS-1$
 		}
 
 		List<ListenerRegistration> list = map.get(clazz);

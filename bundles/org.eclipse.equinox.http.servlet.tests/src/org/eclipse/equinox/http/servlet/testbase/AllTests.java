@@ -13,8 +13,13 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.testbase;
 
+import org.eclipse.equinox.http.servlet.tests.AuthenticationTest;
 import org.eclipse.equinox.http.servlet.tests.DispatchingTest;
+import org.eclipse.equinox.http.servlet.tests.PreprocessorTestCase;
 import org.eclipse.equinox.http.servlet.tests.ServletTest;
+import org.eclipse.equinox.http.servlet.tests.TestHttpServiceAndErrorPage;
+import org.eclipse.equinox.http.servlet.tests.TestHttpServiceAndNamedServlet;
+import org.eclipse.equinox.http.servlet.tests.TestUpload;
 import org.eclipse.equinox.http.servlet.tests.Test_140_11_3;
 import org.eclipse.equinox.http.servlet.tests.Test_140_2_17to22;
 import org.eclipse.equinox.http.servlet.tests.Test_140_2_26to27;
@@ -36,6 +41,7 @@ import org.eclipse.equinox.http.servlet.tests.Test_table_140_1_HTTP_WHITEBOARD_C
 import org.eclipse.equinox.http.servlet.tests.Test_table_140_1_HTTP_WHITEBOARD_CONTEXT_NAME_tieGoesToOldest;
 import org.eclipse.equinox.http.servlet.tests.Test_table_140_1_HTTP_WHITEBOARD_CONTEXT_PATH_type;
 import org.eclipse.equinox.http.servlet.tests.Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED;
+import org.eclipse.equinox.http.servlet.tests.Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED_validate;
 import org.eclipse.equinox.http.servlet.tests.Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ERROR_PAGE_4xx;
 import org.eclipse.equinox.http.servlet.tests.Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ERROR_PAGE_exception;
 import org.eclipse.equinox.http.servlet.tests.Test_table_140_5_HTTP_WHITEBOARD_FILTER_DISPATCHER_error;
@@ -49,7 +55,9 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+	AuthenticationTest.class,
 	DispatchingTest.class,
+	PreprocessorTestCase.class,
 	ServletTest.class,
 	Test_140_11_3.class,
 	Test_140_2_17to22.class,
@@ -72,13 +80,17 @@ import org.junit.runners.Suite.SuiteClasses;
 	Test_table_140_1_HTTP_WHITEBOARD_CONTEXT_NAME_tieGoesToOldest.class,
 	Test_table_140_1_HTTP_WHITEBOARD_CONTEXT_PATH_type.class,
 	Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED.class,
+	Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED_validate.class,
 	Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ERROR_PAGE_4xx.class,
 	Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ERROR_PAGE_exception.class,
 	Test_table_140_5_HTTP_WHITEBOARD_FILTER_DISPATCHER_error.class,
 	Test_table_140_5_HTTP_WHITEBOARD_FILTER_DISPATCHER_request.class,
 	Test_table_140_5_HTTP_WHITEBOARD_FILTER_PATTERN.class,
 	Test_table_140_5_HTTP_WHITEBOARD_FILTER_REGEX.class,
-	Test_table_140_6_HTTP_WHITEBOARD_RESOURCE_validation.class
+	Test_table_140_6_HTTP_WHITEBOARD_RESOURCE_validation.class,
+	TestHttpServiceAndErrorPage.class,
+	TestHttpServiceAndNamedServlet.class,
+	TestUpload.class,
 })
 public class AllTests {
 	// see @SuiteClasses

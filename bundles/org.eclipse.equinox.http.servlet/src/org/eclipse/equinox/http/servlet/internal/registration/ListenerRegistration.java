@@ -19,7 +19,7 @@ import java.util.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
-import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
+import org.eclipse.equinox.http.servlet.internal.context.ServiceHolder;
 import org.eclipse.equinox.http.servlet.internal.servlet.HttpSessionAdaptor;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.runtime.dto.ListenerDTO;
@@ -131,27 +131,36 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 			contextController);
 	}
 
+	ClassLoader getClassLoader() {
+		return classLoader;
+	}
+
+	EventListener getDelegate() {
+		return super.getT();
+	}
+
 	private class EventListenerInvocationHandler implements InvocationHandler {
 
 		public EventListenerInvocationHandler() {
 		}
 
 		@Override
-		public Object invoke(Object proxy, Method method, Object[] args)
+		public Object invoke(Object theProxy, Method method, Object[] args)
 			throws Throwable {
 
-			ClassLoader original = Thread.currentThread().getContextClassLoader();
+			Thread thread = Thread.currentThread();
+			ClassLoader original = thread.getContextClassLoader();
 
 			try {
-				Thread.currentThread().setContextClassLoader(classLoader);
+				thread.setContextClassLoader(getClassLoader());
 				try {
-					return method.invoke(ListenerRegistration.super.getT(), args);
+					return method.invoke(getDelegate(), args);
 				} catch (InvocationTargetException e) {
 					throw e.getCause();
 				}
 			}
 			finally {
-				Thread.currentThread().setContextClassLoader(original);
+				thread.setContextClassLoader(original);
 			}
 		}
 	}

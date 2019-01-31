@@ -8,4 +8,19 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="src/org/eclipse/equinox/http/servlet/internal/HttpServiceImpl.java" type="org.eclipse.equinox.http.servlet.internal.HttpServiceImpl">
+        <filter id="574619656">
+            <message_arguments>
+                <message_argument value="HttpService"/>
+                <message_argument value="HttpServiceImpl"/>
+            </message_arguments>
+        </filter>
+        <filter id="574668824">
+            <message_arguments>
+                <message_argument value="ExtendedHttpService"/>
+                <message_argument value="HttpServiceImpl"/>
+                <message_argument value="HttpService"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>

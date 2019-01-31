@@ -22,7 +22,7 @@ public class NullServletContextHelperException extends IllegalArgumentException 
 	private static final long serialVersionUID = 8516340810740210836L;
 
 	public NullServletContextHelperException() {
-		super("ServletContexHelper cannot be null.");
+		super("ServletContexHelper cannot be null."); //$NON-NLS-1$
 	}
 
 }

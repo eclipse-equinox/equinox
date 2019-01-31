@@ -67,7 +67,7 @@ public class Test_140_4_9 extends BaseTest {
 		invoked.set(false);
 		assertEquals("a", requestAdvisor.request("some/path/b.html"));
 		assertTrue(invoked.get());
-		assertEquals("404", requestAdvisor.request("", null).get("responseCode").get(0));
+		assertEquals("a", requestAdvisor.request(""));
 	}
 
 }

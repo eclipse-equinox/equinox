@@ -16,23 +16,22 @@
 
 package org.eclipse.equinox.http.servlet.internal;
 
+import static org.osgi.service.http.whiteboard.HttpWhiteboardConstants.*;
+
 import java.security.*;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
+import javax.servlet.*;
 import org.eclipse.equinox.http.servlet.ExtendedHttpService;
+import org.eclipse.equinox.http.servlet.internal.context.HttpContextHolder;
 import org.eclipse.equinox.http.servlet.internal.context.WrappedHttpContext;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
 import org.eclipse.equinox.http.servlet.internal.util.Throw;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.*;
 import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
@@ -42,15 +41,11 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	final HttpServiceRuntimeImpl httpServiceRuntime;
 	private volatile boolean shutdown = false; // We prevent use of this instance if HttpServiceFactory.ungetService has called unregisterAliases.
 
-	private final ConcurrentMap<HttpContext, ServiceReference<DefaultServletContextHelper>> contextMap = new ConcurrentHashMap<HttpContext, ServiceReference<DefaultServletContextHelper>>();
-	private final ServiceReference<DefaultServletContextHelper> defaultHttpContextReference;
-
 	public HttpServiceImpl(
 		Bundle bundle, HttpServiceRuntimeImpl httpServiceRuntime) {
 
 		this.bundle = bundle;
 		this.httpServiceRuntime = httpServiceRuntime;
-		defaultHttpContextReference = this.bundle.getBundleContext().getServiceReference(DefaultServletContextHelper.class);
 	}
 
 	/**
@@ -59,9 +54,10 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	public synchronized HttpContext createDefaultHttpContext() {
 		checkShutdown();
 
-		DefaultServletContextHelper defaultServletContextHelper = bundle.getBundleContext().getService(defaultHttpContextReference);
-
-		contextMap.putIfAbsent(defaultServletContextHelper, defaultHttpContextReference);
+		DefaultServletContextHelper defaultServletContextHelper = bundle.getBundleContext().getService(httpServiceRuntime.defaultContextReg.getReference());
+		HttpContextHolder httpContextHolder = new HttpContextHolder(defaultServletContextHelper, httpServiceRuntime.defaultContextReg);
+		httpContextHolder.incrementUseCount();
+		httpServiceRuntime.legacyContextMap.putIfAbsent(defaultServletContextHelper, httpContextHolder);
 
 		return defaultServletContextHelper;
 	}
@@ -78,12 +74,12 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 		checkShutdown();
 		httpContext = httpContext == null ? createDefaultHttpContext() : registerContext(httpContext);
-		final ServiceReference<DefaultServletContextHelper> serviceReference = contextMap.get(httpContext);
+		final HttpContextHolder httpContextHolder = httpServiceRuntime.legacyContextMap.get(httpContext);
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
 				@Override
-				public Void run() throws ServletException {
-					httpServiceRuntime.registerHttpServiceFilter(bundle, alias, filter, initparams, serviceReference);
+				public Void run() {
+					httpServiceRuntime.registerHttpServiceFilter(bundle, alias, filter, initparams, httpContextHolder);
 					return null;
 				}
 			});
@@ -104,12 +100,12 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 		checkShutdown();
 		httpContext = httpContext == null ? createDefaultHttpContext() : registerContext(httpContext);
-		final ServiceReference<DefaultServletContextHelper> serviceReference = contextMap.get(httpContext);
+		final HttpContextHolder httpContextHolder = httpServiceRuntime.legacyContextMap.get(httpContext);
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
 				@Override
 				public Void run() throws NamespaceException {
-					httpServiceRuntime.registerHttpServiceResources(bundle, alias, name, serviceReference);
+					httpServiceRuntime.registerHttpServiceResources(bundle, alias, name, httpContextHolder);
 					return null;
 				}
 			});
@@ -126,17 +122,17 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	 */
 	public synchronized void registerServlet(
 			final String alias, final Servlet servlet,
-			final Dictionary initparams, HttpContext httpContext)
+			final Dictionary<?, ?> initparams, HttpContext httpContext)
 		throws ServletException, NamespaceException {
 
 		checkShutdown();
 		httpContext = httpContext == null ? createDefaultHttpContext() : registerContext(httpContext);
-		final ServiceReference<DefaultServletContextHelper> serviceReference = contextMap.get(httpContext);
+		final HttpContextHolder httpContextHolder = httpServiceRuntime.legacyContextMap.get(httpContext);
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
 				@Override
 				public Void run() throws NamespaceException, ServletException {
-					httpServiceRuntime.registerHttpServiceServlet(bundle, alias, servlet, initparams, serviceReference);
+					httpServiceRuntime.registerHttpServiceServlet(bundle, alias, servlet, initparams, httpContextHolder);
 					return null;
 				}
 			});
@@ -182,20 +178,24 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	}
 
 	private HttpContext registerContext(HttpContext httpContext) {
-		ServiceReference<? extends HttpContext> serviceReference = contextMap.get(httpContext);
+		HttpContextHolder httpContextHolder = httpServiceRuntime.legacyContextMap.get(httpContext);
 
-		if (serviceReference == null) {
+		if (httpContextHolder == null) {
+			String legacyId = httpContext.getClass().getName().replaceAll("[^a-zA-Z_0-9\\-]", "_") + "-" + generateLegacyId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			Dictionary<String, Object> props = new Hashtable<String, Object>();
-			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, httpContext.getClass().getName().replaceAll("[^a-zA-Z_0-9\\-]", "_") + "-" + generateLegacyId()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/"); //$NON-NLS-1$
-			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_TARGET, httpServiceRuntime.getTargetFilter());
+			props.put(HTTP_WHITEBOARD_CONTEXT_NAME, legacyId);
+			props.put(HTTP_WHITEBOARD_CONTEXT_PATH, "/"); //$NON-NLS-1$
+			props.put(HTTP_WHITEBOARD_TARGET, httpServiceRuntime.getTargetFilter());
+			props.put(HTTP_SERVICE_CONTEXT_PROPERTY, legacyId);
 			props.put(Const.EQUINOX_LEGACY_CONTEXT_HELPER, Boolean.TRUE);
 			props.put(Const.EQUINOX_LEGACY_HTTP_CONTEXT_INITIATING_ID, bundle.getBundleId());
 
 			@SuppressWarnings("unchecked")
 			ServiceRegistration<DefaultServletContextHelper> registration = (ServiceRegistration<DefaultServletContextHelper>)bundle.getBundleContext().registerService(ServletContextHelper.class.getName(), new WrappedHttpContext(httpContext, bundle), props);
+			httpContextHolder = new HttpContextHolder(httpContext, registration);
+			httpContextHolder.incrementUseCount();
 
-			contextMap.put(httpContext, registration.getReference());
+			httpServiceRuntime.legacyContextMap.put(httpContext, httpContextHolder);
 		}
 
 		return httpContext;

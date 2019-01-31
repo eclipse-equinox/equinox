@@ -62,16 +62,21 @@ public class ResponseStateHandler {
 			}
 
 			if (endpoint.getServletContextHelper().handleSecurity(request, response)) {
-				if (filters.isEmpty()) {
-					endpoint.service(request, response);
+				try {
+					if (filters.isEmpty()) {
+						endpoint.service(request, response);
+					}
+					else {
+						Collections.sort(filters);
+
+						FilterChain chain = new FilterChainImpl(
+							filters, endpoint, dispatchTargets.getDispatcherType());
+
+						chain.doFilter(request, response);
+					}
 				}
-				else {
-					Collections.sort(filters);
-
-					FilterChain chain = new FilterChainImpl(
-						filters, endpoint, dispatchTargets.getDispatcherType());
-
-					chain.doFilter(request, response);
+				finally {
+					endpoint.getServletContextHelper().finishSecurity(request, response);
 				}
 			}
 		}
@@ -144,14 +149,12 @@ public class ResponseStateHandler {
 					responseWrapper.setCompleted(true);
 				}
 				else {
-					try {
-						PrintWriter writer = response.getWriter();
-						writer.close();
+					try (PrintWriter writer = response.getWriter()) {
+						// just force a close
 					}
 					catch (IllegalStateException ise1) {
-						try {
-							ServletOutputStream outputStream = response.getOutputStream();
-							outputStream.close();
+						try (ServletOutputStream outputStream = response.getOutputStream()) {
+							// just force a close
 						}
 						catch (IllegalStateException ise2) {
 							// ignore
@@ -219,7 +222,7 @@ public class ResponseStateHandler {
 
 		do {
 			errorDispatchTargets = contextController.getDispatchTargets(
-				className, null, null, null, null, null, Match.EXACT, null);
+				className, null, null, null, null, null, Match.ERROR, null);
 
 			if (errorDispatchTargets != null) {
 				break;
@@ -319,7 +322,7 @@ public class ResponseStateHandler {
 		ContextController contextController = dispatchTargets.getContextController();
 
 		DispatchTargets errorDispatchTargets = contextController.getDispatchTargets(
-			String.valueOf(status), null, null, null, null, null, Match.EXACT, null);
+			String.valueOf(status), null, null, null, null, null, Match.ERROR, null);
 
 		if (errorDispatchTargets == null) {
 			wrappedResponse.sendError(status, responseWrapper.getMessage());

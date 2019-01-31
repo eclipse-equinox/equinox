@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Raymond Augé.
+ * Copyright (c) 2016, 2019 Raymond Augé.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,31 +20,7 @@ import org.osgi.service.http.runtime.dto.ServletDTO;
  * This type may become irrelevant if the properties appear as part of a
  * future OSGi Http Whiteboard specification.
  */
+@Deprecated
 public class ExtendedServletDTO extends ServletDTO {
-
-	/**
-	 * Specifies whether multipart support is enabled.
-	 */
-	public boolean multipartEnabled;
-
-	/**
-	 * Specifies the size threshold after which the file will be written to disk.
-	 */
-	public int multipartFileSizeThreshold;
-
-	/**
-	 * Specifies the location where the files can be stored on disk.
-	 */
-	public String multipartLocation;
-
-	/**
-	 * Specifies the maximum size of a file being uploaded.
-	 */
-	public long multipartMaxFileSize;
-
-	/**
-	 * Specifies the maximum request size.
-	 */
-	public long multipartMaxRequestSize;
-
+	// deprecated
 }

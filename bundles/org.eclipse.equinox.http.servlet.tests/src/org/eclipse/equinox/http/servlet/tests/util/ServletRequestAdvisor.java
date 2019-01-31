@@ -281,6 +281,10 @@ public class ServletRequestAdvisor extends Object {
 		connection.setReadTimeout(150 * 1000);
 
 		if (headers != null) {
+			if (headers.containsKey("method")) {
+				connection.setRequestMethod((String)headers.remove("method").get(0));
+			}
+
 			for(Map.Entry<String, List<Object>> entry : headers.entrySet()) {
 				for(Object entryValue : entry.getValue()) {
 					if (entryValue instanceof String) {
@@ -339,7 +343,9 @@ public class ServletRequestAdvisor extends Object {
 
 			writer.append("--" + boundary);
 			writer.append(CRLF);
-			writer.append("Content-Disposition: form-data; name=\"file\"; filename=\"");
+			writer.append("Content-Disposition: form-data; name=\"");
+			writer.append(param);
+			writer.append("\"; filename=\"");
 			writer.append(fileName);
 			writer.append("\"");
 			writer.append(CRLF);

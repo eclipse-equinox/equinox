@@ -20,18 +20,16 @@ import java.util.*;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
-import org.eclipse.equinox.http.servlet.dto.ExtendedServletDTO;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
-import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
-import org.eclipse.equinox.http.servlet.internal.dto.ExtendedErrorPageDTO;
+import org.eclipse.equinox.http.servlet.internal.context.ServiceHolder;
 import org.eclipse.equinox.http.servlet.internal.multipart.MultipartSupport;
 import org.eclipse.equinox.http.servlet.internal.multipart.MultipartSupportFactory;
-import org.eclipse.equinox.http.servlet.internal.servlet.Match;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.context.ServletContextHelper;
+import org.osgi.service.http.runtime.dto.ServletDTO;
 
 //This class wraps the servlet object registered in the HttpService.registerServlet call, to manage the context classloader when handleRequests are being asked.
-public class ServletRegistration extends EndpointRegistration<ExtendedServletDTO> {
+public class ServletRegistration extends EndpointRegistration<ServletDTO> {
 
 	private static MultipartSupportFactory factory;
 
@@ -52,13 +50,11 @@ public class ServletRegistration extends EndpointRegistration<ExtendedServletDTO
 	}
 
 	public ServletRegistration(
-		ServiceHolder<Servlet> servletHolder, ExtendedServletDTO servletDTO, ExtendedErrorPageDTO errorPageDTO,
+		ServiceHolder<Servlet> servletHolder, ServletDTO servletDTO,
 		ServletContextHelper servletContextHelper,
 		ContextController contextController, ServletContext servletContext) {
 
 		super(servletHolder, servletDTO, servletContextHelper, contextController);
-
-		this.errorPageDTO = errorPageDTO;
 
 		if (servletDTO.multipartEnabled) {
 			if (factory == null) {
@@ -71,10 +67,6 @@ public class ServletRegistration extends EndpointRegistration<ExtendedServletDTO
 			multipartSupport = null;
 		}
 		needDecode = MatchableRegistration.patternsRequireDecode(servletDTO.patterns);
-	}
-
-	public ExtendedErrorPageDTO getErrorPageDTO() {
-		return errorPageDTO;
 	}
 
 	@Override
@@ -97,28 +89,6 @@ public class ServletRegistration extends EndpointRegistration<ExtendedServletDTO
 		return servletHolder.getServiceReference();
 	}
 
-	@Override
-	public String match(
-		String name, String servletPath, String pathInfo, String extension,
-		Match match) {
-
-		if ((errorPageDTO != null) && (name != null)) {
-			for (long errorCode : errorPageDTO.errorCodes) {
-				if (String.valueOf(errorCode).equals(name)) {
-					return name;
-				}
-			}
-
-			for (String exception : errorPageDTO.exceptions) {
-				if (exception.equals(name)) {
-					return name;
-				}
-			}
-		}
-
-		return super.match(name, servletPath, pathInfo, extension, match);
-	}
-
 	public Map<String, Part> parseRequest(HttpServletRequest request) throws IOException, ServletException {
 		if (multipartSupport == null) {
 			throw new IOException("Servlet not configured for multipart!"); //$NON-NLS-1$
@@ -132,6 +102,5 @@ public class ServletRegistration extends EndpointRegistration<ExtendedServletDTO
 	}
 
 	private final boolean needDecode;
-	private final ExtendedErrorPageDTO errorPageDTO;
 	private final MultipartSupport multipartSupport;
 }

@@ -17,12 +17,19 @@
 package org.eclipse.equinox.http.servlet.internal.servlet;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import org.eclipse.equinox.http.servlet.internal.Activator;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.context.DispatchTargets;
+import org.eclipse.equinox.http.servlet.internal.registration.PreprocessorRegistration;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.whiteboard.Preprocessor;
 
 /**
  * The ProxyServlet is the private side of a Servlet that when registered (and init() called) in a servlet container
@@ -88,11 +95,50 @@ public class ProxyServlet extends HttpServlet {
 			alias = Const.SLASH;
 		}
 
+		preprocess(request, response, alias, request.getDispatcherType());
+	}
+
+	public void preprocess(
+			HttpServletRequest request,
+			HttpServletResponse response, String alias, DispatcherType dispatcherType)
+		throws ServletException, IOException {
+
+		Map<ServiceReference<Preprocessor>, PreprocessorRegistration> registrations = httpServiceRuntimeImpl.getPreprocessorRegistrations();
+
+		if (registrations.isEmpty()) {
+			dispatch(request, response, alias, dispatcherType);
+		}
+		else {
+			List<PreprocessorRegistration> preprocessors = new CopyOnWriteArrayList<>();
+
+			for (Entry<ServiceReference<Preprocessor>, PreprocessorRegistration> entry : registrations.entrySet()) {
+				PreprocessorRegistration registration = entry.getValue();
+				preprocessors.add(registration);
+				registration.addReference();
+			}
+
+			try {
+				FilterChain chain = new PreprocessorChainImpl(preprocessors, alias, dispatcherType, this);
+
+				chain.doFilter(request, response);
+			}
+			finally {
+				for (PreprocessorRegistration registration : preprocessors) {
+					registration.removeReference();
+				}
+			}
+		}
+	}
+
+	public void dispatch(
+			HttpServletRequest request,
+			HttpServletResponse response, String alias, DispatcherType dispatcherType)
+		throws ServletException, IOException {
+
 		DispatchTargets dispatchTargets = httpServiceRuntimeImpl.getDispatchTargets(alias, null);
 
 		if (dispatchTargets != null) {
-			dispatchTargets.doDispatch(
-				request, response, alias, request.getDispatcherType());
+			dispatchTargets.doDispatch(request, response, alias, dispatcherType);
 
 			return;
 		}

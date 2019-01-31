@@ -30,15 +30,13 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  * @author Raymond Augé
  */
 public class ContextFilterTrackerCustomizer
-	extends RegistrationServiceTrackerCustomizer<Filter, AtomicReference<FilterRegistration>> {
+	extends RegistrationServiceTrackerCustomizer<Filter, FilterRegistration> {
 
 	public ContextFilterTrackerCustomizer(
 		BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime,
 		ContextController contextController) {
 
-		super(bundleContext, httpServiceRuntime);
-
-		this.contextController = contextController;
+		super(bundleContext, httpServiceRuntime, contextController);
 	}
 
 	@Override
@@ -51,6 +49,8 @@ public class ContextFilterTrackerCustomizer
 		}
 
 		try {
+			contextController.checkShutdown();
+
 			if (!contextController.matches(serviceReference)) {
 				// Only the default context will perform the "does anyone match" checks.
 				if (httpServiceRuntime.isDefaultContext(contextController) &&
@@ -70,41 +70,26 @@ public class ContextFilterTrackerCustomizer
 		catch (HttpWhiteboardFailureException hwfe) {
 			httpServiceRuntime.log(hwfe.getMessage(), hwfe);
 
-			recordFailedFilterDTO(serviceReference, hwfe.getFailureReason());
+			recordFailed(serviceReference, hwfe.getFailureReason());
 		}
 		catch (Exception e) {
 			httpServiceRuntime.log(e.getMessage(), e);
 
-			recordFailedFilterDTO(serviceReference, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
+			recordFailed(serviceReference, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
+		}
+		finally {
+			httpServiceRuntime.incrementServiceChangecount();
 		}
 
 		return result;
 	}
 
 	@Override
-	public void modifiedService(
-		ServiceReference<Filter> serviceReference,
-		AtomicReference<FilterRegistration> filterReference) {
-
-		removedService(serviceReference, filterReference);
-		AtomicReference<FilterRegistration> added = addingService(serviceReference);
-		filterReference.set(added.get());
-	}
-
-	@Override
-	public void removedService(
-		ServiceReference<Filter> serviceReference,
-		AtomicReference<FilterRegistration> filterReference) {
-		FilterRegistration registration = filterReference.get();
-		if (registration != null) {
-			// Destroy now ungets the object we are using
-			registration.destroy();
-		}
-
+	void removeFailed(ServiceReference<Filter> serviceReference) {
 		contextController.getHttpServiceRuntime().removeFailedFilterDTO(serviceReference);
 	}
 
-	private void recordFailedFilterDTO(
+	private void recordFailed(
 		ServiceReference<Filter> serviceReference, int failureReason) {
 
 		FailedFilterDTO failedFilterDTO = new FailedFilterDTO();
@@ -128,7 +113,5 @@ public class ContextFilterTrackerCustomizer
 
 		contextController.getHttpServiceRuntime().recordFailedFilterDTO(serviceReference, failedFilterDTO);
 	}
-
-	private ContextController contextController;
 
 }

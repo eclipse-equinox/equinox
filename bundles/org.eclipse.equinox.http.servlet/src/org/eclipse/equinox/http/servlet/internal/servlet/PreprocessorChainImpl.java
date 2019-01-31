@@ -19,43 +19,40 @@ import java.util.List;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.eclipse.equinox.http.servlet.internal.registration.EndpointRegistration;
-import org.eclipse.equinox.http.servlet.internal.registration.FilterRegistration;
+import org.eclipse.equinox.http.servlet.internal.registration.PreprocessorRegistration;
 
-public class FilterChainImpl implements FilterChain {
+public class PreprocessorChainImpl implements FilterChain {
 
-	private final List<FilterRegistration> matchingFilterRegistrations;
-	private final EndpointRegistration<?> registration;
+	private final ProxyServlet proxyServlet;
+	private final List<PreprocessorRegistration> preprocessors;
+	private final String alias;
 	private final DispatcherType dispatcherType;
 	private final int filterCount;
 	private int filterIndex = 0;
 
-	public FilterChainImpl(
-		List<FilterRegistration> matchingFilterRegistrations,
-		EndpointRegistration<?> registration, DispatcherType dispatcherType) {
+	public PreprocessorChainImpl(
+		List<PreprocessorRegistration> preprocessors,
+		String alias, DispatcherType dispatcherType, ProxyServlet proxyServlet) {
 
-		this.matchingFilterRegistrations = matchingFilterRegistrations;
+		this.preprocessors = preprocessors;
+		this.alias = alias;
 		this.dispatcherType = dispatcherType;
-		this.registration = registration;
-		this.filterCount = matchingFilterRegistrations.size();
+		this.proxyServlet = proxyServlet;
+		this.filterCount = preprocessors.size();
 	}
 
 	public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 		if (filterIndex < filterCount) {
-			FilterRegistration filterRegistration = matchingFilterRegistrations.get(filterIndex++);
+			PreprocessorRegistration registration = preprocessors.get(filterIndex++);
 
-			if (filterRegistration.appliesTo(this)) {
-				filterRegistration.doFilter((HttpServletRequest) request, (HttpServletResponse) response, this);
+			registration.doFilter(
+				(HttpServletRequest) request, (HttpServletResponse) response, this);
 
-				return;
-			}
+			return;
 		}
 
-		registration.service((HttpServletRequest) request, (HttpServletResponse) response);
-	}
-
-	public DispatcherType getDispatcherType() {
-		return dispatcherType;
+		proxyServlet.dispatch(
+			(HttpServletRequest) request, (HttpServletResponse) response, alias, dispatcherType);
 	}
 
 }

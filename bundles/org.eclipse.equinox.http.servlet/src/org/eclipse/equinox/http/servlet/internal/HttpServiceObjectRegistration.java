@@ -15,18 +15,21 @@
 
 package org.eclipse.equinox.http.servlet.internal;
 
+import org.eclipse.equinox.http.servlet.internal.context.HttpContextHolder;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceRegistration;
 
 public class HttpServiceObjectRegistration {
 	public final Object serviceKey;
 	public final ServiceRegistration<?> registration;
+	public final HttpContextHolder httpContextHolder;
 	public final Bundle bundle;
 	public HttpServiceObjectRegistration(
 		Object serviceKey, ServiceRegistration<?> registration,
-		Bundle bundle) {
+		HttpContextHolder httpContextHolder, Bundle bundle) {
 		this.serviceKey = serviceKey;
 		this.registration = registration;
+		this.httpContextHolder = httpContextHolder;
 		this.bundle = bundle;
 	}
 }

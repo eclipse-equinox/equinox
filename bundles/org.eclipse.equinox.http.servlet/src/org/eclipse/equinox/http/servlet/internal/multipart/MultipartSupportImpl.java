@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Raymond Augé and others.
+ * Copyright (c) 2016, 2019 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,13 +25,13 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.eclipse.equinox.http.servlet.dto.ExtendedServletDTO;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.http.runtime.dto.ServletDTO;
 
 public class MultipartSupportImpl implements MultipartSupport {
 
-	public MultipartSupportImpl(ExtendedServletDTO servletDTO, ServletContext servletContext) {
+	public MultipartSupportImpl(ServletDTO servletDTO, ServletContext servletContext) {
 		this.servletDTO = servletDTO;
 
 		// Must return non-null File. See Servlet 3.1 §4.8.1
@@ -107,7 +107,7 @@ public class MultipartSupportImpl implements MultipartSupport {
 		return parts;
 	}
 
-	private final ExtendedServletDTO servletDTO;
+	private final ServletDTO servletDTO;
 	private final ServletFileUpload upload;
 
 

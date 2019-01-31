@@ -20,31 +20,7 @@ import org.osgi.service.http.runtime.dto.FailedServletDTO;
  * This type may become irrelevant if the properties appear as part of a
  * future OSGi Http Whiteboard specification.
  */
+@Deprecated
 public class ExtendedFailedServletDTO extends FailedServletDTO {
-
-	/**
-	 * Specifies whether multipart support is enabled.
-	 */
-	public boolean multipartEnabled;
-
-	/**
-	 * Specifies the size threshold after which the file will be written to disk.
-	 */
-	public int multipartFileSizeThreshold;
-
-	/**
-	 * Specifies the location where the files can be stored on disk.
-	 */
-	public String multipartLocation;
-
-	/**
-	 * Specifies the maximum size of a file being uploaded.
-	 */
-	public long multipartMaxFileSize;
-
-	/**
-	 * Specifies the maximum request size.
-	 */
-	public long multipartMaxRequestSize;
-
+	// ignore
 }

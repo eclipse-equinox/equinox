@@ -167,21 +167,25 @@ public class Activator
 		BundleContext trackingContext = useSystemContext ? context.getBundle(Constants.SYSTEM_BUNDLE_LOCATION).getBundleContext() : context;
 		HttpServiceRuntimeImpl httpServiceRuntime = new HttpServiceRuntimeImpl(
 			trackingContext, context, servletContext, serviceProperties);
+		httpServiceRuntime.open();
 
 		proxyServlet.setHttpServiceRuntimeImpl(httpServiceRuntime);
 
 		// imperative API support;
 		// the http service must be registered first so we can get its service id
-		HttpServiceFactory httpServiceFactory = new HttpServiceFactory(
-			httpServiceRuntime);
+		HttpServiceFactory httpServiceFactory = new HttpServiceFactory(httpServiceRuntime);
 		ServiceRegistration<?> hsfRegistration = context.registerService(
 			HTTP_SERVICES_CLASSES, httpServiceFactory, serviceProperties);
 
 		serviceProperties.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ID, Collections.singletonList(hsfRegistration.getReference().getProperty(Constants.SERVICE_ID)));
+
 		ServiceRegistration<HttpServiceRuntime> hsrRegistration =
 			context.registerService(
 				HttpServiceRuntime.class, httpServiceRuntime,
 				serviceProperties);
+
+		httpServiceRuntime.setHsrRegistration(hsrRegistration);
+
 		return new HttpTuple(
 			proxyServlet, httpServiceFactory, hsfRegistration,
 			httpServiceRuntime, hsrRegistration);
@@ -241,18 +245,6 @@ public class Activator
 			if (!httpServiceEndpoints.isEmpty()) {
 				return httpServiceEndpoints.toArray(new String[0]);
 			}
-		}
-
-		int majorVersion = servletContext.getMajorVersion();
-
-		if (majorVersion < 3) {
-			servletContext.log(
-				"The http container does not support servlet 3.0+. " +
-					"Therefore, the value of " +
-						HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT +
-							" cannot be calculated.");
-
-			return new String[0];
 		}
 
 		contextPath = servletContext.getContextPath();

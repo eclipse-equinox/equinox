@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2019 Raymond Augé and others.
+ * Copyright (c) Feb. 1, 2019 Liferay, Inc.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9,33 +9,34 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     Raymond Augé <raymond.auge@liferay.com> - Bug 436698
+ *    Liferay, Inc. - initial API and implementation and/or initial
+ *                    documentation
  ******************************************************************************/
 
 package org.eclipse.equinox.http.servlet.internal.customizer;
 
-import static org.osgi.service.http.whiteboard.HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY;
-import static org.osgi.service.http.whiteboard.HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT;
+import static org.osgi.service.http.whiteboard.HttpWhiteboardConstants.*;
 
 import java.util.concurrent.atomic.AtomicReference;
+import javax.servlet.Servlet;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
+import org.eclipse.equinox.http.servlet.internal.dto.ExtendedErrorPageDTO;
 import org.eclipse.equinox.http.servlet.internal.error.HttpWhiteboardFailureException;
-import org.eclipse.equinox.http.servlet.internal.registration.ResourceRegistration;
+import org.eclipse.equinox.http.servlet.internal.registration.ErrorPageRegistration;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
-import org.eclipse.equinox.http.servlet.internal.util.StringPlus;
-import org.osgi.framework.*;
+import org.eclipse.equinox.http.servlet.internal.util.DTOUtil;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.runtime.dto.DTOConstants;
-import org.osgi.service.http.runtime.dto.FailedResourceDTO;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /**
  * @author Raymond Augé
  */
-public class ContextResourceTrackerCustomizer
-	extends RegistrationServiceTrackerCustomizer<Object, ResourceRegistration> {
+public class ContextErrorPageTrackerCustomizer
+	extends RegistrationServiceTrackerCustomizer<Servlet, ErrorPageRegistration>{
 
-	public ContextResourceTrackerCustomizer(
+	public ContextErrorPageTrackerCustomizer(
 		BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime,
 		ContextController contextController) {
 
@@ -43,10 +44,10 @@ public class ContextResourceTrackerCustomizer
 	}
 
 	@Override
-	public AtomicReference<ResourceRegistration> addingService(
-		ServiceReference<Object> serviceReference) {
+	public AtomicReference<ErrorPageRegistration>
+		addingService(ServiceReference<Servlet> serviceReference) {
 
-		AtomicReference<ResourceRegistration> result = new AtomicReference<ResourceRegistration>();
+		AtomicReference<ErrorPageRegistration> result = new AtomicReference<ErrorPageRegistration>();
 		if (!httpServiceRuntime.matches(serviceReference)) {
 			return result;
 		}
@@ -68,16 +69,17 @@ public class ContextResourceTrackerCustomizer
 			else if (contextController.isLegacyContext() &&
 					(serviceReference.getProperty(Const.EQUINOX_LEGACY_TCCL_PROP) == null) &&  // IS a whiteboard service
 					(serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_SELECT) != null) &&
-					(((String)serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_SELECT))).contains(HTTP_SERVICE_CONTEXT_PROPERTY.concat(Const.EQUAL))) {
+					(((String)serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_SELECT))).contains(HTTP_SERVICE_CONTEXT_PROPERTY.concat(Const.EQUAL)) &&
+					(serviceReference.getProperty(HTTP_WHITEBOARD_SERVLET_PATTERN) != null)) {
 
 				// don't allow whiteboard Servlets that specifically attempt to bind to a legacy context
 				throw new HttpWhiteboardFailureException(
-					"Whiteboard resources cannot bind to legacy contexts. " + serviceReference, DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING); //$NON-NLS-1$
+					"Whiteboard ErrorPages with pattern cannot bind to legacy contexts. " + serviceReference, DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING); //$NON-NLS-1$
 			}
 
-			httpServiceRuntime.removeFailedResourceDTO(serviceReference);
+			httpServiceRuntime.removeFailedErrorPageDTO(serviceReference);
 
-			result.set(contextController.addResourceRegistration(serviceReference));
+			result.set(contextController.addErrorPageRegistration(serviceReference));
 		}
 		catch (HttpWhiteboardFailureException hwfe) {
 			httpServiceRuntime.log(hwfe.getMessage(), hwfe);
@@ -97,23 +99,14 @@ public class ContextResourceTrackerCustomizer
 	}
 
 	@Override
-	void removeFailed(ServiceReference<Object> serviceReference) {
-		contextController.getHttpServiceRuntime().removeFailedResourceDTO(serviceReference);
+	void removeFailed(ServiceReference<Servlet> serviceReference) {
+		contextController.getHttpServiceRuntime().removeFailedErrorPageDTO(serviceReference);
 	}
 
-	private void recordFailed(
-		ServiceReference<Object> serviceReference, int failureReason) {
+	void recordFailed(ServiceReference<?> servletReference, int failureReason) {
+		ExtendedErrorPageDTO errorPageDTO = DTOUtil.assembleErrorPageDTO(servletReference, contextController.getServiceId(), false);
 
-		FailedResourceDTO failedResourceDTO = new FailedResourceDTO();
-
-		failedResourceDTO.failureReason = failureReason;
-		failedResourceDTO.patterns = StringPlus.from(
-			serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN)).toArray(new String[0]);
-		failedResourceDTO.prefix = String.valueOf(serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX));
-		failedResourceDTO.serviceId = (Long)serviceReference.getProperty(Constants.SERVICE_ID);
-		failedResourceDTO.servletContextId = contextController.getServiceId();
-
-		contextController.getHttpServiceRuntime().recordFailedResourceDTO(serviceReference, failedResourceDTO);
+		contextController.recordFailedErrorPageDTO(servletReference, errorPageDTO, failureReason);
 	}
 
 }

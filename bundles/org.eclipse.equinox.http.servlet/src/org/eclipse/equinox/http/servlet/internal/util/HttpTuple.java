@@ -39,6 +39,7 @@ public class HttpTuple {
 		Activator.unregisterHttpService(proxyServlet);
 		proxyServlet.setHttpServiceRuntimeImpl(null);
 		hsfRegistration.unregister();
+		httpServiceRuntime.setHsrRegistration(null);
 		hsrRegistration.unregister();
 		httpServiceRuntime.destroy();
 	}

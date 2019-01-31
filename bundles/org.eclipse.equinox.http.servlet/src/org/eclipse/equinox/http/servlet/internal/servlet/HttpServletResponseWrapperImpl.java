@@ -32,14 +32,14 @@ public class HttpServletResponseWrapperImpl extends HttpServletResponseWrapper {
 	}
 
 	@Override
-	public void sendError(int status) {
-		this.status = status;
+	public void sendError(int theStatus) {
+		this.status = theStatus;
 	}
 
 	@Override
-	public void sendError(int status, String message) {
-		this.status = status;
-		this.message = message;
+	public void sendError(int theStatus, String theMessage) {
+		this.status = theStatus;
+		this.message = theMessage;
 	}
 
 	public String getMessage() {

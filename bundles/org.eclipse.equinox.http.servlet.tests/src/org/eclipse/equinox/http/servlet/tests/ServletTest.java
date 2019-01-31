@@ -2666,7 +2666,6 @@ public class ServletTest extends BaseTest {
 
 				List<FileItem> items = null;
 				try {
-					@SuppressWarnings("unchecked")
 					List<FileItem> parseRequest = upload.parseRequest(req);
 					items = parseRequest;
 				} catch (FileUploadException e) {

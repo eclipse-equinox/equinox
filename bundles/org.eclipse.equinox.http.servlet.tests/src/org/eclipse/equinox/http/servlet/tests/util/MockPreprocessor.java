@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2019 Raymond Augé and others.
+ * Copyright (c) Jan. 26, 2019 Liferay, Inc.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9,16 +9,13 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     Raymond Augé <raymond.auge@liferay.com> - Bug 436698
+ *    Liferay, Inc. - tests
  ******************************************************************************/
 
-package org.eclipse.equinox.http.servlet.internal.servlet;
+package org.eclipse.equinox.http.servlet.tests.util;
 
-/**
- * @author Raymond Augé
- */
-public enum Match {
+import org.osgi.service.http.whiteboard.Preprocessor;
 
-	EXACT, ERROR, EXTENSION, REGEX, DEFAULT_SERVLET, CONTEXT_ROOT
+public class MockPreprocessor extends MockFilter implements Preprocessor {
 
 }

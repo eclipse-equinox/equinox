@@ -14,17 +14,236 @@
 
 package org.eclipse.equinox.http.servlet.internal.util;
 
+import static org.osgi.service.http.whiteboard.HttpWhiteboardConstants.*;
+
 import java.lang.reflect.Array;
 import java.util.*;
-import org.eclipse.equinox.http.servlet.dto.ExtendedFailedServletDTO;
-import org.eclipse.equinox.http.servlet.dto.ExtendedServletDTO;
+import org.eclipse.equinox.http.servlet.internal.dto.ExtendedErrorPageDTO;
+import org.eclipse.equinox.http.servlet.internal.dto.ExtendedErrorPageDTO.ErrorCodeType;
+import org.eclipse.equinox.http.servlet.internal.error.HttpWhiteboardFailureException;
 import org.osgi.dto.DTO;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.runtime.dto.*;
 
 /**
  * @author Raymond Augé
  */
 public class DTOUtil {
+
+	public static ExtendedErrorPageDTO assembleErrorPageDTO(ServiceReference<?> serviceReference, long contextId, boolean validated) {
+		Object errorPageObj = serviceReference.getProperty(HTTP_WHITEBOARD_SERVLET_ERROR_PAGE);
+
+		if (errorPageObj == null) {
+			return null;
+		}
+
+		ExtendedErrorPageDTO errorPageDTO = new ExtendedErrorPageDTO();
+
+		errorPageDTO.asyncSupported = false;
+		Object asyncSupportedObj = serviceReference.getProperty(HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED);
+		if (asyncSupportedObj == null) {
+			// ignored
+		}
+		else if (Boolean.class.isInstance(asyncSupportedObj)) {
+			errorPageDTO.asyncSupported = ((Boolean)asyncSupportedObj).booleanValue();
+		}
+		else if (String.class.isInstance(asyncSupportedObj)) {
+			errorPageDTO.asyncSupported = Boolean.valueOf((String)asyncSupportedObj);
+		}
+		// There is no validation for this scenario, truthiness of any other input is false
+
+		List<String> errorPages = StringPlus.from(errorPageObj);
+		if (errorPages.isEmpty()) {
+			throw new HttpWhiteboardFailureException("'errorPage' expects String, String[] or Collection<String>", DTOConstants.FAILURE_REASON_VALIDATION_FAILED); //$NON-NLS-1$
+		}
+
+		List<String> exceptions = new ArrayList<String>();
+		Set<Long> errorCodeSet = new LinkedHashSet<Long>();
+
+		for(String errorPage : errorPages) {
+			try {
+				if ("4xx".equals(errorPage)) { //$NON-NLS-1$
+					errorPageDTO.errorCodeType = ErrorCodeType.RANGE_4XX;
+					for (long code = 400; code < 500; code++) {
+						errorCodeSet.add(code);
+					}
+				} else if ("5xx".equals(errorPage)) { //$NON-NLS-1$
+					errorPageDTO.errorCodeType = ErrorCodeType.RANGE_5XX;
+					for (long code = 500; code < 600; code++) {
+						errorCodeSet.add(code);
+					}
+				} else if (errorPage.matches("\\d{3}")) { //$NON-NLS-1$
+					errorPageDTO.errorCodeType = ErrorCodeType.SPECIFIC;
+					long code = Long.parseLong(errorPage);
+					errorCodeSet.add(code);
+				} else {
+					exceptions.add(errorPage);
+				}
+			}
+			catch (NumberFormatException nfe) {
+				exceptions.add(errorPage);
+			}
+		}
+
+		errorPageDTO.errorCodes = new long[errorCodeSet.size()];
+		int i = 0;
+		for(Long code : errorCodeSet) {
+			errorPageDTO.errorCodes[i] = code;
+			i++;
+		}
+
+		errorPageDTO.exceptions = exceptions.toArray(new String[0]);
+
+		errorPageDTO.initParams = ServiceProperties.parseInitParams(
+			serviceReference, HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX);
+
+		Object servletNameObj = serviceReference.getProperty(HTTP_WHITEBOARD_SERVLET_NAME);
+		if (servletNameObj == null) {
+			// ignore
+		}
+		else if (String.class.isInstance(servletNameObj)) {
+			errorPageDTO.name = (String)servletNameObj;
+		}
+		else if (validated) {
+			throw new HttpWhiteboardFailureException("'name' expects String", DTOConstants.FAILURE_REASON_VALIDATION_FAILED); //$NON-NLS-1$
+		}
+
+		errorPageDTO.serviceId = (Long)serviceReference.getProperty(Constants.SERVICE_ID);
+		errorPageDTO.servletContextId = contextId;
+
+		return errorPageDTO;
+	}
+
+	@SuppressWarnings("deprecation")
+	public static org.eclipse.equinox.http.servlet.dto.ExtendedServletDTO assembleServletDTO(ServiceReference<?> serviceReference, long contextId, boolean validated) {
+		org.eclipse.equinox.http.servlet.dto.ExtendedServletDTO servletDTO = new org.eclipse.equinox.http.servlet.dto.ExtendedServletDTO();
+
+		servletDTO.asyncSupported = false;
+		Object asyncSupportedObj = serviceReference.getProperty(HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED);
+		if (asyncSupportedObj == null) {
+			// ignored
+		}
+		else if (Boolean.class.isInstance(asyncSupportedObj)) {
+			servletDTO.asyncSupported = ((Boolean)asyncSupportedObj).booleanValue();
+		}
+		else if (String.class.isInstance(asyncSupportedObj)) {
+			servletDTO.asyncSupported = Boolean.valueOf((String)asyncSupportedObj);
+		}
+		// There is no validation for this scenario, truthiness of any other input is false
+
+		servletDTO.initParams = ServiceProperties.parseInitParams(
+			serviceReference, HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX);
+
+		servletDTO.multipartEnabled = false;
+		Object multipartEnabledObj = serviceReference.getProperty(HTTP_WHITEBOARD_SERVLET_MULTIPART_ENABLED);
+		if (multipartEnabledObj == null) {
+			multipartEnabledObj = serviceReference.getProperty(Const.EQUINOX_HTTP_MULTIPART_ENABLED);
+		}
+		if (multipartEnabledObj == null) {
+			// ignore
+		}
+		else if (Boolean.class.isInstance(multipartEnabledObj)) {
+			servletDTO.multipartEnabled = ((Boolean)multipartEnabledObj).booleanValue();
+		}
+		else if (String.class.isInstance(multipartEnabledObj)) {
+			servletDTO.multipartEnabled = Boolean.valueOf((String)multipartEnabledObj);
+		}
+		// There is no validation for this scenario, truthiness of any other input is false
+
+		servletDTO.multipartFileSizeThreshold = 0;
+		servletDTO.multipartLocation = Const.BLANK;
+		servletDTO.multipartMaxFileSize = -1L;
+		servletDTO.multipartMaxRequestSize = -1L;
+
+		if (servletDTO.multipartEnabled) {
+			Object multipartFileSizeThresholdObj = serviceReference.getProperty(HTTP_WHITEBOARD_SERVLET_MULTIPART_FILESIZETHRESHOLD);
+			if (multipartFileSizeThresholdObj == null) {
+				multipartFileSizeThresholdObj = serviceReference.getProperty(Const.EQUINOX_HTTP_MULTIPART_FILESIZETHRESHOLD);
+			}
+			if (multipartFileSizeThresholdObj == null) {
+				// ignore
+			}
+			else if (Integer.class.isInstance(multipartFileSizeThresholdObj)) {
+				servletDTO.multipartFileSizeThreshold = ((Integer)multipartFileSizeThresholdObj).intValue();
+			}
+			else if (validated) {
+				throw new HttpWhiteboardFailureException("'multipartFileSizeThreshold' expects int or Integer", DTOConstants.FAILURE_REASON_VALIDATION_FAILED); //$NON-NLS-1$
+			}
+
+			Object multipartLocationObj = serviceReference.getProperty(HTTP_WHITEBOARD_SERVLET_MULTIPART_LOCATION);
+			if (multipartLocationObj == null) {
+				multipartLocationObj = serviceReference.getProperty(Const.EQUINOX_HTTP_MULTIPART_LOCATION);
+			}
+			if (multipartLocationObj == null) {
+				// ignore
+			}
+			else if (String.class.isInstance(multipartLocationObj)) {
+				servletDTO.multipartLocation = (String)multipartLocationObj;
+			}
+			else if (validated) {
+				throw new HttpWhiteboardFailureException("'multipartLocation' expects String", DTOConstants.FAILURE_REASON_VALIDATION_FAILED); //$NON-NLS-1$
+			}
+
+			Object multipartMaxFileSizeObj = serviceReference.getProperty(HTTP_WHITEBOARD_SERVLET_MULTIPART_MAXFILESIZE);
+			if (multipartMaxFileSizeObj == null) {
+				multipartMaxFileSizeObj = serviceReference.getProperty(Const.EQUINOX_HTTP_MULTIPART_MAXFILESIZE);
+			}
+			if (multipartMaxFileSizeObj == null) {
+				// ignore
+			}
+			else if (Long.class.isInstance(multipartMaxFileSizeObj)) {
+				servletDTO.multipartMaxFileSize = ((Long)multipartMaxFileSizeObj).longValue();
+			}
+			else if (validated) {
+				throw new HttpWhiteboardFailureException("'multipartMaxFileSize' expects [L|l]ong", DTOConstants.FAILURE_REASON_VALIDATION_FAILED); //$NON-NLS-1$
+			}
+
+			Object multipartMaxRequestSizeObj = serviceReference.getProperty(HTTP_WHITEBOARD_SERVLET_MULTIPART_MAXREQUESTSIZE);
+			if (multipartMaxRequestSizeObj == null) {
+				multipartMaxRequestSizeObj = serviceReference.getProperty(Const.EQUINOX_HTTP_MULTIPART_MAXREQUESTSIZE);
+			}
+			if (multipartMaxRequestSizeObj == null) {
+				// ignore
+			}
+			else if (Long.class.isInstance(multipartMaxRequestSizeObj)) {
+				servletDTO.multipartMaxRequestSize = ((Long)multipartMaxRequestSizeObj).longValue();
+			}
+			else if (validated) {
+				throw new HttpWhiteboardFailureException("'multipartMaxRequestSize' expects [L|l]ong", DTOConstants.FAILURE_REASON_VALIDATION_FAILED); //$NON-NLS-1$
+			}
+		}
+
+		Object servletNameObj = serviceReference.getProperty(HTTP_WHITEBOARD_SERVLET_NAME);
+		if (servletNameObj == null) {
+			// ignore
+		}
+		else if (String.class.isInstance(servletNameObj)) {
+			servletDTO.name = (String)servletNameObj;
+		}
+		else if (validated) {
+			throw new HttpWhiteboardFailureException("'name' expects String", DTOConstants.FAILURE_REASON_VALIDATION_FAILED); //$NON-NLS-1$
+		}
+
+		Object patternObj = serviceReference.getProperty(HTTP_WHITEBOARD_SERVLET_PATTERN);
+		if (patternObj == null) {
+			servletDTO.patterns = new String[0];
+		}
+		else {
+			servletDTO.patterns = sort(StringPlus.from(patternObj).toArray(new String[0]));
+
+			if (validated && (servletDTO.patterns.length > 0)) {
+				for (String pattern : servletDTO.patterns) {
+					checkPattern(pattern);
+				}
+			}
+		}
+
+		servletDTO.serviceId = (Long)serviceReference.getProperty(Constants.SERVICE_ID);
+		servletDTO.servletContextId = contextId;
+
+		return servletDTO;
+	}
 
 	public static ErrorPageDTO clone(ErrorPageDTO original) {
 		ErrorPageDTO clone = new ErrorPageDTO();
@@ -85,6 +304,16 @@ public class DTOUtil {
 		return clone;
 	}
 
+	public static FailedPreprocessorDTO clone(FailedPreprocessorDTO original) {
+		FailedPreprocessorDTO clone = new FailedPreprocessorDTO();
+
+		clone.failureReason = copy(original.failureReason);
+		clone.initParams = copyStringMap(original.initParams);
+		clone.serviceId = copy(original.serviceId);
+
+		return clone;
+	}
+
 	public static FailedResourceDTO clone(FailedResourceDTO original) {
 		FailedResourceDTO clone = new FailedResourceDTO();
 
@@ -115,8 +344,8 @@ public class DTOUtil {
 		return clone;
 	}
 
-	public static ExtendedFailedServletDTO clone(ExtendedFailedServletDTO original) {
-		ExtendedFailedServletDTO clone = new ExtendedFailedServletDTO();
+	public static FailedServletDTO clone(FailedServletDTO original) {
+		FailedServletDTO clone = new FailedServletDTO();
 
 		clone.asyncSupported = copy(original.asyncSupported);
 		clone.failureReason = copy(original.failureReason);
@@ -172,8 +401,8 @@ public class DTOUtil {
 		return clone;
 	}
 
-	public static ExtendedServletDTO clone(ExtendedServletDTO original) {
-		ExtendedServletDTO clone = new ExtendedServletDTO();
+	public static ServletDTO clone(ServletDTO original) {
+		ServletDTO clone = new ServletDTO();
 
 		clone.asyncSupported = copy(original.asyncSupported);
 		clone.initParams = copyStringMap(original.initParams);
@@ -301,6 +530,32 @@ public class DTOUtil {
 		return String.valueOf(v);
 	}
 
+	private static void checkPattern(String pattern) {
+		if (pattern == null) {
+			throw new HttpWhiteboardFailureException("Pattern cannot be null", DTOConstants.FAILURE_REASON_VALIDATION_FAILED); //$NON-NLS-1$
+		}
+
+		if (pattern.indexOf("*.") == 0) { //$NON-NLS-1$
+			return;
+		}
+
+		if (Const.BLANK.equals(pattern)) {
+			return;
+		}
+
+		if (Const.SLASH.equals(pattern)) {
+			return;
+		}
+
+		if (!pattern.startsWith(Const.SLASH) ||
+			(pattern.endsWith(Const.SLASH) && !pattern.equals(Const.SLASH)) ||
+			pattern.contains("**")) { //$NON-NLS-1$
+
+			throw new HttpWhiteboardFailureException(
+				"Invalid pattern '" + pattern + "'", DTOConstants.FAILURE_REASON_VALIDATION_FAILED); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+	}
+
 	private static Class<?> mapComponentType(Class<?> componentType) {
 		if (componentType.isPrimitive()
 				|| componentType.isArray()
@@ -335,4 +590,15 @@ public class DTOUtil {
 	private static <K, V> Map<K, V> newMap(int size) {
 		return new HashMap<K, V>(size);
 	}
+
+	private static String[] sort(String[] values) {
+		if (values == null) {
+			return null;
+		}
+
+		Arrays.sort(values);
+
+		return values;
+	}
+
 }

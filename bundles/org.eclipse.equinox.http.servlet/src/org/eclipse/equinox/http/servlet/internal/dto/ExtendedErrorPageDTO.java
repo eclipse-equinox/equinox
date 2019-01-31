@@ -29,5 +29,5 @@ public class ExtendedErrorPageDTO extends ErrorPageDTO {
 	/**
 	 * Indicates the type of error codes defined. This is calculated by the system.
 	 */
-	public ErrorCodeType erroCodeType;
+	public ErrorCodeType errorCodeType;
 }

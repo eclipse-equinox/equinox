@@ -85,32 +85,30 @@ public class DispatchTargets {
 
 		setDispatcherType(requestedDispatcherType);
 
-		RequestAttributeSetter setter = new RequestAttributeSetter(originalRequest);
-
-		if (dispatcherType == DispatcherType.INCLUDE) {
-			setter.setAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH, contextController.getFullContextPath());
-			setter.setAttribute(RequestDispatcher.INCLUDE_PATH_INFO, getPathInfo());
-			setter.setAttribute(RequestDispatcher.INCLUDE_QUERY_STRING, getQueryString());
-			setter.setAttribute(RequestDispatcher.INCLUDE_REQUEST_URI, getRequestURI());
-			setter.setAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH, getServletPath());
-		}
-		else if (dispatcherType == DispatcherType.FORWARD) {
-			response.resetBuffer();
-
-			setter.setAttribute(RequestDispatcher.FORWARD_CONTEXT_PATH, originalRequest.getContextPath());
-			setter.setAttribute(RequestDispatcher.FORWARD_PATH_INFO, originalRequest.getPathInfo());
-			setter.setAttribute(RequestDispatcher.FORWARD_QUERY_STRING, originalRequest.getQueryString());
-			setter.setAttribute(RequestDispatcher.FORWARD_REQUEST_URI, originalRequest.getRequestURI());
-			setter.setAttribute(RequestDispatcher.FORWARD_SERVLET_PATH, originalRequest.getServletPath());
-		}
-
 		HttpServletRequest request = originalRequest;
 		HttpServletRequestWrapperImpl requestWrapper = HttpServletRequestWrapperImpl.findHttpRuntimeRequest(originalRequest);
 		HttpServletResponseWrapper responseWrapper = HttpServletResponseWrapperImpl.findHttpRuntimeResponse(response);
 
 		boolean includeWrapperAdded = false;
 
-		try {
+		try (RequestAttributeSetter setter = new RequestAttributeSetter(originalRequest)) {
+			if (dispatcherType == DispatcherType.INCLUDE) {
+				setter.setAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH, contextController.getFullContextPath());
+				setter.setAttribute(RequestDispatcher.INCLUDE_PATH_INFO, getPathInfo());
+				setter.setAttribute(RequestDispatcher.INCLUDE_QUERY_STRING, getQueryString());
+				setter.setAttribute(RequestDispatcher.INCLUDE_REQUEST_URI, getRequestURI());
+				setter.setAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH, getServletPath());
+			}
+			else if (dispatcherType == DispatcherType.FORWARD) {
+				response.resetBuffer();
+
+				setter.setAttribute(RequestDispatcher.FORWARD_CONTEXT_PATH, originalRequest.getContextPath());
+				setter.setAttribute(RequestDispatcher.FORWARD_PATH_INFO, originalRequest.getPathInfo());
+				setter.setAttribute(RequestDispatcher.FORWARD_QUERY_STRING, originalRequest.getQueryString());
+				setter.setAttribute(RequestDispatcher.FORWARD_REQUEST_URI, originalRequest.getRequestURI());
+				setter.setAttribute(RequestDispatcher.FORWARD_SERVLET_PATH, originalRequest.getServletPath());
+			}
+
 			if (requestWrapper == null) {
 				requestWrapper = new HttpServletRequestWrapperImpl(originalRequest);
 				request = requestWrapper;
@@ -140,8 +138,6 @@ public class DispatchTargets {
 			}
 
 			requestWrapper.pop();
-
-			setter.close();
 		}
 	}
 

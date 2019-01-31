@@ -14,6 +14,8 @@
 
 package org.eclipse.equinox.http.servlet.internal.context;
 
+import static org.osgi.service.http.whiteboard.HttpWhiteboardConstants.*;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.AccessController;
@@ -25,8 +27,6 @@ import java.util.regex.PatternSyntaxException;
 import javax.servlet.*;
 import javax.servlet.Filter;
 import javax.servlet.http.*;
-import org.eclipse.equinox.http.servlet.dto.ExtendedFailedServletDTO;
-import org.eclipse.equinox.http.servlet.dto.ExtendedServletDTO;
 import org.eclipse.equinox.http.servlet.internal.HttpServiceRuntimeImpl;
 import org.eclipse.equinox.http.servlet.internal.customizer.*;
 import org.eclipse.equinox.http.servlet.internal.dto.ExtendedErrorPageDTO;
@@ -40,91 +40,12 @@ import org.eclipse.equinox.http.servlet.internal.util.*;
 import org.osgi.framework.*;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.dto.*;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * @author Raymond Augé
  */
 public class ContextController {
-
-	public static final class ServiceHolder<S> implements Comparable<ServiceHolder<?>> {
-		final ServiceObjects<S> serviceObjects;
-		final S service;
-		final Bundle bundle;
-		final long serviceId;
-		final int serviceRanking;
-		final ClassLoader legacyTCCL;
-		public ServiceHolder(ServiceObjects<S> serviceObjects) {
-			this.serviceObjects = serviceObjects;
-			this.bundle = serviceObjects.getServiceReference().getBundle();
-			this.service = serviceObjects.getService();
-			this.legacyTCCL = (ClassLoader)serviceObjects.getServiceReference().getProperty(Const.EQUINOX_LEGACY_TCCL_PROP);
-			Long serviceIdProp = (Long)serviceObjects.getServiceReference().getProperty(Constants.SERVICE_ID);
-			if (legacyTCCL != null) {
-				// this is a legacy registration; use a negative id for the DTO
-				serviceIdProp = -serviceIdProp;
-			}
-			this.serviceId = serviceIdProp;
-			Integer rankProp = (Integer) serviceObjects.getServiceReference().getProperty(Constants.SERVICE_RANKING);
-			this.serviceRanking = rankProp == null ? 0 : rankProp.intValue();
-		}
-		public ServiceHolder(S service, Bundle bundle, long serviceId, int serviceRanking, ClassLoader legacyTCCL) {
-			this.service = service;
-			this.bundle = bundle;
-			this.serviceObjects = null;
-			this.serviceId = serviceId;
-			this.serviceRanking = serviceRanking;
-			this.legacyTCCL = legacyTCCL;
-		}
-		public S get() {
-			return service;
-		}
-
-		public Bundle getBundle() {
-			return bundle;
-		}
-
-		public ClassLoader getLegacyTCCL() {
-			return legacyTCCL;
-		}
-
-		public void release() {
-			if (serviceObjects != null && service != null) {
-				try {
-					serviceObjects.ungetService(service);
-				} catch (IllegalStateException e) {
-					// this can happen if the whiteboard bundle is in the process of stopping
-					// and the framework is in the middle of auto-unregistering any services
-					// the bundle forgot to unregister on stop
-				}
-			}
-		}
-
-		public ServiceReference<S> getServiceReference() {
-			return serviceObjects == null ? null : serviceObjects.getServiceReference();
-		}
-		@Override
-		public int compareTo(ServiceHolder<?> o) {
-			final int thisRanking = serviceRanking;
-			final int otherRanking = o.serviceRanking;
-			if (thisRanking != otherRanking) {
-				if (thisRanking < otherRanking) {
-					return 1;
-				}
-				return -1;
-			}
-			final long thisId = this.serviceId;
-			final long otherId = o.serviceId;
-			if (thisId == otherId) {
-				return 0;
-			}
-			if (thisId < otherId) {
-				return -1;
-			}
-			return 1;
-		}
-	}
 
 	public ContextController(
 		BundleContext trackingContextParam, BundleContext consumingContext,
@@ -142,7 +63,7 @@ public class ContextController {
 		this.servletContextHelperRefFilter = createFilter(contextServiceId);
 
 		this.initParams = ServiceProperties.parseInitParams(
-			serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX, parentServletContext);
+			serviceReference, HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX, parentServletContext);
 
 		listenerServiceTracker = new ServiceTracker<EventListener, AtomicReference<ListenerRegistration>>(
 			trackingContext, httpServiceRuntime.getListenerFilter(),
@@ -157,6 +78,13 @@ public class ContextController {
 				trackingContext, httpServiceRuntime, this));
 
 		filterServiceTracker.open();
+
+		errorPageServiceTracker =  new ServiceTracker<Servlet, AtomicReference<ErrorPageRegistration>>(
+			trackingContext, httpServiceRuntime.getErrorPageFilter(),
+			new ContextErrorPageTrackerCustomizer(
+				trackingContext, httpServiceRuntime, this));
+
+		errorPageServiceTracker.open();
 
 		servletServiceTracker =  new ServiceTracker<Servlet, AtomicReference<ServletRegistration>>(
 			trackingContext, httpServiceRuntime.getServletFilter(),
@@ -173,9 +101,77 @@ public class ContextController {
 		resourceServiceTracker.open();
 	}
 
-	public FilterRegistration addFilterRegistration(ServiceReference<Filter> filterRef) throws ServletException {
-		checkShutdown();
+	public ErrorPageRegistration addErrorPageRegistration(ServiceReference<Servlet> servletRef) {
+		ServiceHolder<Servlet> servletHolder = new ServiceHolder<Servlet>(consumingContext.getServiceObjects(servletRef));
+		Servlet servlet = servletHolder.get();
+		ErrorPageRegistration registration = null;
+		//boolean addedRegisteredObject = false;
+		try {
+			if (servlet == null) {
+				throw new IllegalArgumentException("Servlet cannot be null"); //$NON-NLS-1$
+			}
+			//addedRegisteredObject = httpServiceRuntime.getRegisteredObjects().add(servlet);
+			//if (!addedRegisteredObject) {
+			//	throw new HttpWhiteboardFailureException("Multiple registration of instance detected. Prototype scope is recommended: " + servletRef, DTOConstants.FAILURE_REASON_SERVICE_IN_USE); //$NON-NLS-1$
+			//}
+			registration = doAddErrorPageRegistration(servletHolder, servletRef);
+		} finally {
+			if (registration == null) {
+				// Always attempt to release here; even though destroy() may have been called
+				// on the registration while failing to add.  There are cases where no
+				// ServletRegistration may have even been created at all to call destory() on.
+				// Also, addedRegisteredObject may be false which means we never call doAddServletRegistration
+				servletHolder.release();
+				//if (addedRegisteredObject) {
+				//	httpServiceRuntime.getRegisteredObjects().remove(servlet);
+				//}
+			}
+		}
+		return registration;
+	}
 
+	private ErrorPageRegistration doAddErrorPageRegistration(ServiceHolder<Servlet> servletHolder, ServiceReference<Servlet> servletRef) {
+		ExtendedErrorPageDTO errorPageDTO = DTOUtil.assembleErrorPageDTO(servletRef, getServiceId(), true);
+		errorPageDTO.servletInfo = servletHolder.get().getServletInfo();
+		errorPageDTO.serviceId = servletHolder.getServiceId();
+
+		if (((errorPageDTO.errorCodes == null) || (errorPageDTO.errorCodes.length == 0)) &&
+			((errorPageDTO.exceptions == null) || (errorPageDTO.exceptions.length == 0))) {
+
+			throw new HttpWhiteboardFailureException("'errorPage' expects String, String[] or Collection<String>.", DTOConstants.FAILURE_REASON_VALIDATION_FAILED); //$NON-NLS-1$
+		}
+
+		if (errorPageDTO.name == null) {
+			errorPageDTO.name = servletHolder.get().getClass().getName();
+		}
+
+		ServletContextHelper curServletContextHelper = getServletContextHelper(
+			servletHolder.getBundle());
+
+		ServletContext servletContext = createServletContext(
+			servletHolder.getBundle(), curServletContextHelper);
+		ErrorPageRegistration errorPageRegistration = new ErrorPageRegistration(
+			servletHolder, errorPageDTO, curServletContextHelper, this);
+		ServletConfig servletConfig = new ServletConfigImpl(
+			errorPageDTO.name, errorPageDTO.initParams, servletContext);
+
+		try {
+			errorPageRegistration.init(servletConfig);
+		}
+		catch (Throwable t) {
+			errorPageRegistration.destroy();
+
+			return Throw.unchecked(t);
+		}
+
+		recordErrorPageShadowing(errorPageRegistration);
+
+		endpointRegistrations.add(errorPageRegistration);
+
+		return errorPageRegistration;
+	}
+
+	public FilterRegistration addFilterRegistration(ServiceReference<Filter> filterRef) throws ServletException {
 		ServiceHolder<Filter> filterHolder = new ServiceHolder<Filter>(consumingContext.getServiceObjects(filterRef));
 		Filter filter = filterHolder.get();
 		FilterRegistration registration = null;
@@ -201,13 +197,12 @@ public class ContextController {
 	}
 
 	private FilterRegistration doAddFilterRegistration(ServiceHolder<Filter> filterHolder, ServiceReference<Filter> filterRef) throws ServletException {
-
 		boolean asyncSupported = ServiceProperties.parseBoolean(
-			filterRef, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED);
+			filterRef, HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED);
 
 		List<String> dispatcherList = StringPlus.from(
 			filterRef.getProperty(
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER));
+				HTTP_WHITEBOARD_FILTER_DISPATCHER));
 		String[] dispatchers = dispatcherList.toArray(new String[0]);
 		Integer filterPriority = (Integer)filterRef.getProperty(
 			Constants.SERVICE_RANKING);
@@ -215,24 +210,22 @@ public class ContextController {
 			filterPriority = Integer.valueOf(0);
 		}
 		Map<String, String> filterInitParams = ServiceProperties.parseInitParams(
-			filterRef, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX);
+			filterRef, HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX);
 		List<String> patternList = StringPlus.from(
 			filterRef.getProperty(
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN));
+				HTTP_WHITEBOARD_FILTER_PATTERN));
 		String[] patterns = patternList.toArray(new String[0]);
 		List<String> regexList = StringPlus.from(
 			filterRef.getProperty(
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX));
+				HTTP_WHITEBOARD_FILTER_REGEX));
 		String[] regexs = regexList.toArray(new String[0]);
 		List<String> servletList = StringPlus.from(
 			filterRef.getProperty(
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_SERVLET));
+				HTTP_WHITEBOARD_FILTER_SERVLET));
 		String[] servletNames = servletList.toArray(new String[0]);
 
 		String name = ServiceProperties.parseName(filterRef.getProperty(
-			HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME), filterHolder.get());
-
-		Filter filter = filterHolder.get();
+			HTTP_WHITEBOARD_FILTER_NAME), filterHolder.get());
 
 		if (((patterns == null) || (patterns.length == 0)) &&
 			((regexs == null) || (regexs.length == 0)) &&
@@ -254,18 +247,10 @@ public class ContextController {
 			}
 		}
 
-		if (filter == null) {
-			throw new HttpWhiteboardFailureException("Filter cannot be null", DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE); //$NON-NLS-1$
-		}
+		Filter filter = filterHolder.get();
 
 		if (name == null) {
 			name = filter.getClass().getName();
-		}
-
-		for (FilterRegistration filterRegistration : filterRegistrations) {
-			if (filterRegistration.getT().equals(filter)) {
-				throw new RegisteredFilterException(filter);
-			}
 		}
 
 		dispatchers = checkDispatcher(dispatchers);
@@ -278,7 +263,7 @@ public class ContextController {
 		filterDTO.name = name;
 		filterDTO.patterns = sort(patterns);
 		filterDTO.regexs = regexs;
-		filterDTO.serviceId = filterHolder.serviceId;
+		filterDTO.serviceId = filterHolder.getServiceId();
 		filterDTO.servletContextId = contextServiceId;
 		filterDTO.servletNames = sort(servletNames);
 
@@ -299,9 +284,6 @@ public class ContextController {
 	}
 
 	public ListenerRegistration addListenerRegistration(ServiceReference<EventListener> listenerRef) throws ServletException {
-
-		checkShutdown();
-
 		ServiceHolder<EventListener> listenerHolder = new ServiceHolder<EventListener>(consumingContext.getServiceObjects(listenerRef));
 		EventListener listener = listenerHolder.get();
 		ListenerRegistration registration = null;
@@ -339,7 +321,7 @@ public class ContextController {
 
 		ListenerDTO listenerDTO = new ListenerDTO();
 
-		listenerDTO.serviceId = listenerHolder.serviceId;
+		listenerDTO.serviceId = listenerHolder.getServiceId();
 		listenerDTO.servletContextId = contextServiceId;
 		listenerDTO.types = asStringArray(classes);
 
@@ -367,13 +349,10 @@ public class ContextController {
 	}
 
 	public ResourceRegistration addResourceRegistration(ServiceReference<?> resourceRef) {
-
-		checkShutdown();
-
 		ClassLoader legacyTCCL = (ClassLoader)resourceRef.getProperty(Const.EQUINOX_LEGACY_TCCL_PROP);
 		Integer rankProp = (Integer) resourceRef.getProperty(Constants.SERVICE_RANKING);
 		int serviceRanking = rankProp == null ? 0 : rankProp.intValue();
-		Object patternObj = resourceRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN);
+		Object patternObj = resourceRef.getProperty(HTTP_WHITEBOARD_RESOURCE_PATTERN);
 		if (!(patternObj instanceof String) &&
 			!(patternObj instanceof String[]) &&
 			!(patternObj instanceof Collection)) {
@@ -388,7 +367,7 @@ public class ContextController {
 			serviceId = -serviceId;
 		}
 		Object prefixObj = resourceRef.getProperty(
-			HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
+			HTTP_WHITEBOARD_RESOURCE_PREFIX);
 
 		checkPrefix(prefixObj);
 		String prefix = (String)prefixObj;
@@ -441,8 +420,6 @@ public class ContextController {
 	}
 
 	public ServletRegistration addServletRegistration(ServiceReference<Servlet> servletRef) {
-		checkShutdown();
-
 		ServiceHolder<Servlet> servletHolder = new ServiceHolder<Servlet>(consumingContext.getServiceObjects(servletRef));
 		Servlet servlet = servletHolder.get();
 		ServletRegistration registration = null;
@@ -472,118 +449,25 @@ public class ContextController {
 	}
 
 	private ServletRegistration doAddServletRegistration(ServiceHolder<Servlet> servletHolder, ServiceReference<Servlet> servletRef) {
-		boolean asyncSupported = ServiceProperties.parseBoolean(
-			servletRef,	HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED);
-		List<String> errorPageList = StringPlus.from(
-			servletRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE));
-		String[] errorPages = errorPageList.toArray(new String[0]);
-		Map<String, String> servletInitParams = ServiceProperties.parseInitParams(
-			servletRef, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX);
-		List<String> patternList = StringPlus.from(
-			servletRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN));
-		String[] patterns = patternList.toArray(new String[0]);
-		String servletNameFromProperties = (String)servletRef.getProperty(
-			HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
-		String generatedServletName = ServiceProperties.parseName(
-			servletRef.getProperty(
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME), servletHolder.get());
-		boolean multipartEnabled = ServiceProperties.parseBoolean(
-			servletRef, Const.EQUINOX_HTTP_MULTIPART_ENABLED);
-		Integer multipartFileSizeThreshold = (Integer)servletRef.getProperty(
-			Const.EQUINOX_HTTP_MULTIPART_FILESIZETHRESHOLD);
-		String multipartLocation = (String)servletRef.getProperty(
-			Const.EQUINOX_HTTP_MULTIPART_LOCATION);
-		Long multipartMaxFileSize = (Long)servletRef.getProperty(
-			Const.EQUINOX_HTTP_MULTIPART_MAXFILESIZE);
-		Long multipartMaxRequestSize = (Long)servletRef.getProperty(
-			Const.EQUINOX_HTTP_MULTIPART_MAXREQUESTSIZE);
+		ServletDTO servletDTO = DTOUtil.assembleServletDTO(servletRef, getServiceId(), true);
+		servletDTO.servletInfo = servletHolder.get().getServletInfo();
+		servletDTO.serviceId = servletHolder.getServiceId();
 
-		if (((patterns == null) || (patterns.length == 0)) &&
-			((errorPages == null) || errorPages.length == 0) &&
-			(servletNameFromProperties == null)) {
+		if (((servletDTO.patterns == null) || (servletDTO.patterns.length == 0)) &&
+			(servletDTO.name == null)) {
 
 			StringBuilder sb = new StringBuilder();
 			sb.append("One of the service properties "); //$NON-NLS-1$
-			sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE);
+			sb.append(HTTP_WHITEBOARD_SERVLET_NAME);
 			sb.append(", "); //$NON-NLS-1$
-			sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
-			sb.append(", "); //$NON-NLS-1$
-			sb.append(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN);
+			sb.append(HTTP_WHITEBOARD_SERVLET_PATTERN);
 			sb.append(" must contain a value."); //$NON-NLS-1$
 
-			throw new IllegalArgumentException(sb.toString());
+			throw new HttpWhiteboardFailureException(sb.toString(), DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
 		}
 
-		if (patterns != null) {
-			for (String pattern : patterns) {
-				checkPattern(pattern);
-			}
-		}
-
-		ExtendedServletDTO servletDTO = new ExtendedServletDTO();
-
-		servletDTO.asyncSupported = asyncSupported;
-		servletDTO.initParams = servletInitParams;
-		servletDTO.multipartEnabled = multipartEnabled;
-		servletDTO.multipartFileSizeThreshold = (multipartFileSizeThreshold != null ? multipartFileSizeThreshold : 0);
-		servletDTO.multipartLocation = (multipartLocation != null ? multipartLocation : Const.BLANK);
-		servletDTO.multipartMaxFileSize = (multipartMaxFileSize != null ? multipartMaxFileSize : -1L);
-		servletDTO.multipartMaxRequestSize = (multipartMaxRequestSize != null ? multipartMaxRequestSize : -1L);
-		servletDTO.name = generatedServletName;
-		servletDTO.patterns = sort(patterns);
-		servletDTO.serviceId = servletHolder.serviceId;
-		servletDTO.servletContextId = contextServiceId;
-		servletDTO.servletInfo = servletHolder.get().getServletInfo();
-
-		ExtendedErrorPageDTO errorPageDTO = null;
-
-		if ((errorPages != null) && (errorPages.length > 0)) {
-			errorPageDTO = new ExtendedErrorPageDTO();
-
-			errorPageDTO.asyncSupported = asyncSupported;
-			List<String> exceptions = new ArrayList<String>();
-			// Not sure if it is important to maintain order of insertion or natural ordering here.
-			// Using insertion ordering with linked hash set.
-			Set<Long> errorCodeSet = new LinkedHashSet<Long>();
-
-			for(String errorPage : errorPages) {
-				try {
-					if ("4xx".equals(errorPage)) { //$NON-NLS-1$
-						errorPageDTO.erroCodeType = ErrorCodeType.RANGE_4XX;
-						for (long code = 400; code < 500; code++) {
-							errorCodeSet.add(code);
-						}
-					} else if ("5xx".equals(errorPage)) { //$NON-NLS-1$
-						errorPageDTO.erroCodeType = ErrorCodeType.RANGE_5XX;
-						for (long code = 500; code < 600; code++) {
-							errorCodeSet.add(code);
-						}
-					} else if (errorPage.length() == 3) {
-						errorPageDTO.erroCodeType = ErrorCodeType.SPECIFIC;
-						long code = Long.parseLong(errorPage);
-						errorCodeSet.add(code);
-					} else {
-						exceptions.add(errorPage);
-					}
-				}
-				catch (NumberFormatException nfe) {
-					exceptions.add(errorPage);
-				}
-			}
-
-			long[] errorCodes = new long[errorCodeSet.size()];
-			int i = 0;
-			for(Long code : errorCodeSet) {
-				errorCodes[i] = code;
-				i++;
-			}
-			errorPageDTO.errorCodes = errorCodes;
-			errorPageDTO.exceptions = exceptions.toArray(new String[0]);
-			errorPageDTO.initParams = servletInitParams;
-			errorPageDTO.name = generatedServletName;
-			errorPageDTO.serviceId = servletHolder.serviceId;
-			errorPageDTO.servletContextId = contextServiceId;
-			errorPageDTO.servletInfo = servletHolder.get().getServletInfo();
+		if (servletDTO.name == null) {
+			servletDTO.name = servletHolder.get().getClass().getName();
 		}
 
 		ServletContextHelper curServletContextHelper = getServletContextHelper(
@@ -592,10 +476,10 @@ public class ContextController {
 		ServletContext servletContext = createServletContext(
 			servletHolder.getBundle(), curServletContextHelper);
 		ServletRegistration servletRegistration = new ServletRegistration(
-			servletHolder, servletDTO, errorPageDTO, curServletContextHelper, this,
+			servletHolder, servletDTO, curServletContextHelper, this,
 			servletContext);
 		ServletConfig servletConfig = new ServletConfigImpl(
-			generatedServletName, servletInitParams, servletContext);
+			servletDTO.name, servletDTO.initParams, servletContext);
 
 		try {
 			servletRegistration.init(servletConfig);
@@ -607,7 +491,6 @@ public class ContextController {
 		}
 
 		recordEndpointShadowing(servletRegistration);
-		recordErrorPageShadowing(servletRegistration, errorPageDTO);
 
 		endpointRegistrations.add(servletRegistration);
 
@@ -635,7 +518,7 @@ public class ContextController {
 		}
 		for (EndpointRegistration<?> shadowedReg : shadowedRegs) {
 			if (shadowedReg instanceof ServletRegistration) {
-				recordFailedServletDTO(shadowedReg.getServiceReference(), (ExtendedServletDTO)shadowedReg.getD(), DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE);
+				recordFailedServletDTO(shadowedReg.getServiceReference(), (ServletDTO)shadowedReg.getD(), DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE);
 			}
 			else {
 				recordFailedResourceDTO(shadowedReg.getServiceReference(), (ResourceDTO)shadowedReg.getD(), DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE);
@@ -643,72 +526,70 @@ public class ContextController {
 		}
 	}
 
-	private void recordErrorPageShadowing(ServletRegistration servletRegistration, ExtendedErrorPageDTO newErrorPageDTO) {
-		if (newErrorPageDTO == null) {
-			return;
-		}
-		Set<ServletRegistration> shadowedEPs = new HashSet<ServletRegistration>();
+	private void recordErrorPageShadowing(ErrorPageRegistration newRegistration) {
+		Set<ErrorPageRegistration> shadowedEPs = new HashSet<ErrorPageRegistration>();
 		for (EndpointRegistration<?> existingRegistration : endpointRegistrations) {
-			if (!(existingRegistration instanceof ServletRegistration)) {
+			if (!(existingRegistration instanceof ErrorPageRegistration)) {
 				continue;
 			}
-			ServletRegistration existingSRegistration = (ServletRegistration)existingRegistration;
-			ExtendedErrorPageDTO existingErrorPageDTO = existingSRegistration.getErrorPageDTO();
+			ErrorPageRegistration existingSRegistration = (ErrorPageRegistration)existingRegistration;
+			ExtendedErrorPageDTO existingErrorPageDTO = existingSRegistration.getD();
 			if ((existingErrorPageDTO == null) ||
-				(((existingErrorPageDTO.erroCodeType == ErrorCodeType.RANGE_4XX) || (existingErrorPageDTO.erroCodeType == ErrorCodeType.RANGE_5XX)) && (newErrorPageDTO.erroCodeType == ErrorCodeType.SPECIFIC))) {
+				(((existingErrorPageDTO.errorCodeType == ErrorCodeType.RANGE_4XX) || (existingErrorPageDTO.errorCodeType == ErrorCodeType.RANGE_5XX)) && (newRegistration.getD().errorCodeType == ErrorCodeType.SPECIFIC))) {
 				continue;
 			}
-			if (((existingErrorPageDTO.erroCodeType == ErrorCodeType.RANGE_4XX) && (newErrorPageDTO.erroCodeType == ErrorCodeType.RANGE_4XX)) ||
-				((existingErrorPageDTO.erroCodeType == ErrorCodeType.RANGE_5XX) && (newErrorPageDTO.erroCodeType == ErrorCodeType.RANGE_5XX))) {
-				if (servletRegistration.compareTo(existingSRegistration) < 0) {
+			if (((existingErrorPageDTO.errorCodeType == ErrorCodeType.RANGE_4XX) && (newRegistration.getD().errorCodeType == ErrorCodeType.RANGE_4XX)) ||
+				((existingErrorPageDTO.errorCodeType == ErrorCodeType.RANGE_5XX) && (newRegistration.getD().errorCodeType == ErrorCodeType.RANGE_5XX))) {
+				if (newRegistration.compareTo(existingSRegistration) < 0) {
 					shadowedEPs.add(existingSRegistration);
 				}
 				// the new reg is shadowed by existing reg
 				else {
-					shadowedEPs.add(servletRegistration);
+					shadowedEPs.add(newRegistration);
 				}
 				continue;
 			}
-			for (long newErrorCode : newErrorPageDTO.errorCodes) {
+			for (long newErrorCode : newRegistration.getD().errorCodes) {
 				for (long existingCode : existingErrorPageDTO.errorCodes) {
 					if (newErrorCode == existingCode) {
 						// the new reg is shadowing an existing reg
-						if (servletRegistration.compareTo(existingSRegistration) < 0) {
+						if (newRegistration.compareTo(existingSRegistration) < 0) {
 							shadowedEPs.add(existingSRegistration);
 						}
 						// the new reg is shadowed by existing reg
 						else {
-							shadowedEPs.add(servletRegistration);
+							shadowedEPs.add(newRegistration);
 						}
 						// notice that we keep checking all the existing regs. more than one could be shadowed because reg's multi patterns
 					}
 				}
 			}
-			for (String newException : newErrorPageDTO.exceptions) {
+			for (String newException : newRegistration.getD().exceptions) {
 				for (String existingException : existingErrorPageDTO.exceptions) {
 					if (newException.equals(existingException)) {
 						// the new reg is shadowing an existing reg
-						if (servletRegistration.compareTo(existingSRegistration) < 0) {
+						if (newRegistration.compareTo(existingSRegistration) < 0) {
 							shadowedEPs.add(existingSRegistration);
 						}
 						// the new reg is shadowed by existing reg
 						else {
-							shadowedEPs.add(servletRegistration);
+							shadowedEPs.add(newRegistration);
 						}
 						// notice that we keep checking all the existing regs. more than one could be shadowed because reg's multi patterns
 					}
 				}
 			}
 		}
-		for (ServletRegistration shadowedReg : shadowedEPs) {
-			recordFailedErrorPageDTO(shadowedReg.getServiceReference(), shadowedReg.getErrorPageDTO(), DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE);
+		for (ErrorPageRegistration shadowedReg : shadowedEPs) {
+			recordFailedErrorPageDTO(shadowedReg.getServiceReference(), shadowedReg.getD(), DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE);
 		}
 	}
 
-	public void destroy() {
+	public synchronized void destroy() {
 		flushActiveSessions();
 		resourceServiceTracker.close();
 		servletServiceTracker.close();
+		errorPageServiceTracker.close();
 		filterServiceTracker.close();
 		listenerServiceTracker.close();
 
@@ -719,6 +600,10 @@ public class ContextController {
 		proxyContext.destroy();
 
 		shutdown = true;
+	}
+
+	public boolean isLegacyContext() {
+		return serviceReference.getProperty(HTTP_SERVICE_CONTEXT_PROPERTY) != null;
 	}
 
 	public String getContextName() {
@@ -988,7 +873,7 @@ public class ContextController {
 
 	public boolean matches(ServiceReference<?> whiteBoardService) {
 		String contextSelector = (String) whiteBoardService.getProperty(
-			HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
+			HTTP_WHITEBOARD_CONTEXT_SELECT);
 		// make sure the context helper is either one of the built-in ones registered by this http whiteboard implementation;
 		// or is visible to the whiteboard registering bundle.
 		if (!visibleContextHelper(whiteBoardService)) {
@@ -998,14 +883,14 @@ public class ContextController {
 			contextSelector = httpServiceRuntime.getDefaultContextSelectFilter(whiteBoardService);
 			if (contextSelector == null) {
 				contextSelector = "(" + //$NON-NLS-1$
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" //$NON-NLS-1$
-					+ HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME + ")"; //$NON-NLS-1$
+					HTTP_WHITEBOARD_CONTEXT_NAME + "=" //$NON-NLS-1$
+					+ HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME + ")"; //$NON-NLS-1$
 			}
 		}
 
 		if (!contextSelector.startsWith(Const.OPEN_PAREN)) {
 			contextSelector = Const.OPEN_PAREN +
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME +
+				HTTP_WHITEBOARD_CONTEXT_NAME +
 					Const.EQUAL + contextSelector + Const.CLOSE_PAREN;
 		}
 
@@ -1178,7 +1063,7 @@ public class ContextController {
 		}
 	}
 
-	private void checkShutdown() {
+	public synchronized void checkShutdown() {
 		if (shutdown) {
 			throw new IllegalStateException(
 				"Context is already shutdown"); //$NON-NLS-1$
@@ -1214,21 +1099,18 @@ public class ContextController {
 
 		for (EndpointRegistration<?> endpointRegistration : endpointRegistrations) {
 			if (endpointRegistration instanceof ResourceRegistration) {
-				if (!httpServiceRuntime.failedResourceDTO(endpointRegistration.getServiceReference())) {
+				if (!httpServiceRuntime.isFailedResourceDTO(endpointRegistration.getServiceReference())) {
 					resourceDTOs.add(DTOUtil.clone((ResourceDTO)endpointRegistration.getD()));
 				}
 			}
-			else {
-				ServletRegistration servletRegistration = (ServletRegistration)endpointRegistration;
-				if (!httpServiceRuntime.failedServletDTO(servletRegistration.getServiceReference())) {
-					servletDTOs.add(DTOUtil.clone(servletRegistration.getD()));
+			else if (endpointRegistration instanceof ErrorPageRegistration) {
+				if (!httpServiceRuntime.isFailedErrorPageDTO(endpointRegistration.getServiceReference())) {
+					errorPageDTOs.add(DTOUtil.clone((ExtendedErrorPageDTO)endpointRegistration.getD()));
 				}
-
-				ErrorPageDTO errorPageDTO = servletRegistration.getErrorPageDTO();
-				if ((errorPageDTO != null) &&
-					!httpServiceRuntime.failedErrorPageDTO(servletRegistration.getServiceReference())) {
-
-					errorPageDTOs.add(DTOUtil.clone(errorPageDTO));
+			}
+			else {
+				if (!httpServiceRuntime.isFailedServletDTO(endpointRegistration.getServiceReference())) {
+					servletDTOs.add(DTOUtil.clone((ServletDTO)endpointRegistration.getD()));
 				}
 			}
 		}
@@ -1472,76 +1354,37 @@ public class ContextController {
 		getHttpServiceRuntime().recordFailedResourceDTO(resourceReference, failedResourceDTO);
 	}
 
-	public void recordFailedServletDTO(
-		ServiceReference<?> servletReference, ExtendedServletDTO servletDTO, int failureReason) {
+	public void recordFailedServletDTO(ServiceReference<?> servletReference, ServletDTO servletDTO, int failureReason) {
+		FailedServletDTO failedServletDTO = new FailedServletDTO();
 
-		ExtendedFailedServletDTO failedServletDTO = new ExtendedFailedServletDTO();
-
-		if (servletDTO != null) {
-			failedServletDTO.asyncSupported = servletDTO.asyncSupported;
-			failedServletDTO.failureReason = failureReason;
-			failedServletDTO.initParams = servletDTO.initParams;
-			failedServletDTO.multipartEnabled = servletDTO.multipartEnabled;
-			failedServletDTO.multipartFileSizeThreshold = servletDTO.multipartFileSizeThreshold;
-			failedServletDTO.multipartLocation = servletDTO.multipartLocation;
-			failedServletDTO.multipartMaxFileSize = servletDTO.multipartMaxFileSize;
-			failedServletDTO.multipartMaxRequestSize = servletDTO.multipartMaxRequestSize;
-			failedServletDTO.name = servletDTO.name;
-			failedServletDTO.patterns = servletDTO.patterns;
-			failedServletDTO.serviceId = servletDTO.serviceId;
-			failedServletDTO.servletContextId = servletDTO.servletContextId;
-			failedServletDTO.servletInfo = servletDTO.servletInfo;
-		}
-		else {
-			failedServletDTO.asyncSupported = BooleanPlus.from(
-				servletReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED), false);
-			failedServletDTO.failureReason = failureReason;
-			failedServletDTO.initParams = ServiceProperties.parseInitParams(
-				servletReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX);
-			failedServletDTO.multipartEnabled = ServiceProperties.parseBoolean(
-				servletReference, Const.EQUINOX_HTTP_MULTIPART_ENABLED);
-			Integer multipartFileSizeThreshold = (Integer)servletReference.getProperty(
-				Const.EQUINOX_HTTP_MULTIPART_FILESIZETHRESHOLD);
-			if (multipartFileSizeThreshold != null) {
-				failedServletDTO.multipartFileSizeThreshold = multipartFileSizeThreshold;
-			}
-			failedServletDTO.multipartLocation = (String)servletReference.getProperty(
-				Const.EQUINOX_HTTP_MULTIPART_LOCATION);
-			Long multipartMaxFileSize = (Long)servletReference.getProperty(
-				Const.EQUINOX_HTTP_MULTIPART_MAXFILESIZE);
-			if (multipartMaxFileSize != null) {
-				failedServletDTO.multipartMaxFileSize = multipartMaxFileSize;
-			}
-			Long multipartMaxRequestSize = (Long)servletReference.getProperty(
-				Const.EQUINOX_HTTP_MULTIPART_MAXREQUESTSIZE);
-			if (multipartMaxRequestSize != null) {
-				failedServletDTO.multipartMaxRequestSize = multipartMaxRequestSize;
-			}
-			failedServletDTO.name = (String)servletReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
-			failedServletDTO.patterns = StringPlus.from(
-				servletReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN)).toArray(new String[0]);
-			failedServletDTO.serviceId = (Long)servletReference.getProperty(Constants.SERVICE_ID);
-			if (servletReference.getProperty(Const.EQUINOX_LEGACY_TCCL_PROP) != null) {
-				failedServletDTO.serviceId = -failedServletDTO.serviceId;
-			}
-			failedServletDTO.servletContextId = getServiceId();
-			failedServletDTO.servletInfo = Const.BLANK;
-		}
+		failedServletDTO.asyncSupported = servletDTO.asyncSupported;
+		failedServletDTO.failureReason = failureReason;
+		failedServletDTO.initParams = servletDTO.initParams;
+		failedServletDTO.multipartEnabled = servletDTO.multipartEnabled;
+		failedServletDTO.multipartFileSizeThreshold = servletDTO.multipartFileSizeThreshold;
+		failedServletDTO.multipartLocation = servletDTO.multipartLocation;
+		failedServletDTO.multipartMaxFileSize = servletDTO.multipartMaxFileSize;
+		failedServletDTO.multipartMaxRequestSize = servletDTO.multipartMaxRequestSize;
+		failedServletDTO.name = servletDTO.name;
+		failedServletDTO.patterns = servletDTO.patterns;
+		failedServletDTO.serviceId = servletDTO.serviceId;
+		failedServletDTO.servletContextId = servletDTO.servletContextId;
+		failedServletDTO.servletInfo = servletDTO.servletInfo;
 
 		getHttpServiceRuntime().recordFailedServletDTO(servletReference, failedServletDTO);
 	}
 
 	private String validateName() {
-		Object contextNameObj = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
+		Object contextNameObj = serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_NAME);
 
 		if (contextNameObj == null) {
 			throw new IllegalContextNameException(
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + " is null. Ignoring!", //$NON-NLS-1$
+				HTTP_WHITEBOARD_CONTEXT_NAME + " is null. Ignoring!", //$NON-NLS-1$
 				DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
 		}
 		else if (!(contextNameObj instanceof String)) {
 			throw new IllegalContextNameException(
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + " is not String. Ignoring!", //$NON-NLS-1$
+				HTTP_WHITEBOARD_CONTEXT_NAME + " is not String. Ignoring!", //$NON-NLS-1$
 				DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
 		}
 
@@ -1569,16 +1412,16 @@ public class ContextController {
 	}
 
 	private String validatePath() {
-		Object contextPathObj = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH);
+		Object contextPathObj = serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_PATH);
 
 		if (contextPathObj == null) {
 			throw new IllegalContextPathException(
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH + " is null. Ignoring!", //$NON-NLS-1$
+				HTTP_WHITEBOARD_CONTEXT_PATH + " is null. Ignoring!", //$NON-NLS-1$
 				DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
 		}
 		else if (!(contextPathObj instanceof String)) {
 			throw new IllegalContextPathException(
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH + " is not String. Ignoring!", //$NON-NLS-1$
+				HTTP_WHITEBOARD_CONTEXT_PATH + " is not String. Ignoring!", //$NON-NLS-1$
 				DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
 		}
 
@@ -1629,8 +1472,9 @@ public class ContextController {
 	private boolean shutdown;
 	private String string;
 
+	private final ServiceTracker<Servlet, AtomicReference<ErrorPageRegistration>> errorPageServiceTracker;
 	private final ServiceTracker<Filter, AtomicReference<FilterRegistration>> filterServiceTracker;
 	private final ServiceTracker<EventListener, AtomicReference<ListenerRegistration>> listenerServiceTracker;
-	private final ServiceTracker<Servlet, AtomicReference<ServletRegistration>> servletServiceTracker;
 	private final ServiceTracker<Object, AtomicReference<ResourceRegistration>> resourceServiceTracker;
+	private final ServiceTracker<Servlet, AtomicReference<ServletRegistration>> servletServiceTracker;
 }

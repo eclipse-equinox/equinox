@@ -148,9 +148,7 @@ public class ResourceServlet extends HttpServlet {
 
 					if (contentLength != 0) {
 						// open the input stream
-						InputStream is = null;
-						try {
-							is = connection.getInputStream();
+						try (InputStream is = connection.getInputStream()) {
 							// write the resource
 							try {
 								OutputStream os = resp.getOutputStream();
@@ -173,13 +171,6 @@ public class ResourceServlet extends HttpServlet {
 							// SecurityException may indicate the following scenarios
 							// - url is not accessible
 							sendError(resp, HttpServletResponse.SC_FORBIDDEN);
-						} finally {
-							if (is != null)
-								try {
-									is.close();
-								} catch (IOException e) {
-									// ignore
-								}
 						}
 					}
 					return Boolean.TRUE;
@@ -233,8 +224,7 @@ public class ResourceServlet extends HttpServlet {
 			}
 		}
 
-		Reader reader = new InputStreamReader(is);
-		try {
+		try (Reader reader = new InputStreamReader(is)) {
 			char[] buffer = new char[8192];
 			int charsRead = reader.read(buffer);
 			int writtenContentLength = 0;
@@ -245,10 +235,6 @@ public class ResourceServlet extends HttpServlet {
 				writer.write(buffer, 0, charsRead);
 				writtenContentLength += charsRead;
 				charsRead = reader.read(buffer);
-			}
-		} finally {
-			if (reader != null) {
-				reader.close(); // will also close input stream
 			}
 		}
 	}

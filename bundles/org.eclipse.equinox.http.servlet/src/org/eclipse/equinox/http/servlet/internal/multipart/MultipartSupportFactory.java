@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Raymond Augé and others.
+ * Copyright (c) 2016, 2019 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,10 +14,10 @@
 package org.eclipse.equinox.http.servlet.internal.multipart;
 
 import javax.servlet.ServletContext;
-import org.eclipse.equinox.http.servlet.dto.ExtendedServletDTO;
+import org.osgi.service.http.runtime.dto.ServletDTO;
 
 public interface MultipartSupportFactory {
 
-	MultipartSupport newInstance(ExtendedServletDTO servletDTO, ServletContext servletContext);
+	MultipartSupport newInstance(ServletDTO servletDTO, ServletContext servletContext);
 
 }

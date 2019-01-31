@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2019 Raymond Augé and others.
+ * Copyright (c) Feb. 1, 2019 Liferay, Inc.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9,7 +9,8 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     Raymond Augé <raymond.auge@liferay.com> - Bug 436698
+ *    Liferay, Inc. - initial API and implementation and/or initial
+ *                    documentation
  ******************************************************************************/
 
 package org.eclipse.equinox.http.servlet.internal.registration;
@@ -17,34 +18,32 @@ package org.eclipse.equinox.http.servlet.internal.registration;
 import javax.servlet.Servlet;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.context.ServiceHolder;
+import org.eclipse.equinox.http.servlet.internal.dto.ExtendedErrorPageDTO;
+import org.eclipse.equinox.http.servlet.internal.servlet.Match;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.runtime.dto.ResourceDTO;
+
 /**
  * @author Raymond Augé
  */
-public class ResourceRegistration extends EndpointRegistration<ResourceDTO> {
+public class ErrorPageRegistration extends EndpointRegistration<ExtendedErrorPageDTO> {
 
-	public ResourceRegistration(
-		ServiceReference<?> serviceReference, ServiceHolder<Servlet> servletHolder, ResourceDTO resourceDTO,
+	public ErrorPageRegistration(
+		ServiceHolder<Servlet> servletHolder, ExtendedErrorPageDTO errorPageDTO,
 		ServletContextHelper servletContextHelper,
 		ContextController contextController) {
 
-		super(servletHolder, resourceDTO, servletContextHelper, contextController);
-
-		this.serviceReference = serviceReference;
-		name = servletHolder.get().getClass().getName().concat("#").concat(getD().prefix); //$NON-NLS-1$
-		needDecode = MatchableRegistration.patternsRequireDecode(resourceDTO.patterns);
+		super(servletHolder, errorPageDTO, servletContextHelper, contextController);
 	}
 
 	@Override
 	public String getName() {
-		return name;
+		return getD().name;
 	}
 
 	@Override
 	public String[] getPatterns() {
-		return getD().patterns;
+		return EMPTY;
 	}
 
 	@Override
@@ -54,16 +53,40 @@ public class ResourceRegistration extends EndpointRegistration<ResourceDTO> {
 
 	@Override
 	public ServiceReference<?> getServiceReference() {
-		return serviceReference;
+		return servletHolder.getServiceReference();
 	}
 
 	@Override
 	public boolean needDecode() {
-		return needDecode;
+		return false;
 	}
 
-	private final boolean needDecode;
-	private final String name;
-	private final ServiceReference<?> serviceReference;
+	@Override
+	public String match(
+		String name, String servletPath, String pathInfo, String extension,
+		Match match) {
+
+		if (match != Match.ERROR) {
+			return null;
+		}
+
+		if (name != null) {
+			for (long errorCode : getD().errorCodes) {
+				if (String.valueOf(errorCode).equals(name)) {
+					return name;
+				}
+			}
+
+			for (String exception : getD().exceptions) {
+				if (exception.equals(name)) {
+					return name;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	private static final String[] EMPTY = new String[0];
 
 }

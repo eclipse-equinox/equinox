@@ -21,7 +21,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
-import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
+import org.eclipse.equinox.http.servlet.internal.context.ServiceHolder;
 import org.eclipse.equinox.http.servlet.internal.servlet.FilterChainImpl;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
@@ -235,10 +235,6 @@ public class FilterRegistration
 				if (isPathWildcardMatch(pattern, path)) {
 					if (extensionWithPrefixMatch != null) {
 						return extensionWithPrefixMatch.equals(extension);
-					}
-					// special case for context path
-					if (Const.SLASH.equals(path) && Const.SLASH_STAR.equals(pattern)) {
-						return false;
 					}
 					return true;
 				}

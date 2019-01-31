@@ -19,7 +19,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
-import org.eclipse.equinox.http.servlet.internal.context.ContextController.ServiceHolder;
+import org.eclipse.equinox.http.servlet.internal.context.ServiceHolder;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
 import org.osgi.dto.DTO;
 import org.osgi.framework.ServiceReference;
@@ -81,12 +81,12 @@ public abstract class EndpointRegistration<D extends DTO>
 
 		EndpointRegistration<?> endpointRegistration = (EndpointRegistration<?>)obj;
 
-		return getT().equals(endpointRegistration.getT());
+		return getD().equals(endpointRegistration.getD());
 	}
 
 	@Override
 	public int hashCode() {
-		return Long.valueOf(getServiceId()).hashCode();
+		return getD().hashCode();
 	}
 
 	//Delegate the init call to the actual servlet
@@ -122,6 +122,10 @@ public abstract class EndpointRegistration<D extends DTO>
 	public String match(
 		String name, String servletPath, String pathInfo, String extension,
 		Match match) {
+
+		if (match == Match.ERROR) {
+			return null;
+		}
 
 		if (name != null) {
 			if (getName().equals(name)) {
@@ -169,7 +173,11 @@ public abstract class EndpointRegistration<D extends DTO>
 
 	@Override
 	public int compareTo(EndpointRegistration<?> o) {
-		return servletHolder.compareTo(o.servletHolder);
+		int result = servletHolder.compareTo(o.servletHolder);
+		if (result == 0) {
+			result = Long.compare(getD().hashCode(), o.getD().hashCode());
+		}
+		return result;
 	}
 
 	@Override

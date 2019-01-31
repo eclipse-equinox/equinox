@@ -25,7 +25,7 @@ public class RegisteredServletContextHelperException
 	private static final long serialVersionUID = 7301237379456486249L;
 
 	public RegisteredServletContextHelperException() {
-		super("ServletContextHelper has already been registered.");
+		super("ServletContextHelper has already been registered."); //$NON-NLS-1$
 	}
 
 }

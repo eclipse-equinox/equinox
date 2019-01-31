@@ -15,6 +15,7 @@
 package org.eclipse.equinox.http.servlet.testbase;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -29,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -57,6 +59,7 @@ import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.HttpServiceRuntime;
 import org.osgi.service.http.runtime.HttpServiceRuntimeConstants;
@@ -73,6 +76,7 @@ import org.osgi.service.http.runtime.dto.ServletContextDTO;
 import org.osgi.service.http.runtime.dto.ServletDTO;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class BaseTest {
 
@@ -92,7 +96,34 @@ public class BaseTest {
 		advisor = new BundleAdvisor(bundleContext);
 		stopJetty();
 		startBundles();
-		runtimeTracker = new ServiceTracker<>(bundleContext, HttpServiceRuntime.class, null);
+		runtimeTracker = new ServiceTracker<>(bundleContext, HttpServiceRuntime.class, new ServiceTrackerCustomizer<HttpServiceRuntime,ServiceReference<HttpServiceRuntime>>() {
+
+			@Override
+			public ServiceReference<HttpServiceRuntime> addingService(
+					ServiceReference<HttpServiceRuntime> reference) {
+				final Object obj = reference
+						.getProperty(Constants.SERVICE_CHANGECOUNT);
+				if (obj != null) {
+					httpRuntimeChangeCount.set(Long.valueOf(obj.toString()));
+				}
+				return reference;
+			}
+
+			@Override
+			public void modifiedService(
+					ServiceReference<HttpServiceRuntime> reference,
+					ServiceReference<HttpServiceRuntime> service) {
+				addingService(reference);
+			}
+
+			@Override
+			public void removedService(
+					ServiceReference<HttpServiceRuntime> reference,
+					ServiceReference<HttpServiceRuntime> service) {
+				httpRuntimeChangeCount.set(-1);
+			}
+
+		});
 		runtimeTracker.open();
 		runtimeTracker.waitForService(100);
 		startJetty();
@@ -454,6 +485,99 @@ public class BaseTest {
 		return getHttpServiceRuntime().getRuntimeDTO().failedResourceDTOs;
 	}
 
+	protected long waitForRegistration(final long previousCount) {
+		return waitForRegistration(previousCount, 100);
+	}
+
+	protected long waitForRegistration(final long previousCount,
+			int maxAttempts) {
+		while (this.httpRuntimeChangeCount.longValue() == previousCount) {
+			if (maxAttempts <= 0) {
+				throw new IllegalStateException("Max attempts exceeded");
+			}
+			try {
+				Thread.sleep(20L);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+			maxAttempts--;
+		}
+		return this.httpRuntimeChangeCount.longValue();
+	}
+
+	protected long getHttpRuntimeChangeCount() {
+		return httpRuntimeChangeCount.longValue();
+	}
+
+	protected void registerDummyServletInHttpService()
+			throws ServletException, NamespaceException {
+		final String path = "/tesths";
+		final HttpService service = this.getHttpService();
+		service.registerServlet(path, new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void doGet(HttpServletRequest req,
+					HttpServletResponse resp) throws IOException {
+				resp.getWriter().print("helloworld");
+				resp.flushBuffer();
+			}
+		}, null, null);
+	}
+
+	protected void unregisterDummyServletFromHttpService() {
+		this.getHttpService().unregister("/tesths");
+	}
+
+	protected ServletContextDTO getServletContextDTOForDummyServlet() {
+		for (final ServletContextDTO dto : this.getHttpServiceRuntime()
+				.getRuntimeDTO().servletContextDTOs) {
+			for (final ServletDTO sd : dto.servletDTOs) {
+				if (sd.patterns.length > 0
+						&& "/tesths".equals(sd.patterns[0])) {
+					return dto;
+				}
+			}
+		}
+		fail("Servlet context for http service not found");
+		return null;
+	}
+
+	protected FailedErrorPageDTO getFailedErrorPageDTOByException(
+			String exception) {
+		for (FailedErrorPageDTO failedErrorPageDTO : getFailedErrorPageDTOs()) {
+			for (String ex : failedErrorPageDTO.exceptions) {
+				if (exception.equals(ex)) {
+					return failedErrorPageDTO;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	protected ErrorPageDTO getErrorPageDTOByException(String context,
+			String exception) {
+		ServletContextDTO servletContextDTO = getServletContextDTOByName(
+				context);
+
+		if (servletContextDTO == null) {
+			return null;
+		}
+
+		for (ErrorPageDTO errorPageDTO : servletContextDTO.errorPageDTOs) {
+			for (String ex : errorPageDTO.exceptions) {
+				if (exception.equals(ex)) {
+					return errorPageDTO;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	final AtomicLong httpRuntimeChangeCount	= new AtomicLong(-1);
+
 	protected static final String PROTOTYPE = "prototype/";
 	protected static final String CONFIGURE = "configure";
 	protected static final String UNREGISTER = "unregister";
@@ -480,7 +604,7 @@ public class BaseTest {
 	protected BundleAdvisor advisor;
 	protected ServletRequestAdvisor requestAdvisor;
 	protected final Collection<ServiceRegistration<? extends Object>> registrations = new ArrayList<ServiceRegistration<? extends Object>>();
-	protected ServiceTracker<HttpServiceRuntime, HttpServiceRuntime> runtimeTracker;
+	protected ServiceTracker<HttpServiceRuntime, ServiceReference<HttpServiceRuntime>> runtimeTracker;
 
 	protected static class TestFilter implements Filter {
 		AtomicInteger called = new AtomicInteger(0);
