@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2012, 2014). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2012, 2017). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ package org.osgi.service.http.runtime.dto;
  * being used by a servlet context due to a problem.
  * <p>
  * As the servlet represented by this DTO is not used due to a failure, the
- * field {@link FailedErrorPageDTO#servletContextId} always returns {@code 0}
- * and does not point to an existing servlet context.
+ * field {@link FailedServletDTO#servletContextId} always returns {@code 0} and
+ * does not point to an existing servlet context.
  * 
  * @NotThreadSafe
  * @author $Id$
@@ -38,6 +38,9 @@ public class FailedServletDTO extends ServletDTO {
 	 * @see DTOConstants#FAILURE_REASON_SERVICE_NOT_GETTABLE
 	 * @see DTOConstants#FAILURE_REASON_SERVLET_CONTEXT_FAILURE
 	 * @see DTOConstants#FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE
+	 * @see DTOConstants#FAILURE_REASON_SERVLET_WRITE_TO_LOCATION_DENIED
+	 * @see DTOConstants#FAILURE_REASON_WHITEBOARD_WRITE_TO_DEFAULT_DENIED
+	 * @see DTOConstants#FAILURE_REASON_SERVLET_READ_FROM_DEFAULT_DENIED
 	 */
 	public int	failureReason;
 }

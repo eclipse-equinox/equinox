@@ -17,27 +17,21 @@
 package org.osgi.service.http.runtime.dto;
 
 /**
- * Represents a listener service which is currently not being used by a servlet
- * context due to a problem.
- * <p>
- * As the listener represented by this DTO is not used due to a failure, the
- * field {@link FailedErrorPageDTO#servletContextId} always returns {@code 0}
- * and does not point to an existing servlet context.
+ * Represents a preprocessor service which is currently not being used due to a
+ * problem.
  * 
  * @NotThreadSafe
  * @author $Id$
+ * @since 1.1
  */
-public class FailedListenerDTO extends ListenerDTO {
+public class FailedPreprocessorDTO extends PreprocessorDTO {
 
 	/**
-	 * The reason why the listener represented by this DTO is not used.
+	 * The reason why the preprocessor represented by this DTO is not used.
 	 * 
 	 * @see DTOConstants#FAILURE_REASON_UNKNOWN
 	 * @see DTOConstants#FAILURE_REASON_EXCEPTION_ON_INIT
-	 * @see DTOConstants#FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
 	 * @see DTOConstants#FAILURE_REASON_SERVICE_NOT_GETTABLE
-	 * @see DTOConstants#FAILURE_REASON_SERVLET_CONTEXT_FAILURE
-	 * @see DTOConstants#FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE
 	 */
 	public int	failureReason;
 
