@@ -125,7 +125,7 @@ public class ExtendedLogServiceTest extends TestCase {
 	public void testNullLoggerLogNull() throws Exception {
 		log.getLogger((String) null).log(null, 0, null, null);
 		ExtendedLogEntry entry = listener.getEntryX();
-		assertEquals("Wrong logger name.", "LogService", entry.getLoggerName());
+		assertEquals("Wrong logger name.", "LogService" + "." + bundle.getSymbolicName(), entry.getLoggerName());
 		assertTrue(entry.getLevel() == 0);
 		assertTrue(entry.getMessage() == null);
 		assertTrue(entry.getException() == null);

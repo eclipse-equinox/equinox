@@ -203,7 +203,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		LogListener listener = new LogListener() {
 			@Override
 			public void logged(LogEntry entry) {
-				if ("Events.Framework".equals(entry.getLoggerName())) {
+				if ((entry.getLoggerName()).startsWith("Events.Framework.")) {
 					logEntry.set(entry);
 					countDown.countDown();
 				}
@@ -215,9 +215,12 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		countDown.await(5, TimeUnit.SECONDS);
 
 		ExtendedLogEntry entry = (ExtendedLogEntry) logEntry.get();
+		assertNotNull("Framework event not logged", entry);
 		assertTrue(entry.getLevel() == LogService.LOG_INFO);
 		assertEquals("Wrong level.", LogLevel.INFO, entry.getLogLevel());
 		assertTrue("Wrong context: " + entry.getContext(), entry.getContext() instanceof FrameworkEvent);
+		assertEquals("Wrong bundle.", getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION), entry.getBundle());
+		assertEquals("Wrong logger name.", "Events.Framework." + entry.getBundle().getSymbolicName(), entry.getLoggerName());
 	}
 
 	public void testLogFrameworkEventType() throws Exception {
@@ -471,6 +474,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		LogEntry logEntry = listener.getEntryX();
 		assertEquals("Wrong message.", message, logEntry.getMessage());
 		assertEquals("Wrong bundle.", bundle, logEntry.getBundle());
+		assertEquals("Wrong logger name.", "Events.Bundle." + bundle.getSymbolicName(), logEntry.getLoggerName());
 
 	}
 

@@ -26,6 +26,7 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 	private final ExtendedLogServiceFactory factory;
 	private volatile Bundle bundle;
 	private final Map<Class<? extends org.osgi.service.log.Logger>, Map<String, LoggerImpl>> loggerCache = new HashMap<>();
+	private final String LOG_SERVICE = "LogService"; //$NON-NLS-1$
 
 	public ExtendedLogServiceImpl(ExtendedLogServiceFactory factory, Bundle bundle) {
 		this.factory = factory;
@@ -124,7 +125,9 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 	@Override
 	public <L extends org.osgi.service.log.Logger> L getLogger(String name, Class<L> loggerType) {
 		if (name == null) {
-			name = "LogService"; //$NON-NLS-1$
+			Bundle current = bundle;
+			String bsn = (current == null) ? null : current.getSymbolicName();
+			name = (bsn == null) ? LOG_SERVICE : LOG_SERVICE + "." + bsn; //$NON-NLS-1$
 		}
 		LoggerImpl logger = null;
 		Map<String, LoggerImpl> loggers = null;

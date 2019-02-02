@@ -222,9 +222,10 @@ public class LogServiceTest extends TestCase {
 		BundleContext context = OSGiTestsActivator.getContext();
 		ServiceRegistration<Object> reg = context.registerService(Object.class, new Object(), null);
 		ServiceReference<Object> ref = reg.getReference();
+		String expectedLoggerName = "Events.Service" + "." + context.getBundle().getSymbolicName();
 
 		LogEntry entry = listener.getEntryX();
-		assertEquals("Wrong logger name.", "Events.Service", entry.getLoggerName());
+		assertEquals("Wrong logger name.", expectedLoggerName, entry.getLoggerName());
 		assertEquals("Wrong event log level.", LogLevel.INFO, entry.getLogLevel());
 		assertEquals("Wrong bundle.", context.getBundle(), entry.getBundle());
 		assertNull("Wrong exception.", entry.getException());
@@ -234,7 +235,7 @@ public class LogServiceTest extends TestCase {
 		reg.setProperties(new Hashtable(Collections.singletonMap("key1", "value1")));
 
 		entry = listener.getEntryX();
-		assertEquals("Wrong logger name.", "Events.Service", entry.getLoggerName());
+		assertEquals("Wrong logger name.", expectedLoggerName, entry.getLoggerName());
 		assertEquals("Wrong event log level.", LogLevel.DEBUG, entry.getLogLevel());
 		assertEquals("Wrong bundle.", context.getBundle(), entry.getBundle());
 		assertNull("Wrong exception.", entry.getException());
@@ -243,7 +244,7 @@ public class LogServiceTest extends TestCase {
 
 		reg.unregister();
 		entry = listener.getEntryX();
-		assertEquals("Wrong logger name.", "Events.Service", entry.getLoggerName());
+		assertEquals("Wrong logger name.", expectedLoggerName, entry.getLoggerName());
 		assertEquals("Wrong event log level.", LogLevel.INFO, entry.getLogLevel());
 		assertEquals("Wrong bundle.", context.getBundle(), entry.getBundle());
 		assertNull("Wrong exception.", entry.getException());

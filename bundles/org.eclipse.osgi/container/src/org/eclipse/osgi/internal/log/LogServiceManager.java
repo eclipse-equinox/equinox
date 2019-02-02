@@ -128,8 +128,10 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 	@SuppressWarnings("deprecation")
 	public void bundleChanged(BundleEvent event) {
 		Bundle bundle = event.getBundle();
-		if (logReaderServiceFactory.isLoggable(bundle, LOGGER_BUNDLE_EVENT, LogService.LOG_INFO)) {
-			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(LOGGER_BUNDLE_EVENT);
+		String bsn = (bundle == null) ? null : bundle.getSymbolicName();
+		String loggerName = (bsn == null) ? LOGGER_BUNDLE_EVENT : LOGGER_BUNDLE_EVENT + "." + bsn; //$NON-NLS-1$
+		if (logReaderServiceFactory.isLoggable(bundle, loggerName, LogService.LOG_INFO)) {
+			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(loggerName);
 			int eventType = event.getType();
 			logger.log(bundle, event, null, LogService.LOG_INFO, getBundleEventTypeName(eventType), null, null);
 		}
@@ -143,10 +145,12 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 		ServiceReference<?> reference = event.getServiceReference();
 		Bundle bundle = reference.getBundle();
 		int eventType = event.getType();
+		String bsn = (bundle == null) ? null : bundle.getSymbolicName();
+		String loggerName = (bsn == null) ? LOGGER_SERVICE_EVENT : LOGGER_SERVICE_EVENT + "." + bsn; //$NON-NLS-1$
 		@SuppressWarnings("deprecation")
 		int logType = (eventType == ServiceEvent.MODIFIED) ? LogService.LOG_DEBUG : LogService.LOG_INFO;
-		if (logReaderServiceFactory.isLoggable(bundle, LOGGER_SERVICE_EVENT, logType)) {
-			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(LOGGER_SERVICE_EVENT);
+		if (logReaderServiceFactory.isLoggable(bundle, loggerName, logType)) {
+			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(loggerName);
 			logger.log(bundle, event, null, logType, getServiceEventTypeName(eventType), reference, null);
 		}
 	}
@@ -171,9 +175,10 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 				logType = LogService.LOG_INFO;
 				break;
 		}
-
-		if (logReaderServiceFactory.isLoggable(bundle, LOGGER_FRAMEWORK_EVENT, logType)) {
-			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(LOGGER_FRAMEWORK_EVENT);
+		String bsn = (bundle == null) ? null : bundle.getSymbolicName();
+		String loggerName = (bsn == null) ? LOGGER_FRAMEWORK_EVENT : LOGGER_FRAMEWORK_EVENT + "." + bsn; //$NON-NLS-1$
+		if (logReaderServiceFactory.isLoggable(bundle, loggerName, logType)) {
+			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(loggerName);
 			logger.log(bundle, event, null, logType, getFrameworkEventTypeName(eventType), null, event.getThrowable());
 		}
 	}
