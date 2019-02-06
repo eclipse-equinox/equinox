@@ -262,4 +262,237 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="src/org/osgi/service/http/context/ServletContextHelper.java" type="org.osgi.service.http.context.ServletContextHelper">
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="finishSecurity(HttpServletRequest, HttpServletResponse)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/http/runtime/dto/DTOConstants.java" type="org.osgi.service.http.runtime.dto.DTOConstants">
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="FAILURE_REASON_SERVLET_READ_FROM_DEFAULT_DENIED"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="FAILURE_REASON_SERVLET_WRITE_TO_LOCATION_DENIED"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="FAILURE_REASON_WHITEBOARD_WRITE_TO_DEFAULT_DENIED"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="FAILURE_REASON_WHITEBOARD_WRITE_TO_LOCATION_DENIED"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/http/runtime/dto/FailedPreprocessorDTO.java" type="org.osgi.service.http.runtime.dto.FailedPreprocessorDTO">
+        <filter comment="Ignore OSGi API" id="1108344834">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="org.osgi.service.http.runtime.dto.FailedPreprocessorDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/http/runtime/dto/PreprocessorDTO.java" type="org.osgi.service.http.runtime.dto.PreprocessorDTO">
+        <filter comment="Ignore OSGi API" id="1108344834">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="org.osgi.service.http.runtime.dto.PreprocessorDTO"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/http/runtime/dto/RuntimeDTO.java" type="org.osgi.service.http.runtime.dto.RuntimeDTO">
+        <filter comment="Ignore OSGi API" id="336658481">
+            <message_arguments>
+                <message_argument value="org.osgi.service.http.runtime.dto.RuntimeDTO"/>
+                <message_argument value="failedPreprocessorDTOs"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="336658481">
+            <message_arguments>
+                <message_argument value="org.osgi.service.http.runtime.dto.RuntimeDTO"/>
+                <message_argument value="preprocessorDTOs"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="failedPreprocessorDTOs"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="preprocessorDTOs"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/http/runtime/dto/ServletDTO.java" type="org.osgi.service.http.runtime.dto.ServletDTO">
+        <filter comment="Ignore OSGi API" id="336658481">
+            <message_arguments>
+                <message_argument value="org.osgi.service.http.runtime.dto.ServletDTO"/>
+                <message_argument value="multipartEnabled"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="336658481">
+            <message_arguments>
+                <message_argument value="org.osgi.service.http.runtime.dto.ServletDTO"/>
+                <message_argument value="multipartFileSizeThreshold"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="336658481">
+            <message_arguments>
+                <message_argument value="org.osgi.service.http.runtime.dto.ServletDTO"/>
+                <message_argument value="multipartLocation"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="336658481">
+            <message_arguments>
+                <message_argument value="org.osgi.service.http.runtime.dto.ServletDTO"/>
+                <message_argument value="multipartMaxFileSize"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="336658481">
+            <message_arguments>
+                <message_argument value="org.osgi.service.http.runtime.dto.ServletDTO"/>
+                <message_argument value="multipartMaxRequestSize"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="multipartEnabled"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="multipartFileSizeThreshold"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="multipartLocation"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="multipartMaxFileSize"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="multipartMaxRequestSize"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/http/whiteboard/HttpWhiteboardConstants.java" type="org.osgi.service.http.whiteboard.HttpWhiteboardConstants">
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="HTTP_SERVICE_CONTEXT_FILTER"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="HTTP_SERVICE_CONTEXT_PROPERTY"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="HTTP_WHITEBOARD_IMPLEMENTATION"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="HTTP_WHITEBOARD_PREPROCESSOR_INIT_PARAM_PREFIX"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="HTTP_WHITEBOARD_SERVLET_MULTIPART_ENABLED"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="HTTP_WHITEBOARD_SERVLET_MULTIPART_FILESIZETHRESHOLD"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="HTTP_WHITEBOARD_SERVLET_MULTIPART_LOCATION"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="HTTP_WHITEBOARD_SERVLET_MULTIPART_MAXFILESIZE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="HTTP_WHITEBOARD_SERVLET_MULTIPART_MAXREQUESTSIZE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="HTTP_WHITEBOARD_SPECIFICATION_VERSION"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/osgi/service/http/whiteboard/Preprocessor.java" type="org.osgi.service.http.whiteboard.Preprocessor">
+        <filter comment="Ignore OSGi API" id="1108344834">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="org.osgi.service.http.whiteboard.Preprocessor"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>
