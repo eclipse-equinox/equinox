@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Julian Honnen
+ *  Copyright (c) 2018 Julian Honnen
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,8 +17,23 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+@SuppressWarnings("deprecation")
 @RunWith(Suite.class)
-@SuiteClasses(RuntimeTests.class)
-public class AllTests {
+@SuiteClasses({
+	CoreExceptionTest.class,
+	OperationCanceledExceptionTest.class,
+	PathTest.class,
+	PluginVersionIdentifierTest.class,
+	ProgressMonitorWrapperTest.class,
+	QualifiedNameTest.class,
+	SafeRunnerTest.class,
+	StatusTest.class,
+	SubMonitorSmallTicksTest.class,
+	SubMonitorTest.class,
+	SubProgressTest.class,
+	URIUtilTest.class,
+	URLTest.class
+})
+public class RuntimeTests {
 	// intentionally left blank
 }
