@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            class="org.eclipse.equinox.common.tests.adaptable.TestAdapterFactory"
+            adaptableType="org.eclipse.equinox.common.tests.adaptable.TestAdaptable">
+         <adapter
+               type="org.eclipse.equinox.common.tests.adaptable.TestAdapter">
+         </adapter>
+      </factory>
+   </extension> 
+   <extension-point id="factoryLoaderTest" name="factoryLoaderTest" schema="schema/factoryLoaderTest.exsd"/>
+   <extension point="org.eclipse.core.runtime.adapters">
+      <factory class="org.eclipse.equinox.common.tests.adaptable.TestAdapterFactoryLoader" 
+         adaptableType="org.eclipse.equinox.common.tests.adaptable.TestAdaptable">
+         <adapter type="testAdapter.testUnknown"/>
+      </factory>
+   </extension>
+</plugin>

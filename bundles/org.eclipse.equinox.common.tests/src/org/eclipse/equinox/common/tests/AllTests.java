@@ -13,12 +13,20 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
+import org.eclipse.equinox.common.tests.adaptable.AdaptableTests;
+import org.eclipse.equinox.common.tests.registry.RegistryTests;
+import org.eclipse.equinox.common.tests.registry.simple.SimpleRegistryTests;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses(RuntimeTests.class)
+@SuiteClasses({
+	RuntimeTests.class,
+	AdaptableTests.class,
+	RegistryTests.class,
+	SimpleRegistryTests.class
+})
 public class AllTests {
 	// intentionally left blank
 }
