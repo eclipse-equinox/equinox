@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.equinox.http.jetty" version="2">
+    <resource path="src/org/eclipse/equinox/http/jetty/JettyConstants.java" type="org.eclipse.equinox.http.jetty.JettyConstants">
+        <filter comment="Using package version here." id="1209008130">
+            <message_arguments>
+                <message_argument value="1.5"/>
+                <message_argument value="3.7"/>
+                <message_argument value="HOUSEKEEPER_INTERVAL"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>
