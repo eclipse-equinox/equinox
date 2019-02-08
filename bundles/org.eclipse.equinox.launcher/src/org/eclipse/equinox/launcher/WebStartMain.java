@@ -304,7 +304,7 @@ public class WebStartMain extends Main {
 
 	//Build the osgi bundle list. The allbundles data structure is changed during the process. 
 	private void buildOSGiBundleList() {
-		StringBuffer finalBundleList = new StringBuffer(allBundles.size() * 30);
+		StringBuilder finalBundleList = new StringBuilder(allBundles.size() * 30);
 		//First go through all the bundles of the bundle
 		for (Iterator<BundleInfo> iterator = bundleList.iterator(); iterator.hasNext();) {
 			BundleInfo searched = iterator.next();

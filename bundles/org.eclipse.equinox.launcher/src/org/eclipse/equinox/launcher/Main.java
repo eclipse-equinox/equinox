@@ -409,7 +409,7 @@ public class Main {
 	}
 
 	private String getFragmentString(String fragmentOS, String fragmentWS, String fragmentArch) {
-		StringBuffer buffer = new StringBuffer(PLUGIN_ID);
+		StringBuilder buffer = new StringBuilder(PLUGIN_ID);
 		buffer.append('.');
 		buffer.append(fragmentWS);
 		buffer.append('.');
@@ -746,7 +746,7 @@ public class Main {
 			//them to spaces on certain class library implementations.
 			if (urlString.indexOf('+') >= 0) {
 				int len = urlString.length();
-				StringBuffer buf = new StringBuffer(len);
+				StringBuilder buf = new StringBuilder(len);
 				for (int i = 0; i < len; i++) {
 					char c = urlString.charAt(i);
 					if (c == '+')
@@ -2512,7 +2512,7 @@ public class Main {
 	protected String getDate(Date date) {
 		Calendar c = Calendar.getInstance();
 		c.setTime(date);
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		appendPaddedInt(c.get(Calendar.YEAR), 4, sb).append('-');
 		appendPaddedInt(c.get(Calendar.MONTH) + 1, 2, sb).append('-');
 		appendPaddedInt(c.get(Calendar.DAY_OF_MONTH), 2, sb).append(' ');
@@ -2523,7 +2523,7 @@ public class Main {
 		return sb.toString();
 	}
 
-	private StringBuffer appendPaddedInt(int value, int pad, StringBuffer buffer) {
+	private StringBuilder appendPaddedInt(int value, int pad, StringBuilder buffer) {
 		pad = pad - 1;
 		if (pad == 0)
 			return buffer.append(Integer.toString(value));
@@ -2630,7 +2630,7 @@ public class Main {
 
 	private void setMultiValueProperty(String property, String[] value) {
 		if (value != null) {
-			StringBuffer result = new StringBuffer(300);
+			StringBuilder result = new StringBuilder(300);
 			for (int i = 0; i < value.length; i++) {
 				if (value[i] != null) {
 					result.append(value[i]);
@@ -2818,7 +2818,7 @@ public class Main {
 	}
 
 	public static String substituteVars(String path) {
-		StringBuffer buf = new StringBuffer(path.length());
+		StringBuilder buf = new StringBuilder(path.length());
 		StringTokenizer st = new StringTokenizer(path, VARIABLE_DELIM_STRING, true);
 		boolean varStarted = false; // indicates we are processing a var subtitute
 		String var = null; // the current var key
