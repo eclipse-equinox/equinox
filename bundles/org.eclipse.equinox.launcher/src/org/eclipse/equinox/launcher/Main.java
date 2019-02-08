@@ -771,12 +771,12 @@ public class Main {
 	protected String[] getArrayFromList(String prop) {
 		if (prop == null || prop.trim().equals("")) //$NON-NLS-1$
 			return new String[0];
-		Vector<String> list = new Vector<>();
+		ArrayList<String> list = new ArrayList<>();
 		StringTokenizer tokens = new StringTokenizer(prop, ","); //$NON-NLS-1$
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();
 			if (!token.equals("")) //$NON-NLS-1$
-				list.addElement(token);
+				list.add(token);
 		}
 		return list.isEmpty() ? new String[0] : list.toArray(new String[list.size()]);
 	}
