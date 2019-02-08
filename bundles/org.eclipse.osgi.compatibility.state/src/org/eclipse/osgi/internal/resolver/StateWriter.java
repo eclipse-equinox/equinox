@@ -38,7 +38,7 @@ class StateWriter {
 		Integer cur = objectTable.get(object);
 		if (cur != null)
 			return cur.intValue();
-		objectTable.put(object, Integer.valueOf(objectTable.size()));
+		objectTable.put(object, new Integer(objectTable.size()));
 		// return the index of the object just added (i.e. size - 1)
 		return (objectTable.size() - 1);
 	}
