@@ -24,7 +24,10 @@ package org.eclipse.core.launcher;
  * on this class are not API.
  * @noextend This class is not intended to be subclassed by clients.
  * @noinstantiate This class is not intended to be instantiated by clients.
+ * @deprecated
  */
+
+@Deprecated
 public class Main {
 
 	/**
