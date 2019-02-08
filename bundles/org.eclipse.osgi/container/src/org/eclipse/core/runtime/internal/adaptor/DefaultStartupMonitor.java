@@ -65,7 +65,7 @@ public class DefaultStartupMonitor implements StartupMonitor {
 		if (EclipseStarter.debug) {
 			String timeString = equinoxConfig.getConfiguration("eclipse.startTime"); //$NON-NLS-1$ 
 			long time = timeString == null ? 0L : Long.parseLong(timeString);
-			Debug.println("Application Started: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$
+			Debug.println("Application started in : " + (System.currentTimeMillis() - time) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		splashHandler.run();
 	}
