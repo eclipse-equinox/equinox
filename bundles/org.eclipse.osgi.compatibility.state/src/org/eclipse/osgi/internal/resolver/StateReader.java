@@ -77,11 +77,11 @@ final class StateReader {
 	}
 
 	private void addToObjectTable(Object object, int index) {
-		objectTable.put(new Integer(index), object);
+		objectTable.put(Integer.valueOf(index), object);
 	}
 
 	private Object getFromObjectTable(int index) {
-		Object result = objectTable.get(new Integer(index));
+		Object result = objectTable.get(Integer.valueOf(index));
 		if (result == null)
 			throw new IllegalStateException("Expected to find an object at table index: " + index); //$NON-NLS-1$
 		return result;
@@ -447,7 +447,7 @@ final class StateReader {
 			else if (type == 2)
 				value = in.readBoolean() ? Boolean.TRUE : Boolean.FALSE;
 			else if (type == 3)
-				value = new Integer(in.readInt());
+				value = Integer.valueOf(in.readInt());
 			else if (type == 4)
 				value = new Long(in.readLong());
 			else if (type == 5)
@@ -477,7 +477,7 @@ final class StateReader {
 							list.add(readString(in, false));
 							break;
 						case 3 :
-							list.add(new Integer(in.readInt()));
+							list.add(Integer.valueOf(in.readInt()));
 							break;
 						case 4 :
 							list.add(new Long(in.readLong()));

@@ -24,7 +24,7 @@ import org.osgi.framework.wiring.BundleRevision;
 
 public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements ExportPackageDescription {
 	public static final String EQUINOX_EE = "x-equinox-ee"; //$NON-NLS-1$
-	private static final Integer EQUINOX_EE_DEFAULT = new Integer(-1);
+	private static final Integer EQUINOX_EE_DEFAULT = Integer.valueOf(-1);
 	private String[] uses;
 	private Map<String, Object> attributes;
 	private Map<String, String> arbitraryDirectives;
@@ -65,7 +65,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 			if (friends != null)
 				result.put(StateImpl.FRIENDS_DIRECTIVE, friends);
 			result.put(StateImpl.INTERNAL_DIRECTIVE, internal);
-			result.put(EQUINOX_EE, equinox_ee == -1 ? EQUINOX_EE_DEFAULT : new Integer(equinox_ee));
+			result.put(EQUINOX_EE, equinox_ee == -1 ? EQUINOX_EE_DEFAULT : Integer.valueOf(equinox_ee));
 			return result;
 		}
 	}
@@ -137,7 +137,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 			if (key.equals(StateImpl.INTERNAL_DIRECTIVE))
 				return internal;
 			if (key.equals(EQUINOX_EE))
-				return equinox_ee == -1 ? EQUINOX_EE_DEFAULT : new Integer(equinox_ee);
+				return equinox_ee == -1 ? EQUINOX_EE_DEFAULT : Integer.valueOf(equinox_ee);
 			return null;
 		}
 	}
