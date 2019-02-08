@@ -711,7 +711,7 @@ public class Main {
 	private boolean checkConfigurationLocation(URL locationUrl) {
 		if (locationUrl == null || !"file".equals(locationUrl.getProtocol())) //$NON-NLS-1$
 			return true;
-		if (Boolean.valueOf(System.getProperty(PROP_CONFIG_AREA + READ_ONLY_AREA_SUFFIX)).booleanValue()) {
+		if (Boolean.parseBoolean(System.getProperty(PROP_CONFIG_AREA + READ_ONLY_AREA_SUFFIX))) {
 			// user wants readonly config area
 			return true;
 		}
