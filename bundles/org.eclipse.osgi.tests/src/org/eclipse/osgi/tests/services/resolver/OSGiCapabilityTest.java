@@ -532,7 +532,7 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		StringBuffer capabililty = new StringBuffer();
+		StringBuilder capabililty = new StringBuilder();
 		capabililty.append("testFailure:osgi.identity; test=failure");
 		manifest.put(GenericCapabilityTest.GENERIC_CAPABILITY, capabililty.toString());
 

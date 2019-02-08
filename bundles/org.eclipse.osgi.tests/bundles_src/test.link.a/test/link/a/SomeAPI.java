@@ -18,7 +18,7 @@ import test.link.a.params.AParam;
 
 public class SomeAPI {
 	public Long getBundleID(Bundle bundle) {
-		return new Long(bundle.getBundleId());
+		return Long.valueOf(bundle.getBundleId());
 	}
 
 	public String getString(AParam arg0) {

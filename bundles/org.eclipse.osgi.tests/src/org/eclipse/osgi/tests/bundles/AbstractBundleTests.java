@@ -143,7 +143,7 @@ public class AbstractBundleTests extends CoreTest {
 	}
 
 	private static Object toString(FrameworkEvent event) {
-		StringBuffer result = new StringBuffer("FrameworkEvent [");
+		StringBuilder result = new StringBuilder("FrameworkEvent [");
 		switch (event.getType()) {
 			case FrameworkEvent.ERROR :
 				result.append("ERROR");
@@ -171,7 +171,7 @@ public class AbstractBundleTests extends CoreTest {
 	}
 
 	private static Object toString(BundleEvent event) {
-		StringBuffer result = new StringBuffer("BundleEvent [");
+		StringBuilder result = new StringBuilder("BundleEvent [");
 		switch (event.getType()) {
 			case BundleEvent.INSTALLED :
 				result.append("INSTALLED");

@@ -135,7 +135,7 @@ public class FileManagerTests extends OSGiTest {
 	}
 
 	private String getInputStreamContents(InputStream is) throws IOException {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		byte[] data = new byte[64];
 		int len;
 		try {

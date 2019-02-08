@@ -146,7 +146,7 @@ public class ApplicationAdminTest extends OSGiTest {
 		HashMap args = new HashMap();
 		args.put("test.arg1", Boolean.TRUE); //$NON-NLS-1$
 		args.put("test.arg2", Integer.valueOf(34)); //$NON-NLS-1$
-		args.put("test.arg3", new Long(34)); //$NON-NLS-1$
+		args.put("test.arg3", Long.valueOf(34)); //$NON-NLS-1$
 		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		args.put("test.arg4", this); //$NON-NLS-1$
@@ -163,12 +163,12 @@ public class ApplicationAdminTest extends OSGiTest {
 		list.clear();
 		list.add("test"); //$NON-NLS-1$
 		list.add(Integer.valueOf(0));
-		list.add(new Long(0));
-		list.add(new Float(0));
-		list.add(new Double(0));
-		list.add(new Byte((byte) 0));
-		list.add(new Short((short) 1));
-		list.add(new Character((char) 0));
+		list.add(Long.valueOf(0));
+		list.add(Float.valueOf(0));
+		list.add(Double.valueOf(0));
+		list.add(Byte.valueOf((byte) 0));
+		list.add(Short.valueOf((short) 1));
+		list.add(Character.valueOf((char) 0));
 		list.add(Boolean.TRUE);
 		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
@@ -185,12 +185,12 @@ public class ApplicationAdminTest extends OSGiTest {
 
 		args.put("test.arg13", "test"); //$NON-NLS-1$ //$NON-NLS-2$
 		args.put("test.arg14", Integer.valueOf(0)); //$NON-NLS-1$
-		args.put("test.arg15", new Long(0)); //$NON-NLS-1$
-		args.put("test.arg16", new Float(0)); //$NON-NLS-1$
-		args.put("test.arg17", new Double(0)); //$NON-NLS-1$
-		args.put("test.arg18", new Byte((byte) 0)); //$NON-NLS-1$
-		args.put("test.arg19", new Short((short) 1)); //$NON-NLS-1$
-		args.put("test.arg20", new Character((char) 0)); //$NON-NLS-1$
+		args.put("test.arg15", Long.valueOf(0)); //$NON-NLS-1$
+		args.put("test.arg16", Float.valueOf(0)); //$NON-NLS-1$
+		args.put("test.arg17", Double.valueOf(0)); //$NON-NLS-1$
+		args.put("test.arg18", Byte.valueOf((byte) 0)); //$NON-NLS-1$
+		args.put("test.arg19", Short.valueOf((short) 1)); //$NON-NLS-1$
+		args.put("test.arg20", Character.valueOf((char) 0)); //$NON-NLS-1$
 		args.put("test.arg21", Boolean.TRUE); //$NON-NLS-1$
 		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
@@ -199,7 +199,7 @@ public class ApplicationAdminTest extends OSGiTest {
 		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, true); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		args.clear();
-		args.put(new Long(0), "test"); //$NON-NLS-1$
+		args.put(Long.valueOf(0), "test"); //$NON-NLS-1$
 		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, true, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
@@ -824,7 +824,7 @@ public class ApplicationAdminTest extends OSGiTest {
 			HashMap args = new HashMap();
 			args.put("test.arg1", Boolean.TRUE); //$NON-NLS-1$
 			args.put("test.arg2", Integer.valueOf(34)); //$NON-NLS-1$
-			args.put("test.arg3", new Long(34)); //$NON-NLS-1$
+			args.put("test.arg3", Long.valueOf(34)); //$NON-NLS-1$
 			app.schedule("schedule.1", args, "org/osgi/application/timer", "(minute=*)", true); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		} catch (InvalidSyntaxException e) {
 			fail("Failed to schedule an application", e); //$NON-NLS-1$
@@ -854,7 +854,7 @@ public class ApplicationAdminTest extends OSGiTest {
 			HashMap args = new HashMap();
 			args.put("test.arg1", Boolean.TRUE); //$NON-NLS-1$
 			args.put("test.arg2", Integer.valueOf(34)); //$NON-NLS-1$
-			args.put("test.arg3", new Long(34)); //$NON-NLS-1$
+			args.put("test.arg3", Long.valueOf(34)); //$NON-NLS-1$
 			for (Iterator iEntries = args.entrySet().iterator(); iEntries.hasNext();) {
 				Map.Entry entry = (Map.Entry) iEntries.next();
 				assertEquals("key: " + entry.getKey(), entry.getValue(), results.get(entry.getKey())); //$NON-NLS-1$
@@ -883,7 +883,7 @@ public class ApplicationAdminTest extends OSGiTest {
 			HashMap args = new HashMap();
 			args.put("test.arg1", Boolean.TRUE); //$NON-NLS-1$
 			args.put("test.arg2", Integer.valueOf(34)); //$NON-NLS-1$
-			args.put("test.arg3", new Long(34)); //$NON-NLS-1$
+			args.put("test.arg3", Long.valueOf(34)); //$NON-NLS-1$
 			// make it non-recurring
 			app.schedule("schedule.2", args, "org/osgi/application/timer", "(minute=*)", false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		} catch (InvalidSyntaxException e) {
@@ -919,7 +919,7 @@ public class ApplicationAdminTest extends OSGiTest {
 			HashMap args = new HashMap();
 			args.put("test.arg1", Boolean.TRUE); //$NON-NLS-1$
 			args.put("test.arg2", Integer.valueOf(34)); //$NON-NLS-1$
-			args.put("test.arg3", new Long(34)); //$NON-NLS-1$
+			args.put("test.arg3", Long.valueOf(34)); //$NON-NLS-1$
 			for (Iterator iEntries = args.entrySet().iterator(); iEntries.hasNext();) {
 				Map.Entry entry = (Map.Entry) iEntries.next();
 				assertEquals("key: " + entry.getKey(), entry.getValue(), results.get(entry.getKey())); //$NON-NLS-1$
@@ -1160,7 +1160,7 @@ public class ApplicationAdminTest extends OSGiTest {
 				Object[][] foundEvents = getEvents();
 				String foundEventsMsg;
 				if (foundEvents.length > 0) {
-					StringBuffer eventsBuffer = new StringBuffer();
+					StringBuilder eventsBuffer = new StringBuilder();
 					eventsBuffer.append("\nFound the following events: \n"); //$NON-NLS-1$
 					for (int i = 0; i < foundEvents.length; i++)
 						eventsBuffer.append(" handle event: ").append(foundEvents[i][0]).append(" ").append(foundEvents[i][1]).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -1239,7 +1239,7 @@ public class ApplicationAdminTest extends OSGiTest {
 				Object[][] foundEvents = getEvents();
 				String foundEventsMsg;
 				if (foundEvents.length > 0) {
-					StringBuffer eventsBuffer = new StringBuffer();
+					StringBuilder eventsBuffer = new StringBuilder();
 					eventsBuffer.append("\nFound the following events: \n"); //$NON-NLS-1$
 					for (int i = 0; i < foundEvents.length; i++)
 						eventsBuffer.append(" descriptor event: ").append(foundEvents[i][0]).append(" ").append(foundEvents[i][1]).append(" ").append(foundEvents[i][2]).append(" ").append(foundEvents[i][3]).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$

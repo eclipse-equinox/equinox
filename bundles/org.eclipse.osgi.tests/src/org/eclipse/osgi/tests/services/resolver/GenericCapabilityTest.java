@@ -40,7 +40,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		StringBuffer capabililty = new StringBuffer();
+		StringBuilder capabililty = new StringBuilder();
 		capabililty.append("foo; version=\"1.3.1\"; attr1=\"value1\"; attr2=\"value2\",");
 		capabililty.append("bar:bartype; version=\"1.4.1\"; attr1=\"value1\"; attr2=\"value2\",");
 		capabililty.append("test.types:testtype;");
@@ -57,7 +57,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericRequire");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		StringBuffer required = new StringBuffer();
+		StringBuilder required = new StringBuilder();
 		required.append("genericCapability:osgi.identity; selection-filter=\"(version=1.0)\",");
 		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
 		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
@@ -90,7 +90,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		StringBuffer capabililty = new StringBuffer();
+		StringBuilder capabililty = new StringBuilder();
 		capabililty.append("foo; version=\"1.3.1\"; attr1=\"value1\"; attr2=\"value2\",");
 		capabililty.append("bar:bartype; version=\"1.4.1\"; attr1=\"value1\"; attr2=\"value2\",");
 		capabililty.append("test.types:testtype;");
@@ -107,7 +107,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericRequire");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		StringBuffer required = new StringBuffer();
+		StringBuilder required = new StringBuilder();
 		required.append("genericCapability:osgi.identity; selection-filter=\"(version>=1.0)\",");
 		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
 		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
@@ -136,7 +136,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability");
 		manifest.put(Constants.BUNDLE_VERSION, "2.0.0");
-		capabililty = new StringBuffer();
+		capabililty = new StringBuilder();
 		capabililty.append("foo; version=\"1.3.2\"; attr1=\"value1\"; attr2=\"value2\",");
 		capabililty.append("bar:bartype; version=\"1.4.2\"; attr1=\"value1\"; attr2=\"value2\",");
 		capabililty.append("test.types:testtype;");
@@ -174,7 +174,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		StringBuffer capabililty = new StringBuffer();
+		StringBuilder capabililty = new StringBuilder();
 		capabililty.append("foo; version=\"1.3.1\"; attr1=\"value1\"; attr2=\"value2\",");
 		capabililty.append("bar:bartype; version=\"1.4.1\"; attr1=\"value1\"; attr2=\"value2\",");
 		capabililty.append("test.types:testtype;");
@@ -191,7 +191,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericRequire");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		StringBuffer required = new StringBuffer();
+		StringBuilder required = new StringBuilder();
 		required.append("genericCapability:osgi.identity; selection-filter=\"(version>=1.0)\",");
 		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
 		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
@@ -241,7 +241,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		StringBuffer capabililty = new StringBuffer();
+		StringBuilder capabililty = new StringBuilder();
 		capabililty.append("foo; version=\"1.3.1\"; attr1=\"value1\"; attr2=\"value2\",");
 		capabililty.append("bar:bartype; version=\"1.4.1\"; attr1=\"value1\"; attr2=\"value2\",");
 		capabililty.append("test.types:testtype;");
@@ -258,7 +258,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability.frag1");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.FRAGMENT_HOST, "genericCapability;bundle-version=\"[1.0.0,2.0.0)\"");
-		capabililty = new StringBuffer();
+		capabililty = new StringBuilder();
 		capabililty.append("fragmentStuff");
 		manifest.put(GENERIC_CAPABILITY, capabililty.toString());
 		BundleDescription genCapFrag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
@@ -267,7 +267,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericRequire");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		StringBuffer required = new StringBuffer();
+		StringBuilder required = new StringBuilder();
 		required.append("genericCapability:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.bundle))\",");
 		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
 		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
@@ -328,7 +328,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "org.eclipse.equinox.generic.frag.b");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.FRAGMENT_HOST, "org.eclipse.equinox.generic.host;bundle-version=\"1.0.0\"");
-		StringBuffer required = new StringBuffer();
+		StringBuilder required = new StringBuilder();
 		required.append("org.eclipse.equinox.generic.host:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.bundle))\",");
 		required.append("frag.a,");
 		required.append("org.eclipse.equinox.generic.frag.a:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.fragment))\",");
@@ -412,7 +412,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		StringBuffer capabililty = new StringBuffer();
+		StringBuilder capabililty = new StringBuilder();
 		capabililty.append("foo; version=\"1.3.1\"; attr1=\"value1\"; attr2=\"value2\",");
 		capabililty.append("bar:bartype; version=\"1.4.1\"; attr1=\"value1\"; attr2=\"value2\",");
 		capabililty.append("test.types:testtype;");
@@ -432,7 +432,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericRequire");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		StringBuffer required = new StringBuffer();
+		StringBuilder required = new StringBuilder();
 		required.append("genericCapability:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.bundle))\",");
 		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
 		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
@@ -477,7 +477,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapablity");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		StringBuffer capabililty = new StringBuffer();
+		StringBuilder capabililty = new StringBuilder();
 		capabililty.append("foo; version=\"1.3.1\"; attr1=\"value1\"; attr2=\"value2\",");
 		capabililty.append("bar:bartype; version=\"1.4.1\"; attr1=\"value1\"; attr2=\"value2\",");
 		capabililty.append("test.types:testtype;");
@@ -488,7 +488,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		capabililty.append(" aSet:set=\"a,b,c,d\";");
 		capabililty.append(" aString:string=\"someString\"");
 		manifest.put(GENERIC_CAPABILITY, capabililty.toString());
-		StringBuffer required = new StringBuffer();
+		StringBuilder required = new StringBuilder();
 		required.append("foo:cycle; selection-filter=\"(version>=1.3.0)\"");
 		manifest.put(GENERIC_REQUIRE, required.toString());
 		BundleDescription genCap = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
@@ -497,7 +497,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability.frag1");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.FRAGMENT_HOST, "genericCapablity;bundle-version=\"[1.0.0,2.0.0)\"");
-		capabililty = new StringBuffer();
+		capabililty = new StringBuilder();
 		capabililty.append("fragmentStuff");
 		manifest.put(GENERIC_CAPABILITY, capabililty.toString());
 		BundleDescription genCapFrag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
@@ -506,10 +506,10 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericRequire");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		capabililty = new StringBuffer();
+		capabililty = new StringBuilder();
 		capabililty.append("foo:cycle; version:version=\"2.0\"");
 		manifest.put(GENERIC_CAPABILITY, capabililty.toString());
-		required = new StringBuffer();
+		required = new StringBuilder();
 		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
 		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
 		required.append("test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\",");

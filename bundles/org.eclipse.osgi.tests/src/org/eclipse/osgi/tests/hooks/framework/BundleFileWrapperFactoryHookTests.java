@@ -68,7 +68,7 @@ public class BundleFileWrapperFactoryHookTests extends AbstractFrameworkHookTest
 	}
 
 	private String readURL(URL url) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
 			try {

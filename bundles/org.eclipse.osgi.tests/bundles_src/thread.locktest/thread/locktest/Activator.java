@@ -41,7 +41,7 @@ public class Activator implements BundleActivator, Runnable {
 		long totalTime = System.currentTimeMillis() - startTime;
 		System.out.println("loaded Class1 " + totalTime);
 		if (totalTime < 40000)
-			AbstractBundleTests.simpleResults.addEvent(new Long(5000));
+			AbstractBundleTests.simpleResults.addEvent(Long.valueOf(5000));
 	}
 
 }

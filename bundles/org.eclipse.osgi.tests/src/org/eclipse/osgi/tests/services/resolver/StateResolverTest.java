@@ -119,13 +119,13 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("1.0", 3, deltas.length); //$NON-NLS-1$
 		Map deltasMap = new HashMap();
 		for (int i = 0; i < deltas.length; i++)
-			deltasMap.put(new Long(deltas[i].getBundle().getBundleId()), deltas[i]);
-		assertNotNull("1.1", deltasMap.get(new Long(1))); //$NON-NLS-1$
-		assertNotNull("1.2", deltasMap.get(new Long(2))); //$NON-NLS-1$
-		assertNotNull("1.3", deltasMap.get(new Long(3))); //$NON-NLS-1$
-		assertEquals("2.1", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(new Long(1))).getType()); //$NON-NLS-1$
-		assertEquals("2.2", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(new Long(2))).getType()); //$NON-NLS-1$
-		assertEquals("2.3", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(new Long(3))).getType()); //$NON-NLS-1$
+			deltasMap.put(Long.valueOf(deltas[i].getBundle().getBundleId()), deltas[i]);
+		assertNotNull("1.1", deltasMap.get(Long.valueOf(1))); //$NON-NLS-1$
+		assertNotNull("1.2", deltasMap.get(Long.valueOf(2))); //$NON-NLS-1$
+		assertNotNull("1.3", deltasMap.get(Long.valueOf(3))); //$NON-NLS-1$
+		assertEquals("2.1", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(Long.valueOf(1))).getType()); //$NON-NLS-1$
+		assertEquals("2.2", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(Long.valueOf(2))).getType()); //$NON-NLS-1$
+		assertEquals("2.3", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(Long.valueOf(3))).getType()); //$NON-NLS-1$
 	}
 
 	public void testBasicResolution() throws BundleException {
@@ -430,13 +430,13 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("1.0", 4, deltas.length); //$NON-NLS-1$
 		Map deltasMap = new HashMap();
 		for (int i = 0; i < deltas.length; i++)
-			deltasMap.put(new Long(deltas[i].getBundle().getBundleId()), deltas[i]);
-		assertNotNull("1.1", deltasMap.get(new Long(1))); //$NON-NLS-1$
-		assertNotNull("1.2", deltasMap.get(new Long(2))); //$NON-NLS-1$
-		assertNotNull("1.3", deltasMap.get(new Long(3))); //$NON-NLS-1$
-		assertEquals("2.1", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(new Long(1))).getType()); //$NON-NLS-1$
-		assertEquals("2.2", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(new Long(2))).getType()); //$NON-NLS-1$
-		assertEquals("2.3", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(new Long(3))).getType()); //$NON-NLS-1$
+			deltasMap.put(Long.valueOf(deltas[i].getBundle().getBundleId()), deltas[i]);
+		assertNotNull("1.1", deltasMap.get(Long.valueOf(1))); //$NON-NLS-1$
+		assertNotNull("1.2", deltasMap.get(Long.valueOf(2))); //$NON-NLS-1$
+		assertNotNull("1.3", deltasMap.get(Long.valueOf(3))); //$NON-NLS-1$
+		assertEquals("2.1", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(Long.valueOf(1))).getType()); //$NON-NLS-1$
+		assertEquals("2.2", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(Long.valueOf(2))).getType()); //$NON-NLS-1$
+		assertEquals("2.3", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(Long.valueOf(3))).getType()); //$NON-NLS-1$
 		state.removeBundle(1);
 		delta = state.resolve(false);
 		deltas = delta.getChanges();
@@ -504,25 +504,25 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("1.0", 3, deltas.length); //$NON-NLS-1$
 		Map deltasMap = new HashMap();
 		for (int i = 0; i < deltas.length; i++)
-			deltasMap.put(new Long(deltas[i].getBundle().getBundleId()), deltas[i]);
-		assertNotNull("1.1", deltasMap.get(new Long(1))); //$NON-NLS-1$
-		assertNotNull("1.2", deltasMap.get(new Long(2))); //$NON-NLS-1$
-		assertNotNull("1.3", deltasMap.get(new Long(3))); //$NON-NLS-1$
-		assertEquals("2.1", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(new Long(1))).getType()); //$NON-NLS-1$
-		assertEquals("2.2", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(new Long(2))).getType()); //$NON-NLS-1$
-		assertEquals("2.3", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(new Long(3))).getType()); //$NON-NLS-1$
+			deltasMap.put(Long.valueOf(deltas[i].getBundle().getBundleId()), deltas[i]);
+		assertNotNull("1.1", deltasMap.get(Long.valueOf(1))); //$NON-NLS-1$
+		assertNotNull("1.2", deltasMap.get(Long.valueOf(2))); //$NON-NLS-1$
+		assertNotNull("1.3", deltasMap.get(Long.valueOf(3))); //$NON-NLS-1$
+		assertEquals("2.1", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(Long.valueOf(1))).getType()); //$NON-NLS-1$
+		assertEquals("2.2", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(Long.valueOf(2))).getType()); //$NON-NLS-1$
+		assertEquals("2.3", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(Long.valueOf(3))).getType()); //$NON-NLS-1$
 		delta = state.resolve(new BundleDescription[] {state.getBundle(1)});
 		deltas = delta.getChanges();
 		assertEquals("3.0", 3, deltas.length); //$NON-NLS-1$
 		deltasMap = new HashMap();
 		for (int i = 0; i < deltas.length; i++)
-			deltasMap.put(new Long(deltas[i].getBundle().getBundleId()), deltas[i]);
-		assertNotNull("3.1", deltasMap.get(new Long(1))); //$NON-NLS-1$
-		assertNotNull("3.2", deltasMap.get(new Long(2))); //$NON-NLS-1$
-		assertNotNull("3.3", deltasMap.get(new Long(3))); //$NON-NLS-1$
-		assertEquals("3.4", BundleDelta.RESOLVED, ((BundleDelta) deltasMap.get(new Long(1))).getType()); //$NON-NLS-1$
-		assertEquals("3.5", BundleDelta.RESOLVED, ((BundleDelta) deltasMap.get(new Long(2))).getType()); //$NON-NLS-1$
-		assertEquals("3.6", BundleDelta.RESOLVED, ((BundleDelta) deltasMap.get(new Long(3))).getType()); //$NON-NLS-1$
+			deltasMap.put(Long.valueOf(deltas[i].getBundle().getBundleId()), deltas[i]);
+		assertNotNull("3.1", deltasMap.get(Long.valueOf(1))); //$NON-NLS-1$
+		assertNotNull("3.2", deltasMap.get(Long.valueOf(2))); //$NON-NLS-1$
+		assertNotNull("3.3", deltasMap.get(Long.valueOf(3))); //$NON-NLS-1$
+		assertEquals("3.4", BundleDelta.RESOLVED, ((BundleDelta) deltasMap.get(Long.valueOf(1))).getType()); //$NON-NLS-1$
+		assertEquals("3.5", BundleDelta.RESOLVED, ((BundleDelta) deltasMap.get(Long.valueOf(2))).getType()); //$NON-NLS-1$
+		assertEquals("3.6", BundleDelta.RESOLVED, ((BundleDelta) deltasMap.get(Long.valueOf(3))).getType()); //$NON-NLS-1$
 
 	}
 

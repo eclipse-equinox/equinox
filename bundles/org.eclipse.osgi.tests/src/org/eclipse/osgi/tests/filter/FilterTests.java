@@ -15,11 +15,22 @@ package org.eclipse.osgi.tests.filter;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
-import junit.framework.*;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import junit.framework.AssertionFailedError;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
 import org.eclipse.osgi.tests.util.MapDictionary;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 
 public abstract class FilterTests extends TestCase {
 	public static Test suite() {
@@ -31,7 +42,7 @@ public abstract class FilterTests extends TestCase {
 
 	/**
 	 * Fail with cause t.
-	 * 
+	 *
 	 * @param message Failure message.
 	 * @param t Cause of the failure.
 	 */
@@ -53,17 +64,17 @@ public abstract class FilterTests extends TestCase {
 		props.put("channel", new Object[] {Integer.valueOf(34), "101"});
 		props.put("status", "(on\\)*");
 		List vec = new ArrayList(10);
-		vec.add(new Long(150));
+		vec.add(Long.valueOf(150));
 		vec.add("100");
 		props.put("max record time", vec);
 		props.put("canrecord", "true(x)");
-		props.put("shortvalue", new Short((short) 1000));
+		props.put("shortvalue", Short.valueOf((short) 1000));
 		props.put("intvalue", Integer.valueOf(100000));
-		props.put("longvalue", new Long(10000000000L));
-		props.put("bytevalue", new Byte((byte) 10));
-		props.put("floatvalue", new Float(1.01));
-		props.put("doublevalue", new Double(2.01));
-		props.put("charvalue", new Character('A'));
+		props.put("longvalue", Long.valueOf(10000000000L));
+		props.put("bytevalue", Byte.valueOf((byte) 10));
+		props.put("floatvalue", Float.valueOf(1.01f));
+		props.put("doublevalue", Double.valueOf(2.01));
+		props.put("charvalue", Character.valueOf('A'));
 		props.put("booleanvalue", Boolean.TRUE);
 		props.put("weirdvalue", new Hashtable());
 		props.put("primintarrayvalue", new int[] {1, 2, 3});
@@ -84,7 +95,7 @@ public abstract class FilterTests extends TestCase {
 		props.put("|", "c");
 		props.put("&", "c");
 		props.put("empty", "");
-		props.put("space", new Character(' '));
+		props.put("space", Character.valueOf(' '));
 		return props;
 	}
 

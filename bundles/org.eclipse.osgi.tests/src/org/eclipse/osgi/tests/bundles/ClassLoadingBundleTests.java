@@ -1013,7 +1013,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		threadLockTest.loadClass("thread.locktest.ATest"); //$NON-NLS-1$
 
 		Object[] expectedEvents = new Object[2];
-		expectedEvents[0] = new Long(5000);
+		expectedEvents[0] = Long.valueOf(5000);
 		expectedEvents[1] = new BundleEvent(BundleEvent.STARTED, threadLockTest);
 		Object[] actualEvents = simpleResults.getResults(2);
 		compareResults(expectedEvents, actualEvents);
@@ -2123,7 +2123,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	}
 
 	private String readURL(URL url) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
 			try {

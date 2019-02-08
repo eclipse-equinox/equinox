@@ -538,13 +538,13 @@ public class DebugOptionsTestCase extends CoreTest {
 		assertNull("A method name was found when it should be null", traceOutput[0].getMethodName()); //$NON-NLS-1$
 		assertTrue("A line number other than -1 was read in", traceOutput[0].getLineNumber() == -1); //$NON-NLS-1$
 		assertEquals("trace message is incorrect", "testing 1", traceOutput[0].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
-		final StringBuffer expectedThrowableText1 = new StringBuffer("java.lang.Exception: "); //$NON-NLS-1$
+		final StringBuilder expectedThrowableText1 = new StringBuilder("java.lang.Exception: "); //$NON-NLS-1$
 		expectedThrowableText1.append(exceptionMessage1);
 		expectedThrowableText1.append(DebugOptionsTestCase.LINE_SEPARATOR);
 		expectedThrowableText1.append(DebugOptionsTestCase.TAB_CHARACTER);
 		expectedThrowableText1.append("at org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase.testVerboseDebugging(DebugOptionsTestCase.java:"); //$NON-NLS-1$		
 		if (!traceOutput[0].getThrowableText().startsWith(expectedThrowableText1.toString())) {
-			final StringBuffer errorMessage = new StringBuffer("The expected throwable text does not start with the actual throwable text."); //$NON-NLS-1$
+			final StringBuilder errorMessage = new StringBuilder("The expected throwable text does not start with the actual throwable text."); //$NON-NLS-1$
 			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
 			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
 			errorMessage.append("Expected"); //$NON-NLS-1$
@@ -649,7 +649,7 @@ public class DebugOptionsTestCase extends CoreTest {
 			fail("Failed 'DebugTrace.trace(option, message, Throwable)' test as an invalid trace entry was found.  Actual Value: '" + invalidEx.getActualValue() + "'.", invalidEx); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
-		final StringBuffer expectedThrowableText1 = new StringBuffer("java.lang.Exception: "); //$NON-NLS-1$
+		final StringBuilder expectedThrowableText1 = new StringBuilder("java.lang.Exception: "); //$NON-NLS-1$
 		expectedThrowableText1.append(exceptionMessage1);
 		expectedThrowableText1.append(DebugOptionsTestCase.LINE_SEPARATOR);
 		expectedThrowableText1.append(DebugOptionsTestCase.TAB_CHARACTER);
@@ -664,7 +664,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		assertEquals("trace message is incorrect", "testing 1", traceOutput[0].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertNotNull("throwable text should not be null", traceOutput[0].getThrowableText()); //$NON-NLS-1$
 		if (!traceOutput[0].getThrowableText().startsWith(expectedThrowableText1.toString())) {
-			final StringBuffer errorMessage = new StringBuffer("The expected throwable text does not start with the actual throwable text."); //$NON-NLS-1$
+			final StringBuilder errorMessage = new StringBuilder("The expected throwable text does not start with the actual throwable text."); //$NON-NLS-1$
 			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
 			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
 			errorMessage.append("Expected"); //$NON-NLS-1$
@@ -684,7 +684,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		assertNotNull("throwable should not be null", traceOutput[0].getThrowableText()); //$NON-NLS-1$
 		assertEquals("Wrong number of trace entries for trace without an exception", 2, traceOutput.length); //$NON-NLS-1$
 
-		final StringBuffer expectedThrowableText2 = new StringBuffer("java.lang.Exception: "); //$NON-NLS-1$
+		final StringBuilder expectedThrowableText2 = new StringBuilder("java.lang.Exception: "); //$NON-NLS-1$
 		expectedThrowableText2.append(exceptionMessage3);
 		expectedThrowableText2.append(DebugOptionsTestCase.LINE_SEPARATOR);
 		expectedThrowableText2.append(DebugOptionsTestCase.TAB_CHARACTER);
@@ -698,7 +698,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		assertEquals("trace message is incorrect", "testing 3", traceOutput[1].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertNotNull("throwable text should not be null", traceOutput[1].getThrowableText()); //$NON-NLS-1$
 		if (!traceOutput[1].getThrowableText().startsWith(expectedThrowableText2.toString())) {
-			final StringBuffer errorMessage = new StringBuffer("The expected throwable text does not start with the actual throwable text."); //$NON-NLS-1$
+			final StringBuilder errorMessage = new StringBuilder("The expected throwable text does not start with the actual throwable text."); //$NON-NLS-1$
 			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
 			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
 			errorMessage.append("Expected"); //$NON-NLS-1$
@@ -1012,7 +1012,7 @@ public class DebugOptionsTestCase extends CoreTest {
 	private static String decodeString(final String inputString) {
 		if (inputString == null || inputString.indexOf(TRACE_ELEMENT_DELIMITER_ENCODED) < 0)
 			return inputString;
-		final StringBuffer tempBuffer = new StringBuffer(inputString);
+		final StringBuilder tempBuffer = new StringBuilder(inputString);
 		int currentIndex = tempBuffer.indexOf(TRACE_ELEMENT_DELIMITER_ENCODED);
 		while (currentIndex >= 0) {
 			tempBuffer.replace(currentIndex, currentIndex + TRACE_ELEMENT_DELIMITER_ENCODED.length(), TRACE_ELEMENT_DELIMITER);
@@ -1140,7 +1140,7 @@ public class DebugOptionsTestCase extends CoreTest {
 	private String readEntry(final Reader traceReader) throws IOException {
 
 		char inputChar = (char) traceReader.read();
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		while (inputChar != DebugOptionsTestCase.TRACE_ELEMENT_DELIMITER.charAt(0)) {
 			inputChar = (char) traceReader.read();
 			if (inputChar != DebugOptionsTestCase.TRACE_ELEMENT_DELIMITER.charAt(0)) {
