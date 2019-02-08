@@ -1171,7 +1171,7 @@ public class Main {
 	private Object[] getVersionElements(String version) {
 		if (version.endsWith(".jar")) //$NON-NLS-1$
 			version = version.substring(0, version.length() - 4);
-		Object[] result = {new Integer(0), new Integer(0), new Integer(0), ""}; //$NON-NLS-1$
+		Object[] result = {Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(0), ""}; //$NON-NLS-1$
 		StringTokenizer t = new StringTokenizer(version, "."); //$NON-NLS-1$
 		String token;
 		int i = 0;
@@ -1180,7 +1180,7 @@ public class Main {
 			if (i < 3) {
 				// major, minor or service ... numeric values
 				try {
-					result[i++] = new Integer(token);
+					result[i++] = Integer.valueOf(token);
 				} catch (Exception e) {
 					// invalid number format - use default numbers (0) for the rest
 					break;
