@@ -741,10 +741,7 @@ public class Main {
 	 *       in InternalBootLoader
 	 */
 	protected String decode(String urlString) {
-		//try to use Java 1.4 method if available
 		try {
-			Class<URLDecoder> clazz = URLDecoder.class;
-			Method method = clazz.getDeclaredMethod("decode", String.class, String.class); //$NON-NLS-1$
 			//first encode '+' characters, because URLDecoder incorrectly converts 
 			//them to spaces on certain class library implementations.
 			if (urlString.indexOf('+') >= 0) {
@@ -759,34 +756,10 @@ public class Main {
 				}
 				urlString = buf.toString();
 			}
-			Object result = method.invoke(null, urlString, "UTF-8"); //$NON-NLS-1$
-			if (result != null)
-				return (String) result;
-		} catch (Exception e) {
-			//JDK 1.4 method not found -- fall through and decode by hand
+			return URLDecoder.decode(urlString, "UTF-8"); //$NON-NLS-1$
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalArgumentException(e.getMessage());
 		}
-		//decode URL by hand
-		boolean replaced = false;
-		byte[] encodedBytes = urlString.getBytes();
-		int encodedLength = encodedBytes.length;
-		byte[] decodedBytes = new byte[encodedLength];
-		int decodedLength = 0;
-		for (int i = 0; i < encodedLength; i++) {
-			byte b = encodedBytes[i];
-			if (b == '%') {
-				if (i + 2 >= encodedLength)
-					throw new IllegalArgumentException("Malformed URL (\"" + urlString + "\"): % must be followed by 2 digits."); //$NON-NLS-1$//$NON-NLS-2$
-				byte enc1 = encodedBytes[++i];
-				byte enc2 = encodedBytes[++i];
-				b = (byte) ((hexToByte(enc1) << 4) + hexToByte(enc2));
-				replaced = true;
-			}
-			decodedBytes[decodedLength++] = b;
-		}
-		if (!replaced)
-			return urlString;
-
-		return new String(decodedBytes, 0, decodedLength, StandardCharsets.UTF_8);
 	}
 
 	/**
@@ -2583,55 +2556,6 @@ public class Main {
 		logFile = new File(base.getPath(), Long.toString(System.currentTimeMillis()) + ".log"); //$NON-NLS-1$
 		new File(logFile.getParent()).mkdirs();
 		System.getProperties().put(PROP_LOGFILE, logFile.getAbsolutePath());
-	}
-
-	/**
-	 * Converts an ASCII character representing a hexadecimal
-	 * value into its integer equivalent.
-	 */
-	private int hexToByte(byte b) {
-		switch (b) {
-			case '0' :
-				return 0;
-			case '1' :
-				return 1;
-			case '2' :
-				return 2;
-			case '3' :
-				return 3;
-			case '4' :
-				return 4;
-			case '5' :
-				return 5;
-			case '6' :
-				return 6;
-			case '7' :
-				return 7;
-			case '8' :
-				return 8;
-			case '9' :
-				return 9;
-			case 'A' :
-			case 'a' :
-				return 10;
-			case 'B' :
-			case 'b' :
-				return 11;
-			case 'C' :
-			case 'c' :
-				return 12;
-			case 'D' :
-			case 'd' :
-				return 13;
-			case 'E' :
-			case 'e' :
-				return 14;
-			case 'F' :
-			case 'f' :
-				return 15;
-			default :
-				throw new IllegalArgumentException("Switch error decoding URL"); //$NON-NLS-1$
-		}
 	}
 
 	private void openLogFile() throws IOException {
