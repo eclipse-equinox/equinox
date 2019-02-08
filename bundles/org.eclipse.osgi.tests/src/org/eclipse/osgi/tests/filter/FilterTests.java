@@ -50,7 +50,7 @@ public abstract class FilterTests extends TestCase {
 	private Dictionary getProperties() {
 		Dictionary props = new Hashtable();
 		props.put("room", "bedroom");
-		props.put("channel", new Object[] {new Integer(34), "101"});
+		props.put("channel", new Object[] {Integer.valueOf(34), "101"});
 		props.put("status", "(on\\)*");
 		List vec = new ArrayList(10);
 		vec.add(new Long(150));
@@ -58,7 +58,7 @@ public abstract class FilterTests extends TestCase {
 		props.put("max record time", vec);
 		props.put("canrecord", "true(x)");
 		props.put("shortvalue", new Short((short) 1000));
-		props.put("intvalue", new Integer(100000));
+		props.put("intvalue", Integer.valueOf(100000));
 		props.put("longvalue", new Long(10000000000L));
 		props.put("bytevalue", new Byte((byte) 10));
 		props.put("floatvalue", new Float(1.01));

@@ -53,7 +53,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 		// register find hook 1
 		props.put(Constants.SERVICE_DESCRIPTION, "find hook 1"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_DESCRIPTION, "min value"); //$NON-NLS-1$
-		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
+		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
 		ServiceRegistration regHook1 = testContext.registerService(FindHook.class.getName(), new FindHook() {
 			public void find(BundleContext context, String name, String filter, boolean allServices, Collection references) {
 				try {
@@ -104,7 +104,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 		// register find hook 2
 		props.put(Constants.SERVICE_DESCRIPTION, "find hook 2"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_DESCRIPTION, "max value first"); //$NON-NLS-1$
-		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
+		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		ServiceRegistration regHook2 = testContext.registerService(FindHook.class.getName(), new FindHook() {
 			public void find(BundleContext context, String name, String filter, boolean allServices, Collection references) {
 				try {
@@ -152,7 +152,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 		// register find hook 3
 		props.put(Constants.SERVICE_DESCRIPTION, "find hook 3"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_DESCRIPTION, "max value second"); //$NON-NLS-1$
-		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
+		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		ServiceRegistration regHook3 = testContext.registerService(FindHook.class.getName(), new FindHook() {
 			public void find(BundleContext context, String name, String filter, boolean allServices, Collection references) {
 				try {
@@ -202,7 +202,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 		// register find hook 4
 		props.put(Constants.SERVICE_DESCRIPTION, "find hook 4"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_DESCRIPTION, "max value third"); //$NON-NLS-1$
-		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
+		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		ServiceRegistration regHook4 = testContext.registerService(FindHook.class.getName(), new FindHook() {
 			public void find(BundleContext context, String name, String filter, boolean allServices, Collection references) {
 				try {

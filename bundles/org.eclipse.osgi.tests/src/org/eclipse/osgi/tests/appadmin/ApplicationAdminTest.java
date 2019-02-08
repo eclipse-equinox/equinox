@@ -145,7 +145,7 @@ public class ApplicationAdminTest extends OSGiTest {
 		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".simpleApp"); //$NON-NLS-1$
 		HashMap args = new HashMap();
 		args.put("test.arg1", Boolean.TRUE); //$NON-NLS-1$
-		args.put("test.arg2", new Integer(34)); //$NON-NLS-1$
+		args.put("test.arg2", Integer.valueOf(34)); //$NON-NLS-1$
 		args.put("test.arg3", new Long(34)); //$NON-NLS-1$
 		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
@@ -162,7 +162,7 @@ public class ApplicationAdminTest extends OSGiTest {
 
 		list.clear();
 		list.add("test"); //$NON-NLS-1$
-		list.add(new Integer(0));
+		list.add(Integer.valueOf(0));
 		list.add(new Long(0));
 		list.add(new Float(0));
 		list.add(new Double(0));
@@ -184,7 +184,7 @@ public class ApplicationAdminTest extends OSGiTest {
 		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		args.put("test.arg13", "test"); //$NON-NLS-1$ //$NON-NLS-2$
-		args.put("test.arg14", new Integer(0)); //$NON-NLS-1$
+		args.put("test.arg14", Integer.valueOf(0)); //$NON-NLS-1$
 		args.put("test.arg15", new Long(0)); //$NON-NLS-1$
 		args.put("test.arg16", new Float(0)); //$NON-NLS-1$
 		args.put("test.arg17", new Double(0)); //$NON-NLS-1$
@@ -823,7 +823,7 @@ public class ApplicationAdminTest extends OSGiTest {
 		try {
 			HashMap args = new HashMap();
 			args.put("test.arg1", Boolean.TRUE); //$NON-NLS-1$
-			args.put("test.arg2", new Integer(34)); //$NON-NLS-1$
+			args.put("test.arg2", Integer.valueOf(34)); //$NON-NLS-1$
 			args.put("test.arg3", new Long(34)); //$NON-NLS-1$
 			app.schedule("schedule.1", args, "org/osgi/application/timer", "(minute=*)", true); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		} catch (InvalidSyntaxException e) {
@@ -853,7 +853,7 @@ public class ApplicationAdminTest extends OSGiTest {
 			assertNotNull("Null results", results); //$NON-NLS-1$
 			HashMap args = new HashMap();
 			args.put("test.arg1", Boolean.TRUE); //$NON-NLS-1$
-			args.put("test.arg2", new Integer(34)); //$NON-NLS-1$
+			args.put("test.arg2", Integer.valueOf(34)); //$NON-NLS-1$
 			args.put("test.arg3", new Long(34)); //$NON-NLS-1$
 			for (Iterator iEntries = args.entrySet().iterator(); iEntries.hasNext();) {
 				Map.Entry entry = (Map.Entry) iEntries.next();
@@ -882,7 +882,7 @@ public class ApplicationAdminTest extends OSGiTest {
 			app.lock();
 			HashMap args = new HashMap();
 			args.put("test.arg1", Boolean.TRUE); //$NON-NLS-1$
-			args.put("test.arg2", new Integer(34)); //$NON-NLS-1$
+			args.put("test.arg2", Integer.valueOf(34)); //$NON-NLS-1$
 			args.put("test.arg3", new Long(34)); //$NON-NLS-1$
 			// make it non-recurring
 			app.schedule("schedule.2", args, "org/osgi/application/timer", "(minute=*)", false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -918,7 +918,7 @@ public class ApplicationAdminTest extends OSGiTest {
 			assertNotNull("Null results", results); //$NON-NLS-1$
 			HashMap args = new HashMap();
 			args.put("test.arg1", Boolean.TRUE); //$NON-NLS-1$
-			args.put("test.arg2", new Integer(34)); //$NON-NLS-1$
+			args.put("test.arg2", Integer.valueOf(34)); //$NON-NLS-1$
 			args.put("test.arg3", new Long(34)); //$NON-NLS-1$
 			for (Iterator iEntries = args.entrySet().iterator(); iEntries.hasNext();) {
 				Map.Entry entry = (Map.Entry) iEntries.next();

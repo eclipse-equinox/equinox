@@ -21,7 +21,7 @@ public class NLSTestCase extends CoreTest {
 
 	public void testEmptyMessageBug200296() {
 		try {
-			NLS.bind("", new Integer(0));
+			NLS.bind("", Integer.valueOf(0));
 		} catch (NegativeArraySizeException e) {
 			fail("1.0", e);
 		}

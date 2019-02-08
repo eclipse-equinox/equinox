@@ -365,15 +365,15 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		Hashtable props = new Hashtable();
 		props.put("name", testMethodName); //$NON-NLS-1$ 
 		props.put(Constants.SERVICE_DESCRIPTION, "min value"); //$NON-NLS-1$
-		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
+		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
 		ServiceRegistration reg1 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
 
 		props.put(Constants.SERVICE_DESCRIPTION, "max value first"); //$NON-NLS-1$
-		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
+		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		ServiceRegistration reg2 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
 
 		props.put(Constants.SERVICE_DESCRIPTION, "max value second"); //$NON-NLS-1$
-		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
+		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		ServiceRegistration reg3 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
 
 		try {
@@ -418,15 +418,15 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		Hashtable props = new Hashtable();
 		props.put("name", testMethodName); //$NON-NLS-1$ 
 		props.put(Constants.SERVICE_DESCRIPTION, "min value"); //$NON-NLS-1$
-		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
+		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
 		ServiceRegistration reg1 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
 
 		props.put(Constants.SERVICE_DESCRIPTION, "max value first"); //$NON-NLS-1$
-		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
+		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		ServiceRegistration reg2 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
 
 		props.put(Constants.SERVICE_DESCRIPTION, "max value second"); //$NON-NLS-1$
-		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
+		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		ServiceRegistration reg3 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
 
 		try {
@@ -470,14 +470,14 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		};
 		Hashtable props = new Hashtable();
 		props.put(getName(), Boolean.TRUE);
-		props.put(Constants.SERVICE_RANKING, new Integer(15));
+		props.put(Constants.SERVICE_RANKING, Integer.valueOf(15));
 		ServiceRegistration reg1 = getContext().registerService(Runnable.class.getName(), runIt, props);
-		props.put(Constants.SERVICE_RANKING, new Integer(10));
+		props.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
 		ServiceRegistration reg2 = getContext().registerService(Runnable.class.getName(), runIt, props);
 		try {
 			assertEquals("wrong service reference", reg1.getReference(), getContext().getServiceReference("java.lang.Runnable")); //$NON-NLS-1$//$NON-NLS-2$
 
-			props.put(Constants.SERVICE_RANKING, new Integer(20));
+			props.put(Constants.SERVICE_RANKING, Integer.valueOf(20));
 			reg2.setProperties(props);
 			assertEquals("wrong service reference", reg2.getReference(), getContext().getServiceReference("java.lang.Runnable")); //$NON-NLS-1$//$NON-NLS-2$
 		} finally {

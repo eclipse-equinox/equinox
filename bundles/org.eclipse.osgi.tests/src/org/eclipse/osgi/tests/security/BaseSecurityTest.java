@@ -87,7 +87,7 @@ public class BaseSecurityTest extends CoreTest {
 
 		KeyStoreTrustEngine dummyTE = new KeyStoreTrustEngine(tempEngine.getAbsolutePath(), "JKS", "changeit".toCharArray(), "temp.jks", null);
 		Hashtable properties = new Hashtable(7);
-		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
+		properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 
 		trustReg = OSGiTestsActivator.getContext().registerService(TrustEngine.class.getName(), dummyTE, properties);
 	}
