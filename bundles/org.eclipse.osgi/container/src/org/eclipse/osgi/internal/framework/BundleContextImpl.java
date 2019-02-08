@@ -14,10 +14,21 @@
 
 package org.eclipse.osgi.internal.framework;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLConnection;
-import java.security.*;
-import java.util.*;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
@@ -25,10 +36,32 @@ import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.messages.Msg;
-import org.eclipse.osgi.internal.serviceregistry.*;
+import org.eclipse.osgi.internal.serviceregistry.HookContext;
+import org.eclipse.osgi.internal.serviceregistry.ServiceReferenceImpl;
+import org.eclipse.osgi.internal.serviceregistry.ServiceRegistrationImpl;
+import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
+import org.eclipse.osgi.internal.serviceregistry.ServiceUse;
+import org.eclipse.osgi.internal.serviceregistry.ShrinkableCollection;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceObjects;
+import org.osgi.framework.ServicePermission;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.hooks.bundle.FindHook;
 import org.osgi.resource.Capability;
 
@@ -714,9 +747,11 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		try {
 			if (debug.DEBUG_BUNDLE_TIME) {
 				start = System.currentTimeMillis();
-				Debug.println("Finding activator for " + bundle); //$NON-NLS-1$
 			}
 			activator = loadBundleActivator();
+			if (debug.DEBUG_BUNDLE_TIME) {
+				Debug.println((System.currentTimeMillis() - start) + "ms" + " to load the activator of " + bundle); //$NON-NLS-1$  //$NON-NLS-2$
+			}
 		} catch (Exception e) {
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
@@ -725,9 +760,6 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		}
 
 		if (activator != null) {
-			if (debug.DEBUG_BUNDLE_TIME) {
-				Debug.println("Starting " + bundle); //$NON-NLS-1$
-			}
 			try {
 				startActivator(activator);
 			} catch (BundleException be) {
@@ -735,7 +767,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 				throw be;
 			} finally {
 				if (debug.DEBUG_BUNDLE_TIME) {
-					Debug.println("End starting " + bundle + " " + (System.currentTimeMillis() - start)); //$NON-NLS-1$ //$NON-NLS-2$
+					Debug.println((System.currentTimeMillis() - start) + "ms" + " to load and start the activator of " + bundle); //$NON-NLS-1$  //$NON-NLS-2$
 				}
 			}
 		}
