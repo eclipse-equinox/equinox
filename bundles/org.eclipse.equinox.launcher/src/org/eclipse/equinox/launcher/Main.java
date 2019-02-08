@@ -1410,8 +1410,7 @@ public class Main {
 		}
 		if (hashCode < 0)
 			hashCode = -(hashCode);
-		String installDirHash = String.valueOf(hashCode);
-		return installDirHash;
+		return String.valueOf(hashCode);
 	}
 
 	/**
