@@ -21,3 +21,4 @@ Bug 537705 - I-Build: I20180805-2000 build failed
 Bug 538962 - I-Build I20180911-1400 build failed 
 Needs a touch for felix.scr qualifier update
 Build I20180920-0430 failed
+Bug 544317 - IBuild I20190210-1800 failed due to unresolved project dependencies.
