@@ -775,8 +775,9 @@ public class Main {
 		StringTokenizer tokens = new StringTokenizer(prop, ","); //$NON-NLS-1$
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();
-			if (!token.equals("")) //$NON-NLS-1$
+			if (!token.isEmpty()) {
 				list.add(token);
+			}
 		}
 		return list.isEmpty() ? new String[0] : list.toArray(new String[list.size()]);
 	}
