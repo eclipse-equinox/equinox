@@ -2836,15 +2836,7 @@ public class Main {
 					if (var != null && var.length() > 0)
 						prop = System.getProperty(var);
 					if (prop == null) {
-						try {
-							// try using the System.getenv method if it exists (bug 126921)
-							Method getenv = System.class.getMethod("getenv", new Class[] {String.class}); //$NON-NLS-1$
-							prop = (String) getenv.invoke(null, new Object[] {var});
-						} catch (Throwable t) {
-							// do nothing; 
-							// on 1.4 VMs this throws an error
-							// on J2ME this method does not exist
-						}
+						prop = System.getenv(var);
 					}
 					if (prop != null) {
 						// found a value; use it
