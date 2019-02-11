@@ -23,6 +23,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.*;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -2090,17 +2092,8 @@ public class Main {
 
 		// try to load saved configuration file
 		Properties props = new Properties();
-		InputStream is = null;
-		try {
-			is = getStream(url);
+		try (InputStream is = getStream(url)) {
 			props.load(is);
-		} finally {
-			if (is != null)
-				try {
-					is.close();
-				} catch (IOException e) {
-					//ignore failure to close
-				}
 		}
 		return props;
 	}
@@ -2277,44 +2270,6 @@ public class Main {
 		return null;
 	}
 
-	/**
-	 * Transfers all available bytes from the given input stream to the given output stream. 
-	 * Regardless of failure, this method closes both streams.
-	 */
-	private static void transferStreams(InputStream source, OutputStream destination) {
-		byte[] buffer = new byte[8096];
-		try {
-			while (true) {
-				int bytesRead = -1;
-				try {
-					bytesRead = source.read(buffer);
-				} catch (IOException e) {
-					return;
-				}
-				if (bytesRead == -1)
-					break;
-				try {
-					destination.write(buffer, 0, bytesRead);
-				} catch (IOException e) {
-					return;
-				}
-			}
-		} finally {
-			try {
-				source.close();
-			} catch (IOException e) {
-				// ignore
-			} finally {
-				//close destination in finally in case source.close fails
-				try {
-					destination.close();
-				} catch (IOException e) {
-					// ignore
-				}
-			}
-		}
-	}
-
 	/*
 	 * Look for the specified spash file in the given JAR and extract it to the config 
 	 * area for caching purposes.
@@ -2356,32 +2311,18 @@ public class Main {
 			ZipEntry entry = file.getEntry(jarEntry.replace(File.separatorChar, '/'));
 			if (entry == null)
 				return null;
-			InputStream input = null;
-			try {
-				input = file.getInputStream(entry);
+
+			Path outputFile = splash.toPath();
+			Files.createDirectories(outputFile.getParent());
+
+			try (InputStream input = file.getInputStream(entry)) {
+				Files.copy(input, outputFile);
 			} catch (IOException e) {
 				log("Exception opening splash: " + entry.getName() + " in JAR file: " + jarPath); //$NON-NLS-1$ //$NON-NLS-2$
 				log(e);
 				return null;
 			}
-			new File(splash.getParent()).mkdirs();
-			OutputStream output;
-			try {
-				output = new BufferedOutputStream(new FileOutputStream(splash));
-			} catch (FileNotFoundException e) {
-				try {
-					input.close();
-				} catch (IOException e1) {
-					// ignore
-				}
-				return null;
-			}
-			transferStreams(input, output);
-			try {
-				file.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+
 			return splash.exists() ? splash.getAbsolutePath() : null;
 		} catch (IOException e) {
 			log("Exception looking for " + jarEntry + " in JAR file: " + jarPath); //$NON-NLS-1$ //$NON-NLS-2$
