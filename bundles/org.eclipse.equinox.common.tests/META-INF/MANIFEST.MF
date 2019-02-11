@@ -14,3 +14,4 @@ Import-Package: org.eclipse.osgi.service.localization,
  org.osgi.framework,
  org.osgi.service.packageadmin,
  org.osgi.util.tracker
+Eclipse-BundleShape: dir
