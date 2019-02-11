@@ -34,7 +34,11 @@ import java.util.zip.ZipFile;
  * 
  * @noextend This class is not intended to be subclassed by clients.
  * @noinstantiate This class is not intended to be instantiated by clients.
+ * @noreference This class is not intended to be referenced by clients.
  * @deprecated Java WebStart is removed in Java 11.
+ * 
+ * This API is planned to be deleted, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=544262
+ * 
  */
 //The bundles are discovered by finding all the jars on the classpath. Then they are added with their full path to the osgi.bundles list.
 @Deprecated
