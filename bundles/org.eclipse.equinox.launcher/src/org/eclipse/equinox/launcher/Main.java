@@ -2013,7 +2013,7 @@ public class Main {
 				path = new String(chars);
 			}
 		if (path.toLowerCase().endsWith(".jar")) //$NON-NLS-1$
-			path = path.substring(0, path.lastIndexOf("/") + 1); //$NON-NLS-1$
+			path = path.substring(0, path.lastIndexOf('/') + 1); //$NON-NLS-1$
 		if (path.toLowerCase().endsWith("/plugins/")) //$NON-NLS-1$ 
 			path = path.substring(0, path.length() - "/plugins/".length()); //$NON-NLS-1$
 		try {
