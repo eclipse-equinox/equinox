@@ -3501,22 +3501,6 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testPackageNamespaceBundleSymbolicNameAttribute() throws Exception {
-		DummyContainerAdaptor adaptor = createDummyAdaptor();
-		ModuleContainer container = adaptor.getContainer();
-		// install the system.bundle
-		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
-		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
-		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
-
-		ModuleWiring wiring = systemBundle.getCurrentRevision().getWiring();
-		List<BundleCapability> packages = wiring.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
-		Assert.assertEquals("Wrong number of host packages.", 2, packages.size());
-		//system.bundle alias shouldn't be added to the bundle-symbolic-name attribute of the osgi.wiring.package capabilities of SYSTEM BUNDLE.
-		Assert.assertEquals("Wrong bundle-symbolic-name attribute", "org.eclipse.osgi", packages.get(0).getAttributes().get(PackageNamespace.CAPABILITY_BUNDLE_SYMBOLICNAME_ATTRIBUTE));
-	}
-
-	@Test
 	public void testStartDeadLock() throws BundleException, InterruptedException, IOException {
 		CountDownLatch startLatch = new CountDownLatch(1);
 		CountDownLatch stopLatch = new CountDownLatch(1);

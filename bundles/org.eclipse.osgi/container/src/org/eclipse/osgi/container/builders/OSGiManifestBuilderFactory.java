@@ -100,13 +100,13 @@ public final class OSGiManifestBuilderFactory {
 			validateHeaders(manifest);
 		}
 
-		setSymbolicNameAndVersion(builder, manifest, symbolicNameAlias, manifestVersion);
+		Object symbolicName = getSymbolicNameAndVersion(builder, manifest, symbolicNameAlias, manifestVersion);
 
 		Collection<Map<String, Object>> exportedPackages = new ArrayList<>();
-		getPackageExports(builder, ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, manifest.get(Constants.EXPORT_PACKAGE)), exportedPackages);
-		getPackageExports(builder, ManifestElement.parseHeader(HEADER_OLD_PROVIDE_PACKAGE, manifest.get(HEADER_OLD_PROVIDE_PACKAGE)), exportedPackages);
+		getPackageExports(builder, ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, manifest.get(Constants.EXPORT_PACKAGE)), symbolicName, exportedPackages);
+		getPackageExports(builder, ManifestElement.parseHeader(HEADER_OLD_PROVIDE_PACKAGE, manifest.get(HEADER_OLD_PROVIDE_PACKAGE)), symbolicName, exportedPackages);
 		if (extraExports != null && !extraExports.isEmpty()) {
-			getPackageExports(builder, ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, extraExports), exportedPackages);
+			getPackageExports(builder, ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, extraExports), symbolicName, exportedPackages);
 		}
 		getPackageImports(builder, manifest, exportedPackages, manifestVersion);
 
@@ -245,7 +245,7 @@ public final class OSGiManifestBuilderFactory {
 		return manifestVersionHeader == null ? 1 : Integer.parseInt(manifestVersionHeader);
 	}
 
-	private static void setSymbolicNameAndVersion(ModuleRevisionBuilder builder, Map<String, String> manifest, String symbolicNameAlias, int manifestVersion) throws BundleException {
+	private static Object getSymbolicNameAndVersion(ModuleRevisionBuilder builder, Map<String, String> manifest, String symbolicNameAlias, int manifestVersion) throws BundleException {
 		boolean isFragment = manifest.get(Constants.FRAGMENT_HOST) != null;
 		builder.setTypes(isFragment ? BundleRevision.TYPE_FRAGMENT : 0);
 		String version = manifest.get(Constants.BUNDLE_VERSION);
@@ -311,9 +311,11 @@ public final class OSGiManifestBuilderFactory {
 				builder.addCapability(IdentityNamespace.IDENTITY_NAMESPACE, directives, identityAttributes);
 			}
 		}
+
+		return symbolicName == null ? symbolicNameAlias : symbolicName;
 	}
 
-	private static void getPackageExports(ModuleRevisionBuilder builder, ManifestElement[] exportElements, Collection<Map<String, Object>> exportedPackages) throws BundleException {
+	private static void getPackageExports(ModuleRevisionBuilder builder, ManifestElement[] exportElements, Object symbolicName, Collection<Map<String, Object>> exportedPackages) throws BundleException {
 		if (exportElements == null)
 			return;
 		for (ManifestElement exportElement : exportElements) {
@@ -326,7 +328,6 @@ public final class OSGiManifestBuilderFactory {
 			String specVersionAttr = (String) attributes.remove(Constants.PACKAGE_SPECIFICATION_VERSION);
 			Version version = versionAttr == null ? (specVersionAttr == null ? Version.emptyVersion : Version.parseVersion(specVersionAttr)) : Version.parseVersion(versionAttr);
 			attributes.put(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE, version);
-			String symbolicName = builder.getSymbolicName();
 			if (symbolicName != null) {
 				attributes.put(PackageNamespace.CAPABILITY_BUNDLE_SYMBOLICNAME_ATTRIBUTE, symbolicName);
 			}
