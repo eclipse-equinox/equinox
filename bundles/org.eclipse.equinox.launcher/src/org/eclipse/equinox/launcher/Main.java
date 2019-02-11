@@ -1420,9 +1420,9 @@ public class Main {
 	 * @param argString the arguments string
 	 */
 	public static void main(String argString) {
-		Vector<String> list = new Vector<>(5);
+		ArrayList<String> list = new ArrayList<>(5);
 		for (StringTokenizer tokens = new StringTokenizer(argString, " "); tokens.hasMoreElements();) //$NON-NLS-1$
-			list.addElement(tokens.nextToken());
+			list.add(tokens.nextToken());
 		main(list.toArray(new String[list.size()]));
 	}
 
