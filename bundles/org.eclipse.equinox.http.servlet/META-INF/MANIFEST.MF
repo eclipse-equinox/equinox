@@ -27,6 +27,7 @@ Import-Package: org.apache.commons.fileupload;version="[1.2.2, 2.0.0)";resolutio
  org.osgi.service.http.runtime;version="[1.1,1.2)",
  org.osgi.service.http.runtime.dto;version="[1.1,1.2)",
  org.osgi.service.http.whiteboard;version="[1.1,1.2)",
+ org.osgi.service.log;version="[1.4,2)",
  org.osgi.util.tracker;version="[1.5,2.0)"
 Comment-Header: Both Eclipse-LazyStart and Bundle-ActivationPolicy are specified for compatibility with 3.2
 Eclipse-LazyStart: true

@@ -14,6 +14,8 @@
 
 package org.eclipse.equinox.http.servlet.internal.error;
 
+import java.util.Objects;
+
 /**
  * @author Raymond Augé
  */
@@ -22,7 +24,7 @@ public class HttpWhiteboardFailureException extends IllegalArgumentException {
 	private static final long serialVersionUID = 1944632136470074075L;
 
 	public HttpWhiteboardFailureException(String message, int failureReason) {
-		super(message);
+		super(Objects.requireNonNull(message));
 
 		this.failureReason = failureReason;
 	}

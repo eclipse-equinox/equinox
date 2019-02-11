@@ -56,12 +56,12 @@ public class PreprocessorCustomizer
 			result.set(addPreprocessorRegistration(serviceReference));
 		}
 		catch (HttpWhiteboardFailureException hwfe) {
-			httpServiceRuntime.log(hwfe.getMessage(), hwfe);
+			httpServiceRuntime.debug(hwfe.getMessage(), hwfe);
 
 			recordFailed(serviceReference, hwfe.getFailureReason());
 		}
 		catch (Exception e) {
-			httpServiceRuntime.log(e.getMessage(), e);
+			httpServiceRuntime.error(e.getMessage(), e);
 
 			recordFailed(serviceReference, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
 		}

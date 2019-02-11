@@ -54,8 +54,8 @@ public class HttpSessionTracker implements HttpSessionInvalidator {
 				parentSession.invalidate();
 			}
 			catch (IllegalStateException ise) {
-				httpServiceRuntime.log(
-					"Session was already invalidated!", ise); //$NON-NLS-1$
+				httpServiceRuntime.debug(
+					"Session was already invalidated: " + parentSession.getId(), ise); //$NON-NLS-1$
 			}
 		}
 	}
@@ -86,7 +86,7 @@ public class HttpSessionTracker implements HttpSessionInvalidator {
 		// At this point there should be no left over sessions. If
 		// there are we'll log it because there's some kind of leak.
 		if (!httpSessionAdaptorsMap.isEmpty()) {
-			httpServiceRuntime.log(
+			httpServiceRuntime.debug(
 				"There are HttpSessionAdaptors left over. There might be a context or session leak!"); //$NON-NLS-1$
 		}
 	}

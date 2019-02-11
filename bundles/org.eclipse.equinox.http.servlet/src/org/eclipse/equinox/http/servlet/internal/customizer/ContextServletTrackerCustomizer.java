@@ -81,12 +81,12 @@ public class ContextServletTrackerCustomizer
 			result.set(contextController.addServletRegistration(serviceReference));
 		}
 		catch (HttpWhiteboardFailureException hwfe) {
-			httpServiceRuntime.log(hwfe.getMessage(), hwfe);
+			httpServiceRuntime.debug(hwfe.getMessage(), hwfe);
 
 			recordFailed(serviceReference, hwfe.getFailureReason());
 		}
 		catch (Throwable t) {
-			httpServiceRuntime.log(t.getMessage(), t);
+			httpServiceRuntime.error(t.getMessage(), t);
 
 			recordFailed(serviceReference, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
 		}

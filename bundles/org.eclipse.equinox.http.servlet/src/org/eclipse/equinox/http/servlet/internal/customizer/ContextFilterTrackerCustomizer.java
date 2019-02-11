@@ -68,12 +68,12 @@ public class ContextFilterTrackerCustomizer
 			result.set(contextController.addFilterRegistration(serviceReference));
 		}
 		catch (HttpWhiteboardFailureException hwfe) {
-			httpServiceRuntime.log(hwfe.getMessage(), hwfe);
+			httpServiceRuntime.debug(hwfe.getMessage(), hwfe);
 
 			recordFailed(serviceReference, hwfe.getFailureReason());
 		}
-		catch (Exception e) {
-			httpServiceRuntime.log(e.getMessage(), e);
+		catch (Throwable t) {
+			httpServiceRuntime.error(t.getMessage(), t);
 
 			recordFailed(serviceReference, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
 		}

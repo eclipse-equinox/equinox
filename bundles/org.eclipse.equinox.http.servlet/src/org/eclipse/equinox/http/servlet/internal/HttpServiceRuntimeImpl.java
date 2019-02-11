@@ -44,6 +44,8 @@ import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.HttpServiceRuntime;
 import org.osgi.service.http.runtime.dto.*;
 import org.osgi.service.http.whiteboard.Preprocessor;
+import org.osgi.service.log.Logger;
+import org.osgi.service.log.LoggerFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -74,6 +76,22 @@ public class HttpServiceRuntimeImpl
 		this.targetFilter = "(" + Activator.UNIQUE_SERVICE_ID + "=" + this.attributes.get(Activator.UNIQUE_SERVICE_ID) + ")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		this.httpSessionTracker = new HttpSessionTracker(this);
 		this.invalidatorReg = trackingContext.registerService(HttpSessionInvalidator.class, this.httpSessionTracker, attributes);
+
+		loggerFactoryTracker = new ServiceTracker<>(consumingContext, LoggerFactory.class, new ServiceTrackerCustomizer<LoggerFactory, Logger>() {
+			@Override
+			public Logger addingService(ServiceReference<LoggerFactory> reference) {
+				return getConsumingContext().getService(reference).getLogger(HttpServiceRuntimeImpl.class);
+			}
+			@Override
+			public void modifiedService(ServiceReference<LoggerFactory> reference, Logger service) {
+				// ignore
+			}
+			@Override
+			public void removedService(ServiceReference<LoggerFactory> reference, Logger service) {
+				// ignore
+			}
+		});
+		loggerFactoryTracker.open();
 
 		contextServiceTracker =
 			new ServiceTracker<ServletContextHelper, AtomicReference<ContextController>>(
@@ -121,12 +139,12 @@ public class HttpServiceRuntimeImpl
 			result.set(contextController);
 		}
 		catch (HttpWhiteboardFailureException hwfe) {
-			parentServletContext.log(hwfe.getMessage(), hwfe);
+			debug(hwfe.getMessage(), hwfe);
 
 			recordFailedServletContextDTO(serviceReference, 0, hwfe.getFailureReason());
 		}
-		catch (Exception e) {
-			parentServletContext.log(e.getMessage(), e);
+		catch (Throwable t) {
+			error(t.getMessage(), t);
 
 			recordFailedServletContextDTO(serviceReference, 0, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
 		}
@@ -233,6 +251,7 @@ public class HttpServiceRuntimeImpl
 		httpSessionTracker.clear();
 		registeredObjects.clear();
 		scheduledExecutor.shutdown();
+		loggerFactoryTracker.close();
 	}
 
 	public DispatchTargets getDispatchTargets(
@@ -344,12 +363,34 @@ public class HttpServiceRuntimeImpl
 		return null;
 	}
 
-	public void log(String message) {
-		parentServletContext.log(message);
+	public void debug(String message) {
+		Logger logger = loggerFactoryTracker.getService();
+		if (logger == null) {
+			parentServletContext.log(String.valueOf(message));
+		}
+		else {
+			logger.debug(String.valueOf(message));
+		}
 	}
 
-	public void log(String message, Throwable t) {
-		parentServletContext.log(message, t);
+	public void debug(String message, Throwable t) {
+		Logger logger = loggerFactoryTracker.getService();
+		if (logger == null) {
+			parentServletContext.log(String.valueOf(message), t);
+		}
+		else {
+			logger.debug(String.valueOf(message), t);
+		}
+	}
+
+	public void error(String message, Throwable t) {
+		Logger logger = loggerFactoryTracker.getService();
+		if (logger == null) {
+			parentServletContext.log(String.valueOf(message), t);
+		}
+		else {
+			logger.error(String.valueOf(message), t);
+		}
 	}
 
 	public boolean matches(ServiceReference<?> serviceReference) {
@@ -1281,7 +1322,7 @@ public class HttpServiceRuntimeImpl
 		new ConcurrentHashMap<ServiceReference<?>, FailedPreprocessorDTO>();
 
 	private final Set<Object> registeredObjects = Collections.newSetFromMap(new ConcurrentHashMap<Object, Boolean>());
-
+	private final ServiceTracker<LoggerFactory, Logger> loggerFactoryTracker;
 	private final ServiceTracker<ServletContextHelper, AtomicReference<ContextController>> contextServiceTracker;
 	private final ServiceTracker<Preprocessor, AtomicReference<PreprocessorRegistration>> preprocessorServiceTracker;
 	private final ServiceTracker<ContextPathCustomizer, ContextPathCustomizer> contextPathAdaptorTracker;
