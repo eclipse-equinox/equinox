@@ -77,7 +77,13 @@ public class ProxyServlet extends HttpServlet {
 			return null;
 		}
 		String requestUri = HttpServletRequestWrapperImpl.getDispatchRequestURI(request);
-		return requestUri.substring(request.getContextPath().length() + request.getServletPath().length());
+		String contextPath = request.getContextPath();
+		String servletPath = request.getServletPath();
+		if (request.getDispatcherType() == DispatcherType.INCLUDE) {
+			contextPath = (String)request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH);
+			servletPath = (String)request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
+		}
+		return requestUri.substring(contextPath.length() + servletPath.length());
 	}
 
 	/**
