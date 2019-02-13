@@ -25,6 +25,7 @@ package org.eclipse.core.launcher;
  * @noextend This class is not intended to be subclassed by clients.
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noreference This class is not intended to be referenced by clients.
+ * 
  * @deprecated
  *
  * This API is planned to be deleted, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=544262
