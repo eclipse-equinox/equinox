@@ -26,13 +26,14 @@ import org.eclipse.core.internal.runtime.AdapterManager;
  * the {@link IAdaptable} interface and explicitly forwarding
  * the <code>getAdapter</code> request to an implementation
  * of the {@link IAdapterManager} service. The method would look like:
+ * </p>
  * <pre>
  *     public &lt;T&gt; T getAdapter(Class&lt;T&gt; adapter) {
  *         IAdapterManager manager = ...;//lookup the IAdapterManager service         
  *         return manager.getAdapter(this, adapter);
  *     }
  * </pre>
- * </p><p>
+ * <p>
  * This class can be used without OSGi running.
  * </p><p>
  * Clients may subclass.

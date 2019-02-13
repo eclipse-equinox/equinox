@@ -29,6 +29,7 @@ import org.osgi.framework.Version;
  * is an uninterpreted string (no whitespace characters allowed).
  * For example, the following are valid version identifiers 
  * (as strings):
+ * </p>
  * <ul>
  *   <li><code>0.0.0</code></li>
  *   <li><code>1.0.127564</code></li>
@@ -36,7 +37,6 @@ import org.osgi.framework.Version;
  *   <li><code>1.9</code> (interpreted as <code>1.9.0</code>)</li>
  *   <li><code>3</code> (interpreted as <code>3.0.0</code>)</li>
  * </ul>
- * </p>
  * <p>
  * The version identifier can be decomposed into a major, minor, 
  * service level component and qualifier components. A difference

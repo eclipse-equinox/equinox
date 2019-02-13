@@ -20,6 +20,7 @@ package org.eclipse.core.runtime;
  * to provide details of failures (e.g., validation methods).
  * <p>
  * A status carries the following information:
+ * </p>
  * <ul>
  * <li> plug-in identifier (required)</li>
  * <li> severity (required)</li>
@@ -28,6 +29,7 @@ package org.eclipse.core.runtime;
  * <li> exception (optional) - for problems stemming from a failure at
  *    a lower level</li>
  * </ul>
+ * <p>
  * Some status objects, known as multi-statuses, have other status objects 
  * as children.
  * </p>

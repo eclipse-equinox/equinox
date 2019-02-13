@@ -19,6 +19,7 @@ import org.osgi.service.prefs.BackingStoreException;
  * This interface is implemented by objects that visit preference nodes.
  * <p>
  * Usage:
+ * </p>
  * <pre>
  * class Visitor implements IPreferenceNodeVisitor {
  *    public boolean visit(IEclipsePreferences node) {
@@ -29,7 +30,7 @@ import org.osgi.service.prefs.BackingStoreException;
  * IEclipsePreferences root = ...;
  * root.accept(new Visitor());
  * </pre>
- * </p><p>
+ * <p>
  * Clients may implement this interface.
  * </p>
  *

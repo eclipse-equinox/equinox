@@ -37,6 +37,7 @@ public class Adapters {
 	 * 
 	 * Otherwise returns null.
 	 * 
+	 * @param <T> class type to adapt to
 	 * @param sourceObject
 	 *            object to adapt, can be null
 	 * @param adapter
@@ -99,6 +100,7 @@ public class Adapters {
 	 * <p>
 	 * See {@link #adapt(Object, Class, boolean)}.
 	 * 
+	 * @param <T> class type to adapt to
 	 * @param sourceObject
 	 *            object to adapt, can be null
 	 * @param adapter

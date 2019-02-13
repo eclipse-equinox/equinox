@@ -26,12 +26,12 @@ import org.eclipse.osgi.util.NLS;
  * and debugging.
  * <p>
  * In this strategy:
- * </p><p><ul>
+ * </p><ul>
  * <li>Logging is done onto <code>System.out</code>;</li>
- * <li>The translation routine assumes that keys are prefixed with <code>'%'/<code>;</li>
+ * <li>The translation routine assumes that keys are prefixed with <code>'%'/</code>;</li>
  * <li>Caching is enabled and doesn't use state or time stamp validation;</li>
  * <li>Standard Java class loading is used to create executable extensions.</li>
- * </ul></p><p>
+ * </ul><p>
  * This class can be used without OSGi running.
  * </p><p>
  * This class can be overridden and/or instantiated by clients.

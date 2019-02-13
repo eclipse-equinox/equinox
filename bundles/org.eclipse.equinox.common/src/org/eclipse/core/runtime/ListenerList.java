@@ -26,7 +26,7 @@ import java.util.stream.StreamSupport;
  * to the underlying array data structure for reading, with the trust that they will 
  * not modify the underlying array.
  * <p>
- * <a name="same"></a>A listener list handles the <i>same</i> listener being added 
+ * A listener list handles the <i>same</i> listener being added 
  * multiple times, and tolerates removal of listeners that are the same as other
  * listeners in the list.  For this purpose, listeners can be compared with each other 
  * using either equality or identity, as specified in the list constructor.
@@ -37,7 +37,7 @@ import java.util.stream.StreamSupport;
  * <code>FooListener#eventHappened(Event)</code>, is:
  * </p>
  * <pre>
-ListenerList&lt;FooListener&gt; fooListeners = new ListenerList<>();
+ListenerList&lt;FooListener&gt; fooListeners = new ListenerList&lt;&gt;();
 //...
 for (FooListener listener : fooListeners) {
 	listener.eventHappened(event);

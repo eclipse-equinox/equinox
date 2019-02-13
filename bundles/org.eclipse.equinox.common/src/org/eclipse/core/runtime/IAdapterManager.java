@@ -32,7 +32,7 @@ package org.eclipse.core.runtime;
  * <p>
  * The following code snippet shows how one might register an adapter of type
  * <code>com.example.acme.Sticky</code> on resources in the workspace.
- * <p>
+ * </p>
  * 
  * <pre>
  *  IAdapterFactory pr = new IAdapterFactory() {
@@ -60,7 +60,7 @@ package org.eclipse.core.runtime;
  *  Platform.getAdapterManager().registerAdapters(pr, IResource.class);
  *   </pre>
  * 
- * </p><p>
+ * <p>
  * This interface can be used without OSGi running.
  * </p><p>
  * This interface is not intended to be implemented by clients.

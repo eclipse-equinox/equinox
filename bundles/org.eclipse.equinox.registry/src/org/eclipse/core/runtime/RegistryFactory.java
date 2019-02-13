@@ -24,11 +24,11 @@ import org.eclipse.core.runtime.spi.RegistryStrategy;
  * Use this class to create or obtain an extension registry.
  * <p>
  * The following methods can be used without OSGi running:
- * </p><p><ul>
+ * </p><ul>
  * <li>{@link #createRegistry(RegistryStrategy, Object, Object)}</li>
  * <li>{@link #getRegistry()}</li>
  * <li>{@link #setDefaultRegistryProvider(IRegistryProvider)}</li>
- * </ul></p><p>
+ * </ul><p>
  * This class is not intended to be subclassed or instantiated.
  * </p>
  * @since org.eclipse.equinox.registry 3.2

@@ -50,6 +50,7 @@ public interface IAdaptable {
 	 * rather than invoking it directly.
 	 *
 	 * @param adapter the adapter class to look up
+	 * @param <T> the class type
 	 * @return a object of the given class, 
 	 *    or <code>null</code> if this object does not
 	 *    have an adapter for the given class

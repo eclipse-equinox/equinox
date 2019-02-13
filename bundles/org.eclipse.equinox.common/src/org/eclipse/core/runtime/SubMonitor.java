@@ -38,7 +38,6 @@ import org.eclipse.core.internal.runtime.TracingOptions;
  * if a called method fails to call done() on the given monitor or fails to consume all the ticks on 
  * the given monitor, the parent will correct the problem after the method returns.</li>  
  * </ul>
- * <p></p>
  * <p><b>USAGE:</b></p>
  * 
  * <p>When implementing a method that accepts an IProgressMonitor:</p>
@@ -49,7 +48,6 @@ import org.eclipse.core.internal.runtime.TracingOptions;
  * accepts an IProgressMonitor.</li>
  * </ul>
  * 
- * <p></p>
  * <p><b>Example: Recommended usage</b></p>
  *
  * <p>This example demonstrates how the recommended usage of <code>SubMonitor</code> makes it unnecessary to call
@@ -79,7 +77,6 @@ import org.eclipse.core.internal.runtime.TracingOptions;
  *      }
  * </pre>
  * 
- * <p></p>
  * <p><b>Example: Branches</b></p>
  *
  * <p>This example demonstrates how to smoothly report progress in situations where some of the work is optional.</p>
@@ -118,7 +115,6 @@ import org.eclipse.core.internal.runtime.TracingOptions;
  * </pre>
  * 
  * 
- * <p></p>
  * <p><b>Example: Loops</b></p>
  *
  * <p>This example demonstrates how to report progress in a loop.</p> 
@@ -143,7 +139,6 @@ import org.eclipse.core.internal.runtime.TracingOptions;
  * </pre>
  *
  *
- * <p></p>
  * <p><b>Example: Infinite progress</b></p>
  * 
  * <p>This example demonstrates how to report logarithmic progress in situations where the number of ticks
