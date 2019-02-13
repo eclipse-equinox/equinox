@@ -243,7 +243,7 @@ public class FrameworkExtensionInstaller {
 		BundleActivator activator = null;
 		try {
 			Class<?> activatorClass = Class.forName(activatorName);
-			activator = (BundleActivator) activatorClass.newInstance();
+			activator = (BundleActivator) activatorClass.getConstructor().newInstance();
 			startActivator(activator, context, extensionRevision.getBundle());
 		} catch (Throwable e) {
 			BundleException eventException;

@@ -13,9 +13,18 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
-import java.io.*;
-import java.util.*;
-import org.osgi.framework.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Dictionary;
+import java.util.List;
+import java.util.Map;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.Version;
 
 /**
  * A factory for states and their component objects.  
@@ -494,19 +503,11 @@ public interface StateObjectFactory {
 		private StateObjectFactory getImplementation() {
 			synchronized (this.monitor) {
 				if (implementation == null) {
-					Exception error = null;
 					try {
 						Class<?> implClass = Class.forName(IMPL_NAME);
-						implementation = (StateObjectFactory) implClass.newInstance();
-					} catch (ClassNotFoundException e) {
-						error = e;
-					} catch (InstantiationException e) {
-						error = e;
-					} catch (IllegalAccessException e) {
-						error = e;
-					}
-					if (error != null) {
-						throw new UnsupportedOperationException("Not able to create StateObjectFactory implementation: " + IMPL_NAME, error); //$NON-NLS-1$
+						implementation = (StateObjectFactory) implClass.getConstructor().newInstance();
+					} catch (Throwable t) {
+						throw new UnsupportedOperationException("Not able to create StateObjectFactory implementation: " + IMPL_NAME, t); //$NON-NLS-1$
 					}
 				}
 				return implementation;

@@ -193,7 +193,7 @@ public final class HookRegistry {
 			String hookName = iHooks.next();
 			try {
 				Class<?> clazz = Class.forName(hookName);
-				HookConfigurator configurator = (HookConfigurator) clazz.newInstance();
+				HookConfigurator configurator = (HookConfigurator) clazz.getConstructor().newInstance();
 				configurator.addHooks(this);
 			} catch (Throwable t) {
 				// We expect the follow exeptions may happen; but we need to catch all here

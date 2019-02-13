@@ -17,6 +17,7 @@ package org.eclipse.osgi.internal.framework;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URLConnection;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -776,7 +777,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		 same activator object when we stop this bundle. */
 	}
 
-	private BundleActivator loadBundleActivator() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+	private BundleActivator loadBundleActivator() throws ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		ModuleWiring wiring = bundle.getModule().getCurrentRevision().getWiring();
 		if (wiring == null) {
 			return null;
@@ -795,7 +796,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			return null;
 		}
 		Class<?> activatorClass = loader.findClass(activatorName);
-		return (BundleActivator) activatorClass.newInstance();
+		return (BundleActivator) activatorClass.getConstructor().newInstance();
 	}
 
 	/**

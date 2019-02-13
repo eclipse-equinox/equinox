@@ -14,7 +14,10 @@
 
 package org.eclipse.osgi.internal.framework;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
 import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.internal.debug.Debug;
@@ -32,7 +35,11 @@ import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.storage.BundleLocalizationImpl;
 import org.eclipse.osgi.storage.url.BundleResourceHandler;
 import org.eclipse.osgi.storage.url.BundleURLConverter;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.permissionadmin.PermissionAdmin;
@@ -132,19 +139,11 @@ public class SystemBundleActivator implements BundleActivator {
 					// try to use a specific classloader by classname
 					try {
 						Class<?> clazz = Class.forName(securityManager);
-						sm = (SecurityManager) clazz.newInstance();
-					} catch (ClassNotFoundException e) {
-						// do nothing
-					} catch (ClassCastException e) {
-						// do nothing
-					} catch (InstantiationException e) {
-						// do nothing
-					} catch (IllegalAccessException e) {
-						// do nothing
+						sm = (SecurityManager) clazz.getConstructor().newInstance();
+					} catch (Throwable t) {
+						throw new BundleException("Failed to create security manager", t); //$NON-NLS-1$
 					}
 				}
-				if (sm == null)
-					throw new NoClassDefFoundError(securityManager);
 				if (configuration.getDebug().DEBUG_SECURITY)
 					Debug.println("Setting SecurityManager to: " + sm); //$NON-NLS-1$
 				System.setSecurityManager(sm);
