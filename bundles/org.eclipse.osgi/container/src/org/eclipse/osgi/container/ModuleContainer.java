@@ -208,7 +208,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	 * Creates a synthetic requirement that is not associated with any module revision.
 	 * This is useful for calling {@link FrameworkWiring#findProviders(Requirement)}.
 	 * @param namespace the requirement namespace
-	 * @param directives the requriement directives
+	 * @param directives the requirement directives
 	 * @param attributes the requirement attributes
 	 * @return a synthetic requirement
 	 */
