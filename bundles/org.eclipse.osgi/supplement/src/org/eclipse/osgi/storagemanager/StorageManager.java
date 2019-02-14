@@ -13,9 +13,22 @@
  *******************************************************************************/
 package org.eclipse.osgi.storagemanager;
 
-import java.io.*;
-import java.util.*;
-import org.eclipse.osgi.framework.internal.reliablefile.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.SyncFailedException;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import org.eclipse.osgi.framework.internal.reliablefile.ReliableFile;
+import org.eclipse.osgi.framework.internal.reliablefile.ReliableFileInputStream;
+import org.eclipse.osgi.framework.internal.reliablefile.ReliableFileOutputStream;
 import org.eclipse.osgi.internal.location.LocationHelper;
 import org.eclipse.osgi.internal.location.Locker;
 import org.eclipse.osgi.internal.messages.Msg;
@@ -33,7 +46,7 @@ import org.eclipse.osgi.internal.messages.Msg;
  * Clients can not extend this class
  * </p>
  * <p>
- * Example
+ * Example:</p>
  * <pre>
  * //Open the storage manager
  * org.eclipse.osgi.storagemanager.StorageManager cacheStorageManager = new StorageManager("d:/sharedFolder/bar/", false); //$NON-NLS-1$
@@ -65,7 +78,6 @@ import org.eclipse.osgi.internal.messages.Msg;
  * //Close the file manager at the end
  * cacheStorageManager.close();
  * </pre>
- * </p>
  * <p>
  * Implementation details <br>
  * The following implementation details are provided to help with understanding the 

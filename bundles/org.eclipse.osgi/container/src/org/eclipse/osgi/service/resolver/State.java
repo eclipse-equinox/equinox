@@ -13,7 +13,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.List;
+import java.util.Map;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
@@ -117,7 +120,7 @@ public interface State {
 	 * version. A null value is returned if no such bundle is found in this state.
 	 * A resolved bundle is always preferably returned over an unresolved bundle.
 	 * If multiple bundles with the same resolution state are available, the bundle
-	 * with the highest version number is returned if the <code>version<code> is
+	 * with the highest version number is returned if the <code>version</code> is
 	 * null.
 	 * 
 	 * @param symbolicName symbolic name of the bundle to query
