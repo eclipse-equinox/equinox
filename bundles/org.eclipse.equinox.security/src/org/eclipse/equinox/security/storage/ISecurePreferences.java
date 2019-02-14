@@ -38,7 +38,7 @@ import java.io.IOException;
  * 		node.put("password", myPassword, true);
  * </pre>
  * <p>
- * This interface has the following differences from the {@link org.osgi.service.prefs.Preferences}:
+ * This interface has the following differences from the {@link org.osgi.service.prefs.Preferences}:</p>
  * <ul>
  * <li>get...() and put...() methods throw StorageException</li>
  * <li>put...() methods have an extra argument bEncrypt</li>
@@ -47,7 +47,7 @@ import java.io.IOException;
  * <li>flush() throws IOException</li>
  * <li>sync() method is removed</li>
  * </ul> 
- * </p><p>
+ * <p>
  * On the keyring side, when adding a key to the node, you can ask framework to encrypt it. Framework
  * will lazily acquire password from password provider and use it to encrypt all new  entries added 
  * to the secure preferences tree in this session. 

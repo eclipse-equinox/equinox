@@ -23,7 +23,7 @@ import org.eclipse.equinox.bidi.custom.StructuredTextTypeHandler;
  * ensure correct presentation, or to remove those characters to 
  * restore the original text
  * (for more explanations, please see the 
- * {@link org.eclipse.equinox.bidi package documentation</a>}.
+ * {@link org.eclipse.equinox.bidi package documentation}.
  * <p>
  * This class can be used without OSGi running (but only the structured text types declared
  * in {@link StructuredTextTypeHandlerFactory} are available in that mode).

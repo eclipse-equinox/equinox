@@ -57,12 +57,12 @@ import org.osgi.framework.Bundle;
  *  </p>
  *  <p>
  *  TLD discovery is slightly different, to clarify it occurs in one of three ways:
+ *  </p>
  *  <ol>
  *  <li> declarations found in /WEB-INF/web.xml (found either on the bundleResourcePath in the bundle or in the ServletContext)</li>
  *  <li> tld files found under /WEB-INF (found either on the bundleResourcePath in the bundle or in the ServletContext)</li>
  *  <li> tld files found in jars on the Bundle-Classpath (see org.eclipse.equinox.internal.jsp.jasper.JSPClassLoader)</li>
  *  </ol>
- *  </p>
  *  <p>
  *  Other than the setting and resetting of the thread context classloader and additional resource lookups in the bundle the JSPServlet
  *  is behaviourally consistent with the JSP 2.0 specification and regular Jasper operation.

@@ -19,11 +19,11 @@ import org.eclipse.equinox.bidi.custom.StructuredTextTypeHandler;
  * Provides advanced methods for processing bidirectional text with 
  * a specific structure to ensure proper presentation.
  * For a general introduction to structured text, see the 
- * {@link <a href="../package-summary.html">org.eclipse.equinox.bidi
- * package documentation</a>}.
+ * {@link org.eclipse.equinox.bidi
+ * package documentation}.
  * For details about when the advanced methods are needed, see
- * {@link <a href="package-summary.html">this
- * package documentation</a>}.
+ * {@link org.eclipse.equinox.bidi.advanced this
+ * package documentation}.
  * <p>
  * Identifiers for several common handlers are included in 
  * {@link org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory}. For handlers 
@@ -63,17 +63,17 @@ import org.eclipse.equinox.bidi.custom.StructuredTextTypeHandler;
  * </p><p>
  * The following code shows how to transform a certain type of structured text
  * (directory and file paths) in order to obtain the <i>full</i>
- * text corresponding to the given <i>lean</i> text.
+ * text corresponding to the given <i>lean</i> text.</p>
  * <pre>
  *   IStructuredTextExpert expert = StructuredTextExpertFactory.getExpert(StructuredTextTypeHandlerFactory.FILE);
  *   String leanText = "D:\\\u05d0\u05d1\\\u05d2\\\u05d3.ext";
  *   String fullText = expert.leanToFullText(leanText);
  *   System.out.println("full text = " + fullText);
  * </pre>
- * </p><p>
+ * <p>
  * The following code shows how to transform successive lines of Java
  * code in order to obtain the <i>full</i>
- * text corresponding to the <i>lean</i> text of each line.
+ * text corresponding to the <i>lean</i> text of each line.</p>
  * <pre>
  *   IStructuredTextExpert expert = StructuredTextExpertFactory.getStatefulExpert(StructuredTextTypeHandlerFactory.JAVA);
  *   String leanText = "int i = 3; // first Java statement";
@@ -83,7 +83,7 @@ import org.eclipse.equinox.bidi.custom.StructuredTextTypeHandler;
  *   fullText = expert.leanToFullText(leanText,);
  *   System.out.println("full text = " + fullText);
  * </pre>
- * </p>
+ * 
  */
 public interface IStructuredTextExpert {
 

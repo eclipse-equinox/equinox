@@ -135,7 +135,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 	 * progress monitor, the given name will NOT be used to update
 	 * the progress bar's main task label. That means the given 
 	 * string will be ignored. If style <code>PREPEND_MAIN_LABEL_TO_SUBTASK
-	 * <code> is specified, then the given string will be prepended to
+	 * </code> is specified, then the given string will be prepended to
 	 * every string passed to <code>subTask(String)</code>.
 	 */
 	@Override

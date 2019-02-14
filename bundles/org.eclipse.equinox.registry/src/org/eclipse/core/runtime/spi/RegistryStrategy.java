@@ -234,9 +234,9 @@ public class RegistryStrategy {
 	/**
 	 * Override this method to customize scheduling of an extension registry event. Note that this method
 	 * <strong>must</strong> make the following call to actually process the event:
-	 * <p><pre><code>
+	 * <pre><code>
 	 * 	RegistryStrategy.processChangeEvent(listeners, deltas, registry);
-	 * </code></pre></p><p>
+	 * </code></pre><p>
 	 * In the default implementation, the method registry events are executed in a queue
 	 * on a separate thread (i.e. asynchronously, sequentially).
 	 * </p>
