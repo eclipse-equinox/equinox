@@ -23,6 +23,7 @@ public class AllFrameworkHookTests {
 		suite.addTest(new TestSuite(ClassLoaderHookTests.class));
 		suite.addTest(new TestSuite(BundleFileWrapperFactoryHookTests.class));
 		suite.addTest(new TestSuite(ContextFinderTests.class));
+		suite.addTest(new TestSuite(DevClassPathWithExtensionTests.class));
 		return suite;
 	}
 }
