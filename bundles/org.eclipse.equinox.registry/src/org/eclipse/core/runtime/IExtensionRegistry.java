@@ -89,10 +89,10 @@ public interface IExtensionRegistry {
 	 *
 	 * </p><p>
 	 * This method is equivalent to:
+	 * </p>
 	 * <pre>
 	 *     addRegistryChangeListener(listener,null);
 	 * </pre>
-	 * </p>
 	 *
 	 * @param listener the listener
 	 * @see IRegistryChangeListener

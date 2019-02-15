@@ -714,7 +714,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * <p>This is property makes it unnecessary to call done() on a SubMonitor instance, since child
 	 * monitors are automatically cleaned up the next time the parent is touched.</p> 
 	 * 
-	 * <code><pre> 
+	 * <pre> <code>
 	 *      ////////////////////////////////////////////////////////////////////////////
 	 *      // Example 1: Typical usage of newChild
 	 *      void myMethod(IProgressMonitor parent) {
@@ -755,7 +755,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 *          Object someValue = computeValue(progress.newChild(50));
 	 *          callMethod(progress.newChild(50), someValue);
 	 *      }
-	 * </pre></code>
+	 * </code></pre>
 	 * 
 	 * @param totalWork number of ticks to consume from the receiver
 	 * @param suppressFlags a bitwise combination of SUPPRESS_* flags. They can be used to suppress
@@ -843,7 +843,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * <p>This makes it unnecessary to call done() on a SubMonitor instance, since child
 	 * monitors are automatically cleaned up the next time the parent is touched.</p> 
 	 * 
-	 * <code><pre> 
+	 * <pre><code>
 	 *      ////////////////////////////////////////////////////////////////////////////
 	 *      // Example 1: Typical usage of split
 	 *      void myMethod(IProgressMonitor parent) {
@@ -884,7 +884,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 *          Object someValue = computeValue(progress.split(50));
 	 *          callMethod(progress.split(50), someValue);
 	 *      }
-	 * </pre></code>
+	 * </code></pre>
 	 * 
 	 * @param totalWork number of ticks to consume from the receiver
 	 * @return a new SubMonitor instance
@@ -914,7 +914,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * <p>This is property makes it unnecessary to call done() on a SubMonitor instance, since child
 	 * monitors are automatically cleaned up the next time the parent is touched.</p> 
 	 * 
-	 * <code><pre> 
+	 * <pre> <code>
 	 *      ////////////////////////////////////////////////////////////////////////////
 	 *      // Example 1: Typical usage of split
 	 *      void myMethod(IProgressMonitor parent) {
@@ -955,7 +955,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 *          Object someValue = computeValue(progress.split(50));
 	 *          callMethod(progress.split(50), someValue);
 	 *      }
-	 * </pre></code>
+	 * </code></pre>
 	 * 
 	 * @param totalWork number of ticks to consume from the receiver
 	 * @param suppressFlags a bitwise combination of SUPPRESS_* flags. They can be used to suppress

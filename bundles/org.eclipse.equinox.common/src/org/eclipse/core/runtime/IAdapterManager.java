@@ -203,11 +203,13 @@ public interface IAdapterManager {
 	 * Returns a status of an adapter factory registered that may be able
 	 * to convert <code>adaptable</code> to an object of type <code>adapterTypeName</code>.
 	 * <p>
-	 * One of the following values can be returned:<ul>
+	 * One of the following values can be returned:</p>
+	 * <ul>
 	 * <li>{@link org.eclipse.core.runtime.IAdapterManager#NONE} if no applicable adapter factory was found;</li>
 	 * <li>{@link org.eclipse.core.runtime.IAdapterManager#NOT_LOADED} if an adapter factory was found, but has not been loaded;</li>
 	 * <li>{@link org.eclipse.core.runtime.IAdapterManager#LOADED} if an adapter factory was found, and it is loaded.</li>
-	 * </ul></p>
+	 * </ul>
+	 * 
 	 * @param adaptable the adaptable object being queried (usually an instance
 	 * of <code>IAdaptable</code>)
 	 * @param adapterTypeName the fully qualified class name of an adapter to

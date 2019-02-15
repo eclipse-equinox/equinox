@@ -64,13 +64,13 @@ public interface IPreferenceFilter {
 	 * </p>
 	 * <p>
 	 * For example:
+	 * </p>
 	 * <pre>
 	 * "org.eclipse.core.resources" -> null
 	 * "org.eclipse.ui" -> new PreferenceFilterEntry[] {
 	 * 		new PreferenceFilterEntry("DEFAULT_PERSPECTIVE_LOCATION"),
 	 * 		new PreferenceFilterEntry("SHOW_INTRO_ON_STARTUP")}
 	 * </pre>
-	 * </p>
 	 *
 	 * @return the mapping table
 	 * @see PreferenceFilterEntry

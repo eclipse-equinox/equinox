@@ -140,13 +140,13 @@ public interface ISecurePreferences {
 	 * <p>
 	 * If the node path is invalid, an {@link IllegalArgumentException} will be thrown
 	 * by this method. The valid node path:
+	 * </p>
 	 * <ul>
 	 * <li>contains only ASCII characters between 32 and 126 (ASCII alphanumeric and printable
 	 * characters);</li>
 	 * <li>can not contain two or more consecutive forward slashes;</li>
 	 * <li>can not end with a trailing forward slash.</li>
 	 * </ul>
-	 * </p>
 	 * @see org.osgi.service.prefs.Preferences
 	 * @see org.osgi.service.prefs.Preferences#node(String)
 	 * @param pathName absolute or relative path to the node

@@ -153,15 +153,15 @@ public class StructuredTextEnvironment {
 	 * will be displayed.
 	 * <p>
 	 * The orientation value is one of the following:
+	 * </p>
 	 * <ul>
 	 * <li>{@link #ORIENT_LTR ORIENT_LTR},</li>
 	 * <li>{@link #ORIENT_LTR ORIENT_RTL},</li>
 	 * <li>{@link #ORIENT_CONTEXTUAL_LTR ORIENT_CONTEXTUAL_LTR},</li>
 	 * <li>{@link #ORIENT_CONTEXTUAL_RTL ORIENT_CONTEXTUAL_RTL},</li>
 	 * <li>{@link #ORIENT_UNKNOWN ORIENT_UNKNOWN}, or</li>
-	 * <li>{@link #ORIENT_IGNORE ORIENT_IGNORE}</li>.
+	 * <li>{@link #ORIENT_IGNORE ORIENT_IGNORE}</li>
 	 * </ul>
-	 * </p>
 	 */
 	public int getOrientation() {
 		return orientation;

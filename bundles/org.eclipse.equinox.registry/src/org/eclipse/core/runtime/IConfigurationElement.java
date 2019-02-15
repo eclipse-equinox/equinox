@@ -89,10 +89,11 @@ public interface IConfigurationElement {
 	 * <p>
 	 * The names of configuration element attributes
 	 * are the same as the attribute names of the corresponding XML element.
-	 * For example, the configuration markup
+	 * For example, the configuration markup</p>
 	 * <pre>
 	 * &lt;bg pattern="stripes"/&gt;
 	 * </pre>
+	 * <p>
 	 * corresponds to a configuration element named <code>"bg"</code>
 	 * with an attribute named <code>"pattern"</code>
 	 * with attribute value <code>"stripes"</code>.
@@ -134,10 +135,11 @@ public interface IConfigurationElement {
 	 * <p>
 	 * The names of configuration element attributes
 	 * are the same as the attribute names of the corresponding XML element.
-	 * For example, the configuration markup
+	 * For example, the configuration markup</p>
 	 * <pre>
 	 * &lt;bg pattern="stripes"/&gt;
 	 * </pre>
+	 * <p>
 	 * corresponds to a configuration element named <code>"bg"</code>
 	 * with an attribute named <code>"pattern"</code>
 	 * with attribute value <code>"stripes"</code>.
@@ -162,10 +164,11 @@ public interface IConfigurationElement {
 	 * <p>
 	 * The names of configuration element attributes
 	 * are the same as the attribute names of the corresponding XML element.
-	 * For example, the configuration markup
+	 * For example, the configuration markup</p>
 	 * <pre>
 	 * &lt;bg color="blue" pattern="stripes"/&gt;
 	 * </pre>
+	 * <p>
 	 * corresponds to a configuration element named <code>"bg"</code>
 	 * with attributes named <code>"color"</code>
 	 * and <code>"pattern"</code>.
@@ -183,13 +186,14 @@ public interface IConfigurationElement {
 	 * <p>
 	 * Each child corresponds to a nested
 	 * XML element in the configuration markup.
-	 * For example, the configuration markup
+	 * For example, the configuration markup</p>
 	 * <pre>
 	 * &lt;view&gt;
 	 * &nbsp&nbsp&nbsp&nbsp&lt;verticalHint&gt;top&lt;/verticalHint&gt;
 	 * &nbsp&nbsp&nbsp&nbsp&lt;horizontalHint&gt;left&lt;/horizontalHint&gt;
 	 * &lt;/view&gt;
 	 * </pre>
+	 * <p>
 	 * corresponds to a configuration element, named <code>"view"</code>,
 	 * with two children.
 	 * </p>
@@ -302,10 +306,11 @@ public interface IConfigurationElement {
 	 * <p>
 	 * Note that translation specified in the plug-in manifest
 	 * file is <b>not</b> automatically applied.
-	 * For example, the configuration markup
+	 * For example, the configuration markup</p>
 	 * <pre>
 	 * &lt;tooltip&gt;#hattip&lt;/tooltip&gt;
 	 * </pre>
+	 * <p>
 	 * corresponds to a configuration element, named <code>"tooltip"</code>,
 	 * with value <code>"#hattip"</code>.
 	 * </p>

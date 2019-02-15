@@ -23,7 +23,7 @@ package org.eclipse.core.runtime.preferences;
  */
 public final class PreferenceFilterEntry {
 
-	private String key;
+	private final String key;
 	private String matchType;
 
 	/**
@@ -48,7 +48,7 @@ public final class PreferenceFilterEntry {
 	 * an exact match.
 	 * </p>
 	 * @param key the name of the preference key
-	 * @param matchType specifies key match type, may be <code>null</null> to indicate
+	 * @param matchType specifies key match type, may be <code>null</code> to indicate
 	 * that exact match is required
 	 * @since 3.3
 	 */

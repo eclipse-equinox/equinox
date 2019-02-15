@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
-import org.eclipse.core.runtime.CoreException;
-
 /**
  * Interface for executable extension classes that require access to
  * their configuration element, or implement an extension adapter.
@@ -44,10 +42,11 @@ public interface IExecutableExtension {
 	 * <p>
 	 * Regular executable extensions specify their Java implementation
 	 * class name as an attribute of the configuration element for the
-	 * extension. For example
+	 * extension. For example</p>
 	 * <pre>
 	 *     &lt;action run="com.example.BaseAction"/&gt;
 	 * </pre>
+	 * <p>
 	 * In the above example, this method would be called with a reference
 	 * to the <code>&lt;action&gt;</code> element (first argument), and
 	 * <code>"run"</code> as the name of the attribute that defined
@@ -69,24 +68,24 @@ public interface IExecutableExtension {
 	 * form. For example, if the extension point specifies an attribute
 	 * <code>"run"</code> to contain the name of the extension implementation,
 	 * an adapter can be configured as
+	 * </p>
 	 * <pre>
 	 *     &lt;action run="com.example.ExternalAdapter:./cmds/util.exe -opt 3"/&gt;
 	 * </pre>
-	 * </p>
 	 * <p>
 	 * (2) by converting the attribute used to specify the executable
 	 * extension to a child element of the original configuration element,
 	 * and specifying the adapter data in the form of xml markup.
 	 * Using this form, the example above would become
+	 * </p>
 	 * <pre>
 	 *     &lt;action&gt;
-	 *         &lt;<it>run</it> class="com.xyz.ExternalAdapter"&gt;
+	 *         &lt;run class="com.xyz.ExternalAdapter"&gt;
 	 *             &lt;parameter name="exec" value="./cmds/util.exe"/&gt;
 	 *             &lt;parameter name="opt"  value="3"/&gt;
-	 *         &lt;/<it>run</it>&gt;
+	 *         &lt;/run&gt;
 	 *     &lt;/action&gt;
 	 * </pre>
-	 * </p>
 	 * <p>
 	 * Form (2) will typically only be
 	 * used for extension points that anticipate the majority of
@@ -98,6 +97,7 @@ public interface IExecutableExtension {
 	 * 0-argument public constructor. The adapter data is passed as the
 	 * last argument of this method. The data argument is defined as Object.
 	 * It can have the following values:
+	 * </p>
 	 * <ul>
 	 * <li><code>null</code>, if no adapter data was supplied</li>
 	 * <li>in case (1), the initialization data
@@ -106,7 +106,6 @@ public interface IExecutableExtension {
 	 *		as a <code>Hashtable</code> containing the actual
 	 *		parameter names and values (both <code>String</code>s)</li>
 	 * </ul>
-	 * </p>
 	 *
 	 * @param config the configuration element used to trigger this execution.
 	 *		It can be queried by the executable extension for specific

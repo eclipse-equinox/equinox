@@ -329,11 +329,12 @@ public final class URIUtil {
 
 	/**
 	 * Returns an absolute URI that is created by appending the given relative URI to 
-	 * the given base.  If the <tt>relative</tt> URI is already absolute it is simply returned.
+	 * the given base.  If the <code>relative</code> URI is already absolute it is simply returned.
 	 * <p>
 	 * This method is guaranteed to be the inverse of {@link #makeRelative(URI, URI)}.
 	 * That is, if R = makeRelative(O, B), then makeAbsolute(R, B), will return the original
 	 * URI O.
+	 * </p>
 	 * 
 	 * @param relative the relative URI
 	 * @param baseURI the base URI

@@ -33,10 +33,10 @@ public abstract class AbstractPreferenceStorage {
 	 * <p>
 	 * The table keys consist of an optional child node path and separator, followed by
 	 * the property key. The table values are the values of the properties.
+	 * </p>
 	 * <pre>
 	 *     [childNodePath/]propertyKey=propertyValue
 	 * </pre>
-	 * </p>
 	 * <p>
 	 * Note: Whether they are absolute or relative, the paths in the returned Properties
 	 * object are always interpreted as relative to the node specified by nodePath.

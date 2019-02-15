@@ -117,13 +117,13 @@ public class RegistryStrategy {
 	 * to the registry. The method adds a log entry based on the supplied status.
 	 * <p>
 	 * This method writes a message to <code>System.out</code>
-	 * in the following format:
+	 * in the following format:</p>
 	 * <pre>
 	 * [Error|Warning|Log]: Main error message
 	 * [Error|Warning|Log]: Child error message 1
 	 * 	...
 	 * [Error|Warning|Log]: Child error message N
-	 * </pre></p>
+	 * </pre>
 	 *
 	 * @param status the status to log
 	 */

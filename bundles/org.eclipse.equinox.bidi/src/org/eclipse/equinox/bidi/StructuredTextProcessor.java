@@ -70,9 +70,9 @@ public final class StructuredTextProcessor {
 	 * Each segment has the Unicode Bidi Algorithm applied to it,
 	 * but as a whole, the string is oriented left to right.
 	 * </p><p>
-	 * For example, a file path such as <tt>d:\myfolder\FOLDER\MYFILE.java</tt>
+	 * For example, a file path such as <code>d:\myfolder\FOLDER\MYFILE.java</code>
 	 * (where capital letters indicate RTL text) should render as
-	 * <tt>d:\myfolder\REDLOF\ELIFYM.java</tt>.
+	 * <code>d:\myfolder\REDLOF\ELIFYM.java</code>.
 	 * </p>
 	 * 
 	 * @param str the <i>lean</i> text to process

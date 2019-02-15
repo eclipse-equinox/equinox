@@ -493,6 +493,7 @@ public interface IPath extends Cloneable {
 	 * device id.  The same separator, "/", is used on all platforms.
 	 * <p>
 	 * Example result strings (without and with device id):
+	 * </p>
 	 * <pre>
 	 * "/foo/bar.txt"
 	 * "bar.txt"
@@ -508,7 +509,6 @@ public interface IPath extends Cloneable {
 	 * "C:/"
 	 * </pre>
 	 * This string is suitable for passing to <code>Path(String)</code>.
-	 * </p>
 	 *
 	 * @return a string representation of this path
 	 * @see Path

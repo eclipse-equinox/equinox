@@ -67,6 +67,7 @@ public class CoreException extends Exception {
 	 *   create a new {@link Status} with your plug-in ID and this 
 	 *   <code>CoreException</code>, and use that new status for error reporting
 	 *   or as a method return value. For example, instead of:
+	 * </p>
 	 *   <pre>
 	 *      yourPlugin.getLog().log(exception.getStatus());
 	 *   </pre>
@@ -75,7 +76,6 @@ public class CoreException extends Exception {
 	 *      IStatus result = new Status(exception.getStatus().getSeverity(), pluginId, message, exception);
 	 *      yourPlugin.getLog().log(result);
 	 *   </pre>
-	 * </p>
 	 *
 	 * @return a status object
 	 */

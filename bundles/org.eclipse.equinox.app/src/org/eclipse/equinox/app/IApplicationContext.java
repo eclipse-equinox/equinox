@@ -37,6 +37,7 @@ public interface IApplicationContext {
 	 * while launching or running an application then the launcher will set this property 
 	 * automatically in order to display a message to the end user.  An application may
 	 * set this property for the following reasons:
+	 * </p>
 	 * <ul>
 	 *   <li>To provide the command line arguments to relaunch the eclipse platform.  See
 	 *   {@link IApplication#EXIT_RELAUNCH}</li>
@@ -47,7 +48,6 @@ public interface IApplicationContext {
 	 *   set to the empty <code>String</code>.  This is useful for 
 	 *   headless applications where error dialogs must never be displayed.</li>
 	 * </ul>
-	 * </p>
 	 * @since 1.3
 	 */
 	public static final String EXIT_DATA_PROPERTY = "eclipse.exitdata"; //$NON-NLS-1$

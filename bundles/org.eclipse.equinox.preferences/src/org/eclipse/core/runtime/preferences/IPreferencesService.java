@@ -68,7 +68,7 @@ public interface IPreferencesService {
 	 * path of a child node and key. If the key contains a slash ("/") character, then a
 	 * double-slash must be used to denote the end of they child path and the beginning
 	 * of the key. Otherwise it is assumed that the key is the last segment of the path.
-	 * The following are some examples of keys and their meanings:
+	 * The following are some examples of keys and their meanings:</p>
 	 * <ul>
 	 * <li>"a" - look for a value for the property "a"
 	 * <li>"//a" - look for a value for the property "a"
@@ -81,7 +81,7 @@ public interface IPreferencesService {
 	 * <li>"/a/b//c/d" - look in the child node "a/b" for the property "c/d"
 	 * <li>"/a/b//c//d" - look in the child node "a/b" for the property "c//d"
 	 * </ul>
-	 * </p><p>
+	 * <p>
 	 * The scope look-up order is determined by the preference service default
 	 * lookup order, not by the order of the scope contexts that are being passed in.
 	 * The context objects are only consulted to help determine which nodes to
@@ -123,7 +123,7 @@ public interface IPreferencesService {
 	 * path of a child node and key. If the key contains a slash ("/") character, then a
 	 * double-slash must be used to denote the end of they child path and the beginning
 	 * of the key. Otherwise it is assumed that the key is the last segment of the path.
-	 * The following are some examples of keys and their meanings:
+	 * The following are some examples of keys and their meanings:</p>
 	 * <ul>
 	 * <li>"a" - look for a value for the property "a"
 	 * <li>"//a" - look for a value for the property "a"
@@ -136,7 +136,7 @@ public interface IPreferencesService {
 	 * <li>"/a/b//c/d" - look in the child node "a/b" for the property "c/d"
 	 * <li>"/a/b//c//d" - look in the child node "a/b" for the property "c//d"
 	 * </ul>
-	 * </p><p>
+	 * <p>
 	 * The scope look-up order is determined by the preference service default
 	 * lookup order, not by the order of the scope contexts that are being passed in.
 	 * The context objects are only consulted to help determine which nodes to
@@ -178,7 +178,7 @@ public interface IPreferencesService {
 	 * path of a child node and key. If the key contains a slash ("/") character, then a
 	 * double-slash must be used to denote the end of they child path and the beginning
 	 * of the key. Otherwise it is assumed that the key is the last segment of the path.
-	 * The following are some examples of keys and their meanings:
+	 * The following are some examples of keys and their meanings:</p>
 	 * <ul>
 	 * <li>"a" - look for a value for the property "a"
 	 * <li>"//a" - look for a value for the property "a"
@@ -191,7 +191,7 @@ public interface IPreferencesService {
 	 * <li>"/a/b//c/d" - look in the child node "a/b" for the property "c/d"
 	 * <li>"/a/b//c//d" - look in the child node "a/b" for the property "c//d"
 	 * </ul>
-	 * </p><p>
+	 * <p>
 	 * The scope look-up order is determined by the preference service default
 	 * lookup order, not by the order of the scope contexts that are being passed in.
 	 * The context objects are only consulted to help determine which nodes to
@@ -233,7 +233,7 @@ public interface IPreferencesService {
 	 * path of a child node and key. If the key contains a slash ("/") character, then a
 	 * double-slash must be used to denote the end of they child path and the beginning
 	 * of the key. Otherwise it is assumed that the key is the last segment of the path.
-	 * The following are some examples of keys and their meanings:
+	 * The following are some examples of keys and their meanings:</p>
 	 * <ul>
 	 * <li>"a" - look for a value for the property "a"
 	 * <li>"//a" - look for a value for the property "a"
@@ -246,7 +246,7 @@ public interface IPreferencesService {
 	 * <li>"/a/b//c/d" - look in the child node "a/b" for the property "c/d"
 	 * <li>"/a/b//c//d" - look in the child node "a/b" for the property "c//d"
 	 * </ul>
-	 * </p><p>
+	 * <p>
 	 * The scope look-up order is determined by the preference service default
 	 * lookup order, not by the order of the scope contexts that are being passed in.
 	 * The context objects are only consulted to help determine which nodes to
@@ -288,7 +288,7 @@ public interface IPreferencesService {
 	 * path of a child node and key. If the key contains a slash ("/") character, then a
 	 * double-slash must be used to denote the end of they child path and the beginning
 	 * of the key. Otherwise it is assumed that the key is the last segment of the path.
-	 * The following are some examples of keys and their meanings:
+	 * The following are some examples of keys and their meanings:</p>
 	 * <ul>
 	 * <li>"a" - look for a value for the property "a"
 	 * <li>"//a" - look for a value for the property "a"
@@ -301,7 +301,7 @@ public interface IPreferencesService {
 	 * <li>"/a/b//c/d" - look in the child node "a/b" for the property "c/d"
 	 * <li>"/a/b//c//d" - look in the child node "a/b" for the property "c//d"
 	 * </ul>
-	 * </p><p>
+	 * <p>
 	 * The scope look-up order is determined by the preference service default
 	 * lookup order, not by the order of the scope contexts that are being passed in.
 	 * The context objects are only consulted to help determine which nodes to
@@ -343,7 +343,7 @@ public interface IPreferencesService {
 	 * path of a child node and key. If the key contains a slash ("/") character, then a
 	 * double-slash must be used to denote the end of they child path and the beginning
 	 * of the key. Otherwise it is assumed that the key is the last segment of the path.
-	 * The following are some examples of keys and their meanings:
+	 * The following are some examples of keys and their meanings:</p>
 	 * <ul>
 	 * <li>"a" - look for a value for the property "a"
 	 * <li>"//a" - look for a value for the property "a"
@@ -356,7 +356,7 @@ public interface IPreferencesService {
 	 * <li>"/a/b//c/d" - look in the child node "a/b" for the property "c/d"
 	 * <li>"/a/b//c//d" - look in the child node "a/b" for the property "c//d"
 	 * </ul>
-	 * </p><p>
+	 * <p>
 	 * The scope look-up order is determined by the preference service default
 	 * lookup order, not by the order of the scope contexts that are being passed in.
 	 * The context objects are only consulted to help determine which nodes to
@@ -398,7 +398,7 @@ public interface IPreferencesService {
 	 * path of a child node and key. If the key contains a slash ("/") character, then a
 	 * double-slash must be used to denote the end of they child path and the beginning
 	 * of the key. Otherwise it is assumed that the key is the last segment of the path.
-	 * The following are some examples of keys and their meanings:
+	 * The following are some examples of keys and their meanings:</p>
 	 * <ul>
 	 * <li>"a" - look for a value for the property "a"
 	 * <li>"//a" - look for a value for the property "a"
@@ -411,7 +411,7 @@ public interface IPreferencesService {
 	 * <li>"/a/b//c/d" - look in the child node "a/b" for the property "c/d"
 	 * <li>"/a/b//c//d" - look in the child node "a/b" for the property "c//d"
 	 * </ul>
-	 * </p><p>
+	 * <p>
 	 * The scope look-up order is determined by the preference service default
 	 * lookup order, not by the order of the scope contexts that are being passed in.
 	 * The context objects are only consulted to help determine which nodes to
@@ -455,12 +455,12 @@ public interface IPreferencesService {
 	 * the preference is not exported. The exclusion can also occur at a per-node level.
 	 * Wild cards are <em>not</em> accepted in the excludes list as a basic String compare
 	 * is done. The basic algorithm is similar to the following:
+	 * </p>
 	 * <pre>
 	 * String fullPath = node.absolutePath() + '/' + key;
 	 * if (!fullPath.startsWith(excludesList[i]))
 	 * 	// export preference
 	 * </pre>
-	 * </p>
 	 * <p>
 	 * The values stored in the resulting stream are suitable for later being read by the
 	 * by {@link #importPreferences(InputStream)} or {@link #readPreferences(InputStream)} methods.

@@ -44,16 +44,17 @@ public final class FileLocator {
 	 * <code>null</code> is returned if no such entry is found.  Note that
 	 * there is no specific order to the fragments.
 	 * </p><p>
-	 * The following variables may also be used as entries in the provided path:
+	 * The following variables may also be used as entries in the provided path:</p>
 	 * <ul>
 	 *     <li>$nl$ - for language specific information</li>
 	 *     <li>$os$ - for operating system specific information</li>
 	 *     <li>$ws$ - for windowing system specific information</li>
 	 * </ul>
-	 * </p><p>
+	 * <p>
 	 * A path of "$nl$/about.properties" in an environment with a default 
 	 * locale of en_CA will return a URL corresponding to the first location
 	 * about.properties is found according to the following order:
+	 * </p>
 	 * <pre>
 	 *     plugin root/nl/en/CA/about.properties
 	 *     fragment1 root/nl/en/CA/about.properties
@@ -68,7 +69,7 @@ public final class FileLocator {
 	 *     fragment2 root/about.properties
 	 *     ...
 	 * </pre>
-	 * </p><p>
+	 * <p>
 	 * The current environment variable values can be overridden using 
 	 * the override map argument or <code>null</code> can be specified
 	 * if this is not desired.
@@ -97,16 +98,17 @@ public final class FileLocator {
 	 * <code>null</code> is returned if no such entry is found.  Note that
 	 * there is no specific order to the fragments.
 	 * </p><p>
-	 * The following variables may also be used as entries in the provided path:
+	 * The following variables may also be used as entries in the provided path:</p>
 	 * <ul>
 	 *     <li>$nl$ - for language specific information</li>
 	 *     <li>$os$ - for operating system specific information</li>
 	 *     <li>$ws$ - for windowing system specific information</li>
 	 * </ul>
-	 * </p><p>
+	 * <p>
 	 * A path of "$nl$/about.properties" in an environment with a default
 	 * locale of en_CA will return a URL corresponding to the first location
 	 * about.properties is found according to the following order:
+	 * </p>
 	 * <pre>
 	 *     plugin root/nl/en/CA/about.properties
 	 *     fragment1 root/nl/en/CA/about.properties
@@ -121,7 +123,7 @@ public final class FileLocator {
 	 *     fragment2 root/about.properties
 	 *     ...
 	 * </pre>
-	 * </p><p>
+	 * <p>
 	 * @see FileLocator#find(Bundle, IPath, Map) for the option to override the current environment variables
 	 * </p>
 	 *
@@ -168,15 +170,17 @@ public final class FileLocator {
 	 * there is no specific order to the fragments.
 	 * </p><p>
 	 * The following variables may also be used as segments in the path of the provided URL:
+	 * </p>
 	 * <ul>
 	 *     <li>$nl$ - for language specific information</li>
 	 *     <li>$os$ - for operating system specific information</li>
 	 *     <li>$ws$ - for windowing system specific information</li>
 	 * </ul>
-	 * </p><p>
+	 * <p>
 	 * For example, a URL of "platform:/plugin/org.eclipse.core.runtime/$nl$/about.properties" in an 
 	 * environment with a default locale of en_CA will return a URL corresponding to 
 	 * the first location about.properties is found according to the following order:
+	 * </p>
 	 * <pre>
 	 *     plugin root/nl/en/CA/about.properties
 	 *     fragment1 root/nl/en/CA/about.properties
@@ -191,7 +195,6 @@ public final class FileLocator {
 	 *     fragment2 root/about.properties
 	 *     ...
 	 * </pre>
-	 * </p>
 	 * 
 	 * @param url The location of a bundle entry that potentially includes the above
 	 * environment variables

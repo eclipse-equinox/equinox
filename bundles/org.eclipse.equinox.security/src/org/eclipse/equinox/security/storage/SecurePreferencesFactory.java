@@ -35,6 +35,7 @@ final public class SecurePreferencesFactory {
 	 * The framework will attempt to open secure preferences in a user-specific location. 
 	 * As a result, the information stored can be shared among all programs run by the user. 
 	 * The location is determined as follows:
+	 * </p>
 	 * <ol>
 	 * <li>&quot;-equinox.keyring&quot; command line arguments</li>
 	 * <li>Java's &quot;user.home&quot; environment variable. On Windows system it usually 
@@ -44,7 +45,6 @@ final public class SecurePreferencesFactory {
 	 * <li>if it fails, preferences will use configuration location of the current Eclipse 
 	 * instance.</li>
 	 * </ol>
-	 * </p>
 	 * @return default instance of secure preferences, <code>null</code> if application
 	 * was unable to create secure preferences using default location
 	 */

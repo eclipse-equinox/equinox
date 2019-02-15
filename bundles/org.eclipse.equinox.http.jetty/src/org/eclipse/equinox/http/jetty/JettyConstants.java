@@ -157,10 +157,10 @@ public interface JettyConstants {
 	public static final String HOUSEKEEPER_INTERVAL = "housekeeper.interval"; //$NON-NLS-1$
 
 	/**
-	 * name="customizer.class" type="String" <br />
+	 * name="customizer.class" type="String" <br>
 	 * (full qualified name of the class that implements
 	 * <code>org.eclipse.equinox.http.jetty.JettyCustomizer</code> and has a public no-arg constructor;
-	 * the class must be supplied via a fragment to this bundle's classpath)</code>
+	 * the class must be supplied via a fragment to this bundle's classpath)
 	 * @since 1.1
 	 */
 	public static final String CUSTOMIZER_CLASS = "customizer.class"; //$NON-NLS-1$

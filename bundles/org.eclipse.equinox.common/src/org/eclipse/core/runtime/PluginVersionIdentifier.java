@@ -114,7 +114,6 @@ public final class PluginVersionIdentifier {
 	 *   <li><code>1.9</code> (interpreted as <code>1.9.0</code>)</li>
 	 *   <li><code>3</code> (interpreted as <code>3.0.0</code>)</li>
 	 * </ul>
-	 * </p>
 	 * 
 	 * @param versionId string representation of the version identifier. 
 	 * Qualifier characters that are not a letter or a digit are replaced.
