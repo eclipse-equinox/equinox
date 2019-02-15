@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.NoSuchElementException;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
@@ -61,7 +62,7 @@ public abstract class ClassLoaderHook {
 
 	/**
 	 * Gets called by a classpath manager when looking for ClasspathEntry objects.  This method allows 
-	 * a classloading hook to add additional ClasspathEntry objects
+	 * a class loading hook to add additional ClasspathEntry objects
 	 * @param cpEntries the list of ClasspathEntry objects currently available for the requested classpath
 	 * @param cp the name of the requested classpath
 	 * @param hostmanager the classpath manager the requested ClasspathEntry is for
@@ -223,7 +224,7 @@ public abstract class ClassLoaderHook {
 	/**
 	 * Gets called by a classpath manager during {@link ClasspathManager#findLocalClass(String)} before 
 	 * searching the local classloader for a class.  A classpath manager will call this method for 
-	 * each configured class loading stat hook.
+	 * each configured class loading hook.
 	 * @param name the name of the requested class
 	 * @param manager the classpath manager used to find and load the requested class
 	 * @throws ClassNotFoundException to prevent the requested class from loading
@@ -235,11 +236,12 @@ public abstract class ClassLoaderHook {
 	/**
 	 * Gets called by a classpath manager during {@link ClasspathManager#findLocalClass(String)} after
 	 * searching the local classloader for a class. A classpath manager will call this method for 
-	 * each configured class loading stat hook.
+	 * each configured class loading hook.
 	 * @param name the name of the requested class
 	 * @param clazz the loaded class or null if not found
 	 * @param manager the classpath manager used to find and load the requested class
-	 * @throws ClassNotFoundException 
+	 * @throws ClassNotFoundException to prevent the requested class from loading.  This is highly discouraged
+	 * because if the class is non-null it is already too late to throw an exception.
 	 */
 	public void postFindLocalClass(String name, Class<?> clazz, ClasspathManager manager) throws ClassNotFoundException {
 		// do nothing
@@ -248,9 +250,10 @@ public abstract class ClassLoaderHook {
 	/**
 	 * Gets called by a classpath manager during {@link ClasspathManager#findLocalResource(String)} before
 	 * searching the local classloader for a resource. A classpath manager will call this method for 
-	 * each configured class loading stat hook.
+	 * each configured class loading hook.
 	 * @param name the name of the requested resource
 	 * @param manager the classpath manager used to find the requested resource
+	 * @throws NoSuchElementException will prevent the local resource from loading
 	 */
 	public void preFindLocalResource(String name, ClasspathManager manager) {
 		// do nothing
@@ -259,10 +262,11 @@ public abstract class ClassLoaderHook {
 	/**
 	 * Gets called by a classpath manager during {@link ClasspathManager#findLocalResource(String)} after
 	 * searching the local classloader for a resource. A classpath manager will call this method for 
-	 * each configured class loading stat hook.
+	 * each configured class loading hook.
 	 * @param name the name of the requested resource
 	 * @param resource the URL to the requested resource or null if not found
 	 * @param manager the classpath manager used to find the requested resource
+	 * @throws NoSuchElementException will prevent the local resource from loading
 	 */
 	public void postFindLocalResource(String name, URL resource, ClasspathManager manager) {
 		// do nothing
@@ -270,7 +274,7 @@ public abstract class ClassLoaderHook {
 
 	/**
 	 * Gets called by a classpath manager after an attempt is made to define a class.  This method allows 
-	 * a class loading stat hook to record data about a class definition. 
+	 * a class loading hook to record data about a class definition. 
 	 * @param name the name of the class that got defined
 	 * @param clazz the class object that got defined or null if an error occurred while defining a class
 	 * @param classbytes the class bytes used to define the class

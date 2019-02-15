@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleCapability;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
@@ -357,18 +358,30 @@ public class ClasspathManager {
 	 */
 	public URL findLocalResource(String resource) {
 		List<ClassLoaderHook> hooks = hookRegistry.getClassLoaderHooks();
+		boolean hookFailed = false;
 		for (ClassLoaderHook hook : hooks) {
-			hook.preFindLocalResource(resource, this);
+			try {
+				hook.preFindLocalResource(resource, this);
+			} catch (NoSuchElementException e) {
+				// mark the resource load as failed, but continue to all the hooks
+				hookFailed = true;
+			}
 		}
 		URL result = null;
 		try {
-			result = findLocalResourceImpl(resource, -1);
-			return result;
+			if (!hookFailed) {
+				result = findLocalResourceImpl(resource, -1);
+			}
 		} finally {
 			for (ClassLoaderHook hook : hooks) {
-				hook.postFindLocalResource(resource, result, this);
+				try {
+					hook.postFindLocalResource(resource, result, this);
+				} catch (NoSuchElementException e) {
+					result = null;
+				}
 			}
 		}
+		return result;
 	}
 
 	private URL findLocalResourceImpl(String resource, int classPathIndex) {
@@ -431,7 +444,7 @@ public class ClasspathManager {
 			ClasspathEntry[] hookEntries = hook.getClassPathEntries(resource, this);
 			if (hookEntries != null) {
 				findLocalResources(resource, hookEntries, m, classPathIndex, resources);
-				return resources.size() > 0 ? Collections.enumeration(resources): EMPTY_ENUMERATION;
+				return resources.size() > 0 ? Collections.enumeration(resources) : EMPTY_ENUMERATION;
 			}
 		}
 

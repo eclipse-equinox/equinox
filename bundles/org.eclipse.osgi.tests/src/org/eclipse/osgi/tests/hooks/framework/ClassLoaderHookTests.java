@@ -37,6 +37,7 @@ import org.osgi.framework.wiring.FrameworkWiring;
 public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 	private static final String TEST_BUNDLE = "substitutes.a";
 	private static final String TEST_CLASSNAME = "substitutes.x.Ax";
+	private static final String TEST_CLASSNAME_RESOURCE = "substitutes/x/Ax.class";
 	private static final String HOOK_CONFIGURATOR_BUNDLE = "classloader.hooks.a";
 	private static final String HOOK_CONFIGURATOR_CLASS = "org.eclipse.osgi.tests.classloader.hooks.a.TestHookConfigurator";
 	private static final String REJECT_PROP = "classloader.hooks.a.reject";
@@ -44,6 +45,8 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 	private static final String RECURSION_LOAD = "classloader.hooks.a.recursion.load";
 	private static final String RECURSION_LOAD_SUPPORTED = "classloader.hooks.a.recursion.load.supported";
 	private static final String FILTER_CLASS_PATHS = "classloader.hooks.a.filter.class.paths";
+	private static final String PREVENT_RESOURCE_LOAD_PRE = "classloader.hooks.a.fail.resource.load.pre";
+	private static final String PREVENT_RESOURCE_LOAD_POST = "classloader.hooks.a.fail.resource.load.post";
 
 	private Map<String, String> configuration;
 	private Framework framework;
@@ -56,6 +59,8 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 		setRecursionLoad(false);
 		setRecursionLoadSupported(false);
 		setFilterClassPaths(false);
+		setPreventResourceLoadPre(false);
+		setPreventResourceLoadPost(false);
 		String loc = bundleInstaller.getBundleLocation(HOOK_CONFIGURATOR_BUNDLE);
 		loc = loc.substring(loc.indexOf("file:"));
 		classLoader.addURL(new URL(loc));
@@ -98,6 +103,14 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 
 	private void setFilterClassPaths(boolean value) {
 		System.setProperty(FILTER_CLASS_PATHS, Boolean.toString(value));
+	}
+
+	private void setPreventResourceLoadPre(boolean value) {
+		System.setProperty(PREVENT_RESOURCE_LOAD_PRE, Boolean.toString(value));
+	}
+
+	private void setPreventResourceLoadPost(boolean value) {
+		System.setProperty(PREVENT_RESOURCE_LOAD_POST, Boolean.toString(value));
 	}
 
 	public void testRejectTransformationFromWeavingHook() throws Exception {
@@ -192,5 +205,23 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 		} catch (ClassNotFoundException e) {
 			// expected
 		}
+	}
+
+	public void testPreventResourceLoadFromClassLoadingHook() throws Exception {
+		setPreventResourceLoadPre(false);
+		setPreventResourceLoadPost(false);
+		initAndStartFramework();
+		Bundle b = installBundle();
+		URL resource = b.getResource(TEST_CLASSNAME_RESOURCE);
+		assertNotNull("Could not find resource.", resource);
+
+		setPreventResourceLoadPre(true);
+		resource = b.getResource(TEST_CLASSNAME_RESOURCE);
+		assertNull("Could find resource.", resource);
+
+		setPreventResourceLoadPre(false);
+		setPreventResourceLoadPost(true);
+		resource = b.getResource(TEST_CLASSNAME_RESOURCE);
+		assertNull("Could find resource.", resource);
 	}
 }

@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.classloader.hooks.a;
 
+import java.net.URL;
+import java.util.NoSuchElementException;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.internal.hookregistry.HookConfigurator;
@@ -27,6 +29,8 @@ public class TestHookConfigurator implements HookConfigurator {
 	private static final String RECURSION_LOAD = "classloader.hooks.a.recursion.load";
 	private static final String RECURSION_LOAD_SUPPORTED = "classloader.hooks.a.recursion.load.supported";
 	private static final String FILTER_CLASS_PATHS = "classloader.hooks.a.filter.class.paths";
+	private static final String PREVENT_RESOURCE_LOAD_PRE = "classloader.hooks.a.fail.resource.load.pre";
+	private static final String PREVENT_RESOURCE_LOAD_POST = "classloader.hooks.a.fail.resource.load.post";
 	final ThreadLocal<Boolean> doingRecursionLoad = new ThreadLocal<Boolean>() {
 		protected Boolean initialValue() {
 			return false;
@@ -80,6 +84,20 @@ public class TestHookConfigurator implements HookConfigurator {
 					return new ClasspathEntry[0];
 				}
 				return super.getClassPathEntries(name, manager);
+			}
+
+			@Override
+			public void preFindLocalResource(String name, ClasspathManager manager) {
+				if (Boolean.getBoolean(PREVENT_RESOURCE_LOAD_PRE)) {
+					throw new NoSuchElementException();
+				}
+			}
+
+			@Override
+			public void postFindLocalResource(String name, URL resource, ClasspathManager manager) {
+				if (Boolean.getBoolean(PREVENT_RESOURCE_LOAD_POST)) {
+					throw new NoSuchElementException();
+				}
 			}
 		});
 	}
