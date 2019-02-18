@@ -730,7 +730,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 *      void myMethod(IProgressMonitor parent) {
 	 *          SubMonitor progress = SubMonitor.convert(parent, 100);
 	 *          
-	 *          for (int i = 0; i < 100; i++) {
+	 *          for (int i = 0; i &lt; 100; i++) {
 	 *              // Creating the next child monitor will clean up the previous one,
 	 *              // causing progress to be reported smoothly even if we don't do anything
 	 *              // with the monitors we create
@@ -859,7 +859,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 *      void myMethod(IProgressMonitor parent) {
 	 *          SubMonitor progress = SubMonitor.convert(parent, 100);
 	 *          
-	 *          for (int i = 0; i < 100; i++) {
+	 *          for (int i = 0; i &lt; 100; i++) {
 	 *              // Creating the next child monitor will clean up the previous one,
 	 *              // causing progress to be reported smoothly even if we don't do anything
 	 *              // with the monitors we create
@@ -930,7 +930,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 *      void myMethod(IProgressMonitor parent) {
 	 *          SubMonitor progress = SubMonitor.convert(parent, 100);
 	 *          
-	 *          for (int i = 0; i < 100; i++) {
+	 *          for (int i = 0; i &lt; 100; i++) {
 	 *              // Creating the next child monitor will clean up the previous one,
 	 *              // causing progress to be reported smoothly even if we don't do anything
 	 *              // with the monitors we create

@@ -189,8 +189,8 @@ public interface IConfigurationElement {
 	 * For example, the configuration markup</p>
 	 * <pre>
 	 * &lt;view&gt;
-	 * &nbsp&nbsp&nbsp&nbsp&lt;verticalHint&gt;top&lt;/verticalHint&gt;
-	 * &nbsp&nbsp&nbsp&nbsp&lt;horizontalHint&gt;left&lt;/horizontalHint&gt;
+	 * 	&lt;verticalHint&gt;top&lt;/verticalHint&gt;
+	 * 	&lt;horizontalHint&gt;left&lt;/horizontalHint&gt;
 	 * &lt;/view&gt;
 	 * </pre>
 	 * <p>

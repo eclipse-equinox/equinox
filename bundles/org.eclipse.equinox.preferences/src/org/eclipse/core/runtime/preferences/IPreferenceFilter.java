@@ -66,8 +66,8 @@ public interface IPreferenceFilter {
 	 * For example:
 	 * </p>
 	 * <pre>
-	 * "org.eclipse.core.resources" -> null
-	 * "org.eclipse.ui" -> new PreferenceFilterEntry[] {
+	 * "org.eclipse.core.resources" -&gt; null
+	 * "org.eclipse.ui" -&gt; new PreferenceFilterEntry[] {
 	 * 		new PreferenceFilterEntry("DEFAULT_PERSPECTIVE_LOCATION"),
 	 * 		new PreferenceFilterEntry("SHOW_INTRO_ON_STARTUP")}
 	 * </pre>
