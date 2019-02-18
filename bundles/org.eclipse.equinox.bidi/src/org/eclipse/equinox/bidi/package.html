@@ -40,13 +40,13 @@ In this package, text without directional formatting characters is
 called <b><i>lean</i></b> text while the text with added directional
 formatting characters is called <b><i>full</i></b> text.
 </p><p>
-The class {@link
-<a href="StructuredTextProcessor.html"><b>StructuredTextProcessor</b></a>}
+The class 
+<a href="StructuredTextProcessor.html"><b>StructuredTextProcessor</b></a>
 is the main tool for processing structured text.  It facilitates
 handling several types of structured text, each type being handled
 by a specific
-{@link <a href="custom/StructuredTextTypeHandler.html">
-<b><i>type handler</i></b></a>} :</p>
+<a href="./custom/StructuredTextTypeHandler.html">
+<b><i>type handler</i></b></a> :</p>
 <ul>
   <li>comma delimited list</li>
   <li>e-mail address</li>
@@ -60,8 +60,9 @@ by a specific
 </ul>
 <p>
 For each of these types, an identifier is defined in
-{@link <a href="StructuredTextTypeHandlerFactory.html">
-<b><i>StructuredTextTypeHandlerFactory</i></b></a>} :</p>
+ <a href="StructuredTextTypeHandlerFactory.html">
+<b><i>StructuredTextTypeHandlerFactory</i></b></a> :</p>
+<p>
 These identifiers can be used as argument in some methods of
 <b>StructuredTextProcessor</b> to specify the type of handler to apply.
 </p><p>
@@ -72,8 +73,8 @@ manner, when the following conditions are satisfied:
   <li>There exists an appropriate handler for the type of the
       structured text.</li>
   <li>There is no need to specify non-default conditions related
-      to the {@link <a href="advanced/StructuredTextEnvironment.html">
-      environment</a>}.</li>
+      to the <a href="advanced/StructuredTextEnvironment.html">
+      environment</a>.</li>
   <li>The only operations needed are to transform <i>lean</i> text
       into <i>full</i> text or vice versa.</li>
   <li>There is no interdependence between the processing of a
@@ -83,13 +84,13 @@ manner, when the following conditions are satisfied:
 <p>
 When their needs go beyond the conditions above,
 users can use classes in the
-{@link <a href="advanced/package-summary.html">
-org.eclipse.equinox.bidi.advanced</a>} package.
+<a href="advanced/package-summary.html">
+org.eclipse.equinox.bidi.advanced</a>}package.
 </p><p>
 Developers who want to develop new handlers to support types of
 structured text not currently supported can use components
-of the package {@link <a href="custom/package-summary.html">
-org.eclipse.equinox.bidi.custom</a>}.
+of the package <a href="custom/package-summary.html">
+org.eclipse.equinox.bidi.custom</a>.
 The source code of packages org.eclipse.equinox.bidi.* can serve as example of
 how to develop processors for currently unsupported types of structured text.
 </p><p>
