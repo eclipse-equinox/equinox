@@ -111,14 +111,15 @@ public class TextProcessor {
 	 * to the provided delimiters. Each segment has the Unicode BiDi algorithm
 	 * applied to it, but as a whole, the string is oriented left to right.
 	 * <p>
-	 * For example a file path such as <tt>d:\myFolder\FOLDER\MYFILE.java</tt>
+	 * For example a file path such as <code>d:\myFolder\FOLDER\MYFILE.java</code>
 	 * (where capital letters indicate RTL text) should render as
-	 * <tt>d:\myFolder\REDLOF\ELIFYM.java</tt> when using the Unicode BiDi
+	 * <code>d:\myFolder\REDLOF\ELIFYM.java</code> when using the Unicode BiDi
 	 * algorithm and segmenting the string according to the specified delimiter
 	 * set.
 	 * </p>
 	 * <p>
 	 * The following algorithm is used:
+	 * </p>
 	 * <ol>
 	 * <li>Scan the string to locate the delimiters.</li>
 	 * <li>While scanning, note the direction of the last strong character
@@ -135,7 +136,6 @@ public class TextProcessor {
 	 * LRE/PDF if the string begins with an LTR letter, contains no RTL letter,
 	 * and ends with either a LTR letter or a digit.</li>
 	 * </ol>
-	 * </p>
 	 * <p>
 	 * NOTE: this method will change the shape of the original string passed in
 	 * by inserting punctuation characters into the text in order to make it

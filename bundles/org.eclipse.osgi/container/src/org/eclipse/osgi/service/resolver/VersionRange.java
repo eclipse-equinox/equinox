@@ -42,7 +42,7 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 	 * is used. 
 	 */
 	public VersionRange(Version minVersion, boolean includeMin, Version maxVersion, boolean includeMax) {
-		super(includeMin ? INCLUDE_MIN : EXCLUDE_MIN, minVersion == null ? Version.emptyVersion : minVersion, versionMax.equals(maxVersion) ? null : maxVersion, includeMax ? INCLUDE_MAX : EXCLUDE_MAX); 
+		super(includeMin ? INCLUDE_MIN : EXCLUDE_MIN, minVersion == null ? Version.emptyVersion : minVersion, versionMax.equals(maxVersion) ? null : maxVersion, includeMax ? INCLUDE_MAX : EXCLUDE_MAX);
 	}
 
 	/**
@@ -50,6 +50,7 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 	 * 
 	 * <p>
 	 * Here is the grammar for version range strings.
+	 * </p>
 	 * <pre>
 	 * version-range ::= interval | atleast
 	 * interval ::= ( include-min | exclude-min ) min-version ',' max-version ( include-max | exclude-max )
@@ -61,7 +62,6 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 	 * include-max ::= ']'
 	 * exclude-max ::= ')'
 	 * </pre>
-	 * </p>
 	 * 
 	 * @param versionRange string representation of the version range or <code>null</code>
 	 * for the empty range "0.0.0"

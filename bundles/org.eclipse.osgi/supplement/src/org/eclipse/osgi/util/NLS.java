@@ -19,7 +19,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.util.SupplementDebug;
@@ -131,12 +136,12 @@ public abstract class NLS {
 	 * For example, if the locale is set to en_US and <code>org.eclipse.example.nls.messages</code>
 	 * is used as the base name then the following resources will be searched using the class
 	 * loader of the specified class:
+	 * </p>
 	 * <pre>
 	 *   org/eclipse/example/nls/messages_en_US.properties
 	 *   org/eclipse/example/nls/messages_en.properties
 	 *   org/eclipse/example/nls/messages.properties
 	 * </pre>
-	 * </p>
 	 * 
 	 * @param baseName the base name of a fully qualified message properties file.
 	 * @param clazz the class where the constants will exist

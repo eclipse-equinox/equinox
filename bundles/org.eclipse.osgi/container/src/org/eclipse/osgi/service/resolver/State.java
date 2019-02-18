@@ -309,12 +309,12 @@ public interface State {
 	 * To ensure that this state and the given resovler are properly linked,
 	 * the following expression must be included in this method if the given
 	 * resolver (value) is not identical to the result of this.getResolver().
+	 * </p>
 	 * 
 	 * <pre>
 	 *  if (this.getResolver() != value) value.setState(this);
 	 * </pre>
 	 * 
-	 * </p>
 	 */
 	// TODO what happens if you set the Resolver after some bundles have
 	// been added to the state but it is not resolved?  Should setting
@@ -510,9 +510,8 @@ public interface State {
 	 * <li>org.osgi.framework.language - the language being used.  This property is used to resolve the language attribute 
 	 * of bundle native code (i.e. Bundle-NativeCode).</li>
 	 * </ul>
-	 * <p>
-	 * The values used for the supported properties can be <tt>String</tt> type
-	 * to specify a single value for the property or they can by <tt>String[]</tt>
+	 * The values used for the supported properties can be <code>String</code> type
+	 * to specify a single value for the property or they can by <code>String[]</code>
 	 * to specify a list of values for the property. 
 	 * @param platformProperties the platform properties of the state
 	 * @return false if the platformProperties specified do not change any of the

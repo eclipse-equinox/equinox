@@ -43,10 +43,10 @@ public interface Resolver {
 	 * resolution.
 	 * </p>
 	 * @param discard the list of bundles to discard the resolve status and 
-	 * reresolve.  A <tt>null</tt> value indicates that all currently unresolved
+	 * reresolve.  A <code>null</code> value indicates that all currently unresolved
 	 * bundles in the state should be resolved.
 	 * @param platformProperties the platform properties used to match platform filters
-	 * against.  A <tt>null</tt> value indicates that the system properties should
+	 * against.  A <code>null</code> value indicates that the system properties should
 	 * be used to match against
 	 */
 	public void resolve(BundleDescription[] discard, Dictionary<Object, Object>[] platformProperties);

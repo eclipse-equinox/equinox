@@ -125,7 +125,7 @@ public class ManifestElement {
 	 * test1.jar;test2.jar;test3.jar;selection-filter="(os.name=Windows XP)"
 	 * </pre>
 	 * <p>
-	 * This manifest element has a value of <tt>test1.jar;test2.jar;test3.jar</tt>
+	 * This manifest element has a value of <code>test1.jar;test2.jar;test3.jar</code>
 	 * </p>
 	 * 
 	 * @return the value of the manifest element.
