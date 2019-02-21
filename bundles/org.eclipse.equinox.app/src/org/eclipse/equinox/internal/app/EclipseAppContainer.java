@@ -64,7 +64,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 	private final Object lock = new Object();
 	// A map of ApplicationDescriptors keyed by eclipse application ID
 	/* @GuardedBy(lock) */
-	final private HashMap apps = new HashMap();
+	final private HashMap<String, EclipseAppDescriptor> apps = new HashMap<>();
 
 	final private IExtensionRegistry extensionRegistry;
 	final private ServiceTracker launcherTracker;
@@ -72,7 +72,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 	private boolean missingProductReported;
 
 	/* @GuardedBy(lock) */
-	final private Collection activeHandles = new ArrayList(); // the currently active application handles
+	final private Collection<EclipseAppHandle> activeHandles = new ArrayList<>(); // the currently active application handles
 	/* @GuardedBy(lock) */
 	private EclipseAppHandle activeMain; // the handle currently running on the main thread
 	/* @GuardedBy(lock) */
@@ -80,7 +80,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 	/* @GuardedBy(lock) */
 	private EclipseAppHandle activeScopedSingleton; // the current scoped singleton handle
 	/* @GuardedBy(lock) */
-	private HashMap/*<<String> <ArrayList <EclipseAppHandle>> */ activeLimited; // Map of handles that have cardinality limits
+	private HashMap<String, ArrayList<EclipseAppHandle>> activeLimited; // Map of handles that have cardinality limits
 	private String defaultAppId;
 	private DefaultApplicationListener defaultAppListener;
 	private ParameterizedRunnable defaultMainThreadAppHandle; // holds the default app handle to be run on the main thread
@@ -129,12 +129,12 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 	private EclipseAppDescriptor getAppDescriptor(String applicationId) {
 		EclipseAppDescriptor result = null;
 		synchronized (lock) {
-			result = (EclipseAppDescriptor) apps.get(applicationId);
+			result = apps.get(applicationId);
 		}
 		if (result == null) {
 			registerAppDescriptor(applicationId); // try again just in case we are waiting for an event
 			synchronized (lock) {
-				result = (EclipseAppDescriptor) apps.get(applicationId);
+				result = apps.get(applicationId);
 			}
 		}
 		return result;
@@ -145,7 +145,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 			System.out.println("Creating application descriptor: " + appExtension.getUniqueIdentifier()); //$NON-NLS-1$
 		String iconPath = null;
 		synchronized (lock) {
-			EclipseAppDescriptor appDescriptor = (EclipseAppDescriptor) apps.get(appExtension.getUniqueIdentifier());
+			EclipseAppDescriptor appDescriptor = apps.get(appExtension.getUniqueIdentifier());
 			if (appDescriptor != null)
 				return appDescriptor;
 			// the appDescriptor does not exist for the app ID; create it
@@ -200,7 +200,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 		if (Activator.DEBUG)
 			System.out.println("Removing application descriptor: " + applicationId); //$NON-NLS-1$
 		synchronized (lock) {
-			EclipseAppDescriptor appDescriptor = (EclipseAppDescriptor) apps.remove(applicationId);
+			EclipseAppDescriptor appDescriptor = apps.remove(applicationId);
 			if (appDescriptor == null)
 				return null;
 			appDescriptor.unregister();
@@ -211,7 +211,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 	/*
 	 * Gives access to the RegisterService privileged action.
 	 */
-	PrivilegedAction getRegServiceAction(String[] serviceClasses, Object serviceObject, Dictionary serviceProps) {
+	PrivilegedAction getRegServiceAction(String[] serviceClasses, Object serviceObject, Dictionary<String, ?> serviceProps) {
 		return new RegisterService(serviceClasses, serviceObject, serviceProps);
 	}
 
@@ -221,9 +221,9 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 	private class RegisterService implements PrivilegedAction {
 		String[] serviceClasses;
 		Object serviceObject;
-		Dictionary serviceProps;
+		Dictionary<String, ?> serviceProps;
 
-		RegisterService(String[] serviceClasses, Object serviceObject, Dictionary serviceProps) {
+		RegisterService(String[] serviceClasses, Object serviceObject, Dictionary<String, ?> serviceProps) {
 			this.serviceClasses = serviceClasses;
 			this.serviceObject = serviceObject;
 			this.serviceProps = serviceProps;
@@ -239,7 +239,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 		// find the default application
 		String applicationId = getDefaultAppId();
 		EclipseAppDescriptor defaultDesc = null;
-		Map args = new HashMap(2);
+		Map<String, Object> args = new HashMap<>(2);
 		args.put(EclipseAppDescriptor.APP_DEFAULT, Boolean.TRUE);
 		if (applicationId == null && !delayError) {
 			// the application id is not set; use a descriptor that will throw an exception
@@ -438,7 +438,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 			return branding;
 		}
 		IConfigurationElement[] elements = extensionRegistry.getConfigurationElementsFor(PI_RUNTIME, PT_PRODUCTS);
-		List logEntries = null;
+		List<FrameworkLogEntry> logEntries = null;
 		for (int i = 0; i < elements.length; i++) {
 			IConfigurationElement element = elements[i];
 			if (element.getName().equalsIgnoreCase("provider")) { //$NON-NLS-1$
@@ -454,13 +454,13 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 						}
 				} catch (CoreException e) {
 					if (logEntries == null)
-						logEntries = new ArrayList(3);
+						logEntries = new ArrayList<>(3);
 					logEntries.add(new FrameworkLogEntry(Activator.PI_APP, NLS.bind(Messages.provider_invalid, element.getParent().toString()), 0, e, null));
 				}
 			}
 		}
 		if (logEntries != null)
-			Activator.log(new FrameworkLogEntry(Activator.PI_APP, Messages.provider_invalid_general, 0, null, (FrameworkLogEntry[]) logEntries.toArray(new FrameworkLogEntry[logEntries.size()])));
+			Activator.log(new FrameworkLogEntry(Activator.PI_APP, Messages.provider_invalid_general, 0, null, logEntries.toArray(new FrameworkLogEntry[logEntries.size()])));
 
 		if (!missingProductReported) {
 			Activator.log(new FrameworkLogEntry(Activator.PI_APP, NLS.bind(Messages.product_notFound, productId), 0, null, null));
@@ -471,8 +471,8 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 
 	private void refreshAppDescriptors() {
 		synchronized (lock) {
-			for (Iterator allApps = apps.values().iterator(); allApps.hasNext();)
-				((EclipseAppDescriptor) allApps.next()).refreshProperties();
+			for (Iterator<EclipseAppDescriptor> allApps = apps.values().iterator(); allApps.hasNext();)
+				allApps.next().refreshProperties();
 		}
 	}
 
@@ -506,10 +506,10 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 					break;
 				case EclipseAppDescriptor.FLAG_CARD_LIMITED :
 					if (activeLimited == null)
-						activeLimited = new HashMap(3);
-					ArrayList limited = (ArrayList) activeLimited.get(eclipseApp.getApplicationId());
+						activeLimited = new HashMap<>(3);
+					ArrayList<EclipseAppHandle> limited = activeLimited.get(eclipseApp.getApplicationId());
 					if (limited == null) {
-						limited = new ArrayList(eclipseApp.getCardinality());
+						limited = new ArrayList<>(eclipseApp.getCardinality());
 						activeLimited.put(eclipseApp.getApplicationId(), limited);
 					}
 					limited.add(appHandle);
@@ -534,7 +534,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 				activeScopedSingleton = null;
 			else if (((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getCardinalityType() == EclipseAppDescriptor.FLAG_CARD_LIMITED) {
 				if (activeLimited != null) {
-					ArrayList limited = (ArrayList) activeLimited.get(((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getApplicationId());
+					ArrayList<EclipseAppHandle> limited = activeLimited.get(((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getApplicationId());
 					if (limited != null)
 						limited.remove(appHandle);
 				}
@@ -561,7 +561,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 					break;
 				case EclipseAppDescriptor.FLAG_CARD_LIMITED :
 					if (activeLimited != null) {
-						ArrayList limited = (ArrayList) activeLimited.get(eclipseApp.getApplicationId());
+						ArrayList<EclipseAppHandle> limited = activeLimited.get(eclipseApp.getApplicationId());
 						if (limited != null && limited.size() >= eclipseApp.getCardinality())
 							return LOCKED_SINGLETON_LIMITED_RUNNING;
 					}
@@ -577,7 +577,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 		}
 	}
 
-	static Object callMethod(Object obj, String methodName, Class[] argTypes, Object[] args) {
+	static Object callMethod(Object obj, String methodName, Class<?>[] argTypes, Object[] args) {
 		try {
 			return callMethodWithException(obj, methodName, argTypes, args);
 		} catch (Throwable t) {
@@ -586,7 +586,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 		return null;
 	}
 
-	static Object callMethodWithException(Object obj, String methodName, Class[] argTypes, Object[] args) throws Exception {
+	static Object callMethodWithException(Object obj, String methodName, Class<?>[] argTypes, Object[] args) throws Exception {
 		try {
 			Method method = obj.getClass().getMethod(methodName, argTypes);
 			return method.invoke(obj, args);

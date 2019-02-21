@@ -73,9 +73,9 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 				baseIconDir = iconPath.substring(0, lastSlash);
 				iconFile = iconPath.substring(lastSlash + 1);
 			}
-			Enumeration urls = contributor.findEntries(baseIconDir, iconFile, false);
+			Enumeration<URL> urls = contributor.findEntries(baseIconDir, iconFile, false);
 			if (urls != null && urls.hasMoreElements())
-				iconResult = (URL) urls.nextElement();
+				iconResult = urls.nextElement();
 		}
 		this.iconURL = iconResult;
 	}
@@ -163,8 +163,8 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	/*
 	 * Gets a snapshot of the current service properties.
 	 */
-	Hashtable getServiceProperties() {
-		Hashtable props = new Hashtable(10);
+	Hashtable<String, Object> getServiceProperties() {
+		Hashtable<String, Object> props = new Hashtable<>(10);
 		props.put(ApplicationDescriptor.APPLICATION_PID, getApplicationId());
 		if (name != null)
 			props.put(ApplicationDescriptor.APPLICATION_NAME, name);
@@ -192,7 +192,7 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	/*
 	 * Returns the appHandle.  If it does not exist then one is created.
 	 */
-	private EclipseAppHandle createAppHandle(Map arguments) throws ApplicationException {
+	private EclipseAppHandle createAppHandle(Map<String, Object> arguments) throws ApplicationException {
 		EclipseAppHandle newAppHandle = new EclipseAppHandle(getInstanceID(), arguments, this);
 		appContainer.lock(newAppHandle);
 		ServiceRegistration appHandleReg = (ServiceRegistration) AccessController.doPrivileged(appContainer.getRegServiceAction(new String[] {ApplicationHandle.class.getName(), IApplicationContext.class.getName()}, newAppHandle, newAppHandle.getServiceProperties()));

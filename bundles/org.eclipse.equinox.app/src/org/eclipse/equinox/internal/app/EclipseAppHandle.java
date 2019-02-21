@@ -45,7 +45,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 
 	private volatile ServiceRegistration handleRegistration;
 	private int status = EclipseAppHandle.FLAG_STARTING;
-	private final Map arguments;
+	private final Map<String, Object> arguments;
 	private Object application;
 	private final Boolean defaultAppInstance;
 	private Object result;
@@ -56,13 +56,13 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	/*
 	 * Constructs a handle for a single running instance of a eclipse application.
 	 */
-	EclipseAppHandle(String instanceId, Map arguments, EclipseAppDescriptor descriptor) {
+	EclipseAppHandle(String instanceId, Map<String, Object> arguments, EclipseAppDescriptor descriptor) {
 		super(instanceId, descriptor);
 		defaultAppInstance = arguments == null || arguments.get(EclipseAppDescriptor.APP_DEFAULT) == null ? Boolean.FALSE : (Boolean) arguments.remove(EclipseAppDescriptor.APP_DEFAULT);
 		if (arguments == null)
-			this.arguments = new HashMap(2);
+			this.arguments = new HashMap<>(2);
 		else
-			this.arguments = new HashMap(arguments);
+			this.arguments = new HashMap<>(arguments);
 	}
 
 	@Override
@@ -131,8 +131,8 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	/*
 	 * Gets a snapshot of the current service properties.
 	 */
-	Dictionary getServiceProperties() {
-		Dictionary props = new Hashtable(6);
+	Dictionary<String, Object> getServiceProperties() {
+		Dictionary<String, Object> props = new Hashtable<>(6);
 		props.put(ApplicationHandle.APPLICATION_PID, getInstanceId());
 		props.put(ApplicationHandle.APPLICATION_STATE, getState());
 		props.put(ApplicationHandle.APPLICATION_DESCRIPTOR, getApplicationDescriptor().getApplicationId());
@@ -296,13 +296,11 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		if (refs == null || refs.length == 0)
 			return null;
 		// Implement our own Comparator to sort services
-		Arrays.sort(refs, new Comparator() {
+		Arrays.sort(refs, new Comparator<ServiceReference>() {
 			@Override
-			public int compare(Object o1, Object o2) {
+			public int compare(ServiceReference ref1, ServiceReference ref2) {
 				// sort in descending order
 				// sort based on service ranking first; highest rank wins
-				ServiceReference ref1 = (ServiceReference) o1;
-				ServiceReference ref2 = (ServiceReference) o2;
 				Object property = ref1.getProperty(Constants.SERVICE_RANKING);
 				int rank1 = (property instanceof Integer) ? ((Integer) property).intValue() : 0;
 				property = ref2.getProperty(Constants.SERVICE_RANKING);

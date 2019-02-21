@@ -33,14 +33,14 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 	private boolean recurring;
 	private String topic;
 	private String eventFilter;
-	private Map args;
+	private Map<String, Object> args;
 	private String appPid;
 	private String id;
 	private ServiceRegistration sr;
 	private ServiceTracker appTracker;
 	private boolean removed = false;
 
-	EclipseScheduledApplication(BundleContext context, String id, String appPid, Map args, String topic, String eventFilter, boolean recurring) throws InvalidSyntaxException {
+	EclipseScheduledApplication(BundleContext context, String id, String appPid, Map<String, Object> args, String topic, String eventFilter, boolean recurring) throws InvalidSyntaxException {
 		this.id = id;
 		this.appPid = appPid;
 		this.args = args;
@@ -89,14 +89,14 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 	}
 
 	@Override
-	public synchronized Map getArguments() {
+	public synchronized Map<String, Object> getArguments() {
 		if (removed)
 			throw new IllegalStateException(Messages.scheduled_app_removed);
-		return args == null ? null : new HashMap(args);
+		return args == null ? null : new HashMap<>(args);
 	}
 
-	private Map getArguments(Event trigger) {
-		Map result = args == null ? new HashMap() : getArguments();
+	private Map<String, Object> getArguments(Event trigger) {
+		Map<String, Object> result = args == null ? new HashMap<String, Object>() : getArguments();
 		result.put(TRIGGERING_EVENT, new GuardedObject(trigger, new TriggerGuard(trigger.getTopic())));
 		return result;
 	}

@@ -46,9 +46,9 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	private static BundleContext context;
 	private static ServiceTracker configTracker;
 	private static Location configLocation;
-	private static Collection locks = new ArrayList();
-	private static Map scheduledApps = new HashMap();
-	static ArrayList timerApps = new ArrayList();
+	private static Collection<String> locks = new ArrayList<>();
+	private static Map<String, EclipseScheduledApplication> scheduledApps = new HashMap<>();
+	static ArrayList<EclipseScheduledApplication> timerApps = new ArrayList<>();
 	private static StorageManager storageManager;
 	private static boolean scheduling = false;
 	static boolean shutdown = false;
@@ -144,7 +144,7 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	 * @throws InvalidSyntaxException
 	 * @throws ApplicationException 
 	 */
-	public static ScheduledApplication addScheduledApp(ApplicationDescriptor descriptor, String scheduleId, Map arguments, String topic, String eventFilter, boolean recurring) throws InvalidSyntaxException, ApplicationException {
+	public static ScheduledApplication addScheduledApp(ApplicationDescriptor descriptor, String scheduleId, Map<String, Object> arguments, String topic, String eventFilter, boolean recurring) throws InvalidSyntaxException, ApplicationException {
 		if (!scheduling && !checkSchedulingSupport())
 			throw new ApplicationException(ApplicationException.APPLICATION_SCHEDULING_FAILED, "Cannot support scheduling without org.osgi.service.event package"); //$NON-NLS-1$
 		// check the event filter for correct syntax
@@ -168,7 +168,7 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 			}
 		}
 		scheduledApps.put(scheduledApp.getScheduleId(), scheduledApp);
-		Hashtable serviceProps = new Hashtable();
+		Hashtable<String, Object> serviceProps = new Hashtable<>();
 		if (scheduledApp.getTopic() != null)
 			serviceProps.put(EventConstants.EVENT_TOPIC, new String[] {scheduledApp.getTopic()});
 		if (scheduledApp.getEventFilter() != null)
@@ -299,8 +299,8 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 		try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(locksData))) {
 			out.writeInt(DATA_VERSION);
 			out.writeInt(locks.size());
-			for (Iterator iterLocks = locks.iterator(); iterLocks.hasNext();)
-				out.writeUTF((String) iterLocks.next());
+			for (Iterator<String> iterLocks = locks.iterator(); iterLocks.hasNext();)
+				out.writeUTF(iterLocks.next());
 		}
 	}
 
@@ -309,8 +309,8 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 		try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(schedulesData))) {
 			out.writeInt(DATA_VERSION);
 			out.writeInt(scheduledApps.size());
-			for (Iterator apps = scheduledApps.values().iterator(); apps.hasNext();) {
-				EclipseScheduledApplication app = (EclipseScheduledApplication) apps.next();
+			for (Iterator<EclipseScheduledApplication> apps = scheduledApps.values().iterator(); apps.hasNext();) {
+				EclipseScheduledApplication app = apps.next();
 				writeStringOrNull(out, app.getScheduleId());
 				writeStringOrNull(out, app.getAppPid());
 				writeStringOrNull(out, app.getTopic());
@@ -344,20 +344,20 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 					if (minute == lastMin)
 						continue;
 					lastMin = minute;
-					Hashtable props = new Hashtable();
+					Hashtable<String, Object> props = new Hashtable<>();
 					props.put(ScheduledApplication.YEAR, Integer.valueOf(cal.get(Calendar.YEAR)));
 					props.put(ScheduledApplication.MONTH, Integer.valueOf(cal.get(Calendar.MONTH)));
 					props.put(ScheduledApplication.DAY_OF_MONTH, Integer.valueOf(cal.get(Calendar.DAY_OF_MONTH)));
 					props.put(ScheduledApplication.DAY_OF_WEEK, Integer.valueOf(cal.get(Calendar.DAY_OF_WEEK)));
 					props.put(ScheduledApplication.HOUR_OF_DAY, Integer.valueOf(cal.get(Calendar.HOUR_OF_DAY)));
 					props.put(ScheduledApplication.MINUTE, Integer.valueOf(minute));
-					Event timerEvent = new Event(ScheduledApplication.TIMER_TOPIC, (Dictionary) props);
+					Event timerEvent = new Event(ScheduledApplication.TIMER_TOPIC, (Dictionary<String, ?>) props);
 					EclipseScheduledApplication[] apps = null;
 					// poor mans implementation of dispatching events; the spec will not allow us to use event admin to dispatch the virtual timer events; boo!!
 					synchronized (timerApps) {
 						if (timerApps.size() == 0)
 							continue;
-						apps = (EclipseScheduledApplication[]) timerApps.toArray(new EclipseScheduledApplication[timerApps.size()]);
+						apps = timerApps.toArray(new EclipseScheduledApplication[timerApps.size()]);
 					}
 					for (int i = 0; i < apps.length; i++) {
 						try {
