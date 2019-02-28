@@ -188,13 +188,11 @@ public class FilterRegistration
 	}
 
 	private void createContextAttributes() {
-		contextController.getProxyContext().createContextAttributes(
-			contextController);
+		contextController.createContextAttributes();
 	}
 
 	private void destroyContextAttributes() {
-		contextController.getProxyContext().destroyContextAttributes(
-			contextController);
+		contextController.destroyContextAttributes();
 	}
 
 	protected boolean isPathWildcardMatch(String pattern, String path) {

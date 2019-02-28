@@ -602,19 +602,27 @@ public class ContextController {
 		shutdown = true;
 	}
 
+	public void createContextAttributes() {
+		getProxyContext().createContextAttributes(this);
+	}
+
+	public void destroyContextAttributes() {
+		if (shutdown) {
+			return;
+		}
+
+		proxyContext.destroyContextAttributes(this);
+	}
+
 	public boolean isLegacyContext() {
 		return serviceReference.getProperty(HTTP_SERVICE_CONTEXT_PROPERTY) != null;
 	}
 
 	public String getContextName() {
-		checkShutdown();
-
 		return contextName;
 	}
 
 	public String getContextPath() {
-		checkShutdown();
-
 		return contextPath;
 	}
 
@@ -769,26 +777,18 @@ public class ContextController {
 	}
 
 	public Map<String, HttpSessionAdaptor> getActiveSessions() {
-		checkShutdown();
-
 		return activeSessions;
 	}
 
 	public Set<EndpointRegistration<?>> getEndpointRegistrations() {
-		checkShutdown();
-
 		return endpointRegistrations;
 	}
 
 	public EventListeners getEventListeners() {
-		checkShutdown();
-
 		return eventListeners;
 	}
 
 	public Set<FilterRegistration> getFilterRegistrations() {
-		checkShutdown();
-
 		return filterRegistrations;
 	}
 
@@ -824,8 +824,6 @@ public class ContextController {
 	}
 
 	public HttpServiceRuntimeImpl getHttpServiceRuntime() {
-		checkShutdown();
-
 		return httpServiceRuntime;
 	}
 
@@ -834,29 +832,21 @@ public class ContextController {
 	}
 
 	public Set<ListenerRegistration> getListenerRegistrations() {
-		checkShutdown();
-
 		return listenerRegistrations;
 	}
 
 	public ProxyContext getProxyContext() {
-		checkShutdown();
-
 		return proxyContext;
 	}
 
 	public long getServiceId() {
-		checkShutdown();
-
 		return contextServiceId;
 	}
 
 	public synchronized ServletContextDTO getServletContextDTO(){
-		checkShutdown();
-
 		ServletContextDTO servletContextDTO = new ServletContextDTO();
 
-		ServletContext servletContext = getProxyContext().getServletContext();
+		ServletContext servletContext = proxyContext.getServletContext();
 
 		servletContextDTO.attributes = getDTOAttributes(servletContext);
 		servletContextDTO.contextPath = getContextPath();
@@ -1253,6 +1243,10 @@ public class ContextController {
 	}
 
 	public void fireSessionIdChanged(String oldSessionId) {
+		if (shutdown) {
+			return;
+		}
+
 		ServletContext servletContext = proxyContext.getServletContext();
 		if ((servletContext.getMajorVersion() <= 3) && (servletContext.getMinorVersion() < 1)) {
 			return;
