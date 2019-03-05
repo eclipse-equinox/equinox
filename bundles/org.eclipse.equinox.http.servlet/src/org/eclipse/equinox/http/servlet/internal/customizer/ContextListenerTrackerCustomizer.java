@@ -65,16 +65,17 @@ public class ContextListenerTrackerCustomizer
 
 			httpServiceRuntime.removeFailedListenerDTO(serviceReference);
 
-			String listener = (String)serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
+			Object listenerObj = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
 
-			if (Boolean.FALSE.toString().equalsIgnoreCase(listener)) {
-				return result;
+			if (!(listenerObj instanceof Boolean) && !(listenerObj instanceof String)) {
+				throw new HttpWhiteboardFailureException(
+					HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER + "=" + listenerObj + " is not a valid option. Ignoring!", //$NON-NLS-1$ //$NON-NLS-2$
+					DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
 			}
 
-			if (!Boolean.TRUE.toString().equalsIgnoreCase(listener)) {
-				throw new HttpWhiteboardFailureException(
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER + "=" + listener + " is not a valid option. Ignoring!", //$NON-NLS-1$ //$NON-NLS-2$
-					DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
+			if (Boolean.FALSE.equals(listenerObj) || !Boolean.valueOf(String.valueOf(listenerObj)).booleanValue()) {
+				// Asks to be ignored.
+				return result;
 			}
 
 			result.set(contextController.addListenerRegistration(serviceReference));
