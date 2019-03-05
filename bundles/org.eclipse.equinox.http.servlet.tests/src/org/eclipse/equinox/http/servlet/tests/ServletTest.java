@@ -1969,6 +1969,26 @@ public class ServletTest extends BaseTest {
 	}
 
 	@Test
+	public void test_ResourceAliasNormal() throws Exception {
+		HttpService extendedHttpService = getHttpService();
+
+		extendedHttpService.registerResources("/testalias", "/org/eclipse/equinox/http/servlet/tests", null);
+
+		String actual = requestAdvisor.request("testalias/resource2.txt");
+		Assert.assertEquals("Wrong value.", "test", actual);
+	}
+
+	@Test
+	public void test_ResourceAliasSlash() throws Exception {
+		HttpService extendedHttpService = getHttpService();
+
+		extendedHttpService.registerResources("/", "/org/eclipse/equinox/http/servlet/tests", null);
+
+		String actual = requestAdvisor.request("resource2.txt");
+		Assert.assertEquals("Wrong value.", "test", actual);
+	}
+
+	@Test
 	public void test_ResourceRangeRequest_Complete() throws Exception {
 		Bundle bundle = installBundle(TEST_BUNDLE_2);
 		ServletContextHelper customSCH = new ServletContextHelper(bundle) {

@@ -771,15 +771,18 @@ public class HttpServiceRuntimeImpl
 			throw new IllegalArgumentException("Name cannot be null"); //$NON-NLS-1$
 		}
 		String pattern = alias;
-		if (pattern.startsWith("/*.")) { //$NON-NLS-1$
+		if (pattern.startsWith(Const.SLASH_STAR_DOT)) {
 			pattern = pattern.substring(1);
 		}
-		else if (!pattern.contains("*.") && //$NON-NLS-1$
-				!pattern.endsWith(Const.SLASH_STAR) &&
-				!pattern.endsWith(Const.SLASH)) {
-			pattern += Const.SLASH_STAR;
+		// need to make sure exact matching aliases are converted to wildcard pattern matches
+		if (!pattern.endsWith(Const.SLASH_STAR) && !pattern.startsWith(Const.STAR_DOT) && !pattern.contains(Const.SLASH_STAR_DOT)) {
+			if (pattern.endsWith(Const.SLASH)) {
+				pattern = pattern + '*';
+			} else {
+				pattern = pattern + Const.SLASH_STAR;
+			}
 		}
-
+		// check the pattern against the original input
 		ContextController.checkPattern(alias);
 
 		synchronized (legacyMappings) {
