@@ -1506,6 +1506,10 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	}
 
 	public void testUninstallInUse01() throws BundleException {
+		if (getContext().getServiceReference("org.eclipse.equinox.region.RegionDigraph") != null) {
+			System.out.println("Cannot test uninstall in use with RegionDigraph service");
+			return;
+		}
 		Bundle exporter1 = installer.installBundle("exporter.importer1"); //$NON-NLS-1$
 		BundleRevision iExporter1 = exporter1.adapt(BundleRevision.class);
 		Bundle exporter2 = installer.installBundle("exporter.importer2"); //$NON-NLS-1$

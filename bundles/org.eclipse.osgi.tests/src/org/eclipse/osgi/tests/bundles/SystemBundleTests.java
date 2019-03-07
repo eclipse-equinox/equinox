@@ -3312,7 +3312,8 @@ public class SystemBundleTests extends AbstractBundleTests {
 		URI uri = new URI(frameworkLocation);
 		File f = new File(uri);
 		if (!f.isFile()) {
-			Assert.fail("Cannot test when framework location is a directory: " + f.getAbsolutePath());
+			System.out.println("Cannot test when framework location is a directory: " + f.getAbsolutePath());
+			return;
 		}
 		File testDestination = OSGiTestsActivator.getContext().getDataFile(getName() + ".framework.jar");
 		BaseSecurityTest.copy(new FileInputStream(f), testDestination);

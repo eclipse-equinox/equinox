@@ -18,8 +18,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Collection;
@@ -37,6 +38,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.hooks.bundle.CollisionHook;
+import org.osgi.framework.wiring.BundleWiring;
 
 public class BundleInstallUpdateTests extends AbstractBundleTests {
 	public static Test suite() {
@@ -435,20 +437,23 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		is.close();
 	}
 
-	public void testEscapeZipRoot() throws IOException, BundleException, InvalidSyntaxException, URISyntaxException {
+	public void testEscapeZipRoot() throws IOException, BundleException, InvalidSyntaxException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		String entry1 = "../../escapedZipRoot1.txt";
 		String entry2 = "dir1/../../../escapedZipRoot2.txt";
 		String cp1 = "../../cp.jar";
+		String nativeCode = "../../lib/nativeCode";
 		File bundlesDirectory = OSGiTestsActivator.getContext().getDataFile(getName());
 		bundlesDirectory.mkdirs();
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		headers.put(Constants.BUNDLE_SYMBOLICNAME, getName());
-		headers.put(Constants.BUNDLE_CLASSPATH, "., ../../cp.jar");
+		headers.put(Constants.BUNDLE_CLASSPATH, "., " + cp1);
+		headers.put(Constants.BUNDLE_NATIVECODE, nativeCode);
 		Map<String, String> entries = new HashMap<>();
 		entries.put(entry1, "value");
 		entries.put(entry2, "value");
 		entries.put(cp1, "value");
+		entries.put(nativeCode, "value");
 
 		File testBundleJarFile = SystemBundleTests.createBundle(bundlesDirectory, getName(), headers, entries);
 		Bundle testBundle = getContext().installBundle(getName(), new FileInputStream(testBundleJarFile));
@@ -458,6 +463,11 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		} catch (ClassNotFoundException e) {
 			// expected
 		}
+		ClassLoader cl = testBundle.adapt(BundleWiring.class).getClassLoader();
+		Method findLibrary = ClassLoader.class.getDeclaredMethod("findLibrary", String.class);
+		findLibrary.setAccessible(true);
+		assertNull("Found library.", findLibrary.invoke(cl, "nativeCode"));
+
 		URLConverter bundleURLConverter = getContext().getService(getContext().getServiceReferences(URLConverter.class, "(protocol=bundleentry)").iterator().next());
 
 		URL dir1 = bundleURLConverter.toFileURL(testBundle.getEntry("dir1/"));
