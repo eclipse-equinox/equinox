@@ -45,7 +45,9 @@ public interface IPreferenceNodeVisitor {
 	 * @param node the node to visit
 	 * @return <code>true</code> if the node's children should
 	 *		be visited; <code>false</code> if they should be skipped
-	 * @throws BackingStoreException
+	 * @throws BackingStoreException if this operation cannot be completed due
+	 *         to a failure in the backing store, or inability to communicate
+	 *         with it.
 	 */
 	public boolean visit(IEclipsePreferences node) throws BackingStoreException;
 }

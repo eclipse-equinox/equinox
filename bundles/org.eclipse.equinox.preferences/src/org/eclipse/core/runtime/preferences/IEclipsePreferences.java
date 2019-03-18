@@ -315,7 +315,9 @@ public interface IEclipsePreferences extends Preferences {
 	 *
 	 * @param visitor the visitor
 	 * @see IPreferenceNodeVisitor#visit(IEclipsePreferences)
-	 * @throws BackingStoreException
+	 * @throws BackingStoreException if this operation cannot be completed due
+	 *         to a failure in the backing store, or inability to communicate
+	 *         with it.
 	 */
 	public void accept(IPreferenceNodeVisitor visitor) throws BackingStoreException;
 }

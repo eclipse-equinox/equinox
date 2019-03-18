@@ -31,14 +31,14 @@ public interface ILoginContext {
 	/**
 	 * Call this method to perform a login. 
 	 * @see LoginContext#login()
-	 * @throws LoginException
+	 * @throws LoginException if the authentication fails.
 	 */
 	public void login() throws LoginException;
 
 	/**
 	 * Call this method to perform a logout.
 	 * @see LoginContext#logout()
-	 * @throws LoginException
+	 * @throws LoginException if the logout fails.
 	 */
 	public void logout() throws LoginException;
 

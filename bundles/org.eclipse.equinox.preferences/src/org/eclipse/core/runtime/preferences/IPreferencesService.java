@@ -611,7 +611,7 @@ public interface IPreferencesService {
 	 * @param node the tree to export
 	 * @param filters the list of filters to export
 	 * @param output the stream to export to
-	 * @throws CoreException
+	 * @throws CoreException if there was a problem exporting the preferences
 	 * @see #exportPreferences(IEclipsePreferences, OutputStream, String[])
 	 * @see #readPreferences(InputStream)
 	 * @see #applyPreferences(IEclipsePreferences, IPreferenceFilter[])
@@ -629,7 +629,7 @@ public interface IPreferencesService {
 	 * @param node the tree to match against
 	 * @param filters the list of filters to match against
 	 * @return the array of matching transfers
-	 * @throws CoreException
+	 * @throws CoreException if there are problems during matching
 	 * @see IPreferenceFilter
 	 * @since 3.1
 	 */
@@ -650,7 +650,7 @@ public interface IPreferencesService {
 	 *
 	 * @param node the tree to consider applying
 	 * @param filters the filters to use
-	 * @throws CoreException
+	 * @throws CoreException if there are problems applying the preferences
 	 * @see #applyPreferences(IExportedPreferences)
 	 * @see #readPreferences(InputStream)
 	 * @see IPreferenceFilter
