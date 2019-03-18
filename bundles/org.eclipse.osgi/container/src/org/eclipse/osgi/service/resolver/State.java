@@ -387,12 +387,12 @@ public interface State {
 	public StateDelta resolve(BundleDescription[] resolve, boolean discard);
 
 	/**
-	 * Sets the version overrides which are to be applied during the resolutoin
+	 * Sets the version overrides which are to be applied during the resolution
 	 * of this state. Version overrides allow external forces to
 	 * refine/override the version constraints setup by the components in the
 	 * state.
 	 * 
-	 * @param value
+	 * @param value Format undefined.
 	 * @deprecated The exact form of this has never been defined.  There is
 	 * no alternative method available.
 	 */

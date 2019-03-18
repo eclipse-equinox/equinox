@@ -35,8 +35,8 @@ public interface StateDelta {
 	 * included.  Otherwise, all bundle deltas whose type's bit-wise and with the
 	 * mask is non-zero are included. 
 	 * 
-	 * @param mask
-	 * @param exact
+	 * @param mask match mask
+	 * @param exact whether exact match or bit-wise matching should be performed
 	 * @return an array of bundle deltas matching the given match criteria.
 	 */
 	public BundleDelta[] getChanges(int mask, boolean exact);

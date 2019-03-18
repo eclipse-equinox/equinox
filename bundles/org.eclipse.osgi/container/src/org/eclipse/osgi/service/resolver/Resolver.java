@@ -86,7 +86,7 @@ public interface Resolver {
 
 	/**
 	 * Notifies the resolver a bundle has been added to the state.
-	 * @param bundle
+	 * @param bundle the bundle added
 	 */
 	public void bundleAdded(BundleDescription bundle);
 

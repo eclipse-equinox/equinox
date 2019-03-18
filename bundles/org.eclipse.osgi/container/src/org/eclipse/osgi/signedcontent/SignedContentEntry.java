@@ -46,7 +46,7 @@ public interface SignedContentEntry {
 
 	/**
 	 * Returns true if the entry is signed; false otherwise.  This is a convenience method
-	 * equivalent to calling <code>{@link #getSignerInfos()}.length > 0</code> 
+	 * equivalent to calling <code>{@link #getSignerInfos()}.length &gt; 0</code> 
 	 * @return true if the content is signed
 	 */
 	public boolean isSigned();

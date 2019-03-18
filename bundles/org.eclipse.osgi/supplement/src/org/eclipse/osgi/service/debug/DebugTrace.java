@@ -34,7 +34,7 @@ package org.eclipse.osgi.service.debug;
  * <p>
  * Note that the pipe character ("&#124;") is reserved for internal use. If this character 
  * happens to occur in any of the thread name, the option, the message or an Exception
- * message, it will be escaped to the corresponding HTML representation ("&amp&#35;124&#59;").   
+ * message, it will be escaped to the corresponding HTML representation ("&amp;&#35;124&#59;").   
  * </p>
  *  
  * @since 3.5

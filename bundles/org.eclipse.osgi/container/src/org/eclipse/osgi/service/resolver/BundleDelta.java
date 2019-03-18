@@ -114,9 +114,9 @@ public interface BundleDelta extends Comparable<BundleDelta> {
 	 * The natural order of elements is determined by the bundle id of the
 	 * BundleDescription that this bundle delta is for.
 	 * 
-	 * @return int which should be <0 if the receiver should sort before the
+	 * @return int which should be &lt;0 if the receiver should sort before the
 	 *         argument, 0 if the receiver should sort in the same position as
-	 *         the argument, and >0 if the receiver should sort after the
+	 *         the argument, and &gt;0 if the receiver should sort after the
 	 *         argument.
 	 * @param obj
 	 *            another BundleDelta an object to compare the receiver to
