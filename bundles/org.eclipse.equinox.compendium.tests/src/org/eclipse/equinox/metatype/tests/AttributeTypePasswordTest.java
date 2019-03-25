@@ -27,17 +27,17 @@ public class AttributeTypePasswordTest extends AbstractTest {
 		bundle.start();
 	}
 
-	@After
-	public void tearDown() throws Exception {
-		bundle.stop();
-		super.tearDown();
-	}
-
 	/*
 	 * Ensures the PASSWORD type is recognized.
 	 */
 	@Test
 	public void testAttributeTypePassword1() {
+		doTestAttributeTypePassword1();
+		restartMetatype();
+		doTestAttributeTypePassword1();
+	}
+
+	private void doTestAttributeTypePassword1() {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
@@ -53,6 +53,12 @@ public class AttributeTypePasswordTest extends AbstractTest {
 	 */
 	@Test
 	public void testAttributeTypePassword2() {
+		doTestAttributeTypePassword2();
+		restartMetatype();
+		doTestAttributeTypePassword2();
+	}
+
+	private void doTestAttributeTypePassword2() {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
@@ -66,6 +72,12 @@ public class AttributeTypePasswordTest extends AbstractTest {
 	 */
 	@Test
 	public void testAttributeTypePassword3() {
+		doTestAttributeTypePassword3();
+		restartMetatype();
+		doTestAttributeTypePassword3();
+	}
+
+	private void doTestAttributeTypePassword3() {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
@@ -80,6 +92,12 @@ public class AttributeTypePasswordTest extends AbstractTest {
 	 */
 	@Test
 	public void testAttributeTypePassword4() {
+		doTestAttributeTypePassword4();
+		restartMetatype();
+		doTestAttributeTypePassword4();
+	}
+
+	private void doTestAttributeTypePassword4() {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
@@ -95,6 +113,12 @@ public class AttributeTypePasswordTest extends AbstractTest {
 	 */
 	@Test
 	public void testAttributeTypePassword5() {
+		doTestAttributeTypePassword5();
+		restartMetatype();
+		doTestAttributeTypePassword5();
+	}
+
+	private void doTestAttributeTypePassword5() {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
@@ -110,6 +134,12 @@ public class AttributeTypePasswordTest extends AbstractTest {
 	 */
 	@Test
 	public void testAttributeTypePassword6() {
+		doTestAttributeTypePassword6();
+		restartMetatype();
+		doTestAttributeTypePassword6();
+	}
+
+	private void doTestAttributeTypePassword6() {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);

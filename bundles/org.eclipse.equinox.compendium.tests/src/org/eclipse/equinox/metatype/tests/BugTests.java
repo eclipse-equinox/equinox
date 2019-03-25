@@ -27,7 +27,13 @@ public class BugTests extends AbstractTest {
 	 * A cardinality of zero should not require a default value to be specified.
 	 */
 	@Test
-	public void test334642() {
+	public void test334642() throws Exception {
+		doTest334642();
+		restartMetatype();
+		doTest334642();
+	}
+
+	private void doTest334642() {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		Assert.assertNotNull("Metatype information not found", mti); //$NON-NLS-1$
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb3", null); //$NON-NLS-1$
@@ -62,7 +68,13 @@ public class BugTests extends AbstractTest {
 	 * StringIndexOutOfBoundsException when description or name attributes are an empty string
 	 */
 	@Test
-	public void test341963() {
+	public void test341963() throws Exception {
+		doTest341963();
+		restartMetatype();
+		doTest341963();
+	}
+
+	private void doTest341963() {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		Assert.assertNotNull("Metatype information not found", mti); //$NON-NLS-1$
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("ocd2", null); //$NON-NLS-1$
@@ -86,9 +98,4 @@ public class BugTests extends AbstractTest {
 		bundle.start();
 	}
 
-	@After
-	public void tearDown() throws Exception {
-		bundle.stop();
-		super.tearDown();
-	}
 }

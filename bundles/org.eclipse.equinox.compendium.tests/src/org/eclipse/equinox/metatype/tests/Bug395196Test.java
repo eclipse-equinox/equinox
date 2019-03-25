@@ -34,7 +34,13 @@ public class Bug395196Test extends AbstractTest {
 	private ObjectClassDefinition ocd;
 
 	@Test
-	public void testRejectDefaultValueWhenNotAnOption() {
+	public void testRejectDefaultValueWhenNotAnOption() throws Exception {
+		doTestRejectDefaultValueWhenNotAnOption();
+		restartMetatype();
+		doTestRejectDefaultValueWhenNotAnOption();
+	}
+
+	private void doTestRejectDefaultValueWhenNotAnOption() {
 		AttributeDefinition ad = findAttributeDefinitionById("ocd3-ad1", ads); //$NON-NLS-1$
 		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		assertNull("Default value not matching one of the options was not rejected", ad.getDefaultValue()); //$NON-NLS-1$
@@ -45,6 +51,10 @@ public class Bug395196Test extends AbstractTest {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb1"); //$NON-NLS-1$
 		bundle.start();
+		getMetaTypeObjects();
+	}
+
+	private void getMetaTypeObjects() {
 		mti = metatype.getMetaTypeInformation(bundle);
 		Assert.assertNotNull("Metatype information not found", mti); //$NON-NLS-1$
 		ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1.testRejectDefaultValueWhenNotAnOption", null); //$NON-NLS-1$
@@ -54,9 +64,9 @@ public class Bug395196Test extends AbstractTest {
 		Assert.assertEquals("Wrong number of attribute definitions", 1, ads.length); //$NON-NLS-1$
 	}
 
-	@After
-	public void tearDown() throws Exception {
-		bundle.stop();
-		super.tearDown();
+	@Override
+	public void restartMetatype() {
+		super.restartMetatype();
+		getMetaTypeObjects();
 	}
 }

@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.AttributeDefinition;
 
 public class ValueTokenizer {
@@ -114,7 +113,7 @@ public class ValueTokenizer {
 	}
 
 	/*
-	 * Method to return values as Vector.
+	 * Method to return values as collection.
 	 */
 	public Collection<String> getValues() {
 		return Collections.unmodifiableList(values);
@@ -150,20 +149,21 @@ public class ValueTokenizer {
 		try {
 			// All or nothing. If either min or max is not null and cannot be
 			// parsed as an integer, do the string comparison instead.
-			Integer min = ad._minValue == null ? null : Integer.valueOf((String) ad._minValue);
-			Integer max = ad._maxValue == null ? null : Integer.valueOf((String) ad._maxValue);
+			Integer min = ad.getMinValue() == null ? null : Integer.valueOf((String) ad.getMinValue());
+			Integer max = ad.getMaxValue() == null ? null : Integer.valueOf((String) ad.getMaxValue());
 			if (min != null && value.length() < min)
 				return true;
 			if (max != null && value.length() > max)
 				return true;
 		} catch (NumberFormatException e) {
 			// Either min or max was not an integer. Do a string comparison.
-			if ((ad._minValue != null && value.compareTo((String) ad._minValue) < 0) || (ad._maxValue != null && value.compareTo((String) ad._maxValue) > 0))
+			if ((ad.getMinValue() != null && value.compareTo((String) ad.getMinValue()) < 0) || (ad.getMaxValue() != null && value.compareTo((String) ad.getMaxValue()) > 0))
 				return true;
 		}
 		return false;
 	}
 
+	@SuppressWarnings("deprecation")
 	public String validate(AttributeDefinitionImpl ad) {
 		// An empty list means the original value was null. Null is never valid.
 		if (values.isEmpty()) {
@@ -187,37 +187,37 @@ public class ValueTokenizer {
 			for (Iterator<String> i = values.iterator(); i.hasNext();) {
 				s = i.next();
 				// If options were declared and the value does not match one of them, the value is not valid.
-				if (!ad._values.isEmpty() && !ad._values.contains(s)) {
+				if (ad.containsInvalidValue(s)) {
 					return NLS.bind(MetaTypeMsg.VALUE_OUT_OF_OPTION, s);
 				}
 				// Check the type. Also check the range if min or max were declared.
 				boolean rangeError = false;
-				switch (ad._dataType) {
+				switch (ad.getType()) {
 					case AttributeDefinition.PASSWORD :
 					case AttributeDefinition.STRING :
 						rangeError = validateString(ad, s);
 						break;
 					case AttributeDefinition.INTEGER :
 						Integer intVal = Integer.valueOf(s);
-						if (ad._minValue != null && intVal.compareTo((Integer) ad._minValue) < 0) {
+						if (ad.getMinValue() != null && intVal.compareTo((Integer) ad.getMinValue()) < 0) {
 							rangeError = true;
-						} else if (ad._maxValue != null && intVal.compareTo((Integer) ad._maxValue) > 0) {
+						} else if (ad.getMaxValue() != null && intVal.compareTo((Integer) ad.getMaxValue()) > 0) {
 							rangeError = true;
 						}
 						break;
 					case AttributeDefinition.LONG :
 						Long longVal = Long.valueOf(s);
-						if (ad._minValue != null && longVal.compareTo((Long) ad._minValue) < 0) {
+						if (ad.getMinValue() != null && longVal.compareTo((Long) ad.getMinValue()) < 0) {
 							rangeError = true;
-						} else if (ad._maxValue != null && longVal.compareTo((Long) ad._maxValue) > 0) {
+						} else if (ad.getMaxValue() != null && longVal.compareTo((Long) ad.getMaxValue()) > 0) {
 							rangeError = true;
 						}
 						break;
 					case AttributeDefinition.DOUBLE :
 						Double doubleVal = Double.valueOf(s);
-						if (ad._minValue != null && doubleVal.compareTo((Double) ad._minValue) < 0) {
+						if (ad.getMinValue() != null && doubleVal.compareTo((Double) ad.getMinValue()) < 0) {
 							rangeError = true;
-						} else if (ad._maxValue != null && doubleVal.compareTo((Double) ad._maxValue) > 0) {
+						} else if (ad.getMaxValue() != null && doubleVal.compareTo((Double) ad.getMaxValue()) > 0) {
 							rangeError = true;
 						}
 						break;
@@ -227,49 +227,49 @@ public class ValueTokenizer {
 						break;
 					case AttributeDefinition.CHARACTER :
 						Character charVal = Character.valueOf(s.charAt(0));
-						if (ad._minValue != null && charVal.compareTo((Character) ad._minValue) < 0) {
+						if (ad.getMinValue() != null && charVal.compareTo((Character) ad.getMinValue()) < 0) {
 							rangeError = true;
-						} else if (ad._maxValue != null && charVal.compareTo((Character) ad._maxValue) > 0) {
+						} else if (ad.getMaxValue() != null && charVal.compareTo((Character) ad.getMaxValue()) > 0) {
 							rangeError = true;
 						}
 						break;
 					case AttributeDefinition.FLOAT :
 						Float floatVal = Float.valueOf(s);
-						if (ad._minValue != null && floatVal.compareTo((Float) ad._minValue) < 0) {
+						if (ad.getMinValue() != null && floatVal.compareTo((Float) ad.getMinValue()) < 0) {
 							rangeError = true;
-						} else if (ad._maxValue != null && floatVal.compareTo((Float) ad._maxValue) > 0) {
+						} else if (ad.getMaxValue() != null && floatVal.compareTo((Float) ad.getMaxValue()) > 0) {
 							rangeError = true;
 						}
 						break;
 					case AttributeDefinition.SHORT :
 						Short shortVal = Short.valueOf(s);
-						if (ad._minValue != null && shortVal.compareTo((Short) ad._minValue) < 0) {
+						if (ad.getMinValue() != null && shortVal.compareTo((Short) ad.getMinValue()) < 0) {
 							rangeError = true;
-						} else if (ad._maxValue != null && shortVal.compareTo((Short) ad._maxValue) > 0) {
+						} else if (ad.getMaxValue() != null && shortVal.compareTo((Short) ad.getMaxValue()) > 0) {
 							rangeError = true;
 						}
 						break;
 					case AttributeDefinition.BYTE :
 						Byte byteVal = Byte.valueOf(s);
-						if (ad._minValue != null && byteVal.compareTo((Byte) ad._minValue) < 0) {
+						if (ad.getMinValue() != null && byteVal.compareTo((Byte) ad.getMinValue()) < 0) {
 							rangeError = true;
-						} else if (ad._maxValue != null && byteVal.compareTo((Byte) ad._maxValue) > 0) {
+						} else if (ad.getMaxValue() != null && byteVal.compareTo((Byte) ad.getMaxValue()) > 0) {
 							rangeError = true;
 						}
 						break;
 					case AttributeDefinition.BIGDECIMAL :
 						BigDecimal bigDecVal = new BigDecimal(s);
-						if (ad._minValue != null && bigDecVal.compareTo((BigDecimal) ad._minValue) < 0) {
+						if (ad.getMinValue() != null && bigDecVal.compareTo((BigDecimal) ad.getMinValue()) < 0) {
 							rangeError = true;
-						} else if (ad._maxValue != null && bigDecVal.compareTo((BigDecimal) ad._maxValue) > 0) {
+						} else if (ad.getMaxValue() != null && bigDecVal.compareTo((BigDecimal) ad.getMaxValue()) > 0) {
 							rangeError = true;
 						}
 						break;
 					case AttributeDefinition.BIGINTEGER :
 						BigInteger bigIntVal = new BigInteger(s);
-						if (ad._minValue != null && bigIntVal.compareTo((BigInteger) ad._minValue) < 0) {
+						if (ad.getMinValue() != null && bigIntVal.compareTo((BigInteger) ad.getMinValue()) < 0) {
 							rangeError = true;
-						} else if (ad._maxValue != null && bigIntVal.compareTo((BigInteger) ad._maxValue) > 0) {
+						} else if (ad.getMaxValue() != null && bigIntVal.compareTo((BigInteger) ad.getMaxValue()) > 0) {
 							rangeError = true;
 						}
 						break;
@@ -286,7 +286,7 @@ public class ValueTokenizer {
 			return NLS.bind(MetaTypeMsg.VALUE_NOT_A_NUMBER, s);
 		} catch (Exception e) {
 			String message = NLS.bind(MetaTypeMsg.EXCEPTION_MESSAGE, e.getClass().getName(), e.getMessage());
-			logger.log(LogService.LOG_DEBUG, message, e);
+			logger.log(LogTracker.LOG_DEBUG, message, e);
 			return message;
 		}
 	}

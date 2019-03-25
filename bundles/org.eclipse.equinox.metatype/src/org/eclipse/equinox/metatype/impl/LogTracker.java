@@ -27,6 +27,19 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 
 public class LogTracker extends ServiceTracker<LogService, LogService> {
+
+	@SuppressWarnings("deprecation")
+	final static int LOG_ERROR = LogService.LOG_ERROR;
+
+	@SuppressWarnings("deprecation")
+	final static int LOG_WARNING = LogService.LOG_WARNING;
+
+	@SuppressWarnings("deprecation")
+	final static int LOG_INFO = LogService.LOG_INFO;
+
+	@SuppressWarnings("deprecation")
+	final static int LOG_DEBUG = LogService.LOG_DEBUG;
+
 	/** LogService interface class name */
 	protected final static String clazz = "org.osgi.service.log.LogService"; //$NON-NLS-1$
 
@@ -63,7 +76,7 @@ public class LogTracker extends ServiceTracker<LogService, LogService> {
 	}
 
 	@SuppressWarnings("deprecation")
-	public synchronized void log(ServiceReference<?> reference, int level, String message, Throwable exception) {
+	public void log(ServiceReference<?> reference, int level, String message, Throwable exception) {
 		ServiceReference<LogService>[] references = getServiceReferences();
 
 		if (references != null) {
@@ -94,7 +107,6 @@ public class LogTracker extends ServiceTracker<LogService, LogService> {
 	 * @param throwable Log exception or null if none.
 	 * @param reference ServiceReference associated with message or null if none.
 	 */
-	@SuppressWarnings("deprecation")
 	protected void noLogService(int level, String message, Throwable throwable, ServiceReference<?> reference) {
 		if (out != null) {
 			synchronized (out) {
@@ -104,22 +116,22 @@ public class LogTracker extends ServiceTracker<LogService, LogService> {
 				out.print(timestamp + " "); //$NON-NLS-1$
 
 				switch (level) {
-					case LogService.LOG_DEBUG : {
+					case LOG_DEBUG : {
 						out.print(LogTrackerMsg.Debug);
 
 						break;
 					}
-					case LogService.LOG_INFO : {
+					case LOG_INFO : {
 						out.print(LogTrackerMsg.Info);
 
 						break;
 					}
-					case LogService.LOG_WARNING : {
+					case LOG_WARNING : {
 						out.print(LogTrackerMsg.Warning);
 
 						break;
 					}
-					case LogService.LOG_ERROR : {
+					case LOG_ERROR : {
 						out.print(LogTrackerMsg.Error);
 
 						break;

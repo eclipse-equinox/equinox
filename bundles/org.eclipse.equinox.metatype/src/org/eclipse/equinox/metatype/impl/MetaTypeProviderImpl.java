@@ -15,12 +15,12 @@ package org.eclipse.equinox.metatype.impl;
 
 import java.net.URL;
 import java.util.*;
+import java.util.Map.Entry;
 import javax.xml.parsers.SAXParser;
 import org.eclipse.equinox.metatype.EquinoxObjectClassDefinition;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
-import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.MetaTypeProvider;
 import org.osgi.service.metatype.MetaTypeService;
 
@@ -38,13 +38,13 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	public static final String RESOURCE_FILE_EXT = ".properties"; //$NON-NLS-1$
 	public static final char DIRECTORY_SEP = '/';
 
-	Bundle _bundle;
+	final Bundle _bundle;
 
-	Hashtable<String, ObjectClassDefinitionImpl> _allPidOCDs = new Hashtable<String, ObjectClassDefinitionImpl>(7);
-	Hashtable<String, ObjectClassDefinitionImpl> _allFPidOCDs = new Hashtable<String, ObjectClassDefinitionImpl>(7);
+	final Map<String, ObjectClassDefinitionImpl> _allPidOCDs;
+	final Map<String, ObjectClassDefinitionImpl> _allFPidOCDs;
 
 	String[] _locales;
-	boolean _isThereMeta = false;
+	final boolean _isThereMeta;
 
 	// Give access to subclasses.
 	protected final LogTracker logger;
@@ -56,13 +56,22 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 
 		this._bundle = bundle;
 		this.logger = logger;
-
+		this._allPidOCDs = new HashMap<>();
+		this._allFPidOCDs = new HashMap<>();
 		// read all bundle's metadata files and build internal data structures
 		_isThereMeta = readMetaFiles(bundle, parser);
 
 		if (!_isThereMeta) {
-			logger.log(LogService.LOG_DEBUG, NLS.bind(MetaTypeMsg.METADATA_NOT_FOUND, bundle.getSymbolicName(), bundle.getBundleId()));
+			logger.log(LogTracker.LOG_DEBUG, NLS.bind(MetaTypeMsg.METADATA_NOT_FOUND, bundle.getSymbolicName(), bundle.getBundleId()));
 		}
+	}
+
+	public MetaTypeProviderImpl(Bundle bundle, LogTracker logger, Map<String, ObjectClassDefinitionImpl> pidOCDs, Map<String, ObjectClassDefinitionImpl> fPidOCDs) {
+		this._bundle = bundle;
+		this.logger = logger;
+		this._isThereMeta = true;
+		this._allPidOCDs = pidOCDs;
+		this._allFPidOCDs = fPidOCDs;
 	}
 
 	/**
@@ -107,7 +116,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 					}
 				}
 			} catch (Exception e) {
-				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.METADATA_FILE_PARSE_ERROR, new Object[] {entry, bundle.getBundleId(), bundle.getSymbolicName()}), e);
+				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.METADATA_FILE_PARSE_ERROR, new Object[] {entry, bundle.getBundleId(), bundle.getSymbolicName()}), e);
 			}
 		}
 		return result;
@@ -167,19 +176,15 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	public synchronized String[] getLocales() {
 		if (_locales != null)
 			return checkForDefault(_locales);
-		Vector<String> localizationFiles = new Vector<String>(7);
+		List<String> localizationFiles = new ArrayList<String>(7);
 		// get all the localization resources for PIDS
-		Enumeration<ObjectClassDefinitionImpl> ocds = _allPidOCDs.elements();
-		while (ocds.hasMoreElements()) {
-			ObjectClassDefinitionImpl ocd = ocds.nextElement();
+		for (ObjectClassDefinitionImpl ocd : _allPidOCDs.values()) {
 			String localization = ocd.getLocalization();
 			if (localization != null && !localizationFiles.contains(localization))
 				localizationFiles.add(localization);
 		}
 		// get all the localization resources for FPIDS
-		ocds = _allFPidOCDs.elements();
-		while (ocds.hasMoreElements()) {
-			ObjectClassDefinitionImpl ocd = ocds.nextElement();
+		for (ObjectClassDefinitionImpl ocd : _allFPidOCDs.values()) {
 			String localization = ocd.getLocalization();
 			if (localization != null && !localizationFiles.contains(localization))
 				localizationFiles.add(localization);
@@ -187,9 +192,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 		if (localizationFiles.size() == 0)
 			localizationFiles.add(getBundleLocalization(_bundle));
 		Vector<String> locales = new Vector<String>(7);
-		Enumeration<String> eLocalizationFiles = localizationFiles.elements();
-		while (eLocalizationFiles.hasMoreElements()) {
-			String localizationFile = eLocalizationFiles.nextElement();
+		for (String localizationFile : localizationFiles) {
 			int iSlash = localizationFile.lastIndexOf(DIRECTORY_SEP);
 			String baseDir;
 			String baseFileName;
@@ -229,5 +232,16 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 		if (locales == null || locales.length == 0 || (locales.length == 1 && Locale.getDefault().toString().equals(locales[0])))
 			return null;
 		return locales;
+	}
+
+	void getStrings(Set<String> strings) {
+		for (Entry<String, ObjectClassDefinitionImpl> entry : _allPidOCDs.entrySet()) {
+			strings.add(entry.getKey());
+			entry.getValue().getStrings(strings);
+		}
+		for (Entry<String, ObjectClassDefinitionImpl> entry : _allFPidOCDs.entrySet()) {
+			strings.add(entry.getKey());
+			entry.getValue().getStrings(strings);
+		}
 	}
 }

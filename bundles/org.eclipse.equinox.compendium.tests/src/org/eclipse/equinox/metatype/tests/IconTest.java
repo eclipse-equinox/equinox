@@ -15,7 +15,8 @@ package org.eclipse.equinox.metatype.tests;
 
 import static org.junit.Assert.assertNull;
 
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.service.metatype.*;
 
@@ -38,6 +39,12 @@ public class IconTest extends AbstractTest {
 
 	@Test
 	public void testIcon() throws Exception {
+		doTestIcon();
+		restartMetatype();
+		doTestIcon();
+	}
+
+	private void doTestIcon() throws Exception {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		assertNotNull(mti);
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb9", null); //$NON-NLS-1$
@@ -45,19 +52,23 @@ public class IconTest extends AbstractTest {
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
 		assertAttributeDefinitions(ads, 1);
 		assertAttributeDefinition(ads[0], 0, null, null, "1", "ad1", null, null, AttributeDefinition.STRING); //$NON-NLS-1$ //$NON-NLS-2$
-		assertIcon(ocd.getIcon(10000), 10000);
-		assertIcon(ocd.getIcon(22500), 22500);
-		assertIcon(ocd.getIcon(40000), 40000);
-		assertIcon(ocd.getIcon(5000), 10000);
-		assertIcon(ocd.getIcon(50000), 40000);
-		assertIcon(ocd.getIcon(16249), 10000);
-		assertIcon(ocd.getIcon(16251), 22500);
-		assertIcon(ocd.getIcon(31249), 22500);
-		assertIcon(ocd.getIcon(31251), 40000);
+		assertIcon(ocd.getIcon(4931), 4931);
+		assertIcon(ocd.getIcon(7933), 7933);
+		assertIcon(ocd.getIcon(10182), 10182);
+		assertIcon(ocd.getIcon(5000), 4931);
+		assertIcon(ocd.getIcon(50000), 10182);
+		assertIcon(ocd.getIcon(6400), 4931);
+		assertIcon(ocd.getIcon(6500), 7933);
 	}
 
 	@Test
 	public void testNullIcon() throws Exception {
+		doTestNullIcon();
+		restartMetatype();
+		doTestNullIcon();
+	}
+
+	private void doTestNullIcon() throws Exception {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		assertNotNull(mti);
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb9.2", null); //$NON-NLS-1$
@@ -72,11 +83,5 @@ public class IconTest extends AbstractTest {
 	public void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb9"); //$NON-NLS-1$
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		bundle.uninstall();
-		super.tearDown();
 	}
 }

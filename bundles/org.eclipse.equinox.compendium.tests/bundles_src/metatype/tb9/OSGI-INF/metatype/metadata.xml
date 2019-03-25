@@ -5,9 +5,9 @@
 		xsi:schemaLocation="http://www.org.osgi/xmlns/metatype/v1.2.0/md metatype.xsd">
 	<OCD id="1" name="ocd1">
 		<AD name="ad1" id="1" type="String"/>
-		<Icon size="10000" resource="icons/tn_ibm_turns_100-100x100.jpg"/>
-		<Icon size="22500" resource="icons/tn_ibm_turns_100-150x150.jpg"/>
-		<Icon size="40000" resource="icons/tn_ibm_turns_100-200x200.jpg"/>
+		<Icon size="4931" resource="icons/tn_ibm_turns_100-100x100.jpg"/>
+		<Icon size="7933" resource="icons/tn_ibm_turns_100-150x150.jpg"/>
+		<Icon size="10182" resource="icons/tn_ibm_turns_100-200x200.jpg"/>
 	</OCD>
 	<OCD id="2" name="ocd2">
 		<AD id="1" name="ad1" type="Byte"/>

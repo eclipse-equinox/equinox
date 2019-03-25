@@ -13,31 +13,36 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.impl;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import org.eclipse.equinox.metatype.EquinoxAttributeDefinition;
+import org.eclipse.equinox.metatype.impl.Persistence.Reader;
+import org.eclipse.equinox.metatype.impl.Persistence.Writer;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.service.log.LogService;
+import org.osgi.service.metatype.AttributeDefinition;
 
 /**
  * Implementation of AttributeDefintion
  */
 public class AttributeDefinitionImpl extends LocalizationElement implements EquinoxAttributeDefinition, Cloneable {
 
-	String _name;
-	String _id;
-	String _description;
-	int _cardinality = 0;
-	int _dataType;
-	Object _minValue = null;
-	Object _maxValue = null;
-	boolean _isRequired = true;
-
-	String[] _defaults = null;
-	Vector<String> _values = new Vector<String>(7);
-	Vector<String> _labels = new Vector<String>(7);
+	private final String _name;
+	private final String _id;
+	private final String _description;
+	private final int _cardinality;
+	private final int _dataType;
+	private final Object _minValue;
+	private final Object _maxValue;
+	private final boolean _isRequired;
 
 	private final LogTracker logger;
 	private final ExtendableHelper helper;
+
+	private volatile String[] _defaults = null;
+	private volatile ArrayList<String> _values = new ArrayList<String>(7);
+	private volatile ArrayList<String> _labels = new ArrayList<String>(7);
 
 	/**
 	 * Constructor of class AttributeDefinitionImpl.
@@ -63,20 +68,20 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	/*
 	 * 
 	 */
-	public synchronized Object clone() {
+	public Object clone() {
 
 		AttributeDefinitionImpl ad = new AttributeDefinitionImpl(_id, _name, _description, _dataType, _cardinality, _minValue, _maxValue, _isRequired, getLocalization(), logger, helper);
 
-		if (_defaults != null) {
-			ad.setDefaultValue(_defaults.clone());
+		String[] curDefaults = _defaults;
+		if (curDefaults != null) {
+			ad.setDefaultValue(curDefaults.clone());
 		}
-		if ((_labels != null) && (_values != null)) {
-			@SuppressWarnings("unchecked")
-			Vector<String> labels = (Vector<String>) _labels.clone();
-			@SuppressWarnings("unchecked")
-			Vector<String> values = (Vector<String>) _values.clone();
-			ad.setOption(labels, values, false);
-		}
+
+		@SuppressWarnings("unchecked")
+		ArrayList<String> labels = (ArrayList<String>) _labels.clone();
+		@SuppressWarnings("unchecked")
+		ArrayList<String> values = (ArrayList<String>) _values.clone();
+		ad.setOption(labels, values, false);
 
 		return ad;
 	}
@@ -90,13 +95,6 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 		return getLocalized(_name);
 	}
 
-	/**
-	 * Method to set the name of AttributeDefinition.
-	 */
-	void setName(String name) {
-		this._name = name;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -104,13 +102,6 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	 */
 	public String getID() {
 		return _id;
-	}
-
-	/**
-	 * Method to set the ID of AttributeDefinition.
-	 */
-	void setID(String id) {
-		this._id = id;
 	}
 
 	/*
@@ -122,13 +113,6 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 		return getLocalized(_description);
 	}
 
-	/**
-	 * Method to set the description of AttributeDefinition.
-	 */
-	void setDescription(String description) {
-		this._description = description;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -136,13 +120,6 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	 */
 	public int getCardinality() {
 		return _cardinality;
-	}
-
-	/**
-	 * Method to set the cardinality of AttributeDefinition.
-	 */
-	void setCardinality(int cardinality) {
-		this._cardinality = cardinality;
 	}
 
 	/*
@@ -155,24 +132,10 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	}
 
 	/**
-	 * Method to set the data type of AttributeDefinition.
-	 */
-	void setType(int type) {
-		this._dataType = type;
-	}
-
-	/**
 	 * Method to get the required flag of AttributeDefinition.
 	 */
 	boolean isRequired() {
 		return _isRequired;
-	}
-
-	/**
-	 * Method to set the required flag of AttributeDefinition.
-	 */
-	void setRequired(boolean isRequired) {
-		this._isRequired = isRequired;
 	}
 
 	/*
@@ -182,15 +145,14 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	 */
 	public String[] getOptionLabels() {
 
-		if ((_labels == null) || (_labels.size() == 0)) {
+		List<String> curLabels = _labels;
+		if (curLabels.isEmpty()) {
 			return null;
 		}
 
-		String[] returnedLabels = new String[_labels.size()];
-		Enumeration<String> labelKeys = _labels.elements();
+		String[] returnedLabels = new String[curLabels.size()];
 		int i = 0;
-		while (labelKeys.hasMoreElements()) {
-			String labelKey = labelKeys.nextElement();
+		for (String labelKey : curLabels) {
 			returnedLabels[i] = getLocalized(labelKey);
 			i++;
 		}
@@ -203,41 +165,47 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	 * @see org.osgi.service.metatype.AttributeDefinition#getOptionValues()
 	 */
 	public String[] getOptionValues() {
+		List<String> curValues = _values;
 
-		if ((_values == null) || (_values.size() == 0)) {
+		if (curValues.isEmpty()) {
 			return null;
 		}
 
-		return _values.toArray(new String[_values.size()]);
+		return curValues.toArray(MetaTypeInformationImpl.emptyStringArray);
 	}
 
 	/**
 	 * Method to set the Option values of AttributeDefinition.
 	 */
-	void setOption(Vector<String> labels, Vector<String> values, boolean needValidation) {
+	void setOption(ArrayList<String> labels, ArrayList<String> values, boolean needValidation) {
 		if ((labels == null) || (values == null)) {
-			logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.NULL_OPTIONS, getID()));
+			logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.NULL_OPTIONS, getID()));
 			return;
 		}
 		if (labels.size() != values.size()) {
-			logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.INCONSISTENT_OPTIONS, getID()));
+			logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.INCONSISTENT_OPTIONS, getID()));
 			return;
 		}
-		_labels = labels;
-		_values = values;
 		if (needValidation) {
-			for (int index = 0; index < _values.size(); index++) {
-				ValueTokenizer vt = new ValueTokenizer(_values.get(index), logger);
-				_values.set(index, vt.getValuesAsString());
+			for (int index = 0; index < values.size(); index++) {
+				ValueTokenizer vt = new ValueTokenizer(values.get(index), logger);
+				values.set(index, vt.getValuesAsString());
 				String reason = vt.validate(this);
 				if ((reason != null) && reason.length() > 0) {
-					logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_OPTIONS, new Object[] {_values.get(index), getID(), reason}));
-					_labels.remove(index);
-					_values.remove(index);
+					logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_OPTIONS, new Object[] {values.get(index), getID(), reason}));
+					labels.remove(index);
+					values.remove(index);
 					index--; // Because this one has been removed.
 				}
 			}
 		}
+		_labels = labels;
+		_values = values;
+	}
+
+	boolean containsInvalidValue(String value) {
+		List<String> curValues = _values;
+		return !curValues.isEmpty() && !curValues.contains(value);
 	}
 
 	/*
@@ -257,7 +225,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 		ValueTokenizer vt = new ValueTokenizer(defaults_str, logger);
 		String reason = vt.validate(this);
 		if ((reason != null) && reason.length() > 0) {
-			logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_DEFAULTS, new Object[] {vt.getValuesAsString(), getID(), reason}));
+			logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_DEFAULTS, new Object[] {vt.getValuesAsString(), getID(), reason}));
 			return;
 		}
 		String[] defaults = vt.getValuesAsArray();
@@ -275,20 +243,6 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	 */
 	private void setDefaultValue(String[] defaults) {
 		_defaults = defaults;
-	}
-
-	/**
-	 * Method to set the validation value - min of AttributeDefinition.
-	 */
-	void setMinValue(Object minValue) {
-		this._minValue = minValue;
-	}
-
-	/**
-	 * Method to set the validation value - max of AttributeDefinition.
-	 */
-	void setMaxValue(Object maxValue) {
-		this._maxValue = maxValue;
 	}
 
 	/*
@@ -324,4 +278,198 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	public String getMin() {
 		return _minValue == null ? null : String.valueOf(_minValue);
 	}
+
+	Object getMaxValue() {
+		return _maxValue;
+	}
+
+	Object getMinValue() {
+		return _minValue;
+	}
+
+	void getStrings(Set<String> strings) {
+		String[] curDefaults = _defaults;
+		if (curDefaults != null) {
+			for (String string : curDefaults) {
+				strings.add(string);
+			}
+		}
+		strings.add(_description);
+		strings.add(_id);
+		strings.add(_name);
+		strings.add(getLocalization());
+		for (String string : _values) {
+			strings.add(string);
+		}
+
+		for (String string : _labels) {
+			strings.add(string);
+		}
+		helper.getStrings(strings);
+		if (getType() == AttributeDefinition.STRING || getType() == AttributeDefinition.PASSWORD) {
+			if (_maxValue != null) {
+				strings.add(getMax());
+			}
+			if (_minValue != null) {
+				strings.add(getMin());
+			}
+		}
+	}
+
+	public static AttributeDefinitionImpl load(Reader reader, LogTracker logger) throws IOException {
+		String id = reader.readString();
+		String description = reader.readString();
+		String name = reader.readString();
+		int type = reader.readInt();
+		int cardinality = reader.readInt();
+		boolean isRequired = reader.readBoolean();
+		String localization = reader.readString();
+
+		String[] defaults = null;
+		if (reader.readBoolean()) {
+			int numDefaults = reader.readInt();
+			defaults = new String[numDefaults];
+			for (int i = 0; i < numDefaults; i++) {
+				defaults[i] = reader.readString();
+			}
+		}
+		int numLabels = reader.readInt();
+		ArrayList<String> labels = new ArrayList<>(numLabels);
+		for (int i = 0; i < numLabels; i++) {
+			labels.add(reader.readString());
+		}
+		int numValues = reader.readInt();
+		ArrayList<String> values = new ArrayList<>();
+		for (int i = 0; i < numValues; i++) {
+			values.add(reader.readString());
+		}
+		ExtendableHelper helper = ExtendableHelper.load(reader);
+		Object min = readMinMax(type, reader);
+		Object max = readMinMax(type, reader);
+
+		AttributeDefinitionImpl result = new AttributeDefinitionImpl(id, name, description, type, cardinality, min, max, isRequired, localization, logger, helper);
+		result.setDefaultValue(defaults);
+		result.setOption(labels, values, false);
+		return result;
+	}
+
+	public void write(Writer writer) throws IOException {
+		writer.writeString(_id);
+		writer.writeString(_description);
+		writer.writeString(_name);
+		writer.writeInt(_dataType);
+		writer.writeInt(_cardinality);
+		writer.writeBoolean(_isRequired);
+		writer.writeString(getLocalization());
+		String[] curDefaults = _defaults;
+		if (curDefaults == null) {
+			writer.writeBoolean(false);
+		} else {
+			writer.writeBoolean(true);
+			writer.writeInt(curDefaults.length);
+			for (String defaultValue : curDefaults) {
+				writer.writeString(defaultValue);
+			}
+		}
+		List<String> curLabels = _labels;
+		writer.writeInt(curLabels.size());
+		for (String label : curLabels) {
+			writer.writeString(label);
+		}
+		List<String> curValues = _values;
+		writer.writeInt(curValues.size());
+		for (String value : curValues) {
+			writer.writeString(value);
+		}
+		helper.write(writer);
+		writeMinMax(_minValue, writer);
+		writeMinMax(_maxValue, writer);
+	}
+
+	@SuppressWarnings("deprecation")
+	private static Object readMinMax(int dataType, Reader reader) throws IOException {
+		boolean isNull = reader.readBoolean();
+		if (isNull) {
+			return null;
+		}
+		switch (dataType) {
+			// PASSWORD should be treated like STRING.
+			case AttributeDefinition.PASSWORD :
+			case AttributeDefinition.STRING :
+				return reader.readString();
+			case AttributeDefinition.LONG :
+				return reader.readLong();
+			case AttributeDefinition.INTEGER :
+				return reader.readInt();
+			case AttributeDefinition.SHORT :
+				return reader.readShort();
+			case AttributeDefinition.CHARACTER :
+				return reader.readCharacter();
+			case AttributeDefinition.BYTE :
+				return reader.readByte();
+			case AttributeDefinition.DOUBLE :
+				return reader.readDouble();
+			case AttributeDefinition.FLOAT :
+				return reader.readFloat();
+			case AttributeDefinition.BIGINTEGER :
+				return new BigInteger(reader.readString());
+			case AttributeDefinition.BIGDECIMAL :
+				return new BigDecimal(reader.readString());
+			case AttributeDefinition.BOOLEAN :
+				return reader.readBoolean();
+			default :
+				return reader.readString();
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	private void writeMinMax(Object v, Writer writer) throws IOException {
+		if (v == null) {
+			writer.writeBoolean(true);
+			return;
+		}
+		writer.writeBoolean(false);
+		switch (_dataType) {
+			// PASSWORD should be treated like STRING.
+			case AttributeDefinition.PASSWORD :
+			case AttributeDefinition.STRING :
+				writer.writeString((String) v);
+				return;
+			case AttributeDefinition.LONG :
+				writer.writeLong((Long) v);
+				return;
+			case AttributeDefinition.INTEGER :
+				writer.writeInt((Integer) v);
+				return;
+			case AttributeDefinition.SHORT :
+				writer.writeShort((Short) v);
+				return;
+			case AttributeDefinition.CHARACTER :
+				writer.writeCharacter((Character) v);
+				return;
+			case AttributeDefinition.BYTE :
+				writer.writeByte((Byte) v);
+				return;
+			case AttributeDefinition.DOUBLE :
+				writer.writeDouble((Double) v);
+				return;
+			case AttributeDefinition.FLOAT :
+				writer.writeFloat((Float) v);
+				return;
+			case AttributeDefinition.BIGINTEGER :
+				writer.writeString(v.toString());
+				return;
+			case AttributeDefinition.BIGDECIMAL :
+				writer.writeString(v.toString());
+				return;
+			case AttributeDefinition.BOOLEAN :
+				writer.writeBoolean((Boolean) v);
+				return;
+			default :
+				// Unknown data type
+				writer.writeString(String.valueOf(v));
+				return;
+		}
+	}
+
 }

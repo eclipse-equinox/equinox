@@ -13,6 +13,10 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.impl;
 
+import java.io.IOException;
+import java.util.Set;
+import org.eclipse.equinox.metatype.impl.Persistence.Reader;
+import org.eclipse.equinox.metatype.impl.Persistence.Writer;
 import org.osgi.framework.Bundle;
 
 /**
@@ -21,13 +25,13 @@ import org.osgi.framework.Bundle;
 class Icon implements Cloneable {
 
 	private final String _fileName;
-	private final Integer _size;
+	private final int _size;
 	private final Bundle _bundle;
 
 	/**
 	 * Constructor of class Icon.
 	 */
-	public Icon(String fileName, Integer size, Bundle bundle) {
+	public Icon(String fileName, int size, Bundle bundle) {
 
 		this._fileName = fileName;
 		this._size = size;
@@ -59,5 +63,20 @@ class Icon implements Cloneable {
 	 */
 	Bundle getIconBundle() {
 		return _bundle;
+	}
+
+	void getStrings(Set<String> strings) {
+		strings.add(_fileName);
+	}
+
+	public static Icon load(Reader reader, Bundle b) throws IOException {
+		int size = reader.readInt();
+		String fileName = reader.readString();
+		return new Icon(fileName, size, b);
+	}
+
+	public void write(Writer writer) throws IOException {
+		writer.writeInt(_size);
+		writer.writeString(_fileName);
 	}
 }

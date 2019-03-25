@@ -31,6 +31,12 @@ public class Bug340899Test extends AbstractTest {
 	 */
 	@Test
 	public void test1() throws Exception {
+		doTest1();
+		restartMetatype();
+		doTest1();
+	}
+
+	private void doTest1() throws Exception {
 		execute("tb5", "org.eclipse.equinox.metatype.tests.tb5"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -41,6 +47,12 @@ public class Bug340899Test extends AbstractTest {
 	 */
 	@Test
 	public void test2() throws Exception {
+		doTest2();
+		restartMetatype();
+		doTest2();
+	}
+
+	private void doTest2() throws Exception {
 		execute("tb6", "org.eclipse.equinox.metatype.tests.tb6"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -51,6 +63,12 @@ public class Bug340899Test extends AbstractTest {
 	 */
 	@Test
 	public void test3() throws Exception {
+		doTest3();
+		restartMetatype();
+		doTest3();
+	}
+
+	private void doTest3() throws Exception {
 		execute("tb7", "org.eclipse.equinox.metatype.tests.tb7"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 

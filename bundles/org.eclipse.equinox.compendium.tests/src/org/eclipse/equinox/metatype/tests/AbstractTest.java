@@ -17,8 +17,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.*;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import org.eclipse.equinox.compendium.tests.Activator;
 import org.eclipse.equinox.metatype.EquinoxMetaTypeService;
 import org.eclipse.osgi.tests.bundles.BundleInstaller;
@@ -72,8 +70,7 @@ public abstract class AbstractTest {
 			} finally {
 				icon.close();
 			}
-			Icon i = new ImageIcon(baos.toByteArray());
-			Assert.assertEquals("Wrong icon size", size, i.getIconHeight() * i.getIconWidth()); //$NON-NLS-1$
+			Assert.assertEquals("Wrong size.", size, baos.size()); //$NON-NLS-1$
 		} finally {
 			baos.close();
 		}
@@ -146,18 +143,35 @@ public abstract class AbstractTest {
 
 	@Before
 	public void setUp() throws Exception {
+		startMetatype();
+		bundleInstaller = new BundleInstaller("bundle_tests/metatype", Activator.getBundleContext()); //$NON-NLS-1$
+	}
+
+	private void startMetatype() throws Exception {
 		Activator.getBundle(Activator.BUNDLE_METATYPE).start();
 		metaTypeReference = Activator.getBundleContext().getServiceReference(EquinoxMetaTypeService.class);
 		Assert.assertNotNull("Metatype service reference not found", metaTypeReference); //$NON-NLS-1$
 		metatype = Activator.getBundleContext().getService(metaTypeReference);
 		Assert.assertNotNull("Metatype service not found", metatype); //$NON-NLS-1$
-		bundleInstaller = new BundleInstaller("bundle_tests/metatype", Activator.getBundleContext()); //$NON-NLS-1$
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		bundleInstaller.shutdown();
+		stopMetatype();
+	}
+
+	private void stopMetatype() throws Exception {
 		Activator.getBundleContext().ungetService(metaTypeReference);
 		Activator.getBundle(Activator.BUNDLE_METATYPE).stop();
+	}
+
+	public void restartMetatype() {
+		try {
+			stopMetatype();
+			startMetatype();
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
 	}
 }

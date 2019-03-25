@@ -109,6 +109,12 @@ public class Bug332161Test extends AbstractTest {
 	 */
 	@Test
 	public void test1() {
+		doTest1();
+		restartMetatype();
+		doTest1();
+	}
+
+	private void doTest1() {
 		AttributeDefinition ad = findAttributeDefinitionById("char1", ads); //$NON-NLS-1$
 		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		String defaultValue = getFirstDefaultValue(ad.getDefaultValue());
@@ -133,6 +139,12 @@ public class Bug332161Test extends AbstractTest {
 	 */
 	@Test
 	public void test2() {
+		doTest2();
+		restartMetatype();
+		doTest2();
+	}
+
+	private void doTest2() {
 		AttributeDefinition ad = findAttributeDefinitionById("string1", ads); //$NON-NLS-1$
 		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		String defaultValue = getFirstDefaultValue(ad.getDefaultValue());
@@ -148,6 +160,12 @@ public class Bug332161Test extends AbstractTest {
 	 */
 	@Test
 	public void test3() {
+		doTest3();
+		restartMetatype();
+		doTest3();
+	}
+
+	private void doTest3() {
 		AttributeDefinition ad = findAttributeDefinitionById("string2", ads); //$NON-NLS-1$
 		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		String[] defaultValue = ad.getDefaultValue();
@@ -186,6 +204,12 @@ public class Bug332161Test extends AbstractTest {
 	 */
 	@Test
 	public void test4() {
+		doTest4();
+		restartMetatype();
+		doTest4();
+	}
+
+	private void doTest4() {
 		AttributeDefinition ad = findAttributeDefinitionById("string3", ads); //$NON-NLS-1$
 		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		assertNull("Default value was not null", ad.getDefaultValue()); //$NON-NLS-1$
@@ -196,6 +220,12 @@ public class Bug332161Test extends AbstractTest {
 	 */
 	@Test
 	public void test5() {
+		doTest5();
+		restartMetatype();
+		doTest5();
+	}
+
+	private void doTest5() {
 		AttributeDefinition ad = findAttributeDefinitionById("char2", ads); //$NON-NLS-1$
 		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		assertNull("Default value was not null", ad.getDefaultValue()); //$NON-NLS-1$
@@ -208,6 +238,12 @@ public class Bug332161Test extends AbstractTest {
 	 */
 	@Test
 	public void test6() {
+		doTest6();
+		restartMetatype();
+		doTest6();
+	}
+
+	private void doTest6() {
 		AttributeDefinition ad = findAttributeDefinitionById("string3", ads); //$NON-NLS-1$
 		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		assertValidationFail(null, ad);
@@ -222,6 +258,12 @@ public class Bug332161Test extends AbstractTest {
 	 */
 	@Test
 	public void test7() {
+		doTest7();
+		restartMetatype();
+		doTest7();
+	}
+
+	private void doTest7() {
 		AttributeDefinition ad = findAttributeDefinitionById("char3", ads); //$NON-NLS-1$
 		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		assertValidationPass("\\\u0009", ad); //$NON-NLS-1$
@@ -242,6 +284,12 @@ public class Bug332161Test extends AbstractTest {
 	 */
 	@Test
 	public void test8() {
+		doTest8();
+		restartMetatype();
+		doTest8();
+	}
+
+	private void doTest8() {
 		AttributeDefinition ad = findAttributeDefinitionById("string4", ads); //$NON-NLS-1$
 		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		String[] defaultValue = ad.getDefaultValue();
@@ -262,6 +310,12 @@ public class Bug332161Test extends AbstractTest {
 	 */
 	@Test
 	public void test9() {
+		doTest9();
+		restartMetatype();
+		doTest9();
+	}
+
+	private void doTest9() {
 		AttributeDefinition ad = findAttributeDefinitionById("integer1", ads); //$NON-NLS-1$
 		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		String[] defaultValue = ad.getDefaultValue();
@@ -276,6 +330,12 @@ public class Bug332161Test extends AbstractTest {
 	 */
 	@Test
 	public void test10() {
+		doTest10();
+		restartMetatype();
+		doTest10();
+	}
+
+	private void doTest10() {
 		AttributeDefinition ad = findAttributeDefinitionById("string5", ads); //$NON-NLS-1$
 		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		String[] defaultValue = ad.getDefaultValue();
@@ -298,6 +358,10 @@ public class Bug332161Test extends AbstractTest {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb4"); //$NON-NLS-1$
 		bundle.start();
+		getMetatypeObjects();
+	}
+
+	private void getMetatypeObjects() {
 		mti = metatype.getMetaTypeInformation(bundle);
 		Assert.assertNotNull("Metatype information not found", mti); //$NON-NLS-1$
 		ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb4", null); //$NON-NLS-1$
@@ -307,10 +371,10 @@ public class Bug332161Test extends AbstractTest {
 		Assert.assertEquals("Wrong number of attribute definitions", 9, ads.length); //$NON-NLS-1$
 	}
 
-	@After
-	public void tearDown() throws Exception {
-		bundle.stop();
-		super.tearDown();
+	@Override
+	public void restartMetatype() {
+		super.restartMetatype();
+		getMetatypeObjects();
 	}
 
 	private void validateChar1Options(String[] optionLabels, String[] optionValues) {

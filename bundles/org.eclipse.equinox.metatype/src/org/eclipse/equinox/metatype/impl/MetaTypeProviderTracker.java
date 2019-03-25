@@ -22,7 +22,6 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.cm.ManagedServiceFactory;
-import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.*;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -158,7 +157,7 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 				e = ase;
 			}
 		}
-		log.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_PID_METATYPE_PROVIDER_IGNORED, new Object[] {_bundle.getSymbolicName(), _bundle.getBundleId(), name, value}), e);
+		log.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_PID_METATYPE_PROVIDER_IGNORED, new Object[] {_bundle.getSymbolicName(), _bundle.getBundleId(), name, value}), e);
 		return new String[0];
 	}
 

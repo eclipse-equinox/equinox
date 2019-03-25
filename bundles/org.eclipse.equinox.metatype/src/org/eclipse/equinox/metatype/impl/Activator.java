@@ -13,13 +13,13 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.impl;
 
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.equinox.metatype.EquinoxMetaTypeService;
 import org.osgi.framework.*;
 import org.osgi.service.cm.ManagedService;
-import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.MetaTypeProvider;
 import org.osgi.service.metatype.MetaTypeService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -64,7 +64,7 @@ public class Activator implements BundleActivator {
 		}
 		// Do this first to make logging available as early as possible.
 		lsTracker.open();
-		lsTracker.log(LogService.LOG_DEBUG, "====== Meta Type Service starting ! ====="); //$NON-NLS-1$
+		lsTracker.log(LogTracker.LOG_DEBUG, "====== Meta Type Service starting ! ====="); //$NON-NLS-1$
 		// Do this next to make MetaTypeProviders available as early as possible.
 		mtpTracker.open();
 		// Do this last because it may result in the MetaTypeService being registered.
@@ -84,7 +84,7 @@ public class Activator implements BundleActivator {
 			mtpTracker = metaTypeProviderTracker;
 			lsTracker = logServiceTracker;
 		}
-		lsTracker.log(LogService.LOG_DEBUG, "====== Meta Type Service stopping ! ====="); //$NON-NLS-1$
+		lsTracker.log(LogTracker.LOG_DEBUG, "====== Meta Type Service stopping ! ====="); //$NON-NLS-1$
 		spfTracker.close();
 		mtpTracker.close();
 		// Do this last to leave logging available as long as possible.
@@ -228,6 +228,11 @@ public class Activator implements BundleActivator {
 				service = metaTypeService = new MetaTypeServiceImpl(saxParserFactory, logService, mtpTracker);
 			}
 			bundleCtx.addBundleListener(service);
+			try {
+				service.load(bundleCtx, logService, mtpTracker);
+			} catch (IOException e) {
+				logService.log(LogTracker.LOG_ERROR, "Error loading cached metatype info.", e); //$NON-NLS-1$
+			}
 			ServiceRegistration<?> registration = bundleCtx.registerService(new String[] {MetaTypeService.class.getName(), EquinoxMetaTypeService.class.getName()}, service, properties);
 			synchronized (this) {
 				metaTypeServiceRegistration = registration;
@@ -252,6 +257,11 @@ public class Activator implements BundleActivator {
 		private void unregisterMetaTypeService(ServiceRegistration<?> registration, MetaTypeServiceImpl service) {
 			registration.unregister();
 			bundleCtx.removeBundleListener(service);
+			try {
+				service.save(bundleCtx);
+			} catch (IOException e) {
+				logService.log(LogTracker.LOG_ERROR, "Error saving metatype cache.", e); //$NON-NLS-1$
+			}
 		}
 	}
 }
