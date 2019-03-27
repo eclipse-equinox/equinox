@@ -108,7 +108,7 @@
       </activation>
       <properties>
         <!-- location of rt.equinox.binaries project -->
-        <rt.equinox.binaries.loc>../../../</rt.equinox.binaries.loc>
+        <rt.equinox.binaries.loc>../../../rt.equinox.binaries</rt.equinox.binaries.loc>
       </properties>
       <build>
         <plugins>
@@ -125,7 +125,7 @@
                       them -->
                     <echo message="Copy eclipse binaries to launcher binaries"/>
                     <copy todir="bin" verbose="true" includeEmptyDirs="false" failonerror="true">
-                      <fileset dir="${rt.equinox.binaries.loc}/rt.equinox.binaries/org.eclipse.equinox.executable/bin/">
+                      <fileset dir="${rt.equinox.binaries.loc}/org.eclipse.equinox.executable/bin/">
                         <include name="cocoa/macosx/x86_64/**/*"/>
                         <include name="gtk/linux/ppc64le/**/*"/>
                         <include name="gtk/linux/x86_64/**/*"/>
