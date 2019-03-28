@@ -145,7 +145,10 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 		BundleContext systemContext = context.getBundle(Constants.SYSTEM_BUNDLE_LOCATION).getBundleContext();
 		if (cache.isFile()) {
 			try (Reader reader = new Reader(new DataInputStream(new BufferedInputStream(new FileInputStream(cache))))) {
-
+				if (!reader.isValidPersistenceVersion()) {
+					logger.log(LogTracker.LOG_INFO, "Metatype cache version is not supported.  Ignoring cache."); //$NON-NLS-1$
+					return;
+				}
 				int numService = reader.readInt();
 				for (int i = 0; i < numService; i++) {
 					long id = reader.readLong();
@@ -171,6 +174,7 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 	void save(BundleContext context) throws IOException {
 		File cache = context.getDataFile(CACHE_FILE);
 		try (Writer writer = new Writer(new DataOutputStream(new BufferedOutputStream(new FileOutputStream(cache))))) {
+			writer.writePersistenceVersion();
 			List<MetaTypeInformation> serviceInfos = new ArrayList<>();
 			List<MetaTypeInformationImpl> xmlInfos = new ArrayList<>();
 			synchronized (_mtps) {

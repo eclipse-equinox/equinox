@@ -18,7 +18,7 @@ import java.util.*;
  *******************************************************************************/
 
 public class Persistence {
-
+	private static final int PERSISTENCE_VERSION = 0;
 	private static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 	private static final byte NULL = 0;
 	private static final byte OBJECT = 1;
@@ -34,6 +34,10 @@ public class Persistence {
 
 		public Reader(DataInputStream in) {
 			this.in = in;
+		}
+
+		public boolean isValidPersistenceVersion() throws IOException {
+			return in.readInt() == PERSISTENCE_VERSION;
 		}
 
 		public void readIndexedStrings() throws IOException {
@@ -115,6 +119,10 @@ public class Persistence {
 
 		public Writer(DataOutputStream out) {
 			this.out = out;
+		}
+
+		public void writePersistenceVersion() throws IOException {
+			out.writeInt(PERSISTENCE_VERSION);
 		}
 
 		public void writeIndexedStrings(Set<String> strings) throws IOException {

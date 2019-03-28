@@ -231,7 +231,7 @@ public class Activator implements BundleActivator {
 			try {
 				service.load(bundleCtx, logService, mtpTracker);
 			} catch (IOException e) {
-				logService.log(LogTracker.LOG_ERROR, "Error loading cached metatype info.", e); //$NON-NLS-1$
+				logService.log(LogTracker.LOG_WARNING, "Error loading cached metatype info.", e); //$NON-NLS-1$
 			}
 			ServiceRegistration<?> registration = bundleCtx.registerService(new String[] {MetaTypeService.class.getName(), EquinoxMetaTypeService.class.getName()}, service, properties);
 			synchronized (this) {
@@ -260,7 +260,7 @@ public class Activator implements BundleActivator {
 			try {
 				service.save(bundleCtx);
 			} catch (IOException e) {
-				logService.log(LogTracker.LOG_ERROR, "Error saving metatype cache.", e); //$NON-NLS-1$
+				logService.log(LogTracker.LOG_WARNING, "Error saving metatype cache.", e); //$NON-NLS-1$
 			}
 		}
 	}
