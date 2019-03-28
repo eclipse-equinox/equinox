@@ -66,10 +66,12 @@ import org.osgi.service.http.runtime.HttpServiceRuntimeConstants;
 import org.osgi.service.http.runtime.dto.ErrorPageDTO;
 import org.osgi.service.http.runtime.dto.FailedErrorPageDTO;
 import org.osgi.service.http.runtime.dto.FailedFilterDTO;
+import org.osgi.service.http.runtime.dto.FailedListenerDTO;
 import org.osgi.service.http.runtime.dto.FailedResourceDTO;
 import org.osgi.service.http.runtime.dto.FailedServletContextDTO;
 import org.osgi.service.http.runtime.dto.FailedServletDTO;
 import org.osgi.service.http.runtime.dto.FilterDTO;
+import org.osgi.service.http.runtime.dto.ListenerDTO;
 import org.osgi.service.http.runtime.dto.RequestInfoDTO;
 import org.osgi.service.http.runtime.dto.ResourceDTO;
 import org.osgi.service.http.runtime.dto.ServletContextDTO;
@@ -339,6 +341,22 @@ public class BaseTest {
 		return getBundleContext().getService(serviceReference);
 	}
 
+	protected ListenerDTO getListenerDTOByServiceId(String contextName, long serviceId) {
+		ServletContextDTO servletContextDTO = getServletContextDTOByName(contextName);
+
+		if (servletContextDTO == null) {
+			return null;
+		}
+
+		for (ListenerDTO listenerDTO : servletContextDTO.listenerDTOs) {
+			if (serviceId == listenerDTO.serviceId) {
+				return listenerDTO;
+			}
+		}
+
+		return null;
+	}
+
 	protected long getServiceId(ServiceRegistration<?> sr) {
 		return (Long) sr.getReference().getProperty(Constants.SERVICE_ID);
 	}
@@ -439,6 +457,20 @@ public class BaseTest {
 
 	protected FailedFilterDTO[] getFailedFilterDTOs() {
 		return getHttpServiceRuntime().getRuntimeDTO().failedFilterDTOs;
+	}
+
+	protected FailedListenerDTO getFailedListenerDTOByServiceId(long serviceId) {
+		for (FailedListenerDTO failedListenerDTO : getFailedListenerDTOs()) {
+			if (serviceId == failedListenerDTO.serviceId) {
+				return failedListenerDTO;
+			}
+		}
+
+		return null;
+	}
+
+	protected FailedListenerDTO[] getFailedListenerDTOs() {
+		return getHttpServiceRuntime().getRuntimeDTO().failedListenerDTOs;
 	}
 
 	protected FailedServletContextDTO getFailedServletContextDTOByName(String name) {

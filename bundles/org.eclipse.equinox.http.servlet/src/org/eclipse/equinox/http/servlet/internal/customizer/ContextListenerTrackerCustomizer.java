@@ -67,13 +67,23 @@ public class ContextListenerTrackerCustomizer
 
 			Object listenerObj = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
 
-			if (!(listenerObj instanceof Boolean) && !(listenerObj instanceof String)) {
+			if (!(listenerObj instanceof Boolean) &&
+				!"true".equalsIgnoreCase(String.valueOf(listenerObj)) && //$NON-NLS-1$
+				!"false".equalsIgnoreCase(String.valueOf(listenerObj)) && //$NON-NLS-1$
+				!"1".equalsIgnoreCase(String.valueOf(listenerObj)) && //$NON-NLS-1$
+				!"0".equalsIgnoreCase(String.valueOf(listenerObj)) && //$NON-NLS-1$
+				!"yes".equalsIgnoreCase(String.valueOf(listenerObj)) && //$NON-NLS-1$
+				!"no".equalsIgnoreCase(String.valueOf(listenerObj)) //$NON-NLS-1$
+				) {
 				throw new HttpWhiteboardFailureException(
 					HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER + "=" + listenerObj + " is not a valid option. Ignoring!", //$NON-NLS-1$ //$NON-NLS-2$
 					DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
 			}
 
-			if (Boolean.FALSE.equals(listenerObj) || !Boolean.valueOf(String.valueOf(listenerObj)).booleanValue()) {
+			if (Boolean.FALSE.equals(listenerObj) ||
+				"false".equalsIgnoreCase(String.valueOf(listenerObj)) ||  //$NON-NLS-1$
+				"0".equalsIgnoreCase(String.valueOf(listenerObj)) ||  //$NON-NLS-1$
+				"no".equalsIgnoreCase(String.valueOf(listenerObj))) { //$NON-NLS-1$
 				// Asks to be ignored.
 				return result;
 			}
