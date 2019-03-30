@@ -106,10 +106,6 @@
           <name>!longnotexistingproperty</name>
         </property>
       </activation>
-      <properties>
-        <!-- location of rt.equinox.binaries project -->
-        <rt.equinox.binaries.loc>../../../rt.equinox.binaries</rt.equinox.binaries.loc>
-      </properties>
       <build>
         <plugins>
           <plugin>

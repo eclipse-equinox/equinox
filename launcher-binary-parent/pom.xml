@@ -47,7 +47,7 @@
               <property name="feature.base" value="."/>
               <target>
                 <copy todir="${project.build.directory}" overwrite="true">
-                  <fileset dir="../../../rt.equinox.binaries/${project.artifactId}/">
+                  <fileset dir="${rt.equinox.binaries.loc}/${project.artifactId}">
                     <include name="*.so"/>
                     <include name="*.dll"/>
                   </fileset>
