@@ -50,9 +50,9 @@ final public class StructuredTextExpertFactory {
 	 */
 	private static final String defaultSeparators = StructuredTextProcessor.getDefaultSeparators();
 
-	static private Map sharedDefaultExperts = new HashMap(); // String type -> expert
+	static private Map<String, IStructuredTextExpert> sharedDefaultExperts = new HashMap<>(); // String type -> expert
 
-	static private Map sharedExperts = new HashMap(); // String type -> map of { environment -> expert }
+	static private Map<String, Map<StructuredTextEnvironment, IStructuredTextExpert>> sharedExperts = new HashMap<>(); // String type -> map of { environment -> expert }
 
 	static private IStructuredTextExpert defaultExpert;
 
@@ -90,7 +90,7 @@ final public class StructuredTextExpertFactory {
 	static public IStructuredTextExpert getExpert(String type) {
 		IStructuredTextExpert expert;
 		synchronized (sharedDefaultExperts) {
-			expert = (IStructuredTextExpert) sharedDefaultExperts.get(type);
+			expert = sharedDefaultExperts.get(type);
 			if (expert == null) {
 				StructuredTextTypeHandler handler = StructuredTextTypeHandlerFactory.getHandler(type);
 				if (handler == null)
@@ -124,18 +124,18 @@ final public class StructuredTextExpertFactory {
 		if (environment == null)
 			environment = StructuredTextEnvironment.DEFAULT;
 		synchronized (sharedExperts) {
-			Map experts = (Map) sharedExperts.get(type);
+			Map<StructuredTextEnvironment, IStructuredTextExpert> experts = sharedExperts.get(type);
 			if (experts == null) {
-				experts = new HashMap(); // environment -> expert
+				experts = new HashMap<StructuredTextEnvironment, IStructuredTextExpert>(); // environment -> expert
 				sharedExperts.put(type, experts);
 			}
-			expert = (IStructuredTextExpert) experts.get(environment);
+			expert = experts.get(environment);
 			if (expert == null) {
 				StructuredTextTypeHandler handler = StructuredTextTypeHandlerFactory.getHandler(type);
 				if (handler == null)
 					throw new IllegalArgumentException("Invalid type argument"); //$NON-NLS-1$
 				expert = new StructuredTextImpl(handler, environment, false);
-				experts.put(type, expert);
+				experts.put(environment, expert);
 			}
 		}
 		return expert;

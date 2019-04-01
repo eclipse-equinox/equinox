@@ -25,7 +25,7 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class StructuredTextActivator implements BundleActivator {
 
-	private ServiceTracker logTracker = null;
+	private ServiceTracker<FrameworkLog, FrameworkLog> logTracker = null;
 	private BundleContext bundleContext;
 	private static StructuredTextActivator instance;
 
@@ -71,7 +71,7 @@ public class StructuredTextActivator implements BundleActivator {
 
 	public Locale getDefaultLocale() {
 		// use OSGi service
-		ServiceReference[] references = null;
+		ServiceReference<?>[] references = null;
 		try {
 			references = bundleContext.getAllServiceReferences(null, LocaleProvider.class.getName());
 		} catch (InvalidSyntaxException e) {
@@ -92,10 +92,10 @@ public class StructuredTextActivator implements BundleActivator {
 
 	private FrameworkLog getFrameworkLog() {
 		if (logTracker == null) {
-			logTracker = new ServiceTracker(bundleContext, FrameworkLog.class.getName(), null);
+			logTracker = new ServiceTracker<>(bundleContext, FrameworkLog.class, null);
 			logTracker.open();
 		}
-		return (FrameworkLog) logTracker.getService();
+		return logTracker.getService();
 	}
 
 	static public void logError(String message, Exception e) {

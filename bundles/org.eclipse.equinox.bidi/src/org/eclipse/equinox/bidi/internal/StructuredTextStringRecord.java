@@ -47,7 +47,8 @@ public class StructuredTextStringRecord {
 	private static boolean wrapAround;
 
 	// the pool
-	private static SoftReference[] recordRefs = new SoftReference[POOLSIZE];
+	@SuppressWarnings("unchecked")
+	private static SoftReference<StructuredTextStringRecord>[] recordRefs = new SoftReference[POOLSIZE];
 
 	// hash code of the recorded strings
 	private static int[] hashArray = new int[POOLSIZE];
@@ -124,10 +125,10 @@ public class StructuredTextStringRecord {
 		}
 		StructuredTextStringRecord record = null;
 		if (recordRefs[last] != null)
-			record = (StructuredTextStringRecord) recordRefs[last].get();
+			record = recordRefs[last].get();
 		if (record == null) {
 			record = new StructuredTextStringRecord();
-			recordRefs[last] = new SoftReference(record);
+			recordRefs[last] = new SoftReference<>(record);
 		}
 		hashArray[last] = string.hashCode();
 		for (int i = 0; i < record.usedSegmentCount; i++)
@@ -208,7 +209,7 @@ public class StructuredTextStringRecord {
 		for (int i = myLast; i >= 0; i--) {
 			if (hash != hashArray[i])
 				continue;
-			record = (StructuredTextStringRecord) recordRefs[i].get();
+			record = recordRefs[i].get();
 			if (record == null)
 				continue;
 			if (string.equals(record.string))
@@ -219,7 +220,7 @@ public class StructuredTextStringRecord {
 		for (int i = MAXINDEX; i > myLast; i--) {
 			if (hash != hashArray[i])
 				continue;
-			record = (StructuredTextStringRecord) recordRefs[i].get();
+			record = recordRefs[i].get();
 			if (record == null)
 				continue;
 			if (string.equals(record.string))
@@ -304,10 +305,10 @@ public class StructuredTextStringRecord {
 	public static synchronized void clear() {
 		for (int i = 0; i <= MAXINDEX; i++) {
 			hashArray[i] = 0;
-			SoftReference softRef = recordRefs[i];
+			SoftReference<StructuredTextStringRecord> softRef = recordRefs[i];
 			if (softRef == null)
 				continue;
-			StructuredTextStringRecord record = (StructuredTextStringRecord) softRef.get();
+			StructuredTextStringRecord record = softRef.get();
 			if (record == null)
 				continue;
 			record.boundaries = null;
