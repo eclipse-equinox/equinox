@@ -14,7 +14,8 @@
 
 package org.eclipse.equinox.internal.transforms.xslt;
 
-import java.util.Properties;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
@@ -24,18 +25,18 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class Activator implements BundleActivator {
 
-	private ServiceRegistration registration;
-	private ServiceTracker logTracker;
+	private ServiceRegistration<Object> registration;
+	private ServiceTracker<FrameworkLog, FrameworkLog> logTracker;
 
 	public void start(BundleContext context) throws Exception {
-		logTracker = new ServiceTracker(context, FrameworkLog.class.getName(), null);
+		logTracker = new ServiceTracker<>(context, FrameworkLog.class, null);
 		logTracker.open();
 
-		Properties properties = new Properties();
+		Dictionary<String, String> properties = new Hashtable<>();
 		properties.put("equinox.transformerType", "xslt"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		Object transformer = new XSLTStreamTransformer(logTracker);
-		registration = context.registerService(Object.class.getName(), transformer, properties);
+		registration = context.registerService(Object.class, transformer, properties);
 
 	}
 

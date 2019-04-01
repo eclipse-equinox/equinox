@@ -83,21 +83,21 @@ public class XSLTStreamTransformer {
 	/**
 	 * Tracks the logging service.
 	 */
-	private ServiceTracker logTracker;
+	private ServiceTracker<FrameworkLog, FrameworkLog> logTracker;
 
 	/**
 	 * A map containing compiled XSLT transformations.  
 	 * These transforms are held by soft references so that we don't bloat memory for this purpose.  
 	 * After startup these transforms are of little use.
 	 */
-	private static final Map templateMap = new HashMap();
+	private static final Map<URL, SoftReference<Templates>> templateMap = new HashMap<>();
 
 	/**
 	 * Create a new instance of this transformer.
 	 * 
 	 * @param logTracker the log service 
 	 */
-	public XSLTStreamTransformer(ServiceTracker logTracker) {
+	public XSLTStreamTransformer(ServiceTracker<FrameworkLog, FrameworkLog> logTracker) {
 		this.logTracker = logTracker;
 	}
 
@@ -134,9 +134,9 @@ public class XSLTStreamTransformer {
 	private synchronized Templates getTemplate(URL transformerURL) {
 		Templates templates = null;
 
-		SoftReference templatesRef = (SoftReference) templateMap.get(transformerURL);
+		SoftReference<Templates> templatesRef = templateMap.get(transformerURL);
 		if (templatesRef != null) {
-			templates = (Templates) templatesRef.get();
+			templates = templatesRef.get();
 		}
 
 		if (templates != null)
@@ -158,7 +158,7 @@ public class XSLTStreamTransformer {
 				SAXSource xsltSource = new SAXSource(reader, inputSource);
 
 				try {
-					templatesRef = new SoftReference(templates = tFactory.newTemplates(xsltSource));
+					templatesRef = new SoftReference<>(templates = tFactory.newTemplates(xsltSource));
 					templateMap.put(transformerURL, templatesRef);
 				} catch (Exception e) {
 					// can't create the template. May be an IO
@@ -184,7 +184,7 @@ public class XSLTStreamTransformer {
 	}
 
 	void log(int severity, String msg, Throwable t) {
-		FrameworkLog log = (FrameworkLog) logTracker.getService();
+		FrameworkLog log = logTracker.getService();
 		if (log == null) {
 			if (msg != null)
 				System.err.println(msg);
