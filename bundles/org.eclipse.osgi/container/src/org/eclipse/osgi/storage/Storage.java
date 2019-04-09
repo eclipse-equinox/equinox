@@ -474,7 +474,7 @@ public class Storage {
 			}
 		}
 		mruList.shutdown();
-		adaptor.shutdownResolverExecutor();
+		adaptor.shutdownExecutors();
 	}
 
 	private boolean needUpdate(ModuleRevision currentRevision, ModuleRevisionBuilder newBuilder) {

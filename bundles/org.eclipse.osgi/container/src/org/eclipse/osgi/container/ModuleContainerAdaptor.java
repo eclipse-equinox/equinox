@@ -22,12 +22,20 @@ import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.framework.startlevel.FrameworkStartLevel;
 
 /**
  * Adapts the behavior of a container.
  * @since 3.10
  */
 public abstract class ModuleContainerAdaptor {
+	private static Executor defaultExecutor = new Executor() {
+		@Override
+		public void execute(Runnable command) {
+			command.run();
+		}
+	};
+
 	/**
 	 * Event types that may be {@link #publishContainerEvent(ContainerEvent, Module, Throwable, FrameworkListener...) published}
 	 * for a container.
@@ -291,12 +299,19 @@ public abstract class ModuleContainerAdaptor {
 	 * @since 3.11
 	 */
 	public Executor getResolverExecutor() {
-		return new Executor() {
-			@Override
-			public void execute(Runnable command) {
-				command.run();
-			}
-		};
+		return defaultExecutor;
+	}
+
+	/**
+	 * Returns the executor used to by the 
+	 * {@link ModuleContainer#getFrameworkStartLevel() FrameworkStartLevel} implementation to
+	 * start bundles that have the same start level.  This allows bundles to be
+	 * started in parallel.
+	 * @return the executor used by the {@link FrameworkStartLevel} implementation.
+	 * @since 3.14
+	 */
+	public Executor getStartLevelExecutor() {
+		return defaultExecutor;
 	}
 
 	/**

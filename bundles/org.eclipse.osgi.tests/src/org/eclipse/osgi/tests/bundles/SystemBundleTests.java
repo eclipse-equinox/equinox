@@ -37,9 +37,11 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Properties;
@@ -3500,6 +3502,140 @@ public class SystemBundleTests extends AbstractBundleTests {
 			assertEquals("Size on expected order is wrong.", expectedStopOrder.size(), stoppedBundles.size());
 			for (int i = 0; i < expectedStopOrder.size(); i++) {
 				assertEquals("Wrong bundle at: " + i, expectedStopOrder.get(i), stoppedBundles.get(i));
+			}
+		} catch (BundleException e) {
+			fail("Failed init", e);
+		} finally {
+			try {
+				if (equinox != null) {
+					equinox.stop();
+					equinox.waitForStop(1000);
+				}
+			} catch (BundleException e) {
+				fail("Failed to stop framework.", e);
+			} catch (InterruptedException e) {
+				fail("Failed to stop framework.", e);
+			}
+		}
+	}
+
+	public void testStartLevelSingleThread() throws IOException, InterruptedException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map configuration = new HashMap();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = null;
+		final int numBundles = 20;
+		final File[] testBundleFiles = createBundles(new File(config, "testBundles"), numBundles);
+		try {
+			equinox = new Equinox(configuration);
+			equinox.start();
+			for (int i = 0; i < numBundles; i++) {
+				Bundle b = equinox.getBundleContext().installBundle("reference:file:///" + testBundleFiles[i].getAbsolutePath());
+				b.adapt(BundleStartLevel.class).setStartLevel(5);
+				b.start();
+			}
+
+			final Set<Thread> startingThreads = Collections.synchronizedSet(new HashSet<Thread>());
+			equinox.getBundleContext().addBundleListener(new SynchronousBundleListener() {
+				@Override
+				public void bundleChanged(BundleEvent event) {
+					if (event.getType() == BundleEvent.STARTING) {
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							// nothing
+						}
+						startingThreads.add(Thread.currentThread());
+					}
+				}
+			});
+
+			final CountDownLatch waitForStartLevel = new CountDownLatch(1);
+			equinox.adapt(FrameworkStartLevel.class).setStartLevel(5, new FrameworkListener() {
+				@Override
+				public void frameworkEvent(FrameworkEvent event) {
+					waitForStartLevel.countDown();
+				}
+			});
+			waitForStartLevel.await(10, TimeUnit.SECONDS);
+
+			assertEquals("Did not finish start level setting.", 0, waitForStartLevel.getCount());
+			assertEquals("Wrong number of start threads.", 1, startingThreads.size());
+
+		} catch (BundleException e) {
+			fail("Failed init", e);
+		} finally {
+			try {
+				if (equinox != null) {
+					equinox.stop();
+					equinox.waitForStop(1000);
+				}
+			} catch (BundleException e) {
+				fail("Failed to stop framework.", e);
+			} catch (InterruptedException e) {
+				fail("Failed to stop framework.", e);
+			}
+		}
+	}
+
+	public void testStartLevelMultiThread() throws IOException, InterruptedException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, String> configuration = new HashMap();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(EquinoxConfiguration.PROP_EQUINOX_START_LEVEL_THREAD_COUNT, "5");
+		Equinox equinox = null;
+		final int numBundles = 40;
+		final File[] testBundleFiles = createBundles(new File(config, "testBundles"), numBundles);
+		try {
+			equinox = new Equinox(configuration);
+			equinox.start();
+			for (int i = 0; i < numBundles; i++) {
+				Bundle b = equinox.getBundleContext().installBundle("reference:file:///" + testBundleFiles[i].getAbsolutePath());
+				if (i < 20) {
+					b.adapt(BundleStartLevel.class).setStartLevel(5);
+				} else {
+					b.adapt(BundleStartLevel.class).setStartLevel(10);
+				}
+				b.start();
+			}
+
+			final Set<Thread> startingThreads = Collections.synchronizedSet(new HashSet<Thread>());
+			final List<Bundle> startingBundles = Collections.synchronizedList(new ArrayList<Bundle>());
+			equinox.getBundleContext().addBundleListener(new SynchronousBundleListener() {
+				@Override
+				public void bundleChanged(BundleEvent event) {
+					if (event.getType() == BundleEvent.STARTING) {
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							// nothing
+						}
+						startingBundles.add(event.getBundle());
+						startingThreads.add(Thread.currentThread());
+					}
+				}
+			});
+
+			final CountDownLatch waitForStartLevel = new CountDownLatch(1);
+			equinox.adapt(FrameworkStartLevel.class).setStartLevel(5, new FrameworkListener() {
+				@Override
+				public void frameworkEvent(FrameworkEvent event) {
+					waitForStartLevel.countDown();
+				}
+			});
+			waitForStartLevel.await(10, TimeUnit.SECONDS);
+
+			assertEquals("Did not finish start level setting.", 0, waitForStartLevel.getCount());
+			assertEquals("Wrong number of start threads.", 6, startingThreads.size());
+
+			ListIterator<Bundle> itr = startingBundles.listIterator();
+			while (itr.hasNext()) {
+				Bundle b2 = itr.next();
+				if (itr.hasPrevious()) {
+					Bundle b1 = itr.previous();
+					itr.next();
+					assertTrue("Wrong order to starting bundle.", b1.adapt(BundleStartLevel.class).getStartLevel() <= b2.adapt(BundleStartLevel.class).getStartLevel());
+				}
 			}
 		} catch (BundleException e) {
 			fail("Failed init", e);

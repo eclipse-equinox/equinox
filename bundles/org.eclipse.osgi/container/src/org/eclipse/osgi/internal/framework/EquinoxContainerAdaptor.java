@@ -64,7 +64,8 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 			platformClassLoader = (ClassLoader) getPlatformClassLoader.invoke(null);
 		} catch (Throwable t) {
 			// try everything possible to not fail <clinit>
-			platformClassLoader = new ClassLoader(Object.class.getClassLoader()) { /* boot class loader */};
+			platformClassLoader = new ClassLoader(Object.class.getClassLoader()) {
+				/* boot class loader */};
 		}
 		BOOT_CLASSLOADER = platformClassLoader;
 	}
@@ -76,8 +77,10 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	private final ClassLoader moduleClassLoaderParent;
 	private final AtomicLong lastSecurityAdminFlush;
 
-	final AtomicLazyInitializer<Executor> executor = new AtomicLazyInitializer<>();
-	final Callable<Executor> lazyExecutorCreator;
+	final AtomicLazyInitializer<Executor> resolverExecutor;
+	final Callable<Executor> lazyResolverExecutorCreator;
+	final AtomicLazyInitializer<Executor> startLevelExecutor;
+	final Callable<Executor> lazyStartLevelExecutorCreator;
 
 	public EquinoxContainerAdaptor(EquinoxContainer container, Storage storage, Map<Long, Generation> initial) {
 		this.container = container;
@@ -86,19 +89,53 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		this.initial = initial;
 		this.moduleClassLoaderParent = getModuleClassLoaderParent(container.getConfiguration());
 		this.lastSecurityAdminFlush = new AtomicLong();
-		this.lazyExecutorCreator = createLazyExecutorCreator(container.getConfiguration());
+
+		EquinoxConfiguration config = container.getConfiguration();
+		@SuppressWarnings("deprecation")
+		String resolverThreadCntProp = config.getConfiguration(EquinoxConfiguration.PROP_EQUINOX_RESOLVER_THREAD_COUNT, //
+				config.getConfiguration(EquinoxConfiguration.PROP_RESOLVER_THREAD_COUNT));
+
+		int resolverThreadCnt;
+		try {
+			// note that resolver thread count defaults to -1 (compute based on processor number)
+			resolverThreadCnt = resolverThreadCntProp == null ? -1 : Integer.parseInt(resolverThreadCntProp);
+		} catch (NumberFormatException e) {
+			resolverThreadCnt = -1;
+		}
+		String startLevelThreadCntProp = config.getConfiguration(EquinoxConfiguration.PROP_EQUINOX_START_LEVEL_THREAD_COUNT);
+		int startLevelThreadCnt;
+		try {
+			// Note that start-level thread count defaults to 1 (synchronous start)
+			startLevelThreadCnt = startLevelThreadCntProp == null ? 1 : Integer.parseInt(startLevelThreadCntProp);
+		} catch (NumberFormatException e) {
+			startLevelThreadCnt = 1;
+		}
+
+		if (resolverThreadCnt == startLevelThreadCnt) {
+			// use a single executor
+			this.resolverExecutor = new AtomicLazyInitializer<>();
+			this.lazyResolverExecutorCreator = createLazyExecutorCreator(container.getConfiguration(), //
+					"Equinox executor thread - " + EquinoxContainerAdaptor.this.toString(), //$NON-NLS-1$
+					resolverThreadCnt);
+			this.startLevelExecutor = resolverExecutor;
+			this.lazyStartLevelExecutorCreator = lazyResolverExecutorCreator;
+		} else {
+			// use two different executors
+			this.resolverExecutor = new AtomicLazyInitializer<>();
+			this.lazyResolverExecutorCreator = createLazyExecutorCreator(container.getConfiguration(), //
+					"Equinox resolver thread - " + EquinoxContainerAdaptor.this.toString(), //$NON-NLS-1$
+					resolverThreadCnt);
+			this.startLevelExecutor = new AtomicLazyInitializer<>();
+			this.lazyStartLevelExecutorCreator = createLazyExecutorCreator(container.getConfiguration(), //
+					"Equinox start level thread - " + EquinoxContainerAdaptor.this.toString(), //$NON-NLS-1$
+					startLevelThreadCnt);
+		}
+
 	}
 
-	private Callable<Executor> createLazyExecutorCreator(EquinoxConfiguration config) {
-		String threadCntProp = config.getConfiguration(EquinoxConfiguration.PROP_RESOLVER_THREAD_COUNT);
-		int threadCntTmp;
-		try {
-			threadCntTmp = threadCntProp == null ? -1 : Integer.parseInt(threadCntProp);
-		} catch (NumberFormatException e) {
-			threadCntTmp = -1;
-		}
+	private Callable<Executor> createLazyExecutorCreator(EquinoxConfiguration config, final String threadName, int threadCnt) {
 		// use the number of processors - 1 because we use the current thread when rejected
-		final int maxThreads = threadCntTmp <= 0 ? Math.max(Runtime.getRuntime().availableProcessors() - 1, 1) : threadCntTmp;
+		final int maxThreads = threadCnt <= 0 ? Math.max(Runtime.getRuntime().availableProcessors() - 1, 1) : threadCnt;
 		return new Callable<Executor>() {
 			@Override
 			public Executor call() throws Exception {
@@ -120,7 +157,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 				ThreadFactory threadFactory = new ThreadFactory() {
 					@Override
 					public Thread newThread(Runnable r) {
-						Thread t = new Thread(r, "Resolver thread - " + EquinoxContainerAdaptor.this.toString()); //$NON-NLS-1$
+						Thread t = new Thread(r, threadName);
 						t.setDaemon(true);
 						return t;
 					}
@@ -362,7 +399,12 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 
 	@Override
 	public Executor getResolverExecutor() {
-		return executor.getInitialized(lazyExecutorCreator);
+		return resolverExecutor.getInitialized(lazyResolverExecutorCreator);
+	}
+
+	@Override
+	public Executor getStartLevelExecutor() {
+		return startLevelExecutor.getInitialized(lazyStartLevelExecutorCreator);
 	}
 
 	@Override
@@ -370,8 +412,12 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		return container.getScheduledExecutor();
 	}
 
-	public void shutdownResolverExecutor() {
-		Executor current = executor.getAndClear();
+	public void shutdownExecutors() {
+		Executor current = resolverExecutor.getAndClear();
+		if (current instanceof ExecutorService) {
+			((ExecutorService) current).shutdown();
+		}
+		current = startLevelExecutor.getAndClear();
 		if (current instanceof ExecutorService) {
 			((ExecutorService) current).shutdown();
 		}
