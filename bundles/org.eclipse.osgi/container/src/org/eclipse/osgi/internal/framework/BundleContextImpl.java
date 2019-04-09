@@ -751,7 +751,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			}
 			activator = loadBundleActivator();
 			if (debug.DEBUG_BUNDLE_TIME) {
-				Debug.println((System.currentTimeMillis() - start) + "ms" + " to load the activator of " + bundle); //$NON-NLS-1$  //$NON-NLS-2$
+				Debug.println((System.currentTimeMillis() - start) + "ms to load the activator of " + bundle); //$NON-NLS-1$
 			}
 		} catch (Exception e) {
 			if (e instanceof RuntimeException) {
@@ -768,7 +768,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 				throw be;
 			} finally {
 				if (debug.DEBUG_BUNDLE_TIME) {
-					Debug.println((System.currentTimeMillis() - start) + "ms" + " to load and start the activator of " + bundle); //$NON-NLS-1$  //$NON-NLS-2$
+					Debug.println((System.currentTimeMillis() - start) + "ms to load and start the activator of " + bundle); //$NON-NLS-1$
 				}
 			}
 		}
