@@ -388,7 +388,12 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * @throws BundleException if an errors occurs while starting
 	 */
 	public void start(StartOptions... options) throws BundleException {
-		revisions.getContainer().checkAdminPermission(getBundle(), AdminPermission.EXECUTE);
+		ModuleContainer container = getContainer();
+		long startTime = 0;
+		if (container.DEBUG_BUNDLE_START_TIME) {
+			startTime = System.nanoTime();
+		}
+		container.checkAdminPermission(getBundle(), AdminPermission.EXECUTE);
 		if (options == null) {
 			options = new StartOptions[0];
 		}
@@ -415,7 +420,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			}
 			checkFragment();
 			persistStartOptions(options);
-			if (getStartLevel() > getRevisions().getContainer().getStartLevel()) {
+			if (getStartLevel() > container.getStartLevel()) {
 				if (StartOptions.TRANSIENT.isContained(options)) {
 					// it is an error to attempt to transient start a bundle without its start level met
 					throw new BundleException(Msg.Module_Transient_StartError, BundleException.START_TRANSIENT_ERROR);
@@ -432,7 +437,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				unlockStateChange(ModuleEvent.STARTED);
 				lockedStarted = false;
 				try {
-					report = getRevisions().getContainer().resolve(Collections.singletonList(this), true);
+					report = container.resolve(Collections.singletonList(this), true);
 				} finally {
 					lockStateChange(ModuleEvent.STARTED);
 					lockedStarted = true;
@@ -473,6 +478,10 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			if (!EnumSet.of(ModuleEvent.STARTED, ModuleEvent.LAZY_ACTIVATION, ModuleEvent.STOPPED).contains(event))
 				throw new IllegalStateException("Wrong event type: " + event); //$NON-NLS-1$
 			publishEvent(event);
+			// only print bundleTime information if we actually fired an event for this bundle
+			if (container.DEBUG_BUNDLE_START_TIME) {
+				Debug.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) + "ms for total start time of " + this); //$NON-NLS-1$
+			}
 		}
 
 		if (startError != null) {

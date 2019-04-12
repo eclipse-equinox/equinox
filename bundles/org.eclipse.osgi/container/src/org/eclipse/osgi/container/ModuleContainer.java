@@ -132,6 +132,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	private final boolean autoStartOnResolve;
 
 	boolean DEBUG_MONITOR_LAZY = false;
+	boolean DEBUG_BUNDLE_START_TIME = false;
 
 	/**
 	 * Constructs a new container with the specified adaptor, module database.
@@ -1554,6 +1555,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 		frameworkStartLevel.setDebugOptions();
 		if (options != null) {
 			this.DEBUG_MONITOR_LAZY = options.getBooleanOption(Debug.OPTION_MONITOR_LAZY, false);
+			this.DEBUG_BUNDLE_START_TIME = options.getBooleanOption(Debug.OPTION_DEBUG_BUNDLE_START_TIME, false);
 		}
 	}
 

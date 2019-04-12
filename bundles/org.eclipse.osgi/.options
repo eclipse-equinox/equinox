@@ -20,8 +20,12 @@ org.eclipse.osgi/debug/security=false
 org.eclipse.osgi/debug/startlevel=false
 # Prints out package admin service debug information
 org.eclipse.osgi/debug/packageadmin=false
-# Prints out timing information for bundle activation
+# Prints out timing information for loading and calling BundleActivator.start
 org.eclipse.osgi/debug/bundleTime=false
+# Prints out total time for starting a bundle which includes:
+# - loading and calling BundleActivator.start
+# - other time spent resolving bundles and firing bundle events to listeners
+org.eclipse.osgi/debug/bundleStartTime=false
 # Debug the loading of message bundles
 org.eclipse.osgi/debug/messageBundles=false
 # Debug the object pool additions

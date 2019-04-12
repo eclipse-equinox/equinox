@@ -38,6 +38,11 @@ public class Debug implements DebugOptionsListener {
 	 * Bundle time Debug option key.
 	 */
 	public static final String OPTION_DEBUG_BUNDLE_TIME = ECLIPSE_OSGI + "/debug/bundleTime"; //$NON-NLS-1$
+
+	/**
+	 * Bundle start time Debug option key.
+	 */
+	public static final String OPTION_DEBUG_BUNDLE_START_TIME = ECLIPSE_OSGI + "/debug/bundleStartTime"; //$NON-NLS-1$
 	/**
 	 * Loader Debug option key.
 	 */
