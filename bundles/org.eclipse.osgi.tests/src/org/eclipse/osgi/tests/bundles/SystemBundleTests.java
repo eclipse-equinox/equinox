@@ -3578,11 +3578,26 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
-	public void testStartLevelMultiThread() throws IOException, InterruptedException {
+	public void testStartLevelMultiThreadExplicit4() throws IOException, InterruptedException {
+		doTestStartLevelMultiThread(4);
+	}
+
+	public void testStartLevelMultiThreadExplicit1() throws IOException, InterruptedException {
+		doTestStartLevelMultiThread(1);
+	}
+
+	public void testStartLevelMultiThreadAvailableProcessors() throws IOException, InterruptedException {
+		doTestStartLevelMultiThread(0);
+	}
+
+	private void doTestStartLevelMultiThread(int expectedCount) throws IOException, InterruptedException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, String> configuration = new HashMap();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
-		configuration.put(EquinoxConfiguration.PROP_EQUINOX_START_LEVEL_THREAD_COUNT, "5");
+		configuration.put(EquinoxConfiguration.PROP_EQUINOX_START_LEVEL_THREAD_COUNT, String.valueOf(expectedCount));
+		if (expectedCount <= 0) {
+			expectedCount = Runtime.getRuntime().availableProcessors();
+		}
 		Equinox equinox = null;
 		final int numBundles = 40;
 		final File[] testBundleFiles = createBundles(new File(config, "testBundles"), numBundles);
@@ -3617,16 +3632,17 @@ public class SystemBundleTests extends AbstractBundleTests {
 			});
 
 			final CountDownLatch waitForStartLevel = new CountDownLatch(1);
-			equinox.adapt(FrameworkStartLevel.class).setStartLevel(5, new FrameworkListener() {
+			equinox.adapt(FrameworkStartLevel.class).setStartLevel(10, new FrameworkListener() {
 				@Override
 				public void frameworkEvent(FrameworkEvent event) {
 					waitForStartLevel.countDown();
 				}
 			});
-			waitForStartLevel.await(10, TimeUnit.SECONDS);
+			waitForStartLevel.await(20, TimeUnit.SECONDS);
 
 			assertEquals("Did not finish start level setting.", 0, waitForStartLevel.getCount());
-			assertEquals("Wrong number of start threads.", 5, startingThreads.size());
+			assertEquals("Wrong number of start threads.", expectedCount, startingThreads.size());
+			assertEquals("Wrong number of started bundles.", numBundles, startingBundles.size());
 
 			ListIterator<Bundle> itr = startingBundles.listIterator();
 			while (itr.hasNext()) {
