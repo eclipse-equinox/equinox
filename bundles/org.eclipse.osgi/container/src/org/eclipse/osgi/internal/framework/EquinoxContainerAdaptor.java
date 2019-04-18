@@ -134,12 +134,13 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	}
 
 	private Callable<Executor> createLazyExecutorCreator(EquinoxConfiguration config, final String threadName, int threadCnt) {
-		// use the number of processors - 1 because we use the current thread when rejected
-		final int maxThreads = threadCnt <= 0 ? Math.max(Runtime.getRuntime().availableProcessors() - 1, 1) : threadCnt;
+		// use the number of processors when configured value is <=0
+		final int maxThreads = threadCnt <= 0 ? Runtime.getRuntime().availableProcessors() : threadCnt;
 		return new Callable<Executor>() {
 			@Override
 			public Executor call() throws Exception {
 				if (maxThreads == 1) {
+					// just do synchronous execution with current thread
 					return new Executor() {
 						@Override
 						public void execute(Runnable command) {
@@ -147,9 +148,11 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 						}
 					};
 				}
+				// Decrement maxThreads by 1 for maxPoolSize because we use the current thread when max pool size is reached
+				int maxPoolSize = maxThreads - 1;
 				// Always want to go to zero threads when idle
 				int coreThreads = 0;
-				// idle timeout; make it short to get rid of threads quickly after resolve
+				// idle timeout; make it short to get rid of threads quickly after use
 				int idleTimeout = 10;
 				// use sync queue to force thread creation
 				BlockingQueue<Runnable> queue = new SynchronousQueue<>();
@@ -162,14 +165,14 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 						return t;
 					}
 				};
-				// use a rejection policy that simply runs the task in the current thread once the max threads is reached
+				// use a rejection policy that simply runs the task in the current thread once the max pool size is reached
 				RejectedExecutionHandler rejectHandler = new RejectedExecutionHandler() {
 					@Override
 					public void rejectedExecution(Runnable r, ThreadPoolExecutor exe) {
 						r.run();
 					}
 				};
-				return new ThreadPoolExecutor(coreThreads, maxThreads, idleTimeout, TimeUnit.SECONDS, queue, threadFactory, rejectHandler);
+				return new ThreadPoolExecutor(coreThreads, maxPoolSize, idleTimeout, TimeUnit.SECONDS, queue, threadFactory, rejectHandler);
 			}
 		};
 	}

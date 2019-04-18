@@ -3626,7 +3626,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			waitForStartLevel.await(10, TimeUnit.SECONDS);
 
 			assertEquals("Did not finish start level setting.", 0, waitForStartLevel.getCount());
-			assertEquals("Wrong number of start threads.", 6, startingThreads.size());
+			assertEquals("Wrong number of start threads.", 5, startingThreads.size());
 
 			ListIterator<Bundle> itr = startingBundles.listIterator();
 			while (itr.hasNext()) {
