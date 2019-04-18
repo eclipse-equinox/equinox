@@ -111,7 +111,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 			startLevelThreadCnt = 1;
 		}
 
-		if (resolverThreadCnt == startLevelThreadCnt) {
+		if ((resolverThreadCnt < 1 && startLevelThreadCnt < 1) || resolverThreadCnt == startLevelThreadCnt) {
 			// use a single executor
 			this.resolverExecutor = new AtomicLazyInitializer<>();
 			this.lazyResolverExecutorCreator = createLazyExecutorCreator(container.getConfiguration(), //
