@@ -14,10 +14,22 @@
 package org.eclipse.osgi.container;
 
 import java.security.AllPermission;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.eclipse.osgi.internal.framework.FilterImpl;
-import org.osgi.framework.*;
+import org.osgi.framework.AdminPermission;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.Version;
 import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Namespace;
 
 /**
@@ -219,26 +231,38 @@ public final class ModuleRevisionBuilder {
 	 * @return the new new {@link Module#getCurrentRevision() current} revision.
 	 */
 	ModuleRevision addRevision(Module module, Object revisionInfo) {
-		Collection<?> systemNames = Collections.emptyList();
-		Module systemModule = module.getContainer().getModule(0);
-		if (systemModule != null) {
-			ModuleRevision systemRevision = systemModule.getCurrentRevision();
-			List<ModuleCapability> hostCapabilities = systemRevision.getModuleCapabilities(HostNamespace.HOST_NAMESPACE);
-			for (ModuleCapability hostCapability : hostCapabilities) {
-				Object hostNames = hostCapability.getAttributes().get(HostNamespace.HOST_NAMESPACE);
-				if (hostNames instanceof Collection) {
-					systemNames = (Collection<?>) hostNames;
-				} else if (hostNames instanceof String) {
-					systemNames = Arrays.asList(hostNames);
-				}
-			}
-		}
 		ModuleRevisions revisions = module.getRevisions();
 		ModuleRevision revision = new ModuleRevision(symbolicName, version, types, capabilityInfos, requirementInfos, revisions, revisionInfo);
+
 		revisions.addRevision(revision);
 		module.getContainer().getAdaptor().associateRevision(revision, revisionInfo);
 
 		try {
+			checkFrameworkExtensionPermission(module, revision);
+			module.getContainer().checkAdminPermission(module.getBundle(), AdminPermission.LIFECYCLE);
+		} catch (SecurityException e) {
+			revisions.removeRevision(revision);
+			throw e;
+		}
+		return revision;
+	}
+
+	private void checkFrameworkExtensionPermission(Module module, ModuleRevision revision) {
+		if ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+			Collection<?> systemNames = Collections.emptyList();
+			Module systemModule = module.getContainer().getModule(0);
+			if (systemModule != null) {
+				ModuleRevision systemRevision = systemModule.getCurrentRevision();
+				List<ModuleCapability> hostCapabilities = systemRevision.getModuleCapabilities(HostNamespace.HOST_NAMESPACE);
+				for (ModuleCapability hostCapability : hostCapabilities) {
+					Object hostNames = hostCapability.getAttributes().get(HostNamespace.HOST_NAMESPACE);
+					if (hostNames instanceof Collection) {
+						systemNames = (Collection<?>) hostNames;
+					} else if (hostNames instanceof String) {
+						systemNames = Arrays.asList(hostNames);
+					}
+				}
+			}
 			List<ModuleRequirement> hostRequirements = revision.getModuleRequirements(HostNamespace.HOST_NAMESPACE);
 			for (ModuleRequirement hostRequirement : hostRequirements) {
 				FilterImpl f = null;
@@ -265,12 +289,7 @@ public final class ModuleRevisionBuilder {
 					}
 				}
 			}
-			module.getContainer().checkAdminPermission(module.getBundle(), AdminPermission.LIFECYCLE);
-		} catch (SecurityException e) {
-			revisions.removeRevision(revision);
-			throw e;
 		}
-		return revision;
 	}
 
 	private static void addGenericInfo(List<GenericInfo> infos, String namespace, Map<String, String> directives, Map<String, Object> attributes) {
