@@ -985,8 +985,17 @@ public class ModuleDatabase {
 			return (objectTable.size() - 1);
 		}
 
-		private static void addToReadTable(Object object, int index, Map<Integer, Object> objectTable) {
-			objectTable.put(Integer.valueOf(index), object);
+		private static void addToReadTable(Object object, int index, List<Object> objectTable) {
+			if (index == objectTable.size()) {
+				objectTable.add(object);
+			} else if (index < objectTable.size()) {
+				objectTable.set(index, object);
+			} else {
+				while (objectTable.size() < index) {
+					objectTable.add(null);
+				}
+				objectTable.add(object);
+			}
 		}
 
 		public static void store(ModuleDatabase moduleDatabase, DataOutputStream out, boolean persistWirings) throws IOException {
@@ -1139,7 +1148,8 @@ public class ModuleDatabase {
 			moduleDatabase.nextId.set(in.readLong());
 			moduleDatabase.setInitialModuleStartLevel(in.readInt());
 
-			Map<Integer, Object> objectTable = new HashMap<>();
+			List<Object> objectTable = new ArrayList<>();
+
 			if (version >= 2) {
 				int numStrings = in.readInt();
 				for (int i = 0; i < numStrings; i++) {
@@ -1235,7 +1245,7 @@ public class ModuleDatabase {
 			out.writeLong(module.getLastModified());
 		}
 
-		private static void readModule(ModuleDatabase moduleDatabase, DataInputStream in, Map<Integer, Object> objectTable, int version) throws IOException {
+		private static void readModule(ModuleDatabase moduleDatabase, DataInputStream in, List<Object> objectTable, int version) throws IOException {
 			ModuleRevisionBuilder builder = new ModuleRevisionBuilder();
 			int moduleIndex = in.readInt();
 			String location = readString(in, objectTable);
@@ -1308,7 +1318,7 @@ public class ModuleDatabase {
 			out.writeInt(requirer);
 		}
 
-		private static void readWire(DataInputStream in, Map<Integer, Object> objectTable) throws IOException {
+		private static void readWire(DataInputStream in, List<Object> objectTable) throws IOException {
 			int wireIndex = in.readInt();
 
 			ModuleCapability capability = (ModuleCapability) objectTable.get(in.readInt());
@@ -1373,7 +1383,7 @@ public class ModuleDatabase {
 			}
 		}
 
-		private static ModuleWiring readWiring(DataInputStream in, Map<Integer, Object> objectTable) throws IOException {
+		private static ModuleWiring readWiring(DataInputStream in, List<Object> objectTable) throws IOException {
 			ModuleRevision revision = (ModuleRevision) objectTable.get(in.readInt());
 			if (revision == null)
 				throw new NullPointerException("Could not find revision for wiring."); //$NON-NLS-1$
@@ -1423,7 +1433,7 @@ public class ModuleDatabase {
 		}
 
 		@SuppressWarnings("unchecked")
-		private static void readGenericInfo(boolean isCapability, DataInputStream in, ModuleRevisionBuilder builder, Map<Integer, Object> objectTable, int version) throws IOException {
+		private static void readGenericInfo(boolean isCapability, DataInputStream in, ModuleRevisionBuilder builder, List<Object> objectTable, int version) throws IOException {
 			String namespace = readString(in, objectTable);
 			Map<String, Object> attributes = version >= 2 ? (Map<String, Object>) objectTable.get(in.readInt()) : readMap(in, objectTable);
 			Map<String, ?> directives = version >= 2 ? (Map<String, ?>) objectTable.get(in.readInt()) : readMap(in, objectTable);
@@ -1473,12 +1483,12 @@ public class ModuleDatabase {
 			}
 		}
 
-		private static void readIndexedMap(DataInputStream in, Map<Integer, Object> objectTable) throws IOException {
+		private static void readIndexedMap(DataInputStream in, List<Object> objectTable) throws IOException {
 			Map<String, Object> result = readMap(in, objectTable);
 			addToReadTable(result, in.readInt(), objectTable);
 		}
 
-		private static Map<String, Object> readMap(DataInputStream in, Map<Integer, Object> objectTable) throws IOException {
+		private static Map<String, Object> readMap(DataInputStream in, List<Object> objectTable) throws IOException {
 			int count = in.readInt();
 			Map<String, Object> result;
 			if (count == 0) {
@@ -1501,7 +1511,7 @@ public class ModuleDatabase {
 			return result;
 		}
 
-		private static Object readMapValue(DataInputStream in, int type, Map<Integer, Object> objectTable) throws IOException {
+		private static Object readMapValue(DataInputStream in, int type, List<Object> objectTable) throws IOException {
 			switch (type) {
 				case VALUE_STRING :
 					return readString(in, objectTable);
@@ -1569,7 +1579,7 @@ public class ModuleDatabase {
 			return -2;
 		}
 
-		private static List<?> readList(DataInputStream in, Map<Integer, Object> objectTable) throws IOException {
+		private static List<?> readList(DataInputStream in, List<Object> objectTable) throws IOException {
 			int size = in.readInt();
 			if (size == 0)
 				return Collections.emptyList();
@@ -1584,7 +1594,7 @@ public class ModuleDatabase {
 			return Collections.unmodifiableList(list);
 		}
 
-		private static Object readListValue(byte listType, DataInputStream in, Map<Integer, Object> objectTable) throws IOException {
+		private static Object readListValue(byte listType, DataInputStream in, List<Object> objectTable) throws IOException {
 			switch (listType) {
 				case VALUE_STRING :
 					return readString(in, objectTable);
@@ -1623,17 +1633,17 @@ public class ModuleDatabase {
 			writeString(string, out, objectTable);
 		}
 
-		private static Version readIndexedVersion(DataInputStream in, Map<Integer, Object> objectTable) throws IOException {
+		private static Version readIndexedVersion(DataInputStream in, List<Object> objectTable) throws IOException {
 			Version version = readVersion0(in, objectTable, false);
 			addToReadTable(version, in.readInt(), objectTable);
 			return version;
 		}
 
-		private static Version readVersion(DataInputStream in, Map<Integer, Object> objectTable) throws IOException {
+		private static Version readVersion(DataInputStream in, List<Object> objectTable) throws IOException {
 			return readVersion0(in, objectTable, true);
 		}
 
-		private static Version readVersion0(DataInputStream in, Map<Integer, Object> objectTable, boolean intern) throws IOException {
+		private static Version readVersion0(DataInputStream in, List<Object> objectTable, boolean intern) throws IOException {
 			byte type = in.readByte();
 			if (type == INDEX) {
 				int index = in.readInt();
@@ -1673,17 +1683,17 @@ public class ModuleDatabase {
 			}
 		}
 
-		static private String readIndexedString(DataInputStream in, Map<Integer, Object> objectTable) throws IOException {
+		static private String readIndexedString(DataInputStream in, List<Object> objectTable) throws IOException {
 			String string = readString0(in, objectTable, false);
 			addToReadTable(string, in.readInt(), objectTable);
 			return string;
 		}
 
-		static private String readString(DataInputStream in, Map<Integer, Object> objectTable) throws IOException {
+		static private String readString(DataInputStream in, List<Object> objectTable) throws IOException {
 			return readString0(in, objectTable, true);
 		}
 
-		static private String readString0(DataInputStream in, Map<Integer, Object> objectTable, boolean intern) throws IOException {
+		static private String readString0(DataInputStream in, List<Object> objectTable, boolean intern) throws IOException {
 			byte type = in.readByte();
 			if (type == INDEX) {
 				int index = in.readInt();
