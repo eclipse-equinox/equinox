@@ -22,3 +22,4 @@ Build I20180920-0430 failed
 Bug 541072 - Update platform to Jetty 9.4.14
 Bug 534964 - [http servlet] invalidation of container sessions is too aggressive 
 Bug 544635 - Update platform to Jetty 9.4.15
+Bug 546665 - Update platform to Jetty 9.4.17 to pick up security fixes
