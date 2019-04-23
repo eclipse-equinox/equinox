@@ -50,6 +50,7 @@ WindowsServer2012R2 "Windows 2012 R2" "Windows Server 2012 R2" Win2012R2 Win32 #
 WindowsServer2015 "Windows 2015" "Windows Server 2015" Win2015 Win32 # Microsoft
 WindowsServer2015R2 "Windows 2015 R2" "Windows Server 2015 R2" Win2015R2 Win32 # Microsoft
 WindowsServer2016 "Windows 2016" "Windows Server 2016" Win2016 Win32 # Microsoft
+WindowsServer2019 "Windows 2019" "Windows Server 2019" Win2019 Win32 # Microsoft
 Windows7 "Windows 7" Win7 Win32 # Microsoft
 Windows8 "Windows 8" "Windows 8.1" "Windows 8.2" "Windows 8.3" Win8 Win32 # Microsoft
 Windows10 "Windows 10" Win10 Win32 # Microsoft
