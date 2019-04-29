@@ -114,7 +114,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		if ((resolverThreadCnt < 1 && startLevelThreadCnt < 1) || resolverThreadCnt == startLevelThreadCnt) {
 			// use a single executor
 			this.resolverExecutor = new AtomicLazyInitializer<>();
-			this.lazyResolverExecutorCreator = createLazyExecutorCreator(container.getConfiguration(), //
+			this.lazyResolverExecutorCreator = createLazyExecutorCreator( //
 					"Equinox executor thread - " + EquinoxContainerAdaptor.this.toString(), //$NON-NLS-1$
 					resolverThreadCnt);
 			this.startLevelExecutor = resolverExecutor;
@@ -122,18 +122,18 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		} else {
 			// use two different executors
 			this.resolverExecutor = new AtomicLazyInitializer<>();
-			this.lazyResolverExecutorCreator = createLazyExecutorCreator(container.getConfiguration(), //
+			this.lazyResolverExecutorCreator = createLazyExecutorCreator( //
 					"Equinox resolver thread - " + EquinoxContainerAdaptor.this.toString(), //$NON-NLS-1$
 					resolverThreadCnt);
 			this.startLevelExecutor = new AtomicLazyInitializer<>();
-			this.lazyStartLevelExecutorCreator = createLazyExecutorCreator(container.getConfiguration(), //
+			this.lazyStartLevelExecutorCreator = createLazyExecutorCreator(//
 					"Equinox start level thread - " + EquinoxContainerAdaptor.this.toString(), //$NON-NLS-1$
 					startLevelThreadCnt);
 		}
 
 	}
 
-	private Callable<Executor> createLazyExecutorCreator(EquinoxConfiguration config, final String threadName, int threadCnt) {
+	private Callable<Executor> createLazyExecutorCreator(final String threadName, int threadCnt) {
 		// use the number of processors when configured value is <=0
 		final int maxThreads = threadCnt <= 0 ? Runtime.getRuntime().availableProcessors() : threadCnt;
 		return new Callable<Executor>() {
