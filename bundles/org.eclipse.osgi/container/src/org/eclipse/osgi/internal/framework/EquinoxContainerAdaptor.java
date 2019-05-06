@@ -22,6 +22,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.SynchronousQueue;
@@ -111,29 +112,31 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 			startLevelThreadCnt = 1;
 		}
 
-		if ((resolverThreadCnt < 1 && startLevelThreadCnt < 1) || resolverThreadCnt == startLevelThreadCnt) {
-			// use a single executor
-			this.resolverExecutor = new AtomicLazyInitializer<>();
-			this.lazyResolverExecutorCreator = createLazyExecutorCreator( //
-					"Equinox executor thread - " + EquinoxContainerAdaptor.this.toString(), //$NON-NLS-1$
-					resolverThreadCnt);
-			this.startLevelExecutor = resolverExecutor;
-			this.lazyStartLevelExecutorCreator = lazyResolverExecutorCreator;
-		} else {
-			// use two different executors
-			this.resolverExecutor = new AtomicLazyInitializer<>();
-			this.lazyResolverExecutorCreator = createLazyExecutorCreator( //
-					"Equinox resolver thread - " + EquinoxContainerAdaptor.this.toString(), //$NON-NLS-1$
-					resolverThreadCnt);
-			this.startLevelExecutor = new AtomicLazyInitializer<>();
-			this.lazyStartLevelExecutorCreator = createLazyExecutorCreator(//
-					"Equinox start level thread - " + EquinoxContainerAdaptor.this.toString(), //$NON-NLS-1$
-					startLevelThreadCnt);
-		}
+		// Use two different executors for resolver and start-level because of the different queue requirements
+
+		// For the resolver we must use a SynchronousQueue because multiple threads
+		// can kick off a resolution operation and block one of the executor threads
+		// per resolution operation.
+		// If the number of concurrent resolution operations reaches the number of
+		// executor threads then each executor thread may end up blocked causing the
+		// executor to no longer accept work.  A SynchronousQueue prevents that from
+		// happening.
+		this.resolverExecutor = new AtomicLazyInitializer<>();
+		this.lazyResolverExecutorCreator = createLazyExecutorCreator( //
+				"Equinox resolver thread - " + EquinoxContainerAdaptor.this.toString(), //$NON-NLS-1$
+				resolverThreadCnt, new SynchronousQueue<Runnable>());
+
+		// For the start-level we can safely use a growing queue because the thread feeding the
+		// start-level executor with work is a single thread and it can safely block waiting
+		// for the work of the executor threads to finish.
+		this.startLevelExecutor = new AtomicLazyInitializer<>();
+		this.lazyStartLevelExecutorCreator = createLazyExecutorCreator(//
+				"Equinox start level thread - " + EquinoxContainerAdaptor.this.toString(), //$NON-NLS-1$
+				startLevelThreadCnt, new LinkedBlockingQueue<Runnable>(1000));
 
 	}
 
-	private Callable<Executor> createLazyExecutorCreator(final String threadName, int threadCnt) {
+	private Callable<Executor> createLazyExecutorCreator(final String threadName, int threadCnt, final BlockingQueue<Runnable> queue) {
 		// use the number of processors when configured value is <=0
 		final int maxThreads = threadCnt <= 0 ? Runtime.getRuntime().availableProcessors() : threadCnt;
 		return new Callable<Executor>() {
@@ -148,14 +151,10 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 						}
 					};
 				}
-				// Decrement maxThreads by 1 for maxPoolSize because we use the current thread when max pool size is reached
-				int maxPoolSize = maxThreads - 1;
-				// Always want to go to zero threads when idle
-				int coreThreads = 0;
+				// Always want to create core threads until max size
+				int coreThreads = maxThreads;
 				// idle timeout; make it short to get rid of threads quickly after use
 				int idleTimeout = 10;
-				// use sync queue to force thread creation
-				BlockingQueue<Runnable> queue = new SynchronousQueue<>();
 				// try to name the threads with useful name
 				ThreadFactory threadFactory = new ThreadFactory() {
 					@Override
@@ -166,13 +165,11 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 					}
 				};
 				// use a rejection policy that simply runs the task in the current thread once the max pool size is reached
-				RejectedExecutionHandler rejectHandler = new RejectedExecutionHandler() {
-					@Override
-					public void rejectedExecution(Runnable r, ThreadPoolExecutor exe) {
-						r.run();
-					}
-				};
-				return new ThreadPoolExecutor(coreThreads, maxPoolSize, idleTimeout, TimeUnit.SECONDS, queue, threadFactory, rejectHandler);
+				RejectedExecutionHandler rejectHandler = new ThreadPoolExecutor.CallerRunsPolicy();
+
+				ThreadPoolExecutor executor = new ThreadPoolExecutor(coreThreads, maxThreads, idleTimeout, TimeUnit.SECONDS, queue, threadFactory, rejectHandler);
+				executor.allowCoreThreadTimeOut(true);
+				return executor;
 			}
 		};
 	}
