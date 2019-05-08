@@ -635,10 +635,9 @@ public class Main {
 				// JavaSE-9's extension path in Java 9-ea+108. The identifier "1.9" could be changed to "9", but "1.9" works just as well.
 				type = PARENT_CLASSLOADER_EXT;
 			}
-		} catch (SecurityException e) {
+		} catch (SecurityException | NumberFormatException e) {
 			// If the security manager won't allow us to get the system property, continue for
 			// now and let things fail later on their own if necessary.
-		} catch (NumberFormatException e) {
 			// If the version string was in a format that we don't understand, continue and
 			// let things fail later on their own if necessary.
 		}
@@ -690,11 +689,9 @@ public class Main {
 				System.setProperty(PROP_EXITDATA, "<title>Incompatible JVM</title>Version " + availableVersion + " of the JVM is not suitable for this product. Version: " + requiredVersion + " or greater is required."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			return compatible;
-		} catch (SecurityException e) {
+		} catch (SecurityException | NumberFormatException e) {
 			// If the security manager won't allow us to get the system property, continue for
 			// now and let things fail later on their own if necessary.
-			return true;
-		} catch (NumberFormatException e) {
 			// If the version string was in a format that we don't understand, continue and
 			// let things fail later on their own if necessary.
 			return true;

@@ -66,10 +66,7 @@ public class EventAdminAdapter implements ServiceTrackerCustomizer<Object, Objec
 		if (eventAdmin != null && logEventHandlers > 0 && logListener == null) {
 			try {
 				logListener = new EventAdminLogListener(context.getService(eventAdmin));
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (NoSuchMethodException e) {
+			} catch (ClassNotFoundException | NoSuchMethodException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

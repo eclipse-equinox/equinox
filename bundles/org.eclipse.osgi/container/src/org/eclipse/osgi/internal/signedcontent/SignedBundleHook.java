@@ -173,9 +173,7 @@ public class SignedBundleHook implements ActivatorHookFactory, BundleFileWrapper
 					return new BundleFileWrapper(signedBaseFile);
 				}
 			}
-		} catch (IOException e) {
-			log("Bad bundle file: " + bundleFile.getBaseFile(), FrameworkLogEntry.WARNING, e); //$NON-NLS-1$
-		} catch (GeneralSecurityException e) {
+		} catch (IOException | GeneralSecurityException e) {
 			log("Bad bundle file: " + bundleFile.getBaseFile(), FrameworkLogEntry.WARNING, e); //$NON-NLS-1$
 		}
 		return null;

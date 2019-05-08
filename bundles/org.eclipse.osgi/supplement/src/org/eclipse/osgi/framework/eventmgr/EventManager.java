@@ -346,12 +346,7 @@ public class EventManager {
 					// will not automatically clear this variable for each loop iteration.
 					item = null;
 				}
-			} catch (RuntimeException e) {
-				if (EventManager.DEBUG) {
-					e.printStackTrace();
-				}
-				throw e;
-			} catch (Error e) {
+			} catch (RuntimeException | Error e) {
 				if (EventManager.DEBUG) {
 					e.printStackTrace();
 				}

@@ -145,11 +145,9 @@ public class LocationHelper {
 		}
 		try {
 			return URLDecoder.decode(urlString, "UTF-8"); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException | RuntimeException e) {
 			// Tried but failed
 			// TODO should we throw runtime exception here?
-			return urlString;
-		} catch (RuntimeException e) {
 			// May have illegal characters for decoding
 			return urlString;
 		}

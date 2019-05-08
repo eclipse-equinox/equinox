@@ -236,14 +236,11 @@ public class WebStartMain extends Main {
 		try {
 			nameField.setAccessible(true);
 			return (String) nameField.get(jarFile);
-		} catch (SecurityException e) {
+		} catch (SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			// Don't have permissions, ignore
-		} catch (IllegalArgumentException e) {
-			// Shouldn't happen
-		} catch (IllegalAccessException e) {
+			// or
 			// Shouldn't happen
 		}
-
 		return null;
 	}
 

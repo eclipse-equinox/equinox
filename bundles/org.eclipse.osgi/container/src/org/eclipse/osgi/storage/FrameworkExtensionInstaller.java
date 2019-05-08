@@ -65,13 +65,12 @@ public class FrameworkExtensionInstaller {
 			Method result = clazz.getDeclaredMethod(name, args);
 			result.setAccessible(true);
 			return result;
-		} catch (NoSuchMethodException e) {
-			// do nothing look in super class below
 		} catch (SecurityException e) {
 			// if we do not have the permissions then we will not find the method
-		} catch (RuntimeException e) {
+		} catch (NoSuchMethodException | RuntimeException e) {
+			// do nothing look in super class below
 			// have to avoid blowing up <clinit>
-		}
+		}  
 		return findMethod(clazz.getSuperclass(), name, args);
 	}
 
@@ -129,11 +128,9 @@ public class FrameworkExtensionInstaller {
 					continue;
 				try {
 					callAddURLMethod(StorageUtil.encodeFileURL(files[i]));
-				} catch (InvocationTargetException e) {
+				} catch (InvocationTargetException | MalformedURLException e) {
 					throw new BundleException("Error adding extension content.", e); //$NON-NLS-1$
-				} catch (MalformedURLException e) {
-					throw new BundleException("Error adding extension content.", e); //$NON-NLS-1$
-				}
+				} 
 			}
 		}
 

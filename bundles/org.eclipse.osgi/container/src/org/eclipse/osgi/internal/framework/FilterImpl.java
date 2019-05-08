@@ -1167,9 +1167,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 				setAccessible(method);
 				try {
 					return method.invoke(null, value2.trim());
-				} catch (IllegalAccessException e) {
-					return null;
-				} catch (InvocationTargetException e) {
+				} catch (IllegalAccessException | InvocationTargetException e) {
 					return null;
 				}
 			}
@@ -1185,11 +1183,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 			setAccessible(constructor);
 			try {
 				return constructor.newInstance(value2.trim());
-			} catch (IllegalAccessException e) {
-				return null;
-			} catch (InvocationTargetException e) {
-				return null;
-			} catch (InstantiationException e) {
+			} catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
 				return null;
 			}
 		} while (false);

@@ -155,13 +155,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 			if (resolve)
 				resolveClass(clazz);
 			return (clazz);
-		} catch (Error e) {
-			if (getDebug().DEBUG_LOADER) {
-				Debug.println("ModuleClassLoader[" + getBundleLoader() + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				Debug.printStackTrace(e);
-			}
-			throw e;
-		} catch (ClassNotFoundException e) {
+		} catch (Error | ClassNotFoundException e) {
 			// If the class is not found do not try to look for it locally.
 			// The delegate would have already done that for us.
 			if (getDebug().DEBUG_LOADER) {

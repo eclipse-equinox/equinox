@@ -82,12 +82,9 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	static boolean safeIsLoggable(LogFilter filter, Bundle bundle, String name, int level) {
 		try {
 			return filter.isLoggable(bundle, name, level);
-		} catch (RuntimeException e) {
+		} catch (RuntimeException | LinkageError e) {
 			// "listener.logged" calls user code and might throw an unchecked exception
 			// we catch the error here to gather information on where the problem occurred.
-			getErrorStream().println("LogFilter.isLoggable threw a non-fatal unchecked exception as follows:"); //$NON-NLS-1$
-			e.printStackTrace(getErrorStream());
-		} catch (LinkageError e) {
 			// Catch linkage errors as these are generally recoverable but let other Errors propagate (see bug 222001)
 			getErrorStream().println("LogFilter.isLoggable threw a non-fatal unchecked exception as follows:"); //$NON-NLS-1$
 			e.printStackTrace(getErrorStream());
@@ -109,16 +106,13 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	static void safeLogged(LogListener listener, LogEntry logEntry) {
 		try {
 			listener.logged(logEntry);
-		} catch (RuntimeException e) {
+		} catch (RuntimeException | LinkageError e) {
 			// "listener.logged" calls user code and might throw an unchecked exception
 			// we catch the error here to gather information on where the problem occurred.
-			getErrorStream().println("LogListener.logged threw a non-fatal unchecked exception as follows:"); //$NON-NLS-1$
-			e.printStackTrace(getErrorStream());
-		} catch (LinkageError e) {
 			// Catch linkage errors as these are generally recoverable but let other Errors propagate (see bug 222001)
 			getErrorStream().println("LogListener.logged threw a non-fatal unchecked exception as follows:"); //$NON-NLS-1$
 			e.printStackTrace(getErrorStream());
-		}
+		} 	
 	}
 
 	public ExtendedLogReaderServiceFactory(int maxHistory, LogLevel defaultLevel) {

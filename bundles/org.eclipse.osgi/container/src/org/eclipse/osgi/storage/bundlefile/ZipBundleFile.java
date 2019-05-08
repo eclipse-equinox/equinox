@@ -235,11 +235,7 @@ public class ZipBundleFile extends BundleFile {
 
 					return nested;
 				}
-			} catch (IOException e) {
-				if (debug.DEBUG_BUNDLE_FILE)
-					Debug.printStackTrace(e);
-				generation.getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Unable to extract content: " + generation.getRevision() + ": " + entry, e); //$NON-NLS-1$ //$NON-NLS-2$
-			} catch (StorageException e) {
+			} catch (IOException | StorageException e) {
 				if (debug.DEBUG_BUNDLE_FILE)
 					Debug.printStackTrace(e);
 				generation.getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Unable to extract content: " + generation.getRevision() + ": " + entry, e); //$NON-NLS-1$ //$NON-NLS-2$

@@ -1758,10 +1758,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 						// of launching or shutting down the framework
 						adaptor.publishContainerEvent(ContainerEvent.START_LEVEL, module, null, listeners);
 					}
-				} catch (Error e) {
-					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e, listeners);
-					throw e;
-				} catch (RuntimeException e) {
+				} catch (Error | RuntimeException e) {
 					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e, listeners);
 					throw e;
 				}

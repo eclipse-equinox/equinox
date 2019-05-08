@@ -73,10 +73,7 @@ public class EventAdminLogListener implements SynchronousLogListener {
 				throw (Error) t;
 			// unexpected
 			throw new RuntimeException(e);
-		} catch (IllegalAccessException e) {
-			// unexpected
-			throw new RuntimeException(e);
-		} catch (InstantiationException e) {
+		} catch (IllegalAccessException | InstantiationException e) {
 			// unexpected
 			throw new RuntimeException(e);
 		}

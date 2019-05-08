@@ -1006,10 +1006,7 @@ public class EclipseStarter {
 				// include basic bundles in case they were not resolved before
 				if ((osgiBundle.getState() & Bundle.INSTALLED) != 0)
 					toRefresh.add(osgiBundle);
-			} catch (BundleException e) {
-				FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
-				log.log(entry);
-			} catch (IOException e) {
+			} catch (BundleException | IOException e) {
 				FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
 				log.log(entry);
 			}
