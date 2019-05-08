@@ -62,6 +62,7 @@ public class SingleOperationListenableFuture<ResultType> extends
 		}
 	}
 
+	@Override
 	public void runWithProgress(final IProgressRunnable<?> runnable) {
 		Assert.isNotNull(runnable);
 		if (!isCanceled()) {

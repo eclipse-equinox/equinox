@@ -57,10 +57,12 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 
 	private final RegionLifecycleListener regionLifecycleListener = new RegionLifecycleListener() {
 
+		@Override
 		public void regionAdded(Region region) {
 			addRegion(region);
 		}
 
+		@Override
 		public void regionRemoving(Region region) {
 			removeRegion(region);
 		}
@@ -148,6 +150,7 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public ManageableRegion[] getRegions() {
 		List<ManageableRegion> regions = new ArrayList<ManageableRegion>();
 		synchronized (this.monitor) {
@@ -161,6 +164,7 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public ManageableRegion getRegion(String regionName) {
 		return this.manageableRegions.get(regionName);
 	}

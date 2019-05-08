@@ -33,10 +33,12 @@ public class ExtendableHelper implements Extendable {
 		this.extensions = extensions;
 	}
 
+	@Override
 	public Map<String, String> getExtensionAttributes(String schema) {
 		return Collections.unmodifiableMap(extensions.get(schema));
 	}
 
+	@Override
 	public Set<String> getExtensionUris() {
 		return Collections.unmodifiableSet(extensions.keySet());
 	}

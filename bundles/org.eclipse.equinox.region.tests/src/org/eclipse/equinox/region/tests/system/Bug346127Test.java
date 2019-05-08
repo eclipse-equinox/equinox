@@ -52,6 +52,7 @@ public class Bug346127Test extends AbstractRegionSystemTest {
 	}
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		Hashtable<String, Object> properties = new Hashtable<String, Object>();

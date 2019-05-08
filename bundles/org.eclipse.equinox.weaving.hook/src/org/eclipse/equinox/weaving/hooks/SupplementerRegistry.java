@@ -119,6 +119,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
     /**
      * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#addBundle(org.osgi.framework.Bundle)
      */
+    @Override
     public void addBundle(final Bundle bundle) {
         // First analyze which supplementers already exists for this bundle
         addSupplementedBundle(bundle);
@@ -130,6 +131,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
     /**
      * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#addSupplementedBundle(org.osgi.framework.Bundle)
      */
+    @Override
     public void addSupplementedBundle(final Bundle bundle) {
         try {
             final Dictionary<?, ?> manifest = bundle.getHeaders(""); //$NON-NLS-1$
@@ -164,6 +166,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
      * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#addSupplementer(org.osgi.framework.Bundle,
      *      boolean)
      */
+    @Override
     public void addSupplementer(final Bundle bundle, final boolean updateBundles) {
         try {
             final Dictionary<?, ?> manifest = bundle.getHeaders(""); //$NON-NLS-1$
@@ -203,6 +206,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
      *      org.eclipse.osgi.util.ManifestElement[],
      *      org.eclipse.osgi.util.ManifestElement[])
      */
+    @Override
     public List<Supplementer> getMatchingSupplementers(
             final String symbolicName, final ManifestElement[] imports,
             final ManifestElement[] exports) {
@@ -227,6 +231,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
     /**
      * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#getPackageAdmin()
      */
+    @Override
     public PackageAdmin getPackageAdmin() {
         return packageAdmin;
     }
@@ -234,6 +239,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
     /**
      * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#getSupplementers(org.osgi.framework.Bundle)
      */
+    @Override
     public Supplementer[] getSupplementers(final Bundle bundle) {
         return getSupplementers(bundle.getBundleId());
     }
@@ -241,6 +247,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
     /**
      * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#getSupplementers(long)
      */
+    @Override
     public Supplementer[] getSupplementers(final long bundleID) {
         if (supplementersByBundle.containsKey(bundleID)) {
             return supplementersByBundle.get(bundleID);
@@ -270,6 +277,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
      * 
      * @param bundles The bundles to refresh
      */
+    @Override
     public void refreshBundles(final Bundle[] bundles) {
         //        if (this.packageAdmin != null) {
         //            if (AbstractWeavingHook.verbose) {
@@ -286,6 +294,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
     /**
      * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#removeBundle(org.osgi.framework.Bundle)
      */
+    @Override
     public void removeBundle(final Bundle bundle) {
         // if this bundle is itself supplemented by others, remove the bundle from those lists
         removeSupplementedBundle(bundle);
@@ -416,6 +425,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
     /**
      * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#setBundleContext(org.osgi.framework.BundleContext)
      */
+    @Override
     public void setBundleContext(final BundleContext context) {
         this.context = context;
     }
@@ -423,6 +433,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
     /**
      * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#setPackageAdmin(org.osgi.service.packageadmin.PackageAdmin)
      */
+    @Override
     public void setPackageAdmin(final PackageAdmin packageAdmin) {
         this.packageAdmin = packageAdmin;
     }

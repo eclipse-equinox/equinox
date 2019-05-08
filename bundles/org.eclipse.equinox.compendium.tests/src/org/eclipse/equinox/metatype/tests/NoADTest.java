@@ -21,6 +21,7 @@ public class NoADTest extends AbstractTest {
 	private Bundle bundle;
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb10"); //$NON-NLS-1$

@@ -354,6 +354,7 @@ public class Bug332161Test extends AbstractTest {
 	}
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb4"); //$NON-NLS-1$

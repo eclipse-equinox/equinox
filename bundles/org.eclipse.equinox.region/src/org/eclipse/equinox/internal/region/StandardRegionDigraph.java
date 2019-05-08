@@ -110,6 +110,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Region createRegion(String regionName) throws BundleException {
 		return createRegion(regionName, true);
 	}
@@ -133,6 +134,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void connect(Region tailRegion, RegionFilter filter, Region headRegion) throws BundleException {
 		createConnection(tailRegion, filter, headRegion, false);
 	}
@@ -140,6 +142,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public RegionFilter replaceConnection(Region tailRegion, RegionFilter filter, Region headRegion) throws BundleException {
 		return createConnection(tailRegion, filter, headRegion, true);
 	}
@@ -211,6 +214,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Iterator<Region> iterator() {
 		synchronized (this.monitor) {
 			Set<Region> snapshot = new HashSet<Region>(this.regions.size());
@@ -222,6 +226,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Set<FilteredRegion> getEdges(Region tailRegion) {
 		synchronized (this.monitor) {
 			// Cope with the case where tailRegion is not in the digraph
@@ -241,10 +246,12 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 			this.regionFilter = regionFilter;
 		}
 
+		@Override
 		public Region getRegion() {
 			return this.region;
 		}
 
+		@Override
 		public RegionFilter getFilter() {
 			return this.regionFilter;
 		}
@@ -254,6 +261,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Region getRegion(String regionName) {
 		synchronized (this.monitor) {
 			return regions.get(regionName);
@@ -263,6 +271,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Region getRegion(Bundle bundle) {
 		return getRegion(bundle.getBundleId());
 	}
@@ -270,6 +279,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Region getRegion(long bundleId) {
 		synchronized (this.monitor) {
 			return this.bundleIdToRegionMapping.getRegion(bundleId);
@@ -279,6 +289,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void removeRegion(Region region) {
 		if (region == null)
 			throw new IllegalArgumentException("The region cannot be null."); //$NON-NLS-1$
@@ -309,6 +320,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String toString() {
 		synchronized (this.monitor) {
 			StringBuffer s = new StringBuffer();
@@ -342,6 +354,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		}
 	}
 
+	@Override
 	public Set<Region> getRegions() {
 		Set<Region> result = new HashSet<Region>();
 		synchronized (this.monitor) {
@@ -350,6 +363,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		return result;
 	}
 
+	@Override
 	public RegionFilterBuilder createRegionFilterBuilder() {
 		return new StandardRegionFilterBuilder();
 	}
@@ -389,6 +403,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void visitSubgraph(Region startingRegion, RegionDigraphVisitor visitor) {
 		this.subgraphTraverser.visitSubgraph(startingRegion, visitor);
 	}
@@ -407,6 +422,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	/** 
 	 * {@inheritDoc}
 	 */
+	@Override
 	public RegionDigraphPersistence getRegionDigraphPersistence() {
 		return new StandardRegionDigraphPersistence();
 	}

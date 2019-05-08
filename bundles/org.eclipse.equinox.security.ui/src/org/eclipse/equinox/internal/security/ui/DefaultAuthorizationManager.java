@@ -33,19 +33,23 @@ public class DefaultAuthorizationManager extends AuthorizationManager {
 		currentStatus = enabled ? Activator.getAuthorizationEngine().getStatus() : IStatus.OK;
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return true;
 	}
 
+	@Override
 	public boolean needsAttention() {
 		return needsAttention; //TODO: make it happen
 	}
 
+	@Override
 	public IStatus getStatus() {
 		currentStatus = enabled ? Activator.getAuthorizationEngine().getStatus() : IStatus.OK;
 		return transformStatus(currentStatus);
 	}
 
+	@Override
 	public void displayManager(IWorkbenchWindow workbenchWindow) {
 		//TODO: manager UI
 	}

@@ -126,6 +126,7 @@ public class GetDefaultValueTest extends AbstractTest {
 	}
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb1"); //$NON-NLS-1$

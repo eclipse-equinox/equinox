@@ -28,6 +28,7 @@ public class StructuredTextXPath extends StructuredTextDelims {
 	/**
 	 *  @return 2 as the number of special cases handled by this handler.
 	 */
+	@Override
 	public int getSpecialsCount(IStructuredTextExpert expert) {
 		return 2;
 	}
@@ -35,6 +36,7 @@ public class StructuredTextXPath extends StructuredTextDelims {
 	/**
 	 *  @return apostrophe and quotation mark as delimiters.
 	 */
+	@Override
 	protected String getDelimiters() {
 		return "''\"\""; //$NON-NLS-1$
 	}

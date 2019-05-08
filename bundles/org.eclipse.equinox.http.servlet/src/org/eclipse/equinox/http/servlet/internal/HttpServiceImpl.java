@@ -66,6 +66,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	 * @throws ServletException
 	 * @see ExtendedHttpService#registerFilter(String, Filter, Dictionary, HttpContext)
 	 */
+	@Override
 	public synchronized void registerFilter(
 			final String alias, final Filter filter,
 			final Dictionary<String, String> initparams,
@@ -153,6 +154,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	/**
 	 * @see ExtendedHttpService#unregisterFilter(Filter)
 	 */
+	@Override
 	public synchronized void unregisterFilter(Filter filter) {
 		checkShutdown();
 

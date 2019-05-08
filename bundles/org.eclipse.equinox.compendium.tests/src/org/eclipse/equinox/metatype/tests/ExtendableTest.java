@@ -26,6 +26,7 @@ public class ExtendableTest extends AbstractTest {
 	private Bundle bundle;
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("extendable.tb1"); //$NON-NLS-1$

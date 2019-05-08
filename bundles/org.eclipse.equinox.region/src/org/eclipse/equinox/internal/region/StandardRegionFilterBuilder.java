@@ -29,6 +29,7 @@ public final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 	private final Map<String, Collection<Filter>> policy = new HashMap<String, Collection<Filter>>();
 
 	@SuppressWarnings("deprecation")
+	@Override
 	public RegionFilterBuilder allow(String namespace, String filter) throws InvalidSyntaxException {
 		if (namespace == null)
 			throw new IllegalArgumentException("The namespace must not be null."); //$NON-NLS-1$
@@ -58,6 +59,7 @@ public final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 	}
 
 	@SuppressWarnings("deprecation")
+	@Override
 	public RegionFilterBuilder allowAll(String namespace) {
 		if (namespace == null)
 			throw new IllegalArgumentException("The namespace must not be null."); //$NON-NLS-1$
@@ -79,6 +81,7 @@ public final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 		return this;
 	}
 
+	@Override
 	public RegionFilter build() {
 		synchronized (this.monitor) {
 			return new StandardRegionFilter(policy);

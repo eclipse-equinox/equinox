@@ -179,6 +179,7 @@ public final class StandardRegionDigraphPersistence implements RegionDigraphPers
 	/** 
 	 * {@inheritDoc}
 	 */
+	@Override
 	public RegionDigraph load(InputStream input) throws IOException {
 		try {
 			return readRegionDigraph(new DataInputStream(input), null, null);
@@ -196,6 +197,7 @@ public final class StandardRegionDigraphPersistence implements RegionDigraphPers
 	/** 
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void save(RegionDigraph digraph, OutputStream output) throws IOException {
 		writeRegionDigraph(new DataOutputStream(output), digraph);
 	}

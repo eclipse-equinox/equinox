@@ -182,6 +182,7 @@ public class SecurityStatusControl extends ControlContribution {
 			return status;
 		}
 
+		@Override
 		public boolean equals(Object another) {
 			boolean returnValue = false;
 			if (another instanceof IconState) {
@@ -196,6 +197,7 @@ public class SecurityStatusControl extends ControlContribution {
 			return returnValue;
 		}
 
+		@Override
 		public int hashCode() {
 			return Boolean.valueOf(enabled).hashCode() + status.hashCode() + Boolean.valueOf(needsAttention).hashCode();
 		}

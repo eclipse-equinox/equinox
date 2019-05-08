@@ -45,6 +45,7 @@ public abstract class StructuredTextDelims extends StructuredTextTypeHandler {
 	 *
 	 *  @see #getDelimiters
 	 */
+	@Override
 	public int indexOfSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int caseNumber, int fromIndex) {
 		char delim = getDelimiters().charAt((caseNumber - 1) * 2);
 		return text.indexOf(delim, fromIndex);
@@ -59,6 +60,7 @@ public abstract class StructuredTextDelims extends StructuredTextTypeHandler {
 	 *  @return the position after the matching end delimiter, or the length
 	 *          of <code>text</code> if no end delimiter is found.
 	 */
+	@Override
 	public int processSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int caseNumber, int separLocation) {
 		StructuredTextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
 		int loc = separLocation + 1;

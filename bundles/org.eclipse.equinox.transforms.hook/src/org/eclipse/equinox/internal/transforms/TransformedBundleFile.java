@@ -69,6 +69,7 @@ public class TransformedBundleFile extends BundleFileWrapper {
 
 		LazyInputStream stream = new LazyInputStream(new InputStreamProvider() {
 
+			@Override
 			public InputStream getInputStream() throws IOException {
 				return original.getInputStream();
 			}

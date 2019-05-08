@@ -180,6 +180,7 @@ public class ApplicationAdminPermission extends Permission {
 	 * @param otherPermission the implied permission
 	 * @return true if this permission implies the {@code otherPermission}, false otherwise.
 	 */
+	@Override
   public boolean implies(Permission otherPermission) {
   	  if( otherPermission == null )
   	  	return false;
@@ -220,6 +221,7 @@ public class ApplicationAdminPermission extends Permission {
       return true;
   }
 
+	@Override
   public boolean equals(Object with) {
   	if( with == null || !(with instanceof ApplicationAdminPermission) )
   		return false;
@@ -256,6 +258,7 @@ public class ApplicationAdminPermission extends Permission {
 	  return a.equals(b);
   }
 
+	@Override
   public int hashCode() {
 	  int hc = 0;
 	  for( int i=0; i != actionsVector.size(); i++ )
@@ -270,6 +273,7 @@ public class ApplicationAdminPermission extends Permission {
    * Returns the actions of this permission.
    * @return the actions specified when this permission was created
    */
+	@Override
   public String getActions() {
   	return actions;
   }
@@ -318,6 +322,7 @@ public class ApplicationAdminPermission extends Permission {
   		this.appDesc = appDesc;
   	}
   	
+	  @Override
   	public boolean equals(Object o) {
   		if (!(o instanceof SignerWrapper))
   			return false;

@@ -71,6 +71,7 @@ public class StructuredTextRegex extends StructuredTextTypeHandler {
 	 *  
 	 *  @return the number of special cases for this handler.
 	 */
+	@Override
 	public int getSpecialsCount(IStructuredTextExpert expert) {
 		return maxSpecial;
 	}
@@ -79,6 +80,7 @@ public class StructuredTextRegex extends StructuredTextTypeHandler {
 	 *  Locates occurrences of the syntactic strings and of
 	 *  R, AL, EN, AN characters.
 	 */
+	@Override
 	public int indexOfSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int caseNumber, int fromIndex) {
 		// In this method, L, R, AL, AN and EN represent bidi categories
 		// as defined in the Unicode Bidirectional Algorithm
@@ -147,6 +149,7 @@ public class StructuredTextRegex extends StructuredTextTypeHandler {
 	/**
 	 *  Processes the special cases.
 	 */
+	@Override
 	public int processSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int caseNumber, int separLocation) {
 		int location;
 
@@ -221,6 +224,7 @@ public class StructuredTextRegex extends StructuredTextTypeHandler {
 		return text.length();
 	}
 
+	@Override
 	public int getDirection(IStructuredTextExpert expert, String text) {
 		return getDirection(expert, text, new StructuredTextCharTypes(expert, text));
 	}
@@ -237,6 +241,7 @@ public class StructuredTextRegex extends StructuredTextTypeHandler {
 	 *          </ul>
 	 *          Otherwise, returns {@link IStructuredTextExpert#DIR_LTR DIR_LTR}.
 	 */
+	@Override
 	public int getDirection(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes) {
 		StructuredTextEnvironment environment = expert.getEnvironment();
 		String language = environment.getLanguage();

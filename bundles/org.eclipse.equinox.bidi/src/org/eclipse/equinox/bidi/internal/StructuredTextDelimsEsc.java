@@ -49,6 +49,7 @@ public abstract class StructuredTextDelimsEsc extends StructuredTextDelims {
 	 *  and skips until after the matching end delimiter,
 	 *  ignoring possibly escaped end delimiters.
 	 */
+	@Override
 	public int processSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int caseNumber, int separLocation) {
 		StructuredTextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
 		int location = separLocation + 1;

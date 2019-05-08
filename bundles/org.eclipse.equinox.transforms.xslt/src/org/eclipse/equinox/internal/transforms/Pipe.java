@@ -55,6 +55,7 @@ public class Pipe {
 					if (!started) {
 						started = true;
 						Thread pipeThread = new Thread(new Runnable() {
+							@Override
 							public void run() {
 								try {
 									pipeInput(input, pipedOutputStream);
@@ -71,27 +72,32 @@ public class Pipe {
 				}
 			}
 
+			@Override
 			public synchronized int available() throws IOException {
 				start();
 				return super.available();
 			}
 
+			@Override
 			public synchronized int read() throws IOException {
 				start();
 				int c = super.read();
 				return c;
 			}
 
+			@Override
 			public int read(byte[] b) throws IOException {
 				start();
 				return super.read(b);
 			}
 
+			@Override
 			public synchronized int read(byte[] b, int off, int len) throws IOException {
 				start();
 				return super.read(b, off, len);
 			}
 
+			@Override
 			public synchronized void reset() throws IOException {
 				started = false;
 				failure = null;

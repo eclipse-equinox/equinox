@@ -41,6 +41,7 @@ public class StructuredTextSingle extends StructuredTextTypeHandler {
 	 *
 	 *  @see #getSeparators getSeparators
 	 */
+	@Override
 	public int indexOfSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int caseNumber, int fromIndex) {
 		return text.indexOf(this.getSeparators(expert).charAt(0), fromIndex);
 	}
@@ -51,6 +52,7 @@ public class StructuredTextSingle extends StructuredTextTypeHandler {
 	 *
 	 *  @return the length of <code>text</code>.
 	 */
+	@Override
 	public int processSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int caseNumber, int separLocation) {
 		StructuredTextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
 		return text.length();
@@ -61,6 +63,7 @@ public class StructuredTextSingle extends StructuredTextTypeHandler {
 	 *
 	 *  @return 1.
 	 */
+	@Override
 	public int getSpecialsCount(IStructuredTextExpert expert) {
 		return 1;
 	}

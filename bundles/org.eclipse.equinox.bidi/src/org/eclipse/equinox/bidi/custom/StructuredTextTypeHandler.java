@@ -363,6 +363,7 @@ public class StructuredTextTypeHandler {
 		return false;
 	}
 
+	@Override
 	public String toString() {
 		return super.toString() + " [" + separators + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}

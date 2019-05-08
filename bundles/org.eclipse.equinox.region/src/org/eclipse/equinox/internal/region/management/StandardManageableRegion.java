@@ -48,6 +48,7 @@ public class StandardManageableRegion implements ManageableRegion {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getName() {
 		return region.getName();
 	}
@@ -55,6 +56,7 @@ public class StandardManageableRegion implements ManageableRegion {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public ManageableRegion[] getDependencies() {
 		Set<FilteredRegion> edges = this.regionDigraph.getEdges(this.region);
 		List<ManageableRegion> dependencies = new ArrayList<ManageableRegion>();
@@ -70,6 +72,7 @@ public class StandardManageableRegion implements ManageableRegion {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public long[] getBundleIds() {
 		Set<Long> bundleIds = this.region.getBundleIds();
 		long[] result = new long[bundleIds.size()];

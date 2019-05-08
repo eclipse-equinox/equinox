@@ -49,6 +49,7 @@ public final class StandardRegionFilter implements RegionFilter {
 		}
 	}
 
+	@Override
 	public boolean isAllowed(Bundle bundle) {
 		if (bundle == null) {
 			return false;
@@ -64,6 +65,7 @@ public final class StandardRegionFilter implements RegionFilter {
 		return isBundleAllowed(attrs);
 	}
 
+	@Override
 	public boolean isAllowed(BundleRevision bundle) {
 		HashMap<String, Object> attrs = new HashMap<String, Object>(4);
 		String bsn = bundle.getSymbolicName();
@@ -112,6 +114,7 @@ public final class StandardRegionFilter implements RegionFilter {
 		return matchAll(VISIBLE_OSGI_SERVICE_NAMESPACE, service);
 	}
 
+	@Override
 	public boolean isAllowed(BundleCapability capability) {
 		return isAllowed(capability.getNamespace(), capability.getAttributes());
 	}
@@ -179,6 +182,7 @@ public final class StandardRegionFilter implements RegionFilter {
 		});
 	}
 
+	@Override
 	public Map<String, Collection<String>> getSharingPolicy() {
 		Map<String, Collection<String>> result = new HashMap<String, Collection<String>>((int) ((filters.size() / 0.75) + 1));
 		for (Map.Entry<String, Collection<Filter>> namespace : filters.entrySet()) {
@@ -195,6 +199,7 @@ public final class StandardRegionFilter implements RegionFilter {
 		return result;
 	}
 
+	@Override
 	public String toString() {
 		return getSharingPolicy().toString();
 	}

@@ -39,6 +39,7 @@ public class NamedFactory implements NamedService, ComponentContextProvider {
     return name;
   }
   
+  @Override
   public String toString() {
     return name;
   }

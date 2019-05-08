@@ -57,6 +57,7 @@ public class UnresolvedBundleTest extends AbstractTest {
 	}
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb8"); //$NON-NLS-1$

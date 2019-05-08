@@ -36,6 +36,7 @@ public class TestServlet9 extends AbstractTestServlet {
 	private static final long serialVersionUID = 1L;
 
 	private final DispatchTo dispatchTo = new DispatchTo();
+	@Override
 	public void activate(ComponentContext componentContext) throws ServletException, NamespaceException {
 		HttpService service = getHttpService();
 		HttpContext context = service.createDefaultHttpContext();

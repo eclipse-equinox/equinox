@@ -174,16 +174,19 @@ public class DataParser {
 			elementName = name;
 		}
 
+		@Override
 		public void endElement(String namespaceURI, String localName, String qName) {
 			finished();
 			// Let parent resume handling SAX events
 			_dp_xmlReader.setContentHandler(_doc_handler);
 		}
 
+		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 			throw new SAXException(NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] {qName, attributes.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
 		}
 
+		@Override
 		public void characters(char[] buf, int start, int end) throws SAXException {
 			String s = new String(buf, start, end).trim();
 			if (s.length() > 0) {
@@ -223,6 +226,7 @@ public class DataParser {
 			super();
 		}
 
+		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes) {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is AbstractHandler:startElement():" //$NON-NLS-1$
@@ -235,6 +239,7 @@ public class DataParser {
 			}
 		}
 
+		@Override
 		public void setDocumentLocator(Locator locator) {
 			// do nothing
 		}
@@ -249,6 +254,7 @@ public class DataParser {
 			super(handler);
 		}
 
+		@Override
 		public void init(String name, Attributes attributes) {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is MetaDataHandler():init()"); //$NON-NLS-1$
@@ -261,6 +267,7 @@ public class DataParser {
 			// OcdHandler and AttributeDefinitionHandler later.
 		}
 
+		@Override
 		public void startElement(String uri, String localName, String qName, Attributes atts) {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is MetaDataHandler:startElement():" //$NON-NLS-1$
@@ -280,6 +287,7 @@ public class DataParser {
 			}
 		}
 
+		@Override
 		protected void finished() {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is MetaDataHandler():finished()"); //$NON-NLS-1$
@@ -346,6 +354,7 @@ public class DataParser {
 			_ocd = new ObjectClassDefinitionImpl(ocd_name_val, ocd_description_val, _refID, _dp_localization, extensionAttributes);
 		}
 
+		@Override
 		public void startElement(String uri, String localName, String qName, Attributes atts) {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is OcdHandler:startElement():" //$NON-NLS-1$
@@ -367,6 +376,7 @@ public class DataParser {
 			}
 		}
 
+		@Override
 		protected void finished() {
 			logger.log(LogTracker.LOG_DEBUG, "Here is OcdHandler():finished()"); //$NON-NLS-1$
 			if (!_isParsedDataValid)
@@ -391,6 +401,7 @@ public class DataParser {
 			super(handler);
 		}
 
+		@Override
 		public void init(String name, Attributes atts) {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is IconHandler:init()"); //$NON-NLS-1$
@@ -521,6 +532,7 @@ public class DataParser {
 			_ad = new AttributeDefinitionImpl(ad_id_val, ad_name_val, ad_description_val, _dataType, ad_cardinality_val, convert(ad_min_val, _dataType), convert(ad_max_val, _dataType), Boolean.valueOf(ad_required_val).booleanValue(), _dp_localization, logger, extensionAttributes);
 		}
 
+		@Override
 		public void startElement(String uri, String localName, String qName, Attributes atts) {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is AttributeDefinitionHandler:startElement():" //$NON-NLS-1$
@@ -542,6 +554,7 @@ public class DataParser {
 			}
 		}
 
+		@Override
 		protected void finished() {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is AttributeDefinitionHandler():finished()"); //$NON-NLS-1$
@@ -577,6 +590,7 @@ public class DataParser {
 			super(handler);
 		}
 
+		@Override
 		public void init(String name, Attributes atts) {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is OptionHandler:init()"); //$NON-NLS-1$
@@ -615,6 +629,7 @@ public class DataParser {
 			super(handler);
 		}
 
+		@Override
 		public void init(String name, Attributes atts) {
 			logger.log(LogTracker.LOG_DEBUG, "Here is DesignateHandler():init()"); //$NON-NLS-1$
 			super.init(name, atts);
@@ -650,6 +665,7 @@ public class DataParser {
 			}
 		}
 
+		@Override
 		public void startElement(String uri, String localName, String qName, Attributes atts) {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is DesignateHandler:startElement():" //$NON-NLS-1$
@@ -669,6 +685,7 @@ public class DataParser {
 			}
 		}
 
+		@Override
 		protected void finished() {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is DesignateHandler():finished()"); //$NON-NLS-1$
@@ -696,6 +713,7 @@ public class DataParser {
 			super(handler);
 		}
 
+		@Override
 		public void init(String name, Attributes atts) {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is ObjectHandler():init()"); //$NON-NLS-1$
@@ -708,6 +726,7 @@ public class DataParser {
 			}
 		}
 
+		@Override
 		public void startElement(String uri, String localName, String qName, Attributes atts) {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is ObjectHandler:startElement():" //$NON-NLS-1$
@@ -740,6 +759,7 @@ public class DataParser {
 			super(handler);
 		}
 
+		@Override
 		public void init(String name, Attributes atts) {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is AttributeHandler():init()"); //$NON-NLS-1$
@@ -790,15 +810,18 @@ public class DataParser {
 		// The following methods are standard SAX ErrorHandler methods.
 		// See SAX documentation for more info.
 
+		@Override
 		public void warning(SAXParseException spe) {
 			_out.println("Warning: " + getParseExceptionInfo(spe)); //$NON-NLS-1$
 		}
 
+		@Override
 		public void error(SAXParseException spe) throws SAXException {
 			String message = "Error: " + getParseExceptionInfo(spe); //$NON-NLS-1$
 			throw new SAXException(message);
 		}
 
+		@Override
 		public void fatalError(SAXParseException spe) throws SAXException {
 			String message = "Fatal Error: " + getParseExceptionInfo(spe); //$NON-NLS-1$
 			throw new SAXException(message);

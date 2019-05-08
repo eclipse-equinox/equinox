@@ -81,28 +81,34 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 		sharedExpert = shared;
 	}
 
+	@Override
 	public StructuredTextTypeHandler getTypeHandler() {
 		return handler;
 	}
 
+	@Override
 	public StructuredTextEnvironment getEnvironment() {
 		return environment;
 	}
 
+	@Override
 	public int getTextDirection(String text) {
 		return handler.getDirection(this, text);
 	}
 
+	@Override
 	public void clearState() {
 		if (sharedExpert)
 			state = null;
 	}
 
+	@Override
 	public void setState(Object newState) {
 		if (sharedExpert)
 			state = newState;
 	}
 
+	@Override
 	public Object getState() {
 		return state;
 	}
@@ -248,6 +254,7 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 	 * formatting characters as either prefix or suffix of the <i>full</i> text.
 	 * <p>
 	 */
+	@Override
 	public String leanToFullText(String text) {
 		int len = text.length();
 		if (len == 0)
@@ -259,6 +266,7 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 		return insertMarks(text, offsets.getOffsets(), direction, prefixLength);
 	}
 
+	@Override
 	public int[] leanToFullMap(String text) {
 		int len = text.length();
 		if (len == 0)
@@ -279,6 +287,7 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 		return map;
 	}
 
+	@Override
 	public int[] leanBidiCharOffsets(String text) {
 		int len = text.length();
 		if (len == 0)
@@ -342,6 +351,7 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 		return offsets;
 	}
 
+	@Override
 	public String fullToLeanText(String full) {
 		if (full.length() == 0)
 			return full;
@@ -446,6 +456,7 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 		return lean;
 	}
 
+	@Override
 	public int[] fullToLeanMap(String full) {
 		int lenFull = full.length();
 		if (lenFull == 0)
@@ -477,6 +488,7 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 		return map;
 	}
 
+	@Override
 	public int[] fullBidiCharOffsets(String full) {
 		int lenFull = full.length();
 		if (lenFull == 0)
@@ -497,6 +509,7 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 		return offsets.getOffsets();
 	}
 
+	@Override
 	public String insertMarks(String text, int[] offsets, int direction, int affixLength) {
 		if (direction != DIR_LTR && direction != DIR_RTL)
 			throw new IllegalArgumentException("Invalid direction"); //$NON-NLS-1$
@@ -545,6 +558,7 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 		return new String(fullChars);
 	}
 
+	@Override
 	public String toString() {
 		return super.toString() + " [handler=" + handler.toString() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}

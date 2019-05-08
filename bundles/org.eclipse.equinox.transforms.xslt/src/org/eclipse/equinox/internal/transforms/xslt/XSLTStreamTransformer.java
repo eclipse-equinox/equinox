@@ -48,6 +48,7 @@ public class XSLTStreamTransformer {
 			this.transformer = transformer;
 		}
 
+		@Override
 		protected void pipeInput(InputStream original, OutputStream result) throws IOException {
 			try {
 				InputSource streamSource = new InputSource(original);
@@ -74,6 +75,7 @@ public class XSLTStreamTransformer {
 	 * The dummy entity resolver which returns empty content for all external entity requests.
 	 */
 	protected EntityResolver resolver = new EntityResolver() {
+		@Override
 		public InputSource resolveEntity(String publicId, String systemId) {
 			// don't validate external entities - too expensive
 			return new InputSource(new StringReader("")); //$NON-NLS-1$

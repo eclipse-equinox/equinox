@@ -44,6 +44,7 @@ public class CacheWriter {
     public CacheWriter(final BlockingQueue<CacheItem> cacheQueue) {
         this.writerThread = new Thread(new Runnable() {
 
+	    @Override
             public void run() {
                 try {
                     while (true) {

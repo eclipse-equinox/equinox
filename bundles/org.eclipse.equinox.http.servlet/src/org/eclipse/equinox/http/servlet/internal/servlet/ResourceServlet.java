@@ -72,6 +72,7 @@ public class ResourceServlet extends HttpServlet {
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction<Boolean>() {
 
+				@Override
 				public Boolean run() throws Exception {
 					URLConnection connection = resourceURL.openConnection();
 					long lastModified = connection.getLastModified();

@@ -150,6 +150,7 @@ public class CoordinationMaxTimeoutTest extends CoordinatorTest {
 	}
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		System.setProperty(PROPERTY_NAME, String.valueOf(TIMEOUT));
 		assertSystemProperty(PROPERTY_NAME, String.valueOf(TIMEOUT));

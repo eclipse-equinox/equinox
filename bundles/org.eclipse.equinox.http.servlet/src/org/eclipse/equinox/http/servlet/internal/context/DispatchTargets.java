@@ -246,6 +246,7 @@ public class DispatchTargets {
 			servletRequest.setAttribute(name, value);
 		}
 
+		@Override
 		public void close() {
 			for (Map.Entry<String, Object> oldValue : oldValues.entrySet()) {
 				if (oldValue.getValue() == null) {

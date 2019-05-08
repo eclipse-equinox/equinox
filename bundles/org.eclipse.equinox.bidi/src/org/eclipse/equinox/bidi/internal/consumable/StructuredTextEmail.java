@@ -29,6 +29,7 @@ public class StructuredTextEmail extends StructuredTextDelimsEsc {
 		super("<>.:,;@"); //$NON-NLS-1$
 	}
 
+	@Override
 	public int getDirection(IStructuredTextExpert expert, String text) {
 		return getDirection(expert, text, new StructuredTextCharTypes(expert, text));
 	}
@@ -44,6 +45,7 @@ public class StructuredTextEmail extends StructuredTextDelimsEsc {
 	 *          </ul>
 	 *          Otherwise, returns {@link IStructuredTextExpert#DIR_LTR DIR_LTR}.
 	 */
+	@Override
 	public int getDirection(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes) {
 		String language = expert.getEnvironment().getLanguage();
 		if (!language.equals("ar")) //$NON-NLS-1$
@@ -63,6 +65,7 @@ public class StructuredTextEmail extends StructuredTextDelimsEsc {
 	/**
 	 *  @return 2 as number of special cases handled by this handler.
 	 */
+	@Override
 	public int getSpecialsCount(IStructuredTextExpert expert) {
 		return 2;
 	}
@@ -70,6 +73,7 @@ public class StructuredTextEmail extends StructuredTextDelimsEsc {
 	/**
 	 *  @return parentheses and quotation marks as delimiters.
 	 */
+	@Override
 	protected String getDelimiters() {
 		return "()\"\""; //$NON-NLS-1$
 	}

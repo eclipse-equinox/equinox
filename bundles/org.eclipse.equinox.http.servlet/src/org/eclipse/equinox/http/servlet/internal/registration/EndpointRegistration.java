@@ -54,6 +54,7 @@ public abstract class EndpointRegistration<D extends DTO>
 		createContextAttributes();
 	}
 
+	@Override
 	public void destroy() {
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {

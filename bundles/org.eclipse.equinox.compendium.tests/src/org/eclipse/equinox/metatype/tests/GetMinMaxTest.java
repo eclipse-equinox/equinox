@@ -25,6 +25,7 @@ public class GetMinMaxTest extends AbstractTest {
 	private EquinoxObjectClassDefinition ocd;
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("getMinMax.tb1"); //$NON-NLS-1$

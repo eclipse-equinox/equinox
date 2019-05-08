@@ -30,6 +30,7 @@ import org.eclipse.equinox.http.servlet.tests.tb.AbstractTestServlet;
 public class TestServlet3 extends AbstractTestServlet {
 	private static final long serialVersionUID = 1L;
 
+	@Override
 	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) throws ServletException, IOException {
 		String expected = "Equinox";  //$NON-NLS-1$
 		try {

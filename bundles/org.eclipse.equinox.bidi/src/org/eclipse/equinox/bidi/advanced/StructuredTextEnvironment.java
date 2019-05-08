@@ -211,6 +211,7 @@ public class StructuredTextEnvironment {
 	 * 
 	 * @return the hash code.
 	 */
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -229,6 +230,7 @@ public class StructuredTextEnvironment {
 	 * 
 	 * @return true if the 2 instances can be used interchangeably.
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;

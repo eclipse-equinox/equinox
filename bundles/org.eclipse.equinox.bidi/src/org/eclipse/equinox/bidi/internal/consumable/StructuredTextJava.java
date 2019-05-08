@@ -45,6 +45,7 @@ public class StructuredTextJava extends StructuredTextTypeHandler {
 	/**
 	 *  @return 4 as the number of special cases handled by this handler.
 	 */
+	@Override
 	public int getSpecialsCount(IStructuredTextExpert expert) {
 		return 4;
 	}
@@ -58,6 +59,7 @@ public class StructuredTextJava extends StructuredTextTypeHandler {
 	     *    <li>comments starting with slash-slash</li>
 	     *  </ol>
 	     */
+	@Override
 	public int indexOfSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int caseNumber, int fromIndex) {
 		switch (caseNumber) {
 			case 1 : /* space */
@@ -82,6 +84,7 @@ public class StructuredTextJava extends StructuredTextTypeHandler {
 	     *    <li>skip until after a line separator</li>
 	     *  </ol>
 	 */
+	@Override
 	public int processSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int caseNumber, int separLocation) {
 		int location, counter, i;
 

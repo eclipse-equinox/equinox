@@ -42,16 +42,19 @@ public class LazyInputStream extends InputStream {
 			original = provider.getInputStream();
 	}
 
+	@Override
 	public int available() throws IOException {
 		initOriginal();
 		return original.available();
 	}
 
+	@Override
 	public void close() throws IOException {
 		initOriginal();
 		original.close();
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		try {
 			initOriginal();
@@ -61,6 +64,7 @@ public class LazyInputStream extends InputStream {
 		}
 	}
 
+	@Override
 	public int hashCode() {
 		try {
 			initOriginal();
@@ -70,6 +74,7 @@ public class LazyInputStream extends InputStream {
 		}
 	}
 
+	@Override
 	public void mark(int readlimit) {
 		try {
 			initOriginal();
@@ -79,6 +84,7 @@ public class LazyInputStream extends InputStream {
 		}
 	}
 
+	@Override
 	public boolean markSupported() {
 		try {
 			initOriginal();
@@ -88,31 +94,37 @@ public class LazyInputStream extends InputStream {
 		}
 	}
 
+	@Override
 	public int read() throws IOException {
 		initOriginal();
 		return original.read();
 	}
 
+	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		initOriginal();
 		return original.read(b, off, len);
 	}
 
+	@Override
 	public int read(byte[] b) throws IOException {
 		initOriginal();
 		return original.read(b);
 	}
 
+	@Override
 	public void reset() throws IOException {
 		initOriginal();
 		original.reset();
 	}
 
+	@Override
 	public long skip(long n) throws IOException {
 		initOriginal();
 		return original.skip(n);
 	}
 
+	@Override
 	public String toString() {
 		try {
 			initOriginal();

@@ -80,6 +80,7 @@ public class IconTest extends AbstractTest {
 	}
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb9"); //$NON-NLS-1$

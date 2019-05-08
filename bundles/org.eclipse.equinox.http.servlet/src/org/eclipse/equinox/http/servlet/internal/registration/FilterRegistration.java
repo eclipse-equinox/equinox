@@ -60,6 +60,7 @@ public class FilterRegistration
 		needDecode = MatchableRegistration.patternsRequireDecode(filterDTO.patterns);
 	}
 
+	@Override
 	public int compareTo(FilterRegistration otherFilterRegistration) {
 		int priorityDifference = priority - otherFilterRegistration.priority;
 		if (priorityDifference != 0)
@@ -72,6 +73,7 @@ public class FilterRegistration
 		return (thisId < otherId) ? -1 : ((thisId == otherId) ? 0 : 1);
 	}
 
+	@Override
 	public void destroy() {
 		if (!initDestoyWithContextController) {
 			return;

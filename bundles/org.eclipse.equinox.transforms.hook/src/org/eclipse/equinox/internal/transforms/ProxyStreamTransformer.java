@@ -44,6 +44,7 @@ public class ProxyStreamTransformer extends StreamTransformer {
 
 	}
 
+	@Override
 	public InputStream getInputStream(InputStream inputStream, URL transformerUrl) throws IOException {
 		try {
 			return (InputStream) method.invoke(object, new Object[] {inputStream, transformerUrl});

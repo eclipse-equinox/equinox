@@ -27,6 +27,7 @@ import org.osgi.framework.Bundle;
  */
 public class ObjectClassDefinitionImpl extends LocalizationElement implements EquinoxObjectClassDefinition, Cloneable {
 	private static final Comparator<Icon> iconComparator = new Comparator<Icon>() {
+		@Override
 		public int compare(Icon icon1, Icon icon2) {
 			return icon1.getIconSize().compareTo(icon2.getIconSize());
 		}
@@ -64,6 +65,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 	/*
 	 * 
 	 */
+	@Override
 	public Object clone() {
 
 		ObjectClassDefinitionImpl ocd = new ObjectClassDefinitionImpl(_name, _description, _id, _type, getLocalization(), helper);
@@ -111,6 +113,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 	 * 
 	 * @see org.osgi.service.metatype.ObjectClassDefinition#getAttributeDefinitions(int)
 	 */
+	@Override
 	public EquinoxAttributeDefinition[] getAttributeDefinitions(int filter) {
 
 		EquinoxAttributeDefinition[] atts;
@@ -227,10 +230,12 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 		}
 	}
 
+	@Override
 	public Map<String, String> getExtensionAttributes(String schema) {
 		return helper.getExtensionAttributes(schema);
 	}
 
+	@Override
 	public Set<String> getExtensionUris() {
 		return helper.getExtensionUris();
 	}

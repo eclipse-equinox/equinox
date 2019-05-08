@@ -38,6 +38,7 @@ class Icon implements Cloneable {
 		this._bundle = bundle;
 	}
 
+	@Override
 	public Object clone() {
 		return new Icon(this._fileName, this._size, this._bundle);
 	}

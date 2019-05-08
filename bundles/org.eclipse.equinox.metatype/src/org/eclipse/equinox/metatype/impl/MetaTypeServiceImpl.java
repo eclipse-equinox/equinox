@@ -53,6 +53,7 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 	 * 
 	 * @see org.osgi.service.metatype.MetaTypeService#getMetaTypeInformation(org.osgi.framework.Bundle)
 	 */
+	@Override
 	public EquinoxMetaTypeInformation getMetaTypeInformation(Bundle bundle) {
 		return getMetaTypeProvider(bundle);
 	}
@@ -69,6 +70,7 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 			if (_mtps.containsKey(bID))
 				return _mtps.get(bID);
 			EquinoxMetaTypeInformation mti = AccessController.doPrivileged(new PrivilegedAction<EquinoxMetaTypeInformation>() {
+				@Override
 				public EquinoxMetaTypeInformation run() {
 					MetaTypeInformationImpl impl = null;
 					try {

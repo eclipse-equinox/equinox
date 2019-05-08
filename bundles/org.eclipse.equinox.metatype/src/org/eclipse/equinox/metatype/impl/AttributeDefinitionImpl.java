@@ -68,6 +68,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	/*
 	 * 
 	 */
+	@Override
 	public Object clone() {
 
 		AttributeDefinitionImpl ad = new AttributeDefinitionImpl(_id, _name, _description, _dataType, _cardinality, _minValue, _maxValue, _isRequired, getLocalization(), logger, helper);
@@ -263,18 +264,22 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 		return vt.validate(this);
 	}
 
+	@Override
 	public Map<String, String> getExtensionAttributes(String schema) {
 		return helper.getExtensionAttributes(schema);
 	}
 
+	@Override
 	public Set<String> getExtensionUris() {
 		return helper.getExtensionUris();
 	}
 
+	@Override
 	public String getMax() {
 		return _maxValue == null ? null : String.valueOf(_maxValue);
 	}
 
+	@Override
 	public String getMin() {
 		return _minValue == null ? null : String.valueOf(_minValue);
 	}

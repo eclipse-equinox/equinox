@@ -46,6 +46,7 @@ public class BindUnbindSuccessor extends BindUnbind implements ComponentManager,
     else      ctxt.disableComponent(name);
   }
 
+  @Override
   public Dictionary getProperties() {
     return ctxt.getProperties();
   }

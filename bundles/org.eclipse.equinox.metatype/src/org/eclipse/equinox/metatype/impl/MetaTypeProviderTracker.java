@@ -68,6 +68,7 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 		return _bundle;
 	}
 
+	@Override
 	public EquinoxObjectClassDefinition getObjectClassDefinition(String id, String locale) {
 		if (_bundle.getState() != Bundle.ACTIVE)
 			return null; // return none if not active
@@ -213,14 +214,17 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 					return ocd.getIcon(size);
 				}
 
+				@Override
 				public Map<String, String> getExtensionAttributes(String schema) {
 					return Collections.<String, String> emptyMap();
 				}
 
+				@Override
 				public Set<String> getExtensionUris() {
 					return Collections.<String> emptySet();
 				}
 
+				@Override
 				public EquinoxAttributeDefinition[] getAttributeDefinitions(int filter) {
 					AttributeDefinition[] ads = ocd.getAttributeDefinitions(filter);
 					if (ads == null || ads.length == 0)
@@ -264,18 +268,22 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 								return ad.getDefaultValue();
 							}
 
+					    @Override
 							public Map<String, String> getExtensionAttributes(String schema) {
 								return Collections.<String, String> emptyMap();
 							}
 
+					    @Override
 							public Set<String> getExtensionUris() {
 								return Collections.<String> emptySet();
 							}
 
+					    @Override
 							public String getMax() {
 								return null;
 							}
 
+					    @Override
 							public String getMin() {
 								return null;
 							}

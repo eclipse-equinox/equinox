@@ -21,6 +21,7 @@ public class SameOcdPidFactoryPidTest extends AbstractTest {
 	private Bundle bundle;
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb2"); //$NON-NLS-1$

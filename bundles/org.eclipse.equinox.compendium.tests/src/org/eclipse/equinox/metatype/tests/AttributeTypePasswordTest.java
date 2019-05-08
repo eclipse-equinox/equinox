@@ -21,6 +21,7 @@ public class AttributeTypePasswordTest extends AbstractTest {
 	private Bundle bundle;
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb1"); //$NON-NLS-1$

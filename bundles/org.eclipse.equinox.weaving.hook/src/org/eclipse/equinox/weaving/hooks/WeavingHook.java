@@ -96,10 +96,12 @@ public class WeavingHook extends AbstractWeavingHook {
         return adaptor;
     }
 
+    @Override
     public IWeavingAdaptor getAdaptor(final long bundleID) {
         return this.adaptors.get(bundleID);
     }
 
+    @Override
     public IWeavingAdaptor getHostBundleAdaptor(final long bundleID) {
         final Bundle bundle = this.bundleContext.getBundle(bundleID);
         if (bundle != null) {
@@ -197,6 +199,7 @@ public class WeavingHook extends AbstractWeavingHook {
         }
     }
 
+    @Override
     public void resetAdaptor(final long bundleID) {
         this.adaptors.remove(bundleID);
     }

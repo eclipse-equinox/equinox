@@ -16,6 +16,7 @@ package org.eclipse.equinox.ds.tests.tb12;
 
 public class NoArgs110 extends CallRegistrator {
 
+  @Override
   public String getName() {
     return "org.eclipse.equinox.ds.tests.tb12.NoArgs110";
   }

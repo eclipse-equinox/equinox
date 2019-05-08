@@ -39,6 +39,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 	protected ValuesView valuesView = null;
 	protected Button buttonSave = null;
 
+	@Override
 	public void setSelection(ISecurePreferences selectedNode) {
 		valuesView.setInput(selectedNode);
 	}
@@ -125,6 +126,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		validateSave();
 	}
 
+	@Override
 	public void modified() {
 		validateSave();
 	}

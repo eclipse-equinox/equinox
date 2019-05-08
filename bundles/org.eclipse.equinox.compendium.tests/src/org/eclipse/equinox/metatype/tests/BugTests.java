@@ -92,6 +92,7 @@ public class BugTests extends AbstractTest {
 	}
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb3"); //$NON-NLS-1$

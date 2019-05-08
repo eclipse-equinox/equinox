@@ -146,6 +146,7 @@ public class ApplicationException extends Exception {
 	 * @return The cause of this exception or {@code null} if no cause was
 	 *         set.
 	 */
+	@Override
 	public Throwable getCause() {
 		return super.getCause();
 	}

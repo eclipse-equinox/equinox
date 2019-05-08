@@ -1242,6 +1242,7 @@ public class DSTest {
     final Bundle tb4 = installBundle("tb4");
 
     new Thread() {
+      @Override
       public void run() {
         try {
           tb2.start(); // start the blocking service
@@ -1252,6 +1253,7 @@ public class DSTest {
     sleep0(scr_restart_timeout + timeout * 2);
 
     new Thread() {
+      @Override
       public void run() {
         try {
           tb4.start(); // start the other
@@ -1276,6 +1278,7 @@ public class DSTest {
 
     // start the other blocking bundle
     new Thread() {
+      @Override
       public void run() {
         try {
           tb3.start();
@@ -1288,6 +1291,7 @@ public class DSTest {
 
     // start the non-blocking bundle
     new Thread() {
+      @Override
       public void run() {
         try {
           tb4.start(); // start the other
@@ -2158,6 +2162,7 @@ public class DSTest {
       this.lastComp = last;
     }
 
+    @Override
     public void run() {
       ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
       assertNotNull("The ConfigurationAdmin should be available", cm);
