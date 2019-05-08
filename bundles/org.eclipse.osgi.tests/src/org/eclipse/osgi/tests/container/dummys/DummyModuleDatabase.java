@@ -99,6 +99,7 @@ public class DummyModuleDatabase extends ModuleDatabase {
 			this.state = state;
 		}
 
+		@Override
 		public boolean equals(Object o) {
 			if (!(o instanceof DummyModuleEvent))
 				return false;
@@ -106,6 +107,7 @@ public class DummyModuleDatabase extends ModuleDatabase {
 			return this.event.equals(that.event) && this.module.equals(that.module) && this.state.equals(that.state);
 		}
 
+		@Override
 		public String toString() {
 			return module + ": " + event + ": " + state;
 		}
@@ -124,6 +126,7 @@ public class DummyModuleDatabase extends ModuleDatabase {
 			this.listeners = listeners;
 		}
 
+		@Override
 		public boolean equals(Object o) {
 			if (!(o instanceof DummyContainerEvent))
 				return false;
@@ -131,6 +134,7 @@ public class DummyModuleDatabase extends ModuleDatabase {
 			return this.type.equals(that.type) && this.module.equals(that.module);
 		}
 
+		@Override
 		public String toString() {
 			return module + ": " + type;
 		}

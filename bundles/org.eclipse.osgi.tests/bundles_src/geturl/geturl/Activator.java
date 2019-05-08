@@ -30,6 +30,7 @@ public class Activator implements BundleActivator {
 		props.put("test.url", url);
 		context.registerService(PrivilegedAction.class, new PrivilegedAction() {
 
+			@Override
 			public Object run() {
 				try {
 					throw new RuntimeException("Expected to fail to create: " + new URL(urlSpec));

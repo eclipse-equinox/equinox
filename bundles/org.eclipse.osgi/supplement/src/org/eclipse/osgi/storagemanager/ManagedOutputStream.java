@@ -51,6 +51,7 @@ public final class ManagedOutputStream extends FilterOutputStream {
 	 * of the managed output streams in the set are closed successfully.
 	 * @see FilterOutputStream#close()
 	 */
+	@Override
 	public void close() throws IOException {
 		manager.closeOutputStream(this);
 	}
@@ -99,6 +100,7 @@ public final class ManagedOutputStream extends FilterOutputStream {
 	 * Override this method to prevent single byte writes to the output stream
 	 * which is done by the default implementation of FilteredOutputStream
 	 */
+	@Override
 	public void write(byte[] bytes, int off, int len) throws IOException {
 		out.write(bytes, off, len);
 	}

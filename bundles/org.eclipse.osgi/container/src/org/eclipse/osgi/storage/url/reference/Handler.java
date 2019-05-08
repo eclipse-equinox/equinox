@@ -46,10 +46,12 @@ public class Handler extends URLStreamHandler {
 	/**
 	 * @throws IOException  
 	 */
+	@Override
 	protected URLConnection openConnection(URL url) throws IOException {
 		return new ReferenceURLConnection(url, installPath);
 	}
 
+	@Override
 	protected void parseURL(URL url, String str, int start, int end) {
 		if (end < start) {
 			return;

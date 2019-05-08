@@ -64,6 +64,7 @@ public abstract class VersionSupplier {
 	 */
 	abstract ResolverBundle getResolverBundle();
 
+	@Override
 	public String toString() {
 		return base.toString();
 	}

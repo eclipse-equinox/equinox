@@ -32,6 +32,7 @@ public class TestHookConfigurator implements HookConfigurator {
 	private static final String PREVENT_RESOURCE_LOAD_PRE = "classloader.hooks.a.fail.resource.load.pre";
 	private static final String PREVENT_RESOURCE_LOAD_POST = "classloader.hooks.a.fail.resource.load.post";
 	final ThreadLocal<Boolean> doingRecursionLoad = new ThreadLocal<Boolean>() {
+		@Override
 		protected Boolean initialValue() {
 			return false;
 		}

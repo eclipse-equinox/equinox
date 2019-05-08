@@ -109,6 +109,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 		return keyStore;
 	}
 
+	@Override
 	public Certificate findTrustAnchor(Certificate[] certChain) throws IOException {
 
 		if (certChain == null || certChain.length == 0)
@@ -175,6 +176,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 		}
 	}
 
+	@Override
 	protected String doAddTrustAnchor(Certificate cert, String alias) throws IOException, GeneralSecurityException {
 		if (isReadOnly())
 			throw new IOException(SignedContentMessages.Default_Trust_Read_Only);
@@ -204,6 +206,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 		return alias;
 	}
 
+	@Override
 	protected void doRemoveTrustAnchor(Certificate cert) throws IOException, GeneralSecurityException {
 		if (isReadOnly())
 			throw new IOException(SignedContentMessages.Default_Trust_Read_Only);
@@ -224,6 +227,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 		}
 	}
 
+	@Override
 	protected void doRemoveTrustAnchor(String alias) throws IOException, GeneralSecurityException {
 
 		if (alias == null) {
@@ -248,6 +252,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 		}
 	}
 
+	@Override
 	public Certificate getTrustAnchor(String alias) throws IOException, GeneralSecurityException {
 
 		if (alias == null) {
@@ -264,6 +269,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 		}
 	}
 
+	@Override
 	public String[] getAliases() throws IOException, GeneralSecurityException {
 
 		List<String> returnList = new ArrayList<>();
@@ -334,10 +340,12 @@ public class KeyStoreTrustEngine extends TrustEngine {
 		return new FileOutputStream(file);
 	}
 
+	@Override
 	public boolean isReadOnly() {
 		return getPassword() == null || !(new File(path).canWrite());
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}

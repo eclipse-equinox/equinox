@@ -24,6 +24,7 @@ public class BundleContextFilterTests extends FilterTests {
 		return new TestSuite(BundleContextFilterTests.class);
 	}
 
+	@Override
 	public Filter createFilter(String filterString) throws InvalidSyntaxException {
 		return OSGiTestsActivator.getContext().createFilter(filterString);
 	}

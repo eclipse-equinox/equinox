@@ -14,6 +14,7 @@
 package multi.release.test.sub2;
 
 public class TestClassAdd9 {
+	@Override
 	public String toString() {
 		return "ADD09";
 	}

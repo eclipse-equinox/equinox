@@ -281,10 +281,12 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 		return null;
 	}
 
+	@Override
 	public BundleDescription getBundleDescription() {
 		return (BundleDescription) getBaseDescription();
 	}
 
+	@Override
 	public ResolverBundle getResolverBundle() {
 		return this;
 	}
@@ -299,6 +301,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 		return null;
 	}
 
+	@Override
 	public String toString() {
 		return "[" + getBundleDescription() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
@@ -671,6 +674,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 	 * If the other BSN is null then -1 is returned
 	 * otherwise String.compareTo is used
 	 */
+	@Override
 	public int compareTo(ResolverBundle o) {
 		String bsn = getName();
 		String otherBsn = o.getName();

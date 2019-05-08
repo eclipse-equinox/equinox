@@ -23,6 +23,7 @@ import org.osgi.framework.launch.FrameworkFactory;
  */
 public class EquinoxFactory implements FrameworkFactory {
 
+	@Override
 	public Framework newFramework(Map<String, String> configuration) {
 		return new Equinox(configuration);
 	}

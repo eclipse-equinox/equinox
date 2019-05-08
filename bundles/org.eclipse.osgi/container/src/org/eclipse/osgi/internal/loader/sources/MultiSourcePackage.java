@@ -25,10 +25,12 @@ public class MultiSourcePackage extends PackageSource {
 		this.suppliers = suppliers;
 	}
 
+	@Override
 	public SingleSourcePackage[] getSuppliers() {
 		return suppliers;
 	}
 
+	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		Class<?> result = null;
 		for (int i = 0; i < suppliers.length; i++) {
@@ -39,6 +41,7 @@ public class MultiSourcePackage extends PackageSource {
 		return result;
 	}
 
+	@Override
 	public URL getResource(String name) {
 		URL result = null;
 		for (int i = 0; i < suppliers.length; i++) {
@@ -49,6 +52,7 @@ public class MultiSourcePackage extends PackageSource {
 		return result;
 	}
 
+	@Override
 	public Enumeration<URL> getResources(String name) {
 		Enumeration<URL> results = null;
 		for (int i = 0; i < suppliers.length; i++)

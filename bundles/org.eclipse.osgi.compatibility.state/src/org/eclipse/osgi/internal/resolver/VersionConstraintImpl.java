@@ -154,6 +154,7 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 			return isSatisfiedBy(((BaseCapability) capability).getBaseDescription());
 		}
 
+		@Override
 		public int hashCode() {
 			return System.identityHashCode(VersionConstraintImpl.this);
 		}
@@ -162,6 +163,7 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 			return VersionConstraintImpl.this;
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
@@ -170,6 +172,7 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 			return ((BundleRequirementImpl) obj).getVersionConstraint() == VersionConstraintImpl.this;
 		}
 
+		@Override
 		public String toString() {
 			return getNamespace() + BaseDescriptionImpl.toString(getAttributes(), false) + BaseDescriptionImpl.toString(getDirectives(), true);
 		}

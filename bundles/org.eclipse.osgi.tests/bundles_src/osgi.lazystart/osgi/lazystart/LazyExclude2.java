@@ -18,6 +18,7 @@ import osgi.lazystart.b.BTest;
 
 public class LazyExclude2 implements ITestRunner {
 
+	@Override
 	public Object testIt() throws Exception {
 		return new BTest();
 	}

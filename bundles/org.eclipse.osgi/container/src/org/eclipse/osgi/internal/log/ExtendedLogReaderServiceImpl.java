@@ -25,6 +25,7 @@ public class ExtendedLogReaderServiceImpl implements ExtendedLogReaderService {
 		this.factory = factory;
 	}
 
+	@Override
 	public synchronized void addLogListener(LogListener listener, LogFilter filter) {
 		checkShutdown();
 		if (listener == null)
@@ -37,15 +38,18 @@ public class ExtendedLogReaderServiceImpl implements ExtendedLogReaderService {
 		factory.addLogListener(listener, filter);
 	}
 
+	@Override
 	public void addLogListener(LogListener listener) {
 		addLogListener(listener, ExtendedLogReaderServiceFactory.NULL_LOGGER_FILTER);
 	}
 
+	@Override
 	public Enumeration<LogEntry> getLog() {
 		checkShutdown();
 		return factory.getLog();
 	}
 
+	@Override
 	public synchronized void removeLogListener(LogListener listener) {
 		checkShutdown();
 		if (listener == null)

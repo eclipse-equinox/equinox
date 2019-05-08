@@ -22,6 +22,7 @@ public class FrameworkUtilFilterTests extends FilterTests {
 		return new TestSuite(FrameworkUtilFilterTests.class);
 	}
 
+	@Override
 	public Filter createFilter(String filterString) throws InvalidSyntaxException {
 		return FrameworkUtil.createFilter(filterString);
 	}

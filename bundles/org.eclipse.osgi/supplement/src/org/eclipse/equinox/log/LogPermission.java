@@ -46,22 +46,27 @@ public class LogPermission extends Permission {
 			throw new IllegalArgumentException("actions must be * or log"); //$NON-NLS-1$
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof LogPermission;
 	}
 
+	@Override
 	public String getActions() {
 		return LOG;
 	}
 
+	@Override
 	public int hashCode() {
 		return LogPermission.class.hashCode();
 	}
 
+	@Override
 	public boolean implies(Permission permission) {
 		return permission instanceof LogPermission;
 	}
 
+	@Override
 	public PermissionCollection newPermissionCollection() {
 		return new LogPermissionCollection();
 	}

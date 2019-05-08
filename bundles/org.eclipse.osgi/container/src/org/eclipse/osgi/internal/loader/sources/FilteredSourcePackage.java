@@ -29,18 +29,21 @@ public class FilteredSourcePackage extends SingleSourcePackage {
 		this.excludes = excludes != null ? ManifestElement.getArrayFromList(excludes) : null;
 	}
 
+	@Override
 	public URL getResource(String name) {
 		if (isFiltered(name, getId()))
 			return null;
 		return super.getResource(name);
 	}
 
+	@Override
 	public Enumeration<URL> getResources(String name) {
 		if (isFiltered(name, getId()))
 			return null;
 		return super.getResources(name);
 	}
 
+	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		if (isFiltered(name, getId()))
 			return null;

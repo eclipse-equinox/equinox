@@ -329,6 +329,7 @@ public class ApplicationAdminTest extends OSGiTest {
 		assertNotNull("app handle is null", handle); //$NON-NLS-1$
 		final ApplicationHandle destroyHandle = handle;
 		new Thread(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					Thread.sleep(1000);
@@ -586,6 +587,7 @@ public class ApplicationAdminTest extends OSGiTest {
 		assertNotNull("app handle is null", handle); //$NON-NLS-1$
 		final ApplicationHandle destroyHandle = handle;
 		new Thread(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					Thread.sleep(1000);

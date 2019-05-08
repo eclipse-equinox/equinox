@@ -28,6 +28,7 @@ public final class LogPermissionCollection extends PermissionCollection {
 	private static final long serialVersionUID = -1955409691185916778L;
 	LogPermission logPermission;
 
+	@Override
 	public void add(Permission permission) {
 		if (!(permission instanceof LogPermission))
 			throw new IllegalArgumentException("invalid permission: " + permission); //$NON-NLS-1$
@@ -37,14 +38,17 @@ public final class LogPermissionCollection extends PermissionCollection {
 			logPermission = (LogPermission) permission;
 	}
 
+	@Override
 	public Enumeration<Permission> elements() {
 		return new Enumeration<Permission>() {
 			private boolean hasMore = (logPermission != null);
 
+		@Override
 			public boolean hasMoreElements() {
 				return hasMore;
 			}
 
+		@Override
 			public Permission nextElement() {
 				if (hasMore) {
 					hasMore = false;
@@ -55,6 +59,7 @@ public final class LogPermissionCollection extends PermissionCollection {
 		};
 	}
 
+	@Override
 	public boolean implies(Permission permission) {
 		return logPermission != null && logPermission.implies(permission);
 	}

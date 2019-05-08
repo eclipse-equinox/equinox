@@ -17,6 +17,7 @@ import org.eclipse.osgi.tests.bundles.ITestRunner;
 import osgi.lazystart.c.CTest;
 public class LazyInclude2 implements ITestRunner {
 
+	@Override
 	public Object testIt() throws Exception {
 		return new CTest();
 	}

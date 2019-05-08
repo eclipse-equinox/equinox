@@ -104,6 +104,7 @@ class OSGiFrameworkHooks {
 				notifyCollisionHooksPriviledged(operationType, target, shrinkable);
 			} else {
 				AccessController.doPrivileged(new PrivilegedAction<Void>() {
+					@Override
 					public Void run() {
 						notifyCollisionHooksPriviledged(operationType, target, shrinkable);
 						return null;
@@ -119,16 +120,19 @@ class OSGiFrameworkHooks {
 			ServiceRegistry registry = container.getServiceRegistry();
 			if (registry != null) {
 				registry.notifyHooksPrivileged(new HookContext() {
+					@Override
 					public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
 						if (hook instanceof CollisionHook) {
 							((CollisionHook) hook).filterCollisions(operationType, target, collisionCandidates);
 						}
 					}
 
+					@Override
 					public String getHookClassName() {
 						return collisionHookName;
 					}
 
+					@Override
 					public String getHookMethodName() {
 						return "filterCollisions"; //$NON-NLS-1$ 
 					}
@@ -203,6 +207,7 @@ class OSGiFrameworkHooks {
 
 		}
 
+		@Override
 		public ResolverHook begin(Collection<BundleRevision> triggers) {
 			if (debug.DEBUG_HOOKS) {
 				Debug.println("ResolverHook.begin"); //$NON-NLS-1$
@@ -252,6 +257,7 @@ class OSGiFrameworkHooks {
 				this.systemModule = systemModule;
 			}
 
+			@Override
 			public void filterResolvable(Collection<BundleRevision> candidates) {
 				if (debug.DEBUG_HOOKS) {
 					Debug.println("ResolverHook.filterResolvable(" + candidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -291,6 +297,7 @@ class OSGiFrameworkHooks {
 				return systemModule == null || !Module.RESOLVED_SET.contains(systemModule.getState()) || (systemModule.getState().equals(State.STARTING) && inInit);
 			}
 
+			@Override
 			public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
 				if (debug.DEBUG_HOOKS) {
 					Debug.println("ResolverHook.filterSingletonCollisions(" + singleton + ", " + collisionCandidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -312,6 +319,7 @@ class OSGiFrameworkHooks {
 				}
 			}
 
+			@Override
 			public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
 				if (debug.DEBUG_HOOKS) {
 					Debug.println("ResolverHook.filterMatches(" + requirement + ", " + candidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -333,6 +341,7 @@ class OSGiFrameworkHooks {
 				}
 			}
 
+			@Override
 			public void end() {
 				if (debug.DEBUG_HOOKS) {
 					Debug.println("ResolverHook.end"); //$NON-NLS-1$

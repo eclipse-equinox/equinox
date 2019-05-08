@@ -48,6 +48,7 @@ public class DefaultStartupMonitor implements StartupMonitor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.adaptor.StartupMonitor#update()
 	 */
+	@Override
 	public void update() {
 		if (updateMethod != null) {
 			try {
@@ -60,6 +61,7 @@ public class DefaultStartupMonitor implements StartupMonitor {
 		}
 	}
 
+	@Override
 	public void applicationRunning() {
 		if (EclipseStarter.debug) {
 			String timeString = equinoxConfig.getConfiguration("eclipse.startTime"); //$NON-NLS-1$ 

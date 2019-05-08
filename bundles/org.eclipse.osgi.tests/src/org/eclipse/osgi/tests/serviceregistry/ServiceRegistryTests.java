@@ -38,6 +38,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		final String testMethodName = getName();
 		// simple ServiceListener test
 		Runnable runIt = new Runnable() {
+			@Override
 			public void run() {
 				// nothing
 			}
@@ -133,6 +134,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		final String testMethodName = getName();
 		// simple ServiceListener test
 		Runnable runIt = new Runnable() {
+			@Override
 			public void run() {
 				// nothing
 			}
@@ -228,6 +230,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		final String testMethodName = getName();
 		// simple ServiceListener test
 		Runnable runIt = new Runnable() {
+			@Override
 			public void run() {
 				// nothing
 			}
@@ -358,6 +361,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		final String testMethodName = getName();
 		// test that getServiceReference returns the proper service
 		Runnable runIt = new Runnable() {
+			@Override
 			public void run() {
 				// nothing
 			}
@@ -395,6 +399,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		ServiceRegistration reg = null;
 		try {
 			reg = OSGiTestsActivator.getContext().registerService(new String[] {Runnable.class.getName(), Object.class.getName(), Object.class.getName()}, new Runnable() {
+				@Override
 				public void run() {
 					// nothing
 				}
@@ -411,6 +416,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		final String testMethodName = getName();
 		// test that getServiceReference returns the proper service
 		Runnable runIt = new Runnable() {
+			@Override
 			public void run() {
 				// nothing
 			}
@@ -464,6 +470,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 
 	public void testModifiedRanking() {
 		Runnable runIt = new Runnable() {
+			@Override
 			public void run() {
 				// nothing
 			}

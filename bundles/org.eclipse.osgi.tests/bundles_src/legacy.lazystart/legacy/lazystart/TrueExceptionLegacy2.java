@@ -18,6 +18,7 @@ import legacy.lazystart.b.BTest;
 
 public class TrueExceptionLegacy2 implements ITestRunner {
 
+	@Override
 	public Object testIt() throws Exception {
 		return new BTest();
 	}

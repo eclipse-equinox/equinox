@@ -67,6 +67,7 @@ public class CDSBundleFile extends BundleFileWrapper {
 	 * If the path is for a class, it will look for the magic cookie in the 
 	 * shared classes cache. If found, the bytes representing the magic cookie are stored in CDSBundleEntry object.
 	 */
+	@Override
 	public BundleEntry getEntry(String path) {
 		BundleEntry wrappedEntry = super.getEntry(path);
 		if (wrappedEntry == null) {

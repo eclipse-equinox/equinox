@@ -31,6 +31,7 @@ public class ReferenceInputStream extends InputStream {
 
 	/* This method should not be called.
 	 */
+	@Override
 	public int read() throws IOException {
 		throw new IOException();
 	}

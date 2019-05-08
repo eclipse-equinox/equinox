@@ -80,6 +80,7 @@ public class ServiceReferenceImpl<S> implements ServiceReference<S> {
 	 * @return The property value to which the key is mapped; <code>null</code>
 	 *         if there is no property named after the key.
 	 */
+	@Override
 	public Object getProperty(String key) {
 		return registration.getProperty(key);
 	}
@@ -104,6 +105,7 @@ public class ServiceReferenceImpl<S> implements ServiceReference<S> {
 	 * 
 	 * @return An array of property keys.
 	 */
+	@Override
 	public String[] getPropertyKeys() {
 		return registration.getPropertyKeys();
 	}
@@ -122,6 +124,7 @@ public class ServiceReferenceImpl<S> implements ServiceReference<S> {
 	 *         that service has already been unregistered.
 	 * @see BundleContext#registerService(String[],Object,java.util.Dictionary)
 	 */
+	@Override
 	public Bundle getBundle() {
 		return registration.getBundle();
 	}
@@ -138,6 +141,7 @@ public class ServiceReferenceImpl<S> implements ServiceReference<S> {
 	 * 
 	 * @since 1.1
 	 */
+	@Override
 	public Bundle[] getUsingBundles() {
 		return registration.getUsingBundles();
 	}
@@ -169,6 +173,7 @@ public class ServiceReferenceImpl<S> implements ServiceReference<S> {
 	 * 
 	 * @since 1.3
 	 */
+	@Override
 	public boolean isAssignableTo(Bundle bundle, String className) {
 		return registration.isAssignableTo(bundle, className);
 	}
@@ -198,6 +203,7 @@ public class ServiceReferenceImpl<S> implements ServiceReference<S> {
 	 *         greater than the specified <code>ServiceReference</code>.
 	 * @since 1.4
 	 */
+	@Override
 	public int compareTo(Object object) {
 		ServiceRegistrationImpl<?> other = ((ServiceReferenceImpl<?>) object).registration;
 
@@ -225,6 +231,7 @@ public class ServiceReferenceImpl<S> implements ServiceReference<S> {
 	 *
 	 * @return  a hash code value for this object.
 	 */
+	@Override
 	public int hashCode() {
 		return registration.hashCode();
 	}
@@ -236,6 +243,7 @@ public class ServiceReferenceImpl<S> implements ServiceReference<S> {
 	 * @return  <code>true</code> if this object is the same as the obj
 	 *          argument; <code>false</code> otherwise.
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) {
 			return true;
@@ -255,6 +263,7 @@ public class ServiceReferenceImpl<S> implements ServiceReference<S> {
 	 *
 	 * @return String
 	 */
+	@Override
 	public String toString() {
 		return registration.toString();
 	}

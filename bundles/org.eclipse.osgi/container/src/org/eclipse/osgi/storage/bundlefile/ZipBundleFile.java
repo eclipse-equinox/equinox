@@ -197,6 +197,7 @@ public class ZipBundleFile extends BundleFile {
 		return generation.getExtractFile(".cp", entryName); //$NON-NLS-1$
 	}
 
+	@Override
 	public File getFile(String entry, boolean nativeCode) {
 		if (!lockOpen()) {
 			return null;
@@ -246,6 +247,7 @@ public class ZipBundleFile extends BundleFile {
 		return null;
 	}
 
+	@Override
 	public boolean containsDir(String dir) {
 		if (!lockOpen()) {
 			return false;
@@ -282,6 +284,7 @@ public class ZipBundleFile extends BundleFile {
 		return false;
 	}
 
+	@Override
 	public BundleEntry getEntry(String path) {
 		if (!lockOpen()) {
 			return null;
@@ -356,6 +359,7 @@ public class ZipBundleFile extends BundleFile {
 		}
 	}
 
+	@Override
 	public void close() throws IOException {
 		openLock.lock();
 		try {
@@ -418,6 +422,7 @@ public class ZipBundleFile extends BundleFile {
 		return false;
 	}
 
+	@Override
 	public void open() throws IOException {
 		getZipFile(false);
 	}
@@ -467,6 +472,7 @@ public class ZipBundleFile extends BundleFile {
 			incrementReference();
 		}
 
+		@Override
 		public int available() throws IOException {
 			try {
 				return super.available();
@@ -475,6 +481,7 @@ public class ZipBundleFile extends BundleFile {
 			}
 		}
 
+		@Override
 		public void close() throws IOException {
 			try {
 				super.close();
@@ -490,6 +497,7 @@ public class ZipBundleFile extends BundleFile {
 			}
 		}
 
+		@Override
 		public int read() throws IOException {
 			try {
 				return super.read();
@@ -498,6 +506,7 @@ public class ZipBundleFile extends BundleFile {
 			}
 		}
 
+		@Override
 		public int read(byte[] var0, int var1, int var2) throws IOException {
 			try {
 				return super.read(var0, var1, var2);
@@ -506,6 +515,7 @@ public class ZipBundleFile extends BundleFile {
 			}
 		}
 
+		@Override
 		public int read(byte[] var0) throws IOException {
 			try {
 				return super.read(var0);
@@ -514,6 +524,7 @@ public class ZipBundleFile extends BundleFile {
 			}
 		}
 
+		@Override
 		public void reset() throws IOException {
 			try {
 				super.reset();
@@ -522,6 +533,7 @@ public class ZipBundleFile extends BundleFile {
 			}
 		}
 
+		@Override
 		public long skip(long var0) throws IOException {
 			try {
 				return super.skip(var0);

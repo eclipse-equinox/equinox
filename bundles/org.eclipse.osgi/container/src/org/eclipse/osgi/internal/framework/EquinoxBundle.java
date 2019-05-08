@@ -101,10 +101,12 @@ public class EquinoxBundle implements Bundle, BundleReference {
 				this.headers = headers;
 			}
 
+			@Override
 			public Enumeration<String> elements() {
 				return headers.elements();
 			}
 
+			@Override
 			public String get(Object key) {
 				if (!(key instanceof String))
 					return null;
@@ -139,22 +141,27 @@ public class EquinoxBundle implements Bundle, BundleReference {
 				return result;
 			}
 
+			@Override
 			public boolean isEmpty() {
 				return headers.isEmpty();
 			}
 
+			@Override
 			public Enumeration<String> keys() {
 				return headers.keys();
 			}
 
+			@Override
 			public String put(String key, String value) {
 				return headers.put(key, value);
 			}
 
+			@Override
 			public String remove(Object key) {
 				return headers.remove(key);
 			}
 
+			@Override
 			public int size() {
 				return headers.size();
 			}
@@ -257,6 +264,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			this.init((FrameworkListener[]) null);
 		}
 
+		@Override
 		public void init(FrameworkListener... listeners) throws BundleException {
 			if (listeners != null) {
 				if (getEquinoxContainer().getConfiguration().getDebug().DEBUG_SYSTEM_BUNDLE) {
@@ -1053,6 +1061,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		return equinoxContainer;
 	}
 
+	@Override
 	public String toString() {
 		String name = getSymbolicName();
 		if (name == null)

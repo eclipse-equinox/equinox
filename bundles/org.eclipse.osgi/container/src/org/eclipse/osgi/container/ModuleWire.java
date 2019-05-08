@@ -72,6 +72,7 @@ public final class ModuleWire implements BundleWire {
 		return hostingRequirer;
 	}
 
+	@Override
 	public String toString() {
 		return getRequirement() + " -> " + getCapability(); //$NON-NLS-1$
 	}

@@ -211,6 +211,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 		final S service;
 		try {
 			service = AccessController.doPrivileged(new PrivilegedAction<S>() {
+				@Override
 				public S run() {
 					return factory.getService(context.getBundleImpl(), registration);
 				}
@@ -259,6 +260,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	void factoryUngetService(final S service) {
 		try {
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				@Override
 				public Void run() {
 					factory.ungetService(context.getBundleImpl(), registration, service);
 					return null;

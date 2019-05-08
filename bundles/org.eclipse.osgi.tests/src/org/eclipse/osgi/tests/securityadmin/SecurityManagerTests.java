@@ -44,6 +44,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		return new TestSuite(SecurityManagerTests.class);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		if (System.getSecurityManager() != null)
 			fail("Cannot test with security manager set"); //$NON-NLS-1$
@@ -53,22 +54,27 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			private static final long serialVersionUID = 3258131349494708277L;
 
 			// A simple PermissionCollection that only has AllPermission
+		@Override
 			public void add(Permission permission) {
 				//no adding to this policy
 			}
 
+		@Override
 			public boolean implies(Permission permission) {
 				return true;
 			}
 
+		@Override
 			public Enumeration elements() {
 				return new Enumeration() {
 					int cur = 0;
 
+			@Override
 					public boolean hasMoreElements() {
 						return cur < 1;
 					}
 
+			@Override
 					public Object nextElement() {
 						if (cur == 0) {
 							cur = 1;
@@ -82,10 +88,12 @@ public class SecurityManagerTests extends AbstractBundleTests {
 
 		Policy.setPolicy(new Policy() {
 
+		@Override
 			public PermissionCollection getPermissions(CodeSource codesource) {
 				return allPermissions;
 			}
 
+		@Override
 			public void refresh() {
 				// nothing
 			}
@@ -94,6 +102,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		super.setUp();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		if (System.getSecurityManager() != null)

@@ -48,6 +48,7 @@ public class DirBundleFile extends BundleFile {
 		return enableStrictBundleEntryPath ? secureAction.getCanonicalFile(basefile) : basefile;
 	}
 
+	@Override
 	public File getFile(String path, boolean nativeCode) {
 		final boolean checkInBundle = path != null && path.indexOf(POINTER_UPPER_DIRECTORY) >= 0;
 		File file = new File(this.basefile, path);
@@ -105,6 +106,7 @@ public class DirBundleFile extends BundleFile {
 		return file;
 	}
 
+	@Override
 	public BundleEntry getEntry(String path) {
 		File filePath = getFile(path, false);
 		if (filePath == null)
@@ -112,11 +114,13 @@ public class DirBundleFile extends BundleFile {
 		return new FileBundleEntry(filePath, path);
 	}
 
+	@Override
 	public boolean containsDir(String dir) {
 		File dirPath = getFile(dir, false);
 		return dirPath != null && BundleFile.secureAction.isDirectory(dirPath);
 	}
 
+	@Override
 	public Enumeration<String> getEntryPaths(String path, boolean recurse) {
 		if (path.length() > 0 && path.charAt(0) == '/')
 			path = path.substring(1);
@@ -145,10 +149,12 @@ public class DirBundleFile extends BundleFile {
 		return Collections.enumeration(entries);
 	}
 
+	@Override
 	public void close() {
 		// nothing to do.
 	}
 
+	@Override
 	public void open() {
 		// nothing to do.
 	}

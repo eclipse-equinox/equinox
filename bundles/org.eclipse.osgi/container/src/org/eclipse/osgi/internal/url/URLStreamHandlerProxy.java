@@ -78,6 +78,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see java.net.URLStreamHandler#equals(URL, URL)
 	 */
+	@Override
 	protected boolean equals(URL url1, URL url2) {
 		return realHandlerService.equals(url1, url2);
 	}
@@ -85,6 +86,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see java.net.URLStreamHandler#getDefaultPort()
 	 */
+	@Override
 	protected int getDefaultPort() {
 		return realHandlerService.getDefaultPort();
 	}
@@ -92,6 +94,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see java.net.URLStreamHandler#getHostAddress(URL)
 	 */
+	@Override
 	protected InetAddress getHostAddress(URL url) {
 		return realHandlerService.getHostAddress(url);
 	}
@@ -99,6 +102,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see java.net.URLStreamHandler#hashCode(URL)
 	 */
+	@Override
 	protected int hashCode(URL url) {
 		return realHandlerService.hashCode(url);
 	}
@@ -106,6 +110,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see java.net.URLStreamHandler#hostsEqual(URL, URL)
 	 */
+	@Override
 	protected boolean hostsEqual(URL url1, URL url2) {
 		return realHandlerService.hostsEqual(url1, url2);
 	}
@@ -113,6 +118,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see java.net.URLStreamHandler#openConnection(URL)
 	 */
+	@Override
 	protected URLConnection openConnection(URL url) throws IOException {
 		return realHandlerService.openConnection(url);
 	}
@@ -120,6 +126,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see java.net.URLStreamHandler#parseURL(URL, String, int, int)
 	 */
+	@Override
 	protected void parseURL(URL url, String str, int start, int end) {
 		realHandlerService.parseURL(urlSetter, url, str, start, end);
 	}
@@ -127,6 +134,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see java.net.URLStreamHandler#sameFile(URL, URL)
 	 */
+	@Override
 	protected boolean sameFile(URL url1, URL url2) {
 		return realHandlerService.sameFile(url1, url2);
 	}
@@ -134,6 +142,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see java.net.URLStreamHandler#toExternalForm(URL)
 	 */
+	@Override
 	protected String toExternalForm(URL url) {
 		return realHandlerService.toExternalForm(url);
 	}
@@ -141,11 +150,13 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see java.net.URLStreamHandler#setURL(URL, String, String, int, String, String, String, String, String)
 	 */
+	@Override
 	public void setURL(URL u, String protocol, String host, int port, String authority, String userInfo, String file, String query, String ref) {
 		super.setURL(u, protocol, host, port, authority, userInfo, file, query, ref);
 	}
 
 	@SuppressWarnings("deprecation")
+	@Override
 	public void setURL(URL url, String protocol, String host, int port, String file, String ref) {
 
 		//using non-deprecated URLStreamHandler.setURL method. 
@@ -156,6 +167,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(ServiceReference)
 	 */
+	@Override
 	public ServiceReference<URLStreamHandlerService> addingService(ServiceReference<URLStreamHandlerService> reference) {
 		//check to see if our protocol is being registered by another service
 		Object prop = reference.getProperty(URLConstants.URL_HANDLER_PROTOCOL);
@@ -184,6 +196,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(ServiceReference, Object)
 	 */
 	// check to see if the ranking has changed.  If so, re-select a new URLHandler
+	@Override
 	public void modifiedService(ServiceReference<URLStreamHandlerService> reference, ServiceReference<URLStreamHandlerService> service) {
 		int newRank = getRank(reference);
 		if (reference == urlStreamServiceReference) {
@@ -206,6 +219,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(ServiceReference, Object)
 	 */
+	@Override
 	public void removedService(ServiceReference<URLStreamHandlerService> reference, ServiceReference<URLStreamHandlerService> service) {
 		// check to see if our URLStreamHandler was unregistered.
 		if (reference != urlStreamServiceReference)
@@ -224,6 +238,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 		return (property instanceof Integer) ? ((Integer) property).intValue() : 0;
 	}
 
+	@Override
 	protected URLConnection openConnection(URL u, Proxy p) throws IOException {
 		try {
 			Method openConn = realHandlerService.getClass().getMethod("openConnection", new Class[] {URL.class, Proxy.class}); //$NON-NLS-1$

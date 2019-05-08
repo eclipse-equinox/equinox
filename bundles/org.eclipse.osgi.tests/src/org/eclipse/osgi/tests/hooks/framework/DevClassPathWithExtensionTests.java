@@ -32,6 +32,7 @@ public class DevClassPathWithExtensionTests extends AbstractFrameworkHookTests {
 	private Framework framework;
 	private String location;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		location = bundleInstaller.getBundleLocation(TEST_BUNDLE);
@@ -42,6 +43,7 @@ public class DevClassPathWithExtensionTests extends AbstractFrameworkHookTests {
 		framework = createFramework(configuration);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		stopQuietly(framework);
 		super.tearDown();

@@ -214,6 +214,7 @@ public class PolicyHandler implements SynchronousBundleListener {
 		context.removeBundleListener(this);
 	}
 
+	@Override
 	public void bundleChanged(BundleEvent event) {
 		if ((event.getType() & (BundleEvent.RESOLVED | BundleEvent.UNRESOLVED)) == 0)
 			return;

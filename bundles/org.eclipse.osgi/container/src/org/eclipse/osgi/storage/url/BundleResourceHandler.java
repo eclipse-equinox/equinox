@@ -48,6 +48,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 	/** 
 	 * Parse reference URL. 
 	 */
+	@Override
 	protected void parseURL(URL url, String str, int start, int end) {
 		if (end < start)
 			return;
@@ -145,6 +146,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 	 *
 	 * @exception	IOException 	thrown if an IO error occurs during connection establishment
 	 */
+	@Override
 	protected URLConnection openConnection(URL url) throws IOException {
 		if (bundleEntry != null) // if the bundleEntry is not null then return quick
 			return (new BundleURLConnection(url, bundleEntry));
@@ -189,6 +191,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 	 * @param   url   the URL.
 	 * @return  a string representation of the URL.
 	 */
+	@Override
 	protected String toExternalForm(URL url) {
 		StringBuffer result = new StringBuffer(url.getProtocol());
 		result.append("://"); //$NON-NLS-1$
@@ -216,6 +219,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		return (result.toString());
 	}
 
+	@Override
 	protected int hashCode(URL url) {
 		int hash = 0;
 		String protocol = url.getProtocol();
@@ -236,14 +240,17 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		return hash;
 	}
 
+	@Override
 	protected boolean equals(URL url1, URL url2) {
 		return sameFile(url1, url2);
 	}
 
+	@Override
 	protected synchronized InetAddress getHostAddress(URL url) {
 		return null;
 	}
 
+	@Override
 	protected boolean hostsEqual(URL url1, URL url2) {
 		String host1 = url1.getHost();
 		String host2 = url2.getHost();
@@ -252,6 +259,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		return (host1 == null && host2 == null);
 	}
 
+	@Override
 	protected boolean sameFile(URL url1, URL url2) {
 		// do a hashcode test to allow each handler to check the adaptor first
 		if (url1.hashCode() != url2.hashCode())

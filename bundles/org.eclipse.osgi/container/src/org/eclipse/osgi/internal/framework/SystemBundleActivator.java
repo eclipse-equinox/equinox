@@ -56,6 +56,7 @@ public class SystemBundleActivator implements BundleActivator {
 	private SecurityManager setSecurityManagner;
 
 	@SuppressWarnings("deprecation")
+	@Override
 	public void start(BundleContext bc) throws Exception {
 		registrations.clear();
 		EquinoxBundle bundle = (EquinoxBundle) bc.getBundle();
@@ -183,6 +184,7 @@ public class SystemBundleActivator implements BundleActivator {
 		}
 	}
 
+	@Override
 	public void stop(BundleContext bc) throws Exception {
 		EquinoxBundle bundle = (EquinoxBundle) bc.getBundle();
 

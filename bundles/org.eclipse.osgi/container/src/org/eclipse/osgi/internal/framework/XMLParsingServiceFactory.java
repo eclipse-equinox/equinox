@@ -27,6 +27,7 @@ class XMLParsingServiceFactory implements ServiceFactory<Object> {
 		this.setTccl = setTccl;
 	}
 
+	@Override
 	public Object getService(Bundle bundle, ServiceRegistration<Object> registration) {
 		if (!setTccl || bundle == null)
 			return createService();
@@ -59,6 +60,7 @@ class XMLParsingServiceFactory implements ServiceFactory<Object> {
 		return DocumentBuilderFactory.newInstance();
 	}
 
+	@Override
 	public void ungetService(Bundle bundle, ServiceRegistration<Object> registration, Object service) {
 		// Do nothing.
 	}

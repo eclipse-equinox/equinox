@@ -95,14 +95,17 @@ public class ShrinkableCollection<E> implements Collection<E> {
 		return true;
 	}
 
+	@Override
 	public boolean add(E e) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public boolean addAll(Collection<? extends E> c) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void clear() {
 		collection.clear();
 		for (Collection<? extends E> c : list) {
@@ -110,18 +113,22 @@ public class ShrinkableCollection<E> implements Collection<E> {
 		}
 	}
 
+	@Override
 	public boolean contains(Object o) {
 		return collection.contains(o);
 	}
 
+	@Override
 	public boolean containsAll(Collection<?> c) {
 		return collection.containsAll(c);
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return collection.isEmpty();
 	}
 
+	@Override
 	public Iterator<E> iterator() {
 		@SuppressWarnings("unchecked")
 		final Iterator<E> iter = (Iterator<E>) collection.iterator();
@@ -132,15 +139,18 @@ public class ShrinkableCollection<E> implements Collection<E> {
 		return new Iterator<E>() {
 			private E last;
 
+		@Override
 			public boolean hasNext() {
 				return iter.hasNext();
 			}
 
+		@Override
 			public E next() {
 				last = iter.next();
 				return last;
 			}
 
+		@Override
 			public void remove() {
 				iter.remove();
 				for (Collection<? extends E> c : collections) {
@@ -150,6 +160,7 @@ public class ShrinkableCollection<E> implements Collection<E> {
 		};
 	}
 
+	@Override
 	public boolean remove(Object o) {
 		final boolean result = collection.remove(o);
 		if (result) {
@@ -160,6 +171,7 @@ public class ShrinkableCollection<E> implements Collection<E> {
 		return result;
 	}
 
+	@Override
 	public boolean removeAll(Collection<?> c) {
 		final boolean result = collection.removeAll(c);
 		if (result) {
@@ -170,6 +182,7 @@ public class ShrinkableCollection<E> implements Collection<E> {
 		return result;
 	}
 
+	@Override
 	public boolean retainAll(Collection<?> c) {
 		final boolean result = collection.retainAll(c);
 		if (result) {
@@ -180,18 +193,22 @@ public class ShrinkableCollection<E> implements Collection<E> {
 		return result;
 	}
 
+	@Override
 	public int size() {
 		return collection.size();
 	}
 
+	@Override
 	public Object[] toArray() {
 		return collection.toArray();
 	}
 
+	@Override
 	public <T> T[] toArray(T[] var0) {
 		return collection.toArray(var0);
 	}
 
+	@Override
 	public String toString() {
 		return collection.toString();
 	}

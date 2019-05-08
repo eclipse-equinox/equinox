@@ -39,6 +39,7 @@ public class SignedContentImpl implements SignedContent {
 		this.contentMDResults = contentMDResults;
 	}
 
+	@Override
 	public SignedContentEntry[] getSignedEntries() {
 		if (contentMDResults == null)
 			return new SignedContentEntry[0];
@@ -51,6 +52,7 @@ public class SignedContentImpl implements SignedContent {
 		return results.toArray(new SignedContentEntry[results.size()]);
 	}
 
+	@Override
 	public SignedContentEntry getSignedEntry(String name) {
 		if (contentMDResults == null)
 			return null;
@@ -58,10 +60,12 @@ public class SignedContentImpl implements SignedContent {
 		return mdResult == null ? null : new SignedContentEntryImpl(name, (SignerInfo[]) mdResult[0]);
 	}
 
+	@Override
 	public SignerInfo[] getSignerInfos() {
 		return signerInfos;
 	}
 
+	@Override
 	public Date getSigningTime(SignerInfo signerInfo) {
 		if (tsaSignerInfos == null)
 			return null;
@@ -69,6 +73,7 @@ public class SignedContentImpl implements SignedContent {
 		return tsaInfo == null ? null : (Date) tsaInfo[1];
 	}
 
+	@Override
 	public SignerInfo getTSASignerInfo(SignerInfo signerInfo) {
 		if (tsaSignerInfos == null)
 			return null;
@@ -76,10 +81,12 @@ public class SignedContentImpl implements SignedContent {
 		return tsaInfo == null ? null : (SignerInfo) tsaInfo[0];
 	}
 
+	@Override
 	public boolean isSigned() {
 		return signerInfos.length > 0;
 	}
 
+	@Override
 	public void checkValidity(SignerInfo signer) throws CertificateExpiredException, CertificateNotYetValidException {
 		Date signingTime = getSigningTime(signer);
 		if (checkedValid)
@@ -146,18 +153,22 @@ public class SignedContentImpl implements SignedContent {
 			this.entrySigners = entrySigners == null ? EMPTY_SIGNERINFO : entrySigners;
 		}
 
+		@Override
 		public String getName() {
 			return entryName;
 		}
 
+		@Override
 		public SignerInfo[] getSignerInfos() {
 			return entrySigners;
 		}
 
+		@Override
 		public boolean isSigned() {
 			return entrySigners.length > 0;
 		}
 
+		@Override
 		public void verify() throws IOException, InvalidContentException {
 			BundleFile currentContent = content;
 			if (currentContent == null)

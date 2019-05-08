@@ -39,6 +39,7 @@ public class ReferenceURLConnection extends URLConnection {
 		this.installPath = installPath;
 	}
 
+	@Override
 	public synchronized void connect() throws IOException {
 		if (!connected) {
 			// TODO assumes that reference URLs are always based on file: URLs.
@@ -91,14 +92,17 @@ public class ReferenceURLConnection extends URLConnection {
 		}
 	}
 
+	@Override
 	public boolean getDoInput() {
 		return true;
 	}
 
+	@Override
 	public boolean getDoOutput() {
 		return false;
 	}
 
+	@Override
 	public InputStream getInputStream() throws IOException {
 		if (!connected) {
 			connect();

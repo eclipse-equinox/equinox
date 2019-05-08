@@ -670,6 +670,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		final Exception[] failureException = new BundleException[1];
 		final FrameworkEvent[] success = new FrameworkEvent[] {null};
 		Thread t = new Thread(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					success[0] = equinox.waitForStop(10000);
@@ -1161,6 +1162,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		final Exception[] failureException = new BundleException[1];
 		final FrameworkEvent[] success = new FrameworkEvent[] {null};
 		Thread waitForUpdate = new Thread(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					success[0] = equinox.waitForStop(10000);

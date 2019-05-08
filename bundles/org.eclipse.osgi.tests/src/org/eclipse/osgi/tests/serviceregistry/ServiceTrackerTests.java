@@ -31,6 +31,7 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 		final String testMethodName = getName();
 		// simple ServiceTracker test
 		Runnable runIt = new Runnable() {
+			@Override
 			public void run() {
 				// nothing
 			}
@@ -110,6 +111,7 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 		final String testMethodName = getName();
 		// simple ServiceTracker test
 		Runnable runIt = new Runnable() {
+			@Override
 			public void run() {
 				// nothing
 			}
@@ -189,6 +191,7 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 		final String testMethodName = getName();
 		// simple ServiceTracker test
 		Runnable runIt = new Runnable() {
+			@Override
 			public void run() {
 				// nothing
 			}

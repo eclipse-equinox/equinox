@@ -79,6 +79,7 @@ public abstract class BundleEntry {
 	 *
 	 * @return String representation of this BundleEntry.
 	 */
+	@Override
 	public String toString() {
 		return (getName());
 	}

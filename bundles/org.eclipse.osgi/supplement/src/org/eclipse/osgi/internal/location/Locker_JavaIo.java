@@ -26,6 +26,7 @@ public class Locker_JavaIo implements Locker {
 		this.lockFile = lockFile;
 	}
 
+	@Override
 	public synchronized boolean lock() throws IOException {
 		//if the lock file already exists, try to delete,
 		//assume failure means another eclipse has it open
@@ -47,6 +48,7 @@ public class Locker_JavaIo implements Locker {
 		return true;
 	}
 
+	@Override
 	public synchronized void release() {
 		try {
 			if (lockRAF != null) {
@@ -60,6 +62,7 @@ public class Locker_JavaIo implements Locker {
 			lockFile.delete();
 	}
 
+	@Override
 	public synchronized boolean isLocked() throws IOException {
 		if (lockRAF != null)
 			return true;

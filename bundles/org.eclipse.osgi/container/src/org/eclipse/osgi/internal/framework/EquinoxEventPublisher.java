@@ -140,6 +140,7 @@ public class EquinoxEventPublisher {
 			publishBundleEventPrivileged(event);
 		} else {
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				@Override
 				public Void run() {
 					publishBundleEventPrivileged(event);
 					return null;
@@ -254,16 +255,19 @@ public class EquinoxEventPublisher {
 		ServiceRegistry serviceRegistry = container.getServiceRegistry();
 		if (serviceRegistry != null) {
 			serviceRegistry.notifyHooksPrivileged(new HookContext() {
+				@Override
 				public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
 					if (hook instanceof EventHook) {
 						((EventHook) hook).event(event, result);
 					}
 				}
 
+				@Override
 				public String getHookClassName() {
 					return eventHookName;
 				}
 
+				@Override
 				public String getHookMethodName() {
 					return "event"; //$NON-NLS-1$
 				}
@@ -298,6 +302,7 @@ public class EquinoxEventPublisher {
 			publishFrameworkEventPrivileged(event, listeners);
 		} else {
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				@Override
 				public Void run() {
 					publishFrameworkEventPrivileged(event, listeners);
 					return null;

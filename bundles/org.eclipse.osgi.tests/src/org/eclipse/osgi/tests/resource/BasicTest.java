@@ -212,18 +212,21 @@ public class BasicTest extends AbstractResourceTest {
 	private void assertTb2() {
 		final BundleRevision revision = tb2.adapt(BundleRevision.class);
 		assertNotIdentityCapability(new CapabilityProvider() {
+			@Override
 			public List getCapabilities(String namespace) {
 				return revision.getDeclaredCapabilities(namespace);
 			}
 		});
 		final Resource resource = revision;
 		assertNotIdentityCapability(new CapabilityProvider() {
+			@Override
 			public List getCapabilities(String namespace) {
 				return resource.getCapabilities(namespace);
 			}
 		});
 		final BundleWiring wiring = tb2.adapt(BundleWiring.class);
 		assertNotIdentityCapability(new CapabilityProvider() {
+			@Override
 			public List getCapabilities(String namespace) {
 				return wiring.getCapabilities(namespace);
 			}

@@ -35,6 +35,7 @@ public class CDSHookConfigurator implements HookConfigurator {
 	private static final String OLD_CDS_CONFIGURATOR = "com.ibm.cds.CDSHookConfigurator"; //$NON-NLS-1$
 	private static final String J9_SHARED_CLASS_HELPER_CLASS = "com.ibm.oti.shared.SharedClassHelperFactory"; //$NON-NLS-1$
 
+	@Override
 	public void addHooks(HookRegistry hookRegistry) {
 		boolean disableCDS = Boolean.valueOf(hookRegistry.getConfiguration().getProperty(DISABLE_CDS));
 		if (disableCDS) {

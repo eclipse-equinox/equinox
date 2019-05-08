@@ -70,6 +70,7 @@ public final class DisabledInfo {
 		return bundle;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == this)
 			return true;
@@ -83,6 +84,7 @@ public final class DisabledInfo {
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

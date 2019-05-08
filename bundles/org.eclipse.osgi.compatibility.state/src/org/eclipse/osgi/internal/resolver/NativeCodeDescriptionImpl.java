@@ -113,6 +113,7 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 		return highest;
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 

@@ -65,6 +65,7 @@ public abstract class NLS {
 	private static final String PROP_WARNINGS = "osgi.nls.warnings"; //$NON-NLS-1$
 	private static final String IGNORE = "ignore"; //$NON-NLS-1$
 	private static final boolean ignoreWarnings = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+		@Override
 		public Boolean run() {
 			return IGNORE.equals(System.getProperty(PROP_WARNINGS));
 		}
@@ -152,6 +153,7 @@ public abstract class NLS {
 			return;
 		}
 		AccessController.doPrivileged(new PrivilegedAction<Void>() {
+			@Override
 			public Void run() {
 				load(baseName, clazz);
 				return null;
@@ -411,6 +413,7 @@ public abstract class NLS {
 		/* (non-Javadoc)
 		 * @see java.util.Hashtable#put(java.lang.Object, java.lang.Object)
 		 */
+		@Override
 		public synchronized Object put(Object key, Object value) {
 			Object fieldObject = fields.put(key, ASSIGNED);
 			// if already assigned, there is nothing to do

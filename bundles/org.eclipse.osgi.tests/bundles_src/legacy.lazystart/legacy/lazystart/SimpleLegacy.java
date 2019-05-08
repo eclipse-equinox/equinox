@@ -18,6 +18,7 @@ import legacy.lazystart.a.ATest;
 
 public class SimpleLegacy implements ITestRunner {
 
+	@Override
 	public Object testIt() throws Exception {
 		return new ATest();
 	}

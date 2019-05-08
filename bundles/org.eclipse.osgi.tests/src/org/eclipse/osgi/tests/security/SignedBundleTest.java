@@ -107,6 +107,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		*/
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}

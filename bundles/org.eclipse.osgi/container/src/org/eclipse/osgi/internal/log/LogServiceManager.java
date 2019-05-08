@@ -126,6 +126,7 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 	 *
 	 */
 	@SuppressWarnings("deprecation")
+	@Override
 	public void bundleChanged(BundleEvent event) {
 		Bundle bundle = event.getBundle();
 		String bsn = (bundle == null) ? null : bundle.getSymbolicName();
@@ -141,6 +142,7 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 	 * ServiceListener.serviceChanged method.
 	 *
 	 */
+	@Override
 	public void serviceChanged(ServiceEvent event) {
 		ServiceReference<?> reference = event.getServiceReference();
 		Bundle bundle = reference.getBundle();
@@ -160,6 +162,7 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 	 *
 	 */
 	@SuppressWarnings("deprecation")
+	@Override
 	public void frameworkEvent(FrameworkEvent event) {
 		Bundle bundle = event.getBundle();
 		int eventType = event.getType();
@@ -272,119 +275,148 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 
 	static class MockSystemBundle implements Bundle {
 
+		@Override
 		public int compareTo(Bundle o) {
 			long idcomp = getBundleId() - o.getBundleId();
 			return (idcomp < 0L) ? -1 : ((idcomp > 0L) ? 1 : 0);
 		}
 
+		@Override
 		public int getState() {
 			return Bundle.RESOLVED;
 		}
 
+		@Override
 		public void start(int options) {
 			// nothing
 		}
 
+		@Override
 		public void start() {
 			// nothing
 		}
 
+		@Override
 		public void stop(int options) {
 			// nothing
 		}
 
+		@Override
 		public void stop() {
 			// nothing
 		}
 
+		@Override
 		public void update(InputStream input) {
 			// nothing
 		}
 
+		@Override
 		public void update() {
 			// nothing
 		}
 
+		@Override
 		public void uninstall() {
 			// nothing
 		}
 
+		@Override
 		public Dictionary<String, String> getHeaders() {
 			return new Hashtable<>();
 		}
 
+		@Override
 		public long getBundleId() {
 			return 0;
 		}
 
+		@Override
 		public String getLocation() {
 			return Constants.SYSTEM_BUNDLE_LOCATION;
 		}
 
+		@Override
 		public ServiceReference<?>[] getRegisteredServices() {
 			return null;
 		}
 
+		@Override
 		public ServiceReference<?>[] getServicesInUse() {
 			return null;
 		}
 
+		@Override
 		public boolean hasPermission(Object permission) {
 			return true;
 		}
 
+		@Override
 		public URL getResource(String name) {
 			return null;
 		}
 
+		@Override
 		public Dictionary<String, String> getHeaders(String locale) {
 			return null;
 		}
 
+		@Override
 		public String getSymbolicName() {
 			return EquinoxContainer.NAME;
 		}
 
+		@Override
 		public Class<?> loadClass(String name) throws ClassNotFoundException {
 			throw new ClassNotFoundException();
 		}
 
+		@Override
 		public Enumeration<URL> getResources(String name) {
 			return null;
 		}
 
+		@Override
 		public Enumeration<String> getEntryPaths(String path) {
 			return null;
 		}
 
+		@Override
 		public URL getEntry(String path) {
 			return null;
 		}
 
+		@Override
 		public long getLastModified() {
 			return System.currentTimeMillis();
 		}
 
+		@Override
 		public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
 			return null;
 		}
 
+		@Override
 		public BundleContext getBundleContext() {
 			return null;
 		}
 
+		@Override
 		public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType) {
 			return new HashMap<>();
 		}
 
+		@Override
 		public Version getVersion() {
 			return new Version(0, 0, 0);
 		}
 
+		@Override
 		public <A> A adapt(Class<A> type) {
 			return null;
 		}
 
+		@Override
 		public File getDataFile(String filename) {
 			return null;
 		}

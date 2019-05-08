@@ -83,5 +83,6 @@ public interface Logger extends org.osgi.service.log.Logger {
 	 *         <code>Logger</code> object;<code>null</code> if no name is
 	 *         associated.
 	 */
+	@Override
 	public String getName();
 }

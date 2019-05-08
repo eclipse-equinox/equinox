@@ -98,6 +98,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		}
 	}
 
+	@Override
 	public boolean isSatisfiedBy(BaseDescription supplier) {
 		return isSatisfiedBy(supplier, true);
 	}
@@ -212,6 +213,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		}
 	}
 
+	@Override
 	public String toString() {
 		return "Import-Package: " + getName() + "; version=\"" + getVersionRange() + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}

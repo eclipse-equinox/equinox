@@ -76,6 +76,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			this.clazz = clazz;
 		}
 
+		@Override
 		public Bundle run() {
 			return impl.getBundlePriv(clazz);
 		}
@@ -90,6 +91,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		this.container = container;
 	}
 
+	@Override
 	public ExportedPackage[] getExportedPackages(Bundle bundle) {
 		if (bundle == null) {
 			return getExportedPackages((String) null);
@@ -112,6 +114,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		return allExports.isEmpty() ? null : allExports.toArray(new ExportedPackage[allExports.size()]);
 	}
 
+	@Override
 	public ExportedPackage getExportedPackage(String name) {
 		ExportedPackage[] allExports = getExportedPackages(name);
 		if (allExports == null)
@@ -132,6 +135,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		return result;
 	}
 
+	@Override
 	public ExportedPackage[] getExportedPackages(String name) {
 		String filter = "(" + PackageNamespace.PACKAGE_NAMESPACE + "=" + (name == null ? "*" : name) + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$
 		Map<String, String> directives = Collections.<String, String> singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter);
@@ -170,14 +174,17 @@ public class PackageAdminImpl implements PackageAdmin {
 		return (result.size() == 0 ? null : result.toArray(new ExportedPackage[result.size()]));
 	}
 
+	@Override
 	public void refreshPackages(Bundle[] input) {
 		container.getFrameworkWiring().refreshBundles(input == null ? null : Arrays.asList(input));
 	}
 
+	@Override
 	public boolean resolveBundles(Bundle[] input) {
 		return container.getFrameworkWiring().resolveBundles(input == null ? null : Arrays.asList(input));
 	}
 
+	@Override
 	public RequiredBundle[] getRequiredBundles(String symbolicName) {
 		String filter = "(" + BundleNamespace.BUNDLE_NAMESPACE + "=" + (symbolicName == null ? "*" : symbolicName) + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$
 		Map<String, String> directives = Collections.<String, String> singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter);
@@ -195,6 +202,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		return result.isEmpty() ? null : result.toArray(new RequiredBundle[result.size()]);
 	}
 
+	@Override
 	public Bundle[] getBundles(String symbolicName, String versionRange) {
 		if (symbolicName == null) {
 			throw new IllegalArgumentException();
@@ -233,6 +241,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		return sorted.toArray(new Bundle[sorted.size()]);
 	}
 
+	@Override
 	public Bundle[] getFragments(Bundle bundle) {
 		ModuleWiring wiring = getWiring(bundle);
 		if (wiring == null) {
@@ -253,6 +262,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		return fragments.isEmpty() ? null : fragments.toArray(new Bundle[fragments.size()]);
 	}
 
+	@Override
 	public Bundle[] getHosts(Bundle bundle) {
 		ModuleWiring wiring = getWiring(bundle);
 		if (wiring == null) {
@@ -298,12 +308,14 @@ public class PackageAdminImpl implements PackageAdmin {
 		return null;
 	}
 
+	@Override
 	public Bundle getBundle(final Class<?> clazz) {
 		if (System.getSecurityManager() == null)
 			return getBundlePriv(clazz);
 		return AccessController.doPrivileged(new GetBundleAction(this, clazz));
 	}
 
+	@Override
 	public int getBundleType(Bundle bundle) {
 		Module module = StartLevelImpl.getModule(bundle);
 		if (module == null) {
@@ -334,16 +346,19 @@ public class PackageAdminImpl implements PackageAdmin {
 			this.providerWiring = providerWiring;
 		}
 
+		@Override
 		public String getName() {
 			return (String) packageCapability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
 		}
 
+		@Override
 		public Bundle getExportingBundle() {
 			if (!providerWiring.isInUse())
 				return null;
 			return providerWiring.getBundle();
 		}
 
+		@Override
 		public Bundle[] getImportingBundles() {
 			if (!providerWiring.isInUse()) {
 				return null;
@@ -408,19 +423,23 @@ public class PackageAdminImpl implements PackageAdmin {
 		/**
 		 * @deprecated
 		 */
+		@Override
 		public String getSpecificationVersion() {
 			return getVersion().toString();
 		}
 
+		@Override
 		public Version getVersion() {
 			Version version = (Version) packageCapability.getAttributes().get(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
 			return version == null ? Version.emptyVersion : version;
 		}
 
+		@Override
 		public boolean isRemovalPending() {
 			return !providerWiring.isCurrent();
 		}
 
+		@Override
 		public String toString() {
 			return packageCapability.toString();
 		}
@@ -484,10 +503,12 @@ public class PackageAdminImpl implements PackageAdmin {
 			return version == null ? Version.emptyVersion : version;
 		}
 
+		@Override
 		public boolean isRemovalPending() {
 			return !providerWiring.isCurrent();
 		}
 
+		@Override
 		public String toString() {
 			return bundleCapability.toString();
 		}

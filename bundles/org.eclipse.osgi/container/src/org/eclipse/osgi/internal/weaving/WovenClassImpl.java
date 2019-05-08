@@ -66,6 +66,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		setState(TRANSFORMING);
 	}
 
+	@Override
 	public byte[] getBytes() {
 		if ((hookFlags & FLAG_HOOKSCOMPLETE) == 0) {
 			checkPermission();
@@ -79,6 +80,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		return results;
 	}
 
+	@Override
 	public void setBytes(byte[] newBytes) {
 		checkPermission();
 		if (newBytes == null)
@@ -95,6 +97,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 			sm.checkPermission(new AdminPermission(loader.getWiring().getBundle(), AdminPermission.WEAVE));
 	}
 
+	@Override
 	public List<String> getDynamicImports() {
 		if ((hookFlags & FLAG_HOOKSCOMPLETE) == 0)
 			return dynamicImports;
@@ -102,6 +105,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		return Collections.unmodifiableList(dynamicImports);
 	}
 
+	@Override
 	public boolean isWeavingComplete() {
 		return (hookFlags & FLAG_WEAVINGCOMPLETE) != 0;
 	}
@@ -130,22 +134,27 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		notifyWovenClassListeners();
 	}
 
+	@Override
 	public String getClassName() {
 		return className;
 	}
 
+	@Override
 	public ProtectionDomain getProtectionDomain() {
 		return classpathEntry.getDomain();
 	}
 
+	@Override
 	public Class<?> getDefinedClass() {
 		return clazz;
 	}
 
+	@Override
 	public BundleWiring getBundleWiring() {
 		return loader.getWiring();
 	}
 
+	@Override
 	public void call(final Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
 		if (error != null)
 			return; // do not call any other hooks once an error has occurred.
@@ -196,10 +205,12 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		return true;
 	}
 
+	@Override
 	public String getHookMethodName() {
 		return "weave"; //$NON-NLS-1$
 	}
 
+	@Override
 	public String getHookClassName() {
 		return weavingHookName;
 	}
@@ -237,6 +248,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		else {
 			try {
 				AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+					@Override
 					public Void run() {
 						registry.notifyHooksPrivileged(context);
 						return null;
@@ -259,6 +271,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 			} else {
 				try {
 					AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+						@Override
 						public Void run() {
 							registry.notifyHooksPrivileged(WovenClassImpl.this);
 							return null;
@@ -320,6 +333,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		}
 	}
 
+	@Override
 	public String toString() {
 		return className;
 	}

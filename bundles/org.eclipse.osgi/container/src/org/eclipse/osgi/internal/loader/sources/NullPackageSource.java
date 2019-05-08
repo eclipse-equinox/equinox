@@ -33,22 +33,27 @@ public class NullPackageSource extends PackageSource {
 		super(name);
 	}
 
+	@Override
 	public SingleSourcePackage[] getSuppliers() {
 		return null;
 	}
 
+	@Override
 	public boolean isNullSource() {
 		return true;
 	}
 
+	@Override
 	public Class<?> loadClass(String name) {
 		return null;
 	}
 
+	@Override
 	public URL getResource(String name) {
 		return null;
 	}
 
+	@Override
 	public Enumeration<URL> getResources(String name) {
 		return null;
 	}

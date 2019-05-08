@@ -229,6 +229,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertEquals("Wrong bundle found.", framework.getBundleContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION), b);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		String loc = bundleInstaller.getBundleLocation(HOOK_CONFIGURATOR_BUNDLE);
@@ -243,6 +244,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		resetStorageHook();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		stopQuietly(framework);
 		super.tearDown();

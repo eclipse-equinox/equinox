@@ -51,6 +51,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 			this.listener = listener;
 		}
 
+		@Override
 		public void run() {
 			safeLogged(listener, logEntry);
 		}
@@ -60,6 +61,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	private static final Enumeration<LogEntry> EMPTY_ENUMERATION = Collections.enumeration(Collections.EMPTY_LIST);
 
 	static final LogFilter NULL_LOGGER_FILTER = new LogFilter() {
+		@Override
 		public boolean isLoggable(Bundle b, String loggerName, int logLevel) {
 			return true;
 		}
@@ -137,10 +139,12 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 		return defaultLevel;
 	}
 
+	@Override
 	public ExtendedLogReaderServiceImpl getService(Bundle bundle, ServiceRegistration<ExtendedLogReaderServiceImpl> registration) {
 		return new ExtendedLogReaderServiceImpl(this);
 	}
 
+	@Override
 	public void ungetService(Bundle bundle, ServiceRegistration<ExtendedLogReaderServiceImpl> registration, ExtendedLogReaderServiceImpl service) {
 		service.shutdown();
 	}
@@ -148,6 +152,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	boolean isLoggable(final Bundle bundle, final String name, final int level) {
 		if (System.getSecurityManager() != null) {
 			return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+				@Override
 				public Boolean run() {
 					return isLoggablePrivileged(bundle, name, level);
 				}
@@ -210,6 +215,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	void log(final Bundle bundle, final String name, final StackTraceElement stackTraceElement, final Object context, final LogLevel logLevelEnum, final int level, final String message, final ServiceReference<?> ref, final Throwable exception) {
 		if (System.getSecurityManager() != null) {
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				@Override
 				public Void run() {
 					logPrivileged(bundle, name, stackTraceElement, context, logLevelEnum, level, message, ref, exception);
 					return null;

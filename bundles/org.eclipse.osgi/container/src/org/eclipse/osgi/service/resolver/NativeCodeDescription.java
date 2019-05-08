@@ -76,6 +76,7 @@ public interface NativeCodeDescription extends BaseDescription, Comparable<Nativ
 	 * code description is less than, equal to, or greater than the specified object.
 	 * @since 3.7
 	 */
+	@Override
 	public int compareTo(NativeCodeDescription other);
 
 	/**

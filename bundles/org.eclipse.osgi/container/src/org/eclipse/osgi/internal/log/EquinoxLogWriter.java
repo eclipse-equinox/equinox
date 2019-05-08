@@ -711,6 +711,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 		return (fwkEntrySeverity & logLevel) != 0;
 	}
 
+	@Override
 	public boolean isLoggable(Bundle bundle, String loggableName, int loggableLevel) {
 		if (!enabled)
 			return false;
@@ -727,6 +728,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 		return loggableLevel == LogService.LOG_ERROR;
 	}
 
+	@Override
 	public void logged(LogEntry entry) {
 		if (!(entry instanceof ExtendedLogEntry))
 			// TODO this should never happen

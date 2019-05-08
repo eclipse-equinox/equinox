@@ -55,6 +55,7 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 		}
 	}
 
+	@Override
 	public boolean isSatisfiedBy(BaseDescription supplier) {
 		if (!(supplier instanceof GenericDescription))
 			return false;
@@ -70,6 +71,7 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 		return true;
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(Constants.REQUIRE_CAPABILITY).append(": ").append(getType()); //$NON-NLS-1$
@@ -99,6 +101,7 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 		}
 	}
 
+	@Override
 	public boolean isResolved() {
 		synchronized (this.monitor) {
 			return suppliers != null && suppliers.length > 0;
@@ -111,12 +114,14 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 		}
 	}
 
+	@Override
 	public BaseDescription getSupplier() {
 		synchronized (this.monitor) {
 			return suppliers == null || suppliers.length == 0 ? null : suppliers[0];
 		}
 	}
 
+	@Override
 	protected void setSupplier(BaseDescription supplier) {
 		synchronized (this.monitor) {
 			if (supplier == null) {

@@ -29,6 +29,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 		final String testMethodName = "testFindHook01"; //$NON-NLS-1$
 		// test the FindHook is called and can remove a reference from the results
 		Runnable runIt = new Runnable() {
+			@Override
 			public void run() {
 				// nothing
 			}
@@ -331,6 +332,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 		final String testMethodName = "testEventHook01"; //$NON-NLS-1$
 		// test the EventHook is called and can remove a reference from the results
 		Runnable runIt = new Runnable() {
+			@Override
 			public void run() {
 				// nothing
 			}

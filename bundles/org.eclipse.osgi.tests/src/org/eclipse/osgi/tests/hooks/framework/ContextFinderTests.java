@@ -30,6 +30,7 @@ public class ContextFinderTests extends AbstractFrameworkHookTests {
 	private Map<String, String> configuration;
 	private Framework framework;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		File file = OSGiTestsActivator.getContext().getDataFile(getName());
@@ -39,6 +40,7 @@ public class ContextFinderTests extends AbstractFrameworkHookTests {
 		initAndStart(framework);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		stopQuietly(framework);
 		super.tearDown();

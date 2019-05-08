@@ -223,6 +223,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		this.exporter = exporter;
 	}
 
+	@Override
 	public BaseDescription getFragmentDeclaration() {
 		return fragmentDeclaration;
 	}
@@ -231,10 +232,12 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		this.fragmentDeclaration = fragmentDeclaration;
 	}
 
+	@Override
 	public String toString() {
 		return "Export-Package: " + getName() + "; version=\"" + getVersion() + "\""; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 	}
 
+	@Override
 	String getInternalNameSpace() {
 		return BundleRevision.PACKAGE_NAMESPACE;
 	}

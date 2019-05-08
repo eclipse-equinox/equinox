@@ -42,15 +42,18 @@ public final class PermissionInfoCollection extends PermissionCollection {
 		setReadOnly(); // collections are managed with ConditionalPermissionAdmin
 	}
 
+	@Override
 	public void add(Permission arg0) {
 		throw new SecurityException();
 	}
 
+	@Override
 	public Enumeration<Permission> elements() {
 		// TODO return an empty enumeration for now; 
 		return BundlePermissions.EMPTY_ENUMERATION;
 	}
 
+	@Override
 	public boolean implies(Permission perm) {
 		if (hasAllPermission)
 			return true;

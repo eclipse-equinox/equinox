@@ -3809,6 +3809,7 @@ public class StateResolverTest extends AbstractStateTest {
 		State state = buildEmptyState();
 		Resolver resolver = state.getResolver();
 		resolver.setSelectionPolicy(new Comparator() {
+			@Override
 			public int compare(Object o1, Object o2) {
 				if (!(o1 instanceof BaseDescription) || !(o2 instanceof BaseDescription))
 					throw new IllegalArgumentException();
@@ -4402,6 +4403,7 @@ public class StateResolverTest extends AbstractStateTest {
 			//do nothing
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			return true;
 		}

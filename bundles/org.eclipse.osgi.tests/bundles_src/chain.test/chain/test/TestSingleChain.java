@@ -18,6 +18,7 @@ import org.eclipse.osgi.tests.bundles.ITestRunner;
 
 public class TestSingleChain implements ITestRunner {
 
+	@Override
 	public Object testIt() throws Exception {
 		return new AChain();
 	}

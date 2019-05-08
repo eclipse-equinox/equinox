@@ -114,6 +114,7 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 	 *
 	 * @exception 	java.io.IOException If an error occurs closing the file.
 	 */
+	@Override
 	public synchronized void close() throws IOException {
 		closeIntermediateFile();
 		reliable.closeOutputFile(crc);
@@ -147,6 +148,7 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 	 * Override default FilterOutputStream method.
 	 * @see FilterOutputStream#write(byte[])
 	 */
+	@Override
 	public void write(byte[] b) throws IOException {
 		this.write(b, 0, b.length);
 	}
@@ -155,6 +157,7 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 	 * Override default FilterOutputStream method.
 	 * @see FilterOutputStream#write(byte[], int, int)
 	 */
+	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
 		out.write(b, off, len);
 		crc.update(b, off, len);
@@ -164,6 +167,7 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 	 * Override default FilterOutputStream method.
 	 * @see FilterOutputStream#write(int)
 	 */
+	@Override
 	public void write(int b) throws IOException {
 		out.write(b);
 		crc.update((byte) b);

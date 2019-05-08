@@ -28,6 +28,7 @@ public class ShrinkableValueCollectionMap<K, V> extends AbstractMap<K, Collectio
 		values = null;
 	}
 
+	@Override
 	public void clear() {
 		map.clear();
 		if (values != null) {
@@ -35,10 +36,12 @@ public class ShrinkableValueCollectionMap<K, V> extends AbstractMap<K, Collectio
 		}
 	}
 
+	@Override
 	public boolean containsKey(Object key) {
 		return map.containsKey(key);
 	}
 
+	@Override
 	public boolean containsValue(Object value) {
 		/* Since values are collections and the collection has identity equality,
 		 * there is no way any value could be contained in this map unless that
@@ -50,10 +53,12 @@ public class ShrinkableValueCollectionMap<K, V> extends AbstractMap<K, Collectio
 		return values.containsValue(value);
 	}
 
+	@Override
 	public Set<Map.Entry<K, Collection<V>>> entrySet() {
 		return new EntrySet();
 	}
 
+	@Override
 	public Collection<V> get(Object key) {
 		Collection<V> value = null;
 		if (values != null) {
@@ -73,10 +78,12 @@ public class ShrinkableValueCollectionMap<K, V> extends AbstractMap<K, Collectio
 		return value;
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return map.isEmpty();
 	}
 
+	@Override
 	public Collection<V> remove(Object key) {
 		Set<? extends Map.Entry<?, ? extends V>> entrySet = map.remove(key);
 		Collection<V> value = null;
@@ -89,6 +96,7 @@ public class ShrinkableValueCollectionMap<K, V> extends AbstractMap<K, Collectio
 		return value;
 	}
 
+	@Override
 	public int size() {
 		return map.size();
 	}
@@ -101,10 +109,12 @@ public class ShrinkableValueCollectionMap<K, V> extends AbstractMap<K, Collectio
 			super();
 		}
 
+		@Override
 		public Iterator<Map.Entry<K, Collection<V>>> iterator() {
 			return new EntryIterator();
 		}
 
+		@Override
 		public int size() {
 			return ShrinkableValueCollectionMap.this.size();
 		}
@@ -121,15 +131,18 @@ public class ShrinkableValueCollectionMap<K, V> extends AbstractMap<K, Collectio
 			iter = map.keySet().iterator();
 		}
 
+		@Override
 		public boolean hasNext() {
 			return iter.hasNext();
 		}
 
+		@Override
 		public Map.Entry<K, Collection<V>> next() {
 			last = iter.next();
 			return new Entry(last);
 		}
 
+		@Override
 		public void remove() {
 			iter.remove();
 			if (values != null) {
@@ -149,10 +162,12 @@ public class ShrinkableValueCollectionMap<K, V> extends AbstractMap<K, Collectio
 			key = k;
 		}
 
+		@Override
 		public K getKey() {
 			return key;
 		}
 
+		@Override
 		public Collection<V> getValue() {
 			if (value == null) {
 				value = ShrinkableValueCollectionMap.this.get(key);
@@ -160,18 +175,22 @@ public class ShrinkableValueCollectionMap<K, V> extends AbstractMap<K, Collectio
 			return value;
 		}
 
+		@Override
 		public Collection<V> setValue(Collection<V> value) {
 			throw new UnsupportedOperationException(); // entries cannot be modified.
 		}
 
+		@Override
 		public String toString() {
 			return getKey() + "=" + getValue(); //$NON-NLS-1$
 		}
 
+		@Override
 		public int hashCode() {
 			return hash(getKey()) ^ hash(getValue());
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			if (obj == this) {
 				return true;

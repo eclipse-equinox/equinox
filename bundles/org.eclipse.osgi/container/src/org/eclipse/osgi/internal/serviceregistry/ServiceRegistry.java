@@ -804,6 +804,7 @@ public class ServiceRegistry {
 			publishServiceEventPrivileged(event);
 		} else {
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				@Override
 				public Void run() {
 					publishServiceEventPrivileged(event);
 					return null;
@@ -1107,6 +1108,7 @@ public class ServiceRegistry {
 	 */
 	static String checkServiceClass(final String[] clazzes, final Object serviceObject) {
 		ClassLoader cl = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+			@Override
 			public ClassLoader run() {
 				return serviceObject.getClass().getClassLoader();
 			}
@@ -1164,6 +1166,7 @@ public class ServiceRegistry {
 			notifyFindHooksPrivileged(context, clazz, filterstring, allservices, result);
 		} else {
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				@Override
 				public Void run() {
 					notifyFindHooksPrivileged(context, clazz, filterstring, allservices, result);
 					return null;
@@ -1177,16 +1180,19 @@ public class ServiceRegistry {
 			Debug.println("notifyServiceFindHooks(" + context.getBundleImpl() + "," + clazz + "," + filterstring + "," + allservices + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		}
 		notifyHooksPrivileged(new HookContext() {
+			@Override
 			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
 				if (hook instanceof FindHook) {
 					((FindHook) hook).find(context, clazz, filterstring, allservices, result);
 				}
 			}
 
+			@Override
 			public String getHookClassName() {
 				return findHookName;
 			}
 
+			@Override
 			public String getHookMethodName() {
 				return "find"; //$NON-NLS-1$
 			}
@@ -1212,16 +1218,19 @@ public class ServiceRegistry {
 		}
 		notifyHooksPrivileged(new HookContext() {
 			@SuppressWarnings("deprecation")
+			@Override
 			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
 				if (hook instanceof EventHook) {
 					((EventHook) hook).event(event, result);
 				}
 			}
 
+			@Override
 			public String getHookClassName() {
 				return eventHookName;
 			}
 
+			@Override
 			public String getHookMethodName() {
 				return "event"; //$NON-NLS-1$
 			}
@@ -1246,16 +1255,19 @@ public class ServiceRegistry {
 			Debug.println("notifyServiceEventListenerHooks(" + event.getType() + ":" + event.getServiceReference() + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 		}
 		notifyHooksPrivileged(new HookContext() {
+			@Override
 			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
 				if (hook instanceof EventListenerHook) {
 					((EventListenerHook) hook).event(event, result);
 				}
 			}
 
+			@Override
 			public String getHookClassName() {
 				return eventListenerHookName;
 			}
 
+			@Override
 			public String getHookMethodName() {
 				return "event"; //$NON-NLS-1$
 			}
@@ -1324,6 +1336,7 @@ public class ServiceRegistry {
 			notifyNewListenerHookPrivileged(registration);
 		} else {
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				@Override
 				public Void run() {
 					notifyNewListenerHookPrivileged(registration);
 					return null;
@@ -1350,16 +1363,19 @@ public class ServiceRegistry {
 
 		final Collection<ListenerInfo> listeners = Collections.unmodifiableCollection(addedListeners);
 		notifyHookPrivileged(systemBundleContext, registration, new HookContext() {
+			@Override
 			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
 				if (hook instanceof ListenerHook) {
 					((ListenerHook) hook).added(listeners);
 				}
 			}
 
+			@Override
 			public String getHookClassName() {
 				return listenerHookName;
 			}
 
+			@Override
 			public String getHookMethodName() {
 				return "added"; //$NON-NLS-1$
 			}
@@ -1386,6 +1402,7 @@ public class ServiceRegistry {
 			notifyListenerHooksPrivileged(listeners, added);
 		} else {
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				@Override
 				public Void run() {
 					notifyListenerHooksPrivileged(listeners, added);
 					return null;
@@ -1402,6 +1419,7 @@ public class ServiceRegistry {
 		}
 
 		notifyHooksPrivileged(new HookContext() {
+			@Override
 			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
 				if (hook instanceof ListenerHook) {
 					if (added) {
@@ -1412,10 +1430,12 @@ public class ServiceRegistry {
 				}
 			}
 
+			@Override
 			public String getHookClassName() {
 				return listenerHookName;
 			}
 
+			@Override
 			public String getHookMethodName() {
 				return added ? "added" : "removed"; //$NON-NLS-1$ //$NON-NLS-2$
 			}

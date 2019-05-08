@@ -76,6 +76,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	 * 
 	 * @param event The <code>ServiceEvent</code> object.
 	 */
+	@Override
 	public void serviceChanged(ServiceEvent event) {
 		ServiceReferenceImpl<?> reference = (ServiceReferenceImpl<?>) event.getServiceReference();
 
@@ -145,6 +146,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	 *
 	 * @return The string representation of this listener.
 	 */
+	@Override
 	public String toString() {
 		String filterString = getFilter();
 		if (filterString == null) {
@@ -158,6 +160,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	 * @return The context of the bundle which added the service listener.
 	 * @see org.osgi.framework.hooks.service.ListenerHook.ListenerInfo#getBundleContext()
 	 */
+	@Override
 	public BundleContext getBundleContext() {
 		return context;
 	}
@@ -168,6 +171,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	 * be <code>null</code> if the listener was added without a filter.
 	 * @see org.osgi.framework.hooks.service.ListenerHook.ListenerInfo#getFilter()
 	 */
+	@Override
 	public String getFilter() {
 		if (filter != null) {
 			return filter.toString();
@@ -185,6 +189,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	 * @return <code>false</code> if the listener has not been been removed,
 	 *         <code>true</code> otherwise.
 	 */
+	@Override
 	public boolean isRemoved() {
 		return removed;
 	}

@@ -150,6 +150,7 @@ public class BERProcessor {
 	 * @return a String representation of the current BER structure.
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		switch (classOfTag) {

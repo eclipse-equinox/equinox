@@ -148,6 +148,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 		return null;
 	}
 
+	@Override
 	public void launch(ParameterizedRunnable app, Object applicationContext) {
 		waitForAppLock.tryAcquire(); // clear out any pending apps notifications
 		if (!runningLock.tryAcquire()) // check to see if an application is currently running
@@ -158,6 +159,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 		runningLock.release(); // release the running lock
 	}
 
+	@Override
 	public void shutdown() {
 		// this method will aquire and keep the runningLock to prevent
 		// all future application launches.

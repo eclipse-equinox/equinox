@@ -17,6 +17,7 @@ import org.eclipse.osgi.tests.bundles.ITestRunner;
 
 public class TestPackageAccess2 implements ITestRunner {
 
+	@Override
 	public Object testIt() throws Exception {
 		new PackageAccessTest2().packageLevelAccess(TestPackageAccess2.class.getName());
 		return null;

@@ -31,6 +31,7 @@ public class BundleURLConverter implements URLConverter {
 	/* (non-Javadoc)
 	 * @see org.eclipse.osgi.service.urlconversion.URLConverter#toFileURL(java.net.URL)
 	 */
+	@Override
 	public URL toFileURL(URL url) throws IOException {
 		URLConnection connection = url.openConnection();
 		if (connection instanceof BundleURLConnection) {
@@ -49,6 +50,7 @@ public class BundleURLConverter implements URLConverter {
 	/* (non-Javadoc)
 	 * @see org.eclipse.osgi.service.urlconversion.URLConverter#resolve(java.net.URL)
 	 */
+	@Override
 	public URL resolve(URL url) throws IOException {
 		URLConnection connection = url.openConnection();
 		if (connection instanceof BundleURLConnection)

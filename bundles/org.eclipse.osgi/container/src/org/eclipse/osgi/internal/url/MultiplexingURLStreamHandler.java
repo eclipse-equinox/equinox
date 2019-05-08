@@ -95,6 +95,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		initializeMethods(factory);
 	}
 
+	@Override
 	protected URLConnection openConnection(URL url) throws IOException {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
@@ -130,6 +131,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		throw new MalformedURLException();
 	}
 
+	@Override
 	protected boolean equals(URL url1, URL url2) {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
@@ -145,6 +147,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		throw new IllegalStateException();
 	}
 
+	@Override
 	protected int getDefaultPort() {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
@@ -160,6 +163,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		throw new IllegalStateException();
 	}
 
+	@Override
 	protected InetAddress getHostAddress(URL url) {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
@@ -175,6 +179,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		throw new IllegalStateException();
 	}
 
+	@Override
 	protected int hashCode(URL url) {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
@@ -190,6 +195,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		throw new IllegalStateException();
 	}
 
+	@Override
 	protected boolean hostsEqual(URL url1, URL url2) {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
@@ -205,6 +211,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		throw new IllegalStateException();
 	}
 
+	@Override
 	protected void parseURL(URL arg0, String arg1, int arg2, int arg3) {
 		URLStreamHandler handler = factory.findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
@@ -223,6 +230,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		throw new IllegalStateException();
 	}
 
+	@Override
 	protected boolean sameFile(URL url1, URL url2) {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
@@ -238,6 +246,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		throw new IllegalStateException();
 	}
 
+	@Override
 	protected void setURL(URL arg0, String arg1, String arg2, int arg3, String arg4, String arg5, String arg6, String arg7, String arg8) {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
@@ -256,6 +265,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		throw new IllegalStateException();
 	}
 
+	@Override
 	protected String toExternalForm(URL url) {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {

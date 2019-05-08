@@ -381,10 +381,12 @@ public abstract class FilterTests extends TestCase {
 			this.value = Integer.parseInt(value);
 		}
 
+		@Override
 		public int compareTo(Object o) {
 			return value - ((SampleComparable) o).value;
 		}
 
+		@Override
 		public String toString() {
 			return String.valueOf(value);
 		}
@@ -397,6 +399,7 @@ public abstract class FilterTests extends TestCase {
 			this.value = Integer.parseInt(value);
 		}
 
+		@Override
 		public boolean equals(Object o) {
 			if (o instanceof SampleObject) {
 				return value == ((SampleObject) o).value;
@@ -404,6 +407,7 @@ public abstract class FilterTests extends TestCase {
 			return false;
 		}
 
+		@Override
 		public String toString() {
 			return String.valueOf(value);
 		}

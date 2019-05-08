@@ -27,6 +27,7 @@ public class ResolverImport extends ResolverConstraint {
 		super(bundle, ips);
 	}
 
+	@Override
 	boolean isOptional() {
 		return ImportPackageSpecification.RESOLUTION_OPTIONAL.equals(((ImportPackageSpecification) constraint).getDirective(Constants.RESOLUTION_DIRECTIVE));
 	}
@@ -35,6 +36,7 @@ public class ResolverImport extends ResolverConstraint {
 		return ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(((ImportPackageSpecification) constraint).getDirective(Constants.RESOLUTION_DIRECTIVE));
 	}
 
+	@Override
 	public String getName() {
 		if (name != null)
 			return name; // return the required package set for a dynamic import

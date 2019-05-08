@@ -31,6 +31,7 @@ public interface ExtendedLogEntry extends LogEntry {
 	 *         <code>LogEntry</code> object;<code>null</code> if no logger name is
 	 *         associated with this <code>LogEntry</code> object.
 	 */
+	@Override
 	String getLoggerName();
 
 	/**

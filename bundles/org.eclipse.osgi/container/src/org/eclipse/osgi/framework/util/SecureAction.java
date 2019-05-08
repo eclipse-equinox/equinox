@@ -34,6 +34,7 @@ public class SecureAction {
 
 	// This ClassLoader is used in loadSystemClass if System.getClassLoader() returns null
 	static final ClassLoader bootClassLoader = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+		@Override
 		public ClassLoader run() {
 			return new ClassLoader(Object.class.getClassLoader()) { /* boot class loader */};
 		}
@@ -59,6 +60,7 @@ public class SecureAction {
 	 */
 	public static PrivilegedAction<SecureAction> createSecureAction() {
 		return new PrivilegedAction<SecureAction>() {
+			@Override
 			public SecureAction run() {
 				return new SecureAction();
 			}
@@ -75,6 +77,7 @@ public class SecureAction {
 		if (System.getSecurityManager() == null)
 			return System.getProperty(property);
 		return AccessController.doPrivileged(new PrivilegedAction<String>() {
+			@Override
 			public String run() {
 				return System.getProperty(property);
 			}
@@ -90,6 +93,7 @@ public class SecureAction {
 		if (System.getSecurityManager() == null)
 			return System.getProperties();
 		return AccessController.doPrivileged(new PrivilegedAction<Properties>() {
+			@Override
 			public Properties run() {
 				return System.getProperties();
 			}
@@ -108,6 +112,7 @@ public class SecureAction {
 			return new FileInputStream(file);
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<FileInputStream>() {
+				@Override
 				public FileInputStream run() throws FileNotFoundException {
 					return new FileInputStream(file);
 				}
@@ -132,6 +137,7 @@ public class SecureAction {
 			return new FileOutputStream(file.getAbsolutePath(), append);
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<FileOutputStream>() {
+				@Override
 				public FileOutputStream run() throws FileNotFoundException {
 					return new FileOutputStream(file.getAbsolutePath(), append);
 				}
@@ -153,6 +159,7 @@ public class SecureAction {
 		if (System.getSecurityManager() == null)
 			return file.length();
 		return AccessController.doPrivileged(new PrivilegedAction<Long>() {
+			@Override
 			public Long run() {
 				return new Long(file.length());
 			}
@@ -171,6 +178,7 @@ public class SecureAction {
 			return file.getCanonicalPath();
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<String>() {
+				@Override
 				public String run() throws IOException {
 					return file.getCanonicalPath();
 				}
@@ -192,6 +200,7 @@ public class SecureAction {
 		if (System.getSecurityManager() == null)
 			return file.getAbsoluteFile();
 		return AccessController.doPrivileged(new PrivilegedAction<File>() {
+			@Override
 			public File run() {
 				return file.getAbsoluteFile();
 			}
@@ -209,6 +218,7 @@ public class SecureAction {
 			return file.getCanonicalFile();
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<File>() {
+				@Override
 				public File run() throws IOException {
 					return file.getCanonicalFile();
 				}
@@ -230,6 +240,7 @@ public class SecureAction {
 		if (System.getSecurityManager() == null)
 			return file.exists();
 		return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+			@Override
 			public Boolean run() {
 				return file.exists() ? Boolean.TRUE : Boolean.FALSE;
 			}
@@ -240,6 +251,7 @@ public class SecureAction {
 		if (System.getSecurityManager() == null)
 			return file.mkdirs();
 		return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+			@Override
 			public Boolean run() {
 				return file.mkdirs() ? Boolean.TRUE : Boolean.FALSE;
 			}
@@ -256,6 +268,7 @@ public class SecureAction {
 		if (System.getSecurityManager() == null)
 			return file.isDirectory();
 		return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+			@Override
 			public Boolean run() {
 				return file.isDirectory() ? Boolean.TRUE : Boolean.FALSE;
 			}
@@ -272,6 +285,7 @@ public class SecureAction {
 		if (System.getSecurityManager() == null)
 			return file.lastModified();
 		return AccessController.doPrivileged(new PrivilegedAction<Long>() {
+			@Override
 			public Long run() {
 				return new Long(file.lastModified());
 			}
@@ -288,6 +302,7 @@ public class SecureAction {
 		if (System.getSecurityManager() == null)
 			return file.list();
 		return AccessController.doPrivileged(new PrivilegedAction<String[]>() {
+			@Override
 			public String[] run() {
 				return file.list();
 			}
@@ -307,6 +322,7 @@ public class SecureAction {
 				return new ZipFile(file);
 			try {
 				return AccessController.doPrivileged(new PrivilegedExceptionAction<ZipFile>() {
+					@Override
 					public ZipFile run() throws IOException {
 						return new ZipFile(file);
 					}
@@ -341,6 +357,7 @@ public class SecureAction {
 			return new URL(protocol, host, port, file, handler);
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<URL>() {
+				@Override
 				public URL run() throws MalformedURLException {
 					return new URL(protocol, host, port, file, handler);
 				}
@@ -364,6 +381,7 @@ public class SecureAction {
 		if (System.getSecurityManager() == null)
 			return createThread0(target, name, contextLoader);
 		return AccessController.doPrivileged(new PrivilegedAction<Thread>() {
+			@Override
 			public Thread run() {
 				return createThread0(target, name, contextLoader);
 			}
@@ -388,6 +406,7 @@ public class SecureAction {
 		if (System.getSecurityManager() == null)
 			return context.getService(reference);
 		return AccessController.doPrivileged(new PrivilegedAction<S>() {
+			@Override
 			public S run() {
 				return context.getService(reference);
 			}
@@ -406,6 +425,7 @@ public class SecureAction {
 			return Class.forName(name);
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>() {
+				@Override
 				public Class<?> run() throws Exception {
 					return Class.forName(name);
 				}
@@ -431,6 +451,7 @@ public class SecureAction {
 		}
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>() {
+				@Override
 				public Class<?> run() throws Exception {
 					ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 					return (systemClassLoader != null) ? systemClassLoader.loadClass(name) : bootClassLoader.loadClass(name);
@@ -453,6 +474,7 @@ public class SecureAction {
 			return;
 		}
 		AccessController.doPrivileged(new PrivilegedAction<Void>() {
+			@Override
 			public Void run() {
 				tracker.open();
 				return null;
@@ -473,6 +495,7 @@ public class SecureAction {
 		}
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+				@Override
 				public Void run() throws BundleException {
 					module.start(options);
 					return null;
@@ -491,6 +514,7 @@ public class SecureAction {
 			return bundle.getBundleContext();
 		}
 		return AccessController.doPrivileged(new PrivilegedAction<BundleContext>() {
+			@Override
 			public BundleContext run() {
 				return bundle.getBundleContext();
 			}
@@ -502,6 +526,7 @@ public class SecureAction {
 			return bundle.getLocation();
 		}
 		return AccessController.doPrivileged(new PrivilegedAction<String>() {
+			@Override
 			public String run() {
 				return bundle.getLocation();
 			}

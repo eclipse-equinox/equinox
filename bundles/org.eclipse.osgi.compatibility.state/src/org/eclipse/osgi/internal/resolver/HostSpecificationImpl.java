@@ -53,6 +53,7 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 		}
 	}
 
+	@Override
 	public boolean isSatisfiedBy(BaseDescription supplier) {
 		if (!(supplier instanceof BundleDescriptionImpl))
 			return false;
@@ -99,6 +100,7 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 		return true;
 	}
 
+	@Override
 	public boolean isResolved() {
 		synchronized (this.monitor) {
 			return hosts != null && hosts.length > 0;
@@ -114,10 +116,12 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 		}
 	}
 
+	@Override
 	public String toString() {
 		return "Fragment-Host: " + getName() + "; bundle-version=\"" + getVersionRange() + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
+	@Override
 	public BaseDescription getSupplier() {
 		synchronized (this.monitor) {
 			if (hosts == null || hosts.length == 0)

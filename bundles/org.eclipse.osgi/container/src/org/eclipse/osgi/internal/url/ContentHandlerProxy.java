@@ -71,6 +71,7 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 	/**
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(ServiceReference)
 	 */
+	@Override
 	public ServiceReference<ContentHandler> addingService(ServiceReference<ContentHandler> reference) {
 		//check to see if our contentType is being registered by another service
 		Object prop = reference.getProperty(URLConstants.URL_CONTENT_MIMETYPE);
@@ -99,6 +100,7 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(ServiceReference, Object)
 	 */
 
+	@Override
 	public void modifiedService(ServiceReference<ContentHandler> reference, ServiceReference<ContentHandler> service) {
 		int newrank = getRank(reference);
 		if (reference == contentHandlerServiceReference) {
@@ -121,6 +123,7 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 	/**
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(ServiceReference, Object)
 	 */
+	@Override
 	public void removedService(ServiceReference<ContentHandler> reference, ServiceReference<ContentHandler> service) {
 		//check to see if our URLStreamHandler was unregistered.
 		if (reference != contentHandlerServiceReference)
@@ -136,6 +139,7 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 	 * @see java.net.ContentHandler#getContent(URLConnection)
 	 */
 
+	@Override
 	public Object getContent(URLConnection uConn) throws IOException {
 		return realHandler.getContent(uConn);
 	}
@@ -152,6 +156,7 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 		/**
 		 * @see java.net.ContentHandler#getContent(URLConnection)
 		 */
+		@Override
 		public Object getContent(URLConnection uConn) throws IOException {
 			return uConn.getInputStream();
 		}

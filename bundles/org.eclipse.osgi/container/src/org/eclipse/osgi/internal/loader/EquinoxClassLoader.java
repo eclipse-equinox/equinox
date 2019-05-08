@@ -47,18 +47,22 @@ public class EquinoxClassLoader extends ModuleClassLoader {
 		this.isRegisteredAsParallel = (ModuleClassLoader.REGISTERED_AS_PARALLEL && EQUINOX_REGISTERED_AS_PARALLEL) || this.configuration.PARALLEL_CAPABLE;
 	}
 
+	@Override
 	protected final Generation getGeneration() {
 		return this.generation;
 	}
 
+	@Override
 	public final ClasspathManager getClasspathManager() {
 		return manager;
 	}
 
+	@Override
 	public final boolean isRegisteredAsParallel() {
 		return isRegisteredAsParallel;
 	}
 
+	@Override
 	public final BundleLoader getBundleLoader() {
 		return delegate;
 	}

@@ -43,6 +43,7 @@ public class DiscardBundleTests extends AbstractBundleTests {
 
 	private File root;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		root = OSGiTestsActivator.getContext().getDataFile(getName());
@@ -50,6 +51,7 @@ public class DiscardBundleTests extends AbstractBundleTests {
 		createBundleJar();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}

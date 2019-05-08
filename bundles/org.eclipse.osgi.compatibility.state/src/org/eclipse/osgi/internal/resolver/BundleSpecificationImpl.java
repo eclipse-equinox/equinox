@@ -75,6 +75,7 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 		}
 	}
 
+	@Override
 	public boolean isSatisfiedBy(BaseDescription supplier) {
 		if (!(supplier instanceof BundleDescriptionImpl))
 			return false;
@@ -115,6 +116,7 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 		return true;
 	}
 
+	@Override
 	public String toString() {
 		return "Require-Bundle: " + getName() + "; bundle-version=\"" + getVersionRange() + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}

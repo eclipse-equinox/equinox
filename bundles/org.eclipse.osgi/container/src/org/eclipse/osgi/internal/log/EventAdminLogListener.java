@@ -61,6 +61,7 @@ public class EventAdminLogListener implements SynchronousLogListener {
 		event = eventClass.getConstructor(String.class, Dictionary.class);
 	}
 
+	@Override
 	public void logged(LogEntry entry) {
 		try {
 			Object convertedEvent = convertEvent(entry);

@@ -26,14 +26,17 @@ public class SignerInfoImpl implements SignerInfo {
 		this.mdAlgorithm = mdAlgorithm;
 	}
 
+	@Override
 	public Certificate[] getCertificateChain() {
 		return chain;
 	}
 
+	@Override
 	public Certificate getTrustAnchor() {
 		return trustAnchor;
 	}
 
+	@Override
 	public boolean isTrusted() {
 		return trustAnchor != null;
 	}
@@ -42,10 +45,12 @@ public class SignerInfoImpl implements SignerInfo {
 		this.trustAnchor = trustAnchor;
 	}
 
+	@Override
 	public String getMessageDigestAlgorithm() {
 		return mdAlgorithm;
 	}
 
+	@Override
 	public int hashCode() {
 		int result = mdAlgorithm.hashCode();
 		for (int i = 0; i < chain.length; i++)
@@ -56,6 +61,7 @@ public class SignerInfoImpl implements SignerInfo {
 		return result;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof SignerInfo))
 			return false;

@@ -23,6 +23,7 @@ import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 
 public class ContextFinder extends ClassLoader implements PrivilegedAction<List<ClassLoader>> {
 	static final class Finder extends SecurityManager {
+		@Override
 		public Class<?>[] getClassContext() {
 			return super.getClassContext();
 		}
@@ -35,6 +36,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 	static Finder contextFinder;
 	static {
 		AccessController.doPrivileged(new PrivilegedAction<Void>() {
+			@Override
 			public Void run() {
 				finderClassLoader = ContextFinder.class.getClassLoader();
 				contextFinder = new Finder();
@@ -95,6 +97,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 		return AccessController.doPrivileged(this);
 	}
 
+	@Override
 	public List<ClassLoader> run() {
 		return basicFindClassLoaders();
 	}
@@ -118,6 +121,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 		cycleDetector.get().remove(name);
 	}
 
+	@Override
 	protected Class<?> loadClass(String arg0, boolean arg1) throws ClassNotFoundException {
 		//Shortcut cycle
 		if (startLoading(arg0) == false)
@@ -138,6 +142,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 		}
 	}
 
+	@Override
 	public URL getResource(String arg0) {
 		//Shortcut cycle
 		if (startLoading(arg0) == false)
@@ -156,6 +161,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 		}
 	}
 
+	@Override
 	public Enumeration<URL> getResources(String arg0) throws IOException {
 		//Shortcut cycle
 		if (startLoading(arg0) == false) {

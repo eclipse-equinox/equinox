@@ -162,6 +162,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	 * @return {@code true} if the service's properties match this
 	 *         {@code Filter}; {@code false} otherwise.
 	 */
+	@Override
 	public boolean match(ServiceReference<?> reference) {
 		if (reference instanceof ServiceReferenceImpl) {
 			return matches(((ServiceReferenceImpl<?>) reference).getRegistration().getProperties());
@@ -181,6 +182,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	 * @throws IllegalArgumentException If {@code dictionary} contains case
 	 *         variants of the same key name.
 	 */
+	@Override
 	public boolean match(Dictionary<String, ?> dictionary) {
 		if (dictionary == null) {
 			return matches(null);
@@ -199,6 +201,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	 *         filter; {@code false} otherwise.
 	 * @since 1.3
 	 */
+	@Override
 	public boolean matchCase(Dictionary<String, ?> dictionary) {
 		switch (op) {
 			case AND : {
@@ -265,6 +268,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	 *         {@code false} otherwise.
 	 * @since 1.6
 	 */
+	@Override
 	public boolean matches(Map<String, ?> map) {
 		switch (op) {
 			case AND : {
@@ -328,6 +332,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	 * @return Filter string.
 	 */
 
+	@Override
 	public String toString() {
 		String result = filterString;
 		if (result == null) {
@@ -446,6 +451,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	 *         returns <code>this.toString().equals(obj.toString()</code>;
 	 *         <code>false</code> otherwise.
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) {
 			return true;
@@ -464,6 +470,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 		 * @return The hashCode of the filter string; that is,
 	 * <code>this.toString().hashCode()</code>.
 	 */
+	@Override
 	public int hashCode() {
 		return this.toString().hashCode();
 	}
@@ -1785,6 +1792,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 			this.accessible = accessible;
 		}
 
+		@Override
 		public Void run() {
 			accessible.setAccessible(true);
 			return null;
@@ -1798,6 +1806,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 		private char rightRule = 0;
 		private Collection<Version> excludes = new ArrayList<>(0);
 
+		@Override
 		public String toString() {
 			if (rightVersion == null) {
 				return leftVersion.toString();

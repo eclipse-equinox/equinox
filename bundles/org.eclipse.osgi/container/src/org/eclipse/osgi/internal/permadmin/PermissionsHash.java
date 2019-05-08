@@ -56,6 +56,7 @@ class PermissionsHash extends PermissionCollection {
 	 * @exception	IllegalStateException
 	 *					if the collection is read only.
 	 */
+	@Override
 	public void add(Permission perm) {
 		if (isReadOnly()) {
 			throw new SecurityException();
@@ -71,6 +72,7 @@ class PermissionsHash extends PermissionCollection {
 	 * @return		Enumeration
 	 *					the permissions in the receiver.
 	 */
+	@Override
 	public Enumeration<Permission> elements() {
 		return perms.keys();
 	}
@@ -86,6 +88,7 @@ class PermissionsHash extends PermissionCollection {
 	 * @param		perm java.security.Permission
 	 *					the permission to check
 	 */
+	@Override
 	public boolean implies(Permission perm) {
 		Permission p = perms.get(perm);
 

@@ -30,6 +30,7 @@ public class GenericConstraint extends ResolverConstraint {
 		multiple = (constraint.getResolution() & GenericSpecification.RESOLUTION_MULTIPLE) != 0;
 	}
 
+	@Override
 	boolean isOptional() {
 		return (((GenericSpecification) constraint).getResolution() & GenericSpecification.RESOLUTION_OPTIONAL) != 0;
 	}

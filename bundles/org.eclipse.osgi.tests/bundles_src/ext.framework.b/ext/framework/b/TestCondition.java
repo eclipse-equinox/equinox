@@ -99,10 +99,12 @@ public class TestCondition implements Condition {
 		return true;
 	}
 
+	@Override
 	public int hashCode() {
 		return id.hashCode();
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof TestCondition))
 			return false;
@@ -126,6 +128,7 @@ public class TestCondition implements Condition {
 		return bundle;
 	}
 
+	@Override
 	public String toString() {
 		return id + '-' + postponed + '-' + mutable + '-' + satisfied;
 	}

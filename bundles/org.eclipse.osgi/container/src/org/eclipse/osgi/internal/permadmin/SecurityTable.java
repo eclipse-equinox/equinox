@@ -188,14 +188,17 @@ public class SecurityTable extends PermissionCollection {
 		return encoded;
 	}
 
+	@Override
 	public void add(Permission permission) {
 		throw new SecurityException();
 	}
 
+	@Override
 	public Enumeration<Permission> elements() {
 		return BundlePermissions.EMPTY_ENUMERATION;
 	}
 
+	@Override
 	public boolean implies(Permission permission) {
 		return (evaluate(null, permission) & SecurityTable.GRANTED) != 0;
 	}

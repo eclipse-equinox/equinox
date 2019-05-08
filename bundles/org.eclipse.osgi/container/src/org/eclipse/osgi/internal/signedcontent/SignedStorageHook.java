@@ -24,6 +24,7 @@ import org.osgi.framework.BundleException;
 public class SignedStorageHook extends StorageHookFactory<List<SignerInfo>, List<SignerInfo>, SignedStorageHook.StorageHookImpl> {
 	private static final int STORAGE_VERSION = 4;
 
+	@Override
 	public int getStorageVersion() {
 		return STORAGE_VERSION;
 	}

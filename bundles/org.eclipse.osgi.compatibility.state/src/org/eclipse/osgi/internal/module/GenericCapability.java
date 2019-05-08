@@ -33,6 +33,7 @@ public class GenericCapability extends VersionSupplier {
 		effective = effectiveDirective == null || Constants.EFFECTIVE_RESOLVE.equals(effectiveDirective) || (Constants.EFFECTIVE_ACTIVE.equals(effectiveDirective) && developmentMode);
 	}
 
+	@Override
 	public BundleDescription getBundleDescription() {
 		return getBaseDescription().getSupplier();
 	}
@@ -41,6 +42,7 @@ public class GenericCapability extends VersionSupplier {
 		return (GenericDescription) getBaseDescription();
 	}
 
+	@Override
 	public ResolverBundle getResolverBundle() {
 		return resolverBundle;
 	}

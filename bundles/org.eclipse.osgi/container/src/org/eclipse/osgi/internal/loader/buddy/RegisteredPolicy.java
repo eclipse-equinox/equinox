@@ -62,6 +62,7 @@ public class RegisteredPolicy extends DependentPolicy {
 			allDependents = null;
 	}
 
+	@Override
 	public Class<?> loadClass(String name) {
 		if (allDependents == null)
 			return null;
@@ -83,6 +84,7 @@ public class RegisteredPolicy extends DependentPolicy {
 		return result;
 	}
 
+	@Override
 	public URL loadResource(String name) {
 		if (allDependents == null)
 			return null;
@@ -99,6 +101,7 @@ public class RegisteredPolicy extends DependentPolicy {
 		return result;
 	}
 
+	@Override
 	public Enumeration<URL> loadResources(String name) {
 		if (allDependents == null)
 			return null;

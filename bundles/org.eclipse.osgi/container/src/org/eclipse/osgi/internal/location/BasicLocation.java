@@ -62,18 +62,22 @@ public class BasicLocation implements Location {
 		this.debug = debug;
 	}
 
+	@Override
 	public boolean allowsDefault() {
 		return defaultValue != null;
 	}
 
+	@Override
 	public URL getDefault() {
 		return defaultValue;
 	}
 
+	@Override
 	public synchronized Location getParentLocation() {
 		return parent;
 	}
 
+	@Override
 	public synchronized URL getURL() {
 		if (location == null && defaultValue != null) {
 			if (debug.get()) {
@@ -88,10 +92,12 @@ public class BasicLocation implements Location {
 		return location;
 	}
 
+	@Override
 	public synchronized boolean isSet() {
 		return location != null;
 	}
 
+	@Override
 	public boolean isReadOnly() {
 		return isReadOnly;
 	}
@@ -99,6 +105,7 @@ public class BasicLocation implements Location {
 	/**
 	 * @deprecated
 	 */
+	@Override
 	public boolean setURL(URL value, boolean lock) throws IllegalStateException {
 		try {
 			return set(value, lock);
@@ -107,10 +114,12 @@ public class BasicLocation implements Location {
 		}
 	}
 
+	@Override
 	public synchronized boolean set(URL value, boolean lock) throws IllegalStateException, IOException {
 		return set(value, lock, null);
 	}
 
+	@Override
 	public synchronized boolean set(URL value, boolean lock, String lockFilePath) throws IllegalStateException, IOException {
 		if (location != null)
 			throw new IllegalStateException(Msg.ECLIPSE_CANNOT_CHANGE_LOCATION);
@@ -150,12 +159,14 @@ public class BasicLocation implements Location {
 		parent = value;
 	}
 
+	@Override
 	public synchronized boolean lock() throws IOException {
 		if (!isSet())
 			throw new IOException(Msg.location_notSet);
 		return lock(lockFile, location);
 	}
 
+	@Override
 	public synchronized boolean isLocked() throws IOException {
 		if (!isSet())
 			return false;
@@ -216,17 +227,20 @@ public class BasicLocation implements Location {
 		locker = LocationHelper.createLocker(lock, lockMode, debug.get());
 	}
 
+	@Override
 	public synchronized void release() {
 		if (locker != null)
 			locker.release();
 	}
 
+	@Override
 	public Location createLocation(Location parentLocation, URL defaultLocation, boolean readonly) {
 		BasicLocation result = new BasicLocation(null, defaultLocation, readonly, dataAreaPrefix, configValues, container, debug);
 		result.setParent(parentLocation);
 		return result;
 	}
 
+	@Override
 	public URL getDataArea(String filename) throws IOException {
 		URL base = getURL();
 		if (base == null)

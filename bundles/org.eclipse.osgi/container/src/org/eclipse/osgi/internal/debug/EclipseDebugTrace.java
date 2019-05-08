@@ -137,6 +137,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 * (non-Javadoc)
 	 * @see org.eclipse.osgi.framework.debug.FrameworkDebugTrace#trace(java.lang.String, java.lang.String)
 	 */
+	@Override
 	public void trace(final String optionPath, final String message) {
 
 		if (isDebuggingEnabled(optionPath)) {
@@ -149,6 +150,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 * (non-Javadoc)
 	 * @see org.eclipse.osgi.framework.debug.FrameworkDebugTrace#trace(java.lang.String, java.lang.String, java.lang.Throwable)
 	 */
+	@Override
 	public void trace(final String optionPath, final String message, final Throwable error) {
 
 		if (isDebuggingEnabled(optionPath)) {
@@ -161,6 +163,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 * (non-Javadoc)
 	 * @see org.eclipse.osgi.framework.debug.FrameworkDebugTrace#traceEntry(java.lang.String)
 	 */
+	@Override
 	public void traceEntry(final String optionPath) {
 
 		if (isDebuggingEnabled(optionPath)) {
@@ -174,6 +177,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 * (non-Javadoc)
 	 * @see org.eclipse.osgi.framework.debug.FrameworkDebugTrace#traceEntry(java.lang.String, java.lang.Object)
 	 */
+	@Override
 	public void traceEntry(final String optionPath, final Object methodArgument) {
 
 		if (isDebuggingEnabled(optionPath)) {
@@ -185,6 +189,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 * (non-Javadoc)
 	 * @see org.eclipse.osgi.framework.debug.FrameworkDebugTrace#traceEntry(java.lang.String, java.lang.Object[])
 	 */
+	@Override
 	public void traceEntry(final String optionPath, final Object[] methodArguments) {
 
 		if (isDebuggingEnabled(optionPath)) {
@@ -214,6 +219,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 * (non-Javadoc)
 	 * @see org.eclipse.osgi.framework.debug.FrameworkDebugTrace#traceExit(java.lang.String)
 	 */
+	@Override
 	public void traceExit(final String optionPath) {
 
 		if (isDebuggingEnabled(optionPath)) {
@@ -227,6 +233,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 * (non-Javadoc)
 	 * @see org.eclipse.osgi.framework.debug.FrameworkDebugTrace#traceExit(java.lang.String, java.lang.Object)
 	 */
+	@Override
 	public void traceExit(final String optionPath, final Object result) {
 
 		if (isDebuggingEnabled(optionPath)) {
@@ -246,6 +253,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 * (non-Javadoc)
 	 * @see org.eclipse.osgi.framework.debug.FrameworkDebugTrace#traceDumpStack(java.lang.String)
 	 */
+	@Override
 	public void traceDumpStack(final String optionPath) {
 
 		if (isDebuggingEnabled(optionPath)) {

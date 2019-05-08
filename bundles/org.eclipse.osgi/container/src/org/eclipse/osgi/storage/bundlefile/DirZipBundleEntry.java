@@ -42,23 +42,28 @@ public class DirZipBundleEntry extends BundleEntry {
 	/**
 	 * @throws IOException  
 	 */
+	@Override
 	public InputStream getInputStream() throws IOException {
 		return new ByteArrayInputStream(new byte[0]);
 	}
 
+	@Override
 	public long getSize() {
 		return 0;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public long getTime() {
 		return 0;
 	}
 
 	@SuppressWarnings("deprecation")
+	@Override
 	public URL getLocalURL() {
 		try {
 			return new URL("jar:" + bundleFile.basefile.toURL() + "!/" + name); //$NON-NLS-1$ //$NON-NLS-2$
@@ -69,6 +74,7 @@ public class DirZipBundleEntry extends BundleEntry {
 	}
 
 	@SuppressWarnings("deprecation")
+	@Override
 	public URL getFileURL() {
 		try {
 			return bundleFile.extractDirectory(name).toURL();

@@ -89,6 +89,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 	 * @param protocol The desired protocol
 	 * @return a URLStreamHandler for the specific protocol.
 	 */
+	@Override
 	public URLStreamHandler createURLStreamHandler(String protocol) {
 		// Check if we are recursing
 		if (isRecursive(protocol))
@@ -201,10 +202,12 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 		}
 	}
 
+	@Override
 	public Object getParentFactory() {
 		return parentFactory;
 	}
 
+	@Override
 	public void setParentFactory(Object parentFactory) {
 		if (this.parentFactory == null) // only allow it to be set once
 			this.parentFactory = (URLStreamHandlerFactory) parentFactory;

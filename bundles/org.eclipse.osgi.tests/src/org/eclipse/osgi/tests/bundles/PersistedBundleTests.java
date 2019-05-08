@@ -71,10 +71,12 @@ public class PersistedBundleTests extends AbstractBundleTests {
 	private static final String NO_PERSISTENCE = "-1";
 	private static final String PERIODIC_PERSISTENCE = "4000";
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}

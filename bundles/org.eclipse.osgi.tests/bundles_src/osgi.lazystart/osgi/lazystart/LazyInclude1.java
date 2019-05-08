@@ -19,6 +19,7 @@ import org.eclipse.osgi.tests.bundles.ITestRunner;
 
 public class LazyInclude1 implements ITestRunner {
 
+	@Override
 	public Object testIt() throws Exception {
 		new CAExcluded();
 		return new CBExcluded();

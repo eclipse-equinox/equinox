@@ -30,6 +30,7 @@ public interface ExtendedLogService extends LogService, Logger {
 	 * @param loggerName The logger name. 
 	 * @return <code>Logger</code> associated with the logger name.
 	 */
+	@Override
 	public Logger getLogger(String loggerName);
 
 	/**

@@ -217,10 +217,12 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		return output.toString();
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public ConditionInfo[] getConditionInfos() {
 		// must make a copy for the public API method to prevent modification
 		return (ConditionInfo[]) cloneArray(conditionInfos);
@@ -230,10 +232,12 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		return conditionInfos;
 	}
 
+	@Override
 	public String getAccessDecision() {
 		return deny ? ConditionalPermissionInfo.DENY : ConditionalPermissionInfo.ALLOW;
 	}
 
+	@Override
 	public PermissionInfo[] getPermissionInfos() {
 		// must make a copy for the public API method to prevent modification
 		return (PermissionInfo[]) cloneArray(permissionInfoCollection.getPermissionInfos());
@@ -246,6 +250,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	/**
 	 * @deprecated
 	 */
+	@Override
 	public void delete() {
 		securityAdmin.delete(this, true);
 	}
@@ -394,14 +399,17 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		return permissionInfoCollection.implies(permission) ? (deny ? DECISION_DENIED : DECISION_GRANTED) : DECISION_ABSTAIN;
 	}
 
+	@Override
 	public String toString() {
 		return getEncoded();
 	}
 
+	@Override
 	public String getEncoded() {
 		return getEncoded(name, conditionInfos, internalGetPermissionInfos(), deny);
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		// doing the simple (slow) thing for now
 		if (obj == this)
@@ -412,6 +420,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		return getEncoded().equals(((ConditionalPermissionInfo) obj).getEncoded());
 	}
 
+	@Override
 	public int hashCode() {
 		return getHashCode(name, internalGetConditionInfos(), internalGetPermissionInfos(), getAccessDecision());
 	}

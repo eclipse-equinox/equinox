@@ -40,18 +40,22 @@ public class SecurityRowSnapShot implements ConditionalPermissionInfo {
 		this.decision = decision;
 	}
 
+	@Override
 	public ConditionInfo[] getConditionInfos() {
 		return (ConditionInfo[]) SecurityRow.cloneArray(conditionInfos);
 	}
 
+	@Override
 	public String getAccessDecision() {
 		return decision;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public PermissionInfo[] getPermissionInfos() {
 		return (PermissionInfo[]) SecurityRow.cloneArray(permissionInfos);
 	}
@@ -59,18 +63,22 @@ public class SecurityRowSnapShot implements ConditionalPermissionInfo {
 	/**
 	 * @deprecated
 	 */
+	@Override
 	public void delete() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public String toString() {
 		return getEncoded();
 	}
 
+	@Override
 	public String getEncoded() {
 		return SecurityRow.getEncoded(name, conditionInfos, permissionInfos, DENY.equalsIgnoreCase(decision));
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		// doing the simple (slow) thing for now
 		if (obj == this)
@@ -81,6 +89,7 @@ public class SecurityRowSnapShot implements ConditionalPermissionInfo {
 		return getEncoded().equals(((ConditionalPermissionInfo) obj).getEncoded());
 	}
 
+	@Override
 	public int hashCode() {
 		return SecurityRow.getHashCode(name, conditionInfos, permissionInfos, getAccessDecision());
 	}

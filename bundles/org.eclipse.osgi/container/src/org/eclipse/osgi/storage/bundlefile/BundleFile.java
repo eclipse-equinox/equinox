@@ -177,6 +177,7 @@ abstract public class BundleFile {
 		return mruIndex;
 	}
 
+	@Override
 	public String toString() {
 		return String.valueOf(basefile);
 	}

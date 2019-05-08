@@ -26,18 +26,22 @@ public class ShrinkableEntrySetValueCollection<E> extends AbstractCollection<E> 
 		entrySet = e;
 	}
 
+	@Override
 	public void clear() {
 		entrySet.clear();
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return entrySet.isEmpty();
 	}
 
+	@Override
 	public Iterator<E> iterator() {
 		return new ValueIterator<>(entrySet.iterator());
 	}
 
+	@Override
 	public int size() {
 		return entrySet.size();
 	}
@@ -52,15 +56,18 @@ public class ShrinkableEntrySetValueCollection<E> extends AbstractCollection<E> 
 			iter = i;
 		}
 
+		@Override
 		public boolean hasNext() {
 			return iter.hasNext();
 		}
 
+		@Override
 		public E next() {
 			final Map.Entry<?, ? extends E> entry = iter.next();
 			return entry.getValue();
 		}
 
+		@Override
 		public void remove() {
 			iter.remove();
 		}

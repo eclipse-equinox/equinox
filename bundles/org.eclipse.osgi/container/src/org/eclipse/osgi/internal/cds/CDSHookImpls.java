@@ -73,6 +73,7 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 		return cdsBundleFile;
 	}
 
+	@Override
 	public void recordClassDefine(String name, Class<?> clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) { // only attempt to record the class define if:
 		// 1) the class was found (clazz != null)
 		// 2) the class has the magic class number CAFEBABE indicating a real class
@@ -139,6 +140,7 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 		return (classbytes[0] & 0xCA) == 0xCA && (classbytes[1] & 0xFE) == 0xFE && (classbytes[2] & 0xBA) == 0xBA && (classbytes[3] & 0xBE) == 0xBE;
 	}
 
+	@Override
 	public void classLoaderCreated(ModuleClassLoader classLoader) {
 		// try to get the url helper for this class loader
 		if (factory == null) {
@@ -185,6 +187,7 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 		}
 	}
 
+	@Override
 	public boolean addClassPathEntry(ArrayList<ClasspathEntry> cpEntries, String cp, ClasspathManager hostmanager, Generation sourceGeneration) {
 		CDSBundleFile hostFile = getCDSBundleFile(hostmanager.getGeneration().getBundleFile());
 		CDSBundleFile sourceFile = getCDSBundleFile(sourceGeneration.getBundleFile());
@@ -200,6 +203,7 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 	}
 
 	//////////////// BundleFileWrapperFactoryHook //////////////
+	@Override
 	public BundleFileWrapper wrapBundleFile(BundleFile bundleFile, Generation generation, boolean base) {
 		// wrap the real bundle file for purposes of loading shared classes.
 		CDSBundleFile newBundleFile;

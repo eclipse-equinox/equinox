@@ -61,6 +61,7 @@ public class ArrayMap<K, V> implements Collection<K> {
 		}
 	}
 
+	@Override
 	public boolean remove(Object key) {
 		int index = keys.indexOf(key);
 		if (index < 0)
@@ -70,6 +71,7 @@ public class ArrayMap<K, V> implements Collection<K> {
 		return true;
 	}
 
+	@Override
 	public void clear() {
 		keys.clear();
 		values.clear();
@@ -83,32 +85,39 @@ public class ArrayMap<K, V> implements Collection<K> {
 		return new ArrayList<>(values);
 	}
 
+	@Override
 	public int size() {
 		return keys.size();
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return keys.isEmpty();
 	}
 
+	@Override
 	public boolean contains(Object o) {
 		return keys.contains(o);
 	}
 
+	@Override
 	public Iterator<K> iterator() {
 		final Iterator<K> keyIter = keys.iterator();
 		final Iterator<V> valueIter = values.iterator();
 
 		return new Iterator<K>() {
+		@Override
 			public boolean hasNext() {
 				return keyIter.hasNext();
 			}
 
+		@Override
 			public K next() {
 				valueIter.next();
 				return keyIter.next();
 			}
 
+		@Override
 			public void remove() {
 				valueIter.remove();
 				keyIter.remove();
@@ -116,26 +125,32 @@ public class ArrayMap<K, V> implements Collection<K> {
 		};
 	}
 
+	@Override
 	public Object[] toArray() {
 		return keys.toArray();
 	}
 
+	@Override
 	public <T> T[] toArray(T[] a) {
 		return keys.toArray(a);
 	}
 
+	@Override
 	public boolean add(K o) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public boolean containsAll(Collection<?> c) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public boolean addAll(Collection<? extends K> c) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public boolean removeAll(Collection<?> c) {
 		boolean result = false;
 		for (Object key : c)
@@ -143,6 +158,7 @@ public class ArrayMap<K, V> implements Collection<K> {
 		return result;
 	}
 
+	@Override
 	public boolean retainAll(Collection<?> c) {
 		boolean result = false;
 		Object[] keyArray = keys.toArray();

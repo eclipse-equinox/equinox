@@ -84,6 +84,7 @@ public abstract class AuthorizationEngine {
 	abstract public int getStatus();
 
 	class AuthEventDispatcher implements EventDispatcher<AuthorizationListener, Object, AuthorizationEvent> {
+		@Override
 		public void dispatchEvent(AuthorizationListener eventListener, Object listenerObject, int eventAction, AuthorizationEvent eventObject) {
 			eventListener.authorizationEvent(eventObject);
 		}

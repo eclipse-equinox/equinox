@@ -175,6 +175,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		return false;
 	}
 
+	@Override
 	public PermissionInfo[] getDefaultPermissions() {
 		synchronized (lock) {
 			if (permAdminDefaults == null)
@@ -183,6 +184,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		}
 	}
 
+	@Override
 	public String[] getLocations() {
 		synchronized (lock) {
 			String[] results = permAdminTable.getLocations();
@@ -190,12 +192,14 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		}
 	}
 
+	@Override
 	public PermissionInfo[] getPermissions(String location) {
 		synchronized (lock) {
 			return permAdminTable.getPermissions(location);
 		}
 	}
 
+	@Override
 	public void setDefaultPermissions(PermissionInfo[] permissions) {
 		checkAllPermission();
 		synchronized (lock) {
@@ -222,6 +226,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		return encoded;
 	}
 
+	@Override
 	public void setPermissions(String location, PermissionInfo[] permissions) {
 		checkAllPermission();
 		synchronized (lock) {
@@ -252,24 +257,29 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/**
 	 * @deprecated
 	 */
+	@Override
 	public ConditionalPermissionInfo addConditionalPermissionInfo(ConditionInfo[] conds, PermissionInfo[] perms) {
 		return setConditionalPermissionInfo(null, conds, perms, true);
 	}
 
+	@Override
 	public ConditionalPermissionInfo newConditionalPermissionInfo(String name, ConditionInfo[] conditions, PermissionInfo[] permissions, String decision) {
 		return new SecurityRowSnapShot(name, conditions, permissions, decision);
 	}
 
+	@Override
 	public ConditionalPermissionInfo newConditionalPermissionInfo(String encoded) {
 		return SecurityRow.createSecurityRowSnapShot(encoded);
 	}
 
+	@Override
 	public ConditionalPermissionUpdate newConditionalPermissionUpdate() {
 		synchronized (lock) {
 			return new SecurityTableUpdate(this, condAdminTable.getRows(), timeStamp);
 		}
 	}
 
+	@Override
 	public AccessControlContext getAccessControlContext(String[] signers) {
 		SecurityAdmin snapShot = getSnapShot();
 		return new AccessControlContext(new ProtectionDomain[] {createProtectionDomain(createMockBundle(signers), snapShot)});
@@ -278,6 +288,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/**
 	 * @deprecated
 	 */
+	@Override
 	public ConditionalPermissionInfo getConditionalPermissionInfo(String name) {
 		synchronized (lock) {
 			return condAdminTable.getRow(name);
@@ -287,6 +298,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/**
 	 * @deprecated
 	 */
+	@Override
 	public Enumeration<ConditionalPermissionInfo> getConditionalPermissionInfos() {
 		// could implement our own Enumeration, but we don't care about performance here.  Just do something simple:
 		synchronized (lock) {
@@ -301,6 +313,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/**
 	 * @deprecated
 	 */
+	@Override
 	public ConditionalPermissionInfo setConditionalPermissionInfo(String name, ConditionInfo[] conds, PermissionInfo[] perms) {
 		return setConditionalPermissionInfo(name, conds, perms, true);
 	}
@@ -531,46 +544,57 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			this.signers = signers;
 		}
 
+		@Override
 		public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
 			return null;
 		}
 
+		@Override
 		public BundleContext getBundleContext() {
 			return null;
 		}
 
+		@Override
 		public long getBundleId() {
 			return -1;
 		}
 
+		@Override
 		public URL getEntry(String path) {
 			return null;
 		}
 
+		@Override
 		public Enumeration<String> getEntryPaths(String path) {
 			return null;
 		}
 
+		@Override
 		public Dictionary<String, String> getHeaders() {
 			return new Hashtable<>();
 		}
 
+		@Override
 		public Dictionary<String, String> getHeaders(String locale) {
 			return getHeaders();
 		}
 
+		@Override
 		public long getLastModified() {
 			return 0;
 		}
 
+		@Override
 		public String getLocation() {
 			return ""; //$NON-NLS-1$
 		}
 
+		@Override
 		public ServiceReference<?>[] getRegisteredServices() {
 			return null;
 		}
 
+		@Override
 		public URL getResource(String name) {
 			return null;
 		}
@@ -578,30 +602,37 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		/**
 		 * @throws IOException  
 		 */
+		@Override
 		public Enumeration<URL> getResources(String name) throws IOException {
 			return null;
 		}
 
+		@Override
 		public ServiceReference<?>[] getServicesInUse() {
 			return null;
 		}
 
+		@Override
 		public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType) {
 			return new HashMap<>(signers);
 		}
 
+		@Override
 		public int getState() {
 			return Bundle.UNINSTALLED;
 		}
 
+		@Override
 		public String getSymbolicName() {
 			return null;
 		}
 
+		@Override
 		public Version getVersion() {
 			return Version.emptyVersion;
 		}
 
+		@Override
 		public boolean hasPermission(Object permission) {
 			return false;
 		}
@@ -609,6 +640,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		/**
 		 * @throws ClassNotFoundException  
 		 */
+		@Override
 		public Class<?> loadClass(String name) throws ClassNotFoundException {
 			throw new IllegalStateException();
 		}
@@ -616,6 +648,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		/**
 		 * @throws BundleException  
 		 */
+		@Override
 		public void start(int options) throws BundleException {
 			throw new IllegalStateException();
 		}
@@ -623,6 +656,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		/**
 		 * @throws BundleException  
 		 */
+		@Override
 		public void start() throws BundleException {
 			throw new IllegalStateException();
 		}
@@ -630,6 +664,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		/**
 		 * @throws BundleException  
 		 */
+		@Override
 		public void stop(int options) throws BundleException {
 			throw new IllegalStateException();
 		}
@@ -637,6 +672,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		/**
 		 * @throws BundleException  
 		 */
+		@Override
 		public void stop() throws BundleException {
 			throw new IllegalStateException();
 		}
@@ -644,6 +680,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		/**
 		 * @throws BundleException  
 		 */
+		@Override
 		public void uninstall() throws BundleException {
 			throw new IllegalStateException();
 		}
@@ -651,6 +688,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		/**
 		 * @throws BundleException  
 		 */
+		@Override
 		public void update() throws BundleException {
 			throw new IllegalStateException();
 		}
@@ -658,18 +696,22 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		/**
 		 * @throws BundleException  
 		 */
+		@Override
 		public void update(InputStream in) throws BundleException {
 			throw new IllegalStateException();
 		}
 
+		@Override
 		public int compareTo(Bundle o) {
 			return 0;
 		}
 
+		@Override
 		public <A> A adapt(Class<A> type) {
 			throw new IllegalStateException();
 		}
 
+		@Override
 		public File getDataFile(String filename) {
 			return null;
 		}
@@ -684,10 +726,12 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			this.issuer = issuer;
 		}
 
+		@Override
 		public Principal getSubjectDN() {
 			return subject;
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
@@ -696,10 +740,12 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			return false;
 		}
 
+		@Override
 		public int hashCode() {
 			return subject.hashCode() + issuer.hashCode();
 		}
 
+		@Override
 		public String toString() {
 			return subject.toString();
 		}
@@ -708,6 +754,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		 * @throws CertificateExpiredException 
 		 * @throws java.security.cert.CertificateNotYetValidException  
 		 */
+		@Override
 		public void checkValidity() throws CertificateExpiredException, java.security.cert.CertificateNotYetValidException {
 			throw new UnsupportedOperationException();
 		}
@@ -716,54 +763,67 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		 * @throws java.security.cert.CertificateExpiredException 
 		 * @throws java.security.cert.CertificateNotYetValidException  
 		 */
+		@Override
 		public void checkValidity(Date var0) throws java.security.cert.CertificateExpiredException, java.security.cert.CertificateNotYetValidException {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public int getBasicConstraints() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Principal getIssuerDN() {
 			return issuer;
 		}
 
+		@Override
 		public boolean[] getIssuerUniqueID() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public boolean[] getKeyUsage() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Date getNotAfter() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Date getNotBefore() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public BigInteger getSerialNumber() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public String getSigAlgName() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public String getSigAlgOID() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public byte[] getSigAlgParams() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public byte[] getSignature() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public boolean[] getSubjectUniqueID() {
 			throw new UnsupportedOperationException();
 		}
@@ -771,10 +831,12 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		/**
 		 * @throws CertificateEncodingException  
 		 */
+		@Override
 		public byte[] getTBSCertificate() throws CertificateEncodingException {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public int getVersion() {
 			throw new UnsupportedOperationException();
 		}
@@ -782,10 +844,12 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		/**
 		 * @throws CertificateEncodingException  
 		 */
+		@Override
 		public byte[] getEncoded() throws CertificateEncodingException {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public PublicKey getPublicKey() {
 			throw new UnsupportedOperationException();
 		}
@@ -797,6 +861,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		 * @throws java.security.SignatureException 
 		 * @throws java.security.cert.CertificateException 
 		 */
+		@Override
 		public void verify(PublicKey var0) throws java.security.InvalidKeyException, java.security.NoSuchAlgorithmException, java.security.NoSuchProviderException, java.security.SignatureException, java.security.cert.CertificateException {
 			throw new UnsupportedOperationException();
 		}
@@ -808,22 +873,27 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		 * @throws SignatureException 
 		 * @throws CertificateException  
 		 */
+		@Override
 		public void verify(PublicKey var0, String var1) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException, CertificateException {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Set<String> getCriticalExtensionOIDs() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public byte[] getExtensionValue(String var0) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Set<String> getNonCriticalExtensionOIDs() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public boolean hasUnsupportedCriticalExtension() {
 			throw new UnsupportedOperationException();
 		}
@@ -836,10 +906,12 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			this.name = name;
 		}
 
+		@Override
 		public String getName() {
 			return name;
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			if (this == obj) {
 				return true;
@@ -850,10 +922,12 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			return false;
 		}
 
+		@Override
 		public int hashCode() {
 			return name.hashCode();
 		}
 
+		@Override
 		public String toString() {
 			return getName();
 		}

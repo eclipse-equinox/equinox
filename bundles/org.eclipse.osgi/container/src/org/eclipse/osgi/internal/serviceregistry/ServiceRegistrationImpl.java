@@ -152,6 +152,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	 * @exception IllegalArgumentException If the <tt>properties</tt>
 	 * parameter contains case variants of the same key name.
 	 */
+	@Override
 	public void setProperties(Dictionary<String, ?> props) {
 		final ServiceReferenceImpl<S> ref;
 		final Map<String, Object> previousProperties;
@@ -201,6 +202,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	 * this ServiceRegistration has already been unregistered.
 	 * @see BundleContextImpl#ungetService
 	 */
+	@Override
 	public void unregister() {
 		final ServiceReferenceImpl<S> ref;
 		synchronized (registry) {
@@ -273,6 +275,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	 * this ServiceRegistration has already been unregistered.
 	 * @return A {@link ServiceReferenceImpl} object.
 	 */
+	@Override
 	public ServiceReference<S> getReference() {
 		return getReferenceImpl();
 	}
@@ -691,6 +694,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	 *
 	 * @return String representation of this object.
 	 */
+	@Override
 	public String toString() {
 		int size = clazzes.length;
 		StringBuilder sb = new StringBuilder(50 * size);
@@ -724,6 +728,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	 *         <code>ServiceRegistrationImpl</code> is greater than, equal to, or
 	 *         less than the specified <code>ServiceRegistrationImpl</code>.
 	 */
+	@Override
 	public int compareTo(ServiceRegistrationImpl<?> other) {
 		final int thisRanking = this.getRanking();
 		final int otherRanking = other.getRanking();

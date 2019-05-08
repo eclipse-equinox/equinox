@@ -56,6 +56,7 @@ public class CDSBundleEntry extends BundleEntry {
 	 * 
 	 * This should is likely never to be called.
 	 */
+	@Override
 	public URL getFileURL() {
 		return wrapped.getFileURL();
 	}
@@ -66,6 +67,7 @@ public class CDSBundleEntry extends BundleEntry {
 	 * wraps the classbytes into a ByteArrayInputStream.  This should not be used
 	 * by classloading.
 	 */
+	@Override
 	public InputStream getInputStream() throws IOException {
 		// someone is trying to get the real bytes of the class file!!
 		// just return the entry from the wrapped file instead of the magic cookie
@@ -79,6 +81,7 @@ public class CDSBundleEntry extends BundleEntry {
 	 * the class during class loading.
 	 * if classbytes is null, it gets the contents from actual BundleEntry and caches it in classbytes.
 	 */
+	@Override
 	public byte[] getBytes() throws IOException {
 		if (classbytes == null) {
 			classbytes = wrapped.getBytes();
@@ -94,18 +97,22 @@ public class CDSBundleEntry extends BundleEntry {
 	 * 
 	 * This should is likely never to be called.
 	 */
+	@Override
 	public URL getLocalURL() {
 		return wrapped.getLocalURL();
 	}
 
+	@Override
 	public String getName() {
 		return path;
 	}
 
+	@Override
 	public long getSize() {
 		return wrapped.getSize();
 	}
 
+	@Override
 	public long getTime() {
 		return wrapped.getTime();
 	}

@@ -583,6 +583,7 @@ public class ManifestElement {
 		return result;
 	}
 
+	@Override
 	public String toString() {
 		Enumeration<String> attrKeys = getKeys();
 		Enumeration<String> directiveKeys = getDirectiveKeys();

@@ -31,6 +31,7 @@ public class VersionHashMap<V extends VersionSupplier> extends MappedList<String
 
 	// assumes existing array is sorted
 	// finds the index where to insert the new value
+	@Override
 	protected int insertionIndex(List<V> existing, V value) {
 		int index = existing.size();
 		if (compare(existing.get(existing.size() - 1), value) > 0) {
@@ -91,6 +92,7 @@ public class VersionHashMap<V extends VersionSupplier> extends MappedList<String
 	// First the resolution status of the supplying bundle.
 	// Second is the supplier version.
 	// Third is the bundle id of the supplying bundle.
+	@Override
 	public int compare(V vs1, V vs2) {
 		// if the selection policy is set then use that
 		if (resolver.getSelectionPolicy() != null)

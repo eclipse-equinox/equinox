@@ -30,30 +30,37 @@ import org.osgi.service.url.URLStreamHandlerSetter;
 
 public class NullURLStreamHandlerService implements URLStreamHandlerService {
 
+	@Override
 	public URLConnection openConnection(URL u) throws IOException {
 		throw new MalformedURLException();
 	}
 
+	@Override
 	public boolean equals(URL url1, URL url2) {
 		throw new IllegalStateException();
 	}
 
+	@Override
 	public int getDefaultPort() {
 		throw new IllegalStateException();
 	}
 
+	@Override
 	public InetAddress getHostAddress(URL url) {
 		throw new IllegalStateException();
 	}
 
+	@Override
 	public int hashCode(URL url) {
 		throw new IllegalStateException();
 	}
 
+	@Override
 	public boolean hostsEqual(URL url1, URL url2) {
 		throw new IllegalStateException();
 	}
 
+	@Override
 	public boolean sameFile(URL url1, URL url2) {
 		throw new IllegalStateException();
 	}
@@ -66,10 +73,12 @@ public class NullURLStreamHandlerService implements URLStreamHandlerService {
 		throw new IllegalStateException();
 	}
 
+	@Override
 	public String toExternalForm(URL url) {
 		throw new IllegalStateException();
 	}
 
+	@Override
 	public void parseURL(URLStreamHandlerSetter realHandler, URL u, String spec, int start, int limit) {
 		throw new IllegalStateException();
 	}

@@ -54,6 +54,7 @@ public class FileBundleEntry extends BundleEntry {
 	 * @return InputStream for the entry
 	 * @exception java.io.IOException
 	 */
+	@Override
 	public InputStream getInputStream() throws IOException {
 		return BundleFile.secureAction.getFileInputStream(file);
 	}
@@ -63,6 +64,7 @@ public class FileBundleEntry extends BundleEntry {
 	 *
 	 * @return size of entry
 	 */
+	@Override
 	public long getSize() {
 		return BundleFile.secureAction.length(file);
 	}
@@ -72,6 +74,7 @@ public class FileBundleEntry extends BundleEntry {
 	 *
 	 * @return name of entry
 	 */
+	@Override
 	public String getName() {
 		return (name);
 	}
@@ -83,15 +86,18 @@ public class FileBundleEntry extends BundleEntry {
 	 *
 	 * @return last modification time.
 	 */
+	@Override
 	public long getTime() {
 		return BundleFile.secureAction.lastModified(file);
 	}
 
+	@Override
 	public URL getLocalURL() {
 		return getFileURL();
 	}
 
 	@SuppressWarnings("deprecation")
+	@Override
 	public URL getFileURL() {
 		try {
 			return file.toURL();

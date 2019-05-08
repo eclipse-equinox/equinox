@@ -47,6 +47,7 @@ final class BundleDeltaImpl implements BundleDelta {
 		this.type = type;
 	}
 
+	@Override
 	public String toString() {
 		return bundleDescription.getSymbolicName() + '_' + bundleDescription.getVersion() + " (" + toTypeString(type) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}

@@ -85,6 +85,7 @@ public class ModuleRequirement implements BundleRequirement {
 		return revision;
 	}
 
+	@Override
 	public String toString() {
 		return namespace + ModuleRevision.toString(attributes, false) + ModuleRevision.toString(directives, true);
 	}

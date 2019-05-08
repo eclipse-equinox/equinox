@@ -150,6 +150,7 @@ public abstract class BaseDescriptionImpl implements BaseDescription {
 			return Collections.unmodifiableMap(attrs);
 		}
 
+		@Override
 		public int hashCode() {
 			return System.identityHashCode(BaseDescriptionImpl.this);
 		}
@@ -158,6 +159,7 @@ public abstract class BaseDescriptionImpl implements BaseDescription {
 			return BaseDescriptionImpl.this;
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
@@ -166,6 +168,7 @@ public abstract class BaseDescriptionImpl implements BaseDescription {
 			return (((BaseCapability) obj).getBaseDescription() == BaseDescriptionImpl.this) && namespace.equals(((BaseCapability) obj).getNamespace());
 		}
 
+		@Override
 		public String toString() {
 			return getNamespace() + BaseDescriptionImpl.toString(getAttributes(), false) + BaseDescriptionImpl.toString(getDirectives(), true);
 		}

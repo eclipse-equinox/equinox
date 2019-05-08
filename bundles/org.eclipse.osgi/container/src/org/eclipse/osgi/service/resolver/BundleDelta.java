@@ -125,5 +125,6 @@ public interface BundleDelta extends Comparable<BundleDelta> {
 	 *                comparable with the receiver.
 	 * @since 3.7
 	 */
+	@Override
 	public int compareTo(BundleDelta obj);
 }

@@ -24,10 +24,12 @@ public final class BundlePermissions extends PermissionCollection {
 
 	// Note that this forces the Enumeration inner class to be loaded as soon as possible (see bug 119069)  
 	static final Enumeration<Permission> EMPTY_ENUMERATION = new Enumeration<Permission>() {
+		@Override
 		public boolean hasMoreElements() {
 			return false;
 		}
 
+		@Override
 		public Permission nextElement() {
 			throw new NoSuchElementException();
 		}
@@ -48,6 +50,7 @@ public final class BundlePermissions extends PermissionCollection {
 		setReadOnly(); // collections are managed with ConditionalPermissionAdmin
 	}
 
+	@Override
 	public void add(Permission permission) {
 		throw new SecurityException();
 	}
@@ -68,6 +71,7 @@ public final class BundlePermissions extends PermissionCollection {
 		wovenPermissions.add(permission);
 	}
 
+	@Override
 	public Enumeration<Permission> elements() {
 		// TODO return an empty enumeration for now; 
 		// It does not seem possible to do this properly with multiple exports and conditional permissions.
@@ -75,6 +79,7 @@ public final class BundlePermissions extends PermissionCollection {
 		return EMPTY_ENUMERATION;
 	}
 
+	@Override
 	public boolean implies(Permission permission) {
 		// first check implied permissions
 		if ((impliedPermissions != null) && impliedPermissions.implies(permission))

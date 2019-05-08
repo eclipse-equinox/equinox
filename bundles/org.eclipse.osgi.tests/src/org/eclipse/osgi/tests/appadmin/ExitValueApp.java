@@ -72,6 +72,7 @@ public class ExitValueApp implements IApplication, Runnable {
 			}
 	}
 
+	@Override
 	public synchronized void run() {
 		if (active) {
 			try {

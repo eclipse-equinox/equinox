@@ -34,6 +34,7 @@ public class SystemPolicy implements IBuddyPolicy {
 		if (instances[type] == null) {
 			instances[type] = new SystemPolicy();
 			instances[type].classLoader = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+				@Override
 				public ClassLoader run() {
 					return createClassLoader(type);
 				}
@@ -68,6 +69,7 @@ public class SystemPolicy implements IBuddyPolicy {
 		return null;
 	}
 
+	@Override
 	public Class<?> loadClass(String name) {
 		try {
 			return classLoader.loadClass(name);
@@ -76,10 +78,12 @@ public class SystemPolicy implements IBuddyPolicy {
 		}
 	}
 
+	@Override
 	public URL loadResource(String name) {
 		return classLoader.getResource(name);
 	}
 
+	@Override
 	public Enumeration<URL> loadResources(String name) {
 		try {
 			return classLoader.getResources(name);

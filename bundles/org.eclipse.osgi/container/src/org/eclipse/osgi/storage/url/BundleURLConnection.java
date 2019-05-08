@@ -50,6 +50,7 @@ public class BundleURLConnection extends URLConnection {
 		this.contentType = null;
 	}
 
+	@Override
 	public synchronized void connect() throws IOException {
 		if (!connected) {
 			if (bundleEntry != null) {
@@ -61,10 +62,12 @@ public class BundleURLConnection extends URLConnection {
 		}
 	}
 
+	@Override
 	public int getContentLength() {
 		return ((int) bundleEntry.getSize());
 	}
 
+	@Override
 	public String getContentType() {
 		if (contentType == null) {
 			contentType = guessContentTypeFromName(bundleEntry.getName());
@@ -89,14 +92,17 @@ public class BundleURLConnection extends URLConnection {
 		return (contentType);
 	}
 
+	@Override
 	public boolean getDoInput() {
 		return (true);
 	}
 
+	@Override
 	public boolean getDoOutput() {
 		return (false);
 	}
 
+	@Override
 	public InputStream getInputStream() throws IOException {
 		if (!connected) {
 			connect();
@@ -105,6 +111,7 @@ public class BundleURLConnection extends URLConnection {
 		return (in);
 	}
 
+	@Override
 	public long getLastModified() {
 		long lastModified = bundleEntry.getTime();
 

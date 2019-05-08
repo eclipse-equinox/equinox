@@ -17,6 +17,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class TestClassBase {
+	@Override
 	public String toString() {
 		return "BASEXX";
 	}

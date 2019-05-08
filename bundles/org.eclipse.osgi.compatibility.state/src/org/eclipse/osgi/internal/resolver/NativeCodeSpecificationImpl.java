@@ -53,6 +53,7 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 	}
 
 	@SuppressWarnings("unchecked")
+	@Override
 	public boolean isSatisfiedBy(BaseDescription supplier) {
 		if (!(supplier instanceof NativeCodeDescription))
 			return false;
@@ -171,6 +172,7 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 		return true;
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		NativeCodeDescription[] suppliers = getPossibleSuppliers();
@@ -183,10 +185,12 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 		return sb.toString();
 	}
 
+	@Override
 	protected Map<String, String> getInternalDirectives() {
 		return Collections.<String, String> emptyMap();
 	}
 
+	@Override
 	protected Map<String, Object> getInteralAttributes() {
 		return Collections.<String, Object> emptyMap();
 	}

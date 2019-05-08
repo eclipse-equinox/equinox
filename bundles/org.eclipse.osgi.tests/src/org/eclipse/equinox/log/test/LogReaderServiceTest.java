@@ -62,6 +62,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		setName(name);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		logReference = OSGiTestsActivator.getContext().getServiceReference(LogService.class.getName());
@@ -80,6 +81,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		rootLoggerContext.setLogLevels(copyLogLevels);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		rootLoggerContext.setLogLevels(rootLogLevels);
 		OSGiTestsActivator.getContext().ungetService(loggerAdminReference);

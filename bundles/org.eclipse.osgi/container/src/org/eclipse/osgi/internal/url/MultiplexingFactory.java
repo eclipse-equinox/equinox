@@ -71,6 +71,7 @@ public abstract class MultiplexingFactory {
 
 	// used to get access to the protected SecurityManager#getClassContext method
 	static class InternalSecurityManager extends SecurityManager {
+		@Override
 		public Class<?>[] getClassContext() {
 			return super.getClassContext();
 		}

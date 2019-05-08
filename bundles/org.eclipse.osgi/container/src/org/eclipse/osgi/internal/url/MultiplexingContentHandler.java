@@ -25,6 +25,7 @@ public class MultiplexingContentHandler extends ContentHandler {
 		this.factory = factory;
 	}
 
+	@Override
 	public Object getContent(URLConnection uConn) throws IOException {
 		ContentHandler handler = factory.findAuthorizedContentHandler(contentType);
 		if (handler != null)

@@ -27,6 +27,7 @@ public class SingleSourcePackage extends PackageSource {
 		this.supplier = supplier;
 	}
 
+	@Override
 	public SingleSourcePackage[] getSuppliers() {
 		return new SingleSourcePackage[] {this};
 	}
@@ -35,18 +36,22 @@ public class SingleSourcePackage extends PackageSource {
 		return supplier;
 	}
 
+	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		return supplier.findLocalClass(name);
 	}
 
+	@Override
 	public URL getResource(String name) {
 		return supplier.findLocalResource(name);
 	}
 
+	@Override
 	public Enumeration<URL> getResources(String name) {
 		return supplier.findLocalResources(name);
 	}
 
+	@Override
 	public boolean equals(Object source) {
 		if (this == source)
 			return true;
@@ -57,6 +62,7 @@ public class SingleSourcePackage extends PackageSource {
 		return supplier == singleSource.supplier && id == singleSource.getId();
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

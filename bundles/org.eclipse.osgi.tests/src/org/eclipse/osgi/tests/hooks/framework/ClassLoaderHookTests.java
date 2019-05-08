@@ -52,6 +52,7 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 	private Framework framework;
 	private String location;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		setRejectTransformation(false);
@@ -72,6 +73,7 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 		framework = createFramework(configuration);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		stopQuietly(framework);
 		super.tearDown();

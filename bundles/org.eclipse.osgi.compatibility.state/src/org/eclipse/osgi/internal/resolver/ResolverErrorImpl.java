@@ -46,6 +46,7 @@ public final class ResolverErrorImpl implements ResolverError {
 		return unsatisfied;
 	}
 
+	@Override
 	public String toString() {
 		switch (getType()) {
 			case ResolverError.EXPORT_PACKAGE_PERMISSION :

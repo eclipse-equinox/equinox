@@ -18,6 +18,7 @@ import osgi.lazystart.b.excluded.a.BAExcluded;
 import osgi.lazystart.b.excluded.b.BBExcluded;
 public class LazyExclude1 implements ITestRunner {
 
+	@Override
 	public Object testIt() throws Exception {
 		new BAExcluded();
 		return new BBExcluded();

@@ -35,6 +35,7 @@ public class Locker_JavaNio implements Locker {
 		this.debug = debug;
 	}
 
+	@Override
 	public synchronized boolean lock() throws IOException {
 		raFile = new RandomAccessFile(lockFile, "rw"); //$NON-NLS-1$
 		try {
@@ -62,6 +63,7 @@ public class Locker_JavaNio implements Locker {
 		return false;
 	}
 
+	@Override
 	public synchronized void release() {
 		if (fileLock != null) {
 			try {
@@ -81,6 +83,7 @@ public class Locker_JavaNio implements Locker {
 		}
 	}
 
+	@Override
 	public synchronized boolean isLocked() throws IOException {
 		if (fileLock != null)
 			return true;

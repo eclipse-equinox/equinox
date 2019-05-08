@@ -230,14 +230,17 @@ public class ManifestLocalization {
 			super(in);
 		}
 
+		@Override
 		public void setParent(ResourceBundle parent) {
 			super.setParent(parent);
 		}
 
+		@Override
 		public boolean isEmpty() {
 			return false;
 		}
 
+		@Override
 		public boolean isStemEmpty() {
 			return parent == null;
 		}
@@ -252,24 +255,29 @@ public class ManifestLocalization {
 		}
 
 		@SuppressWarnings("unchecked")
+		@Override
 		public Enumeration<String> getKeys() {
 			return Collections.enumeration(Collections.EMPTY_LIST);
 		}
 
+		@Override
 		protected Object handleGetObject(String arg0) throws MissingResourceException {
 			return null;
 		}
 
+		@Override
 		public void setParent(ResourceBundle parent) {
 			super.setParent(parent);
 		}
 
+		@Override
 		public boolean isEmpty() {
 			if (parent == null)
 				return true;
 			return ((BundleResourceBundle) parent).isEmpty();
 		}
 
+		@Override
 		public boolean isStemEmpty() {
 			if (defaultRoot.equals(localeString))
 				return false;

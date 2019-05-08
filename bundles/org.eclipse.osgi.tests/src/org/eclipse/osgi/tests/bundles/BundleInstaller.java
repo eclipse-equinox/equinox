@@ -65,6 +65,7 @@ public class BundleInstaller {
 			return getBundleLocation0(name);
 		try {
 			return (String) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+				@Override
 				public Object run() throws Exception {
 					return getBundleLocation0(name);
 				}

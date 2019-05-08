@@ -35,6 +35,7 @@ public class Handler extends BundleResourceHandler {
 		super(container, bundleEntry);
 	}
 
+	@Override
 	protected BundleEntry findBundleEntry(URL url, Module module) throws IOException {
 		ModuleRevision revision = module.getCurrentRevision();
 		BundleInfo.Generation revisionInfo = (BundleInfo.Generation) revision.getRevisionInfo();

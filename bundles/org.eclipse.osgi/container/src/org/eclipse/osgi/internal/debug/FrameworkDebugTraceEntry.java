@@ -145,6 +145,7 @@ public class FrameworkDebugTraceEntry {
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 
 		final StringBuffer buffer = new StringBuffer(threadName);

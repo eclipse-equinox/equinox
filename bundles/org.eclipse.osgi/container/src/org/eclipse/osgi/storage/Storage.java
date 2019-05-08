@@ -555,6 +555,7 @@ public class Storage {
 				/**
 				 * @throws IOException  
 				 */
+				@Override
 				public void connect() throws IOException {
 					connected = true;
 				}
@@ -562,6 +563,7 @@ public class Storage {
 				/**
 				 * @throws IOException  
 				 */
+				@Override
 				public InputStream getInputStream() throws IOException {
 					return (in);
 				}
@@ -580,6 +582,7 @@ public class Storage {
 		if (System.getSecurityManager() == null)
 			return getUpdateLocation0(module);
 		return AccessController.doPrivileged(new PrivilegedAction<String>() {
+			@Override
 			public String run() {
 				return getUpdateLocation0(module);
 			}
@@ -922,6 +925,7 @@ public class Storage {
 			return getContentFile0(staged, isReference, bundleID, generationID);
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<File>() {
+				@Override
 				public File run() throws BundleException {
 					return getContentFile0(staged, isReference, bundleID, generationID);
 				}
@@ -1030,6 +1034,7 @@ public class Storage {
 			return stageContent0(in, sourceURL);
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<File>() {
+				@Override
 				public File run() throws BundleException {
 					return stageContent0(in, sourceURL);
 				}
@@ -1186,6 +1191,7 @@ public class Storage {
 		} else {
 			try {
 				AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+					@Override
 					public Void run() throws IOException {
 						delete0(delete);
 						return null;
@@ -1216,6 +1222,7 @@ public class Storage {
 		} else {
 			try {
 				AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+					@Override
 					public Void run() throws IOException {
 						save0();
 						return null;
@@ -1859,6 +1866,7 @@ public class Storage {
 			private int curDataIndex = 0;
 			private URL nextElement = null;
 
+			@Override
 			public boolean hasMoreElements() {
 				if (nextElement != null)
 					return true;
@@ -1866,6 +1874,7 @@ public class Storage {
 				return nextElement != null;
 			}
 
+			@Override
 			public URL nextElement() {
 				if (!hasMoreElements())
 					throw new NoSuchElementException();

@@ -45,6 +45,7 @@ public class WeavingHookConfigurator extends ClassLoaderHook {
 		return container.getServiceRegistry();
 	}
 
+	@Override
 	public byte[] processClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
 		ServiceRegistry registry = getRegistry();
 		if (registry == null)
@@ -83,6 +84,7 @@ public class WeavingHookConfigurator extends ClassLoaderHook {
 		return null;
 	}
 
+	@Override
 	public void recordClassDefine(String name, Class<?> clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
 		// here we assume the stack contans a woven class with the same name as the class we are defining.
 		WovenClassContext context = wovenClassContext.get();

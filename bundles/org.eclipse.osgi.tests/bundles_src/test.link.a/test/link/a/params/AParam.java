@@ -14,6 +14,7 @@
 package test.link.a.params;
 
 public class AParam {
+	@Override
 	public String toString() {
 		return "AParam"; //$NON-NLS-1$
 	}

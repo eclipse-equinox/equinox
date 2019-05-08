@@ -64,6 +64,7 @@ public abstract class ResolverConstraint {
 		return constraint.getName();
 	}
 
+	@Override
 	public String toString() {
 		return constraint.toString();
 	}

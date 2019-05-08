@@ -59,6 +59,7 @@ public class EquinoxSecurityManager extends SecurityManager {
 			this.context = context;
 		}
 
+		@Override
 		public Void run() {
 			fsm.internalCheckPermission(perm, context);
 			return null;
@@ -87,6 +88,7 @@ public class EquinoxSecurityManager extends SecurityManager {
 		return localCheckContext.get() != null;
 	}
 
+	@Override
 	public void checkPermission(Permission perm, Object context) {
 		AccessController.doPrivileged(new CheckPermissionAction(this, perm, context));
 	}
@@ -185,10 +187,12 @@ public class EquinoxSecurityManager extends SecurityManager {
 		return decision.decision;
 	}
 
+	@Override
 	public void checkPermission(Permission perm) {
 		checkPermission(perm, getSecurityContext());
 	}
 
+	@Override
 	public Object getSecurityContext() {
 		return AccessController.getContext();
 	}

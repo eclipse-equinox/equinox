@@ -61,6 +61,7 @@ public class NestedDirBundleFile extends BundleFile {
 		this.filterPrefixes = filterPrefixes;
 	}
 
+	@Override
 	public void close() {
 		// do nothing.
 	}
@@ -86,6 +87,7 @@ public class NestedDirBundleFile extends BundleFile {
 		return filterPath(path);
 	}
 
+	@Override
 	public BundleEntry getEntry(String path) {
 		if (filterPath(path)) {
 			return null;
@@ -93,6 +95,7 @@ public class NestedDirBundleFile extends BundleFile {
 		return baseBundleFile.getEntry(prependNestedDir(path));
 	}
 
+	@Override
 	public boolean containsDir(String dir) {
 		if (dir == null)
 			return false;
@@ -108,6 +111,7 @@ public class NestedDirBundleFile extends BundleFile {
 		return new StringBuffer(nestedDirName).append(path).toString();
 	}
 
+	@Override
 	public Enumeration<String> getEntryPaths(String path, boolean recurse) {
 		if (filterDir(path)) {
 			return null;
@@ -118,10 +122,12 @@ public class NestedDirBundleFile extends BundleFile {
 			return null;
 		return new Enumeration<String>() {
 
+		@Override
 			public boolean hasMoreElements() {
 				return basePaths.hasMoreElements();
 			}
 
+		@Override
 			public String nextElement() {
 				String next = basePaths.nextElement();
 				return next.substring(cpLength);
@@ -129,6 +135,7 @@ public class NestedDirBundleFile extends BundleFile {
 		};
 	}
 
+	@Override
 	public File getFile(String entry, boolean nativeCode) {
 		// getFile is only valid if this is a root bundle file.
 		// TODO to catch bugs we probably should throw new UnsupportedOperationException()
@@ -138,6 +145,7 @@ public class NestedDirBundleFile extends BundleFile {
 	/**
 	 * @throws IOException  
 	 */
+	@Override
 	public void open() throws IOException {
 		// do nothing
 	}

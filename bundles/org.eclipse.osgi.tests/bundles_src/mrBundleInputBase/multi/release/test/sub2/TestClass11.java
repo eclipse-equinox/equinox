@@ -14,6 +14,7 @@
 package multi.release.test.sub2;
 
 public class TestClass11 {
+	@Override
 	public String toString() {
 		return "BASEXX";
 	}

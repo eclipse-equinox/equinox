@@ -50,6 +50,7 @@ public class SignedBundleFile extends BundleFileWrapper implements SignedContent
 		}
 	}
 
+	@Override
 	public BundleEntry getEntry(String path) {
 		// strip off leading slashes so we can ensure the path matches the one provided in the manifest.
 		if (path.length() > 0 && path.charAt(0) == '/')
@@ -85,6 +86,7 @@ public class SignedBundleFile extends BundleFileWrapper implements SignedContent
 			this.nestedEntry = nestedEntry;
 		}
 
+		@Override
 		public InputStream getInputStream() throws IOException {
 			InputStream in = signedContent.getDigestInputStream(nestedEntry);
 			if (in == null)
@@ -92,22 +94,27 @@ public class SignedBundleFile extends BundleFileWrapper implements SignedContent
 			return in;
 		}
 
+		@Override
 		public long getSize() {
 			return nestedEntry.getSize();
 		}
 
+		@Override
 		public String getName() {
 			return nestedEntry.getName();
 		}
 
+		@Override
 		public long getTime() {
 			return nestedEntry.getTime();
 		}
 
+		@Override
 		public URL getLocalURL() {
 			return nestedEntry.getLocalURL();
 		}
 
+		@Override
 		public URL getFileURL() {
 			return nestedEntry.getFileURL();
 		}
@@ -118,30 +125,37 @@ public class SignedBundleFile extends BundleFileWrapper implements SignedContent
 		return signedContent;
 	}
 
+	@Override
 	public SignedContentEntry[] getSignedEntries() {
 		return signedContent == null ? null : signedContent.getSignedEntries();
 	}
 
+	@Override
 	public SignedContentEntry getSignedEntry(String name) {
 		return signedContent == null ? null : signedContent.getSignedEntry(name);
 	}
 
+	@Override
 	public SignerInfo[] getSignerInfos() {
 		return signedContent == null ? null : signedContent.getSignerInfos();
 	}
 
+	@Override
 	public Date getSigningTime(SignerInfo signerInfo) {
 		return signedContent == null ? null : signedContent.getSigningTime(signerInfo);
 	}
 
+	@Override
 	public SignerInfo getTSASignerInfo(SignerInfo signerInfo) {
 		return signedContent == null ? null : signedContent.getTSASignerInfo(signerInfo);
 	}
 
+	@Override
 	public boolean isSigned() {
 		return signedContent == null ? false : signedContent.isSigned();
 	}
 
+	@Override
 	public void checkValidity(SignerInfo signerInfo) throws CertificateExpiredException, CertificateNotYetValidException {
 		if (signedContent != null)
 			signedContent.checkValidity(signerInfo);

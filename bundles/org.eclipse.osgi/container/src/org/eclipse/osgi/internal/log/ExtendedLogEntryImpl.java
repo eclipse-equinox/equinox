@@ -81,47 +81,58 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 		this.stackTraceElement = stackTraceElement;
 	}
 
+	@Override
 	public String getLoggerName() {
 		return loggerName;
 	}
 
+	@Override
 	public long getSequenceNumber() {
 		return sequenceNumber;
 	}
 
+	@Override
 	public long getThreadId() {
 		return threadId;
 	}
 
+	@Override
 	public String getThreadName() {
 		return threadName;
 	}
 
+	@Override
 	public Bundle getBundle() {
 		return bundle;
 	}
 
+	@Override
 	public Throwable getException() {
 		return throwable;
 	}
 
 	@SuppressWarnings("deprecation")
+	@Override
 	public int getLevel() {
 		return level;
 	}
 
+	@Override
 	public String getMessage() {
 		return message;
 	}
 
+	@Override
 	public ServiceReference<?> getServiceReference() {
 		return ref;
 	}
 
+	@Override
 	public long getTime() {
 		return time;
 	}
 
+	@Override
 	public Object getContext() {
 		return contextObject;
 	}

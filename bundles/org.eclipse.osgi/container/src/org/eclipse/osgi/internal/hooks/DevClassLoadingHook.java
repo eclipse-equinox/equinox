@@ -101,14 +101,17 @@ public class DevClassLoadingHook extends ClassLoaderHook implements KeyedElement
 		return fromFragment ? null : hostGeneration;
 	}
 
+	@Override
 	public boolean compare(KeyedElement other) {
 		return other.getKey() == KEY;
 	}
 
+	@Override
 	public Object getKey() {
 		return KEY;
 	}
 
+	@Override
 	public int getKeyHashCode() {
 		return HASHCODE;
 	}

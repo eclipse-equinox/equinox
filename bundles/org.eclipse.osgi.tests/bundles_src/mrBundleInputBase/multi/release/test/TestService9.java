@@ -14,6 +14,7 @@
 package multi.release.test;
 
 public class TestService9 implements TestService {
+	@Override
 	public String toString() {
 		return "SERVICE_9";
 	}

@@ -15,6 +15,7 @@ package test.bug306181b;
 
 public class Component implements Runnable {
 
+	@Override
 	public void run() {
 		// nothing
 	}

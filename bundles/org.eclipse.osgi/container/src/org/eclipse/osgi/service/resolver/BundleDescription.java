@@ -33,6 +33,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * @return The bundle symbolic name or null if the bundle
 	 * does not have a symbolic name.
 	 */
+	@Override
 	public String getSymbolicName();
 
 	/**
@@ -168,6 +169,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * 
 	 * @return String representation of this bundle.
 	 */
+	@Override
 	public String toString();
 
 	/**

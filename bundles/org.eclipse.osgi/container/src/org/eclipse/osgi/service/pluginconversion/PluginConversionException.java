@@ -68,6 +68,7 @@ public class PluginConversionException extends Exception {
 	 * 
 	 * @return the nested exception or <code>null</code>
 	 */
+	@Override
 	public Throwable getCause() {
 		return cause;
 	}

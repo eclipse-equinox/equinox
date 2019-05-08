@@ -75,6 +75,7 @@ public class BundleLoader extends ModuleLoader {
 	public final static String JAVA_PACKAGE = "java."; //$NON-NLS-1$
 
 	public final static ClassContext CLASS_CONTEXT = AccessController.doPrivileged(new PrivilegedAction<ClassContext>() {
+		@Override
 		public ClassContext run() {
 			return new ClassContext();
 		}
@@ -590,6 +591,7 @@ public class BundleLoader extends ModuleLoader {
 		if (System.getSecurityManager() == null)
 			return clazz.getClassLoader();
 		return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+			@Override
 			public ClassLoader run() {
 				return clazz.getClassLoader();
 			}
@@ -891,6 +893,7 @@ public class BundleLoader extends ModuleLoader {
 	 * Return a string representation of this loader.
 	 * @return String
 	 */
+	@Override
 	public final String toString() {
 		ModuleRevision revision = wiring.getRevision();
 		String name = revision.getSymbolicName();
@@ -1248,6 +1251,7 @@ public class BundleLoader extends ModuleLoader {
 
 	static final class ClassContext extends SecurityManager {
 		// need to make this method public
+		@Override
 		public Class<?>[] getClassContext() {
 			return super.getClassContext();
 		}

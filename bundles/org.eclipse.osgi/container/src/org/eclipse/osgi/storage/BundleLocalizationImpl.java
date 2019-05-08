@@ -36,6 +36,7 @@ public class BundleLocalizationImpl implements BundleLocalization {
 	 * @return A <code>ResourceBundle</code> object for the given bundle and locale.
 	 * If null is passed for the locale parameter, the default locale is used.
 	 */
+	@Override
 	public ResourceBundle getLocalization(Bundle bundle, String locale) {
 		Module m = ((EquinoxBundle) bundle).getModule();
 		ModuleRevision r = m.getCurrentRevision();

@@ -14,6 +14,7 @@
 package ext.extclasspath.a;
 
 public class ExtClasspathExtTest {
+	@Override
 	public String toString() {
 		return "success";
 	}

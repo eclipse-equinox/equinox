@@ -83,6 +83,7 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		registerEclipseTrustEngine();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		for (Bundle b : installedBundles) {
@@ -94,6 +95,7 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		}
 	}
 
+	@Override
 	protected Bundle installBundle(String bundlePath) {
 		Bundle b = super.installBundle(bundlePath);
 		installedBundles.add(b);

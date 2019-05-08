@@ -682,38 +682,47 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		return inCheckConfigurationMode;
 	}
 
+	@Override
 	public boolean inDevelopmentMode() {
 		return inDevelopmentMode;
 	}
 
+	@Override
 	public boolean inDebugMode() {
 		return debugOptions.isDebugEnabled();
 	}
 
+	@Override
 	public String[] getCommandLineArgs() {
 		return allArgs;
 	}
 
+	@Override
 	public String[] getFrameworkArgs() {
 		return frameworkArgs;
 	}
 
+	@Override
 	public String[] getNonFrameworkArgs() {
 		return appArgs;
 	}
 
+	@Override
 	public String getOSArch() {
 		return getConfiguration(PROP_OSGI_ARCH);
 	}
 
+	@Override
 	public String getNL() {
 		return getConfiguration(PROP_OSGI_NL);
 	}
 
+	@Override
 	public String getOS() {
 		return getConfiguration(PROP_OSGI_OS);
 	}
 
+	@Override
 	public String getWS() {
 		return getConfiguration(PROP_OSGI_WS);
 	}

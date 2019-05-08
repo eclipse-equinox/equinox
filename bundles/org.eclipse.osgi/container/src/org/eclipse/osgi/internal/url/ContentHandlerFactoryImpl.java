@@ -64,6 +64,7 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 	 * @see java.net.ContentHandlerFactory#createContentHandler(String)
 	 */
 	//TODO method is too long... consider reducing indentation (returning quickly) and moving complex steps to private methods
+	@Override
 	public ContentHandler createContentHandler(String contentType) {
 		//first, we check to see if there exists a built in content handler for
 		//this content type.  we can not overwrite built in ContentHandlers
@@ -158,10 +159,12 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 		}
 	}
 
+	@Override
 	public Object getParentFactory() {
 		return parentFactory;
 	}
 
+	@Override
 	public void setParentFactory(Object parentFactory) {
 		if (this.parentFactory == null) // only allow it to be set once
 			this.parentFactory = (java.net.ContentHandlerFactory) parentFactory;

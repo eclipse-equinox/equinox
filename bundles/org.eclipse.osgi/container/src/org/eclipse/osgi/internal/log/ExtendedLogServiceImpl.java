@@ -36,37 +36,45 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 	}
 
 	@SuppressWarnings("deprecation")
+	@Override
 	public void log(int level, String message) {
 		log(null, level, message, null);
 	}
 
 	@SuppressWarnings("deprecation")
+	@Override
 	public void log(int level, String message, Throwable exception) {
 		log(null, level, message, exception);
 	}
 
 	@SuppressWarnings("deprecation")
+	@Override
 	public void log(ServiceReference<?> sr, int level, String message) {
 		log(sr, level, message, null);
 	}
 
 	@SuppressWarnings("deprecation")
+	@Override
 	public void log(ServiceReference<?> sr, int level, String message, Throwable exception) {
 		getLogger((String) null).log(sr, level, message, exception);
 	}
 
+	@Override
 	public void log(Object context, int level, String message) {
 		log(context, level, message, null);
 	}
 
+	@Override
 	public void log(Object context, int level, String message, Throwable exception) {
 		getLogger((String) null).log(context, level, message, exception);
 	}
 
+	@Override
 	public Logger getLogger(String name) {
 		return (Logger) getLogger(name, org.osgi.service.log.Logger.class);
 	}
 
+	@Override
 	public Logger getLogger(Bundle logBundle, String name) {
 		if (logBundle == null || logBundle == bundle)
 			return getLogger(name);
@@ -85,10 +93,12 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 		return bundleLogService.getLogger(name, loggerType);
 	}
 
+	@Override
 	public String getName() {
 		return getLogger((String) null).getName();
 	}
 
+	@Override
 	public boolean isLoggable(int level) {
 		return getLogger((String) null).isLoggable(level);
 	}

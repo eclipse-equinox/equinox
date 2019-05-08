@@ -34,36 +34,44 @@ public class LoggerImpl implements Logger {
 		applyLoggerContext(loggerContext);
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public boolean isLoggable(int level) {
 		return logServiceImpl.isLoggable(name, level);
 	}
 
+	@Override
 	public void log(int level, String message) {
 		log(null, level, message, null);
 	}
 
+	@Override
 	public void log(int level, String message, Throwable exception) {
 		log(null, level, message, exception);
 	}
 
 	@SuppressWarnings("rawtypes")
+	@Override
 	public void log(ServiceReference sr, int level, String message) {
 		log(sr, null, level, message, sr, null);
 	}
 
 	@SuppressWarnings("rawtypes")
+	@Override
 	public void log(ServiceReference sr, int level, String message, Throwable exception) {
 		log(sr, null, level, message, sr, exception);
 	}
 
+	@Override
 	public void log(Object context, int level, String message) {
 		log(context, level, message, null);
 	}
 
+	@Override
 	public void log(Object context, int level, String message, Throwable exception) {
 		log(context, null, level, message, null, exception);
 	}

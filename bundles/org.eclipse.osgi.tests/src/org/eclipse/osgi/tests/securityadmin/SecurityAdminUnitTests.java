@@ -83,6 +83,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	private ConditionalPermissionAdmin cpa;
 	private PermissionAdmin pa;
 
+	@Override
 	protected void setUp() throws Exception {
 		previousPolicy = Policy.getPolicy();
 		final Permission allPermission = new AllPermission();
@@ -90,22 +91,27 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 			private static final long serialVersionUID = 3258131349494708277L;
 
 			// A simple PermissionCollection that only has AllPermission
+		@Override
 			public void add(Permission permission) {
 				//no adding to this policy
 			}
 
+		@Override
 			public boolean implies(Permission permission) {
 				return true;
 			}
 
+		@Override
 			public Enumeration elements() {
 				return new Enumeration() {
 					int cur = 0;
 
+			@Override
 					public boolean hasMoreElements() {
 						return cur < 1;
 					}
 
+			@Override
 					public Object nextElement() {
 						if (cur == 0) {
 							cur = 1;
@@ -119,10 +125,12 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 		Policy.setPolicy(new Policy() {
 
+		@Override
 			public PermissionCollection getPermissions(CodeSource codesource) {
 				return allPermissions;
 			}
 
+		@Override
 			public void refresh() {
 				// nothing
 			}
@@ -143,6 +151,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		super.setUp();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		try {
 			equinox.stop();

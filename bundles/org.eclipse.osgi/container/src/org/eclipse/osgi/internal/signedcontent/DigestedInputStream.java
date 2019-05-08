@@ -61,6 +61,7 @@ class DigestedInputStream extends FilterInputStream {
 	/**
 	 * Not supported.
 	 */
+	@Override
 	public synchronized void mark(int readlimit) {
 		// Noop, we don't want to support this
 	}
@@ -68,6 +69,7 @@ class DigestedInputStream extends FilterInputStream {
 	/**
 	 * Always returns false.
 	 */
+	@Override
 	public boolean markSupported() {
 		return false;
 	}
@@ -82,6 +84,7 @@ class DigestedInputStream extends FilterInputStream {
 	 *         expected digests.
 	 * @see java.io.InputStream#read()
 	 */
+	@Override
 	public int read() throws IOException {
 		if (remaining <= 0)
 			return -1;
@@ -118,6 +121,7 @@ class DigestedInputStream extends FilterInputStream {
 	 *         expected digests.
 	 * @see java.io.InputStream#read()
 	 */
+	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		if (remaining <= 0)
 			return -1;
@@ -141,6 +145,7 @@ class DigestedInputStream extends FilterInputStream {
 	 * @throws IOException always thrown if this method is called since mark/reset is not supported.
 	 * @see java.io.InputStream#reset()
 	 */
+	@Override
 	public synchronized void reset() throws IOException {
 		// Throw IOException, we don't want to support this
 		throw new IOException("Reset not supported"); //$NON-NLS-1$
@@ -149,6 +154,7 @@ class DigestedInputStream extends FilterInputStream {
 	/**
 	 * This method is implemented as a read into a bitbucket.
 	 */
+	@Override
 	public long skip(long n) throws IOException {
 		byte buffer[] = new byte[4096];
 		long count = 0;

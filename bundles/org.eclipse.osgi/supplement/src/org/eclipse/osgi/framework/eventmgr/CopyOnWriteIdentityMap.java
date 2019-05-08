@@ -72,6 +72,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * Otherwise the previous value of the key.
 	 * @throws IllegalArgumentException If key is null.
 	 */
+	@Override
 	public synchronized V put(K key, V value) {
 		if (key == null) {
 			throw new IllegalArgumentException();
@@ -108,6 +109,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * 
 	 * @param source The map whose entries are to be added to this map.
 	 */
+	@Override
 	public void putAll(Map<? extends K, ? extends V> source) {
 		int sourceSize = source.size();
 		if (sourceSize == 0) {
@@ -189,6 +191,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * Otherwise, the value associated with the key.
 	 * @throws IllegalArgumentException If key is null.
 	 */
+	@Override
 	public synchronized V remove(Object key) {
 		if (key == null) {
 			throw new IllegalArgumentException();
@@ -229,6 +232,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * Remove all entries from the map.
 	 * 
 	 */
+	@Override
 	public synchronized void clear() {
 		entries = empty();
 	}
@@ -258,6 +262,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * 
 	 * @return <code>true</code> if the list is empty.
 	 */
+	@Override
 	public boolean isEmpty() {
 		return size() == 0;
 	}
@@ -267,6 +272,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * 
 	 * @return The number of entries in the map.
 	 */
+	@Override
 	public int size() {
 		return entries().length;
 	}
@@ -279,6 +285,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * @return The value object for the specified key.
 	 * @throws IllegalArgumentException If key is null.
 	 */
+	@Override
 	public V get(Object key) {
 		if (key == null) {
 			throw new IllegalArgumentException();
@@ -301,6 +308,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * @return <code>true</code> if the specified key is in the map.
 	 * @throws IllegalArgumentException If key is null.
 	 */
+	@Override
 	public boolean containsKey(Object key) {
 		if (key == null) {
 			throw new IllegalArgumentException();
@@ -322,6 +330,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * @param value The value object.
 	 * @return <code>true</code> if the specified value is in the map.
 	 */
+	@Override
 	public boolean containsValue(Object value) {
 		Entry<K, V>[] e = entries();
 		for (int i = 0; i < e.length; i++) {
@@ -339,6 +348,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * @return A Set of Map.Entry for each entry in this map.
 	 * The entries returned by the set cannot be modified.
 	 */
+	@Override
 	public Set<Map.Entry<K, V>> entrySet() {
 		return new Snapshot<>(entries()).entrySet();
 	}
@@ -349,6 +359,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * 
 	 * @return A Set of the key objects in this map
 	 */
+	@Override
 	public Set<K> keySet() {
 		return new Snapshot<>(entries()).keySet();
 	}
@@ -359,6 +370,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * 
 	 * @return A Collection of the value objects in this map.
 	 */
+	@Override
 	public Collection<V> values() {
 		return new Snapshot<>(entries()).values();
 	}
@@ -388,26 +400,32 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 			this.value = value;
 		}
 
+		@Override
 		public K getKey() {
 			return key;
 		}
 
+		@Override
 		public V getValue() {
 			return value;
 		}
 
+		@Override
 		public V setValue(V value) {
 			throw new UnsupportedOperationException(); // entries cannot be modified.
 		}
 
+		@Override
 		public String toString() {
 			return key + "=" + value; //$NON-NLS-1$
 		}
 
+		@Override
 		public int hashCode() {
 			return System.identityHashCode(key) ^ System.identityHashCode(value);
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			if (obj == this) {
 				return true;
@@ -467,14 +485,17 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 				super();
 			}
 
+			@Override
 			public Iterator<Map.Entry<K, V>> iterator() {
 				return new EntryIterator();
 			}
 
+			@Override
 			public int size() {
 				return entries().length;
 			}
 
+			@Override
 			public boolean remove(Object o) {
 				if (o == null) {
 					throw new IllegalArgumentException();
@@ -492,6 +513,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 				return false;
 			}
 
+			@Override
 			public void clear() {
 				clearEntries();
 			}
@@ -505,6 +527,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 				super();
 			}
 
+			@Override
 			public Map.Entry<K, V> next() {
 				return nextEntry();
 			}
@@ -518,14 +541,17 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 				super();
 			}
 
+			@Override
 			public Iterator<K> iterator() {
 				return new KeyIterator();
 			}
 
+			@Override
 			public int size() {
 				return entries().length;
 			}
 
+			@Override
 			public boolean remove(Object o) {
 				if (o == null) {
 					throw new IllegalArgumentException();
@@ -543,6 +569,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 				return false;
 			}
 
+			@Override
 			public void clear() {
 				clearEntries();
 			}
@@ -556,6 +583,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 				super();
 			}
 
+			@Override
 			public K next() {
 				return nextEntry().key;
 			}
@@ -569,14 +597,17 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 				super();
 			}
 
+			@Override
 			public Iterator<V> iterator() {
 				return new ValueIterator();
 			}
 
+			@Override
 			public int size() {
 				return entries().length;
 			}
 
+			@Override
 			public boolean remove(Object o) {
 				if (o == null) {
 					throw new IllegalArgumentException();
@@ -594,6 +625,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 				return false;
 			}
 
+			@Override
 			public void clear() {
 				clearEntries();
 			}
@@ -607,6 +639,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 				super();
 			}
 
+			@Override
 			public V next() {
 				return nextEntry().value;
 			}
@@ -624,6 +657,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 				cursor = 0;
 			}
 
+			@Override
 			public final boolean hasNext() {
 				return cursor < length;
 			}
@@ -639,6 +673,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 				return e[cursor++];
 			}
 
+			@Override
 			public final void remove() {
 				if (length != entries().length) {
 					throw new ConcurrentModificationException();

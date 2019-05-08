@@ -18,6 +18,7 @@ import osgi.lazystart.a.ATest;
 
 public class LazySimple implements ITestRunner {
 
+	@Override
 	public Object testIt() throws Exception {
 		return new ATest();
 	}

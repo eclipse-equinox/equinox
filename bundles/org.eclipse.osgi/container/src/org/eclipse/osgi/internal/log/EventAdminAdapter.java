@@ -51,6 +51,7 @@ public class EventAdminAdapter implements ServiceTrackerCustomizer<Object, Objec
 		eventHandlerTracker.close();
 	}
 
+	@Override
 	public Object addingService(ServiceReference<Object> reference) {
 		Object toTrack = null;
 		Object objectClass = reference.getProperty(Constants.OBJECTCLASS);
@@ -76,11 +77,13 @@ public class EventAdminAdapter implements ServiceTrackerCustomizer<Object, Objec
 		return toTrack;
 	}
 
+	@Override
 	public void modifiedService(ServiceReference<Object> reference, Object tracked) {
 		removedService(reference, tracked);
 		addingService(reference);
 	}
 
+	@Override
 	public void removedService(ServiceReference<Object> reference, Object tracked) {
 		if (tracked == eventAdmin) {
 			eventAdmin = null;

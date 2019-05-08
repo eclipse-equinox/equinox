@@ -492,6 +492,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public String toString() {
 		if (getSymbolicName() == null)
 			return "[" + getBundleId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -955,6 +956,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		return null;
 	}
 
+	@Override
 	String getInternalNameSpace() {
 		return BundleRevision.BUNDLE_NAMESPACE;
 	}
@@ -1017,6 +1019,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			return capability.equals(other.getCapability()) && requirement.equals(other.getRequirement()) && provider.equals(other.getProviderWiring()) && requirer.equals(other.getRequirerWiring());
 		}
 
+		@Override
 		public String toString() {
 			return getRequirement() + " -> " + getCapability(); //$NON-NLS-1$
 		}
@@ -1230,6 +1233,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			return null;
 		}
 
+		@Override
 		public String toString() {
 			return BundleDescriptionImpl.this.toString();
 		}

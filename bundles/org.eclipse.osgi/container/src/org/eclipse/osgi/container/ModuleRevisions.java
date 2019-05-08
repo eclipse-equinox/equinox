@@ -127,6 +127,7 @@ public final class ModuleRevisions implements BundleRevisions {
 		}
 	}
 
+	@Override
 	public String toString() {
 		return "moduleID=" + module.getId(); //$NON-NLS-1$
 	}

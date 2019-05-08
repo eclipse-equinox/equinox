@@ -75,6 +75,7 @@ public class BasePerformanceTest extends AbstractStateTest {
 		return state;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		// uses a constant seed to prevent variation on results

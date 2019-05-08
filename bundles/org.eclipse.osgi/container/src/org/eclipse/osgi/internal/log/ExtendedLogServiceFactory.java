@@ -43,16 +43,19 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 
 	}
 
+	@Override
 	public ExtendedLogServiceImpl getService(Bundle bundle, ServiceRegistration<ExtendedLogService> registration) {
 		return getLogService(bundle);
 	}
 
+	@Override
 	public void ungetService(Bundle bundle, ServiceRegistration<ExtendedLogService> registration, ExtendedLogService service) {
 		// do nothing
 		// Notice that we do not remove the the LogService impl for the bundle because other bundles
 		// still need to be able to get the cached loggers for a bundle.
 	}
 
+	@Override
 	public void bundleChanged(BundleEvent event) {
 		if (event.getType() == BundleEvent.UNINSTALLED)
 			removeLogService(event.getBundle());

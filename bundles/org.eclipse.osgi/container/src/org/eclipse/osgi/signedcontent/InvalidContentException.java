@@ -43,6 +43,7 @@ public class InvalidContentException extends IOException {
 	 * 
 	 * @return The cause of this exception or <code>null</code> if no cause was created.
 	 */
+	@Override
 	public Throwable getCause() {
 		return cause;
 	}
@@ -56,6 +57,7 @@ public class InvalidContentException extends IOException {
 	 *         <code>IllegalStateException</code> since the cause of this
 	 *         exception can only be set when constructed.
 	 */
+	@Override
 	public Throwable initCause(Throwable t) {
 		throw new IllegalStateException();
 	}

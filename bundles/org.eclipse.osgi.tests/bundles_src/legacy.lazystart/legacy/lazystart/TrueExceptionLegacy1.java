@@ -18,6 +18,7 @@ import legacy.lazystart.b.excluded.a.BAExcluded;
 import legacy.lazystart.b.excluded.b.BBExcluded;
 public class TrueExceptionLegacy1 implements ITestRunner {
 
+	@Override
 	public Object testIt() throws Exception {
 		new BAExcluded();
 		return new BBExcluded();

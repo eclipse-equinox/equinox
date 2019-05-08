@@ -76,6 +76,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	/**
 	 * Case-preserved keys.
 	 */
+	@Override
 	public synchronized Enumeration<K> keys() {
 		return new ArrayEnumeration<>(headers, size);
 	}
@@ -83,6 +84,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	/**
 	 * Values.
 	 */
+	@Override
 	public synchronized Enumeration<V> elements() {
 		return new ArrayEnumeration<>(values, size);
 	}
@@ -141,6 +143,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 *
 	 * @param key name.
 	 */
+	@Override
 	public synchronized V get(Object key) {
 		int i = -1;
 		if ((i = getIndex(key)) != -1)
@@ -213,6 +216,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 *
 	 * @return  the number of keys in this dictionary.
 	 */
+	@Override
 	public synchronized int size() {
 		return size;
 	}
@@ -225,6 +229,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 * @return  <code>true</code> if this dictionary maps no keys to values;
 	 *          <code>false</code> otherwise.
 	 */
+	@Override
 	public synchronized boolean isEmpty() {
 		return size == 0;
 	}
@@ -236,6 +241,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 * @param value header value.
 	 * @throws UnsupportedOperationException
 	 */
+	@Override
 	public synchronized V put(K key, V value) {
 		if (readOnly)
 			throw new UnsupportedOperationException();
@@ -248,10 +254,12 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 * @param key header name.
 	 * @throws UnsupportedOperationException
 	 */
+	@Override
 	public V remove(Object key) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
@@ -301,40 +309,49 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 			System.arraycopy(array, 0, this.array, 0, this.array.length);
 		}
 
+		@Override
 		public boolean hasMoreElements() {
 			return cur < array.length;
 		}
 
+		@Override
 		public E nextElement() {
 			return array[cur++];
 		}
 	}
 
+	@Override
 	public synchronized void clear() {
 		if (readOnly)
 			throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public synchronized boolean containsKey(Object key) {
 		return getIndex(key) >= 0;
 	}
 
+	@Override
 	public boolean containsValue(Object value) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public Set<Map.Entry<K, V>> entrySet() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public Set<K> keySet() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void putAll(Map<? extends K, ? extends V> c) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public Collection<V> values() {
 		throw new UnsupportedOperationException();
 	}
