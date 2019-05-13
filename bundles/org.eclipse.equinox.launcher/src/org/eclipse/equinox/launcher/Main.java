@@ -365,7 +365,7 @@ public class Main {
 			os = osgiOs;
 			return os;
 		}
-		String osName = System.getProperties().getProperty("os.name"); //$NON-NLS-1$
+		String osName = System.getProperty("os.name"); //$NON-NLS-1$
 		if (osName.regionMatches(true, 0, Constants.OS_WIN32, 0, 3))
 			return Constants.OS_WIN32;
 		// EXCEPTION: All mappings of SunOS convert to Solaris
@@ -399,7 +399,7 @@ public class Main {
 			arch = osgiArch;
 			return arch;
 		}
-		String name = System.getProperties().getProperty("os.arch");//$NON-NLS-1$
+		String name = System.getProperty("os.arch");//$NON-NLS-1$
 		// Map i386 architecture to x86
 		if (name.equalsIgnoreCase(Constants.INTERNAL_ARCH_I386))
 			return Constants.ARCH_X86;
@@ -553,7 +553,7 @@ public class Main {
 	 * @exception Exception thrown if a problem occurs during the launch
 	 */
 	protected void basicRun(String[] args) throws Exception {
-		System.getProperties().put("eclipse.startTime", Long.toString(System.currentTimeMillis())); //$NON-NLS-1$
+		System.setProperty("eclipse.startTime", Long.toString(System.currentTimeMillis())); //$NON-NLS-1$
 		commands = args;
 		String[] passThruArgs = processCommandLine(args);
 
@@ -686,8 +686,8 @@ public class Main {
 			boolean compatible = available.isGreaterEqualTo(required);
 			if (!compatible) {
 				// any non-zero value should do it - 14 used to be used for version incompatibility in Eclipse 2.1 
-				System.getProperties().put(PROP_EXITCODE, "14"); //$NON-NLS-1$
-				System.getProperties().put(PROP_EXITDATA, "<title>Incompatible JVM</title>Version " + availableVersion + " of the JVM is not suitable for this product. Version: " + requiredVersion + " or greater is required."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				System.setProperty(PROP_EXITCODE, "14"); //$NON-NLS-1$
+				System.setProperty(PROP_EXITDATA, "<title>Incompatible JVM</title>Version " + availableVersion + " of the JVM is not suitable for this product. Version: " + requiredVersion + " or greater is required."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			return compatible;
 		} catch (SecurityException e) {
@@ -721,15 +721,15 @@ public class Main {
 		if (!configDir.exists()) {
 			configDir.mkdirs();
 			if (!configDir.exists()) {
-				System.getProperties().put(PROP_EXITCODE, "15"); //$NON-NLS-1$
-				System.getProperties().put(PROP_EXITDATA, "<title>Invalid Configuration Location</title>The configuration area at '" + configDir + //$NON-NLS-1$
+				System.setProperty(PROP_EXITCODE, "15"); //$NON-NLS-1$
+				System.setProperty(PROP_EXITDATA, "<title>Invalid Configuration Location</title>The configuration area at '" + configDir + //$NON-NLS-1$
 						"' could not be created.  Please choose a writable location using the '-configuration' command line option."); //$NON-NLS-1$
 				return false;
 			}
 		}
 		if (!canWrite(configDir)) {
-			System.getProperties().put(PROP_EXITCODE, "15"); //$NON-NLS-1$
-			System.getProperties().put(PROP_EXITDATA, "<title>Invalid Configuration Location</title>The configuration area at '" + configDir + //$NON-NLS-1$
+			System.setProperty(PROP_EXITCODE, "15"); //$NON-NLS-1$
+			System.setProperty(PROP_EXITDATA, "<title>Invalid Configuration Location</title>The configuration area at '" + configDir + //$NON-NLS-1$
 					"' is not writable.  Please choose a writable location using the '-configuration' command line option."); //$NON-NLS-1$
 			return false;
 		}
@@ -824,7 +824,7 @@ public class Main {
 	}
 
 	private void readFrameworkExtensions(URL base, ArrayList<URL> result) throws IOException {
-		String[] extensions = getArrayFromList(System.getProperties().getProperty(PROP_EXTENSIONS));
+		String[] extensions = getArrayFromList(System.getProperty(PROP_EXTENSIONS));
 		String parent = new File(base.getFile()).getParent().toString();
 		ArrayList<String> extensionResults = new ArrayList<>(extensions.length);
 		for (int i = 0; i < extensions.length; i++) {
@@ -889,16 +889,16 @@ public class Main {
 		String baseJarList = System.getProperty(PROP_CLASSPATH);
 		if (baseJarList == null) {
 			readFrameworkExtensions(base, result);
-			baseJarList = System.getProperties().getProperty(PROP_CLASSPATH);
+			baseJarList = System.getProperty(PROP_CLASSPATH);
 		}
 
 		File fwkFile = new File(base.getFile());
 		boolean fwkIsDirectory = fwkFile.isDirectory();
 		//We found where the fwk is, remember it and its shape
 		if (fwkIsDirectory) {
-			System.getProperties().put(PROP_FRAMEWORK_SHAPE, "folder");//$NON-NLS-1$
+			System.setProperty(PROP_FRAMEWORK_SHAPE, "folder");//$NON-NLS-1$
 		} else {
-			System.getProperties().put(PROP_FRAMEWORK_SHAPE, "jar");//$NON-NLS-1$
+			System.setProperty(PROP_FRAMEWORK_SHAPE, "jar");//$NON-NLS-1$
 		}
 		String fwkPath = new File(new File(base.getFile()).getParent()).getAbsolutePath();
 		if (Character.isUpperCase(fwkPath.charAt(0))) {
@@ -906,7 +906,7 @@ public class Main {
 			chars[0] = Character.toLowerCase(chars[0]);
 			fwkPath = new String(chars);
 		}
-		System.getProperties().put(PROP_FRAMEWORK_SYSPATH, fwkPath);
+		System.setProperty(PROP_FRAMEWORK_SYSPATH, fwkPath);
 
 		String[] baseJars = getArrayFromList(baseJarList);
 		if (baseJars.length == 0) {
@@ -991,7 +991,7 @@ public class Main {
 				url = new URL(url.getProtocol(), url.getHost(), url.getPort(), path);
 		}
 		if (System.getProperty(PROP_FRAMEWORK) == null)
-			System.getProperties().put(PROP_FRAMEWORK, url.toExternalForm());
+			System.setProperty(PROP_FRAMEWORK, url.toExternalForm());
 		if (debug)
 			System.out.println("Framework located:\n    " + url.toExternalForm()); //$NON-NLS-1$
 		// add on any dev path elements
@@ -1207,7 +1207,7 @@ public class Main {
 	 */
 	private static File resolveFile(File toAdjust) {
 		if (!toAdjust.isAbsolute()) {
-			String installArea = System.getProperties().getProperty(PROP_INSTALL_AREA);
+			String installArea = System.getProperty(PROP_INSTALL_AREA);
 			if (installArea != null) {
 				if (installArea.startsWith(FILE_SCHEME))
 					toAdjust = new File(installArea.substring(5), toAdjust.getPath());
@@ -1229,7 +1229,7 @@ public class Main {
 	private URL buildLocation(String property, URL defaultLocation, String userDefaultAppendage) {
 		URL result = null;
 		String location = System.getProperty(property);
-		System.getProperties().remove(property);
+		System.clearProperty(property);
 		// if the instance location is not set, predict where the workspace will be and 
 		// put the instance area inside the workspace meta area.
 		try {
@@ -1257,7 +1257,7 @@ public class Main {
 			}
 		} finally {
 			if (result != null)
-				System.getProperties().put(property, result.toExternalForm());
+				System.setProperty(property, result.toExternalForm());
 		}
 		return result;
 	}
@@ -1491,7 +1491,7 @@ public class Main {
 					message += " and could not be logged: \n" + e.getMessage(); //$NON-NLS-1$
 				else
 					message += ".  See the log file\n" + logFile.getAbsolutePath(); //$NON-NLS-1$
-				System.getProperties().put(PROP_EXITDATA, message);
+				System.setProperty(PROP_EXITDATA, message);
 			} else {
 				// we have an exit code of 13, in most cases the user tries to start a 32/64 bit Eclipse
 				// on a 64/32 bit Eclipse
@@ -1508,7 +1508,7 @@ public class Main {
 				bridge.uninitialize();
 		}
 		// Return an int exit code and ensure the system property is set.
-		System.getProperties().put(PROP_EXITCODE, Integer.toString(result));
+		System.setProperty(PROP_EXITCODE, Integer.toString(result));
 		setExitData();
 		return result;
 	}
@@ -1559,7 +1559,7 @@ public class Main {
 			}
 
 			if (args[i].equalsIgnoreCase(NOEXIT)) {
-				System.getProperties().put(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
+				System.setProperty(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
 				found = true;
 			}
 
@@ -1671,7 +1671,7 @@ public class Main {
 			// Consume the arg here to ensure that the launcher and Eclipse get the 
 			// same value as each other.  
 			if (args[i - 1].equalsIgnoreCase(INSTALL)) {
-				System.getProperties().put(PROP_INSTALL_AREA, arg);
+				System.setProperty(PROP_INSTALL_AREA, arg);
 				found = true;
 			}
 
@@ -1679,7 +1679,7 @@ public class Main {
 			// Consume the arg here to ensure that the launcher and Eclipse get the 
 			// same value as each other.  
 			if (args[i - 1].equalsIgnoreCase(CONFIGURATION)) {
-				System.getProperties().put(PROP_CONFIG_AREA, arg);
+				System.setProperty(PROP_CONFIG_AREA, arg);
 				found = true;
 			}
 
@@ -1690,7 +1690,7 @@ public class Main {
 
 			// look for the name to use by the launcher
 			if (args[i - 1].equalsIgnoreCase(NAME)) {
-				System.getProperties().put(PROP_LAUNCHER_NAME, arg);
+				System.setProperty(PROP_LAUNCHER_NAME, arg);
 				found = true;
 			}
 
@@ -1705,7 +1705,7 @@ public class Main {
 			if (args[i - 1].equalsIgnoreCase(LAUNCHER)) {
 				//not doing anything with this right now, but still consume it
 				//launcher = arg;
-				System.getProperties().put(PROP_LAUNCHER, arg);
+				System.setProperty(PROP_LAUNCHER, arg);
 				found = true;
 			}
 
@@ -1728,7 +1728,7 @@ public class Main {
 
 			//look for the nl setting
 			if (args[i - 1].equalsIgnoreCase(NL)) {
-				System.getProperties().put(PROP_NL, arg);
+				System.setProperty(PROP_NL, arg);
 				found = true;
 			}
 
@@ -1778,7 +1778,7 @@ public class Main {
 				configurationLocation = buildURL(computeDefaultConfigurationLocation(), true);
 		}
 		if (configurationLocation != null)
-			System.getProperties().put(PROP_CONFIG_AREA, configurationLocation.toExternalForm());
+			System.setProperty(PROP_CONFIG_AREA, configurationLocation.toExternalForm());
 		if (debug)
 			System.out.println("Configuration location:\n    " + configurationLocation); //$NON-NLS-1$
 		return configurationLocation;
@@ -1814,13 +1814,13 @@ public class Main {
 				// property is not already set.
 				String location = baseConfiguration.getProperty(PROP_CONFIG_AREA);
 				if (location != null)
-					System.getProperties().put(PROP_CONFIG_AREA, location);
+					System.setProperty(PROP_CONFIG_AREA, location);
 				// if the base sets the install area then use that value if the property is not already set.
 				// This helps in selfhosting cases where you cannot easily compute the install location
 				// from the code base.
 				location = baseConfiguration.getProperty(PROP_INSTALL_AREA);
 				if (location != null && System.getProperty(PROP_INSTALL_AREA) == null)
-					System.getProperties().put(PROP_INSTALL_AREA, location);
+					System.setProperty(PROP_INSTALL_AREA, location);
 			}
 		}
 
@@ -1838,7 +1838,7 @@ public class Main {
 			configuration = loadConfiguration(getConfigurationLocation());
 
 		if (configuration != null && "false".equalsIgnoreCase(configuration.getProperty(PROP_CONFIG_CASCADED))) { //$NON-NLS-1$
-			System.getProperties().remove(PROP_SHARED_CONFIG_AREA);
+			System.clearProperty(PROP_SHARED_CONFIG_AREA);
 			configuration.remove(PROP_SHARED_CONFIG_AREA);
 			mergeProperties(System.getProperties(), configuration, null);
 		} else {
@@ -1857,7 +1857,7 @@ public class Main {
 					//After all we are not in a shared configuration setup.
 					// - remove the property to show that we do not have a parent 
 					// - merge configuration with the system properties 
-					System.getProperties().remove(PROP_SHARED_CONFIG_AREA);
+					System.clearProperty(PROP_SHARED_CONFIG_AREA);
 					mergeProperties(System.getProperties(), configuration, null);
 				} else {
 					// if the parent we are about to read is the same as the base config we read above,
@@ -1881,7 +1881,7 @@ public class Main {
 
 					//now merge the base configuration
 					mergeProperties(System.getProperties(), sharedConfiguration, configuration);
-					System.getProperties().put(PROP_SHARED_CONFIG_AREA, sharedConfigURL.toExternalForm());
+					System.setProperty(PROP_SHARED_CONFIG_AREA, sharedConfigURL.toExternalForm());
 					if (debug)
 						System.out.println("Shared configuration location:\n    " + sharedConfigURL.toExternalForm()); //$NON-NLS-1$
 				}
@@ -1895,7 +1895,7 @@ public class Main {
 			getInstallLocation();
 			URL url = buildURL(urlString, true);
 			urlString = url.toExternalForm();
-			System.getProperties().put(PROP_FRAMEWORK, urlString);
+			System.setProperty(PROP_FRAMEWORK, urlString);
 			bootLocation = urlString;
 		}
 	}
@@ -1959,7 +1959,7 @@ public class Main {
 			return;
 		try {
 			URL absoluteURL = new URL(installURL, locationPath);
-			System.getProperties().put(locationProperty, absoluteURL.toExternalForm());
+			System.setProperty(locationProperty, absoluteURL.toExternalForm());
 		} catch (MalformedURLException e) {
 			// should not happen - the relative URL is known to be valid
 		}
@@ -1978,7 +1978,7 @@ public class Main {
 			installLocation = buildURL(installArea, true);
 			if (installLocation == null)
 				throw new IllegalStateException("Install location is invalid: " + installArea); //$NON-NLS-1$
-			System.getProperties().put(PROP_INSTALL_AREA, installLocation.toExternalForm());
+			System.setProperty(PROP_INSTALL_AREA, installLocation.toExternalForm());
 			if (debug)
 				System.out.println("Install location:\n    " + installLocation); //$NON-NLS-1$
 			return installLocation;
@@ -2027,7 +2027,7 @@ public class Main {
 				// will never happen.  The path is straight from a URL.  
 			}
 			installLocation = new URL(result.getProtocol(), result.getHost(), result.getPort(), path);
-			System.getProperties().put(PROP_INSTALL_AREA, installLocation.toExternalForm());
+			System.setProperty(PROP_INSTALL_AREA, installLocation.toExternalForm());
 		} catch (MalformedURLException e) {
 			// TODO Very unlikely case.  log here.  
 		}
@@ -2166,8 +2166,8 @@ public class Main {
 		bridge.showSplash(splashLocation);
 		long handle = bridge.getSplashHandle();
 		if (handle != 0 && handle != -1) {
-			System.getProperties().put(SPLASH_HANDLE, String.valueOf(handle));
-			System.getProperties().put(SPLASH_LOCATION, splashLocation);
+			System.setProperty(SPLASH_HANDLE, String.valueOf(handle));
+			System.setProperty(SPLASH_LOCATION, splashLocation);
 			bridge.updateSplash();
 		} else {
 			// couldn't show the splash screen for some reason
@@ -2183,7 +2183,7 @@ public class Main {
 			return;
 
 		splashDown = bridge.takeDownSplash();
-		System.getProperties().remove(SPLASH_HANDLE);
+		System.clearProperty(SPLASH_HANDLE);
 
 		try {
 			Runtime.getRuntime().removeShutdownHook(splashHandler);
@@ -2201,7 +2201,7 @@ public class Main {
 		//check the path passed in from -showsplash first.  The old launcher passed a timeout value
 		//as the argument, so only use it if it isn't a number and the file exists.
 		if (splashLocation != null && !Character.isDigit(splashLocation.charAt(0)) && new File(splashLocation).exists()) {
-			System.getProperties().put(PROP_SPLASHLOCATION, splashLocation);
+			System.setProperty(PROP_SPLASHLOCATION, splashLocation);
 			return splashLocation;
 		}
 		String result = System.getProperty(PROP_SPLASHLOCATION);
@@ -2224,7 +2224,7 @@ public class Main {
 			// see if we can get a splash given the splash path
 			result = searchForSplash(path.toArray(new String[path.size()]));
 			if (result != null) {
-				System.getProperties().put(PROP_SPLASHLOCATION, result);
+				System.setProperty(PROP_SPLASHLOCATION, result);
 				return result;
 			}
 		}
@@ -2239,7 +2239,7 @@ public class Main {
 			return null;
 
 		// Get the splash screen for the specified locale
-		String locale = (String) System.getProperties().get(PROP_NL);
+		String locale = System.getProperty(PROP_NL);
 		if (locale == null)
 			locale = Locale.getDefault().toString();
 		String[] nlVariants = buildNLVariants(locale);
@@ -2496,7 +2496,7 @@ public class Main {
 			return;
 		logFile = new File(base.getPath(), Long.toString(System.currentTimeMillis()) + ".log"); //$NON-NLS-1$
 		new File(logFile.getParent()).mkdirs();
-		System.getProperties().put(PROP_LOGFILE, logFile.getAbsolutePath());
+		System.setProperty(PROP_LOGFILE, logFile.getAbsolutePath());
 	}
 
 	private void openLogFile() throws IOException {
@@ -2565,7 +2565,7 @@ public class Main {
 
 	private void setupVMProperties() {
 		if (vm != null)
-			System.getProperties().put(PROP_VM, vm);
+			System.setProperty(PROP_VM, vm);
 		setMultiValueProperty(PROP_VMARGS, vmargs);
 		setMultiValueProperty(PROP_COMMANDS, commands);
 	}
@@ -2579,7 +2579,7 @@ public class Main {
 					result.append('\n');
 				}
 			}
-			System.getProperties().put(property, result.toString());
+			System.setProperty(property, result.toString());
 		}
 	}
 
