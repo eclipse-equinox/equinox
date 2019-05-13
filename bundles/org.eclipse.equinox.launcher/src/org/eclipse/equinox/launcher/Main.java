@@ -867,7 +867,7 @@ public class Main {
 			for (int j = 0; j < entries.length; j++)
 				qualifiedPath += ", " + FILE_SCHEME + path + entries[j]; //$NON-NLS-1$
 			extensionProperties.put(PROP_CLASSPATH, qualifiedPath);
-			mergeProperties(System.getProperties(), extensionProperties, null);
+			mergeWithSystemProperties(extensionProperties, null);
 			if (inDevelopmentMode) {
 				String name = extensions[i];
 				if (name.startsWith(REFERENCE_SCHEME)) {
@@ -1840,7 +1840,7 @@ public class Main {
 		if (configuration != null && "false".equalsIgnoreCase(configuration.getProperty(PROP_CONFIG_CASCADED))) { //$NON-NLS-1$
 			System.clearProperty(PROP_SHARED_CONFIG_AREA);
 			configuration.remove(PROP_SHARED_CONFIG_AREA);
-			mergeProperties(System.getProperties(), configuration, null);
+			mergeWithSystemProperties(configuration, null);
 		} else {
 			ensureAbsolute(PROP_SHARED_CONFIG_AREA);
 			URL sharedConfigURL = buildLocation(PROP_SHARED_CONFIG_AREA, null, ""); //$NON-NLS-1$
@@ -1858,7 +1858,7 @@ public class Main {
 					// - remove the property to show that we do not have a parent 
 					// - merge configuration with the system properties 
 					System.clearProperty(PROP_SHARED_CONFIG_AREA);
-					mergeProperties(System.getProperties(), configuration, null);
+					mergeWithSystemProperties(configuration, null);
 				} else {
 					// if the parent we are about to read is the same as the base config we read above,
 					// just reuse the base
@@ -1873,14 +1873,14 @@ public class Main {
 
 					//merge user configuration since the base has not changed.
 					if (lastKnownBaseTimestamp == sharedConfigTimestamp || lastKnownBaseTimestamp == NO_TIMESTAMP) {
-						mergeProperties(System.getProperties(), configuration, null);
+						mergeWithSystemProperties(configuration, null);
 					} else {
 						configuration = null;
 						System.setProperty(PROP_IGNORE_USER_CONFIGURATION, Boolean.TRUE.toString());
 					}
 
 					//now merge the base configuration
-					mergeProperties(System.getProperties(), sharedConfiguration, configuration);
+					mergeWithSystemProperties(sharedConfiguration, configuration);
 					System.setProperty(PROP_SHARED_CONFIG_AREA, sharedConfigURL.toExternalForm());
 					if (debug)
 						System.out.println("Shared configuration location:\n    " + sharedConfigURL.toExternalForm()); //$NON-NLS-1$
@@ -2524,20 +2524,20 @@ public class Main {
 		}
 	}
 
-	private void mergeProperties(Properties destination, Properties source, Properties userConfiguration) {
+	private void mergeWithSystemProperties(Properties source, Properties userConfiguration) {
 		final String EXT_OVERRIDE_USER = ".override.user"; //$NON-NLS-1$
-		if (destination == null || source == null)
+		if (source == null)
 			return;
 		for (Enumeration<?> e = source.keys(); e.hasMoreElements();) {
 			String key = (String) e.nextElement();
 			if (key.equals(PROP_CLASSPATH)) {
-				String destinationClasspath = destination.getProperty(PROP_CLASSPATH);
+				String destinationClasspath = System.getProperty(PROP_CLASSPATH);
 				String sourceClasspath = source.getProperty(PROP_CLASSPATH);
 				if (destinationClasspath == null)
 					destinationClasspath = sourceClasspath;
 				else
 					destinationClasspath = destinationClasspath + sourceClasspath;
-				destination.put(PROP_CLASSPATH, destinationClasspath);
+				System.setProperty(PROP_CLASSPATH, destinationClasspath);
 				continue;
 			}
 			String value = source.getProperty(key);
@@ -2548,18 +2548,18 @@ public class Main {
 			if (userConfiguration != null && !key.endsWith(EXT_OVERRIDE_USER)) {
 				// check all levels to see if the "override" property was set
 				final String overrideKey = key + EXT_OVERRIDE_USER;
-				boolean shouldOverride = destination.getProperty(overrideKey) != null || source.getProperty(overrideKey) != null;
+				boolean shouldOverride = System.getProperty(overrideKey) != null || source.getProperty(overrideKey) != null;
 				// only set the value if the user specified the override property and if the 
 				// original property wasn't set by a commad-line arg
 				if (shouldOverride && !userConfiguration.contains(key)) {
-					destination.put(key, value);
+					System.setProperty(key, value);
 					continue;
 				}
 			}
 
 			// only set the value if it doesn't already exist to preserve ordering (command-line, user config, shared config)
-			if (destination.getProperty(key) == null)
-				destination.put(key, value);
+			if (System.getProperty(key) == null)
+				System.setProperty(key, value);
 		}
 	}
 
