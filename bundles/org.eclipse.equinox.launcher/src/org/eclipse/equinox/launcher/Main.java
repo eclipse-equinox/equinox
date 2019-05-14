@@ -408,14 +408,10 @@ public class Main {
 	}
 
 	private String getFragmentString(String fragmentOS, String fragmentWS, String fragmentArch) {
-		StringBuilder buffer = new StringBuilder(PLUGIN_ID);
-		buffer.append('.');
-		buffer.append(fragmentWS);
-		buffer.append('.');
-		buffer.append(fragmentOS);
+		StringJoiner buffer = new StringJoiner("."); //$NON-NLS-1$
+		buffer.add(PLUGIN_ID).add(fragmentWS).add(fragmentOS);
 		if (!(fragmentOS.equals(Constants.OS_MACOSX) && !Constants.ARCH_X86_64.equals(fragmentArch))) {
-			buffer.append('.');
-			buffer.append(fragmentArch);
+			buffer.add(fragmentArch);
 		}
 		return buffer.toString();
 	}
