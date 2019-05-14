@@ -1220,22 +1220,19 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 
 	public String toDeepDebugString() {
 		final StringBuffer buffer = new StringBuffer();
-		IPreferenceNodeVisitor visitor = new IPreferenceNodeVisitor() {
-			@Override
-			public boolean visit(IEclipsePreferences node) throws BackingStoreException {
-				buffer.append(node);
+		IPreferenceNodeVisitor visitor = (IEclipsePreferences node) -> {
+			buffer.append(node);
+			buffer.append('\n');
+			String[] keys = node.keys();
+			for (String key : keys) {
+				buffer.append(node.absolutePath());
+				buffer.append(PATH_SEPARATOR);
+				buffer.append(key);
+				buffer.append('=');
+				buffer.append(node.get(key, "*default*")); //$NON-NLS-1$
 				buffer.append('\n');
-				String[] keys = node.keys();
-				for (String key : keys) {
-					buffer.append(node.absolutePath());
-					buffer.append(PATH_SEPARATOR);
-					buffer.append(key);
-					buffer.append('=');
-					buffer.append(node.get(key, "*default*")); //$NON-NLS-1$
-					buffer.append('\n');
-				}
-				return true;
 			}
+			return true;
 		};
 		try {
 			accept(visitor);

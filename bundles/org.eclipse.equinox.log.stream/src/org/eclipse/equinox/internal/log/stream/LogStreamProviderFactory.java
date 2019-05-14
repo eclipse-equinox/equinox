@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.osgi.framework.Bundle;
@@ -35,13 +34,10 @@ public class LogStreamProviderFactory implements ServiceFactory<LogStreamProvide
 	ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService;
 
 	private final int cores = Runtime.getRuntime().availableProcessors();
-	private final ExecutorService executor = Executors.newFixedThreadPool(cores, new ThreadFactory() {
-		@Override
-		public Thread newThread(Runnable r) {
-			Thread t = new Thread(r, "LogStream thread"); //$NON-NLS-1$
-			t.setDaemon(true);
-			return t;
-		}
+	private final ExecutorService executor = Executors.newFixedThreadPool(cores, (Runnable r) -> {
+		Thread t = new Thread(r, "LogStream thread"); //$NON-NLS-1$
+		t.setDaemon(true);
+		return t;
 	});
 
 	public LogStreamProviderFactory(ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService) {

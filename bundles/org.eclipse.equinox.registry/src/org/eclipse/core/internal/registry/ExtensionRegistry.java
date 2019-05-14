@@ -741,12 +741,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		}
 
 		if (debugEvents())
-			addRegistryChangeListener(new IRegistryChangeListener() {
-				@Override
-				public void registryChanged(IRegistryChangeEvent event) {
-					System.out.println(event);
-				}
-			});
+			addRegistryChangeListener(System.out::println);
 
 		// Do extra start processing if specified in the registry strategy
 		strategy.onStart(this); // preserve for backward compatibility; might be removed later

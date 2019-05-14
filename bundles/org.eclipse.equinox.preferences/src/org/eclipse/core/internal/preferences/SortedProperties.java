@@ -44,13 +44,10 @@ public class SortedProperties extends Properties {
 
 	@Override
 	public Set<Entry<Object, Object>> entrySet() {
-		TreeSet<Entry<Object, Object>> set = new TreeSet<>(new Comparator<Entry<Object, Object>>() {
-			@Override
-			public int compare(Entry<Object, Object> e1, Entry<Object, Object> e2) {
-				String s1 = (String) e1.getKey();
-				String s2 = (String) e2.getKey();
-				return s1.compareTo(s2);
-			}
+		TreeSet<Entry<Object, Object>> set = new TreeSet<>((Entry<Object, Object> e1, Entry<Object, Object> e2) -> {
+			String s1 = (String) e1.getKey();
+			String s2 = (String) e2.getKey();
+			return s1.compareTo(s2);
 		});
 		for (Iterator<Entry<Object, Object>> i = super.entrySet().iterator(); i.hasNext();) {
 			set.add(i.next());
