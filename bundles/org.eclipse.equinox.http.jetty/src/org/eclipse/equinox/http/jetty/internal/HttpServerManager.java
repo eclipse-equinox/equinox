@@ -337,9 +337,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 			thread.setContextClassLoader(contextLoader);
 			try {
 				sessionDestroyed.invoke(httpServiceServlet, event.getSession().getId());
-			} catch (IllegalAccessException e) {
-				// not likely
-			} catch (IllegalArgumentException e) {
+			} catch (IllegalAccessException | IllegalArgumentException e) {
 				// not likely
 			} catch (InvocationTargetException e) {
 				throw new RuntimeException(e.getCause());
@@ -355,9 +353,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 			thread.setContextClassLoader(contextLoader);
 			try {
 				sessionIdChanged.invoke(httpServiceServlet, oldSessionId);
-			} catch (IllegalAccessException e) {
-				// not likely
-			} catch (IllegalArgumentException e) {
+			} catch (IllegalAccessException | IllegalArgumentException e) {
 				// not likely
 			} catch (InvocationTargetException e) {
 				throw new RuntimeException(e.getCause());

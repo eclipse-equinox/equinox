@@ -93,9 +93,7 @@ public class TransformerList extends ServiceTracker<Object, Object> {
 				try {
 					transformer = new ProxyStreamTransformer(object);
 					transformers.put(type, transformer);
-				} catch (SecurityException e) {
-					logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Problem creating transformer", e); //$NON-NLS-1$
-				} catch (NoSuchMethodException e) {
+				} catch (SecurityException | NoSuchMethodException e) {
 					logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Problem creating transformer", e); //$NON-NLS-1$
 				}
 			}

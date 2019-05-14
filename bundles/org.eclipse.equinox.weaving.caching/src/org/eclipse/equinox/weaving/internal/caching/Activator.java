@@ -117,12 +117,7 @@ public class Activator implements BundleActivator {
                     enabled = false;
                 }
             }
-        } catch (final ClassNotFoundException ex) {
-        } catch (final SecurityException e) {
-        } catch (final NoSuchMethodException e) {
-        } catch (final IllegalArgumentException e) {
-        } catch (final IllegalAccessException e) {
-        } catch (final InvocationTargetException e) {
+        } catch (final ClassNotFoundException | SecurityException | NoSuchMethodException | IllegalArgumentException | IllegalAccessException | InvocationTargetException ex) {
         }
 
         return enabled;

@@ -42,17 +42,7 @@ public class LocalizationUtils {
 			Object value = field.get(null);
 			if (value instanceof String)
 				return (String) value;
-		} catch (ClassNotFoundException e) {
-			// eat exception and fall through
-		} catch (NoClassDefFoundError e) {
-			// eat exception and fall through
-		} catch (SecurityException e) {
-			// eat exception and fall through
-		} catch (NoSuchFieldException e) {
-			// eat exception and fall through
-		} catch (IllegalArgumentException e) {
-			// eat exception and fall through
-		} catch (IllegalAccessException e) {
+		} catch (ClassNotFoundException | NoClassDefFoundError | SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
 			// eat exception and fall through
 		}
 		return key;

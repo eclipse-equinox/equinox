@@ -43,11 +43,7 @@ public final class SafeRunner {
 		Assert.isNotNull(code);
 		try {
 			code.run();
-		} catch (Exception e) {
-			handleException(code, e);
-		} catch (LinkageError e) {
-			handleException(code, e);
-		} catch (AssertionError e) {
+		} catch (Exception | LinkageError | AssertionError e) {
 			handleException(code, e);
 		}
 	}

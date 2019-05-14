@@ -93,10 +93,10 @@ public class EquinoxRegistryStrategy extends RegistryStrategyOSGI {
 			try {
 				new ExtensionEventDispatcherJob(listeners, deltas, registry).schedule();
 				return; // all done - most typical use case
-			} catch (NoClassDefFoundError e) {
-				useJobs = false; // Jobs are missing
-			} catch (IllegalStateException e) {
-				useJobs = false; // Jobs bundles was stopped
+			} catch (NoClassDefFoundError | IllegalStateException e) {
+				useJobs = false; 
+				// Jobs are missing or
+				// Jobs bundles was stopped
 			}
 		}
 		super.scheduleChangeEvent(listeners, deltas, registry);

@@ -309,12 +309,8 @@ public abstract class ApplicationDescriptor {
 		checkArgs(arguments, false);
 		try {
 			return launchSpecific(arguments);
-		} catch (IllegalStateException ise) {
+		} catch (IllegalStateException | SecurityException | ApplicationException ise) {
 			throw ise;
-		} catch (SecurityException se) {
-			throw se;
-		} catch (ApplicationException ae) {
-			throw ae;
 		} catch (Exception t) {
 			throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, t);
 		}

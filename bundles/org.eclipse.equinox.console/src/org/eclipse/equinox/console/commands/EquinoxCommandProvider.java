@@ -423,10 +423,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 					if (stateFilter == -1)
 						stateFilter = 0;
 					stateFilter |= match.getInt(match);
-				} catch (NoSuchFieldException e) {
-					System.out.println(ConsoleMsg.CONSOLE_INVALID_INPUT + ": " + desiredState); //$NON-NLS-1$
-					throw new IllegalArgumentException();
-				} catch (IllegalAccessException e) {
+				} catch (NoSuchFieldException | IllegalAccessException e) {
 					System.out.println(ConsoleMsg.CONSOLE_INVALID_INPUT + ": " + desiredState); //$NON-NLS-1$
 					throw new IllegalArgumentException();
 				}

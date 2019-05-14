@@ -194,20 +194,16 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		Class<?> classInstance = null;
 		try {
 			classInstance = contributingBundle.loadClass(className);
-		} catch (Exception e1) {
+		} catch (Exception | LinkageError e1) {
 			throwException(NLS.bind(RegistryMessages.plugin_loadClassError, contributingBundle.getSymbolicName(), className), e1);
-		} catch (LinkageError e) {
-			throwException(NLS.bind(RegistryMessages.plugin_loadClassError, contributingBundle.getSymbolicName(), className), e);
 		}
 
 		// create a new instance
 		Object result = null;
 		try {
 			result = classInstance.getDeclaredConstructor().newInstance();
-		} catch (Exception e) {
+		} catch (Exception | LinkageError e) {
 			throwException(NLS.bind(RegistryMessages.plugin_instantiateClassError, contributingBundle.getSymbolicName(), className), e);
-		} catch (LinkageError e1) {
-			throwException(NLS.bind(RegistryMessages.plugin_instantiateClassError, contributingBundle.getSymbolicName(), className), e1);
 		}
 		return result;
 	}

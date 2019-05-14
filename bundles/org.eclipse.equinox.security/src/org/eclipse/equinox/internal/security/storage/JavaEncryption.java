@@ -149,25 +149,10 @@ public class JavaEncryption {
 
 			byte[] result = c.doFinal(clearText);
 			return new CryptoData(passwordExt.getModuleID(), salt, result, iv);
-		} catch (InvalidKeyException e) {
+		} catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
 			handle(e, StorageException.ENCRYPTION_ERROR);
 			return null;
-		} catch (InvalidAlgorithmParameterException e) {
-			handle(e, StorageException.ENCRYPTION_ERROR);
-			return null;
-		} catch (IllegalBlockSizeException e) {
-			handle(e, StorageException.ENCRYPTION_ERROR);
-			return null;
-		} catch (BadPaddingException e) {
-			handle(e, StorageException.ENCRYPTION_ERROR);
-			return null;
-		} catch (InvalidKeySpecException e) {
-			handle(e, StorageException.INTERNAL_ERROR);
-			return null;
-		} catch (NoSuchPaddingException e) {
-			handle(e, StorageException.INTERNAL_ERROR);
-			return null;
-		} catch (NoSuchAlgorithmException e) {
+		} catch (InvalidKeySpecException | NoSuchPaddingException | NoSuchAlgorithmException e) {
 			handle(e, StorageException.INTERNAL_ERROR);
 			return null;
 		}
@@ -200,19 +185,7 @@ public class JavaEncryption {
 
 			byte[] result = c.doFinal(encryptedData.getData());
 			return result;
-		} catch (InvalidAlgorithmParameterException e) {
-			handle(e, StorageException.INTERNAL_ERROR);
-			return null;
-		} catch (InvalidKeyException e) {
-			handle(e, StorageException.INTERNAL_ERROR);
-			return null;
-		} catch (InvalidKeySpecException e) {
-			handle(e, StorageException.INTERNAL_ERROR);
-			return null;
-		} catch (NoSuchPaddingException e) {
-			handle(e, StorageException.INTERNAL_ERROR);
-			return null;
-		} catch (NoSuchAlgorithmException e) {
+		} catch (InvalidAlgorithmParameterException | InvalidKeyException | InvalidKeySpecException | NoSuchPaddingException | NoSuchAlgorithmException e) {
 			handle(e, StorageException.INTERNAL_ERROR);
 			return null;
 		}

@@ -271,9 +271,7 @@ public class SecurePreferences {
 		try {
 			byte[] clearText = getRoot().getCipher().decrypt(passwordExt, data);
 			return StorageUtils.getString(clearText);
-		} catch (IllegalBlockSizeException e) { // invalid password?
-			throw new StorageException(StorageException.DECRYPTION_ERROR, e);
-		} catch (BadPaddingException e) { // invalid password?
+		} catch (IllegalBlockSizeException | BadPaddingException e) { // invalid password?
 			throw new StorageException(StorageException.DECRYPTION_ERROR, e);
 		}
 	}

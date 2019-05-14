@@ -386,9 +386,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	public synchronized Object waitForResult(int timeout) {
 		try {
 			return getExitValue(timeout);
-		} catch (ApplicationException e) {
-			// return null
-		} catch (InterruptedException e) {
+		} catch (ApplicationException | InterruptedException e) {
 			// return null
 		}
 		return null;

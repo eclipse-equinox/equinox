@@ -1099,13 +1099,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 				if (status == IStatus.ERROR || status == IStatus.CANCEL)
 					return false;
 			}
-		} catch (ParserConfigurationException e) {
-			logError(ownerName, contributionName, e);
-			return false;
-		} catch (SAXException e) {
-			logError(ownerName, contributionName, e);
-			return false;
-		} catch (IOException e) {
+		} catch (ParserConfigurationException | SAXException | IOException e) {
 			logError(ownerName, contributionName, e);
 			return false;
 		} finally {

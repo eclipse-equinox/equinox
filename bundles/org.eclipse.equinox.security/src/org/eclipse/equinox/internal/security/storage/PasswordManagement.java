@@ -131,13 +131,7 @@ public class PasswordManagement {
 			CryptoData encryptedData = new CryptoData(node.internalGet(PASSWORD_RECOVERY_KEY));
 			byte[] data = root.getCipher().decrypt(internalPasswordExt, encryptedData);
 			return StorageUtils.getString(data);
-		} catch (IllegalStateException e) {
-			return null;
-		} catch (IllegalBlockSizeException e) {
-			return null;
-		} catch (BadPaddingException e) {
-			return null;
-		} catch (StorageException e) {
+		} catch (IllegalStateException | IllegalBlockSizeException | BadPaddingException | StorageException e) {
 			return null;
 		}
 	}

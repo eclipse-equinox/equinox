@@ -366,17 +366,13 @@ public class DefaultPreferences extends EclipsePreferences {
 		try {
 			input = url.openStream();
 			result.load(input);
-		} catch (IOException e) {
+		} catch (IOException | IllegalArgumentException e) {
 			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
 				PrefsMessages.message("Problem opening stream to preference customization file: " + url); //$NON-NLS-1$
 				e.printStackTrace();
 			}
-		} catch (IllegalArgumentException e) {
-			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
-				PrefsMessages.message("Problem opening stream to preference customization file: " + url); //$NON-NLS-1$
-				e.printStackTrace();
-			}
-		} finally {
+		}
+	     finally {
 			if (input != null)
 				try {
 					input.close();

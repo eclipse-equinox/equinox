@@ -273,9 +273,7 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 			}
 		} catch (InvalidSyntaxException e) {
 			throw new IOException(e.getMessage());
-		} catch (NoClassDefFoundError e) {
-			throw new IOException(e.getMessage());
-		} catch (ClassNotFoundException e) {
+		} catch (NoClassDefFoundError | ClassNotFoundException e) {
 			throw new IOException(e.getMessage());
 		}
 	}

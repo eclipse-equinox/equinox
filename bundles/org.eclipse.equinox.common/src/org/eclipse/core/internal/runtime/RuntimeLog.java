@@ -104,9 +104,7 @@ public final class RuntimeLog {
 			for (int i = 0; i < listeners.length; i++) {
 				try {
 					listeners[i].logging(status, IRuntimeConstants.PI_RUNTIME);
-				} catch (Exception e) {
-					handleException(e);
-				} catch (LinkageError e) {
+				} catch (Exception | LinkageError e) {
 					handleException(e);
 				}
 			}
@@ -162,9 +160,7 @@ public final class RuntimeLog {
 		for (int i = 0; i < listeners.length; i++) {
 			try {
 				listeners[i].logging(status, IRuntimeConstants.PI_RUNTIME);
-			} catch (Exception e) {
-				handleException(e);
-			} catch (LinkageError e) {
+			} catch (Exception | LinkageError e) {
 				handleException(e);
 			}
 		}

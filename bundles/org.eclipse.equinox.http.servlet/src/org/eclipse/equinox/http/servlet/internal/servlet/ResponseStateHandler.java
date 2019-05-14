@@ -156,10 +156,7 @@ public class ResponseStateHandler {
 						try (ServletOutputStream outputStream = response.getOutputStream()) {
 							// just force a close
 						}
-						catch (IllegalStateException ise2) {
-							// ignore
-						}
-						catch (IOException ioe) {
+						catch (IllegalStateException | IOException ise2) {
 							// ignore
 						}
 					}

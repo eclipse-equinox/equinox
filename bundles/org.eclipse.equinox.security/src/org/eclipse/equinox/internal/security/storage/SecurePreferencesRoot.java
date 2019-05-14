@@ -286,10 +286,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 						validPassword = true;
 						break;
 					}
-				} catch (IllegalBlockSizeException e) {
-					if (!moduleExt.changePassword(e, container))
-						break;
-				} catch (BadPaddingException e) {
+				} catch (IllegalBlockSizeException | BadPaddingException e) {
 					if (!moduleExt.changePassword(e, container))
 						break;
 				}

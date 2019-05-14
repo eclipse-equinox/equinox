@@ -55,9 +55,7 @@ public class SecureStorageLoginModule implements LoginModule {
 		PasswordCallback passwordCallback = new PasswordCallback("password: ", false);
 		try {
 			callbackHandler.handle(new Callback[]{nameCallback, passwordCallback});
-		} catch (IOException e) {
-			throw new FailedLoginException("Cannot get username and password");
-		} catch (UnsupportedCallbackException e) {
+		} catch (IOException | UnsupportedCallbackException e) {
 			throw new FailedLoginException("Cannot get username and password");
 		}
 		

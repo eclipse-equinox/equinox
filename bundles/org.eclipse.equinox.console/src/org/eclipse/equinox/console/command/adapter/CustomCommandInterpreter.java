@@ -121,8 +121,7 @@ public void printStackTrace(Throwable t) {
             out.println("Nested Exception");
             printStackTrace(nested);
           }
-        } catch (IllegalAccessException e) {
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
         }
       }
     }
