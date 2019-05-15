@@ -1003,10 +1003,9 @@ public class Main {
 
 	/**
 	 * Searches for the given target directory starting in the "plugins" subdirectory
-	 * of the given location.  If one is found then this location is returned; 
-	 * otherwise an exception is thrown.
+	 * of the given location.
 	 * 
-	 * @return the location where target directory was found
+	 * @return the location where target directory was found, <code>null</code> otherwise
 	 * @param start the location to begin searching
 	 */
 	protected String searchFor(final String target, String start) {
