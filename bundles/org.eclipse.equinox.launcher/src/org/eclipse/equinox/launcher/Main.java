@@ -1010,10 +1010,6 @@ public class Main {
 	 * @param start the location to begin searching
 	 */
 	protected String searchFor(final String target, String start) {
-		return searchFor(target, null, start);
-	}
-
-	protected String searchFor(final String target, final String targetSuffix, String start) {
 		File root = resolveFile(new File(start));
 
 		// Note that File.list only gives you file names not the complete path from start
