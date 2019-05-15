@@ -969,17 +969,17 @@ public class Main {
 	 * @param base the base location
 	 * @exception MalformedURLException if a problem occurs computing the class path
 	 */
-	protected URL[] getBootPath(String base) throws IOException {
+	private URL[] getBootPath(String base) throws IOException {
 		URL url = null;
 		if (base != null) {
 			url = buildURL(base, true);
 		} else {
 			// search in the root location
 			url = getInstallLocation();
-			String path = new File(url.getFile(), "plugins").toString(); //$NON-NLS-1$
-			path = searchFor(framework, path);
+			String pluginsLocation = new File(url.getFile(), "plugins").toString(); //$NON-NLS-1$
+			String path = searchFor(framework, pluginsLocation);
 			if (path == null)
-				throw new RuntimeException("Could not find framework"); //$NON-NLS-1$
+				throw new FileNotFoundException(String.format("Could not find framework under %s", pluginsLocation)); //$NON-NLS-1$
 			if (url.getProtocol().equals("file")) //$NON-NLS-1$
 				url = new File(path).toURL();
 			else
