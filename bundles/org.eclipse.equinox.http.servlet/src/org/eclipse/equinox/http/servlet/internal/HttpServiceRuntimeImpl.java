@@ -57,7 +57,6 @@ public class HttpServiceRuntimeImpl
 		HttpServiceRuntime,
 		ServiceTrackerCustomizer<ServletContextHelper, AtomicReference<ContextController>> {
 
-	@SuppressWarnings("unchecked")
 	public HttpServiceRuntimeImpl(
 		BundleContext trackingContext, BundleContext consumingContext,
 		ServletContext parentServletContext, Dictionary<String, Object> attributes) {
@@ -110,9 +109,9 @@ public class HttpServiceRuntimeImpl
 		defaultContextProps.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
 		defaultContextProps.put(HTTP_WHITEBOARD_CONTEXT_PATH, Const.SLASH);
 		defaultContextProps.put(HTTP_WHITEBOARD_TARGET, this.targetFilter);
-		defaultContextProps.put(HTTP_SERVICE_CONTEXT_PROPERTY, HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
-		defaultContextReg = (ServiceRegistration<DefaultServletContextHelper>) consumingContext.registerService(
-			new String [] {ServletContextHelper.class.getName(), DefaultServletContextHelper.class.getName()}, new DefaultServletContextHelperFactory(), defaultContextProps);
+		defaultContextProps.put(Const.EQUINOX_HTTP_WHITEBOARD_CONTEXT_HELPER_DEFAULT, Boolean.TRUE);
+		defaultContextReg = consumingContext.registerService(
+			ServletContextHelper.class, new DefaultServletContextHelperFactory(), defaultContextProps);
 	}
 
 	public synchronized void open() {
@@ -689,7 +688,8 @@ public class HttpServiceRuntimeImpl
 				props.put(HTTP_WHITEBOARD_TARGET, targetFilter);
 				props.put(HTTP_WHITEBOARD_FILTER_PATTERN, alias);
 				props.put(HTTP_WHITEBOARD_FILTER_NAME, filterName);
-				props.put(HTTP_WHITEBOARD_CONTEXT_SELECT, getFilter(httpContextHolder.getServiceReference()));
+				props.put(HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + Const.EQUINOX_LEGACY_CONTEXT_HELPER + "=true)"); //$NON-NLS-1$ //$NON-NLS-2$
+				props.put(Const.EQUINOX_LEGACY_CONTEXT_SELECT, getFilter(httpContextHolder.getServiceReference()));
 				props.put(Const.EQUINOX_LEGACY_TCCL_PROP, Thread.currentThread().getContextClassLoader());
 				props.put(Constants.SERVICE_RANKING, findFilterPriority(initparams));
 				fillInitParams(props, initparams, HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX);
@@ -700,7 +700,6 @@ public class HttpServiceRuntimeImpl
 
 				// check that init got called and did not throw an exception
 				filterFactory.checkForError();
-				httpContextHolder.incrementUseCount();
 
 				objectRegistration = new HttpServiceObjectRegistration(filter, registration, httpContextHolder, bundle);
 				Set<HttpServiceObjectRegistration> objectRegistrations = bundleRegistrations.get(bundle);
@@ -802,7 +801,6 @@ public class HttpServiceRuntimeImpl
 				props.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
 				props.put(Const.EQUINOX_LEGACY_TCCL_PROP, Thread.currentThread().getContextClassLoader());
 				registration = bundle.getBundleContext().registerService(String.class, "resource", props); //$NON-NLS-1$
-				httpContextHolder.incrementUseCount();
 
 				objectRegistration = new HttpServiceObjectRegistration(fullAlias, registration, httpContextHolder, bundle);
 
@@ -891,7 +889,6 @@ public class HttpServiceRuntimeImpl
 
 				// check that init got called and did not throw an exception
 				legacyServlet.checkForError();
-				httpContextHolder.incrementUseCount();
 
 				objectRegistration = new HttpServiceObjectRegistration(fullAlias, registration, httpContextHolder, bundle);
 
@@ -1284,7 +1281,7 @@ public class HttpServiceRuntimeImpl
 
 	private final Map<String, Object> attributes;
 	private final String targetFilter;
-	final ServiceRegistration<DefaultServletContextHelper> defaultContextReg;
+	final ServiceRegistration<ServletContextHelper> defaultContextReg;
 	private final ServletContext parentServletContext;
 	private final BundleContext trackingContext;
 	private final BundleContext consumingContext;

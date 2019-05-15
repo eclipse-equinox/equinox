@@ -905,6 +905,12 @@ public class ContextController {
 	}
 
 	private boolean visibleContextHelper(ServiceReference<?> whiteBoardService) {
+		if (consumingContext.getBundle().equals(serviceReference.getBundle())) {
+			Boolean defaultContextHelper = (Boolean) serviceReference.getProperty(Const.EQUINOX_HTTP_WHITEBOARD_CONTEXT_HELPER_DEFAULT);
+			if (defaultContextHelper == null) {
+				return true;
+			}
+		}
 		try {
 			if (whiteBoardService.getBundle().getBundleContext().getAllServiceReferences(ServletContextHelper.class.getName(), servletContextHelperRefFilter) != null) {
 				return true;

@@ -54,12 +54,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	public synchronized HttpContext createDefaultHttpContext() {
 		checkShutdown();
 
-		DefaultServletContextHelper defaultServletContextHelper = bundle.getBundleContext().getService(httpServiceRuntime.defaultContextReg.getReference());
-		HttpContextHolder httpContextHolder = new HttpContextHolder(defaultServletContextHelper, httpServiceRuntime.defaultContextReg);
-		httpContextHolder.incrementUseCount();
-		httpServiceRuntime.legacyContextMap.putIfAbsent(defaultServletContextHelper, httpContextHolder);
-
-		return defaultServletContextHelper;
+		return new DefaultServletContextHelper(bundle);
 	}
 
 	/**
@@ -74,8 +69,8 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 		throws ServletException {
 
 		checkShutdown();
-		httpContext = httpContext == null ? createDefaultHttpContext() : registerContext(httpContext);
-		final HttpContextHolder httpContextHolder = httpServiceRuntime.legacyContextMap.get(httpContext);
+		
+		final HttpContextHolder httpContextHolder = getHttpContextHolder(httpContext);
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
 				@Override
@@ -91,6 +86,14 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 	}
 
+	private HttpContextHolder getHttpContextHolder(HttpContext httpContext) {
+		if (httpContext == null) {
+			httpContext = createDefaultHttpContext();
+		}
+		registerContext(httpContext);
+		return httpServiceRuntime.legacyContextMap.get(httpContext);
+	}
+
 	/**
 	 * @throws NamespaceException
 	 * @see HttpService#registerResources(String, String, HttpContext)
@@ -100,8 +103,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 		throws NamespaceException {
 
 		checkShutdown();
-		httpContext = httpContext == null ? createDefaultHttpContext() : registerContext(httpContext);
-		final HttpContextHolder httpContextHolder = httpServiceRuntime.legacyContextMap.get(httpContext);
+		final HttpContextHolder httpContextHolder = getHttpContextHolder(httpContext);
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
 				@Override
@@ -127,8 +129,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 		throws ServletException, NamespaceException {
 
 		checkShutdown();
-		httpContext = httpContext == null ? createDefaultHttpContext() : registerContext(httpContext);
-		final HttpContextHolder httpContextHolder = httpServiceRuntime.legacyContextMap.get(httpContext);
+		final HttpContextHolder httpContextHolder = getHttpContextHolder(httpContext);
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
 				@Override
@@ -183,7 +184,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 		HttpContextHolder httpContextHolder = httpServiceRuntime.legacyContextMap.get(httpContext);
 
 		if (httpContextHolder == null) {
-			String legacyId = httpContext.getClass().getName().replaceAll("[^a-zA-Z_0-9\\-]", "_") + "-" + generateLegacyId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String legacyId= httpContext.getClass().getName().replaceAll("[^a-zA-Z_0-9\\-]", "_") + "-" + generateLegacyId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			Dictionary<String, Object> props = new Hashtable<String, Object>();
 			props.put(HTTP_WHITEBOARD_CONTEXT_NAME, legacyId);
 			props.put(HTTP_WHITEBOARD_CONTEXT_PATH, "/"); //$NON-NLS-1$
@@ -198,6 +199,8 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 			httpContextHolder.incrementUseCount();
 
 			httpServiceRuntime.legacyContextMap.put(httpContext, httpContextHolder);
+		} else {
+			httpContextHolder.incrementUseCount();
 		}
 
 		return httpContext;
