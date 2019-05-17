@@ -13,17 +13,32 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.log;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Map;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
-import org.eclipse.equinox.log.*;
+import org.eclipse.equinox.log.ExtendedLogEntry;
+import org.eclipse.equinox.log.LogFilter;
+import org.eclipse.equinox.log.SynchronousLogListener;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.service.log.*;
+import org.osgi.service.log.LogEntry;
+import org.osgi.service.log.LogLevel;
+import org.osgi.service.log.LogService;
 import org.osgi.service.log.admin.LoggerAdmin;
 import org.osgi.service.log.admin.LoggerContext;
 
@@ -711,6 +726,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 		return (fwkEntrySeverity & logLevel) != 0;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean isLoggable(Bundle bundle, String loggableName, int loggableLevel) {
 		if (!enabled)
@@ -728,6 +744,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 		return loggableLevel == LogService.LOG_ERROR;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void logged(LogEntry entry) {
 		if (!(entry instanceof ExtendedLogEntry))
@@ -750,6 +767,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 		return "unknown"; //$NON-NLS-1$
 	}
 
+	@SuppressWarnings("deprecation")
 	private static int convertSeverity(int entryLevel) {
 		switch (entryLevel) {
 			case LogService.LOG_ERROR :

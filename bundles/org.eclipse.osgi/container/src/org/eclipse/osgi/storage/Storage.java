@@ -1540,6 +1540,7 @@ public class Storage {
 		return result;
 	}
 
+	@SuppressWarnings("deprecation")
 	private void loadVMProfile(Generation systemGeneration) {
 		EquinoxConfiguration equinoxConfig = equinoxContainer.getConfiguration();
 		Properties profileProps = findVMProfile(systemGeneration);
@@ -1686,6 +1687,7 @@ public class Storage {
 		return null;
 	}
 
+	@SuppressWarnings("deprecation")
 	private Properties calculateVMProfile(Version javaVersion) {
 		String systemPackages = calculateVMPackages();
 		if (systemPackages == null) {

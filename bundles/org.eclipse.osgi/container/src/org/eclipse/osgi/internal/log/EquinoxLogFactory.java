@@ -14,11 +14,16 @@
 
 package org.eclipse.osgi.internal.log;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
 import org.eclipse.equinox.log.Logger;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.log.LogService;
 
 class EquinoxLogFactory implements ServiceFactory<FrameworkLog> {
@@ -100,6 +105,7 @@ class EquinoxLogFactory implements ServiceFactory<FrameworkLog> {
 		// nothing
 	}
 
+	@SuppressWarnings("deprecation")
 	static int convertLevel(FrameworkLogEntry logEntry) {
 		switch (logEntry.getSeverity()) {
 			case FrameworkLogEntry.ERROR :
