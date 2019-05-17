@@ -35,8 +35,8 @@ import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleReference;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 import org.osgi.framework.namespace.BundleNamespace;
@@ -298,14 +298,11 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	Bundle getBundlePriv(Class<?> clazz) {
-		ClassLoader cl = clazz.getClassLoader();
-		if (cl instanceof BundleReference) {
-			return ((BundleReference) cl).getBundle();
-		}
-		if (cl == getClass().getClassLoader()) {
+		Bundle b = FrameworkUtil.getBundle(clazz);
+		if (b == null && clazz.getClassLoader() == getClass().getClassLoader()) {
 			return container.getModule(0).getBundle();
 		}
-		return null;
+		return b;
 	}
 
 	@Override
