@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.testbase;
 
+import org.eclipse.equinox.http.servlet.tests.ContextHelperCustomizerTests;
 import org.eclipse.equinox.http.servlet.tests.AuthenticationTest;
 import org.eclipse.equinox.http.servlet.tests.DispatchingTest;
 import org.eclipse.equinox.http.servlet.tests.PreprocessorTestCase;
@@ -93,6 +94,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	TestHttpServiceAndErrorPage.class,
 	TestHttpServiceAndNamedServlet.class,
 	TestUpload.class,
+	ContextHelperCustomizerTests.class
 })
 public class AllTests {
 	// see @SuiteClasses

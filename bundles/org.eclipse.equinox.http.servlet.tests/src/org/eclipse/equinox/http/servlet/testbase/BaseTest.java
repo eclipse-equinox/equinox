@@ -694,10 +694,10 @@ public class BaseTest {
 
 	}
 
-	protected static class TestContextPathAdaptor extends ContextPathCustomizer {
-		private final String defaultFilter;
-		private final String contextPrefix;
-		private final String testName;
+	protected class TestContextPathAdaptor extends ContextPathCustomizer {
+		protected final String defaultFilter;
+		protected final String contextPrefix;
+		protected final String testName;
 
 		/**
 		 * @param defaultFilter
