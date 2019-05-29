@@ -1832,7 +1832,7 @@ public class TestModuleContainer extends AbstractTest {
 		Assert.assertEquals("n3 should resolve.", State.RESOLVED, uses_n3.getState());
 	}
 
-	// DISABLE see bug 498064 @Test
+	@Test
 	public void testUsesTimeout() throws BundleException {
 		// Always want to go to zero threads when idle
 		int coreThreads = 0;
