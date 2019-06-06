@@ -957,7 +957,7 @@ public class ModuleDatabase {
 	}
 
 	private static class Persistence {
-		private static final int VERSION = 2;
+		private static final int VERSION = 3;
 		private static final byte NULL = 0;
 		private static final byte OBJECT = 1;
 		private static final byte INDEX = 2;

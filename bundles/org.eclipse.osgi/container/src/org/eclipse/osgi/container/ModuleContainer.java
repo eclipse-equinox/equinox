@@ -131,6 +131,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	private final boolean autoStartOnResolve;
 
+	final boolean restrictParallelStart;
+
 	boolean DEBUG_MONITOR_LAZY = false;
 	boolean DEBUG_BUNDLE_START_TIME = false;
 
@@ -169,6 +171,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 			autoStartOnResolveProp = Boolean.toString(true);
 		}
 		this.autoStartOnResolve = Boolean.parseBoolean(autoStartOnResolveProp);
+		this.restrictParallelStart = Boolean.parseBoolean(adaptor.getProperty(EquinoxConfiguration.PROP_EQUINOX_START_LEVEL_RESTRICT_PARALLEL));
 	}
 
 	/**
@@ -1713,7 +1716,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 					long currentTimestamp = Long.MIN_VALUE;
 					if (newStartLevel > currentSL) {
 						List<Module> lazyStart = null;
+						List<Module> lazyStartParallel = null;
 						List<Module> eagerStart = null;
+						List<Module> eagerStartParallel = null;
 						for (int i = currentSL; i < newStartLevel; i++) {
 							int toStartLevel = i + 1;
 							activeStartLevel.set(toStartLevel);
@@ -1725,14 +1730,16 @@ public final class ModuleContainer implements DebugOptionsListener {
 								try {
 									sorted = moduleDatabase.getSortedModules(Sort.BY_START_LEVEL);
 									lazyStart = new ArrayList<>(sorted.size());
+									lazyStartParallel = new ArrayList<>(sorted.size());
 									eagerStart = new ArrayList<>(sorted.size());
-									separateModulesByActivationPolicy(sorted, lazyStart, eagerStart);
+									eagerStartParallel = new ArrayList<>(sorted.size());
+									separateModulesByActivationPolicy(sorted, lazyStart, lazyStartParallel, eagerStart, eagerStartParallel);
 									currentTimestamp = moduleDatabase.getTimestamp();
 								} finally {
 									moduleDatabase.readUnlock();
 								}
 							}
-							incStartLevel(toStartLevel, lazyStart, eagerStart);
+							incStartLevel(toStartLevel, lazyStart, lazyStartParallel, eagerStart, eagerStartParallel);
 						}
 					} else {
 						for (int i = currentSL; i > newStartLevel; i--) {
@@ -1765,26 +1772,38 @@ public final class ModuleContainer implements DebugOptionsListener {
 			}
 		}
 
-		private void incStartLevel(int toStartLevel, List<Module> lazyStart, List<Module> eagerStart) {
-			incStartLevel(toStartLevel, lazyStart);
-			incStartLevel(toStartLevel, eagerStart);
+		private void incStartLevel(int toStartLevel, List<Module> lazyStart, List<Module> lazyStartParallel, List<Module> eagerStart, List<Module> eagerStartParallel) {
+			// start lazy activated first
+			// start parallel bundles first
+			incStartLevel(toStartLevel, lazyStartParallel, true);
+			incStartLevel(toStartLevel, lazyStart, false);
+			incStartLevel(toStartLevel, eagerStartParallel, true);
+			incStartLevel(toStartLevel, eagerStart, false);
 		}
 
-		private void separateModulesByActivationPolicy(List<Module> sortedModules, List<Module> lazyStart, List<Module> eagerStart) {
+		private void separateModulesByActivationPolicy(List<Module> sortedModules, List<Module> lazyStart, List<Module> lazyStartParallel, List<Module> eagerStart, List<Module> eagerStartParallel) {
 			for (Module module : sortedModules) {
-				if (module.isLazyActivate()) {
-					lazyStart.add(module);
+				if (!restrictParallelStart || module.isParallelActivated()) {
+					if (module.isLazyActivate()) {
+						lazyStartParallel.add(module);
+					} else {
+						eagerStartParallel.add(module);
+					}
 				} else {
-					eagerStart.add(module);
+					if (module.isLazyActivate()) {
+						lazyStart.add(module);
+					} else {
+						eagerStart.add(module);
+					}
 				}
 			}
 		}
 
-		private void incStartLevel(final int toStartLevel, List<Module> candidatesToStart) {
+		private void incStartLevel(final int toStartLevel, List<Module> candidatesToStart, boolean inParallel) {
 			if (candidatesToStart.isEmpty()) {
 				return;
 			}
-			List<Module> toStart = new ArrayList<>();
+			final List<Module> toStart = new ArrayList<>();
 			for (final Module module : candidatesToStart) {
 				if (isRefreshingSystemModule()) {
 					return;
@@ -1807,7 +1826,12 @@ public final class ModuleContainer implements DebugOptionsListener {
 			if (toStart.isEmpty()) {
 				return;
 			}
-			final Executor executor = adaptor.getStartLevelExecutor();
+			final Executor executor = inParallel ? adaptor.getStartLevelExecutor() : new Executor() {
+				@Override
+				public void execute(Runnable command) {
+					command.run();
+				}
+			};
 			final CountDownLatch done = new CountDownLatch(toStart.size());
 			for (final Module module : toStart) {
 				executor.execute(new Runnable() {

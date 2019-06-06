@@ -227,6 +227,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String PROP_RESOLVER_THREAD_COUNT = "equinox.resolver.thead.count"; //$NON-NLS-1$
 	public static final String PROP_EQUINOX_RESOLVER_THREAD_COUNT = "equinox.resolver.thread.count"; //$NON-NLS-1$
 	public static final String PROP_EQUINOX_START_LEVEL_THREAD_COUNT = "equinox.start.level.thread.count"; //$NON-NLS-1$
+	public static final String PROP_EQUINOX_START_LEVEL_RESTRICT_PARALLEL = "equinox.start.level.restrict.parallel"; //$NON-NLS-1$
 	public static final String PROP_RESOLVER_REVISION_BATCH_SIZE = "equinox.resolver.revision.batch.size"; //$NON-NLS-1$
 	public static final String PROP_RESOLVER_BATCH_TIMEOUT = "equinox.resolver.batch.timeout"; //$NON-NLS-1$
 

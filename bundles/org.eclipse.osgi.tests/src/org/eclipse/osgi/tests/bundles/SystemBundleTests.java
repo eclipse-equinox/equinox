@@ -69,6 +69,7 @@ import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.ExtendedLogService;
 import org.eclipse.equinox.log.test.TestListener2;
+import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.framework.util.FilePath;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
@@ -3581,38 +3582,53 @@ public class SystemBundleTests extends AbstractBundleTests {
 	}
 
 	public void testStartLevelMultiThreadExplicit4() throws IOException, InterruptedException {
-		doTestStartLevelMultiThread(4);
+		doTestStartLevelMultiThread(4, false);
 	}
 
 	public void testStartLevelMultiThreadExplicit1() throws IOException, InterruptedException {
-		doTestStartLevelMultiThread(1);
+		doTestStartLevelMultiThread(1, false);
 	}
 
 	public void testStartLevelMultiThreadAvailableProcessors() throws IOException, InterruptedException {
-		doTestStartLevelMultiThread(0);
+		doTestStartLevelMultiThread(0, false);
 	}
 
-	private void doTestStartLevelMultiThread(int expectedCount) throws IOException, InterruptedException {
+	public void testStartLevelRestrictMultiThreadExplicit4() throws IOException, InterruptedException {
+		doTestStartLevelMultiThread(4, true);
+	}
+
+	private void doTestStartLevelMultiThread(int expectedCount, final boolean restrictParallel) throws IOException, InterruptedException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, String> configuration = new HashMap();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		configuration.put(EquinoxConfiguration.PROP_EQUINOX_START_LEVEL_THREAD_COUNT, String.valueOf(expectedCount));
+		if (restrictParallel) {
+			configuration.put(EquinoxConfiguration.PROP_EQUINOX_START_LEVEL_RESTRICT_PARALLEL, "true");
+		}
 		if (expectedCount <= 0) {
 			expectedCount = Runtime.getRuntime().availableProcessors();
 		}
 		Equinox equinox = null;
-		final int numBundles = 40;
+		final int numBundles = 60;
 		final File[] testBundleFiles = createBundles(new File(config, "testBundles"), numBundles);
 		try {
 			equinox = new Equinox(configuration);
 			equinox.start();
+			FrameworkWiring fwkWiring = equinox.adapt(FrameworkWiring.class);
 			for (int i = 0; i < numBundles; i++) {
 				Bundle b = equinox.getBundleContext().installBundle("reference:file:///" + testBundleFiles[i].getAbsolutePath());
-				if (i < 20) {
+				if (i < 30) {
 					b.adapt(BundleStartLevel.class).setStartLevel(5);
 				} else {
 					b.adapt(BundleStartLevel.class).setStartLevel(10);
 				}
+				Module m = b.adapt(Module.class);
+				assertFalse("Wrong initial value for parallelActivation", m.isParallelActivated());
+				if (b.getBundleId() % 2 == 0) {
+					b.adapt(Module.class).setParallelActivation(true);
+					assertTrue("Wrong value for parallelActivation", m.isParallelActivated());
+				}
+				fwkWiring.resolveBundles(Collections.singleton(b));
 				b.start();
 			}
 
@@ -3643,20 +3659,96 @@ public class SystemBundleTests extends AbstractBundleTests {
 			waitForStartLevel.await(20, TimeUnit.SECONDS);
 
 			assertEquals("Did not finish start level setting.", 0, waitForStartLevel.getCount());
-			assertEquals("Wrong number of start threads.", expectedCount, startingThreads.size());
+			if (restrictParallel && expectedCount > 1) {
+				// when restricting parallel start the restricted bundles will start on
+				// the dispatching thread adding one more thread
+				assertEquals("Wrong number of start threads.", expectedCount + 1, startingThreads.size());
+			} else {
+				assertEquals("Wrong number of start threads.", expectedCount, startingThreads.size());
+			}
 			assertEquals("Wrong number of started bundles.", numBundles, startingBundles.size());
 
 			ListIterator<Bundle> itr = startingBundles.listIterator();
 			while (itr.hasNext()) {
-				Bundle b2 = itr.next();
 				if (itr.hasPrevious()) {
 					Bundle b1 = itr.previous();
 					itr.next();
-					assertTrue("Wrong order to starting bundle.", b1.adapt(BundleStartLevel.class).getStartLevel() <= b2.adapt(BundleStartLevel.class).getStartLevel());
+					Bundle b2 = itr.next();
+
+					int b1sl = b1.adapt(BundleStartLevel.class).getStartLevel();
+					int b2sl = b2.adapt(BundleStartLevel.class).getStartLevel();
+					assertTrue("Wrong order to start bundles: " + b1 + " - " + b2, b1sl <= b2sl);
+					if (restrictParallel && b1sl == b2sl) {
+						boolean b1pa = b1.adapt(Module.class).isParallelActivated();
+						boolean b2pa = b2.adapt(Module.class).isParallelActivated();
+						assertTrue("Wrong order to start bundles: " + b1 + " - " + b2, b1pa || (!b1pa && !b2pa));
+						if (!b1pa) {
+							assertTrue("Wrong order to start bundles: " + b1 + " - " + b2, b1.getBundleId() < b2.getBundleId());
+						}
+					}
+				} else {
+					itr.next();
 				}
 			}
 		} catch (BundleException e) {
 			fail("Failed init", e);
+		} finally {
+			try {
+				if (equinox != null) {
+					equinox.stop();
+					equinox.waitForStop(1000);
+				}
+			} catch (BundleException e) {
+				fail("Failed to stop framework.", e);
+			} catch (InterruptedException e) {
+				fail("Failed to stop framework.", e);
+			}
+		}
+	}
+
+	public void testParallelActivationPersistence() throws IOException, BundleException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map<String, String> configuration = new HashMap();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		final int numBundles = 4;
+		final File[] testBundleFiles = createBundles(new File(config, "testParallelPersistence"), numBundles);
+		Equinox equinox = null;
+		try {
+			equinox = new Equinox(configuration);
+			equinox.start();
+			FrameworkWiring fwkWiring = equinox.adapt(FrameworkWiring.class);
+			for (int i = 0; i < numBundles; i++) {
+				Bundle b = equinox.getBundleContext().installBundle("reference:file:///" + testBundleFiles[i].getAbsolutePath());
+				Module m = b.adapt(Module.class);
+				assertFalse("Wrong initial value for parallelActivation", m.isParallelActivated());
+				if (b.getBundleId() % 2 == 0) {
+					b.adapt(Module.class).setParallelActivation(true);
+					assertTrue("Wrong value for parallelActivation", m.isParallelActivated());
+				}
+				fwkWiring.resolveBundles(Collections.singleton(b));
+				b.start();
+			}
+			equinox.stop();
+			try {
+				equinox.waitForStop(1000);
+			} catch (InterruptedException e) {
+				fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+			}
+			equinox = null;
+			equinox = new Equinox(configuration);
+			equinox.start();
+			Bundle[] bundles = equinox.getBundleContext().getBundles();
+			assertEquals("Wrong number of bundles on restart.", numBundles + 1, bundles.length);
+			for (Bundle b : bundles) {
+				if (b.getBundleId() == 0) {
+					continue;
+				}
+				if (b.getBundleId() % 2 == 0) {
+					assertTrue("Wrong value for parallelActivation", b.adapt(Module.class).isParallelActivated());
+				} else {
+					assertFalse("Wrong value for parallelActivation", b.adapt(Module.class).isParallelActivated());
+				}
+			}
 		} finally {
 			try {
 				if (equinox != null) {
