@@ -13,6 +13,9 @@ package org.eclipse.osgi.internal.log;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.eclipse.equinox.log.SynchronousLogListener;
@@ -49,8 +52,8 @@ public class EventAdminLogListener implements SynchronousLogListener {
 	public static final String EXCEPTION_CLASS = "exception.class"; //$NON-NLS-1$
 	public static final String EXCEPTION_MESSAGE = "exception.message"; //$NON-NLS-1$
 
-	private final Object eventAdmin;
-	private final Method postEvent;
+	final Object eventAdmin;
+	final Method postEvent;
 	private final Constructor<?> event;
 
 	public EventAdminLogListener(Object eventAdmin) throws ClassNotFoundException, NoSuchMethodException {
@@ -64,26 +67,34 @@ public class EventAdminLogListener implements SynchronousLogListener {
 	}
 
 	@Override
-	public void logged(LogEntry entry) {
+	public void logged(final LogEntry entry) {
 		try {
-			Object convertedEvent = convertEvent(entry);
-			postEvent.invoke(eventAdmin, convertedEvent);
-		} catch (InvocationTargetException e) {
-			Throwable t = e.getTargetException();
-			if ((t instanceof RuntimeException))
-				throw (RuntimeException) t;
-			if ((t instanceof Error))
-				throw (Error) t;
-			// unexpected
-			throw new RuntimeException(e);
-		} catch (IllegalAccessException | InstantiationException e) {
-			// unexpected
-			throw new RuntimeException(e);
+			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+				@Override
+				public Void run() throws Exception {
+					Object convertedEvent = convertEvent(entry);
+					postEvent.invoke(eventAdmin, convertedEvent);
+					return null;
+				}
+			});
+		} catch (PrivilegedActionException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof InvocationTargetException) {
+				Throwable t = ((InvocationTargetException) cause).getTargetException();
+				if ((t instanceof RuntimeException))
+					throw (RuntimeException) t;
+				if ((t instanceof Error))
+					throw (Error) t;
+				// unexpected
+				throw new RuntimeException(t);
+			}
+			throw new RuntimeException(cause);
 		}
+
 	}
 
 	@SuppressWarnings("deprecation")
-	private Object convertEvent(LogEntry entry) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+	Object convertEvent(LogEntry entry) throws InstantiationException, IllegalAccessException, InvocationTargetException {
 		String topic = TOPIC;
 		int level = entry.getLevel();
 		switch (level) {
