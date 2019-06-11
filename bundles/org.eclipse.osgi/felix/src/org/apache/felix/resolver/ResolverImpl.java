@@ -2440,7 +2440,8 @@ public class ResolverImpl implements Resolver
         }
 
         @Override
-        public ResolutionException toException() {
+        public ResolutionException toException()
+        {
             return new ReasonException(ReasonException.Reason.UseConstraint, getMessage(), null, getUnresolvedRequirements());
         }
     }
@@ -2448,8 +2449,8 @@ public class ResolverImpl implements Resolver
     private static class EnhancedExecutor
     {
         private final Executor executor;
-        private final Queue<Future<Void>> awaiting = new ConcurrentLinkedQueue<>();
-        private final AtomicReference<Throwable> throwable = new AtomicReference<>();
+        private final Queue<Future<Void>> awaiting = new ConcurrentLinkedQueue<Future<Void>>();
+        private final AtomicReference<Throwable> throwable = new AtomicReference<Throwable>();
 
         public EnhancedExecutor(Executor executor)
         {
@@ -2458,7 +2459,7 @@ public class ResolverImpl implements Resolver
 
         public void execute(final Runnable runnable)
         {
-            FutureTask<Void> task = new FutureTask(new Runnable()
+            FutureTask<Void> task = new FutureTask<Void>(new Runnable()
             {
                 public void run()
                 {
@@ -2513,7 +2514,8 @@ public class ResolverImpl implements Resolver
                 }
             }
             Throwable t = throwable.get();
-            if (t!= null) {
+            if (t != null)
+            {
                 if (t instanceof Runnable)
                 {
                     throw (RuntimeException) t;
