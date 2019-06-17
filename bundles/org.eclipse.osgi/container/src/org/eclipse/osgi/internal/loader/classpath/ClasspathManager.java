@@ -146,25 +146,27 @@ public class ClasspathManager {
 	 *
 	 */
 	public void close() {
-		for (int i = 0; i < entries.length; i++) {
-			if (entries[i] != null) {
+		for (ClasspathEntry entry : entries) {
+			if (entry != null) {
 				try {
-					entries[i].close();
-				} catch (IOException e) {
+					entry.close();
+				}catch (IOException e) {
 					generation.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, generation.getRevision().getRevisions().getModule(), e);
 				}
 			}
 		}
 		FragmentClasspath[] currentFragments = getFragmentClasspaths();
-		for (int i = 0; i < currentFragments.length; i++)
-			currentFragments[i].close();
+		for (FragmentClasspath currentFragment : currentFragments) {
+			currentFragment.close();
+		}
 	}
 
 	private ClasspathEntry[] buildClasspath(String[] cp, ClasspathManager hostloader, Generation source) {
 		ArrayList<ClasspathEntry> result = new ArrayList<>(cp.length);
 		// add the regular classpath entries.
-		for (int i = 0; i < cp.length; i++)
-			findClassPathEntry(result, cp[i], hostloader, source);
+		for (String cpEntry : cp) {
+			findClassPathEntry(result, cpEntry, hostloader, source);
+		}
 		return result.toArray(new ClasspathEntry[result.size()]);
 	}
 
@@ -219,8 +221,7 @@ public class ClasspathManager {
 		// only check for fragments if the generation is the host's generation.
 		if (hostManager.generation == generation) {
 			FragmentClasspath[] hostFrags = hostManager.getFragmentClasspaths();
-			for (int i = 0; i < hostFrags.length; i++) {
-				FragmentClasspath fragCP = hostFrags[i];
+			for (FragmentClasspath fragCP : hostFrags) {
 				element = hostManager.getClasspath(cp, fragCP.getGeneration());
 				if (element != null) {
 					result.add(element);

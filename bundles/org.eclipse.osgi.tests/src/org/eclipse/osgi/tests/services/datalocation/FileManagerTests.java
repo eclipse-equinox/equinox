@@ -13,7 +13,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.datalocation;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Platform;
@@ -53,16 +57,16 @@ public class FileManagerTests extends OSGiTest {
 		rm(base);
 	}
 
-	private void rm(File file) {
-		if (file.isDirectory()) {
-			File[] list = file.listFiles();
-			if (list != null) {
-				for (int idx = 0; idx < list.length; idx++) {
-					rm(list[idx]);
+	private void rm(File folder) {
+		if (folder.isDirectory()) {
+			File[] files = folder.listFiles();
+			if (files != null) {
+				for (File file : files) {
+					rm(file);
 				}
 			}
 		}
-		file.delete();
+		folder.delete();
 	}
 
 	/**

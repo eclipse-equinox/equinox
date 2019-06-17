@@ -1911,15 +1911,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 6, bundleDeltas.length); //$NON-NLS-1$
-
-		for (int i = 0; i < allBundles.length; i++) {
+		for (BundleDescription description : allBundles) {
 			boolean found = false;
 			for (int j = 0; j < bundleDeltas.length && !found; j++) {
 				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, bundleDeltas[j].getType()); //$NON-NLS-1$
-				found = bundleDeltas[j].getBundle() == allBundles[i];
+				found = bundleDeltas[j].getBundle() == description;
 			}
 			if (!found) {
-				fail("Did not find RESOLVED BundleDelta for " + allBundles[i]); //$NON-NLS-1$
+				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
 		stateDelta = state.resolve(new BundleDescription[] {f});
@@ -1944,15 +1943,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 6, bundleDeltas.length); //$NON-NLS-1$
-
-		for (int i = 0; i < allRefreshBundles.length; i++) {
+		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int j = 0; j < bundleDeltas.length && !found; j++) {
 				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, bundleDeltas[j].getType()); //$NON-NLS-1$
-				found = bundleDeltas[j].getBundle() == allRefreshBundles[i];
+				found = bundleDeltas[j].getBundle() == description;
 			}
 			if (!found) {
-				fail("Did not find RESOLVED BundleDelta for " + allRefreshBundles[i]); //$NON-NLS-1$
+				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
 		stateDelta = state.resolve(new BundleDescription[] {f});
@@ -1983,15 +1981,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 8, bundleDeltas.length); //$NON-NLS-1$
-
-		for (int i = 0; i < allRefreshBundles.length; i++) {
+		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int j = 0; j < bundleDeltas.length && !found; j++) {
 				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, bundleDeltas[j].getType()); //$NON-NLS-1$
-				found = bundleDeltas[j].getBundle() == allRefreshBundles[i];
+				found = bundleDeltas[j].getBundle() == description;
 			}
 			if (!found) {
-				fail("Did not find RESOLVED BundleDelta for " + allRefreshBundles[i]); //$NON-NLS-1$
+				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
 		stateDelta = state.resolve(new BundleDescription[] {f});
@@ -2003,15 +2000,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 8, bundleDeltas.length); //$NON-NLS-1$
-
-		for (int i = 0; i < allRefreshBundles.length; i++) {
+		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int j = 0; j < bundleDeltas.length && !found; j++) {
 				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, bundleDeltas[j].getType()); //$NON-NLS-1$
-				found = bundleDeltas[j].getBundle() == allRefreshBundles[i];
+				found = bundleDeltas[j].getBundle() == description;
 			}
 			if (!found) {
-				fail("Did not find RESOLVED BundleDelta for " + allRefreshBundles[i]); //$NON-NLS-1$
+				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
 	}
@@ -2035,15 +2031,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 9, bundleDeltas.length); //$NON-NLS-1$
-
-		for (int i = 0; i < allBundles.length; i++) {
+		for (BundleDescription description : allBundles) {
 			boolean found = false;
 			for (int j = 0; j < bundleDeltas.length && !found; j++) {
 				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, bundleDeltas[j].getType()); //$NON-NLS-1$
-				found = bundleDeltas[j].getBundle() == allBundles[i];
+				found = bundleDeltas[j].getBundle() == description;
 			}
 			if (!found) {
-				fail("Did not find RESOLVED BundleDelta for " + allBundles[i]); //$NON-NLS-1$
+				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
 		stateDelta = state.resolve(new BundleDescription[] {f});
@@ -2056,15 +2051,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDescription[] expectedRefresh = new BundleDescription[] {c, cFrag, f};
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 3, bundleDeltas.length); //$NON-NLS-1$
-
-		for (int i = 0; i < expectedRefresh.length; i++) {
+		for (BundleDescription description : expectedRefresh) {
 			boolean found = false;
 			for (int j = 0; j < bundleDeltas.length && !found; j++) {
 				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, bundleDeltas[j].getType()); //$NON-NLS-1$
-				found = bundleDeltas[j].getBundle() == expectedRefresh[i];
+				found = bundleDeltas[j].getBundle() == description;
 			}
 			if (!found) {
-				fail("Did not find RESOLVED BundleDelta for " + expectedRefresh[i]); //$NON-NLS-1$
+				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
 	}
@@ -2090,15 +2084,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", allRefreshBundles.length, bundleDeltas.length); //$NON-NLS-1$
-
-		for (int i = 0; i < allRefreshBundles.length; i++) {
+		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int j = 0; j < bundleDeltas.length && !found; j++) {
 				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, bundleDeltas[j].getType()); //$NON-NLS-1$
-				found = bundleDeltas[j].getBundle() == allRefreshBundles[i];
+				found = bundleDeltas[j].getBundle() == description;
 			}
 			if (!found) {
-				fail("Did not find RESOLVED BundleDelta for " + allRefreshBundles[i]); //$NON-NLS-1$
+				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
 		stateDelta = state.resolve(new BundleDescription[] {f});
@@ -2116,15 +2109,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDescription[] expectedRefresh = new BundleDescription[] {c, cFrag, f};
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 3, bundleDeltas.length); //$NON-NLS-1$
-
-		for (int i = 0; i < expectedRefresh.length; i++) {
+		for (BundleDescription description : expectedRefresh) {
 			boolean found = false;
 			for (int j = 0; j < bundleDeltas.length && !found; j++) {
 				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, bundleDeltas[j].getType()); //$NON-NLS-1$
-				found = bundleDeltas[j].getBundle() == expectedRefresh[i];
+				found = bundleDeltas[j].getBundle() == description;
 			}
 			if (!found) {
-				fail("Did not find RESOLVED BundleDelta for " + expectedRefresh[i]); //$NON-NLS-1$
+				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
 	}
@@ -2151,15 +2143,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", allRefreshBundles.length, bundleDeltas.length); //$NON-NLS-1$
-
-		for (int j = 0; j < allRefreshBundles.length; j++) {
+		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int k = 0; k < bundleDeltas.length && !found; k++) {
 				assertEquals("unexpected delta type " + bundleDeltas[k], BundleDelta.RESOLVED, bundleDeltas[k].getType()); //$NON-NLS-1$
-				found = bundleDeltas[k].getBundle() == allRefreshBundles[j];
+				found = bundleDeltas[k].getBundle() == description;
 			}
 			if (!found) {
-				fail("Did not find RESOLVED BundleDelta for " + allRefreshBundles[j]); //$NON-NLS-1$
+				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
 		stateDelta = state.resolve(new BundleDescription[] {f});
@@ -2171,15 +2162,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", allRefreshBundles.length, bundleDeltas.length); //$NON-NLS-1$
-
-		for (int j = 0; j < allRefreshBundles.length; j++) {
+		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int k = 0; k < bundleDeltas.length && !found; k++) {
 				assertEquals("unexpected delta type " + bundleDeltas[k], BundleDelta.RESOLVED, bundleDeltas[k].getType()); //$NON-NLS-1$
-				found = bundleDeltas[k].getBundle() == allRefreshBundles[j];
+				found = bundleDeltas[k].getBundle() == description;
 			}
 			if (!found) {
-				fail("Did not find RESOLVED BundleDelta for " + allRefreshBundles[j]); //$NON-NLS-1$
+				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
 	}
@@ -2202,15 +2192,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", allBundles.length, bundleDeltas.length); //$NON-NLS-1$
-
-		for (int j = 0; j < allBundles.length; j++) {
+		for (BundleDescription description : allBundles) {
 			boolean found = false;
 			for (int k = 0; k < bundleDeltas.length && !found; k++) {
 				assertEquals("unexpected delta type " + bundleDeltas[k], BundleDelta.RESOLVED, bundleDeltas[k].getType()); //$NON-NLS-1$
-				found = bundleDeltas[k].getBundle() == allBundles[j];
+				found = bundleDeltas[k].getBundle() == description;
 			}
 			if (!found) {
-				fail("Did not find RESOLVED BundleDelta for " + allBundles[j]); //$NON-NLS-1$
+				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
 
@@ -2219,15 +2208,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDescription[] expectedRefresh = new BundleDescription[] {f, i};
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", expectedRefresh.length, bundleDeltas.length); //$NON-NLS-1$
-
-		for (int j = 0; j < expectedRefresh.length; j++) {
+		for (BundleDescription description : expectedRefresh) {
 			boolean found = false;
 			for (int k = 0; k < bundleDeltas.length && !found; k++) {
 				assertEquals("unexpected delta type " + bundleDeltas[k], BundleDelta.RESOLVED, bundleDeltas[k].getType()); //$NON-NLS-1$
-				found = bundleDeltas[k].getBundle() == expectedRefresh[j];
+				found = bundleDeltas[k].getBundle() == description;
 			}
 			if (!found) {
-				fail("Did not find RESOLVED BundleDelta for " + expectedRefresh[j]); //$NON-NLS-1$
+				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
 		stateDelta = state.resolve(new BundleDescription[] {i});
@@ -2256,15 +2244,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", allRefreshBundles.length, bundleDeltas.length); //$NON-NLS-1$
-
-		for (int l = 0; l < allRefreshBundles.length; l++) {
+		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int m = 0; m < bundleDeltas.length && !found; m++) {
 				assertEquals("unexpected delta type " + bundleDeltas[m], BundleDelta.RESOLVED, bundleDeltas[m].getType()); //$NON-NLS-1$
-				found = bundleDeltas[m].getBundle() == allRefreshBundles[l];
+				found = bundleDeltas[m].getBundle() == description;
 			}
 			if (!found) {
-				fail("Did not find RESOLVED BundleDelta for " + allRefreshBundles[l]); //$NON-NLS-1$
+				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
 
@@ -2273,15 +2260,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDescription[] expectedRefresh = new BundleDescription[] {f, i};
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", expectedRefresh.length, bundleDeltas.length); //$NON-NLS-1$
-
-		for (int l = 0; l < expectedRefresh.length; l++) {
+		for (BundleDescription description : expectedRefresh) {
 			boolean found = false;
 			for (int m = 0; m < bundleDeltas.length && !found; m++) {
 				assertEquals("unexpected delta type " + bundleDeltas[m], BundleDelta.RESOLVED, bundleDeltas[m].getType()); //$NON-NLS-1$
-				found = bundleDeltas[m].getBundle() == expectedRefresh[l];
+				found = bundleDeltas[m].getBundle() == description;
 			}
 			if (!found) {
-				fail("Did not find RESOLVED BundleDelta for " + expectedRefresh[l]); //$NON-NLS-1$
+				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
 		stateDelta = state.resolve(new BundleDescription[] {i});
@@ -2314,15 +2300,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", allRefreshBundles.length, bundleDeltas.length); //$NON-NLS-1$
-
-		for (int k = 0; k < allRefreshBundles.length; k++) {
+		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int l = 0; l < bundleDeltas.length && !found; l++) {
 				assertEquals("unexpected delta type " + bundleDeltas[l], BundleDelta.RESOLVED, bundleDeltas[l].getType()); //$NON-NLS-1$
-				found = bundleDeltas[l].getBundle() == allRefreshBundles[k];
+				found = bundleDeltas[l].getBundle() == description;
 			}
 			if (!found) {
-				fail("Did not find RESOLVED BundleDelta for " + allRefreshBundles[k]); //$NON-NLS-1$
+				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
 		stateDelta = state.resolve(new BundleDescription[] {i});
@@ -2334,15 +2319,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", allRefreshBundles.length, bundleDeltas.length); //$NON-NLS-1$
-
-		for (int k = 0; k < allRefreshBundles.length; k++) {
+		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int l = 0; l < bundleDeltas.length && !found; l++) {
 				assertEquals("unexpected delta type " + bundleDeltas[l], BundleDelta.RESOLVED, bundleDeltas[l].getType()); //$NON-NLS-1$
-				found = bundleDeltas[l].getBundle() == allRefreshBundles[k];
+				found = bundleDeltas[l].getBundle() == description;
 			}
 			if (!found) {
-				fail("Did not find RESOLVED BundleDelta for " + allRefreshBundles[k]); //$NON-NLS-1$
+				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
 	}
@@ -2604,13 +2588,13 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		ExportPackageDescription[] expected = new ExportPackageDescription[aExported.length + dExported.length];
 		System.arraycopy(aExported, 0, expected, 0, aExported.length);
 		System.arraycopy(dExported, 0, expected, aExported.length, dExported.length);
-		for (int index = 0; index < expected.length; index++) {
-			assertContains("eVisible not correct", eVisible, expected[index]); //$NON-NLS-1$
-			assertContains("fVisible not correct", fVisible, expected[index]); //$NON-NLS-1$
-			assertContains("gVisible not correct", gVisible, expected[index]); //$NON-NLS-1$
-			assertContains("hVisible not correct", hVisible, expected[index]); //$NON-NLS-1$
-			assertContains("iVisible not correct", iVisible, expected[index]); //$NON-NLS-1$
-			assertContains("jVisible not correct", jVisible, expected[index]); //$NON-NLS-1$
+		for (ExportPackageDescription exportDescription : expected) {
+			assertContains("eVisible not correct", eVisible, exportDescription); //$NON-NLS-1$
+			assertContains("fVisible not correct", fVisible, exportDescription); //$NON-NLS-1$
+			assertContains("gVisible not correct", gVisible, exportDescription); //$NON-NLS-1$
+			assertContains("hVisible not correct", hVisible, exportDescription); //$NON-NLS-1$
+			assertContains("iVisible not correct", iVisible, exportDescription); //$NON-NLS-1$
+			assertContains("jVisible not correct", jVisible, exportDescription); //$NON-NLS-1$
 		}
 	}
 
@@ -2709,19 +2693,19 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		System.arraycopy(aExported, 0, efExpected, 0, aExported.length);
 		System.arraycopy(dExported, 0, efExpected, aExported.length, dExported.length);
 		efExpected[aExported.length + dExported.length] = l.getSelectedExports()[1];
-		for (int index = 0; index < efExpected.length; index++) {
-			assertContains("eVisible not correct", eVisible, efExpected[index]); //$NON-NLS-1$
-			assertContains("fVisible not correct", fVisible, efExpected[index]); //$NON-NLS-1$
+		for (ExportPackageDescription efExport : efExpected) {
+			assertContains("eVisible not correct", eVisible, efExport); //$NON-NLS-1$
+			assertContains("fVisible not correct", fVisible, efExport); //$NON-NLS-1$
 		}
 
 		ExportPackageDescription[] ghijExpected = new ExportPackageDescription[aExported.length + dExported.length];
 		System.arraycopy(aExported, 0, ghijExpected, 0, aExported.length);
 		System.arraycopy(dExported, 0, ghijExpected, aExported.length, dExported.length);
-		for (int index = 0; index < ghijExpected.length; index++) {
-			assertContains("gVisible not correct", gVisible, ghijExpected[index]); //$NON-NLS-1$
-			assertContains("hVisible not correct", hVisible, ghijExpected[index]); //$NON-NLS-1$
-			assertContains("iVisible not correct", iVisible, ghijExpected[index]); //$NON-NLS-1$
-			assertContains("jVisible not correct", jVisible, ghijExpected[index]); //$NON-NLS-1$
+		for (ExportPackageDescription ghijExport : ghijExpected) {
+			assertContains("gVisible not correct", gVisible, ghijExport); //$NON-NLS-1$
+			assertContains("hVisible not correct", hVisible, ghijExport); //$NON-NLS-1$
+			assertContains("iVisible not correct", iVisible, ghijExport); //$NON-NLS-1$
+			assertContains("jVisible not correct", jVisible, ghijExport); //$NON-NLS-1$
 		}
 
 		ExportPackageDescription[] lExported = l.getSelectedExports();
@@ -2729,9 +2713,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		System.arraycopy(aExported, 0, mnExpected, 0, aExported.length);
 		System.arraycopy(dExported, 0, mnExpected, aExported.length, dExported.length);
 		System.arraycopy(lExported, 0, mnExpected, aExported.length + dExported.length, lExported.length);
-		for (int index = 0; index < mnExpected.length; index++) {
-			assertContains("mVisible not correct", mVisible, mnExpected[index]); //$NON-NLS-1$
-			assertContains("nVisible not correct", nVisible, mnExpected[index]); //$NON-NLS-1$
+		for (ExportPackageDescription mnExport : mnExpected) {
+			assertContains("mVisible not correct", mVisible, mnExport); //$NON-NLS-1$
+			assertContains("nVisible not correct", nVisible, mnExport); //$NON-NLS-1$
 		}
 	}
 

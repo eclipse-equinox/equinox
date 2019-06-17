@@ -764,15 +764,17 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			if (infos.length == 0)
 				return Collections.emptyMap();
 			Map<X509Certificate, List<X509Certificate>> results = new HashMap<>(infos.length);
-			for (int i = 0; i < infos.length; i++) {
-				if (signersType == SIGNERS_TRUSTED && !infos[i].isTrusted())
+			for (SignerInfo info : infos) {
+				if (signersType == SIGNERS_TRUSTED && !info.isTrusted()) {
 					continue;
-				Certificate[] certs = infos[i].getCertificateChain();
+				}
+				Certificate[] certs = info.getCertificateChain();
 				if (certs == null || certs.length == 0)
 					continue;
 				List<X509Certificate> certChain = new ArrayList<>();
-				for (int j = 0; j < certs.length; j++)
-					certChain.add((X509Certificate) certs[j]);
+				for (Certificate cert : certs) {
+					certChain.add((X509Certificate) cert);
+				}
 				results.put((X509Certificate) certs[0], certChain);
 			}
 			return results;

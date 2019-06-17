@@ -90,8 +90,9 @@ class DigestedInputStream extends FilterInputStream {
 			return -1;
 		int c = super.read();
 		if (c != -1) {
-			for (int i = 0; i < digests.length; i++)
-				digests[i].update((byte) c);
+			for (MessageDigest digest : digests) {
+				digest.update((byte) c);
+			}
 			remaining--;
 		} else {
 			// We hit eof so set remaining to zero
@@ -127,8 +128,9 @@ class DigestedInputStream extends FilterInputStream {
 			return -1;
 		int rc = super.read(b, off, len);
 		if (rc != -1) {
-			for (int i = 0; i < digests.length; i++)
-				digests[i].update(b, off, rc);
+			for (MessageDigest digest : digests) {
+				digest.update(b, off, rc);
+			}
 			remaining -= rc;
 		} else {
 			// We hit eof so set remaining to zero

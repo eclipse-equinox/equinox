@@ -13,7 +13,15 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.datalocation;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Platform;
@@ -59,16 +67,16 @@ public class StreamManagerTests extends OSGiTest {
 			System.setProperty("osgi.useReliableFiles", reliableFile);
 	}
 
-	private void rm(File file) {
-		if (file.isDirectory()) {
-			File[] list = file.listFiles();
-			if (list != null) {
-				for (int idx = 0; idx < list.length; idx++) {
-					rm(list[idx]);
+	private void rm(File folder) {
+		if (folder.isDirectory()) {
+			File[] files = folder.listFiles();
+			if (files != null) {
+				for (File file : files) {
+					rm(file);
 				}
 			}
 		}
-		file.delete();
+		folder.delete();
 	}
 
 	private String getInputStreamContents(InputStream is) throws IOException {
@@ -161,9 +169,10 @@ public class StreamManagerTests extends OSGiTest {
 			//now request only the primary file
 			try {
 				InputStream[] isSet = manager1.getInputStreamSet(new String[] {fileName});
-				for (int i = 0; i < isSet.length; i++) {
-					if (isSet[i] != null)
-						isSet[i].close();
+				for (InputStream set : isSet) {
+					if (set != null) {
+						set.close();
+					}
 				}
 				fail("getInputStreamSet was successful");
 			} catch (IOException e) {

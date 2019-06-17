@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -161,23 +160,27 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 
 	void clearWires() {
 		ResolverImport[] allImports = getImportPackages();
-		for (int i = 0; i < allImports.length; i++)
-			allImports[i].clearPossibleSuppliers();
+		for (ResolverImport allImport : allImports) {
+			allImport.clearPossibleSuppliers();
+		}
 
 		if (host != null)
 			host.clearPossibleSuppliers();
 
 		BundleConstraint[] allRequires = getRequires();
-		for (int i = 0; i < allRequires.length; i++)
-			allRequires[i].clearPossibleSuppliers();
+		for (BundleConstraint allRequire : allRequires) {
+			allRequire.clearPossibleSuppliers();
+		}
 
 		GenericConstraint[] allGenericRequires = getGenericRequires();
-		for (int i = 0; i < allGenericRequires.length; i++)
-			allGenericRequires[i].clearPossibleSuppliers();
+		for (GenericConstraint allGenericRequire : allGenericRequires) {
+			allGenericRequire.clearPossibleSuppliers();
+		}
 
 		ResolverExport[] allExports = getExportPackages();
-		for (int i = 0; i < allExports.length; i++)
-			allExports[i].setSubstitute(null);
+		for (ResolverExport allExport : allExports) {
+			allExport.setSubstitute(null);
+		}
 	}
 
 	boolean isResolved() {
@@ -232,17 +235,20 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 	private ResolverExport[] getExports(boolean selected) {
 		ResolverExport[] results = getExportPackages();
 		int removedExports = 0;
-		for (int i = 0; i < results.length; i++)
-			if (selected ? results[i].getSubstitute() != null : results[i].getSubstitute() == null)
+		for (ResolverExport result : results) {
+			if (selected ? result.getSubstitute() != null : result.getSubstitute() == null) {
 				removedExports++;
+			}
+		}
 		if (removedExports == 0)
 			return results;
 		ResolverExport[] selectedExports = new ResolverExport[results.length - removedExports];
 		int index = 0;
-		for (int i = 0; i < results.length; i++) {
-			if (selected ? results[i].getSubstitute() != null : results[i].getSubstitute() == null)
+		for (ResolverExport result : results) {
+			if (selected ? result.getSubstitute() != null : result.getSubstitute() == null) {
 				continue;
-			selectedExports[index] = results[i];
+			}
+			selectedExports[index] = result;
 			index++;
 		}
 		return selectedExports;
@@ -275,9 +281,11 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 
 	BundleConstraint getRequire(String name) {
 		BundleConstraint[] allRequires = getRequires();
-		for (int i = 0; i < allRequires.length; i++)
-			if (allRequires[i].getVersionConstraint().getName().equals(name))
-				return allRequires[i];
+		for (BundleConstraint allRequire : allRequires) {
+			if (allRequire.getVersionConstraint().getName().equals(name)) {
+				return allRequire;
+			}
+		}
 		return null;
 	}
 
@@ -293,9 +301,9 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 
 	ResolverImport getImport(String name) {
 		ResolverImport[] allImports = getImportPackages();
-		for (int i = 0; i < allImports.length; i++) {
-			if (allImports[i].getName().equals(name)) {
-				return allImports[i];
+		for (ResolverImport allImport : allImports) {
+			if (allImport.getName().equals(name)) {
+				return allImport;
 			}
 		}
 		return null;
@@ -323,9 +331,11 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 
 	private boolean isImported(String packageName) {
 		ResolverImport[] allImports = getImportPackages();
-		for (int i = 0; i < allImports.length; i++)
-			if (packageName.equals(allImports[i].getName()))
+		for (ResolverImport allImport : allImports) {
+			if (packageName.equals(allImport.getName())) {
 				return true;
+			}
+		}
 
 		return false;
 	}
@@ -355,10 +365,9 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 			fragment.setNewFragmentExports(true);
 
 		initFragments();
-		// need to make sure there is not already another version of this fragment 
+		// need to make sure there is not already another version of this fragment
 		// already attached to this host
-		for (Iterator<ResolverBundle> iFragments = fragments.iterator(); iFragments.hasNext();) {
-			ResolverBundle existingFragment = iFragments.next();
+		for (ResolverBundle existingFragment : fragments) {
 			String bsn = existingFragment.getName();
 			if (bsn != null && bsn.equals(fragment.getName()))
 				return;
@@ -370,26 +379,30 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 
 		if (newImports.length > 0) {
 			ArrayList<ResolverImport> hostImports = new ArrayList<>(newImports.length);
-			for (int i = 0; i < newImports.length; i++)
-				if (!isImported(newImports[i].getName()))
-					hostImports.add(new ResolverImport(this, newImports[i]));
+			for (ImportPackageSpecification newImport : newImports) {
+				if (!isImported(newImport.getName())) {
+					hostImports.add(new ResolverImport(this, newImport));
+				}
+			}
 			fragmentImports.put(fragment.bundleID, hostImports);
 		}
 
 		if (newRequires.length > 0) {
 			ArrayList<BundleConstraint> hostRequires = new ArrayList<>(newRequires.length);
-			for (int i = 0; i < newRequires.length; i++)
-				if (!isRequired(newRequires[i].getName()))
-					hostRequires.add(new BundleConstraint(this, newRequires[i]));
+			for (BundleSpecification newRequire : newRequires) {
+				if (!isRequired(newRequire.getName())) {
+					hostRequires.add(new BundleConstraint(this, newRequire));
+				}
+			}
 			fragmentRequires.put(fragment.bundleID, hostRequires);
 		}
 
 		if (newGenericRequires.length > 0) {
 			ArrayList<GenericConstraint> hostGenericRequires = new ArrayList<>(newGenericRequires.length);
-			for (int i = 0; i < newGenericRequires.length; i++) {
+			for (GenericSpecification newGenericRequire : newGenericRequires) {
 				// only add namespaces that are not osgi.ee
-				if (!StateImpl.OSGI_EE_NAMESPACE.equals(newGenericRequires[i].getType())) {
-					hostGenericRequires.add(new GenericConstraint(this, newGenericRequires[i], resolver.isDevelopmentMode()));
+				if (!StateImpl.OSGI_EE_NAMESPACE.equals(newGenericRequire.getType())) {
+					hostGenericRequires.add(new GenericConstraint(this, newGenericRequire, resolver.isDevelopmentMode()));
 				}
 			}
 			if (!hostGenericRequires.isEmpty())
@@ -398,15 +411,16 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 
 		ArrayList<ResolverExport> hostExports = new ArrayList<>(newExports.length);
 		if (newExports.length > 0 && dynamicAttach) {
-			for (int i = 0; i < newExports.length; i++) {
-				ResolverExport currentExports[] = getExports(newExports[i].getName());
+			for (ExportPackageDescription newExport : newExports) {
+				ResolverExport[] currentExports = getExports(newExport.getName());
 				boolean foundEquivalent = false;
 				for (int j = 0; j < currentExports.length && !foundEquivalent; j++) {
-					if (equivalentExports(currentExports[j], newExports[i]))
+					if (equivalentExports(currentExports[j], newExport)) {
 						foundEquivalent = true;
+					}
 				}
 				if (!foundEquivalent) {
-					ExportPackageDescription hostExport = new ExportPackageDescriptionImpl(getBundleDescription(), newExports[i]);
+					ExportPackageDescription hostExport = new ExportPackageDescriptionImpl(getBundleDescription(), newExport);
 					hostExports.add(new ResolverExport(this, hostExport));
 				}
 			}
@@ -453,8 +467,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 			return false;
 		if (exactMatch && existingDirectives.size() != newDirectives.size())
 			return false;
-		for (Iterator<Entry<String, Object>> entries = existingDirectives.entrySet().iterator(); entries.hasNext();) {
-			Entry<String, Object> entry = entries.next();
+		for (Entry<String, Object> entry : existingDirectives.entrySet()) {
 			Object newValue = newDirectives.get(entry.getKey());
 			if (newValue == null || entry.getValue().getClass() != newValue.getClass())
 				return false;
@@ -473,20 +486,20 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 		// if the host is resolved then the fragment is not allowed to add new constraints;
 		// if the host is resolved and it already has a constraint of the same name then ensure the supplier satisfies the fragment's constraint
 		boolean result = false;
-		for (int i = 0; i < newImports.length; i++) {
-			ResolverImport hostImport = getImport(newImports[i].getName());
+		for (ImportPackageSpecification newImport : newImports) {
+			ResolverImport hostImport = getImport(newImport.getName());
 			ResolverExport resolvedExport = (ResolverExport) (hostImport == null ? null : hostImport.getSelectedSupplier());
-			if (importPackageConflict(resolvedExport, newImports[i])) {
+			if (importPackageConflict(resolvedExport, newImport)) {
 				result = true;
-				resolver.getState().addResolverError(fragment, ResolverError.FRAGMENT_CONFLICT, newImports[i].toString(), newImports[i]);
+				resolver.getState().addResolverError(fragment, ResolverError.FRAGMENT_CONFLICT, newImport.toString(), newImport);
 			}
 		}
-		for (int i = 0; i < newRequires.length; i++) {
-			BundleConstraint hostRequire = getRequire(newRequires[i].getName());
+		for (BundleSpecification newRequire : newRequires) {
+			BundleConstraint hostRequire = getRequire(newRequire.getName());
 			ResolverBundle resolvedRequire = (ResolverBundle) (hostRequire == null ? null : hostRequire.getSelectedSupplier());
-			if ((resolvedRequire == null && isResolved()) || (resolvedRequire != null && !newRequires[i].isSatisfiedBy(resolvedRequire.getBundleDescription()))) {
+			if ((resolvedRequire == null && isResolved()) || (resolvedRequire != null && !newRequire.isSatisfiedBy(resolvedRequire.getBundleDescription()))) {
 				result = true;
-				resolver.getState().addResolverError(fragment, ResolverError.FRAGMENT_CONFLICT, newRequires[i].toString(), newRequires[i]);
+				resolver.getState().addResolverError(fragment, ResolverError.FRAGMENT_CONFLICT, newRequire.toString(), newRequire);
 			}
 		}
 		// generic constraints cannot conflict; 
@@ -586,9 +599,10 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 			}
 		}
 		ResolverExport[] results = removedExports == null ? new ResolverExport[0] : removedExports.toArray(new ResolverExport[removedExports.size()]);
-		for (int i = 0; i < results.length; i++)
+		for (ResolverExport result : results) {
 			// TODO this is a hack; need to figure out how to indicate that a fragment export is no longer attached
-			results[i].setSubstitute(results[i]);
+			result.setSubstitute(result);
+		}
 		resolver.getResolverExports().remove(results);
 		if (removedCapabilities != null)
 			resolver.removeGenerics(removedCapabilities.toArray(new GenericCapability[removedCapabilities.size()]));
@@ -602,31 +616,34 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 			constraints = remainingFragImports;
 		else
 			constraints = remainingFragRequires;
-		for (int i = 0; i < constraints.length; i++)
-			if (reason.getName().equals(constraints[i].getName())) {
+		for (VersionConstraint constraint : constraints) {
+			if (reason.getName().equals(constraint.getName())) {
 				detachFragment(remainingFragment, reason);
 				return true;
 			}
-		for (int i = 0; i < oldImports.length; i++) {
-			if (oldImports[i].getVersionConstraint().getBundle() != detachedFragment.getBundleDescription())
+		}
+		for (ResolverImport oldImport : oldImports) {
+			if (oldImport.getVersionConstraint().getBundle() != detachedFragment.getBundleDescription()) {
 				continue; // the constraint is not from the detached fragment
-			for (int j = 0; j < remainingFragImports.length; j++) {
-				if (oldImports[i].getName().equals(remainingFragImports[j].getName())) {
+			}
+			for (ImportPackageSpecification remainingFragImport : remainingFragImports) {
+				if (oldImport.getName().equals(remainingFragImport.getName())) {
 					// same constraint, must reuse the constraint object but swap out the fragment info
-					additionalImports.add(oldImports[i]);
-					oldImports[i].setVersionConstraint(remainingFragImports[j]);
+					additionalImports.add(oldImport);
+					oldImport.setVersionConstraint(remainingFragImport);
 					break;
 				}
 			}
 		}
-		for (int i = 0; i < oldRequires.length; i++) {
-			if (oldRequires[i].getVersionConstraint().getBundle() != detachedFragment.getBundleDescription())
+		for (BundleConstraint oldRequire : oldRequires) {
+			if (oldRequire.getVersionConstraint().getBundle() != detachedFragment.getBundleDescription()) {
 				continue; // the constraint is not from the detached fragment
-			for (int j = 0; j < remainingFragRequires.length; j++) {
-				if (oldRequires[i].getName().equals(remainingFragRequires[j].getName())) {
+			}
+			for (BundleSpecification remainingFragRequire : remainingFragRequires) {
+				if (oldRequire.getName().equals(remainingFragRequire.getName())) {
 					// same constraint, must reuse the constraint object but swap out the fragment info
-					additionalRequires.add(oldRequires[i]);
-					oldRequires[i].setVersionConstraint(remainingFragRequires[j]);
+					additionalRequires.add(oldRequire);
+					oldRequire.setVersionConstraint(remainingFragRequire);
 					break;
 				}
 			}
@@ -638,8 +655,9 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 		if (fragments == null)
 			return;
 		ResolverBundle[] allFragments = fragments.toArray(new ResolverBundle[fragments.size()]);
-		for (int i = 0; i < allFragments.length; i++)
-			detachFragment(allFragments[i], null);
+		for (ResolverBundle allFragment : allFragments) {
+			detachFragment(allFragment, null);
+		}
 		fragments = null;
 	}
 

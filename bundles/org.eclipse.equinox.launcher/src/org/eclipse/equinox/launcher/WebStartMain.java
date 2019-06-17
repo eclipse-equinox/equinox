@@ -310,18 +310,15 @@ public class WebStartMain extends Main {
 	private void buildOSGiBundleList() {
 		StringBuilder finalBundleList = new StringBuilder(allBundles.size() * 30);
 		//First go through all the bundles of the bundle
-		for (Iterator<BundleInfo> iterator = bundleList.iterator(); iterator.hasNext();) {
-			BundleInfo searched = iterator.next();
+		for (BundleInfo searched : bundleList) {
 			BundleInfo found = findBundle(searched.bsn, searched.version, true);
 			if (found != null)
 				finalBundleList.append(REFERENCE_SCHEME).append(found.location).append(searched.startData).append(',');
 		}
 
 		if (!Boolean.FALSE.toString().equalsIgnoreCase(System.getProperties().getProperty(PROP_WEBSTART_AUTOMATIC_INSTALLATION))) {
-			for (Iterator<List<BundleInfo>> iterator = allBundles.values().iterator(); iterator.hasNext();) {
-				List<BundleInfo> toAdd = iterator.next();
-				for (Iterator<BundleInfo> iterator2 = toAdd.iterator(); iterator2.hasNext();) {
-					BundleInfo bi = iterator2.next();
+			for (List<BundleInfo> toAdd : allBundles.values()) {
+				for (BundleInfo bi : toAdd) {
 					finalBundleList.append(REFERENCE_SCHEME).append(bi.location).append(',');
 				}
 			}

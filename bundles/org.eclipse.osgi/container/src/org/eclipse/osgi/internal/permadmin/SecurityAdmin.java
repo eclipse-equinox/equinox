@@ -112,11 +112,11 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			permAdminDefaults = new PermissionInfoCollection(defaultInfos);
 		String[] locations = permissionStorage.getLocations();
 		if (locations != null) {
-			for (int i = 0; i < locations.length; i++) {
-				String[] encodedLocationInfos = permissionStorage.getPermissionData(locations[i]);
+			for (String location : locations) {
+				String[] encodedLocationInfos = permissionStorage.getPermissionData(location);
 				if (encodedLocationInfos != null) {
 					PermissionInfo[] locationInfos = getPermissionInfos(encodedLocationInfos);
-					permAdminTable.setPermissions(locations[i], locationInfos);
+					permAdminTable.setPermissions(location, locationInfos);
 				}
 			}
 		}
@@ -453,10 +453,12 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			permAdminCollections = permAdminTable.getCollections();
 			condAdminRows = condAdminTable.getRows();
 		}
-		for (int i = 0; i < permAdminCollections.length; i++)
-			permAdminCollections[i].clearPermissionCache();
-		for (int i = 0; i < condAdminRows.length; i++)
-			condAdminRows[i].clearCaches();
+		for (PermissionInfoCollection permAdminCollection : permAdminCollections) {
+			permAdminCollection.clearPermissionCache();
+		}
+		for (SecurityRow condAdminRow : condAdminRows) {
+			condAdminRow.clearCaches();
+		}
 		condAdminTable.clearEvaluationCache();
 	}
 
@@ -516,8 +518,8 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 
 	private static Bundle createMockBundle(String[] signers) {
 		Map<X509Certificate, List<X509Certificate>> signersMap = new HashMap<>();
-		for (int i = 0; i < signers.length; i++) {
-			List<String> chain = parseDNchain(signers[i]);
+		for (String signer : signers) {
+			List<String> chain = parseDNchain(signer);
 			List<X509Certificate> signersList = new ArrayList<>();
 			Principal subject = null, issuer = null;
 			X509Certificate first = null;

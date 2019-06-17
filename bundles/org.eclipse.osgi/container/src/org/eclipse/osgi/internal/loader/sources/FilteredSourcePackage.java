@@ -74,18 +74,21 @@ public class FilteredSourcePackage extends SingleSourcePackage {
 	}
 
 	private boolean isInList(String name, String[] list) {
-		for (int i = 0; i < list.length; i++) {
-			int len = list[i].length();
+		for (String s : list) {
+			int len = s.length();
 			if (len == 0)
 				continue;
-			if (list[i].charAt(0) == ALL && len == 1)
+			if (s.charAt(0) == ALL && len == 1) {
 				return true; // handles "*" wild card
-			if (list[i].charAt(len - 1) == ALL)
-				if (name.startsWith(list[i].substring(0, len - 1)))
+			}
+			if (s.charAt(len - 1) == ALL) {
+				if (name.startsWith(s.substring(0, len - 1))) {
 					return true;
-			if (name.equals(list[i]))
+				}
+			}
+			if (name.equals(s)) {
 				return true;
-
+			}
 		}
 		return false;
 	}

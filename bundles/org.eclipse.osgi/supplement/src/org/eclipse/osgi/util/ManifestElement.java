@@ -608,11 +608,11 @@ public class ManifestElement {
 	private void addValues(boolean directive, String key, String[] values, StringBuffer result) {
 		if (values == null)
 			return;
-		for (int i = 0; i < values.length; i++) {
+		for (String value : values) {
 			result.append(';').append(key);
 			if (directive)
 				result.append(':');
-			result.append("=\"").append(values[i]).append('\"'); //$NON-NLS-1$			
+			result.append("=\"").append(value).append('\"'); //$NON-NLS-1$
 		}
 	}
 }

@@ -110,19 +110,19 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 		}
 		ServiceReference<ContentHandler>[] serviceReferences = contentHandlerTracker.getServiceReferences();
 		if (serviceReferences != null) {
-			for (int i = 0; i < serviceReferences.length; i++) {
-				Object prop = serviceReferences[i].getProperty(URLConstants.URL_CONTENT_MIMETYPE);
+			for (ServiceReference<ContentHandler> serviceReference : serviceReferences) {
+				Object prop = serviceReference.getProperty(URLConstants.URL_CONTENT_MIMETYPE);
 				if (prop instanceof String)
 					prop = new String[] {(String) prop}; // TODO should this be a warning?
 				if (!(prop instanceof String[])) {
-					String message = NLS.bind(Msg.URL_HANDLER_INCORRECT_TYPE, new Object[] {URLConstants.URL_CONTENT_MIMETYPE, contentHandlerClazz, serviceReferences[i].getBundle()});
+					String message = NLS.bind(Msg.URL_HANDLER_INCORRECT_TYPE, new Object[]{URLConstants.URL_CONTENT_MIMETYPE, contentHandlerClazz, serviceReference.getBundle()});
 					container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, message, null);
 					continue;
 				}
 				String[] contentHandler = (String[]) prop;
-				for (int j = 0; j < contentHandler.length; j++) {
-					if (contentHandler[j].equals(contentType)) {
-						proxy = new ContentHandlerProxy(contentType, serviceReferences[i], context);
+				for (String typename : contentHandler) {
+					if (typename.equals(contentType)) {
+						proxy = new ContentHandlerProxy(contentType, serviceReference, context);
 						proxies.put(contentType, proxy);
 						return (proxy);
 					}

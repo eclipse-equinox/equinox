@@ -170,9 +170,10 @@ public class SecurityTable extends PermissionCollection {
 	}
 
 	SecurityRow getRow(String name) {
-		for (int i = 0; i < rows.length; i++) {
-			if (name.equals(rows[i].getName()))
-				return rows[i];
+		for (SecurityRow row : rows) {
+			if (name.equals(row.getName())) {
+				return row;
+			}
 		}
 		return null;
 	}

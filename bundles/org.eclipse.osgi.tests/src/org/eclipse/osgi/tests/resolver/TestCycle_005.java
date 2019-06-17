@@ -56,8 +56,7 @@ public class TestCycle_005 extends AbstractStateTest {
 		ExportPackageDescription[] exports = bundle_2.getResolvedImports();
 		assertNotNull("export array is unexpectedly null", exports);
 		assertTrue("export array is unexpectedly empty", exports.length > 0);
-		for (int i = 0; i < exports.length; i++) {
-			ExportPackageDescription exp = exports[i];
+		for (ExportPackageDescription exp : exports) {
 			String exportPackageName = exp.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("q")) {
@@ -71,8 +70,7 @@ public class TestCycle_005 extends AbstractStateTest {
 		ExportPackageDescription[] exports = bundle_3.getResolvedImports();
 		assertNotNull("export array is unexpectedly null", exports);
 		assertTrue("export array is unexpectedly empty", exports.length > 0);
-		for (int i = 0; i < exports.length; i++) {
-			ExportPackageDescription exp = exports[i];
+		for (ExportPackageDescription exp : exports) {
 			String exportPackageName = exp.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("r")) {

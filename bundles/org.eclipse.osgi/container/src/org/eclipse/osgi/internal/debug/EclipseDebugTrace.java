@@ -526,8 +526,8 @@ class EclipseDebugTrace implements DebugTrace {
 		writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_VERBOSE_COMMENT + debugOptions.isVerbose());
 		writeComment(traceWriter, "The following option strings are specified for this debug session:"); //$NON-NLS-1$ 
 		final String[] allOptions = debugOptions.getAllOptions();
-		for (int i = 0; i < allOptions.length; i++) {
-			writeComment(traceWriter, "\t" + allOptions[i]); //$NON-NLS-1$
+		for (String allOption : allOptions) {
+			writeComment(traceWriter, "\t" + allOption); //$NON-NLS-1$
 		}
 	}
 

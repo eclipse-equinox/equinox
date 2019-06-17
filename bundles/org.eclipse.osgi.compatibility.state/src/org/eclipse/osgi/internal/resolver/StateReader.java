@@ -249,8 +249,9 @@ final class StateReader {
 		if (hostSpec != null) {
 			BundleDescription[] hosts = hostSpec.getHosts();
 			if (hosts != null) {
-				for (int i = 0; i < hosts.length; i++)
-					((BundleDescriptionImpl) hosts[i]).addDependency(result, false);
+				for (BundleDescription host : hosts) {
+					((BundleDescriptionImpl) host).addDependency(result, false);
+				}
 			}
 		}
 		// the rest is lazy loaded data
@@ -612,8 +613,7 @@ final class StateReader {
 		Map<String, Object> mapAttrs = readMap(in);
 		Dictionary<String, Object> attrs = new Hashtable<>();
 		if (mapAttrs != null) {
-			for (Iterator<String> keys = mapAttrs.keySet().iterator(); keys.hasNext();) {
-				String key = keys.next();
+			for (String key : mapAttrs.keySet()) {
 				attrs.put(key, mapAttrs.get(key));
 			}
 		}

@@ -164,19 +164,19 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 		ServiceReference<URLStreamHandlerService>[] serviceReferences = handlerTracker.getServiceReferences();
 		if (serviceReferences == null)
 			return null;
-		for (int i = 0; i < serviceReferences.length; i++) {
-			Object prop = serviceReferences[i].getProperty(URLConstants.URL_HANDLER_PROTOCOL);
+		for (ServiceReference<URLStreamHandlerService> serviceReference : serviceReferences) {
+			Object prop = serviceReference.getProperty(URLConstants.URL_HANDLER_PROTOCOL);
 			if (prop instanceof String)
 				prop = new String[] {(String) prop}; // TODO should this be a warning?
 			if (!(prop instanceof String[])) {
-				String message = NLS.bind(Msg.URL_HANDLER_INCORRECT_TYPE, new Object[] {URLConstants.URL_HANDLER_PROTOCOL, URLSTREAMHANDLERCLASS, serviceReferences[i].getBundle()});
+				String message = NLS.bind(Msg.URL_HANDLER_INCORRECT_TYPE, new Object[]{URLConstants.URL_HANDLER_PROTOCOL, URLSTREAMHANDLERCLASS, serviceReference.getBundle()});
 				container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, message, null);
 				continue;
 			}
 			String[] protocols = (String[]) prop;
-			for (int j = 0; j < protocols.length; j++) {
-				if (protocols[j].equals(protocol)) {
-					handler = new URLStreamHandlerProxy(protocol, serviceReferences[i], context);
+			for (String candidateProtocol : protocols) {
+				if (candidateProtocol.equals(protocol)) {
+					handler = new URLStreamHandlerProxy(protocol, serviceReference, context);
 					proxies.put(protocol, handler);
 					return (handler);
 				}

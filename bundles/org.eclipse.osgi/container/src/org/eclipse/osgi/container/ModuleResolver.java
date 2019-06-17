@@ -894,8 +894,7 @@ final class ModuleResolver {
 				List<ModuleCapability> candidates = moduleDatabase.findCapabilities(fragmentRequirement);
 				// filter out disabled fragments and singletons
 				filterDisabled(candidates.listIterator());
-				for (Iterator<ModuleCapability> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
-					ModuleCapability candidate = iCandidates.next();
+				for (ModuleCapability candidate : candidates) {
 					ModuleRequirement hostReq = candidate.getRevision().getModuleRequirements(HostNamespace.HOST_NAMESPACE).get(0);
 					for (ModuleCapability hostCap : hostCaps) {
 						if (hostReq.matches(hostCap)) {

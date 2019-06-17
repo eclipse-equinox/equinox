@@ -33,8 +33,8 @@ public class MultiSourcePackage extends PackageSource {
 	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		Class<?> result = null;
-		for (int i = 0; i < suppliers.length; i++) {
-			result = suppliers[i].loadClass(name);
+		for (SingleSourcePackage supplier : suppliers) {
+			result = supplier.loadClass(name);
 			if (result != null)
 				return result;
 		}
@@ -44,8 +44,8 @@ public class MultiSourcePackage extends PackageSource {
 	@Override
 	public URL getResource(String name) {
 		URL result = null;
-		for (int i = 0; i < suppliers.length; i++) {
-			result = suppliers[i].getResource(name);
+		for (SingleSourcePackage supplier : suppliers) {
+			result = supplier.getResource(name);
 			if (result != null)
 				return result;
 		}
@@ -55,8 +55,9 @@ public class MultiSourcePackage extends PackageSource {
 	@Override
 	public Enumeration<URL> getResources(String name) {
 		Enumeration<URL> results = null;
-		for (int i = 0; i < suppliers.length; i++)
-			results = BundleLoader.compoundEnumerations(results, suppliers[i].getResources(name));
+		for (SingleSourcePackage supplier : suppliers) {
+			results = BundleLoader.compoundEnumerations(results, supplier.getResources(name));
+		}
 		return results;
 	}
 

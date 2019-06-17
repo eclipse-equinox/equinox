@@ -73,24 +73,26 @@ class StateWriter {
 		writePlatformProp(platformPropKeys, out);
 		Dictionary<Object, Object>[] propSet = state.getPlatformProperties();
 		out.writeInt(propSet.length);
-		for (int i = 0; i < propSet.length; i++) {
-			Dictionary<Object, Object> props = propSet[i];
+		for (Dictionary<Object, Object> props : propSet) {
 			out.writeInt(platformPropKeys.length);
-			for (int j = 0; j < platformPropKeys.length; j++)
-				writePlatformProp(props.get(platformPropKeys[j]), out);
+			for (String platformPropKey : platformPropKeys) {
+				writePlatformProp(props.get(platformPropKey), out);
+			}
 		}
 		BundleDescription[] bundles = state.getBundles();
 		StateHelperImpl.getInstance().sortBundles(bundles);
 		out.writeInt(bundles.length);
 		if (bundles.length == 0)
 			return;
-		for (int i = 0; i < bundles.length; i++)
-			writeBundleDescription(bundles[i], out, false);
+		for (BundleDescription bundle : bundles) {
+			writeBundleDescription(bundle, out, false);
+		}
 		out.writeBoolean(state.isResolved());
 		// save the lazy data offset
 		out.writeInt(out.size());
-		for (int i = 0; i < bundles.length; i++)
-			writeBundleDescriptionLazyData(bundles[i], out);
+		for (BundleDescription bundle : bundles) {
+			writeBundleDescriptionLazyData(bundle, out);
+		}
 	}
 
 	public void saveState(StateImpl state, File stateFile, File lazyFile) throws IOException {
@@ -104,16 +106,18 @@ class StateWriter {
 				StateHelperImpl.getInstance().sortBundles(bundles);
 				// need to prime the object table with all bundles
 				// this allows us to write only indexes to bundles in the lazy data
-				for (int i = 0; i < bundles.length; i++) {
-					addToObjectTable(bundles[i]);
-					if (bundles[i].getHost() != null)
-						addToObjectTable(bundles[i].getHost());
+				for (BundleDescription bundle : bundles) {
+					addToObjectTable(bundle);
+					if (bundle.getHost() != null) {
+						addToObjectTable(bundle.getHost());
+					}
 				}
 				// first write the lazy data to get the offsets and sizes to the lazy data
 				fosLazy = new FileOutputStream(lazyFile);
 				outLazy = new DataOutputStream(new BufferedOutputStream(fosLazy));
-				for (int i = 0; i < bundles.length; i++)
-					writeBundleDescriptionLazyData(bundles[i], outLazy);
+				for (BundleDescription bundle : bundles) {
+					writeBundleDescriptionLazyData(bundle, outLazy);
+				}
 				// now write the state data
 				fosState = new FileOutputStream(stateFile);
 				outState = new DataOutputStream(new BufferedOutputStream(fosState));
@@ -127,22 +131,24 @@ class StateWriter {
 				// write the platform property values
 				Dictionary<Object, Object>[] propSet = state.getPlatformProperties();
 				outState.writeInt(propSet.length);
-				for (int i = 0; i < propSet.length; i++) {
-					Dictionary<Object, Object> props = propSet[i];
+				for (Dictionary<Object, Object> props : propSet) {
 					outState.writeInt(platformPropKeys.length);
-					for (int j = 0; j < platformPropKeys.length; j++)
-						writePlatformProp(props.get(platformPropKeys[j]), outState);
+					for (String platformPropKey : platformPropKeys) {
+						writePlatformProp(props.get(platformPropKey), outState);
+					}
 				}
 				outState.writeInt(bundles.length);
-				for (int i = 0; i < bundles.length; i++)
+				for (BundleDescription bundle : bundles) {
 					// write out each bundle with the force flag set to make sure
 					// the data is written at least once in the non-lazy state data
-					writeBundleDescription(bundles[i], outState, true);
+					writeBundleDescription(bundle, outState, true);
+				}
 				// write the DisabledInfos
 				DisabledInfo[] infos = state.getDisabledInfos();
 				outState.writeInt(infos.length);
-				for (int i = 0; i < infos.length; i++)
-					writeDisabledInfo(infos[i], outState);
+				for (DisabledInfo info : infos) {
+					writeDisabledInfo(info, outState);
+				}
 				outState.writeBoolean(state.isResolved());
 			} finally {
 				if (outLazy != null) {
@@ -186,8 +192,9 @@ class StateWriter {
 			} else {
 				String[] props = (String[]) obj;
 				out.writeInt(props.length);
-				for (int i = 0; i < props.length; i++)
-					writeStringOrNull(props[i], out);
+				for (String prop : props) {
+					writeStringOrNull(prop, out);
+				}
 			}
 		}
 	}
@@ -242,26 +249,30 @@ class StateWriter {
 
 		ExportPackageDescription[] exports = bundle.getExportPackages();
 		out.writeInt(exports.length);
-		for (int i = 0; i < exports.length; i++)
-			writeExportPackageDesc((ExportPackageDescriptionImpl) exports[i], out);
+		for (ExportPackageDescription export : exports) {
+			writeExportPackageDesc((ExportPackageDescriptionImpl) export, out);
+		}
 
 		ImportPackageSpecification[] imports = bundle.getImportPackages();
 		out.writeInt(imports.length);
-		for (int i = 0; i < imports.length; i++)
-			writeImportPackageSpec((ImportPackageSpecificationImpl) imports[i], out);
+		for (ImportPackageSpecification importSpecification : imports) {
+			writeImportPackageSpec((ImportPackageSpecificationImpl) importSpecification, out);
+		}
 
 		BundleSpecification[] requiredBundles = bundle.getRequiredBundles();
 		out.writeInt(requiredBundles.length);
-		for (int i = 0; i < requiredBundles.length; i++)
-			writeBundleSpec((BundleSpecificationImpl) requiredBundles[i], out);
+		for (BundleSpecification requiredBundle : requiredBundles) {
+			writeBundleSpec((BundleSpecificationImpl) requiredBundle, out);
+		}
 
 		ExportPackageDescription[] selectedExports = bundle.getSelectedExports();
 		if (selectedExports == null) {
 			out.writeInt(0);
 		} else {
 			out.writeInt(selectedExports.length);
-			for (int i = 0; i < selectedExports.length; i++)
-				writeExportPackageDesc((ExportPackageDescriptionImpl) selectedExports[i], out);
+			for (ExportPackageDescription selectedExport : selectedExports) {
+				writeExportPackageDesc((ExportPackageDescriptionImpl) selectedExport, out);
+			}
 		}
 
 		ExportPackageDescription[] substitutedExports = bundle.getSubstitutedExports();
@@ -269,8 +280,9 @@ class StateWriter {
 			out.writeInt(0);
 		} else {
 			out.writeInt(substitutedExports.length);
-			for (int i = 0; i < substitutedExports.length; i++)
-				writeExportPackageDesc((ExportPackageDescriptionImpl) substitutedExports[i], out);
+			for (ExportPackageDescription substitutedExport : substitutedExports) {
+				writeExportPackageDesc((ExportPackageDescriptionImpl) substitutedExport, out);
+			}
 		}
 
 		ExportPackageDescription[] resolvedImports = bundle.getResolvedImports();
@@ -278,8 +290,9 @@ class StateWriter {
 			out.writeInt(0);
 		} else {
 			out.writeInt(resolvedImports.length);
-			for (int i = 0; i < resolvedImports.length; i++)
-				writeExportPackageDesc((ExportPackageDescriptionImpl) resolvedImports[i], out);
+			for (ExportPackageDescription resolvedImport : resolvedImports) {
+				writeExportPackageDesc((ExportPackageDescriptionImpl) resolvedImport, out);
+			}
 		}
 
 		BundleDescription[] resolvedRequires = bundle.getResolvedRequires();
@@ -287,22 +300,23 @@ class StateWriter {
 			out.writeInt(0);
 		} else {
 			out.writeInt(resolvedRequires.length);
-			for (int i = 0; i < resolvedRequires.length; i++)
-				writeBundleDescription(resolvedRequires[i], out, false);
+			for (BundleDescription resolvedRequire : resolvedRequires) {
+				writeBundleDescription(resolvedRequire, out, false);
+			}
 		}
 
 		String[] ees = bundle.getExecutionEnvironments();
 		out.writeInt(ees.length);
-		for (int i = 0; i < ees.length; i++)
-			writeStringOrNull(ees[i], out);
+		for (String ee : ees) {
+			writeStringOrNull(ee, out);
+		}
 
 		Map<String, Long> dynamicStamps = ((BundleDescriptionImpl) bundle).getDynamicStamps();
 		if (dynamicStamps == null)
 			out.writeInt(0);
 		else {
 			out.writeInt(dynamicStamps.size());
-			for (Iterator<String> pkgs = dynamicStamps.keySet().iterator(); pkgs.hasNext();) {
-				String pkg = pkgs.next();
+			for (String pkg : dynamicStamps.keySet()) {
 				writeStringOrNull(pkg, out);
 				out.writeLong(dynamicStamps.get(pkg).longValue());
 			}
@@ -313,8 +327,9 @@ class StateWriter {
 			out.writeInt(0);
 		else {
 			out.writeInt(genericCapabilities.length);
-			for (int i = 0; i < genericCapabilities.length; i++)
-				writeGenericDescription(genericCapabilities[i], out);
+			for (GenericDescription genericCapability : genericCapabilities) {
+				writeGenericDescription(genericCapability, out);
+			}
 		}
 
 		GenericSpecification[] genericRequires = bundle.getGenericRequires();
@@ -322,8 +337,9 @@ class StateWriter {
 			out.writeInt(0);
 		else {
 			out.writeInt(genericRequires.length);
-			for (int i = 0; i < genericRequires.length; i++)
-				writeGenericSpecification((GenericSpecificationImpl) genericRequires[i], out);
+			for (GenericSpecification genericRequire : genericRequires) {
+				writeGenericSpecification((GenericSpecificationImpl) genericRequire, out);
+			}
 		}
 
 		GenericDescription[] selectedCapabilities = bundle.getSelectedGenericCapabilities();
@@ -331,8 +347,9 @@ class StateWriter {
 			out.writeInt(0);
 		else {
 			out.writeInt(selectedCapabilities.length);
-			for (int i = 0; i < selectedCapabilities.length; i++)
-				writeGenericDescription(selectedCapabilities[i], out);
+			for (GenericDescription selectedCapability : selectedCapabilities) {
+				writeGenericDescription(selectedCapability, out);
+			}
 		}
 
 		GenericDescription[] resolvedCapabilities = bundle.getResolvedGenericRequires();
@@ -340,8 +357,9 @@ class StateWriter {
 			out.writeInt(0);
 		else {
 			out.writeInt(resolvedCapabilities.length);
-			for (int i = 0; i < resolvedCapabilities.length; i++)
-				writeGenericDescription(resolvedCapabilities[i], out);
+			for (GenericDescription resolvedCapability : resolvedCapabilities) {
+				writeGenericDescription(resolvedCapability, out);
+			}
 		}
 
 		writeNativeCode(bundle.getNativeCodeSpecification(), out);
@@ -405,8 +423,9 @@ class StateWriter {
 		GenericDescription[] suppliers = specification.getSuppliers();
 		out.writeInt(suppliers == null ? 0 : suppliers.length);
 		if (suppliers != null)
-			for (int i = 0; i < suppliers.length; i++)
-				writeGenericDescription(suppliers[i], out);
+			for (GenericDescription supplier : suppliers) {
+				writeGenericDescription(supplier, out);
+			}
 		out.writeInt(specification.getResolution());
 		writeStringOrNull(specification.getMatchingFilter(), out);
 		writeMap(out, specification.getAttributes());
@@ -449,16 +468,18 @@ class StateWriter {
 		out.writeInt(ranges == null ? 0 : ranges.length);
 		if (ranges == null)
 			return;
-		for (int i = 0; i < ranges.length; i++)
-			writeVersionRange(ranges[i], out);
+		for (VersionRange range : ranges) {
+			writeVersionRange(range, out);
+		}
 	}
 
 	private void writeStringArray(String[] strings, DataOutputStream out) throws IOException {
 		out.writeInt(strings == null ? 0 : strings.length);
 		if (strings == null)
 			return;
-		for (int i = 0; i < strings.length; i++)
-			writeStringOrNull(strings[i], out);
+		for (String string : strings) {
+			writeStringOrNull(string, out);
+		}
 	}
 
 	private void writeMap(DataOutputStream out, Map<String, ?> source) throws IOException {
@@ -589,8 +610,9 @@ class StateWriter {
 			out.writeInt(0);
 		} else {
 			out.writeInt(list.length);
-			for (int i = 0; i < list.length; i++)
-				writeStringOrNull(list[i], out);
+			for (String s : list) {
+				writeStringOrNull(s, out);
+			}
 		}
 	}
 
@@ -632,8 +654,9 @@ class StateWriter {
 			return;
 		}
 		out.writeInt(hosts.length);
-		for (int i = 0; i < hosts.length; i++)
-			writeBundleDescription(hosts[i], out, force);
+		for (BundleDescription h : hosts) {
+			writeBundleDescription(h, out, force);
+		}
 		writeMap(out, host.getAttributes());
 		writeMap(out, host.getArbitraryDirectives());
 	}

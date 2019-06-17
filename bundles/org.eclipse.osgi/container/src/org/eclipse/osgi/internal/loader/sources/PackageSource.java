@@ -74,10 +74,13 @@ public abstract class PackageSource {
 			return false;
 		// This will return true if the specified source has at least one
 		// of the suppliers of this source.
-		for (int i = 0; i < suppliers1.length; i++)
-			for (int j = 0; j < suppliers2.length; j++)
-				if (suppliers2[j].equals(suppliers1[i]))
+		for (SingleSourcePackage supplier1 : suppliers1) {
+			for (SingleSourcePackage supplier2 : suppliers2) {
+				if (supplier2.equals(supplier1)) {
 					return true;
+				}
+			}
+		}
 		return false;
 	}
 
@@ -176,8 +179,8 @@ public abstract class PackageSource {
 		// try the interfaces
 		Class<?>[] interfaces = serviceClass.getInterfaces();
 		// note that getInterfaces never returns null
-		for (int i = 0; i < interfaces.length; i++) {
-			producerSource = getPackageSource(interfaces[i], pkgName, packageAdmin);
+		for (Class<?> intf : interfaces) {
+			producerSource = getPackageSource(intf, pkgName, packageAdmin);
 			if (producerSource != null)
 				return producerSource;
 		}

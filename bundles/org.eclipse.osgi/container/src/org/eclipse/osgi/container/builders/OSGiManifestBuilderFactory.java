@@ -131,20 +131,24 @@ public final class OSGiManifestBuilderFactory {
 	}
 
 	private static void validateHeaders(Map<String, String> manifest) throws BundleException {
-		for (int i = 0; i < DEFINED_OSGI_VALIDATE_HEADERS.length; i++) {
-			String header = manifest.get(DEFINED_OSGI_VALIDATE_HEADERS[i]);
+		for (String definedOSGiValidateHeader : DEFINED_OSGI_VALIDATE_HEADERS) {
+			String header = manifest.get(definedOSGiValidateHeader);
 			if (header != null) {
-				ManifestElement[] elements = ManifestElement.parseHeader(DEFINED_OSGI_VALIDATE_HEADERS[i], header);
-				checkForDuplicateDirectivesAttributes(DEFINED_OSGI_VALIDATE_HEADERS[i], elements);
-				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.IMPORT_PACKAGE)
-					checkImportExportSyntax(DEFINED_OSGI_VALIDATE_HEADERS[i], elements, false, false);
-				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.DYNAMICIMPORT_PACKAGE)
-					checkImportExportSyntax(DEFINED_OSGI_VALIDATE_HEADERS[i], elements, false, true);
-				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.EXPORT_PACKAGE)
-					checkImportExportSyntax(DEFINED_OSGI_VALIDATE_HEADERS[i], elements, true, false);
-				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.FRAGMENT_HOST)
-					checkExtensionBundle(DEFINED_OSGI_VALIDATE_HEADERS[i], elements, manifest);
-			} else if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.BUNDLE_SYMBOLICNAME) {
+				ManifestElement[] elements = ManifestElement.parseHeader(definedOSGiValidateHeader, header);
+				checkForDuplicateDirectivesAttributes(definedOSGiValidateHeader, elements);
+				if (definedOSGiValidateHeader == Constants.IMPORT_PACKAGE) {
+					checkImportExportSyntax(definedOSGiValidateHeader, elements, false, false);
+				}
+				if (definedOSGiValidateHeader == Constants.DYNAMICIMPORT_PACKAGE) {
+					checkImportExportSyntax(definedOSGiValidateHeader, elements, false, true);
+				}
+				if (definedOSGiValidateHeader == Constants.EXPORT_PACKAGE) {
+					checkImportExportSyntax(definedOSGiValidateHeader, elements, true, false);
+				}
+				if (definedOSGiValidateHeader == Constants.FRAGMENT_HOST) {
+					checkExtensionBundle(definedOSGiValidateHeader, elements, manifest);
+				}
+			} else if (definedOSGiValidateHeader == Constants.BUNDLE_SYMBOLICNAME) {
 				throw new BundleException(Constants.BUNDLE_SYMBOLICNAME + " header is required.", BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 			}
 		}
@@ -159,17 +163,17 @@ public final class OSGiManifestBuilderFactory {
 		for (int i = 0; i < length; i++) {
 			// check for duplicate imports
 			String[] packageNames = elements[i].getValueComponents();
-			for (int j = 0; j < packageNames.length; j++) {
-				if (!export && !dynamic && packages.contains(packageNames[j])) {
+			for (String packageName : packageNames) {
+				if (!export && !dynamic && packages.contains(packageName)) {
 					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
-					throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_PACKAGE_DUPLICATES, packageNames[j]), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+					throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_PACKAGE_DUPLICATES, packageName), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 				}
 				// check for java.*
-				if (export && packageNames[j].startsWith("java.")) { //$NON-NLS-1$
+				if (export && packageName.startsWith("java.")) { //$NON-NLS-1$
 					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
-					throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_PACKAGE_JAVA, packageNames[j]), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+					throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_PACKAGE_JAVA, packageName), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 				}
-				packages.add(packageNames[j]);
+				packages.add(packageName);
 			}
 			// check for version/specification version mismatch
 			String version = elements[i].getAttribute(Constants.VERSION_ATTRIBUTE);
@@ -195,25 +199,25 @@ public final class OSGiManifestBuilderFactory {
 
 	private static void checkForDuplicateDirectivesAttributes(String headerKey, ManifestElement[] elements) throws BundleException {
 		// check for duplicate directives
-		for (int i = 0; i < elements.length; i++) {
-			Enumeration<String> directiveKeys = elements[i].getDirectiveKeys();
+		for (ManifestElement element : elements) {
+			Enumeration<String> directiveKeys = element.getDirectiveKeys();
 			if (directiveKeys != null) {
 				while (directiveKeys.hasMoreElements()) {
 					String key = directiveKeys.nextElement();
-					String[] directives = elements[i].getDirectives(key);
+					String[] directives = element.getDirectives(key);
 					if (directives.length > 1) {
-						String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
+						String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, element.toString());
 						throw new BundleException(NLS.bind(message + " : " + Msg.HEADER_DIRECTIVE_DUPLICATES, key), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 					}
 				}
 			}
-			Enumeration<String> attrKeys = elements[i].getKeys();
+			Enumeration<String> attrKeys = element.getKeys();
 			if (attrKeys != null) {
 				while (attrKeys.hasMoreElements()) {
 					String key = attrKeys.nextElement();
-					String[] attrs = elements[i].getAttributes(key);
+					String[] attrs = element.getAttributes(key);
 					if (attrs.length > 1) {
-						String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
+						String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, element.toString());
 						throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_ATTRIBUTE_DUPLICATES, key), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 					}
 				}

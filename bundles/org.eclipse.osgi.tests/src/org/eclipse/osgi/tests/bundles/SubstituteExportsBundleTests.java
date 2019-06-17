@@ -309,11 +309,11 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		}
 
 		String[] unexpectedClasseNames = new String[] {"substitutes.x.Jx", "substitutes.x.Lx", "substitutes.x.Nx", "substitutes.y.Jy", "substitutes.y.Ly", "substitutes.y.Ny"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-		for (int i = 0; i < unexpectedClasseNames.length; i++) {
-			for (int j = 0; j < allBundles.length; j++) {
+		for (String unexpectedClasseName : unexpectedClasseNames) {
+			for (Bundle bundle : allBundles) {
 				try {
-					Class found = allBundles[j].loadClass(unexpectedClasseNames[i]);
-					fail("Found class " + found + " in bundle " + allBundles[j]); //$NON-NLS-1$//$NON-NLS-2$
+					Class found = bundle.loadClass(unexpectedClasseName);
+					fail("Found class " + found + " in bundle " + bundle); //$NON-NLS-1$//$NON-NLS-2$
 				} catch (ClassNotFoundException cnfe) {
 					// expected
 				}
@@ -402,11 +402,11 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		}
 
 		String[] unexpectedClasseNames = new String[] {"substitutes.x.Ix", "substitutes.x.Kx", "substitutes.x.Mx", "substitutes.y.Iy", "substitutes.y.Ky", "substitutes.y.My"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-		for (int i = 0; i < unexpectedClasseNames.length; i++) {
-			for (int j = 0; j < allBundles.length; j++) {
+		for (String unexpectedClasseName : unexpectedClasseNames) {
+			for (Bundle bundle : allBundles) {
 				try {
-					Class found = allBundles[j].loadClass(unexpectedClasseNames[i]);
-					fail("Found class " + found + " in bundle " + allBundles[j]); //$NON-NLS-1$//$NON-NLS-2$
+					Class found = bundle.loadClass(unexpectedClasseName);
+					fail("Found class " + found + " in bundle " + bundle); //$NON-NLS-1$//$NON-NLS-2$
 				} catch (ClassNotFoundException cnfe) {
 					// expected
 				}
@@ -472,12 +472,14 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 	private void doRefreshTest(Bundle[] allBundles, Bundle toRefresh) {
 		installer.resolveBundles(allBundles);
 		Bundle[] refreshed = installer.refreshPackages(new Bundle[] {toRefresh});
-		for (int i = 0; i < allBundles.length; i++) {
+		for (Bundle allBundle : allBundles) {
 			boolean found = false;
-			for (int j = 0; j < refreshed.length && !found; j++)
-				found = allBundles[i] == refreshed[j];
-			if (!found)
-				fail("bundle did not get refreshed: " + allBundles[i]); //$NON-NLS-1$
+			for (int j = 0; j < refreshed.length && !found; j++) {
+				found = allBundle == refreshed[j];
+			}
+			if (!found) {
+				fail("bundle did not get refreshed: " + allBundle); //$NON-NLS-1$
+			}
 		}
 		assertEquals("Wrong number of bundles refreshed", allBundles.length, refreshed.length); //$NON-NLS-1$
 	}
@@ -509,9 +511,9 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong number of yImporters", 3, yImporters.length); //$NON-NLS-1$
 
 		Bundle[] expectedImporters = new Bundle[] {b, c, d};
-		for (int i = 0; i < expectedImporters.length; i++) {
-			contains("xPackages importers does not contain", xImporters, expectedImporters[i]); //$NON-NLS-1$
-			contains("yPackages importers does not contain", yImporters, expectedImporters[i]); //$NON-NLS-1$
+		for (Bundle expectedImporter : expectedImporters) {
+			contains("xPackages importers does not contain", xImporters, expectedImporter); //$NON-NLS-1$
+			contains("yPackages importers does not contain", yImporters, expectedImporter); //$NON-NLS-1$
 		}
 	}
 
@@ -538,27 +540,28 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		assertEquals("yPackages wrong number", 3, yPackages.length); //$NON-NLS-1$
 
 		Bundle[] expectedExporters = new Bundle[] {iBundle, kBundle, mBundle};
-		for (int i = 0; i < expectedExporters.length; i++) {
+		for (Bundle expectedExporter : expectedExporters) {
 			boolean found = false;
 			for (int j = 0; j < xPackages.length && !found; j++) {
-				found = expectedExporters[i] == xPackages[j].getExportingBundle();
+				found = expectedExporter == xPackages[j].getExportingBundle();
 				if (found) {
 					Bundle[] importingBundles = xPackages[j].getImportingBundles();
 					Bundle[] expectedImporters = null;
 					String message = null;
-					if (expectedExporters[i] == iBundle) {
+					if (expectedExporter == iBundle) {
 						expectedImporters = new Bundle[] {jBundle, mBundle, nBundle, pBundle, qBundle};
 						message = "iBundle "; //$NON-NLS-1$
-					} else if (expectedExporters[i] == kBundle) {
+					} else if (expectedExporter == kBundle) {
 						expectedImporters = new Bundle[] {lBundle, mBundle, nBundle, pBundle, qBundle};
 						message = "kBundle "; //$NON-NLS-1$
-					} else if (expectedExporters[i] == mBundle) {
+					} else if (expectedExporter == mBundle) {
 						expectedImporters = new Bundle[] {nBundle, pBundle, qBundle};
 						message = "mBundle "; //$NON-NLS-1$
 					}
 					assertEquals(message, expectedImporters.length, importingBundles.length);
-					for (int k = 0; k < expectedImporters.length; k++)
-						contains(message, importingBundles, expectedImporters[k]);
+					for (Bundle expectedImporter : expectedImporters) {
+						contains(message, importingBundles, expectedImporter);
+					}
 				}
 			}
 		}

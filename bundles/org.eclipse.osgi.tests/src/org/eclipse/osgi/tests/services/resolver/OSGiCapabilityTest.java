@@ -16,11 +16,20 @@ package org.eclipse.osgi.tests.services.resolver;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.GenericDescription;
+import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -194,11 +203,12 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertEquals("Expected number of capabilities do not match", expectedCnt, genRequired.length);
 		assertEquals("Specs do not match Descs", genRequired.length, genProvided.length + (fragIdentity == null ? 0 : 1));
 		Collection providedCollection = new ArrayList(Arrays.asList(genProvided));
-		for (int i = 0; i < genRequired.length; i++) {
-			if (IdentityNamespace.IDENTITY_NAMESPACE.equals(genRequired[i].getType()) && genRequired[i].getSupplier().getHost() != null)
-				assertEquals("Wrong fragment provider: " + genRequired[i], fragIdentity, genRequired[i]);
-			else
-				assertTrue("Wrong provider for requirement: " + genRequired[i], providedCollection.remove(genRequired[i]));
+		for (GenericDescription requiredDescription : genRequired) {
+			if (IdentityNamespace.IDENTITY_NAMESPACE.equals(requiredDescription.getType()) && requiredDescription.getSupplier().getHost() != null) {
+				assertEquals("Wrong fragment provider: " + requiredDescription, fragIdentity, requiredDescription);
+			} else {
+				assertTrue("Wrong provider for requirement: " + requiredDescription, providedCollection.remove(requiredDescription));
+			}
 		}
 	}
 
@@ -613,8 +623,8 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		GenericDescription[] required = requirer.getResolvedGenericRequires();
 		assertEquals("Wrong number of capabilities for bundle: " + requirer, expectedCapabilities.length, required.length);
 		Collection providedCollection = new ArrayList(Arrays.asList(expectedCapabilities));
-		for (int i = 0; i < required.length; i++) {
-			assertTrue("Wrong provider for requirement: " + required[i], providedCollection.remove(required[i]));
+		for (GenericDescription requiredDescription : required) {
+			assertTrue("Wrong provider for requirement: " + requiredDescription, providedCollection.remove(requiredDescription));
 		}
 	}
 }

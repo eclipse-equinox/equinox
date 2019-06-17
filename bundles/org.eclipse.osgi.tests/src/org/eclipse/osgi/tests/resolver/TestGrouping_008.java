@@ -60,8 +60,7 @@ public class TestGrouping_008 extends AbstractStateTest {
 		BundleDescription[] requires = bundle_1.getResolvedRequires();
 		assertNotNull("requires array is unexpectedly null", requires);
 		assertTrue("requires array is unexpectedly empty", requires.length > 0);
-		for (int i = 0; i < requires.length; i++) {
-			BundleDescription bd = requires[i];
+		for (BundleDescription bd : requires) {
 			String requiresName = bd.getName();
 			assertNotNull("bundle name is null", requiresName);
 			if (requiresName.equals("B")) {
@@ -72,8 +71,7 @@ public class TestGrouping_008 extends AbstractStateTest {
 		ExportPackageDescription[] exports = bundle_1.getResolvedImports();
 		assertNotNull("export array is unexpectedly null", exports);
 		assertTrue("export array is unexpectedly empty", exports.length > 0);
-		for (int i = 0; i < exports.length; i++) {
-			ExportPackageDescription exp = exports[i];
+		for (ExportPackageDescription exp : exports) {
 			String exportPackageName = exp.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("p")) {

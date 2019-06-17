@@ -64,10 +64,10 @@ public class GlobalPolicy implements IBuddyPolicy {
 
 		//get all matching resources for each package
 		Enumeration<URL> results = null;
-		for (int i = 0; i < pkgs.length; i++) {
+		for (ExportedPackage pkg : pkgs) {
 			try {
-				results = BundleLoader.compoundEnumerations(results, pkgs[i].getExportingBundle().getResources(name));
-			} catch (IOException e) {
+				results = BundleLoader.compoundEnumerations(results, pkg.getExportingBundle().getResources(name));
+			}catch (IOException e) {
 				//ignore IO problems and try next package
 			}
 		}

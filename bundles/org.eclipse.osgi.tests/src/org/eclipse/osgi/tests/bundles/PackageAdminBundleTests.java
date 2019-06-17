@@ -319,8 +319,9 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 	private String getMessage(Throwable[] results) {
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
-		for (int i = 0; i < results.length; i++)
-			results[i].printStackTrace(pw);
+		for (Throwable result : results) {
+			result.printStackTrace(pw);
+		}
 		return sw.toString();
 	}
 }

@@ -279,8 +279,7 @@ class OSGiFrameworkHooks {
 				if (hooks.isEmpty())
 					return;
 				candidates = new ShrinkableCollection<>(candidates);
-				for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
-					HookReference hookRef = iHooks.next();
+				for (HookReference hookRef : hooks) {
 					if (hookRef.reference.getBundle() == null) {
 						handleHookException(null, hookRef.hook, "filterResolvable"); //$NON-NLS-1$
 					} else {
@@ -305,8 +304,7 @@ class OSGiFrameworkHooks {
 				if (hooks.isEmpty())
 					return;
 				collisionCandidates = new ShrinkableCollection<>(collisionCandidates);
-				for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
-					HookReference hookRef = iHooks.next();
+				for (HookReference hookRef : hooks) {
 					if (hookRef.reference.getBundle() == null) {
 						handleHookException(null, hookRef.hook, "filterSingletonCollisions"); //$NON-NLS-1$
 					} else {
@@ -327,8 +325,7 @@ class OSGiFrameworkHooks {
 				if (hooks.isEmpty())
 					return;
 				candidates = new ShrinkableCollection<>(candidates);
-				for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
-					HookReference hookRef = iHooks.next();
+				for (HookReference hookRef : hooks) {
 					if (hookRef.reference.getBundle() == null) {
 						handleHookException(null, hookRef.hook, "filterMatches"); //$NON-NLS-1$
 					} else {
@@ -352,8 +349,7 @@ class OSGiFrameworkHooks {
 					HookReference missingHook = null;
 					Throwable endError = null;
 					HookReference endBadHook = null;
-					for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
-						HookReference hookRef = iHooks.next();
+					for (HookReference hookRef : hooks) {
 						// We do not remove unregistered services here because we are going to remove all of them at the end
 						if (hookRef.reference.getBundle() == null) {
 							if (missingHook == null)

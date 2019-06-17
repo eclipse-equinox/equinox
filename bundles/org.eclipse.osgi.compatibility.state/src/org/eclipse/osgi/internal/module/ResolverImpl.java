@@ -131,18 +131,18 @@ public class ResolverImpl implements Resolver {
 
 		ArrayList<ResolverBundle> fragmentBundles = new ArrayList<>();
 		// Add each bundle to the resolver's internal state
-		for (int i = 0; i < bundles.length; i++)
-			initResolverBundle(bundles[i], fragmentBundles, false);
+		for (BundleDescription bundle : bundles) {
+			initResolverBundle(bundle, fragmentBundles, false);
+		}
 		// Add each removal pending bundle to the resolver's internal state
 		List<BundleDescription> removedBundles = removalPending.getAllValues();
 		for (BundleDescription removed : removedBundles)
 			initResolverBundle(removed, fragmentBundles, true);
 		// Iterate over the resolved fragments and attach them to their hosts
-		for (Iterator<ResolverBundle> iter = fragmentBundles.iterator(); iter.hasNext();) {
-			ResolverBundle fragment = iter.next();
+		for (ResolverBundle fragment : fragmentBundles) {
 			BundleDescription[] hosts = ((HostSpecification) fragment.getHost().getVersionConstraint()).getHosts();
-			for (int i = 0; i < hosts.length; i++) {
-				ResolverBundle host = bundleMapping.get(hosts[i]);
+			for (BundleDescription h : hosts) {
+				ResolverBundle host = bundleMapping.get(h);
 				if (host != null)
 					// Do not add fragment exports here because they would have been added by the host above.
 					host.attachFragment(fragment, false);
@@ -187,18 +187,19 @@ public class ResolverImpl implements Resolver {
 		visited.add(rb);
 		// Wire requires to bundles
 		BundleConstraint[] requires = rb.getRequires();
-		for (int i = 0; i < requires.length; i++) {
-			rewireRequire(requires[i], visited);
+		for (BundleConstraint require : requires) {
+			rewireRequire(require, visited);
 		}
 		// Wire imports to exports
 		ResolverImport[] imports = rb.getImportPackages();
-		for (int i = 0; i < imports.length; i++) {
-			rewireImport(imports[i], visited);
+		for (ResolverImport resolverImport : imports) {
+			rewireImport(resolverImport, visited);
 		}
 		// Wire generics
 		GenericConstraint[] genericRequires = rb.getGenericRequires();
-		for (int i = 0; i < genericRequires.length; i++)
-			rewireGeneric(genericRequires[i], visited);
+		for (GenericConstraint genericRequire : genericRequires) {
+			rewireGeneric(genericRequire, visited);
+		}
 	}
 
 	private void rewireGeneric(GenericConstraint constraint, List<ResolverBundle> visited) {
@@ -222,8 +223,9 @@ public class ResolverImpl implements Resolver {
 		}
 		VersionSupplier[] matchingCapabilities = constraint.getPossibleSuppliers();
 		if (matchingCapabilities != null)
-			for (int i = 0; i < matchingCapabilities.length; i++)
-				rewireBundle(matchingCapabilities[i].getResolverBundle(), visited);
+			for (VersionSupplier matchingCapability : matchingCapabilities) {
+				rewireBundle(matchingCapability.getResolverBundle(), visited);
+			}
 	}
 
 	private void rewireRequire(BundleConstraint req, List<ResolverBundle> visited) {
@@ -317,9 +319,11 @@ public class ResolverImpl implements Resolver {
 		if (nativeCode != null) {
 			NativeCodeDescription[] nativeCodeSuppliers = nativeCode.getPossibleSuppliers();
 			NativeCodeDescription highestRanked = null;
-			for (int i = 0; i < nativeCodeSuppliers.length; i++)
-				if (nativeCode.isSatisfiedBy(nativeCodeSuppliers[i]) && (highestRanked == null || highestRanked.compareTo(nativeCodeSuppliers[i]) < 0))
-					highestRanked = nativeCodeSuppliers[i];
+			for (NativeCodeDescription nativeCodeSupplier : nativeCodeSuppliers) {
+				if (nativeCode.isSatisfiedBy(nativeCodeSupplier) && (highestRanked == null || highestRanked.compareTo(nativeCodeSupplier) < 0)) {
+					highestRanked = nativeCodeSupplier;
+				}
+			}
 			if (highestRanked == null) {
 				if (!nativeCode.isOptional()) {
 					state.addResolverError(bundleDesc, ResolverError.NO_NATIVECODE_MATCH, nativeCode.toString(), nativeCode);
@@ -342,10 +346,10 @@ public class ResolverImpl implements Resolver {
 			return false;
 		try {
 			Filter filter = FilterImpl.newInstance(platformFilter);
-			for (int i = 0; i < platformProperties.length; i++) {
+			for (Dictionary<Object, Object> platformProperty : platformProperties) {
 				// using matchCase here in case of duplicate case invarient keys (bug 180817)
-				@SuppressWarnings("rawtypes")
-				Dictionary props = platformProperties[i];
+				@SuppressWarnings(value = "rawtypes")
+				Dictionary props = platformProperty;
 				if (filter.matchCase(props))
 					return true;
 			}
@@ -459,8 +463,8 @@ public class ResolverImpl implements Resolver {
 			reRefresh = addDevConstraints(reRefresh);
 			// Unresolve all the supplied bundles and their dependents
 			if (reRefresh != null)
-				for (int i = 0; i < reRefresh.length; i++) {
-					ResolverBundle rb = bundleMapping.get(reRefresh[i]);
+				for (BundleDescription description : reRefresh) {
+					ResolverBundle rb = bundleMapping.get(description);
 					if (rb != null)
 						unresolveBundle(rb, false);
 				}
@@ -588,10 +592,10 @@ public class ResolverImpl implements Resolver {
 		// when in develoment mode we need to reRefresh hosts  of unresolved fragments that add new constraints 
 		// and reRefresh and unresolved bundles that have dependents
 		Set<BundleDescription> additionalRefresh = new HashSet<>();
-		ResolverBundle[] unresolved = unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
-		for (int i = 0; i < unresolved.length; i++) {
-			addUnresolvedWithDependents(unresolved[i], additionalRefresh);
-			addHostsFromFragmentConstraints(unresolved[i], additionalRefresh);
+		ResolverBundle[] allUnresolved  = unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
+		for (ResolverBundle unresolved : allUnresolved ) {
+			addUnresolvedWithDependents(unresolved, additionalRefresh);
+			addHostsFromFragmentConstraints(unresolved, additionalRefresh);
 		}
 		if (additionalRefresh.size() == 0)
 			return reRefresh; // no new bundles found to refresh
@@ -626,9 +630,9 @@ public class ResolverImpl implements Resolver {
 
 	private Collection<ResolverBundle> resolveOptionalConstraints(ResolverBundle[] bundles) {
 		Collection<ResolverBundle> result = new ArrayList<>();
-		for (int i = 0; i < bundles.length; i++) {
-			if (bundles[i] != null && resolveOptionalConstraints(bundles[i])) {
-				result.add(bundles[i]);
+		for (ResolverBundle bundle : bundles) {
+			if (bundle != null && resolveOptionalConstraints(bundle)) {
+				result.add(bundle);
 			}
 		}
 		return result;
@@ -639,21 +643,25 @@ public class ResolverImpl implements Resolver {
 		BundleConstraint[] requires = bundle.getRequires();
 		List<ResolverBundle> cycle = new ArrayList<>();
 		boolean resolvedOptional = false;
-		for (int i = 0; i < requires.length; i++)
-			if (requires[i].isOptional() && requires[i].getSelectedSupplier() == null) {
+		for (BundleConstraint require : requires) {
+			if (require.isOptional() && require.getSelectedSupplier() == null) {
 				cycle.clear();
-				resolveRequire(requires[i], cycle);
-				if (requires[i].getSelectedSupplier() != null)
+				resolveRequire(require, cycle);
+				if (require.getSelectedSupplier() != null) {
 					resolvedOptional = true;
+				}
 			}
+		}
 		ResolverImport[] imports = bundle.getImportPackages();
-		for (int i = 0; i < imports.length; i++)
-			if (imports[i].isOptional() && imports[i].getSelectedSupplier() == null) {
+		for (ResolverImport resolverImport : imports) {
+			if (resolverImport.isOptional() && resolverImport.getSelectedSupplier() == null) {
 				cycle.clear();
-				resolveImport(imports[i], cycle);
-				if (imports[i].getSelectedSupplier() != null)
+				resolveImport(resolverImport, cycle);
+				if (resolverImport.getSelectedSupplier() != null) {
 					resolvedOptional = true;
+				}
 			}
+		}
 		return resolvedOptional;
 	}
 
@@ -796,17 +804,19 @@ public class ResolverImpl implements Resolver {
 			Arrays.sort(bundles);
 		// First attach all fragments to the matching hosts
 		Collection<String> processedFragments = new HashSet<>(bundles.length);
-		for (int i = 0; i < bundles.length; i++)
-			attachFragment(bundles[i], processedFragments);
+		for (ResolverBundle bundle : bundles) {
+			attachFragment(bundle, processedFragments);
+		}
 
 		// Lists of cyclic dependencies recording during resolving
 		List<ResolverBundle> cycle = new ArrayList<>(1); // start small
 		// Attempt to resolve all unresolved bundles
-		for (int i = 0; i < bundles.length; i++) {
-			if (DEBUG)
-				ResolverImpl.log("** RESOLVING " + bundles[i] + " **"); //$NON-NLS-1$ //$NON-NLS-2$
+		for (ResolverBundle bundle : bundles) {
+			if (DEBUG) {
+				ResolverImpl.log("** RESOLVING " + bundle + " **"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			cycle.clear();
-			resolveBundle(bundles[i], cycle);
+			resolveBundle(bundle, cycle);
 			// Check for any bundles involved in a cycle.
 			// if any bundles in the cycle are not resolved then we need to resolve the resolvable ones
 			checkCycle(cycle);
@@ -814,8 +824,9 @@ public class ResolverImpl implements Resolver {
 		// Resolve all fragments that are still attached to at least one host.
 		if (unresolvedBundles.size() > 0) {
 			ResolverBundle[] unresolved = unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
-			for (int i = 0; i < unresolved.length; i++)
-				resolveFragment(unresolved[i]);
+			for (ResolverBundle toResolve : unresolved) {
+				resolveFragment(toResolve);
+			}
 		}
 		checkUsesConstraints(bundles, platformProperties);
 		checkComposites(bundles, platformProperties);
@@ -826,20 +837,21 @@ public class ResolverImpl implements Resolver {
 		if (helpers == null)
 			return;
 		Set<ResolverBundle> exclude = null;
-		for (int i = 0; i < bundles.length; i++) {
-			CompositeResolveHelper helper = helpers.getCompositeResolveHelper(bundles[i].getBundleDescription());
+		for (ResolverBundle bundle : bundles) {
+			CompositeResolveHelper helper = helpers.getCompositeResolveHelper(bundle.getBundleDescription());
 			if (helper == null)
 				continue;
-			if (!bundles[i].isResolved())
+			if (!bundle.isResolved()) {
 				continue;
-			if (!helper.giveExports(getExportsWiredTo(bundles[i], null))) {
-				state.addResolverError(bundles[i].getBundleDescription(), ResolverError.DISABLED_BUNDLE, null, null);
-				bundles[i].setResolvable(false);
+			}
+			if (!helper.giveExports(getExportsWiredTo(bundle, null))) {
+				state.addResolverError(bundle.getBundleDescription(), ResolverError.DISABLED_BUNDLE, null, null);
+				bundle.setResolvable(false);
 				// We pass false for keepFragmentsAttached because we need to redo the attachments (bug 272561)
-				setBundleUnresolved(bundles[i], false, false);
+				setBundleUnresolved(bundle, false, false);
 				if (exclude == null)
 					exclude = new HashSet<>(1);
-				exclude.add(bundles[i]);
+				exclude.add(bundle);
 			}
 		}
 		reResolveBundles(exclude, bundles, platformProperties);
@@ -880,11 +892,11 @@ public class ResolverImpl implements Resolver {
 		if (exclude == null || exclude.size() == 0)
 			return;
 		List<ResolverBundle> remainingUnresolved = new ArrayList<>();
-		for (int i = 0; i < bundles.length; i++) {
-			if (!exclude.contains(bundles[i])) {
+		for (ResolverBundle bundle : bundles) {
+			if (!exclude.contains(bundle)) {
 				// We pass false for keepFragmentsAttached because we need to redo the attachments (bug 272561)
-				setBundleUnresolved(bundles[i], false, false);
-				remainingUnresolved.add(bundles[i]);
+				setBundleUnresolved(bundle, false, false);
+				remainingUnresolved.add(bundle);
 			}
 		}
 		resolveBundles0(remainingUnresolved.toArray(new ResolverBundle[remainingUnresolved.size()]), platformProperties);
@@ -917,8 +929,7 @@ public class ResolverImpl implements Resolver {
 			printCombination(bestCombination);
 		}
 		for (int i = 0; i < bestCombination.length; i++) {
-			for (int j = 0; j < multipleSuppliers[i].length; j++) {
-				ResolverConstraint constraint = multipleSuppliers[i][j];
+			for (ResolverConstraint constraint : multipleSuppliers[i]) {
 				constraint.setSelectedSupplier(bestCombination[i]);
 				// sanity check to make sure we did not just get wired to our own dropped export
 				VersionSupplier selectedSupplier = constraint.getSelectedSupplier();
@@ -1043,8 +1054,9 @@ public class ResolverImpl implements Resolver {
 					multipleSuppliers[current][i].selectNextSupplier();
 				return true; // the current slot has a next supplier
 			}
-			for (int i = 0; i < multipleSuppliers[current].length; i++)
-				multipleSuppliers[current][i].setSelectedSupplier(0); // reset the current slot
+			for (ResolverConstraint multipleSupplier : multipleSuppliers[current]) {
+				multipleSupplier.setSelectedSupplier(0); // reset the current slot
+			}
 			current++; // move to the next slot
 		}
 		return false;
@@ -1064,40 +1076,39 @@ public class ResolverImpl implements Resolver {
 	private List<ResolverConstraint> getConflicts(ResolverBundle[] bundles, Set<String> packageConstraints, Set<String> bundleConstraints, Collection<GenericConstraint> multiRequirementWithMultiSuppliers) {
 		groupingChecker.clear();
 		List<ResolverConstraint> conflicts = null;
-		for (int i = 0; i < bundles.length; i++)
-			conflicts = addConflicts(bundles[i], packageConstraints, bundleConstraints, multiRequirementWithMultiSuppliers, conflicts);
+		for (ResolverBundle bundle : bundles) {
+			conflicts = addConflicts(bundle, packageConstraints, bundleConstraints, multiRequirementWithMultiSuppliers, conflicts);
+		}
 		return conflicts;
 	}
 
 	private List<ResolverConstraint> addConflicts(ResolverBundle bundle, Set<String> packageConstraints, Set<String> bundleConstraints, Collection<GenericConstraint> multiRequirementWithMultiSuppliers, List<ResolverConstraint> conflicts) {
 		BundleConstraint[] requires = bundle.getRequires();
-		for (int i = 0; i < requires.length; i++) {
-			ResolverBundle selectedSupplier = (ResolverBundle) requires[i].getSelectedSupplier();
+		for (BundleConstraint require : requires) {
+			ResolverBundle selectedSupplier = (ResolverBundle) require.getSelectedSupplier();
 			PackageRoots[][] conflict = selectedSupplier == null ? null : groupingChecker.isConsistent(bundle, selectedSupplier);
 			if (conflict != null) {
 				addConflictNames(conflict, packageConstraints, bundleConstraints);
-
-				if (DEBUG_CONFLICTS)
-					printConflict(conflict, requires[i], bundle);
-
+				if (DEBUG_CONFLICTS) {
+					printConflict(conflict, require, bundle);
+				}
 				if (conflicts == null)
 					conflicts = new ArrayList<>(1);
-				conflicts.add(requires[i]);
+				conflicts.add(require);
 			}
 		}
 		ResolverImport[] imports = bundle.getImportPackages();
-		for (int i = 0; i < imports.length; i++) {
-			ResolverExport selectedSupplier = (ResolverExport) imports[i].getSelectedSupplier();
+		for (ResolverImport importConflict : imports) {
+			ResolverExport selectedSupplier = (ResolverExport) importConflict.getSelectedSupplier();
 			PackageRoots[][] conflict = selectedSupplier == null ? null : groupingChecker.isConsistent(bundle, selectedSupplier);
 			if (conflict != null) {
 				addConflictNames(conflict, packageConstraints, bundleConstraints);
-
-				if (DEBUG_CONFLICTS)
-					printConflict(conflict, imports[i], bundle);
-
+				if (DEBUG_CONFLICTS) {
+					printConflict(conflict, importConflict, bundle);
+				}
 				if (conflicts == null)
 					conflicts = new ArrayList<>(1);
-				conflicts.add(imports[i]);
+				conflicts.add(importConflict);
 			}
 		}
 
@@ -1147,26 +1158,28 @@ public class ResolverImpl implements Resolver {
 	}
 
 	// records the conflict names we can use to scope down the list of multiple suppliers
-	private void addConflictNames(PackageRoots[][] conflict, Set<String> packageConstraints, Set<String> bundleConstraints) {
+	private void addConflictNames(PackageRoots[][] conflicts, Set<String> packageConstraints, Set<String> bundleConstraints) {
 		if (packageConstraints == null || bundleConstraints == null)
 			return;
-		for (int i = 0; i < conflict.length; i++) {
-			packageConstraints.add(conflict[i][0].getName());
-			packageConstraints.add(conflict[i][1].getName());
-			ResolverExport[] exports0 = conflict[i][0].getRoots();
-			if (exports0 != null)
-				for (int j = 0; j < exports0.length; j++) {
-					ResolverBundle exporter = exports0[j].getExporter();
+		for (PackageRoots[] conflict : conflicts) {
+			packageConstraints.add(conflict[0].getName());
+			packageConstraints.add(conflict[1].getName());
+			ResolverExport[] exports0 = conflict[0].getRoots();
+			if (exports0 != null) {
+				for (ResolverExport exportConflict : exports0) {
+					ResolverBundle exporter = exportConflict.getExporter();
 					if (exporter != null && exporter.getName() != null)
 						bundleConstraints.add(exporter.getName());
 				}
-			ResolverExport[] exports1 = conflict[i][1].getRoots();
-			if (exports1 != null)
-				for (int j = 0; j < exports1.length; j++) {
-					ResolverBundle exporter = exports1[j].getExporter();
+			}
+			ResolverExport[] exports1 = conflict[1].getRoots();
+			if (exports1 != null) {
+				for (ResolverExport exportConflict : exports1) {
+					ResolverBundle exporter = exportConflict.getExporter();
 					if (exporter != null && exporter.getName() != null)
 						bundleConstraints.add(exporter.getName());
 				}
+			}
 		}
 	}
 
@@ -1313,18 +1326,19 @@ public class ResolverImpl implements Resolver {
 			}
 			// Check that we haven't wired to any dropped exports
 			ResolverImport[] imports = cycleBundle.getImportPackages();
-			for (int j = 0; j < imports.length; j++) {
+			for (ResolverImport resolverImport : imports) {
 				// check for dropped exports
-				while (imports[j].getSelectedSupplier() != null) {
-					ResolverExport importSupplier = (ResolverExport) imports[j].getSelectedSupplier();
-					if (importSupplier.getSubstitute() != null)
-						imports[j].selectNextSupplier();
-					else
+				while (resolverImport.getSelectedSupplier() != null) {
+					ResolverExport importSupplier = (ResolverExport) resolverImport.getSelectedSupplier();
+					if (importSupplier.getSubstitute() != null) {
+						resolverImport.selectNextSupplier();
+					} else {
 						break;
+					}
 				}
-				if (!imports[j].isDynamic() && !imports[j].isOptional() && imports[j].getSelectedSupplier() == null) {
+				if (!resolverImport.isDynamic() && !resolverImport.isOptional() && resolverImport.getSelectedSupplier() == null) {
 					cycleBundle.setResolvable(false);
-					state.addResolverError(imports[j].getVersionConstraint().getBundle(), ResolverError.MISSING_IMPORT_PACKAGE, imports[j].getVersionConstraint().toString(), imports[j].getVersionConstraint());
+					state.addResolverError(resolverImport.getVersionConstraint().getBundle(), ResolverError.MISSING_IMPORT_PACKAGE, resolverImport.getVersionConstraint().toString(), resolverImport.getVersionConstraint());
 					iCycle.remove();
 					continue cycleLoop;
 				}
@@ -1394,15 +1408,17 @@ public class ResolverImpl implements Resolver {
 
 		if (!failed) {
 			GenericConstraint[] genericRequires = bundle.getGenericRequires();
-			for (int i = 0; i < genericRequires.length; i++) {
-				if (genericRequires[i].isEffective()) {
-					if (!resolveGenericReq(genericRequires[i], cycle)) {
-						if (DEBUG || DEBUG_GENERICS)
-							ResolverImpl.log("** GENERICS " + genericRequires[i].getVersionConstraint().getName() + "[" + genericRequires[i].getBundleDescription() + "] failed to resolve"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						state.addResolverError(genericRequires[i].getVersionConstraint().getBundle(), ResolverError.MISSING_GENERIC_CAPABILITY, genericRequires[i].getVersionConstraint().toString(), genericRequires[i].getVersionConstraint());
-						if (genericRequires[i].isFromFragment()) {
-							if (!developmentMode) // only detach fragments when not in devmode
-								bundle.detachFragment(bundleMapping.get(genericRequires[i].getVersionConstraint().getBundle()), null);
+			for (GenericConstraint genericRequire : genericRequires) {
+				if (genericRequire.isEffective()) {
+					if (!resolveGenericReq(genericRequire, cycle)) {
+						if (DEBUG || DEBUG_GENERICS) {
+							ResolverImpl.log("** GENERICS " + genericRequire.getVersionConstraint().getName() + "[" + genericRequire.getBundleDescription() + "] failed to resolve"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						}
+						state.addResolverError(genericRequire.getVersionConstraint().getBundle(), ResolverError.MISSING_GENERIC_CAPABILITY, genericRequire.getVersionConstraint().toString(), genericRequire.getVersionConstraint());
+						if (genericRequire.isFromFragment()) {
+							if (!developmentMode) { // only detach fragments when not in devmode
+								bundle.detachFragment(bundleMapping.get(genericRequire.getVersionConstraint().getBundle()), null);
+							}
 							continue;
 						}
 						if (!developmentMode) {
@@ -1411,8 +1427,8 @@ public class ResolverImpl implements Resolver {
 							break;
 						}
 					} else {
-						if (StateImpl.OSGI_EE_NAMESPACE.equals(genericRequires[i].getNameSpace())) {
-							VersionSupplier supplier = genericRequires[i].getSelectedSupplier();
+						if (StateImpl.OSGI_EE_NAMESPACE.equals(genericRequire.getNameSpace())) {
+							VersionSupplier supplier = genericRequire.getSelectedSupplier();
 							Integer ee = supplier == null ? null : (Integer) ((GenericDescription) supplier.getBaseDescription()).getAttributes().get(ExportPackageDescriptionImpl.EQUINOX_EE);
 							if (ee != null && ((BundleDescriptionImpl) bundle.getBaseDescription()).getEquinoxEE() < 0)
 								((BundleDescriptionImpl) bundle.getBundleDescription()).setEquinoxEE(ee);
@@ -1425,15 +1441,17 @@ public class ResolverImpl implements Resolver {
 		if (!failed) {
 			// Iterate thru required bundles of 'bundle' trying to find matching bundles.
 			BundleConstraint[] requires = bundle.getRequires();
-			for (int i = 0; i < requires.length; i++) {
-				if (!resolveRequire(requires[i], cycle)) {
-					if (DEBUG || DEBUG_REQUIRES)
-						ResolverImpl.log("** REQUIRE " + requires[i].getVersionConstraint().getName() + "[" + requires[i].getBundleDescription() + "] failed to resolve"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					state.addResolverError(requires[i].getVersionConstraint().getBundle(), ResolverError.MISSING_REQUIRE_BUNDLE, requires[i].getVersionConstraint().toString(), requires[i].getVersionConstraint());
+			for (BundleConstraint require : requires) {
+				if (!resolveRequire(require, cycle)) {
+					if (DEBUG || DEBUG_REQUIRES) {
+						ResolverImpl.log("** REQUIRE " + require.getVersionConstraint().getName() + "[" + require.getBundleDescription() + "] failed to resolve"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					state.addResolverError(require.getVersionConstraint().getBundle(), ResolverError.MISSING_REQUIRE_BUNDLE, require.getVersionConstraint().toString(), require.getVersionConstraint());
 					// If the require has failed to resolve and it is from a fragment, then remove the fragment from the host
-					if (requires[i].isFromFragment()) {
-						if (!developmentMode) // only detach fragments when not in devmode
-							bundle.detachFragment(bundleMapping.get(requires[i].getVersionConstraint().getBundle()), requires[i]);
+					if (require.isFromFragment()) {
+						if (!developmentMode) { // only detach fragments when not in devmode
+							bundle.detachFragment(bundleMapping.get(require.getVersionConstraint().getBundle()), require);
+						}
 						continue;
 					}
 					if (!developmentMode) {
@@ -1448,16 +1466,18 @@ public class ResolverImpl implements Resolver {
 		if (!failed) {
 			// Iterate thru imports of 'bundle' trying to find matching exports.
 			ResolverImport[] imports = bundle.getImportPackages();
-			for (int i = 0; i < imports.length; i++) {
+			for (ResolverImport resolverImport : imports) {
 				// Only resolve non-dynamic imports here
-				if (!imports[i].isDynamic() && !resolveImport(imports[i], cycle)) {
-					if (DEBUG || DEBUG_IMPORTS)
-						ResolverImpl.log("** IMPORT " + imports[i].getName() + "[" + imports[i].getBundleDescription() + "] failed to resolve"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				if (!resolverImport.isDynamic() && !resolveImport(resolverImport, cycle)) {
+					if (DEBUG || DEBUG_IMPORTS) {
+						ResolverImpl.log("** IMPORT " + resolverImport.getName() + "[" + resolverImport.getBundleDescription() + "] failed to resolve"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
 					// If the import has failed to resolve and it is from a fragment, then remove the fragment from the host
-					state.addResolverError(imports[i].getVersionConstraint().getBundle(), ResolverError.MISSING_IMPORT_PACKAGE, imports[i].getVersionConstraint().toString(), imports[i].getVersionConstraint());
-					if (imports[i].isFromFragment()) {
-						if (!developmentMode) // only detach fragments when not in devmode
-							bundle.detachFragment(bundleMapping.get(imports[i].getVersionConstraint().getBundle()), imports[i]);
+					state.addResolverError(resolverImport.getVersionConstraint().getBundle(), ResolverError.MISSING_IMPORT_PACKAGE, resolverImport.getVersionConstraint().toString(), resolverImport.getVersionConstraint());
+					if (resolverImport.isFromFragment()) {
+						if (!developmentMode) { // only detach fragments when not in devmode
+							bundle.detachFragment(bundleMapping.get(resolverImport.getVersionConstraint().getBundle()), resolverImport);
+						}
 						continue;
 					}
 					if (!developmentMode) {
@@ -1498,11 +1518,12 @@ public class ResolverImpl implements Resolver {
 		// get all currently attached fragments and ensure that any constraints
 		// they have do not conflict with the constraints resolved to by the host
 		ResolverBundle[] fragments = bundle.getFragments();
-		for (int i = 0; i < fragments.length; i++) {
-			BundleDescription fragment = fragments[i].getBundleDescription();
-			if (bundle.constraintsConflict(fragment, fragment.getImportPackages(), fragment.getRequiredBundles(), fragment.getGenericRequires()) && !developmentMode)
+		for (ResolverBundle resolverFragment : fragments) {
+			BundleDescription fragment = resolverFragment.getBundleDescription();
+			if (bundle.constraintsConflict(fragment, fragment.getImportPackages(), fragment.getRequiredBundles(), fragment.getGenericRequires()) && !developmentMode) {
 				// found some conflicts; detach the fragment
-				bundle.detachFragment(fragments[i], null);
+				bundle.detachFragment(resolverFragment, null);
+			}
 		}
 	}
 
@@ -1712,18 +1733,22 @@ public class ResolverImpl implements Resolver {
 			// first add the possible supplier; this is done before resolving the supplier bundle to prevent endless cycle loops.
 			imp.addPossibleSupplier(export);
 			if (imp.getBundle() != export.getExporter()) {
-				for (int j = 0; j < substitutableExps.length; j++)
-					if (substitutableExps[j].getSubstitute() == null)
-						substitutableExps[j].setSubstitute(export); // Import wins, drop export
+				for (ResolverExport substitutableExp : substitutableExps) {
+					if (substitutableExp.getSubstitute() == null) {
+						substitutableExp.setSubstitute(export); // Import wins, drop export
+					}
+				}
 				// if in dev mode then allow a constraint to resolve to an unresolved bundle
 				if ((originalState != ResolverBundle.RESOLVED && !resolveBundle(export.getExporter(), cycle) && !developmentMode) || export.getSubstitute() != null) {
 					// remove the possible supplier
 					imp.removePossibleSupplier(export);
 					// add back the exports of this package from the importer
 					if (imp.getSelectedSupplier() == null)
-						for (int j = 0; j < substitutableExps.length; j++)
-							if (substitutableExps[j].getSubstitute() == export)
-								substitutableExps[j].setSubstitute(null);
+						for (ResolverExport substitutableExp : substitutableExps) {
+							if (substitutableExp.getSubstitute() == export) {
+								substitutableExp.setSubstitute(null);
+							}
+						}
 					continue; // Bundle hasn't resolved || export has not been selected and is unavailable
 				}
 			} else if (export.getSubstitute() != null)
@@ -1797,60 +1822,65 @@ public class ResolverImpl implements Resolver {
 
 	// Resolves the bundles in the State
 	private void stateResolveBundles(ResolverBundle[] resolvedBundles) {
-		for (int i = 0; i < resolvedBundles.length; i++) {
-			if (!resolvedBundles[i].getBundleDescription().isResolved())
-				stateResolveBundle(resolvedBundles[i]);
+		for (ResolverBundle resolvedBundle : resolvedBundles) {
+			if (!resolvedBundle.getBundleDescription().isResolved()) {
+				stateResolveBundle(resolvedBundle);
+			}
 		}
 	}
 
 	private void stateResolveConstraints(ResolverBundle rb) {
 		ResolverImport[] imports = rb.getImportPackages();
-		for (int i = 0; i < imports.length; i++) {
-			ResolverExport export = (ResolverExport) imports[i].getSelectedSupplier();
+		for (ResolverImport resolverImport : imports) {
+			ResolverExport export = (ResolverExport) resolverImport.getSelectedSupplier();
 			BaseDescription supplier = export == null ? null : export.getExportPackageDescription();
-			state.resolveConstraint(imports[i].getVersionConstraint(), supplier);
+			state.resolveConstraint(resolverImport.getVersionConstraint(), supplier);
 		}
 		BundleConstraint[] requires = rb.getRequires();
-		for (int i = 0; i < requires.length; i++) {
-			ResolverBundle bundle = (ResolverBundle) requires[i].getSelectedSupplier();
+		for (BundleConstraint require : requires) {
+			ResolverBundle bundle = (ResolverBundle) require.getSelectedSupplier();
 			BaseDescription supplier = bundle == null ? null : bundle.getBundleDescription();
-			state.resolveConstraint(requires[i].getVersionConstraint(), supplier);
+			state.resolveConstraint(require.getVersionConstraint(), supplier);
 		}
 		GenericConstraint[] genericRequires = rb.getGenericRequires();
-		for (int i = 0; i < genericRequires.length; i++) {
-			VersionSupplier[] matchingCapabilities = genericRequires[i].getMatchingCapabilities();
-			if (matchingCapabilities == null)
-				state.resolveConstraint(genericRequires[i].getVersionConstraint(), null);
-			else
-				for (int j = 0; j < matchingCapabilities.length; j++)
-					state.resolveConstraint(genericRequires[i].getVersionConstraint(), matchingCapabilities[j].getBaseDescription());
+		for (GenericConstraint genericRequire : genericRequires) {
+			VersionSupplier[] matchingCapabilities = genericRequire.getMatchingCapabilities();
+			if (matchingCapabilities == null) {
+				state.resolveConstraint(genericRequire.getVersionConstraint(), null);
+			} else {
+				for (VersionSupplier matchingCapability : matchingCapabilities) {
+					state.resolveConstraint(genericRequire.getVersionConstraint(), matchingCapability.getBaseDescription());
+				}
+			}
 		}
 	}
 
 	private void stateResolveFragConstraints(ResolverBundle rb) {
 		ResolverBundle host = (ResolverBundle) rb.getHost().getSelectedSupplier();
 		ImportPackageSpecification[] imports = rb.getBundleDescription().getImportPackages();
-		for (int i = 0; i < imports.length; i++) {
-			ResolverImport hostImport = host == null ? null : host.getImport(imports[i].getName());
+		for (ImportPackageSpecification importSpecification : imports) {
+			ResolverImport hostImport = host == null ? null : host.getImport(importSpecification.getName());
 			ResolverExport export = (ResolverExport) (hostImport == null ? null : hostImport.getSelectedSupplier());
 			BaseDescription supplier = export == null ? null : export.getExportPackageDescription();
-			state.resolveConstraint(imports[i], supplier);
+			state.resolveConstraint(importSpecification, supplier);
 		}
 		BundleSpecification[] requires = rb.getBundleDescription().getRequiredBundles();
-		for (int i = 0; i < requires.length; i++) {
-			BundleConstraint hostRequire = host == null ? null : host.getRequire(requires[i].getName());
+		for (BundleSpecification require : requires) {
+			BundleConstraint hostRequire = host == null ? null : host.getRequire(require.getName());
 			ResolverBundle bundle = (ResolverBundle) (hostRequire == null ? null : hostRequire.getSelectedSupplier());
 			BaseDescription supplier = bundle == null ? null : bundle.getBundleDescription();
-			state.resolveConstraint(requires[i], supplier);
+			state.resolveConstraint(require, supplier);
 		}
 		GenericConstraint[] genericRequires = rb.getGenericRequires();
-		for (int i = 0; i < genericRequires.length; i++) {
-			VersionSupplier[] matchingCapabilities = genericRequires[i].getMatchingCapabilities();
-			if (matchingCapabilities == null)
-				state.resolveConstraint(genericRequires[i].getVersionConstraint(), null);
-			else
-				for (int j = 0; j < matchingCapabilities.length; j++)
-					state.resolveConstraint(genericRequires[i].getVersionConstraint(), matchingCapabilities[j].getBaseDescription());
+		for (GenericConstraint genericRequire : genericRequires) {
+			VersionSupplier[] matchingCapabilities = genericRequire.getMatchingCapabilities();
+			if (matchingCapabilities == null) {
+				state.resolveConstraint(genericRequire.getVersionConstraint(), null);
+			} else {
+				for (VersionSupplier matchingCapability : matchingCapabilities) {
+					state.resolveConstraint(genericRequire.getVersionConstraint(), matchingCapability.getBaseDescription());
+				}
+			}
 		}
 	}
 
@@ -1869,17 +1899,18 @@ public class ResolverImpl implements Resolver {
 		// Gather selected exports
 		ResolverExport[] exports = rb.getSelectedExports();
 		List<ExportPackageDescription> selectedExports = new ArrayList<>(exports.length);
-		for (int i = 0; i < exports.length; i++) {
-			if (permissionChecker.checkPackagePermission(exports[i].getExportPackageDescription()))
-				selectedExports.add(exports[i].getExportPackageDescription());
+		for (ResolverExport export : exports) {
+			if (permissionChecker.checkPackagePermission(export.getExportPackageDescription())) {
+				selectedExports.add(export.getExportPackageDescription());
+			}
 		}
 		ExportPackageDescription[] selectedExportsArray = selectedExports.toArray(new ExportPackageDescription[selectedExports.size()]);
 
 		// Gather substitute exports
 		ResolverExport[] substituted = rb.getSubstitutedExports();
 		List<ExportPackageDescription> substitutedExports = new ArrayList<>(substituted.length);
-		for (int i = 0; i < substituted.length; i++) {
-			substitutedExports.add(substituted[i].getExportPackageDescription());
+		for (ResolverExport substitutedExport : substituted) {
+			substitutedExports.add(substitutedExport.getExportPackageDescription());
 		}
 		ExportPackageDescription[] substitutedExportsArray = substitutedExports.toArray(new ExportPackageDescription[substitutedExports.size()]);
 
@@ -1890,13 +1921,14 @@ public class ResolverImpl implements Resolver {
 		BundleConstraint[] requires = rb.getRequires();
 		List<BundleDescription> bundlesWiredTo = new ArrayList<>(requires.length);
 		List<StateWire> requireWires = new ArrayList<>(requires.length);
-		for (int i = 0; i < requires.length; i++)
-			if (requires[i].getSelectedSupplier() != null) {
-				BundleDescription supplier = (BundleDescription) requires[i].getSelectedSupplier().getBaseDescription();
+		for (BundleConstraint require : requires) {
+			if (require.getSelectedSupplier() != null) {
+				BundleDescription supplier = (BundleDescription) require.getSelectedSupplier().getBaseDescription();
 				bundlesWiredTo.add(supplier);
-				StateWire requireWire = newStateWire(rb.getBundleDescription(), requires[i].getVersionConstraint(), supplier, supplier);
+				StateWire requireWire = newStateWire(rb.getBundleDescription(), require.getVersionConstraint(), supplier, supplier);
 				requireWires.add(requireWire);
 			}
+		}
 		BundleDescription[] bundlesWiredToArray = bundlesWiredTo.toArray(new BundleDescription[bundlesWiredTo.size()]);
 		if (!requireWires.isEmpty())
 			stateWires.put(BundleRevision.BUNDLE_NAMESPACE, requireWires);
@@ -1976,13 +2008,14 @@ public class ResolverImpl implements Resolver {
 		ResolverImport[] imports = rb.getImportPackages();
 		List<ExportPackageDescription> exportsWiredTo = new ArrayList<>(imports.length);
 		List<StateWire> importWires = new ArrayList<>(imports.length);
-		for (int i = 0; i < imports.length; i++)
-			if (imports[i].getSelectedSupplier() != null) {
-				ExportPackageDescription supplier = (ExportPackageDescription) imports[i].getSelectedSupplier().getBaseDescription();
+		for (ResolverImport resolverImport : imports) {
+			if (resolverImport.getSelectedSupplier() != null) {
+				ExportPackageDescription supplier = (ExportPackageDescription) resolverImport.getSelectedSupplier().getBaseDescription();
 				exportsWiredTo.add(supplier);
-				StateWire wire = newStateWire(rb.getBundleDescription(), imports[i].getVersionConstraint(), supplier.getExporter(), supplier);
+				StateWire wire = newStateWire(rb.getBundleDescription(), resolverImport.getVersionConstraint(), supplier.getExporter(), supplier);
 				importWires.add(wire);
 			}
+		}
 		if (stateWires != null && !importWires.isEmpty())
 			stateWires.put(BundleRevision.PACKAGE_NAMESPACE, importWires);
 		return exportsWiredTo.toArray(new ExportPackageDescription[exportsWiredTo.size()]);
@@ -2010,12 +2043,13 @@ public class ResolverImpl implements Resolver {
 			ResolverImport[] resolverImports = rb.getImportPackages();
 			// Check through the ResolverImports of this bundle.
 			// If there is a matching one then pass it into resolveImport()
-			for (int j = 0; j < resolverImports.length; j++) {
+			for (ResolverImport resolverImport : resolverImports) {
 				// Make sure it is a dynamic import
-				if (!resolverImports[j].isDynamic())
+				if (!resolverImport.isDynamic()) {
 					continue;
+				}
 				// Resolve the import
-				ExportPackageDescription supplier = resolveDynamicImport(resolverImports[j], requestedPackage);
+				ExportPackageDescription supplier = resolveDynamicImport(resolverImport, requestedPackage);
 				if (supplier != null)
 					return supplier;
 			}
@@ -2173,8 +2207,8 @@ public class ResolverImpl implements Resolver {
 		BundleDescription[] dependents = bundle.getBundleDescription().getDependents();
 		state.resolveBundle(bundle.getBundleDescription(), false, null, null, null, null, null, null, null, null);
 		// Unresolve dependents of 'bundle'
-		for (int i = 0; i < dependents.length; i++) {
-			ResolverBundle db = bundleMapping.get(dependents[i]);
+		for (BundleDescription dependent : dependents) {
+			ResolverBundle db = bundleMapping.get(dependent);
 			if (db == null) {
 				continue;
 			}
@@ -2255,11 +2289,11 @@ public class ResolverImpl implements Resolver {
 			if (requireBundles.length == 0) {
 				ResolverImpl.log("        (r) no requires"); //$NON-NLS-1$
 			} else {
-				for (int i = 0; i < requireBundles.length; i++) {
-					if (requireBundles[i].getSelectedSupplier() == null) {
+				for (BundleConstraint requireBundle : requireBundles) {
+					if (requireBundle.getSelectedSupplier() == null) {
 						ResolverImpl.log("        (r) " + rb.getBundleDescription() + " -> NULL!!!"); //$NON-NLS-1$ //$NON-NLS-2$
 					} else {
-						ResolverImpl.log("        (r) " + rb.getBundleDescription() + " -> " + requireBundles[i].getSelectedSupplier()); //$NON-NLS-1$ //$NON-NLS-2$
+						ResolverImpl.log("        (r) " + rb.getBundleDescription() + " -> " + requireBundle.getSelectedSupplier()); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				}
 			}
@@ -2268,8 +2302,8 @@ public class ResolverImpl implements Resolver {
 			if (hostSpec != null) {
 				VersionSupplier[] hosts = hostSpec.getPossibleSuppliers();
 				if (hosts != null)
-					for (int i = 0; i < hosts.length; i++) {
-						ResolverImpl.log("        (h) " + rb.getBundleDescription() + " -> " + hosts[i].getBundleDescription()); //$NON-NLS-1$ //$NON-NLS-2$
+					for (VersionSupplier host : hosts) {
+						ResolverImpl.log("        (h) " + rb.getBundleDescription() + " -> " + host.getBundleDescription()); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 			}
 			// Imports
@@ -2278,16 +2312,16 @@ public class ResolverImpl implements Resolver {
 				ResolverImpl.log("        (w) no imports"); //$NON-NLS-1$
 				continue;
 			}
-			for (int i = 0; i < imports.length; i++) {
-				if (imports[i].isDynamic() && imports[i].getSelectedSupplier() == null) {
-					ResolverImpl.log("        (w) " + imports[i].getBundle() + ":" + imports[i].getName() + " -> DYNAMIC"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				} else if (imports[i].isOptional() && imports[i].getSelectedSupplier() == null) {
-					ResolverImpl.log("        (w) " + imports[i].getBundle() + ":" + imports[i].getName() + " -> OPTIONAL (could not be wired)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				} else if (imports[i].getSelectedSupplier() == null) {
-					ResolverImpl.log("        (w) " + imports[i].getBundle() + ":" + imports[i].getName() + " -> NULL!!!"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			for (ResolverImport resolverImport : imports) {
+				if (resolverImport.isDynamic() && resolverImport.getSelectedSupplier() == null) {
+					ResolverImpl.log("        (w) " + resolverImport.getBundle() + ":" + resolverImport.getName() + " -> DYNAMIC"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				} else if (resolverImport.isOptional() && resolverImport.getSelectedSupplier() == null) {
+					ResolverImpl.log("        (w) " + resolverImport.getBundle() + ":" + resolverImport.getName() + " -> OPTIONAL (could not be wired)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				} else if (resolverImport.getSelectedSupplier() == null) {
+					ResolverImpl.log("        (w) " + resolverImport.getBundle() + ":" + resolverImport.getName() + " -> NULL!!!"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				} else {
-					ResolverImpl.log("        (w) " + imports[i].getBundle() + ":" + imports[i].getName() + " -> " + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							((ResolverExport) imports[i].getSelectedSupplier()).getExporter() + ":" + imports[i].getSelectedSupplier().getName()); //$NON-NLS-1$
+					ResolverImpl.log("        (w) " + resolverImport.getBundle() + ":" + resolverImport.getName() + " -> " + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							((ResolverExport) resolverImport.getSelectedSupplier()).getExporter() + ":" + resolverImport.getSelectedSupplier().getName()); //$NON-NLS-1$
 				}
 			}
 		}

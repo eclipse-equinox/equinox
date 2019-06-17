@@ -178,8 +178,8 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 			return null;
 		}
 		String[] protocols = (String[]) prop;
-		for (int i = 0; i < protocols.length; i++) {
-			if (protocols[i].equals(protocol)) {
+		for (String candidateProtocol : protocols) {
+			if (candidateProtocol.equals(protocol)) {
 				//If our protocol is registered by another service, check the service ranking and switch URLStreamHandlers if nessecary.
 				int newServiceRanking = getRank(reference);
 				if (newServiceRanking > ranking || urlStreamServiceReference == null)

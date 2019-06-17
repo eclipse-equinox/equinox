@@ -124,14 +124,15 @@ public class FrameworkExtensionInstaller {
 			if (files == null) {
 				return;
 			}
-			for (int i = 0; i < files.length; i++) {
-				if (files[i] == null)
-					continue;
+			for (File file : files) {
+				if (file == null) {
+					continue; 
+				}
 				try {
-					callAddURLMethod(StorageUtil.encodeFileURL(files[i]));
-				} catch (InvocationTargetException | MalformedURLException e) {
+					callAddURLMethod(StorageUtil.encodeFileURL(file));
+				}catch (InvocationTargetException | MalformedURLException e) {
 					throw new BundleException("Error adding extension content.", e); //$NON-NLS-1$
-				} 
+				}
 			}
 		}
 

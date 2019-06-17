@@ -280,8 +280,7 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 		if (ops == null)
 			throw new IllegalArgumentException("The options must not be null."); //$NON-NLS-1$
 		Properties newOptions = new Properties();
-		for (Iterator<Map.Entry<String, String>> entries = ops.entrySet().iterator(); entries.hasNext();) {
-			Map.Entry<String, String> entry = entries.next();
+		for (Map.Entry<String, String> entry : ops.entrySet()) {
 			if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String))
 				throw new IllegalArgumentException("Option keys and values must be of type String: " + entry.getKey() + "=" + entry.getValue()); //$NON-NLS-1$ //$NON-NLS-2$
 			newOptions.put(entry.getKey(), entry.getValue().trim());
@@ -305,8 +304,7 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 				}
 			}
 			// now check for changes to existing values
-			for (Iterator<Map.Entry<Object, Object>> newEntries = newOptions.entrySet().iterator(); newEntries.hasNext();) {
-				Map.Entry<Object, Object> entry = newEntries.next();
+			for (Map.Entry<Object, Object> entry : newOptions.entrySet()) {
 				String existingValue = (String) options.get(entry.getKey());
 				if (!entry.getValue().equals(existingValue)) {
 					String symbolicName = getSymbolicName((String) entry.getKey());
@@ -490,16 +488,16 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 		}
 		if (listenerRefs == null)
 			return;
-		for (int i = 0; i < listenerRefs.length; i++) {
-			DebugOptionsListener service = (DebugOptionsListener) bc.getService(listenerRefs[i]);
+		for (ServiceReference<?> listenerRef : listenerRefs) {
+			DebugOptionsListener service = (DebugOptionsListener) bc.getService(listenerRef);
 			if (service == null)
 				continue;
 			try {
 				service.optionsChanged(this);
-			} catch (Throwable t) {
+			}catch (Throwable t) {
 				// TODO consider logging
 			} finally {
-				bc.ungetService(listenerRefs[i]);
+				bc.ungetService(listenerRef);
 			}
 		}
 	}

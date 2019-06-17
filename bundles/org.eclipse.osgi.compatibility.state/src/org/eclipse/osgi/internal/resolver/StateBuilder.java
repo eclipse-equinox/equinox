@@ -160,17 +160,17 @@ public class StateBuilder {
 		List<ManifestElement> aliasList = null;
 		if (genericAliases.length > 0) {
 			aliasList = new ArrayList<>(genericRequires == null ? 0 : genericRequires.length);
-			for (int i = 0; i < genericAliases.length; i++) {
-				ManifestElement[] aliasReqs = ManifestElement.parseHeader(genericAliases[i][1], manifest.get(genericAliases[i][1]));
+			for (String[] genericAlias : genericAliases) {
+				ManifestElement[] aliasReqs = ManifestElement.parseHeader(genericAlias[1], manifest.get(genericAlias[1]));
 				if (aliasReqs == null)
 					continue;
-				for (int j = 0; j < aliasReqs.length; j++) {
+				for (ManifestElement aliasReq : aliasReqs) {
 					StringBuffer strBuf = new StringBuffer();
-					strBuf.append(aliasReqs[j].getValue()).append(':').append(genericAliases[i][2]);
-					String filter = aliasReqs[j].getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE);
+					strBuf.append(aliasReq.getValue()).append(':').append(genericAlias[2]);
+					String filter = aliasReq.getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE);
 					if (filter != null)
 						strBuf.append("; ").append(Constants.SELECTION_FILTER_ATTRIBUTE).append(filter).append("=\"").append(filter).append("\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					ManifestElement[] withType = ManifestElement.parseHeader(genericAliases[i][1], strBuf.toString());
+					ManifestElement[] withType = ManifestElement.parseHeader(genericAlias[1], strBuf.toString());
 					aliasList.add(withType[0]);
 				}
 			}
@@ -187,18 +187,18 @@ public class StateBuilder {
 		List<ManifestElement> aliasList = null;
 		if (genericAliases.length > 0) {
 			aliasList = new ArrayList<>(genericCapabilities == null ? 0 : genericCapabilities.length);
-			for (int i = 0; i < genericAliases.length; i++) {
-				ManifestElement[] aliasCapabilities = ManifestElement.parseHeader(genericAliases[i][0], manifest.get(genericAliases[i][0]));
+			for (String[] genericAlias : genericAliases) {
+				ManifestElement[] aliasCapabilities = ManifestElement.parseHeader(genericAlias[0], manifest.get(genericAlias[0]));
 				if (aliasCapabilities == null)
 					continue;
-				for (int j = 0; j < aliasCapabilities.length; j++) {
+				for (ManifestElement aliasCapability : aliasCapabilities) {
 					StringBuffer strBuf = new StringBuffer();
-					strBuf.append(aliasCapabilities[j].getValue()).append(':').append(genericAliases[i][2]);
-					for (Enumeration<String> keys = aliasCapabilities[j].getKeys(); keys != null && keys.hasMoreElements();) {
+					strBuf.append(aliasCapability.getValue()).append(':').append(genericAlias[2]);
+					for (Enumeration<String> keys = aliasCapability.getKeys(); keys != null && keys.hasMoreElements();) {
 						String key = keys.nextElement();
-						strBuf.append("; ").append(key).append("=\"").append(aliasCapabilities[j].getAttribute(key)).append("\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						strBuf.append("; ").append(key).append("=\"").append(aliasCapability.getAttribute(key)).append("\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
-					ManifestElement[] withTypes = ManifestElement.parseHeader(genericAliases[i][0], strBuf.toString());
+					ManifestElement[] withTypes = ManifestElement.parseHeader(genericAlias[0], strBuf.toString());
 					aliasList.add(withTypes[0]);
 				}
 			}
@@ -227,20 +227,24 @@ public class StateBuilder {
 	}
 
 	private static void validateHeaders(Dictionary<String, String> manifest, boolean jreBundle) throws BundleException {
-		for (int i = 0; i < DEFINED_OSGI_VALIDATE_HEADERS.length; i++) {
-			String header = manifest.get(DEFINED_OSGI_VALIDATE_HEADERS[i]);
+		for (String definedOSGiValidateHeader : DEFINED_OSGI_VALIDATE_HEADERS) {
+			String header = manifest.get(definedOSGiValidateHeader);
 			if (header != null) {
-				ManifestElement[] elements = ManifestElement.parseHeader(DEFINED_OSGI_VALIDATE_HEADERS[i], header);
-				checkForDuplicateDirectivesAttributes(DEFINED_OSGI_VALIDATE_HEADERS[i], elements);
-				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.IMPORT_PACKAGE)
-					checkImportExportSyntax(DEFINED_OSGI_VALIDATE_HEADERS[i], elements, false, false, jreBundle);
-				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.DYNAMICIMPORT_PACKAGE)
-					checkImportExportSyntax(DEFINED_OSGI_VALIDATE_HEADERS[i], elements, false, true, jreBundle);
-				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.EXPORT_PACKAGE)
-					checkImportExportSyntax(DEFINED_OSGI_VALIDATE_HEADERS[i], elements, true, false, jreBundle);
-				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.FRAGMENT_HOST)
-					checkExtensionBundle(DEFINED_OSGI_VALIDATE_HEADERS[i], elements);
-			} else if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.BUNDLE_SYMBOLICNAME) {
+				ManifestElement[] elements = ManifestElement.parseHeader(definedOSGiValidateHeader, header);
+				checkForDuplicateDirectivesAttributes(definedOSGiValidateHeader, elements);
+				if (definedOSGiValidateHeader == Constants.IMPORT_PACKAGE) {
+					checkImportExportSyntax(definedOSGiValidateHeader, elements, false, false, jreBundle);
+				}
+				if (definedOSGiValidateHeader == Constants.DYNAMICIMPORT_PACKAGE) {
+					checkImportExportSyntax(definedOSGiValidateHeader, elements, false, true, jreBundle);
+				}
+				if (definedOSGiValidateHeader == Constants.EXPORT_PACKAGE) {
+					checkImportExportSyntax(definedOSGiValidateHeader, elements, true, false, jreBundle);
+				}
+				if (definedOSGiValidateHeader == Constants.FRAGMENT_HOST) {
+					checkExtensionBundle(definedOSGiValidateHeader, elements);
+				}
+			} else if (definedOSGiValidateHeader == Constants.BUNDLE_SYMBOLICNAME) {
 				throw new BundleException(NLS.bind(StateMsg.HEADER_REQUIRED, Constants.BUNDLE_SYMBOLICNAME), BundleException.MANIFEST_ERROR);
 			}
 		}
@@ -273,12 +277,13 @@ public class StateBuilder {
 			if (exported.length == 0 && imported == null && dynamicImported == null)
 				return null;
 			allImports = new ArrayList<>(exported.length + (imported == null ? 0 : imported.length));
-			for (int i = 0; i < exported.length; i++) {
-				if (providedExports.contains(exported[i].getName()))
+			for (ExportPackageDescription exportDescription : exported) {
+				if (providedExports.contains(exportDescription.getName())) {
 					continue;
+				}
 				ImportPackageSpecificationImpl result = new ImportPackageSpecificationImpl();
-				result.setName(exported[i].getName());
-				result.setVersionRange(getVersionRange(exported[i].getVersion().toString()));
+				result.setName(exportDescription.getName());
+				result.setVersionRange(getVersionRange(exportDescription.getVersion().toString()));
 				result.setDirective(Constants.RESOLUTION_DIRECTIVE, ImportPackageSpecification.RESOLUTION_STATIC);
 				allImports.add(result);
 			}
@@ -289,27 +294,30 @@ public class StateBuilder {
 		// add dynamics first so they will get overriden by static imports if
 		// the same package is dyanamically imported and statically imported.
 		if (dynamicImported != null)
-			for (int i = 0; i < dynamicImported.length; i++)
-				addImportPackages(dynamicImported[i], allImports, manifestVersion, true);
+			for (ManifestElement dynamicImport : dynamicImported) {
+				addImportPackages(dynamicImport, allImports, manifestVersion, true);
+			}
 		if (imported != null)
-			for (int i = 0; i < imported.length; i++)
-				addImportPackages(imported[i], allImports, manifestVersion, false);
+			for (ManifestElement pkgImport : imported) {
+				addImportPackages(pkgImport, allImports, manifestVersion, false);
+			}
 		return allImports.toArray(new ImportPackageSpecification[allImports.size()]);
 	}
 
 	public static void addImportPackages(ManifestElement importPackage, List<ImportPackageSpecification> allImports, int manifestVersion, boolean dynamic) {
 		String[] importNames = importPackage.getValueComponents();
-		for (int i = 0; i < importNames.length; i++) {
+		for (String importName : importNames) {
 			// do not allow for multiple imports of same package of manifest version < 2
 			if (manifestVersion < 2) {
 				Iterator<ImportPackageSpecification> iter = allImports.iterator();
-				while (iter.hasNext())
-					if (importNames[i].equals(iter.next().getName()))
+				while (iter.hasNext()) {
+					if (importName.equals(iter.next().getName())) {
 						iter.remove();
+					}
+				}
 			}
-
 			ImportPackageSpecificationImpl result = new ImportPackageSpecificationImpl();
-			result.setName(importNames[i]);
+			result.setName(importName);
 			// set common attributes for both dynamic and static imports
 			String versionString = importPackage.getAttribute(Constants.VERSION_ATTRIBUTE);
 			if (versionString == null) // specification-version aliases to version
@@ -320,13 +328,11 @@ public class StateBuilder {
 			// only set the matching attributes if manifest version >= 2
 			if (manifestVersion >= 2)
 				result.setAttributes(getAttributes(importPackage, DEFINED_PACKAGE_MATCHING_ATTRS));
-
 			if (dynamic)
 				result.setDirective(Constants.RESOLUTION_DIRECTIVE, ImportPackageSpecification.RESOLUTION_DYNAMIC);
 			else
 				result.setDirective(Constants.RESOLUTION_DIRECTIVE, getResolution(importPackage.getDirective(Constants.RESOLUTION_DIRECTIVE)));
 			result.setArbitraryDirectives(getDirectives(importPackage, DEFINED_IMPORT_PACKAGE_DIRECTIVES));
-
 			allImports.add(result);
 		}
 	}
@@ -344,8 +350,9 @@ public class StateBuilder {
 			return null;
 		List<ExportPackageDescription> allExports = new ArrayList<>(numExports);
 		if (exported != null)
-			for (int i = 0; i < exported.length; i++)
-				addExportPackages(exported[i], allExports, strict);
+			for (ManifestElement packageExport : exported) {
+				addExportPackages(packageExport, allExports, strict);
+			}
 		if (provides != null)
 			addProvidePackages(provides, allExports, providedExports);
 		return allExports.toArray(new ExportPackageDescription[allExports.size()]);
@@ -353,12 +360,12 @@ public class StateBuilder {
 
 	static void addExportPackages(ManifestElement exportPackage, List<ExportPackageDescription> allExports, boolean strict) {
 		String[] exportNames = exportPackage.getValueComponents();
-		for (int i = 0; i < exportNames.length; i++) {
+		for (String exportName : exportNames) {
 			// if we are in strict mode and the package is marked as internal, skip it.
 			if (strict && "true".equals(exportPackage.getDirective(StateImpl.INTERNAL_DIRECTIVE))) //$NON-NLS-1$
 				continue;
 			ExportPackageDescriptionImpl result = new ExportPackageDescriptionImpl();
-			result.setName(exportNames[i]);
+			result.setName(exportName);
 			String versionString = exportPackage.getAttribute(Constants.VERSION_ATTRIBUTE);
 			if (versionString == null) // specification-version aliases to version
 				versionString = exportPackage.getAttribute(Constants.PACKAGE_SPECIFICATION_VERSION);
@@ -378,19 +385,20 @@ public class StateBuilder {
 
 	private static void addProvidePackages(ManifestElement[] provides, List<ExportPackageDescription> allExports, List<String> providedExports) {
 		ExportPackageDescription[] currentExports = allExports.toArray(new ExportPackageDescription[allExports.size()]);
-		for (int i = 0; i < provides.length; i++) {
+		for (ManifestElement provide : provides) {
 			boolean duplicate = false;
-			for (int j = 0; j < currentExports.length; j++)
-				if (provides[i].getValue().equals(currentExports[j].getName())) {
+			for (ExportPackageDescription currentExport : currentExports) {
+				if (provide.getValue().equals(currentExport.getName())) {
 					duplicate = true;
 					break;
 				}
+			}
 			if (!duplicate) {
 				ExportPackageDescriptionImpl result = new ExportPackageDescriptionImpl();
-				result.setName(provides[i].getValue());
+				result.setName(provide.getValue());
 				allExports.add(result);
 			}
-			providedExports.add(provides[i].getValue());
+			providedExports.add(provide.getValue());
 		}
 	}
 
@@ -420,8 +428,8 @@ public class StateBuilder {
 		while (keys.hasMoreElements()) {
 			boolean definedAttr = false;
 			String key = keys.nextElement();
-			for (int i = 0; i < definedAttrs.length; i++) {
-				if (definedAttrs[i].equals(key)) {
+			for (String attr : definedAttrs) {
+				if (attr.equals(key)) {
 					definedAttr = true;
 					break;
 				}
@@ -670,24 +678,25 @@ public class StateBuilder {
 		if (equinoxRequires == null)
 			return null;
 		ArrayList<GenericSpecification> results = new ArrayList<>(equinoxRequires.length);
-		for (int i = 0; i < equinoxRequires.length; i++) {
-			String[] genericNames = equinoxRequires[i].getValueComponents();
-			for (int j = 0; j < genericNames.length; j++) {
+		for (ManifestElement equinoxRequire : equinoxRequires) {
+			String[] genericNames = equinoxRequire.getValueComponents();
+			for (String genericName : genericNames) {
 				GenericSpecificationImpl spec = new GenericSpecificationImpl();
-				int colonIdx = genericNames[j].indexOf(':');
+				int colonIdx = genericName.indexOf(':');
 				if (colonIdx > 0) {
-					spec.setName(genericNames[j].substring(0, colonIdx));
-					spec.setType(genericNames[j].substring(colonIdx + 1));
-				} else
-					spec.setName(genericNames[j]);
+					spec.setName(genericName.substring(0, colonIdx));
+					spec.setType(genericName.substring(colonIdx + 1));
+				} else {
+					spec.setName(genericName);
+				}
 				try {
-					spec.setMatchingFilter(equinoxRequires[i].getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE), true);
+					spec.setMatchingFilter(equinoxRequire.getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE), true);
 				} catch (InvalidSyntaxException e) {
-					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, GENERIC_REQUIRE, equinoxRequires[i].toString());
+					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, GENERIC_REQUIRE, equinoxRequire.toString());
 					throw new BundleException(message + " : " + Constants.SELECTION_FILTER_ATTRIBUTE, BundleException.MANIFEST_ERROR, e); //$NON-NLS-1$
 				}
-				String optional = equinoxRequires[i].getAttribute(OPTIONAL_ATTR);
-				String multiple = equinoxRequires[i].getAttribute(MULTIPLE_ATTR);
+				String optional = equinoxRequire.getAttribute(OPTIONAL_ATTR);
+				String multiple = equinoxRequire.getAttribute(MULTIPLE_ATTR);
 				int resolution = 0;
 				if (TRUE.equals(optional))
 					resolution |= GenericSpecification.RESOLUTION_OPTIONAL;
@@ -754,22 +763,22 @@ public class StateBuilder {
 		if (equinoxCapabilities == null)
 			return null;
 		ArrayList<GenericDescription> results = new ArrayList<>(equinoxCapabilities.length);
-		for (int i = 0; i < equinoxCapabilities.length; i++) {
-			String[] genericNames = equinoxCapabilities[i].getValueComponents();
-			for (int j = 0; j < genericNames.length; j++) {
+		for (ManifestElement equinoxCapability : equinoxCapabilities) {
+			String[] genericNames = equinoxCapability.getValueComponents();
+			for (String genericName : genericNames) {
 				GenericDescriptionImpl desc = new GenericDescriptionImpl();
-				String name = genericNames[j];
-				int colonIdx = genericNames[j].indexOf(':');
+				String name = genericName;
+				int colonIdx = genericName.indexOf(':');
 				if (colonIdx > 0) {
-					name = genericNames[j].substring(0, colonIdx);
-					desc.setType(genericNames[j].substring(colonIdx + 1));
+					name = genericName.substring(0, colonIdx);
+					desc.setType(genericName.substring(colonIdx + 1));
 					if (IdentityNamespace.IDENTITY_NAMESPACE.equals(desc.getType()))
 						throw new BundleException("A bundle is not allowed to define a capability in the " + IdentityNamespace.IDENTITY_NAMESPACE + " name space."); //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				Map<String, Object> mapAttrs = getAttributes(equinoxCapabilities[i], new String[] {Constants.VERSION_ATTRIBUTE});
+				Map<String, Object> mapAttrs = getAttributes(equinoxCapability, new String[] {Constants.VERSION_ATTRIBUTE});
 				Dictionary<String, Object> attrs = mapAttrs == null ? new Hashtable<String, Object>() : new Hashtable<>(mapAttrs);
 				attrs.put(desc.getType(), name);
-				String versionString = equinoxCapabilities[i].getAttribute(Constants.VERSION_ATTRIBUTE);
+				String versionString = equinoxCapability.getAttribute(Constants.VERSION_ATTRIBUTE);
 				if (versionString != null)
 					attrs.put(Constants.VERSION_ATTRIBUTE, Version.parseVersion(versionString));
 				desc.setAttributes(attrs);
@@ -837,17 +846,17 @@ public class StateBuilder {
 		for (int i = 0; i < length; i++) {
 			// check for duplicate imports
 			String[] packageNames = elements[i].getValueComponents();
-			for (int j = 0; j < packageNames.length; j++) {
-				if (!export && !dynamic && packages.contains(packageNames[j])) {
+			for (String packageName : packageNames) {
+				if (!export && !dynamic && packages.contains(packageName)) {
 					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
-					throw new BundleException(message + " : " + NLS.bind(StateMsg.HEADER_PACKAGE_DUPLICATES, packageNames[j]), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+					throw new BundleException(message + " : " + NLS.bind(StateMsg.HEADER_PACKAGE_DUPLICATES, packageName), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 				}
 				// check for java.*
-				if (export && !jreBundle && packageNames[j].startsWith("java.")) { //$NON-NLS-1$
+				if (export && !jreBundle && packageName.startsWith("java.")) { //$NON-NLS-1$
 					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
-					throw new BundleException(message + " : " + NLS.bind(StateMsg.HEADER_PACKAGE_JAVA, packageNames[j]), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+					throw new BundleException(message + " : " + NLS.bind(StateMsg.HEADER_PACKAGE_JAVA, packageName), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 				}
-				packages.add(packageNames[j]);
+				packages.add(packageName);
 			}
 			// check for version/specification version mismatch
 			String version = elements[i].getAttribute(Constants.VERSION_ATTRIBUTE);
@@ -873,25 +882,25 @@ public class StateBuilder {
 
 	private static void checkForDuplicateDirectivesAttributes(String headerKey, ManifestElement[] elements) throws BundleException {
 		// check for duplicate directives
-		for (int i = 0; i < elements.length; i++) {
-			Enumeration<String> directiveKeys = elements[i].getDirectiveKeys();
+		for (ManifestElement element : elements) {
+			Enumeration<String> directiveKeys = element.getDirectiveKeys();
 			if (directiveKeys != null) {
 				while (directiveKeys.hasMoreElements()) {
 					String key = directiveKeys.nextElement();
-					String[] directives = elements[i].getDirectives(key);
+					String[] directives = element.getDirectives(key);
 					if (directives.length > 1) {
-						String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
+						String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, element.toString());
 						throw new BundleException(NLS.bind(message + " : " + StateMsg.HEADER_DIRECTIVE_DUPLICATES, key), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 					}
 				}
 			}
-			Enumeration<String> attrKeys = elements[i].getKeys();
+			Enumeration<String> attrKeys = element.getKeys();
 			if (attrKeys != null) {
 				while (attrKeys.hasMoreElements()) {
 					String key = attrKeys.nextElement();
-					String[] attrs = elements[i].getAttributes(key);
+					String[] attrs = element.getAttributes(key);
 					if (attrs.length > 1) {
-						String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
+						String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, element.toString());
 						throw new BundleException(message + " : " + NLS.bind(StateMsg.HEADER_ATTRIBUTE_DUPLICATES, key), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 					}
 				}

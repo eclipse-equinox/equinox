@@ -291,10 +291,9 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 			throw new IllegalArgumentException();
 		}
 
-		Entry<K, V>[] e = entries();
-		for (int i = 0; i < e.length; i++) {
-			if (e[i].key == key) {
-				return e[i].value;
+		for (Entry<K, V> entry : entries()) {
+			if (entry.key == key) {
+				return entry.value;
 			}
 		}
 		return null;
@@ -314,9 +313,8 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 			throw new IllegalArgumentException();
 		}
 
-		Entry<K, V>[] e = entries();
-		for (int i = 0; i < e.length; i++) {
-			if (e[i].key == key) {
+		for (Entry<K, V> entry : entries()) {
+			if (entry.key == key) {
 				return true;
 			}
 		}
@@ -332,9 +330,8 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 */
 	@Override
 	public boolean containsValue(Object value) {
-		Entry<K, V>[] e = entries();
-		for (int i = 0; i < e.length; i++) {
-			if (e[i].value == value) {
+		for (Entry<K, V> entry : entries()) {
+			if (entry.value == value) {
 				return true;
 			}
 		}

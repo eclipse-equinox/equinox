@@ -308,8 +308,8 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			checkLazyData();
 			lazyData.exportPackages = exportPackages;
 			if (exportPackages != null) {
-				for (int i = 0; i < exportPackages.length; i++) {
-					((ExportPackageDescriptionImpl) exportPackages[i]).setExporter(this);
+				for (ExportPackageDescription exportPackage : exportPackages) {
+					((ExportPackageDescriptionImpl) exportPackage).setExporter(this);
 				}
 			}
 		}
@@ -320,10 +320,11 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			checkLazyData();
 			lazyData.importPackages = importPackages;
 			if (importPackages != null) {
-				for (int i = 0; i < importPackages.length; i++) {
-					((ImportPackageSpecificationImpl) importPackages[i]).setBundle(this);
-					if (ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(importPackages[i].getDirective(Constants.RESOLUTION_DIRECTIVE)))
+				for (ImportPackageSpecification importPackage : importPackages) {
+					((ImportPackageSpecificationImpl) importPackage).setBundle(this);
+					if (ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(importPackage.getDirective(Constants.RESOLUTION_DIRECTIVE))) {
 						stateBits |= HAS_DYNAMICIMPORT;
+					}
 				}
 			}
 		}
@@ -334,8 +335,8 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			checkLazyData();
 			lazyData.requiredBundles = requiredBundles;
 			if (requiredBundles != null)
-				for (int i = 0; i < requiredBundles.length; i++) {
-					((VersionConstraintImpl) requiredBundles[i]).setBundle(this);
+				for (BundleSpecification requiredBundle : requiredBundles) {
+					((VersionConstraintImpl) requiredBundle).setBundle(this);
 				}
 		}
 	}
@@ -345,8 +346,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			checkLazyData();
 			lazyData.genericCapabilities = genericCapabilities;
 			if (genericCapabilities != null)
-				for (int i = 0; i < genericCapabilities.length; i++)
-					((GenericDescriptionImpl) genericCapabilities[i]).setSupplier(this);
+				for (GenericDescription genericCapability : genericCapabilities) {
+					((GenericDescriptionImpl) genericCapability).setSupplier(this);
+				}
 		}
 	}
 
@@ -355,8 +357,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			checkLazyData();
 			lazyData.genericRequires = genericRequires;
 			if (genericRequires != null)
-				for (int i = 0; i < genericRequires.length; i++)
-					((VersionConstraintImpl) genericRequires[i]).setBundle(this);
+				for (GenericSpecification genericRequire : genericRequires) {
+					((VersionConstraintImpl) genericRequire).setBundle(this);
+				}
 		}
 	}
 
@@ -368,8 +371,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 				((NativeCodeSpecificationImpl) nativeCode).setBundle(this);
 				NativeCodeDescription[] suppliers = nativeCode.getPossibleSuppliers();
 				if (suppliers != null)
-					for (int i = 0; i < suppliers.length; i++)
-						((NativeCodeDescriptionImpl) suppliers[i]).setSupplier(this);
+					for (NativeCodeDescription supplier : suppliers) {
+						((NativeCodeDescriptionImpl) supplier).setSupplier(this);
+					}
 			}
 		}
 	}
@@ -431,8 +435,8 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			checkLazyData();
 			lazyData.selectedExports = selectedExports;
 			if (selectedExports != null) {
-				for (int i = 0; i < selectedExports.length; i++) {
-					((ExportPackageDescriptionImpl) selectedExports[i]).setExporter(this);
+				for (ExportPackageDescription selectedExport : selectedExports) {
+					((ExportPackageDescriptionImpl) selectedExport).setExporter(this);
 				}
 			}
 		}
@@ -540,8 +544,8 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 				return;
 			if (!checkDups && dependencies == null)
 				dependencies = new ArrayList<>(newDependencies.length);
-			for (int i = 0; i < newDependencies.length; i++) {
-				addDependency((BaseDescriptionImpl) newDependencies[i], checkDups);
+			for (BaseDescription newDependency : newDependencies) {
+				addDependency((BaseDescriptionImpl) newDependency, checkDups);
 			}
 		}
 	}

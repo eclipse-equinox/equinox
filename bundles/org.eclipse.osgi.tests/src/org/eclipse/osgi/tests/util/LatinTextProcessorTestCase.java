@@ -27,20 +27,20 @@ public class LatinTextProcessorTestCase extends TextProcessorTestCase {
 		int size = TEST_DEFAULT_PATHS.length + TEST_STAR_PATHS.length + TEST_EQUALS_PATHS.length + TEST_ADDITIONAL_STRINGS.length;
 		ALL_PATHS = new String[size];
 		int idx = 0;
-		for (int i = 0; i < TEST_DEFAULT_PATHS.length; i++) {
-			ALL_PATHS[idx] = TEST_DEFAULT_PATHS[i];
+		for (String testDefaultPath : TEST_DEFAULT_PATHS) {
+			ALL_PATHS[idx] = testDefaultPath;
 			idx++;
 		}
-		for (int i = 0; i < TEST_STAR_PATHS.length; i++) {
-			ALL_PATHS[idx] = TEST_STAR_PATHS[i];
+		for (String testStartPath : TEST_STAR_PATHS) {
+			ALL_PATHS[idx] = testStartPath;
 			idx++;
 		}
-		for (int i = 0; i < TEST_EQUALS_PATHS.length; i++) {
-			ALL_PATHS[idx] = TEST_EQUALS_PATHS[i];
+		for (String testEqualsPath : TEST_EQUALS_PATHS) {
+			ALL_PATHS[idx] = testEqualsPath;
 			idx++;
 		}
-		for (int i = 0; i < TEST_ADDITIONAL_STRINGS.length; i++) {
-			ALL_PATHS[idx] = TEST_ADDITIONAL_STRINGS[i];
+		for (String testAdditionalString : TEST_ADDITIONAL_STRINGS) {
+			ALL_PATHS[idx] = testAdditionalString;
 			idx++;
 		}
 	}

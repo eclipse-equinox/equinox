@@ -824,23 +824,22 @@ public class Main {
 		String[] extensions = getArrayFromList(System.getProperty(PROP_EXTENSIONS));
 		String parent = new File(base.getFile()).getParent();
 		ArrayList<String> extensionResults = new ArrayList<>(extensions.length);
-		for (int i = 0; i < extensions.length; i++) {
-			//Search the extension relatively to the osgi plugin 
-			String path = searchForBundle(extensions[i], parent);
+		for (String extension : extensions) {
+			//Search the extension relatively to the osgi plugin
+			String path = searchForBundle(extension, parent);
 			if (path == null) {
-				log("Could not find extension: " + extensions[i]); //$NON-NLS-1$
+				log("Could not find extension: " + extension); //$NON-NLS-1$
 				continue;
 			}
-			if (debug)
-				System.out.println("Loading extension: " + extensions[i]); //$NON-NLS-1$
-
+			if (debug) {
+				System.out.println("Loading extension: " + extension); //$NON-NLS-1$
+			}
 			URL extensionURL = null;
 			if (installLocation.getProtocol().equals("file")) { //$NON-NLS-1$
 				extensionResults.add(path);
 				extensionURL = new File(path).toURL();
 			} else
 				extensionURL = new URL(installLocation.getProtocol(), installLocation.getHost(), installLocation.getPort(), path);
-
 			//Load a property file of the extension, merge its content, and in case of dev mode add the bin entries
 			Properties extensionProperties = null;
 			try {
@@ -861,12 +860,13 @@ public class Main {
 				qualifiedPath = "."; //$NON-NLS-1$
 			else
 				qualifiedPath = ""; //$NON-NLS-1$
-			for (int j = 0; j < entries.length; j++)
-				qualifiedPath += ", " + FILE_SCHEME + path + entries[j]; //$NON-NLS-1$
+			for (String entry : entries) {
+				qualifiedPath += ", " + FILE_SCHEME + path + entry; //$NON-NLS-1$
+			}
 			extensionProperties.put(PROP_CLASSPATH, qualifiedPath);
 			mergeWithSystemProperties(extensionProperties, null);
 			if (inDevelopmentMode) {
-				String name = extensions[i];
+				String name = extension;
 				if (name.startsWith(REFERENCE_SCHEME)) {
 					// need to extract the BSN from the path
 					name = new File(path).getName();
@@ -912,8 +912,7 @@ public class Main {
 			addEntry(base, result);
 			return;
 		}
-		for (int i = 0; i < baseJars.length; i++) {
-			String string = baseJars[i];
+		for (String string : baseJars) {
 			try {
 				// if the string is a file: URL then *carefully* construct the
 				// URL. Otherwisejust try to build a URL. In either case, if we fail, use
@@ -946,8 +945,7 @@ public class Main {
 		if (devPathList == null)
 			devPathList = devClassPathProps.getProperty("*"); //$NON-NLS-1$
 		String[] locations = getArrayFromList(devPathList);
-		for (int i = 0; i < locations.length; i++) {
-			String location = locations[i];
+		for (String location : locations) {
 			File path = new File(location);
 			URL url;
 			if (path.isAbsolute())
@@ -995,8 +993,9 @@ public class Main {
 		URL[] result = getDevPath(url);
 		if (debug) {
 			System.out.println("Framework classpath:"); //$NON-NLS-1$
-			for (int i = 0; i < result.length; i++)
-				System.out.println("    " + result[i].toExternalForm()); //$NON-NLS-1$
+		    for (URL devPath : result) {
+			System.out.println("    " + devPath.toExternalForm()); //$NON-NLS-1$
+		    }
 		}
 		return result;
 	}
@@ -1017,9 +1016,10 @@ public class Main {
 			return null;
 
 		ArrayList<String> matches = new ArrayList<>(2);
-		for (int i = 0; i < candidates.length; i++) {
-			if (isMatchingCandidate(target, candidates[i], root))
-				matches.add(candidates[i]);
+		for (String candidate : candidates) {
+			if (isMatchingCandidate(target, candidate, root)) {
+				matches.add(candidate);
+			}
 		}
 		String[] names = matches.toArray(new String[matches.size()]);
 		int result = findMax(target, names);
@@ -2203,15 +2203,16 @@ public class Main {
 		if (splashPath != null) {
 			String[] entries = getArrayFromList(splashPath);
 			ArrayList<String> path = new ArrayList<>(entries.length);
-			for (int i = 0; i < entries.length; i++) {
-				String entry = resolve(entries[i]);
+			for (String e : entries) {
+				String entry = resolve(e);
 				if (entry != null && entry.startsWith(FILE_SCHEME)) {
 					File entryFile = new File(entry.substring(5).replace('/', File.separatorChar));
 					entry = searchFor(entryFile.getName(), entryFile.getParent());
 					if (entry != null)
 						path.add(entry);
-				} else
-					log("Invalid splash path entry: " + entries[i]); //$NON-NLS-1$
+				} else {
+					log("Invalid splash path entry: " + e); //$NON-NLS-1$
+				}
 			}
 			// see if we can get a splash given the splash path
 			result = searchForSplash(path.toArray(new String[path.size()]));
@@ -2236,21 +2237,20 @@ public class Main {
 			locale = Locale.getDefault().toString();
 		String[] nlVariants = buildNLVariants(locale);
 
-		for (int i = 0; i < nlVariants.length; i++) {
-			for (int j = 0; j < searchPath.length; j++) {
-				String path = searchPath[j];
+		for (String nlVariant : nlVariants) {
+			for (String path : searchPath) {
 				if (path.startsWith(FILE_SCHEME))
 					path = path.substring(5);
 				// do we have a JAR?
 				if (isJAR(path)) {
-					String result = extractFromJAR(path, nlVariants[i]);
+					String result = extractFromJAR(path, nlVariant);
 					if (result != null)
 						return result;
 				} else {
 					// we have a file or a directory
 					if (!path.endsWith(File.separator))
 						path += File.separator;
-					path += nlVariants[i];
+					path += nlVariant;
 					File result = new File(path);
 					if (result.exists())
 						return result.getAbsolutePath(); // return the first match found [20063]
@@ -2288,8 +2288,8 @@ public class Main {
 		if (splash.exists()) {
 			// if we are running with -clean then delete the cached splash file
 			boolean clean = false;
-			for (int i = 0; i < commands.length; i++) {
-				if (CLEAN.equalsIgnoreCase(commands[i])) {
+			for (String command : commands) {
+				if (CLEAN.equalsIgnoreCase(command)) {
 					clean = true;
 					splash.delete();
 					break;
@@ -2562,12 +2562,12 @@ public class Main {
 		setMultiValueProperty(PROP_COMMANDS, commands);
 	}
 
-	private void setMultiValueProperty(String property, String[] value) {
-		if (value != null) {
+	private void setMultiValueProperty(String property, String[] values) {
+		if (values != null) {
 			StringBuilder result = new StringBuilder(300);
-			for (int i = 0; i < value.length; i++) {
-				if (value[i] != null) {
-					result.append(value[i]);
+			for (String value : values) {
+				if (value != null) {
+					result.append(value);
 					result.append('\n');
 				}
 			}
@@ -2671,14 +2671,15 @@ public class Main {
 		private boolean contains(CodeSource codeSource) {
 			if (codeSource == null)
 				return false;
-			URL url = codeSource.getLocation();
-			if (url == null)
+			URL location = codeSource.getLocation();
+			if (location == null)
 				return false;
 			// Check to see if this URL is in our set of URLs to give AllPermissions to.
-			for (int i = 0; i < urls.length; i++) {
+			for (URL url : urls) {
 				// We do simple equals test here because we assume the URLs will be the same objects.
-				if (urls[i] == url)
+				if (url == location) {
 					return true;
+				}
 			}
 			return false;
 		}
@@ -2703,8 +2704,8 @@ public class Main {
 			if (extensionPaths == null)
 				return super.findLibrary(name);
 			String libName = System.mapLibraryName(name);
-			for (int i = 0; i < extensionPaths.length; i++) {
-				File libFile = new File(extensionPaths[i], libName);
+			for (String extensionPath : extensionPaths) {
+				File libFile = new File(extensionPath, libName);
 				if (libFile.isFile())
 					return libFile.getAbsolutePath();
 			}

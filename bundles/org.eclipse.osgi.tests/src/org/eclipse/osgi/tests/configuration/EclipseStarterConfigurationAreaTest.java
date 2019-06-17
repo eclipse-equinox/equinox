@@ -32,8 +32,9 @@ public class EclipseStarterConfigurationAreaTest extends OSGiTest {
 		ConfigurationSessionTestSuite initialization = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, EclipseStarterConfigurationAreaTest.class.getName());
 		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
 		initialization.addBundle("org.eclipse.osgi.compatibility.state");
-		for (int i = 0; i < ids.length; i++)
-			initialization.addBundle(ids[i]);
+		for (String id : ids) {
+			initialization.addBundle(id);
+		}
 		initialization.addBundle(PI_OSGI_TESTS);
 		// disable clean-up, we want to reuse the configuration
 		initialization.setCleanup(false);
@@ -45,8 +46,9 @@ public class EclipseStarterConfigurationAreaTest extends OSGiTest {
 
 		ConfigurationSessionTestSuite removeExtension = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, EclipseStarterConfigurationAreaTest.class.getName());
 		removeExtension.setConfigurationPath(configPath);
-		for (int i = 0; i < ids.length; i++)
-			removeExtension.addBundle(ids[i]);
+		for (String id : ids) {
+			removeExtension.addBundle(id);
+		}
 		removeExtension.addBundle(PI_OSGI_TESTS);
 		removeExtension.addTest(new EclipseStarterConfigurationAreaTest("testRemoveExtension"));
 		suite.addTest(removeExtension);

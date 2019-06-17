@@ -174,24 +174,28 @@ public class PermissionData {
 		String[] defaultPerms = getPermissionData(null);
 		temp.writeInt(defaultPerms == null ? 0 : defaultPerms.length);
 		if (defaultPerms != null)
-			for (int i = 0; i < defaultPerms.length; i++)
-				temp.writeUTF(defaultPerms[i]);
+			for (String defaultPerm : defaultPerms) {
+				temp.writeUTF(defaultPerm);
+			}
 		String[] locs = getLocations();
 		temp.writeInt(locs == null ? 0 : locs.length);
 		if (locs != null)
-			for (int i = 0; i < locs.length; i++) {
-				temp.writeUTF(locs[i]);
-				String[] perms = getPermissionData(locs[i]);
+			for (String loc : locs) {
+				temp.writeUTF(loc);
+				String[] perms = getPermissionData(loc);
 				temp.writeInt(perms == null ? 0 : perms.length);
-				if (perms != null)
-					for (int j = 0; j < perms.length; j++)
-						temp.writeUTF(perms[j]);
+				if (perms != null) {
+					for (String perm : perms) {
+						temp.writeUTF(perm);
+					}
+				}
 			}
 		String[] condPerms = getConditionalPermissionInfos();
 		temp.writeInt(condPerms == null ? 0 : condPerms.length);
 		if (condPerms != null)
-			for (int i = 0; i < condPerms.length; i++)
-				temp.writeUTF(condPerms[i]);
+			for (String condPerm : condPerms) {
+				temp.writeUTF(condPerm);
+			}
 		temp.close();
 
 		out.writeInt(tempBytes.size());

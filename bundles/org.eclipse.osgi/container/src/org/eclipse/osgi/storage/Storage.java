@@ -1100,15 +1100,16 @@ public class Storage {
 			commandProp = getConfiguration().getConfiguration(Constants.FRAMEWORK_EXECPERMISSION);
 		if (commandProp == null)
 			return;
-		String[] temp = ManifestElement.getArrayFromList(commandProp, " "); //$NON-NLS-1$
-		List<String> command = new ArrayList<>(temp.length + 1);
+		String[] commandComponents = ManifestElement.getArrayFromList(commandProp, " "); //$NON-NLS-1$
+		List<String> command = new ArrayList<>(commandComponents.length + 1);
 		boolean foundFullPath = false;
-		for (int i = 0; i < temp.length; i++) {
-			if ("[fullpath]".equals(temp[i]) || "${abspath}".equals(temp[i])) { //$NON-NLS-1$ //$NON-NLS-2$
+		for (String commandComponent : commandComponents) {
+			if ("[fullpath]".equals(commandComponent) || "${abspath}".equals(commandComponent)) { //$NON-NLS-1$ //$NON-NLS-2$
 				command.add(file.getAbsolutePath());
 				foundFullPath = true;
-			} else
-				command.add(temp[i]);
+			} else {
+				command.add(commandComponent);
+			}
 		}
 		if (!foundFullPath)
 			command.add(file.getAbsolutePath());

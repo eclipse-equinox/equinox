@@ -42,9 +42,9 @@ public class Activator implements BundleActivator {
 	private void doTestAction() {
 		Bundle[] bundles = bc.getBundles();
 		Bundle thisBundle = bc.getBundle();
-		for (int i = 0; i < bundles.length; i++) {
-			if (thisBundle.getBundleId() != bundles[i].getBundleId()) {
-				checkBundle(bundles[i]);
+		for (Bundle bundle : bundles) {
+			if (thisBundle.getBundleId() != bundle.getBundleId()) {
+				checkBundle(bundle);
 			}
 		}
 	}

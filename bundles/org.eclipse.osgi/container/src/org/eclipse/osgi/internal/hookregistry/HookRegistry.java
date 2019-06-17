@@ -20,7 +20,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -146,13 +145,15 @@ public final class HookRegistry {
 					continue;
 				boolean builtin = Boolean.valueOf(configuratorProps.getProperty(BUILTIN_HOOKS)).booleanValue();
 				String[] configurators = ManifestElement.getArrayFromList(hooksValue, ","); //$NON-NLS-1$
-				for (int i = 0; i < configurators.length; i++)
-					if (!configuratorList.contains(configurators[i])) {
-						if (builtin) // make sure the built-in configurators are listed first (bug 170881)
-							configuratorList.add(curBuiltin++, configurators[i]);
-						else
-							configuratorList.add(configurators[i]);
+				for (String configurator : configurators) {
+					if (!configuratorList.contains(configurator)) {
+						if (builtin) {
+							configuratorList.add(curBuiltin++, configurator);
+						} else {
+							configuratorList.add(configurator);
+						}
 					}
+				}
 			} catch (IOException e) {
 				errors.add(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, "error loading: " + url.toExternalForm(), 0, e, null)); //$NON-NLS-1$
 				// ignore and continue to next URL
@@ -172,25 +173,29 @@ public final class HookRegistry {
 		String[] configurators = ManifestElement.getArrayFromList(container.getConfiguration().getConfiguration(HookRegistry.PROP_HOOK_CONFIGURATORS), ","); //$NON-NLS-1$
 		if (configurators.length > 0) {
 			configuratorList.clear(); // clear the list, we are only going to use the configurators from the list
-			for (int i = 0; i < configurators.length; i++)
-				if (!configuratorList.contains(configurators[i]))
-					configuratorList.add(configurators[i]);
+			for (String configurator : configurators) {
+				if (!configuratorList.contains(configurator)) {
+					configuratorList.add(configurator);
+				}
+			}
 			return; // don't do anything else
 		}
 		// Make sure the configurators from the include property are in the list
 		String[] includeConfigurators = ManifestElement.getArrayFromList(container.getConfiguration().getConfiguration(HookRegistry.PROP_HOOK_CONFIGURATORS_INCLUDE), ","); //$NON-NLS-1$
-		for (int i = 0; i < includeConfigurators.length; i++)
-			if (!configuratorList.contains(includeConfigurators[i]))
-				configuratorList.add(includeConfigurators[i]);
+		for (String includeConfigurator : includeConfigurators) {
+			if (!configuratorList.contains(includeConfigurator)) {
+				configuratorList.add(includeConfigurator);
+			}
+		}
 		// Make sure the configurators from the exclude property are no in the list
 		String[] excludeHooks = ManifestElement.getArrayFromList(container.getConfiguration().getConfiguration(HookRegistry.PROP_HOOK_CONFIGURATORS_EXCLUDE), ","); //$NON-NLS-1$
-		for (int i = 0; i < excludeHooks.length; i++)
-			configuratorList.remove(excludeHooks[i]);
+		for (String excludeHook : excludeHooks) {
+			configuratorList.remove(excludeHook);
+		}
 	}
 
 	private void loadConfigurators(List<String> configurators, List<FrameworkLogEntry> errors) {
-		for (Iterator<String> iHooks = configurators.iterator(); iHooks.hasNext();) {
-			String hookName = iHooks.next();
+		for (String hookName : configurators) {
 			try {
 				Class<?> clazz = Class.forName(hookName);
 				HookConfigurator configurator = (HookConfigurator) clazz.getConstructor().newInstance();

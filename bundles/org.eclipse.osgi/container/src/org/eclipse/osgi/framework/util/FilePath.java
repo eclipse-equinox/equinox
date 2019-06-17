@@ -250,8 +250,8 @@ public class FilePath {
 			result.append(device);
 		if (isAbsolute())
 			result.append(SEPARATOR);
-		for (int i = 0; i < segments.length; i++) {
-			result.append(segments[i]);
+		for (String segment : segments) {
+			result.append(segment);
 			result.append(SEPARATOR);
 		}
 		if (segments.length > 0 && !hasTrailingSlash())

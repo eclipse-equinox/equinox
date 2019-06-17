@@ -120,15 +120,16 @@ public class PackageAdminImpl implements PackageAdmin {
 		if (allExports == null)
 			return null;
 		ExportedPackage result = null;
-		for (int i = 0; i < allExports.length; i++) {
-			if (name.equals(allExports[i].getName())) {
+		for (ExportedPackage allExport : allExports) {
+			if (name.equals(allExport.getName())) {
 				if (result == null) {
-					result = allExports[i];
+					result = allExport;
 				} else {
 					Version curVersion = result.getVersion();
-					Version newVersion = allExports[i].getVersion();
-					if (newVersion.compareTo(curVersion) >= 0)
-						result = allExports[i];
+					Version newVersion = allExport.getVersion();
+					if (newVersion.compareTo(curVersion) >= 0) {
+						result = allExport;
+					}
 				}
 			}
 		}

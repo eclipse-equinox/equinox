@@ -60,12 +60,12 @@ public class TestRFC79_005 extends AbstractStateTest {
 		ExportPackageDescription[] exports = bundle_1.getResolvedImports();
 		assertNotNull("export array is unexpectedly null", exports);
 		assertTrue("export array is unexpectedly empty", exports.length > 0);
-		for (int i = 0; i < exports.length; i++) {
-			String exportPackageName = exports[i].getName();
+		for (ExportPackageDescription export : exports) {
+			String exportPackageName = export.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("javax.servlet")) {
-				assertNotNull("Package [javax.servlet] is not wired when it should be ", exports[i].getExporter());
-				assertEquals("Package [javax.servlet] is wired incorrectly ", exports[i].getExporter(), bundle_2);
+				assertNotNull("Package [javax.servlet] is not wired when it should be ", export.getExporter());
+				assertEquals("Package [javax.servlet] is wired incorrectly ", export.getExporter(), bundle_2);
 			}
 		} // end for
 	} // end method
@@ -74,12 +74,12 @@ public class TestRFC79_005 extends AbstractStateTest {
 		ExportPackageDescription[] exports = bundle_2.getResolvedImports();
 		assertNotNull("export array is unexpectedly null", exports);
 		assertTrue("export array is unexpectedly empty", exports.length > 0);
-		for (int i = 0; i < exports.length; i++) {
-			String exportPackageName = exports[i].getName();
+		for (ExportPackageDescription export : exports) {
+			String exportPackageName = export.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("javax.servlet")) {
-				assertNotNull("Package [javax.servlet] is not wired when it should be ", exports[i].getExporter());
-				assertEquals("Package [javax.servlet] is wired incorrectly ", exports[i].getExporter(), bundle_2);
+				assertNotNull("Package [javax.servlet] is not wired when it should be ", export.getExporter());
+				assertEquals("Package [javax.servlet] is wired incorrectly ", export.getExporter(), bundle_2);
 			}
 		} // end for
 	} // end method

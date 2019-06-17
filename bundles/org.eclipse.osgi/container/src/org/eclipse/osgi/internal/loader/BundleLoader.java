@@ -239,11 +239,13 @@ public class BundleLoader extends ModuleLoader {
 		if (sources.length == 1)
 			return sources[0];
 		List<SingleSourcePackage> sourceList = new ArrayList<>(sources.length);
-		for (int i = 0; i < sources.length; i++) {
-			SingleSourcePackage[] innerSources = sources[i].getSuppliers();
-			for (int j = 0; j < innerSources.length; j++)
-				if (!sourceList.contains(innerSources[j]))
-					sourceList.add(innerSources[j]);
+		for (PackageSource source : sources) {
+			SingleSourcePackage[] innerSources = source.getSuppliers();
+			for (SingleSourcePackage innerSource : innerSources) {
+				if (!sourceList.contains(innerSource)) {
+					sourceList.add(innerSource);
+				}
+			}
 		}
 		return new MultiSourcePackage(packageName, sourceList.toArray(new SingleSourcePackage[sourceList.size()]));
 	}
@@ -923,15 +925,19 @@ public class BundleLoader extends ModuleLoader {
 
 			/* match against specific names */
 			if (dynamicImportPackages != null)
-				for (int i = 0; i < dynamicImportPackages.length; i++)
-					if (pkgname.equals(dynamicImportPackages[i]))
+				for (String dynamicImportPackage : dynamicImportPackages) {
+					if (pkgname.equals(dynamicImportPackage)) {
 						return true;
+					}
+				}
 
 			/* match against names with trailing wildcards */
 			if (dynamicImportPackageStems != null)
-				for (int i = 0; i < dynamicImportPackageStems.length; i++)
-					if (pkgname.startsWith(dynamicImportPackageStems[i]))
+				for (String dynamicImportPackageStem : dynamicImportPackageStems) {
+					if (pkgname.startsWith(dynamicImportPackageStem)) {
 						return true;
+					}
+				}
 		}
 		return false;
 	}
@@ -1052,8 +1058,8 @@ public class BundleLoader extends ModuleLoader {
 				stems = new ArrayList<>(size);
 			} else {
 				stems = new ArrayList<>(size + dynamicImportPackageStems.length);
-				for (int i = 0; i < dynamicImportPackageStems.length; i++) {
-					stems.add(dynamicImportPackageStems[i]);
+				for (String dynamicImportPackageStem : dynamicImportPackageStems) {
+					stems.add(dynamicImportPackageStem);
 				}
 			}
 
@@ -1062,8 +1068,8 @@ public class BundleLoader extends ModuleLoader {
 				names = new ArrayList<>(size);
 			} else {
 				names = new ArrayList<>(size + dynamicImportPackages.length);
-				for (int i = 0; i < dynamicImportPackages.length; i++) {
-					names.add(dynamicImportPackages[i]);
+				for (String dynamicImportPackage : dynamicImportPackages) {
+					names.add(dynamicImportPackage);
 				}
 			}
 

@@ -199,12 +199,12 @@ public class ReliableFile {
 			List<Integer> list = new ArrayList<>(defaultMaxGenerations);
 			if (file.exists())
 				list.add(Integer.valueOf(0)); //base file exists
-			for (int i = 0; i < files.length; i++) {
-				if (files[i].startsWith(prefix)) {
+			for (String candidateFile : files) {
+				if (candidateFile.startsWith(prefix)) {
 					try {
-						int id = Integer.parseInt(files[i].substring(prefixLen));
+						int id = Integer.parseInt(candidateFile.substring(prefixLen));
 						list.add(Integer.valueOf(id));
-					} catch (NumberFormatException e) {/*ignore*/
+					}catch (NumberFormatException e) {/*ignore*/
 					}
 				}
 			}
@@ -543,12 +543,12 @@ public class ReliableFile {
 		String[] files = parent.list();
 		if (files == null)
 			return false;
-		for (int i = 0; i < files.length; i++) {
-			if (files[i].startsWith(prefix)) {
+		for (String candidateFile : files) {
+			if (candidateFile.startsWith(prefix)) {
 				try {
-					Integer.parseInt(files[i].substring(prefixLen));
+					Integer.parseInt(candidateFile.substring(prefixLen));
 					return true;
-				} catch (NumberFormatException e) {/*ignore*/
+				}catch (NumberFormatException e) {/*ignore*/
 				}
 			}
 		}
@@ -642,8 +642,7 @@ public class ReliableFile {
 			throw new IOException("Not a valid directory"); //$NON-NLS-1$
 		String files[] = directory.list();
 		Set<String> list = new HashSet<>(files.length / 2);
-		for (int idx = 0; idx < files.length; idx++) {
-			String file = files[idx];
+		for (String file : files) {
 			int pos = file.lastIndexOf('.');
 			if (pos == -1)
 				continue;

@@ -60,8 +60,8 @@ public class BaseSecurityTest extends CoreTest {
 
 	protected static void addDefaultSecurityBundles(ConfigurationSessionTestSuite suite) {
 		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
-		for (int i = 0; i < ids.length; i++) {
-			suite.addBundle(ids[i]);
+		for (String id : ids) {
+			suite.addBundle(id);
 		}
 		suite.addBundle(BUNDLE_SECURITY_TESTS);
 	}
@@ -72,8 +72,8 @@ public class BaseSecurityTest extends CoreTest {
 
 	protected static Certificate[] getTestCertificateChain(String[] aliases) throws KeyStoreException {
 		ArrayList certs = new ArrayList(aliases.length);
-		for (int i = 0; i < aliases.length; i++) {
-			certs.add(getTestCertificate(aliases[i]));
+		for (String alias : aliases) {
+			certs.add(getTestCertificate(alias));
 		}
 		return (Certificate[]) certs.toArray(new Certificate[] {});
 	}

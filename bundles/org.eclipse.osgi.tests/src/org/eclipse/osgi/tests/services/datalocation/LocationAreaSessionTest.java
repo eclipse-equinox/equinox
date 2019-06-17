@@ -48,8 +48,9 @@ public class LocationAreaSessionTest extends OSGiTest {
 		// attempt to lock same location with a session
 		ConfigurationSessionTestSuite sessionLock = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, LocationAreaSessionTest.class.getName());
 		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
-		for (int i = 0; i < ids.length; i++)
-			sessionLock.addBundle(ids[i]);
+		for (String id : ids) {
+			sessionLock.addBundle(id);
+		}
 		sessionLock.addBundle(PI_OSGI_TESTS);
 		try {
 			sessionLock.getSetup().setSystemProperty(TEST_LOCATION_DIR, testLocationLockDir);
@@ -69,8 +70,9 @@ public class LocationAreaSessionTest extends OSGiTest {
 
 		// attempt to lock the location with a session
 		sessionLock = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, LocationAreaSessionTest.class.getName());
-		for (int i = 0; i < ids.length; i++)
-			sessionLock.addBundle(ids[i]);
+		for (String id : ids) {
+			sessionLock.addBundle(id);
+		}
 		sessionLock.addBundle(PI_OSGI_TESTS);
 		try {
 			sessionLock.getSetup().setSystemProperty(TEST_LOCATION_DIR, testLocationLockDir);
@@ -94,8 +96,9 @@ public class LocationAreaSessionTest extends OSGiTest {
 		// attempt to lock same location with a session
 		sessionLock = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, LocationAreaSessionTest.class.getName());
 		ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
-		for (int i = 0; i < ids.length; i++)
-			sessionLock.addBundle(ids[i]);
+		for (String id : ids) {
+			sessionLock.addBundle(id);
+		}
 		sessionLock.addBundle(PI_OSGI_TESTS);
 		try {
 			sessionLock.getSetup().setSystemProperty(TEST_LOCATION_DIR, testLocationLockDir);
@@ -117,8 +120,9 @@ public class LocationAreaSessionTest extends OSGiTest {
 
 		// attempt to lock the location with a session
 		sessionLock = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, LocationAreaSessionTest.class.getName());
-		for (int i = 0; i < ids.length; i++)
-			sessionLock.addBundle(ids[i]);
+		for (String id : ids) {
+			sessionLock.addBundle(id);
+		}
 		sessionLock.addBundle(PI_OSGI_TESTS);
 		try {
 			sessionLock.getSetup().setSystemProperty(TEST_LOCATION_DIR, testLocationLockDir);

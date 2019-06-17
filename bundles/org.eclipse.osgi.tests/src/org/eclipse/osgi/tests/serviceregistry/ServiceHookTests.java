@@ -13,12 +13,28 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.serviceregistry;
 
-import java.util.*;
-import junit.framework.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import junit.framework.AssertionFailedError;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
-import org.osgi.framework.*;
-import org.osgi.framework.hooks.service.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.hooks.service.EventHook;
+import org.osgi.framework.hooks.service.FindHook;
+import org.osgi.framework.hooks.service.ListenerHook;
 
 public class ServiceHookTests extends AbstractBundleTests {
 	public static Test suite() {
@@ -49,7 +65,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 
 		final int[] hookCalled = new int[] {0, 0, 0, 0, 0};
 		final boolean[] startTest = new boolean[] {false};
-		final AssertionFailedError[] hookError = new AssertionFailedError[] {null, null, null, null};
+		final AssertionFailedError[] hookErrors = new AssertionFailedError[] {null, null, null, null};
 
 		// register find hook 1
 		props.put(Constants.SERVICE_DESCRIPTION, "find hook 1"); //$NON-NLS-1$
@@ -96,7 +112,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 						fail("incorrect exception", e); //$NON-NLS-1$
 					}
 				} catch (AssertionFailedError a) {
-					hookError[0] = a;
+					hookErrors[0] = a;
 					return;
 				}
 			}
@@ -144,7 +160,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 						fail("incorrect exception", e); //$NON-NLS-1$
 					}
 				} catch (AssertionFailedError a) {
-					hookError[1] = a;
+					hookErrors[1] = a;
 					return;
 				}
 			}
@@ -192,7 +208,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 						fail("incorrect exception", e); //$NON-NLS-1$
 					}
 				} catch (AssertionFailedError a) {
-					hookError[2] = a;
+					hookErrors[2] = a;
 					return;
 				}
 				// throw an exception from the hook to test that the next hooks are called.
@@ -245,7 +261,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 						fail("incorrect exception", e); //$NON-NLS-1$
 					}
 				} catch (AssertionFailedError a) {
-					hookError[3] = a;
+					hookErrors[3] = a;
 					return;
 				}
 			}
@@ -265,9 +281,9 @@ public class ServiceHookTests extends AbstractBundleTests {
 			assertEquals("hook 3 not called second", 3, hookCalled[2]); //$NON-NLS-1$
 			assertEquals("hook 4 not called third", 4, hookCalled[3]); //$NON-NLS-1$
 			assertEquals("hook 1 not called fourth ", 1, hookCalled[4]); //$NON-NLS-1$
-			for (int i = 0; i < hookError.length; i++) {
-				if (hookError[i] != null) {
-					throw hookError[i];
+			for (AssertionFailedError hookError : hookErrors) {
+				if (hookError != null) {
+					throw hookError;
 				}
 			}
 			assertNotNull("service refs is null", refs); //$NON-NLS-1$
@@ -340,7 +356,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 		final BundleContext testContext = OSGiTestsActivator.getContext();
 
 		final int[] hookCalled = new int[] {0, 0};
-		final AssertionFailedError[] hookError = new AssertionFailedError[] {null};
+		final AssertionFailedError[] hookErrors = new AssertionFailedError[] {null};
 		final List events = new ArrayList();
 
 		final ServiceListener sl = new ServiceListener() {
@@ -389,7 +405,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 						fail("incorrect exception", e); //$NON-NLS-1$
 					}
 				} catch (AssertionFailedError a) {
-					hookError[0] = a;
+					hookErrors[0] = a;
 					return;
 				}
 			}
@@ -422,7 +438,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 						fail("incorrect exception", e); //$NON-NLS-1$
 					}
 				} catch (AssertionFailedError a) {
-					hookError[0] = a;
+					hookErrors[0] = a;
 					return;
 				}
 			}
@@ -443,9 +459,9 @@ public class ServiceHookTests extends AbstractBundleTests {
 			reg1 = testContext.registerService(Runnable.class.getName(), runIt, props);
 			assertEquals("all hooks not called", 1, hookCalled[0]); //$NON-NLS-1$
 			assertEquals("hook 1 not called first", 1, hookCalled[1]); //$NON-NLS-1$
-			for (int i = 0; i < hookError.length; i++) {
-				if (hookError[i] != null) {
-					throw hookError[i];
+			for (AssertionFailedError hookError : hookErrors) {
+				if (hookError != null) {
+					throw hookError;
 				}
 			}
 			synchronized (events) {
@@ -492,9 +508,9 @@ public class ServiceHookTests extends AbstractBundleTests {
 			}
 			assertEquals("all hooks not called", 1, hookCalled[0]); //$NON-NLS-1$
 			assertEquals("hook 1 not called first", 1, hookCalled[1]); //$NON-NLS-1$
-			for (int i = 0; i < hookError.length; i++) {
-				if (hookError[i] != null) {
-					throw hookError[i];
+			for (AssertionFailedError hookError : hookErrors) {
+				if (hookError != null) {
+					throw hookError;
 				}
 			}
 

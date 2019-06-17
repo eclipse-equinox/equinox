@@ -48,8 +48,9 @@ public class MovableConfigurationAreaTest extends OSGiTest {
 
 		ConfigurationSessionTestSuite initialization = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, MovableConfigurationAreaTest.class.getName());
 		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
-		for (int i = 0; i < ids.length; i++)
-			initialization.addBundle(ids[i]);
+		for (String id : ids) {
+			initialization.addBundle(id);
+		}
 		initialization.addBundle(PI_OSGI_TESTS);
 		initialization.setReadOnly(true);
 		// disable clean-up, we want to reuse the configuration
@@ -73,8 +74,9 @@ public class MovableConfigurationAreaTest extends OSGiTest {
 
 		ConfigurationSessionTestSuite afterMoving = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, MovableConfigurationAreaTest.class.getName());
 		afterMoving.setConfigurationPath(destinationPath);
-		for (int i = 0; i < ids.length; i++)
-			afterMoving.addBundle(ids[i]);
+		for (String id : ids) {
+			afterMoving.addBundle(id);
+		}
 		afterMoving.setReadOnly(true);
 		// make sure we don't allow priming for the first run
 		afterMoving.setPrime(false);

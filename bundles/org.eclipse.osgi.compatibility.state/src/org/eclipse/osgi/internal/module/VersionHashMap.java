@@ -44,8 +44,9 @@ public class VersionHashMap<V extends VersionSupplier> extends MappedList<String
 	}
 
 	public void put(V[] versionSuppliers) {
-		for (int i = 0; i < versionSuppliers.length; i++)
-			put(versionSuppliers[i].getName(), versionSuppliers[i]);
+		for (V versionSupplier : versionSuppliers) {
+			put(versionSupplier.getName(), versionSupplier);
+		}
 	}
 
 	public boolean contains(V vs) {
@@ -73,15 +74,15 @@ public class VersionHashMap<V extends VersionSupplier> extends MappedList<String
 	}
 
 	public void remove(V[] versionSuppliers) {
-		for (int i = 0; i < versionSuppliers.length; i++)
-			remove(versionSuppliers[i]);
+		for (V versionSupplier : versionSuppliers) {
+			remove(versionSupplier);
+		}
 	}
 
 	// Once we have resolved bundles, we need to make sure that version suppliers
 	// from the resolved bundles are ahead of those from unresolved bundles
 	void reorder() {
-		for (Iterator<List<V>> it = internal.values().iterator(); it.hasNext();) {
-			List<V> existing = it.next();
+		for (List<V> existing : internal.values()) {
 			if (existing.size() > 1)
 				Collections.sort(existing, this);
 		}

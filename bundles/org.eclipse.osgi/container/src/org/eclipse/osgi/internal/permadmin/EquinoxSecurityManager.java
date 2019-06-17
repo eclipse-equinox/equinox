@@ -128,18 +128,21 @@ public class EquinoxSecurityManager extends SecurityManager {
 			Map<Class<? extends Condition>, Dictionary<Object, Object>> conditionDictionaries = new HashMap<>();
 			for (Decision[] domainDecisions : conditionSets) {
 				boolean grant = false;
-				for (int i = 0; i < domainDecisions.length; i++) {
-					if (domainDecisions[i] == null)
-						break;
-					if ((domainDecisions[i].decision & SecurityTable.ABSTAIN) != 0)
-						continue;
-					if ((domainDecisions[i].decision & SecurityTable.POSTPONED) == 0) {
-						// hit an immediate decision; use it
-						if ((domainDecisions[i].decision & SecurityTable.GRANTED) != 0)
-							grant = true;
+				for (Decision domainDecision : domainDecisions) {
+					if (domainDecision == null) {
 						break;
 					}
-					int decision = getPostponedDecision(domainDecisions[i], conditionDictionaries, cc);
+					if ((domainDecision.decision & SecurityTable.ABSTAIN) != 0) {
+						continue;
+					}
+					if ((domainDecision.decision & SecurityTable.POSTPONED) == 0) {
+						// hit an immediate decision; use it
+						if ((domainDecision.decision & SecurityTable.GRANTED) != 0) {
+							grant = true;
+						}
+						break;
+					}
+					int decision = getPostponedDecision(domainDecision, conditionDictionaries, cc);
 					if ((decision & SecurityTable.ABSTAIN) != 0)
 						continue;
 					if ((decision & SecurityTable.GRANTED) != 0)
@@ -160,27 +163,28 @@ public class EquinoxSecurityManager extends SecurityManager {
 
 	private int getPostponedDecision(Decision decision, Map<Class<? extends Condition>, Dictionary<Object, Object>> conditionDictionaries, CheckContext cc) {
 		Condition[] postponed = decision.postponed;
-		for (int i = 0; i < postponed.length; i++) {
-			Dictionary<Object, Object> condContext = conditionDictionaries.get(postponed[i].getClass());
+		for (Condition postponedCond : postponed) {
+			Dictionary<Object, Object> condContext = conditionDictionaries.get(postponedCond.getClass());
 			if (condContext == null) {
 				condContext = new Hashtable<>();
-				conditionDictionaries.put(postponed[i].getClass(), condContext);
+				conditionDictionaries.put(postponedCond.getClass(), condContext);
 			}
 			// prevent recursion into Condition
 			if (cc.CondClassSet == null)
 				cc.CondClassSet = new ArrayList<>(2);
-			if (cc.CondClassSet.contains(postponed[i].getClass()))
+			if (cc.CondClassSet.contains(postponedCond.getClass())) {
 				return SecurityTable.ABSTAIN;
-			cc.CondClassSet.add(postponed[i].getClass());
+			}
+			cc.CondClassSet.add(postponedCond.getClass());
 			try {
 				// must call isMutable before calling isSatisfied according to the specification
-				boolean mutable = postponed[i].isMutable();
-				boolean isSatisfied = postponed[i].isSatisfied(new Condition[] {postponed[i]}, condContext);
-				decision.handleImmutable(postponed[i], isSatisfied, mutable);
+				boolean mutable = postponedCond.isMutable();
+				boolean isSatisfied = postponedCond.isSatisfied(new Condition[]{postponedCond}, condContext);
+				decision.handleImmutable(postponedCond, isSatisfied, mutable);
 				if (!isSatisfied)
 					return SecurityTable.ABSTAIN;
 			} finally {
-				cc.CondClassSet.remove(postponed[i].getClass());
+				cc.CondClassSet.remove(postponedCond.getClass());
 			}
 		}
 		// call postponed conditions are satisfied return the decision

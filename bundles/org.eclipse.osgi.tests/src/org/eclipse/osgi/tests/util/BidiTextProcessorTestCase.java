@@ -174,17 +174,16 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 
 	public void testOtherStringsDeprocess() {
 		int testNum = 1;
-		for (int i = 0; i < TEST_STAR_PATHS.length; i++) {
-			String result = TextProcessor.process(TEST_STAR_PATHS[i], "*.");
+		for (String testStarPath : TEST_STAR_PATHS) {
+			String result = TextProcessor.process(testStarPath, "*.");
 			String resultDP = TextProcessor.deprocess(result);
-			verifyBidiResult("Deprocess other (star) string" + testNum, resultDP, TEST_STAR_PATHS[i]);
+			verifyBidiResult("Deprocess other (star) string" + testNum, resultDP, testStarPath);
 			testNum++;
 		}
-
-		for (int i = 0; i < TEST_EQUALS_PATHS.length; i++) {
-			String result = TextProcessor.process(TEST_EQUALS_PATHS[i], "=");
+		for (String testEqualsPath : TEST_EQUALS_PATHS) {
+			String result = TextProcessor.process(testEqualsPath, "=");
 			String resultDP = TextProcessor.deprocess(result);
-			verifyBidiResult("Deprocess other (equals) string" + testNum, resultDP, TEST_EQUALS_PATHS[i]);
+			verifyBidiResult("Deprocess other (equals) string" + testNum, resultDP, testEqualsPath);
 			testNum++;
 		}
 	}

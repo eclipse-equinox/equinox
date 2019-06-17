@@ -53,15 +53,15 @@ public class TestCycle_002 extends AbstractStateTest {
 		BundleDescription[] requires = bundle_1.getResolvedRequires();
 		assertNotNull("requires array is unexpectedly null", requires);
 		assertTrue("requires array is unexpectedly empty", requires.length > 0);
-		for (int i = 0; i < requires.length; i++) {
-			String requiresName = requires[i].getName();
+		for (BundleDescription require : requires) {
+			String requiresName = require.getName();
 			assertNotNull("package name is null", requiresName);
 			if (requiresName.equals("B")) {
-				assertNotNull("Require [B] is not wired when it should be ", requires[i]);
-				assertEquals("Require [B] is wired incorrectly ", requires[i], bundle_2);
+				assertNotNull("Require [B] is not wired when it should be ", require);
+				assertEquals("Require [B] is wired incorrectly ", require, bundle_2);
 			} else if (requiresName.equals("C")) {
-				assertNotNull("Require [C] is not wired when it should be ", requires[i]);
-				assertEquals("Require [C] is wired incorrectly ", requires[i], bundle_3);
+				assertNotNull("Require [C] is not wired when it should be ", require);
+				assertEquals("Require [C] is wired incorrectly ", require, bundle_3);
 			}
 		} // end for
 	} // end method
@@ -70,15 +70,15 @@ public class TestCycle_002 extends AbstractStateTest {
 		BundleDescription[] requires = bundle_2.getResolvedRequires();
 		assertNotNull("requires array is unexpectedly null", requires);
 		assertTrue("requires array is unexpectedly empty", requires.length > 0);
-		for (int i = 0; i < requires.length; i++) {
-			String requiresName = requires[i].getName();
+		for (BundleDescription require : requires) {
+			String requiresName = require.getName();
 			assertNotNull("package name is null", requiresName);
 			if (requiresName.equals("A")) {
-				assertNotNull("Require [A] is not wired when it should be ", requires[i]);
-				assertEquals("Require [A] is wired incorrectly ", requires[i], bundle_1);
+				assertNotNull("Require [A] is not wired when it should be ", require);
+				assertEquals("Require [A] is wired incorrectly ", require, bundle_1);
 			} else if (requiresName.equals("C")) {
-				assertNotNull("Require [C] is not wired when it should be ", requires[i]);
-				assertEquals("Require [C] is wired incorrectly ", requires[i], bundle_3);
+				assertNotNull("Require [C] is not wired when it should be ", require);
+				assertEquals("Require [C] is wired incorrectly ", require, bundle_3);
 			}
 		} // end for
 	} // end method
@@ -87,15 +87,15 @@ public class TestCycle_002 extends AbstractStateTest {
 		BundleDescription[] requires = bundle_3.getResolvedRequires();
 		assertNotNull("requires array is unexpectedly null", requires);
 		assertTrue("requires array is unexpectedly empty", requires.length > 0);
-		for (int i = 0; i < requires.length; i++) {
-			String requiresName = requires[i].getName();
+		for (BundleDescription require : requires) {
+			String requiresName = require.getName();
 			assertNotNull("package name is null", requiresName);
 			if (requiresName.equals("A")) {
-				assertNotNull("Require [A] is not wired when it should be ", requires[i]);
-				assertEquals("Require [A] is wired incorrectly ", requires[i], bundle_1);
+				assertNotNull("Require [A] is not wired when it should be ", require);
+				assertEquals("Require [A] is wired incorrectly ", require, bundle_1);
 			} else if (requiresName.equals("B")) {
-				assertNotNull("Require [B] is not wired when it should be ", requires[i]);
-				assertEquals("Require [B] is wired incorrectly ", requires[i], bundle_2);
+				assertNotNull("Require [B] is not wired when it should be ", require);
+				assertEquals("Require [B] is wired incorrectly ", require, bundle_2);
 			}
 		} // end for
 	} // end method

@@ -22,7 +22,6 @@ import java.io.OutputStream;
 import java.io.SyncFailedException;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -270,14 +269,15 @@ public final class StorageManager {
 		if (files != null) {
 			String name = managedFile + '.';
 			int len = name.length();
-			for (int i = 0; i < files.length; i++) {
-				if (!files[i].startsWith(name))
+			for (String file : files) {
+				if (!file.startsWith(name)) {
 					continue;
+				}
 				try {
-					int generation = Integer.parseInt(files[i].substring(len));
+					int generation = Integer.parseInt(file.substring(len));
 					if (generation > oldestGeneration)
 						oldestGeneration = generation;
-				} catch (NumberFormatException e) {
+				}catch (NumberFormatException e) {
 					continue;
 				}
 			}
@@ -620,13 +620,13 @@ public final class StorageManager {
 			//Iterate through the temp files and delete them all, except the one representing this storage manager.
 			String[] files = managerRoot.list();
 			if (files != null) {
-				for (int i = 0; i < files.length; i++) {
-					if (files[i].endsWith(".instance") && (instanceFile == null || !files[i].equalsIgnoreCase(instanceFile.getName()))) { //$NON-NLS-1$
-						Locker tmpLocker = LocationHelper.createLocker(new File(managerRoot, files[i]), lockMode, false);
+				for (String file : files) {
+					if (file.endsWith(".instance") && (instanceFile == null || !file.equalsIgnoreCase(instanceFile.getName()))) { //$NON-NLS-1$
+						Locker tmpLocker = LocationHelper.createLocker(new File(managerRoot, file), lockMode, false);
 						if (tmpLocker.lock()) {
 							//If I can lock it is a file that has been left behind by a crash
 							tmpLocker.release();
-							new File(managerRoot, files[i]).delete();
+							new File(managerRoot, file).delete();
 						} else {
 							tmpLocker.release();
 							return; //The file is still being locked by somebody else
@@ -638,8 +638,7 @@ public final class StorageManager {
 			//If we are here it is because we are the last instance running. After locking the table and getting its latest content, remove all the backup files and change the table
 			updateTable();
 			Collection<Map.Entry<Object, Object>> managedFiles = table.entrySet();
-			for (Iterator<Map.Entry<Object, Object>> iter = managedFiles.iterator(); iter.hasNext();) {
-				Map.Entry<Object, Object> fileEntry = iter.next();
+			for (Map.Entry<Object, Object> fileEntry : managedFiles) {
 				String fileName = (String) fileEntry.getKey();
 				Entry info = (Entry) fileEntry.getValue();
 				if (info.getFileType() == FILETYPE_RELIABLEFILE) {
@@ -654,9 +653,9 @@ public final class StorageManager {
 			if (tempCleanup) {
 				files = base.list();
 				if (files != null) {
-					for (int i = 0; i < files.length; i++) {
-						if (files[i].endsWith(ReliableFile.tmpExt)) {
-							new File(base, files[i]).delete();
+					for (String file : files) {
+						if (file.endsWith(ReliableFile.tmpExt)) {
+							new File(base, file).delete();
 						}
 					}
 				}
@@ -672,9 +671,10 @@ public final class StorageManager {
 		String[] files = base.list();
 		if (files == null)
 			return;
-		for (int i = 0; i < files.length; i++) {
-			if (files[i].startsWith(fileName + '.') && !files[i].equals(notToDelete))
-				new File(base, files[i]).delete();
+		for (String file : files) {
+			if (file.startsWith(fileName + '.') && !file.equals(notToDelete)) {
+				new File(base, file).delete();
+			}
 		}
 	}
 
@@ -849,13 +849,13 @@ public final class StorageManager {
 	 * @see #getOutputStreamSet(String[])
 	 */
 	void abortOutputStream(ManagedOutputStream out) {
-		ManagedOutputStream[] set = out.getStreamSet();
-		if (set == null) {
-			set = new ManagedOutputStream[] {out};
+		ManagedOutputStream[] streamset = out.getStreamSet();
+		if (streamset == null) {
+			streamset = new ManagedOutputStream[] {out};
 		}
-		synchronized (set) {
-			for (int idx = 0; idx < set.length; idx++) {
-				out = set[idx];
+		synchronized (streamset) {
+			for (ManagedOutputStream stream : streamset) {
+				out = stream;
 				if (out.getOutputFile() == null) {
 					// this is a ReliableFileOutpuStream
 					ReliableFileOutputStream rfos = (ReliableFileOutputStream) out.getOutputStream();
@@ -921,9 +921,10 @@ public final class StorageManager {
 		if (streamSet != null) {
 			synchronized (streamSet) {
 				//check all the streams to see if there are any left open....
-				for (int idx = 0; idx < streamSet.length; idx++) {
-					if (streamSet[idx].getState() == ManagedOutputStream.ST_OPEN)
+				for (ManagedOutputStream stream : streamSet) {
+					if (stream.getState() == ManagedOutputStream.ST_OPEN) {
 						return; //done
+					}
 				}
 				//all streams are closed, we need to update storage manager
 				String[] targets = new String[streamSet.length];

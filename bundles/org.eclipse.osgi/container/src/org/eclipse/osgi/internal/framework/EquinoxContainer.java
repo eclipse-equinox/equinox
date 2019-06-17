@@ -15,8 +15,14 @@ package org.eclipse.osgi.internal.framework;
 
 import java.io.IOException;
 import java.security.AccessController;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
@@ -32,7 +38,11 @@ import org.eclipse.osgi.signedcontent.SignedContentFactory;
 import org.eclipse.osgi.storage.Storage;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.*;
+import org.osgi.framework.AdminPermission;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
@@ -85,17 +95,18 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		HashSet<String> exactMatch = new HashSet<>(bootPackages.length);
 		List<String> stemMatch = new ArrayList<>(bootPackages.length);
 		boolean delegateAllValue = false;
-		for (int i = 0; i < bootPackages.length; i++) {
-			if (bootPackages[i].equals("*")) { //$NON-NLS-1$
+		for (String bootPackage : bootPackages) {
+			if (bootPackage.equals("*")) { //$NON-NLS-1$
 				delegateAllValue = true;
 				exactMatch.clear();
 				stemMatch.clear();
 				break;
-			} else if (bootPackages[i].endsWith("*")) { //$NON-NLS-1$
-				if (bootPackages[i].length() > 2 && bootPackages[i].endsWith(".*")) //$NON-NLS-1$
-					stemMatch.add(bootPackages[i].substring(0, bootPackages[i].length() - 1));
+			} else if (bootPackage.endsWith("*")) { //$NON-NLS-1$
+				if (bootPackage.length() > 2 && bootPackage.endsWith(".*")) { //$NON-NLS-1$
+					stemMatch.add(bootPackage.substring(0, bootPackage.length() - 1));
+				}
 			} else {
-				exactMatch.add(bootPackages[i]);
+				exactMatch.add(bootPackage);
 			}
 		}
 		bootDelegateAll = delegateAllValue;
@@ -148,9 +159,11 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		if (bootDelegation.contains(name))
 			return true;
 		if (bootDelegationStems != null)
-			for (int i = 0; i < bootDelegationStems.length; i++)
-				if (name.startsWith(bootDelegationStems[i]))
+			for (String bootDelegationStem : bootDelegationStems) {
+				if (name.startsWith(bootDelegationStem)) {
 					return true;
+				}
+			}
 		return false;
 	}
 

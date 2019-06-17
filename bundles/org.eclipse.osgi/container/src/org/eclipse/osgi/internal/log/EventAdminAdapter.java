@@ -104,9 +104,10 @@ public class EventAdminAdapter implements ServiceTrackerCustomizer<Object, Objec
 
 		if (property instanceof String[]) {
 			String[] topics = (String[]) property;
-			for (int i = 0; i < topics.length; i++) {
-				if (check.contains(topics[i]))
+			for (String topic : topics) {
+				if (check.contains(topic)) {
 					return true;
+				}
 			}
 		}
 

@@ -31,8 +31,9 @@ public class ReadOnlyConfigurationAreaTest extends OSGiTest {
 		ConfigurationSessionTestSuite suite = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, ReadOnlyConfigurationAreaTest.class);
 		suite.setReadOnly(true);
 		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
-		for (int i = 0; i < ids.length; i++)
-			suite.addBundle(ids[i]);
+		for (String id : ids) {
+			suite.addBundle(id);
+		}
 		suite.addBundle(PI_OSGI_TESTS);
 		return suite;
 	}

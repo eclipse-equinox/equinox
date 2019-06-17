@@ -370,9 +370,11 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 	}
 
 	private boolean contains(Object[] array, Object element) {
-		for (int i = 0; i < array.length; i++)
-			if (array[i].equals(element))
+		for (Object o : array) {
+			if (o.equals(element)) {
 				return true;
+			}
+		}
 		return false;
 	}
 }

@@ -64,12 +64,12 @@ public class TestRFC79_002 extends AbstractStateTest {
 		ExportPackageDescription[] exports = bundle_1.getResolvedImports();
 		assertNotNull("export array is unexpectedly null", exports);
 		assertTrue("export array is unexpectedly empty", exports.length > 0);
-		for (int i = 0; i < exports.length; i++) {
-			String exportPackageName = exports[i].getName();
+		for (ExportPackageDescription export : exports) {
+			String exportPackageName = export.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("javax.servlet")) {
-				assertNotNull("Package [javax.servlet] is not wired when it should be ", exports[i].getExporter());
-				assertEquals("Package [javax.servlet] is wired incorrectly ", exports[i].getExporter(), bundle_2);
+				assertNotNull("Package [javax.servlet] is not wired when it should be ", export.getExporter());
+				assertEquals("Package [javax.servlet] is wired incorrectly ", export.getExporter(), bundle_2);
 			}
 		} // end for
 	} // end method
@@ -78,12 +78,12 @@ public class TestRFC79_002 extends AbstractStateTest {
 		ExportPackageDescription[] exports = bundle_2.getResolvedImports();
 		assertNotNull("export array is unexpectedly null", exports);
 		assertTrue("export array is unexpectedly empty", exports.length > 0);
-		for (int i = 0; i < exports.length; i++) {
-			String exportPackageName = exports[i].getName();
+		for (ExportPackageDescription export : exports) {
+			String exportPackageName = export.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("javax.servlet")) {
-				assertNotNull("Package [javax.servlet] is not wired when it should be ", exports[i].getExporter());
-				assertEquals("Package [javax.servlet] is wired incorrectly ", exports[i].getExporter(), bundle_2);
+				assertNotNull("Package [javax.servlet] is not wired when it should be ", export.getExporter());
+				assertEquals("Package [javax.servlet] is wired incorrectly ", export.getExporter(), bundle_2);
 			}
 		} // end for
 	} // end method
@@ -92,15 +92,15 @@ public class TestRFC79_002 extends AbstractStateTest {
 		ExportPackageDescription[] exports = bundle_3.getResolvedImports();
 		assertNotNull("export array is unexpectedly null", exports);
 		assertTrue("export array is unexpectedly empty", exports.length > 0);
-		for (int i = 0; i < exports.length; i++) {
-			String exportPackageName = exports[i].getName();
+		for (ExportPackageDescription export : exports) {
+			String exportPackageName = export.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("org.foo.impl")) {
-				assertNotNull("Package [org.foo.impl] is not wired when it should be ", exports[i].getExporter());
-				assertEquals("Package [org.foo.impl] is wired incorrectly ", exports[i].getExporter(), bundle_2);
+				assertNotNull("Package [org.foo.impl] is not wired when it should be ", export.getExporter());
+				assertEquals("Package [org.foo.impl] is wired incorrectly ", export.getExporter(), bundle_2);
 			} else if (exportPackageName.equals("javax.servlet")) {
-				assertNotNull("Package [javax.servlet] is not wired when it should be ", exports[i].getExporter());
-				assertEquals("Package [javax.servlet] is wired incorrectly ", exports[i].getExporter(), bundle_2);
+				assertNotNull("Package [javax.servlet] is not wired when it should be ", export.getExporter());
+				assertEquals("Package [javax.servlet] is wired incorrectly ", export.getExporter(), bundle_2);
 			}
 		} // end for
 	} // end method
@@ -109,15 +109,15 @@ public class TestRFC79_002 extends AbstractStateTest {
 		ExportPackageDescription[] exports = bundle_4.getResolvedImports();
 		assertNotNull("export array is unexpectedly null", exports);
 		assertTrue("export array is unexpectedly empty", exports.length > 0);
-		for (int i = 0; i < exports.length; i++) {
-			String exportPackageName = exports[i].getName();
+		for (ExportPackageDescription export : exports) {
+			String exportPackageName = export.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("org.foo.impl")) {
-				assertNotNull("Package [org.foo.impl] is not wired when it should be ", exports[i].getExporter());
-				assertEquals("Package [org.foo.impl] is wired incorrectly ", exports[i].getExporter(), bundle_1);
+				assertNotNull("Package [org.foo.impl] is not wired when it should be ", export.getExporter());
+				assertEquals("Package [org.foo.impl] is wired incorrectly ", export.getExporter(), bundle_1);
 			} else if (exportPackageName.equals("javax.servlet")) {
-				assertNotNull("Package [javax.servlet] is not wired when it should be ", exports[i].getExporter());
-				assertEquals("Package [javax.servlet] is wired incorrectly ", exports[i].getExporter(), bundle_2);
+				assertNotNull("Package [javax.servlet] is not wired when it should be ", export.getExporter());
+				assertEquals("Package [javax.servlet] is wired incorrectly ", export.getExporter(), bundle_2);
 			}
 		} // end for
 	} // end method
@@ -126,12 +126,12 @@ public class TestRFC79_002 extends AbstractStateTest {
 		ExportPackageDescription[] exports = bundle_5.getResolvedImports();
 		assertNotNull("export array is unexpectedly null", exports);
 		assertTrue("export array is unexpectedly empty", exports.length > 0);
-		for (int i = 0; i < exports.length; i++) {
-			String exportPackageName = exports[i].getName();
+		for (ExportPackageDescription export : exports) {
+			String exportPackageName = export.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("org.foo.impl")) {
-				assertNotNull("Package [org.foo.impl] is not wired when it should be ", exports[i].getExporter());
-				assertEquals("Package [org.foo.impl] is wired incorrectly ", exports[i].getExporter(), bundle_2);
+				assertNotNull("Package [org.foo.impl] is not wired when it should be ", export.getExporter());
+				assertEquals("Package [org.foo.impl] is wired incorrectly ", export.getExporter(), bundle_2);
 			}
 		} // end for
 	} // end method

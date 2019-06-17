@@ -154,8 +154,7 @@ public abstract class MultiplexingFactory {
 	public Object findAuthorizedFactory(List<Class<?>> ignoredClasses) {
 		List<Object> current = getFactories();
 		Class<?>[] classStack = internalSecurityManager.getClassContext();
-		for (int i = 0; i < classStack.length; i++) {
-			Class<?> clazz = classStack[i];
+		for (Class<?> clazz : classStack) {
 			if (clazz == InternalSecurityManager.class || clazz == MultiplexingFactory.class || ignoredClasses.contains(clazz))
 				continue;
 			if (hasAuthority(clazz))

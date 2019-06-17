@@ -125,8 +125,9 @@ public class SignedStorageHook extends StorageHookFactory<List<SignerInfo>, List
 				return;
 			SignerInfo[] signerInfos = signedContent.getSignerInfos();
 			os.writeInt(signerInfos.length);
-			for (int i = 0; i < signerInfos.length; i++)
-				saveSignerInfo(signerInfos[i], os, saveContext);
+			for (SignerInfo signerInfo : signerInfos) {
+				saveSignerInfo(signerInfo, os, saveContext);
+			}
 
 			// keyed by entry path -> {SignerInfo[] infos, byte[][] results)}
 			Map<String, Object> contentMDResults = signedContent.getContentMDResults();
@@ -146,13 +147,13 @@ public class SignedStorageHook extends StorageHookFactory<List<SignerInfo>, List
 					}
 				}
 
-			for (int i = 0; i < signerInfos.length; i++) {
-				SignerInfo tsaInfo = signedContent.getTSASignerInfo(signerInfos[i]);
+			for (SignerInfo signerInfo : signerInfos) {
+				SignerInfo tsaInfo = signedContent.getTSASignerInfo(signerInfo);
 				os.writeBoolean(tsaInfo != null);
 				if (tsaInfo == null)
 					continue;
 				saveSignerInfo(tsaInfo, os, saveContext);
-				Date signingTime = signedContent.getSigningTime(signerInfos[i]);
+				Date signingTime = signedContent.getSigningTime(signerInfo);
 				os.writeLong(signingTime != null ? signingTime.getTime() : Long.MIN_VALUE);
 			}
 		}

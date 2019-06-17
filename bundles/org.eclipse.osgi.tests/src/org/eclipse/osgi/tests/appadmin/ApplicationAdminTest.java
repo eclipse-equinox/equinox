@@ -44,8 +44,9 @@ public class ApplicationAdminTest extends OSGiTest {
 
 		ConfigurationSessionTestSuite appAdminSessionTest = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, ApplicationAdminTest.class.getName());
 		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
-		for (int i = 0; i < ids.length; i++)
-			appAdminSessionTest.addBundle(ids[i]);
+		for (String id : ids) {
+			appAdminSessionTest.addBundle(id);
+		}
 		appAdminSessionTest.addBundle(PI_OSGI_UTIL);
 		appAdminSessionTest.addBundle(PI_OSGI_SERVICES);
 		appAdminSessionTest.addBundle(PI_OSGI_TESTS);
@@ -56,8 +57,9 @@ public class ApplicationAdminTest extends OSGiTest {
 			throw new RuntimeException(e);
 		}
 		// we add tests the hard way so we can control the order of the tests.
-		for (int i = 0; i < tests.length; i++)
-			appAdminSessionTest.addTest(new ApplicationAdminTest(tests[i]));
+		for (String test : tests) {
+			appAdminSessionTest.addTest(new ApplicationAdminTest(test));
+		}
 		suite.addTest(appAdminSessionTest);
 		return suite;
 	}
@@ -1164,8 +1166,9 @@ public class ApplicationAdminTest extends OSGiTest {
 				if (foundEvents.length > 0) {
 					StringBuilder eventsBuffer = new StringBuilder();
 					eventsBuffer.append("\nFound the following events: \n"); //$NON-NLS-1$
-					for (int i = 0; i < foundEvents.length; i++)
-						eventsBuffer.append(" handle event: ").append(foundEvents[i][0]).append(" ").append(foundEvents[i][1]).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					for (Object[] foundEvent : foundEvents) {
+						eventsBuffer.append(" handle event: ").append(foundEvent[0]).append(" ").append(foundEvent[1]).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
 					foundEventsMsg = eventsBuffer.toString();
 				} else {
 					foundEventsMsg = "\nNo events recorded"; //$NON-NLS-1$
@@ -1243,8 +1246,9 @@ public class ApplicationAdminTest extends OSGiTest {
 				if (foundEvents.length > 0) {
 					StringBuilder eventsBuffer = new StringBuilder();
 					eventsBuffer.append("\nFound the following events: \n"); //$NON-NLS-1$
-					for (int i = 0; i < foundEvents.length; i++)
-						eventsBuffer.append(" descriptor event: ").append(foundEvents[i][0]).append(" ").append(foundEvents[i][1]).append(" ").append(foundEvents[i][2]).append(" ").append(foundEvents[i][3]).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+					for (Object[] foundEvent : foundEvents) {
+						eventsBuffer.append(" descriptor event: ").append(foundEvent[0]).append(" ").append(foundEvent[1]).append(" ").append(foundEvent[2]).append(" ").append(foundEvent[3]).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+					}
 					foundEventsMsg = eventsBuffer.toString();
 				} else {
 					foundEventsMsg = "\nNo events recorded"; //$NON-NLS-1$

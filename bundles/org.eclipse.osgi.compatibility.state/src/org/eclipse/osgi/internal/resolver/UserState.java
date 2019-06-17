@@ -46,22 +46,24 @@ public class UserState extends StateImpl {
 	 * @throws BundleException  
 	 */
 	public StateDelta compare(State baseState) throws BundleException {
-		BundleDescription[] current = this.getBundles();
+		BundleDescription[] currentBundles = this.getBundles();
 		StateDeltaImpl delta = new StateDeltaImpl(this);
 		// process additions and updates
-		for (int i = 0; i < current.length; i++) {
-			BundleDescription existing = baseState.getBundleByLocation(current[i].getLocation());
-			if (existing == null)
-				delta.recordBundleAdded((BundleDescriptionImpl) current[i]);
-			else if (updated.contains(current[i].getLocation()))
-				delta.recordBundleUpdated((BundleDescriptionImpl) current[i]);
+		for (BundleDescription current : currentBundles) {
+			BundleDescription existing = baseState.getBundleByLocation(current.getLocation());
+			if (existing == null) {
+				delta.recordBundleAdded((BundleDescriptionImpl) current);
+			} else if (updated.contains(current.getLocation())) {
+				delta.recordBundleUpdated((BundleDescriptionImpl) current);
+			}
 		}
 		// process removals
-		BundleDescription[] existing = baseState.getBundles();
-		for (int i = 0; i < existing.length; i++) {
-			BundleDescription local = getBundleByLocation(existing[i].getLocation());
-			if (local == null)
-				delta.recordBundleRemoved((BundleDescriptionImpl) existing[i]);
+		BundleDescription[] existingBundles = baseState.getBundles();
+		for (BundleDescription existing : existingBundles) {
+			BundleDescription local = getBundleByLocation(existing.getLocation());
+			if (local == null) {
+				delta.recordBundleRemoved((BundleDescriptionImpl) existing);
+			}
 		}
 		return delta;
 	}

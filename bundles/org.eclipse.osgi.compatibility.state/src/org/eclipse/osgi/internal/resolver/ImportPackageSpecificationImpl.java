@@ -120,9 +120,11 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 					return false;
 				boolean found = false;
 				if (friends != null && getBundle().getSymbolicName() != null)
-					for (int i = 0; i < friends.length; i++)
-						if (getBundle().getSymbolicName().equals(friends[i]))
+					for (String friend : friends) {
+						if (getBundle().getSymbolicName().equals(friend)) {
 							found = true;
+						}
+					}
 				if (!found)
 					return false;
 			}
@@ -149,8 +151,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 			Map<String, ?> exportAttrs = pkgDes.getAttributes();
 			if (exportAttrs == null)
 				return false;
-			for (Iterator<String> i = importAttrs.keySet().iterator(); i.hasNext();) {
-				String importKey = i.next();
+			for (String importKey : importAttrs.keySet()) {
 				Object importValue = importAttrs.get(importKey);
 				Object exportValue = exportAttrs.get(importKey);
 				if (exportValue == null || !importValue.equals(exportValue))
@@ -170,24 +171,25 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	}
 
 	@Override
-	protected boolean hasMandatoryAttributes(String[] mandatory) {
-		if (mandatory != null) {
+	protected boolean hasMandatoryAttributes(String[] checkMandatory) {
+		if (checkMandatory != null) {
 			Map<String, ?> importAttrs = getAttributes();
-			for (int i = 0; i < mandatory.length; i++) {
-				if (Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE.equals(mandatory[i])) {
+			for (String mandatory : checkMandatory) {
+				if (Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE.equals(mandatory)) {
 					if (getBundleSymbolicName() == null)
 						return false;
-				} else if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(mandatory[i])) {
+				} else if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(mandatory)) {
 					if (bundleVersionRange == null)
 						return false;
-				} else if (Constants.PACKAGE_SPECIFICATION_VERSION.equals(mandatory[i]) || Constants.VERSION_ATTRIBUTE.equals(mandatory[i])) {
+				} else if (Constants.PACKAGE_SPECIFICATION_VERSION.equals(mandatory) || Constants.VERSION_ATTRIBUTE.equals(mandatory)) {
 					if (getVersionRange() == null)
 						return false;
 				} else { // arbitrary attribute
 					if (importAttrs == null)
 						return false;
-					if (importAttrs.get(mandatory[i]) == null)
+					if (importAttrs.get(mandatory) == null) {
 						return false;
+					}
 				}
 			}
 		}

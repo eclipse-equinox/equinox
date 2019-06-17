@@ -463,18 +463,18 @@ public class EclipseStarter {
 	}
 
 	private static void ensureBundlesActive(Bundle[] bundles) {
-		for (int i = 0; i < bundles.length; i++) {
-			if (bundles[i].getState() != Bundle.ACTIVE) {
-				if (bundles[i].getState() == Bundle.INSTALLED) {
+		for (Bundle bundle : bundles) {
+			if (bundle.getState() != Bundle.ACTIVE) {
+				if (bundle.getState() == Bundle.INSTALLED) {
 					// Log that the bundle is not resolved
-					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED, bundles[i].getLocation()), 0, null, null));
+					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED, bundle.getLocation()), 0, null, null));
 					continue;
 				}
 				// check that the startlevel allows the bundle to be active (111550)
 				FrameworkStartLevel fwStartLevel = context.getBundle().adapt(FrameworkStartLevel.class);
-				BundleStartLevel bundleStartLevel = bundles[i].adapt(BundleStartLevel.class);
+				BundleStartLevel bundleStartLevel = bundle.adapt(BundleStartLevel.class);
 				if (fwStartLevel != null && (bundleStartLevel.getStartLevel() <= fwStartLevel.getStartLevel())) {
-					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE, bundles[i]), 0, null, null));
+					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE, bundle), 0, null, null));
 				}
 			}
 		}
@@ -629,15 +629,13 @@ public class EclipseStarter {
 		if (installLocation == null) {
 			throw new IllegalStateException(Msg.EclipseStarter_InstallLocation);
 		}
-		for (int i = 0; i < installEntries.length; i++) {
-			String name = installEntries[i];
+		for (String name : installEntries) {
 			int level = defaultStartLevel;
 			boolean start = false;
 			int index = name.lastIndexOf('@');
 			if (index >= 0) {
 				String[] attributes = getArrayFromList(name.substring(index + 1, name.length()), ":"); //$NON-NLS-1$
-				for (int j = 0; j < attributes.length; j++) {
-					String attribute = attributes[j];
+				for (String attribute : attributes) {
 					if (attribute.equals("start")) //$NON-NLS-1$
 						start = true;
 					else {
@@ -654,7 +652,7 @@ public class EclipseStarter {
 			try {
 				URL location = searchForBundle(name, syspath);
 				if (location == null) {
-					FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_BUNDLE_NOT_FOUND, installEntries[i]), 0, null, null);
+					FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_BUNDLE_NOT_FOUND, name), 0, null, null);
 					log.log(entry);
 					// skip this entry
 					continue;
@@ -662,7 +660,7 @@ public class EclipseStarter {
 				location = makeRelative(installLocation.getURL(), location);
 				String locationString = INITIAL_LOCATION + location.toExternalForm();
 				result.add(new InitialBundle(locationString, location, level, start));
-			} catch (IOException e) {
+			}catch (IOException e) {
 				log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, e.getMessage(), 0, e, null));
 			}
 		}
@@ -935,8 +933,7 @@ public class EclipseStarter {
 	private static Bundle[] getCurrentBundles(boolean includeInitial) {
 		Bundle[] installed = context.getBundles();
 		List<Bundle> initial = new ArrayList<>();
-		for (int i = 0; i < installed.length; i++) {
-			Bundle bundle = installed[i];
+		for (Bundle bundle : installed) {
 			if (bundle.getLocation().startsWith(INITIAL_LOCATION)) {
 				if (includeInitial)
 					initial.add(bundle);
@@ -947,8 +944,7 @@ public class EclipseStarter {
 	}
 
 	private static Bundle getBundleByLocation(String location, Bundle[] bundles) {
-		for (int i = 0; i < bundles.length; i++) {
-			Bundle bundle = bundles[i];
+		for (Bundle bundle : bundles) {
 			if (location.equalsIgnoreCase(bundle.getLocation()))
 				return bundle;
 		}
@@ -956,35 +952,36 @@ public class EclipseStarter {
 	}
 
 	private static void uninstallBundles(Bundle[] curInitBundles, InitialBundle[] newInitBundles, List<Bundle> toRefresh) {
-		for (int i = 0; i < curInitBundles.length; i++) {
+		for (Bundle curInitBundle : curInitBundles) {
 			boolean found = false;
-			for (int j = 0; j < newInitBundles.length; j++) {
-				if (curInitBundles[i].getLocation().equalsIgnoreCase(newInitBundles[j].locationString)) {
+			for (InitialBundle newInitBundle : newInitBundles) {
+				if (curInitBundle.getLocation().equalsIgnoreCase(newInitBundle.locationString)) {
 					found = true;
 					break;
 				}
 			}
-			if (!found)
+			if (!found) {
 				try {
-					curInitBundles[i].uninstall();
-					toRefresh.add(curInitBundles[i]);
+					curInitBundle.uninstall();
+					toRefresh.add(curInitBundle);
 				} catch (BundleException e) {
-					FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_FAILED_UNINSTALL, curInitBundles[i].getLocation()), 0, e, null);
+					FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_FAILED_UNINSTALL, curInitBundle.getLocation()), 0, e, null);
 					log.log(entry);
 				}
+			}
 		}
 	}
 
 	private static void installBundles(InitialBundle[] initialBundles, Bundle[] curInitBundles, List<Bundle> startBundles, List<Bundle> lazyActivationBundles, List<Bundle> toRefresh) {
-		for (int i = 0; i < initialBundles.length; i++) {
-			Bundle osgiBundle = getBundleByLocation(initialBundles[i].locationString, curInitBundles);
+		for (InitialBundle initialBundle : initialBundles) {
+			Bundle osgiBundle = getBundleByLocation(initialBundle.locationString, curInitBundles);
 			try {
 				// don't need to install if it is already installed
 				if (osgiBundle == null) {
-					InputStream in = LocationHelper.getStream(initialBundles[i].location);
+					InputStream in = LocationHelper.getStream(initialBundle.location);
 					try {
-						osgiBundle = context.installBundle(initialBundles[i].locationString, in);
-					} catch (BundleException e) {
+						osgiBundle = context.installBundle(initialBundle.locationString, in);
+					}catch (BundleException e) {
 						if (e.getType() == BundleException.DUPLICATE_BUNDLE_ERROR) {
 							continue;
 							// TODO should attempt to lookup the existing bundle
@@ -992,22 +989,24 @@ public class EclipseStarter {
 						throw e;
 					}
 					// only check for lazy activation header if this is a newly installed bundle and is not marked for persistent start
-					if (!initialBundles[i].start && hasLazyActivationPolicy(osgiBundle))
+					if (!initialBundle.start && hasLazyActivationPolicy(osgiBundle)) {
 						lazyActivationBundles.add(osgiBundle);
+					}
 				}
 				// always set the startlevel incase it has changed (bug 111549)
 				// this is a no-op if the level is the same as previous launch.
-				if ((osgiBundle.getState() & Bundle.UNINSTALLED) == 0 && initialBundles[i].level >= 0) {
-					osgiBundle.adapt(BundleStartLevel.class).setStartLevel(initialBundles[i].level);
+				if ((osgiBundle.getState() & Bundle.UNINSTALLED) == 0 && initialBundle.level >= 0) {
+					osgiBundle.adapt(BundleStartLevel.class).setStartLevel(initialBundle.level);
 				}
 				// if this bundle is supposed to be started then add it to the start list
-				if (initialBundles[i].start)
+				if (initialBundle.start) {
 					startBundles.add(osgiBundle);
+				}
 				// include basic bundles in case they were not resolved before
 				if ((osgiBundle.getState() & Bundle.INSTALLED) != 0)
 					toRefresh.add(osgiBundle);
 			} catch (BundleException | IOException e) {
-				FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
+				FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundle.location), 0, e, null);
 				log.log(entry);
 			}
 		}
@@ -1053,10 +1052,12 @@ public class EclipseStarter {
 	}
 
 	private static void startBundles(Bundle[] startBundles, Bundle[] lazyBundles) {
-		for (int i = 0; i < startBundles.length; i++)
-			startBundle(startBundles[i], 0);
-		for (int i = 0; i < lazyBundles.length; i++)
-			startBundle(lazyBundles[i], Bundle.START_ACTIVATION_POLICY);
+		for (Bundle startBundle : startBundles) {
+			startBundle(startBundle, 0);
+		}
+		for (Bundle lazyBundle : lazyBundles) {
+			startBundle(lazyBundle, Bundle.START_ACTIVATION_POLICY);
+		}
 	}
 
 	private static void startBundle(Bundle bundle, int options) {
@@ -1223,8 +1224,7 @@ public class EclipseStarter {
 		String result = null;
 		Object[] maxVersion = null;
 		boolean resultIsFile = false;
-		for (int i = 0; i < candidates.length; i++) {
-			String candidateName = candidates[i];
+		for (String candidateName : candidates) {
 			if (!candidateName.startsWith(target))
 				continue;
 			boolean simpleJar = false;

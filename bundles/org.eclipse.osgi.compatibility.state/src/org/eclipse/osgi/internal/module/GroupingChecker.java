@@ -37,8 +37,8 @@ public class GroupingChecker {
 			return;
 		// process all requires
 		BundleConstraint[] requires = bundle.getRequires();
-		for (int j = 0; j < requires.length; j++) {
-			ResolverBundle selectedSupplier = (ResolverBundle) requires[j].getSelectedSupplier();
+		for (BundleConstraint require : requires) {
+			ResolverBundle selectedSupplier = (ResolverBundle) require.getSelectedSupplier();
 			if (selectedSupplier != null)
 				isConsistentInternal(bundle, selectedSupplier, new ArrayList<ResolverBundle>(1), true, null);
 		}
@@ -82,18 +82,19 @@ public class GroupingChecker {
 		visited.add(matchingBundle);
 		// check that the packages exported by the matching bundle are consistent
 		ResolverExport[] matchingExports = matchingBundle.getExportPackages();
-		for (int i = 0; i < matchingExports.length; i++) {
-			ResolverExport matchingExport = matchingExports[i];
-			if (matchingExports[i].getSubstitute() != null)
-				matchingExport = (ResolverExport) matchingExports[i].getSubstitute();
+		for (ResolverExport matchingExport : matchingExports) {
+			if (matchingExport.getSubstitute() != null) {
+				matchingExport = (ResolverExport) matchingExport.getSubstitute();
+			}
 			results = isConsistentInternal(requiringBundle, matchingExport, dynamicImport, results);
 		}
 		// check that the packages from reexported bundles are consistent
 		BundleConstraint[] supplierRequires = matchingBundle.getRequires();
-		for (int j = 0; j < supplierRequires.length; j++) {
-			ResolverBundle reexported = (ResolverBundle) supplierRequires[j].getSelectedSupplier();
-			if (reexported == null || !((BundleSpecification) supplierRequires[j].getVersionConstraint()).isExported())
+		for (BundleConstraint supplierRequire : supplierRequires) {
+			ResolverBundle reexported = (ResolverBundle) supplierRequire.getSelectedSupplier();
+			if (reexported == null || !((BundleSpecification) supplierRequire.getVersionConstraint()).isExported()) {
 				continue;
+			}
 			results = isConsistentInternal(requiringBundle, reexported, visited, dynamicImport, results);
 		}
 		return results;
@@ -141,8 +142,7 @@ public class GroupingChecker {
 		PackageRoots importingRoots = getPackageRoots(importingBundle, matchingExport.getName(), null);
 		Map<String, PackageRoots> importingPackages = bundles.get(importingBundle);
 		if (importingPackages != null)
-			for (Iterator<PackageRoots> allImportingPackages = importingPackages.values().iterator(); allImportingPackages.hasNext();) {
-				PackageRoots roots = allImportingPackages.next();
+			for (PackageRoots roots : importingPackages.values()) {
 				if (roots != importingRoots)
 					results = roots.isConsistentClassSpace(exportingRoots, matchingExport.getExporter(), null, results);
 			}
@@ -216,8 +216,8 @@ public class GroupingChecker {
 		List<PackageRoots> roots = new ArrayList<>(0);
 		// check roots from required bundles
 		BundleConstraint[] requires = bundle.getRequires();
-		for (int i = 0; i < requires.length; i++) {
-			ResolverBundle supplier = (ResolverBundle) requires[i].getSelectedSupplier();
+		for (BundleConstraint require : requires) {
+			ResolverBundle supplier = (ResolverBundle) require.getSelectedSupplier();
 			if (supplier == null)
 				continue; // no supplier, probably optional
 			if (supplier.getExport(packageName) != null) {
@@ -228,10 +228,11 @@ public class GroupingChecker {
 			} else {
 				// the bundle does not export the package; but it may reexport another bundle that does
 				BundleConstraint[] supplierRequires = supplier.getRequires();
-				for (int j = 0; j < supplierRequires.length; j++) {
-					ResolverBundle reexported = (ResolverBundle) supplierRequires[j].getSelectedSupplier();
-					if (reexported == null || !((BundleSpecification) supplierRequires[j].getVersionConstraint()).isExported())
+				for (BundleConstraint supplierRequire : supplierRequires) {
+					ResolverBundle reexported = (ResolverBundle) supplierRequire.getSelectedSupplier();
+					if (reexported == null || !((BundleSpecification) supplierRequire.getVersionConstraint()).isExported()) {
 						continue;
+					}
 					if (reexported.getExport(packageName) != null) {
 						// the reexported bundle exports the package; get the package roots from it
 						PackageRoots reExportedRoots = getPackageRoots(reexported, packageName, visited);
@@ -259,11 +260,13 @@ public class GroupingChecker {
 			// in this case we cannot share the package roots object; must create one specific for this bundle
 			PackageRoots result = new PackageRoots(packageName);
 			// first merge all the roots from required bundles
-			for (int i = 0; i < requiredRoots.length; i++)
-				result.merge(requiredRoots[i]);
+			for (PackageRoots requiredRoot : requiredRoots) {
+				result.merge(requiredRoot);
+			}
 			// always add this bundles exports to the end if it exports the package
-			for (int i = 0; i < exports.length; i++)
-				result.addRoot(exports[i]);
+			for (ResolverExport export : exports) {
+				result.addRoot(export);
+			}
 			return result;
 		}
 		return roots.size() == 0 ? nullPackageRoots : roots.get(0);
@@ -299,9 +302,11 @@ public class GroupingChecker {
 			String exportBSN = export.getExporter().getName();
 			if (exportBSN != null) {
 				// first one wins
-				for (int i = 0; i < roots.length; i++)
-					if (export.getExporter() != roots[i].getExporter() && exportBSN.equals(roots[i].getExporter().getName()))
+				for (ResolverExport root : roots) {
+					if (export.getExporter() != root.getExporter() && exportBSN.equals(root.getExporter().getName())) {
 						return;
+					}
+				}
 			}
 			if (!contains(export, roots)) {
 				ResolverExport[] newRoots = new ResolverExport[roots.length + 1];
@@ -312,9 +317,11 @@ public class GroupingChecker {
 		}
 
 		private boolean contains(ResolverExport export, ResolverExport[] exports) {
-			for (int i = 0; i < exports.length; i++)
-				if (exports[i] == export)
+			for (ResolverExport e : exports) {
+				if (e == export) {
 					return true;
+				}
+			}
 			return false;
 		}
 
@@ -340,11 +347,12 @@ public class GroupingChecker {
 				String[] uses = root.getUsesDirective();
 				if (uses == null)
 					continue;
-				for (int j = 0; j < uses.length; j++) {
-					if (uses[j].equals(root.getName()))
+				for (String use : uses) {
+					if (use.equals(root.getName())) {
 						continue;
-					PackageRoots thisUsedRoots = getPackageRoots(root.getExporter(), uses[j], null);
-					PackageRoots importingUsedRoots = getPackageRoots(importingBundle, uses[j], null);
+					}
+					PackageRoots thisUsedRoots = getPackageRoots(root.getExporter(), use, null);
+					PackageRoots importingUsedRoots = getPackageRoots(importingBundle, use, null);
 					if (thisUsedRoots == importingUsedRoots)
 						continue;
 					if (thisUsedRoots != nullPackageRoots && importingUsedRoots != nullPackageRoots)
@@ -363,9 +371,7 @@ public class GroupingChecker {
 		public List<PackageRoots[]> isConsistentClassSpace(PackageRoots exportingRoots, ResolverBundle exporter, List<PackageRoots> visited, List<PackageRoots[]> results) {
 			if (roots == null)
 				return results;
-			int size = roots.length;
-			for (int i = 0; i < size; i++) {
-				ResolverExport root = roots[i];
+			for (ResolverExport root : roots) {
 				String[] uses = root.getUsesDirective();
 				if (uses == null)
 					continue;
@@ -374,11 +380,12 @@ public class GroupingChecker {
 				if (visited.contains(this))
 					return results;
 				visited.add(this);
-				for (int j = 0; j < uses.length; j++) {
-					if (uses[j].equals(root.getName()) || !uses[j].equals(exportingRoots.name))
+				for (String use : uses) {
+					if (use.equals(root.getName()) || !use.equals(exportingRoots.name)) {
 						continue;
-					PackageRoots thisUsedRoots = getPackageRoots(root.getExporter(), uses[j], null);
-					PackageRoots exportingUsedRoots = getPackageRoots(exporter, uses[j], null);
+					}
+					PackageRoots thisUsedRoots = getPackageRoots(root.getExporter(), use, null);
+					PackageRoots exportingUsedRoots = getPackageRoots(exporter, use, null);
 					if (thisUsedRoots == exportingRoots)
 						return results;
 					if (thisUsedRoots != nullPackageRoots && exportingUsedRoots != nullPackageRoots)
@@ -410,14 +417,15 @@ public class GroupingChecker {
 
 		// TODO this is a behavioral change; before we only required 1 supplier to match; now roots must be subsets
 		private boolean subSet(ResolverExport[] superSet, ResolverExport[] subSet) {
-			for (int i = 0; i < subSet.length; i++) {
+			for (ResolverExport  subexport : subSet) {
 				boolean found = false;
-				for (int j = 0; j < superSet.length; j++)
+				for (ResolverExport superexport : superSet) {
 					// compare by exporter in case the bundle exports the package multiple times
-					if (subSet[i].getExporter() == superSet[j].getExporter()) {
+					if (subexport.getExporter() == superexport.getExporter()) {
 						found = true;
 						break;
 					}
+				}
 				if (!found)
 					return false;
 			}

@@ -15,8 +15,15 @@ package org.eclipse.osgi.internal.permadmin;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
-import java.security.*;
-import java.util.*;
+import java.security.AccessController;
+import java.security.AllPermission;
+import java.security.Permission;
+import java.security.PermissionCollection;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
 public final class PermissionInfoCollection extends PermissionCollection {
@@ -119,15 +126,16 @@ public final class PermissionInfoCollection extends PermissionCollection {
 		/*
 		 * TODO: We need to cache the permission constructors to enhance performance (see bug 118813).
 		 */
-		for (int i = 0; i < permInfos.length; i++) {
-			if (permInfos[i].getType().equals(permClassName)) {
+		for (PermissionInfo permInfo : permInfos) {
+			if (permInfo.getType().equals(permClassName)) {
 				String args[] = new String[numArgs];
-				if (numArgs > 0)
-					args[0] = permInfos[i].getName();
-				if (numArgs > 1)
-					args[1] = permInfos[i].getActions();
-
-				if (permInfos[i].getType().equals("java.io.FilePermission")) { //$NON-NLS-1$
+				if (numArgs > 0) {
+					args[0] = permInfo.getName();
+				}
+				if (numArgs > 1) {
+					args[1] = permInfo.getActions();
+				}
+				if (permInfo.getType().equals("java.io.FilePermission")) { //$NON-NLS-1$
 					// map FilePermissions for relative names to the bundle's data area
 					if (!args[0].equals("<<ALL FILES>>")) { //$NON-NLS-1$
 						File file = new File(args[0]);

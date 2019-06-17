@@ -53,8 +53,9 @@ public class SignerInfoImpl implements SignerInfo {
 	@Override
 	public int hashCode() {
 		int result = mdAlgorithm.hashCode();
-		for (int i = 0; i < chain.length; i++)
-			result += chain[i].hashCode();
+		for (Certificate cert : chain) {
+			result += cert.hashCode();
+		}
 		// Note that we do not hash based on trustAnchor;
 		// this changes dynamically but we need a constant hashCode for purposes of 
 		// hashing in a Set.

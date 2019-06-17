@@ -1028,44 +1028,44 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		urls[1] = test.getEntry("a/b/c/d"); //$NON-NLS-1$
 		assertNotNull("resource", urls[0]); //$NON-NLS-1$
 		assertNotNull("entry", urls[1]); //$NON-NLS-1$
-		for (int i = 0; i < urls.length; i++) {
-			URL testURL = new URL(urls[i], "g"); //$NON-NLS-1$
+		for (URL url : urls) {
+			URL testURL = new URL(url, "g"); //$NON-NLS-1$
 			assertEquals("g", "/a/b/c/g", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
-			testURL = new URL(urls[i], "./g"); //$NON-NLS-1$
+			testURL = new URL(url, "./g"); //$NON-NLS-1$
 			assertEquals("./g", "/a/b/c/g", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
-			testURL = new URL(urls[i], "g/"); //$NON-NLS-1$
+			testURL = new URL(url, "g/"); //$NON-NLS-1$
 			assertEquals("g/", "/a/b/c/g/", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
-			testURL = new URL(urls[i], "/g"); //$NON-NLS-1$
+			testURL = new URL(url, "/g"); //$NON-NLS-1$
 			assertEquals("/g", "/g", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
-			testURL = new URL(urls[i], "?y"); //$NON-NLS-1$
+			testURL = new URL(url, "?y"); //$NON-NLS-1$
 			assertEquals("?y", "/a/b/c/?y", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
-			testURL = new URL(urls[i], "g?y"); //$NON-NLS-1$
+			testURL = new URL(url, "g?y"); //$NON-NLS-1$
 			assertEquals("g?y", "/a/b/c/g?y", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
-			testURL = new URL(urls[i], "g#s"); //$NON-NLS-1$
+			testURL = new URL(url, "g#s"); //$NON-NLS-1$
 			assertEquals("g#s", "/a/b/c/g#s", testURL.getPath() + "#s"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			testURL = new URL(urls[i], "g?y#s"); //$NON-NLS-1$
+			testURL = new URL(url, "g?y#s"); //$NON-NLS-1$
 			assertEquals("g?y#s", "/a/b/c/g?y#s", testURL.getPath() + "#s"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			testURL = new URL(urls[i], ";x"); //$NON-NLS-1$
+			testURL = new URL(url, ";x"); //$NON-NLS-1$
 			assertEquals(";x", "/a/b/c/;x", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
-			testURL = new URL(urls[i], "g;x"); //$NON-NLS-1$
+			testURL = new URL(url, "g;x"); //$NON-NLS-1$
 			assertEquals("g;x", "/a/b/c/g;x", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
-			testURL = new URL(urls[i], "g;x?y#s"); //$NON-NLS-1$
+			testURL = new URL(url, "g;x?y#s"); //$NON-NLS-1$
 			assertEquals("g;x?y#s", "/a/b/c/g;x?y#s", testURL.getPath() + "#s"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			testURL = new URL(urls[i], "."); //$NON-NLS-1$
+			testURL = new URL(url, "."); //$NON-NLS-1$
 			assertEquals(".", "/a/b/c/", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
-			testURL = new URL(urls[i], "./"); //$NON-NLS-1$
+			testURL = new URL(url, "./"); //$NON-NLS-1$
 			assertEquals("./", "/a/b/c/", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
-			testURL = new URL(urls[i], ".."); //$NON-NLS-1$
+			testURL = new URL(url, ".."); //$NON-NLS-1$
 			assertEquals("..", "/a/b/", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
-			testURL = new URL(urls[i], "../"); //$NON-NLS-1$
+			testURL = new URL(url, "../"); //$NON-NLS-1$
 			assertEquals("../", "/a/b/", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
-			testURL = new URL(urls[i], "../g"); //$NON-NLS-1$
+			testURL = new URL(url, "../g"); //$NON-NLS-1$
 			assertEquals("../g", "/a/b/g", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
-			testURL = new URL(urls[i], "../.."); //$NON-NLS-1$
+			testURL = new URL(url, "../.."); //$NON-NLS-1$
 			assertEquals("../..", "/a/", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
-			testURL = new URL(urls[i], "../../"); //$NON-NLS-1$
+			testURL = new URL(url, "../../"); //$NON-NLS-1$
 			assertEquals("../../", "/a/", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
-			testURL = new URL(urls[i], "../../g"); //$NON-NLS-1$
+			testURL = new URL(url, "../../g"); //$NON-NLS-1$
 			assertEquals("../../g", "/a/g", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}

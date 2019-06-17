@@ -230,8 +230,7 @@ public class ComputeNodeOrder {
 			}
 			int len = vertexList.size();
 			Object[] r = new Object[len];
-			for (Iterator<Vertex> allV = vertexList.iterator(); allV.hasNext();) {
-				Vertex vertex = allV.next();
+			for (Vertex vertex : vertexList) {
 				int f = vertex.finishTime;
 				// note that finish times start at 1, not 0
 				if (increasing) {
@@ -274,8 +273,7 @@ public class ComputeNodeOrder {
 			// find the roots of each component
 			// Map<Vertex,List<Object>> components
 			Map<Vertex, List<Object>> components = new HashMap<>();
-			for (Iterator<Vertex> it = vertexList.iterator(); it.hasNext();) {
-				Vertex vertex = it.next();
+			for (Vertex vertex : vertexList) {
 				if (vertex.predecessor == null) {
 					// this vertex is the root of a component
 					// if component is non-trivial we will hit a child
@@ -295,8 +293,7 @@ public class ComputeNodeOrder {
 				}
 			}
 			List<Object[]> result = new ArrayList<>(components.size());
-			for (Iterator<List<Object>> it = components.values().iterator(); it.hasNext();) {
-				List<Object> component = it.next();
+			for (List<Object> component : components.values()) {
 				if (component.size() > 1) {
 					result.add(component.toArray());
 				}
@@ -475,13 +472,15 @@ public class ComputeNodeOrder {
 		// Step 1: Create the graph object.
 		final Digraph g1 = new Digraph();
 		// add vertexes
-		for (int i = 0; i < objects.length; i++)
-			g1.addVertex(objects[i]);
+		for (Object object : objects) {
+			g1.addVertex(object);
+		}
 		// add edges
-		for (int i = 0; i < references.length; i++)
+		for (Object[] reference : references) {
 			// create an edge from q to p
 			// to cause q to come before p in eventual result
-			g1.addEdge(references[i][1], references[i][0]);
+			g1.addEdge(reference[1], reference[0]);
+		}
 		g1.freeze();
 
 		// Step 2: Create the transposed graph. This time, define the vertexes
@@ -493,8 +492,9 @@ public class ComputeNodeOrder {
 		for (Iterator<Object> it = resortedVertexes.iterator(); it.hasNext();)
 			g2.addVertex(it.next());
 		// add edges
-		for (int i = 0; i < references.length; i++)
-			g2.addEdge(references[i][0], references[i][1]);
+		for (Object[] reference : references) {
+			g2.addEdge(reference[0], reference[1]);
+		}
 		g2.freeze();
 
 		// Step 3: Return the vertexes in increasing order of depth-first finish

@@ -87,11 +87,11 @@ public class TestCondition implements Condition {
 	public boolean isSatisfied(Condition[] conditions, Dictionary context) {
 		if (!isPostponed())
 			throw new IllegalStateException("Should not call isSatisfied(Condition[] conditions, Dictionary context)"); //$NON-NLS-1$
-		for (int i = 0; i < conditions.length; i++) {
-			Boolean isSatisfied = (Boolean) context.get(conditions[i]);
+		for (Condition condition : conditions) {
+			Boolean isSatisfied = (Boolean) context.get(condition);
 			if (isSatisfied == null) {
-				isSatisfied = Boolean.valueOf(conditions[i].isSatisfied());
-				context.put(conditions[i], isSatisfied);
+				isSatisfied = Boolean.valueOf(condition.isSatisfied());
+				context.put(condition, isSatisfied);
 			}
 			if (!isSatisfied.booleanValue())
 				return false;

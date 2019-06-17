@@ -66,8 +66,7 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 
 		// done processing now create a SingedContent to return
 		SignerInfo[] allSigners = signerInfos.toArray(new SignerInfo[signerInfos.size()]);
-		for (Iterator<Map.Entry<String, Object>> iResults = contentMDResults.entrySet().iterator(); iResults.hasNext();) {
-			Map.Entry<String, Object> entry = iResults.next();
+		for (Map.Entry<String, Object> entry : contentMDResults.entrySet()) {
 			@SuppressWarnings("unchecked")
 			List<Object>[] value = (List<Object>[]) entry.getValue();
 			SignerInfo[] entrySigners = value[0].toArray(new SignerInfo[value[0].size()]);

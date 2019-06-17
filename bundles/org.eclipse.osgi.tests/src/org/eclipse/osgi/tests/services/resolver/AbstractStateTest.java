@@ -13,8 +13,18 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
-import java.util.*;
-import org.eclipse.osgi.service.resolver.*;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.BundleSpecification;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.HostSpecification;
+import org.eclipse.osgi.service.resolver.ImportPackageSpecification;
+import org.eclipse.osgi.service.resolver.PlatformAdmin;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.service.resolver.StateObjectFactory;
+import org.eclipse.osgi.service.resolver.VersionConstraint;
 import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.BundleException;
@@ -38,9 +48,11 @@ public abstract class AbstractStateTest extends OSGiTest {
 	}
 
 	public void assertContains(String tag, Object[] array, Object element) {
-		for (int i = 0; i < array.length; i++)
-			if (array[i] == element)
+		for (Object o : array) {
+			if (o == element) {
 				return;
+			}
+		}
 		fail(tag);
 	}
 

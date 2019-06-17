@@ -34,17 +34,17 @@ public class TrustEngineListener {
 		// find any SignedContent with SignerInfos that do not have an anchor;
 		// re-evaluate trust and check authorization for these SignedContents
 		Bundle[] bundles = context.getBundles();
-		for (int i = 0; i < bundles.length; i++) {
-			SignedContentImpl signedContent = getSignedContent(bundles[i]);
+		for (Bundle bundle : bundles) {
+			SignedContentImpl signedContent = getSignedContent(bundle);
 			if (signedContent != null && signedContent.isSigned()) {
 				// check the SignerInfos for this content
 				SignerInfo[] infos = signedContent.getSignerInfos();
-				for (int j = 0; j < infos.length; j++) {
-					if (infos[j].getTrustAnchor() == null) {
+				for (SignerInfo info : infos) {
+					if (info.getTrustAnchor() == null) {
 						// one of the signers is not trusted
 						signedBundleHook.determineTrust(signedContent, SignedBundleHook.VERIFY_TRUST);
 					} else {
-						SignerInfo tsa = signedContent.getTSASignerInfo(infos[j]);
+						SignerInfo tsa = signedContent.getTSASignerInfo(info);
 						if (tsa != null && tsa.getTrustAnchor() == null)
 							// one of the tsa signers is not trusted
 							signedBundleHook.determineTrust(signedContent, SignedBundleHook.VERIFY_TRUST);
@@ -60,21 +60,21 @@ public class TrustEngineListener {
 		Bundle[] bundles = context.getBundles();
 		Set<Bundle> usingAnchor = new HashSet<>();
 		Set<SignerInfo> untrustedSigners = new HashSet<>();
-		for (int i = 0; i < bundles.length; i++) {
-			SignedContentImpl signedContent = getSignedContent(bundles[i]);
+		for (Bundle bundle : bundles) {
+			SignedContentImpl signedContent = getSignedContent(bundle);
 			if (signedContent != null && signedContent.isSigned()) {
 				// check signer infos for this content
 				SignerInfo[] infos = signedContent.getSignerInfos();
-				for (int j = 0; j < infos.length; j++) {
-					if (anchor.equals(infos[j].getTrustAnchor())) {
+				for (SignerInfo info : infos) {
+					if (anchor.equals(info.getTrustAnchor())) {
 						// one of the signers uses this anchor
-						untrustedSigners.add(infos[j]);
-						usingAnchor.add(bundles[i]);
+						untrustedSigners.add(info);
+						usingAnchor.add(bundle);
 					}
-					SignerInfo tsa = signedContent.getTSASignerInfo(infos[j]);
+					SignerInfo tsa = signedContent.getTSASignerInfo(info);
 					if (tsa != null && anchor.equals(tsa.getTrustAnchor())) {
 						// one of the tsa signers uses this anchor
-						usingAnchor.add(bundles[i]);
+						usingAnchor.add(bundle);
 						untrustedSigners.add(tsa);
 					}
 				}
@@ -84,8 +84,7 @@ public class TrustEngineListener {
 		for (Iterator<SignerInfo> untrusted = untrustedSigners.iterator(); untrusted.hasNext();)
 			((SignerInfoImpl) untrusted.next()).setTrustAnchor(null);
 		// re-establish trust
-		for (Iterator<Bundle> untrustedBundles = usingAnchor.iterator(); untrustedBundles.hasNext();) {
-			Bundle bundle = untrustedBundles.next();
+		for (Bundle bundle : usingAnchor) {
 			SignedContentImpl signedContent = getSignedContent(bundle);
 			// found an signer using the anchor for this bundle re-evaluate trust
 			signedBundleHook.determineTrust(signedContent, SignedBundleHook.VERIFY_TRUST);

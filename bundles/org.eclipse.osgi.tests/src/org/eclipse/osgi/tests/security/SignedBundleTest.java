@@ -20,7 +20,10 @@ import java.security.cert.X509Certificate;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
-import org.eclipse.osgi.signedcontent.*;
+import org.eclipse.osgi.signedcontent.InvalidContentException;
+import org.eclipse.osgi.signedcontent.SignedContent;
+import org.eclipse.osgi.signedcontent.SignedContentEntry;
+import org.eclipse.osgi.signedcontent.SignerInfo;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -162,9 +165,9 @@ public class SignedBundleTest extends BaseSecurityTest {
 			// verify and validate the entries
 			SignedContentEntry[] entries = signedContent.getSignedEntries();
 			assertNotNull("Entries is null", entries);
-			for (int i = 0; i < entries.length; i++) {
-				entries[i].verify();
-				SignerInfo[] entryInfos = entries[i].getSignerInfos();
+			for (SignedContentEntry entry : entries) {
+				entry.verify();
+				SignerInfo[] entryInfos = entry.getSignerInfos();
 				assertNotNull("SignerInfo is null", entryInfos);
 				assertEquals("wrong number of entry signers", 1, entryInfos.length);
 				assertEquals("Entry signer does not equal content signer", infos[0], entryInfos[0]);
@@ -200,20 +203,20 @@ public class SignedBundleTest extends BaseSecurityTest {
 			assertNotNull("SignerInfo is null", infos);
 			assertEquals("wrong number of signers", 2, infos.length);
 			// check the signer validity
-			for (int i = 0; i < infos.length; i++) {
-				signedContent.checkValidity(infos[i]);
-				signedContent.checkValidity(infos[i]);
+			for (SignerInfo info : infos) {
+				signedContent.checkValidity(info);
+				signedContent.checkValidity(info);
 				// check the signer trust
-				assertTrue("Signer is not trusted: " + infos[i].getCertificateChain()[0], infos[i].isTrusted());
+				assertTrue("Signer is not trusted: " + info.getCertificateChain()[0], info.isTrusted());
 				// check the trust anchor
-				assertNotNull("Trust anchor is null", infos[i].getTrustAnchor());
+				assertNotNull("Trust anchor is null", info.getTrustAnchor());
 			}
 			// verify and validate the entries
 			SignedContentEntry[] entries = signedContent.getSignedEntries();
 			assertNotNull("Entries is null", entries);
-			for (int i = 0; i < entries.length; i++) {
-				entries[i].verify();
-				SignerInfo[] entryInfos = entries[i].getSignerInfos();
+			for (SignedContentEntry entry : entries) {
+				entry.verify();
+				SignerInfo[] entryInfos = entry.getSignerInfos();
 				assertNotNull("SignerInfo is null", entryInfos);
 				assertEquals("wrong number of entry signers", 2, entryInfos.length);
 				assertEquals("Entry signer does not equal content signer", infos[0], entryInfos[0]);
@@ -247,9 +250,9 @@ public class SignedBundleTest extends BaseSecurityTest {
 			assertNotNull("SignerInfo is null", infos);
 			assertEquals("wrong number of signers", 1, infos.length);
 			// check the signer validity
-			for (int i = 0; i < infos.length; i++) {
+			for (SignerInfo info : infos) {
 				// check the signer trust
-				assertTrue("Signer is trusted: " + infos[i].getCertificateChain()[0], !(infos[i].isTrusted()));
+				assertTrue("Signer is trusted: " + info.getCertificateChain()[0], !(info.isTrusted()));
 			}
 		} catch (Exception e) {
 			fail("Unexpected exception", e);
@@ -278,9 +281,9 @@ public class SignedBundleTest extends BaseSecurityTest {
 			assertNotNull("SignerInfo is null", infos);
 			assertEquals("wrong number of signers", 2, infos.length);
 			// check the signer validity
-			for (int i = 0; i < infos.length; i++) {
+			for (SignerInfo info : infos) {
 				// check the signer trust
-				assertTrue("Signer is trusted: " + infos[i].getCertificateChain()[0], !(infos[i].isTrusted()));
+				assertTrue("Signer is trusted: " + info.getCertificateChain()[0], !(info.isTrusted()));
 			}
 		} catch (Exception e) {
 			fail("Unexpected exception", e);
@@ -311,12 +314,10 @@ public class SignedBundleTest extends BaseSecurityTest {
 			assertEquals("wrong number of signers", 2, infos.length);
 
 			// make sure ca1 signer is trusted
-
 			// check the signer validity
-			for (int i = 0; i < infos.length; i++) {
-				Certificate certs[] = infos[i].getCertificateChain();
-
-				if (infos[i].isTrusted()) {
+			for (SignerInfo info : infos) {
+				Certificate[] certs = info.getCertificateChain();
+				if (info.isTrusted()) {
 					X509Certificate x509Cert = (X509Certificate) certs[0];
 					assertTrue("CA1 LeafA signer is not trusted", x509Cert.getSubjectDN().getName().indexOf("CA1 LeafA") >= 0);
 				}
@@ -352,16 +353,18 @@ public class SignedBundleTest extends BaseSecurityTest {
 
 			SignedContentEntry[] entries = signedContent.getSignedEntries();
 			assertNotNull("Entries is null", entries);
-			for (int i = 0; i < entries.length; i++) {
+			for (SignedContentEntry entry : entries) {
 				try {
-					entries[i].verify();
-					if ("org/eclipse/equinox/security/junit/CorruptClass.class".equals(entries[i].getName()))
-						fail("Expected a corruption for: " + entries[i].getName());
+					entry.verify();
+					if ("org/eclipse/equinox/security/junit/CorruptClass.class".equals(entry.getName())) {
+						fail("Expected a corruption for: " + entry.getName());
+					}
 				} catch (InvalidContentException e) {
-					if (!"org/eclipse/equinox/security/junit/CorruptClass.class".equals(entries[i].getName()))
-						fail("Unexpected corruption in: " + entries[i].getName(), e);
+					if (!"org/eclipse/equinox/security/junit/CorruptClass.class".equals(entry.getName())) {
+						fail("Unexpected corruption in: " + entry.getName(), e);
+					}
 				}
-				SignerInfo[] entryInfos = entries[i].getSignerInfos();
+				SignerInfo[] entryInfos = entry.getSignerInfos();
 				assertNotNull("SignerInfo is null", entryInfos);
 				assertEquals("wrong number of entry signers", 1, entryInfos.length);
 				assertEquals("Entry signer does not equal content signer", infos[0], entryInfos[0]);
@@ -478,9 +481,9 @@ public class SignedBundleTest extends BaseSecurityTest {
 			// verify and validate the entries
 			SignedContentEntry[] entries = signedContent.getSignedEntries();
 			assertNotNull("Entries is null", entries);
-			for (int i = 0; i < entries.length; i++) {
-				entries[i].verify();
-				SignerInfo[] entryInfos = entries[i].getSignerInfos();
+			for (SignedContentEntry entry : entries) {
+				entry.verify();
+				SignerInfo[] entryInfos = entry.getSignerInfos();
 				assertNotNull("SignerInfo is null", entryInfos);
 				assertEquals("wrong number of entry signers", 1, entryInfos.length);
 				assertEquals("Entry signer does not equal content signer", infos[0], entryInfos[0]);
@@ -507,20 +510,20 @@ public class SignedBundleTest extends BaseSecurityTest {
 			assertNotNull("SignerInfo is null", infos);
 			assertEquals("wrong number of signers", 2, infos.length);
 			// check the signer validity
-			for (int i = 0; i < infos.length; i++) {
-				signedContent.checkValidity(infos[i]);
-				signedContent.checkValidity(infos[i]);
+			for (SignerInfo info : infos) {
+				signedContent.checkValidity(info);
+				signedContent.checkValidity(info);
 				// check the signer trust
-				assertTrue("Signer is not trusted: " + infos[i].getCertificateChain()[0], infos[i].isTrusted());
+				assertTrue("Signer is not trusted: " + info.getCertificateChain()[0], info.isTrusted());
 				// check the trust anchor
-				assertNotNull("Trust anchor is null", infos[i].getTrustAnchor());
+				assertNotNull("Trust anchor is null", info.getTrustAnchor());
 			}
 			// verify and validate the entries
 			SignedContentEntry[] entries = signedContent.getSignedEntries();
 			assertNotNull("Entries is null", entries);
-			for (int i = 0; i < entries.length; i++) {
-				entries[i].verify();
-				SignerInfo[] entryInfos = entries[i].getSignerInfos();
+			for (SignedContentEntry entry : entries) {
+				entry.verify();
+				SignerInfo[] entryInfos = entry.getSignerInfos();
 				assertNotNull("SignerInfo is null", entryInfos);
 				assertEquals("wrong number of entry signers", 2, entryInfos.length);
 				assertEquals("Entry signer does not equal content signer", infos[0], entryInfos[0]);
@@ -544,9 +547,9 @@ public class SignedBundleTest extends BaseSecurityTest {
 			assertNotNull("SignerInfo is null", infos);
 			assertEquals("wrong number of signers", 1, infos.length);
 			// check the signer validity
-			for (int i = 0; i < infos.length; i++) {
+			for (SignerInfo info : infos) {
 				// check the signer trust
-				assertTrue("Signer is trusted: " + infos[i].getCertificateChain()[0], !(infos[i].isTrusted()));
+				assertTrue("Signer is trusted: " + info.getCertificateChain()[0], !(info.isTrusted()));
 			}
 		} catch (Exception e) {
 			fail("Unexpected exception", e);
@@ -568,9 +571,9 @@ public class SignedBundleTest extends BaseSecurityTest {
 			assertNotNull("SignerInfo is null", infos);
 			assertEquals("wrong number of signers", 2, infos.length);
 			// check the signer validity
-			for (int i = 0; i < infos.length; i++) {
+			for (SignerInfo info : infos) {
 				// check the signer trust
-				assertTrue("Signer is trusted: " + infos[i].getCertificateChain()[0], !(infos[i].isTrusted()));
+				assertTrue("Signer is trusted: " + info.getCertificateChain()[0], !(info.isTrusted()));
 			}
 		} catch (Exception e) {
 			fail("Unexpected exception", e);
@@ -594,12 +597,10 @@ public class SignedBundleTest extends BaseSecurityTest {
 			assertEquals("wrong number of signers", 2, infos.length);
 
 			// make sure ca1 signer is trusted
-
 			// check the signer validity
-			for (int i = 0; i < infos.length; i++) {
-				Certificate certs[] = infos[i].getCertificateChain();
-
-				if (infos[i].isTrusted()) {
+			for (SignerInfo info : infos) {
+				Certificate[] certs = info.getCertificateChain();
+				if (info.isTrusted()) {
 					X509Certificate x509Cert = (X509Certificate) certs[0];
 					assertTrue("CA1 LeafA signer is not trusted", x509Cert.getSubjectDN().getName().indexOf("CA1 LeafA") >= 0);
 				}
@@ -627,16 +628,18 @@ public class SignedBundleTest extends BaseSecurityTest {
 
 			SignedContentEntry[] entries = signedContent.getSignedEntries();
 			assertNotNull("Entries is null", entries);
-			for (int i = 0; i < entries.length; i++) {
+			for (SignedContentEntry entry : entries) {
 				try {
-					entries[i].verify();
-					if ("org/eclipse/equinox/security/junit/CorruptClass.class".equals(entries[i].getName()))
-						fail("Expected a corruption for: " + entries[i].getName());
+					entry.verify();
+					if ("org/eclipse/equinox/security/junit/CorruptClass.class".equals(entry.getName())) {
+						fail("Expected a corruption for: " + entry.getName());
+					}
 				} catch (InvalidContentException e) {
-					if (!"org/eclipse/equinox/security/junit/CorruptClass.class".equals(entries[i].getName()))
-						fail("Unexpected corruption in: " + entries[i].getName(), e);
+					if (!"org/eclipse/equinox/security/junit/CorruptClass.class".equals(entry.getName())) {
+						fail("Unexpected corruption in: " + entry.getName(), e);
+					}
 				}
-				SignerInfo[] entryInfos = entries[i].getSignerInfos();
+				SignerInfo[] entryInfos = entry.getSignerInfos();
 				assertNotNull("SignerInfo is null", entryInfos);
 				assertEquals("wrong number of entry signers", 1, entryInfos.length);
 				assertEquals("Entry signer does not equal content signer", infos[0], entryInfos[0]);
@@ -693,9 +696,9 @@ public class SignedBundleTest extends BaseSecurityTest {
 		// verify and validate the entries
 		SignedContentEntry[] entries = signedContent.getSignedEntries();
 		assertNotNull("Entries is null", entries);
-		for (int i = 0; i < entries.length; i++) {
-			entries[i].verify();
-			SignerInfo[] entryInfos = entries[i].getSignerInfos();
+		for (SignedContentEntry entry : entries) {
+			entry.verify();
+			SignerInfo[] entryInfos = entry.getSignerInfos();
 			assertNotNull("SignerInfo is null", entryInfos);
 			assertEquals("wrong number of entry signers", 1, entryInfos.length);
 			assertEquals("Entry signer does not equal content signer", infos[0], entryInfos[0]);
@@ -717,9 +720,9 @@ public class SignedBundleTest extends BaseSecurityTest {
 		assertFalse("Content is signed!!", signedContent.isSigned());
 		SignedContentEntry[] entries = signedContent.getSignedEntries();
 		assertNotNull("Entries is null", entries);
-		for (int i = 0; i < entries.length; i++) {
-			entries[i].verify();
-			SignerInfo[] entryInfos = entries[i].getSignerInfos();
+		for (SignedContentEntry entry : entries) {
+			entry.verify();
+			SignerInfo[] entryInfos = entry.getSignerInfos();
 			assertNotNull("SignerInfo is null", entryInfos);
 			assertEquals("wrong number of entry signers", 0, entryInfos.length);
 		}
@@ -740,9 +743,9 @@ public class SignedBundleTest extends BaseSecurityTest {
 		SignedContentEntry[] entries = signedContent.getSignedEntries();
 		assertNotNull("Entries is null", entries);
 		assertEquals("Incorrect number of signed entries", 4, entries.length);
-		for (int i = 0; i < entries.length; i++) {
-			entries[i].verify();
-			SignerInfo[] entryInfos = entries[i].getSignerInfos();
+		for (SignedContentEntry entry : entries) {
+			entry.verify();
+			SignerInfo[] entryInfos = entry.getSignerInfos();
 			assertNotNull("SignerInfo is null", entryInfos);
 			assertEquals("wrong number of entry signers", 1, entryInfos.length);
 		}
@@ -763,9 +766,9 @@ public class SignedBundleTest extends BaseSecurityTest {
 		SignedContentEntry[] entries = signedContent.getSignedEntries();
 		assertNotNull("Entries is null", entries);
 		assertEquals("Incorrect number of signed entries", 4, entries.length);
-		for (int i = 0; i < entries.length; i++) {
-			entries[i].verify();
-			SignerInfo[] entryInfos = entries[i].getSignerInfos();
+		for (SignedContentEntry entry : entries) {
+			entry.verify();
+			SignerInfo[] entryInfos = entry.getSignerInfos();
 			assertNotNull("SignerInfo is null", entryInfos);
 			assertEquals("wrong number of entry signers", 1, entryInfos.length);
 		}
@@ -786,14 +789,14 @@ public class SignedBundleTest extends BaseSecurityTest {
 		SignedContentEntry[] entries = signedContent.getSignedEntries();
 		assertNotNull("Entries is null", entries);
 		assertEquals("Incorrect number of signed entries", 4, entries.length);
-		for (int i = 0; i < entries.length; i++) {
+		for (SignedContentEntry entry : entries) {
 			try {
-				entries[i].verify();
-				assertFalse("Wrong entry is validated: " + entries[i].getName(), "META-INF/test/test1.file".equals(entries[i].getName()));
+				entry.verify();
+				assertFalse("Wrong entry is validated: " + entry.getName(), "META-INF/test/test1.file".equals(entry.getName()));
 			} catch (InvalidContentException e) {
-				assertEquals("Wrong entry is corrupted", "META-INF/test/test1.file", entries[i].getName());
+				assertEquals("Wrong entry is corrupted", "META-INF/test/test1.file", entry.getName());
 			}
-			SignerInfo[] entryInfos = entries[i].getSignerInfos();
+			SignerInfo[] entryInfos = entry.getSignerInfos();
 			assertNotNull("SignerInfo is null", entryInfos);
 			assertEquals("wrong number of entry signers", 1, entryInfos.length);
 		}
@@ -814,14 +817,14 @@ public class SignedBundleTest extends BaseSecurityTest {
 		SignedContentEntry[] entries = signedContent.getSignedEntries();
 		assertNotNull("Entries is null", entries);
 		assertEquals("Incorrect number of signed entries", 4, entries.length);
-		for (int i = 0; i < entries.length; i++) {
+		for (SignedContentEntry entry : entries) {
 			try {
-				entries[i].verify();
-				assertFalse("Wrong entry is validated: " + entries[i].getName(), "META-INF/test.file".equals(entries[i].getName()));
+				entry.verify();
+				assertFalse("Wrong entry is validated: " + entry.getName(), "META-INF/test.file".equals(entry.getName()));
 			} catch (InvalidContentException e) {
-				assertEquals("Wrong entry is corrupted", "META-INF/test.file", entries[i].getName());
+				assertEquals("Wrong entry is corrupted", "META-INF/test.file", entry.getName());
 			}
-			SignerInfo[] entryInfos = entries[i].getSignerInfos();
+			SignerInfo[] entryInfos = entry.getSignerInfos();
 			assertNotNull("SignerInfo is null", entryInfos);
 			assertEquals("wrong number of entry signers", 1, entryInfos.length);
 		}
@@ -895,9 +898,9 @@ public class SignedBundleTest extends BaseSecurityTest {
 			// verify and validate the entries
 			SignedContentEntry[] entries = signedContent.getSignedEntries();
 			assertNotNull("Entries is null", entries);
-			for (int i = 0; i < entries.length; i++) {
-				entries[i].verify();
-				SignerInfo[] entryInfos = entries[i].getSignerInfos();
+			for (SignedContentEntry entry : entries) {
+				entry.verify();
+				SignerInfo[] entryInfos = entry.getSignerInfos();
 				assertNotNull("SignerInfo is null", entryInfos);
 				assertEquals("wrong number of entry signers", 1, entryInfos.length);
 				assertEquals("Entry signer does not equal content signer", infos[0], entryInfos[0]);
@@ -947,14 +950,14 @@ public class SignedBundleTest extends BaseSecurityTest {
 
 			SignedContentEntry[] entries = signedContent.getSignedEntries();
 			assertNotNull("Entries is null", entries);
-			for (int i = 0; i < entries.length; i++) {
+			for (SignedContentEntry entry : entries) {
 				try {
-					entries[i].verify();
-					fail("Expected a corruption for: " + entries[i].getName());
+					entry.verify();
+					fail("Expected a corruption for: " + entry.getName());
 				} catch (InvalidContentException e) {
 					// expected
 				}
-				SignerInfo[] entryInfos = entries[i].getSignerInfos();
+				SignerInfo[] entryInfos = entry.getSignerInfos();
 				assertNotNull("SignerInfo is null", entryInfos);
 				assertEquals("wrong number of entry signers", 1, entryInfos.length);
 				assertEquals("Entry signer does not equal content signer", infos[0], entryInfos[0]);

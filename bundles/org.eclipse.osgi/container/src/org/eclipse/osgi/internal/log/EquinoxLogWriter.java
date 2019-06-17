@@ -489,8 +489,8 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 		FrameworkLogEntry[] children = entry.getChildren();
 		if (children != null) {
-			for (int i = 0; i < children.length; i++) {
-				writeLog(depth + 1, children[i]);
+			for (FrameworkLogEntry child : children) {
+				writeLog(depth + 1, child);
 			}
 		}
 	}

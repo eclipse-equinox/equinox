@@ -106,9 +106,10 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 
 	private Version getHighestVersionMatch(Version version, VersionRange[] ranges) {
 		Version highest = Version.emptyVersion;
-		for (int i = 0; i < ranges.length; i++) {
-			if (ranges[i].isIncluded(version) && highest.compareTo(ranges[i].getMinimum()) < 0)
-				highest = ranges[i].getMinimum();
+		for (VersionRange range : ranges) {
+			if (range.isIncluded(version) && highest.compareTo(range.getMinimum()) < 0) {
+				highest = range.getMinimum();
+			}
 		}
 		return highest;
 	}
@@ -126,36 +127,36 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 		}
 
 		String[] procs = getProcessors();
-		for (int i = 0; i < procs.length; i++) {
+		for (String proc : procs) {
 			sb.append("; "); //$NON-NLS-1$
 			sb.append(Constants.BUNDLE_NATIVECODE_PROCESSOR);
 			sb.append('=');
-			sb.append(procs[i]);
+			sb.append(proc);
 		}
 
 		String[] oses = getOSNames();
-		for (int i = 0; i < oses.length; i++) {
+		for (String os : oses) {
 			sb.append("; "); //$NON-NLS-1$
 			sb.append(Constants.BUNDLE_NATIVECODE_OSNAME);
 			sb.append('=');
-			sb.append(oses[i]);
+			sb.append(os);
 		}
 
 		VersionRange[] osRanges = getOSVersions();
-		for (int i = 0; i < osRanges.length; i++) {
+		for (VersionRange osRange : osRanges) {
 			sb.append("; "); //$NON-NLS-1$
 			sb.append(Constants.BUNDLE_NATIVECODE_OSVERSION);
 			sb.append("=\""); //$NON-NLS-1$
-			sb.append(osRanges[i].toString());
+			sb.append(osRange.toString());
 			sb.append('"');
 		}
 
 		String[] langs = getLanguages();
-		for (int i = 0; i < langs.length; i++) {
+		for (String lang : langs) {
 			sb.append("; "); //$NON-NLS-1$
 			sb.append(Constants.BUNDLE_NATIVECODE_LANGUAGE);
 			sb.append('=');
-			sb.append(langs[i]);
+			sb.append(lang);
 		}
 
 		Filter f = getFilter();

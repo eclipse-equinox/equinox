@@ -208,8 +208,8 @@ public abstract class StateImpl implements State {
 			NativeCodeSpecification nativeCode = description.getNativeCodeSpecification();
 			if (nativeCode != null) {
 				NativeCodeDescription[] suppliers = nativeCode.getPossibleSuppliers();
-				for (int i = 0; i < suppliers.length; i++) {
-					FilterImpl filter = (FilterImpl) suppliers[i].getFilter();
+				for (NativeCodeDescription supplier : suppliers) {
+					FilterImpl filter = (FilterImpl) supplier.getFilter();
 					if (filter != null)
 						addPlatformPropertyKeys(filter.getAttributes());
 				}
@@ -372,8 +372,7 @@ public abstract class StateImpl implements State {
 				return null;
 			BundleDescription unresolvedFound = null;
 			BundleDescription resolvedFound = null;
-			for (int i = 0; i < allBundles.length; i++) {
-				BundleDescription current = allBundles[i];
+			for (BundleDescription current : allBundles) {
 				BundleDescription base;
 
 				if (current.isResolved())
@@ -474,9 +473,9 @@ public abstract class StateImpl implements State {
 		if (hostSpec != null) {
 			if (hosts != null) {
 				hostSpec.setHosts(hosts);
-				for (int i = 0; i < hosts.length; i++) {
-					((BundleDescriptionImpl) hosts[i]).addDependency(bundle, true);
-					checkHostForSubstitutedExports((BundleDescriptionImpl) hosts[i], bundle);
+				for (BundleDescription host : hosts) {
+					((BundleDescriptionImpl) host).addDependency(bundle, true);
+					checkHostForSubstitutedExports((BundleDescriptionImpl) host, bundle);
 				}
 			}
 		}
@@ -519,15 +518,18 @@ public abstract class StateImpl implements State {
 		if (nativeCode != null)
 			nativeCode.setSupplier(null);
 		ImportPackageSpecification[] imports = bundle.getImportPackages();
-		for (int i = 0; i < imports.length; i++)
-			((ImportPackageSpecificationImpl) imports[i]).setSupplier(null);
+		for (ImportPackageSpecification importSpecification : imports) {
+			((ImportPackageSpecificationImpl) importSpecification).setSupplier(null);
+		}
 		BundleSpecification[] requires = bundle.getRequiredBundles();
-		for (int i = 0; i < requires.length; i++)
-			((BundleSpecificationImpl) requires[i]).setSupplier(null);
+		for (BundleSpecification require : requires) {
+			((BundleSpecificationImpl) require).setSupplier(null);
+		}
 		GenericSpecification[] genericRequires = bundle.getGenericRequires();
 		if (genericRequires.length > 0)
-			for (int i = 0; i < genericRequires.length; i++)
-				((GenericSpecificationImpl) genericRequires[i]).setSupplers(null);
+			for (GenericSpecification genericRequire : genericRequires) {
+				((GenericSpecificationImpl) genericRequire).setSupplers(null);
+			}
 
 		bundle.removeDependencies();
 	}
@@ -620,16 +622,17 @@ public abstract class StateImpl implements State {
 		// merge in all removal pending bundles that are not already in the list
 		List<BundleDescription> result = new ArrayList<>(reResolve.length + removed.length);
 		Collections.addAll(result, reResolve);
-		for (int i = 0; i < removed.length; i++) {
+		for (BundleDescription removedDescription : removed) {
 			boolean found = false;
-			for (int j = 0; j < reResolve.length; j++) {
-				if (removed[i] == reResolve[j]) {
+			for (BundleDescription toRefresh : reResolve) {
+				if (removedDescription == toRefresh) {
 					found = true;
 					break;
 				}
 			}
-			if (!found)
-				result.add(removed[i]);
+			if (!found) {
+				result.add(removedDescription);
+			}
 		}
 		return result.toArray(new BundleDescription[result.size()]);
 	}
@@ -640,8 +643,8 @@ public abstract class StateImpl implements State {
 		resolverErrors.clear();
 		if (resolvedBundles.isEmpty())
 			return;
-		for (int i = 0; i < bundles.length; i++) {
-			resolveBundle(bundles[i], false, null, null, null, null, null);
+		for (BundleDescription bundle : bundles) {
+			resolveBundle(bundle, false, null, null, null, null, null);
 		}
 		resolvedBundles.clear();
 	}
@@ -778,11 +781,12 @@ public abstract class StateImpl implements State {
 				if (hostSpec != null) {
 					BundleDescription[] hosts = hostSpec.getHosts();
 					if (hosts != null)
-						for (int i = 0; i < hosts.length; i++)
-							if (hosts[i] == host) {
+						for (BundleDescription hostCandidate : hosts) {
+							if (hostCandidate == host) {
 								fragments.add(bundle);
 								break;
 							}
+						}
 				}
 			}
 		}
@@ -921,15 +925,17 @@ public abstract class StateImpl implements State {
 
 	private void resetSystemExports() {
 		BundleDescription[] systemBundles = getBundles(Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
-		for (int idx = 0; idx < systemBundles.length; idx++) {
-			BundleDescriptionImpl systemBundle = (BundleDescriptionImpl) systemBundles[idx];
-			ExportPackageDescription[] exports = systemBundle.getExportPackages();
+		for (BundleDescription systemBundle : systemBundles) {
+			BundleDescriptionImpl systemBundleImpl = (BundleDescriptionImpl) systemBundle;
+			ExportPackageDescription[] exports = systemBundleImpl.getExportPackages();
 			List<ExportPackageDescription> newExports = new ArrayList<>(exports.length);
-			for (int i = 0; i < exports.length; i++)
-				if (((Integer) exports[i].getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue() < 0)
-					newExports.add(exports[i]);
+			for (ExportPackageDescription export : exports) {
+				if (((Integer) export.getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue() < 0) {
+					newExports.add(export);
+				}
+			}
 			addSystemExports(newExports);
-			systemBundle.setExportPackages(newExports.toArray(new ExportPackageDescription[newExports.size()]));
+			systemBundleImpl.setExportPackages(newExports.toArray(new ExportPackageDescription[newExports.size()]));
 		}
 	}
 
@@ -948,9 +954,9 @@ public abstract class StateImpl implements State {
 			return;
 		ExportPackageDescription[] systemExports = StateBuilder.createExportPackages(elements, null, null, false);
 		Integer profInx = Integer.valueOf(index);
-		for (int j = 0; j < systemExports.length; j++) {
-			((ExportPackageDescriptionImpl) systemExports[j]).setDirective(ExportPackageDescriptionImpl.EQUINOX_EE, profInx);
-			exports.add(systemExports[j]);
+		for (ExportPackageDescription systemExport : systemExports) {
+			((ExportPackageDescriptionImpl) systemExport).setDirective(ExportPackageDescriptionImpl.EQUINOX_EE, profInx);
+			exports.add(systemExport);
 		}
 	}
 
@@ -1053,9 +1059,9 @@ public abstract class StateImpl implements State {
 	}
 
 	private boolean changedProps(Dictionary<Object, Object> origProps, Dictionary<Object, Object> newProps, String[] keys) {
-		for (int i = 0; i < keys.length; i++) {
-			Object origProp = origProps.get(keys[i]);
-			Object newProp = newProps.get(keys[i]);
+		for (String key : keys) {
+			Object origProp = origProps.get(key);
+			Object newProp = newProps.get(key);
 			if (checkProp(origProp, newProp))
 				return true;
 		}
@@ -1203,8 +1209,9 @@ public abstract class StateImpl implements State {
 			}
 			fullyLoaded = false;
 			BundleDescription[] bundles = getBundles();
-			for (int i = 0; i < bundles.length; i++)
-				((BundleDescriptionImpl) bundles[i]).unload();
+			for (BundleDescription bundle : bundles) {
+				((BundleDescriptionImpl) bundle).unload();
+			}
 			reader.flushLazyObjectCache();
 			resolver.flush();
 			return true;
@@ -1218,9 +1225,11 @@ public abstract class StateImpl implements State {
 			if (systemBundles.length > 0) {
 				BundleDescriptionImpl systemBundle = (BundleDescriptionImpl) systemBundles[0];
 				ExportPackageDescription[] exports = systemBundle.getExportPackages();
-				for (int i = 0; i < exports.length; i++)
-					if (((Integer) exports[i].getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue() >= 0)
-						result.add(exports[i]);
+				for (ExportPackageDescription export : exports) {
+					if (((Integer) export.getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue() >= 0) {
+						result.add(export);
+					}
+				}
 			}
 			return result.toArray(new ExportPackageDescription[result.size()]);
 		}
@@ -1280,9 +1289,11 @@ public abstract class StateImpl implements State {
 
 	void addPlatformPropertyKeys(String[] keys) {
 		synchronized (platformPropertyKeys) {
-			for (int i = 0; i < keys.length; i++)
-				if (!platformPropertyKeys.contains(keys[i]))
-					platformPropertyKeys.add(keys[i]);
+			for (String key : keys) {
+				if (!platformPropertyKeys.contains(key)) {
+					platformPropertyKeys.add(key);
+				}
+			}
 		}
 	}
 

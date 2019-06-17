@@ -118,8 +118,9 @@ public class StateResolverTest extends AbstractStateTest {
 		deltas = delta.getChanges();
 		assertEquals("1.0", 3, deltas.length); //$NON-NLS-1$
 		Map deltasMap = new HashMap();
-		for (int i = 0; i < deltas.length; i++)
-			deltasMap.put(Long.valueOf(deltas[i].getBundle().getBundleId()), deltas[i]);
+		for (BundleDelta bundleDelta : deltas) {
+			deltasMap.put(Long.valueOf(bundleDelta.getBundle().getBundleId()), bundleDelta);
+		}
 		assertNotNull("1.1", deltasMap.get(Long.valueOf(1))); //$NON-NLS-1$
 		assertNotNull("1.2", deltasMap.get(Long.valueOf(2))); //$NON-NLS-1$
 		assertNotNull("1.3", deltasMap.get(Long.valueOf(3))); //$NON-NLS-1$
@@ -144,8 +145,9 @@ public class StateResolverTest extends AbstractStateTest {
 		BundleDelta[] resolutions = delta.getChanges(BundleDelta.RESOLVED, false);
 		assertEquals("3.0", 2, resolutions.length); //$NON-NLS-1$
 		Map deltasMap = new HashMap();
-		for (int i = 0; i < resolutions.length; i++)
-			deltasMap.put(resolutions[i].getBundle().getSymbolicName(), resolutions[i]);
+		for (BundleDelta resolution : resolutions) {
+			deltasMap.put(resolution.getBundle().getSymbolicName(), resolution);
+		}
 		assertNotNull("3.1", deltasMap.get(b1.getSymbolicName())); //$NON-NLS-1$
 		assertNotNull("3.2", deltasMap.get(b2.getSymbolicName())); //$NON-NLS-1$
 		// TODO why do we expect unresolved deltas here when the bundle was not resolved in the first place?
@@ -179,8 +181,9 @@ public class StateResolverTest extends AbstractStateTest {
 		BundleDelta[] resolutions = delta.getChanges(BundleDelta.RESOLVED, false);
 		assertEquals("3.0", 6, resolutions.length); //$NON-NLS-1$
 		Map deltasMap = new HashMap();
-		for (int i = 0; i < resolutions.length; i++)
-			deltasMap.put(resolutions[i].getBundle().getSymbolicName(), resolutions[i]);
+		for (BundleDelta resolution : resolutions) {
+			deltasMap.put(resolution.getBundle().getSymbolicName(), resolution);
+		}
 		assertNotNull("3.1", deltasMap.get(b1.getSymbolicName())); //$NON-NLS-1$
 		assertNotNull("3.2", deltasMap.get(b2.getSymbolicName())); //$NON-NLS-1$
 		assertNotNull("3.3", deltasMap.get(b3.getSymbolicName())); //$NON-NLS-1$
@@ -429,8 +432,9 @@ public class StateResolverTest extends AbstractStateTest {
 		deltas = delta.getChanges();
 		assertEquals("1.0", 4, deltas.length); //$NON-NLS-1$
 		Map deltasMap = new HashMap();
-		for (int i = 0; i < deltas.length; i++)
-			deltasMap.put(Long.valueOf(deltas[i].getBundle().getBundleId()), deltas[i]);
+		for (BundleDelta bundleDelta : deltas) {
+			deltasMap.put(Long.valueOf(bundleDelta.getBundle().getBundleId()), bundleDelta);
+		}
 		assertNotNull("1.1", deltasMap.get(Long.valueOf(1))); //$NON-NLS-1$
 		assertNotNull("1.2", deltasMap.get(Long.valueOf(2))); //$NON-NLS-1$
 		assertNotNull("1.3", deltasMap.get(Long.valueOf(3))); //$NON-NLS-1$
@@ -503,8 +507,9 @@ public class StateResolverTest extends AbstractStateTest {
 		deltas = delta.getChanges();
 		assertEquals("1.0", 3, deltas.length); //$NON-NLS-1$
 		Map deltasMap = new HashMap();
-		for (int i = 0; i < deltas.length; i++)
-			deltasMap.put(Long.valueOf(deltas[i].getBundle().getBundleId()), deltas[i]);
+		for (BundleDelta bundleDelta : deltas) {
+			deltasMap.put(Long.valueOf(bundleDelta.getBundle().getBundleId()), bundleDelta);
+		}
 		assertNotNull("1.1", deltasMap.get(Long.valueOf(1))); //$NON-NLS-1$
 		assertNotNull("1.2", deltasMap.get(Long.valueOf(2))); //$NON-NLS-1$
 		assertNotNull("1.3", deltasMap.get(Long.valueOf(3))); //$NON-NLS-1$
@@ -515,8 +520,9 @@ public class StateResolverTest extends AbstractStateTest {
 		deltas = delta.getChanges();
 		assertEquals("3.0", 3, deltas.length); //$NON-NLS-1$
 		deltasMap = new HashMap();
-		for (int i = 0; i < deltas.length; i++)
-			deltasMap.put(Long.valueOf(deltas[i].getBundle().getBundleId()), deltas[i]);
+		for (BundleDelta bundleDelta : deltas) {
+			deltasMap.put(Long.valueOf(bundleDelta.getBundle().getBundleId()), bundleDelta);
+		}
 		assertNotNull("3.1", deltasMap.get(Long.valueOf(1))); //$NON-NLS-1$
 		assertNotNull("3.2", deltasMap.get(Long.valueOf(2))); //$NON-NLS-1$
 		assertNotNull("3.3", deltasMap.get(Long.valueOf(3))); //$NON-NLS-1$
@@ -549,8 +555,9 @@ public class StateResolverTest extends AbstractStateTest {
 		changes = delta.getChanges();
 		assertEquals("2.0", 2, changes.length); //$NON-NLS-1$
 		HashMap deltasMap = new HashMap();
-		for (int i = 0; i < changes.length; i++)
-			deltasMap.put(changes[i].getBundle(), changes[i]);
+		for (BundleDelta change : changes) {
+			deltasMap.put(change.getBundle(), change);
+		}
 		assertNotNull("2.1", deltasMap.get(b1)); //$NON-NLS-1$
 		assertNotNull("2.2", deltasMap.get(b11)); //$NON-NLS-1$
 		assertEquals("2.3", BundleDelta.UNRESOLVED, ((BundleDelta) deltasMap.get(b1)).getType()); //$NON-NLS-1$
@@ -3775,17 +3782,22 @@ public class StateResolverTest extends AbstractStateTest {
 	}
 
 	private ExportPackageDescription[] isConsistent(ExportPackageDescription[] pkgs1, ExportPackageDescription[] pkgs2) {
-		for (int i = 0; i < pkgs1.length; i++)
-			for (int j = 0; j < pkgs2.length; j++)
-				if (pkgs1[i].getName().equals(pkgs2[j].getName()) && pkgs1[i] != pkgs2[j])
-					return new ExportPackageDescription[] {pkgs1[i], pkgs2[j]};
+		for (ExportPackageDescription pkg1 : pkgs1) {
+			for (ExportPackageDescription pkg2 : pkgs2) {
+				if (pkg1.getName().equals(pkg2.getName()) && pkg1 != pkg2) {
+					return new ExportPackageDescription[]{pkg1, pkg2};
+				}
+			}
+		}
 		return null;
 	}
 
 	private boolean contains(Object[] array, Object element) {
-		for (int i = 0; i < array.length; i++)
-			if (array[i].equals(element))
+		for (Object o : array) {
+			if (o.equals(element)) {
 				return true;
+			}
+		}
 		return false;
 	}
 

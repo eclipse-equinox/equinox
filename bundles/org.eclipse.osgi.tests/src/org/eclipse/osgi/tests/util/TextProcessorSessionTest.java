@@ -30,8 +30,9 @@ public class TextProcessorSessionTest extends ConfigurationSessionTestSuite {
 		super(pluginId, clazz);
 		lang = language;
 		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
-		for (int i = 0; i < ids.length; i++)
-			addBundle(ids[i]);
+		for (String id : ids) {
+			addBundle(id);
+		}
 		addBundle(OSGiTest.PI_OSGI_TESTS);
 	}
 

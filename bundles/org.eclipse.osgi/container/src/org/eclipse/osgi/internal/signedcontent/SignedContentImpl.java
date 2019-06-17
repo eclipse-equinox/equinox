@@ -15,9 +15,19 @@ package org.eclipse.osgi.internal.signedcontent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.*;
-import java.util.*;
-import org.eclipse.osgi.signedcontent.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.eclipse.osgi.signedcontent.InvalidContentException;
+import org.eclipse.osgi.signedcontent.SignedContent;
+import org.eclipse.osgi.signedcontent.SignedContentEntry;
+import org.eclipse.osgi.signedcontent.SignerInfo;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.eclipse.osgi.util.NLS;
@@ -92,13 +102,15 @@ public class SignedContentImpl implements SignedContent {
 		if (checkedValid)
 			return;
 		Certificate[] certs = signer.getCertificateChain();
-		for (int i = 0; i < certs.length; i++) {
-			if (!(certs[i] instanceof X509Certificate))
+		for (Certificate cert : certs) {
+			if (!(cert instanceof X509Certificate)) {
 				continue;
-			if (signingTime == null)
-				((X509Certificate) certs[i]).checkValidity();
-			else
-				((X509Certificate) certs[i]).checkValidity(signingTime);
+			}
+			if (signingTime == null) {
+				((X509Certificate) cert).checkValidity();
+			} else {
+				((X509Certificate) cert).checkValidity(signingTime);
+			}
 		}
 		checkedValid = true;
 	}
@@ -125,9 +137,11 @@ public class SignedContentImpl implements SignedContent {
 	}
 
 	private boolean containsInfo(SignerInfo signerInfo) {
-		for (int i = 0; i < signerInfos.length; i++)
-			if (signerInfo == signerInfos[i])
+		for (SignerInfo si : signerInfos) {
+			if (signerInfo == si) {
 				return true;
+			}
+		}
 		return false;
 	}
 

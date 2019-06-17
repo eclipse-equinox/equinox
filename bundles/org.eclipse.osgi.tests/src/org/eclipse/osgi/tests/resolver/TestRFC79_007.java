@@ -64,8 +64,7 @@ public class TestRFC79_007 extends AbstractStateTest {
 		ExportPackageDescription[] exports = bundle_1.getResolvedImports();
 		assertNotNull("export array is unexpectedly null", exports);
 		assertTrue("export array is unexpectedly empty", exports.length > 0);
-		for (int i = 0; i < exports.length; i++) {
-			ExportPackageDescription exp = exports[i];
+		for (ExportPackageDescription exp : exports) {
 			String exportPackageName = exp.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("Q")) {
@@ -85,8 +84,7 @@ public class TestRFC79_007 extends AbstractStateTest {
 		ExportPackageDescription[] exports = bundle_4.getResolvedImports();
 		assertNotNull("export array is unexpectedly null", exports);
 		assertTrue("export array is unexpectedly empty", exports.length > 0);
-		for (int i = 0; i < exports.length; i++) {
-			ExportPackageDescription exp = exports[i];
+		for (ExportPackageDescription exp : exports) {
 			String exportPackageName = exp.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("R")) {

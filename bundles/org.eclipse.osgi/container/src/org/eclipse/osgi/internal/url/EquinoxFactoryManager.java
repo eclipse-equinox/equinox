@@ -229,11 +229,11 @@ public class EquinoxFactoryManager {
 
 	public static Field getField(Class<?> clazz, Class<?> type, boolean instance) {
 		Field[] fields = clazz.getDeclaredFields();
-		for (int i = 0; i < fields.length; i++) {
-			boolean isStatic = Modifier.isStatic(fields[i].getModifiers());
-			if (instance != isStatic && fields[i].getType().equals(type)) {
-				MultiplexingFactory.setAccessible(fields[i]);
-				return fields[i];
+		for (Field field : fields) {
+			boolean isStatic = Modifier.isStatic(field.getModifiers());
+			if (instance != isStatic && field.getType().equals(type)) {
+				MultiplexingFactory.setAccessible(field);
+				return field;
 			}
 		}
 		return null;

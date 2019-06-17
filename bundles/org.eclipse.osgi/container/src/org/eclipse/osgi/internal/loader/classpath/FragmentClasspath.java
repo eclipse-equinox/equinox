@@ -54,10 +54,10 @@ public class FragmentClasspath {
 	 *
 	 */
 	public void close() {
-		for (int i = 0; i < entries.length; i++) {
+		for (ClasspathEntry entry : entries) {
 			try {
-				entries[i].close();
-			} catch (IOException e) {
+				entry.close();
+			}catch (IOException e) {
 				generation.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, generation.getRevision().getRevisions().getModule(), e);
 			}
 		}

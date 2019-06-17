@@ -1133,10 +1133,10 @@ public class SystemBundleTests extends AbstractBundleTests {
 		} catch (IOException e) {
 			fail("Unexpected error creating budnles", e); //$NON-NLS-1$
 		}
-		for (int i = 0; i < testBundles.length; i++) {
+		for (File testBundle : testBundles) {
 			try {
-				systemContext.installBundle("reference:file:///" + testBundles[i].getAbsolutePath()); //$NON-NLS-1$
-			} catch (BundleException e) {
+				systemContext.installBundle("reference:file:///" + testBundle.getAbsolutePath()); //$NON-NLS-1$
+			}catch (BundleException e) {
 				fail("Unexpected install error", e); //$NON-NLS-1$
 			}
 		}
@@ -1219,8 +1219,8 @@ public class SystemBundleTests extends AbstractBundleTests {
 		Bundle[] bundles = context.getBundles();
 		// get an entry from each bundle to ensure each one gets opened.
 		try {
-			for (int i = 0; i < bundles.length; i++) {
-				assertNotNull("No manifest for: " + bundles[i], bundles[i].getEntry("/META-INF/MANIFEST.MF"));
+			for (Bundle bundle : bundles) {
+				assertNotNull("No manifest for: " + bundle, bundle.getEntry("/META-INF/MANIFEST.MF"));
 			}
 		} catch (Throwable t) {
 			// An exception used to get thrown here when we tried to close 
@@ -1587,8 +1587,8 @@ public class SystemBundleTests extends AbstractBundleTests {
 		Bundle[] bundles = systemContext.getBundles();
 		// get the headers from each bundle
 		try {
-			for (int i = 0; i < bundles.length; i++) {
-				bundles[i].getHeaders(); //$NON-NLS-1$
+			for (Bundle bundle : bundles) {
+				bundle.getHeaders(); //$NON-NLS-1$
 			}
 		} catch (Throwable t) {
 			// An exception used to get thrown here when we tried to close 
@@ -3798,8 +3798,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		ExecutorService executor = Executors.newFixedThreadPool(50);
 		final List<Throwable> errors = new CopyOnWriteArrayList<Throwable>();
 		try {
-			for (int i = 0; i < testBundles.length; i++) {
-				final File testBundleFile = testBundles[i];
+			for (final File testBundleFile : testBundles) {
 				executor.execute(new Runnable() {
 
 					@Override
@@ -3812,7 +3811,6 @@ public class SystemBundleTests extends AbstractBundleTests {
 						}
 					}
 				});
-
 			}
 		} finally {
 			executor.shutdown();

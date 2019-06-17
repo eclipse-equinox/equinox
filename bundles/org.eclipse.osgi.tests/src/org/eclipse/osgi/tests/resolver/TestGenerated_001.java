@@ -81,8 +81,7 @@ public class TestGenerated_001 extends AbstractStateTest {
 		exports = bundle_3.getResolvedImports();
 		assertNotNull("export array is unexpectedly null", exports);
 		assertTrue("export array is unexpectedly empty", exports.length > 0);
-		for (int i = 0; i < exports.length; i++) {
-			ExportPackageDescription exp = exports[i];
+		for (ExportPackageDescription exp : exports) {
 			String exportPackageName = exp.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("a2")) {
@@ -110,8 +109,7 @@ public class TestGenerated_001 extends AbstractStateTest {
 		exports = bundle_6.getResolvedImports();
 		assertNotNull("export array is unexpectedly null", exports);
 		assertTrue("export array is unexpectedly empty", exports.length > 0);
-		for (int i = 0; i < exports.length; i++) {
-			ExportPackageDescription exp = exports[i];
+		for (ExportPackageDescription exp : exports) {
 			String exportPackageName = exp.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("a2")) {
@@ -133,8 +131,7 @@ public class TestGenerated_001 extends AbstractStateTest {
 		exports = bundle_7.getResolvedImports();
 		assertNotNull("export array is unexpectedly null", exports);
 		assertTrue("export array is unexpectedly empty", exports.length > 0);
-		for (int i = 0; i < exports.length; i++) {
-			ExportPackageDescription exp = exports[i];
+		for (ExportPackageDescription exp : exports) {
 			String exportPackageName = exp.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("a2")) {
@@ -156,8 +153,7 @@ public class TestGenerated_001 extends AbstractStateTest {
 		exports = bundle_8.getResolvedImports();
 		assertNotNull("export array is unexpectedly null", exports);
 		assertTrue("export array is unexpectedly empty", exports.length > 0);
-		for (int i = 0; i < exports.length; i++) {
-			ExportPackageDescription exp = exports[i];
+		for (ExportPackageDescription exp : exports) {
 			String exportPackageName = exp.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("a2")) {

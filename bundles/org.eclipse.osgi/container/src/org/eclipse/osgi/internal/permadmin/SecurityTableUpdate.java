@@ -29,10 +29,11 @@ public class SecurityTableUpdate implements ConditionalPermissionUpdate {
 		this.timeStamp = timeStamp;
 		// must make a snap shot of the security rows.
 		this.rows = new ArrayList<>(rows.length);
-		for (int i = 0; i < rows.length; i++)
-			// Use SecurityRowSnapShot to prevent modification before commit 
+		for (SecurityRow row : rows) {
+			// Use SecurityRowSnapShot to prevent modification before commit
 			// and to throw exceptions from delete
-			this.rows.add(new SecurityRowSnapShot(rows[i].getName(), rows[i].internalGetConditionInfos(), rows[i].internalGetPermissionInfos(), rows[i].getAccessDecision()));
+			this.rows.add(new SecurityRowSnapShot(row.getName(), row.internalGetConditionInfos(), row.internalGetPermissionInfos(), row.getAccessDecision()));
+		}
 	}
 
 	@Override
