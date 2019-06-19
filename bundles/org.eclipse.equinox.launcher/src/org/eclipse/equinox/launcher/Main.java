@@ -565,7 +565,7 @@ public class Main {
 
 		if (protectBase && (System.getProperty(PROP_SHARED_CONFIG_AREA) == null)) {
 			System.err.println("This application is configured to run in a cascaded mode only."); //$NON-NLS-1$
-			System.setProperty(PROP_EXITCODE, "" + 14); //$NON-NLS-1$
+			System.setProperty(PROP_EXITCODE, Integer.toString(14)); //$NON-NLS-1$
 			return;
 		}
 		// need to ensure that getInstallLocation is called at least once to initialize the value.
@@ -822,7 +822,7 @@ public class Main {
 
 	private void readFrameworkExtensions(URL base, ArrayList<URL> result) throws IOException {
 		String[] extensions = getArrayFromList(System.getProperty(PROP_EXTENSIONS));
-		String parent = new File(base.getFile()).getParent().toString();
+		String parent = new File(base.getFile()).getParent();
 		ArrayList<String> extensionResults = new ArrayList<>(extensions.length);
 		for (int i = 0; i < extensions.length; i++) {
 			//Search the extension relatively to the osgi plugin 
@@ -2040,7 +2040,7 @@ public class Main {
 		}
 		try {
 			if (debug)
-				System.out.print("Configuration file:\n    " + url.toString()); //$NON-NLS-1$
+				System.out.print("Configuration file:\n    " + url); //$NON-NLS-1$
 			result = loadProperties(url);
 			if (debug)
 				System.out.println(" loaded"); //$NON-NLS-1$
@@ -2460,10 +2460,10 @@ public class Main {
 	private StringBuilder appendPaddedInt(int value, int pad, StringBuilder buffer) {
 		pad = pad - 1;
 		if (pad == 0)
-			return buffer.append(Integer.toString(value));
+			return buffer.append(value);
 		int padding = (int) Math.pow(10, pad);
 		if (value >= padding)
-			return buffer.append(Integer.toString(value));
+			return buffer.append(value);
 		while (padding > value && padding > 1) {
 			buffer.append('0');
 			padding = padding / 10;
@@ -2486,7 +2486,7 @@ public class Main {
 		URL base = buildURL(System.getProperty(PROP_CONFIG_AREA), false);
 		if (base == null)
 			return;
-		logFile = new File(base.getPath(), Long.toString(System.currentTimeMillis()) + ".log"); //$NON-NLS-1$
+		logFile = new File(base.getPath(), System.currentTimeMillis() + ".log"); //$NON-NLS-1$
 		new File(logFile.getParent()).mkdirs();
 		System.setProperty(PROP_LOGFILE, logFile.getAbsolutePath());
 	}

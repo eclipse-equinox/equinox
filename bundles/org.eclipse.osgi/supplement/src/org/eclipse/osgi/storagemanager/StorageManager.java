@@ -553,7 +553,7 @@ public final class StorageManager {
 			String value;
 			if (entry.getFileType() != FILETYPE_STANDARD) {
 				value = Integer.toString(entry.getWriteId() - 1) + ',' + //In the table we save the write  number  - 1, because the read number can be totally different.
-						Integer.toString(entry.getFileType());
+						entry.getFileType();
 			} else {
 				value = Integer.toString(entry.getWriteId() - 1); //In the table we save the write  number  - 1, because the read number can be totally different.
 			}
