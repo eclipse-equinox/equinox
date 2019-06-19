@@ -78,7 +78,7 @@ public class EquinoxCommandsConverter implements Converter {
 
 				// check for @ -- this may separate either the version string, or be part of the
 				// location
-				int ix = symbolicName.indexOf("@"); //$NON-NLS-1$
+				int ix = symbolicName.indexOf('@'); //$NON-NLS-1$
 				if (ix != -1) {
 					if ((ix + 1) != symbolicName.length()) {
 						try {
@@ -174,7 +174,7 @@ public class EquinoxCommandsConverter implements Converter {
 		
 		StringBuilder builder = new StringBuilder();
 		for (i = 0; i < count; i++) {
-			builder.append(" " + keys[i] + " = " + dic.get(keys[i])); //$NON-NLS-1$//$NON-NLS-2$
+			builder.append(" ").append(keys[i]).append(" = ").append(dic.get(keys[i])); //$NON-NLS-1$//$NON-NLS-2$
 			builder.append("\r\n");
 		}
 		builder.append("\r\n");

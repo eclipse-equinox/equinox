@@ -58,7 +58,7 @@ public class TimerImpl implements Runnable {
 			}
 			th.start();
 		} catch (Exception e) {
-			throw new RuntimeException("Can not start Timer thread!" + e.toString());
+			throw new RuntimeException("Can not start Timer thread!" + e);
 		}
 	}
 

@@ -202,10 +202,10 @@ public class Util {
 
 		StringBuilder stringBuffer = new StringBuilder(length);
 		if (onLeft)
-			stringBuffer.append(padding.toString());
+			stringBuffer.append(padding);
 		stringBuffer.append(input);
 		if (!onLeft)
-			stringBuffer.append(padding.toString());
+			stringBuffer.append(padding);
 		return stringBuffer.toString();
 	}
 }

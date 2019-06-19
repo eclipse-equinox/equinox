@@ -1247,7 +1247,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 				if (envInfo != null) {
 					System.out.println(ConsoleMsg.CONSOLE_SETTING_PROPERTIES_TITLE);
 					for(String argument : arguments) {
-						int index = argument.indexOf("=");
+						int index = argument.indexOf('=');
 						if(index > -1) {
 							String key = argument.substring(0, index);
 							String value = argument.substring(index + 1, argument.length());

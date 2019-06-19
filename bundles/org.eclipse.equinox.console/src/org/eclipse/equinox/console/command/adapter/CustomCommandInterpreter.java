@@ -214,7 +214,7 @@ public void printBundleResource(Bundle bundle, String resource) {
         System.err.println(e);
       }
     } else {
-      println("CONSOLE_RESOURCE ["+resource+"] NOT_IN_BUNDLE " + bundle.toString());
+      println("CONSOLE_RESOURCE ["+resource+"] NOT_IN_BUNDLE " + bundle);
     }
   }
   

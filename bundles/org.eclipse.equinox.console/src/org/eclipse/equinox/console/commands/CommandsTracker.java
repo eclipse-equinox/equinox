@@ -57,10 +57,10 @@ public class CommandsTracker {
         		synchronized (lock) {
         			if (function.getClass().isArray()) {
         				for (Object func : ((Object[]) function)) {
-        					commandNames.add(scope.toString() + ":" + func.toString());
+        					commandNames.add(scope + ":" + func);
         				}
         			} else {
-        				commandNames.add(scope.toString() + ":" + function.toString());
+        				commandNames.add(scope + ":" + function);
         			}
         			return commandNames;
         		}
@@ -80,10 +80,10 @@ public class CommandsTracker {
 
             if (scope != null && function != null) {
                 if (!function.getClass().isArray()) {
-                    commandNames.remove(scope.toString() + ":" + function.toString());
+                    commandNames.remove(scope + ":" + function);
                 } else {
                     for (Object func : (Object[]) function) {
-                        commandNames.remove(scope.toString() + ":" + func.toString());
+                        commandNames.remove(scope + ":" + func);
                     }
                 }
             }

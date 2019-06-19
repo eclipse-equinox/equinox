@@ -311,7 +311,7 @@ public class Activator implements BundleActivator {
 		dict.put("osgi.command.scope", "equinox");
 		String[] methodNames = new String[commandMethods.length];
 		for (int i = 0; i < commandMethods.length; i++) {
-			String methodName = "" + commandMethods[i].getName().substring(1);
+			String methodName = commandMethods[i].getName().substring(1);
 			methodNames[i] = methodName;
 		}
 

@@ -76,7 +76,7 @@ public class TelnetCommand {
     	String telnetPort = null;
         String consolePropValue = context.getProperty(CONSOLE_PROP);
         if(consolePropValue != null) {
-        	int index = consolePropValue.lastIndexOf(":");
+        	int index = consolePropValue.lastIndexOf(':');
         	if (index > -1) {
         		defaultHost = consolePropValue.substring(0, index);
         	}

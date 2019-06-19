@@ -218,7 +218,7 @@ public abstract class PlatformURLConnection extends URLConnection {
 	}
 
 	protected void debug(String s) {
-		System.out.println("URL " + getURL().toString() + "^" + Integer.toHexString(Thread.currentThread().hashCode()) + " " + s); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		System.out.println("URL " + getURL() + "^" + Integer.toHexString(Thread.currentThread().hashCode()) + " " + s); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	private static void debugStartup(String s) {
@@ -299,9 +299,9 @@ public abstract class PlatformURLConnection extends URLConnection {
 			isInCache = true;
 		} else {
 			// attempt to cache
-			int ix = file.lastIndexOf("/"); //$NON-NLS-1$
+			int ix = file.lastIndexOf('/'); //$NON-NLS-1$
 			tmp = file.substring(ix + 1);
-			tmp = cacheLocation + filePrefix + Long.toString((new java.util.Date()).getTime()) + "_" + tmp; //$NON-NLS-1$
+			tmp = cacheLocation + filePrefix + (new java.util.Date()).getTime() + "_" + tmp; //$NON-NLS-1$
 			tmp = tmp.replace(File.separatorChar, '/');
 			if (isJar) {
 				tmp = PlatformURLHandler.FILE + PlatformURLHandler.PROTOCOL_SEPARATOR + tmp + PlatformURLHandler.JAR_SEPARATOR + jarEntry;

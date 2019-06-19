@@ -39,7 +39,7 @@ public class ThreadsExecutor extends AbstractExecutor {
 	}
 
 	protected String createThreadName(IProgressRunnable<?> runnable) {
-		return "ThreadsExecutor(" + runnable.toString() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "ThreadsExecutor(" + runnable + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**

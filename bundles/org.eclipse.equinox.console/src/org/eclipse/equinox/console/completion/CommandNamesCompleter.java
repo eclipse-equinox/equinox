@@ -73,7 +73,7 @@ public class CommandNamesCompleter implements Completer {
 		Set<String> clearedCommandNames = new HashSet<>();
 		
 		for(String commandName : commandNames) {
-			clearedCommandNames.add(commandName.substring(commandName.indexOf(":") + 1));
+			clearedCommandNames.add(commandName.substring(commandName.indexOf(':') + 1));
 		}
 		
 		return clearedCommandNames;

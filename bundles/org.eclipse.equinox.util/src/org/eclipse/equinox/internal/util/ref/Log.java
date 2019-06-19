@@ -630,14 +630,14 @@ public class Log implements LogInterface, ServiceTrackerCustomizer<LogService, L
 		StringBuilder sBuf = new StringBuilder(prefix).append("[");
 
 		String module = getModuleName(moduleID);
-		sBuf.append(module != null ? module : "" + moduleID);
+		sBuf.append(module != null ? module : String.valueOf(moduleID));
 
 		sBuf.append(chars, 0, 2);
 
 		if (msgID != 0) {
 			// map msgID to String
 			String msg = getMsgValue(msgID);
-			sBuf.append(msg != null ? msg : "" + msgID);
+			sBuf.append(msg != null ? msg : String.valueOf(msgID));
 		}
 
 		if (message != null)
